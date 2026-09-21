@@ -94,35 +94,39 @@
       '<a class="guide-unlock" data-unlock-guide href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver Hoteles en Booking y Desbloquear Guía 🔓</a>' +
       '</div></section>';
   }
-  function flightSearch(meta) {
-    return '<section class="duffel-search" aria-labelledby="duffel-title"><div><h2 id="duffel-title">Vuelos disponibles</h2><p>Compará opciones reales de aerolíneas sin salir de CuántoSale.</p></div>' +
-      '<button type="button" class="duffel-search-button" data-search-flights data-destination="' + esc(meta.dest.key) + '">✈️ Ver vuelos disponibles</button>' +
-      '<div class="duffel-results" aria-live="polite"></div></section>';
+  function flightSearch(meta, budget) {
+    return '<section class="duffel-search" aria-labelledby="duffel-title" data-flight-budget="' + esc(budget) + '"><div><h2 id="duffel-title">Vuelos reales disponibles</h2><p>Ofertas de Duffel filtradas hasta ' + money(budget) + ' para pasajes.</p></div>' +
+      '<div class="duffel-results" aria-live="polite"><p class="duffel-loading">Consultando aerolíneas…</p></div></section>';
   }
   function flightTime(value) {
     if (!value) return 'Horario no disponible';
     return new Date(value).toLocaleString('es-UY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   }
-  function renderFlightOffers(el, data) {
-    if (!data.offers.length) { el.innerHTML = '<p class="duffel-empty">No encontramos vuelos para esta fecha. Probá cambiando el día de ida.</p>'; return; }
-    el.innerHTML = '<div class="flight-cards">' + data.offers.map(function (offer) {
+  function renderFlightOffers(el, data, budget) {
+    var priced = data.offers.filter(function (offer) { return offer.price_usd !== null; });
+    var affordable = priced.filter(function (offer) { return offer.price_usd <= budget; });
+    var fallback = affordable.length === 0;
+    var visible = fallback ? priced.slice(0, 2) : affordable;
+    if (!visible.length) { el.innerHTML = '<p class="duffel-empty">No encontramos vuelos para esta fecha. Probá cambiando el día de ida.</p>'; return; }
+    var warning = fallback ? '<p class="duffel-warning">⚠️ No encontramos vuelos disponibles por debajo de ' + money(budget) + ', pero estos son los más cercanos a tu presupuesto:</p>' : '';
+    el.innerHTML = warning + '<div class="flight-cards">' + visible.map(function (offer) {
       var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
       var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
-      return '<article class="flight-card"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b></div>' +
+      return '<article class="flight-card' + (!fallback ? ' within-budget' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b></div>' +
         '<div class="flight-route"><div><small>Salida</small><b>' + esc(flightTime(offer.departure)) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada</small><b>' + esc(flightTime(offer.arrival)) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '">Seleccionar vuelo</button></div></article>';
     }).join('') + '</div>';
   }
-  function searchFlights(button) {
-    var box = button.parentNode.querySelector('.duffel-results');
-    button.disabled = true; button.textContent = 'Buscando vuelos…';
+  function searchFlights(meta, section) {
+    var box = section.querySelector('.duffel-results');
+    var budget = Number(section.getAttribute('data-flight-budget')) || 0;
     box.innerHTML = '<p class="duffel-loading">Consultando aerolíneas…</p>';
-    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: button.getAttribute('data-destination'), fecha_ida: S.dep, pasajeros: S.pax }) })
+    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, pasajeros: meta.pax }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) { if (!res.ok) throw new Error(res.j.error || 'No pudimos buscar vuelos.'); renderFlightOffers(box, res.j); })
+      .then(function (res) { if (!res.ok) throw new Error(res.j.error || 'No pudimos buscar vuelos.'); renderFlightOffers(box, res.j, budget); })
       .catch(function (e) { box.innerHTML = '<p class="duffel-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
-      .then(function () { button.disabled = false; button.textContent = '✈️ Ver vuelos disponibles'; });
+      ;
   }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
@@ -235,15 +239,13 @@
       note + '</div></section>';
 
     h += ctas(data.meta);
-    h += flightSearch(data.meta);
-    h += foodGuide(data.meta);
 
     var stack = CATS.map(function (c) { return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>'; }).join('');
     var leg = CATS.map(function (c) {
       var v = rec.parts[c[0]];
       return '<div><i style="background:var(' + c[2] + ')"></i><span>' + c[1] + '<em>' + Math.round(v / rec.total * 100) + '%</em>' + srcTag(rec, c[0], live) + '</span><b>' + money(v) + '</b></div>';
     }).join('');
-    h += '<section class="sec"><h2>A dónde se va la plata</h2><p class="sub">El costo real incluye mucho más que el pasaje.</p>' +
+    var breakdownSection = '<section class="sec"><h2>A dónde se va la plata</h2><p class="sub">El costo real incluye mucho más que el pasaje.</p>' +
       '<div class="panel"><div class="stack" role="img" aria-label="Distribución del costo">' + stack + '</div><div class="leg">' + leg + '</div></div></section>';
 
     h += '<section class="sec"><h2>Dónde podés ahorrar</h2><p class="sub">Comparamos fechas, rutas y alojamiento con la propuesta principal.</p><div class="panel">';
@@ -289,9 +291,13 @@
         '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body">' + rows + '</div></details>';
     }).join('');
     h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
+    h += breakdownSection + foodGuide(data.meta);
+    h += flightSearch(data.meta, rec.parts.pasajes);
 
     var el = $('#results');
     el.innerHTML = h;
+    var liveFlights = el.querySelector('.duffel-search');
+    if (liveFlights) searchFlights(data.meta, liveFlights);
     var ch = el.querySelector('.chart'), cu = el.querySelector('.bar.cur');
     if (ch && cu) ch.scrollLeft = cu.offsetLeft - ch.clientWidth / 2 + cu.offsetWidth / 2;
   }
@@ -325,8 +331,6 @@
       schedule();
     });
     $('#results').addEventListener('click', function (e) {
-      var flightButton = e.target.closest('[data-search-flights]');
-      if (flightButton) { searchFlights(flightButton); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) { selectedFlight.textContent = 'Vuelo seleccionado ✓'; selectedFlight.disabled = true; return; }
       var unlock = e.target.closest('[data-unlock-guide]');
