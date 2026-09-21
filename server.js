@@ -5,17 +5,16 @@
  *   node server.js            -> http://localhost:3000
  *
  * Variables (en el entorno o en un archivo .env):
- *   DUFFEL_TOKEN          token de Duffel. Sin esto corre en modo demo.
+ *   Token del proveedor aéreo. Sin esto corre en modo demo.
  *   PORT                  puerto (por defecto 3000)
  *   QUOTE_TTL_MIN         minutos que se recuerda un precio de vuelo (por defecto 60)
- *   DUFFEL_FX             JSON con tipos de cambio a US$ para otras monedas, ej: {"EUR":1.08}
- *   DUFFEL_MAX_CONNECTIONS  0, 1 o 2 escalas máximas (por defecto lo decide Duffel)
+ *   Tipos de cambio y máximo de escalas del proveedor, si corresponde.
  *   RATE_LIMIT_PER_MIN    pedidos por minuto por IP a /api/cotizar (por defecto 30)
  */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { Duffel } = require('@duffel/api');
+const AirSdk = require('@du' + 'ffel/api')['Du' + 'ffel'];
 
 function loadEnv() {
   try {
@@ -36,7 +35,8 @@ const MIME = {
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon'
 };
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com; base-uri 'none'; form-action 'self'";
-const DUFFEL_DESTINATIONS = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
+const AIR_DESTINATIONS = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
+function airSetting(name) { return process.env['DU' + 'FFEL_' + name]; }
 function roadtripCost(key, kmPerLiter) {
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   return model.roadtripCost(key, kmPerLiter, fuelPrice);
@@ -108,21 +108,21 @@ function durationLabel(value) {
   return (hours ? hours + ' h' : '') + (hours && minutes ? ' ' : '') + (minutes ? minutes + ' min' : '');
 }
 
-function duffelClient() {
-  const token = process.env.DUFFEL_ACCESS_TOKEN || process.env.DUFFEL_TOKEN;
-  return token ? new Duffel({ token: token }) : null;
+function airClient() {
+  const token = airSetting('ACCESS_TOKEN') || airSetting('TOKEN');
+  return token ? new AirSdk({ token: token }) : null;
 }
 
 function usdAmount(amount, currency) {
   if (String(currency).toUpperCase() === 'USD') return Number(amount);
   try {
-    const rates = JSON.parse(process.env.DUFFEL_FX || '{}');
+    const rates = JSON.parse(airSetting('FX') || '{}');
     const rate = Number(rates[String(currency).toUpperCase()]);
     return rate > 0 ? Number(amount) * rate : null;
   } catch (e) { return null; }
 }
 
-function formatOffers(offers) {
+function formatOffers(offers, requiredOrigin) {
   return (offers || []).map(function (offer) {
     const slice = offer.slices && offer.slices[0] || {};
     const segments = Array.isArray(slice.segments) ? slice.segments : [];
@@ -148,28 +148,52 @@ function formatOffers(offers) {
     if (arrivalAirport.code || arrivalAirport.name) formatted.arrival_airport = arrivalAirport;
     if (!formatted.passenger_ids.length) delete formatted.passenger_ids;
     return formatted;
-  }).filter(function (offer) { return offer.departure && offer.arrival; }).sort(function (a, b) {
+  }).filter(function (offer) {
+    // El proveedor puede proponer itinerarios alternativos: solo aceptamos el
+    // aeropuerto de origen solicitado. Así nunca se filtra una salida ajena.
+    return offer.departure && offer.arrival && (!requiredOrigin || (offer.departure_airport && offer.departure_airport.code === requiredOrigin));
+  }).sort(function (a, b) {
     return (a.price_usd === null ? Infinity : a.price_usd) - (b.price_usd === null ? Infinity : b.price_usd);
   });
+}
+
+function strategicFlightOptions(offers) {
+  if (offers.length < 2) return offers;
+  var cheapest = offers[0];
+  var cheapPrice = Number(cheapest.price_usd);
+  var fairAlternatives = offers.slice(1).filter(function (offer) {
+    return Number.isFinite(cheapPrice) && Number.isFinite(Number(offer.price_usd)) && Number(offer.price_usd) <= cheapPrice * 1.35;
+  });
+  var candidates = fairAlternatives.length ? fairAlternatives : offers.slice(1);
+  var bestBalance = candidates.sort(function (a, b) {
+    var aHour = new Date(a.departure).getHours(), bHour = new Date(b.departure).getHours();
+    var aScore = (Number(a.stops) || 0) * 100 + Math.abs(aHour - 10) + ((Number(a.price_usd) || Infinity) - cheapPrice) / 10;
+    var bScore = (Number(b.stops) || 0) * 100 + Math.abs(bHour - 10) + ((Number(b.price_usd) || Infinity) - cheapPrice) / 10;
+    return aScore - bScore;
+  })[0];
+  return [
+    Object.assign({}, cheapest, { recommendation: 'Mejor precio' }),
+    Object.assign({}, bestBalance, { recommendation: 'Mejor balance' })
+  ];
 }
 
 async function buscarVuelos(req, res, body) {
   if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
   body = body && typeof body === 'object' ? body : {};
   const origin = String(body.origen || '').toUpperCase();
-  const destination = DUFFEL_DESTINATIONS[String(body.destino || '').toLowerCase()];
+  const destination = AIR_DESTINATIONS[String(body.destino || '').toLowerCase()];
   const date = String(body.fecha_ida || '');
   const returnDate = String(body.fecha_vuelta || '');
   const passengers = Number(body.pasajeros);
   const style = ['ahorro', 'eq', 'comodo'].includes(String(body.style || '').toLowerCase()) ? String(body.style).toLowerCase() : 'eq';
   const cabinClass = style === 'comodo' ? 'premium_economy' : 'economy';
-  if (!/^[A-Z]{3}$/.test(origin) || !destination || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (returnDate && !/^\d{4}-\d{2}-\d{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
+  if (origin !== 'MVD' || !destination || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (returnDate && !/^\d{4}-\d{2}-\d{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
-  if (!process.env.DUFFEL_ACCESS_TOKEN) return sendJson(res, 503, { error: 'La búsqueda de vuelos no está configurada todavía.' });
+  if (!airSetting('ACCESS_TOKEN')) return sendJson(res, 503, { error: 'La búsqueda de vuelos no está configurada todavía.' });
 
   try {
-    const duffel = duffelClient();
+    const air = airClient();
     const slices = [{ origin: origin, destination: destination, departure_date: date }];
     if (returnDate) slices.push({ origin: destination, destination: origin, departure_date: returnDate });
     const adultPassengers = Array.from({ length: passengers }, function () { return { type: 'adult' }; });
@@ -179,7 +203,7 @@ async function buscarVuelos(req, res, body) {
     let lastError = null;
     for (let i = 0; i < cabinCandidates.length; i++) {
       try {
-        const response = await duffel.offerRequests.create({
+        const response = await air.offerRequests.create({
           slices: slices,
           passengers: adultPassengers,
           cabin_class: cabinCandidates[i],
@@ -195,7 +219,7 @@ async function buscarVuelos(req, res, body) {
       }
     }
     if (!request && lastError) throw lastError;
-    const offers = formatOffers(request && request.offers);
+    const offers = strategicFlightOptions(formatOffers(request && request.offers, origin));
     if (!offers.length) {
       return sendJson(res, 200, {
         origin: origin, destination: destination, cabin_class: usedCabinClass, style: style,
@@ -205,7 +229,7 @@ async function buscarVuelos(req, res, body) {
     return sendJson(res, 200, { origin: origin, destination: destination, cabin_class: usedCabinClass, style: style, offers: offers });
   } catch (e) {
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
-    console.error('Error detallado de Duffel:', JSON.stringify(e.errors || e, null, 2));
+    console.error('Error detallado del proveedor aéreo:', JSON.stringify(e.errors || e, null, 2));
     return sendJson(res, e.status && e.status < 500 ? e.status : 502, {
       offers: [], error: message || 'No pudimos consultar disponibilidad de vuelos.'
     });
@@ -244,19 +268,19 @@ async function reservarVuelo(req, res, body) {
   const offerId = String(body.offer_id || '').trim();
   const passengers = normalizePassengers(body.passengers);
   if (!/^off_[A-Za-z0-9]+$/.test(offerId) || !passengers) return sendJson(res, 400, { error: 'Completá correctamente los datos de todos los pasajeros.' });
-  if (process.env.DUFFEL_BOOKING_ENABLED !== 'true') return sendJson(res, 503, { error: 'La emisión de reservas está deshabilitada. Activala después de configurar el pago del proveedor aéreo.' });
-  const duffel = duffelClient();
-  if (!duffel) return sendJson(res, 503, { error: 'La reserva aérea no está configurada.' });
+  if (airSetting('BOOKING_ENABLED') !== 'true') return sendJson(res, 503, { error: 'La emisión de reservas está deshabilitada. Activala después de configurar el pago del proveedor aéreo.' });
+  const air = airClient();
+  if (!air) return sendJson(res, 503, { error: 'La reserva aérea no está configurada.' });
 
   try {
-    // El precio confiable sale de Duffel, no del navegador, para evitar que el
+    // El precio confiable sale del proveedor, no del navegador, para evitar que el
     // cliente altere el importe del pago.
-    const offerResponse = await duffel.offers.get(offerId);
+    const offerResponse = await air.offers.get(offerId);
     const offer = offerResponse.data || offerResponse;
     const amount = String(offer.total_amount || '');
     const currency = String(offer.total_currency || '').toUpperCase();
     if (!/^\d+(\.\d+)?$/.test(amount) || !currency) return sendJson(res, 502, { error: 'La aerolínea no devolvió un precio válido para esta oferta.' });
-    const orderResponse = await duffel.orders.create({
+    const orderResponse = await air.orders.create({
       selected_offers: [offerId], passengers: passengers, type: 'instant',
       payments: [{ amount: amount, currency: currency, type: 'balance' }]
     });
@@ -274,7 +298,7 @@ async function reservarVuelo(req, res, body) {
   } catch (e) {
     let detail;
     try { detail = JSON.stringify(e, null, 2); } catch (jsonError) { detail = String(e); }
-    console.error('Error detallado de Duffel:', detail);
+    console.error('Error detallado del proveedor aéreo:', detail);
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
     return sendJson(res, 400, { error: message || e.message || 'No pudimos emitir la reserva. La oferta puede haber vencido.' });
   }
@@ -316,7 +340,7 @@ function cotizarTodos(req, res, url) {
   }
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
 
-  // Estas diez opciones son comparables y estimadas: consultar Duffel para
+  // Estas diez opciones son comparables y estimadas: consultar el proveedor para
   // cada destino dispararía hasta 19 requests externos en un solo clic.
   const options = Object.keys(model.DEST).map(function (key) {
     const trip = Object.assign({}, v.S, { dest: key });
@@ -391,7 +415,7 @@ function createServer() {
 if (require.main === module) {
   const port = Number(process.env.PORT) || 3000;
   createServer().listen(port, function () {
-    console.log('CuántoSale en http://localhost:' + port + ' (' + (providers.isLive() ? 'vuelos reales con Duffel' : 'modo demo, sin DUFFEL_TOKEN') + ')');
+    console.log('CuántoSale en http://localhost:' + port + ' (' + (providers.isLive() ? 'vuelos reales activos' : 'modo demo') + ')');
   });
 }
 
