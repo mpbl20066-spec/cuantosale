@@ -131,7 +131,7 @@
       return '<article class="flight-card' + (!fallback ? ' within-budget' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b></div>' +
         '<div class="flight-route"><div><small>Salida</small><b>' + esc(flightTime(offer.departure)) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada</small><b>' + esc(flightTime(offer.arrival)) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
-        '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">Seleccionar vuelo</button></div></article>';
+        '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">Seleccionar vuelo</button></div></article>';
     }).join('') + '</div>';
   }
   function searchFlights(meta, section) {
@@ -144,10 +144,10 @@
       .catch(function (e) { box.innerHTML = '<p class="duffel-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
       ;
   }
-  function passengerFields(count) {
+  function passengerFields(count, passengerIds) {
     var fields = '';
     for (var i = 0; i < count; i++) {
-      fields += '<fieldset class="passenger-fields"><legend>Pasajero ' + (i + 1) + '</legend>' +
+      fields += '<fieldset class="passenger-fields" data-passenger-id="' + esc(passengerIds[i] || '') + '"><legend>Pasajero ' + (i + 1) + '</legend>' +
         '<div class="passenger-grid"><div><label>Nombre</label><input required name="given_name" autocomplete="given-name"></div><div><label>Apellido</label><input required name="family_name" autocomplete="family-name"></div>' +
         '<div><label>Fecha de nacimiento</label><input required type="date" name="born_on" autocomplete="bday"></div><div><label>Género</label><select required name="gender"><option value="">Elegir</option><option value="m">Masculino</option><option value="f">Femenino</option></select></div>' +
         '<div><label>Email</label><input required type="email" name="email" autocomplete="email"></div><div><label>Teléfono</label><input required type="tel" name="phone_number" autocomplete="tel"></div>' +
@@ -156,10 +156,11 @@
     return fields;
   }
   function openBookingForm(button) {
-    var modal = $('#booking-modal'), offerId = button.getAttribute('data-select-flight');
+    var modal = $('#booking-modal'), offerId = button.getAttribute('data-select-flight'), passengerIds = [];
+    try { passengerIds = JSON.parse(button.getAttribute('data-passenger-ids') || '[]'); } catch (e) { passengerIds = []; }
     modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<h2 id="booking-title">Datos de los pasajeros</h2><p class="booking-summary">' + esc(button.getAttribute('data-offer-airline') || 'Vuelo seleccionado') + ' · ' + money(Number(button.getAttribute('data-offer-price') || 0)) + '</p>' +
-      '<form id="booking-form" data-offer-id="' + esc(offerId) + '" data-total-amount="' + esc(button.getAttribute('data-offer-price') || '') + '" data-total-currency="' + esc(button.getAttribute('data-offer-currency') || 'USD') + '"><div class="passenger-list">' + passengerFields(S.pax) + '</div><p class="booking-note">Revisá los datos exactamente como aparecen en el documento de viaje.</p><button class="confirm-booking" type="submit">Confirmar y Emitir Reserva</button></form></div>';
+      '<form id="booking-form" data-offer-id="' + esc(offerId) + '" data-total-amount="' + esc(button.getAttribute('data-offer-price') || '') + '" data-total-currency="' + esc(button.getAttribute('data-offer-currency') || 'USD') + '"><div class="passenger-list">' + passengerFields(S.pax, passengerIds) + '</div><p class="booking-note">Revisá los datos exactamente como aparecen en el documento de viaje. El teléfono debe incluir código de país, por ejemplo +59899123456.</p><button class="confirm-booking" type="submit">Confirmar y Emitir Reserva</button></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     modal.querySelector('input').focus();
   }
@@ -174,16 +175,25 @@
     modal.innerHTML = '<div class="booking-dialog booking-success" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><div class="success-icon">🎉</div><h2>¡Reserva confirmada con éxito!</h2><p class="pnr-label">Código localizador</p><strong class="pnr">' + esc(data.booking_reference || 'Pendiente') + '</strong><p class="success-route">' + route + '</p><h3>Pasajeros</h3><ul>' + passengers + '</ul><p class="booking-note">Los detalles de tu reserva fueron enviados al e-mail indicado.</p></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
-  function submitBooking(form) {
+  async function submitBooking(form) {
     var passengerGroups = form.querySelectorAll('.passenger-fields'), passengers = [];
     Array.prototype.forEach.call(passengerGroups, function (group) {
-      passengers.push({ given_name: group.querySelector('[name="given_name"]').value.trim(), family_name: group.querySelector('[name="family_name"]').value.trim(), born_on: group.querySelector('[name="born_on"]').value, gender: group.querySelector('[name="gender"]').value, email: group.querySelector('[name="email"]').value.trim(), phone_number: group.querySelector('[name="phone_number"]').value.trim(), identity_documents: [{ type: group.querySelector('[name="document_type"]').value, unique_identifier: group.querySelector('[name="document_number"]').value.trim() }] });
+      var phone = group.querySelector('[name="phone_number"]').value.trim().replace(/[\s().-]/g, '');
+      passengers.push({ id: group.getAttribute('data-passenger-id') || undefined, title: group.querySelector('[name="gender"]').value === 'm' ? 'mr' : 'ms', given_name: group.querySelector('[name="given_name"]').value.trim(), family_name: group.querySelector('[name="family_name"]').value.trim(), born_on: group.querySelector('[name="born_on"]').value, gender: group.querySelector('[name="gender"]').value, email: group.querySelector('[name="email"]').value.trim(), phone_number: phone, identity_documents: [{ type: group.querySelector('[name="document_type"]').value, unique_identifier: group.querySelector('[name="document_number"]').value.trim() }] });
     });
-    var button = form.querySelector('.confirm-booking'); button.disabled = true; button.textContent = 'Emitiendo reserva…';
-    fetch('/api/vuelos/reservar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer_id: form.getAttribute('data-offer-id'), passengers: passengers, total_amount: form.getAttribute('data-total-amount'), total_currency: form.getAttribute('data-total-currency') }) })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) { if (!res.ok) throw new Error(res.j.error || 'No pudimos emitir la reserva.'); showBookingSuccess(res.j); })
-      .catch(function (e) { var notice = form.querySelector('.booking-error'); if (!notice) { notice = document.createElement('p'); notice.className = 'booking-error'; form.insertBefore(notice, button); } notice.textContent = e.message; button.disabled = false; button.textContent = 'Confirmar y Emitir Reserva'; });
+    var button = form.querySelector('.confirm-booking'), errorBox = form.querySelector('.booking-error');
+    if (!errorBox) { errorBox = document.createElement('p'); errorBox.className = 'booking-error'; form.insertBefore(errorBox, button); }
+    errorBox.hidden = true; button.disabled = true; button.textContent = 'Procesando reserva con la aerolínea...';
+    try {
+      if (passengers.some(function (p) { return !/^\+[1-9]\d{7,14}$/.test(p.phone_number); })) throw new Error('El teléfono debe estar en formato internacional E.164, por ejemplo +59899123456.');
+      var response = await fetch('/api/vuelos/reservar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer_id: form.getAttribute('data-offer-id'), passengers: passengers, total_amount: form.getAttribute('data-total-amount'), total_currency: form.getAttribute('data-total-currency') }) });
+      var data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Error al emitir la reserva');
+      showBookingSuccess(data);
+    } catch (error) {
+      errorBox.textContent = error.message || 'Error al emitir la reserva'; errorBox.hidden = false;
+      button.disabled = false; button.textContent = 'Confirmar y Emitir Reserva';
+    }
   }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
@@ -401,9 +411,8 @@
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
-      var form = e.target.closest('#booking-form'); if (form && e.target.closest('.confirm-booking')) { e.preventDefault(); if (form.checkValidity()) submitBooking(form); }
     });
-    $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id === 'booking-form' && e.target.checkValidity()) submitBooking(e.target); });
+    $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'booking-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } submitBooking(e.target); });
 
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
       list.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) { var o = document.createElement('option'); o.value = d.key; o.textContent = d.name; sel.appendChild(o); });

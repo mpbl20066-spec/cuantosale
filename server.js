@@ -107,8 +107,9 @@ function formatOffers(offers) {
     const first = segments[0] || {}, last = segments[segments.length - 1] || {};
     const carrier = first.marketing_carrier || first.operating_carrier || offer.owner || {};
     const priceUsd = usdAmount(offer.total_amount, offer.total_currency);
-    return {
+    const formatted = {
       id: offer.id,
+      passenger_ids: Array.isArray(offer.passengers) ? offer.passengers.map(function (p) { return p.id; }).filter(Boolean) : [],
       airline: carrier.name || 'Aerolínea',
       logo: carrier.logo_symbol_url || carrier.logo_lockup_url || null,
       departure: first.departing_at || null,
@@ -119,6 +120,8 @@ function formatOffers(offers) {
       original_price: String(offer.total_amount || ''),
       original_currency: offer.total_currency || null
     };
+    if (!formatted.passenger_ids.length) delete formatted.passenger_ids;
+    return formatted;
   }).filter(function (offer) { return offer.departure && offer.arrival; }).sort(function (a, b) {
     return (a.price_usd === null ? Infinity : a.price_usd) - (b.price_usd === null ? Infinity : b.price_usd);
   });
@@ -167,9 +170,10 @@ function normalizePassengers(input) {
     const doc = p.identity_documents && p.identity_documents[0] || {};
     const docType = String(doc.type || '').toLowerCase();
     const docNumber = String(doc.unique_identifier || '').trim();
+    const passengerId = String(p.id || '').trim();
     if (!given || !family || !/^\d{4}-\d{2}-\d{2}$/.test(born) || !['m', 'f'].includes(gender) || !emailRe.test(email) || !phone || !['passport', 'identity_card'].includes(docType) || !docNumber) return null;
     out.push({
-      title: gender === 'm' ? 'mr' : 'ms', given_name: given, family_name: family,
+      id: passengerId || undefined, title: gender === 'm' ? 'mr' : 'ms', given_name: given, family_name: family,
       gender: gender, born_on: born, email: email, phone_number: phone,
       identity_documents: [{ type: docType, unique_identifier: docNumber }]
     });
@@ -211,9 +215,11 @@ async function reservarVuelo(req, res, body) {
       total_currency: currency
     });
   } catch (e) {
+    let detail;
+    try { detail = JSON.stringify(e, null, 2); } catch (jsonError) { detail = String(e); }
+    console.error('Error detallado de Duffel:', detail);
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
-    console.error('[duffel booking]', message || e.message);
-    return sendJson(res, e.status && e.status < 500 ? e.status : 502, { error: message || 'No pudimos emitir la reserva. La oferta puede haber vencido.' });
+    return sendJson(res, 400, { error: message || e.message || 'No pudimos emitir la reserva. La oferta puede haber vencido.' });
   }
 }
 
