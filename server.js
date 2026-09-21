@@ -108,6 +108,19 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
     };
   }).filter(function (hotel) { return hotel.name && hotel.image; });
 }
+function uniqueHotelList(list, fallbackImages) {
+  const seen = new Set();
+  const unique = [];
+  list.forEach(function (entry, index) {
+    const image = entry && entry.image ? String(entry.image).trim() : '';
+    const candidate = image && !seen.has(image) ? image : (fallbackImages[index % fallbackImages.length] || fallbackImages[0]);
+    if (!candidate) return;
+    seen.add(candidate);
+    unique.push(Object.assign({}, entry, { image: candidate }));
+  });
+  return unique;
+}
+
 async function hotelRecommendations(destKey, destName, style, extra) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
   const selectedTier = tierByStyle[style] || 'moderado';
@@ -119,17 +132,19 @@ async function hotelRecommendations(destKey, destName, style, extra) {
   try {
     const realHotels = await fetchBookingHotels(destKey, destName, selectedTier, extra || {});
     if (realHotels.length) {
-      return realHotels.map(function (hotel) {
+      const fallbackImages = HOTEL_IMAGES[selectedTier] || HOTEL_IMAGES.moderado;
+      return uniqueHotelList(realHotels.map(function (hotel) {
         return Object.assign({}, hotel, { tier: selectedTier, similar: Array.isArray(hotel.similar) ? hotel.similar : [] });
-      });
+      }), fallbackImages);
     }
   } catch (error) {
     console.warn('[hotelRecommendations] Booking API no disponible, usando fallback estático:', error && error.message ? error.message : error);
   }
-  return catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel) {
+  const fallbackImages = HOTEL_IMAGES[selectedTier] || HOTEL_IMAGES.moderado;
+  return uniqueHotelList(catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel, index) {
     const images = HOTEL_IMAGES[hotel.tier] || HOTEL_IMAGES.moderado;
-    return Object.assign({}, hotel, { image: images[0], similarImages: images.slice(1), total: 0, perNight: 0, source: 'static' });
-  });
+    return Object.assign({}, hotel, { name: hotel.name, image: images[index % images.length], similarImages: images.slice(1), total: 0, perNight: 0, source: 'static' });
+  }), fallbackImages);
 }
 function adaptPackagesToStyle(result, trip, dep, ret, today) {
   const tierByStyle = { ahorro: 0, eq: 1, comodo: 2 };

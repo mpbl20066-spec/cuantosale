@@ -88,13 +88,29 @@
     };
     return styles[meta.style] || styles.eq;
   }
+  function normalizeHotelCatalog(catalog, defaultHotel) {
+    var unique = [];
+    var seen = new Set();
+    (catalog || []).forEach(function (item, index) {
+      if (!item || !item.name) return;
+      var name = String(item.name);
+      var image = String((item.image || defaultHotel.image || '')).trim();
+      if (!image || seen.has(image)) {
+        image = 'https://images.unsplash.com/photo-' + String(1566073771259 + index * 17).slice(0, 15) + '?auto=format&fit=crop&w=1200&q=80';
+      }
+      seen.add(image);
+      unique.push(Object.assign({}, item, { name: name, image: image }));
+    });
+    return unique.length ? unique : [{ name: defaultHotel.name, image: defaultHotel.image, similar: defaultHotel.similar, tier: defaultHotel.tier }];
+  }
+
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     var profile = hotelStyle(meta);
     var defaultHotel = { tier: profile.tier, name: profile.tier === 'eco' ? 'Pousada céntrica' : profile.tier === 'alto' ? 'Hotel premium frente al mar' : 'Hotel con desayuno', similar: profile.tier === 'eco' ? ['Hostel boutique', 'Posada familiar'] : profile.tier === 'alto' ? ['Resort boutique', 'Hotel 4 estrellas'] : ['Hotel boutique', 'Hotel 3 estrellas'], image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80' };
-    var hotelCatalog = Array.isArray(meta.hotels) && meta.hotels.length ? meta.hotels : [defaultHotel];
+    var hotelCatalog = normalizeHotelCatalog(Array.isArray(meta.hotels) && meta.hotels.length ? meta.hotels : [defaultHotel], defaultHotel);
     var hotel = hotelCatalog[0] || defaultHotel;
     var imageMap = {};
     hotelCatalog.forEach(function (item) {
@@ -242,13 +258,21 @@
     var total = roadtrip
       ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0))
       : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0) + (Number(detailState.parts.local) || 0) + (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) + (Number(detailState.parts.extras) || 0));
-    panel.classList.remove('oculto');
-    panel.innerHTML = '<div class="floating-breakdown__header"><div><span class="floating-breakdown__eyebrow">Desglose del viaje</span><strong>' + money(total) + '</strong></div><span class="floating-breakdown__transport">' + (roadtrip ? 'Roadtrip' : 'Vuelos') + '</span></div><div class="floating-breakdown__list">' + categories.map(function (category) {
-      if (category === 'auto' && !roadtrip) return '';
-      var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
+    var activeCats = categories.map(function (category) {
+      if (category === 'auto' && !roadtrip) return null;
+      var info = CATS.filter(function (c) { return c[0] === category; })[0];
       var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
-      return '<div class="floating-breakdown__row" data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
-    }).join('') + '</div>';
+      return { category: category, label: info ? info[1] : '', color: info ? info[2] : '--c3', value: Number(value) || 0 };
+    }).filter(Boolean);
+    var stack = activeCats.map(function (entry) {
+      return '<span style="width:' + (entry.value / Math.max(total, 1) * 100) + '%;background:var(' + entry.color + ')"></span>';
+    }).join('');
+    var rows = activeCats.map(function (entry) {
+      var percent = total ? Math.round(entry.value / total * 100) : 0;
+      return '<div class="floating-breakdown__row" data-cost-category="' + entry.category + '"><i style="background:var(' + entry.color + ')"></i><span class="floating-breakdown__name">' + entry.label + '</span><span class="floating-breakdown__pct">' + percent + '%</span><b class="floating-breakdown__value" data-cost-value>' + money(entry.value) + '</b></div>';
+    }).join('');
+    panel.classList.remove('oculto');
+    panel.innerHTML = '<div class="floating-breakdown__title-block"><h3>A dónde se va la plata</h3><p>El costo real incluye mucho más que el pasaje.</p></div><div class="floating-breakdown__bar" role="img" aria-label="Distribución del costo">' + stack + '</div><div class="floating-breakdown__list">' + rows + '</div>';
   }
   function breakdownRows() {
     if (!detailState) return '';
