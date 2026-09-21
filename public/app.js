@@ -121,10 +121,28 @@
     detailState.auto = autoEnabled ? Number(detailState.roadtrip.totalUsd) : 0;
     detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
     detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados;
-    var flightSection = document.querySelector('.duffel-search');
+    var flightSection = document.querySelector('.flight-search');
     if (flightSection) flightSection.hidden = !!autoEnabled;
     var autoRow = document.querySelector('[data-cost-category="auto"]');
     if (autoRow) autoRow.hidden = !autoEnabled;
+    recalcularTotalViaje();
+  }
+  function actualizarRoadtrip(kmPerLiter) {
+    if (!detailState || !detailState.roadtrip) return;
+    var r = detailState.roadtrip;
+    var consumption = Number(kmPerLiter);
+    if (!Number.isFinite(consumption) || consumption < 3 || consumption > 40) return;
+    r.kmPerLiter = consumption;
+    r.liters = Math.round((Number(r.roundTripKm) / consumption) * 10) / 10;
+    r.fuelUsd = Math.round(r.liters * Number(r.fuelPriceUsd));
+    r.totalUsd = r.fuelUsd + Number(r.tollsUsd);
+    var litersEl = document.querySelector('[data-roadtrip-liters]');
+    var fuelEl = document.querySelector('[data-roadtrip-fuel]');
+    var totalEl = document.querySelector('[data-roadtrip-total]');
+    if (litersEl) litersEl.textContent = r.liters + ' litros';
+    if (fuelEl) fuelEl.textContent = money(r.fuelUsd);
+    if (totalEl) totalEl.textContent = money(r.totalUsd);
+    if (detailState.auto) detailState.auto = r.totalUsd;
     recalcularTotalViaje();
   }
   function actualizarTransferencia(enabled) {
@@ -135,7 +153,7 @@
   function roadtripCard(meta) {
     var r = meta.roadtrip;
     if (!r) return '';
-    return '<section class="transport-options"><h2>Transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight" checked> ✈️ Mantener vuelos</label><label><input type="radio" name="transport-choice" value="auto"> 🚗 Viajar en Auto propio</label><div class="transport-detail"><p>⛽ Combustible: ' + r.liters + ' litros × ' + money(r.fuelPriceUsd) + ' = <b>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes aproximados: <b>' + money(r.tollsUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km, rendimiento 12 km/l.</p></div></div></section>';
+    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight" checked> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"> 🚗 Auto / Roadtrip</label><div class="transport-detail"><label for="roadtrip-consumption">Consumo promedio del auto (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></div></section>';
   }
   function transferCard(meta) {
     var t = meta.officialTransfer;
@@ -144,7 +162,7 @@
   }
   function openTransferModal(meta) {
     var modal = $('#booking-modal'), t = meta.officialTransfer;
-    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transferencia bancaria</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · Orden pendiente de verificación</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Alias:</b> ' + esc(t.bank.alias) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p><p><b>CUIT:</b> ' + esc(t.bank.taxId) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Número de operación<input required name="operation" autocomplete="off"></label><label>Comprobante de transferencia<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Confirmar transferencia</button></form></div>';
+    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transferencia bancaria</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · Orden pendiente de verificación</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de transferencia<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Confirmar transferencia</button></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   async function submitTransfer(form) {
@@ -153,7 +171,7 @@
     button.disabled = true; button.textContent = 'Registrando transferencia…';
     try {
       var dataUrl = await new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(file); });
-      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: form.querySelector('[name="amount"]').value, operation: form.querySelector('[name="operation"]').value.trim(), destination: S.dest, receipt: { name: file.name, type: file.type, data: dataUrl } }) });
+      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: form.querySelector('[name="amount"]').value, destination: S.dest, receipt: { name: file.name, type: file.type, data: dataUrl } }) });
       var result = await response.json().catch(function () { return {}; });
       if (!response.ok) throw new Error(result.error || 'No pudimos registrar la transferencia.');
       $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>¡Reserva de traslado registrada con éxito!</h2><p>Tu número de orden es <strong>#' + esc(result.order) + '</strong>.</p><p class="booking-note">' + esc(result.message) + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
@@ -185,8 +203,8 @@
       '</div></section>';
   }
   function flightSearch(meta, budget) {
-    return '<section class="duffel-search" aria-labelledby="duffel-title" data-flight-budget="' + esc(budget) + '"><div><h2 id="duffel-title">Vuelos reales disponibles</h2><p>Ofertas de Duffel filtradas hasta ' + money(budget) + ' para pasajes.</p></div>' +
-      '<div class="duffel-results" aria-live="polite"><p class="duffel-loading">Consultando aerolíneas…</p></div></section>';
+    return '<section class="flight-search" aria-labelledby="flight-title"><div><h2 id="flight-title">Vuelos</h2><p>Tarifas aéreas en tiempo real para tu viaje.</p></div>' +
+      '<div class="flight-results" aria-live="polite"><p class="flight-loading">Buscando vuelos disponibles…</p></div></section>';
   }
   function flightTime(value) {
     if (!value) return 'Horario no disponible';
@@ -196,30 +214,26 @@
     data = data && typeof data === 'object' ? data : {};
     var offers = Array.isArray(data.offers) ? data.offers : [];
     if (!offers.length) {
-      el.innerHTML = '<p class="duffel-empty">⚠️ No encontramos vuelos en vivo para este filtro. La propuesta estimada del viaje sigue disponible arriba; probá con otras fechas o intentá nuevamente más tarde.</p>';
+      el.innerHTML = '<p class="flight-empty">⚠️ No encontramos vuelos disponibles en este momento. La propuesta estimada del viaje sigue disponible arriba; probá con otras fechas o intentá nuevamente más tarde.</p>';
       return;
     }
-    var priced = offers.filter(function (offer) { return offer.price_usd !== null; });
-    var affordable = priced.filter(function (offer) { return offer.price_usd <= budget; });
-    var fallback = affordable.length === 0;
-    var visible = fallback ? priced.slice(0, 2) : affordable;
-    if (!visible.length) { el.innerHTML = '<p class="duffel-empty">No encontramos vuelos para esta fecha. Probá cambiando el día de ida.</p>'; return; }
-    var warning = fallback ? '<p class="duffel-warning">⚠️ No encontramos vuelos disponibles por debajo de ' + money(budget) + ', pero estos son los más cercanos a tu presupuesto:</p>' : '';
-    el.innerHTML = warning + '<div class="flight-cards">' + visible.map(function (offer) {
+    var visible = offers.slice().sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
+    if (!visible.length) { el.innerHTML = '<p class="flight-empty">No encontramos vuelos para esta fecha. Probá cambiando el día de ida.</p>'; return; }
+    el.innerHTML = '<div class="flight-cards">' + visible.map(function (offer) {
       var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
       var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
-      return '<article class="flight-card' + (!fallback ? ' within-budget' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b></div>' +
+      return '<article class="flight-card within-budget"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b></div>' +
         '<div class="flight-route"><div><small>Salida</small><b>' + esc(flightTime(offer.departure)) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada</small><b>' + esc(flightTime(offer.arrival)) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">Seleccionar vuelo</button></div></article>';
     }).join('') + '</div>';
     var cheapest = visible[0];
-    if (cheapest && cheapest.price_usd !== null) actualizarPasajes(el.closest('.duffel-search'), Number(cheapest.price_usd));
+    if (cheapest && cheapest.price_usd !== null) actualizarPasajes(el.closest('.flight-search'), Number(cheapest.price_usd));
   }
   function searchFlights(meta, section) {
-    var box = section.querySelector('.duffel-results');
-    var budget = Number(section.getAttribute('data-flight-budget')) || 0;
-    box.innerHTML = '<p class="duffel-loading">Consultando aerolíneas…</p>';
+    var box = section.querySelector('.flight-results');
+    var budget = 0;
+    box.innerHTML = '<p class="flight-loading">Buscando vuelos disponibles…</p>';
     fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }) })
       .then(async function (response) {
         var text = await response.text();
@@ -233,7 +247,7 @@
         }
         renderFlightOffers(box, data, budget);
       })
-      .catch(function (e) { box.innerHTML = '<p class="duffel-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
+      .catch(function (e) { box.innerHTML = '<p class="flight-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
       ;
   }
   function passengerFields(count, passengerIds) {
@@ -361,9 +375,8 @@
   }
   function costNote(cat, meta, p) {
     var city = esc(meta.dest.name);
-    if (cat === 'comidas' || cat === 'local') return '<small class="cost-note">* Basado en tarifas reales de mercado en ' + city + '.</small>';
-    if (cat === 'pasajes' && p.sources[cat] === 'real') return '<small class="cost-note">* Precio real devuelto por Duffel al momento de consultar.</small>';
-    return '<small class="cost-note">* Valor de referencia estimado para ' + city + '.</small>';
+    var text = { pasajes: 'Tarifa aérea en tiempo real.', alojamiento: 'Estimación oficial para estadía en ' + city + '.', comidas: 'Basado en precios reales de mercado y gastronomía local.', local: 'Movilidad urbana y traslados internos.', traslados: 'Servicio oficial Aeropuerto ⇄ Hotel.', extras: 'Tasas aeroportuarias, equipaje y asistencia al viajero.' };
+    return '<small class="cost-note">' + (text[cat] || 'Detalle del viaje.') + '</small>';
   }
 
   function render(data) {
@@ -375,8 +388,8 @@
 
     $('#chip').textContent = live ? 'Precios de referencia' : 'Datos de ejemplo';
     $('#foot').innerHTML = live
-      ? '<p><b>Vuelos:</b> precio real de aerolíneas al momento de la búsqueda, en clase económica, por persona. Puede cambiar hasta que reserves. <b>Alojamiento, comidas, traslados y buses:</b> estimaciones.</p>'
-      : '<p><b>Datos de ejemplo.</b> Los precios de esta página son estimaciones para mostrar cómo funciona el cálculo. Conectá tu cuenta de Duffel para ver precios reales de vuelos.</p>';
+      ? '<p><b>Vuelos:</b> tarifa aérea real al momento de la búsqueda, por persona. Puede cambiar hasta que reserves. <b>Alojamiento, comidas, traslados y buses:</b> valores de referencia.</p>'
+      : '<p><b>Datos de ejemplo.</b> Los precios de esta página son referencias para mostrar cómo funciona el cálculo. Activá la búsqueda de tarifas aéreas en tiempo real para consultar disponibilidad.</p>';
 
     var pct = Math.min(100, Math.round(rec.total / Math.max(budget, 1) * 100));
     var status = data.fits
@@ -470,7 +483,7 @@
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    var liveFlights = view.querySelector('.duffel-search');
+    var liveFlights = view.querySelector('.flight-search');
     if (liveFlights) searchFlights(data.meta, liveFlights);
   }
 
@@ -572,7 +585,7 @@
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) {
         e.preventDefault(); e.stopPropagation();
-        actualizarPasajes(selectedFlight.closest('.duffel-search'), Number(selectedFlight.getAttribute('data-offer-price')));
+        actualizarPasajes(selectedFlight.closest('.flight-search'), Number(selectedFlight.getAttribute('data-offer-price')));
         openBookingForm(selectedFlight); return;
       }
       var unlock = e.target.closest('[data-unlock-guide]');
@@ -581,6 +594,12 @@
     $('#vista-detalle').addEventListener('change', function (e) {
       var hotelChoice = e.target.closest && e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')));
+      var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
+      if (consumption) actualizarRoadtrip(consumption.value);
+    });
+    $('#vista-detalle').addEventListener('input', function (e) {
+      var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
+      if (consumption) actualizarRoadtrip(consumption.value);
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();

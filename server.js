@@ -52,17 +52,19 @@ const ROADTRIP_ROUTES = {
   pip: { name: 'Pipa', km: 4750, tolls: 282, hours: 58 }
 };
 const transferOrders = new Map();
-function roadtripCost(key) {
+function roadtripCost(key, kmPerLiter) {
   const route = ROADTRIP_ROUTES[key];
   if (!route) return null;
+  const consumption = Number(kmPerLiter);
+  const safeConsumption = Number.isFinite(consumption) && consumption >= 3 && consumption <= 40 ? consumption : 12;
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
-  const liters = Math.round((route.km * 2 / 12) * 10) / 10;
+  const liters = Math.round((route.km * 2 / safeConsumption) * 10) / 10;
   const fuel = Math.round(liters * fuelPrice);
-  return { distanceKm: route.km, roundTripKm: route.km * 2, liters: liters, fuelPriceUsd: fuelPrice, fuelUsd: fuel, tollsUsd: route.tolls, totalUsd: fuel + route.tolls, hours: route.hours, source: 'ruta estimada con 12 km/l y peajes configurables' };
+  return { distanceKm: route.km, roundTripKm: route.km * 2, kmPerLiter: safeConsumption, liters: liters, fuelPriceUsd: fuelPrice, fuelUsd: fuel, tollsUsd: route.tolls, totalUsd: fuel + route.tolls, hours: route.hours, source: 'estimación de ruta ida y vuelta, combustible en Brasil y peajes' };
 }
 function transferConfig(destKey, pax) {
   const unit = Number(process.env.OFFICIAL_TRANSFER_PRICE_USD) || 35;
-  return { pricePerPassenger: unit, amount: unit * Math.max(1, Number(pax) || 1), destination: destKey, bank: { bank: process.env.TRANSFER_BANK_NAME || 'Configurar TRANSFER_BANK_NAME', account: process.env.TRANSFER_ACCOUNT || 'Configurar TRANSFER_ACCOUNT', alias: process.env.TRANSFER_ALIAS || 'Configurar TRANSFER_ALIAS', holder: process.env.TRANSFER_HOLDER || 'Configurar TRANSFER_HOLDER', taxId: process.env.TRANSFER_TAX_ID || 'Configurar TRANSFER_TAX_ID' } };
+  return { pricePerPassenger: unit, amount: unit * Math.max(1, Number(pax) || 1), destination: destKey, bank: { bank: 'Prex', account: '361333', holder: 'Maria Paola Batista' } };
 }
 
 /* ---------- límite de pedidos por IP ---------- */
@@ -109,14 +111,14 @@ function readJson(req, maxBytes) {
 
 function registrarTransferencia(req, res, body) {
   body = body && typeof body === 'object' ? body : {};
-  const amount = Number(body.amount), operation = String(body.operation || '').trim();
+  const amount = Number(body.amount);
   const file = body.receipt;
-  if (!Number.isFinite(amount) || amount <= 0 || !operation || !file || !file.data) {
-    return sendJson(res, 400, { error: 'Indicá el número de operación y adjuntá el comprobante.' });
+  if (!Number.isFinite(amount) || amount <= 0 || !file || !file.data) {
+    return sendJson(res, 400, { error: 'Adjuntá el comprobante de transferencia.' });
   }
   if (String(file.data).length > 6e6) return sendJson(res, 413, { error: 'El comprobante supera el tamaño máximo permitido.' });
   const order = 'TRF-' + new Date().getFullYear() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-  transferOrders.set(order, { order: order, status: 'Pendiente de verificación', amount: Math.round(amount), operation: operation, receipt: { name: String(file.name || 'comprobante'), type: String(file.type || 'application/octet-stream'), data: String(file.data) }, createdAt: new Date().toISOString(), destination: String(body.destination || '') });
+  transferOrders.set(order, { order: order, status: 'Pendiente de verificación', amount: Math.round(amount), receipt: { name: String(file.name || 'comprobante'), type: String(file.type || 'application/octet-stream'), data: String(file.data) }, createdAt: new Date().toISOString(), destination: String(body.destination || '') });
   return sendJson(res, 201, { ok: true, order: order, status: 'Pendiente de verificación', message: '¡Reserva de traslado registrada con éxito! En menos de 2 horas validaremos tu comprobante y te enviaremos el voucher definitivo por correo electrónico.' });
 }
 
