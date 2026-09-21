@@ -4,25 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CuántoSale | Cuánto cuesta realmente tu viaje</title>
-<meta name="description" content="Comparamos vuelos, buses y alojamiento desde Uruguay y te decimos cuánto cuesta realmente tu viaje.">
+<meta name="description" content="Comparamos vuelos, ómnibus y alojamiento desde Uruguay y te decimos cuánto cuesta realmente tu viaje.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
-<!-- Script de afiliados Travelpayouts (Money Script) -->
-<script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1" data-cmp-ab="2">
-  (function () {
-      var script = document.createElement("script");
-      script.async = 1;
-      script.setAttribute("data-cmp-ab","2");
-      script.src = 'https://emrldco.com/NTc2NTAy.js?t=576502';
-      document.head.appendChild(script);
-  })();
-</script>
-</head>
 </head>
 <body>
 <div class="wrap">
+
   <header class="top">
     <div class="logo" aria-label="CuántoSale">
       <svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>
@@ -32,49 +22,92 @@
   </header>
 
   <h1>¿Cuánto sale realmente tu viaje?</h1>
-  <p class="lead">Ponés destino, fechas, cuántos viajan y tu presupuesto. Comparamos vuelos, buses y alojamiento y te mostramos el costo total.</p>
+  <p class="lead">Ponés destino, fechas y cuántos viajan. Armamos el presupuesto completo y lo ajustás con tu estilo de viaje.</p>
 
-  <section class="form" aria-label="Datos de tu viaje">
-    <div class="origin">
-      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
-      Salís desde <b>Uruguay (Montevideo)</b>
-    </div>
-    <div>
-      <label for="dest">Destino</label>
-      <select id="dest" class="inp"></select>
-    </div>
-    <div class="row2">
-      <div><label for="dep">Ida</label><input id="dep" class="inp" type="date"></div>
-      <div><label for="ret">Vuelta</label><input id="ret" class="inp" type="date"></div>
-    </div>
-    <div class="row2">
-      <div>
-        <span class="lbl" id="paxl">Viajeros</span>
-        <div class="step" role="group" aria-labelledby="paxl">
-          <button type="button" id="pm" aria-label="Un viajero menos">−</button>
-          <output id="pax" aria-live="polite">2</output>
-          <button type="button" id="pp" aria-label="Un viajero más">+</button>
+  <div class="layout">
+
+    <!-- Panel de presupuesto: fijo arriba en el celular, lateral en pantallas grandes -->
+    <aside class="budget" id="budget" aria-label="Presupuesto total del viaje" hidden>
+      <div class="b-top">
+        <div class="b-sum">
+          <small>Presupuesto total</small>
+          <strong id="bTotal">US$ 0</strong>
+          <span id="bPP" class="b-pp"></span>
         </div>
+        <button type="button" class="cta" id="openCheckout">Reservar viaje completo</button>
       </div>
-      <div>
-        <label for="bud">Presupuesto total</label>
-        <div class="money"><span>US$</span><input id="bud" class="inp" type="number" inputmode="numeric" min="0" step="100"></div>
+      <button type="button" class="b-toggle" id="bToggle" aria-expanded="false" aria-controls="bBody">
+        <span id="bToggleText">Ver desglose y estilo de viaje</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="b-body" id="bBody">
+        <div class="b-status" id="bStatus" role="status"></div>
+        <div class="b-style">
+          <span class="lbl" id="styleLbl">Estilo de viaje</span>
+          <div class="seg" id="styleSeg" role="group" aria-labelledby="styleLbl"></div>
+          <p class="b-note" id="styleNote"></p>
+        </div>
+        <ul class="b-rows" id="bRows"></ul>
       </div>
-    </div>
-    <div>
-      <span class="lbl" id="stl">¿Qué tipo de viaje buscás?</span>
-      <div class="seg" role="group" aria-labelledby="stl" id="seg">
-        <button type="button" data-v="ahorro" aria-pressed="false">Ahorrar al máximo</button>
-        <button type="button" data-v="eq" aria-pressed="true">Equilibrado</button>
-        <button type="button" data-v="comodo" aria-pressed="false">Con comodidad</button>
-      </div>
-    </div>
-  </section>
+    </aside>
 
-  <div id="results" aria-live="polite"></div>
+    <main class="main">
+      <section class="form" aria-label="Datos de tu viaje">
+        <div class="origin">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+          Salís desde <b>Uruguay (Montevideo)</b>
+        </div>
+        <div>
+          <label for="dest">Destino</label>
+          <select id="dest" class="inp"></select>
+        </div>
+        <div class="row2">
+          <div><label for="dep">Ida</label><input id="dep" class="inp" type="date"></div>
+          <div><label for="ret">Vuelta</label><input id="ret" class="inp" type="date"></div>
+        </div>
+        <div class="row2">
+          <div>
+            <span class="lbl" id="paxl">Viajeros</span>
+            <div class="step" role="group" aria-labelledby="paxl">
+              <button type="button" id="pm" aria-label="Un viajero menos">−</button>
+              <output id="pax" aria-live="polite">2</output>
+              <button type="button" id="pp" aria-label="Un viajero más">+</button>
+            </div>
+          </div>
+          <div>
+            <label for="bud">Tu presupuesto (US$)</label>
+            <div class="money"><span>US$</span><input id="bud" class="inp" type="number" inputmode="numeric" min="0" step="100"></div>
+          </div>
+        </div>
+      </section>
+
+      <div id="results"></div>
+    </main>
+  </div>
 
   <footer class="foot" id="foot"></footer>
 </div>
+
+<!-- Ventana "Organizar mi reserva" -->
+<dialog class="modal" id="checkout" aria-labelledby="ckTitle">
+  <div class="ck">
+    <div class="ck-head">
+      <div>
+        <h2 id="ckTitle">Organizar mi reserva</h2>
+        <p id="ckSub"></p>
+      </div>
+      <button type="button" class="ck-x" id="ckClose" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3l12 12M15 3L3 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="ck-progress">
+      <div class="track"><div class="fill" id="ckFill"></div></div>
+      <p id="ckCount"></p>
+    </div>
+    <ol class="ck-steps" id="ckSteps"></ol>
+    <p class="ck-note">Cada enlace se abre en una pestaña nueva. Esta pestaña queda abierta como tu centro de control: reservá en el orden que quieras y volvé acá.</p>
+  </div>
+</dialog>
 
 <script src="/app.js"></script>
 </body>
