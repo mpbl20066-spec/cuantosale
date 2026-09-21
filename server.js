@@ -82,6 +82,37 @@ async function cotizar(req, res, url) {
   }, result));
 }
 
+function cotizarTodos(req, res, url) {
+  if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
+  const today = model.getToday();
+  let v;
+  try {
+    // La validación del viaje es compartida con la cotización individual; el
+    // destino de referencia solo satisface ese validador y luego se reemplaza.
+    v = model.validate(Object.assign({}, Object.fromEntries(url.searchParams), { dest: 'fln' }), today);
+  } catch (e) {
+    return sendJson(res, e.status || 400, { error: e.message });
+  }
+
+  // Estas diez opciones son comparables y estimadas: consultar Duffel para
+  // cada destino dispararía hasta 19 requests externos en un solo clic.
+  const options = Object.keys(model.DEST).map(function (key) {
+    const trip = Object.assign({}, v.S, { dest: key });
+    const result = model.compute(trip, v.dep, v.ret, today, {});
+    const rec = result.list.find(function (p) { return p.id === result.recId; });
+    return {
+      dest: { key: key, name: model.DEST[key].name }, total: rec.total, pp: rec.pp,
+      parts: rec.parts, title: rec.modeShort + ' + hotel ' + rec.tierLabel,
+      tierDesc: rec.tierDesc, fits: result.fits
+    };
+  }).sort(function (a, b) { return a.total - b.total; });
+
+  sendJson(res, 200, {
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated' },
+    options: options
+  });
+}
+
 function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/index.html';
@@ -104,13 +135,16 @@ function createServer() {
     let url;
     try { url = new URL(req.url, 'http://localhost'); } catch (e) { res.writeHead(400); return res.end(); }
     if (url.pathname === '/api/destinos') {
-      return sendJson(res, 200, Object.keys(model.DEST).map(function (k) { return { key: k, name: model.DEST[k].name }; }));
+      return sendJson(res, 200, Object.keys(model.DEST).map(function (k) { return { key: k, name: model.DEST[k].name }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }));
     }
     if (url.pathname === '/api/cotizar') {
       return cotizar(req, res, url).catch(function (e) {
         console.error('[cotizar]', e);
         sendJson(res, 500, { error: 'Error inesperado. Probá de nuevo en un momento.' });
       });
+    }
+    if (url.pathname === '/api/cotizar-todos') {
+      return cotizarTodos(req, res, url);
     }
     try { serveStatic(req, res, url.pathname); } catch (e) { res.writeHead(400); res.end(); }
   });

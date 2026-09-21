@@ -102,6 +102,14 @@ function offer(amount, cur, name, segsOut, segsBack) {
   await t('lista de destinos', async function () {
     const j = JSON.parse((await get(port, '/api/destinos')).body);
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
+    assert.deepStrictEqual(j.map(function (d) { return d.key; }), ['fln', 'for', 'igu', 'mcz', 'nat', 'poa', 'rec', 'rio', 'ssa', 'sao']);
+  });
+  await t('cotiza todos los destinos ordenados por total', async function () {
+    const r = await get(port, '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
+    const j = JSON.parse(r.body);
+    assert.strictEqual(r.status, 200); assert.strictEqual(j.options.length, 10);
+    for (let i = 1; i < j.options.length; i++) assert.ok(j.options[i].total >= j.options[i - 1].total);
+    assert.ok(j.options.every(function (o) { return o.parts && o.dest && typeof o.fits === 'boolean'; }));
   });
   await t('rechaza parámetros inválidos con 400', async function () {
     const r = await get(port, '/api/cotizar?dest=zz&dep=' + dep + '&ret=' + ret + '&pax=2');

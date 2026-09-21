@@ -14,6 +14,18 @@
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { rio: 'RIO', fln: 'FLN', sao: 'SAO', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', poa: 'POA' };
+  var FOOD_TIPS = {
+    rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
+    fln: ['Buscá <b>prato executivo</b> en el centro de Florianópolis al mediodía: generalmente es la comida con mejor relación precio-cantidad.', 'En los mercados públicos y ferias barriales, armá un picnic con frutas, pan de queso y jugos para llevar a la playa.', 'Alejate una o dos cuadras de la playa para encontrar <b>buffet por kilo</b> y platos del día más accesibles.'],
+    sao: ['En los restaurantes por kilo del centro y Vila Madalena, cargá un plato equilibrado y pagá solo por lo que comés.', 'La <b>feira livre</b> es ideal para frutas, pasteles y jugos a precios locales.', 'Compartí una pizza paulista grande: suele rendir para dos personas y es una cena clásica de buen valor.'],
+    ssa: ['Probá un <b>prato feito</b> de comida baiana en el centro histórico, lejos de los locales con vista turística.', 'Las bahianas de acarajé son una merienda abundante y típica; consultá el precio antes de pedir extras.', 'Comprá agua y frutas en mercados locales antes de recorrer Pelourinho o las playas.'],
+    igu: ['Para un almuerzo económico, buscá buffet por kilo o <b>prato feito</b> fuera de la zona hotelera.', 'En supermercados de Foz podés conseguir fruta, agua y meriendas para llevar a las cataratas.', 'Probá churrasquerías con menú de mediodía: muchas tienen opciones más convenientes que la cena.'],
+    rec: ['Buscá menú ejecutivo en Boa Viagem o en el centro, a unas cuadras de la rambla.', 'Las tapiocas y jugos de los mercados son una opción local, rápida y económica para merendar.', 'En el Mercado de São José encontrás ingredientes y comidas populares a precio local.'],
+    for: ['En Mercado dos Peixes podés elegir pescado y pedir que lo preparen; compará puestos antes de decidir.', 'Para el almuerzo, el <b>prato comercial</b> suele ser más barato y abundante que cenar en la costa.', 'Comprá agua de coco y fruta en mercados de barrio, no en los puestos de la playa.'],
+    mcz: ['Buscá menú ejecutivo en Pajuçara o Jatiúca a una cuadra de la costa para evitar el recargo frente al mar.', 'Las tapiocas y cuscuz nordestinos son desayunos o meriendas baratos y rendidores.', 'Para excursiones, llevá agua y snacks del supermercado: en las paradas turísticas los precios suben.'],
+    nat: ['Probá <b>prato feito</b> y buffet por kilo fuera de la primera línea de Ponta Negra.', 'En los mercados locales encontrás castañas, frutas y jugos para una merienda económica.', 'Compartí porciones de camarones o pescado en restaurantes de barrio: suelen ser generosas.'],
+    poa: ['En el Mercado Público encontrás almuerzos, empanadas y productos locales a precios variados.', 'Los restaurantes por kilo del centro son una opción práctica para comer bien al mediodía.', 'Probá una cafetería de barrio para merendar: café con salgado suele costar menos que en zonas turísticas.']
+  };
   var $ = function (s) { return document.querySelector(s); };
   var today = new Date(); today.setHours(12, 0, 0, 0);
   var timer = null, ctrl = null;
@@ -56,6 +68,66 @@
       '<a class="cta-link cta-flights" href="' + esc(flightUrl(meta)) + '" target="_blank" rel="noopener noreferrer">' +
       '<span aria-hidden="true">✈️</span> Buscar y comparar vuelos a ' + city + '</a>' +
       '</div></section>';
+  }
+  function guideUnlocked() {
+    try { return localStorage.getItem('cuantosale_guia_desbloqueada') === 'true'; } catch (e) { return false; }
+  }
+  function unlockGuide() {
+    try { localStorage.setItem('cuantosale_guia_desbloqueada', 'true'); } catch (e) { /* la guía se desbloquea igualmente en esta vista */ }
+    Array.prototype.forEach.call(document.querySelectorAll('.food-guide'), function (guide) {
+      guide.querySelector('.food-tips').classList.remove('bloqueado');
+      var lock = guide.querySelector('.guide-lock');
+      if (lock) lock.hidden = true;
+    });
+  }
+  function foodGuide(meta) {
+    var tips = FOOD_TIPS[meta.dest.key] || FOOD_TIPS.fln;
+    var locked = !guideUnlocked();
+    var items = tips.map(function (tip) { return '<li>' + tip + '</li>'; }).join('');
+    return '<section class="food-guide" aria-labelledby="food-guide-title">' +
+      '<div class="food-guide-head"><span aria-hidden="true">🍽️</span><div><h2 id="food-guide-title">Guía Secreta: Dónde comer bien y barato en ' + esc(meta.dest.name) + '</h2>' +
+      '<p>Ideas locales para cuidar tu presupuesto sin resignar sabor.</p></div></div>' +
+      '<ul class="food-tips' + (locked ? ' bloqueado' : '') + '">' + items + '</ul>' +
+      '<div class="guide-lock"' + (locked ? '' : ' hidden') + '>' +
+      '<div class="guide-lock-icon" aria-hidden="true">🔒</div>' +
+      '<p><b>Contenido exclusivo desbloqueable:</b> Mantener CuántoSale gratuito requiere trabajo. ¡Ayúdanos a mantener la web activa! Solo abre los hoteles disponibles para tu viaje en Booking.com (no necesitás comprar nada; con solo mirar la página se desbloquea la lista automáticamente).</p>' +
+      '<a class="guide-unlock" data-unlock-guide href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver Hoteles en Booking y Desbloquear Guía Secreta 🔓</a>' +
+      '</div></section>';
+  }
+  function renderDestinationResults(data) {
+    var el = $('#destination-results');
+    var cards = data.options.map(function (option) {
+      var rows = CATS.map(function (c) {
+        return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + '</b></div>';
+      }).join('');
+      var meta = { dest: option.dest, dep: data.meta.dep, ret: data.meta.ret, pax: data.meta.pax };
+      return '<article class="destination-card' + (option.fits ? ' fits' : '') + '">' +
+        '<div class="destination-card-top"><div><h3>' + esc(option.dest.name) + '</h3><p>' + esc(option.title) + '. ' + esc(option.tierDesc) + '.</p></div>' +
+        '<div class="destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
+        '<span class="mini ' + (option.fits ? 'g' : 'r') + '">' + (option.fits ? 'Entra en tu presupuesto' : 'Se pasa por ' + money(option.total - data.meta.budget)) + '</span>' +
+        '<details><summary>Ver desglose</summary><div class="destination-breakdown">' + rows + '</div></details>' +
+        '<a class="destination-booking" href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver hoteles en Booking.com</a>' +
+        '</article>';
+    }).join('');
+    var count = data.options.filter(function (option) { return option.fits; }).length;
+    el.innerHTML = '<section class="destination-results-section"><h2>Destinos para tu presupuesto</h2>' +
+      '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo. ' + count + (count === 1 ? ' destino entra' : ' destinos entran') + ' en tu presupuesto.</p>' +
+      '<div class="destination-cards">' + cards + '</div></section>';
+  }
+  function findDestinations() {
+    var budget = Number($('#dest-budget').value);
+    var el = $('#destination-results');
+    if (!budget || budget < 1) { el.innerHTML = '<div class="notice">Ingresá un presupuesto máximo para buscar destinos.</div>'; return; }
+    if (!S.dep || !S.ret) { el.innerHTML = '<div class="notice">Elegí las fechas de ida y vuelta antes de buscar destinos.</div>'; return; }
+    el.innerHTML = '<div class="notice">Buscando destinos para tu presupuesto…</div>';
+    var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style });
+    fetch('/api/cotizar-todos?' + qs.toString())
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.j.error || 'No pudimos buscar destinos.');
+        renderDestinationResults(res.j);
+      })
+      .catch(function (e) { el.innerHTML = '<div class="notice">' + esc(e.message || 'No pudimos buscar destinos ahora.') + '</div>'; });
   }
   function notice(msg) { $('#results').innerHTML = '<div class="notice">' + esc(msg) + '</div>'; }
 
@@ -133,6 +205,7 @@
       note + '</div></section>';
 
     h += ctas(data.meta);
+    h += foodGuide(data.meta);
 
     var stack = CATS.map(function (c) { return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>'; }).join('');
     var leg = CATS.map(function (c) {
@@ -211,6 +284,7 @@
     });
     $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; schedule(); });
     $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Number(e.target.value) || 0); schedule(); });
+    $('#find-destinations').addEventListener('click', findDestinations);
     $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; schedule(); });
     $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; schedule(); });
     $('#seg').addEventListener('click', function (e) {
@@ -220,6 +294,8 @@
       schedule();
     });
     $('#results').addEventListener('click', function (e) {
+      var unlock = e.target.closest('[data-unlock-guide]');
+      if (unlock) { unlockGuide(); return; }
       var b = e.target.closest('[data-shift]'); if (!b) return;
       var s = Number(b.getAttribute('data-shift'));
       S.dep = iso(addDays(parse(S.dep), s)); S.ret = iso(addDays(parse(S.ret), s));
@@ -228,7 +304,7 @@
     });
 
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
-      list.forEach(function (d) { var o = document.createElement('option'); o.value = d.key; o.textContent = d.name; sel.appendChild(o); });
+      list.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) { var o = document.createElement('option'); o.value = d.key; o.textContent = d.name; sel.appendChild(o); });
       sel.value = S.dest;
       run();
     }).catch(function () { notice('No pudimos cargar los destinos. Recargá la página.'); });

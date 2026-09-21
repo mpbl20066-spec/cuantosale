@@ -69,9 +69,17 @@
         <button type="button" data-v="comodo" aria-pressed="false">Con comodidad</button>
       </div>
     </div>
+    <div class="destination-finder">
+      <div>
+        <label for="dest-budget">¿A dónde llego con mi presupuesto?</label>
+        <div class="money"><span>US$</span><input id="dest-budget" class="inp" type="number" inputmode="numeric" min="1" step="100" placeholder="Ej.: 1000"></div>
+      </div>
+      <button type="button" class="find-destinations" id="find-destinations">Buscar destinos</button>
+    </div>
   </section>
 
   <div id="results" aria-live="polite"></div>
+  <div id="destination-results" aria-live="polite"></div>
 
   <footer class="foot" id="foot"></footer>
 </div>
