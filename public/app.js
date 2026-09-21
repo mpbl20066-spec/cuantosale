@@ -94,6 +94,36 @@
       '<a class="guide-unlock" data-unlock-guide href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver Hoteles en Booking y Desbloquear Guía Secreta 🔓</a>' +
       '</div></section>';
   }
+  function flightSearch(meta) {
+    return '<section class="duffel-search" aria-labelledby="duffel-title"><div><h2 id="duffel-title">Vuelos disponibles</h2><p>Compará opciones reales de aerolíneas sin salir de CuántoSale.</p></div>' +
+      '<button type="button" class="duffel-search-button" data-search-flights data-destination="' + esc(meta.dest.key) + '">✈️ Ver vuelos disponibles</button>' +
+      '<div class="duffel-results" aria-live="polite"></div></section>';
+  }
+  function flightTime(value) {
+    if (!value) return 'Horario no disponible';
+    return new Date(value).toLocaleString('es-UY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+  function renderFlightOffers(el, data) {
+    if (!data.offers.length) { el.innerHTML = '<p class="duffel-empty">No encontramos vuelos para esta fecha. Probá cambiando el día de ida.</p>'; return; }
+    el.innerHTML = '<div class="flight-cards">' + data.offers.map(function (offer) {
+      var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
+      var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
+      return '<article class="flight-card"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b></div>' +
+        '<div class="flight-route"><div><small>Salida</small><b>' + esc(flightTime(offer.departure)) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada</small><b>' + esc(flightTime(offer.arrival)) + '</b></div></div>' +
+        '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
+        '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '">Seleccionar vuelo</button></div></article>';
+    }).join('') + '</div>';
+  }
+  function searchFlights(button) {
+    var box = button.parentNode.querySelector('.duffel-results');
+    button.disabled = true; button.textContent = 'Buscando vuelos…';
+    box.innerHTML = '<p class="duffel-loading">Consultando aerolíneas…</p>';
+    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: button.getAttribute('data-destination'), fecha_ida: S.dep, pasajeros: S.pax }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) { if (!res.ok) throw new Error(res.j.error || 'No pudimos buscar vuelos.'); renderFlightOffers(box, res.j); })
+      .catch(function (e) { box.innerHTML = '<p class="duffel-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
+      .then(function () { button.disabled = false; button.textContent = '✈️ Ver vuelos disponibles'; });
+  }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
     var cards = data.options.map(function (option) {
@@ -205,6 +235,7 @@
       note + '</div></section>';
 
     h += ctas(data.meta);
+    h += flightSearch(data.meta);
     h += foodGuide(data.meta);
 
     var stack = CATS.map(function (c) { return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>'; }).join('');
@@ -294,6 +325,10 @@
       schedule();
     });
     $('#results').addEventListener('click', function (e) {
+      var flightButton = e.target.closest('[data-search-flights]');
+      if (flightButton) { searchFlights(flightButton); return; }
+      var selectedFlight = e.target.closest('[data-select-flight]');
+      if (selectedFlight) { selectedFlight.textContent = 'Vuelo seleccionado ✓'; selectedFlight.disabled = true; return; }
       var unlock = e.target.closest('[data-unlock-guide]');
       if (unlock) { unlockGuide(); return; }
       var b = e.target.closest('[data-shift]'); if (!b) return;

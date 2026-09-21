@@ -87,7 +87,13 @@ function offer(amount, cur, name, segsOut, segsBack) {
   console.log('Servidor');
   delete process.env.DUFFEL_TOKEN;
   process.env.RATE_LIMIT_PER_MIN = '1000';
-  const server = require('./server').createServer();
+  const app = require('./server');
+  await t('formatea las ofertas de la SDK de Duffel para el frontend', function () {
+    const offers = app.formatOffers([{ id: 'off_1', total_amount: '299.50', total_currency: 'USD', owner: { name: 'Aerolínea Test' },
+      slices: [{ duration: 'PT3H45M', segments: [{ departing_at: '2027-01-10T10:00:00', arriving_at: '2027-01-10T13:45:00', marketing_carrier: { name: 'Aerolínea Test', logo_symbol_url: 'https://logo.test/a.png' } }] }] }]);
+    assert.deepStrictEqual(offers[0], { id: 'off_1', airline: 'Aerolínea Test', logo: 'https://logo.test/a.png', departure: '2027-01-10T10:00:00', arrival: '2027-01-10T13:45:00', stops: 0, duration: '3 h 45 min', price_usd: 299.5, original_price: '299.50', original_currency: 'USD' });
+  });
+  const server = app.createServer();
   await new Promise(function (r) { server.listen(0, r); });
   const port = server.address().port;
 
