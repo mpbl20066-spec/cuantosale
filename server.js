@@ -37,30 +37,10 @@ const MIME = {
 };
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com; base-uri 'none'; form-action 'self'";
 const DUFFEL_DESTINATIONS = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
-const ROADTRIP_ROUTES = {
-  fln: { name: 'Florianópolis', km: 720, tolls: 42, hours: 9 },
-  rio: { name: 'Río de Janeiro', km: 1900, tolls: 120, hours: 23 },
-  buz: { name: 'Búzios', km: 2050, tolls: 128, hours: 25 },
-  igu: { name: 'Foz de Iguazú', km: 1050, tolls: 76, hours: 14 },
-  ssa: { name: 'Salvador de Bahía', km: 3300, tolls: 205, hours: 40 },
-  sao: { name: 'San Pablo', km: 2050, tolls: 132, hours: 25 },
-  poa: { name: 'Porto Alegre', km: 800, tolls: 55, hours: 10 },
-  rec: { name: 'Recife', km: 4500, tolls: 270, hours: 54 },
-  for: { name: 'Fortaleza', km: 5100, tolls: 300, hours: 62 },
-  mcz: { name: 'Maceió', km: 4100, tolls: 245, hours: 49 },
-  nat: { name: 'Natal', km: 4700, tolls: 280, hours: 57 },
-  pip: { name: 'Pipa', km: 4750, tolls: 282, hours: 58 }
-};
 const transferOrders = new Map();
 function roadtripCost(key, kmPerLiter) {
-  const route = ROADTRIP_ROUTES[key];
-  if (!route) return null;
-  const consumption = Number(kmPerLiter);
-  const safeConsumption = Number.isFinite(consumption) && consumption >= 3 && consumption <= 40 ? consumption : 12;
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
-  const liters = Math.round((route.km * 2 / safeConsumption) * 10) / 10;
-  const fuel = Math.round(liters * fuelPrice);
-  return { distanceKm: route.km, roundTripKm: route.km * 2, kmPerLiter: safeConsumption, liters: liters, fuelPriceUsd: fuelPrice, fuelUsd: fuel, tollsUsd: route.tolls, totalUsd: fuel + route.tolls, hours: route.hours, source: 'estimación de ruta ida y vuelta, combustible en Brasil y peajes' };
+  return model.roadtripCost(key, kmPerLiter, fuelPrice);
 }
 function transferConfig(destKey, pax) {
   const unit = Number(process.env.OFFICIAL_TRANSFER_PRICE_USD) || 35;
@@ -306,6 +286,7 @@ async function cotizar(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
+  v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   const quotes = await providers.getQuotes(model.DEST[v.S.dest], v.S.dep, v.S.ret, v.S.style);
   const result = model.compute(v.S, v.dep, v.ret, today, quotes);
   sendJson(res, 200, Object.assign({
@@ -313,7 +294,7 @@ async function cotizar(req, res, url) {
       mode: providers.isLive() ? 'live' : 'demo',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
-      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest), officialTransfer: transferConfig(v.S.dest, v.S.pax),
+      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax),
       generatedAt: new Date().toISOString()
     }
   }, result));
@@ -330,6 +311,7 @@ function cotizarTodos(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
+  v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
 
   // Estas diez opciones son comparables y estimadas: consultar Duffel para
   // cada destino dispararía hasta 19 requests externos en un solo clic.
@@ -345,7 +327,7 @@ function cotizarTodos(req, res, url) {
   }).sort(function (a, b) { return a.total - b.total; });
 
   sendJson(res, 200, {
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest), officialTransfer: transferConfig(v.S.dest, v.S.pax) },
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax) },
     options: options
   });
 }
