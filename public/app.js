@@ -212,7 +212,7 @@
         '</article>';
     }).join('');
     var count = data.options.filter(function (option) { return option.fits; }).length;
-    el.innerHTML = '<section class="destination-results-section"><h2>Destinos para tu presupuesto</h2>' +
+    el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos que entran en tu presupuesto</h2>' +
       '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo. ' + count + (count === 1 ? ' destino entra' : ' destinos entran') + ' en tu presupuesto.</p>' +
       '<div class="destination-cards">' + cards + '</div></section>';
   }
@@ -283,18 +283,6 @@
       ? 'Entra en tu presupuesto. Te sobran ' + money(budget - rec.total) + '.'
       : 'Ninguna opción entra en ' + money(budget) + '. La más barata te deja ' + money(rec.total - budget) + ' por encima.';
 
-    var note = '';
-    if (live) {
-      if (rec.sources.pasajes === 'real') {
-        note = '<p class="note">Pasaje: precio real de ' + (rec.quote && rec.quote.airline ? esc(rec.quote.airline) : 'una aerolínea') +
-          (rec.quote && rec.quote.transfers ? ', con ' + rec.quote.transfers + (rec.quote.transfers === 1 ? ' escala' : ' escalas') : ', sin escalas') + '.</p>';
-      } else if (rec.mode === 'avion_mvd' || rec.mode === 'avion_ba') {
-        note = '<p class="note">Pasaje: estimado. No encontramos precios reales para estas fechas.</p>';
-      } else {
-        note = '<p class="note">Pasaje: estimado.</p>';
-      }
-    }
-
     var h = '';
     h += '<section class="sec"><div class="hero">' +
       '<div class="tags"><span class="tag">' + (data.fits ? 'La más conveniente para vos' : 'La más barata que encontramos') + '</span>' +
@@ -306,9 +294,7 @@
       '<div class="nums"><div><small>Costo total del viaje</small><span class="big">' + money(rec.total) + '</span></div>' +
       '<div><small>Por persona</small><span class="pp">' + money(rec.pp) + '</span></div></div>' +
       '<div class="budget"><div class="track"><div class="fill' + (data.fits ? '' : ' over') + '" style="width:' + pct + '%"></div></div><p>' + status + '</p></div>' +
-      note + '</div></section>';
-
-    h += ctas(data.meta);
+      '</div></section>';
 
     var stack = CATS.map(function (c) { return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>'; }).join('');
     var leg = CATS.map(function (c) {
@@ -358,7 +344,7 @@
       tags += p.total <= budget ? '<span class="mini g">Entra en tu presupuesto</span>' : '<span class="mini r">Se pasa por ' + money(p.total - budget) + '</span>';
       var rows = CATS.map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + '</b></div>'; }).join('');
       return '<details class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '"><summary><div><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
-        '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body"><div class="proposal-actions"><button type="button" class="btn-ver-propuesta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta ➔</button></div>' + rows + '</div></details>';
+        '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body">' + rows + '<div class="proposal-actions"><button type="button" class="btn-ver-propuesta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta ➔</button></div></div></details>';
     }).join('');
     h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
 
