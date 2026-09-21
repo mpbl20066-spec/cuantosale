@@ -14,6 +14,7 @@
   var S = { dest: 'fln', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', proposalId: '' };
   var massSearch = false;
   var detailState = null;
+  var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
@@ -138,6 +139,10 @@
     detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados;
     var flightSection = document.querySelector('.flight-search');
     if (flightSection) flightSection.hidden = !!autoEnabled;
+    var calculator = document.querySelector('[data-roadtrip-calculator]');
+    if (calculator) calculator.hidden = !autoEnabled;
+    var transferSection = document.querySelector('[data-official-transfer]');
+    if (transferSection) transferSection.hidden = !!autoEnabled;
     var autoRow = document.querySelector('[data-cost-category="auto"]');
     if (autoRow) autoRow.hidden = !autoEnabled;
     sincronizarTrasladoOficial();
@@ -160,15 +165,28 @@
     if (detailState.auto) detailState.auto = r.totalUsd;
     recalcularTotalViaje();
   }
+  function actualizarModeloRoadtrip(model) {
+    var manual = document.querySelector('[data-roadtrip-consumption]');
+    if (!manual) return;
+    var custom = model === 'custom';
+    manual.hidden = !custom;
+    manual.disabled = !custom;
+    if (!custom) {
+      manual.value = ROADTRIP_VEHICLES[model];
+      actualizarRoadtrip(ROADTRIP_VEHICLES[model]);
+    } else {
+      manual.focus();
+    }
+  }
   function roadtripCard(meta, autoSelected) {
     var r = meta.roadtrip;
     if (!r) return '';
-    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight"' + (autoSelected ? ' disabled' : ' checked') + '> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"' + (autoSelected ? ' checked' : '') + '> 🚗 Auto / Roadtrip</label><div class="transport-detail"><label for="roadtrip-consumption">Consumo promedio del auto (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></div></section>';
+    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight"' + (autoSelected ? ' disabled' : ' checked') + '> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"' + (autoSelected ? ' checked' : '') + '> 🚗 Auto / Roadtrip</label><div class="transport-detail" data-roadtrip-calculator' + (autoSelected ? '' : ' hidden') + '><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></div></section>';
   }
   function transferCard(meta) {
     var t = meta.officialTransfer;
     if (!t) return '';
-    return '<section class="transport-options official-transfer"><h2>Traslado Oficial</h2><div class="transport-card"><p>Servicio coordinado para ' + esc(meta.dest.name) + ' · ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná vuelo y posada</button></div></section>';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Traslado Oficial</h2><div class="transport-card"><p>Servicio coordinado para ' + esc(meta.dest.name) + ' · ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná vuelo y posada</button></div></section>';
   }
   function openTransferModal(meta) {
     if (!detailState || !detailState.transfer) return;
@@ -215,26 +233,48 @@
   }
   function flightSearch(meta, budget) {
     return '<section class="flight-search" aria-labelledby="flight-title"><div><h2 id="flight-title">Vuelos</h2><p>Tarifas aéreas en tiempo real para tu viaje.</p></div>' +
+      '<div class="flight-filters" aria-label="Filtros de vuelos"><div><b>Escalas</b><button type="button" data-flight-stop="all" aria-pressed="true">Todos</button><button type="button" data-flight-stop="0">Directos</button><button type="button" data-flight-stop="1">1 escala</button><button type="button" data-flight-stop="2">2+ escalas</button></div><div><b>Horario de salida</b><button type="button" data-flight-time="all" aria-pressed="true">Todo el día</button><button type="button" data-flight-time="morning">Mañana</button><button type="button" data-flight-time="afternoon">Tarde</button><button type="button" data-flight-time="night">Noche</button></div></div>' +
       '<div class="flight-results" aria-live="polite"><p class="flight-loading">Buscando vuelos disponibles…</p></div></section>';
   }
   function flightTime(value) {
     if (!value) return 'Horario no disponible';
     return new Date(value).toLocaleString('es-UY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   }
+  function airportLabel(airport) {
+    airport = airport || {};
+    return (airport.code ? airport.code + ' · ' : '') + (airport.name || 'Aeropuerto no informado');
+  }
+  function flightHour(value) {
+    var date = new Date(value);
+    return isNaN(date.getTime()) ? -1 : date.getHours();
+  }
+  function filteredFlightOffers(section, offers) {
+    var stop = section.getAttribute('data-flight-stop') || 'all';
+    var time = section.getAttribute('data-flight-time') || 'all';
+    return offers.filter(function (offer) {
+      var stops = Number(offer.stops) || 0;
+      var stopOk = stop === 'all' || (stop === '2' ? stops >= 2 : stops === Number(stop));
+      var hour = flightHour(offer.departure);
+      var timeOk = time === 'all' || (time === 'morning' && hour >= 5 && hour < 12) || (time === 'afternoon' && hour >= 12 && hour < 18) || (time === 'night' && (hour >= 18 || (hour >= 0 && hour < 5)));
+      return stopOk && timeOk;
+    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); }).slice(0, 5);
+  }
   function renderFlightOffers(el, data, budget) {
     data = data && typeof data === 'object' ? data : {};
     var offers = Array.isArray(data.offers) ? data.offers : [];
     if (!offers.length) {
-      el.innerHTML = '<p class="flight-empty">⚠️ No encontramos vuelos disponibles en este momento. La propuesta estimada del viaje sigue disponible arriba; probá con otras fechas o intentá nuevamente más tarde.</p>';
+      el.innerHTML = '<p class="flight-empty">No hay vuelos disponibles para esta búsqueda. Probá con otras fechas.</p>';
       return;
     }
-    var visible = offers.slice().sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
-    if (!visible.length) { el.innerHTML = '<p class="flight-empty">No encontramos vuelos para esta fecha. Probá cambiando el día de ida.</p>'; return; }
+    var section = el.closest('.flight-search');
+    if (detailState) detailState.flightOffers = offers;
+    var visible = filteredFlightOffers(section, offers);
+    if (!visible.length) { el.innerHTML = '<p class="flight-empty">No hay vuelos que coincidan con estos filtros.</p>'; return; }
     el.innerHTML = '<div class="flight-cards">' + visible.map(function (offer) {
       var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
       var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
       return '<article class="flight-card within-budget"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b></div>' +
-        '<div class="flight-route"><div><small>Salida</small><b>' + esc(flightTime(offer.departure)) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada</small><b>' + esc(flightTime(offer.arrival)) + '</b></div></div>' +
+        '<div class="flight-route"><div><small>Salida · ' + esc(airportLabel(offer.departure_airport)) + '</small><b>' + esc(flightTime(offer.departure)) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(offer.arrival_airport)) + '</small><b>' + esc(flightTime(offer.arrival)) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">Seleccionar vuelo</button></div></article>';
     }).join('') + '</div>';
@@ -590,6 +630,16 @@
       if (hotelChoice && hotelChoice.checked) { actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true); return; }
       var transportChoice = e.target.closest('[name="transport-choice"]');
       if (transportChoice) { actualizarTransporte(transportChoice.value === 'auto'); return; }
+      var flightFilter = e.target.closest('[data-flight-stop],[data-flight-time]');
+      if (flightFilter) {
+        var flightSection = flightFilter.closest('.flight-search');
+        if (flightFilter.hasAttribute('data-flight-stop')) flightSection.setAttribute('data-flight-stop', flightFilter.getAttribute('data-flight-stop'));
+        if (flightFilter.hasAttribute('data-flight-time')) flightSection.setAttribute('data-flight-time', flightFilter.getAttribute('data-flight-time'));
+        Array.prototype.forEach.call(flightSection.querySelectorAll('[data-flight-stop]'), function (button) { button.setAttribute('aria-pressed', String(button.getAttribute('data-flight-stop') === (flightSection.getAttribute('data-flight-stop') || 'all'))); });
+        Array.prototype.forEach.call(flightSection.querySelectorAll('[data-flight-time]'), function (button) { button.setAttribute('aria-pressed', String(button.getAttribute('data-flight-time') === (flightSection.getAttribute('data-flight-time') || 'all'))); });
+        if (detailState && detailState.flightOffers) renderFlightOffers(flightSection.querySelector('.flight-results'), { offers: detailState.flightOffers });
+        return;
+      }
       var buyTransfer = e.target.closest('[data-buy-transfer]');
       if (buyTransfer) { e.preventDefault(); e.stopPropagation(); openTransferModal(detailState.meta); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
@@ -606,6 +656,8 @@
       if (hotelChoice && hotelChoice.checked) actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true);
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
       if (consumption) actualizarRoadtrip(consumption.value);
+      var roadtripModel = e.target.closest && e.target.closest('[data-roadtrip-model]');
+      if (roadtripModel) actualizarModeloRoadtrip(roadtripModel.value);
     });
     $('#vista-detalle').addEventListener('input', function (e) {
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');

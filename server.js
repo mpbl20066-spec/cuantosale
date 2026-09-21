@@ -143,6 +143,10 @@ function formatOffers(offers) {
       original_price: String(offer.total_amount || ''),
       original_currency: offer.total_currency || null
     };
+    const departureAirport = { code: first.origin && first.origin.iata_code || '', name: first.origin && first.origin.name || '' };
+    const arrivalAirport = { code: last.destination && last.destination.iata_code || '', name: last.destination && last.destination.name || '' };
+    if (departureAirport.code || departureAirport.name) formatted.departure_airport = departureAirport;
+    if (arrivalAirport.code || arrivalAirport.name) formatted.arrival_airport = arrivalAirport;
     if (!formatted.passenger_ids.length) delete formatted.passenger_ids;
     return formatted;
   }).filter(function (offer) { return offer.departure && offer.arrival; }).sort(function (a, b) {
@@ -196,7 +200,7 @@ async function buscarVuelos(req, res, body) {
     if (!offers.length) {
       return sendJson(res, 200, {
         origin: origin, destination: destination, cabin_class: usedCabinClass, style: style,
-        offers: [], error: 'No hay vuelos disponibles o la API de Duffel no devolvió ofertas.'
+        offers: [], error: 'No hay vuelos disponibles para esta búsqueda.'
       });
     }
     return sendJson(res, 200, { origin: origin, destination: destination, cabin_class: usedCabinClass, style: style, offers: offers });
@@ -204,7 +208,7 @@ async function buscarVuelos(req, res, body) {
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
     console.error('Error detallado de Duffel:', JSON.stringify(e.errors || e, null, 2));
     return sendJson(res, e.status && e.status < 500 ? e.status : 502, {
-      offers: [], error: message || 'No hay vuelos disponibles o la API de Duffel falló.'
+      offers: [], error: message || 'No pudimos consultar disponibilidad de vuelos.'
     });
   }
 }
@@ -241,9 +245,9 @@ async function reservarVuelo(req, res, body) {
   const offerId = String(body.offer_id || '').trim();
   const passengers = normalizePassengers(body.passengers);
   if (!/^off_[A-Za-z0-9]+$/.test(offerId) || !passengers) return sendJson(res, 400, { error: 'Completá correctamente los datos de todos los pasajeros.' });
-  if (process.env.DUFFEL_BOOKING_ENABLED !== 'true') return sendJson(res, 503, { error: 'La emisión de reservas está deshabilitada. Activá DUFFEL_BOOKING_ENABLED después de configurar el pago de Duffel.' });
+  if (process.env.DUFFEL_BOOKING_ENABLED !== 'true') return sendJson(res, 503, { error: 'La emisión de reservas está deshabilitada. Activala después de configurar el pago del proveedor aéreo.' });
   const duffel = duffelClient();
-  if (!duffel) return sendJson(res, 503, { error: 'La API de Duffel no está configurada.' });
+  if (!duffel) return sendJson(res, 503, { error: 'La reserva aérea no está configurada.' });
 
   try {
     // El precio confiable sale de Duffel, no del navegador, para evitar que el
@@ -252,7 +256,7 @@ async function reservarVuelo(req, res, body) {
     const offer = offerResponse.data || offerResponse;
     const amount = String(offer.total_amount || '');
     const currency = String(offer.total_currency || '').toUpperCase();
-    if (!/^\d+(\.\d+)?$/.test(amount) || !currency) return sendJson(res, 502, { error: 'Duffel no devolvió un precio válido para esta oferta.' });
+    if (!/^\d+(\.\d+)?$/.test(amount) || !currency) return sendJson(res, 502, { error: 'La aerolínea no devolvió un precio válido para esta oferta.' });
     const orderResponse = await duffel.orders.create({
       selected_offers: [offerId], passengers: passengers, type: 'instant',
       payments: [{ amount: amount, currency: currency, type: 'balance' }]
