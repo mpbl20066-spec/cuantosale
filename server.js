@@ -45,12 +45,30 @@ const HOTEL_RECOMMENDATIONS = {
   ssa: [{ tier: 'eco', name: 'ibis Salvador Rio Vermelho', similar: ['Rede Andrade Plaza Salvador', 'Hotel Pirâmide Pituba'] }, { tier: 'moderado', name: 'Novotel Salvador Rio Vermelho', similar: ['Mercure Salvador Rio Vermelho', 'Quality Hotel & Suites São Salvador'] }, { tier: 'alto', name: 'Fera Palace Hotel', similar: ['Casa do Amarelindo', 'Vila Galé Salvador'] }],
   igu: [{ tier: 'eco', name: 'CLH Suites Foz do Iguaçu', similar: ['Ibis Budget Foz do Iguaçu', 'Hotel Foz do Iguaçu'] }, { tier: 'moderado', name: 'JL Hotel by Bourbon', similar: ['Wyndham Foz do Iguaçu', 'Bourbon Cataratas do Iguaçu'] }, { tier: 'alto', name: 'Hotel das Cataratas', similar: ['Sanma Hotel', 'DoubleTree by Hilton Foz'] }]
 };
-function hotelRecommendations(destKey, destName) {
-  return HOTEL_RECOMMENDATIONS[destKey] || [
+function hotelRecommendations(destKey, destName, style) {
+  const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
+  const selectedTier = tierByStyle[style] || 'moderado';
+  const catalog = HOTEL_RECOMMENDATIONS[destKey] || [
     { tier: 'eco', name: 'Pousada central en ' + destName, similar: ['Hostel céntrico', 'Hotel económico local'] },
     { tier: 'moderado', name: 'Hotel recomendado en ' + destName, similar: ['Hotel con desayuno', 'Posada boutique local'] },
     { tier: 'alto', name: 'Resort seleccionado en ' + destName, similar: ['Hotel frente al mar', 'Hotel boutique premium'] }
   ];
+  return catalog.filter(function (hotel) { return hotel.tier === selectedTier; });
+}
+function adaptPackagesToStyle(result, trip, dep, ret, today) {
+  const tierByStyle = { ahorro: 0, eq: 1, comodo: 2 };
+  const tier = tierByStyle[trip.style] == null ? 1 : tierByStyle[trip.style];
+  // Las propuestas no deben ofrecer ni conservar conexiones que impliquen
+  // partir por Buenos Aires. También se conserva solo la hotelería del estilo.
+  const list = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba' && proposal.ti === tier; });
+  const picked = model.pick(trip, list);
+  const rec = picked.rec;
+  const series = model.seriesFor(trip, rec, dep, ret, today);
+  const cozy = list.slice().sort(function (a, b) { return b.comfort - a.comfort || a.total - b.total; })[0];
+  return Object.assign({}, result, {
+    fits: picked.fits, recId: rec.id, cheapestId: list[0].id, cozyId: cozy.id,
+    list: list, series: series, tips: model.tipsFor(trip, rec, list, series)
+  });
 }
 function roadtripCost(key, kmPerLiter) {
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
@@ -330,13 +348,13 @@ async function cotizar(req, res, url) {
   }
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   const quotes = await providers.getQuotes(model.DEST[v.S.dest], v.S.dep, v.S.ret, v.S.style);
-  const result = model.compute(v.S, v.dep, v.ret, today, quotes);
+  const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
   sendJson(res, 200, Object.assign({
     meta: {
       mode: providers.isLive() ? 'live' : 'demo',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
-      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), hotels: hotelRecommendations(v.S.dest, model.DEST[v.S.dest].name),
+      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), hotels: hotelRecommendations(v.S.dest, model.DEST[v.S.dest].name, v.S.style),
       generatedAt: new Date().toISOString()
     }
   }, result));
@@ -359,7 +377,7 @@ function cotizarTodos(req, res, url) {
   // cada destino dispararía hasta 19 requests externos en un solo clic.
   const options = Object.keys(model.DEST).map(function (key) {
     const trip = Object.assign({}, v.S, { dest: key });
-    const result = model.compute(trip, v.dep, v.ret, today, {});
+    const result = adaptPackagesToStyle(model.compute(trip, v.dep, v.ret, today, {}), trip, v.dep, v.ret, today);
     const rec = result.list.find(function (p) { return p.id === result.recId; });
     return {
       dest: { key: key, name: model.DEST[key].name }, total: rec.total, pp: rec.pp,

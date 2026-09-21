@@ -142,14 +142,12 @@ function offer(amount, cur, name, segsOut, segsBack) {
       return fakeOffers([offer(price, 'USD', 'Aerolínea Test', [b.slices[0].departure_date], [b.slices[1].departure_date])]);
     } };
   });
-  await t('modo real: usa precios de Duffel y los marca como reales', async function () {
+  await t('modo real: usa precios reales desde MVD y excluye Buenos Aires', async function () {
     const j = JSON.parse((await get(port, '/api/cotizar?' + q)).body);
     assert.strictEqual(j.meta.mode, 'live');
     const mvd = j.list.find(function (p) { return p.mode === 'avion_mvd'; });
-    const ba = j.list.find(function (p) { return p.mode === 'avion_ba'; });
     assert.strictEqual(mvd.sources.pasajes, 'real'); assert.strictEqual(mvd.parts.pasajes, 760);
-    assert.ok(ba.parts.pasajes > 300 * 2);   // vuelo real + cruce a Buenos Aires estimado
-    assert.strictEqual(ba.sources.pasajes, 'real');
+    assert.ok(j.list.every(function (p) { return p.mode !== 'avion_ba' && p.ti === 1; }));
     assert.strictEqual(mvd.quote.airline, 'Aerolínea Test');
     const bus = j.list.find(function (p) { return p.mode === 'bus'; });
     assert.strictEqual(bus.sources.pasajes, 'estimado');
