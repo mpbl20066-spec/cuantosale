@@ -12,6 +12,7 @@
 
   var S = { dest: 'fln', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', proposalId: '' };
   var massSearch = false;
+  var detailState = null;
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
@@ -84,8 +85,35 @@
         var nightly = Math.max(1, Math.round(average * option.multiplier));
         var total = nightly * nights * pax;
         var url = bookingUrl(meta, option.order ? { order: option.order } : null);
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '"><span class="hotel-badge">' + option.badge + '</span><h3>' + option.type + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking.com ↗</a></article>';
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '"><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + option.badge + '</span></label><h3>' + option.type + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking.com ↗</a></article>';
       }).join('') + '</div></section>';
+  }
+  function recalcularTotalViaje() {
+    if (!detailState) return;
+    var parts = detailState.parts;
+    var total = Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
+      (Number(parts.comidas) || 0) + (Number(parts.local) || 0) +
+      (Number(parts.traslados) || 0) + (Number(parts.extras) || 0));
+    var totalEl = document.querySelector('[data-detail-total]');
+    if (totalEl) totalEl.textContent = money(total);
+    var rows = document.querySelectorAll('[data-cost-category]');
+    Array.prototype.forEach.call(rows, function (row) {
+      var category = row.getAttribute('data-cost-category');
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : parts[category];
+      var valueEl = row.querySelector('[data-cost-value]');
+      if (valueEl) valueEl.textContent = money(Number(value) || 0);
+    });
+  }
+  function actualizarPasajes(section, price) {
+    if (!detailState || !Number.isFinite(price) || price <= 0) return;
+    detailState.flight = Math.round(price);
+    if (section) section.setAttribute('data-selected-flight-price', String(detailState.flight));
+    recalcularTotalViaje();
+  }
+  function actualizarAlojamiento(price) {
+    if (!detailState || !Number.isFinite(price) || price <= 0) return;
+    detailState.hotel = Math.round(price);
+    recalcularTotalViaje();
   }
   function guideUnlocked() {
     try { return localStorage.getItem('cuantosale_guia_desbloqueada') === 'true'; } catch (e) { return false; }
@@ -135,6 +163,8 @@
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">Seleccionar vuelo</button></div></article>';
     }).join('') + '</div>';
+    var cheapest = visible[0];
+    if (cheapest && cheapest.price_usd !== null) actualizarPasajes(el.closest('.duffel-search'), Number(cheapest.price_usd));
   }
   function searchFlights(meta, section) {
     var box = section.querySelector('.duffel-results');
@@ -360,13 +390,15 @@
 
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
-    var breakdown = CATS.map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('');
-    content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong>' + money(proposal.total) + '</strong></section>' +
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, hotel: proposal.parts.alojamiento };
+    var breakdown = CATS.map(function (c) { return '<div data-cost-category="' + c[0] + '"><span>' + c[1] + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('');
+    content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(data.meta, proposal.parts.pasajes) + '</section>' +
       '<section class="detail-section"><h2>Desglose del viaje</h2><div class="panel detail-breakdown">' + breakdown + '</div></section>' +
       '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
+    recalcularTotalViaje();
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -461,10 +493,20 @@
         if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; }
         window.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
+      var hotelChoice = e.target.closest('[data-hotel-total]');
+      if (hotelChoice && hotelChoice.checked) { actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total'))); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
-      if (selectedFlight) { e.preventDefault(); e.stopPropagation(); openBookingForm(selectedFlight); return; }
+      if (selectedFlight) {
+        e.preventDefault(); e.stopPropagation();
+        actualizarPasajes(selectedFlight.closest('.duffel-search'), Number(selectedFlight.getAttribute('data-offer-price')));
+        openBookingForm(selectedFlight); return;
+      }
       var unlock = e.target.closest('[data-unlock-guide]');
       if (unlock) { unlockGuide(); return; }
+    });
+    $('#vista-detalle').addEventListener('change', function (e) {
+      var hotelChoice = e.target.closest && e.target.closest('[data-hotel-total]');
+      if (hotelChoice && hotelChoice.checked) actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')));
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
