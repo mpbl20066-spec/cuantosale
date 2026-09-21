@@ -133,34 +133,42 @@ async function buscarVuelos(req, res, body) {
   const origin = String(body.origen || '').toUpperCase();
   const destination = DUFFEL_DESTINATIONS[String(body.destino || '').toLowerCase()];
   const date = String(body.fecha_ida || '');
+  const returnDate = String(body.fecha_vuelta || '');
   const passengers = Number(body.pasajeros);
   const style = ['ahorro', 'eq', 'comodo'].includes(String(body.style || '').toLowerCase()) ? String(body.style).toLowerCase() : 'eq';
   const cabinClass = style === 'comodo' ? 'premium_economy' : 'economy';
-  if (!/^[A-Z]{3}$/.test(origin) || !destination || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
+  if (!/^[A-Z]{3}$/.test(origin) || !destination || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (returnDate && !/^\d{4}-\d{2}-\d{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
   if (!process.env.DUFFEL_ACCESS_TOKEN) return sendJson(res, 503, { error: 'La búsqueda de vuelos no está configurada todavía.' });
 
   try {
     const duffel = duffelClient();
-    let usedCabinClass = cabinClass;
-    let response = await duffel.offerRequests.create({
-      slices: [{ origin: origin, destination: destination, departure_date: date }],
-      passengers: Array.from({ length: passengers }, function () { return { type: 'adult' }; }),
-      cabin_class: cabinClass, return_offers: true, supplier_timeout: 15000
-    });
-    let request = response.data || response;
-    // Premium Economy no siempre está disponible en todas las rutas. En ese
-    // caso, Con comodidad conserva la intención del usuario con Business.
-    if (style === 'comodo' && (!request.offers || !request.offers.length)) {
-      response = await duffel.offerRequests.create({
-        slices: [{ origin: origin, destination: destination, departure_date: date }],
-        passengers: Array.from({ length: passengers }, function () { return { type: 'adult' }; }),
-        cabin_class: 'business', return_offers: true, supplier_timeout: 15000
-      });
-      usedCabinClass = 'business';
-      request = response.data || response;
+    const slices = [{ origin: origin, destination: destination, departure_date: date }];
+    if (returnDate) slices.push({ origin: destination, destination: origin, departure_date: returnDate });
+    const adultPassengers = Array.from({ length: passengers }, function () { return { type: 'adult' }; });
+    const cabinCandidates = style === 'comodo' ? ['premium_economy', 'economy'] : ['economy'];
+    let request = null;
+    let usedCabinClass = cabinCandidates[0];
+    let lastError = null;
+    for (let i = 0; i < cabinCandidates.length; i++) {
+      try {
+        const response = await duffel.offerRequests.create({
+          slices: slices,
+          passengers: adultPassengers,
+          cabin_class: cabinCandidates[i],
+          return_offers: true,
+          supplier_timeout: 15000
+        });
+        request = response && (response.data || response);
+        usedCabinClass = cabinCandidates[i];
+        if (request && Array.isArray(request.offers) && request.offers.length) break;
+      } catch (error) {
+        lastError = error;
+        if (i === cabinCandidates.length - 1) throw error;
+      }
     }
+    if (!request && lastError) throw lastError;
     const offers = formatOffers(request && request.offers);
     if (!offers.length) {
       return sendJson(res, 200, {
@@ -171,7 +179,7 @@ async function buscarVuelos(req, res, body) {
     return sendJson(res, 200, { origin: origin, destination: destination, cabin_class: usedCabinClass, style: style, offers: offers });
   } catch (e) {
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
-    console.error('[duffel search]', message || e.message);
+    console.error('Error detallado de Duffel:', JSON.stringify(e.errors || e, null, 2));
     return sendJson(res, e.status && e.status < 500 ? e.status : 502, {
       offers: [], error: message || 'No hay vuelos disponibles o la API de Duffel falló.'
     });

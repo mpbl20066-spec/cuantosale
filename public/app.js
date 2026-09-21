@@ -176,7 +176,7 @@
     var box = section.querySelector('.duffel-results');
     var budget = Number(section.getAttribute('data-flight-budget')) || 0;
     box.innerHTML = '<p class="duffel-loading">Consultando aerolíneas…</p>';
-    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }) })
+    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }) })
       .then(async function (response) {
         var text = await response.text();
         var data = { offers: [] };
