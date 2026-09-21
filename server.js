@@ -134,6 +134,8 @@ async function buscarVuelos(req, res, body) {
   const destination = DUFFEL_DESTINATIONS[String(body.destino || '').toLowerCase()];
   const date = String(body.fecha_ida || '');
   const passengers = Number(body.pasajeros);
+  const style = ['ahorro', 'eq', 'comodo'].includes(String(body.style || '').toLowerCase()) ? String(body.style).toLowerCase() : 'eq';
+  const cabinClass = style === 'comodo' ? 'premium_economy' : 'economy';
   if (!/^[A-Z]{3}$/.test(origin) || !destination || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
@@ -141,13 +143,25 @@ async function buscarVuelos(req, res, body) {
 
   try {
     const duffel = duffelClient();
-    const response = await duffel.offerRequests.create({
+    let usedCabinClass = cabinClass;
+    let response = await duffel.offerRequests.create({
       slices: [{ origin: origin, destination: destination, departure_date: date }],
       passengers: Array.from({ length: passengers }, function () { return { type: 'adult' }; }),
-      cabin_class: 'economy', return_offers: true, supplier_timeout: 15000
+      cabin_class: cabinClass, return_offers: true, supplier_timeout: 15000
     });
-    const request = response.data || response;
-    return sendJson(res, 200, { origin: origin, destination: destination, offers: formatOffers(request.offers) });
+    let request = response.data || response;
+    // Premium Economy no siempre está disponible en todas las rutas. En ese
+    // caso, Con comodidad conserva la intención del usuario con Business.
+    if (style === 'comodo' && (!request.offers || !request.offers.length)) {
+      response = await duffel.offerRequests.create({
+        slices: [{ origin: origin, destination: destination, departure_date: date }],
+        passengers: Array.from({ length: passengers }, function () { return { type: 'adult' }; }),
+        cabin_class: 'business', return_offers: true, supplier_timeout: 15000
+      });
+      usedCabinClass = 'business';
+      request = response.data || response;
+    }
+    return sendJson(res, 200, { origin: origin, destination: destination, cabin_class: usedCabinClass, style: style, offers: formatOffers(request.offers) });
   } catch (e) {
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
     console.error('[duffel search]', message || e.message);
@@ -232,7 +246,7 @@ async function cotizar(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
-  const quotes = await providers.getQuotes(model.DEST[v.S.dest], v.S.dep, v.S.ret);
+  const quotes = await providers.getQuotes(model.DEST[v.S.dest], v.S.dep, v.S.ret, v.S.style);
   const result = model.compute(v.S, v.dep, v.ret, today, quotes);
   sendJson(res, 200, Object.assign({
     meta: {

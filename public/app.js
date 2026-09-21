@@ -11,6 +11,7 @@
   ];
 
   var S = { dest: 'fln', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', proposalId: '' };
+  var massSearch = false;
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
@@ -139,7 +140,7 @@
     var box = section.querySelector('.duffel-results');
     var budget = Number(section.getAttribute('data-flight-budget')) || 0;
     box.innerHTML = '<p class="duffel-loading">Consultando aerolíneas…</p>';
-    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, pasajeros: meta.pax }) })
+    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }) })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) { if (!res.ok) throw new Error(res.j.error || 'No pudimos buscar vuelos.'); renderFlightOffers(box, res.j, budget); })
       .catch(function (e) { box.innerHTML = '<p class="duffel-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
@@ -198,29 +199,32 @@
   }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
-    var cards = data.options.map(function (option) {
+    var fits = data.options.filter(function (option) { return option.fits; });
+    var cards = fits.map(function (option) {
       var rows = CATS.map(function (c) {
         return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + '</b></div>';
       }).join('');
-      var meta = { dest: option.dest, dep: data.meta.dep, ret: data.meta.ret, pax: data.meta.pax };
       return '<article class="destination-card' + (option.fits ? ' fits' : '') + '">' +
+        '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : option.dest.key === 'igu' ? '🌊' : '☀️') + '</span></div>' +
         '<div class="destination-card-top"><div><h3>' + esc(option.dest.name) + '</h3><p>' + esc(option.title) + '. ' + esc(option.tierDesc) + '.</p></div>' +
         '<div class="destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
-        '<span class="mini ' + (option.fits ? 'g' : 'r') + '">' + (option.fits ? 'Entra en tu presupuesto' : 'Se pasa por ' + money(option.total - data.meta.budget)) + '</span>' +
+        '<span class="mini g">¡Entra en tu presupuesto!</span>' +
         '<details><summary>Ver desglose</summary><div class="destination-breakdown">' + rows + '</div></details>' +
-        '<button type="button" class="btn-ver-propuesta" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta completa ➔</button>' +
+        '<button type="button" class="btn-ver-propuesta-destino" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta ➔</button>' +
         '</article>';
     }).join('');
-    var count = data.options.filter(function (option) { return option.fits; }).length;
-    el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos que entran en tu presupuesto</h2>' +
-      '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo. ' + count + (count === 1 ? ' destino entra' : ' destinos entran') + ' en tu presupuesto.</p>' +
-      '<div class="destination-cards">' + cards + '</div></section>';
+    var titleBudget = Number(data.meta.budget).toLocaleString('es-UY');
+    el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos disponibles para tu presupuesto de USD $' + titleBudget + '</h2>' +
+      '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo.</p>' +
+      (fits.length ? '<div class="destination-cards">' + cards + '</div>' : '<div class="notice">No encontramos destinos dentro de ese presupuesto. Probá aumentando el monto o ajustando las fechas.</div>') + '</section>';
   }
   function findDestinations() {
     var budget = S.budget;
     var el = $('#destination-results');
     if (!budget || budget < 1) { el.innerHTML = '<div class="notice">Ingresá un presupuesto máximo para buscar destinos.</div>'; return; }
     if (!S.dep || !S.ret) { el.innerHTML = '<div class="notice">Elegí las fechas de ida y vuelta antes de buscar destinos.</div>'; return; }
+    massSearch = true;
+    $('#results').innerHTML = '';
     el.innerHTML = '<div class="notice">Buscando destinos para tu presupuesto…</div>';
     var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style });
     fetch('/api/cotizar-todos?' + qs.toString())
@@ -239,7 +243,7 @@
   function run() {
     var el = $('#results');
     if (!S.dep || !S.ret) { notice('Elegí las fechas de ida y vuelta para ver el costo.'); return; }
-    if (S.dest === 'todos') { findDestinations(); return; }
+    if (S.dest === 'todos') { return; }
     if (ctrl) ctrl.abort();
     ctrl = new AbortController();
     var mine = ctrl;
@@ -362,6 +366,7 @@
       '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(data.meta, proposal.parts.pasajes) + '</section>' +
       '<section class="detail-section"><h2>Desglose del viaje</h2><div class="panel detail-breakdown">' + breakdown + '</div></section>' +
       '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
+    $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -387,7 +392,6 @@
     if (destination) {
       S.dest = destination;
       $('#dest').value = destination;
-      $('#destination-results').innerHTML = '';
       openDestinationProposal(destination);
       return;
     }
@@ -405,7 +409,14 @@
     $('#pax').textContent = S.pax;
 
     var sel = $('#dest');
-    sel.addEventListener('change', function () { S.dest = sel.value; S.proposalId = ''; schedule(); });
+    function updateDestinationMode() {
+      var all = S.dest === 'todos';
+      $('#btn-buscar-todos').hidden = !all;
+      if (all) { $('#results').innerHTML = ''; $('#destination-results').innerHTML = ''; }
+    }
+    sel.addEventListener('change', function () { S.dest = sel.value; S.proposalId = ''; massSearch = false; updateDestinationMode(); if (S.dest !== 'todos') schedule(); });
+    $('#btn-buscar-todos').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); findDestinations(); });
+    $('.form').addEventListener('keydown', function (e) { if (e.key === 'Enter' && S.dest === 'todos') { e.preventDefault(); $('#btn-buscar-todos').click(); } });
     document.addEventListener('click', handleProposalNavigation, true);
     $('#dep').addEventListener('change', function (e) {
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
@@ -444,7 +455,12 @@
       e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; openDestinationProposal(S.dest);
     });
     $('#vista-detalle').addEventListener('click', function (e) {
-      if (e.target.closest('#btn-volver')) { e.preventDefault(); e.stopPropagation(); $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      if (e.target.closest('#btn-volver')) {
+        e.preventDefault(); e.stopPropagation();
+        $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
+        if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; }
+        window.scrollTo({ top: 0, behavior: 'smooth' }); return;
+      }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) { e.preventDefault(); e.stopPropagation(); openBookingForm(selectedFlight); return; }
       var unlock = e.target.closest('[data-unlock-guide]');
@@ -458,6 +474,7 @@
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
       list.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) { var o = document.createElement('option'); o.value = d.key; o.textContent = d.name; sel.appendChild(o); });
       sel.value = S.dest;
+      updateDestinationMode();
       run();
     }).catch(function () { notice('No pudimos cargar los destinos. Recargá la página.'); });
   }
