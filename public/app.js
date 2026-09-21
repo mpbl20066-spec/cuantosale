@@ -391,6 +391,24 @@
     }).catch(function (e) { notice(e.message); });
   }
 
+  // Captura los botones dinámicos antes de que <details> u otro listener los procese.
+  function handleProposalNavigation(e) {
+    var button = e.target.closest && e.target.closest('.btn-ver-propuesta,[data-propuesta-id],[data-propuesta-dest]');
+    if (!button) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    var destination = button.getAttribute('data-propuesta-dest');
+    if (destination) {
+      S.dest = destination;
+      $('#dest').value = destination;
+      $('#destination-results').innerHTML = '';
+      openDestinationProposal(destination);
+      return;
+    }
+    var proposal = lastData && byId(lastData.list, button.getAttribute('data-propuesta-id'));
+    if (proposal) showProposalView(proposal, lastData);
+  }
+
   /* ---------- formulario ---------- */
   function init() {
     var d0 = addDays(today, 80);
@@ -402,6 +420,7 @@
 
     var sel = $('#dest');
     sel.addEventListener('change', function () { S.dest = sel.value; S.proposalId = ''; schedule(); });
+    document.addEventListener('click', handleProposalNavigation, true);
     $('#dep').addEventListener('change', function (e) {
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
       S.dep = e.target.value;
