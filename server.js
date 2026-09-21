@@ -45,6 +45,11 @@ const HOTEL_RECOMMENDATIONS = {
   ssa: [{ tier: 'eco', name: 'ibis Salvador Rio Vermelho', similar: ['Rede Andrade Plaza Salvador', 'Hotel Pirâmide Pituba'] }, { tier: 'moderado', name: 'Novotel Salvador Rio Vermelho', similar: ['Mercure Salvador Rio Vermelho', 'Quality Hotel & Suites São Salvador'] }, { tier: 'alto', name: 'Fera Palace Hotel', similar: ['Casa do Amarelindo', 'Vila Galé Salvador'] }],
   igu: [{ tier: 'eco', name: 'CLH Suites Foz do Iguaçu', similar: ['Ibis Budget Foz do Iguaçu', 'Hotel Foz do Iguaçu'] }, { tier: 'moderado', name: 'JL Hotel by Bourbon', similar: ['Wyndham Foz do Iguaçu', 'Bourbon Cataratas do Iguaçu'] }, { tier: 'alto', name: 'Hotel das Cataratas', similar: ['Sanma Hotel', 'DoubleTree by Hilton Foz'] }]
 };
+const HOTEL_IMAGES = {
+  eco: ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=960&q=82'],
+  moderado: ['https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=960&q=82'],
+  alto: ['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1601918774946-25832a4be0d6?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=960&q=82']
+};
 function hotelRecommendations(destKey, destName, style) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
   const selectedTier = tierByStyle[style] || 'moderado';
@@ -53,7 +58,10 @@ function hotelRecommendations(destKey, destName, style) {
     { tier: 'moderado', name: 'Hotel recomendado en ' + destName, similar: ['Hotel con desayuno', 'Posada boutique local'] },
     { tier: 'alto', name: 'Resort seleccionado en ' + destName, similar: ['Hotel frente al mar', 'Hotel boutique premium'] }
   ];
-  return catalog.filter(function (hotel) { return hotel.tier === selectedTier; });
+  return catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel) {
+    const images = HOTEL_IMAGES[hotel.tier] || HOTEL_IMAGES.moderado;
+    return Object.assign({}, hotel, { image: images[0], similarImages: images.slice(1) });
+  });
 }
 function adaptPackagesToStyle(result, trip, dep, ret, today) {
   const tierByStyle = { ahorro: 0, eq: 1, comodo: 2 };
@@ -156,6 +164,7 @@ function usdAmount(amount, currency) {
 }
 
 function formatOffers(offers, requiredOrigin) {
+  const excludedOrigins = new Set(['EZE', 'AEP']);
   return (offers || []).map(function (offer) {
     const slice = offer.slices && offer.slices[0] || {};
     const segments = Array.isArray(slice.segments) ? slice.segments : [];
@@ -182,32 +191,37 @@ function formatOffers(offers, requiredOrigin) {
     if (!formatted.passenger_ids.length) delete formatted.passenger_ids;
     return formatted;
   }).filter(function (offer) {
-    // El proveedor puede proponer itinerarios alternativos: solo aceptamos el
-    // aeropuerto de origen solicitado. Así nunca se filtra una salida ajena.
-    return offer.departure && offer.arrival && (!requiredOrigin || (offer.departure_airport && offer.departure_airport.code === requiredOrigin));
+    const departureCode = offer.departure_airport && offer.departure_airport.code ? String(offer.departure_airport.code).toUpperCase() : '';
+    const arrivalCode = offer.arrival_airport && offer.arrival_airport.code ? String(offer.arrival_airport.code).toUpperCase() : '';
+    const isAllowedOrigin = !requiredOrigin || (offer.departure_airport && departureCode === String(requiredOrigin).toUpperCase());
+    const isNotBuenosAires = !excludedOrigins.has(departureCode) && !excludedOrigins.has(arrivalCode);
+    return offer.departure && offer.arrival && isAllowedOrigin && isNotBuenosAires;
   }).sort(function (a, b) {
     return (a.price_usd === null ? Infinity : a.price_usd) - (b.price_usd === null ? Infinity : b.price_usd);
   });
 }
 
 function strategicFlightOptions(offers) {
-  if (offers.length < 2) return offers;
-  var cheapest = offers[0];
-  var cheapPrice = Number(cheapest.price_usd);
-  var fairAlternatives = offers.slice(1).filter(function (offer) {
+  const filtered = (offers || []).filter(function (offer) {
+    const code = offer && offer.departure_airport && offer.departure_airport.code ? String(offer.departure_airport.code).toUpperCase() : '';
+    return !['EZE', 'AEP'].includes(code);
+  });
+  if (filtered.length <= 2) return filtered.slice(0, 3);
+  const cheapest = filtered[0];
+  const cheapPrice = Number(cheapest.price_usd);
+  const fairAlternatives = filtered.slice(1).filter(function (offer) {
     return Number.isFinite(cheapPrice) && Number.isFinite(Number(offer.price_usd)) && Number(offer.price_usd) <= cheapPrice * 1.35;
   });
-  var candidates = fairAlternatives.length ? fairAlternatives : offers.slice(1);
-  var bestBalance = candidates.sort(function (a, b) {
-    var aHour = new Date(a.departure).getHours(), bHour = new Date(b.departure).getHours();
-    var aScore = (Number(a.stops) || 0) * 100 + Math.abs(aHour - 10) + ((Number(a.price_usd) || Infinity) - cheapPrice) / 10;
-    var bScore = (Number(b.stops) || 0) * 100 + Math.abs(bHour - 10) + ((Number(b.price_usd) || Infinity) - cheapPrice) / 10;
+  const candidates = fairAlternatives.length ? fairAlternatives : filtered.slice(1);
+  const bestBalance = candidates.slice().sort(function (a, b) {
+    const aHour = new Date(a.departure).getHours(), bHour = new Date(b.departure).getHours();
+    const aScore = (Number(a.stops) || 0) * 100 + Math.abs(aHour - 10) + ((Number(a.price_usd) || Infinity) - cheapPrice) / 10;
+    const bScore = (Number(b.stops) || 0) * 100 + Math.abs(bHour - 10) + ((Number(b.price_usd) || Infinity) - cheapPrice) / 10;
     return aScore - bScore;
   })[0];
-  return [
-    Object.assign({}, cheapest, { recommendation: 'Mejor precio' }),
-    Object.assign({}, bestBalance, { recommendation: 'Mejor balance' })
-  ];
+  const selected = [Object.assign({}, cheapest, { recommendation: 'Mejor precio' })];
+  if (bestBalance) selected.push(Object.assign({}, bestBalance, { recommendation: 'Mejor balance' }));
+  return selected.slice(0, 3);
 }
 
 async function buscarVuelos(req, res, body) {

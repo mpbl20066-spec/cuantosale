@@ -93,11 +93,16 @@
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     var profile = hotelStyle(meta);
-    var defaultHotel = { tier: profile.tier, name: profile.tier === 'eco' ? 'Pousada céntrica' : profile.tier === 'alto' ? 'Hotel premium frente al mar' : 'Hotel con desayuno', similar: profile.tier === 'eco' ? ['Hostel boutique', 'Posada familiar'] : profile.tier === 'alto' ? ['Resort boutique', 'Hotel 4 estrellas'] : ['Hotel boutique', 'Hotel 3 estrellas'] };
-    var hotel = Array.isArray(meta.hotels) && meta.hotels[0] ? meta.hotels[0] : defaultHotel;
-    // Las tres tarjetas pertenecen siempre a la misma gama del estilo elegido.
-    var options = [{ name: hotel.name, multiplier: 1, recommended: true, similar: Array.isArray(hotel.similar) ? hotel.similar : [] }].concat((hotel.similar || []).map(function (name, index) {
-      return { name: name, multiplier: index === 0 ? 0.92 : 1.08, recommended: false, similar: (hotel.similar || []).filter(function (other) { return other !== name; }) };
+    var defaultHotel = { tier: profile.tier, name: profile.tier === 'eco' ? 'Pousada céntrica' : profile.tier === 'alto' ? 'Hotel premium frente al mar' : 'Hotel con desayuno', similar: profile.tier === 'eco' ? ['Hostel boutique', 'Posada familiar'] : profile.tier === 'alto' ? ['Resort boutique', 'Hotel 4 estrellas'] : ['Hotel boutique', 'Hotel 3 estrellas'], image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80' };
+    var hotelCatalog = Array.isArray(meta.hotels) && meta.hotels.length ? meta.hotels : [defaultHotel];
+    var hotel = hotelCatalog[0] || defaultHotel;
+    var imageMap = {};
+    hotelCatalog.forEach(function (item) {
+      if (item && item.name) imageMap[String(item.name).toLowerCase()] = item.image || defaultHotel.image;
+    });
+    var options = [{ name: hotel.name, multiplier: 1, recommended: true, similar: Array.isArray(hotel.similar) ? hotel.similar : [], image: hotel.image || defaultHotel.image }].concat((hotel.similar || []).map(function (name, index) {
+      var candidate = hotelCatalog.find(function (item) { return item && item.name && String(item.name).toLowerCase() === String(name).toLowerCase(); });
+      return { name: name, multiplier: index === 0 ? 0.92 : 1.08, recommended: false, similar: (hotel.similar || []).filter(function (other) { return other !== name; }), image: (candidate && candidate.image) || imageMap[String(name).toLowerCase()] || defaultHotel.image };
     }));
     return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2><p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
       options.map(function (option) {
@@ -105,16 +110,15 @@
         var total = hotelTotalForRate(meta, accommodationTotal, option.multiplier);
         var url = bookingUrl(meta, { hotel: option.name });
         var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(option.image) + '" alt="' + esc(option.name) + '" loading="lazy"></div><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
       }).join('') + '</div></section>';
   }
   function recalcularTotalViaje() {
     if (!detailState) return;
     var parts = detailState.parts;
     var roadtrip = detailState.transportMode === 'auto';
-    var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + (Number(detailState.transfer) || 0);
-    // En roadtrip el desglose y el total se componen exclusivamente de auto,
-    // alojamiento y comidas: no hay vuelos ni traslados asociados al aeropuerto.
+    var transferCost = Number(detailState.transfer) || 0;
+    var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + transferCost;
     var total = roadtrip
       ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(parts.comidas) || 0))
       : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
@@ -124,7 +128,7 @@
     var rows = document.querySelectorAll('[data-cost-category]');
     Array.prototype.forEach.call(rows, function (row) {
       var category = row.getAttribute('data-cost-category');
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? detailState.auto : category === 'local' && roadtrip ? 0 : parts[category];
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? (roadtrip ? detailState.auto : 0) : category === 'local' && roadtrip ? 0 : (parts[category] || 0);
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
@@ -240,6 +244,7 @@
     var roadtrip = detailState.transportMode === 'auto';
     var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
     return categories.map(function (category) {
+      if (category === 'auto' && !roadtrip) return '';
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
       var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
       return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
@@ -248,12 +253,12 @@
   function transferCard(meta) {
     var t = meta.officialTransfer;
     if (!t) return '';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Traslado Oficial</h2><div class="transport-card"><p>Servicio coordinado para ' + esc(meta.dest.name) + ' · ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná traslado / transfer</button></div></section>';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Traslado privado</h2><div class="transport-card"><p>Traslado privado aeropuerto ➔ pousada para ' + esc(meta.dest.name) + ' · tarifa fija de ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná traslado / transfer</button></div></section>';
   }
   function openTransferModal(meta) {
     if (!detailState || !detailState.transfer) return;
     var modal = $('#booking-modal'), t = meta.officialTransfer;
-    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transferencia bancaria</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · Orden pendiente de verificación</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de transferencia<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Confirmar transferencia</button></form></div>';
+    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Traslado privado</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · tarifa fija confirmada</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de pago<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   async function submitTransfer(form) {
@@ -326,11 +331,11 @@
       var hour = flightHour(offer.departure);
       var timeOk = time === 'all' || (time === 'morning' && hour >= 5 && hour < 12) || (time === 'afternoon' && hour >= 12 && hour < 18) || (time === 'night' && (hour >= 18 || (hour >= 0 && hour < 5)));
       return stopOk && timeOk;
-    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); }).slice(0, 2);
+    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); }).slice(0, 3);
   }
   function renderFlightOffers(el, data, budget) {
     data = data && typeof data === 'object' ? data : {};
-    var offers = (Array.isArray(data.offers) ? data.offers : []).filter(isCarrascoOffer).slice(0, 2);
+    var offers = (Array.isArray(data.offers) ? data.offers : []).filter(isCarrascoOffer).slice(0, 3);
     if (!offers.length) {
       el.innerHTML = '<p class="flight-empty">No hay vuelos disponibles para esta búsqueda. Probá con otras fechas.</p>';
       return;
