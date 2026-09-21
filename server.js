@@ -50,7 +50,65 @@ const HOTEL_IMAGES = {
   moderado: ['https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=960&q=82'],
   alto: ['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1601918774946-25832a4be0d6?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=960&q=82']
 };
-function hotelRecommendations(destKey, destName, style) {
+function bookingSettings() {
+  return {
+    key: process.env.BOOKING_API_KEY || process.env.BOOKING_KEY || process.env.RAPIDAPI_KEY || '',
+    host: process.env.BOOKING_API_HOST || process.env.RAPIDAPI_HOST || '',
+    url: process.env.BOOKING_API_URL || process.env.RAPIDAPI_URL || 'https://booking-com.p.rapidapi.com/v1/hotels/search',
+    destination: process.env.BOOKING_DESTINATION || 'Florianópolis'
+  };
+}
+async function fetchBookingHotels(destKey, destName, style, extra) {
+  const settings = bookingSettings();
+  if (!settings.key || !settings.host || !settings.url) return [];
+  const hotelName = String(destName || settings.destination || 'Florianópolis').trim();
+  const dep = String((extra && extra.dep) || '').trim() || new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const ret = String((extra && extra.ret) || '').trim() || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+  const adults = Number((extra && extra.pax) || 2) || 2;
+  const params = new URLSearchParams({
+    checkin_date: dep,
+    checkout_date: ret,
+    adults_number: String(adults),
+    room_number: '1',
+    order_by: 'price',
+    locale: 'es',
+    currency: 'USD',
+    filter_by_currency: 'USD',
+    units: 'metric',
+    dest_type: 'city',
+    city: hotelName,
+    page_number: '0',
+    page_size: '6'
+  });
+  const response = await fetch(settings.url + '?' + params.toString(), {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': settings.key,
+      'x-rapidapi-host': settings.host,
+      'Accept': 'application/json'
+    }
+  });
+  if (!response || !response.ok) throw new Error('Booking API no disponible.');
+  const payload = await response.json();
+  const results = Array.isArray(payload.result) ? payload.result : Array.isArray(payload.data) ? payload.data : [];
+  return results.slice(0, 3).map(function (hotel, index) {
+    const name = hotel.hotel_name || hotel.name || hotel.hotelName || 'Hotel recomendado';
+    const image = hotel.main_photo_url || hotel.main_photo_url_https || hotel.photo_url || hotel.image || HOTEL_IMAGES[style || 'moderado'][index % 3];
+    const total = Number(hotel.min_total_price || hotel.min_total_price_usd || hotel.price || hotel.total_price || 0);
+    const perNight = Number(hotel.min_total_price || hotel.price || hotel.total_price || 0) / Math.max(1, Number((extra && extra.nights) || 3) || 3);
+    return {
+      name: name,
+      image: image,
+      total: Number.isFinite(total) ? total : 0,
+      perNight: Number.isFinite(perNight) ? perNight : 0,
+      currency: String(hotel.currency || 'USD').toUpperCase(),
+      bookingUrl: hotel.url || hotel.hotel_url || null,
+      similar: [hotel.city || destName, 'Hotel similar en ' + destName].filter(Boolean),
+      source: 'booking'
+    };
+  }).filter(function (hotel) { return hotel.name && hotel.image; });
+}
+async function hotelRecommendations(destKey, destName, style, extra) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
   const selectedTier = tierByStyle[style] || 'moderado';
   const catalog = HOTEL_RECOMMENDATIONS[destKey] || [
@@ -58,9 +116,19 @@ function hotelRecommendations(destKey, destName, style) {
     { tier: 'moderado', name: 'Hotel recomendado en ' + destName, similar: ['Hotel con desayuno', 'Posada boutique local'] },
     { tier: 'alto', name: 'Resort seleccionado en ' + destName, similar: ['Hotel frente al mar', 'Hotel boutique premium'] }
   ];
+  try {
+    const realHotels = await fetchBookingHotels(destKey, destName, selectedTier, extra || {});
+    if (realHotels.length) {
+      return realHotels.map(function (hotel) {
+        return Object.assign({}, hotel, { tier: selectedTier, similar: Array.isArray(hotel.similar) ? hotel.similar : [] });
+      });
+    }
+  } catch (error) {
+    console.warn('[hotelRecommendations] Booking API no disponible, usando fallback estático:', error && error.message ? error.message : error);
+  }
   return catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel) {
     const images = HOTEL_IMAGES[hotel.tier] || HOTEL_IMAGES.moderado;
-    return Object.assign({}, hotel, { image: images[0], similarImages: images.slice(1) });
+    return Object.assign({}, hotel, { image: images[0], similarImages: images.slice(1), total: 0, perNight: 0, source: 'static' });
   });
 }
 function adaptPackagesToStyle(result, trip, dep, ret, today) {
@@ -363,12 +431,13 @@ async function cotizar(req, res, url) {
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   const quotes = await providers.getQuotes(model.DEST[v.S.dest], v.S.dep, v.S.ret, v.S.style);
   const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
+  const hotels = await hotelRecommendations(v.S.dest, model.DEST[v.S.dest].name, v.S.style, { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights });
   sendJson(res, 200, Object.assign({
     meta: {
       mode: providers.isLive() ? 'live' : 'demo',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
-      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), hotels: hotelRecommendations(v.S.dest, model.DEST[v.S.dest].name, v.S.style),
+      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), hotels: hotels,
       generatedAt: new Date().toISOString()
     }
   }, result));
@@ -473,3 +542,5 @@ module.exports = app;
 module.exports.createServer = createServer;
 module.exports.formatOffers = formatOffers;
 module.exports.normalizePassengers = normalizePassengers;
+module.exports.hotelRecommendations = hotelRecommendations;
+module.exports.fetchBookingHotels = fetchBookingHotels;

@@ -93,6 +93,33 @@ function offer(amount, cur, name, segsOut, segsBack) {
       slices: [{ duration: 'PT3H45M', segments: [{ departing_at: '2027-01-10T10:00:00', arriving_at: '2027-01-10T13:45:00', marketing_carrier: { name: 'Aerolínea Test', logo_symbol_url: 'https://logo.test/a.png' } }] }] }]);
     assert.deepStrictEqual(offers[0], { id: 'off_1', airline: 'Aerolínea Test', logo: 'https://logo.test/a.png', departure: '2027-01-10T10:00:00', arrival: '2027-01-10T13:45:00', stops: 0, duration: '3 h 45 min', price_usd: 299.5, original_price: '299.50', original_currency: 'USD' });
   });
+  await t('usa precios y fotos reales de Booking cuando está configurada', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'rapid-key';
+    process.env.BOOKING_API_HOST = 'booking-com.p.rapidapi.com';
+    process.env.BOOKING_API_URL = 'https://booking-com.p.rapidapi.com/v1/hotels/search';
+    global.fetch = async function () {
+      return {
+        ok: true,
+        json: async function () {
+          return {
+            result: [{
+              hotel_name: 'Hotel Booking Floripa',
+              min_total_price: '460',
+              currency: 'USD',
+              main_photo_url: 'https://images.example/hotel.jpg',
+              review_score: '9.2'
+            }]
+          };
+        }
+      };
+    };
+    const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2 });
+    assert.strictEqual(list[0].name, 'Hotel Booking Floripa');
+    assert.strictEqual(list[0].image, 'https://images.example/hotel.jpg');
+    assert.strictEqual(list[0].total, 460);
+    global.fetch = originalFetch;
+  });
   const server = app.createServer();
   await new Promise(function (r) { server.listen(0, r); });
   const port = server.address().port;
