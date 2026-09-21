@@ -54,6 +54,7 @@
       group_children: '0'
     });
     if (extra && extra.order) query.set('order', extra.order);
+    if (extra && extra.hotel) query.set('ss', extra.hotel + ', ' + meta.dest.name + ', Brasil');
     return 'https://www.booking.com/searchresults.es.html?' + query.toString();
   }
   function flightUrl(meta) {
@@ -79,21 +80,35 @@
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     return Math.max(1, Math.round(average * multiplier)) * nights * pax;
   }
+  function hotelTierForBudget(meta, accommodationTotal) {
+    var nights = Math.max(1, Number(meta.nights) || 1);
+    var pax = Math.max(1, Number(meta.pax) || 1);
+    var nightlyBudget = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
+    return nightlyBudget < 55 ? 'eco' : nightlyBudget < 110 ? 'moderado' : 'alto';
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
-    var options = [
-      { badge: 'MÁS ECONÓMICO', type: 'Pousada o Hostel privado', multiplier: 0.70, order: 'price' },
-      { badge: 'RECOMENDADO', type: 'Hotel 3★ con desayuno', multiplier: 1, recommended: true },
-      { badge: 'MAYOR COMODIDAD', type: 'Hotel frente al mar / 4★', multiplier: 1.30 }
+    var nightlyBudget = average;
+    var targetTier = hotelTierForBudget(meta, accommodationTotal);
+    var multipliers = { eco: 0.70, moderado: 1, alto: 1.30 };
+    var badges = { eco: 'MEJOR PARA AHORRAR', moderado: 'RECOMENDADO PARA TU PRESUPUESTO', alto: 'MAYOR COMODIDAD' };
+    var defaultHotels = [
+      { tier: 'eco', name: 'Pousada céntrica', similar: ['Hostel privado', 'Posada familiar'] },
+      { tier: 'moderado', name: 'Hotel con desayuno', similar: ['Hotel boutique', 'Hotel 3 estrellas'] },
+      { tier: 'alto', name: 'Hotel frente al mar', similar: ['Resort boutique', 'Hotel 4 estrellas'] }
     ];
-    return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Tres opciones de alojamiento</h2><p>Elegí el nivel que mejor se ajusta a tu presupuesto para ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
+    var options = (Array.isArray(meta.hotels) && meta.hotels.length ? meta.hotels : defaultHotels).map(function (hotel) {
+      return { tier: hotel.tier, name: hotel.name, similar: Array.isArray(hotel.similar) ? hotel.similar : [], multiplier: multipliers[hotel.tier] || 1, recommended: hotel.tier === targetTier, badge: badges[hotel.tier] || 'RECOMENDADO' };
+    }).sort(function (a, b) { return Number(b.recommended) - Number(a.recommended); });
+    return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles recomendados para tu presupuesto</h2><p>Seleccionamos una opción principal según tu rango de ' + money(nightlyBudget) + ' por noche y alternativas de la misma gama en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
       options.map(function (option) {
         var nightly = Math.max(1, Math.round(average * option.multiplier));
         var total = hotelTotalForRate(meta, accommodationTotal, option.multiplier);
-        var url = bookingUrl(meta, option.order ? { order: option.order } : null);
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + option.badge + '</span></label><h3>' + option.type + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking.com ↗</a></article>';
+        var url = bookingUrl(meta, { hotel: option.name });
+        var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + option.badge + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
       }).join('') + '</div></section>';
   }
   function recalcularTotalViaje() {
@@ -221,9 +236,13 @@
     if (!detailState) return;
     var list = document.querySelector('[data-breakdown-list]');
     if (!list) return;
+    list.innerHTML = breakdownRows();
+  }
+  function breakdownRows() {
+    if (!detailState) return '';
     var roadtrip = detailState.transportMode === 'auto';
     var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
-    list.innerHTML = categories.map(function (category) {
+    return categories.map(function (category) {
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
       var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
       return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
@@ -575,13 +594,14 @@
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
-    var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
+    var hotelMultipliers = { eco: 0.70, moderado: 1, alto: 1.30 };
+    var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, hotelMultipliers[hotelTierForBudget(data.meta, proposal.parts.alojamiento)]);
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: true };
     content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       roadtripCard(Object.assign({}, data.meta, { roadtrip: detailState.roadtrip }), isRoadtrip) +
       '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
-      '<section class="detail-section"><h2>Desglose del viaje</h2><div class="panel detail-breakdown" data-breakdown-list></div></section>' +
+      '<section class="detail-section breakdown-section" data-breakdown-section><h2>Desglose del viaje</h2><div class="panel detail-breakdown" data-breakdown-list aria-live="polite">' + breakdownRows() + '</div></section>' +
       '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     actualizarTransporte(isRoadtrip);
@@ -680,7 +700,7 @@
       var hotelChoice = e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) { actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true); return; }
       var hotelCard = e.target.closest('[data-hotel-option]');
-      if (hotelCard && !e.target.closest('.hotel-booking')) {
+      if (hotelCard && !e.target.closest('.hotel-booking,.hotel-similar')) {
         var hotelInput = hotelCard.querySelector('[data-hotel-total]');
         if (hotelInput) { hotelInput.checked = true; actualizarAlojamiento(Number(hotelInput.getAttribute('data-hotel-total')), true); }
         return;
