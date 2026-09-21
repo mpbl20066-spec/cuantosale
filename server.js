@@ -37,6 +37,33 @@ const MIME = {
 };
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com; base-uri 'none'; form-action 'self'";
 const DUFFEL_DESTINATIONS = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
+const ROADTRIP_ROUTES = {
+  fln: { name: 'Florianópolis', km: 720, tolls: 42, hours: 9 },
+  rio: { name: 'Río de Janeiro', km: 1900, tolls: 120, hours: 23 },
+  buz: { name: 'Búzios', km: 2050, tolls: 128, hours: 25 },
+  igu: { name: 'Foz de Iguazú', km: 1050, tolls: 76, hours: 14 },
+  ssa: { name: 'Salvador de Bahía', km: 3300, tolls: 205, hours: 40 },
+  sao: { name: 'San Pablo', km: 2050, tolls: 132, hours: 25 },
+  poa: { name: 'Porto Alegre', km: 800, tolls: 55, hours: 10 },
+  rec: { name: 'Recife', km: 4500, tolls: 270, hours: 54 },
+  for: { name: 'Fortaleza', km: 5100, tolls: 300, hours: 62 },
+  mcz: { name: 'Maceió', km: 4100, tolls: 245, hours: 49 },
+  nat: { name: 'Natal', km: 4700, tolls: 280, hours: 57 },
+  pip: { name: 'Pipa', km: 4750, tolls: 282, hours: 58 }
+};
+const transferOrders = new Map();
+function roadtripCost(key) {
+  const route = ROADTRIP_ROUTES[key];
+  if (!route) return null;
+  const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
+  const liters = Math.round((route.km * 2 / 12) * 10) / 10;
+  const fuel = Math.round(liters * fuelPrice);
+  return { distanceKm: route.km, roundTripKm: route.km * 2, liters: liters, fuelPriceUsd: fuelPrice, fuelUsd: fuel, tollsUsd: route.tolls, totalUsd: fuel + route.tolls, hours: route.hours, source: 'ruta estimada con 12 km/l y peajes configurables' };
+}
+function transferConfig(destKey, pax) {
+  const unit = Number(process.env.OFFICIAL_TRANSFER_PRICE_USD) || 35;
+  return { pricePerPassenger: unit, amount: unit * Math.max(1, Number(pax) || 1), destination: destKey, bank: { bank: process.env.TRANSFER_BANK_NAME || 'Configurar TRANSFER_BANK_NAME', account: process.env.TRANSFER_ACCOUNT || 'Configurar TRANSFER_ACCOUNT', alias: process.env.TRANSFER_ALIAS || 'Configurar TRANSFER_ALIAS', holder: process.env.TRANSFER_HOLDER || 'Configurar TRANSFER_HOLDER', taxId: process.env.TRANSFER_TAX_ID || 'Configurar TRANSFER_TAX_ID' } };
+}
 
 /* ---------- límite de pedidos por IP ---------- */
 const hits = new Map();
@@ -63,12 +90,13 @@ function sendJson(res, status, obj) {
   res.end(body);
 }
 
-function readJson(req) {
+function readJson(req, maxBytes) {
+  maxBytes = maxBytes || 32768;
   return new Promise(function (resolve, reject) {
     let body = '', size = 0;
     req.on('data', function (chunk) {
       size += chunk.length;
-      if (size > 32768) { const e = new Error('El cuerpo del pedido es demasiado grande.'); e.status = 413; reject(e); req.destroy(); return; }
+      if (size > maxBytes) { const e = new Error('El cuerpo del pedido es demasiado grande.'); e.status = 413; reject(e); req.destroy(); return; }
       body += chunk;
     });
     req.on('end', function () {
@@ -77,6 +105,19 @@ function readJson(req) {
     });
     req.on('error', reject);
   });
+}
+
+function registrarTransferencia(req, res, body) {
+  body = body && typeof body === 'object' ? body : {};
+  const amount = Number(body.amount), operation = String(body.operation || '').trim();
+  const file = body.receipt;
+  if (!Number.isFinite(amount) || amount <= 0 || !operation || !file || !file.data) {
+    return sendJson(res, 400, { error: 'Indicá el número de operación y adjuntá el comprobante.' });
+  }
+  if (String(file.data).length > 6e6) return sendJson(res, 413, { error: 'El comprobante supera el tamaño máximo permitido.' });
+  const order = 'TRF-' + new Date().getFullYear() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  transferOrders.set(order, { order: order, status: 'Pendiente de verificación', amount: Math.round(amount), operation: operation, receipt: { name: String(file.name || 'comprobante'), type: String(file.type || 'application/octet-stream'), data: String(file.data) }, createdAt: new Date().toISOString(), destination: String(body.destination || '') });
+  return sendJson(res, 201, { ok: true, order: order, status: 'Pendiente de verificación', message: '¡Reserva de traslado registrada con éxito! En menos de 2 horas validaremos tu comprobante y te enviaremos el voucher definitivo por correo electrónico.' });
 }
 
 function durationLabel(value) {
@@ -270,7 +311,7 @@ async function cotizar(req, res, url) {
       mode: providers.isLive() ? 'live' : 'demo',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
-      costBasis: model.REAL_COSTS,
+      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest), officialTransfer: transferConfig(v.S.dest, v.S.pax),
       generatedAt: new Date().toISOString()
     }
   }, result));
@@ -302,7 +343,7 @@ function cotizarTodos(req, res, url) {
   }).sort(function (a, b) { return a.total - b.total; });
 
   sendJson(res, 200, {
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS },
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest), officialTransfer: transferConfig(v.S.dest, v.S.pax) },
     options: options
   });
 }
@@ -336,6 +377,11 @@ function createServer() {
     if (req.method === 'POST' && url.pathname === '/api/vuelos/reservar') {
       return readJson(req).then(function (body) { return reservarVuelo(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la reserva.' });
+      });
+    }
+    if (req.method === 'POST' && url.pathname === '/api/traslados/transferencia') {
+      return readJson(req, 6 * 1024 * 1024).then(function (body) { return registrarTransferencia(req, res, body); }).catch(function (e) {
+        sendJson(res, e.status || 400, { error: e.message || 'No pudimos registrar la transferencia.' });
       });
     }
     if (req.method === 'POST') { res.writeHead(404); return res.end(); }

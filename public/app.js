@@ -91,22 +91,23 @@
   function recalcularTotalViaje() {
     if (!detailState) return;
     var parts = detailState.parts;
+    var transport = detailState.auto ? detailState.auto : (Number(parts.traslados) || 0) + (Number(detailState.transfer) || 0);
     var total = Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
       (Number(parts.comidas) || 0) + (Number(parts.local) || 0) +
-      (Number(parts.traslados) || 0) + (Number(parts.extras) || 0));
+      transport + (Number(parts.extras) || 0));
     var totalEl = document.querySelector('[data-detail-total]');
     if (totalEl) totalEl.textContent = money(total);
     var rows = document.querySelectorAll('[data-cost-category]');
     Array.prototype.forEach.call(rows, function (row) {
       var category = row.getAttribute('data-cost-category');
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : parts[category];
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? detailState.auto : parts[category];
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
   }
   function actualizarPasajes(section, price) {
     if (!detailState || !Number.isFinite(price) || price <= 0) return;
-    detailState.flight = Math.round(price);
+    detailState.flight = Math.round(price); detailState.baseFlight = detailState.flight;
     if (section) section.setAttribute('data-selected-flight-price', String(detailState.flight));
     recalcularTotalViaje();
   }
@@ -114,6 +115,49 @@
     if (!detailState || !Number.isFinite(price) || price <= 0) return;
     detailState.hotel = Math.round(price);
     recalcularTotalViaje();
+  }
+  function actualizarTransporte(autoEnabled) {
+    if (!detailState) return;
+    detailState.auto = autoEnabled ? Number(detailState.roadtrip.totalUsd) : 0;
+    detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
+    detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados;
+    var flightSection = document.querySelector('.duffel-search');
+    if (flightSection) flightSection.hidden = !!autoEnabled;
+    var autoRow = document.querySelector('[data-cost-category="auto"]');
+    if (autoRow) autoRow.hidden = !autoEnabled;
+    recalcularTotalViaje();
+  }
+  function actualizarTransferencia(enabled) {
+    if (!detailState) return;
+    detailState.transfer = enabled ? Number(detailState.meta.officialTransfer.amount) : 0;
+    recalcularTotalViaje();
+  }
+  function roadtripCard(meta) {
+    var r = meta.roadtrip;
+    if (!r) return '';
+    return '<section class="transport-options"><h2>Transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight" checked> ✈️ Mantener vuelos</label><label><input type="radio" name="transport-choice" value="auto"> 🚗 Viajar en Auto propio</label><div class="transport-detail"><p>⛽ Combustible: ' + r.liters + ' litros × ' + money(r.fuelPriceUsd) + ' = <b>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes aproximados: <b>' + money(r.tollsUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km, rendimiento 12 km/l.</p></div></div></section>';
+  }
+  function transferCard(meta) {
+    var t = meta.officialTransfer;
+    if (!t) return '';
+    return '<section class="transport-options official-transfer"><h2>Traslado Oficial</h2><div class="transport-card"><label><input type="checkbox" data-transfer-toggle> Activar traslado oficial</label><p>Servicio coordinado para ' + esc(meta.dest.name) + ' · ' + money(t.pricePerPassenger) + ' por pasajero.</p><button type="button" class="btn-transfer" data-buy-transfer>Comprar con transferencia bancaria · ' + money(t.amount) + '</button></div></section>';
+  }
+  function openTransferModal(meta) {
+    var modal = $('#booking-modal'), t = meta.officialTransfer;
+    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transferencia bancaria</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · Orden pendiente de verificación</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Alias:</b> ' + esc(t.bank.alias) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p><p><b>CUIT:</b> ' + esc(t.bank.taxId) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Número de operación<input required name="operation" autocomplete="off"></label><label>Comprobante de transferencia<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Confirmar transferencia</button></form></div>';
+    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+  }
+  async function submitTransfer(form) {
+    var button = form.querySelector('button[type="submit"]'), file = form.querySelector('[name="receipt"]').files[0];
+    if (!file) return;
+    button.disabled = true; button.textContent = 'Registrando transferencia…';
+    try {
+      var dataUrl = await new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(file); });
+      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: form.querySelector('[name="amount"]').value, operation: form.querySelector('[name="operation"]').value.trim(), destination: S.dest, receipt: { name: file.name, type: file.type, data: dataUrl } }) });
+      var result = await response.json().catch(function () { return {}; });
+      if (!response.ok) throw new Error(result.error || 'No pudimos registrar la transferencia.');
+      $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>¡Reserva de traslado registrada con éxito!</h2><p>Tu número de orden es <strong>#' + esc(result.order) + '</strong>.</p><p class="booking-note">' + esc(result.message) + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
+    } catch (e) { button.disabled = false; button.textContent = 'Confirmar transferencia'; alert(e.message || 'No pudimos registrar la transferencia.'); }
   }
   function guideUnlocked() {
     try { return localStorage.getItem('cuantosale_guia_desbloqueada') === 'true'; } catch (e) { return false; }
@@ -412,10 +456,12 @@
 
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, hotel: proposal.parts.alojamiento };
-    var breakdown = CATS.map(function (c) { return '<div data-cost-category="' + c[0] + '"><span>' + c[1] + costNote(c[0], data.meta, proposal) + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('');
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: proposal.parts.alojamiento, auto: 0, transfer: 0, roadtrip: data.meta.roadtrip, meta: data.meta };
+    var breakdown = CATS.map(function (c) { return '<div data-cost-category="' + c[0] + '"><span>' + c[1] + costNote(c[0], data.meta, proposal) + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('') +
+      '<div data-cost-category="auto" hidden><span>Auto: combustible y peajes<small class="cost-note">* Cálculo de ruta ida y vuelta.</small></span><b data-cost-value>US$ 0</b></div>';
     content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
+      roadtripCard(data.meta) + transferCard(data.meta) +
       '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(data.meta, proposal.parts.pasajes) + '</section>' +
       '<section class="detail-section"><h2>Desglose del viaje</h2><div class="panel detail-breakdown">' + breakdown + '</div></section>' +
       '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
@@ -517,6 +563,12 @@
       }
       var hotelChoice = e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) { actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total'))); return; }
+      var transportChoice = e.target.closest('[name="transport-choice"]');
+      if (transportChoice) { actualizarTransporte(transportChoice.value === 'auto'); return; }
+      var transferToggle = e.target.closest('[data-transfer-toggle]');
+      if (transferToggle) { actualizarTransferencia(transferToggle.checked); return; }
+      var buyTransfer = e.target.closest('[data-buy-transfer]');
+      if (buyTransfer) { e.preventDefault(); e.stopPropagation(); openTransferModal(detailState.meta); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) {
         e.preventDefault(); e.stopPropagation();
@@ -533,7 +585,7 @@
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
     });
-    $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'booking-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } submitBooking(e.target); });
+    $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'booking-form' && e.target.id !== 'transfer-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } if (e.target.id === 'transfer-form') submitTransfer(e.target); else submitBooking(e.target); });
 
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
       list.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) { var o = document.createElement('option'); o.value = d.key; o.textContent = d.name; sel.appendChild(o); });
