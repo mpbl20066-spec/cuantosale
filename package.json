@@ -1,5 +1,11 @@
 {
   "name": "cuantosale",
+  "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "description": "CuántoSale: compará vuelos, buses y alojamiento desde Uruguay y mirá el costo total del viaje.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "engines": { "node": ">=18" }
 }

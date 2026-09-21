@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CuántoSale | Cuánto cuesta realmente tu viaje</title>
+<meta name="description" content="Comparamos vuelos, buses y alojamiento desde Uruguay y te decimos cuánto cuesta realmente tu viaje.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo" aria-label="CuántoSale">
+      <svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>
+      cuántosale
+    </div>
+    <span class="chip" id="chip">Cargando…</span>
+  </header>
+
+  <h1>¿Cuánto sale realmente tu viaje?</h1>
+  <p class="lead">Ponés destino, fechas, cuántos viajan y tu presupuesto. Comparamos vuelos, buses y alojamiento y te mostramos el costo total.</p>
+
+  <section class="form" aria-label="Datos de tu viaje">
+    <div class="origin">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+      Salís desde <b>Uruguay (Montevideo)</b>
+    </div>
+    <div>
+      <label for="dest">Destino</label>
+      <select id="dest" class="inp"></select>
+    </div>
+    <div class="row2">
+      <div><label for="dep">Ida</label><input id="dep" class="inp" type="date"></div>
+      <div><label for="ret">Vuelta</label><input id="ret" class="inp" type="date"></div>
+    </div>
+    <div class="row2">
+      <div>
+        <span class="lbl" id="paxl">Viajeros</span>
+        <div class="step" role="group" aria-labelledby="paxl">
+          <button type="button" id="pm" aria-label="Un viajero menos">−</button>
+          <output id="pax" aria-live="polite">2</output>
+          <button type="button" id="pp" aria-label="Un viajero más">+</button>
+        </div>
+      </div>
+      <div>
+        <label for="bud">Presupuesto total</label>
+        <div class="money"><span>US$</span><input id="bud" class="inp" type="number" inputmode="numeric" min="0" step="100"></div>
+      </div>
+    </div>
+    <div>
+      <span class="lbl" id="stl">¿Qué tipo de viaje buscás?</span>
+      <div class="seg" role="group" aria-labelledby="stl" id="seg">
+        <button type="button" data-v="ahorro" aria-pressed="false">Ahorrar al máximo</button>
+        <button type="button" data-v="eq" aria-pressed="true">Equilibrado</button>
+        <button type="button" data-v="comodo" aria-pressed="false">Con comodidad</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="results" aria-live="polite"></div>
+
+  <footer class="foot" id="foot"></footer>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
