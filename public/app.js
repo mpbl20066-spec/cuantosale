@@ -272,7 +272,16 @@
       return '<div class="floating-breakdown__row" data-cost-category="' + entry.category + '"><i style="background:var(' + entry.color + ')"></i><span class="floating-breakdown__name">' + entry.label + '</span><span class="floating-breakdown__pct">' + percent + '%</span><b class="floating-breakdown__value" data-cost-value>' + money(entry.value) + '</b></div>';
     }).join('');
     panel.classList.remove('oculto');
-    panel.innerHTML = '<div class="floating-breakdown__title-block"><h3>A dónde se va la plata</h3><p>El costo real incluye mucho más que el pasaje.</p></div><div class="floating-breakdown__bar" role="img" aria-label="Distribución del costo">' + stack + '</div><div class="floating-breakdown__list">' + rows + '</div>';
+    panel.innerHTML = '<div class="floating-breakdown__title-block"><h3>A dónde se va la plata</h3><p>El costo real incluye mucho más que el pasaje.</p></div>' +
+      '<div class="progress-bar-container" role="img" aria-label="Distribución del costo">' +
+      '<span style="width:13%;background:var(--c1)"></span>' +
+      '<span style="width:49%;background:var(--c2)"></span>' +
+      '<span style="width:23%;background:var(--c3)"></span>' +
+      '<span style="width:7%;background:var(--c5)"></span>' +
+      '<span style="width:3%;background:var(--c4)"></span>' +
+      '<span style="width:6%;background:var(--c6)"></span>' +
+      '</div>' +
+      '<div class="floating-breakdown__list">' + rows + '</div>';
   }
   function breakdownRows() {
     if (!detailState) return '';
