@@ -235,9 +235,20 @@
   }
   function renderBreakdown() {
     if (!detailState) return;
-    var list = document.querySelector('[data-breakdown-list]');
-    if (!list) return;
-    list.innerHTML = breakdownRows();
+    var panel = document.getElementById('floating-breakdown');
+    if (!panel) return;
+    var roadtrip = detailState.transportMode === 'auto';
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
+    var total = roadtrip
+      ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0))
+      : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0) + (Number(detailState.parts.local) || 0) + (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) + (Number(detailState.parts.extras) || 0));
+    panel.classList.remove('oculto');
+    panel.innerHTML = '<div class="floating-breakdown__header"><div><span class="floating-breakdown__eyebrow">Desglose del viaje</span><strong>' + money(total) + '</strong></div><span class="floating-breakdown__transport">' + (roadtrip ? 'Roadtrip' : 'Vuelos') + '</span></div><div class="floating-breakdown__list">' + categories.map(function (category) {
+      if (category === 'auto' && !roadtrip) return '';
+      var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
+      return '<div class="floating-breakdown__row" data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
+    }).join('') + '</div>';
   }
   function breakdownRows() {
     if (!detailState) return '';
@@ -602,9 +613,10 @@
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       roadtripCard(Object.assign({}, data.meta, { roadtrip: detailState.roadtrip }), isRoadtrip) +
       '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
-      '<section class="detail-section breakdown-section" data-breakdown-section><h2>Desglose del viaje</h2><div class="panel detail-breakdown" data-breakdown-list aria-live="polite">' + breakdownRows() + '</div></section>' +
       '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
+    var floating = document.getElementById('floating-breakdown');
+    if (floating) floating.classList.remove('oculto');
     actualizarTransporte(isRoadtrip);
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
@@ -695,6 +707,8 @@
       if (e.target.closest('#btn-volver')) {
         e.preventDefault(); e.stopPropagation();
         $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
+        var floatingBreakdown = document.getElementById('floating-breakdown');
+        if (floatingBreakdown) floatingBreakdown.classList.add('oculto');
         if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; }
         window.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
