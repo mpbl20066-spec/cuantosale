@@ -39,7 +39,7 @@
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
-  function bookingUrl(meta) {
+  function bookingUrl(meta, extra) {
     var query = new URLSearchParams({
       ss: meta.dest.name + ', Brasil',
       checkin: meta.dep,
@@ -48,6 +48,7 @@
       no_rooms: '1',
       group_children: '0'
     });
+    if (extra && extra.order) query.set('order', extra.order);
     return 'https://www.booking.com/searchresults.es.html?' + query.toString();
   }
   function flightUrl(meta) {
@@ -63,11 +64,26 @@
     return '<section class="cta-section" aria-label="Reservá tu viaje">' +
       '<p class="cta-title">¿Listo para avanzar con tu viaje?</p>' +
       '<div class="cta-actions">' +
-      '<a class="cta-link cta-booking" href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">' +
-      '<span aria-hidden="true">🏨</span> Ver hoteles y pousadas en ' + city + ' en Booking.com</a>' +
       '<a class="cta-link cta-flights" href="' + esc(flightUrl(meta)) + '" target="_blank" rel="noopener noreferrer">' +
       '<span aria-hidden="true">✈️</span> Buscar y comparar vuelos a ' + city + '</a>' +
       '</div></section>';
+  }
+  function hotelOptions(meta, accommodationTotal) {
+    var nights = Math.max(1, Number(meta.nights) || 1);
+    var pax = Math.max(1, Number(meta.pax) || 1);
+    var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
+    var options = [
+      { badge: 'MÁS ECONÓMICO', type: 'Pousada o Hostel privado', multiplier: 0.70, order: 'price' },
+      { badge: 'RECOMENDADO', type: 'Hotel 3★ con desayuno', multiplier: 1, recommended: true },
+      { badge: 'MAYOR COMODIDAD', type: 'Hotel frente al mar / 4★', multiplier: 1.30 }
+    ];
+    return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Tres opciones de alojamiento</h2><p>Elegí el nivel que mejor se ajusta a tu presupuesto para ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
+      options.map(function (option) {
+        var nightly = Math.max(1, Math.round(average * option.multiplier));
+        var total = nightly * nights * pax;
+        var url = bookingUrl(meta, option.order ? { order: option.order } : null);
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '"><span class="hotel-badge">' + option.badge + '</span><h3>' + option.type + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking.com ↗</a></article>';
+      }).join('') + '</div></section>';
   }
   function guideUnlocked() {
     try { return localStorage.getItem('cuantosale_guia_desbloqueada') === 'true'; } catch (e) { return false; }
@@ -280,6 +296,7 @@
       note + '</div></section>';
 
     h += ctas(data.meta);
+    h += hotelOptions(data.meta, rec.parts.alojamiento);
 
     var stack = CATS.map(function (c) { return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>'; }).join('');
     var leg = CATS.map(function (c) {
