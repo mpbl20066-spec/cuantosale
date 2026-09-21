@@ -93,7 +93,7 @@
   function recalcularTotalViaje() {
     if (!detailState) return;
     var parts = detailState.parts;
-    var roadtrip = !!detailState.auto;
+    var roadtrip = detailState.transportMode === 'auto';
     var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + (Number(detailState.transfer) || 0);
     var total = Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
       (Number(parts.comidas) || 0) + (roadtrip ? 0 : (Number(parts.local) || 0)) +
@@ -110,7 +110,7 @@
   }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
-    var enabled = !detailState.auto && !!detailState.selectedFlight && !!detailState.selectedHotel;
+    var enabled = detailState.transportMode === 'flight' && !!detailState.selectedFlight && !!detailState.selectedHotel;
     detailState.transfer = enabled ? Number(detailState.meta.officialTransfer.amount) : 0;
     var status = document.querySelector('[data-transfer-status]');
     var button = document.querySelector('[data-buy-transfer]');
@@ -135,6 +135,7 @@
   }
   function actualizarTransporte(autoEnabled) {
     if (!detailState) return;
+    detailState.transportMode = autoEnabled ? 'auto' : 'flight';
     detailState.auto = autoEnabled ? Number(detailState.roadtrip.totalUsd) : 0;
     detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
     detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados;
@@ -164,7 +165,7 @@
     if (litersEl) litersEl.textContent = r.liters + ' litros';
     if (fuelEl) fuelEl.textContent = money(r.fuelUsd);
     if (totalEl) totalEl.textContent = money(r.totalUsd);
-    if (detailState.auto) detailState.auto = r.totalUsd;
+    if (detailState.transportMode === 'auto') detailState.auto = r.totalUsd;
     recalcularTotalViaje();
   }
   function actualizarModeloRoadtrip(model) {
@@ -524,7 +525,7 @@
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: proposal.parts.alojamiento, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: false };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: proposal.parts.alojamiento, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: false };
     var breakdown = CATS.filter(function (c) { return c[0] !== 'auto' || isRoadtrip; }).map(function (c) {
       var hidden = (c[0] === 'auto' && !isRoadtrip) || (isRoadtrip && (c[0] === 'traslados' || c[0] === 'local'));
       return '<div data-cost-category="' + c[0] + '"' + (hidden ? ' hidden' : '') + '><span>' + c[1] + costNote(c[0], data.meta, proposal) + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>';
