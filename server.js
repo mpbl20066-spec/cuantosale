@@ -37,7 +37,6 @@ const MIME = {
 };
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com; base-uri 'none'; form-action 'self'";
 const DUFFEL_DESTINATIONS = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
-const transferOrders = new Map();
 function roadtripCost(key, kmPerLiter) {
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   return model.roadtripCost(key, kmPerLiter, fuelPrice);
@@ -97,9 +96,9 @@ function registrarTransferencia(req, res, body) {
     return sendJson(res, 400, { error: 'Adjuntá el comprobante de transferencia.' });
   }
   if (String(file.data).length > 6e6) return sendJson(res, 413, { error: 'El comprobante supera el tamaño máximo permitido.' });
-  const order = 'TRF-' + new Date().getFullYear() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-  transferOrders.set(order, { order: order, status: 'Pendiente de verificación', amount: Math.round(amount), receipt: { name: String(file.name || 'comprobante'), type: String(file.type || 'application/octet-stream'), data: String(file.data) }, createdAt: new Date().toISOString(), destination: String(body.destination || '') });
-  return sendJson(res, 201, { ok: true, order: order, status: 'Pendiente de verificación', message: '¡Reserva de traslado registrada con éxito! En menos de 2 horas validaremos tu comprobante y te enviaremos el voucher definitivo por correo electrónico.' });
+  // El comprobante se valida de forma administrativa; no exponemos ni pedimos
+  // números de operación en la interfaz de transferencias.
+  return sendJson(res, 201, { ok: true, status: 'Pendiente de verificación', message: '¡Reserva de traslado registrada con éxito! En menos de 2 horas validaremos tu comprobante y te enviaremos el voucher definitivo por correo electrónico.' });
 }
 
 function durationLabel(value) {

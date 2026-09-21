@@ -73,6 +73,12 @@
       '<span aria-hidden="true">✈️</span> Buscar y comparar vuelos a ' + city + '</a>' +
       '</div></section>';
   }
+  function hotelTotalForRate(meta, accommodationTotal, multiplier) {
+    var nights = Math.max(1, Number(meta.nights) || 1);
+    var pax = Math.max(1, Number(meta.pax) || 1);
+    var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
+    return Math.max(1, Math.round(average * multiplier)) * nights * pax;
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
@@ -85,7 +91,7 @@
     return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Tres opciones de alojamiento</h2><p>Elegí el nivel que mejor se ajusta a tu presupuesto para ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
       options.map(function (option) {
         var nightly = Math.max(1, Math.round(average * option.multiplier));
-        var total = nightly * nights * pax;
+        var total = hotelTotalForRate(meta, accommodationTotal, option.multiplier);
         var url = bookingUrl(meta, option.order ? { order: option.order } : null);
         return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + option.badge + '</span></label><h3>' + option.type + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking.com ↗</a></article>';
       }).join('') + '</div></section>';
@@ -95,9 +101,12 @@
     var parts = detailState.parts;
     var roadtrip = detailState.transportMode === 'auto';
     var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + (Number(detailState.transfer) || 0);
-    var total = Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
-      (Number(parts.comidas) || 0) + (roadtrip ? 0 : (Number(parts.local) || 0)) +
-      transport + (Number(parts.extras) || 0));
+    // En roadtrip el desglose y el total se componen exclusivamente de auto,
+    // alojamiento y comidas: no hay vuelos ni traslados asociados al aeropuerto.
+    var total = roadtrip
+      ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(parts.comidas) || 0))
+      : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
+        (Number(parts.comidas) || 0) + (Number(parts.local) || 0) + transport + (Number(parts.extras) || 0));
     var totalEl = document.querySelector('[data-detail-total]');
     if (totalEl) totalEl.textContent = money(total);
     var rows = document.querySelectorAll('[data-cost-category]');
@@ -117,7 +126,7 @@
     if (status) status.textContent = enabled
       ? 'Traslado oficial incluido para ' + detailState.selectedFlight + ' y la posada seleccionada.'
       : 'Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.';
-    if (button) { button.disabled = !enabled; button.textContent = enabled ? 'Subir comprobante de transferencia · ' + money(detailState.transfer) : 'Seleccioná traslado / transfer'; }
+    if (button) { button.disabled = !enabled; button.textContent = 'Seleccioná traslado / transfer'; }
     recalcularTotalViaje();
   }
   function actualizarPasajes(section, price, airline) {
@@ -139,15 +148,15 @@
     detailState.auto = autoEnabled ? Number(detailState.roadtrip.totalUsd) : 0;
     detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
     detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados;
-    var flightSection = document.querySelector('.flight-search');
-    if (flightSection) flightSection.hidden = !!autoEnabled;
-    var calculator = document.querySelector('[data-roadtrip-calculator]');
-    if (calculator) calculator.hidden = !autoEnabled;
-    var transferSection = document.querySelector('[data-official-transfer]');
-    if (transferSection) transferSection.hidden = !!autoEnabled;
-    var autoRow = document.querySelector('[data-cost-category="auto"]');
-    if (autoRow) autoRow.hidden = !autoEnabled;
-    Array.prototype.forEach.call(document.querySelectorAll('[data-cost-category="traslados"],[data-cost-category="local"]'), function (row) { row.hidden = !!autoEnabled; });
+    var flow = document.querySelector('[data-transport-flow]');
+    if (flow) {
+      // Reemplazar, en vez de ocultar, evita que controles de vuelos o transfers
+      // queden disponibles en el DOM cuando el usuario eligió auto (y viceversa).
+      flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
+      var liveFlights = !autoEnabled && flow.querySelector('.flight-search');
+      if (liveFlights) searchFlights(detailState.meta, liveFlights);
+    }
+    renderBreakdown();
     sincronizarTrasladoOficial();
   }
   function actualizarRoadtrip(kmPerLiter) {
@@ -184,7 +193,28 @@
   function roadtripCard(meta, autoSelected) {
     var r = meta.roadtrip;
     if (!r) return '';
-    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight"' + (autoSelected ? ' disabled' : ' checked') + '> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"' + (autoSelected ? ' checked' : '') + '> 🚗 Auto / Roadtrip</label><div class="transport-detail" data-roadtrip-calculator' + (autoSelected ? '' : ' hidden') + '><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></div></section>';
+    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight"' + (autoSelected ? '' : ' checked') + '> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"' + (autoSelected ? ' checked' : '') + '> 🚗 Auto / Roadtrip</label></div></section>';
+  }
+  function roadtripCalculator(meta) {
+    var r = meta.roadtrip;
+    if (!r) return '';
+    return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></section>';
+  }
+  function transportFlow(meta, budget, autoSelected) {
+    if (autoSelected) return roadtripCalculator(meta);
+    return transferCard(meta) + '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(meta, budget) + '</section>';
+  }
+  function renderBreakdown() {
+    if (!detailState) return;
+    var list = document.querySelector('[data-breakdown-list]');
+    if (!list) return;
+    var roadtrip = detailState.transportMode === 'auto';
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
+    list.innerHTML = categories.map(function (category) {
+      var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
+      return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
+    }).join('');
   }
   function transferCard(meta) {
     var t = meta.officialTransfer;
@@ -206,7 +236,7 @@
       var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: form.querySelector('[name="amount"]').value, destination: S.dest, receipt: { name: file.name, type: file.type, data: dataUrl } }) });
       var result = await response.json().catch(function () { return {}; });
       if (!response.ok) throw new Error(result.error || 'No pudimos registrar la transferencia.');
-      $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>¡Reserva de traslado registrada con éxito!</h2><p>Tu número de orden es <strong>#' + esc(result.order) + '</strong>.</p><p class="booking-note">' + esc(result.message) + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
+      $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>¡Reserva de traslado registrada con éxito!</h2><p class="booking-note">' + esc(result.message) + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
     } catch (e) { button.disabled = false; button.textContent = 'Confirmar transferencia'; alert(e.message || 'No pudimos registrar la transferencia.'); }
   }
   function guideUnlocked() {
@@ -525,24 +555,19 @@
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: proposal.parts.alojamiento, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: false };
-    var breakdown = CATS.filter(function (c) { return c[0] !== 'auto' || isRoadtrip; }).map(function (c) {
-      var hidden = (c[0] === 'auto' && !isRoadtrip) || (isRoadtrip && (c[0] === 'traslados' || c[0] === 'local'));
-      return '<div data-cost-category="' + c[0] + '"' + (hidden ? ' hidden' : '') + '><span>' + c[1] + costNote(c[0], data.meta, proposal) + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>';
-    }).join('');
+    var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: true };
     content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
-      roadtripCard(Object.assign({}, data.meta, { roadtrip: detailState.roadtrip }), isRoadtrip) + transferCard(data.meta) +
-      (isRoadtrip ? '' : '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(data.meta, proposal.parts.pasajes) + '</section>') +
-      '<section class="detail-section"><h2>Desglose del viaje</h2><div class="panel detail-breakdown">' + breakdown + '</div></section>' +
+      roadtripCard(Object.assign({}, data.meta, { roadtrip: detailState.roadtrip }), isRoadtrip) +
+      '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
+      '<section class="detail-section"><h2>Desglose del viaje</h2><div class="panel detail-breakdown" data-breakdown-list></div></section>' +
       '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     actualizarTransporte(isRoadtrip);
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    var liveFlights = isRoadtrip ? null : view.querySelector('.flight-search');
-    if (liveFlights) searchFlights(data.meta, liveFlights);
   }
 
   function openDestinationProposal(key) {
