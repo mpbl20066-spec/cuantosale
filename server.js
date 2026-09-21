@@ -161,11 +161,20 @@ async function buscarVuelos(req, res, body) {
       usedCabinClass = 'business';
       request = response.data || response;
     }
-    return sendJson(res, 200, { origin: origin, destination: destination, cabin_class: usedCabinClass, style: style, offers: formatOffers(request.offers) });
+    const offers = formatOffers(request && request.offers);
+    if (!offers.length) {
+      return sendJson(res, 200, {
+        origin: origin, destination: destination, cabin_class: usedCabinClass, style: style,
+        offers: [], error: 'No hay vuelos disponibles o la API de Duffel no devolvió ofertas.'
+      });
+    }
+    return sendJson(res, 200, { origin: origin, destination: destination, cabin_class: usedCabinClass, style: style, offers: offers });
   } catch (e) {
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
     console.error('[duffel search]', message || e.message);
-    return sendJson(res, e.status && e.status < 500 ? e.status : 502, { error: message || 'No pudimos buscar vuelos en este momento.' });
+    return sendJson(res, e.status && e.status < 500 ? e.status : 502, {
+      offers: [], error: message || 'No hay vuelos disponibles o la API de Duffel falló.'
+    });
   }
 }
 

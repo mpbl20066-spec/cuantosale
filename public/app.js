@@ -149,7 +149,13 @@
     return new Date(value).toLocaleString('es-UY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   }
   function renderFlightOffers(el, data, budget) {
-    var priced = data.offers.filter(function (offer) { return offer.price_usd !== null; });
+    data = data && typeof data === 'object' ? data : {};
+    var offers = Array.isArray(data.offers) ? data.offers : [];
+    if (!offers.length) {
+      el.innerHTML = '<p class="duffel-empty">⚠️ No encontramos vuelos en vivo para este filtro. La propuesta estimada del viaje sigue disponible arriba; probá con otras fechas o intentá nuevamente más tarde.</p>';
+      return;
+    }
+    var priced = offers.filter(function (offer) { return offer.price_usd !== null; });
     var affordable = priced.filter(function (offer) { return offer.price_usd <= budget; });
     var fallback = affordable.length === 0;
     var visible = fallback ? priced.slice(0, 2) : affordable;
@@ -171,8 +177,18 @@
     var budget = Number(section.getAttribute('data-flight-budget')) || 0;
     box.innerHTML = '<p class="duffel-loading">Consultando aerolíneas…</p>';
     fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }) })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) { if (!res.ok) throw new Error(res.j.error || 'No pudimos buscar vuelos.'); renderFlightOffers(box, res.j, budget); })
+      .then(async function (response) {
+        var text = await response.text();
+        var data = { offers: [] };
+        if (text.trim()) {
+          try { data = JSON.parse(text); } catch (e) { data = { offers: [], error: 'La API devolvió una respuesta inválida.' }; }
+        }
+        if (!response.ok || !Array.isArray(data.offers) || data.offers.length === 0) {
+          renderFlightOffers(box, data, budget);
+          return;
+        }
+        renderFlightOffers(box, data, budget);
+      })
       .catch(function (e) { box.innerHTML = '<p class="duffel-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
       ;
   }
