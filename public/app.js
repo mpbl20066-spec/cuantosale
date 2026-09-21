@@ -315,6 +315,12 @@
     if (!live) return '';
     return p.sources[cat] === 'real' ? '<span class="src real">real</span>' : '<span class="src">estimado</span>';
   }
+  function costNote(cat, meta, p) {
+    var city = esc(meta.dest.name);
+    if (cat === 'comidas' || cat === 'local') return '<small class="cost-note">* Basado en tarifas reales de mercado en ' + city + '.</small>';
+    if (cat === 'pasajes' && p.sources[cat] === 'real') return '<small class="cost-note">* Precio real devuelto por Duffel al momento de consultar.</small>';
+    return '<small class="cost-note">* Valor de referencia estimado para ' + city + '.</small>';
+  }
 
   function render(data) {
     lastData = data;
@@ -349,7 +355,7 @@
     var stack = CATS.map(function (c) { return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>'; }).join('');
     var leg = CATS.map(function (c) {
       var v = rec.parts[c[0]];
-      return '<div><i style="background:var(' + c[2] + ')"></i><span>' + c[1] + '<em>' + Math.round(v / rec.total * 100) + '%</em>' + srcTag(rec, c[0], live) + '</span><b>' + money(v) + '</b></div>';
+      return '<div><i style="background:var(' + c[2] + ')"></i><span>' + c[1] + '<em>' + Math.round(v / rec.total * 100) + '%</em>' + srcTag(rec, c[0], live) + costNote(c[0], data.meta, rec) + '</span><b>' + money(v) + '</b></div>';
     }).join('');
     var breakdownSection = '<section class="sec"><h2>A dónde se va la plata</h2><p class="sub">El costo real incluye mucho más que el pasaje.</p>' +
       '<div class="panel"><div class="stack" role="img" aria-label="Distribución del costo">' + stack + '</div><div class="leg">' + leg + '</div></div></section>';
@@ -407,7 +413,7 @@
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, hotel: proposal.parts.alojamiento };
-    var breakdown = CATS.map(function (c) { return '<div data-cost-category="' + c[0] + '"><span>' + c[1] + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('');
+    var breakdown = CATS.map(function (c) { return '<div data-cost-category="' + c[0] + '"><span>' + c[1] + costNote(c[0], data.meta, proposal) + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('');
     content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(data.meta, proposal.parts.pasajes) + '</section>' +

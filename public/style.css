@@ -101,6 +101,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:linear-gradi
 .leg{display:grid;gap:2px}
 .leg div{display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
 .leg div:last-child{border-bottom:0}
+.cost-note{display:block;margin-top:3px;color:var(--ink2);font-size:10px;font-weight:400;font-style:italic;line-height:1.25}
 .leg i{width:12px;height:12px;border-radius:4px;display:block}
 .leg b{font-weight:600}
 .leg em{font-style:normal;color:var(--ink2);font-size:13px;margin-left:8px}

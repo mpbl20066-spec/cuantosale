@@ -270,6 +270,7 @@ async function cotizar(req, res, url) {
       mode: providers.isLive() ? 'live' : 'demo',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
+      costBasis: model.REAL_COSTS,
       generatedAt: new Date().toISOString()
     }
   }, result));
@@ -301,7 +302,7 @@ function cotizarTodos(req, res, url) {
   }).sort(function (a, b) { return a.total - b.total; });
 
   sendJson(res, 200, {
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated' },
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS },
     options: options
   });
 }
