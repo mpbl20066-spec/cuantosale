@@ -41,7 +41,7 @@
     </div>
     <div>
       <label for="dest">Destino</label>
-      <select id="dest" class="inp"></select>
+      <select id="dest" class="inp"><option value="todos">🌍 Todos los destinos (Buscar por mi presupuesto)</option></select>
     </div>
     <div class="row2">
       <div><label for="dep">Ida</label><input id="dep" class="inp" type="date"></div>
@@ -68,13 +68,6 @@
         <button type="button" data-v="eq" aria-pressed="true">Equilibrado</button>
         <button type="button" data-v="comodo" aria-pressed="false">Con comodidad</button>
       </div>
-    </div>
-    <div class="destination-finder">
-      <div>
-        <label for="dest-budget">¿A dónde llego con mi presupuesto?</label>
-        <div class="money"><span>US$</span><input id="dest-budget" class="inp" type="number" inputmode="numeric" min="1" step="100" placeholder="Ej.: 1000"></div>
-      </div>
-      <button type="button" class="find-destinations" id="find-destinations">Buscar destinos</button>
     </div>
   </section>
 

@@ -10,10 +10,10 @@
     ['extras', 'Valijas, tasas y seguro', '--c6']
   ];
 
-  var S = { dest: 'fln', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq' };
+  var S = { dest: 'fln', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', proposalId: '' };
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { rio: 'RIO', fln: 'FLN', sao: 'SAO', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', poa: 'POA' };
+  var IATA_BY_DEST = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
   var FOOD_TIPS = {
     rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
     fln: ['Buscá <b>prato executivo</b> en el centro de Florianópolis al mediodía: generalmente es la comida con mejor relación precio-cantidad.', 'En los mercados públicos y ferias barriales, armá un picnic con frutas, pan de queso y jugos para llevar a la playa.', 'Alejate una o dos cuadras de la playa para encontrar <b>buffet por kilo</b> y platos del día más accesibles.'],
@@ -106,7 +106,7 @@
       '<ul class="food-tips' + (locked ? ' bloqueado' : '') + '">' + items + '</ul>' +
       '<div class="guide-lock"' + (locked ? '' : ' hidden') + '>' +
       '<div class="guide-lock-icon" aria-hidden="true">🔒</div>' +
-      '<p>🔒 <b>Contenido exclusivo desbloqueable:</b> Mantener CuántoSale gratuito requiere trabajo. ¡Ayúdanos a mantener la web activa! Solo abre los hoteles en Booking.com para liberar la guía automáticamente.</p>' +
+      '<p>🔒 <b>Contenido exclusivo desbloqueable:</b> Ayúdanos a mantener CuántoSale gratuito abriendo las opciones de alojamiento en Booking.com (no requiere compra, solo abrir el enlace).</p>' +
       '<a class="guide-unlock" data-unlock-guide href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver Hoteles en Booking y Desbloquear Guía 🔓</a>' +
       '</div></section>';
   }
@@ -207,7 +207,7 @@
         '<div class="destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
         '<span class="mini ' + (option.fits ? 'g' : 'r') + '">' + (option.fits ? 'Entra en tu presupuesto' : 'Se pasa por ' + money(option.total - data.meta.budget)) + '</span>' +
         '<details><summary>Ver desglose</summary><div class="destination-breakdown">' + rows + '</div></details>' +
-        '<a class="destination-booking" href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver hoteles en Booking.com</a>' +
+        '<button type="button" class="btn-ver-propuesta" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta completa ➔</button>' +
         '</article>';
     }).join('');
     var count = data.options.filter(function (option) { return option.fits; }).length;
@@ -216,7 +216,7 @@
       '<div class="destination-cards">' + cards + '</div></section>';
   }
   function findDestinations() {
-    var budget = Number($('#dest-budget').value);
+    var budget = S.budget;
     var el = $('#destination-results');
     if (!budget || budget < 1) { el.innerHTML = '<div class="notice">Ingresá un presupuesto máximo para buscar destinos.</div>'; return; }
     if (!S.dep || !S.ret) { el.innerHTML = '<div class="notice">Elegí las fechas de ida y vuelta antes de buscar destinos.</div>'; return; }
@@ -238,6 +238,7 @@
   function run() {
     var el = $('#results');
     if (!S.dep || !S.ret) { notice('Elegí las fechas de ida y vuelta para ver el costo.'); return; }
+    if (S.dest === 'todos') { findDestinations(); return; }
     if (ctrl) ctrl.abort();
     ctrl = new AbortController();
     var mine = ctrl;
@@ -266,7 +267,7 @@
 
   function render(data) {
     var live = data.meta.mode === 'live';
-    var list = data.list, rec = byId(list, data.recId);
+    var list = data.list, rec = byId(list, S.proposalId) || byId(list, data.recId);
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
     var cheapest = byId(list, data.cheapestId), cozy = byId(list, data.cozyId);
 
@@ -355,8 +356,8 @@
       if (live && p.sources.pasajes === 'real') tags += '<span class="mini g">Pasaje real</span>';
       tags += p.total <= budget ? '<span class="mini g">Entra en tu presupuesto</span>' : '<span class="mini r">Se pasa por ' + money(p.total - budget) + '</span>';
       var rows = CATS.map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + '</b></div>'; }).join('');
-      return '<details class="opt"><summary><div><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
-        '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body">' + rows + '</div></details>';
+      return '<details class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '"><summary><div><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
+        '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body"><div class="proposal-actions"><button type="button" class="btn-ver-propuesta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta ➔</button></div>' + rows + '</div></details>';
     }).join('');
     h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
     h += breakdownSection + foodGuide(data.meta);
@@ -380,7 +381,7 @@
     $('#pax').textContent = S.pax;
 
     var sel = $('#dest');
-    sel.addEventListener('change', function () { S.dest = sel.value; schedule(); });
+    sel.addEventListener('change', function () { S.dest = sel.value; S.proposalId = ''; schedule(); });
     $('#dep').addEventListener('change', function (e) {
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
       S.dep = e.target.value;
@@ -389,7 +390,6 @@
     });
     $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; schedule(); });
     $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Number(e.target.value) || 0); schedule(); });
-    $('#find-destinations').addEventListener('click', findDestinations);
     $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; schedule(); });
     $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; schedule(); });
     $('#seg').addEventListener('click', function (e) {
@@ -399,6 +399,10 @@
       schedule();
     });
     $('#results').addEventListener('click', function (e) {
+      var destinationProposal = e.target.closest('[data-propuesta-dest]');
+      if (destinationProposal) { S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; $('#destination-results').innerHTML = ''; S.proposalId = ''; run(); return; }
+      var proposal = e.target.closest('[data-propuesta-id]');
+      if (proposal) { S.proposalId = proposal.getAttribute('data-propuesta-id'); schedule(); setTimeout(function () { $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) { openBookingForm(selectedFlight); return; }
       var unlock = e.target.closest('[data-unlock-guide]');
