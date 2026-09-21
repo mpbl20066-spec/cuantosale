@@ -124,4 +124,5 @@ if (require.main === module) {
   });
 }
 
-module.exports = { createServer };
+const app = createServer();
+module.exports = app
