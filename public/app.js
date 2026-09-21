@@ -83,15 +83,15 @@
   function foodGuide(meta) {
     var tips = FOOD_TIPS[meta.dest.key] || FOOD_TIPS.fln;
     var locked = !guideUnlocked();
-    var items = tips.map(function (tip) { return '<li>' + tip + '</li>'; }).join('');
+    var items = tips.map(function (tip) { return '<li>📍 🔒 ' + tip + '</li>'; }).join('');
     return '<section class="food-guide" aria-labelledby="food-guide-title">' +
       '<div class="food-guide-head"><span aria-hidden="true">🍽️</span><div><h2 id="food-guide-title">Guía Secreta: Dónde comer bien y barato en ' + esc(meta.dest.name) + '</h2>' +
       '<p>Ideas locales para cuidar tu presupuesto sin resignar sabor.</p></div></div>' +
       '<ul class="food-tips' + (locked ? ' bloqueado' : '') + '">' + items + '</ul>' +
       '<div class="guide-lock"' + (locked ? '' : ' hidden') + '>' +
       '<div class="guide-lock-icon" aria-hidden="true">🔒</div>' +
-      '<p><b>Contenido exclusivo desbloqueable:</b> Mantener CuántoSale gratuito requiere trabajo. ¡Ayúdanos a mantener la web activa! Solo abre los hoteles disponibles para tu viaje en Booking.com (no necesitás comprar nada; con solo mirar la página se desbloquea la lista automáticamente).</p>' +
-      '<a class="guide-unlock" data-unlock-guide href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver Hoteles en Booking y Desbloquear Guía Secreta 🔓</a>' +
+      '<p>🔒 <b>Contenido exclusivo desbloqueable:</b> Mantener CuántoSale gratuito requiere trabajo. ¡Ayúdanos a mantener la web activa! Solo abre los hoteles en Booking.com para liberar la guía automáticamente.</p>' +
+      '<a class="guide-unlock" data-unlock-guide href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver Hoteles en Booking y Desbloquear Guía 🔓</a>' +
       '</div></section>';
   }
   function flightSearch(meta) {

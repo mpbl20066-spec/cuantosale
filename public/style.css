@@ -201,7 +201,7 @@ details.opt summary::-webkit-details-marker{display:none}
 .food-tips{display:grid;gap:10px;margin:18px 0 0;padding:0;list-style:none;transition:filter .2s ease}
 .food-tips li{position:relative;padding:13px 14px 13px 42px;border-radius:14px;background:var(--bg);font-size:14px;line-height:1.45}
 .food-tips li::before{content:"✓";position:absolute;left:14px;top:13px;color:var(--good);font-weight:800}
-.bloqueado{filter:blur(5px);user-select:none;pointer-events:none}
+.bloqueado{filter:blur(6px);user-select:none;pointer-events:none}
 .guide-lock{position:absolute;inset:105px 12px 12px;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;border:2px dashed #003580;border-radius:18px;background:color-mix(in srgb,var(--surface) 92%,#dcebf8);text-align:center;box-shadow:0 8px 26px rgba(0,53,128,.13)}
 .guide-lock[hidden]{display:none}
 .guide-lock-icon{font-size:28px;line-height:1}
