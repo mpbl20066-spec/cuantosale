@@ -87,22 +87,23 @@
         var nightly = Math.max(1, Math.round(average * option.multiplier));
         var total = nightly * nights * pax;
         var url = bookingUrl(meta, option.order ? { order: option.order } : null);
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '"><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + option.badge + '</span></label><h3>' + option.type + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking.com ↗</a></article>';
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + total + '" data-hotel-total="' + total + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + option.badge + '</span></label><h3>' + option.type + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightly) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(total) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking.com ↗</a></article>';
       }).join('') + '</div></section>';
   }
   function recalcularTotalViaje() {
     if (!detailState) return;
     var parts = detailState.parts;
-    var transport = detailState.auto ? detailState.auto : (Number(parts.traslados) || 0) + (Number(detailState.transfer) || 0);
+    var roadtrip = !!detailState.auto;
+    var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + (Number(detailState.transfer) || 0);
     var total = Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
-      (Number(parts.comidas) || 0) + (Number(parts.local) || 0) +
+      (Number(parts.comidas) || 0) + (roadtrip ? 0 : (Number(parts.local) || 0)) +
       transport + (Number(parts.extras) || 0));
     var totalEl = document.querySelector('[data-detail-total]');
     if (totalEl) totalEl.textContent = money(total);
     var rows = document.querySelectorAll('[data-cost-category]');
     Array.prototype.forEach.call(rows, function (row) {
       var category = row.getAttribute('data-cost-category');
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? detailState.auto : parts[category];
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? detailState.auto : category === 'local' && roadtrip ? 0 : parts[category];
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
@@ -116,7 +117,7 @@
     if (status) status.textContent = enabled
       ? 'Traslado oficial incluido para ' + detailState.selectedFlight + ' y la posada seleccionada.'
       : 'Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.';
-    if (button) { button.disabled = !enabled; button.textContent = enabled ? 'Subir comprobante de transferencia · ' + money(detailState.transfer) : 'Seleccioná vuelo y posada'; }
+    if (button) { button.disabled = !enabled; button.textContent = enabled ? 'Subir comprobante de transferencia · ' + money(detailState.transfer) : 'Seleccioná traslado / transfer'; }
     recalcularTotalViaje();
   }
   function actualizarPasajes(section, price, airline) {
@@ -145,6 +146,7 @@
     if (transferSection) transferSection.hidden = !!autoEnabled;
     var autoRow = document.querySelector('[data-cost-category="auto"]');
     if (autoRow) autoRow.hidden = !autoEnabled;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-cost-category="traslados"],[data-cost-category="local"]'), function (row) { row.hidden = !!autoEnabled; });
     sincronizarTrasladoOficial();
   }
   function actualizarRoadtrip(kmPerLiter) {
@@ -186,7 +188,7 @@
   function transferCard(meta) {
     var t = meta.officialTransfer;
     if (!t) return '';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Traslado Oficial</h2><div class="transport-card"><p>Servicio coordinado para ' + esc(meta.dest.name) + ' · ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná vuelo y posada</button></div></section>';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Traslado Oficial</h2><div class="transport-card"><p>Servicio coordinado para ' + esc(meta.dest.name) + ' · ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná traslado / transfer</button></div></section>';
   }
   function openTransferModal(meta) {
     if (!detailState || !detailState.transfer) return;
@@ -523,7 +525,10 @@
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: proposal.parts.alojamiento, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: false };
-    var breakdown = CATS.filter(function (c) { return c[0] !== 'auto' || isRoadtrip; }).map(function (c) { return '<div data-cost-category="' + c[0] + '"' + (c[0] === 'auto' && !isRoadtrip ? ' hidden' : '') + '><span>' + c[1] + costNote(c[0], data.meta, proposal) + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('');
+    var breakdown = CATS.filter(function (c) { return c[0] !== 'auto' || isRoadtrip; }).map(function (c) {
+      var hidden = (c[0] === 'auto' && !isRoadtrip) || (isRoadtrip && (c[0] === 'traslados' || c[0] === 'local'));
+      return '<div data-cost-category="' + c[0] + '"' + (hidden ? ' hidden' : '') + '><span>' + c[1] + costNote(c[0], data.meta, proposal) + '</span><b data-cost-value>' + money(proposal.parts[c[0]]) + '</b></div>';
+    }).join('');
     content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       roadtripCard(Object.assign({}, data.meta, { roadtrip: detailState.roadtrip }), isRoadtrip) + transferCard(data.meta) +
@@ -628,6 +633,12 @@
       }
       var hotelChoice = e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) { actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true); return; }
+      var hotelCard = e.target.closest('[data-hotel-option]');
+      if (hotelCard && !e.target.closest('.hotel-booking')) {
+        var hotelInput = hotelCard.querySelector('[data-hotel-total]');
+        if (hotelInput) { hotelInput.checked = true; actualizarAlojamiento(Number(hotelInput.getAttribute('data-hotel-total')), true); }
+        return;
+      }
       var transportChoice = e.target.closest('[name="transport-choice"]');
       if (transportChoice) { actualizarTransporte(transportChoice.value === 'auto'); return; }
       var flightFilter = e.target.closest('[data-flight-stop],[data-flight-time]');
