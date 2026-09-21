@@ -34,6 +34,7 @@
   <h1>¿Cuánto sale realmente tu viaje?</h1>
   <p class="lead">Ponés destino, fechas, cuántos viajan y tu presupuesto. Comparamos vuelos, buses y alojamiento y te mostramos el costo total.</p>
 
+  <div id="vista-principal">
   <section class="form" aria-label="Datos de tu viaje">
     <div class="origin">
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
@@ -73,6 +74,12 @@
 
   <div id="results" aria-live="polite"></div>
   <div id="destination-results" aria-live="polite"></div>
+  </div>
+
+  <div id="vista-detalle" class="oculto" aria-live="polite">
+    <button type="button" id="btn-volver">⬅ Volver a las propuestas</button>
+    <div id="detalle-contenido"></div>
+  </div>
 
   <div id="booking-modal" class="booking-modal" hidden aria-hidden="true"></div>
 

@@ -29,6 +29,7 @@
   var $ = function (s) { return document.querySelector(s); };
   var today = new Date(); today.setHours(12, 0, 0, 0);
   var timer = null, ctrl = null;
+  var lastData = null;
 
   /* ---------- utilidades ---------- */
   function addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
@@ -266,6 +267,7 @@
   }
 
   function render(data) {
+    lastData = data;
     var live = data.meta.mode === 'live';
     var list = data.list, rec = byId(list, S.proposalId) || byId(list, data.recId);
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
@@ -307,7 +309,6 @@
       note + '</div></section>';
 
     h += ctas(data.meta);
-    h += hotelOptions(data.meta, rec.parts.alojamiento);
 
     var stack = CATS.map(function (c) { return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>'; }).join('');
     var leg = CATS.map(function (c) {
@@ -360,15 +361,34 @@
         '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body"><div class="proposal-actions"><button type="button" class="btn-ver-propuesta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta ➔</button></div>' + rows + '</div></details>';
     }).join('');
     h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
-    h += breakdownSection + foodGuide(data.meta);
-    h += flightSearch(data.meta, rec.parts.pasajes);
 
     var el = $('#results');
     el.innerHTML = h;
-    var liveFlights = el.querySelector('.duffel-search');
-    if (liveFlights) searchFlights(data.meta, liveFlights);
     var ch = el.querySelector('.chart'), cu = el.querySelector('.bar.cur');
     if (ch && cu) ch.scrollLeft = cu.offsetLeft - ch.clientWidth / 2 + cu.offsetWidth / 2;
+  }
+
+  function showProposalView(proposal, data) {
+    var view = $('#vista-detalle'), content = $('#detalle-contenido');
+    var breakdown = CATS.map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(proposal.parts[c[0]]) + '</b></div>'; }).join('');
+    content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong>' + money(proposal.total) + '</strong></section>' +
+      '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
+      '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(data.meta, proposal.parts.pasajes) + '</section>' +
+      '<section class="detail-section"><h2>Desglose del viaje</h2><div class="panel detail-breakdown">' + breakdown + '</div></section>' +
+      '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
+    $('#vista-principal').classList.add('oculto');
+    view.classList.remove('oculto');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    var liveFlights = view.querySelector('.duffel-search');
+    if (liveFlights) searchFlights(data.meta, liveFlights);
+  }
+
+  function openDestinationProposal(key) {
+    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
+    fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
+      if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
+      showProposalView(byId(res.j.list, res.j.recId), res.j);
+    }).catch(function (e) { notice(e.message); });
   }
 
   /* ---------- formulario ---------- */
@@ -400,9 +420,9 @@
     });
     $('#results').addEventListener('click', function (e) {
       var destinationProposal = e.target.closest('[data-propuesta-dest]');
-      if (destinationProposal) { S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; $('#destination-results').innerHTML = ''; S.proposalId = ''; run(); return; }
+      if (destinationProposal) { e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; $('#destination-results').innerHTML = ''; openDestinationProposal(S.dest); return; }
       var proposal = e.target.closest('[data-propuesta-id]');
-      if (proposal) { S.proposalId = proposal.getAttribute('data-propuesta-id'); schedule(); setTimeout(function () { $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300); return; }
+      if (proposal) { e.preventDefault(); e.stopPropagation(); var selected = lastData && byId(lastData.list, proposal.getAttribute('data-propuesta-id')); if (selected) showProposalView(selected, lastData); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) { openBookingForm(selectedFlight); return; }
       var unlock = e.target.closest('[data-unlock-guide]');
@@ -412,6 +432,18 @@
       S.dep = iso(addDays(parse(S.dep), s)); S.ret = iso(addDays(parse(S.ret), s));
       $('#dep').value = S.dep; $('#ret').value = S.ret;
       schedule();
+    });
+    $('#destination-results').addEventListener('click', function (e) {
+      var destinationProposal = e.target.closest('[data-propuesta-dest]');
+      if (!destinationProposal) return;
+      e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; openDestinationProposal(S.dest);
+    });
+    $('#vista-detalle').addEventListener('click', function (e) {
+      if (e.target.closest('#btn-volver')) { e.preventDefault(); e.stopPropagation(); $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      var selectedFlight = e.target.closest('[data-select-flight]');
+      if (selectedFlight) { e.preventDefault(); e.stopPropagation(); openBookingForm(selectedFlight); return; }
+      var unlock = e.target.closest('[data-unlock-guide]');
+      if (unlock) { unlockGuide(); return; }
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
