@@ -136,7 +136,6 @@ function normalizeHotelKey(value) {
 function resolveHotelImage(hotel, index, style, destName) {
   const hotelName = sanitizeHotelName(hotel && (hotel.hotel_name || hotel.name || hotel.hotelName || ''));
   const hotelId = sanitizeHotelName(hotel && (hotel.hotel_id || hotel.id || hotel.hotelId || ''));
-  const destKey = String(destName || '').toLowerCase();
   const explicitImage = HOTEL_IMAGE_BY_NAME[normalizeHotelKey(hotelId)] || HOTEL_IMAGE_BY_NAME[normalizeHotelKey(hotelName)];
   if (explicitImage) return explicitImage;
   const validUrls = BOOKING_IMAGE_FIELDS.map(function (field) {
@@ -145,11 +144,7 @@ function resolveHotelImage(hotel, index, style, destName) {
   if (validUrls.length) return validUrls[0];
   const nestedUrl = extractNestedImageUrl(hotel);
   if (nestedUrl) return nestedUrl;
-  const fallbackSet = BOOKING_IMAGE_FALLBACKS[destKey] || BOOKING_IMAGE_FALLBACKS.default;
-  const seed = normalizeHotelKey(hotelName).split(' ').reduce(function (sum, word) {
-    return sum + (word.charCodeAt(0) || 0);
-  }, 0);
-  return fallbackSet[(index + seed + (normalizeHotelKey(hotelName).length % 3)) % fallbackSet.length] || HOTEL_IMAGES[style || 'moderado'][index % 3];
+  return '';
 }
 function bookingSettings() {
   return {
@@ -207,16 +202,18 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
       similar: [hotel.city || destName, 'Hotel similar en ' + destName].filter(Boolean),
       source: 'booking'
     };
-  }).filter(function (hotel) { return hotel.name && hotel.name !== 'Hotel recomendado' && hotel.image; });
+  }).filter(function (hotel) { return hotel.name && hotel.name !== 'Hotel recomendado'; });
 }
 function uniqueHotelList(list, fallbackImages) {
   const seen = new Set();
   const unique = [];
   list.forEach(function (entry, index) {
     const image = entry && entry.image ? String(entry.image).trim() : '';
-    const candidate = image && !seen.has(image) ? image : (fallbackImages[index % fallbackImages.length] || fallbackImages[0]);
-    if (!candidate) return;
-    seen.add(candidate);
+    const candidate = image && !seen.has(image) ? image : '';
+    if (!candidate && image) {
+      return;
+    }
+    if (candidate) seen.add(candidate);
     unique.push(Object.assign({}, entry, { image: candidate }));
   });
   return unique;

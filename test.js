@@ -143,6 +143,27 @@ function offer(amount, cur, name, segsOut, segsBack) {
     assert.strictEqual(list[0].image, 'https://images.example/hotel.jpg');
     global.fetch = originalFetch;
   });
+  await t('si Booking no devuelve foto real, no rellena con imágenes falsas genéricas', async function () {
+    const originalFetch = global.fetch;
+    global.fetch = async function () {
+      return {
+        ok: true,
+        json: async function () {
+          return {
+            result: [{
+              hotel_name: 'Hotel sin foto',
+              min_total_price: '460',
+              currency: 'USD',
+              review_score: '9.2'
+            }]
+          };
+        }
+      };
+    };
+    const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2 });
+    assert.strictEqual(list[0].image, '');
+    global.fetch = originalFetch;
+  });
   const server = app.createServer();
   await new Promise(function (r) { server.listen(0, r); });
   const port = server.address().port;
