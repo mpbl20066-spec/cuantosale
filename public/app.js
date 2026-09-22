@@ -11,7 +11,7 @@
     ['extras', 'Valijas, tasas y seguro', '--c6']
   ];
 
-  var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', proposalId: '' };
+  var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '' };
   var massSearch = false;
   var detailState = null;
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
@@ -239,7 +239,9 @@
   function roadtripCard(meta, autoSelected) {
     var r = meta.roadtrip;
     if (!r) return '';
-    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight"' + (autoSelected ? '' : ' checked') + '> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"' + (autoSelected ? ' checked' : '') + '> 🚗 Auto / Roadtrip</label></div></section>';
+    var allowed = isRoadtripDestinationAllowed(meta && meta.dest && meta.dest.key ? meta.dest.key : S.dest);
+    var autoDisabled = !allowed;
+    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight"' + (autoSelected ? '' : ' checked') + '> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"' + (autoSelected ? ' checked' : '') + (autoDisabled ? ' disabled' : '') + '> 🚗 Auto / Roadtrip' + (autoDisabled ? ' <small>(no disponible en este destino)</small>' : '') + '</label></div></section>';
   }
   function roadtripCalculator(meta) {
     var r = meta.roadtrip;
@@ -608,10 +610,24 @@
     if (!local) return data.list;
     return data.list.map(function (proposal) { return normalizeLocalTransportInProposal(data, proposal); });
   }
+  function isRoadtripDestinationAllowed(destKey) {
+    var key = String(destKey || S.dest || '').toLowerCase();
+    return ['rio', 'buz', 'fln', 'sao', 'igu', 'poa'].indexOf(key) >= 0;
+  }
+  function transportModeFilter(list, selectedMode) {
+    if (!Array.isArray(list)) return list;
+    var mode = String(selectedMode || S.transport || 'flight').toLowerCase();
+    if (mode === 'auto' || mode === 'roadtrip') return list.filter(function (proposal) { return proposal && proposal.mode === 'auto'; });
+    return list.filter(function (proposal) { return proposal && proposal.mode !== 'auto'; });
+  }
   function render(data) {
     lastData = data;
     var live = data.meta.mode === 'live';
-    var list = normalizeLocalTransportInList(data), rec = byId(list, S.proposalId) || byId(list, data.recId);
+    if (!isRoadtripDestinationAllowed(data.meta.dest.key) && S.transport === 'auto') S.transport = 'flight';
+    var list = transportModeFilter(normalizeLocalTransportInList(data), S.transport);
+    if (!list.length) list = transportModeFilter(normalizeLocalTransportInList(data), 'flight');
+    var rec = byId(list, S.proposalId) || byId(list, data.recId);
+    if (!rec && list.length) rec = list[0];
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
     var cheapest = byId(list, data.cheapestId), cozy = byId(list, data.cozyId);
 
@@ -760,7 +776,7 @@
       $('#btn-buscar-todos').hidden = !all;
       if (all) { $('#results').innerHTML = ''; $('#destination-results').innerHTML = ''; }
     }
-    sel.addEventListener('change', function () { S.dest = sel.value; S.proposalId = ''; massSearch = false; updateDestinationMode(); if (S.dest !== 'todos') schedule(); });
+    sel.addEventListener('change', function () { S.dest = sel.value; S.proposalId = ''; S.transport = isRoadtripDestinationAllowed(S.dest) ? 'flight' : 'flight'; massSearch = false; updateDestinationMode(); if (S.dest !== 'todos') schedule(); });
     $('#btn-buscar-todos').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); findDestinations(); });
     $('.form').addEventListener('keydown', function (e) { if (e.key === 'Enter' && S.dest === 'todos') { e.preventDefault(); $('#btn-buscar-todos').click(); } });
     document.addEventListener('click', handleProposalNavigation, true);
@@ -818,7 +834,15 @@
         return;
       }
       var transportChoice = e.target.closest('[name="transport-choice"]');
-      if (transportChoice) { actualizarTransporte(transportChoice.value === 'auto'); return; }
+      if (transportChoice) {
+        var chosenMode = transportChoice.value === 'auto' ? 'auto' : 'flight';
+        if (chosenMode === 'auto' && !isRoadtripDestinationAllowed(detailState.meta.dest.key)) {
+          return;
+        }
+        S.transport = chosenMode;
+        actualizarTransporte(chosenMode === 'auto');
+        return;
+      }
       var flightFilter = e.target.closest('[data-flight-stop],[data-flight-time]');
       if (flightFilter) {
         var flightSection = flightFilter.closest('.flight-search');

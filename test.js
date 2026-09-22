@@ -83,6 +83,11 @@ function offer(amount, cur, name, segsOut, segsBack) {
     bad.forEach(function (b) { assert.throws(function () { model.validate(b, today); }); });
     assert.ok(model.validate({ dest: 'fln', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq' }, today));
   });
+  await t('reserva roadtrip solo para destinos geográficamente habilitados', function () {
+    assert.ok(model.validate({ dest: 'fln', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today));
+    assert.throws(function () { model.validate({ dest: 'ssa', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today); }, /roadtrip|auto/i);
+    assert.throws(function () { model.validate({ dest: 'fln', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'bus' }, today); }, /transporte/i);
+  });
 
   console.log('Servidor');
   delete process.env.DUFFEL_TOKEN;
