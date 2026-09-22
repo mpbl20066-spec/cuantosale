@@ -196,14 +196,58 @@
     var breakdown = document.querySelector('[data-proposal-breakdown]');
     if (breakdown) breakdown.innerHTML = '<h2>A dónde va tu plata</h2>' + proposalBreakdownContent(detailState);
   }
+  function getSelectedFlightOffer() {
+    if (!detailState) return null;
+    var offers = Array.isArray(detailState.flightOffers) ? detailState.flightOffers : [];
+    var selectedId = detailState.selectedFlightId || (detailState.selectedOffer && detailState.selectedOffer.id);
+    if (selectedId) {
+      var match = offers.find(function (offer) { return String(offer.id) === String(selectedId); });
+      if (match) return match;
+    }
+    if (detailState.selectedOffer && detailState.selectedOffer.airline) {
+      var fallback = offers.find(function (offer) { return String(offer.airline) === String(detailState.selectedOffer.airline); });
+      if (fallback) return fallback;
+    }
+    return offers.length ? offers[0] : null;
+  }
+  function formatFlightDateTime(value) {
+    if (!value) return 'sin fecha';
+    var date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString('es-UY', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+  function getSelectedFlightSummary() {
+    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'Todavía no elegiste un vuelo.' };
+    var offer = getSelectedFlightOffer();
+    var airline = (offer && offer.airline) || detailState.selectedFlight || 'Vuelo seleccionado';
+    var outbound = offer && (offer.outbound || offer);
+    var departureValue = outbound && outbound.departure ? outbound.departure : (offer && offer.departure);
+    var arrivalValue = outbound && outbound.arrival ? outbound.arrival : (offer && offer.arrival);
+    var departureText = formatFlightDateTime(departureValue);
+    var arrivalText = formatFlightDateTime(arrivalValue);
+    var route = '';
+    if (offer) {
+      var origin = airportCode(offer.departure_airport || (offer.outbound && offer.outbound.origin));
+      var destination = airportCode(offer.arrival_airport || (offer.outbound && offer.outbound.destination));
+      route = ' · ' + origin + ' → ' + destination;
+    }
+    return {
+      airline: airline,
+      summary: 'Transfer sincronizado para ' + airline + route + ' · Vuelo seleccionado el ' + departureText + (arrivalText && arrivalText !== 'sin fecha' ? ' · llegada ' + arrivalText : ''),
+      departureText: departureText,
+      arrivalText: arrivalText,
+      route: route
+    };
+  }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
     var enabled = detailState.transportMode === 'flight' && !!detailState.selectedFlight && !!detailState.selectedHotel;
     detailState.transfer = enabled ? Number(detailState.meta.officialTransfer.amount) : 0;
     var status = document.querySelector('[data-transfer-status]');
     var button = document.querySelector('[data-buy-transfer]');
+    var flightData = getSelectedFlightSummary();
     if (status) status.textContent = enabled
-      ? 'Traslado oficial incluido para ' + detailState.selectedFlight + ' y la posada seleccionada.'
+      ? flightData.summary
       : 'Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.';
     if (button) { button.disabled = !enabled; button.textContent = 'Seleccioná traslado / transfer'; }
     recalcularTotalViaje();
@@ -331,7 +375,9 @@
   function openTransferModal(meta) {
     if (!detailState || !detailState.transfer) return;
     var modal = $('#booking-modal'), t = meta.officialTransfer;
-    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · tarifa fija confirmada</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de pago<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
+    var flightData = getSelectedFlightSummary();
+    var flightInfo = '<div class="transfer-flight-sync"><p><b>Vuelo activo:</b> ' + esc(flightData.airline) + '</p><p>' + esc(flightData.summary) + '</p></div>';
+    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2>' + flightInfo + '<p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · tarifa fija confirmada</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de pago<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   async function submitTransfer(form) {
