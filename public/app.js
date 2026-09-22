@@ -441,12 +441,115 @@
     if (!t) return '';
     return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><div class="transport-card"><p>Transfer desde el aeropuerto ➔ pousada para ' + esc(meta.dest.name) + ' · tarifa fija de ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná transfer / transfer</button></div></section>';
   }
+  function getTransferPickupWindow() {
+    var offer = getSelectedFlightOffer();
+    var arrivalValue = null;
+    if (offer) {
+      if (offer.outbound && offer.outbound.arrival) arrivalValue = offer.outbound.arrival;
+      else if (offer.inbound && offer.inbound.arrival) arrivalValue = offer.inbound.arrival;
+      else if (offer.arrival) arrivalValue = offer.arrival;
+      else if (offer.departure) arrivalValue = offer.departure;
+    }
+    var baseDate = arrivalValue ? new Date(arrivalValue) : new Date();
+    if (Number.isNaN(baseDate.getTime())) return { baseDate: new Date(), customMinutes: 60 };
+    return {
+      baseDate: baseDate,
+      customMinutes: 60,
+      plusOneHour: new Date(baseDate.getTime() + 60 * 60 * 1000),
+      plusTwoHours: new Date(baseDate.getTime() + 120 * 60 * 1000)
+    };
+  }
+  function getTransferPickupLabel(minutes, customValue) {
+    if (minutes === 'custom') return customValue ? 'Horario personalizado: ' + customValue : 'Horario personalizado';
+    if (Number(minutes) === 60) return '1 hora después de la llegada';
+    if (Number(minutes) === 120) return '2 horas después de la llegada';
+    return 'Horario a coordinar';
+  }
   function openTransferModal(meta) {
-    if (!detailState || !detailState.transfer) return;
-    var modal = $('#booking-modal'), t = meta.officialTransfer;
+    if (!detailState) return;
+    meta = meta || detailState.meta;
+    detailState.transferWizard = detailState.transferWizard || { step: 1, pickupMinutes: 60, customTime: '', hotelName: '' };
+    var state = detailState.transferWizard;
+    if (!state.pickupMinutes) state.pickupMinutes = 60;
+    if (!state.hotelName && detailState.selectedHotelName) state.hotelName = detailState.selectedHotelName;
+    state.step = 1;
+    renderTransferWizard(meta, 1);
+  }
+  function syncTransferWizardStateFromDom(modal) {
+    if (!detailState || !detailState.transferWizard || !modal) return;
+    var state = detailState.transferWizard;
+    var radio = modal.querySelector('[name="transfer-pickup"]:checked');
+    if (radio) {
+      state.pickupMinutes = radio.value;
+      if (String(radio.value) === 'custom') {
+        var customInput = modal.querySelector('[data-transfer-custom-time]');
+        state.customTime = customInput ? customInput.value : '';
+      } else {
+        state.customTime = '';
+      }
+    }
+    var hotelInput = modal.querySelector('[name="transfer-hotel"]');
+    if (hotelInput) state.hotelName = (hotelInput.value || '').trim();
+  }
+  function advanceTransferWizard(targetStep) {
+    var modal = $('#booking-modal');
+    if (!detailState || !detailState.transferWizard || !modal) return;
+    syncTransferWizardStateFromDom(modal);
+    var state = detailState.transferWizard;
+    if (state.step === 1 && String(state.pickupMinutes) === 'custom' && !state.customTime) {
+      alert('Seleccioná un horario personalizado para continuar.');
+      var customInput = modal.querySelector('[data-transfer-custom-time]');
+      if (customInput) customInput.focus();
+      return;
+    }
+    if (state.step === 2 && !state.hotelName) {
+      alert('Ingresá el hotel o pousada de destino para continuar.');
+      var hotelInput = modal.querySelector('[name="transfer-hotel"]');
+      if (hotelInput) hotelInput.focus();
+      return;
+    }
+    state.step = targetStep;
+    renderTransferWizard(detailState.meta, state.step);
+  }
+  function renderTransferWizard(meta, step) {
+    var modal = $('#booking-modal');
+    var t = meta.officialTransfer;
+    if (!detailState) return;
+    detailState.transferWizard = detailState.transferWizard || { step: 1, pickupMinutes: 60, customTime: '', hotelName: '' };
+    var state = detailState.transferWizard;
+    if (step) state.step = step;
     var flightData = getSelectedFlightSummary();
     var flightInfo = '<div class="transfer-flight-sync"><p><b>Vuelo activo:</b> ' + esc(flightData.airline) + '</p><p>' + esc(flightData.summary) + '</p></div>';
-    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2>' + flightInfo + '<p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · tarifa fija confirmada</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de pago<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
+    var arrivalWindow = getTransferPickupWindow();
+    var pickupOptions = [
+      { value: '60', label: '1 hora después de la llegada', time: arrivalWindow.plusOneHour ? arrivalWindow.plusOneHour.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '01:00' },
+      { value: '120', label: '2 horas después de la llegada', time: arrivalWindow.plusTwoHours ? arrivalWindow.plusTwoHours.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '02:00' },
+      { value: 'custom', label: 'Otro horario personalizado', time: 'Ingresá el horario' }
+    ];
+    var selectedIndex = pickupOptions.findIndex(function (option) { return String(option.value) === String(state.pickupMinutes); });
+    var stepMarkup = '';
+    if (state.step === 1) {
+      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 1</span><h3>¿Cuándo querés que te recojan?</h3></div>' +
+        '<div class="transfer-pickup-options">' + pickupOptions.map(function (option) {
+          var index = pickupOptions.indexOf(option);
+          var checked = selectedIndex === index ? 'checked' : '';
+          var customInput = option.value === 'custom' ? '<input class="transfer-custom-time" type="time" data-transfer-custom-time value="' + esc(state.customTime || '') + '" ' + (selectedIndex === index ? '' : 'disabled') + '>' : '<span class="transfer-pickup__time">' + esc(option.time) + '</span>';
+          return '<label class="transfer-pickup-option' + (checked ? ' selected' : '') + '"><input type="radio" name="transfer-pickup" value="' + esc(option.value) + '" ' + checked + ' data-transfer-pickup-radio><span class="transfer-pickup__content"><strong>' + esc(option.label) + '</strong>' + customInput + '</span></label>';
+        }).join('') + '</div>' +
+        '<button type="button" class="confirm-booking" data-transfer-step="2">Continuar</button></div>';
+    } else if (state.step === 2) {
+      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 2</span><h3>¿Dónde te alojás?</h3></div>' +
+        '<label class="transfer-field"><span>Hotel o pousada de destino</span><input type="text" name="transfer-hotel" value="' + esc(state.hotelName || '') + '" placeholder="Ej: Pousada del Sol" autocomplete="off"></label>' +
+        '<button type="button" class="confirm-booking" data-transfer-step="3">Continuar al pago</button></div>';
+    } else {
+      var pickupText = getTransferPickupLabel(state.pickupMinutes, state.customTime);
+      var hotelText = state.hotelName ? state.hotelName : 'No informado';
+      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 3</span><h3>Pago y comprobante</h3></div>' +
+        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p></div>' +
+        '<div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p><p><b>Monto exacto:</b> ' + money(t.amount) + '</p></div>' +
+        '<form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><input type="hidden" name="pickup_minutes" value="' + esc(state.pickupMinutes || 60) + '"><input type="hidden" name="pickup_label" value="' + esc(pickupText) + '"><input type="hidden" name="hotel_name" value="' + esc(hotelText) + '"><label class="transfer-field"><span>Comprobante de pago</span><input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
+    }
+    modal.innerHTML = '<div class="booking-dialog transfer-wizard" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2>' + flightInfo + stepMarkup + '</div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   async function submitTransfer(form) {
@@ -455,7 +558,7 @@
     button.disabled = true; button.textContent = 'Registrando transferencia…';
     try {
       var dataUrl = await new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(file); });
-      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: form.querySelector('[name="amount"]').value, destination: S.dest, receipt: { name: file.name, type: file.type, data: dataUrl } }) });
+      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: form.querySelector('[name="amount"]').value, destination: S.dest, pickup_minutes: form.querySelector('[name="pickup_minutes"]').value || '', pickup_label: form.querySelector('[name="pickup_label"]').value || '', hotel_name: form.querySelector('[name="hotel_name"]').value || '', flight_airline: (detailState && detailState.selectedFlight) || 'Vuelo activo', receipt: { name: file.name, type: file.type, data: dataUrl } }) });
       var result = await response.json().catch(function () { return {}; });
       if (!response.ok) throw new Error(result.error || 'No pudimos registrar la transferencia.');
       $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>¡Reserva de traslado registrada con éxito!</h2><p class="booking-note">' + esc(result.message) + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
@@ -1154,6 +1257,43 @@
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
+      var stepButton = e.target.closest('[data-transfer-step]');
+      if (stepButton) {
+        e.preventDefault(); e.stopPropagation();
+        advanceTransferWizard(Number(stepButton.getAttribute('data-transfer-step')) || 1);
+      }
+    });
+    $('#booking-modal').addEventListener('change', function (e) {
+      var radio = e.target.closest('[name="transfer-pickup"]');
+      if (radio) {
+        if (!detailState || !detailState.transferWizard) return;
+        detailState.transferWizard.pickupMinutes = radio.value;
+        if (String(radio.value) === 'custom') {
+          var customInput = $('#booking-modal').querySelector('[data-transfer-custom-time]');
+          detailState.transferWizard.customTime = customInput ? customInput.value : '';
+        } else {
+          detailState.transferWizard.customTime = '';
+        }
+        return;
+      }
+      var customTime = e.target.closest('[data-transfer-custom-time]');
+      if (customTime && detailState && detailState.transferWizard) {
+        detailState.transferWizard.customTime = customTime.value;
+      }
+      var hotelInput = e.target.closest('[name="transfer-hotel"]');
+      if (hotelInput && detailState && detailState.transferWizard) {
+        detailState.transferWizard.hotelName = hotelInput.value.trim();
+      }
+    });
+    $('#booking-modal').addEventListener('input', function (e) {
+      var customTime = e.target.closest('[data-transfer-custom-time]');
+      if (customTime && detailState && detailState.transferWizard) {
+        detailState.transferWizard.customTime = customTime.value;
+      }
+      var hotelInput = e.target.closest('[name="transfer-hotel"]');
+      if (hotelInput && detailState && detailState.transferWizard) {
+        detailState.transferWizard.hotelName = hotelInput.value.trim();
+      }
     });
     $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'booking-form' && e.target.id !== 'transfer-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } if (e.target.id === 'transfer-form') submitTransfer(e.target); else submitBooking(e.target); });
 
