@@ -161,6 +161,7 @@
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
+    renderQuoteSummary();
   }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
@@ -237,11 +238,7 @@
     }
   }
   function roadtripCard(meta, autoSelected) {
-    var r = meta.roadtrip;
-    if (!r) return '';
-    var allowed = isRoadtripDestinationAllowed(meta && meta.dest && meta.dest.key ? meta.dest.key : S.dest);
-    var autoDisabled = !allowed;
-    return '<section class="transport-options"><h2>Medio de transporte</h2><div class="transport-card"><label><input type="radio" name="transport-choice" value="flight"' + (autoSelected ? '' : ' checked') + '> ✈️ Vuelos</label><label><input type="radio" name="transport-choice" value="auto"' + (autoSelected ? ' checked' : '') + (autoDisabled ? ' disabled' : '') + '> 🚗 Auto / Roadtrip' + (autoDisabled ? ' <small>(no disponible en este destino)</small>' : '') + '</label></div></section>';
+    return '';
   }
   function roadtripCalculator(meta) {
     var r = meta.roadtrip;
@@ -264,6 +261,83 @@
       if (!transferButton.disabled) openTransferModal(detailState.meta);
     });
   }
+  function localTransportDescription(meta) {
+    var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
+    var map = {
+      buz: 'Movilidad en vans, taxis locales y caminatas.',
+      rio: 'Movilidad en Uber, metro y caminatas.',
+      fln: 'Movilidad en vans, taxis y caminatas.',
+      sao: 'Movilidad en metro, Uber y caminatas.',
+      ssa: 'Movilidad en vans, taxis y caminatas.',
+      igu: 'Movilidad en taxis, vans y caminatas.',
+      poa: 'Movilidad en colectivos, taxis y caminatas.',
+      rec: 'Movilidad en taxis, vans y caminatas.',
+      for: 'Movilidad en taxis, vans y caminatas.',
+      mcz: 'Movilidad en taxis, vans y caminatas.',
+      nat: 'Movilidad en taxis, vans y caminatas.',
+      pip: 'Movilidad en taxis, vans y caminatas.',
+      default: 'Movilidad local con transporte público y caminatas.'
+    };
+    return map[key] || map.default;
+  }
+  function getSummarySnapshot() {
+    var meta = detailState && detailState.meta ? detailState.meta : (lastData && lastData.meta ? lastData.meta : null);
+    var proposal = null;
+    if (detailState && detailState.meta) {
+      proposal = lastData && lastData.list && (byId(lastData.list, lastData.recId) || lastData.list[0]);
+    } else if (lastData && lastData.list) {
+      proposal = byId(lastData.list, lastData.recId) || lastData.list[0];
+    }
+    if (!meta || !proposal) return null;
+    var roadtripMode = detailState ? detailState.transportMode === 'auto' : proposal.mode === 'auto';
+    var parts = detailState ? detailState.parts : proposal.parts;
+    var flight = roadtripMode ? 0 : Number(detailState ? detailState.flight : proposal.parts.pasajes || 0);
+    var hotel = Number(detailState ? detailState.hotel : proposal.parts.alojamiento || 0);
+    var local = Number(parts.local || 0);
+    var transfers = Number((detailState ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : (Number(proposal.parts.traslados) || 0)) || 0);
+    var extras = Number(parts.extras || 0);
+    var auto = Number(detailState ? detailState.auto : proposal.parts.auto || 0);
+    var total = roadtripMode
+      ? Math.round((auto || 0) + hotel + (Number(parts.comidas) || 0))
+      : Math.round(flight + hotel + (Number(parts.comidas) || 0) + local + transfers + extras + (Number(detailState ? detailState.transfer : 0) || 0));
+    var rows = roadtripMode
+      ? [
+          { label: 'Auto / Roadtrip', value: auto },
+          { label: 'Alojamiento', value: hotel },
+          { label: 'Comidas', value: Number(parts.comidas) || 0 }
+        ]
+      : [
+          { label: 'Pasajes', value: flight },
+          { label: 'Alojamiento', value: hotel },
+          { label: 'Comidas', value: Number(parts.comidas) || 0 },
+          { label: 'Transporte local', value: local },
+          { label: 'Traslados', value: transfers },
+          { label: 'Extras', value: extras }
+        ];
+    return {
+      destination: meta.dest && meta.dest.name ? meta.dest.name : 'Tu viaje',
+      dep: meta.dep || '',
+      ret: meta.ret || '',
+      total: total,
+      transportLabel: roadtripMode ? 'Auto / Roadtrip' : 'Vuelo + hotel',
+      localNote: localTransportDescription(meta),
+      rows: rows.filter(function (row) { return Number(row.value) > 0; })
+    };
+  }
+  function renderQuoteSummary() {
+    var panel = document.getElementById('floating-summary');
+    if (!panel) return;
+    var snapshot = getSummarySnapshot();
+    if (!snapshot) { panel.classList.add('oculto'); return; }
+    var rowsHtml = snapshot.rows.map(function (row) {
+      return '<div class="floating-summary__row"><span>' + esc(row.label) + '</span><b>' + money(Number(row.value) || 0) + '</b></div>';
+    }).join('');
+    panel.classList.remove('oculto');
+    panel.innerHTML = '<div class="floating-summary__header"><span class="floating-summary__eyebrow">Resumen</span><h3 class="floating-summary__title">' + esc(snapshot.destination) + '</h3><p class="floating-summary__meta"><strong>' + esc(snapshot.dep || 'Fecha ida') + '</strong> → <strong>' + esc(snapshot.ret || 'Fecha vuelta') + '</strong><br>' + esc(snapshot.transportLabel) + '</p></div>' +
+      '<div class="floating-summary__list">' + rowsHtml + '</div>' +
+      '<div class="floating-summary__total"><small>Total general</small><strong>' + money(snapshot.total) + '</strong></div>' +
+      '<div class="floating-summary__cta"><button type="button">Continuar con la reserva</button></div>';
+  }
   function renderBreakdown() {
     if (!detailState) return;
     var panel = document.getElementById('floating-breakdown');
@@ -277,19 +351,22 @@
       if (category === 'auto' && !roadtrip) return null;
       var info = CATS.filter(function (c) { return c[0] === category; })[0];
       var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
-      return { category: category, label: info ? info[1] : '', color: info ? info[2] : '--c3', value: Number(value) || 0 };
+      var note = category === 'local' ? localTransportDescription(detailState.meta) : '';
+      return { category: category, label: info ? info[1] : '', color: info ? info[2] : '--c3', value: Number(value) || 0, note: note };
     }).filter(Boolean);
     var stack = activeCats.map(function (entry) {
       var width = total ? (entry.value / total * 100) : 0;
       return '<span style="width:' + width + '%;background:var(' + entry.color + ')"></span>';
     }).join('');
     var rows = activeCats.map(function (entry) {
-      return '<div class="floating-breakdown__row" data-cost-category="' + entry.category + '"><i style="background:var(' + entry.color + ')"></i><span class="floating-breakdown__name">' + entry.label + '</span><b class="floating-breakdown__value" data-cost-value>' + money(entry.value) + '</b></div>';
+      var noteMarkup = entry.note ? '<small class="floating-breakdown__note">' + esc(entry.note) + '</small>' : '';
+      return '<div class="floating-breakdown__row" data-cost-category="' + entry.category + '"><i style="background:var(' + entry.color + ')"></i><div class="floating-breakdown__meta"><span class="floating-breakdown__name">' + esc(entry.label) + '</span>' + noteMarkup + '</div><b class="floating-breakdown__value" data-cost-value>' + money(entry.value) + '</b></div>';
     }).join('');
     panel.classList.remove('oculto');
-    panel.innerHTML = '<div class="floating-breakdown__title-block"><h3>A dónde se va la plata</h3><p>El costo real incluye mucho más que el pasaje.</p></div>' +
+    panel.innerHTML = '<div class="floating-breakdown__title-block"><h3>Resumen de cotización</h3><p>' + esc((detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'Tu viaje') + ' · ' + esc((detailState.meta && detailState.meta.dep) || '') + ' / ' + esc((detailState.meta && detailState.meta.ret) || '') + '</p></div>' +
       '<div class="progress-bar-container" role="img" aria-label="Distribución del costo">' + stack + '</div>' +
-      '<div class="floating-breakdown__list">' + rows + '</div>';
+      '<div class="floating-breakdown__list">' + rows + '</div>' +
+      '<div class="floating-breakdown__cta"><strong>' + money(total) + '</strong><button type="button">Continuar con la reserva</button></div>';
   }
   function breakdownRows() {
     if (!detailState) return '';
@@ -552,12 +629,15 @@
     var el = $('#results');
     if (!S.dep || !S.ret) { notice('Elegí las fechas de ida y vuelta para ver el costo.'); return; }
     if (S.dest === 'todos') { return; }
+    renderTransportSelector();
+    if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
     if (ctrl) ctrl.abort();
     ctrl = new AbortController();
     var mine = ctrl;
     el.classList.add('loading');
     el.innerHTML = renderLoadingState('Buscando ofertas para tu viaje…');
-    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
+    var transportParam = S.transport === 'auto' ? 'auto' : 'flight';
+    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, transport: transportParam });
     fetch('/api/cotizar?' + qs.toString(), { signal: mine.signal })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -580,7 +660,30 @@
   }
   function costNote(cat, meta, p) {
     var city = esc(meta.dest.name);
-    var text = { pasajes: 'Tarifa aérea en tiempo real.', alojamiento: 'Estimación oficial para estadía en ' + city + '.', comidas: 'Basado en precios reales de mercado y gastronomía local.', local: 'Movilidad urbana y traslados internos.', traslados: 'Servicio oficial Aeropuerto ⇄ Hotel.', auto: 'Combustible y peajes de la ruta ida y vuelta.', extras: 'Tasas aeroportuarias, equipaje y asistencia al viajero.' };
+    var localNotes = {
+      buz: 'Movilidad en vans, taxis locales y caminatas.',
+      rio: 'Movilidad en Uber, metro y caminatas.',
+      fln: 'Movilidad en vans, taxis y caminatas.',
+      sao: 'Movilidad en metro, Uber y caminatas.',
+      ssa: 'Movilidad en vans, taxis y caminatas.',
+      igu: 'Movilidad en taxis, vans y caminatas.',
+      poa: 'Movilidad en colectivos, taxis y caminatas.',
+      rec: 'Movilidad en taxis, vans y caminatas.',
+      for: 'Movilidad en taxis, vans y caminatas.',
+      mcz: 'Movilidad en taxis, vans y caminatas.',
+      nat: 'Movilidad en taxis, vans y caminatas.',
+      pip: 'Movilidad en taxis, vans y caminatas.',
+      default: 'Movilidad local con transporte público y caminatas.'
+    };
+    var text = {
+      pasajes: 'Tarifa aérea en tiempo real.',
+      alojamiento: 'Estimación oficial para estadía en ' + city + '.',
+      comidas: 'Basado en precios reales de mercado y gastronomía local.',
+      local: localNotes[String(meta && meta.dest && meta.dest.key ? meta.dest.key.toLowerCase() : '')] || localNotes.default,
+      traslados: 'Servicio oficial Aeropuerto ⇄ Hotel.',
+      auto: 'Combustible y peajes de la ruta ida y vuelta.',
+      extras: 'Tasas aeroportuarias, equipaje y asistencia al viajero.'
+    };
     return '<small class="cost-note">' + (text[cat] || 'Detalle del viaje.') + '</small>';
   }
 
@@ -613,6 +716,26 @@
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
     return ['rio', 'buz', 'fln', 'sao', 'igu', 'poa'].indexOf(key) >= 0;
+  }
+  function getAvailableTransportModes(destKey) {
+    var key = String(destKey || S.dest || 'todos').toLowerCase();
+    var modes = [{ value: 'flight', label: 'Vuelo' }, { value: 'bus', label: 'Bus' }];
+    if (isRoadtripDestinationAllowed(key)) modes.push({ value: 'auto', label: 'Auto / Roadtrip' });
+    return modes;
+  }
+  function renderTransportSelector() {
+    var wrap = document.getElementById('transport-selector');
+    if (!wrap) return;
+    var key = String(S.dest || 'todos').toLowerCase();
+    var modes = getAvailableTransportModes(key);
+    var current = String(S.transport || 'flight').toLowerCase();
+    if (current === 'roadtrip') current = 'auto';
+    if (current === 'auto' && !isRoadtripDestinationAllowed(key)) current = 'flight';
+    if (!modes.some(function (mode) { return mode.value === current; })) current = modes[0].value;
+    S.transport = current;
+    wrap.innerHTML = modes.map(function (mode) {
+      return '<button type="button" data-transport-mode="' + mode.value + '" aria-pressed="' + (mode.value === current ? 'true' : 'false') + '">' + esc(mode.label) + '</button>';
+    }).join('');
   }
   function transportModeFilter(list, selectedMode) {
     if (!Array.isArray(list)) return list;
@@ -711,6 +834,7 @@
 
     var el = $('#results');
     el.innerHTML = h;
+    renderQuoteSummary();
     var ch = el.querySelector('.chart'), cu = el.querySelector('.bar.cur');
     if (ch && cu) ch.scrollLeft = cu.offsetLeft - ch.clientWidth / 2 + cu.offsetWidth / 2;
   }
@@ -721,15 +845,16 @@
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: true };
-    content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
-      '<aside id="floating-breakdown" class="floating-breakdown oculto" aria-live="polite" aria-label="Desglose del viaje"></aside>' +
+    content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
+      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
-      roadtripCard(Object.assign({}, data.meta, { roadtrip: detailState.roadtrip }), isRoadtrip) +
       '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
-      '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>';
+      '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>' +
+      '</div><aside id="floating-breakdown" class="floating-breakdown oculto" aria-live="polite" aria-label="Desglose del viaje"></aside></div>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     var floating = document.getElementById('floating-breakdown');
     if (floating) floating.classList.remove('oculto');
+    renderQuoteSummary();
     actualizarTransporte(isRoadtrip);
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
@@ -769,6 +894,7 @@
     $('#dep').min = iso(addDays(today, 1)); $('#ret').min = iso(addDays(today, 2));
     $('#bud').value = S.budget;
     $('#pax').textContent = S.pax;
+    renderTransportSelector();
 
     var sel = $('#dest');
     function updateDestinationMode() {
@@ -776,7 +902,27 @@
       $('#btn-buscar-todos').hidden = !all;
       if (all) { $('#results').innerHTML = ''; $('#destination-results').innerHTML = ''; }
     }
-    sel.addEventListener('change', function () { S.dest = sel.value; S.proposalId = ''; S.transport = isRoadtripDestinationAllowed(S.dest) ? 'flight' : 'flight'; massSearch = false; updateDestinationMode(); if (S.dest !== 'todos') schedule(); });
+    function syncTransportSelection() {
+      if (S.dest === 'todos') { S.transport = 'flight'; }
+      if (S.transport === 'roadtrip') S.transport = 'auto';
+      if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
+      if (['flight', 'bus', 'auto'].indexOf(S.transport) < 0) S.transport = 'flight';
+      renderTransportSelector();
+    }
+    sel.addEventListener('change', function () {
+      S.dest = sel.value; S.proposalId = '';
+      if (S.dest === 'todos') { S.transport = 'flight'; }
+      else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
+      massSearch = false; updateDestinationMode(); syncTransportSelection(); if (S.dest !== 'todos') schedule();
+    });
+    $('#transport-selector').addEventListener('click', function (e) {
+      var button = e.target.closest('[data-transport-mode]');
+      if (!button) return;
+      S.transport = button.getAttribute('data-transport-mode');
+      if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
+      renderTransportSelector();
+      if (S.dest !== 'todos') schedule();
+    });
     $('#btn-buscar-todos').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); findDestinations(); });
     $('.form').addEventListener('keydown', function (e) { if (e.key === 'Enter' && S.dest === 'todos') { e.preventDefault(); $('#btn-buscar-todos').click(); } });
     document.addEventListener('click', handleProposalNavigation, true);

@@ -266,8 +266,18 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
   const tierByStyle = { ahorro: 0, eq: 1, comodo: 2 };
   const tier = tierByStyle[trip.style] == null ? 1 : tierByStyle[trip.style];
   // Las propuestas no deben ofrecer ni conservar conexiones que impliquen
-  // partir por Buenos Aires. También se conserva solo la hotelería del estilo.
-  const list = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba' && proposal.ti === tier; });
+  // partir por Buenos Aires. Cuando la capa del estilo deja muy pocas opciones,
+  // se rellena con alternativas válidas de otras categorías para mantener una
+  // respuesta útil en modo demo y en búsquedas rápidas.
+  const preferred = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba' && proposal.ti === tier; });
+  const filtered = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba'; });
+  const list = preferred.length >= 3 ? preferred : filtered.filter(function (proposal) {
+    return !preferred.some(function (item) { return item.id === proposal.id; });
+  }).reduce(function (acc, proposal) {
+    if (acc.some(function (item) { return item.id === proposal.id; })) return acc;
+    acc.push(proposal);
+    return acc;
+  }, preferred.slice()).slice(0, 3);
   const picked = model.pick(trip, list);
   const rec = picked.rec;
   const series = model.seriesFor(trip, rec, dep, ret, today);

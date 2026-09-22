@@ -43,6 +43,10 @@
       <label for="dest">Destino</label>
       <select id="dest" class="inp"><option value="todos">🌍 Todos los destinos (Buscar por mi presupuesto)</option></select>
     </div>
+    <div>
+      <span class="lbl" id="transport-label">Modo de viaje</span>
+      <div id="transport-selector" class="seg transport-seg" role="group" aria-labelledby="transport-label"></div>
+    </div>
     <div class="row2">
       <div><label for="dep">Ida</label><input id="dep" class="inp" type="date"></div>
       <div><label for="ret">Vuelta</label><input id="ret" class="inp" type="date"></div>
@@ -75,6 +79,8 @@
   <div id="results" aria-live="polite"></div>
   <div id="destination-results" aria-live="polite"></div>
   </div>
+
+  <aside id="floating-summary" class="floating-summary oculto" aria-live="polite" aria-label="Resumen del viaje"></aside>
 
   <div id="vista-detalle" class="oculto" aria-live="polite">
     <button type="button" id="btn-volver">⬅ Volver a las propuestas</button>
