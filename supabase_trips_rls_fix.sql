@@ -1,6 +1,7 @@
 -- Ejecutar una vez en Supabase SQL Editor para corregir el 403 de public.trips.
 grant usage on schema public to anon, authenticated;
 grant select, insert, update, delete on table public.trips to authenticated;
+grant select, insert, update, delete on table public.user_trips to authenticated;
 
 alter table public.trips enable row level security;
 
