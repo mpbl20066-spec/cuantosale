@@ -1234,14 +1234,17 @@
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
       massSearch = false; updateDestinationMode(); syncTransportSelection(); if (S.dest !== 'todos') schedule();
     });
-    $('#transport-selector').addEventListener('click', function (e) {
-      var button = e.target.closest('[data-transport-mode]');
-      if (!button) return;
-      S.transport = button.getAttribute('data-transport-mode');
-      if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
-      renderTransportSelector();
-      if (S.dest !== 'todos') schedule();
-    });
+    var transportSelector = $('#transport-selector');
+    if (transportSelector) {
+      transportSelector.addEventListener('click', function (e) {
+        var button = e.target.closest('[data-transport-mode]');
+        if (!button) return;
+        S.transport = button.getAttribute('data-transport-mode');
+        if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
+        renderTransportSelector();
+        if (S.dest !== 'todos') schedule();
+      });
+    }
     $('#btn-buscar-todos').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); findDestinations(); });
     $('.form').addEventListener('keydown', function (e) { if (e.key === 'Enter' && S.dest === 'todos') { e.preventDefault(); $('#btn-buscar-todos').click(); } });
     document.addEventListener('click', handleProposalNavigation, true);
