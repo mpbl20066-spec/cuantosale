@@ -376,6 +376,7 @@
     if (!detailState || !detailState.meta) return '';
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var dailyCosts = getDestinationDailyCosts(detailState.meta.dest && detailState.meta.dest.key);
     var foodValue = Number(detailState.foodPerDay) || Number(detailState.parts && detailState.parts.comidas ? (detailState.parts.comidas / Math.max(1, nights * pax)) : 0) || dailyCosts.food.moderado;
     var localValue = Number(detailState.localPerDay) || Number(detailState.parts && detailState.parts.local ? (detailState.parts.local / Math.max(1, nights * pax)) : 0) || dailyCosts.transport.eco;
     var foodOptions = [
@@ -397,10 +398,12 @@
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Transporte local</span><small>Estilo de movilidad</small></div>' +
+      '<label class="daily-budget__planned"><span>Presupuesto programado por dÃ­a</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(localValue) + '" data-daily-local aria-label="Presupuesto diario de transporte local"><span>/ dÃ­a</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
       '</div>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Comidas</span><small>Estilo gastronómico</small></div>' +
+      '<label class="daily-budget__planned"><span>Presupuesto programado por dÃ­a</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(foodValue) + '" data-daily-food aria-label="Presupuesto diario de comidas"><span>/ dÃ­a</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
