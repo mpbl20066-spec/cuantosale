@@ -174,6 +174,64 @@
       proposalBreakdownContent(state) +
       '</section>';
   }
+  function getActiveBreakdownEntries() {
+    if (!detailState) return [];
+    var roadtrip = detailState.transportMode === 'auto';
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
+    var total = roadtrip
+      ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0))
+      : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
+        (Number(detailState.parts.comidas) || 0) + (Number(detailState.parts.local) || 0) +
+        ((Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0)) + (Number(detailState.parts.extras) || 0));
+    return categories.map(function (category) {
+      if (category === 'auto' && !roadtrip) return null;
+      var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? (detailState.auto || 0) : (detailState.parts[category] || 0);
+      if (Number(value) <= 0) return null;
+      return { category: category, label: info[1], color: info[2], value: Number(value) || 0, width: total ? (Number(value) / total * 100) : 0 };
+    }).filter(Boolean);
+  }
+  function findSelectedHotelLabel() {
+    var checked = document.querySelector('[data-hotel-total]:checked');
+    if (checked) {
+      var card = checked.closest('[data-hotel-option]');
+      if (card) {
+        var name = card.querySelector('h3');
+        if (name && name.textContent) return name.textContent.trim();
+      }
+    }
+    if (detailState && detailState.selectedHotelName) return detailState.selectedHotelName;
+    return 'Hotel seleccionado';
+  }
+  function renderTripSummary() {
+    var summary = $('#trip-summary');
+    if (!summary) return;
+    if (!detailState || !detailState.meta) {
+      summary.hidden = true;
+      summary.innerHTML = '';
+      return;
+    }
+    var entries = getActiveBreakdownEntries();
+    var total = entries.reduce(function (sum, entry) { return sum + entry.value; }, 0);
+    var flightLabel = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || 'Vuelo no seleccionado';
+    var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
+    var hotelName = findSelectedHotelLabel();
+    var transferIncluded = !!detailState.selectedFlight && !!detailState.selectedHotel && detailState.transportMode === 'flight' && Number(detailState.transfer) > 0;
+    var segments = entries.map(function (entry) {
+      return '<span style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
+    }).join('');
+    summary.innerHTML = '<div class="trip-summary__inner">' +
+      '<div class="trip-summary__head"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong></div>' +
+      '<div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
+      '<div class="trip-summary__items">' +
+      '<div class="trip-summary__item"><span>Vuelo</span><b>' + esc(flightLabel) + '</b><em>' + money(flightPrice) + '</em></div>' +
+      '<div class="trip-summary__item"><span>Transfer</span><b>' + (transferIncluded ? 'Incluido' : 'No incluido') + '</b><em>' + (transferIncluded ? money(Number(detailState.meta.officialTransfer.amount) || 0) : '—') + '</em></div>' +
+      '<div class="trip-summary__item"><span>Hotel</span><b>' + esc(hotelName) + '</b><em>' + money(Number(detailState.hotel) || 0) + '</em></div>' +
+      '</div>' +
+      '<button type="button" class="trip-summary__cta" data-summary-book>Reservar / pagar</button>' +
+      '</div>';
+    summary.hidden = false;
+  }
   function recalcularTotalViaje() {
     if (!detailState) return;
     var parts = detailState.parts;
@@ -195,6 +253,7 @@
     });
     var breakdown = document.querySelector('[data-proposal-breakdown]');
     if (breakdown) breakdown.innerHTML = '<h2>A dónde va tu plata</h2>' + proposalBreakdownContent(detailState);
+    renderTripSummary();
   }
   function getSelectedFlightOffer() {
     if (!detailState) return null;
@@ -262,7 +321,17 @@
   function actualizarAlojamiento(price, selectedByUser) {
     if (!detailState || !Number.isFinite(price) || price <= 0) return;
     detailState.hotel = Math.round(price);
-    if (selectedByUser) detailState.selectedHotel = true;
+    if (selectedByUser) {
+      detailState.selectedHotel = true;
+      var checked = document.querySelector('[data-hotel-total]:checked');
+      if (checked) {
+        var card = checked.closest('[data-hotel-option]');
+        if (card) {
+          var label = card.querySelector('h3');
+          if (label) detailState.selectedHotelName = label.textContent.trim();
+        }
+      }
+    }
     sincronizarTrasladoOficial();
   }
   function actualizarTransporte(autoEnabled) {
@@ -547,7 +616,15 @@
     return { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds };
   }
   function openBookingForm(button) {
-    var selectedOffer = persistSelectedOffer(button) || { id: button.getAttribute('data-select-flight') || button.getAttribute('data-offer-id') || '', airline: button.getAttribute('data-offer-airline') || 'Vuelo seleccionado', price: Number(button.getAttribute('data-offer-price') || 0) || 0, currency: button.getAttribute('data-offer-currency') || 'USD', passengerIds: [] };
+    var selectedOffer = null;
+    if (button && typeof button.getAttribute === 'function') {
+      selectedOffer = persistSelectedOffer(button) || { id: button.getAttribute('data-select-flight') || button.getAttribute('data-offer-id') || '', airline: button.getAttribute('data-offer-airline') || 'Vuelo seleccionado', price: Number(button.getAttribute('data-offer-price') || 0) || 0, currency: button.getAttribute('data-offer-currency') || 'USD', passengerIds: [] };
+    } else if (detailState && detailState.selectedOffer) {
+      selectedOffer = detailState.selectedOffer;
+    } else if (detailState) {
+      selectedOffer = { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || 'Vuelo seleccionado', price: Number(detailState.flight) || 0, currency: 'USD', passengerIds: [] };
+    }
+    if (!selectedOffer) return;
     var modal = $('#booking-modal');
     var passengerIds = Array.isArray(selectedOffer.passengerIds) ? selectedOffer.passengerIds : [];
     modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
@@ -852,7 +929,7 @@
     var isRoadtrip = proposal.mode === 'auto';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado' };
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       proposalBreakdownMarkup(detailState) +
@@ -862,6 +939,7 @@
       '</div></div>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     actualizarTransporte(isRoadtrip);
+    renderTripSummary();
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -948,6 +1026,12 @@
       Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
       schedule();
     });
+    $('#trip-summary').addEventListener('click', function (e) {
+      var summaryCta = e.target.closest('[data-summary-book]');
+      if (!summaryCta) return;
+      e.preventDefault(); e.stopPropagation();
+      openBookingForm(detailState && detailState.selectedOffer ? detailState.selectedOffer : { id: detailState && detailState.selectedFlightId || '', airline: detailState && detailState.selectedFlight || 'Vuelo seleccionado', price: Number((detailState && detailState.flight) || 0), currency: 'USD', passengerIds: [] });
+    });
     $('#results').addEventListener('click', function (e) {
       var destinationProposal = e.target.closest('[data-propuesta-dest]');
       if (destinationProposal) { e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; $('#destination-results').innerHTML = ''; openDestinationProposal(S.dest); return; }
@@ -988,11 +1072,11 @@
         window.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
       var hotelChoice = e.target.closest('[data-hotel-total]');
-      if (hotelChoice && hotelChoice.checked) { actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true); return; }
+      if (hotelChoice && hotelChoice.checked) { var hotelCard = hotelChoice.closest('[data-hotel-option]'); var hotelName = hotelCard ? hotelCard.querySelector('h3') : null; if (hotelName) detailState.selectedHotelName = hotelName.textContent.trim(); actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true); return; }
       var hotelCard = e.target.closest('[data-hotel-option]');
       if (hotelCard && !e.target.closest('.hotel-booking,.hotel-similar')) {
         var hotelInput = hotelCard.querySelector('[data-hotel-total]');
-        if (hotelInput) { hotelInput.checked = true; actualizarAlojamiento(Number(hotelInput.getAttribute('data-hotel-total')), true); }
+        if (hotelInput) { hotelInput.checked = true; var hotelName = hotelCard.querySelector('h3'); if (hotelName) detailState.selectedHotelName = hotelName.textContent.trim(); actualizarAlojamiento(Number(hotelInput.getAttribute('data-hotel-total')), true); }
         return;
       }
       var transportChoice = e.target.closest('[name="transport-choice"]');
