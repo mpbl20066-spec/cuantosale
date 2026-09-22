@@ -992,7 +992,7 @@
   }
 
   /* ---------- pantalla ---------- */
-  function byId(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }
+  function byId(list, id) { if (!Array.isArray(list)) return null; for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i]; return null; }
   function titleOf(p) { return p.modeShort + ' + hotel ' + p.tierLabel; }
   function srcTag(p, cat, live) {
     if (!live) return '';
@@ -1236,7 +1236,11 @@
     }
     var proposalId = button.getAttribute('data-propuesta-id');
     var proposal = lastData && (byId(lastData.list, proposalId) || byId(lastData.roadtripList, proposalId));
-    if (proposal) showProposalView(proposal, lastData);
+    if (proposal) {
+      try { showProposalView(proposal, lastData); } catch (error) { console.error('No pudimos abrir la propuesta', error); notice('No pudimos abrir esta propuesta. Probá nuevamente.'); }
+    } else {
+      notice('La propuesta ya no está disponible. Volvé a buscar para actualizarla.');
+    }
   }
 
   /* ---------- formulario ---------- */
