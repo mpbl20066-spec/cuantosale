@@ -504,7 +504,7 @@
     if (!S.dep || !S.ret) { el.innerHTML = '<div class="notice">Elegí las fechas de ida y vuelta antes de buscar destinos.</div>'; return; }
     massSearch = true;
     $('#results').innerHTML = '';
-    el.innerHTML = '<div class="notice">Buscando destinos para tu presupuesto…</div>';
+    el.innerHTML = renderLoadingState('Buscando destinos para tu presupuesto…');
     var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style });
     fetch('/api/cotizar-todos?' + qs.toString())
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
@@ -515,6 +515,10 @@
       .catch(function (e) { el.innerHTML = '<div class="notice">' + esc(e.message || 'No pudimos buscar destinos ahora.') + '</div>'; });
   }
   function notice(msg) { $('#results').innerHTML = '<div class="notice">' + esc(msg) + '</div>'; }
+  function renderLoadingState(label) {
+    var text = label || 'Buscando la mejor propuesta…';
+    return '<section class="sec"><div class="loading-shell" aria-live="polite"><div class="loading-status">' + esc(text) + '</div><div class="skeleton skeleton-hero"></div><div class="skeleton-line short"></div><div class="skeleton-line"></div><div class="skeleton-grid"><div class="skeleton-box"></div><div class="skeleton-box"></div></div><div class="skeleton-grid multi"><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div></div></div></section>';
+  }
 
   /* ---------- pedido al servidor ---------- */
   function schedule() { clearTimeout(timer); timer = setTimeout(run, 250); }
@@ -527,6 +531,7 @@
     ctrl = new AbortController();
     var mine = ctrl;
     el.classList.add('loading');
+    el.innerHTML = renderLoadingState('Buscando ofertas para tu viaje…');
     var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
     fetch('/api/cotizar?' + qs.toString(), { signal: mine.signal })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
@@ -570,12 +575,14 @@
     var status = data.fits
       ? 'Entra en tu presupuesto. Te sobran ' + money(budget - rec.total) + '.'
       : 'Ninguna opción entra en ' + money(budget) + '. La más barata te deja ' + money(rec.total - budget) + ' por encima.';
+    var sourceBadge = live ? 'Precios reales' : 'Precios estimados';
+    var sourcePill = '<span class="tag ghost source-pill">' + esc(sourceBadge) + '</span>';
 
     var h = '';
     h += '<section class="sec"><div class="hero">' +
       '<div class="tags"><span class="tag">' + (data.fits ? 'La más conveniente para vos' : 'La más barata que encontramos') + '</span>' +
       '<span class="tag ghost">' + esc(data.meta.dest.name) + '</span>' +
-      '<span class="tag ghost">' + data.meta.nights + ' noches</span></div>' +
+      '<span class="tag ghost">' + data.meta.nights + ' noches</span>' + sourcePill + '</div>' +
       '<h3>' + esc(titleOf(rec)) + '</h3>' +
       '<p class="meta">' + dLong(dep) + ' a ' + dLong(ret) + ', ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '. Trayecto ' + esc(rec.dur) + '.</p>' +
       '<div class="perf"><i></i><i></i></div>' +

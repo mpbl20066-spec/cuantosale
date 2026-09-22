@@ -164,6 +164,17 @@ function offer(amount, cur, name, segsOut, segsBack) {
     assert.strictEqual(list[0].image, '');
     global.fetch = originalFetch;
   });
+  await t('si Booking falla por timeout, el servidor cae al fallback sin romper la respuesta', async function () {
+    const originalFetch = global.fetch;
+    global.fetch = async function () {
+      throw new Error('timeout');
+    };
+    const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2 });
+    assert.ok(Array.isArray(list));
+    assert.ok(list.length >= 1);
+    assert.ok(list[0].name);
+    global.fetch = originalFetch;
+  });
   const server = app.createServer();
   await new Promise(function (r) { server.listen(0, r); });
   const port = server.address().port;

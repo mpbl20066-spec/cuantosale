@@ -133,6 +133,14 @@ function extractNestedImageUrl(obj) {
 function normalizeHotelKey(value) {
   return String(value || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 }
+function fetchWithTimeout(url, init, timeoutMs) {
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = controller ? setTimeout(function () { controller.abort(); }, timeoutMs || 12000) : null;
+  const request = fetch(url, Object.assign({}, init, controller ? { signal: controller.signal } : {}));
+  return request.finally(function () {
+    if (timer) clearTimeout(timer);
+  });
+}
 function resolveHotelImage(hotel, index, style, destName) {
   const hotelName = sanitizeHotelName(hotel && (hotel.hotel_name || hotel.name || hotel.hotelName || ''));
   const hotelId = sanitizeHotelName(hotel && (hotel.hotel_id || hotel.id || hotel.hotelId || ''));
@@ -176,16 +184,26 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
     page_number: '0',
     page_size: '6'
   });
-  const response = await fetch(settings.url + '?' + params.toString(), {
-    method: 'GET',
-    headers: {
-      'x-rapidapi-key': settings.key,
-      'x-rapidapi-host': settings.host,
-      'Accept': 'application/json'
-    }
-  });
+  let response;
+  try {
+    response = await fetchWithTimeout(settings.url + '?' + params.toString(), {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': settings.key,
+        'x-rapidapi-host': settings.host,
+        'Accept': 'application/json'
+      }
+    }, 12000);
+  } catch (error) {
+    throw new Error('Booking API timeout o no disponible.');
+  }
   if (!response || !response.ok) throw new Error('Booking API no disponible.');
-  const payload = await response.json();
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    throw new Error('Booking API devolvió una respuesta inválida.');
+  }
   const results = Array.isArray(payload.result) ? payload.result : Array.isArray(payload.data) ? payload.data : [];
   return results.slice(0, 3).map(function (hotel, index) {
     const name = sanitizeHotelName(hotel.hotel_name || hotel.name || hotel.hotelName || 'Hotel recomendado');

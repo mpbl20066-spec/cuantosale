@@ -151,6 +151,17 @@ details.opt summary::-webkit-details-marker{display:none}
 
 .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px}
 .foot b{color:var(--ink)}
+.loading-shell{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px 16px;display:grid;gap:14px}
+.loading-status{font-size:13px;font-weight:700;color:var(--ink2)}
+.skeleton{position:relative;overflow:hidden;border-radius:20px;background:linear-gradient(90deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}
+@keyframes loadingShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-hero{height:180px;border-radius:28px}
+.skeleton-line{height:16px;border-radius:999px;background:linear-gradient(90deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}
+.skeleton-line.short{width:42%}
+.skeleton-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.skeleton-box{height:90px;border-radius:14px;background:linear-gradient(90deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}
+.skeleton-box.tall{height:120px}
+.source-pill{background:rgba(255,255,255,.14);color:var(--hero-ink)}
 @media (prefers-reduced-motion:no-preference){
   .fill{transition:width .5s ease}
   .bar .b{transition:height .35s ease}
