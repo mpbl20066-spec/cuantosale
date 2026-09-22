@@ -88,15 +88,34 @@
     };
     return styles[meta.style] || styles.eq;
   }
+  function hotelImageFallback(index, fallback) {
+    var candidates = [
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80'
+    ];
+    return candidates[(Number(index) || 0) % candidates.length] || fallback;
+  }
+  function sanitizeHotelImageUrl(value, fallback) {
+    if (typeof value !== 'string') return fallback;
+    var text = value.trim();
+    var markdown = text.match(/^\[.*?\]\((https?:\/\/[^)]+)\)$/i);
+    if (markdown && markdown[1]) return markdown[1].trim();
+    var direct = text.match(/https?:\/\/[^\s)>"]+/i);
+    return direct ? direct[0].trim() : fallback;
+  }
   function normalizeHotelCatalog(catalog, defaultHotel) {
     var unique = [];
     var seen = new Set();
     (catalog || []).forEach(function (item, index) {
       if (!item || !item.name) return;
       var name = String(item.name);
-      var image = String((item.image || defaultHotel.image || '')).trim();
+      var image = sanitizeHotelImageUrl(item.image, defaultHotel.image);
       if (!image || seen.has(image)) {
-        image = 'https://images.unsplash.com/photo-' + String(1566073771259 + index * 17).slice(0, 15) + '?auto=format&fit=crop&w=1200&q=80';
+        image = hotelImageFallback(index, defaultHotel.image);
       }
       seen.add(image);
       unique.push(Object.assign({}, item, { name: name, image: image }));
@@ -114,20 +133,20 @@
     var hotel = hotelCatalog[0] || defaultHotel;
     var imageMap = {};
     hotelCatalog.forEach(function (item) {
-      if (item && item.name) imageMap[String(item.name).toLowerCase()] = item.image || defaultHotel.image;
+      if (item && item.name) imageMap[String(item.name).toLowerCase()] = sanitizeHotelImageUrl(item.image, defaultHotel.image);
     });
-    var options = [{ name: hotel.name, multiplier: 1, recommended: true, similar: Array.isArray(hotel.similar) ? hotel.similar : [], image: hotel.image || defaultHotel.image, total: Number(hotel.total) || null, perNight: Number(hotel.perNight) || null, bookingUrl: hotel.bookingUrl || null }].concat((hotel.similar || []).map(function (name, index) {
+    var options = [{ name: hotel.name, multiplier: 1, recommended: true, similar: Array.isArray(hotel.similar) ? hotel.similar : [], image: sanitizeHotelImageUrl(hotel.image, defaultHotel.image), total: Number(hotel.total) || null, perNight: Number(hotel.perNight) || null, bookingUrl: hotel.bookingUrl || null }].concat((hotel.similar || []).map(function (name, index) {
       var candidate = hotelCatalog.find(function (item) { return item && item.name && String(item.name).toLowerCase() === String(name).toLowerCase(); });
-      return { name: name, multiplier: index === 0 ? 0.92 : 1.08, recommended: false, similar: (hotel.similar || []).filter(function (other) { return other !== name; }), image: (candidate && candidate.image) || imageMap[String(name).toLowerCase()] || defaultHotel.image, total: candidate && Number(candidate.total) ? Number(candidate.total) : null, perNight: candidate && Number(candidate.perNight) ? Number(candidate.perNight) : null, bookingUrl: (candidate && candidate.bookingUrl) || null };
+      return { name: name, multiplier: index === 0 ? 0.92 : 1.08, recommended: false, similar: (hotel.similar || []).filter(function (other) { return other !== name; }), image: sanitizeHotelImageUrl((candidate && candidate.image) || imageMap[String(name).toLowerCase()] || defaultHotel.image, defaultHotel.image), total: candidate && Number(candidate.total) ? Number(candidate.total) : null, perNight: candidate && Number(candidate.perNight) ? Number(candidate.perNight) : null, bookingUrl: (candidate && candidate.bookingUrl) || null };
     }));
     return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2><p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
-      options.map(function (option) {
+      options.map(function (option, index) {
         var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
         var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
         var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
-        var imageUrl = option && option.image && typeof option.image === 'string' && option.image.trim() ? option.image.trim() : defaultHotel.image;
+        var imageUrl = sanitizeHotelImageUrl(option && option.image && typeof option.image === 'string' ? option.image : '', hotelImageFallback(index, defaultHotel.image));
         var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80\';"></div><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option><div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80\';"></div><label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
       }).join('') + '</div></section>';
   }
   function recalcularTotalViaje() {

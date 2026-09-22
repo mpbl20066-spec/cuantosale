@@ -50,46 +50,103 @@ const HOTEL_IMAGES = {
   moderado: ['https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=960&q=82'],
   alto: ['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1601918774946-25832a4be0d6?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=960&q=82']
 };
-const BOOKING_IMAGE_FIELDS = ['main_photo_url', 'main_photo_url_https', 'photo_url', 'image', 'image_url', 'thumbnail_url', 'cover_photo_url', 'url_1440', 'url_640', 'hotel_photo_url', 'photo'];
+const BOOKING_IMAGE_FIELDS = ['max_photo_url', 'main_photo_url', 'main_photo_url_https', 'photo_url', 'image', 'image_url', 'thumbnail_url', 'cover_photo_url', 'url_1440', 'url_640', 'hotel_photo_url', 'photo'];
+const HOTEL_IMAGE_BY_NAME = {
+  'rede andrade cecomtur': 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1200&q=80',
+  'faial prime suites': 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+  'lk design hotel': 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?auto=format&fit=crop&w=1200&q=80',
+  'ibis copacabana posto 5': 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80',
+  'windsor california copacabana': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+  'hilton rio de janeiro copacabana': 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80',
+  'pousada experience joao fernandes': 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80',
+  'hotel atlantico buzios': 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
+  'insolito boutique hotel': 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80',
+  'novotel sao paulo jaragua': 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1200&q=80',
+  'renaissance sao paulo hotel': 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80'
+};
 const BOOKING_IMAGE_FALLBACKS = {
   fln: [
     'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80'
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80'
   ],
   buz: [
     'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80'
+    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80'
   ],
   rio: [
     'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80'
+    'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80'
   ],
   default: [
     'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=960&q=82'
+    'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=960&q=82',
+    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=960&q=82',
+    'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=960&q=82'
   ]
 };
+function sanitizeHotelName(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return 'Hotel recomendado';
+  return raw.replace(/\s*,\s*Brasil\s*$/gi, '').replace(/\s+/g, ' ').trim();
+}
+function cleanImageUrl(value) {
+  if (typeof value !== 'string') return '';
+  const text = value.trim();
+  const markdown = text.match(/^\[.*?\]\((https?:\/\/[^)]+)\)$/i);
+  if (markdown && markdown[1]) return markdown[1].trim();
+  const url = text.match(/https?:\/\/[^\s)>"]+/i);
+  if (url && url[0]) return url[0].trim();
+  return /^https?:\/\//i.test(text) ? text : '';
+}
+function extractNestedImageUrl(obj) {
+  if (!obj || typeof obj !== 'object') return '';
+  const queue = [obj];
+  const seen = new Set();
+  while (queue.length) {
+    const current = queue.shift();
+    if (!current || typeof current !== 'object') continue;
+    const id = typeof current === 'object' ? JSON.stringify(current) : String(current);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    if (Array.isArray(current)) {
+      current.forEach(function (item) { queue.push(item); });
+      continue;
+    }
+    for (const key of Object.keys(current)) {
+      const value = current[key];
+      const image = cleanImageUrl(value);
+      if (image) return image;
+      if (value && typeof value === 'object') queue.push(value);
+    }
+  }
+  return '';
+}
+function normalizeHotelKey(value) {
+  return String(value || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
 function resolveHotelImage(hotel, index, style, destName) {
-  const hotelName = String(hotel && (hotel.hotel_name || hotel.name || hotel.hotelName || '') || '').toLowerCase();
+  const hotelName = sanitizeHotelName(hotel && (hotel.hotel_name || hotel.name || hotel.hotelName || ''));
+  const hotelId = sanitizeHotelName(hotel && (hotel.hotel_id || hotel.id || hotel.hotelId || ''));
   const destKey = String(destName || '').toLowerCase();
+  const explicitImage = HOTEL_IMAGE_BY_NAME[normalizeHotelKey(hotelId)] || HOTEL_IMAGE_BY_NAME[normalizeHotelKey(hotelName)];
+  if (explicitImage) return explicitImage;
   const validUrls = BOOKING_IMAGE_FIELDS.map(function (field) {
-    const value = hotel && hotel[field];
-    if (!value || typeof value !== 'string') return '';
-    const trimmed = value.trim();
-    return /^https?:\/\//i.test(trimmed) ? trimmed : '';
+    return cleanImageUrl(hotel && hotel[field]);
   }).filter(Boolean);
   if (validUrls.length) return validUrls[0];
+  const nestedUrl = extractNestedImageUrl(hotel);
+  if (nestedUrl) return nestedUrl;
   const fallbackSet = BOOKING_IMAGE_FALLBACKS[destKey] || BOOKING_IMAGE_FALLBACKS.default;
-  const namedFallback = Object.keys(BOOKING_IMAGE_FALLBACKS).reduce(function (match, key) {
-    if (key === 'default') return match;
-    return match || (hotelName && hotelName.indexOf(key) >= 0 ? BOOKING_IMAGE_FALLBACKS[key] : null);
-  }, null);
-  const candidates = namedFallback || fallbackSet;
-  return candidates[(index + (hotelName.length % 3)) % candidates.length] || HOTEL_IMAGES[style || 'moderado'][index % 3];
+  const seed = normalizeHotelKey(hotelName).split(' ').reduce(function (sum, word) {
+    return sum + (word.charCodeAt(0) || 0);
+  }, 0);
+  return fallbackSet[(index + seed + (normalizeHotelKey(hotelName).length % 3)) % fallbackSet.length] || HOTEL_IMAGES[style || 'moderado'][index % 3];
 }
 function bookingSettings() {
   return {
@@ -133,7 +190,7 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   const payload = await response.json();
   const results = Array.isArray(payload.result) ? payload.result : Array.isArray(payload.data) ? payload.data : [];
   return results.slice(0, 3).map(function (hotel, index) {
-    const name = hotel.hotel_name || hotel.name || hotel.hotelName || 'Hotel recomendado';
+    const name = sanitizeHotelName(hotel.hotel_name || hotel.name || hotel.hotelName || 'Hotel recomendado');
     const image = resolveHotelImage(hotel, index, style, destName);
     const total = Number(hotel.min_total_price || hotel.min_total_price_usd || hotel.price || hotel.total_price || 0);
     const perNight = Number(hotel.min_total_price || hotel.price || hotel.total_price || 0) / Math.max(1, Number((extra && extra.nights) || 3) || 3);
@@ -147,7 +204,7 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
       similar: [hotel.city || destName, 'Hotel similar en ' + destName].filter(Boolean),
       source: 'booking'
     };
-  }).filter(function (hotel) { return hotel.name && hotel.image; });
+  }).filter(function (hotel) { return hotel.name && hotel.name !== 'Hotel recomendado' && hotel.image; });
 }
 function uniqueHotelList(list, fallbackImages) {
   const seen = new Set();
