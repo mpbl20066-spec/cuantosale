@@ -142,6 +142,38 @@
         return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
       }).join('') + '</div></section>';
   }
+  function proposalBreakdownContent(state) {
+    if (!state) return '';
+    var roadtrip = state.transportMode === 'auto';
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
+    var total = roadtrip
+      ? Math.round((Number(state.auto) || 0) + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0))
+      : Math.round((Number(state.flight) || 0) + (Number(state.hotel) || 0) +
+        (Number(state.parts.comidas) || 0) + (Number(state.parts.local) || 0) +
+        (Number(state.parts.traslados) || 0) + (Number(state.transfer) || 0) + (Number(state.parts.extras) || 0));
+    var entries = categories.map(function (category) {
+      if (category === 'auto' && !roadtrip) return null;
+      var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
+      var value = category === 'pasajes' ? state.flight : category === 'alojamiento' ? state.hotel : category === 'traslados' ? (Number(state.parts.traslados) || 0) + (Number(state.transfer) || 0) : category === 'auto' ? (state.auto || 0) : (state.parts[category] || 0);
+      if (Number(value) <= 0) return null;
+      return { category: category, label: info[1], color: info[2], value: Number(value) || 0 };
+    }).filter(Boolean);
+    var segments = entries.map(function (entry) {
+      var width = total ? (entry.value / total * 100) : 0;
+      return '<span class="proposal-breakdown__segment" style="width:' + width + '%;background:var(' + entry.color + ')"></span>';
+    }).join('');
+    var rows = entries.map(function (entry) {
+      return '<div class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '"><div class="proposal-breakdown__label"><i style="background:var(' + entry.color + ')"></i><span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></div>';
+    }).join('');
+    return '<div class="proposal-breakdown__stack" role="img" aria-label="Distribución del costo">' + segments + '</div>' +
+      '<div class="proposal-breakdown__list">' + rows + '</div>';
+  }
+  function proposalBreakdownMarkup(state) {
+    return '<section class="proposal-breakdown" data-proposal-breakdown>' +
+      '<h2>A dónde va tu plata</h2>' +
+      proposalBreakdownContent(state) +
+      '</section>';
+  }
   function recalcularTotalViaje() {
     if (!detailState) return;
     var parts = detailState.parts;
@@ -161,6 +193,8 @@
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
+    var breakdown = document.querySelector('[data-proposal-breakdown]');
+    if (breakdown) breakdown.innerHTML = '<h2>A dónde va tu plata</h2>' + proposalBreakdownContent(detailState);
   }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
@@ -756,6 +790,7 @@
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: true };
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
+      proposalBreakdownMarkup(detailState) +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
       '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>' +
