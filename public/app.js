@@ -329,14 +329,28 @@
     if (!panel) return;
     var snapshot = getSummarySnapshot();
     if (!snapshot) { panel.classList.add('oculto'); return; }
+    var collapsed = panel.classList.contains('is-collapsed');
     var rowsHtml = snapshot.rows.map(function (row) {
       return '<div class="floating-summary__row"><span>' + esc(row.label) + '</span><b>' + money(Number(row.value) || 0) + '</b></div>';
     }).join('');
     panel.classList.remove('oculto');
-    panel.innerHTML = '<div class="floating-summary__header"><span class="floating-summary__eyebrow">Resumen</span><h3 class="floating-summary__title">' + esc(snapshot.destination) + '</h3><p class="floating-summary__meta"><strong>' + esc(snapshot.dep || 'Fecha ida') + '</strong> → <strong>' + esc(snapshot.ret || 'Fecha vuelta') + '</strong><br>' + esc(snapshot.transportLabel) + '</p></div>' +
+    panel.classList.toggle('is-collapsed', collapsed);
+    panel.innerHTML = '<button type="button" class="floating-summary__toggle" data-summary-toggle aria-label="Minimizar resumen">' + (collapsed ? '⟨' : '⟩') + '</button>' +
+      '<div class="floating-summary__content">' +
+      '<div class="floating-summary__header"><span class="floating-summary__eyebrow">Resumen</span><h3 class="floating-summary__title">' + esc(snapshot.destination) + '</h3><p class="floating-summary__meta"><strong>' + esc(snapshot.dep || 'Fecha ida') + '</strong> → <strong>' + esc(snapshot.ret || 'Fecha vuelta') + '</strong><br>' + esc(snapshot.transportLabel) + '</p></div>' +
       '<div class="floating-summary__list">' + rowsHtml + '</div>' +
       '<div class="floating-summary__total"><small>Total general</small><strong>' + money(snapshot.total) + '</strong></div>' +
-      '<div class="floating-summary__cta"><button type="button">Continuar con la reserva</button></div>';
+      '<div class="floating-summary__cta"><button type="button">Continuar con la reserva</button></div>' +
+      '</div>';
+    var toggle = panel.querySelector('[data-summary-toggle]');
+    if (toggle) {
+      toggle.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        panel.classList.toggle('is-collapsed');
+        renderQuoteSummary();
+      });
+    }
   }
   function renderBreakdown() {
     if (!detailState) return;
@@ -850,10 +864,8 @@
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
       '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>' +
-      '</div><aside id="floating-breakdown" class="floating-breakdown oculto" aria-live="polite" aria-label="Desglose del viaje"></aside></div>';
+      '</div></div>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
-    var floating = document.getElementById('floating-breakdown');
-    if (floating) floating.classList.remove('oculto');
     renderQuoteSummary();
     actualizarTransporte(isRoadtrip);
     $('#vista-principal').classList.add('oculto');
