@@ -294,25 +294,19 @@ function roadtripCost(key, kmPerLiter) {
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   return model.roadtripCost(key, kmPerLiter, fuelPrice);
 }
-const LOCAL_TRANSPORT_BY_STYLE = {
-  eco: { dailyUsd: 6, multipliers: { rio: 1.1, sao: 1.2, buz: 0.8, fln: 1.0, ssa: 0.9, igu: 1.0 } },
-  eq: { dailyUsd: 15, multipliers: { rio: 1.1, sao: 1.2, buz: 0.8, fln: 1.0, ssa: 0.9, igu: 1.0 } },
-  comodo: { dailyUsd: 35, multipliers: { rio: 1.1, sao: 1.2, buz: 0.8, fln: 1.0, ssa: 0.9, igu: 1.0 } }
-};
 function calculateLocalTransportCost({ style = 'eq', dest = 'rio', nights = 3, pax = 2 } = {}) {
   const normalizedStyle = ['eco', 'eq', 'comodo'].includes(String(style).toLowerCase()) ? String(style).toLowerCase() : 'eq';
   const normalizedDest = String(dest || 'rio').toLowerCase();
-  const base = LOCAL_TRANSPORT_BY_STYLE[normalizedStyle] || LOCAL_TRANSPORT_BY_STYLE.eq;
-  const multiplier = base.multipliers[normalizedDest] || 1;
+  const destination = model.destinationCosts(normalizedDest);
+  const dailyUsd = normalizedStyle === 'comodo' ? destination.transport.confort : destination.transport.eco;
   const totalDays = Math.max(1, Number(nights) || 0) + 1;
   const travelers = Math.max(1, Number(pax) || 1);
-  const dailyUsd = Number((base.dailyUsd * multiplier).toFixed(2));
   const totalUsd = Number((dailyUsd * totalDays * travelers).toFixed(2));
   return {
     style: normalizedStyle,
     destination: normalizedDest,
-    baseDailyUsd: base.dailyUsd,
-    multiplier: Number(multiplier.toFixed(2)),
+    baseDailyUsd: dailyUsd,
+    multiplier: 1,
     nights: Number(nights) || 0,
     totalDays: totalDays,
     pax: travelers,
@@ -633,7 +627,7 @@ async function cotizar(req, res, url) {
       mode: providers.isLive() ? 'live' : 'demo',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
-      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
+      costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
       hotels: hotels, generatedAt: new Date().toISOString()
     },
     localTransport: localTransport
@@ -669,7 +663,7 @@ function cotizarTodos(req, res, url) {
   }).sort(function (a, b) { return a.total - b.total; });
 
   sendJson(res, 200, {
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
     options: options,
     localTransport: localTransport
   });
