@@ -319,7 +319,7 @@
       '<div class="voucher-actions"><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
     modal.dataset.summaryText = summaryText;
     var voucherCards = modal.querySelectorAll('.voucher-card');
-    if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="mailto:reservas@cuantosale.com?subject=Emitir%20vuelo%20-%20' + encodeURIComponent(detailState.meta.dest.name) + '">✈️ Emitir vuelo con agencia</a>');
+    if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-open-duffel-checkout>✈️ Pagar y emitir con Duffel</button>');
     if (voucherCards[1]) voucherCards[1].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">🏨 Reservar en Booking.com ↗</a>');
     if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -887,12 +887,45 @@
     }
     if (!selectedOffer) return;
     var modal = $('#booking-modal');
+    if (!selectedOffer.id) {
+      modal.innerHTML = '<div class="booking-dialog booking-error" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Elegí un vuelo antes de emitir</h2><p>Seleccioná una oferta aérea real en la sección de vuelos para obtener su offer_id y continuar con el checkout de Duffel.</p></div>';
+      modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+      return;
+    }
     var passengerIds = Array.isArray(selectedOffer.passengerIds) ? selectedOffer.passengerIds : [];
     modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<h2 id="booking-title">Datos de los pasajeros</h2><p class="booking-summary">' + esc(selectedOffer.airline) + ' · ' + money(Number(selectedOffer.price || 0)) + '</p>' +
       '<form id="booking-form" data-offer-id="' + esc(selectedOffer.id) + '" data-total-amount="' + esc(selectedOffer.price || '') + '" data-total-currency="' + esc(selectedOffer.currency || 'USD') + '"><div class="passenger-list">' + passengerFields(S.pax, passengerIds) + '</div><p class="booking-note">Revisá los datos exactamente como aparecen en el documento de viaje. El teléfono debe incluir código de país, por ejemplo +59899123456.</p><button class="confirm-booking" type="submit">Confirmar y Emitir Reserva</button></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    var checkoutForm = modal.querySelector('#booking-form');
+    if (checkoutForm) {
+      var submitButton = checkoutForm.querySelector('.confirm-booking');
+      if (submitButton) submitButton.textContent = 'Pagar y Emitir con Duffel';
+      var note = checkoutForm.querySelector('.booking-note');
+      note.insertAdjacentHTML('beforebegin', '<section class="duffel-checkout"><div class="duffel-checkout__offer"><span>Oferta Duffel</span><strong>' + esc(selectedOffer.id || 'Oferta seleccionada') + '</strong><em>' + esc(selectedOffer.airline) + ' · ' + money(Number(selectedOffer.price || 0)) + '</em></div><div class="duffel-checkout__services"><h3>Servicios adicionales</h3><p class="duffel-checkout__muted">Consultando equipaje y servicios disponibles para esta oferta...</p><div data-duffel-services></div></div><div class="duffel-checkout__payment"><h3>Pago seguro con Duffel</h3><p class="duffel-checkout__muted">La tarjeta debe capturarse con Duffel Card Form y autenticarse con 3D Secure. Nunca ingreses el número de tarjeta en esta página.</p><label>Medio de pago<select data-duffel-payment-type><option value="balance">Saldo de la agencia (prueba / configuración actual)</option><option value="card">Tarjeta procesada por Duffel</option></select></label><div data-duffel-card-fields hidden><label>Card ID de Duffel<input data-duffel-card-id placeholder="tcd_..." autocomplete="off"></label><label>Sesión 3D Secure<input data-duffel-3ds-id placeholder="3ds_..." autocomplete="off"></label></div></div></section>');
+      loadDuffelOfferDetails(selectedOffer.id, modal);
+    }
     modal.querySelector('input').focus();
+  }
+  async function loadDuffelOfferDetails(offerId, modal) {
+    if (!offerId || !modal) return;
+    try {
+      var response = await fetch('/api/vuelos/oferta?offer_id=' + encodeURIComponent(offerId));
+      var data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'No pudimos cargar los servicios de la oferta.');
+      var servicesBox = modal.querySelector('[data-duffel-services]');
+      if (!servicesBox) return;
+      var services = Array.isArray(data.available_services) ? data.available_services.filter(function (service) { return service && service.id; }) : [];
+      if (!services.length) { servicesBox.innerHTML = '<p class="duffel-checkout__muted">Esta oferta no tiene equipaje adicional disponible.</p>'; return; }
+      servicesBox.innerHTML = services.map(function (service) {
+        var label = service.type === 'baggage' ? 'Equipaje de bodega' : 'Servicio adicional';
+        var price = money(Number(service.total_amount || 0));
+        return '<label class="duffel-service"><input type="checkbox" data-duffel-service value="' + esc(service.id) + '" data-service-quantity="1"><span><strong>' + label + '</strong><small>' + price + ' · ' + esc(service.id) + '</small></span></label>';
+      }).join('');
+    } catch (error) {
+      var fallback = modal.querySelector('[data-duffel-services]');
+      if (fallback) fallback.innerHTML = '<p class="booking-error">' + esc(error.message || 'No pudimos consultar servicios adicionales.') + '</p>';
+    }
   }
   function closeBookingForm() {
     var modal = $('#booking-modal'); modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = '';
@@ -916,13 +949,22 @@
     errorBox.hidden = true; button.disabled = true; button.textContent = 'Procesando reserva con la aerolínea...';
     try {
       if (passengers.some(function (p) { return !/^\+[1-9]\d{7,14}$/.test(p.phone_number); })) throw new Error('El teléfono debe estar en formato internacional E.164, por ejemplo +59899123456.');
-      var response = await fetch('/api/vuelos/reservar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer_id: form.getAttribute('data-offer-id'), passengers: passengers, total_amount: form.getAttribute('data-total-amount'), total_currency: form.getAttribute('data-total-currency') }) });
+      var selectedServices = Array.prototype.map.call(form.querySelectorAll('[data-duffel-service]:checked'), function (input) { return { id: input.value, quantity: Math.max(1, Number(input.getAttribute('data-service-quantity')) || 1) }; });
+      var paymentTypeInput = form.querySelector('[data-duffel-payment-type]');
+      var paymentType = paymentTypeInput ? paymentTypeInput.value : 'balance';
+      var payment = { type: paymentType };
+      if (paymentType === 'card') {
+        payment.card_id = (form.querySelector('[data-duffel-card-id]') || {}).value || '';
+        payment.three_d_secure_session_id = (form.querySelector('[data-duffel-3ds-id]') || {}).value || '';
+        if (!/^tcd_[A-Za-z0-9]+$/.test(payment.card_id) || !/^3ds_[A-Za-z0-9]+$/.test(payment.three_d_secure_session_id)) throw new Error('Completá el Card ID y la sesión 3D Secure emitidos por Duffel Card.');
+      }
+      var response = await fetch('/api/vuelos/reservar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer_id: form.getAttribute('data-offer-id'), passengers: passengers, services: selectedServices, payment: payment, total_amount: form.getAttribute('data-total-amount'), total_currency: form.getAttribute('data-total-currency') }) });
       var data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al emitir la reserva');
       showBookingSuccess(data);
     } catch (error) {
       errorBox.textContent = error.message || 'Error al emitir la reserva'; errorBox.hidden = false;
-      button.disabled = false; button.textContent = 'Confirmar y Emitir Reserva';
+      button.disabled = false; button.textContent = 'Pagar y Emitir con Duffel';
     }
   }
   function renderDestinationResults(data) {
@@ -1531,6 +1573,8 @@
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
+      var duffelCheckoutButton = e.target.closest('[data-open-duffel-checkout]');
+      if (duffelCheckoutButton) { e.preventDefault(); openBookingForm(); return; }
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();
@@ -1581,6 +1625,11 @@
       }
     });
     $('#booking-modal').addEventListener('change', function (e) {
+      var paymentType = e.target.closest('[data-duffel-payment-type]');
+      if (paymentType) {
+        var cardFields = $('#booking-modal').querySelector('[data-duffel-card-fields]');
+        if (cardFields) cardFields.hidden = paymentType.value !== 'card';
+      }
       var radio = e.target.closest('[name="transfer-pickup"]');
       if (radio) {
         if (!detailState || !detailState.transferWizard) return;

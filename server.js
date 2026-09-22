@@ -571,6 +571,13 @@ async function reservarVuelo(req, res, body) {
   body = body && typeof body === 'object' ? body : {};
   const offerId = String(body.offer_id || '').trim();
   const passengers = normalizePassengers(body.passengers);
+  const requestedServices = Array.isArray(body.services) ? body.services.map(function (service) {
+    return { id: String(service && service.id || '').trim(), quantity: Math.max(1, Number(service && service.quantity) || 1) };
+  }).filter(function (service) { return /^ase_[A-Za-z0-9]+$/.test(service.id); }) : [];
+  const payment = body.payment && typeof body.payment === 'object' ? body.payment : {};
+  const paymentType = String(payment.type || 'balance').toLowerCase();
+  if (!['balance', 'card'].includes(paymentType)) return sendJson(res, 400, { error: 'Medio de pago no válido.' });
+  if (paymentType === 'card' && (!/^tcd_[A-Za-z0-9]+$/.test(String(payment.card_id || '')) || !/^3ds_[A-Za-z0-9]+$/.test(String(payment.three_d_secure_session_id || '')))) return sendJson(res, 400, { error: 'La tarjeta debe validarse con Duffel Card y 3D Secure antes de emitir.' });
   if (!/^off_[A-Za-z0-9]+$/.test(offerId) || !passengers) return sendJson(res, 400, { error: 'Completá correctamente los datos de todos los pasajeros.' });
   if (airSetting('BOOKING_ENABLED') !== 'true') return sendJson(res, 503, { error: 'La emisión de reservas está deshabilitada. Activala después de configurar el pago del proveedor aéreo.' });
   const air = airClient();
@@ -579,18 +586,34 @@ async function reservarVuelo(req, res, body) {
   try {
     // El precio confiable sale del proveedor, no del navegador, para evitar que el
     // cliente altere el importe del pago.
-    const offerResponse = await air.offers.get(offerId);
+    const offerResponse = await air.offers.get(offerId, { return_available_services: true });
     const offer = offerResponse.data || offerResponse;
-    const amount = String(offer.total_amount || '');
+    const availableServices = Array.isArray(offer.available_services) ? offer.available_services : [];
+    const availableById = new Map(availableServices.map(function (service) { return [String(service && service.id || ''), service]; }));
+    const services = [];
+    let servicesAmount = 0;
+    for (const requested of requestedServices) {
+      const available = availableById.get(requested.id);
+      if (!available) return sendJson(res, 400, { error: 'Uno de los servicios adicionales ya no está disponible para esta oferta.' });
+      const unitAmount = Number(available.total_amount || available.amount || 0);
+      if (!Number.isFinite(unitAmount) || unitAmount < 0) return sendJson(res, 502, { error: 'Duffel devolvió un precio inválido para un servicio adicional.' });
+      servicesAmount += unitAmount * requested.quantity;
+      services.push(requested);
+    }
+    const baseAmount = Number(offer.total_amount || 0);
+    const amount = Number.isFinite(baseAmount) ? (baseAmount + servicesAmount).toFixed(2) : '';
     const currency = String(offer.total_currency || '').toUpperCase();
     if (!/^\d+(\.\d+)?$/.test(amount) || !currency) return sendJson(res, 502, { error: 'La aerolínea no devolvió un precio válido para esta oferta.' });
-    const orderResponse = await air.orders.create({
-      selected_offers: [offerId], passengers: passengers, type: 'instant',
-      payments: [{ amount: amount, currency: currency, type: 'balance' }]
-    });
+    const orderPayment = paymentType === 'card'
+      ? { amount: amount, currency: currency, type: 'card', card_id: String(payment.card_id), three_d_secure_session_id: String(payment.three_d_secure_session_id) }
+      : { amount: amount, currency: currency, type: 'balance' };
+    const orderPayload = { selected_offers: [offerId], passengers: passengers, type: 'instant', payments: [orderPayment] };
+    if (services.length) orderPayload.services = services;
+    const orderResponse = await air.orders.create(orderPayload);
     const order = orderResponse.data || orderResponse;
     return sendJson(res, 200, {
       booking_reference: order.booking_reference || order.booking_reference_code || null,
+      order_status: order.status || 'confirmed',
       airline: order.owner && order.owner.name || (offer.owner && offer.owner.name) || null,
       order_id: order.id || null,
       documents: order.documents || [],
@@ -605,6 +628,21 @@ async function reservarVuelo(req, res, body) {
     console.error('Error detallado del proveedor aéreo:', detail);
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
     return sendJson(res, 400, { error: message || e.message || 'No pudimos emitir la reserva. La oferta puede haber vencido.' });
+  }
+}
+
+async function obtenerOferta(req, res, url) {
+  const offerId = String(url.searchParams.get('offer_id') || '').trim();
+  if (!/^off_[A-Za-z0-9]+$/.test(offerId)) return sendJson(res, 400, { error: 'Oferta invÃ¡lida.' });
+  const air = airClient();
+  if (!air) return sendJson(res, 503, { error: 'La integraciÃ³n de Duffel no estÃ¡ configurada.' });
+  try {
+    const response = await air.offers.get(offerId, { return_available_services: true });
+    const offer = response.data || response;
+    return sendJson(res, 200, { id: offer.id, airline: offer.owner && offer.owner.name || null, total_amount: offer.total_amount, total_currency: offer.total_currency, expires_at: offer.expires_at || null, available_services: Array.isArray(offer.available_services) ? offer.available_services : [], passengers: Array.isArray(offer.passengers) ? offer.passengers.map(function (p) { return { id: p.id, type: p.type }; }) : [] });
+  } catch (e) {
+    const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
+    return sendJson(res, e.status && e.status < 500 ? e.status : 502, { error: message || 'La oferta expirÃ³ o ya no estÃ¡ disponible.' });
   }
 }
 
@@ -699,6 +737,9 @@ function createServer() {
       return readJson(req).then(function (body) { return reservarVuelo(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la reserva.' });
       });
+    }
+    if (req.method === 'GET' && url.pathname === '/api/vuelos/oferta') {
+      return obtenerOferta(req, res, url).catch(function (e) { sendJson(res, e.status || 500, { error: e.message || 'No pudimos cargar la oferta.' }); });
     }
     if (req.method === 'POST' && url.pathname === '/api/traslados/transferencia') {
       return readJson(req, 6 * 1024 * 1024).then(function (body) { return registrarTransferencia(req, res, body); }).catch(function (e) {
