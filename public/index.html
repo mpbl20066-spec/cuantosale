@@ -27,6 +27,10 @@
       <svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>
       cuántosale
     </div>
+    <div class="account-actions" aria-label="Cuenta de usuario">
+      <button type="button" id="auth-button" class="account-button">Iniciar sesión</button>
+      <button type="button" id="trips-button" class="account-button account-button--secondary" hidden>Mis viajes</button>
+    </div>
   </header>
 
   <h1>¿Cuánto sale realmente tu viaje?</h1>
@@ -93,10 +97,13 @@
   <aside id="trip-summary" class="trip-summary" aria-live="polite" hidden></aside>
 
   <div id="booking-modal" class="booking-modal" hidden aria-hidden="true"></div>
+  <div id="auth-modal" class="booking-modal" hidden aria-hidden="true"></div>
+  <div id="trips-modal" class="booking-modal" hidden aria-hidden="true"></div>
 
   <footer class="foot" id="foot"></footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/app.js"></script>
 </body>
 </html>

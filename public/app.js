@@ -270,7 +270,7 @@
       '<div class="trip-summary__head"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong></div>' +
       '<div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
       '<div class="trip-summary__items">' + itemsHtml + '</div>' +
-      '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
+      '<div class="trip-summary__actions"><button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button><button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div>' +
       '</div>';
     summary.hidden = false;
   }
@@ -316,7 +316,7 @@
       '<div class="voucher-card"><span class="voucher-icon">🏨</span><div><small>Alojamiento</small><strong>' + esc(selectedHotelName) + '</strong><p>Reserva de referencia en Booking.com</p><b>' + money(hotelTotal) + '</b></div></div>' +
       '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div></div>' +
       '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
-      '<div class="voucher-actions"><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
+      '<div class="voucher-actions"><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
     modal.dataset.summaryText = summaryText;
     var voucherCards = modal.querySelectorAll('.voucher-card');
     if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-open-duffel-checkout>✈️ Pagar y emitir con Duffel</button>');
@@ -1297,8 +1297,143 @@
     }
   }
 
+  /* ---------- cuentas y viajes guardados ---------- */
+  var supabaseClient = null;
+  var authUser = null;
+  var pendingTripSave = false;
+  var tripSaveInProgress = false;
+
+  function authDisplayName(user) {
+    var metadata = user && user.user_metadata || {};
+    return metadata.full_name || metadata.name || (user && user.email) || 'Mi cuenta';
+  }
+  function closeAccountModal(id) {
+    var modal = document.getElementById(id);
+    if (modal) { modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = ''; }
+  }
+  function openAuthModal(message) {
+    var modal = $('#auth-modal');
+    if (!modal) return;
+    if (authUser) { openTripsModal(); return; }
+    modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><button type="button" class="booking-close" data-close-auth aria-label="Cerrar">×</button><span class="account-kicker">CuántoSale</span><h2 id="auth-title">Guardá tus viajes</h2><p class="booking-note">Creá una cuenta para conservar presupuestos e itinerarios en la nube.</p>' + (message ? '<p class="booking-error">' + esc(message) + '</p>' : '') + '<button type="button" class="oauth-button" data-google-auth>Continuar con Google</button><div class="account-divider"><span>o con tu email</span></div><form id="auth-form"><label>Correo electrónico<input required type="email" name="email" autocomplete="email"></label><label>Contraseña<input required minlength="6" type="password" name="password" autocomplete="current-password"></label><div class="account-form-actions"><button type="submit" class="confirm-booking" data-auth-action="signin">Iniciar sesión</button><button type="button" class="account-button account-button--secondary" data-auth-action="signup">Crear cuenta</button></div><p class="account-status" data-auth-status aria-live="polite"></p></form></div>';
+    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    var first = modal.querySelector('input'); if (first) first.focus();
+  }
+  function openTripsModal() {
+    var modal = $('#trips-modal');
+    if (!modal) return;
+    if (!authUser) { pendingTripSave = false; openAuthModal('Iniciá sesión para ver tus viajes.'); return; }
+    modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="trips-title"><button type="button" class="booking-close" data-close-trips aria-label="Cerrar">×</button><span class="account-kicker">Tu cuenta</span><h2 id="trips-title">Mis viajes</h2><p class="booking-note">Itinerarios guardados por ' + esc(authDisplayName(authUser)) + '.</p><div class="saved-trips" data-saved-trips><p class="account-status">Cargando tus viajes...</p></div><button type="button" class="account-button account-button--secondary" data-signout>Cerrar sesión</button></div>';
+    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    loadSavedTrips(modal);
+  }
+  function renderAuthState(user) {
+    authUser = user || null;
+    var button = $('#auth-button'), trips = $('#trips-button');
+    if (button) { var avatar = authUser && authUser.user_metadata && (authUser.user_metadata.avatar_url || authUser.user_metadata.picture); button.innerHTML = authUser ? (avatar ? '<img class="account-avatar" src="' + esc(avatar) + '" alt="">' : '👤 ') + esc(authDisplayName(authUser)) : 'Iniciar sesión'; button.setAttribute('aria-label', authUser ? 'Abrir cuenta de ' + authDisplayName(authUser) : 'Iniciar sesión'); }
+    if (trips) trips.hidden = !authUser;
+  }
+  function tripPayload() {
+    if (!detailState || !detailState.meta) return null;
+    var budget = getBudgetBreakdown(detailState);
+    return {
+      user_id: authUser ? authUser.id : null,
+      title: (detailState.meta.dest && detailState.meta.dest.name || 'Viaje') + ' · ' + (detailState.meta.dep || ''),
+      destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest,
+      destination_name: detailState.meta.dest && detailState.meta.dest.name || 'Brasil',
+      departure_date: detailState.meta.dep || null,
+      return_date: detailState.meta.ret || null,
+      nights: Math.max(1, Number(detailState.meta.nights) || 1),
+      travelers: Math.max(1, Number(detailState.meta.pax) || S.pax || 1),
+      transport_mode: detailState.transportMode || 'flight',
+      food_per_day: Number(detailState.foodPerDay) || 0,
+      local_per_day: Number(detailState.localPerDay) || 0,
+      total_amount: Number(budget.total) || 0,
+      currency: 'USD',
+      details: { parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
+    };
+  }
+  async function saveCurrentTrip() {
+    if (!supabaseClient) { openAuthModal('Configurá Supabase para guardar viajes.'); return; }
+    if (!authUser) { pendingTripSave = true; try { var draft = tripPayload(); if (draft) sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(draft)); sessionStorage.setItem('cuantosale_pending_trip', '1'); } catch (error) {} openAuthModal(); return; }
+    if (tripSaveInProgress) return;
+    var payload = tripPayload();
+    if (!payload) { try { payload = JSON.parse(sessionStorage.getItem('cuantosale_pending_trip_data') || 'null'); } catch (error) { payload = null; } }
+    if (!payload) { alert('Abrí una propuesta antes de guardar el viaje.'); return; }
+    payload.user_id = authUser.id;
+    tripSaveInProgress = true;
+    var result = await supabaseClient.from('user_trips').insert(payload).select().single();
+    tripSaveInProgress = false;
+    if (result.error) { openAuthModal('No pudimos guardar el viaje: ' + result.error.message); return; }
+    pendingTripSave = false;
+    try { sessionStorage.removeItem('cuantosale_pending_trip'); sessionStorage.removeItem('cuantosale_pending_trip_data'); } catch (error) {}
+    alert('Viaje guardado en tu cuenta.');
+  }
+  async function loadSavedTrips(modal) {
+    var box = modal.querySelector('[data-saved-trips]');
+    var result = await supabaseClient.from('user_trips').select('*').order('created_at', { ascending: false });
+    if (result.error) { box.innerHTML = '<p class="booking-error">' + esc(result.error.message) + '</p>'; return; }
+    if (!result.data.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
+    box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.title || trip.destination_name) + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
+    box._trips = result.data;
+  }
+  function loadTrip(trip) {
+    var details = trip.details || {};
+    S.dest = trip.destination_key || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || S.transport;
+    if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
+    if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); openDestinationProposal(S.dest); }
+  }
+  async function initAuth() {
+    if (!window.supabase || !window.supabase.createClient) return;
+    try {
+      var configResponse = await fetch('/api/config');
+      var config = await configResponse.json();
+      if (!config.supabaseUrl || !config.supabaseAnonKey) return;
+      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+      try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
+      var sessionResult = await supabaseClient.auth.getSession();
+      renderAuthState(sessionResult.data && sessionResult.data.session && sessionResult.data.session.user);
+      if (pendingTripSave && authUser) saveCurrentTrip();
+      supabaseClient.auth.onAuthStateChange(function (_event, session) { renderAuthState(session && session.user); if (pendingTripSave && session && session.user) saveCurrentTrip(); });
+    } catch (error) { console.error('Supabase Auth no disponible', error); }
+  }
+
   /* ---------- formulario ---------- */
   function init() {
+    initAuth();
+    var authButton = $('#auth-button'), tripsButton = $('#trips-button');
+    if (authButton) authButton.addEventListener('click', function () { if (authUser) openTripsModal(); else openAuthModal(); });
+    if (tripsButton) tripsButton.addEventListener('click', openTripsModal);
+    $('#trip-summary').addEventListener('click', function (e) { if (e.target.closest('[data-save-trip]')) { e.preventDefault(); saveCurrentTrip(); } });
+    $('#auth-modal').addEventListener('click', async function (e) {
+      if (e.target.closest('[data-close-auth]') || e.target === $('#auth-modal')) return closeAccountModal('auth-modal');
+      var google = e.target.closest('[data-google-auth]');
+      if (google) { if (!supabaseClient) { openAuthModal('La autenticación todavía no está configurada.'); return; } google.disabled = true; var oauth = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); if (oauth.error) openAuthModal(oauth.error.message); return; }
+      var signup = e.target.closest('[data-auth-action="signup"]');
+      if (signup) {
+        if (!supabaseClient) { openAuthModal('La autenticación todavía no está configurada.'); return; }
+        var form = $('#auth-form'), status = form && form.querySelector('[data-auth-status]');
+        if (!form || !form.reportValidity()) return;
+        var result = await supabaseClient.auth.signUp({ email: form.email.value.trim(), password: form.password.value });
+        if (status) status.textContent = result.error ? result.error.message : 'Revisá tu correo para confirmar la cuenta.';
+      }
+    });
+    $('#auth-modal').addEventListener('submit', async function (e) {
+      if (e.target.id !== 'auth-form') return;
+      e.preventDefault();
+      if (!supabaseClient) return;
+      var form = e.target, status = form.querySelector('[data-auth-status]');
+      var result = await supabaseClient.auth.signInWithPassword({ email: form.email.value.trim(), password: form.password.value });
+      if (result.error) { if (status) status.textContent = result.error.message; return; }
+      closeAccountModal('auth-modal');
+    });
+    $('#trips-modal').addEventListener('click', async function (e) {
+      if (e.target.closest('[data-close-trips]') || e.target === $('#trips-modal')) return closeAccountModal('trips-modal');
+      var loadButton = e.target.closest('[data-load-trip]');
+      if (loadButton) { var tripsBox = $('#trips-modal').querySelector('[data-saved-trips]'); var trip = tripsBox && tripsBox._trips && tripsBox._trips.find(function (item) { return String(item.id) === String(loadButton.getAttribute('data-load-trip')); }); if (trip) loadTrip(trip); }
+      var logout = e.target.closest('[data-signout]');
+      if (logout) { await supabaseClient.auth.signOut(); closeAccountModal('trips-modal'); }
+    });
     var d0 = addDays(today, 80);
     S.dep = iso(d0); S.ret = iso(addDays(d0, 7));
     $('#dep').value = S.dep; $('#ret').value = S.ret;
@@ -1575,6 +1710,8 @@
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var duffelCheckoutButton = e.target.closest('[data-open-duffel-checkout]');
       if (duffelCheckoutButton) { e.preventDefault(); openBookingForm(); return; }
+      var saveTripButton = e.target.closest('[data-save-trip]');
+      if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();
