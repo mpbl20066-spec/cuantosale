@@ -318,6 +318,10 @@
       '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
       '<div class="voucher-actions"><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
     modal.dataset.summaryText = summaryText;
+    var voucherCards = modal.querySelectorAll('.voucher-card');
+    if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="mailto:reservas@cuantosale.com?subject=Emitir%20vuelo%20-%20' + encodeURIComponent(detailState.meta.dest.name) + '">✈️ Emitir vuelo con agencia</a>');
+    if (voucherCards[1]) voucherCards[1].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">🏨 Reservar en Booking.com ↗</a>');
+    if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   function syncDailyBudgetState() {
@@ -1545,6 +1549,12 @@
           var status = $('#booking-modal').querySelector('[data-copy-status]');
           if (status) status.textContent = 'No se pudo copiar';
         });
+      }
+      var coordinateTransfer = e.target.closest('[data-coordinate-transfer]');
+      if (coordinateTransfer) {
+        e.preventDefault();
+        closeBookingForm();
+        openTransferModal(detailState && detailState.meta);
       }
       var stepButton = e.target.closest('[data-transfer-step]');
       if (stepButton) {
