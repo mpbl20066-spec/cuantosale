@@ -35,7 +35,7 @@ const MIME = {
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon'
 };
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com; base-uri 'none'; form-action 'self'";
-const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', sao: 'GRU', bho: 'CNF', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', fernando: 'NVT', fln: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
 function airSetting(name) { return process.env['DU' + 'FFEL_' + name]; }
 const HOTEL_RECOMMENDATIONS = {
   fln: [{ tier: 'eco', name: 'Rede Andrade Cecomtur', similar: ['Ibis Florianópolis', 'Hotel Farol da Ilha'] }, { tier: 'moderado', name: 'Faial Prime Suites', similar: ['Novotel Florianópolis', 'Castelmar Hotel'] }, { tier: 'alto', name: 'LK Design Hotel', similar: ['IL Campanario Villaggio Resort', 'Novotel Florianópolis'] }],
@@ -282,9 +282,12 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
   const rec = picked.rec;
   const series = model.seriesFor(trip, rec, dep, ret, today);
   const cozy = list.slice().sort(function (a, b) { return b.comfort - a.comfort || a.total - b.total; })[0];
+  const roadtripList = Array.isArray(result.roadtripList)
+    ? result.roadtripList.filter(function (proposal) { return proposal.mode === 'auto'; }).slice().sort(function (a, b) { return a.total - b.total; }).slice(0, 3)
+    : [];
   return Object.assign({}, result, {
     fits: picked.fits, recId: rec.id, cheapestId: list[0].id, cozyId: cozy.id,
-    list: list, series: series, tips: model.tipsFor(trip, rec, list, series)
+    list: list, roadtripList: roadtripList, series: series, tips: model.tipsFor(trip, rec, list, series)
   });
 }
 function roadtripCost(key, kmPerLiter) {

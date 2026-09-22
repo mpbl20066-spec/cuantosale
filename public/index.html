@@ -38,10 +38,19 @@
       Salís desde <b>Uruguay (Montevideo)</b>
     </div>
     <div>
-      <label for="dest">Destino</label>
-      <select id="dest" class="inp dest-select" aria-label="Seleccioná tu destino">
-        <option value="todos">🌍 Todos los destinos</option>
-      </select>
+      <label for="dest-trigger">Destino</label>
+      <div id="dest" class="custom-select" aria-label="Seleccioná tu destino">
+        <button id="dest-trigger" class="custom-select__trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span id="dest-value" class="custom-select__value">Todos los destinos (Buscar por mi presupuesto)</span>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 7.5 10 12l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="dest-menu" class="custom-select__menu" role="listbox" aria-label="Destinos disponibles" hidden>
+          <button type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true">
+            <span class="custom-select__option-main">🌍 Todos los destinos</span>
+            <span class="custom-select__option-sub">Buscar por mi presupuesto</span>
+          </button>
+        </div>
+      </div>
     </div>
     <div class="row2">
       <div><label for="dep">Ida</label><input id="dep" class="inp" type="date"></div>

@@ -13,10 +13,10 @@
 
   var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '' };
   var DESTINATION_GROUPS = [
-    { label: 'Litoral del Sudeste', keys: ['buz', 'arraial', 'cabo', 'ilha', 'paraty', 'ilhabela', 'ubatuba', 'rio'] },
-    { label: 'Ciudad, Compras y Negocios', keys: ['sao', 'bho'] },
-    { label: 'Paraísos del Nordeste', keys: ['porto', 'mcz', 'maragogi', 'nat', 'pip', 'trancoso', 'ssa', 'for', 'fernando'] },
-    { label: 'Sur, Naturaleza y Cataratas', keys: ['fln', 'bcm', 'gram', 'canela', 'igu'] }
+    { label: 'Litoral del Sudeste', keys: ['buz', 'arraial', 'cabo', 'ilha', 'paraty', 'ilhabela', 'ubatuba', 'rio', 'angra'] },
+    { label: 'Ciudad, Compras y Negocios', keys: ['sao', 'bho', 'curitiba'] },
+    { label: 'Paraísos del Nordeste', keys: ['porto', 'mcz', 'maragogi', 'nat', 'pip', 'trancoso', 'ssa', 'for', 'fernando', 'jericoacoara', 'morro'] },
+    { label: 'Sur, Naturaleza y Cataratas', keys: ['fln', 'bcm', 'gram', 'canela', 'igu', 'poa', 'camboriu', 'bombinhas', 'rosa'] }
   ];
   var BRASIL_DEFAULT_COSTS = {
     beach: {
@@ -41,7 +41,7 @@
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', sao: 'GRU', bho: 'CNF', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', fernando: 'NVT', fln: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
   var FOOD_TIPS = {
     rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
     fln: ['Buscá <b>prato executivo</b> en el centro de Florianópolis al mediodía: generalmente es la comida con mejor relación precio-cantidad.', 'En los mercados públicos y ferias barriales, armá un picnic con frutas, pan de queso y jugos para llevar a la playa.', 'Alejate una o dos cuadras de la playa para encontrar <b>buffet por kilo</b> y platos del día más accesibles.'],
@@ -1029,7 +1029,7 @@
   }
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
-    return ['fln', 'bcm', 'gram', 'canela', 'igu', 'poa'].indexOf(key) >= 0;
+    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'igu', 'poa'].indexOf(key) >= 0;
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();
@@ -1061,7 +1061,8 @@
     lastData = data;
     var live = data.meta.mode === 'live';
     if (!isRoadtripDestinationAllowed(data.meta.dest.key) && S.transport === 'auto') S.transport = 'flight';
-    var list = transportModeFilter(normalizeLocalTransportInList(data), S.transport);
+    var allList = normalizeLocalTransportInList(data);
+    var list = transportModeFilter(allList, S.transport);
     if (!list.length) list = transportModeFilter(normalizeLocalTransportInList(data), 'flight');
     var rec = byId(list, S.proposalId) || byId(list, data.recId);
     if (!rec && list.length) rec = list[0];
@@ -1134,7 +1135,7 @@
       '<div class="panel"><div class="chart">' + bars + '</div>' +
       '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata</span><span>Otras fechas</span></div></div></section>';
 
-    var opts = list.map(function (p) {
+    var proposalMarkup = function (p) {
       var tags = '';
       if (p.id === rec.id) tags += '<span class="mini y">Recomendada</span>';
       if (cheapest && p.id === cheapest.id) tags += '<span class="mini">Más barata</span>';
@@ -1144,7 +1145,13 @@
       var rows = CATS.filter(function (c) { return Number(p.parts[c[0]]) > 0; }).map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + '</b></div>'; }).join('');
       return '<details class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '"><summary><div><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
         '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body">' + rows + '<div class="proposal-actions"><button type="button" class="btn-ver-propuesta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta ➔</button></div></div></details>';
-    }).join('');
+    };
+    var opts = list.map(proposalMarkup).join('');
+    var roadtripList = Array.isArray(data.roadtripList) ? data.roadtripList : [];
+    var roadtripOpts = roadtripList.map(proposalMarkup).join('');
+    if (roadtripOpts && S.transport !== 'auto' && isRoadtripDestinationAllowed(data.meta.dest.key)) {
+      h += '<section class="sec"><h2>Tambien podes ir en auto</h2><p class="sub">Alternativas en auto desde Montevideo, con combustible y peajes estimados.</p><div class="opts">' + roadtripOpts + '</div></section>';
+    }
     h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
 
     var el = $('#results');
@@ -1201,7 +1208,8 @@
       openDestinationProposal(destination);
       return;
     }
-    var proposal = lastData && byId(lastData.list, button.getAttribute('data-propuesta-id'));
+    var proposalId = button.getAttribute('data-propuesta-id');
+    var proposal = lastData && (byId(lastData.list, proposalId) || byId(lastData.roadtripList, proposalId));
     if (proposal) showProposalView(proposal, lastData);
   }
 
@@ -1216,6 +1224,47 @@
     renderTransportSelector();
 
     var sel = $('#dest');
+    var trigger = document.getElementById('dest-trigger');
+    var menu = document.getElementById('dest-menu');
+    var valueLabel = document.getElementById('dest-value');
+    var destItems = [];
+
+    function setDestDisplay(value) {
+      var item = destItems.filter(function (entry) { return entry.value === value; })[0];
+      var text = item ? item.label : 'Todos los destinos (Buscar por mi presupuesto)';
+      if (valueLabel) valueLabel.textContent = text;
+      if (menu) {
+        Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
+          var selected = option.getAttribute('data-dest-value') === value;
+          option.classList.toggle('is-selected', selected);
+          option.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+      }
+    }
+
+    function closeDestMenu() {
+      if (!menu || !trigger || !sel) return;
+      menu.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      sel.classList.remove('is-open');
+    }
+
+    function openDestMenu() {
+      if (!menu || !trigger || !sel) return;
+      menu.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      sel.classList.add('is-open');
+    }
+
+    Object.defineProperty(sel, 'value', {
+      get: function () { return S.dest; },
+      set: function (value) {
+        S.dest = String(value || 'todos');
+        setDestDisplay(S.dest);
+      },
+      configurable: true
+    });
+
     function updateDestinationMode() {
       var all = S.dest === 'todos';
       $('#btn-buscar-todos').hidden = !all;
@@ -1228,11 +1277,32 @@
       if (['flight', 'bus', 'auto'].indexOf(S.transport) < 0) S.transport = 'flight';
       renderTransportSelector();
     }
-    sel.addEventListener('change', function () {
-      S.dest = sel.value; S.proposalId = '';
+    function selectDestination(nextValue) {
+      S.dest = String(nextValue || 'todos'); S.proposalId = '';
       if (S.dest === 'todos') { S.transport = 'flight'; }
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
       massSearch = false; updateDestinationMode(); syncTransportSelection(); if (S.dest !== 'todos') schedule();
+      setDestDisplay(S.dest);
+      closeDestMenu();
+    }
+    if (trigger) {
+      trigger.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (menu && menu.hidden) openDestMenu(); else closeDestMenu();
+      });
+    }
+    if (menu) {
+      menu.addEventListener('click', function (e) {
+        var option = e.target.closest('[data-dest-value]');
+        if (!option) return;
+        selectDestination(option.getAttribute('data-dest-value'));
+      });
+    }
+    document.addEventListener('click', function (e) {
+      if (sel && !sel.contains(e.target)) closeDestMenu();
+    });
+    sel.addEventListener('change', function () {
+      selectDestination(sel.value);
     });
     var transportSelector = $('#transport-selector');
     if (transportSelector) {
@@ -1274,7 +1344,7 @@
       var destinationProposal = e.target.closest('[data-propuesta-dest]');
       if (destinationProposal) { e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; $('#destination-results').innerHTML = ''; openDestinationProposal(S.dest); return; }
       var proposal = e.target.closest('[data-propuesta-id]');
-      if (proposal) { e.preventDefault(); e.stopPropagation(); var selected = lastData && byId(lastData.list, proposal.getAttribute('data-propuesta-id')); if (selected) showProposalView(selected, lastData); return; }
+      if (proposal) { e.preventDefault(); e.stopPropagation(); var proposalId = proposal.getAttribute('data-propuesta-id'); var selected = lastData && (byId(lastData.list, proposalId) || byId(lastData.roadtripList, proposalId)); if (selected) showProposalView(selected, lastData); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) {
         e.preventDefault(); e.stopPropagation();
@@ -1493,7 +1563,6 @@
         ordered.push({ key: d.key, name: d.name, group: 'Otros destinos' });
       });
 
-      sel.innerHTML = '<option value="todos">🌍 Todos los destinos</option>';
       var grouped = {};
       DESTINATION_GROUPS.forEach(function (group) {
         grouped[group.label] = [];
@@ -1504,18 +1573,34 @@
       });
       var groupOrder = DESTINATION_GROUPS.map(function (group) { return group.label; });
       if (grouped['Otros destinos'] && grouped['Otros destinos'].length) groupOrder.push('Otros destinos');
+      var menu = document.getElementById('dest-menu');
+      destItems = [{ value: 'todos', label: 'Todos los destinos (Buscar por mi presupuesto)' }];
+      if (menu) {
+        menu.innerHTML = '<button type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true"><span class="custom-select__option-main">🌍 Todos los destinos</span><span class="custom-select__option-sub">Buscar por mi presupuesto</span></button>';
+      }
       groupOrder.forEach(function (label) {
-        var list = grouped[label];
-        if (!list || !list.length) return;
-        var group = document.createElement('optgroup');
-        group.label = label;
-        list.forEach(function (item) {
-          var o = document.createElement('option');
-          o.value = item.key;
-          o.textContent = item.name;
-          group.appendChild(o);
-        });
-        sel.appendChild(group);
+        var items = grouped[label];
+        if (!items || !items.length) return;
+        if (menu) {
+          var groupWrap = document.createElement('div');
+          groupWrap.className = 'custom-select__group';
+          var groupTitle = document.createElement('span');
+          groupTitle.className = 'custom-select__group-title';
+          groupTitle.textContent = label;
+          groupWrap.appendChild(groupTitle);
+          items.forEach(function (item) {
+            var option = document.createElement('button');
+            option.type = 'button';
+            option.className = 'custom-select__option';
+            option.setAttribute('data-dest-value', item.key);
+            option.setAttribute('role', 'option');
+            option.setAttribute('aria-selected', 'false');
+            option.innerHTML = '<span class="custom-select__option-main">' + esc(item.name) + '</span>';
+            groupWrap.appendChild(option);
+            destItems.push({ value: item.key, label: item.name });
+          });
+          menu.appendChild(groupWrap);
+        }
       });
 
       sel.value = S.dest;
