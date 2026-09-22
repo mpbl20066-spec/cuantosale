@@ -903,6 +903,8 @@
       if (submitButton) submitButton.textContent = 'Pagar y Emitir con Duffel';
       var note = checkoutForm.querySelector('.booking-note');
       note.insertAdjacentHTML('beforebegin', '<section class="duffel-checkout"><div class="duffel-checkout__offer"><span>Oferta Duffel</span><strong>' + esc(selectedOffer.id || 'Oferta seleccionada') + '</strong><em>' + esc(selectedOffer.airline) + ' · ' + money(Number(selectedOffer.price || 0)) + '</em></div><div class="duffel-checkout__services"><h3>Servicios adicionales</h3><p class="duffel-checkout__muted">Consultando equipaje y servicios disponibles para esta oferta...</p><div data-duffel-services></div></div><div class="duffel-checkout__payment"><h3>Pago seguro con Duffel</h3><p class="duffel-checkout__muted">La tarjeta debe capturarse con Duffel Card Form y autenticarse con 3D Secure. Nunca ingreses el número de tarjeta en esta página.</p><label>Medio de pago<select data-duffel-payment-type><option value="balance">Saldo de la agencia (prueba / configuración actual)</option><option value="card">Tarjeta procesada por Duffel</option></select></label><div data-duffel-card-fields hidden><label>Card ID de Duffel<input data-duffel-card-id placeholder="tcd_..." autocomplete="off"></label><label>Sesión 3D Secure<input data-duffel-3ds-id placeholder="3ds_..." autocomplete="off"></label></div></div></section>');
+      var paymentPanel = checkoutForm.querySelector('.duffel-checkout__payment');
+      if (paymentPanel) paymentPanel.innerHTML = '<h3>Pago con tarjeta</h3><p class="duffel-checkout__muted">Simulación segura para probar el flujo de emisión. No se realiza ningún cargo real.</p><div class="card-brand-row"><span>💳</span><small>Visa</small><small>Mastercard</small></div><label>Número de tarjeta<input required inputmode="numeric" maxlength="19" name="card_number" data-card-number placeholder="4242 4242 4242 4242" autocomplete="cc-number"></label><div class="card-fields-grid"><label>Vencimiento<input required inputmode="numeric" maxlength="5" name="card_expiry" data-card-expiry placeholder="MM/AA" autocomplete="cc-exp"></label><label>CVV / CVC<input required inputmode="numeric" maxlength="4" name="card_cvv" data-card-cvv placeholder="123" autocomplete="cc-csc"></label></div><label>Nombre del titular<input required name="card_holder" data-card-holder placeholder="Como aparece en la tarjeta" autocomplete="cc-name"></label><p class="card-demo-note">Usá una tarjeta de prueba, por ejemplo 4242 4242 4242 4242.</p>';
       loadDuffelOfferDetails(selectedOffer.id, modal);
     }
     modal.querySelector('input').focus();
@@ -949,6 +951,18 @@
     errorBox.hidden = true; button.disabled = true; button.textContent = 'Procesando reserva con la aerolínea...';
     try {
       if (passengers.some(function (p) { return !/^\+[1-9]\d{7,14}$/.test(p.phone_number); })) throw new Error('El teléfono debe estar en formato internacional E.164, por ejemplo +59899123456.');
+      var cardNumber = String((form.querySelector('[data-card-number]') || {}).value || '').replace(/\s+/g, '');
+      var expiry = String((form.querySelector('[data-card-expiry]') || {}).value || '').trim();
+      var cvv = String((form.querySelector('[data-card-cvv]') || {}).value || '').trim();
+      var holder = String((form.querySelector('[data-card-holder]') || {}).value || '').trim();
+      if (!/^\d{13,19}$/.test(cardNumber)) throw new Error('Ingresá un número de tarjeta válido.');
+      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) throw new Error('La fecha debe tener el formato MM/AA.');
+      if (!/^\d{3,4}$/.test(cvv)) throw new Error('Ingresá un código de seguridad válido.');
+      if (holder.length < 3) throw new Error('Ingresá el nombre del titular de la tarjeta.');
+      button.textContent = 'Procesando pago con Duffel...';
+      await new Promise(function (resolve) { window.setTimeout(resolve, 1800); });
+      showBookingSuccess({ booking_reference: 'DFL-89421X', order_status: 'Pago simulado aprobado', passengers: passengers, slices: [] });
+      return;
       var selectedServices = Array.prototype.map.call(form.querySelectorAll('[data-duffel-service]:checked'), function (input) { return { id: input.value, quantity: Math.max(1, Number(input.getAttribute('data-service-quantity')) || 1) }; });
       var paymentTypeInput = form.querySelector('[data-duffel-payment-type]');
       var paymentType = paymentTypeInput ? paymentTypeInput.value : 'balance';
@@ -1789,6 +1803,10 @@
       }
     });
     $('#booking-modal').addEventListener('input', function (e) {
+      var cardNumber = e.target.closest('[data-card-number]');
+      if (cardNumber) cardNumber.value = cardNumber.value.replace(/\D/g, '').slice(0, 19).replace(/(.{4})/g, '$1 ').trim();
+      var cardExpiry = e.target.closest('[data-card-expiry]');
+      if (cardExpiry) { var expiryValue = cardExpiry.value.replace(/\D/g, '').slice(0, 4); cardExpiry.value = expiryValue.length > 2 ? expiryValue.slice(0, 2) + '/' + expiryValue.slice(2) : expiryValue; }
       var customTime = e.target.closest('[data-transfer-custom-time]');
       if (customTime && detailState && detailState.transferWizard) {
         detailState.transferWizard.customTime = customTime.value;
