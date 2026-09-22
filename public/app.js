@@ -1316,6 +1316,7 @@
   var authUser = null;
   var pendingTripSave = false;
   var tripSaveInProgress = false;
+  var authReadyPromise = Promise.resolve();
 
   async function guardarViaje(datosVuelo) {
     if (!supabaseClient) throw new Error('Supabase todavía no está configurado.');
@@ -1357,9 +1358,10 @@
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     var first = modal.querySelector('input'); if (first) first.focus();
   }
-  function openTripsModal() {
+  async function openTripsModal() {
     var modal = $('#trips-modal');
     if (!modal) return;
+    await authReadyPromise;
     if (!authUser) { pendingTripSave = false; openAuthModal('Iniciá sesión para ver tus viajes.'); return; }
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="trips-title"><button type="button" class="booking-close" data-close-trips aria-label="Cerrar">×</button><span class="account-kicker">Tu cuenta</span><h2 id="trips-title">Mis viajes</h2><p class="booking-note">Itinerarios guardados por ' + esc(authDisplayName(authUser)) + '.</p><div class="saved-trips" data-saved-trips><p class="account-status">Cargando tus viajes...</p></div><button type="button" class="account-button account-button--secondary" data-signout>Cerrar sesión</button></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -1415,7 +1417,11 @@
   }
   async function loadSavedTrips(modal) {
     var box = modal.querySelector('[data-saved-trips]');
-    var result = await supabaseClient.from('trips').select('*').order('created_at', { ascending: false });
+    var userResult = await supabaseClient.auth.getUser();
+    var user = userResult.data && userResult.data.user;
+    if (userResult.error || !user) { box.innerHTML = '<p class="booking-error">Tu sesión expiró. Volvé a iniciar sesión para ver tus viajes.</p>'; renderAuthState(null); return; }
+    renderAuthState(user);
+    var result = await supabaseClient.from('trips').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
     if (result.error) { box.innerHTML = '<p class="booking-error">' + esc(result.error.message) + '</p>'; return; }
     if (!result.data.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
     box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
@@ -1433,7 +1439,7 @@
       var configResponse = await fetch('/api/config');
       var config = await configResponse.json();
       if (!config.supabaseUrl || !config.supabaseAnonKey) { console.warn('Falta SUPABASE_ANON_KEY/SUPABASE_PUBLISHABLE_KEY en las variables de entorno del despliegue.'); return; }
-      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage } });
       try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
       var sessionResult = await supabaseClient.auth.getSession();
       renderAuthState(sessionResult.data && sessionResult.data.session && sessionResult.data.session.user);
@@ -1444,7 +1450,7 @@
 
   /* ---------- formulario ---------- */
   function init() {
-    initAuth();
+    authReadyPromise = initAuth();
     var authButton = $('#auth-button'), tripsButton = $('#trips-button');
     if (authButton) authButton.addEventListener('click', function () { if (authUser) openTripsModal(); else openAuthModal(); });
     if (tripsButton) tripsButton.addEventListener('click', openTripsModal);
