@@ -263,8 +263,10 @@
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var defaultFood = Number(detailState.parts && detailState.parts.comidas) ? (Number(detailState.parts.comidas) / Math.max(1, nights * pax)) : 0;
     var defaultLocal = Number(detailState.parts && detailState.parts.local) ? (Number(detailState.parts.local) / Math.max(1, nights * pax)) : 0;
-    detailState.foodPerDay = Number(detailState.foodPerDay) || defaultFood || 0;
-    detailState.localPerDay = Number(detailState.localPerDay) || defaultLocal || 0;
+    if (!detailState.foodPerDay || Number(detailState.foodPerDay) <= 0) detailState.foodPerDay = defaultFood || 55;
+    if (!detailState.localPerDay || Number(detailState.localPerDay) <= 0) detailState.localPerDay = defaultLocal || 18;
+    detailState.foodPerDay = Math.max(0, Number(detailState.foodPerDay) || 0);
+    detailState.localPerDay = Math.max(0, Number(detailState.localPerDay) || 0);
     detailState.parts.comidas = Math.round((detailState.foodPerDay || 0) * nights * pax);
     detailState.parts.local = Math.round((detailState.localPerDay || 0) * nights * pax);
     if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) ? Math.round(detailState.meta.officialTransfer.amount * 0.75) : 45;
@@ -311,13 +313,32 @@
     if (!detailState || !detailState.meta) return '';
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
-    var foodValue = Number(detailState.foodPerDay) || Number(detailState.parts && detailState.parts.comidas ? (detailState.parts.comidas / Math.max(1, nights * pax)) : 0) || 0;
-    var localValue = Number(detailState.localPerDay) || Number(detailState.parts && detailState.parts.local ? (detailState.parts.local / Math.max(1, nights * pax)) : 0) || 0;
+    var foodValue = Number(detailState.foodPerDay) || Number(detailState.parts && detailState.parts.comidas ? (detailState.parts.comidas / Math.max(1, nights * pax)) : 0) || 55;
+    var localValue = Number(detailState.localPerDay) || Number(detailState.parts && detailState.parts.local ? (detailState.parts.local / Math.max(1, nights * pax)) : 0) || 18;
+    var foodOptions = [
+      { key: 'casual', label: 'Casual / Street Food', description: 'Picadas, mercados y locales accesibles.', value: 30 },
+      { key: 'moderado', label: 'Moderado (Restaurantes estándar)', description: 'Presupuesto equilibrado para almuerzos y cenas.', value: 55 },
+      { key: 'gourmet', label: 'Gourmet / Alta cocina', description: 'Experiencias culinarias destacadas.', value: 95 }
+    ];
+    var localOptions = [
+      { key: 'econ', label: 'Económico', description: 'Ómnibus y Vans locales.', value: 16 },
+      { key: 'confort', label: 'Confort', description: 'Uber, taxis y traslados privados urbanos.', value: 35 }
+    ];
+    function optionMarkup(options, kind) {
+      return options.map(function (option) {
+        var selected = kind === 'food' ? Math.abs(foodValue - option.value) < 6 : Math.abs(localValue - option.value) < 6;
+        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" data-daily-kind="' + kind + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>US$ ' + option.value + '/día</strong></button>';
+      }).join('');
+    }
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
-      '<div class="daily-budget__grid">' +
-      '<label class="daily-budget__field"><span>Comidas por persona / día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="5" value="' + esc(foodValue.toFixed(0)) + '" data-daily-food></div></label>' +
-      '<label class="daily-budget__field"><span>Transporte local por persona / día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="5" value="' + esc(localValue.toFixed(0)) + '" data-daily-local></div></label>' +
+      '<div class="daily-budget__group">' +
+      '<div class="daily-budget__header"><span>Transporte local</span><small>Estilo de movilidad</small></div>' +
+      '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
+      '</div>' +
+      '<div class="daily-budget__group">' +
+      '<div class="daily-budget__header"><span>Comidas</span><small>Estilo gastronómico</small></div>' +
+      '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
       '</section>';
@@ -564,6 +585,17 @@
     state.step = targetStep;
     renderTransferWizard(detailState.meta, state.step);
   }
+  function addTransferToBudget() {
+    if (!detailState) return;
+    var transferAmount = Number((detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 70) || 70;
+    detailState.transfer = transferAmount;
+    detailState.selectedHotel = true;
+    detailState.transferWizard = detailState.transferWizard || {};
+    detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
+    closeBookingForm();
+    recalcularTotalViaje();
+    renderTripSummary();
+  }
   function renderTransferWizard(meta, step) {
     var modal = $('#booking-modal');
     var t = meta.officialTransfer;
@@ -590,17 +622,14 @@
           return '<label class="transfer-pickup-option' + (checked ? ' selected' : '') + '"><input type="radio" name="transfer-pickup" value="' + esc(option.value) + '" ' + checked + ' data-transfer-pickup-radio><span class="transfer-pickup__content"><strong>' + esc(option.label) + '</strong>' + customInput + '</span></label>';
         }).join('') + '</div>' +
         '<button type="button" class="confirm-booking" data-transfer-step="2">Continuar</button></div>';
-    } else if (state.step === 2) {
-      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 2</span><h3>¿Dónde te alojás?</h3></div>' +
-        '<label class="transfer-field"><span>Hotel o pousada de destino</span><input type="text" name="transfer-hotel" value="' + esc(state.hotelName || '') + '" placeholder="Ej: Pousada del Sol" autocomplete="off"></label>' +
-        '<button type="button" class="confirm-booking" data-transfer-step="3">Continuar al pago</button></div>';
     } else {
       var pickupText = getTransferPickupLabel(state.pickupMinutes, state.customTime);
-      var hotelText = state.hotelName ? state.hotelName : 'No informado';
-      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 3</span><h3>Agregar al presupuesto</h3></div>' +
-        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p><p><b>Costo transfer:</b> ' + money(t.amount) + '</p></div>' +
-        '<div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p><p><b>Monto exacto:</b> ' + money(t.amount) + '</p></div>' +
-        '<form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><input type="hidden" name="pickup_minutes" value="' + esc(state.pickupMinutes || 60) + '"><input type="hidden" name="pickup_label" value="' + esc(pickupText) + '"><input type="hidden" name="hotel_name" value="' + esc(hotelText) + '"><label class="transfer-field"><span>Comprobante de pago</span><input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Agregar al presupuesto</button></form></div>';
+      var hotelText = state.hotelName ? state.hotelName : findSelectedHotelLabel();
+      state.hotelName = hotelText;
+      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 2</span><h3>¿Dónde te alojás?</h3></div>' +
+        '<label class="transfer-field"><span>Hotel o pousada de destino</span><input type="text" name="transfer-hotel" value="' + esc(hotelText) + '" placeholder="Ej: Pousada del Sol" autocomplete="off"></label>' +
+        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p><p><b>Costo transfer:</b> ' + money(t.amount || 70) + '</p></div>' +
+        '<button type="button" class="confirm-booking" data-transfer-add-budget>Agregar al presupuesto</button></div>';
     }
     modal.innerHTML = '<div class="booking-dialog transfer-wizard" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2>' + flightInfo + stepMarkup + '</div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -1226,6 +1255,23 @@
       e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; openDestinationProposal(S.dest);
     });
     $('#vista-detalle').addEventListener('click', function (e) {
+      var dailyBudgetCard = e.target.closest('[data-daily-kind]');
+      if (dailyBudgetCard && detailState) {
+        e.preventDefault(); e.stopPropagation();
+        var kind = dailyBudgetCard.getAttribute('data-daily-kind');
+        var value = Number(dailyBudgetCard.getAttribute('data-daily-value')) || 0;
+        if (kind === 'local') {
+          detailState.localPerDay = value;
+          detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
+        } else if (kind === 'food') {
+          detailState.foodPerDay = value;
+          detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
+        }
+        recalcularTotalViaje();
+        var section = e.target.closest('.daily-budget');
+        if (section) section.innerHTML = dailyBudgetControls();
+        return;
+      }
       if (e.target.closest('#btn-volver')) {
         e.preventDefault(); e.stopPropagation();
         $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
@@ -1336,6 +1382,24 @@
       if (stepButton) {
         e.preventDefault(); e.stopPropagation();
         advanceTransferWizard(Number(stepButton.getAttribute('data-transfer-step')) || 1);
+      }
+      var addBudgetButton = e.target.closest('[data-transfer-add-budget]');
+      if (addBudgetButton) {
+        e.preventDefault(); e.stopPropagation();
+        syncTransferWizardStateFromDom($('#booking-modal'));
+        if (!detailState || !detailState.transferWizard || !detailState.transferWizard.hotelName) {
+          var hotelInput = $('#booking-modal').querySelector('[name="transfer-hotel"]');
+          if (hotelInput) {
+            detailState.transferWizard.hotelName = hotelInput.value.trim();
+          }
+        }
+        if (!detailState || !detailState.transferWizard || !detailState.transferWizard.hotelName) {
+          alert('Ingresá el hotel o pousada de destino para continuar.');
+          var fallbackInput = $('#booking-modal').querySelector('[name="transfer-hotel"]');
+          if (fallbackInput) fallbackInput.focus();
+          return;
+        }
+        addTransferToBudget();
       }
     });
     $('#booking-modal').addEventListener('change', function (e) {
