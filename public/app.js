@@ -1477,30 +1477,27 @@
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
       var byKey = {};
       list.forEach(function (d) { byKey[d.key] = d; });
+      var ordered = [];
       DESTINATION_GROUPS.forEach(function (group) {
-        var groupNode = document.createElement('optgroup');
-        groupNode.label = group.label;
         group.keys.forEach(function (key) {
-          var item = byKey[key];
-          if (!item) return;
-          var o = document.createElement('option');
-          o.value = item.key;
-          o.textContent = item.name;
-          groupNode.appendChild(o);
+          if (byKey[key]) {
+            ordered.push({ key: byKey[key].key, name: byKey[key].name, group: group.label });
+          }
         });
-        if (groupNode.childNodes.length) sel.appendChild(groupNode);
       });
       var extra = list.filter(function (d) { return !DESTINATION_GROUPS.some(function (group) { return group.keys.indexOf(d.key) >= 0; }); });
-      if (extra.length) {
-        var extraGroup = document.createElement('optgroup');
-        extraGroup.label = 'Otros destinos';
-        extra.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) {
-          var o = document.createElement('option');
-          o.value = d.key; o.textContent = d.name;
-          extraGroup.appendChild(o);
-        });
-        sel.appendChild(extraGroup);
-      }
+      extra.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) {
+        ordered.push({ key: d.key, name: d.name, group: 'Otros destinos' });
+      });
+
+      sel.innerHTML = '<option value="todos">🌍 Todos los destinos</option>';
+      ordered.forEach(function (item) {
+        var o = document.createElement('option');
+        o.value = item.key;
+        o.textContent = item.group === 'Otros destinos' ? item.name : item.group + ' · ' + item.name;
+        sel.appendChild(o);
+      });
+
       sel.value = S.dest;
       updateDestinationMode();
       run();
