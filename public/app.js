@@ -326,12 +326,12 @@
   function transferCard(meta) {
     var t = meta.officialTransfer;
     if (!t) return '';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Traslado privado</h2><div class="transport-card"><p>Traslado privado aeropuerto ➔ pousada para ' + esc(meta.dest.name) + ' · tarifa fija de ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná traslado / transfer</button></div></section>';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><div class="transport-card"><p>Transfer desde el aeropuerto ➔ pousada para ' + esc(meta.dest.name) + ' · tarifa fija de ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná transfer / transfer</button></div></section>';
   }
   function openTransferModal(meta) {
     if (!detailState || !detailState.transfer) return;
     var modal = $('#booking-modal'), t = meta.officialTransfer;
-    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Traslado privado</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · tarifa fija confirmada</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de pago<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
+    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2><p class="booking-summary">Monto exacto: <b>' + money(t.amount) + '</b> · tarifa fija confirmada</p><div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p></div><form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><label>Comprobante de pago<input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   async function submitTransfer(form) {
@@ -439,12 +439,15 @@
         : esc(airportCode(offer.departure_airport)) + ' → ' + esc(airportCode(offer.arrival_airport));
       var departText = offer.trip_type === 'round_trip' ? (offer.outbound && offer.outbound.departure ? flightTime(offer.outbound.departure) : flightTime(offer.departure)) : flightTime(offer.departure);
       var arrivalText = offer.trip_type === 'round_trip' ? (offer.inbound && offer.inbound.arrival ? flightTime(offer.inbound.arrival) : flightTime(offer.arrival)) : flightTime(offer.arrival);
-      var buttonText = flightStep === 'inbound' ? 'Seleccionar vuelta' : 'Seleccionar ida';
+      var primaryButtonText = flightStep === 'inbound' ? 'Usar en mi paquete' : 'Elegir este vuelo';
+      var secondaryButtonText = 'Comprar vuelo ahora';
       var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
       return '<article class="flight-card within-budget"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(offer.departure_airport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(offer.arrival_airport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
-        '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div><button type="button" class="select-flight" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + buttonText + '</button></div></article>';
+        '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div></div>' +
+        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + primaryButtonText + '</button>' +
+        '<button type="button" class="btn btn-secondary" data-buy-flight-now data-offer-id="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + secondaryButtonText + '</button></div></article>';
     }).join('') + '</div>';
     if (state && state.outboundId && state.inboundId) {
       var selectedOffer = offers.find(function (offer) { return offer.id === state.inboundId || offer.id === state.outboundId; });
@@ -482,12 +485,28 @@
     }
     return fields;
   }
-  function openBookingForm(button) {
-    var modal = $('#booking-modal'), offerId = button.getAttribute('data-select-flight'), passengerIds = [];
+  function persistSelectedOffer(button) {
+    if (!button || !detailState) return null;
+    var offerId = button.getAttribute('data-select-flight') || button.getAttribute('data-offer-id') || '';
+    var offerPrice = Number(button.getAttribute('data-offer-price') || 0) || 0;
+    var offerAirline = button.getAttribute('data-offer-airline') || 'Vuelo seleccionado';
+    var currency = button.getAttribute('data-offer-currency') || 'USD';
+    var passengerIds = [];
     try { passengerIds = JSON.parse(button.getAttribute('data-passenger-ids') || '[]'); } catch (e) { passengerIds = []; }
+    detailState.selectedFlightId = offerId;
+    detailState.selectedFlight = offerAirline;
+    detailState.flight = Math.round(offerPrice);
+    detailState.baseFlight = detailState.flight;
+    detailState.selectedOffer = { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds };
+    return { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds };
+  }
+  function openBookingForm(button) {
+    var selectedOffer = persistSelectedOffer(button) || { id: button.getAttribute('data-select-flight') || button.getAttribute('data-offer-id') || '', airline: button.getAttribute('data-offer-airline') || 'Vuelo seleccionado', price: Number(button.getAttribute('data-offer-price') || 0) || 0, currency: button.getAttribute('data-offer-currency') || 'USD', passengerIds: [] };
+    var modal = $('#booking-modal');
+    var passengerIds = Array.isArray(selectedOffer.passengerIds) ? selectedOffer.passengerIds : [];
     modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<h2 id="booking-title">Datos de los pasajeros</h2><p class="booking-summary">' + esc(button.getAttribute('data-offer-airline') || 'Vuelo seleccionado') + ' · ' + money(Number(button.getAttribute('data-offer-price') || 0)) + '</p>' +
-      '<form id="booking-form" data-offer-id="' + esc(offerId) + '" data-total-amount="' + esc(button.getAttribute('data-offer-price') || '') + '" data-total-currency="' + esc(button.getAttribute('data-offer-currency') || 'USD') + '"><div class="passenger-list">' + passengerFields(S.pax, passengerIds) + '</div><p class="booking-note">Revisá los datos exactamente como aparecen en el documento de viaje. El teléfono debe incluir código de país, por ejemplo +59899123456.</p><button class="confirm-booking" type="submit">Confirmar y Emitir Reserva</button></form></div>';
+      '<h2 id="booking-title">Datos de los pasajeros</h2><p class="booking-summary">' + esc(selectedOffer.airline) + ' · ' + money(Number(selectedOffer.price || 0)) + '</p>' +
+      '<form id="booking-form" data-offer-id="' + esc(selectedOffer.id) + '" data-total-amount="' + esc(selectedOffer.price || '') + '" data-total-currency="' + esc(selectedOffer.currency || 'USD') + '"><div class="passenger-list">' + passengerFields(S.pax, passengerIds) + '</div><p class="booking-note">Revisá los datos exactamente como aparecen en el documento de viaje. El teléfono debe incluir código de país, por ejemplo +59899123456.</p><button class="confirm-booking" type="submit">Confirmar y Emitir Reserva</button></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     modal.querySelector('input').focus();
   }
@@ -787,7 +806,7 @@
     var isRoadtrip = proposal.mode === 'auto';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: true };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true };
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       proposalBreakdownMarkup(detailState) +
@@ -889,7 +908,19 @@
       var proposal = e.target.closest('[data-propuesta-id]');
       if (proposal) { e.preventDefault(); e.stopPropagation(); var selected = lastData && byId(lastData.list, proposal.getAttribute('data-propuesta-id')); if (selected) showProposalView(selected, lastData); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
-      if (selectedFlight) { openBookingForm(selectedFlight); return; }
+      if (selectedFlight) {
+        e.preventDefault(); e.stopPropagation();
+        persistSelectedOffer(selectedFlight);
+        openBookingForm(selectedFlight);
+        return;
+      }
+      var buyFlightNow = e.target.closest('[data-buy-flight-now]');
+      if (buyFlightNow) {
+        e.preventDefault(); e.stopPropagation();
+        persistSelectedOffer(buyFlightNow);
+        openBookingForm(buyFlightNow);
+        return;
+      }
       var unlock = e.target.closest('[data-unlock-guide]');
       if (unlock) { unlockGuide(); return; }
       var b = e.target.closest('[data-shift]'); if (!b) return;
@@ -959,13 +990,22 @@
             if (state.outboundId && !state.inboundId) {
               state.inboundId = offerId;
               section.setAttribute('data-flight-step', 'done');
+              persistSelectedOffer(selectedFlight);
               actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
               openBookingForm(selectedFlight); return;
             }
           }
         }
+        persistSelectedOffer(selectedFlight);
         actualizarPasajes(selectedFlight.closest('.flight-search'), Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
         openBookingForm(selectedFlight); return;
+      }
+      var buyFlightNow = e.target.closest('[data-buy-flight-now]');
+      if (buyFlightNow) {
+        e.preventDefault(); e.stopPropagation();
+        persistSelectedOffer(buyFlightNow);
+        openBookingForm(buyFlightNow);
+        return;
       }
       var unlock = e.target.closest('[data-unlock-guide]');
       if (unlock) { unlockGuide(); return; }
