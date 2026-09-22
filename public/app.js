@@ -228,7 +228,7 @@
       '<div class="trip-summary__item"><span>Transfer</span><b>' + (transferIncluded ? 'Incluido' : 'No incluido') + '</b><em>' + (transferIncluded ? money(Number(detailState.meta.officialTransfer.amount) || 0) : '—') + '</em></div>' +
       '<div class="trip-summary__item"><span>Hotel</span><b>' + esc(hotelName) + '</b><em>' + money(Number(detailState.hotel) || 0) + '</em></div>' +
       '</div>' +
-      '<button type="button" class="trip-summary__cta" data-summary-book>Reservar / pagar</button>' +
+      '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
       '</div>';
     summary.hidden = false;
   }
@@ -257,8 +257,21 @@
       '</div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
+  function syncDailyBudgetState() {
+    if (!detailState || !detailState.meta) return;
+    var nights = Math.max(1, Number(detailState.meta.nights) || 1);
+    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var defaultFood = Number(detailState.parts && detailState.parts.comidas) ? (Number(detailState.parts.comidas) / Math.max(1, nights * pax)) : 0;
+    var defaultLocal = Number(detailState.parts && detailState.parts.local) ? (Number(detailState.parts.local) / Math.max(1, nights * pax)) : 0;
+    detailState.foodPerDay = Number(detailState.foodPerDay) || defaultFood || 0;
+    detailState.localPerDay = Number(detailState.localPerDay) || defaultLocal || 0;
+    detailState.parts.comidas = Math.round((detailState.foodPerDay || 0) * nights * pax);
+    detailState.parts.local = Math.round((detailState.localPerDay || 0) * nights * pax);
+    if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) ? Math.round(detailState.meta.officialTransfer.amount * 0.75) : 45;
+  }
   function recalcularTotalViaje() {
     if (!detailState) return;
+    syncDailyBudgetState();
     var parts = detailState.parts;
     var roadtrip = detailState.transportMode === 'auto';
     var transferCost = Number(detailState.transfer) || 0;
@@ -293,6 +306,21 @@
       if (fallback) return fallback;
     }
     return offers.length ? offers[0] : null;
+  }
+  function dailyBudgetControls() {
+    if (!detailState || !detailState.meta) return '';
+    var nights = Math.max(1, Number(detailState.meta.nights) || 1);
+    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var foodValue = Number(detailState.foodPerDay) || Number(detailState.parts && detailState.parts.comidas ? (detailState.parts.comidas / Math.max(1, nights * pax)) : 0) || 0;
+    var localValue = Number(detailState.localPerDay) || Number(detailState.parts && detailState.parts.local ? (detailState.parts.local / Math.max(1, nights * pax)) : 0) || 0;
+    return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
+      '<h2>Personalizá tus costos diarios</h2>' +
+      '<div class="daily-budget__grid">' +
+      '<label class="daily-budget__field"><span>Comidas por persona / día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="5" value="' + esc(foodValue.toFixed(0)) + '" data-daily-food></div></label>' +
+      '<label class="daily-budget__field"><span>Transporte local por persona / día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="5" value="' + esc(localValue.toFixed(0)) + '" data-daily-local></div></label>' +
+      '</div>' +
+      '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
+      '</section>';
   }
   function formatFlightDateTime(value) {
     if (!value) return 'sin fecha';
@@ -569,10 +597,10 @@
     } else {
       var pickupText = getTransferPickupLabel(state.pickupMinutes, state.customTime);
       var hotelText = state.hotelName ? state.hotelName : 'No informado';
-      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 3</span><h3>Pago y comprobante</h3></div>' +
-        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p></div>' +
+      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 3</span><h3>Agregar al presupuesto</h3></div>' +
+        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p><p><b>Costo transfer:</b> ' + money(t.amount) + '</p></div>' +
         '<div class="bank-details"><p><b>Banco:</b> ' + esc(t.bank.bank) + '</p><p><b>Cuenta:</b> ' + esc(t.bank.account) + '</p><p><b>Titular:</b> ' + esc(t.bank.holder) + '</p><p><b>Monto exacto:</b> ' + money(t.amount) + '</p></div>' +
-        '<form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><input type="hidden" name="pickup_minutes" value="' + esc(state.pickupMinutes || 60) + '"><input type="hidden" name="pickup_label" value="' + esc(pickupText) + '"><input type="hidden" name="hotel_name" value="' + esc(hotelText) + '"><label class="transfer-field"><span>Comprobante de pago</span><input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Cargar comprobante</button></form></div>';
+        '<form id="transfer-form"><input type="hidden" name="amount" value="' + t.amount + '"><input type="hidden" name="pickup_minutes" value="' + esc(state.pickupMinutes || 60) + '"><input type="hidden" name="pickup_label" value="' + esc(pickupText) + '"><input type="hidden" name="hotel_name" value="' + esc(hotelText) + '"><label class="transfer-field"><span>Comprobante de pago</span><input required type="file" name="receipt" accept="image/*,.pdf"></label><button class="confirm-booking" type="submit">Agregar al presupuesto</button></form></div>';
     }
     modal.innerHTML = '<div class="booking-dialog transfer-wizard" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2>' + flightInfo + stepMarkup + '</div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -580,14 +608,22 @@
   async function submitTransfer(form) {
     var button = form.querySelector('button[type="submit"]'), file = form.querySelector('[name="receipt"]').files[0];
     if (!file) return;
-    button.disabled = true; button.textContent = 'Registrando transferencia…';
+    button.disabled = true; button.textContent = 'Agregando al presupuesto…';
     try {
       var dataUrl = await new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(file); });
-      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: form.querySelector('[name="amount"]').value, destination: S.dest, pickup_minutes: form.querySelector('[name="pickup_minutes"]').value || '', pickup_label: form.querySelector('[name="pickup_label"]').value || '', hotel_name: form.querySelector('[name="hotel_name"]').value || '', flight_airline: (detailState && detailState.selectedFlight) || 'Vuelo activo', receipt: { name: file.name, type: file.type, data: dataUrl } }) });
+      var amount = Number(form.querySelector('[name="amount"]').value || 0);
+      if (detailState) {
+        detailState.transfer = amount;
+        detailState.selectedHotel = true;
+        detailState.transferWizard = detailState.transferWizard || {};
+        detailState.transferWizard.hotelName = form.querySelector('[name="hotel_name"]').value || detailState.selectedHotelName || 'Hotel de destino';
+      }
+      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amount, destination: S.dest, pickup_minutes: form.querySelector('[name="pickup_minutes"]').value || '', pickup_label: form.querySelector('[name="pickup_label"]').value || '', hotel_name: form.querySelector('[name="hotel_name"]').value || '', flight_airline: (detailState && detailState.selectedFlight) || 'Vuelo activo', receipt: { name: file.name, type: file.type, data: dataUrl } }) });
       var result = await response.json().catch(function () { return {}; });
       if (!response.ok) throw new Error(result.error || 'No pudimos registrar la transferencia.');
-      $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>¡Reserva de traslado registrada con éxito!</h2><p class="booking-note">' + esc(result.message) + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
-    } catch (e) { button.disabled = false; button.textContent = 'Confirmar transferencia'; alert(e.message || 'No pudimos registrar la transferencia.'); }
+      sincronizarTrasladoOficial();
+      $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>Transfer agregado al presupuesto</h2><p class="booking-note">' + esc(result.message || 'El transfer quedó incluido en el cálculo de tu viaje.') + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
+    } catch (e) { button.disabled = false; button.textContent = 'Agregar al presupuesto'; alert(e.message || 'No pudimos registrar la transferencia.'); }
   }
   function guideUnlocked() {
     try { return localStorage.getItem('cuantosale_guia_desbloqueada') === 'true'; } catch (e) { return false; }
@@ -1056,9 +1092,15 @@
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado' };
+    var nights = Math.max(1, Number(data.meta.nights) || 1);
+    var pax = Math.max(1, Number(data.meta.pax) || 1);
+    detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
+    detailState.localPerDay = Number((Number(detailState.parts.local) / Math.max(1, nights * pax)).toFixed(2)) || 0;
+    if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Math.round((Number(data.meta.officialTransfer && data.meta.officialTransfer.amount) || 0) * 0.75 + 45);
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       proposalBreakdownMarkup(detailState) +
+      dailyBudgetControls() +
       '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>' +
@@ -1259,10 +1301,34 @@
       if (consumption) actualizarRoadtrip(consumption.value);
       var roadtripModel = e.target.closest && e.target.closest('[data-roadtrip-model]');
       if (roadtripModel) actualizarModeloRoadtrip(roadtripModel.value);
+      var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
+      if (dailyFoodInput && detailState) {
+        detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
+        detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
+        recalcularTotalViaje();
+      }
+      var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
+      if (dailyLocalInput && detailState) {
+        detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
+        detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
+        recalcularTotalViaje();
+      }
     });
     $('#vista-detalle').addEventListener('input', function (e) {
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
       if (consumption) actualizarRoadtrip(consumption.value);
+      var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
+      if (dailyFoodInput && detailState) {
+        detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
+        detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
+        recalcularTotalViaje();
+      }
+      var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
+      if (dailyLocalInput && detailState) {
+        detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
+        detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
+        recalcularTotalViaje();
+      }
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
