@@ -142,25 +142,37 @@
         return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
       }).join('') + '</div></section>';
   }
-  function proposalBreakdownContent(state) {
-    if (!state) return '';
+  function getBudgetBreakdown(state) {
+    if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
     var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
+    var transferValue = Number(state.transfer) || 0;
+    var trasladoValue = (Number(state.parts && state.parts.traslados) || 0) + transferValue;
     var total = roadtrip
       ? Math.round((Number(state.auto) || 0) + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0))
       : Math.round((Number(state.flight) || 0) + (Number(state.hotel) || 0) +
         (Number(state.parts.comidas) || 0) + (Number(state.parts.local) || 0) +
-        (Number(state.parts.traslados) || 0) + (Number(state.transfer) || 0) + (Number(state.parts.extras) || 0));
+        trasladoValue + (Number(state.parts.extras) || 0));
     var entries = categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return null;
       var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
-      var value = category === 'pasajes' ? state.flight : category === 'alojamiento' ? state.hotel : category === 'traslados' ? (Number(state.parts.traslados) || 0) + (Number(state.transfer) || 0) : category === 'auto' ? (state.auto || 0) : (state.parts[category] || 0);
+      var value = category === 'pasajes' ? (Number(state.flight) || 0)
+        : category === 'alojamiento' ? (Number(state.hotel) || 0)
+        : category === 'traslados' ? trasladoValue
+        : category === 'auto' ? (Number(state.auto) || 0)
+        : (Number(state.parts && state.parts[category]) || 0);
       if (Number(value) <= 0) return null;
-      return { category: category, label: info[1], color: info[2], value: Number(value) || 0 };
+      return { category: category, label: info[1], color: info[2], value: Number(value) || 0, width: total ? ((Number(value) / total) * 100) : 0 };
     }).filter(Boolean);
+    return { total: total, entries: entries };
+  }
+  function proposalBreakdownContent(state) {
+    if (!state) return '';
+    var budget = getBudgetBreakdown(state);
+    var total = budget.total;
+    var entries = budget.entries;
     var segments = entries.map(function (entry) {
-      var width = total ? (entry.value / total * 100) : 0;
-      return '<span class="proposal-breakdown__segment" style="width:' + width + '%;background:var(' + entry.color + ')"></span>';
+      return '<span class="proposal-breakdown__segment" style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
     }).join('');
     var rows = entries.map(function (entry) {
       return '<div class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '"><div class="proposal-breakdown__label"><i style="background:var(' + entry.color + ')"></i><span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></div>';
@@ -176,20 +188,7 @@
   }
   function getActiveBreakdownEntries() {
     if (!detailState) return [];
-    var roadtrip = detailState.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
-    var total = roadtrip
-      ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0))
-      : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
-        (Number(detailState.parts.comidas) || 0) + (Number(detailState.parts.local) || 0) +
-        ((Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0)) + (Number(detailState.parts.extras) || 0));
-    return categories.map(function (category) {
-      if (category === 'auto' && !roadtrip) return null;
-      var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? (detailState.auto || 0) : (detailState.parts[category] || 0);
-      if (Number(value) <= 0) return null;
-      return { category: category, label: info[1], color: info[2], value: Number(value) || 0, width: total ? (Number(value) / total * 100) : 0 };
-    }).filter(Boolean);
+    return getBudgetBreakdown(detailState).entries;
   }
   function findSelectedHotelLabel() {
     var checked = document.querySelector('[data-hotel-total]:checked');
@@ -211,8 +210,9 @@
       summary.innerHTML = '';
       return;
     }
-    var entries = getActiveBreakdownEntries();
-    var total = entries.reduce(function (sum, entry) { return sum + entry.value; }, 0);
+    var budget = getBudgetBreakdown(detailState);
+    var total = budget.total;
+    var entries = budget.entries;
     var flightLabel = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || 'Vuelo no seleccionado';
     var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
     var hotelName = findSelectedHotelLabel();
@@ -225,7 +225,7 @@
       '<div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
       '<div class="trip-summary__items">' +
       '<div class="trip-summary__item"><span>Vuelo</span><b>' + esc(flightLabel) + '</b><em>' + money(flightPrice) + '</em></div>' +
-      '<div class="trip-summary__item"><span>Transfer</span><b>' + (transferIncluded ? 'Incluido' : 'No incluido') + '</b><em>' + (transferIncluded ? money(Number(detailState.meta.officialTransfer.amount) || 0) : '—') + '</em></div>' +
+      '<div class="trip-summary__item"><span>Transfer</span><b>' + (transferIncluded ? 'Incluido' : 'No incluido') + '</b><em>' + (transferIncluded ? money(Number(detailState.transfer) || 0) : '—') + '</em></div>' +
       '<div class="trip-summary__item"><span>Hotel</span><b>' + esc(hotelName) + '</b><em>' + money(Number(detailState.hotel) || 0) + '</em></div>' +
       '</div>' +
       '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
@@ -278,10 +278,8 @@
     var roadtrip = detailState.transportMode === 'auto';
     var transferCost = Number(detailState.transfer) || 0;
     var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + transferCost;
-    var total = roadtrip
-      ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(parts.comidas) || 0))
-      : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) +
-        (Number(parts.comidas) || 0) + (Number(parts.local) || 0) + transport + (Number(parts.extras) || 0));
+    var budget = getBudgetBreakdown(detailState);
+    var total = budget.total;
     var totalEl = document.querySelector('[data-detail-total]');
     if (totalEl) totalEl.textContent = money(total);
     var rows = document.querySelectorAll('[data-cost-category]');
