@@ -281,6 +281,32 @@ function roadtripCost(key, kmPerLiter) {
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   return model.roadtripCost(key, kmPerLiter, fuelPrice);
 }
+const LOCAL_TRANSPORT_BY_STYLE = {
+  eco: { dailyUsd: 6, multipliers: { rio: 1.1, sao: 1.2, buz: 0.8, fln: 1.0, ssa: 0.9, igu: 1.0 } },
+  eq: { dailyUsd: 15, multipliers: { rio: 1.1, sao: 1.2, buz: 0.8, fln: 1.0, ssa: 0.9, igu: 1.0 } },
+  comodo: { dailyUsd: 35, multipliers: { rio: 1.1, sao: 1.2, buz: 0.8, fln: 1.0, ssa: 0.9, igu: 1.0 } }
+};
+function calculateLocalTransportCost({ style = 'eq', dest = 'rio', nights = 3, pax = 2 } = {}) {
+  const normalizedStyle = ['eco', 'eq', 'comodo'].includes(String(style).toLowerCase()) ? String(style).toLowerCase() : 'eq';
+  const normalizedDest = String(dest || 'rio').toLowerCase();
+  const base = LOCAL_TRANSPORT_BY_STYLE[normalizedStyle] || LOCAL_TRANSPORT_BY_STYLE.eq;
+  const multiplier = base.multipliers[normalizedDest] || 1;
+  const totalDays = Math.max(1, Number(nights) || 0) + 1;
+  const travelers = Math.max(1, Number(pax) || 1);
+  const dailyUsd = Number((base.dailyUsd * multiplier).toFixed(2));
+  const totalUsd = Number((dailyUsd * totalDays * travelers).toFixed(2));
+  return {
+    style: normalizedStyle,
+    destination: normalizedDest,
+    baseDailyUsd: base.dailyUsd,
+    multiplier: Number(multiplier.toFixed(2)),
+    nights: Number(nights) || 0,
+    totalDays: totalDays,
+    pax: travelers,
+    dailyUsd: dailyUsd,
+    totalUsd: totalUsd
+  };
+}
 function transferConfig(destKey, pax) {
   const unit = Number(process.env.OFFICIAL_TRANSFER_PRICE_USD) || 35;
   return { pricePerPassenger: unit, amount: unit * Math.max(1, Number(pax) || 1), destination: destKey, bank: { bank: 'Prex', account: '361333', holder: 'Maria Paola Batista' } };
@@ -563,14 +589,16 @@ async function cotizar(req, res, url) {
   const quotes = await providers.getQuotes(model.DEST[v.S.dest], v.S.dep, v.S.ret, v.S.style);
   const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
   const hotels = await hotelRecommendations(v.S.dest, model.DEST[v.S.dest].name, v.S.style, { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights });
+  const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
   sendJson(res, 200, Object.assign({
     meta: {
       mode: providers.isLive() ? 'live' : 'demo',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
-      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), hotels: hotels,
-      generatedAt: new Date().toISOString()
-    }
+      costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
+      hotels: hotels, generatedAt: new Date().toISOString()
+    },
+    localTransport: localTransport
   }, result));
 }
 
@@ -587,6 +615,8 @@ function cotizarTodos(req, res, url) {
   }
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
 
+  const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
+
   // Estas diez opciones son comparables y estimadas: consultar el proveedor para
   // cada destino dispararía hasta 19 requests externos en un solo clic.
   const options = Object.keys(model.DEST).map(function (key) {
@@ -601,8 +631,9 @@ function cotizarTodos(req, res, url) {
   }).sort(function (a, b) { return a.total - b.total; });
 
   sendJson(res, 200, {
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax) },
-    options: options
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: model.REAL_COSTS, roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
+    options: options,
+    localTransport: localTransport
   });
 }
 

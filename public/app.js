@@ -559,10 +559,36 @@
     return '<small class="cost-note">' + (text[cat] || 'Detalle del viaje.') + '</small>';
   }
 
+  function getLocalTransportFromData(data) {
+    if (!data) return null;
+    var local = data.meta && (data.meta.localTransport || data.meta.transporteLocal) ? (data.meta.localTransport || data.meta.transporteLocal) : data.localTransport;
+    if (!local || !Number(local.totalUsd) && !Number(local.total_usd)) return null;
+    var total = Number(local.totalUsd || local.total_usd || 0);
+    return { totalUsd: total, dailyUsd: Number(local.dailyUsd || local.daily_usd || 0), multiplier: Number(local.multiplier || 1), totalDays: Number(local.totalDays || local.total_days || 0) };
+  }
+  function normalizeLocalTransportInProposal(data, proposal) {
+    if (!proposal || !proposal.parts) return proposal;
+    var local = getLocalTransportFromData(data);
+    if (!local) return proposal;
+    var nextLocal = Math.round(Number(local.totalUsd) || 0);
+    var previousLocal = Number(proposal.parts.local) || 0;
+    var delta = nextLocal - previousLocal;
+    var nextParts = Object.assign({}, proposal.parts, { local: nextLocal });
+    var baselineTotal = Number(proposal.total) || 0;
+    var nextTotal = Math.max(0, Math.round(baselineTotal + delta));
+    var pax = Number(data && data.meta && data.meta.pax) || Number(proposal.pax) || 1;
+    return Object.assign({}, proposal, { parts: nextParts, total: nextTotal, pp: Math.round(nextTotal / Math.max(1, pax)) });
+  }
+  function normalizeLocalTransportInList(data) {
+    if (!data || !Array.isArray(data.list)) return data && data.list ? data.list : [];
+    var local = getLocalTransportFromData(data);
+    if (!local) return data.list;
+    return data.list.map(function (proposal) { return normalizeLocalTransportInProposal(data, proposal); });
+  }
   function render(data) {
     lastData = data;
     var live = data.meta.mode === 'live';
-    var list = data.list, rec = byId(list, S.proposalId) || byId(list, data.recId);
+    var list = normalizeLocalTransportInList(data), rec = byId(list, S.proposalId) || byId(list, data.recId);
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
     var cheapest = byId(list, data.cheapestId), cozy = byId(list, data.cozyId);
 
@@ -653,6 +679,7 @@
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
+    proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlight: '', selectedHotel: true };
     content.innerHTML = '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
