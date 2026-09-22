@@ -1337,6 +1337,11 @@
       flight_details: datosVuelo.flight_details || datosVuelo.detalles_vuelo || {}
     };
     var result = await supabaseClient.from('trips').insert(payload).select().single();
+    if (result.error && /permission denied|row-level security|42501/i.test(result.error.message || '')) {
+      var fallback = { user_id: user.id, title: (payload.destination || 'Viaje') + ' · ' + (payload.departure_date || ''), destination_key: datosVuelo.destination_key || (payload.flight_details && payload.flight_details.destination_key) || '', destination_name: payload.destination || 'Brasil', departure_date: payload.departure_date, return_date: payload.return_date, total_amount: payload.total_amount, currency: payload.currency, details: payload.flight_details || {} };
+      var fallbackResult = await supabaseClient.from('user_trips').insert(fallback).select().single();
+      if (!fallbackResult.error) return fallbackResult.data;
+    }
     if (result.error) throw new Error('No pudimos guardar el viaje: ' + result.error.message);
     return result.data;
   }
@@ -1404,7 +1409,7 @@
     tripSaveInProgress = true;
     var result;
     try {
-      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, departure_date: payload.departure_date, return_date: payload.return_date, total_amount: payload.total_amount, currency: payload.currency, offer_id: payload.details && payload.details.flight && payload.details.flight.id || null, flight_details: payload.details });
+      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, destination_key: payload.destination_key, departure_date: payload.departure_date, return_date: payload.return_date, total_amount: payload.total_amount, currency: payload.currency, offer_id: payload.details && payload.details.flight && payload.details.flight.id || null, flight_details: payload.details });
     } catch (error) {
       tripSaveInProgress = false;
       openAuthModal(error.message);
@@ -1422,6 +1427,12 @@
     if (userResult.error || !user) { box.innerHTML = '<p class="booking-error">Tu sesión expiró. Volvé a iniciar sesión para ver tus viajes.</p>'; renderAuthState(null); return; }
     renderAuthState(user);
     var result = await supabaseClient.from('trips').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+    if (result.error && /permission denied|row-level security|42501/i.test(result.error.message || '')) {
+      var legacyResult = await supabaseClient.from('user_trips').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      if (!legacyResult.error) {
+        result = { data: legacyResult.data.map(function (trip) { return { id: trip.id, destination: trip.destination_name, departure_date: trip.departure_date, return_date: trip.return_date, total_amount: trip.total_amount, flight_details: trip.details || {}, created_at: trip.created_at }; }), error: null };
+      }
+    }
     if (result.error) { box.innerHTML = '<p class="booking-error">' + esc(result.error.message) + '</p>'; return; }
     if (!result.data.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
     box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
