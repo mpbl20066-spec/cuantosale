@@ -50,6 +50,47 @@ const HOTEL_IMAGES = {
   moderado: ['https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=960&q=82'],
   alto: ['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1601918774946-25832a4be0d6?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=960&q=82']
 };
+const BOOKING_IMAGE_FIELDS = ['main_photo_url', 'main_photo_url_https', 'photo_url', 'image', 'image_url', 'thumbnail_url', 'cover_photo_url', 'url_1440', 'url_640', 'hotel_photo_url', 'photo'];
+const BOOKING_IMAGE_FALLBACKS = {
+  fln: [
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80'
+  ],
+  buz: [
+    'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80'
+  ],
+  rio: [
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80'
+  ],
+  default: [
+    'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80',
+    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=960&q=82'
+  ]
+};
+function resolveHotelImage(hotel, index, style, destName) {
+  const hotelName = String(hotel && (hotel.hotel_name || hotel.name || hotel.hotelName || '') || '').toLowerCase();
+  const destKey = String(destName || '').toLowerCase();
+  const validUrls = BOOKING_IMAGE_FIELDS.map(function (field) {
+    const value = hotel && hotel[field];
+    if (!value || typeof value !== 'string') return '';
+    const trimmed = value.trim();
+    return /^https?:\/\//i.test(trimmed) ? trimmed : '';
+  }).filter(Boolean);
+  if (validUrls.length) return validUrls[0];
+  const fallbackSet = BOOKING_IMAGE_FALLBACKS[destKey] || BOOKING_IMAGE_FALLBACKS.default;
+  const namedFallback = Object.keys(BOOKING_IMAGE_FALLBACKS).reduce(function (match, key) {
+    if (key === 'default') return match;
+    return match || (hotelName && hotelName.indexOf(key) >= 0 ? BOOKING_IMAGE_FALLBACKS[key] : null);
+  }, null);
+  const candidates = namedFallback || fallbackSet;
+  return candidates[(index + (hotelName.length % 3)) % candidates.length] || HOTEL_IMAGES[style || 'moderado'][index % 3];
+}
 function bookingSettings() {
   return {
     key: process.env.BOOKING_API_KEY || process.env.BOOKING_KEY || process.env.RAPIDAPI_KEY || '',
@@ -93,7 +134,7 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   const results = Array.isArray(payload.result) ? payload.result : Array.isArray(payload.data) ? payload.data : [];
   return results.slice(0, 3).map(function (hotel, index) {
     const name = hotel.hotel_name || hotel.name || hotel.hotelName || 'Hotel recomendado';
-    const image = hotel.main_photo_url || hotel.main_photo_url_https || hotel.photo_url || hotel.image || HOTEL_IMAGES[style || 'moderado'][index % 3];
+    const image = resolveHotelImage(hotel, index, style, destName);
     const total = Number(hotel.min_total_price || hotel.min_total_price_usd || hotel.price || hotel.total_price || 0);
     const perNight = Number(hotel.min_total_price || hotel.price || hotel.total_price || 0) / Math.max(1, Number((extra && extra.nights) || 3) || 3);
     return {
