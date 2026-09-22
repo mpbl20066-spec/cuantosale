@@ -1197,13 +1197,18 @@
     detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     detailState.localPerDay = Number((Number(detailState.parts.local) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Math.round((Number(data.meta.officialTransfer && data.meta.officialTransfer.amount) || 0) * 0.75 + 45);
+    data.meta.officialTransfer = data.meta.officialTransfer || { pricePerPassenger: 0, amount: 0 };
+    var renderSafe = function (fn, fallback) { try { return fn(); } catch (error) { console.error('Error al renderizar detalle', error); return fallback; } };
+    var breakdownMarkup = renderSafe(function () { return proposalBreakdownMarkup(detailState); }, '<section class="proposal-breakdown"><h2>Desglose del viaje</h2></section>');
+    var dailyBudgetMarkup = renderSafe(function () { return dailyBudgetControls(); }, '');
+    var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, isRoadtrip); }, '');
+    var hotelsMarkup = renderSafe(function () { return hotelOptions(data.meta, proposal.parts.alojamiento); }, '<section class="detail-section"><h2>Hoteles Recomendados</h2></section>');
+    var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
-      proposalBreakdownMarkup(detailState) +
-      dailyBudgetControls() +
-      '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
-      '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
-      '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>' +
+      breakdownMarkup + dailyBudgetMarkup +
+      '<div data-transport-flow>' + transportMarkup + '</div>' +
+      hotelsMarkup + foodMarkup +
       '</div></div>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     actualizarTransporte(isRoadtrip);
