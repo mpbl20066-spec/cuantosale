@@ -12,12 +12,36 @@
   ];
 
   var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '' };
+  var DESTINATION_GROUPS = [
+    { label: 'Litoral del Sudeste', keys: ['buz', 'arraial', 'cabo', 'ilha', 'paraty', 'ilhabela', 'ubatuba', 'rio'] },
+    { label: 'Ciudad, Compras y Negocios', keys: ['sao', 'bho'] },
+    { label: 'Paraísos del Nordeste', keys: ['porto', 'mcz', 'maragogi', 'nat', 'pip', 'trancoso', 'ssa', 'for', 'fernando'] },
+    { label: 'Sur, Naturaleza y Cataratas', keys: ['fln', 'bcm', 'gram', 'canela', 'igu'] }
+  ];
+  var BRASIL_DEFAULT_COSTS = {
+    beach: {
+      flightUsd: 460,
+      hotelPerNightUsd: 120,
+      foodPerDayUsd: 55,
+      localPerDayUsd: 18,
+      airportTransferUsd: 70,
+      baggageAndInsuranceUsd: 65
+    },
+    city: {
+      flightUsd: 390,
+      hotelPerNightUsd: 140,
+      foodPerDayUsd: 68,
+      localPerDayUsd: 26,
+      airportTransferUsd: 80,
+      baggageAndInsuranceUsd: 75
+    }
+  };
   var massSearch = false;
   var detailState = null;
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { buz: 'GIG', rio: 'GIG', fln: 'FLN', sao: 'GRU', ssa: 'SSA', igu: 'IGU', rec: 'REC', for: 'FOR', mcz: 'MCZ', nat: 'NAT', pip: 'NAT', poa: 'POA' };
+  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', sao: 'GRU', bho: 'CNF', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', fernando: 'NVT', fln: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
   var FOOD_TIPS = {
     rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
     fln: ['Buscá <b>prato executivo</b> en el centro de Florianópolis al mediodía: generalmente es la comida con mejor relación precio-cantidad.', 'En los mercados públicos y ferias barriales, armá un picnic con frutas, pan de queso y jugos para llevar a la playa.', 'Alejate una o dos cuadras de la playa para encontrar <b>buffet por kilo</b> y platos del día más accesibles.'],
@@ -186,6 +210,16 @@
       proposalBreakdownContent(state) +
       '</section>';
   }
+  function getCategoryColor(category) {
+    var match = CATS.filter(function (item) { return item[0] === category; })[0];
+    return match ? match[2] : '--c1';
+  }
+  function getBudgetDefaults(destKey) {
+    var key = String(destKey || '').toLowerCase();
+    var beachKeys = ['buz', 'rio', 'fln', 'ssa', 'rec', 'for', 'mcz', 'nat', 'pip', 'brazil'];
+    var isBeach = beachKeys.indexOf(key) >= 0 || key.indexOf('beach') >= 0 || key.indexOf('playa') >= 0;
+    return isBeach ? BRASIL_DEFAULT_COSTS.beach : BRASIL_DEFAULT_COSTS.city;
+  }
   function getActiveBreakdownEntries() {
     if (!detailState) return [];
     return getBudgetBreakdown(detailState).entries;
@@ -217,17 +251,21 @@
     var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
     var hotelName = findSelectedHotelLabel();
     var transferIncluded = !!detailState.selectedFlight && !!detailState.selectedHotel && detailState.transportMode === 'flight' && Number(detailState.transfer) > 0;
+    var summaryItems = [
+      { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
+      { label: 'Transfer', meta: transferIncluded ? 'Incluido' : 'No incluido', value: transferIncluded ? money(Number(detailState.transfer) || 0) : '—', color: getCategoryColor('traslados') },
+      { label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') }
+    ];
     var segments = entries.map(function (entry) {
       return '<span style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
+    }).join('');
+    var itemsHtml = summaryItems.map(function (item) {
+      return '<div class="trip-summary__item"><span class="trip-summary__marker" style="background:var(' + item.color + ')"></span><div class="trip-summary__meta"><span>' + item.label + '</span><b>' + item.meta + '</b></div><em>' + item.value + '</em></div>';
     }).join('');
     summary.innerHTML = '<div class="trip-summary__inner">' +
       '<div class="trip-summary__head"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong></div>' +
       '<div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
-      '<div class="trip-summary__items">' +
-      '<div class="trip-summary__item"><span>Vuelo</span><b>' + esc(flightLabel) + '</b><em>' + money(flightPrice) + '</em></div>' +
-      '<div class="trip-summary__item"><span>Transfer</span><b>' + (transferIncluded ? 'Incluido' : 'No incluido') + '</b><em>' + (transferIncluded ? money(Number(detailState.transfer) || 0) : '—') + '</em></div>' +
-      '<div class="trip-summary__item"><span>Hotel</span><b>' + esc(hotelName) + '</b><em>' + money(Number(detailState.hotel) || 0) + '</em></div>' +
-      '</div>' +
+      '<div class="trip-summary__items">' + itemsHtml + '</div>' +
       '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
       '</div>';
     summary.hidden = false;
@@ -261,15 +299,16 @@
     if (!detailState || !detailState.meta) return;
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var defaults = getBudgetDefaults((detailState.meta.dest && detailState.meta.dest.key) || (detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'brazil');
     var defaultFood = Number(detailState.parts && detailState.parts.comidas) ? (Number(detailState.parts.comidas) / Math.max(1, nights * pax)) : 0;
     var defaultLocal = Number(detailState.parts && detailState.parts.local) ? (Number(detailState.parts.local) / Math.max(1, nights * pax)) : 0;
-    if (!detailState.foodPerDay || Number(detailState.foodPerDay) <= 0) detailState.foodPerDay = defaultFood || 55;
-    if (!detailState.localPerDay || Number(detailState.localPerDay) <= 0) detailState.localPerDay = defaultLocal || 18;
-    detailState.foodPerDay = Math.max(0, Number(detailState.foodPerDay) || 0);
-    detailState.localPerDay = Math.max(0, Number(detailState.localPerDay) || 0);
+    if (!detailState.foodPerDay || Number(detailState.foodPerDay) <= 0) detailState.foodPerDay = defaultFood || defaults.foodPerDayUsd;
+    if (!detailState.localPerDay || Number(detailState.localPerDay) <= 0) detailState.localPerDay = defaultLocal || defaults.localPerDayUsd;
+    detailState.foodPerDay = Math.max(0, Number(detailState.foodPerDay) || defaults.foodPerDayUsd);
+    detailState.localPerDay = Math.max(0, Number(detailState.localPerDay) || defaults.localPerDayUsd);
     detailState.parts.comidas = Math.round((detailState.foodPerDay || 0) * nights * pax);
     detailState.parts.local = Math.round((detailState.localPerDay || 0) * nights * pax);
-    if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) ? Math.round(detailState.meta.officialTransfer.amount * 0.75) : 45;
+    if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) ? Math.round(detailState.meta.officialTransfer.amount * 0.75) : defaults.baggageAndInsuranceUsd;
   }
   function recalcularTotalViaje() {
     if (!detailState) return;
@@ -990,7 +1029,7 @@
   }
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
-    return ['rio', 'buz', 'fln', 'sao', 'igu', 'poa'].indexOf(key) >= 0;
+    return ['fln', 'bcm', 'gram', 'canela', 'igu', 'poa'].indexOf(key) >= 0;
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();
@@ -1029,7 +1068,8 @@
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
     var cheapest = byId(list, data.cheapestId), cozy = byId(list, data.cozyId);
 
-    $('#chip').textContent = live ? 'Precios de referencia' : 'Datos de ejemplo';
+    var chip = $('#chip');
+    if (chip) chip.textContent = '';
     $('#foot').innerHTML = live
       ? '<p><b>Vuelos:</b> tarifa aérea real al momento de la búsqueda, por persona. Puede cambiar hasta que reserves. <b>Alojamiento, comidas, traslados y buses:</b> valores de referencia.</p>'
       : '<p><b>Datos de ejemplo.</b> Los precios de esta página son referencias para mostrar cómo funciona el cálculo. Activá la búsqueda de tarifas aéreas en tiempo real para consultar disponibilidad.</p>';
@@ -1435,7 +1475,32 @@
     $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'booking-form' && e.target.id !== 'transfer-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } if (e.target.id === 'transfer-form') submitTransfer(e.target); else submitBooking(e.target); });
 
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
-      list.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) { var o = document.createElement('option'); o.value = d.key; o.textContent = d.name; sel.appendChild(o); });
+      var byKey = {};
+      list.forEach(function (d) { byKey[d.key] = d; });
+      DESTINATION_GROUPS.forEach(function (group) {
+        var groupNode = document.createElement('optgroup');
+        groupNode.label = group.label;
+        group.keys.forEach(function (key) {
+          var item = byKey[key];
+          if (!item) return;
+          var o = document.createElement('option');
+          o.value = item.key;
+          o.textContent = item.name;
+          groupNode.appendChild(o);
+        });
+        if (groupNode.childNodes.length) sel.appendChild(groupNode);
+      });
+      var extra = list.filter(function (d) { return !DESTINATION_GROUPS.some(function (group) { return group.keys.indexOf(d.key) >= 0; }); });
+      if (extra.length) {
+        var extraGroup = document.createElement('optgroup');
+        extraGroup.label = 'Otros destinos';
+        extra.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) {
+          var o = document.createElement('option');
+          o.value = d.key; o.textContent = d.name;
+          extraGroup.appendChild(o);
+        });
+        sel.appendChild(extraGroup);
+      }
       sel.value = S.dest;
       updateDestinationMode();
       run();
