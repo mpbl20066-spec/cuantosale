@@ -43,7 +43,10 @@ const HOTEL_RECOMMENDATIONS = {
   buz: [{ tier: 'eco', name: 'Pousada Experience João Fernandes', similar: ['Pousada Praia João Fernandes', 'Pousada Corsário Búzios'] }, { tier: 'moderado', name: 'Hotel Atlântico Búzios', similar: ['Colonna Galápagos Garden', 'Selina Búzios'] }, { tier: 'alto', name: 'Insolito Boutique Hotel', similar: ['Casas Brancas Boutique Hotel', 'Vila da Santa Hotel Boutique'] }],
   sao: [{ tier: 'eco', name: 'ibis budget São Paulo Paulista', similar: ['H3 Hotel Paulista', 'Hotel Dan Inn Planalto'] }, { tier: 'moderado', name: 'Novotel São Paulo Jaraguá', similar: ['Blue Tree Premium Paulista', 'Transamerica Executive Paulista'] }, { tier: 'alto', name: 'Renaissance São Paulo Hotel', similar: ['Tivoli Mofarrej', 'Hotel Unique'] }],
   ssa: [{ tier: 'eco', name: 'ibis Salvador Rio Vermelho', similar: ['Rede Andrade Plaza Salvador', 'Hotel Pirâmide Pituba'] }, { tier: 'moderado', name: 'Novotel Salvador Rio Vermelho', similar: ['Mercure Salvador Rio Vermelho', 'Quality Hotel & Suites São Salvador'] }, { tier: 'alto', name: 'Fera Palace Hotel', similar: ['Casa do Amarelindo', 'Vila Galé Salvador'] }],
-  igu: [{ tier: 'eco', name: 'CLH Suites Foz do Iguaçu', similar: ['Ibis Budget Foz do Iguaçu', 'Hotel Foz do Iguaçu'] }, { tier: 'moderado', name: 'JL Hotel by Bourbon', similar: ['Wyndham Foz do Iguaçu', 'Bourbon Cataratas do Iguaçu'] }, { tier: 'alto', name: 'Hotel das Cataratas', similar: ['Sanma Hotel', 'DoubleTree by Hilton Foz'] }]
+  igu: [{ tier: 'eco', name: 'CLH Suites Foz do Iguaçu', similar: ['Ibis Budget Foz do Iguaçu', 'Hotel Foz do Iguaçu'] }, { tier: 'moderado', name: 'JL Hotel by Bourbon', similar: ['Wyndham Foz do Iguaçu', 'Bourbon Cataratas do Iguaçu'] }, { tier: 'alto', name: 'Hotel das Cataratas', similar: ['Sanma Hotel', 'DoubleTree by Hilton Foz'] }],
+  pip: [{ tier: 'eco', name: 'Pousada do Sol Pipa', similar: ['Pousada Brisa de Pipa', 'Pousada Casa da Praia'] }, { tier: 'moderado', name: 'Pousada Villa dos Prazeres', similar: ['Pousada Mar de Pipa', 'Hotel Pipa Beach'] }, { tier: 'alto', name: 'Pousada Beira da Praia', similar: ['Hotel Pipa Praia', 'Aconchego de Pipa'] }],
+  nat: [{ tier: 'eco', name: 'Pousada Costa Verde', similar: ['Tamarindo Praia Hotel', 'Hotel Praia Mar'] }, { tier: 'moderado', name: 'Hotel Ponta Negra', similar: ['Pousada Manguinhos', 'Hotel Casa do Sol'] }, { tier: 'alto', name: 'Marina Hotel Natal', similar: ['Praia Hotel Natal', 'Hotel Ibis Natal'] }],
+  poa: [{ tier: 'eco', name: 'Hotel Porto Alegrense', similar: ['Pousada Moinhos', 'Hotel Fênix'] }, { tier: 'moderado', name: 'Hotel Moinhos de Vento', similar: ['Hotel Porto Alegre Center', 'Hotel Plaza'] }, { tier: 'alto', name: 'Hotel Blue Tree Premium', similar: ['Hotel Continental Porto Alegre', 'Pousada Casa Brasil'] }]
 };
 const HOTEL_IMAGES = {
   eco: ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=960&q=82', 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=960&q=82'],
@@ -240,8 +243,8 @@ async function hotelRecommendations(destKey, destName, style, extra) {
   }
   const fallbackImages = HOTEL_IMAGES[selectedTier] || HOTEL_IMAGES.moderado;
   return uniqueHotelList(catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel, index) {
-    const images = HOTEL_IMAGES[hotel.tier] || HOTEL_IMAGES.moderado;
-    return Object.assign({}, hotel, { name: hotel.name, image: images[index % images.length], similarImages: images.slice(1), total: 0, perNight: 0, source: 'static' });
+    const image = resolveHotelImage({ hotel_name: hotel.name }, index, hotel.tier || selectedTier, destName);
+    return Object.assign({}, hotel, { name: hotel.name, image: image, similarImages: fallbackImages.slice(1), total: 0, perNight: 0, source: 'static' });
   }), fallbackImages);
 }
 function adaptPackagesToStyle(result, trip, dep, ret, today) {
