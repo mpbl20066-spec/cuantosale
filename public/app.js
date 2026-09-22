@@ -1317,6 +1317,30 @@
   var pendingTripSave = false;
   var tripSaveInProgress = false;
 
+  async function guardarViaje(datosVuelo) {
+    if (!supabaseClient) throw new Error('Supabase todavía no está configurado.');
+    if (!datosVuelo || typeof datosVuelo !== 'object') throw new Error('Faltan los datos del vuelo.');
+    var userResult = await supabaseClient.auth.getUser();
+    if (userResult.error) throw new Error('No pudimos verificar tu sesión.');
+    var user = userResult.data && userResult.data.user;
+    if (!user) throw new Error('Debés iniciar sesión para guardar un viaje.');
+    var payload = {
+      user_id: user.id,
+      origin: datosVuelo.origin || datosVuelo.origen || null,
+      destination: datosVuelo.destination || datosVuelo.destino || null,
+      departure_date: datosVuelo.departure_date || datosVuelo.fecha_ida || null,
+      return_date: datosVuelo.return_date || datosVuelo.fecha_vuelta || null,
+      total_amount: Number(datosVuelo.total_amount || datosVuelo.precio_total) || 0,
+      currency: datosVuelo.currency || 'USD',
+      offer_id: datosVuelo.offer_id || null,
+      flight_details: datosVuelo.flight_details || datosVuelo.detalles_vuelo || {}
+    };
+    var result = await supabaseClient.from('trips').insert(payload).select().single();
+    if (result.error) throw new Error('No pudimos guardar el viaje: ' + result.error.message);
+    return result.data;
+  }
+  window.guardarViaje = guardarViaje;
+
   function authDisplayName(user) {
     var metadata = user && user.user_metadata || {};
     return metadata.full_name || metadata.name || (user && user.email) || 'Mi cuenta';
@@ -1364,7 +1388,7 @@
       local_per_day: Number(detailState.localPerDay) || 0,
       total_amount: Number(budget.total) || 0,
       currency: 'USD',
-      details: { parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
+      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
     };
   }
   async function saveCurrentTrip() {
@@ -1376,24 +1400,30 @@
     if (!payload) { alert('Abrí una propuesta antes de guardar el viaje.'); return; }
     payload.user_id = authUser.id;
     tripSaveInProgress = true;
-    var result = await supabaseClient.from('user_trips').insert(payload).select().single();
+    var result;
+    try {
+      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, departure_date: payload.departure_date, return_date: payload.return_date, total_amount: payload.total_amount, currency: payload.currency, offer_id: payload.details && payload.details.flight && payload.details.flight.id || null, flight_details: payload.details });
+    } catch (error) {
+      tripSaveInProgress = false;
+      openAuthModal(error.message);
+      return;
+    }
     tripSaveInProgress = false;
-    if (result.error) { openAuthModal('No pudimos guardar el viaje: ' + result.error.message); return; }
     pendingTripSave = false;
     try { sessionStorage.removeItem('cuantosale_pending_trip'); sessionStorage.removeItem('cuantosale_pending_trip_data'); } catch (error) {}
     alert('Viaje guardado en tu cuenta.');
   }
   async function loadSavedTrips(modal) {
     var box = modal.querySelector('[data-saved-trips]');
-    var result = await supabaseClient.from('user_trips').select('*').order('created_at', { ascending: false });
+    var result = await supabaseClient.from('trips').select('*').order('created_at', { ascending: false });
     if (result.error) { box.innerHTML = '<p class="booking-error">' + esc(result.error.message) + '</p>'; return; }
     if (!result.data.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
-    box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.title || trip.destination_name) + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
+    box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
     box._trips = result.data;
   }
   function loadTrip(trip) {
-    var details = trip.details || {};
-    S.dest = trip.destination_key || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || S.transport;
+    var details = trip.details || trip.flight_details || {};
+    S.dest = trip.destination_key || details.destination_key || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || S.transport;
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); openDestinationProposal(S.dest); }
   }
