@@ -161,7 +161,6 @@
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
-    renderQuoteSummary();
   }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
@@ -203,7 +202,6 @@
       var liveFlights = !autoEnabled && flow.querySelector('.flight-search');
       if (liveFlights) searchFlights(detailState.meta, liveFlights);
     }
-    renderBreakdown();
     sincronizarTrasladoOficial();
   }
   function actualizarRoadtrip(kmPerLiter) {
@@ -279,108 +277,6 @@
       default: 'Movilidad local con transporte público y caminatas.'
     };
     return map[key] || map.default;
-  }
-  function getSummarySnapshot() {
-    var meta = detailState && detailState.meta ? detailState.meta : (lastData && lastData.meta ? lastData.meta : null);
-    var proposal = null;
-    if (detailState && detailState.meta) {
-      proposal = lastData && lastData.list && (byId(lastData.list, lastData.recId) || lastData.list[0]);
-    } else if (lastData && lastData.list) {
-      proposal = byId(lastData.list, lastData.recId) || lastData.list[0];
-    }
-    if (!meta || !proposal) return null;
-    var roadtripMode = detailState ? detailState.transportMode === 'auto' : proposal.mode === 'auto';
-    var parts = detailState ? detailState.parts : proposal.parts;
-    var flight = roadtripMode ? 0 : Number(detailState ? detailState.flight : proposal.parts.pasajes || 0);
-    var hotel = Number(detailState ? detailState.hotel : proposal.parts.alojamiento || 0);
-    var local = Number(parts.local || 0);
-    var transfers = Number((detailState ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : (Number(proposal.parts.traslados) || 0)) || 0);
-    var extras = Number(parts.extras || 0);
-    var auto = Number(detailState ? detailState.auto : proposal.parts.auto || 0);
-    var total = roadtripMode
-      ? Math.round((auto || 0) + hotel + (Number(parts.comidas) || 0))
-      : Math.round(flight + hotel + (Number(parts.comidas) || 0) + local + transfers + extras + (Number(detailState ? detailState.transfer : 0) || 0));
-    var rows = roadtripMode
-      ? [
-          { label: 'Auto / Roadtrip', value: auto },
-          { label: 'Alojamiento', value: hotel },
-          { label: 'Comidas', value: Number(parts.comidas) || 0 }
-        ]
-      : [
-          { label: 'Pasajes', value: flight },
-          { label: 'Alojamiento', value: hotel },
-          { label: 'Comidas', value: Number(parts.comidas) || 0 },
-          { label: 'Transporte local', value: local },
-          { label: 'Traslados', value: transfers },
-          { label: 'Extras', value: extras }
-        ];
-    return {
-      destination: meta.dest && meta.dest.name ? meta.dest.name : 'Tu viaje',
-      dep: meta.dep || '',
-      ret: meta.ret || '',
-      total: total,
-      transportLabel: roadtripMode ? 'Auto / Roadtrip' : 'Vuelo + hotel',
-      localNote: localTransportDescription(meta),
-      rows: rows.filter(function (row) { return Number(row.value) > 0; })
-    };
-  }
-  function renderQuoteSummary() {
-    var panel = document.getElementById('floating-summary');
-    if (!panel) return;
-    var snapshot = getSummarySnapshot();
-    if (!snapshot) { panel.classList.add('oculto'); return; }
-    var collapsed = panel.classList.contains('is-collapsed');
-    var rowsHtml = snapshot.rows.map(function (row) {
-      return '<div class="floating-summary__row"><span>' + esc(row.label) + '</span><b>' + money(Number(row.value) || 0) + '</b></div>';
-    }).join('');
-    panel.classList.remove('oculto');
-    panel.classList.toggle('is-collapsed', collapsed);
-    panel.innerHTML = '<button type="button" class="floating-summary__toggle" data-summary-toggle aria-label="Minimizar resumen">' + (collapsed ? '⟨' : '⟩') + '</button>' +
-      '<div class="floating-summary__content">' +
-      '<div class="floating-summary__header"><span class="floating-summary__eyebrow">Resumen</span><h3 class="floating-summary__title">' + esc(snapshot.destination) + '</h3><p class="floating-summary__meta"><strong>' + esc(snapshot.dep || 'Fecha ida') + '</strong> → <strong>' + esc(snapshot.ret || 'Fecha vuelta') + '</strong><br>' + esc(snapshot.transportLabel) + '</p></div>' +
-      '<div class="floating-summary__list">' + rowsHtml + '</div>' +
-      '<div class="floating-summary__total"><small>Total general</small><strong>' + money(snapshot.total) + '</strong></div>' +
-      '<div class="floating-summary__cta"><button type="button">Continuar con la reserva</button></div>' +
-      '</div>';
-    var toggle = panel.querySelector('[data-summary-toggle]');
-    if (toggle) {
-      toggle.addEventListener('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        panel.classList.toggle('is-collapsed');
-        renderQuoteSummary();
-      });
-    }
-  }
-  function renderBreakdown() {
-    if (!detailState) return;
-    var panel = document.getElementById('floating-breakdown');
-    if (!panel) return;
-    var roadtrip = detailState.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
-    var total = roadtrip
-      ? Math.round((Number(detailState.auto) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0))
-      : Math.round((Number(detailState.flight) || 0) + (Number(detailState.hotel) || 0) + (Number(detailState.parts.comidas) || 0) + (Number(detailState.parts.local) || 0) + (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) + (Number(detailState.parts.extras) || 0));
-    var activeCats = categories.map(function (category) {
-      if (category === 'auto' && !roadtrip) return null;
-      var info = CATS.filter(function (c) { return c[0] === category; })[0];
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
-      var note = category === 'local' ? localTransportDescription(detailState.meta) : '';
-      return { category: category, label: info ? info[1] : '', color: info ? info[2] : '--c3', value: Number(value) || 0, note: note };
-    }).filter(Boolean);
-    var stack = activeCats.map(function (entry) {
-      var width = total ? (entry.value / total * 100) : 0;
-      return '<span style="width:' + width + '%;background:var(' + entry.color + ')"></span>';
-    }).join('');
-    var rows = activeCats.map(function (entry) {
-      var noteMarkup = entry.note ? '<small class="floating-breakdown__note">' + esc(entry.note) + '</small>' : '';
-      return '<div class="floating-breakdown__row" data-cost-category="' + entry.category + '"><i style="background:var(' + entry.color + ')"></i><div class="floating-breakdown__meta"><span class="floating-breakdown__name">' + esc(entry.label) + '</span>' + noteMarkup + '</div><b class="floating-breakdown__value" data-cost-value>' + money(entry.value) + '</b></div>';
-    }).join('');
-    panel.classList.remove('oculto');
-    panel.innerHTML = '<div class="floating-breakdown__title-block"><h3>Resumen de cotización</h3><p>' + esc((detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'Tu viaje') + ' · ' + esc((detailState.meta && detailState.meta.dep) || '') + ' / ' + esc((detailState.meta && detailState.meta.ret) || '') + '</p></div>' +
-      '<div class="progress-bar-container" role="img" aria-label="Distribución del costo">' + stack + '</div>' +
-      '<div class="floating-breakdown__list">' + rows + '</div>' +
-      '<div class="floating-breakdown__cta"><strong>' + money(total) + '</strong><button type="button">Continuar con la reserva</button></div>';
   }
   function breakdownRows() {
     if (!detailState) return '';
@@ -848,7 +744,6 @@
 
     var el = $('#results');
     el.innerHTML = h;
-    renderQuoteSummary();
     var ch = el.querySelector('.chart'), cu = el.querySelector('.bar.cur');
     if (ch && cu) ch.scrollLeft = cu.offsetLeft - ch.clientWidth / 2 + cu.offsetWidth / 2;
   }
@@ -866,7 +761,6 @@
       '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>' +
       '</div></div>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
-    renderQuoteSummary();
     actualizarTransporte(isRoadtrip);
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
@@ -978,8 +872,6 @@
       if (e.target.closest('#btn-volver')) {
         e.preventDefault(); e.stopPropagation();
         $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
-        var floatingBreakdown = document.getElementById('floating-breakdown');
-        if (floatingBreakdown) floatingBreakdown.classList.add('oculto');
         if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; }
         window.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
