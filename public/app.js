@@ -1392,7 +1392,7 @@
     };
   }
   async function saveCurrentTrip() {
-    if (!supabaseClient) { openAuthModal('Configurá Supabase para guardar viajes.'); return; }
+    if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
     if (!authUser) { pendingTripSave = true; try { var draft = tripPayload(); if (draft) sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(draft)); sessionStorage.setItem('cuantosale_pending_trip', '1'); } catch (error) {} openAuthModal(); return; }
     if (tripSaveInProgress) return;
     var payload = tripPayload();
@@ -1452,10 +1452,10 @@
     $('#auth-modal').addEventListener('click', async function (e) {
       if (e.target.closest('[data-close-auth]') || e.target === $('#auth-modal')) return closeAccountModal('auth-modal');
       var google = e.target.closest('[data-google-auth]');
-      if (google) { if (!supabaseClient) { openAuthModal('La autenticación todavía no está configurada.'); return; } google.disabled = true; var oauth = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); if (oauth.error) openAuthModal(oauth.error.message); return; }
+      if (google) { if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; } google.disabled = true; var oauth = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); if (oauth.error) openAuthModal(oauth.error.message); return; }
       var signup = e.target.closest('[data-auth-action="signup"]');
       if (signup) {
-        if (!supabaseClient) { openAuthModal('La autenticación todavía no está configurada.'); return; }
+        if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
         var form = $('#auth-form'), status = form && form.querySelector('[data-auth-status]');
         if (!form || !form.reportValidity()) return;
         var result = await supabaseClient.auth.signUp({ email: form.email.value.trim(), password: form.password.value });
