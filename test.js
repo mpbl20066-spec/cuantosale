@@ -91,7 +91,30 @@ function offer(amount, cur, name, segsOut, segsBack) {
   await t('formatea las ofertas de la SDK de Duffel para el frontend', function () {
     const offers = app.formatOffers([{ id: 'off_1', total_amount: '299.50', total_currency: 'USD', owner: { name: 'Aerolínea Test' },
       slices: [{ duration: 'PT3H45M', segments: [{ departing_at: '2027-01-10T10:00:00', arriving_at: '2027-01-10T13:45:00', marketing_carrier: { name: 'Aerolínea Test', logo_symbol_url: 'https://logo.test/a.png' } }] }] }]);
-    assert.deepStrictEqual(offers[0], { id: 'off_1', airline: 'Aerolínea Test', logo: 'https://logo.test/a.png', departure: '2027-01-10T10:00:00', arrival: '2027-01-10T13:45:00', stops: 0, duration: '3 h 45 min', price_usd: 299.5, original_price: '299.50', original_currency: 'USD' });
+    assert.strictEqual(offers[0].id, 'off_1');
+    assert.strictEqual(offers[0].airline, 'Aerolínea Test');
+    assert.strictEqual(offers[0].logo, 'https://logo.test/a.png');
+    assert.strictEqual(offers[0].departure, '2027-01-10T10:00:00');
+    assert.strictEqual(offers[0].arrival, '2027-01-10T13:45:00');
+    assert.strictEqual(offers[0].stops, 0);
+    assert.strictEqual(offers[0].duration, '3 h 45 min');
+    assert.strictEqual(offers[0].price_usd, 299.5);
+    assert.strictEqual(offers[0].original_price, '299.50');
+    assert.strictEqual(offers[0].original_currency, 'USD');
+  });
+  await t('mantiene los tramos de ida y vuelta en ofertas round-trip', function () {
+    const offers = app.formatOffers([{
+      id: 'off_round', total_amount: '550.00', total_currency: 'USD', owner: { name: 'Aerolínea Test' },
+      slices: [
+        { duration: 'PT4H', segments: [{ departing_at: '2027-01-10T10:00:00', arriving_at: '2027-01-10T14:00:00', origin: { iata_code: 'MVD', name: 'Montevideo' }, destination: { iata_code: 'NAT', name: 'Natal' }, marketing_carrier: { name: 'Aerolínea Test', logo_symbol_url: 'https://logo.test/a.png' } }] },
+        { duration: 'PT4H10M', segments: [{ departing_at: '2027-01-17T10:00:00', arriving_at: '2027-01-17T14:10:00', origin: { iata_code: 'NAT', name: 'Natal' }, destination: { iata_code: 'MVD', name: 'Montevideo' }, marketing_carrier: { name: 'Aerolínea Test', logo_symbol_url: 'https://logo.test/a.png' } }] }
+      ]
+    }]);
+    assert.strictEqual(offers[0].trip_type, 'round_trip');
+    assert.strictEqual(offers[0].outbound.origin.code, 'MVD');
+    assert.strictEqual(offers[0].inbound.destination.code, 'MVD');
+    assert.strictEqual(offers[0].departure, '2027-01-10T10:00:00');
+    assert.strictEqual(offers[0].arrival, '2027-01-17T14:10:00');
   });
   await t('usa precios y fotos reales de Booking cuando está configurada', async function () {
     const originalFetch = global.fetch;

@@ -391,26 +391,51 @@ function usdAmount(amount, currency) {
 function formatOffers(offers, requiredOrigin) {
   const excludedOrigins = new Set(['EZE', 'AEP']);
   return (offers || []).map(function (offer) {
-    const slice = offer.slices && offer.slices[0] || {};
-    const segments = Array.isArray(slice.segments) ? slice.segments : [];
-    const first = segments[0] || {}, last = segments[segments.length - 1] || {};
-    const carrier = first.marketing_carrier || first.operating_carrier || offer.owner || {};
+    const slices = Array.isArray(offer.slices) ? offer.slices : [];
+    const outboundSlice = slices[0] || {};
+    const inboundSlice = slices[1] || {};
+    const outboundSegments = Array.isArray(outboundSlice.segments) ? outboundSlice.segments : [];
+    const inboundSegments = Array.isArray(inboundSlice.segments) ? inboundSlice.segments : [];
+    const firstOut = outboundSegments[0] || {};
+    const lastOut = outboundSegments[outboundSegments.length - 1] || {};
+    const firstIn = inboundSegments[0] || {};
+    const lastIn = inboundSegments[inboundSegments.length - 1] || {};
+    const carrier = firstOut.marketing_carrier || firstOut.operating_carrier || firstIn.marketing_carrier || firstIn.operating_carrier || offer.owner || {};
     const priceUsd = usdAmount(offer.total_amount, offer.total_currency);
+    const departureAirport = { code: firstOut.origin && firstOut.origin.iata_code || '', name: firstOut.origin && firstOut.origin.name || '' };
+    const arrivalAirport = { code: (lastIn.destination && lastIn.destination.iata_code) || (lastOut.destination && lastOut.destination.iata_code) || '', name: (lastIn.destination && lastIn.destination.name) || (lastOut.destination && lastOut.destination.name) || '' };
+    const outboundAirport = { code: firstOut.origin && firstOut.origin.iata_code || '', name: firstOut.origin && firstOut.origin.name || '' };
+    const inboundAirport = { code: firstIn.origin && firstIn.origin.iata_code || '', name: firstIn.origin && firstIn.origin.name || '' };
     const formatted = {
       id: offer.id,
       passenger_ids: Array.isArray(offer.passengers) ? offer.passengers.map(function (p) { return p.id; }).filter(Boolean) : [],
       airline: carrier.name || 'Aerolínea',
       logo: carrier.logo_symbol_url || carrier.logo_lockup_url || null,
-      departure: first.departing_at || null,
-      arrival: last.arriving_at || null,
-      stops: Math.max(segments.length - 1, 0),
-      duration: durationLabel(slice.duration),
+      departure: firstOut.departing_at || null,
+      arrival: lastIn.arriving_at || lastOut.arriving_at || null,
+      stops: Math.max(outboundSegments.length - 1 + inboundSegments.length - 1, 0),
+      duration: durationLabel((outboundSlice.duration || '') + (inboundSlice.duration ? ' + ' + inboundSlice.duration : '')),
       price_usd: priceUsd === null ? null : Math.round(priceUsd * 100) / 100,
       original_price: String(offer.total_amount || ''),
-      original_currency: offer.total_currency || null
+      original_currency: offer.total_currency || null,
+      trip_type: slices.length > 1 ? 'round_trip' : 'one_way',
+      outbound: {
+        origin: outboundAirport,
+        destination: { code: lastOut.destination && lastOut.destination.iata_code || '', name: lastOut.destination && lastOut.destination.name || '' },
+        departure: firstOut.departing_at || null,
+        arrival: lastOut.arriving_at || null,
+        stops: Math.max(outboundSegments.length - 1, 0),
+        duration: durationLabel(outboundSlice.duration)
+      },
+      inbound: {
+        origin: inboundAirport,
+        destination: { code: lastIn.destination && lastIn.destination.iata_code || '', name: lastIn.destination && lastIn.destination.name || '' },
+        departure: firstIn.departing_at || null,
+        arrival: lastIn.arriving_at || null,
+        stops: Math.max(inboundSegments.length - 1, 0),
+        duration: durationLabel(inboundSlice.duration)
+      }
     };
-    const departureAirport = { code: first.origin && first.origin.iata_code || '', name: first.origin && first.origin.name || '' };
-    const arrivalAirport = { code: last.destination && last.destination.iata_code || '', name: last.destination && last.destination.name || '' };
     if (departureAirport.code || departureAirport.name) formatted.departure_airport = departureAirport;
     if (arrivalAirport.code || arrivalAirport.name) formatted.arrival_airport = arrivalAirport;
     if (!formatted.passenger_ids.length) delete formatted.passenger_ids;
