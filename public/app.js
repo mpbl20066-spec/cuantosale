@@ -282,7 +282,19 @@
     var transferLabel = getTransferPickupLabel(transferState.pickupMinutes, transferState.customTime);
     var selectedHotelName = findSelectedHotelLabel();
     var hotelTotal = Number(detailState.hotel) || 0;
-    var transferTotal = Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 0;
+    var transferTotal = Number(detailState.transfer) || Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 0;
+    var nights = Math.max(1, Number(detailState.meta.nights) || 1);
+    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var dailyCosts = getDestinationDailyCosts(detailState.meta.dest && detailState.meta.dest.key);
+    var foodPerDay = Number(detailState.foodPerDay) || dailyCosts.food.moderado;
+    var localPerDay = Number(detailState.localPerDay) || dailyCosts.transport.eco;
+    var foodTotal = Math.round(foodPerDay * nights * pax);
+    var localTotal = Math.round(localPerDay * nights * pax);
+    var flightTotal = Number(detailState.flight) || 0;
+    var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal);
+    var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'EconÃ³mico';
+    var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
+    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + (transferLabel || 'A coordinar') + ' · ' + money(transferTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     var bookingHref = bookingUrl(detailState.meta, { hotel: selectedHotelName });
     modal.innerHTML = '<div class="booking-dialog itinerary-summary" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title">' +
       '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
@@ -297,6 +309,15 @@
       '<div class="itinerary-summary__section"><h3>Agencia y coordinación</h3>' +
       '<div class="itinerary-summary__card"><p><strong>Contacto:</strong> reservas@cuantosale.com</p><p><strong>Instrucciones:</strong> compartí este resumen con la agencia para emitir los vuelos y coordinar el transfer con el horario y el hotel indicado.</p><p><strong>Importante:</strong> el alojamiento se confirma externamente en Booking.com; la operación aérea y de traslado se gestionan con la agencia.</p></div></div>' +
       '</div>';
+    modal.innerHTML = '<div class="booking-dialog itinerary-summary voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
+      '<div class="voucher-head"><span class="voucher-kicker">CuantoSale · Voucher digital</span><h2 id="itinerary-summary-title">Resumen final del itinerario</h2><p>' + esc(detailState.meta.dest.name) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</p></div>' +
+      '<div class="voucher-total"><span>Total general estimado</span><strong>' + money(totalGeneral) + '</strong><small>Vuelo + hotel + traslados + operación en destino</small></div>' +
+      '<div class="voucher-grid"><div class="voucher-card"><span class="voucher-icon">✈️</span><div><small>Vuelo seleccionado</small><strong>' + esc(flightSummary.airline) + '</strong><p>' + esc(flightSummary.summary) + '</p><b>' + money(flightTotal) + '</b></div></div>' +
+      '<div class="voucher-card"><span class="voucher-icon">🏨</span><div><small>Alojamiento</small><strong>' + esc(selectedHotelName) + '</strong><p>Reserva de referencia en Booking.com</p><b>' + money(hotelTotal) + '</b></div></div>' +
+      '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div></div>' +
+      '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
+      '<div class="voucher-actions"><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
+    modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   function syncDailyBudgetState() {
@@ -1494,6 +1515,25 @@
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
+      var whatsappButton = e.target.closest('[data-share-whatsapp]');
+      if (whatsappButton) {
+        e.preventDefault();
+        var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent($('#booking-modal').dataset.summaryText || '');
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      }
+      var copyButton = e.target.closest('[data-copy-summary]');
+      if (copyButton) {
+        e.preventDefault();
+        var copyText = $('#booking-modal').dataset.summaryText || '';
+        var copyPromise = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(copyText) : Promise.reject(new Error('clipboard unavailable'));
+        copyPromise.then(function () {
+          var status = $('#booking-modal').querySelector('[data-copy-status]');
+          if (status) status.textContent = 'Resumen copiado';
+        }).catch(function () {
+          var status = $('#booking-modal').querySelector('[data-copy-status]');
+          if (status) status.textContent = 'No se pudo copiar';
+        });
+      }
       var stepButton = e.target.closest('[data-transfer-step]');
       if (stepButton) {
         e.preventDefault(); e.stopPropagation();
