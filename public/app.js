@@ -1432,7 +1432,7 @@
     try {
       var configResponse = await fetch('/api/config');
       var config = await configResponse.json();
-      if (!config.supabaseUrl || !config.supabaseAnonKey) return;
+      if (!config.supabaseUrl || !config.supabaseAnonKey) { console.warn('Falta SUPABASE_ANON_KEY/SUPABASE_PUBLISHABLE_KEY en las variables de entorno del despliegue.'); return; }
       supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
       try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
       var sessionResult = await supabaseClient.auth.getSession();
