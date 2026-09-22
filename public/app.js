@@ -640,7 +640,7 @@
       '<section class="detail-section"><h2>Hoteles Recomendados</h2>' + hotelOptions(data.meta, proposal.parts.alojamiento) + '</section>' +
       roadtripCard(Object.assign({}, data.meta, { roadtrip: detailState.roadtrip }), isRoadtrip) +
       '<div data-transport-flow>' + transportFlow(detailState.meta, detailState.flight, isRoadtrip) + '</div>' +
-      '<section class="detail-section"><h2>Guía Secreta del Destino</h2>' + foodGuide(data.meta) + '</section>';
+      '<section class="detail-section"><h2>Recomendaciones</h2>' + foodGuide(data.meta) + '</section>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     var floating = document.getElementById('floating-breakdown');
     if (floating) floating.classList.remove('oculto');
