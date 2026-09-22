@@ -1494,11 +1494,28 @@
       });
 
       sel.innerHTML = '<option value="todos">🌍 Todos los destinos</option>';
+      var grouped = {};
+      DESTINATION_GROUPS.forEach(function (group) {
+        grouped[group.label] = [];
+      });
       ordered.forEach(function (item) {
-        var o = document.createElement('option');
-        o.value = item.key;
-        o.textContent = item.group === 'Otros destinos' ? item.name : item.group + ' · ' + item.name;
-        sel.appendChild(o);
+        if (!grouped[item.group]) grouped[item.group] = [];
+        grouped[item.group].push(item);
+      });
+      var groupOrder = DESTINATION_GROUPS.map(function (group) { return group.label; });
+      if (grouped['Otros destinos'] && grouped['Otros destinos'].length) groupOrder.push('Otros destinos');
+      groupOrder.forEach(function (label) {
+        var list = grouped[label];
+        if (!list || !list.length) return;
+        var group = document.createElement('optgroup');
+        group.label = label;
+        list.forEach(function (item) {
+          var o = document.createElement('option');
+          o.value = item.key;
+          o.textContent = item.name;
+          group.appendChild(o);
+        });
+        sel.appendChild(group);
       });
 
       sel.value = S.dest;
