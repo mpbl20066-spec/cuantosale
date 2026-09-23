@@ -481,14 +481,15 @@
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
     var enabled = detailState.transportMode === 'flight' && !!detailState.selectedFlight && !!detailState.selectedHotel;
-    detailState.transfer = enabled ? Number(detailState.meta.officialTransfer.amount) : 0;
-    var status = document.querySelector('[data-transfer-status]');
-    var button = document.querySelector('[data-buy-transfer]');
-    var flightData = getSelectedFlightSummary();
-    if (status) status.textContent = enabled
-      ? flightData.summary
-      : 'Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.';
-    if (button) { button.disabled = !enabled; button.textContent = 'Seleccioná traslado / transfer'; }
+    var selectedAmount = detailState.transferType === 'private' ? 150 : (detailState.transferType === 'shared' ? 30 : 0);
+    detailState.transfer = enabled ? (selectedAmount || Number(detailState.meta.officialTransfer.amount) || 0) : 0;
+    var transferSection = document.querySelector('[data-official-transfer]');
+    var status = transferSection && transferSection.querySelector('[data-transfer-status]');
+    var button = transferSection && transferSection.querySelector('[data-buy-transfer]');
+    if (status) status.textContent = !enabled
+      ? 'Seleccioná una tarifa aérea y un alojamiento para habilitar el transfer.'
+      : (detailState.transferType === 'private' ? 'Transfer privado seleccionado · US$ 150.' : (detailState.transferType === 'shared' ? 'Transfer compartido seleccionado · US$ 30.' : 'Seleccioná una modalidad de transfer.'));
+    if (button) { button.disabled = !enabled || !detailState.transferType; button.textContent = detailState.transferType ? 'Coordinar traslado' : 'Seleccioná una modalidad'; }
     recalcularTotalViaje();
   }
   function actualizarPasajes(section, price, airline) {
@@ -704,7 +705,7 @@
   }
   function addTransferToBudget() {
     if (!detailState) return;
-    var transferAmount = Number((detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 70) || 70;
+    var transferAmount = detailState.transferType === 'private' ? 150 : (detailState.transferType === 'shared' ? 30 : Number((detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 70) || 70);
     detailState.transfer = transferAmount;
     detailState.selectedHotel = true;
     detailState.transferWizard = detailState.transferWizard || {};
@@ -1372,11 +1373,12 @@
 
   function openDestinationProposal(key, savedTrip) {
     var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
-    fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
+    return fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
       if (savedTrip) { applySavedTripToDetail(savedTrip); window.setTimeout(openItinerarySummaryModal, 0); }
-    }).catch(function (e) { notice(e.message); });
+      return true;
+    }).catch(function (e) { notice(e.message); return null; });
   }
 
   // Captura los botones dinámicos antes de que <details> u otro listener los procese.
@@ -1524,7 +1526,6 @@
     }
     if (result.error) { box.innerHTML = '<p class="booking-error">No se pudieron cargar tus viajes porque la tabla todavía no tiene permisos RLS configurados. Ejecutá <strong>supabase_trips_rls_fix.sql</strong> en el SQL Editor de Supabase y recargá.</p>'; return; }
     if (!result.data.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
-    box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_price || trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
     var seenTrips = new Set();
     var uniqueTrips = result.data.filter(function (trip) {
       var key = [trip.destination, trip.departure_date, trip.return_date, trip.total_price || trip.total_amount, trip.offer_id || ''].join('|') || trip.id;
@@ -1533,17 +1534,10 @@
       return true;
     });
     if (!uniqueTrips.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
-    var rendered = new Set();
-    Array.prototype.forEach.call(box.querySelectorAll('[data-load-trip]'), function (button, index) {
-      var trip = result.data[index] || {};
-      var id = [trip.destination, trip.departure_date, trip.return_date, trip.total_price || trip.total_amount, trip.offer_id || ''].join('|') || String(trip.id || '');
-      if (rendered.has(id)) { var card = button.closest('.saved-trip'); if (card) card.remove(); }
-      else rendered.add(id);
-    });
-    Array.prototype.forEach.call(box.querySelectorAll('[data-load-trip]'), function (button) {
-      if (!button.parentNode.querySelector('[data-delete-trip]')) button.insertAdjacentHTML('afterend', '<button type="button" class="account-button account-button--danger" data-delete-trip="' + esc(button.getAttribute('data-load-trip')) + '" aria-label="Borrar viaje">🗑️</button>');
-    });
+    // Render deduplicated trips directly so every button maps to box._trips.
+    box.innerHTML = uniqueTrips.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_price || trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button><button type="button" class="account-button account-button--danger" data-delete-trip="' + esc(trip.id) + '" aria-label="Borrar viaje">🗑️</button></article>'; }).join('');
     box._trips = uniqueTrips;
+    return;
   }
   async function deleteSavedTrip(tripId) {
     if (!supabaseClient || !tripId) return;
@@ -1593,7 +1587,7 @@
     var details = trip.details || trip.flight_details || {};
     S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport;
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
-    if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); openDestinationProposal(S.dest, trip); }
+    if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); var loaded = await openDestinationProposal(S.dest, trip); if (loaded === null) throw new Error('No pudimos cargar la propuesta guardada.'); }
     else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
   }
   async function initAuth() {
@@ -1643,7 +1637,34 @@
     $('#trips-modal').addEventListener('click', async function (e) {
       if (e.target.closest('[data-close-trips]') || e.target === $('#trips-modal')) return closeAccountModal('trips-modal');
       var loadButton = e.target.closest('[data-load-trip]');
-      if (loadButton) { var tripsBox = $('#trips-modal').querySelector('[data-saved-trips]'); var trip = tripsBox && tripsBox._trips && tripsBox._trips.find(function (item) { return String(item.id) === String(loadButton.getAttribute('data-load-trip')); }); if (trip) loadTrip(trip); }
+      if (loadButton) {
+        e.preventDefault(); e.stopPropagation();
+        var tripsBox = $('#trips-modal').querySelector('[data-saved-trips]');
+        var tripId = loadButton.getAttribute('data-load-trip');
+        var trip = tripsBox && tripsBox._trips && tripsBox._trips.find(function (item) { return String(item.id) === String(tripId); });
+        loadButton.disabled = true;
+        loadButton.dataset.originalText = loadButton.textContent;
+        loadButton.textContent = 'Cargando...';
+        (async function () {
+          try {
+            if (!trip && supabaseClient) {
+              var userResult = await supabaseClient.auth.getUser();
+              var user = userResult.data && userResult.data.user;
+              if (user) {
+                var fetched = await supabaseClient.from('trips').select('*').eq('id', tripId).eq('user_id', user.id).maybeSingle();
+                trip = fetched.data || null;
+              }
+            }
+            if (!trip) throw new Error('No pudimos encontrar ese viaje guardado.');
+            await loadTrip(trip);
+          } catch (error) {
+            loadButton.disabled = false;
+            loadButton.textContent = loadButton.dataset.originalText || 'Cargar';
+            notice(error.message || 'No pudimos cargar el viaje.');
+          }
+        }());
+        return;
+      }
       var deleteButton = e.target.closest('[data-delete-trip]');
       if (deleteButton) { e.preventDefault(); e.stopPropagation(); if (window.confirm('¿Borrar este viaje guardado?')) deleteSavedTrip(deleteButton.getAttribute('data-delete-trip')); return; }
       var logout = e.target.closest('[data-signout]');
