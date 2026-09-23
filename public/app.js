@@ -1885,7 +1885,6 @@
 
     var sel = $('#dest');
     var trigger = document.getElementById('dest-trigger');
-    var destToggle = document.getElementById('dest-toggle');
     var menu = document.getElementById('dest-menu');
     var destItems = [];
     var activeDestOption = null;
@@ -1944,7 +1943,6 @@
       if (!menu || !trigger || !sel) return;
       menu.hidden = true;
       trigger.setAttribute('aria-expanded', 'false');
-      if (destToggle) destToggle.setAttribute('aria-expanded', 'false');
       sel.classList.remove('is-open');
       setDestDisplay(S.dest);
     }
@@ -1953,7 +1951,6 @@
       if (!menu || !trigger || !sel) return;
       menu.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
-      if (destToggle) destToggle.setAttribute('aria-expanded', 'true');
       sel.classList.add('is-open');
     }
 
@@ -2029,16 +2026,6 @@
           }
           if (option) selectDestination(option.getAttribute('data-dest-value'));
         }
-      });
-    }
-    if (destToggle) {
-      destToggle.addEventListener('click', function () {
-        if (menu && menu.hidden) {
-          if (trigger) trigger.value = '';
-          filterDestOptions('');
-          openDestMenu();
-          if (trigger) trigger.focus();
-        } else closeDestMenu();
       });
     }
     if (menu) {
