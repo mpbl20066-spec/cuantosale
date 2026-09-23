@@ -8,7 +8,7 @@
     ['local', 'Transporte local', '--c5'],
     ['traslados', 'Traslados', '--c4'],
     ['auto', 'Auto / Roadtrip', '--c4'],
-    ['extras', 'Valijas, tasas y seguro', '--c6']
+    ['tours', 'Tours y actividades', '--c6']
   ];
   var LOCAL_TOURS = [
     { destinations: ['rio'], destination: 'Río de Janeiro, Brasil', title: 'Cristo Redentor (Tren del Corcovado) y Pan de Azúcar', description: 'Excursión guiada de un día completo con entradas prioritarias y transporte incluido.', price: 65 },
@@ -135,7 +135,9 @@
     });
   }
   function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+    // Las respuestas de proveedores pueden omitir campos; nunca mostrar
+    // "undefined"/"null" literalmente en la interfaz.
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
   function bookingUrl(meta, extra) {
     var query = new URLSearchParams({
@@ -168,6 +170,7 @@
       '</div></section>';
   }
   function hotelTotalForRate(meta, accommodationTotal, multiplier) {
+    var nights = Math.max(1, Number(meta && meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     return Math.max(1, Math.round(average * multiplier)) * nights * pax;
@@ -251,13 +254,10 @@
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
     var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
     if (!tours.length) return '';
-    var nights = Math.max(1, Number(meta.nights) || 1);
-    var pax = Math.max(1, Number(meta.pax) || 1);
-    return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y Experiencias Locales</h2><p>Ideas para disfrutar ' + esc(meta.dest.name) + '. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid">' + tours.map(function (tour) {
-      var message = 'Hola, quiero consultar por el tour “' + tour.title + '” en ' + tour.destination + '. Viajamos ' + pax + (pax === 1 ? ' persona' : ' personas') + ' del ' + meta.dep + ' al ' + meta.ret + '. Precio referencial: US$ ' + tour.price + '.';
-      var href = 'https://wa.me/?text=' + encodeURIComponent(message);
-      return '<article class="local-tour"><span class="local-tour__icon" aria-hidden="true">✦</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div><a class="local-tour__cta" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">Reservar con asistencia <span aria-hidden="true">↗</span></a></article>';
-    }).join('') + '</div><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final por WhatsApp.</p></section>';
+    return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y actividades sugeridas</h2><p>Elegí las experiencias que querés sumar a tu viaje. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid">' + tours.map(function (tour, index) {
+      var id = 'tour-' + destinationKey + '-' + index;
+      return '<article class="local-tour" data-tour-card role="checkbox" tabindex="0" aria-checked="false" aria-label="Sumar ' + esc(tour.title) + ' al presupuesto"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '" tabindex="-1"><span class="local-tour__check" aria-hidden="true">✓</span><span class="local-tour__status">Sumar al presupuesto</span><span class="local-tour__icon" aria-hidden="true">✦</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div></article>';
+    }).join('') + '</div><div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div></section>';
   }
   var hotelRequestId = 0;
   function hotelLoading(meta) {
@@ -303,14 +303,14 @@
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas', 'tours'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
     var transferValue = Number(state.transfer) || 0;
     var trasladoValue = (Number(state.parts && state.parts.traslados) || 0) + transferValue;
     var total = roadtrip
-      ? Math.round((Number(state.auto) || 0) + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0))
+      ? Math.round((Number(state.auto) || 0) + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
       : Math.round((Number(state.flight) || 0) + (Number(state.hotel) || 0) +
         (Number(state.parts.comidas) || 0) + (Number(state.parts.local) || 0) +
-        trasladoValue + (Number(state.parts.extras) || 0));
+        trasladoValue + (Number(state.toursTotal) || 0));
     var entries = categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return null;
       var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
@@ -318,6 +318,7 @@
         : category === 'alojamiento' ? (Number(state.hotel) || 0)
         : category === 'traslados' ? trasladoValue
         : category === 'auto' ? (Number(state.auto) || 0)
+        : category === 'tours' ? (Number(state.toursTotal) || 0)
         : (Number(state.parts && state.parts[category]) || 0);
       if (Number(value) <= 0) return null;
       return { category: category, label: info[1], color: info[2], value: Number(value) || 0, width: total ? ((Number(value) / total) * 100) : 0 };
@@ -392,10 +393,12 @@
     var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
     var hotelName = findSelectedHotelLabel();
     var transferIncluded = !!detailState.selectedFlight && !!detailState.selectedHotel && detailState.transportMode === 'flight' && Number(detailState.transfer) > 0;
+    var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
     var summaryItems = [
       { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
       { label: 'Transfer', meta: transferIncluded ? 'Incluido' : 'No incluido', value: transferIncluded ? money(Number(detailState.transfer) || 0) : '—', color: getCategoryColor('traslados') },
-      { label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') }
+      { label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
+      { label: 'Tours', meta: toursLabel, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
     ];
     var segments = entries.map(function (entry) {
       return '<span style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
@@ -510,7 +513,6 @@
     detailState.localPerDay = Math.max(0, Number(detailState.localPerDay) || 0);
     detailState.parts.comidas = Math.round((detailState.foodPerDay || 0) * nights * pax);
     detailState.parts.local = Math.round((detailState.localPerDay || 0) * nights * pax);
-    if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) ? Math.round(detailState.meta.officialTransfer.amount * 0.75) : defaults.baggageAndInsuranceUsd;
   }
   function recalcularTotalViaje() {
     if (!detailState) return;
@@ -759,7 +761,7 @@
   function breakdownRows() {
     if (!detailState) return '';
     var roadtrip = detailState.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'extras'];
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados'];
     return categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return '';
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
@@ -1206,8 +1208,7 @@
       comidas: 'Basado en precios reales de mercado y gastronomía local.',
       local: localNotes[String(meta && meta.dest && meta.dest.key ? meta.dest.key.toLowerCase() : '')] || localNotes.default,
       traslados: 'Servicio oficial Aeropuerto ⇄ Hotel.',
-      auto: 'Combustible y peajes de la ruta ida y vuelta.',
-      extras: 'Tasas aeroportuarias, equipaje y asistencia al viajero.'
+      auto: 'Combustible y peajes de la ruta ida y vuelta.'
     };
     return '<small class="cost-note">' + (text[cat] || 'Detalle del viaje.') + '</small>';
   }
@@ -1376,12 +1377,11 @@
     var isRoadtrip = proposal.mode === 'auto';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
     var nights = Math.max(1, Number(data.meta.nights) || 1);
     var pax = Math.max(1, Number(data.meta.pax) || 1);
     detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     detailState.localPerDay = Number((Number(detailState.parts.local) / Math.max(1, nights * pax)).toFixed(2)) || 0;
-    if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Math.round((Number(data.meta.officialTransfer && data.meta.officialTransfer.amount) || 0) * 0.75 + 45);
     data.meta.officialTransfer = data.meta.officialTransfer || { pricePerPassenger: 0, amount: 0 };
     var renderSafe = function (fn, fallback) { try { return fn(); } catch (error) { console.error('Error al renderizar detalle', error); return fallback; } };
     var breakdownMarkup = renderSafe(function () { return proposalBreakdownMarkup(detailState); }, '<section class="proposal-breakdown"><h2>Desglose del viaje</h2></section>');
@@ -1602,7 +1602,7 @@
       local_per_day: Number(detailState.localPerDay) || 0,
       total_amount: Number(budget.total) || 0,
       currency: 'USD',
-      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
+      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
     };
   }
   async function saveCurrentTrip() {
@@ -1675,6 +1675,14 @@
     detailState.localPerDay = Number(trip.local_per_day) || Number(details.local_per_day) || Number(details.localPerDay) || detailState.localPerDay || 0;
     detailState.transfer = Number(details.transfer) || 0;
     detailState.transferType = details.transferType || detailState.transferType || '';
+    detailState.selectedTours = Array.isArray(details.tours) ? details.tours : [];
+    detailState.toursTotal = detailState.selectedTours.reduce(function (sum, tour) { return sum + (Number(tour.price) || 0); }, 0);
+    detailState.selectedTours.forEach(function (tour) {
+      var input = Array.prototype.slice.call(document.querySelectorAll('[data-tour-choice]')).find(function (item) { return item.getAttribute('data-tour-title') === tour.title; });
+      if (input) input.checked = true;
+    });
+    var toursButton = document.querySelector('[data-book-selected-tours]');
+    if (toursButton) toursButton.disabled = !detailState.selectedTours.length;
     if (details.hotel) {
       detailState.hotel = Number(details.hotel.total) || detailState.hotel;
       detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName;
@@ -1877,14 +1885,15 @@
 
     var sel = $('#dest');
     var trigger = document.getElementById('dest-trigger');
+    var destToggle = document.getElementById('dest-toggle');
     var menu = document.getElementById('dest-menu');
-    var valueLabel = document.getElementById('dest-value');
     var destItems = [];
+    var activeDestOption = null;
 
     function setDestDisplay(value) {
       var item = destItems.filter(function (entry) { return entry.value === value; })[0];
       var text = item ? item.label : 'Todos los destinos (Buscar por mi presupuesto)';
-      if (valueLabel) valueLabel.textContent = text;
+      if (trigger) trigger.value = text;
       if (menu) {
         Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
           var selected = option.getAttribute('data-dest-value') === value;
@@ -1892,19 +1901,59 @@
           option.setAttribute('aria-selected', selected ? 'true' : 'false');
         });
       }
+      clearActiveDestOption();
+    }
+
+    function normalizeDestQuery(value) {
+      return String(value || '').trim().toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function clearActiveDestOption() {
+      if (activeDestOption) activeDestOption.classList.remove('is-active');
+      activeDestOption = null;
+      if (trigger) trigger.removeAttribute('aria-activedescendant');
+    }
+
+    function filterDestOptions(query, preserveActive) {
+      if (!menu) return [];
+      var normalized = normalizeDestQuery(query);
+      var visible = [];
+      Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
+        var value = option.getAttribute('data-dest-value') || '';
+        var matches = value === 'todos' || !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
+        option.hidden = !matches;
+        if (matches) visible.push(option);
+      });
+      Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__group'), function (group) {
+        group.hidden = !group.querySelector('.custom-select__option:not([hidden])');
+      });
+      if (!preserveActive || activeDestOption && activeDestOption.hidden) clearActiveDestOption();
+      return visible;
+    }
+
+    function setActiveDestOption(option) {
+      clearActiveDestOption();
+      if (!option || !trigger) return;
+      activeDestOption = option;
+      activeDestOption.classList.add('is-active');
+      trigger.setAttribute('aria-activedescendant', option.id);
+      option.scrollIntoView({ block: 'nearest' });
     }
 
     function closeDestMenu() {
       if (!menu || !trigger || !sel) return;
       menu.hidden = true;
       trigger.setAttribute('aria-expanded', 'false');
+      if (destToggle) destToggle.setAttribute('aria-expanded', 'false');
       sel.classList.remove('is-open');
+      setDestDisplay(S.dest);
     }
 
     function openDestMenu() {
       if (!menu || !trigger || !sel) return;
       menu.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
+      if (destToggle) destToggle.setAttribute('aria-expanded', 'true');
       sel.classList.add('is-open');
     }
 
@@ -1938,9 +1987,58 @@
       closeDestMenu();
     }
     if (trigger) {
-      trigger.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        if (menu && menu.hidden) openDestMenu(); else closeDestMenu();
+      trigger.addEventListener('click', function () {
+        if (menu && menu.hidden) {
+          trigger.value = '';
+          filterDestOptions('');
+          openDestMenu();
+        }
+      });
+      trigger.addEventListener('focus', function () {
+        if (menu && menu.hidden) {
+          trigger.value = '';
+          filterDestOptions('');
+          openDestMenu();
+        }
+      });
+      trigger.addEventListener('input', function () {
+        filterDestOptions(trigger.value);
+        openDestMenu();
+      });
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeDestMenu(); return; }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (menu.hidden) openDestMenu();
+          var visible = filterDestOptions(trigger.value, true);
+          if (!visible.length) return;
+          var index = activeDestOption ? visible.indexOf(activeDestOption) : -1;
+          index = e.key === 'ArrowDown' ? (index + 1) % visible.length : (index <= 0 ? visible.length - 1 : index - 1);
+          setActiveDestOption(visible[index]);
+        } else if (e.key === 'Enter' && menu && !menu.hidden) {
+          e.preventDefault();
+          var matches = filterDestOptions(trigger.value, true);
+          var option = activeDestOption;
+          if (!option) {
+            var query = normalizeDestQuery(trigger.value);
+            var destinations = matches.filter(function (candidate) { return candidate.getAttribute('data-dest-value') !== 'todos'; });
+            option = (query && destinations.filter(function (candidate) {
+              var label = candidate.querySelector('.custom-select__option-main');
+              return label && normalizeDestQuery(label.textContent).indexOf(query) === 0;
+            })[0]) || destinations[0] || matches[0];
+          }
+          if (option) selectDestination(option.getAttribute('data-dest-value'));
+        }
+      });
+    }
+    if (destToggle) {
+      destToggle.addEventListener('click', function () {
+        if (menu && menu.hidden) {
+          if (trigger) trigger.value = '';
+          filterDestOptions('');
+          openDestMenu();
+          if (trigger) trigger.focus();
+        } else closeDestMenu();
       });
     }
     if (menu) {
@@ -2063,6 +2161,25 @@
         if (section) section.innerHTML = dailyBudgetControls();
         return;
       }
+      var bookTours = e.target.closest('[data-book-selected-tours]');
+      if (bookTours && detailState) {
+        e.preventDefault(); e.stopPropagation();
+        var selectedTours = detailState.selectedTours || [];
+        if (!selectedTours.length) return;
+        var tourLines = selectedTours.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ')'; }).join('\n');
+        var message = 'Hola, quiero reservar estos tours para mi viaje a ' + detailState.meta.dest.name + ':\n' + tourLines + '\n\nTotal referencial de tours: ' + money(detailState.toursTotal) + '\nViajamos ' + detailState.meta.pax + (Number(detailState.meta.pax) === 1 ? ' persona' : ' personas') + ' del ' + detailState.meta.dep + ' al ' + detailState.meta.ret + '. ¿Podrían confirmar disponibilidad y valor final?';
+        window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+        return;
+      }
+      var tourCard = e.target.closest('[data-tour-card]');
+      if (tourCard && detailState && !e.target.closest('a,button')) {
+        var tourInput = tourCard.querySelector('[data-tour-choice]');
+        if (tourInput) {
+          tourInput.checked = !tourInput.checked;
+          tourInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return;
+      }
       if (e.target.closest('#btn-volver')) {
         e.preventDefault(); e.stopPropagation();
         $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
@@ -2162,6 +2279,23 @@
       if (unlock) { unlockGuide(); return; }
     });
     $('#vista-detalle').addEventListener('change', function (e) {
+      var tourChoice = e.target.closest && e.target.closest('[data-tour-choice]');
+      if (tourChoice && detailState) {
+        var tour = { title: tourChoice.getAttribute('data-tour-title'), destination: tourChoice.getAttribute('data-tour-destination'), price: Number(tourChoice.getAttribute('data-tour-price')) || 0 };
+        detailState.selectedTours = (detailState.selectedTours || []).filter(function (item) { return item.title !== tour.title; });
+        if (tourChoice.checked) detailState.selectedTours.push(tour);
+        detailState.toursTotal = detailState.selectedTours.reduce(function (sum, item) { return sum + item.price; }, 0);
+        var tourCard = tourChoice.closest('[data-tour-card]');
+        if (tourCard) {
+          tourCard.setAttribute('aria-checked', tourChoice.checked ? 'true' : 'false');
+          var tourStatus = tourCard.querySelector('.local-tour__status');
+          if (tourStatus) tourStatus.textContent = tourChoice.checked ? 'Añadido al presupuesto' : 'Sumar al presupuesto';
+        }
+        var bookTours = document.querySelector('[data-book-selected-tours]');
+        if (bookTours) bookTours.disabled = !detailState.selectedTours.length;
+        recalcularTotalViaje();
+        return;
+      }
       var hotelChoice = e.target.closest && e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true);
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
@@ -2185,6 +2319,16 @@
         detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
         detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
+      }
+    });
+    $('#vista-detalle').addEventListener('keydown', function (e) {
+      var tourCard = e.target.closest && e.target.closest('[data-tour-card]');
+      if (!tourCard || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      var tourInput = tourCard.querySelector('[data-tour-choice]');
+      if (tourInput) {
+        tourInput.checked = !tourInput.checked;
+        tourInput.dispatchEvent(new Event('change', { bubbles: true }));
       }
     });
     $('#vista-detalle').addEventListener('input', function (e) {
@@ -2329,7 +2473,7 @@
       var menu = document.getElementById('dest-menu');
       destItems = [{ value: 'todos', label: 'Todos los destinos (Buscar por mi presupuesto)' }];
       if (menu) {
-        menu.innerHTML = '<button type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true"><span class="custom-select__option-main">🌍 Todos los destinos</span><span class="custom-select__option-sub">Buscar por mi presupuesto</span></button>';
+        menu.innerHTML = '<button id="dest-option-todos" type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true"><span class="custom-select__option-main">🌍 Todos los destinos</span><span class="custom-select__option-sub">Buscar por mi presupuesto</span></button>';
       }
       groupOrder.forEach(function (label) {
         var items = grouped[label];
@@ -2344,6 +2488,7 @@
           items.forEach(function (item) {
             var option = document.createElement('button');
             option.type = 'button';
+            option.id = 'dest-option-' + item.key;
             option.className = 'custom-select__option';
             option.setAttribute('data-dest-value', item.key);
             option.setAttribute('role', 'option');
@@ -2357,6 +2502,7 @@
       });
 
       sel.value = S.dest;
+      filterDestOptions('');
       updateDestinationMode();
       run();
     }).catch(function () { notice('No pudimos cargar los destinos. Recargá la página.'); });
