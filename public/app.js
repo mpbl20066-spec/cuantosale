@@ -229,6 +229,7 @@
     return getBudgetBreakdown(detailState).entries;
   }
   function findSelectedHotelLabel() {
+    if (detailState && detailState.selectedHotelName && detailState.selectedHotelName !== 'Hotel recomendado') return detailState.selectedHotelName;
     var checked = document.querySelector('[data-hotel-total]:checked');
     if (checked) {
       var card = checked.closest('[data-hotel-option]');
@@ -280,6 +281,7 @@
     var flightSummary = getSelectedFlightSummary();
     var transferState = detailState.transferWizard || { pickupMinutes: 60, customTime: '', hotelName: findSelectedHotelLabel() };
     var transferLabel = getTransferPickupLabel(transferState.pickupMinutes, transferState.customTime);
+    var transferModeLabel = detailState.transferType === 'private' ? 'Transfer privado' : (detailState.transferType === 'shared' ? 'Transfer compartido' : (transferLabel || 'A coordinar'));
     var selectedHotelName = findSelectedHotelLabel();
     var hotelTotal = Number(detailState.hotel) || 0;
     var transferTotal = Number(detailState.transfer) || Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 0;
@@ -295,6 +297,7 @@
     var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
     var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + (transferLabel || 'A coordinar') + ' · ' + money(transferTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
+    summaryText = summaryText.replace('Traslado: ' + (transferLabel || 'A coordinar'), 'Traslado: ' + transferModeLabel);
     var bookingHref = bookingUrl(detailState.meta, { hotel: selectedHotelName });
     modal.innerHTML = '<div class="booking-dialog itinerary-summary" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title">' +
       '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
@@ -319,6 +322,16 @@
       '<div class="voucher-actions"><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
     modal.dataset.summaryText = summaryText;
     var voucherCards = modal.querySelectorAll('.voucher-card');
+    if (voucherCards[0]) {
+      var flightSmall = voucherCards[0].querySelector('small');
+      var flightParagraph = voucherCards[0].querySelector('p');
+      if (flightSmall) flightSmall.textContent = flightSummary.isRoundTrip ? 'Vuelo seleccionado · Ida y vuelta' : 'Vuelo seleccionado';
+      if (flightParagraph) flightParagraph.textContent = flightSummary.summary;
+    }
+    if (voucherCards[2]) {
+      var transferStrong = voucherCards[2].querySelector('strong');
+      if (transferStrong) transferStrong.textContent = transferModeLabel;
+    }
     if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-open-duffel-checkout>✈️ Pagar y emitir con Duffel</button>');
     if (voucherCards[1]) voucherCards[1].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">🏨 Reservar en Booking.com ↗</a>');
     if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
@@ -374,6 +387,7 @@
       var fallback = offers.find(function (offer) { return String(offer.airline) === String(detailState.selectedOffer.airline); });
       if (fallback) return fallback;
     }
+    if (detailState.selectedOffer && (detailState.selectedOffer.outbound || detailState.selectedOffer.departure)) return detailState.selectedOffer;
     return offers.length ? offers[0] : null;
   }
   function dailyBudgetControls() {
@@ -538,6 +552,11 @@
     if (!r) return '';
     return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></section>';
   }
+  function transferCard(meta) {
+    var selected = detailState && detailState.transferType || '';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p><div class="transfer-choice-grid"><button type="button" class="transfer-choice' + (selected === 'shared' ? ' is-selected' : '') + '" data-transfer-choice="shared" data-transfer-amount="30"><strong>Transfer compartido</strong><b>US$ 30</b><small>Compartís el vehículo con otros pasajeros.</small></button><button type="button" class="transfer-choice' + (selected === 'private' ? ' is-selected' : '') + '" data-transfer-choice="private" data-transfer-amount="150"><strong>Transfer privado</strong><b>US$ 150</b><small>Vehículo exclusivo y traslado directo.</small></button></div><p data-transfer-status>' + (selected ? 'Transfer ' + (selected === 'private' ? 'privado' : 'compartido') + ' seleccionado.' : 'Seleccioná una modalidad para incluirla en tu presupuesto.') + '</p><button type="button" class="btn-transfer" data-buy-transfer' + (selected ? '' : ' disabled') + '>Coordinar traslado</button></div></section>';
+  }
+
   function transportFlow(meta, budget, autoSelected) {
     if (autoSelected) return roadtripCalculator(meta);
     return '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
@@ -589,6 +608,12 @@
     if (!t) return '';
     return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><div class="transport-card"><p>Transfer desde el aeropuerto ➔ pousada para ' + esc(meta.dest.name) + ' · tarifa fija de ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná transfer / transfer</button></div></section>';
   }
+  // Explicit airport transfer modes used by the proposal and saved itinerary.
+  function transferCard(meta) {
+    var selected = detailState && detailState.transferType || '';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Eleg&iacute; entre una opci&oacute;n compartida o privada para ' + esc(meta.dest.name) + '.</p><div class="transfer-choice-grid"><button type="button" class="transfer-choice' + (selected === 'shared' ? ' is-selected' : '') + '" data-transfer-choice="shared" data-transfer-amount="30"><strong>Transfer compartido</strong><b>US$ 30</b><small>Traslado compartido con otros pasajeros.</small></button><button type="button" class="transfer-choice' + (selected === 'private' ? ' is-selected' : '') + '" data-transfer-choice="private" data-transfer-amount="150"><strong>Transfer privado</strong><b>US$ 150</b><small>Veh&iacute;culo exclusivo y traslado directo.</small></button></div><p data-transfer-status>' + (selected ? 'Transfer ' + (selected === 'private' ? 'privado' : 'compartido') + ' seleccionado.' : 'Seleccion&aacute; una modalidad para incluirla en tu presupuesto.') + '</p><button type="button" class="btn-transfer" data-buy-transfer' + (selected ? '' : ' disabled') + '>Coordinar traslado</button></section>';
+  }
+
   function getTransferPickupWindow() {
     var offer = getSelectedFlightOffer();
     var arrivalValue = null;
@@ -877,8 +902,9 @@
     detailState.selectedFlight = offerAirline;
     detailState.flight = Math.round(offerPrice);
     detailState.baseFlight = detailState.flight;
-    detailState.selectedOffer = { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds };
-    return { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds };
+    var completeOffer = Array.isArray(detailState.flightOffers) && detailState.flightOffers.find(function (offer) { return String(offer.id) === String(offerId); });
+    detailState.selectedOffer = Object.assign({}, completeOffer || {}, { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds });
+    return detailState.selectedOffer;
   }
   function openBookingForm(button) {
     var selectedOffer = null;
@@ -1303,6 +1329,29 @@
     return { airline: airline, summary: summary, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), route: ' · ' + airportCode(origin) + ' → ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination };
   }
 
+  // Voucher round-trip summary: keep both legs and the original offer total.
+  function getSelectedFlightSummary() {
+    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'No hay un vuelo seleccionado.' };
+    var offer = getSelectedFlightOffer() || detailState.selectedOffer || {};
+    var airline = offer.airline || detailState.selectedFlight || 'Vuelo seleccionado';
+    var outbound = offer.outbound || offer;
+    var inbound = offer.inbound || {};
+    var origin = outbound.origin || offer.departure_airport || {};
+    var destination = outbound.destination || offer.arrival_airport || {};
+    var departure = outbound.departure || offer.departure;
+    var arrival = outbound.arrival;
+    var returnOrigin = inbound.origin || destination;
+    var returnDestination = inbound.destination || origin;
+    var returnDeparture = inbound.departure;
+    var returnArrival = inbound.arrival;
+    var flightNumber = offer.flight_number || outbound.flight_number || '';
+    var inboundFlightNumber = inbound.flight_number || '';
+    var outboundText = (flightNumber ? 'Vuelo ' + flightNumber : 'Numero de vuelo no informado') + ' · ' + (origin.name || origin.code || 'Origen') + ' (' + (airportCode(origin) || '---') + ') -> ' + (destination.name || destination.code || 'Destino') + ' (' + (airportCode(destination) || '---') + ') · salida ' + formatFlightDateTime(departure) + ' · llegada ' + formatFlightDateTime(arrival);
+    var isRoundTrip = offer.trip_type === 'round_trip' || !!(inbound.departure || inbound.arrival);
+    var inboundText = isRoundTrip ? ((inboundFlightNumber ? 'Vuelo ' + inboundFlightNumber : 'Numero de vuelo no informado') + ' · ' + (returnOrigin.name || returnOrigin.code || 'Destino') + ' (' + (airportCode(returnOrigin) || '---') + ') -> ' + (returnDestination.name || returnDestination.code || 'Origen') + ' (' + (airportCode(returnDestination) || '---') + ') · salida ' + formatFlightDateTime(returnDeparture) + ' · llegada ' + formatFlightDateTime(returnArrival)) : '';
+    return { airline: airline, summary: isRoundTrip ? 'Ida: ' + outboundText + ' | Vuelta: ' + inboundText + ' · tarifa ida y vuelta incluida' : outboundText, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), route: ' · ' + airportCode(origin) + ' -> ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination, isRoundTrip: isRoundTrip, outboundText: outboundText, inboundText: inboundText };
+  }
+
   function openDestinationProposal(key, savedTrip) {
     var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
     fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
@@ -1416,7 +1465,7 @@
       local_per_day: Number(detailState.localPerDay) || 0,
       total_amount: Number(budget.total) || 0,
       currency: 'USD',
-      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
+      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
     };
   }
   async function saveCurrentTrip() {
@@ -1495,6 +1544,7 @@
     detailState.foodPerDay = Number(trip.food_per_day) || Number(details.foodPerDay) || detailState.foodPerDay || 0;
     detailState.localPerDay = Number(trip.local_per_day) || Number(details.localPerDay) || detailState.localPerDay || 0;
     detailState.transfer = Number(details.transfer) || 0;
+    detailState.transferType = details.transferType || detailState.transferType || '';
     if (details.hotel) { detailState.hotel = Number(details.hotel.total) || detailState.hotel; detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName; }
     if (details.flight && details.flight.id) {
       detailState.selectedOffer = details.flight;
@@ -1782,6 +1832,24 @@
         if (detailState && detailState.flightOffers) renderFlightOffers(flightSection.querySelector('.flight-results'), { offers: detailState.flightOffers });
         return;
       }
+      var transferChoice = e.target.closest('[data-transfer-choice]');
+      if (transferChoice) {
+        e.preventDefault(); e.stopPropagation();
+        var mode = transferChoice.getAttribute('data-transfer-choice');
+        var amount = Number(transferChoice.getAttribute('data-transfer-amount')) || 0;
+        detailState.transferType = mode;
+        detailState.transfer = amount;
+        detailState.selectedHotel = true;
+        detailState.transferWizard = detailState.transferWizard || {};
+        detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
+        Array.prototype.forEach.call(e.currentTarget.querySelectorAll('[data-transfer-choice]'), function (choice) { choice.classList.toggle('is-selected', choice === transferChoice); });
+        var status = e.currentTarget.querySelector('[data-transfer-status]');
+        if (status) status.textContent = mode === 'private' ? 'Transfer privado seleccionado · US$ 150.' : 'Transfer compartido seleccionado · US$ 30.';
+        var buyTransferButton = e.currentTarget.querySelector('[data-buy-transfer]');
+        if (buyTransferButton) buyTransferButton.disabled = false;
+        recalcularTotalViaje(); renderTripSummary();
+        return;
+      }
       var buyTransfer = e.target.closest('[data-buy-transfer]');
       if (buyTransfer) { e.preventDefault(); e.stopPropagation(); openTransferModal(detailState.meta); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
@@ -1793,20 +1861,15 @@
           var offer = detailState.flightOffers.find(function (item) { return String(item.id) === String(offerId); });
           var roundTrip = offer && offer.trip_type === 'round_trip';
           if (roundTrip) {
+            // Duffel already returns both slices in one offer: keep the complete
+            // ida y vuelta and its single total price as the selected itinerary.
             var section = selectedFlight.closest('.flight-search');
-            if (!state.outboundId) {
-              state.outboundId = offerId;
-              section.setAttribute('data-flight-step', 'inbound');
-              renderFlightOffers(section.querySelector('.flight-results'), { offers: detailState.flightOffers });
-              return;
-            }
-            if (state.outboundId && !state.inboundId) {
-              state.inboundId = offerId;
-              section.setAttribute('data-flight-step', 'done');
-              persistSelectedOffer(selectedFlight);
-              actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
-              return;
-            }
+            state.outboundId = offerId;
+            state.inboundId = offerId;
+            section.setAttribute('data-flight-step', 'done');
+            persistSelectedOffer(selectedFlight);
+            actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
+            return;
           }
         }
         persistSelectedOffer(selectedFlight);
