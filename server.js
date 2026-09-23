@@ -633,16 +633,16 @@ async function reservarVuelo(req, res, body) {
 
 async function obtenerOferta(req, res, url) {
   const offerId = String(url.searchParams.get('offer_id') || '').trim();
-  if (!/^off_[A-Za-z0-9]+$/.test(offerId)) return sendJson(res, 400, { error: 'Oferta invÃ¡lida.' });
+  if (!/^off_[A-Za-z0-9]+$/.test(offerId)) return sendJson(res, 400, { error: 'Oferta inválida.' });
   const air = airClient();
-  if (!air) return sendJson(res, 503, { error: 'La integraciÃ³n de Duffel no estÃ¡ configurada.' });
+  if (!air) return sendJson(res, 503, { error: 'La integración de Duffel no está configurada.' });
   try {
     const response = await air.offers.get(offerId, { return_available_services: true });
     const offer = response.data || response;
     return sendJson(res, 200, { id: offer.id, airline: offer.owner && offer.owner.name || null, total_amount: offer.total_amount, total_currency: offer.total_currency, expires_at: offer.expires_at || null, available_services: Array.isArray(offer.available_services) ? offer.available_services : [], passengers: Array.isArray(offer.passengers) ? offer.passengers.map(function (p) { return { id: p.id, type: p.type }; }) : [] });
   } catch (e) {
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
-    return sendJson(res, e.status && e.status < 500 ? e.status : 502, { error: message || 'La oferta expirÃ³ o ya no estÃ¡ disponible.' });
+    return sendJson(res, e.status && e.status < 500 ? e.status : 502, { error: message || 'La oferta expiró o ya no está disponible.' });
   }
 }
 

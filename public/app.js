@@ -292,7 +292,7 @@
     var localTotal = Math.round(localPerDay * nights * pax);
     var flightTotal = Number(detailState.flight) || 0;
     var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal);
-    var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'EconÃ³mico';
+    var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
     var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + (transferLabel || 'A coordinar') + ' · ' + money(transferTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     var bookingHref = bookingUrl(detailState.meta, { hotel: selectedHotelName });
@@ -402,12 +402,12 @@
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Transporte local</span><small>Estilo de movilidad</small></div>' +
-      '<label class="daily-budget__planned"><span>Presupuesto programado por dÃ­a</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(localValue) + '" data-daily-local aria-label="Presupuesto diario de transporte local"><span>/ dÃ­a</span></div></label>' +
+      '<label class="daily-budget__planned"><span>Presupuesto programado por día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(localValue) + '" data-daily-local aria-label="Presupuesto diario de transporte local"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
       '</div>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Comidas</span><small>Estilo gastronómico</small></div>' +
-      '<label class="daily-budget__planned"><span>Presupuesto programado por dÃ­a</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(foodValue) + '" data-daily-food aria-label="Presupuesto diario de comidas"><span>/ dÃ­a</span></div></label>' +
+      '<label class="daily-budget__planned"><span>Presupuesto programado por día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(foodValue) + '" data-daily-food aria-label="Presupuesto diario de comidas"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
@@ -1442,7 +1442,7 @@
       seenTrips.add(String(key));
       return true;
     });
-    if (!uniqueTrips.length) { box.innerHTML = '<p class="account-status">TodavÃ­a no guardaste viajes.</p>'; return; }
+    if (!uniqueTrips.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
     var rendered = new Set();
     Array.prototype.forEach.call(box.querySelectorAll('[data-load-trip]'), function (button, index) {
       var trip = result.data[index] || {};
