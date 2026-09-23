@@ -1281,11 +1281,12 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function openDestinationProposal(key) {
+  function openDestinationProposal(key, savedTrip) {
     var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
     fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
+      if (savedTrip) applySavedTripToDetail(savedTrip);
     }).catch(function (e) { notice(e.message); });
   }
 
@@ -1434,13 +1435,47 @@
     if (result.error) { box.innerHTML = '<p class="booking-error">No se pudieron cargar tus viajes porque la tabla todavía no tiene permisos RLS configurados. Ejecutá <strong>supabase_trips_rls_fix.sql</strong> en el SQL Editor de Supabase y recargá.</p>'; return; }
     if (!result.data.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
     box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_price || trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
-    box._trips = result.data;
+    var seenTrips = new Set();
+    var uniqueTrips = result.data.filter(function (trip) {
+      var key = [trip.destination, trip.departure_date, trip.return_date, trip.total_price || trip.total_amount, trip.offer_id || ''].join('|') || trip.id;
+      if (seenTrips.has(String(key))) return false;
+      seenTrips.add(String(key));
+      return true;
+    });
+    if (!uniqueTrips.length) { box.innerHTML = '<p class="account-status">TodavÃ­a no guardaste viajes.</p>'; return; }
+    var rendered = new Set();
+    Array.prototype.forEach.call(box.querySelectorAll('[data-load-trip]'), function (button, index) {
+      var trip = result.data[index] || {};
+      var id = [trip.destination, trip.departure_date, trip.return_date, trip.total_price || trip.total_amount, trip.offer_id || ''].join('|') || String(trip.id || '');
+      if (rendered.has(id)) { var card = button.closest('.saved-trip'); if (card) card.remove(); }
+      else rendered.add(id);
+    });
+    box._trips = uniqueTrips;
+  }
+  function applySavedTripToDetail(trip) {
+    if (!detailState || !trip) return;
+    var details = trip.details || trip.flight_details || {};
+    detailState.parts = Object.assign({}, detailState.parts || {}, details.parts || {});
+    detailState.transportMode = trip.transport_mode || detailState.transportMode || 'flight';
+    detailState.foodPerDay = Number(trip.food_per_day) || Number(details.foodPerDay) || detailState.foodPerDay || 0;
+    detailState.localPerDay = Number(trip.local_per_day) || Number(details.localPerDay) || detailState.localPerDay || 0;
+    detailState.transfer = Number(details.transfer) || 0;
+    if (details.hotel) { detailState.hotel = Number(details.hotel.total) || detailState.hotel; detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName; }
+    if (details.flight && details.flight.id) {
+      detailState.selectedOffer = details.flight;
+      detailState.selectedFlightId = details.flight.id;
+      detailState.selectedFlight = details.flight.airline || detailState.selectedFlight;
+      detailState.flight = Number(details.flight.price) || detailState.flight;
+      detailState.baseFlight = detailState.flight;
+    }
+    actualizarTransporte(detailState.transportMode === 'auto');
+    renderTripSummary();
   }
   function loadTrip(trip) {
     var details = trip.details || trip.flight_details || {};
     S.dest = trip.destination_key || details.destination_key || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || S.transport;
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
-    if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); openDestinationProposal(S.dest); }
+    if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); openDestinationProposal(S.dest, trip); }
   }
   async function initAuth() {
     if (!window.supabase || !window.supabase.createClient) return;
