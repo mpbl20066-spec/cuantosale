@@ -867,11 +867,12 @@
       var arrivalText = offer.trip_type === 'round_trip' ? (offer.inbound && offer.inbound.arrival ? flightTime(offer.inbound.arrival) : flightTime(offer.arrival)) : flightTime(offer.arrival);
       var primaryButtonText = 'Agregar a presupuesto';
       var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
-      return '<article class="flight-card within-budget"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + stageBadge + '</div>' +
+      var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
+      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(offer.departure_airport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(offer.arrival_airport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div></div>' +
-        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + primaryButtonText + '</button></div></article>';
+        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary" aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : primaryButtonText) + '</button></div></article>';
     }).join('') + '</div>';
     if (state && state.outboundId && state.inboundId) {
       var selectedOffer = offers.find(function (offer) { return offer.id === state.inboundId || offer.id === state.outboundId; });
@@ -1558,7 +1559,21 @@
     detailState.localPerDay = Number(trip.local_per_day) || Number(details.local_per_day) || Number(details.localPerDay) || detailState.localPerDay || 0;
     detailState.transfer = Number(details.transfer) || 0;
     detailState.transferType = details.transferType || detailState.transferType || '';
-    if (details.hotel) { detailState.hotel = Number(details.hotel.total) || detailState.hotel; detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName; }
+    if (details.hotel) {
+      detailState.hotel = Number(details.hotel.total) || detailState.hotel;
+      detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName;
+      var hotelOptions = document.querySelectorAll('[data-hotel-option]');
+      Array.prototype.forEach.call(hotelOptions, function (option) {
+        var title = option.querySelector('h3');
+        var input = option.querySelector('[data-hotel-total]');
+        var matchesName = title && details.hotel.name && normalizeDestinationText(title.textContent) === normalizeDestinationText(details.hotel.name);
+        var matchesTotal = input && Number(input.getAttribute('data-hotel-total')) === Number(details.hotel.total);
+        if (input && (matchesName || (!details.hotel.name && matchesTotal))) {
+          input.checked = true;
+          detailState.selectedHotelName = title ? title.textContent.trim() : detailState.selectedHotelName;
+        }
+      });
+    }
     if (details.flight && details.flight.id) {
       detailState.selectedOffer = details.flight;
       detailState.selectedFlightId = details.flight.id;
