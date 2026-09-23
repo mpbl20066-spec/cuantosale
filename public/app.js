@@ -10,7 +10,7 @@
     ['auto', 'Auto / Roadtrip', '--c4'],
     ['tours', 'Tours y actividades', '--c6']
   ];
-+  function tour(destinations, destination, title, description, price, details) {
+  function tour(destinations, destination, title, description, price, details) {
     return { destinations: destinations, destination: destination, title: title, description: description, price: price, details: details };
   }
   // Precios referenciales por persona en USD: incluyen margen operativo para venta manual.
@@ -1087,6 +1087,43 @@
       return stopOk && timeOk;
     }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
   }
+  /** De la lista ordenada por precio, se queda con la opción más barata y, si existe,
+   * una segunda con una diferencia relevante de precio, cabina u horario. Evita
+   * abrumar con una lista larga de tarjetas casi idénticas por tramo. */
+  function pickTopFlightOffers(offers) {
+    if (!offers.length) return offers;
+    var primary = offers[0];
+    var second = null;
+    for (var i = 1; i < offers.length; i++) {
+      var candidate = offers[i];
+      var bothPriced = primary.price_usd != null && candidate.price_usd != null;
+      var priceDiff = bothPriced ? Math.abs(candidate.price_usd - primary.price_usd) : 0;
+      var priceRatio = bothPriced && primary.price_usd > 0 ? priceDiff / primary.price_usd : 0;
+      var differentCabin = candidate.cabin_class !== primary.cabin_class;
+      var hourDiff = Math.abs(flightHour(candidate.departure) - flightHour(primary.departure));
+      var differentSchedule = hourDiff >= 3;
+      if (differentCabin || priceRatio >= 0.15 || (differentSchedule && priceDiff >= 40)) {
+        second = candidate;
+        break;
+      }
+    }
+    return second ? [primary, second] : [primary];
+  }
+  function flightSummaryCard(offer) {
+    function legRow(leg, label) {
+      if (!leg) return '';
+      return '<div class="flight-summary-leg"><span class="flight-badge">' + esc(label) + '</span>' +
+        '<div class="flight-summary-route"><b>' + esc(airportCode(leg.origin)) + '</b><span aria-hidden="true">→</span><b>' + esc(airportCode(leg.destination)) + '</b></div>' +
+        '<div class="flight-summary-times"><span>Sale ' + esc(flightTime(leg.departure)) + '</span><span>Llega ' + esc(flightTime(leg.arrival)) + '</span></div></div>';
+    }
+    var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
+    var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
+    return '<div class="flight-summary-card">' +
+      '<div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b><span class="flight-badge cabin-badge">' + esc(offer.cabin_label || cabinClassLabel(offer.cabin_class)) + '</span></div>' +
+      legRow(offer.outbound, 'Ida') + legRow(offer.inbound, 'Vuelta') +
+      '<div class="flight-summary-footer"><small>Precio final · Ida y vuelta</small><b>' + price + '</b></div>' +
+      '<button type="button" class="btn btn-secondary flight-summary-change" data-change-flight>Elegir otro vuelo</button></div>';
+  }
   function getFlightSelectionState() {
     if (!detailState) return null;
     if (!detailState.flightSelection) {
@@ -1114,10 +1151,20 @@
     if (titleEl) titleEl.textContent = flightStep === 'inbound' ? 'Vuelos de vuelta' : (flightStep === 'done' ? 'Itinerario seleccionado' : 'Vuelos de ida');
     if (subtitleEl) subtitleEl.textContent = flightStep === 'inbound'
       ? 'Revisá el vuelo de vuelta incluido en la tarifa seleccionada.'
-      : (flightStep === 'done' ? 'El precio mostrado corresponde al itinerario seleccionado.' : 'Elegí la opción de ida para continuar.');
+      : (flightStep === 'done' ? 'Este es el itinerario que se sumó a tu presupuesto.' : 'Te mostramos la opción más conveniente y, si aporta algo distinto, una alternativa.');
     var visible = filteredFlightOffers(section, offers);
-    if ((flightStep === 'inbound' || flightStep === 'done') && state && state.outboundId) {
+    if (flightStep === 'done' && state && state.outboundId) {
+      var doneOffer = visible.find(function (offer) { return String(offer.id) === String(state.outboundId); }) || offers.find(function (offer) { return String(offer.id) === String(state.outboundId); });
+      if (doneOffer) {
+        el.innerHTML = flightSummaryCard(doneOffer);
+        if (doneOffer.price_usd !== null) actualizarPasajes(section, Number(doneOffer.price_usd), doneOffer.airline);
+        return;
+      }
+    }
+    if (flightStep === 'inbound' && state && state.outboundId) {
       visible = visible.filter(function (offer) { return String(offer.id) === String(state.outboundId); });
+    } else if (flightStep === 'outbound') {
+      visible = pickTopFlightOffers(visible);
     }
     if (!visible.length) { el.innerHTML = '<p class="flight-empty">No hay vuelos que coincidan con estos filtros.</p>'; return; }
     el.innerHTML = '<div class="flight-cards">' + visible.map(function (offer) {
@@ -1152,10 +1199,6 @@
         '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
         '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="Esta tarifa no está disponible en USD para sumarla al presupuesto."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'No convertible a US$')) + '</button>' + affiliateLink + '</div></article>';
     }).join('') + '</div>';
-    if (state && state.outboundId && state.inboundId) {
-      var selectedOffer = offers.find(function (offer) { return offer.id === state.inboundId || offer.id === state.outboundId; });
-      if (selectedOffer && selectedOffer.price_usd !== null) actualizarPasajes(el.closest('.flight-search'), Number(selectedOffer.price_usd), selectedOffer.airline);
-    }
   }
   function searchFlights(meta, section) {
     var box = section.querySelector('.flight-results');
@@ -2333,6 +2376,16 @@
       }
       var buyTransfer = e.target.closest('[data-buy-transfer]');
       if (buyTransfer) { e.preventDefault(); e.stopPropagation(); openTransferModal(detailState.meta); return; }
+      var changeFlight = e.target.closest('[data-change-flight]');
+      if (changeFlight && detailState) {
+        e.preventDefault(); e.stopPropagation();
+        var changeSection = changeFlight.closest('.flight-search');
+        var changeState = getFlightSelectionState();
+        changeState.stage = 'outbound'; changeState.outboundId = null; changeState.inboundId = null;
+        changeSection.setAttribute('data-flight-step', 'outbound');
+        if (detailState.flightOffers) renderFlightOffers(changeSection.querySelector('.flight-results'), { offers: detailState.flightOffers });
+        return;
+      }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) {
         e.preventDefault(); e.stopPropagation();
