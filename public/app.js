@@ -1917,13 +1917,16 @@
       if (!menu) return [];
       var normalized = normalizeDestQuery(query);
       var visible = [];
-      Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
+      Array.prototype.forEach.call(menu.querySelectorAll('button[data-dest-value]'), function (option) {
         var matches = !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
         option.hidden = !matches;
+        option.style.display = matches ? 'flex' : 'none';
         if (matches) visible.push(option);
       });
       Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__group'), function (group) {
-        group.hidden = !group.querySelector('.custom-select__option:not([hidden])');
+        var hasVisibleOption = !!group.querySelector('button[data-dest-value]:not([hidden])');
+        group.hidden = !hasVisibleOption;
+        group.style.display = hasVisibleOption ? 'block' : 'none';
       });
       if (!preserveActive || activeDestOption && activeDestOption.hidden) clearActiveDestOption();
       return visible;
@@ -1985,6 +1988,13 @@
       massSearch = false; updateDestinationMode(); syncTransportSelection();
       if (S.dest !== 'todos') schedule();
     }
+    function bindDestinationOption(option) {
+      if (!option) return;
+      option.addEventListener('click', function (event) {
+        event.preventDefault();
+        selectDestination(option.getAttribute('data-dest-value'));
+      });
+    }
     if (trigger) {
       trigger.addEventListener('click', function () {
         if (menu && menu.hidden) {
@@ -2028,15 +2038,6 @@
           }
           if (option) selectDestination(option.getAttribute('data-dest-value'));
         }
-      });
-    }
-    if (menu) {
-      menu.addEventListener('click', function (e) {
-        var option = e.target.closest('[data-dest-value]');
-        if (!option) return;
-        e.preventDefault();
-        e.stopPropagation();
-        selectDestination(option.getAttribute('data-dest-value'));
       });
     }
     document.addEventListener('click', function (e) {
@@ -2465,6 +2466,7 @@
       destItems = [{ value: 'todos', label: 'Todos los destinos (Buscar por mi presupuesto)' }];
       if (menu) {
         menu.innerHTML = '<button id="dest-option-todos" type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true"><span class="custom-select__option-main">🌍 Todos los destinos</span><span class="custom-select__option-sub">Buscar por mi presupuesto</span></button>';
+        bindDestinationOption(menu.querySelector('#dest-option-todos'));
       }
       groupOrder.forEach(function (label) {
         var items = grouped[label];
@@ -2485,6 +2487,7 @@
             option.setAttribute('role', 'option');
             option.setAttribute('aria-selected', 'false');
             option.innerHTML = '<span class="custom-select__option-main">' + esc(item.name) + '</span>';
+            bindDestinationOption(option);
             groupWrap.appendChild(option);
             destItems.push({ value: item.key, label: item.name });
           });
