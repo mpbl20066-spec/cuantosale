@@ -1286,7 +1286,7 @@
     fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
-      if (savedTrip) applySavedTripToDetail(savedTrip);
+      if (savedTrip) { applySavedTripToDetail(savedTrip); window.setTimeout(openItinerarySummaryModal, 0); }
     }).catch(function (e) { notice(e.message); });
   }
 
@@ -1450,7 +1450,20 @@
       if (rendered.has(id)) { var card = button.closest('.saved-trip'); if (card) card.remove(); }
       else rendered.add(id);
     });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-load-trip]'), function (button) {
+      if (!button.parentNode.querySelector('[data-delete-trip]')) button.insertAdjacentHTML('afterend', '<button type="button" class="account-button account-button--danger" data-delete-trip="' + esc(button.getAttribute('data-load-trip')) + '" aria-label="Borrar viaje">🗑️</button>');
+    });
     box._trips = uniqueTrips;
+  }
+  async function deleteSavedTrip(tripId) {
+    if (!supabaseClient || !tripId) return;
+    var userResult = await supabaseClient.auth.getUser();
+    var user = userResult.data && userResult.data.user;
+    if (!user) return;
+    var result = await supabaseClient.from('trips').delete().eq('id', tripId).eq('user_id', user.id);
+    if (result.error && /permission denied|row-level security|42501/i.test(result.error.message || '')) result = await supabaseClient.from('user_trips').delete().eq('id', tripId).eq('user_id', user.id);
+    if (result.error) { alert('No pudimos borrar el viaje: ' + result.error.message); return; }
+    await openTripsModal();
   }
   function applySavedTripToDetail(trip) {
     if (!detailState || !trip) return;
@@ -1525,6 +1538,8 @@
       if (e.target.closest('[data-close-trips]') || e.target === $('#trips-modal')) return closeAccountModal('trips-modal');
       var loadButton = e.target.closest('[data-load-trip]');
       if (loadButton) { var tripsBox = $('#trips-modal').querySelector('[data-saved-trips]'); var trip = tripsBox && tripsBox._trips && tripsBox._trips.find(function (item) { return String(item.id) === String(loadButton.getAttribute('data-load-trip')); }); if (trip) loadTrip(trip); }
+      var deleteButton = e.target.closest('[data-delete-trip]');
+      if (deleteButton) { e.preventDefault(); e.stopPropagation(); if (window.confirm('¿Borrar este viaje guardado?')) deleteSavedTrip(deleteButton.getAttribute('data-delete-trip')); return; }
       var logout = e.target.closest('[data-signout]');
       if (logout) { await supabaseClient.auth.signOut(); closeAccountModal('trips-modal'); }
     });
