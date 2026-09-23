@@ -69,9 +69,17 @@
         </div>
       </div>
     </div>
-    <div class="row2">
-      <div><label for="dep">Ida</label><input id="dep" class="inp" type="date"></div>
-      <div><label for="ret">Vuelta</label><input id="ret" class="inp" type="date"></div>
+    <div class="date-range-picker">
+      <div class="row2 date-range-fields">
+        <button type="button" id="dep-trigger" class="date-range-field" aria-haspopup="dialog" aria-controls="date-range-panel" aria-expanded="false"><span>Ida</span><strong id="dep-label">Elegí una fecha</strong></button>
+        <button type="button" id="ret-trigger" class="date-range-field" aria-haspopup="dialog" aria-controls="date-range-panel" aria-expanded="false"><span>Vuelta</span><strong id="ret-label">Elegí una fecha</strong></button>
+      </div>
+      <div id="date-range-panel" class="date-range-panel" role="dialog" aria-label="Elegí las fechas de tu viaje" hidden>
+        <div class="date-range-panel__top"><button type="button" class="date-range-nav" data-calendar-nav="prev" aria-label="Mes anterior">‹</button><p id="date-range-instruction" aria-live="polite">Elegí la fecha de ida</p><button type="button" class="date-range-nav" data-calendar-nav="next" aria-label="Mes siguiente">›</button></div>
+        <div id="date-range-months" class="date-range-months"></div>
+      </div>
+      <input id="dep" type="date" tabindex="-1" aria-hidden="true" hidden>
+      <input id="ret" type="date" tabindex="-1" aria-hidden="true" hidden>
     </div>
     <div class="row2">
       <div>

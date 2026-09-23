@@ -62,6 +62,8 @@
   var today = new Date(); today.setHours(12, 0, 0, 0);
   var timer = null, ctrl = null;
   var lastData = null;
+  var rangeCalendarMonth = null;
+  var rangeCalendarStep = 'dep';
 
   /* ---------- utilidades ---------- */
   function addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
@@ -69,6 +71,61 @@
   function parse(s) { var p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2], 12); }
   function money(n) { return 'US$ ' + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
   function dLong(d) { return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' }); }
+  function shortDateLabel(value) {
+    if (!value) return 'Elegí una fecha';
+    return parse(value).toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+  function syncDateRangeFields() {
+    var departure = document.getElementById('dep');
+    var returning = document.getElementById('ret');
+    var departureLabel = document.getElementById('dep-label');
+    var returnLabel = document.getElementById('ret-label');
+    if (departure) departure.value = S.dep;
+    if (returning) returning.value = S.ret;
+    if (departureLabel) departureLabel.textContent = shortDateLabel(S.dep);
+    if (returnLabel) returnLabel.textContent = shortDateLabel(S.ret);
+  }
+  function calendarMonthMarkup(monthDate) {
+    var year = monthDate.getFullYear();
+    var month = monthDate.getMonth();
+    var first = new Date(year, month, 1, 12);
+    var offset = (first.getDay() + 6) % 7;
+    var count = new Date(year, month + 1, 0, 12).getDate();
+    var minDeparture = iso(addDays(today, 1));
+    var days = '';
+    for (var blank = 0; blank < offset; blank++) days += '<span class="date-range-day date-range-day--blank" aria-hidden="true"></span>';
+    for (var day = 1; day <= count; day++) {
+      var value = iso(new Date(year, month, day, 12));
+      var disabled = value < minDeparture || (rangeCalendarStep === 'ret' && S.dep && value <= S.dep);
+      var inRange = !!(S.dep && S.ret && value >= S.dep && value <= S.ret);
+      var endpoint = value === S.dep || value === S.ret;
+      var classes = 'date-range-day' + (disabled ? ' is-disabled' : '') + (inRange ? ' is-in-range' : '') + (endpoint ? ' is-endpoint' : '') + (value === iso(today) ? ' is-today' : '');
+      var dateLabel = new Date(year, month, day, 12).toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      days += '<button type="button" class="' + classes + '" data-range-date="' + value + '" aria-label="' + esc(dateLabel) + '"' + (endpoint ? ' aria-pressed="true"' : '') + (disabled ? ' disabled' : '') + '>' + day + '</button>';
+    }
+    var weekdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(function (label) { return '<span class="date-range-weekday" aria-hidden="true">' + label + '</span>'; }).join('');
+    var monthLabel = first.toLocaleDateString('es-UY', { month: 'long', year: 'numeric' });
+    return '<section class="date-range-month" aria-label="' + esc(monthLabel) + '"><h3>' + esc(monthLabel) + '</h3><div class="date-range-grid" role="grid">' + weekdays + days + '</div></section>';
+  }
+  function renderDateRangeCalendar() {
+    var months = document.getElementById('date-range-months');
+    var instruction = document.getElementById('date-range-instruction');
+    var previous = document.querySelector('[data-calendar-nav="prev"]');
+    if (!months || !rangeCalendarMonth) return;
+    var second = new Date(rangeCalendarMonth.getFullYear(), rangeCalendarMonth.getMonth() + 1, 1, 12);
+    months.innerHTML = calendarMonthMarkup(rangeCalendarMonth) + calendarMonthMarkup(second);
+    if (instruction) instruction.textContent = rangeCalendarStep === 'dep' ? 'Elegí la fecha de ida' : 'Ahora elegí la fecha de vuelta';
+    var firstAllowedMonth = new Date(today.getFullYear(), today.getMonth(), 1, 12);
+    if (previous) previous.disabled = rangeCalendarMonth <= firstAllowedMonth;
+  }
+  function closeDateRangeCalendar() {
+    var panel = document.getElementById('date-range-panel');
+    if (panel) panel.hidden = true;
+    ['dep-trigger', 'ret-trigger'].forEach(function (id) {
+      var button = document.getElementById(id);
+      if (button) button.setAttribute('aria-expanded', 'false');
+    });
+  }
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
@@ -492,10 +549,12 @@
         return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>US$ ' + option.value + '/día</strong></button>';
       }).join('');
       var customSelected = mode === 'custom';
-      var custom = '<button type="button" class="daily-budget__option daily-budget__option--custom' + (customSelected ? ' is-selected' : '') + '" aria-pressed="' + customSelected + '" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Escribí el monto que querés gastar.</span><strong>Ingresar monto</strong></button>';
       var customValue = kind === 'food' ? detailState.foodCustomValue : detailState.localCustomValue;
-      var input = customSelected ? '<label class="daily-budget__planned"><span>Ingresá tu presupuesto personalizado</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(customValue)) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Presupuesto personalizado diario para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span>/ día</span></div></label>' : '';
-      return presets + custom + input;
+      var input = '<label class="daily-budget__planned"><span>Monto por día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(customValue)) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Presupuesto personalizado diario para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span>/día</span></div></label>';
+      var custom = customSelected
+        ? '<div class="daily-budget__option daily-budget__option--custom is-selected" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span>' + input + '</div>'
+        : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Escribí el monto que querés gastar.</span><strong>Ingresar monto</strong></button>';
+      return presets + custom;
     }
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
@@ -1770,7 +1829,7 @@
   async function loadTrip(trip) {
     var details = trip.details || trip.flight_details || {};
     S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport;
-    if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
+    if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; syncDateRangeFields(); if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); var loaded = await openDestinationProposal(S.dest, trip); if (loaded === null) throw new Error('No pudimos cargar la propuesta guardada.'); }
     else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
   }
@@ -1876,6 +1935,54 @@
     S.dep = iso(d0); S.ret = iso(addDays(d0, 7));
     $('#dep').value = S.dep; $('#ret').value = S.ret;
     $('#dep').min = iso(addDays(today, 1)); $('#ret').min = iso(addDays(today, 2));
+    syncDateRangeFields();
+    var dateRangePanel = $('#date-range-panel');
+    function openDateRange(which) {
+      rangeCalendarStep = which === 'ret' && S.dep ? 'ret' : 'dep';
+      var anchor = which === 'ret' ? (S.ret || S.dep) : S.dep;
+      rangeCalendarMonth = anchor ? new Date(parse(anchor).getFullYear(), parse(anchor).getMonth(), 1, 12) : new Date(today.getFullYear(), today.getMonth(), 1, 12);
+      dateRangePanel.hidden = false;
+      $('#dep-trigger').setAttribute('aria-expanded', 'true');
+      $('#ret-trigger').setAttribute('aria-expanded', 'true');
+      renderDateRangeCalendar();
+    }
+    $('#dep-trigger').addEventListener('click', function () { openDateRange('dep'); });
+    $('#ret-trigger').addEventListener('click', function () { openDateRange('ret'); });
+    dateRangePanel.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var nav = e.target.closest('[data-calendar-nav]');
+      if (nav) {
+        var amount = nav.getAttribute('data-calendar-nav') === 'next' ? 1 : -1;
+        rangeCalendarMonth = new Date(rangeCalendarMonth.getFullYear(), rangeCalendarMonth.getMonth() + amount, 1, 12);
+        renderDateRangeCalendar();
+        return;
+      }
+      var day = e.target.closest('[data-range-date]');
+      if (!day || day.disabled) return;
+      var selectedDate = day.getAttribute('data-range-date');
+      if (rangeCalendarStep === 'dep' || !S.dep || selectedDate <= S.dep) {
+        S.dep = selectedDate;
+        S.ret = '';
+        rangeCalendarStep = 'ret';
+        syncDateRangeFields();
+        renderDateRangeCalendar();
+        return;
+      }
+      S.ret = selectedDate;
+      syncDateRangeFields();
+      closeDateRangeCalendar();
+      $('#ret-trigger').focus();
+      schedule();
+    });
+    document.addEventListener('click', function (e) {
+      if (dateRangePanel && !dateRangePanel.hidden && !e.target.closest('.date-range-picker')) closeDateRangeCalendar();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && dateRangePanel && !dateRangePanel.hidden) {
+        closeDateRangeCalendar();
+        $('#dep-trigger').focus();
+      }
+    });
     $('#bud').value = S.budget;
     $('#pax').textContent = S.pax;
     renderTransportSelector();
@@ -1979,9 +2086,10 @@
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
       S.dep = e.target.value;
       if (S.dep && (!S.ret || parse(S.ret) <= parse(S.dep))) { S.ret = iso(addDays(parse(S.dep), Math.max(old, 1))); $('#ret').value = S.ret; }
+      syncDateRangeFields();
       schedule();
     });
-    $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; schedule(); });
+    $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; syncDateRangeFields(); schedule(); });
     $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Number(e.target.value) || 0); schedule(); });
     $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; schedule(); });
     $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; schedule(); });
@@ -2014,7 +2122,7 @@
       var b = e.target.closest('[data-shift]'); if (!b) return;
       var s = Number(b.getAttribute('data-shift'));
       S.dep = iso(addDays(parse(S.dep), s)); S.ret = iso(addDays(parse(S.ret), s));
-      $('#dep').value = S.dep; $('#ret').value = S.ret;
+      syncDateRangeFields();
       schedule();
     });
     $('#destination-results').addEventListener('click', function (e) {
@@ -2025,9 +2133,15 @@
     $('#vista-detalle').addEventListener('click', function (e) {
       var dailyBudgetCard = e.target.closest('[data-daily-kind]');
       if (dailyBudgetCard && detailState) {
+        if (e.target.closest('input')) return;
         e.preventDefault(); e.stopPropagation();
         var kind = dailyBudgetCard.getAttribute('data-daily-kind');
         if (kind === 'local-custom' || kind === 'food-custom') {
+          if ((kind === 'local-custom' && detailState.localBudgetMode === 'custom') || (kind === 'food-custom' && detailState.foodBudgetMode === 'custom')) {
+            var existingInput = dailyBudgetCard.querySelector('input');
+            if (existingInput) existingInput.focus();
+            return;
+          }
           var customKind = kind.split('-')[0];
           detailState[customKind + 'BudgetMode'] = 'custom';
           var customSection = dailyBudgetCard.closest('.daily-budget');
