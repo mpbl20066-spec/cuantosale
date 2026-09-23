@@ -49,6 +49,20 @@
     rec: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg',
     poa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg/1920px-IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg'
   };
+  // Fotos reales por tipo de actividad (Wikimedia Commons), para que cada tarjeta
+  // de tour muestre algo específico en vez de repetir siempre la foto del destino.
+  var TOUR_CATEGORY_PHOTOS = {
+    boat: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Escuna_de_passeio%2C_em_Florian%C3%B3polis-SC%2C_BRASIL.JPG/1920px-Escuna_de_passeio%2C_em_Florian%C3%B3polis-SC%2C_BRASIL.JPG',
+    buggy: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Passeio_de_Buggy_nas_dunas_de_Genipabu_01.jpg/1920px-Passeio_de_Buggy_nas_dunas_de_Genipabu_01.jpg',
+    kayak: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Starr-230301-6176-Cocos_nucifera-view_Molokini_and_Kahoolawe_with_stand_up_paddlers_kayakers_and_snorkelers-Kamaole_Beach_Park_Kihei-Maui_%2852746466170%29.jpg/1920px-Starr-230301-6176-Cocos_nucifera-view_Molokini_and_Kahoolawe_with_stand_up_paddlers_kayakers_and_snorkelers-Kamaole_Beach_Park_Kihei-Maui_%2852746466170%29.jpg'
+  };
+  function classifyTourPhoto(title) {
+    var t = String(title || '').toLowerCase();
+    if (/barco|lancha|schooner|escuna|catamar|jangada|volta.{0,3}ilha|vuelta a la isla/.test(t)) return 'boat';
+    if (/buggy|4x4|jeep/.test(t)) return 'buggy';
+    if (/kayak|paddle/.test(t)) return 'kayak';
+    return null;
+  }
   // Precios referenciales por persona en USD: incluyen margen operativo para venta manual.
   // Se muestran como orientación y siempre deben confirmarse según fecha, cupo y operador.
   var LOCAL_TOURS = [
@@ -395,9 +409,11 @@
     // cada destino (con respaldo fijo incluido, nunca queda la sección vacía).
     var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; }).slice(0, 3);
     if (!tours.length) return '';
-    var photo = DEST_PHOTOS[destinationKey];
+    var destPhoto = DEST_PHOTOS[destinationKey];
     return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y actividades sugeridas</h2><p>Elegí las experiencias que querés sumar a tu viaje. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid">' + tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
+      var category = classifyTourPhoto(tour.title);
+      var photo = (category && TOUR_CATEGORY_PHOTOS[category]) || destPhoto;
       var mediaMarkup = photo
         ? '<div class="local-tour__media"><img src="' + esc(photo) + '" alt="' + esc(tour.title) + '" loading="lazy"></div>'
         : '<div class="local-tour__media local-tour__media-empty"><span aria-hidden="true">✦</span></div>';
@@ -585,6 +601,106 @@
     var toggle = summary.querySelector('[data-trip-summary-toggle]');
     if (toggle) toggle.setAttribute('aria-expanded', String(!isMobile || !summary.classList.contains('minimized')));
   }
+  /* ---------- tarjeta para Instagram Stories ---------- */
+  var htmlToImagePromise = null;
+  function loadHtmlToImage() {
+    if (window.htmlToImage) return Promise.resolve(window.htmlToImage);
+    if (htmlToImagePromise) return htmlToImagePromise;
+    htmlToImagePromise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js';
+      script.onload = function () { resolve(window.htmlToImage); };
+      script.onerror = function () { htmlToImagePromise = null; reject(new Error('No pudimos cargar el generador de imágenes.')); };
+      document.head.appendChild(script);
+    });
+    return htmlToImagePromise;
+  }
+  function storySummaryChip(icon, label, included) {
+    if (!included) return '';
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:99px;padding:9px 15px;font-size:14px;font-weight:700;color:#fff;">' + icon + ' ' + esc(label) + '</span>';
+  }
+  function buildStoryCardNode(meta, totals) {
+    var photo = DEST_PHOTOS[meta.dest.key] || '';
+    var location = [meta.dest.region, meta.dest.country || 'Brasil'].filter(Boolean).join(' - ');
+    // El nodo se clona a SVG/canvas para exportarlo: si se posiciona fuera del
+    // viewport (ej. left:-9999px) el navegador puede no llegar a pintarlo y la
+    // captura sale en blanco. Por eso se ancla en (0,0) dentro de un wrapper
+    // con overflow:hidden y tamaño 0, que lo mantiene invisible pero pintado.
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;pointer-events:none;z-index:-1;';
+    var node = document.createElement('div');
+    node.style.cssText = 'width:540px;height:960px;font-family:Poppins,Arial,sans-serif;';
+    node.innerHTML =
+      '<div style="position:relative;width:540px;height:960px;background:#0B1B2B;color:#fff;overflow:hidden;">' +
+      (photo ? '<img src="' + esc(photo) + '" crossorigin="anonymous" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">' : '') +
+      '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,27,43,.1) 0%,rgba(11,27,43,.5) 55%,rgba(11,27,43,.96) 100%);"></div>' +
+      '<div style="position:absolute;top:40px;left:40px;right:40px;display:flex;align-items:center;gap:9px;">' +
+      '<span style="width:11px;height:11px;border-radius:50%;background:#F6B21B;"></span>' +
+      '<span style="font-weight:800;letter-spacing:.02em;font-size:22px;">cuántosale</span>' +
+      '</div>' +
+      '<div style="position:absolute;left:40px;right:40px;bottom:44px;">' +
+      (location ? '<div style="font-size:15px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#F6B21B;margin-bottom:8px;">' + esc(location) + '</div>' : '') +
+      '<div style="font-size:46px;font-weight:800;line-height:1.05;margin-bottom:20px;">' + esc(meta.dest.name) + '</div>' +
+      '<div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);border-radius:22px;padding:22px 24px;margin-bottom:18px;">' +
+      '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:4px;">Costo total del viaje</div>' +
+      '<div style="font-size:48px;font-weight:800;line-height:1;">' + esc(money(totals.total)) + '</div>' +
+      '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-top:6px;">' + esc(money(totals.pp)) + ' por persona</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+      storySummaryChip('✈️', 'Vuelo', totals.flightTotal > 0) +
+      storySummaryChip('🏨', 'Hotel', totals.hotelTotal > 0) +
+      storySummaryChip('🚐', 'Transfer', totals.transferTotal > 0) +
+      '</div>' +
+      '<div style="margin-top:26px;font-size:14px;font-weight:600;color:rgba(255,255,255,.75);">Armá el tuyo gratis en <b style="color:#fff;">cuantosale.uy</b></div>' +
+      '</div></div>';
+    wrapper.appendChild(node);
+    document.body.appendChild(wrapper);
+    return wrapper;
+  }
+  function downloadBlob(blob, fileName) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url; link.download = fileName;
+    document.body.appendChild(link); link.click(); link.remove();
+    window.setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+  function shareStoryCard(button) {
+    if (!detailState || !detailState.meta) return;
+    var originalLabel = button ? button.textContent : '';
+    if (button) { button.disabled = true; button.textContent = '⏳ Generando imagen…'; }
+    var budget = getBudgetBreakdown(detailState);
+    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var totals = {
+      total: Number(budget.total) || 0,
+      pp: Math.round((Number(budget.total) || 0) / pax),
+      flightTotal: Number(detailState.flight) || 0,
+      hotelTotal: Number(detailState.hotel) || 0,
+      transferTotal: getSelectedTransferAmount(detailState)
+    };
+    var meta = detailState.meta;
+    var wrapper = null;
+    loadHtmlToImage().then(function (htmlToImage) {
+      wrapper = buildStoryCardNode(meta, totals);
+      return htmlToImage.toBlob(wrapper.firstChild, { width: 540, height: 960, pixelRatio: 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' });
+    }).then(function (blob) {
+      if (!blob) throw new Error('No se pudo generar la imagen.');
+      var fileName = 'cuantosale-' + (meta.dest.key || 'viaje') + '.png';
+      var file = typeof File === 'function' ? new File([blob], fileName, { type: 'image/png' }) : null;
+      var shareData = file ? { files: [file], title: 'Mi viaje a ' + meta.dest.name, text: 'Mirá cuánto sale mi viaje a ' + meta.dest.name + ' con cuantosale.uy' } : null;
+      if (shareData && navigator.canShare && navigator.canShare({ files: shareData.files })) {
+        return navigator.share(shareData).catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          downloadBlob(blob, fileName);
+        });
+      }
+      downloadBlob(blob, fileName);
+    }).catch(function (e) {
+      alert(e && e.message || 'No pudimos generar la imagen para compartir. Probá de nuevo en un momento.');
+    }).finally(function () {
+      if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+      if (button) { button.disabled = false; button.textContent = originalLabel || '📸 Compartir en Instagram'; }
+    });
+  }
   function openItinerarySummaryModal() {
     if (!detailState || !detailState.meta) return;
     var modal = $('#booking-modal');
@@ -632,7 +748,7 @@
       '<div class="voucher-card"><span class="voucher-icon">🏨</span><div><small>Alojamiento</small><strong>' + esc(selectedHotelName) + '</strong><p>Reserva de referencia en Booking.com</p><b>' + money(hotelTotal) + '</b></div></div>' +
       '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div></div>' +
       '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
-      '<div class="voucher-actions"><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
+      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
     modal.dataset.summaryText = summaryText;
     var voucherCards = modal.querySelectorAll('.voucher-card');
     if (voucherCards[0]) {
@@ -984,6 +1100,21 @@
     if (Number(minutes) === 120) return '2 horas después de la llegada';
     return 'Horario a coordinar';
   }
+  function transferFlightLegCard(label, origin, destination, departureText, arrivalText, flightNumber) {
+    return '<div class="transfer-flight-leg"><span class="flight-badge">' + esc(label) + '</span>' +
+      '<div class="flight-route"><div><small>' + esc(airportCode(origin)) + ' → ' + esc(airportCode(destination)) + '</small><small>Salida · ' + esc(airportLabel(origin)) + '</small><b>' + esc(departureText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destination)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
+      (flightNumber ? '<small class="transfer-flight-leg__number">Vuelo ' + esc(flightNumber) + '</small>' : '') + '</div>';
+  }
+  function transferFlightInfoMarkup(flightData) {
+    var hasFlight = !!(flightData && flightData.origin && (flightData.origin.code || flightData.origin.name));
+    if (!hasFlight) {
+      return '<div class="transfer-flight-sync transfer-flight-sync--empty"><p>✈️ Todavía no elegiste un vuelo. En cuanto lo hagas, usamos su horario real para sugerir la recogida.</p></div>';
+    }
+    return '<div class="transfer-flight-sync"><div class="flight-airline"><b>' + esc(flightData.airline) + '</b></div>' +
+      transferFlightLegCard('Ida', flightData.origin, flightData.destination, flightData.departureText, flightData.arrivalText, flightData.flightNumber) +
+      (flightData.isRoundTrip ? transferFlightLegCard('Vuelta', flightData.returnOrigin, flightData.returnDestination, flightData.returnDepartureText, flightData.returnArrivalText, flightData.inboundFlightNumber) : '') +
+      '</div>';
+  }
   function openTransferModal(meta) {
     if (!detailState) return;
     meta = meta || detailState.meta;
@@ -1049,7 +1180,7 @@
     var state = detailState.transferWizard;
     if (step) state.step = step;
     var flightData = getSelectedFlightSummary();
-    var flightInfo = '<div class="transfer-flight-sync"><p><b>Vuelo activo:</b> ' + esc(flightData.airline) + '</p><p>' + esc(flightData.summary) + '</p></div>';
+    var flightInfo = transferFlightInfoMarkup(flightData);
     var arrivalWindow = getTransferPickupWindow();
     var pickupOptions = [
       { value: '60', label: '1 hora después de la llegada', time: arrivalWindow.plusOneHour ? arrivalWindow.plusOneHour.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '01:00' },
@@ -2654,6 +2785,8 @@
           if (status) status.textContent = 'No se pudo copiar';
         });
       }
+      var storyButton = e.target.closest('[data-share-story]');
+      if (storyButton) { e.preventDefault(); shareStoryCard(storyButton); }
       var coordinateTransfer = e.target.closest('[data-coordinate-transfer]');
       if (coordinateTransfer) {
         e.preventDefault();
