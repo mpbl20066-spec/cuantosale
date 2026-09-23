@@ -457,12 +457,12 @@
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Transporte local</span><small>Presupuesto libre</small></div>' +
-      '<label class="daily-budget__planned"><span>Introduce tu presupuesto diario</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Escribí tu monto" data-daily-local aria-label="Introduce tu presupuesto diario de transporte local"><span>/ día</span></div></label>' +
+      '<label class="daily-budget__planned"><span>Presupuesto personalizado</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Ej: 30" data-daily-local aria-label="Presupuesto personalizado diario de transporte local"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
       '</div>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Comidas</span><small>Presupuesto libre</small></div>' +
-      '<label class="daily-budget__planned"><span>Introduce tu presupuesto diario</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Escribí tu monto" data-daily-food aria-label="Introduce tu presupuesto diario de comidas"><span>/ día</span></div></label>' +
+      '<label class="daily-budget__planned"><span>Presupuesto personalizado</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Ej: 30" data-daily-food aria-label="Presupuesto personalizado diario para comidas"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
