@@ -1979,7 +1979,7 @@
     }
     function selectDestination(nextValue) {
       var destinationKey = String(nextValue || 'todos');
-      if (!destItems.some(function (item) { return item.value === destinationKey; })) return;
+      if (!destinationKey) return;
       S.dest = destinationKey; S.proposalId = '';
       if (S.dest === 'todos') { S.transport = 'flight'; }
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
@@ -1990,10 +1990,11 @@
     }
     function bindDestinationOption(option) {
       if (!option) return;
-      option.addEventListener('click', function (event) {
+      option.onclick = function (event) {
         event.preventDefault();
+        event.stopPropagation();
         selectDestination(option.getAttribute('data-dest-value'));
-      });
+      };
     }
     if (trigger) {
       trigger.addEventListener('click', function () {
