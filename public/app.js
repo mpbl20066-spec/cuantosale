@@ -1201,6 +1201,11 @@
       visible = visible.filter(function (offer) { return String(offer.id) === String(state.outboundId); });
     } else if (flightStep === 'outbound') {
       visible = pickTopFlightOffers(visible);
+      // Mientras el usuario no confirmó un itinerario, el presupuesto ya refleja
+      // la tarifa real más barata que Duffel encontró, no una estimación estática.
+      if (state && !state.outboundId && visible.length && visible[0].price_usd !== null) {
+        actualizarPasajes(section, Number(visible[0].price_usd), visible[0].airline);
+      }
     }
     if (!visible.length) { el.innerHTML = '<p class="flight-empty">No hay vuelos que coincidan con estos filtros.</p>'; return; }
     el.innerHTML = '<div class="flight-cards">' + visible.map(function (offer) {
