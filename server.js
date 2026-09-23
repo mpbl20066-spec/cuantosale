@@ -38,6 +38,17 @@ const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrld
 const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
 function airSetting(name) { return process.env['DU' + 'FFEL_' + name]; }
 const HOTEL_RECOMMENDATIONS = {
+  canela: [
+    { tier: 'eco', name: 'Hotel Serra Canela', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/512641126.jpg?hp=1&k=4b5c3568010320013919e899e3a212a93d8ecb46049c51c3620000ef6f093e12&o=', bookingUrl: 'https://www.booking.com/hotel/br/serra-canela.html', similar: [] },
+    { tier: 'eco', name: 'Hotel Serra Nevada', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/684063341.jpg?k=391f094744a92fc93de9e8bee697887793d0242a8afdfe981803e150b8520c9e&o=', bookingUrl: 'https://hotelserranevada.com.br/', similar: [] },
+    { tier: 'eco', name: 'Blumen Hotel Boutique', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/515110418.jpg?hp=1&k=fe1a5584a5c1f5826f7beb293e679d353c10fc769321d446644411516af71980&o=', bookingUrl: 'https://www.blumenhotelboutique.com.br/', similar: [] },
+    { tier: 'moderado', name: 'Hotel Serra Nevada', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/684063341.jpg?k=391f094744a92fc93de9e8bee697887793d0242a8afdfe981803e150b8520c9e&o=', bookingUrl: 'https://hotelserranevada.com.br/', similar: [] },
+    { tier: 'moderado', name: 'Blumen Hotel Boutique', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/515110418.jpg?hp=1&k=fe1a5584a5c1f5826f7beb293e679d353c10fc769321d446644411516af71980&o=', bookingUrl: 'https://www.blumenhotelboutique.com.br/', similar: [] },
+    { tier: 'moderado', name: 'Golden Tulip Canela', image: 'https://media.iceportal.com/176942/photos/94105926_XXL.jpg', bookingUrl: 'https://canela.goldentulip.com/pt-br/', similar: [] },
+    { tier: 'alto', name: 'Blumen Hotel Boutique', image: 'https://cf.bstatic.com/xdata/images/hotel/max1024x768/515110418.jpg?hp=1&k=fe1a5584a5c1f5826f7beb293e679d353c10fc769321d446644411516af71980&o=', bookingUrl: 'https://www.blumenhotelboutique.com.br/', similar: [] },
+    { tier: 'alto', name: 'Golden Tulip Canela', image: 'https://media.iceportal.com/176942/photos/94105926_XXL.jpg', bookingUrl: 'https://canela.goldentulip.com/pt-br/', similar: [] },
+    { tier: 'alto', name: 'DoubleTree by Hilton Caracol Canela', image: 'https://www.hilton.com/im/en/CXJCADT/23208143/whatsapp-image-2025-05-28-at-20-55-57.jpeg?ch=2239&cw=4000&gravity=NorthWest&impolicy=crop&rh=430&rw=768&xposition=0&yposition=380', bookingUrl: 'https://www.hilton.com/pt/hotels/cxjcadt-doubletree-caracol-canela/', similar: [] }
+  ],
   fln: [{ tier: 'eco', name: 'Rede Andrade Cecomtur', similar: ['Ibis Florianópolis', 'Hotel Farol da Ilha'] }, { tier: 'moderado', name: 'Faial Prime Suites', similar: ['Novotel Florianópolis', 'Castelmar Hotel'] }, { tier: 'alto', name: 'LK Design Hotel', similar: ['IL Campanario Villaggio Resort', 'Novotel Florianópolis'] }],
   rio: [{ tier: 'eco', name: 'ibis Copacabana Posto 5', similar: ['Hotel Atlântico Travel', 'Windsor Copa'] }, { tier: 'moderado', name: 'Windsor California Copacabana', similar: ['Arena Copacabana Hotel', 'Hotel Astoria Palace'] }, { tier: 'alto', name: 'Hilton Rio de Janeiro Copacabana', similar: ['Fairmont Rio de Janeiro', 'Miramar by Windsor'] }],
   buz: [{ tier: 'eco', name: 'Pousada Experience João Fernandes', similar: ['Pousada Praia João Fernandes', 'Pousada Corsário Búzios'] }, { tier: 'moderado', name: 'Hotel Atlântico Búzios', similar: ['Colonna Galápagos Garden', 'Selina Búzios'] }, { tier: 'alto', name: 'Insolito Boutique Hotel', similar: ['Casas Brancas Boutique Hotel', 'Vila da Santa Hotel Boutique'] }],
@@ -217,7 +228,7 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
       perNight: Number.isFinite(perNight) ? perNight : 0,
       currency: String(hotel.currency || 'USD').toUpperCase(),
       bookingUrl: hotel.url || hotel.hotel_url || null,
-      similar: [hotel.city || destName, 'Hotel similar en ' + destName].filter(Boolean),
+      similar: [],
       source: 'booking'
     };
   }).filter(function (hotel) { return hotel.name && hotel.name !== 'Hotel recomendado'; });
@@ -240,27 +251,26 @@ function uniqueHotelList(list, fallbackImages) {
 async function hotelRecommendations(destKey, destName, style, extra) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
   const selectedTier = tierByStyle[style] || 'moderado';
-  const catalog = HOTEL_RECOMMENDATIONS[destKey] || [
-    { tier: 'eco', name: 'Pousada central en ' + destName, similar: ['Hostel céntrico', 'Hotel económico local'] },
-    { tier: 'moderado', name: 'Hotel recomendado en ' + destName, similar: ['Hotel con desayuno', 'Posada boutique local'] },
-    { tier: 'alto', name: 'Resort seleccionado en ' + destName, similar: ['Hotel frente al mar', 'Hotel boutique premium'] }
-  ];
+  const catalog = HOTEL_RECOMMENDATIONS[destKey] || [];
+  const staticHotels = catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel, index) {
+    const image = resolveHotelImage({ hotel_name: hotel.name, image: hotel.image }, index, hotel.tier || selectedTier, destName);
+    return Object.assign({}, hotel, { image: image, total: 0, perNight: 0, source: 'static' });
+  });
   try {
     const realHotels = await fetchBookingHotels(destKey, destName, selectedTier, extra || {});
     if (realHotels.length) {
-      const fallbackImages = HOTEL_IMAGES[selectedTier] || HOTEL_IMAGES.moderado;
-      return uniqueHotelList(realHotels.map(function (hotel) {
-        return Object.assign({}, hotel, { tier: selectedTier, similar: Array.isArray(hotel.similar) ? hotel.similar : [] });
-      }), fallbackImages);
+      const combined = realHotels.map(function (hotel) {
+        return Object.assign({}, hotel, { tier: selectedTier, similar: [] });
+      });
+      staticHotels.forEach(function (hotel) {
+        if (combined.length < 3 && !combined.some(function (item) { return normalizeHotelKey(item.name) === normalizeHotelKey(hotel.name); })) combined.push(hotel);
+      });
+      return uniqueHotelList(combined.slice(0, 3));
     }
   } catch (error) {
     console.warn('[hotelRecommendations] Booking API no disponible, usando fallback estático:', error && error.message ? error.message : error);
   }
-  const fallbackImages = HOTEL_IMAGES[selectedTier] || HOTEL_IMAGES.moderado;
-  return uniqueHotelList(catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel, index) {
-    const image = resolveHotelImage({ hotel_name: hotel.name }, index, hotel.tier || selectedTier, destName);
-    return Object.assign({}, hotel, { name: hotel.name, image: image, similarImages: fallbackImages.slice(1), total: 0, perNight: 0, source: 'static' });
-  }), fallbackImages);
+  return uniqueHotelList(staticHotels);
 }
 function adaptPackagesToStyle(result, trip, dep, ret, today) {
   const tierByStyle = { ahorro: 0, eq: 1, comodo: 2 };

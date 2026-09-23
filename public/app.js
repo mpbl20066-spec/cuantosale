@@ -140,7 +140,7 @@
       if (image) seen.add(image);
       unique.push(Object.assign({}, item, { name: name, image: image }));
     });
-    return unique.length ? unique : [{ name: defaultHotel.name, image: '', similar: defaultHotel.similar, tier: defaultHotel.tier }];
+    return unique;
   }
 
   function hotelOptions(meta, accommodationTotal) {
@@ -148,26 +148,33 @@
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     var profile = hotelStyle(meta);
-    var defaultHotel = { tier: profile.tier, name: profile.tier === 'eco' ? 'Pousada céntrica' : profile.tier === 'alto' ? 'Hotel premium frente al mar' : 'Hotel con desayuno', similar: profile.tier === 'eco' ? ['Hostel boutique', 'Posada familiar'] : profile.tier === 'alto' ? ['Resort boutique', 'Hotel 4 estrellas'] : ['Hotel boutique', 'Hotel 3 estrellas'], image: '' };
-    var hotelCatalog = normalizeHotelCatalog(Array.isArray(meta.hotels) && meta.hotels.length ? meta.hotels : [defaultHotel], defaultHotel);
-    var hotel = hotelCatalog[0] || defaultHotel;
-    var imageMap = {};
-    hotelCatalog.forEach(function (item) {
-      if (item && item.name) imageMap[String(item.name).toLowerCase()] = sanitizeHotelImageUrl(item.image, defaultHotel.image);
+    var defaultHotel = { tier: profile.tier, name: '', similar: [], image: '' };
+    var hotelCatalog = normalizeHotelCatalog(Array.isArray(meta.hotels) ? meta.hotels : [], defaultHotel);
+    var options = hotelCatalog.slice(0, 3).map(function (item, index) {
+      return {
+        name: item.name,
+        multiplier: index === 0 ? 1 : (index === 1 ? 0.92 : 1.08),
+        recommended: index === 0,
+        similar: Array.isArray(item.similar) ? item.similar : [],
+        image: sanitizeHotelImageUrl(item.image, ''),
+        total: Number(item.total) || null,
+        perNight: Number(item.perNight) || null,
+        bookingUrl: item.bookingUrl || null
+      };
     });
-    var options = [{ name: hotel.name, multiplier: 1, recommended: true, similar: Array.isArray(hotel.similar) ? hotel.similar : [], image: sanitizeHotelImageUrl(hotel.image, defaultHotel.image), total: Number(hotel.total) || null, perNight: Number(hotel.perNight) || null, bookingUrl: hotel.bookingUrl || null }].concat((hotel.similar || []).map(function (name, index) {
-      var candidate = hotelCatalog.find(function (item) { return item && item.name && String(item.name).toLowerCase() === String(name).toLowerCase(); });
-      return { name: name, multiplier: index === 0 ? 0.92 : 1.08, recommended: false, similar: (hotel.similar || []).filter(function (other) { return other !== name; }), image: sanitizeHotelImageUrl((candidate && candidate.image) || imageMap[String(name).toLowerCase()] || defaultHotel.image, defaultHotel.image), total: candidate && Number(candidate.total) ? Number(candidate.total) : null, perNight: candidate && Number(candidate.perNight) ? Number(candidate.perNight) : null, bookingUrl: (candidate && candidate.bookingUrl) || null };
-    }));
+    if (!options.length) {
+      return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles en ' + esc(meta.dest.name) + '</h2><p>No encontramos opciones reales con fotos para estas fechas.</p></div></div></section>';
+    }
     return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2><p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
       options.map(function (option, index) {
         var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
         var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
         var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
-        var imageUrl = sanitizeHotelImageUrl(option && option.image && typeof option.image === 'string' ? option.image : '', hotelImageFallback(index, defaultHotel.image));
+        var imageUrl = sanitizeHotelImageUrl(option && option.image && typeof option.image === 'string' ? option.image : '', '');
         var imageMarkup = imageUrl ? '<div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.removeAttribute(\'src\');"></div>' : '<div class="hotel-image-wrap hotel-image-empty"><span>Sin foto disponible</span></div>';
         var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a><details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details></article>';
+        var similarMarkup = similar ? '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details>' : '';
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
       }).join('') + '</div></section>';
   }
   function getBudgetBreakdown(state) {
@@ -860,16 +867,24 @@
     el.innerHTML = '<div class="flight-cards">' + visible.map(function (offer) {
       var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
       var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
-      var routeLabel = offer.trip_type === 'round_trip'
-        ? esc(airportCode(offer.outbound && offer.outbound.origin) || airportCode(offer.departure_airport)) + ' → ' + esc(airportCode(offer.outbound && offer.outbound.destination) || airportCode(offer.arrival_airport))
-        : esc(airportCode(offer.departure_airport)) + ' → ' + esc(airportCode(offer.arrival_airport));
-      var departText = offer.trip_type === 'round_trip' ? (offer.outbound && offer.outbound.departure ? flightTime(offer.outbound.departure) : flightTime(offer.departure)) : flightTime(offer.departure);
-      var arrivalText = offer.trip_type === 'round_trip' ? (offer.inbound && offer.inbound.arrival ? flightTime(offer.inbound.arrival) : flightTime(offer.arrival)) : flightTime(offer.arrival);
+      var isRoundTrip = offer.trip_type === 'round_trip';
+      var displayedLeg = isRoundTrip && flightStep === 'inbound'
+        ? offer.inbound
+        : (isRoundTrip ? offer.outbound : offer);
+      var originAirport = displayedLeg && displayedLeg.origin
+        ? displayedLeg.origin
+        : offer.departure_airport;
+      var destinationAirport = displayedLeg && displayedLeg.destination
+        ? displayedLeg.destination
+        : offer.arrival_airport;
+      var routeLabel = esc(airportCode(originAirport) || '---') + ' → ' + esc(airportCode(destinationAirport) || '---');
+      var departText = flightTime((displayedLeg && displayedLeg.departure) || offer.departure);
+      var arrivalText = flightTime((displayedLeg && displayedLeg.arrival) || offer.arrival);
       var primaryButtonText = 'Agregar a presupuesto';
       var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
       var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
       return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + stageBadge + '</div>' +
-        '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(offer.departure_airport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(offer.arrival_airport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
+        '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div></div>' +
         '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary" aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : primaryButtonText) + '</button></div></article>';
