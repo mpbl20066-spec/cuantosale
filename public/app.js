@@ -428,10 +428,14 @@
     var arrivalValue = outbound && outbound.arrival ? outbound.arrival : (offer && offer.arrival);
     var departureText = formatFlightDateTime(departureValue);
     var arrivalText = formatFlightDateTime(arrivalValue);
+    var flightNumber = (offer && (offer.flight_number || (offer.outbound && offer.outbound.flight_number))) || '';
+    var inboundFlightNumber = offer && offer.inbound && offer.inbound.flight_number || '';
+    var originAirport = offer && (offer.departure_airport || (offer.outbound && offer.outbound.origin));
+    var destinationAirport = offer && (offer.arrival_airport || (offer.outbound && offer.outbound.destination));
     var route = '';
     if (offer) {
-      var origin = airportCode(offer.departure_airport || (offer.outbound && offer.outbound.origin));
-      var destination = airportCode(offer.arrival_airport || (offer.outbound && offer.outbound.destination));
+      var origin = airportCode(originAirport);
+      var destination = airportCode(destinationAirport);
       route = ' · ' + origin + ' → ' + destination;
     }
     return {
@@ -1281,6 +1285,24 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Resumen de vuelo real: reemplaza cualquier texto genérico del voucher.
+  function getSelectedFlightSummary() {
+    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'Todavía no elegiste un vuelo.' };
+    var offer = getSelectedFlightOffer();
+    var airline = offer && offer.airline || detailState.selectedFlight || 'Vuelo seleccionado';
+    var outbound = offer && (offer.outbound || offer) || {};
+    var inbound = offer && offer.inbound || {};
+    var departure = outbound.departure || offer && offer.departure;
+    var arrival = inbound.arrival || offer && offer.arrival || outbound.arrival;
+    var origin = outbound.origin || offer && offer.departure_airport || {};
+    var destination = outbound.destination || offer && offer.arrival_airport || {};
+    var flightNumber = offer && (offer.flight_number || outbound.flight_number) || '';
+    var inboundFlightNumber = inbound.flight_number || '';
+    var numbers = flightNumber ? 'Vuelo ' + flightNumber + (inboundFlightNumber ? ' · regreso ' + inboundFlightNumber : '') : 'Número de vuelo no informado';
+    var summary = numbers + ' · ' + (origin.name || origin.code || 'Origen no informado') + ' → ' + (destination.name || destination.code || 'Destino no informado') + ' · salida ' + formatFlightDateTime(departure) + ' · llegada ' + formatFlightDateTime(arrival);
+    return { airline: airline, summary: summary, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), route: ' · ' + airportCode(origin) + ' → ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination };
+  }
+
   function openDestinationProposal(key, savedTrip) {
     var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
     fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
@@ -1484,11 +1506,26 @@
     actualizarTransporte(detailState.transportMode === 'auto');
     renderTripSummary();
   }
-  function loadTrip(trip) {
+  function normalizeDestinationText(value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+  async function resolveSavedDestinationKey(trip, details) {
+    var key = trip.destination_key || details.destination_key || '';
+    if (key && key !== 'todos') return key;
+    var name = normalizeDestinationText(trip.destination || trip.destination_name || '');
+    try {
+      var response = await fetch('/api/destinos');
+      var list = await response.json();
+      var match = Array.isArray(list) && list.find(function (item) { return normalizeDestinationText(item.name) === name || normalizeDestinationText(item.name).indexOf(name) >= 0 || name.indexOf(normalizeDestinationText(item.name)) >= 0; });
+      return match && match.key || '';
+    } catch (error) { return ''; }
+  }
+  async function loadTrip(trip) {
     var details = trip.details || trip.flight_details || {};
-    S.dest = trip.destination_key || details.destination_key || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || S.transport;
+    S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || S.transport;
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); openDestinationProposal(S.dest, trip); }
+    else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
   }
   async function initAuth() {
     if (!window.supabase || !window.supabase.createClient) return;

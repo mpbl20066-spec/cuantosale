@@ -420,6 +420,7 @@ function formatOffers(offers, requiredOrigin) {
       logo: carrier.logo_symbol_url || carrier.logo_lockup_url || null,
       departure: firstOut.departing_at || null,
       arrival: lastIn.arriving_at || lastOut.arriving_at || null,
+      flight_number: firstOut.flight_number || null,
       stops: Math.max(outboundSegments.length - 1 + inboundSegments.length - 1, 0),
       duration: durationLabel((outboundSlice.duration || '') + (inboundSlice.duration ? ' + ' + inboundSlice.duration : '')),
       price_usd: priceUsd === null ? null : Math.round(priceUsd * 100) / 100,
@@ -431,6 +432,7 @@ function formatOffers(offers, requiredOrigin) {
         destination: { code: lastOut.destination && lastOut.destination.iata_code || '', name: lastOut.destination && lastOut.destination.name || '' },
         departure: firstOut.departing_at || null,
         arrival: lastOut.arriving_at || null,
+        flight_number: firstOut.flight_number || null,
         stops: Math.max(outboundSegments.length - 1, 0),
         duration: durationLabel(outboundSlice.duration)
       },
@@ -439,6 +441,7 @@ function formatOffers(offers, requiredOrigin) {
         destination: { code: lastIn.destination && lastIn.destination.iata_code || '', name: lastIn.destination && lastIn.destination.name || '' },
         departure: firstIn.departing_at || null,
         arrival: lastIn.arriving_at || null,
+        flight_number: firstIn.flight_number || null,
         stops: Math.max(inboundSegments.length - 1, 0),
         duration: durationLabel(inboundSlice.duration)
       }
