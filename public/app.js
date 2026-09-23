@@ -281,12 +281,24 @@
       return '<div class="trip-summary__item"><span class="trip-summary__marker" style="background:var(' + item.color + ')"></span><div class="trip-summary__meta"><span>' + item.label + '</span><b>' + item.meta + '</b></div><em>' + item.value + '</em></div>';
     }).join('');
     summary.innerHTML = '<div class="trip-summary__inner">' +
-      '<div class="trip-summary__head"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong></div>' +
-      '<div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
+      '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong><span class="trip-summary__toggle-icon" aria-hidden="true">⌃</span></button>' +
+      '<div class="trip-summary__details"><div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
       '<div class="trip-summary__items">' + itemsHtml + '</div>' +
-      '<div class="trip-summary__actions"><button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button><button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div>' +
+      '<div class="trip-summary__actions"><button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button><button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div></div>' +
       '</div>';
     summary.hidden = false;
+    syncTripSummaryViewport();
+  }
+  function syncTripSummaryViewport() {
+    var summary = $('#trip-summary');
+    if (!summary) return;
+    var isMobile = window.innerWidth <= 768;
+    var wasMobile = summary.getAttribute('data-mobile-viewport') === 'true';
+    if (isMobile && !wasMobile) summary.classList.add('minimized');
+    if (!isMobile) summary.classList.remove('minimized');
+    summary.setAttribute('data-mobile-viewport', String(isMobile));
+    var toggle = summary.querySelector('[data-trip-summary-toggle]');
+    if (toggle) toggle.setAttribute('aria-expanded', String(!isMobile || !summary.classList.contains('minimized')));
   }
   function openItinerarySummaryModal() {
     if (!detailState || !detailState.meta) return;
@@ -855,20 +867,25 @@
     }
     var section = el.closest('.flight-search');
     if (detailState) detailState.flightOffers = offers;
-    var flightStep = section.getAttribute('data-flight-step') || 'outbound';
     var state = getFlightSelectionState();
+    var flightStep = section.getAttribute('data-flight-step') || (state && state.stage) || 'outbound';
     var stepLabel = flightStep === 'inbound' ? 'Vuelta' : 'Ida';
     var titleEl = section.querySelector('h2');
     var subtitleEl = section.querySelector('p');
-    if (titleEl) titleEl.textContent = flightStep === 'inbound' ? 'Vuelos de vuelta' : 'Vuelos de ida';
-    if (subtitleEl) subtitleEl.textContent = flightStep === 'inbound' ? 'Elegí la opción de regreso para completar el itinerario.' : 'Elegí la opción de ida para continuar.';
+    if (titleEl) titleEl.textContent = flightStep === 'inbound' ? 'Vuelos de vuelta' : (flightStep === 'done' ? 'Itinerario seleccionado' : 'Vuelos de ida');
+    if (subtitleEl) subtitleEl.textContent = flightStep === 'inbound'
+      ? 'Revisá el vuelo de vuelta incluido en la tarifa seleccionada.'
+      : (flightStep === 'done' ? 'El precio mostrado corresponde al itinerario seleccionado.' : 'Elegí la opción de ida para continuar.');
     var visible = filteredFlightOffers(section, offers);
+    if ((flightStep === 'inbound' || flightStep === 'done') && state && state.outboundId) {
+      visible = visible.filter(function (offer) { return String(offer.id) === String(state.outboundId); });
+    }
     if (!visible.length) { el.innerHTML = '<p class="flight-empty">No hay vuelos que coincidan con estos filtros.</p>'; return; }
     el.innerHTML = '<div class="flight-cards">' + visible.map(function (offer) {
       var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
       var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
       var isRoundTrip = offer.trip_type === 'round_trip';
-      var displayedLeg = isRoundTrip && flightStep === 'inbound'
+      var displayedLeg = isRoundTrip && (flightStep === 'inbound' || flightStep === 'done')
         ? offer.inbound
         : (isRoundTrip ? offer.outbound : offer);
       var originAirport = displayedLeg && displayedLeg.origin
@@ -880,13 +897,15 @@
       var routeLabel = esc(airportCode(originAirport) || '---') + ' → ' + esc(airportCode(destinationAirport) || '---');
       var departText = flightTime((displayedLeg && displayedLeg.departure) || offer.departure);
       var arrivalText = flightTime((displayedLeg && displayedLeg.arrival) || offer.arrival);
-      var primaryButtonText = 'Agregar a presupuesto';
-      var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
+      var primaryButtonText = isRoundTrip
+        ? (flightStep === 'inbound' ? 'Confirmar ida y vuelta' : (flightStep === 'done' ? 'Itinerario seleccionado' : 'Seleccionar ida'))
+        : (flightStep === 'done' ? 'Vuelo seleccionado' : 'Agregar a presupuesto');
+      var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(flightStep === 'done' ? 'Ida y vuelta' : stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
       var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
       return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
-        '<div class="flight-price"><small>Precio final</small><b>' + price + '</b></div></div>' +
+        '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
         '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary" aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : primaryButtonText) + '</button></div></article>';
     }).join('') + '</div>';
     if (state && state.outboundId && state.inboundId) {
@@ -1641,7 +1660,20 @@
     var authButton = $('#auth-button'), tripsButton = $('#trips-button');
     if (authButton) authButton.addEventListener('click', function () { if (authUser) openTripsModal(); else openAuthModal(); });
     if (tripsButton) tripsButton.addEventListener('click', openTripsModal);
-    $('#trip-summary').addEventListener('click', function (e) { if (e.target.closest('[data-save-trip]')) { e.preventDefault(); saveCurrentTrip(); } });
+    $('#trip-summary').addEventListener('click', function (e) {
+      var toggle = e.target.closest('[data-trip-summary-toggle]');
+      if (toggle) {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          var summary = $('#trip-summary');
+          summary.classList.toggle('minimized');
+          toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
+        }
+        return;
+      }
+      if (e.target.closest('[data-save-trip]')) { e.preventDefault(); saveCurrentTrip(); }
+    });
+    window.addEventListener('resize', syncTripSummaryViewport);
     $('#auth-modal').addEventListener('click', async function (e) {
       if (e.target.closest('[data-close-auth]') || e.target === $('#auth-modal')) return closeAccountModal('auth-modal');
       var google = e.target.closest('[data-google-auth]');
@@ -1927,23 +1959,40 @@
         e.preventDefault(); e.stopPropagation();
         var offerId = selectedFlight.getAttribute('data-select-flight');
         var state = getFlightSelectionState();
+        var section = selectedFlight.closest('.flight-search');
         if (state && detailState && detailState.flightOffers) {
           var offer = detailState.flightOffers.find(function (item) { return String(item.id) === String(offerId); });
           var roundTrip = offer && offer.trip_type === 'round_trip';
           if (roundTrip) {
-            // Duffel already returns both slices in one offer: keep the complete
-            // ida y vuelta and its single total price as the selected itinerary.
-            var section = selectedFlight.closest('.flight-search');
-            state.outboundId = offerId;
-            state.inboundId = offerId;
-            section.setAttribute('data-flight-step', 'done');
+            if (state.stage !== 'inbound' && state.stage !== 'done') {
+              state.stage = 'inbound';
+              state.outboundId = offerId;
+              state.inboundId = null;
+              section.setAttribute('data-flight-step', 'inbound');
+              renderFlightOffers(section.querySelector('.flight-results'), { offers: detailState.flightOffers });
+              section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              return;
+            }
+            if (state.stage === 'inbound' && String(state.outboundId) === String(offerId)) {
+              state.inboundId = offerId;
+              state.stage = 'done';
+              section.setAttribute('data-flight-step', 'done');
+            } else {
+              return;
+            }
             persistSelectedOffer(selectedFlight);
             actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
+            renderFlightOffers(section.querySelector('.flight-results'), { offers: detailState.flightOffers });
             return;
           }
+          state.stage = 'done';
+          state.outboundId = offerId;
+          state.inboundId = null;
+          section.setAttribute('data-flight-step', 'done');
         }
         persistSelectedOffer(selectedFlight);
-        actualizarPasajes(selectedFlight.closest('.flight-search'), Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
+        actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
+        if (section && detailState && detailState.flightOffers) renderFlightOffers(section.querySelector('.flight-results'), { offers: detailState.flightOffers });
         return;
       }
       var unlock = e.target.closest('[data-unlock-guide]');

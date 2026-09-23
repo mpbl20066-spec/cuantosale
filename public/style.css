@@ -310,3 +310,17 @@ details.opt summary::-webkit-details-marker{display:none}
 .duffel-service,.official-transfer{background:var(--surface)}
 .card-brand-row small{background:var(--control-bg);color:var(--ink)}
 .trip-summary{background:var(--surface)}
+.trip-summary__head{width:100%;padding:0;border:0;background:transparent;color:var(--ink);font:inherit;text-align:left;box-shadow:none;cursor:default}
+.trip-summary__toggle-icon{display:none}
+.trip-summary__details{display:grid;gap:10px}
+@media (max-width:768px){
+  .trip-summary{padding:9px 12px 10px}
+  .trip-summary__inner{gap:0}
+  .trip-summary__head{min-height:38px;align-items:center;cursor:pointer}
+  .trip-summary__head:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
+  .trip-summary__head strong{font-size:30px}
+  .trip-summary__toggle-icon{display:block;font-size:20px;line-height:1;transition:transform .18s ease}
+  .trip-summary__details{gap:8px;margin-top:8px}
+  .trip-summary.minimized .trip-summary__details{display:none}
+  .trip-summary.minimized .trip-summary__toggle-icon{transform:rotate(180deg)}
+}
