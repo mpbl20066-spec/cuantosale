@@ -1331,9 +1331,7 @@
       destination: datosVuelo.destination || datosVuelo.destino || null,
       departure_date: datosVuelo.departure_date || datosVuelo.fecha_ida || null,
       return_date: datosVuelo.return_date || datosVuelo.fecha_vuelta || null,
-      total_amount: Number(datosVuelo.total_amount || datosVuelo.precio_total) || 0,
-      currency: datosVuelo.currency || 'USD',
-      offer_id: datosVuelo.offer_id || null,
+      total_price: Number(datosVuelo.total_price || datosVuelo.total_amount || datosVuelo.precio_total) || 0,
       flight_details: datosVuelo.flight_details || datosVuelo.detalles_vuelo || {}
     };
     var result = await supabaseClient.from('trips').insert(payload).select().single();
@@ -1409,7 +1407,7 @@
     tripSaveInProgress = true;
     var result;
     try {
-      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, destination_key: payload.destination_key, departure_date: payload.departure_date, return_date: payload.return_date, total_amount: payload.total_amount, currency: payload.currency, offer_id: payload.details && payload.details.flight && payload.details.flight.id || null, flight_details: payload.details });
+      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, destination_key: payload.destination_key, departure_date: payload.departure_date, return_date: payload.return_date, total_price: payload.total_amount, flight_details: payload.details });
     } catch (error) {
       tripSaveInProgress = false;
       openAuthModal(error.message);
@@ -1435,7 +1433,7 @@
     }
     if (result.error) { box.innerHTML = '<p class="booking-error">No se pudieron cargar tus viajes porque la tabla todavía no tiene permisos RLS configurados. Ejecutá <strong>supabase_trips_rls_fix.sql</strong> en el SQL Editor de Supabase y recargá.</p>'; return; }
     if (!result.data.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
-    box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
+    box.innerHTML = result.data.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_price || trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button></article>'; }).join('');
     box._trips = result.data;
   }
   function loadTrip(trip) {

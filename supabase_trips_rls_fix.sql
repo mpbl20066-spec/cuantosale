@@ -29,6 +29,8 @@ drop policy if exists "Usuarios pueden ver sus propios trips" on public.trips;
 drop policy if exists "Usuarios pueden insertar sus propios trips" on public.trips;
 drop policy if exists "Acceso total autenticados" on public.trips;
 drop policy if exists "Permitir todo a todos temporariamente" on public.trips;
+drop policy if exists "Utilizadores podem ver as suas próprias viagens" on public.trips;
+drop policy if exists "Utilizadores podem inserir as suas próprias viagens" on public.trips;
 
 create policy "Users can read their own trips"
   on public.trips for select
@@ -50,5 +52,3 @@ create policy "Users can delete their own trips"
   on public.trips for delete
   to authenticated
   using (auth.uid() = user_id);
-
-grant select, insert, update, delete on table public.user_trips to authenticated;
