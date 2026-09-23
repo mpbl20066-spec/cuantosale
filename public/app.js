@@ -1996,6 +1996,13 @@
         selectDestination(option.getAttribute('data-dest-value'));
       };
     }
+    document.addEventListener('pointerdown', function (event) {
+      var option = event.target.closest && event.target.closest('#dest-menu button[data-dest-value]');
+      if (!option || option.hidden) return;
+      event.preventDefault();
+      event.stopPropagation();
+      selectDestination(option.getAttribute('data-dest-value'));
+    }, true);
     if (trigger) {
       trigger.addEventListener('click', function () {
         if (menu && menu.hidden) {
