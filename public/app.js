@@ -1918,8 +1918,7 @@
       var normalized = normalizeDestQuery(query);
       var visible = [];
       Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
-        var value = option.getAttribute('data-dest-value') || '';
-        var matches = value === 'todos' || !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
+        var matches = !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
         option.hidden = !matches;
         if (matches) visible.push(option);
       });
@@ -1976,12 +1975,15 @@
       renderTransportSelector();
     }
     function selectDestination(nextValue) {
-      S.dest = String(nextValue || 'todos'); S.proposalId = '';
+      var destinationKey = String(nextValue || 'todos');
+      if (!destItems.some(function (item) { return item.value === destinationKey; })) return;
+      S.dest = destinationKey; S.proposalId = '';
       if (S.dest === 'todos') { S.transport = 'flight'; }
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
-      massSearch = false; updateDestinationMode(); syncTransportSelection(); if (S.dest !== 'todos') schedule();
       setDestDisplay(S.dest);
       closeDestMenu();
+      massSearch = false; updateDestinationMode(); syncTransportSelection();
+      if (S.dest !== 'todos') schedule();
     }
     if (trigger) {
       trigger.addEventListener('click', function () {
@@ -2032,6 +2034,8 @@
       menu.addEventListener('click', function (e) {
         var option = e.target.closest('[data-dest-value]');
         if (!option) return;
+        e.preventDefault();
+        e.stopPropagation();
         selectDestination(option.getAttribute('data-dest-value'));
       });
     }
