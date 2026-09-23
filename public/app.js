@@ -1493,13 +1493,11 @@
       return '<details class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '"><summary><div><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
         '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body">' + rows + '<div class="proposal-actions"><button type="button" class="btn-ver-propuesta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta ➔</button></div></div></details>';
     };
-    var opts = list.map(proposalMarkup).join('');
-    var roadtripList = Array.isArray(data.roadtripList) ? data.roadtripList : [];
-    var roadtripOpts = roadtripList.map(proposalMarkup).join('');
-    if (roadtripOpts && S.transport !== 'auto' && isRoadtripDestinationAllowed(data.meta.dest.key)) {
-      h += '<section class="sec"><h2>Tambien podes ir en auto</h2><p class="sub">Alternativas en auto desde Montevideo, con combustible y peajes estimados.</p><div class="opts">' + roadtripOpts + '</div></section>';
-    }
-    h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
+    // Solo se comparan propuestas de la misma gama de alojamiento que la recomendada
+    // (la que ya refleja el estilo de viaje elegido arriba), para no mezclar tiers.
+    var sameTier = list.filter(function (p) { return p.ti === rec.ti; });
+    var opts = sameTier.map(proposalMarkup).join('');
+    h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
 
     var el = $('#results');
     el.innerHTML = h;
