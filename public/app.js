@@ -18,6 +18,17 @@
     { destinations: ['pip'], destination: 'Praia do Pipa, Brasil', title: 'Paseo en Buggy de “Playa en Playa”', description: 'Recorrido extremo y panorámico visitando Chapadão, Baía dos Golfinhos y Sibaúma.', price: 45 },
     { destinations: ['gram', 'canela'], destination: 'Gramado y Canela, Brasil', title: 'Tour del Vino en Bento Gonçalves (Valle de los Viñedos)', description: 'Excursión de un día con cata de vinos, espumantes y almuerzo típico colonial incluido.', price: 70 }
   ];
+  function tourDetailText(tour) {
+    var details = {
+      rio: ['Incluye entradas prioritarias, guía especializado y traslado dentro de Río.', 'Salida temprano; duración aproximada de 8 horas.', 'Llevá calzado cómodo y una campera liviana para el Corcovado.'],
+      fln: ['Incluye traslado hasta Playa da Armação, navegación y tiempo libre en la isla.', 'Las salidas dependen del clima y suelen comenzar por la mañana.', 'Confirmá la salida según el estado del mar y llevá protector solar.'],
+      maragogi: ['Incluye navegación en catamarán y tiempo para snorkel en las piscinas naturales.', 'La experiencia se realiza con marea baja; el horario cambia cada día.', 'Consultá la tabla de mareas antes de reservar.'],
+      pip: ['Incluye buggy con conductor y paradas panorámicas en las principales playas.', 'Duración aproximada de medio día; se recomienda salir por la mañana.', 'Usá ropa cómoda, protector solar y llevá agua.'],
+      gram: ['Incluye transporte, degustación de vinos y espumantes y almuerzo colonial.', 'Excursión de día completo desde Gramado o Canela.', 'Reservá con anticipación en temporada alta y avisá si tenés restricciones alimentarias.']
+    };
+    var item = details[tour.destinations[0]] || ['Incluye la actividad principal y acompañamiento local.', 'Los horarios dependen de la disponibilidad del operador.', 'Confirmá disponibilidad, punto de encuentro y valor final antes de reservar.'];
+    return 'Incluye: ' + item[0] + ' Horarios: ' + item[1] + ' Recomendación: ' + item[2];
+  }
 
   var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '' };
   var DESTINATION_GROUPS = [
@@ -256,8 +267,15 @@
     if (!tours.length) return '';
     return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y actividades sugeridas</h2><p>Elegí las experiencias que querés sumar a tu viaje. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid">' + tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
-      return '<article class="local-tour" data-tour-card role="checkbox" tabindex="0" aria-checked="false" aria-label="Sumar ' + esc(tour.title) + ' al presupuesto"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '" tabindex="-1"><span class="local-tour__check" aria-hidden="true">✓</span><span class="local-tour__status">Sumar al presupuesto</span><span class="local-tour__icon" aria-hidden="true">✦</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div></article>';
+      return '<article class="local-tour" data-tour-card role="checkbox" tabindex="0" aria-checked="false" aria-label="Sumar ' + esc(tour.title) + ' al presupuesto"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '" tabindex="-1"><span class="local-tour__check" aria-hidden="true">✓</span><span class="local-tour__status">Sumar al presupuesto</span><span class="local-tour__icon" aria-hidden="true">✦</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div><button type="button" class="local-tour__detail" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">Ver detalle</button></article>';
     }).join('') + '</div><div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div></section>';
+  }
+  function openTourDetailModal(button) {
+    var modal = $('#booking-modal');
+    if (!modal || !button) return;
+    modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span><h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2><p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p><div class="tour-detail-modal__copy"><p>' + esc(button.getAttribute('data-tour-detail')) + '</p></div><p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
   }
   var hotelRequestId = 0;
   function hotelLoading(meta) {
@@ -2169,6 +2187,12 @@
         var tourLines = selectedTours.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ')'; }).join('\n');
         var message = 'Hola, quiero reservar estos tours para mi viaje a ' + detailState.meta.dest.name + ':\n' + tourLines + '\n\nTotal referencial de tours: ' + money(detailState.toursTotal) + '\nViajamos ' + detailState.meta.pax + (Number(detailState.meta.pax) === 1 ? ' persona' : ' personas') + ' del ' + detailState.meta.dep + ' al ' + detailState.meta.ret + '. ¿Podrían confirmar disponibilidad y valor final?';
         window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+        return;
+      }
+      var tourDetail = e.target.closest('[data-tour-detail-open]');
+      if (tourDetail) {
+        e.preventDefault(); e.stopPropagation();
+        openTourDetailModal(tourDetail);
         return;
       }
       var tourCard = e.target.closest('[data-tour-card]');
