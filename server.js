@@ -509,7 +509,7 @@ function cotizarTodos(req, res, url) {
     const result = adaptPackagesToStyle(model.compute(trip, v.dep, v.ret, today, {}), trip, v.dep, v.ret, today);
     const rec = result.list.find(function (p) { return p.id === result.recId; });
     return {
-      dest: { key: key, name: model.DEST[key].name }, total: rec.total, pp: rec.pp,
+      dest: { key: key, name: model.DEST[key].name, region: model.DEST[key].region || '', country: 'Brasil' }, total: rec.total, pp: rec.pp,
       parts: rec.parts, title: rec.modeShort + ' + hotel ' + rec.tierLabel,
       tierDesc: rec.tierDesc, fits: result.fits
     };
