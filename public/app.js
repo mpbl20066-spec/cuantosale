@@ -1416,7 +1416,7 @@
     tripSaveInProgress = false;
     pendingTripSave = false;
     try { sessionStorage.removeItem('cuantosale_pending_trip'); sessionStorage.removeItem('cuantosale_pending_trip_data'); } catch (error) {}
-    alert('Viaje guardado en tu cuenta.');
+    await openTripsModal();
   }
   async function loadSavedTrips(modal) {
     var box = modal.querySelector('[data-saved-trips]');
