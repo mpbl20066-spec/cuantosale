@@ -55,6 +55,44 @@ const HOTEL_NEARBY_DESTINATIONS = {
   gram: { key: 'canela', name: 'Canela', label: 'Canela, cerca de Gramado' },
   canela: { key: 'gram', name: 'Gramado', label: 'Gramado, cerca de Canela' }
 };
+// Respaldo cuando Booking.com no devuelve (o no alcanza) 3 opciones reales para
+// la categoría elegida. Usa cadenas hoteleras reales con presencia amplia en
+// Brasil por nivel de comodidad; el link de reserva siempre apunta a una
+// búsqueda real y funcional de Booking.com para esa ciudad y esas fechas.
+const HOTEL_TIER_FALLBACK = [
+  { id: 'eco', label: 'Económico', brands: ['ibis budget', 'Selina', 'Che Lagarto Hostel'],
+    desc: 'Habitaciones simples y funcionales, ideal para dormir bien gastando poco.' },
+  { id: 'medio', label: 'Intermedio', brands: ['ibis', 'Travel Inn', 'Slaviero'],
+    desc: 'Hotel 3 estrellas con buena ubicación y desayuno incluido.' },
+  { id: 'confort', label: 'Confort', brands: ['Mercure', 'Golden Tulip', 'Blue Tree'],
+    desc: 'Hotel 4 estrellas con más comodidades y mejor ubicación.' }
+];
+function fallbackBookingUrl(destName, dep, ret, pax, hotelName) {
+  const query = new URLSearchParams({
+    ss: (hotelName ? hotelName + ', ' : '') + destName + ', Brasil',
+    group_adults: String(Math.max(1, Number(pax) || 1)), no_rooms: '1', group_children: '0'
+  });
+  if (dep) query.set('checkin', dep);
+  if (ret) query.set('checkout', ret);
+  return 'https://www.booking.com/searchresults.es.html?' + query.toString();
+}
+function fallbackHotelsFor(destKey, destName, tierIndex, extra) {
+  const dest = model.DEST[destKey];
+  const tierInfo = HOTEL_TIER_FALLBACK[tierIndex] || HOTEL_TIER_FALLBACK[1];
+  const nights = Math.max(1, Number(extra && extra.nights) || 1);
+  const basePerNight = Math.max(20, Math.round((dest && Array.isArray(dest.lodge) ? dest.lodge[tierIndex] : null) || [70, 130, 220][tierIndex] || 130));
+  const spread = [0.92, 1, 1.1];
+  return tierInfo.brands.map(function (brand, index) {
+    const name = brand + ' ' + destName;
+    const perNight = Math.round(basePerNight * spread[index]);
+    return {
+      name: name, hotelId: '', image: '', total: perNight * nights, perNight: perNight, currency: 'USD', rating: 0,
+      bookingUrl: fallbackBookingUrl(destName, extra && extra.dep, extra && extra.ret, extra && extra.pax, name),
+      similar: [], source: 'fallback', tier: tierInfo.id,
+      description: tierInfo.desc
+    };
+  });
+}
 function sanitizeHotelName(value) {
   const raw = String(value || '').trim();
   if (!raw) return 'Hotel recomendado';
@@ -258,15 +296,20 @@ function uniqueHotelList(list, fallbackImages) {
   return unique;
 }
 
+// Siempre debe haber exactamente 3 opciones alineadas a la categoría (tier)
+// que el usuario eligió arriba (Económico / Intermedio / Confort). Se prioriza
+// alojamiento real de Booking.com dentro del rango de precio de esa categoría;
+// lo que falte para llegar a 3 se completa con el respaldo de cadenas reales.
 async function hotelRecommendations(destKey, destName, style, extra) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
+  const tierIndex = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
   const selectedTier = tierByStyle[style] || 'moderado';
   const budgetTarget = hotelBudgetTarget(destKey, style, extra || {});
+  let realHotels = [];
   try {
-    let realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, extra || {})).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName }); });
-    let nearby = null;
+    realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, extra || {})).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName }); });
     if (realHotels.length < 3) {
-      nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
+      const nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
       if (nearby) {
         try {
           const regionalHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, extra || {});
@@ -276,14 +319,29 @@ async function hotelRecommendations(destKey, destName, style, extra) {
         }
       }
     }
-    const selected = selectThreeHotelsByBudget(realHotels, budgetTarget).map(function (hotel) {
-      return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName });
-    });
-    return uniqueHotelList(selected.slice(0, 3));
   } catch (error) {
     console.warn('[hotelRecommendations] Booking API no disponible:', error && error.message ? error.message : error);
-    return [];
+    realHotels = [];
   }
+  const priced = uniqueHotelList(realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; }));
+  // Un hotel real más barato que el objetivo de la categoría sigue siendo válido
+  // para esa categoría; lo que se descarta es lo que se pasa claramente de precio.
+  const high = budgetTarget > 0 ? budgetTarget * 1.5 : Infinity;
+  const matchingCategory = priced
+    .filter(function (hotel) { return hotel.perNight <= high; })
+    .sort(function (a, b) { return Math.abs(a.perNight - budgetTarget) - Math.abs(b.perNight - budgetTarget); })
+    .slice(0, 3)
+    .map(function (hotel) { return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName }); });
+  const missing = 3 - matchingCategory.length;
+  const fallback = missing > 0 ? fallbackHotelsFor(destKey, destName, tierIndex, extra) : [];
+  const combined = uniqueHotelList(matchingCategory.concat(fallback)).slice(0, 3);
+  return combined.map(function (hotel, index) {
+    return Object.assign({}, hotel, {
+      tier: selectedTier,
+      highlight: ['Recomendado', 'Buena opción', 'Alternativa'][index],
+      recommended: index === 0
+    });
+  });
 }
 
 function adaptPackagesToStyle(result, trip, dep, ret, today) {

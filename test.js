@@ -139,17 +139,19 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
     };
     try {
       const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
-      assert.strictEqual(list.length, 1);
+      // Siempre son 3: el hotel real de Booking más 2 de respaldo que completan la categoría.
+      assert.strictEqual(list.length, 3);
       assert.strictEqual(list[0].name, 'Hotel Booking Floripa');
       assert.strictEqual(list[0].image, 'https://images.example/hotel.jpg');
       assert.strictEqual(list[0].total, 700);
       assert.strictEqual(list[0].perNight, 100);
       assert.strictEqual(list[0].source, 'booking');
+      assert.deepStrictEqual(list.slice(1).map(function (hotel) { return hotel.source; }), ['fallback', 'fallback']);
       assert.ok(seen.some(function (request) { return request.url.hostname === 'booking-com15.p.rapidapi.com' && request.url.pathname.endsWith('/api/v1/hotels/searchHotels'); }));
       assert.ok(seen.every(function (request) { return request.options.headers['x-rapidapi-key'] === 'test-key'; }));
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
-  await t('sin foto o precio real no inventa resultados de alojamiento', async function () {
+  await t('sin foto real completa el resto con el respaldo de cadenas conocidas', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
     global.fetch = async function (url) {
@@ -158,16 +160,25 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
       if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [{ hotel_id: 'hotel-2', property: { name: 'Hotel sin foto' }, priceBreakdown: { grossPrice: { value: 460, currency: 'USD' } } }] } }; } };
       return { ok: true, status: 200, json: async function () { return { data: [] }; } };
     };
-    try { assert.deepStrictEqual(await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 }), []); }
-    finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+    try {
+      const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      assert.strictEqual(list.length, 3);
+      assert.ok(list.every(function (hotel) { return hotel.source === 'fallback'; }));
+      assert.ok(list.every(function (hotel) { return /^https:\/\/www\.booking\.com\//.test(hotel.bookingUrl); }));
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
-  await t('ante fallos de Booking no devuelve catálogo simulado', async function () {
+  await t('ante fallos de Booking siempre entrega 3 opciones de respaldo de la categoría elegida', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
     global.fetch = async function () { throw new Error('timeout'); };
     const originalWarn = console.warn; console.warn = function () {};
-    try { assert.deepStrictEqual(await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2 }), []); }
-    finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; console.warn = originalWarn; }
+    try {
+      const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2 });
+      assert.strictEqual(list.length, 3);
+      assert.ok(list.every(function (hotel) { return hotel.source === 'fallback' && hotel.tier === 'moderado'; }));
+      assert.ok(list.every(function (hotel) { return Number(hotel.perNight) > 0 && Number(hotel.total) > 0; }));
+      assert.strictEqual(new Set(list.map(function (hotel) { return hotel.name; })).size, 3);
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; console.warn = originalWarn; }
   });
 
   const server = app.createServer();
