@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CuántoSale | Cuánto cuesta realmente tu viaje</title>
 <meta name="description" content="Comparamos vuelos, buses y alojamiento desde Uruguay y te decimos cuánto cuesta realmente tu viaje.">
+<meta name="theme-color" content="#0A1830">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CuántoSale">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,6 +34,7 @@
       cuántosale
     </div>
     <div class="account-actions" aria-label="Cuenta de usuario">
+      <button type="button" id="install-app-button" class="account-button install-app-button">Instalar App</button>
       <button type="button" id="auth-button" class="account-button">Iniciar sesión</button>
       <button type="button" id="trips-button" class="account-button account-button--secondary" hidden>Mis viajes</button>
     </div>
@@ -99,11 +106,19 @@
   <div id="booking-modal" class="booking-modal" hidden aria-hidden="true"></div>
   <div id="auth-modal" class="booking-modal" hidden aria-hidden="true"></div>
   <div id="trips-modal" class="booking-modal" hidden aria-hidden="true"></div>
+  <div id="install-help" class="booking-modal install-help" hidden aria-hidden="true">
+    <div class="booking-dialog install-help__dialog" role="dialog" aria-modal="true" aria-labelledby="install-help-title">
+      <button type="button" class="booking-close" data-close-install-help aria-label="Cerrar">×</button>
+      <h2 id="install-help-title">Instalar CuántoSale</h2>
+      <div id="install-help-content"></div>
+    </div>
+  </div>
 
   <footer class="foot" id="foot"></footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/pwa.js"></script>
 <script src="/app.js"></script>
 </body>
 </html>

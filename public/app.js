@@ -353,8 +353,8 @@
     if (voucherCards[0]) {
       var flightContent = voucherCards[0].querySelector('div');
       if (flightContent) {
-        var legMarkup = '<div class="voucher-flight-legs"><div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Ida</span><strong>' + esc(flightSummary.flightNumber || 'Vuelo regular') + '</strong><span>' + esc((flightSummary.origin && (flightSummary.origin.name || flightSummary.origin.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.origin) || '---') + ') &rarr; ' + esc((flightSummary.destination && (flightSummary.destination.name || flightSummary.destination.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.destination) || '---') + ')</span><small>' + esc(flightSummary.departureText) + ' &rarr; ' + esc(flightSummary.arrivalText) + '</small></div>';
-        if (flightSummary.isRoundTrip) legMarkup += '<div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Vuelta</span><strong>' + esc(flightSummary.inboundFlightNumber || 'Vuelo regular') + '</strong><span>' + esc((flightSummary.returnOrigin && (flightSummary.returnOrigin.name || flightSummary.returnOrigin.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.returnOrigin) || '---') + ') &rarr; ' + esc((flightSummary.returnDestination && (flightSummary.returnDestination.name || flightSummary.returnDestination.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.returnDestination) || '---') + ')</span><small>' + esc(flightSummary.returnDepartureText) + ' &rarr; ' + esc(flightSummary.returnArrivalText) + '</small></div>';
+        var legMarkup = '<div class="voucher-flight-legs"><div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Ida</span><strong>' + esc(flightSummary.outboundAirline || flightSummary.airline) + (flightSummary.flightNumber ? ' · ' + esc(flightSummary.flightNumber) : '') + '</strong><span>' + esc((flightSummary.origin && (flightSummary.origin.name || flightSummary.origin.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.origin) || '---') + ') &rarr; ' + esc((flightSummary.destination && (flightSummary.destination.name || flightSummary.destination.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.destination) || '---') + ')</span><small>' + esc(flightSummary.departureText) + ' &rarr; ' + esc(flightSummary.arrivalText) + '</small></div>';
+        if (flightSummary.isRoundTrip) legMarkup += '<div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Vuelta</span><strong>' + esc(flightSummary.inboundAirline || flightSummary.airline) + (flightSummary.inboundFlightNumber ? ' · ' + esc(flightSummary.inboundFlightNumber) : '') + '</strong><span>' + esc((flightSummary.returnOrigin && (flightSummary.returnOrigin.name || flightSummary.returnOrigin.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.returnOrigin) || '---') + ') &rarr; ' + esc((flightSummary.returnDestination && (flightSummary.returnDestination.name || flightSummary.returnDestination.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.returnDestination) || '---') + ')</span><small>' + esc(flightSummary.returnDepartureText) + ' &rarr; ' + esc(flightSummary.returnArrivalText) + '</small></div>';
         legMarkup += '</div>';
         flightContent.innerHTML = '<small>' + (flightSummary.isRoundTrip ? 'Vuelo seleccionado · Ida y vuelta' : 'Vuelo seleccionado') + '</small><strong>' + esc(flightSummary.airline) + '</strong>' + legMarkup + '<b>' + money(flightTotal) + '</b>';
       }
@@ -1388,22 +1388,45 @@
     if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'No hay un vuelo seleccionado.' };
     var offer = getSelectedFlightOffer() || detailState.selectedOffer || {};
     var airline = offer.airline || detailState.selectedFlight || 'Vuelo seleccionado';
-    var outbound = offer.outbound || offer;
-    var inbound = offer.inbound || {};
+    function normalizeLeg(leg, slice) {
+      leg = leg || {};
+      var hasMappedData = (leg.origin && (leg.origin.code || leg.origin.iata_code || leg.origin.name)) ||
+        (leg.destination && (leg.destination.code || leg.destination.iata_code || leg.destination.name)) || leg.departure || leg.arrival;
+      if (hasMappedData) return leg;
+      var segments = slice && Array.isArray(slice.segments) ? slice.segments : [];
+      var first = segments[0] || {};
+      var last = segments[segments.length - 1] || {};
+      var originAirport = first.origin || {};
+      var destinationAirport = last.destination || {};
+      var carrier = first.marketing_carrier || first.operating_carrier || {};
+      return {
+        origin: { code: originAirport.iata_code || '', name: originAirport.name || '' },
+        destination: { code: destinationAirport.iata_code || '', name: destinationAirport.name || '' },
+        departure: first.departing_at || null,
+        arrival: last.arriving_at || null,
+        flight_number: first.flight_number || '',
+        airline: carrier.name || ''
+      };
+    }
+    var slices = Array.isArray(offer.slices) ? offer.slices : [];
+    var outbound = normalizeLeg(offer.outbound || {}, slices[0]) || offer;
+    var inbound = normalizeLeg(offer.inbound || {}, slices[1]);
+    if (!outbound.origin && !outbound.destination) outbound = offer.outbound || offer;
     var origin = outbound.origin || offer.departure_airport || {};
     var destination = outbound.destination || offer.arrival_airport || {};
     var departure = outbound.departure || offer.departure;
     var arrival = outbound.arrival;
-    var returnOrigin = inbound.origin || destination;
-    var returnDestination = inbound.destination || origin;
+    var returnOrigin = inbound.origin || (inbound.departure || inbound.arrival ? {} : destination);
+    var returnDestination = inbound.destination || (inbound.departure || inbound.arrival ? {} : origin);
     var returnDeparture = inbound.departure;
     var returnArrival = inbound.arrival;
     var flightNumber = offer.flight_number || outbound.flight_number || '';
     var inboundFlightNumber = inbound.flight_number || '';
+    var inboundAirline = inbound.airline || airline;
+    var isRoundTrip = offer.trip_type === 'round_trip' || slices.length > 1 || !!(inbound.departure || inbound.arrival);
     var outboundText = (flightNumber ? 'Vuelo ' + flightNumber : 'Numero de vuelo no informado') + ' · ' + (origin.name || origin.code || 'Origen') + ' (' + (airportCode(origin) || '---') + ') -> ' + (destination.name || destination.code || 'Destino') + ' (' + (airportCode(destination) || '---') + ') · salida ' + formatFlightDateTime(departure) + ' · llegada ' + formatFlightDateTime(arrival);
-    var isRoundTrip = offer.trip_type === 'round_trip' || !!(inbound.departure || inbound.arrival);
     var inboundText = isRoundTrip ? ((inboundFlightNumber ? 'Vuelo ' + inboundFlightNumber : 'Numero de vuelo no informado') + ' · ' + (returnOrigin.name || returnOrigin.code || 'Destino') + ' (' + (airportCode(returnOrigin) || '---') + ') -> ' + (returnDestination.name || returnDestination.code || 'Origen') + ' (' + (airportCode(returnDestination) || '---') + ') · salida ' + formatFlightDateTime(returnDeparture) + ' · llegada ' + formatFlightDateTime(returnArrival)) : '';
-    return { airline: airline, summary: isRoundTrip ? 'Ida: ' + outboundText + ' | Vuelta: ' + inboundText + ' · tarifa ida y vuelta incluida' : outboundText, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), route: ' · ' + airportCode(origin) + ' -> ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination, isRoundTrip: isRoundTrip, outboundText: outboundText, inboundText: inboundText };
+    return { airline: airline, outboundAirline: outbound.airline || airline, inboundAirline: inboundAirline, summary: isRoundTrip ? 'Ida: ' + outboundText + ' | Vuelta: ' + inboundText + ' · tarifa ida y vuelta incluida' : outboundText, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), returnDepartureText: formatFlightDateTime(returnDeparture), returnArrivalText: formatFlightDateTime(returnArrival), route: ' · ' + airportCode(origin) + ' -> ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination, returnOrigin: returnOrigin, returnDestination: returnDestination, isRoundTrip: isRoundTrip, outboundText: outboundText, inboundText: inboundText };
   }
 
   function openDestinationProposal(key, savedTrip) {

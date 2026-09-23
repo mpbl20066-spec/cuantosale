@@ -420,7 +420,7 @@ function formatOffers(offers, requiredOrigin) {
     const carrier = firstOut.marketing_carrier || firstOut.operating_carrier || firstIn.marketing_carrier || firstIn.operating_carrier || offer.owner || {};
     const priceUsd = usdAmount(offer.total_amount, offer.total_currency);
     const departureAirport = { code: firstOut.origin && firstOut.origin.iata_code || '', name: firstOut.origin && firstOut.origin.name || '' };
-    const arrivalAirport = { code: (lastIn.destination && lastIn.destination.iata_code) || (lastOut.destination && lastOut.destination.iata_code) || '', name: (lastIn.destination && lastIn.destination.name) || (lastOut.destination && lastOut.destination.name) || '' };
+    const arrivalAirport = { code: lastOut.destination && lastOut.destination.iata_code || '', name: lastOut.destination && lastOut.destination.name || '' };
     const outboundAirport = { code: firstOut.origin && firstOut.origin.iata_code || '', name: firstOut.origin && firstOut.origin.name || '' };
     const inboundAirport = { code: firstIn.origin && firstIn.origin.iata_code || '', name: firstIn.origin && firstIn.origin.name || '' };
     const formatted = {
@@ -429,7 +429,9 @@ function formatOffers(offers, requiredOrigin) {
       airline: carrier.name || 'Aerolínea',
       logo: carrier.logo_symbol_url || carrier.logo_lockup_url || null,
       departure: firstOut.departing_at || null,
-      arrival: lastIn.arriving_at || lastOut.arriving_at || null,
+      arrival: lastOut.arriving_at || null,
+      return_departure: firstIn.departing_at || null,
+      return_arrival: lastIn.arriving_at || null,
       flight_number: firstOut.flight_number || null,
       stops: Math.max(outboundSegments.length - 1 + inboundSegments.length - 1, 0),
       duration: durationLabel((outboundSlice.duration || '') + (inboundSlice.duration ? ' + ' + inboundSlice.duration : '')),
@@ -443,6 +445,7 @@ function formatOffers(offers, requiredOrigin) {
         departure: firstOut.departing_at || null,
         arrival: lastOut.arriving_at || null,
         flight_number: firstOut.flight_number || null,
+        airline: (firstOut.marketing_carrier || firstOut.operating_carrier || {}).name || carrier.name || 'Aerolínea',
         stops: Math.max(outboundSegments.length - 1, 0),
         duration: durationLabel(outboundSlice.duration)
       },
@@ -452,6 +455,7 @@ function formatOffers(offers, requiredOrigin) {
         departure: firstIn.departing_at || null,
         arrival: lastIn.arriving_at || null,
         flight_number: firstIn.flight_number || null,
+        airline: (firstIn.marketing_carrier || firstIn.operating_carrier || {}).name || carrier.name || 'Aerolínea',
         stops: Math.max(inboundSegments.length - 1, 0),
         duration: durationLabel(inboundSlice.duration)
       }

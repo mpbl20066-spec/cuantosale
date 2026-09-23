@@ -324,3 +324,15 @@ details.opt summary::-webkit-details-marker{display:none}
   .trip-summary.minimized .trip-summary__details{display:none}
   .trip-summary.minimized .trip-summary__toggle-icon{transform:rotate(180deg)}
 }
+
+.install-app-button[hidden]{display:none}
+.install-help__dialog{max-width:480px}
+.install-help__dialog p{color:var(--ink2);line-height:1.55}
+.install-help__dialog ol{display:grid;gap:12px;padding-left:23px;color:var(--ink2);line-height:1.55}
+.install-help__dialog li::marker{color:var(--accent);font-weight:800}
+@media (max-width:560px){
+  .top{gap:7px}
+  .logo{gap:6px;font-size:18px}
+  .account-actions{gap:5px}
+  .account-actions .account-button{min-height:36px;padding:0 8px;font-size:10px;white-space:nowrap}
+}
