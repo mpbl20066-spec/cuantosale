@@ -1469,6 +1469,7 @@
     };
   }
   async function saveCurrentTrip() {
+    if (authReadyPromise) await authReadyPromise;
     if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
     if (!authUser) { pendingTripSave = true; try { var draft = tripPayload(); if (draft) sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(draft)); sessionStorage.setItem('cuantosale_pending_trip', '1'); } catch (error) {} openAuthModal(); return; }
     if (tripSaveInProgress) return;
@@ -1479,7 +1480,7 @@
     tripSaveInProgress = true;
     var result;
     try {
-      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, destination_key: payload.destination_key, departure_date: payload.departure_date, return_date: payload.return_date, total_price: payload.total_amount, flight_details: payload.details });
+      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, destination_key: payload.destination_key, departure_date: payload.departure_date, return_date: payload.return_date, total_price: payload.total_amount, flight_details: Object.assign({}, payload.details, { transport_mode: payload.transport_mode, food_per_day: payload.food_per_day, local_per_day: payload.local_per_day, travelers: payload.travelers, total_amount: payload.total_amount }) });
     } catch (error) {
       tripSaveInProgress = false;
       openAuthModal(error.message);
@@ -1540,9 +1541,9 @@
     if (!detailState || !trip) return;
     var details = trip.details || trip.flight_details || {};
     detailState.parts = Object.assign({}, detailState.parts || {}, details.parts || {});
-    detailState.transportMode = trip.transport_mode || detailState.transportMode || 'flight';
-    detailState.foodPerDay = Number(trip.food_per_day) || Number(details.foodPerDay) || detailState.foodPerDay || 0;
-    detailState.localPerDay = Number(trip.local_per_day) || Number(details.localPerDay) || detailState.localPerDay || 0;
+    detailState.transportMode = trip.transport_mode || details.transport_mode || detailState.transportMode || 'flight';
+    detailState.foodPerDay = Number(trip.food_per_day) || Number(details.food_per_day) || Number(details.foodPerDay) || detailState.foodPerDay || 0;
+    detailState.localPerDay = Number(trip.local_per_day) || Number(details.local_per_day) || Number(details.localPerDay) || detailState.localPerDay || 0;
     detailState.transfer = Number(details.transfer) || 0;
     detailState.transferType = details.transferType || detailState.transferType || '';
     if (details.hotel) { detailState.hotel = Number(details.hotel.total) || detailState.hotel; detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName; }
@@ -1572,7 +1573,7 @@
   }
   async function loadTrip(trip) {
     var details = trip.details || trip.flight_details || {};
-    S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || S.transport;
+    S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport;
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); openDestinationProposal(S.dest, trip); }
     else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
