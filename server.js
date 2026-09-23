@@ -437,6 +437,20 @@ async function buscarVuelos(req, res, body) {
   }
 }
 
+// Una sola tarifa real de Duffel (1 pasajero, ida y vuelta) para anclar la
+// propuesta recomendada y, con ella, toda la serie de "otra fecha" (que ya
+// se calcula como el total recomendado + la variación estimada del modelo).
+// Evita las N consultas que implicaría cotizar cada fecha o cada destino.
+async function getLiveFlightQuote(destinationIata, dep, ret, style) {
+  if (!duffel.isConfigured()) return null;
+  const cabinClass = duffel.styleCabins(style)[0] || 'economy';
+  const offers = await duffel.searchFlights({ origin: 'MVD', destination: destinationIata, departureDate: dep, returnDate: ret, passengers: 1, cabinClass: cabinClass });
+  const priced = offers.filter(function (offer) { return Number.isFinite(offer.price_usd) && offer.price_usd > 0; });
+  if (!priced.length) return null;
+  const cheapest = priced.reduce(function (min, offer) { return offer.price_usd < min.price_usd ? offer : min; });
+  return { pp: cheapest.price_usd, airline: cheapest.airline || null, exact: true, foundDep: dep, foundRet: ret, source: 'duffel' };
+}
+
 async function cotizar(req, res, url) {
   if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
   const today = model.getToday();
@@ -447,9 +461,21 @@ async function cotizar(req, res, url) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
-  // La pantalla inicial usa estimaciones locales; los precios reales de vuelos
-  // se consultan desde el detalle, cuando el usuario ya vio la propuesta.
-  const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, {}), v.S, v.dep, v.ret, today);
+  // La pantalla inicial anda con una tarifa real de Duffel para la ruta/fechas
+  // elegidas cuando está disponible; si Duffel falla o no está configurado,
+  // se cae de vuelta a la estimación local sin romper la respuesta.
+  let quotes = {};
+  let liveQuoteApplied = false;
+  const destCfgForQuote = model.DEST[v.S.dest];
+  if (destCfgForQuote && destCfgForQuote.modes.avion_mvd) {
+    try {
+      const quote = await getLiveFlightQuote(destCfgForQuote.iata, v.dep, v.ret, v.S.style);
+      if (quote) { quotes = { avion_mvd: quote }; liveQuoteApplied = true; }
+    } catch (e) {
+      console.error('[cotizar] tarifa real de Duffel no disponible:', e.message);
+    }
+  }
+  const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
   const recommendedProposal = result.list.find(function (proposal) { return proposal.id === result.recId; });
   const nonHotelCost = recommendedProposal ? Number(recommendedProposal.total) - Number(recommendedProposal.parts.alojamiento || 0) : 0;
   const hotelBudgetPerNight = url.searchParams.has('hotel_budget_per_night')
@@ -460,7 +486,7 @@ async function cotizar(req, res, url) {
   const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
   sendJson(res, 200, Object.assign({
     meta: {
-      mode: 'estimated',
+      mode: liveQuoteApplied ? 'live' : 'estimated',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
