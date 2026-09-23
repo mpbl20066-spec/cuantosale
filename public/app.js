@@ -1492,6 +1492,12 @@
       if ('requestIdleCallback' in window) window.requestIdleCallback(loadHotels, { timeout: 1200 });
       else window.setTimeout(loadHotels, 120);
     }
+    var liveFlightSection = content.querySelector('.flight-search');
+    if (!isRoadtrip && liveFlightSection) {
+      window.setTimeout(function () {
+        if (detailState && detailState.meta === data.meta) searchFlights(data.meta, liveFlightSection);
+      }, 80);
+    }
   }
 
   // Resumen de vuelo real: reemplaza cualquier texto genérico del voucher.
