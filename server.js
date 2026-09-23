@@ -360,7 +360,11 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
     acc.push(proposal);
     return acc;
   }, preferred.slice()).slice(0, 3);
-  const picked = model.pick(trip, list);
+  // La recomendación (Gran total, hotel, etc.) siempre debe salir de la
+  // categoría que el usuario eligió arriba, aunque el presupuesto no la
+  // cubra del todo: rellenar `list` con otras categorías es solo para no
+  // dejar la grilla de tarjetas vacía, nunca para elegir la propuesta.
+  const picked = model.pick(trip, preferred.length ? preferred : list);
   const rec = picked.rec;
   const series = model.seriesFor(trip, rec, dep, ret, today);
   const cozy = list.slice().sort(function (a, b) { return b.comfort - a.comfort || a.total - b.total; })[0];
