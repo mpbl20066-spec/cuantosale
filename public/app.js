@@ -117,7 +117,40 @@
     tour(['rec'], 'Recife, Brasil', 'Olinda histórica y Recife Antigo', 'Iglesias, casonas coloridas, arte y miradores del litoral pernambucano.', 48, 'Incluye transporte y guía por Recife Antigo, Marco Zero y el centro histórico de Olinda. Duración aproximada de 6 horas. Usar calzado cómodo y confirmar qué entradas o consumos están incluidos.'),
     tour(['rec'], 'Recife, Brasil', 'Porto de Galinhas desde Recife', 'Playa, jangada y tiempo libre en las piscinas naturales.', 58, 'Incluye traslado ida y vuelta desde Recife y orientación para la jangada en Porto de Galinhas. Día completo, con horario definido por la marea. La jangada, comidas y actividades opcionales pueden cobrarse aparte.'),
     tour(['poa'], 'Porto Alegre, Brasil', 'Gramado y Canela desde Porto Alegre', 'Excursión por la Serra Gaúcha con parques, arquitectura y gastronomía.', 82, 'Incluye transporte ida y vuelta y paradas panorámicas en Gramado y Canela. Jornada de 12 horas aproximadamente. Las entradas a parques y museos no están incluidas salvo indicación del operador.'),
-    tour(['poa'], 'Porto Alegre, Brasil', 'Bento Gonçalves y Vale dos Vinhedos', 'Bodegas, degustaciones y cultura italiana de la Serra Gaúcha.', 88, 'Incluye traslado desde Porto Alegre, visita a bodegas y degustaciones seleccionadas. Excursión de día completo. El Tren del Vino y el almuerzo pueden formar parte de un paquete superior; confirmar al reservar.')
+    tour(['poa'], 'Porto Alegre, Brasil', 'Bento Gonçalves y Vale dos Vinhedos', 'Bodegas, degustaciones y cultura italiana de la Serra Gaúcha.', 88, 'Incluye traslado desde Porto Alegre, visita a bodegas y degustaciones seleccionadas. Excursión de día completo. El Tren del Vino y el almuerzo pueden formar parte de un paquete superior; confirmar al reservar.'),
+    tour(['buz'], 'Búzios, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['arraial'], 'Arraial do Cabo, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['cabo'], 'Cabo Frio, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['ilha'], 'Ilha Grande, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['paraty'], 'Paraty, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['ilhabela'], 'Ilhabela, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['ubatuba'], 'Ubatuba, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['rio'], 'Río de Janeiro, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['angra'], 'Angra dos Reis, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['sao'], 'São Paulo, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
+    tour(['bho'], 'Belo Horizonte, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
+    tour(['curitiba'], 'Curitiba, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
+    tour(['porto'], 'Porto de Galinhas, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['mcz'], 'Maceió, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['maragogi'], 'Maragogi, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['nat'], 'Natal, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['pip'], 'Praia do Pipa, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['trancoso'], 'Trancoso / Arraial d’Ajuda, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['ssa'], 'Salvador de Bahía, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['for'], 'Fortaleza / Jericoacoara, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['jericoacoara'], 'Jericoacoara, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['morro'], 'Morro de São Paulo, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['fernando'], 'Fernando de Noronha, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['camboriu'], 'Camboriú, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['bombinhas'], 'Bombinhas, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['rosa'], 'Praia do Rosa, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['bcm'], 'Balneário Camboriú, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['gram'], 'Gramado, Brasil', 'Snowland, el parque de nieve indoor', 'Nieve, trineo y clima frío bajo techo en pleno verano gaúcho.', 55, 'Incluye traslado y entrada general al parque temático de nieve artificial, con zona de trineos y bar de hielo. Actividad de medio día. Llevar ropa de abrigo; el parque provee camperas para la zona de nieve.'),
+    tour(['canela'], 'Canela, Brasil', 'Parque do Caracol y su cascada', 'Mirador y torre de observación frente a la cascada más conocida de Canela.', 25, 'Incluye traslado y entrada al parque, con acceso al mirador de la cascada del Caracol y sendero corto por el bosque nativo. Actividad de medio día. Llevar calzado cómodo y cámara de fotos.'),
+    tour(['igu'], 'Foz de Iguazú, Brasil', 'Represa de Itaipú', 'Visita guiada a una de las mayores hidroeléctricas del mundo.', 45, 'Incluye traslado y recorrido panorámico por el circuito de visitantes de Itaipú Binacional, con parada en el mirador y proyección institucional. Duración aproximada de 2 horas y media. Llevar documento de identidad, es obligatorio para el ingreso.'),
+    tour(['rec'], 'Recife, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['poa'], 'Porto Alegre, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
   ];
   function tourDetailText(tour) {
     return tour.details || 'Incluye la actividad principal y acompañamiento local. Confirmá horarios, punto de encuentro, disponibilidad y valor final antes de reservar.';
@@ -358,11 +391,17 @@
   }
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
-    var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
+    // Siempre exactamente 3: son las 3 experiencias principales cargadas para
+    // cada destino (con respaldo fijo incluido, nunca queda la sección vacía).
+    var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; }).slice(0, 3);
     if (!tours.length) return '';
+    var photo = DEST_PHOTOS[destinationKey];
     return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y actividades sugeridas</h2><p>Elegí las experiencias que querés sumar a tu viaje. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid">' + tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
-      return '<article class="local-tour" data-tour-card role="checkbox" tabindex="0" aria-checked="false" aria-label="Sumar ' + esc(tour.title) + ' al presupuesto"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '" tabindex="-1"><span class="local-tour__check" aria-hidden="true">✓</span><span class="local-tour__status">Sumar al presupuesto</span><span class="local-tour__icon" aria-hidden="true">✦</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div><button type="button" class="local-tour__detail" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">Ver detalle</button></article>';
+      var mediaMarkup = photo
+        ? '<div class="local-tour__media"><img src="' + esc(photo) + '" alt="' + esc(tour.title) + '" loading="lazy"></div>'
+        : '<div class="local-tour__media local-tour__media-empty"><span aria-hidden="true">✦</span></div>';
+      return '<article class="local-tour" data-tour-card role="checkbox" tabindex="0" aria-checked="false" aria-label="Sumar ' + esc(tour.title) + ' al presupuesto">' + mediaMarkup + '<div class="local-tour__body"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '" tabindex="-1"><span class="local-tour__check" aria-hidden="true">✓</span><span class="local-tour__status">Sumar al presupuesto</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div><button type="button" class="local-tour__detail" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">Ver detalle</button></div></article>';
     }).join('') + '</div><div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div></section>';
   }
   function openTourDetailModal(button) {
@@ -749,7 +788,6 @@
   }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
-    var enabled = detailState.transportMode === 'flight' && !!detailState.selectedFlight && !!detailState.selectedHotel;
     var selectedAmount = detailState.transferType === 'private' ? 150 : (detailState.transferType === 'shared' ? 30 : 0);
     // La modalidad elegida se suma al presupuesto inmediatamente. Vuelo y hotel
     // solo son requisitos para coordinar el traslado, no para cotizar su costo.
@@ -757,17 +795,11 @@
       ? (selectedAmount || Number(detailState.meta.officialTransfer.amount) || 0)
       : 0;
     var transferSection = document.querySelector('[data-official-transfer]');
-    var status = transferSection && transferSection.querySelector('[data-transfer-status]');
     var button = transferSection && transferSection.querySelector('[data-buy-transfer]');
-    var transferLabel = detailState.transferType === 'private' ? 'privado' : 'compartido';
-    if (status) {
-      if (!detailState.transferType) status.textContent = 'Seleccioná una modalidad de transfer.';
-      else if (!enabled) status.textContent = 'Transfer ' + transferLabel + ' seleccionado · ' + money(detailState.transfer) + ' incluido en el presupuesto. Elegí un vuelo y alojamiento para coordinarlo.';
-      else status.textContent = 'Transfer ' + transferLabel + ' seleccionado · ' + money(detailState.transfer) + ' incluido en el presupuesto.';
-    }
     if (button) {
-      button.disabled = !enabled || !detailState.transferType;
-      button.textContent = !detailState.transferType ? 'Seleccioná una modalidad' : (!enabled ? 'Elegí vuelo y alojamiento' : 'Coordinar traslado');
+      button.disabled = !detailState.transferType;
+      button.classList.toggle('is-added', !!detailState.transferType);
+      button.textContent = detailState.transferType ? '✓ Agregado al presupuesto' : 'Elegí un tipo de transfer';
     }
     recalcularTotalViaje();
   }
@@ -848,9 +880,38 @@
     if (!r) return '';
     return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></section>';
   }
+  function transferPickupTimeLabel(date) {
+    return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
+  }
   function transferCard(meta) {
     var selected = detailState && detailState.transferType || '';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p><div class="transfer-choice-grid"><button type="button" class="transfer-choice' + (selected === 'shared' ? ' is-selected' : '') + '" data-transfer-choice="shared" data-transfer-amount="30"><strong>Transfer compartido</strong><b>US$ 30</b><small>Compartís el vehículo con otros pasajeros.</small></button><button type="button" class="transfer-choice' + (selected === 'private' ? ' is-selected' : '') + '" data-transfer-choice="private" data-transfer-amount="150"><strong>Transfer privado</strong><b>US$ 150</b><small>Vehículo exclusivo y traslado directo.</small></button></div><p data-transfer-status>' + (selected ? 'Transfer ' + (selected === 'private' ? 'privado' : 'compartido') + ' seleccionado.' : 'Seleccioná una modalidad para incluirla en tu presupuesto.') + '</p><button type="button" class="btn-transfer" data-buy-transfer' + (selected ? '' : ' disabled') + '>Coordinar traslado</button></div></section>';
+    var wizard = (detailState && detailState.transferWizard) || {};
+    var pickupMinutes = wizard.pickupMinutes ? String(wizard.pickupMinutes) : '60';
+    var offer = getSelectedFlightOffer();
+    var hasLiveFlight = !!(offer && ((offer.outbound && offer.outbound.arrival) || offer.arrival));
+    var pickupWindow = getTransferPickupWindow();
+    var suggestionMarkup = hasLiveFlight
+      ? '<p class="transfer-suggestion">✈️ Tu vuelo llega ' + esc(transferPickupTimeLabel(pickupWindow.baseDate)) + ' hs. Te sugerimos coordinar la recogida para ' + esc(transferPickupTimeLabel(pickupWindow.plusOneHour)) + ' hs (1 hora después).</p>'
+      : '';
+    var cards = [
+      { key: 'shared', amount: 30, icon: '🚐', title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros.' },
+      { key: 'private', amount: 150, icon: '🚗', title: 'Transfer privado', desc: 'Vehículo exclusivo y traslado directo.' }
+    ].map(function (card) {
+      var isSelected = selected === card.key;
+      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '"><span class="transfer-choice__icon" aria-hidden="true">' + card.icon + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">US$ ' + card.amount + '</b></button>';
+    }).join('');
+    var pickupMarkup = selected ? '<div class="transfer-pickup" data-transfer-pickup>' +
+      '<span class="transfer-pickup__label">Horario de recogida</span><div class="transfer-pickup__chips">' +
+      ['60', '120', 'custom'].map(function (value) {
+        var label = value === '60' ? '1 h después · ' + transferPickupTimeLabel(pickupWindow.plusOneHour)
+          : value === '120' ? '2 h después · ' + transferPickupTimeLabel(pickupWindow.plusTwoHours)
+          : 'Personalizado';
+        return '<button type="button" class="transfer-pickup__chip' + (pickupMinutes === value ? ' is-selected' : '') + '" data-transfer-pickup-choice="' + value + '">' + esc(label) + '</button>';
+      }).join('') + '</div>' +
+      (pickupMinutes === 'custom' ? '<input type="time" class="transfer-pickup__time" data-transfer-custom-time value="' + esc(wizard.customTime || '') + '" aria-label="Horario personalizado de recogida">' : '') +
+      '</div>' : '';
+    var addedLabel = selected ? '✓ Agregado al presupuesto' : 'Elegí un tipo de transfer';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p>' + suggestionMarkup + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" data-buy-transfer' + (selected ? '' : ' disabled') + '>' + addedLabel + '</button></section>';
   }
 
   function transportFlow(meta, budget, autoSelected) {
@@ -2416,9 +2477,21 @@
         detailState.transferType = mode;
         detailState.transfer = amount;
         detailState.transferWizard = detailState.transferWizard || {};
+        detailState.transferWizard.pickupMinutes = detailState.transferWizard.pickupMinutes || '60';
         detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
-        Array.prototype.forEach.call(e.currentTarget.querySelectorAll('[data-transfer-choice]'), function (choice) { choice.classList.toggle('is-selected', choice === transferChoice); });
+        var transferSectionEl = transferChoice.closest('[data-official-transfer]');
+        if (transferSectionEl) transferSectionEl.outerHTML = transferCard(detailState.meta);
         sincronizarTrasladoOficial();
+        return;
+      }
+      var pickupChoice = e.target.closest('[data-transfer-pickup-choice]');
+      if (pickupChoice) {
+        e.preventDefault(); e.stopPropagation();
+        detailState.transferWizard = detailState.transferWizard || {};
+        detailState.transferWizard.pickupMinutes = pickupChoice.getAttribute('data-transfer-pickup-choice');
+        if (detailState.transferWizard.pickupMinutes !== 'custom') detailState.transferWizard.customTime = '';
+        var pickupSectionEl = pickupChoice.closest('[data-official-transfer]');
+        if (pickupSectionEl) pickupSectionEl.outerHTML = transferCard(detailState.meta);
         return;
       }
       var buyTransfer = e.target.closest('[data-buy-transfer]');
@@ -2497,6 +2570,12 @@
       }
       var hotelChoice = e.target.closest && e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true);
+      var transferCustomTime = e.target.closest && e.target.closest('[data-transfer-custom-time]');
+      if (transferCustomTime && detailState) {
+        detailState.transferWizard = detailState.transferWizard || {};
+        detailState.transferWizard.pickupMinutes = 'custom';
+        detailState.transferWizard.customTime = transferCustomTime.value;
+      }
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
       if (consumption) actualizarRoadtrip(consumption.value);
       var roadtripModel = e.target.closest && e.target.closest('[data-roadtrip-model]');
