@@ -410,7 +410,7 @@
     var flightLabel = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || 'Vuelo no seleccionado';
     var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
     var hotelName = findSelectedHotelLabel();
-    var transferIncluded = !!detailState.selectedFlight && !!detailState.selectedHotel && detailState.transportMode === 'flight' && Number(detailState.transfer) > 0;
+    var transferIncluded = detailState.transportMode === 'flight' && !!detailState.transferType && Number(detailState.transfer) > 0;
     var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
     var summaryItems = [
       { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
@@ -649,14 +649,24 @@
     if (!detailState) return;
     var enabled = detailState.transportMode === 'flight' && !!detailState.selectedFlight && !!detailState.selectedHotel;
     var selectedAmount = detailState.transferType === 'private' ? 150 : (detailState.transferType === 'shared' ? 30 : 0);
-    detailState.transfer = enabled ? (selectedAmount || Number(detailState.meta.officialTransfer.amount) || 0) : 0;
+    // La modalidad elegida se suma al presupuesto inmediatamente. Vuelo y hotel
+    // solo son requisitos para coordinar el traslado, no para cotizar su costo.
+    detailState.transfer = detailState.transportMode === 'flight' && detailState.transferType
+      ? (selectedAmount || Number(detailState.meta.officialTransfer.amount) || 0)
+      : 0;
     var transferSection = document.querySelector('[data-official-transfer]');
     var status = transferSection && transferSection.querySelector('[data-transfer-status]');
     var button = transferSection && transferSection.querySelector('[data-buy-transfer]');
-    if (status) status.textContent = !enabled
-      ? 'Seleccioná una tarifa aérea y un alojamiento para habilitar el transfer.'
-      : (detailState.transferType === 'private' ? 'Transfer privado seleccionado · US$ 150.' : (detailState.transferType === 'shared' ? 'Transfer compartido seleccionado · US$ 30.' : 'Seleccioná una modalidad de transfer.'));
-    if (button) { button.disabled = !enabled || !detailState.transferType; button.textContent = detailState.transferType ? 'Coordinar traslado' : 'Seleccioná una modalidad'; }
+    var transferLabel = detailState.transferType === 'private' ? 'privado' : 'compartido';
+    if (status) {
+      if (!detailState.transferType) status.textContent = 'Seleccioná una modalidad de transfer.';
+      else if (!enabled) status.textContent = 'Transfer ' + transferLabel + ' seleccionado · ' + money(detailState.transfer) + ' incluido en el presupuesto. Elegí un vuelo y alojamiento para coordinarlo.';
+      else status.textContent = 'Transfer ' + transferLabel + ' seleccionado · ' + money(detailState.transfer) + ' incluido en el presupuesto.';
+    }
+    if (button) {
+      button.disabled = !enabled || !detailState.transferType;
+      button.textContent = !detailState.transferType ? 'Seleccioná una modalidad' : (!enabled ? 'Elegí vuelo y alojamiento' : 'Coordinar traslado');
+    }
     recalcularTotalViaje();
   }
   function actualizarPasajes(section, price, airline) {
@@ -2245,15 +2255,10 @@
         var amount = Number(transferChoice.getAttribute('data-transfer-amount')) || 0;
         detailState.transferType = mode;
         detailState.transfer = amount;
-        detailState.selectedHotel = true;
         detailState.transferWizard = detailState.transferWizard || {};
         detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
         Array.prototype.forEach.call(e.currentTarget.querySelectorAll('[data-transfer-choice]'), function (choice) { choice.classList.toggle('is-selected', choice === transferChoice); });
-        var status = e.currentTarget.querySelector('[data-transfer-status]');
-        if (status) status.textContent = mode === 'private' ? 'Transfer privado seleccionado · US$ 150.' : 'Transfer compartido seleccionado · US$ 30.';
-        var buyTransferButton = e.currentTarget.querySelector('[data-buy-transfer]');
-        if (buyTransferButton) buyTransferButton.disabled = false;
-        recalcularTotalViaje(); renderTripSummary();
+        sincronizarTrasladoOficial();
         return;
       }
       var buyTransfer = e.target.closest('[data-buy-transfer]');
