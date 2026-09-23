@@ -262,7 +262,7 @@ function selectThreeHotelsByBudget(hotels, dailyBudget) {
 }
 function hotelBudgetTarget(destKey, style, extra) {
   const explicit = Number(extra && extra.hotelBudgetPerNight);
-  if (Number.isFinite(explicit) && explicit > 0) return Math.min(explicit, 1000000);
+  if (extra && extra.hotelBudgetPerNight != null && Number.isFinite(explicit) && explicit >= 0) return Math.min(explicit, 1000000);
   const destination = model.DEST[destKey];
   const tierIndex = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
   const perPerson = destination && Array.isArray(destination.lodge) ? Number(destination.lodge[tierIndex]) : 0;
@@ -787,20 +787,44 @@ async function cotizar(req, res, url) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
-  const quotes = await providers.getQuotes(model.DEST[v.S.dest], v.S.dep, v.S.ret, v.S.style);
-  const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
-  const hotels = await hotelRecommendations(v.S.dest, model.DEST[v.S.dest].name, v.S.style, { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights });
+  // La pantalla inicial usa estimaciones locales; los precios reales de vuelos
+  // se consultan desde el detalle, cuando el usuario ya vio la propuesta.
+  const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, {}), v.S, v.dep, v.ret, today);
+  const recommendedProposal = result.list.find(function (proposal) { return proposal.id === result.recId; });
+  const nonHotelCost = recommendedProposal ? Number(recommendedProposal.total) - Number(recommendedProposal.parts.alojamiento || 0) : 0;
+  const hotelBudgetPerNight = url.searchParams.has('hotel_budget_per_night')
+    ? Number(url.searchParams.get('hotel_budget_per_night'))
+    : (v.S.budget > 0 ? Math.max(0, (v.S.budget - nonHotelCost) / Math.max(1, v.nights)) : null);
+  const hotelExtra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights };
+  if (Number.isFinite(hotelBudgetPerNight) && hotelBudgetPerNight >= 0) hotelExtra.hotelBudgetPerNight = hotelBudgetPerNight;
   const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
   sendJson(res, 200, Object.assign({
     meta: {
-      mode: providers.isLive() ? 'live' : 'demo',
+      mode: 'estimated',
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
-      hotels: hotels, hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, { hotelBudgetPerNight: url.searchParams.get('hotel_budget_per_night'), pax: v.S.pax }), hotelsNearby: (hotels.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== model.DEST[v.S.dest].name; }) || {}).areaLabel || '', generatedAt: new Date().toISOString()
+      hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString()
     },
     localTransport: localTransport
   }, result));
+}
+
+async function cotizarHoteles(req, res, url) {
+  if (limited('hoteles:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas de alojamiento. Esperá un minuto y probá de nuevo.' });
+  let v;
+  try { v = model.validate(Object.fromEntries(url.searchParams), model.getToday()); }
+  catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
+  const dest = model.DEST[v.S.dest];
+  const rawBudget = url.searchParams.get('hotel_budget_per_night');
+  const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights };
+  if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
+  const hotels = await hotelRecommendations(v.S.dest, dest.name, v.S.style, extra);
+  return sendJson(res, 200, {
+    hotels: hotels,
+    hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra),
+    hotelsNearby: (hotels.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== dest.name; }) || {}).areaLabel || ''
+  });
 }
 
 function cotizarTodos(req, res, url) {
@@ -891,6 +915,12 @@ function createServer() {
       return cotizar(req, res, url).catch(function (e) {
         console.error('[cotizar]', e);
         sendJson(res, 500, { error: 'Error inesperado. Probá de nuevo en un momento.' });
+      });
+    }
+    if (url.pathname === '/api/hoteles') {
+      return cotizarHoteles(req, res, url).catch(function (e) {
+        console.error('[hoteles]', e);
+        sendJson(res, 502, { error: 'No pudimos cargar alojamientos ahora.' });
       });
     }
     if (url.pathname === '/api/cotizar-todos') {

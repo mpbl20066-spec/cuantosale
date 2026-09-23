@@ -182,6 +182,43 @@
         return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
       }).join('') + '</div></section>';
   }
+  var hotelRequestId = 0;
+  function hotelLoading(meta) {
+    return '<section class="hotel-options hotel-options-loading" aria-live="polite"><div class="hotel-options-head"><div><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2><p>Buscando opciones disponibles…</p></div></div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
+  }
+  function loadHotelRecommendations(meta, accommodationTotal) {
+    var requestId = ++hotelRequestId;
+    if (meta.hotelsLoaded) {
+      var cached = document.querySelector('.hotel-options-loading');
+      if (cached) cached.outerHTML = hotelOptions(meta, accommodationTotal);
+      return;
+    }
+    var params = new URLSearchParams({ dest: meta.dest.key, dep: meta.dep, ret: meta.ret, pax: meta.pax, style: meta.style || 'eq' });
+    if (meta.hotelBudgetPerNight != null && Number.isFinite(Number(meta.hotelBudgetPerNight))) params.set('hotel_budget_per_night', String(meta.hotelBudgetPerNight));
+    fetch('/api/hoteles?' + params.toString()).then(function (response) {
+      return response.json().then(function (data) { if (!response.ok) throw new Error(data.error || 'No pudimos cargar alojamientos.'); return data; });
+    }).then(function (data) {
+      if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
+      meta.hotels = Array.isArray(data.hotels) ? data.hotels : [];
+      meta.hotelsNearby = data.hotelsNearby || '';
+      meta.hotelsLoaded = true;
+      var current = document.querySelector('.hotel-options-loading');
+      if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
+      var recommended = document.querySelector('[data-hotel-total]:checked');
+      if (recommended) {
+        var card = recommended.closest('[data-hotel-option]');
+        detailState.selectedHotelName = card && card.querySelector('h3') ? card.querySelector('h3').textContent.trim() : detailState.selectedHotelName;
+        actualizarAlojamiento(Number(recommended.getAttribute('data-hotel-total')), true);
+      }
+    }).catch(function (error) {
+      if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
+      console.warn('[hoteles] No se pudieron cargar alojamientos:', error.message);
+      meta.hotels = [];
+      meta.hotelsLoaded = true;
+      var current = document.querySelector('.hotel-options-loading');
+      if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
+    });
+  }
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
@@ -449,21 +486,25 @@
       { key: 'confort', label: 'Confort', description: 'Uber, taxis y traslados privados urbanos.', value: dailyCosts.transport.confort }
     ];
     function optionMarkup(options, kind) {
-      return options.map(function (option) {
-        var selected = kind === 'food' ? Math.abs(foodValue - option.value) < 6 : Math.abs(localValue - option.value) < 6;
-        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" data-daily-kind="' + kind + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>US$ ' + option.value + '/día</strong></button>';
+      var mode = kind === 'food' ? detailState.foodBudgetMode : detailState.localBudgetMode;
+      var presets = options.map(function (option) {
+        var selected = mode !== 'custom' && (kind === 'food' ? Math.abs(foodValue - option.value) < 6 : Math.abs(localValue - option.value) < 6);
+        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>US$ ' + option.value + '/día</strong></button>';
       }).join('');
+      var customSelected = mode === 'custom';
+      var custom = '<button type="button" class="daily-budget__option daily-budget__option--custom' + (customSelected ? ' is-selected' : '') + '" aria-pressed="' + customSelected + '" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Escribí el monto que querés gastar.</span><strong>Ingresar monto</strong></button>';
+      var customValue = kind === 'food' ? detailState.foodCustomValue : detailState.localCustomValue;
+      var input = customSelected ? '<label class="daily-budget__planned"><span>Ingresá tu presupuesto personalizado</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(customValue)) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Presupuesto personalizado diario para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span>/ día</span></div></label>' : '';
+      return presets + custom + input;
     }
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Transporte local</span><small>Presupuesto libre</small></div>' +
-      '<label class="daily-budget__planned"><span>Presupuesto personalizado</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Ej: 30" data-daily-local aria-label="Presupuesto personalizado diario de transporte local"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
       '</div>' +
       '<div class="daily-budget__group">' +
       '<div class="daily-budget__header"><span>Comidas</span><small>Presupuesto libre</small></div>' +
-      '<label class="daily-budget__planned"><span>Presupuesto personalizado</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Ej: 30" data-daily-food aria-label="Presupuesto personalizado diario para comidas"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
@@ -552,7 +593,7 @@
       flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
       wireTransportFlow(flow);
       var liveFlights = !autoEnabled && flow.querySelector('.flight-search');
-      if (liveFlights) searchFlights(detailState.meta, liveFlights);
+      if (liveFlights) scheduleFlightSearch(detailState.meta, liveFlights);
     }
     sincronizarTrasladoOficial();
   }
@@ -823,7 +864,7 @@
   function flightSearch(meta, budget) {
     return '<section class="flight-search" aria-labelledby="flight-title"><div><h2 id="flight-title">Vuelos</h2><p>Tarifas aéreas en tiempo real para tu viaje.</p></div>' +
       '<div class="flight-filters" aria-label="Filtros de vuelos"><div><b>Escalas</b><button type="button" data-flight-stop="all" aria-pressed="true">Todos</button><button type="button" data-flight-stop="0">Directos</button><button type="button" data-flight-stop="1">1 escala</button><button type="button" data-flight-stop="2">2+ escalas</button></div><div><b>Horario de salida</b><button type="button" data-flight-time="all" aria-pressed="true">Todo el día</button><button type="button" data-flight-time="morning">Mañana</button><button type="button" data-flight-time="afternoon">Tarde</button><button type="button" data-flight-time="night">Noche</button></div></div>' +
-      '<div class="flight-results" aria-live="polite"><p class="flight-loading">Buscando vuelos disponibles…</p></div></section>';
+      '<div class="flight-results" aria-live="polite"><p class="flight-loading">La búsqueda comenzará al acercarte a esta sección.</p></div></section>';
   }
   function flightTime(value) {
     if (!value) return 'Horario no disponible';
@@ -949,6 +990,8 @@
   function searchFlights(meta, section) {
     var box = section.querySelector('.flight-results');
     var budget = 0;
+    if (!box || section.getAttribute('data-flight-requested') === '1') return;
+    section.setAttribute('data-flight-requested', '1');
     box.innerHTML = '<p class="flight-loading">Buscando vuelos disponibles…</p>';
     fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }) })
       .then(async function (response) {
@@ -963,8 +1006,24 @@
         }
         renderFlightOffers(box, data, budget);
       })
-      .catch(function (e) { box.innerHTML = '<p class="flight-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
+      .catch(function (e) { section.removeAttribute('data-flight-requested'); box.innerHTML = '<p class="flight-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
       ;
+  }
+  function scheduleFlightSearch(meta, section) {
+    if (!section || section.getAttribute('data-flight-scheduled') === '1') return;
+    section.setAttribute('data-flight-scheduled', '1');
+    var started = false;
+    var start = function () {
+      if (started || !section.isConnected) return;
+      started = true;
+      if (observer) observer.disconnect();
+      searchFlights(meta, section);
+    };
+    var observer = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+      if (entries.some(function (entry) { return entry.isIntersecting; })) start();
+    }, { rootMargin: '180px' }) : null;
+    if (observer) observer.observe(section);
+    window.setTimeout(start, 5000);
   }
   function passengerFields(count, passengerIds) {
     var fields = '';
@@ -1279,7 +1338,7 @@
     if (chip) chip.textContent = '';
     $('#foot').innerHTML = live
       ? '<p><b>Vuelos:</b> tarifa aérea real al momento de la búsqueda, por persona. Puede cambiar hasta que reserves. <b>Alojamiento, comidas, traslados y buses:</b> valores de referencia.</p>'
-      : '<p><b>Datos de ejemplo.</b> Los precios de esta página son referencias para mostrar cómo funciona el cálculo. Activá la búsqueda de tarifas aéreas en tiempo real para consultar disponibilidad.</p>';
+      : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento, comidas, traslados y buses son valores de referencia.</p>';
 
     var pct = Math.min(100, Math.round(rec.total / Math.max(budget, 1) * 100));
     var status = data.fits
@@ -1371,7 +1430,7 @@
     var isRoadtrip = proposal.mode === 'auto';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado' };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
     var nights = Math.max(1, Number(data.meta.nights) || 1);
     var pax = Math.max(1, Number(data.meta.pax) || 1);
     detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
@@ -1382,7 +1441,7 @@
     var breakdownMarkup = renderSafe(function () { return proposalBreakdownMarkup(detailState); }, '<section class="proposal-breakdown"><h2>Desglose del viaje</h2></section>');
     var dailyBudgetMarkup = renderSafe(function () { return dailyBudgetControls(); }, '');
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, isRoadtrip); }, '');
-    var hotelsMarkup = renderSafe(function () { return hotelOptions(data.meta, proposal.parts.alojamiento); }, '<section class="detail-section"><h2>Hoteles Recomendados</h2></section>');
+    var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
     var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
@@ -1396,6 +1455,11 @@
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!data.meta.hotelsLoaded) {
+      var loadHotels = function () { loadHotelRecommendations(data.meta, proposal.parts.alojamiento); };
+      if ('requestIdleCallback' in window) window.requestIdleCallback(loadHotels, { timeout: 1200 });
+      else window.setTimeout(loadHotels, 120);
+    }
   }
 
   // Resumen de vuelo real: reemplaza cualquier texto genérico del voucher.
@@ -1500,6 +1564,21 @@
   var pendingTripSave = false;
   var tripSaveInProgress = false;
   var authReadyPromise = Promise.resolve();
+  var authInitPromise = null;
+  var supabaseSdkPromise = null;
+  function loadSupabaseSdk() {
+    if (window.supabase && window.supabase.createClient) return Promise.resolve();
+    if (supabaseSdkPromise) return supabaseSdkPromise;
+    supabaseSdkPromise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = function () { reject(new Error('No pudimos cargar el servicio de cuenta.')); };
+      document.head.appendChild(script);
+    });
+    return supabaseSdkPromise;
+  }
 
   async function guardarViaje(datosVuelo) {
     if (!supabaseClient) throw new Error('Supabase todavía no está configurado.');
@@ -1580,7 +1659,7 @@
     };
   }
   async function saveCurrentTrip() {
-    if (authReadyPromise) await authReadyPromise;
+    if (!supabaseClient) { authReadyPromise = initAuth(); await authReadyPromise; }
     if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
     if (!authUser) { pendingTripSave = true; try { var draft = tripPayload(); if (draft) sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(draft)); sessionStorage.setItem('cuantosale_pending_trip', '1'); } catch (error) {} openAuthModal(); return; }
     if (tripSaveInProgress) return;
@@ -1695,27 +1774,32 @@
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); var loaded = await openDestinationProposal(S.dest, trip); if (loaded === null) throw new Error('No pudimos cargar la propuesta guardada.'); }
     else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
   }
-  async function initAuth() {
-    if (!window.supabase || !window.supabase.createClient) return;
-    try {
-      var configResponse = await fetch('/api/config');
-      var config = await configResponse.json();
-      if (!config.supabaseUrl || !config.supabaseAnonKey) { console.warn('Falta SUPABASE_ANON_KEY/SUPABASE_PUBLISHABLE_KEY en las variables de entorno del despliegue.'); return; }
-      supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage } });
-      try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
-      var sessionResult = await supabaseClient.auth.getSession();
-      renderAuthState(sessionResult.data && sessionResult.data.session && sessionResult.data.session.user);
-      if (pendingTripSave && authUser) saveCurrentTrip();
-      supabaseClient.auth.onAuthStateChange(function (_event, session) { renderAuthState(session && session.user); if (pendingTripSave && session && session.user) saveCurrentTrip(); });
-    } catch (error) { console.error('Supabase Auth no disponible', error); }
+  function initAuth() {
+    if (supabaseClient) return Promise.resolve();
+    if (authInitPromise) return authInitPromise;
+    authInitPromise = (async function () {
+      try {
+        await loadSupabaseSdk();
+        var configResponse = await fetch('/api/config');
+        var config = await configResponse.json();
+        if (!config.supabaseUrl || !config.supabaseAnonKey) { console.warn('Falta SUPABASE_ANON_KEY/SUPABASE_PUBLISHABLE_KEY en las variables de entorno del despliegue.'); return; }
+        supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage } });
+        try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
+        var sessionResult = await supabaseClient.auth.getSession();
+        renderAuthState(sessionResult.data && sessionResult.data.session && sessionResult.data.session.user);
+        if (pendingTripSave && authUser) window.setTimeout(saveCurrentTrip, 0);
+        supabaseClient.auth.onAuthStateChange(function (_event, session) { renderAuthState(session && session.user); if (pendingTripSave && session && session.user) window.setTimeout(saveCurrentTrip, 0); });
+      } catch (error) { authInitPromise = null; console.error('Supabase Auth no disponible', error); }
+    })();
+    return authInitPromise;
   }
 
   /* ---------- formulario ---------- */
   function init() {
-    authReadyPromise = initAuth();
     var authButton = $('#auth-button'), tripsButton = $('#trips-button');
-    if (authButton) authButton.addEventListener('click', function () { if (authUser) openTripsModal(); else openAuthModal(); });
-    if (tripsButton) tripsButton.addEventListener('click', openTripsModal);
+    if (authButton) authButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(function () { if (authUser) openTripsModal(); else openAuthModal(); }); });
+    if (tripsButton) tripsButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(openTripsModal); });
+    if (window.location.search.indexOf('code=') >= 0 || window.location.hash.indexOf('access_token=') >= 0) { authReadyPromise = initAuth(); }
     $('#trip-summary').addEventListener('click', function (e) {
       var toggle = e.target.closest('[data-trip-summary-toggle]');
       if (toggle) {
@@ -1943,12 +2027,25 @@
       if (dailyBudgetCard && detailState) {
         e.preventDefault(); e.stopPropagation();
         var kind = dailyBudgetCard.getAttribute('data-daily-kind');
+        if (kind === 'local-custom' || kind === 'food-custom') {
+          var customKind = kind.split('-')[0];
+          detailState[customKind + 'BudgetMode'] = 'custom';
+          var customSection = dailyBudgetCard.closest('.daily-budget');
+          if (customSection) {
+            customSection.innerHTML = dailyBudgetControls();
+            var customInput = customSection.querySelector('[data-daily-' + customKind + ']');
+            if (customInput) customInput.focus();
+          }
+          return;
+        }
         var value = Number(dailyBudgetCard.getAttribute('data-daily-value')) || 0;
         if (kind === 'local') {
+          detailState.localBudgetMode = 'preset';
           detailState.localPerDayTouched = true;
           detailState.localPerDay = value;
           detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         } else if (kind === 'food') {
+          detailState.foodBudgetMode = 'preset';
           detailState.foodPerDayTouched = true;
           detailState.foodPerDay = value;
           detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
@@ -2065,6 +2162,8 @@
       if (roadtripModel) actualizarModeloRoadtrip(roadtripModel.value);
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
+        detailState.foodBudgetMode = 'custom';
+        detailState.foodCustomValue = dailyFoodInput.value;
         detailState.foodPerDayTouched = true;
         detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
         detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
@@ -2072,6 +2171,8 @@
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
       if (dailyLocalInput && detailState) {
+        detailState.localBudgetMode = 'custom';
+        detailState.localCustomValue = dailyLocalInput.value;
         detailState.localPerDayTouched = true;
         detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
         detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
@@ -2083,6 +2184,8 @@
       if (consumption) actualizarRoadtrip(consumption.value);
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
+        detailState.foodBudgetMode = 'custom';
+        detailState.foodCustomValue = dailyFoodInput.value;
         detailState.foodPerDayTouched = true;
         detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
         detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
@@ -2090,6 +2193,8 @@
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
       if (dailyLocalInput && detailState) {
+        detailState.localBudgetMode = 'custom';
+        detailState.localCustomValue = dailyLocalInput.value;
         detailState.localPerDayTouched = true;
         detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
         detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
