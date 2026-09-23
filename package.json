@@ -9,8 +9,5 @@
   },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "@duffel/api": "^4.30.0"
   }
 }

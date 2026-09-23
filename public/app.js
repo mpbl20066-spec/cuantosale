@@ -10,6 +10,14 @@
     ['auto', 'Auto / Roadtrip', '--c4'],
     ['extras', 'Valijas, tasas y seguro', '--c6']
   ];
+  var LOCAL_TOURS = [
+    { destinations: ['rio'], destination: 'Río de Janeiro, Brasil', title: 'Cristo Redentor (Tren del Corcovado) y Pan de Azúcar', description: 'Excursión guiada de un día completo con entradas prioritarias y transporte incluido.', price: 65 },
+    { destinations: ['rio'], destination: 'Río de Janeiro, Brasil', title: 'Full Day a Arraial do Cabo con Paseo en Barco', description: 'Traslado ida y vuelta desde Río + navegación por las aguas cristalinas con parada para snorkel.', price: 50 },
+    { destinations: ['fln'], destination: 'Florianópolis, Brasil', title: 'Excursión en Barco a Isla de Campeche', description: 'Salida desde Playa da Armação hacia el “Caribe catarinense” con tiempo libre para playa y senderos.', price: 40 },
+    { destinations: ['maragogi'], destination: 'Maragogi, Brasil', title: 'Catamarán a las Piscinas Naturales (Galés)', description: 'Paseo en catamarán sujeto a la marea baja para hacer snorkel en los arrecifes de coral.', price: 35 },
+    { destinations: ['pip'], destination: 'Praia do Pipa, Brasil', title: 'Paseo en Buggy de “Playa en Playa”', description: 'Recorrido extremo y panorámico visitando Chapadão, Baía dos Golfinhos y Sibaúma.', price: 45 },
+    { destinations: ['gram', 'canela'], destination: 'Gramado y Canela, Brasil', title: 'Tour del Vino en Bento Gonçalves (Valle de los Viñedos)', description: 'Excursión de un día con cata de vinos, espumantes y almuerzo típico colonial incluido.', price: 70 }
+  ];
 
   var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '' };
   var DESTINATION_GROUPS = [
@@ -160,7 +168,6 @@
       '</div></section>';
   }
   function hotelTotalForRate(meta, accommodationTotal, multiplier) {
-    var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     return Math.max(1, Math.round(average * multiplier)) * nights * pax;
@@ -217,7 +224,8 @@
         highlight: item.highlight || '',
         total: Number(item.total) || null,
         perNight: Number(item.perNight) || null,
-        bookingUrl: item.bookingUrl || null
+        bookingUrl: item.bookingUrl || null,
+        source: item.source || ''
       };
     });
     if (!options.length) {
@@ -236,8 +244,20 @@
         var imageMarkup = imageUrl ? '<div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.removeAttribute(\'src\');"></div>' : '<div class="hotel-image-wrap hotel-image-empty"><span>Sin foto disponible</span></div>';
         var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
         var similarMarkup = similar ? '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details>' : '';
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">Estimación para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + ' total estimado</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3><p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
       }).join('') + '</div></section>';
+  }
+  function localToursMarkup(meta) {
+    var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
+    var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
+    if (!tours.length) return '';
+    var nights = Math.max(1, Number(meta.nights) || 1);
+    var pax = Math.max(1, Number(meta.pax) || 1);
+    return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y Experiencias Locales</h2><p>Ideas para disfrutar ' + esc(meta.dest.name) + '. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid">' + tours.map(function (tour) {
+      var message = 'Hola, quiero consultar por el tour “' + tour.title + '” en ' + tour.destination + '. Viajamos ' + pax + (pax === 1 ? ' persona' : ' personas') + ' del ' + meta.dep + ' al ' + meta.ret + '. Precio referencial: US$ ' + tour.price + '.';
+      var href = 'https://wa.me/?text=' + encodeURIComponent(message);
+      return '<article class="local-tour"><span class="local-tour__icon" aria-hidden="true">✦</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div><a class="local-tour__cta" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">Reservar con asistencia <span aria-hidden="true">↗</span></a></article>';
+    }).join('') + '</div><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final por WhatsApp.</p></section>';
   }
   var hotelRequestId = 0;
   function hotelLoading(meta) {
@@ -252,9 +272,12 @@
     }
     var params = new URLSearchParams({ dest: meta.dest.key, dep: meta.dep, ret: meta.ret, pax: meta.pax, style: meta.style || 'eq' });
     if (meta.hotelBudgetPerNight != null && Number.isFinite(Number(meta.hotelBudgetPerNight))) params.set('hotel_budget_per_night', String(meta.hotelBudgetPerNight));
-    fetch('/api/hoteles?' + params.toString()).then(function (response) {
+    var controller = typeof AbortController === 'function' ? new AbortController() : null;
+    var timeout = window.setTimeout(function () { if (controller) controller.abort(); }, 30000);
+    fetch('/api/hoteles?' + params.toString(), controller ? { signal: controller.signal } : {}).then(function (response) {
       return response.json().then(function (data) { if (!response.ok) throw new Error(data.error || 'No pudimos cargar alojamientos.'); return data; });
     }).then(function (data) {
+      window.clearTimeout(timeout);
       if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
       meta.hotels = Array.isArray(data.hotels) ? data.hotels : [];
       meta.hotelsNearby = data.hotelsNearby || '';
@@ -268,8 +291,9 @@
         actualizarAlojamiento(Number(recommended.getAttribute('data-hotel-total')), true);
       }
     }).catch(function (error) {
+      window.clearTimeout(timeout);
       if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
-      console.warn('[hoteles] No se pudieron cargar alojamientos:', error.message);
+      console.warn('[hoteles] No se pudieron cargar alojamientos:', error && error.message || 'error desconocido');
       meta.hotels = [];
       meta.hotelsLoaded = true;
       var current = document.querySelector('.hotel-options-loading');
@@ -468,7 +492,6 @@
       var hotelContent = voucherCards[1].querySelector('div');
       if (hotelContent) hotelContent.innerHTML = '<small>Alojamiento seleccionado</small><strong>' + esc(selectedHotelName) + '</strong><p>' + esc(selectedHotelDetail) + '</p><b>' + money(hotelTotal) + '</b>';
     }
-    if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-open-duffel-checkout>✈️ Pagar y emitir con Duffel</button>');
     if (voucherCards[1]) voucherCards[1].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">🏨 Reservar en Booking.com ↗</a>');
     if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -651,8 +674,6 @@
       // queden disponibles en el DOM cuando el usuario eligió auto (y viceversa).
       flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
       wireTransportFlow(flow);
-      var liveFlights = !autoEnabled && flow.querySelector('.flight-search');
-      if (liveFlights) scheduleFlightSearch(detailState.meta, liveFlights);
     }
     sincronizarTrasladoOficial();
   }
@@ -746,16 +767,6 @@
       return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
     }).join('');
   }
-  function transferCard(meta) {
-    var t = meta.officialTransfer;
-    if (!t) return '';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><div class="transport-card"><p>Transfer desde el aeropuerto ➔ pousada para ' + esc(meta.dest.name) + ' · tarifa fija de ' + money(t.pricePerPassenger) + ' por pasajero.</p><p data-transfer-status>Seleccioná una tarifa aérea y una posada para incluir este traslado automáticamente.</p><button type="button" class="btn-transfer" data-buy-transfer disabled>Seleccioná transfer / transfer</button></div></section>';
-  }
-  // Explicit airport transfer modes used by the proposal and saved itinerary.
-  function transferCard(meta) {
-    var selected = detailState && detailState.transferType || '';
-  }
-
   function getTransferPickupWindow() {
     var offer = getSelectedFlightOffer();
     var arrivalValue = null;
@@ -923,7 +934,7 @@
   function flightSearch(meta, budget) {
     return '<section class="flight-search" aria-labelledby="flight-title"><div><h2 id="flight-title">Vuelos</h2><p>Tarifas aéreas en tiempo real para tu viaje.</p></div>' +
       '<div class="flight-filters" aria-label="Filtros de vuelos"><div><b>Escalas</b><button type="button" data-flight-stop="all" aria-pressed="true">Todos</button><button type="button" data-flight-stop="0">Directos</button><button type="button" data-flight-stop="1">1 escala</button><button type="button" data-flight-stop="2">2+ escalas</button></div><div><b>Horario de salida</b><button type="button" data-flight-time="all" aria-pressed="true">Todo el día</button><button type="button" data-flight-time="morning">Mañana</button><button type="button" data-flight-time="afternoon">Tarde</button><button type="button" data-flight-time="night">Noche</button></div></div>' +
-      '<div class="flight-results" aria-live="polite"><p class="flight-loading">La búsqueda comenzará al acercarte a esta sección.</p></div></section>';
+      '<div class="flight-results" aria-live="polite"><div class="flight-search-prompt"><p>Buscá tarifas actuales y compará agencias para tu ruta.</p><button type="button" class="btn btn-primary" data-start-flight-search>Buscar vuelos disponibles</button></div></div></section>';
   }
   function flightTime(value) {
     if (!value) return 'Horario no disponible';
@@ -980,7 +991,7 @@
       var hour = flightHour(offer.departure);
       var timeOk = time === 'all' || (time === 'morning' && hour >= 5 && hour < 12) || (time === 'afternoon' && hour >= 12 && hour < 18) || (time === 'night' && (hour >= 18 || (hour >= 0 && hour < 5)));
       return stopOk && timeOk;
-    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); }).slice(0, 9);
+    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
   }
   function getFlightSelectionState() {
     if (!detailState) return null;
@@ -994,7 +1005,9 @@
     var style = (detailState && detailState.meta && detailState.meta.style) || data.style || S.style || 'eq';
     var offers = filterFlightOffersByCabin((Array.isArray(data.offers) ? data.offers : []).filter(isCarrascoOffer), style, data.cabin_class);
     if (!offers.length) {
-      el.innerHTML = '<p class="flight-empty">No hay vuelos disponibles para esta búsqueda. Probá con otras fechas.</p>';
+      el.innerHTML = '<div class="flight-empty"><p>' + esc(data.error || 'No hay vuelos disponibles para esta búsqueda. Probá con otras fechas.') + '</p><button type="button" class="btn btn-secondary" data-retry-flight-search>Intentar de nuevo</button></div>';
+      var emptySection = el.closest('.flight-search');
+      if (emptySection) emptySection.removeAttribute('data-flight-requested');
       return;
     }
     var section = el.closest('.flight-search');
@@ -1034,12 +1047,16 @@
         : (flightStep === 'done' ? 'Vuelo seleccionado' : 'Agregar a presupuesto');
       var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(flightStep === 'done' ? 'Ida y vuelta' : stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
       var cabinBadge = '<span class="flight-badge cabin-badge">' + esc(offer.cabin_label || cabinClassLabel(offer.cabin_class)) + '</span>';
+      var agencyLabel = offer.agency ? '<small class="flight-agency">Venta por ' + esc(offer.agency) + '</small>' : '';
       var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
-      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + cabinBadge + stageBadge + '</div>' +
+      var priceKnown = offer.price_usd !== null && Number.isFinite(Number(offer.price_usd));
+      var affiliateHref = offer.provider === 'skyscrapper' && /^https:\/\/(?:www\.)?skyscanner\.com\//i.test(offer.booking_url || '') ? offer.booking_url : offer.provider === 'travelpayouts' ? '/api/vuelos/comprar?search_id=' + encodeURIComponent(offer.search_id || '') + '&term=' + encodeURIComponent(offer.affiliate_term || '') : '';
+      var affiliateLink = affiliateHref ? '<a class="btn btn-secondary flight-buy-link" href="' + esc(affiliateHref) + '" target="_blank" rel="noopener noreferrer">' + (offer.provider === 'skyscrapper' ? 'Ver opciones en Skyscanner' : 'Ver precio y reservar') + '</a>' : '';
+      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + agencyLabel + cabinBadge + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
-        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary" aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(offer.price_usd === null ? '' : offer.price_usd) + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : primaryButtonText) + '</button></div></article>';
+        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="Esta tarifa no está disponible en USD para sumarla al presupuesto."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'No convertible a US$')) + '</button>' + affiliateLink + '</div></article>';
     }).join('') + '</div>';
     if (state && state.outboundId && state.inboundId) {
       var selectedOffer = offers.find(function (offer) { return offer.id === state.inboundId || offer.id === state.outboundId; });
@@ -1051,49 +1068,21 @@
     var budget = 0;
     if (!box || section.getAttribute('data-flight-requested') === '1') return;
     section.setAttribute('data-flight-requested', '1');
-    box.innerHTML = '<p class="flight-loading">Buscando vuelos disponibles…</p>';
-    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }) })
+    box.innerHTML = '<div class="flight-skeleton" aria-label="Buscando vuelos" role="status"><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div><span class="sr-only">Buscando tarifas actuales…</span></div>';
+    var controller = typeof AbortController === 'function' ? new AbortController() : null;
+    var timeout = window.setTimeout(function () { if (controller) controller.abort(); }, 20000);
+    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }), signal: controller ? controller.signal : undefined })
       .then(async function (response) {
+        window.clearTimeout(timeout);
         var text = await response.text();
         var data = { offers: [] };
         if (text.trim()) {
           try { data = JSON.parse(text); } catch (e) { data = { offers: [], error: 'La API devolvió una respuesta inválida.' }; }
         }
-        if (!response.ok || !Array.isArray(data.offers) || data.offers.length === 0) {
-          renderFlightOffers(box, data, budget);
-          return;
-        }
+        if (!response.ok && !data.error) data.error = 'No pudimos consultar vuelos ahora. Probá de nuevo en unos minutos.';
         renderFlightOffers(box, data, budget);
       })
-      .catch(function (e) { section.removeAttribute('data-flight-requested'); box.innerHTML = '<p class="flight-empty">' + esc(e.message || 'No pudimos buscar vuelos.') + '</p>'; })
-      ;
-  }
-  function scheduleFlightSearch(meta, section) {
-    if (!section || section.getAttribute('data-flight-scheduled') === '1') return;
-    section.setAttribute('data-flight-scheduled', '1');
-    var started = false;
-    var start = function () {
-      if (started || !section.isConnected) return;
-      started = true;
-      if (observer) observer.disconnect();
-      searchFlights(meta, section);
-    };
-    var observer = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
-      if (entries.some(function (entry) { return entry.isIntersecting; })) start();
-    }, { rootMargin: '180px' }) : null;
-    if (observer) observer.observe(section);
-    window.setTimeout(start, 5000);
-  }
-  function passengerFields(count, passengerIds) {
-    var fields = '';
-    for (var i = 0; i < count; i++) {
-      fields += '<fieldset class="passenger-fields" data-passenger-id="' + esc(passengerIds[i] || '') + '"><legend>Pasajero ' + (i + 1) + '</legend>' +
-        '<div class="passenger-grid"><div><label>Nombre</label><input required name="given_name" autocomplete="given-name"></div><div><label>Apellido</label><input required name="family_name" autocomplete="family-name"></div>' +
-        '<div><label>Fecha de nacimiento</label><input required type="date" name="born_on" autocomplete="bday"></div><div><label>Género</label><select required name="gender"><option value="">Elegir</option><option value="m">Masculino</option><option value="f">Femenino</option></select></div>' +
-        '<div><label>Email</label><input required type="email" name="email" autocomplete="email"></div><div><label>Teléfono</label><input required type="tel" name="phone_number" autocomplete="tel"></div>' +
-        '<div><label>Tipo de documento</label><select required name="document_type"><option value="">Elegir</option><option value="passport">Pasaporte</option><option value="identity_card">Cédula / documento</option></select></div><div><label>Número de documento</label><input required name="document_number" autocomplete="off"></div></div></fieldset>';
-    }
-    return fields;
+      .catch(function (e) { window.clearTimeout(timeout); section.removeAttribute('data-flight-requested'); box.innerHTML = '<div class="flight-empty"><p>' + esc(e && e.name === 'AbortError' ? 'La búsqueda está tardando más de lo esperado. Podés volver a intentarlo.' : e && e.message || 'No pudimos buscar vuelos ahora.') + '</p><button type="button" class="btn btn-secondary" data-retry-flight-search>Intentar de nuevo</button></div>'; });
   }
   function persistSelectedOffer(button) {
     if (!button || !detailState) return null;
@@ -1111,110 +1100,8 @@
     detailState.selectedOffer = Object.assign({}, completeOffer || {}, { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds });
     return detailState.selectedOffer;
   }
-  function openBookingForm(button) {
-    var selectedOffer = null;
-    if (button && typeof button.getAttribute === 'function') {
-      selectedOffer = persistSelectedOffer(button) || { id: button.getAttribute('data-select-flight') || button.getAttribute('data-offer-id') || '', airline: button.getAttribute('data-offer-airline') || 'Vuelo seleccionado', price: Number(button.getAttribute('data-offer-price') || 0) || 0, currency: button.getAttribute('data-offer-currency') || 'USD', passengerIds: [] };
-    } else if (detailState && detailState.selectedOffer) {
-      selectedOffer = detailState.selectedOffer;
-    } else if (detailState) {
-      selectedOffer = { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || 'Vuelo seleccionado', price: Number(detailState.flight) || 0, currency: 'USD', passengerIds: [] };
-    }
-    if (!selectedOffer) return;
-    var modal = $('#booking-modal');
-    if (!selectedOffer.id) {
-      modal.innerHTML = '<div class="booking-dialog booking-error" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Elegí un vuelo antes de emitir</h2><p>Seleccioná una oferta aérea real en la sección de vuelos para obtener su offer_id y continuar con el checkout de Duffel.</p></div>';
-      modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
-      return;
-    }
-    var passengerIds = Array.isArray(selectedOffer.passengerIds) ? selectedOffer.passengerIds : [];
-    modal.innerHTML = '<div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<h2 id="booking-title">Datos de los pasajeros</h2><p class="booking-summary">' + esc(selectedOffer.airline) + ' · ' + money(Number(selectedOffer.price || 0)) + '</p>' +
-      '<form id="booking-form" data-offer-id="' + esc(selectedOffer.id) + '" data-total-amount="' + esc(selectedOffer.price || '') + '" data-total-currency="' + esc(selectedOffer.currency || 'USD') + '"><div class="passenger-list">' + passengerFields(S.pax, passengerIds) + '</div><p class="booking-note">Revisá los datos exactamente como aparecen en el documento de viaje. El teléfono debe incluir código de país, por ejemplo +59899123456.</p><button class="confirm-booking" type="submit">Confirmar y Emitir Reserva</button></form></div>';
-    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
-    var checkoutForm = modal.querySelector('#booking-form');
-    if (checkoutForm) {
-      var submitButton = checkoutForm.querySelector('.confirm-booking');
-      if (submitButton) submitButton.textContent = 'Pagar y Emitir con Duffel';
-      var note = checkoutForm.querySelector('.booking-note');
-      note.insertAdjacentHTML('beforebegin', '<section class="duffel-checkout"><div class="duffel-checkout__offer"><span>Oferta Duffel</span><strong>' + esc(selectedOffer.id || 'Oferta seleccionada') + '</strong><em>' + esc(selectedOffer.airline) + ' · ' + money(Number(selectedOffer.price || 0)) + '</em></div><div class="duffel-checkout__services"><h3>Servicios adicionales</h3><p class="duffel-checkout__muted">Consultando equipaje y servicios disponibles para esta oferta...</p><div data-duffel-services></div></div><div class="duffel-checkout__payment"><h3>Pago seguro con Duffel</h3><p class="duffel-checkout__muted">La tarjeta debe capturarse con Duffel Card Form y autenticarse con 3D Secure. Nunca ingreses el número de tarjeta en esta página.</p><label>Medio de pago<select data-duffel-payment-type><option value="balance">Saldo de la agencia (prueba / configuración actual)</option><option value="card">Tarjeta procesada por Duffel</option></select></label><div data-duffel-card-fields hidden><label>Card ID de Duffel<input data-duffel-card-id placeholder="tcd_..." autocomplete="off"></label><label>Sesión 3D Secure<input data-duffel-3ds-id placeholder="3ds_..." autocomplete="off"></label></div></div></section>');
-      var paymentPanel = checkoutForm.querySelector('.duffel-checkout__payment');
-      if (paymentPanel) paymentPanel.innerHTML = '<h3>Pago con tarjeta</h3><p class="duffel-checkout__muted">Simulación segura para probar el flujo de emisión. No se realiza ningún cargo real.</p><div class="card-brand-row"><span>💳</span><small>Visa</small><small>Mastercard</small></div><label>Número de tarjeta<input required inputmode="numeric" maxlength="19" name="card_number" data-card-number placeholder="4242 4242 4242 4242" autocomplete="cc-number"></label><div class="card-fields-grid"><label>Vencimiento<input required inputmode="numeric" maxlength="5" name="card_expiry" data-card-expiry placeholder="MM/AA" autocomplete="cc-exp"></label><label>CVV / CVC<input required inputmode="numeric" maxlength="4" name="card_cvv" data-card-cvv placeholder="123" autocomplete="cc-csc"></label></div><label>Nombre del titular<input required name="card_holder" data-card-holder placeholder="Como aparece en la tarjeta" autocomplete="cc-name"></label><p class="card-demo-note">Usá una tarjeta de prueba, por ejemplo 4242 4242 4242 4242.</p>';
-      loadDuffelOfferDetails(selectedOffer.id, modal);
-    }
-    modal.querySelector('input').focus();
-  }
-  async function loadDuffelOfferDetails(offerId, modal) {
-    if (!offerId || !modal) return;
-    try {
-      var response = await fetch('/api/vuelos/oferta?offer_id=' + encodeURIComponent(offerId));
-      var data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'No pudimos cargar los servicios de la oferta.');
-      var servicesBox = modal.querySelector('[data-duffel-services]');
-      if (!servicesBox) return;
-      var services = Array.isArray(data.available_services) ? data.available_services.filter(function (service) { return service && service.id; }) : [];
-      if (!services.length) { servicesBox.innerHTML = '<p class="duffel-checkout__muted">Esta oferta no tiene equipaje adicional disponible.</p>'; return; }
-      servicesBox.innerHTML = services.map(function (service) {
-        var label = service.type === 'baggage' ? 'Equipaje de bodega' : 'Servicio adicional';
-        var price = money(Number(service.total_amount || 0));
-        return '<label class="duffel-service"><input type="checkbox" data-duffel-service value="' + esc(service.id) + '" data-service-quantity="1"><span><strong>' + label + '</strong><small>' + price + ' · ' + esc(service.id) + '</small></span></label>';
-      }).join('');
-    } catch (error) {
-      var fallback = modal.querySelector('[data-duffel-services]');
-      if (fallback) fallback.innerHTML = '<p class="booking-error">' + esc(error.message || 'No pudimos consultar servicios adicionales.') + '</p>';
-    }
-  }
   function closeBookingForm() {
     var modal = $('#booking-modal'); modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = '';
-  }
-  function showBookingSuccess(data) {
-    var modal = $('#booking-modal');
-    var passengers = (data.passengers || []).map(function (p) { return '<li>' + esc(p.given_name + ' ' + p.family_name) + '</li>'; }).join('');
-    var first = data.slices && data.slices[0] || {}, segs = first.segments || [];
-    var route = segs.length ? esc((segs[0].origin && (segs[0].origin.name || segs[0].origin.iata_code) || '') + ' → ' + (segs[segs.length - 1].destination && (segs[segs.length - 1].destination.name || segs[segs.length - 1].destination.iata_code) || '')) : 'Itinerario confirmado';
-    modal.innerHTML = '<div class="booking-dialog booking-success" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><div class="success-icon">🎉</div><h2>¡Reserva confirmada con éxito!</h2><p class="pnr-label">Código localizador</p><strong class="pnr">' + esc(data.booking_reference || 'Pendiente') + '</strong><p class="success-route">' + route + '</p><h3>Pasajeros</h3><ul>' + passengers + '</ul><p class="booking-note">Los detalles de tu reserva fueron enviados al e-mail indicado.</p></div>';
-    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
-  }
-  async function submitBooking(form) {
-    var passengerGroups = form.querySelectorAll('.passenger-fields'), passengers = [];
-    Array.prototype.forEach.call(passengerGroups, function (group) {
-      var phone = group.querySelector('[name="phone_number"]').value.trim().replace(/[\s().-]/g, '');
-      passengers.push({ id: group.getAttribute('data-passenger-id') || undefined, title: group.querySelector('[name="gender"]').value === 'm' ? 'mr' : 'ms', given_name: group.querySelector('[name="given_name"]').value.trim(), family_name: group.querySelector('[name="family_name"]').value.trim(), born_on: group.querySelector('[name="born_on"]').value, gender: group.querySelector('[name="gender"]').value, email: group.querySelector('[name="email"]').value.trim(), phone_number: phone, identity_documents: [{ type: group.querySelector('[name="document_type"]').value, unique_identifier: group.querySelector('[name="document_number"]').value.trim() }] });
-    });
-    var button = form.querySelector('.confirm-booking'), errorBox = form.querySelector('.booking-error');
-    if (!errorBox) { errorBox = document.createElement('p'); errorBox.className = 'booking-error'; form.insertBefore(errorBox, button); }
-    errorBox.hidden = true; button.disabled = true; button.textContent = 'Procesando reserva con la aerolínea...';
-    try {
-      if (passengers.some(function (p) { return !/^\+[1-9]\d{7,14}$/.test(p.phone_number); })) throw new Error('El teléfono debe estar en formato internacional E.164, por ejemplo +59899123456.');
-      var cardNumber = String((form.querySelector('[data-card-number]') || {}).value || '').replace(/\s+/g, '');
-      var expiry = String((form.querySelector('[data-card-expiry]') || {}).value || '').trim();
-      var cvv = String((form.querySelector('[data-card-cvv]') || {}).value || '').trim();
-      var holder = String((form.querySelector('[data-card-holder]') || {}).value || '').trim();
-      if (!/^\d{13,19}$/.test(cardNumber)) throw new Error('Ingresá un número de tarjeta válido.');
-      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) throw new Error('La fecha debe tener el formato MM/AA.');
-      if (!/^\d{3,4}$/.test(cvv)) throw new Error('Ingresá un código de seguridad válido.');
-      if (holder.length < 3) throw new Error('Ingresá el nombre del titular de la tarjeta.');
-      button.textContent = 'Procesando pago con Duffel...';
-      await new Promise(function (resolve) { window.setTimeout(resolve, 1800); });
-      showBookingSuccess({ booking_reference: 'DFL-89421X', order_status: 'Pago simulado aprobado', passengers: passengers, slices: [] });
-      return;
-      var selectedServices = Array.prototype.map.call(form.querySelectorAll('[data-duffel-service]:checked'), function (input) { return { id: input.value, quantity: Math.max(1, Number(input.getAttribute('data-service-quantity')) || 1) }; });
-      var paymentTypeInput = form.querySelector('[data-duffel-payment-type]');
-      var paymentType = paymentTypeInput ? paymentTypeInput.value : 'balance';
-      var payment = { type: paymentType };
-      if (paymentType === 'card') {
-        payment.card_id = (form.querySelector('[data-duffel-card-id]') || {}).value || '';
-        payment.three_d_secure_session_id = (form.querySelector('[data-duffel-3ds-id]') || {}).value || '';
-        if (!/^tcd_[A-Za-z0-9]+$/.test(payment.card_id) || !/^3ds_[A-Za-z0-9]+$/.test(payment.three_d_secure_session_id)) throw new Error('Completá el Card ID y la sesión 3D Secure emitidos por Duffel Card.');
-      }
-      var response = await fetch('/api/vuelos/reservar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ offer_id: form.getAttribute('data-offer-id'), passengers: passengers, services: selectedServices, payment: payment, total_amount: form.getAttribute('data-total-amount'), total_currency: form.getAttribute('data-total-currency') }) });
-      var data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Error al emitir la reserva');
-      showBookingSuccess(data);
-    } catch (error) {
-      errorBox.textContent = error.message || 'Error al emitir la reserva'; errorBox.hidden = false;
-      button.disabled = false; button.textContent = 'Pagar y Emitir con Duffel';
-    }
   }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
@@ -1501,12 +1388,13 @@
     var dailyBudgetMarkup = renderSafe(function () { return dailyBudgetControls(); }, '');
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, isRoadtrip); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
+    var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
     var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       breakdownMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
-      hotelsMarkup + foodMarkup +
+      hotelsMarkup + toursMarkup + foodMarkup +
       '</div></div>';
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     actualizarTransporte(isRoadtrip);
@@ -2131,6 +2019,12 @@
       e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; openDestinationProposal(S.dest);
     });
     $('#vista-detalle').addEventListener('click', function (e) {
+      var startFlightSearch = e.target.closest('[data-start-flight-search],[data-retry-flight-search]');
+      if (startFlightSearch) {
+        e.preventDefault(); e.stopPropagation();
+        if (detailState) searchFlights(detailState.meta, startFlightSearch.closest('.flight-search'));
+        return;
+      }
       var dailyBudgetCard = e.target.closest('[data-daily-kind]');
       if (dailyBudgetCard && detailState) {
         if (e.target.closest('input')) return;
@@ -2317,8 +2211,6 @@
     });
     $('#booking-modal').addEventListener('click', function (e) {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
-      var duffelCheckoutButton = e.target.closest('[data-open-duffel-checkout]');
-      if (duffelCheckoutButton) { e.preventDefault(); openBookingForm(); return; }
       var saveTripButton = e.target.closest('[data-save-trip]');
       if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
@@ -2371,11 +2263,6 @@
       }
     });
     $('#booking-modal').addEventListener('change', function (e) {
-      var paymentType = e.target.closest('[data-duffel-payment-type]');
-      if (paymentType) {
-        var cardFields = $('#booking-modal').querySelector('[data-duffel-card-fields]');
-        if (cardFields) cardFields.hidden = paymentType.value !== 'card';
-      }
       var radio = e.target.closest('[name="transfer-pickup"]');
       if (radio) {
         if (!detailState || !detailState.transferWizard) return;
@@ -2411,7 +2298,7 @@
         detailState.transferWizard.hotelName = hotelInput.value.trim();
       }
     });
-    $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'booking-form' && e.target.id !== 'transfer-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } if (e.target.id === 'transfer-form') submitTransfer(e.target); else submitBooking(e.target); });
+    $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'transfer-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } submitTransfer(e.target); });
 
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
       var byKey = {};
