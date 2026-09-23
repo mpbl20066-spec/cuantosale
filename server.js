@@ -112,8 +112,23 @@ const BOOKING_IMAGE_FALLBACKS = {
 // Algunas islas y pueblos pequeños no están indexados como ciudad en Booking.
 // En esos casos buscamos alojamientos en el municipio de acceso más cercano.
 const HOTEL_NEARBY_DESTINATIONS = {
+  buz: { key: 'cabo', name: 'Cabo Frio', label: 'Cabo Frio, cerca de Búzios' },
+  arraial: { key: 'cabo', name: 'Cabo Frio', label: 'Cabo Frio, cerca de Arraial do Cabo' },
+  cabo: { key: 'arraial', name: 'Arraial do Cabo', label: 'Arraial do Cabo, cerca de Cabo Frio' },
   ilha: { key: 'angra', name: 'Angra dos Reis', label: 'Angra dos Reis, cerca de Ilha Grande' },
-  paraty: { key: 'angra', name: 'Angra dos Reis', label: 'Angra dos Reis y alrededores' }
+  paraty: { key: 'angra', name: 'Angra dos Reis', label: 'Angra dos Reis y alrededores' },
+  ilhabela: { key: 'ilhabela', name: 'São Sebastião', label: 'São Sebastião, junto a Ilhabela' },
+  ubatuba: { key: 'ubatuba', name: 'Caraguatatuba', label: 'Caraguatatuba, cerca de Ubatuba' },
+  maragogi: { key: 'mcz', name: 'Maceió', label: 'Maceió, región cercana a Maragogi' },
+  porto: { key: 'rec', name: 'Recife', label: 'Recife, región cercana a Porto de Galinhas' },
+  trancoso: { key: 'trancoso', name: 'Porto Seguro', label: 'Porto Seguro, cerca de Trancoso' },
+  jericoacoara: { key: 'for', name: 'Fortaleza', label: 'Fortaleza, región de acceso a Jericoacoara' },
+  morro: { key: 'ssa', name: 'Salvador', label: 'Salvador, región de acceso a Morro de São Paulo' },
+  pip: { key: 'nat', name: 'Natal', label: 'Natal, región cercana a Pipa' },
+  bombinhas: { key: 'bcm', name: 'Balneário Camboriú', label: 'Balneário Camboriú, cerca de Bombinhas' },
+  rosa: { key: 'fln', name: 'Florianópolis', label: 'Florianópolis, región cercana a Praia do Rosa' },
+  gram: { key: 'canela', name: 'Canela', label: 'Canela, cerca de Gramado' },
+  canela: { key: 'gram', name: 'Gramado', label: 'Gramado, cerca de Canela' }
 };
 function sanitizeHotelName(value) {
   const raw = String(value || '').trim();
@@ -184,6 +199,75 @@ function bookingSettings() {
     destination: process.env.BOOKING_DESTINATION || 'Florianópolis'
   };
 }
+function normalizeHotelApiResponse(payload, extra, source) {
+  const roots = [payload && payload.result, payload && payload.data, payload && payload.hotels];
+  ['popularity', 'price', 'rating', 'distance'].forEach(function (key) {
+    if (payload && Array.isArray(payload[key])) roots.push(payload[key]);
+  });
+  const arrays = roots.filter(Array.isArray);
+  let rows = Array.isArray(payload) ? payload : arrays.find(function (list) { return list.length > 0; }) || arrays[0] || [];
+  if (!rows.length && payload && typeof payload === 'object' && (payload.hotelName || payload.hotel_name || payload.name)) rows = [payload];
+  const nights = Math.max(1, Number((extra && extra.nights) || 1));
+  return rows.map(function (hotel, index) {
+    const lastPrice = hotel.last_price_info || {};
+    const rawName = hotel.hotel_name || hotel.hotelName || hotel.name && (hotel.name.label || hotel.name.en || hotel.name.EN && hotel.name.EN[0] && hotel.name.EN[0].name || hotel.name) || hotel.label || '';
+    const name = sanitizeHotelName(rawName);
+    const nightlyRaw = Number(hotel.price_pn || lastPrice.price_pn || hotel.perNight || hotel.per_night || hotel.pricefrom || 0);
+    const nightlySource = !!(hotel.price_pn || lastPrice.price_pn || hotel.perNight || hotel.per_night || hotel.pricefrom);
+    const totalRaw = Number(hotel.min_total_price || hotel.min_total_price_usd || hotel.total_price || lastPrice.price || hotel.priceAvg || hotel.priceavg || hotel.priceFrom || hotel.price || 0);
+    const total = nightlySource ? nightlyRaw * nights : totalRaw;
+    const nightly = nightlySource ? nightlyRaw : totalRaw / nights;
+    return {
+      name: name,
+      hotelId: String(hotel.hotel_id || hotel.hotelId || hotel.id || ''),
+      image: resolveHotelImage(hotel, index, '', ''),
+      total: Number.isFinite(total) ? total : 0,
+      perNight: Number.isFinite(nightly) ? nightly : 0,
+      currency: String(hotel.currency || 'USD').toUpperCase(),
+      rating: Number(hotel.review_score || hotel.rating || 0),
+      bookingUrl: hotel.url || hotel.hotel_url || hotel.link || null,
+      similar: [],
+      source: source || 'travelpayouts'
+    };
+  }).filter(function (hotel) { return hotel.name && hotel.name !== 'Hotel recomendado'; });
+}
+function selectThreeHotelsByBudget(hotels, dailyBudget) {
+  const target = Math.max(0, Number(dailyBudget) || 0);
+  const unique = uniqueHotelList((hotels || []).filter(function (hotel) { return hotel && hotel.name; }));
+  const priced = unique.filter(function (hotel) { return Number(hotel.perNight) > 0; }).sort(function (a, b) { return Number(a.perNight) - Number(b.perNight); });
+  const unpriced = unique.filter(function (hotel) { return !(Number(hotel.perNight) > 0); });
+  const selected = [];
+  function take(list) {
+    const found = list.find(function (hotel) { return !selected.some(function (item) { return normalizeHotelKey(item.name) === normalizeHotelKey(hotel.name); }); });
+    if (found) selected.push(found);
+  }
+  if (priced.length) {
+    const lowTarget = target > 0 ? target * 0.8 : priced[0].perNight;
+    take(priced.filter(function (hotel) { return hotel.perNight <= lowTarget; }).slice().reverse());
+    if (!selected.length) take(priced);
+    const mediumTarget = target > 0 ? target : priced[Math.floor((priced.length - 1) / 2)].perNight;
+    take(priced.slice().sort(function (a, b) { return Math.abs(a.perNight - mediumTarget) - Math.abs(b.perNight - mediumTarget); }));
+    const upper = priced.filter(function (hotel) { return target > 0 ? hotel.perNight > target && hotel.perNight <= target * 1.25 : true; });
+    take(upper);
+  }
+  priced.concat(unpriced).forEach(function (hotel) {
+    if (selected.length < 3) take([hotel]);
+  });
+  return selected.slice(0, 3).map(function (hotel, index) {
+    return Object.assign({}, hotel, {
+      highlight: ['Económico', 'Equilibrado', 'Cerca de tu presupuesto'][index],
+      recommended: index === 0
+    });
+  });
+}
+function hotelBudgetTarget(destKey, style, extra) {
+  const explicit = Number(extra && extra.hotelBudgetPerNight);
+  if (Number.isFinite(explicit) && explicit > 0) return Math.min(explicit, 1000000);
+  const destination = model.DEST[destKey];
+  const tierIndex = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
+  const perPerson = destination && Array.isArray(destination.lodge) ? Number(destination.lodge[tierIndex]) : 0;
+  return Math.max(0, perPerson * Math.max(1, Number(extra && extra.pax) || 1));
+}
 async function fetchBookingHotels(destKey, destName, style, extra) {
   const settings = bookingSettings();
   if (!settings.key || !settings.host || !settings.url) return [];
@@ -204,7 +288,7 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
     dest_type: 'city',
     city: hotelName,
     page_number: '0',
-    page_size: '6'
+    page_size: '30'
   });
   let response;
   try {
@@ -226,23 +310,7 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   } catch (error) {
     throw new Error('Booking API devolvió una respuesta inválida.');
   }
-  const results = Array.isArray(payload.result) ? payload.result : Array.isArray(payload.data) ? payload.data : [];
-  return results.slice(0, 3).map(function (hotel, index) {
-    const name = sanitizeHotelName(hotel.hotel_name || hotel.name || hotel.hotelName || 'Hotel recomendado');
-    const image = resolveHotelImage(hotel, index, style, destName);
-    const total = Number(hotel.min_total_price || hotel.min_total_price_usd || hotel.price || hotel.total_price || 0);
-    const perNight = Number(hotel.min_total_price || hotel.price || hotel.total_price || 0) / Math.max(1, Number((extra && extra.nights) || 3) || 3);
-    return {
-      name: name,
-      image: image,
-      total: Number.isFinite(total) ? total : 0,
-      perNight: Number.isFinite(perNight) ? perNight : 0,
-      currency: String(hotel.currency || 'USD').toUpperCase(),
-      bookingUrl: hotel.url || hotel.hotel_url || null,
-      similar: [],
-      source: 'booking'
-    };
-  }).filter(function (hotel) { return hotel.name && hotel.name !== 'Hotel recomendado'; });
+  return normalizeHotelApiResponse(payload, extra, 'booking');
 }
 function uniqueHotelList(list, fallbackImages) {
   const seen = new Set();
@@ -259,21 +327,30 @@ function uniqueHotelList(list, fallbackImages) {
 async function hotelRecommendations(destKey, destName, style, extra) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
   const selectedTier = tierByStyle[style] || 'moderado';
+  const budgetTarget = hotelBudgetTarget(destKey, style, extra || {});
   const catalog = HOTEL_RECOMMENDATIONS[destKey] || [];
   const staticHotels = catalog.filter(function (hotel) { return hotel.tier === selectedTier; }).map(function (hotel, index) {
     const image = resolveHotelImage({ hotel_name: hotel.name, image: hotel.image }, index, hotel.tier || selectedTier, destName);
     return Object.assign({}, hotel, { image: image, total: 0, perNight: 0, source: 'static' });
   });
   try {
-    let realHotels = await fetchBookingHotels(destKey, destName, selectedTier, extra || {});
+    const exactHotels = await fetchBookingHotels(destKey, destName, selectedTier, extra || {});
+    let realHotels = exactHotels.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName }); });
     let nearby = null;
-    if (!realHotels.length) {
+    if (realHotels.length < 3) {
       nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
-      if (nearby) realHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, extra || {});
+      if (nearby) {
+        try {
+          const regionalHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, extra || {});
+          realHotels = realHotels.concat(regionalHotels.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: nearby.label }); }));
+        } catch (regionalError) {
+          console.warn('[hotelRecommendations] Búsqueda regional no disponible:', regionalError && regionalError.message ? regionalError.message : regionalError);
+        }
+      }
     }
     if (realHotels.length) {
-      const combined = realHotels.map(function (hotel) {
-        return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: nearby ? nearby.label : destName });
+      const combined = selectThreeHotelsByBudget(realHotels, budgetTarget).map(function (hotel) {
+        return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName });
       });
       staticHotels.forEach(function (hotel) {
         if (combined.length < 3 && !combined.some(function (item) { return normalizeHotelKey(item.name) === normalizeHotelKey(hotel.name); })) combined.push(hotel);
@@ -720,7 +797,7 @@ async function cotizar(req, res, url) {
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
-      hotels: hotels, hotelsNearby: hotels.length && hotels[0].areaLabel && hotels[0].areaLabel !== model.DEST[v.S.dest].name ? hotels[0].areaLabel : '', generatedAt: new Date().toISOString()
+      hotels: hotels, hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, { hotelBudgetPerNight: url.searchParams.get('hotel_budget_per_night'), pax: v.S.pax }), hotelsNearby: (hotels.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== model.DEST[v.S.dest].name; }) || {}).areaLabel || '', generatedAt: new Date().toISOString()
     },
     localTransport: localTransport
   }, result));
@@ -839,3 +916,5 @@ module.exports.formatOffers = formatOffers;
 module.exports.normalizePassengers = normalizePassengers;
 module.exports.hotelRecommendations = hotelRecommendations;
 module.exports.fetchBookingHotels = fetchBookingHotels;
+module.exports.normalizeHotelApiResponse = normalizeHotelApiResponse;
+module.exports.selectThreeHotelsByBudget = selectThreeHotelsByBudget;
