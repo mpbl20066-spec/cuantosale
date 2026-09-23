@@ -241,6 +241,12 @@
     if (detailState && detailState.selectedHotelName) return detailState.selectedHotelName;
     return 'Hotel seleccionado';
   }
+  function findSelectedHotelDetail() {
+    var checked = document.querySelector('[data-hotel-total]:checked');
+    var card = checked && checked.closest('[data-hotel-option]');
+    var detail = card && card.querySelector('.hotel-detail');
+    return detail && detail.textContent ? detail.textContent.trim() : 'Alojamiento seleccionado';
+  }
   function renderTripSummary() {
     var summary = $('#trip-summary');
     if (!summary) return;
@@ -282,7 +288,10 @@
     var transferState = detailState.transferWizard || { pickupMinutes: 60, customTime: '', hotelName: findSelectedHotelLabel() };
     var transferLabel = getTransferPickupLabel(transferState.pickupMinutes, transferState.customTime);
     var transferModeLabel = detailState.transferType === 'private' ? 'Transfer privado' : (detailState.transferType === 'shared' ? 'Transfer compartido' : (transferLabel || 'A coordinar'));
+    if (detailState.transferType === 'shared') detailState.transfer = 30;
+    if (detailState.transferType === 'private') detailState.transfer = 150;
     var selectedHotelName = findSelectedHotelLabel();
+    var selectedHotelDetail = findSelectedHotelDetail();
     var hotelTotal = Number(detailState.hotel) || 0;
     var transferTotal = Number(detailState.transfer) || Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 0;
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
@@ -323,14 +332,23 @@
     modal.dataset.summaryText = summaryText;
     var voucherCards = modal.querySelectorAll('.voucher-card');
     if (voucherCards[0]) {
-      var flightSmall = voucherCards[0].querySelector('small');
-      var flightParagraph = voucherCards[0].querySelector('p');
-      if (flightSmall) flightSmall.textContent = flightSummary.isRoundTrip ? 'Vuelo seleccionado · Ida y vuelta' : 'Vuelo seleccionado';
-      if (flightParagraph) flightParagraph.textContent = flightSummary.summary;
+      var flightContent = voucherCards[0].querySelector('div');
+      if (flightContent) {
+        var legMarkup = '<div class="voucher-flight-legs"><div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Ida</span><strong>' + esc(flightSummary.flightNumber || 'Vuelo regular') + '</strong><span>' + esc((flightSummary.origin && (flightSummary.origin.name || flightSummary.origin.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.origin) || '---') + ') &rarr; ' + esc((flightSummary.destination && (flightSummary.destination.name || flightSummary.destination.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.destination) || '---') + ')</span><small>' + esc(flightSummary.departureText) + ' &rarr; ' + esc(flightSummary.arrivalText) + '</small></div>';
+        if (flightSummary.isRoundTrip) legMarkup += '<div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Vuelta</span><strong>' + esc(flightSummary.inboundFlightNumber || 'Vuelo regular') + '</strong><span>' + esc((flightSummary.returnOrigin && (flightSummary.returnOrigin.name || flightSummary.returnOrigin.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.returnOrigin) || '---') + ') &rarr; ' + esc((flightSummary.returnDestination && (flightSummary.returnDestination.name || flightSummary.returnDestination.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.returnDestination) || '---') + ')</span><small>' + esc(flightSummary.returnDepartureText) + ' &rarr; ' + esc(flightSummary.returnArrivalText) + '</small></div>';
+        legMarkup += '</div>';
+        flightContent.innerHTML = '<small>' + (flightSummary.isRoundTrip ? 'Vuelo seleccionado · Ida y vuelta' : 'Vuelo seleccionado') + '</small><strong>' + esc(flightSummary.airline) + '</strong>' + legMarkup + '<b>' + money(flightTotal) + '</b>';
+      }
     }
     if (voucherCards[2]) {
       var transferStrong = voucherCards[2].querySelector('strong');
       if (transferStrong) transferStrong.textContent = transferModeLabel;
+      var transferText = voucherCards[2].querySelector('p');
+      if (transferText) transferText.textContent = 'Hacia ' + (transferState.hotelName || selectedHotelName);
+    }
+    if (voucherCards[1]) {
+      var hotelContent = voucherCards[1].querySelector('div');
+      if (hotelContent) hotelContent.innerHTML = '<small>Alojamiento seleccionado</small><strong>' + esc(selectedHotelName) + '</strong><p>' + esc(selectedHotelDetail) + '</p><b>' + money(hotelTotal) + '</b>';
     }
     if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-open-duffel-checkout>✈️ Pagar y emitir con Duffel</button>');
     if (voucherCards[1]) voucherCards[1].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">🏨 Reservar en Booking.com ↗</a>');
