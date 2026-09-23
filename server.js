@@ -52,6 +52,11 @@ const HOTEL_RECOMMENDATIONS = {
   fln: [{ tier: 'eco', name: 'Rede Andrade Cecomtur', similar: ['Ibis Florianópolis', 'Hotel Farol da Ilha'] }, { tier: 'moderado', name: 'Faial Prime Suites', similar: ['Novotel Florianópolis', 'Castelmar Hotel'] }, { tier: 'alto', name: 'LK Design Hotel', similar: ['IL Campanario Villaggio Resort', 'Novotel Florianópolis'] }],
   rio: [{ tier: 'eco', name: 'ibis Copacabana Posto 5', similar: ['Hotel Atlântico Travel', 'Windsor Copa'] }, { tier: 'moderado', name: 'Windsor California Copacabana', similar: ['Arena Copacabana Hotel', 'Hotel Astoria Palace'] }, { tier: 'alto', name: 'Hilton Rio de Janeiro Copacabana', similar: ['Fairmont Rio de Janeiro', 'Miramar by Windsor'] }],
   buz: [{ tier: 'eco', name: 'Pousada Experience João Fernandes', similar: ['Pousada Praia João Fernandes', 'Pousada Corsário Búzios'] }, { tier: 'moderado', name: 'Hotel Atlântico Búzios', similar: ['Colonna Galápagos Garden', 'Selina Búzios'] }, { tier: 'alto', name: 'Insolito Boutique Hotel', similar: ['Casas Brancas Boutique Hotel', 'Vila da Santa Hotel Boutique'] }],
+  ilha: [
+    { tier: 'eco', name: 'Pousada Só Natureza', similar: ['Pousada Paloma', 'Pousada Portal do Sol'] },
+    { tier: 'moderado', name: 'Pousada Paloma', similar: ['Pousada Só Natureza', 'Pousada Portal do Sol'] },
+    { tier: 'alto', name: 'Pousada Portal do Sol', similar: ['Pousada Paloma', 'Pousada Só Natureza'] }
+  ],
   sao: [{ tier: 'eco', name: 'ibis budget São Paulo Paulista', similar: ['H3 Hotel Paulista', 'Hotel Dan Inn Planalto'] }, { tier: 'moderado', name: 'Novotel São Paulo Jaraguá', similar: ['Blue Tree Premium Paulista', 'Transamerica Executive Paulista'] }, { tier: 'alto', name: 'Renaissance São Paulo Hotel', similar: ['Tivoli Mofarrej', 'Hotel Unique'] }],
   ssa: [{ tier: 'eco', name: 'ibis Salvador Rio Vermelho', similar: ['Rede Andrade Plaza Salvador', 'Hotel Pirâmide Pituba'] }, { tier: 'moderado', name: 'Novotel Salvador Rio Vermelho', similar: ['Mercure Salvador Rio Vermelho', 'Quality Hotel & Suites São Salvador'] }, { tier: 'alto', name: 'Fera Palace Hotel', similar: ['Casa do Amarelindo', 'Vila Galé Salvador'] }],
   igu: [{ tier: 'eco', name: 'CLH Suites Foz do Iguaçu', similar: ['Ibis Budget Foz do Iguaçu', 'Hotel Foz do Iguaçu'] }, { tier: 'moderado', name: 'JL Hotel by Bourbon', similar: ['Wyndham Foz do Iguaçu', 'Bourbon Cataratas do Iguaçu'] }, { tier: 'alto', name: 'Hotel das Cataratas', similar: ['Sanma Hotel', 'DoubleTree by Hilton Foz'] }],
@@ -103,6 +108,12 @@ const BOOKING_IMAGE_FALLBACKS = {
     'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=960&q=82',
     'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=960&q=82'
   ]
+};
+// Algunas islas y pueblos pequeños no están indexados como ciudad en Booking.
+// En esos casos buscamos alojamientos en el municipio de acceso más cercano.
+const HOTEL_NEARBY_DESTINATIONS = {
+  ilha: { key: 'angra', name: 'Angra dos Reis', label: 'Angra dos Reis, cerca de Ilha Grande' },
+  paraty: { key: 'angra', name: 'Angra dos Reis', label: 'Angra dos Reis y alrededores' }
 };
 function sanitizeHotelName(value) {
   const raw = String(value || '').trim();
@@ -236,14 +247,11 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
 function uniqueHotelList(list, fallbackImages) {
   const seen = new Set();
   const unique = [];
-  list.forEach(function (entry, index) {
-    const image = entry && entry.image ? String(entry.image).trim() : '';
-    const candidate = image && !seen.has(image) ? image : '';
-    if (!candidate && image) {
-      return;
-    }
-    if (candidate) seen.add(candidate);
-    unique.push(Object.assign({}, entry, { image: candidate }));
+  list.forEach(function (entry) {
+    const name = normalizeHotelKey(entry && entry.name);
+    if (!name || seen.has(name)) return;
+    seen.add(name);
+    unique.push(Object.assign({}, entry, { image: entry && entry.image ? String(entry.image).trim() : '' }));
   });
   return unique;
 }
@@ -257,10 +265,15 @@ async function hotelRecommendations(destKey, destName, style, extra) {
     return Object.assign({}, hotel, { image: image, total: 0, perNight: 0, source: 'static' });
   });
   try {
-    const realHotels = await fetchBookingHotels(destKey, destName, selectedTier, extra || {});
+    let realHotels = await fetchBookingHotels(destKey, destName, selectedTier, extra || {});
+    let nearby = null;
+    if (!realHotels.length) {
+      nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
+      if (nearby) realHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, extra || {});
+    }
     if (realHotels.length) {
       const combined = realHotels.map(function (hotel) {
-        return Object.assign({}, hotel, { tier: selectedTier, similar: [] });
+        return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: nearby ? nearby.label : destName });
       });
       staticHotels.forEach(function (hotel) {
         if (combined.length < 3 && !combined.some(function (item) { return normalizeHotelKey(item.name) === normalizeHotelKey(hotel.name); })) combined.push(hotel);
@@ -405,7 +418,7 @@ function usdAmount(amount, currency) {
   } catch (e) { return null; }
 }
 
-function formatOffers(offers, requiredOrigin) {
+function formatOffers(offers, requiredOrigin, requestedCabinClass) {
   const excludedOrigins = new Set(['EZE', 'AEP']);
   return (offers || []).map(function (offer) {
     const slices = Array.isArray(offer.slices) ? offer.slices : [];
@@ -418,6 +431,14 @@ function formatOffers(offers, requiredOrigin) {
     const firstIn = inboundSegments[0] || {};
     const lastIn = inboundSegments[inboundSegments.length - 1] || {};
     const carrier = firstOut.marketing_carrier || firstOut.operating_carrier || firstIn.marketing_carrier || firstIn.operating_carrier || offer.owner || {};
+    const offerPassengers = Array.isArray(offer.passengers) ? offer.passengers : [];
+    const segmentPassengers = outboundSegments.concat(inboundSegments).reduce(function (all, segment) {
+      return all.concat(Array.isArray(segment.passengers) ? segment.passengers : []);
+    }, []);
+    const cabinClass = offerPassengers.concat(segmentPassengers).map(function (passenger) {
+      return passenger && (passenger.cabin_class || passenger.cabin && passenger.cabin.name);
+    }).find(Boolean) || requestedCabinClass || 'economy';
+    const cabinLabels = { economy: 'Economy', premium_economy: 'Premium Economy', business: 'Business', first: 'First' };
     const priceUsd = usdAmount(offer.total_amount, offer.total_currency);
     const departureAirport = { code: firstOut.origin && firstOut.origin.iata_code || '', name: firstOut.origin && firstOut.origin.name || '' };
     const arrivalAirport = { code: lastOut.destination && lastOut.destination.iata_code || '', name: lastOut.destination && lastOut.destination.name || '' };
@@ -428,6 +449,8 @@ function formatOffers(offers, requiredOrigin) {
       passenger_ids: Array.isArray(offer.passengers) ? offer.passengers.map(function (p) { return p.id; }).filter(Boolean) : [],
       airline: carrier.name || 'Aerolínea',
       logo: carrier.logo_symbol_url || carrier.logo_lockup_url || null,
+      cabin_class: cabinClass,
+      cabin_label: cabinLabels[cabinClass] || 'Cabina no informada',
       departure: firstOut.departing_at || null,
       arrival: lastOut.arriving_at || null,
       return_departure: firstIn.departing_at || null,
@@ -507,7 +530,6 @@ async function buscarVuelos(req, res, body) {
   const returnDate = String(body.fecha_vuelta || '');
   const passengers = Number(body.pasajeros);
   const style = ['ahorro', 'eq', 'comodo'].includes(String(body.style || '').toLowerCase()) ? String(body.style).toLowerCase() : 'eq';
-  const cabinClass = style === 'comodo' ? 'premium_economy' : 'economy';
   if (origin !== 'MVD' || !destination || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (returnDate && !/^\d{4}-\d{2}-\d{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
@@ -518,36 +540,51 @@ async function buscarVuelos(req, res, body) {
     const slices = [{ origin: origin, destination: destination, departure_date: date }];
     if (returnDate) slices.push({ origin: destination, destination: origin, departure_date: returnDate });
     const adultPassengers = Array.from({ length: passengers }, function () { return { type: 'adult' }; });
-    const cabinCandidates = style === 'comodo' ? ['premium_economy', 'economy'] : ['economy'];
-    let request = null;
-    let usedCabinClass = cabinCandidates[0];
-    let lastError = null;
-    for (let i = 0; i < cabinCandidates.length; i++) {
-      try {
-        const response = await air.offerRequests.create({
-          slices: slices,
-          passengers: adultPassengers,
-          cabin_class: cabinCandidates[i],
-          return_offers: true,
-          supplier_timeout: 15000
-        });
-        request = response && (response.data || response);
-        usedCabinClass = cabinCandidates[i];
-        if (request && Array.isArray(request.offers) && request.offers.length) break;
-      } catch (error) {
-        lastError = error;
-        if (i === cabinCandidates.length - 1) throw error;
-      }
+    const preferredCabins = style === 'ahorro' ? ['economy']
+      : style === 'comodo' ? ['premium_economy', 'business']
+        : ['economy', 'premium_economy'];
+    async function requestCabinOffers(cabinClass) {
+      const response = await air.offerRequests.create({
+        slices: slices,
+        passengers: adultPassengers,
+        cabin_class: cabinClass,
+        return_offers: true,
+        supplier_timeout: 12000
+      });
+      const request = response && (response.data || response);
+      return Array.isArray(request && request.offers) ? request.offers : [];
     }
-    if (!request && lastError) throw lastError;
-    const offers = strategicFlightOptions(formatOffers(request && request.offers, origin));
+    let requestErrors = [];
+    let cabinResults = await Promise.all(preferredCabins.map(async function (cabinClass) {
+      try { return { cabinClass: cabinClass, offers: await requestCabinOffers(cabinClass) }; }
+      catch (error) { requestErrors.push(error); return { cabinClass: cabinClass, offers: [] }; }
+    }));
+    cabinResults = cabinResults.map(function (result) {
+      const formatted = formatOffers(result.offers, origin, result.cabinClass)
+        .filter(function (offer) { return offer.cabin_class === result.cabinClass; });
+      return Object.assign({}, result, { formatted: formatted });
+    });
+    let usedFallback = false;
+    if (style === 'comodo' && !cabinResults.some(function (result) { return result.formatted.length > 0; })) {
+      usedFallback = true;
+      try {
+        const economyOffers = await requestCabinOffers('economy');
+        cabinResults = [{ cabinClass: 'economy', offers: economyOffers, formatted: formatOffers(economyOffers, origin, 'economy').filter(function (offer) { return offer.cabin_class === 'economy'; }) }];
+      }
+      catch (error) { requestErrors.push(error); }
+    }
+    if (!cabinResults.some(function (result) { return result.formatted.length > 0; }) && requestErrors.length) throw requestErrors[requestErrors.length - 1];
+
+    const offers = cabinResults.reduce(function (all, result) {
+      return all.concat(strategicFlightOptions(result.formatted));
+    }, []);
     if (!offers.length) {
       return sendJson(res, 200, {
-        origin: origin, destination: destination, cabin_class: usedCabinClass, style: style,
+        origin: origin, destination: destination, cabin_classes: usedFallback ? ['economy'] : preferredCabins, style: style, cabin_fallback: usedFallback,
         offers: [], error: 'No hay vuelos disponibles para esta búsqueda.'
       });
     }
-    return sendJson(res, 200, { origin: origin, destination: destination, cabin_class: usedCabinClass, style: style, offers: offers });
+    return sendJson(res, 200, { origin: origin, destination: destination, cabin_classes: usedFallback ? ['economy'] : preferredCabins, style: style, cabin_fallback: usedFallback, offers: offers });
   } catch (e) {
     const message = e && e.errors && e.errors[0] && (e.errors[0].message || e.errors[0].title);
     console.error('Error detallado del proveedor aéreo:', JSON.stringify(e.errors || e, null, 2));
@@ -683,7 +720,7 @@ async function cotizar(req, res, url) {
       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
-      hotels: hotels, generatedAt: new Date().toISOString()
+      hotels: hotels, hotelsNearby: hotels.length && hotels[0].areaLabel && hotels[0].areaLabel !== model.DEST[v.S.dest].name ? hotels[0].areaLabel : '', generatedAt: new Date().toISOString()
     },
     localTransport: localTransport
   }, result));

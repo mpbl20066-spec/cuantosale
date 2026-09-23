@@ -163,10 +163,14 @@
       };
     });
     if (!options.length) {
-      return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles en ' + esc(meta.dest.name) + '</h2><p>No encontramos opciones reales con fotos para estas fechas.</p></div></div></section>';
+      var destinationName = meta.dest.name || 'el destino elegido';
+      var destinationQuery = encodeURIComponent(destinationName);
+      var nearbyName = meta.dest.key === 'ilha' || meta.dest.key === 'paraty' ? 'Angra dos Reis' : '';
+      var nearbyLink = nearbyName ? '<a class="hotel-nearby-link hotel-nearby-link-secondary" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(nearbyName) + '" target="_blank" rel="noopener noreferrer">Ampliar a ' + esc(nearbyName) + ' ↗</a>' : '';
+      return '<section class="hotel-options hotel-options-empty" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Alojamientos en ' + esc(destinationName) + '</h2><p>No pudimos cargar opciones automáticamente para estas fechas. Consultá alojamientos y disponibilidad directamente en el destino.</p><a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(destinationName) + ' ↗</a>' + nearbyLink + '</div></div></section>';
     }
     return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2><p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
-      options.map(function (option, index) {
+      (meta.hotelsNearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(meta.hotelsNearby) + ', una zona cercana a ' + esc(meta.dest.name) + '.</p>' : '') + options.map(function (option, index) {
         var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
         var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
         var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
@@ -382,10 +386,10 @@
     var defaults = getBudgetDefaults((detailState.meta.dest && detailState.meta.dest.key) || (detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'brazil');
     var defaultFood = Number(detailState.parts && detailState.parts.comidas) ? (Number(detailState.parts.comidas) / Math.max(1, nights * pax)) : 0;
     var defaultLocal = Number(detailState.parts && detailState.parts.local) ? (Number(detailState.parts.local) / Math.max(1, nights * pax)) : 0;
-    if (!detailState.foodPerDay || Number(detailState.foodPerDay) <= 0) detailState.foodPerDay = defaultFood || defaults.foodPerDayUsd;
-    if (!detailState.localPerDay || Number(detailState.localPerDay) <= 0) detailState.localPerDay = defaultLocal || defaults.localPerDayUsd;
-    detailState.foodPerDay = Math.max(0, Number(detailState.foodPerDay) || defaults.foodPerDayUsd);
-    detailState.localPerDay = Math.max(0, Number(detailState.localPerDay) || defaults.localPerDayUsd);
+    if ((!Number.isFinite(Number(detailState.foodPerDay)) || Number(detailState.foodPerDay) <= 0) && !detailState.foodPerDayTouched) detailState.foodPerDay = defaultFood || defaults.foodPerDayUsd;
+    if ((!Number.isFinite(Number(detailState.localPerDay)) || Number(detailState.localPerDay) <= 0) && !detailState.localPerDayTouched) detailState.localPerDay = defaultLocal || defaults.localPerDayUsd;
+    detailState.foodPerDay = Math.max(0, Number(detailState.foodPerDay) || 0);
+    detailState.localPerDay = Math.max(0, Number(detailState.localPerDay) || 0);
     detailState.parts.comidas = Math.round((detailState.foodPerDay || 0) * nights * pax);
     detailState.parts.local = Math.round((detailState.localPerDay || 0) * nights * pax);
     if (Number(detailState.parts.extras) <= 0) detailState.parts.extras = Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) ? Math.round(detailState.meta.officialTransfer.amount * 0.75) : defaults.baggageAndInsuranceUsd;
@@ -452,13 +456,13 @@
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group">' +
-      '<div class="daily-budget__header"><span>Transporte local</span><small>Estilo de movilidad</small></div>' +
-      '<label class="daily-budget__planned"><span>Presupuesto programado por día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(localValue) + '" data-daily-local aria-label="Presupuesto diario de transporte local"><span>/ día</span></div></label>' +
+      '<div class="daily-budget__header"><span>Transporte local</span><small>Presupuesto libre</small></div>' +
+      '<label class="daily-budget__planned"><span>Introduce tu presupuesto diario</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Escribí tu monto" data-daily-local aria-label="Introduce tu presupuesto diario de transporte local"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
       '</div>' +
       '<div class="daily-budget__group">' +
-      '<div class="daily-budget__header"><span>Comidas</span><small>Estilo gastronómico</small></div>' +
-      '<label class="daily-budget__planned"><span>Presupuesto programado por día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + esc(foodValue) + '" data-daily-food aria-label="Presupuesto diario de comidas"><span>/ día</span></div></label>' +
+      '<div class="daily-budget__header"><span>Comidas</span><small>Presupuesto libre</small></div>' +
+      '<label class="daily-budget__planned"><span>Introduce tu presupuesto diario</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" placeholder="Escribí tu monto" data-daily-food aria-label="Introduce tu presupuesto diario de comidas"><span>/ día</span></div></label>' +
       '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
@@ -649,7 +653,6 @@
   // Explicit airport transfer modes used by the proposal and saved itinerary.
   function transferCard(meta) {
     var selected = detailState && detailState.transferType || '';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Eleg&iacute; entre una opci&oacute;n compartida o privada para ' + esc(meta.dest.name) + '.</p><div class="transfer-choice-grid"><button type="button" class="transfer-choice' + (selected === 'shared' ? ' is-selected' : '') + '" data-transfer-choice="shared" data-transfer-amount="30"><strong>Transfer compartido</strong><b>US$ 30</b><small>Traslado compartido con otros pasajeros.</small></button><button type="button" class="transfer-choice' + (selected === 'private' ? ' is-selected' : '') + '" data-transfer-choice="private" data-transfer-amount="150"><strong>Transfer privado</strong><b>US$ 150</b><small>Veh&iacute;culo exclusivo y traslado directo.</small></button></div><p data-transfer-status>' + (selected ? 'Transfer ' + (selected === 'private' ? 'privado' : 'compartido') + ' seleccionado.' : 'Seleccion&aacute; una modalidad para incluirla en tu presupuesto.') + '</p><button type="button" class="btn-transfer" data-buy-transfer' + (selected ? '' : ' disabled') + '>Coordinar traslado</button></section>';
   }
 
   function getTransferPickupWindow() {
@@ -835,6 +838,33 @@
     // Nunca se muestra una alternativa originada en otro aeropuerto.
     return airportCode(offer && offer.departure_airport) === 'MVD';
   }
+  function normalizeCabinClass(value) {
+    value = String(value || '').toLowerCase().replace(/[\s-]+/g, '_');
+    if (value.indexOf('business') >= 0) return 'business';
+    if (value.indexOf('premium_economy') >= 0 || value.indexOf('premium') >= 0) return 'premium_economy';
+    if (value.indexOf('first') >= 0) return 'first';
+    return value === 'economy' || value.indexOf('economy') >= 0 ? 'economy' : '';
+  }
+  function cabinClassLabel(cabinClass) {
+    return ({ economy: 'Economy', premium_economy: 'Premium Economy', business: 'Business', first: 'First' })[cabinClass] || 'Cabina no informada';
+  }
+  function cabinClassesForStyle(style) {
+    if (style === 'ahorro') return ['economy'];
+    if (style === 'comodo') return ['premium_economy', 'business'];
+    return ['economy', 'premium_economy'];
+  }
+  function filterFlightOffersByCabin(offers, style, fallbackClass) {
+    var preferred = cabinClassesForStyle(style);
+    var taggedOffers = offers.map(function (offer) {
+      var cabinClass = normalizeCabinClass(offer.cabin_class || offer.cabinClass || offer.cabin_label || fallbackClass) || 'economy';
+      return Object.assign({}, offer, { cabin_class: cabinClass, cabin_label: offer.cabin_label || cabinClassLabel(cabinClass) });
+    });
+    var matching = taggedOffers.filter(function (offer) { return preferred.indexOf(offer.cabin_class) >= 0; });
+    if (style === 'comodo' && matching.length === 0) {
+      return taggedOffers.filter(function (offer) { return offer.cabin_class === 'economy'; });
+    }
+    return matching;
+  }
   function flightHour(value) {
     var date = new Date(value);
     return isNaN(date.getTime()) ? -1 : date.getHours();
@@ -849,7 +879,7 @@
       var hour = flightHour(offer.departure);
       var timeOk = time === 'all' || (time === 'morning' && hour >= 5 && hour < 12) || (time === 'afternoon' && hour >= 12 && hour < 18) || (time === 'night' && (hour >= 18 || (hour >= 0 && hour < 5)));
       return stopOk && timeOk;
-    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); }).slice(0, 3);
+    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); }).slice(0, 9);
   }
   function getFlightSelectionState() {
     if (!detailState) return null;
@@ -860,7 +890,8 @@
   }
   function renderFlightOffers(el, data, budget) {
     data = data && typeof data === 'object' ? data : {};
-    var offers = (Array.isArray(data.offers) ? data.offers : []).filter(isCarrascoOffer).slice(0, 6);
+    var style = (detailState && detailState.meta && detailState.meta.style) || data.style || S.style || 'eq';
+    var offers = filterFlightOffersByCabin((Array.isArray(data.offers) ? data.offers : []).filter(isCarrascoOffer), style, data.cabin_class);
     if (!offers.length) {
       el.innerHTML = '<p class="flight-empty">No hay vuelos disponibles para esta búsqueda. Probá con otras fechas.</p>';
       return;
@@ -901,8 +932,9 @@
         ? (flightStep === 'inbound' ? 'Confirmar ida y vuelta' : (flightStep === 'done' ? 'Itinerario seleccionado' : 'Seleccionar ida'))
         : (flightStep === 'done' ? 'Vuelo seleccionado' : 'Agregar a presupuesto');
       var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(flightStep === 'done' ? 'Ida y vuelta' : stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
+      var cabinBadge = '<span class="flight-badge cabin-badge">' + esc(offer.cabin_label || cabinClassLabel(offer.cabin_class)) + '</span>';
       var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
-      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + stageBadge + '</div>' +
+      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + cabinBadge + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
@@ -1912,9 +1944,11 @@
         var kind = dailyBudgetCard.getAttribute('data-daily-kind');
         var value = Number(dailyBudgetCard.getAttribute('data-daily-value')) || 0;
         if (kind === 'local') {
+          detailState.localPerDayTouched = true;
           detailState.localPerDay = value;
           detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         } else if (kind === 'food') {
+          detailState.foodPerDayTouched = true;
           detailState.foodPerDay = value;
           detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         }
@@ -2030,12 +2064,14 @@
       if (roadtripModel) actualizarModeloRoadtrip(roadtripModel.value);
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
+        detailState.foodPerDayTouched = true;
         detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
         detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
       if (dailyLocalInput && detailState) {
+        detailState.localPerDayTouched = true;
         detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
         detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
@@ -2046,12 +2082,14 @@
       if (consumption) actualizarRoadtrip(consumption.value);
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
+        detailState.foodPerDayTouched = true;
         detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
         detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
       if (dailyLocalInput && detailState) {
+        detailState.localPerDayTouched = true;
         detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
         detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
