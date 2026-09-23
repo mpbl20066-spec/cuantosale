@@ -1294,11 +1294,13 @@
         (photo
           ? '<div class="destination-banner destination-banner-photo"><img src="' + esc(photo) + '" alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
           : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : option.dest.key === 'igu' ? '🌊' : '☀️') + '</span></div>') +
+        '<div class="destination-card-body">' +
         '<div class="destination-card-top"><div><h3>' + esc(option.dest.name) + '</h3>' + (location ? '<p class="destination-location">' + esc(location) + '</p>' : '') + '<p>' + esc(option.title) + '. ' + esc(option.tierDesc) + '.</p></div>' +
         '<div class="destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
         '<span class="mini g">¡Entra en tu presupuesto!</span>' +
         '<details><summary>Ver desglose</summary><div class="destination-breakdown">' + rows + '</div></details>' +
         '<button type="button" class="btn-ver-propuesta-destino" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta ➔</button>' +
+        '</div>' +
         '</article>';
     }).join('');
     var titleBudget = Number(data.meta.budget).toLocaleString('es-UY');
