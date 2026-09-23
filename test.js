@@ -60,60 +60,70 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
 
   console.log('Servidor y proveedores');
   process.env.RATE_LIMIT_PER_MIN = '1000';
-  process.env.FLIGHT_RAPIDAPI_KEY = '';
-  process.env.FLIGHT_RAPIDAPI_HOST = 'sky-scrapper.p.rapidapi.com';
-  process.env.RAPIDAPI_KEY = '';
-  process.env.RAPIDAPI_HOST = '';
+  process.env.DUFFEL_API_KEY = '';
+  process.env.DUFFEL_ACCESS_TOKEN = '';
+  process.env.DUFFEL_TOKEN = '';
   process.env.BOOKING_API_KEY = '';
   process.env.BOOKING_API_HOST = 'booking-com15.p.rapidapi.com';
   const app = require('./server');
-  const skyScrapper = require('./lib/providers/skyscrapper');
-  await t('mapea las ofertas de Sky Scrapper a la interfaz de vuelos', function () {
-    const offer = skyScrapper.mapItinerary({
-      id: 'itinerary-1', price: { raw: 299.5, currency: 'USD' },
-      legs: [{ origin: { id: 'MVD', name: 'Carrasco' }, destination: { id: 'FLN', name: 'Florianópolis' },
-        departure: '2027-01-10T10:00:00', arrival: '2027-01-10T13:45:00', durationInMinutes: 225, stopCount: 0,
-        carriers: { marketing: [{ name: 'Aerolínea Test', logoUrl: 'https://logo.test/a.png' }] } },
-      { origin: { id: 'FLN', name: 'Florianópolis' }, destination: { id: 'MVD', name: 'Carrasco' }, departure: '2027-01-17T10:00:00', arrival: '2027-01-17T14:10:00', durationInMinutes: 250, stopCount: 1, carriers: { marketing: [{ name: 'Aerolínea Test' }] } }],
-      deepLink: 'https://www.skyscanner.com/transport/flights/'
+  const duffel = require('./lib/providers/duffel');
+  await t('mapea las ofertas de Duffel al contrato visual de vuelos', function () {
+    const offer = duffel.mapOffer({
+      id: 'off_test_1', total_amount: '321.50', total_currency: 'USD',
+      owner: { name: 'Aerolínea propietaria', logo_symbol_url: 'https://logo.test/a.svg' },
+      passengers: [{ id: 'pas_1', cabin_class: 'economy' }],
+      slices: [
+        { segments: [{ origin: { iata_code: 'MVD', name: 'Carrasco' }, destination: { iata_code: 'FLN', name: 'Florianópolis' }, departing_at: '2027-01-10T10:00:00Z', arriving_at: '2027-01-10T13:45:00Z', marketing_carrier: { iata_code: 'XX', name: 'Marca' }, operating_carrier: { name: 'Aerolínea Operadora' }, marketing_carrier_flight_number: '123' }] },
+        { segments: [{ origin: { iata_code: 'FLN', name: 'Florianópolis' }, destination: { iata_code: 'MVD', name: 'Carrasco' }, departing_at: '2027-01-17T10:00:00Z', arriving_at: '2027-01-17T14:10:00Z', marketing_carrier: { name: 'Marca' }, operating_carrier: { name: 'Aerolínea Operadora' } }] }
+      ]
     }, 'economy');
-    assert.strictEqual(offer.provider, 'skyscrapper');
+    assert.strictEqual(offer.provider, 'duffel');
     assert.strictEqual(offer.trip_type, 'round_trip');
     assert.strictEqual(offer.departure_airport.code, 'MVD');
     assert.strictEqual(offer.inbound.destination.code, 'MVD');
-    assert.strictEqual(offer.price_usd, 299.5);
-    assert.strictEqual(offer.booking_url, 'https://www.skyscanner.com/transport/flights/');
+    assert.strictEqual(offer.airline, 'Aerolínea Operadora');
+    assert.strictEqual(offer.price_usd, 321.5);
+    assert.strictEqual(offer.passenger_ids[0], 'pas_1');
   });
   await t('mantiene las reglas de cabina por estilo', function () {
-    assert.deepStrictEqual(skyScrapper.styleCabins('ahorro'), ['economy']);
-    assert.deepStrictEqual(skyScrapper.styleCabins('eq'), ['economy', 'premium_economy']);
-    assert.deepStrictEqual(skyScrapper.styleCabins('comodo'), ['premium_economy', 'business']);
+    assert.deepStrictEqual(duffel.styleCabins('ahorro'), ['economy']);
+    assert.deepStrictEqual(duffel.styleCabins('eq'), ['economy', 'premium_economy']);
+    assert.deepStrictEqual(duffel.styleCabins('comodo'), ['premium_economy', 'business']);
   });
-  await t('resuelve aeropuertos y busca vuelos con las cabeceras de RapidAPI', async function () {
-    const oldKey = process.env.FLIGHT_RAPIDAPI_KEY;
+  await t('resuelve lugares y busca vuelos con Duffel-Version v2 y Bearer auth', async function () {
+    const oldKey = process.env.DUFFEL_API_KEY;
     const seen = [];
-    process.env.FLIGHT_RAPIDAPI_KEY = 'test-key';
-    skyScrapper.setFetch(async function (url, options) {
-      seen.push({ url: new URL(url), options: options });
-      if (new URL(url).pathname.endsWith('/searchAirport')) {
-        const code = new URL(url).searchParams.get('query');
-        return { ok: true, status: 200, json: async function () { return { status: true, data: [{ skyId: code, entityId: 'entity-' + code }] }; } };
+    process.env.DUFFEL_API_KEY = 'test-token';
+    duffel.setFetch(async function (url, options) {
+      const parsed = new URL(url);
+      seen.push({ url: parsed, options: options });
+      if (parsed.pathname === '/places/suggestions') {
+        const code = parsed.searchParams.get('query');
+        return { ok: true, status: 200, json: async function () { return { data: [{ type: 'airport', iata_code: code, name: code === 'MVD' ? 'Carrasco' : 'Florianópolis' }] }; } };
       }
-      return { ok: true, status: 200, json: async function () { return { status: true, data: { itineraries: [{
-        id: 'flight-mvd-fln', price: { raw: 321, currency: 'USD' }, legs: [{
-          origin: { id: 'MVD', name: 'Carrasco' }, destination: { id: 'FLN', name: 'Florianópolis' }, departure: '2027-01-10T10:00:00', arrival: '2027-01-10T13:00:00', durationInMinutes: 180, stopCount: 0,
-          carriers: { marketing: [{ name: 'Aerolínea Test' }] }
-        }]
-      }] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: { offers: [{
+        id: 'off_mvd_fln', total_amount: '321.00', total_currency: 'USD', passengers: [{ id: 'pas_1' }], slices: [{ segments: [{
+          origin: { iata_code: 'MVD', name: 'Carrasco' }, destination: { iata_code: 'FLN', name: 'Florianópolis' }, departing_at: '2027-01-10T10:00:00Z', arriving_at: '2027-01-10T13:00:00Z', operating_carrier: { name: 'Aerolínea Test' }
+        }] }] }] } }; } };
     });
-    const offers = await skyScrapper.searchFlights({ origin: 'MVD', destination: 'FLN', departureDate: dep, returnDate: ret, passengers: 2, cabinClass: 'economy' });
-    assert.strictEqual(offers.length, 1);
-    assert.strictEqual(offers[0].departure_airport.code, 'MVD');
-    assert.strictEqual(offers[0].price_usd, 321);
-    assert.ok(seen.some(function (request) { return request.url.pathname.endsWith('/api/v1/flights/searchFlights'); }));
-    assert.ok(seen.every(function (request) { return request.options.headers['x-rapidapi-key'] === 'test-key'; }));
-    skyScrapper.setFetch(null);
-    process.env.FLIGHT_RAPIDAPI_KEY = oldKey;
+    try {
+      const offers = await duffel.searchFlights({ origin: 'MVD', destination: 'FLN', departureDate: dep, returnDate: ret, passengers: 2, cabinClass: 'economy' });
+      assert.strictEqual(offers.length, 1);
+      assert.strictEqual(offers[0].departure_airport.code, 'MVD');
+      assert.strictEqual(offers[0].price_usd, 321);
+      assert.strictEqual(seen.filter(function (request) { return request.url.pathname === '/places/suggestions'; }).length, 2);
+      const request = seen.find(function (item) { return item.url.pathname === '/air/offer_requests'; });
+      assert.ok(request);
+      assert.strictEqual(request.url.searchParams.get('return_offers'), 'true');
+      assert.strictEqual(request.options.headers.Authorization, 'Bearer test-token');
+      assert.strictEqual(request.options.headers['Duffel-Version'], 'v2');
+      const body = JSON.parse(request.options.body);
+      assert.deepStrictEqual(body.data.slices, [{ origin: 'MVD', destination: 'FLN', departure_date: dep }, { origin: 'FLN', destination: 'MVD', departure_date: ret }]);
+      assert.strictEqual(body.data.passengers.length, 2);
+    } finally {
+      duffel.setFetch(null);
+      process.env.DUFFEL_API_KEY = oldKey;
+    }
   });
   await t('normaliza hoteles reales de Booking.com con tarifa e imagen', async function () {
     const originalFetch = global.fetch;
@@ -163,6 +173,33 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   const server = app.createServer();
   await new Promise(function (r) { server.listen(0, r); });
   const port = server.address().port;
+  await t('expone ofertas Duffel por la ruta de búsqueda que consume la PWA', async function () {
+    process.env.DUFFEL_API_KEY = 'test-token';
+    duffel.setFetch(async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname === '/places/suggestions') {
+        const code = parsed.searchParams.get('query');
+        return { ok: true, status: 200, json: async function () { return { data: [{ type: 'airport', iata_code: code, name: code }] }; } };
+      }
+      return { ok: true, status: 200, json: async function () { return { data: { offers: [{
+        id: 'off_api_test', total_amount: '250.00', total_currency: 'USD', slices: [{ segments: [{
+          origin: { iata_code: 'MVD', name: 'Carrasco' }, destination: { iata_code: 'FLN', name: 'Florianópolis' }, departing_at: '2027-01-10T10:00:00Z', arriving_at: '2027-01-10T13:00:00Z', operating_carrier: { name: 'Operadora Test' }
+        }] }]
+      }] } }; } };
+    });
+    try {
+      const response = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 1, style: 'ahorro' });
+      const payload = JSON.parse(response.body);
+      assert.strictEqual(response.status, 200);
+      assert.strictEqual(payload.provider, 'duffel');
+      assert.strictEqual(payload.offers[0].id, 'off_api_test');
+      assert.strictEqual(payload.offers[0].price_usd, 250);
+      assert.strictEqual(payload.offers[0].airline, 'Operadora Test');
+    } finally {
+      duffel.setFetch(null);
+      process.env.DUFFEL_API_KEY = '';
+    }
+  });
   await t('cotiza un viaje estimado sin credenciales externas', async function () {
     const r = await get(port, '/api/cotizar?' + q);
     const j = JSON.parse(r.body);
@@ -201,7 +238,7 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   await t('con clave vacía la búsqueda real de vuelos responde con error controlado', async function () {
     const r = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 2, style: 'eq' });
     const j = JSON.parse(r.body);
-    assert.strictEqual(r.status, 503); assert.deepStrictEqual(j.offers, []); assert.match(j.error, /FLIGHT_RAPIDAPI_KEY/);
+    assert.strictEqual(r.status, 503); assert.deepStrictEqual(j.offers, []); assert.match(j.error, /DUFFEL_API_KEY|DUFFEL_ACCESS_TOKEN/);
   });
   server.close();
   console.log('\n' + passed + ' pruebas OK' + (process.exitCode ? ' (con fallas)' : ''));

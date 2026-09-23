@@ -5,7 +5,7 @@
  *   node server.js            -> http://localhost:3000
  *
  * Variables (en el entorno o en un archivo .env):
- *   FLIGHT_RAPIDAPI_KEY y FLIGHT_RAPIDAPI_HOST para búsquedas con Sky Scrapper.
+ *   DUFFEL_API_KEY (o DUFFEL_ACCESS_TOKEN) para búsquedas reales de vuelos.
  *   PORT                  puerto (por defecto 3000)
  *   BOOKING_API_KEY y BOOKING_API_HOST para la API de alojamientos.
  *   RATE_LIMIT_PER_MIN    pedidos por minuto por IP a /api/cotizar (por defecto 30)
@@ -25,8 +25,7 @@ function loadEnv() {
 loadEnv();
 
 const model = require('./lib/model');
-const travelpayouts = require('./lib/providers/travelpayouts');
-const skyScrapper = require('./lib/providers/skyscrapper');
+const duffel = require('./lib/providers/duffel');
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MIME = {
@@ -412,20 +411,29 @@ async function buscarVuelos(req, res, body) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
   try {
-    const cabins = skyScrapper.styleCabins(style);
-    let offers = (await Promise.all(cabins.map(function (cabinClass) {
-      return skyScrapper.searchFlights({ origin: origin, destination: destination, departureDate: date, returnDate: returnDate, passengers: passengers, cabinClass: cabinClass });
-    }))).flat();
+    const cabins = duffel.styleCabins(style);
+    const cabinResults = await Promise.all(cabins.map(function (cabinClass) {
+      return duffel.searchFlights({ origin: origin, destination: destination, departureDate: date, returnDate: returnDate, passengers: passengers, cabinClass: cabinClass })
+        .then(function (results) { return { offers: results, error: null }; })
+        .catch(function (error) { return { offers: [], error: error }; });
+    }));
+    let offers = cabinResults.reduce(function (all, result) { return all.concat(result.offers); }, []);
+    let providerErrors = cabinResults.map(function (result) { return result.error; }).filter(Boolean);
     let usedFallback = false;
     if (style === 'comodo' && !offers.length) {
       usedFallback = true;
-      offers = await skyScrapper.searchFlights({ origin: origin, destination: destination, departureDate: date, returnDate: returnDate, passengers: passengers, cabinClass: 'economy' });
+      try {
+        offers = await duffel.searchFlights({ origin: origin, destination: destination, departureDate: date, returnDate: returnDate, passengers: passengers, cabinClass: 'economy' });
+      } catch (error) {
+        providerErrors.push(error);
+      }
     }
+    if (!offers.length && providerErrors.length) throw providerErrors[0];
     offers.sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
-    return sendJson(res, 200, { provider: 'skyscrapper', origin: origin, destination: destination, style: style, cabin_fallback: usedFallback, offers: offers, error: offers.length ? null : 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.' });
+    return sendJson(res, 200, { provider: 'duffel', origin: origin, destination: destination, style: style, cabin_fallback: usedFallback, offers: offers, error: offers.length ? null : 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.' });
   } catch (e) {
-    console.error('[Sky Scrapper vuelos]', e.message);
-    return sendJson(res, e.status || 502, { provider: 'skyscrapper', offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
+    console.error('[Duffel vuelos]', e.message);
+    return sendJson(res, e.status || 502, { provider: 'duffel', offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
   }
 }
 
@@ -541,15 +549,8 @@ function createServer() {
       });
     }
     if (req.method === 'GET' && url.pathname === '/api/vuelos/comprar') {
-      const searchId = url.searchParams.get('search_id');
-      const term = url.searchParams.get('term');
       if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
-      return travelpayouts.getAffiliateUrl(searchId, term).then(function (affiliateUrl) {
-        res.writeHead(302, { Location: affiliateUrl, 'Cache-Control': 'no-store' });
-        res.end();
-      }).catch(function (e) {
-        sendJson(res, e.status || 502, { error: e.message || 'No pudimos abrir la agencia de viajes.' });
-      });
+      return sendJson(res, 410, { error: 'La reserva de vuelos se gestiona directamente con Duffel.' });
     }
     if (req.method === 'POST' && url.pathname === '/api/traslados/transferencia') {
       return readJson(req, 6 * 1024 * 1024).then(function (body) { return registrarTransferencia(req, res, body); }).catch(function (e) {
@@ -588,7 +589,7 @@ function createServer() {
 if (require.main === module) {
   const port = Number(process.env.PORT) || 3000;
   createServer().listen(port, function () {
-    console.log('CuántoSale en http://localhost:' + port + ' (' + (skyScrapper.isConfigured() ? 'búsqueda Sky Scrapper configurada' : 'Sky Scrapper sin configurar; se mostrará un aviso controlado') + ')');
+    console.log('CuántoSale en http://localhost:' + port + ' (' + (duffel.isConfigured() ? 'búsqueda Duffel configurada' : 'Duffel sin configurar; se mostrará un aviso controlado') + ')');
   });
 }
 

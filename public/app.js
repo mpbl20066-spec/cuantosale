@@ -375,11 +375,17 @@
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
     });
   }
+  function getSelectedTransferAmount(state) {
+    if (!state || state.transportMode === 'auto') return 0;
+    if (state.transferType === 'private') return 150;
+    if (state.transferType === 'shared') return 30;
+    return Math.max(0, Number(state.transfer) || 0);
+  }
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
     var categories = roadtrip ? ['auto', 'alojamiento', 'comidas', 'tours'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
-    var transferValue = Number(state.transfer) || 0;
+    var transferValue = getSelectedTransferAmount(state);
     var trasladoValue = (Number(state.parts && state.parts.traslados) || 0) + transferValue;
     var total = roadtrip
       ? Math.round((Number(state.auto) || 0) + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
@@ -467,11 +473,12 @@
     var flightLabel = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || 'Vuelo no seleccionado';
     var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
     var hotelName = findSelectedHotelLabel();
-    var transferIncluded = detailState.transportMode === 'flight' && !!detailState.transferType && Number(detailState.transfer) > 0;
+    var transferAmount = getSelectedTransferAmount(detailState);
+    var transferIncluded = transferAmount > 0;
     var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
     var summaryItems = [
       { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
-      { label: 'Transfer', meta: transferIncluded ? 'Incluido' : 'No incluido', value: transferIncluded ? money(Number(detailState.transfer) || 0) : '—', color: getCategoryColor('traslados') },
+      { label: 'Transfer', meta: transferIncluded ? 'Incluido' : 'No incluido', value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') },
       { label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
       { label: 'Tours', meta: toursLabel, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
     ];
@@ -594,7 +601,7 @@
     syncDailyBudgetState();
     var parts = detailState.parts;
     var roadtrip = detailState.transportMode === 'auto';
-    var transferCost = Number(detailState.transfer) || 0;
+    var transferCost = getSelectedTransferAmount(detailState);
     var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + transferCost;
     var budget = getBudgetBreakdown(detailState);
     var total = budget.total;
@@ -850,7 +857,7 @@
     return categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return '';
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + (Number(detailState.transfer) || 0) : category === 'auto' ? detailState.auto : detailState.parts[category];
+      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + getSelectedTransferAmount(detailState) : category === 'auto' ? detailState.auto : detailState.parts[category];
       return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
     }).join('');
   }

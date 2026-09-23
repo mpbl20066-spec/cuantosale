@@ -12,7 +12,7 @@ cuantosale/
 ├─ lib/
 │  ├─ model.js                Cálculo de costos, propuestas, ahorros y comparador de fechas
 │  └─ providers/
-│     ├─ skyscrapper.js       Búsqueda de vuelos en Sky Scrapper / RapidAPI
+│     ├─ duffel.js            Búsqueda y normalización de vuelos de Duffel
 │     ├─ busbud.js            Buses: pendiente (por ahora estimado)
 │     └─ hotels.js            Hoteles: pendiente (por ahora estimado)
 ├─ public/                    La web (index.html, style.css, app.js)
@@ -27,16 +27,16 @@ cuantosale/
 2. En la carpeta del proyecto: `node server.js`
 3. Abrí http://localhost:3000
 
-Sin `FLIGHT_RAPIDAPI_KEY`, el servidor muestra un estado de error controlado en la búsqueda de vuelos; la PWA sigue funcionando con los costos estimados.
+Sin `DUFFEL_API_KEY` o `DUFFEL_ACCESS_TOKEN`, el servidor muestra un estado de error controlado en la búsqueda de vuelos; la PWA sigue funcionando con los costos estimados.
 
-## 2. Conectar Sky Scrapper (vuelos en RapidAPI)
+## 2. Conectar Duffel (vuelos)
 
-1. Suscribí el proyecto a **Sky Scrapper** en RapidAPI y comprobá en Code Snippets que el host sea `sky-scrapper.p.rapidapi.com`.
-2. En Vercel, agregá `FLIGHT_RAPIDAPI_KEY` como variable secreta del servidor. Opcionalmente define `FLIGHT_RAPIDAPI_HOST`; por defecto usa `sky-scrapper.p.rapidapi.com`. También se aceptan `RAPIDAPI_KEY` / `RAPIDAPI_HOST` para proyectos que ya los tengan configurados.
-3. Mantén `BOOKING_API_KEY` y `BOOKING_API_HOST` separadas para la integración de hoteles. Las credenciales nunca se exponen al navegador.
-4. Redeployá la aplicación después de guardar las variables. La búsqueda usa `searchAirport` para resolver los identificadores requeridos antes de llamar a `searchFlights`; la resolución queda en memoria cuando el runtime conserva la instancia.
+1. Creá un access token en el dashboard de Duffel y guardalo en Vercel como `DUFFEL_API_KEY` (también se acepta `DUFFEL_ACCESS_TOKEN`). Es un secreto de servidor: no uses prefijos `NEXT_PUBLIC_`.
+2. Redeployá después de guardar o cambiar el token. Las llamadas usan [Create an Offer Request](https://duffel.com/docs/api/offer-requests), autenticación Bearer y `Duffel-Version: v2`.
+3. La aplicación resuelve los códigos IATA de origen y destino con [Places Suggestions](https://duffel.com/docs/api/places/schema) antes de crear la búsqueda. El token no llega al navegador.
+4. Conservá `BOOKING_API_KEY` y `BOOKING_API_HOST` por separado: esas variables siguen correspondiendo únicamente a alojamientos.
 
-La tarifa se puede agregar al presupuesto cuando la API devuelve un precio en USD. Si la respuesta incluye un enlace de Skyscanner aprobado por el proveedor, se muestra “Ver opciones en Skyscanner”. La API de RapidAPI proporciona datos de búsqueda; no implica por sí sola que exista un enlace afiliado ni aprobación de Travelpayouts.
+Las tarjetas conservan la forma de respuesta que usa la interfaz: aerolínea operadora, trayectos, escalas, duración, cabina y tarifa. Solo las ofertas en USD se pueden sumar directamente al presupuesto, cuya moneda base es USD. La búsqueda muestra tarifas; no crea órdenes ni procesa pagos.
 
 ### Alojamientos reales de Booking.com / RapidAPI
 
@@ -52,16 +52,16 @@ La PWA incluye experiencias referenciales para Río de Janeiro, Florianópolis, 
 
 | Componente | Origen |
 |---|---|
-| Pasajes de avión desde Montevideo | Sky Scrapper en RapidAPI cuando la clave y la suscripción están activas; el presupuesto suma tarifas en USD |
+| Pasajes de avión desde Montevideo | Duffel cuando el access token está configurado; el presupuesto suma tarifas en USD |
 | Cruce a Buenos Aires, buses y ferry | Estimado (pendiente: Busbud u otra fuente) |
 | Alojamiento, comidas, transporte local, traslados, valijas, seguro | Estimado (`lib/model.js`) |
 | Comparador de fechas | Estimado a partir del precio de tu fecha (para no hacer 15 consultas por búsqueda) |
 
-La compra se completa en el proveedor de reserva enlazado por la respuesta. La API de vuelos no garantiza enlaces de afiliado; Travelpayouts permanece como integración legacy sin usarse en la búsqueda activa.
+La API de Duffel permite crear órdenes a partir de una oferta, pero esta integración de CuántoSale se limita a buscar y mostrar tarifas; no reserva ni cobra vuelos.
 
 ### Costos y límites de las consultas
 
-- Sky Scrapper aplica las cuotas del plan activo de RapidAPI. Cada búsqueda puede ejecutar consultas por cabina además de resolver los aeropuertos; verificá límites y precio del plan en RapidAPI antes de habilitar tráfico público.
+- Cada búsqueda puede ejecutar una solicitud por cabina preferida además de resolver origen y destino. Revisá las cuotas y condiciones vigentes de tu organización de Duffel antes de habilitar tráfico público.
 - Cada persona puede hacer `RATE_LIMIT_PER_MIN` búsquedas por minuto (30 por defecto).
 
 ## 3. Publicarlo en internet
@@ -69,7 +69,7 @@ La compra se completa en el proveedor de reserva enlazado por la respuesta. La A
 Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.):
 
 - Comando de inicio: `node server.js`
-- Variables de entorno: `FLIGHT_RAPIDAPI_KEY` y opcionalmente `FLIGHT_RAPIDAPI_HOST`; para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`
+- Variables de entorno: `DUFFEL_API_KEY` (o `DUFFEL_ACCESS_TOKEN`); para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`
 - El puerto lo define el hosting con `PORT`; el servidor ya lo lee.
 
 ## 4. Pruebas
