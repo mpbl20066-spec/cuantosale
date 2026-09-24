@@ -519,6 +519,19 @@
       proposalBreakdownContent(state) +
       '</section>';
   }
+  function toursWhatsappUrl(state) {
+    var selectedTours = (state && state.selectedTours) || [];
+    if (!selectedTours.length || !state.meta) return null;
+    var tourLines = selectedTours.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ')'; }).join('\n');
+    var message = 'Hola, quiero reservar estos tours para mi viaje a ' + state.meta.dest.name + ':\n' + tourLines + '\n\nTotal referencial de tours: ' + money(state.toursTotal) + '\nViajamos ' + state.meta.pax + (Number(state.meta.pax) === 1 ? ' persona' : ' personas') + ' del ' + state.meta.dep + ' al ' + state.meta.ret + '. ¿Podrían confirmar disponibilidad y valor final?';
+    return 'https://wa.me/?text=' + encodeURIComponent(message);
+  }
+  function flightWhatsappUrl(state, flightSummary, flightTotal) {
+    if (!state || !state.meta) return null;
+    var route = ((flightSummary.origin && (flightSummary.origin.name || flightSummary.origin.code)) || 'Origen') + ' → ' + ((flightSummary.destination && (flightSummary.destination.name || flightSummary.destination.code)) || state.meta.dest.name);
+    var message = 'Hola, quiero reservar este vuelo para mi viaje a ' + state.meta.dest.name + ':\n' + flightSummary.airline + ' · ' + route + '\n' + flightSummary.summary + '\nPrecio de referencia: ' + money(flightTotal) + '\nFechas: ' + state.meta.dep + ' al ' + state.meta.ret + ' · ' + state.meta.pax + (Number(state.meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '. ¿Podrían confirmar disponibilidad y emitir?';
+    return 'https://wa.me/?text=' + encodeURIComponent(message);
+  }
   function getCategoryColor(category) {
     var match = CATS.filter(function (item) { return item[0] === category; })[0];
     return match ? match[2] : '--c1';
@@ -708,12 +721,13 @@
     var transferState = detailState.transferWizard || { pickupMinutes: 60, customTime: '', hotelName: findSelectedHotelLabel() };
     var transferLabel = getTransferPickupLabel(transferState.pickupMinutes, transferState.customTime);
     var transferModeLabel = detailState.transferType === 'private' ? 'Transfer privado' : (detailState.transferType === 'shared' ? 'Transfer compartido' : (transferLabel || 'A coordinar'));
-    if (detailState.transferType === 'shared') detailState.transfer = 30;
-    if (detailState.transferType === 'private') detailState.transfer = 150;
     var selectedHotelName = findSelectedHotelLabel();
     var selectedHotelDetail = findSelectedHotelDetail();
     var hotelTotal = Number(detailState.hotel) || 0;
-    var transferTotal = Number(detailState.transfer) || Number(detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 0;
+    // Única fuente de verdad para el monto del traslado: la misma función que
+    // ya usan el widget "Mi Viaje" y "A dónde va tu plata", para que este
+    // voucher nunca muestre un número distinto al resto de la pantalla.
+    var transferTotal = getSelectedTransferAmount(detailState);
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var dailyCosts = getDestinationDailyCosts(detailState.meta.dest && detailState.meta.dest.key);
@@ -722,31 +736,25 @@
     var foodTotal = Math.round(foodPerDay * nights * pax);
     var localTotal = Math.round(localPerDay * nights * pax);
     var flightTotal = Number(detailState.flight) || 0;
-    var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal);
+    var selectedTours = detailState.selectedTours || [];
+    var toursTotal = Number(detailState.toursTotal) || 0;
+    var toursLabel = selectedTours.length ? selectedTours.length + (selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
+    var toursDetail = selectedTours.length ? selectedTours.map(function (tour) { return tour.title; }).join(', ') : 'Sumá actividades desde la sección de tours.';
+    var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal + toursTotal);
     var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
-    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + (transferLabel || 'A coordinar') + ' · ' + money(transferTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
+    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + (transferLabel || 'A coordinar') + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     summaryText = summaryText.replace('Traslado: ' + (transferLabel || 'A coordinar'), 'Traslado: ' + transferModeLabel);
     var bookingHref = bookingUrl(detailState.meta, { hotel: selectedHotelName });
-    modal.innerHTML = '<div class="booking-dialog itinerary-summary" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title">' +
-      '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<h2 id="itinerary-summary-title">Resumen final del itinerario</h2>' +
-      '<div class="itinerary-summary__section"><h3>Vuelo seleccionado</h3>' +
-      '<div class="itinerary-summary__card"><p><strong>' + esc(flightSummary.airline) + '</strong></p><p>' + esc(flightSummary.summary) + '</p></div></div>' +
-      '<div class="itinerary-summary__section"><h3>Transfer</h3>' +
-      '<div class="itinerary-summary__card"><p><strong>Horario:</strong> ' + esc(transferLabel) + '</p><p><strong>Hotel destino:</strong> ' + esc(transferState.hotelName || selectedHotelName) + '</p><p><strong>Costo transfer:</strong> ' + money(transferTotal) + '</p></div></div>' +
-      '<div class="itinerary-summary__section"><h3>Hotel</h3>' +
-      '<div class="itinerary-summary__card"><p><strong>' + esc(selectedHotelName) + '</strong></p><p>Costo de referencia: ' + money(hotelTotal) + '</p>' +
-      '<a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar en Booking.com ↗</a></div></div>' +
-      '<div class="itinerary-summary__section"><h3>Agencia y coordinación</h3>' +
-      '<div class="itinerary-summary__card"><p><strong>Contacto:</strong> reservas@cuantosale.com</p><p><strong>Instrucciones:</strong> compartí este resumen con la agencia para emitir los vuelos y coordinar el transfer con el horario y el hotel indicado.</p><p><strong>Importante:</strong> el alojamiento se confirma externamente en Booking.com; la operación aérea y de traslado se gestionan con la agencia.</p></div></div>' +
-      '</div>';
+    var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
+    var toursBookUrl = toursWhatsappUrl(detailState);
     modal.innerHTML = '<div class="booking-dialog itinerary-summary voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<div class="voucher-head"><span class="voucher-kicker">CuantoSale · Voucher digital</span><h2 id="itinerary-summary-title">Resumen final del itinerario</h2><p>' + esc(detailState.meta.dest.name) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</p></div>' +
-      '<div class="voucher-total"><span>Total general estimado</span><strong>' + money(totalGeneral) + '</strong><small>Vuelo + hotel + traslados + operación en destino</small></div>' +
+      '<div class="voucher-total"><span>Total general estimado</span><strong>' + money(totalGeneral) + '</strong><small>Vuelo + hotel + traslados + tours + operación en destino</small></div>' +
       '<div class="voucher-grid"><div class="voucher-card"><span class="voucher-icon">✈️</span><div><small>Vuelo seleccionado</small><strong>' + esc(flightSummary.airline) + '</strong><p>' + esc(flightSummary.summary) + '</p><b>' + money(flightTotal) + '</b></div></div>' +
       '<div class="voucher-card"><span class="voucher-icon">🏨</span><div><small>Alojamiento</small><strong>' + esc(selectedHotelName) + '</strong><p>Reserva de referencia en Booking.com</p><b>' + money(hotelTotal) + '</b></div></div>' +
-      '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div></div>' +
+      '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div>' +
+      '<div class="voucher-card"><span class="voucher-icon">🎟️</span><div><small>Tours y actividades</small><strong>' + esc(toursLabel) + '</strong><p>' + esc(toursDetail) + '</p><b>' + money(toursTotal) + '</b></div></div></div>' +
       '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
       '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
     modal.dataset.summaryText = summaryText;
@@ -770,8 +778,10 @@
       var hotelContent = voucherCards[1].querySelector('div');
       if (hotelContent) hotelContent.innerHTML = '<small>Alojamiento seleccionado</small><strong>' + esc(selectedHotelName) + '</strong><p>' + esc(selectedHotelDetail) + '</p><b>' + money(hotelTotal) + '</b>';
     }
+    if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', flightBookUrl ? '<a class="voucher-card__action" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer">✈️ Reservar Vuelo</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>✈️ Reservar Vuelo</button>');
     if (voucherCards[1]) voucherCards[1].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">🏨 Reservar en Booking.com ↗</a>');
     if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
+    if (voucherCards[3]) voucherCards[3].querySelector('div').insertAdjacentHTML('beforeend', toursBookUrl ? '<a class="voucher-card__action" href="' + esc(toursBookUrl) + '" target="_blank" rel="noopener noreferrer">🎟️ Reservar Tours</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>🎟️ Reservar Tours</button>');
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   function syncDailyBudgetState() {
@@ -904,11 +914,13 @@
   }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
-    var selectedAmount = detailState.transferType === 'private' ? 150 : (detailState.transferType === 'shared' ? 30 : 0);
     // La modalidad elegida se suma al presupuesto inmediatamente. Vuelo y hotel
     // solo son requisitos para coordinar el traslado, no para cotizar su costo.
+    // getSelectedTransferAmount() es la única fuente de verdad del monto, para
+    // que este total nunca se desincronice del que muestran Mi Viaje y el
+    // desglose "A dónde va tu plata".
     detailState.transfer = detailState.transportMode === 'flight' && detailState.transferType
-      ? (selectedAmount || Number(detailState.meta.officialTransfer.amount) || 0)
+      ? getSelectedTransferAmount(detailState)
       : 0;
     var transferSection = document.querySelector('[data-official-transfer]');
     var button = transferSection && transferSection.querySelector('[data-buy-transfer]');
@@ -1163,8 +1175,7 @@
   }
   function addTransferToBudget() {
     if (!detailState) return;
-    var transferAmount = detailState.transferType === 'private' ? 150 : (detailState.transferType === 'shared' ? 30 : Number((detailState.meta && detailState.meta.officialTransfer && detailState.meta.officialTransfer.amount) || 70) || 70);
-    detailState.transfer = transferAmount;
+    detailState.transfer = getSelectedTransferAmount(detailState);
     detailState.selectedHotel = true;
     detailState.transferWizard = detailState.transferWizard || {};
     detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
@@ -2544,11 +2555,9 @@
       var bookTours = e.target.closest('[data-book-selected-tours]');
       if (bookTours && detailState) {
         e.preventDefault(); e.stopPropagation();
-        var selectedTours = detailState.selectedTours || [];
-        if (!selectedTours.length) return;
-        var tourLines = selectedTours.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ')'; }).join('\n');
-        var message = 'Hola, quiero reservar estos tours para mi viaje a ' + detailState.meta.dest.name + ':\n' + tourLines + '\n\nTotal referencial de tours: ' + money(detailState.toursTotal) + '\nViajamos ' + detailState.meta.pax + (Number(detailState.meta.pax) === 1 ? ' persona' : ' personas') + ' del ' + detailState.meta.dep + ' al ' + detailState.meta.ret + '. ¿Podrían confirmar disponibilidad y valor final?';
-        window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+        var toursUrl = toursWhatsappUrl(detailState);
+        if (!toursUrl) return;
+        window.open(toursUrl, '_blank', 'noopener,noreferrer');
         return;
       }
       var tourDetail = e.target.closest('[data-tour-detail-open]');
