@@ -221,10 +221,17 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   });
   await t('devuelve únicamente destinos de los cinco bloques de Brasil', async function () {
     const j = JSON.parse((await get(port, '/api/destinos')).body);
-    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
+    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty', 'bue'];
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
+    assert.ok(j.some(function (d) { return d.key === 'bue' && d.name === 'Buenos Aires'; }));
     assert.strictEqual(j.length, allowed.length);
     assert.deepStrictEqual(j.map(function (d) { return d.key; }).sort(), allowed.slice().sort());
+  });
+  await t('cotiza Buenos Aires como destino de Argentina', async function () {
+    const r = await get(port, '/api/cotizar?dest=bue&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
+    const j = JSON.parse(r.body);
+    assert.strictEqual(r.status, 200); assert.strictEqual(j.meta.dest.key, 'bue');
+    assert.strictEqual(j.meta.dest.country, 'Argentina'); assert.ok(j.list.length >= 3);
   });
   await t('cotiza destinos de los cinco bloques ordenados por total', async function () {
     const r = await get(port, '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');

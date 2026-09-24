@@ -26,6 +26,8 @@
     ilhabela: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Vista_do_Pico_do_Baepi.jpg/1920px-Vista_do_Pico_do_Baepi.jpg',
     ubatuba: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/20230725_084402.jpg',
     rio: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Cidade_Maravilhosa.jpg/1920px-Cidade_Maravilhosa.jpg',
+    // Gobierno de la Ciudad Autónoma de Buenos Aires, CC BY 2.5 AR.
+    bue: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Panorama_9_de_Julio_y_el_Obelisco.jpg/960px-Panorama_9_de_Julio_y_el_Obelisco.jpg',
     angra: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Angra_dos_Reis%2C_Brazil_2018_116.jpg/1920px-Angra_dos_Reis%2C_Brazil_2018_116.jpg',
     sao: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Vista_da_Avenida_Paulista_-_Sesc_Avenida_Paulista_por_Rodrigo_Tetsuo_Argenton_%281%29.jpg/1920px-Vista_da_Avenida_Paulista_-_Sesc_Avenida_Paulista_por_Rodrigo_Tetsuo_Argenton_%281%29.jpg',
     bho: 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Praca_do_Papa%2C_Belo_Horizonte_%28cropped%292.jpg',
@@ -195,6 +197,9 @@
     { id: 'salvador', label: 'Salvador de Bahía', image: 'ssa', keys: ['ssa'], subcategories: [
       { label: 'Salvador de Bahía', key: 'ssa' }
     ] },
+    { id: 'buenosaires', label: 'Buenos Aires', image: 'bue', keys: ['bue'], subcategories: [
+      { label: 'Centro / Recoleta', key: 'bue' }, { label: 'Palermo / Zona Norte', key: 'bue' }, { label: 'Escapada de Fin de Semana', key: 'bue' }
+    ] },
     { id: 'florianopolis', label: 'Florianópolis', image: 'fln', keys: ['fln'], subcategories: [
       { label: 'Canasvieiras / Norte', key: 'fln' }, { label: 'Praia dos Ingleses', key: 'fln' }, { label: 'Centro / Sur', key: 'fln' }
     ] },
@@ -204,8 +209,8 @@
   ];
   var MONTH_DESTINATION_ROTATION = {
     0: ['florianopolis', 'ilhabela'], 1: ['florianopolis', 'ilhabela'],
-    2: ['rio', 'buzios'], 3: ['rio', 'buzios'], 4: ['rio', 'nordeste'],
-    5: ['nordeste', 'salvador'], 6: ['nordeste', 'salvador'], 7: ['rio', 'nordeste'],
+    2: ['rio', 'buzios'], 3: ['rio', 'buenosaires'], 4: ['nordeste', 'buenosaires'],
+    5: ['nordeste', 'salvador'], 6: ['buenosaires', 'salvador'], 7: ['rio', 'buenosaires'],
     8: ['rio', 'buzios'], 9: ['rio', 'buzios'], 10: ['nordeste', 'salvador'],
     11: ['rio', 'nordeste']
   };
@@ -228,6 +233,7 @@
     }
   };
   var DESTINATION_DAILY_COSTS = {
+    bue: { transport: { eco: 18, confort: 38 }, food: { casual: 30, moderado: 58, gourmet: 100 } },
     sao: { transport: { eco: 22, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } }, buz: { transport: { eco: 18, confort: 38 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, arraial: { transport: { eco: 14, confort: 28 }, food: { casual: 25, moderado: 45, gourmet: 75 } }, cabo: { transport: { eco: 12, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } }, ilha: { transport: { eco: 10, confort: 30 }, food: { casual: 28, moderado: 52, gourmet: 90 } }, paraty: { transport: { eco: 12, confort: 26 }, food: { casual: 24, moderado: 44, gourmet: 75 } }, ilhabela: { transport: { eco: 16, confort: 35 }, food: { casual: 30, moderado: 58, gourmet: 95 } }, ubatuba: { transport: { eco: 15, confort: 32 }, food: { casual: 25, moderado: 48, gourmet: 80 } }, rio: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 95 } }, bho: { transport: { eco: 14, confort: 28 }, food: { casual: 22, moderado: 42, gourmet: 75 } }, porto: { transport: { eco: 15, confort: 32 }, food: { casual: 28, moderado: 52, gourmet: 85 } }, mcz: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 80 } }, maragogi: { transport: { eco: 13, confort: 28 }, food: { casual: 24, moderado: 45, gourmet: 75 } }, nat: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 48, gourmet: 80 } }, pip: { transport: { eco: 16, confort: 35 }, food: { casual: 30, moderado: 55, gourmet: 90 } }, trancoso: { transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } }, ssa: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } }, for: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, jericoacoara: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, fernando: { transport: { eco: 30, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } }, fln: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 90 } }, bcm: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 50, gourmet: 85 } }, gram: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 62, gourmet: 110 } }, canela: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 62, gourmet: 110 } }, igu: { transport: { eco: 12, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } }
   };
   function getDestinationDailyCosts(key) { return DESTINATION_DAILY_COSTS[String(key || '').toLowerCase()] || DESTINATION_DAILY_COSTS.rio; }
@@ -236,8 +242,8 @@
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
-  var DEST_IATA_ALIASES = { rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
+  var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+  var DEST_IATA_ALIASES = { bue: 'EZE AEP BUE', rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
   var DESTINATION_HUBS = [
     { name: 'Río de Janeiro', codes: 'GIG / SDU', options: [
       { label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Centro / Sur' },
@@ -258,8 +264,9 @@
       { label: 'Centro / Sur de la isla', key: 'fln', codes: 'FLN', subcategory: 'Centro / Sur de la isla' }
     ] },
     { name: 'Buenos Aires', codes: 'EZE / AEP', options: [
-      { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE', unavailable: true },
-      { label: 'Palermo / Zona Norte', key: 'bue', codes: 'EZE AEP BUE', unavailable: true }
+      { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE' },
+      { label: 'Palermo / Zona Norte', key: 'bue', codes: 'EZE AEP BUE' },
+      { label: 'Escapada de Fin de Semana', key: 'bue', codes: 'EZE AEP BUE', subcategory: 'Escapada de Fin de Semana' }
     ] }
   ];
   var ORIGIN_AIRPORTS = { MVD: 'Montevideo (MVD)', PDP: 'Punta del Este (PDP)' };
@@ -303,6 +310,7 @@
   var timer = null, ctrl = null;
   var lastData = null;
   var pendingDestinationScroll = false;
+  var featuredProposalSelection = null;
   var rangeCalendarMonth = null;
   var rangeCalendarStep = 'dep';
 
@@ -323,8 +331,29 @@
     var returnLabel = document.getElementById('ret-label');
     if (departure) departure.value = S.dep;
     if (returning) returning.value = S.ret;
+    if (departure) departure.min = iso(addDays(today, 1));
+    if (returning) returning.min = S.dep ? iso(addDays(parse(S.dep), 1)) : iso(addDays(today, 2));
     if (departureLabel) departureLabel.textContent = shortDateLabel(S.dep);
     if (returnLabel) returnLabel.textContent = shortDateLabel(S.ret);
+  }
+  function featuredTravelDates(monthIndex, subcategory) {
+    var selectedMonth = Math.max(0, Math.min(11, Number(monthIndex) || 0));
+    var text = String(subcategory && subcategory.label || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    var departure;
+    if (text.indexOf('reveillon') >= 0) {
+      departure = new Date(today.getFullYear(), 11, 28, 12);
+      if (departure <= today) departure = new Date(today.getFullYear() + 1, 11, 28, 12);
+    } else {
+      departure = new Date(today.getFullYear(), selectedMonth, 12, 12);
+      if (departure <= today) {
+        var nextDay = addDays(today, 1);
+        var lastDayOfSelectedMonth = new Date(today.getFullYear(), selectedMonth + 1, 0, 12);
+        departure = today.getMonth() === selectedMonth && today.getFullYear() === lastDayOfSelectedMonth.getFullYear() && nextDay <= lastDayOfSelectedMonth
+          ? nextDay : new Date(today.getFullYear() + 1, selectedMonth, 12, 12);
+      }
+    }
+    var tripNights = text.indexOf('fin de semana') >= 0 ? 2 : 7;
+    return { dep: iso(departure), ret: iso(addDays(departure, tripNights)) };
   }
   function calendarMonthMarkup(monthDate) {
     var year = monthDate.getFullYear();
@@ -723,9 +752,6 @@
     });
     return htmlToImagePromise;
   }
-  function storyInclusionPill(label) {
-    return '<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:700;white-space:nowrap;"><b style="font-size:13px;color:#F6B21B;">✓</b>' + esc(label) + '</span>';
-  }
   function storyDateRange(meta) {
     function format(value) {
       if (!value) return '';
@@ -739,7 +765,7 @@
     return cheapest && cheapest.date ? format(cheapest.date) : 'Fecha más económica del mes';
   }
   function storyCostLabel(entry) {
-    return { pasajes: 'Vuelo', alojamiento: 'Hotel', comidas: 'Comidas / régimen', local: 'Transporte local', traslados: 'Traslados', tours: 'Tours', auto: 'Auto / roadtrip' }[entry.category] || entry.label;
+    return { pasajes: 'Voos', alojamiento: 'Alojamento', comidas: 'Refeições', local: 'Transporte local', traslados: 'Transfers', tours: 'Passeios', auto: 'Carro / roadtrip' }[entry.category] || entry.label;
   }
   function loadStoryPhoto(photoUrl) {
     if (!photoUrl) return Promise.reject(new Error('No hay una foto disponible para este destino.'));
@@ -758,6 +784,8 @@
   }
   function buildStoryCardNode(meta, totals, photo) {
     var location = [meta.dest.region, meta.dest.country || 'Brasil'].filter(Boolean).join(' - ');
+    var includedItems = totals.entries.filter(function (entry) { return Number(entry.value) > 0; }).map(storyCostLabel);
+    var inclusions = includedItems.length ? includedItems.join(' + ') : 'Voos + alojamento';
     // El nodo se clona a SVG/canvas para exportarlo: si se posiciona fuera del
     // viewport (ej. left:-9999px) el navegador puede no llegar a pintarlo y la
     // captura sale en blanco. Por eso se ancla en (0,0) dentro de un wrapper
@@ -771,20 +799,20 @@
       (photo ? '<img src="' + esc(photo) + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">' : '') +
       '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,27,43,.02) 0%,rgba(11,27,43,.08) 42%,rgba(11,27,43,.72) 68%,rgba(11,27,43,.96) 100%);"></div>' +
       '<div style="position:absolute;top:40px;left:40px;right:40px;display:flex;align-items:center;gap:9px;">' +
-      '<span style="width:11px;height:11px;border-radius:50%;background:#F6B21B;"></span>' +
-      '<span style="font-weight:800;letter-spacing:.02em;font-size:22px;">cuántosale</span>' +
+      '<svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>' +
+      '<span style="font-family:Poppins,Arial,sans-serif;font-weight:700;letter-spacing:-.02em;font-size:22px;">cuántosale</span>' +
       '</div>' +
       '<div style="position:absolute;left:40px;right:40px;bottom:38px;">' +
       (location ? '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:7px;">' + esc(location) + '</div>' : '') +
       '<div style="font-size:40px;font-weight:800;line-height:1.02;margin-bottom:11px;">' + esc(meta.dest.name) + '</div>' +
-      '<div style="display:flex;align-items:center;gap:18px;margin-bottom:12px;color:rgba(255,255,255,.94);font-size:13px;font-weight:600;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '</span></div>' +
+      '<div style="display:flex;align-items:center;gap:18px;margin-bottom:12px;color:rgba(255,255,255,.94);font-size:13px;font-weight:600;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' passageiro' : ' passageiros') + '</span></div>' +
       '<div style="background:rgba(11,27,43,.52);border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:16px 19px;margin-bottom:12px;">' +
-      '<div style="font-size:11px;color:rgba(255,255,255,.78);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Precio por pasajero</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,.78);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Preço por passageiro</div>' +
       '<div style="font-size:58px;font-weight:800;line-height:1;letter-spacing:-.03em;">' + esc(money(totals.pp)) + '</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total del viaje: ' + esc(money(totals.total)) + '</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total da viagem: ' + esc(money(totals.total)) + '</div>' +
       '</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px;">' + totals.entries.filter(function (entry) { return Number(entry.value) > 0; }).map(function (entry) { return storyInclusionPill(storyCostLabel(entry)); }).join('') + '</div>' +
-      '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">¿Viajamos juntos? Armá el tuyo acá <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
+      '<div style="margin:0 0 12px;color:rgba(255,255,255,.82);font-size:13px;font-weight:500;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inclui: ' + esc(inclusions) + '</div>' +
+      '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">Calcula o teu orçamento exato em <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
       '</div></div>';
     wrapper.appendChild(node);
     document.body.appendChild(wrapper);
@@ -2496,10 +2524,10 @@
       if (['flight', 'bus', 'auto'].indexOf(S.transport) < 0) S.transport = 'flight';
       renderTransportSelector();
     }
-    function selectDestination(nextValue, subcategory) {
+    function selectDestination(nextValue, subcategory, fromFeatured) {
       var destinationKey = String(nextValue || 'todos');
       if (!destinationKey) return;
-      if (destinationKey === 'bue') { notice('Estamos preparando las propuestas para Buenos Aires.'); closeDestMenu(); return; }
+      if (!fromFeatured) featuredProposalSelection = null;
       S.dest = destinationKey; S.proposalId = ''; S.subcategory = String(subcategory || '');
       if (S.dest === 'todos') { S.transport = 'flight'; }
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
@@ -2611,7 +2639,23 @@
       renderDestinationHighlights(new Date().getMonth());
       highlights.addEventListener('change', function (event) {
         var month = event.target.closest('[data-feature-month]');
-        if (month) renderDestinationHighlights(Number(month.value));
+        if (!month) return;
+        var monthIndex = Number(month.value);
+        renderDestinationHighlights(monthIndex);
+        var featuredSelection = featuredProposalSelection;
+        var selectedSubcategory = featuredSelection && featuredSelection.subcategory;
+        var dates = featuredTravelDates(monthIndex, selectedSubcategory);
+        S.dep = dates.dep; S.ret = dates.ret;
+        syncDateRangeFields();
+        if (featuredSelection) {
+          pendingDestinationScroll = true;
+          selectDestination(selectedSubcategory.key, selectedSubcategory.label, true);
+        } else if (S.dest !== 'todos') {
+          pendingDestinationScroll = true;
+          schedule();
+        } else if (massSearch) {
+          findDestinations();
+        }
       });
       highlights.addEventListener('click', function (event) {
         var arrow = event.target.closest('[data-feature-prev], [data-feature-next]');
@@ -2638,8 +2682,13 @@
           ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; }) : group && group.subcategories;
         var subcategory = availableSubcategories && choice && availableSubcategories[Number(choice.value)];
         if (subcategory) {
+          var selectedMonth = Number($('#destination-highlights [data-feature-month]').value);
+          featuredProposalSelection = { monthIndex: selectedMonth, subcategory: subcategory };
+          var dates = featuredTravelDates(selectedMonth, subcategory);
+          S.dep = dates.dep; S.ret = dates.ret;
+          syncDateRangeFields();
           pendingDestinationScroll = true;
-          selectDestination(subcategory.key, subcategory.label);
+          selectDestination(subcategory.key, subcategory.label, true);
         }
       });
     }

@@ -33,8 +33,9 @@ const MIME = {
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon'
 };
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com https://*.supabase.co https://*.wikimedia.org; frame-src https://*.supabase.co; base-uri 'none'; form-action 'self'";
-const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
 const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
+const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue']);
 // Algunas islas y pueblos pequeños no están indexados como ciudad en Booking.
 // En esos casos buscamos alojamientos en el municipio de acceso más cercano.
 const HOTEL_NEARBY_DESTINATIONS = {
@@ -532,7 +533,7 @@ async function cotizar(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
-  if (!HOME_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí uno de los destinos destacados de Brasil.' });
+  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
   const origin = String(url.searchParams.get('origin') || 'MVD').toUpperCase();
   if (!['MVD', 'PDP'].includes(origin)) return sendJson(res, 400, { error: 'El aeropuerto de salida debe ser MVD o PDP.' });
   v.S.origin = origin;
@@ -564,7 +565,7 @@ async function cotizar(req, res, url) {
   sendJson(res, 200, Object.assign({
     meta: {
       mode: liveQuoteApplied ? 'live' : 'estimated',
-       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name }, origin: origin, subcategory: subcategory,
+       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name, region: model.DEST[v.S.dest].region || '', country: model.DEST[v.S.dest].country || 'Brasil' }, origin: origin, subcategory: subcategory,
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
       hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString()
@@ -578,7 +579,7 @@ async function cotizarHoteles(req, res, url) {
   let v;
   try { v = model.validate(Object.fromEntries(url.searchParams), model.getToday()); }
   catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
-  if (!HOME_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí uno de los destinos destacados de Brasil.' });
+  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
   const dest = model.DEST[v.S.dest];
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights };
@@ -666,7 +667,7 @@ function createServer() {
     }
     if (req.method === 'POST') { res.writeHead(404); return res.end(); }
     if (url.pathname === '/api/destinos') {
-      return sendJson(res, 200, HOME_DESTINATION_KEYS.map(function (k) { return { key: k, name: model.DEST[k].name }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }));
+      return sendJson(res, 200, SEARCH_DESTINATION_KEYS.map(function (k) { return { key: k, name: model.DEST[k].name }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }));
     }
     if (url.pathname === '/api/config') {
       return sendJson(res, 200, {
