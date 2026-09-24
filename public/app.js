@@ -239,25 +239,25 @@
   var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
   var DEST_IATA_ALIASES = { rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
   var DESTINATION_HUBS = [
-    { label: '🛬 Río de Janeiro (GIG / SDU)', options: [
+    { name: 'Río de Janeiro', codes: 'GIG / SDU', options: [
       { label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Centro / Sur' },
       { label: 'Búzios', key: 'buz', codes: 'GIG SDU' }, { label: 'Arraial do Cabo', key: 'arraial', codes: 'GIG SDU' },
       { label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' }
     ] },
-    { label: '🛬 San Pablo (GRU / CGH)', options: [
+    { name: 'San Pablo', codes: 'GRU / CGH', options: [
       { label: 'Ilhabela', key: 'ilhabela', codes: 'GRU CGH' }, { label: 'Ubatuba', key: 'ubatuba', codes: 'GRU CGH' },
       { label: 'Paraty', key: 'paraty', codes: 'GRU CGH' }
     ] },
-    { label: '🛬 Nordeste (REC / MCZ / SSA)', options: [
+    { name: 'Nordeste', codes: 'REC / MCZ / SSA', options: [
       { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' }, { label: 'Maceió', key: 'mcz', codes: 'MCZ' },
       { label: 'Salvador de Bahía', key: 'ssa', codes: 'SSA' }
     ] },
-    { label: '🛬 Florianópolis (FLN)', options: [
+    { name: 'Florianópolis', codes: 'FLN', options: [
       { label: 'Canasvieiras / Norte', key: 'fln', codes: 'FLN', subcategory: 'Canasvieiras / Norte' },
       { label: 'Praia dos Ingleses', key: 'fln', codes: 'FLN', subcategory: 'Praia dos Ingleses' },
       { label: 'Centro / Sur de la isla', key: 'fln', codes: 'FLN', subcategory: 'Centro / Sur de la isla' }
     ] },
-    { label: '🛬 Buenos Aires (EZE / AEP)', options: [
+    { name: 'Buenos Aires', codes: 'EZE / AEP', options: [
       { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE', unavailable: true },
       { label: 'Palermo / Zona Norte', key: 'bue', codes: 'EZE AEP BUE', unavailable: true }
     ] }
@@ -3160,7 +3160,7 @@
           groupWrap.className = 'custom-select__group';
           var groupTitle = document.createElement('span');
           groupTitle.className = 'custom-select__group-title';
-          groupTitle.textContent = hub.label;
+          groupTitle.innerHTML = '<span class="custom-select__hub-icon" aria-hidden="true">🛬</span><span>' + esc(hub.name) + '</span><strong class="custom-select__hub-code">' + esc(hub.codes) + '</strong>';
           groupWrap.appendChild(groupTitle);
           hub.options.forEach(function (item, optionIndex) {
             var option = document.createElement('button');
