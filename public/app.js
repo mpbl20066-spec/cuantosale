@@ -181,13 +181,25 @@
     return tour.details || 'Incluye la actividad principal y acompañamiento local. Confirmá horarios, punto de encuentro, disponibilidad y valor final antes de reservar.';
   }
 
-  var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '' };
+  var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '' };
   var DESTINATION_GROUPS = [
-    { label: 'Litoral del Sudeste', keys: ['buz', 'arraial', 'cabo', 'ilha', 'paraty', 'ilhabela', 'ubatuba', 'rio', 'angra'] },
-    { label: 'Ciudad, Compras y Negocios', keys: ['sao', 'bho', 'curitiba'] },
-    { label: 'Paraísos del Nordeste', keys: ['porto', 'mcz', 'maragogi', 'nat', 'pip', 'trancoso', 'ssa', 'for', 'fernando', 'jericoacoara', 'morro'] },
-    { label: 'Sur, Naturaleza y Cataratas', keys: ['fln', 'bcm', 'gram', 'canela', 'igu', 'poa', 'camboriu', 'bombinhas', 'rosa'] }
+    { id: 'rio', label: 'Río de Janeiro', image: 'rio', keys: ['rio'], subcategories: [
+      { label: 'Réveillon Copacabana (31/12)', key: 'rio' }, { label: 'Zona Sur / Ipanema', key: 'rio' }, { label: 'Centro Histórico', key: 'rio' }
+    ] },
+    { id: 'buzios', label: 'Búzios / Arraial do Cabo / Cabo Frio', image: 'buz', keys: ['buz', 'arraial', 'cabo'], subcategories: [
+      { label: 'Búzios + Arraial do Cabo', key: 'buz' }, { label: 'Sólo Búzios', key: 'buz' }, { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' }
+    ] },
+    { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'mcz', 'ssa'], subcategories: [
+      { label: 'Porto de Galinhas (All Inclusive)', key: 'porto' }, { label: 'Maceió (Resort)', key: 'mcz' }, { label: 'Salvador de Bahía', key: 'ssa' }
+    ] },
+    { id: 'florianopolis', label: 'Florianópolis', image: 'fln', keys: ['fln'], subcategories: [
+      { label: 'Canasvieiras / Norte', key: 'fln' }, { label: 'Praia dos Ingleses', key: 'fln' }, { label: 'Centro / Sur', key: 'fln' }
+    ] },
+    { id: 'ilhabela', label: 'Ilhabela / Ubatuba / Paraty', image: 'ilhabela', keys: ['ilhabela', 'ubatuba', 'paraty'], subcategories: [
+      { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' }, { label: 'Ilhabela', key: 'ilhabela' }
+    ] }
   ];
+  var MONTH_DESTINATION_ROTATION = { 9: ['rio', 'buzios'], 10: ['nordeste'], 11: ['rio', 'nordeste'], 0: ['florianopolis', 'ilhabela'] };
   var BRASIL_DEFAULT_COSTS = {
     beach: {
       flightUsd: 460,
@@ -216,6 +228,29 @@
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+  var DEST_IATA_ALIASES = { rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
+  var ORIGIN_AIRPORTS = { MVD: 'Montevideo (MVD)', PDP: 'Punta del Este (PDP)' };
+  function originLabel(code) { return ORIGIN_AIRPORTS[String(code || 'MVD').toUpperCase()] || ORIGIN_AIRPORTS.MVD; }
+  function originCityName(code) { return originLabel(code).split(' · ')[0]; }
+  function renderDestinationHighlights(monthIndex) {
+    var root = document.getElementById('destination-highlights');
+    if (!root) return;
+    var names = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex];
+    var groups = seasonalIds ? DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; }) : DESTINATION_GROUPS;
+    var monthOptions = names.map(function (name, index) { return '<option value="' + index + '"' + (index === monthIndex ? ' selected' : '') + '>' + name.charAt(0).toUpperCase() + name.slice(1) + '</option>'; }).join('');
+    var cards = groups.map(function (group) {
+      var options = group.subcategories.map(function (item, index) { return '<option value="' + index + '">' + esc(item.label) + '</option>'; }).join('');
+      var photo = DEST_PHOTOS[group.image];
+      return '<article class="featured-destination" data-featured-destination="' + esc(group.id) + '">' +
+        (photo ? '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy"></div>' : '') +
+        '<div class="featured-destination__body"><span class="featured-destination__eyebrow">BRASIL · DESTINO DESTACADO</span><h3>' + esc(group.label) + '</h3>' +
+        '<label class="sr-only" for="featured-subcategory-' + esc(group.id) + '">Elegí una zona de ' + esc(group.label) + '</label>' +
+        '<select id="featured-subcategory-' + esc(group.id) + '" data-feature-subcategory="' + esc(group.id) + '">' + options + '</select>' +
+        '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">→</span></button></div></article>';
+    }).join('');
+    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">ESCAPADAS PARA CADA TEMPORADA</span><h2 id="destination-highlights-title">Destinos destacados</h2><p>Elegí una zona y te mostramos una propuesta para tu viaje.</p></div><label>Ver destinos para <select data-feature-month aria-label="Simular mes para ver destinos">' + monthOptions + '</select></label></div><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div>';
+  }
   var FOOD_TIPS = {
     rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
     fln: ['Buscá <b>prato executivo</b> en el centro de Florianópolis al mediodía: generalmente es la comida con mejor relación precio-cantidad.', 'En los mercados públicos y ferias barriales, armá un picnic con frutas, pan de queso y jugos para llevar a la playa.', 'Alejate una o dos cuadras de la playa para encontrar <b>buffet por kilo</b> y platos del día más accesibles.'],
@@ -232,6 +267,7 @@
   var today = new Date(); today.setHours(12, 0, 0, 0);
   var timer = null, ctrl = null;
   var lastData = null;
+  var pendingDestinationScroll = false;
   var rangeCalendarMonth = null;
   var rangeCalendarStep = 'dep';
 
@@ -320,7 +356,7 @@
     // Es un enlace saliente estándar que Money Script puede atribuir al hacer clic.
     var dep = meta.dep.slice(8, 10) + meta.dep.slice(5, 7);
     var ret = meta.ret.slice(8, 10) + meta.ret.slice(5, 7);
-    return 'https://www.aviasales.com/search/MVD' + dep + iata + ret + meta.pax;
+    return 'https://www.aviasales.com/search/' + String(meta.origin || 'MVD').toUpperCase() + dep + iata + ret + meta.pax;
   }
   function ctas(meta) {
     var city = esc(meta.dest.name);
@@ -652,9 +688,18 @@
     });
     return htmlToImagePromise;
   }
-  function storySummaryChip(icon, label, included) {
-    if (!included) return '';
-    return '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:99px;padding:9px 15px;font-size:14px;font-weight:700;color:#fff;">' + icon + ' ' + esc(label) + '</span>';
+  function storySummaryChip(label, value) {
+    return '<span style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:9px 11px;font-size:12px;font-weight:700;color:#fff;"><span>' + esc(label) + '</span><b style="white-space:nowrap;">' + esc(money(value)) + '</b></span>';
+  }
+  function storyDateRange(meta) {
+    function format(value) {
+      var date = parse(value);
+      return isNaN(date) ? String(value || '') : date.toLocaleDateString('es-UY', { day: '2-digit', month: 'short' }).replace('.', '');
+    }
+    return format(meta.dep) + ' - ' + format(meta.ret);
+  }
+  function storyCostLabel(entry) {
+    return { pasajes: 'Vuelo', alojamiento: 'Hotel', comidas: 'Comidas / régimen', local: 'Transporte local', traslados: 'Traslados', tours: 'Tours', auto: 'Auto / roadtrip' }[entry.category] || entry.label;
   }
   function loadStoryPhoto(photoUrl) {
     if (!photoUrl) return Promise.reject(new Error('No hay una foto disponible para este destino.'));
@@ -689,20 +734,18 @@
       '<span style="width:11px;height:11px;border-radius:50%;background:#F6B21B;"></span>' +
       '<span style="font-weight:800;letter-spacing:.02em;font-size:22px;">cuántosale</span>' +
       '</div>' +
-      '<div style="position:absolute;left:40px;right:40px;bottom:44px;">' +
+      '<div style="position:absolute;left:40px;right:40px;bottom:38px;">' +
       (location ? '<div style="font-size:15px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#F6B21B;margin-bottom:8px;">' + esc(location) + '</div>' : '') +
-      '<div style="font-size:46px;font-weight:800;line-height:1.05;margin-bottom:20px;">' + esc(meta.dest.name) + '</div>' +
-      '<div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);border-radius:22px;padding:22px 24px;margin-bottom:18px;">' +
-      '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:4px;">Costo total del viaje</div>' +
-      '<div style="font-size:48px;font-weight:800;line-height:1;">' + esc(money(totals.total)) + '</div>' +
-      '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-top:6px;">' + esc(money(totals.pp)) + ' por persona</div>' +
+      '<div style="font-size:42px;font-weight:800;line-height:1.02;margin-bottom:10px;">' + esc(meta.dest.name) + '</div>' +
+      '<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:14px;color:rgba(255,255,255,.88);font-size:13px;font-weight:700;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '</span></div>' +
+      '<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:18px 20px;margin-bottom:13px;">' +
+      '<div style="font-size:12px;color:rgba(255,255,255,.78);margin-bottom:5px;text-transform:uppercase;letter-spacing:.09em;">Precio por pasajero</div>' +
+      '<div style="font-size:58px;font-weight:800;line-height:1;">' + esc(money(totals.pp)) + '</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,.72);margin-top:7px;">Total del viaje · ' + esc(money(totals.total)) + '</div>' +
       '</div>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
-      storySummaryChip('✈️', 'Vuelo', totals.flightTotal > 0) +
-      storySummaryChip('🏨', 'Hotel', totals.hotelTotal > 0) +
-      storySummaryChip('🚐', 'Transfer', totals.transferTotal > 0) +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">' + totals.entries.map(function (entry) { return storySummaryChip(storyCostLabel(entry), entry.value); }).join('') +
       '</div>' +
-      '<div style="margin-top:26px;font-size:14px;font-weight:600;color:rgba(255,255,255,.75);">Armá el tuyo gratis en <b style="color:#fff;">cuantosale.uy</b></div>' +
+      '<div style="margin-top:15px;font-size:15px;font-weight:800;color:#fff;">¿Viajamos juntos? Armá el tuyo acá <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
       '</div></div>';
     wrapper.appendChild(node);
     document.body.appendChild(wrapper);
@@ -724,9 +767,7 @@
     var totals = {
       total: Number(budget.total) || 0,
       pp: Math.round((Number(budget.total) || 0) / pax),
-      flightTotal: Number(detailState.flight) || 0,
-      hotelTotal: Number(detailState.hotel) || 0,
-      transferTotal: getSelectedTransferAmount(detailState)
+      entries: budget.entries || []
     };
     var meta = detailState.meta;
     var wrapper = null;
@@ -1479,7 +1520,7 @@
     box.innerHTML = '<div class="flight-skeleton" aria-label="Buscando vuelos" role="status"><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div><span class="sr-only">Buscando tarifas actuales…</span></div>';
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
     var timeout = window.setTimeout(function () { if (controller) controller.abort(); }, 20000);
-    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }), signal: controller ? controller.signal : undefined })
+    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: meta.origin || S.origin || 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }), signal: controller ? controller.signal : undefined })
       .then(async function (response) {
         window.clearTimeout(timeout);
         var text = await response.text();
@@ -1513,7 +1554,12 @@
   }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
-    var fits = data.options.filter(function (option) { return option.fits; });
+    var fits = DESTINATION_GROUPS.map(function (group) {
+      var options = data.options.filter(function (option) { return group.keys.indexOf(option.dest.key) >= 0 && option.fits; });
+      if (!options.length) return null;
+      var best = options.slice().sort(function (a, b) { return a.total - b.total; })[0];
+      return Object.assign({}, best, { dest: Object.assign({}, best.dest, { name: group.label }), featuredGroup: group.id });
+    }).filter(Boolean).sort(function (a, b) { return a.total - b.total; });
     var cards = fits.map(function (option) {
       var rows = CATS.map(function (c) {
         return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + '</b></div>';
@@ -1525,7 +1571,7 @@
           ? '<div class="destination-banner destination-banner-photo"><img src="' + esc(photo) + '" alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
           : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : option.dest.key === 'igu' ? '🌊' : '☀️') + '</span></div>') +
         '<div class="destination-card-body">' +
-        '<div class="destination-card-top"><div><h3>' + esc(option.dest.name) + '</h3>' + (location ? '<p class="destination-location">' + esc(location) + '</p>' : '') + '<p>' + esc(option.title) + '. ' + esc(option.tierDesc) + '.</p></div>' +
+        '<div class="destination-card-top"><div><h3>' + esc(option.dest.name) + '</h3>' + (location ? '<p class="destination-location">' + esc(location) + '</p>' : '') + '<p>' + esc(option.title.replace(/Vuelo desde Montevideo/g, 'Vuelo desde ' + originCityName(data.meta.origin))) + '. ' + esc(option.tierDesc) + '.</p></div>' +
         '<div class="destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
         '<span class="mini g">¡Entra en tu presupuesto!</span>' +
         '<details><summary>Ver desglose</summary><div class="destination-breakdown">' + rows + '</div></details>' +
@@ -1546,7 +1592,7 @@
     massSearch = true;
     $('#results').innerHTML = '';
     el.innerHTML = renderLoadingState('Buscando destinos para tu presupuesto…');
-    var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style });
+    var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style, origin: S.origin });
     fetch('/api/cotizar-todos?' + qs.toString())
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -1566,7 +1612,11 @@
 
   function run() {
     var el = $('#results');
-    if (!S.dep || !S.ret) { notice('Elegí las fechas de ida y vuelta para ver el costo.'); return; }
+    if (!S.dep || !S.ret) {
+      notice('Elegí las fechas de ida y vuelta para ver el costo.');
+      if (pendingDestinationScroll) scrollToDestinationResults();
+      return;
+    }
     if (S.dest === 'todos') { return; }
     renderTransportSelector();
     if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
@@ -1576,23 +1626,28 @@
     el.classList.add('loading');
     el.innerHTML = renderLoadingState('Buscando ofertas para tu viaje…');
     var transportParam = S.transport === 'auto' ? 'auto' : 'flight';
-    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, transport: transportParam });
+    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, transport: transportParam, origin: S.origin, subcategory: S.subcategory });
     fetch('/api/cotizar?' + qs.toString(), { signal: mine.signal })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
-        if (!res.ok) { notice(res.j.error || 'No pudimos calcular tu viaje.'); return; }
+        if (!res.ok) {
+          notice(res.j.error || 'No pudimos calcular tu viaje.');
+          if (pendingDestinationScroll) scrollToDestinationResults();
+          return;
+        }
         render(res.j);
       })
       .catch(function (e) {
         if (e.name === 'AbortError') return;
         notice('No pudimos calcular ahora. Probá de nuevo en un momento.');
+        if (pendingDestinationScroll) scrollToDestinationResults();
       })
       .then(function () { if (ctrl === mine) el.classList.remove('loading'); });
   }
 
   /* ---------- pantalla ---------- */
   function byId(list, id) { if (!Array.isArray(list)) return null; for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i]; return null; }
-  function titleOf(p) { return p.modeShort + ' + hotel ' + p.tierLabel; }
+  function titleOf(p) { return p.modeShort.replace(/Montevideo/g, originCityName(detailState && detailState.meta && detailState.meta.origin || S.origin)) + ' + hotel ' + p.tierLabel; }
   function srcTag(p, cat, live) {
     if (!live) return '';
     return p.sources[cat] === 'real' ? '<span class="src real">real</span>' : '<span class="src">estimado</span>';
@@ -1776,6 +1831,12 @@
     el.innerHTML = h;
     var ch = el.querySelector('.chart'), cu = el.querySelector('.bar.cur');
     if (ch && cu) ch.scrollLeft = cu.offsetLeft - ch.clientWidth / 2 + cu.offsetWidth / 2;
+    if (pendingDestinationScroll) window.setTimeout(scrollToDestinationResults, 50);
+  }
+  function scrollToDestinationResults() {
+    var results = $('#results');
+    pendingDestinationScroll = false;
+    if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function showProposalView(proposal, data) {
@@ -1797,7 +1858,7 @@
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
     var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
-      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + ' · Salís desde Montevideo · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
+      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
       breakdownMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + foodMarkup +
@@ -1886,7 +1947,7 @@
   }
 
   function openDestinationProposal(key, savedTrip) {
-    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style });
+    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory });
     return fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
@@ -2014,7 +2075,7 @@
       local_per_day: Number(detailState.localPerDay) || 0,
       total_amount: Number(budget.total) || 0,
       currency: 'USD',
-      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
+      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
     };
   }
   async function saveCurrentTrip() {
@@ -2029,7 +2090,7 @@
     tripSaveInProgress = true;
     var result;
     try {
-      result = await guardarViaje({ origin: 'Montevideo', destination: payload.destination_name, destination_key: payload.destination_key, departure_date: payload.departure_date, return_date: payload.return_date, total_price: payload.total_amount, flight_details: Object.assign({}, payload.details, { transport_mode: payload.transport_mode, food_per_day: payload.food_per_day, local_per_day: payload.local_per_day, travelers: payload.travelers, total_amount: payload.total_amount }) });
+      result = await guardarViaje({ origin: originLabel(payload.details.origin || S.origin), destination: payload.destination_name, destination_key: payload.destination_key, departure_date: payload.departure_date, return_date: payload.return_date, total_price: payload.total_amount, flight_details: Object.assign({}, payload.details, { transport_mode: payload.transport_mode, food_per_day: payload.food_per_day, local_per_day: payload.local_per_day, travelers: payload.travelers, total_amount: payload.total_amount }) });
     } catch (error) {
       tripSaveInProgress = false;
       openAuthModal(error.message);
@@ -2136,7 +2197,8 @@
   }
   async function loadTrip(trip) {
     var details = trip.details || trip.flight_details || {};
-    S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport;
+    S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport; S.origin = details.origin === 'PDP' ? 'PDP' : (details.origin === 'MVD' ? 'MVD' : S.origin); S.subcategory = details.subcategory || '';
+    var originInput = $('#origin-input'); if (originInput) originInput.value = originLabel(S.origin);
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; syncDateRangeFields(); if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); var loaded = await openDestinationProposal(S.dest, trip); if (loaded === null) throw new Error('No pudimos cargar la propuesta guardada.'); }
     else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
@@ -2304,6 +2366,7 @@
     function setDestDisplay(value) {
       var item = destItems.filter(function (entry) { return entry.value === value; })[0];
       var text = item ? item.label : 'Todos los destinos (Buscar por mi presupuesto)';
+      if (S.subcategory) text += ' · ' + S.subcategory;
       if (trigger) trigger.value = text;
       if (menu) {
         Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
@@ -2328,9 +2391,14 @@
     function filterDestOptions(query, preserveActive) {
       if (!menu) return [];
       var normalized = normalizeDestQuery(query);
+      var iataQuery = /^[a-z]{3}$/.test(normalized) && Array.prototype.some.call(menu.querySelectorAll('button[data-dest-value]'), function (option) {
+        return normalizeDestQuery(option.getAttribute('data-iata-codes') || '').split(/\s+/).indexOf(normalized) >= 0;
+      });
       var visible = [];
       Array.prototype.forEach.call(menu.querySelectorAll('button[data-dest-value]'), function (option) {
-        var matches = !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
+        var iataCodes = normalizeDestQuery(option.getAttribute('data-iata-codes') || '').split(/\s+/);
+        var searchable = normalizeDestQuery(option.textContent + ' ' + (option.getAttribute('data-iata-codes') || ''));
+        var matches = !normalized || (iataQuery ? iataCodes.indexOf(normalized) >= 0 : searchable.indexOf(normalized) >= 0);
         option.hidden = !matches;
         option.style.display = matches ? 'flex' : 'none';
         if (matches) visible.push(option);
@@ -2389,16 +2457,134 @@
       if (['flight', 'bus', 'auto'].indexOf(S.transport) < 0) S.transport = 'flight';
       renderTransportSelector();
     }
-    function selectDestination(nextValue) {
+    function selectDestination(nextValue, subcategory) {
       var destinationKey = String(nextValue || 'todos');
       if (!destinationKey) return;
-      S.dest = destinationKey; S.proposalId = '';
+      S.dest = destinationKey; S.proposalId = ''; S.subcategory = String(subcategory || '');
       if (S.dest === 'todos') { S.transport = 'flight'; }
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
       setDestDisplay(S.dest);
       closeDestMenu();
       massSearch = false; updateDestinationMode(); syncTransportSelection();
       if (S.dest !== 'todos') schedule();
+    }
+    var originInput = document.getElementById('origin-input');
+    function readOriginCode(value) {
+      var text = String(value || '').trim().toUpperCase();
+      if (text === 'MVD' || /\(MVD\)$/.test(text)) return 'MVD';
+      if (text === 'PDP' || /\(PDP\)$/.test(text)) return 'PDP';
+      return '';
+    }
+    var originPicker = document.getElementById('origin-picker');
+    var originMenu = document.getElementById('origin-menu');
+    var originToggle = document.getElementById('origin-toggle');
+    function filterOriginOptions(query) {
+      if (!originMenu) return [];
+      var normalized = normalizeDestQuery(query);
+      var typedCode = readOriginCode(query);
+      var visible = [];
+      Array.prototype.forEach.call(originMenu.querySelectorAll('[data-origin-code]'), function (option) {
+        var code = option.getAttribute('data-origin-code');
+        var text = normalizeDestQuery(option.textContent + ' ' + code);
+        var matches = !normalized || code === typedCode || text.indexOf(normalized) >= 0;
+        option.hidden = !matches;
+        option.style.display = matches ? 'grid' : 'none';
+        if (matches) visible.push(option);
+      });
+      return visible;
+    }
+    function openOriginMenu() {
+      if (!originMenu || !originInput) return;
+      originMenu.hidden = false;
+      originInput.setAttribute('aria-expanded', 'true');
+      if (originToggle) originToggle.setAttribute('aria-expanded', 'true');
+    }
+    function closeOriginMenu(restoreValue) {
+      if (!originMenu) return;
+      originMenu.hidden = true;
+      if (originInput) {
+        originInput.setAttribute('aria-expanded', 'false');
+        if (restoreValue) originInput.value = originLabel(S.origin);
+      }
+      if (originToggle) originToggle.setAttribute('aria-expanded', 'false');
+    }
+    function selectOrigin(code) {
+      if (code !== 'MVD' && code !== 'PDP') return;
+      var changed = S.origin !== code;
+      S.origin = code;
+      if (originInput) originInput.value = originLabel(code);
+      closeOriginMenu(false);
+      if (changed && S.dest !== 'todos') schedule();
+    }
+    function syncOriginFromInput(restoreLabel) {
+      var code = readOriginCode(originInput && originInput.value);
+      if (!code) {
+        if (restoreLabel && originInput) originInput.value = originLabel(S.origin);
+        return;
+      }
+      var changed = S.origin !== code;
+      S.origin = code;
+      if (restoreLabel && originInput) originInput.value = originLabel(code);
+      if (changed && S.dest !== 'todos') schedule();
+    }
+    if (originInput) {
+      originInput.addEventListener('focus', function () {
+        if (originInput.value === originLabel(S.origin)) originInput.value = '';
+        filterOriginOptions(originInput.value);
+        openOriginMenu();
+      });
+      originInput.addEventListener('input', function () { syncOriginFromInput(false); filterOriginOptions(originInput.value); openOriginMenu(); });
+      originInput.addEventListener('change', function () { syncOriginFromInput(true); });
+      originInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') { closeOriginMenu(true); return; }
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          var options = filterOriginOptions(originInput.value);
+          openOriginMenu();
+          if (options[0]) options[0].focus();
+        } else if (event.key === 'Enter') {
+          var code = readOriginCode(originInput.value);
+          if (code) { event.preventDefault(); selectOrigin(code); }
+        }
+      });
+    }
+    if (originMenu) {
+      originMenu.addEventListener('pointerdown', function (event) { if (event.target.closest('[data-origin-code]')) event.preventDefault(); });
+      originMenu.addEventListener('click', function (event) {
+        var option = event.target.closest('[data-origin-code]');
+        if (option) selectOrigin(option.getAttribute('data-origin-code'));
+      });
+      originMenu.addEventListener('keydown', function (event) {
+        var option = event.target.closest('[data-origin-code]');
+        if (event.key === 'Escape') { closeOriginMenu(true); if (originInput) originInput.focus(); }
+        else if (event.key === 'Enter' && option) { event.preventDefault(); selectOrigin(option.getAttribute('data-origin-code')); if (originInput) originInput.focus(); }
+      });
+    }
+    if (originToggle) {
+      originToggle.addEventListener('click', function () {
+        if (originMenu && !originMenu.hidden) closeOriginMenu(true);
+        else { filterOriginOptions(''); openOriginMenu(); }
+      });
+    }
+    var highlights = document.getElementById('destination-highlights');
+    if (highlights) {
+      renderDestinationHighlights(new Date().getMonth());
+      highlights.addEventListener('change', function (event) {
+        var month = event.target.closest('[data-feature-month]');
+        if (month) renderDestinationHighlights(Number(month.value));
+      });
+      highlights.addEventListener('click', function (event) {
+        var choose = event.target.closest('[data-feature-search]');
+        if (!choose) return;
+        var group = DESTINATION_GROUPS.filter(function (item) { return item.id === choose.getAttribute('data-feature-search'); })[0];
+        var card = choose.closest('[data-featured-destination]');
+        var choice = card && card.querySelector('[data-feature-subcategory]');
+        var subcategory = group && choice && group.subcategories[Number(choice.value)];
+        if (subcategory) {
+          pendingDestinationScroll = true;
+          selectDestination(subcategory.key, subcategory.label);
+        }
+      });
     }
     function bindDestinationOption(option) {
       if (!option) return;
@@ -2431,6 +2617,14 @@
         }
       });
       trigger.addEventListener('input', function () {
+        var enteredOrigin = readOriginCode(trigger.value);
+        if (enteredOrigin) {
+          var originChanged = S.origin !== enteredOrigin;
+          S.origin = enteredOrigin;
+          if (originInput) originInput.value = originLabel(enteredOrigin);
+          trigger.value = '';
+          if (originChanged && S.dest !== 'todos') schedule();
+        }
         filterDestOptions(trigger.value);
         openDestMenu();
       });
@@ -2461,6 +2655,7 @@
       });
     }
     document.addEventListener('click', function (e) {
+      if (originPicker && !originPicker.contains(e.target)) closeOriginMenu(true);
       if (sel && !sel.contains(e.target)) closeDestMenu();
     });
     sel.addEventListener('change', function () {
@@ -2906,10 +3101,6 @@
           }
         });
       });
-      var extra = list.filter(function (d) { return !DESTINATION_GROUPS.some(function (group) { return group.keys.indexOf(d.key) >= 0; }); });
-      extra.sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).forEach(function (d) {
-        ordered.push({ key: d.key, name: d.name, group: 'Otros destinos' });
-      });
 
       var grouped = {};
       DESTINATION_GROUPS.forEach(function (group) {
@@ -2920,7 +3111,6 @@
         grouped[item.group].push(item);
       });
       var groupOrder = DESTINATION_GROUPS.map(function (group) { return group.label; });
-      if (grouped['Otros destinos'] && grouped['Otros destinos'].length) groupOrder.push('Otros destinos');
       var menu = document.getElementById('dest-menu');
       destItems = [{ value: 'todos', label: 'Todos los destinos (Buscar por mi presupuesto)' }];
       if (menu) {
@@ -2943,6 +3133,7 @@
             option.id = 'dest-option-' + item.key;
             option.className = 'custom-select__option';
             option.setAttribute('data-dest-value', item.key);
+            option.setAttribute('data-iata-codes', DEST_IATA_ALIASES[item.key] || IATA_BY_DEST[item.key] || '');
             option.setAttribute('role', 'option');
             option.setAttribute('aria-selected', 'false');
             option.innerHTML = '<span class="custom-select__option-main">' + esc(item.name) + '</span>';

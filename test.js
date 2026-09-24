@@ -212,21 +212,25 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
     }
   });
   await t('cotiza un viaje estimado sin credenciales externas', async function () {
-    const r = await get(port, '/api/cotizar?' + q);
+    const r = await get(port, '/api/cotizar?' + q + '&origin=PDP&subcategory=Praia%20dos%20Ingleses');
     const j = JSON.parse(r.body);
     assert.strictEqual(r.status, 200); assert.strictEqual(j.meta.mode, 'estimated');
+    assert.strictEqual(j.meta.origin, 'PDP'); assert.strictEqual(j.meta.subcategory, 'Praia dos Ingleses');
     assert.ok(j.list.length >= 3); assert.ok(j.recId);
     assert.ok(j.list.every(function (p) { return p.sources.pasajes === 'estimado'; }));
   });
-  await t('devuelve todos los destinos configurados', async function () {
+  await t('devuelve únicamente destinos de los cinco bloques de Brasil', async function () {
     const j = JSON.parse((await get(port, '/api/destinos')).body);
+    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
-    assert.strictEqual(j.length, Object.keys(model.DEST).length);
+    assert.strictEqual(j.length, allowed.length);
+    assert.deepStrictEqual(j.map(function (d) { return d.key; }).sort(), allowed.slice().sort());
   });
-  await t('cotiza todos los destinos ordenados por total', async function () {
+  await t('cotiza destinos de los cinco bloques ordenados por total', async function () {
     const r = await get(port, '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
     const j = JSON.parse(r.body);
-    assert.strictEqual(r.status, 200); assert.strictEqual(j.options.length, Object.keys(model.DEST).length);
+    assert.strictEqual(r.status, 200); assert.strictEqual(j.options.length, 11);
+    assert.ok(j.options.every(function (o) { return ['rio', 'buz', 'arraial', 'cabo', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'].includes(o.dest.key); }));
     for (let i = 1; i < j.options.length; i++) assert.ok(j.options[i].total >= j.options[i - 1].total);
     assert.ok(j.options.every(function (o) { return o.parts && o.dest && typeof o.fits === 'boolean'; }));
   });

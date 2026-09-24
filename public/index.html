@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=26">
+<link rel="stylesheet" href="/style.css?v=30">
 <!-- Script de afiliados Travelpayouts (Money Script) -->
 <script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1" data-cmp-ab="2">
   (function () {
@@ -50,9 +50,11 @@
 
   <div id="vista-principal">
   <section class="form" aria-label="Datos de tu viaje">
-    <div class="origin">
+    <div class="origin" id="origin-picker">
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
-      Salís desde <b>Uruguay (Montevideo)</b>
+      <label for="origin-input">Salís desde</label>
+      <div class="origin__control"><input id="origin-input" type="text" value="Montevideo (MVD)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="origin-menu" aria-label="Aeropuerto de origen, buscá por ciudad o código IATA"><button id="origin-toggle" type="button" aria-label="Mostrar aeropuertos disponibles" aria-expanded="false">▾</button></div>
+      <div id="origin-menu" class="origin__menu" role="listbox" aria-label="Aeropuertos de salida" hidden><button type="button" role="option" data-origin-code="MVD"><strong>Montevideo</strong><span>Aeropuerto Internacional de Carrasco · MVD</span></button><button type="button" role="option" data-origin-code="PDP"><strong>Punta del Este</strong><span>Aeropuerto Internacional de Laguna del Sauce · PDP</span></button></div>
     </div>
     <div>
       <label for="dest-trigger">Destino</label>
@@ -105,6 +107,8 @@
     <button type="button" id="btn-buscar-todos" class="btn-buscar-todos" hidden>🔍 Buscar destinos por presupuesto</button>
   </section>
 
+  <section id="destination-highlights" class="destination-highlights" aria-labelledby="destination-highlights-title"></section>
+
   <div id="results" aria-live="polite"></div>
   <div id="destination-results" aria-live="polite"></div>
   </div>
@@ -131,6 +135,6 @@
 </div>
 
 <script defer src="/pwa.js"></script>
-<script defer src="/app.js?v=28"></script>
+<script defer src="/app.js?v=35"></script>
 </body>
 </html>

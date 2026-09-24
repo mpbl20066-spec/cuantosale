@@ -34,6 +34,7 @@ const MIME = {
 };
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com https://*.supabase.co https://*.wikimedia.org; frame-src https://*.supabase.co; base-uri 'none'; form-action 'self'";
 const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
 // Algunas islas y pueblos pequeños no están indexados como ciudad en Booking.
 // En esos casos buscamos alojamientos en el municipio de acceso más cercano.
 const HOTEL_NEARBY_DESTINATIONS = {
@@ -478,7 +479,7 @@ async function buscarVuelos(req, res, body) {
   const returnDate = String(body.fecha_vuelta || '');
   const passengers = Number(body.pasajeros);
   const style = ['ahorro', 'eq', 'comodo'].includes(String(body.style || '').toLowerCase()) ? String(body.style).toLowerCase() : 'eq';
-  if (origin !== 'MVD' || !destination || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) || (returnDate && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
+  if (!['MVD', 'PDP'].includes(origin) || !destination || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) || (returnDate && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
   try {
@@ -512,10 +513,10 @@ async function buscarVuelos(req, res, body) {
 // propuesta recomendada y, con ella, toda la serie de "otra fecha" (que ya
 // se calcula como el total recomendado + la variación estimada del modelo).
 // Evita las N consultas que implicaría cotizar cada fecha o cada destino.
-async function getLiveFlightQuote(destinationIata, dep, ret, style) {
+async function getLiveFlightQuote(destinationIata, dep, ret, style, origin) {
   if (!duffel.isConfigured()) return null;
   const cabinClass = duffel.styleCabins(style)[0] || 'economy';
-  const offers = await duffel.searchFlights({ origin: 'MVD', destination: destinationIata, departureDate: dep, returnDate: ret, passengers: 1, cabinClass: cabinClass });
+  const offers = await duffel.searchFlights({ origin: origin || 'MVD', destination: destinationIata, departureDate: dep, returnDate: ret, passengers: 1, cabinClass: cabinClass });
   const priced = offers.filter(function (offer) { return Number.isFinite(offer.price_usd) && offer.price_usd > 0; });
   if (!priced.length) return null;
   const cheapest = priced.reduce(function (min, offer) { return offer.price_usd < min.price_usd ? offer : min; });
@@ -531,6 +532,11 @@ async function cotizar(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
+  if (!HOME_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí uno de los destinos destacados de Brasil.' });
+  const origin = String(url.searchParams.get('origin') || 'MVD').toUpperCase();
+  if (!['MVD', 'PDP'].includes(origin)) return sendJson(res, 400, { error: 'El aeropuerto de salida debe ser MVD o PDP.' });
+  v.S.origin = origin;
+  const subcategory = String(url.searchParams.get('subcategory') || '').slice(0, 100);
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   // La pantalla inicial anda con una tarifa real de Duffel para la ruta/fechas
   // elegidas cuando está disponible; si Duffel falla o no está configurado,
@@ -540,7 +546,7 @@ async function cotizar(req, res, url) {
   const destCfgForQuote = model.DEST[v.S.dest];
   if (destCfgForQuote && destCfgForQuote.modes.avion_mvd) {
     try {
-      const quote = await getLiveFlightQuote(destCfgForQuote.iata, v.dep, v.ret, v.S.style);
+      const quote = await getLiveFlightQuote(destCfgForQuote.iata, v.dep, v.ret, v.S.style, origin);
       if (quote) { quotes = { avion_mvd: quote }; liveQuoteApplied = true; }
     } catch (e) {
       console.error('[cotizar] tarifa real de Duffel no disponible:', e.message);
@@ -558,7 +564,7 @@ async function cotizar(req, res, url) {
   sendJson(res, 200, Object.assign({
     meta: {
       mode: liveQuoteApplied ? 'live' : 'estimated',
-      dest: { key: v.S.dest, name: model.DEST[v.S.dest].name },
+       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name }, origin: origin, subcategory: subcategory,
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
       hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString()
@@ -572,6 +578,7 @@ async function cotizarHoteles(req, res, url) {
   let v;
   try { v = model.validate(Object.fromEntries(url.searchParams), model.getToday()); }
   catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
+  if (!HOME_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí uno de los destinos destacados de Brasil.' });
   const dest = model.DEST[v.S.dest];
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights };
@@ -595,13 +602,16 @@ function cotizarTodos(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
+  const origin = String(url.searchParams.get('origin') || 'MVD').toUpperCase();
+  if (!['MVD', 'PDP'].includes(origin)) return sendJson(res, 400, { error: 'El aeropuerto de salida debe ser MVD o PDP.' });
+  v.S.origin = origin;
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
 
   const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
 
   // Estas diez opciones son comparables y estimadas: consultar el proveedor para
   // cada destino dispararía hasta 19 requests externos en un solo clic.
-  const options = Object.keys(model.DEST).map(function (key) {
+  const options = HOME_DESTINATION_KEYS.map(function (key) {
     const trip = Object.assign({}, v.S, { dest: key });
     const result = adaptPackagesToStyle(model.compute(trip, v.dep, v.ret, today, {}), trip, v.dep, v.ret, today);
     const rec = result.list.find(function (p) { return p.id === result.recId; });
@@ -613,7 +623,7 @@ function cotizarTodos(req, res, url) {
   }).sort(function (a, b) { return a.total - b.total; });
 
   sendJson(res, 200, {
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, mode: 'estimated', costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, origin: origin, mode: 'estimated', costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
     options: options,
     localTransport: localTransport
   });
@@ -656,7 +666,7 @@ function createServer() {
     }
     if (req.method === 'POST') { res.writeHead(404); return res.end(); }
     if (url.pathname === '/api/destinos') {
-      return sendJson(res, 200, Object.keys(model.DEST).map(function (k) { return { key: k, name: model.DEST[k].name }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }));
+      return sendJson(res, 200, HOME_DESTINATION_KEYS.map(function (k) { return { key: k, name: model.DEST[k].name }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }));
     }
     if (url.pathname === '/api/config') {
       return sendJson(res, 200, {
