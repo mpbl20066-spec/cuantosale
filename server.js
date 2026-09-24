@@ -351,20 +351,29 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
   // partir por Buenos Aires. Cuando la capa del estilo deja muy pocas opciones,
   // se rellena con alternativas válidas de otras categorías para mantener una
   // respuesta útil en modo demo y en búsquedas rápidas.
-  const preferred = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba' && proposal.ti === tier; });
+  const preferredCore = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba' && proposal.ti === tier; });
+  // Para destinos donde ir en auto es una alternativa real (Florianópolis hacia
+  // el sur), se suma como una propuesta comparable más en "Todas las
+  // propuestas" -- sin tocar la recomendación, que sigue anclada a vuelo/bus
+  // para no alterar el resto del flujo (cotización real de Duffel, transfer
+  // desde el aeropuerto, etc.), pensado para llegar en avión o bus.
+  const roadtripSameTier = Array.isArray(result.roadtripList)
+    ? result.roadtripList.filter(function (proposal) { return proposal.mode === 'auto' && proposal.ti === tier; })
+    : [];
+  const preferred = preferredCore.concat(roadtripSameTier).sort(function (a, b) { return a.total - b.total; });
   const filtered = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba'; });
-  const list = preferred.length >= 3 ? preferred : filtered.filter(function (proposal) {
+  const list = (preferred.length >= 3 ? preferred : filtered.filter(function (proposal) {
     return !preferred.some(function (item) { return item.id === proposal.id; });
   }).reduce(function (acc, proposal) {
     if (acc.some(function (item) { return item.id === proposal.id; })) return acc;
     acc.push(proposal);
     return acc;
-  }, preferred.slice()).slice(0, 3);
+  }, preferred.slice()).slice(0, 3)).slice().sort(function (a, b) { return a.total - b.total; });
   // La recomendación (Gran total, hotel, etc.) siempre debe salir de la
   // categoría que el usuario eligió arriba, aunque el presupuesto no la
   // cubra del todo: rellenar `list` con otras categorías es solo para no
   // dejar la grilla de tarjetas vacía, nunca para elegir la propuesta.
-  const picked = model.pick(trip, preferred.length ? preferred : list);
+  const picked = model.pick(trip, preferredCore.length ? preferredCore : list);
   const rec = picked.rec;
   const series = model.seriesFor(trip, rec, dep, ret, today);
   const cozy = list.slice().sort(function (a, b) { return b.comfort - a.comfort || a.total - b.total; })[0];

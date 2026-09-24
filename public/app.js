@@ -764,7 +764,7 @@
     var toursBookUrl = toursWhatsappUrl(detailState);
     modal.innerHTML = '<div class="booking-dialog itinerary-summary voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<div class="voucher-head"><span class="voucher-kicker">CuantoSale · Voucher digital</span><h2 id="itinerary-summary-title">Resumen final del itinerario</h2><p>' + esc(detailState.meta.dest.name) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</p></div>' +
-      '<div class="voucher-total"><span>Total general estimado</span><strong>' + money(totalGeneral) + '</strong><small>Vuelo + hotel + traslados + tours + operación en destino</small></div>' +
+      '<div class="voucher-total"><span>Total general estimado</span><strong>' + money(totalGeneral) + '</strong><div class="voucher-total__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</div><small>Calculado para ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ' · Vuelo + hotel + traslados + tours + operación en destino</small></div>' +
       '<div class="voucher-grid"><div class="voucher-card"><span class="voucher-icon">✈️</span><div><small>Vuelo seleccionado</small><strong>' + esc(flightSummary.airline) + '</strong><p>' + esc(flightSummary.summary) + '</p><b>' + money(flightTotal) + '</b></div></div>' +
       '<div class="voucher-card"><span class="voucher-icon">🏨</span><div><small>Alojamiento</small><strong>' + esc(selectedHotelName) + '</strong><p>Reserva de referencia en Booking.com</p><b>' + money(hotelTotal) + '</b></div></div>' +
       '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div>' +
@@ -1625,7 +1625,7 @@
   }
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
-    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'igu', 'poa'].indexOf(key) >= 0;
+    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'igu', 'poa', 'camboriu', 'bombinhas', 'rosa'].indexOf(key) >= 0;
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();
@@ -1647,19 +1647,15 @@
       return '<button type="button" data-transport-mode="' + mode.value + '" aria-pressed="' + (mode.value === current ? 'true' : 'false') + '">' + esc(mode.label) + '</button>';
     }).join('');
   }
-  function transportModeFilter(list, selectedMode) {
-    if (!Array.isArray(list)) return list;
-    var mode = String(selectedMode || S.transport || 'flight').toLowerCase();
-    if (mode === 'auto' || mode === 'roadtrip') return list.filter(function (proposal) { return proposal && proposal.mode === 'auto'; });
-    return list.filter(function (proposal) { return proposal && proposal.mode !== 'auto'; });
-  }
   function render(data) {
     lastData = data;
     var live = data.meta.mode === 'live';
     if (!isRoadtripDestinationAllowed(data.meta.dest.key) && S.transport === 'auto') S.transport = 'flight';
-    var allList = normalizeLocalTransportInList(data);
-    var list = transportModeFilter(allList, S.transport);
-    if (!list.length) list = transportModeFilter(normalizeLocalTransportInList(data), 'flight');
+    // El servidor ya devuelve, en la misma categoría elegida, todos los medios
+    // de transporte reales para el destino (vuelo, bus y auto cuando aplica),
+    // así que "Todas las propuestas" los compara directamente sin volver a
+    // filtrarlos acá por el selector de transporte.
+    var list = normalizeLocalTransportInList(data);
     var rec = byId(list, S.proposalId) || byId(list, data.recId);
     if (!rec && list.length) rec = list[0];
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
