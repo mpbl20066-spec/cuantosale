@@ -646,8 +646,22 @@
     if (!included) return '';
     return '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:99px;padding:9px 15px;font-size:14px;font-weight:700;color:#fff;">' + icon + ' ' + esc(label) + '</span>';
   }
-  function buildStoryCardNode(meta, totals) {
-    var photo = DEST_PHOTOS[meta.dest.key] || '';
+  function loadStoryPhoto(photoUrl) {
+    if (!photoUrl) return Promise.reject(new Error('No hay una foto disponible para este destino.'));
+    return fetch(photoUrl, { mode: 'cors', cache: 'force-cache' }).then(function (response) {
+      if (!response.ok) throw new Error('La foto del destino no se pudo descargar.');
+      return response.blob();
+    }).then(function (blob) {
+      if (!blob.type || blob.type.indexOf('image/') !== 0) throw new Error('La imagen del destino no está disponible.');
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () { resolve(String(reader.result || '')); };
+        reader.onerror = function () { reject(new Error('No se pudo preparar la foto del destino.')); };
+        reader.readAsDataURL(blob);
+      });
+    });
+  }
+  function buildStoryCardNode(meta, totals, photo) {
     var location = [meta.dest.region, meta.dest.country || 'Brasil'].filter(Boolean).join(' - ');
     // El nodo se clona a SVG/canvas para exportarlo: si se posiciona fuera del
     // viewport (ej. left:-9999px) el navegador puede no llegar a pintarlo y la
@@ -659,7 +673,7 @@
     node.style.cssText = 'width:540px;height:960px;font-family:Poppins,Arial,sans-serif;';
     node.innerHTML =
       '<div style="position:relative;width:540px;height:960px;background:#0B1B2B;color:#fff;overflow:hidden;">' +
-      (photo ? '<img src="' + esc(photo) + '" crossorigin="anonymous" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">' : '') +
+      (photo ? '<img src="' + esc(photo) + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">' : '') +
       '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,27,43,.1) 0%,rgba(11,27,43,.5) 55%,rgba(11,27,43,.96) 100%);"></div>' +
       '<div style="position:absolute;top:40px;left:40px;right:40px;display:flex;align-items:center;gap:9px;">' +
       '<span style="width:11px;height:11px;border-radius:50%;background:#F6B21B;"></span>' +
@@ -706,9 +720,13 @@
     };
     var meta = detailState.meta;
     var wrapper = null;
-    loadHtmlToImage().then(function (htmlToImage) {
-      wrapper = buildStoryCardNode(meta, totals);
-      return htmlToImage.toBlob(wrapper.firstChild, { width: 540, height: 960, pixelRatio: 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' });
+    Promise.all([loadHtmlToImage(), loadStoryPhoto(DEST_PHOTOS[meta.dest.key] || '')]).then(function (loaded) {
+      var htmlToImage = loaded[0];
+      wrapper = buildStoryCardNode(meta, totals, loaded[1]);
+      var photoNode = wrapper.querySelector('img');
+      return (photoNode && photoNode.decode ? photoNode.decode() : Promise.resolve()).then(function () {
+        return htmlToImage.toBlob(wrapper.firstChild, { width: 540, height: 960, pixelRatio: 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' });
+      });
     }).then(function (blob) {
       if (!blob) throw new Error('No se pudo generar la imagen.');
       var fileName = 'cuantosale-' + (meta.dest.key || 'viaje') + '.png';
