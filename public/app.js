@@ -494,7 +494,10 @@
         : category === 'auto' ? (Number(state.auto) || 0)
         : category === 'tours' ? (Number(state.toursTotal) || 0)
         : (Number(state.parts && state.parts[category]) || 0);
-      if (Number(value) <= 0) return null;
+      // Tours siempre se lista en "A dónde va tu plata", aunque todavía no se
+      // haya sumado ninguna actividad, para que la categoría no desaparezca
+      // del desglose apenas el usuario la mira antes de elegir algo.
+      if (category !== 'tours' && Number(value) <= 0) return null;
       return { category: category, label: info[1], color: info[2], value: Number(value) || 0, width: total ? ((Number(value) / total) * 100) : 0 };
     }).filter(Boolean);
     return { total: total, entries: entries };
@@ -582,10 +585,14 @@
     var transferAmount = getSelectedTransferAmount(detailState);
     var transferIncluded = transferAmount > 0;
     var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
+    var foodPerDay = Number(detailState.foodPerDay) || 0;
+    var localPerDay = Number(detailState.localPerDay) || 0;
     var summaryItems = [
       { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
       { label: 'Transfer', meta: transferIncluded ? 'Incluido' : 'No incluido', value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') },
       { label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
+      { label: 'Comida', meta: foodPerDay ? money(foodPerDay) + '/día' : 'Estimado', value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
+      { label: 'Transporte local', meta: localPerDay ? money(localPerDay) + '/día' : 'Estimado', value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
       { label: 'Tours', meta: toursLabel, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
     ];
     var segments = entries.map(function (entry) {
