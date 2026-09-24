@@ -192,6 +192,9 @@
     { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'mcz', 'ssa'], subcategories: [
       { label: 'Porto de Galinhas (All Inclusive)', key: 'porto' }, { label: 'Maceió (Resort)', key: 'mcz' }, { label: 'Salvador de Bahía', key: 'ssa' }
     ] },
+    { id: 'salvador', label: 'Salvador de Bahía', image: 'ssa', keys: ['ssa'], subcategories: [
+      { label: 'Salvador de Bahía', key: 'ssa' }
+    ] },
     { id: 'florianopolis', label: 'Florianópolis', image: 'fln', keys: ['fln'], subcategories: [
       { label: 'Canasvieiras / Norte', key: 'fln' }, { label: 'Praia dos Ingleses', key: 'fln' }, { label: 'Centro / Sur', key: 'fln' }
     ] },
@@ -199,7 +202,13 @@
       { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' }, { label: 'Ilhabela', key: 'ilhabela' }
     ] }
   ];
-  var MONTH_DESTINATION_ROTATION = { 9: ['rio', 'buzios'], 10: ['nordeste'], 11: ['rio', 'nordeste'], 0: ['florianopolis', 'ilhabela'] };
+  var MONTH_DESTINATION_ROTATION = {
+    0: ['florianopolis', 'ilhabela'], 1: ['florianopolis', 'ilhabela'],
+    2: ['rio', 'buzios'], 3: ['rio', 'buzios'], 4: ['rio', 'nordeste'],
+    5: ['nordeste', 'salvador'], 6: ['nordeste', 'salvador'], 7: ['rio', 'nordeste'],
+    8: ['rio', 'buzios'], 9: ['rio', 'buzios'], 10: ['nordeste', 'salvador'],
+    11: ['rio', 'nordeste']
+  };
   var BRASIL_DEFAULT_COSTS = {
     beach: {
       flightUsd: 460,
@@ -229,6 +238,30 @@
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
   var DEST_IATA_ALIASES = { rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
+  var DESTINATION_HUBS = [
+    { label: '🛬 Río de Janeiro (GIG / SDU)', options: [
+      { label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Centro / Sur' },
+      { label: 'Búzios', key: 'buz', codes: 'GIG SDU' }, { label: 'Arraial do Cabo', key: 'arraial', codes: 'GIG SDU' },
+      { label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' }
+    ] },
+    { label: '🛬 San Pablo (GRU / CGH)', options: [
+      { label: 'Ilhabela', key: 'ilhabela', codes: 'GRU CGH' }, { label: 'Ubatuba', key: 'ubatuba', codes: 'GRU CGH' },
+      { label: 'Paraty', key: 'paraty', codes: 'GRU CGH' }
+    ] },
+    { label: '🛬 Nordeste (REC / MCZ / SSA)', options: [
+      { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' }, { label: 'Maceió', key: 'mcz', codes: 'MCZ' },
+      { label: 'Salvador de Bahía', key: 'ssa', codes: 'SSA' }
+    ] },
+    { label: '🛬 Florianópolis (FLN)', options: [
+      { label: 'Canasvieiras / Norte', key: 'fln', codes: 'FLN', subcategory: 'Canasvieiras / Norte' },
+      { label: 'Praia dos Ingleses', key: 'fln', codes: 'FLN', subcategory: 'Praia dos Ingleses' },
+      { label: 'Centro / Sur de la isla', key: 'fln', codes: 'FLN', subcategory: 'Centro / Sur de la isla' }
+    ] },
+    { label: '🛬 Buenos Aires (EZE / AEP)', options: [
+      { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE', unavailable: true },
+      { label: 'Palermo / Zona Norte', key: 'bue', codes: 'EZE AEP BUE', unavailable: true }
+    ] }
+  ];
   var ORIGIN_AIRPORTS = { MVD: 'Montevideo (MVD)', PDP: 'Punta del Este (PDP)' };
   function originLabel(code) { return ORIGIN_AIRPORTS[String(code || 'MVD').toUpperCase()] || ORIGIN_AIRPORTS.MVD; }
   function originCityName(code) { return originLabel(code).split(' · ')[0]; }
@@ -236,20 +269,22 @@
     var root = document.getElementById('destination-highlights');
     if (!root) return;
     var names = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex];
-    var groups = seasonalIds ? DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; }) : DESTINATION_GROUPS;
+    var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex] || MONTH_DESTINATION_ROTATION[new Date().getMonth()];
+    var groups = DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; });
     var monthOptions = names.map(function (name, index) { return '<option value="' + index + '"' + (index === monthIndex ? ' selected' : '') + '>' + name.charAt(0).toUpperCase() + name.slice(1) + '</option>'; }).join('');
     var cards = groups.map(function (group) {
-      var options = group.subcategories.map(function (item, index) { return '<option value="' + index + '">' + esc(item.label) + '</option>'; }).join('');
+      var subcategories = monthIndex === 10 && group.id === 'nordeste' ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; }) : group.subcategories;
+      var options = subcategories.map(function (item, index) { return '<option value="' + index + '">' + esc(item.label) + '</option>'; }).join('');
       var photo = DEST_PHOTOS[group.image];
+      var cardLabel = monthIndex === 11 && group.id === 'rio' ? 'Río de Janeiro · Réveillon' : group.label;
       return '<article class="featured-destination" data-featured-destination="' + esc(group.id) + '">' +
         (photo ? '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy"></div>' : '') +
-        '<div class="featured-destination__body"><span class="featured-destination__eyebrow">BRASIL · DESTINO DESTACADO</span><h3>' + esc(group.label) + '</h3>' +
+        '<div class="featured-destination__body"><span class="featured-destination__eyebrow">BRASIL · DESTINO DESTACADO</span><h3>' + esc(cardLabel) + '</h3>' +
         '<label class="sr-only" for="featured-subcategory-' + esc(group.id) + '">Elegí una zona de ' + esc(group.label) + '</label>' +
         '<select id="featured-subcategory-' + esc(group.id) + '" data-feature-subcategory="' + esc(group.id) + '">' + options + '</select>' +
         '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">→</span></button></div></article>';
     }).join('');
-    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">ESCAPADAS PARA CADA TEMPORADA</span><h2 id="destination-highlights-title">Destinos destacados</h2><p>Elegí una zona y te mostramos una propuesta para tu viaje.</p></div><label>Ver destinos para <select data-feature-month aria-label="Simular mes para ver destinos">' + monthOptions + '</select></label></div><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div>';
+    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">ESCAPADAS PARA CADA TEMPORADA</span><h2 id="destination-highlights-title">Destinos destacados</h2><p>Elegí una zona y te mostramos una propuesta para tu viaje.</p></div><label>Ver destinos para <select data-feature-month aria-label="Simular mes para ver destinos">' + monthOptions + '</select></label></div><div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">‹</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">›</button></div>';
   }
   var FOOD_TIPS = {
     rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
@@ -688,15 +723,20 @@
     });
     return htmlToImagePromise;
   }
-  function storySummaryChip(label, value) {
-    return '<span style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:9px 11px;font-size:12px;font-weight:700;color:#fff;"><span>' + esc(label) + '</span><b style="white-space:nowrap;">' + esc(money(value)) + '</b></span>';
+  function storyInclusionPill(label) {
+    return '<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;font-weight:700;white-space:nowrap;"><b style="font-size:13px;color:#F6B21B;">✓</b>' + esc(label) + '</span>';
   }
   function storyDateRange(meta) {
     function format(value) {
+      if (!value) return '';
       var date = parse(value);
-      return isNaN(date) ? String(value || '') : date.toLocaleDateString('es-UY', { day: '2-digit', month: 'short' }).replace('.', '');
+      return isNaN(date) ? String(value) : String(date.getDate()).padStart(2, '0') + '-' + date.toLocaleDateString('es-UY', { month: 'short' }).replace(/\./g, '');
     }
-    return format(meta.dep) + ' - ' + format(meta.ret);
+    var departure = format(meta.dep), returning = format(meta.ret);
+    if (departure && returning) return departure + ' - ' + returning;
+    var cheapest = meta.cheapestDateRange || meta.cheapestDates;
+    if (cheapest && cheapest.dep && cheapest.ret) return format(cheapest.dep) + ' - ' + format(cheapest.ret);
+    return cheapest && cheapest.date ? format(cheapest.date) : 'Fecha más económica del mes';
   }
   function storyCostLabel(entry) {
     return { pasajes: 'Vuelo', alojamiento: 'Hotel', comidas: 'Comidas / régimen', local: 'Transporte local', traslados: 'Traslados', tours: 'Tours', auto: 'Auto / roadtrip' }[entry.category] || entry.label;
@@ -729,23 +769,22 @@
     node.innerHTML =
       '<div style="position:relative;width:540px;height:960px;background:#0B1B2B;color:#fff;overflow:hidden;">' +
       (photo ? '<img src="' + esc(photo) + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">' : '') +
-      '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,27,43,.1) 0%,rgba(11,27,43,.5) 55%,rgba(11,27,43,.96) 100%);"></div>' +
+      '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,27,43,.02) 0%,rgba(11,27,43,.08) 42%,rgba(11,27,43,.72) 68%,rgba(11,27,43,.96) 100%);"></div>' +
       '<div style="position:absolute;top:40px;left:40px;right:40px;display:flex;align-items:center;gap:9px;">' +
       '<span style="width:11px;height:11px;border-radius:50%;background:#F6B21B;"></span>' +
       '<span style="font-weight:800;letter-spacing:.02em;font-size:22px;">cuántosale</span>' +
       '</div>' +
       '<div style="position:absolute;left:40px;right:40px;bottom:38px;">' +
-      (location ? '<div style="font-size:15px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#F6B21B;margin-bottom:8px;">' + esc(location) + '</div>' : '') +
-      '<div style="font-size:42px;font-weight:800;line-height:1.02;margin-bottom:10px;">' + esc(meta.dest.name) + '</div>' +
-      '<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:14px;color:rgba(255,255,255,.88);font-size:13px;font-weight:700;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '</span></div>' +
-      '<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:18px 20px;margin-bottom:13px;">' +
-      '<div style="font-size:12px;color:rgba(255,255,255,.78);margin-bottom:5px;text-transform:uppercase;letter-spacing:.09em;">Precio por pasajero</div>' +
-      '<div style="font-size:58px;font-weight:800;line-height:1;">' + esc(money(totals.pp)) + '</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,.72);margin-top:7px;">Total del viaje · ' + esc(money(totals.total)) + '</div>' +
+      (location ? '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:7px;">' + esc(location) + '</div>' : '') +
+      '<div style="font-size:40px;font-weight:800;line-height:1.02;margin-bottom:11px;">' + esc(meta.dest.name) + '</div>' +
+      '<div style="display:flex;align-items:center;gap:18px;margin-bottom:12px;color:rgba(255,255,255,.94);font-size:13px;font-weight:600;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '</span></div>' +
+      '<div style="background:rgba(11,27,43,.52);border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:16px 19px;margin-bottom:12px;">' +
+      '<div style="font-size:11px;color:rgba(255,255,255,.78);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Precio por pasajero</div>' +
+      '<div style="font-size:58px;font-weight:800;line-height:1;letter-spacing:-.03em;">' + esc(money(totals.pp)) + '</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total del viaje: ' + esc(money(totals.total)) + '</div>' +
       '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">' + totals.entries.map(function (entry) { return storySummaryChip(storyCostLabel(entry), entry.value); }).join('') +
-      '</div>' +
-      '<div style="margin-top:15px;font-size:15px;font-weight:800;color:#fff;">¿Viajamos juntos? Armá el tuyo acá <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px;">' + totals.entries.filter(function (entry) { return Number(entry.value) > 0; }).map(function (entry) { return storyInclusionPill(storyCostLabel(entry)); }).join('') + '</div>' +
+      '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">¿Viajamos juntos? Armá el tuyo acá <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
       '</div></div>';
     wrapper.appendChild(node);
     document.body.appendChild(wrapper);
@@ -2364,13 +2403,13 @@
     var activeDestOption = null;
 
     function setDestDisplay(value) {
-      var item = destItems.filter(function (entry) { return entry.value === value; })[0];
+      var item = destItems.filter(function (entry) { return entry.value === value && (!S.subcategory || entry.subcategory === S.subcategory); })[0] || destItems.filter(function (entry) { return entry.value === value; })[0];
       var text = item ? item.label : 'Todos los destinos (Buscar por mi presupuesto)';
-      if (S.subcategory) text += ' · ' + S.subcategory;
+      if (S.subcategory && (!item || item.subcategory !== S.subcategory)) text += ' · ' + S.subcategory;
       if (trigger) trigger.value = text;
       if (menu) {
         Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
-          var selected = option.getAttribute('data-dest-value') === value;
+          var selected = option.getAttribute('data-dest-value') === value && (!S.subcategory || option.getAttribute('data-subcategory') === S.subcategory);
           option.classList.toggle('is-selected', selected);
           option.setAttribute('aria-selected', selected ? 'true' : 'false');
         });
@@ -2460,6 +2499,7 @@
     function selectDestination(nextValue, subcategory) {
       var destinationKey = String(nextValue || 'todos');
       if (!destinationKey) return;
+      if (destinationKey === 'bue') { notice('Estamos preparando las propuestas para Buenos Aires.'); closeDestMenu(); return; }
       S.dest = destinationKey; S.proposalId = ''; S.subcategory = String(subcategory || '');
       if (S.dest === 'todos') { S.transport = 'flight'; }
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
@@ -2574,12 +2614,29 @@
         if (month) renderDestinationHighlights(Number(month.value));
       });
       highlights.addEventListener('click', function (event) {
+        var arrow = event.target.closest('[data-feature-prev], [data-feature-next]');
+        if (arrow) {
+          var carousel = highlights.querySelector('.destination-highlights__carousel');
+          if (!carousel) return;
+          var forward = arrow.hasAttribute('data-feature-next');
+          var atEnd = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth - 4;
+          var atStart = carousel.scrollLeft <= 4;
+          if (carousel.scrollWidth <= carousel.clientWidth + 4) {
+            if (forward) carousel.appendChild(carousel.firstElementChild);
+            else carousel.insertBefore(carousel.lastElementChild, carousel.firstElementChild);
+          } else if (forward && atEnd) carousel.scrollTo({ left: 0, behavior: 'smooth' });
+          else if (!forward && atStart) carousel.scrollTo({ left: carousel.scrollWidth, behavior: 'smooth' });
+          else carousel.scrollBy({ left: forward ? carousel.clientWidth : -carousel.clientWidth, behavior: 'smooth' });
+          return;
+        }
         var choose = event.target.closest('[data-feature-search]');
         if (!choose) return;
         var group = DESTINATION_GROUPS.filter(function (item) { return item.id === choose.getAttribute('data-feature-search'); })[0];
         var card = choose.closest('[data-featured-destination]');
         var choice = card && card.querySelector('[data-feature-subcategory]');
-        var subcategory = group && choice && group.subcategories[Number(choice.value)];
+        var availableSubcategories = group && Number($('#destination-highlights [data-feature-month]').value) === 10 && group.id === 'nordeste'
+          ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; }) : group && group.subcategories;
+        var subcategory = availableSubcategories && choice && availableSubcategories[Number(choice.value)];
         if (subcategory) {
           pendingDestinationScroll = true;
           selectDestination(subcategory.key, subcategory.label);
@@ -2591,7 +2648,7 @@
       option.onclick = function (event) {
         event.preventDefault();
         event.stopPropagation();
-        selectDestination(option.getAttribute('data-dest-value'));
+        selectDestination(option.getAttribute('data-dest-value'), option.getAttribute('data-subcategory'));
       };
     }
     document.addEventListener('pointerdown', function (event) {
@@ -2599,7 +2656,7 @@
       if (!option || option.hidden) return;
       event.preventDefault();
       event.stopPropagation();
-      selectDestination(option.getAttribute('data-dest-value'));
+      selectDestination(option.getAttribute('data-dest-value'), option.getAttribute('data-subcategory'));
     }, true);
     if (trigger) {
       trigger.addEventListener('click', function () {
@@ -2650,7 +2707,7 @@
               return label && normalizeDestQuery(label.textContent).indexOf(query) === 0;
             })[0]) || destinations[0] || matches[0];
           }
-          if (option) selectDestination(option.getAttribute('data-dest-value'));
+          if (option) selectDestination(option.getAttribute('data-dest-value'), option.getAttribute('data-subcategory'));
         }
       });
     }
@@ -3090,56 +3147,36 @@
     });
     $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'transfer-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } submitTransfer(e.target); });
 
-    fetch('/api/destinos').then(function (r) { return r.json(); }).then(function (list) {
-      var byKey = {};
-      list.forEach(function (d) { byKey[d.key] = d; });
-      var ordered = [];
-      DESTINATION_GROUPS.forEach(function (group) {
-        group.keys.forEach(function (key) {
-          if (byKey[key]) {
-            ordered.push({ key: byKey[key].key, name: byKey[key].name, group: group.label });
-          }
-        });
-      });
-
-      var grouped = {};
-      DESTINATION_GROUPS.forEach(function (group) {
-        grouped[group.label] = [];
-      });
-      ordered.forEach(function (item) {
-        if (!grouped[item.group]) grouped[item.group] = [];
-        grouped[item.group].push(item);
-      });
-      var groupOrder = DESTINATION_GROUPS.map(function (group) { return group.label; });
+    fetch('/api/destinos').then(function (r) { return r.json(); }).then(function () {
       var menu = document.getElementById('dest-menu');
       destItems = [{ value: 'todos', label: 'Todos los destinos (Buscar por mi presupuesto)' }];
       if (menu) {
         menu.innerHTML = '<button id="dest-option-todos" type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true"><span class="custom-select__option-main">🌍 Todos los destinos</span><span class="custom-select__option-sub">Buscar por mi presupuesto</span></button>';
         bindDestinationOption(menu.querySelector('#dest-option-todos'));
       }
-      groupOrder.forEach(function (label) {
-        var items = grouped[label];
-        if (!items || !items.length) return;
+      DESTINATION_HUBS.forEach(function (hub, hubIndex) {
         if (menu) {
           var groupWrap = document.createElement('div');
           groupWrap.className = 'custom-select__group';
           var groupTitle = document.createElement('span');
           groupTitle.className = 'custom-select__group-title';
-          groupTitle.textContent = label;
+          groupTitle.textContent = hub.label;
           groupWrap.appendChild(groupTitle);
-          items.forEach(function (item) {
+          hub.options.forEach(function (item, optionIndex) {
             var option = document.createElement('button');
             option.type = 'button';
-            option.id = 'dest-option-' + item.key;
+            option.id = 'dest-option-' + hubIndex + '-' + optionIndex;
             option.className = 'custom-select__option';
             option.setAttribute('data-dest-value', item.key);
-            option.setAttribute('data-iata-codes', DEST_IATA_ALIASES[item.key] || IATA_BY_DEST[item.key] || '');
+            option.setAttribute('data-iata-codes', item.codes || DEST_IATA_ALIASES[item.key] || IATA_BY_DEST[item.key] || '');
+            option.setAttribute('data-subcategory', item.subcategory || '');
             option.setAttribute('role', 'option');
             option.setAttribute('aria-selected', 'false');
-            option.innerHTML = '<span class="custom-select__option-main">' + esc(item.name) + '</span>';
+            if (item.unavailable) { option.disabled = true; option.setAttribute('aria-label', item.label + ', próximamente'); }
+            option.innerHTML = '<span class="custom-select__option-main">' + esc(item.label) + '</span>' + (item.unavailable ? '<span class="custom-select__option-sub">Próximamente</span>' : '');
             bindDestinationOption(option);
             groupWrap.appendChild(option);
-            destItems.push({ value: item.key, label: item.name });
+            destItems.push({ value: item.key, label: item.label, subcategory: item.subcategory || '' });
           });
           menu.appendChild(groupWrap);
         }

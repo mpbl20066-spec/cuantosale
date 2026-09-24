@@ -221,7 +221,7 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   });
   await t('devuelve únicamente destinos de los cinco bloques de Brasil', async function () {
     const j = JSON.parse((await get(port, '/api/destinos')).body);
-    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
+    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
     assert.strictEqual(j.length, allowed.length);
     assert.deepStrictEqual(j.map(function (d) { return d.key; }).sort(), allowed.slice().sort());
@@ -229,8 +229,8 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   await t('cotiza destinos de los cinco bloques ordenados por total', async function () {
     const r = await get(port, '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
     const j = JSON.parse(r.body);
-    assert.strictEqual(r.status, 200); assert.strictEqual(j.options.length, 11);
-    assert.ok(j.options.every(function (o) { return ['rio', 'buz', 'arraial', 'cabo', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'].includes(o.dest.key); }));
+    assert.strictEqual(r.status, 200); assert.strictEqual(j.options.length, 12);
+    assert.ok(j.options.every(function (o) { return ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'].includes(o.dest.key); }));
     for (let i = 1; i < j.options.length; i++) assert.ok(j.options[i].total >= j.options[i - 1].total);
     assert.ok(j.options.every(function (o) { return o.parts && o.dest && typeof o.fits === 'boolean'; }));
   });
