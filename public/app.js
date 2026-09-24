@@ -13,6 +13,9 @@
   function tour(destinations, destination, title, description, price, details) {
     return { destinations: destinations, destination: destination, title: title, description: description, price: price, details: details };
   }
+  // Los precios recibidos para Florianópolis están en BRL; convertimos con la
+  // cotización de venta PTAX del 23/09/2026 (R$5,1414 por US$1) y sumamos US$5.
+  function florianopolisTourPrice(brl) { return Number((brl / 5.1414 + 5).toFixed(2)); }
   // Fotos reales de cada destino (Wikimedia Commons, licencia libre) para la cabecera de las tarjetas.
   var DEST_PHOTOS = {
     buz: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg/1920px-Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg',
@@ -112,8 +115,16 @@
     tour(['morro'], 'Morro de São Paulo, Brasil', 'Tirolesa y miradores de Morro', 'Aventura suave con vistas a la Primeira y Segunda Praia.', 38, 'Incluye orientación para la tirolesa y recorrido por los miradores principales. Actividad de medio día; la tirolesa puede cerrar por viento o lluvia. Usar calzado cómodo y guardar objetos sueltos.'),
     tour(['fernando'], 'Fernando de Noronha, Brasil', 'Baía dos Porcos y playas del Mar de Dentro', 'Circuito guiado por miradores y playas de aguas transparentes.', 88, 'Incluye traslado interno, guía ambiental y paradas en Sancho, Baía dos Porcos y miradores según acceso. Jornada de 6 horas. Las tasas del parque y preservación pueden cobrarse aparte; llevar snorkel y agua.'),
     tour(['fernando'], 'Fernando de Noronha, Brasil', 'Paseo en barco con snorkel y puesta de sol', 'Navegación por la costa con posibilidad de avistar delfines.', 98, 'Incluye embarcación, guía y equipo básico de flotación para una parada de snorkel. Duración de 4 horas, con horario condicionado por el mar. La observación de fauna no se garantiza; confirmar tasas y restricciones ambientales.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Excursión en barco a Isla de Campeche', 'Navegación desde Armação hacia el Caribe catarinense.', 45, 'Incluye traslado hasta el embarque, navegación y tiempo libre en la isla. Salidas de 5 a 6 horas sujetas a clima, oleaje y autorización del parque. Llevar protector solar, agua y reservar con anticipación en temporada alta.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Ruta de playas del este y Lagoa da Conceição', 'Praia Mole, Joaquina, dunas y miradores en un recorrido completo.', 42, 'Incluye traslado y guía por las playas del este, Lagoa da Conceição y mirantes. Duración aproximada de 6 horas. No incluye alquiler de sombrillas, comidas ni actividades opcionales en las dunas.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Paseo en escuna pirata', 'Navegación costera en escuna desde Florianópolis.', florianopolisTourPrice(190), 'Precio de referencia: R$190. Presentá tu reserva en la boletería. Duración y recorrido sujetos a disponibilidad y condiciones del mar.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Catamarán con almuerzo', 'Excursión en catamarán con almuerzo incluido.', florianopolisTourPrice(250), 'Precio de referencia: R$250. La excursión incluye almuerzo según la opción seleccionada. Confirmá horarios, menú y punto de embarque al reservar.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Excursión en barco a Isla de Campeche', 'Navegación desde Armação hacia el Caribe catarinense.', florianopolisTourPrice(100), 'Precio de referencia: R$100. Incluye navegación y tiempo libre en la isla. Salidas sujetas al clima, oleaje y autorización del parque; confirmá si el traslado hasta el embarque está incluido.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Bautismo de buceo', 'Primera inmersión con barco, equipo e instructor.', florianopolisTourPrice(495), 'Precio de referencia: R$495. La captura indica barco, equipamiento e instructor. La actividad depende de las condiciones del mar y puede requerir una ficha de salud.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Bombinhas y Praia de Quatro Ilhas', 'Excursión de día completo a playas de Bombinhas.', florianopolisTourPrice(120), 'Precio de referencia: R$120. La captura indica traslado de ida y vuelta y visita a las playas. Confirmá itinerario, horarios y servicios incluidos.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Tour de playas de Florianópolis', 'Recorrido por las playas y paisajes más conocidos de la isla.', florianopolisTourPrice(80), 'Precio de referencia: R$80. La captura indica traslado de ida y vuelta. El recorrido y las paradas dependen del operador y las condiciones del día.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'City tour de Florianópolis', 'Recorrido guiado por los puntos destacados de la ciudad.', florianopolisTourPrice(110), 'Precio de referencia: R$110. La captura indica traslado de ida y vuelta. Confirmá los lugares visitados, horarios y punto de salida.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Beto Carrero World', 'Excursión al parque temático Beto Carrero World.', florianopolisTourPrice(110), 'Precio de referencia: R$110. La captura muestra traslado y entrada; verificá qué tipo de ingreso incluye la tarifa y la disponibilidad para la fecha elegida.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Balneário Camboriú', 'Excursión a Balneário Camboriú con traslado y entradas.', florianopolisTourPrice(190), 'Precio de referencia: R$190. La captura indica traslado de ida y vuelta y entradas. Confirmá qué atracciones están incluidas.'),
+    tour(['fln'], 'Florianópolis, Brasil', 'Guarda do Embaú', 'Excursión a Guarda do Embaú y sus paisajes costeros.', florianopolisTourPrice(100), 'Precio de referencia: R$100. La captura indica traslado de ida y vuelta y guía. Confirmá horarios, recorrido y servicios incluidos.'),
     tour(['camboriu'], 'Camboriú, Brasil', 'Parque Unipraias y teleférico', 'Vistas de la costa, senderos y acceso al parque de atracciones.', 52, 'Incluye traslado local y acceso al circuito principal del Parque Unipraias, según disponibilidad. Medio día de actividad. Las atracciones adicionales se pagan aparte; llevar calzado cómodo y consultar altura mínima.'),
     tour(['camboriu'], 'Camboriú, Brasil', 'Paseo en barco por la costa de Balneário', 'Navegación panorámica desde la Barra Sul con música y paradas.', 40, 'Incluye embarcación compartida y recorrido frente a las playas centrales. Duración aproximada de 3 horas, sujeta al clima. Bebidas y consumos a bordo no están incluidos.'),
     tour(['bombinhas'], 'Bombinhas, Brasil', 'Snorkel en Ilha do Arvoredo', 'Navegación y bautismo de snorkel en aguas transparentes.', 62, 'Incluye embarcación, máscara, chaleco y acompañamiento de instructor durante el snorkel. La salida depende de la visibilidad y del oleaje. Llevar traje de baño, toalla y confirmar requisitos para la reserva.'),
@@ -405,12 +416,11 @@
   }
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
-    // Siempre exactamente 3: son las 3 experiencias principales cargadas para
-    // cada destino (con respaldo fijo incluido, nunca queda la sección vacía).
-    var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; }).slice(0, 3);
+    // Mostrar todas las experiencias cargadas para el destino seleccionado.
+    var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
     if (!tours.length) return '';
     var destPhoto = DEST_PHOTOS[destinationKey];
-    return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y actividades sugeridas</h2><p>Elegí las experiencias que querés sumar a tu viaje. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid">' + tours.map(function (tour, index) {
+    return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y actividades sugeridas</h2><p>Elegí las experiencias que querés sumar a tu viaje. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
       var category = classifyTourPhoto(tour.title);
       var photo = (category && TOUR_CATEGORY_PHOTOS[category]) || destPhoto;
@@ -418,7 +428,7 @@
         ? '<div class="local-tour__media"><img src="' + esc(photo) + '" alt="' + esc(tour.title) + '" loading="lazy"></div>'
         : '<div class="local-tour__media local-tour__media-empty"><span aria-hidden="true">✦</span></div>';
       return '<article class="local-tour" data-tour-card role="checkbox" tabindex="0" aria-checked="false" aria-label="Sumar ' + esc(tour.title) + ' al presupuesto">' + mediaMarkup + '<div class="local-tour__body"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '" tabindex="-1"><span class="local-tour__check" aria-hidden="true">✓</span><span class="local-tour__status">Sumar al presupuesto</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div><button type="button" class="local-tour__detail" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">Ver detalle</button></div></article>';
-    }).join('') + '</div><div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div></section>';
+    }).join('') + '</div>' + (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') + '<div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div></section>';
   }
   function openTourDetailModal(button) {
     var modal = $('#booking-modal');
@@ -2519,6 +2529,16 @@
       e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; openDestinationProposal(S.dest);
     });
     $('#vista-detalle').addEventListener('click', function (e) {
+      var moreTours = e.target.closest('[data-toggle-more-tours]');
+      if (moreTours) {
+        e.preventDefault(); e.stopPropagation();
+        var toursSection = moreTours.closest('.local-tours');
+        if (!toursSection) return;
+        var expanded = toursSection.classList.toggle('local-tours--expanded');
+        moreTours.setAttribute('aria-expanded', String(expanded));
+        moreTours.innerHTML = expanded ? 'Ver menos tours <span aria-hidden="true">⌃</span>' : 'Ver más tours (' + (toursSection.querySelectorAll('.local-tour').length - 3) + ') <span aria-hidden="true">⌄</span>';
+        return;
+      }
       var startFlightSearch = e.target.closest('[data-start-flight-search],[data-retry-flight-search]');
       if (startFlightSearch) {
         e.preventDefault(); e.stopPropagation();
