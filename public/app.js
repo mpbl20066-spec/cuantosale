@@ -798,7 +798,32 @@
     return cheapest && cheapest.date ? format(cheapest.date) : 'Fecha más económica del mes';
   }
   function storyCostLabel(entry) {
-    return { pasajes: 'Voos', alojamiento: 'Alojamento', comidas: 'Refeições', local: 'Transporte local', traslados: 'Transfers', tours: 'Passeios', auto: 'Carro / roadtrip' }[entry.category] || entry.label;
+    return { pasajes: 'Vuelos', bus: 'Bus', alojamiento: 'Alojamiento', comidas: 'Régimen', local: 'Transporte local', traslados: 'Traslados', tours: 'Tours', auto: 'Auto' }[entry.category] || entry.label;
+  }
+  function storyInclusionIcon(category) {
+    var paths = {
+      pasajes: '<path d="M3 14.5 21 7l-2 5-6 3-1 5-2 1v-5l-5 1z"/><path d="m10 11-3-4"/>',
+      bus: '<rect x="4" y="4" width="16" height="14" rx="3"/><path d="M4 11h16M8 18l-2 3m10-3 2 3M8 8h.01M16 8h.01"/>',
+      auto: '<path d="m5 11 2-5h10l2 5 2 2v5h-2m-14 0H3v-5zM5 13h14M7 18h10"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/>',
+      alojamiento: '<path d="M3 20V5m0 10h18v5M3 11h5a3 3 0 0 1 3 3v1m0-4h6a4 4 0 0 1 4 4"/><path d="M7 8h.01"/>',
+      comidas: '<path d="M7 3v7m-3-7v4a3 3 0 0 0 6 0V3m-3 7v11m10-18v18m0-18a4 4 0 0 1 4 4v4h-4"/>',
+      traslados: '<path d="M4 16v-5l2-4h12l2 4v5M4 12h16M7 16h.01M17 16h.01M7 7l1-3h8l1 3"/>'
+    };
+    return '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (paths[category] || paths.alojamiento) + '</svg>';
+  }
+  function storyInclusionsMarkup(meta, entries) {
+    var order = ['pasajes', 'bus', 'auto', 'alojamiento', 'comidas', 'traslados'];
+    var present = Object.create(null);
+    (entries || []).forEach(function (entry) {
+      if (Number(entry.value) > 0 && order.indexOf(entry.category) >= 0) present[entry.category] = true;
+    });
+    if (meta.hotelType === 'all-inclusive') present.comidas = true;
+    var items = order.filter(function (category) { return present[category]; }).map(function (category) {
+      var label = category === 'comidas' && meta.hotelType === 'all-inclusive' ? 'All Inclusive' : storyCostLabel({ category: category });
+      return '<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">' + storyInclusionIcon(category) + '<b style="font-weight:500;">' + esc(label) + '</b></span>';
+    });
+    if (!items.length) items = ['<span style="display:inline-flex;align-items:center;gap:5px;">' + storyInclusionIcon('pasajes') + '<b style="font-weight:500;">Vuelos</b></span>', '<span style="display:inline-flex;align-items:center;gap:5px;">' + storyInclusionIcon('alojamiento') + '<b style="font-weight:500;">Alojamiento</b></span>'];
+    return '<div style="display:flex;align-items:center;gap:8px;margin:0 0 12px;color:rgba(255,255,255,.9);font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;"><span style="flex:none;color:rgba(255,255,255,.72);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Incluye</span>' + items.map(function (item, index) { return (index ? '<span style="flex:none;color:#F6B21B;font-weight:700;">+</span>' : '') + item; }).join('') + '</div>';
   }
   function loadStoryPhoto(photoUrl) {
     if (!photoUrl) return Promise.reject(new Error('No hay una foto disponible para este destino.'));
@@ -817,8 +842,7 @@
   }
   function buildStoryCardNode(meta, totals, photo) {
     var location = [meta.dest.region, meta.dest.country || 'Brasil'].filter(Boolean).join(' - ');
-    var includedItems = totals.entries.filter(function (entry) { return Number(entry.value) > 0; }).map(storyCostLabel);
-    var inclusions = includedItems.length ? includedItems.join(' + ') : 'Voos + alojamento';
+    var inclusionsMarkup = storyInclusionsMarkup(meta, totals.entries);
     // El nodo se clona a SVG/canvas para exportarlo: si se posiciona fuera del
     // viewport (ej. left:-9999px) el navegador puede no llegar a pintarlo y la
     // captura sale en blanco. Por eso se ancla en (0,0) dentro de un wrapper
@@ -838,14 +862,14 @@
       '<div style="position:absolute;left:40px;right:40px;bottom:38px;">' +
       (location ? '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:7px;">' + esc(location) + '</div>' : '') +
       '<div style="font-size:40px;font-weight:800;line-height:1.02;margin-bottom:11px;">' + esc(meta.dest.name) + '</div>' +
-      '<div style="display:flex;align-items:center;gap:18px;margin-bottom:12px;color:rgba(255,255,255,.94);font-size:13px;font-weight:600;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' passageiro' : ' passageiros') + '</span></div>' +
+      '<div style="display:flex;align-items:center;gap:18px;margin-bottom:12px;color:rgba(255,255,255,.94);font-size:13px;font-weight:600;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '</span></div>' +
       '<div style="background:rgba(11,27,43,.52);border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:16px 19px;margin-bottom:12px;">' +
-      '<div style="font-size:11px;color:rgba(255,255,255,.78);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Preço por passageiro</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,.78);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Precio por pasajero</div>' +
       '<div style="font-size:58px;font-weight:800;line-height:1;letter-spacing:-.03em;">' + esc(money(totals.pp)) + '</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total da viagem: ' + esc(money(totals.total)) + '</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total del viaje: ' + esc(money(totals.total)) + '</div>' +
       '</div>' +
-      '<div style="margin:0 0 12px;color:rgba(255,255,255,.82);font-size:13px;font-weight:500;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Inclui: ' + esc(inclusions) + '</div>' +
-      '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">Calcula o teu orçamento exato em <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
+      inclusionsMarkup +
+      '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">Calculá tu presupuesto exacto en <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
       '</div></div>';
     wrapper.appendChild(node);
     document.body.appendChild(wrapper);
