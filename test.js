@@ -55,7 +55,10 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   await t('reserva roadtrip solo para destinos geográficamente habilitados', function () {
     assert.ok(model.validate({ dest: 'fln', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today));
     assert.throws(function () { model.validate({ dest: 'ssa', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today); }, /roadtrip|auto/i);
-    assert.throws(function () { model.validate({ dest: 'fln', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'bus' }, today); }, /transporte/i);
+    const florianopolisBus = model.validate({ dest: 'fln', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'bus' }, today);
+    assert.strictEqual(florianopolisBus.S.transport, 'bus');
+    const buenosAiresAuto = model.validate({ dest: 'bue', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today);
+    assert.strictEqual(buenosAiresAuto.S.transport, 'auto');
   });
 
   console.log('Servidor y proveedores');

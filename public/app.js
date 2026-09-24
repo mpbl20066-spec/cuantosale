@@ -3,6 +3,7 @@
 
   var CATS = [
     ['pasajes', 'Pasajes', '--c1'],
+    ['bus', 'Bus', '--c1'],
     ['alojamiento', 'Alojamiento', '--c2'],
     ['comidas', 'Comidas', '--c3'],
     ['local', 'Transporte local', '--c5'],
@@ -183,7 +184,20 @@
     return tour.details || 'Incluye la actividad principal y acompañamiento local. Confirmá horarios, punto de encuentro, disponibilidad y valor final antes de reservar.';
   }
 
-  var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '' };
+  var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', hotelType: 'intermedio', hotelTypeExplicit: false };
+  var HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
+  function inferHotelType(value) {
+    var text = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
+    if (/all-inclusive|todo-incluido/.test(text)) return 'all-inclusive';
+    if (/resort/.test(text)) return 'resort';
+    if (/boutique/.test(text)) return 'boutique';
+    if (/economico|ahorro/.test(text)) return 'economico';
+    if (/intermedio|3-estrellas/.test(text)) return 'intermedio';
+    if (/confort|premium/.test(text)) return 'confort';
+    return '';
+  }
+  function hotelTypeForStyle(style) { return style === 'ahorro' ? 'economico' : style === 'comodo' ? 'confort' : 'intermedio'; }
+  function hotelTypeFactor(type) { return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22, economico: 0.82, intermedio: 1, confort: 1.3 })[type] || 1; }
   var DESTINATION_GROUPS = [
     { id: 'rio', label: 'Río de Janeiro', image: 'rio', keys: ['rio'], subcategories: [
       { label: 'Réveillon Copacabana (31/12)', key: 'rio' }, { label: 'Zona Sur / Ipanema', key: 'rio' }, { label: 'Centro Histórico', key: 'rio' }
@@ -192,7 +206,7 @@
       { label: 'Búzios + Arraial do Cabo', key: 'buz' }, { label: 'Sólo Búzios', key: 'buz' }, { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' }
     ] },
     { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'mcz', 'ssa'], subcategories: [
-      { label: 'Porto de Galinhas (All Inclusive)', key: 'porto' }, { label: 'Maceió (Resort)', key: 'mcz' }, { label: 'Salvador de Bahía', key: 'ssa' }
+      { label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' }, { label: 'Maceió (Resort)', key: 'mcz', hotelType: 'resort' }, { label: 'Salvador de Bahía', key: 'ssa' }
     ] },
     { id: 'salvador', label: 'Salvador de Bahía', image: 'ssa', keys: ['ssa'], subcategories: [
       { label: 'Salvador de Bahía', key: 'ssa' }
@@ -438,6 +452,15 @@
     return Math.max(1, Math.round(average * multiplier)) * nights * pax;
   }
   function hotelStyle(meta) {
+    var typeProfiles = {
+      'all-inclusive': { tier: 'all-inclusive', title: 'All Inclusive', badge: 'ALL INCLUSIVE', description: 'Régimen con comidas y servicios incluidos en el alojamiento.' },
+      resort: { tier: 'resort', title: 'Resort', badge: 'RESORT', description: 'Alojamientos tipo resort; el precio se estima con el régimen seleccionado.' },
+      boutique: { tier: 'boutique', title: 'Boutique', badge: 'HOTEL BOUTIQUE', description: 'Alojamientos boutique con una selección de menor escala.' },
+      economico: { tier: 'eco', title: 'Económico', badge: 'SÚPER ECONÓMICO', description: 'Opciones de bajo costo filtradas por el presupuesto por noche.' },
+      intermedio: { tier: 'moderado', title: 'Intermedio', badge: 'MEJOR RELACIÓN PRECIO-CALIDAD', description: 'Hoteles de gama media filtrados por presupuesto por noche.' },
+      confort: { tier: 'alto', title: 'Confort', badge: 'COMODIDAD PREMIUM', description: 'Hoteles de categoría superior filtrados por presupuesto.' }
+    };
+    if (typeProfiles[meta.hotelType]) return typeProfiles[meta.hotelType];
     var styles = {
       ahorro: { tier: 'eco', title: 'Ahorrar al máximo', badge: 'SÚPER ECONÓMICO', description: 'Posadas, hosteles boutique y opciones de bajo costo.' },
       eq: { tier: 'moderado', title: 'Equilibrado', badge: 'MEJOR RELACIÓN PRECIO-CALIDAD', description: 'Hoteles de gama media con buena ubicación y servicios.' },
@@ -472,13 +495,18 @@
     return unique;
   }
 
+  function hotelTypeSelectMarkup(meta) {
+    var selected = meta.hotelType || 'intermedio';
+    var options = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
+    return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></label>';
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     var profile = hotelStyle(meta);
     var defaultHotel = { tier: profile.tier, name: '', similar: [], image: '' };
-    var hotelCatalog = normalizeHotelCatalog(Array.isArray(meta.hotels) ? meta.hotels : [], defaultHotel);
+    var hotelCatalog = normalizeHotelCatalog(Array.isArray(meta.hotels) ? meta.hotels : [], defaultHotel).filter(function (hotel) { return !hotel.hotelType || hotel.hotelType === meta.hotelType; });
     var options = hotelCatalog.slice(0, 3).map(function (item, index) {
       return {
         name: item.name,
@@ -496,12 +524,14 @@
     });
     if (!options.length) {
       var destinationName = meta.dest.name || 'el destino elegido';
+      var strictType = ['all-inclusive', 'resort', 'boutique'].indexOf(meta.hotelType) >= 0;
+      var emptyCopy = strictType ? 'No encontramos alojamientos verificados de tipo ' + (HOTEL_TYPE_LABELS[meta.hotelType] || meta.hotelType) + ' para estas fechas. No mostramos categorías distintas como reemplazo.' : 'No pudimos cargar opciones automáticamente para estas fechas. Consultá alojamientos y disponibilidad directamente en el destino.';
       var destinationQuery = encodeURIComponent(destinationName);
       var nearbyName = meta.dest.key === 'ilha' || meta.dest.key === 'paraty' ? 'Angra dos Reis' : '';
       var nearbyLink = nearbyName ? '<a class="hotel-nearby-link hotel-nearby-link-secondary" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(nearbyName) + '" target="_blank" rel="noopener noreferrer">Ampliar a ' + esc(nearbyName) + ' ↗</a>' : '';
-      return '<section class="hotel-options hotel-options-empty" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Alojamientos en ' + esc(destinationName) + '</h2><p>No pudimos cargar opciones automáticamente para estas fechas. Consultá alojamientos y disponibilidad directamente en el destino.</p><a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(destinationName) + ' ↗</a>' + nearbyLink + '</div></div></section>';
+      return '<section class="hotel-options hotel-options-empty" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Alojamientos en ' + esc(destinationName) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(emptyCopy) + '</p><a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(destinationName) + ' ↗</a>' + nearbyLink + '</div></div></section>';
     }
-    return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2><p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
+    return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
       (meta.hotelsNearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(meta.hotelsNearby) + ', una zona cercana a ' + esc(meta.dest.name) + '.</p>' : '') + options.map(function (option, index) {
         var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
         var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
@@ -539,7 +569,7 @@
   }
   var hotelRequestId = 0;
   function hotelLoading(meta) {
-    return '<section class="hotel-options hotel-options-loading" aria-live="polite"><div class="hotel-options-head"><div><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2><p>Buscando opciones disponibles…</p></div></div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
+    return '<section class="hotel-options hotel-options-loading" aria-live="polite"><div class="hotel-options-head"><div><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>Buscando opciones disponibles…</p></div></div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
   }
   function loadHotelRecommendations(meta, accommodationTotal) {
     var requestId = ++hotelRequestId;
@@ -548,7 +578,7 @@
       if (cached) cached.outerHTML = hotelOptions(meta, accommodationTotal);
       return;
     }
-    var params = new URLSearchParams({ dest: meta.dest.key, dep: meta.dep, ret: meta.ret, pax: meta.pax, style: meta.style || 'eq' });
+    var params = new URLSearchParams({ dest: meta.dest.key, dep: meta.dep, ret: meta.ret, pax: meta.pax, style: meta.style || 'eq', hotel_type: meta.hotelType || 'intermedio', subcategory: meta.subcategory || '' });
     if (meta.hotelBudgetPerNight != null && Number.isFinite(Number(meta.hotelBudgetPerNight))) params.set('hotel_budget_per_night', String(meta.hotelBudgetPerNight));
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
     var timeout = window.setTimeout(function () { if (controller) controller.abort(); }, 30000);
@@ -587,18 +617,19 @@
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas', 'tours'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas', 'tours'] : state.transportMode === 'bus' ? ['bus', 'alojamiento', 'comidas', 'local', 'tours'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
     var transferValue = getSelectedTransferAmount(state);
     var trasladoValue = (Number(state.parts && state.parts.traslados) || 0) + transferValue;
     var total = roadtrip
       ? Math.round((Number(state.auto) || 0) + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
-      : Math.round((Number(state.flight) || 0) + (Number(state.hotel) || 0) +
+      : Math.round((state.transportMode === 'bus' ? (Number(state.parts && state.parts.bus) || 0) : (Number(state.flight) || 0)) + (Number(state.hotel) || 0) +
         (Number(state.parts.comidas) || 0) + (Number(state.parts.local) || 0) +
         trasladoValue + (Number(state.toursTotal) || 0));
     var entries = categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return null;
       var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
       var value = category === 'pasajes' ? (Number(state.flight) || 0)
+        : category === 'bus' ? (Number(state.parts && state.parts.bus) || 0)
         : category === 'alojamiento' ? (Number(state.hotel) || 0)
         : category === 'traslados' ? trasladoValue
         : category === 'auto' ? (Number(state.auto) || 0)
@@ -705,8 +736,10 @@
     var foodPerDay = Number(detailState.foodPerDay) || 0;
     var localPerDay = Number(detailState.localPerDay) || 0;
     var summaryItems = [
-      { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
-      { label: 'Transfer', meta: esc(transferMeta), value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') },
+      detailState.transportMode === 'bus'
+        ? { label: 'Bus', meta: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(Number(detailState.parts && detailState.parts.bus) || 0), color: getCategoryColor('bus') }
+        : { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
+      ...(detailState.transportMode === 'flight' ? [{ label: 'Transfer', meta: esc(transferMeta), value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') }] : []),
       { label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
       { label: 'Comida', meta: foodPerDay ? money(foodPerDay) + '/día' : 'Estimado', value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
       { label: 'Transporte local', meta: localPerDay ? money(localPerDay) + '/día' : 'Estimado', value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
@@ -942,7 +975,8 @@
     var defaults = getBudgetDefaults((detailState.meta.dest && detailState.meta.dest.key) || (detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'brazil');
     var defaultFood = Number(detailState.parts && detailState.parts.comidas) ? (Number(detailState.parts.comidas) / Math.max(1, nights * pax)) : 0;
     var defaultLocal = Number(detailState.parts && detailState.parts.local) ? (Number(detailState.parts.local) / Math.max(1, nights * pax)) : 0;
-    if ((!Number.isFinite(Number(detailState.foodPerDay)) || Number(detailState.foodPerDay) <= 0) && !detailState.foodPerDayTouched) detailState.foodPerDay = defaultFood || defaults.foodPerDayUsd;
+    if (detailState.meta.hotelType === 'all-inclusive') { detailState.foodPerDay = 0; detailState.parts.comidas = 0; }
+    else if ((!Number.isFinite(Number(detailState.foodPerDay)) || Number(detailState.foodPerDay) <= 0) && !detailState.foodPerDayTouched) detailState.foodPerDay = defaultFood || defaults.foodPerDayUsd;
     if ((!Number.isFinite(Number(detailState.localPerDay)) || Number(detailState.localPerDay) <= 0) && !detailState.localPerDayTouched) detailState.localPerDay = defaultLocal || defaults.localPerDayUsd;
     detailState.foodPerDay = Math.max(0, Number(detailState.foodPerDay) || 0);
     detailState.localPerDay = Math.max(0, Number(detailState.localPerDay) || 0);
@@ -960,6 +994,8 @@
     var total = budget.total;
     var totalEl = document.querySelector('[data-detail-total]');
     if (totalEl) totalEl.textContent = money(total);
+    var perPersonEl = document.querySelector('[data-detail-total-pp]');
+    if (perPersonEl) perPersonEl.textContent = money(Math.round(total / Math.max(1, Number(detailState.meta.pax) || 1))) + ' por persona';
     var rows = document.querySelectorAll('[data-cost-category]');
     Array.prototype.forEach.call(rows, function (row) {
       var category = row.getAttribute('data-cost-category');
@@ -1083,7 +1119,10 @@
   }
   function actualizarAlojamiento(price, selectedByUser) {
     if (!detailState || !Number.isFinite(price) || price <= 0) return;
-    detailState.hotel = Math.round(price);
+    if (detailState.multiStay && selectedByUser) {
+      detailState.multiStay.selectedPrimaryHotelTotal = Math.round(price);
+      updateMultiStayPricing();
+    } else { detailState.hotel = Math.round(price); }
     if (selectedByUser) {
       detailState.selectedHotel = true;
       var checked = document.querySelector('[data-hotel-total]:checked');
@@ -1102,7 +1141,7 @@
     detailState.transportMode = autoEnabled ? 'auto' : 'flight';
     detailState.auto = autoEnabled ? Number(detailState.roadtrip.totalUsd) : 0;
     detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
-    detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados;
+    detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados + (detailState.multiStay ? Number(detailState.multiStay.transferBetweenUsd) || 0 : 0);
     var flow = document.querySelector('[data-transport-flow]');
     if (flow) {
       // Reemplazar, en vez de ocultar, evita que controles de vuelos o transfers
@@ -1187,8 +1226,10 @@
     return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p>' + suggestionMarkup + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" disabled>' + addedLabel + '</button></section>';
   }
 
-  function transportFlow(meta, budget, autoSelected) {
-    if (autoSelected) return roadtripCalculator(meta);
+  function transportFlow(meta, budget, mode) {
+    var selectedMode = typeof mode === 'string' ? mode : mode ? 'auto' : 'flight';
+    if (selectedMode === 'auto') return roadtripCalculator(meta);
+    if (selectedMode === 'bus') return '<section class="transport-options bus-itinerary"><h2>Bus semicama / cama</h2><p>Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
     return '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
   }
   function localTransportDescription(meta) {
@@ -1213,7 +1254,7 @@
   function breakdownRows() {
     if (!detailState) return '';
     var roadtrip = detailState.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados'];
+    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : detailState.transportMode === 'bus' ? ['bus', 'alojamiento', 'comidas', 'local'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados'];
     return categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return '';
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
@@ -1692,8 +1733,8 @@
     var mine = ctrl;
     el.classList.add('loading');
     el.innerHTML = renderLoadingState('Buscando ofertas para tu viaje…');
-    var transportParam = S.transport === 'auto' ? 'auto' : 'flight';
-    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, transport: transportParam, origin: S.origin, subcategory: S.subcategory });
+    var transportParam = S.transport === 'roadtrip' ? 'auto' : S.transport;
+    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, transport: transportParam, origin: S.origin, subcategory: S.subcategory, hotel_type: S.hotelType });
     fetch('/api/cotizar?' + qs.toString(), { signal: mine.signal })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -1714,7 +1755,14 @@
 
   /* ---------- pantalla ---------- */
   function byId(list, id) { if (!Array.isArray(list)) return null; for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i]; return null; }
-  function titleOf(p) { return p.modeShort.replace(/Montevideo/g, originCityName(detailState && detailState.meta && detailState.meta.origin || S.origin)) + ' + hotel ' + p.tierLabel; }
+  function titleOf(p) {
+    var origin = originCityName(detailState && detailState.meta && detailState.meta.origin || S.origin);
+    var originAirport = originLabel(detailState && detailState.meta && detailState.meta.origin || S.origin);
+    var mode = p.mode === 'auto' ? 'Viaje en auto desde ' + originAirport : p.mode === 'bus' ? 'Bus semicama/cama desde ' + originAirport : 'Vuelo desde ' + originAirport;
+    var type = detailState && detailState.meta && detailState.meta.hotelType || S.hotelType || 'intermedio';
+    var hotel = HOTEL_TYPE_LABELS[type] || (p.tierLabel ? p.tierLabel.charAt(0).toUpperCase() + p.tierLabel.slice(1) : 'Intermedio');
+    return mode + ' + Hotel ' + hotel;
+  }
   function srcTag(p, cat, live) {
     if (!live) return '';
     return p.sources[cat] === 'real' ? '<span class="src real">real</span>' : '<span class="src">estimado</span>';
@@ -1775,11 +1823,13 @@
   }
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
-    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'igu', 'poa', 'camboriu', 'bombinhas', 'rosa'].indexOf(key) >= 0;
+    return ['rio', 'bue', 'fln', 'bcm', 'gram', 'canela', 'igu', 'poa', 'camboriu', 'bombinhas', 'rosa'].indexOf(key) >= 0;
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();
-    var modes = [{ value: 'flight', label: 'Vuelo' }, { value: 'bus', label: 'Bus' }];
+    var busDestinations = ['bue', 'fln', 'bcm', 'camboriu', 'bombinhas', 'rosa', 'gram', 'canela', 'igu', 'poa'];
+    var modes = [{ value: 'flight', label: 'Vuelo' }];
+    if (busDestinations.indexOf(key) >= 0) modes.push({ value: 'bus', label: 'Bus' });
     if (isRoadtripDestinationAllowed(key)) modes.push({ value: 'auto', label: 'Auto / Roadtrip' });
     return modes;
   }
@@ -1799,6 +1849,7 @@
   }
   function render(data) {
     lastData = data;
+    S.hotelType = data.meta.hotelType || S.hotelType;
     var live = data.meta.mode === 'live';
     if (!isRoadtripDestinationAllowed(data.meta.dest.key) && S.transport === 'auto') S.transport = 'flight';
     // El servidor ya devuelve, en la misma categoría elegida, todos los medios
@@ -1890,7 +1941,10 @@
     };
     // Solo se comparan propuestas de la misma gama de alojamiento que la recomendada
     // (la que ya refleja el estilo de viaje elegido arriba), para no mezclar tiers.
-    var sameTier = list.filter(function (p) { return p.ti === rec.ti; });
+    var allProposals = list.concat(Array.isArray(data.alternatives) ? data.alternatives : []).filter(function (proposal, index, proposals) {
+      return proposal.mode !== 'avion_ba' && proposals.findIndex(function (candidate) { return candidate.id === proposal.id; }) === index;
+    });
+    var sameTier = allProposals.filter(function (p) { return p.ti === rec.ti; }).sort(function (a, b) { return a.total - b.total; });
     var opts = sameTier.map(proposalMarkup).join('');
     h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
 
@@ -1906,32 +1960,116 @@
     if (results) results.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function multiStayMarkup(state) {
+    var trip = state && state.multiStay;
+    if (!trip || !trip.stays || trip.stays.length !== 2) return '';
+    var nights = Math.max(1, Number(trip.totalNights) || 1);
+    var firstNights = Math.max(1, Math.min(nights - 1, Number(trip.firstNights) || Math.floor(nights / 2)));
+    var secondNights = nights - firstNights;
+    var first = trip.stays[0], second = trip.stays[1];
+    var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '): aeropuerto → Búzios → Arraial do Cabo → aeropuerto. Incluye transfers de aeropuerto y ' + trip.transferBetweenLabel.toLowerCase() + ' (' + money(trip.transferBetweenUsd) + ' en total).';
+    return '<section class="multistay-panel" aria-labelledby="multistay-title" data-multistay-panel>' +
+      '<div class="multistay-panel__head"><div><span class="multistay-panel__eyebrow">ITINERARIO MULTIDESTINO</span><h2 id="multistay-title">Distribuí tus noches</h2></div><span class="multistay-panel__total">' + nights + (nights === 1 ? ' noche' : ' noches') + ' en total</span></div>' +
+      (nights > 1 ? '<div class="multistay-panel__stays"><div class="multistay-panel__stay"><strong>' + esc(first.name) + '</strong><span><b data-multistay-first-nights>' + firstNights + '</b> ' + (firstNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-first-cost>' + money(0) + ' alojamiento estimado</small></div>' +
+      '<label class="multistay-panel__slider"><span class="sr-only">Noches en ' + esc(first.name) + '</span><input type="range" min="1" max="' + (nights - 1) + '" step="1" value="' + firstNights + '" data-multistay-split aria-valuetext="' + firstNights + ' noches en ' + esc(first.name) + ', ' + secondNights + ' en ' + esc(second.name) + '"></label>' +
+      '<div class="multistay-panel__stay"><strong>' + esc(second.name) + '</strong><span><b data-multistay-second-nights>' + secondNights + '</b> ' + (secondNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-second-cost>' + money(0) + ' alojamiento estimado</small></div></div>' : '<p class="multistay-panel__hint">Para dividir la estadía entre localidades necesitás al menos 2 noches.</p>') +
+      '<p class="multistay-panel__logistics">✈️ ' + esc(logistics) + '</p><p class="multistay-panel__hint">Alojamiento y traslado interlocalidad son estimaciones; el precio se ajusta al cambiar el reparto.</p></section>';
+  }
+  function updateMultiStayPricing() {
+    if (!detailState || !detailState.multiStay) return;
+    var trip = detailState.multiStay;
+    var totalNights = Math.max(1, Number(trip.totalNights) || 1);
+    var firstNights = totalNights > 1 ? Math.max(1, Math.min(totalNights - 1, Number(trip.firstNights) || 1)) : totalNights;
+    var secondNights = totalNights - firstNights;
+    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var rooms = Math.ceil(pax / 2);
+    var typeFactor = hotelTypeFactor(detailState.meta.hotelType);
+    var firstStayCost;
+    if (Number.isFinite(Number(trip.selectedPrimaryHotelTotal)) && Number(trip.selectedPrimaryHotelTotal) > 0) {
+      firstStayCost = Math.round(Number(trip.selectedPrimaryHotelTotal) * firstNights / totalNights);
+    } else {
+      firstStayCost = Math.round((trip.stays[0].nightlyRates || []).slice(0, firstNights).reduce(function (sum, rate) { return sum + Number(rate || 0); }, 0) * rooms * typeFactor);
+    }
+    var secondStayCost = Math.round((trip.stays[1].nightlyRates || []).slice(firstNights, totalNights).reduce(function (sum, rate) { return sum + Number(rate || 0); }, 0) * rooms * typeFactor);
+    trip.firstNights = firstNights;
+    trip.firstStayCost = firstStayCost;
+    trip.secondStayCost = secondStayCost;
+    detailState.hotel = firstStayCost + secondStayCost;
+    var firstCount = document.querySelector('[data-multistay-first-nights]');
+    var secondCount = document.querySelector('[data-multistay-second-nights]');
+    var firstCost = document.querySelector('[data-multistay-first-cost]');
+    var secondCost = document.querySelector('[data-multistay-second-cost]');
+    var slider = document.querySelector('[data-multistay-split]');
+    if (firstCount) firstCount.textContent = String(firstNights);
+    if (secondCount) secondCount.textContent = String(secondNights);
+    if (firstCost) firstCost.textContent = money(firstStayCost) + ' alojamiento estimado';
+    if (secondCost) secondCost.textContent = money(secondStayCost) + ' alojamiento estimado';
+    if (slider) slider.setAttribute('aria-valuetext', firstNights + ' noches en ' + trip.stays[0].name + ', ' + secondNights + ' en ' + trip.stays[1].name);
+  }
+  function changeHotelType(type) {
+    if (!detailState || !detailState.meta || !HOTEL_TYPE_LABELS[type]) return;
+    var current = detailState.meta.hotelType;
+    if (current === type) return;
+    detailState.meta.hotelType = type;
+    detailState.hotelType = type;
+    detailState.meta.hotelsLoaded = false;
+    detailState.meta.hotels = [];
+    detailState.meta.hotelBudgetPerNight = null;
+    detailState.selectedHotelName = 'Estimación · Hotel ' + HOTEL_TYPE_LABELS[type];
+    if (detailState.multiStay) {
+      detailState.multiStay.selectedPrimaryHotelTotal = null;
+      updateMultiStayPricing();
+    } else {
+      detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelTypeFactor(type));
+    }
+    detailState.parts.comidas = type === 'all-inclusive' ? 0 : detailState.originalMealEstimate;
+    detailState.foodPerDayTouched = type === 'all-inclusive';
+    detailState.foodPerDay = type === 'all-inclusive' ? 0 : (detailState.originalMealEstimate / Math.max(1, Number(detailState.meta.nights) * Number(detailState.meta.pax)));
+    S.hotelType = type;
+    if (detailState.proposal) {
+      var title = document.querySelector('.detail-summary h2');
+      if (title) title.textContent = titleOf(detailState.proposal);
+    }
+    var hotelSection = document.querySelector('.hotel-options');
+    if (hotelSection) hotelSection.outerHTML = hotelLoading(detailState.meta);
+    recalcularTotalViaje();
+    loadHotelRecommendations(detailState.meta, detailState.hotel);
+  }
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
+    var selectedTransportMode = proposal.mode === 'auto' ? 'auto' : proposal.mode === 'bus' ? 'bus' : 'flight';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: isRoadtrip ? 'auto' : 'flight', roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
     var nights = Math.max(1, Number(data.meta.nights) || 1);
     var pax = Math.max(1, Number(data.meta.pax) || 1);
+    if (data.meta.multiStay && data.meta.multiStay.stays && data.meta.multiStay.stays.length === 2) {
+      detailState.multiStay = Object.assign({}, data.meta.multiStay, { totalNights: nights, firstNights: Math.max(1, Math.floor(nights / 2)) });
+      detailState.baseTraslados = Number(proposal.parts.traslados) || 0;
+      detailState.parts.traslados = detailState.baseTraslados + (Number(detailState.multiStay.transferBetweenUsd) || 0);
+      updateMultiStayPricing();
+    }
     detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     detailState.localPerDay = Number((Number(detailState.parts.local) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     data.meta.officialTransfer = data.meta.officialTransfer || { pricePerPassenger: 0, amount: 0 };
     var renderSafe = function (fn, fallback) { try { return fn(); } catch (error) { console.error('Error al renderizar detalle', error); return fallback; } };
     var breakdownMarkup = renderSafe(function () { return proposalBreakdownMarkup(detailState); }, '<section class="proposal-breakdown"><h2>Desglose del viaje</h2></section>');
     var dailyBudgetMarkup = renderSafe(function () { return dailyBudgetControls(); }, '');
-    var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, isRoadtrip); }, '');
+    var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
     var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
-      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong></section>' +
-      breakdownMarkup + dailyBudgetMarkup +
+      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
+      renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + foodMarkup +
       '</div></div>';
+    updateMultiStayPricing();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
-    actualizarTransporte(isRoadtrip);
+    if (detailState.transportMode === 'auto' || detailState.transportMode === 'flight') actualizarTransporte(isRoadtrip);
+    else { var groundFlow = document.querySelector('[data-transport-flow]'); if (groundFlow) groundFlow.innerHTML = transportFlow(detailState.meta, detailState.flight, detailState.transportMode); }
     renderTripSummary();
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
@@ -1942,7 +2080,7 @@
       else window.setTimeout(loadHotels, 120);
     }
     var liveFlightSection = content.querySelector('.flight-search');
-    if (!isRoadtrip && liveFlightSection) {
+    if (detailState.transportMode === 'flight' && liveFlightSection) {
       window.setTimeout(function () {
         if (detailState && detailState.meta === data.meta) searchFlights(data.meta, liveFlightSection);
       }, 80);
@@ -2014,7 +2152,7 @@
   }
 
   function openDestinationProposal(key, savedTrip) {
-    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory });
+    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory, hotel_type: S.hotelType });
     return fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
@@ -2037,7 +2175,7 @@
       return;
     }
     var proposalId = button.getAttribute('data-propuesta-id');
-    var proposal = lastData && (byId(lastData.list, proposalId) || byId(lastData.roadtripList, proposalId));
+      var proposal = lastData && (byId(lastData.list, proposalId) || byId(lastData.alternatives, proposalId) || byId(lastData.roadtripList, proposalId));
     if (proposal) {
       try { showProposalView(proposal, lastData); } catch (error) { console.error('No pudimos abrir la propuesta', error); notice('No pudimos abrir esta propuesta. Probá nuevamente.'); }
     } else {
@@ -2142,7 +2280,7 @@
       local_per_day: Number(detailState.localPerDay) || 0,
       total_amount: Number(budget.total) || 0,
       currency: 'USD',
-      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, roadtrip: detailState.roadtrip || null }
+      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, hotelType: detailState.meta.hotelType || S.hotelType, roadtrip: detailState.roadtrip || null }
     };
   }
   async function saveCurrentTrip() {
@@ -2264,7 +2402,7 @@
   }
   async function loadTrip(trip) {
     var details = trip.details || trip.flight_details || {};
-    S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport; S.origin = details.origin === 'PDP' ? 'PDP' : (details.origin === 'MVD' ? 'MVD' : S.origin); S.subcategory = details.subcategory || '';
+    S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport; S.origin = details.origin === 'PDP' ? 'PDP' : (details.origin === 'MVD' ? 'MVD' : S.origin); S.subcategory = details.subcategory || ''; S.hotelType = details.hotelType || inferHotelType(S.subcategory) || hotelTypeForStyle(S.style);
     var originInput = $('#origin-input'); if (originInput) originInput.value = originLabel(S.origin);
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; syncDateRangeFields(); if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); var loaded = await openDestinationProposal(S.dest, trip); if (loaded === null) throw new Error('No pudimos cargar la propuesta guardada.'); }
@@ -2524,11 +2662,14 @@
       if (['flight', 'bus', 'auto'].indexOf(S.transport) < 0) S.transport = 'flight';
       renderTransportSelector();
     }
-    function selectDestination(nextValue, subcategory, fromFeatured) {
+    function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelType) {
       var destinationKey = String(nextValue || 'todos');
       if (!destinationKey) return;
       if (!fromFeatured) featuredProposalSelection = null;
       S.dest = destinationKey; S.proposalId = ''; S.subcategory = String(subcategory || '');
+      var inferredHotelType = requestedHotelType || inferHotelType(S.subcategory);
+      S.hotelTypeExplicit = !!inferredHotelType;
+      S.hotelType = inferredHotelType || hotelTypeForStyle(S.style);
       if (S.dest === 'todos') { S.transport = 'flight'; }
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
       setDestDisplay(S.dest);
@@ -2688,7 +2829,7 @@
           S.dep = dates.dep; S.ret = dates.ret;
           syncDateRangeFields();
           pendingDestinationScroll = true;
-          selectDestination(subcategory.key, subcategory.label, true);
+          selectDestination(subcategory.key, subcategory.label, true, subcategory.hotelType);
         }
       });
     }
@@ -2774,6 +2915,7 @@
         if (!button) return;
         S.transport = button.getAttribute('data-transport-mode');
         if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
+        if (S.transport === 'bus' && getAvailableTransportModes(S.dest).every(function (mode) { return mode.value !== 'bus'; })) S.transport = 'flight';
         renderTransportSelector();
         if (S.dest !== 'todos') schedule();
       });
@@ -2795,6 +2937,7 @@
     $('#seg').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       S.style = b.getAttribute('data-v');
+      if (!S.hotelTypeExplicit) S.hotelType = hotelTypeForStyle(S.style);
       Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
       schedule();
     });
@@ -2808,7 +2951,7 @@
       var destinationProposal = e.target.closest('[data-propuesta-dest]');
       if (destinationProposal) { e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; $('#destination-results').innerHTML = ''; openDestinationProposal(S.dest); return; }
       var proposal = e.target.closest('[data-propuesta-id]');
-      if (proposal) { e.preventDefault(); e.stopPropagation(); var proposalId = proposal.getAttribute('data-propuesta-id'); var selected = lastData && (byId(lastData.list, proposalId) || byId(lastData.roadtripList, proposalId)); if (selected) showProposalView(selected, lastData); return; }
+      if (proposal) { e.preventDefault(); e.stopPropagation(); var proposalId = proposal.getAttribute('data-propuesta-id'); var selected = lastData && (byId(lastData.list, proposalId) || byId(lastData.alternatives, proposalId) || byId(lastData.roadtripList, proposalId)); if (selected) showProposalView(selected, lastData); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
       if (selectedFlight) {
         e.preventDefault(); e.stopPropagation();
@@ -2923,12 +3066,13 @@
       }
       var transportChoice = e.target.closest('[name="transport-choice"]');
       if (transportChoice) {
-        var chosenMode = transportChoice.value === 'auto' ? 'auto' : 'flight';
+        var chosenMode = ['auto', 'bus'].indexOf(transportChoice.value) >= 0 ? transportChoice.value : 'flight';
         if (chosenMode === 'auto' && !isRoadtripDestinationAllowed(detailState.meta.dest.key)) {
           return;
         }
         S.transport = chosenMode;
-        actualizarTransporte(chosenMode === 'auto');
+        if (chosenMode === 'bus') { detailState.transportMode = 'bus'; detailState.auto = 0; detailState.flight = 0; detailState.parts.traslados = 0; var busFlow = document.querySelector('[data-transport-flow]'); if (busFlow) busFlow.innerHTML = transportFlow(detailState.meta, 0, 'bus'); recalcularTotalViaje(); }
+        else actualizarTransporte(chosenMode === 'auto');
         return;
       }
       var flightFilter = e.target.closest('[data-flight-stop],[data-flight-time]');
@@ -3081,7 +3225,17 @@
         tourInput.dispatchEvent(new Event('change', { bubbles: true }));
       }
     });
+    $('#vista-detalle').addEventListener('change', function (e) {
+      var hotelTypeSelect = e.target.closest && e.target.closest('[data-hotel-type-select]');
+      if (hotelTypeSelect) changeHotelType(hotelTypeSelect.value);
+    });
     $('#vista-detalle').addEventListener('input', function (e) {
+      var staySlider = e.target.closest && e.target.closest('[data-multistay-split]');
+      if (staySlider && detailState && detailState.multiStay) {
+        detailState.multiStay.firstNights = Number(staySlider.value) || 1;
+        updateMultiStayPricing();
+        recalcularTotalViaje();
+      }
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
       if (consumption) actualizarRoadtrip(consumption.value);
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');

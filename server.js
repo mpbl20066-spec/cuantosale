@@ -182,6 +182,9 @@ function normalizeHotelApiResponse(payload, extra, source) {
       perNight: hasNightly ? nightlyRaw : total / nights,
       currency: currency,
       rating: Number(property.reviewScore || property.review_score || hotel.review_score || hotel.rating || 0),
+      propertyType: String(property.propertyType || property.property_type || hotel.property_type || hotel.hotel_type || ''),
+      description: String(property.description || hotel.description || ''),
+      categoryText: JSON.stringify({ property: property, amenities: hotel.facilities || hotel.amenities || hotel.hotelFacilities || hotel.hotel_facilities || [], mealPlan: hotel.meal_plan || hotel.mealPlan || hotel.board_type || '' }),
       bookingUrl: bookingUrl,
       similar: [],
       source: source || 'booking'
@@ -218,13 +221,58 @@ function selectThreeHotelsByBudget(hotels, dailyBudget) {
     });
   });
 }
+const HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
+function resolveHotelType(value, subcategory, style) {
+  const normalized = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
+  const context = (normalized + ' ' + String(subcategory || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')).replace(/[_ ]+/g, '-');
+  if (context.indexOf('all-inclusive') >= 0 || context.indexOf('todo-incluido') >= 0) return 'all-inclusive';
+  if (context.indexOf('resort') >= 0) return 'resort';
+  if (context.indexOf('boutique') >= 0) return 'boutique';
+  if (context.indexOf('economico') >= 0 || context.indexOf('económico') >= 0 || context.indexOf('ahorro') >= 0) return 'economico';
+  if (context.indexOf('intermedio') >= 0 || context.indexOf('3-estrellas') >= 0) return 'intermedio';
+  if (context.indexOf('confort') >= 0 || context.indexOf('premium') >= 0) return 'confort';
+  return style === 'ahorro' ? 'economico' : style === 'comodo' ? 'confort' : 'intermedio';
+}
+function hotelTypeMultiplier(type) {
+  return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22, economico: 0.82, intermedio: 1, confort: 1.3 })[type] || 1;
+}
+function hotelMatchesType(hotel, type, budgetTarget) {
+  if (!type || type === 'intermedio' || type === 'confort' || type === 'economico') {
+    const rate = Number(hotel.perNight) || 0;
+    if (!rate || !budgetTarget) return type !== 'economico';
+    if (type === 'economico') return rate <= budgetTarget * 0.85;
+    if (type === 'intermedio') return rate > budgetTarget * 0.75 && rate <= budgetTarget * 1.25;
+    return rate > budgetTarget * 1.1;
+  }
+  const text = normalizeHotelKey([hotel.name, hotel.propertyType, hotel.description, hotel.categoryText].filter(Boolean).join(' '));
+  if (type === 'all-inclusive') return /all inclusive|todo incluido|todo inclusivo/.test(text);
+  if (type === 'resort') return /resort/.test(text);
+  if (type === 'boutique') return /boutique/.test(text);
+  return false;
+}
+function applyHotelTypeToProposal(proposal, type, pax) {
+  const factor = hotelTypeMultiplier(type);
+  const baseHotel = Number(proposal.parts.alojamiento) || 0;
+  const baseMeals = Number(proposal.parts.comidas) || 0;
+  proposal.baseHotelCost = baseHotel;
+  proposal.baseMealCost = baseMeals;
+  proposal.parts.alojamiento = Math.round(baseHotel * factor);
+  if (type === 'all-inclusive') proposal.parts.comidas = 0;
+  proposal.hotelType = type;
+  proposal.hotelTypeLabel = HOTEL_TYPE_LABELS[type] || 'Intermedio';
+  proposal.total = Object.keys(proposal.parts).reduce(function (sum, key) { return sum + (Number(proposal.parts[key]) || 0); }, 0);
+  proposal.pp = Math.round(proposal.total / Math.max(1, Number(pax) || 1));
+  return proposal;
+}
 function hotelBudgetTarget(destKey, style, extra) {
   const explicit = Number(extra && extra.hotelBudgetPerNight);
   if (extra && extra.hotelBudgetPerNight != null && Number.isFinite(explicit) && explicit >= 0) return Math.min(explicit, 1000000);
   const destination = model.DEST[destKey];
   const tierIndex = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
   const perPerson = destination && Array.isArray(destination.lodge) ? Number(destination.lodge[tierIndex]) : 0;
-  return Math.max(0, perPerson * Math.max(1, Number(extra && extra.pax) || 1));
+  const pax = Math.max(1, Number(extra && extra.pax) || 1);
+  const rooms = Math.ceil(pax / 2);
+  return Math.max(0, perPerson * rooms * hotelTypeMultiplier(extra && extra.hotelType));
 }
 async function bookingApiJson(url, settings) {
   let response;
@@ -306,15 +354,17 @@ async function hotelRecommendations(destKey, destName, style, extra) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
   const tierIndex = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
   const selectedTier = tierByStyle[style] || 'moderado';
-  const budgetTarget = hotelBudgetTarget(destKey, style, extra || {});
+  const hotelType = resolveHotelType(extra && extra.hotelType, extra && extra.subcategory, style);
+  const hotelExtra = Object.assign({}, extra || {}, { hotelType: hotelType });
+  const budgetTarget = hotelBudgetTarget(destKey, style, hotelExtra);
   let realHotels = [];
   try {
-    realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, extra || {})).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName }); });
+    realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, hotelExtra)).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName }); });
     if (realHotels.length < 3) {
       const nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
       if (nearby) {
         try {
-          const regionalHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, extra || {});
+          const regionalHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, hotelExtra);
           realHotels = realHotels.concat(regionalHotels.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: nearby.label }); }));
         } catch (regionalError) {
           console.warn('[hotelRecommendations] Búsqueda regional no disponible:', regionalError && regionalError.message ? regionalError.message : regionalError);
@@ -328,18 +378,19 @@ async function hotelRecommendations(destKey, destName, style, extra) {
   const priced = uniqueHotelList(realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; }));
   // Un hotel real más barato que el objetivo de la categoría sigue siendo válido
   // para esa categoría; lo que se descarta es lo que se pasa claramente de precio.
-  const high = budgetTarget > 0 ? budgetTarget * 1.5 : Infinity;
+  const high = budgetTarget > 0 ? budgetTarget * 1.6 : Infinity;
   const matchingCategory = priced
-    .filter(function (hotel) { return hotel.perNight <= high; })
+    .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget); })
     .sort(function (a, b) { return Math.abs(a.perNight - budgetTarget) - Math.abs(b.perNight - budgetTarget); })
     .slice(0, 3)
     .map(function (hotel) { return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName }); });
   const missing = 3 - matchingCategory.length;
-  const fallback = missing > 0 ? fallbackHotelsFor(destKey, destName, tierIndex, extra) : [];
+  const canUseGenericFallback = hotelType === 'economico' || hotelType === 'intermedio' || hotelType === 'confort';
+  const fallback = missing > 0 && canUseGenericFallback ? fallbackHotelsFor(destKey, destName, hotelType === 'economico' ? 0 : hotelType === 'confort' ? 2 : tierIndex, hotelExtra) : [];
   const combined = uniqueHotelList(matchingCategory.concat(fallback)).slice(0, 3);
   return combined.map(function (hotel, index) {
     return Object.assign({}, hotel, {
-      tier: selectedTier,
+      tier: selectedTier, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio',
       highlight: ['Recomendado', 'Buena opción', 'Alternativa'][index],
       recommended: index === 0
     });
@@ -384,7 +435,9 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
     : [];
   return Object.assign({}, result, {
     fits: picked.fits, recId: rec.id, cheapestId: list[0].id, cozyId: cozy.id,
-    list: list, roadtripList: roadtripList, series: series, tips: model.tipsFor(trip, rec, list, series)
+    list: list,
+    alternatives: (Array.isArray(result.alternatives) ? result.alternatives : []).filter(function (proposal) { return proposal.mode !== 'avion_ba'; }),
+    roadtripList: roadtripList, series: series, tips: model.tipsFor(trip, rec, list, series)
   });
 }
 function roadtripCost(key, kmPerLiter) {
@@ -545,7 +598,7 @@ async function cotizar(req, res, url) {
   let quotes = {};
   let liveQuoteApplied = false;
   const destCfgForQuote = model.DEST[v.S.dest];
-  if (destCfgForQuote && destCfgForQuote.modes.avion_mvd) {
+  if (v.S.transport === 'flight' && destCfgForQuote && destCfgForQuote.modes.avion_mvd) {
     try {
       const quote = await getLiveFlightQuote(destCfgForQuote.iata, v.dep, v.ret, v.S.style, origin);
       if (quote) { quotes = { avion_mvd: quote }; liveQuoteApplied = true; }
@@ -553,19 +606,31 @@ async function cotizar(req, res, url) {
       console.error('[cotizar] tarifa real de Duffel no disponible:', e.message);
     }
   }
+  const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), subcategory, v.S.style);
+  v.S.hotelType = hotelType;
   const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
   const recommendedProposal = result.list.find(function (proposal) { return proposal.id === result.recId; });
+  const isBuziosArraial = /b[uú]zios\s*\+\s*arraial/i.test(subcategory);
+  const multiStay = isBuziosArraial && recommendedProposal ? {
+    hub: { name: 'Río de Janeiro', iata: 'GIG' },
+    stays: [
+      { key: 'buz', name: 'Búzios', nightlyRates: model.lodgingNightlyCosts('buz', recommendedProposal.ti, v.dep, v.nights) },
+      { key: 'arraial', name: 'Arraial do Cabo', nightlyRates: model.lodgingNightlyCosts('arraial', recommendedProposal.ti, v.dep, v.nights) }
+    ],
+    transferBetweenUsd: 30 * v.S.pax,
+    transferBetweenLabel: 'Traslado entre Búzios y Arraial do Cabo (estimado, un tramo)'
+  } : null;
   const nonHotelCost = recommendedProposal ? Number(recommendedProposal.total) - Number(recommendedProposal.parts.alojamiento || 0) : 0;
   const hotelBudgetPerNight = url.searchParams.has('hotel_budget_per_night')
     ? Number(url.searchParams.get('hotel_budget_per_night'))
-    : (v.S.budget > 0 ? Math.max(0, (v.S.budget - nonHotelCost) / Math.max(1, v.nights)) : null);
-  const hotelExtra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights };
+    : (v.S.budget > 0 ? Math.max(0, (v.S.budget - nonHotelCost) / Math.max(1, v.nights) / Math.ceil(Math.max(1, v.S.pax) / 2)) : null);
+  const hotelExtra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: subcategory };
   if (Number.isFinite(hotelBudgetPerNight) && hotelBudgetPerNight >= 0) hotelExtra.hotelBudgetPerNight = hotelBudgetPerNight;
   const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
   sendJson(res, 200, Object.assign({
     meta: {
       mode: liveQuoteApplied ? 'live' : 'estimated',
-       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name, region: model.DEST[v.S.dest].region || '', country: model.DEST[v.S.dest].country || 'Brasil' }, origin: origin, subcategory: subcategory,
+       dest: { key: v.S.dest, name: model.DEST[v.S.dest].name, region: model.DEST[v.S.dest].region || '', country: model.DEST[v.S.dest].country || 'Brasil' }, origin: origin, subcategory: subcategory, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio', multiStay: multiStay,
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
       hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString()
@@ -581,13 +646,14 @@ async function cotizarHoteles(req, res, url) {
   catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
   if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
   const dest = model.DEST[v.S.dest];
+  const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), url.searchParams.get('subcategory'), v.S.style);
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
-  const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights };
+  const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: url.searchParams.get('subcategory') || '' };
   if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
   const hotels = await hotelRecommendations(v.S.dest, dest.name, v.S.style, extra);
   return sendJson(res, 200, {
     hotels: hotels,
-    hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra),
+    hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra), hotelType: hotelType,
     hotelsNearby: (hotels.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== dest.name; }) || {}).areaLabel || ''
   });
 }
