@@ -1,6 +1,6 @@
 'use strict';
 
-var CACHE_NAME = 'cuantosale-shell-v24';
+var CACHE_NAME = 'cuantosale-shell-v25';
 var APP_SHELL = [
   '/',
   '/manifest.json',

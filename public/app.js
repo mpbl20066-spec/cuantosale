@@ -584,12 +584,19 @@
     var hotelName = findSelectedHotelLabel();
     var transferAmount = getSelectedTransferAmount(detailState);
     var transferIncluded = transferAmount > 0;
+    // El detalle del transfer (modalidad + horario de recogida) se elige
+    // dentro de "Transfer desde el aeropuerto" sin abrir ningún modal; una
+    // vez elegido, este panel es el único lugar donde se administra y ve.
+    var transferWizard = detailState.transferWizard || {};
+    var transferModeLabel = detailState.transferType === 'private' ? 'Privado' : (detailState.transferType === 'shared' ? 'Compartido' : '');
+    var transferPickupLabel = transferIncluded ? getTransferPickupLabel(transferWizard.pickupMinutes || '60', transferWizard.customTime) : '';
+    var transferMeta = transferIncluded ? (transferModeLabel + (transferPickupLabel ? ' · ' + transferPickupLabel : '')) : 'No incluido';
     var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
     var foodPerDay = Number(detailState.foodPerDay) || 0;
     var localPerDay = Number(detailState.localPerDay) || 0;
     var summaryItems = [
       { label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
-      { label: 'Transfer', meta: transferIncluded ? 'Incluido' : 'No incluido', value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') },
+      { label: 'Transfer', meta: esc(transferMeta), value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') },
       { label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
       { label: 'Comida', meta: foodPerDay ? money(foodPerDay) + '/día' : 'Estimado', value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
       { label: 'Transporte local', meta: localPerDay ? money(localPerDay) + '/día' : 'Estimado', value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
@@ -929,13 +936,6 @@
     detailState.transfer = detailState.transportMode === 'flight' && detailState.transferType
       ? getSelectedTransferAmount(detailState)
       : 0;
-    var transferSection = document.querySelector('[data-official-transfer]');
-    var button = transferSection && transferSection.querySelector('[data-buy-transfer]');
-    if (button) {
-      button.disabled = !detailState.transferType;
-      button.classList.toggle('is-added', !!detailState.transferType);
-      button.textContent = detailState.transferType ? '✓ Agregado al presupuesto' : 'Elegí un tipo de transfer';
-    }
     recalcularTotalViaje();
   }
   function actualizarPasajes(section, price, airline) {
@@ -972,7 +972,6 @@
       // Reemplazar, en vez de ocultar, evita que controles de vuelos o transfers
       // queden disponibles en el DOM cuando el usuario eligió auto (y viceversa).
       flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
-      wireTransportFlow(flow);
     }
     sincronizarTrasladoOficial();
   }
@@ -1045,25 +1044,16 @@
       }).join('') + '</div>' +
       (pickupMinutes === 'custom' ? '<input type="time" class="transfer-pickup__time" data-transfer-custom-time value="' + esc(wizard.customTime || '') + '" aria-label="Horario personalizado de recogida">' : '') +
       '</div>' : '';
+    // Elegir una tarjeta ya suma el transfer al presupuesto (igual que tours y
+    // hoteles); este botón es solo el indicador de estado, nunca abre un modal
+    // ni un flujo de pasos adicional. El detalle queda centralizado en "Mi Viaje".
     var addedLabel = selected ? '✓ Agregado al presupuesto' : 'Elegí un tipo de transfer';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p>' + suggestionMarkup + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" data-buy-transfer' + (selected ? '' : ' disabled') + '>' + addedLabel + '</button></section>';
+    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p>' + suggestionMarkup + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" disabled>' + addedLabel + '</button></section>';
   }
 
   function transportFlow(meta, budget, autoSelected) {
     if (autoSelected) return roadtripCalculator(meta);
     return '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
-  }
-  function wireTransportFlow(flow) {
-    var transferButton = flow.querySelector('[data-buy-transfer]');
-    if (!transferButton) return;
-    // El bloque se vuelve a crear al alternar el medio de transporte, por eso
-    // el botón recibe un listener propio cada vez que se renderiza.
-    transferButton.addEventListener('click', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      sincronizarTrasladoOficial();
-      if (!transferButton.disabled) openTransferModal(detailState.meta);
-    });
   }
   function localTransportDescription(meta) {
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
@@ -2639,10 +2629,9 @@
         if (detailState.transferWizard.pickupMinutes !== 'custom') detailState.transferWizard.customTime = '';
         var pickupSectionEl = pickupChoice.closest('[data-official-transfer]');
         if (pickupSectionEl) pickupSectionEl.outerHTML = transferCard(detailState.meta);
+        renderTripSummary();
         return;
       }
-      var buyTransfer = e.target.closest('[data-buy-transfer]');
-      if (buyTransfer) { e.preventDefault(); e.stopPropagation(); openTransferModal(detailState.meta); return; }
       var changeFlight = e.target.closest('[data-change-flight]');
       if (changeFlight && detailState) {
         e.preventDefault(); e.stopPropagation();
@@ -2722,6 +2711,7 @@
         detailState.transferWizard = detailState.transferWizard || {};
         detailState.transferWizard.pickupMinutes = 'custom';
         detailState.transferWizard.customTime = transferCustomTime.value;
+        renderTripSummary();
       }
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
       if (consumption) actualizarRoadtrip(consumption.value);
