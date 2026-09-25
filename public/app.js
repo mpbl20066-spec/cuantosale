@@ -2718,7 +2718,10 @@
       var visible = [];
       Array.prototype.forEach.call(menu.querySelectorAll('button[data-dest-value]'), function (option) {
         var iataCodes = normalizeDestQuery(option.getAttribute('data-iata-codes') || '').split(/\s+/);
-        var searchable = normalizeDestQuery(option.textContent + ' ' + (option.getAttribute('data-iata-codes') || ''));
+        // El nombre visible de cada opción suele ser el barrio/zona (ej.
+        // "Canasvieiras / Norte"), no la ciudad ("Florianópolis") — esa vive
+        // solo en el título del grupo, así que hay que sumarla acá también.
+        var searchable = normalizeDestQuery(option.textContent + ' ' + (option.getAttribute('data-iata-codes') || '') + ' ' + (option.getAttribute('data-hub-name') || ''));
         var matches = !normalized || (iataQuery ? iataCodes.indexOf(normalized) >= 0 : searchable.indexOf(normalized) >= 0);
         option.hidden = !matches;
         option.style.display = matches ? 'flex' : 'none';
@@ -3502,6 +3505,7 @@
             option.className = 'custom-select__option';
             option.setAttribute('data-dest-value', item.key);
             option.setAttribute('data-iata-codes', item.codes || DEST_IATA_ALIASES[item.key] || IATA_BY_DEST[item.key] || '');
+            option.setAttribute('data-hub-name', hub.name);
             option.setAttribute('data-subcategory', item.subcategory || '');
             option.setAttribute('role', 'option');
             option.setAttribute('aria-selected', 'false');
