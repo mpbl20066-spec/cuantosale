@@ -14,7 +14,7 @@
   :root{--wl-bg:#0B1330;--wl-card:#12193A;--wl-line:#26305C;--wl-amber:#F2A93B;--wl-ink:#F3F6FC;--wl-ink2:#9AA6C7}
   *{box-sizing:border-box}
   body{margin:0;background:var(--wl-bg);color:var(--wl-ink);font-family:'Poppins',system-ui,sans-serif;min-height:100vh}
-  .wl-wrap{max-width:600px;margin:0 auto;padding:32px 20px;display:flex;flex-direction:column;justify-content:center;min-height:100vh}
+  .wl-wrap{max-width:600px;margin:0 auto;padding:32px 20px;display:flex;flex-direction:column;justify-content:center;min-height:100vh;min-height:100dvh}
   .wl-card{background:var(--wl-card);border:3px solid var(--wl-amber);border-radius:28px;padding:48px 40px;box-shadow:0 0 0 1px rgba(242,169,59,.18),0 32px 80px -24px rgba(242,169,59,.4)}
   .wl-logo{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:26px;margin-bottom:26px}
   .wl-countdown__label{text-align:center;color:var(--wl-ink2);font-size:13px;margin:0 0 14px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
@@ -50,13 +50,40 @@
   .wl-stat:first-child{border-top:0}
   .wl-stat b{color:var(--wl-amber);font-size:18px}
   .wl-status{font-size:12px;color:var(--wl-ink2);margin:10px 0 0;text-align:center}
+  /* En celular la tarjeta tiene que entrar entera en la primera pantalla:
+     se achica tipografía, padding y contadora, y se respeta la barra del
+     navegador con dvh + safe-area para que no quede nada bajo el notch. */
   @media (max-width:560px){
-    .wl-card{padding:32px 22px;border-radius:22px}
-    h1{font-size:32px}
-    .wl-countdown{gap:8px}
-    .wl-countdown__unit{min-width:0;flex:1;padding:12px 4px}
-    .wl-countdown__unit b{font-size:28px}
-    .wl-confirm-position{font-size:48px}
+    .wl-wrap{padding:10px 10px;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom))}
+    .wl-card{padding:18px 16px;border-radius:20px;border-width:2px;box-shadow:0 0 0 1px rgba(242,169,59,.18),0 14px 32px -18px rgba(242,169,59,.4)}
+    .wl-logo{font-size:18px;margin-bottom:8px;gap:7px}
+    .wl-logo svg{width:15px;height:19px}
+    .wl-countdown__label{font-size:10.5px;margin:0 0 6px;letter-spacing:.05em}
+    .wl-countdown{gap:5px;margin:0 0 12px}
+    .wl-countdown__unit{min-width:0;flex:1;padding:6px 2px;border-radius:11px;gap:2px}
+    .wl-countdown__unit b{font-size:21px}
+    .wl-countdown__unit span{font-size:9px}
+    h1{font-size:22px;line-height:1.06;margin:0 0 8px}
+    .wl-sub{font-size:13px;line-height:1.4;margin-bottom:14px}
+    .wl-field{margin-bottom:8px}
+    .wl-field input{padding:13px;font-size:16px}
+    .wl-btn{padding:13px;font-size:16px;border-radius:12px}
+    .wl-free-note{font-size:11.5px;margin-top:6px}
+    .wl-urgency{font-size:11.5px;line-height:1.4;padding:9px 11px;margin-top:10px;gap:6px;border-radius:11px}
+    .wl-confirm-label{margin-bottom:14px}
+    .wl-confirm-position{font-size:40px;margin:4px 0}
+    .wl-share{padding:8px}
+    .wl-stat{padding:8px 0}
+    .wl-reward{padding:11px;margin-top:11px}
+    .wl-reward p{font-size:12px;margin-bottom:7px}
+    .wl-count{font-size:12px;margin-top:10px}
+  }
+  /* Pantallas bajas en horizontal (celular girado): se recorta un poco más. */
+  @media (max-height:560px) and (max-width:900px){
+    .wl-wrap{justify-content:flex-start}
+    h1{font-size:22px}
+    .wl-sub{display:none}
+    .wl-countdown{margin-bottom:12px}
   }
 </style>
 </head>
