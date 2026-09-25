@@ -273,6 +273,19 @@
     var legs = Math.max(1, Math.ceil(roundTripKm / stepKm));
     return { stops: Math.max(0, legs - 1), everyKm: Math.round(roundTripKm / legs), minutesPerStop: isEv ? 35 : 15 };
   }
+  // Separado de roadtripCalculator para poder recalcularlo en vivo cuando
+  // cambia el modelo eléctrico (autonomía distinta) sin re-renderizar toda
+  // la sección de transporte.
+  function roadtripStopsInnerHtml(stopsPlan, isEv) {
+    return '<summary>' + (isEv ? '🔌' : '☕') + ' Paradas recomendadas en la ruta (' + stopsPlan.stops + ')</summary><div class="roadtrip-stops__body">' +
+      (stopsPlan.stops > 0
+        ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
+        : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
+      (isEv
+        ? '<p class="cost-note">* No tenemos la ubicación real de los cargadores de esta ruta (no está integrado ningún mapa de red de carga todavía). Antes de salir, confirmá estaciones disponibles cada ' + stopsPlan.everyKm + ' km aprox. en una app de carga real (por ejemplo Electromaps o PlugShare, o la app de UTE si arrancás desde Uruguay).</p>'
+        : '<p class="cost-note">* Son paradas de descanso sugeridas por fatiga en viajes largos, no un tramo obligatorio.</p>') +
+      '</div>';
+  }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
@@ -1248,6 +1261,10 @@
     if (electricityEl) electricityEl.textContent = money(figures.electricityUsd);
     if (totalEl) totalEl.textContent = money(figures.totalUsd);
     if (rangeEl) rangeEl.textContent = figures.usableRangeKm + ' km';
+    // La autonomía cambia con el modelo elegido, así que el plan de paradas
+    // tiene que recalcularse acá y no quedarse con el del modelo anterior.
+    var stopsEl = document.querySelector('[data-roadtrip-stops]');
+    if (stopsEl) stopsEl.innerHTML = roadtripStopsInnerHtml(roadtripStopsPlan(detailState.roadtrip.roundTripKm, true, figures.usableRangeKm), true);
     if (detailState.transportMode === 'auto' && detailState.roadtripVehicleType === 'ev') detailState.auto = figures.totalUsd;
     recalcularTotalViaje();
   }
@@ -1282,7 +1299,7 @@
     var stopsPlan = roadtripStopsPlan(r.roundTripKm, isEv, ev.usableRangeKm);
 
     var vehicleTabs = '<div class="roadtrip-vtabs" role="tablist">' +
-      '<button type="button" class="roadtrip-vtab' + (!isEv ? ' is-active' : '') + '" data-roadtrip-vtype="combustion" role="tab" aria-selected="' + !isEv + '">⛽ Combustión</button>' +
+      '<button type="button" class="roadtrip-vtab' + (!isEv ? ' is-active' : '') + '" data-roadtrip-vtype="combustion" role="tab" aria-selected="' + !isEv + '">⛽ Combustible</button>' +
       '<button type="button" class="roadtrip-vtab' + (isEv ? ' is-active' : '') + '" data-roadtrip-vtype="ev" role="tab" aria-selected="' + isEv + '">🔋 Eléctrico</button>' +
       '</div>';
 
@@ -1294,14 +1311,7 @@
     var routeCard = '<div class="transport-card roadtrip-route"><div class="roadtrip-route__stat"><span>Ruta ida y vuelta</span><b>' + r.roundTripKm + ' km</b></div><div class="roadtrip-route__stat"><span>Manejo estimado</span><b>' + r.hours + ' hs</b></div><div class="roadtrip-route__stat"><span>Destino</span><b>' + esc(meta.dest.name) + '</b></div></div>';
 
     var showStops = isEv || r.roundTripKm >= 600;
-    var stopsPanel = showStops ? ('<details class="roadtrip-stops"' + (isEv ? ' open' : '') + '><summary>' + (isEv ? '🔌' : '☕') + ' Paradas recomendadas en la ruta (' + stopsPlan.stops + ')</summary><div class="roadtrip-stops__body">' +
-      (stopsPlan.stops > 0
-        ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
-        : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
-      (isEv
-        ? '<p class="cost-note">* No tenemos la ubicación real de los cargadores de esta ruta (no está integrado ningún mapa de red de carga todavía). Antes de salir, confirmá estaciones disponibles cada ' + stopsPlan.everyKm + ' km aprox. en una app de carga real (por ejemplo Electromaps o PlugShare, o la app de UTE si arrancás desde Uruguay).</p>'
-        : '<p class="cost-note">* Son paradas de descanso sugeridas por fatiga en viajes largos, no un tramo obligatorio.</p>') +
-      '</div></details>') : '';
+    var stopsPanel = showStops ? ('<details class="roadtrip-stops" data-roadtrip-stops' + (isEv ? ' open' : '') + '>' + roadtripStopsInnerHtml(stopsPlan, isEv) + '</details>') : '';
 
     return '<section class="transport-options roadtrip-planner">' + vehicleTabs + combustionPanel + evPanel + routeCard + stopsPanel + '</section>';
   }
