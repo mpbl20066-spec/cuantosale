@@ -987,7 +987,6 @@
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
     var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + (transferLabel || 'A coordinar') + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     summaryText = summaryText.replace('Traslado: ' + (transferLabel || 'A coordinar'), 'Traslado: ' + transferModeLabel);
-    var bookingHref = bookingUrl(detailState.meta, { hotel: selectedHotelName });
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
     var toursBookUrl = toursWhatsappUrl(detailState);
     modal.innerHTML = '<div class="booking-dialog itinerary-summary voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
@@ -998,8 +997,7 @@
       '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div>' +
       '<div class="voucher-card"><span class="voucher-icon">🎟️</span><div><small>Tours y actividades</small><strong>' + esc(toursLabel) + '</strong><p>' + esc(toursDetail) + '</p><b>' + money(toursTotal) + '</b></div></div></div>' +
       '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
-      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a>' +
-      '<button type="button" class="itinerary-summary__booking itinerary-summary__booking--tp" data-book-hotel-affiliate data-hotel-name="' + esc(selectedHotelName) + '" data-hotel-total="' + hotelTotal + '">Reservar alojamiento (Travelpayouts) ↗</button></div>';
+      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><button type="button" class="voucher-copy" data-split-trip>🤝 Dividir viaje con amigos</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div>';
     modal.dataset.summaryText = summaryText;
     var voucherCards = modal.querySelectorAll('.voucher-card');
     if (voucherCards[0]) {
@@ -1022,7 +1020,6 @@
       if (hotelContent) hotelContent.innerHTML = '<small>Alojamiento seleccionado</small><strong>' + esc(selectedHotelName) + '</strong><p>' + esc(selectedHotelDetail) + '</p><b>' + money(hotelTotal) + '</b>';
     }
     if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', flightBookUrl ? '<a class="voucher-card__action" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer">✈️ Reservar Vuelo</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>✈️ Reservar Vuelo</button>');
-    if (voucherCards[1]) voucherCards[1].querySelector('div').insertAdjacentHTML('beforeend', '<a class="voucher-card__action" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">🏨 Reservar en Booking.com ↗</a>');
     if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
     if (voucherCards[3]) voucherCards[3].querySelector('div').insertAdjacentHTML('beforeend', toursBookUrl ? '<a class="voucher-card__action" href="' + esc(toursBookUrl) + '" target="_blank" rel="noopener noreferrer">🎟️ Reservar Tours</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>🎟️ Reservar Tours</button>');
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -2314,8 +2311,6 @@
   var authUser = null;
   var pendingTripSave = false;
   var tripSaveInProgress = false;
-  var travelpayoutsMarker = '';
-  var lastSavedTripId = null;
   var authReadyPromise = Promise.resolve();
   var authInitPromise = null;
   var supabaseSdkPromise = null;
@@ -2359,51 +2354,6 @@
     return result.data;
   }
   window.guardarViaje = guardarViaje;
-
-  // sub_id único por clic para atribuir cada reserva de hotel a un viaje y un
-  // usuario puntuales en los reportes de Travelpayouts (viaje_id + user_id +
-  // timestamp en base36, compactado porque el parámetro tiene largo limitado).
-  function generateHotelSubId(tripId, userId) {
-    var t = String(tripId || 'na').replace(/-/g, '').slice(0, 10);
-    var u = String(userId || 'anon').replace(/-/g, '').slice(0, 10);
-    return 't' + t + '-u' + u + '-' + Date.now().toString(36);
-  }
-  // Registra el clic en estado "pendiente" antes de salir del sitio, para
-  // poder conciliar después contra el reporte de conversiones de Travelpayouts.
-  async function registerHotelClick(subId, meta, hotelName, hotelTotal, tripId) {
-    if (!supabaseClient || !authUser) return;
-    try {
-      await supabaseClient.from('reservas_hoteles').insert({
-        user_id: authUser.id,
-        trip_id: tripId || null,
-        destination_key: meta.dest.key,
-        hotel_name: hotelName || null,
-        sub_id: subId,
-        click_total: Number(hotelTotal) || null,
-        currency: 'USD',
-        status: 'pending',
-        provider: 'travelpayouts'
-      });
-    } catch (error) { /* no bloquear la salida del usuario por un error de tracking */ }
-  }
-  // Hotellook/Travelpayouts no nos da el ID interno del hotel (nuestros
-  // datos de hoteles vienen de Booking.com, no de Hotellook), así que no
-  // podemos armar un link directo a la ficha de esa propiedad puntual. Lo
-  // más cerca que llegamos sin esa integración es que el término de
-  // búsqueda incluya el nombre del hotel, para que sus resultados lo
-  // prioricen en vez de mostrar el destino genérico.
-  function travelpayoutsHotelUrl(meta, subId, hotelName) {
-    var destination = hotelName ? hotelName + ', ' + meta.dest.name + ', Brasil' : meta.dest.name + ', Brasil';
-    var params = new URLSearchParams({
-      marker: travelpayoutsMarker || '',
-      sub_id: subId,
-      destination: destination,
-      checkIn: meta.dep,
-      checkOut: meta.ret,
-      adults: String(meta.pax || 1)
-    });
-    return 'https://search.hotellook.com/?' + params.toString();
-  }
 
   function authDisplayName(user) {
     var metadata = user && user.user_metadata || {};
@@ -2456,14 +2406,15 @@
       details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, hotelType: detailState.meta.hotelType || S.hotelType, roadtrip: detailState.roadtrip || null }
     };
   }
-  async function saveCurrentTrip() {
+  async function saveCurrentTrip(options) {
+    var skipTripsModal = options && options.skipTripsModal;
     if (!supabaseClient) { authReadyPromise = initAuth(); await authReadyPromise; }
-    if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
-    if (!authUser) { pendingTripSave = true; try { var draft = tripPayload(); if (draft) sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(draft)); sessionStorage.setItem('cuantosale_pending_trip', '1'); } catch (error) {} openAuthModal(); return; }
-    if (tripSaveInProgress) return;
+    if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return false; }
+    if (!authUser) { pendingTripSave = true; try { var draft = tripPayload(); if (draft) sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(draft)); sessionStorage.setItem('cuantosale_pending_trip', '1'); } catch (error) {} openAuthModal(); return false; }
+    if (tripSaveInProgress) return false;
     var payload = tripPayload();
     if (!payload) { try { payload = JSON.parse(sessionStorage.getItem('cuantosale_pending_trip_data') || 'null'); } catch (error) { payload = null; } }
-    if (!payload) { alert('Abrí una propuesta antes de guardar el viaje.'); return; }
+    if (!payload) { alert('Abrí una propuesta antes de guardar el viaje.'); return false; }
     payload.user_id = authUser.id;
     tripSaveInProgress = true;
     var result;
@@ -2472,13 +2423,13 @@
     } catch (error) {
       tripSaveInProgress = false;
       openAuthModal(error.message);
-      return;
+      return false;
     }
     tripSaveInProgress = false;
     pendingTripSave = false;
-    lastSavedTripId = result && result.id || lastSavedTripId;
     try { sessionStorage.removeItem('cuantosale_pending_trip'); sessionStorage.removeItem('cuantosale_pending_trip_data'); } catch (error) {}
-    await openTripsModal();
+    if (!skipTripsModal) await openTripsModal();
+    return true;
   }
   async function loadSavedTrips(modal) {
     var box = modal.querySelector('[data-saved-trips]');
@@ -2637,7 +2588,6 @@
         await loadSupabaseSdk();
         var configResponse = await fetch('/api/config');
         var config = await configResponse.json();
-        travelpayoutsMarker = config.travelpayoutsMarker || '';
         if (!config.supabaseUrl || !config.supabaseAnonKey) { console.warn('Falta SUPABASE_ANON_KEY/SUPABASE_PUBLISHABLE_KEY en las variables de entorno del despliegue.'); return; }
         supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage } });
         try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
@@ -3496,18 +3446,20 @@
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var saveTripButton = e.target.closest('[data-save-trip]');
       if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
-      var hotelAffiliateButton = e.target.closest('[data-book-hotel-affiliate]');
-      if (hotelAffiliateButton) {
+      var splitTripButton = e.target.closest('[data-split-trip]');
+      if (splitTripButton) {
         e.preventDefault();
         (async function () {
-          if (!supabaseClient) { await initAuth(); }
-          if (!authUser) { openAuthModal('Iniciá sesión para reservar el hotel y hacer seguimiento de tu clic.'); return; }
-          if (!detailState || !detailState.meta) return;
-          var subId = generateHotelSubId(lastSavedTripId, authUser.id);
-          var hotelName = hotelAffiliateButton.getAttribute('data-hotel-name');
-          var win = window.open(travelpayoutsHotelUrl(detailState.meta, subId, hotelName), '_blank', 'noopener,noreferrer');
-          if (!win) notice('Permití las ventanas emergentes para abrir la reserva.');
-          registerHotelClick(subId, detailState.meta, hotelName, hotelAffiliateButton.getAttribute('data-hotel-total'), lastSavedTripId);
+          var originalLabel = splitTripButton.textContent;
+          splitTripButton.disabled = true;
+          splitTripButton.textContent = 'Guardando...';
+          var saved = await saveCurrentTrip({ skipTripsModal: true });
+          if (saved) {
+            window.location.href = '/grupo';
+            return;
+          }
+          splitTripButton.disabled = false;
+          splitTripButton.textContent = originalLabel;
         }());
         return;
       }
@@ -3516,19 +3468,6 @@
         e.preventDefault();
         var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent($('#booking-modal').dataset.summaryText || '');
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      }
-      var copyButton = e.target.closest('[data-copy-summary]');
-      if (copyButton) {
-        e.preventDefault();
-        var copyText = $('#booking-modal').dataset.summaryText || '';
-        var copyPromise = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(copyText) : Promise.reject(new Error('clipboard unavailable'));
-        copyPromise.then(function () {
-          var status = $('#booking-modal').querySelector('[data-copy-status]');
-          if (status) status.textContent = 'Resumen copiado';
-        }).catch(function () {
-          var status = $('#booking-modal').querySelector('[data-copy-status]');
-          if (status) status.textContent = 'No se pudo copiar';
-        });
       }
       var storyButton = e.target.closest('[data-share-story]');
       if (storyButton) { e.preventDefault(); shareStoryCard(storyButton); }
