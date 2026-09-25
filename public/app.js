@@ -282,21 +282,24 @@
         ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
         : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
       (isEv
-        ? '<div data-roadtrip-chargers><p class="cost-note">Buscando cargadores reales cerca del destino…</p></div><p class="cost-note">* Cargadores listados vía Open Charge Map, una base colaborativa: puede haber estaciones nuevas o cerradas que todavía no estén cargadas ahí. Confirmá disponibilidad antes de salir.</p>'
+        ? '<div data-roadtrip-chargers><div class="roadtrip-chargers__loading"><span class="roadtrip-chargers__spinner" aria-hidden="true"></span>Buscando cargadores reales cerca del destino…</div></div><p class="cost-note">* Cargadores listados vía Open Charge Map, una base colaborativa: puede haber estaciones nuevas o cerradas que todavía no estén cargadas ahí. Confirmá disponibilidad antes de salir.</p>'
         : '<p class="cost-note">* Son paradas de descanso sugeridas por fatiga en viajes largos, no un tramo obligatorio.</p>') +
       '</div>';
   }
   var chargersCache = {};
+  // El visitante nunca ve la diferencia entre "la API falló", "no hay
+  // cargadores cerca" o "todavía no configuramos la clave": las tres caen
+  // en el mismo fallback prolijo. No tiene sentido exponerle un problema de
+  // configuración del sitio; eso lo vemos nosotros en los logs del server.
   function renderChargersHtml(destKey, data) {
-    if (!data || data.error) return '<p class="cost-note">No pudimos consultar cargadores ahora. Probá una app como Electromaps o PlugShare antes de salir.</p>';
-    if (data.configured === false) return '';
-    if (!data.chargers || !data.chargers.length) return '<p class="cost-note">No encontramos cargadores cargados en Open Charge Map cerca de este destino todavía. Probá una app como Electromaps o PlugShare antes de salir.</p>';
-    return '<p class="roadtrip-chargers__label">Cargadores reales cerca de tu destino:</p><ul class="roadtrip-chargers__list">' +
+    var fallback = '<div class="roadtrip-chargers__empty"><span>🔌</span><p>No encontramos cargadores cargados en Open Charge Map cerca de este destino todavía. Probá una app como <a href="https://www.electromaps.com" target="_blank" rel="noopener noreferrer">Electromaps</a> o <a href="https://www.plugshare.com" target="_blank" rel="noopener noreferrer">PlugShare</a> antes de salir.</p></div>';
+    if (!data || data.error || data.configured === false || !data.chargers || !data.chargers.length) return fallback;
+    return '<p class="roadtrip-chargers__label">🔌 Cargadores reales cerca de tu destino</p><ul class="roadtrip-chargers__list">' +
       data.chargers.slice(0, 5).map(function (c) {
         var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(c.lat + ',' + c.lng);
-        return '<li><b>' + esc(c.name) + '</b>' + (c.address ? '<span>' + esc(c.address) + '</span>' : '') +
-          (c.connectors && c.connectors.length ? '<span class="roadtrip-chargers__connectors">' + esc(c.connectors.join(' · ')) + '</span>' : '') +
-          '<a href="' + esc(mapsUrl) + '" target="_blank" rel="noopener noreferrer">Cómo llegar ↗</a></li>';
+        var connectorChips = c.connectors && c.connectors.length ? '<span class="roadtrip-chargers__chips">' + c.connectors.slice(0, 3).map(function (name) { return '<span class="roadtrip-chargers__chip">' + esc(name) + '</span>'; }).join('') + '</span>' : '';
+        return '<li><div class="roadtrip-chargers__info"><b>' + esc(c.name) + '</b>' + (c.address ? '<span class="roadtrip-chargers__address">' + esc(c.address) + '</span>' : '') + connectorChips + '</div>' +
+          '<a class="roadtrip-chargers__link" href="' + esc(mapsUrl) + '" target="_blank" rel="noopener noreferrer">Cómo llegar<span aria-hidden="true">↗</span></a></li>';
       }).join('') + '</ul>';
   }
   async function loadRoadtripChargers(destKey) {
