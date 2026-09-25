@@ -14,6 +14,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const crypto = require('crypto');
 
 function loadEnv() {
   try {
@@ -779,10 +780,77 @@ function cotizarTodos(req, res, url) {
   });
 }
 
+// Páginas que sólo existen durante el prelanzamiento: la app de cotización y
+// el reparto de gastos. La raíz del dominio muestra la waitlist al público,
+// así que estas no pueden quedar accesibles sólo por adivinar la URL.
+//
+// El candado va por ARCHIVO y no por ruta a propósito: la app también se
+// alcanza como /app, como /app/ y como /index.html (el catch-all de más abajo
+// sirve ese archivo directamente), y el reparto como /grupo y /grupo.html.
+// Filtrando sólo la ruta /app, esas otras entradas quedarían abiertas.
+const PRELAUNCH_FILES = new Set(['index.html', 'grupo.html']);
+
+function prelaunchGuard() {
+  const user = String(process.env.APP_USER || '').trim();
+  const pass = String(process.env.APP_PASS || '');
+  // Sin las dos variables no hay candado: el desarrollo local sigue abierto.
+  if (!user || !pass) return null;
+  return { user: user, pass: pass };
+}
+
+function safeEqual(a, b) {
+  const ab = Buffer.from(String(a), 'utf8');
+  const bb = Buffer.from(String(b), 'utf8');
+  if (ab.length !== bb.length) {
+    crypto.timingSafeEqual(ab, ab); // igual trabajo, resultado falso
+    return false;
+  }
+  return crypto.timingSafeEqual(ab, bb);
+}
+
+function denyPrelaunch(res) {
+  const body = '<!doctype html><meta charset="utf-8"><title>Acceso restringido</title>'
+    + '<body style="font-family:system-ui;background:#0B1330;color:#F3F6FC;display:grid;place-items:center;height:100vh;margin:0">'
+    + '<div style="text-align:center"><h1 style="font-size:20px;margin:0 0 8px">Acceso restringido</h1>'
+    + '<p style="color:#9AA6C7;margin:0">Esta p&aacute;gina a&uacute;n no es p&uacute;blica.</p></div>';
+  res.writeHead(401, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'WWW-Authenticate': 'Basic realm="CuantoSale", charset="UTF-8"',
+    'Cache-Control': 'no-store'
+  });
+  res.end(body);
+}
+
+// Devuelve true si ya respondió con un 401 (acceso denegado).
+function checkPrelaunchAccess(req, res, relPath) {
+  const guard = prelaunchGuard();
+  if (!guard) return false;
+  if (!PRELAUNCH_FILES.has(path.basename(relPath).toLowerCase())) return false;
+  const header = String(req.headers.authorization || '');
+  const m = /^Basic\s+(.+)$/i.exec(header);
+  let ok = false;
+  if (m) {
+    let decoded = '';
+    try { decoded = Buffer.from(m[1], 'base64').toString('utf8'); } catch (e) { decoded = ''; }
+    const sep = decoded.indexOf(':');
+    const user = sep >= 0 ? decoded.slice(0, sep) : decoded;
+    const pass = sep >= 0 ? decoded.slice(sep + 1) : '';
+    // Se calculan las dos comparaciones siempre: cortocircuitar aquí
+    // devolvería si el usuario existe midiendo el tiempo de respuesta.
+    const userOk = safeEqual(user, guard.user);
+    const passOk = safeEqual(pass, guard.pass);
+    ok = userOk && passOk;
+  }
+  if (ok) return false;
+  denyPrelaunch(res);
+  return true;
+}
+
 const COMPRESSIBLE_EXT = new Set(['.html', '.css', '.js', '.json', '.svg']);
 function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/waitlist.html';
+  if (checkPrelaunchAccess(req, res, rel)) return;
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (file !== PUBLIC_DIR && file.indexOf(PUBLIC_DIR + path.sep) !== 0) { res.writeHead(403); return res.end('Prohibido'); }
   fs.readFile(file, function (err, data) {
