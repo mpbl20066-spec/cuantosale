@@ -2285,11 +2285,18 @@
       });
     } catch (error) { /* no bloquear la salida del usuario por un error de tracking */ }
   }
-  function travelpayoutsHotelUrl(meta, subId) {
+  // Hotellook/Travelpayouts no nos da el ID interno del hotel (nuestros
+  // datos de hoteles vienen de Booking.com, no de Hotellook), así que no
+  // podemos armar un link directo a la ficha de esa propiedad puntual. Lo
+  // más cerca que llegamos sin esa integración es que el término de
+  // búsqueda incluya el nombre del hotel, para que sus resultados lo
+  // prioricen en vez de mostrar el destino genérico.
+  function travelpayoutsHotelUrl(meta, subId, hotelName) {
+    var destination = hotelName ? hotelName + ', ' + meta.dest.name + ', Brasil' : meta.dest.name + ', Brasil';
     var params = new URLSearchParams({
       marker: travelpayoutsMarker || '',
       sub_id: subId,
-      destination: meta.dest.name + ', Brasil',
+      destination: destination,
       checkIn: meta.dep,
       checkOut: meta.ret,
       adults: String(meta.pax || 1)
@@ -3388,9 +3395,10 @@
           if (!authUser) { openAuthModal('Iniciá sesión para reservar el hotel y hacer seguimiento de tu clic.'); return; }
           if (!detailState || !detailState.meta) return;
           var subId = generateHotelSubId(lastSavedTripId, authUser.id);
-          var win = window.open(travelpayoutsHotelUrl(detailState.meta, subId), '_blank', 'noopener,noreferrer');
+          var hotelName = hotelAffiliateButton.getAttribute('data-hotel-name');
+          var win = window.open(travelpayoutsHotelUrl(detailState.meta, subId, hotelName), '_blank', 'noopener,noreferrer');
           if (!win) notice('Permití las ventanas emergentes para abrir la reserva.');
-          registerHotelClick(subId, detailState.meta, hotelAffiliateButton.getAttribute('data-hotel-name'), hotelAffiliateButton.getAttribute('data-hotel-total'), lastSavedTripId);
+          registerHotelClick(subId, detailState.meta, hotelName, hotelAffiliateButton.getAttribute('data-hotel-total'), lastSavedTripId);
         }());
         return;
       }
