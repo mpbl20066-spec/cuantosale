@@ -111,6 +111,11 @@ create index if not exists reservas_hoteles_user_created_idx
 create index if not exists reservas_hoteles_sub_id_idx
   on public.reservas_hoteles (sub_id);
 
+-- Estas tablas se crean por SQL Editor, así que a diferencia de trips/user_trips
+-- (creadas antes, probablemente con grants ya aplicados) necesitan el GRANT
+-- explícito: RLS solo filtra filas, no reemplaza el permiso de tabla.
+grant select, insert, update on public.reservas_hoteles to authenticated;
+
 -- Split de gastos por link (cuantosale.uy/grupo/{id}), sin login obligatorio.
 -- El id (uuid) del grupo funciona como "contraseña" del link: quien lo tiene
 -- puede leer y escribir en ese grupo. No usar para montos sensibles: no hay
@@ -167,6 +172,13 @@ create policy "Anyone with the link can delete an expense"
 
 create index if not exists participantes_grupo_idx on public.participantes (grupo_id);
 create index if not exists gastos_grupo_idx on public.gastos (grupo_id);
+
+-- Link de grupo = "contraseña" del grupo, así que anon también necesita
+-- poder leer/escribir a nivel de tabla (las policies de arriba ya acotan qué
+-- filas puede tocar cada quien).
+grant select, insert on public.grupos_viaje to anon, authenticated;
+grant select, insert on public.participantes to anon, authenticated;
+grant select, insert, delete on public.gastos to anon, authenticated;
 
 -- Waitlist de /waitlist con referidos. La tabla no tiene ninguna policy de
 -- select/insert para anon: toda lectura y escritura pasa por las funciones
