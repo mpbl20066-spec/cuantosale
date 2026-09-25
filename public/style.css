@@ -383,7 +383,6 @@ details.opt summary::-webkit-details-marker{display:none}
   .trip-summary.minimized .trip-summary__toggle-icon{transform:rotate(180deg)}
 }
 
-.install-app-button[hidden]{display:none}
 .hotel-nearby-note{grid-column:1/-1;margin:0;padding:12px 14px;border-radius:12px;background:var(--cel-soft);color:var(--ink2);font-size:13px}
 .hotel-options-empty{padding:24px}
 .daily-budget__option:focus-visible{outline:3px solid var(--accent);outline-offset:2px}

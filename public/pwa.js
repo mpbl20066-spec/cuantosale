@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  var installButton = document.getElementById('install-app-button');
   var helpDialog = document.getElementById('install-help');
   var helpContent = document.getElementById('install-help-content');
   var deferredInstallPrompt = null;
@@ -9,11 +8,42 @@
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
+  // La instalación ahora es automática, así que hace falta una memoria de por
+  // qué no se volvió a preguntar. Se guarda la fecha del descarte y se reintenta
+  // pasado un tiempo, para no fastidiar en cada carga pero tampoco dejar de
+  // preguntar nunca a quien lo cerró por error.
+  var DISMISS_KEY = 'cuantosale_install_dismissed_at';
+  var REASK_DAYS = 30;
+  var AUTO_DELAY_MS = 3500;
+  var isTouch = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+
+  var IOS_HELP = '<p>Para agregar CuántoSale a tu iPhone o iPad:</p><ol>'
+    + '<li>Si abriste este enlace desde Instagram, toca el menú <b>⋯</b> y elige <b>Abrir en Safari</b>.</li>'
+    + '<li>En Safari, toca <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li>'
+    + '<li>Desplázate y selecciona <b>Añadir a pantalla de inicio</b>, luego toca <b>Añadir</b>.</li></ol>';
+
+  function dismissedRecently() {
+    try {
+      var raw = localStorage.getItem(DISMISS_KEY);
+      if (!raw) return false;
+      var at = Number(raw);
+      if (!at) return false;
+      return (Date.now() - at) < REASK_DAYS * 24 * 60 * 60 * 1000;
+    } catch (error) { return false; }
+  }
+
+  function markDismissed() {
+    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (error) { /* modo privado */ }
+  }
+
+  function clearDismissed() {
+    try { localStorage.removeItem(DISMISS_KEY); } catch (error) { /* modo privado */ }
+  }
+
   function closeHelp() {
     if (!helpDialog) return;
     helpDialog.hidden = true;
     helpDialog.setAttribute('aria-hidden', 'true');
-    if (installButton) installButton.focus();
   }
 
   function showHelp(markup) {
@@ -25,45 +55,65 @@
     if (closeButton) closeButton.focus();
   }
 
+  // Un toque en cualquier parte cuenta como "no me interesa ahora": es lo que
+  // espera la gente cuando un cartelito aparece solo.
+  function noteDismiss() {
+    if (!helpDialog || helpDialog.hidden) return;
+    closeHelp();
+    markDismissed();
+  }
+
   window.addEventListener('beforeinstallprompt', function (event) {
     event.preventDefault();
     deferredInstallPrompt = event;
+    scheduleAutoInstall();
   });
 
-  if (installButton) {
-    if (isStandalone) installButton.hidden = true;
-    installButton.addEventListener('click', async function () {
-      if (isIOS) {
-        showHelp('<p>Para agregar CuántoSale a tu iPhone o iPad:</p><ol><li>Si abriste este enlace desde Instagram, toca el menú <b>⋯</b> y elige <b>Abrir en Safari</b>.</li><li>En Safari, toca <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li><li>Desplázate y selecciona <b>Añadir a pantalla de inicio</b>, luego toca <b>Añadir</b>.</li></ol>');
-        return;
-      }
+  function scheduleAutoInstall() {
+    if (isStandalone || dismissedRecently()) return;
+    window.setTimeout(tryAutoInstall, AUTO_DELAY_MS);
+  }
 
-      if (deferredInstallPrompt) {
-        var promptEvent = deferredInstallPrompt;
-        deferredInstallPrompt = null;
-        await promptEvent.prompt();
-        var choice = await promptEvent.userChoice;
-        if (choice && choice.outcome === 'accepted') installButton.hidden = true;
-        return;
-      }
+  async function tryAutoInstall() {
+    if (isStandalone || dismissedRecently()) return;
 
-      showHelp('<p>Para instalar CuántoSale en Android:</p><ol><li>Abre este sitio en <b>Chrome</b>. Si llegaste desde Instagram, usa el menú para abrirlo en Chrome.</li><li>Toca <b>⋮</b> en Chrome y selecciona <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.</li><li>Confirma con <b>Instalar</b> o <b>Añadir</b>.</li></ol>');
-    });
+    // En iOS no existe beforeinstallprompt: la instalación sólo se puede hacer
+    // a mano desde el menú Compartir. Por eso ahí se explica el paso a paso en
+    // vez de disparar un cartelito que nunca va a aparecer.
+    if (isIOS) {
+      showHelp(IOS_HELP);
+      return;
+    }
+
+    if (!deferredInstallPrompt) return;
+    var promptEvent = deferredInstallPrompt;
+    deferredInstallPrompt = null;
+    try {
+      await promptEvent.prompt();
+      var choice = await promptEvent.userChoice;
+      if (!choice || choice.outcome !== 'accepted') markDismissed();
+    } catch (error) {
+      markDismissed();
+    }
   }
 
   if (helpDialog) {
     helpDialog.addEventListener('click', function (event) {
-      if (event.target === helpDialog || event.target.closest('[data-close-install-help]')) closeHelp();
+      if (event.target === helpDialog || event.target.closest('[data-close-install-help]')) noteDismiss();
     });
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && !helpDialog.hidden) closeHelp();
+      if (event.key === 'Escape' && !helpDialog.hidden) noteDismiss();
     });
   }
 
   window.addEventListener('appinstalled', function () {
-    if (installButton) installButton.hidden = true;
+    clearDismissed();
     deferredInstallPrompt = null;
   });
+
+  // Si el evento no llega (ya instalada, o el navegador no lo emite) en iOS
+  // igual conviene ofrecer las instrucciones, porque ahí nunca se dispara solo.
+  if (isIOS && isTouch && !isStandalone) scheduleAutoInstall();
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
