@@ -963,7 +963,8 @@
       '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div>' +
       '<div class="voucher-card"><span class="voucher-icon">🎟️</span><div><small>Tours y actividades</small><strong>' + esc(toursLabel) + '</strong><p>' + esc(toursDetail) + '</p><b>' + money(toursTotal) + '</b></div></div></div>' +
       '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
-      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a></div>';
+      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-copy-summary>📋 Copiar resumen al portapapeles</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div><a class="itinerary-summary__booking" href="' + esc(bookingHref) + '" target="_blank" rel="noopener noreferrer">Reservar alojamiento en Booking.com ↗</a>' +
+      '<button type="button" class="itinerary-summary__booking itinerary-summary__booking--tp" data-book-hotel-affiliate data-hotel-name="' + esc(selectedHotelName) + '" data-hotel-total="' + hotelTotal + '">Reservar alojamiento (Travelpayouts) ↗</button></div>';
     modal.dataset.summaryText = summaryText;
     var voucherCards = modal.querySelectorAll('.voucher-card');
     if (voucherCards[0]) {
@@ -1171,6 +1172,7 @@
       // Reemplazar, en vez de ocultar, evita que controles de vuelos o transfers
       // queden disponibles en el DOM cuando el usuario eligió auto (y viceversa).
       flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
+      if (autoEnabled) initRoadtripMapIfPresent(detailState.meta);
     }
     sincronizarTrasladoOficial();
   }
@@ -1208,10 +1210,85 @@
   function roadtripCard(meta, autoSelected) {
     return '';
   }
+  var googleMapsApiKey = '';
+  var googleMapsLoadPromise = null;
+  function loadGoogleMapsSdk() {
+    if (window.google && window.google.maps && window.google.maps.DirectionsService) return Promise.resolve();
+    if (googleMapsLoadPromise) return googleMapsLoadPromise;
+    googleMapsLoadPromise = fetch('/api/config').then(function (r) { return r.json(); }).then(function (config) {
+      googleMapsApiKey = config.googleMapsApiKey || '';
+      if (!googleMapsApiKey) throw new Error('Falta configurar GOOGLE_MAPS_API_KEY en las variables de entorno.');
+      return new Promise(function (resolve, reject) {
+        var script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(googleMapsApiKey) + '&libraries=geometry';
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = function () { reject(new Error('No pudimos cargar el mapa de Google.')); };
+        document.head.appendChild(script);
+      });
+    });
+    return googleMapsLoadPromise;
+  }
+  // Dibuja la ruta MVD/PDP → destino. Si ya hay una polyline cacheada en
+  // Supabase para ese origen-destino la reutiliza (sin llamar a Directions);
+  // si no, consulta Directions una vez y guarda el resultado para la próxima.
+  async function initRoadtripMapIfPresent(meta) {
+    var container = document.querySelector('[data-roadtrip-map]');
+    if (!container || !meta || !meta.dest) return;
+    var originKey = meta.origin || S.origin || 'MVD';
+    var destKey = meta.dest.key;
+    var cacheKey = originKey + '|' + destKey;
+    if (container.dataset.routeCacheKey === cacheKey) return;
+    container.dataset.routeCacheKey = cacheKey;
+    container.innerHTML = '<p class="cost-note">Cargando mapa de ruta...</p>';
+    try {
+      await loadGoogleMapsSdk();
+      if (!supabaseClient) { try { await initAuth(); } catch (error) {} }
+      var originAddress = originKey === 'PDP' ? 'Punta del Este, Uruguay' : 'Montevideo, Uruguay';
+      var destinationAddress = meta.dest.name + ', Brasil';
+      var cachedRoute = null;
+      if (supabaseClient) {
+        var cachedResult = await supabaseClient.from('route_polylines').select('*').eq('origin', originKey).eq('destination_key', destKey).maybeSingle();
+        if (!cachedResult.error) cachedRoute = cachedResult.data;
+      }
+      if (container.dataset.routeCacheKey !== cacheKey) return; // el usuario ya cambió de destino/transporte
+      container.innerHTML = '';
+      var map = new google.maps.Map(container, { zoom: 5, center: { lat: -27, lng: -50 }, disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative' });
+      if (cachedRoute && cachedRoute.encoded_polyline) {
+        var path = google.maps.geometry.encoding.decodePath(cachedRoute.encoded_polyline);
+        new google.maps.Polyline({ path: path, strokeColor: '#f5b942', strokeWeight: 4, map: map });
+        var bounds = new google.maps.LatLngBounds();
+        path.forEach(function (point) { bounds.extend(point); });
+        map.fitBounds(bounds);
+        return;
+      }
+      var directionsService = new google.maps.DirectionsService();
+      var directionsRenderer = new google.maps.DirectionsRenderer({ map: map, polylineOptions: { strokeColor: '#f5b942', strokeWeight: 4 } });
+      directionsService.route({ origin: originAddress, destination: destinationAddress, travelMode: google.maps.TravelMode.DRIVING }, function (result, status) {
+        if (status !== 'OK' || !result || container.dataset.routeCacheKey !== cacheKey) {
+          if (status !== 'OK') container.innerHTML = '<p class="cost-note">No pudimos calcular la ruta en el mapa.</p>';
+          return;
+        }
+        directionsRenderer.setDirections(result);
+        var leg = result.routes[0] && result.routes[0].legs[0];
+        var encodedPolyline = google.maps.geometry.encoding.encodePath(result.routes[0].overview_path);
+        if (supabaseClient && leg) {
+          supabaseClient.from('route_polylines').upsert({
+            origin: originKey, destination_key: destKey,
+            distance_km: Math.round(leg.distance.value / 1000),
+            duration_minutes: Math.round(leg.duration.value / 60),
+            encoded_polyline: encodedPolyline, provider: 'google_directions'
+          }, { onConflict: 'origin,destination_key', ignoreDuplicates: true }).catch(function () { /* el mapa ya se mostró; el cacheo es best-effort */ });
+        }
+      });
+    } catch (error) {
+      if (container.dataset.routeCacheKey === cacheKey) container.innerHTML = '<p class="cost-note">No pudimos cargar el mapa de ruta (' + esc(error.message || 'error desconocido') + ').</p>';
+    }
+  }
   function roadtripCalculator(meta) {
     var r = meta.roadtrip;
     if (!r) return '';
-    return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></section>';
+    return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div><div class="transport-card roadtrip-map" data-roadtrip-map aria-label="Mapa de la ruta en auto"></div></section>';
   }
   function transferPickupTimeLabel(date) {
     return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
@@ -2212,6 +2289,8 @@
   var authUser = null;
   var pendingTripSave = false;
   var tripSaveInProgress = false;
+  var travelpayoutsMarker = '';
+  var lastSavedTripId = null;
   var authReadyPromise = Promise.resolve();
   var authInitPromise = null;
   var supabaseSdkPromise = null;
@@ -2255,6 +2334,44 @@
     return result.data;
   }
   window.guardarViaje = guardarViaje;
+
+  // sub_id único por clic para atribuir cada reserva de hotel a un viaje y un
+  // usuario puntuales en los reportes de Travelpayouts (viaje_id + user_id +
+  // timestamp en base36, compactado porque el parámetro tiene largo limitado).
+  function generateHotelSubId(tripId, userId) {
+    var t = String(tripId || 'na').replace(/-/g, '').slice(0, 10);
+    var u = String(userId || 'anon').replace(/-/g, '').slice(0, 10);
+    return 't' + t + '-u' + u + '-' + Date.now().toString(36);
+  }
+  // Registra el clic en estado "pendiente" antes de salir del sitio, para
+  // poder conciliar después contra el reporte de conversiones de Travelpayouts.
+  async function registerHotelClick(subId, meta, hotelName, hotelTotal, tripId) {
+    if (!supabaseClient || !authUser) return;
+    try {
+      await supabaseClient.from('reservas_hoteles').insert({
+        user_id: authUser.id,
+        trip_id: tripId || null,
+        destination_key: meta.dest.key,
+        hotel_name: hotelName || null,
+        sub_id: subId,
+        click_total: Number(hotelTotal) || null,
+        currency: 'USD',
+        status: 'pending',
+        provider: 'travelpayouts'
+      });
+    } catch (error) { /* no bloquear la salida del usuario por un error de tracking */ }
+  }
+  function travelpayoutsHotelUrl(meta, subId) {
+    var params = new URLSearchParams({
+      marker: travelpayoutsMarker || '',
+      sub_id: subId,
+      destination: meta.dest.name + ', Brasil',
+      checkIn: meta.dep,
+      checkOut: meta.ret,
+      adults: String(meta.pax || 1)
+    });
+    return 'https://search.hotellook.com/?' + params.toString();
+  }
 
   function authDisplayName(user) {
     var metadata = user && user.user_metadata || {};
@@ -2327,6 +2444,7 @@
     }
     tripSaveInProgress = false;
     pendingTripSave = false;
+    lastSavedTripId = result && result.id || lastSavedTripId;
     try { sessionStorage.removeItem('cuantosale_pending_trip'); sessionStorage.removeItem('cuantosale_pending_trip_data'); } catch (error) {}
     await openTripsModal();
   }
@@ -2354,7 +2472,7 @@
     });
     if (!uniqueTrips.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
     // Render deduplicated trips directly so every button maps to box._trips.
-    box.innerHTML = uniqueTrips.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span>' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_price || trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button><button type="button" class="account-button account-button--danger" data-delete-trip="' + esc(trip.id) + '" aria-label="Borrar viaje">🗑️</button></article>'; }).join('');
+    box.innerHTML = uniqueTrips.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span data-trip-total="' + esc(trip.id) + '">' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_price || trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button><button type="button" class="account-button account-button--secondary" data-refresh-trip="' + esc(trip.id) + '">Actualizar precio</button><button type="button" class="account-button account-button--danger" data-delete-trip="' + esc(trip.id) + '" aria-label="Borrar viaje">🗑️</button></article>'; }).join('');
     box._trips = uniqueTrips;
     return;
   }
@@ -2367,6 +2485,53 @@
     if (result.error && /permission denied|row-level security|42501/i.test(result.error.message || '')) result = await supabaseClient.from('user_trips').delete().eq('id', tripId).eq('user_id', user.id);
     if (result.error) { alert('No pudimos borrar el viaje: ' + result.error.message); return; }
     await openTripsModal();
+  }
+  // Reconsulta /api/cotizar con los mismos parámetros de búsqueda guardados y
+  // persiste el total recalculado, sin tocar el resto del snapshot (hotel,
+  // vuelo o traslado elegidos siguen siendo los que el usuario ya confirmó).
+  async function refreshTripPrice(tripId, button) {
+    if (!supabaseClient || !tripId) return;
+    var box = $('#trips-modal').querySelector('[data-saved-trips]');
+    var trip = box && box._trips && box._trips.find(function (item) { return String(item.id) === String(tripId); });
+    if (!trip) { notice('No pudimos encontrar ese viaje guardado.'); return; }
+    var details = trip.details || trip.flight_details || {};
+    var originalText = button ? button.textContent : '';
+    if (button) { button.disabled = true; button.textContent = 'Actualizando...'; }
+    try {
+      var destKey = await resolveSavedDestinationKey(trip, details);
+      if (!destKey) throw new Error('No pudimos identificar el destino para actualizar el precio.');
+      var params = new URLSearchParams({
+        dest: destKey,
+        dep: trip.departure_date || '',
+        ret: trip.return_date || '',
+        pax: String(Number(trip.travelers) || Number(details.travelers) || 1),
+        budget: String(Number(details.queryBudget) || 0),
+        style: details.style || 'comodo',
+        origin: details.origin === 'PDP' ? 'PDP' : 'MVD',
+        subcategory: details.subcategory || '',
+        hotel_type: details.hotelType || ''
+      });
+      var res = await fetch('/api/cotizar?' + params.toString());
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No pudimos actualizar el precio.');
+      var rec = data.list && data.list.find(function (p) { return p.id === data.recId; });
+      if (!rec) throw new Error('No encontramos una propuesta recomendada para este viaje.');
+      var userResult = await supabaseClient.auth.getUser();
+      var user = userResult.data && userResult.data.user;
+      if (!user) throw new Error('Tu sesión expiró. Volvé a iniciar sesión.');
+      var updateResult = await supabaseClient.from('trips').update({ total_amount: rec.total }).eq('id', tripId).eq('user_id', user.id);
+      if (updateResult.error && /permission denied|row-level security|42501/i.test(updateResult.error.message || '')) {
+        updateResult = await supabaseClient.from('user_trips').update({ total_amount: rec.total }).eq('id', tripId).eq('user_id', user.id);
+      }
+      if (updateResult.error) throw new Error('No pudimos guardar el precio actualizado: ' + updateResult.error.message);
+      trip.total_amount = rec.total; trip.total_price = rec.total;
+      var totalLabel = box.querySelector('[data-trip-total="' + tripId + '"]');
+      if (totalLabel) totalLabel.textContent = (trip.departure_date || '') + ' → ' + (trip.return_date || '') + ' · ' + money(rec.total);
+    } catch (error) {
+      notice(error.message || 'No pudimos actualizar el precio.');
+    } finally {
+      if (button) { button.disabled = false; button.textContent = originalText || 'Actualizar precio'; }
+    }
   }
   function applySavedTripToDetail(trip) {
     if (!detailState || !trip) return;
@@ -2440,6 +2605,7 @@
         await loadSupabaseSdk();
         var configResponse = await fetch('/api/config');
         var config = await configResponse.json();
+        travelpayoutsMarker = config.travelpayoutsMarker || '';
         if (!config.supabaseUrl || !config.supabaseAnonKey) { console.warn('Falta SUPABASE_ANON_KEY/SUPABASE_PUBLISHABLE_KEY en las variables de entorno del despliegue.'); return; }
         supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage } });
         try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
@@ -2525,6 +2691,8 @@
         }());
         return;
       }
+      var refreshButton = e.target.closest('[data-refresh-trip]');
+      if (refreshButton) { e.preventDefault(); e.stopPropagation(); refreshTripPrice(refreshButton.getAttribute('data-refresh-trip'), refreshButton); return; }
       var deleteButton = e.target.closest('[data-delete-trip]');
       if (deleteButton) { e.preventDefault(); e.stopPropagation(); if (window.confirm('¿Borrar este viaje guardado?')) deleteSavedTrip(deleteButton.getAttribute('data-delete-trip')); return; }
       var logout = e.target.closest('[data-signout]');
@@ -3285,6 +3453,20 @@
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var saveTripButton = e.target.closest('[data-save-trip]');
       if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
+      var hotelAffiliateButton = e.target.closest('[data-book-hotel-affiliate]');
+      if (hotelAffiliateButton) {
+        e.preventDefault();
+        (async function () {
+          if (!supabaseClient) { await initAuth(); }
+          if (!authUser) { openAuthModal('Iniciá sesión para reservar el hotel y hacer seguimiento de tu clic.'); return; }
+          if (!detailState || !detailState.meta) return;
+          var subId = generateHotelSubId(lastSavedTripId, authUser.id);
+          var win = window.open(travelpayoutsHotelUrl(detailState.meta, subId), '_blank', 'noopener,noreferrer');
+          if (!win) notice('Permití las ventanas emergentes para abrir la reserva.');
+          registerHotelClick(subId, detailState.meta, hotelAffiliateButton.getAttribute('data-hotel-name'), hotelAffiliateButton.getAttribute('data-hotel-total'), lastSavedTripId);
+        }());
+        return;
+      }
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();

@@ -1,11 +1,11 @@
-'use strict';
+﻿'use strict';
 /*
- * Servidor de CuántoSale. Node 18 o superior.
+ * Servidor de CuÃ¡ntoSale. Node 18 o superior.
  *
  *   node server.js            -> http://localhost:3000
  *
  * Variables (en el entorno o en un archivo .env):
- *   DUFFEL_API_KEY (o DUFFEL_ACCESS_TOKEN) para búsquedas reales de vuelos.
+ *   DUFFEL_API_KEY (o DUFFEL_ACCESS_TOKEN) para bÃºsquedas reales de vuelos.
  *   PORT                  puerto (por defecto 3000)
  *   BOOKING_API_KEY y BOOKING_API_HOST para la API de alojamientos.
  *   RATE_LIMIT_PER_MIN    pedidos por minuto por IP a /api/cotizar (por defecto 30)
@@ -20,7 +20,7 @@ function loadEnv() {
       const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
       if (m && !(m[1] in process.env)) process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, '');
     });
-  } catch (e) { /* no hay .env: está bien */ }
+  } catch (e) { /* no hay .env: estÃ¡ bien */ }
 }
 loadEnv();
 
@@ -36,38 +36,38 @@ const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrld
 const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
 const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
 const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue']);
-// Algunas islas y pueblos pequeños no están indexados como ciudad en Booking.
-// En esos casos buscamos alojamientos en el municipio de acceso más cercano.
+// Algunas islas y pueblos pequeÃ±os no estÃ¡n indexados como ciudad en Booking.
+// En esos casos buscamos alojamientos en el municipio de acceso mÃ¡s cercano.
 const HOTEL_NEARBY_DESTINATIONS = {
-  buz: { key: 'cabo', name: 'Cabo Frio', label: 'Cabo Frio, cerca de Búzios' },
+  buz: { key: 'cabo', name: 'Cabo Frio', label: 'Cabo Frio, cerca de BÃºzios' },
   arraial: { key: 'cabo', name: 'Cabo Frio', label: 'Cabo Frio, cerca de Arraial do Cabo' },
   cabo: { key: 'arraial', name: 'Arraial do Cabo', label: 'Arraial do Cabo, cerca de Cabo Frio' },
   ilha: { key: 'angra', name: 'Angra dos Reis', label: 'Angra dos Reis, cerca de Ilha Grande' },
   paraty: { key: 'angra', name: 'Angra dos Reis', label: 'Angra dos Reis y alrededores' },
-  ilhabela: { key: 'ilhabela', name: 'São Sebastião', label: 'São Sebastião, junto a Ilhabela' },
+  ilhabela: { key: 'ilhabela', name: 'SÃ£o SebastiÃ£o', label: 'SÃ£o SebastiÃ£o, junto a Ilhabela' },
   ubatuba: { key: 'ubatuba', name: 'Caraguatatuba', label: 'Caraguatatuba, cerca de Ubatuba' },
-  maragogi: { key: 'mcz', name: 'Maceió', label: 'Maceió, región cercana a Maragogi' },
-  porto: { key: 'rec', name: 'Recife', label: 'Recife, región cercana a Porto de Galinhas' },
+  maragogi: { key: 'mcz', name: 'MaceiÃ³', label: 'MaceiÃ³, regiÃ³n cercana a Maragogi' },
+  porto: { key: 'rec', name: 'Recife', label: 'Recife, regiÃ³n cercana a Porto de Galinhas' },
   trancoso: { key: 'trancoso', name: 'Porto Seguro', label: 'Porto Seguro, cerca de Trancoso' },
-  jericoacoara: { key: 'for', name: 'Fortaleza', label: 'Fortaleza, región de acceso a Jericoacoara' },
-  morro: { key: 'ssa', name: 'Salvador', label: 'Salvador, región de acceso a Morro de São Paulo' },
-  pip: { key: 'nat', name: 'Natal', label: 'Natal, región cercana a Pipa' },
-  bombinhas: { key: 'bcm', name: 'Balneário Camboriú', label: 'Balneário Camboriú, cerca de Bombinhas' },
-  rosa: { key: 'fln', name: 'Florianópolis', label: 'Florianópolis, región cercana a Praia do Rosa' },
+  jericoacoara: { key: 'for', name: 'Fortaleza', label: 'Fortaleza, regiÃ³n de acceso a Jericoacoara' },
+  morro: { key: 'ssa', name: 'Salvador', label: 'Salvador, regiÃ³n de acceso a Morro de SÃ£o Paulo' },
+  pip: { key: 'nat', name: 'Natal', label: 'Natal, regiÃ³n cercana a Pipa' },
+  bombinhas: { key: 'bcm', name: 'BalneÃ¡rio CamboriÃº', label: 'BalneÃ¡rio CamboriÃº, cerca de Bombinhas' },
+  rosa: { key: 'fln', name: 'FlorianÃ³polis', label: 'FlorianÃ³polis, regiÃ³n cercana a Praia do Rosa' },
   gram: { key: 'canela', name: 'Canela', label: 'Canela, cerca de Gramado' },
   canela: { key: 'gram', name: 'Gramado', label: 'Gramado, cerca de Canela' }
 };
 // Respaldo cuando Booking.com no devuelve (o no alcanza) 3 opciones reales para
-// la categoría elegida. Usa cadenas hoteleras reales con presencia amplia en
+// la categorÃ­a elegida. Usa cadenas hoteleras reales con presencia amplia en
 // Brasil por nivel de comodidad; el link de reserva siempre apunta a una
-// búsqueda real y funcional de Booking.com para esa ciudad y esas fechas.
+// bÃºsqueda real y funcional de Booking.com para esa ciudad y esas fechas.
 const HOTEL_TIER_FALLBACK = [
-  { id: 'eco', label: 'Económico', brands: ['ibis budget', 'Selina', 'Che Lagarto Hostel'],
+  { id: 'eco', label: 'EconÃ³mico', brands: ['ibis budget', 'Selina', 'Che Lagarto Hostel'],
     desc: 'Habitaciones simples y funcionales, ideal para dormir bien gastando poco.' },
   { id: 'medio', label: 'Intermedio', brands: ['ibis', 'Travel Inn', 'Slaviero'],
-    desc: 'Hotel 3 estrellas con buena ubicación y desayuno incluido.' },
+    desc: 'Hotel 3 estrellas con buena ubicaciÃ³n y desayuno incluido.' },
   { id: 'confort', label: 'Confort', brands: ['Mercure', 'Golden Tulip', 'Blue Tree'],
-    desc: 'Hotel 4 estrellas con más comodidades y mejor ubicación.' }
+    desc: 'Hotel 4 estrellas con mÃ¡s comodidades y mejor ubicaciÃ³n.' }
 ];
 function fallbackBookingUrl(destName, dep, ret, pax, hotelName) {
   const query = new URLSearchParams({
@@ -149,7 +149,7 @@ function bookingSettings() {
     key: process.env.BOOKING_API_KEY || '',
     host: String(process.env.BOOKING_API_HOST || 'booking-com15.p.rapidapi.com').trim().replace(/^https?:\/\//, '').replace(/\/$/, ''),
     url: process.env.BOOKING_API_URL || 'https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels',
-    destination: process.env.BOOKING_DESTINATION || 'Florianópolis'
+    destination: process.env.BOOKING_DESTINATION || 'FlorianÃ³polis'
   };
 }
 function normalizeHotelApiResponse(payload, extra, source) {
@@ -174,6 +174,11 @@ function normalizeHotelApiResponse(payload, extra, source) {
     const image = bookingPhoto(hotel) || bookingPhoto(property);
     const currency = String(gross.currency || compositeGross.currency || hotel.currency || breakdown.currency || 'USD').toUpperCase();
     const bookingUrl = safeBookingHotelUrl(hotel.url || hotel.hotel_url || hotel.bookingUrl || hotel.link || property.url);
+    // Extraer regimen de comidas de todos los posibles campos de Booking API
+    var rawMealPlan = String(
+      hotel.meal_plan || hotel.mealPlan || hotel.board_type || hotel.board || hotel.meal_type ||
+      (property && (property.meal_plan || property.mealPlan || property.board_type)) || ''
+    ).toLowerCase().trim();
     return {
       name: name,
       hotelId: String(hotel.hotel_id || hotel.hotelId || property.hotel_id || property.id || hotel.id || ''),
@@ -184,7 +189,8 @@ function normalizeHotelApiResponse(payload, extra, source) {
       rating: Number(property.reviewScore || property.review_score || hotel.review_score || hotel.rating || 0),
       propertyType: String(property.propertyType || property.property_type || hotel.property_type || hotel.hotel_type || ''),
       description: String(property.description || hotel.description || ''),
-      categoryText: JSON.stringify({ property: property, amenities: hotel.facilities || hotel.amenities || hotel.hotelFacilities || hotel.hotel_facilities || [], mealPlan: hotel.meal_plan || hotel.mealPlan || hotel.board_type || '' }),
+      mealPlan: rawMealPlan,
+      categoryText: JSON.stringify({ property: property, amenities: hotel.facilities || hotel.amenities || hotel.hotelFacilities || hotel.hotel_facilities || [], mealPlan: rawMealPlan }),
       bookingUrl: bookingUrl,
       similar: [],
       source: source || 'booking'
@@ -216,19 +222,19 @@ function selectThreeHotelsByBudget(hotels, dailyBudget) {
   });
   return selected.slice(0, 3).map(function (hotel, index) {
     return Object.assign({}, hotel, {
-      highlight: ['Económico', 'Equilibrado', 'Cerca de tu presupuesto'][index],
+      highlight: ['EconÃ³mico', 'Equilibrado', 'Cerca de tu presupuesto'][index],
       recommended: index === 0
     });
   });
 }
-const HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
+const HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'EconÃ³mico', intermedio: 'Intermedio', confort: 'Confort' };
 function resolveHotelType(value, subcategory, style) {
   const normalized = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
   const context = (normalized + ' ' + String(subcategory || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')).replace(/[_ ]+/g, '-');
   if (context.indexOf('all-inclusive') >= 0 || context.indexOf('todo-incluido') >= 0) return 'all-inclusive';
   if (context.indexOf('resort') >= 0) return 'resort';
   if (context.indexOf('boutique') >= 0) return 'boutique';
-  if (context.indexOf('economico') >= 0 || context.indexOf('económico') >= 0 || context.indexOf('ahorro') >= 0) return 'economico';
+  if (context.indexOf('economico') >= 0 || context.indexOf('econÃ³mico') >= 0 || context.indexOf('ahorro') >= 0) return 'economico';
   if (context.indexOf('intermedio') >= 0 || context.indexOf('3-estrellas') >= 0) return 'intermedio';
   if (context.indexOf('confort') >= 0 || context.indexOf('premium') >= 0) return 'confort';
   return style === 'ahorro' ? 'economico' : style === 'comodo' ? 'confort' : 'intermedio';
@@ -245,7 +251,13 @@ function hotelMatchesType(hotel, type, budgetTarget) {
     return rate > budgetTarget * 1.1;
   }
   const text = normalizeHotelKey([hotel.name, hotel.propertyType, hotel.description, hotel.categoryText].filter(Boolean).join(' '));
-  if (type === 'all-inclusive') return /all inclusive|todo incluido|todo inclusivo/.test(text);
+  if (type === 'all-inclusive') {
+    // Priorizar el campo mealPlan extraido directamente de la API de Booking
+    const mp = String(hotel.mealPlan || '').toLowerCase();
+    if (mp && (mp.includes('all_inclusive') || mp.includes('all-inclusive') || mp.includes('all inclusive') || mp === '5')) return true;
+    // Fallback: buscar en texto libre del hotel
+    return /all inclusive|todo incluido|todo inclusivo/.test(text);
+  }
   if (type === 'resort') return /resort/.test(text);
   if (type === 'boutique') return /boutique/.test(text);
   return false;
@@ -282,10 +294,10 @@ async function bookingApiJson(url, settings) {
       headers: { 'x-rapidapi-key': settings.key, 'x-rapidapi-host': settings.host, Accept: 'application/json' }
     }, 9000);
   } catch (error) {
-    throw new Error(error && error.name === 'AbortError' ? 'Booking API excedió el tiempo de espera.' : 'No se pudo conectar con Booking API.');
+    throw new Error(error && error.name === 'AbortError' ? 'Booking API excediÃ³ el tiempo de espera.' : 'No se pudo conectar con Booking API.');
   }
   let payload;
-  try { payload = await response.json(); } catch (error) { throw new Error('Booking API devolvió una respuesta JSON inválida.'); }
+  try { payload = await response.json(); } catch (error) { throw new Error('Booking API devolviÃ³ una respuesta JSON invÃ¡lida.'); }
   if (!response || !response.ok || payload && payload.status === false) {
     const message = String(payload && (payload.message || payload.error) || 'No se pudo consultar disponibilidad.').slice(0, 180);
     throw new Error('Booking API (HTTP ' + (response && response.status || 502) + '): ' + message);
@@ -301,7 +313,7 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   const settings = bookingSettings();
   if (!settings.key) throw new Error('Falta configurar BOOKING_API_KEY en las variables de entorno de Vercel.');
   if (!settings.host || !settings.url) throw new Error('Falta configurar BOOKING_API_HOST o BOOKING_API_URL en Vercel.');
-  const hotelName = String(destName || settings.destination || 'Florianópolis').trim();
+  const hotelName = String(destName || settings.destination || 'FlorianÃ³polis').trim();
   const dep = String((extra && extra.dep) || '').trim() || new Date(Date.now() + 86400000).toISOString().slice(0, 10);
   const ret = String((extra && extra.ret) || '').trim() || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
   const adults = Math.max(1, Number((extra && extra.pax) || 1));
@@ -311,12 +323,15 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   const destinationPayload = await bookingApiJson(destinationUrl.toString(), settings);
   const destinationRows = responseRows(destinationPayload);
   const target = destinationRows.find(function (item) { return item && /city/i.test(String(item.search_type || item.dest_type || '')); }) || destinationRows[0];
-  if (!target || target.dest_id == null || !target.search_type) throw new Error('Booking API no encontró la ciudad "' + hotelName + '".');
+  if (!target || target.dest_id == null || !target.search_type) throw new Error('Booking API no encontrÃ³ la ciudad "' + hotelName + '".');
+  const isAllInclusive = extra && extra.hotelType === 'all-inclusive';
   const params = new URLSearchParams({
     dest_id: String(target.dest_id), search_type: String(target.search_type),
     arrival_date: dep, departure_date: ret, adults: String(adults), room_qty: '1',
     page_number: '1', units: 'metric', languagecode: 'es', currency_code: 'USD'
   });
+  // Filtrar por regimen todo-incluido directamente en la API de Booking
+  if (isAllInclusive) { params.set('meal_plan', 'all_inclusive'); params.set('filter_by_meal_plan', '5'); }
   const searchUrl = new URL(settings.url);
   Object.keys(Object.fromEntries(params)).forEach(function (key) { searchUrl.searchParams.set(key, params.get(key)); });
   const payload = await bookingApiJson(searchUrl.toString(), settings);
@@ -346,9 +361,9 @@ function uniqueHotelList(list, fallbackImages) {
   return unique;
 }
 
-// Siempre debe haber exactamente 3 opciones alineadas a la categoría (tier)
-// que el usuario eligió arriba (Económico / Intermedio / Confort). Se prioriza
-// alojamiento real de Booking.com dentro del rango de precio de esa categoría;
+// Siempre debe haber exactamente 3 opciones alineadas a la categorÃ­a (tier)
+// que el usuario eligiÃ³ arriba (EconÃ³mico / Intermedio / Confort). Se prioriza
+// alojamiento real de Booking.com dentro del rango de precio de esa categorÃ­a;
 // lo que falte para llegar a 3 se completa con el respaldo de cadenas reales.
 async function hotelRecommendations(destKey, destName, style, extra) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
@@ -367,7 +382,7 @@ async function hotelRecommendations(destKey, destName, style, extra) {
           const regionalHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, hotelExtra);
           realHotels = realHotels.concat(regionalHotels.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: nearby.label }); }));
         } catch (regionalError) {
-          console.warn('[hotelRecommendations] Búsqueda regional no disponible:', regionalError && regionalError.message ? regionalError.message : regionalError);
+          console.warn('[hotelRecommendations] BÃºsqueda regional no disponible:', regionalError && regionalError.message ? regionalError.message : regionalError);
         }
       }
     }
@@ -376,8 +391,8 @@ async function hotelRecommendations(destKey, destName, style, extra) {
     realHotels = [];
   }
   const priced = uniqueHotelList(realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; }));
-  // Un hotel real más barato que el objetivo de la categoría sigue siendo válido
-  // para esa categoría; lo que se descarta es lo que se pasa claramente de precio.
+  // Un hotel real mÃ¡s barato que el objetivo de la categorÃ­a sigue siendo vÃ¡lido
+  // para esa categorÃ­a; lo que se descarta es lo que se pasa claramente de precio.
   const high = budgetTarget > 0 ? budgetTarget * 1.6 : Infinity;
   const matchingCategory = priced
     .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget); })
@@ -386,12 +401,41 @@ async function hotelRecommendations(destKey, destName, style, extra) {
     .map(function (hotel) { return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName }); });
   const missing = 3 - matchingCategory.length;
   const canUseGenericFallback = hotelType === 'economico' || hotelType === 'intermedio' || hotelType === 'confort';
-  const fallback = missing > 0 && canUseGenericFallback ? fallbackHotelsFor(destKey, destName, hotelType === 'economico' ? 0 : hotelType === 'confort' ? 2 : tierIndex, hotelExtra) : [];
+  // Para all-inclusive no usamos el fallback generico (son cadenas que NO son all-inclusive).
+  // En su lugar generamos entradas con el link de Booking filtrado por todo-incluido.
+  var fallback = [];
+  if (missing > 0) {
+    if (canUseGenericFallback) {
+      fallback = fallbackHotelsFor(destKey, destName, hotelType === 'economico' ? 0 : hotelType === 'confort' ? 2 : tierIndex, hotelExtra);
+    } else if (hotelType === 'all-inclusive') {
+      // Generar N entradas que apuntan a Booking con filtro all-inclusive real
+      var aiQuery = new URLSearchParams({
+        ss: destName + ', Brasil', group_adults: String(Math.max(1, Number(hotelExtra.pax) || 1)),
+        no_rooms: '1', group_children: '0', nflt: 'mealplan%3D5',
+        checkin: hotelExtra.dep || '', checkout: hotelExtra.ret || ''
+      });
+      var aiUrl = 'https://www.booking.com/searchresults.es.html?' + aiQuery.toString();
+      var aiNames = ['Complejo Todo Incluido', 'Resort All Inclusive', 'Hotel All Inclusive'];
+      for (var ai = 0; ai < missing; ai++) {
+        fallback.push({
+          name: aiNames[ai] || ('All Inclusive ' + destName),
+          hotelId: '', image: '',
+          total: Math.round((budgetTarget || 200) * Math.max(1, Number(hotelExtra.nights) || 1)),
+          perNight: budgetTarget || 200, currency: 'USD', rating: 0,
+          mealPlan: 'all_inclusive', hotelType: 'all-inclusive',
+          bookingUrl: aiUrl,
+          description: 'Régimen todo incluido: comidas, bebidas y actividades incluidas en el precio.',
+          similar: [], source: 'fallback-ai', tier: selectedTier,
+          hotelTypeLabel: 'All Inclusive'
+        });
+      }
+    }
+  }
   const combined = uniqueHotelList(matchingCategory.concat(fallback)).slice(0, 3);
   return combined.map(function (hotel, index) {
     return Object.assign({}, hotel, {
       tier: selectedTier, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio',
-      highlight: ['Recomendado', 'Buena opción', 'Alternativa'][index],
+      highlight: ['Recomendado', 'Buena opciÃ³n', 'Alternativa'][index],
       recommended: index === 0
     });
   });
@@ -402,14 +446,14 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
   const tier = tierByStyle[trip.style] == null ? 1 : tierByStyle[trip.style];
   // Las propuestas no deben ofrecer ni conservar conexiones que impliquen
   // partir por Buenos Aires. Cuando la capa del estilo deja muy pocas opciones,
-  // se rellena con alternativas válidas de otras categorías para mantener una
-  // respuesta útil en modo demo y en búsquedas rápidas.
+  // se rellena con alternativas vÃ¡lidas de otras categorÃ­as para mantener una
+  // respuesta Ãºtil en modo demo y en bÃºsquedas rÃ¡pidas.
   const preferredCore = result.list.filter(function (proposal) { return proposal.mode !== 'avion_ba' && proposal.ti === tier; });
-  // Para destinos donde ir en auto es una alternativa real (Florianópolis hacia
-  // el sur), se suma como una propuesta comparable más en "Todas las
-  // propuestas" -- sin tocar la recomendación, que sigue anclada a vuelo/bus
-  // para no alterar el resto del flujo (cotización real de Duffel, transfer
-  // desde el aeropuerto, etc.), pensado para llegar en avión o bus.
+  // Para destinos donde ir en auto es una alternativa real (FlorianÃ³polis hacia
+  // el sur), se suma como una propuesta comparable mÃ¡s en "Todas las
+  // propuestas" -- sin tocar la recomendaciÃ³n, que sigue anclada a vuelo/bus
+  // para no alterar el resto del flujo (cotizaciÃ³n real de Duffel, transfer
+  // desde el aeropuerto, etc.), pensado para llegar en aviÃ³n o bus.
   const roadtripSameTier = Array.isArray(result.roadtripList)
     ? result.roadtripList.filter(function (proposal) { return proposal.mode === 'auto' && proposal.ti === tier; })
     : [];
@@ -422,10 +466,10 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
     acc.push(proposal);
     return acc;
   }, preferred.slice()).slice(0, 3)).slice().sort(function (a, b) { return a.total - b.total; });
-  // La recomendación (Gran total, hotel, etc.) siempre debe salir de la
-  // categoría que el usuario eligió arriba, aunque el presupuesto no la
-  // cubra del todo: rellenar `list` con otras categorías es solo para no
-  // dejar la grilla de tarjetas vacía, nunca para elegir la propuesta.
+  // La recomendaciÃ³n (Gran total, hotel, etc.) siempre debe salir de la
+  // categorÃ­a que el usuario eligiÃ³ arriba, aunque el presupuesto no la
+  // cubra del todo: rellenar `list` con otras categorÃ­as es solo para no
+  // dejar la grilla de tarjetas vacÃ­a, nunca para elegir la propuesta.
   const picked = model.pick(trip, preferredCore.length ? preferredCore : list);
   const rec = picked.rec;
   const series = model.seriesFor(trip, rec, dep, ret, today);
@@ -469,7 +513,7 @@ function transferConfig(destKey, pax) {
   return { pricePerPassenger: unit, amount: unit * Math.max(1, Number(pax) || 1), destination: destKey, bank: { bank: 'Prex', account: '361333', holder: 'Maria Paola Batista' } };
 }
 
-/* ---------- límite de pedidos por IP ---------- */
+/* ---------- lÃ­mite de pedidos por IP ---------- */
 const hits = new Map();
 function limited(ip) {
   const max = Number(process.env.RATE_LIMIT_PER_MIN) || 30;
@@ -505,7 +549,7 @@ function readJson(req, maxBytes) {
     });
     req.on('end', function () {
       try { resolve(body ? JSON.parse(body) : {}); }
-      catch (e) { e.status = 400; e.message = 'El cuerpo debe ser JSON válido.'; reject(e); }
+      catch (e) { e.status = 400; e.message = 'El cuerpo debe ser JSON vÃ¡lido.'; reject(e); }
     });
     req.on('error', reject);
   });
@@ -516,16 +560,16 @@ function registrarTransferencia(req, res, body) {
   const amount = Number(body.amount);
   const file = body.receipt;
   if (!Number.isFinite(amount) || amount <= 0 || !file || !file.data) {
-    return sendJson(res, 400, { error: 'Adjuntá el comprobante de transferencia.' });
+    return sendJson(res, 400, { error: 'AdjuntÃ¡ el comprobante de transferencia.' });
   }
-  if (String(file.data).length > 6e6) return sendJson(res, 413, { error: 'El comprobante supera el tamaño máximo permitido.' });
+  if (String(file.data).length > 6e6) return sendJson(res, 413, { error: 'El comprobante supera el tamaÃ±o mÃ¡ximo permitido.' });
   // El comprobante se valida de forma administrativa; no exponemos ni pedimos
-  // números de operación en la interfaz de transferencias.
-  return sendJson(res, 201, { ok: true, status: 'Pendiente de verificación', message: '¡Reserva de traslado registrada con éxito! En menos de 2 horas validaremos tu comprobante y te enviaremos el voucher definitivo por correo electrónico.' });
+  // nÃºmeros de operaciÃ³n en la interfaz de transferencias.
+  return sendJson(res, 201, { ok: true, status: 'Pendiente de verificaciÃ³n', message: 'Â¡Reserva de traslado registrada con Ã©xito! En menos de 2 horas validaremos tu comprobante y te enviaremos el voucher definitivo por correo electrÃ³nico.' });
 }
 
 async function buscarVuelos(req, res, body) {
-  if (limited('vuelos:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
+  if (limited('vuelos:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
   body = body && typeof body === 'object' ? body : {};
   const origin = String(body.origen || '').toUpperCase();
   const destination = AIR_DESTINATIONS[String(body.destino || '').toLowerCase()];
@@ -534,7 +578,7 @@ async function buscarVuelos(req, res, body) {
   const passengers = Number(body.pasajeros);
   const style = ['ahorro', 'eq', 'comodo'].includes(String(body.style || '').toLowerCase()) ? String(body.style).toLowerCase() : 'eq';
   if (!['MVD', 'PDP'].includes(origin) || !destination || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) || (returnDate && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
-    return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
+    return sendJson(res, 400, { error: 'Datos de bÃºsqueda de vuelo invÃ¡lidos.' });
   }
   try {
     const cabins = duffel.styleCabins(style);
@@ -556,7 +600,7 @@ async function buscarVuelos(req, res, body) {
     }
     if (!offers.length && providerErrors.length) throw providerErrors[0];
     offers.sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
-    return sendJson(res, 200, { provider: 'duffel', origin: origin, destination: destination, style: style, cabin_fallback: usedFallback, offers: offers, error: offers.length ? null : 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.' });
+    return sendJson(res, 200, { provider: 'duffel', origin: origin, destination: destination, style: style, cabin_fallback: usedFallback, offers: offers, error: offers.length ? null : 'No hay vuelos disponibles para esas fechas. ProbÃ¡ con otras fechas.' });
   } catch (e) {
     console.error('[Duffel vuelos]', e.message);
     return sendJson(res, e.status || 502, { provider: 'duffel', offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
@@ -565,8 +609,8 @@ async function buscarVuelos(req, res, body) {
 
 // Una sola tarifa real de Duffel (1 pasajero, ida y vuelta) para anclar la
 // propuesta recomendada y, con ella, toda la serie de "otra fecha" (que ya
-// se calcula como el total recomendado + la variación estimada del modelo).
-// Evita las N consultas que implicaría cotizar cada fecha o cada destino.
+// se calcula como el total recomendado + la variaciÃ³n estimada del modelo).
+// Evita las N consultas que implicarÃ­a cotizar cada fecha o cada destino.
 async function getLiveFlightQuote(destinationIata, dep, ret, style, origin) {
   if (!duffel.isConfigured()) return null;
   const cabinClass = duffel.styleCabins(style)[0] || 'economy';
@@ -578,7 +622,7 @@ async function getLiveFlightQuote(destinationIata, dep, ret, style, origin) {
 }
 
 async function cotizar(req, res, url) {
-  if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
+  if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
   const today = model.getToday();
   let v;
   try {
@@ -586,15 +630,15 @@ async function cotizar(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
-  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
+  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'ElegÃ­ un destino disponible en el buscador.' });
   const origin = String(url.searchParams.get('origin') || 'MVD').toUpperCase();
   if (!['MVD', 'PDP'].includes(origin)) return sendJson(res, 400, { error: 'El aeropuerto de salida debe ser MVD o PDP.' });
   v.S.origin = origin;
   const subcategory = String(url.searchParams.get('subcategory') || '').slice(0, 100);
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
   // La pantalla inicial anda con una tarifa real de Duffel para la ruta/fechas
-  // elegidas cuando está disponible; si Duffel falla o no está configurado,
-  // se cae de vuelta a la estimación local sin romper la respuesta.
+  // elegidas cuando estÃ¡ disponible; si Duffel falla o no estÃ¡ configurado,
+  // se cae de vuelta a la estimaciÃ³n local sin romper la respuesta.
   let quotes = {};
   let liveQuoteApplied = false;
   const destCfgForQuote = model.DEST[v.S.dest];
@@ -610,15 +654,15 @@ async function cotizar(req, res, url) {
   v.S.hotelType = hotelType;
   const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
   const recommendedProposal = result.list.find(function (proposal) { return proposal.id === result.recId; });
-  const isBuziosArraial = /b[uú]zios\s*\+\s*arraial/i.test(subcategory);
+  const isBuziosArraial = /b[uÃº]zios\s*\+\s*arraial/i.test(subcategory);
   const multiStay = isBuziosArraial && recommendedProposal ? {
-    hub: { name: 'Río de Janeiro', iata: 'GIG' },
+    hub: { name: 'RÃ­o de Janeiro', iata: 'GIG' },
     stays: [
-      { key: 'buz', name: 'Búzios', nightlyRates: model.lodgingNightlyCosts('buz', recommendedProposal.ti, v.dep, v.nights) },
+      { key: 'buz', name: 'BÃºzios', nightlyRates: model.lodgingNightlyCosts('buz', recommendedProposal.ti, v.dep, v.nights) },
       { key: 'arraial', name: 'Arraial do Cabo', nightlyRates: model.lodgingNightlyCosts('arraial', recommendedProposal.ti, v.dep, v.nights) }
     ],
     transferBetweenUsd: 30 * v.S.pax,
-    transferBetweenLabel: 'Traslado entre Búzios y Arraial do Cabo (estimado, un tramo)'
+    transferBetweenLabel: 'Traslado entre BÃºzios y Arraial do Cabo (estimado, un tramo)'
   } : null;
   const nonHotelCost = recommendedProposal ? Number(recommendedProposal.total) - Number(recommendedProposal.parts.alojamiento || 0) : 0;
   const hotelBudgetPerNight = url.searchParams.has('hotel_budget_per_night')
@@ -640,11 +684,11 @@ async function cotizar(req, res, url) {
 }
 
 async function cotizarHoteles(req, res, url) {
-  if (limited('hoteles:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas de alojamiento. Esperá un minuto y probá de nuevo.' });
+  if (limited('hoteles:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas de alojamiento. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
   let v;
   try { v = model.validate(Object.fromEntries(url.searchParams), model.getToday()); }
   catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
-  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
+  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'ElegÃ­ un destino disponible en el buscador.' });
   const dest = model.DEST[v.S.dest];
   const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), url.searchParams.get('subcategory'), v.S.style);
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
@@ -659,11 +703,11 @@ async function cotizarHoteles(req, res, url) {
 }
 
 function cotizarTodos(req, res, url) {
-  if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
+  if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
   const today = model.getToday();
   let v;
   try {
-    // La validación del viaje es compartida con la cotización individual; el
+    // La validaciÃ³n del viaje es compartida con la cotizaciÃ³n individual; el
     // destino de referencia solo satisface ese validador y luego se reemplaza.
     v = model.validate(Object.assign({}, Object.fromEntries(url.searchParams), { dest: 'fln' }), today);
   } catch (e) {
@@ -677,7 +721,7 @@ function cotizarTodos(req, res, url) {
   const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
 
   // Estas diez opciones son comparables y estimadas: consultar el proveedor para
-  // cada destino dispararía hasta 19 requests externos en un solo clic.
+  // cada destino dispararÃ­a hasta 19 requests externos en un solo clic.
   const options = HOME_DESTINATION_KEYS.map(function (key) {
     const trip = Object.assign({}, v.S, { dest: key });
     const result = adaptPackagesToStyle(model.compute(trip, v.dep, v.ret, today, {}), trip, v.dep, v.ret, today);
@@ -719,11 +763,11 @@ function createServer() {
     try { url = new URL(req.url, 'http://localhost'); } catch (e) { res.writeHead(400); return res.end(); }
     if (req.method === 'POST' && url.pathname === '/api/vuelos/buscar') {
       return readJson(req).then(function (body) { return buscarVuelos(req, res, body); }).catch(function (e) {
-        sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la búsqueda.' });
+        sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la bÃºsqueda.' });
       });
     }
     if (req.method === 'GET' && url.pathname === '/api/vuelos/comprar') {
-      if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
+      if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
       return sendJson(res, 410, { error: 'La reserva de vuelos se gestiona directamente con Duffel.' });
     }
     if (req.method === 'POST' && url.pathname === '/api/traslados/transferencia') {
@@ -738,13 +782,15 @@ function createServer() {
     if (url.pathname === '/api/config') {
       return sendJson(res, 200, {
         supabaseUrl: process.env.SUPABASE_URL || 'https://hqyzmeordvjccytgltse.supabase.co',
-        supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+        travelpayoutsMarker: process.env.TRAVELPAYOUTS_MARKER || '',
+        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || ''
       });
     }
     if (url.pathname === '/api/cotizar') {
       return cotizar(req, res, url).catch(function (e) {
         console.error('[cotizar]', e);
-        sendJson(res, 500, { error: 'Error inesperado. Probá de nuevo en un momento.' });
+        sendJson(res, 500, { error: 'Error inesperado. ProbÃ¡ de nuevo en un momento.' });
       });
     }
     if (url.pathname === '/api/hoteles') {
@@ -756,6 +802,16 @@ function createServer() {
     if (url.pathname === '/api/cotizar-todos') {
       return cotizarTodos(req, res, url);
     }
+    // /grupo y /grupo/<uuid> son rutas cliente (SPA): el id se lee del path
+    // en el navegador, así que el servidor siempre entrega el mismo HTML.
+    if (/^\/grupo(\/[0-9a-f-]{1,36})?\/?$/i.test(url.pathname)) {
+      try { serveStatic(req, res, '/grupo.html'); } catch (e) { res.writeHead(400); res.end(); }
+      return;
+    }
+    if (/^\/waitlist\/?$/i.test(url.pathname)) {
+      try { serveStatic(req, res, '/waitlist.html'); } catch (e) { res.writeHead(400); res.end(); }
+      return;
+    }
     try { serveStatic(req, res, url.pathname); } catch (e) { res.writeHead(400); res.end(); }
   });
 }
@@ -763,13 +819,13 @@ function createServer() {
 if (require.main === module) {
   const port = Number(process.env.PORT) || 3000;
   createServer().listen(port, function () {
-    console.log('CuántoSale en http://localhost:' + port + ' (' + (duffel.isConfigured() ? 'búsqueda Duffel configurada' : 'Duffel sin configurar; se mostrará un aviso controlado') + ')');
+    console.log('CuÃ¡ntoSale en http://localhost:' + port + ' (' + (duffel.isConfigured() ? 'bÃºsqueda Duffel configurada' : 'Duffel sin configurar; se mostrarÃ¡ un aviso controlado') + ')');
   });
 }
 
 const app = createServer();
 module.exports = app;
-// Vercel consume la función `app`; exponer el factory permite levantar un
+// Vercel consume la funciÃ³n `app`; exponer el factory permite levantar un
 // servidor aislado en las pruebas sin alterar el handler desplegado.
 module.exports.createServer = createServer;
 module.exports.hotelRecommendations = hotelRecommendations;

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dividir gastos del viaje | CuántoSale</title>
+<meta name="description" content="Armá un grupo, compartí el link y dividí los gastos del viaje con tus amigos, sin necesidad de crear una cuenta.">
+<meta name="theme-color" content="#0A1830">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=32">
+<style>
+  .grupo-wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px}
+  .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+  .grupo-header a{color:var(--ink2);text-decoration:none;font-size:13px}
+  .grupo-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px}
+  .grupo-card h1,.grupo-card h2{font-family:var(--fh);margin:0 0 12px;line-height:1}
+  .grupo-card h1{font-size:32px}.grupo-card h2{font-size:22px}
+  .grupo-field{display:block;margin-bottom:14px;font-weight:700;font-size:13px}
+  .grupo-field input,.grupo-field select{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:15px}
+  .grupo-checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .grupo-checks label{display:flex;align-items:center;gap:5px;font-weight:500;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:6px 10px;font-size:13px;cursor:pointer}
+  .grupo-btn{border:0;border-radius:13px;background:var(--ink);color:var(--bg);padding:12px 18px;font-weight:700;cursor:pointer;font-size:15px}
+  .grupo-btn--danger{background:transparent;color:#c0392b;padding:4px 8px;font-size:12px}
+  .grupo-share{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px}
+  .grupo-share input{flex:1;border:0;background:transparent;color:var(--ink);font-size:13px}
+  .grupo-participants{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
+  .grupo-chip{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+  .grupo-expense{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+  .grupo-expense:first-child{border-top:0}
+  .grupo-expense small{display:block;color:var(--ink2);margin-top:3px}
+  .grupo-balance{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+  .grupo-balance:first-child{border-top:0}
+  .grupo-balance b.pos{color:#087E5B}.grupo-balance b.neg{color:#c0392b}
+  .grupo-error{color:#c0392b;font-size:13px}
+  .grupo-note{color:var(--ink2);font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap grupo-wrap">
+  <div class="grupo-header">
+    <a href="/">← CuántoSale</a>
+    <span class="account-button account-button--secondary" style="cursor:default">💸 Dividir gastos</span>
+  </div>
+  <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
+</div>
+<script src="/grupo.js" defer></script>
+</body>
+</html>
