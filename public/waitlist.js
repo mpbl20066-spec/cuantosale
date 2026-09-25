@@ -33,14 +33,37 @@
 
   function render(html) { app.innerHTML = html; }
 
+  // Fecha fija de lanzamiento (hora de Uruguay, UTC-3). Si hace falta
+  // correrla, es el único lugar a tocar.
+  var LAUNCH_DATE = new Date('2026-10-02T00:00:00-03:00');
+  function tickCountdown() {
+    var els = { d: document.getElementById('wl-cd-d'), h: document.getElementById('wl-cd-h'), m: document.getElementById('wl-cd-m'), s: document.getElementById('wl-cd-s') };
+    if (!els.d) return;
+    var diff = LAUNCH_DATE.getTime() - Date.now();
+    if (diff <= 0) {
+      var wrap = document.getElementById('wl-countdown');
+      var label = document.querySelector('.wl-countdown__label');
+      if (label) label.textContent = '¡Ya lanzamos!';
+      if (wrap) wrap.hidden = true;
+      return;
+    }
+    var totalSeconds = Math.floor(diff / 1000);
+    els.d.textContent = Math.floor(totalSeconds / 86400);
+    els.h.textContent = String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, '0');
+    els.m.textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    els.s.textContent = String(totalSeconds % 60).padStart(2, '0');
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+
   // Muestra el formulario al toque, sin esperar red: el contador se completa
   // después en paralelo y solo parchea su propio <span>, sin re-renderizar
   // el formulario (así no se pierde lo que el usuario ya tipeó).
   function renderForm(errorMessage) {
     render(
       '<div class="wl-card">' +
-      '<h1>Sé de los primeros en usar CuántoSale</h1>' +
-      '<p class="wl-sub">La plataforma definitiva para organizar y dividir viajes con amigos en Uruguay. Dejanos tu email y entrá antes que nadie.</p>' +
+      '<h1>El lanzamiento oficial de CuántoSale está más cerca de lo que creés</h1>' +
+      '<p class="wl-sub">Anotate gratis a la lista de espera exclusiva. Sé el primero en usar la plataforma que calcula, compara y divide gastos de viajes en Uruguay.</p>' +
       (errorMessage ? '<p class="wl-error">' + esc(errorMessage) + '</p>' : '') +
       '<form id="waitlist-form">' +
       '<label class="wl-field"><input required type="email" name="email" placeholder="tu@email.com" autocomplete="email"></label>' +
@@ -87,8 +110,20 @@
     } catch (error) { /* sin contador no se rompe el formulario */ }
   }
 
+  // 5% de descuento por amigo invitado, tope 20% (4 invitados). Solo se
+  // muestra el beneficio, nunca la cuenta exacta: la aplicación real del
+  // descuento queda para cuando haya checkout, esto es la vidriera.
+  var REWARD_STEP_PCT = 5;
+  var REWARD_MAX_PCT = 20;
   function renderConfirmation(position, referralCode, invitedCount) {
     var shareUrl = window.location.origin + '/waitlist?ref=' + encodeURIComponent(referralCode);
+    var unlockedPct = Math.min(REWARD_MAX_PCT, Number(invitedCount) * REWARD_STEP_PCT);
+    var atMax = unlockedPct >= REWARD_MAX_PCT;
+    var rewardCopy = atMax
+      ? '🎉 ¡Desbloqueaste el <b>' + REWARD_MAX_PCT + '% off</b> máximo en tours y transfers para tu viaje!'
+      : (invitedCount > 0
+          ? 'Ya desbloqueaste <b>' + unlockedPct + '% off</b> en tours y transfers. Seguí invitando para llegar al <b>' + REWARD_MAX_PCT + '%</b>.'
+          : 'Invitá amigos y desbloqueá beneficios exclusivos de hasta <b>' + REWARD_MAX_PCT + '% off</b> en tours y transfers para tu viaje.');
     render(
       '<div class="wl-card">' +
       '<p class="wl-confirm-label">Tu lugar en la lista</p>' +
@@ -97,6 +132,9 @@
       '<div class="wl-share"><input readonly value="' + esc(shareUrl) + '" id="share-url"><button type="button" id="copy-share">Copiar</button></div>' +
       '<p class="wl-status" id="copy-status" aria-live="polite"></p>' +
       '<div class="wl-stat"><span>Amigos invitados</span><b>' + esc(invitedCount) + '</b></div>' +
+      '<div class="wl-reward"><p>' + rewardCopy + '</p>' +
+      '<div class="wl-reward__track"><div class="wl-reward__fill" style="width:' + Math.round((unlockedPct / REWARD_MAX_PCT) * 100) + '%"></div></div>' +
+      '<div class="wl-reward__steps"><span>0%</span><span>' + REWARD_MAX_PCT + '% off</span></div></div>' +
       '</div>'
     );
     document.getElementById('copy-share').addEventListener('click', function () {
