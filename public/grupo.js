@@ -20,6 +20,15 @@
       return id;
     } catch (error) { return 'anon-' + Date.now(); }
   }
+  // "Quién soy" en este grupo se recuerda localmente por browser, sin tocar
+  // la fila de nadie más en Supabase: así elegir tu nombre de una lista no
+  // corre el riesgo de que dos personas terminen "siendo" la misma fila.
+  function rememberedParticipantId(groupId) {
+    try { return localStorage.getItem('cuantosale_grupo_me_' + groupId); } catch (error) { return null; }
+  }
+  function rememberParticipant(groupId, participantId) {
+    try { localStorage.setItem('cuantosale_grupo_me_' + groupId, participantId); } catch (error) {}
+  }
 
   async function loadSupabaseSdk() {
     if (window.supabase && window.supabase.createClient) return;
@@ -68,17 +77,39 @@
     });
   }
 
-  function renderJoinForm(groupId, errorMessage) {
+  function renderJoinForm(groupId, errorMessage, showAddForm) {
+    var existingMarkup = participants.length
+      ? '<p class="grupo-note">¿Quién sos?</p><div class="grupo-participants" id="join-existing">' +
+        participants.map(function (p) { return '<button type="button" class="grupo-chip" style="cursor:pointer;border:1px solid var(--line);background:var(--bg)" data-claim-participant="' + esc(p.id) + '">' + esc(p.display_name) + '</button>'; }).join('') +
+        '</div>'
+      : '<p class="grupo-note">Todavía no hay nadie en este grupo. Sé el primero:</p>';
     render(
       '<div class="grupo-card"><h1>' + esc(group.name) + '</h1>' +
-      '<p class="grupo-note">Sumate a este grupo para agregar y ver los gastos compartidos.</p>' +
       (errorMessage ? '<p class="grupo-error">' + esc(errorMessage) + '</p>' : '') +
-      '<form id="join-form">' +
-      '<label class="grupo-field">Tu nombre<input required name="yourName" placeholder="¿Cómo te llamás?" maxlength="40"></label>' +
-      '<button type="submit" class="grupo-btn">Sumarme al grupo</button>' +
-      '</form></div>'
+      existingMarkup +
+      (participants.length && !showAddForm
+        ? '<button type="button" class="grupo-btn" id="join-not-listed" style="background:transparent;border:1px solid var(--line);color:var(--ink);margin-top:4px">No estoy en la lista / Agregarme</button>'
+        : '<form id="join-form"><label class="grupo-field">Tu nombre<input required name="yourName" placeholder="¿Cómo te llamás?" maxlength="40"></label>' +
+          '<button type="submit" class="grupo-btn">Sumarme al grupo</button></form>') +
+      '</div>'
     );
-    document.getElementById('join-form').addEventListener('submit', async function (e) {
+    var claimButtons = document.getElementById('join-existing');
+    if (claimButtons) {
+      claimButtons.addEventListener('click', function (e) {
+        var button = e.target.closest('[data-claim-participant]');
+        if (!button) return;
+        var participantId = button.getAttribute('data-claim-participant');
+        var participant = participants.find(function (p) { return p.id === participantId; });
+        if (!participant) return;
+        rememberParticipant(groupId, participantId);
+        me = participant;
+        renderGroup(groupId);
+      });
+    }
+    var notListedButton = document.getElementById('join-not-listed');
+    if (notListedButton) notListedButton.addEventListener('click', function () { renderJoinForm(groupId, null, true); });
+    var joinForm = document.getElementById('join-form');
+    if (joinForm) joinForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       var yourName = e.target.yourName.value.trim();
       if (!yourName) return;
@@ -86,11 +117,12 @@
       try {
         var result = await supabaseClient.from('participantes').insert({ grupo_id: groupId, display_name: yourName, device_id: deviceId() }).select().single();
         if (result.error) throw new Error(result.error.message);
+        rememberParticipant(groupId, result.data.id);
         me = result.data;
         await loadGroupData(groupId);
         renderGroup(groupId);
       } catch (error) {
-        renderJoinForm(groupId, error.message || 'No pudimos sumarte al grupo.');
+        renderJoinForm(groupId, error.message || 'No pudimos sumarte al grupo.', true);
       }
     });
   }
@@ -233,7 +265,13 @@
     participants = participantsResult.data || [];
     var expensesResult = await supabaseClient.from('gastos').select('*').eq('grupo_id', groupId).order('created_at', { ascending: false });
     expenses = expensesResult.data || [];
-    me = participants.find(function (p) { return p.device_id === deviceId(); }) || null;
+    var rememberedId = rememberedParticipantId(groupId);
+    me = participants.find(function (p) { return p.id === rememberedId; })
+      // Compatibilidad con quienes ya se habían sumado antes de este cambio,
+      // cuando "quién soy" todavía se resolvía por device_id.
+      || participants.find(function (p) { return p.device_id === deviceId(); })
+      || null;
+    if (me) rememberParticipant(groupId, me.id);
   }
 
   async function init() {
