@@ -62,7 +62,7 @@
   function renderForm(errorMessage) {
     render(
       '<div class="wl-card">' +
-      '<div class="wl-logo"><svg width="22" height="27" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#FFFFFF"/><circle cx="12" cy="11.5" r="4.6" fill="#F2A93B"/></svg>cuántosale</div>' +
+      '<div class="wl-logo"><svg width="22" height="27" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#FFFFFF"/><circle cx="12" cy="11.5" r="4.6" fill="#F2A93B"/></svg>CuantoSale.uy</div>' +
       '<p class="wl-countdown__label">Lanzamiento oficial en</p>' +
       '<div class="wl-countdown" id="wl-countdown" aria-live="polite">' +
       '<div class="wl-countdown__unit"><b id="wl-cd-d">–</b><span>días</span></div>' +
@@ -71,11 +71,12 @@
       '<div class="wl-countdown__unit"><b id="wl-cd-s">–</b><span>seg</span></div>' +
       '</div>' +
       '<h1>🚀 Llegamos a Uruguay. Preparate para viajar inteligente</h1>' +
-      '<p class="wl-sub">Olvidate de las peleas de plata con tus amigos. Sumate a la lista de espera exclusiva y sé el primero en probar la herramienta definitiva para calcular, comparar y dividir gastos de viajes.</p>' +
+      '<p class="wl-sub">Olvidate de las peleas de plata con tus amigos. Calculá el costo total de tu viaje — vuelos, alojamiento, comidas y nafta incluidos — y dividilo entre todos sin vueltas.</p>' +
       (errorMessage ? '<p class="wl-error">' + esc(errorMessage) + '</p>' : '') +
       '<form id="waitlist-form">' +
       '<label class="wl-field"><input required type="email" name="email" placeholder="tu@email.com" autocomplete="email"></label>' +
       '<button type="submit" class="wl-btn">¡Quiero unirme ahora!</button>' +
+      '<p class="wl-free-note">Gratis, sin tarjeta de crédito.</p>' +
       '</form>' +
       '<p class="wl-urgency" id="wl-count-line" hidden></p>' +
       '</div>'
