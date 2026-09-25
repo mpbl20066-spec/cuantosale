@@ -149,7 +149,10 @@
       '<div class="grupo-card"><h1>' + esc(group.name) + '</h1>' +
       '<div class="grupo-share"><input readonly value="' + esc(shareUrl) + '" id="share-url"><button type="button" class="grupo-btn" id="copy-share">Copiar link</button></div>' +
       '<p class="grupo-note" id="copy-status" aria-live="polite"></p>' +
-      '<div class="grupo-participants">' + participants.map(function (p) { return '<span class="grupo-chip">' + esc(p.display_name) + (me && p.id === me.id ? ' (vos)' : '') + '</span>'; }).join('') + '</div></div>' +
+      '<div class="grupo-participants">' + participants.map(function (p) { return '<span class="grupo-chip">' + esc(p.display_name) + (me && p.id === me.id ? ' (vos)' : '') + '</span>'; }).join('') + '</div>' +
+      '<form id="add-participant-form" style="display:flex;gap:8px;margin-top:10px">' +
+      '<input name="participantName" placeholder="Nombre de otro amigo" maxlength="40" style="flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)">' +
+      '<button type="submit" class="grupo-btn" style="width:auto;white-space:nowrap">+ Agregar</button></form></div>' +
 
       '<div class="grupo-card"><h2>Agregar gasto</h2><form id="expense-form">' +
       '<label class="grupo-field">Descripción<input required name="description" placeholder="Ej: Supermercado" maxlength="80"></label>' +
@@ -162,6 +165,27 @@
       '<div class="grupo-card"><h2>Cómo se salda</h2>' + balancesMarkup + '</div>'
     );
 
+    document.getElementById('add-participant-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var form = e.target;
+      var name = form.participantName.value.trim();
+      if (!name) return;
+      var button = form.querySelector('button');
+      button.disabled = true;
+      try {
+        // Sumado a mano por otro participante: no tiene navegador propio en
+        // el grupo, así que le asignamos un device_id sintético en vez de
+        // exigirle que abra el link para anotarse.
+        var syntheticDeviceId = 'manual-' + (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+        var result = await supabaseClient.from('participantes').insert({ grupo_id: groupId, display_name: name, device_id: syntheticDeviceId });
+        if (result.error) throw new Error(result.error.message);
+        await loadGroupData(groupId);
+        renderGroup(groupId);
+      } catch (error) {
+        button.disabled = false;
+        alert(error.message || 'No pudimos agregar al participante.');
+      }
+    });
     document.getElementById('copy-share').addEventListener('click', function () {
       var status = document.getElementById('copy-status');
       var copyPromise = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(shareUrl) : Promise.reject(new Error('sin portapapeles'));
