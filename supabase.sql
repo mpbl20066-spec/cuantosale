@@ -111,34 +111,6 @@ create index if not exists reservas_hoteles_user_created_idx
 create index if not exists reservas_hoteles_sub_id_idx
   on public.reservas_hoteles (sub_id);
 
--- Cachea la polyline calculada por Directions para cada combinación
--- origen (MVD/PDP) + destino, así solo se llama a la API de Google una vez
--- por ruta en vez de una vez por cada visitante que mira ese destino en auto.
-create table if not exists public.route_polylines (
-  id uuid primary key default gen_random_uuid(),
-  origin text not null,
-  destination_key text not null,
-  distance_km numeric not null,
-  duration_minutes integer not null,
-  encoded_polyline text not null,
-  provider text not null default 'google_directions',
-  created_at timestamptz not null default now(),
-  unique (origin, destination_key)
-);
-
-alter table public.route_polylines enable row level security;
-
--- Es un caché compartido, no datos personales: cualquiera puede leerlo, y
--- cualquiera puede insertar la primera vez que se calcula una ruta (el índice
--- único de arriba hace que solo el primer cálculo quede guardado).
-create policy "Anyone can read cached routes"
-  on public.route_polylines for select
-  using (true);
-
-create policy "Anyone can cache a newly computed route"
-  on public.route_polylines for insert
-  with check (true);
-
 -- Split de gastos por link (cuantosale.uy/grupo/{id}), sin login obligatorio.
 -- El id (uuid) del grupo funciona como "contraseña" del link: quien lo tiene
 -- puede leer y escribir en ese grupo. No usar para montos sensibles: no hay

@@ -783,8 +783,7 @@ function createServer() {
       return sendJson(res, 200, {
         supabaseUrl: process.env.SUPABASE_URL || 'https://hqyzmeordvjccytgltse.supabase.co',
         supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-        travelpayoutsMarker: process.env.TRAVELPAYOUTS_MARKER || '',
-        googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || ''
+        travelpayoutsMarker: process.env.TRAVELPAYOUTS_MARKER || ''
       });
     }
     if (url.pathname === '/api/cotizar') {

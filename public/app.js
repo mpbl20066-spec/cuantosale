@@ -1172,7 +1172,6 @@
       // Reemplazar, en vez de ocultar, evita que controles de vuelos o transfers
       // queden disponibles en el DOM cuando el usuario eligió auto (y viceversa).
       flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
-      if (autoEnabled) initRoadtripMapIfPresent(detailState.meta);
     }
     sincronizarTrasladoOficial();
   }
@@ -1210,85 +1209,10 @@
   function roadtripCard(meta, autoSelected) {
     return '';
   }
-  var googleMapsApiKey = '';
-  var googleMapsLoadPromise = null;
-  function loadGoogleMapsSdk() {
-    if (window.google && window.google.maps && window.google.maps.DirectionsService) return Promise.resolve();
-    if (googleMapsLoadPromise) return googleMapsLoadPromise;
-    googleMapsLoadPromise = fetch('/api/config').then(function (r) { return r.json(); }).then(function (config) {
-      googleMapsApiKey = config.googleMapsApiKey || '';
-      if (!googleMapsApiKey) throw new Error('Falta configurar GOOGLE_MAPS_API_KEY en las variables de entorno.');
-      return new Promise(function (resolve, reject) {
-        var script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(googleMapsApiKey) + '&libraries=geometry';
-        script.async = true;
-        script.onload = resolve;
-        script.onerror = function () { reject(new Error('No pudimos cargar el mapa de Google.')); };
-        document.head.appendChild(script);
-      });
-    });
-    return googleMapsLoadPromise;
-  }
-  // Dibuja la ruta MVD/PDP → destino. Si ya hay una polyline cacheada en
-  // Supabase para ese origen-destino la reutiliza (sin llamar a Directions);
-  // si no, consulta Directions una vez y guarda el resultado para la próxima.
-  async function initRoadtripMapIfPresent(meta) {
-    var container = document.querySelector('[data-roadtrip-map]');
-    if (!container || !meta || !meta.dest) return;
-    var originKey = meta.origin || S.origin || 'MVD';
-    var destKey = meta.dest.key;
-    var cacheKey = originKey + '|' + destKey;
-    if (container.dataset.routeCacheKey === cacheKey) return;
-    container.dataset.routeCacheKey = cacheKey;
-    container.innerHTML = '<p class="cost-note">Cargando mapa de ruta...</p>';
-    try {
-      await loadGoogleMapsSdk();
-      if (!supabaseClient) { try { await initAuth(); } catch (error) {} }
-      var originAddress = originKey === 'PDP' ? 'Punta del Este, Uruguay' : 'Montevideo, Uruguay';
-      var destinationAddress = meta.dest.name + ', Brasil';
-      var cachedRoute = null;
-      if (supabaseClient) {
-        var cachedResult = await supabaseClient.from('route_polylines').select('*').eq('origin', originKey).eq('destination_key', destKey).maybeSingle();
-        if (!cachedResult.error) cachedRoute = cachedResult.data;
-      }
-      if (container.dataset.routeCacheKey !== cacheKey) return; // el usuario ya cambió de destino/transporte
-      container.innerHTML = '';
-      var map = new google.maps.Map(container, { zoom: 5, center: { lat: -27, lng: -50 }, disableDefaultUI: true, zoomControl: true, gestureHandling: 'cooperative' });
-      if (cachedRoute && cachedRoute.encoded_polyline) {
-        var path = google.maps.geometry.encoding.decodePath(cachedRoute.encoded_polyline);
-        new google.maps.Polyline({ path: path, strokeColor: '#f5b942', strokeWeight: 4, map: map });
-        var bounds = new google.maps.LatLngBounds();
-        path.forEach(function (point) { bounds.extend(point); });
-        map.fitBounds(bounds);
-        return;
-      }
-      var directionsService = new google.maps.DirectionsService();
-      var directionsRenderer = new google.maps.DirectionsRenderer({ map: map, polylineOptions: { strokeColor: '#f5b942', strokeWeight: 4 } });
-      directionsService.route({ origin: originAddress, destination: destinationAddress, travelMode: google.maps.TravelMode.DRIVING }, function (result, status) {
-        if (status !== 'OK' || !result || container.dataset.routeCacheKey !== cacheKey) {
-          if (status !== 'OK') container.innerHTML = '<p class="cost-note">No pudimos calcular la ruta en el mapa.</p>';
-          return;
-        }
-        directionsRenderer.setDirections(result);
-        var leg = result.routes[0] && result.routes[0].legs[0];
-        var encodedPolyline = google.maps.geometry.encoding.encodePath(result.routes[0].overview_path);
-        if (supabaseClient && leg) {
-          supabaseClient.from('route_polylines').upsert({
-            origin: originKey, destination_key: destKey,
-            distance_km: Math.round(leg.distance.value / 1000),
-            duration_minutes: Math.round(leg.duration.value / 60),
-            encoded_polyline: encodedPolyline, provider: 'google_directions'
-          }, { onConflict: 'origin,destination_key', ignoreDuplicates: true }).catch(function () { /* el mapa ya se mostró; el cacheo es best-effort */ });
-        }
-      });
-    } catch (error) {
-      if (container.dataset.routeCacheKey === cacheKey) container.innerHTML = '<p class="cost-note">No pudimos cargar el mapa de ruta (' + esc(error.message || 'error desconocido') + ').</p>';
-    }
-  }
   function roadtripCalculator(meta) {
     var r = meta.roadtrip;
     if (!r) return '';
-    return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div><div class="transport-card roadtrip-map" data-roadtrip-map aria-label="Mapa de la ruta en auto"></div></section>';
+    return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></section>';
   }
   function transferPickupTimeLabel(date) {
     return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
