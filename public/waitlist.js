@@ -74,14 +74,18 @@
       '<div class="wl-countdown__unit"><b id="wl-cd-s">–</b><span>seg</span></div>' +
       '</div>' +
       '<h1>🚀 Llegamos a Uruguay. Preparate para viajar inteligente</h1>' +
-      '<p class="wl-sub">Olvidate de las peleas de plata con tus amigos. Calculá el costo total de tu viaje — vuelos, alojamiento, comidas y nafta incluidos — y dividilo entre todos sin vueltas.</p>' +
+      // Lo que va dentro de .wl-long se oculta en pantallas angostas: en el
+      // celo sobra texto y lo que hace falta es que la tarjeta entre entera,
+      // no que la letra se vuelva ilegible. En compu se ve la versión corta
+      // de la descripción.
+      '<p class="wl-sub">Olvidate de las peleas de plata con tus amigos.<span class="wl-long"> </span>Calculá el costo total de tu viaje<span class="wl-long"> &mdash; vuelos, alojamiento, comidas y nafta incluidos &mdash;</span> y dividilo entre todos sin vueltas.</p>' +
       (errorMessage ? '<p class="wl-error">' + esc(errorMessage) + '</p>' : '') +
       '<form id="waitlist-form">' +
       '<label class="wl-field"><input required type="email" name="email" placeholder="tu@email.com" autocomplete="email"></label>' +
       '<button type="submit" class="wl-btn">¡Quiero unirme ahora!</button>' +
       '<p class="wl-free-note">Gratis, sin tarjeta de crédito.</p>' +
       '</form>' +
-      '<p class="wl-urgency">⚠️ <span><b>Acceso limitado:</b> solo ' + BETA_CAP + ' cupos disponibles para la versión Beta. ¡Los lugares se están llenando rápido!</span></p>' +
+      '<p class="wl-urgency">⚠️ <span><b>Acceso limitado:</b> solo ' + BETA_CAP + ' cupos<span class="wl-long"> disponibles para la versi&oacute;n Beta. ¡Los lugares se est&aacute;n llenando r&aacute;pido!</span></span></p>' +
       '</div>'
     );
     tickCountdown();
