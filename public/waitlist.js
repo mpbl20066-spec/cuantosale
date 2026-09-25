@@ -3,6 +3,9 @@
   var app = document.getElementById('waitlist-app');
   var supabaseClient = null;
   var sdkPromise = null;
+  // Tope real que se piensa sostener para la Beta (no depende del conteo
+  // real de anotados, que puede ser bajo al arrancar sin restar tracción).
+  var BETA_CAP = 500;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function refCodeFromUrl() {
@@ -78,7 +81,7 @@
       '<button type="submit" class="wl-btn">¡Quiero unirme ahora!</button>' +
       '<p class="wl-free-note">Gratis, sin tarjeta de crédito.</p>' +
       '</form>' +
-      '<p class="wl-urgency" id="wl-count-line" hidden></p>' +
+      '<p class="wl-urgency">⚠️ <span><b>Acceso limitado:</b> solo ' + BETA_CAP + ' cupos disponibles para la versión Beta. ¡Los lugares se están llenando rápido!</span></p>' +
       '</div>'
     );
     tickCountdown();
@@ -103,22 +106,6 @@
         renderForm(error.message || 'No pudimos anotarte. Probá de nuevo.');
       }
     });
-    fillCount();
-  }
-
-  // BETA_CAP es un tope real que pensás sostener (no una cifra de "gente ya
-  // anotada" inventada) — el conteo que se muestra junto es siempre el real.
-  var BETA_CAP = 500;
-  async function fillCount() {
-    var line = document.getElementById('wl-count-line');
-    try {
-      await loadSupabaseSdk();
-      var result = await supabaseClient.rpc('waitlist_count');
-      var count = result.error ? NaN : Number(result.data);
-      if (!Number.isFinite(count) || !line) return;
-      line.hidden = false;
-      line.innerHTML = '⚠️ <span><b>Acceso limitado:</b> solo ' + BETA_CAP + ' cupos disponibles para la versión Beta. Ya se anotaron <b>' + count + '</b> ' + (count === 1 ? 'viajero' : 'viajeros') + ' — sumate antes de que se llenen.</span>';
-    } catch (error) { /* sin contador no se rompe el formulario */ }
   }
 
   // 5% de descuento por amigo invitado, tope 20% (4 invitados). Solo se
