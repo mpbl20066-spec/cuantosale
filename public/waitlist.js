@@ -35,7 +35,7 @@
 
   // Fecha fija de lanzamiento (hora de Uruguay, UTC-3). Si hace falta
   // correrla, es el único lugar a tocar.
-  var LAUNCH_DATE = new Date('2026-10-02T00:00:00-03:00');
+  var LAUNCH_DATE = new Date('2026-10-01T20:00:00-03:00');
   function tickCountdown() {
     var els = { d: document.getElementById('wl-cd-d'), h: document.getElementById('wl-cd-h'), m: document.getElementById('wl-cd-m'), s: document.getElementById('wl-cd-s') };
     if (!els.d) return;
