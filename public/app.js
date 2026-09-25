@@ -282,9 +282,36 @@
         ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
         : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
       (isEv
-        ? '<p class="cost-note">* No tenemos la ubicación real de los cargadores de esta ruta (no está integrado ningún mapa de red de carga todavía). Antes de salir, confirmá estaciones disponibles cada ' + stopsPlan.everyKm + ' km aprox. en una app de carga real (por ejemplo Electromaps o PlugShare, o la app de UTE si arrancás desde Uruguay).</p>'
+        ? '<div data-roadtrip-chargers><p class="cost-note">Buscando cargadores reales cerca del destino…</p></div><p class="cost-note">* Cargadores listados vía Open Charge Map, una base colaborativa: puede haber estaciones nuevas o cerradas que todavía no estén cargadas ahí. Confirmá disponibilidad antes de salir.</p>'
         : '<p class="cost-note">* Son paradas de descanso sugeridas por fatiga en viajes largos, no un tramo obligatorio.</p>') +
       '</div>';
+  }
+  var chargersCache = {};
+  function renderChargersHtml(destKey, data) {
+    if (!data || data.error) return '<p class="cost-note">No pudimos consultar cargadores ahora. Probá una app como Electromaps o PlugShare antes de salir.</p>';
+    if (data.configured === false) return '';
+    if (!data.chargers || !data.chargers.length) return '<p class="cost-note">No encontramos cargadores cargados en Open Charge Map cerca de este destino todavía. Probá una app como Electromaps o PlugShare antes de salir.</p>';
+    return '<p class="roadtrip-chargers__label">Cargadores reales cerca de tu destino:</p><ul class="roadtrip-chargers__list">' +
+      data.chargers.slice(0, 5).map(function (c) {
+        var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(c.lat + ',' + c.lng);
+        return '<li><b>' + esc(c.name) + '</b>' + (c.address ? '<span>' + esc(c.address) + '</span>' : '') +
+          (c.connectors && c.connectors.length ? '<span class="roadtrip-chargers__connectors">' + esc(c.connectors.join(' · ')) + '</span>' : '') +
+          '<a href="' + esc(mapsUrl) + '" target="_blank" rel="noopener noreferrer">Cómo llegar ↗</a></li>';
+      }).join('') + '</ul>';
+  }
+  async function loadRoadtripChargers(destKey) {
+    if (chargersCache[destKey]) return chargersCache[destKey];
+    var promise = fetch('/api/cargadores?dest=' + encodeURIComponent(destKey)).then(function (r) { return r.json(); }).catch(function () { return { error: true }; });
+    chargersCache[destKey] = promise;
+    return promise;
+  }
+  async function pintarCargadoresRoadtrip(destKey) {
+    var container = document.querySelector('[data-roadtrip-chargers]');
+    if (!container) return;
+    var data = await loadRoadtripChargers(destKey);
+    var freshContainer = document.querySelector('[data-roadtrip-chargers]');
+    if (!freshContainer) return; // el usuario ya cambió de tab/destino mientras cargaba
+    freshContainer.innerHTML = renderChargersHtml(destKey, data);
   }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
@@ -1210,6 +1237,7 @@
       // queden disponibles en el DOM cuando el usuario eligió auto (y viceversa).
       flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
     }
+    if (autoEnabled && detailState.roadtripVehicleType === 'ev') pintarCargadoresRoadtrip(detailState.meta.dest.key);
     sincronizarTrasladoOficial();
   }
   function actualizarRoadtrip(kmPerLiter) {
@@ -1272,6 +1300,7 @@
     if (detailState.transportMode === 'auto') detailState.auto = currentRoadtripTotal();
     var flow = document.querySelector('[data-transport-flow]');
     if (flow) flow.innerHTML = transportFlow(detailState.meta, detailState.flight, true);
+    if (type === 'ev') pintarCargadoresRoadtrip(detailState.meta.dest.key);
     recalcularTotalViaje();
   }
   function roadtripCard(meta, autoSelected) {
