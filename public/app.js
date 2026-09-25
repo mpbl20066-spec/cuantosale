@@ -254,6 +254,25 @@
   var massSearch = false;
   var detailState = null;
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
+  // Consumo (kWh cada 100 km) y capacidad de batería de modelos populares en
+  // la región. Son specs de fábrica publicadas, no telemetría real: quedan
+  // como punto de partida editable, igual que el km/l de los combustión.
+  var EV_VEHICLES = {
+    kwid_etech: { label: 'Renault Kwid E-Tech · 12 kWh/100km', kwhPer100km: 12, batteryKwh: 26.8 },
+    byd_dolphin: { label: 'BYD Dolphin · 15 kWh/100km', kwhPer100km: 15, batteryKwh: 44.9 },
+    byd_yuanplus: { label: 'BYD Yuan Plus (Atto 3) · 16 kWh/100km', kwhPer100km: 16, batteryKwh: 60.5 },
+    bolt: { label: 'Chevrolet Bolt EV · 17 kWh/100km', kwhPer100km: 17, batteryKwh: 65 },
+    model3: { label: 'Tesla Model 3 · 14 kWh/100km', kwhPer100km: 14, batteryKwh: 57.5 }
+  };
+  var DEFAULT_KWH_PRICE_USD = 0.35;
+  // Plan de paradas puramente aritmético a partir del rango de la batería o
+  // de un umbral de fatiga (combustión): no conocemos la ubicación real de
+  // cargadores en la ruta, así que nunca inventamos nombres de estaciones.
+  function roadtripStopsPlan(roundTripKm, isEv, usableRangeKm) {
+    var stepKm = isEv ? Math.max(50, usableRangeKm) : 400;
+    var legs = Math.max(1, Math.ceil(roundTripKm / stepKm));
+    return { stops: Math.max(0, legs - 1), everyKm: Math.round(roundTripKm / legs), minutesPerStop: isEv ? 35 : 15 };
+  }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
   var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
@@ -333,6 +352,9 @@
   function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function parse(s) { var p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2], 12); }
   function money(n) { return 'US$ ' + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+  // money() redondea a entero (pensada para montos en dólares) y trunca
+  // tarifas fraccionarias como US$/kWh a "US$ 0" — esta conserva decimales.
+  function moneyPrecise(n) { return 'US$ ' + (Number(n) || 0).toFixed(2); }
   function dLong(d) { return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' }); }
   function shortDateLabel(value) {
     if (!value) return 'Elegí una fecha';
@@ -1161,10 +1183,15 @@
     }
     sincronizarTrasladoOficial();
   }
+  function currentRoadtripTotal() {
+    if (!detailState || !detailState.roadtrip) return 0;
+    if (detailState.roadtripVehicleType === 'ev') return roadtripEvFigures(detailState.roadtrip, detailState.roadtripEv || {}).totalUsd;
+    return Number(detailState.roadtrip.totalUsd) || 0;
+  }
   function actualizarTransporte(autoEnabled) {
     if (!detailState) return;
     detailState.transportMode = autoEnabled ? 'auto' : 'flight';
-    detailState.auto = autoEnabled ? Number(detailState.roadtrip.totalUsd) : 0;
+    detailState.auto = autoEnabled ? currentRoadtripTotal() : 0;
     detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
     detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados + (detailState.multiStay ? Number(detailState.multiStay.transferBetweenUsd) || 0 : 0);
     var flow = document.querySelector('[data-transport-flow]');
@@ -1190,14 +1217,15 @@
     if (litersEl) litersEl.textContent = r.liters + ' litros';
     if (fuelEl) fuelEl.textContent = money(r.fuelUsd);
     if (totalEl) totalEl.textContent = money(r.totalUsd);
-    if (detailState.transportMode === 'auto') detailState.auto = r.totalUsd;
+    if (detailState.transportMode === 'auto' && detailState.roadtripVehicleType !== 'ev') detailState.auto = r.totalUsd;
     recalcularTotalViaje();
   }
   function actualizarModeloRoadtrip(model) {
     var manual = document.querySelector('[data-roadtrip-consumption]');
+    var manualLabel = document.querySelector('[data-roadtrip-consumption-label]');
     if (!manual) return;
     var custom = model === 'custom';
-    manual.hidden = !custom;
+    if (manualLabel) manualLabel.hidden = !custom;
     manual.disabled = !custom;
     if (!custom) {
       manual.value = ROADTRIP_VEHICLES[model];
@@ -1206,13 +1234,76 @@
       manual.focus();
     }
   }
+  function actualizarRoadtripEv(patch) {
+    if (!detailState || !detailState.roadtrip) return;
+    detailState.roadtripEv = Object.assign({}, detailState.roadtripEv, patch);
+    var figures = roadtripEvFigures(detailState.roadtrip, detailState.roadtripEv);
+    var kwhEl = document.querySelector('[data-roadtrip-ev-kwh]');
+    var rateEl = document.querySelector('[data-roadtrip-ev-rate]');
+    var electricityEl = document.querySelector('[data-roadtrip-ev-electricity]');
+    var totalEl = document.querySelector('[data-roadtrip-ev-total]');
+    var rangeEl = document.querySelector('[data-roadtrip-ev-range]');
+    if (kwhEl) kwhEl.textContent = figures.kwh + ' kWh';
+    if (rateEl) rateEl.textContent = moneyPrecise(figures.kwhPrice);
+    if (electricityEl) electricityEl.textContent = money(figures.electricityUsd);
+    if (totalEl) totalEl.textContent = money(figures.totalUsd);
+    if (rangeEl) rangeEl.textContent = figures.usableRangeKm + ' km';
+    if (detailState.transportMode === 'auto' && detailState.roadtripVehicleType === 'ev') detailState.auto = figures.totalUsd;
+    recalcularTotalViaje();
+  }
+  function cambiarVehiculoRoadtrip(type) {
+    if (!detailState || (type !== 'combustion' && type !== 'ev')) return;
+    if (detailState.roadtripVehicleType === type) return;
+    detailState.roadtripVehicleType = type;
+    if (detailState.transportMode === 'auto') detailState.auto = currentRoadtripTotal();
+    var flow = document.querySelector('[data-transport-flow]');
+    if (flow) flow.innerHTML = transportFlow(detailState.meta, detailState.flight, true);
+    recalcularTotalViaje();
+  }
   function roadtripCard(meta, autoSelected) {
     return '';
+  }
+  function roadtripEvFigures(r, ev) {
+    var preset = EV_VEHICLES[ev.modelKey] || EV_VEHICLES.byd_dolphin;
+    var kwhPer100 = Number(ev.kwhPer100km) || preset.kwhPer100km;
+    var batteryKwh = Number(ev.batteryKwh) || preset.batteryKwh;
+    var kwhPrice = Number(ev.kwhPrice) > 0 ? Number(ev.kwhPrice) : DEFAULT_KWH_PRICE_USD;
+    var kwh = Math.round((r.roundTripKm / 100) * kwhPer100 * 10) / 10;
+    var electricityUsd = Math.round(kwh * kwhPrice);
+    var usableRangeKm = Math.max(50, Math.round((batteryKwh * 0.8) / kwhPer100 * 100));
+    return { modelKey: ev.modelKey || 'byd_dolphin', kwhPer100km: kwhPer100, batteryKwh: batteryKwh, kwhPrice: kwhPrice, kwh: kwh, electricityUsd: electricityUsd, tollsUsd: r.tollsUsd, totalUsd: electricityUsd + r.tollsUsd, usableRangeKm: usableRangeKm };
   }
   function roadtripCalculator(meta) {
     var r = meta.roadtrip;
     if (!r) return '';
-    return '<section class="transport-options"><div class="transport-card transport-detail" data-roadtrip-calculator><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption">Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption hidden disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p><p>⏱️ Manejo estimado: <b>' + r.hours + ' horas</b></p><p class="cost-note">* Ruta ida y vuelta de ' + r.roundTripKm + ' km. Combustible estimado para ruta/Brasil y peajes incluidos.</p></div></section>';
+    var vType = (detailState && detailState.roadtripVehicleType) || 'combustion';
+    var isEv = vType === 'ev';
+    var ev = roadtripEvFigures(r, (detailState && detailState.roadtripEv) || {});
+    var stopsPlan = roadtripStopsPlan(r.roundTripKm, isEv, ev.usableRangeKm);
+
+    var vehicleTabs = '<div class="roadtrip-vtabs" role="tablist">' +
+      '<button type="button" class="roadtrip-vtab' + (!isEv ? ' is-active' : '') + '" data-roadtrip-vtype="combustion" role="tab" aria-selected="' + !isEv + '">⛽ Combustión</button>' +
+      '<button type="button" class="roadtrip-vtab' + (isEv ? ' is-active' : '') + '" data-roadtrip-vtype="ev" role="tab" aria-selected="' + isEv + '">🔋 Eléctrico</button>' +
+      '</div>';
+
+    var combustionPanel = '<div class="transport-card transport-detail" data-roadtrip-calculator' + (isEv ? ' hidden' : '') + '><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption" data-roadtrip-consumption-label hidden>Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p></div>';
+
+    var evOptionsMarkup = Object.keys(EV_VEHICLES).map(function (key) { return '<option value="' + key + '"' + (key === ev.modelKey ? ' selected' : '') + '>' + esc(EV_VEHICLES[key].label) + '</option>'; }).join('');
+    var evPanel = '<div class="transport-card transport-detail" data-roadtrip-ev-panel' + (!isEv ? ' hidden' : '') + '><label for="roadtrip-ev-model">Modelo eléctrico<select id="roadtrip-ev-model" data-roadtrip-ev-model>' + evOptionsMarkup + '</select></label><label for="roadtrip-ev-price">Tarifa de carga (US$ por kWh)<input id="roadtrip-ev-price" type="number" inputmode="decimal" min="0.05" max="2" step="0.01" value="' + esc(ev.kwhPrice) + '" data-roadtrip-ev-price></label><p>🔋 Energía: <span data-roadtrip-ev-kwh>' + ev.kwh + ' kWh</span> × <span data-roadtrip-ev-rate>' + moneyPrecise(ev.kwhPrice) + '</span>/kWh = <b data-roadtrip-ev-electricity>' + money(ev.electricityUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(ev.tollsUsd) + '</b></p><p>🚗 Total Auto Eléctrico: <b data-roadtrip-ev-total>' + money(ev.totalUsd) + '</b></p><p>🔌 Autonomía real estimada: <b data-roadtrip-ev-range>' + ev.usableRangeKm + ' km</b> por carga (80% de batería, sin apurar el 20% restante)</p><p class="cost-note">* Tarifa de carga pública estimada; confirmá el precio real en tu red de carga antes de salir.</p></div>';
+
+    var routeCard = '<div class="transport-card roadtrip-route"><div class="roadtrip-route__stat"><span>Ruta ida y vuelta</span><b>' + r.roundTripKm + ' km</b></div><div class="roadtrip-route__stat"><span>Manejo estimado</span><b>' + r.hours + ' hs</b></div><div class="roadtrip-route__stat"><span>Destino</span><b>' + esc(meta.dest.name) + '</b></div></div>';
+
+    var showStops = isEv || r.roundTripKm >= 600;
+    var stopsPanel = showStops ? ('<details class="roadtrip-stops"' + (isEv ? ' open' : '') + '><summary>' + (isEv ? '🔌' : '☕') + ' Paradas recomendadas en la ruta (' + stopsPlan.stops + ')</summary><div class="roadtrip-stops__body">' +
+      (stopsPlan.stops > 0
+        ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
+        : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
+      (isEv
+        ? '<p class="cost-note">* No tenemos la ubicación real de los cargadores de esta ruta (no está integrado ningún mapa de red de carga todavía). Antes de salir, confirmá estaciones disponibles cada ' + stopsPlan.everyKm + ' km aprox. en una app de carga real (por ejemplo Electromaps o PlugShare, o la app de UTE si arrancás desde Uruguay).</p>'
+        : '<p class="cost-note">* Son paradas de descanso sugeridas por fatiga en viajes largos, no un tramo obligatorio.</p>') +
+      '</div></details>') : '';
+
+    return '<section class="transport-options roadtrip-planner">' + vehicleTabs + combustionPanel + evPanel + routeCard + stopsPanel + '</section>';
   }
   function transferPickupTimeLabel(date) {
     return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
@@ -2066,7 +2157,7 @@
     var selectedTransportMode = proposal.mode === 'auto' ? 'auto' : proposal.mode === 'bus' ? 'bus' : 'flight';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
     var nights = Math.max(1, Number(data.meta.nights) || 1);
     var pax = Math.max(1, Number(data.meta.pax) || 1);
     if (data.meta.multiStay && data.meta.multiStay.stays && data.meta.multiStay.stays.length === 2) {
@@ -3201,6 +3292,8 @@
         else actualizarTransporte(chosenMode === 'auto');
         return;
       }
+      var roadtripVtype = e.target.closest('[data-roadtrip-vtype]');
+      if (roadtripVtype) { e.preventDefault(); cambiarVehiculoRoadtrip(roadtripVtype.getAttribute('data-roadtrip-vtype')); return; }
       var flightFilter = e.target.closest('[data-flight-stop],[data-flight-time]');
       if (flightFilter) {
         var flightSection = flightFilter.closest('.flight-search');
@@ -3322,6 +3415,10 @@
       if (consumption) actualizarRoadtrip(consumption.value);
       var roadtripModel = e.target.closest && e.target.closest('[data-roadtrip-model]');
       if (roadtripModel) actualizarModeloRoadtrip(roadtripModel.value);
+      var evModel = e.target.closest && e.target.closest('[data-roadtrip-ev-model]');
+      if (evModel) actualizarRoadtripEv({ modelKey: evModel.value, kwhPer100km: null, batteryKwh: null });
+      var evPrice = e.target.closest && e.target.closest('[data-roadtrip-ev-price]');
+      if (evPrice) actualizarRoadtripEv({ kwhPrice: Number(evPrice.value) || DEFAULT_KWH_PRICE_USD });
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
         detailState.foodBudgetMode = 'custom';
@@ -3364,6 +3461,8 @@
       }
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
       if (consumption) actualizarRoadtrip(consumption.value);
+      var evPriceInput = e.target.closest && e.target.closest('[data-roadtrip-ev-price]');
+      if (evPriceInput) actualizarRoadtripEv({ kwhPrice: Number(evPriceInput.value) || DEFAULT_KWH_PRICE_USD });
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
         detailState.foodBudgetMode = 'custom';
