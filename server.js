@@ -13,6 +13,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 
 function loadEnv() {
   try {
@@ -778,6 +779,7 @@ function cotizarTodos(req, res, url) {
   });
 }
 
+const COMPRESSIBLE_EXT = new Set(['.html', '.css', '.js', '.json', '.svg']);
 function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/waitlist.html';
@@ -785,11 +787,27 @@ function serveStatic(req, res, pathname) {
   if (file !== PUBLIC_DIR && file.indexOf(PUBLIC_DIR + path.sep) !== 0) { res.writeHead(403); return res.end('Prohibido'); }
   fs.readFile(file, function (err, data) {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
-    res.writeHead(200, {
-      'Content-Type': MIME[path.extname(file)] || 'application/octet-stream',
-      'Cache-Control': 'no-cache', 'Content-Security-Policy': CSP,
+    const ext = path.extname(file);
+    const headers = {
+      'Content-Type': MIME[ext] || 'application/octet-stream',
+      // Las rutas con `?v=N` son inmutables por diseño: cambiar el archivo
+      // implica bumpear la versión, así que cachearlas fuerte es seguro y
+      // evita redescargar app.js/style.css enteros en cada visita. Lo que no
+      // lleva versión (HTML de entrada, manifest, íconos) sigue sin cachear.
+      'Cache-Control': req.url.indexOf('?') >= 0 ? 'public, max-age=31536000, immutable' : 'no-cache',
+      'Content-Security-Policy': CSP,
       'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer'
-    });
+    };
+    if (COMPRESSIBLE_EXT.has(ext) && data.length > 512) {
+      const acceptEncoding = String(req.headers['accept-encoding'] || '');
+      if (acceptEncoding.indexOf('gzip') >= 0) {
+        headers['Content-Encoding'] = 'gzip';
+        headers['Vary'] = 'Accept-Encoding';
+        res.writeHead(200, headers);
+        return res.end(zlib.gzipSync(data, { level: 6 }));
+      }
+    }
+    res.writeHead(200, headers);
     res.end(data);
   });
 }
