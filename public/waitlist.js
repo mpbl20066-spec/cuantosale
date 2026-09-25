@@ -62,16 +62,25 @@
   function renderForm(errorMessage) {
     render(
       '<div class="wl-card">' +
-      '<h1>El lanzamiento oficial de CuántoSale está más cerca de lo que creés</h1>' +
-      '<p class="wl-sub">Anotate gratis a la lista de espera exclusiva. Sé el primero en usar la plataforma que calcula, compara y divide gastos de viajes en Uruguay.</p>' +
+      '<div class="wl-logo"><svg width="22" height="27" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#FFFFFF"/><circle cx="12" cy="11.5" r="4.6" fill="#F2A93B"/></svg>cuántosale</div>' +
+      '<p class="wl-countdown__label">Lanzamiento oficial en</p>' +
+      '<div class="wl-countdown" id="wl-countdown" aria-live="polite">' +
+      '<div class="wl-countdown__unit"><b id="wl-cd-d">–</b><span>días</span></div>' +
+      '<div class="wl-countdown__unit"><b id="wl-cd-h">–</b><span>hs</span></div>' +
+      '<div class="wl-countdown__unit"><b id="wl-cd-m">–</b><span>min</span></div>' +
+      '<div class="wl-countdown__unit"><b id="wl-cd-s">–</b><span>seg</span></div>' +
+      '</div>' +
+      '<h1>🚀 Llegamos a Uruguay. Preparate para viajar inteligente</h1>' +
+      '<p class="wl-sub">Olvidate de las peleas de plata con tus amigos. Sumate a la lista de espera exclusiva y sé el primero en probar la herramienta definitiva para calcular, comparar y dividir gastos de viajes.</p>' +
       (errorMessage ? '<p class="wl-error">' + esc(errorMessage) + '</p>' : '') +
       '<form id="waitlist-form">' +
       '<label class="wl-field"><input required type="email" name="email" placeholder="tu@email.com" autocomplete="email"></label>' +
-      '<button type="submit" class="wl-btn">Quiero unirme al acceso anticipado</button>' +
+      '<button type="submit" class="wl-btn">¡Quiero unirme ahora!</button>' +
       '</form>' +
       '<p class="wl-urgency" id="wl-count-line" hidden></p>' +
       '</div>'
     );
+    tickCountdown();
     document.getElementById('waitlist-form').addEventListener('submit', async function (e) {
       e.preventDefault();
       var form = e.target;
@@ -96,8 +105,9 @@
     fillCount();
   }
 
-  // Prueba social con el conteo real (nunca un número inventado): funciona
-  // igual de bien recién arrancada la waitlist que con miles de anotados.
+  // BETA_CAP es un tope real que pensás sostener (no una cifra de "gente ya
+  // anotada" inventada) — el conteo que se muestra junto es siempre el real.
+  var BETA_CAP = 500;
   async function fillCount() {
     var line = document.getElementById('wl-count-line');
     try {
@@ -106,7 +116,7 @@
       var count = result.error ? NaN : Number(result.data);
       if (!Number.isFinite(count) || !line) return;
       line.hidden = false;
-      line.innerHTML = '⚠️ Cupos limitados para la beta. <b>' + count + '</b> ' + (count === 1 ? 'viajero ya se anotó' : 'viajeros ya se anotaron') + ' — sumate antes de que se llenen.';
+      line.innerHTML = '⚠️ <span><b>Acceso limitado:</b> solo ' + BETA_CAP + ' cupos disponibles para la versión Beta. Ya se anotaron <b>' + count + '</b> ' + (count === 1 ? 'viajero' : 'viajeros') + ' — sumate antes de que se llenen.</span>';
     } catch (error) { /* sin contador no se rompe el formulario */ }
   }
 
