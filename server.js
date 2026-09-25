@@ -742,7 +742,7 @@ function cotizarTodos(req, res, url) {
 
 function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
-  if (rel === '/') rel = '/index.html';
+  if (rel === '/') rel = '/waitlist.html';
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (file !== PUBLIC_DIR && file.indexOf(PUBLIC_DIR + path.sep) !== 0) { res.writeHead(403); return res.end('Prohibido'); }
   fs.readFile(file, function (err, data) {
@@ -809,6 +809,13 @@ function createServer() {
     }
     if (/^\/waitlist\/?$/i.test(url.pathname)) {
       try { serveStatic(req, res, '/waitlist.html'); } catch (e) { res.writeHead(400); res.end(); }
+      return;
+    }
+    // La raíz del dominio es la landing de waitlist mientras dure el
+    // prelanzamiento; la app real de cotización queda corrida a /app, sin
+    // link público hacia ella (nadie llega ahí por accidente).
+    if (/^\/app\/?$/i.test(url.pathname)) {
+      try { serveStatic(req, res, '/index.html'); } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
     try { serveStatic(req, res, url.pathname); } catch (e) { res.writeHead(400); res.end(); }

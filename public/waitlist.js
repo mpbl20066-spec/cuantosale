@@ -116,7 +116,7 @@
   var REWARD_STEP_PCT = 5;
   var REWARD_MAX_PCT = 20;
   function renderConfirmation(position, referralCode, invitedCount) {
-    var shareUrl = window.location.origin + '/waitlist?ref=' + encodeURIComponent(referralCode);
+    var shareUrl = window.location.origin + '/?ref=' + encodeURIComponent(referralCode);
     var unlockedPct = Math.min(REWARD_MAX_PCT, Number(invitedCount) * REWARD_STEP_PCT);
     var atMax = unlockedPct >= REWARD_MAX_PCT;
     var rewardCopy = atMax
