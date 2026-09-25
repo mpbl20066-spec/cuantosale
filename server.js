@@ -907,7 +907,15 @@ function createServer() {
       return sendJson(res, 200, {
         supabaseUrl: process.env.SUPABASE_URL || 'https://hqyzmeordvjccytgltse.supabase.co',
         supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-        travelpayoutsMarker: process.env.TRAVELPAYOUTS_MARKER || '780345'
+        travelpayoutsMarker: process.env.TRAVELPAYOUTS_MARKER || '780345',
+        // Diagnóstico del candado de prelanzamiento. Dice sólo si el proceso
+        // recibió las variables, nunca cuáles son: sirve para distinguir un
+        // problema de configuración de un bug, sin filtrar el secreto.
+        prelaunchLock: {
+          userPresent: Boolean(String(process.env.APP_USER || '').trim()),
+          passPresent: Boolean(String(process.env.APP_PASS || '').trim()),
+          active: Boolean(prelaunchGuard())
+        }
       });
     }
     if (url.pathname === '/api/cotizar') {
