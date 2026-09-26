@@ -288,13 +288,25 @@
   // Separado de roadtripCalculator para poder recalcularlo en vivo cuando
   // cambia el modelo eléctrico (autonomía distinta) sin re-renderizar toda
   // la sección de transporte.
+  //
+  // Ojo con lo que promete cada título. En un auto a nafta las paradas son de
+  // descanso y sí están en la ruta, así que el título va con "en la ruta". En
+  // eléctrico las paradas son cargas: el cálculo de cada cuántos km es real,
+  // pero los cargadores que listamos abajo son los del DESTINO (la API los
+  // busca en un radio alrededor del destino), no los del camino. Por eso el
+  // título no dice "paradas en la ruta" y el texto aclara la diferencia: si no,
+  // se leía como que esas estaciones están donde hay que parar.
   function roadtripStopsInnerHtml(stopsPlan, isEv) {
-    return '<summary>' + (isEv ? '🔌' : '☕') + ' Paradas recomendadas en la ruta (' + stopsPlan.stops + ')</summary><div class="roadtrip-stops__body">' +
+    var title = isEv
+      ? '🔌 Plan de carga: parar cada ' + stopsPlan.everyKm + ' km'
+      : '☕ Paradas de descanso en la ruta (' + stopsPlan.stops + ')';
+    return '<summary>' + title + '</summary><div class="roadtrip-stops__body">' +
       (stopsPlan.stops > 0
         ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
         : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
       (isEv
-        ? '<div data-roadtrip-chargers><div class="roadtrip-chargers__loading"><span class="roadtrip-chargers__spinner" aria-hidden="true"></span>Buscando cargadores reales cerca del destino…</div></div><p class="cost-note">* Cargadores listados vía Open Charge Map, una base colaborativa: puede haber estaciones nuevas o cerradas que todavía no estén cargadas ahí. Confirmá disponibilidad antes de salir.</p>'
+        ? '<div data-roadtrip-chargers><div class="roadtrip-chargers__loading"><span class="roadtrip-chargers__spinner" aria-hidden="true"></span>Buscando cargadores reales cerca del destino…</div></div>'
+          + '<p class="cost-note">* Los cargadores de arriba están <b>en tu destino</b>, no en el camino. Para las ' + stopsPlan.stops + ' paradas del trayecto, planificalas en <a href="https://www.google.com/maps/dir/?api=1" target="_blank" rel="noopener noreferrer">Google Maps</a> o en una app como <a href="https://www.electromaps.com" target="_blank" rel="noopener noreferrer">Electromaps</a> y <a href="https://www.plugshare.com" target="_blank" rel="noopener noreferrer">PlugShare</a>: nosotros sólo tenemos los del destino. Datos de Open Charge Map, una base colaborativa: puede haber estaciones nuevas o cerradas sin cargar. Confirmá disponibilidad antes de salir.</p>'
         : '<p class="cost-note">* Son paradas de descanso sugeridas por fatiga en viajes largos, no un tramo obligatorio.</p>') +
       '</div>';
   }
@@ -306,7 +318,7 @@
   function renderChargersHtml(destKey, data) {
     var fallback = '<div class="roadtrip-chargers__empty"><span>🔌</span><p>No encontramos cargadores cargados en Open Charge Map cerca de este destino todavía. Probá una app como <a href="https://www.electromaps.com" target="_blank" rel="noopener noreferrer">Electromaps</a> o <a href="https://www.plugshare.com" target="_blank" rel="noopener noreferrer">PlugShare</a> antes de salir.</p></div>';
     if (!data || data.error || data.configured === false || !data.chargers || !data.chargers.length) return fallback;
-    return '<p class="roadtrip-chargers__label">🔌 Cargadores reales cerca de tu destino</p><ul class="roadtrip-chargers__list">' +
+    return '<p class="roadtrip-chargers__label">🔌 Cargadores en tu destino, no en el camino</p><ul class="roadtrip-chargers__list">' +
       data.chargers.slice(0, 5).map(function (c) {
         var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(c.lat + ',' + c.lng);
         var connectorChips = c.connectors && c.connectors.length ? '<span class="roadtrip-chargers__chips">' + c.connectors.slice(0, 3).map(function (name) { return '<span class="roadtrip-chargers__chip">' + esc(name) + '</span>'; }).join('') + '</span>' : '';
