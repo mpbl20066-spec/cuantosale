@@ -678,6 +678,13 @@
      codigo grande con la etiqueta abajo, que es como se lee mejor en un
      celu. Las opciones sin tasa llegan deshabilitadas con un guion.
      --------------------------------------------------------------- */
+  // El header vive en el HTML, pero el selector depende del estado de la
+  // moneda y de que ya llegaran las tasas, asi que se inyecta desde aca.
+  function pintarHeader() {
+    console.warn('SONDA pintarHeader');
+    const slot = document.getElementById('currency-picker-slot');
+    if (slot) slot.innerHTML = selectorMoneda();
+  }
   function selectorMoneda() {
     var rates = FX.rates || {};
     var hay = !!Object.keys(rates).length;
@@ -697,7 +704,12 @@
       + '</div></div>';
   }
   function refrescarSelectorMoneda() {
+    // el del header primero: su outerHTML se lleva el slot, y despues
+    // buscarlo mas en el documento daria null
+    const slot = document.getElementById('currency-picker-slot');
+    if (slot) slot.innerHTML = selectorMoneda();
     document.querySelectorAll('[data-currency-picker]').forEach(function (el) {
+      if (el.closest('#currency-picker-slot')) return;
       el.outerHTML = selectorMoneda();
     });
   }
@@ -714,6 +726,7 @@
     if (lastData) { try { render(lastData); } catch (e) { } }
   }
   async function cargarTasas() {
+    console.warn('SONDA cargarTasas arranque');
     try {
       const r = await fetch('/api/tasas', { headers: { Accept: 'application/json' } });
       const j = await r.json();
@@ -730,7 +743,9 @@
     let guardada = null;
     try { guardada = localStorage.getItem('cuantosale_moneda'); } catch (e) { }
     if (guardada && tasaDe(guardada) != null) S.currency = guardada;
+    pintarHeader();
     refrescarSelectorMoneda();
+    console.warn('SONDA cargarTasas fin');
     if (lastData) { try { render(lastData); } catch (e) { } }
   }
   document.addEventListener('click', function (e) {
@@ -765,6 +780,23 @@
     if (!Number.isFinite(v)) return '';
     var tasa = tasaDe(monedaActiva().code);
     return formatoMiles(v * (tasa == null ? 1 : tasa), 0);
+  }
+  // El presupuesto se lleva en la base (USD) y la conversion es solo de
+  // pantalla. Estas dos son el puente para los campos que la persona edita a
+  // mano: el input de "monto por dia" se muestra en la moneda que eligio, asi
+  // que lo que tipea hay que volver a llevarlo a la base antes de sumarlo.
+  function aMoneda(n) {
+    var v = Number(n);
+    if (!Number.isFinite(v)) return 0;
+    var tasa = tasaDe(monedaActiva().code);
+    return tasa == null ? v : v * tasa;
+  }
+  function aBase(n) {
+    var v = Number(n);
+    if (!Number.isFinite(v)) return 0;
+    var tasa = tasaDe(monedaActiva().code);
+    if (tasa == null || tasa === 0) return v;
+    return v / tasa;
   }
   function dLong(d) { return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' }); }
   function shortDateLabel(value) {
@@ -1297,7 +1329,7 @@
   }
   function proposalBreakdownMarkup(state) {
     return '<section class="proposal-breakdown" data-proposal-breakdown>' +
-      '<h2>A dónde va tu plata</h2>' +
+      '<div class="sec__head"><h2>A dónde va tu plata</h2>' + selectorMoneda() + '</div>' +
       proposalBreakdownContent(state) +
       '</section>';
   }
@@ -1720,11 +1752,15 @@
       var mode = kind === 'food' ? detailState.foodBudgetMode : detailState.localBudgetMode;
       var presets = options.map(function (option) {
         var selected = mode !== 'custom' && (kind === 'food' ? Math.abs(foodValue - option.value) < 6 : Math.abs(localValue - option.value) < 6);
-        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>US$ ' + option.value + '/día</strong></button>';
+        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>' + money(option.value) + '/día</strong></button>';
       }).join('');
       var customSelected = mode === 'custom';
       var customValue = kind === 'food' ? detailState.foodCustomValue : detailState.localCustomValue;
-      var input = '<label class="daily-budget__planned"><span>Monto por día</span><div class="daily-budget__input-wrap"><span>US$</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(customValue)) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Presupuesto personalizado diario para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span>/día</span></div></label>';
+      // El input se muestra en la moneda elegida (que es la que la persona
+      // tiene en la cabeza) pero lo que se guarda es la base: customValue
+      // sigue siendo USD y se convierte acá y en el handler. Asi el presupuesto
+      // nunca se pisa con un número de otra moneda.
+      var input = '<label class="daily-budget__planned"><span>Monto por día</span><div class="daily-budget__input-wrap"><span>' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Presupuesto personalizado diario para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span>/día</span></div></label>';
       var custom = customSelected
         ? '<div class="daily-budget__option daily-budget__option--custom is-selected" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span>' + input + '</div>'
         : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Escribí el monto que querés gastar.</span><strong>Ingresar monto</strong></button>';
@@ -1924,7 +1960,7 @@
     var combustionPanel = '<div class="transport-card transport-detail" data-roadtrip-calculator' + (isEv ? ' hidden' : '') + '><label for="roadtrip-model">Modelo o consumo del auto<select id="roadtrip-model" data-roadtrip-model><option value="onix">Chevrolet Onix · 13 km/l</option><option value="gol" selected>VW Gol · 12 km/l</option><option value="argo">Fiat Argo · 12,5 km/l</option><option value="hilux">Toyota Hilux · 9 km/l</option><option value="kwid">Renault Kwid · 15 km/l</option><option value="custom">Personalizado (Ingresar manual)</option></select></label><label for="roadtrip-consumption" data-roadtrip-consumption-label hidden>Consumo personalizado (km por litro)<input id="roadtrip-consumption" type="number" inputmode="decimal" min="3" max="40" step="0.1" value="' + esc(r.kmPerLiter || 12) + '" data-roadtrip-consumption disabled></label><p>⛽ Combustible: <span data-roadtrip-liters>' + r.liters + ' litros</span> × ' + money(r.fuelPriceUsd) + '/l = <b data-roadtrip-fuel>' + money(r.fuelUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(r.tollsUsd) + '</b></p><p>🚗 Total Auto / Roadtrip: <b data-roadtrip-total>' + money(r.totalUsd) + '</b></p></div>';
 
     var evOptionsMarkup = Object.keys(EV_VEHICLES).map(function (key) { return '<option value="' + key + '"' + (key === ev.modelKey ? ' selected' : '') + '>' + esc(EV_VEHICLES[key].label) + '</option>'; }).join('');
-    var evPanel = '<div class="transport-card transport-detail" data-roadtrip-ev-panel' + (!isEv ? ' hidden' : '') + '><label for="roadtrip-ev-model">Modelo eléctrico<select id="roadtrip-ev-model" data-roadtrip-ev-model>' + evOptionsMarkup + '</select></label><label for="roadtrip-ev-price">Tarifa de carga (US$ por kWh)<input id="roadtrip-ev-price" type="number" inputmode="decimal" min="0.05" max="2" step="0.01" value="' + esc(ev.kwhPrice) + '" data-roadtrip-ev-price></label><p>🔋 Energía: <span data-roadtrip-ev-kwh>' + ev.kwh + ' kWh</span> × <span data-roadtrip-ev-rate>' + moneyPrecise(ev.kwhPrice) + '</span>/kWh = <b data-roadtrip-ev-electricity>' + money(ev.electricityUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(ev.tollsUsd) + '</b></p><p>🚗 Total Auto Eléctrico: <b data-roadtrip-ev-total>' + money(ev.totalUsd) + '</b></p><p>🔌 Autonomía real estimada: <b data-roadtrip-ev-range>' + ev.usableRangeKm + ' km</b> por carga (80% de batería, sin apurar el 20% restante)</p><p class="cost-note">* Tarifa de carga pública estimada; confirmá el precio real en tu red de carga antes de salir.</p></div>';
+    var evPanel = '<div class="transport-card transport-detail" data-roadtrip-ev-panel' + (!isEv ? ' hidden' : '') + '><label for="roadtrip-ev-model">Modelo eléctrico<select id="roadtrip-ev-model" data-roadtrip-ev-model>' + evOptionsMarkup + '</select></label><label for="roadtrip-ev-price">Tarifa de carga (' + esc(monedaActiva().simbolo) + ' por kWh)<input id="roadtrip-ev-price" type="number" inputmode="decimal" min="0.05" max="2" step="0.01" value="' + esc(ev.kwhPrice) + '" data-roadtrip-ev-price></label><p>🔋 Energía: <span data-roadtrip-ev-kwh>' + ev.kwh + ' kWh</span> × <span data-roadtrip-ev-rate>' + moneyPrecise(ev.kwhPrice) + '</span>/kWh = <b data-roadtrip-ev-electricity>' + money(ev.electricityUsd) + '</b></p><p>🚧 Peajes estimados: <b>' + money(ev.tollsUsd) + '</b></p><p>🚗 Total Auto Eléctrico: <b data-roadtrip-ev-total>' + money(ev.totalUsd) + '</b></p><p>🔌 Autonomía real estimada: <b data-roadtrip-ev-range>' + ev.usableRangeKm + ' km</b> por carga (80% de batería, sin apurar el 20% restante)</p><p class="cost-note">* Tarifa de carga pública estimada; confirmá el precio real en tu red de carga antes de salir.</p></div>';
 
     var routeCard = '<div class="transport-card roadtrip-route"><div class="roadtrip-route__stat"><span>Ruta ida y vuelta</span><b>' + r.roundTripKm + ' km</b></div><div class="roadtrip-route__stat"><span>Manejo estimado</span><b>' + r.hours + ' hs</b></div><div class="roadtrip-route__stat"><span>Destino</span><b>' + esc(meta.dest.name) + '</b></div></div>';
 
@@ -1951,7 +1987,7 @@
       { key: 'private', amount: 150, icon: '🚗', title: 'Transfer privado', desc: 'Vehículo exclusivo y traslado directo.' }
     ].map(function (card) {
       var isSelected = selected === card.key;
-      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '"><span class="transfer-choice__icon" aria-hidden="true">' + card.icon + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">US$ ' + card.amount + '</b></button>';
+      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '"><span class="transfer-choice__icon" aria-hidden="true">' + card.icon + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b></button>';
     }).join('');
     var pickupMarkup = selected ? '<div class="transfer-pickup" data-transfer-pickup>' +
       '<span class="transfer-pickup__label">Horario de recogida</span><div class="transfer-pickup__chips">' +
@@ -2714,7 +2750,7 @@
         '<span class="v">' + moneySolo(x.total) + '</span><span class="b" style="height:' + ht + 'px"></span>' +
         '<span class="d"><b>' + d.getDate() + '</b>' + d.toLocaleDateString('es-UY', { month: 'short' }) + '</span></button>';
     }).join('');
-    h += '<section class="sec"><h2>Mismo viaje, otra fecha</h2><p class="sub">Costo total en US$ si salís antes o después, con las mismas noches. Es una estimación a partir del precio de tu fecha. Tocá una barra para usarla.</p>' +
+    h += '<section class="sec"><h2>Mismo viaje, otra fecha</h2><p class="sub">Costo total en ' + esc(monedaActiva().simbolo) + ' si salís antes o después, con las mismas noches. Es una estimación a partir del precio de tu fecha. Tocá una barra para usarla.</p>' +
       '<div class="panel"><div class="chart">' + bars + '</div>' +
       '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata</span><span>Otras fechas</span></div></div></section>';
 
@@ -2866,7 +2902,7 @@
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
     var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
-      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
+      '<section class="detail-summary">' + selectorMoneda() + '<span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + foodMarkup +
@@ -4079,18 +4115,19 @@
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
         detailState.foodBudgetMode = 'custom';
-        detailState.foodCustomValue = dailyFoodInput.value;
+        // Lo tipeado viene en la moneda activa: se guarda y se suma en la base.
+        detailState.foodCustomValue = aBase(dailyFoodInput.value);
         detailState.foodPerDayTouched = true;
-        detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
+        detailState.foodPerDay = Math.max(0, aBase(dailyFoodInput.value));
         detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
       if (dailyLocalInput && detailState) {
         detailState.localBudgetMode = 'custom';
-        detailState.localCustomValue = dailyLocalInput.value;
+        detailState.localCustomValue = aBase(dailyLocalInput.value);
         detailState.localPerDayTouched = true;
-        detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
+        detailState.localPerDay = Math.max(0, aBase(dailyLocalInput.value));
         detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
       }
@@ -4123,18 +4160,19 @@
       var dailyFoodInput = e.target.closest && e.target.closest('[data-daily-food]');
       if (dailyFoodInput && detailState) {
         detailState.foodBudgetMode = 'custom';
-        detailState.foodCustomValue = dailyFoodInput.value;
+        // Lo tipeado viene en la moneda activa: se guarda y se suma en la base.
+        detailState.foodCustomValue = aBase(dailyFoodInput.value);
         detailState.foodPerDayTouched = true;
-        detailState.foodPerDay = Math.max(0, Number(dailyFoodInput.value) || 0);
+        detailState.foodPerDay = Math.max(0, aBase(dailyFoodInput.value));
         detailState.parts.comidas = Math.round(detailState.foodPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
       if (dailyLocalInput && detailState) {
         detailState.localBudgetMode = 'custom';
-        detailState.localCustomValue = dailyLocalInput.value;
+        detailState.localCustomValue = aBase(dailyLocalInput.value);
         detailState.localPerDayTouched = true;
-        detailState.localPerDay = Math.max(0, Number(dailyLocalInput.value) || 0);
+        detailState.localPerDay = Math.max(0, aBase(dailyLocalInput.value));
         detailState.parts.local = Math.round(detailState.localPerDay * Math.max(1, Number(detailState.meta.nights) || 1) * Math.max(1, Number(detailState.meta.pax) || 1));
         recalcularTotalViaje();
       }
@@ -4283,6 +4321,7 @@
     }).catch(function () { notice('No pudimos cargar los destinos. Recargá la página.'); });
   }
 
+  console.warn('SONDA fin del IIFE');
   cargarTasas();
   init();
 })();
