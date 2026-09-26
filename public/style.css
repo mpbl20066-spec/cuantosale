@@ -611,27 +611,23 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 
 /* -------------------------------------------------------
    Selector de moneda
-   Un solo campo: el simbolo de la moneda actual a la izquierda y un <select>
-   nativo que se abre hacia abajo. El nativo se usa a proposito: en un celu se
-   comporta como el menu del sistema, scrollea bien y no hay que mantener un
-   popover a mano.
+   Un badge con el codigo de la moneda activa. Sin etiqueta, sin flecha y sin
+   desplegable: el clic avanza a la siguiente. Es lo que menos peso visual
+   pone al lado del boton de sesion.
    ------------------------------------------------------- */
 .sec__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.currency-picker{display:flex;align-items:center;gap:10px;flex:0 0 auto;margin:0}
-.currency-picker__label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
-.currency-picker__field{position:relative;display:flex;align-items:center;padding:2px 34px 2px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);transition:border-color .16s ease,box-shadow .16s ease}
-.currency-picker__field:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}
-.currency-picker__field>b{font-size:15px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
-/* el triangulo del navegador se ve crudo sobre el fondo, lo reemplazamos */
-.currency-select{appearance:none;-webkit-appearance:none;background:transparent;border:0;color:transparent;font:inherit;cursor:pointer;padding:7px 4px;min-width:96px}
-.currency-select>option{color:var(--ink);background:var(--surface);font:600 14px Poppins,sans-serif}
-.currency-picker__field::after{content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;margin-top:-5px;border-right:2px solid var(--ink2);border-bottom:2px solid var(--ink2);transform:rotate(45deg);pointer-events:none}
-.currency-picker.is-loading .currency-picker__field{opacity:.5;pointer-events:none}
+.currency-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  min-width:56px;height:32px;padding:0 12px;margin:0;border:1px solid var(--line);
+  border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer;
+  transition:border-color .16s ease,background .16s ease,transform .12s ease}
+.currency-badge>b{font-size:13px;font-weight:800;letter-spacing:.02em;line-height:1}
+.currency-badge:hover{border-color:var(--cel);background:var(--cel-soft)}
+.currency-badge:active{transform:scale(.96)}
+/* el mismo azul que .daily-budget__option.is-selected, para que se lea igual */
+.currency-badge:focus-visible{outline:3px solid var(--cel);outline-offset:2px}
+.currency-badge.is-loading{opacity:.45;pointer-events:none}
 @media (max-width:560px){
   .sec__head{gap:10px}
-  .currency-picker{width:100%;justify-content:space-between}
-  .currency-picker__field{flex:1}
-  .currency-select{flex:1;min-width:0}
 }
 
 /* ---------- salto del desglose / "Mi Viaje" a la seccion del rubro ----------
