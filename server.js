@@ -32,6 +32,9 @@ const duffel = require('./lib/providers/duffel');
 // reservas generen comision. Es independiente de los precios: la API de
 // precios (RapidAPI o partner) y la de afiliados son dos cuentas distintas.
 const travelpayouts = require('./lib/providers/travelpayouts');
+// Actividades y tours con precio real de Civitatis. Si no hay credenciales, el
+// provider queda inerte y la seccion de tours sigue con la lista local.
+const civitatis = require('./lib/providers/civitatis');
 
 /*
  * Tasas de cambio para el selector de moneda.
@@ -1041,6 +1044,39 @@ async function cotizarHoteles(req, res, url) {
   });
 }
 
+/*
+ * Actividades del destino (Civitatis), para la seccion de tours.
+ *
+ * Es un endpoint aparte y no va dentro de /api/cotizar-todos a proposito: los
+ * hotspots se piden aparte y llegan aparte, y este tambien. Ademas Civitatis
+ * depende de credenciales que pueden no estar: si faltan, este endpoint
+ * devuelve 200 con una lista vacia y la pantalla sigue mostrando los tours
+ * locales. Un 502 obligaria al front a decidir que hacer, y el fallback ya
+ * esta resuelto del lado del cliente.
+ */
+async function listarActividades(req, res, url) {
+  if (limited('actividades:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
+  const destKey = String(url.searchParams.get('dest') || '').trim().toLowerCase();
+  // Un destino que no existe en el modelo no se consulta: evita que alguien
+  ///pega nombres raros y nos haga gastar cuota de Civitatis.
+  if (!destKey || !model.DEST[destKey]) return sendJson(res, 200, { activities: [], source: 'local' });
+  if (!civitatis.isConfigured()) return sendJson(res, 200, { activities: [], source: 'local', reason: 'civitatis sin configurar' });
+
+  const extra = {
+    dep: String(url.searchParams.get('dep') || '').trim(),
+    ret: String(url.searchParams.get('ret') || '').trim(),
+    pax: Math.max(1, Number(url.searchParams.get('pax')) || 1),
+    currency: String(url.searchParams.get('currency') || 'USD').toUpperCase()
+  };
+  const actividades = await civitatis.actividades(destKey, extra);
+  return sendJson(res, 200, {
+    activities: actividades,
+    // Si vuelve vacio no es un error: el front cae a los tours locales y no
+    // tiene por que distinctionar "no hay" de "no pudimos preguntar".
+    source: actividades.length ? 'civitatis' : 'local'
+  });
+}
+
 function cotizarTodos(req, res, url) {
   if (limited('cotizar-todos:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
   const today = model.getToday();
@@ -1265,14 +1301,34 @@ function checkPrelaunchAccess(req, res, relPath) {
 }
 
 const COMPRESSIBLE_EXT = new Set(['.html', '.css', '.js', '.json', '.svg']);
+// app.js pesa ~350KB sin minificar. Comprimirlo con gzipSync() bloquea el event
+// loop del proceso durante toda la compresión, y como vercel.json rutea
+// /(.*) a esta función no hay CDN de estáticos delante: cada cache miss pagaba
+// una lectura de disco + una compresión de 350KB en el hilo único, con todas las
+// requests concurrentes esperando. El resultado se cachea por archivo+mtime para
+// que solo se pague una vez por despliegue.
+const gzipCache = new Map();
+function gzipCached(file, mtimeMs, payload) {
+  const key = file + '|' + mtimeMs;
+  const hit = gzipCache.get(key);
+  if (hit) return hit;
+  const compressed = zlib.gzipSync(payload, { level: 6 });
+  // Poda de seguridad: si se despliega muchas veces sin reiniciar, el mapa no
+  // tiene que crecer sin límite.
+  if (gzipCache.size > 24) gzipCache.clear();
+  gzipCache.set(key, compressed);
+  return compressed;
+}
 function serveStatic(req, res, pathname, transform) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/waitlist.html';
   if (checkPrelaunchAccess(req, res, rel)) return;
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (file !== PUBLIC_DIR && file.indexOf(PUBLIC_DIR + path.sep) !== 0) { res.writeHead(403); return res.end('Prohibido'); }
-  fs.readFile(file, function (err, data) {
-    if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+  fs.stat(file, function (statErr, stat) {
+    if (statErr) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+    fs.readFile(file, function (err, data) {
+      if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
     const ext = path.extname(file);
     const send = function (payload) {
       const headers = {
@@ -1304,7 +1360,7 @@ function serveStatic(req, res, pathname, transform) {
         if (acceptEncoding.indexOf('gzip') >= 0) {
           headers['Content-Encoding'] = 'gzip';
           res.writeHead(200, headers);
-          return res.end(zlib.gzipSync(payload, { level: 6 }));
+          return res.end(gzipCached(file, stat.mtimeMs, payload));
         }
       }
       res.writeHead(200, headers);
@@ -1315,6 +1371,7 @@ function serveStatic(req, res, pathname, transform) {
     // previa sin el nombre del viaje es mucho mejor que una página rota.
     if (typeof transform !== 'function') return send(data);
     Promise.resolve(transform(data)).then(send).catch(function () { send(data); });
+    });
   });
 }
 
@@ -1412,6 +1469,34 @@ function serveGrupoPage(req, res, groupId) {
 
 function createServer() {
   return http.createServer(function (req, res) {
+    // Red de seguridad para TODO el handler. Antes cada ruta tenía su propio
+    // try/catch y cinco no lo tenían (/api/destinos, /api/config,
+    // /api/cotizar-todos, /api/destinos-destacados, /api/cargadores). Un throw
+    // sincrónico ahí escapaba del listener y terminaba el proceso: en una
+    // instancia de Vercel caliente, eso se llevaba por delante TODAS las
+    // requests concurrentes como 502, no solo la que falló.
+    try {
+      handleRequest(req, res);
+    } catch (error) {
+      console.error('[servidor] ' + (req.url || '') + ' ->', error);
+      if (res.headersSent) { try { res.end(); } catch (e) { /* socket ya muerto */ } return; }
+      try { sendJson(res, 500, { error: 'Error inesperado. Probá de nuevo en un momento.' }); }
+      catch (e) { try { res.end(); } catch (e2) { /* nada que hacer */ } }
+    }
+  });
+}
+
+// Un rechazo de promesa que nadie atiende también tumbaba el proceso. Se loguea
+// y se sigue sirviendo: perder una búsqueda es un error, perder el servidor es
+// una caída.
+process.on('unhandledRejection', function (reason) {
+  console.error('[servidor] promesa rechazada sin manejar:', reason);
+});
+process.on('uncaughtException', function (error) {
+  console.error('[servidor] excepción sin capturar:', error);
+});
+
+function handleRequest(req, res) {
     if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'POST') { res.writeHead(405); return res.end(); }
     let url;
     try { url = new URL(req.url, 'http://localhost'); } catch (e) { res.writeHead(400); return res.end(); }
@@ -1498,6 +1583,12 @@ function createServer() {
         sendJson(res, 502, { error: 'No pudimos cargar alojamientos ahora.' });
       });
     }
+    if (url.pathname === '/api/actividades') {
+      return listarActividades(req, res, url).catch(function (e) {
+        console.error('[actividades]', e);
+        sendJson(res, 502, { error: 'No pudimos cargar las actividades ahora.' });
+      });
+    }
     if (url.pathname === '/api/cotizar-todos') {
       return cotizarTodos(req, res, url);
     }
@@ -1532,7 +1623,6 @@ function createServer() {
       return;
     }
     try { serveStatic(req, res, url.pathname); } catch (e) { res.writeHead(400); res.end(); }
-  });
 }
 
 if (require.main === module) {
