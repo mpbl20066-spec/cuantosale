@@ -34,7 +34,7 @@ const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon'
 };
-const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com https://*.supabase.co https://*.wikimedia.org; frame-src https://*.supabase.co; base-uri 'none'; form-action 'self'";
+const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.wikimedia.org; frame-src https://*.supabase.co; base-uri 'none'; form-action 'self'";
 const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
 const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
 const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue', 'gram', 'igu']);
@@ -516,14 +516,56 @@ function transferConfig(destKey, pax) {
 }
 
 /* ---------- lÃ­mite de pedidos por IP ---------- */
+/* ---------- lÃ­mite de pedidos por IP ---------- */
+/*
+ * Cada tipo de pedido lleva su propio cubo (el prefijo de la clave) por una
+ * razón práctica: /api/cotizar-todos y /api/destinos-destacados son cálculo
+ * local y no cuestan nada, mientras que /api/cotizar, /api/hoteles y
+ * /api/vuelos/buscar gastan cuota de Duffel y de Booking. Con un cubo
+ * compartido, alguien que golpeara los endpoints gratuitos podía agotarle el
+ * cupo de cotizar a un usuario legítimo.
+ *
+ * LÍMITE CONOCIDO, no resuelto por este código: el contador vive en la
+ * memoria del proceso. En Vercel cada instancia es efímera, así que el límite
+ * real es "por instancia": con varias instancias a la vez el tope se multiplica
+ * y se reinicia en cada despliegue. Para un límite compartido de verdad hace
+ * falta un store externo (Upstash Redis o similar). En un host de un solo
+ * proceso —un VPS, o el desarrollo local— esto funciona correctamente.
+ *
+ * Variables: RATE_LIMIT_PER_MIN (pedidos por minuto y cubo, 30 por defecto) y
+ * RATE_LIMIT_MAX_IPS (techo de entradas guardadas, 20000 por defecto).
+ */
 const hits = new Map();
-function limited(ip) {
+let hitsCalls = 0;
+function sweepHits(now) {
+  hits.forEach(function (v, k) { if (now > v.reset) hits.delete(k); });
+}
+function limited(bucket) {
+  // Las dos variables se leen en cada llamada, no al cargar el módulo, para
+  // que cambiarlas en caliente (tests, y un ajuste en un despliegue) surta
+  // efecto sin reiniciar el proceso.
   const max = Number(process.env.RATE_LIMIT_PER_MIN) || 30;
+  const maxIps = Number(process.env.RATE_LIMIT_MAX_IPS) || 20000;
   const now = Date.now();
-  let h = hits.get(ip);
-  if (!h || now > h.reset) { h = { n: 0, reset: now + 60000 }; hits.set(ip, h); }
+  // Barrido amortizado: limpiar en cada pedido sería recorrer el mapa entero
+  // siempre. Cada 256 pedidos alcanza para que no crezca sin control.
+  if ((++hitsCalls & 0xff) === 0) sweepHits(now);
+  let h = hits.get(bucket);
+  if (!h || now > h.reset) { h = { n: 0, reset: now + 60000 }; hits.set(bucket, h); }
   h.n++;
-  if (hits.size > 5000) { hits.forEach(function (v, k) { if (now > v.reset) hits.delete(k); }); }
+  if (hits.size > maxIps) {
+    // Techo duro de memoria. El barrido solo no alcanza: si entran IPs de
+    // golpe (muchos orígenes distintos dentro del mismo minuto) todavía no
+    // hay nada vencido que borrar y el mapa crecería hasta agotar la memoria
+    // del proceso. El Map conserva el orden de inserción, así que las
+    // primeras claves son las más viejas y son las que se descartan.
+    sweepHits(now);
+    while (hits.size > maxIps) {
+      const oldest = hits.keys().next();
+      if (oldest.done) break;
+      hits.delete(oldest.value);
+    }
+  }
   return h.n > max;
 }
 function clientIp(req) {
@@ -624,7 +666,7 @@ async function getLiveFlightQuote(destinationIata, dep, ret, style, origin) {
 }
 
 async function cotizar(req, res, url) {
-  if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
+  if (limited('cotizar:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
   const today = model.getToday();
   let v;
   try {
@@ -705,7 +747,7 @@ async function cotizarHoteles(req, res, url) {
 }
 
 function cotizarTodos(req, res, url) {
-  if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
+  if (limited('cotizar-todos:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
   const today = model.getToday();
   let v;
   try {
@@ -966,7 +1008,7 @@ function createServer() {
       });
     }
     if (req.method === 'GET' && url.pathname === '/api/vuelos/comprar') {
-      if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
+      if (limited('vuelos-comprar:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
       return sendJson(res, 410, { error: 'La reserva de vuelos se gestiona directamente con Duffel.' });
     }
     if (req.method === 'POST' && url.pathname === '/api/traslados/transferencia') {

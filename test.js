@@ -357,6 +357,50 @@ function haversineKm(a, b) {
     // Sin variables el desarrollo local sigue abierto.
     assert.strictEqual((await get(port, cotizar)).status, 200, 'sin candado configurado la API responde');
   });
+  await t('los endpoints que cuestan plata no comparten cupo con los gratuitos', async function () {
+    // /api/cotizar-todos es cálculo local y no gasta cuota. Antes compartía
+    // cubo con /api/cotizar, que sí llama a Duffel: golpear el endpoint
+    // gratuito le agotaba el cupo de cotizar al usuario.
+    const libre = '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=9000&style=eq';
+    const caro = '/api/cotizar?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=9000&style=eq';
+    // IP propia para no arrastrar el consumo de las pruebas anteriores.
+    const ip = { 'X-Forwarded-For': '203.0.113.7' };
+    const original = process.env.RATE_LIMIT_PER_MIN;
+    process.env.RATE_LIMIT_PER_MIN = '3';
+    try {
+      for (let i = 0; i < 6; i++) await get(port, libre, ip);
+      assert.strictEqual((await get(port, libre, ip)).status, 429, 'el propio endpoint gratuito tiene que bloquear');
+      assert.strictEqual((await get(port, caro, ip)).status, 200, 'el endpoint de pago quedó bloqueado por golpear el gratuito');
+    } finally { if (original === undefined) delete process.env.RATE_LIMIT_PER_MIN; else process.env.RATE_LIMIT_PER_MIN = original; }
+  });
+  await t('el mapa de límites no crece sin techo con muchas IPs distintas', async function () {
+    // Regresión: el barrido sólo corría al pasar de 5000 entradas y sólo
+    // borraba lo vencido, así que con muchos orígenes dentro del mismo
+    // minuto no se borraba nada y el mapa crecía hasta agotar la memoria.
+    // Con límite 1 por minuto, la segunda petición de una IP da 429. Si su
+    // entrada fue descartada por el techo, el contador arranca de cero y da
+    // 200: eso es lo que distingue un mapa acotado de uno que crece.
+    const original = process.env.RATE_LIMIT_MAX_IPS;
+    const originalMax = process.env.RATE_LIMIT_PER_MIN;
+    process.env.RATE_LIMIT_MAX_IPS = '5';
+    process.env.RATE_LIMIT_PER_MIN = '1';
+    const ipVieja = { 'X-Forwarded-For': '198.51.100.42' };
+    // /api/destinos no pasa por limited(), así que sirve /api/cotizar-todos,
+    // que sí lo usa.
+    const golpe = '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=9000&style=eq';
+    try {
+      assert.strictEqual((await get(port, golpe, ipVieja)).status, 200);
+      assert.strictEqual((await get(port, golpe, ipVieja)).status, 429, 'sin techo, la segunda petición da 429');
+      for (let i = 0; i < 60; i++) {
+        await get(port, golpe, { 'X-Forwarded-For': '198.51.100.' + (100 + i) });
+      }
+      assert.strictEqual((await get(port, golpe, ipVieja)).status, 200,
+        'la entrada vieja debió descartarse por el techo y reiniciar su contador');
+    } finally {
+      if (original === undefined) delete process.env.RATE_LIMIT_MAX_IPS; else process.env.RATE_LIMIT_MAX_IPS = original;
+      if (originalMax === undefined) delete process.env.RATE_LIMIT_PER_MIN; else process.env.RATE_LIMIT_PER_MIN = originalMax;
+    }
+  });
   await t('sirve la web y bloquea rutas fuera de /public', async function () {
     const r = await get(port, '/');
     assert.strictEqual(r.status, 200); assert.ok(r.body.indexOf('cuántosale') >= 0);
