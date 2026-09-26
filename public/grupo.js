@@ -25,6 +25,7 @@
     share: 'M12 3v12M12 3L8 7M12 3l4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6',
     link: 'M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1',
     trash: 'M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5',
+    check: 'M4.5 12.5l5 5 10-11',
     arrow: 'M4 12h16M14 6l6 6-6 6',
     // Tenedor y cuchillo como dos formas separadas y anchas: un plato con
     // cubiertos dibujados en detalle desaparece a este tamaño.
@@ -425,7 +426,10 @@
   // repintar (y borrar lo que el usuario está escribiendo) si nada cambió.
   function dataSignature() {
     return [group && group.name, participants.map(function (p) { return p.id + ':' + p.display_name; }).join(','),
-      expenses.map(function (e) { return e.id + ':' + e.amount + ':' + e.description + ':' + e.paid_by_participante_id + ':' + splitIdsOf(e).join('+'); }).join(',')
+      expenses.map(function (e) { return e.id + ':' + e.amount + ':' + e.currency + ':' + e.description + ':' + e.paid_by_participante_id + ':' + splitIdsOf(e).join('+'); }).join(','),
+      // Los saldos pagados van en la firma: si no, el poll vería la pantalla
+      // igual y no repintaría el tilde que el usuario acaba de poner.
+      saldosGuardados().slice().sort().join(',')
     ].join('|');
   }
 
@@ -444,6 +448,24 @@
     var payerOptionsMarkup = participants.map(function (p) {
       return '<option value="' + esc(p.id) + '"' + (me && p.id === me.id ? ' selected' : '') + '>' + esc(p.display_name) + '</option>';
     }).join('');
+    // Monedas para cargar un gasto y para ver la página. Se muestran solo las
+    // que tienen tasa; si no llegó ninguna, no se ofrece selector y todos los
+    // montos se leen en la moneda del grupo.
+    var disponibles = monedasVerificables();
+    var currencyPickerMarkup = disponibles.length
+      ? disponibles.map(function (m) {
+          return '<option value="' + esc(m.code) + '"' + (m.code === currency ? ' selected' : '') + '>' + esc(m.etiqueta || m.code) + '</option>';
+        }).join('')
+      : '';
+    var verEnMarkup = disponibles.length
+      ? '<span class="grupo-veren"><span class="grupo-veren__label">Ver en</span>' +
+        '<select class="grupo-veren__sel" aria-label="Moneda para ver los montos">' +
+        '<option value="">' + esc(currency) + ' (del grupo)</option>' +
+        disponibles.filter(function (m) { return m.code !== currency; }).map(function (m) {
+          return '<option value="' + esc(m.code) + '"' + (verEn === m.code ? ' selected' : '') + '>' + esc(m.code) + '</option>';
+        }).join('') +
+        '</select></span>'
+      : '';
     var expensesMarkup = expenses.length
       ? expenses.map(function (expense) {
           // "dividido entre 3" no dice quiénes. Con los nombres al lado, cada
@@ -457,9 +479,9 @@
             '<div class="grupo-expense__name">' + esc(expense.description) + '</div>' +
             '<div class="grupo-expense__meta">Pagó ' + esc(participantName(expense.paid_by_participante_id)) + '</div>' +
             '<div class="grupo-expense__meta">Entre ' + (splitIds.length === 1 ? '1 persona' : splitIds.length + ' personas') +
-            (splitIds.length ? ': ' + esc(money(Number(expense.amount) / splitIds.length, currency)) + ' c/u' : '') + '</div>' +
+            (splitIds.length ? ': ' + esc(moneyVer(Number(expense.amount) / splitIds.length, expense.currency)) + ' c/u' : '') + '</div>' +
             '</div></div>' +
-            '<div class="grupo-expense__right"><span class="grupo-expense__amount">' + esc(money(expense.amount, currency)) + '</span>' +
+            '<div class="grupo-expense__right"><span class="grupo-expense__amount">' + esc(moneyVer(expense.amount, expense.currency)) + '</span>' +
             (canDelete ? '<button type="button" class="grupo-trash" data-delete-expense="' + esc(expense.id) + '" aria-label="Borrar ' + esc(expense.description) + '">' + icon('trash') + '</button>' : '') +
             '</div></div>';
         }).join('')
@@ -471,18 +493,34 @@
           var value = Math.round((balances[p.id] || 0) * 100) / 100;
           var label = Math.abs(value) < 0.01
             ? '<b class="pos">al día</b>'
-            : '<b class="' + (value > 0 ? 'pos' : 'neg') + '">' + (value > 0 ? 'le deben ' : 'debe ') + esc(money(Math.abs(value), currency)) + '</b>';
+            : '<b class="' + (value > 0 ? 'pos' : 'neg') + '">' + (value > 0 ? 'le deben ' : 'debe ') + esc(moneyVer(Math.abs(value), currency)) + '</b>';
           return '<div class="grupo-balance"><span>' + esc(p.display_name) + '</span>' + label + '</div>';
         }).join('')
       : '';
+    // Cada transferencia trae su botón de "Ya pagué". Se marca por par (from|to)
+    // y no por importe, porque el greedy vuelve a calcular los montos cada vez
+    // que se toca un gasto.
+    var pendientes = moves.filter(function (move) { return !saldoEstaPagado(move); }).length;
     var balancesMarkup = moves.length
       ? moves.map(function (move) {
-          return '<div class="grupo-settle"><span class="grupo-settle__flow"><b>' + esc(participantName(move.from)) + '</b>' +
+          var pagado = saldoEstaPagado(move);
+          var key = saldoKey(move);
+          return '<div class="grupo-settle' + (pagado ? ' is-paid' : '') + '">' +
+            '<span class="grupo-settle__flow"><b>' + esc(participantName(move.from)) + '</b>' +
             '<span class="grupo-settle__arrow" aria-hidden="true">' + icon('arrow') + '</span>' +
             '<b>' + esc(participantName(move.to)) + '</b></span>' +
-            '<span class="grupo-settle__amount">' + esc(money(move.amount, currency)) + '</span></div>';
+            '<span class="grupo-settle__amount">' + esc(moneyVer(move.amount, currency)) + '</span>' +
+            '<button type="button" class="grupo-settledon" data-saldo="' + esc(key) + '" aria-pressed="' + (pagado ? 'true' : 'false') + '">' +
+            '<span class="grupo-settledon__box" aria-hidden="true">' + (pagado ? '✓' : '') + '</span>' +
+            (pagado ? 'Pagado' : 'Ya pagué') + '</button></div>';
         }).join('')
       : '<p class="grupo-note">Las cuentas están saldadas.</p>';
+    // Cuando no queda ninguna transferencia pendiente se dice explícitamente:
+    // es la pregunta que todos hacen al final del viaje y "no hay nada para
+    // pagar" no contesta nada.
+    var alDiaMarkup = moves.length && !pendientes
+      ? '<div class="grupo-allday">' + icon('check') + '<span>Están todos al día. No queda nada por pagar.</span></div>'
+      : '';
 
     render(
       '<div class="grupo-card">' +
@@ -514,7 +552,12 @@
       // la repite: "Monto (USD)" arriba y "US$" abajo era lo mismo dos veces.
       '<label class="grupo-field">Monto<span class="grupo-amount">' +
       '<span class="grupo-amount__code">' + esc(categorySymbol(currency)) + '</span>' +
-      '<input required name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Monto"></span></label>' +
+      '<input required name="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Monto">' +
+      // El selector va adentro del campo, a la derecha del número: se elige la
+      // moneda en la que se pagó y la app la convierte a la del grupo. Sin
+      // tasas no se ofrece nada, porque no hay forma honesta de convertir.
+      (currencyPickerMarkup ? '<select class="grupo-amount__cur" name="currency" aria-label="Moneda del gasto">' + currencyPickerMarkup + '</select>' : '') +
+      '</span></label>' +
       '<label class="grupo-field">¿Quién pagó?<select name="paidBy">' + payerOptionsMarkup + '</select></label>' +
       '<span class="grupo-field">¿Entre quiénes se divide?<span class="grupo-checks">' + checksMarkup + '</span>' +
       '<span class="grupo-checks__tools"><button type="button" class="grupo-minibtn" data-checks="all">Seleccionar todos</button></span></span>' +
@@ -522,11 +565,15 @@
       '<button type="submit" class="grupo-btn grupo-btn--primary">Agregar gasto</button></form></div>' +
 
       '<div class="grupo-card"><div class="grupo-card__head"><h2>Gastos (' + expenses.length + ')</h2>' +
-      (expenses.length ? '<span class="grupo-badge">' + esc(money(total, currency)) + '</span>' : '') + '</div>' + expensesMarkup + '</div>' +
+      (expenses.length ? '<span class="grupo-badge">' + esc(moneyVer(total, currency)) + '</span>' : '') + '</div>' + expensesMarkup +
+      // El selector de "Ver en" va arriba de la lista de gastos, que es donde
+      // se leen los montos. Solo aparece si hay más de una moneda con tasa.
+      (verEnMarkup && disponibles.length > 1 ? verEnMarkup : '') + '</div>' +
 
       '<div class="grupo-card"><h2>Cómo se salda</h2>' +
       (balancesSummary ? '<div class="grupo-subhead">Saldo de cada uno</div>' + balancesSummary : '') +
       (moves.length ? '<div class="grupo-subhead">Transferencias</div>' + balancesMarkup : balancesMarkup) +
+      alDiaMarkup +
       '</div>'
     );
 
