@@ -28,6 +28,10 @@ loadEnv();
 
 const model = require('./lib/model');
 const duffel = require('./lib/providers/duffel');
+// Convierte los links de Booking en links de Travelpayouts para que las
+// reservas generen comision. Es independiente de los precios: la API de
+// precios (RapidAPI o partner) y la de afiliados son dos cuentas distintas.
+const travelpayouts = require('./lib/providers/travelpayouts');
 
 /*
  * Tasas de cambio para el selector de moneda.
@@ -133,8 +137,18 @@ const CSP = "default-src 'self'; " +
   "frame-src https://*.supabase.co https://api.duffel.cards https://ui-components.evervault.com; " +
   "base-uri 'none'; form-action 'self'";
 const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
-const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
+// Los destinos que la app ofrece, agrupados por región. Esta lista estaba
+// desincronizada del picker de public/app.js en las dos direcciones: tenía
+// 'ilha', que el picker nunca ofrece (la búsqueda por presupuesto cotizaba un
+// destino invisible) y le faltaba 'canela', que el picker sí ofrece (elegir
+// Canela devolvía 400 "Elegí un destino disponible en el buscador").
+const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'canela', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
 const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue', 'gram', 'igu']);
+// Un destino es válido si existe en el modelo. La lista de arriba define qué se
+// ofrece y cómo se agrupa, pero no se usa para rechazar pedidos: así, si el
+// picker suma un destino nuevo, este no devuelve un 400 invisible hasta que
+// alguien acuerda las dos listas a mano.
+const VALID_DESTINATION_KEYS = new Set(Object.keys(model.DEST));
 // Algunas islas y pueblos pequeños no están indexados como ciudad en Booking.
 // En esos casos buscamos alojamientos en el municipio de acceso más cercano.
 const HOTEL_NEARBY_DESTINATIONS = {
@@ -578,8 +592,26 @@ async function hotelRecommendations(destKey, destName, style, extra) {
     }
   }
   const combined = uniqueHotelList(matchingCategory.concat(fallback)).slice(0, 3);
+  // Ultimo paso: convertir los links de Booking en links de Travelpayouts para
+  // que la reserva entre por nuestro marker y genere comision. Va aca, y no
+  // adentro de fetchBookingHotels, porque los links del fallback tambien son de
+  // Booking y esos tambien generan comision. Se hace en un solo lote al final
+  // para no gastar una request por hotel.
+  let partnerLinks = null;
+  try {
+    if (travelpayouts.isConfigured()) {
+      partnerLinks = await travelpayouts.toPartnerUrls(combined.map(function (hotel) { return hotel.bookingUrl; }));
+    }
+  } catch (error) {
+    console.warn('[hotelRecommendations] Travelpayouts no disponible:', error && error.message ? error.message : error);
+  }
   return combined.map(function (hotel, index) {
+    const bookingUrl = partnerLinks && partnerLinks.get(hotel.bookingUrl) ? partnerLinks.get(hotel.bookingUrl) : hotel.bookingUrl;
     return Object.assign({}, hotel, {
+      bookingUrl: bookingUrl,
+      // Marca para el cliente: si el link trae marker, el clic suma. Sirve para
+      // medir despues cuantos clics se convierten en reservas.
+      affiliate: partnerLinks && partnerLinks.get(hotel.bookingUrl) ? 'travelpayouts' : '',
       tier: selectedTier, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio',
       highlight: ['Recomendado', 'Buena opción', 'Alternativa'][index],
       recommended: index === 0
@@ -699,22 +731,47 @@ function limited(bucket) {
   h.n++;
   if (hits.size > maxIps) {
     // Techo duro de memoria. El barrido solo no alcanza: si entran IPs de
-    // golpe (muchos orígenes distintos dentro del mismo minuto) todavía no
-    // hay nada vencido que borrar y el mapa crecería hasta agotar la memoria
-    // del proceso. El Map conserva el orden de inserción, así que las
-    // primeras claves son las más viejas y son las que se descartan.
+    // golpe (muchos origenes distintos dentro del mismo minuto) todavia no
+    // hay nada vencido que borrar y el mapa crecera hasta agotar la memoria
+    // del proceso.
+    //
+    // Antes se expulsaba por orden de insercion del Map, asumiendo que la
+    // primera clave era la mas vieja. Es falso: un cubo solo vuelve a
+    // insertarse cuando EXPIRA, asi que el frente del Map es el cubo que lleva
+    // mas tiempo vivo, no el mas vencido. Borrarlo tiraba el contador de un
+    // usuario legitimo que recien estaba usando la app, y un atacante podia
+    // provocarlo a voluntad inserte 20.000 IPs falsas (cada una con su cubo
+    // nuevo) y vaciar todos los contadores reales del proceso.
+    //
+    // Ahora se expulsa el cubo que vence antes: es el que mas probablemente
+    // este solo, y el que menos informacion de limite vale perder.
     sweepHits(now);
     while (hits.size > maxIps) {
-      const oldest = hits.keys().next();
-      if (oldest.done) break;
-      hits.delete(oldest.value);
+      let soonest = null;
+      let soonestAt = Infinity;
+      hits.forEach(function (v, k) { if (v.reset < soonestAt) { soonestAt = v.reset; soonest = k; } });
+      if (soonest === null) break;
+      hits.delete(soonest);
     }
   }
   return h.n > max;
 }
 function clientIp(req) {
-  const xf = req.headers['x-forwarded-for'];
-  return (xf ? String(xf).split(',')[0].trim() : req.socket.remoteAddress) || 'x';
+  // La IP que decide el cubo del rate limit tiene que ser la que ve el proxy
+  // de confianza, NO la primera de X-Forwarded-For. Ese header lo arma el
+  // cliente: `curl -H 'X-Forwarded-For: 1.2.3.4'` en cada pedido devolvia un
+  // cubo nuevo y `limited()` nunca llegaba a frenar nada. El formato de XFF es
+  // `cliente, proxy1, proxy2`, y el valor de la derecha lo agrega el ultimo
+  // salto (en Vercel, la plataforma), que es el unico que no se puede falsear.
+  // Por eso se toma el ULTIMO elemento y no el primero.
+  const vercel = String(req.headers['x-vercel-forwarded-for'] || '').trim();
+  if (/^[0-9a-f:.]{3,45}$/i.test(vercel)) return vercel;
+  const xf = String(req.headers['x-forwarded-for'] || '').split(',');
+  for (let i = xf.length - 1; i >= 0; i--) {
+    const candidate = xf[i].trim();
+    if (/^[0-9a-f:.]{3,45}$/i.test(candidate)) return candidate;
+  }
+  return req.socket.remoteAddress || 'x';
 }
 
 function sendJson(res, status, obj) {
@@ -910,7 +967,7 @@ async function cotizar(req, res, url) {
   } catch (e) {
     return sendJson(res, e.status || 400, { error: e.message });
   }
-  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
+  if (!VALID_DESTINATION_KEYS.has(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
   const origin = String(url.searchParams.get('origin') || 'MVD').toUpperCase();
   if (!['MVD', 'PDP'].includes(origin)) return sendJson(res, 400, { error: 'El aeropuerto de salida debe ser MVD o PDP.' });
   v.S.origin = origin;
@@ -968,7 +1025,7 @@ async function cotizarHoteles(req, res, url) {
   let v;
   try { v = model.validate(Object.fromEntries(url.searchParams), model.getToday()); }
   catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
-  if (!SEARCH_DESTINATION_KEYS.includes(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
+  if (!VALID_DESTINATION_KEYS.has(v.S.dest)) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
   const dest = model.DEST[v.S.dest];
   const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), url.searchParams.get('subcategory'), v.S.style);
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
@@ -1218,19 +1275,32 @@ function serveStatic(req, res, pathname, transform) {
     const send = function (payload) {
       const headers = {
         'Content-Type': MIME[ext] || 'application/octet-stream',
-        // Las rutas con `?v=N` son inmutables por diseño: cambiar el archivo
-        // implica bumpear la versión, así que cachearlas fuerte es seguro y
-        // evita redescargar app.js/style.css enteros en cada visita. Lo que no
-        // lleva versión (HTML de entrada, manifest, íconos) sigue sin cachear.
-        'Cache-Control': req.url.indexOf('?') >= 0 ? 'public, max-age=31536000, immutable' : 'no-cache',
+        // Solo lo que lleva un `?v=N` explicito es inmutable: cambiar el archivo
+        // implica bumpear la version, asi que cachearlo fuerte es seguro y evita
+        // redescargar app.js/style.css enteros en cada visita. Lo demas va con
+        // no-cache para que el HTML de entrada (que es quien lleva el ?v=N) se
+        // vuelva a pedir y pueda apuntar a una version nueva.
+        //
+        // Antes la condición era `req.url.indexOf('?') >= 0`, o sea CUALQUIER
+        // query string. Eso congelaba un año el HTML de entrada de cualquier
+        // visita con tag de marketing: /app?utm_source=ig o /?utm_source=whatsapp.
+        // Y como el HTML es justamente el que referencia app.js?v=N, un link de
+        // Instagram dejaba pineado el app shell entero: un ?v=71 futuro nunca
+        // llegaba a ese usuario. Para una app que se abre desde WhatsApp e
+        // Instagram, el caso con utm es el caso normal, no el borde.
+        'Cache-Control': /[?&]v=\d+/.test(req.url) ? 'public, max-age=31536000, immutable' : 'no-cache',
         'Content-Security-Policy': CSP,
-        'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer'
+        'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
+        // Vary tiene que ir en AMBAS variantes (comprimida y sin comprimir): si
+        // solo va en la comprimida, un cache compartido puede guardar la
+        // respuesta identity y la gzip bajo la misma URL y despues servirle
+        // gzip a un cliente que no lo pidio.
+        'Vary': 'Accept-Encoding'
       };
       if (COMPRESSIBLE_EXT.has(ext) && payload.length > 512) {
         const acceptEncoding = String(req.headers['accept-encoding'] || '');
         if (acceptEncoding.indexOf('gzip') >= 0) {
           headers['Content-Encoding'] = 'gzip';
-          headers['Vary'] = 'Accept-Encoding';
           res.writeHead(200, headers);
           return res.end(zlib.gzipSync(payload, { level: 6 }));
         }
@@ -1401,6 +1471,9 @@ function createServer() {
         supabaseUrl: process.env.SUPABASE_URL || 'https://hqyzmeordvjccytgltse.supabase.co',
         supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
         travelpayoutsMarker: process.env.TRAVELPAYOUTS_MARKER || '780345',
+        // Si hay token, el server puede convertir los links de hotel en links de
+        // afiliado. El front lo usa para saber si los clics generan comision.
+        travelpayoutsConfigured: travelpayouts.isConfigured(),
         // Diagnóstico del candado de prelanzamiento. Dice sólo si el proceso
         // recibió las variables, nunca cuáles son: sirve para distinguir un
         // problema de configuración de un bug, sin filtrar el secreto.
