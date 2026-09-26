@@ -193,7 +193,10 @@ function haversineKm(a, b) {
       assert.strictEqual(list[0].source, 'booking');
       assert.deepStrictEqual(list.slice(1).map(function (hotel) { return hotel.source; }), ['fallback', 'fallback']);
       assert.ok(seen.some(function (request) { return request.url.hostname === 'booking-com15.p.rapidapi.com' && request.url.pathname.endsWith('/api/v1/hotels/searchHotels'); }));
-      assert.ok(seen.every(function (request) { return request.options.headers['x-rapidapi-key'] === 'test-key'; }));
+      // Solo los pedidos a Booking llevan la key. La conversion de links de
+      // Travelpayouts es otro proveedor y va por otro lado; si se mezclara el
+      // mock, el assertion de aca miraria la key equivocada.
+      assert.ok(seen.filter(function (request) { return request.url.hostname === 'booking-com15.p.rapidapi.com'; }).every(function (request) { return request.options.headers['x-rapidapi-key'] === 'test-key'; }));
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
   await t('sin foto real completa el resto con el respaldo de cadenas conocidas', async function () {
@@ -266,9 +269,12 @@ function haversineKm(a, b) {
   });
   await t('devuelve únicamente destinos de los cinco bloques de Brasil', async function () {
     const j = JSON.parse((await get(port, '/api/destinos')).body);
-    // Gramado y Foz de Iguazú se agregaron al buscador después de que esta
-    // lista se escribiera; si la volvés a tocar, actualizá también acá.
-    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty', 'bue', 'gram', 'igu'];
+    // Gramado, Foz de Iguazú y Canela se agregaron al buscador después de que
+    // esta lista se escribiera; si la volvés a tocar, actualizá también acá.
+    // Canela entró en lugar de Ilha: el picker de public/app.js ofrece Canela
+    // y no ofrece Ilha, y con la lista anterior elegir Canela devolvía 400
+    // mientras la búsqueda por presupuesto cotizaba Ilha, que nadie podía ver.
+    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'canela', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty', 'bue', 'gram', 'igu'];
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
     assert.ok(j.some(function (d) { return d.key === 'bue' && d.name === 'Buenos Aires'; }));
     assert.strictEqual(j.length, allowed.length);
@@ -295,7 +301,7 @@ function haversineKm(a, b) {
     const r = await get(port, '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
     const j = JSON.parse(r.body);
     assert.strictEqual(r.status, 200); assert.strictEqual(j.options.length, 12);
-    assert.ok(j.options.every(function (o) { return ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'].includes(o.dest.key); }));
+    assert.ok(j.options.every(function (o) { return ['rio', 'buz', 'arraial', 'cabo', 'canela', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'].includes(o.dest.key); }));
     for (let i = 1; i < j.options.length; i++) assert.ok(j.options[i].total >= j.options[i - 1].total);
     assert.ok(j.options.every(function (o) { return o.parts && o.dest && typeof o.fits === 'boolean'; }));
   });

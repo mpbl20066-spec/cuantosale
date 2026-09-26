@@ -606,14 +606,16 @@ async function hotelRecommendations(destKey, destName, style, extra) {
     console.warn('[hotelRecommendations] Travelpayouts no disponible:', error && error.message ? error.message : error);
   }
   return combined.map(function (hotel, index) {
-    const bookingUrl = partnerLinks && partnerLinks.get(hotel.bookingUrl) ? partnerLinks.get(hotel.bookingUrl) : hotel.bookingUrl;
+    // El provider solo deja la entrada en el Map si el link se CONVIRTIO de
+    // verdad. Si no esta, el link va sin marker: el usuario puede reservar
+    // igual, pero no suma comision. Y el campo affiliate queda vacio, para no
+    // aparentar un tracking que no existe.
+    const convertido = partnerLinks && partnerLinks.get(hotel.bookingUrl) ? partnerLinks.get(hotel.bookingUrl) : '';
     return Object.assign({}, hotel, {
-      bookingUrl: bookingUrl,
-      // Marca para el cliente: si el link trae marker, el clic suma. Sirve para
-      // medir despues cuantos clics se convierten en reservas.
-      affiliate: partnerLinks && partnerLinks.get(hotel.bookingUrl) ? 'travelpayouts' : '',
+      bookingUrl: convertido || hotel.bookingUrl,
+      affiliate: convertido ? 'travelpayouts' : '',
       tier: selectedTier, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio',
-      highlight: ['Recomendado', 'Buena opción', 'Alternativa'][index],
+      highlight: ['Recomendado', 'Buona opción', 'Alternativa'][index],
       recommended: index === 0
     });
   });

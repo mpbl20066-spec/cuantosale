@@ -136,7 +136,9 @@ prueba('un link que falla no arrastra a los demas', async function () {
   const malo = 'https://www.booking.com/hotel/malo';
   const out = await tp.toPartnerUrls([bueno, malo]);
   ok(out.get(bueno) === 'https://tp.st/ok', 'el bueno se convierte');
-  ok(out.get(malo) === malo, 'el malo vuelve como estaba');
+  // El link que fallo NO debe estar en el Map: asi el server sabe que no se
+  // pudo convertir y no lo marca como afiliado.
+  ok(!out.has(malo), 'el que falla no se mete en el Map, para que el server no lo marque como afiliado');
 });
 
 prueba('si no hay body valido, no rompe', async function () {
@@ -152,8 +154,11 @@ prueba('el lote entero falla sin romper', async function () {
   tp.setFetch(fakeFetch([{ status: 400, body: { code: 'incorrect_request_body', error: 'invalid trs' } }]));
   const urls = ['https://www.booking.com/a', 'https://www.booking.com/b'];
   const out = await tp.toPartnerUrls(urls);
-  urls.forEach(function (u) { ok(out.get(u) === u, 'tiene que devolver el original para ' + u); });
+  // Cuando falla el lote entero, ningun link se convierte. El Map vuelve vacio
+  // y el server usa los links originales sin marcar como afiliado.
+  ok(out.size === 0, 'con el lote caido el Map queda vacio, no se llena con los originales');
 });
+
 
 (async function () {
   let fails = 0;
