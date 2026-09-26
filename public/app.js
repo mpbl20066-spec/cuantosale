@@ -684,27 +684,23 @@
     const slot = document.getElementById('currency-picker-slot');
     if (slot) slot.innerHTML = selectorMoneda();
   }
+  // Badge compacto: solo el codigo de la moneda activa. Sin etiqueta "MONEDA",
+  // sin flecha y sin desplegable: el clic avanza a la siguiente moneda que
+  // tenga tasa. Es lo mas liviano que se puede poner al lado del boton de
+  // sesion sin competir con el.
   function selectorMoneda() {
     var rates = FX.rates || {};
     var hay = !!Object.keys(rates).length;
     var m = monedaActiva();
-    return '<label class="currency-picker' + (hay ? '' : ' is-loading') + '">'
-      + '<span class="currency-picker__label">Moneda</span>'
-      + '<span class="currency-picker__field">'
-      + '<b>' + esc(m.simbolo) + '</b>'
-      + '<select class="currency-select" data-currency-select aria-label="Moneda del presupuesto">'
-      + MONEDAS_APP.map(function (op) {
-        var off = !hay || tasaDe(op.code) == null;
-        return '<option value="' + op.code + '"' + (op.code === S.currency ? ' selected' : '') + (off ? ' disabled' : '')
-          + '>' + esc(op.etiqueta) + ' (' + op.code + ')</option>';
-      }).join('')
-      + '</select></span></label>';
+    var disponibles = MONEDAS_APP.filter(function (op) { return hay && tasaDe(op.code) != null; });
+    var falta = hay && disponibles.length < MONEDAS_APP.length;
+    return '<button type="button" class="currency-badge' + (hay ? '' : ' is-loading') + '"'
+      + ' data-currency-cycle aria-label="Cambiar moneda. Ahora: ' + esc(m.etiqueta) + '"'
+      + ' title="' + esc(m.etiqueta) + (falta ? ' (algunas no tienen tasa todavia)' : '') + '">'
+      + '<b>' + m.code + '</b></button>';
   }
   function refrescarSelectorMoneda() {
-    // Se reemplaza el <label class="currency-picker"> entero. Antes se
-    // reemplazaba el <select> suelto por el widget completo, y eso partia el
-    // .currency-picker__field por la mitad.
-    document.querySelectorAll('.currency-picker').forEach(function (el) {
+    document.querySelectorAll('.currency-badge').forEach(function (el) {
       el.outerHTML = selectorMoneda();
     });
   }
@@ -752,9 +748,20 @@
     refrescarSelectorMoneda();
     if (lastData) { try { render(lastData); } catch (e) { } }
   }
-  document.addEventListener('change', function (e) {
-    const s = e.target.closest && e.target.closest('[data-currency-select]');
-    if (s) aplicarMoneda(s.value);
+  // Ciclico: avanza a la siguiente moneda disponible. Si solo hay una, no hace
+  // nada. Las que no tienen tasa se saltan, asi nunca se elige una que no se
+  // pueda calcular.
+  function siguienteMoneda() {
+    var disponibles = MONEDAS_APP.filter(function (op) { return tasaDe(op.code) != null; });
+    if (disponibles.length < 2) return null;
+    var i = disponibles.findIndex(function (op) { return op.code === S.currency; });
+    return disponibles[(i + 1 + disponibles.length) % disponibles.length].code;
+  }
+  document.addEventListener('click', function (e) {
+    const b = e.target.closest && e.target.closest('[data-currency-cycle]');
+    if (!b) return;
+    const sig = siguienteMoneda();
+    if (sig) aplicarMoneda(sig);
   });
 
   function money(n) {
@@ -1378,8 +1385,10 @@
       // La fila es un botón: el desglose dice cuánta plata va a cada rubro, y
       // el lugar donde esa plata se cambia o se revisa es unos centímetros más
       // abajo. syncBudgetJumpTargets() desactiva las filas cuya sección todavía
-      // no existe (tours sin actividades cargadas, traslados fuera de vuelo).
-      return '<button type="button" class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '" data-jump-category="' + entry.category + '" aria-label="Ir a la sección de ' + esc(entry.label) + '"><div class="proposal-breakdown__label">' + icon + '<span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></button>';
+      // no existe (tours sin actividades cargadas, traslados fuera de vuelo) y
+      // les saca el "Ir a la sección", para no anunciarle al lector de pantalla
+      // un salto que el clic no va a hacer.
+      return '<button type="button" class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '" data-jump-category="' + entry.category + '" data-jump-label="' + esc(entry.label) + '" aria-label="Ir a la sección de ' + esc(entry.label) + '"><div class="proposal-breakdown__label">' + icon + '<span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></button>';
     }).join('');
     return '<div class="proposal-breakdown__stack" role="img" aria-label="Distribución del costo">' + segments + '</div>' +
       '<div class="proposal-breakdown__list">' + rows + '</div>';
@@ -1439,20 +1448,23 @@
     if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
     highlightBudgetAnchor(target);
     var token = ++budgetJumpToken;
+    function landed() {
+      // "Aterrizó" = el borde superior de la sección quedó contra el margen
+      // superior de la pantalla. El margen lo pone scroll-margin-top (18px).
+      return Math.abs(target.getBoundingClientRect().top - 18) <= 4;
+    }
     function go(behavior, isRetry) {
       if (token !== budgetJumpToken) return;
-      var before = window.pageYOffset;
       target.scrollIntoView({ behavior: behavior, block: 'start' });
       target.focus({ preventScroll: true });
       if (isRetry) return;
-      // Chromium se come un scroll suave si se pide en el mismo frame que un
-      // scroll instantáneo anterior (típico: recién se abrió una propuesta, que
-      // arranca con un "volver arriba", y el usuario clickeó un rubro enseguida).
-      // Si a los 150ms la página no se movió, el salto no arrancó: se completa
-      // de una, sin animación, en vez de dejar al usuario donde estaba.
+      // El scroll suave no siempre arranca: si la página quedó en 0 justo antes
+      // (recién se abrió una propuesta, que arranca con un "volver arriba"),
+      // Chromium lo ignora y el clic no parece hacer nada. Si a los 350ms la
+      // sección todavía no llegó, se completa de una, sin animación.
       window.setTimeout(function () {
-        if (token === budgetJumpToken && Math.abs(window.pageYOffset - before) < 2) go('auto', true);
-      }, 150);
+        if (token === budgetJumpToken && !landed()) go('auto', true);
+      }, 350);
     }
     // Un frame de margen: si veníamos de un scroll en vuelo, primero lo cancela.
     window.requestAnimationFrame(function () { go('smooth', false); });
