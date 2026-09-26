@@ -209,12 +209,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .opt__disclosure:focus-visible,.opt__cta:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .opt__body>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
 .propuesta-seleccionada{border:2px solid var(--accent)!important;box-shadow:0 8px 20px rgba(246,178,27,.2)}
-.destination-card>.btn-ver-propuesta{display:flex;align-self:flex-end;margin:14px 0 0 auto}
 /* El movimiento (elevación, flecha, chevron) sólo si el sistema no pide menos
    movimiento: el color del hover sí se mantiene, no informa nada nuevo. */
 @media (prefers-reduced-motion:no-preference){
-  .opt{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
-  .opt:hover{transform:translateY(-2px)}
+  .opt,.destination-card{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+  .opt:hover,.destination-card:hover{transform:translateY(-2px)}
   .opt__disclosure{transition:color .18s ease,border-color .18s ease,transform .18s ease}
   .opt__disclosure:hover{transform:translateY(-1px)}
   .opt__cta{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
@@ -377,7 +376,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @media (max-width:560px){.transfer-choice-grid{grid-template-columns:1fr}}
 
 /* Theme-aware form and action contrast, including system dark mode on mobile. */
-.find-destinations,.btn-buscar-todos,.btn-ver-propuesta,.btn-ver-propuesta-destino,.account-button:not(.account-button--secondary):not(.account-button--danger){background:var(--action-bg);color:var(--action-ink);border:1px solid var(--action-border)}
+.find-destinations,.btn-buscar-todos,.btn-ver-propuesta,.account-button:not(.account-button--secondary):not(.account-button--danger){background:var(--action-bg);color:var(--action-ink);border:1px solid var(--action-border)}
 .inp::placeholder{color:var(--ink2);opacity:1}
 .custom-select__trigger{background:var(--control-bg);border-color:var(--control-border);color:var(--ink)}
 .custom-select__value{color:var(--ink)}
@@ -597,3 +596,29 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .detail-section>h2{font-size:28px}
 }
 
+/* -------------------------------------------------------
+   Selector de moneda
+   Va arriba a la derecha del h2 de la seccion, no en una barra propia: la
+   seccion ya tiene titulo y bajada, y sumar un bloque mas la empuja hacia
+   abajo sin necesidad. Usa los mismos tokens que el resto (--cel, --cel-soft,
+   --ink) para que se lea como parte de la pagina y no como un widget pegado.
+   ------------------------------------------------------- */
+.sec__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.currency-picker{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.currency-picker__label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+.currency-picker__opts{display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.currency-opt{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:54px;padding:6px 9px;border:0;border-radius:9px;background:transparent;color:var(--ink2);cursor:pointer;transition:background .16s ease,color .16s ease}
+.currency-opt b{font-size:13px;font-weight:800;line-height:1.1}
+.currency-opt span{font-size:9.5px;font-weight:700;letter-spacing:.08em;opacity:.75}
+.currency-opt:hover:not(:disabled){background:var(--cel-soft);color:var(--ink)}
+/* el mismo azul que usa .daily-budget__option.is-selected cuando elegis algo */
+.currency-opt.is-on{background:var(--cel-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--cel)}
+.currency-opt.is-off{opacity:.35;cursor:not-allowed}
+.currency-opt:focus-visible{outline:3px solid var(--cel);outline-offset:2px}
+.currency-picker.is-loading .currency-picker__opts{opacity:.5;pointer-events:none}
+@media (max-width:560px){
+  .sec__head{gap:10px}
+  .currency-picker{width:100%;justify-content:space-between}
+  .currency-picker__opts{flex:1}
+  .currency-opt{flex:1;min-width:0}
+}

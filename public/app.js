@@ -2839,7 +2839,13 @@
     }).catch(function (e) { notice(e.message); return null; });
   }
 
-  // Captura los botones dinámicos antes de que <details> u otro listener los procese.
+  // Captura los botones dinámicos antes que cualquier listener en burbujeo.
+  // Es el ÚNICO punto de entrada de "Ver propuesta": los CTA viven en dos
+  // contenedores distintos (#results y #destination-results) y antes cada uno
+  // tenía su propio listener para [data-propuesta-dest]. Como este corre en
+  // captura y corta la propagación, esos dos nunca llegaban a ejecutarse: eran
+  // código muerto que hacía creer que el selector apuntaba al elemento
+  // equivocado. Si se agrega otra lista de propuestas, el handler va acá.
   function handleProposalNavigation(e) {
     var button = e.target.closest && e.target.closest('.btn-ver-propuesta,[data-propuesta-id],[data-propuesta-dest]');
     if (!button) return;
@@ -2847,6 +2853,9 @@
     e.stopImmediatePropagation();
     var destination = button.getAttribute('data-propuesta-dest');
     if (destination) {
+      // #dest es el <div> del combobox, no un <select>: su propiedad "value" está
+      // definida con Object.defineProperty y el setter llama a setDestDisplay,
+      // que es lo que refresca la etiqueta y marca la opción del menú.
       S.dest = destination;
       $('#dest').value = destination;
       openDestinationProposal(destination);
@@ -3695,8 +3704,6 @@
       openItinerarySummaryModal();
     });
     $('#results').addEventListener('click', function (e) {
-      var destinationProposal = e.target.closest('[data-propuesta-dest]');
-      if (destinationProposal) { e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; $('#destination-results').innerHTML = ''; openDestinationProposal(S.dest); return; }
       var proposal = e.target.closest('[data-propuesta-id]');
       if (proposal) { e.preventDefault(); e.stopPropagation(); var proposalId = proposal.getAttribute('data-propuesta-id'); var selected = lastData && (byId(lastData.list, proposalId) || byId(lastData.alternatives, proposalId) || byId(lastData.roadtripList, proposalId)); if (selected) showProposalView(selected, lastData); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
@@ -3713,11 +3720,6 @@
       S.dep = iso(addDays(parse(S.dep), s)); S.ret = iso(addDays(parse(S.ret), s));
       syncDateRangeFields();
       schedule();
-    });
-    $('#destination-results').addEventListener('click', function (e) {
-      var destinationProposal = e.target.closest('[data-propuesta-dest]');
-      if (!destinationProposal) return;
-      e.preventDefault(); e.stopPropagation(); S.dest = destinationProposal.getAttribute('data-propuesta-dest'); sel.value = S.dest; openDestinationProposal(S.dest);
     });
     $('#vista-detalle').addEventListener('click', function (e) {
       var moreTours = e.target.closest('[data-toggle-more-tours]');
