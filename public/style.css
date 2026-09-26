@@ -419,9 +419,18 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tours__summary{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
 .local-tours__summary b{color:var(--ink)}
 .local-tours__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-width:0}
-.local-tour{display:flex;min-width:0;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
 .local-tour:has([data-tour-choice]:checked){border-color:#f1b145;box-shadow:0 10px 24px rgba(241,177,69,.28)}
+/* La tarjeta completa es la zona sensible. El checkbox se estira con
+   position:absolute sobre el article: el clic en cualquier punto lo activa y
+   el teclado conserva un único control que tabula (Enter lo agrega el JS). */
+.local-tour__input{position:absolute;z-index:1;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
+.local-tour:has(.local-tour__input:focus-visible){outline:3px solid var(--accent);outline-offset:3px}
+/* Tilde circular que aparece en la foto cuando la experiencia ya está en el viaje. */
+.local-tour__check{position:absolute;z-index:2;top:10px;right:10px;display:grid;place-items:center;width:30px;height:30px;border-radius:999px;background:#f1b145;color:#0f192d;box-shadow:0 4px 12px rgba(10,24,48,.32);opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+.local-tour__check svg{width:17px;height:17px}
+.local-tour:has([data-tour-choice]:checked) .local-tour__check{opacity:1;transform:scale(1)}
 /* Foto con velo: el texto va montado arriba, como en el catálogo de referencia.
    El velo es fijo y no usa --hero-* porque estas tarjetas son oscuras siempre. */
 .local-tour__media{position:relative;flex:0 0 auto;height:186px;background:var(--bg)}
@@ -441,31 +450,22 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tour__description{flex:1;margin:0 0 12px;color:var(--ink2);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
 .local-tour__meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .local-tour__chip{padding:4px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);font-size:10.5px;font-weight:700;white-space:nowrap}
-.local-tour__actions{display:flex;align-items:stretch;gap:8px;margin-top:auto}
-.local-tour__add{flex:1 1 auto;display:flex;min-height:42px;align-items:center;justify-content:center;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:12.5px;font-weight:800;cursor:pointer}
-.local-tour__add:has([data-tour-choice]:checked){background:#f1b145;color:#0f192d}
-.local-tour__input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.local-tour__add-done{display:none}
-.local-tour__add:has([data-tour-choice]:checked) .local-tour__add-face{display:none}
-.local-tour__add:has([data-tour-choice]:checked) .local-tour__add-done{display:inline}
-.local-tour__add:focus-within{outline:3px solid var(--accent);outline-offset:2px}
-.local-tour__detail{flex:0 0 auto;min-height:42px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:12.5px;font-weight:700;cursor:pointer}
-.local-tour__detail:hover{border-color:var(--ink2)}
-.local-tour__detail:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* Pie de la tarjeta: sólo la confirmación de selección y el botón de detalle.
+   No hay botón de "agregar": elegir es tocar la tarjeta. */
+.local-tour__foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
+.local-tour__flag{display:inline-flex;min-width:0;align-items:center;gap:6px;color:var(--good);font-size:11.5px;font-weight:800;line-height:1.2;opacity:0;transform:translateY(3px);transition:opacity .18s ease,transform .18s ease}
+.local-tour__flag svg{flex:0 0 15px;width:15px;height:15px}
+.local-tour:has([data-tour-choice]:checked) .local-tour__flag{opacity:1;transform:none}
+.local-tour__info{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;gap:7px;margin-left:auto;padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);font-size:12px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
+.local-tour__info:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
+.local-tour__info-ico{flex:0 0 16px;width:16px;height:16px;color:var(--cel)}
+.local-tour__info:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .local-tours:not(.local-tours--expanded) .local-tour:nth-child(n+4){display:none}
 .local-tours__more{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:0;border:0;background:transparent;color:var(--cel);font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .local-tours__more:hover{color:var(--ink)}
 .local-tours__more:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:4px}
 .local-tour__cta{display:flex;min-height:44px;align-items:center;justify-content:center;gap:8px;margin-top:12px;padding:9px 12px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);text-align:center;text-decoration:none;font-size:12px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
 .local-tour__cta:hover{color:var(--action-ink);filter:brightness(1.14)}
-.local-tours__note{margin:12px 0 0;color:var(--ink2);font-size:11px;line-height:1.5}
-.local-tours__footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
-.local-tours__footer .local-tours__note{margin:0}
-/* El botón de reserva pasa a azul marino: el verde anterior era el único
-   verde de toda la app y se veía como un elemento ajeno. */
-.local-tours__whatsapp{display:flex;min-width:min(100%,340px);min-height:46px;align-items:center;justify-content:center;gap:8px;margin-left:auto;padding:10px 16px;border:0;border-radius:13px;background:var(--action-bg);color:var(--action-ink);font-size:13px;font-weight:800;line-height:1.3;cursor:pointer}
-.local-tours__whatsapp:hover:not(:disabled){filter:brightness(1.14)}
-.local-tours__whatsapp:disabled{background:var(--line);color:var(--ink2);cursor:not-allowed}
 /* Créditos de las fotos. CC BY y CC BY-SA obligan a dar crédito: además de
    ser lo correcto, es la prueba de que tenemos derecho a usarlas. */
 .local-tours__credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}
@@ -564,7 +564,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__slider::before,.destination-highlights__slider::after{width:54px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 54px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:200px}.featured-destination__overlay h3{font-size:25px}}
 @media(max-width:900px){.local-tours__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__grid{grid-template-columns:minmax(0,1fr)}.local-tour{padding:14px}.local-tours__footer{align-items:stretch;flex-direction:column}.local-tours__whatsapp{width:100%;min-width:0;font-size:13px}}
+@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__grid{grid-template-columns:minmax(0,1fr)}.local-tour{padding:14px}}
 .flight-airline{flex-wrap:wrap}
 .flight-airline .cabin-badge{white-space:nowrap;background:var(--cel-soft);color:var(--ink)}
 .install-help__dialog{max-width:480px}

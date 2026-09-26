@@ -1101,6 +1101,7 @@
   }
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
+    var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
     // Mostrar todas las experiencias cargadas para el destino seleccionado.
     var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
     if (!tours.length) return '';
@@ -1109,7 +1110,7 @@
     var creditos = {};
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
     var head = '<div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span>' +
-      '<h2 id="local-tours-title">Tours y actividades</h2>' +
+      '<h2 id="local-tours-title">Los imperdibles de ' + esc(destinationName) + '</h2>' +
       '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
       (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
       ' &middot; precio referencial</p></div></div>';
@@ -1129,16 +1130,25 @@
           '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg>' +
           '<h3 class="local-tour__title-over">' + esc(tour.title) + '</h3></div>';
       var duration = tourDuration(tour);
+      // Toda la tarjeta es la zona sensible: el checkbox va estirado con
+      // position:absolute sobre el article y solo el boton de detalle queda
+      // por encima (z-index). Un clic en cualquier punto elige la
+      // experiencia y el teclado sigue teniendo un unico control que tabula.
+      var checkIco = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.6 9.4 17.5 19.5 6.9"/></svg>';
       return '<article class="local-tour" data-tour-card>' +
+        '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '">' +
         media +
+        '<span class="local-tour__check" aria-hidden="true">' + checkIco + '</span>' +
         '<div class="local-tour__body">' +
         '<p class="local-tour__destination">' + esc(tour.destination) + '</p>' +
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
         '<span class="local-tour__chip">Precio referencial</span></div>' +
-        '<div class="local-tour__actions">' +
-        '<label class="local-tour__add"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '"><span class="local-tour__add-face" aria-hidden="true">Sumar</span><span class="local-tour__add-done" aria-hidden="true">Sumado</span></label>' +
-        '<button type="button" class="local-tour__detail" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">Detalle</button>' +
+        '<div class="local-tour__foot">' +
+        '<span class="local-tour__flag" aria-hidden="true">' + checkIco + 'En tu viaje</span>' +
+        '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">' +
+        '<svg class="local-tour__info-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4h.01"/></svg>' +
+        '<span>Ver detalle</span></button>' +
         '</div></div></article>';
     }).join('');
     var creditList = Object.keys(creditos).map(function (url) {
@@ -1151,7 +1161,6 @@
     return '<section class="local-tours" aria-labelledby="local-tours-title">' + head +
       '<div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + cards + '</div>' +
       (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') +
-      '<div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div>' +
       creditsBlock + '</section>';
   }
   // Duración estimada, sacada del texto de detalle que ya está cargado en
@@ -3908,11 +3917,12 @@
         openTourDetailModal(tourDetail);
         return;
       }
-      // La tarjeta ya no es un checkbox: antes toda la superficie escribía
-      // click y adentro tenía el botón "Detalle", dos acciones compitiendo en
-      // el mismo lugar. Ahora sólo el botón "Sumar" agrega al presupuesto.
+      // La tarjeta completa es la zona sensible: el checkbox va estirado con
+      // position:absolute encima del article, asi que el clic llega al input y el
+      // toggle es el nativo del navegador. Solo el boton de detalle se superpone
+      // (z-index) y por eso se atiende antes, aca.
       var tourCard = e.target.closest('[data-tour-card]');
-      if (tourCard && detailState && !e.target.closest('a,button,label')) {
+      if (tourCard && !e.target.closest('a,button,label')) {
         return;
       }
       if (e.target.closest('#btn-volver')) {
@@ -4040,8 +4050,9 @@
         if (tourChoice.checked) detailState.selectedTours.push(tour);
         detailState.toursTotal = detailState.selectedTours.reduce(function (sum, item) { return sum + item.price; }, 0);
         var tourCard = tourChoice.closest('[data-tour-card]');
-        // El estado visual lo lleva :has() en CSS (el botón dice "Sumado" y la
-        // tarjeta se marca en ámbar), así que acá no hay que tocar texto.
+                // El estado visual (borde ambar, tilde y "En tu viaje") lo lleva
+        // :has() en CSS sobre el checkbox, asi que aca no hay que tocar texto
+        // ni clases: solo se recalcula el total.
         if (tourCard) tourCard.classList.toggle('is-added', tourChoice.checked);
         var bookTours = document.querySelector('[data-book-selected-tours]');
         if (bookTours) bookTours.disabled = !detailState.selectedTours.length;
@@ -4085,14 +4096,14 @@
       }
     });
     $('#vista-detalle').addEventListener('keydown', function (e) {
-      var tourCard = e.target.closest && e.target.closest('[data-tour-card]');
-      if (!tourCard || (e.key !== 'Enter' && e.key !== ' ')) return;
+      // El checkbox estirado es el unico control de la tarjeta y el espacio ya
+      // lo resuelve el navegador. Solo sumamos Enter, que en un checkbox no
+      // hace nada por defecto.
+      var tourInput = e.target.closest && e.target.closest('[data-tour-choice]');
+      if (!tourInput || e.key !== 'Enter') return;
       e.preventDefault();
-      var tourInput = tourCard.querySelector('[data-tour-choice]');
-      if (tourInput) {
-        tourInput.checked = !tourInput.checked;
-        tourInput.dispatchEvent(new Event('change', { bubbles: true }));
-      }
+      tourInput.checked = !tourInput.checked;
+      tourInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
     $('#vista-detalle').addEventListener('change', function (e) {
       var hotelTypeSelect = e.target.closest && e.target.closest('[data-hotel-type-select]');
