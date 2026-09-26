@@ -301,7 +301,11 @@
     return tour.details || 'Incluye la actividad principal y acompañamiento local. Confirmá horarios, punto de encuentro, disponibilidad y valor final antes de reservar.';
   }
 
-  var S = { dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', hotelType: 'intermedio', hotelTypeExplicit: false };
+  var MONEDAS_APP = [{ code: 'USD', etiqueta: 'Dolares', simbolo: 'US$' },
+    { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
+    { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: 'UYU$' }];
+  var FX = { rates: null, base: 'USD', until: 0, cargando: true };
+  var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', hotelType: 'intermedio', hotelTypeExplicit: false };
   var HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
   function inferHotelType(value) {
     var text = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
@@ -644,10 +648,124 @@
   function addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
   function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function parse(s) { var p = s.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2], 12); }
-  function money(n) { return 'US$ ' + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
-  // money() redondea a entero (pensada para montos en dólares) y trunca
+  function tasaDe(code) {
+    if (!code || code === FX.base) return 1;
+    var r = FX.rates && Number(FX.rates[code]);
+    return Number.isFinite(r) && r > 0 ? r : null;
+  }
+  function monedaActiva() {
+    var c = S.currency;
+    return MONEDAS_APP.filter(function (m) { return m.code === c; })[0] || MONEDAS_APP[0];
+  }
+  function formatoMiles(n, dec) {
+    var neg = n < 0;
+    var s = Math.abs(n).toFixed(dec);
+    var p = s.split('.');
+    p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return (neg ? '-' : '') + p.join(dec ? ',' : '');
+  }
+  // Dolar y peso Uruguay no se usan con centavos en la practica, asi que van
+  // redondos como siempre. El real si los tiene, pero en un total de viaje
+  // "R$ 5.013,22" es ruido: decimales solo cuando el valor es chico
+  // (tarifas por kWh, por noche), nunca en totales.
+  function decimalesDe(code, total) {
+    if (code !== 'BRL') return 0;
+    return Math.abs(total) >= 1000 ? 0 : 2;
+  }
+/* ---------------------------------------------------------------
+     Selector de moneda. Va arriba a la derecha del h2 de la seccion.
+     Se dibuja con markup plano, no con un <select>, para poder mostrar el
+     codigo grande con la etiqueta abajo, que es como se lee mejor en un
+     celu. Las opciones sin tasa llegan deshabilitadas con un guion.
+     --------------------------------------------------------------- */
+  function selectorMoneda() {
+    var rates = FX.rates || {};
+    var hay = !!Object.keys(rates).length;
+    return '<div class="currency-picker' + (hay ? '' : ' is-loading') + '" data-currency-picker>'
+      + '<span class="currency-picker__label">Moneda</span>'
+      + '<div class="currency-picker__opts" role="group" aria-label="Moneda del presupuesto">'
+      + MONEDAS_APP.map(function (m) {
+        var tasa = tasaDe(m.code);
+        var activa = m.code === S.currency;
+        var off = !hay || tasa == null;
+        return '<button type="button" class="currency-opt' + (activa ? ' is-on' : '')
+          + (off ? ' is-off' : '') + '" data-currency="' + m.code + '"'
+          + ' aria-pressed="' + (activa ? 'true' : 'false') + '"'
+          + (off ? ' disabled title="Tasa no disponible todavia"' : '')
+          + '><b>' + m.simbolo + '</b><span>' + m.code + '</span></button>';
+      }).join('')
+      + '</div></div>';
+  }
+  function refrescarSelectorMoneda() {
+    document.querySelectorAll('[data-currency-picker]').forEach(function (el) {
+      el.outerHTML = selectorMoneda();
+    });
+  }
+  function aplicarMoneda(code) {
+    if (tasaDe(code) == null && !(FX.rates && Object.keys(FX.rates).length)) {
+      // todavia no llegaron las tasas: no dejamos cambiar a algo que no podemos calcular
+      if (code !== FX.base) return;
+    }
+    S.currency = code;
+    try { localStorage.setItem('cuantosale_moneda', code); } catch (e) { /* modo privado */ }
+    refrescarSelectorMoneda();
+    // repintamos lo que ya esta en pantalla
+    if (typeof renderTripSummary === 'function' && detailState) { try { renderTripSummary(); } catch (e) { } }
+    if (lastData) { try { render(lastData); } catch (e) { } }
+  }
+  async function cargarTasas() {
+    try {
+      const r = await fetch('/api/tasas', { headers: { Accept: 'application/json' } });
+      const j = await r.json();
+      if (j && j.monedas) {
+        MONEDAS_APP = j.monedas.map(function (m) {
+          return { code: m.code, etiqueta: m.etiqueta, simbolo: m.simbolo };
+        });
+      }
+      if (j && j.rates) { FX.rates = j.rates; FX.base = j.base || 'USD'; }
+      FX.cargando = false;
+    } catch (e) {
+      FX.cargando = false;
+    }
+    let guardada = null;
+    try { guardada = localStorage.getItem('cuantosale_moneda'); } catch (e) { }
+    if (guardada && tasaDe(guardada) != null) S.currency = guardada;
+    refrescarSelectorMoneda();
+    if (lastData) { try { render(lastData); } catch (e) { } }
+  }
+  document.addEventListener('click', function (e) {
+    const b = e.target.closest && e.target.closest('[data-currency]');
+    if (b && !b.disabled) aplicarMoneda(b.getAttribute('data-currency'));
+  });
+
+  function money(n) {
+    var v = Number(n);
+    if (!Number.isFinite(v)) return '';
+    var m = monedaActiva();
+    var tasa = tasaDe(m.code);
+    // Sin tasa para esta moneda no inventamos numero: seguimos en la base.
+    if (tasa == null) { m = MONEDAS_APP[0]; tasa = 1; }
+    var total = v * tasa;
+    return m.simbolo + ' ' + formatoMiles(total, decimalesDe(m.code, total));
+  }
+  // money() redondea a entero (por defecto en dolares) y trunca
   // tarifas fraccionarias como US$/kWh a "US$ 0" — esta conserva decimales.
-  function moneyPrecise(n) { return 'US$ ' + (Number(n) || 0).toFixed(2); }
+  function moneyPrecise(n) {
+    var v = Number(n) || 0;
+    var m = monedaActiva();
+    var tasa = tasaDe(m.code);
+    if (tasa == null) { m = MONEDAS_APP[0]; tasa = 1; }
+    return m.simbolo + ' ' + formatoMiles(v * tasa, 2);
+  }
+  // Numero sin simbolo, para las etiquetas de los graficos de barras.
+  // Antes hacia money(x).replace('US$ ',''), que con reales o pesos se
+  // comia un prefijo que ya no estaba y dejaba el simbolo pegado al numero.
+  function moneySolo(n) {
+    var v = Number(n);
+    if (!Number.isFinite(v)) return '';
+    var tasa = tasaDe(monedaActiva().code);
+    return formatoMiles(v * (tasa == null ? 1 : tasa), 0);
+  }
   function dLong(d) { return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' }); }
   function shortDateLabel(value) {
     if (!value) return 'Elegí una fecha';
@@ -2584,7 +2702,7 @@
       var d = parse(x.dep);
       var cls = 'bar' + (x.shift === 0 ? ' cur' : '') + (x === bestS ? ' best' : '');
       return '<button type="button" class="' + cls + '" data-shift="' + x.shift + '" aria-label="Salir el ' + dLong(d) + ': ' + money(x.total) + '">' +
-        '<span class="v">' + money(x.total).replace('US$ ', '') + '</span><span class="b" style="height:' + ht + 'px"></span>' +
+        '<span class="v">' + moneySolo(x.total) + '</span><span class="b" style="height:' + ht + 'px"></span>' +
         '<span class="d"><b>' + d.getDate() + '</b>' + d.toLocaleDateString('es-UY', { month: 'short' }) + '</span></button>';
     }).join('');
     h += '<section class="sec"><h2>Mismo viaje, otra fecha</h2><p class="sub">Costo total en US$ si salís antes o después, con las mismas noches. Es una estimación a partir del precio de tu fecha. Tocá una barra para usarla.</p>' +
@@ -2624,7 +2742,7 @@
     });
     var sameTier = allProposals.filter(function (p) { return p.ti === rec.ti; }).sort(function (a, b) { return a.total - b.total; });
     var opts = sameTier.map(proposalMarkup).join('');
-    h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.</p><div class="opts">' + opts + '</div></section>';
+    h += '<section class="sec"><div class="sec__head"><h2>Todas las propuestas</h2>' + selectorMoneda() + '</div><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.</p><div class="opts">' + opts + '</div></section>';
 
     var el = $('#results');
     el.innerHTML = h;
@@ -4154,5 +4272,6 @@
     }).catch(function () { notice('No pudimos cargar los destinos. Recargá la página.'); });
   }
 
+  cargarTasas();
   init();
 })();

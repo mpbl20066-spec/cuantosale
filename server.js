@@ -29,6 +29,75 @@ loadEnv();
 const model = require('./lib/model');
 const duffel = require('./lib/providers/duffel');
 
+/*
+ * Tasas de cambio para el selector de moneda.
+ *
+ * Fuente: exchangerate-api.com. Con EXCHANGERATE_API_KEY usa v6; sin key cae a
+ * v4, que es gratis y no pide autenticacion. Se cachea hasta
+ * time_next_update_utc porque la API publica una vez por dia: pegarle en cada
+ * carga de pagina no sirve y, consume el cuota.
+ *
+ * Si ninguna fuente responde se devuelve rates:null y el cliente se queda solo
+ * con USD. Preferimos mostrar un selector incompleto a multiplicar por un numero
+ * inventado.
+ */
+const MONEDAS = [
+  { code: 'USD', etiqueta: 'Dólares', simbolo: 'US$', decimales: 0 },
+  { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$', decimales: 2 },
+  { code: 'UYU', etiqueta: 'Pesosruguayos', simbolo: 'UYU$', decimales: 0 }
+];
+let fxCache = { rates: null, base: 'USD', until: 0, source: '', at: 0 };
+
+function exchangerateKey() {
+  return String(process.env.EXCHANGERATE_API_KEY || '').trim();
+}
+async function pedirTasas() {
+  const key = exchangerateKey();
+  if (key) {
+    const url = 'https://v6.exchangerate-api.com/v6/' + encodeURIComponent(key) + '/latest/USD';
+    const r = await fetchWithTimeout(url, { headers: { Accept: 'application/json' } }, 9000);
+    const j = await r.json();
+    if (j && j.result === 'success' && j.conversion_rates) {
+      return {
+        rates: j.conversion_rates, base: j.base_code || 'USD', source: 'v6',
+        until: Date.parse(j.time_next_update_utc || '') || (Date.now() + 12 * 3600e3)
+      };
+    }
+  }
+  // v4: gratis, sin key, forma distinta (rates en vez de conversion_rates)
+  const r4 = await fetchWithTimeout('https://api.exchangerate-api.com/v4/latest/USD',
+    { headers: { Accept: 'application/json' } }, 9000);
+  const j4 = await r4.json();
+  if (j4 && j4.rates) {
+    return {
+      rates: j4.rates, base: j4.base || 'USD', source: 'v4',
+      until: (Number(j4.time_last_updated) || Math.floor(Date.now() / 1000)) * 1000 + 12 * 3600e3
+    };
+  }
+  throw new Error('ninguna fuente de tasas respondio');
+}
+async function getTasas() {
+  const ahora = Date.now();
+  if (fxCache.rates && ahora < fxCache.until) return fxCache;
+  if (fxCache.intentarEn && ahora < fxCache.intentarEn) return fxCache;   // no reintentar en bucle
+  fxCache.intentarEn = ahora + 10 * 60e3;
+  try {
+    const t = await pedirTasas();
+    // no publicamos esto, solo BRL y UYU. Mandar 160 divisas por request es
+    // regalarle datos a cualquier curioso que llame al endpoint.
+    const rates = {};
+    MONEDAS.forEach(function (m) {
+      const v = Number(t.rates[m.code]);
+      if (Number.isFinite(v) && v > 0) rates[m.code] = v;
+    });
+    fxCache = { rates: Object.keys(rates).length ? rates : null, base: t.base, until: t.until, source: t.source, at: ahora };
+  } catch (e) {
+    console.warn('[tasas]', e.message);
+    fxCache.intentarEn = ahora + 10 * 60e3;
+  }
+  return fxCache;
+}
+
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
@@ -1262,7 +1331,17 @@ function createServer() {
     if (url.pathname === '/api/destinos') {
       return sendJson(res, 200, SEARCH_DESTINATION_KEYS.map(function (k) { return { key: k, name: model.DEST[k].name }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }));
     }
-    if (url.pathname === '/api/config') {
+    if (url.pathname === '/api/tasas') {
+    return getTasas().then(function (t) {
+      return sendJson(res, 200, {
+        monedas: MONEDAS, rates: t.rates, base: t.base,
+        fuente: t.source, actualizado: t.at ? new Date(t.at).toISOString() : null
+      });
+    }).catch(function (e) {
+      return sendJson(res, 503, { monedas: MONEDAS, rates: null, error: e.message });
+    });
+  }
+  if (url.pathname === '/api/config') {
       return sendJson(res, 200, {
         supabaseUrl: process.env.SUPABASE_URL || 'https://hqyzmeordvjccytgltse.supabase.co',
         supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
