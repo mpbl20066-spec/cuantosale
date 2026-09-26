@@ -704,44 +704,6 @@ async function cotizarHoteles(req, res, url) {
   });
 }
 
-// Cargadores eléctricos reales cerca del destino, vía Open Charge Map. La
-// API key nunca llega al navegador: el cliente solo pide `dest` acá.
-async function cargadoresElectricos(req, res, url) {
-  if (limited('cargadores:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas consultas seguidas. Esperá un minuto y probá de nuevo.' });
-  const destKey = String(url.searchParams.get('dest') || '').toLowerCase();
-  const coords = model.DEST_COORDS[destKey];
-  if (!coords) return sendJson(res, 400, { error: 'No tenemos coordenadas para ese destino.' });
-  if (!process.env.OCM_API_KEY) return sendJson(res, 200, { chargers: [], configured: false });
-  try {
-    const ocmUrl = new URL('https://api.openchargemap.io/v3/poi/');
-    ocmUrl.searchParams.set('output', 'json');
-    ocmUrl.searchParams.set('latitude', String(coords.lat));
-    ocmUrl.searchParams.set('longitude', String(coords.lng));
-    ocmUrl.searchParams.set('distance', '30');
-    ocmUrl.searchParams.set('distanceunit', 'KM');
-    ocmUrl.searchParams.set('maxresults', '8');
-    ocmUrl.searchParams.set('verbose', 'false');
-    const response = await fetchWithTimeout(ocmUrl, { headers: { 'X-API-Key': process.env.OCM_API_KEY } }, 8000);
-    if (!response.ok) throw new Error('Open Charge Map respondió ' + response.status);
-    const data = await response.json();
-    const chargers = (Array.isArray(data) ? data : []).map(function (poi) {
-      const address = poi.AddressInfo || {};
-      const connections = Array.isArray(poi.Connections) ? poi.Connections : [];
-      const connectorTypes = connections.map(function (c) { return c.ConnectionType && c.ConnectionType.Title; }).filter(Boolean);
-      return {
-        name: address.Title || 'Cargador sin nombre',
-        address: [address.AddressLine1, address.Town].filter(Boolean).join(', '),
-        connectors: Array.from(new Set(connectorTypes)),
-        lat: address.Latitude, lng: address.Longitude
-      };
-    }).filter(function (c) { return Number.isFinite(c.lat) && Number.isFinite(c.lng); });
-    return sendJson(res, 200, { chargers: chargers, configured: true });
-  } catch (e) {
-    console.error('[cargadores]', e.message);
-    return sendJson(res, 200, { chargers: [], configured: true, error: 'No pudimos consultar cargadores ahora.' });
-  }
-}
-
 function cotizarTodos(req, res, url) {
   if (limited(clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });
   const today = model.getToday();
@@ -999,10 +961,11 @@ function createServer() {
       return featuredPriceItems(req, res, url);
     }
     if (url.pathname === '/api/cargadores') {
-      return cargadoresElectricos(req, res, url).catch(function (e) {
-        console.error('[cargadores]', e);
-        sendJson(res, 200, { chargers: [], configured: true, error: 'No pudimos consultar cargadores ahora.' });
-      });
+      // El endpoint se retiró: Open Charge Map sólo tiene cargadores alrededor
+      // del destino, no en el corredor, así que la lista que servía no
+      // correspondía a las paradas del viaje. Se responde 410 en vez de 404
+      // para que quede claro que fue una decisión y no un error.
+      return sendJson(res, 410, { error: 'Ya no mostramos cargadores: la fuente disponible sólo cubre el destino, no el trayecto.' });
     }
     // /grupo y /grupo/<uuid> son rutas cliente (SPA): el id se lee del path
     // en el navegador, así que el servidor siempre entrega el mismo HTML.

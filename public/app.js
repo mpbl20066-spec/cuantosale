@@ -289,13 +289,17 @@
   // cambia el modelo eléctrico (autonomía distinta) sin re-renderizar toda
   // la sección de transporte.
   //
-  // Ojo con lo que promete cada título. En un auto a nafta las paradas son de
-  // descanso y sí están en la ruta, así que el título va con "en la ruta". En
-  // eléctrico las paradas son cargas: el cálculo de cada cuántos km es real,
-  // pero los cargadores que listamos abajo son los del DESTINO (la API los
-  // busca en un radio alrededor del destino), no los del camino. Por eso el
-  // título no dice "paradas en la ruta" y el texto aclara la diferencia: si no,
-  // se leía como que esas estaciones están donde hay que parar.
+  // Acá NO se listan cargadores, y es a propósito. Se intentó: la app consultaba
+  // Open Charge Map y pintaba una lista, pero la base sólo tiene cargadores
+  // alrededor del destino. Para Montevideo -> Florianópolis (1245 km de ida)
+  // se midió el corredor y hay 3 cargadores en total, dos de ellos fuera de la
+  // ruta: no alcanza ni para una lista útil. Peor todavía, una lista de
+  // "paradas" que en realidad son estaciones donde ya llegaste hace pensar que
+  // el trayecto está cubierto cuando no lo está.
+  //
+  // Lo que sí es calculable y sí le sirve a la persona es cuántas cargas va a
+  // needing y cada cuántos kilómetros. Eso sale de la autonomía real del
+  // modelo, y para el resto la mandamos a las apps que sí tienen el mapa.
   function roadtripStopsInnerHtml(stopsPlan, isEv) {
     var title = isEv
       ? '🔌 Plan de carga: parar cada ' + stopsPlan.everyKm + ' km'
@@ -305,40 +309,10 @@
         ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
         : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
       (isEv
-        ? '<div data-roadtrip-chargers><div class="roadtrip-chargers__loading"><span class="roadtrip-chargers__spinner" aria-hidden="true"></span>Buscando cargadores reales cerca del destino…</div></div>'
-          + '<p class="cost-note">* Los cargadores de arriba están <b>en tu destino</b>, no en el camino. Para las ' + stopsPlan.stops + ' paradas del trayecto, planificalas en <a href="https://www.google.com/maps/dir/?api=1" target="_blank" rel="noopener noreferrer">Google Maps</a> o en una app como <a href="https://www.electromaps.com" target="_blank" rel="noopener noreferrer">Electromaps</a> y <a href="https://www.plugshare.com" target="_blank" rel="noopener noreferrer">PlugShare</a>: nosotros sólo tenemos los del destino. Datos de Open Charge Map, una base colaborativa: puede haber estaciones nuevas o cerradas sin cargar. Confirmá disponibilidad antes de salir.</p>'
+        ? '<p>Son <b>' + stopsPlan.stops + ' cargas</b> de ida y vuelta. Para elegir dónde recargar, mirá el trayecto en <a href="https://www.google.com/maps/dir/?api=1" target="_blank" rel="noopener noreferrer">Google Maps</a> filtrando por "carga de vehículos eléctricos", o usá <a href="https://www.electromaps.com" target="_blank" rel="noopener noreferrer">Electromaps</a> o <a href="https://www.plugshare.com" target="_blank" rel="noopener noreferrer">PlugShare</a>, que tienen el mapa de todo el camino.</p>'
+          + '<p class="cost-note">* No te mostramos una lista de estaciones a propósito: no tenemos una fuente con los cargadores del corredor y una lista incompleta haría creer que el viaje está cubierto. La autonomía y el número de carga son un cálculo con el rango real del modelo, no una consulta.</p>'
         : '<p class="cost-note">* Son paradas de descanso sugeridas por fatiga en viajes largos, no un tramo obligatorio.</p>') +
       '</div>';
-  }
-  var chargersCache = {};
-  // El visitante nunca ve la diferencia entre "la API falló", "no hay
-  // cargadores cerca" o "todavía no configuramos la clave": las tres caen
-  // en el mismo fallback prolijo. No tiene sentido exponerle un problema de
-  // configuración del sitio; eso lo vemos nosotros en los logs del server.
-  function renderChargersHtml(destKey, data) {
-    var fallback = '<div class="roadtrip-chargers__empty"><span>🔌</span><p>No encontramos cargadores cargados en Open Charge Map cerca de este destino todavía. Probá una app como <a href="https://www.electromaps.com" target="_blank" rel="noopener noreferrer">Electromaps</a> o <a href="https://www.plugshare.com" target="_blank" rel="noopener noreferrer">PlugShare</a> antes de salir.</p></div>';
-    if (!data || data.error || data.configured === false || !data.chargers || !data.chargers.length) return fallback;
-    return '<p class="roadtrip-chargers__label">🔌 Cargadores en tu destino, no en el camino</p><ul class="roadtrip-chargers__list">' +
-      data.chargers.slice(0, 5).map(function (c) {
-        var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(c.lat + ',' + c.lng);
-        var connectorChips = c.connectors && c.connectors.length ? '<span class="roadtrip-chargers__chips">' + c.connectors.slice(0, 3).map(function (name) { return '<span class="roadtrip-chargers__chip">' + esc(name) + '</span>'; }).join('') + '</span>' : '';
-        return '<li><div class="roadtrip-chargers__info"><b>' + esc(c.name) + '</b>' + (c.address ? '<span class="roadtrip-chargers__address">' + esc(c.address) + '</span>' : '') + connectorChips + '</div>' +
-          '<a class="roadtrip-chargers__link" href="' + esc(mapsUrl) + '" target="_blank" rel="noopener noreferrer">Cómo llegar<span aria-hidden="true">↗</span></a></li>';
-      }).join('') + '</ul>';
-  }
-  async function loadRoadtripChargers(destKey) {
-    if (chargersCache[destKey]) return chargersCache[destKey];
-    var promise = fetch('/api/cargadores?dest=' + encodeURIComponent(destKey)).then(function (r) { return r.json(); }).catch(function () { return { error: true }; });
-    chargersCache[destKey] = promise;
-    return promise;
-  }
-  async function pintarCargadoresRoadtrip(destKey) {
-    var container = document.querySelector('[data-roadtrip-chargers]');
-    if (!container) return;
-    var data = await loadRoadtripChargers(destKey);
-    var freshContainer = document.querySelector('[data-roadtrip-chargers]');
-    if (!freshContainer) return; // el usuario ya cambió de tab/destino mientras cargaba
-    freshContainer.innerHTML = renderChargersHtml(destKey, data);
   }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
@@ -1387,7 +1361,6 @@
       // queden disponibles en el DOM cuando el usuario eligió auto (y viceversa).
       flow.innerHTML = transportFlow(detailState.meta, detailState.flight, autoEnabled);
     }
-    if (autoEnabled && detailState.roadtripVehicleType === 'ev') pintarCargadoresRoadtrip(detailState.meta.dest.key);
     sincronizarTrasladoOficial();
   }
   function actualizarRoadtrip(kmPerLiter) {
@@ -1450,7 +1423,6 @@
     if (detailState.transportMode === 'auto') detailState.auto = currentRoadtripTotal();
     var flow = document.querySelector('[data-transport-flow]');
     if (flow) flow.innerHTML = transportFlow(detailState.meta, detailState.flight, true);
-    if (type === 'ev') pintarCargadoresRoadtrip(detailState.meta.dest.key);
     recalcularTotalViaje();
   }
   function roadtripCard(meta, autoSelected) {
