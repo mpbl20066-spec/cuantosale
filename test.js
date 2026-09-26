@@ -17,13 +17,18 @@ function post(port, path, value) {
     request.on('error', reject); request.end(JSON.stringify(value));
   });
 }
-function get(port, path) {
+function get(port, path, headers) {
   return new Promise(function (resolve, reject) {
-    http.get({ port: port, path: path }, function (res) {
+    const opts = { port: port, path: path };
+    if (headers) opts.headers = headers;
+    http.get(opts, function (res) {
       let b = ''; res.on('data', function (c) { b += c; });
       res.on('end', function () { resolve({ status: res.statusCode, body: b, headers: res.headers }); });
     }).on('error', reject);
   });
+}
+function basic(user, pass) {
+  return { Authorization: 'Basic ' + Buffer.from(user + ':' + pass, 'utf8').toString('base64') };
 }
 const today = model.getToday();
 const dep = model.iso(model.addDays(today, 60));
@@ -323,6 +328,34 @@ function haversineKm(a, b) {
     assert.strictEqual(up.pax, 10); assert.strictEqual(down.pax, 1);
     // Con 10 viajeros el total por persona tiene que bajar: el vuelo se comparte.
     assert.ok(up.items[0].pp < down.items[0].total);
+  });
+  await t('el candado de prelanzamiento cierra la API, no sólo las páginas', async function () {
+    // Regresión: el candado filtraba por nombre de archivo, así que
+    // /api/cotizar y /api/hoteles seguían respondiendo 200 sin contraseña y
+    // devolvían cotizaciones reales quemando la cuota de Duffel y Booking.
+    const user = 'prelaunch-user', pass = 'prelaunch-pass';
+    const cotizar = '/api/cotizar?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000';
+    process.env.APP_USER = user; process.env.APP_PASS = pass;
+    try {
+      const sinCred = await get(port, cotizar);
+      assert.strictEqual(sinCred.status, 401, '/api/cotizar respondió sin credenciales');
+      assert.ok(JSON.parse(sinCred.body).error, 'el 401 de la API tiene que ser JSON, no el HTML del navegador');
+
+      const hoteles = await get(port, '/api/hoteles?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000');
+      assert.strictEqual(hoteles.status, 401, '/api/hoteles respondió sin credenciales');
+
+      // La waitlist es la cara pública y lee /api/config para guardar el email.
+      assert.strictEqual((await get(port, '/api/config')).status, 200, '/api/config tiene que quedar público para la waitlist');
+
+      const conCred = await get(port, cotizar, basic(user, pass));
+      assert.strictEqual(conCred.status, 200, 'con la contraseña correcta tiene que responder');
+      assert.strictEqual((await get(port, cotizar, basic(user, 'incorrecta'))).status, 401, 'con la contraseña incorrecta tiene que rechazar');
+      assert.strictEqual((await get(port, cotizar, basic('otro', pass))).status, 401, 'con el usuario incorrecto tiene que rechazar');
+    } finally {
+      delete process.env.APP_USER; delete process.env.APP_PASS;
+    }
+    // Sin variables el desarrollo local sigue abierto.
+    assert.strictEqual((await get(port, cotizar)).status, 200, 'sin candado configurado la API responde');
   });
   await t('sirve la web y bloquea rutas fuera de /public', async function () {
     const r = await get(port, '/');

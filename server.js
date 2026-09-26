@@ -845,6 +845,47 @@ function denyPrelaunch(res) {
   res.end(body);
 }
 
+// Devuelve true si la petición trae credenciales válidas del candado, o si
+// no hay candado configurado (desarrollo local).
+function prelaunchAuthorized(req) {
+  const guard = prelaunchGuard();
+  if (!guard) return true;
+  const header = String(req.headers.authorization || '');
+  const m = /^Basic\s+(.+)$/i.exec(header);
+  if (!m) return false;
+  let decoded = '';
+  try { decoded = Buffer.from(m[1], 'base64').toString('utf8'); } catch (e) { decoded = ''; }
+  const sep = decoded.indexOf(':');
+  const user = sep >= 0 ? decoded.slice(0, sep) : decoded;
+  const pass = sep >= 0 ? decoded.slice(sep + 1) : '';
+  // Se calculan las dos comparaciones siempre: cortocircuitar aquí
+  // devolvería si el usuario existe midiendo el tiempo de respuesta.
+  const userOk = safeEqual(user, guard.user);
+  const passOk = safeEqual(pass, guard.pass);
+  return userOk && passOk;
+}
+
+/*
+ * API que queda pública aunque la app esté candada.
+ *
+ * Es una lista de excepciones, no de bloqueos: todo /api/* queda detrás del
+ * candado salvo lo que esté acá, así que un endpoint nuevo nace protegido y
+ * hay que abrirlo a propósito.
+ *
+ * /api/config es la única excepción real. La waitlist es la cara pública del
+ * sitio y necesita leer de ahí la URL y la clave anónima de Supabase para
+ * guardar el email (ver public/waitlist.js). La clave anónima está pensada
+ * para ser pública y la protege el RLS de Supabase.
+ */
+const PRELAUNCH_PUBLIC_API = new Set(['/api/config']);
+
+function denyPrelaunchJson(res) {
+  // Sin WWW-Authenticate a propósito: en una respuesta a un fetch de la app
+  // ese encabezado hace que el navegador abra el diálogo de Basic Auth en
+  // medio de la pantalla. Acá alcanza con un 401 que el cliente pueda leer.
+  sendJson(res, 401, { error: 'Acceso restringido. Esta aplicación todavía no es pública.' });
+}
+
 // Devuelve true si ya respondió con un 401 (acceso denegado).
 function checkPrelaunchAccess(req, res, relPath) {
   const guard = prelaunchGuard();
@@ -909,6 +950,16 @@ function createServer() {
     if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'POST') { res.writeHead(405); return res.end(); }
     let url;
     try { url = new URL(req.url, 'http://localhost'); } catch (e) { res.writeHead(400); return res.end(); }
+    // Candado de prelanzamiento para la API. Va antes de cualquier ruta para
+    // que ningún endpoint quede por afuera, tampoco los POST de más abajo.
+    //
+    // Sin esto el candado sólo cerraba las páginas: /api/cotizar y /api/hoteles
+    // seguían respondiendo 200 sin contraseña y devolvían cotizaciones reales,
+    // consumiendo la cuota de Duffel y de Booking a nombre de cualquiera que
+    // supiera la URL.
+    if (url.pathname.indexOf('/api/') === 0 && !PRELAUNCH_PUBLIC_API.has(url.pathname)) {
+      if (!prelaunchAuthorized(req)) return denyPrelaunchJson(res);
+    }
     if (req.method === 'POST' && url.pathname === '/api/vuelos/buscar') {
       return readJson(req).then(function (body) { return buscarVuelos(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la bÃºsqueda.' });
