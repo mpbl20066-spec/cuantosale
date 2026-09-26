@@ -1075,7 +1075,7 @@
   }
   // La API de Booking a veces devuelve el nombre del hotel ya doble codificado:
   // los bytes UTF-8 de "Búzios" leídos con un código de un byte por carácter,
-  // que en pantalla aparecen como "BÃºzios". El server ya lo repara en
+  // que en pantalla aparecen como "Búzios". El server ya lo repara en
   // sanitizeHotelName, pero en producción el síntoma aparece igual, así que el
   // dato se repara también acá: si la corrupción entra por cualquier capa
   // (respuesta cacheada del proveedor, CDN, proxy), el nombre se ve bien igual.

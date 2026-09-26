@@ -520,7 +520,12 @@ async function hotelRecommendations(destKey, destName, style, extra) {
       const nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
       if (nearby) {
         try {
-          const regionalHotels = await fetchBookingHotels(nearby.key, nearby.name, selectedTier, hotelExtra);
+          // El nombre va reparado: esta es la query que se manda a Booking, y si
+          // el source se vuelve a guardar con el encoding equivocado el fallback
+          // regional buscaria "MaceiÃ³" y volveria con cero resultados, sin
+          // avisar. fixMojibake ya corre sobre los nombres que vuelven; este es
+          // el mismo problema del otro lado del cable.
+          const regionalHotels = await fetchBookingHotels(nearby.key, fixMojibake(nearby.name), selectedTier, hotelExtra);
           realHotels = realHotels.concat(regionalHotels.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: nearby.label }); }));
         } catch (regionalError) {
           console.warn('[hotelRecommendations] BÃºsqueda regional no disponible:', regionalError && regionalError.message ? regionalError.message : regionalError);
