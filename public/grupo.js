@@ -83,9 +83,18 @@
     if (/comida|almuerzo|cena|desayun|pizza|empanad|sandwich|\bbar\b|restaur|cerveza|vino|helado|asado|parrillada|\bpub\b/.test(text)) return 'food';
     return 'bag';
   }
+  // El símbolo viene del servidor (/api/tasas) para que el grupo y la home
+  // muestren lo mismo. La lista de acá es solo el respaldo cuando las tasas
+  // todavía no llegaron.
   function categorySymbol(code) {
-    var symbols = { USD: 'US$', BRL: 'R$', UYU: '$', ARS: '$', EUR: '€', GBP: '£', MXN: '$', CLP: '$', COP: '$' };
     var normalized = String(code || 'USD').toUpperCase();
+    // Se lee después de cargarTasas(): si el fetch falló, la lista de respaldo
+    // de abajo cubre el caso.
+    if (FX.monedas && FX.monedas.length) {
+      var found = FX.monedas.filter(function (m) { return m.code === normalized; })[0];
+      if (found && found.simbolo) return found.simbolo;
+    }
+    var symbols = { USD: 'US$', BRL: 'R$', UYU: '$', ARS: '$', EUR: '€', GBP: '£', MXN: '$', CLP: '$', COP: '$' };
     return symbols[normalized] || normalized + ' ';
   }
   // Centimas solo cuando las hay: en un viaje entre amigos casi todos los
@@ -123,7 +132,7 @@
   }
   // Un importe cualquiera, ya expresado en la moneda en la que se ve. Las
   // tasas se piden para que "Ver en" funcione; sin ellas cae al importe tal
-  // cual came, que es lo correcto porque en ese caso todos están en la misma.
+  // cual viene, que es lo correcto porque todos estan en la misma moneda.
   function moneyVer(n, code) {
     var target = verMoneda();
     var value = convertir(n, code || groupCurrency(), target);
@@ -604,6 +613,50 @@
     });
     form.description.addEventListener('input', function () { markCategory(form.description.value); });
 
+    /* ---------- moneda del gasto ---------- */
+    // El símbolo a la izquierda del campo sigue a la moneda elegida: si no, al
+    // cambiar a reais queda "US$" junto a un número en reales.
+    var amountCurrency = form.querySelector('select[name="currency"]');
+    var amountCode = form.querySelector('.grupo-amount__code');
+    if (amountCurrency && amountCode) {
+      amountCurrency.addEventListener('change', function () {
+        amountCode.textContent = categorySymbol(amountCurrency.value);
+      });
+    }
+
+    /* ---------- ver en otra moneda ---------- */
+    var verEnSelect = app.querySelector('.grupo-veren__sel');
+    if (verEnSelect) {
+      verEnSelect.addEventListener('change', function () {
+        guardarVerEn(verEnSelect.value);
+        // Se repinta entero, así que el scroll y el foco se devuelven: en un
+        // viaje se cargan varios gastos seguidos y perder lo que se estaba
+        // escribiendo obliga a empezar de nuevo.
+        var scrollTop = window.scrollY || window.pageYOffset || 0;
+        renderGroup(groupId);
+        window.scrollTo(0, scrollTop);
+        var refocus = document.querySelector('#expense-form input[name="description"]');
+        if (refocus) refocus.focus();
+      });
+    }
+
+    /* ---------- saldos pagados ---------- */
+    Array.prototype.forEach.call(app.querySelectorAll('[data-saldo]'), function (button) {
+      button.addEventListener('click', async function () {
+        var key = button.getAttribute('data-saldo');
+        button.disabled = true;
+        try {
+          var result = await supabaseClient.from('grupos_viaje').update({ saldos: alternarSaldo(key) }).eq('id', groupId);
+          if (result.error) throw new Error(result.error.message);
+          await loadGroupData(groupId);
+          renderGroup(groupId);
+        } catch (error) {
+          button.disabled = false;
+          window.alert(error.message || 'No pudimos marcar el pago.');
+        }
+      });
+    });
+
     document.getElementById('share-button').addEventListener('click', function () {
       var status = document.getElementById('copy-status');
       var payload = { title: group.name + ' · CuántoSale', text: shareMessage(), url: url };
@@ -655,6 +708,13 @@
       splitInputs().forEach(function (input) { input.checked = true; });
     });
 
+    // La moneda del gasto. El <select> es opcional (no se pinta si no hay
+    // tasas), así que si no está se usa la del grupo.
+    function expenseCurrency() {
+      var select = form.querySelector('select[name="currency"]');
+      return select && select.value ? select.value : groupCurrency();
+    }
+
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var splitIds = splitInputs().filter(function (input) { return input.checked; }).map(function (input) { return input.value; });
@@ -667,9 +727,12 @@
       if (!splitIds.length) { expenseError.textContent = 'Elegí al menos una persona para dividir.'; return; }
       form.querySelector('button[type="submit"]').disabled = true;
       try {
+        // Se guarda en la moneda en la que se pagó, no en la del grupo: el
+        // saldo de cada quien se calculahr converting, pero el importe original
+        // es el que de verdad se gastó y conviene no perderlo.
         var result = await supabaseClient.from('gastos').insert({
           grupo_id: groupId, paid_by_participante_id: form.paidBy.value, description: description,
-          amount: amount, currency: groupCurrency(), split_between: splitIds
+          amount: amount, currency: expenseCurrency(), split_between: splitIds
         });
         if (result.error) throw new Error(result.error.message);
         await loadGroupData(groupId);
@@ -783,6 +846,11 @@
         });
         return;
       }
+      // Las tasas se piden antes de pintar: sin ellas no hay conversión y el
+      // formulario se caería a la moneda del grupo. Si el fetch falla, el
+      // grupo sigue entrando igual (cargarTasas no propaga el error).
+      await cargarTasas();
+      verEn = verEnGuardado();
       await loadGroupData(groupId);
       if (!me) { renderJoinForm(groupId); return; }
       renderGroup(groupId);
