@@ -30,9 +30,46 @@ const dep = model.iso(model.addDays(today, 60));
 const ret = model.iso(model.addDays(today, 67));
 const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
 
+// Distancia en línea recta entre dos puntos, en km. Es la cota inferior de
+// cualquier ruta por carretera: ningún camino puede ser más corto que el
+// vuelo de pájaro. Sirve para detectar kilómetros inventados.
+function haversineKm(a, b) {
+  const R = 6371, rad = (d) => d * Math.PI / 180;
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
 
 (async function main() {
   console.log('Modelo');
+  await t('ningún roadtrip es más corto que la línea recta', function () {
+    // Regresión: el roadtrip a Florianópolis declaraba 720 km cuando la línea
+    // recta son 1087. Ese error subestimaba el combustible de todo el
+    // litoral de Santa Catarina sin que ninguna prueba lo notara.
+    const errors = [];
+    Object.keys(model.ROADTRIP_ROUTES).forEach(function (key) {
+      const destino = model.DEST_COORDS[key];
+      if (!destino) return; // sin coordenadas no hay contra qué comparar
+      Object.keys(model.ORIGIN_COORDS).forEach(function (origen) {
+        const piso = haversineKm(model.ORIGIN_COORDS[origen], destino);
+        const declarado = model.ROADTRIP_ROUTES[key].km;
+        if (declarado < piso) errors.push(key + ' desde ' + origen + ': ' + declarado + ' km < ' + Math.round(piso) + ' km de línea recta');
+      });
+    });
+    assert.deepStrictEqual(errors, [], 'rutas por debajo de la línea recta: ' + errors.join('; '));
+  });
+  await t('las horas de manejo son proporcionales a la distancia', function () {
+    Object.keys(model.ROADTRIP_ROUTES).forEach(function (key) {
+      const r = model.ROADTRIP_ROUTES[key];
+      assert.ok(r.km > 0, key + ' sin kilómetros');
+      assert.ok(r.hours > 0, key + ' sin horas');
+      // Ni 400 km/h (imposible) ni 25 km/h de promedio (excesivamente
+      // conservador en ruta). Un promedio de 60-95 km/h cubre rutas mixtas.
+      const promedio = r.km / r.hours;
+      assert.ok(promedio > 45 && promedio < 100, key + ' promedio de ' + Math.round(promedio) + ' km/h fuera de rango razonable');
+    });
+  });
   await t('un precio real de vuelo reemplaza la estimación y se marca como real', function () {
     const d = model.parse(dep), r = model.parse(ret);
     const est = model.calc('fln', 'avion_mvd', 1, 2, d, r, today, null);
