@@ -10,6 +10,7 @@
   var pollTimer = null;
   var lastSignature = '';
   var nameDraft = null; // nombre del viaje precargado desde la app
+  var nameFromAuth = ''; // nombre del usuario logueado, para no pedirlo de nuevo
   var PRESET_KEY = 'cuantosale_grupo_preset';
   var POLL_MS = 12000;
   // Íconos de categoría. La categoría NO se elige: se deduce de la descripción
@@ -110,6 +111,32 @@
     try { sessionStorage.removeItem(PRESET_KEY); } catch (error) {}
   }
 
+  // Si la persona ya está logueada, su nombre no hay que volver a escribirlo.
+  // La sesión vive en localStorage bajo el mismo project ref, así que el
+  // cliente de esta página la encuentra sola. Es best-effort: si no hay sesión
+  // (o el lookup falla) el campo queda con su placeholder y no se rompe nada.
+  // Misma precedencia que authDisplayName() en app.js, para que el mismo
+  // usuario no aparezca con dos nombres distintos según la página.
+  async function loadNameFromSession() {
+    try {
+      var result = await supabaseClient.auth.getUser();
+      var user = result && result.data && result.data.user;
+      if (!user) return '';
+      var metadata = user.user_metadata || {};
+      // Se prueba cada campo ya recortado: un full_name de sólo espacios es
+      // truthy en JS, así que con un || normal cortocircuitaba y el nombre
+      // quedaba vacío en vez de caer al email.
+      var candidates = [metadata.full_name, metadata.name, user.email];
+      for (var i = 0; i < candidates.length; i++) {
+        var value = String(candidates[i] || '').trim();
+        if (value) return value;
+      }
+      return '';
+    } catch (error) {
+      return '';
+    }
+  }
+
   async function loadSupabaseSdk() {
     if (supabaseClient) return;
     var config = await fetch('/api/config').then(function (r) { return r.json(); });
@@ -156,7 +183,7 @@
       (errorMessage ? '<p class="grupo-error">' + esc(errorMessage) + '</p>' : '') +
       '<form id="create-form">' +
       '<label class="grupo-field">Nombre del viaje o grupo<input required name="groupName" placeholder="Ej: Finde en Florianópolis" maxlength="80" value="' + esc(preset) + '"></label>' +
-      '<label class="grupo-field">Tu nombre<input required name="yourName" placeholder="Ej: Bruno" maxlength="40"></label>' +
+      '<label class="grupo-field">Tu nombre<input required name="yourName" placeholder="Ej: Bruno" maxlength="40" value="' + esc(nameFromAuth) + '"></label>' +
       '<button type="submit" class="grupo-btn grupo-btn--primary">Crear grupo y obtener link</button>' +
       '</form></div>'
     );
@@ -553,7 +580,19 @@
     var groupId = groupIdFromPath();
     try {
       await loadSupabaseSdk();
-      if (!groupId) { renderCreateForm(); return; }
+      if (!groupId) {
+        renderCreateForm();
+        // El formulario se pinta ya, sin esperar el lookup de la sesión: el
+        // nombre se completa solo un instante después si hay sesión abierta.
+        // El chequeo de !input.value evita pisar lo que la persona ya empiece
+        // a escribir mientras espera.
+        loadNameFromSession().then(function (name) {
+          nameFromAuth = name;
+          var input = document.querySelector('#create-form [name="yourName"]');
+          if (name && input && !input.value.trim()) input.value = name;
+        });
+        return;
+      }
       await loadGroupData(groupId);
       if (!me) { renderJoinForm(groupId); return; }
       renderGroup(groupId);
