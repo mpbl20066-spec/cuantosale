@@ -56,6 +56,47 @@
     poa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg/1920px-IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg'
   };
   /*
+   * Créditos de las fotos. Archivo GENERADO por creditos-fotos.js.
+   *
+   * Se cargan aparte y no van en línea en app.js: son 35 entradas de texto
+   * quieto que sólo se necesitan cuando se abre el desplegable de créditos, y
+   * app.js ya es grande. Además, si el archivo no está (por ejemplo en un
+   * entorno de pruebas), la app sigue funcionando y simplemente no muestra
+   * créditos.
+   */
+  var FOTO_CREDITOS = {};
+  var fotoCreditosCargados = false;
+  function cargarCreditosFotos() {
+    if (fotoCreditosCargados) return Promise.resolve(FOTO_CREDITOS);
+    fotoCreditosCargados = true;
+    return fetch('/creditos-fotos.generated.js')
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (src) {
+        if (!src) return FOTO_CREDITOS;
+        // El archivo se carga como script y se apoya en window.FOTO_CREDITOS
+        // para no duplicar la tabla acá.
+        var holder = document.createElement('div');
+        holder.id = 'foto-creditos-cargados';
+        holder.hidden = true;
+        var script = document.createElement('script');
+        script.src = '/creditos-fotos.generated.js';
+        holder.appendChild(script);
+        document.body.appendChild(holder);
+        return new Promise(function (resolve) {
+          script.addEventListener('load', function () {
+            FOTO_CREDITOS = window.FOTO_CREDITOS || {};
+            resolve(FOTO_CREDITOS);
+          });
+          script.addEventListener('error', function () { resolve(FOTO_CREDITOS); });
+        });
+      })
+      .catch(function () { return FOTO_CREDITOS; });
+  }
+  function fotoCreditosDe(url) {
+    return FOTO_CREDITOS[url] || null;
+  }
+
+  /*
    * Fotos de tours, de Wikimedia Commons.
    *
    * Sólo entran acá las que se revisaron una por una mirando la imagen. Una
@@ -1096,6 +1137,10 @@
       if (category !== 'tours' && Number(value) <= 0) return null;
       return { category: category, label: info[1], color: info[2], value: Number(value) || 0, width: total ? ((Number(value) / total) * 100) : 0 };
     }).filter(Boolean);
+    // Ordenamos por monto, de mayor a menor. El orden por taxologia (pasajes,
+    // alojamiento, comidas...) dejaba los rubros que mas plata pesan en el
+    // medio, y el usuario quiere ver primero donde se va la plata.
+    entries.sort(function (a, b) { return (Number(b.value) || 0) - (Number(a.value) || 0); });
     return { total: total, entries: entries };
   }
   function proposalBreakdownContent(state) {
@@ -1203,13 +1248,25 @@
       { cat: 'local', label: 'Transporte local', meta: localPerDay ? money(localPerDay) + '/día' : 'Estimado', value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
       { cat: 'tours', label: 'Tours', meta: toursLabel, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
     ];
+    // Mismo criterio que la barra: de mayor a menor monto. Los rubros en cero
+    // quedan al final, que es donde el usuario tiene menos que mirar.
+    summaryItems.forEach(function (item) {
+      item.n = item.cat === 'bus' ? (Number(detailState.parts && detailState.parts.bus) || 0)
+        : item.cat === 'pasajes' ? flightPrice
+        : item.cat === 'alojamiento' ? (Number(detailState.hotel) || 0)
+        : item.cat === 'comidas' ? (Number(detailState.parts && detailState.parts.comidas) || 0)
+        : item.cat === 'local' ? (Number(detailState.parts && detailState.parts.local) || 0)
+        : item.cat === 'traslados' ? (transferIncluded ? transferAmount : 0)
+        : (Number(detailState.toursTotal) || 0);
+    });
+    summaryItems.sort(function (a, b) { return (Number(b.n) || 0) - (Number(a.n) || 0); });
     var segments = entries.map(function (entry) {
       return '<span style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
     }).join('');
     var itemsHtml = summaryItems.map(function (item) {
       // Sólo el ícono: el cuadrado de color repetía la misma información y
       // ocupaba ancho al lado del texto.
-      return '<div class="trip-summary__item">'
+      return '<div class="trip-summary__item' + (item.n ? '' : ' is-zero') + '">'
         + categoryIcon(item.cat, item.color)
         + '<div class="trip-summary__meta"><b>' + item.label + '</b><span>' + item.meta + '</span></div>'
         + '<em>' + item.value + '</em>'
