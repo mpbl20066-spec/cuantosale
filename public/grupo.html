@@ -10,42 +10,75 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=45">
+<link rel="stylesheet" href="/style.css?v=46">
 <style>
   .grupo-wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px}
-  .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
-  .grupo-header a{color:var(--ink2);text-decoration:none;font-size:13px}
+  .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+  .grupo-header a{color:var(--ink2);text-decoration:none;font-size:13px;font-weight:600}
+  .grupo-kicker{color:var(--ink2);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
   .grupo-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:16px}
-  .grupo-card h1,.grupo-card h2{font-family:var(--fh);margin:0 0 12px;line-height:1}
-  .grupo-card h1{font-size:32px}.grupo-card h2{font-size:22px}
+  .grupo-card h1,.grupo-card h2{font-family:var(--fh);margin:0 0 12px;line-height:1.05}
+  .grupo-card h1{font-size:32px;word-break:break-word}
+  .grupo-card h2{font-size:22px}
+  /* El nombre del viaje es el dato que más importa de esta pantalla: va grande
+     y, cuando hay fecha de vuelta, en un subtítulo aparte. */
+  .grupo-card__head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .grupo-card__head h1,.grupo-card__head h2{margin:0}
+  .grupo-badge{flex:0 0 auto;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--ink2);white-space:nowrap}
+  .grupo-sub{color:var(--ink2);font-size:13px;margin:-6px 0 14px}
+
   .grupo-field{display:block;margin-bottom:14px;font-weight:700;font-size:13px}
-  .grupo-field input,.grupo-field select{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:15px}
+  .grupo-field input,.grupo-field select{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:15px}
+  .grupo-field input:focus,.grupo-field select:focus{outline:none;border-color:var(--ink2)}
   .grupo-checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
   .grupo-checks label{display:flex;align-items:center;gap:5px;font-weight:500;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:6px 10px;font-size:13px;cursor:pointer}
+  .grupo-checks input{width:auto;margin:0;accent-color:var(--ink)}
+
   .grupo-btn{border:0;border-radius:13px;background:var(--ink);color:var(--bg);padding:12px 18px;font-weight:700;cursor:pointer;font-size:15px}
+  .grupo-btn:disabled{opacity:.55;cursor:default}
+  .grupo-btn--ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
   .grupo-btn--danger{background:transparent;color:#c0392b;padding:4px 8px;font-size:12px}
-  .grupo-share{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px}
-  .grupo-share input{flex:1;border:0;background:transparent;color:var(--ink);font-size:13px}
-  .grupo-participants{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
+
+  /* Compartir es la acción principal de la pantalla: dos botones, el de
+     primera con el peso visual y el link visible por si igual lo quiere copiar
+     a mano (o lo necesita para pegarlo en otro lado). */
+  .grupo-share{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .grupo-share__actions{display:flex;gap:8px}
+  .grupo-share__actions .grupo-btn{flex:1 1 auto;padding:12px 10px}
+  .grupo-share input{box-sizing:border-box;width:100%;margin-top:10px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink2);font-size:12px}
+
+  .grupo-participants{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
   .grupo-chip{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+  .grupo-add{display:flex;gap:8px;margin-top:10px}
+  .grupo-add input{flex:1;min-width:0;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:15px}
+  .grupo-add button{flex:0 0 auto;white-space:nowrap}
+
   .grupo-expense{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
   .grupo-expense:first-child{border-top:0}
   .grupo-expense small{display:block;color:var(--ink2);margin-top:3px}
-  .grupo-balance{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+  .grupo-expense__right{text-align:right;flex:0 0 auto}
+
+  .grupo-balance{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
   .grupo-balance:first-child{border-top:0}
   .grupo-balance b.pos{color:#087E5B}.grupo-balance b.neg{color:#c0392b}
-  .grupo-error{color:#c0392b;font-size:13px}
+  .grupo-settle{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;background:var(--bg);margin-top:8px;font-size:14px}
+  .grupo-settle__amount{flex:0 0 auto;font-weight:700;font-family:var(--fh);font-size:20px}
+
+  .grupo-error{color:#c0392b;font-size:13px;margin:10px 0 0}
   .grupo-note{color:var(--ink2);font-size:12px;margin-top:10px}
+  .grupo-preset{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;font-size:13px}
+  .grupo-preset button{border:0;background:transparent;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline}
 </style>
 </head>
 <body>
 <div class="wrap grupo-wrap">
   <div class="grupo-header">
     <a href="/app">← CuántoSale</a>
-    <span class="account-button account-button--secondary" style="cursor:default">💸 Dividir gastos</span>
+    <span class="grupo-kicker">Dividir gastos</span>
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=2" defer></script>
+<script src="/grupo.js?v=3" defer></script>
 </body>
 </html>

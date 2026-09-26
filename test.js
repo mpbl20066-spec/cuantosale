@@ -475,7 +475,7 @@ function haversineKm(a, b) {
     assert.ok(bad2.status === 403 || bad2.status === 404);
     const appScript = await get(port, '/app.js');
     assert.strictEqual(appScript.status, 200);
-    ['Cristo Redentor', 'Isla de Campeche', 'Piscinas Naturales', 'Playa en Playa', 'Tour del Vino', 'data-tour-choice', 'Añadido al presupuesto', 'data-tour-detail-open', 'Reservar los tours seleccionados'].forEach(function (copy) { assert.ok(appScript.body.includes(copy), 'Falta contenido de tours: ' + copy); });
+    ['Cristo Redentor', 'Isla de Campeche', 'Piscinas Naturales', 'Playa en Playa', 'Tour del Vino', 'data-tour-choice', 'data-tour-detail-open', 'Reservar los tours seleccionados', 'Créditos de las fotos'].forEach(function (copy) { assert.ok(appScript.body.includes(copy), 'Falta contenido de tours: ' + copy); });
   });
   await t('con clave vacía la búsqueda real de vuelos responde con error controlado', async function () {
     const r = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 2, style: 'eq' });

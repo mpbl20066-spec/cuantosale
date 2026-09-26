@@ -55,19 +55,95 @@
     rec: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg',
     poa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg/1920px-IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg'
   };
-  // Fotos reales por tipo de actividad (Wikimedia Commons), para que cada tarjeta
-  // de tour muestre algo específico en vez de repetir siempre la foto del destino.
-  var TOUR_CATEGORY_PHOTOS = {
-    boat: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Escuna_de_passeio%2C_em_Florian%C3%B3polis-SC%2C_BRASIL.JPG/1920px-Escuna_de_passeio%2C_em_Florian%C3%B3polis-SC%2C_BRASIL.JPG',
-    buggy: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Passeio_de_Buggy_nas_dunas_de_Genipabu_01.jpg/1920px-Passeio_de_Buggy_nas_dunas_de_Genipabu_01.jpg',
-    kayak: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Starr-230301-6176-Cocos_nucifera-view_Molokini_and_Kahoolawe_with_stand_up_paddlers_kayakers_and_snorkelers-Kamaole_Beach_Park_Kihei-Maui_%2852746466170%29.jpg/1920px-Starr-230301-6176-Cocos_nucifera-view_Molokini_and_Kahoolawe_with_stand_up_paddlers_kayakers_and_snorkelers-Kamaole_Beach_Park_Kihei-Maui_%2852746466170%29.jpg'
+  /*
+   * Fotos de tours, de Wikimedia Commons.
+   *
+   * Sólo entran acá las que se revisaron una por una mirando la imagen. Una
+   * búsqueda automática devuelve la foto del lugar equivocado con total
+   * naturalidad, y el filtro de licencia y de formato no lo detecta:
+   *
+   *   - "Pedra Furada" devuelve el arco de Serra da Capivara (Piauí), no el de
+   *     Jericoacoara.
+   *   - La foto de kayak que estaba antes venía de Kamaole Beach Park, Hawái,
+   *     y se mostraba en los 21 kayak tours de Brasil.
+   *   - "Rua das Pedras" devolvía la de Lisboa, no la de Búzios.
+   *   - Una de Itaipú era correcta pero estaba sacada a través del vidrio de
+   *     un bus, con el marco y los reflejos a la vista.
+   *
+   * El autor y la licencia se muestran en la web porque CC BY y CC BY-SA
+   * obligan a dar crédito: sin eso el uso deja de estar autorizado. Y es
+   * además la prueba de que tenemos derecho a usarlas.
+   *
+   * Los tours que no están en este mapa no muestran foto: muestran un
+   * degradado con el ícono de la actividad. Es honesto y se ve prolijo; una
+   * foto de otro lugar o de otro país no lo es.
+   */
+  var TOUR_PHOTOS = {
+    'rio#Cristo Redentor y Pan de Azúcar': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Unique_Moment_with_the_Moon_and_Christ_the_Redeemer_3.jpg/1280px-Unique_Moment_with_the_Moon_and_Christ_the_Redeemer_3.jpg',
+      autor: 'Donatas Dabravolskas', licencia: 'CC BY-SA 4.0'
+    },
+    'ssa#Pelourinho, Elevador Lacerda e Mercado Modelo': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Pelourinho_Salvador_Bahia_2018-0601.jpg/1280px-Pelourinho_Salvador_Bahia_2018-0601.jpg',
+      autor: 'Paul R. Burley', licencia: 'CC BY-SA 4.0'
+    },
+    'bho#Pampulha e arquitetura de Niemeyer': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/PedroVilela_Lagoa_da_Pampulha_Belo_Horizonte_MG_%2840158074024%29.jpg/1280px-PedroVilela_Lagoa_da_Pampulha_Belo_Horizonte_MG_%2840158074024%29.jpg',
+      autor: 'MTur Destinos', licencia: 'Dominio público'
+    },
+    'igu#Cataratas del lado brasileño e Parque das Aves': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/00_1838_Iguazu_Falls_from_the_Brazilian_side.jpg/1280px-00_1838_Iguazu_Falls_from_the_Brazilian_side.jpg',
+      autor: 'W. Bulach', licencia: 'CC BY-SA 4.0'
+    },
+    'igu#Cataratas argentinas com Garganta del Diablo': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Boca_de_la_Garganta_del_Diablo_en_Cataratas_del_Iguaz%C3%BA_01.jpg/1280px-Boca_de_la_Garganta_del_Diablo_en_Cataratas_del_Iguaz%C3%BA_01.jpg',
+      autor: 'MIKEMDP', licencia: 'CC BY-SA 4.0'
+    },
+    'bcm#Beto Carrero World desde Camboriú': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Vista_do_Beto_Carrero_World_a_partir_da_roda-gigante%2C_Penha_SC.JPG/1280px-Vista_do_Beto_Carrero_World_a_partir_da_roda-gigante%2C_Penha_SC.JPG',
+      autor: 'HVL', licencia: 'CC BY 4.0'
+    }
   };
-  function classifyTourPhoto(title) {
+
+  /*
+   * Actividad del tour, para elegir el ícono del degradado cuando no hay foto.
+   * Sólo elige ícono y color: nunca una foto.
+   */
+  var TOUR_ACTIVITIES = [
+    { id: 'boat', test: /barco|lancha|schooner|escuna|catamar|jangada|volta.{0,3}ilha|vuelta a la isla|navega|delfin/ },
+    { id: 'buggy', test: /buggy|4x4|jeep|carro|trilha.*buggy/ },
+    { id: 'paddle', test: /kayak|paddle|stand up/ },
+    { id: 'wine', test: /vino|italiana/ },
+    { id: 'snow', test: /nieve|snowland/ },
+    { id: 'city', test: /city tour|centro hist|praia do forte|lugar hist/ },
+    { id: 'nature', test: /cascata|trilha|catarata|represa|duna|praia natural/ },
+    { id: 'food', test: /gastron|bares|comida|mercado/ }
+  ];
+  function tourActivity(title) {
     var t = String(title || '').toLowerCase();
-    if (/barco|lancha|schooner|escuna|catamar|jangada|volta.{0,3}ilha|vuelta a la isla/.test(t)) return 'boat';
-    if (/buggy|4x4|jeep/.test(t)) return 'buggy';
-    if (/kayak|paddle/.test(t)) return 'kayak';
-    return null;
+    for (var i = 0; i < TOUR_ACTIVITIES.length; i++) {
+      if (TOUR_ACTIVITIES[i].test.test(t)) return TOUR_ACTIVITIES[i].id;
+    }
+    return 'default';
+  }
+  // Degradado e ícono por actividad. Los colores salen de la paleta de la
+  // marca para que la sección no se vea ajena al resto de la app.
+  var TOUR_ACTIVITY_SKINS = {
+    boat: { from: '#1d4e89', to: '#0b1b3a', ico: '<path d="M3 17h18l-2 3H5z"/><path d="M12 3v11"/><path d="M8 14l4-3 4 3"/>' },
+    buggy: { from: '#8a5a10', to: '#3d2708', ico: '<path d="M4 16h16v3H4z"/><path d="M6 16l2-5h8l2 5"/><circle cx="8" cy="19" r="1.6"/><circle cx="16" cy="19" r="1.6"/>' },
+    paddle: { from: '#0e6a6a', to: '#08312f', ico: '<path d="M15 3l-9 12"/><path d="M4 19c2-1.4 3.4-1.4 5.4 0 2-1.4 3.4-1.4 5.4 0 2-1.4 3.4-1.4 5.2 0"/>' },
+    wine: { from: '#6b1f3a', to: '#2e0c17', ico: '<path d="M8 3h8l-1 6a3 3 0 0 1-6 0z"/><path d="M12 12v7"/><path d="M8.5 21h7"/>' },
+    snow: { from: '#2b5a8a', to: '#12253d', ico: '<path d="M12 3v18"/><path d="M4 7l16 10"/><path d="M20 7L4 17"/>' },
+    city: { from: '#3d4a63', to: '#161d2b', ico: '<path d="M4 21V9l6-3v15"/><path d="M10 21V4l10 5v12"/><path d="M3 21h18"/>' },
+    nature: { from: '#1d6b3f', to: '#0a2b18', ico: '<path d="M3 20l6-9 4 5 3-4 5 8z"/><circle cx="17" cy="6" r="2.4"/>' },
+    food: { from: '#9a3412', to: '#3d1508', ico: '<path d="M6 3v8a2 2 0 0 0 4 0V3"/><path d="M8 11v10"/><path d="M17 3c-1.6 1.6-2 3-2 5s.8 2.6 2 3v10"/>' },
+    default: { from: '#2a3f63', to: '#0d1728', ico: '<path d="M12 3l2.6 5.9L21 10l-4.8 4.4 1.3 6.6L12 17.8 6.5 21l1.3-6.6L3 10l6.4-1.1z"/>' }
+  };
+  function tourActivitySkin(title) {
+    return TOUR_ACTIVITY_SKINS[tourActivity(title)] || TOUR_ACTIVITY_SKINS.default;
+  }
+  function tourPhoto(destinationKey, tour) {
+    return TOUR_PHOTOS[String(destinationKey).toLowerCase() + '#' + String(tour && tour.title || '')] || null;
   }
   // Precios referenciales por persona en USD: incluyen margen operativo para venta manual.
   // Se muestran como orientación y siempre deben confirmarse según fecha, cupo y operador.
@@ -860,16 +936,67 @@
     // Mostrar todas las experiencias cargadas para el destino seleccionado.
     var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
     if (!tours.length) return '';
-    var destPhoto = DEST_PHOTOS[destinationKey];
-    return '<section class="local-tours" aria-labelledby="local-tours-title"><div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span><h2 id="local-tours-title">Tours y actividades sugeridas</h2><p>Elegí las experiencias que querés sumar a tu viaje. Precio referencial, sujeto a disponibilidad.</p></div></div><div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + tours.map(function (tour, index) {
+    // Créditos de las fotos que sí se muestran. Se arman con las que aparecen
+    // en esta pantalla, no con el catálogo entero:，也就 no se listan fotos
+    // que el visitante no está viendo.
+    var creditos = {};
+    var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
+    var head = '<div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span>' +
+      '<h2 id="local-tours-title">Tours y actividades</h2>' +
+      '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
+      (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
+      ' &middot; precio referencial</p></div></div>';
+    var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
-      var category = classifyTourPhoto(tour.title);
-      var photo = (category && TOUR_CATEGORY_PHOTOS[category]) || destPhoto;
-      var mediaMarkup = photo
-        ? '<div class="local-tour__media"><img src="' + esc(photo) + '" alt="' + esc(tour.title) + '" loading="lazy"></div>'
-        : '<div class="local-tour__media local-tour__media-empty"><span aria-hidden="true">✦</span></div>';
-      return '<article class="local-tour" data-tour-card role="checkbox" tabindex="0" aria-checked="false" aria-label="Sumar ' + esc(tour.title) + ' al presupuesto">' + mediaMarkup + '<div class="local-tour__body"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '" tabindex="-1"><span class="local-tour__check" aria-hidden="true">✓</span><span class="local-tour__status">Sumar al presupuesto</span><p class="local-tour__destination">' + esc(tour.destination) + '</p><h3>' + esc(tour.title) + '</h3><p class="local-tour__description">' + esc(tour.description) + '</p><div class="local-tour__price"><small>Precio referencial</small><b>' + money(tour.price) + '</b></div><button type="button" class="local-tour__detail" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">Ver detalle</button></div></article>';
-    }).join('') + '</div>' + (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') + '<div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div></section>';
+      var photo = tourPhoto(destinationKey, tour);
+      if (photo) creditos[photo.url] = photo;
+      var skin = tourActivitySkin(tour.title);
+      // Con foto: velo para que el texto se lea siempre. Sin foto: degradado
+      // con el ícono de la actividad, que no miente sobre lo que es.
+      var media = photo
+        ? '<div class="local-tour__media"><img src="' + esc(photo.url) + '" alt="' + esc(tour.title) + '" loading="lazy">' +
+          '<div class="local-tour__scrim"></div>' +
+          '<div class="local-tour__over"><h3>' + esc(tour.title) + '</h3>' +
+          '<p class="local-tour__price"><b>' + money(tour.price) + '</b><span>por persona</span></p></div></div>'
+        : '<div class="local-tour__media local-tour__media-plain" style="background:linear-gradient(150deg,' + skin.from + ',' + skin.to + ')">' +
+          '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg>' +
+          '<h3 class="local-tour__title-over">' + esc(tour.title) + '</h3></div>';
+      var duration = tourDuration(tour);
+      return '<article class="local-tour" data-tour-card>' +
+        media +
+        '<div class="local-tour__body">' +
+        '<p class="local-tour__destination">' + esc(tour.destination) + '</p>' +
+        '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
+        '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
+        '<span class="local-tour__chip">Precio referencial</span></div>' +
+        '<div class="local-tour__actions">' +
+        '<label class="local-tour__add"><input class="local-tour__input" type="checkbox" id="' + id + '" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '"><span class="local-tour__add-face" aria-hidden="true">Sumar</span><span class="local-tour__add-done" aria-hidden="true">Sumado</span></label>' +
+        '<button type="button" class="local-tour__detail" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">Detalle</button>' +
+        '</div></div></article>';
+    }).join('');
+    var creditList = Object.keys(creditos).map(function (url) {
+      var c = creditos[url];
+      return '<li>' + esc(c.autor) + ' &middot; ' + esc(c.licencia) + '</li>';
+    }).join('');
+    var creditsBlock = creditList
+      ? '<details class="local-tours__credits"><summary>Créditos de las fotos</summary><p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre:</p><ul>' + creditList + '</ul></details>'
+      : '';
+    return '<section class="local-tours" aria-labelledby="local-tours-title">' + head +
+      '<div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + cards + '</div>' +
+      (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') +
+      '<div class="local-tours__footer"><p class="local-tours__note">El precio es orientativo. Confirmá disponibilidad, fecha y valor final.</p><button type="button" class="local-tours__whatsapp" data-book-selected-tours disabled>Reservar los tours seleccionados <span aria-hidden="true">↗</span></button></div>' +
+      creditsBlock + '</section>';
+  }
+  // Duración estimada, sacada del texto de detalle que ya está cargado en
+  // LOCAL_TOURS. Antes esa información sólo se veía abriendo el modal, y es
+  // justo lo que hace decidir si un tour entra en el viaje.
+  function tourDuration(tour) {
+    var t = String((tour && tour.details) || '').toLowerCase();
+    if (/entre 3 y 4 horas|3 a 4 horas|4 horas/.test(t)) return 'Media jornada';
+    if (/6 a 7 horas|jornada completa|full day|día completo|9 horas|6:30 a 19/.test(t)) return 'Jornada completa';
+    if (/media jornada|5 horas|4 a 5 horas|6 horas|5 a 7/.test(t)) return 'Media jornada';
+    if (/3 horas|2 horas|3 a 4 horas/.test(t)) return 'Unas horas';
+    return 'Consultar duración';
   }
   function openTourDetailModal(button) {
     var modal = $('#booking-modal');
@@ -3526,13 +3653,11 @@
         openTourDetailModal(tourDetail);
         return;
       }
+      // La tarjeta ya no es un checkbox: antes toda la superficie escribía
+      // click y adentro tenía el botón "Detalle", dos acciones compitiendo en
+      // el mismo lugar. Ahora sólo el botón "Sumar" agrega al presupuesto.
       var tourCard = e.target.closest('[data-tour-card]');
-      if (tourCard && detailState && !e.target.closest('a,button')) {
-        var tourInput = tourCard.querySelector('[data-tour-choice]');
-        if (tourInput) {
-          tourInput.checked = !tourInput.checked;
-          tourInput.dispatchEvent(new Event('change', { bubbles: true }));
-        }
+      if (tourCard && detailState && !e.target.closest('a,button,label')) {
         return;
       }
       if (e.target.closest('#btn-volver')) {
@@ -3660,11 +3785,9 @@
         if (tourChoice.checked) detailState.selectedTours.push(tour);
         detailState.toursTotal = detailState.selectedTours.reduce(function (sum, item) { return sum + item.price; }, 0);
         var tourCard = tourChoice.closest('[data-tour-card]');
-        if (tourCard) {
-          tourCard.setAttribute('aria-checked', tourChoice.checked ? 'true' : 'false');
-          var tourStatus = tourCard.querySelector('.local-tour__status');
-          if (tourStatus) tourStatus.textContent = tourChoice.checked ? 'Añadido al presupuesto' : 'Sumar al presupuesto';
-        }
+        // El estado visual lo lleva :has() en CSS (el botón dice "Sumado" y la
+        // tarjeta se marca en ámbar), así que acá no hay que tocar texto.
+        if (tourCard) tourCard.classList.toggle('is-added', tourChoice.checked);
         var bookTours = document.querySelector('[data-book-selected-tours]');
         if (bookTours) bookTours.disabled = !detailState.selectedTours.length;
         recalcularTotalViaje();
@@ -3761,6 +3884,10 @@
           var originalLabel = splitTripButton.textContent;
           splitTripButton.disabled = true;
           splitTripButton.textContent = 'Guardando...';
+          // Se pasa el nombre del viaje antes de saltar, para que /grupo abra
+          // con el nombre ya puesto en vez de pedirlo de cero.
+          var draft = tripPayload();
+          if (draft) { try { sessionStorage.setItem('cuantosale_grupo_preset', JSON.stringify({ name: draft.title, destination_key: draft.destination_key })); } catch (error) {} }
           var saved = await saveCurrentTrip({ skipTripsModal: true });
           if (saved) {
             window.location.href = '/grupo';
