@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 /*
  * Servidor de CuÃ¡ntoSale. Node 18 o superior.
  *
@@ -34,7 +34,27 @@ const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon'
 };
-const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.wikimedia.org; frame-src https://*.supabase.co; base-uri 'none'; form-action 'self'";
+// Checkout de vuelos con Duffel. Las fuentes son las que exige el FAQ de
+// @duffel/components para este trío:
+//   - script-src  assets.duffel.com  -> el custom element por CDN
+//                 js.evervault.com   -> SDK del desafío 3DS
+//   - frame-src   api.duffel.cards   -> iframe PCI del formulario de tarjeta
+//                 ui-components.evervault.com -> UI del 3DS
+//   - connect-src api.duffel.com    -> la API que el browser consulta
+//                 keys.evervault.com / api.evervault.com
+//   - img-src     assets.duffel.com  -> spinner del form
+//   - style-src-attr 'unsafe-inline' -> estilos inline del componente React
+// El CSP es la única barrera que impide que un script de terceros inyectado en
+// la página de pago lea la tarjeta: no se le pueden agregar dominios aca.
+const CSP = "default-src 'self'; " +
+  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://assets.duffel.com https://js.evervault.com; " +
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+  "style-src-attr 'unsafe-inline'; " +
+  "font-src https://fonts.gstatic.com; " +
+  "img-src 'self' data: https: https://assets.duffel.com; " +
+  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://api.duffel.com https://api.duffel.cards https://keys.evervault.com https://api.evervault.com; " +
+  "frame-src https://*.supabase.co https://api.duffel.cards https://ui-components.evervault.com; " +
+  "base-uri 'none'; form-action 'self'";
 const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
 const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
 const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue', 'gram', 'igu']);
@@ -599,6 +619,98 @@ function readJson(req, maxBytes) {
   });
 }
 
+// ---------------------------------------------------------------- checkout
+// Cuerpo crudo: la firma HMAC del webhook se calcula sobre los bytes exactos
+// que envió Duffel, así que no se puede pasar por JSON.parse antes de verificar.
+function readRaw(req, maxBytes) {
+  maxBytes = maxBytes || 65536;
+  return new Promise(function (resolve, reject) {
+    const chunks = [];
+    let size = 0;
+    req.on('data', function (chunk) {
+      size += chunk.length;
+      if (size > maxBytes) { const e = new Error('Cuerpo demasiado grande.'); e.status = 413; reject(e); req.destroy(); return; }
+      chunks.push(chunk);
+    });
+    req.on('end', function () { resolve(Buffer.concat(chunks)); });
+    req.on('error', reject);
+  });
+}
+
+// El client key habilita el formulario de tarjeta PCI de Duffel. No es el
+// access token, así que puede viajar al browser. Se cachea unos minutos para
+// no gastarse una llamada de Duffel en cada apertura del checkout.
+let clientKeyCache = { value: null, expiresAt: 0 };
+async function duffelClientKey(req, res) {
+  if (!duffel.isConfigured()) return sendJson(res, 503, { error: 'La reserva de vuelos todavía no está disponible.' });
+  if (clientKeyCache.value && clientKeyCache.expiresAt > Date.now()) {
+    return sendJson(res, 200, { clientKey: clientKeyCache.value });
+  }
+  const key = await duffel.createClientKey();
+  clientKeyCache = { value: key, expiresAt: Date.now() + 10 * 60 * 1000 };
+  sendJson(res, 200, { clientKey: key });
+}
+
+// Crea la orden en Duffel y la cobra. El importe lo calcula el server leyendo
+// la oferta otra vez: el browser solo manda el id de la oferta y los datos de
+// los pasajeros, nunca un precio.
+async function crearOrdenVuelo(req, res, body) {
+  if (!duffel.isConfigured()) return sendJson(res, 503, { error: 'La reserva de vuelos todavía no está disponible.' });
+  if (limited('orden-vuelo:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados intentos seguidos. Esperá un minuto y probá de nuevo.' });
+  body = body && typeof body === 'object' ? body : {};
+  const result = await duffel.createOrder({
+    offerId: body.offerId,
+    cardId: body.cardId,
+    threeDSecureSessionId: body.threeDSecureSessionId,
+    passengers: body.passengers
+  });
+  sendJson(res, 201, {
+    orderId: result.order_id,
+    bookingReference: result.booking_reference,
+    status: result.status,
+    charged: result.quote.charge_amount,
+    currency: result.quote.currency,
+    cost: result.quote.cost,
+    markupAmount: result.quote.markup_amount,
+    markupPercent: result.quote.markup_percent
+  });
+}
+
+// Webhook de Duffel. NO es crítico para cobrar: la orden se crea de a cara en
+// crearOrdenVuelo y devuelve el resultado de forma síncrona. Esto solo mantiene
+// el estado alineado si el vuelo se cancela o modifica después.
+//
+// El esquema de firma de Duffel no está documentado públicamente con certeza,
+// así que el nombre del header y el algoritmo son configurables. Si no hay
+// secreto configurado el endpoint se cierra: es preferible no sincronizar a
+// aceptar pedidos de cualquiera que adivine la URL.
+function duffelWebhook(req, res) {
+  const secret = String(process.env.DUFFEL_WEBHOOK_SECRET || '');
+  if (!secret) return sendJson(res, 503, { error: 'Webhooks deshabilitados.' });
+  const headerName = String(process.env.DUFFEL_WEBHOOK_SIGNATURE_HEADER || 'x-duffel-signature').toLowerCase();
+  const provided = String(req.headers[headerName] || '');
+  return readRaw(req).then(function (raw) {
+    const expected = crypto.createHmac('sha256', secret).update(raw).digest('hex');
+    const a = Buffer.from(provided);
+    const b = Buffer.from(expected);
+    // timingSafeEqual exige mismo largo: comparar sin isso filtra el largo real.
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      return sendJson(res, 401, { error: 'Firma inválida.' });
+    }
+    let event;
+    try { event = JSON.parse(raw.toString('utf8') || '{}'); } catch (e) { return sendJson(res, 400, { error: 'JSON inválido.' }); }
+    const data = event && event.data || {};
+    console.log('[duffel-webhook]', JSON.stringify({
+      type: String(event.type || data.type || ''),
+      order: String(data.id || ''),
+      status: String(data.status || data.identifier || '')
+    }));
+    sendJson(res, 200, { received: true });
+  }).catch(function (e) {
+    sendJson(res, e.status || 500, { error: e.message || 'No se pudo procesar el webhook.' });
+  });
+}
+
 function registrarTransferencia(req, res, body) {
   body = body && typeof body === 'object' ? body : {};
   const amount = Number(body.amount);
@@ -921,6 +1033,12 @@ function prelaunchAuthorized(req) {
  */
 const PRELAUNCH_PUBLIC_API = new Set(['/api/config']);
 
+// Rutas que NO pasan por el candado de pre-lanzamiento. El webhook queda
+// fuera porque lo llama Duffel desde sus servidores, no el navegador: si
+// exigiera el user/pass de /app, nunca llegaría. No es un hueco de seguridad
+// porque duffelWebhook() rechaza el pedido salvo que la firma HMAC cuadre.
+const PRELAUNCH_EXEMPT = new Set(['/api/duffel/webhook']);
+
 function denyPrelaunchJson(res) {
   // Sin WWW-Authenticate a propósito: en una respuesta a un fetch de la app
   // ese encabezado hace que el navegador abra el diálogo de Basic Auth en
@@ -999,13 +1117,28 @@ function createServer() {
     // seguían respondiendo 200 sin contraseña y devolvían cotizaciones reales,
     // consumiendo la cuota de Duffel y de Booking a nombre de cualquiera que
     // supiera la URL.
-    if (url.pathname.indexOf('/api/') === 0 && !PRELAUNCH_PUBLIC_API.has(url.pathname)) {
+    if (url.pathname.indexOf('/api/') === 0 && !PRELAUNCH_PUBLIC_API.has(url.pathname) && !PRELAUNCH_EXEMPT.has(url.pathname)) {
       if (!prelaunchAuthorized(req)) return denyPrelaunchJson(res);
     }
     if (req.method === 'POST' && url.pathname === '/api/vuelos/buscar') {
       return readJson(req).then(function (body) { return buscarVuelos(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la bÃºsqueda.' });
       });
+    }
+    if (req.method === 'GET' && url.pathname === '/api/duffel/client-key') {
+      return duffelClientKey(req, res).catch(function (e) {
+        console.error('[duffel-client-key]', e);
+        sendJson(res, e.status || 502, { error: e.message || 'No pudimos preparar el pago.' });
+      });
+    }
+    if (req.method === 'POST' && url.pathname === '/api/duffel/orden') {
+      return readJson(req).then(function (body) { return crearOrdenVuelo(req, res, body); }).catch(function (e) {
+        console.error('[duffel-orden]', e);
+        sendJson(res, e.status || 502, { error: e.message || 'No pudimos completar la reserva.' });
+      });
+    }
+    if (req.method === 'POST' && url.pathname === '/api/duffel/webhook') {
+      return duffelWebhook(req, res);
     }
     if (req.method === 'GET' && url.pathname === '/api/vuelos/comprar') {
       if (limited('vuelos-comprar:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas bÃºsquedas seguidas. EsperÃ¡ un minuto y probÃ¡ de nuevo.' });

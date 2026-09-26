@@ -252,3 +252,81 @@ $$;
 revoke all on public.waitlist from anon, authenticated;
 grant execute on function public.waitlist_count() to anon, authenticated;
 grant execute on function public.waitlist_signup(text, text) to anon, authenticated;
+
+-- Órdenes de vuelo cobradas con tarjeta a través de Duffel.
+--
+-- Es distinta de reservas_hoteles: aquella es de Travelpayouts (4-5% sobre
+-- reservas de Booking, que se cobran 60-90 días después y llegan sin nuestro
+-- user_id). Acá el cobro es inmediato y sincrónico contra nuestro propio
+-- pedido, así que sí se puede associate al user_id y, sobre todo, se guarda
+-- el desglose del markup para saber cuánto se ganó de verdad.
+--
+-- La escribe el navegador con la clave anónima después de que el servidor
+-- devuelve 201, por eso la RLS puede seguir atando cada fila a su usuario.
+-- `cost` y `markup_amount` vienen del server (que relee la oferta en Duffel),
+-- nunca del cliente: si se pudieran alterar, la conciliación no valdría.
+create table if not exists public.ordenes_vuelo (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  trip_id uuid references public.trips(id) on delete set null,
+  duffel_order_id text not null unique,
+  duffel_offer_id text,
+  booking_reference text,
+  airline text,
+  origin text,
+  destination text,
+  departure_date date,
+  return_date date,
+  passengers integer not null default 1 check (passengers > 0),
+  cost numeric not null check (cost >= 0),
+  markup_amount numeric not null check (markup_amount >= 0),
+  markup_percent numeric not null check (markup_percent >= 0),
+  charged numeric not null check (charged > 0),
+  currency text not null default 'USD',
+  status text not null default 'confirmed'
+    check (status in ('pending', 'confirmed', 'cancelled', 'refunded', 'failed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.ordenes_vuelo enable row level security;
+
+create policy "Users can read their own flight orders"
+  on public.ordenes_vuelo for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own flight orders"
+  on public.ordenes_vuelo for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own flight orders"
+  on public.ordenes_vuelo for update
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create index if not exists ordenes_vuelo_user_created_idx
+  on public.ordenes_vuelo (user_id, created_at desc);
+
+-- Conciliación: cuánto se facturó y cuánto se ganó, por mes y por markup.
+-- Ahora mismo no hay política de select para anon: la vista es solo de la
+-- persona dueña. Para el negocio se lee con credenciales de servidor.
+create or replace function public.ingresos_vuelo_mensual(p_mes date)
+returns table(ordenes bigint, facturado numeric, costo numeric, margen numeric, margen_pct numeric)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    count(*),
+    coalesce(sum(charged), 0),
+    coalesce(sum(cost), 0),
+    coalesce(sum(markup_amount), 0),
+    case when coalesce(sum(charged), 0) > 0
+      then round((sum(markup_amount) / sum(charged) * 100)::numeric, 2)
+      else 0 end
+  from public.ordenes_vuelo
+  where status = 'confirmed'
+    and date_trunc('month', created_at)::date = p_mes;
+$$;
+
+revoke all on public.ordenes_vuelo from anon;
+grant execute on function public.ingresos_vuelo_mensual(date) to authenticated;
