@@ -296,6 +296,12 @@
     tour(['igu'], 'Foz de Iguazú, Brasil', 'Represa de Itaipú', 'Visita guiada a una de las mayores hidroeléctricas del mundo.', 45, 'Incluye traslado y recorrido panorámico por el circuito de visitantes de Itaipú Binacional, con parada en el mirador y proyección institucional. Duración aproximada de 2 horas y media. Llevar documento de identidad, es obligatorio para el ingreso.'),
     tour(['rec'], 'Recife, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
     tour(['poa'], 'Porto Alegre, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
+    // Buenos Aires estaba sin una sola experiencia: la seccion de tours no se
+    // dibujaba para ese destino y la Guia Secreta quedaba pegada a los hoteles.
+    tour(['bue'], 'Buenos Aires, Argentina', 'Teatro Colón, Casa Rosada y el centro histórico', 'Los tres íconos de la ciudad con guía y entrada al Teatro Colón.', 28, 'Incluye guía local y recorrido por el Teatro Colón, la Plaza de Mayo, la Casa Rosada y el Cabildo, con entrada al Teatro Colón sujeta a disponibilidad. Duración aproximada de 3 horas. Llevar documento para el acceso.'),
+    tour(['bue'], 'Buenos Aires, Argentina', 'City tour en bici por La Boca y Puerto Madero', 'Pedaleo por el barrio del tango, los muelles y la Costanera Sur.', 32, 'Incluye bicicleta, casco y guía. Recorrido por Caminito, la Vuelta de Rocha, Puerto Madero y la Costanera, con paradas para fotos. Duración aproximada de 3 horas. El circuito es de asfalto urbano y conviene circular con precaución.'),
+    tour(['bue'], 'Buenos Aires, Argentina', 'Mercado de San Telmo y Antigüedades', 'Puestos de antigüedades, librerías de mapa y mogules del barrio.', 24, 'Incluye acompañamiento de guía por el Mercado de Antigüedades de San Telmo y las calles vecinas. Duración aproximada de 2 horas. El consume y las compras no están incluidos, y hay que negociar el precio con el vendedor.'),
+    tour(['bue'], 'Buenos Aires, Argentina', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
   ];
   function tourDetailText(tour) {
     return tour.details || 'Incluye la actividad principal y acompañamiento local. Confirmá horarios, punto de encuentro, disponibilidad y valor final antes de reservar.';
@@ -348,19 +354,10 @@
       { label: 'Cataratas (lado brasileño)', key: 'igu' }, { label: 'Parque das Aves', key: 'igu' }
     ] }
   ];
-  // La rotación arranca siempre con Río y Floripa: son los dos destinos que
-  // la gente busca para una escapada y los que la app sabe cotizar mejor
-  // (vuelo directo desde Montevideo y, en Floripa, además bus). El resto de la
-  // lista sigue rotando por temporada para que la sección no sea siempre la
-  // misma. El orden final de las tarjetas lo define el precio, no esta lista.
-  var MONTH_DESTINATION_ROTATION = {
-    0: ['rio', 'florianopolis', 'buzios', 'gramado'], 1: ['rio', 'florianopolis', 'buzios', 'nordeste'],
-    2: ['rio', 'florianopolis', 'buzios', 'buenosaires'], 3: ['rio', 'florianopolis', 'nordeste', 'buenosaires'],
-    4: ['rio', 'florianopolis', 'nordeste', 'buenosaires'], 5: ['rio', 'florianopolis', 'nordeste', 'gramado'],
-    6: ['rio', 'florianopolis', 'buenosaires', 'gramado', 'foz'], 7: ['rio', 'florianopolis', 'buzios', 'gramado'],
-    8: ['rio', 'florianopolis', 'buzios', 'buenosaires'], 9: ['rio', 'florianopolis', 'buzios', 'nordeste'],
-    10: ['rio', 'florianopolis', 'nordeste', 'salvador'], 11: ['rio', 'florianopolis', 'nordeste', 'foz']
-  };
+  // Antes esta seccion rotaba 3 o 4 destinos por mes (esta tabla) para que la
+  // vitrina no fuera siempre la misma. Se mostraba tan poco que la pagina parecia
+  // no tener mas destinos, asi que ahora entran todos los grupos y los tabs de
+  // mes solo cambian las fechas y el precio de cada tarjeta.
   var BRASIL_DEFAULT_COSTS = {
     beach: {
       flightUsd: 460,
@@ -520,8 +517,9 @@
     var index = Math.max(0, Math.min(windows.length - 1, Number(windowIndex) || 0));
     var window = windows[index];
     var monthIndex = window.month;
-    var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex] || MONTH_DESTINATION_ROTATION[new Date().getMonth()];
-    var groups = DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; });
+    // Todos los grupos, siempre. El tab de mes cambia las fechas y el precio de
+    // cada tarjeta, no qué destinos se ofrecen: por eso ya no se filtra nada.
+    var groups = DESTINATION_GROUPS;
     // Las seis pestañas, de ahora hacia adelante. El mes actual va primero y
     // queda marcado: no tiene sentido ofrecer enero cuando estamos en
     // septiembre, ni un destino de diciembre para alguien que viaja en marzo.
@@ -592,7 +590,6 @@
     var windows = featuredMonthWindows(6);
     var index = Math.max(0, Math.min(windows.length - 1, Number(windowIndex) || 0));
     var window = windows[index];
-    var monthIndex = window.month;
     // La ventana entra en la clave porque las fechas cambian: sin ella, un
     // mismo mes en dos ventanas distintas devolvería precios de otro viaje.
     var cacheKey = window.depIso + '|' + window.retIso + '|' + S.pax + '|' + S.style + '|' + S.origin;
@@ -601,8 +598,7 @@
       return;
     }
     renderDestinationHighlights(index, null);
-    var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex] || MONTH_DESTINATION_ROTATION[new Date().getMonth()];
-    var groups = DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; });
+    var groups = DESTINATION_GROUPS;
     var items = groups.map(function (group) {
       return featuredPriceKey(window, featuredSubcategory(group, window)).item;
     });
@@ -664,10 +660,10 @@
     p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     return (neg ? '-' : '') + p.join(dec ? ',' : '');
   }
-  // Dolar y peso Uruguay no se usan con centavos en la practica, asi que van
-  // redondos como siempre. El real si los tiene, pero en un total de viaje
-  // "R$ 5.013,22" es ruido: decimales solo cuando el valor es chico
-  // (tarifas por kWh, por noche), nunca en totales.
+  // Dolar, peso uruguayo y peso argentino no se usan con centavos en la
+  // practica, asi que van redondos como siempre. El real si los tiene, pero en
+  // un total de viaje "R$ 5.013,22" es ruido: decimales solo cuando el valor
+  // es chico (tarifas por kWh, por noche), nunca en totales.
   function decimalesDe(code, total) {
     if (code !== 'BRL') return 0;
     return Math.abs(total) >= 1000 ? 0 : 2;
@@ -1929,15 +1925,25 @@
         : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Escribí el monto que querés gastar.</span><strong>Ingresar monto</strong></button>';
       return presets + custom;
     }
+    // El nº de columnas sale de la cantidad de opciones. Con 3 columnas y
+    // cuatro cajas (tres presets + "Personalizado") la cuarta caía sola en una
+    // fila y dejaba la retícula descompensada; con 2 columnas el bloque de
+    // comidas queda 2x2 y el de transporte, 3 en línea. La caja del input es
+    // además más alta que las otras, así que en el CSS la fila se iguala con
+    // grid-auto-rows:1fr.
+    function optionsGrid(options, kind) {
+      var total = options.length + 1;
+      return '<div class="daily-budget__options daily-budget__options--cols-' + (total >= 4 ? 2 : total) + '">' + optionMarkup(options, kind) + '</div>';
+    }
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group" data-budget-anchor="local">' +
       '<div class="daily-budget__header"><span>Transporte local</span></div>' +
-      '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
+      optionsGrid(localOptions, 'local') +
       '</div>' +
       '<div class="daily-budget__group" data-budget-anchor="comidas">' +
       '<div class="daily-budget__header"><span>Comidas</span></div>' +
-      '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
+      optionsGrid(foodOptions, 'food') +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
       '</section>';

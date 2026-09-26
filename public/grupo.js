@@ -94,7 +94,9 @@
       var found = FX.monedas.filter(function (m) { return m.code === normalized; })[0];
       if (found && found.simbolo) return found.simbolo;
     }
-    var symbols = { USD: 'US$', BRL: 'R$', UYU: '$', ARS: '$', EUR: '€', GBP: '£', MXN: '$', CLP: '$', COP: '$' };
+    // Respaldo para cuando las tasas no llegaron. Tiene los mismos simbolos
+    // que server.js para que el group no cambie de cara a mitad de carga.
+    var symbols = { USD: 'US$', BRL: 'R$', UYU: 'UYU$', ARS: 'ARS$', EUR: '€', GBP: '£', MXN: 'MXN$', CLP: 'CLP$', COP: 'COP$' };
     return symbols[normalized] || normalized + ' ';
   }
   // Centimas solo cuando las hay: en un viaje entre amigos casi todos los

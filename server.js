@@ -41,12 +41,18 @@ const duffel = require('./lib/providers/duffel');
  * con USD. Preferimos mostrar un selector incompleto a multiplicar por un numero
  * inventado.
  */
+// El símbolo lleva el código adelante cuando el "$" a secas no alcanza. Con
+// pesos Belgrano, pesosCb ordenados y dólares publishing en la misma pantalla,
+// un "$" suelto no dice nada: "UYU$" y "ARS$" se leen de un vistazo y no
+// hacen falta dosguias.
+// Ojo: esto ropes en cada monto de la app. "US$ 1.200" pasa a "US$ 1.200"
+// (igual, el dólar ya lo llevaba) pero "UYU$ 1.200" es mas largo que "$ 1.200".
+// Es el precio de no tener que adivinar.
 const MONEDAS = [
   { code: 'USD', etiqueta: 'Dólares', simbolo: 'US$' },
   { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
-  // El peso va como "$" a secas, que es como se usa aca. El codigo (UYU) al
-  // lado lo desambigua; "UYU$" era ruido.
-  { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }
+  { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: 'UYU$' },
+  { code: 'ARS', etiqueta: 'Pesos argentinos', simbolo: 'ARS$' }
 ];
 let fxCache = { rates: null, base: 'USD', until: 0, source: '', at: 0 };
 
