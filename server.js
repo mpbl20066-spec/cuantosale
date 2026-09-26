@@ -186,8 +186,50 @@ function fallbackHotelsFor(destKey, destName, tierIndex, extra) {
     };
   });
 }
+// Los 32 caracteres que Windows-1252 ubica entre 0x80 y 0x9F, donde Latin-1 no
+// tiene nada. Sin esta tabla "â€™" (un apostrophe curly de UTF-8 doble
+// codificado) no se puede deshacer, porque '€' y '™' caen fuera de Latin-1.
+// El listado sale de la implementación de WHATWG de Node y no de memoria:
+// varios de estos caracteres son de control (U+0081, U+008D, U+008F, U+0090,
+// U+009D) y es fácil cambiarlos de lugar sin darse cuenta, lo que rompe el
+// repair sin que salte ningún error.
+const CP1252_HIGH = '\u20AC\u0081\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\u008D\u017D\u008F\u0090\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\u009D\u017E\u0178';
+// Traduce el texto a sus bytes Windows-1252. Devuelve null si algún carácter no
+// se puede representar, en cuyo caso el texto no viene de un doble encoding.
+function cp1252Bytes(text) {
+  const bytes = [];
+  for (const ch of text) {
+    const code = ch.codePointAt(0);
+    if (code < 0x80) { bytes.push(code); continue; }
+    // El bloque alto de CP1252 se busca por carácter y no por rango: '€' es
+    // U+20AC, muy por encima de 0x9F, y representa el byte 0x80.
+    const high = CP1252_HIGH.indexOf(ch);
+    if (high >= 0) { bytes.push(0x80 + high); continue; }
+    if (code >= 0xa0 && code <= 0xff) { bytes.push(code); continue; }
+    return null;
+  }
+  return Buffer.from(bytes);
+}
+// La API de Booking/Booqio a veces devuelve el nombre del hotel ya doble
+// codificado: los bytes UTF-8 de "Búzios" leídos como Latin-1, que en pantalla
+// aparecen como "BÃºzios". Se re-decodifica sólo cuando está la firma del
+// problema y el resultado es texto UTF-8 válido, así una cadena correcta
+// queda intacta.
+function fixMojibake(value) {
+  const text = String(value == null ? '' : value);
+  // "Ã", "Â" y "â" son la huella de UTF-8 interpretado como un código de una
+  // byte por carácter.
+  if (!/[ÃÂâ]/.test(text)) return text;
+  const bytes = cp1252Bytes(text);
+  if (!bytes) return text;
+  const fixed = bytes.toString('utf8');
+  // Caracteres de reemplazo = la secuencia no era UTF-8 válido: es un texto que
+  // ya traía esas letras de forma legítima ("Hotel São Paulo" en mayúsculas).
+  if (fixed.indexOf('\uFFFD') >= 0) return text;
+  return fixed;
+}
 function sanitizeHotelName(value) {
-  const raw = String(value || '').trim();
+  const raw = fixMojibake(value).trim();
   if (!raw) return 'Hotel recomendado';
   return raw.replace(/\s*,\s*Brasil\s*$/gi, '').replace(/\s+/g, ' ').trim();
 }

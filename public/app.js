@@ -1082,10 +1082,13 @@
     return unique;
   }
 
+  // El <select> va envuelto para poder dibujarle el chevron con ::after, igual
+  // que .custom-select__control: con appearance:none el control nativo del
+  // sistema queda con la flecha desalineada y el alto distinto al del resto.
   function hotelTypeSelectMarkup(meta) {
     var selected = meta.hotelType || 'intermedio';
     var options = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
-    return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></label>';
+    return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></span></label>';
   }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
