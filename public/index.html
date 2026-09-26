@@ -14,23 +14,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=44">
-<!-- Script de afiliados Travelpayouts (Money Script) -->
-<script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1" data-cmp-ab="2">
-  (function () {
-      function loadAffiliateScript() {
-        var script = document.createElement("script");
-        script.async = true;
-        script.setAttribute("data-cmp-ab","2");
-        script.src = 'https://emrldco.com/NTc2NTAy.js?t=576502';
-        document.head.appendChild(script);
-      }
-      window.addEventListener('load', function () {
-        if ('requestIdleCallback' in window) window.requestIdleCallback(loadAffiliateScript, { timeout: 5000 });
-        else window.setTimeout(loadAffiliateScript, 2000);
-      }, { once: true });
-  })();
-</script>
+<link rel="stylesheet" href="/style.css?v=45">
+<!-- Checkout de vuelos. El custom element de Duffel se carga desde su CDN
+     oficial: no requiere React ni build step, así que el proyecto sigue
+     siendo JS vanilla. La versión va fija a propósito (no "?v=N") porque el
+     cache-busting de este repo solo aplica a /style.css y /app.js. -->
+<script src="https://assets.duffel.com/components/3.3.1/duffel-card-form.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -121,6 +110,7 @@
   <aside id="trip-summary" class="trip-summary" aria-live="polite" hidden></aside>
 
   <div id="booking-modal" class="booking-modal" hidden aria-hidden="true"></div>
+  <div id="checkout-modal" class="booking-modal" hidden aria-hidden="true" aria-label="Reservar y pagar tu vuelo"></div>
   <div id="auth-modal" class="booking-modal" hidden aria-hidden="true"></div>
   <div id="trips-modal" class="booking-modal" hidden aria-hidden="true"></div>
   <div id="install-help" class="booking-modal install-help" hidden aria-hidden="true">
@@ -135,6 +125,6 @@
 </div>
 
 <script defer src="/pwa.js"></script>
-<script defer src="/app.js?v=53"></script>
+<script defer src="/app.js?v=54"></script>
 </body>
 </html>

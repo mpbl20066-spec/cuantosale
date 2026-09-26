@@ -348,14 +348,16 @@
   function originCityName(code) { return originLabel(code).split(' · ')[0]; }
   // Subcategoría que abre una tarjeta. Sin selector de zona, la tarjeta usa
   // siempre la primera, así que el orden de la lista importa: la que esté
-  // primero es la que define el precio y las fechas que ve la persona.
+  // primero es la que define el precio que ve la persona. Las fechas ya no
+  // salen de acá sino de la ventana del mes, que es la misma para todas las
+  // tarjetas de esa ventana.
   //
   // Réveillon es el caso trampa. En DESTINATION_GROUPS la entrada de Río es
-  // 'Réveillon Copacabana (31/12)' y featuredTravelDates() fuerza el 28/12
-  // cuando la etiqueta dice "reveillon": si quedara primera, la tarjeta de
-  // Río mostraría fechas de diciembre en septiembre. Por eso el fin de año
-  // sólo se usa en diciembre, y en el resto del año se cuela la zona general.
-  function featuredSubcategory(group, monthIndex) {
+  // 'Réveillon Copacabana (31/12)', que sólo tiene sentido a fin de año: si
+  // quedara primera todo el año, la tarjeta de Río mostraría Copacabana de
+  // Nochevieja en septiembre. Por eso el fin de año sólo se usa en diciembre.
+  function featuredSubcategory(group, window) {
+    var monthIndex = window ? window.month : new Date().getMonth();
     var list = monthIndex === 10 && group.id === 'nordeste'
       ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; })
       : group.subcategories;
@@ -374,25 +376,38 @@
   // duplicar la lógica (y terminaría mostrando un número que no coincide con
   // el de la propuesta). Se mandan las fechas ya resueltas por tarjeta para
   // que el servidor no tenga que volver a decidir qué fecha va con qué mes.
-  function featuredPriceKey(monthIndex, subcategory) {
-    var dates = featuredTravelDates(monthIndex, subcategory);
+  function featuredPriceKey(window, subcategory) {
     return {
       key: subcategory.key,
-      item: subcategory.key + '~' + dates.dep + '~' + dates.ret + '~' + (subcategory.hotelType || 'intermedio'),
-      dates: dates
+      item: subcategory.key + '~' + window.depIso + '~' + window.retIso + '~' + (subcategory.hotelType || 'intermedio'),
+      dates: window
     };
   }
-  function renderDestinationHighlights(monthIndex, pricedByKey) {
+  function renderDestinationHighlights(windowIndex, pricedByKey) {
     var root = document.getElementById('destination-highlights');
     if (!root) return;
-    var names = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    var windows = featuredMonthWindows(6);
+    var index = Math.max(0, Math.min(windows.length - 1, Number(windowIndex) || 0));
+    var window = windows[index];
+    var monthIndex = window.month;
     var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex] || MONTH_DESTINATION_ROTATION[new Date().getMonth()];
     var groups = DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; });
-    var monthOptions = names.map(function (name, index) { return '<option value="' + index + '"' + (index === monthIndex ? ' selected' : '') + '>' + name.charAt(0).toUpperCase() + name.slice(1) + '</option>'; }).join('');
+    // Las seis pestañas, de ahora hacia adelante. El mes actual va primero y
+    // queda marcado: no tiene sentido ofrecer enero cuando estamos en
+    // septiembre, ni un destino de diciembre para alguien que viaja en marzo.
+    var tabs = windows.map(function (w, i) {
+      var isCurrent = i === 0;
+      var special = w.label !== 'Fin de semana';
+      var name = MONTH_NAMES[w.month].charAt(0).toUpperCase() + MONTH_NAMES[w.month].slice(1, 3);
+      return '<button type="button" class="featured-month' + (i === index ? ' is-active' : '') + (special ? ' is-special' : '') + '"'
+        + ' data-feature-month="' + i + '" aria-pressed="' + (i === index) + '"'
+        + ' title="' + esc(MONTH_NAMES[w.month] + ' ' + w.year + ' — ' + w.label) + '">'
+        + '<b>' + esc(name) + '</b><small>' + esc(isCurrent ? 'Este mes' : w.label) + '</small></button>';
+    }).join('');
     // Cada tarjeta se precifica con la misma zona que abriría "Ver propuesta",
     // así el número de la tarjeta y el de la propuesta nunca se contradicen.
     var priced = groups.map(function (group) {
-      return { group: group, first: featuredPriceKey(monthIndex, featuredSubcategory(group, monthIndex)) };
+      return { group: group, first: featuredPriceKey(window, featuredSubcategory(group, window)) };
     });
     // Ordenamos por precio ascendente: la sección se llama "más económicos", así
     // que lo más barato tiene que verse primero. Los que aún no tienen precio
@@ -419,36 +434,49 @@
         ? '<p class="featured-destination__price"><b>' + money(price) + '</b><span class="featured-destination__price-tag">desde, por persona</span><span class="featured-destination__price-mode">' + esc(price.modeShort || '') + '</span></p>'
         : '<p class="featured-destination__price is-loading" aria-hidden="true"><span class="featured-destination__skeleton"></span></p>';
       return '<article class="featured-destination' + (isCheapest ? ' is-cheapest' : '') + '" data-featured-destination="' + esc(group.id) + '"'
-        + ' data-feature-price-key="' + esc(first.key) + '" data-feature-dates="' + esc(travel.dep) + '|' + esc(travel.ret) + '">'
+        + ' data-feature-price-key="' + esc(first.key) + '" data-feature-dates="' + esc(travel.depIso) + '|' + esc(travel.retIso) + '">'
         + (isCheapest ? '<span class="featured-destination__flag">M&aacute;s barato</span>' : '')
         + '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy">'
         + '<div class="featured-destination__scrim"></div>'
         + '<div class="featured-destination__overlay"><h3>' + esc(cardLabel) + '</h3>' + priceLine + '</div></div>'
-        + '<div class="featured-destination__meta"><span>' + esc(shortDateLabel(travel.dep).replace(/\./g, '')) + ' &rarr; ' + esc(shortDateLabel(travel.ret).replace(/\./g, '')) + '</span>'
+        + '<div class="featured-destination__meta">'
+        + '<span class="featured-destination__when"><b>' + esc(window.label) + '</b> ' + esc(shortDateLabel(travel.depIso).replace(/\./g, '')) + ' &rarr; ' + esc(shortDateLabel(travel.retIso).replace(/\./g, '')) + '</span>'
         + '<span>' + S.pax + ' ' + (S.pax === 1 ? 'viajero' : 'viajeros') + '</span></div>'
         + '<div class="featured-destination__body">'
         + '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">&rarr;</span></button>'
         + '</div></article>';
     }).join('');
-    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">M&Aacute;S ECON&Oacute;MICOS</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona. Toc&aacute; un destino y te mostramos la propuesta.</p></div><label>Ver para <select data-feature-month aria-label="Simular mes para ver destinos">' + monthOptions + '</select></label></div><div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">&lsaquo;</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">&rsaquo;</button></div>';
+    var next = nextSpecialDateAfter(6);
+    var nextLine = next
+      ? '<p class="destination-highlights__next">Pr&oacute;ximo feriado largo: <b>' + esc(next.label) + '</b>, ' + esc(shortDateLabel(next.depIso).replace(/\./g, '')) + '</p>'
+      : '';
+    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">M&Aacute;S ECON&Oacute;MICOS</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona, para los pr&oacute;ximos seis meses. Toc&aacute; un destino y te mostramos la propuesta.</p>' + nextLine + '</div></div>'
+      + '<div class="featured-months" role="group" aria-label="Elegir mes de la escapada">' + tabs + '</div>'
+      + '<div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">&lsaquo;</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">&rsaquo;</button></div>';
   }
   // Precios de las tarjetas. Se piden una vez por mes/viajeros/estilo y se
   // cachean: el carrusel se vuelve a pintar al cambiar de mes, y sin cache cada
   // repintado volvería a pegarle al servidor.
   var featuredPricesCache = {};
-  function loadFeaturedPrices(monthIndex, force) {
-    var cacheKey = monthIndex + '|' + S.pax + '|' + S.style + '|' + S.origin;
+  function loadFeaturedPrices(windowIndex, force) {
+    var windows = featuredMonthWindows(6);
+    var index = Math.max(0, Math.min(windows.length - 1, Number(windowIndex) || 0));
+    var window = windows[index];
+    var monthIndex = window.month;
+    // La ventana entra en la clave porque las fechas cambian: sin ella, un
+    // mismo mes en dos ventanas distintas devolvería precios de otro viaje.
+    var cacheKey = window.depIso + '|' + window.retIso + '|' + S.pax + '|' + S.style + '|' + S.origin;
     if (!force && featuredPricesCache[cacheKey]) {
-      renderDestinationHighlights(monthIndex, featuredPricesCache[cacheKey]);
+      renderDestinationHighlights(index, featuredPricesCache[cacheKey]);
       return;
     }
-    renderDestinationHighlights(monthIndex, null);
+    renderDestinationHighlights(index, null);
     var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex] || MONTH_DESTINATION_ROTATION[new Date().getMonth()];
     var groups = DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; });
     var items = groups.map(function (group) {
-      return featuredPriceKey(monthIndex, featuredSubcategory(group, monthIndex)).item;
+      return featuredPriceKey(window, featuredSubcategory(group, window)).item;
     });
-    var qs = new URLSearchParams({ month: String(monthIndex), pax: String(S.pax), style: S.style, origin: S.origin, items: items.join(',') });
+    var qs = new URLSearchParams({ pax: String(S.pax), style: S.style, origin: S.origin, items: items.join(',') });
     fetch('/api/destinos-destacados?' + qs.toString())
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -458,8 +486,9 @@
         featuredPricesCache[cacheKey] = byKey;
         // Sólo repintamos si el usuario sigue en el mismo mes: si ya cambió a
         // otro, su render fue el que pidió esta tanda y no hay que pisarlo.
-        if (document.querySelector('[data-feature-month]') && Number(document.querySelector('[data-feature-month]').value) === monthIndex) {
-          renderDestinationHighlights(monthIndex, byKey);
+        var active = document.querySelector('[data-feature-month].is-active');
+        if (active && Number(active.getAttribute('data-feature-month')) === index) {
+          renderDestinationHighlights(index, byKey);
         }
       })
       .catch(function () { /* sin precios: las tarjetas quedan igual, sin cifras */ });
@@ -510,24 +539,146 @@
     if (departureLabel) departureLabel.textContent = shortDateLabel(S.dep);
     if (returnLabel) returnLabel.textContent = shortDateLabel(S.ret);
   }
-  function featuredTravelDates(monthIndex, subcategory) {
-    var selectedMonth = Math.max(0, Math.min(11, Number(monthIndex) || 0));
-    var text = String(subcategory && subcategory.label || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    var departure;
-    if (text.indexOf('reveillon') >= 0) {
-      departure = new Date(today.getFullYear(), 11, 28, 12);
-      if (departure <= today) departure = new Date(today.getFullYear() + 1, 11, 28, 12);
-    } else {
-      departure = new Date(today.getFullYear(), selectedMonth, 12, 12);
-      if (departure <= today) {
-        var nextDay = addDays(today, 1);
-        var lastDayOfSelectedMonth = new Date(today.getFullYear(), selectedMonth + 1, 0, 12);
-        departure = today.getMonth() === selectedMonth && today.getFullYear() === lastDayOfSelectedMonth.getFullYear() && nextDay <= lastDayOfSelectedMonth
-          ? nextDay : new Date(today.getFullYear() + 1, selectedMonth, 12, 12);
-      }
+  /* ---------- fechas de escapada ---------- */
+  var MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+  // Pascua gregoriana por el algoritmo anónimo. Hace falta porque Carnaval y
+  // Semana Santa no son fechas fijas: dependen de Pascua, que va entre el 22
+  // de marzo y el 25 de abril. Escribirlas a mano las deja desfasadas casi
+  // todos los años.
+  function easterSunday(year) {
+    var a = year % 19;
+    var b = Math.floor(year / 100);
+    var c = year % 100;
+    var d = Math.floor(b / 4);
+    var e = b % 4;
+    var f = Math.floor((b + 8) / 25);
+    var g = Math.floor((b - f + 1) / 3);
+    var h = (19 * a + b - d - g + 15) % 30;
+    var i = Math.floor(c / 4);
+    var k = c % 4;
+    var l = (32 + 2 * e + 2 * i - h - k) % 7;
+    var m = Math.floor((a + 11 * h + 22 * l) / 451);
+    var month = Math.floor((h + l - 7 * m + 114) / 31);
+    var day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month - 1, day, 12);
+  }
+
+  // Feriados nationally fijos de Uruguay. Carnaval y Semana Santa no van acá
+  // porque salen de Pascua. Se listan los que efectivamente arman escapada:
+  // 1 May y 19 Jun no generan fin de semana largo en la mayoría de los años.
+  var URUGUAY_HOLIDAYS = [
+    { month: 0, day: 1, label: 'Año Nuevo' },
+    { month: 7, day: 25, label: 'Día de la Independencia' },
+    { month: 9, day: 12, label: 'Día de la Raza' },
+    { month: 10, day: 2, label: 'Día de los Difuntos' },
+    { month: 11, day: 25, label: 'Navidad' }
+  ];
+
+  /*
+   * Ventanas especiales de un año: Carnaval, Semana Santa, los feriados fijos
+   * que arman puente y el fin de año. No dependen del mes que se está viendo.
+   */
+  function featuredSpecialWindows(year) {
+    var list = [];
+    var easter = easterSunday(year);
+    // Carnaval: lunes y martes. La escapada clásica arranca el viernes previo.
+    list.push({ dep: addDays(easter, -51), ret: addDays(easter, -45), label: 'Carnaval' });
+    // Semana Santa: de miércoles a domingo.
+    list.push({ dep: addDays(easter, -4), ret: easter, label: 'Semana Santa' });
+    // Feriados fijos. Sólo interessan cuando caen de martes a jueves (puente
+    // con el fin de semana) o en lunes (se corre el fin de semana entero). Si
+    // caen sábado o domingo no generan nada que organizar.
+    URUGUAY_HOLIDAYS.forEach(function (holiday) {
+      var date = new Date(year, holiday.month, holiday.day, 12);
+      var dow = date.getDay();
+      if (dow === 1) list.push({ dep: addDays(date, -4), ret: date, label: holiday.label });
+      else if (dow >= 2 && dow <= 4) list.push({ dep: addDays(date, -4), ret: addDays(date, 2), label: holiday.label });
+    });
+    // Fin de año: el tramo más pedido del calendario, del 30 de diciembre al
+    // 2 de enero.
+    list.push({ dep: new Date(year, 11, 30, 12), ret: new Date(year + 1, 0, 2, 12), label: 'Fin de año' });
+    return list;
+  }
+
+  /*
+   * Los meses que se ofrecen, con una ventana cada uno.
+   *
+   * La sección ofrece seis meses desde el actual, no el calendario entero: un
+   * destino de diciembre no le sirve a nadie en marzo.
+   *
+   * Una ventana especial se asigna al primer mes que toca y no se repite. Sin
+   * esa regla, Fin de año (que sale el 30 de diciembre y vuelve el 2 de enero)
+   * aparecería en diciembre y en enero con las mismas fechas, y pasar de un
+   * mes al otro no cambiaría nada. Con ella, diciembre se queda con Fin de año
+   * y enero cae en el fin de semana más cercano.
+   *
+   * Todas las tarjetas de un mes comparten las mismas fechas: antes cada
+   * tarjeta podía caer en una fecha distinta según su subcategoría, y dos
+   * tarjetas de la misma pantalla llegaban a decir fechas diferentes.
+   */
+  function featuredMonthWindows(count) {
+    count = count || 6;
+    var specials = [];
+    for (var y = today.getFullYear(); y <= today.getFullYear() + 2; y++) {
+      specials = specials.concat(featuredSpecialWindows(y));
     }
-    var tripNights = text.indexOf('fin de semana') >= 0 ? 2 : 7;
-    return { dep: iso(departure), ret: iso(addDays(departure, tripNights)) };
+    var used = {};
+    var out = [];
+    for (var i = 0; i < count; i++) {
+      var cursor = new Date(today.getFullYear(), today.getMonth() + i, 1, 12);
+      var month = cursor.getMonth(), year = cursor.getFullYear();
+      // El año importa tanto como el mes. Comparar sólo getMonth() dejaba pasar
+      // la ventana de fin de año de 2027 a enero de 2027, y el mes mostraba
+      // unas fechas de diciembre del año siguiente.
+      var fallsInMonth = function (date) {
+        return date.getFullYear() === year && date.getMonth() === month;
+      };
+      var candidates = specials.filter(function (w) {
+        return fallsInMonth(w.dep) || fallsInMonth(w.ret);
+      }).sort(function (a, b) { return a.dep - b.dep; });
+      var pick = null;
+      for (var j = 0; j < candidates.length; j++) {
+        var key = iso(candidates[j].dep);
+        if (used[key] || candidates[j].dep <= today) continue;
+        used[key] = true;
+        pick = candidates[j];
+        break;
+      }
+      if (!pick) {
+        // Sin feriado en el mes: un fin de semana a mitad de mes, que es lo que
+        // la gente busca igual. Se toma el tercer sábado del mes.
+        var departure = new Date(year, month, 1, 12);
+        departure = addDays(departure, (6 - departure.getDay() + 7) % 7 + 14);
+        pick = { dep: departure, ret: addDays(departure, 2), label: 'Fin de semana' };
+      }
+      if (pick.dep <= today) {
+        var nextDay = addDays(today, 1);
+        if (nextDay <= new Date(year, month + 1, 0, 12)) {
+          pick = { dep: nextDay, ret: addDays(nextDay, 2), label: 'Fin de semana' };
+        }
+      }
+      out.push({
+        month: month, year: year, label: pick.label,
+        dep: pick.dep, ret: pick.ret,
+        depIso: iso(pick.dep), retIso: iso(pick.ret),
+        nights: Math.round((pick.ret - pick.dep) / 864e5)
+      });
+    }
+    return out;
+  }
+
+  // Próximo feriado largo que cae FUERA de la ventana visible, para poder
+  // avisar cuándo toca Carnaval aunque todavía falte para llegar a él.
+  // Reusa la misma asignación: si no, devolvería el primero de los seis meses
+  // que ya están a la vista, que no es lo que el usuario necesita saber.
+  function nextSpecialDateAfter(visibleMonths) {
+    var visible = visibleMonths || 6;
+    var all = featuredMonthWindows(visible + 12);
+    for (var i = visible; i < all.length; i++) {
+      if (all[i].label !== 'Fin de semana' && all[i].dep > today) return all[i];
+    }
+    return null;
   }
   function calendarMonthMarkup(monthDate) {
     var year = monthDate.getFullYear();
@@ -1885,13 +2036,25 @@
       var agencyLabel = offer.agency ? '<small class="flight-agency">Venta por ' + esc(offer.agency) + '</small>' : '';
       var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
       var priceKnown = offer.price_usd !== null && Number.isFinite(Number(offer.price_usd));
-      var affiliateHref = offer.provider === 'travelpayouts' ? '/api/vuelos/comprar?search_id=' + encodeURIComponent(offer.search_id || '') + '&term=' + encodeURIComponent(offer.affiliate_term || '') : '';
-      var affiliateLink = affiliateHref ? '<a class="btn btn-secondary flight-buy-link" href="' + esc(affiliateHref) + '" target="_blank" rel="noopener noreferrer">Ver precio y reservar</a>' : '';
+      // El vuelo se vende acá mismo, contra Duffel: no hay link saliente a
+      // Aviasales ni a Booking. El botón lleva el id de la oferta y nada
+      // más: el importe se recalcula en el server contra el precio real de
+      // Duffel, así que alterar el data-price de acá no cambia lo que se cobra.
+      var duffelCheckout = offer.provider === 'duffel' && priceKnown
+        ? '<button type="button" class="btn btn-secondary flight-buy-link" data-checkout-flight="' + esc(offer.id) + '"' +
+          ' data-checkout-price="' + esc(offer.price_usd) + '"' +
+          ' data-checkout-airline="' + esc(offer.airline) + '"' +
+          ' data-checkout-origin="' + esc((offer.departure_airport || {}).code || '') + '"' +
+          ' data-checkout-destination="' + esc((offer.arrival_airport || {}).code || '') + '"' +
+          ' data-checkout-departure="' + esc(String(offer.departure || '').slice(0, 10)) + '"' +
+          ' data-checkout-return="' + esc(String(offer.return_departure || '').slice(0, 10)) + '"' +
+          ' data-checkout-passengers="' + esc(String((offer.passenger_ids || []).length || 1)) + '">Reservar y pagar</button>'
+        : '';
       return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + agencyLabel + cabinBadge + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
-        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="Esta tarifa no está disponible en USD para sumarla al presupuesto."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'No convertible a US$')) + '</button>' + affiliateLink + '</div></article>';
+        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="Esta tarifa no está disponible en USD para sumarla al presupuesto."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'No convertible a US$')) + '</button>' + duffelCheckout + '</div></article>';
     }).join('') + '</div>';
   }
   function searchFlights(meta, section) {
@@ -3105,28 +3268,22 @@
     }
     var highlights = document.getElementById('destination-highlights');
     if (highlights) {
-      loadFeaturedPrices(new Date().getMonth());
-      highlights.addEventListener('change', function (event) {
-        var month = event.target.closest('[data-feature-month]');
-        if (!month) return;
-        var monthIndex = Number(month.value);
-        loadFeaturedPrices(monthIndex, true);
-        var featuredSelection = featuredProposalSelection;
-        var selectedSubcategory = featuredSelection && featuredSelection.subcategory;
-        var dates = featuredTravelDates(monthIndex, selectedSubcategory);
-        S.dep = dates.dep; S.ret = dates.ret;
-        syncDateRangeFields();
-        if (featuredSelection) {
-          pendingDestinationScroll = true;
-          selectDestination(selectedSubcategory.key, selectedSubcategory.label, true);
-        } else if (S.dest !== 'todos') {
-          pendingDestinationScroll = true;
-          schedule();
-        } else if (massSearch) {
-          findDestinations();
-        }
-      });
+      loadFeaturedPrices(0);
+      // Las pestañas de mes son botones, no un <select>: se escuchan por click.
+      // Cada ventana trae sus propias fechas, así que al cambiar de mes se
+      // actualizan también los campos de ida y vuelta del formulario.
       highlights.addEventListener('click', function (event) {
+        var monthTab = event.target.closest('[data-feature-month]');
+        if (monthTab) {
+          var windowIndex = Number(monthTab.getAttribute('data-feature-month'));
+          var window = featuredMonthWindows(6)[windowIndex];
+          if (!window) return;
+          loadFeaturedPrices(windowIndex, true);
+          S.dep = window.depIso; S.ret = window.retIso;
+          syncDateRangeFields();
+          if (S.dest !== 'todos') { pendingDestinationScroll = true; schedule(); }
+          return;
+        }
         var arrow = event.target.closest('[data-feature-prev], [data-feature-next]');
         if (arrow) {
           var carousel = highlights.querySelector('.destination-highlights__carousel');
@@ -3145,14 +3302,16 @@
         var choose = event.target.closest('[data-feature-search]');
         if (!choose) return;
         var group = DESTINATION_GROUPS.filter(function (item) { return item.id === choose.getAttribute('data-feature-search'); })[0];
-        // Misma zona que priced la tarjeta: el precio mostrado y la propuesta
-        // que se abre tienen que ser la misma, siempre.
-        var subcategory = group && featuredSubcategory(group, Number($('#destination-highlights [data-feature-month]').value));
+        var activeTab = document.querySelector('[data-feature-month].is-active');
+        var windowIndex = activeTab ? Number(activeTab.getAttribute('data-feature-month')) : 0;
+        var window = featuredMonthWindows(6)[windowIndex];
+        if (!group || !window) return;
+        // Misma zona y mismas fechas que las de la tarjeta: el precio mostrado
+        // y la propuesta que se abre tienen que ser la misma, siempre.
+        var subcategory = featuredSubcategory(group, window);
         if (subcategory) {
-          var selectedMonth = Number($('#destination-highlights [data-feature-month]').value);
-          featuredProposalSelection = { monthIndex: selectedMonth, subcategory: subcategory };
-          var dates = featuredTravelDates(selectedMonth, subcategory);
-          S.dep = dates.dep; S.ret = dates.ret;
+          featuredProposalSelection = { monthIndex: window.month, subcategory: subcategory };
+          S.dep = window.depIso; S.ret = window.retIso;
           syncDateRangeFields();
           pendingDestinationScroll = true;
           selectDestination(subcategory.key, subcategory.label, true, subcategory.hotelType);

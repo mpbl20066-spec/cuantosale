@@ -401,6 +401,70 @@ function haversineKm(a, b) {
       if (originalMax === undefined) delete process.env.RATE_LIMIT_PER_MIN; else process.env.RATE_LIMIT_PER_MIN = originalMax;
     }
   });
+  await t('las ventanas de escapada ofrecen seis meses distintos y en el futuro', async function () {
+    // El código de fechas vive en public/app.js, que es un script de navegador
+    // sin build: no se puede require()ar. Se ejecuta tal cual está, para que
+    // la prueba ejercite el código real y no una copia.
+    const fs = require('fs');
+    const path = require('path');
+    const source = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const block = source.match(/var MONTH_NAMES[\s\S]*?function nextSpecialDateAfter[\s\S]*?\n  }/);
+    assert.ok(block, 'no se encontró el bloque de fechas en app.js');
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const addDays = function (d, n) { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; };
+    const iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+    const scope = { today: today, addDays: addDays, iso: iso, module: { exports: {} } };
+    const factory = new Function('today', 'addDays', 'iso',
+      block[0] + '\nreturn { easterSunday: easterSunday, featuredMonthWindows: featuredMonthWindows, nextSpecialDateAfter: nextSpecialDateAfter, MONTH_NAMES: MONTH_NAMES };');
+    const fechas = factory(today, addDays, iso);
+
+    // Pascua contra el calendario gregoriano publicado. Si este algoritmo se
+    // rompe, Carnaval y Semana Santa caen en fechas que no existen.
+    const pascua = { 2020: [3, 12], 2021: [3, 4], 2022: [3, 17], 2023: [3, 9], 2024: [2, 31], 2025: [3, 20], 2026: [3, 5], 2027: [2, 28], 2028: [3, 16], 2030: [3, 21] };
+    Object.keys(pascua).forEach(function (year) {
+      const d = fechas.easterSunday(Number(year));
+      assert.ok(d.getMonth() === pascua[year][0] && d.getDate() === pascua[year][1],
+        'Pascua ' + year + ': calculó ' + d.toDateString() + ', el calendario dice ' + pascua[year][0] + '/' + pascua[year][1]);
+    });
+
+    const windows = fechas.featuredMonthWindows(6);
+    assert.strictEqual(windows.length, 6, 'deben ofrecerse seis meses');
+    // Empiezan en el mes actual, que es lo que se pidió: nada de meses pasados.
+    assert.strictEqual(windows[0].month, today.getMonth());
+    assert.strictEqual(windows[0].year, today.getFullYear());
+    // Ninguna ventana en el pasado y ninguna repetida: si Fin de año saliera
+    // en diciembre y en enero con las mismas fechas, cambiar de mes no
+    // cambiaría nada.
+    const departures = windows.map(function (w) { return w.depIso; });
+    const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    assert.strictEqual(new Set(departures).size, 6, 'hay meses con las mismas fechas: ' + departures.join(', '));
+    windows.forEach(function (w) {
+      // w.dep y w.ret ya son Date; w.depIso/w.retIso son las strings.
+      assert.ok(w.dep > today, 'ventana en el pasado: ' + w.depIso);
+      assert.ok(w.ret > w.dep, 'la vuelta es anterior a la ida: ' + w.depIso);
+      assert.ok(w.label, 'ventana sin etiqueta');
+    });
+    // Los seis meses son correlativos.
+    for (let i = 1; i < windows.length; i++) {
+      const expected = (new Date(windows[0].year, windows[0].month + i, 1, 12)).getMonth();
+      assert.strictEqual(windows[i].month, expected, 'el mes ' + (i + 1) + ' no es correlativo');
+    }
+    // Y cada ventana sale de verdad en el mes que muestra, o con días de
+    // anticipación como para un viaje que arranca el último día. Este es el
+    // invariante que hace falta: sin él, comparar sólo el número de mes
+    // dejaba que enero tomara el 30 de diciembre del año siguiente, y como
+    // esa fecha está en el futuro igual pasaba todos los demás controles.
+    windows.forEach(function (w) {
+      const monthStart = new Date(w.year, w.month, 1, 12);
+      const monthEnd = new Date(w.year, w.month + 1, 0, 12);
+      const earliest = new Date(monthStart.getTime() - 10 * 864e5);
+      assert.ok(w.dep >= earliest && w.dep <= monthEnd,
+        'la ventana de ' + MONTHS[w.month] + ' sale el ' + w.depIso + ', que no pertenece a ese mes');
+    });
+    // El próximo feriado largo tiene que caer fuera de la ventana visible.
+    const next = fechas.nextSpecialDateAfter(6);
+    if (next) assert.ok(departures.indexOf(next.depIso) < 0, 'el "próximo feriado" ya está en la ventana visible');
+  });
   await t('sirve la web y bloquea rutas fuera de /public', async function () {
     const r = await get(port, '/');
     assert.strictEqual(r.status, 200); assert.ok(r.body.indexOf('cuántosale') >= 0);
