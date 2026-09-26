@@ -958,15 +958,25 @@ function featuredPriceItems(req, res, url) {
   return sendJson(res, 200, { pax: pax, style: style, items: items });
 }
 
-// Páginas que sólo existen durante el prelanzamiento: la app de cotización y
-// el reparto de gastos. La raíz del dominio muestra la waitlist al público,
-// así que estas no pueden quedar accesibles sólo por adivinar la URL.
+// Páginas que sólo existen durante el prelanzamiento: la app de cotización. La
+// raíz del dominio muestra la waitlist al público, así que ésta no puede quedar
+// accesible sólo por adivinar la URL.
 //
-// El candado va por ARCHIVO y no por ruta a propósito: la app también se
-// alcanza como /app, como /app/ y como /index.html (el catch-all de más abajo
-// sirve ese archivo directamente), y el reparto como /grupo y /grupo.html.
-// Filtrando sólo la ruta /app, esas otras entradas quedarían abiertas.
-const PRELAUNCH_FILES = new Set(['index.html', 'grupo.html']);
+// El candado va por ARCHIVO y no por ruta a propósito: la app también se alcanza
+// como /app, como /app/ y como /index.html (el catch-all de más abajo sirve ese
+// archivo directamente). Filtrando sólo la ruta /app, esas otras entradas
+// quedarían abiertas.
+//
+// grupo.html NO va acá a propósito. El reparto de gastos es un link para
+// mandar por WhatsApp: si pidiera user/pass, el receptor no podría abrirlo y la
+// vista previa del link (que no manda credenciales) saldría como "Acceso
+// restringido" en vez de mostrar el nombre del viaje. Queda abierto, y no
+// contradice el motivo del candado: el riesgo era /api/cotizar y /api/hoteles
+// respondiendo sin contraseña y quemando cuota de Duffel y Booking, y /grupo no
+// toca ninguno de los dos (sólo /api/config, que ya es público, y Supabase
+// directo con la anon key). El acceso a los datos de un grupo lo protege el
+// uuid de la URL, no el candado: es el mismo modelo que ya estaba antes.
+const PRELAUNCH_FILES = new Set(['index.html']);
 
 function prelaunchGuard() {
   const user = String(process.env.APP_USER || '').trim();
@@ -1072,7 +1082,7 @@ function checkPrelaunchAccess(req, res, relPath) {
 }
 
 const COMPRESSIBLE_EXT = new Set(['.html', '.css', '.js', '.json', '.svg']);
-function serveStatic(req, res, pathname) {
+function serveStatic(req, res, pathname, transform) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/waitlist.html';
   if (checkPrelaunchAccess(req, res, rel)) return;
@@ -1081,27 +1091,126 @@ function serveStatic(req, res, pathname) {
   fs.readFile(file, function (err, data) {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
     const ext = path.extname(file);
-    const headers = {
-      'Content-Type': MIME[ext] || 'application/octet-stream',
-      // Las rutas con `?v=N` son inmutables por diseño: cambiar el archivo
-      // implica bumpear la versión, así que cachearlas fuerte es seguro y
-      // evita redescargar app.js/style.css enteros en cada visita. Lo que no
-      // lleva versión (HTML de entrada, manifest, íconos) sigue sin cachear.
-      'Cache-Control': req.url.indexOf('?') >= 0 ? 'public, max-age=31536000, immutable' : 'no-cache',
-      'Content-Security-Policy': CSP,
-      'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer'
-    };
-    if (COMPRESSIBLE_EXT.has(ext) && data.length > 512) {
-      const acceptEncoding = String(req.headers['accept-encoding'] || '');
-      if (acceptEncoding.indexOf('gzip') >= 0) {
-        headers['Content-Encoding'] = 'gzip';
-        headers['Vary'] = 'Accept-Encoding';
-        res.writeHead(200, headers);
-        return res.end(zlib.gzipSync(data, { level: 6 }));
+    const send = function (payload) {
+      const headers = {
+        'Content-Type': MIME[ext] || 'application/octet-stream',
+        // Las rutas con `?v=N` son inmutables por diseño: cambiar el archivo
+        // implica bumpear la versión, así que cachearlas fuerte es seguro y
+        // evita redescargar app.js/style.css enteros en cada visita. Lo que no
+        // lleva versión (HTML de entrada, manifest, íconos) sigue sin cachear.
+        'Cache-Control': req.url.indexOf('?') >= 0 ? 'public, max-age=31536000, immutable' : 'no-cache',
+        'Content-Security-Policy': CSP,
+        'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer'
+      };
+      if (COMPRESSIBLE_EXT.has(ext) && payload.length > 512) {
+        const acceptEncoding = String(req.headers['accept-encoding'] || '');
+        if (acceptEncoding.indexOf('gzip') >= 0) {
+          headers['Content-Encoding'] = 'gzip';
+          headers['Vary'] = 'Accept-Encoding';
+          res.writeHead(200, headers);
+          return res.end(zlib.gzipSync(payload, { level: 6 }));
+        }
       }
+      res.writeHead(200, headers);
+      res.end(payload);
+    };
+    // `transform` deja reescribir el archivo antes de mandarlo (ver
+    // serveGrupoPage). Si falla, se manda el archivo original: una vista
+    // previa sin el nombre del viaje es mucho mejor que una página rota.
+    if (typeof transform !== 'function') return send(data);
+    Promise.resolve(transform(data)).then(send).catch(function () { send(data); });
+  });
+}
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+// La página de /grupo es una SPA: el navegador arma todo con JS, así que si el
+// servidor entrega el HTML tal cual, la vista previa del link que se pega en
+// WhatsApp o iMessage no tiene idea de qué viaje es. Con el nombre del grupo
+// en los og:tags, la vista previa ya sale con el nombre del viaje.
+const grupoNameCache = new Map();
+const grupoNameInFlight = new Map();
+const GRUPO_NAME_TTL_MS = 60000;
+const GRUPO_NAME_STALE_MS = 3600000; // hasta una hora de datos viejos antes de cortar
+const GRUPO_NAME_MAX = 500;
+async function grupoNombre(groupId) {
+  const cached = grupoNameCache.get(groupId);
+  const age = cached ? Date.now() - cached.at : Infinity;
+  if (cached && age < GRUPO_NAME_TTL_MS) return cached.name;
+  // Un link compartido en un grupo de 200 personas abre 200 veces casi juntas.
+  // Con stale-while-revalidate cada una sale con la última respuesta buena sin
+  // esperar el round-trip, y sólo una pega a Supabase por grupo. El nombre del
+  // viaje es un dato cosmético para la vista previa: que llegue con hasta una
+  // hora de atraso no molesta, y por eso el HTML sin nombre es un resultado
+  // aceptable (y el que se devuelve si la consulta falla).
+  if (cached && age < GRUPO_NAME_STALE_MS) {
+    grupoNombreRefresh(groupId);
+    return cached.name;
+  }
+  return grupoNombreRefresh(groupId);
+}
+// Deduplica refrescos: si llegan 50 requests juntas y no hay nada cacheado,
+// sale una sola consulta, no 50. El resultado (incluido el fallo) se comparte
+// con todas las que estavam esperando.
+function grupoNombreRefresh(groupId) {
+  const pending = grupoNameInFlight.get(groupId);
+  if (pending) return pending;
+  const request = fetchGrupoNombre(groupId).then(function (name) {
+    grupoNameInFlight.delete(groupId);
+    if (name) {
+      // Cache acotada: los ids son uuid que cualquiera puede inventar, así que
+      // un crawler probando /grupo/<random> no debe hacer crecer el Map sin fin.
+      if (grupoNameCache.size >= GRUPO_NAME_MAX) {
+        const oldest = grupoNameCache.keys().next().value;
+        grupoNameCache.delete(oldest);
+      }
+      grupoNameCache.set(groupId, { name, at: Date.now() });
     }
-    res.writeHead(200, headers);
-    res.end(data);
+    return name;
+  }, function () {
+    grupoNameInFlight.delete(groupId);
+    return null;
+  });
+  grupoNameInFlight.set(groupId, request);
+  return request;
+}
+async function fetchGrupoNombre(groupId) {
+  const url = process.env.SUPABASE_URL || 'https://hqyzmeordvjccytgltse.supabase.co';
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  if (!anonKey) return null;
+  const endpoint = url + '/rest/v1/grupos_viaje?select=name&limit=1&id=eq.' + encodeURIComponent(groupId);
+  const response = await fetchWithTimeout(endpoint, { headers: { apikey: anonKey, authorization: 'Bearer ' + anonKey, accept: 'application/json' } }, 2500);
+  if (!response.ok) return null;
+  const rows = await response.json();
+  const name = rows && rows[0] && rows[0].name ? String(rows[0].name).trim() : '';
+  return name || null;
+}
+function serveGrupoPage(req, res, groupId) {
+  if (!groupId) { serveStatic(req, res, '/grupo.html'); return; }
+  serveStatic(req, res, '/grupo.html', async function (data) {
+    const name = await grupoNombre(groupId);
+    if (!name) return data;
+    const proto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim() || 'http';
+    const pageUrl = proto + '://' + String(req.headers.host || 'cuantosale.uy') + '/grupo/' + groupId;
+    const title = escapeHtml(name + ' · CuántoSale');
+    const description = escapeHtml('Sumate a dividir los gastos de "' + name + '" con tus amigos. No hace falta crear una cuenta.');
+    const tags = [
+      '<meta property="og:type" content="website">',
+      '<meta property="og:site_name" content="CuántoSale">',
+      '<meta property="og:title" content="' + title + '">',
+      '<meta property="og:description" content="' + description + '">',
+      '<meta property="og:url" content="' + escapeHtml(pageUrl) + '">',
+      '<meta name="twitter:card" content="summary">',
+      '<meta name="twitter:title" content="' + title + '">',
+      '<meta name="twitter:description" content="' + description + '">'
+    ].join('');
+    let html = data.toString('utf8').replace(/<title>[\s\S]*?<\/title>/i, '<title>' + title + '</title>');
+    html = html.replace('</head>', tags + '</head>');
+    return Buffer.from(html, 'utf8');
   });
 }
 
@@ -1194,9 +1303,12 @@ function createServer() {
       return sendJson(res, 410, { error: 'Ya no mostramos cargadores: la fuente disponible sólo cubre el destino, no el trayecto.' });
     }
     // /grupo y /grupo/<uuid> son rutas cliente (SPA): el id se lee del path
-    // en el navegador, así que el servidor siempre entrega el mismo HTML.
-    if (/^\/grupo(\/[0-9a-f-]{1,36})?\/?$/i.test(url.pathname)) {
-      try { serveStatic(req, res, '/grupo.html'); } catch (e) { res.writeHead(400); res.end(); }
+    // en el navegador, así que el servidor siempre entrega el mismo HTML. Para
+    // /grupo/<uuid> eso se completa con los og:tags del nombre del viaje, que
+    // es lo único que un crawler o una vista previa de chat llega a ver.
+    const grupoRoute = url.pathname.match(/^\/grupo(?:\/([0-9a-f-]{1,36}))?\/?$/i);
+    if (grupoRoute) {
+      try { serveGrupoPage(req, res, grupoRoute[1] || null); } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
     if (/^\/waitlist\/?$/i.test(url.pathname)) {
