@@ -843,7 +843,10 @@
       return '<span class="proposal-breakdown__segment" style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
     }).join('');
     var rows = entries.map(function (entry) {
-      return '<div class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '"><div class="proposal-breakdown__label"><i style="background:var(' + entry.color + ')"></i><span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></div>';
+      // Mismo ícono que usa el panel "MI VIAJE", en vez de un cuadrado de
+      // color: las dos vistas ya se leen con la misma clave visual.
+      var icon = categoryIcon(entry.category, entry.color);
+      return '<div class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '"><div class="proposal-breakdown__label">' + icon + '<span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></div>';
     }).join('');
     return '<div class="proposal-breakdown__stack" role="img" aria-label="Distribución del costo">' + segments + '</div>' +
       '<div class="proposal-breakdown__list">' + rows + '</div>';
