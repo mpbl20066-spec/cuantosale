@@ -1426,8 +1426,12 @@
     Array.prototype.forEach.call(jumpers, function (node) {
       var target = budgetAnchorFor(node.getAttribute('data-jump-category'));
       var jumpable = !!target;
+      var label = node.getAttribute('data-jump-label');
       node.classList.toggle('is-jumpable', jumpable);
+      // Sin destino el botón se desactiva y deja de anunciarse como un salto:
+      // el texto visible ya dice el nombre del rubro.
       if ('disabled' in node) node.disabled = !jumpable;
+      if (label) node.setAttribute('aria-label', jumpable ? 'Ir a la sección de ' + label : label);
     });
   }
   function highlightBudgetAnchor(target) {
@@ -1466,8 +1470,10 @@
         if (token === budgetJumpToken && !landed()) go('auto', true);
       }, 350);
     }
-    // Un frame de margen: si veníamos de un scroll en vuelo, primero lo cancela.
-    window.requestAnimationFrame(function () { go('smooth', false); });
+    // Sin requestAnimationFrame: no dispara con la pestaña en segundo plano y
+    // el clic se pierde. Un timeout(0) deja pasar el frame igual y además corre
+    // siempre, que es lo que importa para un salto pedido por la persona.
+    window.setTimeout(function () { go('smooth', false); }, 0);
     return true;
   }
   function handleBudgetJump(e) {
@@ -1579,7 +1585,7 @@
       // Sólo el ícono: el cuadrado de color repetía la misma información y
       // ocupaba ancho al lado del texto. El botón entero lleva a la sección
       // donde ese rubro se configura, igual que las filas del desglose.
-      return '<button type="button" class="trip-summary__item' + (item.n ? '' : ' is-zero') + '" data-jump-category="' + item.cat + '" aria-label="Ir a la sección de ' + esc(item.label) + '">'
+      return '<button type="button" class="trip-summary__item' + (item.n ? '' : ' is-zero') + '" data-jump-category="' + item.cat + '" data-jump-label="' + esc(item.label) + '" aria-label="Ir a la sección de ' + esc(item.label) + '">'
         + categoryIcon(item.cat, item.color)
         + '<div class="trip-summary__meta"><b>' + item.label + '</b><span>' + item.meta + '</span></div>'
         + '<em>' + item.value + '</em>'
