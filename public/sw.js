@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v35';
+var CACHE_NAME = 'cuantosale-shell-v36';
 var APP_SHELL = [
   '/',
   '/manifest.json',

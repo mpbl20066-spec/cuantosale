@@ -1597,11 +1597,11 @@
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group">' +
-      '<div class="daily-budget__header"><span>Transporte local</span><small>Presupuesto libre</small></div>' +
+      '<div class="daily-budget__header"><span>Transporte local</span></div>' +
       '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
       '</div>' +
       '<div class="daily-budget__group">' +
-      '<div class="daily-budget__header"><span>Comidas</span><small>Presupuesto libre</small></div>' +
+      '<div class="daily-budget__header"><span>Comidas</span></div>' +
       '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
       '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
