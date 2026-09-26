@@ -3,17 +3,24 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v49';
+var CACHE_NAME = 'cuantosale-shell-v53';
 var APP_SHELL = [
-  '/',
+  // '/app' y NO '/': el servidor responde '/' con la landing de waitlist
+  // (server.js: if (rel === '/') rel = '/waitlist.html') y la calculadora vive
+  // en '/app'. Precachear '/' guardaba el mail-capture como si fuera el app
+  // shell, así que quien instalaba la PWA y perdía señal al abrirla veía
+  // "coming soon" en vez de la calculadora.
+  '/app',
   '/manifest.json',
-  '/style.css',
-  '/app.js',
   '/pwa.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',
   '/icons/apple-touch-icon.png'
+  // style.css y app.js NO van acá: el HTML los pide con '?v=N', y una entrada
+  // sin query nunca matchea esa URL (la clave del cache es la URL completa).
+  // Quedaban precacheadas y se descargaban igual: 352 KB de más en la primera
+  // visita, guardados bajo una clave que nadie consulta.
 ];
 
 self.addEventListener('install', function (event) {
@@ -39,11 +46,18 @@ self.addEventListener('fetch', function (event) {
     event.respondWith(fetch(request).then(function (response) {
       if (response.ok) {
         var copy = response.clone();
-        caches.open(CACHE_NAME).then(function (cache) { cache.put('/', copy); });
+        // Se cachea bajo la URL que se pidió, no bajo la clave literal '/'.
+        // Con la clave fija, abrir /grupo/<uuid> o /app sobreescribía la
+        // entrada '/' y el siguiente visitante offline se llevaba esa página.
+        caches.open(CACHE_NAME).then(function (cache) { cache.put(request, copy); });
       }
       return response;
     }).catch(function () {
-      return caches.match(request).then(function (cached) { return cached || caches.match('/'); });
+      return caches.match(request).then(function (cached) {
+        // Sin red: primero la URL exacta, después el shell de la app. La
+        // waitlist queda como último recurso, no como respuesta principal.
+        return cached || caches.match('/app') || caches.match('/');
+      });
     }));
     return;
   }

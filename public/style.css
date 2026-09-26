@@ -1,5 +1,24 @@
 :root{
   --bg:#F2F6FA; --surface:#FFFFFF; --ink:#10233E; --ink2:#48617F; --line:#DCE5EE;
+  /* --line es para separadores entre bloques, donde un tono suave está bien.
+     Para el BORDE de un control hace falta 3:1 contra el fondo (WCAG 1.4.11) y
+     --line daba 1.27:1 sobre blanco: los campos de origen, fechas, viajeros y
+     presupuesto se leían como texto flotante, no como campos. --control-line
+     da 3.1:1 sobre #FFFFFF y 4.9:1 sobre el surface del modo oscuro. */
+  --control-line:#7E8DA0;
+  /* Anillo de foco. Antes se usaba --accent (ámbar) con outline:3px, que da
+     1.86:1 sobre blanco y 1.71:1 sobre --bg: por debajo del 3:1 de WCAG 2.4.11,
+     o sea que el foco de teclado era prácticamente imperceptible. El halo
+     rgba(246,178,27,.18) de los campos era peor: 1.18:1. --focus es el mismo
+     celeste de marca (--cel), que da 5.97:1 en claro y 8.3:1 en oscuro. */
+  --focus:#1B5FA8;
+  /* Estado "elegido" de un control. Antes cada componente lo definia por su
+     cuenta y uno usaba --hero-bg, que en modo oscuro es ÁMBAR: el control de
+     3 opciones (Ahorrar / Equilibrado / Cómodo) quedaba ámbar seleccionado con
+     las otras dos más oscuras que la card, y "ámbar" dejaba de significar
+     "acento de marca" para significar "tu elección". Estos tres tokens son un
+     solo lugar donde definirlo. */
+  --selected-bg:#DCEBF8; --selected-border:#10233E; --selected-ink:#10233E;
   --action-bg:#10233E; --action-ink:#FFFFFF; --action-border:transparent;
   --control-bg:#FFFFFF; --control-border:#E2E8F0; --control-hover:#F8FAFC; --control-muted:#64748B; --control-selected:#F8FAFC; --control-selected-ink:#1D4ED8;
   --accent:#F6B21B; --accent-ink:#10233E;
@@ -14,21 +33,23 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B;
+    --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
     --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
     --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
     --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
     color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
     --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
+    --selected-bg:#1B3A63; --selected-border:#EEF3F9; --selected-ink:#EEF3F9;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B;
+  --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
   --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
   --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
   --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
   color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
   --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
+  --selected-bg:#1B3A63; --selected-border:#EEF3F9; --selected-ink:#EEF3F9;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
@@ -45,8 +66,14 @@ button,input,select{font:inherit;color:inherit}
 .wrap{max-width:760px;margin:0 auto;padding:20px 18px 72px}
 
 /* header */
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:21px;letter-spacing:-.02em}
+/* min-width:0 en los tres es lo que corta el desbordamiento: sin esto, un
+   flex item no puede encogerse por debajo de su contenido, asi que un nombre
+   largo ("María Fernanda Rodríguez") empujaba la barra mas alla del viewport.
+   En 360px el headerlogged-in necesita ~429px de los 324px disponibles, y
+   html/body no tienen overflow-xhidden, asi que se veía una barra de scroll
+   horizontal en cada visita autenticada. */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.logo{display:flex;align-items:center;gap:9px;flex:0 1 auto;min-width:0;overflow:hidden;font-weight:700;font-size:21px;letter-spacing:-.02em;white-space:nowrap}
 .logo svg{display:block}
 .chip{font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;background:var(--cel-soft);color:var(--ink)}
 h1{font-family:var(--fh);font-weight:800;font-size:clamp(52px,14vw,92px);line-height:.9;letter-spacing:-.01em;margin:24px 0 18px}
@@ -54,16 +81,20 @@ h1{font-family:var(--fh);font-weight:800;font-size:clamp(52px,14vw,92px);line-he
 /* form */
 .form{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:20px;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
-.date-range-picker{position:relative;min-width:0}.date-range-field{display:grid;align-content:center;gap:4px;width:100%;min-width:0;height:52px;padding:7px 14px;border:1.5px solid var(--line);border-radius:16px;background:var(--bg);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}.date-range-field:hover,.date-range-field[aria-expanded="true"]{border-color:var(--ink2)}.date-range-field:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(246,178,27,.18)}.date-range-field span{font-size:11px;font-weight:700;color:var(--ink2)}.date-range-field strong{overflow:hidden;font-size:15px;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.date-range-panel{position:absolute;top:calc(100% + 9px);left:0;z-index:60;width:min(700px,100%);max-height:min(75vh,620px);overflow:auto;padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 20px 48px rgba(16,35,62,.22)}.date-range-panel[hidden]{display:none}.date-range-panel__top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.date-range-panel__top p{margin:0;font-size:13px;font-weight:700;text-align:center}.date-range-nav{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:25px;line-height:1;cursor:pointer}.date-range-nav:disabled{opacity:.4;cursor:not-allowed}.date-range-months{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.date-range-month h3{margin:0 0 10px;text-align:center;font-size:15px;text-transform:capitalize}.date-range-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.date-range-weekday{display:grid;place-items:center;height:32px;color:var(--ink2);font-size:11px;font-weight:700}.date-range-day{display:grid;place-items:center;min-width:0;aspect-ratio:1;border:0;border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}.date-range-day:not(:disabled):hover{background:var(--cel-soft)}.date-range-day.is-in-range{border-radius:8px;background:var(--cel-soft)}.date-range-day.is-endpoint{border-radius:999px;background:var(--ink);color:#fff;font-weight:800}.date-range-day.is-today:not(.is-endpoint){box-shadow:inset 0 0 0 1px var(--cel)}.date-range-day:disabled{color:var(--ink2);opacity:.35;cursor:not-allowed}.date-range-day--blank{pointer-events:none}
+.date-range-picker{position:relative;min-width:0}.date-range-field{display:grid;align-content:center;gap:4px;width:100%;min-width:0;height:52px;padding:7px 14px;border:1.5px solid var(--control-line);border-radius:16px;background:var(--control-bg);color:var(--ink);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}.date-range-field:hover,.date-range-field[aria-expanded="true"]{border-color:var(--ink2)}.date-range-field:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}.date-range-field span{font-size:11px;font-weight:700;color:var(--ink2)}.date-range-field strong{overflow:hidden;font-size:15px;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}.date-range-panel{position:absolute;top:calc(100% + 9px);left:0;z-index:60;width:min(700px,100%);max-height:min(75vh,620px);overflow:auto;padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 20px 48px rgba(16,35,62,.22)}.date-range-panel[hidden]{display:none}.date-range-panel__top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.date-range-panel__top p{margin:0;font-size:13px;font-weight:700;text-align:center}/* 44px es el mínimo táctil de WCAG 2.5.5. Estos tres controles y chips estaban
+   en 38px y ~29px respectivamente: chicos para el dedo y, en el caso de los
+   filtros de vuelo, blancos para algo que se toca repetidamente al comparar
+   tarifas. */
+.date-range-nav{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-size:25px;line-height:1;cursor:pointer}.date-range-nav:disabled{opacity:.4;cursor:not-allowed}.date-range-months{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.date-range-month h3{margin:0 0 10px;text-align:center;font-size:15px;text-transform:capitalize}.date-range-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.date-range-weekday{display:grid;place-items:center;height:32px;color:var(--ink2);font-size:11px;font-weight:700}.date-range-day{display:grid;place-items:center;min-width:0;aspect-ratio:1;border:0;border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}.date-range-day:not(:disabled):hover{background:var(--cel-soft)}.date-range-day.is-in-range{border-radius:8px;background:var(--cel-soft)}.date-range-day.is-endpoint{border-radius:999px;background:var(--ink);color:#fff;font-weight:800}.date-range-day.is-today:not(.is-endpoint){box-shadow:inset 0 0 0 1px var(--cel)}.date-range-day:disabled{color:var(--ink2);opacity:.35;cursor:not-allowed}.date-range-day--blank{pointer-events:none}
 label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
-.inp{width:100%;min-width:0;height:52px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg);padding:0 14px;font-weight:500;font-size:16px;color:var(--ink);transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.inp{width:100%;min-width:0;height:52px;border-radius:16px;border:1.5px solid var(--control-line);background:var(--control-bg);padding:0 14px;font-weight:500;font-size:16px;color:var(--ink);transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
 .inp::placeholder{color:var(--ink2);opacity:1}
 .inp:hover{border-color:var(--ink2)}
 .custom-select{position:relative;width:100%}
-.custom-select__control{position:relative;display:flex;align-items:center;width:100%;min-width:0;min-height:52px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--control-bg);box-shadow:0 2px 10px rgba(15,23,42,.04);transition:border-color .18s ease,box-shadow .18s ease}
+.custom-select__control{position:relative;display:flex;align-items:center;width:100%;min-width:0;min-height:52px;border:1.5px solid var(--control-line);border-radius:14px;background:var(--control-bg);box-shadow:0 2px 10px rgba(15,23,42,.04);transition:border-color .18s ease,box-shadow .18s ease}
 .custom-select__control::after{position:absolute;top:50%;right:19px;width:8px;height:8px;border-right:1.8px solid var(--control-muted);border-bottom:1.8px solid var(--control-muted);content:"";pointer-events:none;transform:translateY(-75%) rotate(45deg);transition:transform .18s ease}
-.custom-select__control:focus-within,.custom-select.is-open .custom-select__control{border-color:var(--accent);box-shadow:0 0 0 4px rgba(246,178,27,.22)}
-.custom-select__trigger{flex:1 1 auto;width:100%;min-width:0;min-height:50px;padding:0 52px 0 18px;border:0;border-radius:14px;background:transparent;box-shadow:none;color:var(--ink);font:500 15px system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;outline:none}
+.custom-select__control:focus-within{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}.custom-select.is-open .custom-select__control{border-color:var(--accent);box-shadow:0 0 0 4px rgba(246,178,27,.22)}
+.custom-select__trigger{flex:1 1 auto;width:100%;min-width:0;min-height:50px;padding:0 52px 0 18px;border:0;border-radius:14px;background:transparent;box-shadow:none;color:var(--ink);font:500 16px var(--fb);outline:none}
 .custom-select__trigger::placeholder{color:var(--control-muted);opacity:1}
 .custom-select.is-open .custom-select__control::after{transform:translateY(-25%) rotate(225deg)}
 .custom-select__value{display:block;flex:1 1 auto;text-align:left;font-size:15px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -83,13 +114,13 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .custom-select__option-sub{font-size:12px;color:var(--control-muted);line-height:1.35}
 .custom-select__option.is-selected .custom-select__option-main{color:var(--ink)}
 .custom-select__option.is-selected .custom-select__option-sub{color:var(--control-muted)}
-.inp:focus,.inp:focus-visible,.seg button:focus-visible,.step button:focus-visible,.bar:focus-visible,.apply:focus-visible,.cta-link:focus-visible,.guide-unlock:focus-visible,summary:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(246,178,27,.18)}
+.inp:focus,.inp:focus-visible,.seg button:focus-visible,.step button:focus-visible,.bar:focus-visible,.apply:focus-visible,.cta-link:focus-visible,.guide-unlock:focus-visible,summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
 .origin{position:relative;display:grid;grid-template-columns:18px minmax(0,1fr);align-items:center;column-gap:8px;font-size:14px;color:var(--ink2)}
 .origin>svg{grid-column:1;grid-row:1}
 .origin>label{grid-column:2;grid-row:1;margin:0;font-size:12px}
-.origin__control{position:relative;grid-column:1/-1;display:flex;min-width:0;height:52px;margin-top:6px;border:1.5px solid var(--line);border-radius:16px;background:var(--bg)}
-.origin__control:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px rgba(246,178,27,.18)}
-.origin__control input{flex:1;width:100%;min-width:0;padding:0 10px 0 14px;border:0;border-radius:16px;background:transparent;color:var(--ink);font-size:14px;font-weight:600;outline:none}
+.origin__control{position:relative;grid-column:1/-1;display:flex;min-width:0;height:52px;margin-top:6px;border:1.5px solid var(--control-line);border-radius:16px;background:var(--control-bg)}
+.origin__control:focus-within{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
+.origin__control input{flex:1;width:100%;min-width:0;padding:0 10px 0 14px;border:0;border-radius:16px;background:transparent;color:var(--ink);font-size:16px;font-weight:600;outline:none}
 .origin__control button{flex:0 0 40px;border:0;border-radius:0 14px 14px 0;background:transparent;color:var(--ink2);font-size:19px;cursor:pointer}
 .origin__menu{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:80;display:grid;gap:4px;padding:7px;border:1px solid var(--control-border);border-radius:15px;background:var(--control-bg);box-shadow:0 18px 38px rgba(15,23,42,.25)}
 .origin__menu[hidden]{display:none}
@@ -97,7 +128,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .origin__menu button:hover,.origin__menu button:focus-visible{background:var(--control-hover);outline:none}
 .origin__menu strong{font-size:14px}.origin__menu span{font-size:11px;color:var(--control-muted)}
 .origin b{color:var(--ink);font-weight:600}
-.step{display:flex;align-items:center;height:52px;border-radius:16px;border:1.5px solid var(--line);background:var(--bg);overflow:hidden}
+.step{display:flex;align-items:center;height:52px;border-radius:16px;border:1.5px solid var(--control-line);background:var(--control-bg);overflow:hidden}
 .step button{flex:0 0 52px;height:100%;border:0;background:transparent;font-size:24px;font-weight:600;cursor:pointer}
 .step button:active{background:var(--cel-soft)}
 .step output{flex:1;text-align:center;font-weight:600}
@@ -106,7 +137,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .money .inp{padding-left:58px}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .seg button{border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 8px;font-size:14px;font-weight:600;cursor:pointer;line-height:1.25;min-height:56px}
-.seg button[aria-pressed="true"]{background:var(--hero-bg);color:var(--hero-ink);border-color:var(--hero-bg)}
+.seg button[aria-pressed="true"]{background:var(--selected-bg);color:var(--selected-ink);border-color:var(--selected-border)}
 .transport-seg{grid-template-columns:repeat(3,1fr)}
 .transport-seg button{min-height:48px}
 .destination-finder{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;padding-top:4px}
@@ -206,7 +237,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .opt__disclosure{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
 .opt__disclosure:hover,.opt__disclosure.is-open{border-color:var(--ink2);color:var(--ink)}
 .opt__chevron{display:inline-block;font-size:18px;line-height:1}
-.opt__disclosure:focus-visible,.opt__cta:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt__disclosure:focus-visible,.opt__cta:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .opt__body>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
 .propuesta-seleccionada{border:2px solid var(--accent)!important;box-shadow:0 8px 20px rgba(246,178,27,.2)}
 /* El movimiento (elevación, flecha, chevron) sólo si el sistema no pide menos
@@ -289,11 +320,23 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-type-filter>span:first-child{font-size:13px;font-weight:700;color:var(--ink)}
 .hotel-type-filter__control{position:relative;display:block;min-width:0}
 .hotel-type-filter__control::after{position:absolute;top:50%;right:19px;width:8px;height:8px;border-right:1.8px solid var(--control-muted);border-bottom:1.8px solid var(--control-muted);content:"";pointer-events:none;transform:translateY(-75%) rotate(45deg)}
-.hotel-type-filter select{display:block;width:100%;min-height:52px;margin:0;padding:0 52px 0 17px;border:1.5px solid var(--control-border);border-radius:14px;background-color:var(--control-bg);box-shadow:0 2px 10px rgba(15,23,42,.04);color:var(--ink);font:500 15px var(--fb);appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}
+.hotel-type-filter select{display:block;width:100%;min-height:52px;margin:0;padding:0 52px 0 17px;border:1.5px solid var(--control-line);border-radius:14px;background-color:var(--control-bg);box-shadow:0 2px 10px rgba(15,23,42,.04);color:var(--ink);font:500 16px var(--fb);appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}
 .hotel-type-filter select:hover{border-color:var(--control-muted)}
-.hotel-type-filter select:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(246,178,27,.22)}
+.hotel-type-filter select:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
 @media (max-width:560px){.hotel-type-filter{max-width:none}}
 .hotel-choice{display:flex;align-items:center;gap:7px;cursor:pointer}.hotel-choice input{accent-color:var(--cel);width:17px;height:17px}.hotel-choice .hotel-badge{margin:0}
+/* La card entera es la etiqueta del radio (ver hotelOptions() en app.js): el
+   label envuelve imagen, badge, nombre, descripción y precios, así que no hay
+   que acertarle a una tira de 26px para cambiar de hotel. Los enlaces quedan
+   fuera del label a propósito. */
+.hotel-option__pick{display:flex;flex:1;flex-direction:column;align-items:stretch;cursor:pointer}
+/* No había NINGÚN estado de seleccionado: el único realce era .recommended,
+   que es "Recomendado" del servidor, no "lo que elegiste". Un usuario podía
+   cambiar de hotel sin ninguna señal visual de cuál tenía elegido. */
+.hotel-option:has(.hotel-option__pick input:checked){border:2px solid var(--selected-border);background:var(--selected-bg)}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--selected-border);color:var(--surface);border-color:var(--selected-border)}
+.hotel-option:has(.hotel-option__pick input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
+.hotel-pick-hint{display:block;margin-top:12px;padding:10px 12px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-size:13px;font-weight:700;text-align:center;transition:background .16s ease,color .16s ease,border-color .16s ease}
 
 /* Resultados de vuelos */
 .flight-search{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.flight-search>div:first-child{display:flex;justify-content:space-between;gap:16px;align-items:center}.flight-search h2{font-family:var(--fh);font-size:34px;line-height:1;margin:0}.flight-search p{margin:5px 0 0;color:var(--ink2);font-size:13px}
@@ -325,8 +368,13 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @media (max-width:700px){.destination-cards{grid-template-columns:1fr}}
 
 /* Formulario de pasajeros y comprobante */
-.booking-modal{position:fixed;inset:0;z-index:100;background:rgba(10,24,48,.68);display:grid;place-items:center;padding:16px;overflow:auto}.booking-modal[hidden]{display:none}.booking-dialog{position:relative;width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:26px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.3)}.booking-dialog h2{font-family:var(--fh);font-size:38px;line-height:1;margin:0 40px 6px 0}.booking-close{position:absolute;right:16px;top:14px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--bg);font-size:25px;line-height:1;cursor:pointer}.booking-summary{margin:0 0 20px;color:var(--ink2);font-size:14px}.passenger-fields{margin:14px 0 0;padding:16px;border:1px solid var(--line);border-radius:18px}.passenger-fields legend{padding:0 8px;font-size:16px;font-weight:700}.passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.passenger-grid label{margin-bottom:5px}.passenger-grid input,.passenger-grid select{width:100%;height:44px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);padding:0 11px}.booking-note{color:var(--ink2);font-size:13px}.confirm-booking{width:100%;min-height:54px;border:0;border-radius:15px;background:#003580;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.confirm-booking:disabled{opacity:.65;cursor:wait}.booking-error{padding:10px 12px;border-radius:12px;background:var(--coral-soft);color:var(--coral);font-size:13px;font-weight:600}.booking-success{text-align:center}.success-icon{font-size:42px}.booking-success h2{margin:6px 0 16px}.pnr-label{margin:0;color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.pnr{display:block;color:var(--good);font-family:var(--fh);font-size:42px;line-height:1.1;letter-spacing:.08em}.success-route{margin:16px 0;padding:12px;border-radius:12px;background:var(--bg);font-weight:600}.booking-success h3{text-align:left;margin:18px 0 4px;font-size:16px}.itinerary-summary{display:grid;gap:16px}.itinerary-summary__section{display:grid;gap:8px}.itinerary-summary__section h3{margin:0;font-size:18px}.itinerary-summary__card{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.itinerary-summary__card p{margin:0;font-size:14px;line-height:1.45;color:var(--ink)}.itinerary-summary__booking{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 14px;border-radius:12px;background:#003580;color:#fff;text-decoration:none;font-weight:700}.itinerary-summary__booking:hover{color:#fff;filter:brightness(1.08)}.daily-budget{display:grid;gap:14px}.daily-budget__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.daily-budget__field{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.daily-budget__field span{font-size:13px;font-weight:700}.daily-budget__input-wrap{display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}.daily-budget__input-wrap span{font-size:13px;color:var(--ink2)}.daily-budget__input-wrap input{flex:1;height:44px;border:0;background:transparent;padding:0;font-size:15px;color:var(--ink);outline:none}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}.transfer-wizard{display:grid;gap:18px}.transfer-flight-sync{display:grid;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-flight-sync p{margin:0}.transfer-flight-sync--empty{color:var(--ink2);font-size:13px}.transfer-flight-leg{display:grid;gap:6px}.transfer-flight-leg:not(:first-child){padding-top:12px;border-top:1px dashed var(--line)}.transfer-flight-leg .flight-route{margin:0}.transfer-flight-leg__number{color:var(--ink2)}.transfer-step{display:grid;gap:16px}.transfer-step__header{display:grid;gap:6px}.transfer-step__badge{display:inline-flex;align-items:center;justify-content:center;width:max-content;padding:5px 9px;border-radius:999px;background:var(--cel-soft);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}.transfer-step h3{margin:0;font-family:var(--fh);font-size:28px;line-height:1.1}.transfer-pickup-options{display:grid;gap:10px}.transfer-pickup-option{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer}.transfer-pickup-option.selected{border-color:#003580;background:#edf5ff}.transfer-pickup-option input{margin-top:3px}.transfer-pickup__content{display:grid;gap:6px;flex:1;min-width:0}.transfer-pickup__content strong{font-size:14px;line-height:1.35}.transfer-pickup__time{display:block;font-size:12px;color:var(--ink2)}.transfer-custom-time{width:100%;max-width:180px;height:42px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:#fff}.transfer-field{display:grid;gap:8px}.transfer-field span{font-size:13px;font-weight:700}.transfer-field input{width:100%;height:46px;padding:0 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg)}.transfer-summary-box{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-summary-box p{margin:0;color:var(--ink);font-size:14px}.transfer-summary-box b{color:var(--ink)}.transfer-field input[type="file"]{padding:11px 12px;height:auto}.transfer-step .bank-details{margin:0}@media (max-width:560px){.daily-budget__grid{grid-template-columns:1fr}}.booking-success ul{text-align:left;margin:0;padding-left:20px}.booking-success .booking-note{margin-top:18px}
-@media (max-width:560px){.booking-modal{padding:0;align-items:end}.booking-dialog{max-height:94vh;border-radius:25px 25px 0 0;padding:22px 16px}.booking-dialog h2{font-size:32px}.passenger-grid{grid-template-columns:1fr}.passenger-fields{padding:13px}}
+/* padding-bottom con env(safe-area-inset-bottom): :root es html, y un box con
+   position:fixed se posiciona contra el viewport, no contra el padding de html.
+   Con viewport-fit=cover + black-translucent, el bottom-sheet se dibujaba
+   pegado al borde inferior y el boton de confirmar pagaba bajo el home
+   indicator. Era el unico overlay fijo del archivo sin safe-area. */
+.booking-modal{position:fixed;inset:0;z-index:100;background:rgba(10,24,48,.68);display:grid;place-items:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom,0px));overflow:auto;overscroll-behavior:contain}.booking-modal[hidden]{display:none}.booking-dialog{position:relative;width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:26px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.3)}.booking-dialog h2{font-family:var(--fh);font-size:38px;line-height:1;margin:0 40px 6px 0}.booking-close{position:absolute;right:16px;top:14px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--bg);font-size:25px;line-height:1;cursor:pointer}.booking-summary{margin:0 0 20px;color:var(--ink2);font-size:14px}.passenger-fields{margin:14px 0 0;padding:16px;border:1px solid var(--line);border-radius:18px}.passenger-fields legend{padding:0 8px;font-size:16px;font-weight:700}.passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.passenger-grid label{margin-bottom:5px}.passenger-grid input,.passenger-grid select{width:100%;height:44px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);padding:0 11px}.booking-note{color:var(--ink2);font-size:13px}.confirm-booking{width:100%;min-height:54px;border:0;border-radius:15px;background:#003580;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.confirm-booking:disabled{opacity:.65;cursor:wait}.booking-error{padding:10px 12px;border-radius:12px;background:var(--coral-soft);color:var(--coral);font-size:13px;font-weight:600}.booking-success{text-align:center}.success-icon{font-size:42px}.booking-success h2{margin:6px 0 16px}.pnr-label{margin:0;color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.pnr{display:block;color:var(--good);font-family:var(--fh);font-size:42px;line-height:1.1;letter-spacing:.08em}.success-route{margin:16px 0;padding:12px;border-radius:12px;background:var(--bg);font-weight:600}.booking-success h3{text-align:left;margin:18px 0 4px;font-size:16px}.itinerary-summary{display:grid;gap:16px}.itinerary-summary__section{display:grid;gap:8px}.itinerary-summary__section h3{margin:0;font-size:18px}.itinerary-summary__card{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.itinerary-summary__card p{margin:0;font-size:14px;line-height:1.45;color:var(--ink)}.itinerary-summary__booking{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 14px;border-radius:12px;background:#003580;color:#fff;text-decoration:none;font-weight:700}.itinerary-summary__booking:hover{color:#fff;filter:brightness(1.08)}.daily-budget{display:grid;gap:14px}.daily-budget__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.daily-budget__field{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.daily-budget__field span{font-size:13px;font-weight:700}.daily-budget__input-wrap{display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg)}.daily-budget__input-wrap span{font-size:13px;color:var(--ink2)}.daily-budget__input-wrap input{flex:1;height:44px;border:0;background:transparent;padding:0;font-size:16px;color:var(--ink);outline:none}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}.transfer-wizard{display:grid;gap:18px}.transfer-flight-sync{display:grid;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-flight-sync p{margin:0}.transfer-flight-sync--empty{color:var(--ink2);font-size:13px}.transfer-flight-leg{display:grid;gap:6px}.transfer-flight-leg:not(:first-child){padding-top:12px;border-top:1px dashed var(--line)}.transfer-flight-leg .flight-route{margin:0}.transfer-flight-leg__number{color:var(--ink2)}.transfer-step{display:grid;gap:16px}.transfer-step__header{display:grid;gap:6px}.transfer-step__badge{display:inline-flex;align-items:center;justify-content:center;width:max-content;padding:5px 9px;border-radius:999px;background:var(--cel-soft);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}.transfer-step h3{margin:0;font-family:var(--fh);font-size:28px;line-height:1.1}.transfer-pickup-options{display:grid;gap:10px}.transfer-pickup-option{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer}.transfer-pickup-option.selected{border-color:var(--selected-border);background:var(--selected-bg)}.transfer-pickup-option input{margin-top:3px}.transfer-pickup__content{display:grid;gap:6px;flex:1;min-width:0}.transfer-pickup__content strong{font-size:14px;line-height:1.35}.transfer-pickup__time{display:block;font-size:12px;color:var(--ink2)}.transfer-custom-time{width:100%;max-width:180px;height:42px;padding:0 10px;border:1px solid var(--control-line);border-radius:10px;background:var(--control-bg)}.transfer-field{display:grid;gap:8px}.transfer-field span{font-size:13px;font-weight:700}.transfer-field input{width:100%;height:46px;padding:0 12px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg)}.transfer-summary-box{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-summary-box p{margin:0;color:var(--ink);font-size:14px}.transfer-summary-box b{color:var(--ink)}.transfer-field input[type="file"]{padding:11px 12px;height:auto}.transfer-step .bank-details{margin:0}@media (max-width:560px){.daily-budget__grid{grid-template-columns:1fr}}.booking-success ul{text-align:left;margin:0;padding-left:20px}.booking-success .booking-note{margin-top:18px}
+@media (max-width:560px){.booking-modal{padding:0;align-items:end}.booking-dialog{max-height:94vh;border-radius:25px 25px 0 0;padding:22px 16px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}.booking-dialog h2{font-size:32px}.passenger-grid{grid-template-columns:1fr}.passenger-fields{padding:13px}}
 .voucher-dialog{gap:18px;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);border:1px solid rgba(16,35,62,.12);padding:30px;overflow-x:hidden}.voucher-head{padding-bottom:4px;border-bottom:1px dashed #cbd5e1}.voucher-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.voucher-head h2{margin:7px 40px 5px 0}.voucher-head p{margin:0;color:var(--ink2);font-size:14px}.voucher-total{display:grid;gap:5px;padding:18px 20px;border-radius:18px;background:#10233e;color:#fff;box-shadow:0 12px 24px rgba(16,35,62,.16)}.voucher-total span{font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.8}.voucher-total strong{font-family:var(--fh);font-size:40px;line-height:1}.voucher-total__pp{display:inline-flex;align-self:start;margin-top:2px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.14);font-size:12px;font-weight:800}.voucher-total small{font-size:12px;opacity:.72}.voucher-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.voucher-card{display:flex;gap:10px;min-width:0;padding:14px;border:1px solid #dbe3ee;border-radius:16px;background:#fff}.voucher-icon{font-size:22px;line-height:1}.voucher-card div{display:grid;gap:4px;min-width:0}.voucher-card small{color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.voucher-card strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.voucher-card p{margin:0;color:var(--ink2);font-size:11px;line-height:1.35}.voucher-card b{font-family:var(--fh);font-size:20px}.voucher-section{display:grid;gap:12px;padding:18px;border:1px solid #dbe3ee;border-radius:18px;background:#fff}.voucher-section__title{display:flex;gap:10px;align-items:flex-start}.voucher-section__title>span{font-size:23px}.voucher-section__title h3{margin:0;font-size:19px}.voucher-section__title p{margin:3px 0 0;color:var(--ink2);font-size:12px}.voucher-breakdown{display:grid;gap:8px}.voucher-breakdown>div{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid #edf1f6}.voucher-breakdown span{font-size:13px;font-weight:700}.voucher-breakdown b{font-size:13px}.voucher-breakdown em{font-style:normal;color:#0b6bcb;font-size:12px;font-weight:800}.voucher-actions{display:grid;gap:9px}.voucher-whatsapp,.voucher-copy,.voucher-instagram{min-height:48px;border:0;border-radius:13px;padding:0 16px;font-size:14px;font-weight:800;cursor:pointer}.voucher-whatsapp{background:#25d366;color:#063b1e;box-shadow:0 8px 18px rgba(37,211,102,.2)}.voucher-instagram{background:linear-gradient(135deg,#feda75,#d62976 60%,#4f5bd5);color:#fff;box-shadow:0 8px 18px rgba(214,41,118,.25)}.voucher-instagram:disabled{opacity:.7;cursor:wait}.voucher-copy{border:1px solid #cbd5e1;background:#fff;color:var(--ink)}.voucher-copy-status{min-height:16px;color:var(--good);font-size:12px;text-align:center}.voucher-dialog .itinerary-summary__booking{width:100%;background:#eaf2ff;color:#0b4f97}.voucher-dialog .itinerary-summary__booking:hover{color:#0b4f97}@media (max-width:560px){.voucher-dialog{padding:22px 16px}.voucher-grid{grid-template-columns:1fr}.voucher-total strong{font-size:34px}.voucher-breakdown>div{grid-template-columns:1fr auto}.voucher-breakdown em{grid-column:2}}
 
 /* Color por categoría en el resumen final, también en vista móvil. */
@@ -357,7 +405,12 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .guide-unlock:active{transform:translateY(0)}
 @media (max-width:560px){.food-guide{padding:16px}.food-guide h2{font-size:28px}.guide-lock{inset:94px 8px 8px;padding:16px}.guide-unlock{width:100%}}
 
-.trip-summary{position:fixed;right:20px;bottom:20px;z-index:90;width:min(360px,calc(100vw - 24px));border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.96);color:var(--ink);backdrop-filter:blur(12px);box-shadow:0 18px 38px rgba(16,35,62,.18);padding:12px 12px 10px}.trip-summary__inner{display:grid;gap:10px}.trip-summary__head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.trip-summary__eyebrow{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:var(--cel-soft);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.trip-summary__head strong{font-family:var(--fh);font-size:48px;line-height:.86;letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__bar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line);gap:2px}.trip-summary__bar span{display:block;height:100%;min-width:3px}.trip-summary__items{display:grid;gap:4px}.trip-summary__item{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}.trip-summary__item em{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__ico{flex:0 0 20px;width:20px;height:20px;display:block;color:var(--c1);stroke-width:1.85}.trip-summary__meta{flex:1;display:grid;gap:1px;min-width:0}.trip-summary__meta b{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em}.trip-summary__meta span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trip-summary__item.is-zero{opacity:.45}.trip-summary__item em{font-style:normal;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap}.trip-summary__cta{width:100%;height:48px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer}.trip-summary__cta:hover{filter:brightness(1.05)}.trip-summary[hidden]{display:none}
+/* Sin backdrop-filter: más abajo (patch de contraste) el fondo se sobreescribe
+   con --surface opaco, así que el blur era 100% invisible y aun así obligaba al
+   compositor a difuminar el fondo en cada repintado de un elemento position:
+   fixed que se repinta en cada recálculo del total. Costo de GPU en un Android
+   de gama media, a cambio de nada visible. */
+.trip-summary{position:fixed;right:20px;bottom:20px;z-index:90;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--ink);box-shadow:0 18px 38px rgba(16,35,62,.18);padding:12px 12px 10px}.trip-summary__inner{display:grid;gap:10px}.trip-summary__head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.trip-summary__eyebrow{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:var(--cel-soft);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.trip-summary__head strong{font-family:var(--fh);font-size:48px;line-height:.86;letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__bar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line);gap:2px}.trip-summary__bar span{display:block;height:100%;min-width:3px}.trip-summary__items{display:grid;gap:4px}.trip-summary__item{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}.trip-summary__item em{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__ico{flex:0 0 20px;width:20px;height:20px;display:block;color:var(--c1);stroke-width:1.85}.trip-summary__meta{flex:1;display:grid;gap:1px;min-width:0}.trip-summary__meta b{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em}.trip-summary__meta span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trip-summary__item.is-zero{opacity:.45}.trip-summary__item em{font-style:normal;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap}.trip-summary__cta{width:100%;height:48px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer}.trip-summary__cta:hover{filter:brightness(1.05)}.trip-summary[hidden]{display:none}
 .daily-budget{display:grid;gap:16px}.daily-budget__group{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}.daily-budget__header{display:flex;align-items:end;justify-content:space-between;gap:10px}.daily-budget__header span{font-weight:800;font-size:17px}.daily-budget__header small{color:var(--ink2);font-size:11px}/* El nº de columnas lo elige el JS segun cuantas opciones haya (--cols-2 /
    --cols-3) para que la reticula siempre quede cuadrada: con 3 columnas fijos y
    4 cajas, la cuarta caia sola en una fila. grid-auto-rows:1fr iguala el alto de
@@ -369,7 +422,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    de 3 y otra de 1, que es justo lo que se vino a corregir. */
 @media (max-width:560px){.daily-budget__options--cols-2,.daily-budget__options--cols-3{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:400px){.daily-budget__option{min-height:110px}.daily-budget__option strong{font-size:21px}}
-.daily-budget__option--custom.is-selected{align-items:stretch;gap:6px;cursor:default}.daily-budget__option--custom.is-selected:hover{transform:none}.daily-budget__option--custom .daily-budget__planned{width:100%;gap:5px;padding:0}.daily-budget__option--custom .daily-budget__planned>span{font-size:11px}.daily-budget__option--custom .daily-budget__input-wrap{max-width:none;min-height:42px;padding:0 8px;background:var(--surface)}.daily-budget__option--custom .daily-budget__input-wrap input{min-width:0;height:38px;font-size:15px}
+.daily-budget__option--custom.is-selected{align-items:stretch;gap:6px;cursor:default}.daily-budget__option--custom.is-selected:hover{transform:none}.daily-budget__option--custom .daily-budget__planned{width:100%;gap:5px;padding:0}.daily-budget__option--custom .daily-budget__planned>span{font-size:11px}.daily-budget__option--custom .daily-budget__input-wrap{max-width:none;min-height:42px;padding:0 8px;background:var(--surface)}.daily-budget__option--custom .daily-budget__input-wrap input{min-width:0;height:38px;font-size:16px}
 .daily-budget__option--custom.is-selected{min-width:0;overflow:hidden}.daily-budget__option--custom.is-selected .daily-budget__planned,.daily-budget__option--custom.is-selected .daily-budget__input-wrap{box-sizing:border-box;min-width:0;max-width:100%;width:100%}.daily-budget__option--custom.is-selected .daily-budget__input-wrap{overflow:hidden;gap:5px}.daily-budget__option--custom.is-selected .daily-budget__input-wrap input{box-sizing:border-box;flex:1 1 0;width:100%;min-width:0;max-width:100%}
 @media(max-width:560px){.date-range-panel{padding:12px}.date-range-months{grid-template-columns:1fr}.date-range-month:nth-child(n+2){display:none}.date-range-grid{gap:2px}.date-range-day{font-size:14px}}
 
@@ -380,7 +433,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .roadtrip-route{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}.roadtrip-route__stat{display:flex;flex-direction:column;gap:3px;text-align:center}.roadtrip-route__stat span{font-size:11px;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em;font-weight:700}.roadtrip-route__stat b{font-family:var(--fh);font-size:22px;line-height:1.1}
 .roadtrip-stops{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px 18px;overflow:hidden}.roadtrip-stops summary{cursor:pointer;font-weight:800;font-size:14px;list-style:none}.roadtrip-stops summary::-webkit-details-marker{display:none}.roadtrip-stops__body{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--ink2)}.roadtrip-stops__body p{margin:0 0 8px}.roadtrip-stops[open]{border-color:var(--accent)}
 @media (max-width:560px){.roadtrip-route{grid-template-columns:1fr}}
-.flight-filters{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.flight-filters div{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.flight-filters b{font-size:12px;margin-right:4px}.flight-filters button{border:1px solid var(--line);border-radius:99px;background:var(--surface);padding:6px 9px;color:var(--ink);font-size:12px;cursor:pointer}.flight-filters button[aria-pressed="true"]{border-color:#087E5B;background:var(--good-soft);color:#07543e;font-weight:700}.transport-detail select,.transport-detail input[type="number"]{display:block;width:100%;max-width:320px;margin:6px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}.transport-detail label{display:block;margin-bottom:10px}
+.flight-filters{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.flight-filters div{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.flight-filters b{font-size:12px;margin-right:4px}.flight-filters button{min-height:44px;border:1px solid var(--control-line);border-radius:99px;background:var(--surface);padding:6px 14px;color:var(--ink);font-size:13px;cursor:pointer}.flight-filters button[aria-pressed="true"]{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}.transport-detail select,.transport-detail input[type="number"]{display:block;width:100%;max-width:320px;margin:6px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}.transport-detail label{display:block;margin-bottom:10px}
 @media (max-width:900px){.trip-summary{left:12px;right:12px;bottom:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;max-width:none}.trip-summary__head strong{font-size:36px}}
 @media (max-width:560px){.trip-summary__item{grid-template-columns:58px minmax(0,1fr) auto}.trip-summary__item b{white-space:normal}.trip-summary__cta{height:46px}}
 .daily-budget__planned{display:grid;gap:7px;padding:10px 0 2px}.daily-budget__planned>span{font-size:13px;font-weight:700;color:var(--ink)}.daily-budget__planned .daily-budget__input-wrap{max-width:280px;min-height:48px;border:1.5px solid var(--line);background:var(--surface);transition:border-color .16s ease,box-shadow .16s ease}.daily-budget__planned .daily-budget__input-wrap:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}.daily-budget__planned input{font-weight:700}.daily-budget__planned input::placeholder{color:var(--ink2);font-size:13px;font-weight:400;opacity:.8}
@@ -389,10 +442,10 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .transfer-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.transfer-choice{display:flex;align-items:center;gap:12px;padding:16px;border:2px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}.transfer-choice:hover{transform:translateY(-2px);border-color:var(--ink2)}.transfer-choice__icon{display:grid;flex:0 0 auto;width:44px;height:44px;place-items:center;border-radius:12px;background:var(--cel-soft);font-size:22px}.transfer-choice__body{flex:1;min-width:0;display:grid;gap:3px}.transfer-choice strong{font-size:14px}.transfer-choice__price{flex:0 0 auto;font-family:var(--fh);font-size:24px}.transfer-choice small{color:var(--ink2);line-height:1.35}.transfer-choice.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.transfer-choice.is-selected .transfer-choice__icon{background:var(--cel);color:var(--cel-ink)}
 .official-transfer{padding:20px;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 5px 16px rgba(16,35,62,.08)}.official-transfer>p{margin:6px 0 14px;color:var(--ink2);font-size:13px}.official-transfer .btn-transfer:disabled{opacity:.55;cursor:not-allowed}
 .transfer-suggestion{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:var(--cel-soft);color:var(--ink);font-size:13px;font-weight:600}
-.transfer-pickup{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.transfer-pickup__label{display:block;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--ink2)}.transfer-pickup__chips{display:flex;flex-wrap:wrap;gap:8px}.transfer-pickup__chip{border:1px solid var(--line);border-radius:99px;background:var(--surface);padding:8px 12px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer}.transfer-pickup__chip.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.transfer-pickup__time{display:block;margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:13px}
+.transfer-pickup{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.transfer-pickup__label{display:block;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--ink2)}.transfer-pickup__chips{display:flex;flex-wrap:wrap;gap:8px}.transfer-pickup__chip{min-height:44px;border:1px solid var(--control-line);border-radius:99px;background:var(--surface);padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}.transfer-pickup__chip.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.transfer-pickup__time{display:block;margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:13px}
 .btn-transfer.is-added{background:var(--good)}
 .duffel-checkout{display:grid;gap:14px;margin:16px 0}.duffel-checkout__offer,.duffel-checkout__services,.duffel-checkout__payment{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--bg)}.duffel-checkout__offer span,.duffel-checkout__muted{color:var(--ink2);font-size:12px}.duffel-checkout__offer strong{font-family:var(--fh);font-size:18px;overflow-wrap:anywhere}.duffel-checkout__offer em{font-style:normal;font-size:13px}.duffel-checkout h3{margin:0;font-size:17px}.duffel-checkout label{display:grid;gap:6px;font-size:13px;font-weight:700}.duffel-checkout select,.duffel-checkout input{width:100%;min-height:42px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:#fff;color:var(--ink)}.duffel-checkout__payment [data-duffel-card-fields]{display:grid;gap:9px;margin-top:6px}.duffel-service{display:flex!important;grid-template-columns:auto 1fr;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--line);border-radius:11px;background:#fff;cursor:pointer}.duffel-service input{width:auto;min-height:auto;margin-top:3px}.duffel-service span{display:grid;gap:3px}.duffel-service small{color:var(--ink2);font-weight:400}
-.account-actions{display:flex;align-items:center;gap:8px;margin-left:auto}.account-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 13px;border:0;border-radius:11px;background:var(--ink);color:#fff;font:600 12px Poppins,sans-serif;text-decoration:none;cursor:pointer}.account-button:hover{filter:brightness(1.1)}.account-button--secondary{border:1px solid var(--line);background:var(--surface);color:var(--ink)}.account-dialog{max-width:520px}.account-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.account-dialog h2{margin-top:8px}.account-dialog label{display:grid;gap:6px;margin-top:12px;font-size:13px;font-weight:700}.account-dialog input{width:100%;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}.oauth-button{width:100%;min-height:48px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;cursor:pointer}.account-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink2);font-size:12px}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:var(--line)}.account-form-actions{display:flex;gap:8px;margin-top:16px}.account-form-actions .confirm-booking{flex:1}.account-form-actions .account-button{flex:0 0 auto}.account-status{min-height:18px;margin:12px 0 0;color:var(--ink2);font-size:13px}.saved-trips{display:grid;gap:9px;margin:16px 0}.saved-trip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.saved-trip>div{display:grid;gap:4px;min-width:0}.saved-trip strong{font-size:14px;overflow:hidden;text-overflow:ellipsis}.saved-trip span{color:var(--ink2);font-size:12px}.trip-summary__actions{display:grid;gap:8px}.trip-summary__save{width:100%;height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800;cursor:pointer}.trip-summary__save:hover{border-color:var(--ink);background:var(--bg)}
+.account-actions{display:flex;align-items:center;gap:8px;margin-left:auto;min-width:0;flex:0 1 auto}.account-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 13px;border:0;border-radius:11px;background:var(--ink);color:#fff;font:600 12px Poppins,sans-serif;text-decoration:none;cursor:pointer}.account-button:hover{filter:brightness(1.1)}.account-button--secondary{border:1px solid var(--line);background:var(--surface);color:var(--ink)}.account-dialog{max-width:520px}.account-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.account-dialog h2{margin-top:8px}.account-dialog label{display:grid;gap:6px;margin-top:12px;font-size:13px;font-weight:700}.account-dialog input{width:100%;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}.oauth-button{width:100%;min-height:48px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;cursor:pointer}.account-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink2);font-size:12px}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:var(--line)}.account-form-actions{display:flex;gap:8px;margin-top:16px}.account-form-actions .confirm-booking{flex:1}.account-form-actions .account-button{flex:0 0 auto}.account-status{min-height:18px;margin:12px 0 0;color:var(--ink2);font-size:13px}.saved-trips{display:grid;gap:9px;margin:16px 0}.saved-trip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.saved-trip>div{display:grid;gap:4px;min-width:0}.saved-trip strong{font-size:14px;overflow:hidden;text-overflow:ellipsis}.saved-trip span{color:var(--ink2);font-size:12px}.trip-summary__actions{display:grid;gap:8px}.trip-summary__save{width:100%;height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800;cursor:pointer}.trip-summary__save:hover{border-color:var(--ink);background:var(--bg)}
 .account-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:5px}
 .card-brand-row{display:flex;align-items:center;gap:8px;color:var(--ink2)}.card-brand-row span{font-size:22px}.card-brand-row small{padding:4px 7px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:10px;font-weight:800}.card-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card-demo-note{margin:2px 0 0;color:var(--ink2);font-size:11px}
 .account-button--danger{min-width:38px;padding:0 8px;border:1px solid #f2b8ae;background:#fff4f1;color:#b42318}.account-button--danger:hover{background:#ffe3dd;border-color:#d92d20}
@@ -407,7 +460,13 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .custom-select__group-title,.custom-select__option-sub{color:var(--control-muted)}
 .custom-select__option{color:var(--ink)}
 .custom-select__option:hover,.custom-select__option:focus-visible{background:var(--control-hover)}
-.custom-select__option.is-selected,.custom-select__option.is-selected .custom-select__option-main{background:var(--control-selected);color:var(--control-selected-ink)}
+/* El destino seleccionado se queda con el diseño de arriba (fondo --cel-soft,
+   filete de --cel a la izquierda, texto --ink). Este bloque de contraste lo
+   volvía a declarar con --control-selected, que es un casi blanco: el
+   seleccionado pasaba de "una opción entre tres" a "no se sabe cuál está
+   elegida", y el texto quedaba en azul sobre blanco en vez de navy sobre
+   celeste como el resto de los grupos del picker. */
+.custom-select__option.is-selected .custom-select__option-sub{color:var(--ink2)}
 .transport-detail select,.transport-detail input[type="number"],.duffel-checkout select,.duffel-checkout input,.transfer-custom-time,.oauth-button,.trip-summary__save{background:var(--control-bg);border-color:var(--control-border);color:var(--ink)}
 .duffel-service,.official-transfer{background:var(--surface)}
 .card-brand-row small{background:var(--control-bg);color:var(--ink)}
@@ -415,11 +474,15 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .trip-summary__head{width:100%;padding:0;border:0;background:transparent;color:var(--ink);font:inherit;text-align:left;box-shadow:none;cursor:default}
 .trip-summary__toggle-icon{display:none}
 .trip-summary__details{display:grid;gap:10px}
-@media (max-width:768px){
-  .trip-summary{padding:9px 12px 10px}
+/* 900px y no 768px: tiene que coincidir con (a) el breakpoint donde el panel
+   pasa a ancho completo y (b) el corte que usa syncTripSummaryViewport() en
+   app.js. Con 768 el iPhone en horizontal (844x390) quedaba con el panel
+   abierto a todo el ancho, sin max-height y sin manera de cerrarlo. */
+@media (max-width:900px){
+  .trip-summary{padding:9px 12px 10px;max-height:min(46vh,320px)}
   .trip-summary__inner{gap:0}
   .trip-summary__head{min-height:38px;align-items:center;cursor:pointer}
-  .trip-summary__head:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
+  .trip-summary__head:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:10px}
   .trip-summary__head strong{font-size:30px}
   .trip-summary__toggle-icon{display:block;font-size:20px;line-height:1;transition:transform .18s ease}
   .trip-summary__details{gap:8px;margin-top:8px}
@@ -429,10 +492,29 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 
 .hotel-nearby-note{grid-column:1/-1;margin:0;padding:12px 14px;border-radius:12px;background:var(--cel-soft);color:var(--ink2);font-size:13px}
 .hotel-options-empty{padding:24px}
-.daily-budget__option:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.daily-budget__option:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .hotel-skeleton-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.hotel-skeleton-card{height:290px;border-radius:18px;background:linear-gradient(100deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}.hotel-options-loading .hotel-options-head p{margin-bottom:0}
 @media(max-width:760px){.hotel-skeleton-grid{grid-template-columns:1fr}.hotel-skeleton-card{height:150px}.hotel-skeleton-card:nth-child(n+2){display:none}}
-@media(prefers-reduced-motion:reduce){.hotel-skeleton-card{animation:none}}
+@media(prefers-reduced-motion:reduce){
+  /* El archivo tiene 35 transiciones y 7 animaciones, y solo 3 sitios
+     respetaban la preferencia del sistema: el resto de los hover con
+     translateY y, peor, los shimmer (.skeleton, .skeleton-line,
+     .skeleton-box, .hotel-skeleton-card) con 'infinite' y sin ningun guard.
+     Una persona con movimiento reducido puesta a ver skeletons latiendo
+     indefinidamente en cada busqueda no la va a volver a abrir.
+
+     Este bloque global es el patron correcto: en vez de envolver cada
+     animacion nueva en un prefers-reduced-motion:no-preference (que es como
+     se escribieron dos de las tres existentes y es facil de olvidar), se
+     apaga todo de una vez y por defecto. Las que si queremos en el futuro se
+     reencienden con un no-preference despues de este bloque. */
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+}
 .hotel-nearby-link{display:inline-flex;margin-top:12px;padding:11px 15px;border-radius:12px;background:var(--cel);color:#fff;font-weight:700;text-decoration:none}
 .hotel-nearby-link:hover{color:#fff;filter:brightness(1.08)}
 .local-tours{min-width:0;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05);overflow:hidden}
@@ -452,7 +534,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    position:absolute sobre el article: el clic en cualquier punto lo activa y
    el teclado conserva un único control que tabula (Enter lo agrega el JS). */
 .local-tour__input{position:absolute;z-index:1;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
-.local-tour:has(.local-tour__input:focus-visible){outline:3px solid var(--accent);outline-offset:3px}
+.local-tour:has(.local-tour__input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
 /* Cinta de seleccion: entra desde arriba cuando la experiencia ya esta en el
    viaje. Es lo unico que tapa un poco de la foto y no la deja ilegible. */
 .local-tour__ribbon{position:absolute;z-index:2;top:0;right:0;left:0;display:flex;align-items:center;gap:6px;padding:7px 14px;background:#f1b145;color:#0f192d;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(-100%);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
@@ -484,11 +566,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tour__info{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;gap:7px;margin-left:auto;padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);font-size:12px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
 .local-tour__info:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
 .local-tour__info-ico{flex:0 0 16px;width:16px;height:16px;color:var(--cel)}
-.local-tour__info:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.local-tour__info:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .local-tours:not(.local-tours--expanded) .local-tour:nth-child(n+4){display:none}
 .local-tours__more{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:0;border:0;background:transparent;color:var(--cel);font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .local-tours__more:hover{color:var(--ink)}
-.local-tours__more:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:4px}
+.local-tours__more:focus-visible{outline:3px solid var(--focus);outline-offset:4px;border-radius:4px}
 .local-tour__cta{display:flex;min-height:44px;align-items:center;justify-content:center;gap:8px;margin-top:12px;padding:9px 12px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);text-align:center;text-decoration:none;font-size:12px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
 .local-tour__cta:hover{color:var(--action-ink);filter:brightness(1.14)}
 /* Créditos de las fotos. CC BY y CC BY-SA obligan a dar crédito: además de
@@ -496,7 +578,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tours__credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}
 .local-tours__credits summary{cursor:pointer;font-weight:700;color:var(--ink2)}
 .local-tours__credits summary:hover{color:var(--ink)}
-.local-tours__credits summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.local-tours__credits summary:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:4px}
 .local-tours__credits p{margin:8px 0 4px}
 .local-tours__credits a{color:var(--cel);font-weight:700}
 .local-tours__credits ul{margin:0;padding-left:18px}
@@ -505,7 +587,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .foot-credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}
 .foot-credits summary{cursor:pointer;font-weight:700;color:var(--ink2)}
 .foot-credits summary:hover{color:var(--ink)}
-.foot-credits summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.foot-credits summary:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:4px}
 .foot-credits p{margin:8px 0 4px}
 .foot-credits a{color:var(--cel);font-weight:700}
 .foot-credits ul{margin:0;padding-left:18px}
@@ -525,7 +607,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .destination-highlights__head h2{margin:5px 0 4px;font-family:var(--fh);font-size:34px;line-height:1.05}
 .destination-highlights__head p{margin:0;color:var(--ink2);font-size:13px}
 .destination-highlights__head>label{flex:0 0 auto;margin:0;color:var(--ink2);font-size:12px}
-.destination-highlights__head select,.featured-destination select{width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:600 13px var(--fb)}
+.destination-highlights__head select,.featured-destination select{width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font:600 16px var(--fb)}
 .destination-highlights__head select{width:auto;min-width:140px}
 .destination-highlights__eyebrow{color:#087f70;font-size:10px;font-weight:800;letter-spacing:.12em}
 .destination-highlights__next{margin:8px 0 0;color:var(--ink2);font-size:12.5px}
@@ -535,7 +617,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    el usuario ve de entrada que en marzo hay Carnaval. */
 .featured-months{display:flex;gap:8px;overflow-x:auto;margin:0 0 16px;padding:2px 2px 6px;scroll-snap-type:x proximity;scrollbar-width:none;-ms-overflow-style:none}
 .featured-months::-webkit-scrollbar{display:none}
-.featured-month{flex:1 1 0;min-width:92px;scroll-snap-align:start;display:grid;gap:2px;padding:9px 10px;border:1.5px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);text-align:center;cursor:pointer;transition:border-color .16s ease,background .16s ease,color .16s ease}
+.featured-month{flex:1 1 0;min-width:92px;min-height:44px;scroll-snap-align:start;display:grid;gap:2px;padding:9px 10px;border:1.5px solid var(--control-line);border-radius:14px;background:var(--control-bg);color:var(--ink);text-align:center;cursor:pointer;transition:border-color .16s ease,background .16s ease,color .16s ease}
 .featured-month:hover{border-color:var(--ink2)}
 .featured-month b{font-size:14px;font-weight:700;line-height:1.2}
 .featured-month small{font-size:10.5px;line-height:1.25;color:var(--ink2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -543,7 +625,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .featured-month.is-active small{color:var(--ink2)}
 .featured-month.is-special::after{content:"";display:block;width:5px;height:5px;margin:3px auto 0;border-radius:50%;background:#f1b145}
 .featured-month.is-active.is-special::after{background:var(--accent)}
-.featured-month:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.featured-month:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .destination-highlights__slider{position:relative}
 /* El degradado de los bordes va ACIMA del carrusel pero NO es el carrusel: una
    mask-image sobre un overflow-x:auto rompe el scroll tactil en iOS. Estos dos
@@ -560,7 +642,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .destination-highlights__carousel::-webkit-scrollbar{display:none}
 .destination-highlights__arrow{position:absolute;z-index:2;top:50%;display:grid;width:40px;height:40px;place-items:center;transform:translateY(-50%);border:1px solid rgba(16,35,62,.12);border-radius:50%;background:#fff;color:#10233e;box-shadow:0 5px 18px rgba(16,35,62,.22);font-size:26px;line-height:1;cursor:pointer;transition:background .18s ease,transform .18s ease}
 .destination-highlights__arrow:hover{transform:translateY(-50%) scale(1.06);background:#f2f6fc}
-.destination-highlights__arrow:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.destination-highlights__arrow:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 .destination-highlights__arrow--prev{left:8px}
 .destination-highlights__arrow--next{right:8px}
 .featured-destination{position:relative;min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--bg);scroll-snap-align:start}
@@ -585,14 +667,21 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .featured-destination__body{display:grid;gap:8px;padding:12px 14px 14px}
 .featured-destination__search{display:flex;min-height:44px;align-items:center;justify-content:space-between;padding:0 14px;border:1px solid var(--action-border);border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:13px;font-weight:800;cursor:pointer;transition:filter .18s ease,transform .18s ease}
 .featured-destination__search:hover{filter:brightness(1.14);transform:translateY(-1px)}
-.featured-destination__search:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.featured-destination__search:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__slider::before,.destination-highlights__slider::after{width:54px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 54px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:200px}.featured-destination__overlay h3{font-size:25px}}
 @media(max-width:900px){.local-tours__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__grid{grid-template-columns:minmax(0,1fr)}.local-tour{padding:14px}}
 .flight-airline{flex-wrap:wrap}
 .flight-airline .cabin-badge{white-space:nowrap;background:var(--cel-soft);color:var(--ink)}
+/* z-index propio: #install-help es el ÚLTIMO modal del DOM, así que con el
+   mismo 100 que los demás se pintaba encima del de reserva. Si se muestra,
+   tiene que quedar por arriba de todo. */
+#install-help{z-index:110}
 .install-help__dialog{max-width:480px}
+.install-help__actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.install-help__actions .btn{width:100%;min-height:44px}
+@media (max-width:400px){.install-help__actions{grid-template-columns:1fr}}
 .install-help__dialog p{color:var(--ink2);line-height:1.55}
 .install-help__dialog ol{display:grid;gap:12px;padding-left:23px;color:var(--ink2);line-height:1.55}
 .install-help__dialog li::marker{color:var(--accent);font-weight:800}
@@ -600,7 +689,12 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .top{gap:7px}
   .logo{gap:6px;font-size:18px}
   .account-actions{gap:5px}
-  .account-actions .account-button{min-height:36px;padding:0 8px;font-size:10px;white-space:nowrap}
+  /* 36px era el objetivo tactil mas chico del header y ademas venia con
+     font-size:10px, que empeora todavia mas el desborde. Ahora 44px (minimo
+     WCAG 2.5.5) y el nombre se recorta con puntos suspensivos en vez de
+     empujar la barra. El logo tambien puede encogerse antes que romperse. */
+  .account-actions .account-button{min-height:44px;max-width:30vw;padding:0 9px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .logo{font-size:18px}
 }
 
 @media(max-width:520px){.multistay-panel__stays{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.multistay-panel__stay:last-child{text-align:left}.multistay-panel__slider{grid-column:1/-1;grid-row:2}.multistay-panel__slider input{transform:none;width:100%;margin:0}}
@@ -623,20 +717,37 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 
 /* -------------------------------------------------------
    Selector de moneda
-   Un badge con el codigo de la moneda activa. Sin etiqueta, sin flecha y sin
-   desplegable: el clic avanza a la siguiente. Es lo que menos peso visual
-   pone al lado del boton de sesion.
+   Un badge con el codigo de la moneda activa; el clic avanza a la siguiente.
+   Sigue siendo deliberadamente liviano para no competir con el boton de sesion,
+   pero "liviano" no puede significar "ilegible":
+
+   - mide 32px de alto, el objetivo tactil mas chico del header, y la regla
+     de <=560px sube .account-button a 36px pero no tocaba el badge.
+   - el borde era --line (1.27:1 sobre blanco): no se leia como un control.
+   - no tenia ninguna senal de que fuera pulsable: sin chevron, sin globo, sin
+     desplegable, solo tres letras en una caja gris. Como cicla a la siguiente
+     moneda, no habia nada en pantalla que indicara que habia N opciones.
+
+   Ahora: 44px de alto, borde a 3:1 y un chevron que se dibuja con ::after
+   (asi el markup del badge no cambia y el refresco por outerHTML lo mantiene).
    ------------------------------------------------------- */
+/* El badge de la banda de resumen va sobre --hero-bg (navy en claro, ámbar en
+   oscuro). No tenía regla propia: salía blanco sobre navy por accidente, y en
+   modo oscuro quedaba un chip navy oscuro sobre ámbar. Las dos combinaciones
+   son legibles, pero por casualidad y no por decisión. */
+.detail-summary .currency-badge{border-color:transparent;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.detail-summary .currency-badge:hover{border-color:currentColor;background:transparent}
 .sec__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.currency-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
-  min-width:56px;height:32px;padding:0 12px;margin:0;border:1px solid var(--line);
-  border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer;
+.currency-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  min-width:62px;min-height:44px;padding:0 11px;margin:0;border:1.5px solid var(--control-line);
+  border-radius:12px;background:var(--control-bg);color:var(--ink);cursor:pointer;
   transition:border-color .16s ease,background .16s ease,transform .12s ease}
-.currency-badge>b{font-size:13px;font-weight:800;letter-spacing:.02em;line-height:1}
+.currency-badge::after{content:"";width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-top:4.5px solid currentColor;opacity:.55}
+.currency-badge>b{font-size:14px;font-weight:800;letter-spacing:.02em;line-height:1}
 .currency-badge:hover{border-color:var(--cel);background:var(--cel-soft)}
 .currency-badge:active{transform:scale(.96)}
-/* el mismo azul que .daily-budget__option.is-selected, para que se lea igual */
-.currency-badge:focus-visible{outline:3px solid var(--cel);outline-offset:2px}
+/* el mismo --focus que el resto de la app, para que se lea igual */
+.currency-badge:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .currency-badge.is-loading{opacity:.45;pointer-events:none}
 @media (max-width:560px){
   .sec__head{gap:10px}
@@ -654,7 +765,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    tarjetas adentro, y el outline las marca igual sin inventarles un borde. */
 .is-budget-anchor{animation:budget-anchor-flash 1.8s ease-out}
 @keyframes budget-anchor-flash{
-  0%,55%{outline:3px solid var(--accent);outline-offset:3px}
+  0%,55%{outline:3px solid var(--focus);outline-offset:3px}
   100%{outline:3px solid rgba(246,178,27,0);outline-offset:3px}
 }
 /* reset de <button> para que el rubro se vea igual que el <div> que era */
@@ -667,7 +778,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .proposal-breakdown__row:hover,
 .trip-summary__item:hover{background:var(--cel-soft)}
 .proposal-breakdown__row:focus-visible,
-.trip-summary__item:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+.trip-summary__item:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:10px}
 /* Sin seccion destino (tours sin actividades cargadas, traslados fuera del
    modo vuelo) la fila vuelve a ser texto: no se promete un salto inexistente. */
 .proposal-breakdown__row:not(.is-jumpable),

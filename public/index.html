@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=57">
+<link rel="stylesheet" href="/style.css?v=61">
 <!-- Checkout de vuelos. El custom element de Duffel se carga desde su CDN
      oficial: no requiere React ni build step, así que el proyecto sigue
      siendo JS vanilla. La versión va fija a propósito (no "?v=N") porque el
@@ -93,7 +93,13 @@
         <button type="button" data-v="comodo" aria-pressed="false">Con comodidad</button>
       </div>
     </div>
-    <button type="button" id="btn-buscar-todos" class="btn-buscar-todos" hidden>🔍 Buscar destinos por presupuesto</button>
+    <!-- Sin `hidden`: el destino inicial es 'todos', asi que este boton es la
+         unica via de iniciar una busqueda. Antes dependia de que terminara el
+         fetch de /api/destinos para mostrarse, asi que en 3G el formulario se
+         quedaba sin boton, y si ese fetch fallaba no habia forma de buscar.
+         updateDestinationMode() sigue pudiendo ocultarlo cuando se elige un
+         destino concreto. -->
+    <button type="button" id="btn-buscar-todos" class="btn-buscar-todos">🔍 Buscar destinos por presupuesto</button>
   </section>
 
   <section id="destination-highlights" class="destination-highlights" aria-labelledby="destination-highlights-title"></section>
@@ -125,6 +131,6 @@
 </div>
 
 <script defer src="/pwa.js"></script>
-<script defer src="/app.js?v=75"></script>
+<script defer src="/app.js?v=82"></script>
 </body>
 </html>
