@@ -436,7 +436,10 @@ details.opt summary::-webkit-details-marker{display:none}
 .tour-detail-modal__copy p{margin:0;color:var(--ink);font-size:14px;line-height:1.7}
 .tour-detail-modal__hint{margin:16px 0 0;color:var(--ink2);font-size:12px;line-height:1.5}
 
-/* Destinos destacados para explorar antes de cotizar */
+/* Destinos destacados para explorar antes de cotizar.
+   La tarjeta es una "foto con texto encima": imagen arriba, scrim para que el
+   texto siempre tenga contraste, y el precio en ámbar para que sea lo primero
+   que se lea. Los dos colores son los de la marca. */
 .destination-highlights{margin:28px 0 12px;padding:22px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 8px 28px rgba(16,35,62,.06)}
 .destination-highlights__head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px}
 .destination-highlights__head h2{margin:5px 0 4px;font-family:var(--fh);font-size:34px;line-height:1.05}
@@ -453,26 +456,29 @@ details.opt summary::-webkit-details-marker{display:none}
 .destination-highlights__arrow:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .destination-highlights__arrow--prev{left:2px}
 .destination-highlights__arrow--next{right:2px}
-.featured-destination{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--bg);scroll-snap-align:start}
+.featured-destination{position:relative;min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--bg);scroll-snap-align:start}
 .destination-highlights__carousel .featured-destination{flex:0 0 calc((100% - 14px)/2)}
-.featured-destination__image{height:150px;background:var(--cel-soft)}
+.featured-destination.is-cheapest{border-color:#f1b145;box-shadow:0 6px 20px rgba(241,177,69,.28)}
+.featured-destination__flag{position:absolute;z-index:3;top:10px;left:10px;padding:4px 9px;border-radius:99px;background:#f1b145;color:#0f192d;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.featured-destination__image{position:relative;height:210px;background:#0f192d}
 .featured-destination__image img{display:block;width:100%;height:100%;object-fit:cover}
-.featured-destination__body{display:grid;gap:8px;padding:14px}
-.featured-destination__body h3{margin:0;font-size:18px;line-height:1.2}
-/* Zonas de la tarjeta de destinos destacados: chips en vez de <select>. */
-.featured-destination__zones{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
-.featured-destination__chip{min-height:34px;max-width:100%;padding:6px 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink2);font:600 12.5px var(--fb);text-align:left;cursor:pointer;transition:border-color .16s ease,color .16s ease,background .16s ease}
-.featured-destination__chip:hover{border-color:var(--ink2);color:var(--ink)}
-.featured-destination__chip.is-active{border-color:var(--ink);background:var(--ink);color:var(--bg)}
-.featured-destination__chip:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.featured-destination__body h3{min-height:2.4em}
-.featured-destination__search{margin-top:4px}
-
+/* Degradado propio (no --hero-*) porque esta tarjeta es siempre oscura, incluso
+   en modo claro: el scrim tiene que garantizar contraste contra la foto. */
+.featured-destination__scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,25,45,0) 32%,rgba(15,25,45,.72) 62%,rgba(15,25,45,.95) 100%)}
+.featured-destination__overlay{position:absolute;right:0;bottom:0;left:0;padding:14px}
+.featured-destination__overlay h3{margin:0 0 6px;color:#fff;font-family:var(--fh);font-size:27px;line-height:1.05;text-shadow:0 1px 10px rgba(0,0,0,.4)}
+.featured-destination__price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 7px;margin:0;min-height:20px;color:#fff;font-size:12.5px;opacity:.92;line-height:1.35}
+.featured-destination__price b{color:#f1b145;font-size:18px;font-weight:800;letter-spacing:-.01em}
+.featured-destination__price-tag{font-size:11.5px;opacity:.85}
+.featured-destination__price-mode{font-size:11px;opacity:.72}
+.featured-destination__price.is-loading .featured-destination__skeleton{display:block;width:96px;height:15px;border-radius:6px;background:rgba(255,255,255,.22)}
+.featured-destination__meta{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);color:var(--ink2);font-size:11.5px;font-weight:600}
+.featured-destination__body{display:grid;gap:8px;padding:12px 14px 14px}
 .featured-destination__search{display:flex;min-height:44px;align-items:center;justify-content:space-between;padding:0 14px;border:1px solid var(--action-border);border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:13px;font-weight:800;cursor:pointer;transition:filter .18s ease,transform .18s ease}
 .featured-destination__search:hover{filter:brightness(1.14);transform:translateY(-1px)}
 .featured-destination__search:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 44px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:170px}}
+@media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 44px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:200px}.featured-destination__overlay h3{font-size:25px}}
 @media(max-width:900px){.local-tours__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__grid{grid-template-columns:minmax(0,1fr)}.local-tour{padding:14px}.local-tours__footer{align-items:stretch;flex-direction:column}.local-tours__whatsapp{width:100%;min-width:0;font-size:13px}}
 .flight-airline{flex-wrap:wrap}

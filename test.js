@@ -224,11 +224,24 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   });
   await t('devuelve únicamente destinos de los cinco bloques de Brasil', async function () {
     const j = JSON.parse((await get(port, '/api/destinos')).body);
-    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty', 'bue'];
+    // Gramado y Foz de Iguazú se agregaron al buscador después de que esta
+    // lista se escribiera; si la volvés a tocar, actualizá también acá.
+    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty', 'bue', 'gram', 'igu'];
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
     assert.ok(j.some(function (d) { return d.key === 'bue' && d.name === 'Buenos Aires'; }));
     assert.strictEqual(j.length, allowed.length);
     assert.deepStrictEqual(j.map(function (d) { return d.key; }).sort(), allowed.slice().sort());
+  });
+  await t('todo destino del buscador existe en el modelo y es de Brasil salvo Buenos Aires', async function () {
+    // Esta es la que habría detectado el desfase de Gramado y Foz: la lista
+    // de arriba se desactualiza en silencio, pero el modelo no.
+    const j = JSON.parse((await get(port, '/api/destinos')).body);
+    j.forEach(function (d) {
+      assert.ok(model.DEST[d.key], 'destino del buscador ausente del modelo: ' + d.key);
+      const country = d.key === 'bue' ? 'Argentina' : 'Brasil';
+      assert.strictEqual(model.DEST[d.key].country || 'Brasil', country, 'país inesperado en ' + d.key);
+      assert.ok(d.name && typeof d.name === 'string', 'destino sin nombre: ' + d.key);
+    });
   });
   await t('cotiza Buenos Aires como destino de Argentina', async function () {
     const r = await get(port, '/api/cotizar?dest=bue&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
@@ -247,6 +260,32 @@ const q = 'dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq';
   await t('rechaza parámetros inválidos con 400', async function () {
     const r = await get(port, '/api/cotizar?dest=zz&dep=' + dep + '&ret=' + ret + '&pax=2');
     assert.strictEqual(r.status, 400); assert.ok(JSON.parse(r.body).error);
+  });
+  await t('precifica las tarjetas de destinos destacados con el modelo real', async function () {
+    const items = ['rio', 'fln', 'bue'].map(function (k) { return k + '~' + dep + '~' + ret + '~intermedio'; }).join(',');
+    const j = JSON.parse((await get(port, '/api/destinos-destacados?items=' + items + '&pax=2&style=eq&origin=MVD')).body);
+    assert.strictEqual(j.items.length, 3);
+    assert.ok(j.items.every(function (i) { return i.pp > 0 && i.total >= i.pp; }));
+    // El cartel anuncia la opción más barata, pero nunca una salida por Buenos
+    // Aires: esa conexión la app la descarta y no debe aparecer en el precio.
+    assert.ok(j.items.every(function (i) { return i.modeShort !== 'Salir por Buenos Aires'; }));
+    assert.ok(j.items.every(function (i) { return i.nights > 0; }));
+  });
+  await t('descarta destinos y fechas inválidos sin perder los válidos', async function () {
+    const junk = ['basura', 'rio~xx~' + ret, 'rio~' + ret + '~' + dep, 'noexiste~' + dep + '~' + ret].join(',');
+    const ok = 'rio~' + dep + '~' + ret;
+    const j = JSON.parse((await get(port, '/api/destinos-destacados?items=' + junk + ',' + ok)).body);
+    // La basura no puede agotar el cupo: el válido del final tiene que entrar.
+    assert.strictEqual(j.items.length, 1);
+    assert.strictEqual(j.items[0].key, 'rio');
+  });
+  await t('acota los viajeros de las tarjetas al rango válido', async function () {
+    const items = 'rio~' + dep + '~' + ret;
+    const up = JSON.parse((await get(port, '/api/destinos-destacados?items=' + items + '&pax=999')).body);
+    const down = JSON.parse((await get(port, '/api/destinos-destacados?items=' + items + '&pax=-4')).body);
+    assert.strictEqual(up.pax, 10); assert.strictEqual(down.pax, 1);
+    // Con 10 viajeros el total por persona tiene que bajar: el vuelo se comparte.
+    assert.ok(up.items[0].pp < down.items[0].total);
   });
   await t('sirve la web y bloquea rutas fuera de /public', async function () {
     const r = await get(port, '/');

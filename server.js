@@ -780,6 +780,68 @@ function cotizarTodos(req, res, url) {
   });
 }
 
+/*
+ * Precios de las tarjetas de "Destinos destacados".
+ *
+ * El cliente resuelve las fechas de cada tarjeta (incluye el caso especial de
+ * Réveillon) y las manda ya resueltas en `items`, con el formato
+ * `clave~ida~vuelta~tipoHotel`. El servidor no vuelve a decidir fechas: sólo
+ * aplica el modelo de costos a lo que le llega. Así no hay dos reglas de
+ * fechas que puedan desincronizarse entre cliente y servidor.
+ *
+ * Para cada grupo devolvemos la opción MÁS BARATA que la app realmente
+ * ofrecería: el mismo filtro de `adaptPackagesToStyle` (se descartan las
+ * salidas por Buenos Aires) para no prometer un precio con una conexión que
+ * la app no va a mostrar.
+ */
+const FEATURED_MAX_ITEMS = 12;
+const FEATURED_HOTEL_TYPES = ['all-inclusive', 'resort', 'boutique', 'economico', 'intermedio', 'confort'];
+
+function featuredPriceItems(req, res, url) {
+  if (limited('destacados:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas consultas seguidas. Esperá un minuto y probá de nuevo.' });
+  const pax = Math.min(10, Math.max(1, parseInt(url.searchParams.get('pax'), 10) || 2));
+  const style = ['ahorro', 'eq', 'comodo'].indexOf(String(url.searchParams.get('style') || '').toLowerCase()) >= 0
+    ? String(url.searchParams.get('style')).toLowerCase() : 'eq';
+  const origin = ['MVD', 'PDP'].indexOf(String(url.searchParams.get('origin') || 'MVD').toUpperCase()) >= 0
+    ? String(url.searchParams.get('origin')).toUpperCase() : 'MVD';
+  const today = model.getToday();
+  const re = /^\d{4}-\d{2}-\d{2}$/;
+  const items = String(url.searchParams.get('items') || '').split(',')
+    .map(function (raw) { return raw.split('~'); })
+    .filter(function (parts) { return parts.length >= 3; })
+    .map(function (parts) {
+      const key = String(parts[0] || '').trim();
+      const dep = String(parts[1] || '').trim();
+      const ret = String(parts[2] || '').trim();
+      const hotelType = FEATURED_HOTEL_TYPES.indexOf(String(parts[3] || '').trim()) >= 0 ? String(parts[3]).trim() : 'intermedio';
+      if (!model.DEST[key] || !re.test(dep) || !re.test(ret)) return null;
+      const depDate = model.parse(dep), retDate = model.parse(ret);
+      const nights = model.daysBetween(depDate, retDate);
+      if (isNaN(depDate) || isNaN(retDate) || nights < 1 || nights > 30) return null;
+      // 'flight' (el transporte por defecto de la app) y no 'all': con 'all'
+      // el precio más bajo salía siempre en Auto / Roadtrip, que es una
+      // alternativa que la app muestra aparte y no la que se abre al tocar
+      // "Ver propuesta". El cartel tiene que anticipar lo que se ve después.
+      // El filtro de avion_ba es el mismo que usa adaptPackagesToStyle.
+      const trip = { dest: key, pax: pax, budget: 0, style: style, transport: 'flight', kmPerLiter: 12,
+        hotelType: hotelType, origin: origin, fuelPriceUsd: Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2 };
+      const cheapest = model.build(trip, depDate, retDate, today, null)
+        .filter(function (proposal) { return proposal.mode !== 'avion_ba'; })
+        .sort(function (a, b) { return a.total - b.total; })[0];
+      if (!cheapest) return null;
+      return {
+        key: key, total: cheapest.total, pp: cheapest.pp, nights: nights,
+        modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel
+      };
+    })
+    .filter(Boolean)
+    // El tope se aplica DESPUÉS de descartar los inválidos: si se cortara antes,
+    // un cliente que mandara basura en los primeros items se quedaría sin
+    // precios y la sección se mostraría sin cifras.
+    .slice(0, FEATURED_MAX_ITEMS);
+  return sendJson(res, 200, { pax: pax, style: style, items: items });
+}
+
 // Páginas que sólo existen durante el prelanzamiento: la app de cotización y
 // el reparto de gastos. La raíz del dominio muestra la waitlist al público,
 // así que estas no pueden quedar accesibles sólo por adivinar la URL.
@@ -932,6 +994,9 @@ function createServer() {
     }
     if (url.pathname === '/api/cotizar-todos') {
       return cotizarTodos(req, res, url);
+    }
+    if (url.pathname === '/api/destinos-destacados') {
+      return featuredPriceItems(req, res, url);
     }
     if (url.pathname === '/api/cargadores') {
       return cargadoresElectricos(req, res, url).catch(function (e) {

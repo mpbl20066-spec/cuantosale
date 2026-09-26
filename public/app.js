@@ -227,13 +227,18 @@
       { label: 'Cataratas (lado brasileño)', key: 'igu' }, { label: 'Parque das Aves', key: 'igu' }
     ] }
   ];
+  // La rotación arranca siempre con Río y Floripa: son los dos destinos que
+  // la gente busca para una escapada y los que la app sabe cotizar mejor
+  // (vuelo directo desde Montevideo y, en Floripa, además bus). El resto de la
+  // lista sigue rotando por temporada para que la sección no sea siempre la
+  // misma. El orden final de las tarjetas lo define el precio, no esta lista.
   var MONTH_DESTINATION_ROTATION = {
-    0: ['florianopolis', 'ilhabela'], 1: ['florianopolis', 'ilhabela'],
-    2: ['rio', 'buzios'], 3: ['rio', 'buenosaires'], 4: ['nordeste', 'buenosaires'],
-    5: ['nordeste', 'salvador', 'gramado'], 6: ['buenosaires', 'salvador', 'gramado', 'foz'],
-    7: ['rio', 'buenosaires', 'gramado'], 8: ['rio', 'buzios'], 9: ['rio', 'buzios'],
-    10: ['nordeste', 'salvador'],
-    11: ['rio', 'nordeste', 'foz']
+    0: ['rio', 'florianopolis', 'buzios', 'gramado'], 1: ['rio', 'florianopolis', 'buzios', 'nordeste'],
+    2: ['rio', 'florianopolis', 'buzios', 'buenosaires'], 3: ['rio', 'florianopolis', 'nordeste', 'buenosaires'],
+    4: ['rio', 'florianopolis', 'nordeste', 'buenosaires'], 5: ['rio', 'florianopolis', 'nordeste', 'gramado'],
+    6: ['rio', 'florianopolis', 'buenosaires', 'gramado', 'foz'], 7: ['rio', 'florianopolis', 'buzios', 'gramado'],
+    8: ['rio', 'florianopolis', 'buzios', 'buenosaires'], 9: ['rio', 'florianopolis', 'buzios', 'nordeste'],
+    10: ['rio', 'florianopolis', 'nordeste', 'salvador'], 11: ['rio', 'florianopolis', 'nordeste', 'foz']
   };
   var BRASIL_DEFAULT_COSTS = {
     beach: {
@@ -355,35 +360,123 @@
   var ORIGIN_AIRPORTS = { MVD: 'Montevideo (MVD)', PDP: 'Punta del Este (PDP)' };
   function originLabel(code) { return ORIGIN_AIRPORTS[String(code || 'MVD').toUpperCase()] || ORIGIN_AIRPORTS.MVD; }
   function originCityName(code) { return originLabel(code).split(' · ')[0]; }
-  function renderDestinationHighlights(monthIndex) {
+  // Subcategoría que abre una tarjeta. Sin selector de zona, la tarjeta usa
+  // siempre la primera, así que el orden de la lista importa: la que esté
+  // primero es la que define el precio y las fechas que ve la persona.
+  //
+  // Réveillon es el caso trampa. En DESTINATION_GROUPS la entrada de Río es
+  // 'Réveillon Copacabana (31/12)' y featuredTravelDates() fuerza el 28/12
+  // cuando la etiqueta dice "reveillon": si quedara primera, la tarjeta de
+  // Río mostraría fechas de diciembre en septiembre. Por eso el fin de año
+  // sólo se usa en diciembre, y en el resto del año se cuela la zona general.
+  function featuredSubcategory(group, monthIndex) {
+    var list = monthIndex === 10 && group.id === 'nordeste'
+      ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; })
+      : group.subcategories;
+    // Sin normalizar acentos la búsqueda falla: la etiqueta dice "Réveillon"
+    // con e acentuada y 'reveillon' plano nunca aparecería.
+    var plain = function (item) {
+      return String(item.label || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    };
+    var yearEnd = list.filter(function (item) { return plain(item).indexOf('reveillon') >= 0; });
+    var regular = list.filter(function (item) { return plain(item).indexOf('reveillon') < 0; });
+    if (monthIndex === 11 && yearEnd.length) return yearEnd[0];
+    return regular[0] || list[0];
+  }
+  // Las tarjetas se piden al servidor para mostrar un precio real: el modelo
+  // de costos vive en lib/model.js y el cliente no lo puede calcular sin
+  // duplicar la lógica (y terminaría mostrando un número que no coincide con
+  // el de la propuesta). Se mandan las fechas ya resueltas por tarjeta para
+  // que el servidor no tenga que volver a decidir qué fecha va con qué mes.
+  function featuredPriceKey(monthIndex, subcategory) {
+    var dates = featuredTravelDates(monthIndex, subcategory);
+    return {
+      key: subcategory.key,
+      item: subcategory.key + '~' + dates.dep + '~' + dates.ret + '~' + (subcategory.hotelType || 'intermedio'),
+      dates: dates
+    };
+  }
+  function renderDestinationHighlights(monthIndex, pricedByKey) {
     var root = document.getElementById('destination-highlights');
     if (!root) return;
     var names = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex] || MONTH_DESTINATION_ROTATION[new Date().getMonth()];
     var groups = DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; });
     var monthOptions = names.map(function (name, index) { return '<option value="' + index + '"' + (index === monthIndex ? ' selected' : '') + '>' + name.charAt(0).toUpperCase() + name.slice(1) + '</option>'; }).join('');
-    var cards = groups.map(function (group) {
-      var subcategories = monthIndex === 10 && group.id === 'nordeste' ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; }) : group.subcategories;
-      // Las zonas van como chips y no como <select>: dentro de una tarjeta de
-      // contenido un desplegable se lee como un formulario.
-      var chips = subcategories.length > 1 ? subcategories.map(function (item, index) {
-        return '<button type="button" class="featured-destination__chip' + (index === 0 ? ' is-active' : '') + '"'
-          + ' data-feature-chip="' + esc(group.id) + '" data-feature-index="' + index + '"'
-          + ' aria-pressed="' + (index === 0 ? 'true' : 'false') + '">' + esc(item.label) + '</button>';
-      }).join('') : '';
+    // Cada tarjeta se precifica con la misma zona que abriría "Ver propuesta",
+    // así el número de la tarjeta y el de la propuesta nunca se contradicen.
+    var priced = groups.map(function (group) {
+      return { group: group, first: featuredPriceKey(monthIndex, featuredSubcategory(group, monthIndex)) };
+    });
+    // Ordenamos por precio ascendente: la sección se llama "más económicos", así
+    // que lo más barato tiene que verse primero. Los que aún no tienen precio
+    // (endpoint caído) se quedan al final, en el orden en que vinieron.
+    var ordered = priced.slice().sort(function (a, b) {
+      var pa = pricedByKey && pricedByKey[a.first.key], pb = pricedByKey && pricedByKey[b.first.key];
+      if (!pa || !pb) return (pa ? -1 : 0) - (pb ? -1 : 0) || 0;
+      return pa - pb;
+    });
+    var cheapestKey = ordered.length && pricedByKey ? ordered.filter(function (entry) { return pricedByKey[entry.first.key]; })[0].first.key : null;
+    var cards = ordered.map(function (entry) {
+      var group = entry.group, first = entry.first;
       var photo = DEST_PHOTOS[group.image];
       // El grupo puede traer varias zonas pegadas ("Búzios / Arraial do Cabo /
-      // Cabo Frio") y eso parte el título en dos líneas. Las zonas van en los
-      // chips, así que el título queda solo con el destino principal.
+      // Cabo Frio") y eso parte el título en dos líneas. La tarjeta muestra solo
+      // el destino principal; el precio y las fechas son los de su zona por
+      // defecto, que es la que se abre al tocar "Ver propuesta".
       var mainLabel = String(group.label).split(' / ')[0];
       var cardLabel = monthIndex === 11 && group.id === 'rio' ? 'Río de Janeiro · Réveillon' : mainLabel;
-      return '<article class="featured-destination" data-featured-destination="' + esc(group.id) + '">' +
-        (photo ? '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy"></div>' : '') +
-        '<div class="featured-destination__body"><h3>' + esc(cardLabel) + '</h3>' +
-        (chips ? '<div class="featured-destination__zones" role="group" aria-label="Zona de ' + esc(group.label) + '">' + chips + '</div>' : '') +
-        '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">→</span></button></div></article>';
+      var price = pricedByKey && pricedByKey[first.key];
+      var isCheapest = price != null && first.key === cheapestKey;
+      var travel = first.dates;
+      var priceLine = price != null
+        ? '<p class="featured-destination__price"><b>' + money(price) + '</b><span class="featured-destination__price-tag">desde, por persona</span><span class="featured-destination__price-mode">' + esc(price.modeShort || '') + '</span></p>'
+        : '<p class="featured-destination__price is-loading" aria-hidden="true"><span class="featured-destination__skeleton"></span></p>';
+      return '<article class="featured-destination' + (isCheapest ? ' is-cheapest' : '') + '" data-featured-destination="' + esc(group.id) + '"'
+        + ' data-feature-price-key="' + esc(first.key) + '" data-feature-dates="' + esc(travel.dep) + '|' + esc(travel.ret) + '">'
+        + (isCheapest ? '<span class="featured-destination__flag">M&aacute;s barato</span>' : '')
+        + '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy">'
+        + '<div class="featured-destination__scrim"></div>'
+        + '<div class="featured-destination__overlay"><h3>' + esc(cardLabel) + '</h3>' + priceLine + '</div></div>'
+        + '<div class="featured-destination__meta"><span>' + esc(shortDateLabel(travel.dep).replace(/\./g, '')) + ' &rarr; ' + esc(shortDateLabel(travel.ret).replace(/\./g, '')) + '</span>'
+        + '<span>' + S.pax + ' ' + (S.pax === 1 ? 'viajero' : 'viajeros') + '</span></div>'
+        + '<div class="featured-destination__body">'
+        + '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">&rarr;</span></button>'
+        + '</div></article>';
     }).join('');
-    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">ESCAPADAS PARA CADA TEMPORADA</span><h2 id="destination-highlights-title">Destinos destacados</h2><p>Elegí una zona y te mostramos una propuesta para tu viaje.</p></div><label>Ver destinos para <select data-feature-month aria-label="Simular mes para ver destinos">' + monthOptions + '</select></label></div><div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">‹</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">›</button></div>';
+    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">M&Aacute;S ECON&Oacute;MICOS</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona. Toc&aacute; un destino y te mostramos la propuesta.</p></div><label>Ver para <select data-feature-month aria-label="Simular mes para ver destinos">' + monthOptions + '</select></label></div><div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">&lsaquo;</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">&rsaquo;</button></div>';
+  }
+  // Precios de las tarjetas. Se piden una vez por mes/viajeros/estilo y se
+  // cachean: el carrusel se vuelve a pintar al cambiar de mes, y sin cache cada
+  // repintado volvería a pegarle al servidor.
+  var featuredPricesCache = {};
+  function loadFeaturedPrices(monthIndex, force) {
+    var cacheKey = monthIndex + '|' + S.pax + '|' + S.style + '|' + S.origin;
+    if (!force && featuredPricesCache[cacheKey]) {
+      renderDestinationHighlights(monthIndex, featuredPricesCache[cacheKey]);
+      return;
+    }
+    renderDestinationHighlights(monthIndex, null);
+    var seasonalIds = MONTH_DESTINATION_ROTATION[monthIndex] || MONTH_DESTINATION_ROTATION[new Date().getMonth()];
+    var groups = DESTINATION_GROUPS.filter(function (group) { return seasonalIds.indexOf(group.id) >= 0; });
+    var items = groups.map(function (group) {
+      return featuredPriceKey(monthIndex, featuredSubcategory(group, monthIndex)).item;
+    });
+    var qs = new URLSearchParams({ month: String(monthIndex), pax: String(S.pax), style: S.style, origin: S.origin, items: items.join(',') });
+    fetch('/api/destinos-destacados?' + qs.toString())
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) return;
+        var byKey = {};
+        (res.j.items || []).forEach(function (item) { byKey[item.key] = item.pp; });
+        featuredPricesCache[cacheKey] = byKey;
+        // Sólo repintamos si el usuario sigue en el mismo mes: si ya cambió a
+        // otro, su render fue el que pidió esta tanda y no hay que pisarlo.
+        if (document.querySelector('[data-feature-month]') && Number(document.querySelector('[data-feature-month]').value) === monthIndex) {
+          renderDestinationHighlights(monthIndex, byKey);
+        }
+      })
+      .catch(function () { /* sin precios: las tarjetas quedan igual, sin cifras */ });
   }
   var FOOD_TIPS = {
     rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
@@ -3024,12 +3117,12 @@
     }
     var highlights = document.getElementById('destination-highlights');
     if (highlights) {
-      renderDestinationHighlights(new Date().getMonth());
+      loadFeaturedPrices(new Date().getMonth());
       highlights.addEventListener('change', function (event) {
         var month = event.target.closest('[data-feature-month]');
         if (!month) return;
         var monthIndex = Number(month.value);
-        renderDestinationHighlights(monthIndex);
+        loadFeaturedPrices(monthIndex, true);
         var featuredSelection = featuredProposalSelection;
         var selectedSubcategory = featuredSelection && featuredSelection.subcategory;
         var dates = featuredTravelDates(monthIndex, selectedSubcategory);
@@ -3061,27 +3154,12 @@
           else carousel.scrollBy({ left: forward ? carousel.clientWidth : -carousel.clientWidth, behavior: 'smooth' });
           return;
         }
-        var chip = event.target.closest('[data-feature-chip]');
-        if (chip) {
-          var chipCard = chip.closest('[data-featured-destination]');
-          if (chipCard) {
-            Array.prototype.forEach.call(chipCard.querySelectorAll('[data-feature-chip]'), function (el) {
-              el.classList.remove('is-active');
-              el.setAttribute('aria-pressed', 'false');
-            });
-            chip.classList.add('is-active');
-            chip.setAttribute('aria-pressed', 'true');
-          }
-          return;
-        }
         var choose = event.target.closest('[data-feature-search]');
         if (!choose) return;
         var group = DESTINATION_GROUPS.filter(function (item) { return item.id === choose.getAttribute('data-feature-search'); })[0];
-        var card = choose.closest('[data-featured-destination]');
-        var activeChip = card && card.querySelector('[data-feature-chip].is-active');
-        var availableSubcategories = group && Number($('#destination-highlights [data-feature-month]').value) === 10 && group.id === 'nordeste'
-          ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; }) : group && group.subcategories;
-        var subcategory = availableSubcategories && activeChip && availableSubcategories[Number(activeChip.getAttribute('data-feature-index'))];
+        // Misma zona que priced la tarjeta: el precio mostrado y la propuesta
+        // que se abre tienen que ser la misma, siempre.
+        var subcategory = group && featuredSubcategory(group, Number($('#destination-highlights [data-feature-month]').value));
         if (subcategory) {
           var selectedMonth = Number($('#destination-highlights [data-feature-month]').value);
           featuredProposalSelection = { monthIndex: selectedMonth, subcategory: subcategory };
