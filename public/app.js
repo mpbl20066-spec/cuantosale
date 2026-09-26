@@ -977,9 +977,8 @@
     // Mostrar todas las experiencias cargadas para el destino seleccionado.
     var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
     if (!tours.length) return '';
-    // Créditos de las fotos que sí se muestran. Se arman con las que aparecen
-    // en esta pantalla, no con el catálogo entero:，也就 no se listan fotos
-    // que el visitante no está viendo.
+    // Los tours ya guardan autor y licencia en TOUR_PHOTOS; el pie global los
+    // reagrupa. Acá sólo se registra cuáles se están mostrando.
     var creditos = {};
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
     var head = '<div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span>' +
@@ -2485,9 +2484,26 @@
 
     var chip = $('#chip');
     if (chip) chip.textContent = '';
-    $('#foot').innerHTML = live
+    $('#foot').innerHTML = (live
       ? '<p><b>Vuelos:</b> tarifa aérea real al momento de la búsqueda, por persona. Puede cambiar hasta que reserves. <b>Alojamiento, comidas, traslados y buses:</b> valores de referencia.</p>'
-      : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento, comidas, traslados y buses son valores de referencia.</p>';
+      : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento, comidas, traslados y buses son valores de referencia.</p>')
+      + '<details class="foot-credits" data-foot-credits><summary>Créditos de las fotos</summary>' +
+      '<p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre. ' +
+      'Cada autor y licencia se detalle más abajo.</p><ul data-foot-credits-list></ul></details>';
+
+    // Los créditos se cargan después de pintar para no frenar el primer render.
+    cargarCreditosFotos().then(function () {
+      var lista = document.querySelector('[data-foot-credits-list]');
+      if (!lista) return;
+      var usadas = Object.keys(FOTO_CREDITOS).filter(function (url) {
+        return document.documentElement.innerHTML.indexOf(url) >= 0;
+      });
+      if (!usadas.length) return;
+      lista.innerHTML = usadas.sort().map(function (url) {
+        var c = fotoCreditosDe(url);
+        return '<li>' + esc(c.autor) + ' &middot; ' + esc(c.licencia) + '</li>';
+      }).join('');
+    });
 
     var pct = Math.min(100, Math.round(rec.total / Math.max(budget, 1) * 100));
     var status = data.fits

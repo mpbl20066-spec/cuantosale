@@ -435,6 +435,15 @@ details.opt summary::-webkit-details-marker{display:none}
 .local-tours__credits p{margin:8px 0 4px}
 .local-tours__credits a{color:var(--cel);font-weight:700}
 .local-tours__credits ul{margin:0;padding-left:18px}
+/* Créditos globales, al pie de la página: reunión de todas las fotos que la
+   app cargó, no sólo las de los tours. */
+.foot-credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}
+.foot-credits summary{cursor:pointer;font-weight:700;color:var(--ink2)}
+.foot-credits summary:hover{color:var(--ink)}
+.foot-credits summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.foot-credits p{margin:8px 0 4px}
+.foot-credits a{color:var(--cel);font-weight:700}
+.foot-credits ul{margin:0;padding-left:18px}
 .tour-detail-modal__eyebrow{display:block;margin-bottom:8px;color:var(--cel);font-size:11px;font-weight:800;letter-spacing:.12em}
 .tour-detail-modal h2{max-width:580px;margin-bottom:12px}
 .tour-detail-modal__description{margin:0 0 16px;color:var(--ink2);font-size:14px;line-height:1.55}
