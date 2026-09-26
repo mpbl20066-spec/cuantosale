@@ -1,7 +1,7 @@
 'use strict';
 
-// Subir este número descarta el cache viejo: la estrategia de assets es
-// cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
+// Subir este nÃºmero descarta el cache viejo: la estrategia de assets es
+// cache-first, asÃ­ que sin cambiarlo los usuarios siguen viendo la versiÃ³n
 // anterior de app.js y style.css para siempre.
 var CACHE_NAME = 'cuantosale-shell-v36';
 var APP_SHELL = [

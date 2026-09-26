@@ -176,11 +176,15 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .legend .l1::before{background:var(--ink);border-color:var(--ink)}
 .legend .l2::before{background:var(--accent);border-color:var(--accent)}
 
-.opts{display:grid;gap:10px}
-details.opt{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
-details.opt[open]{border-color:var(--ink2)}
-details.opt summary{list-style:none;display:flex;justify-content:space-between;gap:14px;align-items:center;padding:16px;cursor:pointer}
-details.opt summary::-webkit-details-marker{display:none}
+/* ---------- tarjeta de propuesta (Vuelo/Bus/Auto + Hotel) ----------
+   Dos acciones, dos superficies: la tarjeta no es clickeable en bloque, cada
+   acción tiene su propio botón. Antes el <details> hacía de cartelera y el
+   botón real sólo aparecía después de desplegarlo. */
+.opts{display:grid;gap:12px}
+.opt{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:20px}
+.opt:hover,.opt.is-open{border-color:var(--ink2);box-shadow:0 12px 30px rgba(16,35,62,.10)}
+.opt__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.opt__main{min-width:0}
 .opt .t{font-weight:600;font-size:16px;line-height:1.25}
 .opt .s{font-size:13px;color:var(--ink2);margin-top:2px}
 .opt .tg{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
@@ -188,12 +192,48 @@ details.opt summary::-webkit-details-marker{display:none}
 .mini.y{background:var(--accent);color:var(--accent-ink)}
 .mini.g{background:var(--good-soft);color:var(--good)}
 .mini.r{background:var(--coral-soft);color:var(--coral)}
-.opt .r{text-align:right;flex:0 0 auto}
-.opt .r b{display:block;font-family:var(--fh);font-weight:800;font-size:32px;line-height:1}
-.opt .r span{font-size:12px;color:var(--ink2)}
-.opt .body{padding:0 16px 14px}
-.opt .body div{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
-.propuesta-seleccionada{border:2px solid var(--accent)!important;box-shadow:0 8px 20px rgba(246,178,27,.2)}.proposal-actions{border-top:0!important;padding:10px 0 0!important;display:flex!important;justify-content:flex-end!important}.btn-ver-propuesta{align-self:flex-end;margin-left:auto;border:0;border-radius:12px;background:var(--ink);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}.btn-ver-propuesta:hover{filter:brightness(1.15);transform:translateY(-1px)}.destination-card>.btn-ver-propuesta{display:flex;align-self:flex-end;margin:14px 0 0 auto}
+/* Precio arriba a la derecha; en el celu pasa abajo del título para que el
+   número grande no quede apretado contra el borde. */
+.opt__price{flex:0 0 auto;text-align:right}
+.opt__price b{display:block;font-family:var(--fh);font-weight:800;font-size:32px;line-height:1}
+.opt__price span{font-size:12px;color:var(--ink2)}
+/* margin-top:auto pega las acciones abajo: en el grid todas las tarjetas miden
+   lo mismo, así los CTA quedan alineados aunque unas tengan más etiquetas. */
+.opt__actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.btn-ver-propuesta{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-left:auto;border:0;border-radius:12px;background:var(--ink);color:#fff;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.opt__cta:hover{box-shadow:0 10px 22px rgba(16,35,62,.24);filter:brightness(1.1)}
+.opt__arrow{display:inline-block;font-size:17px;line-height:1}
+.opt__disclosure{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
+.opt__disclosure:hover,.opt__disclosure.is-open{border-color:var(--ink2);color:var(--ink)}
+.opt__chevron{display:inline-block;font-size:18px;line-height:1}
+.opt__disclosure:focus-visible,.opt__cta:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.opt__body>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.propuesta-seleccionada{border:2px solid var(--accent)!important;box-shadow:0 8px 20px rgba(246,178,27,.2)}
+.destination-card>.btn-ver-propuesta{display:flex;align-self:flex-end;margin:14px 0 0 auto}
+/* El movimiento (elevación, flecha, chevron) sólo si el sistema no pide menos
+   movimiento: el color del hover sí se mantiene, no informa nada nuevo. */
+@media (prefers-reduced-motion:no-preference){
+  .opt{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+  .opt:hover{transform:translateY(-2px)}
+  .opt__disclosure{transition:color .18s ease,border-color .18s ease,transform .18s ease}
+  .opt__disclosure:hover{transform:translateY(-1px)}
+  .opt__cta{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+  .opt__cta:hover{transform:translateY(-2px)}
+  .opt__cta:hover .opt__arrow{transform:translateX(3px)}
+  .opt__arrow,.opt__chevron{transition:transform .2s ease}
+  .opt__disclosure.is-open .opt__chevron{transform:rotate(90deg)}
+}
+/* En pantallas chicas el precio y las acciones se apilan y los dos botones
+   toman el ancho disponible: 44px de alto, sin puntería fina. */
+@media (max-width:520px){
+  .opt{padding:14px;border-radius:18px;gap:12px}
+  .opt__head{flex-direction:column;gap:10px}
+  .opt__price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;text-align:left}
+  .opt__price b{font-size:28px}
+  .destination-total small{font-size:10px}
+  .opt__actions{gap:8px}
+  .opt__disclosure,.opt__cta{flex:1 1 auto;justify-content:center;margin:0}
+}
 
 .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px}
 .foot b{color:var(--ink)}
@@ -254,19 +294,21 @@ details.opt summary::-webkit-details-marker{display:none}
 /* Comparador de destinos por presupuesto */
 .destination-results-section h2{font-family:var(--fh);font-weight:700;font-size:38px;line-height:1;margin:0 0 6px}
 .destination-results-section>.sub{margin:0 0 16px;color:var(--ink2);font-size:14px}
-.destination-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+/* Sin align-items:start para que las tarjetas de una fila midan lo mismo y el
+   margin-top:auto de .opt__actions deje los CTA alineados entre tarjetas. */
+.destination-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .destination-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
 .destination-card-body{display:flex;flex-direction:column;flex:1;padding:16px}
 .destination-banner{flex:0 0 auto;height:92px;display:grid;place-items:center;background:linear-gradient(135deg,#d8f1ef,#f6b21b);font-size:48px;border-radius:20px 20px 0 0;overflow:hidden}.destination-banner-fln{background:linear-gradient(135deg,#b6e3ef,#f6d58a)}.destination-banner-for,.destination-banner-nat,.destination-banner-pip{background:linear-gradient(135deg,#9ad9d1,#f6b21b)}.destination-banner-igu{background:linear-gradient(135deg,#9bc8e8,#d7efdb)}.destination-banner-sao,.destination-banner-poa{background:linear-gradient(135deg,#c9d4e5,#f0c58a)}
 .destination-banner-photo{height:150px;background:var(--bg)}.destination-banner-photo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:20px 20px 0 0}
 .destination-card.fits{border-color:var(--good);box-shadow:0 5px 16px color-mix(in srgb,var(--good) 14%,transparent)}
-.destination-card-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+/* El hover no toca el borde: en estas tarjetas el verde es la señal de "entra
+   en tu presupuesto" y no debe desvanecerse al pasar el mouse. */
+.destination-card:hover{box-shadow:0 12px 30px rgba(16,35,62,.14)}
 .destination-card h3{margin:0;font-size:19px;line-height:1.2}.destination-location{margin:2px 0 0;color:var(--ink2);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}.destination-card p{margin:4px 0 10px;color:var(--ink2);font-size:13px}
-.destination-total{text-align:right;flex:0 0 auto}.destination-total small,.destination-total span{display:block;color:var(--ink2);font-size:11px}.destination-total b{display:block;font-family:var(--fh);font-size:34px;line-height:1;font-weight:800;white-space:nowrap}
-.destination-card details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.destination-card summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ink2)}
-.destination-breakdown{margin-top:8px}.destination-breakdown div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}.destination-breakdown b{font-weight:600}
-.btn-ver-propuesta-destino{align-self:flex-end;margin:14px 0 0 auto;border:0;border-radius:12px;padding:11px 15px;background:var(--ink);color:#fff;font-size:13px;font-weight:700;cursor:pointer}.btn-ver-propuesta-destino:hover{filter:brightness(1.14);transform:translateY(-1px)}
-@media (max-width:560px){.destination-finder{grid-template-columns:1fr}.find-destinations{width:100%}.destination-card-top{flex-direction:column}.destination-total{text-align:left}.destination-total b{font-size:38px}}
+.destination-card-tags{margin-top:2px}
+.destination-total small{color:var(--ink2);font-size:11px}
+@media (max-width:560px){.destination-finder{grid-template-columns:1fr}.find-destinations{width:100%}}
 @media (max-width:700px){.destination-cards{grid-template-columns:1fr}}
 
 /* Formulario de pasajeros y comprobante */
@@ -303,7 +345,7 @@ details.opt summary::-webkit-details-marker{display:none}
 @media (max-width:560px){.food-guide{padding:16px}.food-guide h2{font-size:28px}.guide-lock{inset:94px 8px 8px;padding:16px}.guide-unlock{width:100%}}
 
 .trip-summary{position:fixed;right:20px;bottom:20px;z-index:90;width:min(360px,calc(100vw - 24px));border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.96);color:var(--ink);backdrop-filter:blur(12px);box-shadow:0 18px 38px rgba(16,35,62,.18);padding:12px 12px 10px}.trip-summary__inner{display:grid;gap:10px}.trip-summary__head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.trip-summary__eyebrow{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:var(--cel-soft);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.trip-summary__head strong{font-family:var(--fh);font-size:48px;line-height:.86;letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__bar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line);gap:2px}.trip-summary__bar span{display:block;height:100%;min-width:3px}.trip-summary__items{display:grid;gap:4px}.trip-summary__item{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}.trip-summary__item em{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__ico{flex:0 0 20px;width:20px;height:20px;display:block;color:var(--c1);stroke-width:1.85}.trip-summary__meta{flex:1;display:grid;gap:1px;min-width:0}.trip-summary__meta b{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em}.trip-summary__meta span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trip-summary__item.is-zero{opacity:.45}.trip-summary__item em{font-style:normal;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap}.trip-summary__cta{width:100%;height:48px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer}.trip-summary__cta:hover{filter:brightness(1.05)}.trip-summary[hidden]{display:none}
-.daily-budget{display:grid;gap:16px}.daily-budget__group{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}.daily-budget__header{display:flex;align-items:end;justify-content:space-between;gap:10px}.daily-budget__header span{font-weight:800;font-size:17px}.daily-budget__options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}.daily-budget__option-copy{font-size:11px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
+.daily-budget{display:grid;gap:16px}.daily-budget__group{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}.daily-budget__header{display:flex;align-items:end;justify-content:space-between;gap:10px}.daily-budget__header span{font-weight:800;font-size:17px}.daily-budget__header small{color:var(--ink2);font-size:11px}.daily-budget__options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}.daily-budget__option-copy{font-size:11px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
 @media (max-width:400px){.daily-budget__options{grid-template-columns:repeat(2,minmax(0,1fr))}.daily-budget__option{min-height:110px}.daily-budget__option strong{font-size:21px}}
 .daily-budget__option--custom.is-selected{align-items:stretch;gap:6px;cursor:default}.daily-budget__option--custom.is-selected:hover{transform:none}.daily-budget__option--custom .daily-budget__planned{width:100%;gap:5px;padding:0}.daily-budget__option--custom .daily-budget__planned>span{font-size:11px}.daily-budget__option--custom .daily-budget__input-wrap{max-width:none;min-height:42px;padding:0 8px;background:var(--surface)}.daily-budget__option--custom .daily-budget__input-wrap input{min-width:0;height:38px;font-size:15px}
 .daily-budget__option--custom.is-selected{min-width:0;overflow:hidden}.daily-budget__option--custom.is-selected .daily-budget__planned,.daily-budget__option--custom.is-selected .daily-budget__input-wrap{box-sizing:border-box;min-width:0;max-width:100%;width:100%}.daily-budget__option--custom.is-selected .daily-budget__input-wrap{overflow:hidden;gap:5px}.daily-budget__option--custom.is-selected .daily-budget__input-wrap input{box-sizing:border-box;flex:1 1 0;width:100%;min-width:0;max-width:100%}
@@ -319,7 +361,6 @@ details.opt summary::-webkit-details-marker{display:none}
 .flight-filters{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.flight-filters div{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.flight-filters b{font-size:12px;margin-right:4px}.flight-filters button{border:1px solid var(--line);border-radius:99px;background:var(--surface);padding:6px 9px;color:var(--ink);font-size:12px;cursor:pointer}.flight-filters button[aria-pressed="true"]{border-color:#087E5B;background:var(--good-soft);color:#07543e;font-weight:700}.transport-detail select,.transport-detail input[type="number"]{display:block;width:100%;max-width:320px;margin:6px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}.transport-detail label{display:block;margin-bottom:10px}
 @media (max-width:900px){.trip-summary{left:12px;right:12px;bottom:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;max-width:none}.trip-summary__head strong{font-size:36px}}
 @media (max-width:560px){.trip-summary__item{grid-template-columns:58px minmax(0,1fr) auto}.trip-summary__item b{white-space:normal}.trip-summary__cta{height:46px}}
-
 .daily-budget__planned{display:grid;gap:7px;padding:10px 0 2px}.daily-budget__planned>span{font-size:13px;font-weight:700;color:var(--ink)}.daily-budget__planned .daily-budget__input-wrap{max-width:280px;min-height:48px;border:1.5px solid var(--line);background:var(--surface);transition:border-color .16s ease,box-shadow .16s ease}.daily-budget__planned .daily-budget__input-wrap:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}.daily-budget__planned input{font-weight:700}.daily-budget__planned input::placeholder{color:var(--ink2);font-size:13px;font-weight:400;opacity:.8}
 .voucher-card__action{display:inline-flex;align-items:center;justify-content:center;align-self:end;margin-top:7px;min-height:30px;padding:0 9px;border:1px solid #cbd5e1;border-radius:9px;background:#f8fbff;color:#0b4f97;text-decoration:none;font-size:11px;font-weight:800;line-height:1.1;transition:background .18s ease,border-color .18s ease,transform .18s ease}.voucher-card__action:hover{background:#eaf2ff;border-color:#0b6bcb;transform:translateY(-1px)}.voucher-card__action--button{font-family:inherit;cursor:pointer}.voucher-card__action--button:disabled{opacity:.55;cursor:not-allowed}
 .voucher-flight-legs{display:grid;gap:8px;margin:5px 0}.voucher-flight-leg{display:grid;gap:3px;padding:9px 10px;border-left:3px solid #0b6bcb;border-radius:0 10px 10px 0;background:#f5f8fc}.voucher-flight-leg__label{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0b6bcb}.voucher-flight-leg strong{font-size:12px}.voucher-flight-leg span:not(.voucher-flight-leg__label){font-size:11px;line-height:1.35;color:var(--ink)}.voucher-flight-leg small{font-size:11px;color:var(--ink2)}.voucher-card:nth-child(2) strong{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}.voucher-card:nth-child(2) p{font-size:11px}.voucher-card:nth-child(3) strong{white-space:normal;overflow:visible;text-overflow:clip}.voucher-card:nth-child(4) strong{white-space:normal;overflow:visible;text-overflow:clip}.voucher-card:nth-child(4) p{font-size:11px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}

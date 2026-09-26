@@ -500,6 +500,15 @@
       dates: window
     };
   }
+  // Los destinos destacados son la pantalla de inicio: globos de entrada para
+  // arrancar una búsqueda. En cuanto hay un resultado real se ocultan, porque
+  // una lista de "escapadas que salen menos" arriba del resultado distrae de
+  // la propuesta que la persona fue a buscar. Vuelven al limpiar la búsqueda
+  // (destino = "todos"), que es el único estado sin resultados.
+  function setHighlightsVisible(visible) {
+    var section = document.getElementById('destination-highlights');
+    if (section) section.hidden = !visible;
+  }
   function renderDestinationHighlights(windowIndex, pricedByKey) {
     var root = document.getElementById('destination-highlights');
     if (!root) return;
@@ -2288,22 +2297,35 @@
       var best = options.slice().sort(function (a, b) { return a.total - b.total; })[0];
       return Object.assign({}, best, { dest: Object.assign({}, best.dest, { name: group.label }), featuredGroup: group.id });
     }).filter(Boolean).sort(function (a, b) { return a.total - b.total; });
-    var cards = fits.map(function (option) {
-      var rows = CATS.map(function (c) {
+    var cards = fits.map(function (option, index) {
+      // Sólo las categorías con costo: una fila en US$ 0 es ruido en un
+      // desglose que la persona abre para entender de dónde sale el precio.
+      var rows = CATS.filter(function (c) { return Number(option.parts[c[0]]) > 0; }).map(function (c) {
         return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + '</b></div>';
       }).join('');
       var photo = DEST_PHOTOS[option.dest.key];
       var location = [option.dest.region, option.dest.country || 'Brasil'].filter(Boolean).join(' - ');
-      return '<article class="destination-card' + (option.fits ? ' fits' : '') + '">' +
+      // Comparte la anatomía de la tarjeta de propuesta (opt__*): precio arriba
+      // a la derecha, las dos acciones siempre a la vista y el desglose debajo.
+      // Las dos listas de la app muestran el mismo tipo de dato y tienen que
+      // leerse igual.
+      var bodyId = 'destino-desglose-' + index;
+      return '<article class="destination-card' + (option.fits ? ' fits' : '') + '" data-opt-card>' +
         (photo
           ? '<div class="destination-banner destination-banner-photo"><img src="' + esc(photo) + '" alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
           : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : option.dest.key === 'igu' ? '🌊' : '☀️') + '</span></div>') +
         '<div class="destination-card-body">' +
-        '<div class="destination-card-top"><div><h3>' + esc(option.dest.name) + '</h3>' + (location ? '<p class="destination-location">' + esc(location) + '</p>' : '') + '<p>' + esc(option.title.replace(/Vuelo desde Montevideo/g, 'Vuelo desde ' + originCityName(data.meta.origin))) + '. ' + esc(option.tierDesc) + '.</p></div>' +
-        '<div class="destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
-        '<span class="mini g">¡Entra en tu presupuesto!</span>' +
-        '<details><summary>Ver desglose</summary><div class="destination-breakdown">' + rows + '</div></details>' +
-        '<button type="button" class="btn-ver-propuesta-destino" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta ➔</button>' +
+        '<div class="opt__head destination-card-top"><div class="opt__main">' +
+        '<h3>' + esc(option.dest.name) + '</h3>' +
+        (location ? '<p class="destination-location">' + esc(location) + '</p>' : '') +
+        '<p>' + esc(option.title.replace(/Vuelo desde Montevideo/g, 'Vuelo desde ' + originCityName(data.meta.origin))) + '. ' + esc(option.tierDesc) + '.</p></div>' +
+        '<div class="opt__price destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
+        '<div class="destination-card-tags"><span class="mini g">¡Entra en tu presupuesto!</span></div>' +
+        '<div class="opt__actions">' +
+        '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
+        '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
+        '</div>' +
+        '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + '</div>' +
         '</div>' +
         '</article>';
     }).join('');
@@ -2318,6 +2340,7 @@
     if (!budget || budget < 1) { el.innerHTML = '<div class="notice">Ingresá un presupuesto máximo para buscar destinos.</div>'; return; }
     if (!S.dep || !S.ret) { el.innerHTML = '<div class="notice">Elegí las fechas de ida y vuelta antes de buscar destinos.</div>'; return; }
     massSearch = true;
+    setHighlightsVisible(false);
     $('#results').innerHTML = '';
     el.innerHTML = renderLoadingState('Buscando destinos para tu presupuesto…');
     var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style, origin: S.origin });
@@ -2346,6 +2369,9 @@
       return;
     }
     if (S.dest === 'todos') { return; }
+    // Hay una búsqueda real en marcha: los destacados ya cumplieron su función
+    // de puerta de entrada, así que se van de la vista.
+    setHighlightsVisible(false);
     renderTransportSelector();
     if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
     if (ctrl) ctrl.abort();
@@ -2565,7 +2591,12 @@
       '<div class="panel"><div class="chart">' + bars + '</div>' +
       '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata</span><span>Otras fechas</span></div></div></section>';
 
-    var proposalMarkup = function (p) {
+    // La tarjeta tiene dos acciones y dos superficies distintas: "Ver propuesta"
+    // abre el detalle completo y "Ver desglose" despliega el reparto por categoría
+    // sin salir de la lista. Antes la única pista era que toda la tarjeta fuera
+    // clickeable: en escritorio se adivinaba, en el celu no se veía, y el botón
+    // real ("Ver propuesta") sólo aparecía después de desplegar la tarjeta.
+    var proposalMarkup = function (p, index) {
       var tags = '';
       if (p.id === rec.id) tags += '<span class="mini y">Recomendada</span>';
       if (cheapest && p.id === cheapest.id) tags += '<span class="mini">Más barata</span>';
@@ -2573,8 +2604,18 @@
       if (live && p.sources.pasajes === 'real') tags += '<span class="mini g">Pasaje real</span>';
       tags += p.total <= budget ? '<span class="mini g">Entra en tu presupuesto</span>' : '<span class="mini r">Se pasa por ' + money(p.total - budget) + '</span>';
       var rows = CATS.filter(function (c) { return Number(p.parts[c[0]]) > 0; }).map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + '</b></div>'; }).join('');
-      return '<details class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '"><summary><div><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
-        '<div class="r"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div></summary><div class="body">' + rows + '<div class="proposal-actions"><button type="button" class="btn-ver-propuesta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta ➔</button></div></div></details>';
+      var bodyId = 'opt-desglose-' + index;
+      return '<article class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '" data-opt-card>' +
+        '<div class="opt__head">' +
+          '<div class="opt__main"><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
+          '<div class="opt__price"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div>' +
+        '</div>' +
+        '<div class="opt__actions">' +
+          '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
+          '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
+        '</div>' +
+        '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + '</div>' +
+      '</article>';
     };
     // Solo se comparan propuestas de la misma gama de alojamiento que la recomendada
     // (la que ya refleja el estilo de viaje elegido arriba), para no mezclar tiers.
@@ -2583,7 +2624,7 @@
     });
     var sameTier = allProposals.filter(function (p) { return p.ti === rec.ti; }).sort(function (a, b) { return a.total - b.total; });
     var opts = sameTier.map(proposalMarkup).join('');
-    h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá una para ver el desglose.</p><div class="opts">' + opts + '</div></section>';
+    h += '<section class="sec"><h2>Todas las propuestas</h2><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.</p><div class="opts">' + opts + '</div></section>';
 
     var el = $('#results');
     el.innerHTML = h;
@@ -2818,6 +2859,24 @@
     } else {
       notice('La propuesta ya no está disponible. Volvé a buscar para actualizarla.');
     }
+  }
+
+  // "Ver desglose" despliega el reparto por categoría dentro de la tarjeta, sin
+  // cambiar de vista. Vive en el documento y no en un contenedor porque el mismo
+  // botón aparece en dos listas distintas: las propuestas de un destino
+  // (#results) y los destinos que entran en el presupuesto (#destination-results).
+  function handleBreakdownToggle(e) {
+    var toggle = e.target.closest && e.target.closest('[data-opt-toggle]');
+    if (!toggle) return;
+    e.preventDefault(); e.stopPropagation();
+    var card = toggle.closest('[data-opt-card]');
+    var body = card && card.querySelector('.opt__body');
+    if (!body) return;
+    var open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    toggle.classList.toggle('is-open', !open);
+    if (card) card.classList.toggle('is-open', !open);
+    body.hidden = open;
   }
 
   /* ---------- cuentas y viajes guardados ---------- */
@@ -3344,7 +3403,9 @@
     function updateDestinationMode() {
       var all = S.dest === 'todos';
       $('#btn-buscar-todos').hidden = !all;
-      if (all) { $('#results').innerHTML = ''; $('#destination-results').innerHTML = ''; }
+      // Sin destino elegido no hay resultados: es el estado inicial, así que la
+      // sección de destacados vuelve a estar disponible.
+      if (all) { setHighlightsVisible(true); $('#results').innerHTML = ''; $('#destination-results').innerHTML = ''; }
     }
     function syncTransportSelection() {
       if (S.dest === 'todos') { S.transport = 'flight'; }
@@ -3608,6 +3669,7 @@
     $('#btn-buscar-todos').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); findDestinations(); });
     $('.form').addEventListener('keydown', function (e) { if (e.key === 'Enter' && S.dest === 'todos') { e.preventDefault(); $('#btn-buscar-todos').click(); } });
     document.addEventListener('click', handleProposalNavigation, true);
+    document.addEventListener('click', handleBreakdownToggle, true);
     $('#dep').addEventListener('change', function (e) {
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
       S.dep = e.target.value;
@@ -3736,7 +3798,7 @@
       if (e.target.closest('#btn-volver')) {
         e.preventDefault(); e.stopPropagation();
         $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
-        if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; }
+        if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; setHighlightsVisible(true); }
         window.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
       var hotelChoice = e.target.closest('[data-hotel-total]');
