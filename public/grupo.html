@@ -42,6 +42,19 @@
   .grupo-toast{position:absolute;left:50%;bottom:calc(100% + 7px);transform:translateX(-50%);z-index:5;white-space:nowrap;background:var(--ink);color:var(--bg);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600}
   .grupo-toast[hidden]{display:none}
 
+  /* Grilla de categorías: 3 columnas, ícono con el color de la categoría y
+     label en caja alta. Es un atajo para escribir menos, no un campo más. */
+  .grupo-cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .grupo-cat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:74px;padding:11px 6px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .12s ease}
+  .grupo-cat:hover{border-color:var(--ink2);background:var(--cel-soft)}
+  .grupo-cat:active{transform:scale(.97)}
+  .grupo-cat__ico{display:grid;place-items:center;width:22px;height:22px}
+  .grupo-cat__ico svg{width:22px;height:22px;stroke-width:2}
+  .grupo-cat__label{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);text-align:center;line-height:1.15}
+  .grupo-cat[aria-pressed="true"]{border-color:var(--ink);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--ink)}
+  .grupo-cat[aria-pressed="true"] .grupo-cat__label{color:var(--ink)}
+  @media (max-width:380px){.grupo-cats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
   .grupo-field{display:block;margin-bottom:16px;font-weight:700;font-size:13px}
   .grupo-field input,.grupo-field select{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px;transition:border-color .18s ease,box-shadow .18s ease}
   .grupo-field input::placeholder{color:var(--ink2);opacity:.55}
@@ -120,6 +133,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=6" defer></script>
+<script src="/grupo.js?v=7" defer></script>
 </body>
 </html>

@@ -430,6 +430,9 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tours__summary{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
 .local-tours__summary b{color:var(--ink)}
 .local-tours__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-width:0}
+/* El borde no cambia de grosor al marcar (solo de color), asi que la tarjeta
+   no corre nada. Relleno de color + borde duro se leia como un boton de
+   escritorio; la marca real va en la cinta de arriba. */
 .local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
 .local-tour:has([data-tour-choice]:checked){border-color:#f1b145;box-shadow:0 10px 24px rgba(241,177,69,.28)}
@@ -438,10 +441,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    el teclado conserva un único control que tabula (Enter lo agrega el JS). */
 .local-tour__input{position:absolute;z-index:1;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
 .local-tour:has(.local-tour__input:focus-visible){outline:3px solid var(--accent);outline-offset:3px}
-/* Tilde circular que aparece en la foto cuando la experiencia ya está en el viaje. */
-.local-tour__check{position:absolute;z-index:2;top:10px;right:10px;display:grid;place-items:center;width:30px;height:30px;border-radius:999px;background:#f1b145;color:#0f192d;box-shadow:0 4px 12px rgba(10,24,48,.32);opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
-.local-tour__check svg{width:17px;height:17px}
-.local-tour:has([data-tour-choice]:checked) .local-tour__check{opacity:1;transform:scale(1)}
+/* Cinta de seleccion: entra desde arriba cuando la experiencia ya esta en el
+   viaje. Es lo unico que tapa un poco de la foto y no la deja ilegible. */
+.local-tour__ribbon{position:absolute;z-index:2;top:0;right:0;left:0;display:flex;align-items:center;gap:6px;padding:7px 14px;background:#f1b145;color:#0f192d;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(-100%);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+.local-tour__ribbon svg{flex:0 0 14px;width:14px;height:14px}
+.local-tour:has([data-tour-choice]:checked) .local-tour__ribbon{opacity:1;transform:none}
 /* Foto con velo: el texto va montado arriba, como en el catálogo de referencia.
    El velo es fijo y no usa --hero-* porque estas tarjetas son oscuras siempre. */
 .local-tour__media{position:relative;flex:0 0 auto;height:186px;background:var(--bg)}
@@ -461,12 +465,10 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tour__description{flex:1;margin:0 0 12px;color:var(--ink2);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
 .local-tour__meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .local-tour__chip{padding:4px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);font-size:10.5px;font-weight:700;white-space:nowrap}
-/* Pie de la tarjeta: sólo la confirmación de selección y el botón de detalle.
-   No hay botón de "agregar": elegir es tocar la tarjeta. */
-.local-tour__foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
-.local-tour__flag{display:inline-flex;min-width:0;align-items:center;gap:6px;color:var(--good);font-size:11.5px;font-weight:800;line-height:1.2;opacity:0;transform:translateY(3px);transition:opacity .18s ease,transform .18s ease}
-.local-tour__flag svg{flex:0 0 15px;width:15px;height:15px}
-.local-tour:has([data-tour-choice]:checked) .local-tour__flag{opacity:1;transform:none}
+/* Pie de la tarjeta: sólo el botón de detalle. La confirmación de que la
+   experiencia ya está en el viaje va en la cinta de arriba, así que acá no
+   hay que repetirla ni dejar un hueco reservado. */
+.local-tour__foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:auto}
 .local-tour__info{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;gap:7px;margin-left:auto;padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);font-size:12px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
 .local-tour__info:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
 .local-tour__info-ico{flex:0 0 16px;width:16px;height:16px;color:var(--cel)}
@@ -609,27 +611,67 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 
 /* -------------------------------------------------------
    Selector de moneda
-   Va arriba a la derecha del h2 de la seccion, no en una barra propia: la
-   seccion ya tiene titulo y bajada, y sumar un bloque mas la empuja hacia
-   abajo sin necesidad. Usa los mismos tokens que el resto (--cel, --cel-soft,
-   --ink) para que se lea como parte de la pagina y no como un widget pegado.
+   Un solo campo: el simbolo de la moneda actual a la izquierda y un <select>
+   nativo que se abre hacia abajo. El nativo se usa a proposito: en un celu se
+   comporta como el menu del sistema, scrollea bien y no hay que mantener un
+   popover a mano.
    ------------------------------------------------------- */
 .sec__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.currency-picker{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.currency-picker{display:flex;align-items:center;gap:10px;flex:0 0 auto;margin:0}
 .currency-picker__label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
-.currency-picker__opts{display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
-.currency-opt{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:54px;padding:6px 9px;border:0;border-radius:9px;background:transparent;color:var(--ink2);cursor:pointer;transition:background .16s ease,color .16s ease}
-.currency-opt b{font-size:13px;font-weight:800;line-height:1.1}
-.currency-opt span{font-size:9.5px;font-weight:700;letter-spacing:.08em;opacity:.75}
-.currency-opt:hover:not(:disabled){background:var(--cel-soft);color:var(--ink)}
-/* el mismo azul que usa .daily-budget__option.is-selected cuando elegis algo */
-.currency-opt.is-on{background:var(--cel-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--cel)}
-.currency-opt.is-off{opacity:.35;cursor:not-allowed}
-.currency-opt:focus-visible{outline:3px solid var(--cel);outline-offset:2px}
-.currency-picker.is-loading .currency-picker__opts{opacity:.5;pointer-events:none}
+.currency-picker__field{position:relative;display:flex;align-items:center;padding:2px 34px 2px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);transition:border-color .16s ease,box-shadow .16s ease}
+.currency-picker__field:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}
+.currency-picker__field>b{font-size:15px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+/* el triangulo del navegador se ve crudo sobre el fondo, lo reemplazamos */
+.currency-select{appearance:none;-webkit-appearance:none;background:transparent;border:0;color:transparent;font:inherit;cursor:pointer;padding:7px 4px;min-width:96px}
+.currency-select>option{color:var(--ink);background:var(--surface);font:600 14px Poppins,sans-serif}
+.currency-picker__field::after{content:"";position:absolute;right:14px;top:50%;width:7px;height:7px;margin-top:-5px;border-right:2px solid var(--ink2);border-bottom:2px solid var(--ink2);transform:rotate(45deg);pointer-events:none}
+.currency-picker.is-loading .currency-picker__field{opacity:.5;pointer-events:none}
 @media (max-width:560px){
   .sec__head{gap:10px}
   .currency-picker{width:100%;justify-content:space-between}
-  .currency-picker__opts{flex:1}
-  .currency-opt{flex:1;min-width:0}
+  .currency-picker__field{flex:1}
+  .currency-select{flex:1;min-width:0}
+}
+
+/* ---------- salto del desglose / "Mi Viaje" a la seccion del rubro ----------
+   Las filas de "A donde va tu plata" y los rubros del panel "Mi Viaje" son
+   <button>: el desglose dice cuanto plata va a cada cosa y el clic lleva a
+   donde esa plata se cambia. Antes eran <div> inertes y el usuario tenia que
+   scrollear a ojo para encontrar la seccion. */
+[data-budget-anchor]{scroll-margin-top:18px;scroll-margin-bottom:96px}
+/* El destino se marca al llegar, para que se vea en que seccion se cayo. Es
+   outline y no box-shadow porque no todas las secciones son una tarjeta con
+   fondo: varias (vuelos, bus, transfer) son un contenedor pelado con las
+   tarjetas adentro, y el outline las marca igual sin inventarles un borde. */
+.is-budget-anchor{animation:budget-anchor-flash 1.8s ease-out}
+@keyframes budget-anchor-flash{
+  0%,55%{outline:3px solid var(--accent);outline-offset:3px}
+  100%{outline:3px solid rgba(246,178,27,0);outline-offset:3px}
+}
+/* reset de <button> para que el rubro se vea igual que el <div> que era */
+.proposal-breakdown__row,
+.trip-summary__item{
+  width:100%;margin:0;background:none;border:0;border-top:1px solid var(--line);
+  font:inherit;color:inherit;text-align:left;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+}
+.proposal-breakdown__row:hover,
+.trip-summary__item:hover{background:var(--cel-soft)}
+.proposal-breakdown__row:focus-visible,
+.trip-summary__item:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+/* Sin seccion destino (tours sin actividades cargadas, traslados fuera del
+   modo vuelo) la fila vuelve a ser texto: no se promete un salto inexistente. */
+.proposal-breakdown__row:not(.is-jumpable),
+.trip-summary__item:not(.is-jumpable){cursor:default}
+.proposal-breakdown__row:not(.is-jumpable):hover,
+.trip-summary__item:not(.is-jumpable):hover{background:none}
+.proposal-breakdown__row:focus,
+.trip-summary__item:focus{outline:none}
+/* al enfocarlo por teclado despues del salto no debe quedar el anillo del
+   navegador sobre la seccion: la marca amarilla ya dice donde se cayo */
+[data-budget-anchor]:focus{outline:none}
+/* en el celu el panel "Mi Viaje" va pegado abajo y taparia el destino */
+@media (max-width:768px){
+  [data-budget-anchor]{scroll-margin-bottom:150px}
 }

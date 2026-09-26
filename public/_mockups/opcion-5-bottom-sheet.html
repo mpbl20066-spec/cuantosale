@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opción 5 — Hoja inferior</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* Opción 5: el form deja de ser una sección más de la página y pasa a ser
+     una hoja inferior, igual que el patrón de .booking-dialog y .trip-summary
+     que la app ya usa. La lista de gastos queda de fondo, atenuada. */
+  .g-scrim{position:relative;padding-bottom:40px}
+  .g-scrim::after{position:fixed;inset:0;background:rgba(10,24,48,.5);content:"";pointer-events:none}
+  .g-sheet{position:relative;z-index:2;margin:26px -16px 0;padding:0 20px 26px;background:var(--surface);border-radius:32px 32px 0 0;box-shadow:0 -22px 48px -12px rgba(10,24,48,.5)}
+  .g-sheet__grip{width:44px;height:5px;margin:11px auto 0;border-radius:99px;background:var(--line)}
+  .g-sheet__head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+  .g-sheet__head h2{font-family:var(--fh);font-size:30px;line-height:1;margin:0;color:var(--ink)}
+  .g-x{flex:0 0 auto;display:grid;place-items:center;width:38px;height:38px;border:0;border-radius:99px;background:var(--bg);color:var(--ink2);font-size:20px;line-height:1;cursor:pointer}
+  .g-sheet__tag{display:block;margin-top:5px;font-family:var(--fb);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--cel)}
+
+  /* Bloque del monto en navy, echoing el panel de la opción 1 pero más chico. */
+  .g-amount{display:flex;align-items:center;gap:12px;padding:17px 18px;margin-bottom:19px;border-radius:20px;background:var(--hero-bg);color:var(--hero-ink)}
+  .g-amount .cur{flex:0 0 auto;display:grid;place-items:center;height:38px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.12);color:var(--hero-soft);font-family:var(--fb);font-size:13px;font-weight:800}
+  .g-amount input{flex:1;min-width:0;border:0;background:transparent;outline:none;font-family:var(--fh);font-size:46px;line-height:1;font-weight:800;letter-spacing:-.02em;color:var(--hero-accent);font-variant-numeric:tabular-nums}
+  .g-amount input::placeholder{color:rgba(255,255,255,.3)}
+  .g-amount input::-webkit-outer-spin-button,.g-amount input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .g-amount input[type=number]{-moz-appearance:textfield}
+
+  .g-lbl{display:block;margin-bottom:7px;font-family:var(--fb);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+  .g-field{margin-bottom:17px}
+  .g-in,.g-sel{display:block;width:100%;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px;outline:none;transition:border-color .18s ease,box-shadow .18s ease}
+  .g-in::placeholder{color:var(--ink2);opacity:.55}
+  .g-in:hover,.g-sel:hover{border-color:var(--ink2)}
+  .g-in:focus,.g-sel:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(246,178,27,.18)}
+  .g-sel{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2348617F' stroke-width='2.5' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px}
+
+  .g-people{display:flex;flex-wrap:wrap;gap:8px}
+  .g-person{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px solid var(--line);border-radius:99px;background:var(--bg);color:var(--ink2);font-family:var(--fb);font-size:13.5px;font-weight:600;cursor:pointer}
+  .g-person .box{display:grid;place-items:center;width:17px;height:17px;border-radius:6px;border:2px solid var(--control-muted);background:var(--surface);color:transparent;font-size:10px;font-weight:800}
+  .g-person[aria-pressed="true"]{border-color:var(--ink);background:var(--surface);color:var(--ink);font-weight:700}
+  .g-person[aria-pressed="true"] .box{background:var(--ink);border-color:var(--ink);color:var(--accent)}
+  .g-tools{margin-top:11px}
+  .g-mini{border:1px solid var(--line);border-radius:99px;background:transparent;color:var(--ink2);padding:6px 12px;font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer}
+
+  .g-cta{width:100%;padding:17px 18px;border:0;border-radius:16px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:16.5px;font-weight:800;cursor:pointer}
+  .g-cancel{width:100%;margin-top:9px;padding:13px;border:1px solid var(--line);border-radius:14px;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer}
+  .g-foot{margin-top:12px;text-align:center;font-family:var(--fb);font-size:11.5px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap grupo-wrap">
+  <span class="opcion">OPCIÓN <b>5</b> · Hoja inferior (bottom sheet)</span>
+
+  <div class="grupo-header">
+    <a href="#">← CuántoSale</a>
+    <span class="grupo-kicker">Dividir gastos</span>
+  </div>
+
+  <!-- La página real, atenuada detrás de la hoja -->
+  <div class="g-scrim">
+    <div class="grupo-card">
+      <div class="grupo-card__head">
+        <h1>Viaje a Iguazú</h1>
+        <span class="grupo-badge">4 personas</span>
+      </div>
+      <div class="grupo-participants">
+        <span class="grupo-chip">pao bati (vos)</span>
+        <span class="grupo-chip">mpbl</span>
+        <span class="grupo-chip">ana</span>
+        <span class="grupo-chip">tomas</span>
+      </div>
+    </div>
+
+    <div class="grupo-card">
+      <div class="grupo-card__head">
+        <h2>Gastos (3)</h2>
+        <span class="grupo-badge">US$ 2.480</span>
+      </div>
+      <div class="grupo-expense">
+        <div class="grupo-expense__main">
+          <span class="grupo-expense__ico">🛒</span>
+          <div class="grupo-expense__body">
+            <div class="grupo-expense__name">Supermercado</div>
+            <div class="grupo-expense__meta">pao bati · entre 3</div>
+          </div>
+        </div>
+        <div class="grupo-expense__right"><span class="grupo-expense__amount">US$ 1.200</span></div>
+      </div>
+      <div class="grupo-expense">
+        <div class="grupo-expense__main">
+          <span class="grupo-expense__ico">⛽</span>
+          <div class="grupo-expense__body">
+            <div class="grupo-expense__name">Combustible</div>
+            <div class="grupo-expense__meta">mpbl · entre 4</div>
+          </div>
+        </div>
+        <div class="grupo-expense__right"><span class="grupo-expense__amount">US$ 780</span></div>
+      </div>
+    </div>
+
+    <!-- ============ OPCIÓN 5 ============ -->
+    <form class="g-sheet">
+      <div class="g-sheet__grip"></div>
+      <div class="g-sheet__head">
+        <div>
+          <span class="g-sheet__tag">+ Nuevo gasto</span>
+          <h2>Agregar gasto</h2>
+        </div>
+        <button type="button" class="g-x" aria-label="Cerrar">×</button>
+      </div>
+
+      <div class="g-amount">
+        <span class="cur">US$</span>
+        <input type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" value="1200">
+      </div>
+
+      <div class="g-field">
+        <label class="g-lbl" for="d">Descripción</label>
+        <input class="g-in" id="d" placeholder="Ej: Supermercado" value="Supermercado">
+      </div>
+
+      <div class="g-field">
+        <label class="g-lbl" for="p">¿Quién pagó?</label>
+        <select class="g-sel" id="p">
+          <option>pao bati (vos)</option>
+          <option>mpbl</option>
+          <option>ana</option>
+          <option>tomas</option>
+        </select>
+      </div>
+
+      <div class="g-field" style="margin-bottom:0">
+        <span class="g-lbl">¿Entre quiénes se divide?</span>
+        <div class="g-people">
+          <button type="button" class="g-person" aria-pressed="true"><span class="box">✓</span>pao bati</button>
+          <button type="button" class="g-person" aria-pressed="true"><span class="box">✓</span>mpbl</button>
+          <button type="button" class="g-person" aria-pressed="true"><span class="box">✓</span>ana</button>
+          <button type="button" class="g-person"><span class="box">✓</span>tomas</button>
+        </div>
+        <div class="g-tools"><button type="button" class="g-mini">Seleccionar todos</button></div>
+      </div>
+
+      <button type="submit" class="g-cta" style="margin-top:20px">Agregar gasto</button>
+      <button type="button" class="g-cancel">Cancelar</button>
+      <p class="g-foot">Podés cargarlo ahora y ajustarlo después.</p>
+    </form>
+  </div>
+</div>
+</body>
+</html>

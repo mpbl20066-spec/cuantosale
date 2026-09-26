@@ -9,6 +9,11 @@
   var currentGroupId = null;
   var pollTimer = null;
   var lastSignature = '';
+  // Tasas de /api/tasas, iguais a las que usa la home. Si no llegan, el grupo
+  // entero se muestra en su moneda y no se ofrece cambiar.
+  var FX = { rates: null, base: 'USD', monedas: null };
+  // Moneda en la que se ve toda la página. Vacío = la del grupo.
+  var verEn = '';
   var nameDraft = null; // nombre del viaje precargado desde la app
   var nameFromAuth = ''; // nombre del usuario logueado, para no pedirlo de nuevo
   var PRESET_KEY = 'cuantosale_grupo_preset';
@@ -22,8 +27,6 @@
     trash: 'M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5',
     arrow: 'M4 12h16M14 6l6 6-6 6',
     // Tenedor y cuchillo como dos formas separadas y anchas: un plato con
-    // utensils dibujados en detalle disappears a este tamaño.
-    // Tenedor y cuchillo como dos formas separadas y anchas: un plato con
     // cubiertos dibujados en detalle desaparece a este tamaño.
     food: 'M7 3v5a2 2 0 0 0 4 0V3M9 10v11M17 3v18M17 3c2 1.5 2 6 0 7.5',
     cart: 'M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6M9 20h.01M17 20h.01',
@@ -31,8 +34,28 @@
     // Cama: cabecero, colchón y dos almohadas bien separadas.
     bed: 'M3 19V6M3 14h18v5M21 19v-3M7 11h3.5M13.5 11H17',
     ticket: 'M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8zM14 6v12',
-    bag: 'M5 8h14l1 12H4L5 8zM9 8V6a3 3 0 0 1 6 0v2'
+    bag: 'M5 8h14l1 12H4L5 8zM9 8V6a3 3 0 0 1 6 0v2',
+    coffee: 'M4 8h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8zM16 9.5h1.8a2.7 2.7 0 0 1 0 5.4H16M4 21.5h13',
+    plane: 'M10.5 3.2a1.6 1.6 0 0 1 3 0V9l7.5 4.4v2.3L13.5 13v4.3l2.8 2v1.7L12 20l-4.3 1v-1.7l2.8-2V13L3 15.7v-2.3L10.5 9V3.2z',
+    wash: 'M4.5 4.5h15v15h-15zM4.5 9.5h15M8 6.8h.01M10.5 6.8h.01M13 6.8h.01M12 13.4a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8z'
   };
+  // Las categorías de la grilla. El ícono se deduce del texto (guessCategory),
+  // así que la grilla no guarda nada por su cuenta: escribe la descripción y el
+  // resto sale de ahí. Por eso cada label tiene que contener una palabra que la
+  // deducción reconozca, si no el ícono del gasto sale como "General".
+  // El color sale de la paleta categórica del sitio (--c1 a --c6) para no
+  // inventar una escala de color nueva.
+  var CATEGORIAS = [
+    { key: 'alojamiento', label: 'Alojamiento', icon: 'bed', color: 'var(--c2)' },
+    { key: 'actividades', label: 'Actividades', icon: 'ticket', color: 'var(--c4)' },
+    { key: 'restaurantes', label: 'Restaurantes', icon: 'food', color: 'var(--c3)' },
+    { key: 'transportes', label: 'Transportes', icon: 'car', color: 'var(--c5)' },
+    { key: 'cafe', label: 'Café', icon: 'coffee', color: 'var(--c6)' },
+    { key: 'vuelos', label: 'Vuelos', icon: 'plane', color: 'var(--c1)' },
+    { key: 'supermercado', label: 'Supermercado', icon: 'cart', color: 'var(--c2)' },
+    { key: 'lavanderia', label: 'Lavandería', icon: 'wash', color: 'var(--c4)' },
+    { key: 'general', label: 'General', icon: 'bag', color: 'var(--c6)' }
+  ];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function icon(name) {
@@ -40,15 +63,23 @@
     // vuelven ilegibles (la cama y los cubiertos parecían un rayón).
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (ICONS[name] || ICONS.bag) + '"/></svg>';
   }
-  // Deduce la categoría del texto del gasto. Se primero la más específica para
-  // que "compra en el supermercado" caiga en supermercado y no en varios.
+  // Deduce el ícono del texto del gasto. El orden importa: se prueba primero lo
+  // más específico, así "Café" no cae en restaurantes y "vuelo a São Paulo" no
+  // cae en alojamiento.
+  // Los tokens cortos van con \b porque si no matchean dentro de otras palabras:
+  // "bar" encontraba "barrio" y "mercado del barrio" salía como comida, y
+  // "bus" encontraba "búsqueda". Los labels de la grilla tienen que matchear
+  // alguno de estos patrones para que el ícono del gasto salga bien.
   function guessCategory(description) {
     var text = String(description || '').toLowerCase();
-    if (/super|market|almacen|verdul|panader|carnic|despensa/.test(text)) return 'cart';
-    if (/comida|almuerzo|cena|desayun|cafe|pizza|empanad|sandwich|bar|restaur|cerveza|vino|helado|asado|parrillada/.test(text)) return 'food';
-    if (/taxi|uber|remis|auto|nafta|gasolin|combus|tren|avion|vuelo|boleto|pasaje|estacionamiento|parking|peaje/.test(text)) return 'car';
+    if (/lavander|lavado|lavatrice|secadora/.test(text)) return 'wash';
+    if (/caf[eé]|coffee|capuchino|espresso|latte/.test(text)) return 'coffee';
+    if (/vuelo|avi[oó]n|avi[aã]o|a[eé]reo|flight/.test(text)) return 'plane';
+    if (/super|market|mercado|almacen|verdul|panader|carnic|despensa/.test(text)) return 'cart';
     if (/hotel|aloj|depto|departamento|cabana|hostal|reserva|playa/.test(text)) return 'bed';
-    if (/museo|tour|excursion|entrada|paseo|surf|show|cine|boleto/.test(text)) return 'ticket';
+    if (/museo|tour|excursion|entrada|paseo|surf|show|cine|actividad/.test(text)) return 'ticket';
+    if (/\btaxi(s)?\b|\buber\b|\bremis\b|\bauto(s)?\b|\bnafta\b|\bgasolin|\bcombus|\bbus(es)?\b|\btren\b|\bcolectivo\b|\bmetro\b|\bestacionamiento\b|\bparking\b|\bpeaje\b|\btransporte/.test(text)) return 'car';
+    if (/comida|almuerzo|cena|desayun|pizza|empanad|sandwich|\bbar\b|restaur|cerveza|vino|helado|asado|parrillada|\bpub\b/.test(text)) return 'food';
     return 'bag';
   }
   function categorySymbol(code) {
@@ -67,6 +98,73 @@
   }
   function money(n, code) { return categorySymbol(code || (group && group.currency) || 'USD') + ' ' + formatAmount(n); }
   function groupCurrency() { return (group && group.currency) || 'USD'; }
+
+  /* ---------- monedas ---------- */
+  function tasaDe(code) {
+    if (!code || !FX.rates) return null;
+    var normalized = String(code).toUpperCase();
+    if (normalized === FX.base) return 1;
+    var rate = Number(FX.rates[normalized]);
+    return Number.isFinite(rate) && rate > 0 ? rate : null;
+  }
+  // Pasa un importe de una moneda a otra. Devuelve null si falta alguna de las
+  // dos tasas: prefierimos no convertir antes que inventar un número.
+  function convertir(amount, from, to) {
+    var a = tasaDe(from), b = tasaDe(to);
+    if (a == null || b == null) return null;
+    return (Number(amount) || 0) * (b / a);
+  }
+  // La moneda en la que se está mostrando. Si no hay tasas, o la elegida no
+  // tiene, se cae en la del grupo en vez de dejar un número sin unidad.
+  function verMoneda() {
+    if (verEn && tasaDe(verEn) != null) return verEn;
+    return groupCurrency();
+  }
+  // Un importe cualquiera, ya expresado en la moneda en la que se ve. Las
+  // tasas se piden para que "Ver en" funcione; sin ellas cae al importe tal
+  // cual came, que es lo correcto porque en ese caso todos están en la misma.
+  function moneyVer(n, code) {
+    var target = verMoneda();
+    var value = convertir(n, code || groupCurrency(), target);
+    return money(value == null ? n : value, target);
+  }
+  // Los balances y las transferencias se calculan siempre en la moneda del
+  // grupo: es la única forma de que sumar gastos cargados en distintas monedas
+  // signifique algo.
+  function aMonedaGrupo(n, code) {
+    var value = convertir(n, code, groupCurrency());
+    return value == null ? (Number(n) || 0) : value;
+  }
+  async function cargarTasas() {
+    try {
+      var r = await fetch('/api/tasas', { headers: { Accept: 'application/json' } });
+      var j = await r.json();
+      if (j && j.rates && Object.keys(j.rates).length) {
+        FX.rates = j.rates;
+        FX.base = j.base || 'USD';
+      }
+      if (j && j.monedas && j.monedas.length) FX.monedas = j.monedas;
+    } catch (e) {
+      // Sin tasas el grupo sigue funcionando: todo queda en su moneda.
+    }
+  }
+  // Solo las monedas con tasa disponible. El servidor ya publica una lista
+  // corta a propósito (no las 160 divisas de la API), así que acá no hay
+  //Nothing que filtrar: se usa lo que él manda.
+  function monedasVerificables() {
+    if (!FX.monedas || !FX.monedas.length) return [];
+    return FX.monedas.filter(function (m) { return tasaDe(m.code) != null; });
+  }
+  function verEnGuardado() {
+    try { return localStorage.getItem('cuantosale_grupo_ver_en') || ''; } catch (e) { return ''; }
+  }
+  function guardarVerEn(code) {
+    verEn = code || '';
+    try {
+      if (verEn) localStorage.setItem('cuantosale_grupo_ver_en', verEn);
+      else localStorage.removeItem('cuantosale_grupo_ver_en');
+    } catch (e) {}
+  }
   function groupIdFromPath() {
     var match = window.location.pathname.match(/^\/grupo\/([0-9a-f-]{36})\/?$/i);
     return match ? match[1] : null;
@@ -275,8 +373,11 @@
     expenses.forEach(function (expense) {
       var splitIds = splitIdsOf(expense);
       if (!splitIds.length) return; // gasto sin participantes válidos: no genera deuda
-      var share = Number(expense.amount) / splitIds.length;
-      if (expense.paid_by_participante_id) balances[expense.paid_by_participante_id] = (balances[expense.paid_by_participante_id] || 0) + Number(expense.amount);
+      // Todo se lleva a la moneda del grupo antes de sumar: un gasto cargado en
+      // reales y otro en dólares no se pueden sumar así nomás.
+      var total = aMonedaGrupo(expense.amount, expense.currency);
+      var share = total / splitIds.length;
+      if (expense.paid_by_participante_id) balances[expense.paid_by_participante_id] = (balances[expense.paid_by_participante_id] || 0) + total;
       splitIds.forEach(function (participantId) { balances[participantId] = (balances[participantId] || 0) - share; });
     });
     return balances;
@@ -304,7 +405,22 @@
     return moves;
   }
   function participantName(id) { var p = personById(id); return p ? p.display_name : 'Alguien'; }
-  function totalSpent() { return expenses.reduce(function (sum, expense) { return sum + (Number(expense.amount) || 0); }, 0); }
+  function totalSpent() { return expenses.reduce(function (sum, expense) { return sum + aMonedaGrupo(expense.amount, expense.currency); }, 0); }
+
+  /* ---------- saldos pagados ---------- */
+  function saldosGuardados() {
+    return Array.isArray(group && group.saldos) ? group.saldos : [];
+  }
+  // La clave es el par, no el importe: el greedy recalcula los montos cada vez
+  // que se toca un gasto, así que una marca atada al número se perdería.
+  function saldoKey(move) { return move.from + '|' + move.to; }
+  function saldoEstaPagado(move) { return saldosGuardados().indexOf(saldoKey(move)) !== -1; }
+  function alternarSaldo(key) {
+    var next = saldosGuardados().slice();
+    var i = next.indexOf(key);
+    if (i === -1) next.push(key); else next.splice(i, 1);
+    return next;
+  }
   // Firma de los datos que pinta la pantalla. El poll la compara para no
   // repintar (y borrar lo que el usuario está escribiendo) si nada cambió.
   function dataSignature() {
@@ -388,7 +504,12 @@
       '<p class="grupo-error" id="participant-error" role="alert"></p></div>' +
 
       '<div class="grupo-card"><h2 style="margin-bottom:18px">Agregar gasto</h2><form id="expense-form">' +
-      '<label class="grupo-field">Descripción<input required name="description" placeholder="Ej: Supermercado" maxlength="80"></label>' +
+      '<div class="grupo-cats" id="cat-picker">' + CATEGORIAS.map(function (cat) {
+        return '<button type="button" class="grupo-cat" data-cat="' + esc(cat.key) + '" data-cat-label="' + esc(cat.label) + '" aria-pressed="false">' +
+          '<span class="grupo-cat__ico" style="color:' + cat.color + '">' + icon(cat.icon) + '</span>' +
+          '<span class="grupo-cat__label">' + esc(cat.label) + '</span></button>';
+      }).join('') + '</div>' +
+      '<label class="grupo-field" style="margin-top:18px">Descripción<input required name="description" placeholder="Ej: Supermercado" maxlength="80"></label>' +
       // El símbolo de la moneda ya va adentro del campo, así que el label no
       // la repite: "Monto (USD)" arriba y "US$" abajo era lo mismo dos veces.
       '<label class="grupo-field">Monto<span class="grupo-amount">' +
@@ -413,6 +534,28 @@
     var expenseError = document.getElementById('expense-error');
     var form = document.getElementById('expense-form');
     function splitInputs() { return Array.prototype.slice.call(form.querySelectorAll('input[name="split"]')); }
+
+    // La grilla no guarda una categoría aparte: escribe la descripción y el
+    // ícono sale de deduplicarla (guessCategory). Por eso, si después se edita
+    // el texto a mano, el resaltado se recalcula: si la grilla y el texto
+    // pueden discrepar, un día muestran cosas distintas y nadie sabe cuál gana.
+    var catPicker = document.getElementById('cat-picker');
+    function markCategory(description) {
+      var guessed = guessCategory(description);
+      Array.prototype.forEach.call(catPicker.querySelectorAll('[data-cat]'), function (button) {
+        var own = guessCategory(button.getAttribute('data-cat-label'));
+        var match = own !== 'bag' && own === guessed;
+        button.setAttribute('aria-pressed', match ? 'true' : 'false');
+      });
+    }
+    catPicker.addEventListener('click', function (e) {
+      var button = e.target.closest('[data-cat]');
+      if (!button) return;
+      form.description.value = button.getAttribute('data-cat-label');
+      markCategory(form.description.value);
+      form.amount.focus();
+    });
+    form.description.addEventListener('input', function () { markCategory(form.description.value); });
 
     document.getElementById('share-button').addEventListener('click', function () {
       var status = document.getElementById('copy-status');

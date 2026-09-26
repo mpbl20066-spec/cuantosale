@@ -1,0 +1,61 @@
+/* Marco de página copiado de grupo.html para que las 5 variantes se vean
+   dentro del contexto real de la app (no una cajita blanca flotando sola). */
+.grupo-wrap{max-width:620px;margin:0 auto;padding:24px 16px 64px}
+.grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.grupo-header a{color:var(--ink2);text-decoration:none;font-size:13px;font-weight:600}
+.grupo-kicker{color:var(--ink2);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+
+.grupo-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin-bottom:16px}
+.grupo-card h1,.grupo-card h2{font-family:var(--fh);margin:0;line-height:1.05}
+.grupo-card h1{font-size:32px;word-break:break-word}
+.grupo-card h2{font-size:22px;font-weight:600}
+.grupo-card__head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.grupo-card__head h1,.grupo-card__head h2{margin:0}
+.grupo-card__head h1{font-size:28px}
+.grupo-badge{flex:0 0 auto;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.grupo-sub{color:var(--ink2);font-size:13px;margin:-4px 0 16px}
+
+.grupo-invite{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px 18px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:16px;font-weight:700;cursor:pointer}
+.grupo-linkchip{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;padding:10px 12px;border:1px dashed var(--line);border-radius:11px;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:12.5px;font-weight:600}
+
+.grupo-participants{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 0}
+.grupo-chip{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+.grupo-add{display:flex;gap:8px;margin-top:10px}
+.grupo-add input{flex:1;min-width:0;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px}
+.grupo-add input::placeholder{color:var(--ink2);opacity:.55}
+.grupo-add button{flex:0 0 auto;white-space:nowrap}
+
+.grupo-field{display:block;margin-bottom:16px;font-weight:700;font-size:13px}
+.grupo-btn{border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);padding:12px 17px;font-family:var(--fb);font-weight:700;cursor:pointer;font-size:15px}
+.grupo-btn--primary{width:100%;padding:15px 18px;font-size:16px;border-radius:14px;margin-top:2px}
+.grupo-btn--ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.grupo-minibtn{border:1px solid var(--line);border-radius:99px;background:transparent;color:var(--ink2);padding:6px 12px;font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer}
+.grupo-minibtn:hover{border-color:var(--ink2);color:var(--ink)}
+
+.grupo-expense{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--line)}
+.grupo-expense:first-child{border-top:0}
+.grupo-expense__main{display:flex;gap:10px;min-width:0}
+.grupo-expense__ico{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--bg);color:var(--ink2)}
+.grupo-expense__ico svg{width:19px;height:19px}
+.grupo-expense__body{min-width:0}
+.grupo-expense__name{font-size:15px;font-weight:700;word-break:break-word}
+.grupo-expense__meta{margin-top:4px;color:var(--ink2);font-size:12.5px}
+.grupo-expense__right{flex:0 0 auto;display:flex;align-items:center;gap:2px}
+.grupo-expense__amount{font-size:15.5px;font-weight:700;white-space:nowrap}
+
+.grupo-balance{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.grupo-balance:first-child{border-top:0}
+.grupo-balance b.pos{color:var(--good)}
+.grupo-balance b.neg{color:var(--coral)}
+.grupo-balance b.pos,.grupo-balance b.neg{white-space:nowrap;font-weight:700}
+.grupo-subhead{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:18px 0 2px}
+.grupo-settle{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;background:var(--bg);margin-top:8px;font-size:14px}
+.grupo-settle__flow{display:flex;align-items:center;gap:7px;min-width:0}
+.grupo-settle__amount{flex:0 0 auto;font-weight:700;color:var(--coral)}
+.grupo-note{color:var(--ink2);font-size:12px;margin-top:10px}
+.grupo-error{color:var(--coral);font-size:13px;margin:10px 0 0}
+.grupo-error:empty{display:none}
+
+/* Etiqueta de opción, fuera del mockup: no pertenece a la app. */
+.opcion{display:inline-flex;align-items:center;gap:7px;margin-bottom:14px;background:var(--ink);color:var(--bg);border-radius:99px;padding:6px 13px;font-family:var(--fb);font-size:12px;font-weight:700;letter-spacing:.03em}
+.opcion b{color:var(--accent)}

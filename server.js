@@ -42,9 +42,11 @@ const duffel = require('./lib/providers/duffel');
  * inventado.
  */
 const MONEDAS = [
-  { code: 'USD', etiqueta: 'Dólares', simbolo: 'US$', decimales: 0 },
-  { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$', decimales: 2 },
-  { code: 'UYU', etiqueta: 'Pesosruguayos', simbolo: 'UYU$', decimales: 0 }
+  { code: 'USD', etiqueta: 'Dólares', simbolo: 'US$' },
+  { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
+  // El peso va como "$" a secas, que es como se usa aca. El codigo (UYU) al
+  // lado lo desambigua; "UYU$" era ruido.
+  { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }
 ];
 let fxCache = { rates: null, base: 'USD', until: 0, source: '', at: 0 };
 

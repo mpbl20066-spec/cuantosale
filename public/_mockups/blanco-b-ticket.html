@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blanco B — Ticket + grupos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="_base.css">
+<style>
+  /* B — Ticket + grupos. Blanco, pero con el monto centrado como un ticket y
+     los datos metidos en un panel agrupado con separadores (estilo iOS). */
+  .g-form{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:26px 20px 20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(16,35,62,.04),0 14px 30px -16px rgba(16,35,62,.18)}
+  .g-ticket{text-align:center;padding-bottom:20px;margin-bottom:20px;border-bottom:1px dashed var(--line)}
+  .g-ticket .lbl{font-family:var(--fb);font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+  /* El input no puede ser flex:1 porque eso lo estira a todo el ancho y deja
+     el "US$" pegado al borde. Ancho en ch y el grupo se centra como bloque. */
+  .g-ticket .sum{display:inline-flex;align-items:baseline;gap:8px;margin-top:4px}
+  .g-ticket .cur{font-family:var(--fh);font-size:22px;font-weight:700;color:var(--accent)}
+  .g-ticket input{flex:0 1 auto;width:5.4ch;min-width:0;border:0;background:transparent;outline:none;font-family:var(--fh);font-size:62px;line-height:.9;font-weight:800;letter-spacing:-.03em;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+  .g-ticket input::placeholder{color:var(--line)}
+  .g-ticket input::-webkit-outer-spin-button,.g-ticket input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .g-ticket input[type=number]{-moz-appearance:textfield}
+  .g-ticket .hint{margin-top:6px;font-family:var(--fb);font-size:11.5px;font-weight:600;color:var(--ink2)}
+
+  /* Panel agrupado: label a la izquierda, control a la derecha, separados por
+     líneas. Un solo bloque en vez de cuatro campos sueltos. */
+  .g-group{overflow:hidden;border-radius:18px;background:var(--bg);border:1px solid var(--line)}
+  .g-row{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+  .g-row:first-child{border-top:0}
+  .g-row > label,.g-row > .lbl{font-family:var(--fb);font-size:12.5px;font-weight:700;color:var(--ink2);letter-spacing:.01em}
+  .g-in,.g-sel{display:block;width:100%;height:46px;padding:0 14px;border:0;border-radius:12px;background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:15px;font-weight:500;outline:none;box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow .18s ease}
+  .g-in::placeholder{color:var(--ink2);opacity:.5}
+  .g-in:hover,.g-sel:hover{box-shadow:inset 0 0 0 1.5px var(--ink2)}
+  .g-in:focus,.g-sel:focus{box-shadow:inset 0 0 0 2px var(--accent),0 0 0 4px rgba(246,178,27,.18)}
+  .g-sel{appearance:none;cursor:pointer;font-weight:600;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2348617F' stroke-width='2.4' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:38px}
+
+  /* La fila de participantes ocupa todo el ancho debajo del label. */
+  .g-row--stack{grid-template-columns:1fr;gap:10px}
+  .g-people{display:flex;flex-wrap:wrap;gap:7px}
+  .g-person{display:inline-flex;align-items:center;gap:7px;padding:8px 12px 8px 8px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink2);font-family:var(--fb);font-size:13.5px;font-weight:600;cursor:pointer;transition:.18s}
+  .g-person .av{display:grid;place-items:center;width:24px;height:24px;border-radius:99px;background:var(--bg);color:var(--ink2);font-size:10px;font-weight:800}
+  .g-person[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);font-weight:700}
+  .g-person[aria-pressed="true"] .av{background:var(--ink);color:var(--accent)}
+  .g-tools{display:flex;gap:7px;margin-top:2px}
+  .g-mini{border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink2);padding:6px 12px;font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer}
+  .g-mini:hover{border-color:var(--ink2);color:var(--ink)}
+
+  .g-live{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0;padding:14px 16px;border-radius:18px;background:var(--cel-soft)}
+  .g-live div{display:flex;flex-direction:column;gap:1px}
+  .g-live span{font-family:var(--fb);font-size:12.5px;font-weight:700;color:var(--ink)}
+  .g-live small{font-family:var(--fb);font-size:11.5px;font-weight:500;color:var(--ink2)}
+  .g-live b{font-family:var(--fh);font-size:32px;line-height:1;color:var(--ink);white-space:nowrap}
+
+  .g-cta{width:100%;min-height:56px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-family:var(--fb);font-size:16.5px;font-weight:800;cursor:pointer;box-shadow:0 10px 20px -10px rgba(246,178,27,.9);transition:transform .18s ease}
+  .g-cta:hover{transform:translateY(-1px)}
+  .g-foot{margin-top:12px;text-align:center;font-family:var(--fb);font-size:11.5px;color:var(--ink2)}
+</style>
+</head>
+<body>
+<div class="wrap grupo-wrap">
+  <span class="opcion">BLANCO <b>B</b> · Ticket + panel agrupado</span>
+
+  <div class="grupo-header">
+    <a href="#">← CuántoSale</a>
+    <span class="grupo-kicker">Dividir gastos</span>
+  </div>
+
+  <div class="grupo-card">
+    <div class="grupo-card__head">
+      <h1>Viaje a Iguazú</h1>
+      <span class="grupo-badge">4 personas</span>
+    </div>
+    <button type="button" class="grupo-invite">Invitar amigos al grupo</button>
+    <div class="grupo-participants">
+      <span class="grupo-chip">pao bati (vos)</span>
+      <span class="grupo-chip">mpbl</span>
+      <span class="grupo-chip">ana</span>
+      <span class="grupo-chip">tomas</span>
+    </div>
+  </div>
+
+  <form class="g-form">
+    <div class="g-ticket">
+      <div class="lbl">Monto</div>
+      <div class="sum">
+        <span class="cur">US$</span>
+        <input type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" value="1200">
+      </div>
+      <p class="hint">Supermercado · entre 3 personas</p>
+    </div>
+
+    <div class="g-group">
+      <div class="g-row">
+        <label for="d">Descripción</label>
+        <input class="g-in" id="d" placeholder="Ej: Supermercado" value="Supermercado">
+      </div>
+      <div class="g-row">
+        <label for="p">¿Quién pagó?</label>
+        <select class="g-sel" id="p">
+          <option>pao bati (vos)</option>
+          <option>mpbl</option>
+          <option>ana</option>
+          <option>tomas</option>
+        </select>
+      </div>
+      <div class="g-row g-row--stack">
+        <span class="lbl">¿Entre quiénes se divide?</span>
+        <div class="g-people">
+          <button type="button" class="g-person" aria-pressed="true"><span class="av">PB</span>pao bati</button>
+          <button type="button" class="g-person" aria-pressed="true"><span class="av">MP</span>mpbl</button>
+          <button type="button" class="g-person" aria-pressed="true"><span class="av">AN</span>ana</button>
+          <button type="button" class="g-person"><span class="av">TO</span>tomas</button>
+        </div>
+        <div class="g-tools"><button type="button" class="g-mini">Seleccionar todos</button><button type="button" class="g-mini">Ninguno</button></div>
+      </div>
+    </div>
+
+    <div class="g-live">
+      <div><span>Le toca a cada uno</span><small>1200 ÷ 3, sin redondeos</small></div>
+      <b>US$ 400</b>
+    </div>
+
+    <button type="submit" class="g-cta">Agregar gasto</button>
+    <p class="g-foot">Podés cargarlo ahora y ajustarlo después.</p>
+  </form>
+
+  <div class="grupo-card">
+    <div class="grupo-card__head">
+      <h2>Gastos (3)</h2>
+      <span class="grupo-badge">US$ 2.480</span>
+    </div>
+    <div class="grupo-expense">
+      <div class="grupo-expense__main">
+        <span class="grupo-expense__ico">🛒</span>
+        <div class="grupo-expense__body">
+          <div class="grupo-expense__name">Supermercado</div>
+          <div class="grupo-expense__meta">pao bati · entre 3</div>
+        </div>
+      </div>
+      <div class="grupo-expense__right"><span class="grupo-expense__amount">US$ 1.200</span></div>
+    </div>
+    <div class="grupo-expense">
+      <div class="grupo-expense__main">
+        <span class="grupo-expense__ico">⛽</span>
+        <div class="grupo-expense__body">
+          <div class="grupo-expense__name">Combustible</div>
+          <div class="grupo-expense__meta">mpbl · entre 4</div>
+        </div>
+      </div>
+      <div class="grupo-expense__right"><span class="grupo-expense__amount">US$ 780</span></div>
+    </div>
+  </div>
+
+  <div class="grupo-card">
+    <h2>Cómo se salda</h2>
+    <div class="grupo-subhead">Saldo de cada uno</div>
+    <div class="grupo-balance"><span>pao bati</span><b class="neg">− US$ 300</b></div>
+    <div class="grupo-balance"><span>mpbl</span><b class="pos">+ US$ 195</b></div>
+  </div>
+</div>
+</body>
+</html>

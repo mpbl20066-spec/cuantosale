@@ -126,6 +126,12 @@ create table if not exists public.grupos_viaje (
   name text not null,
   destination_key text,
   currency text not null default 'USD',
+  -- Transferencias ya saldadas, como pares "quien|quien". Es un jsonb y no una
+  -- tabla aparte porque nobody tiene cuenta: el link del grupo es la contraseña,
+  -- así que no hay a quién auditear y alcanza con no volver a mostrar lo ya
+  -- pagado. La clave es el par y no el monto, porque el greedy de saldas puede
+  -- recalcular el importe cuando se agrega o borra un gasto.
+  saldos jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
 );
 
@@ -157,6 +163,10 @@ create policy "Anyone with the link can read a group"
   on public.grupos_viaje for select using (true);
 create policy "Anyone can create a group"
   on public.grupos_viaje for insert with check (true);
+-- Necesario para marcar una transferencia como pagada. El alcance es el mismo
+-- que el delete de gastos: cualquiera con el link toca la fila del grupo.
+create policy "Anyone with the link can update a group"
+  on public.grupos_viaje for update using (true) with check (true);
 
 create policy "Anyone with the link can read participants"
   on public.participantes for select using (true);
@@ -176,7 +186,7 @@ create index if not exists gastos_grupo_idx on public.gastos (grupo_id);
 -- Link de grupo = "contraseña" del grupo, así que anon también necesita
 -- poder leer/escribir a nivel de tabla (las policies de arriba ya acotan qué
 -- filas puede tocar cada quien).
-grant select, insert on public.grupos_viaje to anon, authenticated;
+grant select, insert, update on public.grupos_viaje to anon, authenticated;
 grant select, insert on public.participantes to anon, authenticated;
 grant select, insert, delete on public.gastos to anon, authenticated;
 

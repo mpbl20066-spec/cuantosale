@@ -303,7 +303,7 @@
 
   var MONEDAS_APP = [{ code: 'USD', etiqueta: 'Dolares', simbolo: 'US$' },
     { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
-    { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: 'UYU$' }];
+    { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }];
   var FX = { rates: null, base: 'USD', until: 0, cargando: true };
   var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', hotelType: 'intermedio', hotelTypeExplicit: false };
   var HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
@@ -681,35 +681,30 @@
   // El header vive en el HTML, pero el selector depende del estado de la
   // moneda y de que ya llegaran las tasas, asi que se inyecta desde aca.
   function pintarHeader() {
-    console.warn('SONDA pintarHeader');
     const slot = document.getElementById('currency-picker-slot');
     if (slot) slot.innerHTML = selectorMoneda();
   }
   function selectorMoneda() {
     var rates = FX.rates || {};
     var hay = !!Object.keys(rates).length;
-    return '<div class="currency-picker' + (hay ? '' : ' is-loading') + '" data-currency-picker>'
+    var m = monedaActiva();
+    return '<label class="currency-picker' + (hay ? '' : ' is-loading') + '">'
       + '<span class="currency-picker__label">Moneda</span>'
-      + '<div class="currency-picker__opts" role="group" aria-label="Moneda del presupuesto">'
-      + MONEDAS_APP.map(function (m) {
-        var tasa = tasaDe(m.code);
-        var activa = m.code === S.currency;
-        var off = !hay || tasa == null;
-        return '<button type="button" class="currency-opt' + (activa ? ' is-on' : '')
-          + (off ? ' is-off' : '') + '" data-currency="' + m.code + '"'
-          + ' aria-pressed="' + (activa ? 'true' : 'false') + '"'
-          + (off ? ' disabled title="Tasa no disponible todavia"' : '')
-          + '><b>' + m.simbolo + '</b><span>' + m.code + '</span></button>';
+      + '<span class="currency-picker__field">'
+      + '<b>' + esc(m.simbolo) + '</b>'
+      + '<select class="currency-select" data-currency-select aria-label="Moneda del presupuesto">'
+      + MONEDAS_APP.map(function (op) {
+        var off = !hay || tasaDe(op.code) == null;
+        return '<option value="' + op.code + '"' + (op.code === S.currency ? ' selected' : '') + (off ? ' disabled' : '')
+          + '>' + esc(op.etiqueta) + ' (' + op.code + ')</option>';
       }).join('')
-      + '</div></div>';
+      + '</select></span></label>';
   }
   function refrescarSelectorMoneda() {
-    // el del header primero: su outerHTML se lleva el slot, y despues
-    // buscarlo mas en el documento daria null
-    const slot = document.getElementById('currency-picker-slot');
-    if (slot) slot.innerHTML = selectorMoneda();
-    document.querySelectorAll('[data-currency-picker]').forEach(function (el) {
-      if (el.closest('#currency-picker-slot')) return;
+    // Se reemplaza el <label class="currency-picker"> entero. Antes se
+    // reemplazaba el <select> suelto por el widget completo, y eso partia el
+    // .currency-picker__field por la mitad.
+    document.querySelectorAll('.currency-picker').forEach(function (el) {
       el.outerHTML = selectorMoneda();
     });
   }
@@ -722,11 +717,21 @@
     try { localStorage.setItem('cuantosale_moneda', code); } catch (e) { /* modo privado */ }
     refrescarSelectorMoneda();
     // repintamos lo que ya esta en pantalla
-    if (typeof renderTripSummary === 'function' && detailState) { try { renderTripSummary(); } catch (e) { } }
+    // Tres lugares muestran precios y cada uno tiene su funcion:
+    //   recalcularTotalViaje -> el total grande de la vista de detalle
+    //   renderTripSummary   -> el panel flotante "Mi viaje"
+    //   proposalBreakdownContent -> el desglose "A donde va tu plata"
+    // Con solo una de las dos primeras, cambiar de moneda dejaba el precio
+    // viejo en pantalla mientras el simbolo ya habia cambiado.
+    if (detailState) {
+      if (typeof recalcularTotalViaje === 'function') { try { recalcularTotalViaje(); } catch (e) { } }
+      if (typeof renderTripSummary === 'function') { try { renderTripSummary(); } catch (e) { } }
+      var bd = document.querySelector('[data-proposal-breakdown]');
+      if (bd) { try { bd.innerHTML = proposalBreakdownHead() + proposalBreakdownContent(detailState); } catch (e) { } }
+    }
     if (lastData) { try { render(lastData); } catch (e) { } }
   }
   async function cargarTasas() {
-    console.warn('SONDA cargarTasas arranque');
     try {
       const r = await fetch('/api/tasas', { headers: { Accept: 'application/json' } });
       const j = await r.json();
@@ -745,12 +750,11 @@
     if (guardada && tasaDe(guardada) != null) S.currency = guardada;
     pintarHeader();
     refrescarSelectorMoneda();
-    console.warn('SONDA cargarTasas fin');
     if (lastData) { try { render(lastData); } catch (e) { } }
   }
-  document.addEventListener('click', function (e) {
-    const b = e.target.closest && e.target.closest('[data-currency]');
-    if (b && !b.disabled) aplicarMoneda(b.getAttribute('data-currency'));
+  document.addEventListener('change', function (e) {
+    const s = e.target.closest && e.target.closest('[data-currency-select]');
+    if (s) aplicarMoneda(s.value);
   });
 
   function money(n) {
@@ -1066,12 +1070,52 @@
     var direct = text.match(/https?:\/\/[^\s)>"]+/i);
     return direct ? direct[0].trim() : (fallback || '');
   }
+  // La API de Booking a veces devuelve el nombre del hotel ya doble codificado:
+  // los bytes UTF-8 de "Búzios" leídos con un código de un byte por carácter,
+  // que en pantalla aparecen como "BÃºzios". El server ya lo repara en
+  // sanitizeHotelName, pero en producción el síntoma aparece igual, así que el
+  // dato se repara también acá: si la corrupción entra por cualquier capa
+  // (respuesta cacheada del proveedor, CDN, proxy), el nombre se ve bien igual.
+  //
+  // Se aplica sólo cuando aparece la firma del problema y el resultado es
+  // UTF-8 válido, así que un texto correcto queda intacto: "São Paulo" y
+  // "Pousada São José" no se tocan porque no son UTF-8 válido al re-decodificar.
+  // Los 32 caracteres que Windows-1252 ubica entre 0x80 y 0x9F. El listado sale
+  // de la implementacion de WHATWG de Node y no de memoria: varios son de
+  // control (U+0081, U+008D, U+008F, U+0090, U+009D) y cambiarlos de lugar no
+  // rompe nada visible, solo deja de reparar.
+  var CP1252_HIGH = '\u20AC\u0081\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\u008D\u017D\u008F\u0090\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\u009D\u017E\u0178';
+  // Uno solo: fixMojibake corre por cada hotel de cada respuesta.
+  var UTF8_DECODER = new TextDecoder('utf-8');
+  function fixMojibake(value) {
+    var text = String(value == null ? '' : value);
+    if (!/[ÃÂâ]/.test(text)) return text;
+    var bytes = [];
+    for (var i = 0; i < text.length; i++) {
+      var code = text.charCodeAt(i);
+      if (code < 0x80) { bytes.push(code); continue; }
+      // El bloque alto de Windows-1252 va del 0x80 al 0x9F, pero sus caracteres
+      // están en U+20AC y U+2122 (fuera de Latin-1), así que se busca por
+      // carácter y no por rango.
+      var high = CP1252_HIGH.indexOf(text.charAt(i));
+      if (high >= 0) { bytes.push(0x80 + high); continue; }
+      if (code >= 0xa0 && code <= 0xff) { bytes.push(code); continue; }
+      return text;
+    }
+    var fixed;
+    try { fixed = UTF8_DECODER.decode(new Uint8Array(bytes)); }
+    catch (error) { return text; }
+    // Caracteres de reemplazo = la secuencia no era UTF-8 válido: el texto ya
+    // traía esas letras de forma legítima.
+    if (fixed.indexOf('\uFFFD') >= 0) return text;
+    return fixed;
+  }
   function normalizeHotelCatalog(catalog, defaultHotel) {
     var unique = [];
     var seen = new Set();
     (catalog || []).forEach(function (item, index) {
       if (!item || !item.name) return;
-      var name = String(item.name);
+      var name = fixMojibake(item.name);
       var image = sanitizeHotelImageUrl(item.image, defaultHotel.image);
       if (!image || seen.has(image)) {
         image = '';
@@ -1119,9 +1163,9 @@
       var destinationQuery = encodeURIComponent(destinationName);
       var nearbyName = meta.dest.key === 'ilha' || meta.dest.key === 'paraty' ? 'Angra dos Reis' : '';
       var nearbyLink = nearbyName ? '<a class="hotel-nearby-link hotel-nearby-link-secondary" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(nearbyName) + '" target="_blank" rel="noopener noreferrer">Ampliar a ' + esc(nearbyName) + ' ↗</a>' : '';
-      return '<section class="hotel-options hotel-options-empty" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Alojamientos en ' + esc(destinationName) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(emptyCopy) + '</p><a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(destinationName) + ' ↗</a>' + nearbyLink + '</div></div></section>';
+      return '<section class="hotel-options hotel-options-empty" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Alojamientos en ' + esc(destinationName) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(emptyCopy) + '</p><a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(destinationName) + ' ↗</a>' + nearbyLink + '</div></div></section>';
     }
-    return '<section class="hotel-options" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
+    return '<section class="hotel-options" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
       (meta.hotelsNearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(meta.hotelsNearby) + ', una zona cercana a ' + esc(meta.dest.name) + '.</p>' : '') + options.map(function (option, index) {
         var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
         var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
@@ -1149,13 +1193,17 @@
       '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
       (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
       ' &middot; precio referencial</p></div></div>';
+    // Iconos de la tarjeta: trazo, como los de CATEGORY_ICONS, para que se
+    // lean bien en el panel chico y hereden el color de cada tema.
+    var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+    var icoCheck = '<svg ' + icoBase + ' stroke-width="2.6" aria-hidden="true"><path d="M4.5 12.6 9.4 17.5 19.5 6.9"/></svg>';
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
       var photo = tourPhoto(destinationKey, tour);
       if (photo) creditos[photo.url] = photo;
       var skin = tourActivitySkin(tour.title);
       // Con foto: velo para que el texto se lea siempre. Sin foto: degradado
-      // con el ícono de la actividad, que no miente sobre lo que es.
+      // con el icono de la actividad, que no miente sobre lo que es.
       var media = photo
         ? '<div class="local-tour__media"><img src="' + esc(photo.url) + '" alt="' + esc(tour.title) + '" loading="lazy">' +
           '<div class="local-tour__scrim"></div>' +
@@ -1165,24 +1213,26 @@
           '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg>' +
           '<h3 class="local-tour__title-over">' + esc(tour.title) + '</h3></div>';
       var duration = tourDuration(tour);
+      // Marca de seleccion: cinta solida arriba en vez de relleno de color.
+      // Un card con fondo celeste y borde duro parecia un boton de escritorio;
+      // la cinta se lee como estado y no tapa la foto ni el precio.
+      var ribbon = '<span class="local-tour__ribbon" aria-hidden="true">' + icoCheck + 'En tu viaje</span>';
       // Toda la tarjeta es la zona sensible: el checkbox va estirado con
       // position:absolute sobre el article y solo el boton de detalle queda
       // por encima (z-index). Un clic en cualquier punto elige la
       // experiencia y el teclado sigue teniendo un unico control que tabula.
-      var checkIco = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.6 9.4 17.5 19.5 6.9"/></svg>';
       return '<article class="local-tour" data-tour-card>' +
         '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '">' +
+        ribbon +
         media +
-        '<span class="local-tour__check" aria-hidden="true">' + checkIco + '</span>' +
         '<div class="local-tour__body">' +
         '<p class="local-tour__destination">' + esc(tour.destination) + '</p>' +
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
         '<span class="local-tour__chip">Precio referencial</span></div>' +
         '<div class="local-tour__foot">' +
-        '<span class="local-tour__flag" aria-hidden="true">' + checkIco + 'En tu viaje</span>' +
         '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">' +
-        '<svg class="local-tour__info-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4h.01"/></svg>' +
+        '<svg class="local-tour__info-ico" ' + icoBase + ' aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4h.01"/></svg>' +
         '<span>Ver detalle</span></button>' +
         '</div></div></article>';
     }).join('');
@@ -1193,7 +1243,7 @@
     var creditsBlock = creditList
       ? '<details class="local-tours__credits"><summary>Créditos de las fotos</summary><p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre:</p><ul>' + creditList + '</ul></details>'
       : '';
-    return '<section class="local-tours" aria-labelledby="local-tours-title">' + head +
+    return '<section class="local-tours" data-budget-anchor="tours" aria-labelledby="local-tours-title">' + head +
       '<div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + cards + '</div>' +
       (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') +
       creditsBlock + '</section>';
@@ -1218,7 +1268,7 @@
   }
   var hotelRequestId = 0;
   function hotelLoading(meta) {
-    return '<section class="hotel-options hotel-options-loading" aria-live="polite"><div class="hotel-options-head"><div><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>Buscando opciones disponibles…</p></div></div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
+    return '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head"><div><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>Buscando opciones disponibles…</p></div></div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
   }
   function loadHotelRecommendations(meta, accommodationTotal) {
     var requestId = ++hotelRequestId;
@@ -1325,16 +1375,96 @@
       // Mismo ícono que usa el panel "MI VIAJE", en vez de un cuadrado de
       // color: las dos vistas ya se leen con la misma clave visual.
       var icon = categoryIcon(entry.category, entry.color);
-      return '<div class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '"><div class="proposal-breakdown__label">' + icon + '<span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></div>';
+      // La fila es un botón: el desglose dice cuánta plata va a cada rubro, y
+      // el lugar donde esa plata se cambia o se revisa es unos centímetros más
+      // abajo. syncBudgetJumpTargets() desactiva las filas cuya sección todavía
+      // no existe (tours sin actividades cargadas, traslados fuera de vuelo).
+      return '<button type="button" class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '" data-jump-category="' + entry.category + '" aria-label="Ir a la sección de ' + esc(entry.label) + '"><div class="proposal-breakdown__label">' + icon + '<span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></button>';
     }).join('');
     return '<div class="proposal-breakdown__stack" role="img" aria-label="Distribución del costo">' + segments + '</div>' +
       '<div class="proposal-breakdown__list">' + rows + '</div>';
+  }
+  function proposalBreakdownHead() {
+    return '<div class="sec__head"><h2>A dónde va tu plata</h2>' + selectorMoneda() + '</div>';
   }
   function proposalBreakdownMarkup(state) {
     return '<section class="proposal-breakdown" data-proposal-breakdown>' +
       '<div class="sec__head"><h2>A dónde va tu plata</h2>' + selectorMoneda() + '</div>' +
       proposalBreakdownContent(state) +
       '</section>';
+  }
+  /* ---------- salto desde el desglose / "Mi Viaje" a la sección del rubro ----------
+     El desglose y el panel "Mi Viaje" son el mapa del presupuesto: dicen cuánta
+     plata va a cada rubro, pero la decisión se toma más abajo (elegir régimen,
+     sumar un tour, cambiar el vuelo). Un clic en cualquiera de las dos vistas
+     lleva a esa sección en vez de dejar al usuario buscándola a ojo.
+     Cada destino se marca con data-budget-anchor="<categoría>" en el markup de
+     la sección, así el mapa se actualiza solo cuando cambia el modo de
+     transporte o llegan los hoteles. */
+  function budgetAnchorFor(category) {
+    if (!category) return null;
+    var detail = document.getElementById('detalle-contenido');
+    var scope = detail || document;
+    return scope.querySelector('[data-budget-anchor="' + category + '"]');
+  }
+  // Las filas se dibujan antes que las secciones que apuntan (el HTML del
+  // detalle se arma completo en un solo innerHTML), así que el "puede saltar"
+  // se resuelve después, ya con el DOM real. Las categorías sin destino posible
+  // -tours cuando el destino no tiene actividades, traslados fuera de vuelo-
+  // quedan como texto plano en vez de prometer un salto que no existe.
+  function syncBudgetJumpTargets() {
+    var jumpers = document.querySelectorAll('[data-jump-category]');
+    Array.prototype.forEach.call(jumpers, function (node) {
+      var target = budgetAnchorFor(node.getAttribute('data-jump-category'));
+      var jumpable = !!target;
+      node.classList.toggle('is-jumpable', jumpable);
+      if ('disabled' in node) node.disabled = !jumpable;
+    });
+  }
+  function highlightBudgetAnchor(target) {
+    var previous = document.querySelectorAll('.is-budget-anchor');
+    Array.prototype.forEach.call(previous, function (node) { node.classList.remove('is-budget-anchor'); });
+    target.classList.add('is-budget-anchor');
+    window.clearTimeout(highlightBudgetAnchor.timer);
+    highlightBudgetAnchor.timer = window.setTimeout(function () { target.classList.remove('is-budget-anchor'); }, 1800);
+  }
+  // Un token por salto: si el usuario va clickeando rubros seguidos, el último
+  // clic gana y los scrolls pendientes de los anteriores se descartan.
+  var budgetJumpToken = 0;
+  function jumpToBudgetSection(category) {
+    var target = budgetAnchorFor(category);
+    if (!target) return false;
+    // Se lleva el foco al destino para que el salto también se pueda seguir con
+    // el teclado desde ahí, no sólo con el mouse.
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    highlightBudgetAnchor(target);
+    var token = ++budgetJumpToken;
+    function go(behavior, isRetry) {
+      if (token !== budgetJumpToken) return;
+      var before = window.pageYOffset;
+      target.scrollIntoView({ behavior: behavior, block: 'start' });
+      target.focus({ preventScroll: true });
+      if (isRetry) return;
+      // Chromium se come un scroll suave si se pide en el mismo frame que un
+      // scroll instantáneo anterior (típico: recién se abrió una propuesta, que
+      // arranca con un "volver arriba", y el usuario clickeó un rubro enseguida).
+      // Si a los 150ms la página no se movió, el salto no arrancó: se completa
+      // de una, sin animación, en vez de dejar al usuario donde estaba.
+      window.setTimeout(function () {
+        if (token === budgetJumpToken && Math.abs(window.pageYOffset - before) < 2) go('auto', true);
+      }, 150);
+    }
+    // Un frame de margen: si veníamos de un scroll en vuelo, primero lo cancela.
+    window.requestAnimationFrame(function () { go('smooth', false); });
+    return true;
+  }
+  function handleBudgetJump(e) {
+    var trigger = e.target.closest && e.target.closest('[data-jump-category]');
+    if (!trigger || trigger.disabled) return;
+    if (jumpToBudgetSection(trigger.getAttribute('data-jump-category'))) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
   function toursWhatsappUrl(state) {
     var selectedTours = (state && state.selectedTours) || [];
@@ -1435,12 +1565,13 @@
     }).join('');
     var itemsHtml = summaryItems.map(function (item) {
       // Sólo el ícono: el cuadrado de color repetía la misma información y
-      // ocupaba ancho al lado del texto.
-      return '<div class="trip-summary__item' + (item.n ? '' : ' is-zero') + '">'
+      // ocupaba ancho al lado del texto. El botón entero lleva a la sección
+      // donde ese rubro se configura, igual que las filas del desglose.
+      return '<button type="button" class="trip-summary__item' + (item.n ? '' : ' is-zero') + '" data-jump-category="' + item.cat + '" aria-label="Ir a la sección de ' + esc(item.label) + '">'
         + categoryIcon(item.cat, item.color)
         + '<div class="trip-summary__meta"><b>' + item.label + '</b><span>' + item.meta + '</span></div>'
         + '<em>' + item.value + '</em>'
-        + '</div>';
+        + '</button>';
     }).join('');
     summary.innerHTML = '<div class="trip-summary__inner">' +
       '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong><span class="trip-summary__toggle-icon" aria-hidden="true">⌃</span></button>' +
@@ -1450,6 +1581,11 @@
       '</div>';
     summary.hidden = false;
     syncTripSummaryViewport();
+    // El panel "Mi Viaje" y el desglose se repintan en cada recálculo: es el
+    // momento natural para volver a resolver qué filas pueden saltar, porque
+    // las secciones destino acaban de cambiar (modo de transporte, hoteles,
+    // budget diario).
+    syncBudgetJumpTargets();
   }
   function syncTripSummaryViewport() {
     var summary = $('#trip-summary');
@@ -1717,7 +1853,9 @@
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
     var breakdown = document.querySelector('[data-proposal-breakdown]');
-    if (breakdown) breakdown.innerHTML = '<h2>A dónde va tu plata</h2>' + proposalBreakdownContent(detailState);
+    // Mismo encabezado que proposalBreakdownMarkup: si solo se re-renderiza el
+    // contenido, el selector de moneda se pierde al primer clic en una categoría.
+    if (breakdown) breakdown.innerHTML = proposalBreakdownHead() + proposalBreakdownContent(detailState);
     renderTripSummary();
   }
   function getSelectedFlightOffer() {
@@ -1763,6 +1901,10 @@
       // tiene en la cabeza) pero lo que se guarda es la base: customValue
       // sigue siendo USD y se convierte acá y en el handler. Asi el presupuesto
       // nunca se pisa con un número de otra moneda.
+      // Ojo con el separador: el value de un <input type="number"> tiene que
+      // ir con punto, porque la especifiacion descarta el valor si no es un
+      // float valido. Con coma el campo se muestra vacio. El punto se ve junto
+      // al símbolo, que es la convención de los campos numéricos.
       var input = '<label class="daily-budget__planned"><span>Monto por día</span><div class="daily-budget__input-wrap"><span>' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Presupuesto personalizado diario para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span>/día</span></div></label>';
       var custom = customSelected
         ? '<div class="daily-budget__option daily-budget__option--custom is-selected" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span>' + input + '</div>'
@@ -1771,11 +1913,11 @@
     }
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
-      '<div class="daily-budget__group">' +
+      '<div class="daily-budget__group" data-budget-anchor="local">' +
       '<div class="daily-budget__header"><span>Transporte local</span></div>' +
       '<div class="daily-budget__options">' + optionMarkup(localOptions, 'local') + '</div>' +
       '</div>' +
-      '<div class="daily-budget__group">' +
+      '<div class="daily-budget__group" data-budget-anchor="comidas">' +
       '<div class="daily-budget__header"><span>Comidas</span></div>' +
       '<div class="daily-budget__options">' + optionMarkup(foodOptions, 'food') + '</div>' +
       '</div>' +
@@ -1970,7 +2112,7 @@
     var showStops = isEv || r.roundTripKm >= 600;
     var stopsPanel = showStops ? ('<details class="roadtrip-stops" data-roadtrip-stops' + (isEv ? ' open' : '') + '>' + roadtripStopsInnerHtml(stopsPlan, isEv) + '</details>') : '';
 
-    return '<section class="transport-options roadtrip-planner">' + vehicleTabs + combustionPanel + evPanel + routeCard + stopsPanel + '</section>';
+    return '<section class="transport-options roadtrip-planner" data-budget-anchor="auto">' + vehicleTabs + combustionPanel + evPanel + routeCard + stopsPanel + '</section>';
   }
   function transferPickupTimeLabel(date) {
     return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
@@ -2006,14 +2148,14 @@
     // hoteles); este botón es solo el indicador de estado, nunca abre un modal
     // ni un flujo de pasos adicional. El detalle queda centralizado en "Mi Viaje".
     var addedLabel = selected ? '✓ Agregado al presupuesto' : 'Elegí un tipo de transfer';
-    return '<section class="transport-options official-transfer" data-official-transfer><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p>' + suggestionMarkup + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" disabled>' + addedLabel + '</button></section>';
+    return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados"><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p>' + suggestionMarkup + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" disabled>' + addedLabel + '</button></section>';
   }
 
   function transportFlow(meta, budget, mode) {
     var selectedMode = typeof mode === 'string' ? mode : mode ? 'auto' : 'flight';
     if (selectedMode === 'auto') return roadtripCalculator(meta);
-    if (selectedMode === 'bus') return '<section class="transport-options bus-itinerary"><h2>Bus semicama / cama</h2><p>Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
-    return '<section class="detail-section"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
+    if (selectedMode === 'bus') return '<section class="transport-options bus-itinerary" data-budget-anchor="bus"><h2>Bus semicama / cama</h2><p>Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
+    return '<section class="detail-section" data-budget-anchor="pasajes"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
   }
   function localTransportDescription(meta) {
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
@@ -3845,6 +3987,7 @@
     $('.form').addEventListener('keydown', function (e) { if (e.key === 'Enter' && S.dest === 'todos') { e.preventDefault(); $('#btn-buscar-todos').click(); } });
     document.addEventListener('click', handleProposalNavigation, true);
     document.addEventListener('click', handleBreakdownToggle, true);
+    document.addEventListener('click', handleBudgetJump, true);
     $('#dep').addEventListener('change', function (e) {
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
       S.dep = e.target.value;
@@ -4324,7 +4467,6 @@
     }).catch(function () { notice('No pudimos cargar los destinos. Recargá la página.'); });
   }
 
-  console.warn('SONDA fin del IIFE');
   cargarTasas();
   init();
 })();
