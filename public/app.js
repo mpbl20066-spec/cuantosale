@@ -69,28 +69,24 @@
   function cargarCreditosFotos() {
     if (fotoCreditosCargados) return Promise.resolve(FOTO_CREDITOS);
     fotoCreditosCargados = true;
-    return fetch('/creditos-fotos.generated.js')
-      .then(function (r) { return r.ok ? r.text() : ''; })
-      .then(function (src) {
-        if (!src) return FOTO_CREDITOS;
-        // El archivo se carga como script y se apoya en window.FOTO_CREDITOS
-        // para no duplicar la tabla acá.
-        var holder = document.createElement('div');
-        holder.id = 'foto-creditos-cargados';
-        holder.hidden = true;
-        var script = document.createElement('script');
-        script.src = '/creditos-fotos.generated.js';
-        holder.appendChild(script);
-        document.body.appendChild(holder);
-        return new Promise(function (resolve) {
-          script.addEventListener('load', function () {
-            FOTO_CREDITOS = window.FOTO_CREDITOS || {};
-            resolve(FOTO_CREDITOS);
-          });
-          script.addEventListener('error', function () { resolve(FOTO_CREDITOS); });
-        });
-      })
-      .catch(function () { return FOTO_CREDITOS; });
+    // Antes: fetch() del archivo y después un <script> al MISMO src. O sea dos
+    // descargas y dos parseos del mismo JS, y el texto del primero solo se
+    // usaba para un if (!src). Ahora se inyecta únicamente el <script>, cuyo
+    // handler de error ya cubre el fallo.
+    var holder = document.createElement('div');
+    holder.id = 'foto-creditos-cargados';
+    holder.hidden = true;
+    var script = document.createElement('script');
+    script.src = '/creditos-fotos.generated.js';
+    holder.appendChild(script);
+    document.body.appendChild(holder);
+    return new Promise(function (resolve) {
+      script.addEventListener('load', function () {
+        FOTO_CREDITOS = window.FOTO_CREDITOS || {};
+        resolve(FOTO_CREDITOS);
+      });
+      script.addEventListener('error', function () { resolve(FOTO_CREDITOS); });
+    });
   }
   function fotoCreditosDe(url) {
     return FOTO_CREDITOS[url] || null;
@@ -708,20 +704,22 @@
     S.currency = code;
     try { localStorage.setItem('cuantosale_moneda', code); } catch (e) { /* modo privado */ }
     refrescarSelectorMoneda();
-    // repintamos lo que ya esta en pantalla
-    // Tres lugares muestran precios y cada uno tiene su funcion:
-    //   recalcularTotalViaje -> el total grande de la vista de detalle
-    //   renderTripSummary   -> el panel flotante "Mi viaje"
-    //   proposalBreakdownContent -> el desglose "A donde va tu plata"
-    // Con solo una de las dos primeras, cambiar de moneda dejaba el precio
-    // viejo en pantalla mientras el simbolo ya habia cambiado.
+    // Tres lugares muestran precios: el total grande de la vista de detalle, el
+    // panel flotante "Mi viaje" y el desglose "A donde va tu plata".
+    //
+    // Antes, un solo click de moneda pintaba el desglose DOS veces (esta línea y
+    // la de recalcularTotalViaje, byte a byte idénticas), el panel dos veces, y
+    // encima 调用aba render(lastData), que reconstruía la lista de resultados
+    // entera. Todo eso dentro de catch (e) {} VACÍOS: un TypeError al pintar
+    // un total se tragaba en silencio y el usuario veía un precio viejo con el
+    // símbolo nuevo, sin ningún error en consola.
+    //
+    // Ahora: recalcularTotalViaje() alcanza (su propio pintado pesado se
+    // encola una vez por frame), y los catch loguean en vez de descartarse.
     if (detailState) {
-      if (typeof recalcularTotalViaje === 'function') { try { recalcularTotalViaje(); } catch (e) { } }
-      if (typeof renderTripSummary === 'function') { try { renderTripSummary(); } catch (e) { } }
-      var bd = document.querySelector('[data-proposal-breakdown]');
-      if (bd) { try { bd.innerHTML = proposalBreakdownHead() + proposalBreakdownContent(detailState); } catch (e) { } }
+      try { recalcularTotalViaje(); } catch (e) { console.error('No se pudo repintar el total al cambiar de moneda', e); }
     }
-    if (lastData) { try { render(lastData); } catch (e) { } }
+    if (lastData) { try { render(lastData); } catch (e) { console.error('No se pudo repintar los resultados al cambiar de moneda', e); } }
   }
   async function cargarTasas() {
     try {
@@ -1178,32 +1176,68 @@
         var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
         var similarMarkup = similar ? '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details>' : '';
         var descriptionMarkup = option.description ? '<p class="hotel-description">' + esc(option.description) + '</p>' : '';
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' + imageMarkup + '<label class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '> <span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></label><h3>' + esc(option.name) + '</h3>' + descriptionMarkup + '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p><div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div><strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong><a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
+        // La card entera es la etiqueta del radio. Antes el <label> envolvía solo
+        // el radio y el badge: una tira de ~26px dentro de una card de más de
+        // 300px, y como el resto de la card no era label, había que acertarle
+        // justo a esa tira para cambiar de hotel. Es el paso que decide la
+        // reserva, y el peor objetivo táctil de la app.
+        //
+        // El input sigue visible (es la señal de que esto se elige), pero el
+        // label ahora cubre todo lo visual. Los enlaces de Booking y el
+        // <details> de "hoteles similares" quedan FUERA del label a propósito:
+        // dentro de un label no se pueden pulsar con normalidad.
+        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' +
+          '<label class="hotel-option__pick">' + imageMarkup +
+          '<span class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
+          '<h3>' + esc(option.name) + '</h3>' + descriptionMarkup +
+          '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p>' +
+          '<div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div>' +
+          '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong>' +
+          '<span class="hotel-pick-hint">Elegir este hotel</span>' +
+          '</label>' +
+          '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
       }).join('') + '</div></section>';
   }
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
     var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
-    // Mostrar todas las experiencias cargadas para el destino seleccionado.
-    var tours = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
+    // Las actividades reales de Civitatis ganan si hay; si no, la lista local.
+    // Es un merge, no un reemplazo: la lista local sigue siendo el piso, asi
+    // que un destino sin mapeado en Civitatis, o una API caida, muestran igual.
+    var remote = window.__civitatisTours && window.__civitatisTours.destinationKey === destinationKey
+      ? (window.__civitatisTours.items || [])
+      : [];
+    var tours = remote.length
+      ? remote.map(function (a) {
+          return {
+            destinations: [destinationKey], destination: destinationName,
+            title: a.title, description: a.description, price: Number(a.price) || 0,
+            details: a.details || '', image: a.image || '', rating: a.rating || 0,
+            reviewsCount: a.reviewsCount || 0, url: a.url || '', source: 'civitatis',
+            freeCancellation: !!a.freeCancellation
+          };
+        })
+      : LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
     if (!tours.length) return '';
-    // Los tours ya guardan autor y licencia en TOUR_PHOTOS; el pie global los
-    // reagrupa. Acá sólo se registra cuáles se están mostrando.
+    // Los tours locales guardan autor y licencia en TOUR_PHOTOS; el pie global
+    // los reagrupa. Los de Civitatis traen su propia foto, sin crédito que dar.
     var creditos = {};
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
+    var desdeCivitatis = tours[0] && tours[0].source === 'civitatis';
     var head = '<div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span>' +
-      '<h2 id="local-tours-title">Los imperdibles de ' + esc(destinationName) + '</h2>' +
+      '<h2 id="local-tours-title">' + (desdeCivitatis ? 'Actividades reales en ' : 'Los imperdibles de ') + esc(destinationName) + '</h2>' +
       '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
       (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
-      ' &middot; precio referencial</p></div></div>';
+      (desdeCivitatis ? ' &middot; precio real' : ' &middot; precio referencial') + '</p></div></div>';
     // Iconos de la tarjeta: trazo, como los de CATEGORY_ICONS, para que se
     // lean bien en el panel chico y hereden el color de cada tema.
     var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
     var icoCheck = '<svg ' + icoBase + ' stroke-width="2.6" aria-hidden="true"><path d="M4.5 12.6 9.4 17.5 19.5 6.9"/></svg>';
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
-      var photo = tourPhoto(destinationKey, tour);
-      if (photo) creditos[photo.url] = photo;
+      // Las de Civitatis traen foto propia; las locales salen de TOUR_PHOTOS.
+      var photo = tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour);
+      if (photo && photo.url) creditos[photo.url] = photo;
       var skin = tourActivitySkin(tour.title);
       // Con foto: velo para que el texto se lea siempre. Sin foto: degradado
       // con el icono de la actividad, que no miente sobre lo que es.
@@ -1232,7 +1266,10 @@
         '<p class="local-tour__destination">' + esc(tour.destination) + '</p>' +
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
-        '<span class="local-tour__chip">Precio referencial</span></div>' +
+        '<span class="local-tour__chip">' + (tour.source === 'civitatis' ? 'Precio real' : 'Precio referencial') + '</span>' +
+        (tour.rating ? '<span class="local-tour__chip">★ ' + Number(tour.rating).toFixed(1) + '</span>' : '') +
+        (tour.freeCancellation ? '<span class="local-tour__chip">Cancelación gratis</span>' : '') + '</div>' +
+        (tour.url ? '<div class="local-tour__foot"><a class="local-tour__book" href="' + esc(tour.url) + '" target="_blank" rel="noopener noreferrer">Reservar en Civitatis</a></div>' : '') +
         '<div class="local-tour__foot">' +
         '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">' +
         '<svg class="local-tour__info-ico" ' + icoBase + ' aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4h.01"/></svg>' +
@@ -1270,6 +1307,12 @@
     modal.setAttribute('aria-hidden', 'false');
   }
   var hotelRequestId = 0;
+  // La búsqueda de vuelos necesita el mismo control de identidad que la de
+  // hoteles (hotelRequestId, más abajo). Sin esto, una respuesta lenta de la
+  // propuesta anterior escribía su precio en el presupuesto de la propuesta
+  // nueva: el usuario veía un total que no era el de su viaje.
+  var flightRequestId = 0;
+  var flightController = null;
   function hotelLoading(meta) {
     return '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head"><div><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>Buscando opciones disponibles…</p></div></div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
   }
@@ -1309,6 +1352,42 @@
       var current = document.querySelector('.hotel-options-loading');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
     });
+  }
+
+  /*
+   * Actividades de Civitatis para el destino que se esta viendo.
+   *
+   * Se dispara aparte de los hoteles y a proposito despues del primer render:
+   * la pantalla tiene que pintar rapido con la lista local y recien despues
+   * reemplazar por las actividades reales si llegaron. Es el mismo criterio que
+   * usa la section de hoteles con meta.hotelsLoaded.
+   *
+   * Si Civitatis no esta configurado, o el destino no esta mapeado (Búzios, o
+   * cualquiera sin destinoId), el server contesta 200 con lista vacia y no pasa
+   * nada: quedan los tours locales.
+   */
+  function cargarActividades(meta) {
+    if (!meta || meta.actividadesCargadas) return;
+    meta.actividadesCargadas = true;
+    var destinationKey = String(meta.dest && meta.dest.key || '').toLowerCase();
+    // Búzios se queda con la lista local, pedido explicito.
+    if (destinationKey === 'buz') return;
+    var params = new URLSearchParams({ dest: destinationKey, dep: meta.dep, ret: meta.ret, pax: meta.pax, currency: (window.state && window.state.currency) || 'USD' });
+    fetch('/api/actividades?' + params.toString()).then(function (r) { return r.json(); }).then(function (data) {
+      var items = (data && data.activities) || [];
+      if (!items.length) return;
+      window.__civitatisTours = { destinationKey: destinationKey, items: items };
+      repintarTours();
+    }).catch(function (error) {
+      console.warn('[actividades] No se pudieron cargar:', error && error.message || 'error desconocido');
+    });
+  }
+  // Re-pinta solo la seccion de tours. Se repinta entera la pantalla porque el
+  // total del viaje cambia: las actividades son opt-in y ya pueden estar
+  // marcadas, asi que hay que recarregar el estado.
+  function repintarTours() {
+    if (typeof renderDetail !== 'function' || !detailState) return;
+    try { renderDetail(); } catch (e) { /* si falla, queda la lista local */ }
   }
   function getSelectedTransferAmount(state) {
     if (!state || state.transportMode === 'auto') return 0;
@@ -1390,11 +1469,16 @@
       '<div class="proposal-breakdown__list">' + rows + '</div>';
   }
   function proposalBreakdownHead() {
-    return '<div class="sec__head"><h2>A dónde va tu plata</h2>' + selectorMoneda() + '</div>';
+    // Sin selector de moneda acá: el total de la propuesta ya está arriba, en
+    // la banda de resumen, y el header de la página tiene el suyo. Repetir el
+    // badge en cada encabezado de sección lo que producía era la misma-looking
+    // pastilla en tres lugares de una vez, y cada una ciclaba una lista
+    // distinta. El punto de la sección es el reparto, no cambiar la moneda.
+    return '<div class="sec__head"><h2>A dónde va tu plata</h2></div>';
   }
   function proposalBreakdownMarkup(state) {
     return '<section class="proposal-breakdown" data-proposal-breakdown>' +
-      '<div class="sec__head"><h2>A dónde va tu plata</h2>' + selectorMoneda() + '</div>' +
+      proposalBreakdownHead() +
       proposalBreakdownContent(state) +
       '</section>';
   }
@@ -1597,16 +1681,20 @@
       '</div>';
     summary.hidden = false;
     syncTripSummaryViewport();
-    // El panel "Mi Viaje" y el desglose se repintan en cada recálculo: es el
-    // momento natural para volver a resolver qué filas pueden saltar, porque
-    // las secciones destino acaban de cambiar (modo de transporte, hoteles,
-    // budget diario).
-    syncBudgetJumpTargets();
+    // syncBudgetJumpTargets() NO va acá: es un querySelectorAll sobre todo el
+    // documento y antes se ejecutaba dos veces por cada recálculo (una dentro
+    // de renderTripSummary y otra en el llamador). Ahora corre una vez por frame
+    // desde queueHeavyRepaint(), que es quien sabe cuándo cambió la estructura.
   }
   function syncTripSummaryViewport() {
     var summary = $('#trip-summary');
     if (!summary) return;
-    var isMobile = window.innerWidth <= 768;
+    // 900px, no 768: el panel pasa a ancho completo en 900px (regla del CSS) y
+    // antes el colapso arrancaba en 768. Un iPhone 14/15 en horizontal mide
+    // 844x390, así que caía en el hueco: full-width y expandido, con ~200px de
+    // alto sobre un viewport de 390 y sin forma de cerrarlo. El corte tiene que
+    // coincidir con el del layout.
+    var isMobile = window.innerWidth <= 900;
     var wasMobile = summary.getAttribute('data-mobile-viewport') === 'true';
     if (isMobile && !wasMobile) summary.classList.add('minimized');
     if (!isMobile) summary.classList.remove('minimized');
@@ -1850,6 +1938,52 @@
     detailState.parts.comidas = Math.round((detailState.foodPerDay || 0) * nights * pax);
     detailState.parts.local = Math.round((detailState.localPerDay || 0) * nights * pax);
   }
+  /* ---------- pintado pesado, coalescido por frame ----------
+     recalcularTotalViaje() se llama desde muchos lugares, y dos de ellos son
+     listeners de 'input' sin throttle (el slider de estadía dividida y los
+     campos de monto diario). Un 'input' en un range dispara a la tasa de
+     refresco, así que cada gesto producia ~60 recalculos por segundo, y cada
+     uno reparseaba dos innerHTML completos (el desglose y el panel "Mi Viaje")
+     más un querySelectorAll sobre todo el documento.
+
+     Los totales chicos (el número grande, las filas del desglose) se siguen
+     actualizando de forma síncrona: son asignaciones de un textContent y no
+     cuestan nada. Lo caro — los dos innerHTML — se agrupa: si dentro del mismo
+     frame llegan 12 recálculos, se pinta una sola vez al final. */
+  var heavyPaintQueued = false;
+  function queueHeavyRepaint() {
+    if (heavyPaintQueued) return;
+    heavyPaintQueued = true;
+    var done = false;
+    var run = function () {
+      if (done) return;
+      done = true;
+      heavyPaintQueued = false;
+      // Si en el frame de espera se desarmó la vista de detalle (el usuario
+      // volvió a las propuestas), no hay nada que pintar.
+      var view = $('#vista-detalle');
+      if (!detailState || (view && view.classList.contains('oculto'))) return;
+      var breakdown = document.querySelector('[data-proposal-breakdown]');
+      if (breakdown) breakdown.innerHTML = proposalBreakdownHead() + proposalBreakdownContent(detailState);
+      renderTripSummary();
+      // El panel "Mi Viaje" y el desglose se repintan en cada recálculo: es el
+      // momento natural para volver a resolver qué filas pueden saltar, porque
+      // las secciones destino acaban de cambiar (modo de transporte, hoteles,
+      // presupuesto diario). Ahora corre una vez por frame, en vez de anidado
+      // dentro de renderTripSummary(), que además lo llamaba dos veces por
+      // recálculo.
+      syncBudgetJumpTargets();
+    };
+    // rAF para no pintar fuera de ciclo, Y un setTimeout como red de seguridad.
+    // rAF NO se dispara en una pestaña en segundo plano (el navegador no
+    // pinta), y ese es justo el caso de esta app: la persona abre la propuesta
+    // y se va a WhatsApp a comparar precios, con la pestaña detrás. Con solo
+    // rAF el panel "Mi Viaje" y el desglose se quedaban sin pintar hasta que
+    // volviera a la pestaña. Con cualquiera de los dos que dispare primero,
+    // pasa; el flag `done` hace que el segundo sea no-op.
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
+    window.setTimeout(run, 50);
+  }
   function recalcularTotalViaje() {
     if (!detailState) return;
     syncDailyBudgetState();
@@ -1870,11 +2004,7 @@
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
-    var breakdown = document.querySelector('[data-proposal-breakdown]');
-    // Mismo encabezado que proposalBreakdownMarkup: si solo se re-renderiza el
-    // contenido, el selector de moneda se pierde al primer clic en una categoría.
-    if (breakdown) breakdown.innerHTML = proposalBreakdownHead() + proposalBreakdownContent(detailState);
-    renderTripSummary();
+    queueHeavyRepaint();
   }
   function getSelectedFlightOffer() {
     if (!detailState) return null;
@@ -2077,12 +2207,22 @@
     if (detailState.roadtripVehicleType === 'ev') return roadtripEvFigures(detailState.roadtrip, detailState.roadtripEv || {}).totalUsd;
     return Number(detailState.roadtrip.totalUsd) || 0;
   }
-  function actualizarTransporte(autoEnabled) {
+  // Parte de estado de actualizarTransporte, sin DOM. Existe separada para que
+  // showProposalView() pueda fijar el estado ANTES de construir el markup: antes
+  // construía el flow una vez, lo metía en el innerHTML, y enseguida lo
+  // sobreescribía con un segundo transportFlow() idéntico. Ese segundo parseo
+  // además se llevaba por delante el prompt .flight-results (lo que el usuario
+  // iba a tocar) y reseteaba data-flight-step y data-flight-requested.
+  function syncTransportState(autoEnabled) {
     if (!detailState) return;
     detailState.transportMode = autoEnabled ? 'auto' : 'flight';
     detailState.auto = autoEnabled ? currentRoadtripTotal() : 0;
     detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
     detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados + (detailState.multiStay ? Number(detailState.multiStay.transferBetweenUsd) || 0 : 0);
+  }
+  function actualizarTransporte(autoEnabled) {
+    if (!detailState) return;
+    syncTransportState(autoEnabled);
     var flow = document.querySelector('[data-transport-flow]');
     if (flow) {
       // Reemplazar, en vez de ocultar, evita que controles de vuelos o transfers
@@ -2548,7 +2688,14 @@
     }
     return detailState.flightSelection;
   }
-  function renderFlightOffers(el, data, budget) {
+  // `expectedMeta` y `requestId` los pasa searchFlights y sirven para descartar
+  // una respuesta que ya no corresponde a la propuesta abierta. El camino de
+  // los filtros los omite a propósito: ahí la respuesta es el estado local.
+  function flightResponseIsCurrent(requestId, expectedMeta) {
+    return requestId === flightRequestId && !!detailState && detailState.meta === expectedMeta;
+  }
+  function renderFlightOffers(el, data, budget, expectedMeta, requestId) {
+    if (expectedMeta && !flightResponseIsCurrent(requestId, expectedMeta)) return;
     data = data && typeof data === 'object' ? data : {};
     var style = (detailState && detailState.meta && detailState.meta.style) || data.style || S.style || 'eq';
     var offers = filterFlightOffersByCabin((Array.isArray(data.offers) ? data.offers : []).filter(isCarrascoOffer), style, data.cabin_class);
@@ -2582,9 +2729,15 @@
       visible = visible.filter(function (offer) { return String(offer.id) === String(state.outboundId); });
     } else if (flightStep === 'outbound') {
       visible = pickTopFlightOffers(visible);
-      // Mientras el usuario no confirmó un itinerario, el presupuesto ya refleja
-      // la tarifa real más barata que Duffel encontró, no una estimación estática.
-      if (state && !state.outboundId && visible.length && visible[0].price_usd !== null) {
+      // Mientras el usuario no confirmó un itinerario, el presupuesto refleja
+      // la tarifa más barata que Duffel encontró, no una estimación estática.
+      //
+      // Solo la PRIMERA vez que llegan las ofertas. Antes se recalculaba en
+      // cada repintado, y el camino de los filtros vuelve a pintar la lista:
+      // marcar "2+ escalas" (peor tarifa) hacía subir el total solo, y
+      // "Directos" lo bajaba. Un control de filtro no puede cambiar el precio.
+      if (state && !state.outboundId && !detailState.flightAutoPriced && visible.length && visible[0].price_usd !== null) {
+        detailState.flightAutoPriced = true;
         actualizarPasajes(section, Number(visible[0].price_usd), visible[0].airline);
       }
     }
@@ -2639,8 +2792,15 @@
     var budget = 0;
     if (!box || section.getAttribute('data-flight-requested') === '1') return;
     section.setAttribute('data-flight-requested', '1');
+    // Identidad de esta búsqueda: si el usuario abre otra propuesta mientras
+    // Duffel responde, la respuesta vieja se descarta en vez de pisar el
+    // presupuesto de la nueva. Se aborta además la petición en vuelo para no
+    // gastar cuota de un resultado que nadie va a ver.
+    var requestId = ++flightRequestId;
+    if (flightController) { try { flightController.abort(); } catch (e) { } }
     box.innerHTML = '<div class="flight-skeleton" aria-label="Buscando vuelos" role="status"><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div><div class="skeleton-box tall"></div><span class="sr-only">Buscando tarifas actuales…</span></div>';
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
+    flightController = controller;
     var timeout = window.setTimeout(function () { if (controller) controller.abort(); }, 20000);
     fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: meta.origin || S.origin || 'MVD', destino: meta.dest.key, fecha_ida: meta.dep, fecha_vuelta: meta.ret, pasajeros: meta.pax, style: meta.style || S.style || 'eq' }), signal: controller ? controller.signal : undefined })
       .then(async function (response) {
@@ -2651,9 +2811,14 @@
           try { data = JSON.parse(text); } catch (e) { data = { offers: [], error: 'La API devolvió una respuesta inválida.' }; }
         }
         if (!response.ok && !data.error) data.error = 'No pudimos consultar vuelos ahora. Probá de nuevo en unos minutos.';
-        renderFlightOffers(box, data, budget);
+        renderFlightOffers(box, data, budget, meta, requestId);
       })
-      .catch(function (e) { window.clearTimeout(timeout); section.removeAttribute('data-flight-requested'); box.innerHTML = '<div class="flight-empty"><p>' + esc(e && e.name === 'AbortError' ? 'La búsqueda está tardando más de lo esperado. Podés volver a intentarlo.' : e && e.message || 'No pudimos buscar vuelos ahora.') + '</p><button type="button" class="btn btn-secondary" data-retry-flight-search>Intentar de nuevo</button></div>'; });
+      .catch(function (e) {
+        window.clearTimeout(timeout);
+        if (requestId !== flightRequestId) return;
+        section.removeAttribute('data-flight-requested');
+        box.innerHTML = '<div class="flight-empty"><p>' + esc(e && e.name === 'AbortError' ? 'La búsqueda está tardando más de lo esperado. Podés volver a intentarlo.' : e && e.message || 'No pudimos buscar vuelos ahora.') + '</p><button type="button" class="btn btn-secondary" data-retry-flight-search>Intentar de nuevo</button></div>';
+      });
   }
   function persistSelectedOffer(button) {
     if (!button || !detailState) return null;
@@ -2796,7 +2961,9 @@
   }
   function srcTag(p, cat, live) {
     if (!live) return '';
-    return p.sources[cat] === 'real' ? '<span class="src real">real</span>' : '<span class="src">estimado</span>';
+    // Solo `pasajes` puede llegar como 'real' (ver lib/model.js). El resto de
+    // categorias son estimaciones propias y se muestran como tales.
+    return p && p.sources && p.sources[cat] === 'real' ? '<span class="src real">real</span>' : '<span class="src">estimado</span>';
   }
   function costNote(cat, meta, p) {
     var city = esc(meta.dest.name);
@@ -2818,7 +2985,7 @@
     var text = {
       pasajes: 'Tarifa aérea en tiempo real.',
       alojamiento: 'Estimación oficial para estadía en ' + city + '.',
-      comidas: 'Basado en precios reales de mercado y gastronomía local.',
+      comidas: 'Valor de referencia para comer y beber en ' + city + '.',
       local: localNotes[String(meta && meta.dest && meta.dest.key ? meta.dest.key.toLowerCase() : '')] || localNotes.default,
       traslados: 'Servicio oficial Aeropuerto ⇄ Hotel.',
       auto: 'Combustible y peajes de la ruta ida y vuelta.'
@@ -2890,6 +3057,22 @@
     var list = normalizeLocalTransportInList(data);
     var rec = byId(list, S.proposalId) || byId(list, data.recId);
     if (!rec && list.length) rec = list[0];
+    // Sin propuestas no hay nada que pintar. Antes seguia adelante con `rec`
+    // en undefined y reventaba mas abajo en `data.tips.length`,
+    // `data.series.forEach` o `p.sources.pasajes`; ese throw caia en el catch
+    // generico de run(), que muestra "No pudimos calcular ahora", o sea que
+    // "no hay propuestas para estas fechas" se le comunicaba al usuario como
+    // falla del servidor. Reintentaba, cobraba el mismo mensaje y se iba.
+    if (!rec) {
+      notice('No encontramos propuestas para estas fechas. Probá otras fechas o subí un poco el presupuesto.');
+      if (pendingDestinationScroll) scrollToDestinationResults();
+      return;
+    }
+    // Respuestas parciales: el servidor puede mandar la lista sin tips, sin
+    // series o sin sources y la vista tiene que aguantarlo igual.
+    if (!Array.isArray(data.tips)) data.tips = [];
+    if (!Array.isArray(data.series)) data.series = [];
+    if (!rec.sources) rec.sources = {};
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
     var cheapest = byId(list, data.cheapestId), cozy = byId(list, data.cozyId);
 
@@ -2906,8 +3089,14 @@
     cargarCreditosFotos().then(function () {
       var lista = document.querySelector('[data-foot-credits-list]');
       if (!lista) return;
+      // El DOM se serializaba UNA VEZ POR CREDITO: documentElement.innerHTML
+      // fuerza un recorrido completo de nodos, atributos y src de cada <img> de
+      // la página, y FOTO_CREDITOS tiene 35 entradas. Eran 35 serializaciones
+      // completas por cada render(), y render() corre en cada búsqueda y en
+      // cada cambio de moneda. Ahora se lee una sola vez y se busca en el texto.
+      var htmlPagina = document.documentElement.innerHTML;
       var usadas = Object.keys(FOTO_CREDITOS).filter(function (url) {
-        return document.documentElement.innerHTML.indexOf(url) >= 0;
+        return htmlPagina.indexOf(url) >= 0;
       });
       if (!usadas.length) return;
       lista.innerHTML = usadas.sort().map(function (url) {
@@ -2986,7 +3175,7 @@
       if (p.id === rec.id) tags += '<span class="mini y">Recomendada</span>';
       if (cheapest && p.id === cheapest.id) tags += '<span class="mini">Más barata</span>';
       if (cozy && p.id === cozy.id) tags += '<span class="mini">Más cómoda</span>';
-      if (live && p.sources.pasajes === 'real') tags += '<span class="mini g">Pasaje real</span>';
+      if (live && p.sources && p.sources.pasajes === 'real') tags += '<span class="mini g">Pasaje real</span>';
       tags += p.total <= budget ? '<span class="mini g">Entra en tu presupuesto</span>' : '<span class="mini r">Se pasa por ' + money(p.total - budget) + '</span>';
       var rows = CATS.filter(function (c) { return Number(p.parts[c[0]]) > 0; }).map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + '</b></div>'; }).join('');
       var bodyId = 'opt-desglose-' + index;
@@ -3009,13 +3198,16 @@
     });
     var sameTier = allProposals.filter(function (p) { return p.ti === rec.ti; }).sort(function (a, b) { return a.total - b.total; });
     var opts = sameTier.map(proposalMarkup).join('');
-    h += '<section class="sec"><div class="sec__head"><h2>Todas las propuestas</h2>' + selectorMoneda() + '</div><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.</p><div class="opts">' + opts + '</div></section>';
+    h += '<section class="sec"><div class="sec__head"><h2>Todas las propuestas</h2></div><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.</p><div class="opts">' + opts + '</div></section>';
 
     var el = $('#results');
     el.innerHTML = h;
     var ch = el.querySelector('.chart'), cu = el.querySelector('.bar.cur');
     if (ch && cu) ch.scrollLeft = cu.offsetLeft - ch.clientWidth / 2 + cu.offsetWidth / 2;
     if (pendingDestinationScroll) window.setTimeout(scrollToDestinationResults, 50);
+    // Le avisa a pwa.js que ya hay algo que ver. El prompt de instalación se
+    // pide por intención, no por tiempo: hasta acá no tenía sentido ofrecerlo.
+    try { window.dispatchEvent(new CustomEvent('cuantosale:resultados')); } catch (e) { /* sin CustomEvent */ }
   }
   function scrollToDestinationResults() {
     var results = $('#results');
@@ -3113,7 +3305,7 @@
     var selectedTransportMode = proposal.mode === 'auto' ? 'auto' : proposal.mode === 'bus' ? 'bus' : 'flight';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null, flightAutoPriced: false };
     var nights = Math.max(1, Number(data.meta.nights) || 1);
     var pax = Math.max(1, Number(data.meta.pax) || 1);
     if (data.meta.multiStay && data.meta.multiStay.stays && data.meta.multiStay.stays.length === 2) {
@@ -3125,6 +3317,11 @@
     detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     detailState.localPerDay = Number((Number(detailState.parts.local) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     data.meta.officialTransfer = data.meta.officialTransfer || { pricePerPassenger: 0, amount: 0 };
+    // El estado de transporte se fija acá, antes de construir el markup, para
+    // que el flujo se pinte una sola vez con los valores definitivos. Antes se
+    // armaba, se insertaba y enseguida se sobreescribía con un segundo
+    // transportFlow() de contenido idéntico.
+    if (selectedTransportMode === 'auto' || selectedTransportMode === 'flight') syncTransportState(isRoadtrip);
     var renderSafe = function (fn, fallback) { try { return fn(); } catch (error) { console.error('Error al renderizar detalle', error); return fallback; } };
     var breakdownMarkup = renderSafe(function () { return proposalBreakdownMarkup(detailState); }, '<section class="proposal-breakdown"><h2>Desglose del viaje</h2></section>');
     var dailyBudgetMarkup = renderSafe(function () { return dailyBudgetControls(); }, '');
@@ -3140,22 +3337,45 @@
       '</div></div>';
     updateMultiStayPricing();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
-    if (detailState.transportMode === 'auto' || detailState.transportMode === 'flight') actualizarTransporte(isRoadtrip);
-    else { var groundFlow = document.querySelector('[data-transport-flow]'); if (groundFlow) groundFlow.innerHTML = transportFlow(detailState.meta, detailState.flight, detailState.transportMode); }
-    renderTripSummary();
+    // El estado ya está fijado arriba: acá solo queda reflejar el traslado
+    // oficial y pintar los totales UNA vez. Antes, actualizarTransporte()
+    // re-armaba el flujo y disparaba un segundo renderTripSummary() encima del
+    // primero, y renderTripSummary() se volvía a llamar acá: tres breakdowns y
+    // tres paneles "Mi Viaje" para abrir una propuesta.
+    sincronizarTrasladoOficial();
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (!data.meta.hotelsLoaded) {
-      var loadHotels = function () { loadHotelRecommendations(data.meta, proposal.parts.alojamiento); };
-      if ('requestIdleCallback' in window) window.requestIdleCallback(loadHotels, { timeout: 1200 });
-      else window.setTimeout(loadHotels, 120);
-    }
+    // Hoteles y vuelos no dependen uno del otro, así que van juntos. Antes los
+    // hoteles iban por requestIdleCallback con timeout de 1.2s (que bajo presión
+    // de main thread los difería hasta ese límite) y los vuelos 80ms después por
+    // setTimeout: en la práctica los vuelos salían primero y el usuario veía las
+    // tarifas aereas antes de que los hoteles empezaran siquiera a cargar. El
+    // proposal se armaba en dos fases visibles en vez de una.
     var liveFlightSection = content.querySelector('.flight-search');
+    var pending = [];
+    if (!data.meta.hotelsLoaded) {
+      pending.push(function () { return loadHotelRecommendations(data.meta, proposal.parts.alojamiento); });
+    }
+    // Las actividades de Civitatis van aparte de los hoteles: siyvuelven, la
+    // pantalla ya esta pintada con los tours locales y recien despues se
+    // reemplazan por los reales.
+    if (!data.meta.actividadesCargadas) {
+      pending.push(function () { cargarActividades(data.meta); });
+    }
     if (detailState.transportMode === 'flight' && liveFlightSection) {
-      window.setTimeout(function () {
-        if (detailState && detailState.meta === data.meta) searchFlights(data.meta, liveFlightSection);
-      }, 80);
+      pending.push(function () { return searchFlights(data.meta, liveFlightSection); });
+    }
+    if (pending.length) {
+      if (typeof Promise !== 'undefined' && Promise.allSettled) {
+        // allSettled y no all: que falle un proveedor no debe impedir que el
+        // otro se pinte.
+        Promise.allSettled(pending.map(function (run) {
+          try { return run(); } catch (e) { return Promise.reject(e); }
+        }));
+      } else {
+        pending.forEach(function (run) { try { run(); } catch (e) { /* sin soporte */ } });
+      }
     }
   }
 
@@ -3944,7 +4164,12 @@
           var windowIndex = Number(monthTab.getAttribute('data-feature-month'));
           var window = featuredMonthWindows(6)[windowIndex];
           if (!window) return;
-          loadFeaturedPrices(windowIndex, true);
+          // Sin force: la clave del cache ya incluye la ventana (depIso, retIso,
+          // etc.), así que las entradas son perfectamente reutilizables. Con
+          // force cada clic de pestaña de mes era un /api/destinos-destacados
+          // nuevo: ir y volver entre dos meses N veces costaba N requests donde
+          // alcanzaban con 2.
+          loadFeaturedPrices(windowIndex);
           S.dep = window.depIso; S.ret = window.retIso;
           syncDateRangeFields();
           if (S.dest !== 'todos') { pendingDestinationScroll = true; schedule(); }
@@ -4208,6 +4433,14 @@
         var card = hotelCard || hotelChoice.closest('[data-hotel-option]');
         var hotelInput = card && card.querySelector('[data-hotel-total]');
         if (hotelInput) {
+          // preventDefault NECESARIO ahora que la card entera es un <label>:
+          // sin esto, el click en la imagen o en el nombre hace que el label
+          // reenvíe un segundo click al radio, y ese segundo click volvía a
+          // entrar acá con checked ya en true -> isActive -> deseleccionar. En
+          // la práctica: tocar la card seleccionaba y deseleccionaba en el
+          // mismo gesto. Cancelando la acción por defecto del label, este
+          // handler queda como única fuente de verdad y checked se maneja acá.
+          e.preventDefault();
           var total = Math.round(Number(hotelInput.getAttribute('data-hotel-total')) || 0);
           var isActive = hotelInput.checked && detailState.selectedHotel !== false && detailState.selectedHotelTotal != null && Math.round(Number(detailState.selectedHotelTotal)) === total;
           if (isActive) { hotelInput.checked = false; deseleccionarHotel(); return; }
@@ -4569,4 +4802,6 @@
 
   cargarTasas();
   init();
+
+  window.__cs = { rts: renderTripSummary, qh: queueHeavyRepaint, ds: function(){ return detailState; } };
 })();
