@@ -219,14 +219,21 @@
     ] },
     { id: 'ilhabela', label: 'Ilhabela / Ubatuba / Paraty', image: 'ilhabela', keys: ['ilhabela', 'ubatuba', 'paraty'], subcategories: [
       { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' }, { label: 'Ilhabela', key: 'ilhabela' }
+    ] },
+    { id: 'gramado', label: 'Gramado / Canela', image: 'gram', keys: ['gram', 'canela'], subcategories: [
+      { label: 'Gramado Centro', key: 'gram' }, { label: 'Vale dos Vinhedos', key: 'gram' }, { label: 'Canela', key: 'canela' }
+    ] },
+    { id: 'foz', label: 'Foz de Iguaçu', image: 'igu', keys: ['igu'], subcategories: [
+      { label: 'Cataratas (lado brasileño)', key: 'igu' }, { label: 'Parque das Aves', key: 'igu' }
     ] }
   ];
   var MONTH_DESTINATION_ROTATION = {
     0: ['florianopolis', 'ilhabela'], 1: ['florianopolis', 'ilhabela'],
     2: ['rio', 'buzios'], 3: ['rio', 'buenosaires'], 4: ['nordeste', 'buenosaires'],
-    5: ['nordeste', 'salvador'], 6: ['buenosaires', 'salvador'], 7: ['rio', 'buenosaires'],
-    8: ['rio', 'buzios'], 9: ['rio', 'buzios'], 10: ['nordeste', 'salvador'],
-    11: ['rio', 'nordeste']
+    5: ['nordeste', 'salvador', 'gramado'], 6: ['buenosaires', 'salvador', 'gramado', 'foz'],
+    7: ['rio', 'buenosaires', 'gramado'], 8: ['rio', 'buzios'], 9: ['rio', 'buzios'],
+    10: ['nordeste', 'salvador'],
+    11: ['rio', 'nordeste', 'foz']
   };
   var BRASIL_DEFAULT_COSTS = {
     beach: {

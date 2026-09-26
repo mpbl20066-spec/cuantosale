@@ -37,7 +37,7 @@ const MIME = {
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https://emrldco.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://emrldco.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://emrldco.com https://*.emrldco.com https://*.supabase.co https://*.wikimedia.org; frame-src https://*.supabase.co; base-uri 'none'; form-action 'self'";
 const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
 const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'ilha', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
-const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue']);
+const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue', 'gram', 'igu']);
 // Algunas islas y pueblos pequeÃ±os no estÃ¡n indexados como ciudad en Booking.
 // En esos casos buscamos alojamientos en el municipio de acceso mÃ¡s cercano.
 const HOTEL_NEARBY_DESTINATIONS = {
