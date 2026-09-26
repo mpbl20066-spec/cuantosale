@@ -943,8 +943,9 @@
       return '<span style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
     }).join('');
     var itemsHtml = summaryItems.map(function (item) {
+      // Sólo el ícono: el cuadrado de color repetía la misma información y
+      // ocupaba ancho al lado del texto.
       return '<div class="trip-summary__item">'
-        + '<span class="trip-summary__marker" style="background:var(' + item.color + ')"></span>'
         + categoryIcon(item.cat, item.color)
         + '<div class="trip-summary__meta"><b>' + item.label + '</b><span>' + item.meta + '</span></div>'
         + '<em>' + item.value + '</em>'
