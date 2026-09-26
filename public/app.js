@@ -357,14 +357,23 @@
     var monthOptions = names.map(function (name, index) { return '<option value="' + index + '"' + (index === monthIndex ? ' selected' : '') + '>' + name.charAt(0).toUpperCase() + name.slice(1) + '</option>'; }).join('');
     var cards = groups.map(function (group) {
       var subcategories = monthIndex === 10 && group.id === 'nordeste' ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; }) : group.subcategories;
-      var options = subcategories.map(function (item, index) { return '<option value="' + index + '">' + esc(item.label) + '</option>'; }).join('');
+      // Las zonas van como chips y no como <select>: dentro de una tarjeta de
+      // contenido un desplegable se lee como un formulario.
+      var chips = subcategories.length > 1 ? subcategories.map(function (item, index) {
+        return '<button type="button" class="featured-destination__chip' + (index === 0 ? ' is-active' : '') + '"'
+          + ' data-feature-chip="' + esc(group.id) + '" data-feature-index="' + index + '"'
+          + ' aria-pressed="' + (index === 0 ? 'true' : 'false') + '">' + esc(item.label) + '</button>';
+      }).join('') : '';
       var photo = DEST_PHOTOS[group.image];
-      var cardLabel = monthIndex === 11 && group.id === 'rio' ? 'Río de Janeiro · Réveillon' : group.label;
+      // El grupo puede traer varias zonas pegadas ("Búzios / Arraial do Cabo /
+      // Cabo Frio") y eso parte el título en dos líneas. Las zonas van en los
+      // chips, así que el título queda solo con el destino principal.
+      var mainLabel = String(group.label).split(' / ')[0];
+      var cardLabel = monthIndex === 11 && group.id === 'rio' ? 'Río de Janeiro · Réveillon' : mainLabel;
       return '<article class="featured-destination" data-featured-destination="' + esc(group.id) + '">' +
         (photo ? '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy"></div>' : '') +
-        '<div class="featured-destination__body"><span class="featured-destination__eyebrow">BRASIL · DESTINO DESTACADO</span><h3>' + esc(cardLabel) + '</h3>' +
-        '<label class="sr-only" for="featured-subcategory-' + esc(group.id) + '">Elegí una zona de ' + esc(group.label) + '</label>' +
-        '<select id="featured-subcategory-' + esc(group.id) + '" data-feature-subcategory="' + esc(group.id) + '">' + options + '</select>' +
+        '<div class="featured-destination__body"><h3>' + esc(cardLabel) + '</h3>' +
+        (chips ? '<div class="featured-destination__zones" role="group" aria-label="Zona de ' + esc(group.label) + '">' + chips + '</div>' : '') +
         '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">→</span></button></div></article>';
     }).join('');
     root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">ESCAPADAS PARA CADA TEMPORADA</span><h2 id="destination-highlights-title">Destinos destacados</h2><p>Elegí una zona y te mostramos una propuesta para tu viaje.</p></div><label>Ver destinos para <select data-feature-month aria-label="Simular mes para ver destinos">' + monthOptions + '</select></label></div><div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">‹</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">›</button></div>';
@@ -3045,14 +3054,27 @@
           else carousel.scrollBy({ left: forward ? carousel.clientWidth : -carousel.clientWidth, behavior: 'smooth' });
           return;
         }
+        var chip = event.target.closest('[data-feature-chip]');
+        if (chip) {
+          var chipCard = chip.closest('[data-featured-destination]');
+          if (chipCard) {
+            Array.prototype.forEach.call(chipCard.querySelectorAll('[data-feature-chip]'), function (el) {
+              el.classList.remove('is-active');
+              el.setAttribute('aria-pressed', 'false');
+            });
+            chip.classList.add('is-active');
+            chip.setAttribute('aria-pressed', 'true');
+          }
+          return;
+        }
         var choose = event.target.closest('[data-feature-search]');
         if (!choose) return;
         var group = DESTINATION_GROUPS.filter(function (item) { return item.id === choose.getAttribute('data-feature-search'); })[0];
         var card = choose.closest('[data-featured-destination]');
-        var choice = card && card.querySelector('[data-feature-subcategory]');
+        var activeChip = card && card.querySelector('[data-feature-chip].is-active');
         var availableSubcategories = group && Number($('#destination-highlights [data-feature-month]').value) === 10 && group.id === 'nordeste'
           ? group.subcategories.filter(function (item) { return item.key !== 'ssa'; }) : group && group.subcategories;
-        var subcategory = availableSubcategories && choice && availableSubcategories[Number(choice.value)];
+        var subcategory = availableSubcategories && activeChip && availableSubcategories[Number(activeChip.getAttribute('data-feature-index'))];
         if (subcategory) {
           var selectedMonth = Number($('#destination-highlights [data-feature-month]').value);
           featuredProposalSelection = { monthIndex: selectedMonth, subcategory: subcategory };
