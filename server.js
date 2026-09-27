@@ -379,16 +379,25 @@ function normalizeHotelApiResponse(payload, extra, source) {
   const nights = Math.max(1, Number((extra && extra.nights) || 1));
   return rows.map(function (hotel) {
     const property = hotel.property || hotel;
-    const breakdown = hotel.priceBreakdown || hotel.price_breakdown || {};
-    const composite = hotel.compositePriceBreakdown || {};
+    // El priceBreakdown de Booking viene ANIDADO en `property`, no en la raiz
+    // del hotel. Leyendolo solo en la raiz, `breakdown` quedaba siempre vacio,
+    // `gross` daba 0 y el filtro de `total > 0` se comia los 20 hoteles reales
+    // que llegaban en la respuesta: la API respondia 200 y la app servia
+    // igual los 3 estimados del modelo, sin error y sin aviso.
+    const breakdown = hotel.priceBreakdown || hotel.price_breakdown
+      || property.priceBreakdown || property.price_breakdown || {};
+    const composite = hotel.compositePriceBreakdown || property.compositePriceBreakdown || {};
     const gross = breakdown.grossPrice || breakdown.gross_price || {};
     const compositeGross = composite.grossAmount || composite.gross_amount || {};
-    const nightlyRaw = Number(hotel.price_pn || hotel.perNight || hotel.per_night || 0);
-    const totalCandidates = [gross.value, gross.amount, compositeGross.amount, compositeGross.value, breakdown.totalPrice, hotel.min_total_price, hotel.total_price, hotel.price];
+    const nightlyRaw = Number(hotel.price_pn || hotel.perNight || hotel.per_night || property.price_pn || 0);
+    const totalCandidates = [gross.value, gross.amount, compositeGross.amount, compositeGross.value, breakdown.totalPrice, hotel.min_total_price, hotel.total_price, property.min_total_price, property.total_price, hotel.price];
     const totalRaw = Number(totalCandidates.find(function (value) { return value !== undefined && value !== null && value !== ''; }));
     const hasNightly = Number.isFinite(nightlyRaw) && nightlyRaw > 0;
     const hasTotal = Number.isFinite(totalRaw) && totalRaw > 0;
-    const total = hasTotal ? totalRaw : hasNightly ? nightlyRaw * nights : 0;
+    // Booking manda los precios con toda la precision del float (266.4285714...),
+    // y eso llegaba crudo a la tarjeta. Se redondea a centésimas, que es como
+    // se muestran todos los demás precios de la app.
+    const total = Math.round((hasTotal ? totalRaw : hasNightly ? nightlyRaw * nights : 0) * 100) / 100;
     const rawName = property.name || hotel.hotel_name || hotel.hotelName || hotel.name && (hotel.name.label || hotel.name.en || hotel.name.EN && hotel.name.EN[0] && hotel.name.EN[0].name || hotel.name) || hotel.label || '';
     const name = sanitizeHotelName(rawName);
     const image = bookingPhoto(hotel) || bookingPhoto(property);
@@ -404,7 +413,7 @@ function normalizeHotelApiResponse(payload, extra, source) {
       hotelId: String(hotel.hotel_id || hotel.hotelId || property.hotel_id || property.id || hotel.id || ''),
       image: image,
       total: total,
-      perNight: hasNightly ? nightlyRaw : total / nights,
+      perNight: hasNightly ? Math.round(nightlyRaw * 100) / 100 : Math.round((total / nights) * 100) / 100,
       currency: currency,
       rating: Number(property.reviewScore || property.review_score || hotel.review_score || hotel.rating || 0),
       propertyType: String(property.propertyType || property.property_type || hotel.property_type || hotel.hotel_type || ''),

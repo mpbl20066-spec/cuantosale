@@ -117,8 +117,10 @@ function bookingPhoto(hotel) {
     const prop = x.property || x;
     const foto = bookingPhoto(x) || bookingPhoto(prop);
     if (foto) conFoto++;
-    const noche = Number(x.price_pn || x.perNight || x.per_night || 0);
-    const br = x.priceBreakdown || x.price_breakdown || {};
+    const noche = Number(x.price_pn || x.perNight || x.per_night || prop.price_pn || 0);
+    // priceBreakdown viene anidado en `property`, no en la raiz del hotel: leerlo
+    // solo en la raiz daba total 0 y hacia creer que la API no trae precios.
+    const br = x.priceBreakdown || x.price_breakdown || prop.priceBreakdown || prop.price_breakdown || {};
     const gross = br.grossPrice || br.gross_price || {};
     const total = Number(gross.value || gross.amount || x.min_total_price || x.total_price || x.price || 0);
     console.log('   ' + (i + 1) + ') ' + String(prop.name || x.hotel_name || '?').slice(0, 44));
