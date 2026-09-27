@@ -2792,16 +2792,20 @@
   }
   function flightSummaryCard(offer) {
     function legRow(leg, label) {
-      if (!leg) return '';
+      // Cuando el tramo no viene, se muestra la fila igual saying "no informada".
+      // Omitirla hacía que la tarjeta pareciera de solo ida cuando el precio es
+      // de ida y vuelta, que es justo lo que confundía.
+      if (!leg) {
+        return '<div class="flight-summary-leg is-unknown"><span class="flight-badge">' + esc(label) + '</span>' +
+          '<div class="flight-summary-unknown">Google no informa los horarios de este tramo. ' +
+          'El precio de abajo igual es del viaje completo.</div></div>';
+      }
       return '<div class="flight-summary-leg"><span class="flight-badge">' + esc(label) + '</span>' +
         '<div class="flight-summary-route"><b>' + esc(airportCode(leg.origin)) + '</b><span aria-hidden="true">→</span><b>' + esc(airportCode(leg.destination)) + '</b></div>' +
         '<div class="flight-summary-times"><span>Sale ' + esc(flightTime(leg.departure)) + '</span><span>Llega ' + esc(flightTime(leg.arrival)) + '</span></div></div>';
     }
     var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
     var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
-    // El precio que trae la tarjeta ya es el total de ida y vuelta. El tramo de
-    // vuelta no viene en la respuesta, así que no se muestra una fila que no
-    // existe: la reserva se completa en Google Flights, que sí la muestra.
     var book = offer.book_url
       ? '<a class="btn btn-primary flight-summary-book" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Reservar en Google Flights</a>'
       : '';
@@ -2810,7 +2814,7 @@
       legRow(offer.outbound, 'Ida') + legRow(offer.inbound, 'Vuelta') +
       '<div class="flight-summary-footer"><small>Precio final · Ida y vuelta</small><b>' + price + '</b></div>' +
       '<div class="flight-summary-actions">' + book + '<button type="button" class="btn btn-secondary flight-summary-change" data-change-flight>Elegir otro vuelo</button></div>' +
-      '<p class="flight-summary-note">Precio de Google Flights. La reserva se completa en su sitio, no acá.</p></div>';
+      '<p class="flight-summary-note">Precio de Google Flights para el viaje completo. Google no expone los horarios de vuelta, así que solo mostramos el tramo de ida. La reserva se completa en su sitio, no acá.</p></div>';
   }
   function getFlightSelectionState() {
     if (!detailState) return null;
@@ -2906,7 +2910,7 @@
         ? '<a class="btn btn-secondary flight-buy-link" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver y reservar en Google Flights</a>'
         : '';
       return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + cabinBadge + stageBadge + '</div>' +
-        '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
+        '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div>' + (isRoundTrip ? '<small class="flight-route__note">Horarios de la ida. El precio es del viaje completo.</small>' : '') + '</div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
         '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="No pudimos obtener un precio en USD para esta opción."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'Sin precio en USD')) + '</button>' + bookLink + '</div></article>';
