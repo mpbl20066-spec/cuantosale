@@ -321,132 +321,225 @@ var REGIONES = {
   'pernambuco': {
     resumen: 'Recife y Olinda, Porto de Galinhas y Fernando de Noronha. Cultura, la muela y la muña del nordeste y las mejores playas del estado.',
     beaches: [
-      { name: 'Boa Viagem', zona: 'Recife', vibe: 'La playa urbana de Recife, con los arrecifes de coral al lado. Con movimiento y servicios.', cuando: 'Todo el año.' },
-      { name: 'Porto de Galinhas', zona: 'A 40 km al sur de Recife', vibe: 'La de las pools naturales y las jangadas. Agua tranquila y verde, y la excursión de botes llena la playa.', cuando: 'Todo el año, con oleaje más fuerte en invierno.' }
+      { name: 'Boa Viagem', zona: 'Recife', vibe: 'La playa urbana de Recife, con un reef de coral que frena el oleaje. Tiene movimiento de ciudad y servicios a lo largo de toda la orla.', cuando: 'Todo el año. El agua es más tranquila que en el resto del nordeste gracias al reef.' },
+      { name: 'Porto de Galinhas', zona: 'A 40 km al sur de Recife', vibe: 'El pueblo de las pools naturales. El agua es verde y tranquila, y los botes de jangada salen hacia el arrecife. Es la playa más familiar del estado.', cuando: 'Todo el año. En invierno el oleaje sube y hay días de bandera roja.' },
+      { name: 'Fernando de Noronha', zona: 'Isla, a 350 km de Recife', vibe: 'Una isla protegida con cupos diarios. El agua es tan clara que se ven los peces desde el avión. No es un paseo: es un plan que hay que reservar con semanas.', cuando: 'Todo el año, con los precios más altos entre diciembre y marzo. Hay que reservar el cupo antes de comprar el pasaje.' }
     ],
     comer: [
-      { name: 'Tapioca y cuscuz', tipo: 'Desayuno', zona: 'Recife y Olinda', usd: 4, momento: '7 a 10 h', nota: 'El cuscuz nordestino es un bol de maíz de primera, barato y llena. La tapioca es el desayuno de la calle en todo el nordeste.' },
-      { name: 'Prato feito pernambucano', tipo: 'Almuerzo', zona: 'Recife', usd: 8, momento: 'Mediodía', nota: 'El negocio local, con carne de sol, pescado y acarajé, igual que en el resto de Brasil.' }
+      { name: 'Carne de sol', tipo: 'Almuerzo', zona: 'Recife y el interior', usd: 10, momento: 'Mediodía', nota: 'La carne curada al sol, con queso de leche y harina de mandioca. Es la carne más característica del nordeste. Sale en el mercado de Santo Amaro, en Recife.' },
+      { name: 'Cuscuz', tipo: 'Desayuno', zona: 'Recife y Olinda', usd: 4, momento: '7 a 10 h', nota: 'Un bol de maíz cocido, que se come temprano con queso y aceite. Es barato y llena, y es el desayuno de la calle.' },
+      { name: 'Acarajé de Olinda', tipo: 'Merienda', zona: 'Olinda', usd: 4, momento: 'Tarde', nota: 'El bollo de yuca y camarón de Bahia llega hasta acá, frito y con salsa picante. En las casas del centro histórico de Olinda.' }
     ],
     tips: [
       { titulo: 'Olinda está a 30 minutos y vale el viaje', texto: 'Olinda es colonial, con las casonas pintadas de la iglesia y el frevo en cada esquina, y se recorre casi entera a pie. Es el mejor plan de día desde Recife.' },
       { titulo: 'Fernando de Noronha no es una excursión', texto: 'Es una isla protegida, con cupo diario y tarifas altas. Hay que reservar con semanas de anticipación. Si no reservaste, no vayas: vale, pero como último día y no improvisado.' },
       { titulo: 'Recife es la mejor base', texto: 'La ciudad es el mejor punto de partida para Olinda y Porto de Galinhas. Recife esplanada y con poco que ver caminando, pero el aprendizaje está en la comida y en el movimiento.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Olinda', zona: 'A 30 km de Recife', dur: '1 dia', usd: 0, nota: 'La ciudad colonial con las casonas de colores, las iglesias de barroco y el frevo en la calle. Se recorre entera a pie. Es el mejor plan de día desde Recife.' },
+      { name: 'Centro histórico de Recife', zona: 'Recife', dur: '2 h', usd: 0, nota: 'El centro histórico con las iglesias de piedra caliza y las escaleras del siglo XVII. Y de noche, el maracatu: los tambores no paran hasta el amanecer.' }
+    ],
+    hacer: [
+      { name: 'Paseo en jangada', zona: 'Porto de Galinhas', dur: '2 h', usd: 25, nota: 'La barca que sale del pueblo hasta el arrecife, con guía y equipo. Es lo que hace famoso el lugar: se ve el coral desde arriba y se nadan las pozas.' }
+    ],
   },
 
   'ceara': {
     resumen: 'Fortaleza y Jericoacoara. Dunas, lagunas y la costa más ventosa del Brasil.',
     beaches: [
-      { name: 'Praia do Futuro', zona: 'Fortaleza', vibe: 'La playa urbana más larga: 4 km de arena y movimiento. Donde va la ciudad los fines de semana.', cuando: 'Todo el año. En la desembocadura del Mucuripe hay corriente: no se nada ahí.' }
+      { name: 'Praia do Futuro', zona: 'Fortaleza', vibe: 'La playa urbana de la capital: cuatro kilómetros de arena, con barra y movimiento los fines de semana. Es playa de ciudad, no de balneario.', cuando: 'Todo el año. En la desembocadura del Mucuripe hay corriente de aire: no se nada ahí.' },
+      { name: 'Jericoacoara', zona: 'A 500 km de Fortaleza, en el extremo del estado', vibe: 'El pueblo de las lagunas y las dunas. La Laguna do Jeri se llena con la marea y la duna se sube a caballo o en buggy. Es la playa más famosa del nordeste y no se parece a ninguna otra.', cuando: 'Todo el año, con temporada fuerte de junio a enero. Con poco viento las dunas se pueden subir a caballo; con mucho viento, no.' },
+      { name: 'Canoa', zona: 'Entre Fortaleza y Jericoacoara', vibe: 'El pueblo de las redes de pesca tiradas sobre la arena, con las barcas de los pescadores tiradas en la calle. Es la parada más tranquila del recorrido.', cuando: 'Todo el año. Es la que se elige cuando Jericoacoara queda de lado.' }
     ],
     comer: [
-      { name: 'Carne de sol', tipo: 'Almuerzo', zona: 'Fortaleza y el interior', usd: 12, momento: 'Mediodía', nota: 'La carne curada al sol que se come en todo el estado, servida con queso de leche y tapioca. Es la carne más característica de Ceará y sale en el mercado central.' },      { name: 'Camarao', tipo: 'Almuerzo', zona: 'Puerto', usd: 10, momento: 'Mediodía', nota: 'La pesca de Ceará es fuerte, así que el camarão sale barato. En el mercado del puerto, no en la orla.' }
+      { name: 'Carne de sol', tipo: 'Almuerzo', zona: 'Fortaleza y el interior', usd: 10, momento: 'Mediodía', nota: 'La carne curada al sol de Ceará, que se come con queso de leche y pasta de caña. Es la carne más característica del estado y sale en el mercado central.' },
+      { name: 'Peixe frito', tipo: 'Almuerzo', zona: 'Puerto de Fortaleza', usd: 11, momento: 'Mediodía', nota: 'El pescado frito con chambinho, que se compra en el mercado del puerto y se come ahí mismo. La pesca del estado es fuerte, así que sale barato.' },
+      { name: 'Cuscuz', tipo: 'Desayuno', zona: 'Fortaleza y Jericoacoara', usd: 4, momento: '7 a 10 h', nota: 'El bol de maíz cocido, con queso y aceite. Es el desayuno de la calle en todo el nordeste.' }
     ],
     tips: [
       { titulo: 'Fortaleza es la base, no el destino', texto: 'Fortaleza es ciudad y playa urbana. Si viniste por las dunas y las lagunas, basate cerca de Jericoacoara o en la costa, no en la capital.' },
       { titulo: 'El viento hay que planificarlo', texto: 'El kitesurf y el windsurf son el fuerte de la costa. Si no te interesan, anda en los momentos de poco viento. Y con el doble de protector solar: aquí el sol pega más fuerte.' },
       { titulo: 'Jericoacoara necesita tiempo', texto: 'La laguna, las dunas y el pueblo se recorren a caballo o en buggy por la arena. No se puede en auto normal hasta casi la orilla. Reserve el paseo al llegar.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Centro histórico de Fortaleza', zona: 'Fortaleza', dur: '2 h', usd: 0, nota: 'El centro con los teatros de piedra, la Plaza da República y el Museu da Cachaça. Se camina entero y no hay que pagar entrada.' },
+      { name: 'Dunas de Jericoacoara', zona: 'Jericoacoara', dur: '3 h', usd: 35, nota: 'El paseo en buggy por las dunas hasta la laguna, con un guía que baja a la laguna. Es la actividad que define el lugar y hay que reservarla al llegar.' }
+    ],
+    hacer: [
+      { name: 'Paseo en buggy por las dunas', zona: 'Jericoacoara', dur: '3 h', usd: 35, nota: 'Es la forma de llegar a la laguna, porque en auto normal no se pasa. Hay que reservar el paseo el día anterior, y va con guía.' }
+    ],
   },
 
   'sao-paulo': {
     resumen: 'La ciudad más grande del país, con la mejor comida de calle de América del sur. No es un destino de playa.',
     beaches: [],
     comer: [
-      { name: 'Lanche completo (PF)', tipo: 'Almuerzo', zona: 'Centro y barrios', usd: 8, momento: 'Mediodía hasta las 15 h', nota: 'São Paulo llama “lanches” a lo que en Río es un prato feito: sandwich, papas y bebida por menos de lo que cuesta un café. Es la comida más barata de la ciudad.' },
-      { name: 'Feira livre', tipo: 'Compra', zona: 'Cambia por barrio y por día', usd: 5, momento: 'Sábado a la mañana', nota: 'Cada barrio tiene su feira en un día fijo de la semana. Averiguá cuál es el tuyo antes de salir, y llevá fruta, pan de queso y comida ya hecha.' }
+      { name: 'Prato feito paulista', tipo: 'Almuerzo', zona: 'Sao Paulo y Ubatuba', usd: 8, momento: 'Mediodía hasta las 15 h', nota: 'El plato hecho del día con arroz, feijão, carne, ensalada y postre. En la ciudad lo llaman lanche, y en la costa prato feito.' },
+      { name: 'Camarão de Ubatuba', tipo: 'Almuerzo', zona: 'Ubatuba', usd: 13, momento: 'Mediodía', nota: 'El camarón a la plancha o al vapor, con aceite y limón. La pesca de la costa norte es fuerte, así que sale barato.' }
     ],
     tips: [
       { titulo: 'São Paulo no es un plan de playa', texto: 'Si elegiste São Paulo, no vas a una playa: vas a comer la mejor comida de Brasil y a ver la ciudad. El metro es enorme, rápido y barato, y te ahorra el taxi siempre.' },
       { titulo: 'La mejor cocina del país está aca', texto: 'São Paulo tiene la mayor densidad de restaurantes de alta cocina de América Latina, y a precios que en Europa serían un menú de tres platos.' }
-    ]
+    ],
+    beaches: [
+      { name: 'Ilhabela', zona: 'Litoral norte, a 2 h de Sao Paulo', vibe: 'La isla sin construccion. Casi toda es parque nacional: son senderos entre selva y agua. Se recorre a pie o en barco.', cuando: 'Todo el año, con temporada de diciembre a marzo. En enero y febrero se llena.' },
+      { name: 'Ubatuba', zona: 'Litoral norte, a 3 h de Sao Paulo', vibe: 'La costa con la menor cantidad de gente del estado. Son kilómetros de playa con agua verde, bosque hasta la arena y pocos hoteles.', cuando: 'Todo el año. De mayo a septiembre hay viento, y es cuando funciona el kitesurf.' }
+    ],
+    atracciones: [
+      { name: 'Ilha Bela', zona: 'Ilhabela', dur: '1 dia', usd: 0, nota: 'La isla que da nombre a la región, con los senderos de playa y las mejores fotos del litoral norte. Es la caminata de un día entero.' },
+      { name: 'Parque Estadual de Ubatuba', zona: 'Ubatuba', dur: '3 h', usd: 0, nota: 'El parque que va desde la playa hasta la selva alta. Se recorre a pie, con el bosque pegado a la arena. Gratis.' }
+    ],
+    hacer: [
+      { name: 'Barco a Ilha Bela', zona: 'Ilhabela', dur: '1 dia', usd: 45, nota: 'El barco desde Sao Sebastião hasta la isla, con tiempo para la caminata. Es el mejor plan de un día del litoral norte.' }
+    ],
   },
 
   'alagoas': {
     resumen: 'Maceió y Maragogi. El litoral de playas de coral, con los precios más bajos del nordeste.',
     beaches: [
-      { name: 'Pajuçara y Jatiúca', zona: 'Maceió', vibe: 'Las dos playas de la ciudad. Jatiúca tiene la arena más blanca y mejor equipada; Pajuçara, más movimiento.', cuando: 'Todo el año.' }
+      { name: 'Pajuçara', zona: 'Maceió', vibe: 'La playa del centro de Maceió, con la iglesia de arriba mirándola y un movimiento de ciudad. El agua tiene coral abajo y se ve.', cuando: 'Todo el año. Los domingos se llena de gente de la ciudad.' },
+      { name: 'Jatiúca', zona: 'Maceió', vibe: 'La playa mejor armada de la ciudad, con quiosco, tablero y arbolado. La arena es más blanca y el agua más turbia que en Pajuçara.', cuando: 'Todo el año. Es la más cómoda para un día de playa con familia.' },
+      { name: 'Maragogi', zona: 'A 2 h de Maceió', vibe: 'El pueblo de las lagunas y las pozas. El agua es muy tranquila y verde, y se llega nadando a las pozas entre los corales. Es la playa más tranquila del nordeste.', cuando: 'Todo el año. Con marea baja las pozas quedan al aire y son el mejor momento para nadar.' }
     ],
     comer: [
-      { name: 'Prato feito alagoano', tipo: 'Almuerzo', zona: 'Maceió', usd: 7, momento: 'Mediodía', nota: 'El más barato del nordeste: carne de sol, cuscuz y mariscos frescos a precios de ciudad chica.' }
+      { name: 'Prato feito alagoano', tipo: 'Almuerzo', zona: 'Maceió', usd: 7, momento: 'Mediodía', nota: 'El plato hecho con carne de sol, cassoulet y mariscos frescos. Es el más barato del nordeste, con precios de ciudad chica.' },
+      { name: 'Cuscuz', tipo: 'Desayuno', zona: 'Maceió y Maragogi', usd: 4, momento: '7 a 10 h', nota: 'El bol de maíz cocido con queso y aceite. Barato, llena, y el desayuno de la calle en todo el nordeste.' },
+      { name: 'Tapioca', tipo: 'Desayuno', zona: 'Maceió', usd: 4, momento: '7 a 10 h', nota: 'La masa de tapioca hecha en el momento, con queijo coalho, mantega y carne. Es lo más típico de la zona.' }
     ],
     tips: [
       { titulo: 'Maragogi tiene el agua más limpia', texto: 'Sus lagunas naturales son lo mejor del nordeste. Está a 2 horas de Maceió, así que basate en Maceió o comprá un pasaje con tiempo.' },
       { titulo: 'Es la parada barata del circuito', texto: 'La comida y la playa son baratas de verdad, pero en la temporada de feriados los precios se disparan igual que en todo el nordeste.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Praia de São Miguel dos Milagres', zona: 'Entre Maragogi y Porto Calvo', dur: '2 h', usd: 0, nota: 'La playa que le da nombre a las canoneras del sur: un brazo de mar sin oleaje y con el agua tan quieta que parece pileta. Se llega por la estrada.' },
+      { name: 'Mercado de Maceió', zona: 'Centro de Maceió', dur: '1 h', usd: 5, nota: 'El mercado de artesanía y comida con la producción de la región. Los soaps y las piezas de artesanía salen más baratos que en las tiendas.' }
+    ],
+    hacer: [
+      { name: 'Paseo a las pozas de Maragogi', zona: 'Maragogi', dur: '2 h', usd: 20, nota: 'La lancha que sale del pueblo a las pozas entre los corales, con guía. Es lo que hace famoso el lugar: nadar en agua quieta y verde.' }
+    ],
   },
 
   'rio-grande-do-norte': {
     resumen: 'Natal, Pipa y la costa. Natal es la ciudad-playa de siempre; Pipa es la del backpacker y la de la noche.',
     beaches: [
-      { name: 'Ponta Negra y el Morro do Careca', zona: 'Natal', vibe: 'La playa con el icono de la ciudad: un morro de arena con mirador al final y la puesta de sol más famosa de Natal.', cuando: 'Todo el año.' },
-      { name: 'Pipa', zona: 'A 80 km al sur de Natal', vibe: 'La capital del backpacker con la noche más intensa de la costa. Playa, gente y barra hasta la madrugada.', cuando: 'Todo el año, con la mayor actividad de diciembre a marzo.' }
+      { name: 'Ponta Negra', zona: 'Natal', vibe: 'La playa con el morro de arena al final, que tiene un mirador con la mejor puesta de sol de la ciudad. Es la orla de Natal: con barra y movimiento.', cuando: 'Todo el año. En la punta del morro hay un faro y un chiringuito.' },
+      { name: 'Morro do Careca', zona: 'Natal', vibe: 'El morro de arena más famoso de la costa, con el mirador de la Duna. Se sube en menos de diez minutos.', cuando: 'Todo el año. El mirador cierra cuando hay lluvia, así que conviene ir de mañana.' },
+      { name: 'Pipa', zona: 'A 80 km al sur de Natal', vibe: 'El pueblo de la noche. Playa de mar abierto con la barra al lado, y de noche una calle de bares con música que no baja hasta la madrugada.', cuando: 'Todo el año, con la mayor actividad de diciembre a marzo. En julio y agosto está vacío y barato.' }
     ],
     comer: [
-      { name: 'Prato feito potiguar', tipo: 'Almuerzo', zona: 'Natal y Pipa', usd: 7, momento: 'Mediodía', nota: 'El negocio local: carne, feijão, cuscuz y queso. En Pipa los restaurantes de la calle suben el precio por la movida del barrio.' }
+      { name: 'Prato feito potiguar', tipo: 'Almuerzo', zona: 'Natal y Pipa', usd: 7, momento: 'Mediodía', nota: 'El plato hecho con carne, cuscuz, feijão y queijo. En Pipa los restaurantes de la calle suben el precio por la movida del barrio.' },
+      { name: 'Camarão na chapa', tipo: 'Cena', zona: 'Pipa', usd: 14, momento: 'Noche', nota: 'El camarón a la plancha con ajo y limón, que se come en la playa o en un simple kiosco. Es la cena de Pipa.' }
     ],
     tips: [
       { titulo: 'Natal y Pipa son dos viajes distintos', texto: 'Natal es ciudad grande, con playa y vida urbana normal. Pipa es pueblo chico, con la movida nocturna. No intentes hacer las dos en el mismo día sin auto.' },
       { titulo: 'El kitesurf vive acá', texto: 'La costa de Rio Grande do Norte está entre las mejores del mundo para kitesurf. El viento pega fuerte entre mayo y septiembre.' },
       { titulo: 'Ponta Negra de noche no es de noche', texto: 'La calle de shops y bares de la playa se llena a partir de las 22 h y no baja nunca. Si querés cenar tranquilo, no ahí: a unas cuadras adentro, en el centro.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Mirante da Duna', zona: 'Natal', dur: '1 h', usd: 0, nota: 'La escalera de madera que sube al Morro do Careca, con el punto más alto de la duna. Gratis, y es la mejor foto de Natal.' },
+      { name: 'Mirante da Praia do Amor', zona: 'Pipa', dur: '1 h', usd: 3, nota: 'El mirador de la punta de Pipa, sobre la playa más chica. Se ve toda la costa y es el atardecer del pueblo.' }
+    ],
+    hacer: [
+      { name: 'Paseo en buggy por las dunas', zona: 'Natal', dur: '3 h', usd: 30, nota: 'El buggy que recorre las dunas de Genipabu y Praia do Dreams, con parada para nadar. Se reserva el día anterior, en la ciudad.' }
+    ],
   },
 
   'parana': {
     resumen: 'Foz de Iguazú y Curitiba. Las cataratas más grandes del mundo y la ciudad más verde del Brasil.',
     beaches: [],
     comer: [
-      { name: 'Prato feito en Foz', tipo: 'Almuerzo', zona: 'Foz', usd: 8, momento: 'Mediodía', nota: 'La ciudad más barata del circuito, porque no es destino de playa sino de naturaleza. Comida simple y abundante.' }
+      { name: 'Barbecue de Foz', tipo: 'Almuerzo', zona: 'Foz de Iguaçu', usd: 11, momento: 'Almuerzo y cena', nota: 'La carne a la parrilla que se come en el sur de Brazil, con mani y farofa. Foz tiene un montón de casas de rodizio con esa carne.' },
+      { name: 'Pão de queijo de Curitiba', tipo: 'Merienda', zona: 'Curitiba', usd: 3, momento: 'Toda la tarde', nota: 'El pan de queso de sabor real, recién hecho. Sale de cualquier panadería de la calle y es mejor que el congelado.' }
     ],
     tips: [
       { titulo: 'Las cataratas no se ven de un solo lado', texto: 'Un lado son las cataratas y el otro el Parque de las Aves. El ticket único cubre los dos, y un día entero es el mínimo para verlos sin correr.' },
       { titulo: 'Iguazú no es Curitiba', texto: 'Están a 4 horas en el mismo estado. No se ven las cataratas y la ciudad el mismo día sin madrugar mucho.' },
       { titulo: 'Foz no es una ciudad bonita', texto: 'Es una ciudad de tránsito, con malls y una avenida larga. No esperes charm. Lo único que justifica la parada es pasar a las cataratas.' }
-    ]
+    ],
+    beaches: [
+    ],
+    atracciones: [
+      { name: 'Cataratas do Iguaçu', zona: 'Foz de Iguaçu', dur: '1 dia', usd: 0, nota: 'Las cataratas más grandes del país, con 275 saltos. El ticket cubre el lado argentino y el Parque das Aves, que tiene el nido de la guacamaya azul. El paseo en tren hasta la base es obligatorio.' },
+      { name: 'Parque das Aves', zona: 'Foz de Iguaçu', dur: '3 h', usd: 0, nota: 'El parque de aves exóticas de América Latina, con el nido de la guacamaya azul y el corre de las avestruces. Va pegado a las cataratas y se hace en el mismo día.' },
+      { name: 'Jardim Botânico de Curitiba', zona: 'Curitiba', dur: '2 h', usd: 0, nota: 'El jardín con la estufa de cristal, que es la estufa más grande del país. Está en el centro y se recorre a pie.' }
+    ],
+    hacer: [
+      { name: 'Tren hasta la base de las cataratas', zona: 'Foz de Iguaçu', dur: '2 h', usd: 8, nota: 'El tren que va hasta el mirador. Es incluido en el ticket y es la única forma de llegar a la base sin caminar dos horas.' }
+    ],
   },
 
   'paraiba': {
     resumen: 'João Pessoa y la costa. El balneario más barato del nordeste, con la pared de coral más famosa del país.',
     beaches: [
-      { name: 'Praia do Tambaba', zona: 'João Pessoa', vibe: 'La playa de las paredes de coral: un acantilado de color a diez metros de la arena. Es la foto del estado y casi nunca hay gente.', cuando: 'Todo el año. Con marea baja el agua baja y el coral queda al descubierto.' },
-      { name: 'Bica do Roque', zona: 'Centro de João Pessoa', vibe: 'La playa del centro, con un faro y el mejor atardecer de la costa. Tranquila y larga.', cuando: 'Todo el año, y de las pocas con puesta de sol sobre el mar en el nordeste.' }
+      { name: 'Praia da Penha', zona: 'João Pessoa', vibe: 'La playa con el acantilado de piedra caliza en la punta, que aparece en todas las fotos. El mar es abierto y hay tabla sobre las rocas.', cuando: 'Todo el año. Con marea baja la punta de la Penha se puede caminar y está llena de gente.' },
+      { name: 'Bica do Roque', zona: 'Centro de João Pessoa', vibe: 'La playa del centro, con el faro al final. Es la que se ve desde el hotel, y tiene puesta de sol sobre el mar.', cuando: 'Todo el año. Es la más tranquila de las tres y la más cómoda para ir a diario.' },
+      { name: 'Praia do Amor', zona: 'A 20 km de João Pessoa', vibe: 'La playa con la quebra de agua que forma un corazón cuando la marea está baja. Está llena de gente y muchas familias.', cuando: 'Todo el año. La forma del corazón se ve con la marea baja, al atardecer.' }
     ],
     comer: [
-      { name: 'Bolo de rolo', tipo: 'Postre', zona: 'Centro de João Pessoa', usd: 4, momento: 'Cualquier hora', nota: 'La torta de rollo es de Coremas, en el interior del estado, y llega a João Pessoa entera en fila. Se come fría, con queso de leche y un café con ella. Es el postre que identifica a Paraíba.' },
-      { name: 'Prato feito paraibano', tipo: 'Almuerzo', zona: 'Centro y barrios', usd: 7, momento: 'Mediodía', nota: 'El negocio local, con carne de cozimento (que se hierve en vez de secarse al sol, al contrario que en Ceará) y pastel de harina. Muy barato.' }
+      { name: 'Bolo de rolo', tipo: 'Postre', zona: 'João Pessoa', usd: 4, momento: 'Cualquier hora', nota: 'La torta de rollo con queso de leche por dentro. Viene fría, en porción, y es el postre que identifica a Paraíba. Se compra en cualquier panadería del centro.' },
+      { name: 'Cozido paraibano', tipo: 'Almuerzo', zona: 'João Pessoa', usd: 9, momento: 'Mediodía', nota: 'La carne hervida con verduras y mandioca, que es la forma de Paraíba de servirla. Sale más barato que la carne de sol y es igual de típica.' },
+      { name: 'Tapioca', tipo: 'Desayuno', zona: 'João Pessoa', usd: 4, momento: '7 a 10 h', nota: 'La masa de tapioca hecha en el momento, con queso, carne o queijo coalho. Es el desayuno de la calle.' }
     ],
     tips: [
       { titulo: 'Es el nordeste sin los precios del nordeste', texto: 'João Pessoa tiene playa de ciudad, kitesurf de clase mundial y comida de puerto, y es bastante más barata que Recife o Salvador. La infraestructura hotelera todavía es más chico, así que el alojamiento sale barato también.' },
       { titulo: 'El kitesurf vive acá', texto: 'La costa de Paraíba es de las mejores del mundo para kitesurf, con viento constante. La temporada fuerte va de mayo a septiembre, con viento de mar.' },
       { titulo: 'Cachaça de calidad en vez de vino', texto: 'Paraíba tiene su propia producción de cachaça de caña, que se visita y se prueba en un mismo lugar. Es un plan de medio día distinto al de la Serra Gaucha y bastante más barato.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Monumento das Cruzes', zona: 'João Pessoa', dur: '45 min', usd: 0, nota: 'El conjunto de cruces de piedra en lo alto de la Penha, que se ve desde toda la ciudad. Es el punto más viejo de Paraíba. Gratis, y es la mejor vista.' },
+      { name: 'Centro histórico de João Pessoa', zona: 'Centro', dur: '2 h', usd: 0, nota: 'La plaza y la calle de casonas del siglo XIX, con el teatro y la catedral. Se camena en una tarde y no hay que pagar entrada.' }
+    ],
+    hacer: [
+      { name: 'Paseo en barca por el río Paraíba', zona: 'João Pessoa', dur: '2 h', usd: 20, nota: 'La barca que sale del centro y sube por el río, que es uno de los más anchos de Brasil. Se ve la ciudad desde el agua, y es el mejor paseo.' }
+    ],
   },
 
   'minas-gerais': {
     resumen: 'Belo Horizonte. La ciudad de las torres y la cocina más completa del interior de Brasil. Sin playa y sin naturaleza.',
     beaches: [],
     comer: [
-      { name: 'Prato feito mineiro', tipo: 'Almuerzo', zona: 'Centro y Savassi', usd: 8, momento: 'Mediodía', nota: 'El más completo de Brasil: plato, legumbre, espagueti, guarana y postre. Es la mejor relación precio-calidad del interior.' }
+      { name: 'Prato feito mineiro', tipo: 'Almuerzo', zona: 'Centro y Savassi', usd: 8, momento: 'Mediodía', nota: 'El más completo de Brazil: plato, legumbre, espagueti, feijão, guarana y postre. Es la mejor relación precio-calidad del interior del pais.' },
+      { name: 'Pão de queijo de Minas', tipo: 'Merienda', zona: 'Toda la ciudad', usd: 3, momento: 'Toda la tarde', nota: 'El pan de queso de la region, con receta propia. La diferencia con el de Sao Paulo es el uso del queso de minas y el sabor ahumado.' },
+      { name: 'Pastel de feijão', tipo: 'Merienda', zona: 'Toda la ciudad', usd: 4, momento: 'Tarde', nota: 'El pastelito de masa de feijão con picadillo de carne, que es la merienda típica de Minas. Se compra en cualquier panaderia.' }
     ],
     tips: [
       { titulo: 'Belo Horizonte no es un destino turístico', texto: 'Es una ciudad de negocios de cinco millones de habitantes. Si no tenés un motivo claro, la ciudad no tiene nada que ofrecer. Pero es muy barata y se come muy bien.' },
       { titulo: 'No confundas la región con la ciudad', texto: 'Minas Gerais tiene la mejor cocina del país, pero la mayor parte de esa comida está en BH. Si viniste por la comida, come en la ciudad; el resto de Minas es campo y montaña.' }
-    ]
+    ],
+    beaches: [
+    ],
+    atracciones: [
+      { name: 'Praça da Liberdade', zona: 'Centro de Belo Horizonte', dur: '1 h', usd: 0, nota: 'La plaza con las iglesias coloniales alrededor. Es el centro histórico de la ciudad y se cruza entero a pie.' },
+      { name: 'Igreja São Francisco de Assis', zona: 'Centro de Belo Horizonte', dur: '30 min', usd: 0, nota: 'La iglesia barroca de 1771, con las imágenes de Aleijadinho. Es la pieza más importante de Minas y entra gratis.' }
+    ],
+    hacer: [
+      { name: 'Mercado Municipal', zona: 'Centro', dur: '1 h', usd: 6, nota: 'El mercado con el queso de Minas y los puestos de artesanía. Es el mejor lugar para comprar queso para llevar.' }
+    ],
   },
 
   'buenos-aires': {
     resumen: 'La ciudad más grande de Hispanoamérica. Cultura, milongas, y el mejor café de la región.',
     beaches: [],
     comer: [
-      { name: 'Empanada de carne', tipo: 'Merienda', zona: 'Centro y Palermo', usd: 2, momento: 'Cualquiera', nota: 'La clásica: carne cortada a cuchillo a cuchillo. Pide la de carne, no la de pollo, y no la de humita. Media docena en cualquier confiteria del centro es el almuerzo más barato y el más argentino.' },
-      { name: 'Parrilla porteña', tipo: 'Cena', zona: 'Palermo y San Telmo', usd: 22, momento: 'Noche', nota: 'La carne más cara de la región, y vale la pena. Un bife de chorizo, milanesa con pure y una chopper, todo por menos de lo que cuesta un vuelo de una hora.' }
+      { name: 'Empanada de carne', tipo: 'Merienda', zona: 'Centro y Palermo', usd: 2, momento: 'Cualquier hora', nota: 'La empanada de carne cortada a cuchillo, que es distinta a la de pollo. Media docena en cualquier confitería del centro es el almuerzo más barato.' },
+      { name: 'Milanesa napolitana', tipo: 'Almuerzo', zona: 'Centro y Palermo', usd: 9, momento: 'Mediodía', nota: 'El filete empanado con jamon y queso, con pure. Es el plato casero por excelencia y se come en cualquier casa de comida.' },
+      { name: 'Parrilla porteña', tipo: 'Cena', zona: 'Palermo y San Telmo', usd: 22, momento: 'Noche', nota: 'La parrilla con la carne argentina. Es la cena más cara de la región y vale la pena: un bife de chorizo o un bife de cuadril.' }
     ],
     tips: [
       { titulo: 'El cambio, con tarjeta y en el banco', texto: 'Con tarjeta el cambio es el oficial. El cambio informal de la calle te deja un 20% menos. Para gastar en pesos, retira en un cajero y no en la casa de cambio.' },
       { titulo: 'La noche arranca tarde', texto: 'Cenar a las 21 h es merienda, no cena. Si tenés una sola noche: la milonga arranca a la medianoche y sigue hasta el amanecer. Cenar temprano es el error más caro del viaje.' },
       { titulo: 'El subte es serio', texto: 'La linea H es la única que cruza la ciudad de norte a sur: rápida, segura y te muestra la vida real de un porteño. Se paga con la SUBE, que se compra en cualquier kiosco.' }
-    ]
+    ],
+    beaches: [
+    ],
+    atracciones: [
+      { name: 'Teatro Colón', zona: 'Centro', dur: '1 h', usd: 8, nota: 'El templo de la opera, con la fachada de mármol. La entrada guiada sale más cara que el show, así que conviene ver el edificio y después elegir qué show.' },
+      { name: 'Recorrido por San Telmo', zona: 'San Telmo', dur: '2 h', usd: 0, nota: 'El barrio de las tiendas de antigüedades, los conventillos y los tangos de la calle. Es la mejor caminata de la ciudad y no se paga nada.' },
+      { name: 'Mercado de San Telmo', zona: 'San Telmo', dur: '1 h', usd: 0, nota: 'El mercado techado con puestos de antigüedades y artesanía. Los domingos hay feria de anticüedades y es cuando está lleno.' }
+    ],
+    hacer: [
+      { name: 'Cambio de moneda con tarjeta', zona: 'Banco', dur: '1 h', usd: 0, nota: 'El cambio con tarjeta al cambio oficial. El cambio informal de la calle deja un veinte por ciento menos. Para pesos, mejor cajero automático.' }
+    ],
   }
 
 };
