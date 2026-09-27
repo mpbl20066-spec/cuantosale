@@ -484,17 +484,27 @@
           var splitIds = splitIdsOf(expense);
           var canDelete = !me || expense.paid_by_participante_id === me.id;
           return '<div class="grupo-expense">' +
-            '<div class="grupo-expense__main">' +
             '<span class="grupo-expense__ico">' + icon(guessCategory(expense.description)) + '</span>' +
             '<div class="grupo-expense__body">' +
+            // El monto va en la MISMA fila que el título, con justify-between.
+            // Antes estaba en una columna aparte con align-items:center, así
+            // que el precio quedaba flotando en el medio de una fila de tres
+            // líneas mientras el ícono y el título quedaban arriba: eso es
+            // exactamente la desalineación que se veía.
+            '<div class="grupo-expense__top">' +
             '<div class="grupo-expense__name">' + esc(expense.description) + '</div>' +
+            '<span class="grupo-expense__amount">' + esc(moneyVer(expense.amount, expense.currency)) + '</span>' +
+            '</div>' +
+            // Las dos líneas de detalle van dentro de la columna de contenido,
+            // debajo del título, y nunca debajo del ícono.
             '<div class="grupo-expense__meta">Pagó ' + esc(participantName(expense.paid_by_participante_id)) + '</div>' +
             '<div class="grupo-expense__meta">Entre ' + (splitIds.length === 1 ? '1 persona' : splitIds.length + ' personas') +
             (splitIds.length ? ': ' + esc(moneyVer(Number(expense.amount) / splitIds.length, expense.currency)) + ' c/u' : '') + '</div>' +
-            '</div></div>' +
-            '<div class="grupo-expense__right"><span class="grupo-expense__amount">' + esc(moneyVer(expense.amount, expense.currency)) + '</span>' +
+            '</div>' +
+            // La papelera queda fuera de la columna de contenido y alineada
+            // arriba, al lado del ícono.
             (canDelete ? '<button type="button" class="grupo-trash" data-delete-expense="' + esc(expense.id) + '" aria-label="Borrar ' + esc(expense.description) + '">' + icon('trash') + '</button>' : '') +
-            '</div></div>';
+            '</div>';
         }).join('')
       : '<p class="grupo-note" style="margin-top:0">Todavía no hay gastos cargados.</p>';
     // El saldo por persona contesta la pregunta que aparece primero ("¿cuánto

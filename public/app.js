@@ -633,6 +633,11 @@
   var lastData = null;
   var pendingDestinationScroll = false;
   var featuredProposalSelection = null;
+  // Destino abierto en la última visita, y los filtros con los que se abrió.
+  // El segundo es para no marcar un destino que ya no corresponde a la búsqueda
+  // actual: si cambian las fechas o el presupuesto, la marca se cae sola.
+  var selectedDestKey = null;
+  var selectedDestFor = null;
   var rangeCalendarMonth = null;
   var rangeCalendarStep = 'dep';
 
@@ -2912,8 +2917,23 @@
   function closeBookingForm() {
     var modal = $('#booking-modal'); modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = '';
   }
+  // Pinta la marca de destino elegido sobre las cards que ya estan en el DOM.
+  // Se usa al volver del detalle, donde la grilla no se vuelve a renderizar.
+  // La clave sale de data-dest-key, que se escribe al armar la card.
+  function pintarDestinoSeleccionado() {
+    var cards = document.querySelectorAll('#destination-results .destination-card[data-dest-key]');
+    Array.prototype.forEach.call(cards, function (card) {
+      card.classList.toggle('is-selected', card.getAttribute('data-dest-key') === selectedDestKey);
+    });
+  }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
+    // Destino que quedó abierto en la última visita. Al volver de "Volver a
+    // todos los destinos" la card sigue marcada, así se ve cuál se estaba
+    // mirando sin tener que acordarse. Se limpia solo si cambian los filtros,
+    // porque con otros dates el destino elegido puede no ser el mismo.
+    var mismatch = selectedDestKey && selectedDestFor !== (data.meta ? data.meta.dep + '|' + data.meta.ret + '|' + data.meta.pax + '|' + data.meta.budget : '');
+    if (mismatch) { selectedDestKey = null; selectedDestFor = null; }
     var fits = DESTINATION_GROUPS.map(function (group) {
       var options = data.options.filter(function (option) { return group.keys.indexOf(option.dest.key) >= 0 && option.fits; });
       if (!options.length) return null;
@@ -2933,7 +2953,7 @@
       // Las dos listas de la app muestran el mismo tipo de dato y tienen que
       // leerse igual.
       var bodyId = 'destino-desglose-' + index;
-      return '<article class="destination-card' + (option.fits ? ' fits' : '') + '" data-opt-card>' +
+      return '<article class="destination-card' + (option.fits ? ' fits' : '') + (selectedDestKey === option.dest.key ? ' is-selected' : '') + '" data-opt-card data-dest-key="' + esc(option.dest.key) + '">' +
         (photo
           ? '<div class="destination-banner destination-banner-photo"><img src="' + esc(photo) + '" alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
           : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : option.dest.key === 'igu' ? '🌊' : '☀️') + '</span></div>') +
@@ -3517,6 +3537,11 @@
   }
 
   function openDestinationProposal(key, savedTrip) {
+    // Se marca acá y no en el click del handler: esta es la unica ruta por la
+    // que se abre una propuesta, asi que el estado no queda desincronizado si
+    // mañana se agrega otra forma de entrar.
+    selectedDestKey = key || null;
+    selectedDestFor = S.dep + '|' + S.ret + '|' + S.pax + '|' + S.budget;
     var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory, hotel_type: S.hotelType });
     return fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
@@ -4494,6 +4519,11 @@
         e.preventDefault(); e.stopPropagation();
         $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
         if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; setHighlightsVisible(true); }
+        // Al volver, la card del destino que se estaba mirando queda marcada. Se
+        // cambia la clase en el DOM en vez de renderizar la grilla entera: el
+        // repintado completo tira abajo los "ver desglose" abiertos y la
+        // posicion del scroll, y aca lo unico que cambia es un estado.
+        pintarDestinoSeleccionado();
         window.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
       // Hotel: el input es un radio nativo, así que el clic repetido no lo

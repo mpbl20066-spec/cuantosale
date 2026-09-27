@@ -13,7 +13,7 @@
 <!-- Misma versión que /app: el servidor marca las URLs con ?v= como
      immutable de un año, así que pedir un ?v= viejo deja al usuario pegado
      con el CSS viejo para siempre. Si tocás style.css, subí las dos páginas. -->
-<link rel="stylesheet" href="/style.css?v=65">
+<link rel="stylesheet" href="/style.css?v=67">
 <style>
   .grupo-wrap{max-width:620px;margin:0 auto;padding:24px 16px 64px}
   .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
@@ -93,18 +93,32 @@
   /* Cada gasto es una línea: ícono de categoría, nombre, quién pagó, entre
      cuántos y el monto. El ícono va sólo para que la lista se lea de un
      vistazo; la categoría se deduce del texto, no se elige. */
-  .grupo-expense{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--line)}
+  /* Fila de gasto: ícono de ancho fijo a la izquierda, columna de contenido al
+     lado, papelera al extremo derecho. Todo con align-items:flex-start, así el
+     ícono, el título y el monto comparten la misma línea base.
+
+     El monto NO va en una columna aparte. Antes estaba en .grupo-expense__right
+     con align-items:center, y eso lo centraba a media altura de una fila de
+     tres líneas mientras el ícono y el título quedaban pegados arriba: eso era
+     la desalineación. Ahora el monto vive en la misma fila que el título, con
+     justify-between, y las dos líneas de detalle quedan debajo del título
+     dentro de la columna de contenido, nunca debajo del ícono. */
+  .grupo-expense{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-top:1px solid var(--line)}
   .grupo-expense:first-child{border-top:0}
-  .grupo-expense__main{display:flex;gap:10px;min-width:0}
-  .grupo-expense__ico{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--bg);color:var(--ink2)}
+  .grupo-expense__ico{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--bg);color:var(--ink2)}
   .grupo-expense__ico svg{width:19px;height:19px}
-  .grupo-expense__body{min-width:0}
-  .grupo-expense__name{font-size:15px;font-weight:700;word-break:break-word}
-  .grupo-expense__meta{margin-top:4px;color:var(--ink2);font-size:12.5px}
-  .grupo-expense__right{flex:0 0 auto;display:flex;align-items:center;gap:2px}
-  .grupo-expense__amount{font-size:15.5px;font-weight:700;white-space:nowrap}
-  .grupo-trash{display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--ink2);cursor:pointer;opacity:0;transition:opacity .16s ease,background .16s ease,color .16s ease}
-  .grupo-expense:hover .grupo-trash,.grupo-trash:focus-visible{opacity:1}
+  /* flex:1 + min-width:0 para que un nombre largo de gasto o de persona
+     encoja el texto y no empuje el monto ni desborde la fila. */
+  .grupo-expense__body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+  .grupo-expense__top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .grupo-expense__name{min-width:0;font-size:15px;font-weight:700;word-break:break-word}
+  .grupo-expense__meta{margin-top:4px;color:var(--ink2);font-size:12.5px;overflow-wrap:anywhere}
+  .grupo-expense__amount{flex:0 0 auto;font-size:15.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+  /* La papelera se revela al hover en puntero, pero en pantalla táctil no hay
+     hover: se quedaba en opacity:0 y no había forma de borrar un gasto desde
+     el celular. Ahora siempre se ve en puntero fino y con area tactil de 44px. */
+  .grupo-trash{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;margin:-8px -8px -8px 0;border:0;border-radius:10px;background:transparent;color:var(--ink2);cursor:pointer;opacity:.55;transition:opacity .16s ease,background .16s ease,color .16s ease}
+  .grupo-expense:hover .grupo-trash,.grupo-trash:focus-visible{opacity:1;background:var(--coral-soft);color:var(--coral)}
   .grupo-trash:hover{background:var(--coral-soft);color:var(--coral)}
   .grupo-trash svg{width:15px;height:15px}
   @media (hover:none){.grupo-trash{opacity:.55}}
@@ -163,6 +177,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=9" defer></script>
+<script src="/grupo.js?v=10" defer></script>
 </body>
 </html>

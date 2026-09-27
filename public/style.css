@@ -26,6 +26,14 @@
      en los tours. El usuario tenía que aprender una regla nueva cada vez.
      Acá hay una sola, y los cuatro la comparten. */
   --card-bg:#FFFFFF; --card-border:#C3D0DE; --card-radius:18px;
+  /* Estado "elegido" de una card, compartido por los cinco grupos donde se
+     elige algo: destinos, propuestas, hotel, tours y presupuesto diario.
+     --card-sel-border es un ámbar MÁS PROFUNDO que el de marca a propósito:
+     #F6B21B sobre blanco da 1.86:1 y como borde de 2px no se ve; #B8791B da
+     3.1:1 y se lee como marco. El ámbar brillante queda para la etiqueta y el
+     resplandor, que no necesitan contraste de borde. */
+  --card-sel-border:#B8791B; --card-sel-bg:#FEF7E7;
+  --card-sel-glow:0 8px 20px rgba(246,178,27,.20);
   --action-bg:#10233E; --action-ink:#FFFFFF; --action-border:transparent;
   --control-bg:#FFFFFF; --control-border:#E2E8F0; --control-hover:#F8FAFC; --control-muted:#64748B; --control-selected:#F8FAFC; --control-selected-ink:#1D4ED8;
   --accent:#F6B21B; --accent-ink:#10233E;
@@ -58,6 +66,8 @@
   --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
   --selected-bg:#1B3A63; --selected-border:#EEF3F9; --selected-ink:#EEF3F9;
   --card-bg:#12294A; --card-border:#8B9CB2; --card-radius:18px;
+  --card-sel-border:#E8A93B; --card-sel-bg:#33290E;
+  --card-sel-glow:0 8px 20px rgba(0,0,0,.45);
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
@@ -220,7 +230,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    acción tiene su propio botón. Antes el <details> hacía de cartelera y el
    botón real sólo aparecía después de desplegarlo. */
 .opts{display:grid;gap:12px}
-.opt{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:20px}
+.opt{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:20px;transition:border-color .3s ease,background .3s ease,box-shadow .3s ease,transform .3s ease}
 .opt:hover,.opt.is-open{border-color:var(--ink2);box-shadow:0 12px 30px rgba(16,35,62,.10)}
 .opt__head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
 .opt__main{min-width:0}
@@ -247,7 +257,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .opt__chevron{display:inline-block;font-size:18px;line-height:1}
 .opt__disclosure:focus-visible,.opt__cta:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .opt__body>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
-.propuesta-seleccionada{border:2px solid var(--accent)!important;box-shadow:0 8px 20px rgba(246,178,27,.2)}
+.propuesta-seleccionada{border:2px solid var(--card-sel-border)!important;background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
 /* El movimiento (elevación, flecha, chevron) sólo si el sistema no pide menos
    movimiento: el color del hover sí se mantiene, no informa nada nuevo. */
 @media (prefers-reduced-motion:no-preference){
@@ -347,8 +357,8 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* No había NINGÚN estado de seleccionado: el único realce era .recommended,
    que es "Recomendado" del servidor, no "lo que elegiste". Un usuario podía
    cambiar de hotel sin ninguna señal visual de cuál tenía elegido. */
-.hotel-option:has(.hotel-option__pick input:checked){border:2px solid var(--selected-border);background:var(--selected-bg)}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--selected-border);color:var(--surface);border-color:var(--selected-border)}
+.hotel-option:has(.hotel-option__pick input:checked){border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--card-sel-border);color:#fff;border-color:var(--card-sel-border)}
 .hotel-option:has(.hotel-option__pick input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
 .hotel-pick-hint{display:block;margin-top:12px;padding:10px 12px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-size:13px;font-weight:700;text-align:center;transition:background .16s ease,color .16s ease,border-color .16s ease}
 
@@ -367,11 +377,18 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* Sin align-items:start para que las tarjetas de una fila midan lo mismo y el
    margin-top:auto de .opt__actions deje los CTA alineados entre tarjetas. */
 .destination-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.destination-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.destination-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden;transition:border-color .3s ease,background .3s ease,box-shadow .3s ease,transform .3s ease}
 .destination-card-body{display:flex;flex-direction:column;flex:1;padding:16px}
 .destination-banner{flex:0 0 auto;height:92px;display:grid;place-items:center;background:linear-gradient(135deg,#d8f1ef,#f6b21b);font-size:48px;border-radius:20px 20px 0 0;overflow:hidden}.destination-banner-fln{background:linear-gradient(135deg,#b6e3ef,#f6d58a)}.destination-banner-for,.destination-banner-nat,.destination-banner-pip{background:linear-gradient(135deg,#9ad9d1,#f6b21b)}.destination-banner-igu{background:linear-gradient(135deg,#9bc8e8,#d7efdb)}.destination-banner-sao,.destination-banner-poa{background:linear-gradient(135deg,#c9d4e5,#f0c58a)}
 .destination-banner-photo{height:150px;background:var(--bg)}.destination-banner-photo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:20px 20px 0 0}
 .destination-card.fits{border-color:var(--good);box-shadow:0 5px 16px color-mix(in srgb,var(--good) 14%,transparent)}
+/* Estado elegido del destino. Va DESPUES de .fits a proposito: las dos reglas
+   tienen la misma especificidad, asi que si esta fuera antes el borde verde de
+   "entra en tu presupuesto" le ganaba y el destino elegido se veia verde.
+   Elegido tiene que ganarle a "entra en el presupuesto": son dos senales
+   distintas y la segunda no puede tapar la primera.
+   Comparte los tokens con propuestas, hotel, tours y presupuesto diario. */
+.destination-card.is-selected{border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
 /* El hover no toca el borde: en estas tarjetas el verde es la señal de "entra
    en tu presupuesto" y no debe desvanecerse al pasar el mouse. */
 .destination-card:hover{box-shadow:0 12px 30px rgba(16,35,62,.14)}
@@ -435,7 +452,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* Mismo bloque de card elegible que .hotel-option y .local-tour. Antes el
    estado de elegido era navy de 1px acá y navy de 2px en los otros dos, con
    el mismo color de fondo: el mismo gesto, dos grosores distintos. */
-.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{border:2px solid var(--selected-border);background:var(--selected-bg);box-shadow:0 8px 18px rgba(16,35,62,.08)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}.daily-budget__option-copy{font-size:11px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
+.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}.daily-budget__option-copy{font-size:11px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
 /* En un celu las dos rejillas caen a una columna: 2 arriba quedaria una fila
    de 3 y otra de 1, que es justo lo que se vino a corregir. */
 @media (max-width:560px){.daily-budget__options--cols-2,.daily-budget__options--cols-3{grid-template-columns:minmax(0,1fr)}}
@@ -552,7 +569,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    grupo. Ahora el estado se comunica solo con el marco y el fondo. */
 .local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
-.local-tour:has([data-tour-choice]:checked){border:2px solid var(--selected-border);background:var(--selected-bg);box-shadow:0 8px 18px rgba(16,35,62,.08)}
+.local-tour:has([data-tour-choice]:checked){border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
 /* La tarjeta completa es la zona sensible. El checkbox se estira con
    position:absolute sobre el article: el clic en cualquier punto lo activa y
    el teclado conserva un único control que tabula (Enter lo agrega el JS). */
