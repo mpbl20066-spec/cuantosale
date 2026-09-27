@@ -562,25 +562,36 @@
       var meCobra = moves.filter(function (move) { return move.to === meId; });
       var losDemas = moves.filter(function (move) { return move.from !== meId && move.to !== meId; });
       var mioPaga = mePaga.filter(function (move) { return !saldoEstaPagado(move); });
+      var mioCobra = meCobra.filter(function (move) { return !saldoEstaPagado(move); });
       // Los dos bloques son independientes: en un grupo se es deudor y
       // acreedor al mismo tiempo, y con un if/else solo se mostraba uno de los
       // dos lados, que es justo la mitad de la situación de esa persona.
+      // En los dos, el titular y el subtitulo cambian segun si queda algo
+      // pendiente. Decir "te tienen que pagar X" al lado de una fila verde de
+      // "Pagado" es una contradiccion, y el monto pendiente se separa del
+      // total: si una de las dos ya esta saldada, el titular tiene que decir
+      // la que falta, no la suma de las dos.
       var mio = '';
       if (mePaga.length) {
-        // Si ya esta todo pagado, decir "tenes que pagarle X" es mentira: la
-        // fila queda con su boton en "Pagado" para poder volver atras, pero el
-        // titular tiene que decir que ya esta saldado.
-        mio += '<div class="grupo-subhead">Lo que tenés que pagar</div>' +
+        mio += '<div class="grupo-subhead">' + (mioPaga.length ? 'Lo que tenés que pagar' : 'Lo que ya liquidaste') + '</div>' +
           (mioPaga.length
             ? '<p class="grupo-mine">Tenés que pagarle <b>' + esc(moneyVer(saldosDe(mioPaga), currency)) + '</b>' +
               (mioPaga.length > 1 ? ', en ' + mioPaga.length + ' transferencias' : '') + '.</p>'
             : '<p class="grupo-mine">Ya liquidaste los <b>' + esc(moneyVer(saldosDe(mePaga), currency)) + '</b> que debías.</p>') +
+          // Con boton siempre: si ya esta pagado, el boton queda en "Pagado" y
+          // sirve para volver atras.
           mePaga.map(function (move) { return settleRow(move, true, true); }).join('');
       }
       if (meCobra.length) {
-        mio += '<div class="grupo-subhead">Lo que te tienen que pagar</div>' +
-          '<p class="grupo-mine">Te tienen que pagar <b>' + esc(moneyVer(saldosDe(meCobra), currency)) + '</b>' +
-          (meCobra.length > 1 ? ', en ' + meCobra.length + ' transferencias' : '') + '.</p>' +
+        mio += '<div class="grupo-subhead">' + (mioCobra.length ? 'Lo que te tienen que pagar' : 'Lo que ya te pagaron') + '</div>' +
+          (mioCobra.length
+            ? '<p class="grupo-mine">Te tienen que pagar <b>' + esc(moneyVer(saldosDe(mioCobra), currency)) + '</b>' +
+              (mioCobra.length > 1 ? ', en ' + mioCobra.length + ' transferencias' : '') + '.</p>'
+            // "Ya te pagaron" y no "recibiste": lo que marco el pagado es el
+            // deudor desde su dispositivo, no el cobro. El grupo ya trata esa
+            // marca como oficial en el cartel de "estan todos al dia", asi que
+            // el titular tiene que estar a la misma altura.
+            : '<p class="grupo-mine">Ya te pagaron los <b>' + esc(moneyVer(saldosDe(meCobra), currency)) + '</b> que te debían.</p>') +
           // Sin boton: esto no lo paga la persona que mira, asi que no tiene
           // nada que marcar. El que lo cobra lo confirma por su cuenta.
           meCobra.map(function (move) { return settleRow(move, true, false); }).join('');
