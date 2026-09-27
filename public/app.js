@@ -832,7 +832,10 @@
     var m = monedaActiva();
     var tasa = tasaDe(m.code);
     // Sin tasa para esta moneda no inventamos numero: seguimos en la base.
-    if (tasa == null) { m = MONEDAS_APP[0]; tasa = 1; }
+    // OJO: la base, NO la primera de la lista. Como la lista empieza por UYU,
+    // un fallo al cargar las tasas pintaba "US$ 1.010" como "$ 1.010", con un
+    // error de 37 veces. Ver monedaBase().
+    if (tasa == null) { m = monedaBase(); tasa = 1; }
     var total = v * tasa;
     return m.simbolo + ' ' + formatoMiles(total, decimalesDe(m.code, total));
   }
@@ -842,7 +845,7 @@
     var v = Number(n) || 0;
     var m = monedaActiva();
     var tasa = tasaDe(m.code);
-    if (tasa == null) { m = MONEDAS_APP[0]; tasa = 1; }
+    if (tasa == null) { m = monedaBase(); tasa = 1; }
     return m.simbolo + ' ' + formatoMiles(v * tasa, 2);
   }
   // Numero sin simbolo, para las etiquetas de los graficos de barras.
