@@ -255,6 +255,41 @@ function haversineKm(a, b) {
     assert.match(app, /window\.CS_TOURS = toursFor/, 'falta exponer CS_TOURS para la guia');
   });
 
+  await t('fotos de tours: toda clave de SUBJECTS coincide con un tour de app.js', function () {
+    // buscar-fotos-tours.js cruza sus claves "destino#Titulo" contra los
+    // tour() de app.js con un indexOf literal. Si el titulo no calza al
+    // caracter, el cruce no falla: la clave simplemente no aparece y ese tour
+    // se queda sin foto sin error ni aviso. Por eso 15 claves estaban rotas y
+    // nadie lo notaba: 3 por acentos que quedaron en latin1 ("JaponÃªs" en vez
+    // de "Japonês") y 12 porque el titulo se escribio en Portuguese ("em", "e",
+    // "os") mientras el de app.js esta en Castellano ("en", "y", "los").
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const tours = new Set();
+    for (const m of app.matchAll(/tour\(\['([a-z]+)'\],\s*'[^']*',\s*'((?:[^'\\]|\\.)*)'/g)) {
+      tours.add(m[1] + '#' + m[2]);
+    }
+    assert.ok(tours.size > 100, 'no se pudieron leer los tour() de app.js: ' + tours.size);
+
+    const script = fs.readFileSync(path.join(__dirname, 'buscar-fotos-tours.js'), 'utf8');
+    const bloque = script.slice(script.indexOf('const SUBJECTS'), script.indexOf('const UA'));
+    const claves = [...bloque.matchAll(/^\s*'((?:[^'\\]|\\.)*)':/gm)].map(function (x) { return x[1]; });
+    assert.ok(claves.length > 50, 'no se pudo leer SUBJECTS: ' + claves.length + ' claves');
+
+    const rotas = claves.filter(function (k) { return !tours.has(k); });
+    assert.deepStrictEqual(rotas, [],
+      'estas claves de SUBJECTS no matchean ningun tour de app.js, asi que el buscador de fotos las ignora en silencio: ' + rotas.join(' | '));
+
+    // Y lo mismo con el resultado ya guardado: si se renombra una clave, el
+    // JSON compilado tiene que renombrarse con ella.
+    const jsonPath = path.join(__dirname, 'tour-photos.buscar.json');
+    if (fs.existsSync(jsonPath)) {
+      const guardadas = Object.keys(JSON.parse(fs.readFileSync(jsonPath, 'utf8')));
+      const viejas = guardadas.filter(function (k) { return !tours.has(k); });
+      assert.deepStrictEqual(viejas, [],
+        'tour-photos.buscar.json tiene claves de una version vieja de los titulos: ' + viejas.join(' | '));
+    }
+  });
+
 
 
   console.log('Modelo');
