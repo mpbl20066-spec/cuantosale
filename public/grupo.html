@@ -152,6 +152,28 @@
      transferencia pendiente: es la pregunta que todos hacen al final. */
   .grupo-allday{display:flex;align-items:center;gap:9px;margin-top:14px;padding:12px 14px;border-radius:14px;background:var(--good-soft);color:var(--good);font-size:14px;font-weight:700}
   .grupo-allday svg{flex:0 0 auto;width:19px;height:19px;stroke-width:2.4}
+  /* "Cómo se salda" con la identidad de quien mira: primero lo suyo, con su
+     botón, y lo del resto del grupo plegado. Todo lo nuevo acá es superficie o
+     marco neutro, a proposito: el ambar de --card-sel-* ya significa "elegido"
+     en las otras cards de la app y reutilizarlo para "esto es tuyo" mezclaria
+     dos senales distintas. La fila propia se distingue por estar sobre la
+     superficie, no por un color nuevo. */
+  .grupo-mine{margin:2px 0 0;font-size:15px;line-height:1.4;color:var(--ink)}
+  .grupo-mine b{font-weight:800;white-space:nowrap}
+  .grupo-settle.is-mine{background:var(--surface);border:1.5px solid var(--line);box-shadow:0 4px 14px rgba(16,35,62,.08)}
+  /* is-paid gana en orden a proposito: si la fila propia ya esta pagada, el
+     fondo verde de "listo" tiene que ganarle al marco de "esto es tuyo". */
+  .grupo-settle.is-mine.is-paid{background:var(--good-soft);border-color:transparent;box-shadow:none}
+  .grupo-balance.is-me{font-weight:800}
+  .grupo-balance.is-me em{font-style:normal;font-weight:700;color:var(--ink2)}
+  .grupo-other{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+  .grupo-other>summary{display:flex;align-items:center;gap:8px;min-height:38px;cursor:pointer;font-size:14px;font-weight:700;color:var(--ink2);list-style:none;-webkit-tap-highlight-color:transparent}
+  .grupo-other>summary::-webkit-details-marker{display:none}
+  .grupo-other>summary::before{content:'+';flex:0 0 auto;width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:var(--bg);font-size:15px;font-weight:800;line-height:1;transition:transform .18s ease}
+  .grupo-other[open]>summary::before{transform:rotate(45deg)}
+  .grupo-other>summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
+  .grupo-other .grupo-note{margin:2px 0 0}
+  @media (prefers-reduced-motion:reduce){.grupo-other>summary::before{transition:none}}
 
   /* Selector de moneda del gasto: va a la derecha del número, adentro del
      campo, para que se lea "48.500 UYU$" en una sola línea. */
@@ -177,6 +199,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=10" defer></script>
+<script src="/grupo.js?v=11" defer></script>
 </body>
 </html>

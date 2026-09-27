@@ -515,27 +515,84 @@
           var label = Math.abs(value) < 0.01
             ? '<b class="pos">al día</b>'
             : '<b class="' + (value > 0 ? 'pos' : 'neg') + '">' + (value > 0 ? 'le deben ' : 'debe ') + esc(moneyVer(Math.abs(value), currency)) + '</b>';
-          return '<div class="grupo-balance"><span>' + esc(p.display_name) + '</span>' + label + '</div>';
+          // "(vos)" en el saldo también: la lista es de todos, y sin marcar
+          // cuál es el tuyo hay que buscar el nombre entre las filas.
+          return '<div class="grupo-balance' + (me && p.id === me.id ? ' is-me' : '') + '"><span>' + esc(p.display_name) + (me && p.id === me.id ? ' <em>(vos)</em>' : '') + '</span>' + label + '</div>';
         }).join('')
       : '';
-    // Cada transferencia trae su botón de "Ya pagué". Se marca por par (from|to)
-    // y no por importe, porque el greedy vuelve a calcular los montos cada vez
-    // que se toca un gasto.
+    // Cada transferencia se marca por par (from|to) y no por importe, porque
+    // el greedy vuelve a calcular los montos cada vez que se toca un gasto.
     var pendientes = moves.filter(function (move) { return !saldoEstaPagado(move); }).length;
-    var balancesMarkup = moves.length
-      ? moves.map(function (move) {
-          var pagado = saldoEstaPagado(move);
-          var key = saldoKey(move);
-          return '<div class="grupo-settle' + (pagado ? ' is-paid' : '') + '">' +
-            '<span class="grupo-settle__flow"><b>' + esc(participantName(move.from)) + '</b>' +
-            '<span class="grupo-settle__arrow" aria-hidden="true">' + icon('arrow') + '</span>' +
-            '<b>' + esc(participantName(move.to)) + '</b></span>' +
-            '<span class="grupo-settle__amount">' + esc(moneyVer(move.amount, currency)) + '</span>' +
-            '<button type="button" class="grupo-settledon" data-saldo="' + esc(key) + '" aria-pressed="' + (pagado ? 'true' : 'false') + '">' +
-            '<span class="grupo-settledon__box" aria-hidden="true">' + (pagado ? '✓' : '') + '</span>' +
-            (pagado ? 'Pagado' : 'Ya pagué') + '</button></div>';
-        }).join('')
-      : '<p class="grupo-note">Las cuentas están saldadas.</p>';
+    var meId = me ? me.id : null;
+    // Una fila de transferencia. "mio" y "conBoton" van por separado a
+    // proposito: el botón depende de si la fila le compete a quien mira, y la
+    // marca de "esto es tuyo" depende ademas de que haya alguien mirando. Sin
+    // identidad no se puede marcar la fila de nadie como propia, aunque se le
+    // deje el botón.
+    function settleRow(move, mio, conBoton) {
+      var pagado = saldoEstaPagado(move);
+      var key = saldoKey(move);
+      return '<div class="grupo-settle' + (pagado ? ' is-paid' : '') + (mio ? ' is-mine' : '') + '">' +
+        '<span class="grupo-settle__flow"><b>' + esc(participantName(move.from)) + '</b>' +
+        '<span class="grupo-settle__arrow" aria-hidden="true">' + icon('arrow') + '</span>' +
+        '<b>' + esc(participantName(move.to)) + '</b></span>' +
+        '<span class="grupo-settle__amount">' + esc(moneyVer(move.amount, currency)) + '</span>' +
+        (conBoton ?
+          '<button type="button" class="grupo-settledon" data-saldo="' + esc(key) + '" aria-pressed="' + (pagado ? 'true' : 'false') + '">' +
+          '<span class="grupo-settledon__box" aria-hidden="true">' + (pagado ? '✓' : '') + '</span>' +
+          (pagado ? 'Pagado' : 'Ya pagué') + '</button>' : '') + '</div>';
+    }
+    function saldosDe(arr) {
+      return arr.reduce(function (sum, move) { return Math.round((sum + move.amount) * 100) / 100; }, 0);
+    }
+    var saldosMarkup;
+    if (!moves.length) {
+      saldosMarkup = '<p class="grupo-note">Las cuentas están saldadas.</p>';
+    } else if (!meId) {
+      // Sin identidad no hay filtrado por rol posible, y esconder transferencias
+      // sin saber quién mira sería peor que mostrarlas todas. Queda el
+      // comportamiento anterior, con su botón, para el caso de abrir el link
+      // sin haberse sentado antes en el grupo.
+      saldosMarkup = moves.map(function (move) { return settleRow(move, false, true); }).join('');
+    } else {
+      // Lo que le compete a la persona que mira va arriba. Lo del resto del
+      // grupo va abajo y plegado: no es lo que tiene que hacer ahora, y con la
+      // lista abierta lo primero que se leia era la transferencia de otro.
+      var mePaga = moves.filter(function (move) { return move.from === meId; });
+      var meCobra = moves.filter(function (move) { return move.to === meId; });
+      var losDemas = moves.filter(function (move) { return move.from !== meId && move.to !== meId; });
+      var mioPaga = mePaga.filter(function (move) { return !saldoEstaPagado(move); });
+      // Los dos bloques son independientes: en un grupo se es deudor y
+      // acreedor al mismo tiempo, y con un if/else solo se mostraba uno de los
+      // dos lados, que es justo la mitad de la situación de esa persona.
+      var mio = '';
+      if (mePaga.length) {
+        // Si ya esta todo pagado, decir "tenes que pagarle X" es mentira: la
+        // fila queda con su boton en "Pagado" para poder volver atras, pero el
+        // titular tiene que decir que ya esta saldado.
+        mio += '<div class="grupo-subhead">Lo que tenés que pagar</div>' +
+          (mioPaga.length
+            ? '<p class="grupo-mine">Tenés que pagarle <b>' + esc(moneyVer(saldosDe(mioPaga), currency)) + '</b>' +
+              (mioPaga.length > 1 ? ', en ' + mioPaga.length + ' transferencias' : '') + '.</p>'
+            : '<p class="grupo-mine">Ya liquidaste los <b>' + esc(moneyVer(saldosDe(mePaga), currency)) + '</b> que debías.</p>') +
+          mePaga.map(function (move) { return settleRow(move, true, true); }).join('');
+      }
+      if (meCobra.length) {
+        mio += '<div class="grupo-subhead">Lo que te tienen que pagar</div>' +
+          '<p class="grupo-mine">Te tienen que pagar <b>' + esc(moneyVer(saldosDe(meCobra), currency)) + '</b>' +
+          (meCobra.length > 1 ? ', en ' + meCobra.length + ' transferencias' : '') + '.</p>' +
+          // Sin boton: esto no lo paga la persona que mira, asi que no tiene
+          // nada que marcar. El que lo cobra lo confirma por su cuenta.
+          meCobra.map(function (move) { return settleRow(move, true, false); }).join('');
+      }
+      var resto = losDemas.length
+        ? '<details class="grupo-other"><summary>Las ' + losDemas.length + ' ' +
+          (losDemas.length === 1 ? 'transferencia' : 'transferencias') + ' de otras personas</summary>' +
+          '<p class="grupo-note">No son pagos tuyos: son transferencias entre los demás del grupo.</p>' +
+          losDemas.map(function (move) { return settleRow(move, false, false); }).join('') + '</details>'
+        : '';
+      saldosMarkup = mio + resto;
+    }
     // Cuando no queda ninguna transferencia pendiente se dice explícitamente:
     // es la pregunta que todos hacen al final del viaje y "no hay nada para
     // pagar" no contesta nada.
@@ -593,7 +650,7 @@
 
       '<div class="grupo-card"><h2>Cómo se salda</h2>' +
       (balancesSummary ? '<div class="grupo-subhead">Saldo de cada uno</div>' + balancesSummary : '') +
-      (moves.length ? '<div class="grupo-subhead">Transferencias</div>' + balancesMarkup : balancesMarkup) +
+      saldosMarkup +
       alDiaMarkup +
       '</div>'
     );
