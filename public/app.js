@@ -333,78 +333,159 @@
   // ofrecen; el resto tiene entre 1 y 8.
   var DESTINATION_GROUPS = [
     { id: 'rio', label: 'Río de Janeiro', image: 'rio', keys: ['rio'], subcategories: [
-      { label: 'Réveillon Copacabana (31/12)', key: 'rio' }, { label: 'Zona Sur / Ipanema', key: 'rio' }, { label: 'Centro Histórico', key: 'rio' },
+{ label: 'Réveillon Copacabana (31/12)', key: 'rio' },
+{ label: 'Zona Sur / Ipanema', key: 'rio' },
+{ label: 'Centro Histórico', key: 'rio' },
       { label: 'Río + Búzios', key: 'rio', secondKey: 'buz' },
-      { label: 'Río + Angra dos Reis', key: 'rio', secondKey: 'angra' },
+      { label: 'Río + Angra dos Reis', key: 'rio', secondKey: 'angra' }
     ] },
     { id: 'buzios', label: 'Búzios / Arraial do Cabo / Cabo Frio', image: 'buz', keys: ['buz', 'arraial', 'cabo'], subcategories: [
       // La primera subcategoria es la que abre la tarjeta cuando no hay selector
-      // de zona, asi que va primera y trae el secondKey. Antes la segunda repetia
-      // este mismo nombre y la tapaba: secondKeyForSubcategory() corta en la
-      // primera coincidencia, matcheaba la que no lo tenia y devolvia vacio.
+      // de zona, asi que el par va primero y trae el secondKey. Antes la segunda
+      // repetia este mismo nombre y la tapaba: secondKeyForSubcategory() corta en
+      // la primera coincidencia, matcheaba la que no lo tenia y devolvia vacio.,
       { label: 'Búzios + Arraial do Cabo', key: 'buz', secondKey: 'arraial' },
-      { label: 'Sólo Búzios', key: 'buz' },
-      { label: 'Arraial do Cabo', key: 'arraial' },
-      { label: 'Cabo Frio + Arraial do Cabo', key: 'cabo', secondKey: 'arraial' },
-      { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' },
-      { label: 'Búzios + Arraial do Cabo', key: 'buz', secondKey: 'arraial' },
-      { label: 'Búzios + Cabo Frio', key: 'buz', secondKey: 'arraial' },
+      { label: 'Búzios + Cabo Frio', key: 'buz', secondKey: 'cabo' },
+      { label: 'Arraial do Cabo + Cabo Frio', key: 'arraial', secondKey: 'cabo' },
+{ label: 'Sólo Búzios', key: 'buz' },
+{ label: 'Arraial do Cabo', key: 'arraial' },
+{ label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' }
     ] },
     { id: 'costaverde', label: 'Costa Verde (Ilhabela / Ubatuba / Paraty)', image: 'ilhabela', keys: ['paraty', 'ubatuba', 'ilhabela', 'angra', 'ilha'], subcategories: [
-      { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' },
-      { label: 'Ilhabela', key: 'ilhabela' }, { label: 'Angra dos Reis', key: 'angra' }, { label: 'Ilha Grande', key: 'ilha' },
+{ label: 'Paraty Histórico', key: 'paraty' },
+{ label: 'Ubatuba Playas', key: 'ubatuba' },
+{ label: 'Ilhabela', key: 'ilhabela' },
+{ label: 'Angra dos Reis', key: 'angra' },
+{ label: 'Ilha Grande', key: 'ilha' },
       { label: 'Paraty + Ubatuba', key: 'paraty', secondKey: 'ubatuba' },
-      { label: 'Ubatuba + Ilhabela', key: 'ubatuba', secondKey: 'ilhabela' },
       { label: 'Paraty + Ilhabela', key: 'paraty', secondKey: 'ilhabela' },
-      { label: 'Angra dos Reis + Ilha Grande', key: 'angra', secondKey: 'ilha' },
+      { label: 'Paraty + Angra dos Reis', key: 'paraty', secondKey: 'angra' },
+      { label: 'Paraty + Ilha Grande', key: 'paraty', secondKey: 'ilha' },
+      { label: 'Ubatuba + Ilhabela', key: 'ubatuba', secondKey: 'ilhabela' },
+      { label: 'Ubatuba + Angra dos Reis', key: 'ubatuba', secondKey: 'angra' },
+      { label: 'Ubatuba + Ilha Grande', key: 'ubatuba', secondKey: 'ilha' },
+      { label: 'Ilhabela + Angra dos Reis', key: 'ilhabela', secondKey: 'angra' },
+      { label: 'Ilhabela + Ilha Grande', key: 'ilhabela', secondKey: 'ilha' },
+      { label: 'Angra dos Reis + Ilha Grande', key: 'angra', secondKey: 'ilha' }
     ] },
     { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
-      { label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
-      { label: 'Balneário Camboriú', key: 'bcm' }, { label: 'Itapema', key: 'itapema' },
-      { label: 'Bombinhas', key: 'bombinhas' }, { label: 'Garopaba', key: 'garopaba' },
-      { label: 'Praia do Rosa', key: 'rosa' }, { label: 'Ferrugem', key: 'ferrugem' }, { label: 'Piçarras', key: 'picarras' },
+{ label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
+{ label: 'Balneário Camboriú', key: 'bcm' },
+{ label: 'Itapema', key: 'itapema' },
+{ label: 'Bombinhas', key: 'bombinhas' },
+{ label: 'Garopaba', key: 'garopaba' },
+{ label: 'Praia do Rosa', key: 'rosa' },
+{ label: 'Ferrugem', key: 'ferrugem' },
+{ label: 'Piçarras', key: 'picarras' },
       { label: 'Florianópolis + Balneário Camboriú', key: 'fln', secondKey: 'bcm' },
-      { label: 'Balneário Camboriú + Itapema', key: 'bcm', secondKey: 'itapema' },
-      { label: 'Itapema + Piçarras', key: 'itapema', secondKey: 'picarras' },
+      { label: 'Florianópolis + Itapema', key: 'fln', secondKey: 'itapema' },
       { label: 'Florianópolis + Bombinhas', key: 'fln', secondKey: 'bombinhas' },
+      { label: 'Florianópolis + Garopaba', key: 'fln', secondKey: 'garopaba' },
+      { label: 'Florianópolis + Praia do Rosa', key: 'fln', secondKey: 'rosa' },
+      { label: 'Florianópolis + Ferrugem', key: 'fln', secondKey: 'ferrugem' },
+      { label: 'Florianópolis + Piçarras', key: 'fln', secondKey: 'picarras' },
+      { label: 'Balneário Camboriú + Itapema', key: 'bcm', secondKey: 'itapema' },
+      { label: 'Balneário Camboriú + Bombinhas', key: 'bcm', secondKey: 'bombinhas' },
+      { label: 'Balneário Camboriú + Garopaba', key: 'bcm', secondKey: 'garopaba' },
+      { label: 'Balneário Camboriú + Praia do Rosa', key: 'bcm', secondKey: 'rosa' },
+      { label: 'Balneário Camboriú + Ferrugem', key: 'bcm', secondKey: 'ferrugem' },
+      { label: 'Balneário Camboriú + Piçarras', key: 'bcm', secondKey: 'picarras' },
+      { label: 'Itapema + Bombinhas', key: 'itapema', secondKey: 'bombinhas' },
+      { label: 'Itapema + Garopaba', key: 'itapema', secondKey: 'garopaba' },
+      { label: 'Itapema + Praia do Rosa', key: 'itapema', secondKey: 'rosa' },
+      { label: 'Itapema + Ferrugem', key: 'itapema', secondKey: 'ferrugem' },
+      { label: 'Itapema + Piçarras', key: 'itapema', secondKey: 'picarras' },
       { label: 'Bombinhas + Garopaba', key: 'bombinhas', secondKey: 'garopaba' },
+      { label: 'Bombinhas + Praia do Rosa', key: 'bombinhas', secondKey: 'rosa' },
+      { label: 'Bombinhas + Ferrugem', key: 'bombinhas', secondKey: 'ferrugem' },
+      { label: 'Bombinhas + Piçarras', key: 'bombinhas', secondKey: 'picarras' },
+      { label: 'Garopaba + Praia do Rosa', key: 'garopaba', secondKey: 'rosa' },
       { label: 'Garopaba + Ferrugem', key: 'garopaba', secondKey: 'ferrugem' },
-      { label: 'Ferrugem + Praia do Rosa', key: 'ferrugem', secondKey: 'rosa' },
+      { label: 'Garopaba + Piçarras', key: 'garopaba', secondKey: 'picarras' },
+      { label: 'Praia do Rosa + Ferrugem', key: 'rosa', secondKey: 'ferrugem' },
+      { label: 'Praia do Rosa + Piçarras', key: 'rosa', secondKey: 'picarras' },
+      { label: 'Ferrugem + Piçarras', key: 'ferrugem', secondKey: 'picarras' }
     ] },
     { id: 'litoralrs', label: 'Litoral de Rio Grande do Sul', image: 'gram', keys: ['torres', 'canoa'], subcategories: [
-      { label: 'Torres', key: 'torres' }, { label: 'Capão da Canoa', key: 'canoa' },
-      { label: 'Torres + Capão da Canoa', key: 'torres', secondKey: 'canoa' },
+{ label: 'Torres', key: 'torres' },
+{ label: 'Capão da Canoa', key: 'canoa' },
+      { label: 'Torres + Capão da Canoa', key: 'torres', secondKey: 'canoa' }
     ] },
     { id: 'bahia', label: 'Bahía', image: 'ssa', keys: ['ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso'], subcategories: [
-      { label: 'Salvador de Bahía', key: 'ssa' }, { label: 'Porto Seguro', key: 'portoseguro' },
-      { label: 'Praia do Forte', key: 'forte' }, { label: 'Morro de São Paulo', key: 'morro' },
-      { label: 'Itacaré', key: 'itacare' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso' },
-      { label: 'Salvador + Praia do Forte', key: 'ssa', secondKey: 'forte' },
+{ label: 'Salvador de Bahía', key: 'ssa' },
+{ label: 'Porto Seguro', key: 'portoseguro' },
+{ label: 'Praia do Forte', key: 'forte' },
+{ label: 'Morro de São Paulo', key: 'morro' },
+{ label: 'Itacaré', key: 'itacare' },
+{ label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso' },
       { label: 'Salvador + Porto Seguro', key: 'ssa', secondKey: 'portoseguro' },
+      { label: 'Salvador + Praia do Forte', key: 'ssa', secondKey: 'forte' },
       { label: 'Salvador + Morro de São Paulo', key: 'ssa', secondKey: 'morro' },
+      { label: 'Salvador + Itacaré', key: 'ssa', secondKey: 'itacare' },
       { label: 'Salvador + Arraial d\'Ajuda', key: 'ssa', secondKey: 'trancoso' },
+      { label: 'Porto Seguro + Praia do Forte', key: 'portoseguro', secondKey: 'forte' },
+      { label: 'Porto Seguro + Morro de São Paulo', key: 'portoseguro', secondKey: 'morro' },
+      { label: 'Porto Seguro + Itacaré', key: 'portoseguro', secondKey: 'itacare' },
       { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', secondKey: 'trancoso' },
+      { label: 'Praia do Forte + Morro de São Paulo', key: 'forte', secondKey: 'morro' },
+      { label: 'Praia do Forte + Itacaré', key: 'forte', secondKey: 'itacare' },
+      { label: 'Praia do Forte + Arraial d\'Ajuda', key: 'forte', secondKey: 'trancoso' },
+      { label: 'Morro de São Paulo + Itacaré', key: 'morro', secondKey: 'itacare' },
+      { label: 'Morro de São Paulo + Arraial d\'Ajuda', key: 'morro', secondKey: 'trancoso' },
+      { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', secondKey: 'trancoso' }
     ] },
     { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for'], subcategories: [
-      { label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' },
-      { label: 'Maragogi', key: 'maragogi' }, { label: 'Maceió (Resort)', key: 'mcz', hotelType: 'resort' },
-      { label: 'Recife', key: 'rec' }, { label: 'João Pessoa', key: 'joaopessoa' },
-      { label: 'Natal', key: 'nat' }, { label: 'Pipa', key: 'pip' },
-      { label: 'Fortaleza / Jericoacoara', key: 'for' },
-      { label: 'Natal + Pipa', key: 'nat', secondKey: 'pip' },
-      { label: 'Recife + Porto de Galinhas', key: 'rec', secondKey: 'porto' },
+{ label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' },
+{ label: 'Maragogi', key: 'maragogi' },
+{ label: 'Maceió (Resort)', key: 'mcz', hotelType: 'resort' },
+{ label: 'Recife', key: 'rec' },
+{ label: 'João Pessoa', key: 'joaopessoa' },
+{ label: 'Natal', key: 'nat' },
+{ label: 'Pipa', key: 'pip' },
+{ label: 'Fortaleza / Jericoacoara', key: 'for' },
+      { label: 'Porto de Galinhas + Maragogi', key: 'porto', secondKey: 'maragogi' },
+      { label: 'Porto de Galinhas + Maceió', key: 'porto', secondKey: 'mcz' },
+      { label: 'Porto de Galinhas + Recife', key: 'porto', secondKey: 'rec' },
+      { label: 'Porto de Galinhas + João Pessoa', key: 'porto', secondKey: 'joaopessoa' },
+      { label: 'Porto de Galinhas + Natal', key: 'porto', secondKey: 'nat' },
+      { label: 'Porto de Galinhas + Pipa', key: 'porto', secondKey: 'pip' },
+      { label: 'Porto de Galinhas + Fortaleza', key: 'porto', secondKey: 'for' },
+      { label: 'Maragogi + Maceió', key: 'maragogi', secondKey: 'mcz' },
+      { label: 'Maragogi + Recife', key: 'maragogi', secondKey: 'rec' },
+      { label: 'Maragogi + João Pessoa', key: 'maragogi', secondKey: 'joaopessoa' },
+      { label: 'Maragogi + Natal', key: 'maragogi', secondKey: 'nat' },
+      { label: 'Maragogi + Pipa', key: 'maragogi', secondKey: 'pip' },
+      { label: 'Maragogi + Fortaleza', key: 'maragogi', secondKey: 'for' },
+      { label: 'Maceió + Recife', key: 'mcz', secondKey: 'rec' },
+      { label: 'Maceió + João Pessoa', key: 'mcz', secondKey: 'joaopessoa' },
+      { label: 'Maceió + Natal', key: 'mcz', secondKey: 'nat' },
+      { label: 'Maceió + Pipa', key: 'mcz', secondKey: 'pip' },
+      { label: 'Maceió + Fortaleza', key: 'mcz', secondKey: 'for' },
       { label: 'Recife + João Pessoa', key: 'rec', secondKey: 'joaopessoa' },
-      { label: 'Maceió + Maragogi', key: 'mcz', secondKey: 'maragogi' },
+      { label: 'Recife + Natal', key: 'rec', secondKey: 'nat' },
+      { label: 'Recife + Pipa', key: 'rec', secondKey: 'pip' },
+      { label: 'Recife + Fortaleza', key: 'rec', secondKey: 'for' },
+      { label: 'João Pessoa + Natal', key: 'joaopessoa', secondKey: 'nat' },
+      { label: 'João Pessoa + Pipa', key: 'joaopessoa', secondKey: 'pip' },
+      { label: 'João Pessoa + Fortaleza', key: 'joaopessoa', secondKey: 'for' },
+      { label: 'Natal + Pipa', key: 'nat', secondKey: 'pip' },
       { label: 'Natal + Fortaleza', key: 'nat', secondKey: 'for' },
+      { label: 'Pipa + Fortaleza', key: 'pip', secondKey: 'for' }
     ] },
     { id: 'buenosaires', label: 'Buenos Aires', image: 'bue', keys: ['bue'], subcategories: [
-      { label: 'Centro / Recoleta', key: 'bue' }, { label: 'Palermo / Zona Norte', key: 'bue' }, { label: 'Escapada de Fin de Semana', key: 'bue' }
+{ label: 'Centro / Recoleta', key: 'bue' },
+{ label: 'Palermo / Zona Norte', key: 'bue' },
+{ label: 'Escapada de Fin de Semana', key: 'bue' }
     ] },
     { id: 'gramado', label: 'Gramado / Canela', image: 'gram', keys: ['gram', 'canela'], subcategories: [
-      { label: 'Gramado Centro', key: 'gram' }, { label: 'Vale dos Vinhedos', key: 'gram' }, { label: 'Canela', key: 'canela' }
+{ label: 'Gramado Centro', key: 'gram' },
+{ label: 'Vale dos Vinhedos', key: 'gram' },
+{ label: 'Canela', key: 'canela' },
+      { label: 'Gramado + Canela', key: 'gram', secondKey: 'canela' }
     ] },
     { id: 'foz', label: 'Foz de Iguaçu', image: 'igu', keys: ['igu'], subcategories: [
-      { label: 'Cataratas (lado brasileño)', key: 'igu' }, { label: 'Parque das Aves', key: 'igu' }
+{ label: 'Cataratas (lado brasileño)', key: 'igu' },
+{ label: 'Parque das Aves', key: 'igu' }
     ] }
   ];
   // Antes esta seccion rotaba 3 o 4 destinos por mes (esta tabla) para que la
@@ -522,78 +603,147 @@
   // (mismo vuelo, distinto destino), y no por region como la grilla.
   var DESTINATION_HUBS = [
     { name: 'Río de Janeiro', codes: 'GIG / SDU', options: [
-      { label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Zona Sur / Ipanema' },
-      { label: 'Búzios', key: 'buz', codes: 'GIG SDU' }, { label: 'Arraial do Cabo', key: 'arraial', codes: 'GIG SDU' },
-      { label: 'Cabo Frio', key: 'cabo', codes: 'GIG SDU' },
-      { label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' }, { label: 'Angra dos Reis', key: 'angra', codes: 'GIG SDU' },
+{ label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Zona Sur / Ipanema' },
+{ label: 'Búzios', key: 'buz', codes: 'GIG SDU' },
+{ label: 'Arraial do Cabo', key: 'arraial', codes: 'GIG SDU' },
+{ label: 'Cabo Frio', key: 'cabo', codes: 'GIG SDU' },
+{ label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' },
+{ label: 'Angra dos Reis', key: 'angra', codes: 'GIG SDU' },
       { label: 'Búzios + Arraial do Cabo', key: 'buz', codes: 'GIG SDU', subcategory: 'Búzios + Arraial do Cabo' },
       { label: 'Búzios + Cabo Frio', key: 'buz', codes: 'GIG SDU', subcategory: 'Búzios + Cabo Frio' },
+      { label: 'Arraial do Cabo + Cabo Frio', key: 'arraial', codes: 'GIG SDU', subcategory: 'Arraial do Cabo + Cabo Frio' },
+      { label: 'Angra dos Reis + Ilha Grande', key: 'angra', codes: 'GIG SDU', subcategory: 'Angra dos Reis + Ilha Grande' },
       { label: 'Río + Búzios', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Búzios' },
-      { label: 'Río + Angra dos Reis', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Angra dos Reis' },
-      { label: 'Angra dos Reis + Ilha Grande', key: 'angra', codes: 'GIG SDU', subcategory: 'Angra dos Reis + Ilha Grande' }
-      // Los pares van al final del hub, con el nombre a la vista, para que un
-      // destino suelto y un viaje de dos paradas no se confundan.
+      { label: 'Río + Angra dos Reis', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Angra dos Reis' }
     ] },
     { name: 'San Pablo', codes: 'GRU / CGH', options: [
-      { label: 'Ilhabela', key: 'ilhabela', codes: 'GRU CGH' }, { label: 'Ubatuba', key: 'ubatuba', codes: 'GRU CGH' },
-      { label: 'Paraty', key: 'paraty', codes: 'GRU CGH' },
+{ label: 'Ilhabela', key: 'ilhabela', codes: 'GRU CGH' },
+{ label: 'Ubatuba', key: 'ubatuba', codes: 'GRU CGH' },
+{ label: 'Paraty', key: 'paraty', codes: 'GRU CGH' },
       { label: 'Paraty + Ubatuba', key: 'paraty', codes: 'GRU CGH', subcategory: 'Paraty + Ubatuba' },
+      { label: 'Paraty + Ilhabela', key: 'paraty', codes: 'GRU CGH', subcategory: 'Paraty + Ilhabela' },
+      { label: 'Paraty + Angra dos Reis', key: 'paraty', codes: 'GRU CGH', subcategory: 'Paraty + Angra dos Reis' },
+      { label: 'Paraty + Ilha Grande', key: 'paraty', codes: 'GRU CGH', subcategory: 'Paraty + Ilha Grande' },
       { label: 'Ubatuba + Ilhabela', key: 'ubatuba', codes: 'GRU CGH', subcategory: 'Ubatuba + Ilhabela' },
-      { label: 'Paraty + Ilhabela', key: 'paraty', codes: 'GRU CGH', subcategory: 'Paraty + Ilhabela' }
-      // Los pares van al final del hub, con el nombre a la vista, para que un
-      // destino suelto y un viaje de dos paradas no se confundan.
+      { label: 'Ubatuba + Angra dos Reis', key: 'ubatuba', codes: 'GRU CGH', subcategory: 'Ubatuba + Angra dos Reis' },
+      { label: 'Ubatuba + Ilha Grande', key: 'ubatuba', codes: 'GRU CGH', subcategory: 'Ubatuba + Ilha Grande' },
+      { label: 'Ilhabela + Angra dos Reis', key: 'ilhabela', codes: 'GRU CGH', subcategory: 'Ilhabela + Angra dos Reis' },
+      { label: 'Ilhabela + Ilha Grande', key: 'ilhabela', codes: 'GRU CGH', subcategory: 'Ilhabela + Ilha Grande' }
     ] },
     { name: 'Santa Catarina', codes: 'FLN', options: [
-      { label: 'Florianópolis', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis (Canasvieiras / Ingleses)' },
-      { label: 'Balneário Camboriú', key: 'bcm', codes: 'FLN' }, { label: 'Itapema', key: 'itapema', codes: 'FLN' },
-      { label: 'Bombinhas', key: 'bombinhas', codes: 'FLN' }, { label: 'Garopaba', key: 'garopaba', codes: 'FLN' },
-      { label: 'Praia do Rosa', key: 'rosa', codes: 'FLN' }, { label: 'Ferrugem', key: 'ferrugem', codes: 'FLN' },
-      { label: 'Piçarras', key: 'picarras', codes: 'FLN' },
+{ label: 'Florianópolis', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis (Canasvieiras / Ingleses)' },
+{ label: 'Balneário Camboriú', key: 'bcm', codes: 'FLN' },
+{ label: 'Itapema', key: 'itapema', codes: 'FLN' },
+{ label: 'Bombinhas', key: 'bombinhas', codes: 'FLN' },
+{ label: 'Garopaba', key: 'garopaba', codes: 'FLN' },
+{ label: 'Praia do Rosa', key: 'rosa', codes: 'FLN' },
+{ label: 'Ferrugem', key: 'ferrugem', codes: 'FLN' },
+{ label: 'Piçarras', key: 'picarras', codes: 'FLN' },
       { label: 'Florianópolis + Balneário Camboriú', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Balneário Camboriú' },
-      { label: 'Balneário Camboriú + Itapema', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Itapema' },
-      { label: 'Itapema + Piçarras', key: 'itapema', codes: 'FLN', subcategory: 'Itapema + Piçarras' },
+      { label: 'Florianópolis + Itapema', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Itapema' },
       { label: 'Florianópolis + Bombinhas', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Bombinhas' },
+      { label: 'Florianópolis + Garopaba', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Garopaba' },
+      { label: 'Florianópolis + Praia do Rosa', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Praia do Rosa' },
+      { label: 'Florianópolis + Ferrugem', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Ferrugem' },
+      { label: 'Florianópolis + Piçarras', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Piçarras' },
+      { label: 'Balneário Camboriú + Itapema', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Itapema' },
+      { label: 'Balneário Camboriú + Bombinhas', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Bombinhas' },
+      { label: 'Balneário Camboriú + Garopaba', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Garopaba' },
+      { label: 'Balneário Camboriú + Praia do Rosa', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Praia do Rosa' },
+      { label: 'Balneário Camboriú + Ferrugem', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Ferrugem' },
+      { label: 'Balneário Camboriú + Piçarras', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Piçarras' },
+      { label: 'Itapema + Bombinhas', key: 'itapema', codes: 'FLN', subcategory: 'Itapema + Bombinhas' },
+      { label: 'Itapema + Garopaba', key: 'itapema', codes: 'FLN', subcategory: 'Itapema + Garopaba' },
+      { label: 'Itapema + Praia do Rosa', key: 'itapema', codes: 'FLN', subcategory: 'Itapema + Praia do Rosa' },
+      { label: 'Itapema + Ferrugem', key: 'itapema', codes: 'FLN', subcategory: 'Itapema + Ferrugem' },
+      { label: 'Itapema + Piçarras', key: 'itapema', codes: 'FLN', subcategory: 'Itapema + Piçarras' },
       { label: 'Bombinhas + Garopaba', key: 'bombinhas', codes: 'FLN', subcategory: 'Bombinhas + Garopaba' },
+      { label: 'Bombinhas + Praia do Rosa', key: 'bombinhas', codes: 'FLN', subcategory: 'Bombinhas + Praia do Rosa' },
+      { label: 'Bombinhas + Ferrugem', key: 'bombinhas', codes: 'FLN', subcategory: 'Bombinhas + Ferrugem' },
+      { label: 'Bombinhas + Piçarras', key: 'bombinhas', codes: 'FLN', subcategory: 'Bombinhas + Piçarras' },
+      { label: 'Garopaba + Praia do Rosa', key: 'garopaba', codes: 'FLN', subcategory: 'Garopaba + Praia do Rosa' },
       { label: 'Garopaba + Ferrugem', key: 'garopaba', codes: 'FLN', subcategory: 'Garopaba + Ferrugem' },
-      { label: 'Ferrugem + Praia do Rosa', key: 'ferrugem', codes: 'FLN', subcategory: 'Ferrugem + Praia do Rosa' }
-      // Los pares van al final del hub, con el nombre a la vista, para que un
-      // destino suelto y un viaje de dos paradas no se confundan.
+      { label: 'Garopaba + Piçarras', key: 'garopaba', codes: 'FLN', subcategory: 'Garopaba + Piçarras' },
+      { label: 'Praia do Rosa + Ferrugem', key: 'rosa', codes: 'FLN', subcategory: 'Praia do Rosa + Ferrugem' },
+      { label: 'Praia do Rosa + Piçarras', key: 'rosa', codes: 'FLN', subcategory: 'Praia do Rosa + Piçarras' },
+      { label: 'Ferrugem + Piçarras', key: 'ferrugem', codes: 'FLN', subcategory: 'Ferrugem + Piçarras' }
     ] },
     { name: 'Rio Grande do Sul', codes: 'POA', options: [
-      { label: 'Torres', key: 'torres', codes: 'POA' }, { label: 'Capão da Canoa', key: 'canoa', codes: 'POA' },
+{ label: 'Torres', key: 'torres', codes: 'POA' },
+{ label: 'Capão da Canoa', key: 'canoa', codes: 'POA' },
       { label: 'Torres + Capão da Canoa', key: 'torres', codes: 'POA', subcategory: 'Torres + Capão da Canoa' }
-      // Los pares van al final del hub, con el nombre a la vista, para que un
-      // destino suelto y un viaje de dos paradas no se confundan.
     ] },
     { name: 'Bahía', codes: 'SSA', options: [
-      { label: 'Salvador de Bahía', key: 'ssa', codes: 'SSA' }, { label: 'Porto Seguro', key: 'portoseguro', codes: 'SSA' },
-      { label: 'Praia do Forte', key: 'forte', codes: 'SSA' }, { label: 'Morro de São Paulo', key: 'morro', codes: 'SSA' },
-      { label: 'Itacaré', key: 'itacare', codes: 'SSA' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso', codes: 'SSA' },
-      { label: 'Salvador + Praia do Forte', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Praia do Forte' },
+{ label: 'Salvador de Bahía', key: 'ssa', codes: 'SSA' },
+{ label: 'Porto Seguro', key: 'portoseguro', codes: 'SSA' },
+{ label: 'Praia do Forte', key: 'forte', codes: 'SSA' },
+{ label: 'Morro de São Paulo', key: 'morro', codes: 'SSA' },
+{ label: 'Itacaré', key: 'itacare', codes: 'SSA' },
+{ label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso', codes: 'SSA' },
       { label: 'Salvador + Porto Seguro', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Porto Seguro' },
+      { label: 'Salvador + Praia do Forte', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Praia do Forte' },
       { label: 'Salvador + Morro de São Paulo', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Morro de São Paulo' },
+      { label: 'Salvador + Itacaré', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Itacaré' },
       { label: 'Salvador + Arraial d\'Ajuda', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Arraial d\'Ajuda' },
-      { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Arraial d\'Ajuda' }
-      // Los pares van al final del hub, con el nombre a la vista, para que un
-      // destino suelto y un viaje de dos paradas no se confundan.
+      { label: 'Porto Seguro + Praia do Forte', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Praia do Forte' },
+      { label: 'Porto Seguro + Morro de São Paulo', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Morro de São Paulo' },
+      { label: 'Porto Seguro + Itacaré', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Itacaré' },
+      { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Arraial d\'Ajuda' },
+      { label: 'Praia do Forte + Morro de São Paulo', key: 'forte', codes: 'SSA', subcategory: 'Praia do Forte + Morro de São Paulo' },
+      { label: 'Praia do Forte + Itacaré', key: 'forte', codes: 'SSA', subcategory: 'Praia do Forte + Itacaré' },
+      { label: 'Praia do Forte + Arraial d\'Ajuda', key: 'forte', codes: 'SSA', subcategory: 'Praia do Forte + Arraial d\'Ajuda' },
+      { label: 'Morro de São Paulo + Itacaré', key: 'morro', codes: 'SSA', subcategory: 'Morro de São Paulo + Itacaré' },
+      { label: 'Morro de São Paulo + Arraial d\'Ajuda', key: 'morro', codes: 'SSA', subcategory: 'Morro de São Paulo + Arraial d\'Ajuda' },
+      { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', codes: 'SSA', subcategory: 'Itacaré + Arraial d\'Ajuda' }
     ] },
     { name: 'Nordeste', codes: 'REC / MCZ / SSA / NAT / JPA / FOR', options: [
-      { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' }, { label: 'Maragogi', key: 'maragogi', codes: 'MCZ' },
-      { label: 'Maceió', key: 'mcz', codes: 'MCZ' }, { label: 'Recife', key: 'rec', codes: 'REC' },
-      { label: 'João Pessoa', key: 'joaopessoa', codes: 'JPA' }, { label: 'Natal', key: 'nat', codes: 'NAT' },
-      { label: 'Pipa', key: 'pip', codes: 'NAT' }, { label: 'Fortaleza / Jericoacoara', key: 'for', codes: 'FOR' },
-      { label: 'Natal + Pipa', key: 'nat', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Natal + Pipa' },
-      { label: 'Recife + Porto de Galinhas', key: 'rec', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Recife + Porto de Galinhas' },
-      { label: 'Recife + João Pessoa', key: 'rec', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Recife + João Pessoa' },
-      { label: 'Maceió + Maragogi', key: 'mcz', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Maceió + Maragogi' },
-      { label: 'Natal + Fortaleza', key: 'nat', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Natal + Fortaleza' }
-      // Los pares van al final del hub, con el nombre a la vista, para que un
-      // destino suelto y un viaje de dos paradas no se confundan.
+{ label: 'Porto de Galinhas', key: 'porto', codes: 'REC' },
+{ label: 'Maragogi', key: 'maragogi', codes: 'MCZ' },
+{ label: 'Maceió', key: 'mcz', codes: 'MCZ' },
+{ label: 'Recife', key: 'rec', codes: 'REC' },
+{ label: 'João Pessoa', key: 'joaopessoa', codes: 'JPA' },
+{ label: 'Natal', key: 'nat', codes: 'NAT' },
+{ label: 'Pipa', key: 'pip', codes: 'NAT' },
+{ label: 'Fortaleza / Jericoacoara', key: 'for', codes: 'FOR' },
+      { label: 'Porto de Galinhas + Maragogi', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Maragogi' },
+      { label: 'Porto de Galinhas + Maceió', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Maceió' },
+      { label: 'Porto de Galinhas + Recife', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Recife' },
+      { label: 'Porto de Galinhas + João Pessoa', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + João Pessoa' },
+      { label: 'Porto de Galinhas + Natal', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Natal' },
+      { label: 'Porto de Galinhas + Pipa', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Pipa' },
+      { label: 'Porto de Galinhas + Fortaleza', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Fortaleza' },
+      { label: 'Maragogi + Maceió', key: 'maragogi', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maragogi + Maceió' },
+      { label: 'Maragogi + Recife', key: 'maragogi', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maragogi + Recife' },
+      { label: 'Maragogi + João Pessoa', key: 'maragogi', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maragogi + João Pessoa' },
+      { label: 'Maragogi + Natal', key: 'maragogi', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maragogi + Natal' },
+      { label: 'Maragogi + Pipa', key: 'maragogi', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maragogi + Pipa' },
+      { label: 'Maragogi + Fortaleza', key: 'maragogi', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maragogi + Fortaleza' },
+      { label: 'Maceió + Recife', key: 'mcz', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maceió + Recife' },
+      { label: 'Maceió + João Pessoa', key: 'mcz', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maceió + João Pessoa' },
+      { label: 'Maceió + Natal', key: 'mcz', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maceió + Natal' },
+      { label: 'Maceió + Pipa', key: 'mcz', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maceió + Pipa' },
+      { label: 'Maceió + Fortaleza', key: 'mcz', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Maceió + Fortaleza' },
+      { label: 'Recife + João Pessoa', key: 'rec', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Recife + João Pessoa' },
+      { label: 'Recife + Natal', key: 'rec', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Recife + Natal' },
+      { label: 'Recife + Pipa', key: 'rec', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Recife + Pipa' },
+      { label: 'Recife + Fortaleza', key: 'rec', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Recife + Fortaleza' },
+      { label: 'João Pessoa + Natal', key: 'joaopessoa', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'João Pessoa + Natal' },
+      { label: 'João Pessoa + Pipa', key: 'joaopessoa', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'João Pessoa + Pipa' },
+      { label: 'João Pessoa + Fortaleza', key: 'joaopessoa', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'João Pessoa + Fortaleza' },
+      { label: 'Natal + Pipa', key: 'nat', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Natal + Pipa' },
+      { label: 'Natal + Fortaleza', key: 'nat', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Natal + Fortaleza' },
+      { label: 'Pipa + Fortaleza', key: 'pip', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Pipa + Fortaleza' }
     ] },
     { name: 'Buenos Aires', codes: 'EZE / AEP', options: [
-      { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE' },
-      { label: 'Palermo / Zona Norte', key: 'bue', codes: 'EZE AEP BUE' },
-      { label: 'Escapada de Fin de Semana', key: 'bue', codes: 'EZE AEP BUE', subcategory: 'Escapada de Fin de Semana' }
+{ label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE' },
+{ label: 'Palermo / Zona Norte', key: 'bue', codes: 'EZE AEP BUE' },
+{ label: 'Escapada de Fin de Semana', key: 'bue', codes: 'EZE AEP BUE', subcategory: 'Escapada de Fin de Semana' }
+    ] },
+    { name: 'Gramado', codes: 'POA', options: [
+      { label: 'Gramado Centro', key: 'gram', codes: 'POA', subcategory: 'Gramado Centro' },
+      { label: 'Vale dos Vinhedos', key: 'gram', codes: 'POA', subcategory: 'Vale dos Vinhedos' },
+      { label: 'Canela', key: 'canela', codes: 'POA' },
+      { label: 'Gramado + Canela', key: 'gram', codes: 'POA', subcategory: 'Gramado + Canela' }
     ] }
   ];
   var ORIGIN_AIRPORTS = { MVD: 'Montevideo (MVD)', PDP: 'Punta del Este (PDP)' };
@@ -4229,6 +4379,14 @@
         var hasVisibleOption = !!group.querySelector('button[data-dest-value]:not([hidden])');
         group.hidden = !hasVisibleOption;
         group.style.display = hasVisibleOption ? 'block' : 'none';
+        // La linea que separa los destinos sueltos de los pares se esconde
+        // junto con el grupo: si ningun par quedo visible, la linea sola seria
+        // un titulo sin nada debajo.
+        Array.prototype.forEach.call(group.querySelectorAll('.custom-select__pairs-note'), function (note) {
+          var hayPar = !!group.querySelector('button[data-subcategory*=" + "]:not([hidden])');
+          note.hidden = !hayPar;
+          note.style.display = hayPar ? 'block' : 'none';
+        });
       });
       if (!preserveActive || activeDestOption && activeDestOption.hidden) clearActiveDestOption();
       return visible;
@@ -5037,7 +5195,19 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
           groupTitle.className = 'custom-select__group-title';
           groupTitle.innerHTML = '<span class="custom-select__hub-icon" aria-hidden="true">🛬</span><span>' + esc(hub.name) + '</span><strong class="custom-select__hub-code">' + esc(hub.codes) + '</strong>';
           groupWrap.appendChild(groupTitle);
+          // Los pares van al final del hub. Antes del primero va una linea que
+          // los separa de los destinos sueltos: con 28 pares en Santa Catarina,
+          // "Balneário Camboriú" al lado de "Balneário Camboriú + Itapema" se
+          // confunden, y el filtro los deja pegados igual.
+          var pairNoteDone = false;
           hub.options.forEach(function (item, optionIndex) {
+            if (!pairNoteDone && item.subcategory && item.subcategory.indexOf(' + ') >= 0) {
+              pairNoteDone = true;
+              var pairNote = document.createElement('span');
+              pairNote.className = 'custom-select__pairs-note';
+              pairNote.textContent = 'Viajes de dos paradas';
+              groupWrap.appendChild(pairNote);
+            }
             var option = document.createElement('button');
             option.type = 'button';
             option.id = 'dest-option-' + hubIndex + '-' + optionIndex;

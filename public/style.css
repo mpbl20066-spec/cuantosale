@@ -121,7 +121,9 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .custom-select__menu::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px;border:2px solid transparent;background-clip:content-box}
 .custom-select__group{padding:4px 6px 0}
 .custom-select__group + .custom-select__group{margin-top:4px}
-.custom-select__group-title{display:flex;align-items:center;gap:7px;padding:12px 12px 8px;margin-top:2px;margin-bottom:2px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);font-weight:750;background:transparent;line-height:1.4}
+  /* La linea de pares es un titulo mas: mismo formato, y un poco menos de aire arriba porque ya la separa el padding del option anterior. */
+  .custom-select__pairs-note{margin-top:0}
+.custom-select__group-title,.custom-select__pairs-note{display:flex;align-items:center;gap:7px;padding:12px 12px 8px;margin-top:2px;margin-bottom:2px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);font-weight:750;background:transparent;line-height:1.4}
 .custom-select__hub-icon{font-size:12px;line-height:1}
 .custom-select__hub-code{margin-left:auto;padding:3px 6px;border:1px solid rgba(16,35,62,.12);border-radius:6px;background:#edf3ff;color:#10233e;font-size:10px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
 .custom-select__option{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;width:100%;padding:13px 14px 13px 18px;border:0;border-left:3px solid transparent;border-radius:12px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
@@ -483,7 +485,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .custom-select__trigger{background:var(--control-bg);border-color:var(--control-border);color:var(--ink)}
 .custom-select__value{color:var(--ink)}
 .custom-select__menu{background:var(--control-bg);border-color:var(--control-border);color:var(--ink)}
-.custom-select__group-title,.custom-select__option-sub{color:var(--control-muted)}
+.custom-select__group-title,.custom-select__option-sub,.custom-select__pairs-note{color:var(--control-muted)}
 .custom-select__option{color:var(--ink)}
 .custom-select__option:hover,.custom-select__option:focus-visible{background:var(--control-hover)}
 /* El destino seleccionado se queda con el diseño de arriba (fondo --cel-soft,

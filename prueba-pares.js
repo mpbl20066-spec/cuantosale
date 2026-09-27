@@ -1,7 +1,14 @@
-/* Que los 26 pares del desplegable resuelvan a una segunda parada real.
-   Reproduce la logica de secondKeyForSubcategory() contra los archivos reales, y
+/* Que los 88 pares de dos paradas resuelvan a una segunda parada real, y que el
+   nombre que se muestra sea el del viaje que se esta cotizando.
+
+   Reproduce la logica de secondKeyForSubcategory() contra los archivos reales y
    ademas le pide el precio a la API como lo haria el navegador. Un par que no
-   resuelve, o que la API rechaza, es un par que el usuario elige y no pasa nada. */
+   resuelve, o que la API rechaza, es un par que el usuario elige y no pasa nada.
+
+   El punto 3 es el que atrapo el bug de plata: "Buzios + Cabo Frio" tenia
+   secondKey 'arraial', asi que cotizaba Buzios -> Arraial do Cabo con el nombre
+   de Cabo Frio. Las otras dos verificaciones pasaban, porque solo preguntaban si
+   el secondKey existia, no si era el que decia el nombre. */
 const fs = require('fs');
 const raiz = 'C:/Users/mpbl2/AppData/Local/Temp/opencode/wt-combo/';
 const app = fs.readFileSync(raiz + 'public/app.js', 'utf8');
@@ -17,50 +24,148 @@ const bloque = (txt, desde, hasta) => txt.slice(txt.indexOf(desde), txt.indexOf(
 const gHub = bloque(app, 'var DESTINATION_HUBS = [', '\n  ];');
 const gGrupos = bloque(app, 'var DESTINATION_GROUPS = [', '\n  ];');
 
-// Los pares que ofrece el desplegable
-const ops = [...gHub.matchAll(/\{ label: '([^']+ \+ [^']+)', key: '(\w+)', codes: '[^']+', subcategory: '([^']+)' \}/g)]
+// Los pares que ofrece el desplegable. Los grupos del patron son 1=label,
+// 2=key, 3=subcategory.
+const ops = [...gHub.matchAll(/\{ label: '((?:[^'\\]|\\.)* \+ (?:[^'\\]|\\.)*)', key: '(\w+)', codes: '[^']*', subcategory: '((?:[^'\\]|\\.)*)' \}/g)]
   .map(m => ({ label: m[1], key: m[2], sub: m[3] }));
 // Las subcategorias de par. La clave es "primeraParada|nombre", que es como
 // secondKeyForSubcategory() las busca: compara el label y la key, y el secondKey
-// es el valor. Antes la armaba invertida y por eso daba 26 "SIN RESOLVER".
+// es el valor. Antes la armaba invertida y por eso daba 88 "SIN RESOLVER".
 const subs = new Map();
-for (const m of gGrupos.matchAll(/\{ label: '([^']+ \+ [^']+)', key: '(\w+)', secondKey: '(\w+)' \}/g)) {
+for (const m of gGrupos.matchAll(/\{ label: '((?:[^'\\]|\\.)* \+ (?:[^'\\]|\\.)*)', key: '(\w+)', secondKey: '(\w+)' \}/g)) {
   subs.set(m[2] + '|' + m[1], m[3]);
 }
+// La clave de subs es "primera|nombre" y el nombre ya trae el " + " adentro, as
+// que no se puede recuperar la segunda parada partiendola: hace falta aparte.
+const segundaDe = new Map();
+for (const m of gGrupos.matchAll(/\{ label: '((?:[^'\\]|\\.)* \+ (?:[^'\\]|\\.)*)', key: '(\w+)', secondKey: '(\w+)' \}/g)) {
+  segundaDe.set(m[2] + '|' + m[1], { a: m[2], b: m[3] });
+}
 
-console.log('1) Los 26 pares del desplegable resuelven a una segunda parada');
+// El nombre que lleva cada destino dentro de un par.
+//
+// Sale de las opciones sueltas de los hubs, que si son nombres de destino
+// ("Búzios", "Balneário Camboriú"). No puede salir de las subcategorias de los
+// grupos, porque esas son zonas: la de Búzios es "Sólo Búzios" y la de Cabo
+// Frio es "Ruta de Playas (Cabo Frio)", y con esa tabla el punto 3 daba 23
+// falsos positivos.
+//
+// Se les saca el agregado de zona: "Río de Janeiro (Centro / Sur)" es "Río de
+// Janeiro", "Arraial d'Ajuda / Trancoso" es "Arraial d'Ajuda".
+function sinZona(s) {
+  return s.split(' (')[0].split(' / ')[0];
+}
+const NOM = new Map();
+for (const m of gHub.matchAll(/\{ label: '((?:[^'\\]|\\.)*)', key: '(\w+)'/g)) {
+  if (m[1].indexOf(' + ') >= 0) continue;
+  if (!NOM.has(m[2])) NOM.set(m[2], sinZona(m[1]));
+}
+// Rio, Salvador y Fortaleza van cortos en los pares porque en el nombre del par
+// se leen mejor. Son las tres excepciones, y estan aca a proposito: si alguien
+// las cambia en los pares, el punto 3 avisa.
+const CORTO = { rio: 'Río', ssa: 'Salvador', for: 'Fortaleza' };
+for (const k in CORTO) if (NOM.has(k)) NOM.set(k, CORTO[k]);
+// Gramado tiene dos subcategorias ("Centro" y "Vale dos Vinhedos") pero es un
+// destino solo, asi que el par usa el nombre a secas.
+if (NOM.has('gram')) NOM.set('gram', 'Gramado');
+console.log('nombres de destino conocidos: ' + NOM.size);
+
+console.log('\n1) Los ' + ops.length + ' pares del desplegable resuelven a una segunda parada');
 const sinResolver = [];
 for (const o of ops) {
   const second = subs.get(o.key + '|' + o.sub);
   if (!second) sinResolver.push(o.label);
-  check(o.label.padEnd(38) + ' -> ' + (second || 'SIN RESOLVER'), !!second);
+  check(o.label.padEnd(40) + ' -> ' + (second || 'SIN RESOLVER'), !!second);
 }
 check('ninguno queda sin resolver', sinResolver.length === 0, sinResolver.join(', '));
 
 console.log('\n2) Los nombres del desplegable y de la subcategoria coinciden');
 {
-  const labelsSub = new Set([...gGrupos.matchAll(/\{ label: '([^']+ \+ [^']+)', key: '\w+', secondKey/g)].map(m => m[1]));
-  const huerfanos = ops.filter(o => !labelsSub.has(o.sub));
+  const huerfanos = ops.filter(o => !subs.has(o.key + '|' + o.sub));
   check('toda opcion tiene su subcategoria con el mismo nombre', huerfanos.length === 0,
     huerfanos.map(o => o.sub).join(', '));
+  const alReves = [...subs.keys()].filter(k => !ops.some(o => o.key + '|' + o.sub === k));
+  check('toda subcategoria tiene su opcion en el desplegable', alReves.length === 0, alReves.join(', '));
+  const dup = ops.map(o => o.key + '|' + o.sub).filter((x, i, A) => A.indexOf(x) !== i);
+  check('ningun par esta dos veces en el desplegable', dup.length === 0, [...new Set(dup)].join(', '));
+  // Y lo mismo en las subcategorias, que es donde estaba el bug: dos
+  // subcategorias con el mismo nombre y la segunda sin secondKey.
+  // secondKeyForSubcategory() corta en la primera coincidencia, asi que la
+  // segunda era inalcanzable y la que ganaba no llevaba segunda parada.
+  const subLabels = [...gGrupos.matchAll(/\{ label: '((?:[^'\\]|\\.)* \+ (?:[^'\\]|\\.)*)', key: '(\w+)'/g)]
+    .map(m => m[2] + '|' + m[1]);
+  const dupSub = subLabels.filter((x, i, A) => A.indexOf(x) !== i);
+  check('ninguna subcategoria de par esta repetida', dupSub.length === 0, [...new Set(dupSub)].join(', '));
+  // Un par no puede repetir la misma parada en las dos mitades del nombre.
+  const mismo = [...subs.keys()].filter(k => {
+    const p = k.split('|')[1].split(' + ');
+    return p.length === 2 && p[0] === p[1];
+  });
+  check('ningun par repite la misma parada', mismo.length === 0, mismo.join(', '));
 }
 
-console.log('\n3) Cada segunda parada esta en el modelo y es combinable');
+console.log('\n3) El nombre del par dice el viaje que se cotiza');
+{
+  // Esta es la que atrapa el bug de Cabo Frio: no basta con que el secondKey
+  // exista, tiene que ser el que dice la segunda mitad del nombre.
+  const malos = [], sinNombre = [];
+  for (const [k, second] of subs) {
+    const label = k.split('|')[1], key = k.split('|')[0];
+    const partes = label.split(' + ');
+    if (partes.length !== 2) { malos.push(label + ' -> el nombre no tiene dos paradas'); continue; }
+    if (!NOM.has(key) || !NOM.has(second)) { sinNombre.push(label + ' (' + (NOM.has(key) ? key : '?') + '/' + (NOM.has(second) ? second : '?') + ')'); continue; }
+    if (partes[0] !== NOM.get(key) || partes[1] !== NOM.get(second)) {
+      malos.push(label + ' -> key ' + key + ' + second ' + second + '  (el nombre dice "' + partes.join(' / ') + '")');
+    }
+  }
+  check('los ' + subs.size + ' nombres coinciden con sus secondKey', malos.length === 0, malos.join(' | '));
+  check('todo destino de un par tiene nombre conocido', sinNombre.length === 0, sinNombre.join(', '));
+}
+
+console.log('\n4) Cada segunda parada esta en el modelo y es combinable');
 {
   const malos = [];
-  for (const o of ops) {
-    const second = subs.get(o.key + '|' + o.sub);
-    if (!second) continue;
-    if (!model.DEST[second]) { malos.push(o.label + ' -> ' + second + ' no existe'); continue; }
-    if (!model.comboTransfer(second, o.key, 1)) malos.push(o.label + ' -> la API lo rechaza');
+  for (const [k, second] of subs) {
+    const label = k.split('|')[1], key = k.split('|')[0];
+    if (!model.DEST[second]) { malos.push(label + ' -> ' + second + ' no existe en DEST'); continue; }
+    if (!model.comboTransfer(second, key, 1)) malos.push(label + ' -> la API lo rechaza (distancia)');
   }
-  check('los 26 pares cotizan', malos.length === 0, malos.join(' | '));
+  check('los ' + subs.size + ' pares cotizan', malos.length === 0, malos.length + ': ' + malos.join(' | '));
 }
 
-console.log('\n4) Ningun par se combina consigo mismo');
+console.log('\n5) Ningun par se combina consigo mismo');
 {
-  const raros = ops.filter(o => { const s = subs.get(o.key + '|' + o.sub); return s && s === o.key; });
-  check('nadie es su propia segunda parada', raros.length === 0, raros.map(r => r.label).join(', '));
+  const raros = [...subs.entries()].filter(([k, s]) => s === k.split('|')[0]);
+  check('nadie es su propia segunda parada', raros.length === 0, raros.map(r => r[0]).join(', '));
+}
+
+console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a mano');
+{
+  // A que grupo pertenece cada destino. Se matchea el encabezado entero del
+  // grupo: el id, la etiqueta y las claves estan en la misma linea, asi que
+  // buscarlo hacia atras desde "keys" no encuentra nada.
+  const grupoDe = new Map();
+  let posible = 0;
+  for (const m of gGrupos.matchAll(/\{ id: '([^']+)', label: '[^']*', image: '[^']*', keys: \[([^\]]*)\], subcategories: \[/g)) {
+    const claves = [...m[2].matchAll(/'([^']+)'/g)].map(x => x[1]);
+    for (const k of claves) grupoDe.set(k, m[1]);
+    posible += claves.length * (claves.length - 1) / 2;
+  }
+  console.log('   grupos leidos: ' + new Set(grupoDe.values()).size + ', destinos: ' + grupoDe.size + ', C(n,2) suma ' + posible);
+  check('se leen los 10 grupos', new Set(grupoDe.values()).size === 10, new Set(grupoDe.values()).size + ' grupos');
+  check('todos los destinos de un par pertenecen a un grupo',
+    [...segundaDe.keys()].every(k => grupoDe.has(segundaDe.get(k).a) && grupoDe.has(segundaDe.get(k).b)),
+    [...segundaDe.keys()].filter(k => !grupoDe.has(segundaDe.get(k).a) || !grupoDe.has(segundaDe.get(k).b)).join(', '));
+
+  // Un par cruza grupos cuando sus dos paradas no estan en el mismo. Deberian
+  // ser solo los dos de Rio, que estan porque el hub de Rio los sirve aunque Rio
+  // sea un grupo de una sola clave.
+  const cruzan = [...segundaDe.entries()].filter(([, v]) => grupoDe.get(v.a) !== grupoDe.get(v.b))
+    .map(([k]) => k.split('|')[0] + ' + ' + k.split('|')[1]);
+  check('cruzan grupos solo ' + cruzan.length + ': ' + cruzan.join(', '),
+    cruzan.length === 2 && cruzan.every(x => x.indexOf('rio + ') === 0), cruzan.join(', '));
+  check('el total es C(n,2) de los grupos mas esos 2: ' + (posible + 2),
+    subs.size === posible + 2, 'hay ' + subs.size + ', C(n,2) suma ' + posible);
 }
 
 console.log(fallos.length ? '\n' + fallos.length + ' FALLOS:\n - ' + fallos.join('\n - ') : '\nTODO OK');
