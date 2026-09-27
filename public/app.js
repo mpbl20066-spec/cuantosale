@@ -1049,10 +1049,22 @@
     // un total se tragaba en silencio y el usuario veía un precio viejo con el
     // símbolo nuevo, sin ningún error en consola.
     //
-    // Ahora: recalcularTotalViaje() alcanza (su propio pintado pesado se
-    // encola una vez por frame), y los catch loguean en vez de descartarse.
+    // Ahora: repintarPresupuestoDiario() alcanza, porque su propio pintado
+    // pesado se encola una vez por frame, y los catch loguean en vez de
+    // descartarse.
+    //
+    // Se llama a esa y no a recalcularTotalViaje() porque
+    // repintarPresupuestoDiario ya la llama por dentro. Con las dos, el
+    // desglose se pintaba dos veces, que es justo lo que el parrafo de arriba
+    // cuenta que se arranco.
+    //
+    // Lo que faltaba era la seccion "Personaliza tus costos diarios". Sus
+    // presets salen de money() y del simbolo de la moneda activa, pero nadie
+    // la volvia a dibujar al cambiar de moneda: el total grande y "A donde va
+    // tu plata" si cambiaban, y las cajas de Comidas y Transporte local
+    // seguian con el simbolo viejo al lado.
     if (detailState) {
-      try { recalcularTotalViaje(); } catch (e) { console.error('No se pudo repintar el total al cambiar de moneda', e); }
+      try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar el total al cambiar de moneda', e); }
     }
     if (lastData) { try { render(lastData); } catch (e) { console.error('No se pudo repintar los resultados al cambiar de moneda', e); } }
   }
