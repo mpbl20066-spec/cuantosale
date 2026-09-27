@@ -540,7 +540,15 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
       hotel.image = bookingPhoto(photos) || bookingPhoto(photos && photos.data);
     } catch (error) { console.warn('[Booking fotos]', error.message); }
   }));
-  return hotels.filter(function (hotel) { return hotel.image; });
+  // Un hotel real sin foto sigue siendo un hotel real, con su precio real.
+  // Antes se filtraba por `hotel.image` y se tiraba abajo TODA la respuesta de
+  // Booking si faltaba alguna foto: un fallo del endpoint getHotelPhotos
+  // terminaba en la pantalla completa de hotels estimados, con precios
+  // inventados, sin que nada dejara claro que la falla era de imagenes y no de
+  // cotizacion. Ahora la foto solo ordena (primero las que la traen) y no
+  // descarta: el front ya sabe pintar un hotel sin foto con su degradado.
+  const ranked = hotels.slice().sort(function (a, b) { return (b.image ? 1 : 0) - (a.image ? 1 : 0); });
+  return ranked;
 }
 
 function uniqueHotelList(list, fallbackImages) {
@@ -559,7 +567,7 @@ function uniqueHotelList(list, fallbackImages) {
 // que el usuario eligió arriba (Económico / Intermedio / Confort). Se prioriza
 // alojamiento real de Booking.com dentro del rango de precio de esa categoría;
 // lo que falte para llegar a 3 se completa con el respaldo de cadenas reales.
-async function hotelRecommendations(destKey, destName, style, extra) {
+async function hotelRecommendations(destKey, destName, style, extra, diag) {
   const tierByStyle = { ahorro: 'eco', eq: 'moderado', comodo: 'alto' };
   const tierIndex = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
   const selectedTier = tierByStyle[style] || 'moderado';
@@ -586,10 +594,19 @@ async function hotelRecommendations(destKey, destName, style, extra) {
       }
     }
   } catch (error) {
-    console.warn('[hotelRecommendations] Booking API no disponible:', error && error.message ? error.message : error);
+    const motivo = error && error.message ? error.message : String(error);
+    console.warn('[hotelRecommendations] Booking API no disponible:', motivo);
     realHotels = [];
+    // El motivo se devuelve en la respuesta en vez de morir en el log. Antes
+    // una key sin suscripcion, un host mal configurado o un 403 se veian
+    // IGUAL que unhotel sin precio: la pantalla servia estimados del modelo
+    //como si fueran cotizaciones. Con `diag` el front puede decirlo.
+    if (diag) diag.bookingError = motivo;
   }
   const priced = uniqueHotelList(realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; }));
+  // cuantos vinieron con precio real de Booking: si es 0, lo que se muestra en
+  // pantalla es estimacion del modelo, y el front tiene que poder decirlo.
+  if (diag) diag.bookingCount = priced.length;
   // Un hotel real más barato que el objetivo de la categoría sigue siendo válido
   // para esa categoría; lo que se descarta es lo que se pasa claramente de precio.
   const high = budgetTarget > 0 ? budgetTarget * 1.6 : Infinity;
@@ -1084,11 +1101,17 @@ async function cotizarHoteles(req, res, url) {
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: url.searchParams.get('subcategory') || '' };
   if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
-  const hotels = await hotelRecommendations(v.S.dest, dest.name, v.S.style, extra);
+  const hotelDiag = {};
+  const hotels = await hotelRecommendations(v.S.dest, dest.name, v.S.style, extra, hotelDiag);
   return sendJson(res, 200, {
     hotels: hotels,
     hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra), hotelType: hotelType,
-    hotelsNearby: (hotels.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== dest.name; }) || {}).areaLabel || ''
+    hotelsNearby: (hotels.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== dest.name; }) || {}).areaLabel || '',
+    // Que el frontend pueda distinguir "precio real de Booking" de "estimado del
+    // modelo" sin adivinar por la forma del dato. Con la key sin suscribir,
+    // bookingCount viene 0 y bookingError explica por que.
+    bookingCount: Number(hotelDiag.bookingCount) || 0,
+    bookingError: hotelDiag.bookingError || null
   });
 }
 
