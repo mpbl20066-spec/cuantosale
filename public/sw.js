@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v73';
+var CACHE_NAME = 'cuantosale-shell-v74';
 var APP_SHELL = [
   // '/app' y NO '/': el servidor responde '/' con la landing de waitlist
   // (server.js: if (rel === '/') rel = '/waitlist.html') y la calculadora vive
@@ -18,6 +18,10 @@ var APP_SHELL = [
   // red y la primera pantalla sin señal no puede armar las tarjetas. Se
   // refresca sola cuando cambia el CACHE_NAME de arriba.
   '/daily-costs.js',
+  // Precios de transfer por destino. Mismo motivo que daily-costs.js: las cards
+  // del transfer leen este global apenas carga app.js, y sin el precache la
+  // primera apertura sin senal cae al piso de 20/60 en vez del precio real.
+  '/transfer-precios.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',

@@ -1065,6 +1065,7 @@
     // seguian con el simbolo viejo al lado.
     if (detailState) {
       try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar el total al cambiar de moneda', e); }
+      try { repintarPreciosEnMoneda(); } catch (e) { console.error('No se pudieron repintar los precios de hotel y traslado al cambiar de moneda', e); }
     }
     if (lastData) { try { render(lastData); } catch (e) { console.error('No se pudo repintar los resultados al cambiar de moneda', e); } }
   }
@@ -1519,6 +1520,19 @@
     var options = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
     return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></span></label>';
   }
+  /* Que hotel hay que marcar al redibujar la lista.
+     Devuelve true/false si el total guardado esta en la lista, y null si no se
+     sabe (todavia no se eligio ninguno, o el hotel guardado ya no se ofrece).
+     El null es distinto de false a proposito: false seria "no marcar ninguno" y
+     dejaria la lista sin radio marcado, que es peor que marcar el recomendado. */
+  function hotelElegidoEnEstaLista(totalValue) {
+    if (!detailState || !detailState.selectedHotel) return null;
+    var guardado = Number(detailState.selectedHotelTotal);
+    if (!Number.isFinite(guardado) || guardado <= 0) return null;
+    // Margen de 1 porque el total guardado viene de un data-hotel-total ya
+    // redondeado al pintarse.
+    return Math.abs(guardado - totalValue) < 1;
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
@@ -1570,9 +1584,15 @@
         // label ahora cubre todo lo visual. Los enlaces de Booking y el
         // <details> de "hoteles similares" quedan FUERA del label a propósito:
         // dentro de un label no se pueden pulsar con normalidad.
+        // El marcado sale de lo que la persona elegio, no de "recommended": al
+        // cambiar de moneda se repinta esta lista para actualizar los importes, y
+        // si dependiera de recommended la eleccion se perderia y el presupuesto
+        // saltaria solo. recommended queda de respaldo cuando no hay eleccion.
+        var elegido = hotelElegidoEnEstaLista(totalValue);
+        var marcado = elegido != null ? elegido : !!option.recommended;
         return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' +
           '<label class="hotel-option__pick">' + imageMarkup +
-          '<span class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
+          '<span class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
           '<h3>' + esc(option.name) + '</h3>' + descriptionMarkup +
           '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p>' +
           '<div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div>' +
@@ -2510,6 +2530,59 @@
     recalcularTotalViaje();
     var section = document.querySelector('.daily-budget');
     if (section) section.innerHTML = dailyBudgetControls();
+  }
+  /* Los importes de hotel y de traslado tambien salen de money(), asi que
+     cambian con la moneda, pero vivian en secciones que nadie repintaba. Es el
+     mismo bug que el de los costos diarios, dos veces mas.
+
+     No se vuelven a pedir al servidor: los datos ya estan en detailState.meta, asi
+     que se rehace el HTML con los mismos generadores. Y no se recalcula el
+     presupuesto despues, porque los totales en la base no cambian al cambiar la
+     moneda: saltaria el numero que la persona ya eligio. La lista de hoteles
+     vuelve a marcar lo que estaba marcado (ver hotelElegidoEnEstaLista). */
+  /* Que hacer cuando cambian los viajeros con una propuesta abierta.
+
+     Los botones +/- solo cambiaban S.pax y el numero del contador, asi que
+     detailState se quedaba con el numero de viajeros anterior. Las partes que
+     son por persona (comidas y transporte local) seguian con el total viejo:
+     con 4, 3 y 2 viajeros el total daba $209.074, $177.217 y $105.560, cuando
+     de 2 a 3 deberia crecer 50% y crecia 67,9%. Los vuelos no tenian el
+     problema porque se vuelven a consultar.
+
+     Se recalcula desde el valor por persona por dia, que es el unico dato que
+     no depende de cuantos van. No se tocan alojamiento ni traslados: una
+     habitacion no sale mas cara por ser tres, y el traslado ya viene por
+     persona desde el modelo.
+
+     Si la persona puso "Sin sumar" en comidas o en transporte, se respeta y se
+     deja en cero: recalcular un cero porque cambio el numero de viajeros seria
+     desconocer su decision. */
+  function alCambiarViajeros() {
+    if (detailState && detailState.meta) {
+      var noches = Math.max(1, Number(detailState.meta.nights) || 1);
+      var pax = Math.max(1, Number(S.pax) || 1);
+      detailState.meta.pax = pax;
+      if (detailState.foodBudgetMode !== 'none') {
+        detailState.parts.comidas = Math.round((Number(detailState.foodPerDay) || 0) * noches * pax);
+      }
+      if (detailState.localBudgetMode !== 'none') {
+        detailState.parts.local = Math.round((Number(detailState.localPerDay) || 0) * noches * pax);
+      }
+      try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar al cambiar los viajeros', e); }
+    }
+    schedule();
+  }
+  function repintarPreciosEnMoneda() {
+    if (!detailState || !detailState.meta) return;
+    // .hotel-options es lo que devuelve el generador una vez cargaron los hoteles;
+    // .hotel-options-loading es solo el placeholder y lo maneja
+    // loadHotelRecommendations.
+    var listaHoteles = document.querySelector('.hotel-options');
+    if (listaHoteles && detailState.meta.hotelsLoaded) {
+      listaHoteles.outerHTML = hotelOptions(detailState.meta, detailState.hotel);
+    }
+    var traslado = document.querySelector('[data-official-transfer]');
+    if (traslado) traslado.outerHTML = transferCard(detailState.meta);
   }
   function deseleccionarHotel() {
     if (!detailState) return;
@@ -4927,8 +5000,8 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
     });
     $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; syncDateRangeFields(); schedule(); });
     $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Number(e.target.value) || 0); schedule(); });
-    $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; schedule(); });
-    $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; schedule(); });
+    $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
+    $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
     $('#seg').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       S.style = b.getAttribute('data-v');
