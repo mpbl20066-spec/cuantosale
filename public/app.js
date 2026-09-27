@@ -1582,26 +1582,41 @@
           '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
       }).join('') + '</div></section>';
   }
-  function localToursMarkup(meta) {
-    var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
-    var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
+  /* Los tours de un destino, con el precio real de las fechas que esta
+     mirando el usuario si hay Civitatis, y la lista local si no.
+     Vive aparte de localToursMarkup porque la Guia Secreta tambien los
+     muestra, y duplicar la logica de Civitatis hacia que un dia una diga
+     una cosa y la otra otra. */
+  function toursFor(destinationKey, destinationName) {
+    var key = String(destinationKey || '').toLowerCase();
+    if (!key) return [];
+    destinationName = destinationName || key;
     // Las actividades reales de Civitatis ganan si hay; si no, la lista local.
     // Es un merge, no un reemplazo: la lista local sigue siendo el piso, asi
     // que un destino sin mapeado en Civitatis, o una API caida, muestran igual.
-    var remote = window.__civitatisTours && window.__civitatisTours.destinationKey === destinationKey
+    var remote = window.__civitatisTours && window.__civitatisTours.destinationKey === key
       ? (window.__civitatisTours.items || [])
       : [];
-    var tours = remote.length
+    return remote.length
       ? remote.map(function (a) {
           return {
-            destinations: [destinationKey], destination: destinationName,
+            destinations: [key], destination: destinationName,
             title: a.title, description: a.description, price: Number(a.price) || 0,
             details: a.details || '', image: a.image || '', rating: a.rating || 0,
             reviewsCount: a.reviewsCount || 0, url: a.url || '', source: 'civitatis',
             freeCancellation: !!a.freeCancellation
           };
         })
-      : LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(destinationKey) >= 0; });
+      : LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(key) >= 0; });
+  }
+  // Se expone porque la Guia Secreta tambien dibuja los tours y su preview
+  // los necesita. Mismo criterio que los otros globales del proyecto: datos
+  // que se leen, no logica que se ejecuta.
+  window.CS_TOURS = toursFor;
+  function localToursMarkup(meta) {
+    var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
+    var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
+    var tours = toursFor(destinationKey, destinationName);
     if (!tours.length) return '';
     // Los tours locales guardan autor y licencia en TOUR_PHOTOS; el pie global
     // los reagrupa. Los de Civitatis traen su propia foto, sin crédito que dar.
