@@ -580,12 +580,19 @@ function mezclarGuia(propia, regional) {
   if (!propia) return regional || null;
   if (!regional) return propia;
   var salida = Object.assign({}, regional, propia);
-  ['beaches', 'comer', 'hacer', 'tips'].forEach(function (seccion) {
+  // 'atracciones' faltaba en esta lista: la ciudad que la define no perdia
+  // nada porque no hay regional con atracciones todavia, pero cualquier
+  // regional que las tenga en el futuro se las imporia encima.
+  ['beaches', 'atracciones', 'comer', 'hacer', 'tips'].forEach(function (seccion) {
     var dePropia = propia[seccion];
     var deRegional = regional[seccion];
-    if (Array.isArray(dePropia) && dePropia.length) return;           // la ciudad manda
-    if (Array.isArray(dePropia) && !deRegional) return;                // vacio explicito, sin regional
-    salida[seccion] = deRegional || dePropia;
+    // Un array, aunque este vacio, es una decision de la ciudad: se respeta.
+    // El bug era que `[]` caia en la linea de abajo y se completaba sola con
+    // la regional. Sao Paulo declaraba beaches: [] justamente para que la
+    // regional de Sao Paulo (Ilhabela y Ubatuba) no le apareciera.
+    if (Array.isArray(dePropia)) return;
+    if (deRegional === undefined) return;   // la ciudad no lo define: nada que hacer
+    salida[seccion] = deRegional;
   });
   return salida;
 }
