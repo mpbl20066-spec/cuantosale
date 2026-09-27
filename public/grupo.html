@@ -148,6 +148,14 @@
   .grupo-settledon__box{display:grid;place-items:center;width:15px;height:15px;border:2px solid var(--line);border-radius:5px;font-size:9px;font-weight:800;line-height:1;color:transparent}
   .grupo-settledon[aria-pressed="true"]{border-color:var(--good);background:var(--good);color:var(--action-ink)}
   .grupo-settledon[aria-pressed="true"] .grupo-settledon__box{border-color:var(--good);background:var(--action-ink);color:var(--good)}
+  /* A 320-360px el boton de 44px mas el importe se comen el ancho y a los
+     nombres les quedan 24px: medido, cada nombre se partia en dos lineas de una
+     letra. A partir de aca la fila pasa a dos lineas: arriba quien le paga a
+     quien, abajo el importe y el boton. Mismo corte que la fila de gasto. */
+  @media (max-width:420px){
+    .grupo-settle{flex-wrap:wrap;row-gap:10px}
+    .grupo-settle__flow{flex:1 1 100%}
+  }
   .grupo-settle.is-paid{background:var(--good-soft)}
   .grupo-settle.is-paid .grupo-settle__flow,.grupo-settle.is-paid .grupo-settle__amount{opacity:.55}
   .grupo-settle.is-paid .grupo-settle__amount{text-decoration:line-through}
@@ -202,6 +210,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=13" defer></script>
+<script src="/grupo.js?v=14" defer></script>
 </body>
 </html>
