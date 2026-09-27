@@ -563,13 +563,25 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   const dep = String((extra && extra.dep) || '').trim() || new Date(Date.now() + 86400000).toISOString().slice(0, 10);
   const ret = String((extra && extra.ret) || '').trim() || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
   const adults = Math.max(1, Number((extra && extra.pax) || 1));
-  const destinationUrl = new URL('/api/v1/hotels/searchDestination', 'https://' + settings.host);
-  destinationUrl.searchParams.set('query', hotelName);
-  destinationUrl.searchParams.set('locale', 'es');
-  const destinationPayload = await bookingApiJson(destinationUrl.toString(), settings);
-  const destinationRows = responseRows(destinationPayload);
-  const target = destinationRows.find(function (item) { return item && /city/i.test(String(item.search_type || item.dest_type || '')); }) || destinationRows[0];
-  if (!target || target.dest_id == null || !target.search_type) throw new Error('Booking API no encontró la ciudad "' + hotelName + '".');
+  // El nombre del destino en lib/model.js está escrito para que se lea bien en
+  // la interfaz, y a veces son dos ciudades: "Fortaleza / Jericoacoara",
+  // "Trancoso / Arraial d'Ajuda". Booking no entiende esa barra: searchDestination
+  // no devuelve nada y el destino caía entero al respaldo, sin hoteles reales.
+  // Se prueban las partes en orden y se usa la primera que resuelva.
+  const candidatos = hotelName.split(/\s*\/\s*/).map(function (part) { return part.trim(); }).filter(Boolean);
+  if (!candidatos.length) candidatos.push(hotelName);
+  let target = null;
+  let consultado = null;
+  for (const candidato of candidatos) {
+    const destinationUrl = new URL('/api/v1/hotels/searchDestination', 'https://' + settings.host);
+    destinationUrl.searchParams.set('query', candidato);
+    destinationUrl.searchParams.set('locale', 'es');
+    const destinationPayload = await bookingApiJson(destinationUrl.toString(), settings);
+    const destinationRows = responseRows(destinationPayload);
+    const elegido = destinationRows.find(function (item) { return item && /city/i.test(String(item.search_type || item.dest_type || '')); }) || destinationRows[0];
+    if (elegido && elegido.dest_id != null && elegido.search_type) { target = elegido; consultado = candidato; break; }
+  }
+  if (!target) throw new Error('Booking API no encontró la ciudad "' + hotelName + '" (probó: ' + candidatos.join(', ') + ').');
   const isAllInclusive = extra && extra.hotelType === 'all-inclusive';
   const params = new URLSearchParams({
     dest_id: String(target.dest_id), search_type: String(target.search_type),
@@ -813,9 +825,50 @@ function calculateLocalTransportCost({ style = 'eq', dest = 'rio', nights = 3, p
     totalUsd: totalUsd
   };
 }
+/*
+ * Transfer desde el aeropuerto: el precio sale de la tabla por destino
+ * (data/transfer-precios.json, via model.TRANSFER_PRICES), no de una constante.
+ *
+ * ANTES eran tres numeros distintos para lo mismo: las cards del cliente
+ * mostraban 30 y 150 fijos, y esta funcion usaba OFFICIAL_TRANSFER_PRICE_USD
+ * (35) por pasajero. Para dos personas el wizard decia 70 y la card decia 30.
+ * Ademas los tres eran iguales para los 44 destinos, y de GIG a Rio hay 18 km
+ * contra 174 km de GIG a Buzios.
+ *
+ * La semantica que se fijo, y que antes estaba mezclada:
+ *   compartido: USD por PERSONA, solo ida.
+ *   privado:    USD por VEHICULO de hasta 4 personas, solo ida. NO se multiplica
+ *               por los pasajeros: es el mismo auto para los dos.
+ *
+ * `bank` se mantiene porque la app lo usa para mostrar los datos de la cuenta de
+ * Prex. Es informacion del servicio, no del precio, asi que no se toca.
+ */
 function transferConfig(destKey, pax) {
-  const unit = Number(process.env.OFFICIAL_TRANSFER_PRICE_USD) || 35;
-  return { pricePerPassenger: unit, amount: unit * Math.max(1, Number(pax) || 1), destination: destKey, bank: { bank: 'Prex', account: '361333', holder: 'Maria Paola Batista' } };
+  const personas = Math.max(1, Number(pax) || 1);
+  const tabla = model.transferOptions(destKey);
+  // Destino fuera de la tabla: se cae al precio por pasajero de antes, que al
+  // menos es un piso conocido. No deberia pasar: validar-transfer.js obliga a
+  // que los 44 destinos de DEST esten en la tabla.
+  if (!tabla) {
+    const unit = Number(process.env.OFFICIAL_TRANSFER_PRICE_USD) || 35;
+    return {
+      destino: destKey, sinTabla: true, iata: null, modo: 'car', km: null,
+      compartido: unit, privado: unit * 3, appRideUsd: null,
+      precioPorPasajero: unit, monto: unit * personas, personas: personas,
+      banco: { bank: 'Prex', account: '361333', holder: 'Maria Paola Batista' }
+    };
+  }
+  return {
+    destino: destKey, nombre: tabla.nombre, sinTabla: false,
+    iata: tabla.iata, modo: tabla.modo, km: tabla.km,
+    // Se mandan los dos precios y el app elige. `monto` queda como el compartido
+    // por la persona, que es lo que se venia usando para el total.
+    compartido: tabla.compartido, privado: tabla.privado, appRideUsd: tabla.appRideUsd,
+    precioPorPasajero: tabla.compartido,
+    monto: tabla.compartido * personas,
+    personas: personas,
+    banco: { bank: 'Prex', account: '361333', holder: 'Maria Paola Batista' }
+  };
 }
 
 /* ---------- límite de pedidos por IP ---------- */
