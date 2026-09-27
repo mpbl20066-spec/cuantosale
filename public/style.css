@@ -358,11 +358,22 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-type-filter select:hover{border-color:var(--control-muted)}
 .hotel-type-filter select:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
 @media (max-width:560px){.hotel-type-filter{max-width:none}}
-.hotel-choice{display:flex;align-items:center;gap:7px;cursor:pointer}/* El radio toma el mismo ambar del marco de seleccion. Antes usaba --cel
-   (azul): con la card elegida en ambar, el radio marcado quedaba azul arriba
-   de una card ambar, o sea dos colores para la misma senal de "elegiste esto".
-   --card-sel-border da 3.1:1 sobre blanco, que es lo que pide un control. */
-.hotel-choice input{accent-color:var(--card-sel-border);width:17px;height:17px}.hotel-choice .hotel-badge{margin:0}
+/* El radio ya no se ve, pero no se saco del DOM: sigue siendo el control que
+   el teclado tabula, el que hace que un clic en cualquier punto de la card
+   cambie el hotel (la card entera es el label) y el que :has(:checked) mira
+   para pintar el marco, el fondo y el boton "Elegir este hotel". Por eso
+   queda en 1px con opacity 0 y no en display:none, que lo sacaria del
+   recorrido del teclado y dejaria la card sin forma de elegirse con teclado.
+
+   El circulo repetia una señal que ya dan tres cosas a la vez: el marco de 2px
+   con el color de seleccion, el fondo de la card, y el boton que pasa a
+   "Agregado". Y ocupaba justo el lugar donde se lee el badge ("Recomendado",
+   "Buena opcion"), que es el dato que si distingue a las tres tarjetas. */
+.hotel-choice input{position:absolute;width:1px;height:1px;margin:0;padding:0;opacity:0;pointer-events:none}.hotel-choice .hotel-badge{margin:0}
+/* El wrapper sigue porque el JS lo nombra y porque mantiene el badge alineado
+   con el borde de la imagen. Sin el radio no queda nada que separar, asi que
+   el gap de 7px se fue con el. */
+.hotel-choice{display:flex;align-items:center;cursor:pointer}
 /* La card entera es la etiqueta del radio (ver hotelOptions() en app.js): el
    label envuelve imagen, badge, nombre, descripción y precios, así que no hay
    que acertarle a una tira de 26px para cambiar de hotel. Los enlaces quedan
