@@ -2062,22 +2062,23 @@
   }
   // Un token por salto: si el usuario va clickeando rubros seguidos, el último
   // clic gana y los scrolls pendientes de los anteriores se descartan.
-  var budgetJumpToken = 0;
-  function jumpToBudgetSection(category) {
-    var target = budgetAnchorFor(category);
+  var sectionJumpToken = 0;
+  /* Salto con foco a cualquier sección de la página. Lo usan las filas del
+     desglose / "Mi Viaje" (que van a la sección del rubro) y el CTA "Ver mi
+     presupuesto" (que va al resumen final del itinerario). */
+  function jumpToSection(target) {
     if (!target) return false;
     // Se lleva el foco al destino para que el salto también se pueda seguir con
     // el teclado desde ahí, no sólo con el mouse.
     if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
-    highlightBudgetAnchor(target);
-    var token = ++budgetJumpToken;
+    var token = ++sectionJumpToken;
     function landed() {
       // "Aterrizó" = el borde superior de la sección quedó contra el margen
       // superior de la pantalla. El margen lo pone scroll-margin-top (18px).
       return Math.abs(target.getBoundingClientRect().top - 18) <= 4;
     }
     function go(behavior, isRetry) {
-      if (token !== budgetJumpToken) return;
+      if (token !== sectionJumpToken) return;
       target.scrollIntoView({ behavior: behavior, block: 'start' });
       target.focus({ preventScroll: true });
       if (isRetry) return;
@@ -2086,7 +2087,7 @@
       // Chromium lo ignora y el clic no parece hacer nada. Si a los 350ms la
       // sección todavía no llegó, se completa de una, sin animación.
       window.setTimeout(function () {
-        if (token === budgetJumpToken && !landed()) go('auto', true);
+        if (token === sectionJumpToken && !landed()) go('auto', true);
       }, 350);
     }
     // Sin requestAnimationFrame: no dispara con la pestaña en segundo plano y
@@ -2094,6 +2095,12 @@
     // siempre, que es lo que importa para un salto pedido por la persona.
     window.setTimeout(function () { go('smooth', false); }, 0);
     return true;
+  }
+  function jumpToBudgetSection(category) {
+    var target = budgetAnchorFor(category);
+    if (!target) return false;
+    highlightBudgetAnchor(target);
+    return jumpToSection(target);
   }
   function handleBudgetJump(e) {
     var trigger = e.target.closest && e.target.closest('[data-jump-category]');
@@ -2355,6 +2362,10 @@
   function shareStoryCard(button) {
     if (!detailState || !detailState.meta) return;
     var originalLabel = button ? button.textContent : '';
+    // El resumen se re-pinta con cada recálculo del presupuesto, y eso
+    // repondraría este botón (con su "Generando imagen…") a mitad de la
+    // generación. El flag congela el repintado mientras dura.
+    itinerarySummaryBusy = true;
     if (button) { button.disabled = true; button.textContent = '⏳ Generando imagen…'; }
     var budget = getBudgetBreakdown(detailState);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
@@ -2387,13 +2398,29 @@
     }).catch(function (e) {
       alert(e && e.message || 'No pudimos generar la imagen para compartir. Probá de nuevo en un momento.');
     }).finally(function () {
+      itinerarySummaryBusy = false;
       if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
       if (button) { button.disabled = false; button.textContent = originalLabel || '📸 Compartir en Instagram'; }
     });
   }
-  function openItinerarySummaryModal() {
-    if (!detailState || !detailState.meta) return;
-    var modal = $('#booking-modal');
+  /* ---------- Resumen final del itinerario ----------
+     Antes era un modal (#booking-modal) con fondo oscurecido y botón de cerrar:
+     la conclusión del viaje tapaba la pantalla, y para volver a tocar el vuelo
+     o sumar un tour había que cerrarla primero. Ahora es la última sección de la
+     vista de detalle, con el mismo ancho que el resto del contenido, y se llega
+     scrolleando (el CTA "Ver mi presupuesto" del panel "Mi Viaje" la trae a la
+     vista). Como vive en la página, se re-pinta en cada recálculo del
+     presupuesto: los números que muestra son los de este momento, no los de
+     cuando se abrió. */
+  function itinerarySummaryHost() { return $('#itinerary-summary'); }
+  // Un botón del resumen con una acción en curso (generando la imagen para
+  // Instagram, guardando antes de saltar a /grupo) cambia su propio label para
+  // dar feedback. Un repintado en medio le devolvería el label original y la
+  // acción parecería perdida, así que mientras dura se congela el repintado.
+  var itinerarySummaryBusy = false;
+  function renderItinerarySummary() {
+    var host = itinerarySummaryHost();
+    if (itinerarySummaryBusy || !host || !detailState || !detailState.meta) return;
     var flightSummary = getSelectedFlightSummary();
     var transferState = detailState.transferWizard || { pickupMinutes: 60, customTime: '', hotelName: findSelectedHotelLabel() };
     var transferLabel = getTransferPickupLabel(transferState.pickupMinutes, transferState.customTime);
@@ -2424,7 +2451,7 @@
     summaryText = summaryText.replace('Traslado: ' + (transferLabel || 'A coordinar'), 'Traslado: ' + transferModeLabel);
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
     var toursBookUrl = toursWhatsappUrl(detailState);
-    modal.innerHTML = '<div class="booking-dialog itinerary-summary voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
+    host.innerHTML = '<div class="voucher-dialog">' +
       '<div class="voucher-head"><span class="voucher-kicker">CuantoSale · Voucher digital</span><h2 id="itinerary-summary-title">Resumen final del itinerario</h2><p>' + esc(detailState.meta.dest.name) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</p></div>' +
       '<div class="voucher-total"><span>Total general estimado</span><strong>' + money(totalGeneral) + '</strong><div class="voucher-total__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</div><small>Calculado para ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ' · Vuelo + hotel + traslados + tours + operación en destino</small></div>' +
       '<div class="voucher-grid"><div class="voucher-card"><span class="voucher-icon">✈️</span><div><small>Vuelo seleccionado</small><strong>' + esc(flightSummary.airline) + '</strong><p>' + esc(flightSummary.summary) + '</p><b>' + money(flightTotal) + '</b></div></div>' +
@@ -2433,8 +2460,8 @@
       '<div class="voucher-card"><span class="voucher-icon">🎟️</span><div><small>Tours y actividades</small><strong>' + esc(toursLabel) + '</strong><p>' + esc(toursDetail) + '</p><b>' + money(toursTotal) + '</b></div></div></div>' +
       '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
       '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><button type="button" class="voucher-copy" data-split-trip>🤝 Dividir viaje con amigos</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div>';
-    modal.dataset.summaryText = summaryText;
-    var voucherCards = modal.querySelectorAll('.voucher-card');
+    host.dataset.summaryText = summaryText;
+    var voucherCards = host.querySelectorAll('.voucher-card');
     if (voucherCards[0]) {
       var flightContent = voucherCards[0].querySelector('div');
       if (flightContent) {
@@ -2457,7 +2484,20 @@
     if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', flightBookUrl ? '<a class="voucher-card__action" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer">✈️ Reservar Vuelo</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>✈️ Reservar Vuelo</button>');
     if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
     if (voucherCards[3]) voucherCards[3].querySelector('div').insertAdjacentHTML('beforeend', toursBookUrl ? '<a class="voucher-card__action" href="' + esc(toursBookUrl) + '" target="_blank" rel="noopener noreferrer">🎟️ Reservar Tours</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>🎟️ Reservar Tours</button>');
-    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    host.hidden = false;
+    host.classList.remove('oculto');
+  }
+  // El CTA "Ver mi presupuesto" del panel "Mi Viaje" no abre nada: pinta el
+  // resumen si todavía no está y lo trae a la vista. El salto es el mismo de las
+  // filas del desglose, con su reintento cuando el scroll suave no arranca, y el
+  // foco queda en la sección —que se anuncia por su aria-labelledby— para que
+  // se pueda seguir desde el teclado.
+  function showItinerarySummary() {
+    var host = itinerarySummaryHost();
+    if (!host || !detailState || !detailState.meta) return;
+    renderItinerarySummary();
+    if (!host.innerHTML) return;
+    jumpToSection(host);
   }
   function syncDailyBudgetState() {
     if (!detailState || !detailState.meta) return;
@@ -2512,6 +2552,13 @@
       // dentro de renderTripSummary(), que además lo llamaba dos veces por
       // recálculo.
       syncBudgetJumpTargets();
+      // El resumen final del itinerario es una sección de la página, no un
+      // modal: si no se repintara acá quedaría mostrando el total de antes de
+      // cambiar el vuelo, sumar un tour o mover el presupuesto diario. Sólo
+      // cuando ya se llegó a ver, para no pagar un innerHTML en cada gesto de
+      // una vista que todavía no se scrolleó hasta el final.
+      var summaryHost = itinerarySummaryHost();
+      if (summaryHost && !summaryHost.hidden && !summaryHost.classList.contains('oculto')) renderItinerarySummary();
     };
     // rAF para no pintar fuera de ciclo, Y un setTimeout como red de seguridad.
     // rAF NO se dispara en una pestaña en segundo plano (el navegador no
@@ -4316,6 +4363,12 @@
     sincronizarTrasladoOficial();
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
+    // El resumen final se pinta acá, con la vista ya visible: hasta este punto
+    // queueHeavyRepaint() salía temprano porque #vista-detalle seguía oculto, y
+    // la sección nueva nacía vacía. Se muestra siempre —es la última sección de
+    // la página, no algo que haya que pedir— y de acá en adelante se repinta sola
+    // con cada recálculo.
+    renderItinerarySummary();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     // Hoteles y vuelos no dependen uno del otro, así que van juntos. Antes los
     // hoteles iban por requestIdleCallback con timeout de 1.2s (que bajo presión
@@ -4424,7 +4477,7 @@
     return fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
-      if (savedTrip) { applySavedTripToDetail(savedTrip); window.setTimeout(openItinerarySummaryModal, 0); }
+      if (savedTrip) { applySavedTripToDetail(savedTrip); window.setTimeout(showItinerarySummary, 0); }
       return true;
     }).catch(function (e) {
       // Se devuelve el motivo y no un null pelado. Antes devolvia null, y el
@@ -5345,7 +5398,7 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       var summaryCta = e.target.closest('[data-summary-book]');
       if (!summaryCta) return;
       e.preventDefault(); e.stopPropagation();
-      openItinerarySummaryModal();
+      showItinerarySummary();
     });
     $('#results').addEventListener('click', function (e) {
       var proposal = e.target.closest('[data-propuesta-id]');
@@ -5658,8 +5711,12 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         recalcularTotalViaje();
       }
     });
-    $('#booking-modal').addEventListener('click', function (e) {
-      if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
+    // Acciones del resumen final del itinerario. Antes vivían en el listener de
+    // #booking-modal, porque el resumen se pintaba adentro del modal. Ahora que
+    // es una sección de #vista-detalle, los botones viven en su propio
+    // contenedor y el modal vuelve a ser solo para lo que de verdad se abre
+    // encima de la página (reserva, transfer, checkout).
+    $('#itinerary-summary').addEventListener('click', function (e) {
       var saveTripButton = e.target.closest('[data-save-trip]');
       if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
       var splitTripButton = e.target.closest('[data-split-trip]');
@@ -5667,6 +5724,7 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         e.preventDefault();
         (async function () {
           var originalLabel = splitTripButton.textContent;
+          itinerarySummaryBusy = true;
           splitTripButton.disabled = true;
           splitTripButton.textContent = 'Guardando...';
           // Se pasa el nombre del viaje antes de saltar, para que /grupo abra
@@ -5678,6 +5736,7 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
             window.location.href = '/grupo';
             return;
           }
+          itinerarySummaryBusy = false;
           splitTripButton.disabled = false;
           splitTripButton.textContent = originalLabel;
         }());
@@ -5686,17 +5745,22 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();
-        var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent($('#booking-modal').dataset.summaryText || '');
+        var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(itinerarySummaryHost().dataset.summaryText || '');
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
       }
       var storyButton = e.target.closest('[data-share-story]');
       if (storyButton) { e.preventDefault(); shareStoryCard(storyButton); }
       var coordinateTransfer = e.target.closest('[data-coordinate-transfer]');
+      // No hace falta cerrar nada antes: el resumen ya no está en el modal, así
+      // que el wizard de transfer se abre encima de la página sin desarmar la
+      // sección de abajo.
       if (coordinateTransfer) {
         e.preventDefault();
-        closeBookingForm();
         openTransferModal(detailState && detailState.meta);
       }
+    });
+    $('#booking-modal').addEventListener('click', function (e) {
+      if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var stepButton = e.target.closest('[data-transfer-step]');
       if (stepButton) {
         e.preventDefault(); e.stopPropagation();
