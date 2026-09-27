@@ -70,10 +70,13 @@ const COMMITTED = {};
     COMMITTED[rel] = cp.execSync('git show HEAD:' + rel, { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
   } catch (e) { COMMITTED[rel] = null; }
 });
+// git guarda LF y el checkout en Windows deja CRLF, asi que comparar los
+// strings tal cual da "distinto" con el archivo perfectamente limpio.
+const sinEol = (s) => String(s == null ? '' : s).replace(/\r\n/g, '\n');
 const sucios = [];
 [['public/guias.js', origGuias], ['public/app.js', origApp]].forEach(function (par) {
   const base = COMMITTED[par[0]];
-  if (base !== null && base !== par[1]) sucios.push(par[0]);
+  if (base !== null && sinEol(base) !== sinEol(par[1])) sucios.push(par[0]);
 });
 if (sucios.length) {
   console.error('No se corre con ' + sucios.join(' y ') + ' sin commitear.');
