@@ -2910,6 +2910,44 @@
   function transferPickupTimeLabel(date) {
     return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
   }
+  /* Dibujo de las dos opciones de transfer, en lugar del emoji.
+     El emoji (🚐 y 🚗) se veía distinto en cada sistema operativo y además
+     no decía nada: las dos opciones son un auto, lo único que las separa es
+     cuántas personas van adentro. El dibujo dice justamente eso: la van alta
+     lleva tres cabezas en la ventanilla y el auto bajo lleva una sola, con el
+     asiento de atrás vacío. También por eso son dos vehículos de silueta muy
+     distinta (una caja alta, el otro una sedan) y no el mismo dibujo con dos
+     colores: se tienen que diferenciar de un vistazo.
+     Trazo como CATEGORY_ICONS, así que heredan el color del estado y no hay
+     que dar crédito de licencia. */
+  function transferArt(key) {
+    var ico = 'class="transfer-choice__art" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    if (key === 'shared') {
+      // Van de traslado. Tres cabezas, y de paso se ve que es más alta y
+      // angosta que el auto: la diferencia de silueta es la primera señal.
+      return '<svg ' + ico + '>' +
+        '<path d="M2.4 15.4V10.4l1.9-3.4A2.4 2.4 0 0 1 6.1 6h10.8a2.4 2.4 0 0 1 1.9.9l2.2 3.5v5"/>' +
+        '<path d="M2.4 15.4h18.6"/>' +
+        '<rect x="4.5" y="7.6" width="14.4" height="5.4" rx="1.2"/>' +
+        '<circle cx="8" cy="10.3" r="1.2"/><circle cx="11.7" cy="10.3" r="1.2"/><circle cx="15.4" cy="10.3" r="1.2"/>' +
+        '<circle cx="6.8" cy="17.4" r="2.1"/><circle cx="16.8" cy="17.4" r="2.1"/>' +
+        '</svg>';
+    }
+    // Auto privado. Una sola cabeza, bien adentro y adelante en la ventanilla,
+    // y la mitad de atrás vacía: ahí no viaja nadie. Sin montante en el medio:
+    // cuando lo dibujaba, el montante y la cabeza quedaban pegados a 34px y no
+    // se distinguían. La ventana sola ya dice "un solo ocupante". El techo va
+    // más bajo que el de la van a propósito (6.4 contra 9.4 de alto): con la
+    // cabina al mismo nivel los dos dibujos se leían como el mismo vehículo.
+    return '<svg ' + ico + '>' +
+      '<path d="M2.2 15.4v-2.8h3.2L7.8 9h5.6l2.2 3.6h2.2a2.8 2.8 0 0 1 2 2.8"/>' +
+      '<path d="M2.2 15.4h17.6"/>' +
+      '<path d="M5.9 12.2 8.1 9.4h5.1l2.1 2.8Z"/>' +
+      '<circle cx="12.4" cy="10.8" r="1.25"/>' +
+      '<circle cx="6.6" cy="17.4" r="2.1"/><circle cx="15.6" cy="17.4" r="2.1"/>' +
+      '</svg>';
+  }
   function transferCard(meta) {
     var selected = detailState && detailState.transferType || '';
     var wizard = (detailState && detailState.transferWizard) || {};
@@ -2929,8 +2967,8 @@
       ? '<p class="cost-note">' + esc(t.nota || 'A este destino no se llega en transfer por carretera.') + '</p>'
       : '';
     var cards = [
-      { key: 'shared', amount: t.compartido, icon: '🚐', title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros. Se cobra por persona.' },
-      { key: 'private', amount: t.privado, icon: '🚗', title: 'Transfer privado', desc: 'Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.' }
+      { key: 'shared', amount: t.compartido, title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros. Se cobra por persona.' },
+      { key: 'private', amount: t.privado, title: 'Transfer privado', desc: 'Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.' }
     ].filter(function (card) {
       // A una isla no hay van compartida: el unico traslado es el vuelo. Mostrar
       // la card con precio 0 seria ofrecer un transfer gratis.
@@ -2938,7 +2976,7 @@
       return !(card.amount <= 0);
     }).map(function (card) {
       var isSelected = selected === card.key;
-      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '"><span class="transfer-choice__icon" aria-hidden="true">' + card.icon + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b></button>';
+      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b></button>';
     }).join('');
     var pickupMarkup = selected ? '<div class="transfer-pickup" data-transfer-pickup>' +
       '<span class="transfer-pickup__label">Horario de recogida</span><div class="transfer-pickup__chips">' +

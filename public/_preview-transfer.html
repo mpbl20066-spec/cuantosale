@@ -1,0 +1,54 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preview · Transfer compartido y privado</title><link rel="stylesheet" href="/style.css?v=80"><style>body{background:#f4f7fb;padding:18px;font-family:Poppins,sans-serif}.wrap{max-width:760px;margin:0 auto}h1{font:700 15px Poppins,sans-serif;color:#10233e;margin:0 0 4px}p.aviso{font:400 12px Poppins,sans-serif;color:#5a6b85;margin:0 0 16px}.grosor{padding:18px;background:#fff;border-radius:18px;margin-bottom:20px}.grosor h2{font:700 12px Poppins,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#5a6b85;margin:0 0 10px}.fila{display:flex;gap:16px;flex-wrap:wrap}.fila>div{flex:1 1 240px}.nota{font:400 11px Poppins,sans-serif;color:#5a6b85;margin:8px 0 0;text-align:center}</style></head><body>
+<div class="wrap">
+  <h1>Transfer desde el aeropuerto — preview</h1>
+  <p class="aviso">Markup y copy reales de <b>transferCard()</b> en public/app.js. Reemplaza el emoji 🚐 🚗 por un dibujo.</p>
+
+  <div class="grosor">
+    <h2>Como se ve en la app (44px, el tamaño real)</h2>
+    <section class="transport-options official-transfer">
+      <h2>Transfer desde el aeropuerto</h2>
+      <p>Elegí cómo querés llegar a tu alojamiento en Florianópolis (75 km desde FLN).</p>
+      <div class="transfer-choice-grid">
+        <button type="button" class="transfer-choice"><span class="transfer-choice__icon">
+          <svg class="transfer-choice__art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2.4 15.4V10.4l1.9-3.4A2.4 2.4 0 0 1 6.1 6h10.8a2.4 2.4 0 0 1 1.9.9l2.2 3.5v5"/>
+            <path d="M2.4 15.4h18.6"/>
+            <rect x="4.5" y="7.6" width="14.4" height="5.4" rx="1.2"/>
+            <circle cx="8" cy="10.3" r="1.2"/><circle cx="11.7" cy="10.3" r="1.2"/><circle cx="15.4" cy="10.3" r="1.2"/>
+            <circle cx="6.8" cy="17.4" r="2.1"/><circle cx="16.8" cy="17.4" r="2.1"/>
+          </svg></span><span class="transfer-choice__body"><strong>Transfer compartido</strong><small>Compartís el vehículo con otros pasajeros. Se cobra por persona.</small></span><b class="transfer-choice__price">US$ 24</b></button>
+        <button type="button" class="transfer-choice is-selected"><span class="transfer-choice__icon">
+          <svg class="transfer-choice__art" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2.2 15.4v-2.8h3.2L7.8 9h5.6l2.2 3.6h2.2a2.8 2.8 0 0 1 2 2.8"/>
+            <path d="M2.2 15.4h17.6"/>
+            <path d="M5.9 12.2 8.1 9.4h5.1l2.1 2.8Z"/>
+            <circle cx="12.4" cy="10.8" r="1.25"/>
+            <circle cx="6.6" cy="17.4" r="2.1"/><circle cx="15.6" cy="17.4" r="2.1"/>
+          </svg></span><span class="transfer-choice__body"><strong>Transfer privado</strong><small>Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.</small></span><b class="transfer-choice__price">US$ 78</b></button>
+      </div>
+    </section>
+  </div>
+
+  <div class="grosor">
+    <h2>Ampliado, para revisar el dibujo</h2>
+    <div class="fila">
+      <div><div class="transfer-choice__icon" style="width:120px;height:120px">
+        <svg class="transfer-choice__art" style="width:104px;height:104px" viewBox="0 0 24 24" fill="none" stroke="#10233e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2.4 15.4V10.4l1.9-3.4A2.4 2.4 0 0 1 6.1 6h10.8a2.4 2.4 0 0 1 1.9.9l2.2 3.5v5"/>
+          <path d="M2.4 15.4h18.6"/>
+          <rect x="4.5" y="7.6" width="14.4" height="5.4" rx="1.2"/>
+          <circle cx="8" cy="10.3" r="1.2"/><circle cx="11.7" cy="10.3" r="1.2"/><circle cx="15.4" cy="10.3" r="1.2"/>
+          <circle cx="6.8" cy="17.4" r="2.1"/><circle cx="16.8" cy="17.4" r="2.1"/>
+        </svg></div><p class="nota">compartido &middot; van alta, 3 cabezas</p></div>
+      <div><div class="transfer-choice__icon" style="width:120px;height:120px">
+        <svg class="transfer-choice__art" style="width:104px;height:104px" viewBox="0 0 24 24" fill="none" stroke="#10233e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2.2 15.4v-2.8h3.2L7.8 9h5.6l2.2 3.6h2.2a2.8 2.8 0 0 1 2 2.8"/>
+          <path d="M2.2 15.4h17.6"/>
+          <path d="M5.9 12.2 8.1 9.4h5.1l2.1 2.8Z"/>
+          <circle cx="12.4" cy="10.8" r="1.25"/>
+          <circle cx="6.6" cy="17.4" r="2.1"/><circle cx="15.6" cy="17.4" r="2.1"/>
+        </svg></div><p class="nota">privado &middot; auto bajo, 1 cabeza y atrás vacía</p></div>
+    </div>
+  </div>
+</div>
+</body></html>
