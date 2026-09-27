@@ -335,7 +335,10 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    forma de saber cuál tenías reservado. El marco y el fondo son solo del
    estado elegido; la sugerencia se comunica con el badge, que ya dice
    "Recomendado". */
-.hotel-option.recommended{box-shadow:0 4px 14px rgba(16,35,62,.10)}.hotel-badge{align-self:flex-start;border-radius:99px;padding:5px 9px;background:var(--cel-soft);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.04em}.hotel-option.recommended .hotel-badge{background:var(--cel-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--cel)}.hotel-option h3{margin:14px 0 5px;font-size:17px;line-height:1.2}.hotel-description{margin:0 0 6px;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-detail{min-height:40px;margin:0;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-price{display:flex;align-items:baseline;gap:5px;margin-top:16px}.hotel-price small,.hotel-price span{color:var(--ink2);font-size:11px}.hotel-price b{font-family:var(--fh);font-size:32px;line-height:1}.hotel-total{margin-top:6px;font-size:12px}.hotel-booking{display:flex;justify-content:center;align-items:center;min-height:46px;margin-top:16px;border-radius:13px;background:#003580;color:#fff;text-align:center;text-decoration:none;font-size:13px;font-weight:700}.hotel-booking:hover{color:#fff;filter:brightness(1.1)}.hotel-similar{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;font-size:12px}.hotel-similar summary{cursor:pointer;color:var(--ink);font-weight:700}.hotel-similar ul{margin:8px 0 0;padding-left:18px;line-height:1.7}.hotel-similar a{color:var(--cel);text-decoration:none}.breakdown-section{display:block!important}.detail-breakdown{min-height:48px}
+.hotel-option.recommended{box-shadow:0 4px 14px rgba(16,35,62,.10)}.hotel-badge{align-self:flex-start;border-radius:99px;padding:5px 9px;background:var(--cel-soft);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.04em}/* El badge de "Recomendado" ya no lleva anillo: solo ese lo tenía, y las tres
+   cards quedaban con formatos distintos arriba ("Recomendado" con un aro azul,
+   "Buena opción" y "Alternativa" sin aro) para decir exactamente lo mismo.
+   El texto del badge ya dice cuál es cuál; el aro no aportaba nada. */.hotel-option h3{margin:14px 0 5px;font-size:17px;line-height:1.2}.hotel-description{margin:0 0 6px;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-detail{min-height:40px;margin:0;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-price{display:flex;align-items:baseline;gap:5px;margin-top:16px}.hotel-price small,.hotel-price span{color:var(--ink2);font-size:11px}.hotel-price b{font-family:var(--fh);font-size:32px;line-height:1}.hotel-total{margin-top:6px;font-size:12px}.hotel-booking{display:flex;justify-content:center;align-items:center;min-height:46px;margin-top:16px;border-radius:13px;background:#003580;color:#fff;text-align:center;text-decoration:none;font-size:13px;font-weight:700}.hotel-booking:hover{color:#fff;filter:brightness(1.1)}.hotel-similar{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;font-size:12px}.hotel-similar summary{cursor:pointer;color:var(--ink);font-weight:700}.hotel-similar ul{margin:8px 0 0;padding-left:18px;line-height:1.7}.hotel-similar a{color:var(--cel);text-decoration:none}.breakdown-section{display:block!important}.detail-breakdown{min-height:48px}
 @media (max-width:720px){.hotel-grid{grid-template-columns:1fr}.hotel-detail{min-height:0}.hotel-option.recommended{order:-1}}
 /* Selector de tipo de alojamiento. Replica .custom-select__control: mismo alto,
    mismo radio y mismo chevron dibujado con ::after, para que el filtro se lea
@@ -348,7 +351,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-type-filter select:hover{border-color:var(--control-muted)}
 .hotel-type-filter select:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
 @media (max-width:560px){.hotel-type-filter{max-width:none}}
-.hotel-choice{display:flex;align-items:center;gap:7px;cursor:pointer}.hotel-choice input{accent-color:var(--cel);width:17px;height:17px}.hotel-choice .hotel-badge{margin:0}
+.hotel-choice{display:flex;align-items:center;gap:7px;cursor:pointer}/* El radio toma el mismo ambar del marco de seleccion. Antes usaba --cel
+   (azul): con la card elegida en ambar, el radio marcado quedaba azul arriba
+   de una card ambar, o sea dos colores para la misma senal de "elegiste esto".
+   --card-sel-border da 3.1:1 sobre blanco, que es lo que pide un control. */
+.hotel-choice input{accent-color:var(--card-sel-border);width:17px;height:17px}.hotel-choice .hotel-badge{margin:0}
 /* La card entera es la etiqueta del radio (ver hotelOptions() en app.js): el
    label envuelve imagen, badge, nombre, descripción y precios, así que no hay
    que acertarle a una tira de 26px para cambiar de hotel. Los enlaces quedan
