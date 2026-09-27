@@ -490,10 +490,12 @@ function selectThreeHotelsByBudget(hotels, dailyBudget) {
   });
 }
 const HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
-function resolveHotelType(value, subcategory, style) {
 // Los seis tipos del selector. La lista vive tambien en hotelTypeSelectMarkup()
-// (public/app.js); si se agrega uno hay que tocar los dos lados.
+// (public/app.js); si se agrega uno hay que tocar los dos lados. Aca, en scope de
+// modulo: hotelRecommendations() tambien los necesita, para saber que tipos hay de
+// verdad en un destino. Dentro de resolveHotelType no se ve desde ahi.
 const HOTEL_TYPES = new Set(['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive']);
+function resolveHotelType(value, subcategory, style) {
   const normalized = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
   // La eleccion explicita del selector gana siempre. Antes se concatenaba con
   // la subcategoria y ganaba la subcategoria: con "boutique" elegido y la
@@ -645,6 +647,11 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   });
   // Filtrar por regimen todo-incluido directamente en la API de Booking
   if (isAllInclusive) { params.set('meal_plan', 'all_inclusive'); params.set('filter_by_meal_plan', '5'); }
+  // NO se manda filter_by_property_type. Se probo y esta RapidAPI lo rechaza:
+  // con el parametro, bookingCount baja a 0 para TODOS los tipos y la pantalla
+  // pasa a servir los tres hoteles estimados del modelo sin decir que no hay
+  // ningun hotel real. El tipo se resuelve sobre los 20 que ya llegan, sin
+  // gastarlos.
   const searchUrl = new URL(settings.url);
   Object.keys(Object.fromEntries(params)).forEach(function (key) { searchUrl.searchParams.set(key, params.get(key)); });
   const payload = await bookingApiJson(searchUrl.toString(), settings);
@@ -726,6 +733,17 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   // cuantos vinieron con precio real de Booking: si es 0, lo que se muestra en
   // pantalla es estimacion del modelo, y el front tiene que poder decirlo.
   if (diag) diag.bookingCount = priced.length;
+  // Que tipos hay de verdad entre los hoteles reales que llegaron. Es la misma
+  // comprobacion que despues decide que se muestra, corrida sobre los 20 en vez
+  // de sobre los 3: asi el selector puede ofrecer solo lo que existe. Con
+  // bookingCount en 0 (sin key o caida de la API) no se dice nada, porque no
+  // sabemos nada, y el selector ofrece los seis como antes.
+  if (diag && priced.length) {
+    diag.tiposDisponibles = Array.from(HOTEL_TYPES).filter(function (type) {
+      if (type === 'all-inclusive') return true;   // tiene su propio respaldo
+      return priced.some(function (hotel) { return hotelMatchesType(hotel, type, budgetTarget); });
+    });
+  }
   // Un hotel real más barato que el objetivo de la categoría sigue siendo válido
   // para esa categoría; lo que se descarta es lo que se pasa claramente de precio.
   const high = budgetTarget > 0 ? budgetTarget * 1.6 : Infinity;
@@ -1294,7 +1312,13 @@ async function cotizarHoteles(req, res, url) {
     // modelo" sin adivinar por la forma del dato. Con la key sin suscribir,
     // bookingCount viene 0 y bookingError explica por que.
     bookingCount: Number(hotelDiag.bookingCount) || 0,
-    bookingError: hotelDiag.bookingError || null
+    bookingError: hotelDiag.bookingError || null,
+    // Que tipos de alojamiento offering de verdad para este destino. El selector
+    // los ofrece todos y con esto puede dejar de ofrecer los que no existen: en Rio
+    // no hay ni un resort entre los 20 hoteles que trae Booking, y ofrecerlo
+    // llevaba a una lista vacia. Sale gratis porque los 20 ya vienen sin filtrar
+    // por tipo: se corre el mismo filtro que se usaria para mostrarlos.
+    tiposDisponibles: hotelDiag.tiposDisponibles || null
   });
 }
 
@@ -1788,6 +1812,11 @@ function handleRequest(req, res) {
     if (req.method === 'POST') { res.writeHead(404); return res.end(); }
     if (url.pathname === '/api/destinos') {
       return sendJson(res, 200, SEARCH_DESTINATION_KEYS.map(function (k) { return { key: k, name: model.DEST[k].name }; }).sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }));
+    }
+    // Estado del cache de SerpAPI. Publico y sin costo: sirve para responder
+    // "esto ya estaba cacheado?" antes de pedir algo y pagarlo dos veces.
+    if (url.pathname === '/api/cache') {
+      return sendJson(res, 200, flightProviders.stats());
     }
     if (url.pathname === '/api/tasas') {
     return getTasas().then(function (t) {
