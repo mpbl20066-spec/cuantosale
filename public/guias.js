@@ -211,16 +211,28 @@ var REGIONES = {
   'santa-catarina': {
     resumen: 'Costa de Santa Catarina: balnearios de familia al norte, Praia do Rosa y Garopaba al sur, y la isla en el medio.',
     beaches: [
-      { name: 'Costa norte (Itapema, Piçarras, Balneário Camboriú)', zona: 'BR-101, hasta 60 km al norte de la isla', vibe: 'Balnearios de familia. Mucha estructura, caro en verano y lleno de gente de São Paulo.', cuando: 'De diciembre a marzo es el pico absoluto: el precio se duplica y hay que reservar con meses.' }
+      { name: 'Balneário Camboriú', zona: 'Costa norte, 60 km de la ilha', vibe: 'El balneario más caro y más vertical del estado: torres de treinta pisos pegadas a la arena. La fama se la dan la escala y el precio. La playa de verdad es la de al lado, Praia do Norte, con los acantilados que salen en todas las fotos de Brazil.', cuando: 'De diciembre a marzo es el pico absoluto. Fuera de eso baja a pueblo de veraneo y los precios se caen a la mitad.' },
+      { name: 'Bombinhas', zona: 'Costa norte, entre Camboriú e Itapema', vibe: 'Una serie de caletas y playas chicas, todas protegidas del oleaje por los islotes. Es la costa más tranquila del norte y la más familiar: poca gente joven, muchas familias con niños.', cuando: 'Todo el año, y es la que mejor aguanta los días de viento del sur, porque el agua queda encerrada.' },
+      { name: 'Praia do Rosa', zona: 'Costa sur, 40 km al sur de la ilha', vibe: 'El pueblo más lindo de la costa. Sin torres, sin música alta, con casas de colores y arena blanca y fina. Es donde va la gente de Santa Catarina, no el turismo de São Paulo.', cuando: 'Todo el año, y llueve menos que en el norte del estado.' },
+      { name: 'Garopaba', zona: 'Costa sur, sobre una península', vibe: 'Pueblo de surf con vida de pueblo chico. La playa principal está entre dos penínsulas y la segunda tiene un faro que se ve desde cualquier lado de la bahía.', cuando: 'Todo el año. El kitesurf tiene su temporada de mayo a septiembre.' },
+      { name: 'Itapema', zona: 'Costa norte, entre Camboriú y Blumenau', vibe: 'El balneario premium de hoy, y más caro que Camboriú. Tiene la mejor oferta de playa y de restaurante del estado, que es decir que también los precios más altos.', cuando: 'De diciembre a marzo, con los precios de temporada alta del resto de la costa.' }
     ],
     comer: [
-      { name: 'Prato feito de balneario', tipo: 'Almuerzo', zona: 'Todos los pueblos de la costa', usd: 8, momento: 'Mediodía', nota: 'El plato del día con acompañamiento: arroz, feijão, carne, ensalada y postre, a precio fijo y a la vista antes de pedir.' }
+      { name: 'Pastel catarinense', tipo: 'Merienda', zona: 'Todos los pueblos de la costa', usd: 4, momento: 'Toda la tarde', nota: 'La empanada frita que es propia del estado: carne deshebrada, concha de almeja y aceituna. Es distinta a la pastel de São Paulo y sale en la barra de la feria.' },
+      { name: 'Risoles de la feria', tipo: 'Merienda', zona: 'Ferias y bazares de cada pueblo', usd: 4, momento: 'Tarde y noche', nota: 'Rellenos de carne o de queso, fritos, con chimichurri. Cada pueblo tiene su feria en un día de la semana distinto: el de Garopaba es el miércoles y el de Bombinhas el jueves. Es la merienda de la tarde de todo el estado.' }
     ],
     tips: [
       { titulo: 'La BR-101 es el eje de todo', texto: 'Todos los pueblos de la costa están sobre la misma ruta. Sin auto el bus entre pueblos funciona, pero la frecuencia cae fuerte después de las 20 h. Planificá el regreso antes de la salida, no en el lugar.' },
       { titulo: 'Dos Santa Catarinas distintas', texto: 'La costa norte es estructura y familia. La costa sur (Rosa, Garopaba, Ferrugem) es más chica, más tranquila y más barata. No son el mismo viaje, aunque compartan bus y aeropuerto.' },
       { titulo: 'Camboriú no es una playa: es un edificio', texto: 'El balneario más caro del estado, con torres de 30 pisos sobre la arena. La playa que todos quieren ver es la de al lado y la vas a poder ver gratis desde la costa sur.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Serra do Tabuleiro', zona: 'Sur de la ilha, hacia Imbituba', dur: '4 h', usd: 0, nota: 'La tabla más alta de Santa Catarina. El sendero hasta arriba son cuatro horas de ida y vuelta y hay que anotarse en el ICMBio antes de ir. Es el plan de un día entero, no una parada.' },
+      { name: 'Faro de Garopaba', zona: 'Garopaba', dur: '1 h', usd: 0, nota: 'El faro de la segunda península, con la mejor vista de la bahía. Gratis, y se llega en veinte minutos caminando desde el centro del pueblo.' }
+    ],
+    hacer: [
+      { name: 'Recorrer la BR-101 en bus', zona: 'Toda la costa', dur: '3 h', usd: 8, nota: 'El bus entre pueblos funciona bien y es la forma de recorrer la costa sin auto. La frecuencia se cae fuerte después de las 20 h: el regreso hay que mirarlo antes de subir.' }
+    ],
   },
 
   'rio-grande-do-sul': {
@@ -242,19 +254,30 @@ var REGIONES = {
   'rio-de-janeiro': {
     resumen: 'La ciudad y la Costa Verde. Mucho para ver, precios turísticos en Copacabana e Ipanema, y comida de calle excelente en el centro.',
     beaches: [
-      { name: 'Copacabana e Ipanema', zona: 'Zona Sur', vibe: 'Las clásicas: sol, movimiento y precio turístico. La arena es buena, los precios no.', cuando: 'Todo el año. En verano (diciembre a marzo) se llenan de forasteros.' },
-      { name: 'Praia do Arpoador', zona: 'Entre Copacabana e Ipanema', vibe: 'La mejor para ver el atardecer, y gratis. No es para bañarse: tiene olas fuertes y no tiene servicios.', cuando: 'Cualquier día, 40 minutos antes del atardecer.' }
+      { name: 'Búzios', zona: 'Península, 2 h desde Rio', vibe: 'El pueblo de barcos de la Costa Verde. Calle empedrada, puerto con veleros y una calle de tiendas. Se llega en bus o por la carretera.', cuando: 'Todo el año. En verano se llena de gente de Rio y suben los precios.' },
+      { name: 'Arraial do Cabo', zona: 'Península, 3 h desde Rio', vibe: 'La punta más al sur. Tiene la Praia dos Anjos y la Praia do Amor, una cala con forma de corazón. Es la más lejos y la más tranquila.', cuando: 'Todo el año. El sendero de la Praia do Amor se inunda con la marea alta, así que hay que ir por la mañana.' },
+      { name: 'Paraty', zona: 'Costa Verde, 4 h desde Rio', vibe: 'El pueblo colonial más conservado de la costa. Casas del siglo XVIII con las puertas pintadas de colores y una calle empedrada. Es el que más se parece a una postal.', cuando: 'Todo el año. Julio es la temporada fuerte, con el festival de jazz.' },
+      { name: 'Ilha Grande', zona: 'Isla, ferry desde Angra dos Reis', vibe: 'Una isla que es casi toda parque nacional. No hay vehículos: se recorre caminando. Es de las islas mejor conservadas de Brasil.', cuando: 'Todo el año. El ferry sale de Angra dos o tres veces por día, así que el pasaje hay que reservarlo antes.' },
+      { name: 'Angra dos Reis', zona: 'Bahía, 2 h desde Rio', vibe: 'No es una playa: es una bahía con tres mil islas y agua tranquila. Lo que se visita es el centro histórico, que es colonial.', cuando: 'Todo el año. Las playas están en islas, así que hay que combinarse con un ferry o una excursión.' }
     ],
     comer: [
-      { name: 'Prato feito en el centro', tipo: 'Almuerzo', zona: 'Centro / Catete', usd: 9, momento: 'Mediodía hasta las 15 h', nota: 'El negocio de la ciudad. Millones de personas lo comen todos los días y no es un plan turístico. Un poco más caro que en el interior, y lo vale.' },
-      { name: 'Feira livre', tipo: 'Compra', zona: 'Cambia según el barrio', usd: 5, momento: 'Sábado a la mañana', nota: 'Fruta, pasteles, jugos y comida ya hecha a precio de barrio. Cada barrio tiene su día: averiguá cuál cae antes de ir.' }
+      { name: 'Cachaça artesanal', tipo: 'Compra', zona: 'Paraty', usd: 12, momento: 'Cualquiera', nota: 'Paraty es la capital de la cachaça de caña de la Costa Verde, y hay destilerías que se pueden visitar. La artesanal sale menos que la de supermercado.' },
+      { name: 'Feira de artesanía', tipo: 'Compra', zona: 'Búzios', usd: 8, momento: 'Sábado a la mañana', nota: 'La feria de Búzios tiene puestos de cerámica, ropa y artesanía. Conviene mirar el cartel de precios antes de comprar: en la calle principal cambian.' }
     ],
     tips: [
       { titulo: 'La Zona Sur es la turística, la Zona Norte es la ciudad', texto: 'El café y la comida de calidad están en Ipanema y Botafogo. Los precios de comida callejera y los mercados están en el centro y en la Zona Norte. Con tres días, cruzate a comer.' },
       { titulo: 'El moqueco es domingo al mediodía', texto: 'El comidazo más grande del Brasil es un domingo al mediodía: montaña de arroz, costillar y farofa. Es un desayuno, no un almuerzo. Buscate un lugar con esse, no uno turístico.' },
       { titulo: 'Angra y Paraty se llegan en bus o auto', texto: 'Están a 2 o 3 horas de la ciudad. El bus es mucho más barato y funciona bien. El auto se justifica solo si hacés más de un destino en el mismo día.' },
       { titulo: 'Una favela no es una atracción', texto: 'Es un barrio real con gente real, y el tour guiado de dos horas es la forma correcta y razonable de verlo. Se visita a la luz del día y acompañado. Sin eso, no se sube: el resto de la ciudad alcanza y sobra.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Centro histórico de Paraty', zona: 'Paraty', dur: '2 h', usd: 0, nota: 'El conjunto de casas coloniales del siglo XVIII, con las puertas pintadas y las ventanas con reja de hierro. Se recorre entero a pie y es gratis.' },
+      { name: 'Forte de Santa Catarina', zona: 'Centro de Rio', dur: '1 h', usd: 5, nota: 'La fortaleza portuguesa de 1637, en la punta de la isla. Es la parte vieja de Rio y el arranque de la Ruta Bandeirante.' }
+    ],
+    hacer: [
+      { name: 'Paseo en barco por la bahía', zona: 'Angra dos Reis', dur: '3 h', usd: 15, nota: 'La forma de llegar a las playas de la bahía es en barco, y se contrata en el puerto. Un paseo a una isla deshabitada es el mejor plan de la zona.' },
+      { name: 'Bajada a la Praia do Amor', zona: 'Arraial do Cabo', dur: '2 h', usd: 0, nota: 'Se baja por unas escaleras de doscientos peldaños entre las rocas, y se vuelve subiendo. Con marea alta el sendero queda bajo agua.' }
+    ],
   },
 
   'bahia': {
