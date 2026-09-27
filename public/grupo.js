@@ -9,6 +9,9 @@
   var currentGroupId = null;
   var pollTimer = null;
   var lastSignature = '';
+  // La migración del formato viejo de saldos se intenta una vez por carga de
+  // página, no en cada poll.
+  var migracionIntentada = false;
   // Tasas de /api/tasas, iguais a las que usa la home. Si no llegan, el grupo
   // entero se muestra en su moneda y no se ofrece cambiar.
   var FX = { rates: null, base: 'USD', monedas: null };
@@ -113,16 +116,27 @@
 
   /* ---------- monedas ---------- */
   function tasaDe(code) {
-    if (!code || !FX.rates) return null;
+    if (!code) return null;
     var normalized = String(code).toUpperCase();
+    // La base a si misma es 1 aunque no haya llegado ninguna tasa: si las
+    // "/api/tasas" felló, un grupo en USD con gastos en USD tiene que poder
+    // igual mostrar sus montos, y no hay nada que convertir.
     if (normalized === FX.base) return 1;
+    if (!FX.rates) return null;
     var rate = Number(FX.rates[normalized]);
     return Number.isFinite(rate) && rate > 0 ? rate : null;
   }
   // Pasa un importe de una moneda a otra. Devuelve null si falta alguna de las
   // dos tasas: prefierimos no convertir antes que inventar un número.
   function convertir(amount, from, to) {
-    var a = tasaDe(from), b = tasaDe(to);
+    var origen = String(from || '').toUpperCase();
+    var destino = String(to || '').toUpperCase();
+    if (!origen || !destino) return null;
+    // De una moneda a la misma no hay nada que convertir, y no hace falta
+    // ninguna tasa. Sin esto, un grupo en pesos se queda sin numeros si
+    // /api/tasas cae, que es justo cuando mas los necesita.
+    if (origen === destino) return Number(amount) || 0;
+    var a = tasaDe(origen), b = tasaDe(destino);
     if (a == null || b == null) return null;
     return (Number(amount) || 0) * (b / a);
   }
@@ -135,17 +149,30 @@
   // Un importe cualquiera, ya expresado en la moneda en la que se ve. Las
   // tasas se piden para que "Ver en" funcione; sin ellas cae al importe tal
   // cual viene, que es lo correcto porque todos estan en la misma moneda.
+  // Si lo que NO se puede convertir es el importe (viene en otra moneda y no
+  // hay tasa), se devuelve con SU propio símbolo y no con el de la moneda que
+  // se está mirando: antes se pintaba el número crudo con el símbolo de la
+  // destino, y 100 dólares se leían como 100 pesos, un error de 40 veces sin
+  // ningún aviso.
   function moneyVer(n, code) {
-    var target = verMoneda();
-    var value = convertir(n, code || groupCurrency(), target);
-    return money(value == null ? n : value, target);
+    var origen = String(code || groupCurrency()).toUpperCase();
+    var target = String(verMoneda()).toUpperCase();
+    if (origen === target) return money(n, target);
+    var value = convertir(n, origen, target);
+    return value == null ? money(n, origen) : money(value, target);
   }
   // Los balances y las transferencias se calculan siempre en la moneda del
   // grupo: es la única forma de que sumar gastos cargados en distintas monedas
-  // signifique algo.
+  // signifique algo. Si un gasto no se puede traer a la moneda del grupo se
+  // devuelve null y la fila se deja fuera de la cuenta en vez de sumar un numero
+  // en otra moneda como si fuera de esta.
   function aMonedaGrupo(n, code) {
-    var value = convertir(n, code, groupCurrency());
-    return value == null ? (Number(n) || 0) : value;
+    // Sin moneda se asume la del grupo: es lo que dice el default de la columna
+    // y lo unico que se puede suponer sin inventar. Si la columna llegara vacia
+    // por una fila vieja, tratarla como "no convertible" dejaria el gasto fuera
+    // de todas las cuentas sin que nadie entienda por que.
+    var value = convertir(n, code || groupCurrency(), groupCurrency());
+    return value == null ? null : value;
   }
   async function cargarTasas() {
     try {
@@ -379,15 +406,21 @@
   function splitIdsOf(expense) {
     return Array.isArray(expense.split_between) ? expense.split_between.filter(function (id) { return !!personById(id); }) : [];
   }
+  // Los gastos que quedaron afuera de la cuenta por no poder convertirse a la
+  // moneda del grupo. Se guardan para poder nombrarlos abajo en vez de dejar
+  // un total que no cierra sin explicación.
+  var gastosSinConvertir = [];
   function computeBalances() {
     var balances = {};
-    participants.forEach(function (p) { balances[p.id] = 0; });
+    participantes.forEach(function (p) { balances[p.id] = 0; });
+    gastosSinConvertir = [];
     expenses.forEach(function (expense) {
       var splitIds = splitIdsOf(expense);
       if (!splitIds.length) return; // gasto sin participantes válidos: no genera deuda
       // Todo se lleva a la moneda del grupo antes de sumar: un gasto cargado en
       // reales y otro en dólares no se pueden sumar así nomás.
       var total = aMonedaGrupo(expense.amount, expense.currency);
+      if (total == null) { gastosSinConvertir.push(expense); return; }
       var share = total / splitIds.length;
       if (expense.paid_by_participante_id) balances[expense.paid_by_participante_id] = (balances[expense.paid_by_participante_id] || 0) + total;
       splitIds.forEach(function (participantId) { balances[participantId] = (balances[participantId] || 0) - share; });
@@ -417,21 +450,112 @@
     return moves;
   }
   function participantName(id) { var p = personById(id); return p ? p.display_name : 'Alguien'; }
-  function totalSpent() { return expenses.reduce(function (sum, expense) { return sum + aMonedaGrupo(expense.amount, expense.currency); }, 0); }
+  // El total de lo cargado. Suma solo lo que se pudo traer a la moneda del
+  // grupo: los que no, quedan fuera de la cuenta y la vista los nombra aparte.
+  function totalSpent() {
+    return expenses.reduce(function (sum, expense) {
+      var value = aMonedaGrupo(expense.amount, expense.currency);
+      return value == null ? sum : sum + value;
+    }, 0);
+  }
 
   /* ---------- saldos pagados ---------- */
+  // Lo que ya se pagó, por par, en la moneda del grupo: {"bruno|paola": 13251941721.22}.
+  // Se guarda el MONTO y no solo el par porque el greedy recalcula los importes
+  // cada vez que se toca un gasto. Con la clave del par sola, un gasto nuevo
+  // que volviera a generar esa pareja (cualquier gasto de Bruno cambia lo que
+  // debe) salía con el tilde de "Pagado" y el dinero nuevo desaparecía de la
+  // lista sin que nadie lo pidiera. Guardando el monto, lo pagado se descuenta
+  // del saldo antes de repartir y lo que sobra es deuda nueva de verdad.
   function saldosGuardados() {
-    return Array.isArray(group && group.saldos) ? group.saldos : [];
+    var raw = group && group.saldos;
+    if (!raw) return {};
+    if (Array.isArray(raw)) {
+      // Formato viejo: ["quien|quien", ...], sin monto. El pago existe pero no
+      // se sabe cuánto era, así que queda en null hasta que migrarSaldos() lo
+      // complete con el importe que tenía esa transferencia.
+      return raw.reduce(function (acc, key) {
+        if (typeof key === 'string' && key.indexOf('|') > 0) acc[key] = null;
+        return acc;
+      }, {});
+    }
+    return typeof raw === 'object' ? raw : {};
   }
-  // La clave es el par, no el importe: el greedy recalcula los montos cada vez
-  // que se toca un gasto, así que una marca atada al número se perdería.
   function saldoKey(move) { return move.from + '|' + move.to; }
-  function saldoEstaPagado(move) { return saldosGuardados().indexOf(saldoKey(move)) !== -1; }
-  function alternarSaldo(key) {
-    var next = saldosGuardados().slice();
-    var i = next.indexOf(key);
-    if (i === -1) next.push(key); else next.splice(i, 1);
+  // Cuánto se le descuenta a cada quien de lo que ya pagó, para que el greedy
+  // reparta solo lo que falta. Se descuenta el mismo monto de los dos lados, y
+  // nunca más de lo que esa persona debe: si el gasto se borró, o el deudor ya
+  // está al día, el pago viejo se ignora en vez de dejar un saldo positivo
+  // fantasma que haría que el total no cierre.
+  function saldoPendiente(balances) {
+    var pagado = saldosGuardados();
+    var out = {};
+    Object.keys(balances).forEach(function (id) { out[id] = balances[id]; });
+    Object.keys(pagado).forEach(function (key) {
+      var partes = key.split('|');
+      var deudor = partes[0], acreedor = partes[1];
+      var monto = Number(pagado[key]);
+      if (!(monto > 0) || out[deudor] == null || out[acreedor] == null) return;
+      var n = Math.min(monto, Math.max(0, -out[deudor]), Math.max(0, out[acreedor]));
+      if (n <= 0) return;
+      out[deudor] += n;
+      out[acreedor] -= n;
+    });
+    return out;
+  }
+  // Las transferencias ya saldadas, para mostrarlas tachadas y para poder
+  // deshacerlas. Una entrada sin monto (formato viejo sin migrar todavía) no se
+  // muestra: no hay cifra que tachar.
+  function saldosSaldados() {
+    var pagado = saldosGuardados();
+    return Object.keys(pagado).map(function (key) {
+      var partes = key.split('|');
+      return { from: partes[0], to: partes[1], amount: Math.round((Number(pagado[key]) || 0) * 100) / 100 };
+    }).filter(function (move) {
+      return move.amount > 0 && !!personById(move.from) && !!personById(move.to);
+    });
+  }
+  // Marca o desmarca una transferencia guardando el monto, no solo el par. La
+  // accion va explicita porque las dos no se pueden deducir del estado: si
+  // alguien pago la mitad, quedan 125 pagados y 125 pendientes para la misma
+  // pareja, y el boton de la fila pendiente ("Ya pagué", sumar) es el mismo que
+  // el de la fila saldada ("Deshacer", restar). Sin distinguirlos, el segundo
+  // toque borraba el pago que ya estaba hecho.
+  function marcarSaldo(move, accion) {
+    var next = Object.assign({}, saldosGuardados());
+    var key = saldoKey(move);
+    var actual = Math.round((Number(next[key]) || 0) * 100) / 100;
+    if (accion === 'deshacer') {
+      // Si ya no queda nada de esa deuda, la marca se va entera: dejar un resto
+      // invisible sería peor que no tener registro.
+      var queda = Math.round((actual - move.amount) * 100) / 100;
+      if (queda > 0.01) next[key] = queda; else delete next[key];
+    } else {
+      next[key] = Math.round((actual + move.amount) * 100) / 100;
+    }
     return next;
+  }
+  // Los grupos de antes guardaban solo el par. Esos pagos sí existen, así que se
+  // completan con el importe que tenía la transferencia en ese momento y se
+  // guardan. Si no se completaran, cada gasto nuevo volvería a saldar esa
+  // pareja solo y el bug volvería con ellos.
+  function migrarSaldosPlan() {
+    var pagado = saldosGuardados();
+    var viejas = Object.keys(pagado).filter(function (key) { return !(Number(pagado[key]) > 0); });
+    if (!viejas.length) return null;
+    var crudo = {};
+    Object.keys(pagado).forEach(function (key) {
+      if (Number(pagado[key]) > 0) crudo[key] = Number(pagado[key]);
+    });
+    // Con el plan vacío no hay con qué completar los pagos: mejor dejar los
+    // datos como están que borrarlos por una migración a ciegas.
+    var plan = settlements(computeBalances());
+    if (!plan.length) return null;
+    plan.forEach(function (move) {
+      var key = saldoKey(move);
+      if (viejas.indexOf(key) !== -1) crudo[key] = move.amount;
+    });
+    return crudo;
   }
   // Firma de los datos que pinta la pantalla. El poll la compara para no
   // repintar (y borrar lo que el usuario está escribiendo) si nada cambió.
@@ -439,8 +563,9 @@
     return [group && group.name, participants.map(function (p) { return p.id + ':' + p.display_name; }).join(','),
       expenses.map(function (e) { return e.id + ':' + e.amount + ':' + e.currency + ':' + e.description + ':' + e.paid_by_participante_id + ':' + splitIdsOf(e).join('+'); }).join(','),
       // Los saldos pagados van en la firma: si no, el poll vería la pantalla
-      // igual y no repintaría el tilde que el usuario acaba de poner.
-      saldosGuardados().slice().sort().join(',')
+      // igual y no repintaría el tilde que el usuario acaba de poner. Se
+      // serializan par y monto, que es lo que ahora identifica cada pago.
+      saldosSaldados().map(function (m) { return saldoKey(m) + ':' + m.amount; }).sort().join(',')
     ].join('|');
   }
 
@@ -451,7 +576,12 @@
     var url = shareUrl();
     var currency = groupCurrency();
     var balances = computeBalances();
-    var moves = settlements(balances);
+    // Lo pendiente sale de los saldos brutos menos lo ya pagado. El greedy
+    // reparte sobre eso, así que un gasto nuevo genera deuda nueva de verdad y
+    // no vuelve a salir con el tilde de la transferencia anterior.
+    var pendiente = saldoPendiente(balances);
+    var moves = settlements(pendiente);
+    var pagadas = saldosSaldados();
     var total = totalSpent();
     var checksMarkup = participants.map(function (p) {
       return '<label><input type="checkbox" name="split" value="' + esc(p.id) + '" checked> ' + esc(p.display_name) + '</label>';
@@ -477,12 +607,38 @@
         }).join('') +
         '</select></span>'
       : '';
+    // Lo que no se pudo convertir se dice, con nombre y apellido. Un total que
+    // no cierra sin explicación se lee como error de la app, y un monto con el
+    // símbolo de otra moneda se lee como un número inventado. Las dos cosas son
+    // peores que un aviso.
+    // Esta lista se arma aparte de gastosSinConvertir (que usa computeBalances
+    // para no mandar a la cuenta) a propósito: ahí solo entran los gastos que
+    // además de no convertir tienen participantes válidos, y el aviso tiene que
+    // nombrar a todos los que se quedaron fuera del total, que es lo que totalSpent
+    // deja de sumar.
+    var sinConvertir = expenses.filter(function (expense) {
+      return aMonedaGrupo(expense.amount, expense.currency) == null;
+    });
+    var faltaTasa = tasaDe(verMoneda()) == null;
+    var sinConvertirMarkup = (sinConvertir.length || faltaTasa)
+      ? '<p class="grupo-warn">' +
+        (sinConvertir.length
+          ? (sinConvertir.length === 1 ? 'El gasto ' : sinConvertir.length + ' de los gastos ') +
+            '"' + esc(sinConvertir.map(function (expense) { return expense.description; }).join('", "')) + '" ' +
+            (sinConvertir.length === 1 ? 'está' : 'están') + ' en una moneda sin tasa y no ' +
+            (sinConvertir.length === 1 ? 'cuenta' : 'cuentan') + ' en el total ni en los saldos.'
+          : '') +
+        (faltaTasa && verEn
+          ? ' No hay tasa para pasar a ' + esc(verEn) + ': los montos se muestran en la moneda en la que se gastaron.'
+          : '') +
+        '</p>'
+      : '';
+
     var expensesMarkup = expenses.length
       ? expenses.map(function (expense) {
           // "dividido entre 3" no dice quiénes. Con los nombres al lado, cada
           // quien puede revisar su parte sin tener que hacer la cuenta mental.
           var splitIds = splitIdsOf(expense);
-          var canDelete = !me || expense.paid_by_participante_id === me.id;
           return '<div class="grupo-expense">' +
             '<span class="grupo-expense__ico">' + icon(guessCategory(expense.description)) + '</span>' +
             '<div class="grupo-expense__body">' +
@@ -501,17 +657,23 @@
             '<div class="grupo-expense__meta">Entre ' + (splitIds.length === 1 ? '1 persona' : splitIds.length + ' personas') +
             (splitIds.length ? ': ' + esc(moneyVer(Number(expense.amount) / splitIds.length, expense.currency)) + ' c/u' : '') + '</div>' +
             '</div>' +
-            // La papelera queda fuera de la columna de contenido y alineada
-            // arriba, al lado del ícono.
-            (canDelete ? '<button type="button" class="grupo-trash" data-delete-expense="' + esc(expense.id) + '" aria-label="Borrar ' + esc(expense.description) + '">' + icon('trash') + '</button>' : '') +
+            // La papelera va en todas las filas, no solo en las que pagó la
+            // persona que mira: en un viaje entre amigos el que cargo el gasto
+            // no siempre es quien lo escribe, y esconderle la papelera lo
+            // dejaba sin poder corregir un numero mal cargado. Borrar pide
+            // confirmacion, asi que no pasa por un clic a secas.
+            '<button type="button" class="grupo-trash" data-delete-expense="' + esc(expense.id) + '" aria-label="Borrar ' + esc(expense.description) + '">' + icon('trash') + '</button>' +
             '</div>';
         }).join('')
       : '<p class="grupo-note" style="margin-top:0">Todavía no hay gastos cargados.</p>';
     // El saldo por persona contesta la pregunta que aparece primero ("¿cuánto
-    // puse yo?") sin obligar a hacer la resta de los movimientos de abajo.
+    // puse yo?") sin obligar a hacer la resta de los movimientos de abajo. Van
+    // los saldos PENDIENTES, no los brutos: con los brutos, después de que
+    // todos pagan la lista seguía diciendo "le deben" lo mismo de siempre, que
+    // es la misma mentira que el tilde en las transferencias.
     var balancesSummary = expenses.length
       ? participants.map(function (p) {
-          var value = Math.round((balances[p.id] || 0) * 100) / 100;
+          var value = Math.round((pendiente[p.id] || 0) * 100) / 100;
           var label = Math.abs(value) < 0.01
             ? '<b class="pos">al día</b>'
             : '<b class="' + (value > 0 ? 'pos' : 'neg') + '">' + (value > 0 ? 'le deben ' : 'debe ') + esc(moneyVer(Math.abs(value), currency)) + '</b>';
@@ -520,40 +682,77 @@
           return '<div class="grupo-balance' + (me && p.id === me.id ? ' is-me' : '') + '"><span>' + esc(p.display_name) + (me && p.id === me.id ? ' <em>(vos)</em>' : '') + '</span>' + label + '</div>';
         }).join('')
       : '';
-    // Cada transferencia se marca por par (from|to) y no por importe, porque
-    // el greedy vuelve a calcular los montos cada vez que se toca un gasto.
-    var pendientes = moves.filter(function (move) { return !saldoEstaPagado(move); }).length;
     var meId = me ? me.id : null;
     // Una fila de transferencia. "mio" y "conBoton" van por separado a
     // proposito: el botón depende de si la fila le compete a quien mira, y la
     // marca de "esto es tuyo" depende ademas de que haya alguien mirando. Sin
     // identidad no se puede marcar la fila de nadie como propia, aunque se le
     // deje el botón.
+    // El monto va en el data-saldo-monto porque la marca se guarda con la cifra:
+    // desmarcar tiene que sacar exactamente lo que esa fila marcaba, y con la
+    // sola clave del par no se sabe cuánto era.
     function settleRow(move, mio, conBoton) {
-      var pagado = saldoEstaPagado(move);
       var key = saldoKey(move);
-      return '<div class="grupo-settle' + (pagado ? ' is-paid' : '') + (mio ? ' is-mine' : '') + '">' +
+      return '<div class="grupo-settle' + (mio ? ' is-mine' : '') + '">' +
         '<span class="grupo-settle__flow"><b>' + esc(participantName(move.from)) + '</b>' +
         '<span class="grupo-settle__arrow" aria-hidden="true">' + icon('arrow') + '</span>' +
         '<b>' + esc(participantName(move.to)) + '</b></span>' +
         '<span class="grupo-settle__amount">' + esc(moneyVer(move.amount, currency)) + '</span>' +
         (conBoton ?
-          '<button type="button" class="grupo-settledon" data-saldo="' + esc(key) + '" aria-pressed="' + (pagado ? 'true' : 'false') + '">' +
-          '<span class="grupo-settledon__box" aria-hidden="true">' + (pagado ? '✓' : '') + '</span>' +
-          (pagado ? 'Pagado' : 'Ya pagué') + '</button>' : '') + '</div>';
+          '<button type="button" class="grupo-settledon" data-saldo="' + esc(key) + '" data-saldo-monto="' + esc(move.amount) + '" data-saldo-accion="pagar" aria-pressed="false">' +
+          '<span class="grupo-settledon__box" aria-hidden="true"></span>' +
+          'Ya pagué</button>' : '') + '</div>';
+    }
+    // Las transferencias ya saldadas van aparte, tachadas. Antes vivían
+    // mezcladas con las pendientes y el tilde convivía con un titular que decía
+    // "te tienen que pagar": dos verdades contradictorias en el mismo bloque.
+    function settledRow(move) {
+      return '<div class="grupo-settle is-paid' + (me && (move.from === me.id || move.to === me.id) ? ' is-mine' : '') + '">' +
+        '<span class="grupo-settle__flow"><b>' + esc(participantName(move.from)) + '</b>' +
+        '<span class="grupo-settle__arrow" aria-hidden="true">' + icon('arrow') + '</span>' +
+        '<b>' + esc(participantName(move.to)) + '</b></span>' +
+        '<span class="grupo-settle__amount">' + esc(moneyVer(move.amount, currency)) + '</span>' +
+        // El botón está para poder volver atrás: una marca de pago mal puesta
+        // (se marcó la transferencia equivocada) dejaba al resto del grupo
+        // viendo una deuda que ya estaba saldada, y sin esto no había cómo
+        // arreglarlo.
+        '<button type="button" class="grupo-settledon is-undo" data-saldo="' + esc(saldoKey(move)) + '" data-saldo-monto="' + esc(move.amount) + '" data-saldo-accion="deshacer" aria-pressed="true">' +
+        '<span class="grupo-settledon__box" aria-hidden="true">✓</span>' +
+        'Deshacer</button></div>';
     }
     function saldosDe(arr) {
       return arr.reduce(function (sum, move) { return Math.round((sum + move.amount) * 100) / 100; }, 0);
     }
+    var pagadosMarkup = pagadas.length
+      ? '<details class="grupo-other" open><summary>Las ' + pagadas.length + ' ' +
+        (pagadas.length === 1 ? 'transferencia ya saldada' : 'transferencias ya saldadas') + '</summary>' +
+        '<p class="grupo-note">Ya están pagadas. No cuentan como deuda pendiente.</p>' +
+        pagadas.map(settledRow).join('') + '</details>'
+      : '';
     var saldosMarkup;
+    // Cuando no queda ninguna transferencia pendiente se dice explícitamente:
+    // es la pregunta que todos hacen al final del viaje y "no hay nada para
+    // pagar" no contesta nada. Se arma acá arriba y no al final porque en el
+    // caso "todo saldado" es justamente el contenido de la rama de abajo, y
+    // asi queda pegado a las dos cosas que dependen de el.
+    // La excepcion es cuando quedaron gastos sin convertir: si ni esos entraron
+    // en la cuenta, no se puede afirmar que no hay nada por pagar, porque en
+    // realidad hay gastos que ni siquiera se pudieron mirar.
+    var alDiaMarkup = !moves.length && expenses.length && !gastosSinConvertir.length
+      ? '<div class="grupo-allday">' + icon('check') + '<span>Están todos al día. No queda nada por pagar.</span></div>'
+      : '';
     if (!moves.length) {
-      saldosMarkup = '<p class="grupo-note">Las cuentas están saldadas.</p>';
+      // No queda nada pendiente. Si hubo gastos, el cartel de "están todos al
+      // día" lo dice más abajo y acá no hace falta repetirlo. Si no se pudo
+      // convertir ningún gasto, el aviso de arriba es lo que explica por qué
+      // la lista de transferencias está vacía.
+      saldosMarkup = (expenses.length ? '' : '<p class="grupo-note">Todavía no hay nada que saldar.</p>') + pagadosMarkup;
     } else if (!meId) {
       // Sin identidad no hay filtrado por rol posible, y esconder transferencias
       // sin saber quién mira sería peor que mostrarlas todas. Queda el
       // comportamiento anterior, con su botón, para el caso de abrir el link
       // sin haberse sentado antes en el grupo.
-      saldosMarkup = moves.map(function (move) { return settleRow(move, false, true); }).join('');
+      saldosMarkup = moves.map(function (move) { return settleRow(move, false, true); }).join('') + pagadosMarkup;
     } else {
       // Lo que le compete a la persona que mira va arriba. Lo del resto del
       // grupo va abajo y plegado: no es lo que tiene que hacer ahora, y con la
@@ -561,37 +760,23 @@
       var mePaga = moves.filter(function (move) { return move.from === meId; });
       var meCobra = moves.filter(function (move) { return move.to === meId; });
       var losDemas = moves.filter(function (move) { return move.from !== meId && move.to !== meId; });
-      var mioPaga = mePaga.filter(function (move) { return !saldoEstaPagado(move); });
-      var mioCobra = meCobra.filter(function (move) { return !saldoEstaPagado(move); });
       // Los dos bloques son independientes: en un grupo se es deudor y
       // acreedor al mismo tiempo, y con un if/else solo se mostraba uno de los
-      // dos lados, que es justo la mitad de la situación de esa persona.
-      // En los dos, el titular y el subtitulo cambian segun si queda algo
-      // pendiente. Decir "te tienen que pagar X" al lado de una fila verde de
-      // "Pagado" es una contradiccion, y el monto pendiente se separa del
-      // total: si una de las dos ya esta saldada, el titular tiene que decir
-      // la que falta, no la suma de las dos.
+      // dos lados, que es justo la mitad de la situación de esa persona. Acá no
+      // hace falta separar lo pagado de lo pendiente: lo pendiente ya viene
+      // pendiente de saldoPendiente(), así que todas las filas de estos bloques
+      // son deuda real y el titular nunca contradice a las filas de abajo.
       var mio = '';
       if (mePaga.length) {
-        mio += '<div class="grupo-subhead">' + (mioPaga.length ? 'Lo que tenés que pagar' : 'Lo que ya liquidaste') + '</div>' +
-          (mioPaga.length
-            ? '<p class="grupo-mine">Tenés que pagarle <b>' + esc(moneyVer(saldosDe(mioPaga), currency)) + '</b>' +
-              (mioPaga.length > 1 ? ', en ' + mioPaga.length + ' transferencias' : '') + '.</p>'
-            : '<p class="grupo-mine">Ya liquidaste los <b>' + esc(moneyVer(saldosDe(mePaga), currency)) + '</b> que debías.</p>') +
-          // Con boton siempre: si ya esta pagado, el boton queda en "Pagado" y
-          // sirve para volver atras.
+        mio += '<div class="grupo-subhead">Lo que tenés que pagar</div>' +
+          '<p class="grupo-mine">Tenés que pagarle <b>' + esc(moneyVer(saldosDe(mePaga), currency)) + '</b>' +
+          (mePaga.length > 1 ? ', en ' + mePaga.length + ' transferencias' : '') + '.</p>' +
           mePaga.map(function (move) { return settleRow(move, true, true); }).join('');
       }
       if (meCobra.length) {
-        mio += '<div class="grupo-subhead">' + (mioCobra.length ? 'Lo que te tienen que pagar' : 'Lo que ya te pagaron') + '</div>' +
-          (mioCobra.length
-            ? '<p class="grupo-mine">Te tienen que pagar <b>' + esc(moneyVer(saldosDe(mioCobra), currency)) + '</b>' +
-              (mioCobra.length > 1 ? ', en ' + mioCobra.length + ' transferencias' : '') + '.</p>'
-            // "Ya te pagaron" y no "recibiste": lo que marco el pagado es el
-            // deudor desde su dispositivo, no el cobro. El grupo ya trata esa
-            // marca como oficial en el cartel de "estan todos al dia", asi que
-            // el titular tiene que estar a la misma altura.
-            : '<p class="grupo-mine">Ya te pagaron los <b>' + esc(moneyVer(saldosDe(meCobra), currency)) + '</b> que te debían.</p>') +
+        mio += '<div class="grupo-subhead">Lo que te tienen que pagar</div>' +
+          '<p class="grupo-mine">Te tienen que pagar <b>' + esc(moneyVer(saldosDe(meCobra), currency)) + '</b>' +
+          (meCobra.length > 1 ? ', en ' + meCobra.length + ' transferencias' : '') + '.</p>' +
           // Sin boton: esto no lo paga la persona que mira, asi que no tiene
           // nada que marcar. El que lo cobra lo confirma por su cuenta.
           meCobra.map(function (move) { return settleRow(move, true, false); }).join('');
@@ -602,14 +787,8 @@
           '<p class="grupo-note">No son pagos tuyos: son transferencias entre los demás del grupo.</p>' +
           losDemas.map(function (move) { return settleRow(move, false, false); }).join('') + '</details>'
         : '';
-      saldosMarkup = mio + resto;
+      saldosMarkup = mio + resto + pagadosMarkup;
     }
-    // Cuando no queda ninguna transferencia pendiente se dice explícitamente:
-    // es la pregunta que todos hacen al final del viaje y "no hay nada para
-    // pagar" no contesta nada.
-    var alDiaMarkup = moves.length && !pendientes
-      ? '<div class="grupo-allday">' + icon('check') + '<span>Están todos al día. No queda nada por pagar.</span></div>'
-      : '';
 
     render(
       '<div class="grupo-card">' +
@@ -657,7 +836,8 @@
       (expenses.length ? '<span class="grupo-badge">' + esc(moneyVer(total, currency)) + '</span>' : '') + '</div>' + expensesMarkup +
       // El selector de "Ver en" va arriba de la lista de gastos, que es donde
       // se leen los montos. Solo aparece si hay más de una moneda con tasa.
-      (verEnMarkup && disponibles.length > 1 ? verEnMarkup : '') + '</div>' +
+      (verEnMarkup && disponibles.length > 1 ? verEnMarkup : '') +
+      sinConvertirMarkup + '</div>' +
 
       '<div class="grupo-card"><h2>Cómo se salda</h2>' +
       (balancesSummary ? '<div class="grupo-subhead">Saldo de cada uno</div>' + balancesSummary : '') +
@@ -724,9 +904,18 @@
     Array.prototype.forEach.call(app.querySelectorAll('[data-saldo]'), function (button) {
       button.addEventListener('click', async function () {
         var key = button.getAttribute('data-saldo');
+        // El monto y la accion van en el botón. El monto porque la marca guarda
+        // la cifra y desmarcar tiene que sacar exactamente lo que esa fila
+        // marcaba; la accion porque "Ya pagué" suma y "Deshacer" resta, y con
+        // la misma pareja a medio pagar los dos botones pueden tener el mismo
+        // par y el mismo monto.
+        var monto = Number(button.getAttribute('data-saldo-monto')) || 0;
+        var accion = button.getAttribute('data-saldo-accion');
+        var partes = key.split('|');
         button.disabled = true;
         try {
-          var result = await supabaseClient.from('grupos_viaje').update({ saldos: alternarSaldo(key) }).eq('id', groupId);
+          var siguiente = marcarSaldo({ from: partes[0], to: partes[1], amount: monto }, accion);
+          var result = await supabaseClient.from('grupos_viaje').update({ saldos: siguiente }).eq('id', groupId);
           if (result.error) throw new Error(result.error.message);
           await loadGroupData(groupId);
           renderGroup(groupId);
@@ -907,6 +1096,31 @@
       || participants.find(function (p) { return p.device_id === deviceId(); })
       || null;
     if (me) rememberParticipant(groupId, me.id);
+    // Los grupos creados antes de que la marca guardara el monto tienen
+    // ["quien|quien"] en vez de {"quien|quien": monto}. Esos pagos existen, así
+    // que se completan con el importe que tenía la transferencia y se guardan
+    // una sola vez: si no, cada gasto nuevo volvía a saldar esa pareja solo.
+    // Va después de cargar participantes y gastos porque migrarSaldos() necesita
+    // los dos para saber cuánto se había pagado.
+    await migrarSaldos(groupId);
+  }
+
+  // Escribe el formato nuevo una vez por carga de página. Si el guardado falla
+  // no se reintenta en cada poll: la pantalla igual muestra los pagos bien
+  // (saldosSaldados() los resuelve en memoria) y en el próximo poll se vuelve a
+  // intentar sin joder a nadie con un error.
+  async function migrarSaldos(groupId) {
+    if (migracionIntentada) return;
+    migracionIntentada = true;
+    var migrado = migrarSaldosPlan();
+    if (!migrado) return;
+    try {
+      var result = await supabaseClient.from('grupos_viaje').update({ saldos: migrado }).eq('id', groupId);
+      if (!result.error) group.saldos = migrado;
+    } catch (error) {
+      // Sin migrar: la página funciona igual, solo que el próximo render vuelve
+      // a calcular el formato viejo en memoria.
+    }
   }
 
   async function init() {

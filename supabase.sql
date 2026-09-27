@@ -126,11 +126,18 @@ create table if not exists public.grupos_viaje (
   name text not null,
   destination_key text,
   currency text not null default 'USD',
-  -- Transferencias ya saldadas, como pares "quien|quien". Es un jsonb y no una
-  -- tabla aparte porque nobody tiene cuenta: el link del grupo es la contraseña,
-  -- así que no hay a quién auditear y alcanza con no volver a mostrar lo ya
-  -- pagado. La clave es el par y no el monto, porque el greedy de saldas puede
-  -- recalcular el importe cuando se agrega o borra un gasto.
+  -- Transferencias ya saldadas, por par y con su importe: {"bruno|paola": 13251941721.22}.
+  -- Es un jsonb y no una tabla aparte porque nobody tiene cuenta: el link del
+  -- grupo es la contraseña, así que no hay a quién auditear y alcanza con no
+  -- volver a mostrar lo ya pagado.
+  -- El importe va adentro, y no solo el par, porque el greedy de saldas
+  -- recalcula los montos cada vez que se agrega o borra un gasto. Con la clave
+  -- del par sola, un gasto nuevo que volviera a generar esa pareja salía con el
+  -- tilde de "Pagado" y el dinero nuevo desaparecía de la lista. Guardando el
+  -- monto, lo pagado se descuenta del saldo antes de repartir.
+  -- Los grupos creados antes de esto tienen ["quien|quien"] (el par, sin
+  -- importe). La app los lee igual y completa el importe una vez, al cargar, sin
+  -- migración: no hay que correr nada contra la base.
   saldos jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
 );

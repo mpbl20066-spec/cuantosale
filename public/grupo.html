@@ -103,7 +103,12 @@
      la desalineación. Ahora el monto vive en la misma fila que el título, con
      justify-between, y las dos líneas de detalle quedan debajo del título
      dentro de la columna de contenido, nunca debajo del ícono. */
-  .grupo-expense{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-top:1px solid var(--line)}
+  /* La fila se centra en vertical (align-items:center) y no arranca pegada
+     arriba (flex-start): con la papelera en todas las filas, el ícono y el
+     botón quedaban desalineados de los de las filas que no los tenían, y
+     apelando a eso para esconder la papelera no quedaba. El título y el monto
+     siguen compartiendo línea base adentro de la columna de contenido. */
+  .grupo-expense{display:flex;align-items:center;gap:10px;padding:13px 0;border-top:1px solid var(--line)}
   .grupo-expense:first-child{border-top:0}
   .grupo-expense__ico{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--bg);color:var(--ink2)}
   .grupo-expense__ico svg{width:19px;height:19px}
@@ -116,8 +121,11 @@
   .grupo-expense__amount{flex:0 0 auto;font-size:15.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
   /* La papelera se revela al hover en puntero, pero en pantalla táctil no hay
      hover: se quedaba en opacity:0 y no había forma de borrar un gasto desde
-     el celular. Ahora siempre se ve en puntero fino y con area tactil de 44px. */
-  .grupo-trash{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;margin:-8px -8px -8px 0;border:0;border-radius:10px;background:transparent;color:var(--ink2);cursor:pointer;opacity:.55;transition:opacity .16s ease,background .16s ease,color .16s ease}
+     el celular. Ahora siempre se ve en puntero fino y con area tactil de 44px.
+     El margen negativo era para que el botón de 44px no agrandara la fila; con
+     la fila centrada, también hay que sacarle el negativo de arriba y abajo o
+     la papelera queda más alta que el centro. */
+  .grupo-trash{flex:0 0 auto;align-self:center;display:grid;place-items:center;width:44px;height:44px;margin-right:-8px;border:0;border-radius:10px;background:transparent;color:var(--ink2);cursor:pointer;opacity:.55;transition:opacity .16s ease,background .16s ease,color .16s ease}
   .grupo-expense:hover .grupo-trash,.grupo-trash:focus-visible{opacity:1;background:var(--coral-soft);color:var(--coral)}
   .grupo-trash:hover{background:var(--coral-soft);color:var(--coral)}
   .grupo-trash svg{width:15px;height:15px}
@@ -148,6 +156,14 @@
   .grupo-settledon__box{display:grid;place-items:center;width:15px;height:15px;border:2px solid var(--line);border-radius:5px;font-size:9px;font-weight:800;line-height:1;color:transparent}
   .grupo-settledon[aria-pressed="true"]{border-color:var(--good);background:var(--good);color:var(--action-ink)}
   .grupo-settledon[aria-pressed="true"] .grupo-settledon__box{border-color:var(--good);background:var(--action-ink);color:var(--good)}
+  /* El boton de la fila ya saldada es al reves: no marca nada, saca lo que se
+     marco. Por eso no se pinta del verde de "confirmado" (que es lo que
+     aria-pressed=true significa en cualquier otro boton de la pagina) sino del
+     coral de "se puede tocar", asi que no se confunda con marcar un pago. */
+  .grupo-settledon.is-undo{background:transparent;border-color:transparent;color:var(--ink2);opacity:0}
+  .grupo-settledon.is-undo:hover,.grupo-settledon.is-undo:focus-visible{opacity:1;border-color:var(--coral);color:var(--coral)}
+  .grupo-settledon.is-undo .grupo-settledon__box{border-color:currentColor;background:transparent;color:currentColor}
+  @media (hover:none){.grupo-settledon.is-undo{opacity:1}}
   /* A 320-360px el boton de 44px mas el importe se comen el ancho y a los
      nombres les quedan 24px: medido, cada nombre se partia en dos lineas de una
      letra. A partir de aca la fila pasa a dos lineas: arriba quien le paga a
@@ -198,6 +214,11 @@
   .grupo-error{color:var(--coral);font-size:13px;margin:10px 0 0}
   .grupo-error:empty{display:none}
   .grupo-note{color:var(--ink2);font-size:12px;margin-top:10px}
+  /* Aviso de que un monto no se pudo convertir. No es un error de la pagina: es
+     que falta la tasa de una moneda, y el numero que se ve al lado es el de
+     verdad, en su moneda. Sin esto el que mira no tiene forma de saber que
+     esas dos filas no se pueden sumar entre si. */
+  .grupo-warn{margin:12px 0 0;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;background:var(--bg);color:var(--ink2);font-size:12.5px;line-height:1.45}
   .grupo-preset{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 16px;padding:11px 13px;border:1px dashed var(--line);border-radius:12px;font-size:13px}
   .grupo-preset button{border:0;background:transparent;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline}
 </style>
