@@ -491,8 +491,17 @@ function selectThreeHotelsByBudget(hotels, dailyBudget) {
 }
 const HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
 function resolveHotelType(value, subcategory, style) {
+// Los seis tipos del selector. La lista vive tambien en hotelTypeSelectMarkup()
+// (public/app.js); si se agrega uno hay que tocar los dos lados.
+const HOTEL_TYPES = new Set(['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive']);
   const normalized = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
-  const context = (normalized + ' ' + String(subcategory || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')).replace(/[_ ]+/g, '-');
+  // La eleccion explicita del selector gana siempre. Antes se concatenaba con
+  // la subcategoria y ganaba la subcategoria: con "boutique" elegido y la
+  // subcategoria "Maceio (Resort)", el contexto decia "boutique maceio
+  // (resort)" y el chequeo de resort, que va antes, devolvia resort. La
+  // persona pedia boutique y le daban resorts sin que nada lo dijera.
+  if (normalized && HOTEL_TYPES.has(normalized)) return normalized;
+  const context = (' ' + String(subcategory || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')).replace(/[_ ]+/g, '-');
   if (context.indexOf('all-inclusive') >= 0 || context.indexOf('todo-incluido') >= 0) return 'all-inclusive';
   if (context.indexOf('resort') >= 0) return 'resort';
   if (context.indexOf('boutique') >= 0) return 'boutique';
@@ -504,7 +513,11 @@ function resolveHotelType(value, subcategory, style) {
 function hotelTypeMultiplier(type) {
   return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22, economico: 0.82, intermedio: 1, confort: 1.3 })[type] || 1;
 }
-function hotelMatchesType(hotel, type, budgetTarget) {
+// El precio y el tipo son dos filtros distintos y hacen falta por separado: la
+// segunda pasada de requetas relaja el precio (un hotel real fuera de banda es
+// un mal dato) pero el tipo no se relaja nunca, porque un loft no es un resort
+// por mas barato que sea.
+function hotelPasaElPrecio(hotel, type, budgetTarget) {
   if (!type || type === 'intermedio' || type === 'confort' || type === 'economico') {
     const rate = Number(hotel.perNight) || 0;
     if (!rate || !budgetTarget) return type !== 'economico';
@@ -512,6 +525,12 @@ function hotelMatchesType(hotel, type, budgetTarget) {
     if (type === 'intermedio') return rate > budgetTarget * 0.75 && rate <= budgetTarget * 1.25;
     return rate > budgetTarget * 1.1;
   }
+  // Resort, boutique y all-inclusive no se filtran por precio: su banda la
+  // decide el multiplicador del tipo, no el objetivo de la categoria.
+  return true;
+}
+function hotelEsDelTipo(hotel, type) {
+  if (!type || type === 'intermedio' || type === 'confort' || type === 'economico') return true;
   const text = normalizeHotelKey([hotel.name, hotel.propertyType, hotel.description, hotel.categoryText].filter(Boolean).join(' '));
   if (type === 'all-inclusive') {
     // Priorizar el campo mealPlan extraido directamente de la API de Booking
@@ -523,6 +542,9 @@ function hotelMatchesType(hotel, type, budgetTarget) {
   if (type === 'resort') return /resort/.test(text);
   if (type === 'boutique') return /boutique/.test(text);
   return false;
+}
+function hotelMatchesType(hotel, type, budgetTarget) {
+  return hotelPasaElPrecio(hotel, type, budgetTarget) && hotelEsDelTipo(hotel, type);
 }
 function applyHotelTypeToProposal(proposal, type, pax) {
   const factor = hotelTypeMultiplier(type);
@@ -725,7 +747,13 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   let realesExtra = [];
   if (matchingCategory.length < 3) {
     const yaElegidos = new Set(matchingCategory.map(function (hotel) { return normalizeHotelKey(hotel.name); }));
-    const restantes = priced.filter(function (hotel) { return !yaElegidos.has(normalizeHotelKey(hotel.name)); });
+    const restantes = priced.filter(function (hotel) {
+      // El tipo se mantiene: antes esta pasada no filtraba por nada, asi que si
+      // no habia resorts completaba con lofts y apartamentos y los ofrecia como
+      // si fueran. Relajar el precio era la idea del comentario de arriba;
+      // relajar tambien el tipo convertsia el selector en una decoracion.
+      return !yaElegidos.has(normalizeHotelKey(hotel.name)) && hotelEsDelTipo(hotel, hotelType);
+    });
     realesExtra = conTier(restantes.sort(porDistancia).slice(0, 3 - matchingCategory.length));
   }
   const combinedReales = matchingCategory.concat(realesExtra);
