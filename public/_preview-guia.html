@@ -87,10 +87,7 @@
 <body>
 <div class="wrap">
   <div class="barra">
-    <select id="dest">
-      <option value="fln">Florianópolis</option>
-      <option value="sao">São Paulo</option>
-    </select>
+    <select id="dest"></select>
     <label for="food">Comida por día (US$)</label>
     <input id="food" type="number" min="0" step="1" value="28">
     <button type="button" id="imprimir">Imprimir / Guardar como PDF</button>
@@ -103,15 +100,39 @@
 <script src="/guias.js"></script>
 <script>
 (function () {
+  // Un destino de muestra por guia, para poder ver las 15 distintas. Las
+  // regionales que ya son tan婿 se repiten 6 u 8 veces en los 44 destinos.
+  var MUESTRA = [
+    ['fln', 'Florianópolis', 'Santa Catarina'],
+    ['sao', 'São Paulo', 'São Paulo'],
+    ['itapema', 'Itapema', 'Santa Catarina'],
+    ['garopaba', 'Garopaba', 'Santa Catarina'],
+    ['gram', 'Gramado', 'Rio Grande do Sul'],
+    ['torres', 'Torres', 'Rio Grande do Sul'],
+    ['poa', 'Porto Alegre', 'Rio Grande do Sul'],
+    ['paraty', 'Paraty', 'Rio de Janeiro'],
+    ['arraial', 'Arraial do Cabo', 'Rio de Janeiro'],
+    ['angra', 'Angra dos Reis', 'Rio de Janeiro'],
+    ['trancoso', 'Trancoso', 'Bahía'],
+    ['morro', 'Morro de São Paulo', 'Bahía'],
+    ['itacare', 'Itacaré', 'Bahía'],
+    ['rec', 'Recife', 'Pernambuco'],
+    ['porto', 'Porto de Galinhas', 'Pernambuco'],
+    ['for', 'Fortaleza', 'Ceará'],
+    ['jericoacoara', 'Jericoacoara', 'Ceará'],
+    ['mcz', 'Maceió', 'Alagoas'],
+    ['nat', 'Natal', 'Rio Grande do Norte'],
+    ['pip', 'Pipa', 'Rio Grande do Norte'],
+    ['igu', 'Foz de Iguaçu', 'Paraná'],
+    ['curitiba', 'Curitiba', 'Paraná'],
+    ['joaopessoa', 'João Pessoa', 'Paraíba'],
+    ['bho', 'Belo Horizonte', 'Minas Gerais'],
+    ['bue', 'Buenos Aires', 'Buenos Aires']
+  ];
   var DEST = { key:'fln', name:'Florianópolis', region:'Santa Catarina' };
   var VIAJE = { dep:'2026-11-14', ret:'2026-11-17', noches:3, pax:2 };
-  // Cambiar el destino desde la barra para comparar la guia de ciudad con la
-  // regional. La region se resuelve con el mismo slug que usa guiAs.js.
-  var REGION_POR_DEST = { fln:'Santa Catarina', sao:'São Paulo', gram:'Rio Grande do Sul',
-    bue:'Buenos Aires', ssa:'Bahía', igu:'Paraná' };
   function nombreRegion(k){
-    if (REGION_POR_DEST[k]) return REGION_POR_DEST[k];
-    if (k === 'fln') return 'Santa Catarina';
+    for (var i=0;i<MUESTRA.length;i++) if (MUESTRA[i][0]===k) return MUESTRA[i][2];
     return '';
   }
 
@@ -292,12 +313,17 @@
   var input = document.getElementById('food');
   function draw(){
     DEST.region = nombreRegion(DEST.key);
-    if (DEST.key !== 'fln') DEST.name = DEST.key === 'sao' ? 'São Paulo' : DEST.key;
+    for (var i = 0; i < MUESTRA.length; i++) if (MUESTRA[i][0] === DEST.key) DEST.name = MUESTRA[i][1];
     var g = window.CS_GUIAS.guiaPara(DEST.key, DEST.region);
     document.getElementById('hoja').innerHTML = g ? render(g, Number(input.value)) : '<p>Sin guía para ' + DEST.key + '</p>';
   }
   var sel = document.getElementById('dest');
-  if (sel) sel.addEventListener('change', function(){ DEST.key = sel.value; draw(); });
+  if (sel) {
+    sel.innerHTML = MUESTRA.map(function (m) {
+      return '<option value="' + m[0] + '">' + m[1] + '</option>';
+    }).join('');
+    sel.addEventListener('change', function () { DEST.key = sel.value; draw(); });
+  }
   input.addEventListener('input', draw);
   document.getElementById('imprimir').addEventListener('click', function(){ window.print(); });
   draw();

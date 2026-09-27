@@ -14,10 +14,25 @@ cuantosale/
 │  └─ providers/
 │     ├─ index.js             Agregador de vuelos: cache, dedupe y pausa por cuota
 │     ├─ serpapi.js           Vuelos: búsqueda y normalización de Google Flights
+│     ├─ civitatis.js         Tours: precio real de la fecha que se está mirando
 │     ├─ busbud.js            Buses: pendiente (por ahora estimado)
-│     └─ hotels.js            Hoteles: pendiente (por ahora estimado)
+│     └─ hotels.js            Hoteles: Booking.com / RapidAPI
+├─ data/
+│  ├─ costos-diarios.json     Comida y transporte local por destino (fuente + confianza)
+│  ├─ transfer-precios.json   Transfer de aeropuerto por destino (fuente + confianza)
+│  └─ distancias-aeropuerto.json  Km reales de OSRM, cacheados
+├─ scripts/
+│  ├─ build-costos.js         Reparte costos-diarios.json al modelo y al cliente
+│  ├─ build-transfer.js       Reparte transfer-precios.json al modelo y al cliente
+│  ├─ build-transfer-precios.js  Propone la tabla de transfer desde los anclas y los km
+│  ├─ validar-costos.js       Valida costos-diarios.json y sus copias generadas
+│  ├─ validar-transfer.js     Valida transfer-precios.json y sus copias generadas
+│  ├─ pull-aeropuertos.js     Coordenadas de los 15 aeropuertos, desde OurAirports
+│  └─ pull-distancias.js      Km de carretera desde OSRM
 ├─ public/                    La web (index.html, style.css, app.js)
-│  └─ guiAs.js                Contenido de la Guía Secreta, por destino
+│  ├─ guiAs.js                Contenido de la Guía Secreta, por destino
+│  ├─ daily-costs.js          GENERADO. No editar a mano.
+│  └─ transfer-precios.js     GENERADO. No editar a mano.
 ├─ test.js                    Pruebas automáticas
 ├─ .env.example               Plantilla de configuración
 └─ package.json
@@ -73,6 +88,47 @@ La aplicación resuelve el destino con `/api/v1/hotels/searchDestination`, consu
 
 Configura en Vercel `BOOKING_API_KEY` y `BOOKING_API_HOST=booking-com15.p.rapidapi.com`. El endpoint de búsqueda se define por defecto en el código; `BOOKING_API_URL` es opcional.
 
+### Transfer desde el aeropuerto
+
+`data/transfer-precios.json` es la fuente de verdad del precio del transfer. `npm run build:transfer` la reparte a `TRANSFER_PRICES` en `lib/model.js` (la que cotiza el server) y a `public/transfer-precios.js` (la que dibuja las cards). `npm run check:transfer` la valida.
+
+**El problema que vino a resolver.** El precio estaba en tres lugares y los tres decían una cosa distinta:
+
+| Dónde | Valor | Unidad |
+|---|---|---|
+| Cards en `public/app.js` | 30 / 150 | por viaje, escritos a mano |
+| `getSelectedTransferAmount()` | 30 / 150 | repetidos a mano |
+| `transferConfig()` en `server.js` | `OFFICIAL_TRANSFER_PRICE_USD` (35) | por **pasajero** |
+
+Para dos personas el wizard decía 70 y la card decía 30. Y los tres eran iguales para los 44 destinos, lo cual no puede ser: de GIG a Río hay 18 km y de GIG a Búzios hay 174 por la RJ-124.
+
+**La semántica que se fijó**, porque antes estaba mezclada:
+
+- `compartido`: USD por **persona**, solo ida.
+- `privado`: USD por **vehículo** de hasta 4 personas, solo ida. No se multiplica por los pasajeros.
+- `appRideUsd`: precio de un pedido de Uber/99 por vehículo, cuando se pudo verificar. No es un transfer (no hay meet & greet). Va en su propio campo porque meterlo como si fuera el privado lo subestimaba a menos de la mitad.
+
+**Cómo se investigó.** Por aeropuerto, no por destino: los 44 destinos cuelgan de solo **15 aeropuertos de llegada**, y el precio es función de (aeropuerto → hotel), no del nombre del destino.
+
+| Dato | De dónde sale |
+|---|---|
+| Coordenadas de los 15 aeropuertos | OurAirports (dominio público), con `npm run pull:aeropuertos` |
+| Km de carretera aeropuerto → destino | OSRM (`router.project-osrm.org`), cacheados en `data/distancias-aeropuerto.json`, con `npm run pull:distancias` |
+| Precios | Búsqueda web, con la fuente escrita en el `fuente` de cada destino |
+
+**Cuánta confianza hay, sin adornos.** De 88 celdas (44 destinos × 2 modalidades), **5 tienen un precio publicado**: el compartido de Río, Búzios e Ilha Grande, y el privado de São Paulo. Las otras 83 salen de un modelo de distancia calibrado contra esos precios:
+
+```
+compartido = 18 + 0,06 * km      (por persona)
+privado    = 12 + 0,62 * km      (por vehículo, con piso de 1,6x el compartido)
+```
+
+El compartido casi no crece con la distancia, y los datos lo confirman: entre GIG→Río (18 km, US$ 22) y GIG→Búzios (174 km, US$ 29) hay 156 km de diferencia y 7 dólares de precio. Lo que se paga es el chofer y el vehículo, que se reparten entre los pasajeros. **El 94% de la tabla sigue siendo estimación y está marcado como tal**: `confianza: 'baja'` con la derivación escrita en la fila. Para mostrar un precio como real, tiene que haber un precio real.
+
+**Un bug de código de aeropuerto que salió en el camino.** `AIR_DESTINATIONS` en `server.js` dice que `fernando` llega por **NVT**. NVT es el aeropuerto de Navegantes, en Santa Catarina, a 2.900 km de la isla; el código de Fernando de Noronha es **FEN**. Es el mismo tipo de error que el README documenta para `RIO` y `SAO`. La tabla de transfer usa FEN y hay un test que lo fija, pero **el arreglo en `AIR_DESTINATIONS` está pendiente**: la búsqueda de vuelos a Fernando de Noronha sigue apuntando a Santa Catarina.
+
+**Destinos sin carretera.** `ilha` (ferry desde Río o Angra) y `fernando` (vuelo desde REC) llevan un `modo` que no es `car`, y la UI no les ofrece una van. Antes se les ofrecía igual que a Río, que no existe. `soloPrivado` marca los que no tienen traslado compartido.
+
 ### Tours y experiencias locales
 
 La PWA incluye experiencias referenciales para Río de Janeiro, Florianópolis, Maragogi, Praia do Pipa y Gramado/Canela. Cada ficha abre WhatsApp con el mensaje y los datos del viaje ya preparados (`https://wa.me/?text=...`); al no tener un número comercial configurado, la persona elige el contacto al abrir WhatsApp. Los importes son referenciales y se confirman por asistencia.
@@ -107,8 +163,11 @@ El schema y las reglas de contenido están documentados en la cabecera del archi
 |---|---|
 | Pasajes de avión desde Montevideo | Google Flights vía SerpAPI cuando hay `SERPAPI_API_KEY`; el presupuesto suma tarifas en USD |
 | Comparador de fechas ("mismo viaje, otra fecha") | Precio real de vuelo por fecha cuando el punto se pudo consultar; estimado en los puntos que fallaron |
+| Alojamiento | Booking.com / RapidAPI, con tarifa y foto reales |
+| Tours | Civitatis, con el precio de la fecha que está mirando el usuario |
+| **Transfer de aeropuerto** | **5 de 88 celdas con precio publicado** (`data/transfer-precios.json`); el resto sale de un modelo de distancia con km reales de OSRM y está marcado `confianza: 'baja'` |
 | Cruce a Buenos Aires, buses y ferry | Estimado (pendiente: Busbud u otra fuente) |
-| Alojamiento, comidas, transporte local, traslados, valijas, seguro | Estimado (`lib/model.js`) |
+| Comidas, transporte local, valijas, seguro | Estimado (`lib/model.js` y `data/costos-diarios.json`) |
 
 El gráfico de fechas mezcla las dos cosas a propósito, pero las marca: las barras con precio real van sólidas y las estimadas con borde punteado, y el subtítulo dice cuántas de las N fechas son reales. Un precio inventado presentado como real sería peor que no mostrar el gráfico.
 
@@ -144,13 +203,33 @@ Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.)
 
 Conviene correrla después de tocar `public/guias.js` o `public/app.js`. Los dos bugs más caros de esa parte fueron silenciosos: renombrar `d.region` a `d.región` dejaba la cobertura de guías en 0 sin tirar error, y renombrar la clave `cuando` a `cuándo` hacía que el render recibiera `undefined` y desapareciera la línea "Cuándo" de las 19 playas. Un test que no falla cuando tiene que fallar no sirve de nada, y por eso el humo existe.
 
+### Tablas de datos y sus validadores
+
+| Comando | Qué hace |
+|---|---|
+| `npm run build:todo` | Reparte las dos tablas al modelo y al cliente (`prestart` y `pretest` lo corren) |
+| `npm run check:todo` | Valida las dos tablas y que las copias generadas estén al día |
+| `npm run pull:aeropuertos` | Descarga OurAirports e imprime las coordenadas de los 15 aeropuertos |
+| `npm run pull:distancias` | Consulta OSRM y cachea los km de carretera en `data/distancias-aeropuerto.json` |
+| `npm run pull:transfer` | Regenera `data/transfer-precios.json` desde los anclas y los km cacheados |
+
+`validar-transfer.js` no es decorativo: durante este trabajo lo hizo fallar cinco veces y cada falla era un error real. Vale la pena correrlo después de tocar la tabla. Entre otras cosas, comprueba que el privado nunca salga más barato que el compartido, que todo destino de carretera tenga km, que los que no la tienen declaren `ferry` o `vuelo`, y que no haya números de transfer escritos a mano en `public/app.js`.
+
 ## 5. Qué falta para una versión completa
 
 - **Buses y ferry reales:** Busbud da acceso a sus datos a socios; hay que pedirles un convenio. Completá `lib/providers/busbud.js`.
+- **Arreglar `AIR_DESTINATIONS` para `fernando`:** dice `NVT` (Navegantes, Santa Catarina) cuando el código de la isla es `FEN`. La tabla de transfer ya usa `FEN` y hay un test que lo fija, pero la búsqueda de vuelos sigue mandando a la provincia equivocada.
+- **Bajar los precios de transfer del modelo:** 83 de 88 celdas salen de la fórmula de distancia. Cada vez que se encuentre una tarifa publicada, se agrega el ancla a `ANCHORS` en `scripts/build-transfer-precios.js` con su fuente, se corre `npm run pull:transfer` y `npm run build:transfer`, y la celda pasa de `confianza: 'baja'` a `media`.
 - **Textos legales:** términos y política de privacidad antes de abrirla al público.
 - **Idea:** poné un botón de "Quiero que me avisen" con un formulario externo para medir interés.
 
 ## Cambiar destinos y estimaciones
 
-Todo está en `lib/model.js`: la lista `DEST` (destinos, códigos de aeropuerto, precios base) y `TIERS` (categorías de alojamiento).
-Para agregar un destino, sumá una entrada con su código IATA y sus tipos de transporte.
+`DEST` y `TIERS` están en `lib/model.js`. Para agregar un destino, sumá la entrada con su código IATA y sus tipos de transporte, y después:
+
+1. Sumalo a `data/costos-diarios.json` (comida y transporte local) y a `data/transfer-precios.json` (transfer del aeropuerto), con `fuente`, `verificado` y `confianza`.
+2. Si es un destino nuevo, aggregate su coordenada a `DEST_COORDS` en `lib/model.js` — sin ella no se puede coticar el traslado entre paradas ni medir la distancia al aeropuerto.
+3. `npm run pull:distancias` para guardar los km desde OSRM, y `npm run build:todo` para repartir.
+4. `npm run check:todo` y `npm test`.
+
+Los tres validadores (`validar-costos.js`, `validar-transfer.js` y `prueba-destinos.js`) están para que un destino agregado a medias se note al instante, no tres meses después.

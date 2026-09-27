@@ -44,6 +44,9 @@
   .wl-confirm-position{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:64px;color:var(--wl-amber);line-height:1;text-align:center;margin:6px 0}
   .wl-confirm-label{text-align:center;color:var(--wl-ink2);font-size:13px;margin-bottom:22px}
   .wl-share{display:flex;gap:8px;align-items:center;background:#0E1533;border:1px solid var(--wl-line);border-radius:12px;padding:10px}
+  /* Botón grande de compartir. Amber sólido como la CTA, pero más chico que
+     el alta: después de anotarse, la acción que suma es pasar el link. */
+  .wl-share-btn{display:block;width:100%;border:0;border-radius:14px;background:var(--wl-amber);color:#1A1200;padding:17px;font-weight:800;font-size:17px;cursor:pointer;margin-bottom:12px;box-shadow:0 10px 24px -10px rgba(242,169,59,.55)}
   .wl-share input{flex:1;border:0;background:transparent;color:var(--wl-ink);font-size:13px;min-width:0}
   .wl-share button{flex:none;border:0;border-radius:9px;background:var(--wl-amber);color:#1A1200;padding:9px 12px;font-weight:700;font-size:13px;cursor:pointer}
   .wl-stat{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--wl-line);font-size:14px}
@@ -76,6 +79,7 @@
     .wl-confirm-label{margin-bottom:14px}
     .wl-confirm-position{font-size:40px;margin:4px 0}
     .wl-share{padding:9px}
+    .wl-share-btn{padding:15px;font-size:16px;margin-bottom:10px}
     .wl-stat{padding:9px 0}
     .wl-reward{padding:12px;margin-top:12px}
     .wl-reward p{font-size:13px;margin-bottom:8px}
@@ -100,12 +104,14 @@
     .wl-btn{padding:13px}
     .wl-free-note{margin-top:6px}
     .wl-urgency{font-size:12.5px;line-height:1.4;padding:9px 11px;margin-top:10px}
+    .wl-share-btn{padding:13px;font-size:15px;margin-bottom:8px}
   }
   /* Pantallas bajas en horizontal (celular girado): se recorta un poco más. */
   @media (max-height:560px) and (max-width:900px){
     .wl-wrap{justify-content:flex-start}
     h1{font-size:22px}
     .wl-sub{display:none}
+    .wl-share-btn{padding:13px;font-size:15px;margin-bottom:8px}
     .wl-countdown{margin-bottom:12px}
   }
 </style>
@@ -116,6 +122,6 @@
 </div>
 <!-- El ?v= tiene que bumpearse en cada cambio de waitlist.js: el servidor
      cachea las rutas con ?v= como inmutables durante un año. -->
-<script src="/waitlist.js?v=8" defer></script>
+<script src="/waitlist.js?v=9" defer></script>
 </body>
 </html>
