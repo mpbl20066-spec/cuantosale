@@ -53,7 +53,31 @@
     canela: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Catedral_Nossa_Senhora_de_Lourdes.JPG/1920px-Catedral_Nossa_Senhora_de_Lourdes.JPG',
     igu: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg/1920px-Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg',
     rec: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg',
-    poa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg/1920px-IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg'
+    poa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg/1920px-IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg',
+    // Los 10 que faltaban. Todos verificados contra la DESCRIPCION del
+    // archivo en Commons y no contra el nombre, por dos motivos que ya
+    // aparecieron: hay homonimos y hay licencias restringidas.
+    //
+    // - "forte" devolvia 3 de 5 resultados de Praia do Forte do Cao, en
+    //   ANCORA, PORTUGAL. La que esta aca es la de Bahia, confirmado por la
+    //   descripcion del archivo.
+    // - "ferrugem" tenia como mejor candidata un "CC BY-SA 2.0 br": la "br"
+    //   significa que la licencia solo vale dentro de Brasil, asi que no
+    //   sirve para una web que se lee desde Montevideo. Descartada.
+    // - "torres" solo por el nombre no da nada (devuelve PDFs de archivo
+    //   historico). Hay que buscarla por su landmark: el Parque da Guarita.
+    // - "garopaba" quedo en 1152 px, mas chica que las demas, porque las
+    //   candidatas grandes que hay son de Armacao (Florianopolis).
+    portoseguro: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg/1280px-Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg',
+    itacare: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg/1280px-Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg',
+    forte: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg/1280px-Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg',
+    itapema: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Praia_de_Itapema_-_Orla.jpg/1280px-Praia_de_Itapema_-_Orla.jpg',
+    garopaba: 'https://upload.wikimedia.org/wikipedia/commons/7/79/Garopaba_Beach_July_2009.JPG',
+    ferrugem: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Nascer_na_Praia_da_Ferrugem.JPG/1280px-Nascer_na_Praia_da_Ferrugem.JPG',
+    picarras: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Praia_de_Pi%C3%A7arras.jpg/1280px-Praia_de_Pi%C3%A7arras.jpg',
+    torres: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg/1280px-Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg',
+    canoa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Farol_litoral_Capao_da_Canoa_Praia_Ara%C3%A7a.jpg/1280px-Farol_litoral_Capao_da_Canoa_Praia_Ara%C3%A7a.jpg',
+    joaopessoa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg/1280px-Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg'
   };
   /*
    * Créditos de las fotos. Archivo GENERADO por creditos-fotos.js.
@@ -2791,30 +2815,70 @@
     return second ? [primary, second] : [primary];
   }
   function flightSummaryCard(offer) {
-    function legRow(leg, label) {
-      // Cuando el tramo no viene, se muestra la fila igual saying "no informada".
-      // Omitirla hacía que la tarjeta pareciera de solo ida cuando el precio es
-      // de ida y vuelta, que es justo lo que confundía.
-      if (!leg) {
-        return '<div class="flight-summary-leg is-unknown"><span class="flight-badge">' + esc(label) + '</span>' +
-          '<div class="flight-summary-unknown">Google no informa los horarios de este tramo. ' +
-          'El precio de abajo igual es del viaje completo.</div></div>';
-      }
-      return '<div class="flight-summary-leg"><span class="flight-badge">' + esc(label) + '</span>' +
-        '<div class="flight-summary-route"><b>' + esc(airportCode(leg.origin)) + '</b><span aria-hidden="true">→</span><b>' + esc(airportCode(leg.destination)) + '</b></div>' +
-        '<div class="flight-summary-times"><span>Sale ' + esc(flightTime(leg.departure)) + '</span><span>Llega ' + esc(flightTime(leg.arrival)) + '</span></div></div>';
+    // Iconos en SVG inline y no emoji: el proyecto ya usa iconos propios y los
+    // emoji se veían distintos entre Android y iOS.
+    var iconInfo = '<svg class="fi" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v5M10 6.3v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    var iconSwap = '<svg class="fi" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M16 7a6.5 6.5 0 0 0-11.4-2M4 13a6.5 6.5 0 0 0 11.4 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4.2 2.4v3.2h3.2M15.8 17.6v-3.2h-3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    // La API devuelve el precio del GRUPO, no el de una persona: la misma ruta y
+    // fechas dan US$ 249 para 1 adulto y US$ 499 para 2. Se muestra de grande el
+    // precio POR PASAJERO, que es como el usuario compara viajes, y el total
+    // del grupo debajo, que es lo que se suma de verdad al presupuesto.
+    //
+    // Importante: lo que se suma al presupuesto sigue siendo el total (lo usa
+    // actualizarPasajes y parts.pasajes del modelo). Esto es solo presentación.
+    // Lo que no se puede es rotular el total como "por pasajero": daría un
+    // número que no es el que se paga.
+    var pax = (detailState && detailState.meta && Number(detailState.meta.pax)) || 1;
+    var total = offer.price_usd === null ? null : Number(offer.price_usd);
+    var priceText;
+    var priceSub = '';
+    if (total === null) {
+      priceText = esc(offer.original_price + ' ' + (offer.original_currency || ''));
+    } else if (pax > 1) {
+      priceText = money(Math.round(total / pax));
+      priceSub = '<span class="flight-summary-pax">por pasajero</span>' +
+        '<span class="flight-summary-total-group">' + money(total) + ' total · ' + pax + ' viajeros</span>';
+    } else {
+      priceText = money(total);
+      priceSub = '<span class="flight-summary-pax">1 viajero · precio total</span>';
     }
-    var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
+    // Fin del bloque de precio.
     var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
-    var book = offer.book_url
-      ? '<a class="btn btn-primary flight-summary-book" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Reservar en Google Flights</a>'
-      : '';
+    var cabin = offer.cabin_label || cabinClassLabel(offer.cabin_class);
+
+    // La vuelta siempre va de la llegada a la salida. Los horarios no vienen en
+    // la respuesta de la API, pero el sentido del viaje sí se sabe, y la línea
+    // se muestra igual: omitirla hacía leer la tarjeta como un pasaje de ida.
+    var backFrom = airportCode(offer.arrival_airport);
+    var backTo = airportCode(offer.departure_airport);
+    var backRoute = (backFrom && backFrom !== '—' ? backFrom : 'destino') + ' → ' + (backTo && backTo !== '—' ? backTo : 'origen');
+
     return '<div class="flight-summary-card">' +
-      '<div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b><span class="flight-badge cabin-badge">' + esc(offer.cabin_label || cabinClassLabel(offer.cabin_class)) + '</span></div>' +
-      legRow(offer.outbound, 'Ida') + legRow(offer.inbound, 'Vuelta') +
-      '<div class="flight-summary-footer"><small>Precio final · Ida y vuelta</small><b>' + price + '</b></div>' +
-      '<div class="flight-summary-actions">' + book + '<button type="button" class="btn btn-secondary flight-summary-change" data-change-flight>Elegir otro vuelo</button></div>' +
-      '<p class="flight-summary-note">Precio de Google Flights para el viaje completo. Google no expone los horarios de vuelta, así que solo mostramos el tramo de ida. La reserva se completa en su sitio, no acá.</p></div>';
+      '<div class="flight-summary-head">' + logo + '<b>' + esc(offer.airline) + '</b>' + (cabin ? '<span class="flight-badge cabin-badge">' + esc(cabin) + '</span>' : '') + '</div>' +
+      '<div class="flight-summary-line">' +
+        '<span class="flight-summary-tag">Ida</span>' +
+        '<span class="flight-summary-path">' + esc(routeOf(offer.outbound, offer)) + '</span>' +
+        '<span class="flight-summary-when">Sale ' + esc(flightTime(offer.departure)) + ' · Llega ' + esc(flightTime(offer.arrival)) + '</span>' +
+      '</div>' +
+      '<div class="flight-summary-line is-muted">' +
+        '<span class="flight-summary-tag">Vuelta</span>' +
+        '<span class="flight-summary-path">' + esc(backRoute) + '</span>' +
+        '<span class="flight-summary-when">Horarios sujetos a confirmación en el sitio oficial</span>' +
+      '</div>' +
+      '<div class="flight-summary-total"><span class="flight-summary-total-label">Tarifa final · Ida y vuelta</span>' +
+        '<b class="flight-summary-total-value">' + priceText + '</b>' + priceSub + '</div>' +
+      (offer.book_url ? '<a class="btn btn-primary flight-summary-book" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Reservar en Google Flights</a>' : '') +
+      '<button type="button" class="flight-summary-change" data-change-flight>' + iconSwap + 'Elegir otro vuelo</button>' +
+      '<p class="flight-summary-foot">' + iconInfo + '<span>Tarifa final de ida y vuelta con ' + esc(offer.airline) + '. Al hacer clic, completás la reserva de forma segura en Google Flights.</span></p>' +
+      '</div>';
+  }
+
+  // "MVD → GIG" de un tramo, con los nombres de aeropuerto si el tramo existe.
+  function routeOf(leg, offer) {
+    var from = leg && leg.origin ? airportCode(leg.origin) : airportCode(offer && offer.departure_airport);
+    var to = leg && leg.destination ? airportCode(leg.destination) : airportCode(offer && offer.arrival_airport);
+    return (from || '—') + ' → ' + (to || '—');
   }
   function getFlightSelectionState() {
     if (!detailState) return null;
