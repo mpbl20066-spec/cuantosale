@@ -1566,6 +1566,18 @@
   function hotelTypeSelectMarkup(meta) {
     var selected = meta.hotelType || 'intermedio';
     var options = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
+    // Solo los tipos para los que este destino tiene algo de verdad, que es lo
+    // que dice meta.tiposHotelDisponibles. Sin el dato se ofrecen los seis: no
+    // saber no es lo mismo que no haber, y ofrecer de mas es mejor que dejar
+    // elegir algo que va a salir vacio.
+    if (Array.isArray(meta.tiposHotelDisponibles) && meta.tiposHotelDisponibles.length) {
+      var disponibles = options.filter(function (type) { return meta.tiposHotelDisponibles.indexOf(type) >= 0; });
+      if (disponibles.length) options = disponibles;
+      // Si el tipo que estaba elegido no existe aca, se cae al primero que si.
+      // Marcar algo que la lista de abajo no va a tener es peor que cambiarlo.
+      if (options.indexOf(selected) < 0) selected = options[0];
+    }
+    if (meta.hotelType !== selected) meta.hotelType = selected;
     return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></span></label>';
   }
   /* Que hotel hay que marcar al redibujar la lista.
@@ -1803,6 +1815,10 @@
       if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
       meta.hotels = Array.isArray(data.hotels) ? data.hotels : [];
       meta.hotelsNearby = data.hotelsNearby || '';
+      // Que tipos de alojamiento hay de verdad para este destino. El server lo
+      // calcula sobre los mismos 20 hoteles reales que ya trae, asi que no es
+      // una llamada extra; y puede venir null si no hay key de Booking.
+      meta.tiposHotelDisponibles = Array.isArray(data.tiposDisponibles) ? data.tiposDisponibles : null;
       meta.hotelsLoaded = true;
       var current = document.querySelector('.hotel-options-loading');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
