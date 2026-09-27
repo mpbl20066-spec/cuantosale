@@ -122,35 +122,63 @@ const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon'
 };
-// Checkout de vuelos con Duffel. Las fuentes son las que exige el FAQ de
-// @duffel/components para este trío:
-//   - script-src  assets.duffel.com  -> el custom element por CDN
-//                 js.evervault.com   -> SDK del desafío 3DS
-//   - frame-src   api.duffel.cards   -> iframe PCI del formulario de tarjeta
-//                 ui-components.evervault.com -> UI del 3DS
-//   - connect-src api.duffel.com    -> la API que el browser consulta
-//                 keys.evervault.com / api.evervault.com
-//   - img-src     assets.duffel.com  -> spinner del form
-//   - style-src-attr 'unsafe-inline' -> estilos inline del componente React
-// El CSP es la única barrera que impide que un script de terceros inyectado en
-// la página de pago lea la tarjeta: no se le pueden agregar dominios aca.
+// Los precios de vuelo llegan por el server y los links de reserva apuntan a
+// Google Flights, así que el browser no necesita hablar con ningun proveedor de
+// vuelos. Lo que queda permitido es lo que la pagina ya usaba: Supabase para
+// autenticacion, Wikimedia para las fotos de destinos y el CDN de iconos.
+// El CSP es la unica barrera que impide que un script inyectado se lleve datos
+// de sesion, asi que no se le pueden agregar dominios sin necesidad.
 const CSP = "default-src 'self'; " +
-  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://assets.duffel.com https://js.evervault.com; " +
+  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
   "style-src-attr 'unsafe-inline'; " +
   "font-src https://fonts.gstatic.com; " +
-  "img-src 'self' data: https: https://assets.duffel.com; " +
-  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://api.duffel.com https://api.duffel.cards https://keys.evervault.com https://api.evervault.com; " +
-  "frame-src https://*.supabase.co https://api.duffel.cards https://ui-components.evervault.com; " +
+  "img-src 'self' data: https:; " +
+  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org; " +
+  "frame-src https://*.supabase.co; " +
   "base-uri 'none'; form-action 'self'";
-const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+// Cuarta lista de destinos, y la que el cliente no ve: si una clave no esta
+// aca, /api/vuelos/buscar la rechaza con "!destination" y el destino no puede
+// buscar vuelo real aunque el modelo, el desplegable y la grilla lo ofrezcan.
+// Tiene que coincidir con HOME_DESTINATION_KEYS.
+const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
 // Los destinos que la app ofrece, agrupados por región. Esta lista estaba
 // desincronizada del picker de public/app.js en las dos direcciones: tenía
 // 'ilha', que el picker nunca ofrece (la búsqueda por presupuesto cotizaba un
 // destino invisible) y le faltaba 'canela', que el picker sí ofrece (elegir
 // Canela devolvía 400 "Elegí un destino disponible en el buscador").
-const HOME_DESTINATION_KEYS = ['rio', 'buz', 'arraial', 'cabo', 'canela', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'];
-const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS.concat(['bue', 'gram', 'igu']);
+//
+// Esta lista es la que recorre cotizarTodos(), o sea la que decide qué
+// DestinationCards de "Todos los destinos" existen. Estaba clavada en 12
+// destinos: los 10 de la grilla + bue, gram e igu. Con eso, 25 de los destinos
+// que el picker ofrecia nunca aparecian en la busqueda por presupuesto, y
+// Torres o Capao da Canoa, que son mas baratos que los 12, tampoco aparecian.
+// El comentario de abajo decia que era por los requests externos, pero este
+// path es todo local: model.compute() por destino mide 3 ms, o sea 135 ms los
+// 44. No hay tope tecnico, habia un tope editorial.
+//
+// Debe coincidir con la union de DESTINATION_GROUPS en public/app.js.
+// prueba-destinos.js lo verifica, porque la desincronizacion es la causa raiz
+// de que un destino exista y no se vea.
+const HOME_DESTINATION_KEYS = [
+  // Rio de Janeiro
+  'rio',
+  // Buzios / Arraial do Cabo / Cabo Frio
+  'buz', 'arraial', 'cabo',
+  // Costa Verde
+  'paraty', 'ubatuba', 'ilhabela', 'angra', 'ilha',
+  // Litoral de Santa Catarina
+  'fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras',
+  // Litoral de Rio Grande do Sul
+  'torres', 'canoa',
+  // Bahia
+  'ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso',
+  // Nordeste
+  'porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for',
+  // Buenos Aires, Serra gaucha y Foz
+  'bue', 'gram', 'canela', 'igu'
+];
+const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS;
 // Un destino es válido si existe en el modelo. La lista de arriba define qué se
 // ofrece y cómo se agrupa, pero no se usa para rechazar pedidos: así, si el
 // picker suma un destino nuevo, este no devuelve un 400 invisible hasta que

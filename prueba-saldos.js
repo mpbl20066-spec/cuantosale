@@ -2,7 +2,9 @@
    Extrae el bloque REAL del archivo (por posicion, no por copia) y lo corre con
    stubs: si el codigo cambia, la prueba cambia con el. */
 const fs = require('fs');
-const path = 'C:/Users/mpbl2/Desktop/CuantoSale/public/grupo.js';
+// __dirname y no una ruta fija: con la ruta fija, corrido desde un worktree de
+// git leeria el grupo.js del checkout principal y validaria otro codigo.
+const path = __dirname.replace(/\\/g, '/') + '/public/grupo.js';
 
 const src = fs.readFileSync(path, 'utf8');
 const lines = src.split(/\r?\n/);

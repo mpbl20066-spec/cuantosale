@@ -321,27 +321,51 @@
   }
   function hotelTypeForStyle(style) { return style === 'ahorro' ? 'economico' : style === 'comodo' ? 'confort' : 'intermedio'; }
   function hotelTypeFactor(type) { return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22, economico: 0.82, intermedio: 1, confort: 1.3 })[type] || 1; }
+  // Los grupos son la primera pantalla de la app: definen que se ofrece. Un
+  // destino que esta en model.js pero no aca esta cotizable y no se muestra, que
+  // es como Angra, Ilha Grande, Bombinhas, Camboriu, Praia do Rosa, Morro,
+  // Maragogi, Recife, Natal, Pipa y Arraial d'Ajuda estuvieron durante meses.
+  // prueba-destinos.js corta eso: exige que toda clave de aca exista en DEST.
+  //
+  // Regional y no por numero de paradas: un grupo con una sola parada hace que
+  // la grilla se vea vacia, asi que las paradas sueltas se agrupan con su
+  // region. Bahia y Nordeste son los grupos mas largos porque son los que mas
+  // ofrecen; el resto tiene entre 1 y 8.
   var DESTINATION_GROUPS = [
     { id: 'rio', label: 'Río de Janeiro', image: 'rio', keys: ['rio'], subcategories: [
       { label: 'Réveillon Copacabana (31/12)', key: 'rio' }, { label: 'Zona Sur / Ipanema', key: 'rio' }, { label: 'Centro Histórico', key: 'rio' }
     ] },
     { id: 'buzios', label: 'Búzios / Arraial do Cabo / Cabo Frio', image: 'buz', keys: ['buz', 'arraial', 'cabo'], subcategories: [
-      { label: 'Búzios + Arraial do Cabo', key: 'buz' }, { label: 'Sólo Búzios', key: 'buz' }, { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' }
+      { label: 'Búzios + Arraial do Cabo', key: 'buz' }, { label: 'Sólo Búzios', key: 'buz' },
+      { label: 'Arraial do Cabo', key: 'arraial' }, { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' }
     ] },
-    { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'mcz', 'ssa'], subcategories: [
-      { label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' }, { label: 'Maceió (Resort)', key: 'mcz', hotelType: 'resort' }, { label: 'Salvador de Bahía', key: 'ssa' }
+    { id: 'costaverde', label: 'Costa Verde (Ilhabela / Ubatuba / Paraty)', image: 'ilhabela', keys: ['paraty', 'ubatuba', 'ilhabela', 'angra', 'ilha'], subcategories: [
+      { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' },
+      { label: 'Ilhabela', key: 'ilhabela' }, { label: 'Angra dos Reis', key: 'angra' }, { label: 'Ilha Grande', key: 'ilha' }
     ] },
-    { id: 'salvador', label: 'Salvador de Bahía', image: 'ssa', keys: ['ssa'], subcategories: [
-      { label: 'Salvador de Bahía', key: 'ssa' }
+    { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
+      { label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
+      { label: 'Balneário Camboriú', key: 'bcm' }, { label: 'Itapema', key: 'itapema' },
+      { label: 'Bombinhas', key: 'bombinhas' }, { label: 'Garopaba', key: 'garopaba' },
+      { label: 'Praia do Rosa', key: 'rosa' }, { label: 'Ferrugem', key: 'ferrugem' }, { label: 'Piçarras', key: 'picarras' }
+    ] },
+    { id: 'litoralrs', label: 'Litoral de Rio Grande do Sul', image: 'gram', keys: ['torres', 'canoa'], subcategories: [
+      { label: 'Torres', key: 'torres' }, { label: 'Capão da Canoa', key: 'canoa' }
+    ] },
+    { id: 'bahia', label: 'Bahía', image: 'ssa', keys: ['ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso'], subcategories: [
+      { label: 'Salvador de Bahía', key: 'ssa' }, { label: 'Porto Seguro', key: 'portoseguro' },
+      { label: 'Praia do Forte', key: 'forte' }, { label: 'Morro de São Paulo', key: 'morro' },
+      { label: 'Itacaré', key: 'itacare' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso' }
+    ] },
+    { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for'], subcategories: [
+      { label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' },
+      { label: 'Maragogi', key: 'maragogi' }, { label: 'Maceió (Resort)', key: 'mcz', hotelType: 'resort' },
+      { label: 'Recife', key: 'rec' }, { label: 'João Pessoa', key: 'joaopessoa' },
+      { label: 'Natal', key: 'nat' }, { label: 'Pipa', key: 'pip' },
+      { label: 'Fortaleza / Jericoacoara', key: 'for' }
     ] },
     { id: 'buenosaires', label: 'Buenos Aires', image: 'bue', keys: ['bue'], subcategories: [
       { label: 'Centro / Recoleta', key: 'bue' }, { label: 'Palermo / Zona Norte', key: 'bue' }, { label: 'Escapada de Fin de Semana', key: 'bue' }
-    ] },
-    { id: 'florianopolis', label: 'Florianópolis', image: 'fln', keys: ['fln'], subcategories: [
-      { label: 'Canasvieiras / Norte', key: 'fln' }, { label: 'Praia dos Ingleses', key: 'fln' }, { label: 'Centro / Sur', key: 'fln' }
-    ] },
-    { id: 'ilhabela', label: 'Ilhabela / Ubatuba / Paraty', image: 'ilhabela', keys: ['ilhabela', 'ubatuba', 'paraty'], subcategories: [
-      { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' }, { label: 'Ilhabela', key: 'ilhabela' }
     ] },
     { id: 'gramado', label: 'Gramado / Canela', image: 'gram', keys: ['gram', 'canela'], subcategories: [
       { label: 'Gramado Centro', key: 'gram' }, { label: 'Vale dos Vinhedos', key: 'gram' }, { label: 'Canela', key: 'canela' }
@@ -374,6 +398,33 @@
   };
   var DESTINATION_DAILY_COSTS = {
     bue: { transport: { eco: 18, confort: 38 }, food: { casual: 30, moderado: 58, gourmet: 100 } },
+    // Esta tabla es una copia de DESTINATION_COSTS en lib/model.js. Si una clave
+    // falta, getDestinationDailyCosts() cae al fallback .rio y la tarjeta del
+    // navegador muestra un costo diario que el servidor no cobra. Las quince de
+    // abajo son los destinos que ofrece DESTINATION_GROUPS y que no estaban.
+    angra: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 105 } },
+    morro: { transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
+    bombinhas: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
+    rosa: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
+    itapema: { transport: { eco: 15, confort: 32 }, food: { casual: 28, moderado: 54, gourmet: 92 } },
+    garopaba: { transport: { eco: 15, confort: 33 }, food: { casual: 25, moderado: 50, gourmet: 86 } },
+    ferrugem: { transport: { eco: 16, confort: 35 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
+    picarras: { transport: { eco: 16, confort: 35 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
+    torres: { transport: { eco: 15, confort: 33 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
+    canoa: { transport: { eco: 14, confort: 31 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
+    portoseguro: { transport: { eco: 18, confort: 40 }, food: { casual: 33, moderado: 60, gourmet: 105 } },
+    itacare: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 58, gourmet: 100 } },
+    forte: { transport: { eco: 18, confort: 40 }, food: { casual: 34, moderado: 62, gourmet: 105 } },
+    rec: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
+    joaopessoa: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
+
+    // Estas tres no las ofrece todavia ningun grupo (Curitiba y Camboriu son
+    // destinos que el modelo tiene y la grilla no muestra), pero la tabla tiene
+    // que ser copia exacta de la del servidor: si el navegador cae al fallback
+    // .rio para un destino que alguien cotice, muestra un costo que no existe.
+    curitiba: { transport: { eco: 22, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } },
+    camboriu: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
+    poa: { transport: { eco: 13, confort: 30 }, food: { casual: 27, moderado: 50, gourmet: 90 } },
     sao: { transport: { eco: 22, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } }, buz: { transport: { eco: 18, confort: 38 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, arraial: { transport: { eco: 14, confort: 28 }, food: { casual: 25, moderado: 45, gourmet: 75 } }, cabo: { transport: { eco: 12, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } }, ilha: { transport: { eco: 10, confort: 30 }, food: { casual: 28, moderado: 52, gourmet: 90 } }, paraty: { transport: { eco: 12, confort: 26 }, food: { casual: 24, moderado: 44, gourmet: 75 } }, ilhabela: { transport: { eco: 16, confort: 35 }, food: { casual: 30, moderado: 58, gourmet: 95 } }, ubatuba: { transport: { eco: 15, confort: 32 }, food: { casual: 25, moderado: 48, gourmet: 80 } }, rio: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 95 } }, bho: { transport: { eco: 14, confort: 28 }, food: { casual: 22, moderado: 42, gourmet: 75 } }, porto: { transport: { eco: 15, confort: 32 }, food: { casual: 28, moderado: 52, gourmet: 85 } }, mcz: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 80 } }, maragogi: { transport: { eco: 13, confort: 28 }, food: { casual: 24, moderado: 45, gourmet: 75 } }, nat: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 48, gourmet: 80 } }, pip: { transport: { eco: 16, confort: 35 }, food: { casual: 30, moderado: 55, gourmet: 90 } }, trancoso: { transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } }, ssa: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } }, for: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, jericoacoara: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, fernando: { transport: { eco: 30, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } }, fln: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 90 } }, bcm: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 50, gourmet: 85 } }, gram: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 62, gourmet: 110 } }, canela: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 62, gourmet: 110 } }, igu: { transport: { eco: 12, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } }
   };
   function getDestinationDailyCosts(key) { return DESTINATION_DAILY_COSTS[String(key || '').toLowerCase()] || DESTINATION_DAILY_COSTS.rio; }
@@ -430,26 +481,43 @@
   }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA' };
+  var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
   var DEST_IATA_ALIASES = { bue: 'EZE AEP BUE', rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
+  // Segunda superficie: el desplegable de "destino" de arriba. Tiene que traer
+  // los mismos 31 que la grilla, o el destino se ofrece en un lado y no en el
+  // otro. Se organiza por hub de vuelo, que es como la persona elige de verdad
+  // (mismo vuelo, distinto destino), y no por region como la grilla.
   var DESTINATION_HUBS = [
     { name: 'Río de Janeiro', codes: 'GIG / SDU', options: [
-      { label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Centro / Sur' },
+      { label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Zona Sur / Ipanema' },
       { label: 'Búzios', key: 'buz', codes: 'GIG SDU' }, { label: 'Arraial do Cabo', key: 'arraial', codes: 'GIG SDU' },
-      { label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' }
+      { label: 'Cabo Frio', key: 'cabo', codes: 'GIG SDU' },
+      { label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' }, { label: 'Angra dos Reis', key: 'angra', codes: 'GIG SDU' }
     ] },
     { name: 'San Pablo', codes: 'GRU / CGH', options: [
       { label: 'Ilhabela', key: 'ilhabela', codes: 'GRU CGH' }, { label: 'Ubatuba', key: 'ubatuba', codes: 'GRU CGH' },
       { label: 'Paraty', key: 'paraty', codes: 'GRU CGH' }
     ] },
-    { name: 'Nordeste', codes: 'REC / MCZ / SSA', options: [
-      { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' }, { label: 'Maceió', key: 'mcz', codes: 'MCZ' },
-      { label: 'Salvador de Bahía', key: 'ssa', codes: 'SSA' }
+    { name: 'Santa Catarina', codes: 'FLN', options: [
+      { label: 'Florianópolis', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis (Canasvieiras / Ingleses)' },
+      { label: 'Balneário Camboriú', key: 'bcm', codes: 'FLN' }, { label: 'Itapema', key: 'itapema', codes: 'FLN' },
+      { label: 'Bombinhas', key: 'bombinhas', codes: 'FLN' }, { label: 'Garopaba', key: 'garopaba', codes: 'FLN' },
+      { label: 'Praia do Rosa', key: 'rosa', codes: 'FLN' }, { label: 'Ferrugem', key: 'ferrugem', codes: 'FLN' },
+      { label: 'Piçarras', key: 'picarras', codes: 'FLN' }
     ] },
-    { name: 'Florianópolis', codes: 'FLN', options: [
-      { label: 'Canasvieiras / Norte', key: 'fln', codes: 'FLN', subcategory: 'Canasvieiras / Norte' },
-      { label: 'Praia dos Ingleses', key: 'fln', codes: 'FLN', subcategory: 'Praia dos Ingleses' },
-      { label: 'Centro / Sur de la isla', key: 'fln', codes: 'FLN', subcategory: 'Centro / Sur de la isla' }
+    { name: 'Rio Grande do Sul', codes: 'POA', options: [
+      { label: 'Torres', key: 'torres', codes: 'POA' }, { label: 'Capão da Canoa', key: 'canoa', codes: 'POA' }
+    ] },
+    { name: 'Bahía', codes: 'SSA', options: [
+      { label: 'Salvador de Bahía', key: 'ssa', codes: 'SSA' }, { label: 'Porto Seguro', key: 'portoseguro', codes: 'SSA' },
+      { label: 'Praia do Forte', key: 'forte', codes: 'SSA' }, { label: 'Morro de São Paulo', key: 'morro', codes: 'SSA' },
+      { label: 'Itacaré', key: 'itacare', codes: 'SSA' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso', codes: 'SSA' }
+    ] },
+    { name: 'Nordeste', codes: 'REC / MCZ / SSA / NAT / JPA / FOR', options: [
+      { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' }, { label: 'Maragogi', key: 'maragogi', codes: 'MCZ' },
+      { label: 'Maceió', key: 'mcz', codes: 'MCZ' }, { label: 'Recife', key: 'rec', codes: 'REC' },
+      { label: 'João Pessoa', key: 'joaopessoa', codes: 'JPA' }, { label: 'Natal', key: 'nat', codes: 'NAT' },
+      { label: 'Pipa', key: 'pip', codes: 'NAT' }, { label: 'Fortaleza / Jericoacoara', key: 'for', codes: 'FOR' }
     ] },
     { name: 'Buenos Aires', codes: 'EZE / AEP', options: [
       { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE' },

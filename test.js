@@ -2,6 +2,8 @@
 const assert = require('assert');
 const http = require('http');
 const model = require('./lib/model');
+  const fs = require('fs');
+  const path = require('path');
 
 let passed = 0;
 async function t(name, fn) {
@@ -267,18 +269,25 @@ function haversineKm(a, b) {
     assert.ok(j.list.length >= 3); assert.ok(j.recId);
     assert.ok(j.list.every(function (p) { return p.sources.pasajes === 'estimado'; }));
   });
-  await t('devuelve únicamente destinos de los cinco bloques de Brasil', async function () {
+  await t('devuelve exactamente los destinos que la grilla ofrece', async function () {
     const j = JSON.parse((await get(port, '/api/destinos')).body);
-    // Gramado, Foz de Iguazú y Canela se agregaron al buscador después de que
-    // esta lista se escribiera; si la volvés a tocar, actualizá también acá.
-    // Canela entró en lugar de Ilha: el picker de public/app.js ofrece Canela
-    // y no ofrece Ilha, y con la lista anterior elegir Canela devolvía 400
-    // mientras la búsqueda por presupuesto cotizaba Ilha, que nadie podía ver.
-    const allowed = ['rio', 'buz', 'arraial', 'cabo', 'canela', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty', 'bue', 'gram', 'igu'];
+    // Antes comparaba contra una lista de 15 claves escrita a mano, y se pudrio
+    // tres veces: le sobraba 'ilha' (que el picker no ofrece), le faltaba
+    // 'canela' (que si ofrecia) y despues le faltaban 25 destinos mas. La lista
+    // se lee ahora de DESTINATION_GROUPS, que es la unica fuente de verdad de
+    // "que se ofrece". Si el backend y la grilla se desincronizan, esta prueba
+    // lo dice en vez de que un destino exista y no se vea.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desde = app.indexOf('var DESTINATION_GROUPS = [');
+    const grupos = app.slice(desde, app.indexOf('\n  ];', desde));
+    const expected = new Set();
+    for (const g of grupos.matchAll(/keys:\s*\[([^\]]*)\]/g)) {
+      for (const k of g[1].matchAll(/'([^']+)'/g)) expected.add(k[1]);
+    }
+    assert.ok(expected.size >= 30, 'no se pudo leer DESTINATION_GROUPS: ' + expected.size + ' claves');
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
     assert.ok(j.some(function (d) { return d.key === 'bue' && d.name === 'Buenos Aires'; }));
-    assert.strictEqual(j.length, allowed.length);
-    assert.deepStrictEqual(j.map(function (d) { return d.key; }).sort(), allowed.slice().sort());
+    assert.deepStrictEqual(j.map(function (d) { return d.key; }).sort(), [...expected].sort());
   });
   await t('todo destino del buscador existe en el modelo y es de Brasil salvo Buenos Aires', async function () {
     // Esta es la que habría detectado el desfase de Gramado y Foz: la lista
@@ -291,17 +300,82 @@ function haversineKm(a, b) {
       assert.ok(d.name && typeof d.name === 'string', 'destino sin nombre: ' + d.key);
     });
   });
+  await t('la tabla de costos del cliente es copia fiel de la del servidor', function () {
+    // La tabla daily vive dos veces: DESTINATION_COSTS en lib/model.js (la que
+    // cotiza el server) y DESTINATION_DAILY_COSTS en public/app.js (la que
+    // arma las tarjetas en el navegador). Las dos hacen fallback a .rio cuando
+    // no encuentran la clave, asi que una clave que falta no rompe nada: se
+    // cobra Rio de Janeiro en silencio. Ya paso: el cliente se quedo 17
+    // destinos atras y cotizaba angra, curitiba, rec, torres y companhia con
+    // numeros de Rio sin que nada se enterara.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desde = app.indexOf('var DESTINATION_DAILY_COSTS = {');
+    assert.ok(desde > 0, 'no se encontro DESTINATION_DAILY_COSTS en public/app.js');
+    const bloque = app.slice(desde, app.indexOf('};', desde));
+    const cliente = {};
+    for (const m of bloque.matchAll(/([a-z_]+):\s*\{\s*transport:\s*\{([^}]*)\}\s*,\s*food:\s*\{([^}]*)\}\s*\}/g)) {
+      const num = (s) => (s.match(/-?\d+(\.\d+)?/g) || []).map(Number);
+      cliente[m[1]] = { t: num(m[2]), f: num(m[3]) };
+    }
+    const server = model.DESTINATION_COSTS;
+
+    const faltan = Object.keys(server).filter((k) => !cliente[k]);
+    const sobran = Object.keys(cliente).filter((k) => !server[k]);
+    assert.deepStrictEqual(faltan, [], 'destinos que el cliente no tiene: ' + faltan.join(', '));
+    assert.deepStrictEqual(sobran, [], 'destinos que el servidor no tiene: ' + sobran.join(', '));
+
+    for (const k of Object.keys(server)) {
+      const s = server[k], c = cliente[k];
+      assert.deepStrictEqual(
+        [c.t[0], c.t[1], c.f[0], c.f[1], c.f[2]],
+        [s.transport.eco, s.transport.confort, s.food.casual, s.food.moderado, s.food.gourmet],
+        'costos distintos en ' + k + ' (' + (model.DEST[k] && model.DEST[k].name) + ')'
+      );
+    }
+  });
+  await t('todo destino tiene costos propios y no cae al fallback de Rio', function () {
+    // Si un destino no esta en la tabla, destinationCosts() devuelve la de Rio
+    // y el presupuesto sale con la comida y el traslado de otra ciudad, sin
+    // error. Porto Alegre estuvo asi: sin entrada, cobraba Rio siendo el
+    // alojamiento mas barato del catalogo.
+    const fallback = model.destinationCosts('__no_existe__');
+    for (const k of Object.keys(model.DEST)) {
+      const c = model.DESTINATION_COSTS[k];
+      assert.ok(c, k + ' (' + model.DEST[k].name + ') no tiene costos diarios propios');
+      if (k !== 'rio') assert.notStrictEqual(model.destinationCosts(k), fallback, k + ' resuelve al fallback de Rio');
+      assert.ok(c.food.casual < c.food.moderado && c.food.moderado < c.food.gourmet,
+        k + ': la comida tiene que crecer de casual a moderado a gourmet, es ' + JSON.stringify(c.food));
+      assert.ok(c.transport.eco < c.transport.confort,
+        k + ': el traslado tiene que crecer de eco a confort, es ' + JSON.stringify(c.transport));
+    }
+  });
   await t('cotiza Buenos Aires como destino de Argentina', async function () {
     const r = await get(port, '/api/cotizar?dest=bue&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
     const j = JSON.parse(r.body);
     assert.strictEqual(r.status, 200); assert.strictEqual(j.meta.dest.key, 'bue');
     assert.strictEqual(j.meta.dest.country, 'Argentina'); assert.ok(j.list.length >= 3);
   });
-  await t('cotiza destinos de los cinco bloques ordenados por total', async function () {
+  await t('cotiza todos los destinos de la grilla, ordenados por total', async function () {
     const r = await get(port, '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
     const j = JSON.parse(r.body);
-    assert.strictEqual(r.status, 200); assert.strictEqual(j.options.length, 12);
-    assert.ok(j.options.every(function (o) { return ['rio', 'buz', 'arraial', 'cabo', 'canela', 'porto', 'mcz', 'ssa', 'fln', 'ilhabela', 'ubatuba', 'paraty'].includes(o.dest.key); }));
+    assert.strictEqual(r.status, 200);
+    // El total de destinos se deriva de los grupos en vez de estar escrito: la
+    // lista estaba clavada en 12 y por eso 25 destinos que el picker ofrecia
+    // no aparecian nunca en la busqueda por presupuesto. Entre ellos Torres y
+    // Capao da Canoa, que son mas baratos que los 12 y tampoco aparecian.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desde = app.indexOf('var DESTINATION_GROUPS = [');
+    const grupos = app.slice(desde, app.indexOf('\n  ];', desde));
+    const expected = new Set();
+    for (const g of grupos.matchAll(/keys:\s*\[([^\]]*)\]/g)) {
+      for (const k of g[1].matchAll(/'([^']+)'/g)) expected.add(k[1]);
+    }
+    assert.ok(j.options.length > 12, 'siguen siendo pocas opciones: ' + j.options.length);
+    const keys = new Set(j.options.map(function (o) { return o.dest.key; }));
+    for (const k of expected) {
+      assert.ok(keys.has(k), 'la grilla ofrece ' + k + ' pero cotizar-todos no lo devuelve');
+    }
+    assert.strictEqual(keys.size, j.options.length, 'hay destinos repetidos en las opciones');
     for (let i = 1; i < j.options.length; i++) assert.ok(j.options[i].total >= j.options[i - 1].total);
     assert.ok(j.options.every(function (o) { return o.parts && o.dest && typeof o.fits === 'boolean'; }));
   });
