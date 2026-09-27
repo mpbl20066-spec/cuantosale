@@ -81,8 +81,33 @@ console.log('\n5) Casos borde que devuelven null');
 check('el mismo destino dos veces', model.comboTransfer('buz', 'buz', 1) === null);
 check('un destino inexistente', model.comboTransfer('buz', 'noexiste', 1) === null);
 check('el primero inexistente', model.comboTransfer('noexiste', 'buz', 1) === null);
-check('un destino sin coordenadas', model.comboTransfer('buz', 'sao', 1) === null,
-  'sao esta en DEST pero no tiene coordenada: no se puede cotizar el traslado');
+// El destino sin coordenadas se BUSCA, no se nombra. Estaba escrito "sao" a mano
+// y el 30/09 le agregaron la coordenada, asi que la asercion empezo a fallar por
+// un nombre, no por el comportamiento que queria verificar. Si todos los
+// destinos tuvieran coordenada, la asercion no tendria nada que comprobar y
+// conviene que se note.
+{
+  const coords = model.DEST_COORDS || {};
+  const sinCoordenada = Object.keys(model.DEST).filter(function (k) { return !coords[k]; });
+  check('hay al menos un destino sin coordenada para probar este caso', sinCoordenada.length > 0,
+    'todos los ' + Object.keys(model.DEST).length + ' destinos tienen coordenada: este caso borde ya no se puede probar');
+  if (sinCoordenada.length) {
+    const k = sinCoordenada[0];
+    check('un destino sin coordenadas: ' + k, model.comboTransfer('buz', k, 1) === null,
+      k + ' esta en DEST pero no tiene coordenada: no se puede cotizar el traslado');
+  }
+  // Y que las coordenadas que si estan sean números de verdad, no strings.
+  const malas = Object.keys(coords).filter(function (k) {
+    const c = coords[k] || {};
+    return typeof c.lat !== 'number' || typeof c.lng !== 'number' || !isFinite(c.lat) || !isFinite(c.lng);
+  });
+  check('toda coordenada es un numero finito', malas.length === 0, malas.join(', '));
+  const fueraDeRango = Object.keys(coords).filter(function (k) {
+    const c = coords[k] || {};
+    return Math.abs(c.lat) > 90 || Math.abs(c.lng) > 180;
+  });
+  check('ninguna coordenada esta fuera del planeta', fueraDeRango.length === 0, fueraDeRango.join(', '));
+}
 
 console.log('\n6) El precio crece con la distancia');
 {

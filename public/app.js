@@ -4226,7 +4226,20 @@
       showProposalView(byId(res.j.list, res.j.recId), res.j);
       if (savedTrip) { applySavedTripToDetail(savedTrip); window.setTimeout(openItinerarySummaryModal, 0); }
       return true;
-    }).catch(function (e) { notice(e.message); return null; });
+    }).catch(function (e) {
+      // Se devuelve el motivo y no un null pelado. Antes devolvia null, y el
+      // que abria la propuesta desde un viaje guardado convertia ese null en
+      // "No pudimos cargar la propuesta guardada.", un mensaje que no dice
+      // nada. Y como este aviso va al mismo #results, el genérico pisaba al
+      // bueno y el usuario se quedaba sin saber qué faltaba.
+      //
+      // El caso que mas aparece: /api/cotizar responde 400 con un mensaje
+      // claro cuando las fechas del viaje guardado no sirven, asi que un
+      // viaje guardado de hace un mes ya no se puede abrir nunca. El aviso
+      // bueno es "La fecha de ida tiene que ser a partir de manana".
+      notice(e.message);
+      return { error: e.message || 'No pudimos cargar la propuesta.' };
+    });
   }
 
   // Captura los botones dinámicos antes que cualquier listener en burbujeo.
@@ -4551,7 +4564,14 @@
     S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport; S.origin = details.origin === 'PDP' ? 'PDP' : (details.origin === 'MVD' ? 'MVD' : S.origin); S.subcategory = details.subcategory || ''; S.hotelType = details.hotelType || inferHotelType(S.subcategory) || hotelTypeForStyle(S.style);
     var originInput = $('#origin-input'); if (originInput) originInput.value = originLabel(S.origin);
     if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; syncDateRangeFields(); if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
-    if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') { closeAccountModal('trips-modal'); var loaded = await openDestinationProposal(S.dest, trip); if (loaded === null) throw new Error('No pudimos cargar la propuesta guardada.'); }
+    if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') {
+      closeAccountModal('trips-modal');
+      var opened = await openDestinationProposal(S.dest, trip);
+      // Se re-lanza el motivo que devuelva, no un texto generico: si el
+      // viaje guardado tiene fechas vencidas o vacias, el 400 de
+      // /api/cotizar ya lo dice bien y ese texto es el que tiene que llegar.
+      if (opened && opened.error) throw new Error(opened.error);
+    }
     else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
   }
   function initAuth() {

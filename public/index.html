@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=76">
+<link rel="stylesheet" href="/style.css?v=78">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -138,7 +138,11 @@
      frescura. Si le pusiéramos version propia, volvería a pasar lo de app.js:
      un archivo actualizado que el cache sirve viejo para siempre. -->
 <script defer src="/daily-costs.js"></script>
-<script defer src="/app.js?v=99"></script>
+<!-- Precios de transfer por destino. Generado desde data/transfer-precios.json
+     con `npm run build:transfer`. Va antes de app.js porque las cards del
+     transfer leen de acá cuando el server todavía no mandó meta.officialTransfer. -->
+<script defer src="/transfer-precios.js"></script>
+<script defer src="/app.js?v=101"></script>
 
 </body>
 </html>
