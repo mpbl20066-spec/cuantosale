@@ -966,18 +966,6 @@
       })
       .catch(function () { /* sin precios: las tarjetas quedan igual, sin cifras */ });
   }
-  var FOOD_TIPS = {
-    rio: ['Probá un <b>prato feito</b> al mediodía en los restaurantes por kilo de Copacabana o Botafogo: suele incluir arroz, feijão, proteína y ensalada.', 'Para playa, comprá agua, fruta y snacks en un supermercado antes de bajar a la arena: los kioscos de la orla cuestan bastante más.', 'En Feira de São Cristóvão encontrás porciones abundantes de comida nordestina y opciones para compartir.'],
-    fln: ['Buscá <b>prato executivo</b> en el centro de Florianópolis al mediodía: generalmente es la comida con mejor relación precio-cantidad.', 'En los mercados públicos y ferias barriales, armá un picnic con frutas, pan de queso y jugos para llevar a la playa.', 'Alejate una o dos cuadras de la playa para encontrar <b>buffet por kilo</b> y platos del día más accesibles.'],
-    sao: ['En los restaurantes por kilo del centro y Vila Madalena, cargá un plato equilibrado y pagá solo por lo que comés.', 'La <b>feira livre</b> es ideal para frutas, pasteles y jugos a precios locales.', 'Compartí una pizza paulista grande: suele rendir para dos personas y es una cena clásica de buen valor.'],
-    ssa: ['Probá un <b>prato feito</b> de comida baiana en el centro histórico, lejos de los locales con vista turística.', 'Las bahianas de acarajé son una merienda abundante y típica; consultá el precio antes de pedir extras.', 'Comprá agua y frutas en mercados locales antes de recorrer Pelourinho o las playas.'],
-    igu: ['Para un almuerzo económico, buscá buffet por kilo o <b>prato feito</b> fuera de la zona hotelera.', 'En supermercados de Foz podés conseguir fruta, agua y meriendas para llevar a las cataratas.', 'Probá churrasquerías con menú de mediodía: muchas tienen opciones más convenientes que la cena.'],
-    rec: ['Buscá menú ejecutivo en Boa Viagem o en el centro, a unas cuadras de la rambla.', 'Las tapiocas y jugos de los mercados son una opción local, rápida y económica para merendar.', 'En el Mercado de São José encontrás ingredientes y comidas populares a precio local.'],
-    for: ['En Mercado dos Peixes podés elegir pescado y pedir que lo preparen; compará puestos antes de decidir.', 'Para el almuerzo, el <b>prato comercial</b> suele ser más barato y abundante que cenar en la costa.', 'Comprá agua de coco y fruta en mercados de barrio, no en los puestos de la playa.'],
-    mcz: ['Buscá menú ejecutivo en Pajuçara o Jatiúca a una cuadra de la costa para evitar el recargo frente al mar.', 'Las tapiocas y cuscuz nordestinos son desayunos o meriendas baratos y rendidores.', 'Para excursiones, llevá agua y snacks del supermercado: en las paradas turísticas los precios suben.'],
-    nat: ['Probá <b>prato feito</b> y buffet por kilo fuera de la primera línea de Ponta Negra.', 'En los mercados locales encontrás castañas, frutas y jugos para una merienda económica.', 'Compartí porciones de camarones o pescado en restaurantes de barrio: suelen ser generosas.'],
-    poa: ['En el Mercado Público encontrás almuerzos, empanadas y productos locales a precios variados.', 'Los restaurantes por kilo del centro son una opción práctica para comer bien al mediodía.', 'Probá una cafetería de barrio para merendar: café con salgado suele costar menos que en zonas turísticas.']
-  };
   var $ = function (s) { return document.querySelector(s); };
   var today = new Date(); today.setHours(12, 0, 0, 0);
   var timer = null, ctrl = null;
@@ -1883,16 +1871,25 @@
     var oficial = meta && meta.officialTransfer;
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
     var tabla = (typeof CS_TRANSFER_PRICES !== 'undefined' && CS_TRANSFER_PRICES) ? CS_TRANSFER_PRICES[key] : null;
-    var compartido = (oficial && oficial.compartido) || (tabla && tabla.compartido) || 20;
-    var privado = (oficial && oficial.privado) || (tabla && tabla.privado) || (compartido * 3);
+    // OJO con el 0. Un destino sin traslado compartido (fernando, que es una
+    // isla) tiene compartido: 0, y 0 es falsy: con || caia al piso de 20 y el
+    // presupuesto cobraba una van que no existe. Por eso se prueba null/undefined
+    // y no la verdad del valor.
+    var primero = function (a, b, c) {
+      if (a != null) return a;
+      if (b != null) return b;
+      return c;
+    };
+    var compartido = primero(oficial && oficial.compartido, tabla && tabla.compartido, 20);
+    var privado = primero(oficial && oficial.privado, tabla && tabla.privado, Number(compartido) * 3);
     return {
-      compartido: Number(compartido) || 20,
-      privado: Number(privado) || 60,
-      km: (oficial && oficial.km != null) ? oficial.km : (tabla && tabla.km != null ? tabla.km : null),
-      iata: (oficial && oficial.iata) || (tabla && tabla.iata) || null,
-      modo: (oficial && oficial.modo) || (tabla && tabla.modo) || 'car',
+      compartido: Number(compartido),
+      privado: Number(privado),
+      km: primero(oficial && oficial.km, tabla && tabla.km, null),
+      iata: primero(oficial && oficial.iata, tabla && tabla.iata, null),
+      modo: primero(oficial && oficial.modo, tabla && tabla.modo, 'car'),
       soloPrivado: !!(oficial && oficial.soloPrivado) || !!(tabla && tabla.soloPrivado),
-      appRideUsd: (oficial && oficial.appRideUsd != null) ? oficial.appRideUsd : (tabla && tabla.appRideUsd != null ? tabla.appRideUsd : null),
+      appRideUsd: primero(oficial && oficial.appRideUsd, tabla && tabla.appRideUsd, null),
       nota: oficial && oficial.nota
     };
   }
@@ -1907,6 +1904,12 @@
     var precios = transferPreciosDe(state.meta || {});
     if (state.transferType === 'private') return precios.privado;
     if (state.transferType === 'shared') {
+      // Un destino sin van compartida (soloPrivado) no tiene nada que cobrar por
+      // este lado. Se puede llegar aqui sin que la persona lo elija: si marco
+      // "compartido" en Rio y despues cambio el destino a Fernando de Noronha,
+      // el estado todavia decia 'shared' y el presupuesto sumaba el piso de 20
+      // por persona. Que devuelva 0 y no un numero inventado.
+      if (precios.soloPrivado || !(precios.compartido > 0)) return 0;
       // El compartido se cobra por persona, asi que el total escala con los
       // viajeros. detailState no guarda pax: sale de meta.pax, que es lo que
       // manda el server, y si no esta, del estado del buscador.
@@ -3143,31 +3146,174 @@
       $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>Transfer agregado al presupuesto</h2><p class="booking-note">' + esc(result.message || 'El transfer quedó incluido en el cálculo de tu viaje.') + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
     } catch (e) { button.disabled = false; button.textContent = 'Agregar al presupuesto'; alert(e.message || 'No pudimos registrar la transferencia.'); }
   }
-  function guideUnlocked() {
-    try { return localStorage.getItem('cuantosale_guia_desbloqueada') === 'true'; } catch (e) { return false; }
+
+  /* ------------------------------------------------------------------
+     Guia Secreta. Los datos viven en public/guias.js; aca solo se pintan.
+
+     Tres cosas que esta seccion hace distinto:
+
+     - El veredicto de comida. detailState.foodPerDay es el presupuesto
+       diario de comida por pasajero que ya calcula el modelo (app.js:3647).
+       La guia compara los precios contra ese numero y dice si alcanzan. Sin
+       eso, una lista de lugares no dice si el viaje le alcanza a la persona.
+
+     - Los tours no estan en guiAs.js. Se piden con toursFor(), la misma
+       funcion de la seccion de experiencias, asi que salen con el precio real
+       de las fechas que esta mirando el usuario. Escribirlos en la guia los
+       convertiria en precio estimado, que es lo que Civitatis vino a
+       reemplazar.
+
+     - Sin lock. Antes se dibujaba borrosa con un blur y un candado que se
+       abria con un clic, pero el texto estaba en el DOM igual: se leia con el
+       verificador de elementos o con un lector de pantalla. Y con
+       window.print() la guia entera se imprimia, bloqueada o no. Un lock que
+       no bloquea promete algo que no hace. Si alguna vez hay contenido de
+       verdad que reservar, va por servidor.
+     ------------------------------------------------------------------ */
+  function guiaSecreta(meta) {
+    if (!window.CS_GUIAS || !meta || !meta.dest) return '';
+    var guia = window.CS_GUIAS.guiaPara(meta.dest.key, meta.dest.region);
+    // Sin guia escrita no se muestra nada. Antes el fallback era la de
+    // Florianopolis, asi que Gramado veia "busca prato executivo en el centro
+    // de Florianopolis".
+    if (!guia) return '';
+
+    var foodPerDay = Math.round(Number(detailState && detailState.foodPerDay) || 0);
+
+    function bloque(seccion, etiqueta, cuerpo) {
+      if (!cuerpo) return '';
+      return '<div class="guia-bloque" data-guia-seccion="' + esc(seccion) + '">' +
+        '<h3 class="guia-bloque__titulo">' + etiqueta + '</h3>' + cuerpo + '</div>';
+    }
+    function chips(valores) {
+      return valores.filter(Boolean).map(function (v) { return '<span class="guia-tag">' + esc(v) + '</span>'; }).join('');
+    }
+    function etiquetaPrecio(valor) {
+      if (typeof valor !== 'number') return '';
+      return '<span class="guia-precio">' + (valor === 0 ? 'Gratis' : money(valor)) + '</span>';
+    }
+    function fotoDe(item) {
+      if (!item.foto) return '';
+      return '<div class="guia-foto"><img src="' + esc(item.foto) + '" alt="' + esc(item.name) + '" loading="lazy"></div>';
+    }
+
+    var cuerpo = '';
+
+    // Veredicto de comida. Va primero porque es la pregunta que responde la
+    // pagina entera: si el viaje me alcanza.
+    var conPrecio = (guia.comer || []).filter(function (c) { return typeof c.usd === 'number'; });
+    if (foodPerDay > 0 && conPrecio.length) {
+      var alcanzan = conPrecio.filter(function (c) { return c.usd <= foodPerDay; });
+      if (alcanzan.length) {
+        cuerpo += '<div class="guia-veredicto"><b>Con US$' + foodPerDay + ' por día y persona</b> te alcanzan: ' +
+          alcanzan.slice(0, 3).map(function (c) { return esc(c.name.toLowerCase()); }).join(', ') +
+          (alcanzan.length > 3 ? ' y ' + (alcanzan.length - 3) + ' más.' : '.') + '</div>';
+      } else {
+        var barato = conPrecio.reduce(function (min, c) { return c.usd < min.usd ? c : min; });
+        cuerpo += '<div class="guia-veredicto guia-veredicto--malo"><b>Con US$' + foodPerDay +
+          ' por día esta guía no alcanza.</b> Lo más barato que aparece cuesta ' + money(barato.usd) +
+          '. Conviene revisar el presupuesto de comida antes de cerrar el vuelo.</div>';
+      }
+    }
+
+    if ((guia.temporada || {}).nota) {
+      cuerpo += bloque('temporada', '🗓️ Cuándo ir', '<p class="guia-nota">' + esc(guia.temporada.nota) + '</p>');
+    }
+
+    if ((guia.beaches || []).length) {
+      var beaches = guia.beaches.map(function (b) {
+        return '<article class="guia-item' + (b.foto ? ' guia-item--foto' : '') + '">' + fotoDe(b) +
+          '<div class="guia-item__cuerpo">' +
+          '<div class="guia-item__head"><b>' + esc(b.name) + '</b>' + chips([b.zona]) + '</div>' +
+          '<p class="guia-nota">' + esc(b.vibe) + '</p>' +
+          (b.cuando ? '<p class="guia-nota guia-nota--chica"><b>Cuándo:</b> ' + esc(b.cuando) + '</p>' : '') +
+          '</div></article>';
+      }).join('');
+      cuerpo += bloque('beaches', '🏖️ Qué playa ir', '<div class="guia-lista">' + beaches + '</div>');
+    }
+
+    if ((guia.atracciones || []).length) {
+      var atracciones = guia.atracciones.map(function (a) {
+        return '<article class="guia-item">' +
+          '<div class="guia-item__head"><b>' + esc(a.name) + '</b>' + chips([a.zona, a.dur]) + etiquetaPrecio(a.usd) + '</div>' +
+          '<p class="guia-nota">' + esc(a.nota) + '</p></article>';
+      }).join('');
+      cuerpo += bloque('atracciones', '📍 Qué ver', '<div class="guia-lista">' + atracciones + '</div>');
+    }
+
+    if ((guia.comer || []).length) {
+      var comer = guia.comer.map(function (c) {
+        var clase = '';
+        if (foodPerDay > 0 && typeof c.usd === 'number') {
+          clase = c.usd <= foodPerDay ? ' guia-precio--cabe' : ' guia-precio--pasa';
+        }
+        return '<article class="guia-item">' +
+          '<div class="guia-item__head"><b>' + esc(c.name) + '</b>' + chips([c.tipo, c.zona, c.momento]) +
+          (typeof c.usd === 'number' ? '<span class="guia-precio' + clase + '">' + money(c.usd) + '</span>' : '') + '</div>' +
+          '<p class="guia-nota">' + esc(c.nota) + '</p></article>';
+      }).join('');
+      cuerpo += bloque('comer', '🍽️ Dónde comer', '<div class="guia-lista">' + comer + '</div>');
+    }
+
+    // Tours: datos reales, no escritos a mano.
+    var tours = toursFor(meta.dest.key, meta.dest.name) || [];
+    if (tours.length) {
+      var precioReal = tours[0] && tours[0].source === 'civitatis';
+      var lista = tours.slice(0, 3).map(function (t) {
+        var datos = [];
+        if (t.rating) datos.push('★ ' + Number(t.rating).toFixed(1));
+        if (t.freeCancellation) datos.push('Cancelación gratis');
+        datos.push(precioReal ? 'Precio real' : 'Precio referencial');
+        return '<article class="guia-item">' +
+          '<div class="guia-item__head"><b>' + esc(t.title) + '</b><span class="guia-precio">' + money(t.price) + '</span></div>' +
+          '<p class="guia-nota guia-nota--chica">' + esc(datos.join(' · ')) + '</p>' +
+          (t.description ? '<p class="guia-nota">' + esc(t.description) + '</p>' : '') + '</article>';
+      }).join('');
+      cuerpo += bloque('tours', '🎟️ Tours recomendados',
+        '<p class="guia-nota guia-nota--chica">' + tours.length + ' en este destino. ' +
+        (precioReal ? 'Precios de las fechas que estás mirando.' : 'Precios referenciales.') + '</p>' +
+        '<div class="guia-lista">' + lista + '</div>');
+    }
+
+    if ((guia.hacer || []).length) {
+      var hacer = guia.hacer.map(function (h) {
+        return '<article class="guia-item">' +
+          '<div class="guia-item__head"><b>' + esc(h.name) + '</b>' + chips([h.zona, h.dur]) + etiquetaPrecio(h.usd) + '</div>' +
+          '<p class="guia-nota">' + esc(h.nota) + '</p></article>';
+      }).join('');
+      cuerpo += bloque('hacer', '🧭 Qué hacer', '<div class="guia-lista">' + hacer + '</div>');
+    }
+
+    if ((guia.tips || []).length) {
+      var tips = guia.tips.map(function (t) {
+        return '<div class="guia-tip"><b>' + esc(t.titulo) + '</b><p>' + esc(t.texto) + '</p></div>';
+      }).join('');
+      cuerpo += bloque('tips', '💡 Tips locales', '<div class="guia-tips">' + tips + '</div>');
+    }
+
+    if (!cuerpo) return '';
+
+    var pie = '<div class="guia-pie">Precios de comida orientativos, confirmá en el lugar. ' +
+      (meta.dest.region ? 'Región: ' + esc(meta.dest.region) + '. ' : '') + 'Generado por CuántoSale.</div>';
+
+    // Créditos de fotos. CC BY y CC BY-SA no permiten usar una imagen sin
+    // atribuir al autor y nombrar la licencia.
+    var creditos = (typeof FOTO_CREDITOS !== 'undefined' && FOTO_CREDITOS) ? FOTO_CREDITOS : {};
+    var usadas = (guia.beaches || []).filter(function (b) { return b.foto && creditos[b.foto]; });
+    if (usadas.length) {
+      pie += '<div class="guia-creditos"><b>Fotos</b> (Wikimedia Commons): ' +
+        usadas.map(function (b) {
+          return esc(b.name) + ' — ' + esc(creditos[b.foto].autor) + ', ' + esc(creditos[b.foto].licencia);
+        }).join(' · ') + '.</div>';
+    }
+
+    return '<section class="food-guide guia" aria-labelledby="guia-title">' +
+      '<div class="food-guide-head"><span aria-hidden="true">🧭</span><div>' +
+      '<h2 id="guia-title">Guía Secreta de ' + esc(meta.dest.name) + '</h2>' +
+      '<p>' + esc(guia.resumen) + '</p></div></div>' +
+      '<div class="guia-body">' + cuerpo + pie + '</div></section>';
   }
-  function unlockGuide() {
-    try { localStorage.setItem('cuantosale_guia_desbloqueada', 'true'); } catch (e) { /* la guía se desbloquea igualmente en esta vista */ }
-    Array.prototype.forEach.call(document.querySelectorAll('.food-guide'), function (guide) {
-      guide.querySelector('.food-tips').classList.remove('bloqueado');
-      var lock = guide.querySelector('.guide-lock');
-      if (lock) lock.hidden = true;
-    });
-  }
-  function foodGuide(meta) {
-    var tips = FOOD_TIPS[meta.dest.key] || FOOD_TIPS.fln;
-    var locked = !guideUnlocked();
-    var items = tips.map(function (tip) { return '<li>📍 🔒 ' + tip + '</li>'; }).join('');
-    return '<section class="food-guide" aria-labelledby="food-guide-title">' +
-      '<div class="food-guide-head"><span aria-hidden="true">🍽️</span><div><h2 id="food-guide-title">Guía Secreta: Dónde comer bien y barato en ' + esc(meta.dest.name) + '</h2>' +
-      '<p>Ideas locales para cuidar tu presupuesto sin resignar sabor.</p></div></div>' +
-      '<ul class="food-tips' + (locked ? ' bloqueado' : '') + '">' + items + '</ul>' +
-      '<div class="guide-lock"' + (locked ? '' : ' hidden') + '>' +
-      '<div class="guide-lock-icon" aria-hidden="true">🔒</div>' +
-      '<p>🔒 <b>Contenido exclusivo desbloqueable:</b> Ayúdanos a mantener CuántoSale gratuito abriendo las opciones de alojamiento en Booking.com (no requiere compra, solo abrir el enlace).</p>' +
-      '<a class="guide-unlock" data-unlock-guide href="' + esc(bookingUrl(meta)) + '" target="_blank" rel="noopener noreferrer">🏨 Ver Hoteles en Booking y Desbloquear Guía 🔓</a>' +
-      '</div></section>';
-  }
+
   function flightSearch(meta, budget) {
     return '<section class="flight-search" aria-labelledby="flight-title"><div><h2 id="flight-title">Vuelos</h2><p>Tarifas aéreas en tiempo real para tu viaje.</p></div>' +
       '<div class="flight-filters" aria-label="Filtros de vuelos"><div><b>Escalas</b><button type="button" data-flight-stop="all" aria-pressed="true">Todos</button><button type="button" data-flight-stop="0">Directos</button><button type="button" data-flight-stop="1">1 escala</button><button type="button" data-flight-stop="2">2+ escalas</button></div><div><b>Horario de salida</b><button type="button" data-flight-time="all" aria-pressed="true">Todo el día</button><button type="button" data-flight-time="morning">Mañana</button><button type="button" data-flight-time="afternoon">Tarde</button><button type="button" data-flight-time="night">Noche</button></div></div>' +
@@ -4099,7 +4245,7 @@
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
-    var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
+    var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + dailyBudgetMarkup +
@@ -5156,10 +5302,7 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         persistSelectedOffer(selectedFlight);
         actualizarPasajes(selectedFlight.closest('.flight-search'), Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
         return;
-      }
-      var unlock = e.target.closest('[data-unlock-guide]');
-      if (unlock) { unlockGuide(); return; }
-      var b = e.target.closest('[data-shift]'); if (!b) return;
+      }      var b = e.target.closest('[data-shift]'); if (!b) return;
       var s = Number(b.getAttribute('data-shift'));
       S.dep = iso(addDays(parse(S.dep), s)); S.ret = iso(addDays(parse(S.ret), s));
       syncDateRangeFields();
@@ -5361,10 +5504,7 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
         if (section && detailState && detailState.flightOffers) renderFlightOffers(section.querySelector('.flight-results'), { offers: detailState.flightOffers });
         return;
-      }
-      var unlock = e.target.closest('[data-unlock-guide]');
-      if (unlock) { unlockGuide(); return; }
-    });
+      }    });
     $('#vista-detalle').addEventListener('change', function (e) {
       var tourChoice = e.target.closest && e.target.closest('[data-tour-choice]');
       if (tourChoice && detailState) {
