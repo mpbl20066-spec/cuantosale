@@ -628,7 +628,12 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    descripción y precio van en el cuerpo claro, igual que "Transporte local" y
    "Comidas". */
 .local-tour__media{position:relative;flex:0 0 auto;height:152px;background:var(--bg)}
-.local-tour__media img{display:block;width:100%;height:100%;object-fit:cover}
+/* object-position abajo, no al centro. La franja es de 152px y las fotos son
+   verticales, así que "cover" recorta por arriba y por abajo: con el centrado
+   salía el cielo y las copas de los árboles, que es justo la parte que menos
+   dice de la experiencia. Abajo entra la persona, la lancha, la arena y el
+   agua. */
+.local-tour__media img{display:block;width:100%;height:100%;object-fit:cover;object-position:center bottom}
 .local-tour__price{display:flex;align-items:baseline;gap:6px;margin:0 0 12px}
 .local-tour__price b{color:var(--ink);font-size:22px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .local-tour__price span{color:var(--ink2);font-size:11.5px}
