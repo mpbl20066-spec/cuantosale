@@ -1109,7 +1109,7 @@ async function buscarVuelos(req, res, body) {
       passengers: passengers, style: style
     });
     return sendJson(res, 200, {
-      provider: 'serpapi', origin: origin, destination: destination,
+      provider: flightProviders.providerName(), origin: origin, destination: destination,
       // El precio de cada tarjeta ya es el TOTAL de ida y vuelta, no solo la
       // ida: la API lo marca como `type: "Round trip"` y escala con la cantidad
       // de pasajeros (1 adulto = US$ 249, 2 = US$ 499 en la misma ruta). Por
@@ -1117,12 +1117,26 @@ async function buscarVuelos(req, res, body) {
       // cuesta un solo crédito.
       round_trip: !!returnDate,
       offers: result.offers,
-      error: result.offers.length ? null : 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.'
+      error: result.offers.length ? null : browseVacioMsg()
     });
   } catch (e) {
     console.error('[browse vuelos]', e.message);
-    return sendJson(res, e.status || 502, { provider: 'serpapi', offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
+    return sendJson(res, e.status || 502, { provider: flightProviders.providerName(), offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
   }
+}
+
+/*
+ * El browse sin(key ni mock) cae en el modelo, y antes devolvia el mismo
+ * "No hay vuelos disponibles para esas fechas. Proba con otras fechas." que un
+ * buscador de verdad. Es un mensaje que miente: no es que no haya vuelos, es que
+ * no se consulto a nadie. Alguien que prueba la app sin credenciales lo leia
+ * como un fallo de la ruta y no como un modo de la app.
+ */
+function browseVacioMsg() {
+  if (!flightProviders.isLive()) {
+    return 'Busqueda de vuelos sin credenciales: se muestra el precio estimado del modelo. Poné SERPAPI_API_KEY para precios reales, o MOCK_FLIGHTS=1 para probar con datos falsos.';
+  }
+  return 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.';
 }
 
 async function calendarioVuelos(req, res, url) {
@@ -1380,7 +1394,7 @@ function cotizarTodos(req, res, url) {
     const result = adaptPackagesToStyle(model.compute(trip, v.dep, v.ret, today, {}), trip, v.dep, v.ret, today);
     const rec = result.list.find(function (p) { return p.id === result.recId; });
     return {
-      dest: { key: key, name: model.DEST[key].name, region: model.DEST[key].region || '', country: 'Brasil' }, total: rec.total, pp: rec.pp,
+      dest: { key: key, name: model.DEST[key].name, region: model.DEST[key].region || '', country: model.DEST[key].country || 'Brasil' }, total: rec.total, pp: rec.pp,
       parts: rec.parts, title: rec.modeShort + ' + hotel ' + rec.tierLabel,
       tierDesc: rec.tierDesc, fits: result.fits
     };
@@ -1903,7 +1917,16 @@ function handleRequest(req, res) {
 if (require.main === module) {
   const port = Number(process.env.PORT) || 3000;
   createServer().listen(port, function () {
-    console.log('CuántoSale en http://localhost:' + port + ' (' + (flightProviders.isLive() ? 'precios de vuelo reales via SerpAPI' : 'sin SERPAPI_API_KEY; los vuelos mostraran precios estimados') + ')');
+    // El banner dice que proveedor esta activo. Con MOCK_FLIGHTS=1 el proyecto
+    // responde precios, pero inventados: anunciar "precios reales" ahi seria
+    // mentira, y es el unico lugar donde se ve de un vistazo que se esta
+    // probando con datos falsos.
+    const modoVuelos = flightProviders.providerName() === 'mock'
+      ? 'MOCK_FLIGHTS=1; los precios de vuelo son INVENTADOS, no los gastes en produccion'
+      : (flightProviders.isLive()
+        ? 'precios de vuelo reales via SerpAPI'
+        : 'sin SERPAPI_API_KEY; los vuelos mostraran precios estimados');
+    console.log('CuántoSale en http://localhost:' + port + ' (' + modoVuelos + ')');
   });
 }
 

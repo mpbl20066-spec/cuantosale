@@ -1,3 +1,6 @@
 .env
+# Copia de .env. Tiene las mismas claves que .env: si alguna vez se sube por
+# error, las claves de Booking, Supabase y Travelpayouts quedan expuestas.
+.env.bak
 node_modules
 .DS_Store
