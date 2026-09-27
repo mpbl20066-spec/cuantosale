@@ -1,0 +1,192 @@
+{
+  "bue|EZE": {
+    "km": 320,
+    "horas": 0.5,
+    "lineaRecta": 28.1
+  },
+  "buz|GIG": {
+    "km": 1743,
+    "horas": 2.7,
+    "lineaRecta": 133.8
+  },
+  "arraial|GIG": {
+    "km": 1698,
+    "horas": 2.6,
+    "lineaRecta": 126.8
+  },
+  "cabo|GIG": {
+    "km": 1598,
+    "horas": 2.5,
+    "lineaRecta": 126.5
+  },
+  "paraty|GIG": {
+    "km": 2481,
+    "horas": 4,
+    "lineaRecta": 156.7
+  },
+  "ilhabela|GRU": {
+    "km": 1851,
+    "horas": 3.7,
+    "lineaRecta": 120.1
+  },
+  "ubatuba|GRU": {
+    "km": 2065,
+    "horas": 3.4,
+    "lineaRecta": 141.5
+  },
+  "rio|GIG": {
+    "km": 181,
+    "horas": 0.3,
+    "lineaRecta": 13.4
+  },
+  "angra|GIG": {
+    "km": 1386,
+    "horas": 2.4,
+    "lineaRecta": 107.8
+  },
+  "porto|REC": {
+    "km": 527,
+    "horas": 0.8,
+    "lineaRecta": 42.9
+  },
+  "mcz|MCZ": {
+    "km": 206,
+    "horas": 0.5,
+    "lineaRecta": 16.3
+  },
+  "maragogi|MCZ": {
+    "km": 1292,
+    "horas": 2.1,
+    "lineaRecta": 83.7
+  },
+  "nat|NAT": {
+    "km": 248,
+    "horas": 0.4,
+    "lineaRecta": 17.9
+  },
+  "pip|NAT": {
+    "km": 295,
+    "horas": 0.5,
+    "lineaRecta": 23.7
+  },
+  "trancoso|SSA": {
+    "km": 1628,
+    "horas": 2.7,
+    "lineaRecta": 87.2
+  },
+  "ssa|SSA": {
+    "km": 245,
+    "horas": 0.5,
+    "lineaRecta": 19.1
+  },
+  "for|FOR": {
+    "km": 91,
+    "horas": 0.2,
+    "lineaRecta": 2
+  },
+  "morro|SSA": {
+    "km": 2422,
+    "horas": 3.9,
+    "lineaRecta": 82.8
+  },
+  "portoseguro|SSA": {
+    "km": 6995,
+    "horas": 11.4,
+    "lineaRecta": 401.1
+  },
+  "itacare|SSA": {
+    "km": 3592,
+    "horas": 5.7,
+    "lineaRecta": 168.7
+  },
+  "forte|SSA": {
+    "km": 618,
+    "horas": 1.1,
+    "lineaRecta": 50.3
+  },
+  "fln|FLN": {
+    "km": 170,
+    "horas": 0.4,
+    "lineaRecta": 8.3
+  },
+  "camboriu|FLN": {
+    "km": 957,
+    "horas": 1.4,
+    "lineaRecta": 75.7
+  },
+  "bombinhas|FLN": {
+    "km": 888,
+    "horas": 1.5,
+    "lineaRecta": 58.3
+  },
+  "rosa|FLN": {
+    "km": 959,
+    "horas": 1.6,
+    "lineaRecta": 50
+  },
+  "bcm|FLN": {
+    "km": 958,
+    "horas": 1.4,
+    "lineaRecta": 76
+  },
+  "itapema|FLN": {
+    "km": 884,
+    "horas": 1.4,
+    "lineaRecta": 64.5
+  },
+  "garopaba|FLN": {
+    "km": 892,
+    "horas": 1.5,
+    "lineaRecta": 39.6
+  },
+  "ferrugem|FLN": {
+    "km": 998,
+    "horas": 1.6,
+    "lineaRecta": 53.5
+  },
+  "picarras|FLN": {
+    "km": 1288,
+    "horas": 1.8,
+    "lineaRecta": 101.5
+  },
+  "gram|POA": {
+    "km": 1086,
+    "horas": 1.9,
+    "lineaRecta": 74.4
+  },
+  "canela|POA": {
+    "km": 1153,
+    "horas": 2.1,
+    "lineaRecta": 77.5
+  },
+  "torres|POA": {
+    "km": 1843,
+    "horas": 2.5,
+    "lineaRecta": 156.8
+  },
+  "canoa|POA": {
+    "km": 1349,
+    "horas": 1.8,
+    "lineaRecta": 113.8
+  },
+  "igu|IGU": {
+    "km": 140,
+    "horas": 0.3,
+    "lineaRecta": 11.2
+  },
+  "rec|REC": {
+    "km": 126,
+    "horas": 0.3,
+    "lineaRecta": 8.7
+  },
+  "joaopessoa|JPA": {
+    "km": 131,
+    "horas": 0.3,
+    "lineaRecta": 8.1
+  },
+  "poa|POA": {
+    "km": 95,
+    "horas": 0.2,
+    "lineaRecta": 6.6
+  }
+}

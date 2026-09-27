@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es-UY">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Preview · Guía Secreta</title>
+<!--
+  ARTEFACTO DE DESARROLLO. No es parte de la app.
+  Renderiza public/guias.js con el layout que se va a usar en la guia real,
+  para juzgar si el schema sirve antes de cablearlo en app.js.
+
+  Probar distintos presupuestos de comida:
+    ?food=14   economico
+    ?food=28   intermedio
+    ?food=55   confort
+-->
+<style>
+  :root{
+    --ink:#10233e; --ink2:#5b6b80; --line:#dfe5ec; --bg:#f5f7fa; --surface:#fff;
+    --cel:#0d6efd; --cel-soft:#e8f1fe; --good:#0f7b3f; --warn:#8a5a00; --warn-soft:#fff6e0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:24px;background:var(--bg);color:var(--ink);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:860px;margin:0 auto}
+  .barra{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+  .barra input{width:110px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font:inherit}
+  .barra button{padding:9px 16px;border:0;border-radius:10px;background:var(--cel);color:#fff;
+    font:inherit;font-weight:700;cursor:pointer}
+  .barra code{background:var(--surface);padding:4px 8px;border-radius:8px;font-size:13px}
+
+  .hoja{background:var(--surface);border:1px solid var(--line);border-radius:20px;
+    padding:32px;box-shadow:0 10px 30px rgba(16,35,62,.07)}
+
+  .portada{border-bottom:2px solid var(--ink);padding-bottom:20px;margin-bottom:24px}
+  .portada .eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cel)}
+  .portada h1{font-size:40px;line-height:1.05;margin:8px 0 10px;letter-spacing:-.02em}
+  .portada .resumen{font-size:18px;color:var(--ink2);margin:0 0 16px}
+  .ficha{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:var(--bg);border:1px solid var(--line);border-radius:999px;
+    padding:6px 13px;font-size:13px;font-weight:600}
+  .chip b{font-weight:800}
+
+  .veredicto{background:var(--warn-soft);border-left:4px solid var(--warn);
+    border-radius:0 12px 12px 0;padding:14px 18px;margin:0 0 28px;font-size:15px}
+  .veredicto b{color:var(--warn)}
+
+  h2{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--cel);margin:32px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  h2:first-of-type{margin-top:0}
+
+  .item{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;break-inside:avoid}
+  .item.foto{padding:0;overflow:hidden}
+  .item.foto img{display:block;width:100%;height:190px;object-fit:cover;background:var(--line)}
+  .item.foto .cuerpo{padding:14px 16px}
+  .sinfoto{display:inline-block;margin-top:6px;font-size:11.5px;color:var(--ink2);
+    background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:3px 8px}
+  .item .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:5px}
+  .item .head b{font-size:17px}
+  .item .nota{color:var(--ink2);font-size:14.5px;margin:0}
+  .tag{display:inline-block;background:var(--cel-soft);color:var(--cel);border-radius:999px;
+    padding:3px 10px;font-size:11.5px;font-weight:700;white-space:nowrap}
+  .precio{margin-left:auto;font-weight:800;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .precios{font-size:12.5px;color:var(--ink2);font-weight:500}
+  .queda{color:var(--good)} .pasa{color:var(--warn)}
+
+  .tip{border-left:3px solid var(--cel);background:var(--cel-soft);border-radius:0 12px 12px 0;
+    padding:13px 16px;margin-bottom:10px;break-inside:avoid}
+  .tip b{display:block;margin-bottom:3px}
+  .tip p{margin:0;font-size:14.5px;color:var(--ink)}
+
+  .pie{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink2)}
+  .creditos{margin-top:8px;font-size:11px;color:var(--ink2);line-height:1.45}
+  .oculto{display:none}
+
+  @media print{
+    body{background:#fff;padding:0;font-size:11pt}
+    .barra{display:none}
+    .hoja{border:0;box-shadow:none;padding:0;border-radius:0}
+    h2{margin-top:18px}
+    .item,.tip{break-inside:avoid}
+    @page{margin:14mm}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="barra">
+    <select id="dest">
+      <option value="fln">Florianópolis</option>
+      <option value="sao">São Paulo</option>
+    </select>
+    <label for="food">Comida por día (US$)</label>
+    <input id="food" type="number" min="0" step="1" value="28">
+    <button type="button" id="imprimir">Imprimir / Guardar como PDF</button>
+    <code>preview de guiAs.js</code>
+  </div>
+  <div class="hoja" id="hoja"></div>
+</div>
+
+<script src="/creditos-fotos.generated.js"></script>
+<script src="/guias.js"></script>
+<script>
+(function () {
+  var DEST = { key:'fln', name:'Florianópolis', region:'Santa Catarina' };
+  var VIAJE = { dep:'2026-11-14', ret:'2026-11-17', noches:3, pax:2 };
+  // Cambiar el destino desde la barra para comparar la guia de ciudad con la
+  // regional. La region se resuelve con el mismo slug que usa guiAs.js.
+  var REGION_POR_DEST = { fln:'Santa Catarina', sao:'São Paulo', gram:'Rio Grande do Sul',
+    bue:'Buenos Aires', ssa:'Bahía', igu:'Paraná' };
+  function nombreRegion(k){
+    if (REGION_POR_DEST[k]) return REGION_POR_DEST[k];
+    if (k === 'fln') return 'Santa Catarina';
+    return '';
+  }
+
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function money(n){ return 'US$ ' + Number(n).toLocaleString('es-UY'); }
+  function fecha(iso){
+    var p = iso.split('-');
+    return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('es-UY',{day:'numeric',month:'short'});
+  }
+  function mm(n){ return money(Math.round(n)); }
+
+  function veredicto(guia, food){
+    var conPrecio = (guia.comer||[]).filter(function(c){ return typeof c.usd === 'number'; });
+    if (!conPrecio.length || !(food > 0)) return '';
+    var cheaper = conPrecio.filter(function(c){ return c.usd <= food; });
+    var caro = conPrecio.filter(function(c){ return c.usd > food * 2; });
+    if (!cheaper.length) {
+      return '<div class="veredicto"><b>Con US$' + food + ' por día</b> esta guia no te alcanza: ' +
+        'lo más barato que aparece cuesta ' + mm(conPrecio[0].usd) + '. Conviene revisar el presupuesto ' +
+        'de comida antes de fijar el vuelo.</div>';
+    }
+    var nombres = cheaper.slice(0,3).map(function(c){ return esc(c.name.toLowerCase()); });
+    var extra = caro.length
+      ? ' Los ' + caro.map(function(c){ return esc(c.name.toLowerCase()); }).join(' y ') + ' se van de presupuesto.'
+      : '';
+    return '<div class="veredicto"><b>Con US$' + food + ' por día y persona</b> te alcanzan: ' +
+      nombres.join(', ') + '.' + (cheaper.length > 3 ? ' Y ' + (cheaper.length-3) + ' más.' : '') + extra + '</div>';
+  }
+
+  function render(guia, food){
+    var out = [];
+    out.push('<div class="portada">');
+    out.push('<div class="eyebrow">Guía Secreta</div>');
+    out.push('<h1>' + esc(DEST.name) + '</h1>');
+    out.push('<p class="resumen">' + esc(guia.resumen) + '</p>');
+    out.push('<div class="ficha">');
+    out.push('<span class="chip">' + VIAJE.noches + ' noches</span>');
+    out.push('<span class="chip">' + VIAJE.pax + ' personas</span>');
+    out.push('<span class="chip">' + fecha(VIAJE.dep) + ' – ' + fecha(VIAJE.ret) + '</span>');
+    if (guia.temporada) out.push('<span class="chip">Temporada alta: ' + esc(guia.temporada.alta.map(function(m){
+      return ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][m-1];
+    }).join(', ')) + '</span>');
+    out.push('</div></div>');
+
+    var v = veredicto(guia, food);
+    if (v) out.push(v);
+
+    if ((guia.temporada||{}).nota) {
+      out.push('<h2>Cuándo ir</h2><div class="item"><p class="nota">' + esc(guia.temporada.nota) + '</p></div>');
+    }
+
+    if ((guia.beaches||[]).length) {
+      out.push('<h2>Qué playa ir</h2>');
+      guia.beaches.forEach(function(b){
+        var cuerpo = '<div class="head"><b>' + esc(b.name) + '</b>' +
+          (b.zona ? '<span class="tag">' + esc(b.zona) + '</span>' : '') + '</div>' +
+          '<p class="nota">' + esc(b.vibe) + '</p>' +
+          (b.cuando ? '<p class="nota"><b>Cuándo:</b> ' + esc(b.cuando) + '</p>' : '');
+        if (b.foto) {
+          out.push('<div class="item foto">' +
+            '<img src="' + esc(b.foto) + '" alt="' + esc(b.name) + '" loading="lazy" ' +
+            'onerror="this.remove();this.nextElementSibling.classList.remove(\'oculto\')">' +
+            '<div class="cuerpo">' + cuerpo + '</div></div>');
+        } else {
+          out.push('<div class="item">' + cuerpo +
+            '<span class="sinfoto">Sin foto verificada: se muestra solo el texto</span></div>');
+        }
+      });
+    }
+
+    if ((guia.comer||[]).length) {
+      out.push('<h2>Dónde comer</h2>');
+      guia.comer.forEach(function(c){
+        var precio = '';
+        if (typeof c.usd === 'number') {
+          var cabe = food > 0 && c.usd <= food;
+          var clase = food > 0 ? (cabe ? 'queda' : 'pasa') : '';
+          precio = '<span class="precio ' + clase + '">' + mm(c.usd) + '</span>';
+        }
+        out.push('<div class="item"><div class="head"><b>' + esc(c.name) + '</b>' +
+          (c.tipo ? '<span class="tag">' + esc(c.tipo) + '</span>' : '') + precio + '</div>' +
+          (c.zona || c.momento ? '<p class="precios">' + esc([c.zona, c.momento].filter(Boolean).join(' · ')) + '</p>' : '') +
+          (c.nota ? '<p class="nota">' + esc(c.nota) + '</p>' : '') + '</div>');
+      });
+    }
+
+    if ((guia.atracciones||[]).length) {
+      out.push('<h2>Qué ver</h2>');
+      guia.atracciones.forEach(function(a){
+        var precio = typeof a.usd === 'number' ? '<span class="precio">' + (a.usd === 0 ? 'Gratis' : mm(a.usd)) + '</span>' : '';
+        out.push('<div class="item"><div class="head"><b>' + esc(a.name) + '</b>' +
+          (a.zona ? '<span class="tag">' + esc(a.zona) + '</span>' : '') +
+          (a.dur ? '<span class="tag">' + esc(a.dur) + '</span>' : '') + precio + '</div>' +
+          (a.nota ? '<p class="nota">' + esc(a.nota) + '</p>' : '') + '</div>');
+      });
+    }
+
+    // Tours recomendados: derivados de los datos reales, no escritos a mano.
+    // El preview no carga app.js (arrancaria la SPA entera), asi que los saca
+    // del texto del archivo. Es un artefacto de desarrollo, no produccion.
+    var tours = (typeof CS_TOURS_PREVIEW === 'undefined') ? null : CS_TOURS_PREVIEW(DEST.key);
+    if (tours && tours.length) {
+      var reales = tours.some(function (t) { return t.source === 'civitatis'; });
+      out.push('<h2>Tours recomendados</h2>');
+      out.push('<p class="nota" style="margin:-6px 0 10px">' + tours.length +
+        (reales ? ' con precio real para tus fechas.' : ' con precio referencial.') +
+        ' Salen de la misma fuente que la sección de experiencias.</p>');
+      tours.slice(0, 4).forEach(function(t){
+        var meta = [];
+        if (t.rating) meta.push('★ ' + Number(t.rating).toFixed(1));
+        if (t.freeCancellation) meta.push('Cancelación gratis');
+        meta.push(t.source === 'civitatis' ? 'Precio real' : 'Precio referencial');
+        out.push('<div class="item"><div class="head"><b>' + esc(t.title) + '</b>' +
+          '<span class="precio">' + mm(t.price) + '</span></div>' +
+          '<p class="precios">' + esc(t.destination) + ' · ' + esc(meta.join(' · ')) + '</p>' +
+          (t.description ? '<p class="nota">' + esc(t.description) + '</p>' : '') + '</div>');
+      });
+    }
+
+    if ((guia.hacer||[]).length) {
+      out.push('<h2>Qué hacer</h2>');
+      guia.hacer.forEach(function(h){
+        var precio = typeof h.usd === 'number' ? '<span class="precio">' + (h.usd === 0 ? 'Gratis' : mm(h.usd)) + '</span>' : '';
+        out.push('<div class="item"><div class="head"><b>' + esc(h.name) + '</b>' +
+          (h.zona ? '<span class="tag">' + esc(h.zona) + '</span>' : '') +
+          (h.dur ? '<span class="tag">' + esc(h.dur) + '</span>' : '') + precio + '</div>' +
+          (h.nota ? '<p class="nota">' + esc(h.nota) + '</p>' : '') + '</div>');
+      });
+    }
+
+    if ((guia.tips||[]).length) {
+      out.push('<h2>Tips locales</h2>');
+      guia.tips.forEach(function(t){
+        out.push('<div class="tip"><b>' + esc(t.titulo) + '</b><p>' + esc(t.texto) + '</p></div>');
+      });
+    }
+
+    out.push('<div class="pie">Región: ' + esc(DEST.region) + ' · Precios de comida orientativos, confirmá en el lugar. ' +
+      'Generado por CuántoSale.');
+    // Créditos de fotos. CC BY-SA no permite usar una imagen sin atribuir al
+    // autor y nombrar la licencia: esto no es opcional si se imprime la guía.
+    var creditos = (typeof FOTO_CREDITOS !== 'undefined') ? FOTO_CREDITOS : {};
+    var usados = (guia.beaches || []).filter(function (b) { return b.foto && creditos[b.foto]; });
+    if (usados.length) {
+      out.push('<div class="creditos"><b>Fotos</b> (Wikimedia Commons): ' +
+        usados.map(function (b) {
+          var c = creditos[b.foto];
+          return esc(b.name) + ' — ' + esc(c.autor) + ', ' + esc(c.licencia);
+        }).join(' · ') + '.</div>');
+    }
+    out.push('</div>');
+    return out.join('');
+  }
+
+  // Datos reales de tours, extraidos del texto de app.js. Solo para el preview.
+  var CS_TOURS_PREVIEW = (function () {
+    var mapa = {};
+    fetch('/app.js').then(function (r) { return r.text(); }).then(function (txt) {
+      var re = /tour\(\[([^\]]*)\],\s*'([^']*)',\s*'([^']*)',\s*'([^']*)',\s*([\d.]+)/g;
+      var m;
+      while ((m = re.exec(txt)) !== null) {
+        var claves = m[1].split(',').map(function (k) { return k.trim().replace(/^'|'$/g, ''); });
+        claves.forEach(function (k) {
+          (mapa[k] = mapa[k] || []).push({
+            destinations: [k], destination: m[2], title: m[3],
+            description: m[4], price: Number(m[5]) || 0, source: 'local'
+          });
+        });
+      }
+    });
+    return function (key) { return mapa[String(key).toLowerCase()] || []; };
+  })();
+
+  var input = document.getElementById('food');
+  function draw(){
+    DEST.region = nombreRegion(DEST.key);
+    if (DEST.key !== 'fln') DEST.name = DEST.key === 'sao' ? 'São Paulo' : DEST.key;
+    var g = window.CS_GUIAS.guiaPara(DEST.key, DEST.region);
+    document.getElementById('hoja').innerHTML = g ? render(g, Number(input.value)) : '<p>Sin guía para ' + DEST.key + '</p>';
+  }
+  var sel = document.getElementById('dest');
+  if (sel) sel.addEventListener('change', function(){ DEST.key = sel.value; draw(); });
+  input.addEventListener('input', draw);
+  document.getElementById('imprimir').addEventListener('click', function(){ window.print(); });
+  draw();
+})();
+</script>
+</body>
+</html>

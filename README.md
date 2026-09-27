@@ -79,17 +79,25 @@ La PWA incluye experiencias referenciales para Río de Janeiro, Florianópolis, 
 
 ### Guía Secreta
 
-`public/guias.js` tiene el contenido por destino: qué playa ir, dónde comer con precios, qué hacer y tips locales. Se resuelve en tres pasos y se corta en el primero que existe:
+`public/guias.js` tiene el contenido por destino. Se resuelve en tres pasos y se corta en el primero que existe:
 
-1. `GUIAS[destKey]` — override de ciudad (por ahora, `fln`)
-2. `REGIONES[dest.region]` — guía regional, con la region tomada de `DEST[]` en `lib/model.js`
+1. `GUIAS[destKey]` — guía de ciudad (hoy `fln` y `sao`)
+2. `REGIONES[dest.region]` — guía regional, con la región tomada de `DEST[]` en `lib/model.js`
 3. `null` — sin guía. La vista lo dice, no muestra otra ciudad
 
 El paso 3 es el que corrige un bug: antes la lista caía siempre en la de Florianópolis, así que Gramado, Canela, Torres, Maragogi, Porto de Galinhas y Buenos Aires veían "buscá prato executivo en el centro de Florianópolis". Un destino sin guía escrita muestra un estado vacío; uno mal escrito hace cruzar el país.
 
+**Ciudad y regional se mezclan, no se reemplazan.** `mezclarGuia()` combina sección por sección: la ciudad gana donde define algo, la regional aporta lo que la ciudad no menciona. Sin esto, la guía de Gramado perdía el aviso de la regional sobre el clima de la Serra, que sigue siendo cierto. Un `beaches: []` explícito sí gana a la regional, que es lo correcto para una ciudad sin playa.
+
 Las regiones se comparan en **slug** y no con el nombre de `DEST[]`: "Ceará" y "Ceara" son dos strings distintas, y comparar contra el nombre crudo hacía fallar en silencio para 8 de 13 regiones sin que nada se quejara. `regionSlug()` normaliza en los dos lados, igual que `inferHotelType` en `app.js`.
 
+**Secciones:** `beaches`, `atracciones`, `comer`, `hacer`, `tips`, más `temporada` y `resumen`. `atracciones` y `hacer` están separadas a propósito: si se empieza y termina en menos de una hora es atracción, si hay que reservar media jornada es un plan. Mezcladas no se puede responder "tengo dos horas, qué hago".
+
+**No hay sección de tours a propósito.** En `app.js` hay 111 tours escritos y encima el catálogo de Civitatis con el precio de la fecha que está mirando el usuario. Escribirlos también en la guía los convertiría en precio estimado, que es justo lo que Civitatis vino a reemplazar. La guía pide los tours al render con `toursFor()`, la misma función que usa la sección de experiencias.
+
 Con la estructura actual, 13 guías regionales cubren los 44 destinos. Agregar una guía de ciudad es sumar una entrada; agregar una región es cubrir un estado entero sin tocar nada más.
+
+**Cómo se escribe contenido nuevo.** En texto plano primero y con revisión a mano, después un script lo pasa a objetos. Escribir la prosa directo en el `.js` salió varias veces con palabras de otro idioma y frases sin sentido, y eso solo se detecta leyendo. Las fotos se verifican contra la **descripción** del archivo en Commons, no contra el nombre: hay homónimos ("São Francisco do Sul" a 300 km, "Praia do Forte do Cão" en Portugal) y licencias restringidas a Brasil (`CC BY-SA 2.0 br`).
 
 El schema y las reglas de contenido están documentados en la cabecera del archivo.
 

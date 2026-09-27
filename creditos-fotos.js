@@ -117,11 +117,37 @@ ${lineas.join(',\n')}
 if (typeof module !== 'undefined' && module.exports) module.exports = FOTO_CREDITOS;
 `;
 
-  fs.writeFileSync(OUT, cuerpo, 'utf8');
-  console.log('Fotos con credito: ' + Object.keys(creditos).length + ' / ' + urls.length);
+  // Guarda contra regresiones. Commons corta con 429 y este script lleva casi
+  // un minuto por corrida: si lo cortan a mitad de camino, la tabla que
+  // escribe tiene MENOS creditos que la que ya estaba, y pisa los datos
+  // buenos de las fotos que ya estaban. Pasó: la tabla bajo de 46 a 35
+  // entradas y seis fotos quedaron sin acreditar por un Ctrl+C.
+  //
+  // Un archivo generado que pierde información nunca es una mejora, asi que
+  // una corrida incompleta no escribe nada y dice por que.
+  let previas = 0;
+  if (fs.existsSync(OUT)) {
+    try {
+      const viejo = require(OUT);
+      previas = viejo && typeof viejo === 'object' ? Object.keys(viejo).length : 0;
+    } catch (e) { previas = 0; }
+  }
+  const nuevas = Object.keys(creditos).length;
+
+  console.log('Fotos con credito: ' + nuevas + ' / ' + urls.length +
+    (previas ? '  (la tabla actual tiene ' + previas + ')' : ''));
   if (sinFicha.length) {
     console.log('\nSin credito (' + sinFicha.length + '), hay que revisarlas a mano:');
     sinFicha.forEach((u) => console.log('   ' + u));
   }
+
+  if (nuevas < previas) {
+    console.log('\nNO SE ESCRIBIO NADA: la corrida dio ' + nuevas + ' creditos y el archivo ' +
+      'tiene ' + previas + '. Suele ser un 429 de Commons a mitad de camino.');
+    console.log('Volvé a correrlo. No borres el archivo a mano: este es el que hay que conservar.');
+    process.exit(1);
+  }
+
+  fs.writeFileSync(OUT, cuerpo, 'utf8');
   console.log('\nEscrito: public/creditos-fotos.generated.js');
 })();
