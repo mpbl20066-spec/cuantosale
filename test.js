@@ -2,8 +2,8 @@
 const assert = require('assert');
 const http = require('http');
 const model = require('./lib/model');
-  const fs = require('fs');
-  const path = require('path');
+const fs = require('fs');
+const path = require('path');
 
 let passed = 0;
 async function t(name, fn) {
@@ -107,69 +107,265 @@ function haversineKm(a, b) {
 
   console.log('Servidor y proveedores');
   process.env.RATE_LIMIT_PER_MIN = '1000';
-  process.env.DUFFEL_API_KEY = '';
-  process.env.DUFFEL_ACCESS_TOKEN = '';
-  process.env.DUFFEL_TOKEN = '';
+  process.env.SERPAPI_API_KEY = '';
   process.env.BOOKING_API_KEY = '';
   process.env.BOOKING_API_HOST = 'booking-com15.p.rapidapi.com';
   const app = require('./server');
-  const duffel = require('./lib/providers/duffel');
-  await t('mapea las ofertas de Duffel al contrato visual de vuelos', function () {
-    const offer = duffel.mapOffer({
-      id: 'off_test_1', total_amount: '321.50', total_currency: 'USD',
-      owner: { name: 'Aerolínea propietaria', logo_symbol_url: 'https://logo.test/a.svg' },
-      passengers: [{ id: 'pas_1', cabin_class: 'economy' }],
-      slices: [
-        { segments: [{ origin: { iata_code: 'MVD', name: 'Carrasco' }, destination: { iata_code: 'FLN', name: 'Florianópolis' }, departing_at: '2027-01-10T10:00:00Z', arriving_at: '2027-01-10T13:45:00Z', marketing_carrier: { iata_code: 'XX', name: 'Marca' }, operating_carrier: { name: 'Aerolínea Operadora' }, marketing_carrier_flight_number: '123' }] },
-        { segments: [{ origin: { iata_code: 'FLN', name: 'Florianópolis' }, destination: { iata_code: 'MVD', name: 'Carrasco' }, departing_at: '2027-01-17T10:00:00Z', arriving_at: '2027-01-17T14:10:00Z', marketing_carrier: { name: 'Marca' }, operating_carrier: { name: 'Aerolínea Operadora' } }] }
+  const serpapi = require('./lib/providers/serpapi');
+  const flights = require('./lib/providers');
+
+  // Respuesta de google_flights recortada a lo que el provider realmente lee.
+  // El fixture imita el caso real: en una búsqueda de ida y vuelta, `price` es
+  // el de la IDA solamente y el total de vuelta recién aparece si se sigue el
+  // `departure_token`.
+  const serpapiOutboundFixture = function () {
+    return {
+      best_flights: [
+        {
+          price: 180, type: 'One way', airline: 'Aerolínea Test', airline_logo: 'https://logo.test/a.svg',
+          total_duration: 165, departure_token: 'tok_out_1', booking_token: 'book_1',
+          layovers: [],
+          flights: [{ departure_airport: { id: 'MVD', name: 'Carrasco', time: '2027-01-10T10:00' }, arrival_airport: { id: 'FLN', name: 'Florianópolis', time: '2027-01-10T12:45' }, airline: 'Aerolínea Test', flight_number: 'AR 123' }]
+        },
+        {
+          price: 240, type: 'One way', airline: 'Aerolínea Barata', airline_logo: null,
+          total_duration: 300, departure_token: 'tok_out_2', booking_token: 'book_2',
+          layovers: [{ id: 'GRU', name: 'Guarulhos', duration: 90 }],
+          flights: [
+            { departure_airport: { id: 'MVD', name: 'Carrasco', time: '2027-01-10T08:00' }, arrival_airport: { id: 'GRU', name: 'Guarulhos', time: '2027-01-10T10:30' }, airline: 'Aerolínea Barata', flight_number: 'BR 10' },
+            { departure_airport: { id: 'GRU', name: 'Guarulhos', time: '2027-01-10T12:00' }, arrival_airport: { id: 'FLN', name: 'Florianópolis', time: '2027-01-10T13:00' }, airline: 'Aerolínea Barata', flight_number: 'BR 20' }
+          ]
+        }
       ]
-    }, 'economy');
-    assert.strictEqual(offer.provider, 'duffel');
-    assert.strictEqual(offer.trip_type, 'round_trip');
-    assert.strictEqual(offer.departure_airport.code, 'MVD');
-    assert.strictEqual(offer.inbound.destination.code, 'MVD');
-    assert.strictEqual(offer.airline, 'Aerolínea Operadora');
-    assert.strictEqual(offer.price_usd, 321.5);
-    assert.strictEqual(offer.passenger_ids[0], 'pas_1');
-  });
-  await t('mantiene las reglas de cabina por estilo', function () {
-    assert.deepStrictEqual(duffel.styleCabins('ahorro'), ['economy']);
-    assert.deepStrictEqual(duffel.styleCabins('eq'), ['economy', 'premium_economy']);
-    assert.deepStrictEqual(duffel.styleCabins('comodo'), ['premium_economy', 'business']);
-  });
-  await t('resuelve lugares y busca vuelos con Duffel-Version v2 y Bearer auth', async function () {
-    const oldKey = process.env.DUFFEL_API_KEY;
-    const seen = [];
-    process.env.DUFFEL_API_KEY = 'test-token';
-    duffel.setFetch(async function (url, options) {
-      const parsed = new URL(url);
-      seen.push({ url: parsed, options: options });
-      if (parsed.pathname === '/places/suggestions') {
-        const code = parsed.searchParams.get('query');
-        return { ok: true, status: 200, json: async function () { return { data: [{ type: 'airport', iata_code: code, name: code === 'MVD' ? 'Carrasco' : 'Florianópolis' }] }; } };
-      }
-      return { ok: true, status: 200, json: async function () { return { data: { offers: [{
-        id: 'off_mvd_fln', total_amount: '321.00', total_currency: 'USD', passengers: [{ id: 'pas_1' }], slices: [{ segments: [{
-          origin: { iata_code: 'MVD', name: 'Carrasco' }, destination: { iata_code: 'FLN', name: 'Florianópolis' }, departing_at: '2027-01-10T10:00:00Z', arriving_at: '2027-01-10T13:00:00Z', operating_carrier: { name: 'Aerolínea Test' }
-        }] }] }] } }; } };
+    };
+  };
+
+  await t('mapea un vuelo de Google Flights al contrato visual de la app', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    serpapi.setFetch(async function () {
+      return { ok: true, status: 200, json: async function () { return serpapiOutboundFixture(); } };
     });
     try {
-      const offers = await duffel.searchFlights({ origin: 'MVD', destination: 'FLN', departureDate: dep, returnDate: ret, passengers: 2, cabinClass: 'economy' });
-      assert.strictEqual(offers.length, 1);
-      assert.strictEqual(offers[0].departure_airport.code, 'MVD');
-      assert.strictEqual(offers[0].price_usd, 321);
-      assert.strictEqual(seen.filter(function (request) { return request.url.pathname === '/places/suggestions'; }).length, 2);
-      const request = seen.find(function (item) { return item.url.pathname === '/air/offer_requests'; });
-      assert.ok(request);
-      assert.strictEqual(request.url.searchParams.get('return_offers'), 'true');
-      assert.strictEqual(request.options.headers.Authorization, 'Bearer test-token');
-      assert.strictEqual(request.options.headers['Duffel-Version'], 'v2');
-      const body = JSON.parse(request.options.body);
-      assert.deepStrictEqual(body.data.slices, [{ origin: 'MVD', destination: 'FLN', departure_date: dep }, { origin: 'FLN', destination: 'MVD', departure_date: ret }]);
-      assert.strictEqual(body.data.passengers.length, 2);
+      const result = await serpapi.searchOutbound({ origin: 'MVD', destination: 'FLN', departureDate: dep, returnDate: ret, passengers: 2, travelClass: 1 });
+      assert.strictEqual(result.offers.length, 2);
+      const first = result.offers[0];
+      assert.strictEqual(first.provider, 'serpapi');
+      assert.strictEqual(first.departure_airport.code, 'MVD');
+      assert.strictEqual(first.arrival_airport.code, 'FLN');
+      assert.strictEqual(first.price_usd, 180);
+      assert.strictEqual(first.stops, 0);
+      // La fixture trae fecha de vuelta, así que la tarjeta es de ida y vuelta
+      // y su precio es el total del viaje.
+      assert.strictEqual(first.trip_type, 'round_trip');
+      // El tramo de vuelta no viene en la respuesta de la API: queda en null
+      // en vez de inventarse horarios.
+      assert.strictEqual(first.inbound, null);
+      // Sin passenger_ids: SerpAPI no emite boletos, asi que no hay oferta que
+      // reservar y no se inventan identificadores de pasajero.
+      assert.deepStrictEqual(first.passenger_ids, []);
+      assert.ok(first.departure_token, 'la tarjeta de ida necesita departure_token para pedir la vuelta');
+      assert.ok(first.book_url.indexOf('google.com/travel/flights') > -1);
+      // El segundo vuelo tiene una escala y debe contarla.
+      assert.strictEqual(result.offers[1].stops, 1);
     } finally {
-      duffel.setFetch(null);
-      process.env.DUFFEL_API_KEY = oldKey;
+      serpapi.setFetch(null);
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+
+  await t('traduce el estilo de viaje a la cabina que espera la API', function () {
+    process.env.SERPAPI_CABIN_COMODO = '';
+    delete process.env.SERPAPI_CABIN_COMODO;
+    assert.strictEqual(serpapi.travelClassFor('ahorro'), 1);
+    assert.strictEqual(serpapi.travelClassFor('eq'), 1);
+    assert.strictEqual(serpapi.travelClassFor('comodo'), 2);
+  });
+
+  await t('armá la consulta con los parametros de google_flights y la key solo en el server', function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'secreta';
+    try {
+      const query = serpapi.buildQuery({ origin: 'mvd', destination: 'fln', departureDate: dep, returnDate: ret, passengers: 2, travelClass: 1 });
+      assert.strictEqual(query.get('engine'), 'google_flights');
+      assert.strictEqual(query.get('departure_id'), 'MVD');
+      assert.strictEqual(query.get('arrival_id'), 'FLN');
+      assert.strictEqual(query.get('outbound_date'), dep);
+      assert.strictEqual(query.get('return_date'), ret);
+      assert.strictEqual(query.get('adults'), '2');
+      // La moneda se pide explicita: el modelo entero de la app trabaja en USD.
+      assert.strictEqual(query.get('currency'), 'USD');
+      assert.strictEqual(query.get('api_key'), 'secreta');
+    } finally {
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+
+  await t('el destino se resuelve al aeropuerto, no al código de ciudad', function () {
+    const model = require('./lib/model');
+    // `model.DEST.rio.iata` es "RIO" y `sao` es "SAO": son áreas metropolitanas,
+    // no aeropuertos. Con SerpAPI eso hace que la búsqueda vuelva VACÍA y sin
+    // error, o sea que la app caía a estimado en silencio y no había forma de
+    // enterarse desde los logs. Rio y São Paulo son los destinos más buscados.
+    // Los mocks no lo detectaban porque ignoraban el código de destino.
+    ['rio', 'sao'].forEach(function (key) {
+      const cityCode = model.DEST[key].iata;
+      assert.notStrictEqual(cityCode, 'GIG', 'rio no debe usar el código de ciudad');
+    });
+    // El endpoint tiene que usar la tabla de aeropuertos, no la del modelo.
+    assert.ok(app.airportFor('rio') === 'GIG', 'rio debe resolverse a GIG');
+    assert.ok(app.airportFor('sao') === 'GRU', 'sao debe resolverse a GRU');
+    // Y ningún destino puede quedar con el código de ciudad.
+    Object.keys(model.DEST).forEach(function (key) {
+      const resolved = app.airportFor(key);
+      assert.ok(/^[A-Z]{3}$/.test(resolved), key + ' debe resolver a un código de aeropuerto de 3 letras');
+    });
+  });
+
+  await t('el browse de ida y vuelta trae el total en una sola busqueda', async function () {
+    // Verificado contra la API real: con outbound_date + return_date, `price`
+    // llega como `type: "Round trip"` y ya es el total del viaje (1 adulto =
+    // US$ 249, 2 adultos = US$ 499 en la misma ruta y fechas). Por eso no hay
+    // segunda etapa ni un token de por medio.
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    serpapi.setFetch(async function () {
+      return { ok: true, status: 200, json: async function () {
+        return { best_flights: [{ price: 499, type: 'Round trip', airline: 'Aerolínea Test', total_duration: 163, departure_token: 'tok_1', layovers: [],
+          flights: [{ departure_airport: { id: 'MVD', name: 'Carrasco', time: '2027-03-10 13:57' }, arrival_airport: { id: 'GIG', name: 'Galeão', time: '2027-03-10 16:40' }, airline: 'Aerolínea Test', flight_number: 'AR 763' }] }] };
+      } };
+    });
+    try {
+      const result = await serpapi.searchOutbound({ origin: 'MVD', destination: 'GIG', departureDate: '2027-03-10', returnDate: '2027-03-17', passengers: 2, travelClass: 1 });
+      assert.strictEqual(result.offers.length, 1);
+      const offer = result.offers[0];
+      assert.strictEqual(offer.trip_type, 'round_trip', 'con fecha de vuelta la tarjeta es de ida y vuelta');
+      assert.strictEqual(offer.price_usd, 499, 'el precio es el total de ida y vuelta, no solo la ida');
+      // El tramo de vuelta no viene en la respuesta: se deja en null en vez de
+      // inventar horarios que la API nunca devolvió.
+      assert.strictEqual(offer.inbound, null);
+      assert.ok(offer.outbound, 'el tramo de ida sí viene');
+    } finally {
+      serpapi.setFetch(null);
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+
+  await t('marca la búsqueda de solo ida como one_way', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    serpapi.setFetch(async function () {
+      return { ok: true, status: 200, json: async function () {
+        return { best_flights: [{ price: 314, type: 'One way', airline: 'Gol', total_duration: 163, layovers: [], flights: [
+          { departure_airport: { id: 'MVD', name: 'Carrasco', time: '2027-03-10 04:35' }, arrival_airport: { id: 'GIG', name: 'Galeão', time: '2027-03-10 07:15' }, airline: 'Gol', flight_number: 'G3 7589' }] }] };
+      } };
+    });
+    try {
+      const result = await serpapi.searchOutbound({ origin: 'MVD', destination: 'GIG', departureDate: '2027-03-10', returnDate: '', passengers: 2, travelClass: 1 });
+      assert.strictEqual(result.offers[0].trip_type, 'one_way');
+      assert.strictEqual(result.offers[0].price_usd, 314);
+    } finally {
+      serpapi.setFetch(null);
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+
+  await t('trata el error de cuota como 429 aunque SerpAPI responda 200', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    serpapi.setFetch(async function () {
+      return { ok: true, status: 200, json: async function () { return { error: 'Your API key has run out of searches' }; } };
+    });
+    try {
+      let threw = null;
+      try { await serpapi.priceForDate({ origin: 'MVD', destination: 'FLN', dep: dep, ret: ret, passengers: 1 }); } catch (e) { threw = e; }
+      assert.ok(threw, 'una key sin créditos tiene que lanzar un error, no devolver precio vacío en silencio');
+      assert.strictEqual(threw.status, 429);
+      assert.strictEqual(threw.quotaExhausted, true);
+    } finally {
+      serpapi.setFetch(null);
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+
+  await t('un error de parámetro NO se confunde con cuota agotada', async function () {
+    // SerpAPI responde 200 con `{ error: "..." }` para los dos casos. Si todo
+    // eso activara el cooldown, un typo en un parámetro congelaría los precios
+    // de vuelos un minuto entero y el gráfico volvería a estimaciones sin que
+    // nada pareciera roto. Esto se rompió en producción y por eso tiene test.
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    serpapi.setFetch(async function () {
+      return { ok: true, status: 200, json: async function () { return { error: 'Missing `departure_id` parameter.' }; } };
+    });
+    flights.clearCache();
+    try {
+      let threw = null;
+      try { await serpapi.priceForDate({ origin: 'MVD', destination: 'FLN', dep: dep, ret: ret, passengers: 1 }); } catch (e) { threw = e; }
+      assert.ok(threw);
+      assert.strictEqual(threw.quotaExhausted, false, 'un parámetro faltante no es cuota agotada');
+      assert.notStrictEqual(threw.status, 429, 'no debe activar el cooldown de cuota');
+    } finally {
+      serpapi.setFetch(null);
+      flights.clearCache();
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+
+  await t('el cache evita pagar dos veces la misma fecha', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    process.env.SERPAPI_CALENDAR_TTL_H = '24';
+    let calls = 0;
+    serpapi.setFetch(async function () {
+      calls += 1;
+      return { ok: true, status: 200, json: async function () {
+        return { best_flights: [{ price: 100, type: 'Round trip', total_duration: 100, layovers: [], flights: [] }], price_insights: { lowest_price: 210, price_level: 'low' } };
+      } };
+    });
+    flights.clearCache();
+    try {
+      const points = [{ shift: 0, dep: dep, ret: ret }, { shift: 1, dep: dep, ret: ret }];
+      const first = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
+      const callsAfterFirst = calls;
+      const second = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
+      assert.strictEqual(second.real, first.real, 'la segunda pasada devuelve lo mismo');
+      // Los dos puntos comparten la clave (mismo dep y ret en el fixture), asi
+      // que el segundo tiene que salir del cache sin gastar otro crédito.
+      assert.strictEqual(calls, callsAfterFirst, 'la segunda consulta no puede volver a pegarle a SerpAPI');
+    } finally {
+      serpapi.setFetch(null);
+      flights.clearCache();
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+
+  await t('el calendario reparte precio real y estimado por separado', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    serpapi.setFetch(async function () {
+      return { ok: true, status: 200, json: async function () {
+        return { best_flights: [{ price: 200, type: 'Round trip', total_duration: 100, layovers: [], flights: [] }] };
+      } };
+    });
+    flights.clearCache();
+    try {
+      const points = [
+        { shift: -1, dep: '2027-01-09', ret: '2027-01-16' },
+        { shift: 0, dep: '2027-01-10', ret: '2027-01-17' },
+        { shift: 1, dep: '2027-01-11', ret: '2027-01-18' }
+      ];
+      const result = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
+      assert.strictEqual(result.puntos.length, 3);
+      assert.strictEqual(result.real + result.estimados, 3, 'cada punto tiene que estar en una de las dos listas');
+      result.puntos.forEach(function (punto) {
+        if (punto.real) assert.ok(punto.pp > 0, 'un punto real siempre trae precio');
+        else assert.strictEqual(punto.pp, null, 'un punto estimado no inventa precio');
+      });
+    } finally {
+      serpapi.setFetch(null);
+      flights.clearCache();
+      process.env.SERPAPI_API_KEY = oldKey;
     }
   });
   await t('normaliza hoteles reales de Booking.com con tarifa e imagen', async function () {
@@ -234,32 +430,58 @@ function haversineKm(a, b) {
   const server = app.createServer();
   await new Promise(function (r) { server.listen(0, r); });
   const port = server.address().port;
-  await t('expone ofertas Duffel por la ruta de búsqueda que consume la PWA', async function () {
-    process.env.DUFFEL_API_KEY = 'test-token';
-    duffel.setFetch(async function (url) {
+  await t('expone vuelos de Google Flights por la ruta de búsqueda que consume la PWA', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    flights.clearCache();
+    serpapi.setFetch(async function (url) {
       const parsed = new URL(url);
-      if (parsed.pathname === '/places/suggestions') {
-        const code = parsed.searchParams.get('query');
-        return { ok: true, status: 200, json: async function () { return { data: [{ type: 'airport', iata_code: code, name: code }] }; } };
-      }
-      return { ok: true, status: 200, json: async function () { return { data: { offers: [{
-        id: 'off_api_test', total_amount: '250.00', total_currency: 'USD', slices: [{ segments: [{
-          origin: { iata_code: 'MVD', name: 'Carrasco' }, destination: { iata_code: 'FLN', name: 'Florianópolis' }, departing_at: '2027-01-10T10:00:00Z', arriving_at: '2027-01-10T13:00:00Z', operating_carrier: { name: 'Operadora Test' }
-        }] }]
-      }] } }; } };
+      assert.strictEqual(parsed.pathname, '/search.json');
+      assert.strictEqual(parsed.searchParams.get('engine'), 'google_flights');
+      return { ok: true, status: 200, json: async function () { return serpapiOutboundFixture(); } };
     });
     try {
       const response = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 1, style: 'ahorro' });
       const payload = JSON.parse(response.body);
       assert.strictEqual(response.status, 200);
-      assert.strictEqual(payload.provider, 'duffel');
-      assert.strictEqual(payload.offers[0].id, 'off_api_test');
-      assert.strictEqual(payload.offers[0].price_usd, 250);
-      assert.strictEqual(payload.offers[0].airline, 'Operadora Test');
+      assert.strictEqual(payload.provider, 'serpapi');
+      assert.strictEqual(payload.offers[0].departure_airport.code, 'MVD');
+      assert.strictEqual(payload.offers[0].price_usd, 180);
+      assert.strictEqual(payload.offers[0].airline, 'Aerolínea Test');
+      // Ninguna tarjeta puede llevar un link de pago propio: la reserva se
+      // completa afuera y la app no cobra vuelos.
+      assert.ok(payload.offers.every(function (o) { return !o.booking_url && !o.checkout_url; }));
     } finally {
-      duffel.setFetch(null);
-      process.env.DUFFEL_API_KEY = '';
+      serpapi.setFetch(null);
+      flights.clearCache();
+      process.env.SERPAPI_API_KEY = oldKey;
     }
+  });
+  await t('el calendario de fechas responde puntos con precio por separado', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = 'test-key';
+    flights.clearCache();
+    serpapi.setFetch(async function () {
+      return { ok: true, status: 200, json: async function () { return { best_flights: [{ price: 300, type: 'Round trip', total_duration: 100, layovers: [], flights: [] }] }; } };
+    });
+    try {
+      const r = await get(port, '/api/vuelos/calendario?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&style=eq&origin=MVD');
+      const j = JSON.parse(r.body);
+      assert.strictEqual(r.status, 200);
+      assert.strictEqual(j.configured, true);
+      assert.ok(Array.isArray(j.puntos));
+      assert.ok(j.puntos.length > 1, 'el calendario tiene que traer varias fechas');
+      assert.ok(j.puntos.every(function (p) { return typeof p.dep === 'string' && typeof p.shift === 'number'; }));
+      assert.ok(j.puntos.some(function (p) { return p.real; }), 'con el buscador andando algun punto tiene que traer precio real');
+    } finally {
+      serpapi.setFetch(null);
+      flights.clearCache();
+      process.env.SERPAPI_API_KEY = oldKey;
+    }
+  });
+  await t('el calendario rechaza destinos que no vuelan', async function () {
+    const r = await get(port, '/api/vuelos/calendario?dest=zz&dep=' + dep + '&ret=' + ret + '&pax=2&style=eq');
+    assert.strictEqual(r.status, 400);
   });
   await t('cotiza un viaje estimado sin credenciales externas', async function () {
     const r = await get(port, '/api/cotizar?' + q + '&origin=PDP&subcategory=Praia%20dos%20Ingleses');
@@ -300,23 +522,29 @@ function haversineKm(a, b) {
       assert.ok(d.name && typeof d.name === 'string', 'destino sin nombre: ' + d.key);
     });
   });
-  await t('la tabla de costos del cliente es copia fiel de la del servidor', function () {
-    // La tabla daily vive dos veces: DESTINATION_COSTS en lib/model.js (la que
-    // cotiza el server) y DESTINATION_DAILY_COSTS en public/app.js (la que
-    // arma las tarjetas en el navegador). Las dos hacen fallback a .rio cuando
-    // no encuentran la clave, asi que una clave que falta no rompe nada: se
-    // cobra Rio de Janeiro en silencio. Ya paso: el cliente se quedo 17
-    // destinos atras y cotizaba angra, curitiba, rec, torres y companhia con
-    // numeros de Rio sin que nada se enterara.
+  await t('daily-costs.js esta al dia y app.js no vuelve a copiar la tabla', function () {
+    // La tabla daily vivia escrita a mano en DOS archivos: DESTINATION_COSTS en
+    // lib/model.js (la que cotiza el server) y DESTINATION_DAILY_COSTS en
+    // public/app.js (la que dibuja las tarjetas). Las dos caian al fallback de
+    // Rio cuando no encontraban la clave, asi que una clave faltante no rompia
+    // nada: se cobraba Rio de Janeiro en silencio. Paso de verdad: el cliente se
+    // quedo 17 destinos atras y cotizaba angra, curitiba, rec, torres y demas
+    // con numeros de Rio sin que nada se enterara.
+    //
+    // Ahora hay una sola fuente, lib/model.js. El cliente la recibe por
+    // public/daily-costs.js, que genera scripts/build-daily-costs.js (lo corren
+    // pretest y prestart). Esta prueba igual la verifica, para que correr
+    // `node test.js` sin npm tampoco deje pasar una desincronizacion.
     const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
-    const desde = app.indexOf('var DESTINATION_DAILY_COSTS = {');
-    assert.ok(desde > 0, 'no se encontro DESTINATION_DAILY_COSTS en public/app.js');
-    const bloque = app.slice(desde, app.indexOf('};', desde));
-    const cliente = {};
-    for (const m of bloque.matchAll(/([a-z_]+):\s*\{\s*transport:\s*\{([^}]*)\}\s*,\s*food:\s*\{([^}]*)\}\s*\}/g)) {
-      const num = (s) => (s.match(/-?\d+(\.\d+)?/g) || []).map(Number);
-      cliente[m[1]] = { t: num(m[2]), f: num(m[3]) };
-    }
+    assert.ok(app.indexOf('var DESTINATION_DAILY_COSTS = window.CS_DESTINATION_DAILY_COSTS') >= 0,
+      'app.js deberia leer el global generado, no tener la tabla escrita adentro');
+    assert.ok(app.indexOf('var DESTINATION_DAILY_COSTS = {') < 0,
+      'app.js volvio a copiar la tabla: quedo una segunda fuente de verdad');
+
+    const generado = path.join(__dirname, 'public', 'daily-costs.js');
+    assert.ok(fs.existsSync(generado), 'falta public/daily-costs.js: corré npm run build:costos');
+    delete require.cache[require.resolve(generado)];
+    const cliente = require(generado);
     const server = model.DESTINATION_COSTS;
 
     const faltan = Object.keys(server).filter((k) => !cliente[k]);
@@ -327,11 +555,21 @@ function haversineKm(a, b) {
     for (const k of Object.keys(server)) {
       const s = server[k], c = cliente[k];
       assert.deepStrictEqual(
-        [c.t[0], c.t[1], c.f[0], c.f[1], c.f[2]],
+        [c.transport.eco, c.transport.confort, c.food.casual, c.food.moderado, c.food.gourmet],
         [s.transport.eco, s.transport.confort, s.food.casual, s.food.moderado, s.food.gourmet],
         'costos distintos en ' + k + ' (' + (model.DEST[k] && model.DEST[k].name) + ')'
       );
     }
+
+    // El index tiene que pedirlo antes que app.js y el service worker tiene que
+    // precachearlo: sin lo primero el global no existe cuando app.js corre, y
+    // sin lo segundo la primera apertura sin senal no arma las tarjetas.
+    const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    const iTag = html.indexOf('src="/daily-costs.js');
+    assert.ok(iTag > 0, 'index.html no carga /daily-costs.js');
+    assert.ok(iTag < html.indexOf('src="/app.js'), 'daily-costs.js tiene que cargarse antes que app.js');
+    const sw = fs.readFileSync(path.join(__dirname, 'public', 'sw.js'), 'utf8');
+    assert.ok(sw.indexOf("'/daily-costs.js'") > 0, 'sw.js no precachea /daily-costs.js');
   });
   await t('todo destino tiene costos propios y no cae al fallback de Rio', function () {
     // Si un destino no esta en la tabla, destinationCosts() devuelve la de Rio
@@ -412,7 +650,7 @@ function haversineKm(a, b) {
   await t('el candado de prelanzamiento cierra la API, no sólo las páginas', async function () {
     // Regresión: el candado filtraba por nombre de archivo, así que
     // /api/cotizar y /api/hoteles seguían respondiendo 200 sin contraseña y
-    // devolvían cotizaciones reales quemando la cuota de Duffel y Booking.
+    // devolvían cotizaciones reales quemando la cuota de SerpAPI y de Booking.
     const user = 'prelaunch-user', pass = 'prelaunch-pass';
     const cotizar = '/api/cotizar?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000';
     process.env.APP_USER = user; process.env.APP_PASS = pass;
@@ -439,7 +677,7 @@ function haversineKm(a, b) {
   });
   await t('los endpoints que cuestan plata no comparten cupo con los gratuitos', async function () {
     // /api/cotizar-todos es cálculo local y no gasta cuota. Antes compartía
-    // cubo con /api/cotizar, que sí llama a Duffel: golpear el endpoint
+    // cubo con /api/cotizar, que sí consulta el buscador de vuelos: golpear el endpoint
     // gratuito le agotaba el cupo de cotizar al usuario.
     const libre = '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=9000&style=eq';
     const caro = '/api/cotizar?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=9000&style=eq';
@@ -562,10 +800,26 @@ function haversineKm(a, b) {
     assert.ok(!appScript.body.includes('local-tour__add'), 'el botón "Sumar" ya no debe existir');
     assert.ok(!appScript.body.includes('Reservar los tours seleccionados'), 'el pie con la nota y el botón de reserva ya no debe existir');
   });
-  await t('con clave vacía la búsqueda real de vuelos responde con error controlado', async function () {
-    const r = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 2, style: 'eq' });
-    const j = JSON.parse(r.body);
-    assert.strictEqual(r.status, 503); assert.deepStrictEqual(j.offers, []); assert.match(j.error, /DUFFEL_API_KEY|DUFFEL_ACCESS_TOKEN/);
+  await t('con key vacía la búsqueda real de vuelos responde con error controlado', async function () {
+    const oldKey = process.env.SERPAPI_API_KEY;
+    process.env.SERPAPI_API_KEY = '';
+    flights.clearCache();
+    try {
+      const r = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 2, style: 'eq' });
+      const j = JSON.parse(r.body);
+      assert.strictEqual(r.status, 503); assert.deepStrictEqual(j.offers, []);
+      assert.match(j.error, /no está disponible/i);
+      // Sin key el calendario responde 200 con la lista vacía: es una mejora
+      // sobre la estimación y no puede romper la pantalla de resultados.
+      const c = await get(port, '/api/vuelos/calendario?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&style=eq');
+      const cj = JSON.parse(c.body);
+      assert.strictEqual(c.status, 200);
+      assert.strictEqual(cj.configured, false);
+      assert.deepStrictEqual(cj.puntos, []);
+    } finally {
+      process.env.SERPAPI_API_KEY = oldKey;
+      flights.clearCache();
+    }
   });
   server.close();
   console.log('\n' + passed + ' pruebas OK' + (process.exitCode ? ' (con fallas)' : ''));

@@ -396,37 +396,15 @@
       baggageAndInsuranceUsd: 75
     }
   };
-  var DESTINATION_DAILY_COSTS = {
-    bue: { transport: { eco: 18, confort: 38 }, food: { casual: 30, moderado: 58, gourmet: 100 } },
-    // Esta tabla es una copia de DESTINATION_COSTS en lib/model.js. Si una clave
-    // falta, getDestinationDailyCosts() cae al fallback .rio y la tarjeta del
-    // navegador muestra un costo diario que el servidor no cobra. Las quince de
-    // abajo son los destinos que ofrece DESTINATION_GROUPS y que no estaban.
-    angra: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 105 } },
-    morro: { transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
-    bombinhas: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
-    rosa: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
-    itapema: { transport: { eco: 15, confort: 32 }, food: { casual: 28, moderado: 54, gourmet: 92 } },
-    garopaba: { transport: { eco: 15, confort: 33 }, food: { casual: 25, moderado: 50, gourmet: 86 } },
-    ferrugem: { transport: { eco: 16, confort: 35 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
-    picarras: { transport: { eco: 16, confort: 35 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
-    torres: { transport: { eco: 15, confort: 33 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
-    canoa: { transport: { eco: 14, confort: 31 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
-    portoseguro: { transport: { eco: 18, confort: 40 }, food: { casual: 33, moderado: 60, gourmet: 105 } },
-    itacare: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 58, gourmet: 100 } },
-    forte: { transport: { eco: 18, confort: 40 }, food: { casual: 34, moderado: 62, gourmet: 105 } },
-    rec: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
-    joaopessoa: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
-
-    // Estas tres no las ofrece todavia ningun grupo (Curitiba y Camboriu son
-    // destinos que el modelo tiene y la grilla no muestra), pero la tabla tiene
-    // que ser copia exacta de la del servidor: si el navegador cae al fallback
-    // .rio para un destino que alguien cotice, muestra un costo que no existe.
-    curitiba: { transport: { eco: 22, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } },
-    camboriu: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
-    poa: { transport: { eco: 13, confort: 30 }, food: { casual: 27, moderado: 50, gourmet: 90 } },
-    sao: { transport: { eco: 22, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } }, buz: { transport: { eco: 18, confort: 38 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, arraial: { transport: { eco: 14, confort: 28 }, food: { casual: 25, moderado: 45, gourmet: 75 } }, cabo: { transport: { eco: 12, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } }, ilha: { transport: { eco: 10, confort: 30 }, food: { casual: 28, moderado: 52, gourmet: 90 } }, paraty: { transport: { eco: 12, confort: 26 }, food: { casual: 24, moderado: 44, gourmet: 75 } }, ilhabela: { transport: { eco: 16, confort: 35 }, food: { casual: 30, moderado: 58, gourmet: 95 } }, ubatuba: { transport: { eco: 15, confort: 32 }, food: { casual: 25, moderado: 48, gourmet: 80 } }, rio: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 95 } }, bho: { transport: { eco: 14, confort: 28 }, food: { casual: 22, moderado: 42, gourmet: 75 } }, porto: { transport: { eco: 15, confort: 32 }, food: { casual: 28, moderado: 52, gourmet: 85 } }, mcz: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 80 } }, maragogi: { transport: { eco: 13, confort: 28 }, food: { casual: 24, moderado: 45, gourmet: 75 } }, nat: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 48, gourmet: 80 } }, pip: { transport: { eco: 16, confort: 35 }, food: { casual: 30, moderado: 55, gourmet: 90 } }, trancoso: { transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } }, ssa: { transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } }, for: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, jericoacoara: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } }, fernando: { transport: { eco: 30, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } }, fln: { transport: { eco: 16, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 90 } }, bcm: { transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 50, gourmet: 85 } }, gram: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 62, gourmet: 110 } }, canela: { transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 62, gourmet: 110 } }, igu: { transport: { eco: 12, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } }
-  };
+  // Los costos diarios por destino NO viven acá: viven en public/daily-costs.js,
+  // que se genera desde lib/model.js con `npm run build:costos`. Estaban escritos
+  // a mano en los dos archivos y ya divergieron una vez (el cliente se quedó
+  // destinos atrás y cotizaba con números de Río de Janeiro en silencio, porque
+  // las dos tablas caían al fallback de rio sin dar error). Una sola fuente.
+  var DESTINATION_DAILY_COSTS = window.CS_DESTINATION_DAILY_COSTS || {};
+  if (!window.CS_DESTINATION_DAILY_COSTS) {
+    console.error('Falta /daily-costs.js: corré npm run build:costos y serví el archivo generado.');
+  }
   function getDestinationDailyCosts(key) { return DESTINATION_DAILY_COSTS[String(key || '').toLowerCase()] || DESTINATION_DAILY_COSTS.rio; }
   var massSearch = false;
   var detailState = null;
@@ -2731,7 +2709,7 @@
   function flightSearch(meta, budget) {
     return '<section class="flight-search" aria-labelledby="flight-title"><div><h2 id="flight-title">Vuelos</h2><p>Tarifas aéreas en tiempo real para tu viaje.</p></div>' +
       '<div class="flight-filters" aria-label="Filtros de vuelos"><div><b>Escalas</b><button type="button" data-flight-stop="all" aria-pressed="true">Todos</button><button type="button" data-flight-stop="0">Directos</button><button type="button" data-flight-stop="1">1 escala</button><button type="button" data-flight-stop="2">2+ escalas</button></div><div><b>Horario de salida</b><button type="button" data-flight-time="all" aria-pressed="true">Todo el día</button><button type="button" data-flight-time="morning">Mañana</button><button type="button" data-flight-time="afternoon">Tarde</button><button type="button" data-flight-time="night">Noche</button></div></div>' +
-      '<div class="flight-results" aria-live="polite"><div class="flight-search-prompt"><p>Buscá tarifas actuales y compará agencias para tu ruta.</p><button type="button" class="btn btn-primary" data-start-flight-search>Buscar vuelos disponibles</button></div></div></section>';
+      '<div class="flight-results" aria-live="polite"><div class="flight-search-prompt"><p>Buscá tarifas actuales y compará horarios y|scaleas para tu ruta.</p><button type="button" class="btn btn-primary" data-start-flight-search>Buscar vuelos disponibles</button></div></div></section>';
   }
   function flightTime(value) {
     if (!value) return 'Horario no disponible';
@@ -2821,15 +2799,24 @@
     }
     var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
     var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
+    // El precio que trae la tarjeta ya es el total de ida y vuelta. El tramo de
+    // vuelta no viene en la respuesta, así que no se muestra una fila que no
+    // existe: la reserva se completa en Google Flights, que sí la muestra.
+    var book = offer.book_url
+      ? '<a class="btn btn-primary flight-summary-book" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Reservar en Google Flights</a>'
+      : '';
     return '<div class="flight-summary-card">' +
       '<div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b><span class="flight-badge cabin-badge">' + esc(offer.cabin_label || cabinClassLabel(offer.cabin_class)) + '</span></div>' +
       legRow(offer.outbound, 'Ida') + legRow(offer.inbound, 'Vuelta') +
       '<div class="flight-summary-footer"><small>Precio final · Ida y vuelta</small><b>' + price + '</b></div>' +
-      '<button type="button" class="btn btn-secondary flight-summary-change" data-change-flight>Elegir otro vuelo</button></div>';
+      '<div class="flight-summary-actions">' + book + '<button type="button" class="btn btn-secondary flight-summary-change" data-change-flight>Elegir otro vuelo</button></div>' +
+      '<p class="flight-summary-note">Precio de Google Flights. La reserva se completa en su sitio, no acá.</p></div>';
   }
   function getFlightSelectionState() {
     if (!detailState) return null;
     if (!detailState.flightSelection) {
+      // `outbound` y `done` son las dos etapas que quedan: elegir y confirmar.
+      // `inbound` ya no se usa (no hay una segunda búsqueda que hacer).
       detailState.flightSelection = { stage: 'outbound', outboundId: null, inboundId: null };
     }
     return detailState.flightSelection;
@@ -2855,13 +2842,13 @@
     if (detailState) detailState.flightOffers = offers;
     var state = getFlightSelectionState();
     var flightStep = section.getAttribute('data-flight-step') || (state && state.stage) || 'outbound';
-    var stepLabel = flightStep === 'inbound' ? 'Vuelta' : 'Ida';
+    var stepLabel = 'Ida';
     var titleEl = section.querySelector('h2');
     var subtitleEl = section.querySelector('p');
-    if (titleEl) titleEl.textContent = flightStep === 'inbound' ? 'Vuelos de vuelta' : (flightStep === 'done' ? 'Itinerario seleccionado' : 'Vuelos de ida');
-    if (subtitleEl) subtitleEl.textContent = flightStep === 'inbound'
-      ? 'Revisá el vuelo de vuelta incluido en la tarifa seleccionada.'
-      : (flightStep === 'done' ? 'Este es el itinerario que se sumó a tu presupuesto.' : 'Te mostramos la opción más conveniente y, si aporta algo distinto, una alternativa.');
+    if (titleEl) titleEl.textContent = flightStep === 'done' ? 'Itinerario seleccionado' : 'Vuelos desde Montevideo';
+    if (subtitleEl) subtitleEl.textContent = flightStep === 'done'
+      ? 'Este es el itinerario que se sumó a tu presupuesto.'
+      : 'Te mostramos la opción más conveniente y, si aporta algo distinto, una alternativa. El precio es de ida y vuelta.';
     var visible = filteredFlightOffers(section, offers);
     if (flightStep === 'done' && state && state.outboundId) {
       var doneOffer = visible.find(function (offer) { return String(offer.id) === String(state.outboundId); }) || offers.find(function (offer) { return String(offer.id) === String(state.outboundId); });
@@ -2871,12 +2858,10 @@
         return;
       }
     }
-    if (flightStep === 'inbound' && state && state.outboundId) {
-      visible = visible.filter(function (offer) { return String(offer.id) === String(state.outboundId); });
-    } else if (flightStep === 'outbound') {
+    if (flightStep === 'outbound') {
       visible = pickTopFlightOffers(visible);
       // Mientras el usuario no confirmó un itinerario, el presupuesto refleja
-      // la tarifa más barata que Duffel encontró, no una estimación estática.
+      // la tarifa más barata que encontró el buscador, no una estimación estática.
       //
       // Solo la PRIMERA vez que llegan las ofertas. Antes se recalculaba en
       // cada repintado, y el camino de los filtros vuelve a pintar la lista:
@@ -2892,9 +2877,10 @@
       var logo = offer.logo ? '<img src="' + esc(offer.logo) + '" alt="" class="flight-logo">' : '<span class="flight-logo-fallback" aria-hidden="true">✈️</span>';
       var price = offer.price_usd === null ? esc(offer.original_price + ' ' + (offer.original_currency || '')) : money(offer.price_usd);
       var isRoundTrip = offer.trip_type === 'round_trip';
-      var displayedLeg = isRoundTrip && (flightStep === 'inbound' || flightStep === 'done')
-        ? offer.inbound
-        : (isRoundTrip ? offer.outbound : offer);
+      // Solo se conoce el tramo de ida (`flights[]` trae un único segmento),
+      // así que la tarjeta muestra ese. El precio que acompaña sí es el total de
+      // ida y vuelta, y por eso el pie lo dice explícito.
+      var displayedLeg = offer.outbound || offer;
       var originAirport = displayedLeg && displayedLeg.origin
         ? displayedLeg.origin
         : offer.departure_airport;
@@ -2905,32 +2891,25 @@
       var departText = flightTime((displayedLeg && displayedLeg.departure) || offer.departure);
       var arrivalText = flightTime((displayedLeg && displayedLeg.arrival) || offer.arrival);
       var primaryButtonText = isRoundTrip
-        ? (flightStep === 'inbound' ? 'Confirmar ida y vuelta' : (flightStep === 'done' ? 'Itinerario seleccionado' : 'Seleccionar ida'))
+        ? (flightStep === 'done' ? 'Itinerario seleccionado' : 'Sumar al presupuesto')
         : (flightStep === 'done' ? 'Vuelo seleccionado' : 'Agregar a presupuesto');
-      var stageBadge = offer.trip_type === 'round_trip' ? '<span class="flight-badge">' + esc(flightStep === 'done' ? 'Ida y vuelta' : stepLabel) + '</span>' : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
+      var stageBadge = isRoundTrip
+        ? '<span class="flight-badge">Ida y vuelta</span>'
+        : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
       var cabinBadge = '<span class="flight-badge cabin-badge">' + esc(offer.cabin_label || cabinClassLabel(offer.cabin_class)) + '</span>';
-      var agencyLabel = offer.agency ? '<small class="flight-agency">Venta por ' + esc(offer.agency) + '</small>' : '';
       var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
       var priceKnown = offer.price_usd !== null && Number.isFinite(Number(offer.price_usd));
-      // El vuelo se vende acá mismo, contra Duffel: no hay link saliente a
-      // Aviasales ni a Booking. El botón lleva el id de la oferta y nada
-      // más: el importe se recalcula en el server contra el precio real de
-      // Duffel, así que alterar el data-price de acá no cambia lo que se cobra.
-      var duffelCheckout = offer.provider === 'duffel' && priceKnown
-        ? '<button type="button" class="btn btn-secondary flight-buy-link" data-checkout-flight="' + esc(offer.id) + '"' +
-          ' data-checkout-price="' + esc(offer.price_usd) + '"' +
-          ' data-checkout-airline="' + esc(offer.airline) + '"' +
-          ' data-checkout-origin="' + esc((offer.departure_airport || {}).code || '') + '"' +
-          ' data-checkout-destination="' + esc((offer.arrival_airport || {}).code || '') + '"' +
-          ' data-checkout-departure="' + esc(String(offer.departure || '').slice(0, 10)) + '"' +
-          ' data-checkout-return="' + esc(String(offer.return_departure || '').slice(0, 10)) + '"' +
-          ' data-checkout-passengers="' + esc(String((offer.passenger_ids || []).length || 1)) + '">Reservar y pagar</button>'
+      // El vuelo NO se vende acá: SerpAPI devuelve precios de búsqueda y un
+      // link, no una oferta que reserving. El botón lleva a Google Flights con
+      // la búsqueda ya armada, que es donde el usuario termina comprando.
+      var bookLink = offer.book_url
+        ? '<a class="btn btn-secondary flight-buy-link" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver y reservar en Google Flights</a>'
         : '';
-      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + agencyLabel + cabinBadge + stageBadge + '</div>' +
+      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + cabinBadge + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
-        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="Esta tarifa no está disponible en USD para sumarla al presupuesto."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'No convertible a US$')) + '</button>' + duffelCheckout + '</div></article>';
+        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="No pudimos obtener un precio en USD para esta opción."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'Sin precio en USD')) + '</button>' + bookLink + '</div></article>';
     }).join('') + '</div>';
   }
   function searchFlights(meta, section) {
@@ -2939,7 +2918,7 @@
     if (!box || section.getAttribute('data-flight-requested') === '1') return;
     section.setAttribute('data-flight-requested', '1');
     // Identidad de esta búsqueda: si el usuario abre otra propuesta mientras
-    // Duffel responde, la respuesta vieja se descarta en vez de pisar el
+    // el buscador responde, la respuesta vieja se descarta en vez de pisar el
     // presupuesto de la nueva. Se aborta además la petición en vuelo para no
     // gastar cuota de un resultado que nadie va a ver.
     var requestId = ++flightRequestId;
@@ -3206,6 +3185,145 @@
       return '<button type="button" data-transport-mode="' + mode.value + '" aria-pressed="' + (mode.value === current ? 'true' : 'false') + '">' + esc(mode.label) + '</button>';
     }).join('');
   }
+  /*
+   * Barras del calendario de precios. `realFlight` en un punto dice que el
+   * total de esa fecha viene de precios de vuelo reales y no del modelo: la
+   * barra real se dibuja con otra tinta y la etiqueta lo aclara.
+   *
+   * La altura se normaliza contra el mínimo y el máximo del conjunto. Cuando
+   * todos los totales son iguales (mx === mn) se usan alturas medias en vez de
+   * dividir por cero, que devolvía NaN y dejaba las barras sin alto.
+   */
+  function tipsSectionHtml(data) {
+    var out = '<section class="sec" data-tips-section><h2>Dónde podés ahorrar</h2><p class="sub">Comparamos fechas, rutas y alojamiento con la propuesta principal.</p><div class="panel">';
+    if (data.tips && data.tips.length) {
+      out += data.tips.map(function (t) {
+        var title = t.title, text = t.text, btn = '';
+        if (t.kind === 'fecha') {
+          var n = Math.abs(t.shift);
+          title = 'Salí el ' + dLong(parse(t.dep));
+          text = n + (n === 1 ? ' día ' : ' días ') + (t.shift < 0 ? 'antes' : 'después') + ', con la misma cantidad de noches.';
+          btn = '<button type="button" class="apply" data-shift="' + t.shift + '">Usar estas fechas</button>';
+        }
+        return '<div class="tip"><div class="save">−' + money(t.save) + '</div><div><h4>' + esc(title) + '</h4><p>' + esc(text) + '</p>' + btn + '</div></div>';
+      }).join('');
+    } else {
+      out += '<p style="margin:0">Con estas fechas y esta ruta ya estás en una muy buena combinación. Probá con otro destino o cambiá el presupuesto.</p>';
+    }
+    return out + '</div></section>';
+  }
+
+  /*
+   * Recalcula el bloque de ahorro con la serie ya actualizada.
+   *
+   * El tip de "salí el día X y ahorrá $Y" sale del mínimo de la serie, así que
+   * con precios reales el ahorro puede ser distinto al estimado. Dejarlo viejo
+   * haría que el gráfico dijera una cosa y el tip otra.
+   *
+   * Se replica la regla de `tipsFor()` del modelo (umbral de US$15) para no
+   * tener que volver a pedir la cotización completa por un bloque de texto.
+   */
+  function renderTips(data) {
+    var host = document.querySelector('[data-tips-section]');
+    if (!host || !data || !data.series || !data.series.length) return;
+    var list = byId(normalizeLocalTransportInList(data), data.recId) || (data.list || [])[0];
+    if (!list) return;
+    var best = null;
+    data.series.forEach(function (x) {
+      if (typeof x.total !== 'number' || !isFinite(x.total)) return;
+      if (!best || x.total < best.total) best = x;
+    });
+    var tips = [];
+    if (best && best.shift !== 0 && list.total - best.total >= 15) {
+      tips.push({ kind: 'fecha', save: list.total - best.total, shift: best.shift, dep: best.dep });
+    }
+    data.tips = tips;
+    host.outerHTML = tipsSectionHtml(data);
+  }
+
+  function priceChartBars(series) {
+    var list = Array.isArray(series) ? series : [];
+    if (!list.length) return '';
+    var mn = Infinity, mx = -Infinity, best = null;
+    list.forEach(function (x) {
+      if (typeof x.total !== 'number' || !isFinite(x.total)) return;
+      if (x.total < mn) { mn = x.total; best = x; }
+      if (x.total > mx) mx = x.total;
+    });
+    if (!isFinite(mn)) return '';
+    return list.map(function (x) {
+      var total = typeof x.total === 'number' && isFinite(x.total) ? x.total : mn;
+      var ht = mx === mn ? 82 : 34 + 96 * ((total - mn) / (mx - mn));
+      var d = parse(x.dep);
+      var cls = 'bar' + (x.shift === 0 ? ' cur' : '') + (x === best ? ' best' : '') + (x.realFlight ? ' real' : ' est');
+      var base = 'Salir el ' + dLong(d) + ': ' + money(total) + (x.realFlight ? ' (precio real)' : ' (estimado)');
+      return '<button type="button" class="' + cls + '" data-shift="' + x.shift + '" aria-label="' + esc(base) + '">' +
+        '<span class="v">' + moneySolo(total) + '</span><span class="b" style="height:' + ht.toFixed(1) + 'px"></span>' +
+        '<span class="d"><b>' + d.getDate() + '</b>' + d.toLocaleDateString('es-UY', { month: 'short' }) + '</span></button>';
+    }).join('');
+  }
+
+  /*
+   * Pide los precios reales de las fechas vecinas y reemplaza las barras.
+   *
+   * Son 15 búsquedas, o sea 15 créditos, así que el pedido se hace una sola vez
+   * por propuesta y nunca se reintenta solo: si falla, el gráfico se queda con
+   * la estimación y el aviso lo dice. El server ya cachea por punto, así que
+   * volver a esta pantalla no vuelve a cobrar.
+   */
+  function loadPriceCalendar(data) {
+    if (!data || !data.meta || data.__calendarAsked) return;
+    var meta = data.meta;
+    if (!meta.dest || !meta.dep || !meta.ret || !meta.pax) return;
+    data.__calendarAsked = true;
+
+    var query = new URLSearchParams({
+      dest: meta.dest.key, dep: meta.dep, ret: meta.ret,
+      pax: String(meta.pax), style: meta.style || S.style || 'eq',
+      origin: meta.origin || S.origin || 'MVD'
+    });
+    var box = document.querySelector('[data-calendar-chart]');
+    if (!box) return;
+    fetch('/api/vuelos/calendario?' + query.toString(), { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (result) {
+        // El proposal abierto puede haber cambiado mientras volaba la respuesta.
+        if (lastData !== data) return;
+        var puntos = result && Array.isArray(result.puntos) ? result.puntos : [];
+        if (!puntos.length) return;
+        var byShift = {};
+        puntos.forEach(function (p) { byShift[p.shift] = p; });
+
+        var real = 0;
+        data.series = data.series.map(function (x) {
+          var punto = byShift[x.shift];
+          if (!punto || !punto.real || !punto.pp) return x;
+          // El server ya devino el total recalculado con el vuelo real, pero el
+          // navegador no confía en eso para pintar: rehace la misma cuenta.
+          // Si `estFlightBase` faltara, se descarta el punto en vez de sumar un
+          // vuelo sobre un total que ya lo incluía.
+          if (typeof x.estFlightBase !== 'number') return x;
+          var total = Math.max(1, Math.round(x.total - x.estFlightBase + punto.pp * meta.pax));
+          real += 1;
+          return Object.assign({}, x, { total: total, realFlight: true, flightPP: punto.pp });
+        });
+        if (!real) return;
+        box.innerHTML = priceChartBars(data.series);
+
+        var note = document.querySelector('[data-calendar-note]');
+        if (note) {
+          note.textContent = 'Costo total en ' + monedaActiva().simbolo + ' si salís antes o después, con las mismas noches. ' +
+            real + ' de ' + data.series.length + ' fechas con precio de vuelo real' +
+            (real < data.series.length ? '; las demás son estimaciones.' : '.') +
+            ' Tocá una barra para usarla.';
+        }
+        // Se redibuja el "dónde podés ahorrar" porque el ahorro depende del
+        // mínimo de la serie, que con precios reales puede haber cambiado.
+        renderTips(data);
+      })
+      .catch(function () { /* el gráfico estimado ya está en pantalla */ });
+  }
+
   function render(data) {
     lastData = data;
     S.hotelType = data.meta.hotelType || S.hotelType;
@@ -3295,36 +3413,18 @@
     var breakdownSection = '<section class="sec"><h2>A dónde se va la plata</h2><p class="sub">El costo real incluye mucho más que el pasaje.</p>' +
       '<div class="panel"><div class="stack" role="img" aria-label="Distribución del costo">' + stack + '</div><div class="leg">' + leg + '</div></div></section>';
 
-    h += '<section class="sec"><h2>Dónde podés ahorrar</h2><p class="sub">Comparamos fechas, rutas y alojamiento con la propuesta principal.</p><div class="panel">';
-    if (data.tips.length) {
-      h += data.tips.map(function (t) {
-        var title = t.title, text = t.text, btn = '';
-        if (t.kind === 'fecha') {
-          var n = Math.abs(t.shift);
-          title = 'Salí el ' + dLong(parse(t.dep));
-          text = n + (n === 1 ? ' día ' : ' días ') + (t.shift < 0 ? 'antes' : 'después') + ', con la misma cantidad de noches.';
-          btn = '<button type="button" class="apply" data-shift="' + t.shift + '">Usar estas fechas</button>';
-        }
-        return '<div class="tip"><div class="save">−' + money(t.save) + '</div><div><h4>' + esc(title) + '</h4><p>' + esc(text) + '</p>' + btn + '</div></div>';
-      }).join('');
-    } else {
-      h += '<p style="margin:0">Con estas fechas y esta ruta ya estás en una muy buena combinación. Probá con otro destino o cambiá el presupuesto.</p>';
-    }
-    h += '</div></section>';
+    h += tipsSectionHtml(data);
 
-    var mn = Infinity, mx = -Infinity, bestS = null;
-    data.series.forEach(function (x) { if (x.total < mn) { mn = x.total; bestS = x; } if (x.total > mx) mx = x.total; });
-    var bars = data.series.map(function (x) {
-      var ht = 34 + 96 * ((x.total - mn) / ((mx - mn) || 1));
-      var d = parse(x.dep);
-      var cls = 'bar' + (x.shift === 0 ? ' cur' : '') + (x === bestS ? ' best' : '');
-      return '<button type="button" class="' + cls + '" data-shift="' + x.shift + '" aria-label="Salir el ' + dLong(d) + ': ' + money(x.total) + '">' +
-        '<span class="v">' + moneySolo(x.total) + '</span><span class="b" style="height:' + ht + 'px"></span>' +
-        '<span class="d"><b>' + d.getDate() + '</b>' + d.toLocaleDateString('es-UY', { month: 'short' }) + '</span></button>';
-    }).join('');
-    h += '<section class="sec"><h2>Mismo viaje, otra fecha</h2><p class="sub">Costo total en ' + esc(monedaActiva().simbolo) + ' si salís antes o después, con las mismas noches. Es una estimación a partir del precio de tu fecha. Tocá una barra para usarla.</p>' +
-      '<div class="panel"><div class="chart">' + bars + '</div>' +
-      '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata</span><span>Otras fechas</span></div></div></section>';
+    // ---- "Mismo viaje, otra fecha"
+    // Las barras arrancan estimadas (así se ven al instante) y se reemplazan por
+    // precios reales cuando vuelve /api/vuelos/calendario. Se distinguen con
+    // `realFlight`: una barra real sin marca sería una promesa que la app no
+    // puede cumplir, y el gráfico dice textualmente que es una estimación.
+    var calendarBox = '<div class="chart" data-calendar-chart>' + priceChartBars(data.series) + '</div>';
+    var realCount = data.series.filter(function (x) { return x.realFlight; }).length;
+    h += '<section class="sec"><h2>Mismo viaje, otra fecha</h2><p class="sub" data-calendar-note>Costo total en ' + esc(monedaActiva().simbolo) + ' si salís antes o después, con las mismas noches. Tocá una barra para usarla.</p>' +
+      '<div class="panel">' + calendarBox +
+      '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata</span><span' + (realCount === data.series.length ? ' class="l3"' : '') + '>Otras fechas</span></div></div></section>';
 
     // La tarjeta tiene dos acciones y dos superficies distintas: "Ver propuesta"
     // abre el detalle completo y "Ver desglose" despliega el reparto por categoría
@@ -3366,6 +3466,10 @@
     var ch = el.querySelector('.chart'), cu = el.querySelector('.bar.cur');
     if (ch && cu) ch.scrollLeft = cu.offsetLeft - ch.clientWidth / 2 + cu.offsetWidth / 2;
     if (pendingDestinationScroll) window.setTimeout(scrollToDestinationResults, 50);
+    // Los precios reales de las fechas vecinas llegan después de que la propuesta
+    // ya está en pantalla: son 15 búsquedas y no tiene sentido hacerlas esperar
+    // al resultado principal, que es lo que el usuario vino a ver.
+    loadPriceCalendar(data);
     // Le avisa a pwa.js que ya hay algo que ver. El prompt de instalación se
     // pide por intención, no por tiempo: hasta acá no tenía sentido ofrecerlo.
     try { window.dispatchEvent(new CustomEvent('cuantosale:resultados')); } catch (e) { /* sin CustomEvent */ }
@@ -4690,35 +4794,16 @@
         var offerId = selectedFlight.getAttribute('data-select-flight');
         var state = getFlightSelectionState();
         var section = selectedFlight.closest('.flight-search');
-        if (state && detailState && detailState.flightOffers) {
-          var offer = detailState.flightOffers.find(function (item) { return String(item.id) === String(offerId); });
-          var roundTrip = offer && offer.trip_type === 'round_trip';
-          if (roundTrip) {
-            if (state.stage !== 'inbound' && state.stage !== 'done') {
-              state.stage = 'inbound';
-              state.outboundId = offerId;
-              state.inboundId = null;
-              section.setAttribute('data-flight-step', 'inbound');
-              renderFlightOffers(section.querySelector('.flight-results'), { offers: detailState.flightOffers });
-              section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              return;
-            }
-            if (state.stage === 'inbound' && String(state.outboundId) === String(offerId)) {
-              state.inboundId = offerId;
-              state.stage = 'done';
-              section.setAttribute('data-flight-step', 'done');
-            } else {
-              return;
-            }
-            persistSelectedOffer(selectedFlight);
-            actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));
-            renderFlightOffers(section.querySelector('.flight-results'), { offers: detailState.flightOffers });
-            return;
-          }
+        // Una sola etapa: con SerpAPI el precio que trae la tarjeta ya es el
+        // total de ida y vuelta, así que no hay una segunda elección que hacer.
+        // Antes el flujo era elegir ida y después vuelta porque Duffel devolvía
+        // los tramos por separado; contra esta API ese segundo paso no devolvía
+        // nada y solo costaba un crédito extra.
+        if (state) {
           state.stage = 'done';
           state.outboundId = offerId;
           state.inboundId = null;
-          section.setAttribute('data-flight-step', 'done');
+          if (section) section.setAttribute('data-flight-step', 'done');
         }
         persistSelectedOffer(selectedFlight);
         actualizarPasajes(section, Number(selectedFlight.getAttribute('data-offer-price')), selectedFlight.getAttribute('data-offer-airline'));

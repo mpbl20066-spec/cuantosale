@@ -265,6 +265,14 @@ grant execute on function public.waitlist_signup(text, text) to anon, authentica
 
 -- Órdenes de vuelo cobradas con tarjeta a través de Duffel.
 --
+-- SIN USO desde que los vuelos se consultan con SerpAPI. SerpAPI devuelve
+-- precios y un link a Google Flights: no emite boletos, no cobra y no hay PNR,
+-- así que ya no se crea ninguna orden de vuelo desde la app. La tabla queda
+-- como está a propósito: borrarla es una operación destructiva y hay que
+-- confirmar antes contra la base real que no quedó ninguna fila que valga.
+-- Si se confirma, el drop es:
+--   drop table if exists public.vuelos_ordenes cascade;  -- más el nombre real
+--
 -- Es distinta de reservas_hoteles: aquella es de Travelpayouts (4-5% sobre
 -- reservas de Booking, que se cobran 60-90 días después y llegan sin nuestro
 -- user_id). Acá el cobro es inmediato y sincrónico contra nuestro propio

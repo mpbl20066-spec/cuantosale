@@ -13,6 +13,11 @@ var APP_SHELL = [
   '/app',
   '/manifest.json',
   '/pwa.js',
+  //Va sin '?v=' y por eso sí va en el precache: son 4 KB de costos por destino
+  // que app.js necesita apenas carga, y si no están el navegador los pide por
+  // red y la primera pantalla sin señal no puede armar las tarjetas. Se
+  // refresca sola cuando cambia el CACHE_NAME de arriba.
+  '/daily-costs.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',

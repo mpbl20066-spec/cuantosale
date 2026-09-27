@@ -5,7 +5,7 @@
  *   node server.js            -> http://localhost:3000
  *
  * Variables (en el entorno o en un archivo .env):
- *   DUFFEL_API_KEY (o DUFFEL_ACCESS_TOKEN) para búsquedas reales de vuelos.
+ *   SERPAPI_API_KEY         para búsquedas reales de vuelos (Google Flights).
  *   PORT                  puerto (por defecto 3000)
  *   BOOKING_API_KEY y BOOKING_API_HOST para la API de alojamientos.
  *   RATE_LIMIT_PER_MIN    pedidos por minuto por IP a /api/cotizar (por defecto 30)
@@ -27,7 +27,11 @@ function loadEnv() {
 loadEnv();
 
 const model = require('./lib/model');
-const duffel = require('./lib/providers/duffel');
+// Vuelos reales. El agregador es el único que habla con SerpAPI: ahí viven el
+// cache, el dedupe de pedidos simultáneos y la pausa cuando se acaban los
+// créditos del mes. Si el server llamara al provider directo, cada endpoint
+// pagaría su propio precio por la misma búsqueda.
+const flightProviders = require('./lib/providers');
 // Convierte los links de Booking en links de Travelpayouts para que las
 // reservas generen comision. Es independiente de los precios: la API de
 // precios (RapidAPI o partner) y la de afiliados son dos cuentas distintas.
@@ -667,7 +671,7 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
   // Para destinos donde ir en auto es una alternativa real (Florianópolis hacia
   // el sur), se suma como una propuesta comparable más en "Todas las
   // propuestas" -- sin tocar la recomendación, que sigue anclada a vuelo/bus
-  // para no alterar el resto del flujo (cotización real de Duffel, transfer
+  // para no alterar el resto del flujo (cotización real de vuelos, transfer
   // desde el aeropuerto, etc.), pensado para llegar en avión o bus.
   const roadtripSameTier = Array.isArray(result.roadtripList)
     ? result.roadtripList.filter(function (proposal) { return proposal.mode === 'auto' && proposal.ti === tier; })
@@ -734,7 +738,7 @@ function transferConfig(destKey, pax) {
  * Cada tipo de pedido lleva su propio cubo (el prefijo de la clave) por una
  * razón práctica: /api/cotizar-todos y /api/destinos-destacados son cálculo
  * local y no cuestan nada, mientras que /api/cotizar, /api/hoteles y
- * /api/vuelos/buscar gastan cuota de Duffel y de Booking. Con un cubo
+ * /api/vuelos/calendario gastan cuota de SerpAPI y de Booking. Con un cubo
  * compartido, alguien que golpeara los endpoints gratuitos podía agotarle el
  * cupo de cotizar a un usuario legítimo.
  *
@@ -837,98 +841,6 @@ function readJson(req, maxBytes) {
   });
 }
 
-// ---------------------------------------------------------------- checkout
-// Cuerpo crudo: la firma HMAC del webhook se calcula sobre los bytes exactos
-// que envió Duffel, así que no se puede pasar por JSON.parse antes de verificar.
-function readRaw(req, maxBytes) {
-  maxBytes = maxBytes || 65536;
-  return new Promise(function (resolve, reject) {
-    const chunks = [];
-    let size = 0;
-    req.on('data', function (chunk) {
-      size += chunk.length;
-      if (size > maxBytes) { const e = new Error('Cuerpo demasiado grande.'); e.status = 413; reject(e); req.destroy(); return; }
-      chunks.push(chunk);
-    });
-    req.on('end', function () { resolve(Buffer.concat(chunks)); });
-    req.on('error', reject);
-  });
-}
-
-// El client key habilita el formulario de tarjeta PCI de Duffel. No es el
-// access token, así que puede viajar al browser. Se cachea unos minutos para
-// no gastarse una llamada de Duffel en cada apertura del checkout.
-let clientKeyCache = { value: null, expiresAt: 0 };
-async function duffelClientKey(req, res) {
-  if (!duffel.isConfigured()) return sendJson(res, 503, { error: 'La reserva de vuelos todavía no está disponible.' });
-  if (clientKeyCache.value && clientKeyCache.expiresAt > Date.now()) {
-    return sendJson(res, 200, { clientKey: clientKeyCache.value });
-  }
-  const key = await duffel.createClientKey();
-  clientKeyCache = { value: key, expiresAt: Date.now() + 10 * 60 * 1000 };
-  sendJson(res, 200, { clientKey: key });
-}
-
-// Crea la orden en Duffel y la cobra. El importe lo calcula el server leyendo
-// la oferta otra vez: el browser solo manda el id de la oferta y los datos de
-// los pasajeros, nunca un precio.
-async function crearOrdenVuelo(req, res, body) {
-  if (!duffel.isConfigured()) return sendJson(res, 503, { error: 'La reserva de vuelos todavía no está disponible.' });
-  if (limited('orden-vuelo:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados intentos seguidos. Esperá un minuto y probá de nuevo.' });
-  body = body && typeof body === 'object' ? body : {};
-  const result = await duffel.createOrder({
-    offerId: body.offerId,
-    cardId: body.cardId,
-    threeDSecureSessionId: body.threeDSecureSessionId,
-    passengers: body.passengers
-  });
-  sendJson(res, 201, {
-    orderId: result.order_id,
-    bookingReference: result.booking_reference,
-    status: result.status,
-    charged: result.quote.charge_amount,
-    currency: result.quote.currency,
-    cost: result.quote.cost,
-    markupAmount: result.quote.markup_amount,
-    markupPercent: result.quote.markup_percent
-  });
-}
-
-// Webhook de Duffel. NO es crítico para cobrar: la orden se crea de a cara en
-// crearOrdenVuelo y devuelve el resultado de forma síncrona. Esto solo mantiene
-// el estado alineado si el vuelo se cancela o modifica después.
-//
-// El esquema de firma de Duffel no está documentado públicamente con certeza,
-// así que el nombre del header y el algoritmo son configurables. Si no hay
-// secreto configurado el endpoint se cierra: es preferible no sincronizar a
-// aceptar pedidos de cualquiera que adivine la URL.
-function duffelWebhook(req, res) {
-  const secret = String(process.env.DUFFEL_WEBHOOK_SECRET || '');
-  if (!secret) return sendJson(res, 503, { error: 'Webhooks deshabilitados.' });
-  const headerName = String(process.env.DUFFEL_WEBHOOK_SIGNATURE_HEADER || 'x-duffel-signature').toLowerCase();
-  const provided = String(req.headers[headerName] || '');
-  return readRaw(req).then(function (raw) {
-    const expected = crypto.createHmac('sha256', secret).update(raw).digest('hex');
-    const a = Buffer.from(provided);
-    const b = Buffer.from(expected);
-    // timingSafeEqual exige mismo largo: comparar sin isso filtra el largo real.
-    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
-      return sendJson(res, 401, { error: 'Firma inválida.' });
-    }
-    let event;
-    try { event = JSON.parse(raw.toString('utf8') || '{}'); } catch (e) { return sendJson(res, 400, { error: 'JSON inválido.' }); }
-    const data = event && event.data || {};
-    console.log('[duffel-webhook]', JSON.stringify({
-      type: String(event.type || data.type || ''),
-      order: String(data.id || ''),
-      status: String(data.status || data.identifier || '')
-    }));
-    sendJson(res, 200, { received: true });
-  }).catch(function (e) {
-    sendJson(res, e.status || 500, { error: e.message || 'No se pudo procesar el webhook.' });
-  });
-}
-
 function registrarTransferencia(req, res, body) {
   body = body && typeof body === 'object' ? body : {};
   const amount = Number(body.amount);
@@ -942,7 +854,24 @@ function registrarTransferencia(req, res, body) {
   return sendJson(res, 201, { ok: true, status: 'Pendiente de verificación', message: '¡Reserva de traslado registrada con éxito! En menos de 2 horas validaremos tu comprobante y te enviaremos el voucher definitivo por correo electrónico.' });
 }
 
+/*
+ * Precios de las fechas vecinas del grafico "mismo viaje, otra fecha".
+ *
+ * Va aparte de /api/cotizar a proposito: son 15 busquedas, no una. Encima es
+ * trabajo desperdiciado si el usuario nunca mira el grafico, asi que el cliente
+ * lo pide aparte y solo cuando decide pedirlo.
+ */
+/*
+ * Browse de vuelos, en una sola búsqueda.
+ *
+ * Se implementó en dos etapas al principio (elegir ida, después vuelta, con un
+ * `departure_token` entre medio) porque así funcionaba con Duffel. Contra
+ * SerpAPI no: la segunda llamada devuelve cero resultados y, además, no hacía
+ * falta, porque el precio de la primera ya viene como total de ida y vuelta.
+ * El browse quedó en un paso y cuesta un crédito.
+ */
 async function buscarVuelos(req, res, body) {
+  if (!flightProviders.isLive()) return sendJson(res, 503, { provider: 'serpapi', offers: [], error: 'La búsqueda de vuelos no está disponible en este momento.' });
   if (limited('vuelos:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
   body = body && typeof body === 'object' ? body : {};
   const origin = String(body.origen || '').toUpperCase();
@@ -950,49 +879,104 @@ async function buscarVuelos(req, res, body) {
   const date = String(body.fecha_ida || '');
   const returnDate = String(body.fecha_vuelta || '');
   const passengers = Number(body.pasajeros);
-  const style = ['ahorro', 'eq', 'comodo'].includes(String(body.style || '').toLowerCase()) ? String(body.style).toLowerCase() : 'eq';
-  if (!['MVD', 'PDP'].includes(origin) || !destination || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) || (returnDate && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
+  const style = ['ahorro', 'eq', 'comodo'].indexOf(String(body.style || '').toLowerCase()) >= 0 ? String(body.style).toLowerCase() : 'eq';
+  if (['MVD', 'PDP'].indexOf(origin) < 0 || !destination || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) || (returnDate && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
+
   try {
-    const cabins = duffel.styleCabins(style);
-    const cabinResults = await Promise.all(cabins.map(function (cabinClass) {
-      return duffel.searchFlights({ origin: origin, destination: destination, departureDate: date, returnDate: returnDate, passengers: passengers, cabinClass: cabinClass })
-        .then(function (results) { return { offers: results, error: null }; })
-        .catch(function (error) { return { offers: [], error: error }; });
-    }));
-    let offers = cabinResults.reduce(function (all, result) { return all.concat(result.offers); }, []);
-    let providerErrors = cabinResults.map(function (result) { return result.error; }).filter(Boolean);
-    let usedFallback = false;
-    if (style === 'comodo' && !offers.length) {
-      usedFallback = true;
-      try {
-        offers = await duffel.searchFlights({ origin: origin, destination: destination, departureDate: date, returnDate: returnDate, passengers: passengers, cabinClass: 'economy' });
-      } catch (error) {
-        providerErrors.push(error);
-      }
-    }
-    if (!offers.length && providerErrors.length) throw providerErrors[0];
-    offers.sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
-    return sendJson(res, 200, { provider: 'duffel', origin: origin, destination: destination, style: style, cabin_fallback: usedFallback, offers: offers, error: offers.length ? null : 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.' });
+    const result = await flightProviders.searchOffers({
+      origin: origin, destination: destination,
+      departureDate: date, returnDate: returnDate,
+      passengers: passengers, style: style
+    });
+    return sendJson(res, 200, {
+      provider: 'serpapi', origin: origin, destination: destination,
+      // El precio de cada tarjeta ya es el TOTAL de ida y vuelta, no solo la
+      // ida: la API lo marca como `type: "Round trip"` y escala con la cantidad
+      // de pasajeros (1 adulto = US$ 249, 2 = US$ 499 en la misma ruta). Por
+      // eso no hace falta una segunda etapa para conocer el total, y el browse
+      // cuesta un solo crédito.
+      round_trip: !!returnDate,
+      offers: result.offers,
+      error: result.offers.length ? null : 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.'
+    });
   } catch (e) {
-    console.error('[Duffel vuelos]', e.message);
-    return sendJson(res, e.status || 502, { provider: 'duffel', offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
+    console.error('[browse vuelos]', e.message);
+    return sendJson(res, e.status || 502, { provider: 'serpapi', offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
   }
 }
 
-// Una sola tarifa real de Duffel (1 pasajero, ida y vuelta) para anclar la
-// propuesta recomendada y, con ella, toda la serie de "otra fecha" (que ya
-// se calcula como el total recomendado + la variación estimada del modelo).
-// Evita las N consultas que implicaría cotizar cada fecha o cada destino.
+async function calendarioVuelos(req, res, url) {
+  // Se valida antes de mirar si hay credenciales: un destino inválido es un 400
+  // siempre, tenga o no key puesta. Si se invirtiera el orden, con la app sin
+  // key un destino garbage devolvería 200 y la respuesta no significaría nada.
+  const dest = String(url.searchParams.get('dest') || '').toLowerCase();
+  const destCfg = model.DEST[dest];
+  if (!destCfg || !destCfg.modes.avion_mvd) return sendJson(res, 400, { error: 'Elegí un destino disponible en el buscador.' });
+  const origin = String(url.searchParams.get('origin') || 'MVD').toUpperCase();
+  if (['MVD', 'PDP'].indexOf(origin) < 0) return sendJson(res, 400, { error: 'El aeropuerto de salida debe ser MVD o PDP.' });
+  const pax = Number(url.searchParams.get('pax'));
+  if (!(pax >= 1 && pax <= 10)) return sendJson(res, 400, { error: 'La cantidad de viajeros tiene que ser entre 1 y 10.' });
+  const styleRaw = String(url.searchParams.get('style') || '').toLowerCase();
+  const style = ['ahorro', 'eq', 'comodo'].indexOf(styleRaw) >= 0 ? styleRaw : 'eq';
+  const dep = String(url.searchParams.get('dep') || '');
+  const ret = String(url.searchParams.get('ret') || '');
+  if (!model.parse(dep) || !model.parse(ret)) return sendJson(res, 400, { error: 'Las fechas no son válidas.' });
+  if (!flightProviders.isLive()) return sendJson(res, 200, { puntos: [], real: 0, estimados: 0, configured: false });
+  if (limited('calendario:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
+
+  // Las fechas salen de la misma función que usa /api/cotizar, así que el
+  // calendario del server y el del cliente no pueden mostrar fechas distintas.
+  const points = model.seriesDates(model.parse(dep), model.parse(ret), model.getToday());
+  if (!points.length) return sendJson(res, 200, { puntos: [], real: 0, estimados: 0, configured: true });
+
+  const calendar = await flightProviders.getCalendar(origin, airportFor(dest), points, style, pax);
+  sendJson(res, 200, Object.assign({
+    configured: true, origin: origin, destination: airportFor(dest),
+    dep: dep, ret: ret, pax: pax, style: style
+  }, calendar));
+}
+
+/*
+ * Aeroluerto de un destino.
+ *
+ * OJO con esto: `model.DEST[...].iata` a veces es el código de la CIUDAD y no
+ * del aeropuerto. `rio` vale "RIO" y `sao` vale "SAO", que no son aeropuertos:
+ * son áreas metropolitanas. Con Duffel no pasaba nada porque resolvía el lugar
+ * por nombre, pero SerpAPI busca por código de aeropuerto y con "RIO" no
+ * encuentra nada: devuelve una respuesta vacía y SIN error, así que la app caía
+ * a estimado en silencio. Rio y São Paulo, que son los dos destinos más
+ * buscados, nunca mostraban precio real por esto.
+ *
+ * `AIR_DESTINATIONS` sí tiene los códigos de aeropuerto correctos (GIG, GRU), y
+ * es la misma tabla que ya usa el browse. Por eso se resuelve por ahí primero.
+ */
+function airportFor(destKey) {
+  const key = String(destKey || '').toLowerCase();
+  return AIR_DESTINATIONS[key] || (model.DEST[key] && model.DEST[key].iata) || '';
+}
+
+/*
+ * Tarifa real por pasajero para anclar la propuesta recomendada. La cache y el
+ * dedupe de pedidos simultaneos viven en el agregador (`lib/providers`), no
+ * aca: si vivieran en el server, el endpoint del calendario pagaria su propia
+ * tarifa por la misma fecha.
+ *
+ * `dep` y `ret` llegan como Date desde `model.validate()`, y SerpAPI exige
+ * `YYYY-MM-DD`: mandarle un ISO con hora y minutos (que es lo que sale de
+ * `toISOString()`) devuelve 400 y la app cae a estimado sin avisar. Por eso se
+ * normalizan acá y no se confía en que el llamador traiga el formato correcto.
+ */
+function isoDate(value) {
+  if (value instanceof Date) return Number.isFinite(value.getTime()) ? value.toISOString().slice(0, 10) : '';
+  const raw = String(value || '').trim();
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : '';
+}
+
 async function getLiveFlightQuote(destinationIata, dep, ret, style, origin) {
-  if (!duffel.isConfigured()) return null;
-  const cabinClass = duffel.styleCabins(style)[0] || 'economy';
-  const offers = await duffel.searchFlights({ origin: origin || 'MVD', destination: destinationIata, departureDate: dep, returnDate: ret, passengers: 1, cabinClass: cabinClass });
-  const priced = offers.filter(function (offer) { return Number.isFinite(offer.price_usd) && offer.price_usd > 0; });
-  if (!priced.length) return null;
-  const cheapest = priced.reduce(function (min, offer) { return offer.price_usd < min.price_usd ? offer : min; });
-  return { pp: cheapest.price_usd, airline: cheapest.airline || null, exact: true, foundDep: dep, foundRet: ret, source: 'duffel' };
+  return flightProviders.getQuote(origin || 'MVD', destinationIata, isoDate(dep), isoDate(ret), style);
 }
 
 async function cotizar(req, res, url) {
@@ -1010,18 +994,18 @@ async function cotizar(req, res, url) {
   v.S.origin = origin;
   const subcategory = String(url.searchParams.get('subcategory') || '').slice(0, 100);
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
-  // La pantalla inicial anda con una tarifa real de Duffel para la ruta/fechas
-  // elegidas cuando está disponible; si Duffel falla o no está configurado,
+  // La pantalla inicial anda con una tarifa real de vuelo para la ruta/fechas
+  // elegidas cuando está disponible; si el buscador falla o no está configurado,
   // se cae de vuelta a la estimación local sin romper la respuesta.
   let quotes = {};
   let liveQuoteApplied = false;
   const destCfgForQuote = model.DEST[v.S.dest];
   if (v.S.transport === 'flight' && destCfgForQuote && destCfgForQuote.modes.avion_mvd) {
     try {
-      const quote = await getLiveFlightQuote(destCfgForQuote.iata, v.dep, v.ret, v.S.style, origin);
+      const quote = await getLiveFlightQuote(airportFor(v.S.dest), v.dep, v.ret, v.S.style, origin);
       if (quote) { quotes = { avion_mvd: quote }; liveQuoteApplied = true; }
     } catch (e) {
-      console.error('[cotizar] tarifa real de Duffel no disponible:', e.message);
+      console.error('[cotizar] tarifa real de vuelo no disponible:', e.message);
     }
   }
   const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), subcategory, v.S.style);
@@ -1223,7 +1207,7 @@ function featuredPriceItems(req, res, url) {
 // vista previa del link (que no manda credenciales) saldría como "Acceso
 // restringido" en vez de mostrar el nombre del viaje. Queda abierto, y no
 // contradice el motivo del candado: el riesgo era /api/cotizar y /api/hoteles
-// respondiendo sin contraseña y quemando cuota de Duffel y Booking, y /grupo no
+// respondiendo sin contraseña y quemando cuota de SerpAPI y de Booking, y /grupo no
 // toca ninguno de los dos (sólo /api/config, que ya es público, y Supabase
 // directo con la anon key). El acceso a los datos de un grupo lo protege el
 // uuid de la URL, no el candado: es el mismo modelo que ya estaba antes.
@@ -1294,11 +1278,11 @@ function prelaunchAuthorized(req) {
  */
 const PRELAUNCH_PUBLIC_API = new Set(['/api/config']);
 
-// Rutas que NO pasan por el candado de pre-lanzamiento. El webhook queda
-// fuera porque lo llama Duffel desde sus servidores, no el navegador: si
-// exigiera el user/pass de /app, nunca llegaría. No es un hueco de seguridad
-// porque duffelWebhook() rechaza el pedido salvo que la firma HMAC cuadre.
-const PRELAUNCH_EXEMPT = new Set(['/api/duffel/webhook']);
+// Rutas que NO pasan por el candado de pre-lanzamiento. Queda vacío a propósito:
+// el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
+// la app ya no emite boletos. Todos los endpoints de la API, incluido el
+// calendario de vuelos, siguen pidiendo user/pass.
+const PRELAUNCH_EXEMPT = new Set();
 
 function denyPrelaunchJson(res) {
   // Sin WWW-Authenticate a propósito: en una respuesta a un fetch de la app
@@ -1537,7 +1521,7 @@ function handleRequest(req, res) {
     //
     // Sin esto el candado sólo cerraba las páginas: /api/cotizar y /api/hoteles
     // seguían respondiendo 200 sin contraseña y devolvían cotizaciones reales,
-    // consumiendo la cuota de Duffel y de Booking a nombre de cualquiera que
+    // consumiendo la cuota de SerpAPI y de Booking a nombre de cualquiera que
     // supiera la URL.
     if (url.pathname.indexOf('/api/') === 0 && !PRELAUNCH_PUBLIC_API.has(url.pathname) && !PRELAUNCH_EXEMPT.has(url.pathname)) {
       if (!prelaunchAuthorized(req)) return denyPrelaunchJson(res);
@@ -1547,24 +1531,13 @@ function handleRequest(req, res) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la búsqueda.' });
       });
     }
-    if (req.method === 'GET' && url.pathname === '/api/duffel/client-key') {
-      return duffelClientKey(req, res).catch(function (e) {
-        console.error('[duffel-client-key]', e);
-        sendJson(res, e.status || 502, { error: e.message || 'No pudimos preparar el pago.' });
+    if (req.method === 'GET' && url.pathname === '/api/vuelos/calendario') {
+      return calendarioVuelos(req, res, url).catch(function (e) {
+        console.error('[calendario-vuelos]', e.message);
+        // El grafico es una mejora sobre la estimacion, nunca la unica fuente:
+        // si falla, el cliente conserva lo que ya tinha y sigue funcionando.
+        return sendJson(res, 200, { puntos: [], real: 0, estimados: 0, configured: true, error: e.message || 'No pudimos consultar los precios de otras fechas.' });
       });
-    }
-    if (req.method === 'POST' && url.pathname === '/api/duffel/orden') {
-      return readJson(req).then(function (body) { return crearOrdenVuelo(req, res, body); }).catch(function (e) {
-        console.error('[duffel-orden]', e);
-        sendJson(res, e.status || 502, { error: e.message || 'No pudimos completar la reserva.' });
-      });
-    }
-    if (req.method === 'POST' && url.pathname === '/api/duffel/webhook') {
-      return duffelWebhook(req, res);
-    }
-    if (req.method === 'GET' && url.pathname === '/api/vuelos/comprar') {
-      if (limited('vuelos-comprar:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
-      return sendJson(res, 410, { error: 'La reserva de vuelos se gestiona directamente con Duffel.' });
     }
     if (req.method === 'POST' && url.pathname === '/api/traslados/transferencia') {
       return readJson(req, 6 * 1024 * 1024).then(function (body) { return registrarTransferencia(req, res, body); }).catch(function (e) {
@@ -1660,7 +1633,7 @@ function handleRequest(req, res) {
 if (require.main === module) {
   const port = Number(process.env.PORT) || 3000;
   createServer().listen(port, function () {
-    console.log('CuántoSale en http://localhost:' + port + ' (' + (duffel.isConfigured() ? 'búsqueda Duffel configurada' : 'Duffel sin configurar; se mostrará un aviso controlado') + ')');
+    console.log('CuántoSale en http://localhost:' + port + ' (' + (flightProviders.isLive() ? 'precios de vuelo reales via SerpAPI' : 'sin SERPAPI_API_KEY; los vuelos mostraran precios estimados') + ')');
   });
 }
 
@@ -1669,6 +1642,9 @@ module.exports = app;
 // Vercel consume la función `app`; exponer el factory permite levantar un
 // servidor aislado en las pruebas sin alterar el handler desplegado.
 module.exports.createServer = createServer;
+// Expuesto para las pruebas: el destino tiene que resolverse al aeropuerto real
+// y no al código de ciudad, y esa diferencia no se ve desde afuera.
+module.exports.airportFor = airportFor;
 module.exports.hotelRecommendations = hotelRecommendations;
 module.exports.fetchBookingHotels = fetchBookingHotels;
 module.exports.normalizeHotelApiResponse = normalizeHotelApiResponse;

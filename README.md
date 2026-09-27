@@ -12,10 +12,12 @@ cuantosale/
 ├─ lib/
 │  ├─ model.js                Cálculo de costos, propuestas, ahorros y comparador de fechas
 │  └─ providers/
-│     ├─ duffel.js            Búsqueda y normalización de vuelos de Duffel
+│     ├─ index.js             Agregador de vuelos: cache, dedupe y pausa por cuota
+│     ├─ serpapi.js           Vuelos: búsqueda y normalización de Google Flights
 │     ├─ busbud.js            Buses: pendiente (por ahora estimado)
 │     └─ hotels.js            Hoteles: pendiente (por ahora estimado)
 ├─ public/                    La web (index.html, style.css, app.js)
+│  └─ guiAs.js                Contenido de la Guía Secreta, por destino
 ├─ test.js                    Pruebas automáticas
 ├─ .env.example               Plantilla de configuración
 └─ package.json
@@ -27,16 +29,43 @@ cuantosale/
 2. En la carpeta del proyecto: `node server.js`
 3. Abrí http://localhost:3000
 
-Sin `DUFFEL_API_KEY` o `DUFFEL_ACCESS_TOKEN`, el servidor muestra un estado de error controlado en la búsqueda de vuelos; la PWA sigue funcionando con los costos estimados.
+Sin `SERPAPI_API_KEY`, el servidor arranca en modo estimado: la web anda, el buscador de vuelos responde con un aviso controlado y el gráfico de fechas muestra la estimación. No se rompe nada.
 
-## 2. Conectar Duffel (vuelos)
+## 2. Conectar SerpAPI (vuelos)
 
-1. Creá un access token en el dashboard de Duffel y guardalo en Vercel como `DUFFEL_API_KEY` (también se acepta `DUFFEL_ACCESS_TOKEN`). Es un secreto de servidor: no uses prefijos `NEXT_PUBLIC_`.
-2. Redeployá después de guardar o cambiar el token. Las llamadas usan [Create an Offer Request](https://duffel.com/docs/api/offer-requests), autenticación Bearer y `Duffel-Version: v2`.
-3. La aplicación resuelve los códigos IATA de origen y destino con [Places Suggestions](https://duffel.com/docs/api/places/schema) antes de crear la búsqueda. El token no llega al navegador.
-4. Conservá `BOOKING_API_KEY` y `BOOKING_API_HOST` por separado: esas variables siguen correspondiendo únicamente a alojamientos.
+1. Creá una cuenta en https://serpapi.com y copiá tu API key del dashboard. Guardala en Vercel (o en tu `.env`) como `SERPAPI_API_KEY`. Es un secreto de servidor: no uses prefijos `NEXT_PUBLIC_`.
+2. Redeployá después de guardar o cambiar la key. Las llamadas usan el motor `google_flights` contra `https://serpapi.com/search.json`.
+3. Conservá `BOOKING_API_KEY` y `BOOKING_API_HOST` por separado: esas variables siguen correspondiendo únicamente a alojamientos.
 
-Las tarjetas conservan la forma de respuesta que usa la interfaz: aerolínea operadora, trayectos, escalas, duración, cabina y tarifa. Solo las ofertas en USD se pueden sumar directamente al presupuesto, cuya moneda base es USD. La búsqueda muestra tarifas; no crea órdenes ni procesa pagos.
+Opcionales, con valores por defecto que ya funcionan: `SERPAPI_GL=uy`, `SERPAPI_HL=es`, `SERPAPI_CABIN_COMODO=2`, `SERPAPI_CALENDAR_TTL_H=24`, `SERPAPI_CACHE_MAX=2000`.
+
+### Por qué SerpAPI y no una API de ventas
+
+Duffel, Amadeus Self-Service y Sabre son GDS: emiten boletos y cobran. Además de pedir aprobación, tienen restricciones por mercado, y para este proyecto eso era un bloqueo. SerpAPI no vende nada, no pide aprobación y funciona desde Uruguay.
+
+El costo de esa decisión es explícito: **los precios son reales pero la reserva se completa en Google Flights, no en la web.** No hay comisión por vuelo, no se cobra el pasaje y no hay PNR. El botón de cada tarjeta abre Google Flights con la búsqueda ya cargada.
+
+### Cómo se consume la cuota
+
+Cada búsqueda exitosa es un crédito. Las que fallan no cuentan, y las que SerpAPI tiene cacheadas por una hora son gratis.
+
+| Qué | Créditos |
+|---|---|
+| Propuesta principal de `/api/cotizar` | 1 |
+| Gráfico "mismo viaje, otra fecha" (15 fechas) | 15 |
+| Browse de vuelos | 1 |
+
+El browse es de **una sola etapa**: el precio que trae la respuesta ya es el total de ida y vuelta. Se verificó contra la API real — con `outbound_date` + `return_date`, `best_flights[0].price` llega marcado como `type: "Round trip"` y escala exacto con los pasajeros (1 adulto = US$ 249, 2 = US$ 499 en la misma ruta y fechas). Lo que la API **no** devuelve es el tramo de vuelta: `flights[]` viene con un solo segmento, el de ida, y la llamada de vuelta con `departure_token` devuelve cero resultados. Por eso la tarjeta muestra solo el tramo de ida y rotula el precio como "Ida y vuelta".
+
+El cache es lo que hace esto viable. Vive en `lib/providers/index.js` y es **por punto** (ruta, fecha ida, fecha vuelta, pasajeros, cabina) con TTL de 24h, no por serie: dos personas buscando la misma ruta el mismo día comparten casi todos sus puntos. Si el cache fuera por serie, dos búsquedas casi nunca coincidirían y cada visita costaría 15 créditos.
+
+Planes de SerpAPI: 250 búsquedas/mes gratis, luego USD 25 por 1.000. El plan desde USD 150 agrega el *Legal Shield*; no hace falta para arrancar si los precios se presentan como estimación con atribución a Google y link de salida.
+
+### Un detalle que costó un bug: el código de aeropuerto
+
+`model.DEST[...].iata` a veces es el código de la **ciudad** y no del aeropuerto: `rio` vale `RIO` y `sao` vale `SAO`, que no son aeropuertos sino áreas metropolitanas. Con Duffel no pasaba nada porque resolvía el lugar por nombre, pero SerpAPI busca por código de aeropuerto y con `RIO` devuelve una respuesta **vacía y sin error**. La app caía a estimado en silencio, sin una sola línea en los logs, y Río y São Paulo — los dos destinos más buscados — nunca mostraban precio real.
+
+Por eso todo lo que consulta vuelos resuelve el destino con `airportFor()`, que usa `AIR_DESTINATIONS` primero y el modelo después. Hay un test que lo fija: si alguien vuelve a usar `model.DEST[...].iata` para buscar vuelos, falla la suite.
 
 ### Alojamientos reales de Booking.com / RapidAPI
 
@@ -48,28 +77,55 @@ Configura en Vercel `BOOKING_API_KEY` y `BOOKING_API_HOST=booking-com15.p.rapida
 
 La PWA incluye experiencias referenciales para Río de Janeiro, Florianópolis, Maragogi, Praia do Pipa y Gramado/Canela. Cada ficha abre WhatsApp con el mensaje y los datos del viaje ya preparados (`https://wa.me/?text=...`); al no tener un número comercial configurado, la persona elige el contacto al abrir WhatsApp. Los importes son referenciales y se confirman por asistencia.
 
+### Guía Secreta
+
+`public/guias.js` tiene el contenido por destino: qué playa ir, dónde comer con precios, qué hacer y tips locales. Se resuelve en tres pasos y se corta en el primero que existe:
+
+1. `GUIAS[destKey]` — override de ciudad (por ahora, `fln`)
+2. `REGIONES[dest.region]` — guía regional, con la region tomada de `DEST[]` en `lib/model.js`
+3. `null` — sin guía. La vista lo dice, no muestra otra ciudad
+
+El paso 3 es el que corrige un bug: antes la lista caía siempre en la de Florianópolis, así que Gramado, Canela, Torres, Maragogi, Porto de Galinhas y Buenos Aires veían "buscá prato executivo en el centro de Florianópolis". Un destino sin guía escrita muestra un estado vacío; uno mal escrito hace cruzar el país.
+
+Las regiones se comparan en **slug** y no con el nombre de `DEST[]`: "Ceará" y "Ceara" son dos strings distintas, y comparar contra el nombre crudo hacía fallar en silencio para 8 de 13 regiones sin que nada se quejara. `regionSlug()` normaliza en los dos lados, igual que `inferHotelType` en `app.js`.
+
+Con la estructura actual, 13 guías regionales cubren los 44 destinos. Agregar una guía de ciudad es sumar una entrada; agregar una región es cubrir un estado entero sin tocar nada más.
+
+El schema y las reglas de contenido están documentados en la cabecera del archivo.
+
 ### Qué es real y qué es estimado
 
 | Componente | Origen |
 |---|---|
-| Pasajes de avión desde Montevideo | Duffel cuando el access token está configurado; el presupuesto suma tarifas en USD |
+| Pasajes de avión desde Montevideo | Google Flights vía SerpAPI cuando hay `SERPAPI_API_KEY`; el presupuesto suma tarifas en USD |
+| Comparador de fechas ("mismo viaje, otra fecha") | Precio real de vuelo por fecha cuando el punto se pudo consultar; estimado en los puntos que fallaron |
 | Cruce a Buenos Aires, buses y ferry | Estimado (pendiente: Busbud u otra fuente) |
 | Alojamiento, comidas, transporte local, traslados, valijas, seguro | Estimado (`lib/model.js`) |
-| Comparador de fechas | Estimado a partir del precio de tu fecha (para no hacer 15 consultas por búsqueda) |
 
-La API de Duffel permite crear órdenes a partir de una oferta, pero esta integración de CuántoSale se limita a buscar y mostrar tarifas; no reserva ni cobra vuelos.
+El gráfico de fechas mezcla las dos cosas a propósito, pero las marca: las barras con precio real van sólidas y las estimadas con borde punteado, y el subtítulo dice cuántas de las N fechas son reales. Un precio inventado presentado como real sería peor que no mostrar el gráfico.
+
+### Endpoints
+
+| Ruta | Qué hace | Costo |
+|---|---|---|
+| `GET /api/cotizar` | Propuesta recomendada + serie de fechas estimada | 1 crédito |
+| `GET /api/vuelos/calendario` | Precio real de vuelo de las 15 fechas vecinas | 15 créditos |
+| `POST /api/vuelos/buscar` | Browse de vuelos (el precio ya es total de ida y vuelta) | 1 crédito |
+
+`/api/vuelos/calendario` devuelve 200 con `puntos: []` cuando no hay credenciales, y también cuando falla: es una mejora sobre la estimación, nunca la única fuente. Un fallo nunca rompe la pantalla de resultados.
 
 ### Costos y límites de las consultas
 
-- Cada búsqueda puede ejecutar una solicitud por cabina preferida además de resolver origen y destino. Revisá las cuotas y condiciones vigentes de tu organización de Duffel antes de habilitar tráfico público.
-- Cada persona puede hacer `RATE_LIMIT_PER_MIN` búsquedas por minuto (30 por defecto).
+- El contador de cuota es de SerpAPI, no de la app. Es el número que hay que mirar antes de habilitar tráfico público.
+- Cada persona puede hacer `RATE_LIMIT_PER_MIN` búsquedas por minuto (30 por defecto), y los endpoints caros tienen cubos separados de los gratuitos.
+- **Límite conocido:** el cache y el rate limit viven en la memoria del proceso. En Vercel cada instancia es efímera, así que dos instancias distintas no comparten cache: el mismo precio puede pagarse dos veces si la petición cae en otra instancia.
 
 ## 3. Publicarlo en internet
 
 Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.):
 
 - Comando de inicio: `node server.js`
-- Variables de entorno: `DUFFEL_API_KEY` (o `DUFFEL_ACCESS_TOKEN`); para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`
+- Variables de entorno: `SERPAPI_API_KEY`; para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`
 - El puerto lo define el hosting con `PORT`; el servidor ya lo lee.
 
 ## 4. Pruebas

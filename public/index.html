@@ -14,12 +14,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=68">
-<!-- Checkout de vuelos. El custom element de Duffel se carga desde su CDN
-     oficial: no requiere React ni build step, así que el proyecto sigue
-     siendo JS vanilla. La versión va fija a propósito (no "?v=N") porque el
-     cache-busting de este repo solo aplica a /style.css y /app.js. -->
-<script src="https://assets.duffel.com/components/3.3.1/duffel-card-form.js" defer></script>
+<link rel="stylesheet" href="/style.css?v=71">
+<!-- Los precios de vuelo se consultan en el server y la reserva se completa en
+     Google Flights, así que la página no carga ningún script de terceros para
+     vuelos. El CSP del server no lo permite. -->
 </head>
 <body>
 <div class="wrap">
@@ -131,6 +129,12 @@
 </div>
 
 <script defer src="/pwa.js"></script>
-<script defer src="/app.js?v=90"></script>
+<!-- GENERADO desde lib/model.js con `npm run build:costos`. Tiene que ir antes
+     de app.js porque app.js lee el global al cargar. Sin '?v=' a proposito: lo
+     invalida el CACHE_NAME del service worker, que es lo que controla su
+     frescura. Si le pusiéramos version propia, volvería a pasar lo de app.js:
+     un archivo actualizado que el cache sirve viejo para siempre. -->
+<script defer src="/daily-costs.js"></script>
+<script defer src="/app.js?v=93"></script>
 </body>
 </html>
