@@ -15,86 +15,86 @@ const fs = require('fs');
 const path = require('path');
 
 // Licencias aceptadas. Commons mezcla material libre con material con
-// derechos restringidos, asÃ­ que el filtro es explÃ­cito y no opcional.
+// derechos restringidos, así que el filtro es explícito y no opcional.
 const FREE = /^(cc0|cc by|cc by-sa|public domain|pd-|no restrictions)/i;
 
-// La bÃºsqueda de Commons exige TODAS las palabras del tÃ©rmino: con cuatro o
-// cinco tÃ©rminos la chances de cero resultado se disparan. Por eso cada
-// subject trae una lista de alternativas que se prueban en orden, de la mÃ¡s
-// especÃ­fica a la mÃ¡s genÃ©rica. Con dos o tres palabras distintivas acierta
+// La búsqueda de Commons exige TODAS las palabras del término: con cuatro o
+// cinco términos la chances de cero resultado se disparan. Por eso cada
+// subject trae una lista de alternativas que se prueban en orden, de la más
+// específica a la más genérica. Con dos o tres palabras distintivas acierta
 // casi siempre.
 const SUBJECTS = {
-  'rio#Cristo Redentor y Pan de AzÃºcar': ['Cristo Redentor', 'Corcovado Rio'],
+  'rio#Cristo Redentor y Pan de Azúcar': ['Cristo Redentor', 'Corcovado Rio'],
   'rio#Full Day a Arraial do Cabo con paseo en barco': ['Arraial do Cabo', 'Prainhas'],
 
-  'buz#Paseo en barco por las playas de BÃºzios': ['Bozios praia', 'Buzios'],
-  'buz#City tour de BÃºzios en buggy': ['Rua das Pedras', 'Buzios centro'],
+  'buz#Paseo en barco por las playas de Búzios': ['Bozios praia', 'Buzios'],
+  'buz#City tour de Búzios en buggy': ['Rua das Pedras', 'Buzios centro'],
 
-  'angra#Ilhas ParadisÃ­acas en lancha': ['Ilhas Paradisacas', 'Angra dos Reis'],
+  'angra#Ilhas Paradisíacas en lancha': ['Ilhas Paradisacas', 'Angra dos Reis'],
   'angra#Paseo de barco a Ilha de Cataguases': ['Cataguases', 'Angra dos Reis'],
   'arraial#Passeio de barco por las Prainhas y Gruta Azul': ['Prainhas Arraial do Cabo', 'Arraial do Cabo praia'],
   'arraial#Buceo de bautismo en aguas cristalinas': ['scuba diving Brazil', 'mergulho Brazil'],
   'bcm#City tour y Cristo Luz': ['Cristo Luz', 'Balneario Camboriu'],
-  'bcm#Beto Carrero World desde CamboriÃº': ['Beto Carrero', 'Beto Carrero World'],
+  'bcm#Beto Carrero World desde Camboriú': ['Beto Carrero', 'Beto Carrero World'],
   'bombinhas#Snorkel em Ilha do Arvoredo': ['Ilha do Arvoredo', 'Arvoredo'],
   'bombinhas#Trilha da Costa Esmeralda': ['Costa Esmeralda', 'Bombinhas'],
-  'cabo#City tour histÃ³rico y playas de Cabo Frio': ['Praia do Forte Cabo Frio', 'Cabo Frio'],
+  'cabo#City tour histórico y playas de Cabo Frio': ['Praia do Forte Cabo Frio', 'Cabo Frio'],
   'cabo#Paseo en barco por el Canal y la Ilha do JaponÃªs': ['Ilha do Japones', 'Cabo Frio canal'],
-  'camboriu#Parque Unipraias y telefÃ©rico': ['Unipraias', 'Camboriu telefÃ©rico'],
-  'camboriu#Paseo en barco por la costa de BalneÃ¡rio': ['Balneario Camboriu', 'Camboriu praia'],
+  'camboriu#Parque Unipraias y teleférico': ['Unipraias', 'Camboriu teleférico'],
+  'camboriu#Paseo en barco por la costa de Balneário': ['Balneario Camboriu', 'Camboriu praia'],
   'canela#Cascata do Caracol y Skyglass': ['Cascata do Caracol', 'Caracol Canela'],
   'canela#Tren del Vino y cultura italiana': ['Trem do Vinho', 'Vale dos Vinhedos'],
   'curitiba#City tour en la Linha Turismo': ['Linha Turismo', 'Curitiba turismo'],
   'curitiba#Morretes en tren por la Serra do Mar': ['Morrotes', 'Serra do Mar'],
-  'fernando#BaÃ­a dos Porcos y playas del Mar de Dentro': ['Baia dos Porcos', 'Fernando de Noronha'],
+  'fernando#Baía dos Porcos y playas del Mar de Dentro': ['Baia dos Porcos', 'Fernando de Noronha'],
   'fernando#Paseo en barco con snorkel y puesta de sol': ['Fernando de Noronha praia', 'Noronha'],
   'for#Praia de Cumbuco y dunas en buggy': ['Cumbuco', 'Cumbuco dunes'],
   'for#Beach Park y costa de Aquiraz': ['Beach Park', 'Aquiraz'],
-  'gram#Tour del Vino en Bento GonÃ§alves e Vale dos Vinhedos': ['Vale dos Vinhedos', 'Bento Goncalves'],
+  'gram#Tour del Vino en Bento Gonçalves e Vale dos Vinhedos': ['Vale dos Vinhedos', 'Bento Goncalves'],
   'gram#City tour de Gramado y parques de Canela': ['Gramado', 'Gramado rua'],
   'gram#Snowland, el parque de nieve indoor': ['Snowland', 'Snowland Gramado'],
-  'igu#Cataratas del lado brasileÃ±o y Parque das Aves': ['Parque das Aves', 'Iguazu Parana'],
+  'igu#Cataratas del lado brasileño y Parque das Aves': ['Parque das Aves', 'Iguazu Parana'],
   'igu#Cataratas argentinas con Garganta del Diablo': ['Garganta del Diablo', 'Iguazu Argentina'],
-  'igu#Represa de ItaipÃº': ['Itaipu', 'Itaipu dam'],
-  'ilha#Vuelta a la isla en lancha rÃ¡pida': ['Lopes Mendes', 'Ilha Grande beach'],
+  'igu#Represa de Itaipú': ['Itaipu', 'Itaipu dam'],
+  'ilha#Vuelta a la isla en lancha rápida': ['Lopes Mendes', 'Ilha Grande beach'],
   'ilha#Trilha guiada a Lopes Mendes': ['Lopes Mendes', 'Ilha Grande trilha'],
   'ilhabela#Jeep tour por playas y cascadas': ['Ilhabela', 'Ilhabela praia'],
   'ilhabela#Paseo en barco a Castelhanos': ['Castelhanos', 'Castelhanos praia'],
-  'jericoacoara#Lagoa do ParaÃ­so y Lagoa Azul en 4x4': ['Lagoa do Paraiso', 'Jericoacoara lagoa'],
+  'jericoacoara#Lagoa do Paraíso y Lagoa Azul en 4x4': ['Lagoa do Paraiso', 'Jericoacoara lagoa'],
   'jericoacoara#PÃ´r do sol en la Duna y Pedra Furada': ['Pedra Furada', 'Jericoacoara duna'],
-  'maragogi#CatamarÃ¡n a las Piscinas Naturales (GalÃ©s)': ['Piscinas Naturais', 'Maragogi'],
+  'maragogi#Catamarán a las Piscinas Naturales (Galés)': ['Piscinas Naturais', 'Maragogi'],
   'maragogi#Buggy por playas del litoral norte': ['Maragogi praia', 'Maragogi'],
-  'mcz#SÃ£o Miguel dos Milagres y Ruta EcolÃ³gica': ['Sao Miguel dos Milagres', 'Sao Miguel dos Milagres praia'],
+  'mcz#São Miguel dos Milagres y Ruta Ecológica': ['Sao Miguel dos Milagres', 'Sao Miguel dos Milagres praia'],
   'morro#Volta Ã  Ilha em lancha': ['Morro de Sao Paulo', 'Morro de Sao Paulo ilha'],
   'morro#Tirolesa y miradores de Morro': ['Morro de Sao Paulo', 'Morro de Sao Paulo vista'],
   'nat#Dunas de Genipabu en buggy': ['Genipabu', 'Genipabu dunes'],
-  'nat#Pipa desde Natal con BaÃ­a dos Golfinhos': ['Baia dos Golfinhos', 'Pipa'],
+  'nat#Pipa desde Natal con Baía dos Golfinhos': ['Baia dos Golfinhos', 'Pipa'],
   'paraty#Schooner por las islas de Paraty': ['Paraty', 'Paraty baia'],
-  'paraty#City tour histÃ³rico y Cachoeira do TobogÃ£': ['Cachoeira do Toboga', 'Paraty centro'],
+  'paraty#City tour histórico y Cachoeira do Tobogã': ['Cachoeira do Toboga', 'Paraty centro'],
   'pip#Paseo en Buggy de Playa en Playa': ['Pipa beach', 'Pipa'],
   'pip#Paseo en lancha para ver delfines': ['Pipa golfinhos', 'Pipa'],
   'porto#Piscinas naturales de Porto de Galinhas': ['Porto de Galinhas', 'Porto de Galinhas pools'],
-  'porto#Praia dos Carneiros y paseo en catamarÃ¡n': ['Praia dos Carneiros', 'Carneiros catamaran'],
-  'rec#Olinda histÃ³rica y Recife Antigo': ['Olinda', 'Olinda Pernambuco'],
+  'porto#Praia dos Carneiros y paseo en catamarán': ['Praia dos Carneiros', 'Carneiros catamaran'],
+  'rec#Olinda histórica y Recife Antigo': ['Olinda', 'Olinda Pernambuco'],
   'rec#Porto de Galinhas desde Recife': ['Recife', 'Recife Antigo'],
   'rosa#Avistaje de ballenas desde los miradores': ['Praia Vermelha', 'Santa Catarina beach'],
   'rosa#Trilha a Praia Vermelha y Ouvidor': ['ouvidor beach', 'Santa Catarina praia'],
-  'sao#City tour por Avenida Paulista y Centro HistÃ³rico': ['Avenida Paulista', 'Paulista Sao Paulo'],
-  'sao#Ruta gastronÃ³mica por Liberdade e Mercado Municipal': ['Mercado Municipal Sao Paulo', 'Liberdade'],
+  'sao#City tour por Avenida Paulista y Centro Histórico': ['Avenida Paulista', 'Paulista Sao Paulo'],
+  'sao#Ruta gastronómica por Liberdade e Mercado Municipal': ['Mercado Municipal Sao Paulo', 'Liberdade'],
   'ssa#Pelourinho, Elevador Lacerda e Mercado Modelo': ['Pelourinho', 'Elevador Lacerda'],
-  'ssa#BahÃ­a de Todos os Santos en schooner': ['Baia de Todos os Santos', 'Salvador bahia'],
-  'trancoso#Praias do Espelho e CaraÃ­va': ['Caraiva', 'Praia do Espelho'],
+  'ssa#Bahía de Todos os Santos en schooner': ['Baia de Todos os Santos', 'Salvador bahia'],
+  'trancoso#Praias do Espelho e Caraíva': ['Caraiva', 'Praia do Espelho'],
   'trancoso#City tour de Trancoso e Quadrado': ['Trancoso', 'Trancoso quadrado'],
   'ubatuba#Paseo en barco por las islas de Ubatuba': ['Ubatuba', 'Ubatuba praia'],
   'ubatuba#Trilha guiada a las cascadas de Ubatuba': ['Ubatuba queda dagua', 'Ubatuba trilhas'],
   'bho#Pampulha e arquitetura de Niemeyer': ['Pampulha', 'Pampulha Belo Horizonte'],
   'bho#Experiencia de bares y comida mineira': ['Belo Horizonte', 'BH bares'],
-  'bho#Free tour a pie por el centro histÃ³rico': ['Belo Horizonte centro', 'Belo Horizonte'],
-  'curitiba#Free tour a pie por el centro histÃ³rico': ['Curitiba centro', 'Curitiba'],
-  'poa#Free tour a pie por el centro histÃ³rico': ['Porto Alegre centro', 'Porto Alegre'],
-  'sao#Free tour a pie por el centro histÃ³rico': ['Sao Paulo centro', 'Sao Paulo'],
+  'bho#Free tour a pie por el centro histórico': ['Belo Horizonte centro', 'Belo Horizonte'],
+  'curitiba#Free tour a pie por el centro histórico': ['Curitiba centro', 'Curitiba'],
+  'poa#Free tour a pie por el centro histórico': ['Porto Alegre centro', 'Porto Alegre'],
+  'sao#Free tour a pie por el centro histórico': ['Sao Paulo centro', 'Sao Paulo'],
   'poa#Gramado e Canela desde Porto Alegre': ['Porto Alegre', 'Porto Alegre skyline'],
-  'poa#Bento GonÃ§alves e Vale dos Vinhedos': ['Bento Goncalves', 'Vale dos Vinhedos']
+  'poa#Bento Gonçalves e Vale dos Vinhedos': ['Bento Goncalves', 'Vale dos Vinhedos']
 };
 
 const UA = 'cuantosale-tour-photos/1.0 (fotos para el catalogo de tours)';
