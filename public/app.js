@@ -307,7 +307,7 @@
     { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
     { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }];
   var FX = { rates: null, base: 'USD', until: 0, cargando: true };
-  var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', hotelType: 'intermedio', hotelTypeExplicit: false };
+  var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
   var HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
   function inferHotelType(value) {
     var text = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
@@ -337,7 +337,10 @@
     ] },
     { id: 'buzios', label: 'Búzios / Arraial do Cabo / Cabo Frio', image: 'buz', keys: ['buz', 'arraial', 'cabo'], subcategories: [
       { label: 'Búzios + Arraial do Cabo', key: 'buz' }, { label: 'Sólo Búzios', key: 'buz' },
-      { label: 'Arraial do Cabo', key: 'arraial' }, { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' }
+      { label: 'Arraial do Cabo', key: 'arraial' },
+      { label: 'Búzios + Arraial do Cabo', key: 'buz', secondKey: 'arraial' },
+      { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' },
+      { label: 'Cabo Frio + Arraial do Cabo', key: 'cabo', secondKey: 'arraial' }
     ] },
     { id: 'costaverde', label: 'Costa Verde (Ilhabela / Ubatuba / Paraty)', image: 'ilhabela', keys: ['paraty', 'ubatuba', 'ilhabela', 'angra', 'ilha'], subcategories: [
       { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' },
@@ -3091,7 +3094,7 @@
     el.classList.add('loading');
     el.innerHTML = renderLoadingState('Buscando ofertas para tu viaje…');
     var transportParam = S.transport === 'roadtrip' ? 'auto' : S.transport;
-    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, transport: transportParam, origin: S.origin, subcategory: S.subcategory, hotel_type: S.hotelType });
+    var qs = new URLSearchParams({ dest: S.dest, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, transport: transportParam, origin: S.origin, subcategory: S.subcategory, second: S.second, hotel_type: S.hotelType });
     fetch('/api/cotizar?' + qs.toString(), { signal: mine.signal })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -3610,7 +3613,7 @@
     // mañana se agrega otra forma de entrar.
     selectedDestKey = key || null;
     selectedDestFor = S.dep + '|' + S.ret + '|' + S.pax + '|' + S.budget;
-    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory, hotel_type: S.hotelType });
+    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory, second: S.second, hotel_type: S.hotelType });
     return fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
@@ -4205,11 +4208,29 @@
       if (['flight', 'bus', 'auto'].indexOf(S.transport) < 0) S.transport = 'flight';
       renderTransportSelector();
     }
-    function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelType) {
+    // Que segunda parada declara una subcategoria, si declara alguna.
+// Las subcategorias son la unica fuente de verdad de que combinaciones se
+// ofrecen. El servidor despues valida que el par exista y sea alcanzable por
+// tierra, pero que el par se ofrezca lo decide esta lista.
+function secondKeyForSubcategory(subcategory, firstKey) {
+  var needle = String(subcategory || '').trim();
+  if (!needle || !firstKey) return '';
+  var found = '';
+  DESTINATION_GROUPS.forEach(function (group) {
+    group.subcategories.forEach(function (sub) {
+      if (found) return;
+      if (String(sub.label || '').trim() === needle && sub.key === firstKey) found = sub.secondKey || '';
+    });
+  });
+  return found;
+}
+
+function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelType) {
       var destinationKey = String(nextValue || 'todos');
       if (!destinationKey) return;
       if (!fromFeatured) featuredProposalSelection = null;
       S.dest = destinationKey; S.proposalId = ''; S.subcategory = String(subcategory || '');
+  S.second = secondKeyForSubcategory(S.subcategory, destinationKey);
       var inferredHotelType = requestedHotelType || inferHotelType(S.subcategory);
       S.hotelTypeExplicit = !!inferredHotelType;
       S.hotelType = inferredHotelType || hotelTypeForStyle(S.style);
