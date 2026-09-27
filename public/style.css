@@ -19,14 +19,16 @@
      "acento de marca" para significar "tu elección". Estos tres tokens son un
      solo lugar donde definirlo. */
   --selected-bg:#DCEBF8; --selected-border:#10233E; --selected-ink:#10233E;
+  /* Card elegible: el mismo bloque de estilo para los cuatro grupos donde se
+     elige algo (transporte local, comidas, hotel, tours). Antes cada uno lo
+     Definía por su cuenta y el resultado era que "elegido" se veía distinto
+     según el grupo: navy de 1px en unos, navy de 2px en otros, ámbar con cinta
+     en los tours. El usuario tenía que aprender una regla nueva cada vez.
+     Acá hay una sola, y los cuatro la comparten. */
+  --card-bg:#FFFFFF; --card-border:#C3D0DE; --card-radius:18px;
   --action-bg:#10233E; --action-ink:#FFFFFF; --action-border:transparent;
   --control-bg:#FFFFFF; --control-border:#E2E8F0; --control-hover:#F8FAFC; --control-muted:#64748B; --control-selected:#F8FAFC; --control-selected-ink:#1D4ED8;
   --accent:#F6B21B; --accent-ink:#10233E;
-  /* Marco de selección de las experiencias. El ámbar de marca (#F6B21B) sobre
-     blanco da 1.7:1, o sea que como borde de 2px no se veía: el estado
-     "elegido" se comunicaba solo con la cinta de arriba. Este es el mismo
-     amarillo más profundo y da 3.1:1, así que el marco se lee por sí solo. */
-  --accent-line:#B8791B; --accent-tint:#FEF7E7;
   --hero-bg:#10233E; --hero-ink:#FFFFFF; --hero-accent:#F6B21B; --hero-soft:#A9CBEA;
   --cel:#1B5FA8; --cel-ink:#FFFFFF; --cel-soft:#DCEBF8; --coral:#D9481F; --coral-soft:#FDE2D9; --good:#12784F; --good-soft:#DCF2E6;
   --c1:#10233E; --c2:#7CB7E8; --c3:#F6B21B; --c4:#E4572E; --c5:#4B7BAA; --c6:#9AA9BA;
@@ -39,8 +41,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
-    --accent-line:#E8A93B; --accent-tint:#33290E;
-    --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
+      --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
     --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
     --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
     color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
@@ -50,13 +51,13 @@
 }
 :root[data-theme="dark"]{
   --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
-  --accent-line:#E8A93B; --accent-tint:#33290E;
   --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
   --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
   --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
   color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
   --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
   --selected-bg:#1B3A63; --selected-border:#EEF3F9; --selected-ink:#EEF3F9;
+  --card-bg:#12294A; --card-border:#8B9CB2; --card-radius:18px;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
@@ -318,7 +319,13 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* Los bloques del detalle se separan con un margen propio y no con el del
    bloque anterior: asi el ritmo no depende de que haya o no tours. Antes la
    Guía Secreta pegaba a los hoteles en los destinos sin experiencias. */
-.hotel-options{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.hotel-options-head h2{font-family:var(--fh);font-weight:700;font-size:34px;line-height:1;margin:0}.hotel-options-head p{margin:6px 0 16px;color:var(--ink2);font-size:13px}.hotel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.hotel-option{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 3px 10px rgba(16,35,62,.06);transition:transform .18s ease,box-shadow .18s ease;overflow:hidden}.hotel-option img{display:block;width:100%;height:160px;object-fit:cover;border-radius:12px}.hotel-option:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(16,35,62,.13)}.hotel-option.recommended{border:2px solid var(--ink);background:var(--cel-soft);box-shadow:0 8px 18px rgba(16,35,62,.08)}.hotel-badge{align-self:flex-start;border-radius:99px;padding:5px 9px;background:var(--cel-soft);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.04em}.hotel-option.recommended .hotel-badge{background:var(--cel-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--cel)}.hotel-option h3{margin:14px 0 5px;font-size:17px;line-height:1.2}.hotel-description{margin:0 0 6px;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-detail{min-height:40px;margin:0;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-price{display:flex;align-items:baseline;gap:5px;margin-top:16px}.hotel-price small,.hotel-price span{color:var(--ink2);font-size:11px}.hotel-price b{font-family:var(--fh);font-size:32px;line-height:1}.hotel-total{margin-top:6px;font-size:12px}.hotel-booking{display:flex;justify-content:center;align-items:center;min-height:46px;margin-top:16px;border-radius:13px;background:#003580;color:#fff;text-align:center;text-decoration:none;font-size:13px;font-weight:700}.hotel-booking:hover{color:#fff;filter:brightness(1.1)}.hotel-similar{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;font-size:12px}.hotel-similar summary{cursor:pointer;color:var(--ink);font-weight:700}.hotel-similar ul{margin:8px 0 0;padding-left:18px;line-height:1.7}.hotel-similar a{color:var(--cel);text-decoration:none}.breakdown-section{display:block!important}.detail-breakdown{min-height:48px}
+.hotel-options{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.hotel-options-head h2{font-family:var(--fh);font-weight:700;font-size:34px;line-height:1;margin:0}.hotel-options-head p{margin:6px 0 16px;color:var(--ink2);font-size:13px}.hotel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.hotel-option{display:flex;flex-direction:column;background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:var(--card-radius);padding:16px;box-shadow:0 3px 10px rgba(16,35,62,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;overflow:hidden}.hotel-option img{display:block;width:100%;height:160px;object-fit:cover;border-radius:12px}.hotel-option:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(16,35,62,.13)}/* "Recomendado" NO es "elegido". Este selector pintaba la card entera con el
+   mismo borde y el mismo fondo que el estado de elegido, así que el hotel que
+   sugería el servidor y el que la persona eligió se veían idénticos: no había
+   forma de saber cuál tenías reservado. El marco y el fondo son solo del
+   estado elegido; la sugerencia se comunica con el badge, que ya dice
+   "Recomendado". */
+.hotel-option.recommended{box-shadow:0 4px 14px rgba(16,35,62,.10)}.hotel-badge{align-self:flex-start;border-radius:99px;padding:5px 9px;background:var(--cel-soft);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.04em}.hotel-option.recommended .hotel-badge{background:var(--cel-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--cel)}.hotel-option h3{margin:14px 0 5px;font-size:17px;line-height:1.2}.hotel-description{margin:0 0 6px;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-detail{min-height:40px;margin:0;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-price{display:flex;align-items:baseline;gap:5px;margin-top:16px}.hotel-price small,.hotel-price span{color:var(--ink2);font-size:11px}.hotel-price b{font-family:var(--fh);font-size:32px;line-height:1}.hotel-total{margin-top:6px;font-size:12px}.hotel-booking{display:flex;justify-content:center;align-items:center;min-height:46px;margin-top:16px;border-radius:13px;background:#003580;color:#fff;text-align:center;text-decoration:none;font-size:13px;font-weight:700}.hotel-booking:hover{color:#fff;filter:brightness(1.1)}.hotel-similar{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;font-size:12px}.hotel-similar summary{cursor:pointer;color:var(--ink);font-weight:700}.hotel-similar ul{margin:8px 0 0;padding-left:18px;line-height:1.7}.hotel-similar a{color:var(--cel);text-decoration:none}.breakdown-section{display:block!important}.detail-breakdown{min-height:48px}
 @media (max-width:720px){.hotel-grid{grid-template-columns:1fr}.hotel-detail{min-height:0}.hotel-option.recommended{order:-1}}
 /* Selector de tipo de alojamiento. Replica .custom-select__control: mismo alto,
    mismo radio y mismo chevron dibujado con ::after, para que el filtro se lea
@@ -424,7 +431,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    las filas, porque la caja "Personalizado" lleva un input y es mas alta. */
 .daily-budget__options{display:grid;gap:10px;grid-auto-rows:1fr}
 .daily-budget__options--cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-.daily-budget__options--cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}.daily-budget__option-copy{font-size:11px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
+.daily-budget__options--cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* Mismo bloque de card elegible que .hotel-option y .local-tour. Antes el
+   estado de elegido era navy de 1px acá y navy de 2px en los otros dos, con
+   el mismo color de fondo: el mismo gesto, dos grosores distintos. */
+.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{border:2px solid var(--selected-border);background:var(--selected-bg);box-shadow:0 8px 18px rgba(16,35,62,.08)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}.daily-budget__option-copy{font-size:11px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
 /* En un celu las dos rejillas caen a una columna: 2 arriba quedaria una fila
    de 3 y otra de 1, que es justo lo que se vino a corregir. */
 @media (max-width:560px){.daily-budget__options--cols-2,.daily-budget__options--cols-3{grid-template-columns:minmax(0,1fr)}}
@@ -534,23 +545,19 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* El borde no cambia de grosor al marcar (solo de color), asi que la tarjeta
    no corre nada. Relleno de color + borde duro se leia como un boton de
    escritorio; la marca real va en la cinta de arriba. */
-.local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1.5px solid var(--control-line);border-radius:18px;background:var(--surface);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
+/* Mismo bloque de card elegible que .daily-budget__option y .hotel-option:
+   fondo, borde, radio y estado de elegido salen de los mismos tokens. La
+   cinta "Tu viaje" se saco: era una segunda señal de "elegido" que solo
+   tenían los tours, y hacia que el mismo gesto se leyera distinto en cada
+   grupo. Ahora el estado se comunica solo con el marco y el fondo. */
+.local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
-/* Marco amarillo + fondo apenas tintado. Es el mismo "modo de selección" de
-   los grupos de localize y comidas (borde que se marca + fondo), pero en el
-   ámbar de la marca en vez del azul, para que las experiencias seReconozcan
-   como tuyas y no como una categoría más. */
-.local-tour:has([data-tour-choice]:checked){border:2px solid var(--accent-line);background:var(--accent-tint);box-shadow:0 8px 20px rgba(184,121,27,.16)}
+.local-tour:has([data-tour-choice]:checked){border:2px solid var(--selected-border);background:var(--selected-bg);box-shadow:0 8px 18px rgba(16,35,62,.08)}
 /* La tarjeta completa es la zona sensible. El checkbox se estira con
    position:absolute sobre el article: el clic en cualquier punto lo activa y
    el teclado conserva un único control que tabula (Enter lo agrega el JS). */
 .local-tour__input{position:absolute;z-index:1;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
 .local-tour:has(.local-tour__input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
-/* Cinta de seleccion: entra desde arriba cuando la experiencia ya esta en el
-   viaje. Es lo unico que tapa un poco de la foto y no la deja ilegible. */
-.local-tour__ribbon{position:absolute;z-index:2;top:0;right:0;left:0;display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(-100%);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
-.local-tour__ribbon svg{flex:0 0 14px;width:14px;height:14px}
-.local-tour:has([data-tour-choice]:checked) .local-tour__ribbon{opacity:1;transform:none}
 /* La foto es una franja arriba y no lleva texto encima. Antes tenía un velo
    degradado con el título en blanco y el precio en ámbar: quedaba bien como
    foto, pero el texto dependía de la imagen para poder leerse y el precio en

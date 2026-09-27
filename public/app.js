@@ -1303,7 +1303,6 @@
     // Iconos de la tarjeta: trazo, como los de CATEGORY_ICONS, para que se
     // lean bien en el panel chico y hereden el color de cada tema.
     var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
-    var icoCheck = '<svg ' + icoBase + ' stroke-width="2.6" aria-hidden="true"><path d="M4.5 12.6 9.4 17.5 19.5 6.9"/></svg>';
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
       // Las de Civitatis traen foto propia; las locales salen de TOUR_PHOTOS.
@@ -1317,10 +1316,10 @@
         : '<div class="local-tour__media local-tour__media-plain" style="background:linear-gradient(150deg,' + skin.from + ',' + skin.to + ')">' +
           '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg></div>';
       var duration = tourDuration(tour);
-      // Marca de seleccion: cinta solida arriba en vez de relleno de color.
-      // Un card con fondo celeste y borde duro parecia un boton de escritorio;
-      // la cinta se lee como estado y no tapa la foto ni el precio.
-      var ribbon = '<span class="local-tour__ribbon" aria-hidden="true">' + icoCheck + 'Tu viaje</span>';
+      // Sin cinta de "elegido". Cuando una card se selecciona cambia el marco y
+      // el fondo, igual que en transporte local, comidas y hotel. La cinta era
+      // una segunda señal que solo tenían los tours, y hacia que el mismo
+      // gesto se leyera distinto según el grupo.
       // Toda la tarjeta es la zona sensible: el checkbox va estirado con
       // position:absolute sobre el article y solo el boton de detalle queda
       // por encima (z-index). Un clic en cualquier punto elige la
@@ -1333,7 +1332,6 @@
       // compara. Ahora las tres tarjetas se leen igual.
       return '<article class="local-tour" data-tour-card>' +
         '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '">' +
-        ribbon +
         media +
         '<div class="local-tour__body">' +
         '<h3 class="local-tour__title">' + esc(tour.title) + '</h3>' +
