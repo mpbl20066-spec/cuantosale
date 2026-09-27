@@ -82,7 +82,6 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-s
 @media (max-width:820px){.detail-layout{grid-template-columns:1fr}}
 button,input,select{font:inherit;color:inherit}
 .wrap{max-width:760px;margin:0 auto;padding:20px 18px 72px}
-
 /* header */
 /* min-width:0 en los tres es lo que corta el desbordamiento: sin esto, un
    flex item no puede encogerse por debajo de su contenido, asi que un nombre
@@ -95,7 +94,6 @@ button,input,select{font:inherit;color:inherit}
 .logo svg{display:block}
 .chip{font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;background:var(--cel-soft);color:var(--ink)}
 h1{font-family:var(--fh);font-weight:800;font-size:clamp(52px,14vw,92px);line-height:.9;letter-spacing:-.01em;margin:24px 0 18px}
-
 /* form */
 .form{margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:20px;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
@@ -166,7 +164,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .find-destinations{min-height:52px;border:1px solid var(--action-border);border-radius:16px;padding:12px 18px;background:var(--action-bg);color:var(--action-ink);font-weight:700;cursor:pointer;transition:transform .18s ease,filter .18s ease}
 .find-destinations:hover{filter:brightness(1.14);transform:translateY(-1px)}
 .btn-buscar-todos{width:100%;min-height:54px;border:1px solid var(--action-border);border-radius:16px;background:var(--action-bg);color:var(--action-ink);font-weight:700;font-size:15px;cursor:pointer;transition:transform .18s ease,filter .18s ease}.btn-buscar-todos:hover{filter:brightness(1.12);transform:translateY(-1px)}.btn-buscar-todos[hidden]{display:none}
-
 /* results */
 #results{margin-top:34px;display:grid;grid-template-columns:minmax(0,1fr);gap:34px}
 #destination-results{margin-top:34px}
@@ -174,7 +171,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .sec h2{font-family:var(--fh);font-weight:700;font-size:38px;line-height:1;margin:0 0 6px;letter-spacing:-.005em}
 .sec .sub{margin:0 0 16px;color:var(--ink2);font-size:14px}
 .notice{padding:16px 18px;border-radius:18px;background:var(--coral-soft);color:var(--ink);font-weight:500}
-
 .hero{position:relative;background:var(--hero-bg);color:var(--hero-ink);border-radius:32px;padding:24px}
 .tags{display:flex;flex-wrap:wrap;gap:8px}
 .tag{font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;background:var(--accent);color:var(--accent-ink)}
@@ -195,7 +191,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .budget .fill{height:100%;border-radius:99px;background:var(--hero-accent)}
 .budget .fill.over{background:var(--coral)}
 .budget p{margin:10px 0 0;font-size:14px;font-weight:600}
-
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px}
 .stack{display:flex;height:18px;border-radius:99px;overflow:hidden;gap:2px;margin-bottom:16px}
 .stack span{display:block;height:100%}
@@ -206,7 +201,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .leg i{width:12px;height:12px;border-radius:4px;display:block}
 .leg b{font-weight:600}
 .leg em{font-style:normal;color:var(--ink2);font-size:13px;margin-left:8px}
-
 .tip{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--line)}
 .tip:first-child{padding-top:0}.tip:last-child{border-bottom:0;padding-bottom:0}
 .save{flex:0 0 auto;min-width:92px;text-align:center;background:var(--accent);color:var(--accent-ink);font-family:var(--fh);font-weight:800;font-size:26px;line-height:1;padding:10px 12px;border-radius:14px;transform:rotate(-2deg)}
@@ -214,7 +208,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .tip p{margin:2px 0 0;color:var(--ink2);font-size:14px}
 .apply{margin-top:8px;border:1.5px solid var(--ink);background:transparent;border-radius:99px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
 .apply:hover{background:var(--cel-soft)}
-
 .chart{position:relative;display:flex;gap:8px;align-items:flex-end;overflow-x:auto;padding:6px 2px 10px;-webkit-overflow-scrolling:touch}
 .bar{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:transparent;cursor:pointer;padding:0}
 .bar .v{font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap}
@@ -228,7 +221,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--cel-soft);border:1.5px solid var(--line)}
 .legend .l1::before{background:var(--ink);border-color:var(--ink)}
 .legend .l2::before{background:var(--accent);border-color:var(--accent)}
-
 /* ---------- tarjeta de propuesta (Vuelo/Bus/Auto + Hotel) ----------
    Dos acciones, dos superficies: la tarjeta no es clickeable en bloque, cada
    acción tiene su propio botón. Antes el <details> hacía de cartelera y el
@@ -286,7 +278,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .opt__actions{gap:8px}
   .opt__disclosure,.opt__cta{flex:1 1 auto;justify-content:center;margin:0}
 }
-
 .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px}
 .foot b{color:var(--ink)}
 .loading-shell{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px 16px;display:grid;gap:14px}
@@ -310,13 +301,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .hero{padding:20px}
   .perf{margin:20px -20px}.perf::before{left:20px;right:20px}
 }
-
 /* server version additions */
 #results.loading{opacity:.5;transition:opacity .2s}
 .src{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;margin-left:8px;background:var(--cel-soft);color:var(--ink)}
 .src.real{background:var(--good-soft);color:var(--good)}
 .hero .note{color:var(--hero-soft);font-size:13px;margin:8px 0 0}
-
 /* Calls to action */
 .cta-section{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}
 .cta-title{margin:0 0 14px;font-size:16px;font-weight:700}
@@ -328,7 +317,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .cta-link:hover{color:#fff;transform:translateY(-2px);box-shadow:0 9px 18px rgba(16,35,62,.22);filter:brightness(1.08)}
 .cta-link:active{transform:translateY(0);box-shadow:0 4px 10px rgba(16,35,62,.16)}
 @media (max-width:560px){.cta-actions{grid-template-columns:1fr}.cta-link{min-height:54px}}
-
 /* Alternativas de alojamiento */
 /* Los bloques del detalle se separan con un margen propio y no con el del
    bloque anterior: asi el ritmo no depende de que haya o no tours. Antes la
@@ -372,7 +360,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--card-sel-border);color:#fff;border-color:var(--card-sel-border)}
 .hotel-option:has(.hotel-option__pick input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
 .hotel-pick-hint{display:block;margin-top:12px;padding:10px 12px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-size:13px;font-weight:700;text-align:center;transition:background .16s ease,color .16s ease,border-color .16s ease}
-
 /* Resultados de vuelos */
 .flight-search{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.flight-search>div:first-child{display:flex;justify-content:space-between;gap:16px;align-items:center}.flight-search h2{font-family:var(--fh);font-size:34px;line-height:1;margin:0}.flight-search p{margin:5px 0 0;color:var(--ink2);font-size:13px}
 .select-flight{border:0;cursor:pointer;font-weight:700;color:#fff;background:#087E5B;border-radius:14px;transition:transform .18s ease,filter .18s ease}.select-flight:hover{filter:brightness(1.1);transform:translateY(-1px)}.select-flight:disabled{cursor:default;filter:none;transform:none;opacity:.72}
@@ -381,7 +368,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .flight-search-prompt{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}.flight-search-prompt p{margin:0;color:var(--ink2);font-size:13px}.flight-skeleton{display:grid;gap:10px;margin-top:16px}.flight-skeleton .skeleton-box{height:122px;border:1px solid var(--line);background:linear-gradient(90deg,var(--bg) 25%,rgba(122,148,176,.18) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}.flight-empty p{margin:0 0 10px}.flight-buy-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.flight-buy-link:hover{color:var(--ink)}
 @media (max-width:560px){.flight-search>div:first-child{display:block}.flight-footer{align-items:flex-end}.flight-price{margin-left:0}.select-flight{margin-left:auto}.flight-card__actions{flex-direction:column}.btn{width:100%}}
 .flight-summary-card{border:1px solid var(--good);border-radius:18px;padding:16px;margin-top:16px;background:var(--good-soft);box-shadow:0 5px 16px color-mix(in srgb,var(--good) 16%,transparent)}.flight-summary-leg{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;border-top:1px dashed var(--line)}.flight-summary-route{display:flex;align-items:center;gap:8px;font-size:15px}.flight-summary-route span{color:var(--ink2)}.flight-summary-times{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ink2);margin-left:auto}.flight-summary-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.flight-summary-footer small{color:var(--ink2)}.flight-summary-footer b{font-family:var(--fh);font-size:26px}.flight-summary-change{margin-top:12px;width:100%}
-
 /* Comparador de destinos por presupuesto */
 .destination-results-section h2{font-family:var(--fh);font-weight:700;font-size:38px;line-height:1;margin:0 0 6px}
 .destination-results-section>.sub{margin:0 0 16px;color:var(--ink2);font-size:14px}
@@ -408,7 +394,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .destination-total small{color:var(--ink2);font-size:11px}
 @media (max-width:560px){.destination-finder{grid-template-columns:1fr}.find-destinations{width:100%}}
 @media (max-width:700px){.destination-cards{grid-template-columns:1fr}}
-
 /* Formulario de pasajeros y comprobante */
 /* padding-bottom con env(safe-area-inset-bottom): :root es html, y un box con
    position:fixed se posiciona contra el viewport, no contra el padding de html.
@@ -418,7 +403,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .booking-modal{position:fixed;inset:0;z-index:100;background:rgba(10,24,48,.68);display:grid;place-items:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom,0px));overflow:auto;overscroll-behavior:contain}.booking-modal[hidden]{display:none}.booking-dialog{position:relative;width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:26px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.3)}.booking-dialog h2{font-family:var(--fh);font-size:38px;line-height:1;margin:0 40px 6px 0}.booking-close{position:absolute;right:16px;top:14px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--bg);font-size:25px;line-height:1;cursor:pointer}.booking-summary{margin:0 0 20px;color:var(--ink2);font-size:14px}.passenger-fields{margin:14px 0 0;padding:16px;border:1px solid var(--line);border-radius:18px}.passenger-fields legend{padding:0 8px;font-size:16px;font-weight:700}.passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.passenger-grid label{margin-bottom:5px}.passenger-grid input,.passenger-grid select{width:100%;height:44px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);padding:0 11px}.booking-note{color:var(--ink2);font-size:13px}.confirm-booking{width:100%;min-height:54px;border:0;border-radius:15px;background:#003580;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.confirm-booking:disabled{opacity:.65;cursor:wait}.booking-error{padding:10px 12px;border-radius:12px;background:var(--coral-soft);color:var(--coral);font-size:13px;font-weight:600}.booking-success{text-align:center}.success-icon{font-size:42px}.booking-success h2{margin:6px 0 16px}.pnr-label{margin:0;color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.pnr{display:block;color:var(--good);font-family:var(--fh);font-size:42px;line-height:1.1;letter-spacing:.08em}.success-route{margin:16px 0;padding:12px;border-radius:12px;background:var(--bg);font-weight:600}.booking-success h3{text-align:left;margin:18px 0 4px;font-size:16px}.itinerary-summary{display:grid;gap:16px}.itinerary-summary__section{display:grid;gap:8px}.itinerary-summary__section h3{margin:0;font-size:18px}.itinerary-summary__card{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.itinerary-summary__card p{margin:0;font-size:14px;line-height:1.45;color:var(--ink)}.itinerary-summary__booking{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 14px;border-radius:12px;background:#003580;color:#fff;text-decoration:none;font-weight:700}.itinerary-summary__booking:hover{color:#fff;filter:brightness(1.08)}.daily-budget{display:grid;gap:14px}.daily-budget__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.daily-budget__field{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.daily-budget__field span{font-size:13px;font-weight:700}.daily-budget__input-wrap{display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg)}.daily-budget__input-wrap span{font-size:13px;color:var(--ink2)}.daily-budget__input-wrap input{flex:1;height:44px;border:0;background:transparent;padding:0;font-size:16px;color:var(--ink);outline:none}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}.transfer-wizard{display:grid;gap:18px}.transfer-flight-sync{display:grid;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-flight-sync p{margin:0}.transfer-flight-sync--empty{color:var(--ink2);font-size:13px}.transfer-flight-leg{display:grid;gap:6px}.transfer-flight-leg:not(:first-child){padding-top:12px;border-top:1px dashed var(--line)}.transfer-flight-leg .flight-route{margin:0}.transfer-flight-leg__number{color:var(--ink2)}.transfer-step{display:grid;gap:16px}.transfer-step__header{display:grid;gap:6px}.transfer-step__badge{display:inline-flex;align-items:center;justify-content:center;width:max-content;padding:5px 9px;border-radius:999px;background:var(--cel-soft);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}.transfer-step h3{margin:0;font-family:var(--fh);font-size:28px;line-height:1.1}.transfer-pickup-options{display:grid;gap:10px}.transfer-pickup-option{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer}.transfer-pickup-option.selected{border-color:var(--selected-border);background:var(--selected-bg)}.transfer-pickup-option input{margin-top:3px}.transfer-pickup__content{display:grid;gap:6px;flex:1;min-width:0}.transfer-pickup__content strong{font-size:14px;line-height:1.35}.transfer-pickup__time{display:block;font-size:12px;color:var(--ink2)}.transfer-custom-time{width:100%;max-width:180px;height:42px;padding:0 10px;border:1px solid var(--control-line);border-radius:10px;background:var(--control-bg)}.transfer-field{display:grid;gap:8px}.transfer-field span{font-size:13px;font-weight:700}.transfer-field input{width:100%;height:46px;padding:0 12px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg)}.transfer-summary-box{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-summary-box p{margin:0;color:var(--ink);font-size:14px}.transfer-summary-box b{color:var(--ink)}.transfer-field input[type="file"]{padding:11px 12px;height:auto}.transfer-step .bank-details{margin:0}@media (max-width:560px){.daily-budget__grid{grid-template-columns:1fr}}.booking-success ul{text-align:left;margin:0;padding-left:20px}.booking-success .booking-note{margin-top:18px}
 @media (max-width:560px){.booking-modal{padding:0;align-items:end}.booking-dialog{max-height:94vh;border-radius:25px 25px 0 0;padding:22px 16px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}.booking-dialog h2{font-size:32px}.passenger-grid{grid-template-columns:1fr}.passenger-fields{padding:13px}}
 .voucher-dialog{gap:18px;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);border:1px solid rgba(16,35,62,.12);padding:30px;overflow-x:hidden}.voucher-head{padding-bottom:4px;border-bottom:1px dashed #cbd5e1}.voucher-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.voucher-head h2{margin:7px 40px 5px 0}.voucher-head p{margin:0;color:var(--ink2);font-size:14px}.voucher-total{display:grid;gap:5px;padding:18px 20px;border-radius:18px;background:#10233e;color:#fff;box-shadow:0 12px 24px rgba(16,35,62,.16)}.voucher-total span{font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.8}.voucher-total strong{font-family:var(--fh);font-size:40px;line-height:1}.voucher-total__pp{display:inline-flex;align-self:start;margin-top:2px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.14);font-size:12px;font-weight:800}.voucher-total small{font-size:12px;opacity:.72}.voucher-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.voucher-card{display:flex;gap:10px;min-width:0;padding:14px;border:1px solid #dbe3ee;border-radius:16px;background:#fff}.voucher-icon{font-size:22px;line-height:1}.voucher-card div{display:grid;gap:4px;min-width:0}.voucher-card small{color:var(--ink2);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.voucher-card strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.voucher-card p{margin:0;color:var(--ink2);font-size:11px;line-height:1.35}.voucher-card b{font-family:var(--fh);font-size:20px}.voucher-section{display:grid;gap:12px;padding:18px;border:1px solid #dbe3ee;border-radius:18px;background:#fff}.voucher-section__title{display:flex;gap:10px;align-items:flex-start}.voucher-section__title>span{font-size:23px}.voucher-section__title h3{margin:0;font-size:19px}.voucher-section__title p{margin:3px 0 0;color:var(--ink2);font-size:12px}.voucher-breakdown{display:grid;gap:8px}.voucher-breakdown>div{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:11px 0;border-top:1px solid #edf1f6}.voucher-breakdown span{font-size:13px;font-weight:700}.voucher-breakdown b{font-size:13px}.voucher-breakdown em{font-style:normal;color:#0b6bcb;font-size:12px;font-weight:800}.voucher-actions{display:grid;gap:9px}.voucher-whatsapp,.voucher-copy,.voucher-instagram{min-height:48px;border:0;border-radius:13px;padding:0 16px;font-size:14px;font-weight:800;cursor:pointer}.voucher-whatsapp{background:#25d366;color:#063b1e;box-shadow:0 8px 18px rgba(37,211,102,.2)}.voucher-instagram{background:linear-gradient(135deg,#feda75,#d62976 60%,#4f5bd5);color:#fff;box-shadow:0 8px 18px rgba(214,41,118,.25)}.voucher-instagram:disabled{opacity:.7;cursor:wait}.voucher-copy{border:1px solid #cbd5e1;background:#fff;color:var(--ink)}.voucher-copy-status{min-height:16px;color:var(--good);font-size:12px;text-align:center}.voucher-dialog .itinerary-summary__booking{width:100%;background:#eaf2ff;color:#0b4f97}.voucher-dialog .itinerary-summary__booking:hover{color:#0b4f97}@media (max-width:560px){.voucher-dialog{padding:22px 16px}.voucher-grid{grid-template-columns:1fr}.voucher-total strong{font-size:34px}.voucher-breakdown>div{grid-template-columns:1fr auto}.voucher-breakdown em{grid-column:2}}
-
 /* Color por categoría en el resumen final, también en vista móvil. */
 .voucher-card{border-width:1px 1px 1px 4px}
 .voucher-card:nth-child(1){border-color:#bfdbfe #bfdbfe #bfdbfe #2563eb;background:linear-gradient(110deg,#eff6ff,#fff 78%)}
@@ -427,7 +411,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .voucher-card:nth-child(4){border-color:#fecdd3 #fecdd3 #fecdd3 #e11d48;background:linear-gradient(110deg,#fff1f2,#fff 78%)}
 .voucher-section{border-color:#bbf7d0;background:linear-gradient(145deg,#f0fdf4,#fff 70%)}
 .voucher-section__title>span{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border-radius:13px;background:#dcfce7}
-
 /* Guía gastronómica desbloqueable */
 .food-guide{position:relative;overflow:hidden;margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}
 .food-guide-head{display:flex;align-items:flex-start;gap:12px}
@@ -446,7 +429,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .guide-unlock:hover{color:#fff;transform:translateY(-2px);filter:brightness(1.12);box-shadow:0 9px 18px rgba(0,53,128,.3)}
 .guide-unlock:active{transform:translateY(0)}
 @media (max-width:560px){.food-guide{padding:16px}.food-guide h2{font-size:28px}.guide-lock{inset:94px 8px 8px;padding:16px}.guide-unlock{width:100%}}
-
 /* Sin backdrop-filter: más abajo (patch de contraste) el fondo se sobreescribe
    con --surface opaco, así que el blur era 100% invisible y aun así obligaba al
    compositor a difuminar el fondo en cada repintado de un elemento position:
@@ -471,7 +453,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .daily-budget__option--custom.is-selected{align-items:stretch;gap:6px;cursor:default}.daily-budget__option--custom.is-selected:hover{transform:none}.daily-budget__option--custom .daily-budget__planned{width:100%;gap:5px;padding:0}.daily-budget__option--custom .daily-budget__planned>span{font-size:11px}.daily-budget__option--custom .daily-budget__input-wrap{max-width:none;min-height:42px;padding:0 8px;background:var(--surface)}.daily-budget__option--custom .daily-budget__input-wrap input{min-width:0;height:38px;font-size:16px}
 .daily-budget__option--custom.is-selected{min-width:0;overflow:hidden}.daily-budget__option--custom.is-selected .daily-budget__planned,.daily-budget__option--custom.is-selected .daily-budget__input-wrap{box-sizing:border-box;min-width:0;max-width:100%;width:100%}.daily-budget__option--custom.is-selected .daily-budget__input-wrap{overflow:hidden;gap:5px}.daily-budget__option--custom.is-selected .daily-budget__input-wrap input{box-sizing:border-box;flex:1 1 0;width:100%;min-width:0;max-width:100%}
 @media(max-width:560px){.date-range-panel{padding:12px}.date-range-months{grid-template-columns:1fr}.date-range-month:nth-child(n+2){display:none}.date-range-grid{gap:2px}.date-range-day{font-size:14px}}
-
 .flight-search{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.flight-search>div:first-child{display:flex;justify-content:space-between;gap:16px;align-items:center}.flight-search h2{font-family:var(--fh);font-size:34px;line-height:1;margin:0}.flight-search p{margin:5px 0 0;color:var(--ink2);font-size:13px}.flight-results:empty{display:none}.flight-loading,.flight-empty{margin:16px 0 0;padding:12px;border-radius:12px;background:var(--bg);font-size:13px;color:var(--ink2)}
 @media (max-width:560px){.flight-search>div:first-child{display:block}}
 .transport-options{margin:0 0 28px}.transport-options h2{font-family:var(--fh);font-size:36px;line-height:1;margin:0 0 12px}.transport-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;display:grid;gap:12px}.transport-card label{font-weight:700;cursor:pointer}.transport-card input{accent-color:var(--cel);margin-right:7px}.transport-detail{border-top:1px solid var(--line);padding-top:10px;color:var(--ink2);font-size:13px}.transport-detail p{margin:5px 0}.btn-transfer{border:0;border-radius:13px;background:#003580;color:#fff;padding:12px 16px;font-weight:700;cursor:pointer}.bank-details{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0}.bank-details p{margin:5px 0}
@@ -496,7 +477,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .card-brand-row{display:flex;align-items:center;gap:8px;color:var(--ink2)}.card-brand-row span{font-size:22px}.card-brand-row small{padding:4px 7px;border:1px solid var(--line);border-radius:6px;background:#fff;font-size:10px;font-weight:800}.card-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card-demo-note{margin:2px 0 0;color:var(--ink2);font-size:11px}
 .account-button--danger{min-width:38px;padding:0 8px;border:1px solid #f2b8ae;background:#fff4f1;color:#b42318}.account-button--danger:hover{background:#ffe3dd;border-color:#d92d20}
 @media (max-width:560px){.transfer-choice-grid{grid-template-columns:1fr}}
-
 /* Theme-aware form and action contrast, including system dark mode on mobile. */
 .find-destinations,.btn-buscar-todos,.btn-ver-propuesta,.account-button:not(.account-button--secondary):not(.account-button--danger){background:var(--action-bg);color:var(--action-ink);border:1px solid var(--action-border)}
 .inp::placeholder{color:var(--ink2);opacity:1}
@@ -535,7 +515,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .trip-summary.minimized .trip-summary__details{display:none}
   .trip-summary.minimized .trip-summary__toggle-icon{transform:rotate(180deg)}
 }
-
 .hotel-nearby-note{grid-column:1/-1;margin:0;padding:12px 14px;border-radius:12px;background:var(--cel-soft);color:var(--ink2);font-size:13px}
 .hotel-options-empty{padding:24px}
 .daily-budget__option:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -548,7 +527,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
      .skeleton-box, .hotel-skeleton-card) con 'infinite' y sin ningun guard.
      Una persona con movimiento reducido puesta a ver skeletons latiendo
      indefinidamente en cada busqueda no la va a volver a abrir.
-
      Este bloque global es el patron correcto: en vez de envolver cada
      animacion nueva en un prefers-reduced-motion:no-preference (que es como
      se escribieron dos de las tres existentes y es facil de olvidar), se
@@ -644,7 +622,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .tour-detail-modal__copy{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
 .tour-detail-modal__copy p{margin:0;color:var(--ink);font-size:14px;line-height:1.7}
 .tour-detail-modal__hint{margin:16px 0 0;color:var(--ink2);font-size:12px;line-height:1.5}
-
 /* Destinos destacados para explorar antes de cotizar.
    La tarjeta es una "foto con texto encima": imagen arriba, scrim para que el
    texto siempre tenga contraste, y el precio en ámbar para que sea lo primero
@@ -747,15 +724,10 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .account-actions .account-button{min-height:44px;max-width:30vw;padding:0 9px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .logo{font-size:18px}
 }
-
 @media(max-width:520px){.multistay-panel__stays{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.multistay-panel__stay:last-child{text-align:left}.multistay-panel__slider{grid-column:1/-1;grid-row:2}.multistay-panel__slider input{transform:none;width:100%;margin:0}}
-
-
 /* Reparto de noches para itinerarios multidestino */
 .multistay-panel{margin:0 0 22px;padding:20px;border:1px solid #dce5ee;border-radius:20px;background:linear-gradient(145deg,#fff 0%,#f7faff 100%);box-shadow:0 8px 26px rgba(16,35,62,.06)}.multistay-panel__head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.multistay-panel__eyebrow{display:block;color:#48617f;font-size:10px;font-weight:800;letter-spacing:.12em}.multistay-panel h2{margin:4px 0 0;color:#10233e;font-family:var(--fh);font-size:30px;line-height:1}.multistay-panel__total{flex:none;padding:7px 10px;border-radius:999px;background:#e8efff;color:#183b70;font-size:12px;font-weight:700}.multistay-panel__stays{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,.8fr) minmax(0,1fr);align-items:center;gap:14px}.multistay-panel__stay{display:grid;gap:5px;color:#10233e}.multistay-panel__stay strong{font-size:15px}.multistay-panel__stay>span{font-size:14px;color:#48617f}.multistay-panel__stay small{color:#48617f;font-size:11px;line-height:1.35}.multistay-panel__stay:last-child{text-align:right}.multistay-panel__slider input{width:100%;accent-color:var(--cel);cursor:pointer}.multistay-panel__logistics{margin:16px 0 0;padding:12px;border-radius:12px;background:#edf4ff;color:#183b70;font-size:12px;line-height:1.5}.multistay-panel__hint,.hotel-multistay-note{margin:8px 0 0;color:#65758a;font-size:11px;line-height:1.45}.detail-summary__per-person{display:block;margin-top:6px;color:var(--hero-soft);font-size:14px;font-weight:600}.hotel-multistay-note{font-weight:600}@media(max-width:520px){.multistay-panel{padding:16px;border-radius:16px}.multistay-panel__head{align-items:flex-start;flex-direction:column;gap:8px}.multistay-panel__stays{grid-template-columns:1fr 76px 1fr;gap:8px}.multistay-panel__stay strong{font-size:13px}.multistay-panel__stay small{font-size:10px}.multistay-panel__slider input{transform:rotate(-90deg);width:74px;margin:0 -1px}.multistay-panel__logistics{font-size:11px}}
-
 @media(max-width:520px){.multistay-panel__stays{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.multistay-panel__stay:last-child{text-align:left}.multistay-panel__slider{grid-column:1/-1;grid-row:2}.multistay-panel__slider input{transform:none;width:100%;margin:0}}
-
 /* Detail summary: font-size más chico y mejor legibilidad en mobile */
 @media(max-width:560px){
   .detail-summary{padding:20px;border-radius:22px}
@@ -765,20 +737,17 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .detail-summary__per-person{font-size:13px}
   .detail-section>h2{font-size:28px}
 }
-
 /* -------------------------------------------------------
    Selector de moneda
    Un badge con el codigo de la moneda activa; el clic avanza a la siguiente.
    Sigue siendo deliberadamente liviano para no competir con el boton de sesion,
    pero "liviano" no puede significar "ilegible":
-
    - mide 32px de alto, el objetivo tactil mas chico del header, y la regla
      de <=560px sube .account-button a 36px pero no tocaba el badge.
    - el borde era --line (1.27:1 sobre blanco): no se leia como un control.
    - no tenia ninguna senal de que fuera pulsable: sin chevron, sin globo, sin
      desplegable, solo tres letras en una caja gris. Como cicla a la siguiente
      moneda, no habia nada en pantalla que indicara que habia N opciones.
-
    Ahora: 44px de alto, borde a 3:1 y un chevron que se dibuja con ::after
    (asi el markup del badge no cambia y el refresco por outerHTML lo mantiene).
    ------------------------------------------------------- */
@@ -786,13 +755,12 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    oscura de resumen de la propuesta, y competía con el total grande: dos
    controles de moneda en pantalla y ninguno de los dos hacía falta ahí. */
 .sec__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.currency-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  min-width:62px;min-height:44px;padding:0 11px;margin:0;border:1.5px solid var(--control-line);
-  border-radius:12px;background:var(--control-bg);color:var(--ink);cursor:pointer;
-  transition:border-color .16s ease,background .16s ease,transform .12s ease}
-.currency-badge::after{content:"";width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-top:4.5px solid currentColor;opacity:.55}
+.currency-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:5px; min-width:62px;min-height:44px;padding:0 6px;margin:0;border:0; border-radius:12px;background:transparent;color:var(--ink);cursor:pointer; transition:background .16s ease,transform .12s ease}
 .currency-badge>b{font-size:14px;font-weight:800;letter-spacing:.02em;line-height:1}
-.currency-badge:hover{border-color:var(--cel);background:var(--cel-soft)}
+  .currency-badge__chevron{flex:0 0 auto;width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6;transition:transform .16s ease}
+.currency-badge:hover{background:var(--cel-soft)}
+  .currency-badge:hover .currency-badge__chevron{opacity:.9}
+  .currency-badge[aria-expanded="true"] .currency-badge__chevron{transform:rotate(180deg)}
 .currency-badge:active{transform:scale(.96)}
 /* el mismo --focus que el resto de la app, para que se lea igual */
 .currency-badge:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -816,7 +784,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @media (max-width:560px){
   .sec__head{gap:10px}
 }
-
 /* ---------- salto del desglose / "Mi Viaje" a la seccion del rubro ----------
    Las filas de "A donde va tu plata" y los rubros del panel "Mi Viaje" son
    <button>: el desglose dice cuanto plata va a cada cosa y el clic lleva a
@@ -858,5 +825,4 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @media (max-width:768px){
   [data-budget-anchor]{scroll-margin-bottom:150px}
 }
-
 @media (prefers-reduced-motion:reduce){.origin__control button svg{transition:none}}

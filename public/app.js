@@ -333,39 +333,69 @@
   // ofrecen; el resto tiene entre 1 y 8.
   var DESTINATION_GROUPS = [
     { id: 'rio', label: 'Río de Janeiro', image: 'rio', keys: ['rio'], subcategories: [
-      { label: 'Réveillon Copacabana (31/12)', key: 'rio' }, { label: 'Zona Sur / Ipanema', key: 'rio' }, { label: 'Centro Histórico', key: 'rio' }
+      { label: 'Réveillon Copacabana (31/12)', key: 'rio' }, { label: 'Zona Sur / Ipanema', key: 'rio' }, { label: 'Centro Histórico', key: 'rio' },
+      { label: 'Río + Búzios', key: 'rio', secondKey: 'buz' },
+      { label: 'Río + Angra dos Reis', key: 'rio', secondKey: 'angra' },
     ] },
     { id: 'buzios', label: 'Búzios / Arraial do Cabo / Cabo Frio', image: 'buz', keys: ['buz', 'arraial', 'cabo'], subcategories: [
-      { label: 'Búzios + Arraial do Cabo', key: 'buz' }, { label: 'Sólo Búzios', key: 'buz' },
-      { label: 'Arraial do Cabo', key: 'arraial' },
+      // La primera subcategoria es la que abre la tarjeta cuando no hay selector
+      // de zona, asi que va primera y trae el secondKey. Antes la segunda repetia
+      // este mismo nombre y la tapaba: secondKeyForSubcategory() corta en la
+      // primera coincidencia, matcheaba la que no lo tenia y devolvia vacio.
       { label: 'Búzios + Arraial do Cabo', key: 'buz', secondKey: 'arraial' },
+      { label: 'Sólo Búzios', key: 'buz' },
+      { label: 'Arraial do Cabo', key: 'arraial' },
+      { label: 'Cabo Frio + Arraial do Cabo', key: 'cabo', secondKey: 'arraial' },
       { label: 'Ruta de Playas (Cabo Frio)', key: 'cabo' },
-      { label: 'Cabo Frio + Arraial do Cabo', key: 'cabo', secondKey: 'arraial' }
+      { label: 'Búzios + Arraial do Cabo', key: 'buz', secondKey: 'arraial' },
+      { label: 'Búzios + Cabo Frio', key: 'buz', secondKey: 'arraial' },
     ] },
     { id: 'costaverde', label: 'Costa Verde (Ilhabela / Ubatuba / Paraty)', image: 'ilhabela', keys: ['paraty', 'ubatuba', 'ilhabela', 'angra', 'ilha'], subcategories: [
       { label: 'Paraty Histórico', key: 'paraty' }, { label: 'Ubatuba Playas', key: 'ubatuba' },
-      { label: 'Ilhabela', key: 'ilhabela' }, { label: 'Angra dos Reis', key: 'angra' }, { label: 'Ilha Grande', key: 'ilha' }
+      { label: 'Ilhabela', key: 'ilhabela' }, { label: 'Angra dos Reis', key: 'angra' }, { label: 'Ilha Grande', key: 'ilha' },
+      { label: 'Paraty + Ubatuba', key: 'paraty', secondKey: 'ubatuba' },
+      { label: 'Ubatuba + Ilhabela', key: 'ubatuba', secondKey: 'ilhabela' },
+      { label: 'Paraty + Ilhabela', key: 'paraty', secondKey: 'ilhabela' },
+      { label: 'Angra dos Reis + Ilha Grande', key: 'angra', secondKey: 'ilha' },
     ] },
     { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
       { label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
       { label: 'Balneário Camboriú', key: 'bcm' }, { label: 'Itapema', key: 'itapema' },
       { label: 'Bombinhas', key: 'bombinhas' }, { label: 'Garopaba', key: 'garopaba' },
-      { label: 'Praia do Rosa', key: 'rosa' }, { label: 'Ferrugem', key: 'ferrugem' }, { label: 'Piçarras', key: 'picarras' }
+      { label: 'Praia do Rosa', key: 'rosa' }, { label: 'Ferrugem', key: 'ferrugem' }, { label: 'Piçarras', key: 'picarras' },
+      { label: 'Florianópolis + Balneário Camboriú', key: 'fln', secondKey: 'bcm' },
+      { label: 'Balneário Camboriú + Itapema', key: 'bcm', secondKey: 'itapema' },
+      { label: 'Itapema + Piçarras', key: 'itapema', secondKey: 'picarras' },
+      { label: 'Florianópolis + Bombinhas', key: 'fln', secondKey: 'bombinhas' },
+      { label: 'Bombinhas + Garopaba', key: 'bombinhas', secondKey: 'garopaba' },
+      { label: 'Garopaba + Ferrugem', key: 'garopaba', secondKey: 'ferrugem' },
+      { label: 'Ferrugem + Praia do Rosa', key: 'ferrugem', secondKey: 'rosa' },
     ] },
     { id: 'litoralrs', label: 'Litoral de Rio Grande do Sul', image: 'gram', keys: ['torres', 'canoa'], subcategories: [
-      { label: 'Torres', key: 'torres' }, { label: 'Capão da Canoa', key: 'canoa' }
+      { label: 'Torres', key: 'torres' }, { label: 'Capão da Canoa', key: 'canoa' },
+      { label: 'Torres + Capão da Canoa', key: 'torres', secondKey: 'canoa' },
     ] },
     { id: 'bahia', label: 'Bahía', image: 'ssa', keys: ['ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso'], subcategories: [
       { label: 'Salvador de Bahía', key: 'ssa' }, { label: 'Porto Seguro', key: 'portoseguro' },
       { label: 'Praia do Forte', key: 'forte' }, { label: 'Morro de São Paulo', key: 'morro' },
-      { label: 'Itacaré', key: 'itacare' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso' }
+      { label: 'Itacaré', key: 'itacare' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso' },
+      { label: 'Salvador + Praia do Forte', key: 'ssa', secondKey: 'forte' },
+      { label: 'Salvador + Porto Seguro', key: 'ssa', secondKey: 'portoseguro' },
+      { label: 'Salvador + Morro de São Paulo', key: 'ssa', secondKey: 'morro' },
+      { label: 'Salvador + Arraial d\'Ajuda', key: 'ssa', secondKey: 'trancoso' },
+      { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', secondKey: 'trancoso' },
     ] },
     { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for'], subcategories: [
       { label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' },
       { label: 'Maragogi', key: 'maragogi' }, { label: 'Maceió (Resort)', key: 'mcz', hotelType: 'resort' },
       { label: 'Recife', key: 'rec' }, { label: 'João Pessoa', key: 'joaopessoa' },
       { label: 'Natal', key: 'nat' }, { label: 'Pipa', key: 'pip' },
-      { label: 'Fortaleza / Jericoacoara', key: 'for' }
+      { label: 'Fortaleza / Jericoacoara', key: 'for' },
+      { label: 'Natal + Pipa', key: 'nat', secondKey: 'pip' },
+      { label: 'Recife + Porto de Galinhas', key: 'rec', secondKey: 'porto' },
+      { label: 'Recife + João Pessoa', key: 'rec', secondKey: 'joaopessoa' },
+      { label: 'Maceió + Maragogi', key: 'mcz', secondKey: 'maragogi' },
+      { label: 'Natal + Fortaleza', key: 'nat', secondKey: 'for' },
     ] },
     { id: 'buenosaires', label: 'Buenos Aires', image: 'bue', keys: ['bue'], subcategories: [
       { label: 'Centro / Recoleta', key: 'bue' }, { label: 'Palermo / Zona Norte', key: 'bue' }, { label: 'Escapada de Fin de Semana', key: 'bue' }
@@ -495,32 +525,70 @@
       { label: 'Río de Janeiro (Centro / Sur)', key: 'rio', codes: 'RIO GIG SDU', subcategory: 'Zona Sur / Ipanema' },
       { label: 'Búzios', key: 'buz', codes: 'GIG SDU' }, { label: 'Arraial do Cabo', key: 'arraial', codes: 'GIG SDU' },
       { label: 'Cabo Frio', key: 'cabo', codes: 'GIG SDU' },
-      { label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' }, { label: 'Angra dos Reis', key: 'angra', codes: 'GIG SDU' }
+      { label: 'Ilha Grande', key: 'ilha', codes: 'GIG SDU' }, { label: 'Angra dos Reis', key: 'angra', codes: 'GIG SDU' },
+      { label: 'Búzios + Arraial do Cabo', key: 'buz', codes: 'GIG SDU', subcategory: 'Búzios + Arraial do Cabo' },
+      { label: 'Búzios + Cabo Frio', key: 'buz', codes: 'GIG SDU', subcategory: 'Búzios + Cabo Frio' },
+      { label: 'Río + Búzios', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Búzios' },
+      { label: 'Río + Angra dos Reis', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Angra dos Reis' },
+      { label: 'Angra dos Reis + Ilha Grande', key: 'angra', codes: 'GIG SDU', subcategory: 'Angra dos Reis + Ilha Grande' }
+      // Los pares van al final del hub, con el nombre a la vista, para que un
+      // destino suelto y un viaje de dos paradas no se confundan.
     ] },
     { name: 'San Pablo', codes: 'GRU / CGH', options: [
       { label: 'Ilhabela', key: 'ilhabela', codes: 'GRU CGH' }, { label: 'Ubatuba', key: 'ubatuba', codes: 'GRU CGH' },
-      { label: 'Paraty', key: 'paraty', codes: 'GRU CGH' }
+      { label: 'Paraty', key: 'paraty', codes: 'GRU CGH' },
+      { label: 'Paraty + Ubatuba', key: 'paraty', codes: 'GRU CGH', subcategory: 'Paraty + Ubatuba' },
+      { label: 'Ubatuba + Ilhabela', key: 'ubatuba', codes: 'GRU CGH', subcategory: 'Ubatuba + Ilhabela' },
+      { label: 'Paraty + Ilhabela', key: 'paraty', codes: 'GRU CGH', subcategory: 'Paraty + Ilhabela' }
+      // Los pares van al final del hub, con el nombre a la vista, para que un
+      // destino suelto y un viaje de dos paradas no se confundan.
     ] },
     { name: 'Santa Catarina', codes: 'FLN', options: [
       { label: 'Florianópolis', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis (Canasvieiras / Ingleses)' },
       { label: 'Balneário Camboriú', key: 'bcm', codes: 'FLN' }, { label: 'Itapema', key: 'itapema', codes: 'FLN' },
       { label: 'Bombinhas', key: 'bombinhas', codes: 'FLN' }, { label: 'Garopaba', key: 'garopaba', codes: 'FLN' },
       { label: 'Praia do Rosa', key: 'rosa', codes: 'FLN' }, { label: 'Ferrugem', key: 'ferrugem', codes: 'FLN' },
-      { label: 'Piçarras', key: 'picarras', codes: 'FLN' }
+      { label: 'Piçarras', key: 'picarras', codes: 'FLN' },
+      { label: 'Florianópolis + Balneário Camboriú', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Balneário Camboriú' },
+      { label: 'Balneário Camboriú + Itapema', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Itapema' },
+      { label: 'Itapema + Piçarras', key: 'itapema', codes: 'FLN', subcategory: 'Itapema + Piçarras' },
+      { label: 'Florianópolis + Bombinhas', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Bombinhas' },
+      { label: 'Bombinhas + Garopaba', key: 'bombinhas', codes: 'FLN', subcategory: 'Bombinhas + Garopaba' },
+      { label: 'Garopaba + Ferrugem', key: 'garopaba', codes: 'FLN', subcategory: 'Garopaba + Ferrugem' },
+      { label: 'Ferrugem + Praia do Rosa', key: 'ferrugem', codes: 'FLN', subcategory: 'Ferrugem + Praia do Rosa' }
+      // Los pares van al final del hub, con el nombre a la vista, para que un
+      // destino suelto y un viaje de dos paradas no se confundan.
     ] },
     { name: 'Rio Grande do Sul', codes: 'POA', options: [
-      { label: 'Torres', key: 'torres', codes: 'POA' }, { label: 'Capão da Canoa', key: 'canoa', codes: 'POA' }
+      { label: 'Torres', key: 'torres', codes: 'POA' }, { label: 'Capão da Canoa', key: 'canoa', codes: 'POA' },
+      { label: 'Torres + Capão da Canoa', key: 'torres', codes: 'POA', subcategory: 'Torres + Capão da Canoa' }
+      // Los pares van al final del hub, con el nombre a la vista, para que un
+      // destino suelto y un viaje de dos paradas no se confundan.
     ] },
     { name: 'Bahía', codes: 'SSA', options: [
       { label: 'Salvador de Bahía', key: 'ssa', codes: 'SSA' }, { label: 'Porto Seguro', key: 'portoseguro', codes: 'SSA' },
       { label: 'Praia do Forte', key: 'forte', codes: 'SSA' }, { label: 'Morro de São Paulo', key: 'morro', codes: 'SSA' },
-      { label: 'Itacaré', key: 'itacare', codes: 'SSA' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso', codes: 'SSA' }
+      { label: 'Itacaré', key: 'itacare', codes: 'SSA' }, { label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso', codes: 'SSA' },
+      { label: 'Salvador + Praia do Forte', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Praia do Forte' },
+      { label: 'Salvador + Porto Seguro', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Porto Seguro' },
+      { label: 'Salvador + Morro de São Paulo', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Morro de São Paulo' },
+      { label: 'Salvador + Arraial d\'Ajuda', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Arraial d\'Ajuda' },
+      { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Arraial d\'Ajuda' }
+      // Los pares van al final del hub, con el nombre a la vista, para que un
+      // destino suelto y un viaje de dos paradas no se confundan.
     ] },
     { name: 'Nordeste', codes: 'REC / MCZ / SSA / NAT / JPA / FOR', options: [
       { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' }, { label: 'Maragogi', key: 'maragogi', codes: 'MCZ' },
       { label: 'Maceió', key: 'mcz', codes: 'MCZ' }, { label: 'Recife', key: 'rec', codes: 'REC' },
       { label: 'João Pessoa', key: 'joaopessoa', codes: 'JPA' }, { label: 'Natal', key: 'nat', codes: 'NAT' },
-      { label: 'Pipa', key: 'pip', codes: 'NAT' }, { label: 'Fortaleza / Jericoacoara', key: 'for', codes: 'FOR' }
+      { label: 'Pipa', key: 'pip', codes: 'NAT' }, { label: 'Fortaleza / Jericoacoara', key: 'for', codes: 'FOR' },
+      { label: 'Natal + Pipa', key: 'nat', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Natal + Pipa' },
+      { label: 'Recife + Porto de Galinhas', key: 'rec', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Recife + Porto de Galinhas' },
+      { label: 'Recife + João Pessoa', key: 'rec', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Recife + João Pessoa' },
+      { label: 'Maceió + Maragogi', key: 'mcz', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Maceió + Maragogi' },
+      { label: 'Natal + Fortaleza', key: 'nat', codes: 'REC / MCZ / NAT / JPA / FOR', subcategory: 'Natal + Fortaleza' }
+      // Los pares van al final del hub, con el nombre a la vista, para que un
+      // destino suelto y un viaje de dos paradas no se confundan.
     ] },
     { name: 'Buenos Aires', codes: 'EZE / AEP', options: [
       { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE' },
@@ -788,7 +856,12 @@
       + '<button type="button" class="currency-badge" data-currency-toggle aria-haspopup="listbox" aria-expanded="false"'
       + ' aria-label="Moneda: ' + esc(m.etiqueta) + '. Cambiar"'
       + ' title="' + esc(m.etiqueta) + (hay ? '' : ' (cargando tasas)') + '">'
-      + '<b>' + esc(m.code) + '</b></button>'
+      + '<b>' + esc(m.code) + '</b>'
+      // El chevron va como SVG y no como triangulo de bordes con ::after: es la
+      // misma "v" de trazo que usan los otros cinco controles, y asi no depende
+      // de que la fuente tenga el glifo. El texto queda en el <b>.
+      + '<svg class="currency-badge__chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+      + '<path d="m6 9 6 6 6-6"/></svg></button>'
       + '<div class="currency-menu" role="listbox" aria-label="Elegí la moneda" hidden>' + opciones + '</div>'
       + '</div>';
   }
