@@ -14,10 +14,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=74">
+
+<link rel="stylesheet" href="/style.css?v=75">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
+
 </head>
 <body>
 <div class="wrap">
@@ -40,7 +42,7 @@
     <div class="origin" id="origin-picker">
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
       <label for="origin-input">Salís desde</label>
-      <div class="origin__control"><input id="origin-input" type="text" value="Montevideo (MVD)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="origin-menu" aria-label="Aeropuerto de origen, buscá por ciudad o código IATA"><button id="origin-toggle" type="button" aria-label="Mostrar aeropuertos disponibles" aria-expanded="false">▾</button></div>
+      <div class="origin__control"><input id="origin-input" type="text" value="Montevideo (MVD)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="origin-menu" aria-label="Aeropuerto de origen, buscá por ciudad o código IATA"><button id="origin-toggle" type="button" aria-label="Mostrar aeropuertos disponibles" aria-expanded="false"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg></button></div>
       <div id="origin-menu" class="origin__menu" role="listbox" aria-label="Aeropuertos de salida" hidden><button type="button" role="option" data-origin-code="MVD"><strong>Montevideo</strong><span>Aeropuerto Internacional de Carrasco · MVD</span></button><button type="button" role="option" data-origin-code="PDP"><strong>Punta del Este</strong><span>Aeropuerto Internacional de Laguna del Sauce · PDP</span></button></div>
     </div>
     <div>
@@ -63,7 +65,7 @@
         <button type="button" id="ret-trigger" class="date-range-field" aria-haspopup="dialog" aria-controls="date-range-panel" aria-expanded="false"><span>Vuelta</span><strong id="ret-label">Elegí una fecha</strong></button>
       </div>
       <div id="date-range-panel" class="date-range-panel" role="dialog" aria-label="Elegí las fechas de tu viaje" hidden>
-        <div class="date-range-panel__top"><button type="button" class="date-range-nav" data-calendar-nav="prev" aria-label="Mes anterior">‹</button><p id="date-range-instruction" aria-live="polite">Elegí la fecha de ida</p><button type="button" class="date-range-nav" data-calendar-nav="next" aria-label="Mes siguiente">›</button></div>
+        <div class="date-range-panel__top"><button type="button" class="date-range-nav" data-calendar-nav="prev" aria-label="Mes anterior"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m15 6-6 6 6 6"/></svg></button><p id="date-range-instruction" aria-live="polite">Elegí la fecha de ida</p><button type="button" class="date-range-nav" data-calendar-nav="next" aria-label="Mes siguiente"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 6 6 6-6 6"/></svg></button></div>
         <div id="date-range-months" class="date-range-months"></div>
       </div>
       <input id="dep" type="date" tabindex="-1" aria-hidden="true" hidden>
@@ -73,9 +75,9 @@
       <div>
         <span class="lbl" id="paxl">Viajeros</span>
         <div class="step" role="group" aria-labelledby="paxl">
-          <button type="button" id="pm" aria-label="Un viajero menos">−</button>
+          <button type="button" id="pm" aria-label="Un viajero menos"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14"/></svg></button>
           <output id="pax" aria-live="polite">2</output>
-          <button type="button" id="pp" aria-label="Un viajero más">+</button>
+          <button type="button" id="pp" aria-label="Un viajero más"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
       <div>
@@ -129,12 +131,14 @@
 </div>
 
 <script defer src="/pwa.js"></script>
+
 <!-- GENERADO desde lib/model.js con `npm run build:costos`. Tiene que ir antes
      de app.js porque app.js lee el global al cargar. Sin '?v=' a proposito: lo
      invalida el CACHE_NAME del service worker, que es lo que controla su
      frescura. Si le pusiéramos version propia, volvería a pasar lo de app.js:
      un archivo actualizado que el cache sirve viejo para siempre. -->
 <script defer src="/daily-costs.js"></script>
-<script defer src="/app.js?v=96"></script>
+<script defer src="/app.js?v=98"></script>
+
 </body>
 </html>

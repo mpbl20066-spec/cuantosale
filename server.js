@@ -1012,15 +1012,47 @@ async function cotizar(req, res, url) {
   v.S.hotelType = hotelType;
   const result = adaptPackagesToStyle(model.compute(v.S, v.dep, v.ret, today, quotes), v.S, v.dep, v.ret, today);
   const recommendedProposal = result.list.find(function (proposal) { return proposal.id === result.recId; });
-  const isBuziosArraial = /b[uú]zios\s*\+\s*arraial/i.test(subcategory);
-  const multiStay = isBuziosArraial && recommendedProposal ? {
-    hub: { name: 'Río de Janeiro', iata: 'GIG' },
+  /* ---------- dos paradas en un mismo viaje ---------- */
+  // Antes esto era un caso unico: un regex sobre el texto de la subcategoria
+  // ("búzios + arraial") que/armaba exactamente dos paradas, buz y arraial, con
+  // un traslado de 30 dolares por pasajero escrito a mano. No habia forma de
+  // combinar Paraty con Angra, ni Bombinhas con Praia do Rosa, ni ninguna otra
+  // pareja.
+  //
+  // Ahora la combinacion viaja como un parametro: `dest` es la primera parada y
+  // `second` la segunda. Que dos paradas sean combinables no se decide con una
+  // lista sino con la geografia: model.comboTransfer() devuelve null si el par
+  // no existe, no tiene coordenadas, o queda a mas de COMBO_MAX_KM. Asi no hay
+  // una octava lista que se pueda desincronizar.
+  const secondKey = String(url.searchParams.get('second') || '').trim().toLowerCase();
+  let comboTransfer = null;
+  if (secondKey) {
+    comboTransfer = model.comboTransfer(secondKey, v.S.dest, v.S.pax, v.S.kmPerLiter, v.S.fuelPriceUsd);
+    if (!comboTransfer) {
+      return sendJson(res, 400, {
+        error: model.DEST[secondKey]
+          ? 'No se puede combinar ' + model.DEST[secondKey].name + ' con ' + model.DEST[v.S.dest].name + ': quedan demasiado lejos para un mismo viaje.'
+          : 'Ese segundo destino no existe.'
+      });
+    }
+  }
+  // El hub es el aeropuerto de la primera parada. Las dos paradas de un mismo
+  // grupo regional comparten aeropuerto, asi que el vuelo redondo alcanza y no
+  // hay que modelar open-jaw. Si alguna combinacion futura no lo cumpliera,
+  // comboTransfer traeria las dos claves y habria que avisarlo.
+  const firstCfg = model.DEST[v.S.dest], secondCfg = secondKey ? model.DEST[secondKey] : null;
+  const sharedHub = firstCfg && secondCfg && firstCfg.iata === secondCfg.iata;
+  const multiStay = comboTransfer && recommendedProposal ? {
+    hub: { name: firstCfg.region || firstCfg.name, iata: firstCfg.iata },
+    sharedHub: !!sharedHub,
+    hubWarning: sharedHub ? null : 'Las dos paradas no comparten aeropuerto: este precio asume un vuelo redondo a ' + firstCfg.iata + '.',
     stays: [
-      { key: 'buz', name: 'Búzios', nightlyRates: model.lodgingNightlyCosts('buz', recommendedProposal.ti, v.dep, v.nights) },
-      { key: 'arraial', name: 'Arraial do Cabo', nightlyRates: model.lodgingNightlyCosts('arraial', recommendedProposal.ti, v.dep, v.nights) }
+      { key: v.S.dest, name: firstCfg.name, nightlyRates: model.lodgingNightlyCosts(v.S.dest, recommendedProposal.ti, v.dep, v.nights) },
+      { key: secondKey, name: secondCfg.name, nightlyRates: model.lodgingNightlyCosts(secondKey, recommendedProposal.ti, v.dep, v.nights) }
     ],
-    transferBetweenUsd: 30 * v.S.pax,
-    transferBetweenLabel: 'Traslado entre Búzios y Arraial do Cabo (estimado, un tramo)'
+    transfer: comboTransfer,
+    transferBetweenUsd: comboTransfer.totalUsd,
+    transferBetweenLabel: comboTransfer.label
   } : null;
   const nonHotelCost = recommendedProposal ? Number(recommendedProposal.total) - Number(recommendedProposal.parts.alojamiento || 0) : 0;
   const hotelBudgetPerNight = url.searchParams.has('hotel_budget_per_night')
