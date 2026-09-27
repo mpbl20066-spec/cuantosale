@@ -133,14 +133,47 @@ const MIME = {
 // El CSP es la unica barrera que impide que un script inyectado se lleve datos
 // de sesion, asi que no se le pueden agregar dominios sin necesidad.
 const CSP = "default-src 'self'; " +
-  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+  // www.googletagmanager.com es el script de gtag.js y *.google-analytics.com /
+  // *.analytics.google.com son adonde van los beacons. Sin estas dos lineas la
+  // etiqueta de Analytics queda bloqueada por CSP y no reporta nada, sin error
+  // visible en la consola: es un fallo silencioso.
+  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; " +
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
   "style-src-attr 'unsafe-inline'; " +
   "font-src https://fonts.gstatic.com; " +
   "img-src 'self' data: https:; " +
-  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org; " +
+  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; " +
   "frame-src https://*.supabase.co; " +
   "base-uri 'none'; form-action 'self'";
+// Google Analytics (GA4). La etiqueta se inyecta una sola vez desde serveStatic
+// para todas las paginas HTML, en vez de pegada en cada archivo: asi no puede
+// quedar duplicada en una pagina ni olvidada en una nueva.
+const GA_MEASUREMENT_ID = String(process.env.GA_MEASUREMENT_ID || 'G-JJSG6WSTYZ').trim();
+function analyticsSnippet() {
+  if (!GA_MEASUREMENT_ID) return '';
+  return '<script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>' +
+    '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
+    "gtag('js',new Date());gtag('config'," + JSON.stringify(GA_MEASUREMENT_ID) + ");</script>";
+}
+function injectAnalytics(payload, ext) {
+  if (ext !== '.html' || !GA_MEASUREMENT_ID) return payload;
+  const html = payload.toString('utf8');
+  // Google avisa que no puede haber dos etiquetas en la misma pagina, y las
+  // vistas previas de desarrollo no existen para el usuario final.
+  if (html.indexOf('googletagmanager.com/gtag/js') >= 0 || html.indexOf(GA_MEASUREMENT_ID) >= 0) return payload;
+  const snippet = analyticsSnippet();
+  if (!snippet) return payload;
+  // Justo despues de <head>, como pide Google; si el HTML no lo tiene, antes
+  // de cerrar la etiqueta.
+  const conHead = /<head[^>]*>/i.exec(html);
+  if (conHead) {
+    const cut = conHead.index + conHead[0].length;
+    return Buffer.from(html.slice(0, cut) + snippet + html.slice(cut), 'utf8');
+  }
+  const close = html.toLowerCase().indexOf('</head>');
+  if (close < 0) return payload;
+  return Buffer.from(html.slice(0, close) + snippet + html.slice(close), 'utf8');
+}
 // Cuarta lista de destinos, y la que el cliente no ve: si una clave no esta
 // aca, /api/vuelos/buscar la rechaza con "!destination" y el destino no puede
 // buscar vuelo real aunque el modelo, el desplegable y la grilla lo ofrezcan.
@@ -1523,6 +1556,9 @@ function serveStatic(req, res, pathname, transform) {
     fs.readFile(file, function (err, data) {
       if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
     const ext = path.extname(file);
+    // Las vistas previas se nombran con _ y son de desarrollo: no entran al
+    //Analytics, asi que no mandan datos de una pagina que no existe.
+    const esPreview = path.basename(file).charAt(0) === '_';
     const send = function (payload) {
       const headers = {
         'Content-Type': MIME[ext] || 'application/octet-stream',
@@ -1562,8 +1598,8 @@ function serveStatic(req, res, pathname, transform) {
     // `transform` deja reescribir el archivo antes de mandarlo (ver
     // serveGrupoPage). Si falla, se manda el archivo original: una vista
     // previa sin el nombre del viaje es mucho mejor que una página rota.
-    if (typeof transform !== 'function') return send(data);
-    Promise.resolve(transform(data)).then(send).catch(function () { send(data); });
+    if (typeof transform !== 'function') return send(injectAnalytics(data, esPreview ? '.bin' : ext));
+    Promise.resolve(transform(data)).then(function (out) { send(injectAnalytics(out, esPreview ? '.bin' : ext)); }).catch(function () { send(injectAnalytics(data, esPreview ? '.bin' : ext)); });
     });
   });
 }
