@@ -139,7 +139,10 @@
      desmarca, para el que lo apretó sin querer. La fila pagada se apaga con
      un tachado suave en vez de desaparecer, así se ve qué ya está saldado y
      qué no sin tener que recordarlo. */
-  .grupo-settledon{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink2);font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:border-color .16s ease,color .16s ease,background .16s ease}
+  /* min-height y no solo padding: el alto sale de la suma de los dos y a 360px
+     quedaban 34px. Es la accion principal de esta seccion, asi que va con los
+     44px que ya usa la papelera y no con 34. */
+  .grupo-settledon{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:7px 14px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink2);font-family:var(--fb);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:border-color .16s ease,color .16s ease,background .16s ease}
   .grupo-settledon:hover{border-color:var(--good);color:var(--good)}
   .grupo-settledon:disabled{opacity:.5;cursor:default}
   .grupo-settledon__box{display:grid;place-items:center;width:15px;height:15px;border:2px solid var(--line);border-radius:5px;font-size:9px;font-weight:800;line-height:1;color:transparent}
@@ -199,6 +202,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=12" defer></script>
+<script src="/grupo.js?v=13" defer></script>
 </body>
 </html>
