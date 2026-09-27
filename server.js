@@ -662,12 +662,29 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   // Un hotel real más barato que el objetivo de la categoría sigue siendo válido
   // para esa categoría; lo que se descarta es lo que se pasa claramente de precio.
   const high = budgetTarget > 0 ? budgetTarget * 1.6 : Infinity;
-  const matchingCategory = priced
+  const porDistancia = function (a, b) { return Math.abs(a.perNight - budgetTarget) - Math.abs(b.perNight - budgetTarget); };
+  const conTier = function (list) {
+    return list.map(function (hotel) { return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName }); });
+  };
+  const matchingCategory = conTier(priced
     .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget); })
-    .sort(function (a, b) { return Math.abs(a.perNight - budgetTarget) - Math.abs(b.perNight - budgetTarget); })
-    .slice(0, 3)
-    .map(function (hotel) { return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName }); });
-  const missing = 3 - matchingCategory.length;
+    .sort(porDistancia)
+    .slice(0, 3));
+  // Cuando NADA real entra en la banda de la categoría, se mostraba el
+  // respaldo inventado y se perdían los 20 hoteles reales que ya habían
+  // llegado. En Río con estilo "comodo" el objetivo es US$187/noche y Booking
+  // no tenía nada por encima: la pantalla ofrecía tres hoteles de fábrica sin
+  // foto en vez de los reales, que eran más baratos pero con precio y foto.
+  // Un hotel real fuera de banda es un mal dato; uno inventado es peor, así que
+  // la segunda pasada completa con los reales más cercanos al objetivo.
+  let realesExtra = [];
+  if (matchingCategory.length < 3) {
+    const yaElegidos = new Set(matchingCategory.map(function (hotel) { return normalizeHotelKey(hotel.name); }));
+    const restantes = priced.filter(function (hotel) { return !yaElegidos.has(normalizeHotelKey(hotel.name)); });
+    realesExtra = conTier(restantes.sort(porDistancia).slice(0, 3 - matchingCategory.length));
+  }
+  const combinedReales = matchingCategory.concat(realesExtra);
+  const missing = 3 - combinedReales.length;
   const canUseGenericFallback = hotelType === 'economico' || hotelType === 'intermedio' || hotelType === 'confort';
   // Para all-inclusive no usamos el fallback generico (son cadenas que NO son all-inclusive).
   // En su lugar generamos entradas con el link de Booking filtrado por todo-incluido.
@@ -699,7 +716,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
       }
     }
   }
-  const combined = uniqueHotelList(matchingCategory.concat(fallback)).slice(0, 3);
+  const combined = uniqueHotelList(combinedReales.concat(fallback)).slice(0, 3);
   // Ultimo paso: convertir los links de Booking en links de Travelpayouts para
   // que la reserva entre por nuestro marker y genere comision. Va aca, y no
   // adentro de fetchBookingHotels, porque los links del fallback tambien son de

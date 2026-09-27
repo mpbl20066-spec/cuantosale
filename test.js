@@ -605,7 +605,7 @@ function haversineKm(a, b) {
       assert.ok(seen.filter(function (request) { return request.url.hostname === 'booking-com15.p.rapidapi.com'; }).every(function (request) { return request.options.headers['x-rapidapi-key'] === 'test-key'; }));
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
-  await t('sin foto real completa el resto con el respaldo de cadenas conocidas', async function () {
+  await t('un hotel real sin foto se conserva y completa con el respaldo', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
     global.fetch = async function (url) {
@@ -617,8 +617,44 @@ function haversineKm(a, b) {
     try {
       const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
       assert.strictEqual(list.length, 3);
-      assert.ok(list.every(function (hotel) { return hotel.source === 'fallback'; }));
-      assert.ok(list.every(function (hotel) { return /^https:\/\/www\.booking\.com\//.test(hotel.bookingUrl); }));
+      // El real sin foto entra: perder el precio por falta de imagen es lo que
+      // hacia que la pantalla cayera entera al respaldo con precios inventados.
+      assert.strictEqual(list[0].name, 'Hotel sin foto');
+      assert.strictEqual(list[0].source, 'booking');
+      assert.strictEqual(list[0].image, '');
+      assert.strictEqual(list[0].perNight, Math.round((460 / 7) * 100) / 100);
+      // Los dos que faltan para llegar a 3 si son del respaldo, y todos con
+      // link de Booking para que se pueda reservar igual.
+      assert.deepStrictEqual(list.slice(1).map(function (hotel) { return hotel.source; }), ['fallback', 'fallback']);
+      // El link del hotel real lo arma Booking, no el respaldo, así que sólo se
+      // exige que los del fallback lleven la búsqueda de Booking.
+      assert.ok(list.slice(1).every(function (hotel) { return /^https:\/\/www\.booking\.com\//.test(hotel.bookingUrl); }));
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
+  await t('sin hoteles en la banda de la categoría igual muestra los reales', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    // Todos los reales quedan muy por debajo de la banda de "confort": antes
+    // se descartaban y la pantalla ofrecia 3 hoteles inventados sin foto.
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'h1', property: { name: 'Barato Uno', photoUrls: ['https://images.example/1.jpg'] }, priceBreakdown: { grossPrice: { value: 350, currency: 'USD' } } },
+        { hotel_id: 'h2', property: { name: 'Barato Dos', photoUrls: ['https://images.example/2.jpg'] }, priceBreakdown: { grossPrice: { value: 420, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      const list = await app.hotelRecommendations('rio', 'Río de Janeiro', 'comodo', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      assert.strictEqual(list.length, 3);
+      // Los dos reales, con su foto, en vez de los tres de fábrica.
+      assert.deepStrictEqual(list.slice(0, 2).map(function (hotel) { return hotel.source; }), ['booking', 'booking']);
+      // El más caro (420/7=60) está más cerca del objetivo de "confort" que el
+      // de 350/7=50, así que va primero.
+      assert.deepStrictEqual(list.slice(0, 2).map(function (hotel) { return hotel.image; }), ['https://images.example/2.jpg', 'https://images.example/1.jpg']);
+      assert.deepStrictEqual(list.slice(0, 2).map(function (hotel) { return hotel.perNight; }), [60, 50]);
+      assert.strictEqual(list[2].source, 'fallback');
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
   await t('ante fallos de Booking siempre entrega 3 opciones de respaldo de la categoría elegida', async function () {
