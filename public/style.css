@@ -103,7 +103,8 @@ h1{font-family:var(--fh);font-weight:800;font-size:clamp(52px,14vw,92px);line-he
    en 38px y ~29px respectivamente: chicos para el dedo y, en el caso de los
    filtros de vuelo, blancos para algo que se toca repetidamente al comparar
    tarifas. */
-.date-range-nav{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-size:25px;line-height:1;cursor:pointer}.date-range-nav:disabled{opacity:.4;cursor:not-allowed}.date-range-months{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.date-range-month h3{margin:0 0 10px;text-align:center;font-size:15px;text-transform:capitalize}.date-range-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.date-range-weekday{display:grid;place-items:center;height:32px;color:var(--ink2);font-size:11px;font-weight:700}.date-range-day{display:grid;place-items:center;min-width:0;aspect-ratio:1;border:0;border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}.date-range-day:not(:disabled):hover{background:var(--cel-soft)}.date-range-day.is-in-range{border-radius:8px;background:var(--cel-soft)}.date-range-day.is-endpoint{border-radius:999px;background:var(--ink);color:#fff;font-weight:800}.date-range-day.is-today:not(.is-endpoint){box-shadow:inset 0 0 0 1px var(--cel)}.date-range-day:disabled{color:var(--ink2);opacity:.35;cursor:not-allowed}.date-range-day--blank{pointer-events:none}
+.date-range-nav{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);cursor:pointer}
+.date-range-nav svg{width:22px;height:22px}.date-range-nav:disabled{opacity:.4;cursor:not-allowed}.date-range-months{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.date-range-month h3{margin:0 0 10px;text-align:center;font-size:15px;text-transform:capitalize}.date-range-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.date-range-weekday{display:grid;place-items:center;height:32px;color:var(--ink2);font-size:11px;font-weight:700}.date-range-day{display:grid;place-items:center;min-width:0;aspect-ratio:1;border:0;border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}.date-range-day:not(:disabled):hover{background:var(--cel-soft)}.date-range-day.is-in-range{border-radius:8px;background:var(--cel-soft)}.date-range-day.is-endpoint{border-radius:999px;background:var(--ink);color:#fff;font-weight:800}.date-range-day.is-today:not(.is-endpoint){box-shadow:inset 0 0 0 1px var(--cel)}.date-range-day:disabled{color:var(--ink2);opacity:.35;cursor:not-allowed}.date-range-day--blank{pointer-events:none}
 label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px}
 .inp{width:100%;min-width:0;height:52px;border-radius:16px;border:1.5px solid var(--control-line);background:var(--control-bg);padding:0 14px;font-weight:500;font-size:16px;color:var(--ink);transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
 .inp::placeholder{color:var(--ink2);opacity:1}
@@ -139,7 +140,9 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .origin__control{position:relative;grid-column:1/-1;display:flex;min-width:0;height:52px;margin-top:6px;border:1.5px solid var(--control-line);border-radius:16px;background:var(--control-bg)}
 .origin__control:focus-within{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
 .origin__control input{flex:1;width:100%;min-width:0;padding:0 10px 0 14px;border:0;border-radius:16px;background:transparent;color:var(--ink);font-size:16px;font-weight:600;outline:none}
-.origin__control button{flex:0 0 40px;border:0;border-radius:0 14px 14px 0;background:transparent;color:var(--ink2);font-size:19px;cursor:pointer}
+.origin__control button{flex:0 0 40px;display:grid;place-items:center;border:0;border-radius:0 14px 14px 0;background:transparent;color:var(--ink2);cursor:pointer}
+.origin__control button svg{width:20px;height:20px;transition:transform .16s ease}
+.origin__control button[aria-expanded="true"] svg{transform:rotate(180deg)}
 .origin__menu{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:80;display:grid;gap:4px;padding:7px;border:1px solid var(--control-border);border-radius:15px;background:var(--control-bg);box-shadow:0 18px 38px rgba(15,23,42,.25)}
 .origin__menu[hidden]{display:none}
 .origin__menu button{display:grid;gap:2px;width:100%;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--ink);text-align:left;cursor:pointer}
@@ -147,7 +150,8 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .origin__menu strong{font-size:14px}.origin__menu span{font-size:11px;color:var(--control-muted)}
 .origin b{color:var(--ink);font-weight:600}
 .step{display:flex;align-items:center;height:52px;border-radius:16px;border:1.5px solid var(--control-line);background:var(--control-bg);overflow:hidden}
-.step button{flex:0 0 52px;height:100%;border:0;background:transparent;font-size:24px;font-weight:600;cursor:pointer}
+.step button{flex:0 0 52px;height:100%;display:grid;place-items:center;border:0;background:transparent;cursor:pointer}
+.step button svg{width:22px;height:22px}
 .step button:active{background:var(--cel-soft)}
 .step output{flex:1;text-align:center;font-weight:600}
 .money{position:relative}
@@ -854,3 +858,5 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @media (max-width:768px){
   [data-budget-anchor]{scroll-margin-bottom:150px}
 }
+
+@media (prefers-reduced-motion:reduce){.origin__control button svg{transition:none}}
