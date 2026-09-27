@@ -532,7 +532,7 @@ function haversineKm(a, b) {
     // con numeros de Rio sin que nada se enterara.
     //
     // Ahora hay una sola fuente, lib/model.js. El cliente la recibe por
-    // public/daily-costs.js, que genera scripts/build-daily-costs.js (lo corren
+    // public/daily-costs.js, que genera scripts/build-costos.js (lo corren
     // pretest y prestart). Esta prueba igual la verifica, para que correr
     // `node test.js` sin npm tampoco deje pasar una desincronizacion.
     const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
@@ -586,6 +586,43 @@ function haversineKm(a, b) {
       assert.ok(c.transport.eco < c.transport.confort,
         k + ': el traslado tiene que crecer de eco a confort, es ' + JSON.stringify(c.transport));
     }
+  });
+  await t('cada destino declara de donde sale su costo, cuando y cuanta confianza tiene', function () {
+    // Los numeros de comida y traslado son ESTIMACIONES: no hay ningun provider
+    // detras, y calc() los marca sources.comidas = 'estimado'. Lo unico que
+    // hace que un conjunto de estimaciones sea defendible es que cada numero
+    // diga de donde salio. data/costos-diarios.json es la fuente unica de esos
+    // numeros y de esa metadata, y de ahi se generan el modelo y el cliente.
+    //
+    // Esta prueba falla si alguien agrega un destino o edita un numero sin
+    // documentar el origen. Antes no habia nada que lo obligara: los 44
+    // destinos entaron con numeros de la nada.
+    const ruta = path.join(__dirname, 'data', 'costos-diarios.json');
+    assert.ok(fs.existsSync(ruta), 'falta data/costos-diarios.json');
+    const datos = JSON.parse(fs.readFileSync(ruta, 'utf8'));
+    const D = datos.destinos;
+    const NIVELES = ['alta', 'media', 'baja'];
+
+    for (const k of Object.keys(model.DEST)) {
+      const v = D[k];
+      assert.ok(v, k + ' (' + model.DEST[k].name + ') no esta en data/costos-diarios.json');
+      assert.ok(v.fuente && v.fuente.length > 20, k + ': "fuente" vacia o demasiado corta');
+      assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(v.verificado || ''), k + ': "verificado" no es una fecha ISO');
+      assert.ok(NIVELES.indexOf(v.confianza) >= 0, k + ': confianza invalida: ' + v.confianza);
+      // Confianza baja tiene que explicar por que: o de donde se derivo, o que
+      // le pasa a la fuente (poco dato, viejo, crowdsourced finito).
+      if (v.confianza === 'baja') {
+        assert.ok(v.derivacion || v.nota, k + ': confianza baja sin explicar la derivacion ni el problema de la fuente');
+      }
+      // Y los numeros del JSON tienen que ser los que quedaron en el codigo.
+      const c = model.DESTINATION_COSTS[k];
+      assert.deepStrictEqual(
+        [c.transport.eco, c.transport.confort, c.food.casual, c.food.moderado, c.food.gourmet],
+        [v.traslado.eco, v.traslado.confort, v.comida.casual, v.comida.moderado, v.comida.gourmet],
+        k + ': el codigo no coincide con data/costos-diarios.json. Corré npm run build:costos');
+    }
+    assert.deepStrictEqual(Object.keys(D).filter((k) => !model.DEST[k]), [],
+      'hay destinos en el JSON que no existen en el modelo');
   });
   await t('cotiza Buenos Aires como destino de Argentina', async function () {
     const r = await get(port, '/api/cotizar?dest=bue&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');

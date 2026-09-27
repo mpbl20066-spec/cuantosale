@@ -4,7 +4,8 @@
   "private": true,
   "description": "CuántoSale: compará vuelos, buses y alojamiento desde Uruguay y mirá el costo total del viaje.",
   "scripts": {
-    "build:costos": "node scripts/build-daily-costs.js",
+    "build:costos": "node scripts/build-costos.js",
+    "check:costos": "node scripts/validar-costos.js",
     "prestart": "npm run build:costos",
     "start": "node server.js",
     "pretest": "npm run build:costos",
