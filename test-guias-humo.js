@@ -56,6 +56,32 @@ function correrGuia() {
 const origGuias = fs.readFileSync(GUIAS, 'utf8');
 const origApp = fs.readFileSync(APP, 'utf8');
 
+/* Si el archivo ya estaba sucio al arrancar, el "estado bueno" que este
+   script usa para restaurar es en realidad un estado roto, y cada corrida lo
+   hornea como tal. Pasa de verdad: un smoke test muerto a mitad de camino
+   dejo una linea inyectada en app.js, y la corrida siguiente la tomo como
+   base y la devolvio al final, asi que el archivo quedo roto en el repo.
+
+   Por eso el baseline sale de git y no de disco. Si hay cambios sin
+   commitear en los archivos que este script rompe, no se corre. */
+const COMMITTED = {};
+['public/guias.js', 'public/app.js'].forEach(function (rel) {
+  try {
+    COMMITTED[rel] = cp.execSync('git show HEAD:' + rel, { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
+  } catch (e) { COMMITTED[rel] = null; }
+});
+const sucios = [];
+[['public/guias.js', origGuias], ['public/app.js', origApp]].forEach(function (par) {
+  const base = COMMITTED[par[0]];
+  if (base !== null && base !== par[1]) sucios.push(par[0]);
+});
+if (sucios.length) {
+  console.error('No se corre con ' + sucios.join(' y ') + ' sin commitear.');
+  console.error('Este script rompe y restaura esos archivos, y para eso necesita que el');
+  console.error('estado bueno este en git. Commitea primero:  git add ' + sucios.join(' '));
+  process.exit(1);
+}
+
 const CASOS = [
   {
     nombre: 'la clave del schema "cuando" renombrada a "cuándo:"',
@@ -112,12 +138,27 @@ for (const caso of CASOS) {
   }
   fs.writeFileSync(caso.archivo, roto, 'utf8');
   let detectado = false, cual = '';
+  let salida = '';
   try {
-    const salida = correrGuia();
+    salida = correrGuia();
     const m = salida.match(/FALLÓ\s+(.+)/);
     if (m) { detectado = true; cual = m[1].trim(); }
+  } catch (e) {
+    salida = '(correrGuia tiro: ' + e.message + ')';
   } finally {
     fs.writeFileSync(caso.archivo, caso.orig, 'utf8');
+    // Verificar que la restauracion fue exacta. Si un escenario deja el
+    // archivo distinto de como estaba, el resto de la corrida corre sobre un
+    // estado que ya no es el bueno.
+    if (fs.readFileSync(caso.archivo, 'utf8') !== caso.orig) {
+      console.error('\n  ABORTA: ' + caso.archivo + ' quedo distinto despues de restaurarlo.');
+      console.error('  El escenario de arriba no volvio el archivo a su estado.');
+      process.exit(1);
+    }
+  }
+  if (!detectado) {
+    console.log('        [debug] largo=' + String(salida).length +
+      ' contiene FALL=' + String(salida).includes('FALL'));
   }
   console.log((detectado ? '  ok    detecta  ' : '  FALLA no detecta  ') + caso.nombre + (cual ? '\n        -> ' + cual : ''));
   if (!detectado) sinDetectar++;

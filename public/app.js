@@ -163,6 +163,66 @@
     'bcm#Beto Carrero World desde Camboriú': {
       url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Vista_do_Beto_Carrero_World_a_partir_da_roda-gigante%2C_Penha_SC.JPG/1280px-Vista_do_Beto_Carrero_World_a_partir_da_roda-gigante%2C_Penha_SC.JPG',
       autor: 'HVL', licencia: 'CC BY 4.0'
+    },
+
+    /* Florianopolis (fln). Los 11 tours de la isla, uno por uno.
+       La foto tiene que ser del mismo lugar que el tour, asi que varias no
+       son "la foto bonita de la bahia" sino el punto exacto que se vende:
+       Praia Mole para el tour de playas, la Isla de Campeche con las canoas
+       atracadas para la ida a la isla, las jangadas de Guarda do Embau.
+       Cuando no habia foto del lugar se eligio una del mismo tipo de
+       actividad en Brasil, y eso queda anotado en el comentario de cada
+       una: es mejor mostrar un catamaran que un caladero sin foto. */
+    'fln#Paseo en escuna pirata': {
+      // Veleros de esquina al atardecer, en un puerto de Brazil. No es la Bahia
+      // Sur, pero es lo que la tarjeta promete: una escuna.
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Schooners..._%28144099381%29.jpg/1280px-Schooners..._%28144099381%29.jpg',
+      autor: 'Diego Torres Silvestre', licencia: 'CC BY 2.0'
+    },
+    'fln#Catamarán con almuerzo': {
+      // Catamaran de paseo en una bahia remakeana. Actividad correcta, bahia
+      // que no: la excursion sale de la Ilha.
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Catamaran_-_panoramio.jpg/1280px-Catamaran_-_panoramio.jpg',
+      autor: 'TMbux', licencia: 'CC BY-SA 3.0'
+    },
+    'fln#Excursión en barco a Isla de Campeche': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/Vista_da_praia_da_Ilha_do_Campeche.jpg/1280px-Vista_da_praia_da_Ilha_do_Campeche.jpg',
+      autor: 'Rafael Baumer De S. Thiago', licencia: 'CC BY-SA 4.0'
+    },
+    'fln#Bautismo de buceo': {
+      // Buceo en Porto de Galinhas (Pernambuco), no en Santa Catarina. La
+      // actividad es la que se vende; el lugar no.
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Mergulho_na_Praia_de_Porto_de_Galinhas_-_Ipojuca%2C_Pernambuco%2C_Brasil.jpg/1280px-Mergulho_na_Praia_de_Porto_de_Galinhas_-_Ipojuca%2C_Pernambuco%2C_Brasil.jpg',
+      autor: 'Ventura', licencia: 'CC BY 2.0'
+    },
+    'fln#Bombinhas y Praia de Quatro Ilhas': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Bombinhas_-_Praia_cuatro_islas.jpg/1280px-Bombinhas_-_Praia_cuatro_islas.jpg',
+      autor: 'Dmmpd', licencia: 'CC BY-SA 4.0'
+    },
+    'fln#Tour de playas de Florianópolis': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Florianopolis_praia_mole.JPG/1280px-Florianopolis_praia_mole.JPG',
+      autor: 'Lionel Baur', licencia: 'CC BY-SA 3.0'
+    },
+    'fln#City tour de Florianópolis': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9b/Pra%C3%A7a_XV_de_Novembro_%28Florian%C3%B3polis%29_by_K%C3%A1tia_C._Oliveira_13.jpg/1280px-Pra%C3%A7a_XV_de_Novembro_%28Florian%C3%B3polis%29_by_K%C3%A1tia_C._Oliveira_13.jpg',
+      autor: 'Ajmcbarreto', licencia: 'CC BY-SA 4.0'
+    },
+    'fln#Beto Carrero World': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/BETO_CARRERO_WORLD%2C_Penha%2C_Santa_Catarina%2C_Brasil_by_Nivaldo_Cit_Filho_-_panoramio_%287%29.jpg/1280px-BETO_CARRERO_WORLD%2C_Penha%2C_Santa_Catarina%2C_Brasil_by_Nivaldo_Cit_Filho_-_panoramio_%287%29.jpg',
+      autor: 'Nivaldo Cit Filho', licencia: 'CC BY-SA 3.0'
+    },
+    'fln#Balneário Camboriú': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Camboriu_praia_central.jpg/1280px-Camboriu_praia_central.jpg',
+      autor: 'Astrodyum', licencia: 'Dominio público'
+    },
+    'fln#Guarda do Embaú': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Guarda_do_Embau_%285326927303%29.jpg/1280px-Guarda_do_Embau_%285326927303%29.jpg',
+      autor: 'Otávio Nogueira', licencia: 'CC BY 2.0'
+    },
+    'fln#Kayak o stand up paddle en la costa': {
+      // Kayak en el Parque Estadual do Rio Vermelho, que esta en la isla.
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Parque_Estadual_do_Rio_Vermelho_-_Robson_10.jpg/1280px-Parque_Estadual_do_Rio_Vermelho_-_Robson_10.jpg',
+      autor: 'Robzera', licencia: 'CC BY-SA 4.0'
     }
   };
 
@@ -1065,6 +1125,7 @@
     // seguian con el simbolo viejo al lado.
     if (detailState) {
       try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar el total al cambiar de moneda', e); }
+      try { repintarPreciosEnMoneda(); } catch (e) { console.error('No se pudieron repintar los precios de hotel y traslado al cambiar de moneda', e); }
     }
     if (lastData) { try { render(lastData); } catch (e) { console.error('No se pudo repintar los resultados al cambiar de moneda', e); } }
   }
@@ -1519,6 +1580,19 @@
     var options = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
     return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></span></label>';
   }
+  /* Que hotel hay que marcar al redibujar la lista.
+     Devuelve true/false si el total guardado esta en la lista, y null si no se
+     sabe (todavia no se eligio ninguno, o el hotel guardado ya no se ofrece).
+     El null es distinto de false a proposito: false seria "no marcar ninguno" y
+     dejaria la lista sin radio marcado, que es peor que marcar el recomendado. */
+  function hotelElegidoEnEstaLista(totalValue) {
+    if (!detailState || !detailState.selectedHotel) return null;
+    var guardado = Number(detailState.selectedHotelTotal);
+    if (!Number.isFinite(guardado) || guardado <= 0) return null;
+    // Margen de 1 porque el total guardado viene de un data-hotel-total ya
+    // redondeado al pintarse.
+    return Math.abs(guardado - totalValue) < 1;
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
@@ -1570,9 +1644,15 @@
         // label ahora cubre todo lo visual. Los enlaces de Booking y el
         // <details> de "hoteles similares" quedan FUERA del label a propósito:
         // dentro de un label no se pueden pulsar con normalidad.
+        // El marcado sale de lo que la persona elegio, no de "recommended": al
+        // cambiar de moneda se repinta esta lista para actualizar los importes, y
+        // si dependiera de recommended la eleccion se perderia y el presupuesto
+        // saltaria solo. recommended queda de respaldo cuando no hay eleccion.
+        var elegido = hotelElegidoEnEstaLista(totalValue);
+        var marcado = elegido != null ? elegido : !!option.recommended;
         return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' +
           '<label class="hotel-option__pick">' + imageMarkup +
-          '<span class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (option.recommended ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
+          '<span class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
           '<h3>' + esc(option.name) + '</h3>' + descriptionMarkup +
           '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p>' +
           '<div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div>' +
@@ -1790,10 +1870,49 @@
     if (typeof renderDetail !== 'function' || !detailState) return;
     try { renderDetail(); } catch (e) { /* si falla, queda la lista local */ }
   }
+  /*
+   * Precio de transfer del destino, para el render. Prioridad:
+   *   1. lo que mando el server en meta.officialTransfer (que sale de la tabla);
+   *   2. la tabla del cliente, public/transfer-precios.js;
+   *   3. un piso, para que la pantalla nunca quede con un precio vacio.
+   *
+   * Los tres caminos dan el mismo numero cuando la tabla esta sana: por eso el
+   * test compara la tabla del cliente con TRANSFER_PRICES del modelo.
+   */
+  function transferPreciosDe(meta) {
+    var oficial = meta && meta.officialTransfer;
+    var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
+    var tabla = (typeof CS_TRANSFER_PRICES !== 'undefined' && CS_TRANSFER_PRICES) ? CS_TRANSFER_PRICES[key] : null;
+    var compartido = (oficial && oficial.compartido) || (tabla && tabla.compartido) || 20;
+    var privado = (oficial && oficial.privado) || (tabla && tabla.privado) || (compartido * 3);
+    return {
+      compartido: Number(compartido) || 20,
+      privado: Number(privado) || 60,
+      km: (oficial && oficial.km != null) ? oficial.km : (tabla && tabla.km != null ? tabla.km : null),
+      iata: (oficial && oficial.iata) || (tabla && tabla.iata) || null,
+      modo: (oficial && oficial.modo) || (tabla && tabla.modo) || 'car',
+      soloPrivado: !!(oficial && oficial.soloPrivado) || !!(tabla && tabla.soloPrivado),
+      appRideUsd: (oficial && oficial.appRideUsd != null) ? oficial.appRideUsd : (tabla && tabla.appRideUsd != null ? tabla.appRideUsd : null),
+      nota: oficial && oficial.nota
+    };
+  }
+  /*
+   * Monto del transfer que se sumo al presupuesto. Es la unica fuente de verdad
+   * del total, como estaba antes, pero los dos numeros salen de la tabla y no de
+   * constantes: el compartido se cobra por persona y el privado por vehiculo, y
+   * por eso el privado no se multiplica por la cantidad de viajeros.
+   */
   function getSelectedTransferAmount(state) {
     if (!state || state.transportMode === 'auto') return 0;
-    if (state.transferType === 'private') return 150;
-    if (state.transferType === 'shared') return 30;
+    var precios = transferPreciosDe(state.meta || {});
+    if (state.transferType === 'private') return precios.privado;
+    if (state.transferType === 'shared') {
+      // El compartido se cobra por persona, asi que el total escala con los
+      // viajeros. detailState no guarda pax: sale de meta.pax, que es lo que
+      // manda el server, y si no esta, del estado del buscador.
+      var pax = Number((state.meta && state.meta.pax) || (state.pax) || (typeof S !== 'undefined' && S && S.pax)) || 1;
+      return precios.compartido * Math.max(1, pax);
+    }
     return Math.max(0, Number(state.transfer) || 0);
   }
   // Iconos por categoría para el resumen de presupuesto. Se dibujan con trazo
@@ -2511,6 +2630,59 @@
     var section = document.querySelector('.daily-budget');
     if (section) section.innerHTML = dailyBudgetControls();
   }
+  /* Los importes de hotel y de traslado tambien salen de money(), asi que
+     cambian con la moneda, pero vivian en secciones que nadie repintaba. Es el
+     mismo bug que el de los costos diarios, dos veces mas.
+
+     No se vuelven a pedir al servidor: los datos ya estan en detailState.meta, asi
+     que se rehace el HTML con los mismos generadores. Y no se recalcula el
+     presupuesto despues, porque los totales en la base no cambian al cambiar la
+     moneda: saltaria el numero que la persona ya eligio. La lista de hoteles
+     vuelve a marcar lo que estaba marcado (ver hotelElegidoEnEstaLista). */
+  /* Que hacer cuando cambian los viajeros con una propuesta abierta.
+
+     Los botones +/- solo cambiaban S.pax y el numero del contador, asi que
+     detailState se quedaba con el numero de viajeros anterior. Las partes que
+     son por persona (comidas y transporte local) seguian con el total viejo:
+     con 4, 3 y 2 viajeros el total daba $209.074, $177.217 y $105.560, cuando
+     de 2 a 3 deberia crecer 50% y crecia 67,9%. Los vuelos no tenian el
+     problema porque se vuelven a consultar.
+
+     Se recalcula desde el valor por persona por dia, que es el unico dato que
+     no depende de cuantos van. No se tocan alojamiento ni traslados: una
+     habitacion no sale mas cara por ser tres, y el traslado ya viene por
+     persona desde el modelo.
+
+     Si la persona puso "Sin sumar" en comidas o en transporte, se respeta y se
+     deja en cero: recalcular un cero porque cambio el numero de viajeros seria
+     desconocer su decision. */
+  function alCambiarViajeros() {
+    if (detailState && detailState.meta) {
+      var noches = Math.max(1, Number(detailState.meta.nights) || 1);
+      var pax = Math.max(1, Number(S.pax) || 1);
+      detailState.meta.pax = pax;
+      if (detailState.foodBudgetMode !== 'none') {
+        detailState.parts.comidas = Math.round((Number(detailState.foodPerDay) || 0) * noches * pax);
+      }
+      if (detailState.localBudgetMode !== 'none') {
+        detailState.parts.local = Math.round((Number(detailState.localPerDay) || 0) * noches * pax);
+      }
+      try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar al cambiar los viajeros', e); }
+    }
+    schedule();
+  }
+  function repintarPreciosEnMoneda() {
+    if (!detailState || !detailState.meta) return;
+    // .hotel-options es lo que devuelve el generador una vez cargaron los hoteles;
+    // .hotel-options-loading es solo el placeholder y lo maneja
+    // loadHotelRecommendations.
+    var listaHoteles = document.querySelector('.hotel-options');
+    if (listaHoteles && detailState.meta.hotelsLoaded) {
+      listaHoteles.outerHTML = hotelOptions(detailState.meta, detailState.hotel);
+    }
+    var traslado = document.querySelector('[data-official-transfer]');
+    if (traslado) traslado.outerHTML = transferCard(detailState.meta);
+  }
   function deseleccionarHotel() {
     if (!detailState) return;
     detailState.selectedHotel = false;
@@ -2742,13 +2914,26 @@
     var offer = getSelectedFlightOffer();
     var hasLiveFlight = !!(offer && ((offer.outbound && offer.outbound.arrival) || offer.arrival));
     var pickupWindow = getTransferPickupWindow();
+    // Los precios salen de la tabla por destino (public/transfer-precios.js, que
+    // se genera desde data/transfer-precios.json). Antes estaban escritos aca como
+    // 30 y 150, iguales para los 44 destinos, y no coincidian con el 35 por
+    // pasajero que mandaba el server: tres numeros para el mismo precio.
+    var t = transferPreciosDe(meta);
     var suggestionMarkup = hasLiveFlight
       ? '<p class="transfer-suggestion">✈️ Tu vuelo llega ' + esc(transferPickupTimeLabel(pickupWindow.baseDate)) + ' hs. Te sugerimos coordinar la recogida para ' + esc(transferPickupTimeLabel(pickupWindow.plusOneHour)) + ' hs (1 hora después).</p>'
       : '';
+    var modoNota = t.modo && t.modo !== 'car'
+      ? '<p class="cost-note">' + esc(t.nota || 'A este destino no se llega en transfer por carretera.') + '</p>'
+      : '';
     var cards = [
-      { key: 'shared', amount: 30, icon: '🚐', title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros.' },
-      { key: 'private', amount: 150, icon: '🚗', title: 'Transfer privado', desc: 'Vehículo exclusivo y traslado directo.' }
-    ].map(function (card) {
+      { key: 'shared', amount: t.compartido, icon: '🚐', title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros. Se cobra por persona.' },
+      { key: 'private', amount: t.privado, icon: '🚗', title: 'Transfer privado', desc: 'Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.' }
+    ].filter(function (card) {
+      // A una isla no hay van compartida: el unico traslado es el vuelo. Mostrar
+      // la card con precio 0 seria ofrecer un transfer gratis.
+      if (card.key === 'shared' && t.soloPrivado) return false;
+      return !(card.amount <= 0);
+    }).map(function (card) {
       var isSelected = selected === card.key;
       return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '"><span class="transfer-choice__icon" aria-hidden="true">' + card.icon + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b></button>';
     }).join('');
@@ -2766,7 +2951,7 @@
     // hoteles); este botón es solo el indicador de estado, nunca abre un modal
     // ni un flujo de pasos adicional. El detalle queda centralizado en "Mi Viaje".
     var addedLabel = selected ? '✓ Agregado al presupuesto' : 'Elegí un tipo de transfer';
-    return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados"><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + '.</p>' + suggestionMarkup + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" disabled>' + addedLabel + '</button></section>';
+    return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados"><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.km ? ' (' + t.km + ' km desde ' + esc(t.iata || 'el aeropuerto') + ')' : '') + '.</p>' + suggestionMarkup + modoNota + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" disabled>' + addedLabel + '</button></section>';
   }
 
   function transportFlow(meta, budget, mode) {
@@ -2902,8 +3087,8 @@
   }
   function renderTransferWizard(meta, step) {
     var modal = $('#booking-modal');
-    var t = meta.officialTransfer;
     if (!detailState) return;
+    var precios = transferPreciosDe(meta);
     detailState.transferWizard = detailState.transferWizard || { step: 1, pickupMinutes: 60, customTime: '', hotelName: '' };
     var state = detailState.transferWizard;
     if (step) state.step = step;
@@ -2932,7 +3117,7 @@
       state.hotelName = hotelText;
       stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 2</span><h3>¿Dónde te alojás?</h3></div>' +
         '<label class="transfer-field"><span>Hotel o pousada de destino</span><input type="text" name="transfer-hotel" value="' + esc(hotelText) + '" placeholder="Ej: Pousada del Sol" autocomplete="off"></label>' +
-        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p><p><b>Costo transfer:</b> ' + money(t.amount || 70) + '</p></div>' +
+        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p><p><b>Costo transfer:</b> ' + money(precios.compartido * Math.max(1, Number(S && S.pax) || 1)) + ' <small>(' + (S && S.pax) + ' persona' + ((S && S.pax) === 1 ? '' : 's') + ')</small></p></div>' +
         '<button type="button" class="confirm-booking" data-transfer-add-budget>Agregar al presupuesto</button></div>';
     }
     modal.innerHTML = '<div class="booking-dialog transfer-wizard" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2>' + flightInfo + stepMarkup + '</div>';
@@ -3902,7 +4087,7 @@
     }
     detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     detailState.localPerDay = Number((Number(detailState.parts.local) / Math.max(1, nights * pax)).toFixed(2)) || 0;
-    data.meta.officialTransfer = data.meta.officialTransfer || { pricePerPassenger: 0, amount: 0 };
+    data.meta.officialTransfer = data.meta.officialTransfer || { compartido: 0, privado: 0, personas: 0, appRideUsd: null };
     // El estado de transporte se fija acá, antes de construir el markup, para
     // que el flujo se pinte una sola vez con los valores definitivos. Antes se
     // armaba, se insertaba y enseguida se sobreescribía con un segundo
@@ -4927,8 +5112,8 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
     });
     $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; syncDateRangeFields(); schedule(); });
     $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Number(e.target.value) || 0); schedule(); });
-    $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; schedule(); });
-    $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; schedule(); });
+    $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
+    $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
     $('#seg').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       S.style = b.getAttribute('data-v');

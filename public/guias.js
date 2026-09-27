@@ -238,17 +238,27 @@ var REGIONES = {
   'rio-grande-do-sul': {
     resumen: 'Serra Gaucha y el litoral sur del estado: vino, fondue y balnearios más baratos que el lado norte.',
     beaches: [
-      { name: 'Torres y Capão da Canoa', zona: 'Litoral sur, unos 200 km de Porto Alegre', vibe: 'Balnearios de familia con toda la estructura. Más baratos y más vacíos que el lado norte del estado.', cuando: 'Todo el año, con temporada fuerte de diciembre a marzo.' }
+      { name: 'Torres', zona: 'Litoral sur, 300 km de Porto Alegre', vibe: 'El balneario del acantilado más alto de la costa gaúcha, de unos cuarenta metros. La ciudad es de casas bajas y la playa es larga.', cuando: 'Todo el año, con temporada fuerte de diciembre a marzo. En enero el precio se multiplica.' },
+      { name: 'Capão da Canoa', zona: 'Litoral sur, 100 km al sur de Torres', vibe: 'El balneario más familiar de la costa y el más barato. No está armado como Torres, pero tiene la misma estructura y la mitad del precio.', cuando: 'Todo el año. Es la opción cuando se busca playa sin pagar un balneario de verdad.' },
+      { name: 'Praia de Tramandaí', zona: 'Litoral norte, 40 km de Porto Alegre', vibe: 'La playa de Porto Alegre. Es larga y tiene movimiento de ciudad, no de balneario. Es la más cercana si el vuelo cae en el aeropuerto.', cuando: 'Todo el año, con temporada de verano. Los fines de semana de enero se llena mucho.' }
     ],
     comer: [
-      { name: 'Fondue y vino', tipo: 'Cena', zona: 'Gramado y Canela', usd: 28, momento: 'Noche', nota: 'La experiencia obligatoria de la Serra Gaucha y la comida más cara del viaje. Hay que ir a un lugar de la región, no a cualquier restaurante con "fondue" en la carta.' },
-      { name: 'Prato feito gaúcho', tipo: 'Almuerzo', zona: 'Toda la región', usd: 10, momento: 'Mediodía', nota: 'Chimarrão, arroz con leche y pastel de carne. Mucho más pesado que el resto de Brasil y las porciones son enormes.' }
+      { name: 'Chimarrão', tipo: 'Merienda', zona: 'Toda la Serra y el litoral', usd: 4, momento: 'Toda la tarde', nota: 'Mate con yerba y sal, servido en una bombilla con agua caliente. Se comparte el mismo mate pasando la bombilla. Es la bebida de la Serra: se compra en un mercado y se lleva a la playa.' },
+      { name: 'Prato feito gaúcho', tipo: 'Almuerzo', zona: 'Todos los pueblos', usd: 10, momento: 'Mediodía', nota: 'Con chimarrão, arroz con leche y pastel de carne. Es mucho más pesado que el resto de Brasil y las porciones son enormes.' },
+      { name: 'Pastel de carne', tipo: 'Merienda', zona: 'Confiterías de los pueblos', usd: 5, momento: 'Tarde', nota: 'Cocido en su propio jugo, se come caliente con la mano. Es la merienda más barata de la costa y se compra en cualquier confitería.' }
     ],
     tips: [
       { titulo: 'Gramado es caro y hay motivo', texto: 'Es la ciudad más famosa de la Serra y los precios lo reflejan. Canela está a 5 km, cuesta un tercio y tiene la misma vista y el mismo clima.' },
       { titulo: 'La costa es otro viaje', texto: 'Si lo que querés es playa, Torres y Capão da Canoa son más baratas y más tranquilas que todo el lado norte. No son comparables a los balnearios de Santa Catarina.' },
       { titulo: 'La Serra no es un destino de sol', texto: 'En la Serra Gaucha llueve todo el año y casi no sale el sol. Nadie va a la playa: se va por la montaña, el vino y los parques. Si buscas calor, alojate en el litoral, no en la ciudad.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Parque da Guarita', zona: 'Torres', dur: '2 h', usd: 0, nota: 'El parque de la punta de Torres, con el mirador que da a todo el mar. Se llega a pie o en tren. Gratis, y la mejor vista de la costa.' },
+      { name: 'Estrada do Caminho da Colônia', zona: 'Entre Torres e Santo Antônio', dur: '3 h', usd: 6, nota: 'O caminho velho dos gauchos que ia de Porto Alegre a costa, hoje empedrado. Se percorre em auto entre campos, com as colonias e as feiras de queijo ao lado.' }
+    ],
+    hacer: [
+      { name: 'Tren turístico de Torres', zona: 'Torres', dur: '1 h', usd: 3, nota: 'Recorre la costa desde el centro hasta el acantilado, con el mar de un lado. Es la forma barata de ver lo mejor de la ciudad.' }
+    ],
   },
 
   'rio-de-janeiro': {
@@ -283,18 +293,29 @@ var REGIONES = {
   'bahia': {
     resumen: 'Salvador, la Costa Doce y Trancoso. Cultura afro, comida de mar, la calle más famosa del país y un litoral de pueblos de playa.',
     beaches: [
-      { name: 'Porto da Barra y el Pelourinho', zona: 'Centro de Salvador', vibe: 'La playa urbana más famosa de Brasil, con el elevador y la iglesia detrás. Es un lugar para ver, no para bañarse.', cuando: 'Todo el año. Fines de semana se llena hasta la calle.' },
-      { name: 'Praia do Forte', zona: 'A 100 km al norte de la capital', vibe: 'El balneario de clase media de Salvador. Más tranquilo que la capital y a una hora de ida.', cuando: 'Todo el año, con estructura de balneario.' }
+      { name: 'Trancoso', zona: 'Costa Doce, 2 h de Salvador', vibe: 'El pueblo de playa más caro de Bahia. Casitas blancas, calle de arena y la iglesia de madera de colores al borde del mar.', cuando: 'Todo el año. Julio es la temporada fuerte, con el festival de jazz del pueblo.' },
+      { name: 'Morro de São Paulo', zona: 'Costa Doce, sur de Salvador', vibe: 'Un pueblo al que se llega en barco y se sube por una escalera. No hay calle para autos: arriba hay un caserío pequeño y el atardecer.', cuando: 'Todo el año. El barco es la única entrada, así que hay que confirmar el horario antes de salir.' },
+      { name: 'Porto Seguro', zona: 'Costa Doce, 3 h de Salvador', vibe: 'La versión más grande y más barata de Trancoso. Mismo mar y misma costa, con más movimiento y precios de barrio.', cuando: 'Todo el año. Es la opción cuando Trancoso queda fuera de presupuesto.' },
+      { name: 'Itacaré', zona: 'Costa Doce, entre Salvador e Ilhéus', vibe: 'Pueblo de playa con la Praia do Amor y varias caletas tranquilas. Es la parada para quien quiere playa sin la movida de Trancoso.', cuando: 'Todo el año. La temporada fuerte va de diciembre a marzo.' },
+      { name: 'Praia do Forte', zona: 'Litoral norte, 70 km de Salvador', vibe: 'El balneario de la clase media de la capital. Tiene estructura y está más cerca que los pueblos de la Costa Doce.', cuando: 'Todo el año. Es la más práctica para un baño de día desde Salvador.' }
     ],
     comer: [
-      { name: 'acarajé de las bahianas', tipo: 'Merienda', zona: 'Largo de Santana, frente a la iglesia', usd: 4, momento: 'Tarde', nota: 'El plato más famoso de Bahía: viene con camarão, vatapa y urucum, y es barato y abundante. Las vendedoras en la plaza son las que saben; la primera vez pedí la cuenta con los extras antes de ordenar.' },
-      { name: 'Prato feito baiano', tipo: 'Almuerzo', zona: 'Centro, lejos de la zona turística', usd: 8, momento: 'Mediodía', nota: 'La cocina de Bahía es de las mejores del país: dende, cazabe, vatapa. Un plato hecho con aceite de palma bien servido y está en todas partes, pero en el Pelourinho el precio se paga por la ubicación.' }
+      { name: 'Acarajé', tipo: 'Merienda', zona: 'Largo de Santana y las playas', usd: 4, momento: 'Tarde', nota: 'La merienda de Bahia. Viene con camarão, vatapá y urucum. Es barato y es abundante. En la plaza de Salvador las vendedoras son las que saben.' },
+      { name: 'Moqueca', tipo: 'Almuerzo', zona: 'Porto Seguro e Itacaré', usd: 12, momento: 'Mediodía', nota: 'El guiso de pescado con aceite de coco y naranja. Es la marca de la cocina de Bahia y se come con arroz y banana.' },
+      { name: 'Pastel de acarajé', tipo: 'Merienda', zona: 'Las playas', usd: 4, momento: 'Tarde', nota: 'El pastelillo frito de camarón que acompaña al acarajé. Viene con salsa de ajo y es la combinación de siempre en la playa.' }
     ],
     tips: [
       { titulo: 'Salvador tiene dos caras', texto: 'El Pelourinho es la postal: más movimiento y precios altos. La Ciudad Baja, detrás, es donde Salvador vive de verdad y donde se come mejor por menos. Bajate de las escaleras y cruzate.' },
       { titulo: 'Trancoso es caro y nadie lo discute', texto: 'Trancoso y Arraial d’Ajuda es el pueblo de playa más caro de Bahía. Vale la pena, pero no es un destino de presupuesto. Porto Seguro e Itacaré dan la misma costa por menos de la mitad.' },
       { titulo: 'El moqueco de Salvador es el original', texto: 'El carnaval de la ciudad tiene su propia versión del moqueco, con más ritmo y más comida. Es el mejor plan de una noche si estás en la capital.' }
-    ]
+    ],
+    atracciones: [
+      { name: 'Centro histórico de Salvador', zona: 'Salvador', dur: '3 h', usd: 0, nota: 'El Pelourinho, con sus casas coloniales de colores y sus iglesias barrocas. Se camina entero a pie y no hay que pagar entrada.' },
+      { name: 'Igreja de São Sebastião', zona: 'Trancoso', dur: '30 min', usd: 3, nota: 'La iglesia de madera pintada que está sobre la arena. Es el símbolo del pueblo y una de las fotos más repetidas de la costa de Bahia.' }
+    ],
+    hacer: [
+      { name: 'Barco a Morro de São Paulo', zona: 'Morro de São Paulo', dur: '1 h', usd: 10, nota: 'El barco deja en la base de la escalera. Es la única forma de llegar, y hay que confirmar el horario del día antes.' }
+    ],
   },
 
   'pernambuco': {
