@@ -860,8 +860,167 @@ function haversineKm(a, b) {
         k + ': el traslado tiene que crecer de eco a confort, es ' + JSON.stringify(c.transport));
     }
   });
-  await t('cada destino declara de donde sale su costo, cuando y cuanta confianza tiene', function () {
-    // Los numeros de comida y traslado son ESTIMACIONES: no hay ningun provider
+  /* ---------- transfer desde el aeropuerto ---------- */
+  await t('el precio del transfer sale de la tabla y no de constantes', function () {
+    // Antes el mismo precio vivia en tres lugares distintos: las cards de
+    // public/app.js ponian 30 (compartido) y 150 (privado) para los 44
+    // destinos, getSelectedTransferAmount() repetia esos dos numeros, y
+    // transferConfig() en server.js usaba OFFICIAL_TRANSFER_PRICE_USD (35) POR
+    // PASAJERO. Para dos personas el wizard decia 70 y la card decia 30, y no
+    // habia forma de que coincidieran. Si alguien vuelve a escribir un numero
+    // adentro, esta prueba falla.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    assert.ok(!/transferType === 'private'\) return \d/.test(app),
+      'app.js tiene un precio de transfer fijo en getSelectedTransferAmount: deberia salir de la tabla');
+    assert.ok(!/data-transfer-amount="\d+"/.test(app),
+      'app.js tiene un data-transfer-amount fijo: las cards deberian tomar el precio de la tabla');
+    assert.ok(!/amount: 30, icon/.test(app) && !/amount: 150, icon/.test(app),
+      'app.js volvio a las cards de transfer con 30 y 150 written a mano');
+    const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
+    assert.ok(server.indexOf('model.transferOptions(destKey)') > 0,
+      'transferConfig() deberia leer la tabla con model.transferOptions()');
+  });
+  await t('transfer-precios.js esta al dia y coincide con el modelo', function () {
+    // Misma logica que el test de daily-costs: una sola fuente (el JSON), dos
+    // copias generadas. Si divergen, la card y el presupuesto muestran precios
+    // distintos sin que nada se entere.
+    const generado = path.join(__dirname, 'public', 'transfer-precios.js');
+    assert.ok(fs.existsSync(generado), 'falta public/transfer-precios.js: corré npm run build:transfer');
+    delete require.cache[require.resolve(generado)];
+    const cliente = require(generado);
+    const server = model.TRANSFER_PRICES;
+
+    const faltan = Object.keys(server).filter((k) => !cliente[k]);
+    const sobran = Object.keys(cliente).filter((k) => !server[k]);
+    assert.deepStrictEqual(faltan, [], 'destinos que el cliente no tiene: ' + faltan.join(', '));
+    assert.deepStrictEqual(sobran, [], 'destinos que el servidor no tiene: ' + sobran.join(', '));
+    for (const k of Object.keys(server)) {
+      assert.deepStrictEqual(
+        [cliente[k].compartido, cliente[k].privado, cliente[k].modo],
+        [server[k].compartido, server[k].privado, server[k].modo],
+        'precios de transfer distintos en ' + k + ' (' + (model.DEST[k] && model.DEST[k].name) + ')'
+      );
+    }
+    const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    const iTag = html.indexOf('src="/transfer-precios.js');
+    assert.ok(iTag > 0, 'index.html no carga /transfer-precios.js');
+    assert.ok(iTag < html.indexOf('src="/app.js'), 'transfer-precios.js tiene que cargarse antes que app.js');
+    const sw = fs.readFileSync(path.join(__dirname, 'public', 'sw.js'), 'utf8');
+    assert.ok(sw.indexOf("'/transfer-precios.js'") > 0, 'sw.js no precachea /transfer-precios.js');
+  });
+  await t('todo destino tiene precio de transfer propio y no cae al fallback', function () {
+    // transferConfig() tiene un piso para destinos fuera de la tabla. Si algum
+    // destino del catalogo llegara a ese piso, todos los destinos se cotizarian
+    // con el mismo precio sin error visible, que es el bug que se quiere evitar.
+    for (const k of Object.keys(model.DEST)) {
+      const t = model.transferOptions(k);
+      assert.ok(t, k + ' (' + model.DEST[k].name + ') no tiene entrada en la tabla de transfer');
+      assert.ok(!t.sinTabla, k + ' cae al piso de OFFICIAL_TRANSFER_PRICE_USD en vez de a la tabla');
+      assert.ok(t.compartido > 0 || t.soloPrivado,
+        k + ' no tiene traslado compartido y no declara soloPrivado');
+      assert.ok(t.privado > 0, k + ' no tiene precio de transfer privado');
+      assert.ok(t.privado >= t.compartido,
+        k + ': el privado (' + t.privado + ') sale menos que el compartido (' + t.compartido + ')');
+    }
+    assert.strictEqual(model.transferOptions('__no_existe__'), null,
+      'un destino inexistente no deberia devolver precios');
+  });
+  await t('el transfer de la isla no se ofrece como una van por carretera', function () {
+    // Ilha Grande no tiene carretera (se llega en barco) y Fernando de Noronha
+    // es una isla a 350 km de la costa (se llega en vuelo desde REC). Antes la
+    // app ofrecia las dos cards de van igual que para Rio, que no existe.
+    const ilha = model.transferOptions('ilha');
+    assert.strictEqual(ilha.modo, 'ferry', 'ilha deberia declararse ferry');
+    assert.ok(ilha.compartido > 0, 'a Ilha Grande se llega en barco, pero con precio');
+    assert.strictEqual(ilha.km, null, 'ilha no deberia tener km de carretera');
+
+    const fernando = model.transferOptions('fernando');
+    assert.strictEqual(fernando.modo, 'vuelo', 'fernando deberia declararse vuelo');
+    assert.ok(fernando.soloPrivado, 'a Fernando de Noronha no hay van compartida');
+    assert.strictEqual(fernando.compartido, 0, 'sin van compartida, el compartido es 0');
+    assert.ok(fernando.privado > 0, 'pero el vuelo tiene precio');
+    // El codigo de la isla es FEN. NVT es Navegantes, en Santa Catarina, a
+    // 2.900 km: con NVT la busqueda de vuelos mandaba a otra provincia.
+    assert.strictEqual(fernando.iata, 'FEN', 'fernando deberia llegar por FEN, no por NVT (que es Navegantes/SC)');
+  });
+  await t('el precio del transfer crece con la distancia al aeropuerto', function () {
+    // El bug de fondo: el mismo precio para todos los destinos. De GIG a Rio hay
+    // 18 km y de GIG a Buzios hay 174 por la RJ-124, y antes los dos costaban lo
+    // mismo. Ademas el compartido casi no crece (lo que se paga es el chofer, que
+    // se reparte) mientras que el privado crece con la distancia.
+    const rio = model.transferOptions('rio'), buz = model.transferOptions('buz');
+    assert.ok(rio.km < buz.km, 'Rio deberia estar mas cerca del aeropuerto que Buzios');
+    assert.ok(buz.compartido > rio.compartido, 'el compartido de Buzios deberia costar mas que el de Rio');
+    assert.ok(buz.privado > rio.privado * 1.5,
+      'el privado de Buzios (' + buz.privado + ') deberia subir bastante mas que el de Rio (' + rio.privado + ')');
+    // El compartido no puede depender tanto de la distancia como el privado.
+    const subidaCompartido = buz.compartido / rio.compartido;
+    const subidaPrivado = buz.privado / rio.privado;
+    assert.ok(subidaCompartido < subidaPrivado,
+      'el compartido (' + subidaCompartido.toFixed(1) + 'x) no deberia subir tanto como el privado (' + subidaPrivado.toFixed(1) + 'x)');
+  });
+  await t('un destino sin van compartida nunca cobra el precio de la compartida', function () {
+    // Regresión: fernando tiene compartido: 0 con soloPrivado, porque a la isla
+    // se llega en vuelo. Pero el cliente armaba el precio con `oficial.compartido
+    // || 20`, y 0 es falsy: caia al piso y el presupuesto cobraba US$ 20 por
+    // persona de una van que no existe. No hacia falta que la persona eligiera
+    // la option: si marco "compartido" en Rio y despues cambio el destino a
+    // Fernando de Noronha, el estado seguia diciendo 'shared'.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    assert.ok(!/oficial && oficial\.compartido\) \|\|/.test(app),
+      'app.js sigue usando truthiness para el precio: con compartido 0 cae al piso');
+
+    // Se corre la funcion real del cliente contra la tabla real.
+    const tabla = require(path.join(__dirname, 'public', 'transfer-precios.js'));
+    const desde = app.indexOf('function transferPreciosDe(meta)');
+    const hastaFn = app.indexOf('function getSelectedTransferAmount(state)');
+    const hasta = app.indexOf('// Iconos por categoría', hastaFn);
+    assert.ok(desde > 0 && hasta > desde, 'no se pudo extraer transferPreciosDe del cliente');
+    const fn = new Function('CS_TRANSFER_PRICES', 'Number',
+      app.slice(desde, hasta) + '; return { transferPreciosDe: transferPreciosDe, getSelectedTransferAmount: getSelectedTransferAmount };'
+    )(tabla, Number);
+
+    const precios = fn.transferPreciosDe({ dest: { key: 'fernando' }, pax: 2 });
+    assert.strictEqual(precios.compartido, 0, 'la compartida de fernando deberia seguir en 0, no caer al piso');
+    assert.ok(precios.soloPrivado, 'fernando deberia declarar soloPrivado');
+    assert.ok(precios.privado > 0, 'pero el privado tiene que valer');
+
+    for (const pax of [1, 2, 4]) {
+      const state = { meta: { dest: { key: 'fernando' }, pax: pax }, transportMode: 'flight', transferType: 'shared' };
+      assert.strictEqual(fn.getSelectedTransferAmount(state), 0,
+        'con ' + pax + ' personas la compartida de fernando no puede costar nada');
+    }
+    // Y el privado sigue siendo el mismo auto para cualquier cantidad de gente.
+    for (const pax of [1, 2, 4]) {
+      const state = { meta: { dest: { key: 'fernando' }, pax: pax }, transportMode: 'flight', transferType: 'private' };
+      assert.strictEqual(fn.getSelectedTransferAmount(state), precios.privado,
+        'el privado de fernando con ' + pax + ' personas');
+    }
+    // Un destino normal: el compartido escala con la gente, el privado no.
+    const rio = fn.transferPreciosDe({ dest: { key: 'rio' }, pax: 3 });
+    assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'shared' }), rio.compartido * 3);
+    assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'private' }), rio.privado);
+  });
+  await t('el server manda el precio de transfer del destino en el meta', async function () {
+    // Ojo con la query: `subcategory` es el nombre que se muestra, no el destino
+    // que se cotiza. Hay que pedir dest=buz, porque si se deja el dest de la
+    // query compartida (fln) el server cotiza Florianópolis y el precio de
+    // transfer que devuelve es el de Florianópolis, no el de Búzios.
+    const r = await get(port, '/api/cotizar?dest=buz&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq&origin=MVD');
+    const j = JSON.parse(r.body);
+    assert.strictEqual(r.status, 200);
+    assert.strictEqual(j.meta.dest.key, 'buz', 'no cotizó Búzios: ' + j.meta.dest.key);
+    const t = j.meta.officialTransfer;
+    assert.ok(t, 'el meta no trae officialTransfer');
+    assert.ok(!t.sinTabla, 'la cotizacion de buzios cae al piso, no a la tabla');
+    assert.strictEqual(t.compartido, model.transferOptions('buz').compartido,
+      'el server no mande el precio de la tabla');
+    assert.strictEqual(t.privado, model.transferOptions('buz').privado, 'el privado no coincide con la tabla');
+    assert.strictEqual(t.monto, t.compartido * j.meta.pax, 'el monto es el compartido por la cantidad de personas');
+    assert.ok(t.km > 0, 'no manda los km del aeropuerto');
+  });
+
+  await t('cada destino declara de donde sale su costo, cuando y cuanta confianza tiene', function () {    // Los numeros de comida y traslado son ESTIMACIONES: no hay ningun provider
     // detras, y calc() los marca sources.comidas = 'estimado'. Lo unico que
     // hace que un conjunto de estimaciones sea defendible es que cada numero
     // diga de donde salio. data/costos-diarios.json es la fuente unica de esos

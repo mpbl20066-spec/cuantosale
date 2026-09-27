@@ -6,9 +6,16 @@
   "scripts": {
     "build:costos": "node scripts/build-costos.js",
     "check:costos": "node scripts/validar-costos.js",
-    "prestart": "npm run build:costos",
+    "build:transfer": "node scripts/build-transfer.js",
+    "check:transfer": "node scripts/validar-transfer.js",
+    "build:todo": "npm run build:costos && npm run build:transfer",
+    "check:todo": "npm run check:costos && npm run check:transfer",
+    "pull:aeropuertos": "node scripts/pull-aeropuertos.js",
+    "pull:distancias": "node scripts/pull-distancias.js",
+    "pull:transfer": "node scripts/build-transfer-precios.js",
+    "prestart": "npm run build:todo",
     "start": "node server.js",
-    "pretest": "npm run build:costos",
+    "pretest": "npm run build:todo",
     "test": "node test.js",
     "test:guias": "node test-guias-humo.js"
   },

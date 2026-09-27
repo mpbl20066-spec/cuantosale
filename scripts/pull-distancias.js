@@ -95,13 +95,12 @@ async function rutaOsrm(a, b) {
       try {
         const r = await rutaOsrm(AEROPUERTO_COORD[iata], b);
         const recto = model.haversineKm(AEROPUERTO_COORD[iata], b);
-        // Una ruta por carretera nunca es mas corta que la linea recta, y
-        // rarely pasa de 2x. Esta guarda existe porque el script una vez dividio
-        // metros por 100 en vez de por 1000 y devolvio 320 km para un tramo que
-        // son 32: todos los precios salieron 10x sin que nada se quejara. Un
-        // numero de ruta que no pasa esto no es un dato, es un error.
+        // INVARIANTE DURO: una ruta por carretera nunca es mas corta que la linea
+        // recta. Esta guarda existe porque el script una vez dividio metros por 100
+        // en vez de por 1000 y devolvio 320 km para un tramo que son 32: todos los
+        // precios salieron 10x sin que nada se quejara. Un numero que no pase esto
+        // no es un dato, es un error.
         if (!(r.km >= recto)) throw new Error('ruta ' + r.km + ' km menor que la linea recta ' + recto + ' km');
-        if (r.km > recto * 2.5) throw new Error('ruta ' + r.km + ' km contra ' + recto + ' km de linea recta: sinuosidad sospechosa');
         cache[ck] = { km: r.km, horas: r.horas, lineaRecta: recto };
         salida[k] = Object.assign({ iata, modo: 'car' }, cache[ck]);
         await dormir(350);
@@ -111,8 +110,14 @@ async function rutaOsrm(a, b) {
       }
     }
     const s = salida[k];
+    // AVISO, no error: hay rutas costeras genuinamente sinuosas. Morro de Sao Paulo
+    // son 242 km desde SSA contra 83 de linea recta, y esta bien: el camino sube
+    // al norte por el Reconcavo y bordea la Bahia de Todos os Santos, mientras que
+    // la recta atraviesa la bahia. Por eso el techo no es un invariante como el
+    // de la ruta >= recta, sino algo que se revisa a ojo.
+    const aviso = s.lineaRecta && s.km / s.lineaRecta > 2.5 ? '  <- sinuoso, revisar' : '';
     console.log('  ' + k.padEnd(13) + ' ' + String(iata).padEnd(4) +
-      String(s.km).padStart(5) + ' km  ' + String(s.horas).padStart(5) + ' h  (recta ' + s.lineaRecta + ' km, x' + (s.km / s.lineaRecta).toFixed(2) + ')');
+      String(s.km).padStart(5) + ' km  ' + String(s.horas).padStart(5) + ' h  (recta ' + s.lineaRecta + ' km, x' + (s.km / s.lineaRecta).toFixed(2) + ')' + aviso);
   }
 
   fs.writeFileSync(CACHE, JSON.stringify(cache, null, 2) + '\n', 'utf8');

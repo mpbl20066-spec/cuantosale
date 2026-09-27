@@ -893,7 +893,7 @@ function transferConfig(destKey, pax) {
   }
   return {
     destino: destKey, nombre: tabla.nombre, sinTabla: false,
-    iata: tabla.iata, modo: tabla.modo, km: tabla.km,
+    iata: tabla.iata, modo: tabla.modo, km: tabla.km, soloPrivado: tabla.soloPrivado,
     // Se mandan los dos precios y el app elige. `monto` queda como el compartido
     // por la persona, que es lo que se venia usando para el total.
     compartido: tabla.compartido, privado: tabla.privado, appRideUsd: tabla.appRideUsd,

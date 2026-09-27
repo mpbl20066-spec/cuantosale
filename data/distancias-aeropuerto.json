@@ -1,0 +1,212 @@
+{
+  "bue|EZE": {
+    "km": 32,
+    "horas": 0.5,
+    "lineaRecta": 28.1
+  },
+  "buz|GIG": {
+    "km": 174,
+    "horas": 2.7,
+    "lineaRecta": 133.8
+  },
+  "arraial|GIG": {
+    "km": 170,
+    "horas": 2.6,
+    "lineaRecta": 126.8
+  },
+  "cabo|GIG": {
+    "km": 160,
+    "horas": 2.5,
+    "lineaRecta": 126.5
+  },
+  "paraty|GIG": {
+    "km": 248,
+    "horas": 4,
+    "lineaRecta": 156.7
+  },
+  "ilhabela|GRU": {
+    "km": 185,
+    "horas": 3.7,
+    "lineaRecta": 120.1
+  },
+  "ubatuba|GRU": {
+    "km": 206,
+    "horas": 3.4,
+    "lineaRecta": 141.5
+  },
+  "rio|GIG": {
+    "km": 18,
+    "horas": 0.3,
+    "lineaRecta": 13.4
+  },
+  "angra|GIG": {
+    "km": 139,
+    "horas": 2.4,
+    "lineaRecta": 107.8
+  },
+  "sao|GRU": {
+    "km": 26,
+    "horas": 0.5,
+    "lineaRecta": 21.3
+  },
+  "bho|CNF": {
+    "km": 40,
+    "horas": 0.6,
+    "lineaRecta": 32
+  },
+  "curitiba|CWB": {
+    "km": 17,
+    "horas": 0.4,
+    "lineaRecta": 14.6
+  },
+  "porto|REC": {
+    "km": 53,
+    "horas": 0.8,
+    "lineaRecta": 42.9
+  },
+  "mcz|MCZ": {
+    "km": 21,
+    "horas": 0.5,
+    "lineaRecta": 16.3
+  },
+  "maragogi|MCZ": {
+    "km": 129,
+    "horas": 2.1,
+    "lineaRecta": 83.7
+  },
+  "nat|NAT": {
+    "km": 25,
+    "horas": 0.4,
+    "lineaRecta": 17.9
+  },
+  "pip|NAT": {
+    "km": 30,
+    "horas": 0.5,
+    "lineaRecta": 23.7
+  },
+  "trancoso|SSA": {
+    "km": 163,
+    "horas": 2.7,
+    "lineaRecta": 87.2
+  },
+  "ssa|SSA": {
+    "km": 24,
+    "horas": 0.5,
+    "lineaRecta": 19.1
+  },
+  "for|FOR": {
+    "km": 9,
+    "horas": 0.2,
+    "lineaRecta": 2
+  },
+  "jericoacoara|FOR": {
+    "km": 295,
+    "horas": 5.6,
+    "lineaRecta": 245.9
+  },
+  "morro|SSA": {
+    "km": 242,
+    "horas": 3.9,
+    "lineaRecta": 82.8
+  },
+  "portoseguro|SSA": {
+    "km": 699,
+    "horas": 11.4,
+    "lineaRecta": 401.1
+  },
+  "itacare|SSA": {
+    "km": 359,
+    "horas": 5.7,
+    "lineaRecta": 168.7
+  },
+  "forte|SSA": {
+    "km": 62,
+    "horas": 1.1,
+    "lineaRecta": 50.3
+  },
+  "fln|FLN": {
+    "km": 17,
+    "horas": 0.4,
+    "lineaRecta": 8.3
+  },
+  "camboriu|FLN": {
+    "km": 96,
+    "horas": 1.4,
+    "lineaRecta": 75.7
+  },
+  "bombinhas|FLN": {
+    "km": 89,
+    "horas": 1.5,
+    "lineaRecta": 58.3
+  },
+  "rosa|FLN": {
+    "km": 96,
+    "horas": 1.6,
+    "lineaRecta": 50
+  },
+  "bcm|FLN": {
+    "km": 96,
+    "horas": 1.4,
+    "lineaRecta": 76
+  },
+  "itapema|FLN": {
+    "km": 88,
+    "horas": 1.4,
+    "lineaRecta": 64.5
+  },
+  "garopaba|FLN": {
+    "km": 89,
+    "horas": 1.5,
+    "lineaRecta": 39.6
+  },
+  "ferrugem|FLN": {
+    "km": 100,
+    "horas": 1.6,
+    "lineaRecta": 53.5
+  },
+  "picarras|FLN": {
+    "km": 129,
+    "horas": 1.8,
+    "lineaRecta": 101.5
+  },
+  "gram|POA": {
+    "km": 109,
+    "horas": 1.9,
+    "lineaRecta": 74.4
+  },
+  "canela|POA": {
+    "km": 115,
+    "horas": 2.1,
+    "lineaRecta": 77.5
+  },
+  "torres|POA": {
+    "km": 184,
+    "horas": 2.5,
+    "lineaRecta": 156.8
+  },
+  "canoa|POA": {
+    "km": 135,
+    "horas": 1.8,
+    "lineaRecta": 113.8
+  },
+  "igu|IGU": {
+    "km": 14,
+    "horas": 0.3,
+    "lineaRecta": 11.2
+  },
+  "rec|REC": {
+    "km": 13,
+    "horas": 0.3,
+    "lineaRecta": 8.7
+  },
+  "joaopessoa|JPA": {
+    "km": 13,
+    "horas": 0.3,
+    "lineaRecta": 8.1
+  },
+  "poa|POA": {
+    "km": 9,
+    "horas": 0.2,
+    "lineaRecta": 6.6
+  }
+}
