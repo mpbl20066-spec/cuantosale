@@ -649,6 +649,16 @@
     var c = S.currency;
     return MONEDAS_APP.filter(function (m) { return m.code === c; })[0] || MONEDAS_APP[0];
   }
+  // Moneda base del presupuesto. El fallback de money() tiene que ser ÉSTA y no
+  // "la primera de la lista": como la lista empieza por UYU (que es lo que
+  // quiere ver un’utilisateur uruguayo), un fallo al cargar las tasas iba a
+  // pintar "US$ 1.010" como "$ 1.010", con un error de 37 veces. La base es USD
+  // y el presupuesto está en USD, así que sin tasas se muestra en la base, que
+  // es el único número que no se está inventando.
+  function monedaBase() {
+    var base = FX.base || 'USD';
+    return MONEDAS_APP.filter(function (m) { return m.code === base; })[0] || MONEDAS_APP[0];
+  }
   function formatoMiles(n, dec) {
     var neg = n < 0;
     var s = Math.abs(n).toFixed(dec);
@@ -676,24 +686,48 @@
     const slot = document.getElementById('currency-picker-slot');
     if (slot) slot.innerHTML = selectorMoneda();
   }
-  // Badge compacto: solo el codigo de la moneda activa. Sin etiqueta "MONEDA",
-  // sin flecha y sin desplegable: el clic avanza a la siguiente moneda que
-  // tenga tasa. Es lo mas liviano que se puede poner al lado del boton de
-  // sesion sin competir con el.
+  // Desplegable de moneda. Antes era un badge que al hacer clic avanzaba a la
+  // siguiente moneda en ciclo, y un panel que se escondía detrás del badge
+  // decía cuántas había: nada indicaba que fuera pulsable ni cuántas opciones
+  // existían, y no había forma de saltar directo a la que se quería.
+  //
+  // Ahora es un botón con el código y una flecha que abre la lista de las
+  // monedas disponibles. Solo tres, que son las que le sirven a este mercado.
   function selectorMoneda() {
     var rates = FX.rates || {};
     var hay = !!Object.keys(rates).length;
     var m = monedaActiva();
-    var disponibles = MONEDAS_APP.filter(function (op) { return hay && tasaDe(op.code) != null; });
-    var falta = hay && disponibles.length < MONEDAS_APP.length;
-    return '<button type="button" class="currency-badge' + (hay ? '' : ' is-loading') + '"'
-      + ' data-currency-cycle aria-label="Cambiar moneda. Ahora: ' + esc(m.etiqueta) + '"'
-      + ' title="' + esc(m.etiqueta) + (falta ? ' (algunas no tienen tasa todavia)' : '') + '">'
-      + '<b>' + m.code + '</b></button>';
+    var opciones = MONEDAS_APP.map(function (op) {
+      var ok = hay && tasaDe(op.code) != null;
+      var sel = op.code === m.code;
+      return '<button type="button" class="currency-option' + (sel ? ' is-selected' : '') + '"'
+        + ' role="option" aria-selected="' + (sel ? 'true' : 'false') + '"'
+        + ' data-currency="' + esc(op.code) + '"' + (ok ? '' : ' disabled') + '>'
+        + '<span class="currency-option__symbol" aria-hidden="true">' + esc(op.simbolo) + '</span>'
+        + '<span class="currency-option__name">' + esc(op.etiqueta) + '</span>'
+        + (sel ? '<span class="currency-option__check" aria-hidden="true">✓</span>' : '')
+        + '</button>';
+    }).join('');
+    return '<div class="currency-picker' + (hay ? '' : ' is-loading') + '">'
+      + '<button type="button" class="currency-badge" data-currency-toggle aria-haspopup="listbox" aria-expanded="false"'
+      + ' aria-label="Moneda: ' + esc(m.etiqueta) + '. Cambiar"'
+      + ' title="' + esc(m.etiqueta) + (hay ? '' : ' (cargando tasas)') + '">'
+      + '<b>' + esc(m.code) + '</b></button>'
+      + '<div class="currency-menu" role="listbox" aria-label="Elegí la moneda" hidden>' + opciones + '</div>'
+      + '</div>';
   }
   function refrescarSelectorMoneda() {
-    document.querySelectorAll('.currency-badge').forEach(function (el) {
+    // Se reemplaza el contenedor entero, no solo el badge: el menú vive adentro
+    // y tiene que reflejar la moneda activa y cuáles tienen tasa.
+    document.querySelectorAll('.currency-picker').forEach(function (el) {
       el.outerHTML = selectorMoneda();
+    });
+  }
+  function cerrarMenusMoneda() {
+    document.querySelectorAll('.currency-menu').forEach(function (menu) {
+      menu.hidden = true;
+      var trigger = menu.parentElement && menu.parentElement.querySelector('[data-currency-toggle]');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
     });
   }
   function aplicarMoneda(code) {
@@ -709,7 +743,7 @@
     //
     // Antes, un solo click de moneda pintaba el desglose DOS veces (esta línea y
     // la de recalcularTotalViaje, byte a byte idénticas), el panel dos veces, y
-    // encima 调用aba render(lastData), que reconstruía la lista de resultados
+    // encima llamaba a render(lastData), que reconstruía la lista de resultados
     // entera. Todo eso dentro de catch (e) {} VACÍOS: un TypeError al pintar
     // un total se tragaba en silencio y el usuario veía un precio viejo con el
     // símbolo nuevo, sin ningún error en consola.
@@ -742,20 +776,54 @@
     refrescarSelectorMoneda();
     if (lastData) { try { render(lastData); } catch (e) { } }
   }
-  // Ciclico: avanza a la siguiente moneda disponible. Si solo hay una, no hace
-  // nada. Las que no tienen tasa se saltan, asi nunca se elige una que no se
-  // pueda calcular.
-  function siguienteMoneda() {
-    var disponibles = MONEDAS_APP.filter(function (op) { return tasaDe(op.code) != null; });
-    if (disponibles.length < 2) return null;
-    var i = disponibles.findIndex(function (op) { return op.code === S.currency; });
-    return disponibles[(i + 1 + disponibles.length) % disponibles.length].code;
-  }
+  // Un clic en el badge abre la lista; un clic en una opción elige y cierra.
+  // Todo delegado en un solo listener de document para no re-atarlos en cada
+  // repintado, que es lo que hace refrescarSelectorMoneda().
   document.addEventListener('click', function (e) {
-    const b = e.target.closest && e.target.closest('[data-currency-cycle]');
-    if (!b) return;
-    const sig = siguienteMoneda();
-    if (sig) aplicarMoneda(sig);
+    var option = e.target.closest && e.target.closest('[data-currency]');
+    if (option) {
+      if (option.disabled) return;
+      e.preventDefault();
+      e.stopPropagation();
+      cerrarMenusMoneda();
+      aplicarMoneda(option.getAttribute('data-currency'));
+      return;
+    }
+    var trigger = e.target.closest && e.target.closest('[data-currency-toggle]');
+    if (trigger) {
+      e.preventDefault();
+      e.stopPropagation();
+      var menu = trigger.parentElement && trigger.parentElement.querySelector('.currency-menu');
+      if (!menu) return;
+      var estabaAbierto = !menu.hidden;
+      cerrarMenusMoneda();
+      if (estabaAbierto) return;
+      menu.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      // El foco va a la opción activa para que con teclado se llegue con las
+      // flechas, que es lo que se espera de un listbox.
+      var activa = menu.querySelector('.currency-option.is-selected') || menu.querySelector('.currency-option:not([disabled])');
+      if (activa) activa.focus();
+      return;
+    }
+    // Cualquier otro clic cierra lo que estuviera abierto.
+    if (e.target.closest && e.target.closest('.currency-menu')) return;
+    cerrarMenusMoneda();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (document.querySelector('.currency-menu:not([hidden])')) { cerrarMenusMoneda(); return; }
+      return;
+    }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    var menu = e.target.closest && e.target.closest('.currency-menu');
+    if (!menu) return;
+    e.preventDefault();
+    var opciones = [].slice.call(menu.querySelectorAll('.currency-option:not([disabled])'));
+    if (!opciones.length) return;
+    var i = opciones.indexOf(document.activeElement);
+    var siguiente = e.key === 'ArrowDown' ? (i + 1) % opciones.length : (i - 1 + opciones.length) % opciones.length;
+    opciones[siguiente].focus();
   });
 
   function money(n) {
@@ -1242,29 +1310,33 @@
       // Con foto: velo para que el texto se lea siempre. Sin foto: degradado
       // con el icono de la actividad, que no miente sobre lo que es.
       var media = photo
-        ? '<div class="local-tour__media"><img src="' + esc(photo.url) + '" alt="' + esc(tour.title) + '" loading="lazy">' +
-          '<div class="local-tour__scrim"></div>' +
-          '<div class="local-tour__over"><h3>' + esc(tour.title) + '</h3>' +
-          '<p class="local-tour__price"><b>' + money(tour.price) + '</b><span>por persona</span></p></div></div>'
+        ? '<div class="local-tour__media"><img src="' + esc(photo.url) + '" alt="' + esc(tour.title) + '" loading="lazy"></div>'
         : '<div class="local-tour__media local-tour__media-plain" style="background:linear-gradient(150deg,' + skin.from + ',' + skin.to + ')">' +
-          '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg>' +
-          '<h3 class="local-tour__title-over">' + esc(tour.title) + '</h3></div>';
+          '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg></div>';
       var duration = tourDuration(tour);
       // Marca de seleccion: cinta solida arriba en vez de relleno de color.
       // Un card con fondo celeste y borde duro parecia un boton de escritorio;
       // la cinta se lee como estado y no tapa la foto ni el precio.
-      var ribbon = '<span class="local-tour__ribbon" aria-hidden="true">' + icoCheck + 'En tu viaje</span>';
+      var ribbon = '<span class="local-tour__ribbon" aria-hidden="true">' + icoCheck + 'Tu viaje</span>';
       // Toda la tarjeta es la zona sensible: el checkbox va estirado con
       // position:absolute sobre el article y solo el boton de detalle queda
       // por encima (z-index). Un clic en cualquier punto elige la
       // experiencia y el teclado sigue teniendo un unico control que tabula.
+      //
+      // Titulo, destino y precio viven en el cuerpo claro, no sobre la foto.
+      // Antes iban sobre un velo oscuro con el precio en ambar: quedaba lindo
+      // como foto pero se leia como otra cosa distinta a los grupos de
+      // "Transporte local" y "Comidas", que son las opciones con las que se
+      // compara. Ahora las tres tarjetas se leen igual.
       return '<article class="local-tour" data-tour-card>' +
         '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '">' +
         ribbon +
         media +
         '<div class="local-tour__body">' +
+        '<h3 class="local-tour__title">' + esc(tour.title) + '</h3>' +
         '<p class="local-tour__destination">' + esc(tour.destination) + '</p>' +
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
+        '<p class="local-tour__price"><b>' + money(tour.price) + '</b><span>por persona</span></p>' +
         '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
         '<span class="local-tour__chip">' + (tour.source === 'civitatis' ? 'Precio real' : 'Precio referencial') + '</span>' +
         (tour.rating ? '<span class="local-tour__chip">★ ' + Number(tour.rating).toFixed(1) + '</span>' : '') +
@@ -3330,7 +3402,7 @@
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
     var foodMarkup = renderSafe(function () { return foodGuide(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
-      '<section class="detail-summary">' + selectorMoneda() + '<span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
+      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + foodMarkup +
@@ -4803,5 +4875,4 @@
   cargarTasas();
   init();
 
-  window.__cs = { rts: renderTripSummary, qh: queueHeavyRepaint, ds: function(){ return detailState; } };
 })();

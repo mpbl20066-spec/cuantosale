@@ -55,11 +55,15 @@ const civitatis = require('./lib/providers/civitatis');
 // Ojo: esto ropes en cada monto de la app. "US$ 1.200" pasa a "US$ 1.200"
 // (igual, el dólar ya lo llevaba) pero "UYU$ 1.200" es mas largo que "$ 1.200".
 // Es el precio de no tener que adivinar.
+// Solo las tres que le sirven a un traveler uruguayo que va a Brasil: la que
+// quiere ver (UYU), la que están cotizando todos los sitios (USD, y es la base
+// del presupuesto) y la que va a pagar allá (BRL). Agregar monedas acá cambia
+// la lista del selector, que es exactamente lo que se quiere: la app es para
+// este mercado, no para el mundo.
 const MONEDAS = [
+  { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' },
   { code: 'USD', etiqueta: 'Dólares', simbolo: 'US$' },
-  { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
-  { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: 'UYU$' },
-  { code: 'ARS', etiqueta: 'Pesos argentinos', simbolo: 'ARS$' }
+  { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' }
 ];
 let fxCache = { rates: null, base: 'USD', until: 0, source: '', at: 0 };
 

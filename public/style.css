@@ -22,6 +22,11 @@
   --action-bg:#10233E; --action-ink:#FFFFFF; --action-border:transparent;
   --control-bg:#FFFFFF; --control-border:#E2E8F0; --control-hover:#F8FAFC; --control-muted:#64748B; --control-selected:#F8FAFC; --control-selected-ink:#1D4ED8;
   --accent:#F6B21B; --accent-ink:#10233E;
+  /* Marco de selección de las experiencias. El ámbar de marca (#F6B21B) sobre
+     blanco da 1.7:1, o sea que como borde de 2px no se veía: el estado
+     "elegido" se comunicaba solo con la cinta de arriba. Este es el mismo
+     amarillo más profundo y da 3.1:1, así que el marco se lee por sí solo. */
+  --accent-line:#B8791B; --accent-tint:#FEF7E7;
   --hero-bg:#10233E; --hero-ink:#FFFFFF; --hero-accent:#F6B21B; --hero-soft:#A9CBEA;
   --cel:#1B5FA8; --cel-ink:#FFFFFF; --cel-soft:#DCEBF8; --coral:#D9481F; --coral-soft:#FDE2D9; --good:#12784F; --good-soft:#DCF2E6;
   --c1:#10233E; --c2:#7CB7E8; --c3:#F6B21B; --c4:#E4572E; --c5:#4B7BAA; --c6:#9AA9BA;
@@ -34,6 +39,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
+    --accent-line:#E8A93B; --accent-tint:#33290E;
     --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
     --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
     --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
@@ -44,6 +50,7 @@
 }
 :root[data-theme="dark"]{
   --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
+  --accent-line:#E8A93B; --accent-tint:#33290E;
   --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
   --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
   --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
@@ -527,9 +534,13 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* El borde no cambia de grosor al marcar (solo de color), asi que la tarjeta
    no corre nada. Relleno de color + borde duro se leia como un boton de
    escritorio; la marca real va en la cinta de arriba. */
-.local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1.5px solid var(--control-line);border-radius:18px;background:var(--surface);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
-.local-tour:has([data-tour-choice]:checked){border-color:#f1b145;box-shadow:0 10px 24px rgba(241,177,69,.28)}
+/* Marco amarillo + fondo apenas tintado. Es el mismo "modo de selección" de
+   los grupos de localize y comidas (borde que se marca + fondo), pero en el
+   ámbar de la marca en vez del azul, para que las experiencias seReconozcan
+   como tuyas y no como una categoría más. */
+.local-tour:has([data-tour-choice]:checked){border:2px solid var(--accent-line);background:var(--accent-tint);box-shadow:0 8px 20px rgba(184,121,27,.16)}
 /* La tarjeta completa es la zona sensible. El checkbox se estira con
    position:absolute sobre el article: el clic en cualquier punto lo activa y
    el teclado conserva un único control que tabula (Enter lo agrega el JS). */
@@ -537,25 +548,26 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tour:has(.local-tour__input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
 /* Cinta de seleccion: entra desde arriba cuando la experiencia ya esta en el
    viaje. Es lo unico que tapa un poco de la foto y no la deja ilegible. */
-.local-tour__ribbon{position:absolute;z-index:2;top:0;right:0;left:0;display:flex;align-items:center;gap:6px;padding:7px 14px;background:#f1b145;color:#0f192d;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(-100%);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+.local-tour__ribbon{position:absolute;z-index:2;top:0;right:0;left:0;display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--accent);color:var(--accent-ink);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:0;transform:translateY(-100%);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
 .local-tour__ribbon svg{flex:0 0 14px;width:14px;height:14px}
 .local-tour:has([data-tour-choice]:checked) .local-tour__ribbon{opacity:1;transform:none}
-/* Foto con velo: el texto va montado arriba, como en el catálogo de referencia.
-   El velo es fijo y no usa --hero-* porque estas tarjetas son oscuras siempre. */
-.local-tour__media{position:relative;flex:0 0 auto;height:186px;background:var(--bg)}
+/* La foto es una franja arriba y no lleva texto encima. Antes tenía un velo
+   degradado con el título en blanco y el precio en ámbar: quedaba bien como
+   foto, pero el texto dependía de la imagen para poder leerse y el precio en
+   ámbar no se comparaba con el resto del desglose. Ahora título, destino,
+   descripción y precio van en el cuerpo claro, igual que "Transporte local" y
+   "Comidas". */
+.local-tour__media{position:relative;flex:0 0 auto;height:152px;background:var(--bg)}
 .local-tour__media img{display:block;width:100%;height:100%;object-fit:cover}
-.local-tour__scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,24,48,0) 28%,rgba(10,24,48,.72) 60%,rgba(10,24,48,.96) 100%)}
-.local-tour__over{position:absolute;right:0;bottom:0;left:0;padding:12px 14px}
-.local-tour__over h3{margin:0 0 6px;color:#fff;font-family:var(--fh);font-size:23px;line-height:1.1;text-shadow:0 1px 10px rgba(0,0,0,.4)}
-.local-tour__price{display:flex;align-items:baseline;gap:6px;margin:0}
-.local-tour__price b{color:#f1b145;font-size:20px;font-weight:800;letter-spacing:-.01em}
-.local-tour__price span{color:#fff;font-size:11.5px;opacity:.85}
+.local-tour__price{display:flex;align-items:baseline;gap:6px;margin:0 0 12px}
+.local-tour__price b{color:var(--ink);font-size:22px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.local-tour__price span{color:var(--ink2);font-size:11.5px}
 /* Sin foto: degradado con el ícono de la actividad. */
 .local-tour__media-plain{display:grid;place-items:center;align-content:center;gap:10px;padding:16px}
 .local-tour__ico{width:38px;height:38px;opacity:.9}
-.local-tour__title-over{margin:0;color:#fff;font-family:var(--fh);font-size:21px;line-height:1.15;text-align:center}
 .local-tour__body{display:flex;flex-direction:column;flex:1;min-width:0;padding:14px}
-.local-tour__destination{margin:0 0 5px;color:var(--ink2);font-size:11px;font-weight:700;line-height:1.4}
+.local-tour__title{margin:0 0 4px;color:var(--ink);font-family:var(--fh);font-size:21px;line-height:1.15}
+.local-tour__destination{margin:0 0 7px;color:var(--ink2);font-size:11px;font-weight:700;line-height:1.4}
 .local-tour__description{flex:1;margin:0 0 12px;color:var(--ink2);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
 .local-tour__meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .local-tour__chip{padding:4px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);font-size:10.5px;font-weight:700;white-space:nowrap}
@@ -671,7 +683,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__slider::before,.destination-highlights__slider::after{width:54px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 54px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:200px}.featured-destination__overlay h3{font-size:25px}}
 @media(max-width:900px){.local-tours__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__grid{grid-template-columns:minmax(0,1fr)}.local-tour{padding:14px}}
+/* La card sin padding propio: la foto va a sangre hasta los bordes y el
+   padding lo aporta el cuerpo. Con padding en la card (lo que había antes) la
+   foto quedaba metida en un marco y el bloque se veía más estrecho que las
+   tarjetas de "Transporte local" y "Comidas". */
+@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__grid{grid-template-columns:minmax(0,1fr)}.local-tour__media{height:168px}}
 .flight-airline{flex-wrap:wrap}
 .flight-airline .cabin-badge{white-space:nowrap;background:var(--cel-soft);color:var(--ink)}
 /* z-index propio: #install-help es el ÚLTIMO modal del DOM, así que con el
@@ -731,12 +747,9 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    Ahora: 44px de alto, borde a 3:1 y un chevron que se dibuja con ::after
    (asi el markup del badge no cambia y el refresco por outerHTML lo mantiene).
    ------------------------------------------------------- */
-/* El badge de la banda de resumen va sobre --hero-bg (navy en claro, ámbar en
-   oscuro). No tenía regla propia: salía blanco sobre navy por accidente, y en
-   modo oscuro quedaba un chip navy oscuro sobre ámbar. Las dos combinaciones
-   son legibles, pero por casualidad y no por decisión. */
-.detail-summary .currency-badge{border-color:transparent;box-shadow:0 1px 0 rgba(0,0,0,.06)}
-.detail-summary .currency-badge:hover{border-color:currentColor;background:transparent}
+/* El selector de moneda vive solo en el header. Estaba además en la banda
+   oscura de resumen de la propuesta, y competía con el total grande: dos
+   controles de moneda en pantalla y ninguno de los dos hacía falta ahí. */
 .sec__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .currency-badge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:5px;
   min-width:62px;min-height:44px;padding:0 11px;margin:0;border:1.5px solid var(--control-line);
@@ -749,6 +762,22 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* el mismo --focus que el resto de la app, para que se lea igual */
 .currency-badge:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .currency-badge.is-loading{opacity:.45;pointer-events:none}
+/* El desplegable. Tres monedas en una columna: son pocas y la columna se lee
+   sin ambigüedad. La referencia que nos pasó usaba varias columnas porque
+   tenía nueve monedas. */
+.currency-picker{position:relative;flex:0 0 auto;display:inline-flex}
+.currency-menu{position:absolute;z-index:95;top:calc(100% + 8px);right:0;min-width:238px;padding:6px;border:1px solid var(--control-line);border-radius:16px;background:var(--surface);box-shadow:0 16px 40px rgba(16,35,62,.22)}
+.currency-menu[hidden]{display:none}
+.currency-option{display:grid;grid-template-columns:44px minmax(0,1fr) 18px;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 10px;border:0;border-radius:11px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;transition:background .14s ease}
+.currency-option:hover:not([disabled]){background:var(--control-hover)}
+.currency-option:focus-visible{outline:3px solid var(--focus);outline-offset:-2px}
+.currency-option[disabled]{opacity:.4;cursor:not-allowed}
+.currency-option__symbol{color:var(--ink2);font-size:12px;font-weight:700;letter-spacing:.01em;white-space:nowrap}
+.currency-option__name{overflow:hidden;font-size:14px;font-weight:600;line-height:1.3;text-overflow:ellipsis;white-space:nowrap}
+.currency-option__check{color:var(--cel);font-size:14px;font-weight:800;text-align:center}
+.currency-option.is-selected{background:var(--selected-bg)}
+.currency-option.is-selected .currency-option__symbol{color:var(--cel)}
+.currency-option.is-selected .currency-option__name{color:var(--cel);font-weight:700}
 @media (max-width:560px){
   .sec__head{gap:10px}
 }
