@@ -488,7 +488,16 @@ async function bookingApiJson(url, settings) {
       headers: { 'x-rapidapi-key': settings.key, 'x-rapidapi-host': settings.host, Accept: 'application/json' }
     }, 9000);
   } catch (error) {
-    throw new Error(error && error.name === 'AbortError' ? 'Booking API excedió el tiempo de espera.' : 'No se pudo conectar con Booking API.');
+    // Antes se pisaba el motivo real con un texto generico, y en produccion
+    // todo fallo de red llegaba al log y a /api/hoteles como el mismo
+    // "No se pudo conectar": DNS, TLS, timeout y un host mal configurado eran
+    // indistinguibles. El codigo del error (ENOTFOUND, ECONNREFUSED,
+    // CERT_...) es lo que dice que host hay que corregir.
+    const codigo = (error && (error.code || error.cause && error.cause.code)) || '';
+    const detalle = (error && error.message ? String(error.message) : String(error)).slice(0, 160);
+    throw new Error(error && error.name === 'AbortError'
+      ? 'Booking API excedió el tiempo de espera.'
+      : 'No se pudo conectar con Booking API (' + settings.host + ')' + (codigo ? ' [' + codigo + ']' : '') + ': ' + detalle);
   }
   let payload;
   try { payload = await response.json(); } catch (error) { throw new Error('Booking API devolvió una respuesta JSON inválida.'); }
