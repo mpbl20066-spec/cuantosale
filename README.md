@@ -140,6 +140,10 @@ Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.)
 
 `node test.js` corre pruebas del modelo de costos y el servidor. Las búsquedas reales usan la suscripción de RapidAPI y consumen la cuota del plan; las pruebas locales no deben consumirla.
 
+`npm run test:guias` corre la prueba de humo de la Guía Secreta: rompe el código a propósito, una vez por cada regresión que de verdad ocurrió, y verifica que `test.js` la marque. No toca la red ni consume cuota.
+
+Conviene correrla después de tocar `public/guias.js` o `public/app.js`. Los dos bugs más caros de esa parte fueron silenciosos: renombrar `d.region` a `d.región` dejaba la cobertura de guías en 0 sin tirar error, y renombrar la clave `cuando` a `cuándo` hacía que el render recibiera `undefined` y desapareciera la línea "Cuándo" de las 19 playas. Un test que no falla cuando tiene que fallar no sirve de nada, y por eso el humo existe.
+
 ## 5. Qué falta para una versión completa
 
 - **Buses y ferry reales:** Busbud da acceso a sus datos a socios; hay que pedirles un convenio. Completá `lib/providers/busbud.js`.

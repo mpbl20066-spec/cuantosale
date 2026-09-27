@@ -13,7 +13,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.join(__dirname, 'public', 'app.js');
+// Se leen los dos archivos que tienen URLs de fotos. Antes era uno solo
+// (app.js), y las fotos de la Guia Secreta, que viven en public/guias.js,
+// quedaban sin acreditar: exactamente lo que este archivo existe para evitar.
+const SRC = [
+  path.join(__dirname, 'public', 'app.js'),
+  path.join(__dirname, 'public', 'guias.js')
+];
 const OUT = path.join(__dirname, 'public', 'creditos-fotos.generated.js');
 const UA = 'cuantosale-creditos/1.0 (atribucion de fotos)';
 
@@ -66,7 +72,7 @@ async function ficha(fileName) {
 }
 
 (async function () {
-  const src = fs.readFileSync(SRC, 'utf8');
+  const src = SRC.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
   const urls = [...new Set([...src.matchAll(/'(https?:\/\/[^']+\.(?:jpg|jpeg|JPG|png|webp))'/g)].map((m) => m[1]))];
   const creditos = {};
   const sinFicha = [];
