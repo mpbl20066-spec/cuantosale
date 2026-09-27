@@ -338,9 +338,35 @@ function safeBookingHotelUrl(value) {
     return url.protocol === 'https:' && (url.hostname === 'booking.com' || url.hostname.endsWith('.booking.com')) ? url.toString() : null;
   } catch (error) { return null; }
 }
+/*
+ * Limpia BOOKING_API_KEY antes de mandarla como header.
+ *
+ * Un header HTTP no puede contener saltos de linea, asi que si la variable
+ * tiene la key pegada dos veces (lo que paso en Vercel) el fetch ni siquiera
+ * sale: Headers.append tira "is an invalid header value" y el mensaje de error
+ * incluye la key entera. Se queda con el primer token, que es la key real.
+ */
+function normalizeBookingKey(raw) {
+  const value = String(raw == null ? '' : raw);
+  const first = value.split(/\s+/).find(function (part) { return part.length > 0; }) || '';
+  return first;
+}
+/*
+ * Saca la key de un texto antes de mandarlo por HTTP o al log. Los errores de
+ * fetch incluyen los valores de los headers, asi que sin esto /api/hoteles
+ * devuelve el secreto a cualquiera que llame al endpoint.
+ */
+function redactBookingKey(text, key) {
+  let out = String(text == null ? '' : text);
+  const clean = normalizeBookingKey(key);
+  if (clean) out = out.split(clean).join('[REDACTED]');
+  // Por si el mensaje trae la key partida o repetida con otros separadores.
+  out = out.replace(/[A-Za-z0-9]{32,}/g, function (chunk) { return chunk === clean ? chunk : '[REDACTED]'; });
+  return out;
+}
 function bookingSettings() {
   return {
-    key: process.env.BOOKING_API_KEY || '',
+    key: normalizeBookingKey(process.env.BOOKING_API_KEY),
     host: String(process.env.BOOKING_API_HOST || 'booking-com15.p.rapidapi.com').trim().replace(/^https?:\/\//, '').replace(/\/$/, ''),
     url: process.env.BOOKING_API_URL || 'https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels',
     destination: process.env.BOOKING_DESTINATION || 'Florianópolis'
@@ -493,8 +519,16 @@ async function bookingApiJson(url, settings) {
     // "No se pudo conectar": DNS, TLS, timeout y un host mal configurado eran
     // indistinguibles. El codigo del error (ENOTFOUND, ECONNREFUSED,
     // CERT_...) es lo que dice que host hay que corregir.
+    //
+    // OJO: este mensaje sale por HTTP. Los errores de fetch traen los valores
+    // de los headers en el texto (un BOOKING_API_KEY pegado dos veces sale
+    // entero en el mensaje de Headers.append), asi que antes de devolverlo hay
+    // que sacarle la key: este endpoint no puede filtrar el secreto.
     const codigo = (error && (error.code || error.cause && error.cause.code)) || '';
-    const detalle = (error && error.message ? String(error.message) : String(error)).slice(0, 160);
+    const detalle = redactBookingKey(
+      (error && error.message ? String(error.message) : String(error)),
+      settings.key
+    ).slice(0, 160);
     throw new Error(error && error.name === 'AbortError'
       ? 'Booking API excedió el tiempo de espera.'
       : 'No se pudo conectar con Booking API (' + settings.host + ')' + (codigo ? ' [' + codigo + ']' : '') + ': ' + detalle);
