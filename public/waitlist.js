@@ -39,31 +39,19 @@
 
   function render(html) { app.innerHTML = html; }
 
-  // Contador público. waitlist_count() ya está definida y con permiso para
-  // anon en supabase.sql, así que el número que se muestra es real siempre:
-  // el tope de cupos de más abajo es un número que se piensa sostener, pero el
-  // conteo de anotados no se maquilla ni se oculta.
-  //
-  // La línea nace oculta y solo se revela si el RPC responde: si la función
-  // no está desplegada o falla la red, es preferible no mostrar nada antes
-  // que un "—". Como parchea solo su propio <span> y no re-renderiza, no
-  // pisa lo que la persona ya tipeó.
+  /* Contador público. waitlist_count() sigue existiendo y se puede seguir
+     llamando, pero la landing NO lo muestra.
+
+     Antes decía "Ya somos N personas en la lista", con el número real que
+     devolvía el RPC. Se saco porque el cupo es de 100 y publicar el conteo
+     convierte la scarcity en un dato: si dice 14 quedan 86, y si dice 96 la landing ya dice "quedan 4" sin que haga falta decirlo. El tope de BETA_CAP sigue
+     dicho de forma explícita, que es un número que uno decide sostener; lo que
+     no va es medir cuántos van.
+
+     Lo que sí quedó: el tope (100 cupos), el contador regresivo de lanzamiento
+     y el premio por invitar, que es sobre tu propia cuenta y no del total. */
   function refreshCount() {
-    return loadSupabaseSdk()
-      .then(function () { return supabaseClient.rpc('waitlist_count'); })
-      .then(function (result) {
-        if (result && result.error) throw new Error(result.error.message);
-        var total = Number(result && result.data);
-        if (!isFinite(total) || total < 0) throw new Error('conteo inválido');
-        var number = document.getElementById('wl-count');
-        var line = document.getElementById('wl-count-line');
-        if (number) number.textContent = String(total);
-        if (line) line.hidden = false;
-      })
-      .catch(function () {
-        var line = document.getElementById('wl-count-line');
-        if (line) line.hidden = true;
-      });
+    return Promise.resolve();
   }
 
   // Fecha fija de lanzamiento (hora de Uruguay, UTC-3). Si hace falta
@@ -115,7 +103,9 @@
       '<button type="submit" class="wl-btn">¡Quiero unirme ahora!</button>' +
       '<p class="wl-free-note">Gratis, sin tarjeta de crédito.</p>' +
       '</form>' +
-      '<p class="wl-count" id="wl-count-line" hidden>Ya somos <b id="wl-count">…</b> personas en la lista</p>' +
+// No va "Ya somos N personas en la lista": con el tope en 100, publicar el
+      // conteo dice cuantos quedan sin que nadie lo calcule. El tope (BETA_CAP) si
+      // se dice, y el contador regresivo de lanzamiento tambien.
       '<p class="wl-urgency">⚠️ <span><b>Acceso limitado:</b> solo ' + BETA_CAP + ' cupos<span class="wl-long"> disponibles para la versi&oacute;n Beta. ¡Los lugares se est&aacute;n llenando r&aacute;pido!</span></span></p>' +
       '</div>'
     );

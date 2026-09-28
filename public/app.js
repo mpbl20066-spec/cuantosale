@@ -5718,6 +5718,11 @@
           option.classList.toggle('is-selected', selected);
           option.setAttribute('aria-selected', selected ? 'true' : 'false');
         });
+      // Re-filtrar aca y no solo al abrir el menu: el destino se cambia desde
+      // el desplegable de arriba, que se puede tocar con este menu abierto. Sin
+      // esto la lista seguia mostrando los pares del destino anterior: con
+      // Buzios elegido y despues elegir Rio, seguian los dos pares de Buzios.
+      filterComboOptions(comboTrigger.value);
       }
       clearActiveDestOption();
     }
@@ -6097,16 +6102,54 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
             + ' id="combo-option-' + esc(sub.key) + '-' + entry.pairs.indexOf(sub) + '">'
             + '<span class="custom-select__option-main">' + esc(sub.label) + '</span></button>';
         }).join('');
-        return '<div class="custom-select__group"><span class="custom-select__group-title">'
+        return '<div class="custom-select__group" data-combo-group="' + esc(entry.group.id) + '"><span class="custom-select__group-title">'
           + '<span>' + esc(entry.group.label) + '</span>'
           + '<strong class="custom-select__group-count">' + entry.pairs.length + '</strong></span>'
           + opciones + '</div>';
       }).join('');
       // "Un solo destino" va primero y no es un par: es la vuelta atrás. Sin él
       // habría que tocar el desplegable de Destino para deshacer una elección.
-      comboMenu.innerHTML = '<button type="button" class="custom-select__option combo-clear" role="option" aria-selected="false" data-combo-clear>'
+      comboMenu.innerHTML = '<p class="combo-menu__hint" data-combo-hint></p>'
+        + '<button type="button" class="custom-select__option combo-clear" role="option" aria-selected="false" data-combo-clear>'
         + '<span class="custom-select__option-main">Un solo destino</span>'
         + '<span class="custom-select__option-sub">Sacar la segunda parada</span></button>' + bloques;
+    }
+
+    /* El menú se filtra por el destino elegido, no solo por lo que se tipea.
+       El control dice "¿Sumás una segunda parada?", asi que su pregunta es
+       "sumarle otra a ESTE destino". Con Destino = Búzios offering los 92 pares
+       del pais no era un filtro: "Angra dos Reis + Ilha Grande" no es una
+       segunda parada de Búzios, es otro viaje entero, y escribir Rio alli
+       rompia la promesa del campo de arriba.
+
+       Un par define las DOS paradas (su primera parada es `key`), asi que el
+       filtro es por esa primera parada, no por la region del grupo. Rio+Búzios
+       aparece con Destino = Rio; Búzios+Arraial aparece con Destino = Búzios.
+       Sin destino elegido (todos) no se filtra: todavia no hay con que. */
+    function comboFiltraPorDestino() {
+      return S.dest && S.dest !== 'todos' ? S.dest : '';
+    }
+function comboNombreDestino() {
+      var key = comboFiltraPorDestino();
+      if (!key) return '';
+      // El nombre sale del GRUPO, no de destItems: las opciones del desplegable
+      // traen la zona ("Rio de Janeiro (Centro / Sur)", "Palermo / Zona Norte",
+      // "Gramado Centro") y partir eso por " / " deja "Rio de Janeiro (Centro" y
+      // "Centro". El grupo trae la ciudad, que es lo que la persona leyo en el
+      // campo de arriba. Primero se saca el parentesis y despues el " / " porque
+      // "Costa Verde (Ilhabela / Ubatuba / Paraty)" se parte por dentro del paren.
+      var grupo = DESTINATION_GROUPS.filter(function (g) { return (g.keys || []).indexOf(key) >= 0; })[0];
+      if (!grupo) return '';
+      var label = String(grupo.label || "").replace(/\s*\([^)]*\)\s*/g, " ");
+      return label.split(" / ")[0].trim();
+    }
+    function comboPasaElFiltro(option) {
+      // "Un solo destino" no es un par: es una accion, y tiene que quedar
+      // disponible siempre que haya algo que deshacer.
+      if (option.hasAttribute('data-combo-clear')) return true;
+      var primero = comboFiltraPorDestino();
+      if (!primero) return true;
+      return option.getAttribute('data-combo-key') === primero;
     }
 
     // El texto del control sale de S.subcategory en vez de guardarse aparte: es
@@ -6137,7 +6180,11 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       var normalized = normalizeDestQuery(query);
       var visible = [];
       Array.prototype.forEach.call(comboMenu.querySelectorAll('.custom-select__option'), function (option) {
-        var matches = !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
+        // Los dos filtros van juntos: el de destino es el que hace la lista
+        // corta, y el de texto solo acota mas lo que ya quedo.
+        var porDestino = comboPasaElFiltro(option);
+        var porTexto = !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
+        var matches = porDestino && porTexto;
         option.hidden = !matches;
         option.style.display = matches ? 'flex' : 'none';
         if (matches) visible.push(option);
@@ -6149,6 +6196,23 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         group.hidden = !hasVisible;
         group.style.display = hasVisible ? 'block' : 'none';
       });
+      // El encabezado del menu dice con que se esta filtrando, y avisa cuando no
+      // hay nada. Sin el aviso, un destino sin combinaciones (Buenos Aires, Foz)
+      // abre un menu vacio y se lee como que la pagina fallo.
+      var hint = comboMenu.querySelector('[data-combo-hint]');
+      if (hint) {
+        var destino = comboNombreDestino();
+        var hayPares = visible.length > 1 || (visible.length === 1 && !visible[0].hasAttribute('data-combo-clear'));
+        if (hayPares) {
+          hint.textContent = destino ? 'Combinaciones que arrancan en ' + destino : 'Elegí las dos paradas';
+          hint.hidden = !destino;
+        } else {
+          hint.textContent = destino
+            ? 'Desde ' + destino + ' no hay combinaciones de dos paradas.'
+            : 'Elegí las dos paradas.';
+          hint.hidden = false;
+        }
+      }
       if (!preserveActive || activeComboOption && activeComboOption.hidden) clearActiveComboOption();
       return visible;
     }

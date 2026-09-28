@@ -159,6 +159,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    del primer encabezado de región para que no se lea como si fuera uno más. */
 .combo-clear{margin-bottom:6px;padding-bottom:13px;border-bottom:1px solid var(--line);border-radius:0 0 12px 12px}
 .combo-clear.is-selected{background:var(--selected-bg)}
+/* Encabezado del menú de segunda parada: dice con qué se está filtrando, y avisa
+   cuando un destino no tiene combinaciones (Buenos Aires, Foz de Iguazú) en vez
+   de abrir un menú vacío que se lee como un error de la página. */
+.combo-menu__hint{margin:0 0 4px;padding:0 12px 2px;color:var(--control-muted);font-size:11px;font-weight:650;line-height:1.45}
+.combo-menu__hint[hidden]{display:none}
 .custom-select__option{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;width:100%;padding:13px 14px 13px 18px;border:0;border-left:3px solid transparent;border-radius:12px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
 .custom-select__option:hover,.custom-select__option:focus-visible,.custom-select__option.is-active{background:var(--control-hover);outline:none}
 .custom-select__option.is-selected{background:var(--cel-soft);border-left-color:var(--cel);color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}
