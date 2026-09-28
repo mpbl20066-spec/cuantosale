@@ -461,7 +461,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 
    Mismo bloque de card elegible que .local-tour y .daily-budget__option: fondo,
    borde, radio y estado de elegido salen de los tokens compartidos. */
-.hotel-option{position:relative;display:grid;grid-template-columns:clamp(120px,32%,232px) minmax(0,1fr);grid-template-rows:auto auto auto;min-width:0;overflow:hidden;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}
+.hotel-option{position:relative;display:grid;grid-template-columns:clamp(150px,30%,232px) minmax(0,1fr);grid-template-rows:auto auto auto;min-width:0;overflow:hidden;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}
 .hotel-option:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(16,35,62,.12)}
 /* "Recomendado" NO es "elegido", asi que el marco y el fondo son solo del estado
    elegido (ver el bloque de :has mas abajo). La sugerencia del servidor se
@@ -482,27 +482,46 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    resto se lee igual en el sitio. */
 .hotel-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:7px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
 .hotel-detail{margin:9px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.45}
-/* Pie: precio a la izquierda, acciones a la derecha, como .local-tour__foot. El
-   precio va en el pie y no arriba porque el "desde" que se lee primero es el del
-   encabezado de la seccion, y repetirlo en cada ficha pone tres cifras
-   compitiendo antes de que la persona haya leido el nombre. */
-.hotel-foot{grid-column:2;grid-row:2;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding:12px 16px 15px}
-.hotel-price{display:grid;align-content:end;gap:1px;min-width:0;margin:0}
+/* Pie en dos columnas: precio a la izquierda, las dos acciones a la derecha, una
+   sobre la otra. El precio va en el pie y no arriba porque el "desde" que se lee
+   primero es el del encabezado de la seccion, y repetirlo en cada ficha pone
+   tres cifras compitiendo antes de que la persona haya leido el nombre.
+
+   Las dos acciones apiladas y no en fila porque la fila no entra: con la ficha
+   de 684px quedaban 439px de texto y la fila necesita 465 (165 del bloque de
+   precio + 300 de las dos pastillas). Con la columna de acciones al ancho de la
+   pastilla mas larga, las dos quedan alineadas y el pie no crece. */
+.hotel-foot{grid-column:2;grid-row:2;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 12px;padding:12px 16px 15px}
+.hotel-price{display:grid;align-content:end;gap:4px;min-width:0;margin:0}
+/* "Desde" es una etiqueta, no una cifra: 10px en versalitas al lado del numero,
+   no una fila propia como estaba. */
+.hotel-price__main{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin:0;min-width:0}
 .hotel-price__from{color:var(--ink2);font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
-/* flex-wrap para que "por noche" baje de linea en vez de empujar la ficha: con
-   una cifra de 5 digitos en una moneda cara el bloque no entra en 200px. */
-.hotel-price__line{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;min-width:0}
-.hotel-price__line b{color:var(--ink);font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.05;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
-.hotel-price__line span{color:var(--ink2);font-size:11.5px;white-space:nowrap}
+.hotel-price__main b{color:var(--ink);font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.05;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hotel-price__unit{color:var(--ink2);font-size:11.5px;white-space:nowrap}
 /* El total va en --ink2 y no en tinta fuerte: es la misma cifra que el precio
    de la noche, y con las dos en negro la segunda tapaba a la primera. */
-.hotel-total{color:var(--ink2);font-size:11.5px;font-weight:600;line-height:1.4}
-.hotel-actions{display:flex;flex:0 1 auto;min-width:0;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+.hotel-total{margin:0;color:var(--ink2);font-size:11.5px;font-weight:600;line-height:1.4}
+/* Grid y no flex para que las dos pastillas tomen el ancho de la mas ancha y
+   queden alineadas como una columna. margin-left:auto para que sigan al borde
+   derecho cuando el pie envuelve y el precio se queda solo arriba. */
+.hotel-actions{display:grid;gap:8px;flex:0 0 auto;margin-left:auto;justify-items:stretch}
 /* Un solo boton de accion, relleno, con la misma tinta de --action-bg que el
    resto de la app. El enlace de Booking va al lado, delineado: son dos gestos
    distintos (elegir aca / mirar alla) y antes los dos eran slabs de ancho
    completo con el navy de Booking dominating la ficha. */
-.hotel-pick-hint{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:12.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:background .16s ease,color .16s ease}
+/* inline-grid y no inline-flex: los dos textos del boton van apilados en la
+   MISMA celda (grid-area:1/1, ver abajo), asi que el boton toma el ancho del mas
+   largo y cambiar de estado no cambia ni el ancho ni el alto.
+
+   Antes el boton era inline-flex con display:none en el texto inactivo, y eso
+   rompia la geometria de la ficha entera: .hotel-actions es flex:0 0 auto, o
+   sea que NO encoge, y con "Elegir este hotel" no entraba al lado del precio,
+   asi que bajaba a una segunda linea. El pie pasaba de 89px a 141px, y como la
+   foto abarca las dos filas de la grilla (grid-row:1/-1), la ficha se achicaba
+   52px y los botones de abajo parecian subir. El estado de elegido se
+   comunicaba con un texto mas corto, o sea con una ficha mas chica. */
+.hotel-pick-hint{display:inline-grid;place-items:center;min-height:40px;padding:0 16px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:12.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:background .16s ease,color .16s ease}
 .hotel-booking{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1.5px solid var(--control-line);border-radius:12px;background:transparent;color:var(--ink);font-size:12.5px;font-weight:700;white-space:nowrap;text-decoration:none;transition:border-color .16s ease,color .16s ease,background .16s ease}
 .hotel-booking:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
 .hotel-booking:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -511,19 +530,34 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-similar summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
 .hotel-similar ul{margin:8px 0 0;padding-left:18px;line-height:1.7}
 .hotel-similar a{color:var(--cel);text-decoration:none}.breakdown-section{display:block!important}.detail-breakdown{min-height:48px}
-/* Con la seccion angosta el texto de la ficha no llega a 200px: el precio y las
-   dos acciones pasan a ocupar el ancho entero y cada boton toma la mitad. Abajo
-   de 320px de seccion la ficha se apila (foto arriba) porque una columna de
-   120px de foto y 160 de texto no dejan leer ni el nombre. */
-@container hoteles (max-width:340px){
+/* Con la seccion angosta las dos pastillas no entran al lado del precio: el pie
+   pasa a dos filas (precio, despues acciones) y las dos pastillas se reparten el
+   ancho. min-width:0 en las dos porque un item de grid no puede angostarse por
+   debajo de su contenido, y con white-space:nowrap eso hacia desbordar la ficha
+   100px en vez de apretar el boton. */
+@container hoteles (max-width:430px){
+  .hotel-foot{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+  .hotel-actions{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);margin-left:0}
+  .hotel-pick-hint,.hotel-booking{min-width:0;padding:0 10px}
+}
+/* Y por debajo de 330 las dos pastillas vuelven a una columna: a mitad de ancho
+   no entra "Ver disponibilidad" y es preferible que bajen a que se corten. */
+@container hoteles (max-width:330px){
+  .hotel-actions{grid-auto-flow:row;grid-auto-columns:auto}
+}
+/* Por debajo de 480px de seccion la ficha se apila y la foto pasa a ser una
+   franja de ancho completo. La alternativa — foto de 150px al lado de una ficha
+   de 250px de alto — es un recorte de 0.6 de proporcion en una foto que viene
+   apaisada: se ve un poste. Como franja, la foto entra entera y el nombre, el
+   precio y las dos acciones tienen el ancho de la ficha.
+   480px de seccion son 558px de ventana, o sea una tablet o un celular
+   apaisado; en cualquier celu en vertical la ficha es apilada. */
+@container hoteles (max-width:480px){
   .hotel-option{grid-template-columns:minmax(0,1fr)}
-  .hotel-image-wrap{grid-column:1;grid-row:1;min-height:132px}
+  .hotel-image-wrap{grid-column:1;grid-row:1;min-height:0;height:clamp(120px,38cqw,150px)}
   .hotel-option__pick{grid-column:1;grid-row:2}
   .hotel-foot{grid-column:1;grid-row:3}
   .hotel-similar{grid-column:1;grid-row:4}
-  .hotel-actions{width:100%}
-  .hotel-pick-hint{flex:1 1 100%}
-  .hotel-booking{flex:1 1 100%}
 }
 /* Selector de tipo de alojamiento. Replica .custom-select__control: mismo alto,
    mismo radio y mismo chevron dibujado con ::after, para que el filtro se lea
@@ -588,10 +622,15 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--pick-sel-bg);color:var(--pick-sel-ink)}
 /* Los dos textos del boton conviven en el DOM y el estado muestra uno u otro:
    el de la ficha elegida decia "Elegir este hotel" en relleno, que es pedirle
-   al usuario que elija algo que ya eligio. */
-.hotel-pick-hint__on{display:none}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint__off{display:none}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint__on{display:inline}
+   al usuario que elija algo que ya eligio.
+
+   visibility y no display:none: los dos ocupan grid-area:1/1, o sea la misma
+   celda, asi que el ancho del boton es el del texto mas largo en los dos
+   estados. Con display:none el perdedor salia del flujo y el boton se
+   encogia al cambiar de estado, que es lo que hacia que la ficha se achicara. */
+.hotel-pick-hint__off,.hotel-pick-hint__on{grid-area:1/1;visibility:hidden}
+.hotel-pick-hint__off{visibility:visible}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint__on{visibility:visible}
 .hotel-option:has(.hotel-option__pick input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
 /* Resultados de vuelos */
 .flight-search{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.flight-search>div:first-child{display:flex;justify-content:space-between;gap:16px;align-items:center}.flight-search h2{font-family:var(--fh);font-size:34px;line-height:1;margin:0}.flight-search p{margin:5px 0 0;color:var(--ink2);font-size:13px}
@@ -803,14 +842,40 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @media (max-width:900px){.trip-summary{left:12px;right:12px;bottom:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;max-width:none}.trip-summary__head strong{font-size:36px}}
 @media (max-width:560px){.trip-summary__item{grid-template-columns:58px minmax(0,1fr) auto}.trip-summary__item b{white-space:normal}.trip-summary__cta{height:46px}}
 .daily-budget__planned{display:grid;gap:7px;padding:10px 0 2px}.daily-budget__planned>span{font-size:13px;font-weight:700;color:var(--ink)}.daily-budget__planned .daily-budget__input-wrap{max-width:280px;min-height:48px;border:1.5px solid var(--line);background:var(--surface);transition:border-color .16s ease,box-shadow .16s ease}.daily-budget__planned .daily-budget__input-wrap:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}.daily-budget__planned input{font-weight:700}.daily-budget__planned input::placeholder{color:var(--ink2);font-size:13px;font-weight:400;opacity:.8}
-.transfer-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.transfer-choice{display:flex;align-items:center;gap:12px;padding:16px;border:2px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}.transfer-choice:hover{transform:translateY(-2px);border-color:var(--ink2)}.transfer-choice__icon{display:grid;flex:0 0 auto;width:44px;height:44px;place-items:center;border-radius:12px;background:var(--cel-soft);font-size:22px}
+.transfer-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.transfer-choice{position:relative;display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}.transfer-choice:hover{transform:translateY(-2px);border-color:var(--ink2)}.transfer-choice__icon{display:grid;flex:0 0 auto;width:44px;height:44px;place-items:center;border-radius:12px;background:var(--cel-soft);font-size:22px}
 /* El dibujo del transfer va a 34px dentro del recuadro de 44: a 24 las cabezas
    de los pasajeros se perdían, que es justo el detalle que explica la
    diferencia entre las dos opciones. */
-.transfer-choice__art{display:block;width:34px;height:34px}.transfer-choice__body{flex:1;min-width:0;display:grid;gap:3px}.transfer-choice strong{font-size:14px}.transfer-choice__price{flex:0 0 auto;font-family:var(--fh);font-size:24px}.transfer-choice small{color:var(--ink2);line-height:1.35}.transfer-choice.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.transfer-choice.is-selected .transfer-choice__icon{background:var(--cel);color:var(--cel-ink)}
-.official-transfer{padding:20px;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 5px 16px rgba(16,35,62,.08)}.official-transfer>p{margin:6px 0 14px;color:var(--ink2);font-size:13px}.official-transfer .btn-transfer:disabled{opacity:.55;cursor:not-allowed}
+.transfer-choice__art{display:block;width:34px;height:34px}.transfer-choice__body{flex:1;min-width:0;display:grid;gap:3px}.transfer-choice strong{font-size:14px}.transfer-choice__price{flex:0 0 auto;font-family:var(--fh);font-size:24px}.transfer-choice small{color:var(--ink2);line-height:1.35}
+/* Elegido se marca con los mismos tokens que las otras cuatro card elegibles de
+   la app (hoteles, tours, comidas, presupuesto diario). Antes el transfer era
+   el unico que se pintaba de celeste con borde navy, o sea el mismo gesto con
+   una regla distinta. El grosor del borde no cambia al marcar para que la
+   tarjeta no corra al elegirse. */
+.transfer-choice.is-selected{border-color:var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}.transfer-choice.is-selected .transfer-choice__icon{background:var(--card-sel-border);color:#fff}
+/* La tilde es la segunda senal de "elegido" y la que se ve de lejos. Es la misma
+   que usan las tarjetas de pago del checkout, con la misma transicion. */
+.transfer-choice__check{position:absolute;top:8px;right:8px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--card-sel-border);color:#fff;opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}.transfer-choice__check svg{width:13px;height:13px}.transfer-choice.is-selected .transfer-choice__check{opacity:1;transform:scale(1)}
+.transfer-choice:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* Cabecera con el total y el boton de reservar, al reves de la seccion de
+   actividades: mismo layout (texto a la izquierda, accion a la derecha), mismo
+   boton relleno y el total en el color de marca arriba. El h2 conserva el
+   tamano de .transport-options para no cambiar el ritmo de la pagina. */
+.official-transfer{padding:20px;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 5px 16px rgba(16,35,62,.08)}
+.official-transfer__head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 16px;margin-bottom:14px}
+.official-transfer__head h2{margin:0}
+.official-transfer__head p{margin:5px 0 0;color:var(--ink2);font-size:13px}
+.official-transfer__cta{display:flex;flex:0 0 auto;flex-direction:column;align-items:flex-end;gap:6px}
+.official-transfer__cta-total{color:var(--cel);font-size:13px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.official-transfer__reserve{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:0;border-radius:13px;background:var(--action-bg);color:var(--action-ink);font-family:inherit;font-size:13.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:filter .18s ease,opacity .18s ease}
+.official-transfer__reserve:hover:not(:disabled){color:var(--action-ink);filter:brightness(1.12)}
+.official-transfer__reserve:disabled{opacity:.5;cursor:not-allowed}
+.official-transfer__reserve:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+@media (max-width:560px){.official-transfer__cta{align-items:stretch;width:100%}.official-transfer__reserve{width:100%}}
 .transfer-suggestion{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:var(--cel-soft);color:var(--ink);font-size:13px;font-weight:600}
-.transfer-pickup{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.transfer-pickup__label{display:block;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--ink2)}.transfer-pickup__chips{display:flex;flex-wrap:wrap;gap:8px}.transfer-pickup__chip{min-height:44px;border:1px solid var(--control-line);border-radius:99px;background:var(--surface);padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}.transfer-pickup__chip.is-selected{background:var(--cel-soft);border-color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}.transfer-pickup__time{display:block;margin-top:10px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:13px}
+/* La pastilla elegida del horario se pinta con el mismo marco ambar de las card
+   elegibles. Antes era celeste con borde navy, la unica excepcion que quedaba. */
+.transfer-pickup{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.transfer-pickup__label{display:block;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--ink2)}.transfer-pickup__chips{display:flex;flex-wrap:wrap;gap:8px}.transfer-pickup__chip{min-height:44px;border:1.5px solid var(--control-line);border-radius:99px;background:var(--surface);padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}.transfer-pickup__chip.is-selected{border-color:var(--card-sel-border);background:var(--card-sel-bg);color:var(--ink);box-shadow:var(--card-sel-glow)}.transfer-pickup__chip:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.transfer-pickup__time{display:block;margin-top:10px;padding:9px;border:1.5px solid var(--control-line);border-radius:10px;background:var(--control-bg);color:var(--ink);font-size:13px}
 .btn-transfer.is-added{background:var(--good)}
 
 .account-actions{display:flex;align-items:center;gap:8px;margin-left:auto;min-width:0;flex:0 1 auto}.account-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 13px;border:0;border-radius:11px;background:var(--ink);color:#fff;font:600 12px Poppins,sans-serif;text-decoration:none;cursor:pointer}.account-button:hover{filter:brightness(1.1)}.account-button--secondary{border:1px solid var(--line);background:var(--surface);color:var(--ink)}.account-dialog{max-width:520px}.account-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.account-dialog h2{margin-top:8px}.account-dialog label{display:grid;gap:6px;margin-top:12px;font-size:13px;font-weight:700}.account-dialog input{width:100%;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}.oauth-button{width:100%;min-height:48px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;cursor:pointer}.account-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink2);font-size:12px}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:var(--line)}.account-form-actions{display:flex;gap:8px;margin-top:16px}.account-form-actions .confirm-booking{flex:1}.account-form-actions .account-button{flex:0 0 auto}.account-status{min-height:18px;margin:12px 0 0;color:var(--ink2);font-size:13px}.saved-trips{display:grid;gap:9px;margin:16px 0}.saved-trip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.saved-trip>div{display:grid;gap:4px;min-width:0}.saved-trip strong{font-size:14px;overflow:hidden;text-overflow:ellipsis}.saved-trip span{color:var(--ink2);font-size:12px}.trip-summary__actions{display:grid;gap:8px}.trip-summary__save{width:100%;height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800;cursor:pointer}.trip-summary__save:hover{border-color:var(--ink);background:var(--bg)}
@@ -1081,20 +1146,45 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .checkout-field input,.checkout-field select{width:100%;height:46px;padding:0 11px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-family:inherit;font-size:14.5px}
 .checkout-field input:focus-visible,.checkout-field select:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
 .checkout-field input:invalid:not(:placeholder-shown){border-color:var(--coral)}
-.checkout-legal{margin:16px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.5}
-/* ---- Grilla de medios de pago ---- */
+/* ---- Bloque de transfer del paso 1 ----
+   El checkout pide un dato extra cuando el pedido es un transfer: donde te
+   deja. Va con el mismo titulo de seccion que usa el recap del paso 3, para que
+   los dos se lean como partes del mismo formulario. */
+.checkout-panel__subtitle{margin:22px 0 0;padding-top:16px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.checkout-transfer-note{display:flex;align-items:flex-start;gap:9px;margin:12px 0 0;padding:11px 13px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;line-height:1.5}
+.checkout-transfer-note .trip-summary__ico{flex:0 0 19px;width:19px;height:19px;margin-top:1px}
+.checkout-transfer-note b{color:var(--ink)}
+.checkout-legal{margin:16px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.5}/* ---- Grilla de medios de pago ---- */
 .checkout-pay-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
-.checkout-pay{position:relative;display:grid;justify-items:center;align-content:center;gap:4px;min-height:88px;padding:10px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .18s ease,background .18s ease}
+.checkout-pay{--pay-logo-h:26px;position:relative;display:grid;justify-items:center;align-content:center;gap:4px;min-height:88px;padding:10px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .18s ease,background .18s ease}
 .checkout-pay:hover{border-color:var(--cel)}
 /* El input real se oculta pero se conserva focusable, para que el teclado
    llegue a la grilla y las flechas funcionen como un radiogroup de verdad. */
 .checkout-pay input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
 .checkout-pay.is-selected{border-color:var(--cel);background:var(--cel-soft)}
 .checkout-pay:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
-/* El nombre de la marca se pinta con CSS y no con un logo. Los logos de los
-   bancos son marca registrada: subirlos al repo sin permiso es el mismo
-   problema que el README ya se resolvio con las fotos de los tours. */
-.checkout-pay__mark{color:var(--pay-brand,var(--ink));font-size:15px;font-weight:800;letter-spacing:-.01em;text-align:center;line-height:1.1}
+/* La caja del logo. Alto fijo y ancho completo: es lo que mantiene parejas las
+   tres filas del 3x3. El wordmark pintado queda como base y se oculta mientras
+   haya <img>; si la imagen falla, el handler de 'error' le pone is-broken y
+   esta regla lo saca de la vista para que aparezca el texto de la marca. */
+.checkout-pay__brand{display:grid;place-items:center;width:100%;height:calc(var(--pay-logo-h) + 2px)}
+/* El alto va en px y NO en porcentaje a proposito. La caja es un grid cuya fila
+   es 'auto', y un max-height:100% contra una pista de tamano automatico no se
+   resuelve: el navegador lo ignora y el logo se sale de la caja. Con Mastercard
+   (proporcion 1.6:1) eso daba 92px de alto dentro de una caja de 28.
+   Alto fijo + width:auto deja que el SVG escale por su relacion intrinseca, y
+   max-width recorta los lockups muy anchos (Scotiabank es 6.8:1) sin deformar:
+   object-fit:contain los centra en la caja. */
+.checkout-pay__logo{display:block;height:var(--pay-logo-h);width:auto;max-width:100%;object-fit:contain}
+/* Placeholder mientras descarga: sin esto la imagen aparece de golpe y empuja
+   el subtitulo. El color es el mismo fondo de la tarjeta, no un gris, para que
+   un logo lento no se note como un bloque raro. */
+.checkout-pay__logo:not(.is-broken){background:var(--surface);border-radius:4px}
+.checkout-pay:has(.checkout-pay__logo.is-broken) .checkout-pay__logo{display:none}
+.checkout-pay:has(.checkout-pay__logo.is-broken) .checkout-pay__mark{display:block}
+/* El respaldo: el nombre de la marca en su color de marca, como estaba antes
+   de los logos. Se mantiene porque las URLs de Commons se rompen. */
+.checkout-pay__mark{display:none;color:var(--pay-brand,var(--ink));font-size:15px;font-weight:800;letter-spacing:-.01em;text-align:center;line-height:1.1}
 .checkout-pay__kind{color:var(--ink2);font-size:10px;font-weight:700;text-align:center;line-height:1.3}
 .checkout-pay__check{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--cel);color:#fff;opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}
 .checkout-pay__check svg{width:12px;height:12px}
@@ -1139,6 +1229,9 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .checkout-steps__text em{display:none}
   .checkout-grid{grid-template-columns:minmax(0,1fr)}
   .checkout-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* En dos columnas la tarjeta es mas ancha que en el 3x3 de escritorio, asi
+     que el logo puede ocupar un poco mas sin empujar el subtitulo. */
+  .checkout-pay{--pay-logo-h:30px}
   .checkout-btn{min-height:46px;padding:0 14px;font-size:13.5px}
   .checkout-btn--next,.checkout-btn--pay{max-width:none}
 }

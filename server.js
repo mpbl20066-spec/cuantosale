@@ -773,43 +773,41 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
       // El tipo se mantiene: antes esta pasada no filtraba por nada, asi que si
       // no habia resorts completaba con lofts y apartamentos y los ofrecia como
       // si fueran. Relajar el precio era la idea del comentario de arriba;
-      // relajar tambien el tipo convertsia el selector en una decoracion.
-      return !yaElegidos.has(normalizeHotelKey(hotel.name)) && hotelEsDelTipo(hotel, hotelType);
+      // relajar tambien el tipo convertia el selector en una decoracion.
+      //
+      // Y para economico/intermedio/confort el precio se mantiene tambien, con el
+      // mismo techo que la primera pasada. Antes esta pasada no filtraba por
+      // precio para NADIE, y como hotelEsDelTipo() devuelve true sin mirar nada
+      // para esos tres tipos, el selector no separaba nada: los tres devolvian
+      // la misma lista, con un hostel de US$199 bajo "Confort" y mas caro que
+      // lo que salia como "Economico". Para los tres tipos del espectro el
+      // precio es el unico discriminador que hay, asi que aflojarlo es
+      // exactamente lo mismo que dejar el selector sin efecto.
+      return !yaElegidos.has(normalizeHotelKey(hotel.name))
+        && hotel.perNight <= high
+        && hotelEsDelTipo(hotel, hotelType);
     });
     realesExtra = conTier(restantes.sort(porDistancia).slice(0, 3 - matchingCategory.length));
   }
   const combinedReales = matchingCategory.concat(realesExtra);
   const missing = 3 - combinedReales.length;
   const canUseGenericFallback = hotelType === 'economico' || hotelType === 'intermedio' || hotelType === 'confort';
-  // Para all-inclusive no usamos el fallback generico (son cadenas que NO son all-inclusive).
-  // En su lugar generamos entradas con el link de Booking filtrado por todo-incluido.
+  /* Para all-inclusive no hay fallback: antes se fabricaban tres entradas con
+     nombres tipo "Complejo Todo Incluido" y el precio puesto en budgetTarget, sin
+     foto y con un link de Booking. Se veian igual que un hotel real y con el
+     numero a dos decimales, al lado de los que si venian de Booking: la unica
+     pista de que eran inventados era una linea de texto ("Estimacion para...
+     total estimado") que cualquiera pasa por alto.
+
+     All Inclusive no es una categoria que admita sustitucion: o hay un hotel con
+     regimen todo incluido para esas fechas, o no hay. Fabricar uno es justo lo
+     que el estado vacio del cliente dice que no se hace. Ahora la lista puede
+     volver vacia y el cliente muestra "No encontramos alojamientos verificados
+     de tipo All Inclusive", con el link de Booking filtrado por mealplan para
+     que la persona siga buscando en el sitio. */
   var fallback = [];
-  if (missing > 0) {
-    if (canUseGenericFallback) {
-      fallback = fallbackHotelsFor(destKey, destName, hotelType === 'economico' ? 0 : hotelType === 'confort' ? 2 : tierIndex, hotelExtra);
-    } else if (hotelType === 'all-inclusive') {
-      // Generar N entradas que apuntan a Booking con filtro all-inclusive real
-      var aiQuery = new URLSearchParams({
-        ss: destName + ', Brasil', group_adults: String(Math.max(1, Number(hotelExtra.pax) || 1)),
-        no_rooms: '1', group_children: '0', nflt: 'mealplan%3D5',
-        checkin: hotelExtra.dep || '', checkout: hotelExtra.ret || ''
-      });
-      var aiUrl = 'https://www.booking.com/searchresults.es.html?' + aiQuery.toString();
-      var aiNames = ['Complejo Todo Incluido', 'Resort All Inclusive', 'Hotel All Inclusive'];
-      for (var ai = 0; ai < missing; ai++) {
-        fallback.push({
-          name: aiNames[ai] || ('All Inclusive ' + destName),
-          hotelId: '', image: '',
-          total: Math.round((budgetTarget || 200) * Math.max(1, Number(hotelExtra.nights) || 1)),
-          perNight: budgetTarget || 200, currency: 'USD', rating: 0,
-          mealPlan: 'all_inclusive', hotelType: 'all-inclusive',
-          bookingUrl: aiUrl,
-          description: 'Régimen todo incluido: comidas, bebidas y actividades incluidas en el precio.',
-          similar: [], source: 'fallback-ai', tier: selectedTier,
-          hotelTypeLabel: 'All Inclusive'
-        });
-      }
-    }
+  if (missing > 0 && canUseGenericFallback) {
+    fallback = fallbackHotelsFor(destKey, destName, hotelType === 'economico' ? 0 : hotelType === 'confort' ? 2 : tierIndex, hotelExtra);
   }
   const combined = uniqueHotelList(combinedReales.concat(fallback)).slice(0, 3);
   // Ultimo paso: convertir los links de Booking en links de Travelpayouts para

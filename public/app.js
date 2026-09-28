@@ -1735,7 +1735,21 @@
       var stopNights = stop === 1 ? reparto.first : (stop === 2 ? reparto.second : nights);
       var defaultHotel = { tier: profile.tier, name: '', similar: [], image: '' };
       var hotelCatalog = normalizeHotelCatalog(Array.isArray(catalog) ? catalog : [], defaultHotel)
-        .filter(function (hotel) { return !hotel.hotelType || hotel.hotelType === meta.hotelType; });
+        .filter(function (hotel) {
+          if (hotel.hotelType) return hotel.hotelType === meta.hotelType;
+          /* Sin tipo declarado solo pasan los tipos que son un ESPECTRO (mas
+             barato, mas caro). En All Inclusive, Resort o Boutique, un hotel
+             sin clasificar no es una opcion de ese tipo: son categorias que no
+             admiten sustitucion, y ofrecer una es justo lo que el estado vacio
+             de abajo promete que no se hace ("No mostramos categorias distintas
+             como reemplazo").
+
+             Antes el filtro era !hotel.hotelType || ... y ese primer termino
+             hacia pasar TODO sin tipo a cualquier filtro, que es por lo que
+             All Inclusive se llenaba de estimados. strictType ya se calculaba
+             para ese texto y no se usaba para filtrar. */
+          return !strictType;
+        });
       var options = hotelCatalog.slice(0, 3).map(function (item, index) {
         return {
           name: item.name,
@@ -1757,10 +1771,25 @@
       var subhead = isPar
         ? '<h3 class="hotel-group__title"><span>' + esc(stopName) + '</span><b>' + stopNights + (stopNights === 1 ? ' noche' : ' noches') + '</b></h3>'
         : '';
+      /* Los dos mensajes. Para los tipos que son un espectro (mas barato, mas
+         caro) el motivo de una lista vacia NO es que la carga falle: es que no
+         hay nada en esa banda de precio, que es justo lo que el filtro hace.
+         Decir "no pudimos cargar" en ese caso carga la culpa en la red y manda a
+         la persona a esperar un resultado que no va a cambiar. Para los tipos
+         estrictos va "no encontramos de ese tipo", que es una promesa de que no
+         vamos a substitutionar por otra categoria. */
       var vacio = strictType
         ? '<p class="hotel-group__empty">No encontramos alojamientos verificados de tipo ' + esc(typeLabel) + ' en ' + esc(stopName) + ' para estas fechas. No mostramos categorías distintas como reemplazo.</p>'
-        : '<p class="hotel-group__empty">No pudimos cargar opciones automáticamente para estas fechas. Consultá alojamientos y disponibilidad directamente en ' + esc(stopName) + '.</p>';
-      var vacioLink = '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(stopName) + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(stopName) + ' ↗</a>';
+        : '<p class="hotel-group__empty">No encontramos alojamientos de categoría ' + esc(typeLabel) + ' en ' + esc(stopName) + ' dentro de tu presupuesto para estas fechas. Bajá el nivel de alojamiento o mirá los tipos que sí tienen opciones.</p>';
+      /* El link del estado vacio lleva el filtro de Booking cuando el tipo lo
+         necesita. Para All Inclusive, mealplan=5 es lo que hace que la búsqueda
+         devuelva todo incluido de verdad; sin eso el link llevaba a cualquier
+         hotel de la ciudad y perdia justo el motivo por el que se esta
+         buscando. Antes ese link vivia en el server, adentro de las entradas
+         inventadas que ya no se generan. */
+      var vacioQuery = new URLSearchParams({ ss: stopName });
+      if (meta.hotelType === 'all-inclusive') vacioQuery.set('nflt', 'mealplan=5');
+      var vacioLink = '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?' + vacioQuery.toString() + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(stopName) + ' ↗</a>';
       var body = options.length
         ? '<div class="hotel-grid">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + options.map(function (option) {
           var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
@@ -1811,7 +1840,7 @@
             '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + (isPar ? ' · ' + stopNights + ' en ' + esc(stopName) : '') + '.</p>' +
             '</span></label>' +
             '<div class="hotel-foot">' +
-            '<p class="hotel-price"><span class="hotel-price__from">Desde</span><span class="hotel-price__line"><b>' + money(nightlyValue) + '</b><span>por noche</span></span>' +
+            '<p class="hotel-price"><span class="hotel-price__main"><span class="hotel-price__from">Desde</span><b>' + money(nightlyValue) + '</b><span class="hotel-price__unit">por noche</span></span>' +
             '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong></p>' +
             '<div class="hotel-actions">' +
             // Los dos textos del boton conviven en el DOM y el CSS muestra uno u
@@ -1845,14 +1874,19 @@
     if (!reparto) {
       var solo = grupo(null);
       if (/hotel-group__empty/.test(solo)) {
-        // La caja vacia de un destino solo: el link a Booking y el de la zona cercana
-        // salían del head, no del grupo. Se conserva para no cambiar el DOM que
-        // el resto de la app ya conoce.
-        var destinationQuery = encodeURIComponent(meta.dest.name || 'el destino elegido');
+        /* Antes, cuando el grupo quedaba vacio, se LO DESCARTABA y se armaba una
+           caja nueva con solo el link a Booking. O sea que el mensaje de grupo
+           ("No encontramos alojamientos verificados de tipo All Inclusive... No
+           mostramos categorias distintas como reemplazo") se escribia en el
+           markup y despues se tiraba: elegir un tipo sin resultados decia
+           exactamente lo mismo que elegir otro, un link pelado sin filtro de
+           tipo. Ahora se conserva el grupo, que ya trae el mensaje y el link con
+           el filtro de Booking que corresponde (mealplan=5 para All Inclusive).
+           Se le sigue agregando el link de la zona cercana, que vive aca y no
+           en el grupo. */
         var nearbyName = meta.dest.key === 'ilha' || meta.dest.key === 'paraty' ? 'Angra dos Reis' : '';
         var nearbyLink = nearbyName ? '<a class="hotel-nearby-link hotel-nearby-link-secondary" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(nearbyName) + '" target="_blank" rel="noopener noreferrer">Ampliar a ' + esc(nearbyName) + ' ↗</a>' : '';
-        return '<section class="hotel-options hotel-options-empty" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head
-          + '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(meta.dest.name) + ' ↗</a>' + nearbyLink + '</section>';
+        return '<section class="hotel-options hotel-options-empty" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + solo + nearbyLink + '</section>';
       }
       return '<section class="hotel-options" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + solo + '</section>';
     }
@@ -2096,26 +2130,39 @@
   ];
   /* Los medios de pago son los de Uruguay primero, porque es el mercado al que
      le habla la app. El campo `kind` separa banco de tarjeta, transferencia o
-     billetera digital, y es lo unico que cambia abajo de la marca. `mark` es el
-     texto de la marca y se pinta con CSS, no con un logo: los logotipos de los
-     bancos son marcas registradas y subirlos al repo sin permiso es justo el
-     problema que el README ya se tomo con las fotos de los tours. Cuando
-     haya logos con licencia clara, se cambia `mark` por una imagen y el
-     resto de la lista no se toca.
+     billetera digital, y es lo unico que cambia abajo de la marca.
+
+     `logo` es el archivo de la marca y `lw`/`lh` su tamano intrinseco, que va
+     como width/height del <img> para que el navegador reserve el espacio antes
+     de que la imagen llegue y la grilla no salte. Estan en Wikimedia Commons,
+     que es la misma fuente que ya usan las fotos de los tours, y el CSP ya la
+     permite (img-src https:).
+
+     Serittamente los logotipos son marca registrada. Estan referenciados por
+     URL y NO se suben al repo, que era el criterio que se habia tomado antes:
+     asi el proyecto no distribuye los archivos, solo los muestra. Si alguna vez
+     hay una version con permiso de uso, se cambia la URL y nada mas.
+
+     `mark` y `brand` no se borran: son el respaldo. Las URLs de Commons incluyen
+     nombres con acentos y guiones peculiarities (el de Visa lleva un en dash
+     U+2013) y un archivo se puede renombrar sin avisar. Si el <img> falla, el
+     handler de 'error' lo saca de la vista y aparece el nombre de la marca
+     pintado en su color. El paso 2 no puede quedar con un cuadrado roto: es la
+     ultima pantalla antes de mandar el pedido por WhatsApp.
 
      Bandes no entra: es un banco chico, con muy poca gente usando su cuenta
      desde el exterior. Entra Prex en su lugar, que es una red de cajeros que la
      gente efectivamente usa para sacar y para transferir. */
   var CHECKOUT_PAYMENTS = [
-    { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f' },
-    { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000' },
-    { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481' },
-    { id: 'scotiabank', label: 'Scotiabank', kind: 'Transferencia bancaria', mark: 'Scotiabank', brand: '#ec111a' },
-    { id: 'prex', label: 'Prex', kind: 'Transferencia bancaria', mark: 'Prex', brand: '#f5a800' },
-    { id: 'oca', label: 'OCA', kind: 'Transferencia bancaria', mark: 'OCA', brand: '#e30613' },
-    { id: 'pix', label: 'Pix', kind: 'Transferencia inmediata', mark: 'Pix', brand: '#00b1e0' },
-    { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71' },
-    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b' }
+    { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/86/LogoBROU.png', lw: 753, lh: 206 },
+    { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Grupo_Santander_Logo.svg', lw: 512, lh: 83 },
+    { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/98/BBVA_logo_2025.svg', lw: 600, lh: 180 },
+    { id: 'scotiabank', label: 'Scotiabank', kind: 'Transferencia bancaria', mark: 'Scotiabank', brand: '#ec111a', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Scotiabank_logo.svg', lw: 273, lh: 40 },
+    { id: 'prex', label: 'Prex', kind: 'Transferencia bancaria', mark: 'Prex', brand: '#f5a800', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Prex_Uruguay.png', lw: 125, lh: 46 },
+    { id: 'oca', label: 'OCA', kind: 'Transferencia bancaria', mark: 'OCA', brand: '#e30613', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/OCA_logo.svg', lw: 512, lh: 111 },
+    { id: 'pix', label: 'Pix', kind: 'Transferencia inmediata', mark: 'Pix', brand: '#00b1e0', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Pix_%28Brazil%29_logo.svg', lw: 899, lh: 318 },
+    { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg', lw: 512, lh: 166 },
+    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg', lw: 1000, lh: 618 }
   ];
   var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
   var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
@@ -2123,51 +2170,145 @@
   // Se recuerda entre aperturas: recargar el formulario entero cada vez que se
   // vuelve de un paso seria un castigo. No se guarda en disco ni sale del
   // navegador.
-  var checkoutState = { step: 0, form: {}, payment: '' };
+  /* El checkout es uno solo y sirve para dos pedidos: las actividades y el
+     transfer. Antes el transfer traia su propio asistente de dos pasos —que no
+     tenia ni una regla de CSS, asi que se veia como texto pelado dentro del
+     modal— y el pedido cerraba con un boton que decia "Agregado al
+     presupuesto" y no confirmaba nada. Ahora elegir la modalidad lo mete al
+     presupuesto igual que elegir una card de actividades, y "Reservar
+     transfer" abre ESTE checkout: mismos tres pasos, mismo resumen lateral,
+     mismo cierre por WhatsApp. Un solo lugar donde aprender a reservar. */
+  var checkoutState = { step: 0, form: {}, payment: '', kind: 'tours' };
+  function checkoutIsTransfer() { return checkoutState.kind === 'transfer'; }
   function checkoutTours() {
     return (detailState && detailState.selectedTours) || [];
   }
+  /* La linea de transfer del checkout. El total sale de getSelectedTransferAmount()
+     y no de multiplicar aca: esa funcion ya sabe que el compartido se cobra por
+     persona y el privado por vehiculo, y es la misma que usan "Mi Viaje", el
+     desglose y el voucher. Si el checkout calculara su propio total, el unico
+     lugar donde apareceria la contradiccion seria la pantalla de confirmacion,
+     que es justo donde no puede haberla. */
+  function checkoutTransferLine() {
+    if (!detailState || !detailState.meta || !detailState.transferType) return null;
+    var precios = transferPreciosDe(detailState.meta);
+    var privado = detailState.transferType === 'private';
+    var unit = Number(privado ? precios.privado : precios.compartido) || 0;
+    // Un destino sin van compartida (soloPrivado) no tiene nada que reservar por
+    // ese lado: sin linea, el checkout no abre.
+    if (!(unit > 0)) return null;
+    return {
+      title: privado ? 'Transfer privado' : 'Transfer compartido',
+      detail: privado ? 'Vehículo exclusivo para los que viajan' : 'Compartís el vehículo con otros pasajeros',
+      price: unit,
+      total: getSelectedTransferAmount(detailState),
+      porPersona: !privado,
+      pax: Math.max(1, Number(detailState.meta.pax) || 1)
+    };
+  }
+  /* Las lineas del resumen lateral y del total, sea cual sea el pedido. */
+  function checkoutItems() {
+    if (!checkoutIsTransfer()) return checkoutTours();
+    var line = checkoutTransferLine();
+    return line ? [line] : [];
+  }
   function checkoutTotals() {
+    var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
+    if (checkoutIsTransfer()) {
+      var line = checkoutTransferLine();
+      return {
+        kind: 'transfer',
+        pax: pax,
+        items: line ? [line] : [],
+        count: line ? 1 : 0,
+        unitTotal: line ? line.price : 0,
+        total: line ? line.total : 0,
+        // El privado no se parte entre los que viajan: "US$ 90 por persona" de un
+        // auto seria mentira, asi que el resumen dice quantas personas viajan y
+        // nada mas. null es lo que le dice al aside que no muestre esa linea.
+        perPerson: line && line.porPersona ? line.price : null
+      };
+    }
     var tours = checkoutTours();
     var toursTotal = tours.reduce(function (sum, t) { return sum + (Number(t.price) || 0); }, 0);
-    var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
     // El precio de cada tour es por persona. Multiplicar por pax es lo que hace
     // que "por persona" y el total del checkout no se contradigan.
     var total = toursTotal * pax;
-    return { pax: pax, tours: tours, unitTotal: toursTotal, total: total, perPerson: tours.length ? toursTotal : 0 };
+    return { kind: 'tours', pax: pax, items: tours, count: tours.length, unitTotal: toursTotal, total: total, perPerson: tours.length ? toursTotal : 0 };
+  }
+  /* "1 hora después de la llegada · 15:20". El horario sale de la llegada real
+     del vuelo cuando hay uno, que es el mismo calculo que hacen los chips de la
+     seccion: el checkout no vuelve a inventar una hora, muestra la que ya esta
+     elegida y que se ve en la pagina. */
+  function transferPickupSummary() {
+    var w = (detailState && detailState.transferWizard) || {};
+    var minutos = String(w.pickupMinutes || '60');
+    var ventana = getTransferPickupWindow();
+    var hora = minutos === 'custom'
+      ? (w.customTime || '')
+      : (minutos === '120' ? transferPickupTimeLabel(ventana.plusTwoHours) : transferPickupTimeLabel(ventana.plusOneHour));
+    return { label: getTransferPickupLabel(minutos, w.customTime), hora: hora, minutos: minutos };
+  }
+  /* Donde te deja el transfer. El hotel elegido en la seccion de alojamiento es
+     el valor por defecto, pero el campo es editable: el operador puede llevar a
+     otro hotel del mismo barrio y prefiero que se escriba a que se suponga. */
+  function transferHotelName() {
+    var f = checkoutState.form || {};
+    var escrito = String(f.transferHotel == null ? '' : f.transferHotel).trim();
+    if (escrito) return escrito;
+    var guardado = detailState && detailState.transferWizard && detailState.transferWizard.hotelName;
+    if (guardado) return guardado;
+    return findSelectedHotelLabel();
   }
   /* El resumen lateral. Se vuelve a pintar en cada paso porque el total cambia
      cuando se agrega o saca una actividad desde el panel, y la grilla de pagos
      puede abrir y cerrar sin cambiar nada: un resumen que queda viejo es peor
-     que no tenerlo. */
+     que no tenerlo.
+
+     El aside es el mismo para los dos pedidos, con las filas que aplican: para
+     el transfer interests la modalidad, el horario de recogida y el vuelo, que
+     son los tres datos que el operador necesita antes de contestarte. */
   function checkoutAside() {
     var t = checkoutTotals();
     var meta = (detailState && detailState.meta) || {};
     var destName = (meta.dest && meta.dest.name) || 'tu destino';
     var nights = Math.max(1, Number(meta.nights) || 1);
     var cover = (meta.dest && meta.dest.photo) || '';
-    var rows = t.tours.length
-      ? t.tours.map(function (tour) {
-          return '<li class="checkout-aside__row"><span class="checkout-aside__row-name">' + esc(tour.title) + '</span>' +
-            '<b>' + money(tour.price) + '</b></li>';
+    var transfer = t.kind === 'transfer';
+    var rows = t.count
+      ? t.items.map(function (item) {
+          return '<li class="checkout-aside__row"><span class="checkout-aside__row-name">' + esc(item.title) + '</span>' +
+            '<b>' + money(transfer ? item.total : item.price) + '</b></li>';
         }).join('')
-      : '<li class="checkout-aside__row is-empty">Todavía no elegiste actividades.</li>';
+      : '<li class="checkout-aside__row is-empty">' + (transfer ? 'Todavía no elegiste un transfer.' : 'Todavía no elegiste actividades.') + '</li>';
+    // "por persona" solo cuando el precio se reparte. En el transfer privado el
+    // auto es uno solo: poner un precio por persona ahi seria inventar una
+    // division que no existe.
+    var porPersona = t.perPerson == null
+      ? t.pax + (t.pax === 1 ? ' persona' : ' personas') + ' · vehículo exclusivo'
+      : (t.pax === 1 ? money(t.perPerson) + ' por persona' : money(Math.round(t.perPerson)) + ' por persona · ' + t.pax + ' personas');
+    var facts = '<li><span>Salís de</span><b>' + esc(originCityName(meta.origin || (S && S.origin))) + '</b></li>' +
+      '<li><span>Fechas</span><b>' + esc(storyDateRange(meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</b></li>' +
+      '<li><span>Viajeros</span><b>' + t.pax + (t.pax === 1 ? ' adulto' : ' adultos') + '</b></li>' +
+      '<li><span>' + (transfer ? 'Transfer' : 'Actividades') + '</span><b>' + t.count + (transfer ? (t.count === 1 ? ' elegido' : ' elegidos') : (t.count === 1 ? ' elegida' : ' elegidas')) + '</b></li>';
+    if (transfer) {
+      var pickup = transferPickupSummary();
+      var vuelo = getSelectedFlightSummary();
+      facts += '<li><span>Recogida</span><b>' + esc(pickup.label + (pickup.hora ? ' · ' + pickup.hora : '')) + '</b></li>' +
+        '<li><span>Vuelo</span><b>' + esc(vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '')) + '</b></li>' +
+        '<li><span>Hotel</span><b>' + esc(transferHotelName()) + '</b></li>';
+    }
     return '<aside class="checkout-aside">' +
       '<div class="checkout-aside__media">' +
       (cover ? '<img src="' + esc(cover) + '" alt="" loading="lazy">' : '') +
       '<span class="checkout-aside__name">' + esc(destName) + '</span>' +
       '</div>' +
-      '<div class="checkout-aside__total"><span>' + (t.tours.length ? 'Precio final' : 'Total estimado') + '</span>' +
+      '<div class="checkout-aside__total"><span>' + (t.count ? (transfer ? 'Total del transfer' : 'Precio final') : 'Total estimado') + '</span>' +
       '<strong>' + money(t.total) + '</strong>' +
-      '<em>' + (t.pax === 1 ? money(t.perPerson) + ' por persona' : money(Math.round(t.perPerson)) + ' por persona · ' + t.pax + ' personas') + '</em></div>' +
-      '<ul class="checkout-aside__facts">' +
-      '<li><span>Salís de</span><b>' + esc(originCityName(meta.origin || (S && S.origin))) + '</b></li>' +
-      '<li><span>Fechas</span><b>' + esc(storyDateRange(meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</b></li>' +
-      '<li><span>Viajeros</span><b>' + t.pax + (t.pax === 1 ? ' adulto' : ' adultos') + '</b></li>' +
-      '<li><span>Actividades</span><b>' + t.tours.length + (t.tours.length === 1 ? ' elegida' : ' elegidas') + '</b></li>' +
-      '</ul>' +
-      '<div class="checkout-aside__list"><h3>Tu viaje</h3><ul class="checkout-aside__rows">' + rows + '</ul>' +
-      '<p class="checkout-aside__total-line"><span>Total actividades</span><b>' + money(t.total) + '</b></p></div>' +
+      '<em>' + porPersona + '</em></div>' +
+      '<ul class="checkout-aside__facts">' + facts + '</ul>' +
+      '<div class="checkout-aside__list"><h3>' + (transfer ? 'Tu traslado' : 'Tu viaje') + '</h3><ul class="checkout-aside__rows">' + rows + '</ul>' +
+      '<p class="checkout-aside__total-line"><span>' + (transfer ? 'Total transfer' : 'Total actividades') + '</span><b>' + money(t.total) + '</b></p></div>' +
       '</aside>';
   }
   function checkoutStepper() {
@@ -2199,6 +2340,24 @@
       '<label for="' + id + '">' + esc(cfg.label) + (cfg.required ? '<span class="checkout-field__req">*</span>' : '') + '</label>' +
       control + '</div>';
   }
+  /* El pedido de transfer necesita un dato que las actividades no: donde te
+     deja. Va en el mismo paso de los datos del viajero y con el hotel ya escrito
+     —el que elegiste en la seccion de alojamiento— porque casi siempre es el
+     mismo y dejarlo en blanco hace que la gente no avance. El horario de
+     recogida no se pregunta aca: se elige en la seccion, con la hora real del
+     vuelo a la vista, y aca se muestra como recordatorio. */
+  function checkoutTransferBlock() {
+    if (!checkoutIsTransfer()) return '';
+    var pickup = transferPickupSummary();
+    var line = checkoutTransferLine();
+    return '<h3 class="checkout-panel__subtitle">El traslado</h3>' +
+      '<div class="checkout-grid">' +
+      checkoutField({ name: 'transferHotel', label: 'Hotel o pousada de destino', required: true, wide: true, value: transferHotelName(), placeholder: 'Ej: Pousada do Porto' }) +
+      '</div>' +
+      '<p class="checkout-transfer-note">' + categoryIcon('traslados', 'cel') +
+      '<span><b>' + esc(line ? line.title : 'Transfer') + '</b> · recogida ' + esc(pickup.label) + (pickup.hora ? ' (' + esc(pickup.hora) + ')' : '') +
+      '. Si el horario no es ese, cambialo en la sección de transfer.</span></p>';
+  }
   function checkoutPanelDatos() {
     var f = checkoutState.form;
     return '<div class="checkout-panel" data-checkout-panel="datos">' +
@@ -2216,6 +2375,7 @@
       checkoutField({ name: 'telefono', label: 'Teléfono', type: 'tel', required: true, value: f.telefono, placeholder: '09X XXX XXX', autocomplete: 'tel' }) +
       checkoutField({ name: 'direccion', label: 'Dirección', value: f.direccion, autocomplete: 'street-address', wide: true }) +
       '</div>' +
+      checkoutTransferBlock() +
       '<p class="checkout-legal">Usamos estos datos solo para coordinar la reserva. No los guardamos en el servidor.</p>' +
       '</div>';
   }
@@ -2228,10 +2388,23 @@
       '<div class="checkout-pay-grid" role="radiogroup" aria-label="Medio de pago">' +
       CHECKOUT_PAYMENTS.map(function (p) {
         var checked = checkoutState.payment === p.id;
+        // El logo va en una caja de alto fijo. Los lockups tienen proporciones
+        // muy distintas entre si: Scotiabank es 6.8:1 y Mastercard 1.6:1. Sin
+        // la caja, cada fila de la grilla tomaria la altura de su logo mas alto
+        // y el 3x3 quedaria con filas desiguales. Adentro, object-fit:contain
+        // recorta al logo angosto sin deformarlo.
+        //
+        // El nombre de la marca queda en sr-only y el wordmark pintado queda
+        // oculto: si el <img> esta, el logo; si falla, el handler de 'error'
+        // le pone is-broken y la tarjeta vuelve a pintar `mark` en su color.
         return '<label class="checkout-pay' + (checked ? ' is-selected' : '') + '" data-checkout-pay>' +
           '<input type="radio" name="checkout-payment" value="' + esc(p.id) + '"' + (checked ? ' checked' : '') + '>' +
+          '<span class="checkout-pay__brand">' +
+          '<img class="checkout-pay__logo" src="' + esc(p.logo) + '" alt="" width="' + p.lw + '" height="' + p.lh + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' +
           '<span class="checkout-pay__mark" style="--pay-brand:' + p.brand + '">' + esc(p.mark) + '</span>' +
+          '</span>' +
           '<span class="checkout-pay__kind">' + esc(p.kind) + '</span>' +
+          '<span class="sr-only">' + esc(p.label) + '</span>' +
           '<span class="checkout-pay__check" aria-hidden="true">' + checkIcon() + '</span>' +
           '</label>';
       }).join('') + '</div>' +
@@ -2247,6 +2420,27 @@
     function dataRow(label, value) {
       return '<li><span>' + esc(label) + '</span><b>' + esc(value || '—') + '</b></li>';
     }
+    // El recap del transfer repite los datos que el operador necesita para
+    // contestarte: modalidad, horario, hotel y vuelo. Es el paso de control, y
+    // controlar no es ver un total: es ver los cuatro datos con los que te van a
+    // decir que si o que no.
+    var pedido = '';
+    if (t.kind === 'transfer') {
+      var pickup = transferPickupSummary();
+      var vuelo = getSelectedFlightSummary();
+      pedido = '<h3>El traslado</h3><ul>' +
+        (t.items.length ? t.items.map(function (item) { return dataRow(item.title, money(item.total) + (item.porPersona ? ' · ' + money(item.price) + ' c/u' : '')); }).join('') : '<li class="is-empty"><span>Sin transfer elegido</span></li>') +
+        dataRow('Recogida', pickup.label + (pickup.hora ? ' · ' + pickup.hora : '')) +
+        dataRow('Hotel', transferHotelName()) +
+        dataRow('Vuelo', vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '')) +
+        '</ul>';
+    } else {
+      pedido = '<h3>Actividades en ' + esc(destino) + '</h3><ul>' +
+        (t.count
+          ? t.items.map(function (tour) { return dataRow(tour.title, money(tour.price) + ' c/u'); }).join('')
+          : '<li class="is-empty"><span>Sin actividades elegidas</span></li>') +
+        '</ul>';
+    }
     return '<div class="checkout-panel" data-checkout-panel="listo">' +
       '<h2 class="checkout-panel__title">Revisá y confirmá</h2>' +
       '<p class="checkout-panel__lead">Te vamos a mandar esta solicitud por WhatsApp. Ahí te confirman disponibilidad, horario y el valor final.</p>' +
@@ -2255,12 +2449,7 @@
       dataRow('Nombre', ((f.titulo ? f.titulo + ' ' : '') + (f.nombre || '') + ' ' + (f.apellido || '')).trim()) +
       dataRow('Documento', ((f.docTipo || '') + (f.docNumero ? ' ' + f.docNumero : '')).trim()) +
       dataRow('Contacto', [f.email, f.telefono].filter(Boolean).join(' · ')) +
-      '</ul>' +
-      '<h3>Actividades en ' + esc(destino) + '</h3><ul>' +
-      (t.tours.length
-        ? t.tours.map(function (tour) { return dataRow(tour.title, money(tour.price) + ' c/u'); }).join('')
-        : '<li class="is-empty"><span>Sin actividades elegidas</span></li>') +
-      '</ul>' +
+      '</ul>' + pedido +
       '<h3>Pago</h3><ul>' + dataRow('Medio de pago', pay ? pay.label : 'Sin elegir') + '</ul>' +
       '<p class="checkout-recap__total"><span>Total a confirmar</span><b>' + money(t.total) + '</b></p>' +
       '</div></div>';
@@ -2285,20 +2474,20 @@
     var step = checkoutState.step;
     var panels = [checkoutPanelDatos, checkoutPanelPago, checkoutPanelListo];
     var t = checkoutTotals();
-    if (!t.tours.length) {
-      // Un checkout sin actividades no tiene nada que confirmar. Si se llega
+    if (!t.count) {
+      // Un checkout sin nada que confirmar no tiene nada que mostrar. Si se llega
       // igual (por ejemplo con el teclado en el boton de una card que se
       // deseleccionó), se vuelve a la lista en vez de mostrar un formulario
       // que va a fallar en el ultimo paso.
       closeBookingForm();
       return;
     }
-    modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title">' +
+    modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title" data-checkout-kind="' + t.kind + '">' +
       '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<div class="checkout-layout">' +
       checkoutAside() +
       '<div class="checkout-main">' +
-      '<header class="checkout-main__head"><h2 id="checkout-title">' + esc((detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'Reservar actividades') + '</h2>' +
+      '<header class="checkout-main__head"><h2 id="checkout-title">' + esc((detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || (t.kind === 'transfer' ? 'Reservar transfer' : 'Reservar actividades')) + '</h2>' +
       checkoutStepper() + '</header>' +
       panels[step]() +
       checkoutActions() +
@@ -2313,6 +2502,18 @@
   function openToursCheckout() {
     if (!detailState || !detailState.meta) return;
     if (!checkoutTours().length) return;
+    checkoutState.kind = 'tours';
+    checkoutState.step = 0;
+    renderCheckout();
+  }
+  /* El transfer entra por el mismo checkout. Se fija `kind` antes de pintar
+     porque el aside, el panel de datos y el mensaje de WhatsApp se leen de ahi:
+     es lo unico que distingue un pedido del otro. Sin linea (destino sin
+     compartido, o modalidad deseleccionada) no abre. */
+  function openTransferCheckout() {
+    if (!detailState || !detailState.meta) return;
+    if (!checkoutTransferLine()) return;
+    checkoutState.kind = 'transfer';
     checkoutState.step = 0;
     renderCheckout();
   }
@@ -2356,6 +2557,13 @@
       // nodo ya no existe y no se puede llamar reportValidity sobre el.
       if (!pending && !el.checkValidity()) pending = el;
     }
+    // El hotel del transfer se copia al estado del viaje en cuanto se escribe.
+    // El voucher y el resumen de "Mi Viaje" leen de ahi, y sin esto mostrarian
+    // "a coordinar" al lado de un checkout que ya tiene el hotel puesto.
+    if (checkoutIsTransfer() && detailState && checkoutState.form.transferHotel) {
+      detailState.transferWizard = detailState.transferWizard || {};
+      detailState.transferWizard.hotelName = String(checkoutState.form.transferHotel).trim();
+    }
     return pending;
   }
   function gotoCheckoutStep(step) {
@@ -2367,27 +2575,48 @@
   }
   /* El mensaje que sale por WhatsApp. Se arma con los datos que la persona
      escribio y con el total que ya viene del modelo: si alguien copia un numero
-     a mano para mandarlo, hay chances de que se equivoque. */
+     a mano para mandarlo, hay chances de que se equivoque.
+     Los dos pedidos arman el mismo esqueleto —viajero, documento, contacto,
+     fechas, personas, medio de pago— y cambian solo el bloque de lo que se pide.
+     El del transfer lleva ademas vuelo y hotel, que es lo primero que mira el
+     operador para decir si puede ir a buscarte. */
   function checkoutWhatsappUrl() {
     var t = checkoutTotals();
-    if (!t.tours.length || !detailState || !detailState.meta) return null;
+    if (!t.count || !detailState || !detailState.meta) return null;
     var f = checkoutState.form;
     var meta = detailState.meta;
     var pay = CHECKOUT_PAYMENTS.filter(function (p) { return p.id === checkoutState.payment; })[0];
     var nombre = ((f.titulo ? f.titulo + ' ' : '') + (f.nombre || '') + ' ' + (f.apellido || '')).trim();
-    var lineas = t.tours.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ' por persona)'; }).join('\n');
     var ref = checkoutRef();
-    var message =
-      'Hola, quiero reservar actividades para mi viaje a ' + meta.dest.name + '.\n\n' +
+    var cabecera =
+      (t.kind === 'transfer' ? 'Hola, quiero coordinar un transfer desde el aeropuerto' : 'Hola, quiero reservar actividades') +
+      ' para mi viaje a ' + meta.dest.name + '.\n\n' +
       'Pedido ' + ref + '\n' +
       'Viajero: ' + nombre + '\n' +
       'Documento: ' + (f.docTipo || '') + (f.docNumero ? ' ' + f.docNumero : '') + '\n' +
       'Contacto: ' + [f.email, f.telefono].filter(Boolean).join(' · ') + '\n' +
-      'Fechas: ' + meta.dep + ' al ' + meta.ret + ' · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '\n\n' +
-      'Actividades:\n' + lineas + '\n\n' +
-      'Total de actividades: ' + money(t.total) + '\n' +
+      'Fechas: ' + meta.dep + ' al ' + meta.ret + ' · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '\n\n';
+    var cuerpo;
+    if (t.kind === 'transfer') {
+      var pickup = transferPickupSummary();
+      var vuelo = getSelectedFlightSummary();
+      var item = t.items[0];
+      cuerpo =
+        'Transfer: ' + (item ? item.title : 'a definir') + ' · ' + money(t.total) +
+        (item && item.porPersona ? ' (' + money(item.price) + ' por persona)' : '') + '\n' +
+        'Recogida: ' + pickup.label + (pickup.hora ? ' (' + pickup.hora + ')' : '') + '\n' +
+        'Vuelo: ' + vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '') + (vuelo.arrivalText ? ' · llega ' + vuelo.arrivalText : '') + '\n' +
+        'Hotel: ' + transferHotelName() + '\n\n' +
+        'Total del transfer: ' + money(t.total) + '\n';
+    } else {
+      var lineas = t.items.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ' por persona)'; }).join('\n');
+      cuerpo = 'Actividades:\n' + lineas + '\n\n' + 'Total de actividades: ' + money(t.total) + '\n';
+    }
+    var message = cabecera + cuerpo +
       'Medio de pago preferido: ' + (pay ? pay.label : 'a coordinar') + '\n\n' +
-      '¿Me confirman disponibilidad, horario y el valor final?';
+      (t.kind === 'transfer'
+        ? '¿Me confirman disponibilidad, punto de encuentro y el valor final?'
+        : '¿Me confirman disponibilidad, horario y el valor final?');
     return 'https://wa.me/?text=' + encodeURIComponent(message);
   }
   /* Referencia corta y legible. No es un comprobante de nada: sirve para que el
@@ -3313,6 +3542,13 @@
     var transferWhere = transferState.hotelName || selectedHotelName;
     var transferNote = 'Recogida ' + esc(transferLabel || 'a coordinar') + (transferWhere && transferWhere !== 'Sin alojamiento' ? ' · hacia ' + esc(transferWhere) : '');
     var toursTitle = 'Tours y actividades' + (selectedTours.length ? ' · ' + selectedTours.length + (selectedTours.length === 1 ? ' elegida' : ' elegidas') : '');
+    /* El CTA del traslado va al MISMO checkout que el de actividades. Sin
+       modalidad elegida no hay nada que reservar, asi que en vez de un boton que
+       no abre nada dice que falta elegirlo y lo dice con el mismo tono que las
+       otras filas sin elegir ("Sin actividades seleccionadas"). */
+    var transferCta = detailState.transferType
+      ? '<button type="button" class="voucher-item__cta" data-coordinate-transfer aria-label="Reservar el traslado desde el aeropuerto">Reservar</button>'
+      : '<p class="voucher-item__detail">Elegí un transfer en la sección de traslados.</p>';
     // findSelectedHotelDetail() devuelve un texto genérico cuando no encontró la
     // card; en ese caso no hay nada que decir y la fila queda solo con el monto.
     var hotelNote = selectedHotelDetail && selectedHotelDetail !== 'Alojamiento seleccionado' ? '<p class="voucher-item__detail">' + esc(selectedHotelDetail) + '</p>' : '';
@@ -3323,7 +3559,7 @@
       '<ul class="voucher-list">' +
       itemRow('pasajes', flightTitle, flightLines, flightTotal, bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline)) +
       itemRow('alojamiento', 'Alojamiento · ' + esc(selectedHotelName), hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName) : '') +
-      itemRow('traslados', transferTitle, '<p class="voucher-item__detail">' + transferNote + '</p>', transferTotal, '<button type="button" class="voucher-item__cta" data-coordinate-transfer aria-label="Coordinar el traslado al aeropuerto">Coordinar</button>') +
+      itemRow('traslados', transferTitle, '<p class="voucher-item__detail">' + transferNote + '</p>', transferTotal, transferCta) +
       itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, bookCta(toursBookUrl, 'Reservar tours', 'Reservar las actividades')) +
       '</ul>' +
       '<section class="voucher-destino"><div class="voucher-destino__head"><h3>Gastos en destino</h3><p>Por día y total del viaje</p></div><ul class="voucher-destino__list"><li><span>Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + '</em></li><li><span>Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + '</em></li></ul><p class="voucher-destino__total">Total en destino <b>' + money(destinoTotal) + '</b></p></section>' +
@@ -3925,7 +4161,7 @@
       return !(card.amount <= 0);
     }).map(function (card) {
       var isSelected = selected === card.key;
-      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b></button>';
+      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b><span class="transfer-choice__check" aria-hidden="true">' + checkIcon() + '</span></button>';
     }).join('');
     var pickupMarkup = selected ? '<div class="transfer-pickup" data-transfer-pickup>' +
       '<span class="transfer-pickup__label">Horario de recogida</span><div class="transfer-pickup__chips">' +
@@ -3933,15 +4169,28 @@
         var label = value === '60' ? '1 h después · ' + transferPickupTimeLabel(pickupWindow.plusOneHour)
           : value === '120' ? '2 h después · ' + transferPickupTimeLabel(pickupWindow.plusTwoHours)
           : 'Personalizado';
-        return '<button type="button" class="transfer-pickup__chip' + (pickupMinutes === value ? ' is-selected' : '') + '" data-transfer-pickup-choice="' + value + '">' + esc(label) + '</button>';
+        return '<button type="button" class="transfer-pickup__chip' + (pickupMinutes === value ? ' is-selected' : '') + '" data-transfer-pickup-choice="' + value + '" aria-pressed="' + (pickupMinutes === value ? 'true' : 'false') + '">' + esc(label) + '</button>';
       }).join('') + '</div>' +
       (pickupMinutes === 'custom' ? '<input type="time" class="transfer-pickup__time" data-transfer-custom-time value="' + esc(wizard.customTime || '') + '" aria-label="Horario personalizado de recogida">' : '') +
       '</div>' : '';
-    // Elegir una tarjeta ya suma el transfer al presupuesto (igual que tours y
-    // hoteles); este botón es solo el indicador de estado, nunca abre un modal
-    // ni un flujo de pasos adicional. El detalle queda centralizado en "Mi Viaje".
-    var addedLabel = selected ? '✓ Agregado al presupuesto' : 'Elegí un tipo de transfer';
-    return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados"><h2>Transfer desde el aeropuerto</h2><p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.km ? ' (' + t.km + ' km desde ' + esc(t.iata || 'el aeropuerto') + ')' : '') + '.</p>' + suggestionMarkup + modoNota + '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '<button type="button" class="btn-transfer' + (selected ? ' is-added' : '') + '" disabled>' + addedLabel + '</button></section>';
+    /* Cabecera con el total y el boton de reservar, igual que la seccion de
+       actividades. Antes terminaba en un <button disabled> que decia "Agregado
+       al presupuesto": un boton que no hace nada y una frase que el presupuesto
+       ya decia en "Mi Viaje". Ademas era el unico camino a la reserva, porque el
+       unico que de verdad abria algo era el "Coordinar" del voucher, tres
+       pantallas más abajo. Ahora elegir la modalidad suma al presupuesto —igual
+       que una card de actividades— y este boton abre el checkout. */
+    var total = getSelectedTransferAmount(detailState);
+    var cta = '<div class="official-transfer__cta">' +
+      '<b class="official-transfer__cta-total"' + (selected ? '' : ' hidden') + '>' + (selected ? money(total) + ' total' : '') + '</b>' +
+      '<button type="button" class="official-transfer__reserve" data-book-transfer' + (selected ? '' : ' disabled') + '>' +
+      '<span>' + (selected ? 'Reservar transfer' : 'Elegí un transfer') + '</span></button></div>';
+    return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
+      '<div class="official-transfer__head"><div><h2>Transfer desde el aeropuerto</h2>' +
+      '<p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.km ? ' (' + t.km + ' km desde ' + esc(t.iata || 'el aeropuerto') + ')' : '') + '.</p></div>' +
+      cta + '</div>' +
+      suggestionMarkup + modoNota +
+      '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '</section>';
   }
 
   function transportFlow(meta, budget, mode) {
@@ -4003,135 +4252,6 @@
     if (Number(minutes) === 60) return '1 hora después de la llegada';
     if (Number(minutes) === 120) return '2 horas después de la llegada';
     return 'Horario a coordinar';
-  }
-  function transferFlightLegCard(label, origin, destination, departureText, arrivalText, flightNumber) {
-    return '<div class="transfer-flight-leg"><span class="flight-badge">' + esc(label) + '</span>' +
-      '<div class="flight-route"><div><small>' + esc(airportCode(origin)) + ' → ' + esc(airportCode(destination)) + '</small><small>Salida · ' + esc(airportLabel(origin)) + '</small><b>' + esc(departureText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destination)) + '</small><b>' + esc(arrivalText) + '</b></div></div>' +
-      (flightNumber ? '<small class="transfer-flight-leg__number">Vuelo ' + esc(flightNumber) + '</small>' : '') + '</div>';
-  }
-  function transferFlightInfoMarkup(flightData) {
-    var hasFlight = !!(flightData && flightData.origin && (flightData.origin.code || flightData.origin.name));
-    if (!hasFlight) {
-      return '<div class="transfer-flight-sync transfer-flight-sync--empty"><p>✈️ Todavía no elegiste un vuelo. En cuanto lo hagas, usamos su horario real para sugerir la recogida.</p></div>';
-    }
-    return '<div class="transfer-flight-sync"><div class="flight-airline"><b>' + esc(flightData.airline) + '</b></div>' +
-      transferFlightLegCard('Ida', flightData.origin, flightData.destination, flightData.departureText, flightData.arrivalText, flightData.flightNumber) +
-      (flightData.isRoundTrip ? transferFlightLegCard('Vuelta', flightData.returnOrigin, flightData.returnDestination, flightData.returnDepartureText, flightData.returnArrivalText, flightData.inboundFlightNumber) : '') +
-      '</div>';
-  }
-  function openTransferModal(meta) {
-    if (!detailState) return;
-    meta = meta || detailState.meta;
-    detailState.transferWizard = detailState.transferWizard || { step: 1, pickupMinutes: 60, customTime: '', hotelName: '' };
-    var state = detailState.transferWizard;
-    if (!state.pickupMinutes) state.pickupMinutes = 60;
-    if (!state.hotelName && detailState.selectedHotelName) state.hotelName = detailState.selectedHotelName;
-    state.step = 1;
-    renderTransferWizard(meta, 1);
-  }
-  function syncTransferWizardStateFromDom(modal) {
-    if (!detailState || !detailState.transferWizard || !modal) return;
-    var state = detailState.transferWizard;
-    var radio = modal.querySelector('[name="transfer-pickup"]:checked');
-    if (radio) {
-      state.pickupMinutes = radio.value;
-      if (String(radio.value) === 'custom') {
-        var customInput = modal.querySelector('[data-transfer-custom-time]');
-        state.customTime = customInput ? customInput.value : '';
-      } else {
-        state.customTime = '';
-      }
-    }
-    var hotelInput = modal.querySelector('[name="transfer-hotel"]');
-    if (hotelInput) state.hotelName = (hotelInput.value || '').trim();
-  }
-  function advanceTransferWizard(targetStep) {
-    var modal = $('#booking-modal');
-    if (!detailState || !detailState.transferWizard || !modal) return;
-    syncTransferWizardStateFromDom(modal);
-    var state = detailState.transferWizard;
-    if (state.step === 1 && String(state.pickupMinutes) === 'custom' && !state.customTime) {
-      alert('Seleccioná un horario personalizado para continuar.');
-      var customInput = modal.querySelector('[data-transfer-custom-time]');
-      if (customInput) customInput.focus();
-      return;
-    }
-    if (state.step === 2 && !state.hotelName) {
-      alert('Ingresá el hotel o pousada de destino para continuar.');
-      var hotelInput = modal.querySelector('[name="transfer-hotel"]');
-      if (hotelInput) hotelInput.focus();
-      return;
-    }
-    state.step = targetStep;
-    renderTransferWizard(detailState.meta, state.step);
-  }
-  function addTransferToBudget() {
-    if (!detailState) return;
-    detailState.transfer = getSelectedTransferAmount(detailState);
-    detailState.selectedHotel = true;
-    detailState.transferWizard = detailState.transferWizard || {};
-    detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
-    closeBookingForm();
-    recalcularTotalViaje();
-    renderTripSummary();
-  }
-  function renderTransferWizard(meta, step) {
-    var modal = $('#booking-modal');
-    if (!detailState) return;
-    var precios = transferPreciosDe(meta);
-    detailState.transferWizard = detailState.transferWizard || { step: 1, pickupMinutes: 60, customTime: '', hotelName: '' };
-    var state = detailState.transferWizard;
-    if (step) state.step = step;
-    var flightData = getSelectedFlightSummary();
-    var flightInfo = transferFlightInfoMarkup(flightData);
-    var arrivalWindow = getTransferPickupWindow();
-    var pickupOptions = [
-      { value: '60', label: '1 hora después de la llegada', time: arrivalWindow.plusOneHour ? arrivalWindow.plusOneHour.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '01:00' },
-      { value: '120', label: '2 horas después de la llegada', time: arrivalWindow.plusTwoHours ? arrivalWindow.plusTwoHours.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '02:00' },
-      { value: 'custom', label: 'Otro horario personalizado', time: 'Ingresá el horario' }
-    ];
-    var selectedIndex = pickupOptions.findIndex(function (option) { return String(option.value) === String(state.pickupMinutes); });
-    var stepMarkup = '';
-    if (state.step === 1) {
-      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 1</span><h3>¿Cuándo querés que te recojan?</h3></div>' +
-        '<div class="transfer-pickup-options">' + pickupOptions.map(function (option) {
-          var index = pickupOptions.indexOf(option);
-          var checked = selectedIndex === index ? 'checked' : '';
-          var customInput = option.value === 'custom' ? '<input class="transfer-custom-time" type="time" data-transfer-custom-time value="' + esc(state.customTime || '') + '" ' + (selectedIndex === index ? '' : 'disabled') + '>' : '<span class="transfer-pickup__time">' + esc(option.time) + '</span>';
-          return '<label class="transfer-pickup-option' + (checked ? ' selected' : '') + '"><input type="radio" name="transfer-pickup" value="' + esc(option.value) + '" ' + checked + ' data-transfer-pickup-radio><span class="transfer-pickup__content"><strong>' + esc(option.label) + '</strong>' + customInput + '</span></label>';
-        }).join('') + '</div>' +
-        '<button type="button" class="confirm-booking" data-transfer-step="2">Continuar</button></div>';
-    } else {
-      var pickupText = getTransferPickupLabel(state.pickupMinutes, state.customTime);
-      var hotelText = state.hotelName ? state.hotelName : findSelectedHotelLabel();
-      state.hotelName = hotelText;
-      stepMarkup = '<div class="transfer-step"><div class="transfer-step__header"><span class="transfer-step__badge">Paso 2</span><h3>¿Dónde te alojás?</h3></div>' +
-        '<label class="transfer-field"><span>Hotel o pousada de destino</span><input type="text" name="transfer-hotel" value="' + esc(hotelText) + '" placeholder="Ej: Pousada del Sol" autocomplete="off"></label>' +
-        '<div class="transfer-summary-box"><p><b>Recogida:</b> ' + esc(pickupText) + '</p><p><b>Hotel:</b> ' + esc(hotelText) + '</p><p><b>Vuelo:</b> ' + esc(flightData.airline) + '</p><p><b>Costo transfer:</b> ' + money(precios.compartido * Math.max(1, Number(S && S.pax) || 1)) + ' <small>(' + (S && S.pax) + ' persona' + ((S && S.pax) === 1 ? '' : 's') + ')</small></p></div>' +
-        '<button type="button" class="confirm-booking" data-transfer-add-budget>Agregar al presupuesto</button></div>';
-    }
-    modal.innerHTML = '<div class="booking-dialog transfer-wizard" role="dialog" aria-modal="true"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><h2>Transfer desde el aeropuerto</h2>' + flightInfo + stepMarkup + '</div>';
-    modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
-  }
-  async function submitTransfer(form) {
-    var button = form.querySelector('button[type="submit"]'), file = form.querySelector('[name="receipt"]').files[0];
-    if (!file) return;
-    button.disabled = true; button.textContent = 'Agregando al presupuesto…';
-    try {
-      var dataUrl = await new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result); }; reader.onerror = reject; reader.readAsDataURL(file); });
-      var amount = Number(form.querySelector('[name="amount"]').value || 0);
-      if (detailState) {
-        detailState.transfer = amount;
-        detailState.selectedHotel = true;
-        detailState.transferWizard = detailState.transferWizard || {};
-        detailState.transferWizard.hotelName = form.querySelector('[name="hotel_name"]').value || detailState.selectedHotelName || 'Hotel de destino';
-      }
-      var response = await fetch('/api/traslados/transferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amount, destination: S.dest, pickup_minutes: form.querySelector('[name="pickup_minutes"]').value || '', pickup_label: form.querySelector('[name="pickup_label"]').value || '', hotel_name: form.querySelector('[name="hotel_name"]').value || '', flight_airline: (detailState && detailState.selectedFlight) || 'Vuelo activo', receipt: { name: file.name, type: file.type, data: dataUrl } }) });
-      var result = await response.json().catch(function () { return {}; });
-      if (!response.ok) throw new Error(result.error || 'No pudimos registrar la transferencia.');
-      sincronizarTrasladoOficial();
-      $('#booking-modal').innerHTML = '<div class="booking-dialog booking-success"><div class="success-icon">✅</div><h2>Transfer agregado al presupuesto</h2><p class="booking-note">' + esc(result.message || 'El transfer quedó incluido en el cálculo de tu viaje.') + '</p><button type="button" class="confirm-booking" data-close-booking>Entendido</button></div>';
-    } catch (e) { button.disabled = false; button.textContent = 'Agregar al presupuesto'; alert(e.message || 'No pudimos registrar la transferencia.'); }
   }
 
   /* ------------------------------------------------------------------
@@ -6769,6 +6889,16 @@ function comboNombreDestino() {
         openToursCheckout();
         return;
       }
+      /* El boton de la cabecera de la seccion de transfer, al lado del de
+         actividades. Va aca y no en el listener del modal porque esta en la
+         pagina: los dos CTAs de reserva se atienden en el mismo lugar. */
+      var bookTransfer = e.target.closest('[data-book-transfer]');
+      if (bookTransfer) {
+        e.preventDefault(); e.stopPropagation();
+        if (bookTransfer.disabled) return;
+        openTransferCheckout();
+        return;
+      }
       var tourDetail = e.target.closest('[data-tour-detail-open]');
       if (tourDetail) {
         e.preventDefault(); e.stopPropagation();
@@ -7101,36 +7231,28 @@ function comboNombreDestino() {
       }
       var storyButton = e.target.closest('[data-share-story]');
       if (storyButton) { e.preventDefault(); shareStoryCard(storyButton); }
+      /* El "Coordinar" del voucher entra al MISMO checkout que las actividades.
+         El boton de la seccion y este llaman a la misma funcion: antes el
+         segundo abria un asistente distinto, con otro formulario y otro boton de
+         cierre, y eran dos flujos para la misma reserva. */
       var coordinateTransfer = e.target.closest('[data-coordinate-transfer]');
       if (coordinateTransfer) {
         e.preventDefault();
         closeBookingForm();
-        openTransferModal(detailState && detailState.meta);
-      }
-      var stepButton = e.target.closest('[data-transfer-step]');
-      if (stepButton) {
-        e.preventDefault(); e.stopPropagation();
-        advanceTransferWizard(Number(stepButton.getAttribute('data-transfer-step')) || 1);
-      }
-      var addBudgetButton = e.target.closest('[data-transfer-add-budget]');
-      if (addBudgetButton) {
-        e.preventDefault(); e.stopPropagation();
-        syncTransferWizardStateFromDom($('#booking-modal'));
-        if (!detailState || !detailState.transferWizard || !detailState.transferWizard.hotelName) {
-          var hotelInput = $('#booking-modal').querySelector('[name="transfer-hotel"]');
-          if (hotelInput) {
-            detailState.transferWizard.hotelName = hotelInput.value.trim();
-          }
-        }
-        if (!detailState || !detailState.transferWizard || !detailState.transferWizard.hotelName) {
-          alert('Ingresá el hotel o pousada de destino para continuar.');
-          var fallbackInput = $('#booking-modal').querySelector('[name="transfer-hotel"]');
-          if (fallbackInput) fallbackInput.focus();
-          return;
-        }
-        addTransferToBudget();
+        openTransferCheckout();
       }
     });
+    // Un logo de Commons que no carga no puede quedar como un cuadrado roto en
+    // la ultima pantalla antes de mandar el pedido. El evento 'error' de una
+    // imagen NO burbujea, asi que el listener va en fase de captura (el tercer
+    // argumento): sin eso no llega nunca al modal y la tarjeta se queda rota.
+    // Delegado y no un onerror en linea porque el paso se repinta entero en
+    // cada cambio de paso y habria que volver a engancharlo cada vez.
+    $('#booking-modal').addEventListener('error', function (e) {
+      var img = e.target;
+      if (!img || !img.classList || !img.classList.contains('checkout-pay__logo')) return;
+      img.classList.add('is-broken');
+    }, true);
     $('#booking-modal').addEventListener('change', function (e) {
       // Medio de pago del checkout. Se marca la tarjeta con la clase en vez de
       // repintar el paso entero: el repintado tiraria abajo el scroll y
@@ -7146,42 +7268,13 @@ function comboNombreDestino() {
         if (warn) warn.remove();
         return;
       }
-      var radio = e.target.closest('[name="transfer-pickup"]');
-      if (radio) {
-        if (!detailState || !detailState.transferWizard) return;
-        detailState.transferWizard.pickupMinutes = radio.value;
-        if (String(radio.value) === 'custom') {
-          var customInput = $('#booking-modal').querySelector('[data-transfer-custom-time]');
-          detailState.transferWizard.customTime = customInput ? customInput.value : '';
-        } else {
-          detailState.transferWizard.customTime = '';
-        }
-        return;
-      }
-      var customTime = e.target.closest('[data-transfer-custom-time]');
-      if (customTime && detailState && detailState.transferWizard) {
-        detailState.transferWizard.customTime = customTime.value;
-      }
-      var hotelInput = e.target.closest('[name="transfer-hotel"]');
-      if (hotelInput && detailState && detailState.transferWizard) {
-        detailState.transferWizard.hotelName = hotelInput.value.trim();
-      }
     });
     $('#booking-modal').addEventListener('input', function (e) {
       var cardNumber = e.target.closest('[data-card-number]');
       if (cardNumber) cardNumber.value = cardNumber.value.replace(/\D/g, '').slice(0, 19).replace(/(.{4})/g, '$1 ').trim();
       var cardExpiry = e.target.closest('[data-card-expiry]');
       if (cardExpiry) { var expiryValue = cardExpiry.value.replace(/\D/g, '').slice(0, 4); cardExpiry.value = expiryValue.length > 2 ? expiryValue.slice(0, 2) + '/' + expiryValue.slice(2) : expiryValue; }
-      var customTime = e.target.closest('[data-transfer-custom-time]');
-      if (customTime && detailState && detailState.transferWizard) {
-        detailState.transferWizard.customTime = customTime.value;
-      }
-      var hotelInput = e.target.closest('[name="transfer-hotel"]');
-      if (hotelInput && detailState && detailState.transferWizard) {
-        detailState.transferWizard.hotelName = hotelInput.value.trim();
-      }
     });
-    $('#booking-modal').addEventListener('submit', function (e) { e.preventDefault(); if (e.target.id !== 'transfer-form') return; if (!e.target.checkValidity()) { e.target.reportValidity(); return; } submitTransfer(e.target); });
 
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function () {
       var menu = document.getElementById('dest-menu');
