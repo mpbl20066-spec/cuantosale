@@ -111,13 +111,6 @@
   <div id="vista-detalle" class="oculto" aria-live="polite">
     <button type="button" id="btn-volver">⬅ Volver a las propuestas</button>
     <div id="detalle-contenido"></div>
-    <!-- El resumen final del itinerario es la ultima seccion de la vista de
-         detalle, no un modal: se llega scrolleando, se lee en el mismo lugar
-         donde se configuro el viaje y se re-pinta con cada recalculo. Vive
-         afuera de #detalle-contenido a proposito, porque showProposalView()
-         reemplaza el innerHTML de ese contenedor entero al abrir otra propuesta
-         y el resumen tiene que sobrevivir a eso. -->
-    <section id="itinerary-summary" class="itinerary-summary-page oculto" hidden aria-labelledby="itinerary-summary-title"></section>
   </div>
 
   <aside id="trip-summary" class="trip-summary" aria-live="polite" hidden></aside>
