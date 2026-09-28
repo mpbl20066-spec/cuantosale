@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preview tarjetas — modo oscuro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght:600;700;800&family=Poppins:wght:400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<style>
+  /* Solo el andamiaje de la preview. Los tokens, los colores de card y los
+     estados los trae style.css tal cual, que es lo que hay que mirar. */
+  body{padding:20px 16px 60px}
+  .wrap{max-width:560px;margin:0 auto}
+  h1{font-size:30px;margin:0 0 4px}
+  .aviso{margin:0 0 22px;color:var(--ink2);font-size:13px}
+  .caso{margin:0 0 26px}
+  .caso h2{margin:0 0 10px;font:700 12px var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+  .hotel-grid{grid-template-columns:1fr}
+  .grid2{display:grid;gap:10px}
+  .img{height:120px;background:linear-gradient(135deg,#2a4a7a,#12294A)}
+  .daily-budget__options{grid-template-columns:1fr 1fr}
+  .local-tours{grid-template-columns:1fr}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tarjetas en modo oscuro</h1>
+  <p class="aviso">Mismos estilos de <code>public/style.css</code>. Sirve para ver las cards sin
+     elegir y elegidas, que es donde se veia el texto blanco sobre blanco.</p>
+
+  <div class="caso">
+    <h2>Hotel — sin elegir / elegida</h2>
+    <div class="hotel-grid">
+      <article class="hotel-option">
+        <div class="img"></div>
+        <h3>Hotel Bella Vista</h3>
+        <p class="hotel-description">Centro de Montevideo · 4 estrellas</p>
+        <p class="hotel-detail">Desayuno incluido · 3 noches</p>
+        <div class="hotel-price"><small>US$</small><b>420</b></div>
+        <p class="hotel-total">Total con impuestos US$ 512</p>
+        <label class="hotel-choice hotel-option__pick">
+          <input type="radio" name="h" checked>
+          <span class="hotel-pick-hint">Elegir</span>
+        </label>
+      </article>
+      <article class="hotel-option">
+        <div class="img"></div>
+        <h3>Hotel Ciudad Vieja</h3>
+        <p class="hotel-description">Barrio histórico · 3 estrellas</p>
+        <p class="hotel-detail">Solo habitación · 2 noches</p>
+        <div class="hotel-price"><small>US$</small><b>300</b></div>
+        <p class="hotel-total">Total con impuestos US$ 361</p>
+        <label class="hotel-choice hotel-option__pick">
+          <input type="radio" name="h">
+          <span class="hotel-pick-hint">Elegir</span>
+        </label>
+      </article>
+    </div>
+  </div>
+
+  <div class="caso">
+    <h2>Presupuesto diario — sin elegir / elegida</h2>
+    <div class="daily-budget__options grid2">
+      <button type="button" class="daily-budget__option">
+        <span class="daily-budget__option-title">Ahorrar</span>
+        <span class="daily-budget__option-copy">Hostales y comida casera. Lo más barato por día.</span>
+        <strong>US$ 38</strong>
+      </button>
+      <button type="button" class="daily-budget__option is-selected">
+        <span class="daily-budget__option-title">Equilibrado</span>
+        <span class="daily-budget__option-copy">Hoteles de 3 estrellas y una salida por día.</span>
+        <strong>US$ 72</strong>
+      </button>
+    </div>
+  </div>
+
+  <div class="caso">
+    <h2>Tour — sin elegir / elegido</h2>
+    <div class="local-tours">
+      <label class="local-tour">
+        <input type="radio" name="t" data-tour-choice>
+        <div class="img"></div>
+        <div class="local-tour__info"><b>City Tour Panorámico</b><span>4 horas · en español</span></div>
+        <div class="local-tour__cta">Elegir</div>
+      </label>
+      <label class="local-tour">
+        <input type="radio" name="t" data-tour-choice checked>
+        <div class="img"></div>
+        <div class="local-tour__info"><b>Gastronomía y mercados</b><span>3 horas · degustación incluida</span></div>
+        <div class="local-tour__cta">Elegir</div>
+      </label>
+    </div>
+  </div>
+</div>
+</body>
+</html>

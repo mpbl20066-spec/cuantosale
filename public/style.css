@@ -55,6 +55,27 @@
     color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
     --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
     --selected-bg:#1B3A63; --selected-border:#EEF3F9; --selected-ink:#EEF3F9;
+    /* Tokens de card. Estos faltaban acá y era el bug: la app NUNCA setea
+       data-theme, asi que el unico camino real al modo oscuro es este bloque
+       de media query, no el :root[data-theme="dark"] de mas abajo. Al no
+       redefinir --card-bg ni --card-sel-bg, las cards seguian heredando los
+       valores CLAROS de :root (#FFFFFF y #FEF7E7) con --inkclaro encima:
+       1.12:1 sin elegir y 1.05:1 elegida. En el celular, donde el sistema
+       suele venir en oscuro, salia la card blanca con el texto gris claro
+       imposible de leer. Estos son los mismos valores del bloque
+       [data-theme="dark"], y dan 13:1 / 12.9:1.
+       --card-radius se omite a proposito: es 18px en los dos temas. */
+    --card-bg:#12294A; --card-border:#8B9CB2;
+    --card-sel-border:#E8A93B; --card-sel-bg:#33290E;
+    --card-sel-glow:0 8px 20px rgba(0,0,0,.45);
+    /* Mismo bug que las cards, un token mas. --focus:#1B5FA8 es el celeste de
+       marca, pensado para un fondo claro. Contra el surface oscuro daba
+       2.25:1, por debajo del 3:1 de WCAG 2.4.11 para un anillo de foco, o
+       sea que el foco de teclado era casi invisible en el celular. El
+       comentario de --focus decia "5.97:1 en claro y 8.3:1 en oscuro", pero
+       ese 8.3:1 era de --cel en oscuro (#7CB7E8), no de --focus. Se usa
+       --cel, que es el mismo celeste aclarado para oscuro. */
+    --focus:#7CB7E8;
   }
 }
 :root[data-theme="dark"]{
@@ -68,6 +89,7 @@
   --card-bg:#12294A; --card-border:#8B9CB2; --card-radius:18px;
   --card-sel-border:#E8A93B; --card-sel-bg:#33290E;
   --card-sel-glow:0 8px 20px rgba(0,0,0,.45);
+  --focus:#7CB7E8;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
