@@ -157,15 +157,24 @@ console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a m
     [...segundaDe.keys()].every(k => grupoDe.has(segundaDe.get(k).a) && grupoDe.has(segundaDe.get(k).b)),
     [...segundaDe.keys()].filter(k => !grupoDe.has(segundaDe.get(k).a) || !grupoDe.has(segundaDe.get(k).b)).join(', '));
 
-  // Un par cruza grupos cuando sus dos paradas no estan en el mismo. Deberian
-  // ser solo los dos de Rio, que estan porque el hub de Rio los sirve aunque Rio
-  // sea un grupo de una sola clave.
+  // Un par cruza grupos cuando sus dos paradas no estan en el mismo. Solo los
+  // tiene Rio, y no por descuido: Rio es un grupo de una sola clave pero su hub
+  // (GIG) sirve todo el corredor, asi que Búzios, Arraial, Cabo Frio, Paraty,
+  // Ilha Grande y Angra se toman con el mismo vuelo redondo. Antes solo estaban
+  // Búzios y Angra y los otros cuatro quedaban sin poder combinar con la capital.
   const cruzan = [...segundaDe.entries()].filter(([, v]) => grupoDe.get(v.a) !== grupoDe.get(v.b))
     .map(([k]) => k.split('|')[0] + ' + ' + k.split('|')[1]);
   check('cruzan grupos solo ' + cruzan.length + ': ' + cruzan.join(', '),
-    cruzan.length === 2 && cruzan.every(x => x.indexOf('rio + ') === 0), cruzan.join(', '));
-  check('el total es C(n,2) de los grupos mas esos 2: ' + (posible + 2),
-    subs.size === posible + 2, 'hay ' + subs.size + ', C(n,2) suma ' + posible);
+    cruzan.length === 6 && cruzan.every(x => x.indexOf('rio + ') === 0), cruzan.join(', '));
+  // Y todos tienen que seguir vuelo por el mismo hub: un par Rio + Ubatuba
+  // (GRU) no es un vuelo redondo y no se puede ofrecer.
+  const HUBS_RIO = ['buz', 'arraial', 'cabo', 'paraty', 'ilha', 'angra'];
+  const conRio = [...segundaDe.entries()].filter(([, v]) => v.a === 'rio').map(([, v]) => v.b);
+  check('Rio combina solo con destinos que vuelan por su hub: ' + HUBS_RIO.join(', '),
+    conRio.length === HUBS_RIO.length && HUBS_RIO.every(k => conRio.includes(k)),
+    conRio.join(', '));
+  check('el total es C(n,2) de los grupos mas los ' + cruzan.length + ' de Rio: ' + (posible + cruzan.length),
+    subs.size === posible + cruzan.length, 'hay ' + subs.size + ', C(n,2) suma ' + posible);
 }
 
 console.log('\n7) El control de segunda parada ofrece los mismos pares');

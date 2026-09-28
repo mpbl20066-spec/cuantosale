@@ -420,7 +420,17 @@
 { label: 'Réveillon Copacabana (31/12)', key: 'rio' },
 { label: 'Zona Sur / Ipanema', key: 'rio' },
 { label: 'Centro Histórico', key: 'rio' },
+      // Río es un grupo de una sola clave pero su hub (GIG) sirve todo el
+      // corredor: Búzios, Arraial, Cabo Frio, Paraty, Ilha Grande y Angra se
+      // toman con el mismo vuelo redondo. Antes solo se ofrecían Búzios y
+      // Angra, y los otros cuatro quedaban sin poder combinar con la capital.
+      // Ubatuba e Ilhabela NO entran acá: vuelan por GRU, asi que un Rio +
+      // Ubatuba necesita dos billetes y no es un vuelo redondo.
       { label: 'Río + Búzios', key: 'rio', secondKey: 'buz' },
+      { label: 'Río + Arraial do Cabo', key: 'rio', secondKey: 'arraial' },
+      { label: 'Río + Cabo Frio', key: 'rio', secondKey: 'cabo' },
+      { label: 'Río + Paraty', key: 'rio', secondKey: 'paraty' },
+      { label: 'Río + Ilha Grande', key: 'rio', secondKey: 'ilha' },
       { label: 'Río + Angra dos Reis', key: 'rio', secondKey: 'angra' }
     ] },
     { id: 'buzios', label: 'Búzios / Arraial do Cabo / Cabo Frio', image: 'buz', keys: ['buz', 'arraial', 'cabo'], subcategories: [
@@ -676,6 +686,10 @@
       { label: 'Arraial do Cabo + Cabo Frio', key: 'arraial', codes: 'GIG SDU', subcategory: 'Arraial do Cabo + Cabo Frio' },
       { label: 'Angra dos Reis + Ilha Grande', key: 'angra', codes: 'GIG SDU', subcategory: 'Angra dos Reis + Ilha Grande' },
       { label: 'Río + Búzios', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Búzios' },
+      { label: 'Río + Arraial do Cabo', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Arraial do Cabo' },
+      { label: 'Río + Cabo Frio', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Cabo Frio' },
+      { label: 'Río + Paraty', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Paraty' },
+      { label: 'Río + Ilha Grande', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Ilha Grande' },
       { label: 'Río + Angra dos Reis', key: 'rio', codes: 'GIG SDU', subcategory: 'Río + Angra dos Reis' }
     ] },
     { name: 'San Pablo', codes: 'GRU / CGH', options: [
@@ -1855,33 +1869,48 @@
       // una segunda señal que solo tenían los tours, y hacia que el mismo
       // gesto se leyera distinto según el grupo.
       // Toda la tarjeta es la zona sensible: el checkbox va estirado con
-      // position:absolute sobre el article y solo el boton de detalle queda
-      // por encima (z-index). Un clic en cualquier punto elige la
-      // experiencia y el teclado sigue teniendo un unico control que tabula.
+      // position:absolute sobre el article y solo los botones quedan por encima
+      // (z-index). Un clic en cualquier punto elige la experiencia y el teclado
+      // sigue teniendo un unico control que tabula.
       //
-      // Titulo, destino y precio viven en el cuerpo claro, no sobre la foto.
-      // Antes iban sobre un velo oscuro con el precio en ambar: quedaba lindo
-      // como foto pero se leia como otra cosa distinta a los grupos de
-      // "Transporte local" y "Comidas", que son las opciones con las que se
-      // compara. Ahora las tres tarjetas se leen igual.
+      // La card es horizontal, con la foto a la izquierda: se lee como la ficha
+      // de un producto y no como una portada. Antes la foto era una franja de
+      // 152px arriba del texto, que es la grilla de las otras secciones de la
+      // pagina, no la de un catalogo. Los tres bloques (foto, cuerpo, pie con
+      // precio y acciones) quedan en una fila en escritorio y se apilan en
+      // columna por debajo de 760px, que es cuando la foto deja de tener ancho
+      // para ser legible.
+      var rating = Number(tour.rating) || 0;
+      var reviews = Number(tour.reviewsCount) || 0;
+      var ratingRow = rating
+        ? '<p class="local-tour__rating"><span class="local-tour__stars" aria-hidden="true">' + starsRow(rating) + '</span>' +
+          '<b>' + rating.toFixed(1) + '</b>' + (reviews ? '<span class="local-tour__reviews">' + reviews + (reviews === 1 ? ' reseña' : ' reseñas') + '</span>' : '') + '</p>'
+        : '';
+      var includes = tourIncludes(tour);
       return '<article class="local-tour" data-tour-card>' +
         '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '">' +
         media +
         '<div class="local-tour__body">' +
+        '<div class="local-tour__head">' +
         '<h3 class="local-tour__title">' + esc(tour.title) + '</h3>' +
-        '<p class="local-tour__destination">' + esc(tour.destination) + '</p>' +
+        '<p class="local-tour__destination"><span class="local-tour__pin" aria-hidden="true">' + pinIcon() + '</span>' + esc(tour.destination) + '</p>' +
+        '</div>' +
+        ratingRow +
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
-        '<p class="local-tour__price"><b>' + money(tour.price) + '</b><span>por persona</span></p>' +
+        (includes ? '<ul class="local-tour__tags">' + includes + '</ul>' : '') +
         '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
-        '<span class="local-tour__chip">' + (tour.source === 'civitatis' ? 'Precio real' : 'Precio referencial') + '</span>' +
-        (tour.rating ? '<span class="local-tour__chip">★ ' + Number(tour.rating).toFixed(1) + '</span>' : '') +
+        '<span class="local-tour__chip' + (tour.source === 'civitatis' ? ' is-real' : '') + '">' + (tour.source === 'civitatis' ? 'Precio real' : 'Precio referencial') + '</span>' +
         (tour.freeCancellation ? '<span class="local-tour__chip">Cancelación gratis</span>' : '') + '</div>' +
-        (tour.url ? '<div class="local-tour__foot"><a class="local-tour__book" href="' + esc(tour.url) + '" target="_blank" rel="noopener noreferrer">Reservar en Civitatis</a></div>' : '') +
         '<div class="local-tour__foot">' +
+        '<p class="local-tour__price"><span class="local-tour__from">Desde</span><b>' + money(tour.price) + '</b><span>por persona</span></p>' +
+        '<div class="local-tour__actions">' +
         '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">' +
         '<svg class="local-tour__info-ico" ' + icoBase + ' aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4h.01"/></svg>' +
-        '<span>Ver detalle</span></button>' +
-        '</div></div></article>';
+        '<span>Detalles</span></button>' +
+        (tour.url
+          ? '<a class="local-tour__book" href="' + esc(tour.url) + '" target="_blank" rel="noopener noreferrer">Ver en Civitatis</a>'
+          : '<button type="button" class="local-tour__book" data-tour-reserve>Reservar</button>') +
+        '</div></div></div></article>';
     }).join('');
     var creditList = Object.keys(creditos).map(function (url) {
       var c = creditos[url];
@@ -1906,12 +1935,362 @@
     if (/3 horas|2 horas|3 a 4 horas/.test(t)) return 'Unas horas';
     return 'Consultar duración';
   }
+  /* Estrellas de la card. Se dibujan con el color de la marca en vez de con un
+     caracter: el glifo de estrella cambia de ancho entre fuentes y los cinco no
+     quedaban alineados. 'full' es la parte entera y 'half' la mitad, que es como
+     se lee un 4.6 sin tener que redondearlo a 5. */
+  function starsRow(value) {
+    var n = Math.max(0, Math.min(5, Number(value) || 0));
+    var full = Math.floor(n);
+    var half = n - full >= 0.25 && n - full < 0.75 ? 1 : 0;
+    var empty = 5 - full - half;
+    function star(fill) {
+      return '<svg class="local-tour__star is-' + fill + '" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<defs><linearGradient id="cs-star-' + fill + '"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs>' +
+        '<path fill="url(#cs-star-' + fill + ')" d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.7l5.8-.8z"/></svg>';
+    }
+    var out = '';
+    for (var i = 0; i < full; i++) out += star('full');
+    if (half) out += star('half');
+    for (var j = 0; j < empty; j++) out += star('empty');
+    return out;
+  }
+  function pinIcon() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+  }
+  /* Las etiquetas "Incluye / No incluye" de la ficha. Se sacan del texto de
+     detalle que ya esta cargado, con las mismo criterio que tourDuration(): si
+     la frase no esta, no se inventa la etiqueta. Una lista vacia es mejor que
+     un "Incluye: traslados" que no se sabe si incluye. */
+  function tourIncludes(tour) {
+    var raw = String((tour && tour.details) || '');
+    if (!raw.trim()) return '';
+    var incluye = [], noIncluye = [];
+    // Corte en el primer "no incluye"/"no son": ahi empieza la lista negativa.
+    var corte = raw.search(/no (incluye|son|comprende|est[áa]n)/i);
+    var posPart = corte >= 0 ? raw.slice(0, corte) : raw;
+    var negPart = corte >= 0 ? raw.slice(corte) : '';
+    function phrases(text) {
+      return text.split(/[.;]\s*/).map(function (s) { return s.trim(); })
+        .filter(function (s) { return s.length > 3 && s.length < 70; });
+    }
+    phrases(posPart).forEach(function (s) { if (incluye.length < 3) incluye.push(s); });
+    phrases(negPart).forEach(function (s) { if (noIncluye.length < 2) noIncluye.push(s); });
+    function tag(ok, text) {
+      return '<li class="local-tour__tag' + (ok ? '' : ' is-no') + '">' +
+        '<span class="local-tour__tag-ico" aria-hidden="true">' + (ok ? checkIcon() : crossIcon()) + '</span>' +
+        esc(text.charAt(0).toUpperCase() + text.slice(1)) + '</li>';
+    }
+    var out = incluye.map(function (t) { return tag(true, t); }).join('') +
+      noIncluye.map(function (t) { return tag(false, t.replace(/^no (incluye|son|comprende|est[áa]n)\s*/i, '')); }).join('');
+    return out;
+  }
+  function checkIcon() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>';
+  }
+  function crossIcon() {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  }
   function openTourDetailModal(button) {
     var modal = $('#booking-modal');
     if (!modal || !button) return;
     modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span><h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2><p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p><div class="tour-detail-modal__copy"><p>' + esc(button.getAttribute('data-tour-detail')) + '</p></div><p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
+  }
+  /* ---------- Checkout de actividades ----------
+     Tres pasos dentro de #booking-modal, con el mismo reparto que usa el
+     checkout de Jorge Martinez: un resumen del viaje fijo a la izquierda y el
+     paso que toca a la derecha, con los botones al pie.
+
+     Lo que NO hace es cobrar. Este proyecto no emite ni cobra nada: los vuelos
+     salen a Google Flights y los tours se confirman por WhatsApp con el
+     operador. Por eso el paso 2 pregunta con que medio de pago le resulta
+     comodo a la persona, no cobra, y el paso 3 manda la solicitud armada. El
+     aviso esta escrito en la pantalla y no es una nota al pie: un boton que
+     dice "Pagar" y no cobra seria la misma mentira que el README prohibe para
+     los precios. */
+  var CHECKOUT_STEPS = [
+    { id: 'datos', label: 'Datos del viaje', hint: 'Quién viaja y a dónde avisarle' },
+    { id: 'pago', label: 'Método de pago', hint: 'Cómo te resulta más cómodo pagar' },
+    { id: 'listo', label: 'Revisar y confirmar', hint: 'Último control antes de enviar' }
+  ];
+  /* Los medios de pago son los de Uruguay primero, porque es el mercado al que
+     le habla la app. El campo `kind` separa banco de tarjeta solo para el
+     subtitulo: la lista se ve igual en los dos casos. `mark` es el texto de la
+     marca y se pinta con CSS, no con un logo: los logotipos de los bancos son
+     marcas registradas y subirlos al repo sin permiso es justo el problema que
+     el README ya se tomo con las fotos de los tours. */
+  var CHECKOUT_PAYMENTS = [
+    { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f' },
+    { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000' },
+    { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481' },
+    { id: 'scotiabank', label: 'Scotiabank', kind: 'Transferencia bancaria', mark: 'Scotiabank', brand: '#ec111a' },
+    { id: 'bandes', label: 'Bandes', kind: 'Transferencia bancaria', mark: 'BANDES', brand: '#00a551' },
+    { id: 'oca', label: 'OCA', kind: 'Transferencia bancaria', mark: 'OCA', brand: '#e30613' },
+    { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71' },
+    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b' },
+    { id: 'amex', label: 'American Express', kind: 'Tarjeta de crédito', mark: 'AMEX', brand: '#006fcf' }
+  ];
+  var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
+  var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
+  var CHECKOUT_COUNTRIES = ['Uruguay', 'Argentina', 'Brasil', 'Chile', 'Paraguay', 'España', 'Otro'];
+  // Se recuerda entre aperturas: recargar el formulario entero cada vez que se
+  // vuelve de un paso seria un castigo. No se guarda en disco ni sale del
+  // navegador.
+  var checkoutState = { step: 0, form: {}, payment: '' };
+  function checkoutTours() {
+    return (detailState && detailState.selectedTours) || [];
+  }
+  function checkoutTotals() {
+    var tours = checkoutTours();
+    var toursTotal = tours.reduce(function (sum, t) { return sum + (Number(t.price) || 0); }, 0);
+    var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
+    // El precio de cada tour es por persona. Multiplicar por pax es lo que hace
+    // que "por persona" y el total del checkout no se contradigan.
+    var total = toursTotal * pax;
+    return { pax: pax, tours: tours, unitTotal: toursTotal, total: total, perPerson: tours.length ? toursTotal : 0 };
+  }
+  /* El resumen lateral. Se vuelve a pintar en cada paso porque el total cambia
+     cuando se agrega o saca una actividad desde el panel, y la grilla de pagos
+     puede abrir y cerrar sin cambiar nada: un resumen que queda viejo es peor
+     que no tenerlo. */
+  function checkoutAside() {
+    var t = checkoutTotals();
+    var meta = (detailState && detailState.meta) || {};
+    var destName = (meta.dest && meta.dest.name) || 'tu destino';
+    var nights = Math.max(1, Number(meta.nights) || 1);
+    var cover = (meta.dest && meta.dest.photo) || '';
+    var rows = t.tours.length
+      ? t.tours.map(function (tour) {
+          return '<li class="checkout-aside__row"><span class="checkout-aside__row-name">' + esc(tour.title) + '</span>' +
+            '<b>' + money(tour.price) + '</b></li>';
+        }).join('')
+      : '<li class="checkout-aside__row is-empty">Todavía no elegiste actividades.</li>';
+    return '<aside class="checkout-aside">' +
+      '<div class="checkout-aside__media">' +
+      (cover ? '<img src="' + esc(cover) + '" alt="" loading="lazy">' : '') +
+      '<span class="checkout-aside__name">' + esc(destName) + '</span>' +
+      '</div>' +
+      '<div class="checkout-aside__total"><span>' + (t.tours.length ? 'Precio final' : 'Total estimado') + '</span>' +
+      '<strong>' + money(t.total) + '</strong>' +
+      '<em>' + (t.pax === 1 ? money(t.perPerson) + ' por persona' : money(Math.round(t.perPerson)) + ' por persona · ' + t.pax + ' personas') + '</em></div>' +
+      '<ul class="checkout-aside__facts">' +
+      '<li><span>Salís de</span><b>' + esc(originCityName(meta.origin || (S && S.origin))) + '</b></li>' +
+      '<li><span>Fechas</span><b>' + esc(storyDateRange(meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</b></li>' +
+      '<li><span>Viajeros</span><b>' + t.pax + (t.pax === 1 ? ' adulto' : ' adultos') + '</b></li>' +
+      '<li><span>Actividades</span><b>' + t.tours.length + (t.tours.length === 1 ? ' elegida' : ' elegidas') + '</b></li>' +
+      '</ul>' +
+      '<div class="checkout-aside__list"><h3>Tu viaje</h3><ul class="checkout-aside__rows">' + rows + '</ul>' +
+      '<p class="checkout-aside__total-line"><span>Total actividades</span><b>' + money(t.total) + '</b></p></div>' +
+      '</aside>';
+  }
+  function checkoutStepper() {
+    var current = checkoutState.step;
+    return '<ol class="checkout-steps" aria-label="Pasos de la reserva">' +
+      CHECKOUT_STEPS.map(function (step, i) {
+        var state = i < current ? 'is-done' : (i === current ? 'is-current' : '');
+        return '<li class="checkout-steps__step ' + state + '">' +
+          '<span class="checkout-steps__num" aria-hidden="true">' + (i < current ? '✓' : (i + 1)) + '</span>' +
+          '<span class="checkout-steps__text"><b>' + esc(step.label) + '</b><em>' + esc(step.hint) + '</em></span>' +
+          '</li>';
+      }).join('') + '</ol>';
+  }
+  /* Un campo. El label va arriba y el asterisco se separa del texto para que el
+     placeholder no tenga que repetir el nombre del campo. */
+  function checkoutField(cfg) {
+    var id = 'ck-' + cfg.name;
+    var common = 'id="' + id + '" name="' + esc(cfg.name) + '"' + (cfg.required ? ' required' : '') +
+      (cfg.value ? ' value="' + esc(cfg.value) + '"' : '') +
+      (cfg.placeholder ? ' placeholder="' + esc(cfg.placeholder) + '"' : '') +
+      (cfg.autocomplete ? ' autocomplete="' + esc(cfg.autocomplete) + '"' : '') +
+      (cfg.maxlength ? ' maxlength="' + cfg.maxlength + '"' : '');
+    var control = cfg.type === 'select'
+      ? '<select ' + common + '>' + cfg.options.map(function (o) {
+          return '<option value="' + esc(o) + '"' + (o === cfg.value ? ' selected' : '') + '>' + esc(o) + '</option>';
+        }).join('') + '</select>'
+      : '<input ' + common + ' type="' + (cfg.type || 'text') + '">';
+    return '<div class="checkout-field' + (cfg.wide ? ' is-wide' : '') + '">' +
+      '<label for="' + id + '">' + esc(cfg.label) + (cfg.required ? '<span class="checkout-field__req">*</span>' : '') + '</label>' +
+      control + '</div>';
+  }
+  function checkoutPanelDatos() {
+    var f = checkoutState.form;
+    return '<div class="checkout-panel" data-checkout-panel="datos">' +
+      '<h2 class="checkout-panel__title">Contanos quién viaja</h2>' +
+      '<p class="checkout-panel__lead">Con esto el operador te confirma disponibilidad y el punto de encuentro.</p>' +
+      '<div class="checkout-grid">' +
+      checkoutField({ name: 'titulo', label: 'Título', type: 'select', options: CHECKOUT_TITLES, value: f.titulo || CHECKOUT_TITLES[0] }) +
+      checkoutField({ name: 'nombre', label: 'Nombre', required: true, value: f.nombre, autocomplete: 'given-name' }) +
+      checkoutField({ name: 'apellido', label: 'Apellido', required: true, value: f.apellido, autocomplete: 'family-name' }) +
+      checkoutField({ name: 'docTipo', label: 'Tipo de documento', type: 'select', options: CHECKOUT_DOC_TYPES, value: f.docTipo || CHECKOUT_DOC_TYPES[0] }) +
+      checkoutField({ name: 'docNumero', label: 'Número de documento', required: true, value: f.docNumero, placeholder: 'Solo números', maxlength: 12 }) +
+      checkoutField({ name: 'nacimiento', label: 'Fecha de nacimiento', type: 'date', value: f.nacimiento }) +
+      checkoutField({ name: 'nacionalidad', label: 'Nacionalidad', type: 'select', options: CHECKOUT_COUNTRIES, value: f.nacionalidad || CHECKOUT_COUNTRIES[0] }) +
+      checkoutField({ name: 'email', label: 'Correo electrónico', type: 'email', required: true, value: f.email, placeholder: 'nombre@correo.com', autocomplete: 'email' }) +
+      checkoutField({ name: 'telefono', label: 'Teléfono', type: 'tel', required: true, value: f.telefono, placeholder: '09X XXX XXX', autocomplete: 'tel' }) +
+      checkoutField({ name: 'direccion', label: 'Dirección', value: f.direccion, autocomplete: 'street-address', wide: true }) +
+      '</div>' +
+      '<p class="checkout-legal">Usamos estos datos solo para coordinar la reserva. No los guardamos en el servidor.</p>' +
+      '</div>';
+  }
+  function checkoutPanelPago() {
+    var t = checkoutTotals();
+    return '<div class="checkout-panel" data-checkout-panel="pago">' +
+      '<h2 class="checkout-panel__title">¿Cómo te queda más cómodo pagar?</h2>' +
+      '<p class="checkout-panel__lead">Elegí tu medio de pago para que el operador te diga por dónde hacerlo.</p>' +
+      '<p class="checkout-notice"><strong>Aún no procesamos pagos.</strong> Esta app cotiza y coordina, pero no cobra: la reserva se confirma con el operador y recién ahí se paga.</p>' +
+      '<div class="checkout-pay-grid" role="radiogroup" aria-label="Medio de pago">' +
+      CHECKOUT_PAYMENTS.map(function (p) {
+        var checked = checkoutState.payment === p.id;
+        return '<label class="checkout-pay' + (checked ? ' is-selected' : '') + '" data-checkout-pay>' +
+          '<input type="radio" name="checkout-payment" value="' + esc(p.id) + '"' + (checked ? ' checked' : '') + '>' +
+          '<span class="checkout-pay__mark" style="--pay-brand:' + p.brand + '">' + esc(p.mark) + '</span>' +
+          '<span class="checkout-pay__kind">' + esc(p.kind) + '</span>' +
+          '<span class="checkout-pay__check" aria-hidden="true">' + checkIcon() + '</span>' +
+          '</label>';
+      }).join('') + '</div>' +
+      '<p class="checkout-pay-total">Total a confirmar: <b>' + money(t.total) + '</b> · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '</p>' +
+      '</div>';
+  }
+  function checkoutPanelListo() {
+    var t = checkoutTotals();
+    var f = checkoutState.form;
+    var pay = CHECKOUT_PAYMENTS.filter(function (p) { return p.id === checkoutState.payment; })[0];
+    var meta = (detailState && detailState.meta) || {};
+    var destino = (meta.dest && meta.dest.name) || 'tu destino';
+    function dataRow(label, value) {
+      return '<li><span>' + esc(label) + '</span><b>' + esc(value || '—') + '</b></li>';
+    }
+    return '<div class="checkout-panel" data-checkout-panel="listo">' +
+      '<h2 class="checkout-panel__title">Revisá y confirmá</h2>' +
+      '<p class="checkout-panel__lead">Te vamos a mandar esta solicitud por WhatsApp. Ahí te confirman disponibilidad, horario y el valor final.</p>' +
+      '<div class="checkout-recap">' +
+      '<h3>Viajero</h3><ul>' +
+      dataRow('Nombre', ((f.titulo ? f.titulo + ' ' : '') + (f.nombre || '') + ' ' + (f.apellido || '')).trim()) +
+      dataRow('Documento', ((f.docTipo || '') + (f.docNumero ? ' ' + f.docNumero : '')).trim()) +
+      dataRow('Contacto', [f.email, f.telefono].filter(Boolean).join(' · ')) +
+      '</ul>' +
+      '<h3>Actividades en ' + esc(destino) + '</h3><ul>' +
+      (t.tours.length
+        ? t.tours.map(function (tour) { return dataRow(tour.title, money(tour.price) + ' c/u'); }).join('')
+        : '<li class="is-empty"><span>Sin actividades elegidas</span></li>') +
+      '</ul>' +
+      '<h3>Pago</h3><ul>' + dataRow('Medio de pago', pay ? pay.label : 'Sin elegir') + '</ul>' +
+      '<p class="checkout-recap__total"><span>Total a confirmar</span><b>' + money(t.total) + '</b></p>' +
+      '</div></div>';
+  }
+  /* El pie cambia por paso: el primero y el segundo avanzan, el tercero manda.
+     En el primero "Cancelar" cierra y en los otros tambien, para que haya una
+     sola forma de salir y no dos botones con nombres parecidos. */
+  function checkoutActions() {
+    var step = checkoutState.step;
+    var last = step === CHECKOUT_STEPS.length - 1;
+    var back = step > 0
+      ? '<button type="button" class="checkout-btn checkout-btn--ghost" data-checkout-back>Volver</button>'
+      : '<button type="button" class="checkout-btn checkout-btn--ghost" data-close-booking>Cancelar</button>';
+    var next = last
+      ? '<button type="button" class="checkout-btn checkout-btn--pay" data-checkout-confirm>' + brandIcon('whatsapp') + '<span>Confirmar por WhatsApp</span></button>'
+      : '<button type="button" class="checkout-btn checkout-btn--next" data-checkout-next>Continuar</button>';
+    return '<footer class="checkout-actions">' + back + next + '</footer>';
+  }
+  function renderCheckout() {
+    var modal = $('#booking-modal');
+    if (!modal) return;
+    var step = checkoutState.step;
+    var panels = [checkoutPanelDatos, checkoutPanelPago, checkoutPanelListo];
+    var t = checkoutTotals();
+    if (!t.tours.length) {
+      // Un checkout sin actividades no tiene nada que confirmar. Si se llega
+      // igual (por ejemplo con el teclado en el boton de una card que se
+      // deseleccionó), se vuelve a la lista en vez de mostrar un formulario
+      // que va a fallar en el ultimo paso.
+      closeBookingForm();
+      return;
+    }
+    modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title">' +
+      '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
+      '<div class="checkout-layout">' +
+      checkoutAside() +
+      '<div class="checkout-main">' +
+      '<header class="checkout-main__head"><h2 id="checkout-title">' + esc((detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'Reservar actividades') + '</h2>' +
+      checkoutStepper() + '</header>' +
+      panels[step]() +
+      checkoutActions() +
+      '</div></div></div>';
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    var first = modal.querySelector('.checkout-panel input, .checkout-panel select');
+    // El foco entra al panel solo en el primer paso. En los otros moverlo
+    // llevaria el foco a un radio ya elegido, que es un salto que nadie pidio.
+    if (first && step === 0) { try { first.focus({ preventScroll: true }); } catch (e) { /* foco no critico */ } }
+  }
+  function openToursCheckout() {
+    if (!detailState || !detailState.meta) return;
+    if (!checkoutTours().length) return;
+    checkoutState.step = 0;
+    renderCheckout();
+  }
+  /* Guarda lo escrito antes de validar el paso. Sin esto, el navegador valida
+     los campos del paso anterior que ya no estan en el DOM y no puede focusing
+     el que falta. */
+  function readCheckoutForm() {
+    var modal = $('#booking-modal');
+    if (!modal) return true;
+    var form = modal.querySelector('.checkout-panel');
+    if (!form) return true;
+    var inputs = form.querySelectorAll('input[name], select[name]');
+    var pending = null;
+    for (var i = 0; i < inputs.length; i++) {
+      var el = inputs[i];
+      checkoutState.form[el.name] = el.value;
+      // El primer control invalido se busca aca, porque al vaciar el panel ese
+      // nodo ya no existe y no se puede llamar reportValidity sobre el.
+      if (!pending && !el.checkValidity()) pending = el;
+    }
+    return pending;
+  }
+  function gotoCheckoutStep(step) {
+    if (step < 0 || step >= CHECKOUT_STEPS.length) return;
+    checkoutState.step = step;
+    renderCheckout();
+    var dialog = $('#booking-modal .checkout-dialog');
+    if (dialog) dialog.scrollTop = 0;
+  }
+  /* El mensaje que sale por WhatsApp. Se arma con los datos que la persona
+     escribio y con el total que ya viene del modelo: si alguien copia un numero
+     a mano para mandarlo, hay chances de que se equivoque. */
+  function checkoutWhatsappUrl() {
+    var t = checkoutTotals();
+    if (!t.tours.length || !detailState || !detailState.meta) return null;
+    var f = checkoutState.form;
+    var meta = detailState.meta;
+    var pay = CHECKOUT_PAYMENTS.filter(function (p) { return p.id === checkoutState.payment; })[0];
+    var nombre = ((f.titulo ? f.titulo + ' ' : '') + (f.nombre || '') + ' ' + (f.apellido || '')).trim();
+    var lineas = t.tours.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ' por persona)'; }).join('\n');
+    var ref = checkoutRef();
+    var message =
+      'Hola, quiero reservar actividades para mi viaje a ' + meta.dest.name + '.\n\n' +
+      'Pedido ' + ref + '\n' +
+      'Viajero: ' + nombre + '\n' +
+      'Documento: ' + (f.docTipo || '') + (f.docNumero ? ' ' + f.docNumero : '') + '\n' +
+      'Contacto: ' + [f.email, f.telefono].filter(Boolean).join(' · ') + '\n' +
+      'Fechas: ' + meta.dep + ' al ' + meta.ret + ' · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '\n\n' +
+      'Actividades:\n' + lineas + '\n\n' +
+      'Total de actividades: ' + money(t.total) + '\n' +
+      'Medio de pago preferido: ' + (pay ? pay.label : 'a coordinar') + '\n\n' +
+      '¿Me confirman disponibilidad, horario y el valor final?';
+    return 'https://wa.me/?text=' + encodeURIComponent(message);
+  }
+  /* Referencia corta y legible. No es un comprobante de nada: sirve para que el
+     operador y la persona en el mismo chat puedan nombrar el pedido. */
+  function checkoutRef() {
+    if (checkoutState.ref) return checkoutState.ref;
+    var hoy = new Date();
+    var sello = String(hoy.getFullYear()).slice(2) + String(hoy.getMonth() + 1).padStart(2, '0') + String(hoy.getDate()).padStart(2, '0');
+    var rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    checkoutState.ref = 'CS-' + sello + '-' + rand;
+    return checkoutState.ref;
   }
   var hotelRequestId = 0;
   // La búsqueda de vuelos necesita el mismo control de identidad que la de
@@ -1962,14 +2341,14 @@
       meta.hotelsLoaded = true;
       // El token de la Guia Secreta. El server solo lo firma si entre los
       // hoteles de este destino hay alguno con precio real de Booking, o sea
-      // algo reservable: sin eso no hay guia que abrir. Se guarda y se pide
-      // aca, sin esperar, para que la guia llegue junto con la seccion.
-      if (data.guiaToken) {
-        guardarTokenGuia(meta.dest.key, data.guiaToken);
-        (function (destKey, m) {
-          pedirGuiaSecreta(destKey, function (g) { pintarGuiaEnDetalle(g, m); });
-        })(meta.dest.key, meta);
-      }
+      // algo reservable: sin eso no hay guia que abrir.
+      //
+      // Se GUARDA pero no se pide la guia. Antes se pedia aca y se pintaba
+      // sola, con lo que cualquier persona que buscaba hoteles de un destino
+      // leia la guia entera sin tocar nada. Ahora la guia se pide cuando la
+      // persona toca "Ver disponibilidad" de un hotel, que es el gesto de
+      // reservar: verGuiaPorReserva() la busca y la pinta en el momento.
+      if (data.guiaToken) guardarTokenGuia(meta.dest.key, data.guiaToken);
       var current = document.querySelector('.hotel-options-loading');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
       // Cada parada toma su recomendado. Con querySelector pelado solo se
@@ -3522,6 +3901,48 @@
   function guiaYaDe(destKey) {
     return (guiaCache[destKey] && guiaCache[destKey].guia) || null;
   }
+  /* El candado de la Guia Secreta. Se dibuja en vez de no dibujar nada para que
+     se vea que la seccion existe: es el premio de llegar hasta el hotel, y sin
+     la promesa a la vista no hay nada que empuje a tocar "Ver disponibilidad".
+     No lleva contenido de la guia ni una parte: si alguien la lee con el
+     verificador de elementos, encuentra el mismo texto que la pagina de cierre. */
+  function guiaCandado(meta) {
+    var destino = meta && meta.dest ? meta.dest.name : '';
+    return '<section class="guia-lock" data-guia-lock aria-labelledby="guia-lock-title">' +
+      '<div class="guia-lock__head"><span class="guia-lock__eyebrow">GUIA SECRETA</span>' +
+      '<h2 id="guia-lock-title">La Guia Secreta de ' + esc(destino) + '</h2></div>' +
+      '<p class="guia-lock__texto">Donde comer por menos plata, que el menu turistico no cuenta, y los precios que de verdad se pagan. ' +
+      'Se abre cuando elegis un hotel y toc&aacute; <b>Ver disponibilidad</b>: es el contenido que va con el hotel, no con el buscador.</p>' +
+      '<p class="guia-lock__nota">No se abre sola. Buscar un destino no la descarga.</p>' +
+      '</section>';
+  }
+  /* Se pide la guia recien cuando la persona toca la reserva de un hotel. Ese
+     gesto es el que el server quiere como prueba: no "busco este destino" sino
+     "estoy por reservar aca". */
+  function abrirGuiaPorReserva(destKey) {
+    if (!destKey || !detailState || !detailState.meta) return;
+    var meta = detailState.meta;
+    if (!meta.dest || meta.dest.key !== destKey) return;
+    pedirGuiaSecreta(destKey, function (guia) {
+      if (!guia) return;
+      // Reemplaza el candado en el lugar que ya ocupaba. Si el render inicial
+      // ya habia pintado la guia (porque ya estaba en cache de una sesion
+      // anterior), pintarGuiaEnDetalle() no hace nada y el candado no esta.
+      var lock = document.querySelector('[data-guia-lock]');
+      if (lock && lock.parentElement) {
+        var envoltura = document.createElement('div');
+        envoltura.innerHTML = guiaSecreta(meta, guia);
+        var seccion = envoltura.firstElementChild;
+        if (seccion) {
+          seccion.setAttribute('data-guia-destino', meta.dest.key);
+          lock.parentElement.replaceChild(seccion, lock);
+          if (seccion.scrollIntoView) seccion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        return;
+      }
+      pintarGuiaEnDetalle(guia, meta);
+    });
+  }
   /* Cuando la guia llega, se inserta sola al final de la vista de detalle.
      No se re-pinta la pagina entera: eso recalcularia el presupuesto y
      saltarian todos los numeros, que es justo lo que el usuario esta
@@ -3545,10 +3966,15 @@
   }
   function guiaSecreta(meta, guia) {
     if (!meta || !meta.dest) return '';
-    // Sin guia no se muestra nada. Antes el fallback era la de Florianopolis,
-    // asi que Gramado veia "busca prato executivo en el centro de
-    // Florianopolis". Y sin token tampoco: la guia no se pide y no se dibuja.
-    if (!guia) return '';
+    // Sin guia se dibuja el CANDADO, no nada. La Guia Secreta es el premio de
+    // llegar hasta el hotel: si la seccion no esta, nadie sabe que existe y no
+    // hay nada que empuje a tocar "Ver disponibilidad". Con el candado a la vista
+    // la oferta se entiende sola.
+    //
+    // El fallback de antes era la guia de Florianopolis, asi que Gramado veia
+    // "busca prato executivo en el centro de Florianopolis": un destino
+    // mostrando los consejos de otro.
+    if (!guia) return guiaCandado(meta);
 
     var foodPerDay = Math.round(Number(detailState && detailState.foodPerDay) || 0);
 
@@ -5929,9 +6355,27 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         repintarPresupuestoDiario();
         return;
       }
-      var bookTours = e.target.closest('[data-book-selected-tours]');
+      var bookTours = e.target.closest('[data-book-selected-tours], [data-tour-reserve]');
       if (bookTours && detailState) {
         e.preventDefault(); e.stopPropagation();
+        // El boton "Reservar" de una card abre el checkout. Antes este handler
+        // mandaba directo a WhatsApp con toursWhatsappUrl(), pero no habia
+        // ningun elemento con [data-book-selected-tours] en el markup: el
+        // handler existia, el boton no. Ademas saltaba los datos del viajero,
+        // que es justo lo que el operador necesita para confirmar.
+        if (bookTours.hasAttribute('data-tour-reserve')) {
+          // Reservar una card que todavia no esta elegida la agrega primero: el
+          // checkout solo confirma lo que ya esta en el total del viaje, y
+          // confirmar algo que no suma seria incoherent.
+          var card = bookTours.closest('[data-tour-card]');
+          var choice = card && card.querySelector('[data-tour-choice]');
+          if (choice && !choice.checked) {
+            choice.checked = true;
+            choice.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          openToursCheckout();
+          return;
+        }
         var toursUrl = toursWhatsappUrl(detailState);
         if (!toursUrl) return;
         window.open(toursUrl, '_blank', 'noopener,noreferrer');
@@ -5941,6 +6385,53 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       if (tourDetail) {
         e.preventDefault(); e.stopPropagation();
         openTourDetailModal(tourDetail);
+        return;
+      }
+      // Checkout: los botones de los tres pasos viven dentro de #booking-modal
+      // y se atienden aca porque el contenedor ya tiene su propio listener para
+      // cerrar. El clic nunca llega al toggle de la card porque estan separados
+      // en el DOM.
+      var ckNext = e.target.closest('[data-checkout-next]');
+      if (ckNext) {
+        e.preventDefault();
+        var invalid = readCheckoutForm();
+        if (invalid) { invalid.reportValidity(); invalid.focus(); return; }
+        gotoCheckoutStep(checkoutState.step + 1);
+        return;
+      }
+      var ckBack = e.target.closest('[data-checkout-back]');
+      if (ckBack) {
+        e.preventDefault();
+        readCheckoutForm();
+        gotoCheckoutStep(checkoutState.step - 1);
+        return;
+      }
+      var ckConfirm = e.target.closest('[data-checkout-confirm]');
+      if (ckConfirm) {
+        e.preventDefault();
+        // El paso 2 no tiene un <form>, asi que su validacion no la hace el
+        // navegador. Acu se comprueba a mano y con un mensaje en la pantalla,
+        // no con un alert.
+        if (!checkoutState.payment) {
+          var notice = $('#booking-modal .checkout-panel');
+          if (notice) {
+            var warn = notice.querySelector('[data-checkout-pay-error]');
+            if (!warn) {
+              warn = document.createElement('p');
+              warn.className = 'checkout-error';
+              warn.setAttribute('data-checkout-pay-error', '');
+              warn.textContent = 'Elegí un medio de pago para continuar.';
+              notice.appendChild(warn);
+            }
+            warn.scrollIntoView({ block: 'nearest' });
+          }
+          return;
+        }
+        var checkoutUrl = checkoutWhatsappUrl();
+        if (!checkoutUrl) { closeBookingForm(); return; }
+        ckConfirm.disabled = true;
+        window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+        closeBookingForm();
         return;
       }
       // La tarjeta completa es la zona sensible: el checkbox va estirado con
@@ -5966,6 +6457,14 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       // desmarca solo, y uno nuevo llega con checked=true en los dos casos. La
       // diferencia la hace el total de la carta activa: si coincide con el que
       // está elegido, el clic es el segundo y deselecciona.
+      // La Guia Secreta se abre con este clic: es el gesto de reservar. Va antes
+      // del manejo de la card porque el selector de abajo excluye .hotel-booking
+      // a proposito (dentro de un <label> el enlace no se puede pulsar bien), y
+      // por lo tanto esta rama es la unica que lo ve.
+      var reservar = e.target.closest && e.target.closest('.hotel-booking');
+      if (reservar && detailState && detailState.meta && detailState.meta.dest) {
+        abrirGuiaPorReserva(detailState.meta.dest.key);
+      }
       var hotelCard = e.target.closest('[data-hotel-option]');
       var hotelChoice = e.target.closest('[data-hotel-total]');
       if ((hotelCard || hotelChoice) && !e.target.closest('.hotel-booking,.hotel-similar')) {
@@ -6243,6 +6742,20 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       }
     });
     $('#booking-modal').addEventListener('change', function (e) {
+      // Medio de pago del checkout. Se marca la tarjeta con la clase en vez de
+      // repintar el paso entero: el repintado tiraria abajo el scroll y
+      // perderia el foco del teclado a mitad de la eleccion.
+      var payInput = e.target.closest('[name="checkout-payment"]');
+      if (payInput) {
+        checkoutState.payment = payInput.value;
+        var labels = $('#booking-modal').querySelectorAll('[data-checkout-pay]');
+        for (var i = 0; i < labels.length; i++) {
+          labels[i].classList.toggle('is-selected', labels[i].contains(payInput));
+        }
+        var warn = $('#booking-modal').querySelector('[data-checkout-pay-error]');
+        if (warn) warn.remove();
+        return;
+      }
       var radio = e.target.closest('[name="transfer-pickup"]');
       if (radio) {
         if (!detailState || !detailState.transferWizard) return;

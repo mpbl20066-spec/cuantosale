@@ -1276,12 +1276,21 @@ async function cotizar(req, res, url) {
   // grupo regional comparten aeropuerto, asi que el vuelo redondo alcanza y no
   // hay que modelar open-jaw. Si alguna combinacion futura no lo cumpliera,
   // comboTransfer traeria las dos claves y habria que avisarlo.
+  //
+  // El hub se resuelve con airportFor() y NO con DEST[].iata, que son cosas
+  // distintas: DEST.rio.iata es 'RIO' (Santos Dumont, solo domestico) mientras
+  // que el vuelo desde Montevideo se compra con GIG (Galeao), que es lo que
+  // AIR_DESTINATIONS dice. Comparando los iata del modelo, todo par de Rio
+  // daba sharedHub false y pintaba "las dos paradas no comparten aeropuerto:
+  // este precio asume un vuelo redondo a RIO" — un aviso falso sobre un vuelo
+  // que en realidad ya se cotizó por GIG.
   const firstCfg = model.DEST[v.S.dest], secondCfg = secondKey ? model.DEST[secondKey] : null;
-  const sharedHub = firstCfg && secondCfg && firstCfg.iata === secondCfg.iata;
+  const firstHub = airportFor(v.S.dest), secondHub = secondKey ? airportFor(secondKey) : '';
+  const sharedHub = !!(firstCfg && secondCfg && firstHub && secondHub && firstHub === secondHub);
   const multiStay = comboTransfer && recommendedProposal ? {
-    hub: { name: firstCfg.region || firstCfg.name, iata: firstCfg.iata },
-    sharedHub: !!sharedHub,
-    hubWarning: sharedHub ? null : 'Las dos paradas no comparten aeropuerto: este precio asume un vuelo redondo a ' + firstCfg.iata + '.',
+    hub: { name: firstCfg.region || firstCfg.name, iata: firstHub || firstCfg.iata },
+    sharedHub: sharedHub,
+    hubWarning: sharedHub ? null : 'Las dos paradas no comparten aeropuerto: este precio asume un vuelo redondo a ' + (firstHub || firstCfg.iata) + '.',
     stays: [
       { key: v.S.dest, name: firstCfg.name, nightlyRates: model.lodgingNightlyCosts(v.S.dest, recommendedProposal.ti, v.dep, v.nights) },
       { key: secondKey, name: secondCfg.name, nightlyRates: model.lodgingNightlyCosts(secondKey, recommendedProposal.ti, v.dep, v.nights) }

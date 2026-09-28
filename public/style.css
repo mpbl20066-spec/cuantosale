@@ -558,8 +558,14 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .food-guide-head>span{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:14px;background:var(--cel-soft);font-size:22px}
 .food-guide h2{font-family:var(--fh);font-weight:700;font-size:32px;line-height:1;margin:0}
 .food-guide-head p{margin:5px 0 0;color:var(--ink2);font-size:13px}
-/* Guia Secreta. Los datos salen de public/guias.js y el markup lo arma
+/* Guia Secreta. Los datos ya no salen de public/guias.js (esa se movio a
+   lib/guias.js y el server la pide con token por /api/guia); el markup lo arma
    guiaSecreta() en public/app.js. */
+.guia-lock{margin-top:22px;padding:22px;border:1.5px dashed var(--control-line);border-radius:20px;background:var(--surface)}
+.guia-lock__eyebrow{color:var(--ink2);font-size:10px;font-weight:800;letter-spacing:.12em}
+.guia-lock__head h2{margin:5px 0 10px;font-family:var(--fh);font-size:30px;line-height:1.05}
+.guia-lock__texto{margin:0;color:var(--ink);font-size:13.5px;line-height:1.55}
+.guia-lock__nota{margin:10px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.45}
 .guia-bloque{margin-top:26px}
 .guia-bloque:first-child{margin-top:18px}
 .guia-bloque__titulo{font-family:var(--fh);font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0 0 11px;padding-bottom:8px;border-bottom:1px solid var(--line)}
