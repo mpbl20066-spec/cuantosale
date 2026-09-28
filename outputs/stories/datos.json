@@ -1,0 +1,1456 @@
+{
+ "generado": "2026-09-27T23:35:30.882Z",
+ "consulta": "dep=2026-09-28&ret=2026-09-30&pax=2&budget=3000&style=eq&origin=MVD&dest=fln&hotel_type=intermedio",
+ "meta": {
+  "dep": "2026-09-28",
+  "ret": "2026-09-30",
+  "pax": 2,
+  "budget": 3000,
+  "style": "eq",
+  "origin": "MVD",
+  "mode": "estimated",
+  "costBasis": {
+   "foodPerDay": {
+    "eco": 14,
+    "medio": 28,
+    "confort": 55
+   },
+   "localTransportPerDay": {
+    "standard": 9,
+    "beachSpecific": 12
+   },
+   "beachSpecificDestinations": [
+    "buz",
+    "pip"
+   ],
+   "destinationCosts": {
+    "poa": {
+     "transport": {
+      "eco": 13,
+      "confort": 30
+     },
+     "food": {
+      "casual": 27,
+      "moderado": 50,
+      "gourmet": 90
+     }
+    },
+    "rio": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 28,
+      "moderado": 55,
+      "gourmet": 95
+     }
+    },
+    "sao": {
+     "transport": {
+      "eco": 22,
+      "confort": 48
+     },
+     "food": {
+      "casual": 35,
+      "moderado": 70,
+      "gourmet": 125
+     }
+    },
+    "curitiba": {
+     "transport": {
+      "eco": 22,
+      "confort": 48
+     },
+     "food": {
+      "casual": 35,
+      "moderado": 70,
+      "gourmet": 125
+     }
+    },
+    "bue": {
+     "transport": {
+      "eco": 18,
+      "confort": 38
+     },
+     "food": {
+      "casual": 30,
+      "moderado": 58,
+      "gourmet": 100
+     }
+    },
+    "bho": {
+     "transport": {
+      "eco": 14,
+      "confort": 28
+     },
+     "food": {
+      "casual": 22,
+      "moderado": 42,
+      "gourmet": 75
+     }
+    },
+    "ssa": {
+     "transport": {
+      "eco": 14,
+      "confort": 30
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 48,
+      "gourmet": 85
+     }
+    },
+    "for": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 32,
+      "moderado": 60,
+      "gourmet": 100
+     }
+    },
+    "nat": {
+     "transport": {
+      "eco": 15,
+      "confort": 32
+     },
+     "food": {
+      "casual": 26,
+      "moderado": 48,
+      "gourmet": 80
+     }
+    },
+    "mcz": {
+     "transport": {
+      "eco": 14,
+      "confort": 30
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 48,
+      "gourmet": 80
+     }
+    },
+    "rec": {
+     "transport": {
+      "eco": 14,
+      "confort": 30
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 48,
+      "gourmet": 82
+     }
+    },
+    "joaopessoa": {
+     "transport": {
+      "eco": 14,
+      "confort": 30
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 48,
+      "gourmet": 82
+     }
+    },
+    "porto": {
+     "transport": {
+      "eco": 15,
+      "confort": 32
+     },
+     "food": {
+      "casual": 28,
+      "moderado": 52,
+      "gourmet": 85
+     }
+    },
+    "maragogi": {
+     "transport": {
+      "eco": 13,
+      "confort": 28
+     },
+     "food": {
+      "casual": 24,
+      "moderado": 45,
+      "gourmet": 75
+     }
+    },
+    "jericoacoara": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 32,
+      "moderado": 60,
+      "gourmet": 100
+     }
+    },
+    "buz": {
+     "transport": {
+      "eco": 18,
+      "confort": 38
+     },
+     "food": {
+      "casual": 32,
+      "moderado": 60,
+      "gourmet": 100
+     }
+    },
+    "arraial": {
+     "transport": {
+      "eco": 14,
+      "confort": 28
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 45,
+      "gourmet": 75
+     }
+    },
+    "cabo": {
+     "transport": {
+      "eco": 12,
+      "confort": 25
+     },
+     "food": {
+      "casual": 22,
+      "moderado": 40,
+      "gourmet": 70
+     }
+    },
+    "angra": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 32,
+      "moderado": 60,
+      "gourmet": 105
+     }
+    },
+    "paraty": {
+     "transport": {
+      "eco": 12,
+      "confort": 26
+     },
+     "food": {
+      "casual": 24,
+      "moderado": 44,
+      "gourmet": 75
+     }
+    },
+    "ilha": {
+     "transport": {
+      "eco": 10,
+      "confort": 30
+     },
+     "food": {
+      "casual": 28,
+      "moderado": 52,
+      "gourmet": 90
+     }
+    },
+    "ubatuba": {
+     "transport": {
+      "eco": 15,
+      "confort": 32
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 48,
+      "gourmet": 80
+     }
+    },
+    "ilhabela": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 30,
+      "moderado": 58,
+      "gourmet": 95
+     }
+    },
+    "fln": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 28,
+      "moderado": 55,
+      "gourmet": 90
+     }
+    },
+    "bcm": {
+     "transport": {
+      "eco": 15,
+      "confort": 32
+     },
+     "food": {
+      "casual": 26,
+      "moderado": 50,
+      "gourmet": 85
+     }
+    },
+    "camboriu": {
+     "transport": {
+      "eco": 15,
+      "confort": 32
+     },
+     "food": {
+      "casual": 26,
+      "moderado": 50,
+      "gourmet": 85
+     }
+    },
+    "bombinhas": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 28,
+      "moderado": 55,
+      "gourmet": 90
+     }
+    },
+    "rosa": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 28,
+      "moderado": 55,
+      "gourmet": 90
+     }
+    },
+    "itapema": {
+     "transport": {
+      "eco": 15,
+      "confort": 32
+     },
+     "food": {
+      "casual": 28,
+      "moderado": 54,
+      "gourmet": 92
+     }
+    },
+    "garopaba": {
+     "transport": {
+      "eco": 15,
+      "confort": 33
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 50,
+      "gourmet": 86
+     }
+    },
+    "ferrugem": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 26,
+      "moderado": 50,
+      "gourmet": 88
+     }
+    },
+    "picarras": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 26,
+      "moderado": 50,
+      "gourmet": 88
+     }
+    },
+    "gram": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 32,
+      "moderado": 62,
+      "gourmet": 110
+     }
+    },
+    "canela": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 32,
+      "moderado": 62,
+      "gourmet": 110
+     }
+    },
+    "torres": {
+     "transport": {
+      "eco": 15,
+      "confort": 33
+     },
+     "food": {
+      "casual": 26,
+      "moderado": 50,
+      "gourmet": 88
+     }
+    },
+    "canoa": {
+     "transport": {
+      "eco": 14,
+      "confort": 31
+     },
+     "food": {
+      "casual": 25,
+      "moderado": 48,
+      "gourmet": 85
+     }
+    },
+    "igu": {
+     "transport": {
+      "eco": 12,
+      "confort": 25
+     },
+     "food": {
+      "casual": 22,
+      "moderado": 40,
+      "gourmet": 70
+     }
+    },
+    "fernando": {
+     "transport": {
+      "eco": 30,
+      "confort": 75
+     },
+     "food": {
+      "casual": 50,
+      "moderado": 95,
+      "gourmet": 160
+     }
+    },
+    "pip": {
+     "transport": {
+      "eco": 16,
+      "confort": 35
+     },
+     "food": {
+      "casual": 30,
+      "moderado": 55,
+      "gourmet": 90
+     }
+    },
+    "trancoso": {
+     "transport": {
+      "eco": 20,
+      "confort": 45
+     },
+     "food": {
+      "casual": 38,
+      "moderado": 70,
+      "gourmet": 120
+     }
+    },
+    "morro": {
+     "transport": {
+      "eco": 20,
+      "confort": 45
+     },
+     "food": {
+      "casual": 38,
+      "moderado": 70,
+      "gourmet": 120
+     }
+    },
+    "portoseguro": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 33,
+      "moderado": 60,
+      "gourmet": 105
+     }
+    },
+    "itacare": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 32,
+      "moderado": 58,
+      "gourmet": 100
+     }
+    },
+    "forte": {
+     "transport": {
+      "eco": 18,
+      "confort": 40
+     },
+     "food": {
+      "casual": 34,
+      "moderado": 62,
+      "gourmet": 105
+     }
+    }
+   }
+  },
+  "roadtrip": {
+   "distanceKm": 1245,
+   "roundTripKm": 2490,
+   "kmPerLiter": 12,
+   "liters": 207.5,
+   "fuelPriceUsd": 1.2,
+   "fuelUsd": 249,
+   "tollsUsd": 42,
+   "totalUsd": 291,
+   "hours": 17,
+   "source": "estimación de ruta ida y vuelta, combustible en Brasil y peajes"
+  },
+  "officialTransfer": {
+   "destino": "fln",
+   "nombre": "Florianópolis",
+   "sinTabla": false,
+   "iata": "FLN",
+   "modo": "car",
+   "km": 17,
+   "soloPrivado": false,
+   "compartido": 20,
+   "privado": 30,
+   "appRideUsd": null,
+   "precioPorPasajero": 20,
+   "monto": 40,
+   "personas": 2,
+   "banco": {
+    "bank": "Prex",
+    "account": "361333",
+    "holder": "Maria Paola Batista"
+   }
+  },
+  "localTransport": {
+   "style": "eq",
+   "destination": "fln",
+   "baseDailyUsd": 16,
+   "multiplier": 1,
+   "nights": 2,
+   "totalDays": 3,
+   "pax": 2,
+   "dailyUsd": 16,
+   "totalUsd": 96
+  }
+ },
+ "destinos": [
+  {
+   "key": "bue",
+   "name": "Buenos Aires",
+   "region": "Buenos Aires",
+   "country": "Argentina",
+   "total": 1021,
+   "pp": 511,
+   "parts": {
+    "pasajes": 504,
+    "bus": 0,
+    "alojamiento": 169,
+    "comidas": 232,
+    "local": 72,
+    "traslados": 44,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Panorama_9_de_Julio_y_el_Obelisco.jpg/960px-Panorama_9_de_Julio_y_el_Obelisco.jpg"
+  },
+  {
+   "key": "igu",
+   "name": "Foz de Iguazú",
+   "region": "Paraná",
+   "country": "Brasil",
+   "total": 1175,
+   "pp": 588,
+   "parts": {
+    "pasajes": 783,
+    "bus": 0,
+    "alojamiento": 141,
+    "comidas": 160,
+    "local": 48,
+    "traslados": 43,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg/1920px-Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg"
+  },
+  {
+   "key": "canoa",
+   "name": "Capão da Canoa",
+   "region": "Río Grande do Sul",
+   "country": "Brasil",
+   "total": 1237,
+   "pp": 619,
+   "parts": {
+    "pasajes": 808,
+    "bus": 0,
+    "alojamiento": 138,
+    "comidas": 192,
+    "local": 56,
+    "traslados": 43,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Farol_litoral_Capao_da_Canoa_Praia_Ara%C3%A7a.jpg/1280px-Farol_litoral_Capao_da_Canoa_Praia_Ara%C3%A7a.jpg"
+  },
+  {
+   "key": "torres",
+   "name": "Torres",
+   "region": "Río Grande do Sul",
+   "country": "Brasil",
+   "total": 1241,
+   "pp": 621,
+   "parts": {
+    "pasajes": 792,
+    "bus": 0,
+    "alojamiento": 145,
+    "comidas": 200,
+    "local": 60,
+    "traslados": 44,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg/1280px-Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg"
+  },
+  {
+   "key": "canela",
+   "name": "Canela",
+   "region": "Río Grande do Sul",
+   "country": "Brasil",
+   "total": 1313,
+   "pp": 657,
+   "parts": {
+    "pasajes": 799,
+    "bus": 0,
+    "alojamiento": 150,
+    "comidas": 248,
+    "local": 72,
+    "traslados": 44,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Catedral_Nossa_Senhora_de_Lourdes.JPG/1920px-Catedral_Nossa_Senhora_de_Lourdes.JPG"
+  },
+  {
+   "key": "gram",
+   "name": "Gramado",
+   "region": "Río Grande do Sul",
+   "country": "Brasil",
+   "total": 1329,
+   "pp": 665,
+   "parts": {
+    "pasajes": 813,
+    "bus": 0,
+    "alojamiento": 152,
+    "comidas": 248,
+    "local": 72,
+    "traslados": 44,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/GRAMADO_-_RIO_GRANDE_DO_SUL_-_BRASIL_BY_AUGUSTO_JANISCKI_JUNIOR_%2814281900109%29.jpg/1920px-GRAMADO_-_RIO_GRANDE_DO_SUL_-_BRASIL_BY_AUGUSTO_JANISCKI_JUNIOR_%2814281900109%29.jpg"
+  },
+  {
+   "key": "itapema",
+   "name": "Itapema",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1337,
+   "pp": 669,
+   "parts": {
+    "pasajes": 850,
+    "bus": 0,
+    "alojamiento": 162,
+    "comidas": 216,
+    "local": 60,
+    "traslados": 49,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Praia_de_Itapema_-_Orla.jpg/1280px-Praia_de_Itapema_-_Orla.jpg"
+  },
+  {
+   "key": "bcm",
+   "name": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1349,
+   "pp": 675,
+   "parts": {
+    "pasajes": 887,
+    "bus": 0,
+    "alojamiento": 154,
+    "comidas": 200,
+    "local": 60,
+    "traslados": 48,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG/1920px-Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG"
+  },
+  {
+   "key": "cabo",
+   "name": "Cabo Frio",
+   "region": "Río de Janeiro",
+   "country": "Brasil",
+   "total": 1363,
+   "pp": 682,
+   "parts": {
+    "pasajes": 949,
+    "bus": 0,
+    "alojamiento": 157,
+    "comidas": 160,
+    "local": 48,
+    "traslados": 49,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Cabo_Frio_%28344068854%29.jpg/1920px-Cabo_Frio_%28344068854%29.jpg"
+  },
+  {
+   "key": "fln",
+   "name": "Florianópolis",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1408,
+   "pp": 704,
+   "parts": {
+    "pasajes": 922,
+    "bus": 0,
+    "alojamiento": 154,
+    "comidas": 220,
+    "local": 64,
+    "traslados": 48,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg/1920px-Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg"
+  },
+  {
+   "key": "garopaba",
+   "name": "Garopaba",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1439,
+   "pp": 720,
+   "parts": {
+    "pasajes": 972,
+    "bus": 0,
+    "alojamiento": 160,
+    "comidas": 200,
+    "local": 60,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/7/79/Garopaba_Beach_July_2009.JPG"
+  },
+  {
+   "key": "arraial",
+   "name": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "country": "Brasil",
+   "total": 1449,
+   "pp": 725,
+   "parts": {
+    "pasajes": 1004,
+    "bus": 0,
+    "alojamiento": 160,
+    "comidas": 180,
+    "local": 56,
+    "traslados": 49,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Oven_S_Beach_Arraial_Do_Cabo_%28247765557%29.jpeg/1920px-Oven_S_Beach_Arraial_Do_Cabo_%28247765557%29.jpeg"
+  },
+  {
+   "key": "ferrugem",
+   "name": "Ferrugem",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1462,
+   "pp": 731,
+   "parts": {
+    "pasajes": 992,
+    "bus": 0,
+    "alojamiento": 160,
+    "comidas": 200,
+    "local": 64,
+    "traslados": 46,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Nascer_na_Praia_da_Ferrugem.JPG/1280px-Nascer_na_Praia_da_Ferrugem.JPG"
+  },
+  {
+   "key": "bombinhas",
+   "name": "Bombinhas",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1475,
+   "pp": 738,
+   "parts": {
+    "pasajes": 978,
+    "bus": 0,
+    "alojamiento": 166,
+    "comidas": 220,
+    "local": 64,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg/1920px-Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg"
+  },
+  {
+   "key": "picarras",
+   "name": "Piçarras",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1506,
+   "pp": 753,
+   "parts": {
+    "pasajes": 1037,
+    "bus": 0,
+    "alojamiento": 159,
+    "comidas": 200,
+    "local": 64,
+    "traslados": 46,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Praia_de_Pi%C3%A7arras.jpg/1280px-Praia_de_Pi%C3%A7arras.jpg"
+  },
+  {
+   "key": "ubatuba",
+   "name": "Ubatuba",
+   "region": "São Paulo",
+   "country": "Brasil",
+   "total": 1513,
+   "pp": 757,
+   "parts": {
+    "pasajes": 1034,
+    "bus": 0,
+    "alojamiento": 177,
+    "comidas": 192,
+    "local": 60,
+    "traslados": 50,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6b/20230725_084402.jpg"
+  },
+  {
+   "key": "paraty",
+   "name": "Paraty",
+   "region": "Río de Janeiro",
+   "country": "Brasil",
+   "total": 1522,
+   "pp": 761,
+   "parts": {
+    "pasajes": 1079,
+    "bus": 0,
+    "alojamiento": 170,
+    "comidas": 176,
+    "local": 48,
+    "traslados": 49,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Paraty_05.JPG/1920px-Paraty_05.JPG"
+  },
+  {
+   "key": "rosa",
+   "name": "Praia do Rosa",
+   "region": "Santa Catarina",
+   "country": "Brasil",
+   "total": 1522,
+   "pp": 761,
+   "parts": {
+    "pasajes": 1026,
+    "bus": 0,
+    "alojamiento": 165,
+    "comidas": 220,
+    "local": 64,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Praia_do_Rosa%2C_SC.JPG/1920px-Praia_do_Rosa%2C_SC.JPG"
+  },
+  {
+   "key": "ilha",
+   "name": "Ilha Grande",
+   "region": "Río de Janeiro",
+   "country": "Brasil",
+   "total": 1543,
+   "pp": 772,
+   "parts": {
+    "pasajes": 1072,
+    "bus": 0,
+    "alojamiento": 173,
+    "comidas": 208,
+    "local": 40,
+    "traslados": 50,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/c/ca/View_Ilha_Grande.JPG"
+  },
+  {
+   "key": "buz",
+   "name": "Búzios",
+   "region": "Río de Janeiro",
+   "country": "Brasil",
+   "total": 1605,
+   "pp": 803,
+   "parts": {
+    "pasajes": 1065,
+    "bus": 0,
+    "alojamiento": 178,
+    "comidas": 240,
+    "local": 72,
+    "traslados": 50,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg/1920px-Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg"
+  },
+  {
+   "key": "rio",
+   "name": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "country": "Brasil",
+   "total": 1608,
+   "pp": 804,
+   "parts": {
+    "pasajes": 1107,
+    "bus": 0,
+    "alojamiento": 164,
+    "comidas": 220,
+    "local": 64,
+    "traslados": 53,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Cidade_Maravilhosa.jpg/1920px-Cidade_Maravilhosa.jpg"
+  },
+  {
+   "key": "ssa",
+   "name": "Salvador de Bahía",
+   "region": "Bahía",
+   "country": "Brasil",
+   "total": 1612,
+   "pp": 806,
+   "parts": {
+    "pasajes": 1178,
+    "bus": 0,
+    "alojamiento": 138,
+    "comidas": 192,
+    "local": 56,
+    "traslados": 48,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Salvador_BA_%28cropped%29_2.jpg/1920px-Salvador_BA_%28cropped%29_2.jpg"
+  },
+  {
+   "key": "angra",
+   "name": "Angra dos Reis",
+   "region": "Río de Janeiro",
+   "country": "Brasil",
+   "total": 1625,
+   "pp": 813,
+   "parts": {
+    "pasajes": 1091,
+    "bus": 0,
+    "alojamiento": 172,
+    "comidas": 240,
+    "local": 72,
+    "traslados": 50,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Angra_dos_Reis%2C_Brazil_2018_116.jpg/1920px-Angra_dos_Reis%2C_Brazil_2018_116.jpg"
+  },
+  {
+   "key": "ilhabela",
+   "name": "Ilhabela",
+   "region": "São Paulo",
+   "country": "Brasil",
+   "total": 1641,
+   "pp": 821,
+   "parts": {
+    "pasajes": 1118,
+    "bus": 0,
+    "alojamiento": 176,
+    "comidas": 232,
+    "local": 64,
+    "traslados": 51,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Vista_do_Pico_do_Baepi.jpg/1920px-Vista_do_Pico_do_Baepi.jpg"
+  },
+  {
+   "key": "porto",
+   "name": "Porto de Galinhas",
+   "region": "Pernambuco",
+   "country": "Brasil",
+   "total": 1646,
+   "pp": 823,
+   "parts": {
+    "pasajes": 1168,
+    "bus": 0,
+    "alojamiento": 162,
+    "comidas": 208,
+    "local": 60,
+    "traslados": 48,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a6/Porto_de_Galinhas_piscinas_naturais.jpg"
+  },
+  {
+   "key": "maragogi",
+   "name": "Maragogi",
+   "region": "Alagoas",
+   "country": "Brasil",
+   "total": 1666,
+   "pp": 833,
+   "parts": {
+    "pasajes": 1235,
+    "bus": 0,
+    "alojamiento": 152,
+    "comidas": 180,
+    "local": 52,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/6/63/Sargentinho_-_Piscinas_naturais_de_Maragogi_-_Alagoas.jpg"
+  },
+  {
+   "key": "mcz",
+   "name": "Maceió",
+   "region": "Alagoas",
+   "country": "Brasil",
+   "total": 1716,
+   "pp": 858,
+   "parts": {
+    "pasajes": 1280,
+    "bus": 0,
+    "alojamiento": 143,
+    "comidas": 192,
+    "local": 56,
+    "traslados": 45,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Praia_de_Ipioca_-_Macei%C3%B3_-_Alagoas_%2811394603505%29.jpg"
+  },
+  {
+   "key": "joaopessoa",
+   "name": "João Pessoa",
+   "region": "Paraíba",
+   "country": "Brasil",
+   "total": 1738,
+   "pp": 869,
+   "parts": {
+    "pasajes": 1301,
+    "bus": 0,
+    "alojamiento": 143,
+    "comidas": 192,
+    "local": 56,
+    "traslados": 46,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg/1280px-Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg"
+  },
+  {
+   "key": "forte",
+   "name": "Praia do Forte",
+   "region": "Bahía",
+   "country": "Brasil",
+   "total": 1748,
+   "pp": 874,
+   "parts": {
+    "pasajes": 1222,
+    "bus": 0,
+    "alojamiento": 159,
+    "comidas": 248,
+    "local": 72,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg/1280px-Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg"
+  },
+  {
+   "key": "nat",
+   "name": "Natal",
+   "region": "Río Grande do Norte",
+   "country": "Brasil",
+   "total": 1748,
+   "pp": 874,
+   "parts": {
+    "pasajes": 1306,
+    "bus": 0,
+    "alojamiento": 145,
+    "comidas": 192,
+    "local": 60,
+    "traslados": 45,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg/1920px-Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg"
+  },
+  {
+   "key": "itacare",
+   "name": "Itacaré",
+   "region": "Bahía",
+   "country": "Brasil",
+   "total": 1758,
+   "pp": 879,
+   "parts": {
+    "pasajes": 1245,
+    "bus": 0,
+    "alojamiento": 162,
+    "comidas": 232,
+    "local": 72,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg/1280px-Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg"
+  },
+  {
+   "key": "rec",
+   "name": "Recife",
+   "region": "Pernambuco",
+   "country": "Brasil",
+   "total": 1796,
+   "pp": 898,
+   "parts": {
+    "pasajes": 1355,
+    "bus": 0,
+    "alojamiento": 145,
+    "comidas": 192,
+    "local": 56,
+    "traslados": 48,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg"
+  },
+  {
+   "key": "morro",
+   "name": "Morro de São Paulo",
+   "region": "Bahía",
+   "country": "Brasil",
+   "total": 1814,
+   "pp": 907,
+   "parts": {
+    "pasajes": 1258,
+    "bus": 0,
+    "alojamiento": 149,
+    "comidas": 280,
+    "local": 80,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/MARCIO_FILHO_FAROL_DO_MORRO_MORRO_DE_S%C3%83O_PAULO_BAHIA_%2839166725080%29.jpg/1920px-MARCIO_FILHO_FAROL_DO_MORRO_MORRO_DE_S%C3%83O_PAULO_BAHIA_%2839166725080%29.jpg"
+  },
+  {
+   "key": "pip",
+   "name": "Pipa",
+   "region": "Río Grande do Norte",
+   "country": "Brasil",
+   "total": 1829,
+   "pp": 915,
+   "parts": {
+    "pasajes": 1353,
+    "bus": 0,
+    "alojamiento": 147,
+    "comidas": 220,
+    "local": 64,
+    "traslados": 45,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/PipaBeachView.JPG/1920px-PipaBeachView.JPG"
+  },
+  {
+   "key": "portoseguro",
+   "name": "Porto Seguro",
+   "region": "Bahía",
+   "country": "Brasil",
+   "total": 1864,
+   "pp": 932,
+   "parts": {
+    "pasajes": 1328,
+    "bus": 0,
+    "alojamiento": 177,
+    "comidas": 240,
+    "local": 72,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg/1280px-Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg"
+  },
+  {
+   "key": "for",
+   "name": "Fortaleza / Jericoacoara",
+   "region": "Ceará",
+   "country": "Brasil",
+   "total": 1872,
+   "pp": 936,
+   "parts": {
+    "pasajes": 1366,
+    "bus": 0,
+    "alojamiento": 146,
+    "comidas": 240,
+    "local": 72,
+    "traslados": 48,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/7/73/Fortaleza%2C_Brazil_%284%29_%28cropped%29.jpg"
+  },
+  {
+   "key": "trancoso",
+   "name": "Trancoso / Arraial d’Ajuda",
+   "region": "Bahía",
+   "country": "Brasil",
+   "total": 1875,
+   "pp": 938,
+   "parts": {
+    "pasajes": 1287,
+    "bus": 0,
+    "alojamiento": 181,
+    "comidas": 280,
+    "local": 80,
+    "traslados": 47,
+    "auto": 0,
+    "tours": 0
+   },
+   "title": "Vuelo desde Montevideo + hotel intermedio",
+   "tierDesc": "Hotel 3 estrellas",
+   "fits": true,
+   "foto": true,
+   "fotoUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Trancoso%2C_Porto_Seguro%2C_Bahia_Brazil.jpg"
+  }
+ ],
+ "fotos": {
+  "buz": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg/1920px-Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg",
+  "arraial": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Oven_S_Beach_Arraial_Do_Cabo_%28247765557%29.jpeg/1920px-Oven_S_Beach_Arraial_Do_Cabo_%28247765557%29.jpeg",
+  "cabo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Cabo_Frio_%28344068854%29.jpg/1920px-Cabo_Frio_%28344068854%29.jpg",
+  "ilha": "https://upload.wikimedia.org/wikipedia/commons/c/ca/View_Ilha_Grande.JPG",
+  "paraty": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Paraty_05.JPG/1920px-Paraty_05.JPG",
+  "ilhabela": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Vista_do_Pico_do_Baepi.jpg/1920px-Vista_do_Pico_do_Baepi.jpg",
+  "ubatuba": "https://upload.wikimedia.org/wikipedia/commons/6/6b/20230725_084402.jpg",
+  "rio": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Cidade_Maravilhosa.jpg/1920px-Cidade_Maravilhosa.jpg",
+  "bue": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Panorama_9_de_Julio_y_el_Obelisco.jpg/960px-Panorama_9_de_Julio_y_el_Obelisco.jpg",
+  "angra": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Angra_dos_Reis%2C_Brazil_2018_116.jpg/1920px-Angra_dos_Reis%2C_Brazil_2018_116.jpg",
+  "sao": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Vista_da_Avenida_Paulista_-_Sesc_Avenida_Paulista_por_Rodrigo_Tetsuo_Argenton_%281%29.jpg/1920px-Vista_da_Avenida_Paulista_-_Sesc_Avenida_Paulista_por_Rodrigo_Tetsuo_Argenton_%281%29.jpg",
+  "bho": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Praca_do_Papa%2C_Belo_Horizonte_%28cropped%292.jpg",
+  "curitiba": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Tangu%C3%A1_Curitiba.jpg/1920px-Tangu%C3%A1_Curitiba.jpg",
+  "porto": "https://upload.wikimedia.org/wikipedia/commons/a/a6/Porto_de_Galinhas_piscinas_naturais.jpg",
+  "mcz": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Praia_de_Ipioca_-_Macei%C3%B3_-_Alagoas_%2811394603505%29.jpg",
+  "maragogi": "https://upload.wikimedia.org/wikipedia/commons/6/63/Sargentinho_-_Piscinas_naturais_de_Maragogi_-_Alagoas.jpg",
+  "nat": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg/1920px-Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg",
+  "pip": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/PipaBeachView.JPG/1920px-PipaBeachView.JPG",
+  "trancoso": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Trancoso%2C_Porto_Seguro%2C_Bahia_Brazil.jpg",
+  "ssa": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Salvador_BA_%28cropped%29_2.jpg/1920px-Salvador_BA_%28cropped%29_2.jpg",
+  "for": "https://upload.wikimedia.org/wikipedia/commons/7/73/Fortaleza%2C_Brazil_%284%29_%28cropped%29.jpg",
+  "jericoacoara": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Anderps_067.JPG/1920px-Anderps_067.JPG",
+  "morro": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/MARCIO_FILHO_FAROL_DO_MORRO_MORRO_DE_S%C3%83O_PAULO_BAHIA_%2839166725080%29.jpg/1920px-MARCIO_FILHO_FAROL_DO_MORRO_MORRO_DE_S%C3%83O_PAULO_BAHIA_%2839166725080%29.jpg",
+  "fernando": "https://upload.wikimedia.org/wikipedia/commons/9/91/EDUARDO_MURUCI_-_BAIA_DOS_PORCOS-%28recorte%29.jpg",
+  "fln": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg/1920px-Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg",
+  "camboriu": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d4/Praia_dos_amores.jpg/1920px-Praia_dos_amores.jpg",
+  "bombinhas": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg/1920px-Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg",
+  "rosa": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Praia_do_Rosa%2C_SC.JPG/1920px-Praia_do_Rosa%2C_SC.JPG",
+  "bcm": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG/1920px-Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG",
+  "gram": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/GRAMADO_-_RIO_GRANDE_DO_SUL_-_BRASIL_BY_AUGUSTO_JANISCKI_JUNIOR_%2814281900109%29.jpg/1920px-GRAMADO_-_RIO_GRANDE_DO_SUL_-_BRASIL_BY_AUGUSTO_JANISCKI_JUNIOR_%2814281900109%29.jpg",
+  "canela": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Catedral_Nossa_Senhora_de_Lourdes.JPG/1920px-Catedral_Nossa_Senhora_de_Lourdes.JPG",
+  "igu": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg/1920px-Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg",
+  "rec": "https://upload.wikimedia.org/wikipedia/commons/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg",
+  "poa": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg/1920px-IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg",
+  "portoseguro": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg/1280px-Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg",
+  "itacare": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg/1280px-Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg",
+  "forte": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg/1280px-Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg",
+  "itapema": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Praia_de_Itapema_-_Orla.jpg/1280px-Praia_de_Itapema_-_Orla.jpg",
+  "garopaba": "https://upload.wikimedia.org/wikipedia/commons/7/79/Garopaba_Beach_July_2009.JPG",
+  "ferrugem": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Nascer_na_Praia_da_Ferrugem.JPG/1280px-Nascer_na_Praia_da_Ferrugem.JPG",
+  "picarras": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Praia_de_Pi%C3%A7arras.jpg/1280px-Praia_de_Pi%C3%A7arras.jpg",
+  "torres": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg/1280px-Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg",
+  "canoa": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Farol_litoral_Capao_da_Canoa_Praia_Ara%C3%A7a.jpg/1280px-Farol_litoral_Capao_da_Canoa_Praia_Ara%C3%A7a.jpg",
+  "joaopessoa": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg/1280px-Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg"
+ }
+}

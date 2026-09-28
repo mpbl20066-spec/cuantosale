@@ -1,6 +1,9 @@
-.env
+﻿.env
 # Copia de .env. Tiene las mismas claves que .env: si alguna vez se sube por
 # error, las claves de Booking, Supabase y Travelpayouts quedan expuestas.
 .env.bak
 node_modules
 .DS_Store
+# Fotos de destino que bajan las historias. Son 20 MB de imagenes de Wikimedia
+# que se regeneran con el extractor: no van al repo.
+outputs/stories/fotos/
