@@ -19,6 +19,7 @@
     "pretest": "npm run build:todo",
     "test": "node test.js",
     "test:guias": "node test-guias-humo.js",
+    "test:cache": "node test-serpapi-cache.js",
     "reels": "node outputs/reels/_build/capture.js && node outputs/reels/_build/vo.js && node outputs/reels/_build/build.js"
   },
   "engines": {
