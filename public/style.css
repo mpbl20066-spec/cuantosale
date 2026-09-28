@@ -34,6 +34,11 @@
      resplandor, que no necesitan contraste de borde. */
   --card-sel-border:#B8791B; --card-sel-bg:#FEF7E7;
   --card-sel-glow:0 8px 20px rgba(246,178,27,.20);
+  /* Boton de "elegido" de la ficha de hotel. --card-sel-border es un token de
+     BORDE: con texto blanco encima daba 3.63:1, y un boton de 13px es texto
+     normal (4.5:1). Este es un ambar mas profundo, 5.9:1 con blanco, y el mismo
+     texto del tema oscuro se pone en navy sobre el ambar claro: 7.5:1. */
+  --pick-sel-bg:#8A5A0E; --pick-sel-ink:#FFFFFF;
   --action-bg:#10233E; --action-ink:#FFFFFF; --action-border:transparent;
   --control-bg:#FFFFFF; --control-border:#E2E8F0; --control-hover:#F8FAFC; --control-muted:#64748B; --control-selected:#F8FAFC; --control-selected-ink:#1D4ED8;
   --accent:#F6B21B; --accent-ink:#10233E;
@@ -75,6 +80,7 @@
     --card-bg:#12294A; --card-border:#8B9CB2;
     --card-sel-border:#E8A93B; --card-sel-bg:#33290E;
     --card-sel-glow:0 8px 20px rgba(0,0,0,.45);
+    --pick-sel-bg:#E8A93B; --pick-sel-ink:#10233E;
     /* Mismo bug que las cards, un token mas. --focus:#1B5FA8 es el celeste de
        marca, pensado para un fondo claro. Contra el surface oscuro daba
        2.25:1, por debajo del 3:1 de WCAG 2.4.11 para un anillo de foco, o
@@ -97,6 +103,7 @@
   --card-bg:#12294A; --card-border:#8B9CB2; --card-radius:18px;
   --card-sel-border:#E8A93B; --card-sel-bg:#33290E;
   --card-sel-glow:0 8px 20px rgba(0,0,0,.45);
+  --pick-sel-bg:#E8A93B; --pick-sel-ink:#10233E;
   --focus:#7CB7E8;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
@@ -417,7 +424,21 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* Los bloques del detalle se separan con un margen propio y no con el del
    bloque anterior: asi el ritmo no depende de que haya o no tours. Antes la
    Guía Secreta pegaba a los hoteles en los destinos sin experiencias. */
-.hotel-options{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.hotel-options-head h2{font-family:var(--fh);font-weight:700;font-size:34px;line-height:1;margin:0}.hotel-options-head p{margin:6px 0 16px;color:var(--ink2);font-size:13px}.hotel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+/* El filtro de tipo se apoya a la derecha del titulo en vez de quedar entre el
+   h2 y la nota. En la columna de 760px de la app el titulo, el <select> de 360px
+   y la explicacion quedaban en tres filas y el bloque se leia como tres
+   secciones distintas. */
+.hotel-options{container-type:inline-size;container-name:hoteles;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05)}
+.hotel-options-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 20px;margin-bottom:16px}
+.hotel-options-head__text{flex:1 1 300px;min-width:0}
+.hotel-options-head h2{margin:0;font-family:var(--fh);font-size:clamp(24px,3vw,32px);font-weight:700;line-height:1.1}
+.hotel-options-head p{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
+/* auto-fill con piso de 420px, el mismo criterio que .local-tours__grid. La
+   pagina vive en una columna de 760px, asi que aqui sale UNA ficha por fila y no
+   tres de 220px: a 220px el nombre se partia en tres lineas y la foto de 160px
+   de alto quedaba mas ancha que el texto. Tomando el ancho de la seccion como
+   unidad, el mismo bloque sirve en el celu sin reglas de tanto corte. */
+.hotel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}
 /* ---------- viaje combinado: un grupo de hoteles por parada ----------
    Los dos grupos van apilados, no en columnas: cada uno lleva el nombre de su
    ciudad arriba y tres cards de 3 columnas abajo. Side by side con dos rejillas
@@ -428,34 +449,105 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-group__title{display:flex;align-items:baseline;gap:9px;margin:0;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
 .hotel-group__title b{flex:none;padding:3px 8px;border-radius:999px;background:var(--cel-soft);color:var(--cel);font-size:11px;font-weight:800;letter-spacing:0}
 .hotel-group__empty{margin:0 0 8px;color:var(--ink2);font-size:13px}
-.hotel-option{display:flex;flex-direction:column;background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:var(--card-radius);padding:16px;box-shadow:0 3px 10px rgba(16,35,62,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;overflow:hidden}.hotel-option img{display:block;width:100%;height:160px;object-fit:cover;border-radius:12px}.hotel-option:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(16,35,62,.13)}/* "Recomendado" NO es "elegido". Este selector pintaba la card entera con el
-   mismo borde y el mismo fondo que el estado de elegido, así que el hotel que
-   sugería el servidor y el que la persona eligió se veían idénticos: no había
-   forma de saber cuál tenías reservado. El marco y el fondo son solo del
-   estado elegido; la sugerencia se comunica con el badge, que ya dice
-   "Recomendado". */
-.hotel-option.recommended{box-shadow:0 4px 14px rgba(16,35,62,.10)}.hotel-badge{align-self:flex-start;border-radius:99px;padding:5px 9px;background:var(--cel-soft);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.04em}/* El badge de "Recomendado" ya no lleva anillo: solo ese lo tenía, y las tres
-   cards quedaban con formatos distintos arriba ("Recomendado" con un aro azul,
-   "Buena opción" y "Alternativa" sin aro) para decir exactamente lo mismo.
-   El texto del badge ya dice cuál es cuál; el aro no aportaba nada. */.hotel-option h3{margin:14px 0 5px;font-size:17px;line-height:1.2}.hotel-description{margin:0 0 6px;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-detail{min-height:40px;margin:0;color:var(--ink2);font-size:12px;line-height:1.4}.hotel-price{display:flex;align-items:baseline;gap:5px;margin-top:16px}.hotel-price small,.hotel-price span{color:var(--ink2);font-size:11px}.hotel-price b{font-family:var(--fh);font-size:32px;line-height:1}.hotel-total{margin-top:6px;font-size:12px}.hotel-booking{display:flex;justify-content:center;align-items:center;min-height:46px;margin-top:16px;border-radius:13px;background:#003580;color:#fff;text-align:center;text-decoration:none;font-size:13px;font-weight:700}.hotel-booking:hover{color:#fff;filter:brightness(1.1)}.hotel-similar{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;font-size:12px}.hotel-similar summary{cursor:pointer;color:var(--ink);font-weight:700}.hotel-similar ul{margin:8px 0 0;padding-left:18px;line-height:1.7}.hotel-similar a{color:var(--cel);text-decoration:none}.breakdown-section{display:block!important}.detail-breakdown{min-height:48px}
-@media (max-width:720px){.hotel-grid{grid-template-columns:1fr}.hotel-detail{min-height:0}.hotel-option.recommended{order:-1}}
+/* ---------- La ficha de un hotel ----------
+   Antes eran tres columnas de 220px dentro de una pagina de 760px, y en 220px
+   no cabia nada: el nombre partido en tres lineas, la fila del precio
+   ("Desde" + cifra de 32px + "por noche" alineadas por la linea base) y dos
+   botones de ancho completo uno debajo del otro compitiendo por el mismo gesto.
+   Ahora la ficha es una fila — foto a la izquierda, texto a la derecha, pie con
+   el precio y las dos acciones — igual que .local-tour de las experiencias de
+   mas abajo, para que las dos secciones de la pagina se lean con la misma
+   grilla.
+
+   Mismo bloque de card elegible que .local-tour y .daily-budget__option: fondo,
+   borde, radio y estado de elegido salen de los tokens compartidos. */
+.hotel-option{position:relative;display:grid;grid-template-columns:clamp(120px,32%,232px) minmax(0,1fr);grid-template-rows:auto auto auto;min-width:0;overflow:hidden;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease}
+.hotel-option:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(16,35,62,.12)}
+/* "Recomendado" NO es "elegido", asi que el marco y el fondo son solo del estado
+   elegido (ver el bloque de :has mas abajo). La sugerencia del servidor se
+   comunica con el badge, que ya dice cual es cual. */
+/* La foto ocupa la primera columna de las TRES filas, asi que llega hasta el
+   borde de abajo de la ficha. Dentro del <label> — como estaba — dejaba un
+   escalon de blanco del alto del pie de precio y acciones. */
+.hotel-image-wrap{grid-column:1;grid-row:1/-1;position:relative;min-height:124px;overflow:hidden;background:var(--bg)}
+.hotel-image{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover}
+.hotel-image-empty{display:grid;place-items:center;padding:12px}
+.hotel-image-empty>span{color:var(--ink2);font-size:11px;font-weight:700;line-height:1.4;text-align:center}
+.hotel-option__pick{grid-column:2;grid-row:1;display:flex;flex-direction:column;min-width:0;cursor:pointer}
+.hotel-body{display:flex;flex-direction:column;min-width:0;padding:15px 16px 0}
+.hotel-name{margin:0;color:var(--ink);font-family:var(--fh);font-size:21px;font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+/* La descripcion de Booking es un parrafo entero: sin corte, una ficha con
+   descripcion y otra sin ella quedan con el pie a distinta altura y la fila de
+   precios deja de alinearse. Dos lineas alcanzan para decir que ofrece y el
+   resto se lee igual en el sitio. */
+.hotel-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:7px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
+.hotel-detail{margin:9px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.45}
+/* Pie: precio a la izquierda, acciones a la derecha, como .local-tour__foot. El
+   precio va en el pie y no arriba porque el "desde" que se lee primero es el del
+   encabezado de la seccion, y repetirlo en cada ficha pone tres cifras
+   compitiendo antes de que la persona haya leido el nombre. */
+.hotel-foot{grid-column:2;grid-row:2;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding:12px 16px 15px}
+.hotel-price{display:grid;align-content:end;gap:1px;min-width:0;margin:0}
+.hotel-price__from{color:var(--ink2);font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+/* flex-wrap para que "por noche" baje de linea en vez de empujar la ficha: con
+   una cifra de 5 digitos en una moneda cara el bloque no entra en 200px. */
+.hotel-price__line{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;min-width:0}
+.hotel-price__line b{color:var(--ink);font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.05;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hotel-price__line span{color:var(--ink2);font-size:11.5px;white-space:nowrap}
+/* El total va en --ink2 y no en tinta fuerte: es la misma cifra que el precio
+   de la noche, y con las dos en negro la segunda tapaba a la primera. */
+.hotel-total{color:var(--ink2);font-size:11.5px;font-weight:600;line-height:1.4}
+.hotel-actions{display:flex;flex:0 1 auto;min-width:0;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+/* Un solo boton de accion, relleno, con la misma tinta de --action-bg que el
+   resto de la app. El enlace de Booking va al lado, delineado: son dos gestos
+   distintos (elegir aca / mirar alla) y antes los dos eran slabs de ancho
+   completo con el navy de Booking dominating la ficha. */
+.hotel-pick-hint{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:12.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:background .16s ease,color .16s ease}
+.hotel-booking{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1.5px solid var(--control-line);border-radius:12px;background:transparent;color:var(--ink);font-size:12.5px;font-weight:700;white-space:nowrap;text-decoration:none;transition:border-color .16s ease,color .16s ease,background .16s ease}
+.hotel-booking:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
+.hotel-booking:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.hotel-similar{grid-column:2;grid-row:3;margin:0;padding:11px 16px 14px;border-top:1px solid var(--line);font-size:12px}
+.hotel-similar summary{cursor:pointer;color:var(--ink);font-weight:700}
+.hotel-similar summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.hotel-similar ul{margin:8px 0 0;padding-left:18px;line-height:1.7}
+.hotel-similar a{color:var(--cel);text-decoration:none}.breakdown-section{display:block!important}.detail-breakdown{min-height:48px}
+/* Con la seccion angosta el texto de la ficha no llega a 200px: el precio y las
+   dos acciones pasan a ocupar el ancho entero y cada boton toma la mitad. Abajo
+   de 320px de seccion la ficha se apila (foto arriba) porque una columna de
+   120px de foto y 160 de texto no dejan leer ni el nombre. */
+@container hoteles (max-width:340px){
+  .hotel-option{grid-template-columns:minmax(0,1fr)}
+  .hotel-image-wrap{grid-column:1;grid-row:1;min-height:132px}
+  .hotel-option__pick{grid-column:1;grid-row:2}
+  .hotel-foot{grid-column:1;grid-row:3}
+  .hotel-similar{grid-column:1;grid-row:4}
+  .hotel-actions{width:100%}
+  .hotel-pick-hint{flex:1 1 100%}
+  .hotel-booking{flex:1 1 100%}
+}
 /* Selector de tipo de alojamiento. Replica .custom-select__control: mismo alto,
    mismo radio y mismo chevron dibujado con ::after, para que el filtro se lea
-   como parte de la página y no como un select del sistema incrustado. */
-.hotel-type-filter{display:grid;gap:7px;max-width:360px;margin:16px 0 12px}
+   como parte de la página y no como un select del sistema incrustado.
+   Va a la derecha del titulo (ver .hotel-options-head), asi que el ancho es el
+   de un control de formulario, no los 360px que ocupaba cuando estaba solo en
+   su propia fila. */
+.hotel-type-filter{display:grid;gap:7px;flex:0 0 264px;min-width:0;margin:0}
 .hotel-type-filter>span:first-child{font-size:13px;font-weight:700;color:var(--ink)}
 .hotel-type-filter__control{position:relative;display:block;min-width:0}
 .hotel-type-filter__control::after{position:absolute;top:50%;right:19px;width:8px;height:8px;border-right:1.8px solid var(--control-muted);border-bottom:1.8px solid var(--control-muted);content:"";pointer-events:none;transform:translateY(-75%) rotate(45deg)}
 .hotel-type-filter select{display:block;width:100%;min-height:52px;margin:0;padding:0 52px 0 17px;border:1.5px solid var(--control-line);border-radius:14px;background-color:var(--control-bg);box-shadow:0 2px 10px rgba(15,23,42,.04);color:var(--ink);font:500 16px var(--fb);appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}
 .hotel-type-filter select:hover{border-color:var(--control-muted)}
 .hotel-type-filter select:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
-@media (max-width:560px){.hotel-type-filter{max-width:none}}
+/* Contenedor y no media query: lo que decide si el filtro entra al lado del
+   titulo es el ancho de la seccion, no el de la ventana. El bloque de detalle va
+   en una columna de 760px dentro de una pagina que puede ser mas angosta. */
+@container hoteles (max-width:600px){.hotel-type-filter{flex:1 1 100%}}
 /* El radio ya no se ve, pero no se saca del DOM: sigue siendo el control que
-   el teclado tabula, el que hace que un clic en cualquier punto de la card
-   cambie el hotel (la card entera es el label) y el que :has(:checked) mira
-   para pintar el marco, el fondo y el boton "Elegir este hotel". Por eso
-   queda en 1px con opacity 0 y no en display:none, que lo sacaria del
-   recorrido del teclado y dejaria la card sin forma de elegirse con teclado.
+   el teclado tabula, el que hace que un clic en cualquier punto de la ficha
+   cambie el hotel y el que :has(:checked) mira para pintar el marco, el fondo y
+   el boton de accion. Por eso queda en 1px con opacity 0 y no en display:none,
+   que lo sacaria del recorrido del teclado y dejaria la ficha sin forma de
+   elegirse con teclado.
 
    El circulo se habia vuelto a pintar en 1288c80 porque un merge se habia
    comido el commit 561c7bd que lo sacaba. Pero era el UNICO radio visible de
@@ -464,26 +556,43 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    fondo. El hotel era el unico con un punto de ambar adentro de un circulo, y
    se leia como un control de otra familia. Ademas ocupaba justo el lugar donde
    se lee el badge ("Recomendado", "Buena opcion"), que es el dato que si
-   distingue a las tres tarjetas entre si.
+   distingue a las tres fichas entre si.
 
-   position:relative en el wrapper ancla el input de 1px al badge. Sin el, el
-   input se posicionaba contra el ancestro posicionado mas cercano —que puede
-   estar en otra seccion de la pagina— y al tabular el teclado el navegador
-   hacia scroll hasta ahi. */
-.hotel-choice{position:relative;display:flex;align-items:center;cursor:pointer}
-.hotel-choice input{position:absolute;width:1px;height:1px;margin:0;padding:0;opacity:0;pointer-events:none}.hotel-choice .hotel-badge{margin:0}
-/* La card entera es la etiqueta del radio (ver hotelOptions() en app.js): el
-   label envuelve imagen, badge, nombre, descripción y precios, así que no hay
-   que acertarle a una tira de 26px para cambiar de hotel. Los enlaces quedan
-   fuera del label a propósito. */
-.hotel-option__pick{display:flex;flex:1;flex-direction:column;align-items:stretch;cursor:pointer}
+   El badge va sobre la foto, abajo a la izquierda, y es la etiqueta visible del
+   radio. El input de 1px se posiciona contra .hotel-choice, que esta sobre
+   .hotel-option: sin un ancestro posicionado cerca el navegador lo ancla al de
+   otra seccion de la pagina y al tabular hace scroll hasta ahi. */
+.hotel-choice{position:absolute;left:10px;bottom:10px;z-index:2;display:flex;align-items:center;cursor:pointer}
+.hotel-choice input{position:absolute;width:1px;height:1px;margin:0;padding:0;opacity:0;pointer-events:none}
+/* Sobre la foto el badge va en --surface con una sombra, no en --cel-soft: un
+   celeste claro sobre una foto clara no tiene contraste propio y la sombra es
+   lo que lo separa del fondo. */
+.hotel-badge{border-radius:99px;padding:5px 10px;background:var(--surface);color:var(--ink);font-size:10px;font-weight:800;letter-spacing:.05em;line-height:1.2;box-shadow:0 2px 10px rgba(6,18,38,.32)}
+/* El texto de la ficha es la etiqueta del radio (ver hotelOptions() en app.js):
+   nombre, descripción y procedencia del precio. La foto y el pie de precio y
+   acciones quedan FUERA del label a propósito — dentro de un label el enlace de
+   Booking no se puede pulsar con normalidad, y el precio no es parte del nombre
+   de lo que se elige. El clic igual elige: lo atiende el handler de
+   [data-hotel-option], que hace preventDefault y es la única fuente de verdad
+   del estado de la selección. */
 /* No había NINGÚN estado de seleccionado: el único realce era .recommended,
    que es "Recomendado" del servidor, no "lo que elegiste". Un usuario podía
-   cambiar de hotel sin ninguna señal visual de cuál tenía elegido. */
-.hotel-option:has(.hotel-option__pick input:checked){border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--card-sel-border);color:#fff;border-color:var(--card-sel-border)}
+   cambiar de hotel sin ninguna señal visual de cuál tenía elegido.
+   El marco no cambia de grosor al marcar (solo de color) para que la ficha no
+   corra medio pixel al elegirse, que con la foto de una columna se notaba. */
+.hotel-option:has(.hotel-option__pick input:checked){border-color:var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
+/* Elegido se dice con un color propio y no con --card-sel-border: ese token es
+   un BORDE, y con #fff encima daba 3.63:1, debajo del 4.5:1 de WCAG para texto
+   de 13px. El boton va en su propio tono, con 5.9:1 en claro y 7.5:1 en
+   oscuro. */
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--pick-sel-bg);color:var(--pick-sel-ink)}
+/* Los dos textos del boton conviven en el DOM y el estado muestra uno u otro:
+   el de la ficha elegida decia "Elegir este hotel" en relleno, que es pedirle
+   al usuario que elija algo que ya eligio. */
+.hotel-pick-hint__on{display:none}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint__off{display:none}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint__on{display:inline}
 .hotel-option:has(.hotel-option__pick input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
-.hotel-pick-hint{display:block;margin-top:12px;padding:10px 12px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-size:13px;font-weight:700;text-align:center;transition:background .16s ease,color .16s ease,border-color .16s ease}
 /* Resultados de vuelos */
 .flight-search{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.flight-search>div:first-child{display:flex;justify-content:space-between;gap:16px;align-items:center}.flight-search h2{font-family:var(--fh);font-size:34px;line-height:1;margin:0}.flight-search p{margin:5px 0 0;color:var(--ink2);font-size:13px}
 .select-flight{border:0;cursor:pointer;font-weight:700;color:#fff;background:#087E5B;border-radius:14px;transition:transform .18s ease,filter .18s ease}.select-flight:hover{filter:brightness(1.1);transform:translateY(-1px)}.select-flight:disabled{cursor:default;filter:none;transform:none;opacity:.72}
@@ -750,8 +859,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-nearby-note{grid-column:1/-1;margin:0;padding:12px 14px;border-radius:12px;background:var(--cel-soft);color:var(--ink2);font-size:13px}
 .hotel-options-empty{padding:24px}
 .daily-budget__option:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.hotel-skeleton-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}.hotel-skeleton-card{height:290px;border-radius:18px;background:linear-gradient(100deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}.hotel-options-loading .hotel-options-head p{margin-bottom:0}
-@media(max-width:760px){.hotel-skeleton-grid{grid-template-columns:1fr}.hotel-skeleton-card{height:150px}.hotel-skeleton-card:nth-child(n+2){display:none}}
+/* El placeholder tiene la forma de lo que va a aparecer: una ficha por fila, no
+   tres columnas angostas. Antes el shimmer era de 290px, la altura de la card
+   vieja; con la ficha nueva de ~190px la espera se veía descuadrada. */
+.hotel-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}.hotel-skeleton-card{height:186px;border-radius:var(--card-radius);background:linear-gradient(100deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}.hotel-options-loading .hotel-options-head p{margin-bottom:0}
+@media(max-width:560px){.hotel-skeleton-card:nth-child(n+3){display:none}}
 @media(prefers-reduced-motion:reduce){
   /* El archivo tiene 35 transiciones y 7 animaciones, y solo 3 sitios
      respetaban la preferencia del sistema: el resto de los hover con
