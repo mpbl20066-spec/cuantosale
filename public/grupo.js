@@ -412,7 +412,7 @@
   var gastosSinConvertir = [];
   function computeBalances() {
     var balances = {};
-    participantes.forEach(function (p) { balances[p.id] = 0; });
+    participants.forEach(function (p) { balances[p.id] = 0; });
     gastosSinConvertir = [];
     expenses.forEach(function (expense) {
       var splitIds = splitIdsOf(expense);
