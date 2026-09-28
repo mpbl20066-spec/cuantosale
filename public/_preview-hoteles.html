@@ -1,0 +1,64 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preview · Alojamiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css"><style>
+body{background:#F2F6FA;padding:16px 0 40px}
+.pv{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;padding:0 16px}
+.pv__col{background:#fff;padding:8px;border-radius:12px}
+.pv__tag{font:700 11px Poppins,sans-serif;color:#48617F;padding:4px 8px 8px;text-transform:uppercase;letter-spacing:.08em}
+.w760{width:760px;max-width:100%}
+.w430{width:430px;max-width:100%}
+.w390{width:390px;max-width:100%}
+.w360{width:360px;max-width:100%}
+@media (prefers-color-scheme: dark){body{background:#0A1830}}
+</style></head><body>
+<div class="pv">
+  <div class="pv__col w760"><div class="pv__tag">escritorio · 760</div><div id="a"></div></div>
+  <div class="pv__col w430"><div class="pv__tag">tablet / celu apaisado · 430</div><div id="c"></div></div>
+  <div class="pv__col w390"><div class="pv__tag">celular · 390</div><div id="b"></div></div>
+  <div class="pv__col w360"><div class="pv__tag">celular chico · 360</div><div id="d"></div></div>
+</div>
+<script>
+var FOTOS = [
+  'data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 300%27><rect width=%27400%27 height=%27300%27 fill=%27%23235B7C%27/><circle cx=%27120%27 cy=%27110%27 r=%2755%27 fill=%27%23F6B21B%27 opacity=%27.85%27/><rect y=%27210%27 width=%27400%27 height=%2790%27 fill=%27%23173640%27/></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 300%27><rect width=%27400%27 height=%27300%27 fill=%27%23B7743A%27/><rect x=%2740%27 y=%2760%27 width=%27120%27 height=%27180%27 rx=%2712%27 fill=%27%23F3E3CB%27/><rect x=%27220%27 y=%27110%27 width=%27120%27 height=%27130%27 rx=%2712%27 fill=%27%238C5A28%27/></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 300%27><rect width=%27400%27 height=%27300%27 fill=%27%23555A63%27/><rect x=%2760%27 y=%27140%27 width=%27280%27 height=%27110%27 rx=%278%27 fill=%27%23D7DCE3%27/><rect x=%2790%27 y=%27170%27 width=%2780%27 height=%2780%27 fill=%27%239AA9BA%27/></svg>'
+];
+var HOTELES = [
+  { n: 'Casa Joseph', b: 'Recomendado', img: 0, d: 'Hotel boutique a cuatro cuadras de la playa, con pileta climatizada y desayuno incluido para dos personas.', p: '471,93', t: '943,80' },
+  { n: 'El Conquistador Hotel', b: 'Buena opción', img: 1, d: 'Frente a la playa de Muro, con acceso directo a la arena y servicio de habitación todo el día.', p: '448,83', t: '897,61' },
+  { n: 'Obelisco 2', b: 'Alternativa', img: 2, d: '', p: '490,46', t: '980,91' }
+];
+function card(h, i, marcado) {
+  return '<article class="hotel-option' + (i === 0 ? ' recommended' : '') + '" data-hotel-option data-hotel-stop="">' +
+    '<span class="hotel-image-wrap"><img class="hotel-image" src="' + FOTOS[h.img] + '" alt="' + h.n + '"></span>' +
+    '<label class="hotel-option__pick">' +
+    '<span class="hotel-choice"><input type="radio" name="hotel-choice-' + (marcado ? 'a' : 'b') + '" value="' + i + '" data-hotel-total="' + i + '" data-hotel-stop=""' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + h.b + '</span></span>' +
+    '<span class="hotel-body">' +
+    '<h3 class="hotel-name">' + h.n + '</h3>' +
+    (h.d ? '<p class="hotel-description">' + h.d + '</p>' : '') +
+    '<p class="hotel-detail">Precio consultado para 2 noches y 2 viajeros.</p>' +
+    '</span></label>' +
+    '<div class="hotel-foot">' +
+    '<p class="hotel-price"><span class="hotel-price__main"><span class="hotel-price__from">Desde</span><b>R$ ' + h.p + '</b><span class="hotel-price__unit">por noche</span></span>' +
+    '<strong class="hotel-total">R$ ' + h.t + ' total en Booking</strong></p>' +
+    '<div class="hotel-actions">' +
+    '<span class="hotel-pick-hint"><span class="hotel-pick-hint__off">Elegir este hotel</span><span class="hotel-pick-hint__on">Elegido</span></span>' +
+    '<a class="hotel-booking" href="#">Ver disponibilidad ↗</a>' +
+    '</div></div>' +
+    '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul><li><a href="#">Hotel Mar y Sol ↗</a></li><li><a href="#">Pousada do Porto ↗</a></li></ul></details>' +
+    '</article>';
+}
+function grid(marcado) {
+  return '<section class="hotel-options"><div class="hotel-options-head"><div class="hotel-options-head__text"><h2 id="hotel-options-title">Hoteles para viajar intermedio</h2>' +
+    '<p>Hoteles de gama media filtrados por presupuesto por noche. Selecciona una alternativa de R$ 219,28 por noche en Buenos Aires.</p></div>' +
+    '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select><option>Intermedio</option></select></span></label>' +
+    '</div>' +
+    '<div class="hotel-grid">' + HOTELES.map(function (h, i) { return card(h, i, marcado); }).join('') + '</div></section>';
+}
+a.innerHTML = grid(true);
+b.innerHTML = grid(true);
+c.innerHTML = grid(false);
+d.innerHTML = grid(true);
+</script>
+</body></html>

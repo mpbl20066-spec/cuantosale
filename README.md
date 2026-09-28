@@ -100,7 +100,7 @@ Configura en Vercel `BOOKING_API_KEY` y `BOOKING_API_HOST=booking-com15.p.rapida
 | `getSelectedTransferAmount()` | 30 / 150 | repetidos a mano |
 | `transferConfig()` en `server.js` | `OFFICIAL_TRANSFER_PRICE_USD` (35) | por **pasajero** |
 
-Para dos personas el wizard decía 70 y la card decía 30. Y los tres eran iguales para los 44 destinos, lo cual no puede ser: de GIG a Río hay 18 km y de GIG a Búzios hay 174 por la RJ-124.
+Para dos personas el asistente decía 70 y la card decía 30. Y los tres eran iguales para los 44 destinos, lo cual no puede ser: de GIG a Río hay 18 km y de GIG a Búzios hay 174 por la RJ-124.
 
 **La semántica que se fijó**, porque antes estaba mezclada:
 
@@ -135,23 +135,33 @@ El compartido casi no crece con la distancia, y los datos lo confirman: entre GI
 
 La card es horizontal, con la foto a la izquierda y la ficha a la derecha: título, ubicación, estrellas con reseñas (solo si el origen las trae), las etiquetas "Incluye / No incluye" que se sacan del texto de detalle, el precio y las acciones. `tourIncludes()` no inventa: si la frase no está en el detalle, la etiqueta no aparece.
 
-### El checkout de actividades
+### El checkout: actividades y transfer
 
 Reservar abre un checkout de tres pasos dentro de `#booking-modal`, con el mismo reparto de las agencias de viaje: un resumen del viaje fijo a la izquierda (`checkoutAside()`) y el paso a la derecha.
 
+**Es un checkout y dos pedidos.** `checkoutState.kind` dice cuál es: `'tours'` o `'transfer'`. Todo lo demás es el mismo código —el aside, los tres pasos, la grilla de pago, el cierre por WhatsApp— y solo cambian las líneas del resumen, el bloque extra del paso 1 y el texto del mensaje. La alternativa anterior era un asistente de dos pasos propio del transfer, que además no tenía ni una regla de CSS: se veía como texto pelado dentro del modal. Dos flujos para la misma reserva, y el segundo era el que nadie usaba.
+
 | Paso | Qué pide | Función |
 |---|---|---|
-| 1 | Título, nombre, apellido, documento, fecha de nacimiento, nacionalidad, email, teléfono, dirección | `checkoutPanelDatos()` |
+| 1 | Título, nombre, apellido, documento, fecha de nacimiento, nacionalidad, email, teléfono, dirección. Con transfer, además el hotel de destino | `checkoutPanelDatos()` |
 | 2 | Con qué medio de pago le resulta cómodo pagar | `checkoutPanelPago()` |
 | 3 | Recap y confirmación | `checkoutPanelListo()` |
 
 **El paso 2 no cobra y no dice que cobre.** El aviso está escrito en la pantalla, arriba de la grilla de medios de pago, porque un botón que dice "Pagar" y no paga es la misma mentira que el README prohíbe para los precios. `CHECKOUT_PAYMENTS` lista los bancos uruguayos (BROU, Santander, BBVA, Scotiabank, Bandes, OCA) y tres tarjetas; el paso 3 manda el pedido armado por WhatsApp, que es lo que ya hacía `toursWhatsappUrl()` pero con los datos del viajero y la referencia del pedido adentro.
 
-El precio de cada card es **por persona** y el total del checkout multiplica por los pasajeros. Mostrar el uno junto al otro sin multiplicar sería contradecirse, así que `checkoutTotals()` es el único lugar donde se calcula.
+#### El transfer entra por acá
+
+Elegir la modalidad (compartido o privado) suma al presupuesto igual que elegir una card de actividades, y el botón de la cabecera de la sección abre este mismo checkout (`openTransferCheckout()`). El "Coordinar" del voucher llama a la misma función.
+
+**El total del checkout no se calcula: se lee.** `checkoutTransferLine()` llama a `getSelectedTransferAmount()`, que es la misma función que usan "Mi Viaje", el desglose y el voucher. Si el checkout multiplicara por su cuenta, la única contradicción posible aparecería en la pantalla de confirmación, que es justo donde no puede haberla. Y el privado no se parte entre los que viajan: el aside dice "2 personas · vehículo exclusivo" en vez de inventar un precio por persona de un auto que es uno solo.
+
+El horario de recogida se elige en la sección, con la hora real del vuelo a la vista (los chips), no en el checkout. Acá solo se muestra como recordatorio. El hotel de destino sí se pregunta, en el paso 1, con el hotel que elegiste en la sección ya escrito: casi siempre es el mismo, y dejarlo en blanco hace que la gente no avance.
 
 Los logos de los bancos no se suben al repo: los nombres de marca se pintan con CSS en el color de la marca. Es el mismo criterio que ya se tomó con las fotos de los tours.
 
 El estado vive en `checkoutState` y se reinicia con cada viaje nuevo (`renderDetalle`), porque los datos de un viajero que quedaron del pedido anterior no son del viaje nuevo.
+
+`node test-checkout.js` corre las dos ramas del checkout (totales, aside, panel de datos, recap y mensaje de WhatsApp) con las funciones reales extraídas de `app.js` y las dependencias simuladas. Es lo que impide que un cambio en un pedido rompa el otro: las dos ramas comparten el mismo DOM y el mismo código.
 
 ### Guía Secreta
 

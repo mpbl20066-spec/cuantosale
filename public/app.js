@@ -2167,9 +2167,6 @@
   var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
   var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
   var CHECKOUT_COUNTRIES = ['Uruguay', 'Argentina', 'Brasil', 'Chile', 'Paraguay', 'España', 'Otro'];
-  // Se recuerda entre aperturas: recargar el formulario entero cada vez que se
-  // vuelve de un paso seria un castigo. No se guarda en disco ni sale del
-  // navegador.
   /* El checkout es uno solo y sirve para dos pedidos: las actividades y el
      transfer. Antes el transfer traia su propio asistente de dos pasos —que no
      tenia ni una regla de CSS, asi que se veia como texto pelado dentro del
@@ -2177,7 +2174,11 @@
      presupuesto" y no confirmaba nada. Ahora elegir la modalidad lo mete al
      presupuesto igual que elegir una card de actividades, y "Reservar
      transfer" abre ESTE checkout: mismos tres pasos, mismo resumen lateral,
-     mismo cierre por WhatsApp. Un solo lugar donde aprender a reservar. */
+     mismo cierre por WhatsApp. Un solo lugar donde aprender a reservar.
+
+     Se recuerda entre aperturas: recargar el formulario entero cada vez que se
+     vuelve de un paso seria un castigo. No se guarda en disco ni sale del
+     navegador. */
   var checkoutState = { step: 0, form: {}, payment: '', kind: 'tours' };
   function checkoutIsTransfer() { return checkoutState.kind === 'transfer'; }
   function checkoutTours() {
@@ -2207,11 +2208,6 @@
     };
   }
   /* Las lineas del resumen lateral y del total, sea cual sea el pedido. */
-  function checkoutItems() {
-    if (!checkoutIsTransfer()) return checkoutTours();
-    var line = checkoutTransferLine();
-    return line ? [line] : [];
-  }
   function checkoutTotals() {
     var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
     if (checkoutIsTransfer()) {
@@ -3799,6 +3795,13 @@
         detailState.parts.local = Math.round((Number(detailState.localPerDay) || 0) * noches * pax);
       }
       try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar al cambiar los viajeros', e); }
+      // El total del transfer depende de cuantos viajan: el compartido se cobra
+      // por persona. El badge de la cabecera de la seccion muestra ese total, asi
+      // que sin repintarla, cambiar de 2 a 3 personas dejaba "R$ 70 total" al
+      // lado de un presupuesto que ya pide R$ 105.
+      var traslado = document.querySelector('[data-official-transfer]');
+      if (traslado) traslado.outerHTML = transferCard(detailState.meta);
+      renderTripSummary();
     }
     schedule();
   }
@@ -3885,6 +3888,7 @@
     var section = document.querySelector('[data-official-transfer]');
     if (section) section.outerHTML = transferCard(detailState.meta);
     sincronizarTrasladoOficial();
+    renderTripSummary();
   }
   function formatFlightDateTime(value) {
     if (!value) return 'sin fecha';
@@ -7004,6 +7008,10 @@ function comboNombreDestino() {
         var transferSectionEl = transferChoice.closest('[data-official-transfer]');
         if (transferSectionEl) transferSectionEl.outerHTML = transferCard(detailState.meta);
         sincronizarTrasladoOficial();
+        // El panel "Mi Viaje" y el voucher leen de detailState, no del DOM: sin
+        // esto la fila de traslados seguia diciendo "Sin traslados" con el
+        // transfer recien elegido hasta que se abriera otra seccion.
+        renderTripSummary();
         return;
       }
       var pickupChoice = e.target.closest('[data-transfer-pickup-choice]');
