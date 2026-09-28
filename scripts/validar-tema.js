@@ -1,15 +1,15 @@
 'use strict';
 /*
- * Valida que los dos bloques de modo oscuro de public/style.css no se separen.
+ * Valida que los dos temas de public/style.css no se separen.
  *
- * Por que existe: public/style.css declara el tema oscuro DOS veces.
+ * Por que existe: public/style.css declaraba el tema oscuro DOS veces.
  *
  *   A) @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) }
  *   B) :root[data-theme="dark"]
  *
- * El bloque B jamas aplica: la app no setea data-theme en ningun lado
+ * El bloque B jamas aplicaba: la app no setea data-theme en ningun lado
  * (no hay toggle de tema en index.html ni en app.js), asi que el unico camino
- * real al modo oscuro es A. Cuando se agregaron los tokens de card al tema
+ * real al modo oscuro era A. Cuando se agregaron los tokens de card al tema
  * oscuro se los puso solo en B, y A seguia heredando los valores claros de
  * :root: --card-bg:#FFFFFF y --card-sel-bg:#FEF7E7 pintaban las cards de
  * blanco con --ink:#EEF3F9 encima, o sea 1.12:1 y 1.05:1. En el celular, que
@@ -18,16 +18,24 @@
  * validar-costos.js y validar-transfer.js ya resuelven para los datos:
  * nada se entera hasta que se rompe en pantalla.
  *
+ * QUE CAMBIO: el oscuro paso a ser el tema por defecto (identidad night
+ * mostaza) y el claro quedo como :root[data-theme="light"]. Eso deja DOS
+ * bloques, uno por tema, y elimina de raiz la duplicacion que habia causado el
+ * bug: ya no hay dos copias que puedan separarse porque un token nuevo se
+ * agrega a una sola. El script se actualizo para vigilar esta forma.
+ *
  * Lo que se comprueba:
- *   1. Los dos bloques oscuridad declaran EXACTAMENTE el mismo set de tokens.
- *   2. Para cada token, los dos bloques declaran el mismo valor.
- *   3. El contraste de los tokens de card contra --ink / --ink2 del modo
- *      oscuro llega al minimo de WCAG, que es el numero que estaba roto.
+ *   1. Los dos temas declaran EXACTAMENTE el mismo set de tokens de color.
+ *   2. Los dos temas se DIFERENCIAN: si el claro fuera una copia del night,
+ *      pedir data-theme="light" no cambiaria nada y nadie se enteraria.
+ *   3. El contraste de los tokens de card, del anillo de foco y de la tinta
+ *      del boton de accion contra --ink / --ink2 llega al minimo de WCAG, en
+ *      los DOS temas. El numero que estaba roto era 1.05:1.
  *   3b. El contraste de los badges de 11 px del panel "De donde salen los
  *      valores" llega a 4.5:1 en los dos temas.
  *   4. Ningun archivo de public/ vuelve a setear data-theme por su cuenta
- *      sin pasar por el toggle, porque eso abriria una tercera vía al tema
- *      oscuro y este chequeo dejaria de cubrirla.
+ *      sin pasar por el toggle, porque eso abriria una tercera via al tema y
+ *      este chequeo dejaria de cubrirla.
  */
 const fs = require('fs');
 const path = require('path');
@@ -72,12 +80,21 @@ function tokensDe(cuerpo) {
   return out;
 }
 
-const A = tokensDe(bloque('@media (prefers-color-scheme: dark)'));
-const B = tokensDe(bloque(':root[data-theme="dark"]'));
-const RAIZ_TOKENS = tokensDe(bloque(':root'));
+/* Dark = :root, porque el tema oscuro paso a ser el DEFAULT y el claro quedo
+   como :root[data-theme="light"]. Antes habia tres bloques (:root claro, la
+   media query y [data-theme="dark"]) y el oscuro estaba duplicado en dos, que
+   es justamente la causa del bug que este script documenta: los tokens se
+   agregaron a la copia que nunca aplicaba. Con dos bloques y una sola fuente
+   por tema, la duplicacion que lo causaba no puede volver a aparecer.
 
-if (!Object.keys(A).length || !Object.keys(B).length) {
-  err('No se pudieron localizar los dos bloques de modo oscuro. Si cambio el ' +
+   NIGHT es el que se compara contra la tinta para el contraste de cards, porque
+   es el tema por defecto y el unico que se ve sin pedir nada. LIGHT se mide con
+   el mismo criterio: un color de marca puede pasar en oscuro y no en claro. */
+const NIGHT = tokensDe(bloque(':root'));
+const LIGHT = tokensDe(bloque(':root[data-theme="light"]'));
+
+if (!Object.keys(NIGHT).length || !Object.keys(LIGHT).length) {
+  err('No se pudieron localizar :root y :root[data-theme="light"]. Si cambio el ' +
     'nombre de alguno, hay que actualizar este script.');
   process.exit(1);
 }
@@ -87,33 +104,41 @@ if (!Object.keys(A).length || !Object.keys(B).length) {
       Un token de color no puede faltar, porque ese es justamente el bug: se
       queda con el valor claro de :root y la card se rompe. */
 const esColor = (v) => /#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/i.test(v || '');
-const colorQueFalta = (lista) => lista.filter((k) => esColor(RAIZ_TOKENS[k]));
 
-const soloA = Object.keys(A).filter((k) => !(k in B));
-const soloB = Object.keys(B).filter((k) => !(k in A));
-const colorSoloA = colorQueFalta(soloA);
-const colorSoloB = colorQueFalta(soloB);
+const soloNight = Object.keys(NIGHT).filter((k) => !(k in LIGHT));
+const soloLight = Object.keys(LIGHT).filter((k) => !(k in NIGHT));
+const colorSoloNight = soloNight.filter((k) => esColor(NIGHT[k]));
+const colorSoloLight = soloLight.filter((k) => esColor(LIGHT[k]));
 
-if (colorSoloA.length) {
-  err('Tokens de color en prefers-color-scheme:dark que NO estan en [data-theme="dark"]: ' +
-    colorSoloA.join(' ') + '.');
+if (colorSoloNight.length) {
+  err('Tokens de color en :root (night) que NO estan en [data-theme="light"]: ' +
+    colorSoloNight.join(' ') + '.');
 }
-if (colorSoloB.length) {
-  err('Tokens de color en [data-theme="dark"] que NO estan en prefers-color-scheme:dark: ' +
-    colorSoloB.join(' ') + '. Aca esta el bug original: se agrego el token al bloque que ' +
-    'nunca aplica y el celular seguia mostrando el valor claro de :root.');
-}
-
-/* 2. mismos valores */
-for (const k of Object.keys(B)) {
-  if (!(k in A)) continue;
-  if (A[k] !== B[k]) {
-    err('El token ' + k + ' difiere entre los dos bloques: media query = "' + A[k] +
-      '" vs [data-theme="dark"] = "' + B[k] + '".');
-  }
+if (colorSoloLight.length) {
+  err('Tokens de color en [data-theme="light"] que NO estan en :root (night): ' +
+    colorSoloLight.join(' ') + '. Aca esta el bug original: se agrego el token a ' +
+    'un solo tema y el otro se queda con el valor del lado contrario.');
 }
 
-/* 3. contraste de los tokens de card contra la tinta del modo oscuro */
+/* 2. los dos temas tienen que SER distintos.
+   Antes esta asercion comparaba los dos bloques de modo oscuro entre si, que ya
+   no tiene sentido: son el mismo tema. Lo que si importa es que el claro no se
+   vuelva una copia del night. Si alguien pega :root dentro de
+   [data-theme="light"], la app sigue arrancando y se ve bien en el tema por
+   defecto, pero el tema claro desaparece sin que nada se entere: el mismo
+   fallo silencioso que este script vino a corregir, del otro lado. */
+let distintos = 0;
+for (const k of Object.keys(LIGHT)) {
+  if (esColor(LIGHT[k]) && NIGHT[k] && LIGHT[k] !== NIGHT[k]) distintos++;
+}
+if (distintos < 8) {
+  err('night y light declaran solo ' + distintos + ' tokens de color distintos. El tema claro ' +
+    'parece una copia del night, asi que pedir data-theme="light" no cambia nada.');
+} else {
+  console.log('  ok  los dos temas difieren en ' + distintos + ' tokens de color');
+}
+
+/* 3. contraste de los tokens de card y del foco, en los DOS temas */
 function lum(hex) {
   const c = hex.replace('#', '').match(/../g).map((h) => parseInt(h, 16) / 255)
     .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
@@ -123,51 +148,61 @@ function ratio(a, b) {
   const l1 = lum(a), l2 = lum(b);
   return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 }
-const raizA = RAIZ_TOKENS;
-const tinta = { ink: A['--ink'], ink2: A['--ink2'] };
-if (/^#[0-9a-f]{6}$/i.test(tinta.ink) && /^#[0-9a-f]{6}$/i.test(tinta.ink2)) {
+
+for (const [tema, tokens] of [['night', NIGHT], ['light', LIGHT]]) {
+  const tinta = { ink: tokens['--ink'], ink2: tokens['--ink2'] };
+  if (!/^#[0-9a-f]{6}$/i.test(tinta.ink) || !/^#[0-9a-f]{6}$/i.test(tinta.ink2)) {
+    av('No se pudieron leer --ink / --ink2 del tema ' + tema + '; se saltea su contraste.');
+    continue;
+  }
   /* --card-sel-bg es el que se rompia (1.05:1). 4.5:1 es el minimo de WCAG
      para texto normal; --ink2 es el tono con el que se dibuja el texto
      secundario de las cards, asi que es el que manda. */
   for (const fondo of ['--card-bg', '--card-sel-bg']) {
-    const valor = A[fondo];
-    if (!/^#[0-9a-f]{6}$/i.test(valor || '')) { err(fondo + ' no es un hex valido en el tema oscuro: "' + valor + '".'); continue; }
+    const valor = tokens[fondo];
+    if (!/^#[0-9a-f]{6}$/i.test(valor || '')) { err(fondo + ' no es un hex valido en el tema ' + tema + ': "' + valor + '".'); continue; }
     const r = ratio(valor, tinta.ink2);
     if (r < 4.5) {
       err(fondo + ' (' + valor + ') contra --ink2 (' + tinta.ink2 + ') da ' + r.toFixed(2) +
-        ':1, debajo de 4.5:1. La card se lee como un bloque de color sin texto.');
+        ':1 en el tema ' + tema + ', debajo de 4.5:1. La card se lee como un bloque de color sin texto.');
     } else {
-      console.log('  ok  ' + fondo + ' ' + valor + ' vs --ink2 = ' + r.toFixed(2) + ':1');
+      console.log('  ok  [' + tema + '] ' + fondo + ' ' + valor + ' vs --ink2 = ' + r.toFixed(2) + ':1');
     }
   }
   for (const [borde, fondo] of [['--card-border', '--card-bg'], ['--card-sel-border', '--card-sel-bg']]) {
-    if (!/^#[0-9a-f]{6}$/i.test(A[borde] || '')) { err(borde + ' no es un hex valido en el tema oscuro.'); continue; }
-    const r = ratio(A[borde], A[fondo]);
-    if (r < 3) err(borde + ' (' + A[borde] + ') contra ' + fondo + ' da ' + r.toFixed(2) + ':1, debajo de 3:1.');
-    else console.log('  ok  ' + borde + ' ' + A[borde] + ' vs ' + fondo + ' = ' + r.toFixed(2) + ':1');
+    if (!/^#[0-9a-f]{6}$/i.test(tokens[borde] || '')) { err(borde + ' no es un hex valido en el tema ' + tema + '.'); continue; }
+    const r = ratio(tokens[borde], tokens[fondo]);
+    if (r < 3) err(borde + ' (' + tokens[borde] + ') contra ' + fondo + ' da ' + r.toFixed(2) + ':1 en el tema ' + tema + ', debajo de 3:1.');
+    else console.log('  ok  [' + tema + '] ' + borde + ' ' + tokens[borde] + ' vs ' + fondo + ' = ' + r.toFixed(2) + ':1');
   }
-  /* El anillo de foco es el otro token que se rompio por la misma causa: es
-     un celeste elegido para fondo claro y contra el surface oscuro daba
-     2.25:1. WCAG 2.4.11 pide 3:1 para el foco, asi que se chequea contra los
-     dos fondos donde se dibuja, --surface y --bg. */
+  /* El anillo de foco es el otro token que se rompio por la misma causa: un
+     celeste elegido para fondo claro contra el surface oscuro daba 2.25:1.
+     WCAG 2.4.11 pide 3:1 para el foco, asi que se chequea contra los dos
+     fondos donde se dibuja, --surface y --bg. */
   for (const fondo of ['--surface', '--bg']) {
-    const v = A['--focus'];
-    if (!/^#[0-9a-f]{6}$/i.test(v || '')) { err('--focus no es un hex valido en el tema oscuro: "' + v + '".'); break; }
-    const r = ratio(v, A[fondo]);
+    const v = tokens['--focus'];
+    if (!/^#[0-9a-f]{6}$/i.test(v || '')) { err('--focus no es un hex valido en el tema ' + tema + ': "' + v + '".'); break; }
+    const r = ratio(v, tokens[fondo]);
     if (r < 3) {
-      err('--focus (' + v + ') contra ' + fondo + ' (' + A[fondo] + ') da ' + r.toFixed(2) +
-        ':1, debajo de 3:1. El foco de teclado no se ve en el tema oscuro.');
+      err('--focus (' + v + ') contra ' + fondo + ' (' + tokens[fondo] + ') da ' + r.toFixed(2) +
+        ':1 en el tema ' + tema + ', debajo de 3:1. El foco de teclado no se ve.');
     } else {
-      console.log('  ok  --focus ' + v + ' vs ' + fondo + ' = ' + r.toFixed(2) + ':1');
+      console.log('  ok  [' + tema + '] --focus ' + v + ' vs ' + fondo + ' = ' + r.toFixed(2) + ':1');
     }
   }
-
-  /* Referencia de lo que se estaba viendo: el valor claro de --card-bg contra
-     la tinta oscura. Si este numero vuelve a 1.x, el bug de las cards volvio. */
-  console.log('\n  (referencia) --card-bg claro ' + (raizA['--card-bg'] || '?') + ' vs --ink2 oscuro = ' +
-    ratio(raizA['--card-bg'] || '#FFFFFF', tinta.ink2).toFixed(2) + ':1');
-} else {
-  av('No se pudieron leer --ink / --ink2 del tema oscuro; se saltea el chequeo de contraste.');
+  /* La tinta del boton de accion va sobre su propio relleno. Con mostaza de
+     fondo el blanco no sirve (1.64:1), asi que este chequeo existe para que
+     nadie vuelva a poner --action-ink en blanco creyendo que el boton es
+     oscuro. */
+  if (/^#[0-9a-f]{6}$/i.test(tokens['--action-bg'] || '') && /^#[0-9a-f]{6}$/i.test(tokens['--action-ink'] || '')) {
+    const r = ratio(tokens['--action-ink'], tokens['--action-bg']);
+    if (r < 4.5) {
+      err('--action-ink (' + tokens['--action-ink'] + ') sobre --action-bg (' + tokens['--action-bg'] +
+        ') da ' + r.toFixed(2) + ':1 en el tema ' + tema + ', debajo de 4.5:1. El texto del boton no se lee.');
+    } else {
+      console.log('  ok  [' + tema + '] --action-ink sobre --action-bg = ' + r.toFixed(2) + ':1');
+    }
+  }
 }
 
 /* 3b. contraste de los badges del panel "De donde salen los valores".
@@ -183,7 +218,7 @@ const BADGES = [
   ['--warn-ink', '--coral-soft', 'badge "confianza baja"']
 ];
 for (const [tinta, fondo, que] of BADGES) {
-  for (const [nombre, tokens] of [['claro', raizA], ['oscuro', A], ['oscuro (data-theme)', B]]) {
+  for (const [nombre, tokens] of [['night', NIGHT], ['light', LIGHT]]) {
     const a = tokens[tinta], b = tokens[fondo];
     if (!/^#[0-9a-f]{6}$/i.test(a || '') || !/^#[0-9a-f]{6}$/i.test(b || '')) {
       err(que + ': en el tema ' + nombre + ' falta ' + tinta + ' o ' + fondo + '.');
@@ -209,7 +244,7 @@ for (const f of fs.readdirSync(path.join(RAIZ, 'public'))) {
   }
 }
 
-console.log('\ntokens modo oscuro: ' + Object.keys(A).length + ' en media query, ' +
-  Object.keys(B).length + ' en [data-theme="dark"]');
+console.log('\ntokens: ' + Object.keys(NIGHT).length + ' en :root (night), ' +
+  Object.keys(LIGHT).length + ' en [data-theme="light"]');
 console.log('\n' + (errores ? errores + ' FALLAS, ' + avisos + ' avisos' : avisos ? avisos + ' avisos, sin fallas' : 'todo bien'));
 process.exit(errores ? 1 : 0);

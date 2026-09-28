@@ -1,110 +1,102 @@
 :root{
-  --bg:#F2F6FA; --surface:#FFFFFF; --ink:#10233E; --ink2:#48617F; --line:#DCE5EE;
-  /* --line es para separadores entre bloques, donde un tono suave está bien.
-     Para el BORDE de un control hace falta 3:1 contra el fondo (WCAG 1.4.11) y
-     --line daba 1.27:1 sobre blanco: los campos de origen, fechas, viajeros y
-     presupuesto se leían como texto flotante, no como campos. --control-line
-     da 3.1:1 sobre #FFFFFF y 4.9:1 sobre el surface del modo oscuro. */
-  --control-line:#7E8DA0;
-  /* Anillo de foco. Antes se usaba --accent (ámbar) con outline:3px, que da
-     1.86:1 sobre blanco y 1.71:1 sobre --bg: por debajo del 3:1 de WCAG 2.4.11,
-     o sea que el foco de teclado era prácticamente imperceptible. El halo
-     rgba(246,178,27,.18) de los campos era peor: 1.18:1. --focus es el mismo
-     celeste de marca (--cel), que da 5.97:1 en claro y 8.3:1 en oscuro. */
-  --focus:#1B5FA8;
-  /* Estado "elegido" de un control. Antes cada componente lo definia por su
-     cuenta y uno usaba --hero-bg, que en modo oscuro es ÁMBAR: el control de
-     3 opciones (Ahorrar / Equilibrado / Cómodo) quedaba ámbar seleccionado con
-     las otras dos más oscuras que la card, y "ámbar" dejaba de significar
-     "acento de marca" para significar "tu elección". Estos tres tokens son un
-     solo lugar donde definirlo. */
-  --selected-bg:#DCEBF8; --selected-border:#10233E; --selected-ink:#10233E;
-  /* Card elegible: el mismo bloque de estilo para los cuatro grupos donde se
-     elige algo (transporte local, comidas, hotel, tours). Antes cada uno lo
-     Definía por su cuenta y el resultado era que "elegido" se veía distinto
-     según el grupo: navy de 1px en unos, navy de 2px en otros, ámbar con cinta
-     en los tours. El usuario tenía que aprender una regla nueva cada vez.
-     Acá hay una sola, y los cuatro la comparten. */
-  --card-bg:#FFFFFF; --card-border:#C3D0DE; --card-radius:18px;
-  /* Estado "elegido" de una card, compartido por los cinco grupos donde se
-     elige algo: destinos, propuestas, hotel, tours y presupuesto diario.
-     --card-sel-border es un ámbar MÁS PROFUNDO que el de marca a propósito:
-     #F6B21B sobre blanco da 1.86:1 y como borde de 2px no se ve; #B8791B da
-     3.1:1 y se lee como marco. El ámbar brillante queda para la etiqueta y el
-     resplandor, que no necesitan contraste de borde. */
-  --card-sel-border:#B8791B; --card-sel-bg:#FEF7E7;
-  --card-sel-glow:0 8px 20px rgba(246,178,27,.20);
-  /* Boton de "elegido" de la ficha de hotel. --card-sel-border es un token de
-     BORDE: con texto blanco encima daba 3.63:1, y un boton de 13px es texto
-     normal (4.5:1). Este es un ambar mas profundo, 5.9:1 con blanco, y el mismo
-     texto del tema oscuro se pone en navy sobre el ambar claro: 7.5:1. */
-  --pick-sel-bg:#8A5A0E; --pick-sel-ink:#FFFFFF;
-  --action-bg:#10233E; --action-ink:#FFFFFF; --action-border:transparent;
-  --control-bg:#FFFFFF; --control-border:#E2E8F0; --control-hover:#F8FAFC; --control-muted:#64748B; --control-selected:#F8FAFC; --control-selected-ink:#1D4ED8;
-  --accent:#F6B21B; --accent-ink:#10233E;
-  --hero-bg:#10233E; --hero-ink:#FFFFFF; --hero-accent:#F6B21B; --hero-soft:#A9CBEA;
-  --cel:#1B5FA8; --cel-ink:#FFFFFF; --cel-soft:#DCEBF8; --coral:#D9481F; --coral-soft:#FDE2D9; --good:#12784F; --good-soft:#DCF2E6;
-  /* Texto de advertencia sobre --coral-soft, para los badges de 11 px del panel
-     "De donde salen los valores". --coral da 3.48:1 sobre --coral-soft, que no
-     alcanza el 4.5:1 de WCAG para texto normal, y un badge de 11 px es texto
-     normal. No se oscurece --coral porque es un color de marca que ya se usa
-     como texto en ocho lugares mas; este token es solo para el badge. */
-  --warn-ink:#A8340F;
-  --c1:#10233E; --c2:#7CB7E8; --c3:#F6B21B; --c4:#E4572E; --c5:#4B7BAA; --c6:#9AA9BA;
-  --fh:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  /* ======================================================================
+     NIGHT MOSTAZA. Este es el tema por defecto de la app.
+
+     Antes el default era el claro y el oscuro vivia detrás de
+     prefers-color-scheme, o sea que la app se veia como el sistema del
+     visitante. Eso hacia que la identidad (pin amarillo, mostaza, cards
+     oscuras) no fuera la que se veia en un celular o en una laptop en
+     claro. Ahora :root ES el tema night y el claro queda como
+     :root[data-theme="light"], una via de escape explicita. No hay toggle,
+     asi que en la practica el night es el unico tema: para ver el claro
+     hay que pedir data-theme="light" a mano.
+
+     Un solo lugar por tema. Antes el oscuro estaba declarado DOS veces
+     (media query y [data-theme="dark"]) y la segunda nunca aplicaba,
+     porque la app no setea data-theme en ningun lado. Cuando se agregaron
+     tokens de card al tema oscuro se los puso solo en esa copia y la
+     real seguia heredando los valores claros de :root: la card salia
+     blanca con el texto claro encima, 1.12:1. scripts/validar-tema.js
+     existe por eso, y ahora valida :root contra [data-theme="light"].
+     ====================================================================== */
+  --bg:#0A101A; --surface:#111A28; --line:#1C2533;
+  /* --line es para separadores, donde un tono apagado esta bien. Para el
+     BORDE de un control hace falta 3:1 contra el fondo (WCAG 1.4.11) y
+     #1C2533 da 1.24:1 sobre --bg: los campos se leerian como texto
+     flotante. --control-line y --card-border son el token de borde real.
+     --control-line da 3.31:1 sobre --bg; --card-border, 3.19:1 sobre
+     --surface, que es el minimo que validar-tema.js exige. */
+  --control-line:#5A6779;
+  --ink:#FFFFFF; --ink2:#C9D4E2;
+  /* Mostaza de marca. #F7C325 da 11.60:1 sobre --bg, asi que sirve para
+     texto de cualquier tamano, no solo para titulos grandes. */
+  --accent:#F7C325; --accent-ink:#0A101A;
+  /* El celeste de marca paso a ser mostaza: --cel es la tinta de etiqueta
+     y de eyebrow en toda la app. Sobre --cel-soft da 8.83:1, de sobra
+     para los badges de 11px del panel "De donde salen los valores". */
+  --cel:#F7C325; --cel-ink:#0A101A; --cel-soft:#1E2A3A;
+  --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
+  --warn-ink:#FFB84D;
+  --hero-bg:#111A28; --hero-ink:#FFFFFF; --hero-accent:#F7C325; --hero-soft:#1A2433;
+  /* Boton de accion: relleno mostaza con TINTA OSCURA encima. No hay
+     alternativa: blanco sobre #F7C325 da 1.64:1. --action-ink a #0A101A
+     da 11.60:1. Antes era navy con texto blanco; invertirlo es lo que
+     hace que los botones se lean como los de la referencia. */
+  --action-bg:#F7C325; --action-ink:#0A101A; --action-border:#F7C325;
+  --control-bg:#111A28; --control-border:#5A6B7E; --control-hover:#1A2433;
+  --control-muted:#8A97A8; --control-selected:#1E2A3A; --control-selected-ink:#FFFFFF;
+  --selected-bg:#1E2A3A; --selected-border:#F7C325; --selected-ink:#FFFFFF;
+  /* Card elegible. Un solo bloque de estilo para los cinco grupos donde se
+     elige algo (destinos, propuestas, hotel, tours, presupuesto diario),
+     para que "elegido" se vea igual en todos y no haya que aprender una
+     regla por grupo. */
+  --card-bg:#111A28; --card-border:#5A6B7E; --card-radius:18px;
+  --card-sel-border:#F7C325; --card-sel-bg:#1E1B0C;
+  --card-sel-glow:0 8px 20px rgba(247,195,37,.16);
+  /* Boton de "elegido" de la ficha de hotel. Mostaza con tinta oscura:
+     11.60:1, contra el 3.63:1 que daba el ambar profundo con texto blanco. */
+  --pick-sel-bg:#F7C325; --pick-sel-ink:#0A101A;
+  /* Anillo de foco. La mostaza da 11.60:1 sobre --bg y 10.64:1 sobre
+     --surface, contra el 3:1 de WCAG 2.4.11. El celeste anterior daba
+     2.25:1 contra el surface oscuro: el foco de teclado era casi invisible. */
+  --focus:#F7C325;
+  --c1:#5B9BD5; --c2:#7CB7E8; --c3:#F7C325; --c4:#F0714F; --c5:#8FA3BB; --c6:#5A6779;
+  /* Las dos familias pasan a ser Poppins. --fh era Barlow Condensed, una
+     condensada de titulares: con numeros tan grandes (clamp de 88px) se
+     leia apretada, y la referencia pide una geometrica abierta. */
+  --fh:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --fb:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
-      --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
-    --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
-    --warn-ink:#FF8A66;
-    --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
-    color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
-    --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
-    --selected-bg:#1B3A63; --selected-border:#EEF3F9; --selected-ink:#EEF3F9;
-    /* Tokens de card. Estos faltaban acá y era el bug: la app NUNCA setea
-       data-theme, asi que el unico camino real al modo oscuro es este bloque
-       de media query, no el :root[data-theme="dark"] de mas abajo. Al no
-       redefinir --card-bg ni --card-sel-bg, las cards seguian heredando los
-       valores CLAROS de :root (#FFFFFF y #FEF7E7) con --inkclaro encima:
-       1.12:1 sin elegir y 1.05:1 elegida. En el celular, donde el sistema
-       suele venir en oscuro, salia la card blanca con el texto gris claro
-       imposible de leer. Estos son los mismos valores del bloque
-       [data-theme="dark"], y dan 13:1 / 12.9:1.
-       --card-radius se omite a proposito: es 18px en los dos temas. */
-    --card-bg:#12294A; --card-border:#8B9CB2;
-    --card-sel-border:#E8A93B; --card-sel-bg:#33290E;
-    --card-sel-glow:0 8px 20px rgba(0,0,0,.45);
-    --pick-sel-bg:#E8A93B; --pick-sel-ink:#10233E;
-    /* Mismo bug que las cards, un token mas. --focus:#1B5FA8 es el celeste de
-       marca, pensado para un fondo claro. Contra el surface oscuro daba
-       2.25:1, por debajo del 3:1 de WCAG 2.4.11 para un anillo de foco, o
-       sea que el foco de teclado era casi invisible en el celular. El
-       comentario de --focus decia "5.97:1 en claro y 8.3:1 en oscuro", pero
-       ese 8.3:1 era de --cel en oscuro (#7CB7E8), no de --focus. Se usa
-       --cel, que es el mismo celeste aclarado para oscuro. */
-    --focus:#7CB7E8;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
-  --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
-  --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
-  --warn-ink:#FF8A66;
-  --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
-  color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
-  --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
-  --selected-bg:#1B3A63; --selected-border:#EEF3F9; --selected-ink:#EEF3F9;
-  --card-bg:#12294A; --card-border:#8B9CB2; --card-radius:18px;
-  --card-sel-border:#E8A93B; --card-sel-bg:#33290E;
-  --card-sel-glow:0 8px 20px rgba(0,0,0,.45);
-  --pick-sel-bg:#E8A93B; --pick-sel-ink:#10233E;
-  --focus:#7CB7E8;
+:root[data-theme="light"]{
+  /* CLARO MOSTAZA. Via de escape explicita; no hay toggle que la active.
+     La diferencia con el night no es solo el fondo: la mostaza viva no
+     puede ser tinta sobre blanco (1.64:1), asi que --cel baja a un ambar
+     profundo (#8A5A0E, 5.92:1 sobre blanco) y la mostaza #F7C325 se
+     queda solo para rellenos, siempre con tinta oscura encima. Son dos
+     ambares con dos trabajos distintos, como el celeste y el ambar de
+     borde que ya tenia el tema claro. */
+  --bg:#F7F8FA; --surface:#FFFFFF; --line:#E2E6EC; --control-line:#7E8DA0;
+  --ink:#101828; --ink2:#48566A;
+  --accent:#F7C325; --accent-ink:#0A101A;
+  --cel:#8A5A0E; --cel-ink:#FFFFFF; --cel-soft:#FDF4DC;
+  --coral:#D9481F; --coral-soft:#FDE2D9; --good:#12784F; --good-soft:#DCF2E6;
+  --warn-ink:#A8340F;
+  --hero-bg:#101828; --hero-ink:#FFFFFF; --hero-accent:#F7C325; --hero-soft:#2A3646;
+  --action-bg:#F7C325; --action-ink:#0A101A; --action-border:#F7C325;
+  --control-bg:#FFFFFF; --control-border:#7E8DA0; --control-hover:#F4F6F9;
+  --control-muted:#5A6779; --control-selected:#FDF4DC; --control-selected-ink:#0A101A;
+  --selected-bg:#FDF4DC; --selected-border:#8A5A0E; --selected-ink:#101828;
+  --card-bg:#FFFFFF; --card-border:#7E8DA0; --card-radius:18px;
+  --card-sel-border:#B8791B; --card-sel-bg:#FEF7E7;
+  --card-sel-glow:0 8px 20px rgba(247,195,37,.20);
+  --pick-sel-bg:#8A5A0E; --pick-sel-ink:#FFFFFF;
+  --focus:#8A5A0E;
+  --c1:#10233E; --c2:#1B5FA8; --c3:#B8791B; --c4:#E4572E; --c5:#4B7BAA; --c6:#7E8DA0;
+  color-scheme:light;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
