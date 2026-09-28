@@ -773,7 +773,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 }
 .hotel-nearby-link{display:inline-flex;margin-top:12px;padding:11px 15px;border-radius:12px;background:var(--cel);color:#fff;font-weight:700;text-decoration:none}
 .hotel-nearby-link:hover{color:#fff;filter:brightness(1.08)}
-.local-tours{min-width:0;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05);overflow:hidden}
+.local-tours{min-width:0;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05);overflow:hidden;container-type:inline-size;container-name:tours}
 .local-tours__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
 .local-tours__eyebrow{color:var(--cel);font-size:10px;font-weight:800;letter-spacing:.12em}
 .local-tours h2{margin:5px 0 0;font-family:var(--fh);font-size:clamp(24px,3vw,32px);line-height:1.1}
@@ -788,8 +788,16 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* La card es horizontal: foto a la izquierda, ficha a la derecha. Dos por fila
    porque con tres la ficha quedaba de ~280px y la foto de ~190px, que es una
    proporcion de postal. Con dos hay ancho para el titulo largo, la lista de
-   "incluye" y el precio sin que nada se corte. */
-.local-tours__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;min-width:0}
+   "incluye" y el precio sin que nada se corte.
+
+   auto-fill y NO repeat(2,...): la cantidad de columnas tiene que depender del
+   ancho que hay, no del ancho de la ventana. Con repeat(2) el navegador
+   divide en dos siempre que la media query no lo impida, y en una seccion
+   angosta las dos columnas quedan de 250px: la foto se come la card y el texto
+   queda en 60px. min(100%,400px) es el piso de una card legible, y el 100%
+   evita que la propia pista desborde cuando el contenedor es mas angosto que
+   ese piso. */
+.local-tours__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:14px;min-width:0}
 /* El borde no cambia de grosor al marcar (solo de color), asi que la tarjeta
    no corre nada. Relleno de color + borde duro se leia como un boton de
    escritorio; la marca real va en el marco. */
@@ -798,7 +806,12 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    cinta "Tu viaje" se saco: era una segunda señal de "elegido" que solo
    tenían los tours, y hacia que el mismo gesto se leyera distinto en cada
    grupo. Ahora el estado se comunica solo con el marco y el fondo. */
-.local-tour{position:relative;display:grid;grid-template-columns:184px minmax(0,1fr);min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
+/* minmax(140px,184px) y no 184px fijo: con la pista fija, una card de 258px
+   dejaba 72px de cuerpo y los botones de abajo quedaban cortados contra el
+   overflow:hidden. Ahora la foto cede antes de que el texto quede ilegible.
+   La foto vuelve a ser de ancho completo recien en la regla de contenedor de
+   mas abajo. */
+.local-tour{position:relative;display:grid;grid-template-columns:minmax(140px,184px) minmax(0,1fr);min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
 .local-tour:has([data-tour-choice]:checked){border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
 /* La tarjeta completa es la zona sensible. El checkbox se estira con
@@ -850,12 +863,19 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    en el pie y no arriba a proposito: el "desde" que se lee primero es el del
    resumen de la seccion, y repetirlo en cada card pone tres cifras compitiendo
    antes de que la persona haya leido el titulo. */
-.local-tour__foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:12px}
+/* flex-wrap y no solo space-between: a 200px de seccion el precio y el boton no
+   entran en la misma linea y el boton se salia del borde. Con wrap bajan de
+   linea recien ahi; en cualquier ancho normal siguen en una sola. */
+.local-tour__foot{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:12px}
 .local-tour__price{display:grid;align-content:end;margin:0;min-width:0}
 .local-tour__from{color:var(--ink2);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .local-tour__price b{color:var(--ink);font-family:var(--fh);font-size:23px;font-weight:800;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .local-tour__price span{color:var(--ink2);font-size:11px}
-.local-tour__actions{display:flex;flex:0 0 auto;align-items:center;gap:7px}
+/* flex:0 1 auto y no 0 0 auto: con basis auto el bloque tomaba su ancho
+   max-content y no podia angostarse, asi que el wrap nunca se activaba y en
+   una seccion de 240px el boton de reservar se salia 21px. cediendo el ancho,
+   los dos botones bajan de linea en vez de desbordar. */
+.local-tour__actions{display:flex;flex:0 1 auto;min-width:0;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:7px}
 /* Los dos botones quedan por encima del checkbox estirado (z-index), igual que
    el de detalle antes: si no, el clic los atraviesa y cambia la seleccion en
    vez de hacer lo que dicen. */
@@ -1104,16 +1124,26 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 @media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__slider::before,.destination-highlights__slider::after{width:54px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 54px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:200px}.featured-destination__overlay h3{font-size:25px}}
-@media(max-width:900px){.local-tours__grid{grid-template-columns:minmax(0,1fr)}}
+/* La card rota en columna cuando la SECCION se angosta, no cuando la ventana.
+   Este es el bug que rompio la primera version: la decision estaba en
+   @media(max-width:560px), o sea atada al ancho de la ventana, asi que una
+   seccion de 250px dentro de una ventana de 1400px se partia en dos columnas
+   de 250px y dejaba la ficha en 60px con los botones cortados. Una regla de
+   contenedor pregunta lo correcto: cuanto mide la seccion.
+
+   El piso es 400px, el mismo que el min() del grid, asi que las dos reglas
+   cuentan la misma historia: mientras haya lugar para dos cards, no hay lugar
+   para apilar. */
+@container tours (max-width:400px){
+  .local-tour{grid-template-columns:minmax(0,1fr)}
+  .local-tour__media{height:160px;min-height:0}
+}
 /* La card sin padding propio: la foto va a sangre hasta los bordes y el
    padding lo aporta el cuerpo. Con padding en la card (lo que había antes) la
    foto quedaba metida en un marco y el bloque se veía más estrecho que las
-   tarjetas de "Transporte local" y "Comidas".
-   Abajo de 560 la card rota en columna: una sola columna de 184px de foto con
-   el texto al lado deja la ficha en 130px, que no alcanza ni para el título.
-   La foto pasa a ser una franja de 168px arriba, como era antes, y el pie con
-   el precio y los dos botones se reparten en la fila completa. */
-@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tour{grid-template-columns:minmax(0,1fr)}.local-tour__media{height:168px;min-height:0}.local-tours__head{align-items:stretch;flex-direction:column;gap:12px}.local-tours__cta-wrap{align-items:stretch}.local-tours__reserve{width:100%}}
+   tarjetas de "Transporte local" y "Comidas". Acá ya no se apila la card, que
+   lo hace la regla de contenedor: esta media query es solo de la cabecera. */
+@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__head{align-items:stretch;flex-direction:column;gap:12px}.local-tours__cta-wrap{align-items:stretch}.local-tours__reserve{width:100%}}
 .flight-airline{flex-wrap:wrap}
 .flight-airline .cabin-badge{white-space:nowrap;background:var(--cel-soft);color:var(--ink)}
 /* z-index propio: #install-help es el ÚLTIMO modal del DOM, así que con el
