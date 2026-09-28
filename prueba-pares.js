@@ -168,5 +168,91 @@ console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a m
     subs.size === posible + 2, 'hay ' + subs.size + ', C(n,2) suma ' + posible);
 }
 
+console.log('\n7) El control de segunda parada ofrece los mismos pares');
+{
+  // El control "¿Sumás una segunda parada?" y el desplegable de Destino leen
+  // los mismos DESTINATION_GROUPS, pero por caminos distintos: el control arma
+  // su menú con comboGroups() y despues resuelve la segunda parada con
+  // secondKeyForSubcategory(). Si uno de los dos deja de filtrar por secondKey,
+  // la opción se sigue viendo pero abre un viaje de UNA sola parada: el error no
+  // da error, cobras el precio de otra cosa. Por eso se evaluan las funciones
+  // reales del archivo y no una copia.
+  //
+  // Brace matching a mano: ninguna de las dos tiene llaves dentro de un string,
+  // asi que contar {} alcanza y no hace falta traer un parser.
+  function extraerFuncion(nombre) {
+    const desde = app.indexOf('function ' + nombre + '(');
+    if (desde < 0) return null;
+    let nivel = 0;
+    for (let j = app.indexOf('{', desde); j < app.length; j++) {
+      if (app[j] === '{') nivel++;
+      else if (app[j] === '}') { nivel--; if (nivel === 0) return app.slice(desde, j + 1); }
+    }
+    return null;
+  }
+
+  const DESTINATION_GROUPS = [...gGrupos.matchAll(/\{ id: '([^']+)', label: '((?:[^'\\]|\\.)*)', image: '[^']*', keys: \[[^\]]*\], subcategories: \[([\s\S]*?)\n    \] \}/g)]
+    .map(g => ({
+      id: g[1], label: g[2],
+      subcategories: [...g[3].matchAll(/\{ label: '((?:[^'\\]|\\.)*)', key: '(\w+)'(?:, secondKey: '(\w+)')? \}/g)]
+        .map(s => ({ label: s[1], key: s[2], secondKey: s[3] || '' }))
+    }));
+
+  const srcCombo = extraerFuncion('comboGroups');
+  const srcSecond = extraerFuncion('secondKeyForSubcategory');
+  check('comboGroups() esta en app.js', !!srcCombo);
+  check('secondKeyForSubcategory() esta en app.js', !!srcSecond);
+  if (!srcCombo || !srcSecond) throw new Error('faltan las funciones del control');
+
+  const comboGroups = eval('(' + srcCombo + ')');
+  const secondKeyForSubcategory = eval('(' + srcSecond + ')');
+
+  const entradas = comboGroups();
+  const opciones = entradas.reduce((n, e) => n + e.pairs.length, 0);
+  console.log('   regiones: ' + entradas.length + ', pares: ' + opciones);
+  check('el control ofrece los ' + subs.size + ' pares', opciones === subs.size, opciones + ' pares');
+
+  // Cada opcion tiene que resolver a la MISMA segunda parada que la declara la
+  // subcategoria: es el dato que viaja en ?second= y el que decide el precio.
+  const sinResolver = [], conSecondDistinto = [];
+  for (const entrada of entradas) {
+    for (const sub of entrada.pairs) {
+      const second = secondKeyForSubcategory(sub.label, sub.key);
+      if (!second) sinResolver.push(sub.label);
+      else if (second !== sub.secondKey) conSecondDistinto.push(sub.label + ' -> ' + second + ' en vez de ' + sub.secondKey);
+    }
+  }
+  check('ninguna opcion queda sin segunda parada', sinResolver.length === 0, sinResolver.slice(0, 5).join(', '));
+  check('cada opcion resuelve la segunda parada que declara', conSecondDistinto.length === 0, conSecondDistinto.slice(0, 5).join(', '));
+
+  // Un par no puede aparecer en dos regiones: el menú los muestra por región y
+  // duplicado es un par que se ofrece dos veces.
+  const repetidos = new Map();
+  for (const e of entradas) for (const p of e.pairs) repetidos.set(p.label, (repetidos.get(p.label) || 0) + 1);
+  const duplos = [...repetidos.entries()].filter(([, n]) => n > 1).map(([l]) => l);
+  check('ningun par aparece dos veces', duplos.length === 0, duplos.join(', '));
+
+  const html = fs.readFileSync(raiz + 'public/index.html', 'utf8');
+  const css = fs.readFileSync(raiz + 'public/style.css', 'utf8');
+  check('index.html tiene el control #combo', html.indexOf('id="combo"') >= 0 && html.indexOf('id="combo-menu"') >= 0);
+  check('el control es un campo del formulario, no una seccion',
+    html.indexOf('combo-field') >= 0 && html.indexOf('id="combo"') < html.indexOf('id="btn-buscar-todos"'),
+    'el control tiene que estar antes del boton de buscar');
+  check('no quedo la seccion de pares que se habia descartado',
+    html.indexOf('trip-combos') < 0 && app.indexOf('trip-combos') < 0 && css.indexOf('.trip-combos') < 0);
+  check('el menu se arma con renderComboMenu() al arrancar',
+    app.indexOf('renderComboMenu();') > app.indexOf('function renderComboMenu'));
+  check('el precio de un par depende de las noches: el menu no muestra numeros',
+    !/class="custom-select__option"[\s\S]{0,600}?money\(/.test(app),
+    'renderComboMenu() usa money()');
+
+  // Sin esto, elegir el par por el desplegable de Destino dejaba el control de
+  // segunda parada mostrando un par viejo: los dos ofrecen lo mismo y tienen que
+  // verse iguales.
+  check('elegir por cualquiera de los dos lados sincroniza el otro',
+    app.indexOf('syncComboDisplay();') > app.indexOf('function selectDestination'),
+    'selectDestination() tiene que llamar a syncComboDisplay()');
+}
+
 console.log(fallos.length ? '\n' + fallos.length + ' FALLOS:\n - ' + fallos.join('\n - ') : '\nTODO OK');
 process.exit(fallos.length ? 1 : 0);

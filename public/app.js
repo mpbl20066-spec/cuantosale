@@ -857,6 +857,34 @@
     var section = document.getElementById('destination-highlights');
     if (section) section.hidden = !visible;
   }
+
+  // ---------- viajes de dos paradas ----------
+
+  // La ventana de fechas del mes que está elegido en las pestañas. La comparten
+  // las cards de "Ver propuesta" y el selector de segunda parada: tocar
+  // cualquiera de las dos cosas tiene que cotizar el mismo viaje, con las mismas
+  // fechas.
+  function activeFeatureWindow() {
+    var tab = document.querySelector('[data-feature-month].is-active');
+    var windows = featuredMonthWindows(6);
+    return windows[tab ? Number(tab.getAttribute('data-feature-month')) || 0 : 0] || windows[0];
+  }
+
+  // Los pares, agrupados por región. La fuente es
+  // DESTINATION_GROUPS[].subcategories y no una lista aparte: el selector de
+  // segunda parada y las opciones del desplegable de Destino tienen que ofrecer
+  // exactamente el mismo conjunto de combinaciones, y duplicar la lista es la
+  // forma más corta de que dejen de coincidir.
+  //
+  // Solo se ofrecen los grupos que tienen al menos un par. Buenos Aires y Foz
+  // de Iguazú no tienen ninguno (una sola parada cada uno) y un encabezado con
+  // cero opciones debajo se ve como un error.
+  function comboGroups() {
+    return DESTINATION_GROUPS.map(function (group) {
+      return { group: group, pairs: (group.subcategories || []).filter(function (sub) { return !!sub.secondKey; }) };
+    }).filter(function (entry) { return entry.pairs.length; });
+  }
+
   function renderDestinationHighlights(windowIndex, pricedByKey) {
     var root = document.getElementById('destination-highlights');
     if (!root) return;
@@ -4254,7 +4282,11 @@
     var firstNights = Math.max(1, Math.min(nights - 1, Number(trip.firstNights) || Math.floor(nights / 2)));
     var secondNights = nights - firstNights;
     var first = trip.stays[0], second = trip.stays[1];
-    var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '): aeropuerto → Búzios → Arraial do Cabo → aeropuerto. Incluye transfers de aeropuerto y ' + trip.transferBetweenLabel.toLowerCase() + ' (' + money(trip.transferBetweenUsd) + ' en total).';
+    // Los nombres de las paradas salen de trip.stays, no de una lista escrita a
+    // mano. Estaba fija en "Búzios → Arraial do Cabo" porque el único par que
+    // existía era ese; con los 88 la frase de logística le decía a alguien que
+    // venía a Paraty + Ilha Grande que su vuelo iba a Búzios y Arraial.
+    var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '): aeropuerto → ' + first.name + ' → ' + second.name + ' → aeropuerto. Incluye transfers de aeropuerto y ' + trip.transferBetweenLabel.toLowerCase() + ' (' + money(trip.transferBetweenUsd) + ' en total).';
     return '<section class="multistay-panel" aria-labelledby="multistay-title" data-multistay-panel>' +
       '<div class="multistay-panel__head"><div><span class="multistay-panel__eyebrow">ITINERARIO MULTIDESTINO</span><h2 id="multistay-title">Distribuí tus noches</h2></div><span class="multistay-panel__total">' + nights + (nights === 1 ? ' noche' : ' noches') + ' en total</span></div>' +
       (nights > 1 ? '<div class="multistay-panel__stays"><div class="multistay-panel__stay"><strong>' + esc(first.name) + '</strong><span><b data-multistay-first-nights>' + firstNights + '</b> ' + (firstNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-first-cost>' + money(0) + ' alojamiento estimado</small></div>' +
@@ -5134,6 +5166,10 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
       setDestDisplay(S.dest);
       closeDestMenu();
+      // El par también puede entrar por el desplegable de Destino: sin esto,
+      // elegir "Búzios + Arraial do Cabo" desde el menú dejaba el control de
+      // segunda parada mostrando un par viejo (o el placeholder).
+      syncComboDisplay();
       massSearch = false; updateDestinationMode(); syncTransportSelection();
       if (S.dest !== 'todos') schedule();
     }
@@ -5276,12 +5312,10 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         var choose = event.target.closest('[data-feature-search]');
         if (!choose) return;
         var group = DESTINATION_GROUPS.filter(function (item) { return item.id === choose.getAttribute('data-feature-search'); })[0];
-        var activeTab = document.querySelector('[data-feature-month].is-active');
-        var windowIndex = activeTab ? Number(activeTab.getAttribute('data-feature-month')) : 0;
-        var window = featuredMonthWindows(6)[windowIndex];
+        var window = activeFeatureWindow();
         if (!group || !window) return;
         // Misma zona y mismas fechas que las de la tarjeta: el precio mostrado
-        // y la propuesta que se abre tienen que ser la misma, siempre.
+        // y la propuesta que se abren tienen que ser la misma, siempre.
         var subcategory = featuredSubcategory(group, window);
         if (subcategory) {
           featuredProposalSelection = { monthIndex: window.month, subcategory: subcategory };
@@ -5360,10 +5394,178 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         }
       });
     }
+    var comboRoot = document.getElementById('combo');
+    var comboTrigger = document.getElementById('combo-trigger');
+    var comboMenu = document.getElementById('combo-menu');
+    var activeComboOption = null;
+
     document.addEventListener('click', function (e) {
       if (originPicker && !originPicker.contains(e.target)) closeOriginMenu(true);
       if (sel && !sel.contains(e.target)) closeDestMenu();
+      if (comboRoot && !comboRoot.contains(e.target)) closeComboMenu();
     });
+
+    /* ---------- segunda parada: los 88 pares ---------- */
+    // El menú se arma una vez, al arrancar, con la misma data que el desplegable
+    // de Destino (comboGroups()). No hay precios acá: el total de un par depende
+    // de cuántas noches van en cada parada, así que un número en el menú sería
+    // inventado.
+    function renderComboMenu() {
+      if (!comboMenu) return;
+      var bloques = comboGroups().map(function (entry) {
+        var opciones = entry.pairs.map(function (sub) {
+          return '<button type="button" class="custom-select__option" role="option" aria-selected="false"'
+            + ' data-combo-key="' + esc(sub.key) + '" data-combo-sub="' + esc(sub.label) + '"'
+            + ' id="combo-option-' + esc(sub.key) + '-' + entry.pairs.indexOf(sub) + '">'
+            + '<span class="custom-select__option-main">' + esc(sub.label) + '</span></button>';
+        }).join('');
+        return '<div class="custom-select__group"><span class="custom-select__group-title">'
+          + '<span>' + esc(entry.group.label) + '</span>'
+          + '<strong class="custom-select__group-count">' + entry.pairs.length + '</strong></span>'
+          + opciones + '</div>';
+      }).join('');
+      // "Un solo destino" va primero y no es un par: es la vuelta atrás. Sin él
+      // habría que tocar el desplegable de Destino para deshacer una elección.
+      comboMenu.innerHTML = '<button type="button" class="custom-select__option combo-clear" role="option" aria-selected="false" data-combo-clear>'
+        + '<span class="custom-select__option-main">Un solo destino</span>'
+        + '<span class="custom-select__option-sub">Sacar la segunda parada</span></button>' + bloques;
+    }
+
+    // El texto del control sale de S.subcategory en vez de guardarse aparte: es
+    // el mismo string que la opción del desplegable, así que elegir el par por
+    // cualquiera de los dos lados lo muestra en los dos.
+    function syncComboDisplay() {
+      if (!comboTrigger) return;
+      var label = S.second ? S.subcategory : '';
+      // Mientras el menú está abierto lo que hay en el input es la búsqueda en
+      // curso, no la selección: pisarlo sería borrar lo que se está tipeando.
+      if (comboMenu.hidden || document.activeElement !== comboTrigger) comboTrigger.value = label;
+      if (!comboMenu) return;
+      Array.prototype.forEach.call(comboMenu.querySelectorAll('.custom-select__option'), function (option) {
+        var selected = !!label && option.getAttribute('data-combo-sub') === label;
+        option.classList.toggle('is-selected', selected);
+        option.setAttribute('aria-selected', selected ? 'true' : 'false');
+      });
+    }
+
+    function clearActiveComboOption() {
+      if (activeComboOption) activeComboOption.classList.remove('is-active');
+      activeComboOption = null;
+      if (comboTrigger) comboTrigger.removeAttribute('aria-activedescendant');
+    }
+
+    function filterComboOptions(query, preserveActive) {
+      if (!comboMenu) return [];
+      var normalized = normalizeDestQuery(query);
+      var visible = [];
+      Array.prototype.forEach.call(comboMenu.querySelectorAll('.custom-select__option'), function (option) {
+        var matches = !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
+        option.hidden = !matches;
+        option.style.display = matches ? 'flex' : 'none';
+        if (matches) visible.push(option);
+      });
+      // El grupo entero se va con sus opciones: un encabezado de región con
+      // cero opciones debajo se lee como algo roto.
+      Array.prototype.forEach.call(comboMenu.querySelectorAll('.custom-select__group'), function (group) {
+        var hasVisible = !!group.querySelector('.custom-select__option:not([hidden])');
+        group.hidden = !hasVisible;
+        group.style.display = hasVisible ? 'block' : 'none';
+      });
+      if (!preserveActive || activeComboOption && activeComboOption.hidden) clearActiveComboOption();
+      return visible;
+    }
+
+    function setActiveComboOption(option) {
+      clearActiveComboOption();
+      if (!option || !comboTrigger) return;
+      activeComboOption = option;
+      activeComboOption.classList.add('is-active');
+      comboTrigger.setAttribute('aria-activedescendant', option.id);
+      option.scrollIntoView({ block: 'nearest' });
+    }
+
+    function closeComboMenu() {
+      if (!comboMenu || !comboTrigger || !comboRoot) return;
+      comboMenu.hidden = true;
+      comboTrigger.setAttribute('aria-expanded', 'false');
+      comboRoot.classList.remove('is-open');
+      syncComboDisplay();
+    }
+
+    function openComboMenu() {
+      if (!comboMenu || !comboTrigger || !comboRoot) return;
+      comboMenu.hidden = false;
+      comboTrigger.setAttribute('aria-expanded', 'true');
+      comboRoot.classList.add('is-open');
+    }
+
+    function chooseCombo(option) {
+      if (!option) return;
+      if (option.hasAttribute('data-combo-clear')) {
+        // Sacar la segunda parada sin perder la zona: si la subcategoría actual
+        // es un par se va, y si era una zona ("Ruta de Playas") se queda.
+        var eraPar = !!secondKeyForSubcategory(S.subcategory, S.dest);
+        selectDestination(S.dest, eraPar ? '' : S.subcategory);
+        return;
+      }
+      // selectDestination() es el único camino para cotizar: saca el secondKey
+      // de la subcategoría, arma la query con ?second= y dispara la búsqueda.
+      // Escribir la query a mano saltearía los dos primeros pasos y el par se
+      // cotizaría como si fuera de una sola parada.
+      pendingDestinationScroll = true;
+      selectDestination(option.getAttribute('data-combo-key'), option.getAttribute('data-combo-sub'));
+    }
+
+    if (comboRoot && comboTrigger && comboMenu) {
+      renderComboMenu();
+      syncComboDisplay();
+      // Se escucha por delegación sobre el menú, no por opción: son 89 botones.
+      comboMenu.addEventListener('click', function (event) {
+        var option = event.target.closest('.custom-select__option');
+        if (!option || option.hidden) return;
+        event.preventDefault();
+        event.stopPropagation();
+        chooseCombo(option);
+        closeComboMenu();
+      });
+      comboTrigger.addEventListener('click', function () {
+        if (comboMenu.hidden) { comboTrigger.value = ''; filterComboOptions(''); openComboMenu(); }
+      });
+      comboTrigger.addEventListener('focus', function () {
+        if (comboMenu.hidden) { comboTrigger.value = ''; filterComboOptions(''); openComboMenu(); }
+      });
+      comboTrigger.addEventListener('input', function () {
+        filterComboOptions(comboTrigger.value);
+        openComboMenu();
+      });
+      comboTrigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeComboMenu(); return; }
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (comboMenu.hidden) openComboMenu();
+          var visibles = filterComboOptions(comboTrigger.value, true);
+          if (!visibles.length) return;
+          var i = activeComboOption ? visibles.indexOf(activeComboOption) : -1;
+          i = e.key === 'ArrowDown' ? (i + 1) % visibles.length : (i <= 0 ? visibles.length - 1 : i - 1);
+          setActiveComboOption(visibles[i]);
+        } else if (e.key === 'Enter' && !comboMenu.hidden) {
+          e.preventDefault();
+          // Igual que el desplegable de Destino: Enter toma la opción activa, o
+          // la primera que arranca con lo tipeado, o la primera que haya.
+          var matches = filterComboOptions(comboTrigger.value, true);
+          var option = activeComboOption;
+          if (!option) {
+            var q = normalizeDestQuery(comboTrigger.value);
+            var conKey = matches.filter(function (candidate) { return !candidate.hasAttribute('data-combo-clear'); });
+            option = (q && conKey.filter(function (candidate) {
+              var label = candidate.querySelector('.custom-select__option-main');
+              return label && normalizeDestQuery(label.textContent).indexOf(q) === 0;
+            })[0]) || conKey[0] || matches[0];
+          }
+          if (option) { chooseCombo(option); closeComboMenu(); }
+        }
+      });
+    }
     sel.addEventListener('change', function () {
       selectDestination(sel.value);
     });

@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=83">
+<link rel="stylesheet" href="/style.css?v=89">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -57,6 +57,24 @@
             <span class="custom-select__option-sub">Buscar por mi presupuesto</span>
           </button>
         </div>
+      </div>
+    </div>
+    <!-- Los 88 pares de dos paradas. Antes solo se llegaban dentro del desplegable
+         de Destino, al final de cada hub: había que abrir el selector, bajar
+         hasta el final de la lista y leer una línea de "Viajes de dos paradas".
+         Un control propio en el formulario los deja a la vista sin tapar la
+         página: cerrado es una fila, y quien quiere dos paradas lo pide a
+         propósito en vez de encontrárselo de paso.
+         El menú lo pinta app.js desde DESTINATION_GROUPS, la misma fuente de
+         verdad que el desplegable de Destino, así que los dos ofrecen
+         exactamente los mismos pares. -->
+    <div class="combo-field">
+      <label for="combo-trigger">¿Sumás una segunda parada?</label>
+      <div id="combo" class="custom-select" aria-label="Viaje de dos paradas">
+        <div class="custom-select__control">
+          <input id="combo-trigger" class="custom-select__trigger" type="text" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="combo-menu" autocomplete="off" spellcheck="false" placeholder="Opcional — elegí las dos paradas">
+        </div>
+        <div id="combo-menu" class="custom-select__menu" role="listbox" aria-label="Pares de destinos disponibles" hidden></div>
       </div>
     </div>
     <div class="date-range-picker">
@@ -151,7 +169,7 @@
      con `npm run build:transfer`. Va antes de app.js porque las cards del
      transfer leen de acá cuando el server todavía no mandó meta.officialTransfer. -->
 <script defer src="/transfer-precios.js"></script>
-<script defer src="/app.js?v=105"></script>
+<script defer src="/app.js?v=112"></script>
 
 </body>
 </html>

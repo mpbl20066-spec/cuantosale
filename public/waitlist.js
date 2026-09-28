@@ -3,9 +3,12 @@
   var app = document.getElementById('waitlist-app');
   var supabaseClient = null;
   var sdkPromise = null;
-  // Tope real que se piensa sostener para la Beta (no depende del conteo
-  // real de anotados, que puede ser bajo al arrancar sin restar tracción).
-  var BETA_CAP = 500;
+  // Tope de la Beta. Bajó de 500 a 100 porque con 15 anotados el "500" se
+  // leía como una cifra inventada: cualquiera hacía la cuenta y veía que
+  // faltaba el 97% del cupo, y esa sensación de "no va a pasar nada" se
+  // llevaba el signup. Un número que se puede alcanzar de verdad se lee
+  // como un límite, y la escasez suma en vez de restar.
+  var BETA_CAP = 100;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function refCodeFromUrl() {
@@ -38,7 +41,7 @@
 
   // Contador público. waitlist_count() ya está definida y con permiso para
   // anon en supabase.sql, así que el número que se muestra es real siempre:
-  // el "500 cupos" de más abajo es un tope que se piensa sostener, pero el
+  // el tope de cupos de más abajo es un número que se piensa sostener, pero el
   // conteo de anotados no se maquilla ni se oculta.
   //
   // La línea nace oculta y solo se revela si el RPC responde: si la función

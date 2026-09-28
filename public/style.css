@@ -148,6 +148,17 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .custom-select__group-title,.custom-select__pairs-note{display:flex;align-items:center;gap:7px;padding:12px 12px 8px;margin-top:2px;margin-bottom:2px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);font-weight:750;background:transparent;line-height:1.4}
 .custom-select__hub-icon{font-size:12px;line-height:1}
 .custom-select__hub-code{margin-left:auto;padding:3px 6px;border:1px solid rgba(16,35,62,.12);border-radius:6px;background:#edf3ff;color:#10233e;font-size:10px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+/* ---------- segunda parada ----------
+   El control de "¿Sumás una segunda parada?" es un .custom-select más: mismo alto,
+   mismo borde y mismo menú, así que se lee como parte del formulario y no como
+   un agregado. El label del formulario es más largo que los otros, y se le da
+   menos peso para no competir con "Destino": la segunda parada es opcional. */
+.combo-field label{color:var(--ink2);font-weight:600}
+.custom-select__group-count{margin-left:auto;padding:2px 6px;border-radius:6px;background:var(--cel-soft);color:var(--cel);font-size:10px;font-weight:800;line-height:1.5}
+/* "Un solo destino" es la vuelta atrás, no un par: va arriba de todo y separado
+   del primer encabezado de región para que no se lea como si fuera uno más. */
+.combo-clear{margin-bottom:6px;padding-bottom:13px;border-bottom:1px solid var(--line);border-radius:0 0 12px 12px}
+.combo-clear.is-selected{background:var(--selected-bg)}
 .custom-select__option{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;width:100%;padding:13px 14px 13px 18px;border:0;border-left:3px solid transparent;border-radius:12px;background:transparent;color:var(--ink);text-align:left;cursor:pointer;transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
 .custom-select__option:hover,.custom-select__option:focus-visible,.custom-select__option.is-active{background:var(--control-hover);outline:none}
 .custom-select__option.is-selected{background:var(--cel-soft);border-left-color:var(--cel);color:var(--ink);box-shadow:0 8px 18px rgba(16,35,62,.08)}
@@ -380,11 +391,28 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .hotel-type-filter select:hover{border-color:var(--control-muted)}
 .hotel-type-filter select:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
 @media (max-width:560px){.hotel-type-filter{max-width:none}}
-.hotel-choice{display:flex;align-items:center;gap:7px;cursor:pointer}/* El radio toma el mismo ambar del marco de seleccion. Antes usaba --cel
-   (azul): con la card elegida en ambar, el radio marcado quedaba azul arriba
-   de una card ambar, o sea dos colores para la misma senal de "elegiste esto".
-   --card-sel-border da 3.1:1 sobre blanco, que es lo que pide un control. */
-.hotel-choice input{accent-color:var(--card-sel-border);width:17px;height:17px}.hotel-choice .hotel-badge{margin:0}
+/* El radio ya no se ve, pero no se saca del DOM: sigue siendo el control que
+   el teclado tabula, el que hace que un clic en cualquier punto de la card
+   cambie el hotel (la card entera es el label) y el que :has(:checked) mira
+   para pintar el marco, el fondo y el boton "Elegir este hotel". Por eso
+   queda en 1px con opacity 0 y no en display:none, que lo sacaria del
+   recorrido del teclado y dejaria la card sin forma de elegirse con teclado.
+
+   El circulo se habia vuelto a pintar en 1288c80 porque un merge se habia
+   comido el commit 561c7bd que lo sacaba. Pero era el UNICO radio visible de
+   los cinco grupos donde se elige algo: tours, destinos, propuestas y
+   presupuesto diario esconden su input y se comunican solo con el marco y el
+   fondo. El hotel era el unico con un punto de ambar adentro de un circulo, y
+   se leia como un control de otra familia. Ademas ocupaba justo el lugar donde
+   se lee el badge ("Recomendado", "Buena opcion"), que es el dato que si
+   distingue a las tres tarjetas entre si.
+
+   position:relative en el wrapper ancla el input de 1px al badge. Sin el, el
+   input se posicionaba contra el ancestro posicionado mas cercano —que puede
+   estar en otra seccion de la pagina— y al tabular el teclado el navegador
+   hacia scroll hasta ahi. */
+.hotel-choice{position:relative;display:flex;align-items:center;cursor:pointer}
+.hotel-choice input{position:absolute;width:1px;height:1px;margin:0;padding:0;opacity:0;pointer-events:none}.hotel-choice .hotel-badge{margin:0}
 /* La card entera es la etiqueta del radio (ver hotelOptions() en app.js): el
    label envuelve imagen, badge, nombre, descripción y precios, así que no hay
    que acertarle a una tira de 26px para cambiar de hotel. Los enlaces quedan
@@ -837,6 +865,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .featured-destination__search:hover{filter:brightness(1.14);transform:translateY(-1px)}
 .featured-destination__search:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
 @media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__slider::before,.destination-highlights__slider::after{width:54px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 54px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:200px}.featured-destination__overlay h3{font-size:25px}}
 @media(max-width:900px){.local-tours__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* La card sin padding propio: la foto va a sangre hasta los bordes y el
