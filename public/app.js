@@ -1951,6 +1951,21 @@
     if (!d) return '';
     return '<svg class="trip-summary__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:var(' + (colorVar || 'c1') + ')" aria-hidden="true">' + d + '</svg>';
   }
+  /* Logos de los botones del resumen. El resto de los iconos de la app son de
+     trazo y salen de CATEGORY_ICONS; los de marca van dibujados porque es la
+     única forma en que se reconocen, y heredan currentColor para que el
+     WhatsApp sea verde en un botón y el resto blanco en el de Instagram. */
+  var BRAND_ICONS = {
+    instagram: '<rect x="3.4" y="3.4" width="17.2" height="17.2" rx="5.4" stroke-width="1.9"/><circle cx="12" cy="12" r="4.1" stroke-width="1.9"/><circle cx="16.9" cy="7.1" r="1.15" fill="currentColor" stroke="none"/>',
+    whatsapp: '<path fill="currentColor" stroke="none" d="M12.04 2.6a9.3 9.3 0 0 0-7.9 14.1l-1.3 4.7 4.8-1.25a9.3 9.3 0 1 0 4.4-17.55Zm0 1.9a7.4 7.4 0 0 1 6.3 11.3 7.4 7.4 0 0 1-8.9 3.05l-.25-.15-2.1.55.56-2.05-.2-.27a7.4 7.4 0 0 1 4.6-12.43Zm-3.03 4.3c-.13 0-.35.05-.53.25-.18.2-.7.68-.7 1.66 0 .98.72 1.93.82 2.07.1.13 1.4 2.22 3.45 3.02 1.7.67 2.05.54 2.42.5.37-.03 1.19-.48 1.36-.96.17-.48.17-.88.11-.96-.05-.09-.18-.14-.38-.22-.2-.09-1.19-.59-1.37-.65-.18-.07-.32-.11-.45.1-.14.22-.53.66-.65.79-.12.13-.24.15-.44.05-.2-.1-.85-.31-1.62-1-.6-.53-1-1.19-1.11-1.39-.12-.2-.02-.32.09-.42.09-.09.2-.23.3-.36.1-.12.14-.2.2-.33.07-.13.04-.25-.02-.35-.06-.1-.45-1.1-.62-1.5-.16-.39-.32-.34-.45-.35h-.38Z"/>',
+    guardar: '<path d="M6.6 3.6h10.8v16.8L12 16.5l-5.4 3.9V3.6Z"/>',
+    dividir: '<circle cx="9.6" cy="8" r="3"/><path d="M4.2 19.4c0-3 2.4-5 5.4-5s5.4 2 5.4 5"/><path d="M16.2 5.7a3 3 0 0 1 0 5.6M17.6 14.9c1.4.7 2.2 2.1 2.2 4"/>'
+  };
+  function brandIcon(key) {
+    var d = BRAND_ICONS[key];
+    if (!d) return '';
+    return '<svg class="voucher-btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+  }
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
@@ -2354,8 +2369,12 @@
   }
   function shareStoryCard(button) {
     if (!detailState || !detailState.meta) return;
-    var originalLabel = button ? button.textContent : '';
-    if (button) { button.disabled = true; button.textContent = '⏳ Generando imagen…'; }
+    // El texto del botón va en un <span> adentro, con el logo de Instagram al
+    // lado: cambiar button.textContent en los estados de "generando" borraría
+    // el svg y el botón se quedaría sin logo para el resto de la sesión.
+    var labelNode = button && button.querySelector('.voucher-btn__label');
+    var originalLabel = labelNode ? labelNode.textContent : (button ? button.textContent : '');
+    if (button) { button.disabled = true; if (labelNode) labelNode.textContent = 'Generando imagen…'; else button.textContent = '⏳ Generando imagen…'; }
     var budget = getBudgetBreakdown(detailState);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var totals = {
@@ -2388,7 +2407,11 @@
       alert(e && e.message || 'No pudimos generar la imagen para compartir. Probá de nuevo en un momento.');
     }).finally(function () {
       if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-      if (button) { button.disabled = false; button.textContent = originalLabel || '📸 Compartir en Instagram'; }
+      if (button) {
+        button.disabled = false;
+        if (labelNode) labelNode.textContent = originalLabel || 'Compartir en Instagram';
+        else button.textContent = originalLabel;
+      }
     });
   }
   /* ---------- Resumen final del itinerario ----------
@@ -2429,39 +2452,72 @@
     summaryText = summaryText.replace('Traslado: ' + (transferLabel || 'A coordinar'), 'Traslado: ' + transferModeLabel);
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
     var toursBookUrl = toursWhatsappUrl(detailState);
+    // El alojamiento no tenía acción propia en la versión anterior, solo el
+    // precio de referencia. Con la fila en una línea, el enlace de
+    // disponibilidad entra en el mismo lugar que el de los otros rubros.
+    var hotelBookUrl = detailState.selectedHotel === false ? null : bookingUrl(detailState.meta, { hotel: selectedHotelName });
+    /* Un tramo del vuelo es una línea: acá no hacen falta el nombre completo del
+       aeropuerto ni la aerolínea repetida, que ya están en el título de la fila. */
+    function legLine(label, origin, destination, departureText, arrivalText, flightNumber) {
+      return '<p class="voucher-item__line"><span class="voucher-item__tag">' + esc(label) + '</span>' + esc(airportCode(origin)) + ' ' + esc(departureText) + ' &rarr; ' + esc(airportCode(destination)) + ' ' + esc(arrivalText) + (flightNumber ? ' · ' + esc(flightNumber) : '') + '</p>';
+    }
+    // formatFlightDateTime() escribe "16 dic. 2026, 06:15 a. m.", que está hecho
+    // para una tarjeta ancha. En una fila eso son tres líneas por tramo, así que
+    // acá sale día-mes y hora; si el vuelo no trae la fecha cruda se usa el
+    // texto largo como estaba.
+    function flightTime(value, fallback) {
+      var date = value ? new Date(value) : null;
+      if (!date || Number.isNaN(date.getTime())) return fallback || '';
+      return date.toLocaleDateString('es-UY', { day: '2-digit', month: 'short' }).replace(/\./g, '') + ' ' + date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+    }
+    // Los tramos crudos salen de la misma oferta que ya usa
+    // getSelectedFlightSummary(); solo se leen para el formato corto.
+    var selectedOffer = getSelectedFlightOffer();
+    var outLeg = (selectedOffer && (selectedOffer.outbound || (Array.isArray(selectedOffer.slices) && selectedOffer.slices[0]))) || selectedOffer || {};
+    var inLeg = (selectedOffer && (selectedOffer.inbound || (Array.isArray(selectedOffer.slices) && selectedOffer.slices[1]))) || null;
+    // El ícono sale de los mismos CATEGORY_ICONS y del mismo color de categoría
+    // que usa el panel "Mi Viaje" y el desglose, para que el mismo rubro se vea
+    // igual en los tres lugares.
+    function itemRow(category, title, detailMarkup, amount, ctaMarkup) {
+      return '<li class="voucher-item"><span class="voucher-item__icon" style="color:var(' + getCategoryColor(category) + ')">' + categoryIcon(category) + '</span>' +
+        '<div class="voucher-item__body"><p class="voucher-item__title">' + title + '</p>' + detailMarkup + '</div>' +
+        '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + money(amount) + '</b>' + (ctaMarkup || '') + '</div></li>';
+    }
+    // "Reservar" es un enlace cuando hay una URL y un botón apagado cuando no la
+    // hay: que falte el vuelo o los tours se ve en el resumen, igual que se ve
+    // en la lista de la página.
+    function bookCta(url, label, labelFor) {
+      return url
+        ? '<a class="voucher-item__cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(labelFor) + '">' + esc(label) + '</a>'
+        : '<button type="button" class="voucher-item__cta is-off" disabled>' + esc(label) + '</button>';
+    }
+    var flightLines = legLine('Ida', flightSummary.origin, flightSummary.destination, flightTime(outLeg.departure, flightSummary.departureText), flightTime(outLeg.arrival, flightSummary.arrivalText), flightSummary.flightNumber);
+    if (flightSummary.isRoundTrip) flightLines += legLine('Vuelta', flightSummary.returnOrigin, flightSummary.returnDestination, flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText), flightTime(inLeg && inLeg.arrival, flightSummary.returnArrivalText), flightSummary.inboundFlightNumber);
+    var flightTitle = 'Vuelo' + (flightSummary.airline ? ' · ' + esc(flightSummary.airline) : '');
+    var transferTitle = detailState.transferType === 'private' ? 'Traslado privado' : (detailState.transferType === 'shared' ? 'Traslado compartido' : 'Traslado');
+    var transferWhere = transferState.hotelName || selectedHotelName;
+    var transferNote = 'Recogida ' + esc(transferLabel || 'a coordinar') + (transferWhere && transferWhere !== 'Sin alojamiento' ? ' · hacia ' + esc(transferWhere) : '');
+    var toursTitle = 'Tours y actividades' + (selectedTours.length ? ' · ' + selectedTours.length + (selectedTours.length === 1 ? ' elegida' : ' elegidas') : '');
+    // findSelectedHotelDetail() devuelve un texto genérico cuando no encontró la
+    // card; en ese caso no hay nada que decir y la fila queda solo con el monto.
+    var hotelNote = selectedHotelDetail && selectedHotelDetail !== 'Alojamiento seleccionado' ? '<p class="voucher-item__detail">' + esc(selectedHotelDetail) + '</p>' : '';
+    var destinoTotal = localTotal + foodTotal;
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<div class="voucher-head"><span class="voucher-kicker">CuantoSale · Voucher digital</span><h2 id="itinerary-summary-title">Resumen final del itinerario</h2><p>' + esc(detailState.meta.dest.name) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</p></div>' +
-      '<div class="voucher-total"><span>Total general estimado</span><strong>' + money(totalGeneral) + '</strong><div class="voucher-total__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</div><small>Calculado para ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ' · Vuelo + hotel + traslados + tours + operación en destino</small></div>' +
-      '<div class="voucher-grid"><div class="voucher-card"><span class="voucher-icon">✈️</span><div><small>Vuelo seleccionado</small><strong>' + esc(flightSummary.airline) + '</strong><p>' + esc(flightSummary.summary) + '</p><b>' + money(flightTotal) + '</b></div></div>' +
-      '<div class="voucher-card"><span class="voucher-icon">🏨</span><div><small>Alojamiento</small><strong>' + esc(selectedHotelName) + '</strong><p>Reserva de referencia en Booking.com</p><b>' + money(hotelTotal) + '</b></div></div>' +
-      '<div class="voucher-card"><span class="voucher-icon">🚐</span><div><small>Traslado</small><strong>' + esc(transferLabel || 'A coordinar') + '</strong><p>Destino: ' + esc(transferState.hotelName || selectedHotelName) + '</p><b>' + money(transferTotal) + '</b></div></div>' +
-      '<div class="voucher-card"><span class="voucher-icon">🎟️</span><div><small>Tours y actividades</small><strong>' + esc(toursLabel) + '</strong><p>' + esc(toursDetail) + '</p><b>' + money(toursTotal) + '</b></div></div></div>' +
-      '<div class="voucher-section"><div class="voucher-section__title"><span>📍</span><div><h3>Presupuesto Operativo en Destino</h3><p>Valores según tus elecciones y la duración del viaje</p></div></div><div class="voucher-breakdown"><div><span>🚕 Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + ' total</em></div><div><span>🍽️ Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + ' total</em></div></div></div>' +
-      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>📸 Compartir en Instagram</button><button type="button" class="voucher-whatsapp" data-share-whatsapp>🟢 Enviar itinerario por WhatsApp</button><button type="button" class="voucher-copy" data-save-trip>☁️ Guardar este viaje</button><button type="button" class="voucher-copy" data-split-trip>🤝 Dividir viaje con amigos</button><span class="voucher-copy-status" data-copy-status aria-live="polite"></span></div>';
+      '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
+      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div><span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span></div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +
+      '<ul class="voucher-list">' +
+      itemRow('pasajes', flightTitle, flightLines, flightTotal, bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline)) +
+      itemRow('alojamiento', 'Alojamiento · ' + esc(selectedHotelName), hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName) : '') +
+      itemRow('traslados', transferTitle, '<p class="voucher-item__detail">' + transferNote + '</p>', transferTotal, '<button type="button" class="voucher-item__cta" data-coordinate-transfer aria-label="Coordinar el traslado al aeropuerto">Coordinar</button>') +
+      itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, bookCta(toursBookUrl, 'Reservar tours', 'Reservar las actividades')) +
+      '</ul>' +
+      '<section class="voucher-destino"><div class="voucher-destino__head"><h3>Gastos en destino</h3><p>Por día y total del viaje</p></div><ul class="voucher-destino__list"><li><span>Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + '</em></li><li><span>Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + '</em></li></ul><p class="voucher-destino__total">Total en destino <b>' + money(destinoTotal) + '</b></p></section>' +
+      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Compartir en Instagram</span></button><div class="voucher-actions__more">' +
+      '<button type="button" class="voucher-chip" data-share-whatsapp aria-label="Enviar el itinerario por WhatsApp">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">WhatsApp</span></button>' +
+      '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
+      '<button type="button" class="voucher-chip" data-split-trip aria-label="Dividir el viaje con amigos">' + brandIcon('dividir') + '<span class="voucher-btn__label">Dividir</span></button>' +
+      '</div></div>';
     modal.dataset.summaryText = summaryText;
-    var voucherCards = modal.querySelectorAll('.voucher-card');
-    if (voucherCards[0]) {
-      var flightContent = voucherCards[0].querySelector('div');
-      if (flightContent) {
-        var legMarkup = '<div class="voucher-flight-legs"><div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Ida</span><strong>' + esc(flightSummary.outboundAirline || flightSummary.airline) + (flightSummary.flightNumber ? ' · ' + esc(flightSummary.flightNumber) : '') + '</strong><span>' + esc((flightSummary.origin && (flightSummary.origin.name || flightSummary.origin.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.origin) || '---') + ') &rarr; ' + esc((flightSummary.destination && (flightSummary.destination.name || flightSummary.destination.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.destination) || '---') + ')</span><small>' + esc(flightSummary.departureText) + ' &rarr; ' + esc(flightSummary.arrivalText) + '</small></div>';
-        if (flightSummary.isRoundTrip) legMarkup += '<div class="voucher-flight-leg"><span class="voucher-flight-leg__label">Vuelta</span><strong>' + esc(flightSummary.inboundAirline || flightSummary.airline) + (flightSummary.inboundFlightNumber ? ' · ' + esc(flightSummary.inboundFlightNumber) : '') + '</strong><span>' + esc((flightSummary.returnOrigin && (flightSummary.returnOrigin.name || flightSummary.returnOrigin.code)) || 'Destino') + ' (' + esc(airportCode(flightSummary.returnOrigin) || '---') + ') &rarr; ' + esc((flightSummary.returnDestination && (flightSummary.returnDestination.name || flightSummary.returnDestination.code)) || 'Origen') + ' (' + esc(airportCode(flightSummary.returnDestination) || '---') + ')</span><small>' + esc(flightSummary.returnDepartureText) + ' &rarr; ' + esc(flightSummary.returnArrivalText) + '</small></div>';
-        legMarkup += '</div>';
-        flightContent.innerHTML = '<small>' + (flightSummary.isRoundTrip ? 'Vuelo seleccionado · Ida y vuelta' : 'Vuelo seleccionado') + '</small><strong>' + esc(flightSummary.airline) + '</strong>' + legMarkup + '<b>' + money(flightTotal) + '</b>';
-      }
-    }
-    if (voucherCards[2]) {
-      var transferStrong = voucherCards[2].querySelector('strong');
-      if (transferStrong) transferStrong.textContent = transferModeLabel;
-      var transferText = voucherCards[2].querySelector('p');
-      if (transferText) transferText.textContent = 'Hacia ' + (transferState.hotelName || selectedHotelName);
-    }
-    if (voucherCards[1]) {
-      var hotelContent = voucherCards[1].querySelector('div');
-      if (hotelContent) hotelContent.innerHTML = '<small>Alojamiento seleccionado</small><strong>' + esc(selectedHotelName) + '</strong><p>' + esc(selectedHotelDetail) + '</p><b>' + money(hotelTotal) + '</b>';
-    }
-    if (voucherCards[0]) voucherCards[0].querySelector('div').insertAdjacentHTML('beforeend', flightBookUrl ? '<a class="voucher-card__action" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer">✈️ Reservar Vuelo</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>✈️ Reservar Vuelo</button>');
-    if (voucherCards[2]) voucherCards[2].querySelector('div').insertAdjacentHTML('beforeend', '<button type="button" class="voucher-card__action voucher-card__action--button" data-coordinate-transfer>🚐 Coordinar traslado</button>');
-    if (voucherCards[3]) voucherCards[3].querySelector('div').insertAdjacentHTML('beforeend', toursBookUrl ? '<a class="voucher-card__action" href="' + esc(toursBookUrl) + '" target="_blank" rel="noopener noreferrer">🎟️ Reservar Tours</a>' : '<button type="button" class="voucher-card__action voucher-card__action--button" disabled>🎟️ Reservar Tours</button>');
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
   }
   function syncDailyBudgetState() {
