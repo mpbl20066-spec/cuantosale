@@ -1175,6 +1175,22 @@
     if (detailState) {
       try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar el total al cambiar de moneda', e); }
       try { repintarPreciosEnMoneda(); } catch (e) { console.error('No se pudieron repintar los precios de hotel y traslado al cambiar de moneda', e); }
+      /* El checkout se dibujo con la moneda anterior y nadie lo volvia a pintar:
+         cambiar la moneda con el modal abierto dejaba el total en "US$ 56" al
+         lado de una pagina que ya estaba en reales, y el paso de medios de pago
+         con la cuenta en dolares. Es el mismo forgets de las secciones, pero
+         todavia mas grave porque el modal tapa la pagina y el unico numero que
+         se ve es ese.
+
+         renderCheckout() rearma el paso corriente desde checkoutState, asi que
+         alcanza con re-dibujar. El readCheckoutForm() va ANTES para no perder
+         lo que la persona escribio y todavia no confirmo con "Continuar". */
+      if ($('#booking-modal .checkout-dialog')) {
+        try {
+          readCheckoutForm();
+          renderCheckout();
+        } catch (e) { console.error('No se pudo repintar el checkout al cambiar de moneda', e); }
+      }
     }
     if (lastData) { try { render(lastData); } catch (e) { console.error('No se pudo repintar los resultados al cambiar de moneda', e); } }
   }
@@ -1751,7 +1767,14 @@
           var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
           var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
           var imageUrl = sanitizeHotelImageUrl(option && option.image && typeof option.image === 'string' ? option.image : '', '');
-          var imageMarkup = imageUrl ? '<div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.removeAttribute(\'src\');"></div>' : '<div class="hotel-image-wrap hotel-image-empty"><span>Sin foto disponible</span></div>';
+          // La foto es una columna de la card, no una franja: va FUERA del <label>
+          // para que ocupe todo el alto de la ficha en vez de dejar un escalón
+          // de blanco abajo, donde van el precio y las acciones. Tocar la foto
+          // sigue eligiendo el hotel porque el click lo atiende el handler de
+          // [data-hotel-option], que ya es la única fuente de verdad del estado
+          // (ver el bloque de hotelCard más abajo). Fuera del label el alt deja de
+          // duplicar el nombre que ya dice el h3.
+          var imageMarkup = imageUrl ? '<span class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.removeAttribute(\'src\');"></span>' : '<span class="hotel-image-wrap hotel-image-empty"><span>Sin foto disponible</span></span>';
           var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
           var similarMarkup = similar ? '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details>' : '';
           var descriptionMarkup = option.description ? '<p class="hotel-description">' + esc(option.description) + '</p>' : '';
@@ -1761,8 +1784,8 @@
           // justo a esa tira para cambiar de hotel. Es el paso que decide la
           // reserva, y el peor objetivo táctil de la app.
           //
-          // El input sigue visible (es la señal de que esto se elige), pero el
-          // label ahora cubre todo lo visual. Los enlaces de Booking y el
+          // El input sigue invisible (es la señal de que esto se elige), pero el
+          // label cubre todo el texto de la ficha. Los enlaces de Booking y el
           // <details> de "hoteles similares" quedan FUERA del label a propósito:
           // dentro de un label no se pueden pulsar con normalidad.
           // El marcado sale de lo que la persona elegio, no de "recommended": al
@@ -1774,23 +1797,40 @@
           // El name del radio lleva la parada: con un solo "hotel-choice" los
           // grupos se deseleccionarian entre si, porque son el mismo grupo de
           // radios y en HTML solo puede haber uno marcado.
-          return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option data-hotel-stop="' + (isPar ? stop : '') + '">' +
-            '<label class="hotel-option__pick">' + imageMarkup +
+          //
+          // El precio y las acciones van en un pie propio, FUERA del label: son
+          // datos y no parte del nombre, y sobre todo el enlace de Booking tiene
+          // que quedar fuera. El pie es una fila con el precio a la izquierda y
+          // las dos acciones a la derecha, igual que .local-tour__foot de las
+          // experiencias, así las dos secciones de la página se leen igual.
+          return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option data-hotel-stop="' + (isPar ? stop : '') + '">' + imageMarkup +
+            '<label class="hotel-option__pick">' +
             '<span class="hotel-choice"><input type="radio" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
-            '<h3>' + esc(option.name) + '</h3>' + descriptionMarkup +
+            '<span class="hotel-body">' +
+            '<h3 class="hotel-name">' + esc(option.name) + '</h3>' + descriptionMarkup +
             '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + (isPar ? ' · ' + stopNights + ' en ' + esc(stopName) : '') + '.</p>' +
-            '<div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div>' +
-            '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong>' +
-            '<span class="hotel-pick-hint">Elegir este hotel</span>' +
-            '</label>' +
-            '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
+            '</span></label>' +
+            '<div class="hotel-foot">' +
+            '<p class="hotel-price"><span class="hotel-price__from">Desde</span><span class="hotel-price__line"><b>' + money(nightlyValue) + '</b><span>por noche</span></span>' +
+            '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong></p>' +
+            '<div class="hotel-actions">' +
+            // Los dos textos del boton conviven en el DOM y el CSS muestra uno u
+            // otro segun el estado. Antes el boton de la card elegida decia
+            // "Elegir este hotel" en amber, que es pedirle al usuario que elija
+            // algo que ya eligio; ahora dice "Elegido".
+            '<span class="hotel-pick-hint"><span class="hotel-pick-hint__off">Elegir este hotel</span><span class="hotel-pick-hint__on">Elegido</span></span>' +
+            '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' +
+            '</div></div>' + similarMarkup + '</article>';
         }).join('') + '</div>'
         : vacio + vacioLink;
       return '<div class="hotel-group' + (isPar ? ' hotel-group--split' : '') + '" data-hotel-group="' + (isPar ? stop : 'solo') + '">' + subhead + body + '</div>';
     }
 
-    var head = '<div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>'
-      + hotelTypeSelectMarkup(meta)
+    // El filtro de tipo va a la derecha del titulo, no entre el h2 y la nota: en
+    // una columna de 760px el <select> de 360px en medio partia el bloque en tres
+    // filas y dejaba la explicación abajo de un control que parece su propia
+    // sección.
+    var head = '<div class="hotel-options-head"><div class="hotel-options-head__text"><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>'
       + '<p>' + esc(profile.description)
       + (reparto
         // Con dos paradas la nota tiene que nombrar las dos y decir que se elige
@@ -1798,7 +1838,7 @@
         // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
         ? ' Elegí un alojamiento en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
         : ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.')
-      + '</p></div></div>';
+      + '</p></div>' + hotelTypeSelectMarkup(meta) + '</div>';
 
     // Un destino solo: el grupo único y, si no hay nada, la sección vacía de
     // siempre, sin cambio de comportamiento.
@@ -2055,21 +2095,27 @@
     { id: 'listo', label: 'Revisar y confirmar', hint: 'Último control antes de enviar' }
   ];
   /* Los medios de pago son los de Uruguay primero, porque es el mercado al que
-     le habla la app. El campo `kind` separa banco de tarjeta solo para el
-     subtitulo: la lista se ve igual en los dos casos. `mark` es el texto de la
-     marca y se pinta con CSS, no con un logo: los logotipos de los bancos son
-     marcas registradas y subirlos al repo sin permiso es justo el problema que
-     el README ya se tomo con las fotos de los tours. */
+     le habla la app. El campo `kind` separa banco de tarjeta, transferencia o
+     billetera digital, y es lo unico que cambia abajo de la marca. `mark` es el
+     texto de la marca y se pinta con CSS, no con un logo: los logotipos de los
+     bancos son marcas registradas y subirlos al repo sin permiso es justo el
+     problema que el README ya se tomo con las fotos de los tours. Cuando
+     haya logos con licencia clara, se cambia `mark` por una imagen y el
+     resto de la lista no se toca.
+
+     Bandes no entra: es un banco chico, con muy poca gente usando su cuenta
+     desde el exterior. Entra Prex en su lugar, que es una red de cajeros que la
+     gente efectivamente usa para sacar y para transferir. */
   var CHECKOUT_PAYMENTS = [
     { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f' },
     { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000' },
     { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481' },
     { id: 'scotiabank', label: 'Scotiabank', kind: 'Transferencia bancaria', mark: 'Scotiabank', brand: '#ec111a' },
-    { id: 'bandes', label: 'Bandes', kind: 'Transferencia bancaria', mark: 'BANDES', brand: '#00a551' },
+    { id: 'prex', label: 'Prex', kind: 'Transferencia bancaria', mark: 'Prex', brand: '#f5a800' },
     { id: 'oca', label: 'OCA', kind: 'Transferencia bancaria', mark: 'OCA', brand: '#e30613' },
+    { id: 'pix', label: 'Pix', kind: 'Transferencia inmediata', mark: 'Pix', brand: '#00b1e0' },
     { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71' },
-    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b' },
-    { id: 'amex', label: 'American Express', kind: 'Tarjeta de crédito', mark: 'AMEX', brand: '#006fcf' }
+    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b' }
   ];
   var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
   var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
@@ -2287,7 +2333,11 @@
     if (!badge) return;
     var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
     badge.hidden = !count;
-    if (count) badge.textContent = total * pax + ' total · ' + count + (count === 1 ? ' actividad' : ' actividades');
+    // money() y no el numero crudo: sin el, el boton decia "240 total" al lado de
+    // cards que decian "US$ 65", o sea un total sin moneda ni conversion al lado
+    // de precios con las dos cosas. Y tampoco servia formatearlo a mano porque
+    // el separador de miles y los decimales cambian con la moneda activa.
+    if (count) badge.textContent = money(total * pax) + ' total · ' + count + (count === 1 ? ' actividad' : ' actividades');
   }
   /* Guarda lo escrito antes de validar el paso. Sin esto, el navegador valida
      los campos del paso anterior que ya no estan en el DOM y no puede focusing
@@ -2358,7 +2408,9 @@
   var flightRequestId = 0;
   var flightController = null;
   function hotelLoading(meta) {
-    return '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head"><div><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>Buscando opciones disponibles…</p></div></div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
+    // Misma cabecera que hotelOptions(): el filtro a la derecha del título, para
+    // que el placeholder no se reorganice solo cuando llegan los datos.
+    return '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head"><div class="hotel-options-head__text"><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2><p>Buscando opciones disponibles…</p></div>' + hotelTypeSelectMarkup(meta) + '</div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
   }
   function loadHotelRecommendations(meta, accommodationTotal) {
     var requestId = ++hotelRequestId;
@@ -3525,6 +3577,48 @@
     }
     var traslado = document.querySelector('[data-official-transfer]');
     if (traslado) traslado.outerHTML = transferCard(detailState.meta);
+    /* Los tours tambien tienen precios y money() los convierte, asi que sin
+       esto cambiar de moneda dejaba la seccion con el simbolo viejo: el
+       selector decia UYU y las cards seguian diciendo "US$ 28". Es el mismo
+       motivo por el que hotel y traslado estan mas arriba: las secciones se
+       redibujan con outerHTML, no se les cambia un simbolo y listo.
+
+       El marcado se regenera, asi que los checkboxes vuelven apagados y hay que
+       restaurarlos por titulo, que es la misma clave que usa la carga de un
+       viaje guardado. Si no se restauraran, cambiar de moneda deseleccionaba
+       las actividades que la persona habia elegido y las sacaba del total. */
+    var tours = document.querySelector('.local-tours');
+    if (tours) {
+      var markupTours = localToursMarkup(detailState.meta);
+      // Si el marcado nuevo viniera vacio se deja la seccion como estaba:
+      // borrarla dejaria un hueco sin una sola card, que se lee como un error.
+      if (markupTours) {
+        var elegidos = (detailState.selectedTours || []).map(function (t) { return t.title; });
+        var estabaAbierto = tours.classList.contains('local-tours--expanded');
+        tours.outerHTML = markupTours;
+        var toursNuevos = document.querySelector('.local-tours');
+        if (toursNuevos && elegidos.length) {
+          Array.prototype.slice.call(toursNuevos.querySelectorAll('[data-tour-choice]')).forEach(function (input) {
+            if (elegidos.indexOf(input.getAttribute('data-tour-title')) < 0) return;
+            input.checked = true;
+            var card = input.closest('[data-tour-card]');
+            if (card) card.classList.add('is-added');
+          });
+        }
+        // "Ver más tours" es un estado del DOM, no del modelo: sin restaurarlo
+        // la persona que habia desplegado las 11 actividades volvia a ver solo
+        // las tres de siempre.
+        if (toursNuevos && estabaAbierto) {
+          toursNuevos.classList.add('local-tours--expanded');
+          var masTours = toursNuevos.querySelector('[data-toggle-more-tours]');
+          if (masTours) {
+            masTours.setAttribute('aria-expanded', 'true');
+            masTours.innerHTML = 'Ver menos tours <span aria-hidden="true">⌃</span>';
+          }
+        }
+        syncToursCta();
+      }
+    }
   }
   function deseleccionarHotel(stop) {
     if (!detailState) return;
