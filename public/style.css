@@ -20,12 +20,13 @@
      existe por eso, y ahora valida :root contra [data-theme="light"].
      ====================================================================== */
   --bg:#0A101A; --surface:#111A28; --line:#2A3646;
-  /* --line es para separadores, donde un tono apagado esta bien. Para el
-     BORDE de un control hace falta 3:1 contra el fondo (WCAG 1.4.11) y
-     #1C2533 da 1.24:1 sobre --bg: los campos se leerian como texto
-     flotante. --control-line y --card-border son el token de borde real.
-     --control-line da 3.31:1 sobre --bg; --card-border, 3.19:1 sobre
-     --surface, que es el minimo que validar-tema.js exige. */
+  /* --line es para separadores y para el borde de una card. Con #1C2533 daba
+     1.13:1 sobre --surface, y --surface esta en 1.09:1 de --bg: una pagina donde
+     la card, su borde y el fondo estan todos en el mismo tono plano no se lee
+     como cards. #2A3646 da 1.43:1, la misma separacion que tenia el night viejo
+     (#26426B sobre #12294A daba 1.44:1) y la que se ve en la referencia. Para
+     el BORDE de un control hace falta 3:1 (WCAG 1.4.11), y de ahi --control-line
+     aparte: 3.31:1 sobre --bg. */
   --control-line:#5A6779;
   --ink:#FFFFFF; --ink2:#C9D4E2;
   /* Mostaza de marca. #F7C325 da 11.60:1 sobre --bg, asi que sirve para
@@ -1251,23 +1252,25 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .checkout-dialog{border-radius:25px 25px 0 0;max-height:94vh;overflow:auto}
   .checkout-layout{min-height:0}
 }
-/* ---------- Widget de actividades de Civitatis ----------
-   Es un iframe de otro origen, asi que no se le puede dar el aspecto de una card
-   nuestra: es un bloque propio, con su encabezado y su nota de afiliado. Lo que
-   si se controla es el marco, el fondo y que no se lleve el scroll de la pagina
-   con un iframe de alto automatico. */
-.civitatis-widget{min-width:0;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05)}
-.civitatis-widget__head{margin-bottom:12px}
-.civitatis-widget h2{margin:5px 0 0;font-family:var(--fh);font-size:clamp(22px,2.6vw,28px);line-height:1.1}
-.civitatis-widget__head p{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
-/* La nota de afiliado vaSIEMPRE visible y antes del iframe, no al pie: si esta
-   debajo, la persona ya toco "Reservar" antes de leerla. */
-.civitatis-widget__note{margin:0 0 12px;padding:9px 12px;border-radius:12px;background:var(--cel-soft);color:var(--ink);font-size:12px;line-height:1.5}
-.civitatis-widget__frame{overflow:hidden;border-radius:16px;background:var(--bg)}
-.civitatis-widget__iframe{display:block;width:100%;border:0}
-.civitatis-widget__foot{margin:12px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.55}
-.civitatis-widget__foot a{color:var(--cel);font-weight:700}
-@media (max-width:560px){.civitatis-widget{padding:16px;border-radius:18px}.civitatis-widget__iframe{height:980px!important}}
+/* ---------- Link de afiliado a Civitatis ----------
+   Antes esto era un <iframe> con la grilla de Civitatis adentro, y por eso el
+   bloque se veia casi igual que la seccion de tours de arriba: mismas cards,
+   misma foto, mismo precio, mismo boton. La diferencia era invisible y la que
+   importaba: el iframe no suma al presupuesto, porque es un documento de otro
+   origen del que no se puede leer nada. Al hacer click la persona se iba de la
+   pagina sin que el total se moviera.
+
+   Ahora es un link, asi que no imita una grilla y no se puede confundir con algo
+   que sume. El bloque queda chico a proposito: es una salida, no una seccion. */
+.civitatis-affiliate{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px;margin-top:22px;padding:16px 20px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}
+.civitatis-affiliate__body{flex:1 1 260px;min-width:0}
+.civitatis-affiliate h2{margin:0;font-family:var(--fh);font-size:20px;line-height:1.15}
+.civitatis-affiliate p{margin:5px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
+.civitatis-affiliate__note{margin-top:6px!important;font-size:11.5px!important;opacity:.9}
+.civitatis-affiliate__link{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1.5px solid var(--control-line);border-radius:13px;color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap;text-decoration:none;transition:border-color .18s ease,color .18s ease,background .18s ease}
+.civitatis-affiliate__link:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
+.civitatis-affiliate__link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+@media (max-width:560px){.civitatis-affiliate{padding:14px 16px;border-radius:18px}.civitatis-affiliate__link{width:100%}}
 
 /* Créditos globales, al pie de la página: reunión de todas las fotos que la
    app cargó, no sólo las de los tours. */

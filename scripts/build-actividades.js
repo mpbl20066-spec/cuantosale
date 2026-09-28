@@ -119,7 +119,12 @@ Object.keys(datos.destinos || {}).forEach(function (destinoCrudo) {
     const autor = String(a.autor || '').trim();
     const licencia = String(a.licencia || '').trim();
     if (!imagen) {
-      Error_(donde + ': falta "imagen". Sin foto la card sale con el degradado y el icono, que es aceptable, pero entonces borra tambien autor y licencia para que quede claro que no hay foto.');
+      /* El mensaje decia antes que sin foto la card sale con el degradado y el
+         icono, "que es aceptable" — pero el return de abajo impedia generar la
+         actividad igual. O sea: el texto describia una opcion que el codigo no
+         tenia. La foto es obligatoria; se dice sin prometer una salida que no
+         existe. */
+      Error_(donde + ': falta "imagen". Es obligatorio: hace falta una foto de Wikimedia Commons con su autor y su licencia.');
       return;
     }
     if (/civitatis\.com/i.test(imagen)) {

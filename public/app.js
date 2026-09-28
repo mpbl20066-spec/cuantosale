@@ -1953,65 +1953,69 @@
   // los necesita. Mismo criterio que los otros globales del proyecto: datos
   // que se leen, no logica que se ejecuta.
   window.CS_TOURS = toursFor;
-  /* ID de afiliado de Civitatis y alto del widget. Van aca y no dentro del
-     snippet porque el panel lo deja pegado en el HTML, y asi no hay que
-     reescribir el iframe entero para cambiar el ID o la moneda. */
+  /* ID de afiliado de Civitatis. Va aca y no pegado en el markup porque asi no
+     hay que tocar el link para cambiar el ID. */
   var CIVITATIS_AFILIADO = '115515';
-  // 6 actividades en grilla de 3 columnas son 2 filas de cards. Medido en la
-  // columna de 760px de la app: cada card queda con su foto, el titulo, el
-  // rating y la fila de precio y boton. El alto va fijo y el iframe con
-  // scrolling="no", para no tener dos barras: la del iframe y la de la pagina.
-  var CIVITATIS_WIDGET_ALTO = 620;
-  /* ---------- Widget de actividades de Civitatis ----------
-     Es un iframe de civitatis.com, NO son datos. Eso define lo que se puede y
-     lo que no se puede hacer con el, asi que va escrito aca y no en el README
-     de afilados:
+  /* ---------- Activities de Civitatis ----------
+     Tenia un widget embebido y ahora tiene un link. El widget era un <iframe>
+     de civitatis.com, y eso define lo que se puede hacer con el:
 
      - No se puede sumar nada al presupuesto. El iframe es un documento de otro
        origen: desde esta pagina no se lee que actividad se selecciono, ni su
        titulo, ni su precio. No hay eventos ni postMessage documentado. Cuando
        alguien toca "Reservar" adentro, se navega DENTRO del iframe y aca no
        pasa nada. Poner un listener de clic sobre el <iframe> solo diria
-       "tocaron algo", no que.
-     - Por eso va en un bloque propio, abajo de la seccion de tours y no dentro.
-       Si un precio real aparece en la grilla que suma al presupuesto, la
-       persona lo elige esperando que entre al total, y no entra.
-     - El widget no acepta filtro por destino en su URL: el parametro no
-       existe. Con typeSelection=all muestra su catalogo global, que al probarlo
-       daba Tenerife y Roma para un viajero que iba a Rio. Por eso el bloque
-       dice de entrada que es el catalogo de Civitatis y no una cotizacion
-       nuestra.
+       "tocaron algo", no que. Y el costo no era invisible: la grilla del widget
+       se veia igual que la de los tours de arriba, que si suma, asi que al
+       hacer click lo unico que se veia era que se iba de la pagina.
+     - Tampoco acepta filtro por destino en su URL: el parametro no existe. Con
+       typeSelection=all mostraba su catalogo global, que al probarlo daba
+       Tenerife y Roma para un viajero que iba a Rio.
+     - currency=USD y no BRL como venia: el widget toma una sola moneda fija,
+       no sigue el selector del encabezado.
      - Los links son de afiliado: la reserva se hace en Civitatis y nosotros
        cobramos comision. Se declara, que en Uruguay es parte de la informacion
        al consumidor y ademas es lo unico que sostiene el "no mentimos" del
        proyecto.
-     - currency=USD y no BRL como venia: el widget toma una sola moneda fija, no
-     sigue el selector del encabezado. BRL era lo que traia el snippet.
-     - No se carga iframeResizer. El snippet del panel lo usa para calcular el
-     alto; aca el alto es fijo y se mide, asi que sobra ese script de terceros
-     (que ademas venia con checkOrigin:false, que es una debilidad conocida de
-     iframe-resizer: acepta mensajes de resize de cualquier origen). */
-  function civitatisWidgetMarkup(meta) {
-    if (!meta || !meta.dest) return '';
-    var destName = meta.dest.name || 'tu destino';
-    return '<section class="civitatis-widget" data-budget-anchor="civitatis" aria-labelledby="civitatis-widget-title">' +
-      '<div class="civitatis-widget__head"><div>' +
-      '<span class="local-tours__eyebrow">CATÁLOGO DE CIVITATIS</span>' +
-      '<h2 id="civitatis-widget-title">Reservá directo con Civitatis</h2>' +
-      '<p>Precios y fotos reales de Civitatis, el operador. La reserva se hace en su sitio y no se suma a tu presupuesto de CuántoSale.</p>' +
-      '</div></div>' +
-      '<div class="civitatis-widget__note"> enlaces de afiliado: si reservás desde acá, nosotros cobramos una comisión y a vos no te cuesta nada.</div>' +
-      '<div class="civitatis-widget__frame">' +
-      '<iframe class="civitatis-widget__iframe" title="Actividades de Civitatis" ' +
-      'src="https://www.civitatis.com/widget-activities/?affiliated=' + esc(CIVITATIS_AFILIADO) +
-      '&amp;display=grid&amp;cant=6&amp;lang=es&amp;currency=USD&amp;transfer=0&amp;cmp=Widget_ES' +
-      '&amp;width=100%25&amp;hideButton=0&amp;centerContent=1&amp;typeSelection=all' +
-      '&amp;color=10233e&amp;typography=Montserrat&amp;removeBackground=0&amp;showShadow=1&amp;roundedButtons=0" ' +
-      'loading="lazy" referrerpolicy="no-referrer" scrolling="no" ' +
-      'style="width:100%;border:0;height:' + CIVITATIS_WIDGET_ALTO + 'px"></iframe>' +
+
+     Lo que queda es un link de texto, que se puede leer entero y no imita una
+     grilla. El catalogo curado (public/actividades-civitatis.js) es la via que
+     si suma al presupuesto, con las mismas fotos y los mismos precios que
+     publica Civitatis. */
+  /* Lo que queda del widget embebido: un link de texto, nada mas.
+  
+     El widget era un <iframe> de civitatis.com con su grilla de 6 cards. Sacarlo
+     no fue por rendimiento ni por estilo: es que no puede hacer lo que la
+     pantalla de al lado promete.
+  
+     Un iframe es un documento de otro origen. Desde esta pagina no se lee que
+     actividad toco la persona, ni su titulo, ni su precio: no hay eventos ni
+     postMessage documentado. Cuando alguien tocaba "Reservar" adentro, navegaba
+     DENTRO del iframe y aca no pasaba nada —ni se sumaba al presupuesto, ni
+     aparecia en el checkout, ni en el mensaje de WhatsApp—. El click se perdia.
+     Un listener de clic sobre el <iframe> solo diria "tocaron algo", no que.
+  
+     Y el costo no era invisible: la grilla del widget se ve EXACTAMENTE como
+     la de "Los imperdibles de <destino>", que si suma. Dos grillas de cards con
+     foto, titulo, precio y btn, una que suma y otra que no, sin ninguna senal en
+     la card misma. El aviso existia, pero estaba en el subtitulo y en un link al
+     pie: texto que se lee una vez, cuando la persona todavia no hacia nada. Al
+     hacer click, lo unico que ve es que se fue de la pagina.
+  
+     La via que si funciona ya existe: el catalogo curado de afiliado
+     (public/actividades-civitatis.js, desde data/actividades-civitatis.json).
+     Son las MISMAS fotos y los MISMOS precios publicados de Civitatis, con el
+     enlace ?aid=, pero servidos por nosotros: cada card es una de las que suman
+     al presupuesto y entran al checkout. Por eso este bloque es un link y no una
+     grilla. */
+  function civitatisAffiliateLink() {
+    return '<section class="civitatis-affiliate" data-budget-anchor="civitatis">' +
+      '<div class="civitatis-affiliate__body">' +
+      '<h2>¿Buscabas más actividades?</h2>' +
+      '<p>Las de arriba tienen precio real de Civitatis y suman a tu presupuesto. En su catálogo hay muchas más, y ahí la reserva se hace en su sitio.</p>' +
+      '<p class="civitatis-affiliate__note">Con el enlace de acá cobramos una comisión si reservás. A vos no te cuesta nada.</p>' +
       '</div>' +
-      '<p class="civitatis-widget__foot"><a href="https://www.civitatis.com/?aid=' + esc(CIVITATIS_AFILIADO) + '" target="_blank" rel="noopener noreferrer sponsored">Ver el catálogo completo en Civitatis ↗</a>' +
-      '<span> Civitatis no muestra todavía el precio de la fecha exacta de tu viaje: el que ves es el que ellos publican para estas fechas.</span></p>' +
+      '<a class="civitatis-affiliate__link" href="https://www.civitatis.com/?aid=' + esc(CIVITATIS_AFILIADO) + '" target="_blank" rel="noopener noreferrer sponsored">Ver el catálogo completo en Civitatis ↗</a>' +
       '</section>';
   }
   function localToursMarkup(meta) {
@@ -5636,9 +5640,10 @@
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
-    // El widget va DESPUES de los tours y en su propio bloque. No va dentro de
-    // la grilla que suma al presupuesto: ver civitatisWidgetMarkup() para por que.
-    var widgetMarkup = renderSafe(function () { return civitatisWidgetMarkup(data.meta); }, '');
+    // El link de afiliado va DESPUES de los tours y en su propio bloque. Va
+    // aparte porque no suma al presupuesto y no puede: ver
+    // civitatisAffiliateLink() para por que.
+    var widgetMarkup = renderSafe(function () { return civitatisAffiliateLink(); }, '');
     // La Guia Secreta no se pinta todavia: depende de si el server nos abre la
     // puerta, y eso no se sabe hasta que responde /api/guia. Se pinta sola
     // cuando llega (pintarGuiaEnDetalle). El fallback del renderSafe era un
