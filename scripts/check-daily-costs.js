@@ -44,6 +44,32 @@ for (const k of Object.keys(srv)) {
 }
 ok('daily-costs.js: ' + Object.keys(cli).length + ' entradas identicas al modelo');
 
+// 4b. la procedencia llega al cliente, y completa
+// El panel "De dónde salen los valores" depende de CS_DESTINATION_DAILY_COSTS_PROVENANCE.
+// Si el generador un dia vuelve a emitir solo los numeros, el panel no falla: se
+// queda mudo y la app vuelve a decir "estimado" sin decir de donde. Eso es
+// exactamente el bug que esto arregla, asi que tiene que romper el check.
+const prov = cli.provenance;
+assert.ok(prov, 'daily-costs.js no exporta la procedencia (corré npm run build:costos)');
+assert.ok(prov._meta && prov._meta.confianza && prov._meta.confianza.alta && prov._meta.confianza.baja,
+  'la procedencia no trae la definicion de los niveles de confianza');
+const fuente = JSON.parse(fs.readFileSync('data/costos-diarios.json', 'utf8')).destinos;
+for (const k of Object.keys(srv)) {
+  assert.ok(prov[k], 'sin procedencia para ' + k + ' (' + (D[k].name) + ')');
+  assert.strictEqual(prov[k].fuente, fuente[k].fuente, 'la fuente de ' + k + ' no coincide con el JSON');
+  assert.strictEqual(prov[k].confianza, fuente[k].confianza, 'la confianza de ' + k + ' no coincide con el JSON');
+  assert.strictEqual(prov[k].verificado, fuente[k].verificado, 'la fecha de ' + k + ' no coincide con el JSON');
+  assert.ok(prov[k].fuente.length > 40, 'la fuente de ' + k + ' es demasiado corta para ser una fuente');
+  // Si el JSON explica una confianza baja, la explicacion tiene que viajar con el
+  // numero: un "confianza: baja" sin derivacion es una advertencia que no dice
+  // que hacer.
+  if (fuente[k].confianza === 'baja') {
+    assert.ok(prov[k].derivacion || prov[k].nota,
+      k + ' es de confianza baja y no viaja ni la derivacion ni la nota al cliente');
+  }
+}
+ok('daily-costs.js: procedencia de ' + Object.keys(srv).length + ' destinos, con fuente y confianza del JSON');
+
 // 5. cadena de carga y de cache
 const html = fs.readFileSync('public/index.html', 'utf8');
 const sw = fs.readFileSync('public/sw.js', 'utf8');
@@ -53,8 +79,8 @@ assert.ok(iTag < html.indexOf('src="/app.js'), 'daily-costs.js debe cargarse ant
 assert.ok(sw.indexOf("'/daily-costs.js'") > 0, 'sw.js no precachea daily-costs.js');
 const vApp = Number((html.match(/app\.js\?v=(\d+)/) || [])[1]);
 const vSw = Number((sw.match(/cuantosale-shell-v(\d+)/) || [])[1]);
-assert.ok(vApp >= 92, 'app.js sin bumpear: el fix no llega a los usuarios (v=' + vApp + ')');
-assert.ok(vSw >= 64, 'sw.js sin bumpear: daily-costs.js queda viejo (v=' + vSw + ')');
+assert.ok(vApp >= 120, 'app.js sin bumpear: el fix no llega a los usuarios (v=' + vApp + ')');
+assert.ok(vSw >= 85, 'sw.js sin bumpear: daily-costs.js queda viejo (v=' + vSw + ')');
 ok('cache: app.js?v=' + vApp + ', sw v' + vSw + ', daily-costs.js precacheado y cargado antes que app.js');
 
 // 6. hooks de npm

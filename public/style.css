@@ -39,6 +39,12 @@
   --accent:#F6B21B; --accent-ink:#10233E;
   --hero-bg:#10233E; --hero-ink:#FFFFFF; --hero-accent:#F6B21B; --hero-soft:#A9CBEA;
   --cel:#1B5FA8; --cel-ink:#FFFFFF; --cel-soft:#DCEBF8; --coral:#D9481F; --coral-soft:#FDE2D9; --good:#12784F; --good-soft:#DCF2E6;
+  /* Texto de advertencia sobre --coral-soft, para los badges de 11 px del panel
+     "De donde salen los valores". --coral da 3.48:1 sobre --coral-soft, que no
+     alcanza el 4.5:1 de WCAG para texto normal, y un badge de 11 px es texto
+     normal. No se oscurece --coral porque es un color de marca que ya se usa
+     como texto en ocho lugares mas; este token es solo para el badge. */
+  --warn-ink:#A8340F;
   --c1:#10233E; --c2:#7CB7E8; --c3:#F6B21B; --c4:#E4572E; --c5:#4B7BAA; --c6:#9AA9BA;
   --fh:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
   --fb:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
@@ -51,6 +57,7 @@
     --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
       --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
     --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
+    --warn-ink:#FF8A66;
     --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
     color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
     --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
@@ -82,6 +89,7 @@
   --bg:#0A1830; --surface:#12294A; --ink:#EEF3F9; --ink2:#A6BBD3; --line:#26426B; --control-line:#8B9CB2;
   --hero-bg:#F6B21B; --hero-ink:#10233E; --hero-accent:#10233E; --hero-soft:#5C4200;
   --cel:#7CB7E8; --cel-ink:#0A1830; --cel-soft:#1B3A63; --coral:#FF8A66; --coral-soft:#4A2419; --good:#5AD19A; --good-soft:#123D2E;
+  --warn-ink:#FF8A66;
   --c1:#E7EEF7; --c2:#7CB7E8; --c3:#F6B21B; --c4:#F0714F; --c5:#5B8FC4; --c6:#8FA3BB;
   color-scheme:dark; --action-bg:#0057A8; --action-ink:#FFFFFF; --action-border:#9CC8F4;
   --control-bg:#12294A; --control-border:#526E93; --control-hover:#1B3A63; --control-muted:#C1D2E5; --control-selected:#24466F; --control-selected-ink:#FFFFFF;
@@ -358,6 +366,41 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 #results.loading{opacity:.5;transition:opacity .2s}
 .src{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;margin-left:8px;background:var(--cel-soft);color:var(--ink)}
 .src.real{background:var(--good-soft);color:var(--good)}
+/* "De dónde salen los valores". El summary es un <details> y no un <h2> para que
+   quede cerrado por defecto: la respuesta de dónde sale cada número interesa a
+   quien está dudando del total, no a quien ya lo aceptó. Cerrado también evita
+   que el panel empuje hacia abajo las secciones de hoteles y tours, que son las
+   que hacen avanzar la conversión. */
+.fuentes{margin:0 0 24px}
+.fuentes__details{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px 18px}
+.fuentes__summary{display:flex;align-items:center;gap:10px;cursor:pointer;font-family:var(--fh);font-size:22px;line-height:1;list-style:none;color:var(--ink)}
+.fuentes__summary::-webkit-details-marker{display:none}
+.fuentes__summary::after{content:"＋";margin-left:auto;font-family:inherit;font-size:20px;color:var(--ink2);line-height:1}
+.fuentes__details[open]>.fuentes__summary::after{content:"－"}
+.fuentes__intro{margin:14px 0 0;color:var(--ink2);font-size:14px;line-height:1.5}
+.fuentes__lista{display:grid;gap:12px;margin-top:14px}
+.fuente-fila{padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.fuente-fila__head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.fuente-fila__head b{font-size:15px;font-weight:800}
+.fuente-fila p{margin:0 0 6px;font-size:13px;line-height:1.5;color:var(--ink2)}
+.fuente-fila p:last-child{margin-bottom:0}
+.fuente-fila__origen b{color:var(--ink)}
+.fuente-fila__detalle{color:var(--ink)}
+.fuente-fila__formula{font-variant-numeric:tabular-nums}
+.fuente-fila__derivacion{color:var(--ink)}
+.fuente-fila__fecha{font-size:12px!important}
+/* El badge de estado y el de confianza son dos cosas: "precio real" dice de
+   dónde salió el número, "confianza baja" dice cuánto merece. Un transfer con
+   tarifa publicada muestra los dos; uno del modelo de distancia muestra
+   "estimado" y "confianza baja", que es lo que corresponde. */
+.fuente-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.fuente-badge+.fuente-badge{margin-left:0}
+.es-real{background:var(--good-soft);color:var(--good)}
+.es-estimado{background:var(--cel-soft);color:var(--cel)}
+.conf-alta{background:var(--good-soft);color:var(--good)}
+.conf-media{background:var(--cel-soft);color:var(--cel)}
+.conf-baja{background:var(--coral-soft);color:var(--warn-ink)}
+.fuentes__pie{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:12px;line-height:1.5}
 .hero .note{color:var(--hero-soft);font-size:13px;margin:8px 0 0}
 /* Calls to action */
 .cta-section{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}
@@ -736,16 +779,26 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tours h2{margin:5px 0 0;font-family:var(--fh);font-size:clamp(24px,3vw,32px);line-height:1.1}
 .local-tours__summary{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
 .local-tours__summary b{color:var(--ink)}
-.local-tours__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;min-width:0}
+.local-tours__cta-wrap{display:flex;flex:0 0 auto;flex-direction:column;align-items:flex-end;gap:6px}
+.local-tours__cta-total{color:var(--cel);font-size:13px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.local-tours__reserve{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:0;border-radius:13px;background:var(--action-bg);color:var(--action-ink);font-family:inherit;font-size:13.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:filter .18s ease,opacity .18s ease}
+.local-tours__reserve:hover:not(:disabled){color:var(--action-ink);filter:brightness(1.12)}
+.local-tours__reserve:disabled{opacity:.5;cursor:not-allowed}
+.local-tours__reserve:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+/* La card es horizontal: foto a la izquierda, ficha a la derecha. Dos por fila
+   porque con tres la ficha quedaba de ~280px y la foto de ~190px, que es una
+   proporcion de postal. Con dos hay ancho para el titulo largo, la lista de
+   "incluye" y el precio sin que nada se corte. */
+.local-tours__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;min-width:0}
 /* El borde no cambia de grosor al marcar (solo de color), asi que la tarjeta
    no corre nada. Relleno de color + borde duro se leia como un boton de
-   escritorio; la marca real va en la cinta de arriba. */
+   escritorio; la marca real va en el marco. */
 /* Mismo bloque de card elegible que .daily-budget__option y .hotel-option:
    fondo, borde, radio y estado de elegido salen de los mismos tokens. La
    cinta "Tu viaje" se saco: era una segunda señal de "elegido" que solo
    tenían los tours, y hacia que el mismo gesto se leyera distinto en cada
    grupo. Ahora el estado se comunica solo con el marco y el fondo. */
-.local-tour{position:relative;display:flex;min-width:0;flex-direction:column;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
+.local-tour{position:relative;display:grid;grid-template-columns:184px minmax(0,1fr);min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
 .local-tour:has([data-tour-choice]:checked){border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
 /* La tarjeta completa es la zona sensible. El checkbox se estira con
@@ -753,39 +806,66 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    el teclado conserva un único control que tabula (Enter lo agrega el JS). */
 .local-tour__input{position:absolute;z-index:1;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:pointer;-webkit-appearance:none;appearance:none}
 .local-tour:has(.local-tour__input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
-/* La foto es una franja arriba y no lleva texto encima. Antes tenía un velo
-   degradado con el título en blanco y el precio en ámbar: quedaba bien como
-   foto, pero el texto dependía de la imagen para poder leerse y el precio en
-   ámbar no se comparaba con el resto del desglose. Ahora título, destino,
-   descripción y precio van en el cuerpo claro, igual que "Transporte local" y
-   "Comidas". */
-.local-tour__media{position:relative;flex:0 0 auto;height:152px;background:var(--bg)}
-/* object-position abajo, no al centro. La franja es de 152px y las fotos son
-   verticales, así que "cover" recorta por arriba y por abajo: con el centrado
-   salía el cielo y las copas de los árboles, que es justo la parte que menos
-   dice de la experiencia. Abajo entra la persona, la lancha, la arena y el
-   agua. */
+/* La foto es una columna de ancho fijo, no una franja. 184px es lo que entra
+   sin que el recorte se coma la escena, y object-position abajo porque la
+   parte de abajo de estas fotos es la que dice de la experiencia: la persona,
+   la lancha, la arena. */
+.local-tour__media{position:relative;min-height:100%;background:var(--bg)}
 .local-tour__media img{display:block;width:100%;height:100%;object-fit:cover;object-position:center bottom}
-.local-tour__price{display:flex;align-items:baseline;gap:6px;margin:0 0 12px}
-.local-tour__price b{color:var(--ink);font-size:22px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.local-tour__price span{color:var(--ink2);font-size:11.5px}
-/* Sin foto: degradado con el ícono de la actividad. */
+/* Sin foto: degradado con el ícono de la actividad, que no miente sobre lo
+   que es. Se estira a toda la altura de la columna. */
 .local-tour__media-plain{display:grid;place-items:center;align-content:center;gap:10px;padding:16px}
 .local-tour__ico{width:38px;height:38px;opacity:.9}
-.local-tour__body{display:flex;flex-direction:column;flex:1;min-width:0;padding:14px}
-.local-tour__title{margin:0 0 4px;color:var(--ink);font-family:var(--fh);font-size:21px;line-height:1.15}
-.local-tour__destination{margin:0 0 7px;color:var(--ink2);font-size:11px;font-weight:700;line-height:1.4}
-.local-tour__description{flex:1;margin:0 0 12px;color:var(--ink2);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
-.local-tour__meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.local-tour__body{display:flex;flex-direction:column;min-width:0;padding:15px 16px}
+.local-tour__head{display:grid;gap:2px;min-width:0}
+.local-tour__title{margin:0;color:var(--ink);font-family:var(--fh);font-size:20px;line-height:1.15;overflow-wrap:anywhere}
+.local-tour__destination{display:flex;align-items:center;gap:4px;margin:0;color:var(--ink2);font-size:11.5px;font-weight:700;line-height:1.4}
+.local-tour__pin{display:grid;place-items:center;flex:0 0 12px;width:12px;height:12px;color:var(--cel)}
+.local-tour__pin svg{width:12px;height:12px}
+/* Estrellas. Cada estrella es una ranura de 13px con la base en --line y, si
+   toca, la misma forma encima en el color de la marca recortada al ancho de la
+   ranura. Un 4.6 se lee como cuatro enteras y media sin redondearlo a cinco, y
+   no hace falta ningun id en el DOM para lograrlo. */
+.local-tour__rating{display:flex;align-items:center;gap:6px;margin:7px 0 0;font-size:12px}
+.local-tour__stars{display:inline-flex;gap:2px}
+.local-tour__star{position:relative;display:block;flex:0 0 auto;width:13px;height:13px;overflow:hidden}
+.local-tour__star svg{position:absolute;inset:0;width:13px;height:13px}
+.local-tour__star-base{fill:var(--line)}
+.local-tour__star-fill{fill:#f0a92a}
+.local-tour__rating b{color:var(--ink);font-size:12px;font-weight:800}
+.local-tour__reviews{color:var(--ink2);font-size:11.5px}
+.local-tour__description{margin:8px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
+.local-tour__tags{display:grid;gap:3px;margin:9px 0 0;padding:0;list-style:none}
+.local-tour__tag{display:flex;align-items:flex-start;gap:5px;color:var(--ink2);font-size:11.5px;line-height:1.4}
+.local-tour__tag-ico{display:grid;place-items:center;flex:0 0 13px;width:13px;height:13px;margin-top:1px;color:var(--good)}
+.local-tour__tag-ico svg{width:13px;height:13px}
+.local-tour__tag.is-no{opacity:.85}
+.local-tour__tag.is-no .local-tour__tag-ico{color:var(--coral)}
+.local-tour__meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
 .local-tour__chip{padding:4px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);font-size:10.5px;font-weight:700;white-space:nowrap}
-/* Pie de la tarjeta: sólo el botón de detalle. La confirmación de que la
-   experiencia ya está en el viaje va en la cinta de arriba, así que acá no
-   hay que repetirla ni dejar un hueco reservado. */
-.local-tour__foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:auto}
-.local-tour__info{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;gap:7px;margin-left:auto;padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);font-size:12px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
+/* "Precio real" es la unica pastilla que distingue una ficha de la API de una
+   estimada. Sin el borde de color se leia como cualquiera de las otras dos. */
+.local-tour__chip.is-real{border-color:color-mix(in srgb,var(--good) 45%,transparent);color:var(--good);background:color-mix(in srgb,var(--good) 12%,transparent)}
+/* Pie de la card: precio a la izquierda, acciones a la derecha. El precio va
+   en el pie y no arriba a proposito: el "desde" que se lee primero es el del
+   resumen de la seccion, y repetirlo en cada card pone tres cifras compitiendo
+   antes de que la persona haya leido el titulo. */
+.local-tour__foot{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:12px}
+.local-tour__price{display:grid;align-content:end;margin:0;min-width:0}
+.local-tour__from{color:var(--ink2);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.local-tour__price b{color:var(--ink);font-family:var(--fh);font-size:23px;font-weight:800;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.local-tour__price span{color:var(--ink2);font-size:11px}
+.local-tour__actions{display:flex;flex:0 0 auto;align-items:center;gap:7px}
+/* Los dos botones quedan por encima del checkbox estirado (z-index), igual que
+   el de detalle antes: si no, el clic los atraviesa y cambia la seleccion en
+   vez de hacer lo que dicen. */
+.local-tour__info,.local-tour__book{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 13px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:800;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
+.local-tour__info{border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 .local-tour__info:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
 .local-tour__info-ico{flex:0 0 16px;width:16px;height:16px;color:var(--cel)}
-.local-tour__info:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.local-tour__book{border:0;background:var(--action-bg);color:var(--action-ink);text-decoration:none}
+.local-tour__book:hover{color:var(--action-ink);filter:brightness(1.12)}
+.local-tour__info:focus-visible,.local-tour__book:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .local-tours:not(.local-tours--expanded) .local-tour:nth-child(n+4){display:none}
 .local-tours__more{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:0;border:0;background:transparent;color:var(--cel);font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .local-tours__more:hover{color:var(--ink)}
@@ -801,6 +881,141 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tours__credits p{margin:8px 0 4px}
 .local-tours__credits a{color:var(--cel);font-weight:700}
 .local-tours__credits ul{margin:0;padding-left:18px}
+/* ---------- Checkout de actividades ----------
+   El reparto es el de un checkout de verdad: un resumen del viaje que no se
+   mueve a la izquierda y el paso que toca a la derecha. El resumen va fijo con
+   position:sticky, no con position:fixed, asi scrollea con el panel largo del
+   formulario sin tapar nada. */
+.checkout-dialog{width:min(940px,100%);padding:0;overflow:hidden}
+.checkout-layout{display:grid;grid-template-columns:290px minmax(0,1fr);align-items:start;min-height:0}
+/* ---- Columna del resumen ---- */
+.checkout-aside{position:sticky;top:0;display:grid;align-content:start;gap:14px;max-height:92vh;overflow:auto;padding:20px;border-right:1px solid var(--line);background:var(--bg)}
+.checkout-aside__media{position:relative;overflow:hidden;border-radius:16px;background:var(--hero-bg)}
+.checkout-aside__media img{display:block;width:100%;height:132px;object-fit:cover}
+/* Sin foto de portada el bloque conserva el alto: si no, el resumen arranca
+   con el total pegado al borde de arriba y pierde la referencia de a que
+   destino pertenece. */
+.checkout-aside__media{min-height:132px;display:grid;align-content:end}
+.checkout-aside__media::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(6,18,38,.78),rgba(6,18,38,.05) 62%)}
+.checkout-aside__name{position:relative;z-index:1;padding:12px 13px;color:#fff;font-family:var(--fh);font-size:19px;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.45)}
+.checkout-aside__total{display:grid;gap:2px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.checkout-aside__total span{color:var(--ink2);font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.checkout-aside__total strong{color:var(--ink);font-family:var(--fh);font-size:31px;font-weight:800;line-height:1.05;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.checkout-aside__total em{color:var(--ink2);font-size:12px;font-style:normal}
+.checkout-aside__facts{display:grid;gap:0;margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.checkout-aside__facts li{display:grid;gap:1px;padding:9px 13px;border-top:1px solid var(--line)}
+.checkout-aside__facts li:first-child{border-top:0}
+.checkout-aside__facts span{color:var(--ink2);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.checkout-aside__facts b{color:var(--ink);font-size:13px;font-weight:700}
+.checkout-aside__list h3{margin:0 0 7px;color:var(--ink2);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.checkout-aside__rows{display:grid;gap:0;margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.checkout-aside__row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:9px 13px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.35}
+.checkout-aside__row:first-child{border-top:0}
+.checkout-aside__row-name{color:var(--ink2);min-width:0;overflow-wrap:anywhere}
+.checkout-aside__row b{color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+.checkout-aside__row.is-empty{display:block;color:var(--ink2);font-style:italic}
+.checkout-aside__total-line{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:10px 0 0;color:var(--ink2);font-size:12.5px}
+.checkout-aside__total-line b{color:var(--ink);font-family:var(--fh);font-size:17px;font-variant-numeric:tabular-nums}
+/* ---- Columna de los pasos ---- */
+.checkout-main{display:flex;min-width:0;flex-direction:column;max-height:92vh}
+.checkout-main__head{padding:20px 24px 0}
+.checkout-main__head h2{margin:0;font-family:var(--fh);font-size:26px;line-height:1.1}
+/* Los tres pasos siempre visibles, con el hecho / el actual / el pendiente
+   distinguidos solo por color y por el numero. Apretar un paso anterior no
+   avanza solo el click del boton: el boton "Volver" del pie es el unico camino
+   hacia atras, y el stepper es informacion, no un control. */
+.checkout-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 0;padding:0;list-style:none;border-bottom:1px solid var(--line)}
+.checkout-steps__step{display:flex;align-items:flex-start;gap:7px;padding:0 0 10px;color:var(--ink2)}
+.checkout-steps__num{display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border:1px solid var(--line);border-radius:50%;background:var(--bg);font-size:11px;font-weight:800}
+.checkout-steps__text{display:grid;gap:1px;min-width:0}
+.checkout-steps__text b{font-size:12.5px;font-weight:800;line-height:1.25}
+.checkout-steps__text em{font-size:10.5px;font-style:normal;line-height:1.3;opacity:.8}
+.checkout-steps__step.is-current{color:var(--ink)}
+.checkout-steps__step.is-current .checkout-steps__num{border-color:var(--cel);background:var(--cel);color:#fff}
+.checkout-steps__step.is-done .checkout-steps__num{border-color:var(--good);color:var(--good)}
+.checkout-panel{flex:1;min-height:0;overflow:auto;padding:20px 24px}
+.checkout-panel__title{margin:0;font-family:var(--fh);font-size:22px;line-height:1.15}
+.checkout-panel__lead{margin:6px 0 0;color:var(--ink2);font-size:13.5px;line-height:1.5}
+/* El aviso de que no se cobra va antes de la grilla de medios de pago, con
+   borde y no solo con color: es la afirmacion que evita que alguien piense que
+   esta pagando. */
+.checkout-notice{margin:14px 0 0;padding:11px 13px;border:1px solid var(--coral);border-radius:13px;background:var(--coral-soft);color:var(--ink);font-size:12.5px;line-height:1.5}
+.checkout-notice strong{display:block;margin-bottom:2px;color:var(--coral);font-size:13px}
+.checkout-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.checkout-field{display:grid;gap:4px;min-width:0}
+.checkout-field.is-wide{grid-column:1/-1}
+.checkout-field label{color:var(--ink2);font-size:12px;font-weight:700}
+.checkout-field__req{margin-left:2px;color:var(--coral)}
+.checkout-field input,.checkout-field select{width:100%;height:46px;padding:0 11px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font-family:inherit;font-size:14.5px}
+.checkout-field input:focus-visible,.checkout-field select:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
+.checkout-field input:invalid:not(:placeholder-shown){border-color:var(--coral)}
+.checkout-legal{margin:16px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.5}
+/* ---- Grilla de medios de pago ---- */
+.checkout-pay-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
+.checkout-pay{position:relative;display:grid;justify-items:center;align-content:center;gap:4px;min-height:88px;padding:10px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .18s ease,background .18s ease}
+.checkout-pay:hover{border-color:var(--cel)}
+/* El input real se oculta pero se conserva focusable, para que el teclado
+   llegue a la grilla y las flechas funcionen como un radiogroup de verdad. */
+.checkout-pay input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.checkout-pay.is-selected{border-color:var(--cel);background:var(--cel-soft)}
+.checkout-pay:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
+/* El nombre de la marca se pinta con CSS y no con un logo. Los logos de los
+   bancos son marca registrada: subirlos al repo sin permiso es el mismo
+   problema que el README ya se resolvio con las fotos de los tours. */
+.checkout-pay__mark{color:var(--pay-brand,var(--ink));font-size:15px;font-weight:800;letter-spacing:-.01em;text-align:center;line-height:1.1}
+.checkout-pay__kind{color:var(--ink2);font-size:10px;font-weight:700;text-align:center;line-height:1.3}
+.checkout-pay__check{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--cel);color:#fff;opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}
+.checkout-pay__check svg{width:12px;height:12px}
+.checkout-pay.is-selected .checkout-pay__check{opacity:1;transform:scale(1)}
+.checkout-pay-total{margin:14px 0 0;padding:11px 13px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;text-align:right}
+.checkout-pay-total b{color:var(--ink);font-family:var(--fh);font-size:18px;font-variant-numeric:tabular-nums}
+/* ---- Recap del paso 3 ---- */
+.checkout-recap{margin-top:16px;display:grid;gap:14px}
+.checkout-recap h3{margin:0;color:var(--ink2);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.checkout-recap ul{display:grid;gap:0;margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.checkout-recap li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 13px;border-top:1px solid var(--line);font-size:13px}
+.checkout-recap li:first-child{border-top:0}
+.checkout-recap li span{color:var(--ink2);min-width:0;overflow-wrap:anywhere}
+.checkout-recap li b{color:var(--ink);text-align:right;white-space:nowrap}
+.checkout-recap li.is-empty{display:block;color:var(--ink2);font-style:italic}
+.checkout-recap__total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0;padding:13px;border-radius:14px;background:var(--hero-bg);color:var(--hero-ink)}
+.checkout-recap__total span{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;opacity:.8}
+.checkout-recap__total b{font-family:var(--fh);font-size:26px;font-variant-numeric:tabular-nums}
+/* ---- Pie con los botones ---- */
+.checkout-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 24px;border-top:1px solid var(--line);background:var(--surface)}
+.checkout-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:14px;font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;transition:filter .18s ease,background .18s ease,border-color .18s ease,color .18s ease}
+.checkout-btn--ghost{border:1px solid var(--line);background:transparent;color:var(--ink)}
+.checkout-btn--ghost:hover{border-color:var(--ink2);color:var(--ink)}
+.checkout-btn--next,.checkout-btn--pay{border:0;background:var(--action-bg);color:var(--action-ink);flex:1;max-width:280px}
+.checkout-btn--next:hover,.checkout-btn--pay:hover{color:var(--action-ink);filter:brightness(1.12)}
+.checkout-btn--pay:disabled{opacity:.6;cursor:wait}
+.checkout-btn--pay .voucher-btn__ico{color:currentColor}
+.checkout-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.checkout-error{margin:14px 0 0;padding:11px 13px;border:1px solid var(--coral);border-radius:13px;background:var(--coral-soft);color:var(--coral);font-size:13px;font-weight:700}
+/* Debajo de 760px el resumen deja de ser columna lateral y pasa arriba, con
+   scroll propio corto: si no, en un celular el formulario entero queda debajo
+   de un resumen que ocupa media pantalla. */
+@media (max-width:760px){
+  .checkout-layout{grid-template-columns:minmax(0,1fr)}
+  .checkout-aside{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}
+  .checkout-aside__media img{height:104px}
+  .checkout-aside__media,.checkout-aside__media{min-height:104px}
+  .checkout-main{max-height:none}
+  .checkout-panel{overflow:visible;padding:16px}
+  .checkout-main__head{padding:16px 16px 0}
+  .checkout-actions{padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .checkout-steps__text em{display:none}
+  .checkout-grid{grid-template-columns:minmax(0,1fr)}
+  .checkout-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .checkout-btn{min-height:46px;padding:0 14px;font-size:13.5px}
+  .checkout-btn--next,.checkout-btn--pay{max-width:none}
+}
+@media (max-width:900px){
+  /* Por debajo de 900 el modal entero pasa a bottom-sheet (ver .booking-modal),
+     asi que el checkout tiene que dejar de medir contra el viewport. */
+  .checkout-dialog{border-radius:25px 25px 0 0;max-height:94vh;overflow:auto}
+  .checkout-layout{min-height:0}
+}
 /* Créditos globales, al pie de la página: reunión de todas las fotos que la
    app cargó, no sólo las de los tours. */
 .foot-credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}
@@ -889,12 +1104,16 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
 @media(max-width:640px){.destination-highlights{margin:20px 0 8px;padding:16px;border-radius:20px}.destination-highlights__slider::before,.destination-highlights__slider::after{width:54px}.destination-highlights__head{align-items:stretch;flex-direction:column;gap:12px}.destination-highlights__head h2{font-size:30px}.destination-highlights__head>label{display:flex;align-items:center;gap:10px}.destination-highlights__head select{flex:1;min-width:0;margin:0}.destination-highlights__carousel{gap:0;padding:2px 54px 8px}.destination-highlights__carousel .featured-destination{flex-basis:100%}.destination-highlights__arrow{width:42px;height:42px}.destination-highlights__arrow--prev{left:1px}.destination-highlights__arrow--next{right:1px}.featured-destination__image{height:200px}.featured-destination__overlay h3{font-size:25px}}
-@media(max-width:900px){.local-tours__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.local-tours__grid{grid-template-columns:minmax(0,1fr)}}
 /* La card sin padding propio: la foto va a sangre hasta los bordes y el
    padding lo aporta el cuerpo. Con padding en la card (lo que había antes) la
    foto quedaba metida en un marco y el bloque se veía más estrecho que las
-   tarjetas de "Transporte local" y "Comidas". */
-@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__grid{grid-template-columns:minmax(0,1fr)}.local-tour__media{height:168px}}
+   tarjetas de "Transporte local" y "Comidas".
+   Abajo de 560 la card rota en columna: una sola columna de 184px de foto con
+   el texto al lado deja la ficha en 130px, que no alcanza ni para el título.
+   La foto pasa a ser una franja de 168px arriba, como era antes, y el pie con
+   el precio y los dos botones se reparten en la fila completa. */
+@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tour{grid-template-columns:minmax(0,1fr)}.local-tour__media{height:168px;min-height:0}.local-tours__head{align-items:stretch;flex-direction:column;gap:12px}.local-tours__cta-wrap{align-items:stretch}.local-tours__reserve{width:100%}}
 .flight-airline{flex-wrap:wrap}
 .flight-airline .cabin-badge{white-space:nowrap;background:var(--cel-soft);color:var(--ink)}
 /* z-index propio: #install-help es el ÚLTIMO modal del DOM, así que con el

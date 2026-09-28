@@ -613,7 +613,26 @@
   if (!window.CS_DESTINATION_DAILY_COSTS) {
     console.error('Falta /daily-costs.js: corré npm run build:costos y serví el archivo generado.');
   }
+  // La procedencia de esos mismos números: de dónde sale, cuándo se verificó y
+  // cuánta confianza tiene. La genera el mismo script, en el mismo archivo, para
+  // que sea imposible que la tabla y su procedencia se desincronicen.
+  var DAILY_COSTS_PROVENANCE = window.CS_DESTINATION_DAILY_COSTS_PROVENANCE || {};
+  var TRANSFER_PROVENANCE = window.CS_TRANSFER_PRICES_PROVENANCE || {};
+  if (!window.CS_DESTINATION_DAILY_COSTS_PROVENANCE) {
+    console.error('Falta la procedencia en /daily-costs.js: corré npm run build:costos.');
+  }
   function getDestinationDailyCosts(key) { return DESTINATION_DAILY_COSTS[String(key || '').toLowerCase()] || DESTINATION_DAILY_COSTS.rio; }
+  // La procedencia del destino, o null. Null es un caso real y no una excepción:
+  // si falta la tabla generada, el panel tiene que quedarse callado en vez de
+  // inventar una fuente.
+  function getDailyCostsProvenance(key) {
+    var p = DAILY_COSTS_PROVENANCE[String(key || '').toLowerCase()];
+    return p && p.fuente ? p : null;
+  }
+  function getTransferProvenance(key) {
+    var p = TRANSFER_PROVENANCE[String(key || '').toLowerCase()];
+    return p && p.fuente ? p : null;
+  }
   var massSearch = false;
   var detailState = null;
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
@@ -1843,11 +1862,19 @@
     var creditos = {};
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
     var desdeCivitatis = tours[0] && tours[0].source === 'civitatis';
+    // El CTA de la cabecera abre el checkout con lo que ya este elegido. Sale
+    // deshabilitado porque sin actividades elegidas no hay nada que confirmar,
+    // y el handler de 'change' lo habilita en el primer clic de una card. El
+    // total se escribe en el mismo handler para que el boton no prometa una
+    // cifra que cambio despues.
     var head = '<div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span>' +
       '<h2 id="local-tours-title">' + (desdeCivitatis ? 'Actividades reales en ' : 'Los imperdibles de ') + esc(destinationName) + '</h2>' +
       '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
       (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
-      (desdeCivitatis ? ' &middot; precio real' : ' &middot; precio referencial') + '</p></div></div>';
+      (desdeCivitatis ? ' &middot; precio real' : ' &middot; precio referencial') + '</p></div>' +
+      '<div class="local-tours__cta-wrap"><b class="local-tours__cta-total" data-tours-cta-total hidden></b>' +
+      '<button type="button" class="local-tours__reserve" data-book-selected-tours disabled>' +
+      '<span>Reservar actividades</span></button></div></div>';
     // Iconos de la tarjeta: trazo, como los de CATEGORY_ICONS, para que se
     // lean bien en el panel chico y hereden el color de cada tema.
     var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
@@ -1935,24 +1962,36 @@
     if (/3 horas|2 horas|3 a 4 horas/.test(t)) return 'Unas horas';
     return 'Consultar duración';
   }
-  /* Estrellas de la card. Se dibujan con el color de la marca en vez de con un
-     caracter: el glifo de estrella cambia de ancho entre fuentes y los cinco no
-     quedaban alineados. 'full' es la parte entera y 'half' la mitad, que es como
-     se lee un 4.6 sin tener que redondearlo a 5. */
+  /* Estrellas de la card. Se dibujan con SVG y no con el caracter de estrella
+     porque el glifo cambia de ancho entre fuentes y las cinco no quedaban
+     alineadas.
+
+     La media estrella se arma con dos <svg> superpuestos dentro de una ranura
+     con overflow:hidden, y la ranura ocupa la mitad del ancho. La primera
+     version usaba un <linearGradient> con id para pintar la mitad, y eso
+     multiplicaba el mismo id por cada estrella de cada fila: document.getElement
+     ById devuelve el primero, el dibujo sale igual por casualidad y el HTML
+     queda invalido. Sin ids no hay nada que resolver. */
   function starsRow(value) {
     var n = Math.max(0, Math.min(5, Number(value) || 0));
     var full = Math.floor(n);
-    var half = n - full >= 0.25 && n - full < 0.75 ? 1 : 0;
-    var empty = 5 - full - half;
-    function star(fill) {
-      return '<svg class="local-tour__star is-' + fill + '" viewBox="0 0 24 24" aria-hidden="true">' +
-        '<defs><linearGradient id="cs-star-' + fill + '"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs>' +
-        '<path fill="url(#cs-star-' + fill + ')" d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.7l5.8-.8z"/></svg>';
+    var resto = n - full;
+    // 0.25 a 0.75 es media estrella. Fuera de ese rango se redondea al entero
+    // mas cercano, que es lo que espera cualquiera que lee "4.8" o "4.1".
+    var half = resto >= 0.25 && resto < 0.75 ? 1 : 0;
+    if (resto >= 0.75) full += 1;
+    var STAR = 'm12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.7l5.8-.8z';
+    function star(kind) {
+      var base = '<svg class="local-tour__star-base" viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR + '"/></svg>';
+      if (kind === 'empty') return '<span class="local-tour__star is-empty">' + base + '</span>';
+      var width = kind === 'half' ? 50 : 100;
+      return '<span class="local-tour__star is-' + kind + '" style="width:' + width + '%">' +
+        base + '<svg class="local-tour__star-fill" viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR + '"/></svg></span>';
     }
     var out = '';
     for (var i = 0; i < full; i++) out += star('full');
     if (half) out += star('half');
-    for (var j = 0; j < empty; j++) out += star('empty');
+    for (var j = full + half; j < 5; j++) out += star('empty');
     return out;
   }
   function pinIcon() {
@@ -2230,6 +2269,25 @@
     if (!checkoutTours().length) return;
     checkoutState.step = 0;
     renderCheckout();
+  }
+  /* El boton "Reservar actividades" de la cabecera y el total que muestra. Se
+     llama desde el 'change' de cada card y desde la carga de un viaje guardado,
+     porque las dos pueden cambiar la seleccion. El total va multiplicado por
+     los pasajeros: el precio de la card es por persona y el boton confirma el
+     total, asi que mostrar el primero al lado del segundo seria contradecirse. */
+  function syncToursCta() {
+    var btn = document.querySelector('[data-book-selected-tours]');
+    if (!btn) return;
+    var total = Number(detailState && detailState.toursTotal) || 0;
+    var count = (detailState && detailState.selectedTours && detailState.selectedTours.length) || 0;
+    btn.disabled = !count;
+    var label = btn.querySelector('span');
+    if (label) label.textContent = count ? 'Reservar actividades' : 'Elegí tus actividades';
+    var badge = document.querySelector('[data-tours-cta-total]');
+    if (!badge) return;
+    var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
+    badge.hidden = !count;
+    if (count) badge.textContent = total * pax + ' total · ' + count + (count === 1 ? ' actividad' : ' actividades');
   }
   /* Guarda lo escrito antes de validar el paso. Sin esto, el navegador valida
      los campos del paso anterior que ya no estan en el DOM y no puede focusing
@@ -2575,6 +2633,171 @@
       proposalBreakdownHead() +
       proposalBreakdownContent(state) +
       '</section>';
+  }
+  /* ---------- "De dónde salen los valores" ----------
+     El desglose de arriba dice CUÁNTO va a cada rubro. Este panel dice DE QUÉ
+     rubro sale cada número, que es la pregunta que sigue.
+
+     La diferencia con un "estimado" a secas: un estimado sin fuente no permite
+     decidir nada, porque no dice si se puede corregir. Acá cada fila dice el
+     proveedor o el nombre del operador del que salió el número, la fecha de
+     verificación y cuánta confianza tiene. Cuando el número sale de un modelo y
+     no de un precio publicado, se dice cuál modelo y con qué insumo.
+
+     Es la diferencia de fondo con una calculadora que multiplica 0,65 y 1,65
+     sobre un promedio ajeno: acá el 94% de los transfers tiene la fórmula
+     escrita al lado del precio. */
+
+  // El origen de cada rubro. Un objeto por categoría, con la misma clave que
+  // CATS, para que agregar un rubro al desglose no pueda olvidarse de declararlo
+  // acá: `fuentesDe` avisa por las categorías sin entrada.
+  function fuentesDe(state) {
+    var meta = (state && state.meta) || {};
+    var destKey = String((meta.dest && meta.dest.key) || '').toLowerCase();
+    var ciudad = (meta.dest && meta.dest.name) || 'tu destino';
+    var noches = Math.max(1, Number(meta.nights) || 1);
+    var pax = Math.max(1, Number(meta.pax) || 1);
+    var comidaProv = getDailyCostsProvenance(destKey);
+    var trasladoProv = getTransferProvenance(destKey);
+    // Un pasaje es real si la tarifa vino de SerpAPI al cotizar la propuesta, o
+    // si la persona eligió un vuelo de la búsqueda en vivo. Antes solo miraba lo
+    // segundo, y el panel llegaba a labeling "estimado" un pasaje que la app ya
+    // identificaba con el tag "Pasaje real" en la tarjeta: dos verdades
+    // opuestas en la misma pantalla, y la más visible era la equivocada.
+    var flightReal = !!(state && (state.flightAutoPriced ||
+      (state.proposal && state.proposal.sources && state.proposal.sources.pasajes === 'real')));
+    var hotelReal = !!meta.hotelsLoaded;
+
+    return {
+      pasajes: {
+        estado: flightReal ? 'real' : 'estimado',
+        origen: 'Google Flights',
+        detalle: 'Tarifa de la fecha que elegiste, consultada al cotizar. La reserva se completa en Google Flights, no acá.',
+        fecha: 'Consultada al cotizar este viaje.'
+      },
+      bus: {
+        estado: 'estimado',
+        origen: 'Modelo propio',
+        detalle: 'La tarifa de bus todavía no tiene una fuente en vivo: es un precio de planificación, no una cotización. Hay que confirmarlo con el operador para tus fechas.',
+        fecha: null
+      },
+      alojamiento: {
+        estado: hotelReal ? 'real' : 'estimado',
+        origen: 'Booking.com',
+        detalle: hotelReal
+          ? 'Tarifa del alojamiento que estás mirando, para tus fechas y tus ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ', con ' + noches + (noches === 1 ? ' noche' : ' noches') + '.'
+          : 'Todavía no cargamos los alojamientos de ' + ciudad + '. El número que ves es una estimación de mercado para ' + noches + (noches === 1 ? ' noche' : ' noches') + '.',
+        fecha: hotelReal ? 'Consultada al cotizar este viaje.' : null
+      },
+      comidas: null,
+      local: null,
+      // Comidas y transporte local comparten el MISMO `fuente` en
+      // data/costos-diarios.json: es un solo texto por destino que cubre las dos
+      // columnas. Pintarlas como dos filas repetía el mismo párrafo de 200
+      // caracteres dos veces seguidas. Van juntas, que además es como el voucher
+      // ya las agrupa ("Gastos en destino").
+      destino: {
+        estado: 'estimado',
+        origen: comidaProv ? 'Base de gastos de ' + ciudad : 'Base de gastos de la región',
+        detalle: comidaProv ? comidaProv.fuente : null,
+        confianza: comidaProv ? comidaProv.confianza : null,
+        verificado: comidaProv ? comidaProv.verificado : null,
+        nota: comidaProv ? comidaProv.nota : null,
+        derivacion: comidaProv ? comidaProv.derivacion : null,
+        formula: comidaProv ? 'Comida y transporte local: ' + noches + (noches === 1 ? ' noche' : ' noches') + ' × ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ' × el valor diario de cada uno.' : null
+      },
+      traslados: trasladoProv ? {
+        estado: 'estimado',
+        origen: 'OSRM + modelo de distancia',
+        detalle: trasladoProv.fuente,
+        confianza: trasladoProv.confianza,
+        verificado: trasladoProv.verificado,
+        derivacion: trasladoProv.derivacion,
+        km: trasladoProv.km,
+        real: trasladoProv.real || [],
+        nota: trasladoProv.modo && trasladoProv.modo !== 'car' ? 'No hay carretera hasta ' + ciudad + ': el traslado es en ' + trasladoProv.modo + '.' : null
+      } : {
+        estado: 'estimado',
+        origen: 'Modelo propio',
+        detalle: 'No tenemos el precio de traslado de ' + ciudad + ' verificado.'
+      },
+      tours: {
+        estado: 'real',
+        origen: 'Civitatis',
+        detalle: 'El precio es el de la fecha que estás mirando. Si no elegiste ninguna actividad, este rubro está en cero.',
+        fecha: null
+      },
+      auto: {
+        estado: 'estimado',
+        origen: 'Modelo propio',
+        detalle: 'Combustible y peajes de la ruta ida y vuelta, con el rendimiento del vehículo que elegiste. No es una cotización de alquiler.',
+        fecha: null
+      }
+    };
+  }
+
+  // El orden en que aparecen las filas, y a qué modo de transporte pertenece
+  // cada una. Es la misma taxonomía que getBudgetBreakdown() usa para el desglose,
+  // así que las dos vistas no pueden mostrar rubros distintos para el mismo viaje.
+  //
+  // 'destino' no es un rubro de CATS: es la fila que junta comidas y local, que
+  // salen de la misma fuente.
+  var FUENTES_POR_MODO = {
+    flight: ['pasajes', 'alojamiento', 'traslados', 'destino', 'tours'],
+    bus: ['bus', 'alojamiento', 'destino', 'tours'],
+    auto: ['auto', 'alojamiento', 'destino', 'tours']
+  };
+  var ETIQUETA_FUENTE = { destino: 'Gastos en destino' };
+
+  function fuenteBadge(estado, confianza) {
+    // El estado y la confianza son cosas distintas y no se mezclan: "real" dice
+    // si el número viene de una consulta; "confianza baja" dice cuánta fe merece
+    // una estimación. Un transfer con tarifa publicada es real y de confianza
+    // alta; uno del modelo de distancia es estimado y de confianza baja.
+    var clase = estado === 'real' ? 'fuente-badge es-real' : 'fuente-badge es-estimado';
+    var texto = estado === 'real' ? 'precio real' : 'estimado';
+    if (estado !== 'real' && confianza) {
+      return '<span class="' + clase + '">' + texto + '</span><span class="fuente-badge es-confianza conf-' + esc(confianza) + '">confianza ' + esc(confianza) + '</span>';
+    }
+    return '<span class="' + clase + '">' + texto + '</span>';
+  }
+
+  function fuentesPanel(state) {
+    if (!state || !state.meta) return '';
+    var fuentes = fuentesDe(state);
+    var orden = FUENTES_POR_MODO[state.transportMode] || FUENTES_POR_MODO.flight;
+    var visibles = orden.filter(function (cat) { return fuentes[cat]; });
+    if (!visibles.length) return '';
+
+    var hayReal = visibles.some(function (cat) { return fuentes[cat].estado === 'real'; });
+    var conteo = visibles.filter(function (cat) { return fuentes[cat].estado === 'real'; }).length;
+    var resumen = hayReal
+      ? conteo + ' de ' + visibles.length + ' rubros usan un precio real de proveedor. Los otros son estimaciones, y abajo está de dónde sale cada una.'
+      : 'Ninguno de los ' + visibles.length + ' rubros de este viaje tiene un precio real: son estimaciones. Abajo está de dónde sale cada una y cuánta confianza tiene.';
+
+    var filas = visibles.map(function (cat) {
+      var f = fuentes[cat];
+      var label = ETIQUETA_FUENTE[cat] || (CATS.filter(function (c) { return c[0] === cat; })[0] || ['', cat])[1];
+      return '<div class="fuente-fila">' +
+        '<div class="fuente-fila__head"><b>' + esc(label) + '</b>' + fuenteBadge(f.estado, f.confianza) + '</div>' +
+        '<p class="fuente-fila__origen">Origen: <b>' + esc(f.origen) + '</b></p>' +
+        (f.detalle ? '<p class="fuente-fila__detalle">' + esc(f.detalle) + '</p>' : '') +
+        (f.formula ? '<p class="fuente-fila__formula">' + esc(f.formula) + '</p>' : '') +
+        (f.km != null ? '<p class="fuente-fila__formula">' + f.km + ' km de carretera, medidos.</p>' : '') +
+        (f.real && f.real.length ? '<p class="fuente-fila__real">Tarifa publicada para: ' + esc(f.real.join(', ')) + '. El resto sale del modelo.</p>' : '') +
+        (f.nota ? '<p class="fuente-fila__nota">' + esc(f.nota) + '</p>' : '') +
+        (f.derivacion ? '<p class="fuente-fila__derivacion"><b>Cómo se calculó:</b> ' + esc(f.derivacion) + '</p>' : '') +
+        (f.verificado ? '<p class="fuente-fila__fecha">Verificado: ' + esc(f.verificado) + (f.fecha ? ' · ' + esc(f.fecha) : '') + '</p>' : (f.fecha ? '<p class="fuente-fila__fecha">' + esc(f.fecha) + '</p>' : '')) +
+        '</div>';
+    }).join('');
+
+    return '<section class="fuentes" data-fuentes>' +
+      '<details class="fuentes__details">' +
+      '<summary class="fuentes__summary"><span>De dónde salen los valores</span></summary>' +
+      '<p class="fuentes__intro">' + esc(resumen) + '</p>' +
+      '<div class="fuentes__lista">' + filas + '</div>' +
+      '<p class="fuentes__pie">Un número sin fuente publicada no se presenta como real. Cuando la fuente no alcanza, se escribe de qué se derivó y con qué confianza.</p>' +
+      '</details></section>';
   }
   /* ---------- salto desde el desglose / "Mi Viaje" a la sección del rubro ----------
      El desglose y el panel "Mi Viaje" son el mapa del presupuesto: dicen cuánta
@@ -5042,6 +5265,10 @@
     var selectedTransportMode = proposal.mode === 'auto' ? 'auto' : proposal.mode === 'bus' ? 'bus' : 'flight';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
+    // El checkout arranca de cero con cada viaje: los datos del viajero que
+    // quedaron del pedido anterior no son del viaje nuevo, y una referencia
+    // vieja pegada al mensaje de WhatsApp seria el error mas dificil de ver.
+    checkoutState = { step: 0, form: {}, payment: '' };
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null, flightAutoPriced: false };
     var nights = Math.max(1, Number(data.meta.nights) || 1);
     var pax = Math.max(1, Number(data.meta.pax) || 1);
@@ -5061,6 +5288,10 @@
     if (selectedTransportMode === 'auto' || selectedTransportMode === 'flight') syncTransportState(isRoadtrip);
     var renderSafe = function (fn, fallback) { try { return fn(); } catch (error) { console.error('Error al renderizar detalle', error); return fallback; } };
     var breakdownMarkup = renderSafe(function () { return proposalBreakdownMarkup(detailState); }, '<section class="proposal-breakdown"><h2>Desglose del viaje</h2></section>');
+    // El panel de fuentes va FUERA de [data-proposal-breakdown] a propósito: ese
+    // section se repinta entero en cada recálculo (queueHeavyRepaint) y se
+    // comería el <details> abierto en cada movimiento de un campo.
+    var fuentesMarkup = renderSafe(function () { return fuentesPanel(detailState); }, '');
     var dailyBudgetMarkup = renderSafe(function () { return dailyBudgetControls(); }, '');
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
@@ -5073,7 +5304,7 @@
     var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
-      renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + dailyBudgetMarkup +
+      renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + fuentesMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + foodMarkup +
       '</div></div>';
@@ -5487,8 +5718,7 @@
       var input = Array.prototype.slice.call(document.querySelectorAll('[data-tour-choice]')).find(function (item) { return item.getAttribute('data-tour-title') === tour.title; });
       if (input) input.checked = true;
     });
-    var toursButton = document.querySelector('[data-book-selected-tours]');
-    if (toursButton) toursButton.disabled = !detailState.selectedTours.length;
+    syncToursCta();
     if (details.hotel) {
       detailState.hotel = Number(details.hotel.total) || detailState.hotel;
       detailState.selectedHotel = true;
@@ -6422,80 +6652,33 @@ function comboNombreDestino() {
       var bookTours = e.target.closest('[data-book-selected-tours], [data-tour-reserve]');
       if (bookTours && detailState) {
         e.preventDefault(); e.stopPropagation();
-        // El boton "Reservar" de una card abre el checkout. Antes este handler
-        // mandaba directo a WhatsApp con toursWhatsappUrl(), pero no habia
-        // ningun elemento con [data-book-selected-tours] en el markup: el
-        // handler existia, el boton no. Ademas saltaba los datos del viajero,
-        // que es justo lo que el operador necesita para confirmar.
+        // Los dos botones abren el checkout: el de la cabecera de la seccion y
+        // el "Reservar" de cada card. Antes este handler mandaba directo a
+        // WhatsApp con toursWhatsappUrl() y no habia ningun elemento con
+        // [data-book-selected-tours] en el markup: el handler existia, el boton
+        // no. Ademas se saltaba los datos del viajero, que es justo lo que el
+        // operador necesita para confirmar.
+        //
+        // toursWhatsappUrl() sigue usandose desde el modal del itinerario, en
+        // la fila "Tours y actividades" del voucher, que es un atajo distinto.
         if (bookTours.hasAttribute('data-tour-reserve')) {
           // Reservar una card que todavia no esta elegida la agrega primero: el
           // checkout solo confirma lo que ya esta en el total del viaje, y
-          // confirmar algo que no suma seria incoherent.
+          // confirmar algo que no suma seria incoherente.
           var card = bookTours.closest('[data-tour-card]');
           var choice = card && card.querySelector('[data-tour-choice]');
           if (choice && !choice.checked) {
             choice.checked = true;
             choice.dispatchEvent(new Event('change', { bubbles: true }));
           }
-          openToursCheckout();
-          return;
         }
-        var toursUrl = toursWhatsappUrl(detailState);
-        if (!toursUrl) return;
-        window.open(toursUrl, '_blank', 'noopener,noreferrer');
+        openToursCheckout();
         return;
       }
       var tourDetail = e.target.closest('[data-tour-detail-open]');
       if (tourDetail) {
         e.preventDefault(); e.stopPropagation();
         openTourDetailModal(tourDetail);
-        return;
-      }
-      // Checkout: los botones de los tres pasos viven dentro de #booking-modal
-      // y se atienden aca porque el contenedor ya tiene su propio listener para
-      // cerrar. El clic nunca llega al toggle de la card porque estan separados
-      // en el DOM.
-      var ckNext = e.target.closest('[data-checkout-next]');
-      if (ckNext) {
-        e.preventDefault();
-        var invalid = readCheckoutForm();
-        if (invalid) { invalid.reportValidity(); invalid.focus(); return; }
-        gotoCheckoutStep(checkoutState.step + 1);
-        return;
-      }
-      var ckBack = e.target.closest('[data-checkout-back]');
-      if (ckBack) {
-        e.preventDefault();
-        readCheckoutForm();
-        gotoCheckoutStep(checkoutState.step - 1);
-        return;
-      }
-      var ckConfirm = e.target.closest('[data-checkout-confirm]');
-      if (ckConfirm) {
-        e.preventDefault();
-        // El paso 2 no tiene un <form>, asi que su validacion no la hace el
-        // navegador. Acu se comprueba a mano y con un mensaje en la pantalla,
-        // no con un alert.
-        if (!checkoutState.payment) {
-          var notice = $('#booking-modal .checkout-panel');
-          if (notice) {
-            var warn = notice.querySelector('[data-checkout-pay-error]');
-            if (!warn) {
-              warn = document.createElement('p');
-              warn.className = 'checkout-error';
-              warn.setAttribute('data-checkout-pay-error', '');
-              warn.textContent = 'Elegí un medio de pago para continuar.';
-              notice.appendChild(warn);
-            }
-            warn.scrollIntoView({ block: 'nearest' });
-          }
-          return;
-        }
-        var checkoutUrl = checkoutWhatsappUrl();
-        if (!checkoutUrl) { closeBookingForm(); return; }
-        ckConfirm.disabled = true;
-        window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
-        closeBookingForm();
         return;
       }
       // La tarjeta completa es la zona sensible: el checkbox va estirado con
@@ -6654,8 +6837,7 @@ function comboNombreDestino() {
         // :has() en CSS sobre el checkbox, asi que aca no hay que tocar texto
         // ni clases: solo se recalcula el total.
         if (tourCard) tourCard.classList.toggle('is-added', tourChoice.checked);
-        var bookTours = document.querySelector('[data-book-selected-tours]');
-        if (bookTours) bookTours.disabled = !detailState.selectedTours.length;
+        syncToursCta();
         recalcularTotalViaje();
         return;
       }
@@ -6743,6 +6925,56 @@ function comboNombreDestino() {
     });
     // Acciones del resumen final del itinerario, que se pinta adentro del modal.
     $('#booking-modal').addEventListener('click', function (e) {
+      /* Los botones del checkout viven acá adentro, no en #vista-detalle: el
+         modal es hermano de la vista, asi que un listener puesto alla nunca
+         los ve. Estaban primero en el de #vista-detalle y por eso "Continuar"
+         no hacia nada. */
+      var ckNext = e.target.closest('[data-checkout-next]');
+      if (ckNext) {
+        e.preventDefault();
+        // readCheckoutForm() devuelve el primer control invalido y guarda todo
+        // lo escrito. Se valida a mano porque el panel anterior ya salio del
+        // DOM y reportValidity() sobre el noaria posible.
+        var invalid = readCheckoutForm();
+        if (invalid) { invalid.reportValidity(); invalid.focus(); return; }
+        gotoCheckoutStep(checkoutState.step + 1);
+        return;
+      }
+      var ckBack = e.target.closest('[data-checkout-back]');
+      if (ckBack) {
+        e.preventDefault();
+        readCheckoutForm();
+        gotoCheckoutStep(checkoutState.step - 1);
+        return;
+      }
+      var ckConfirm = e.target.closest('[data-checkout-confirm]');
+      if (ckConfirm) {
+        e.preventDefault();
+        // El paso 2 no esta dentro de un <form>, asi que su validacion no la
+        // hace el navegador. Se comprueba aca y el aviso se escribe en el
+        // panel, no en un alert.
+        if (!checkoutState.payment) {
+          var panel = $('#booking-modal .checkout-panel');
+          if (panel) {
+            var warn = panel.querySelector('[data-checkout-pay-error]');
+            if (!warn) {
+              warn = document.createElement('p');
+              warn.className = 'checkout-error';
+              warn.setAttribute('data-checkout-pay-error', '');
+              warn.textContent = 'Elegí un medio de pago para continuar.';
+              panel.appendChild(warn);
+            }
+            warn.scrollIntoView({ block: 'nearest' });
+          }
+          return;
+        }
+        var checkoutUrl = checkoutWhatsappUrl();
+        if (!checkoutUrl) { closeBookingForm(); return; }
+        ckConfirm.disabled = true;
+        window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+        closeBookingForm();
+        return;
+      }
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var saveTripButton = e.target.closest('[data-save-trip]');
       if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }

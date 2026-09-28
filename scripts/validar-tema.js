@@ -23,6 +23,8 @@
  *   2. Para cada token, los dos bloques declaran el mismo valor.
  *   3. El contraste de los tokens de card contra --ink / --ink2 del modo
  *      oscuro llega al minimo de WCAG, que es el numero que estaba roto.
+ *   3b. El contraste de los badges de 11 px del panel "De donde salen los
+ *      valores" llega a 4.5:1 en los dos temas.
  *   4. Ningun archivo de public/ vuelve a setear data-theme por su cuenta
  *      sin pasar por el toggle, porque eso abriria una tercera vía al tema
  *      oscuro y este chequeo dejaria de cubrirla.
@@ -166,6 +168,35 @@ if (/^#[0-9a-f]{6}$/i.test(tinta.ink) && /^#[0-9a-f]{6}$/i.test(tinta.ink2)) {
     ratio(raizA['--card-bg'] || '#FFFFFF', tinta.ink2).toFixed(2) + ':1');
 } else {
   av('No se pudieron leer --ink / --ink2 del tema oscuro; se saltea el chequeo de contraste.');
+}
+
+/* 3b. contraste de los badges del panel "De donde salen los valores".
+      Son pastillas de 11 px, o sea texto normal, y van sobre un fondo teñido
+      (--good-soft, --cel-soft, --coral-soft). Es el mismo criterio del punto 3,
+      aplicado a los tokens que los badges usan. Se miden en los DOS temas: un
+      color de marca puede pasar en oscuro y no en claro, que es lo que pasaba
+      con --coral (3.48:1 sobre --coral-soft en claro). Por eso existe
+      --warn-ink y no se oscureció --coral. */
+const BADGES = [
+  ['--good', '--good-soft', 'badge "precio real" / "confianza alta"'],
+  ['--cel', '--cel-soft', 'badge "estimado" / "confianza media"'],
+  ['--warn-ink', '--coral-soft', 'badge "confianza baja"']
+];
+for (const [tinta, fondo, que] of BADGES) {
+  for (const [nombre, tokens] of [['claro', raizA], ['oscuro', A], ['oscuro (data-theme)', B]]) {
+    const a = tokens[tinta], b = tokens[fondo];
+    if (!/^#[0-9a-f]{6}$/i.test(a || '') || !/^#[0-9a-f]{6}$/i.test(b || '')) {
+      err(que + ': en el tema ' + nombre + ' falta ' + tinta + ' o ' + fondo + '.');
+      continue;
+    }
+    const r = ratio(a, b);
+    if (r < 4.5) {
+      err(que + ': ' + tinta + ' (' + a + ') sobre ' + fondo + ' (' + b + ') da ' + r.toFixed(2) +
+        ':1 en el tema ' + nombre + ', debajo de 4.5:1. Es una pastilla de 11 px.');
+    } else {
+      console.log('  ok  ' + que + ' [' + nombre + '] = ' + r.toFixed(2) + ':1');
+    }
+  }
 }
 
 /* 4. nadie reintroduce una tercera via al tema oscuro */

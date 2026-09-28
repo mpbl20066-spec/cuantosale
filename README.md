@@ -31,8 +31,8 @@ cuantosale/
 │  └─ pull-distancias.js      Km de carretera desde OSRM
 ├─ public/                    La web (index.html, style.css, app.js)
 │  ├─ guiAs.js                Contenido de la Guía Secreta, por destino
-│  ├─ daily-costs.js          GENERADO. No editar a mano.
-│  └─ transfer-precios.js     GENERADO. No editar a mano.
+│  ├─ daily-costs.js          GENERADO. No editar a mano. Números + procedencia.
+│  └─ transfer-precios.js     GENERADO. No editar a mano. Números + procedencia.
 ├─ test.js                    Pruebas automáticas
 ├─ .env.example               Plantilla de configuración
 └─ package.json
@@ -131,7 +131,27 @@ El compartido casi no crece con la distancia, y los datos lo confirman: entre GI
 
 ### Tours y experiencias locales
 
-La PWA incluye experiencias referenciales para Río de Janeiro, Florianópolis, Maragogi, Praia do Pipa y Gramado/Canela. Cada ficha abre WhatsApp con el mensaje y los datos del viaje ya preparados (`https://wa.me/?text=...`); al no tener un número comercial configurado, la persona elige el contacto al abrir WhatsApp. Los importes son referenciales y se confirman por asistencia.
+`toursFor()` decide qué se muestra y es la única fuente: el catálogo de Civitatis con el precio de la fecha que está mirando la persona si hay credenciales, y si no la lista local de `LOCAL_TOURS` como piso. Es un merge con piso, no un reemplazo: un destino sin mapear en Civitatis o una API caída muestran igual.
+
+La card es horizontal, con la foto a la izquierda y la ficha a la derecha: título, ubicación, estrellas con reseñas (solo si el origen las trae), las etiquetas "Incluye / No incluye" que se sacan del texto de detalle, el precio y las acciones. `tourIncludes()` no inventa: si la frase no está en el detalle, la etiqueta no aparece.
+
+### El checkout de actividades
+
+Reservar abre un checkout de tres pasos dentro de `#booking-modal`, con el mismo reparto de las agencias de viaje: un resumen del viaje fijo a la izquierda (`checkoutAside()`) y el paso a la derecha.
+
+| Paso | Qué pide | Función |
+|---|---|---|
+| 1 | Título, nombre, apellido, documento, fecha de nacimiento, nacionalidad, email, teléfono, dirección | `checkoutPanelDatos()` |
+| 2 | Con qué medio de pago le resulta cómodo pagar | `checkoutPanelPago()` |
+| 3 | Recap y confirmación | `checkoutPanelListo()` |
+
+**El paso 2 no cobra y no dice que cobre.** El aviso está escrito en la pantalla, arriba de la grilla de medios de pago, porque un botón que dice "Pagar" y no paga es la misma mentira que el README prohíbe para los precios. `CHECKOUT_PAYMENTS` lista los bancos uruguayos (BROU, Santander, BBVA, Scotiabank, Bandes, OCA) y tres tarjetas; el paso 3 manda el pedido armado por WhatsApp, que es lo que ya hacía `toursWhatsappUrl()` pero con los datos del viajero y la referencia del pedido adentro.
+
+El precio de cada card es **por persona** y el total del checkout multiplica por los pasajeros. Mostrar el uno junto al otro sin multiplicar sería contradecirse, así que `checkoutTotals()` es el único lugar donde se calcula.
+
+Los logos de los bancos no se suben al repo: los nombres de marca se pintan con CSS en el color de la marca. Es el mismo criterio que ya se tomó con las fotos de los tours.
+
+El estado vive en `checkoutState` y se reinicia con cada viaje nuevo (`renderDetalle`), porque los datos de un viajero que quedaron del pedido anterior no son del viaje nuevo.
 
 ### Guía Secreta
 
@@ -170,6 +190,21 @@ El schema y las reglas de contenido están documentados en la cabecera del archi
 | Comidas, transporte local, valijas, seguro | Estimado (`lib/model.js` y `data/costos-diarios.json`) |
 
 El gráfico de fechas mezcla las dos cosas a propósito, pero las marca: las barras con precio real van sólidas y las estimadas con borde punteado, y el subtítulo dice cuántas de las N fechas son reales. Un precio inventado presentado como real sería peor que no mostrar el gráfico.
+
+### "De dónde salen los valores"
+
+El desglose dice **cuánto** va a cada rubro. El panel que va debajo, en `<details>` y cerrado por defecto, dice **de qué** sale cada número: el proveedor o el operador del que salió, la fecha de verificación y cuánta confianza tiene. Para Búzios, el rubro de traslados muestra la fuente real (inbuzios.com.br y el operador del propio aeropuerto), los 174 km de OSRM, que el compartido tiene tarifa publicada y el privado no, y la fórmula del modelo que genera el privado.
+
+**Por qué existe.** Un "estimado" a secas no deja decidir nada, porque no dice si se puede corregir. Este panel separa dos cosas que antes iban mezcladas: si el número viene de una consulta (`precio real`) y cuánta fe merece una estimación (`confianza alta/media/baja`). La diferencia importa en esta tabla: 5 de las 88 celdas de transfer tienen tarifa publicada y las otras 83 salen de un modelo de distancia. Mostrarlas todas como "estimado" sería menos preciso de lo que permiten los datos.
+
+**La procedencia se genera, no se escribe.** `data/costos-diarios.json` y `data/transfer-precios.json` ya tenían `fuente`, `confianza`, `verificado` y `derivacion` por destino. Hasta ahora no llegaban al navegador: los dos generadores escribían solo los números. Ahora `npm run build:costos` y `npm run build:transfer` emiten además un segundo global (`CS_DESTINATION_DAILY_COSTS_PROVENANCE` y `CS_TRANSFER_PRICES_PROVENANCE`) en el mismo archivo.
+
+Dos decisiones que no son obvias:
+
+- **Va en un segundo objeto, no como campos de la tabla.** `test.js` y `check-daily-costs.js` comparan `Object.keys(cliente)` contra las claves del modelo; una clave enumerable extra los rompe. En node se expone con `Object.defineProperty(..., { enumerable: false })`, que tampoco aparece en `Object.keys()`.
+- **Comidas y transporte local son una sola fila** ("Gastos en destino"), porque en el JSON comparten el mismo `fuente`: son dos columnas del mismo texto por destino. Pintarlas separadas repetía el mismo párrafo de 200 caracteres dos veces.
+
+**Lo que el panel todavía no hace:** es de solo lectura. No permite editar un rubro ni agregar un margen, que es lo que hace la calculadora de Noma. Editar tiene que entrar por `getBudgetBreakdown()` (`public/app.js`), que es la única función que suma el total, para que un cambio mueva a la vez el número grande, el desglose, "A dónde va tu plata" y el voucher que se comparte.
 
 ### Endpoints
 
@@ -220,8 +255,16 @@ Conviene correrla después de tocar `public/guias.js` o `public/app.js`. Los dos
 - **Buses y ferry reales:** Busbud da acceso a sus datos a socios; hay que pedirles un convenio. Completá `lib/providers/busbud.js`.
 - **Arreglar `AIR_DESTINATIONS` para `fernando`:** dice `NVT` (Navegantes, Santa Catarina) cuando el código de la isla es `FEN`. La tabla de transfer ya usa `FEN` y hay un test que lo fija, pero la búsqueda de vuelos sigue mandando a la provincia equivocada.
 - **Bajar los precios de transfer del modelo:** 83 de 88 celdas salen de la fórmula de distancia. Cada vez que se encuentre una tarifa publicada, se agrega el ancla a `ANCHORS` en `scripts/build-transfer-precios.js` con su fuente, se corre `npm run pull:transfer` y `npm run build:transfer`, y la celda pasa de `confianza: 'baja'` a `media`.
+- **Cobrar de verdad:** el checkout pide los datos del viajero y el medio de pago preferido, pero no cobra. Hoy cierra por WhatsApp. Sumar una pasarela real es un proyecto aparte: hay que elegir proveedor, firmar contrato, guardar el pedido en el servidor, manejar el webhooks de confirmación y devolución, y decidir quién es el merchant of record, porque el precio se pacta con cada operador y no con nosotros.
+- **Los datos del checkout no se guardan:** `checkoutState` vive en memoria y se reinicia al cambiar de viaje. Si hay que recordarlos entre visitas, van a `localStorage` (siguen siendo de la persona, no salen del navegador) o al backend, y ese backend es el mismo que hace falta para cobrar.
 - **Textos legales:** términos y política de privacidad antes de abrirla al público.
 - **Idea:** poné un botón de "Quiero que me avisen" con un formulario externo para medir interés.
+
+### Un detalle que costó una hora de depuración
+
+Los archivos generados se cargan **sin `?v=`**: `/daily-costs.js`, `/transfer-precios.js`, `creditos-fotos.generated.js`. `style.css` y `app.js` sí llevan versión, y el server los sirve con `immutable` de un año, así que subir el número en `index.html` es obligatorio en cada cambio de esos dos.
+
+Los que no llevan versión se sirven con `no-cache`, pero eso obliga a revalidar y el server no manda `ETag` ni `Last-Modified`: el navegador igual puede quedarse con la copia vieja. Cuando `./app` arranca con el error `Falta la procedencia en /daily-costs.js` y `npm run build:costos` dice que todo está al día, el problema es caché del navegador, no el archivo.
 
 ## Cambiar destinos y estimaciones
 

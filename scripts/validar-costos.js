@@ -60,6 +60,12 @@ for (const [k, v] of Object.entries(D)) {
     });
     if (malos.length) err(k + '.' + campo + ' tiene caracteres CJK: ' + JSON.stringify(malos.join('')));
     if (/\bconMuy\b|\s{3,}/.test(t)) err(k + '.' + campo + ' tiene un typo o espaciado raro');
+    // Palabras en ingles coladas. Estos tres textos salen a la pantalla tal cual
+    // en el panel "De donde salen los valores", asi que una palabra en ingles ya
+    // no es un dato sucio: es texto que el usuario lee. Aparecio uno ("Copia
+    // practically de for/jericoacoara" en la derivacion de buz).
+    const ingles = t.match(/\b(practically|basically|actually|literally|probably|without|average|copy)\b/gi);
+    if (ingles) err(k + '.' + campo + ' tiene palabras en ingles: ' + [...new Set(ingles)].join(', '));
   }
 }
 

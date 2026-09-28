@@ -16,7 +16,8 @@
  *   4. Trazabilidad: cada destino dice de donde sale su numero. Confianza 'baja'
  *      tiene que explicar la derivacion.
  *   5. Las copias generadas (lib/model.js y public/transfer-precios.js) están
- *      sincronizadas con el JSON.
+ *      sincronizadas con el JSON, y la procedencia (fuente, confianza, fecha y si
+ *      cada modalidad tiene tarifa publicada) llega al cliente.
  *   6. La tabla del cliente y la del modelo dan el mismo numero.
  *   7. No quedan numeros hardcodeados en public/app.js: ni 30 ni 150 ni 35.
  */
@@ -156,6 +157,37 @@ if (!fs.existsSync(CLIENTE_PATH)) {
     if (cliente[k].compartido !== D[k].compartido || cliente[k].privado !== D[k].privado) {
       err('el cliente y el JSON difieren en ' + k + ': cliente ' + cliente[k].compartido + '/' + cliente[k].privado +
         ' vs JSON ' + D[k].compartido + '/' + D[k].privado);
+    }
+  }
+
+  // 5b. La procedencia tiene que viajar al cliente.
+  // Esta tabla es la que mas lo necesita: 5 de 88 celdas tienen tarifa publicada
+  // y el resto sale de un modelo de distancia. Sin esto en pantalla, la app puede
+  // decir "estimado" pero no "estimado con esta formula y estos km", que es la
+  // diferencia entre una conjetura declarada y una presentada como precio.
+  const prov = cliente.provenance;
+  if (!prov) {
+    err('public/transfer-precios.js no exporta la procedencia. Corré npm run build:transfer');
+  } else {
+    if (!prov._meta || !prov._meta.modelo || !prov._meta.modelo.compartido) {
+      err('la procedencia no trae las formulas del modelo de distancia');
+    }
+    for (const k of claves) {
+      if (!prov[k]) { err('sin procedencia para ' + k); continue; }
+      if (prov[k].fuente !== D[k].fuente) err('la fuente de ' + k + ' no coincide con el JSON');
+      if (prov[k].confianza !== D[k].confianza) err('la confianza de ' + k + ' no coincide con el JSON');
+      if (prov[k].verificado !== D[k].verificado) err('la fecha de ' + k + ' no coincide con el JSON');
+      // 'real' declara que modalidades tienen tarifa publicada. Si el destino es de
+      // confianza baja y dice tener alguna real, o algo esta mal en el JSON o la
+      // app va a mostrar "precio real" al lado de una conjetura.
+      if (D[k].confianza === 'baja' && (prov[k].real || []).length) {
+        err(k + ' es de confianza baja pero declara tarifas reales: ' + prov[k].real.join(', '));
+      }
+      // Toda modalidad que no sea real tiene que poder explicar como se calculo.
+      const sinAncla = ['compartido', 'privado'].filter((m) => !(prov[k].real || []).includes(m));
+      if (sinAncla.length && !prov[k].derivacion) {
+        err(k + ' no tiene tarifa publicada para ' + sinAncla.join('/') + ' y no explica la derivacion');
+      }
     }
   }
 }
