@@ -1,0 +1,39 @@
+{
+  "_COMO_USAR": [
+    "Catalogo de actividades de Civitatis para mostrar en NUESTRAS cards, con el",
+    "precio y la foto reales y el enlace de afiliado. Es la via que reemplaza al",
+    "widget embebido, que no se puede filtrar por destino ni sumar al presupuesto.",
+    "",
+    "COMO SE LLENA: en el panel de afiliados, seccion Enlaces, abris cualquier",
+    "producto de Civitatis y copias la URL con tu ?aid= al final. Pegas el titulo,",
+    "esa URL y el precio que muestra el producto.",
+    "",
+    "LA FOTO NO SE COPIA DE CIVITATIS. Su CDN no se puede enlazar en caliente: es",
+    "propiedad de ellos y ademas el build lo rechaza. Hay que poner una foto de",
+    "Wikimedia Commons con su autor y su licencia, igual que en los tours locales.",
+    "scripts/build-actividades.js no genera el archivo si falta autor o licencia.",
+    "",
+    "PRECIOS: son los que publica Civitatis, no el de la fecha que esta mirando la",
+    "persona. Eso se dice en la card, en la etiqueta de la fuente. El precio por",
+    "fecha exacta solo llega con la API B2B (CIVITATIS_API_KEY), que consulta",
+    "dynamic-prices."
+  ],
+  "afiliado": "115515",
+  "destinos": {
+    "rio": [
+      {
+        "_ejemplo": "copiar un bloque de estos al destino que corresponda y borrar el resto",
+        "titulo": "Cristo Redentor y Pan de Azúcar",
+        "url": "https://www.civitatis.com/es/rio/cristo-redentor-y-pan-de-azucar/?aid=115515",
+        "precio": 65,
+        "descripcion": "Excursión guiada de día completo con entradas prioritarias y transporte.",
+        "rating": 9.3,
+        "resenas": 1036,
+        "cancelacionGratis": true,
+        "imagen": "https://thumb.wikimedia.org/wikipedia/commons/thumb/PLACEHOLDER.jpg",
+        "autor": "Nombre del autor en Commons",
+        "licencia": "CC BY-SA 4.0"
+      }
+    ]
+  }
+}

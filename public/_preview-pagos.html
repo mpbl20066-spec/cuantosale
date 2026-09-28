@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preview · Checkout de medios de pago</title>
+<link rel="stylesheet" href="/style.css?v=preview-pagos">
+<style>
+  /* Solo para el preview: el modal real se dibuja dentro de #booking-modal. */
+  body{padding:24px;background:var(--bg)}
+  .preview-wrap{max-width:520px;margin:0 auto}
+  .preview-note{margin:0 0 14px;padding:10px 12px;border-radius:11px;background:var(--cel-soft);color:var(--ink2);font-size:12px;line-height:1.5}
+  .checkout-panel{padding:0}
+  .preview-h2{margin:26px 0 12px}
+</style>
+</head>
+<body>
+<div class="preview-wrap">
+  <p class="preview-note">
+    Arriba: los nueve logos reales de Wikimedia. Abajo: la misma grilla con
+    todas las imagenes forzadas a fallar, que es lo que ve quien abre el paso 2
+    sin conexión.
+  </p>
+  <div class="checkout-panel">
+    <h2 class="checkout-panel__title">¿Cómo te queda más cómodo pagar?</h2>
+    <p class="checkout-panel__lead">Elegí tu medio de pago para que el operador te diga por dónde hacerlo.</p>
+    <p class="checkout-notice"><strong>Aún no procesamos pagos.</strong> Esta app cotiza y coordina, pero no cobra: la reserva se confirma con el operador y recién ahí se paga.</p>
+    <div class="checkout-pay-grid" id="grid-ok" role="radiogroup" aria-label="Medio de pago"></div>
+    <p class="checkout-pay-total">Total a confirmar: <b>US$ 520</b> · 2 personas</p>
+  </div>
+
+  <h2 class="checkout-panel__title preview-h2">Sin conexión (fallback)</h2>
+  <div class="checkout-panel">
+    <div class="checkout-pay-grid" id="grid-ko" role="radiogroup" aria-label="Medio de pago"></div>
+  </div>
+</div>
+<script>
+// Copia de CHECKOUT_PAYMENTS tal como quedo en app.js. El preview no monta la
+// app entera (no encuentra sus nodos y tira), asi que se pega la tabla sola.
+var CHECKOUT_PAYMENTS = [
+  { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/86/LogoBROU.png', lw: 753, lh: 206 },
+  { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Grupo_Santander_Logo.svg', lw: 512, lh: 83 },
+  { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/98/BBVA_logo_2025.svg', lw: 600, lh: 180 },
+  { id: 'scotiabank', label: 'Scotiabank', kind: 'Transferencia bancaria', mark: 'Scotiabank', brand: '#ec111a', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/22/Scotiabank_logo.svg', lw: 273, lh: 40 },
+  { id: 'prex', label: 'Prex', kind: 'Transferencia bancaria', mark: 'Prex', brand: '#f5a800', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Prex_Uruguay.png', lw: 125, lh: 46 },
+  { id: 'oca', label: 'OCA', kind: 'Transferencia bancaria', mark: 'OCA', brand: '#e30613', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/OCA_logo.svg', lw: 512, lh: 111 },
+  { id: 'pix', label: 'Pix', kind: 'Transferencia inmediata', mark: 'Pix', brand: '#00b1e0', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Pix_%28Brazil%29_logo.svg', lw: 899, lh: 318 },
+  { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg', lw: 512, lh: 166 },
+  { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg', lw: 1000, lh: 618 }
+];
+var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>';
+function card(p, broken) {
+  return '<label class="checkout-pay' + (p.id === 'bbva' ? ' is-selected' : '') + '" data-checkout-pay>' +
+    '<input type="radio" name="demo-' + (broken ? 'ko' : 'ok') + '" value="' + p.id + '"' + (p.id === 'bbva' && broken ? ' checked' : '') + '>' +
+    '<span class="checkout-pay__brand">' +
+    '<img class="checkout-pay__logo' + (broken ? ' is-broken' : '') + '" src="' + (broken ? '/no-existe.svg' : p.logo) + '" alt="" width="' + p.lw + '" height="' + p.lh + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' +
+    '<span class="checkout-pay__mark" style="--pay-brand:' + p.brand + '">' + p.mark + '</span>' +
+    '</span>' +
+    '<span class="checkout-pay__kind">' + p.kind + '</span>' +
+    '<span class="sr-only">' + p.label + '</span>' +
+    '<span class="checkout-pay__check" aria-hidden="true">' + CHECK + '</span>' +
+    '</label>';
+}
+var ok = '', ko = '';
+CHECKOUT_PAYMENTS.forEach(function (p) { ok += card(p, false); ko += card(p, true); });
+document.getElementById('grid-ok').innerHTML = ok;
+document.getElementById('grid-ko').innerHTML = ko;
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

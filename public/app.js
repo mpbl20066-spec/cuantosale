@@ -1904,28 +1904,116 @@
     var key = String(destinationKey || '').toLowerCase();
     if (!key) return [];
     destinationName = destinationName || key;
-    // Las actividades reales de Civitatis ganan si hay; si no, la lista local.
-    // Es un merge, no un reemplazo: la lista local sigue siendo el piso, asi
-    // que un destino sin mapeado en Civitatis, o una API caida, muestran igual.
+    /* Tres escalones, de mas nuevo a mas viejo:
+
+       1. La API B2B (window.__civitatisTours). Es el unico que da el precio DE
+          LA FECHA que esta mirando la persona, porque consulta dynamic-prices.
+          Necesita CIVITATIS_API_KEY.
+
+       2. El catalogo curado de afiliado (public/actividades-civitatis.js). Foto
+          y precio reales de Civitatis, con el enlace ?aid=. Es lo que hace que
+          la card sume al presupuesto y abra el checkout, que el widget embebido
+          no puede hacer por ser un iframe. No necesita ninguna clave.
+
+       3. La lista local de LOCAL_TOURS, con precio estimado. Sigue siendo el
+          piso: sin 1 ni 2, o con una API caida, el destino muestra igual.
+
+       Los tres se SIRVEN, no se reemplazan: la lista local sigue al final para
+       los destinos que todavia no tienen catalogo curado. La API va primero
+       porque su precio es el unico que es de la fecha. */
     var remote = window.__civitatisTours && window.__civitatisTours.destinationKey === key
       ? (window.__civitatisTours.items || [])
       : [];
-    return remote.length
-      ? remote.map(function (a) {
-          return {
-            destinations: [key], destination: destinationName,
-            title: a.title, description: a.description, price: Number(a.price) || 0,
-            details: a.details || '', image: a.image || '', rating: a.rating || 0,
-            reviewsCount: a.reviewsCount || 0, url: a.url || '', source: 'civitatis',
-            freeCancellation: !!a.freeCancellation
-          };
-        })
-      : LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(key) >= 0; });
+    var locales = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(key) >= 0; })
+      .map(function (tour) { return Object.assign({}, tour, { source: 'local' }); });
+    var curadas = ((window.CS_ACTIVIDADES_CIVITATIS || {})[key] || []).map(function (a) {
+      return {
+        destinations: [key], destination: destinationName,
+        title: a.titulo, description: a.descripcion, price: Number(a.precio) || 0,
+        details: '', image: a.imagen || '', rating: a.rating || 0,
+        reviewsCount: a.resenas || 0, url: a.url || '', source: 'civitatis-afiliado',
+        freeCancellation: !!a.cancelacionGratis,
+        autor: a.autor || '', licencia: a.licencia || ''
+      };
+    });
+    var deApi = remote.map(function (a) {
+      return {
+        destinations: [key], destination: destinationName,
+        title: a.title, description: a.description, price: Number(a.price) || 0,
+        details: a.details || '', image: a.image || '', rating: a.rating || 0,
+        reviewsCount: a.reviewsCount || 0, url: a.url || '', source: 'civitatis',
+        freeCancellation: !!a.freeCancellation
+      };
+    });
+    // Sin API, la curada va primero: precio real antes que estimado. Con API, la
+    // de la API va primero porque es la unica de la fecha pedida.
+    return deApi.length ? deApi.concat(curadas, locales) : curadas.concat(locales);
   }
   // Se expone porque la Guia Secreta tambien dibuja los tours y su preview
   // los necesita. Mismo criterio que los otros globales del proyecto: datos
   // que se leen, no logica que se ejecuta.
   window.CS_TOURS = toursFor;
+  /* ID de afiliado de Civitatis y alto del widget. Van aca y no dentro del
+     snippet porque el panel lo deja pegado en el HTML, y asi no hay que
+     reescribir el iframe entero para cambiar el ID o la moneda. */
+  var CIVITATIS_AFILIADO = '115515';
+  // 6 actividades en grilla de 3 columnas son 2 filas de cards. Medido en la
+  // columna de 760px de la app: cada card queda con su foto, el titulo, el
+  // rating y la fila de precio y boton. El alto va fijo y el iframe con
+  // scrolling="no", para no tener dos barras: la del iframe y la de la pagina.
+  var CIVITATIS_WIDGET_ALTO = 620;
+  /* ---------- Widget de actividades de Civitatis ----------
+     Es un iframe de civitatis.com, NO son datos. Eso define lo que se puede y
+     lo que no se puede hacer con el, asi que va escrito aca y no en el README
+     de afilados:
+
+     - No se puede sumar nada al presupuesto. El iframe es un documento de otro
+       origen: desde esta pagina no se lee que actividad se selecciono, ni su
+       titulo, ni su precio. No hay eventos ni postMessage documentado. Cuando
+       alguien toca "Reservar" adentro, se navega DENTRO del iframe y aca no
+       pasa nada. Poner un listener de clic sobre el <iframe> solo diria
+       "tocaron algo", no que.
+     - Por eso va en un bloque propio, abajo de la seccion de tours y no dentro.
+       Si un precio real aparece en la grilla que suma al presupuesto, la
+       persona lo elige esperando que entre al total, y no entra.
+     - El widget no acepta filtro por destino en su URL: el parametro no
+       existe. Con typeSelection=all muestra su catalogo global, que al probarlo
+       daba Tenerife y Roma para un viajero que iba a Rio. Por eso el bloque
+       dice de entrada que es el catalogo de Civitatis y no una cotizacion
+       nuestra.
+     - Los links son de afiliado: la reserva se hace en Civitatis y nosotros
+       cobramos comision. Se declara, que en Uruguay es parte de la informacion
+       al consumidor y ademas es lo unico que sostiene el "no mentimos" del
+       proyecto.
+     - currency=USD y no BRL como venia: el widget toma una sola moneda fija, no
+     sigue el selector del encabezado. BRL era lo que traia el snippet.
+     - No se carga iframeResizer. El snippet del panel lo usa para calcular el
+     alto; aca el alto es fijo y se mide, asi que sobra ese script de terceros
+     (que ademas venia con checkOrigin:false, que es una debilidad conocida de
+     iframe-resizer: acepta mensajes de resize de cualquier origen). */
+  function civitatisWidgetMarkup(meta) {
+    if (!meta || !meta.dest) return '';
+    var destName = meta.dest.name || 'tu destino';
+    return '<section class="civitatis-widget" data-budget-anchor="civitatis" aria-labelledby="civitatis-widget-title">' +
+      '<div class="civitatis-widget__head"><div>' +
+      '<span class="local-tours__eyebrow">CATÁLOGO DE CIVITATIS</span>' +
+      '<h2 id="civitatis-widget-title">Reservá directo con Civitatis</h2>' +
+      '<p>Precios y fotos reales de Civitatis, el operador. La reserva se hace en su sitio y no se suma a tu presupuesto de CuántoSale.</p>' +
+      '</div></div>' +
+      '<div class="civitatis-widget__note"> enlaces de afiliado: si reservás desde acá, nosotros cobramos una comisión y a vos no te cuesta nada.</div>' +
+      '<div class="civitatis-widget__frame">' +
+      '<iframe class="civitatis-widget__iframe" title="Actividades de Civitatis" ' +
+      'src="https://www.civitatis.com/widget-activities/?affiliated=' + esc(CIVITATIS_AFILIADO) +
+      '&amp;display=grid&amp;cant=6&amp;lang=es&amp;currency=USD&amp;transfer=0&amp;cmp=Widget_ES' +
+      '&amp;width=100%25&amp;hideButton=0&amp;centerContent=1&amp;typeSelection=all' +
+      '&amp;color=10233e&amp;typography=Montserrat&amp;removeBackground=0&amp;showShadow=1&amp;roundedButtons=0" ' +
+      'loading="lazy" referrerpolicy="no-referrer" scrolling="no" ' +
+      'style="width:100%;border:0;height:' + CIVITATIS_WIDGET_ALTO + 'px"></iframe>' +
+      '</div>' +
+      '<p class="civitatis-widget__foot"><a href="https://www.civitatis.com/?aid=' + esc(CIVITATIS_AFILIADO) + '" target="_blank" rel="noopener noreferrer sponsored">Ver el catálogo completo en Civitatis ↗</a>' +
+      '<span> Civitatis no muestra todavía el precio de la fecha exacta de tu viaje: el que ves es el que ellos publican para estas fechas.</span></p>' +
+      '</section>';
+  }
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
     var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
@@ -1933,22 +2021,40 @@
     if (!tours.length) return '';
     // Los tours locales guardan autor y licencia en TOUR_PHOTOS; el pie global
     // los reagrupa. Los de Civitatis traen su propia foto, sin crédito que dar.
+    // Los curados de afiliado SIEMPRE traen foto de Commons con su autor y su
+    // licencia, asi que se acreditan tambien: el build no deja generar una
+    // actividad con foto sin acreditar, pero la card no puede confiar en eso
+    // para no romper el pie si alguien edita el JSON a mano.
     var creditos = {};
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
-    var desdeCivitatis = tours[0] && tours[0].source === 'civitatis';
+    var fuente = (tours[0] && tours[0].source) || 'local';
+    /* Tres etiquetas y no dos. Antes alcanzaba con real/referencial, y con el
+       catalogo curado de afiliado esa division mentia en los dos sentidos: el
+       precio del catalogo es real (lo publica Civitatis) pero no es el de la
+       fecha que esta mirando la persona, y el de la API si lo es. Decir
+       "Precio real" para los dos tapa justo la diferencia que sirve para
+       decidir cual de los dos arrives. */
+    var SOURCE_LABEL = {
+      civitatis: 'Precio de la fecha',
+      'civitatis-afiliado': 'Precio publicado · Civitatis',
+      local: 'Precio referencial'
+    };
     // El CTA de la cabecera abre el checkout con lo que ya este elegido. Sale
     // deshabilitado porque sin actividades elegidas no hay nada que confirmar,
     // y el handler de 'change' lo habilita en el primer clic de una card. El
     // total se escribe en el mismo handler para que el boton no prometa una
     // cifra que cambio despues.
+    /* Sin boton de reservar en la cabecera. La reserva se pide desde "Mi Viaje",
+       que ya tiene las filas de actividades y de transfer: un solo boton para los
+       dos pedidos. Tenerlo ademas aca obligaba a recordar en que seccion estabas
+       para no mandar el pedido a otro lado, y con dos pedidos posibles el error
+       era facil. La seccion queda en "elegi lo que quieras"; quien elige decide
+       cuando. */
     var head = '<div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span>' +
-      '<h2 id="local-tours-title">' + (desdeCivitatis ? 'Actividades reales en ' : 'Los imperdibles de ') + esc(destinationName) + '</h2>' +
+      '<h2 id="local-tours-title">' + (fuente !== 'local' ? 'Actividades reales en ' : 'Los imperdibles de ') + esc(destinationName) + '</h2>' +
       '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
       (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
-      (desdeCivitatis ? ' &middot; precio real' : ' &middot; precio referencial') + '</p></div>' +
-      '<div class="local-tours__cta-wrap"><b class="local-tours__cta-total" data-tours-cta-total hidden></b>' +
-      '<button type="button" class="local-tours__reserve" data-book-selected-tours disabled>' +
-      '<span>Reservar actividades</span></button></div></div>';
+      ' &middot; ' + esc(SOURCE_LABEL[fuente] || SOURCE_LABEL.local) + '</p></div></div>';
     // Iconos de la tarjeta: trazo, como los de CATEGORY_ICONS, para que se
     // lean bien en el panel chico y hereden el color de cada tema.
     var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
@@ -2000,7 +2106,8 @@
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         (includes ? '<ul class="local-tour__tags">' + includes + '</ul>' : '') +
         '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
-        '<span class="local-tour__chip' + (tour.source === 'civitatis' ? ' is-real' : '') + '">' + (tour.source === 'civitatis' ? 'Precio real' : 'Precio referencial') + '</span>' +
+        '<span class="local-tour__chip' + (tour.source !== 'local' ? ' is-real' : '') + '">' +
+        esc(SOURCE_LABEL[tour.source] || SOURCE_LABEL.local) + '</span>' +
         (tour.freeCancellation ? '<span class="local-tour__chip">Cancelación gratis</span>' : '') + '</div>' +
         '<div class="local-tour__foot">' +
         '<p class="local-tour__price"><span class="local-tour__from">Desde</span><b>' + money(tour.price) + '</b><span>por persona</span></p>' +
@@ -2008,9 +2115,18 @@
         '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">' +
         '<svg class="local-tour__info-ico" ' + icoBase + ' aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4h.01"/></svg>' +
         '<span>Detalles</span></button>' +
-        (tour.url
-          ? '<a class="local-tour__book" href="' + esc(tour.url) + '" target="_blank" rel="noopener noreferrer">Ver en Civitatis</a>'
-          : '<button type="button" class="local-tour__book" data-tour-reserve>Reservar</button>') +
+        /* Agregar, no reservar. El boton de reservar queda en "Mi Viaje", porque
+           el pedido puede llevar actividades y transfer juntos y no queremos dos
+           mensajes con dos conversaciones para el mismo viaje. Este mantiene el
+           atajo que ya tenia: si la actividad todavia no esta elegida, el clic la
+           agrega antes de abrir el checkout, para que nunca se confirme algo que
+           no suma al total.
+
+           Y el enlace a Civitatis viaja DENTRO del checkout (detalle y mensaje
+           final), no desde la card. Antes el boton era un <a> que se iba directo
+           al sitio: la persona perdia el paso de confirmar y nosotros perdiamos
+           sus datos de viajero. */
+        '<button type="button" class="local-tour__book" data-tour-add>Agregar</button>' +
         '</div></div></div></article>';
     }).join('');
     var creditList = Object.keys(creditos).map(function (url) {
@@ -2167,22 +2283,44 @@
   var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
   var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
   var CHECKOUT_COUNTRIES = ['Uruguay', 'Argentina', 'Brasil', 'Chile', 'Paraguay', 'España', 'Otro'];
-  /* El checkout es uno solo y sirve para dos pedidos: las actividades y el
-     transfer. Antes el transfer traia su propio asistente de dos pasos —que no
-     tenia ni una regla de CSS, asi que se veia como texto pelado dentro del
-     modal— y el pedido cerraba con un boton que decia "Agregado al
-     presupuesto" y no confirmaba nada. Ahora elegir la modalidad lo mete al
-     presupuesto igual que elegir una card de actividades, y "Reservar
-     transfer" abre ESTE checkout: mismos tres pasos, mismo resumen lateral,
-     mismo cierre por WhatsApp. Un solo lugar donde aprender a reservar.
+  /* El checkout es UNO y lleva UN pedido, que puede tener las dos cosas: las
+     actividades elegidas y el transfer elegido. No es "actividades o transfer"
+     porque el boton que lo abre vive en "Mi Viaje", que ya tiene las dos
+     filas: si eligiste dos actividades y un transfer, un mensaje con las dos
+     actividades y otro con el transfer obligan a la persona a hacer dos
+     pedidos separados con dos conversaciones distintas. El operador, en cambio,
+     atiende un solo viaje.
+
+     Antes el transfer traia su propio asistente de dos pasos —que no tenia ni
+     una regla de CSS, asi que se veia como texto pelado dentro del modal— y el
+     pedido cerraba con un boton que decia "Agregado al presupuesto" y no
+     confirmaba nada. Los tres caminos de reserva que tenia la app (el boton de
+     la seccion de actividades, el del transfer y el "Coordinar" del voucher)
+     abrian tres formularios distintos para la misma accion.
 
      Se recuerda entre aperturas: recargar el formulario entero cada vez que se
      vuelve de un paso seria un castigo. No se guarda en disco ni sale del
      navegador. */
-  var checkoutState = { step: 0, form: {}, payment: '', kind: 'tours' };
-  function checkoutIsTransfer() { return checkoutState.kind === 'transfer'; }
+  var checkoutState = { step: 0, form: {}, payment: '' };
   function checkoutTours() {
     return (detailState && detailState.selectedTours) || [];
+  }
+  /* Que hay para reservar. Es la unica fuente: la usan el boton de "Mi Viaje"
+     para decidir si se habilita, el aside para pintar las filas y el mensaje de
+     WhatsApp para listarlas. Tres funciones distintas leerian el estado por su
+     cuenta y el primero que se desactualice mostraria un pedido vacio. */
+  function checkoutPedido() {
+    var tours = checkoutTours();
+    var transfer = checkoutTransferLine();
+    return {
+      tours: tours,
+      transfer: transfer,
+      count: tours.length + (transfer ? 1 : 0),
+      // El transfer solo aparece si el destino tiene donde recogerse y la
+      // modalidad elegida tiene precio. Un destino de ferry no lo tiene, y
+      // ofrecerlo seria un pedido que el operador no puede tomar.
+      hasTransfer: !!transfer
+    };
   }
   /* La linea de transfer del checkout. El total sale de getSelectedTransferAmount()
      y no de multiplicar aca: esa funcion ya sabe que el compartido se cobra por
@@ -2195,55 +2333,52 @@
     var precios = transferPreciosDe(detailState.meta);
     var privado = detailState.transferType === 'private';
     var unit = Number(privado ? precios.privado : precios.compartido) || 0;
-    // Un destino sin van compartida (soloPrivado) no tiene nada que reservar por
-    // ese lado: sin linea, el checkout no abre.
-    if (!(unit > 0)) return null;
+    // Se mira el TOTAL y no el precio unitario, porque el estado puede quedar
+    // desactualizado: si marcaste "compartido" en Rio y despues cambiaste el
+    // destino a uno sin van compartida, detailState.transferType sigue diciendo
+    // 'shared' y la tabla ya no tiene compartido. getSelectedTransferAmount()
+    // devuelve 0 en ese caso, y una linea de R$ 0 en el pedido es un pedido que
+    // el operador no puede tomar.
+    var total = getSelectedTransferAmount(detailState);
+    if (!(unit > 0) || !(total > 0)) return null;
     return {
       title: privado ? 'Transfer privado' : 'Transfer compartido',
       detail: privado ? 'Vehículo exclusivo para los que viajan' : 'Compartís el vehículo con otros pasajeros',
       price: unit,
-      total: getSelectedTransferAmount(detailState),
+      total: total,
       porPersona: !privado,
       pax: Math.max(1, Number(detailState.meta.pax) || 1)
     };
   }
-  /* Las lineas del resumen lateral y del total, sea cual sea el pedido. */
+  /* Las lineas del resumen lateral y el total del pedido. Los dos rubros suman
+     juntos porque van en el mismo mensaje: el total que se confirma es el de las
+     dos cosas, no el de una.
+
+     `perPerson` solo existe cuando el pedido es de actividades, que es el unico
+     caso donde el precio se divide entre los que viajan. Con un transfer
+     privado al lado no se puede decir "X por persona": el auto es uno solo. Por
+     eso el aside recibe null y escribe la cantidad de personas sin precio. */
   function checkoutTotals() {
     var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
-    if (checkoutIsTransfer()) {
-      var line = checkoutTransferLine();
-      return {
-        kind: 'transfer',
-        pax: pax,
-        items: line ? [line] : [],
-        count: line ? 1 : 0,
-        unitTotal: line ? line.price : 0,
-        total: line ? line.total : 0,
-        // El privado no se parte entre los que viajan: "US$ 90 por persona" de un
-        // auto seria mentira, asi que el resumen dice quantas personas viajan y
-        // nada mas. null es lo que le dice al aside que no muestre esa linea.
-        perPerson: line && line.porPersona ? line.price : null
-      };
-    }
-    var tours = checkoutTours();
-    var toursTotal = tours.reduce(function (sum, t) { return sum + (Number(t.price) || 0); }, 0);
-    // El precio de cada tour es por persona. Multiplicar por pax es lo que hace
-    // que "por persona" y el total del checkout no se contradigan.
-    var total = toursTotal * pax;
-    return { kind: 'tours', pax: pax, items: tours, count: tours.length, unitTotal: toursTotal, total: total, perPerson: tours.length ? toursTotal : 0 };
-  }
-  /* "1 hora después de la llegada · 15:20". El horario sale de la llegada real
-     del vuelo cuando hay uno, que es el mismo calculo que hacen los chips de la
-     seccion: el checkout no vuelve a inventar una hora, muestra la que ya esta
-     elegida y que se ve en la pagina. */
-  function transferPickupSummary() {
-    var w = (detailState && detailState.transferWizard) || {};
-    var minutos = String(w.pickupMinutes || '60');
-    var ventana = getTransferPickupWindow();
-    var hora = minutos === 'custom'
-      ? (w.customTime || '')
-      : (minutos === '120' ? transferPickupTimeLabel(ventana.plusTwoHours) : transferPickupTimeLabel(ventana.plusOneHour));
-    return { label: getTransferPickupLabel(minutos, w.customTime), hora: hora, minutos: minutos };
+    var pedido = checkoutPedido();
+    var tours = pedido.tours;
+    var toursUnit = tours.reduce(function (sum, t) { return sum + (Number(t.price) || 0); }, 0);
+    // El precio de cada tour es por persona, y el del compartido tambien. El
+    // privado ya viene escalado por getSelectedTransferAmount() y no se vuelve a
+    // tocar: es el unico lugar donde se decide cuanto suma un auto.
+    var transfer = pedido.transfer;
+    var total = toursUnit * pax + (transfer ? transfer.total : 0);
+    return {
+      pax: pax,
+      tours: tours,
+      transfer: transfer,
+      items: tours.concat(transfer ? [transfer] : []),
+      count: pedido.count,
+      unitTotal: toursUnit,
+      transferTotal: transfer ? transfer.total : 0,
+      total: total,
+      perPerson: tours.length ? toursUnit : null
+    };
   }
   /* Donde te deja el transfer. El hotel elegido en la seccion de alojamiento es
      el valor por defecto, pero el campo es editable: el operador puede llevar a
@@ -2261,36 +2396,40 @@
      puede abrir y cerrar sin cambiar nada: un resumen que queda viejo es peor
      que no tenerlo.
 
-     El aside es el mismo para los dos pedidos, con las filas que aplican: para
-     el transfer interests la modalidad, el horario de recogida y el vuelo, que
-     son los tres datos que el operador necesita antes de contestarte. */
+     Las filas son una por cosa reservada y el total es de todo junto. Con
+     transfer al lado, el aside suma tambien el vuelo y el hotel: no para que se
+     confundan con el pedido —los que reservamos estan en negrita arriba y en la
+     lista de abajo—, sino porque son los otros dos datos que el operador necesita
+     para contestarte, y ya estan a mano. */
   function checkoutAside() {
     var t = checkoutTotals();
     var meta = (detailState && detailState.meta) || {};
     var destName = (meta.dest && meta.dest.name) || 'tu destino';
     var nights = Math.max(1, Number(meta.nights) || 1);
     var cover = (meta.dest && meta.dest.photo) || '';
-    var transfer = t.kind === 'transfer';
+    function linea(item, total) {
+      return '<li class="checkout-aside__row"><span class="checkout-aside__row-name">' + esc(item.title) + '</span>' +
+        '<b>' + money(total) + '</b></li>';
+    }
     var rows = t.count
-      ? t.items.map(function (item) {
-          return '<li class="checkout-aside__row"><span class="checkout-aside__row-name">' + esc(item.title) + '</span>' +
-            '<b>' + money(transfer ? item.total : item.price) + '</b></li>';
-        }).join('')
-      : '<li class="checkout-aside__row is-empty">' + (transfer ? 'Todavía no elegiste un transfer.' : 'Todavía no elegiste actividades.') + '</li>';
-    // "por persona" solo cuando el precio se reparte. En el transfer privado el
-    // auto es uno solo: poner un precio por persona ahi seria inventar una
-    // division que no existe.
+      ? t.tours.map(function (tour) { return linea(tour, tour.price); }).join('') +
+        (t.transfer ? linea(t.transfer, t.transfer.total) : '')
+      : '<li class="checkout-aside__row is-empty">Todavía no elegiste nada para reservar.</li>';
+    // El precio del transfer se muestra como total del viaje, no por persona: el
+    // privado es un auto. El "por persona" es el de las actividades, que si se
+    // dividen, y al lado va cuantos viajan.
     var porPersona = t.perPerson == null
-      ? t.pax + (t.pax === 1 ? ' persona' : ' personas') + ' · vehículo exclusivo'
+      ? t.pax + (t.pax === 1 ? ' persona' : ' personas')
       : (t.pax === 1 ? money(t.perPerson) + ' por persona' : money(Math.round(t.perPerson)) + ' por persona · ' + t.pax + ' personas');
     var facts = '<li><span>Salís de</span><b>' + esc(originCityName(meta.origin || (S && S.origin))) + '</b></li>' +
       '<li><span>Fechas</span><b>' + esc(storyDateRange(meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + '</b></li>' +
-      '<li><span>Viajeros</span><b>' + t.pax + (t.pax === 1 ? ' adulto' : ' adultos') + '</b></li>' +
-      '<li><span>' + (transfer ? 'Transfer' : 'Actividades') + '</span><b>' + t.count + (transfer ? (t.count === 1 ? ' elegido' : ' elegidos') : (t.count === 1 ? ' elegida' : ' elegidas')) + '</b></li>';
-    if (transfer) {
-      var pickup = transferPickupSummary();
+      '<li><span>Viajeros</span><b>' + t.pax + (t.pax === 1 ? ' adulto' : ' adultos') + '</b></li>';
+    if (t.tours.length) {
+      facts += '<li><span>Actividades</span><b>' + t.tours.length + (t.tours.length === 1 ? ' elegida' : ' elegidas') + '</b></li>';
+    }
+    if (t.transfer) {
       var vuelo = getSelectedFlightSummary();
-      facts += '<li><span>Recogida</span><b>' + esc(pickup.label + (pickup.hora ? ' · ' + pickup.hora : '')) + '</b></li>' +
+      facts += '<li><span>Transfer</span><b>' + esc(t.transfer.title) + '</b></li>' +
         '<li><span>Vuelo</span><b>' + esc(vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '')) + '</b></li>' +
         '<li><span>Hotel</span><b>' + esc(transferHotelName()) + '</b></li>';
     }
@@ -2299,12 +2438,12 @@
       (cover ? '<img src="' + esc(cover) + '" alt="" loading="lazy">' : '') +
       '<span class="checkout-aside__name">' + esc(destName) + '</span>' +
       '</div>' +
-      '<div class="checkout-aside__total"><span>' + (t.count ? (transfer ? 'Total del transfer' : 'Precio final') : 'Total estimado') + '</span>' +
+      '<div class="checkout-aside__total"><span>' + (t.count ? 'Total a confirmar' : 'Total estimado') + '</span>' +
       '<strong>' + money(t.total) + '</strong>' +
       '<em>' + porPersona + '</em></div>' +
       '<ul class="checkout-aside__facts">' + facts + '</ul>' +
-      '<div class="checkout-aside__list"><h3>' + (transfer ? 'Tu traslado' : 'Tu viaje') + '</h3><ul class="checkout-aside__rows">' + rows + '</ul>' +
-      '<p class="checkout-aside__total-line"><span>' + (transfer ? 'Total transfer' : 'Total actividades') + '</span><b>' + money(t.total) + '</b></p></div>' +
+      '<div class="checkout-aside__list"><h3>Tu reserva</h3><ul class="checkout-aside__rows">' + rows + '</ul>' +
+      '<p class="checkout-aside__total-line"><span>Total</span><b>' + money(t.total) + '</b></p></div>' +
       '</aside>';
   }
   function checkoutStepper() {
@@ -2339,20 +2478,24 @@
   /* El pedido de transfer necesita un dato que las actividades no: donde te
      deja. Va en el mismo paso de los datos del viajero y con el hotel ya escrito
      —el que elegiste en la seccion de alojamiento— porque casi siempre es el
-     mismo y dejarlo en blanco hace que la gente no avance. El horario de
-     recogida no se pregunta aca: se elige en la seccion, con la hora real del
-     vuelo a la vista, y aca se muestra como recordatorio. */
+     mismo y dejarlo en blanco hace que la gente no avance.
+
+     El horario de recogida NO se pregunta. Antes la app derivaba una hora de la
+     llegada del vuelo y proponia "1 hora despues", con un campo para escribir
+     otra. Eso no es coordinar: el transfer no tiene hora hasta que el operador
+     la confirma, y el mensaje de WhatsApp ya pide explicitamente que confirmen
+     el punto de encuentro. Preguntar una hora que el operador va a cambiar
+     obligaba a la persona a elegir algo que no sabia. */
   function checkoutTransferBlock() {
-    if (!checkoutIsTransfer()) return '';
-    var pickup = transferPickupSummary();
     var line = checkoutTransferLine();
+    if (!line) return '';
     return '<h3 class="checkout-panel__subtitle">El traslado</h3>' +
       '<div class="checkout-grid">' +
       checkoutField({ name: 'transferHotel', label: 'Hotel o pousada de destino', required: true, wide: true, value: transferHotelName(), placeholder: 'Ej: Pousada do Porto' }) +
       '</div>' +
       '<p class="checkout-transfer-note">' + categoryIcon('traslados', 'cel') +
-      '<span><b>' + esc(line ? line.title : 'Transfer') + '</b> · recogida ' + esc(pickup.label) + (pickup.hora ? ' (' + esc(pickup.hora) + ')' : '') +
-      '. Si el horario no es ese, cambialo en la sección de transfer.</span></p>';
+      '<span><b>' + esc(line.title) + '</b> · ' + money(line.total) +
+      '. El horario de recogida y el punto de encuentro los confirma el operador.</span></p>';
   }
   function checkoutPanelDatos() {
     var f = checkoutState.form;
@@ -2416,25 +2559,23 @@
     function dataRow(label, value) {
       return '<li><span>' + esc(label) + '</span><b>' + esc(value || '—') + '</b></li>';
     }
-    // El recap del transfer repite los datos que el operador necesita para
-    // contestarte: modalidad, horario, hotel y vuelo. Es el paso de control, y
-    // controlar no es ver un total: es ver los cuatro datos con los que te van a
-    // decir que si o que no.
+    // El recap lista cada cosa reservada con su total, y abajo el bloque de lo que
+    // el operador necesita para el traslado. Es el paso de control, y controlar no
+    // es ver un total: es ver las filas con las que te van a decir que sí o que no.
+    // Los dos bloques van juntos porque van en el mismo mensaje.
     var pedido = '';
-    if (t.kind === 'transfer') {
-      var pickup = transferPickupSummary();
+    if (t.tours.length) {
+      pedido += '<h3>Actividades en ' + esc(destino) + '</h3><ul>' +
+        t.tours.map(function (tour) { return dataRow(tour.title, money(tour.price) + ' c/u'); }).join('') +
+        '</ul>';
+    }
+    if (t.transfer) {
       var vuelo = getSelectedFlightSummary();
-      pedido = '<h3>El traslado</h3><ul>' +
-        (t.items.length ? t.items.map(function (item) { return dataRow(item.title, money(item.total) + (item.porPersona ? ' · ' + money(item.price) + ' c/u' : '')); }).join('') : '<li class="is-empty"><span>Sin transfer elegido</span></li>') +
-        dataRow('Recogida', pickup.label + (pickup.hora ? ' · ' + pickup.hora : '')) +
+      pedido += '<h3>El traslado</h3><ul>' +
+        dataRow('Transfer', t.transfer.title + ' · ' + money(t.transfer.total)) +
         dataRow('Hotel', transferHotelName()) +
         dataRow('Vuelo', vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '')) +
-        '</ul>';
-    } else {
-      pedido = '<h3>Actividades en ' + esc(destino) + '</h3><ul>' +
-        (t.count
-          ? t.items.map(function (tour) { return dataRow(tour.title, money(tour.price) + ' c/u'); }).join('')
-          : '<li class="is-empty"><span>Sin actividades elegidas</span></li>') +
+        dataRow('Horario de recogida', 'A coordinar con el operador') +
         '</ul>';
     }
     return '<div class="checkout-panel" data-checkout-panel="listo">' +
@@ -2478,12 +2619,12 @@
       closeBookingForm();
       return;
     }
-    modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title" data-checkout-kind="' + t.kind + '">' +
+    modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title">' +
       '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<div class="checkout-layout">' +
       checkoutAside() +
       '<div class="checkout-main">' +
-      '<header class="checkout-main__head"><h2 id="checkout-title">' + esc((detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || (t.kind === 'transfer' ? 'Reservar transfer' : 'Reservar actividades')) + '</h2>' +
+      '<header class="checkout-main__head"><h2 id="checkout-title">' + esc((detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.name) || 'Reservar') + '</h2>' +
       checkoutStepper() + '</header>' +
       panels[step]() +
       checkoutActions() +
@@ -2495,47 +2636,30 @@
     // llevaria el foco a un radio ya elegido, que es un salto que nadie pidio.
     if (first && step === 0) { try { first.focus({ preventScroll: true }); } catch (e) { /* foco no critico */ } }
   }
-  function openToursCheckout() {
+  /* Un solo boton de reserva en toda la app, y abre este checkout con lo que haya
+     elegido: las actividades, el transfer, o los dos. No se pregunta cual de los
+     dos porque al usuario le da igual el detalle interno del pedido: quiere
+     reservar lo que armó. Y para el operador es mejor recibir un solo mensaje con
+     las dos cosas que dos mensajes separados.
+
+     Si no hay nada elegido no abre. El boton de "Mi Viaje" sale deshabilitado en
+     ese caso, pero el teclado puede llegar igual —se queda deseleccionada una
+     card entre el click y el repintado— y un formulario que va a fallar en el
+     ultimo paso es peor que no abrir nada. */
+  function openCheckout() {
     if (!detailState || !detailState.meta) return;
-    if (!checkoutTours().length) return;
-    checkoutState.kind = 'tours';
+    if (!checkoutPedido().count) return;
     checkoutState.step = 0;
     renderCheckout();
   }
-  /* El transfer entra por el mismo checkout. Se fija `kind` antes de pintar
-     porque el aside, el panel de datos y el mensaje de WhatsApp se leen de ahi:
-     es lo unico que distingue un pedido del otro. Sin linea (destino sin
-     compartido, o modalidad deseleccionada) no abre. */
-  function openTransferCheckout() {
-    if (!detailState || !detailState.meta) return;
-    if (!checkoutTransferLine()) return;
-    checkoutState.kind = 'transfer';
-    checkoutState.step = 0;
-    renderCheckout();
-  }
-  /* El boton "Reservar actividades" de la cabecera y el total que muestra. Se
-     llama desde el 'change' de cada card y desde la carga de un viaje guardado,
-     porque las dos pueden cambiar la seleccion. El total va multiplicado por
-     los pasajeros: el precio de la card es por persona y el boton confirma el
-     total, asi que mostrar el primero al lado del segundo seria contradecirse. */
-  function syncToursCta() {
-    var btn = document.querySelector('[data-book-selected-tours]');
-    if (!btn) return;
-    var total = Number(detailState && detailState.toursTotal) || 0;
-    var count = (detailState && detailState.selectedTours && detailState.selectedTours.length) || 0;
-    btn.disabled = !count;
-    var label = btn.querySelector('span');
-    if (label) label.textContent = count ? 'Reservar actividades' : 'Elegí tus actividades';
-    var badge = document.querySelector('[data-tours-cta-total]');
-    if (!badge) return;
-    var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
-    badge.hidden = !count;
-    // money() y no el numero crudo: sin el, el boton decia "240 total" al lado de
-    // cards que decian "US$ 65", o sea un total sin moneda ni conversion al lado
-    // de precios con las dos cosas. Y tampoco servia formatearlo a mano porque
-    // el separador de miles y los decimales cambian con la moneda activa.
-    if (count) badge.textContent = money(total * pax) + ' total · ' + count + (count === 1 ? ' actividad' : ' actividades');
-  }
+  /* El boton de reservar de "Mi Viaje" no tiene funcion propia: se pinta entero
+     dentro de renderTripSummary(), que ya lo escribe con su estado y su total.
+
+     Antes existia syncToursCta(), que actualizaba el boton de la cabecera de la
+     seccion de actividades con un querySelector y un texto. Ese boton ya no
+     esta —la reserva se pide desde el panel— asi que la funcion se fue con el.
+     Lo que hace falta ahora es repintar el panel entero cuando cambia lo que hay
+     para reservar, y de eso se encarga renderTripSummary(). */
   /* Guarda lo escrito antes de validar el paso. Sin esto, el navegador valida
      los campos del paso anterior que ya no estan en el DOM y no puede focusing
      el que falta. */
@@ -2584,35 +2708,49 @@
     var pay = CHECKOUT_PAYMENTS.filter(function (p) { return p.id === checkoutState.payment; })[0];
     var nombre = ((f.titulo ? f.titulo + ' ' : '') + (f.nombre || '') + ' ' + (f.apellido || '')).trim();
     var ref = checkoutRef();
-    var cabecera =
-      (t.kind === 'transfer' ? 'Hola, quiero coordinar un transfer desde el aeropuerto' : 'Hola, quiero reservar actividades') +
-      ' para mi viaje a ' + meta.dest.name + '.\n\n' +
+    /* Un solo mensaje con lo que haya elegido. Los bloques van en el orden en que
+       los necesita el operador: primero las actividades, que tienen horario fijo
+       y son las que se agotan; despues el traslado, que se coordina con el vuelo.
+
+       La pregunta final pide punto de encuentro y horario siempre. Un transfer
+       sin hora no es un pedido incompleto, es una pregunta. */
+    var abre = t.tours.length && t.transfer
+      ? 'Hola, quiero reservar actividades y un transfer'
+      : (t.transfer ? 'Hola, quiero coordinar un transfer desde el aeropuerto' : 'Hola, quiero reservar actividades');
+    var message =
+      abre + ' para mi viaje a ' + meta.dest.name + '.\n\n' +
       'Pedido ' + ref + '\n' +
       'Viajero: ' + nombre + '\n' +
       'Documento: ' + (f.docTipo || '') + (f.docNumero ? ' ' + f.docNumero : '') + '\n' +
       'Contacto: ' + [f.email, f.telefono].filter(Boolean).join(' · ') + '\n' +
       'Fechas: ' + meta.dep + ' al ' + meta.ret + ' · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '\n\n';
-    var cuerpo;
-    if (t.kind === 'transfer') {
-      var pickup = transferPickupSummary();
-      var vuelo = getSelectedFlightSummary();
-      var item = t.items[0];
-      cuerpo =
-        'Transfer: ' + (item ? item.title : 'a definir') + ' · ' + money(t.total) +
-        (item && item.porPersona ? ' (' + money(item.price) + ' por persona)' : '') + '\n' +
-        'Recogida: ' + pickup.label + (pickup.hora ? ' (' + pickup.hora + ')' : '') + '\n' +
-        'Vuelo: ' + vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '') + (vuelo.arrivalText ? ' · llega ' + vuelo.arrivalText : '') + '\n' +
-        'Hotel: ' + transferHotelName() + '\n\n' +
-        'Total del transfer: ' + money(t.total) + '\n';
-    } else {
-      var lineas = t.items.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ' por persona)'; }).join('\n');
-      cuerpo = 'Actividades:\n' + lineas + '\n\n' + 'Total de actividades: ' + money(t.total) + '\n';
+    if (t.tours.length) {
+      /* El enlace de Civitatis viaja DENTRO del pedido, no en la card. Es lo que
+         permite que el boton "Reservar" abra el checkout en vez de irse al sitio
+         de Civitatis: la persona primero se compromete aca (y deja sus datos) y
+         recien ahi recibe el link para terminar la reserva. A la vez queda el
+         rastro de que la comision existe, que es lo que hay que declarar. */
+      var lineas = t.tours.map(function (tour) {
+        var linea = '- ' + tour.title + ' (' + money(tour.price) + ' por persona)';
+        return tour.url ? linea + '\n  ' + tour.url : linea;
+      }).join('\n');
+      message += 'Actividades:\n' + lineas + '\n';
+      message += 'Total de actividades: ' + money(t.unitTotal * t.pax) + '\n\n';
+      if (t.tours.some(function (tour) { return !!tour.url; })) {
+        message += 'Precio publicado por Civitatis (enlace de afiliado). ' +
+          'El precio final lo confirma el operador.\n\n';
+      }
     }
-    var message = cabecera + cuerpo +
+    if (t.transfer) {
+      var vuelo = getSelectedFlightSummary();
+      message += 'Transfer: ' + t.transfer.title + ' · ' + money(t.transfer.total) +
+        (t.transfer.porPersona ? ' (' + money(t.transfer.price) + ' por persona)' : '') + '\n' +
+        'Vuelo: ' + vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '') + (vuelo.arrivalText ? ' · llega ' + vuelo.arrivalText : '') + '\n' +
+        'Hotel: ' + transferHotelName() + '\n\n';
+    }
+    message += 'Total a confirmar: ' + money(t.total) + '\n' +
       'Medio de pago preferido: ' + (pay ? pay.label : 'a coordinar') + '\n\n' +
-      (t.kind === 'transfer'
-        ? '¿Me confirman disponibilidad, punto de encuentro y el valor final?'
-        : '¿Me confirman disponibilidad, horario y el valor final?');
+      '¿Me confirman disponibilidad, horario, punto de encuentro y el valor final?';
     return 'https://wa.me/?text=' + encodeURIComponent(message);
   }
   /* Referencia corta y legible. No es un comprobante de nada: sirve para que el
@@ -3222,13 +3360,14 @@
     var hotelName = findSelectedHotelLabel();
     var transferAmount = getSelectedTransferAmount(detailState);
     var transferIncluded = transferAmount > 0;
-    // El detalle del transfer (modalidad + horario de recogida) se elige
-    // dentro de "Transfer desde el aeropuerto" sin abrir ningún modal; una
-    // vez elegido, este panel es el único lugar donde se administra y ve.
-    var transferWizard = detailState.transferWizard || {};
-    var transferModeLabel = detailState.transferType === 'private' ? 'Privado' : (detailState.transferType === 'shared' ? 'Compartido' : '');
-    var transferPickupLabel = transferIncluded ? getTransferPickupLabel(transferWizard.pickupMinutes || '60', transferWizard.customTime) : '';
-    var transferMeta = transferIncluded ? (transferModeLabel + (transferPickupLabel ? ' · ' + transferPickupLabel : '')) : 'No incluido';
+    // Solo la modalidad. Antes esta fila decia "Compartido · 1 hora después de la
+    // llegada · 15:20": una hora que la app derivaba de la llegada del vuelo y
+    // que el operador iba a cambiar igual. El transfer no tiene horario hasta
+    // que se coordina, asi que la fila dice la modalidad y el monto, que si
+    // son datos.
+    var transferMeta = transferIncluded
+      ? (detailState.transferType === 'private' ? 'Privado' : 'Compartido')
+      : 'No incluido';
     var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
     var foodPerDay = Number(detailState.foodPerDay) || 0;
     var localPerDay = Number(detailState.localPerDay) || 0;
@@ -3267,11 +3406,28 @@
         + '<em>' + item.value + '</em>'
         + '</button>';
     }).join('');
+    /* "Reservar" va arriba de "Ver mi presupuesto", no al lado. Es la accion que
+       cierra el viaje y tiene su propio estado —se habilita solo cuando hay algo
+       reservable y lleva el total de lo que se reserva, que no es el total del
+       viaje— asi que necesita el ancho de la fila. Al lado, en dos columnas,
+       seria un boton con el texto partido.
+
+       El boton se escribe entero aca, con su estado y su total, en vez de
+       actualizarse por partes desde un handler: este panel se repinta completo
+       en cada cambio, asi que un update parcial solo serviria para volver a
+       buscar en el DOM lo que se acaba de calcular. */
+    var pedido = checkoutPedido();
+    var reservaTotal = pedido.count ? money(checkoutTotals().total) : '';
     summary.innerHTML = '<div class="trip-summary__inner">' +
       '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong><span class="trip-summary__toggle-icon" aria-hidden="true">⌃</span></button>' +
       '<div class="trip-summary__details"><div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
       '<div class="trip-summary__items">' + itemsHtml + '</div>' +
-      '<div class="trip-summary__actions"><button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button><button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div></div>' +
+      '<div class="trip-summary__actions">' +
+      '<button type="button" class="trip-summary__reserve" data-book-reserve' + (pedido.count ? '' : ' disabled') + '><span>' +
+      (pedido.count ? 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades')) : 'Elegí algo para reservar') +
+      '</span>' + (reservaTotal ? '<em>' + reservaTotal + '</em>' : '') + '</button>' +
+      '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
+      '<button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div></div>' +
       '</div>';
     summary.hidden = false;
     syncTripSummaryViewport();
@@ -3463,9 +3619,12 @@
     if (!detailState || !detailState.meta) return;
     var modal = $('#booking-modal');
     var flightSummary = getSelectedFlightSummary();
-    var transferState = detailState.transferWizard || { pickupMinutes: 60, customTime: '', hotelName: findSelectedHotelLabel() };
-    var transferLabel = getTransferPickupLabel(transferState.pickupMinutes, transferState.customTime);
-    var transferModeLabel = detailState.transferType === 'private' ? 'Transfer privado' : (detailState.transferType === 'shared' ? 'Transfer compartido' : (transferLabel || 'A coordinar'));
+    // Solo la modalidad. El voucher antes decia "Recogida 1 hora después de la
+    // llegada", una hora derivada del vuelo que el operador iba a cambiar. Ahora
+    // dice "a coordinar", que es lo que realmente es hasta que el operador
+    // responda.
+    var transferState = detailState.transferWizard || { hotelName: findSelectedHotelLabel() };
+    var transferModeLabel = detailState.transferType === 'private' ? 'Transfer privado' : (detailState.transferType === 'shared' ? 'Transfer compartido' : 'A coordinar');
     var selectedHotelName = findSelectedHotelLabel();
     var selectedHotelDetail = findSelectedHotelDetail();
     var hotelTotal = Number(detailState.hotel) || 0;
@@ -3488,8 +3647,7 @@
     var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal + toursTotal);
     var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
-    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + (transferLabel || 'A coordinar') + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
-    summaryText = summaryText.replace('Traslado: ' + (transferLabel || 'A coordinar'), 'Traslado: ' + transferModeLabel);
+    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
     var toursBookUrl = toursWhatsappUrl(detailState);
     // El alojamiento no tenía acción propia en la versión anterior, solo el
@@ -3536,7 +3694,10 @@
     var flightTitle = 'Vuelo' + (flightSummary.airline ? ' · ' + esc(flightSummary.airline) : '');
     var transferTitle = detailState.transferType === 'private' ? 'Traslado privado' : (detailState.transferType === 'shared' ? 'Traslado compartido' : 'Traslado');
     var transferWhere = transferState.hotelName || selectedHotelName;
-    var transferNote = 'Recogida ' + esc(transferLabel || 'a coordinar') + (transferWhere && transferWhere !== 'Sin alojamiento' ? ' · hacia ' + esc(transferWhere) : '');
+    // "Recogida a coordinar" en vez de una hora derivada del vuelo. El voucher es
+    // el documento que se lleva la persona al hotel y el que manda el operador:
+    // ninguno de los dos puede dar por hecho una hora que todavia no existe.
+    var transferNote = 'Recogida a coordinar' + (transferWhere && transferWhere !== 'Sin alojamiento' ? ' · hacia ' + esc(transferWhere) : '');
     var toursTitle = 'Tours y actividades' + (selectedTours.length ? ' · ' + selectedTours.length + (selectedTours.length === 1 ? ' elegida' : ' elegidas') : '');
     /* El CTA del traslado va al MISMO checkout que el de actividades. Sin
        modalidad elegida no hay nada que reservar, asi que en vez de un boton que
@@ -3855,7 +4016,9 @@
             masTours.innerHTML = 'Ver menos tours <span aria-hidden="true">⌃</span>';
           }
         }
-        syncToursCta();
+        // El panel "Mi Viaje" lleva el boton de reservar, y las elegidas que
+        // llegan de Civitatis cambian lo que hay que confirmar.
+        renderTripSummary();
       }
     }
   }
@@ -4096,9 +4259,6 @@
 
     return '<section class="transport-options roadtrip-planner" data-budget-anchor="auto">' + vehicleTabs + combustionPanel + evPanel + routeCard + stopsPanel + '</section>';
   }
-  function transferPickupTimeLabel(date) {
-    return date instanceof Date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
-  }
   /* Dibujo de las dos opciones de transfer, en lugar del emoji.
      El emoji (🚐 y 🚗) se veía distinto en cada sistema operativo y además
      no decía nada: las dos opciones son un auto, lo único que las separa es
@@ -4139,19 +4299,18 @@
   }
   function transferCard(meta) {
     var selected = detailState && detailState.transferType || '';
-    var wizard = (detailState && detailState.transferWizard) || {};
-    var pickupMinutes = wizard.pickupMinutes ? String(wizard.pickupMinutes) : '60';
-    var offer = getSelectedFlightOffer();
-    var hasLiveFlight = !!(offer && ((offer.outbound && offer.outbound.arrival) || offer.arrival));
-    var pickupWindow = getTransferPickupWindow();
     // Los precios salen de la tabla por destino (public/transfer-precios.js, que
     // se genera desde data/transfer-precios.json). Antes estaban escritos aca como
     // 30 y 150, iguales para los 44 destinos, y no coincidian con el 35 por
     // pasajero que mandaba el server: tres numeros para el mismo precio.
     var t = transferPreciosDe(meta);
-    var suggestionMarkup = hasLiveFlight
-      ? '<p class="transfer-suggestion">✈️ Tu vuelo llega ' + esc(transferPickupTimeLabel(pickupWindow.baseDate)) + ' hs. Te sugerimos coordinar la recogida para ' + esc(transferPickupTimeLabel(pickupWindow.plusOneHour)) + ' hs (1 hora después).</p>'
-      : '';
+    // Ni la sugerencia de recogida ni los chips de horario. Antes aca se
+    // derivaba la hora del vuelo y se proponia "1 hora despues", con tres chips
+    // para adjustarla. Eso es coordinar una cita que todavia no existe: el
+    // transfer no tiene hora hasta que el operador la confirma, y una app que
+    // propone 15:20 sin saber si el vuelo llega a tierra a esa hora esta
+    // inventando el dato mas importante del traslado. El horario se coordina
+    // por WhatsApp, que es donde el operador lo cierra.
     var modoNota = t.modo && t.modo !== 'car'
       ? '<p class="cost-note">' + esc(t.nota || 'A este destino no se llega en transfer por carretera.') + '</p>'
       : '';
@@ -4167,34 +4326,22 @@
       var isSelected = selected === card.key;
       return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b><span class="transfer-choice__check" aria-hidden="true">' + checkIcon() + '</span></button>';
     }).join('');
-    var pickupMarkup = selected ? '<div class="transfer-pickup" data-transfer-pickup>' +
-      '<span class="transfer-pickup__label">Horario de recogida</span><div class="transfer-pickup__chips">' +
-      ['60', '120', 'custom'].map(function (value) {
-        var label = value === '60' ? '1 h después · ' + transferPickupTimeLabel(pickupWindow.plusOneHour)
-          : value === '120' ? '2 h después · ' + transferPickupTimeLabel(pickupWindow.plusTwoHours)
-          : 'Personalizado';
-        return '<button type="button" class="transfer-pickup__chip' + (pickupMinutes === value ? ' is-selected' : '') + '" data-transfer-pickup-choice="' + value + '" aria-pressed="' + (pickupMinutes === value ? 'true' : 'false') + '">' + esc(label) + '</button>';
-      }).join('') + '</div>' +
-      (pickupMinutes === 'custom' ? '<input type="time" class="transfer-pickup__time" data-transfer-custom-time value="' + esc(wizard.customTime || '') + '" aria-label="Horario personalizado de recogida">' : '') +
-      '</div>' : '';
-    /* Cabecera con el total y el boton de reservar, igual que la seccion de
-       actividades. Antes terminaba en un <button disabled> que decia "Agregado
-       al presupuesto": un boton que no hace nada y una frase que el presupuesto
-       ya decia en "Mi Viaje". Ademas era el unico camino a la reserva, porque el
-       unico que de verdad abria algo era el "Coordinar" del voucher, tres
-       pantallas más abajo. Ahora elegir la modalidad suma al presupuesto —igual
-       que una card de actividades— y este boton abre el checkout. */
+    /* Sin boton de reservar aca. Elegir la modalidad suma al presupuesto —igual
+       que una card de actividades— y la reserva se pide desde "Mi Viaje", que es
+       donde ya estan los dos pedidos juntos: el de actividades y el de traslado.
+       Un boton por seccion obligaba a recordar en cual de las dos estabas, y el
+       de actividades ya estaba en la cabecera de su seccion, asi que la app
+       tenia tres caminos distintos para la misma accion. */
     var total = getSelectedTransferAmount(detailState);
-    var cta = '<div class="official-transfer__cta">' +
-      '<b class="official-transfer__cta-total"' + (selected ? '' : ' hidden') + '>' + (selected ? money(total) + ' total' : '') + '</b>' +
-      '<button type="button" class="official-transfer__reserve" data-book-transfer' + (selected ? '' : ' disabled') + '>' +
-      '<span>' + (selected ? 'Reservar transfer' : 'Elegí un transfer') + '</span></button></div>';
     return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
       '<div class="official-transfer__head"><div><h2>Transfer desde el aeropuerto</h2>' +
-      '<p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.km ? ' (' + t.km + ' km desde ' + esc(t.iata || 'el aeropuerto') + ')' : '') + '.</p></div>' +
-      cta + '</div>' +
-      suggestionMarkup + modoNota +
-      '<div class="transfer-choice-grid">' + cards + '</div>' + pickupMarkup + '</section>';
+      '<p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.km ? ' (' + t.km + ' km desde ' + esc(t.iata || 'el aeropuerto') + ')' : '') + '.</p>' +
+      (selected ? '<b class="official-transfer__total">' + money(total) + ' total</b>' : '') +
+      '</div></div>' +
+      modoNota +
+      '<div class="transfer-choice-grid">' + cards + '</div>' +
+      (selected ? '<p class="transfer-hint">El horario de recogida lo coordinás con el operador al reservar.</p>' : '') +
+      '</section>';
   }
 
   function transportFlow(meta, budget, mode) {
@@ -4233,31 +4380,6 @@
       return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
     }).join('');
   }
-  function getTransferPickupWindow() {
-    var offer = getSelectedFlightOffer();
-    var arrivalValue = null;
-    if (offer) {
-      if (offer.outbound && offer.outbound.arrival) arrivalValue = offer.outbound.arrival;
-      else if (offer.inbound && offer.inbound.arrival) arrivalValue = offer.inbound.arrival;
-      else if (offer.arrival) arrivalValue = offer.arrival;
-      else if (offer.departure) arrivalValue = offer.departure;
-    }
-    var baseDate = arrivalValue ? new Date(arrivalValue) : new Date();
-    if (Number.isNaN(baseDate.getTime())) return { baseDate: new Date(), customMinutes: 60 };
-    return {
-      baseDate: baseDate,
-      customMinutes: 60,
-      plusOneHour: new Date(baseDate.getTime() + 60 * 60 * 1000),
-      plusTwoHours: new Date(baseDate.getTime() + 120 * 60 * 1000)
-    };
-  }
-  function getTransferPickupLabel(minutes, customValue) {
-    if (minutes === 'custom') return customValue ? 'Horario personalizado: ' + customValue : 'Horario personalizado';
-    if (Number(minutes) === 60) return '1 hora después de la llegada';
-    if (Number(minutes) === 120) return '2 horas después de la llegada';
-    return 'Horario a coordinar';
-  }
-
   /* ------------------------------------------------------------------
      Guia Secreta. El contenido ya no esta en el cliente.
 
@@ -5514,6 +5636,9 @@
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
+    // El widget va DESPUES de los tours y en su propio bloque. No va dentro de
+    // la grilla que suma al presupuesto: ver civitatisWidgetMarkup() para por que.
+    var widgetMarkup = renderSafe(function () { return civitatisWidgetMarkup(data.meta); }, '');
     // La Guia Secreta no se pinta todavia: depende de si el server nos abre la
     // puerta, y eso no se sabe hasta que responde /api/guia. Se pinta sola
     // cuando llega (pintarGuiaEnDetalle). El fallback del renderSafe era un
@@ -5524,7 +5649,7 @@
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + fuentesMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
-      hotelsMarkup + toursMarkup + foodMarkup +
+      hotelsMarkup + toursMarkup + widgetMarkup + foodMarkup +
       '</div></div>';
     updateMultiStayPricing();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
@@ -5936,7 +6061,6 @@
       var input = Array.prototype.slice.call(document.querySelectorAll('[data-tour-choice]')).find(function (item) { return item.getAttribute('data-tour-title') === tour.title; });
       if (input) input.checked = true;
     });
-    syncToursCta();
     if (details.hotel) {
       detailState.hotel = Number(details.hotel.total) || detailState.hotel;
       detailState.selectedHotel = true;
@@ -6028,6 +6152,15 @@
           summary.classList.toggle('minimized');
           toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
         }
+        return;
+      }
+      /* El boton de reservar del panel. Va en este listener y no en el de
+         #vista-detalle porque #trip-summary es hermano de la vista, no esta
+         dentro: un listener puesto alla nunca lo ve. Es el mismo motivo por el
+         que los botones del checkout viven en el del modal. */
+      if (e.target.closest('[data-book-reserve]')) {
+        e.preventDefault();
+        openCheckout();
         return;
       }
       if (e.target.closest('[data-save-trip]')) { e.preventDefault(); saveCurrentTrip(); }
@@ -6867,40 +7000,25 @@ function comboNombreDestino() {
         repintarPresupuestoDiario();
         return;
       }
-      var bookTours = e.target.closest('[data-book-selected-tours], [data-tour-reserve]');
+      /* El boton de la tarjeta. Agrega la actividad y abre el checkout. El texto
+         dice "Agregar" y hace las dos cosas a proposito: es el atajo para quien
+         todavia no seitou mirando el panel, y el checkout confirma lo que ya
+         esta en el total del viaje. Confirmar algo que no suma seria incoherente,
+         asi que agregar va antes.
+
+         El boton que abre el checkout de verdad esta en "Mi Viaje" y lleva
+         actividades y transfer juntos. Este queda como atajo por tarjeta, que
+         es distinto: uno reserva "esta" actividad, el otro manda el viaje. */
+      var bookTours = e.target.closest('[data-tour-add]');
       if (bookTours && detailState) {
         e.preventDefault(); e.stopPropagation();
-        // Los dos botones abren el checkout: el de la cabecera de la seccion y
-        // el "Reservar" de cada card. Antes este handler mandaba directo a
-        // WhatsApp con toursWhatsappUrl() y no habia ningun elemento con
-        // [data-book-selected-tours] en el markup: el handler existia, el boton
-        // no. Ademas se saltaba los datos del viajero, que es justo lo que el
-        // operador necesita para confirmar.
-        //
-        // toursWhatsappUrl() sigue usandose desde el modal del itinerario, en
-        // la fila "Tours y actividades" del voucher, que es un atajo distinto.
-        if (bookTours.hasAttribute('data-tour-reserve')) {
-          // Reservar una card que todavia no esta elegida la agrega primero: el
-          // checkout solo confirma lo que ya esta en el total del viaje, y
-          // confirmar algo que no suma seria incoherente.
-          var card = bookTours.closest('[data-tour-card]');
-          var choice = card && card.querySelector('[data-tour-choice]');
-          if (choice && !choice.checked) {
-            choice.checked = true;
-            choice.dispatchEvent(new Event('change', { bubbles: true }));
-          }
+        var card = bookTours.closest('[data-tour-card]');
+        var choice = card && card.querySelector('[data-tour-choice]');
+        if (choice && !choice.checked) {
+          choice.checked = true;
+          choice.dispatchEvent(new Event('change', { bubbles: true }));
         }
-        openToursCheckout();
-        return;
-      }
-      /* El boton de la cabecera de la seccion de transfer, al lado del de
-         actividades. Va aca y no en el listener del modal porque esta en la
-         pagina: los dos CTAs de reserva se atienden en el mismo lugar. */
-      var bookTransfer = e.target.closest('[data-book-transfer]');
-      if (bookTransfer) {
-        e.preventDefault(); e.stopPropagation();
-        if (bookTransfer.disabled) return;
-        openTransferCheckout();
+        openCheckout();
         return;
       }
       var tourDetail = e.target.closest('[data-tour-detail-open]');
@@ -7002,8 +7120,10 @@ function comboNombreDestino() {
         if (detailState.transferType === mode) { deseleccionarTransfer(); return; }
         detailState.transferType = mode;
         detailState.transfer = amount;
+        // El hotel se deja anotado apenas se elige el transfer, para que el
+        // checkout venga con el destino escrito. El horario ya no se guarda: no
+        // hay horario hasta que el operador lo confirme.
         detailState.transferWizard = detailState.transferWizard || {};
-        detailState.transferWizard.pickupMinutes = detailState.transferWizard.pickupMinutes || '60';
         detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
         var transferSectionEl = transferChoice.closest('[data-official-transfer]');
         if (transferSectionEl) transferSectionEl.outerHTML = transferCard(detailState.meta);
@@ -7011,17 +7131,6 @@ function comboNombreDestino() {
         // El panel "Mi Viaje" y el voucher leen de detailState, no del DOM: sin
         // esto la fila de traslados seguia diciendo "Sin traslados" con el
         // transfer recien elegido hasta que se abriera otra seccion.
-        renderTripSummary();
-        return;
-      }
-      var pickupChoice = e.target.closest('[data-transfer-pickup-choice]');
-      if (pickupChoice) {
-        e.preventDefault(); e.stopPropagation();
-        detailState.transferWizard = detailState.transferWizard || {};
-        detailState.transferWizard.pickupMinutes = pickupChoice.getAttribute('data-transfer-pickup-choice');
-        if (detailState.transferWizard.pickupMinutes !== 'custom') detailState.transferWizard.customTime = '';
-        var pickupSectionEl = pickupChoice.closest('[data-official-transfer]');
-        if (pickupSectionEl) pickupSectionEl.outerHTML = transferCard(detailState.meta);
         renderTripSummary();
         return;
       }
@@ -7069,19 +7178,15 @@ function comboNombreDestino() {
         // :has() en CSS sobre el checkbox, asi que aca no hay que tocar texto
         // ni clases: solo se recalcula el total.
         if (tourCard) tourCard.classList.toggle('is-added', tourChoice.checked);
-        syncToursCta();
+        // El boton de reservar vive en "Mi Viaje" y su etiqueta y su total
+        // dependen de cuantas actividades hay: hay que repintar el panel, no solo
+        // recalcular el total de la pagina.
+        renderTripSummary();
         recalcularTotalViaje();
         return;
       }
       var hotelChoice = e.target.closest && e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true);
-      var transferCustomTime = e.target.closest && e.target.closest('[data-transfer-custom-time]');
-      if (transferCustomTime && detailState) {
-        detailState.transferWizard = detailState.transferWizard || {};
-        detailState.transferWizard.pickupMinutes = 'custom';
-        detailState.transferWizard.customTime = transferCustomTime.value;
-        renderTripSummary();
-      }
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');
       if (consumption) actualizarRoadtrip(consumption.value);
       var roadtripModel = e.target.closest && e.target.closest('[data-roadtrip-model]');
@@ -7239,15 +7344,18 @@ function comboNombreDestino() {
       }
       var storyButton = e.target.closest('[data-share-story]');
       if (storyButton) { e.preventDefault(); shareStoryCard(storyButton); }
-      /* El "Coordinar" del voucher entra al MISMO checkout que las actividades.
-         El boton de la seccion y este llaman a la misma funcion: antes el
-         segundo abria un asistente distinto, con otro formulario y otro boton de
-         cierre, y eran dos flujos para la misma reserva. */
-      var coordinateTransfer = e.target.closest('[data-coordinate-transfer]');
-      if (coordinateTransfer) {
+      /* El "Reservar" de la fila de traslados del voucher. Va al mismo checkout
+         que el de "Mi Viaje", con los dos pedidos juntos. Antes abria un
+         asistente propio del transfer, con otro formulario, y el voucher era el
+         unico lugar desde donde se coordinate el traslado.
+
+         Solo el boton del voucher: el de "Mi Viaje" esta en su propio listener,
+         porque #trip-summary es hermano de la vista y no vive dentro del modal. */
+      var reserveFromVoucher = e.target.closest('[data-coordinate-transfer]');
+      if (reserveFromVoucher) {
         e.preventDefault();
         closeBookingForm();
-        openTransferCheckout();
+        openCheckout();
       }
     });
     // Un logo de Commons que no carga no puede quedar como un cuadrado roto en

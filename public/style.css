@@ -714,7 +714,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    Con viewport-fit=cover + black-translucent, el bottom-sheet se dibujaba
    pegado al borde inferior y el boton de confirmar pagaba bajo el home
    indicator. Era el unico overlay fijo del archivo sin safe-area. */
-.booking-modal{position:fixed;inset:0;z-index:100;background:rgba(10,24,48,.68);display:grid;place-items:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom,0px));overflow:auto;overscroll-behavior:contain}.booking-modal[hidden]{display:none}.booking-dialog{position:relative;width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:26px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.3)}.booking-dialog h2{font-family:var(--fh);font-size:38px;line-height:1;margin:0 40px 6px 0}.booking-close{position:absolute;right:16px;top:14px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--bg);font-size:25px;line-height:1;cursor:pointer}.booking-summary{margin:0 0 20px;color:var(--ink2);font-size:14px}.passenger-fields{margin:14px 0 0;padding:16px;border:1px solid var(--line);border-radius:18px}.passenger-fields legend{padding:0 8px;font-size:16px;font-weight:700}.passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.passenger-grid label{margin-bottom:5px}.passenger-grid input,.passenger-grid select{width:100%;height:44px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);padding:0 11px}.booking-note{color:var(--ink2);font-size:13px}.confirm-booking{width:100%;min-height:54px;border:0;border-radius:15px;background:#003580;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.confirm-booking:disabled{opacity:.65;cursor:wait}.booking-error{padding:10px 12px;border-radius:12px;background:var(--coral-soft);color:var(--coral);font-size:13px;font-weight:600}.booking-success{text-align:center}.success-icon{font-size:42px}.booking-success h2{margin:6px 0 16px}.pnr-label{margin:0;color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.pnr{display:block;color:var(--good);font-family:var(--fh);font-size:42px;line-height:1.1;letter-spacing:.08em}.success-route{margin:16px 0;padding:12px;border-radius:12px;background:var(--bg);font-weight:600}.booking-success h3{text-align:left;margin:18px 0 4px;font-size:16px}.itinerary-summary{display:grid;gap:16px}.itinerary-summary__section{display:grid;gap:8px}.itinerary-summary__section h3{margin:0;font-size:18px}.itinerary-summary__card{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.itinerary-summary__card p{margin:0;font-size:14px;line-height:1.45;color:var(--ink)}.itinerary-summary__booking{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 14px;border-radius:12px;background:#003580;color:#fff;text-decoration:none;font-weight:700}.itinerary-summary__booking:hover{color:#fff;filter:brightness(1.08)}.daily-budget{display:grid;gap:14px}.daily-budget__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.daily-budget__field{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.daily-budget__field span{font-size:13px;font-weight:700}.daily-budget__input-wrap{display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg)}.daily-budget__input-wrap span{font-size:13px;color:var(--ink2)}.daily-budget__input-wrap input{flex:1;height:44px;border:0;background:transparent;padding:0;font-size:16px;color:var(--ink);outline:none}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}.transfer-wizard{display:grid;gap:18px}.transfer-flight-sync{display:grid;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-flight-sync p{margin:0}.transfer-flight-sync--empty{color:var(--ink2);font-size:13px}.transfer-flight-leg{display:grid;gap:6px}.transfer-flight-leg:not(:first-child){padding-top:12px;border-top:1px dashed var(--line)}.transfer-flight-leg .flight-route{margin:0}.transfer-flight-leg__number{color:var(--ink2)}.transfer-step{display:grid;gap:16px}.transfer-step__header{display:grid;gap:6px}.transfer-step__badge{display:inline-flex;align-items:center;justify-content:center;width:max-content;padding:5px 9px;border-radius:999px;background:var(--cel-soft);font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}.transfer-step h3{margin:0;font-family:var(--fh);font-size:28px;line-height:1.1}.transfer-pickup-options{display:grid;gap:10px}.transfer-pickup-option{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer}.transfer-pickup-option.selected{border-color:var(--selected-border);background:var(--selected-bg)}.transfer-pickup-option input{margin-top:3px}.transfer-pickup__content{display:grid;gap:6px;flex:1;min-width:0}.transfer-pickup__content strong{font-size:14px;line-height:1.35}.transfer-pickup__time{display:block;font-size:12px;color:var(--ink2)}.transfer-custom-time{width:100%;max-width:180px;height:42px;padding:0 10px;border:1px solid var(--control-line);border-radius:10px;background:var(--control-bg)}.transfer-field{display:grid;gap:8px}.transfer-field span{font-size:13px;font-weight:700}.transfer-field input{width:100%;height:46px;padding:0 12px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg)}.transfer-summary-box{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.transfer-summary-box p{margin:0;color:var(--ink);font-size:14px}.transfer-summary-box b{color:var(--ink)}.transfer-field input[type="file"]{padding:11px 12px;height:auto}.transfer-step .bank-details{margin:0}@media (max-width:560px){.daily-budget__grid{grid-template-columns:1fr}}.booking-success ul{text-align:left;margin:0;padding-left:20px}.booking-success .booking-note{margin-top:18px}
+.booking-modal{position:fixed;inset:0;z-index:100;background:rgba(10,24,48,.68);display:grid;place-items:center;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom,0px));overflow:auto;overscroll-behavior:contain}.booking-modal[hidden]{display:none}.booking-dialog{position:relative;width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:26px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.3)}.booking-dialog h2{font-family:var(--fh);font-size:38px;line-height:1;margin:0 40px 6px 0}.booking-close{position:absolute;right:16px;top:14px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:var(--bg);font-size:25px;line-height:1;cursor:pointer}.booking-summary{margin:0 0 20px;color:var(--ink2);font-size:14px}.passenger-fields{margin:14px 0 0;padding:16px;border:1px solid var(--line);border-radius:18px}.passenger-fields legend{padding:0 8px;font-size:16px;font-weight:700}.passenger-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.passenger-grid label{margin-bottom:5px}.passenger-grid input,.passenger-grid select{width:100%;height:44px;border:1.5px solid var(--control-line);border-radius:12px;background:var(--control-bg);padding:0 11px}.booking-note{color:var(--ink2);font-size:13px}.confirm-booking{width:100%;min-height:54px;border:0;border-radius:15px;background:#003580;color:#fff;font-size:16px;font-weight:700;cursor:pointer}.confirm-booking:disabled{opacity:.65;cursor:wait}.booking-error{padding:10px 12px;border-radius:12px;background:var(--coral-soft);color:var(--coral);font-size:13px;font-weight:600}.booking-success{text-align:center}.success-icon{font-size:42px}.booking-success h2{margin:6px 0 16px}.pnr-label{margin:0;color:var(--ink2);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.pnr{display:block;color:var(--good);font-family:var(--fh);font-size:42px;line-height:1.1;letter-spacing:.08em}.success-route{margin:16px 0;padding:12px;border-radius:12px;background:var(--bg);font-weight:600}.booking-success h3{text-align:left;margin:18px 0 4px;font-size:16px}.itinerary-summary{display:grid;gap:16px}.itinerary-summary__section{display:grid;gap:8px}.itinerary-summary__section h3{margin:0;font-size:18px}.itinerary-summary__card{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.itinerary-summary__card p{margin:0;font-size:14px;line-height:1.45;color:var(--ink)}.itinerary-summary__booking{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 14px;border-radius:12px;background:#003580;color:#fff;text-decoration:none;font-weight:700}.itinerary-summary__booking:hover{color:#fff;filter:brightness(1.08)}.daily-budget{display:grid;gap:14px}.daily-budget__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.daily-budget__field{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.daily-budget__field span{font-size:13px;font-weight:700}.daily-budget__input-wrap{display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg)}.daily-budget__input-wrap span{font-size:13px;color:var(--ink2)}.daily-budget__input-wrap input{flex:1;height:44px;border:0;background:transparent;padding:0;font-size:16px;color:var(--ink);outline:none}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}@media (max-width:560px){.daily-budget__grid{grid-template-columns:1fr}}.booking-success ul{text-align:left;margin:0;padding-left:20px}.booking-success .booking-note{margin-top:18px}
 @media (max-width:560px){.booking-modal{padding:0;align-items:end}.booking-dialog{max-height:94vh;border-radius:25px 25px 0 0;padding:22px 16px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}.booking-dialog h2{font-size:32px}.passenger-grid{grid-template-columns:1fr}.passenger-fields{padding:13px}}
 /* ---------- Resumen del presupuesto ----------
    Flota sobre la pagina: es el .booking-dialog de #booking-modal, asi que
@@ -865,18 +865,21 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .official-transfer__head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 16px;margin-bottom:14px}
 .official-transfer__head h2{margin:0}
 .official-transfer__head p{margin:5px 0 0;color:var(--ink2);font-size:13px}
-.official-transfer__cta{display:flex;flex:0 0 auto;flex-direction:column;align-items:flex-end;gap:6px}
-.official-transfer__cta-total{color:var(--cel);font-size:13px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.official-transfer__reserve{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:0;border-radius:13px;background:var(--action-bg);color:var(--action-ink);font-family:inherit;font-size:13.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:filter .18s ease,opacity .18s ease}
-.official-transfer__reserve:hover:not(:disabled){color:var(--action-ink);filter:brightness(1.12)}
-.official-transfer__reserve:disabled{opacity:.5;cursor:not-allowed}
-.official-transfer__reserve:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-@media (max-width:560px){.official-transfer__cta{align-items:stretch;width:100%}.official-transfer__reserve{width:100%}}
-.transfer-suggestion{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:var(--cel-soft);color:var(--ink);font-size:13px;font-weight:600}
-/* La pastilla elegida del horario se pinta con el mismo marco ambar de las card
-   elegibles. Antes era celeste con borde navy, la unica excepcion que quedaba. */
-.transfer-pickup{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}.transfer-pickup__label{display:block;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--ink2)}.transfer-pickup__chips{display:flex;flex-wrap:wrap;gap:8px}.transfer-pickup__chip{min-height:44px;border:1.5px solid var(--control-line);border-radius:99px;background:var(--surface);padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}.transfer-pickup__chip.is-selected{border-color:var(--card-sel-border);background:var(--card-sel-bg);color:var(--ink);box-shadow:var(--card-sel-glow)}.transfer-pickup__chip:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.transfer-pickup__time{display:block;margin-top:10px;padding:9px;border:1.5px solid var(--control-line);border-radius:10px;background:var(--control-bg);color:var(--ink);font-size:13px}
-.btn-transfer.is-added{background:var(--good)}
+/* El total de la modalidad elegida, al lado del titulo. No hay boton de
+   reservar aca: la reserva se pide desde "Mi Viaje", que ya tiene las filas de
+   actividades y de transfer, y un solo boton manda un solo pedido. Este numero
+   es el que se va a sumar al presupuesto, asi que conviene verlo en el momento
+   de elegir y no solo despues, en el panel. */
+.official-transfer__total{flex:0 0 auto;color:var(--cel);font-family:var(--fh);font-size:24px;font-weight:800;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.official-transfer__head{gap:6px 16px}.official-transfer__total{width:100%;font-size:22px}}
+/* Donde se coordina el horario. No es decorativo: es la respuesta a la pregunta
+   que la seccion ya no hace. Sin esta linea, quitar los chips de horario
+   dejaba un hueco sin explicar. */
+.transfer-hint{margin:14px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
+/* Los chips de horario de recogida (.transfer-pickup*) se fueron con la funcion
+   que los justificaba: la app derivaba una hora de la llegada del vuelo y
+   proponia "1 hora despues", pero el transfer no tiene hora hasta que el
+   operador la confirma. La regla queda borrada a proposito, no olvidada. */
 
 .account-actions{display:flex;align-items:center;gap:8px;margin-left:auto;min-width:0;flex:0 1 auto}.account-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 13px;border:0;border-radius:11px;background:var(--ink);color:#fff;font:600 12px Poppins,sans-serif;text-decoration:none;cursor:pointer}.account-button:hover{filter:brightness(1.1)}.account-button--secondary{border:1px solid var(--line);background:var(--surface);color:var(--ink)}.account-dialog{max-width:520px}.account-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.account-dialog h2{margin-top:8px}.account-dialog label{display:grid;gap:6px;margin-top:12px;font-size:13px;font-weight:700}.account-dialog input{width:100%;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}.oauth-button{width:100%;min-height:48px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font-size:14px;font-weight:800;cursor:pointer}.account-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink2);font-size:12px}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:var(--line)}.account-form-actions{display:flex;gap:8px;margin-top:16px}.account-form-actions .confirm-booking{flex:1}.account-form-actions .account-button{flex:0 0 auto}.account-status{min-height:18px;margin:12px 0 0;color:var(--ink2);font-size:13px}.saved-trips{display:grid;gap:9px;margin:16px 0}.saved-trip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.saved-trip>div{display:grid;gap:4px;min-width:0}.saved-trip strong{font-size:14px;overflow:hidden;text-overflow:ellipsis}.saved-trip span{color:var(--ink2);font-size:12px}.trip-summary__actions{display:grid;gap:8px}.trip-summary__save{width:100%;height:40px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800;cursor:pointer}.trip-summary__save:hover{border-color:var(--ink);background:var(--bg)}
 .account-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:5px}
@@ -899,7 +902,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    elegida", y el texto quedaba en azul sobre blanco en vez de navy sobre
    celeste como el resto de los grupos del picker. */
 .custom-select__option.is-selected .custom-select__option-sub{color:var(--ink2)}
-.transport-detail select,.transport-detail input[type="number"],.transfer-custom-time,.oauth-button,.trip-summary__save{background:var(--control-bg);border-color:var(--control-border);color:var(--ink)}
+.transport-detail select,.transport-detail input[type="number"],
 .official-transfer{background:var(--surface)}
 .card-brand-row small{background:var(--control-bg);color:var(--ink)}
 .trip-summary{background:var(--surface)}
@@ -956,12 +959,27 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .local-tours h2{margin:5px 0 0;font-family:var(--fh);font-size:clamp(24px,3vw,32px);line-height:1.1}
 .local-tours__summary{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
 .local-tours__summary b{color:var(--ink)}
-.local-tours__cta-wrap{display:flex;flex:0 0 auto;flex-direction:column;align-items:flex-end;gap:6px}
-.local-tours__cta-total{color:var(--cel);font-size:13px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.local-tours__reserve{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:0;border-radius:13px;background:var(--action-bg);color:var(--action-ink);font-family:inherit;font-size:13.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:filter .18s ease,opacity .18s ease}
-.local-tours__reserve:hover:not(:disabled){color:var(--action-ink);filter:brightness(1.12)}
-.local-tours__reserve:disabled{opacity:.5;cursor:not-allowed}
-.local-tours__reserve:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+/* El CTA de la cabecera (.local-tours__cta-wrap, __cta-total, __reserve) se fue
+   con el boton: la reserva se pide desde "Mi Viaje". Se dejan las reglas de la
+   tarjeta, que si se usan. */
+/* ---------- Reservar, en "Mi Viaje" ----------
+   El boton que cierra el viaje. Va arriba de "Ver mi presupuesto" porque tiene
+   su propio estado y su propio total —el de lo que se reserva, que no es el
+   total del viaje— y al lado, en dos columnas, el texto se partia.
+
+   Mismo relleno que el resto de las acciones de la app (--action-bg) y no el
+   ambar del CTA de tours: ese boton ya no existe, y el ambar de --accent es el
+   que usa "Ver mi presupuesto". Dos botones de la misma familia con el mismo
+   color de acento no dicen cual es el que cierra el viaje. */
+.trip-summary__reserve{position:relative;display:flex;width:100%;min-height:52px;align-items:center;justify-content:space-between;gap:10px;padding:0 15px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:inherit;font-size:14px;font-weight:800;line-height:1.2;cursor:pointer;transition:filter .18s ease,opacity .18s ease}
+.trip-summary__reserve:hover:not(:disabled){color:var(--action-ink);filter:brightness(1.12)}
+.trip-summary__reserve:disabled{opacity:.5;cursor:not-allowed}
+.trip-summary__reserve:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.trip-summary__reserve>span{text-align:left;min-width:0}
+/* El total de la reserva, en la misma cifra que el total del viaje para que las
+   dos se lean como de la misma familia. tabular-nums para que no baile el ancho
+   al cambiar de monto. */
+.trip-summary__reserve>em{flex:0 0 auto;font-family:var(--fh);font-size:21px;font-style:normal;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 /* La card es horizontal: foto a la izquierda, ficha a la derecha. Dos por fila
    porque con tres la ficha quedaba de ~280px y la foto de ~190px, que es una
    proporcion de postal. Con dos hay ancho para el titulo largo, la lista de
@@ -1241,6 +1259,24 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .checkout-dialog{border-radius:25px 25px 0 0;max-height:94vh;overflow:auto}
   .checkout-layout{min-height:0}
 }
+/* ---------- Widget de actividades de Civitatis ----------
+   Es un iframe de otro origen, asi que no se le puede dar el aspecto de una card
+   nuestra: es un bloque propio, con su encabezado y su nota de afiliado. Lo que
+   si se controla es el marco, el fondo y que no se lleve el scroll de la pagina
+   con un iframe de alto automatico. */
+.civitatis-widget{min-width:0;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05)}
+.civitatis-widget__head{margin-bottom:12px}
+.civitatis-widget h2{margin:5px 0 0;font-family:var(--fh);font-size:clamp(22px,2.6vw,28px);line-height:1.1}
+.civitatis-widget__head p{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
+/* La nota de afiliado vaSIEMPRE visible y antes del iframe, no al pie: si esta
+   debajo, la persona ya toco "Reservar" antes de leerla. */
+.civitatis-widget__note{margin:0 0 12px;padding:9px 12px;border-radius:12px;background:var(--cel-soft);color:var(--ink);font-size:12px;line-height:1.5}
+.civitatis-widget__frame{overflow:hidden;border-radius:16px;background:var(--bg)}
+.civitatis-widget__iframe{display:block;width:100%;border:0}
+.civitatis-widget__foot{margin:12px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.55}
+.civitatis-widget__foot a{color:var(--cel);font-weight:700}
+@media (max-width:560px){.civitatis-widget{padding:16px;border-radius:18px}.civitatis-widget__iframe{height:980px!important}}
+
 /* Créditos globales, al pie de la página: reunión de todas las fotos que la
    app cargó, no sólo las de los tours. */
 .foot-credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}
@@ -1348,7 +1384,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    foto quedaba metida en un marco y el bloque se veía más estrecho que las
    tarjetas de "Transporte local" y "Comidas". Acá ya no se apila la card, que
    lo hace la regla de contenedor: esta media query es solo de la cabecera. */
-@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__head{align-items:stretch;flex-direction:column;gap:12px}.local-tours__cta-wrap{align-items:stretch}.local-tours__reserve{width:100%}}
+@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__head{align-items:stretch;flex-direction:column;gap:12px}}
 .flight-airline{flex-wrap:wrap}
 .flight-airline .cabin-badge{white-space:nowrap;background:var(--cel-soft);color:var(--ink)}
 /* z-index propio: #install-help es el ÚLTIMO modal del DOM, así que con el
