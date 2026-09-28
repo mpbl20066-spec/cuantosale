@@ -6,7 +6,7 @@
 <title>Preview · Guía Secreta</title>
 <!--
   ARTEFACTO DE DESARROLLO. No es parte de la app.
-  Renderiza public/guias.js con el layout que se va a usar en la guia real,
+  Renderiza la guia con el layout que se va a usar en la guia real,
   para juzgar si el schema sirve antes de cablearlo en app.js.
 
   Probar distintos presupuestos de comida:
@@ -97,7 +97,6 @@
 </div>
 
 <script src="/creditos-fotos.generated.js"></script>
-<script src="/guias.js"></script>
 <script>
 (function () {
   // Un destino de muestra por guia, para poder ver las 15 distintas. Las
@@ -311,11 +310,46 @@
   })();
 
   var input = document.getElementById('food');
-  function draw(){
+  // Cache local del preview. La guia ya no es un archivo publico: sale por
+  // /api/guia con el token que firma /api/hoteles cuando el destino tiene
+  // hoteles con precio real de Booking. El preview hace el mismo camino que la
+  // app, asi que si el token no abre, se ve aca tambien. El cache existe para
+  // que mover el campo de comida no vuelva a pegarle al server.
+  var GUIA = {};
+  function pintarHoja() {
+    var g = GUIA[DEST.key];
+    document.getElementById('hoja').innerHTML = g ? render(g, Number(input.value))
+      : '<p>' + (GUIA[DEST.key] === null
+        ? 'El server no abrió la guía para ' + DEST.key + '. Suele ser que ese destino no tenga hoteles con precio real de Booking.'
+        : 'Sin guía para ' + DEST.key) + '</p>';
+  }
+  function draw() {
     DEST.region = nombreRegion(DEST.key);
     for (var i = 0; i < MUESTRA.length; i++) if (MUESTRA[i][0] === DEST.key) DEST.name = MUESTRA[i][1];
-    var g = window.CS_GUIAS.guiaPara(DEST.key, DEST.region);
-    document.getElementById('hoja').innerHTML = g ? render(g, Number(input.value)) : '<p>Sin guía para ' + DEST.key + '</p>';
+    if (GUIA[DEST.key] !== undefined) { pintarHoja(); return; }
+    document.getElementById('hoja').innerHTML = '<p>Cargando la guía…</p>';
+    pedirGuia(DEST.key).then(function (g) {
+      if (DEST.key !== keyAlPintar) return;   // el destino cambio mientras esperaba
+      GUIA[DEST.key] = g || null;
+      pintarHoja();
+    });
+  }
+  var keyAlPintar = '';
+  function pedirGuia(dest) {
+    keyAlPintar = dest;
+    var fechas = new Date(); fechas.setDate(fechas.getDate() + 30);
+    var ida = fechas.toISOString().slice(0, 10);
+    fechas.setDate(fechas.getDate() + 7);
+    var vuelta = fechas.toISOString().slice(0, 10);
+    return fetch('/api/hoteles?dest=' + encodeURIComponent(dest) + '&dep=' + ida + '&ret=' + vuelta + '&pax=2&style=eq&hotel_type=intermedio')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (h) { return h && h.guiaToken; })
+      .then(function (token) {
+        if (!token) return null;
+        return fetch('/api/guia?dest=' + encodeURIComponent(dest) + '&token=' + encodeURIComponent(token))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { return d && d.guia; });
+      }).catch(function () { return null; });
   }
   var sel = document.getElementById('dest');
   if (sel) {
@@ -324,7 +358,7 @@
     }).join('');
     sel.addEventListener('change', function () { DEST.key = sel.value; draw(); });
   }
-  input.addEventListener('input', draw);
+  input.addEventListener('input', pintarHoja);
   document.getElementById('imprimir').addEventListener('click', function(){ window.print(); });
   draw();
 })();

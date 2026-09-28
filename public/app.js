@@ -1613,7 +1613,15 @@
      sabe (todavia no se eligio ninguno, o el hotel guardado ya no se ofrece).
      El null es distinto de false a proposito: false seria "no marcar ninguno" y
      dejaria la lista sin radio marcado, que es peor que marcar el recomendado. */
-  function hotelElegidoEnEstaLista(totalValue) {
+  function hotelElegidoEnEstaLista(totalValue, stop) {
+    // Un viaje combinado tiene una eleccion POR PARADA. Si el total guardado se
+    // leyera del estado global, marcar una card del grupo de Buzios podria
+    // "encontrar" el hotel que estaba elegido en Rio y no marcar nada.
+    if (detailState && detailState.multiStay) {
+      var porParada = staySelectedTotal(stop);
+      if (!Number.isFinite(porParada) || porParada <= 0) return null;
+      return Math.abs(porParada - totalValue) < 1;
+    }
     if (!detailState || !detailState.selectedHotel) return null;
     var guardado = Number(detailState.selectedHotelTotal);
     if (!Number.isFinite(guardado) || guardado <= 0) return null;
@@ -1621,74 +1629,164 @@
     // redondeado al pintarse.
     return Math.abs(guardado - totalValue) < 1;
   }
+  /* ---------- viajes de dos paradas: reparto de noches y una eleccion por parada ---------- */
+
+  // Reparto de noches y nombres de las dos paradas. El reparto VIVO esta en
+  // detailState.multiStay (lo mueve el slider); meta.multiStay solo trae los
+  // nombres y las tarifas estimadas del server, sin totalNights ni firstNights.
+  function stayNights() {
+    var ms = detailState && detailState.multiStay;
+    if (!ms || !ms.stays || ms.stays.length !== 2) return null;
+    var total = Math.max(1, Number(ms.totalNights) || 1);
+    var first = Math.max(1, Math.min(total - 1, Number(ms.firstNights) || Math.floor(total / 2)));
+    return {
+      total: total, first: first, second: total - first,
+      firstName: ms.stays[0].name, secondName: ms.stays[1].name
+    };
+  }
+  // Total de Booking elegido en cada parada. null = esa parada sigue con la
+  // estimacion del modelo. Antes era un solo numero (selectedPrimaryHotelTotal):
+  // alcanzaba para la primera parada y no para la segunda, que por eso se
+  // cobraba siempre como estimacion.
+  function staySelectedTotal(stop) {
+    var ms = detailState && detailState.multiStay;
+    if (!ms) return null;
+    var v = Number((ms.selectedStayTotals || {})[stop]);
+    return Number.isFinite(v) && v > 0 ? v : null;
+  }
+  function setStaySelectedTotal(stop, total) {
+    if (!detailState || !detailState.multiStay) return;
+    detailState.multiStay.selectedStayTotals = detailState.multiStay.selectedStayTotals || {};
+    if (total == null) delete detailState.multiStay.selectedStayTotals[stop];
+    else detailState.multiStay.selectedStayTotals[stop] = Math.round(total);
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
     var profile = hotelStyle(meta);
-    var defaultHotel = { tier: profile.tier, name: '', similar: [], image: '' };
-    var hotelCatalog = normalizeHotelCatalog(Array.isArray(meta.hotels) ? meta.hotels : [], defaultHotel).filter(function (hotel) { return !hotel.hotelType || hotel.hotelType === meta.hotelType; });
-    var options = hotelCatalog.slice(0, 3).map(function (item, index) {
-      return {
-        name: item.name,
-        multiplier: index === 0 ? 1 : (index === 1 ? 0.92 : 1.08),
-        recommended: index === 0,
-        similar: Array.isArray(item.similar) ? item.similar : [],
-        image: sanitizeHotelImageUrl(item.image, ''),
-        highlight: item.highlight || '',
-        total: Number(item.total) || null,
-        perNight: Number(item.perNight) || null,
-        bookingUrl: item.bookingUrl || null,
-        source: item.source || '',
-        description: item.description || ''
-      };
-    });
-    if (!options.length) {
-      var destinationName = meta.dest.name || 'el destino elegido';
-      var strictType = ['all-inclusive', 'resort', 'boutique'].indexOf(meta.hotelType) >= 0;
-      var emptyCopy = strictType ? 'No encontramos alojamientos verificados de tipo ' + (HOTEL_TYPE_LABELS[meta.hotelType] || meta.hotelType) + ' para estas fechas. No mostramos categorías distintas como reemplazo.' : 'No pudimos cargar opciones automáticamente para estas fechas. Consultá alojamientos y disponibilidad directamente en el destino.';
-      var destinationQuery = encodeURIComponent(destinationName);
-      var nearbyName = meta.dest.key === 'ilha' || meta.dest.key === 'paraty' ? 'Angra dos Reis' : '';
-      var nearbyLink = nearbyName ? '<a class="hotel-nearby-link hotel-nearby-link-secondary" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(nearbyName) + '" target="_blank" rel="noopener noreferrer">Ampliar a ' + esc(nearbyName) + ' ↗</a>' : '';
-      return '<section class="hotel-options hotel-options-empty" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Alojamientos en ' + esc(destinationName) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(emptyCopy) + '</p><a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(destinationName) + ' ↗</a>' + nearbyLink + '</div></div></section>';
+    var reparto = stayNights();
+    var strictType = ['all-inclusive', 'resort', 'boutique'].indexOf(meta.hotelType) >= 0;
+    var typeLabel = HOTEL_TYPE_LABELS[meta.hotelType] || meta.hotelType;
+
+    /* Un grupo de cards. stop es 1 o 2 en un viaje combinado y null en un destino
+       solo, donde sale un unico grupo con el titulo de siempre.
+       Los totales que se muestran son los que Booking devuelve para el rango de
+       fechas completo, que es lo que se consulted. El reparto por parada no se
+       aplica aca sino en el panel "Distribui tus noches": las cards dicen lo que
+       cuesta ese hotel para el viaje entero, y el panel dice cuanto de eso cae
+       en cada parada. Repartirlo tambien en la card obligaria a repintarla cada
+       vez que se mueve el slider, y el precio de Booking ya no seria el que
+      Booking dijo. */
+    function grupo(stop) {
+      var isPar = stop !== null;
+      var catalog = stop === 2 ? meta.hotelsSecond : meta.hotels;
+      var nearby = stop === 2 ? meta.hotelsNearbySecond : meta.hotelsNearby;
+      var stopName = stop === 1 ? reparto.firstName : (stop === 2 ? reparto.secondName : meta.dest.name);
+      var stopNights = stop === 1 ? reparto.first : (stop === 2 ? reparto.second : nights);
+      var defaultHotel = { tier: profile.tier, name: '', similar: [], image: '' };
+      var hotelCatalog = normalizeHotelCatalog(Array.isArray(catalog) ? catalog : [], defaultHotel)
+        .filter(function (hotel) { return !hotel.hotelType || hotel.hotelType === meta.hotelType; });
+      var options = hotelCatalog.slice(0, 3).map(function (item, index) {
+        return {
+          name: item.name,
+          multiplier: index === 0 ? 1 : (index === 1 ? 0.92 : 1.08),
+          recommended: index === 0,
+          similar: Array.isArray(item.similar) ? item.similar : [],
+          image: sanitizeHotelImageUrl(item.image, ''),
+          highlight: item.highlight || '',
+          total: Number(item.total) || null,
+          perNight: Number(item.perNight) || null,
+          bookingUrl: item.bookingUrl || null,
+          source: item.source || '',
+          description: item.description || ''
+        };
+      });
+      // El encabezado del grupo: en un destino solo no hace falta (el h2 de la
+      // seccion ya dice de que ciudad es). En un combinado hace falta, porque hay
+      // dos ciudades en la misma caja.
+      var subhead = isPar
+        ? '<h3 class="hotel-group__title"><span>' + esc(stopName) + '</span><b>' + stopNights + (stopNights === 1 ? ' noche' : ' noches') + '</b></h3>'
+        : '';
+      var vacio = strictType
+        ? '<p class="hotel-group__empty">No encontramos alojamientos verificados de tipo ' + esc(typeLabel) + ' en ' + esc(stopName) + ' para estas fechas. No mostramos categorías distintas como reemplazo.</p>'
+        : '<p class="hotel-group__empty">No pudimos cargar opciones automáticamente para estas fechas. Consultá alojamientos y disponibilidad directamente en ' + esc(stopName) + '.</p>';
+      var vacioLink = '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(stopName) + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(stopName) + ' ↗</a>';
+      var body = options.length
+        ? '<div class="hotel-grid">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + options.map(function (option) {
+          var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
+          var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
+          var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
+          var imageUrl = sanitizeHotelImageUrl(option && option.image && typeof option.image === 'string' ? option.image : '', '');
+          var imageMarkup = imageUrl ? '<div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.removeAttribute(\'src\');"></div>' : '<div class="hotel-image-wrap hotel-image-empty"><span>Sin foto disponible</span></div>';
+          var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
+          var similarMarkup = similar ? '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details>' : '';
+          var descriptionMarkup = option.description ? '<p class="hotel-description">' + esc(option.description) + '</p>' : '';
+          // La card entera es la etiqueta del radio. Antes el <label> envolvía solo
+          // el radio y el badge: una tira de ~26px dentro de una card de más de
+          // 300px, y como el resto de la card no era label, había que acertarle
+          // justo a esa tira para cambiar de hotel. Es el paso que decide la
+          // reserva, y el peor objetivo táctil de la app.
+          //
+          // El input sigue visible (es la señal de que esto se elige), pero el
+          // label ahora cubre todo lo visual. Los enlaces de Booking y el
+          // <details> de "hoteles similares" quedan FUERA del label a propósito:
+          // dentro de un label no se pueden pulsar con normalidad.
+          // El marcado sale de lo que la persona elegio, no de "recommended": al
+          // cambiar de moneda se repinta esta lista para actualizar los importes, y
+          // si dependiera de recommended la eleccion se perderia y el presupuesto
+          // saltaria solo. recommended queda de respaldo cuando no hay eleccion.
+          var elegido = hotelElegidoEnEstaLista(totalValue, stop);
+          var marcado = elegido != null ? elegido : !!option.recommended;
+          // El name del radio lleva la parada: con un solo "hotel-choice" los
+          // grupos se deseleccionarian entre si, porque son el mismo grupo de
+          // radios y en HTML solo puede haber uno marcado.
+          return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option data-hotel-stop="' + (isPar ? stop : '') + '">' +
+            '<label class="hotel-option__pick">' + imageMarkup +
+            '<span class="hotel-choice"><input type="radio" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
+            '<h3>' + esc(option.name) + '</h3>' + descriptionMarkup +
+            '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + (isPar ? ' · ' + stopNights + ' en ' + esc(stopName) : '') + '.</p>' +
+            '<div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div>' +
+            '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong>' +
+            '<span class="hotel-pick-hint">Elegir este hotel</span>' +
+            '</label>' +
+            '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
+        }).join('') + '</div>'
+        : vacio + vacioLink;
+      return '<div class="hotel-group' + (isPar ? ' hotel-group--split' : '') + '" data-hotel-group="' + (isPar ? stop : 'solo') + '">' + subhead + body + '</div>';
     }
-    return '<section class="hotel-options" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title"><div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>' + hotelTypeSelectMarkup(meta) + '<p>' + esc(profile.description) + ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.</p></div></div><div class="hotel-grid">' +
-      (meta.hotelsNearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(meta.hotelsNearby) + ', una zona cercana a ' + esc(meta.dest.name) + '.</p>' : '') + options.map(function (option, index) {
-        var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
-        var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
-        var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
-        var imageUrl = sanitizeHotelImageUrl(option && option.image && typeof option.image === 'string' ? option.image : '', '');
-        var imageMarkup = imageUrl ? '<div class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.removeAttribute(\'src\');"></div>' : '<div class="hotel-image-wrap hotel-image-empty"><span>Sin foto disponible</span></div>';
-        var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
-        var similarMarkup = similar ? '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details>' : '';
-        var descriptionMarkup = option.description ? '<p class="hotel-description">' + esc(option.description) + '</p>' : '';
-        // La card entera es la etiqueta del radio. Antes el <label> envolvía solo
-        // el radio y el badge: una tira de ~26px dentro de una card de más de
-        // 300px, y como el resto de la card no era label, había que acertarle
-        // justo a esa tira para cambiar de hotel. Es el paso que decide la
-        // reserva, y el peor objetivo táctil de la app.
-        //
-        // El input sigue visible (es la señal de que esto se elige), pero el
-        // label ahora cubre todo lo visual. Los enlaces de Booking y el
-        // <details> de "hoteles similares" quedan FUERA del label a propósito:
-        // dentro de un label no se pueden pulsar con normalidad.
-        // El marcado sale de lo que la persona elegio, no de "recommended": al
-        // cambiar de moneda se repinta esta lista para actualizar los importes, y
-        // si dependiera de recommended la eleccion se perderia y el presupuesto
-        // saltaria solo. recommended queda de respaldo cuando no hay eleccion.
-        var elegido = hotelElegidoEnEstaLista(totalValue);
-        var marcado = elegido != null ? elegido : !!option.recommended;
-        return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option>' +
-          '<label class="hotel-option__pick">' + imageMarkup +
-          '<span class="hotel-choice"><input type="radio" name="hotel-choice" value="' + totalValue + '" data-hotel-total="' + totalValue + '"' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
-          '<h3>' + esc(option.name) + '</h3>' + descriptionMarkup +
-          '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.</p>' +
-          '<div class="hotel-price"><small>Desde</small><b>' + money(nightlyValue) + '</b><span>por noche</span></div>' +
-          '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong>' +
-          '<span class="hotel-pick-hint">Elegir este hotel</span>' +
-          '</label>' +
-          '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' + similarMarkup + '</article>';
-      }).join('') + '</div></section>';
+
+    var head = '<div class="hotel-options-head"><div><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>'
+      + hotelTypeSelectMarkup(meta)
+      + '<p>' + esc(profile.description)
+      + (reparto
+        // Con dos paradas la nota tiene que nombrar las dos y decir que se elige
+        // en cada una. Antes decía una sola ("por noche en Rio de Janeiro") y el
+        // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
+        ? ' Elegí un alojamiento en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
+        : ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.')
+      + '</p></div></div>';
+
+    // Un destino solo: el grupo único y, si no hay nada, la sección vacía de
+    // siempre, sin cambio de comportamiento.
+    if (!reparto) {
+      var solo = grupo(null);
+      if (/hotel-group__empty/.test(solo)) {
+        // La caja vacia de un destino solo: el link a Booking y el de la zona cercana
+        // salían del head, no del grupo. Se conserva para no cambiar el DOM que
+        // el resto de la app ya conoce.
+        var destinationQuery = encodeURIComponent(meta.dest.name || 'el destino elegido');
+        var nearbyName = meta.dest.key === 'ilha' || meta.dest.key === 'paraty' ? 'Angra dos Reis' : '';
+        var nearbyLink = nearbyName ? '<a class="hotel-nearby-link hotel-nearby-link-secondary" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(nearbyName) + '" target="_blank" rel="noopener noreferrer">Ampliar a ' + esc(nearbyName) + ' ↗</a>' : '';
+        return '<section class="hotel-options hotel-options-empty" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head
+          + '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?ss=' + destinationQuery + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(meta.dest.name) + ' ↗</a>' + nearbyLink + '</section>';
+      }
+      return '<section class="hotel-options" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + solo + '</section>';
+    }
+    // Viaje combinado: los dos grupos, cada uno con su radios y su nombre. El
+    // reparto de noches lo ajusta el panel de arriba; lo que se elige aca es el
+    // hotel de cada parada.
+    return '<section class="hotel-options hotel-options-split" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + grupo(1) + grupo(2) + '</section>';
   }
   /* Los tours de un destino, con el precio real de las fechas que esta
      mirando el usuario si hay Civitatis, y la lista local si no.
@@ -1833,6 +1931,14 @@
       return;
     }
     var params = new URLSearchParams({ dest: meta.dest.key, dep: meta.dep, ret: meta.ret, pax: meta.pax, style: meta.style || 'eq', hotel_type: meta.hotelType || 'intermedio', subcategory: meta.subcategory || '' });
+    // La segunda parada del viaje combinado viaja en el mismo request. El server
+    // la valida con comboTransfer() y devuelve los dos listados; antes se pedia
+    // solo el de la primera y el de la segunda se cobraba con el promedio del
+    // modelo, sin hotel real y sin avisar.
+    if (meta.multiStay && meta.multiStay.stays && meta.multiStay.stays.length === 2) {
+      var segunda = String(meta.multiStay.stays[1].key || '').toLowerCase();
+      if (segunda) params.set('second', segunda);
+    }
     if (meta.hotelBudgetPerNight != null && Number.isFinite(Number(meta.hotelBudgetPerNight))) params.set('hotel_budget_per_night', String(meta.hotelBudgetPerNight));
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
     var timeout = window.setTimeout(function () { if (controller) controller.abort(); }, 30000);
@@ -1843,19 +1949,46 @@
       if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
       meta.hotels = Array.isArray(data.hotels) ? data.hotels : [];
       meta.hotelsNearby = data.hotelsNearby || '';
+      // Los hoteles de la segunda parada. Vienen en el mismo request; si el viaje
+      // es de un solo destino quedan vacios y hotelOptions() ni los mira.
+      meta.hotelsSecond = Array.isArray(data.hotelsSecond) ? data.hotelsSecond : [];
+      meta.hotelsNearbySecond = data.hotelsNearbySecond || '';
+      if (data.hotelBudgetPerNightSecond != null) meta.hotelBudgetPerNightSecond = data.hotelBudgetPerNightSecond;
       // Que tipos de alojamiento hay de verdad para este destino. El server lo
       // calcula sobre los mismos 20 hoteles reales que ya trae, asi que no es
-      // una llamada extra; y puede venir null si no hay key de Booking.
+      // una llamada extra; y puede venir null si no hay key de Booking. Con dos
+      // paradas el server devuelve la interseccion de los tipos de ambas.
       meta.tiposHotelDisponibles = Array.isArray(data.tiposDisponibles) ? data.tiposDisponibles : null;
       meta.hotelsLoaded = true;
+      // El token de la Guia Secreta. El server solo lo firma si entre los
+      // hoteles de este destino hay alguno con precio real de Booking, o sea
+      // algo reservable: sin eso no hay guia que abrir. Se guarda y se pide
+      // aca, sin esperar, para que la guia llegue junto con la seccion.
+      if (data.guiaToken) {
+        guardarTokenGuia(meta.dest.key, data.guiaToken);
+        (function (destKey, m) {
+          pedirGuiaSecreta(destKey, function (g) { pintarGuiaEnDetalle(g, m); });
+        })(meta.dest.key, meta);
+      }
       var current = document.querySelector('.hotel-options-loading');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
-      var recommended = document.querySelector('[data-hotel-total]:checked');
-      if (recommended) {
+      // Cada parada toma su recomendado. Con querySelector pelado solo se
+      // marcaba el primero de la pagina: en un viaje combinado la segunda parada
+      // se quedaba sin hotel y volvia al estimado del modelo, que es
+      // exactamente el bug que hizo falta partir esto en dos grupos.
+      var paradas = meta.multiStay && meta.multiStay.stays && meta.multiStay.stays.length === 2 ? ['1', '2'] : [''];
+      paradas.forEach(function (stop) {
+        var selector = stop ? '[data-hotel-stop="' + stop + '"][data-hotel-total]:checked' : '[data-hotel-total]:checked';
+        var recommended = document.querySelector(selector);
+        if (!recommended) return;
         var card = recommended.closest('[data-hotel-option]');
-        detailState.selectedHotelName = card && card.querySelector('h3') ? card.querySelector('h3').textContent.trim() : detailState.selectedHotelName;
-        actualizarAlojamiento(Number(recommended.getAttribute('data-hotel-total')), true);
-      }
+        var name = card && card.querySelector('h3');
+        // El nombre visible del alojamiento del resumen es el de la ultima parada
+        // que se proceso. Es un solo campo para dos paradas: lo que hay aca es
+        // "el hotel que estas mirando", no un inventario de los dos.
+        if (name) detailState.selectedHotelName = name.textContent.trim();
+        actualizarAlojamiento(Number(recommended.getAttribute('data-hotel-total')), true, Number(stop) || 0);
+      });
     }).catch(function (error) {
       window.clearTimeout(timeout);
       if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
@@ -2791,8 +2924,20 @@
     var traslado = document.querySelector('[data-official-transfer]');
     if (traslado) traslado.outerHTML = transferCard(detailState.meta);
   }
-  function deseleccionarHotel() {
+  function deseleccionarHotel(stop) {
     if (!detailState) return;
+    // En un viaje combinado la deseleccion es por parada: tocar dos veces la
+    // misma card saca el hotel de ESA parada y deja el de la otra, que es lo que
+    // uno espera. Sin el parametro se caian los dos y el presupuesto bajaba a
+    // cero sin que se hubiera tocado nada.
+    if (detailState.multiStay && stop) {
+      var habia = staySelectedTotal(stop);
+      setStaySelectedTotal(stop, null);
+      if (habia == null) return;
+      updateMultiStayPricing();
+      sincronizarTrasladoOficial();
+      return;
+    }
     detailState.selectedHotel = false;
     detailState.selectedHotelTotal = null;
     detailState.selectedHotelName = '';
@@ -2861,14 +3006,17 @@
     if (section) section.setAttribute('data-selected-flight-price', String(detailState.flight));
     sincronizarTrasladoOficial();
   }
-  function actualizarAlojamiento(price, selectedByUser) {
+  function actualizarAlojamiento(price, selectedByUser, stop) {
     if (!detailState || !Number.isFinite(price) || price <= 0) return;
     // El flag se levanta antes de recalcular el reparto multihotel: si el
     // alojamiento estaba deseleccionado, updateMultiStayPricing() necesita saber
     // que esta vez hay una elección real y no un 0 heredado.
     if (selectedByUser) { detailState.selectedHotel = true; detailState.selectedHotelTotal = Math.round(price); }
     if (detailState.multiStay && selectedByUser) {
-      detailState.multiStay.selectedPrimaryHotelTotal = Math.round(price);
+      // stop 1 o 2: cada parada guarda su propio hotel. Con un solo numero
+      // compartido, elegir en el segundo grupo pisaba el primero y la primera
+      // parada volvía a cobrarse con el promedio del modelo.
+      setStaySelectedTotal(stop === 2 ? 2 : 1, price);
       updateMultiStayPricing();
     } else { detailState.hotel = Math.round(price); }
     if (selectedByUser) {
@@ -3291,7 +3439,26 @@
   }
 
   /* ------------------------------------------------------------------
-     Guia Secreta. Los datos viven en public/guias.js; aca solo se pintan.
+     Guia Secreta. El contenido ya no esta en el cliente.
+
+     Antes public/guias.js era un .js estatico que index.html cargaba antes que
+     este archivo: 66 KB con la guia de los 88 destinos, bajables con curl sin
+     cuenta y sin comprar nada. Y con el, un candado que no podia ser secreto:
+     el texto ya estaba en el DOM, asi que se leia con el verificador de
+     elementos, con un lector de pantalla y con window.print().
+
+     Ahora el contenido esta en lib/guias.js, que el server no sirve. Se pide
+     por /api/guia y el server responde 403 salvo que el cliente traiga el
+     token que se firma cuando el destino tiene hoteles con precio real de
+     Booking (ver guiaToken() en server.js). Sin token esta funcion no
+     devuelve nada y la seccion no se dibuja: no queda texto borroso que
+     despues se pueda leer igual.
+
+     QUE NO ES UN SECRETO
+     El token prueba que el cliente paso por la busqueda de hoteles de ese
+     destino, no que pago. Quien llame a /api/hoteles con fechas validas
+     consigue un token. Para cerrarlo de verdad hay que atarlo a la sesion del
+     usuario, que es el paso que falta.
 
      Tres cosas que esta seccion hace distinto:
 
@@ -3300,25 +3467,87 @@
        La guia compara los precios contra ese numero y dice si alcanzan. Sin
        eso, una lista de lugares no dice si el viaje le alcanza a la persona.
 
-     - Los tours no estan en guiAs.js. Se piden con toursFor(), la misma
+     - Los tours no vienen en la guia. Se piden con toursFor(), la misma
        funcion de la seccion de experiencias, asi que salen con el precio real
        de las fechas que esta mirando el usuario. Escribirlos en la guia los
        convertiria en precio estimado, que es lo que Civitatis vino a
        reemplazar.
-
-     - Sin lock. Antes se dibujaba borrosa con un blur y un candado que se
-       abria con un clic, pero el texto estaba en el DOM igual: se leia con el
-       verificador de elementos o con un lector de pantalla. Y con
-       window.print() la guia entera se imprimia, bloqueada o no. Un lock que
-       no bloquea promete algo que no hace. Si alguna vez hay contenido de
-       verdad que reservar, va por servidor.
      ------------------------------------------------------------------ */
-  function guiaSecreta(meta) {
-    if (!window.CS_GUIAS || !meta || !meta.dest) return '';
-    var guia = window.CS_GUIAS.guiaPara(meta.dest.key, meta.dest.region);
-    // Sin guia escrita no se muestra nada. Antes el fallback era la de
-    // Florianopolis, asi que Gramado veia "busca prato executivo en el centro
-    // de Florianopolis".
+  /* La guia se pide sola y se guarda por destino. Es una llamada que va a
+    earer al travel summary y a re-pintar la seccion, asi que no se puede
+     resolver con un await en medio del render: el resto de la pagina tiene
+     que salir ya. Se carga en paralelo con los hoteles y, cuando llega, se
+     pinta sola.
+     Un token por destino, en memoria: no va a localStorage porque es una
+     credencial de 30 minutos y guardar credenciales en disco es justamente
+     lo que el token evita. Al recargar la pagina se pide de nuevo. */
+  var guiaCache = {};
+  var guiaPedidas = {};
+  function pedirGuiaSecreta(destKey, done) {
+    if (!destKey) return;
+    // El guard mira la GUIA, no la entrada. guardarTokenGuia() crea la entrada
+    // con el token solo, antes de que haya guia: si el guard preguntara por la
+    // entrada, creeria que ya la tiene, devolveria null y no volveria a pedir
+    // nunca. La entrada sin guia es justamente el estado normal de partida.
+    var yaEsta = guiaCache[destKey] && guiaCache[destKey].guia;
+    if (yaEsta) { done(yaEsta); return; }
+    if (guiaPedidas[destKey]) return;
+    guiaPedidas[destKey] = true;
+    var token = guiaCache[destKey] && guiaCache[destKey].token;
+    var url = '/api/guia?dest=' + encodeURIComponent(destKey) + (token ? '&token=' + encodeURIComponent(token) : '');
+    fetch(url).then(function (r) {
+      // 403 es la respuesta normal de quien no reservo con Booking: no es un
+      // error que haya que reportar, es la guia cerrada.
+      if (r.status === 403 || r.status === 404) return null;
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (data) {
+      if (data && data.guia) { guiaCache[destKey] = { guia: data.guia, token: token || null }; done(data.guia); return; }
+      // 403 o 404 no es un fallo: es la guia cerrada para este destino. Se
+      // marca como resuelta para no repreguntar en cada repintado.
+      guiaPedidas[destKey] = false;
+      done(null);
+    }).catch(function () {
+      // Un fallo de red si se reintenta: si no, un 500 dejaria la guia
+      // cerrada para siempre en esta sesion.
+      guiaPedidas[destKey] = false;
+      done(null);
+    });
+  }
+  function guardarTokenGuia(destKey, token) {
+    if (!destKey || !token) return;
+    guiaCache[destKey] = guiaCache[destKey] || {};
+    guiaCache[destKey].token = token;
+  }
+  function guiaYaDe(destKey) {
+    return (guiaCache[destKey] && guiaCache[destKey].guia) || null;
+  }
+  /* Cuando la guia llega, se inserta sola al final de la vista de detalle.
+     No se re-pinta la pagina entera: eso recalcularia el presupuesto y
+     saltarian todos los numeros, que es justo lo que el usuario esta
+     mirando. Solo se agrega el bloque que faltaba. */
+  function pintarGuiaEnDetalle(guia, meta) {
+    if (!guia || !meta || !meta.dest) return;
+    var main = document.querySelector('.detail-main');
+    if (!main) return;
+    // Si el render inicial ya la habia pintado, no hay nada que hacer.
+    if (main.querySelector('[data-guia-destino]')) return;
+    if (document.querySelector('[data-guia-destino="' + meta.dest.key + '"]')) return;
+    var html;
+    try { html = guiaSecreta(meta, guia); } catch (error) { console.error('Error al pintar la guia', error); return; }
+    if (!html) return;
+    var envoltura = document.createElement('div');
+    envoltura.innerHTML = html;
+    var seccion = envoltura.firstElementChild;
+    if (!seccion) return;
+    seccion.setAttribute('data-guia-destino', meta.dest.key);
+    main.appendChild(seccion);
+  }
+  function guiaSecreta(meta, guia) {
+    if (!meta || !meta.dest) return '';
+    // Sin guia no se muestra nada. Antes el fallback era la de Florianopolis,
+    // asi que Gramado veia "busca prato executivo en el centro de
+    // Florianopolis". Y sin token tampoco: la guia no se pide y no se dibuja.
     if (!guia) return '';
 
     var foodPerDay = Math.round(Number(detailState && detailState.foodPerDay) || 0);
@@ -4292,7 +4521,7 @@
       (nights > 1 ? '<div class="multistay-panel__stays"><div class="multistay-panel__stay"><strong>' + esc(first.name) + '</strong><span><b data-multistay-first-nights>' + firstNights + '</b> ' + (firstNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-first-cost>' + money(0) + ' alojamiento estimado</small></div>' +
       '<label class="multistay-panel__slider"><span class="sr-only">Noches en ' + esc(first.name) + '</span><input type="range" min="1" max="' + (nights - 1) + '" step="1" value="' + firstNights + '" data-multistay-split aria-valuetext="' + firstNights + ' noches en ' + esc(first.name) + ', ' + secondNights + ' en ' + esc(second.name) + '"></label>' +
       '<div class="multistay-panel__stay"><strong>' + esc(second.name) + '</strong><span><b data-multistay-second-nights>' + secondNights + '</b> ' + (secondNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-second-cost>' + money(0) + ' alojamiento estimado</small></div></div>' : '<p class="multistay-panel__hint">Para dividir la estadía entre localidades necesitás al menos 2 noches.</p>') +
-      '<p class="multistay-panel__logistics">✈️ ' + esc(logistics) + '</p><p class="multistay-panel__hint">Alojamiento y traslado interlocalidad son estimaciones; el precio se ajusta al cambiar el reparto.</p></section>';
+      '<p class="multistay-panel__logistics">✈️ ' + esc(logistics) + '</p><p class="multistay-panel__hint">El traslado entre paradas siempre es una estimación (lo calcula el modelo con la distancia entre las dos). El alojamiento pasa a ser real cuando elegís un hotel en cada parada.</p></section>';
   }
   function updateMultiStayPricing() {
     if (!detailState || !detailState.multiStay) return;
@@ -4304,12 +4533,22 @@
     var rooms = Math.ceil(pax / 2);
     var typeFactor = hotelTypeFactor(detailState.meta.hotelType);
     var firstStayCost;
-    if (Number.isFinite(Number(trip.selectedPrimaryHotelTotal)) && Number(trip.selectedPrimaryHotelTotal) > 0) {
-      firstStayCost = Math.round(Number(trip.selectedPrimaryHotelTotal) * firstNights / totalNights);
-    } else {
-      firstStayCost = Math.round((trip.stays[0].nightlyRates || []).slice(0, firstNights).reduce(function (sum, rate) { return sum + Number(rate || 0); }, 0) * rooms * typeFactor);
-    }
-    var secondStayCost = Math.round((trip.stays[1].nightlyRates || []).slice(firstNights, totalNights).reduce(function (sum, rate) { return sum + Number(rate || 0); }, 0) * rooms * typeFactor);
+    // Costo de cada parada. Si hay hotel elegido para ESA parada, se prorratea el
+    // total de Booking por la proporcion de noches que cae ahi. Si no, se usa el
+    // promedio del modelo para las noches de esa parada.
+    //
+    // Antes la segunda parada no tenia rama propia: caia siempre en el promedio,
+    // por mas que la seccion de hoteles mostrara solo los de la primera. Era un
+    // numero sin origen que se sumaba al total junto a un hotel real.
+    var rates1 = trip.stays[0].nightlyRates || [];
+    var rates2 = trip.stays[1].nightlyRates || [];
+    var elegido1 = staySelectedTotal(1), elegido2 = staySelectedTotal(2);
+    firstStayCost = elegido1 != null
+      ? Math.round(elegido1 * firstNights / totalNights)
+      : Math.round(rates1.slice(0, firstNights).reduce(function (sum, rate) { return sum + Number(rate || 0); }, 0) * rooms * typeFactor);
+    var secondStayCost = elegido2 != null
+      ? Math.round(elegido2 * secondNights / totalNights)
+      : Math.round(rates2.slice(firstNights, totalNights).reduce(function (sum, rate) { return sum + Number(rate || 0); }, 0) * rooms * typeFactor);
     trip.firstNights = firstNights;
     trip.firstStayCost = firstStayCost;
     trip.secondStayCost = secondStayCost;
@@ -4323,8 +4562,12 @@
     var slider = document.querySelector('[data-multistay-split]');
     if (firstCount) firstCount.textContent = String(firstNights);
     if (secondCount) secondCount.textContent = String(secondNights);
-    if (firstCost) firstCost.textContent = money(firstStayCost) + ' alojamiento estimado';
-    if (secondCost) secondCost.textContent = money(secondStayCost) + ' alojamiento estimado';
+    // La etiqueta del costo cambia segun de donde sale el numero. Decir
+    // "alojamiento estimado" al lado de un hotel real de Booking es mentir por
+    // omision, y era lo que pasaba con la segunda parada: era siempre estimado y
+    // decia lo mismo que la primera, que si era real.
+    if (firstCost) firstCost.textContent = money(firstStayCost) + (elegido1 != null ? ' elegido en Booking' : ' alojamiento estimado');
+    if (secondCost) secondCost.textContent = money(secondStayCost) + (elegido2 != null ? ' elegido en Booking' : ' alojamiento estimado');
     if (slider) slider.setAttribute('aria-valuetext', firstNights + ' noches en ' + trip.stays[0].name + ', ' + secondNights + ' en ' + trip.stays[1].name);
   }
   function changeHotelType(type) {
@@ -4342,7 +4585,11 @@
     detailState.selectedHotel = true;
     detailState.selectedHotelTotal = null;
     if (detailState.multiStay) {
-      detailState.multiStay.selectedPrimaryHotelTotal = null;
+      // Las dos paradas: el tipo de alojamiento es uno solo, asi que cambiarlo
+      // invalida los dos hoteles elegidos. Dejar el de la primera metía un
+      // "boutique" de Rio junto a la lista ya filtrada de la segunda, que puede
+      // no tener ninguno.
+      detailState.multiStay.selectedStayTotals = {};
       updateMultiStayPricing();
     } else {
       detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelTypeFactor(type));
@@ -4392,7 +4639,12 @@
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
-    var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta); }, '<section class="detail-section"><h2>Recomendaciones</h2></section>');
+    // La Guia Secreta no se pinta todavia: depende de si el server nos abre la
+    // puerta, y eso no se sabe hasta que responde /api/guia. Se pinta sola
+    // cuando llega (pintarGuiaEnDetalle). El fallback del renderSafe era un
+    // "Recomendaciones" vacio que ademas mentia: sin guia no hay nada que
+    // recomendar.
+    var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + dailyBudgetMarkup +
@@ -5729,12 +5981,17 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
           // handler queda como única fuente de verdad y checked se maneja acá.
           e.preventDefault();
           var total = Math.round(Number(hotelInput.getAttribute('data-hotel-total')) || 0);
-          var isActive = hotelInput.checked && detailState.selectedHotel !== false && detailState.selectedHotelTotal != null && Math.round(Number(detailState.selectedHotelTotal)) === total;
-          if (isActive) { hotelInput.checked = false; deseleccionarHotel(); return; }
+          // Que parada es: 1 o 2 en un viaje combinado, '' en un destino solo.
+          // Sin esto los dos grupos comparten un solo total guardado y elegir en
+          // uno pisa el otro.
+          var parada = Number(hotelInput.getAttribute('data-hotel-stop')) || 0;
+          var elegido = parada ? staySelectedTotal(parada) : detailState.selectedHotelTotal;
+          var isActive = hotelInput.checked && (parada ? elegido != null : detailState.selectedHotel !== false) && elegido != null && Math.round(Number(elegido)) === total;
+          if (isActive) { hotelInput.checked = false; deseleccionarHotel(parada); return; }
           hotelInput.checked = true;
           var hotelName = card.querySelector('h3');
           if (hotelName) detailState.selectedHotelName = hotelName.textContent.trim();
-          actualizarAlojamiento(total, true);
+          actualizarAlojamiento(total, true, parada);
         }
         return;
       }

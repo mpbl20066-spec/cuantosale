@@ -18,7 +18,7 @@ const path = require('path');
 // quedaban sin acreditar: exactamente lo que este archivo existe para evitar.
 const SRC = [
   path.join(__dirname, 'public', 'app.js'),
-  path.join(__dirname, 'public', 'guias.js')
+  path.join(__dirname, 'lib', 'guias.js')
 ];
 const OUT = path.join(__dirname, 'public', 'creditos-fotos.generated.js');
 const UA = 'cuantosale-creditos/1.0 (atribucion de fotos)';

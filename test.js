@@ -51,7 +51,7 @@ function haversineKm(a, b) {
 (async function main() {
   console.log('Guia Secreta');
   const GUIAS_SECCIONES = ['beaches', 'atracciones', 'comer', 'hacer', 'tips'];
-  const GUIAS_FUENTE = path.join(__dirname, 'public', 'guias.js');
+  const GUIAS_FUENTE = path.join(__dirname, 'lib', 'guias.js');
 
   // guiAs.js publica window.CS_GUIAS porque lo carga el browser. Para poder
   // requirearlo desde aca se simula window y se saca del cache: sin el
@@ -1178,6 +1178,44 @@ function haversineKm(a, b) {
     }
     // Sin variables el desarrollo local sigue abierto.
     assert.strictEqual((await get(port, cotizar)).status, 200, 'sin candado configurado la API responde');
+  });
+  await t('los hoteles de un viaje combinado traen las dos paradas', async function () {
+    // Regresión: /api/hoteles solo miraba `dest`, así que el alojamiento de la
+    // segunda parada se cobraba con el promedio del modelo (lodgingNightlyCosts)
+    // sin que el usuario lo pudiera ver ni cambiar. En la misma sección había un
+    // hotel real de Booking en la primera parada y un número inventado en la
+    // segunda, sin que nada lo dijera.
+    const base = '/api/hoteles?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq&hotel_type=intermedio';
+    const uno = JSON.parse((await get(port, base + '&dest=buz')).body);
+    // Sin segunda parada la respuesta no cambia: hotelsSecond vacío y la clave
+    // en blanco, para que el front sepa que no se consultó nada.
+    assert.ok(Array.isArray(uno.hotels), 'hotels tiene que ser una lista');
+    assert.strictEqual(uno.hotelsSecond.length, 0, 'sin second no hay hoteles de una segunda parada');
+    assert.strictEqual(uno.secondKey, '', 'sin second la clave de la segunda parada viene vacía');
+
+    const par = JSON.parse((await get(port, base + '&dest=buz&subcategory=B%C3%BAzios+%2B+Arraial+do+Cabo&second=arraial')).body);
+    assert.strictEqual(par.secondKey, 'arraial', 'el server tiene que devolver la segunda parada que se pidió');
+    assert.strictEqual(par.secondName, 'Arraial do Cabo', 'y su nombre, para rotular el grupo de hoteles');
+    assert.ok(Array.isArray(par.hotelsSecond), 'hotelsSecond tiene que ser una lista');
+    assert.ok(Array.isArray(par.hotels), 'y no puede romper la lista de la primera parada');
+    // Sin key de Booking las dos vienen vacías, pero la estructura tiene que estar:
+    // es lo que le dice al front "no hay" y no "no se consultó".
+    assert.strictEqual(typeof par.hotelsNearbySecond, 'string', 'hotelsNearbySecond es string aunque no haya zona');
+    assert.ok(par.tiposDisponibles === null || Array.isArray(par.tiposDisponibles), 'tiposDisponibles sigue siendo lista o null');
+    // El presupuesto por noche de la segunda parada se resuelve por separado: si
+    // saliera el de la primera, el filtro de Booking de los dos grupos apuntaría al
+    // mismo número y uno de los dos quedaría siempre vacío.
+    assert.ok(par.hotelBudgetPerNightSecond === null || Number.isFinite(Number(par.hotelBudgetPerNightSecond)),
+      'hotelBudgetPerNightSecond tiene que ser un número o null');
+
+    // Una segunda parada que no existe, o que queda demasiado lejos para un mismo
+    // viaje, no puede pasar: se cobraría la cuota de Booking de un destino que no
+    // se va a cotizar. El par se valida con comboTransfer(), el mismo criterio que
+    // usa /api/cotizar.
+    assert.strictEqual((await get(port, base + '&dest=buz&second=noexiste')).status, 400,
+      'una segunda parada inexistente tiene que rechazarse');
+    assert.strictEqual((await get(port, base + '&dest=buz&second=for')).status, 400,
+      'una segunda parada lejana tiene que rechazarse');
   });
   await t('los endpoints que cuestan plata no comparten cupo con los gratuitos', async function () {
     // /api/cotizar-todos es cálculo local y no gasta cuota. Antes compartía

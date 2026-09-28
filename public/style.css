@@ -369,7 +369,18 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 /* Los bloques del detalle se separan con un margen propio y no con el del
    bloque anterior: asi el ritmo no depende de que haya o no tours. Antes la
    Guía Secreta pegaba a los hoteles en los destinos sin experiencias. */
-.hotel-options{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.hotel-options-head h2{font-family:var(--fh);font-weight:700;font-size:34px;line-height:1;margin:0}.hotel-options-head p{margin:6px 0 16px;color:var(--ink2);font-size:13px}.hotel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.hotel-option{display:flex;flex-direction:column;background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:var(--card-radius);padding:16px;box-shadow:0 3px 10px rgba(16,35,62,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;overflow:hidden}.hotel-option img{display:block;width:100%;height:160px;object-fit:cover;border-radius:12px}.hotel-option:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(16,35,62,.13)}/* "Recomendado" NO es "elegido". Este selector pintaba la card entera con el
+.hotel-options{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.hotel-options-head h2{font-family:var(--fh);font-weight:700;font-size:34px;line-height:1;margin:0}.hotel-options-head p{margin:6px 0 16px;color:var(--ink2);font-size:13px}.hotel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+/* ---------- viaje combinado: un grupo de hoteles por parada ----------
+   Los dos grupos van apilados, no en columnas: cada uno lleva el nombre de su
+   ciudad arriba y tres cards de 3 columnas abajo. Side by side con dos rejillas
+   de 3, el ancho de cada card cae a ~150px en escritorio y los nombres de los
+   hoteles se parten en cuatro lineas. */
+.hotel-group--split{display:grid;gap:10px;padding-top:18px;margin-top:18px;border-top:1px solid var(--line)}
+.hotel-group--split:first-of-type{padding-top:0;margin-top:0;border-top:0}
+.hotel-group__title{display:flex;align-items:baseline;gap:9px;margin:0;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.hotel-group__title b{flex:none;padding:3px 8px;border-radius:999px;background:var(--cel-soft);color:var(--cel);font-size:11px;font-weight:800;letter-spacing:0}
+.hotel-group__empty{margin:0 0 8px;color:var(--ink2);font-size:13px}
+.hotel-option{display:flex;flex-direction:column;background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:var(--card-radius);padding:16px;box-shadow:0 3px 10px rgba(16,35,62,.06);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;overflow:hidden}.hotel-option img{display:block;width:100%;height:160px;object-fit:cover;border-radius:12px}.hotel-option:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(16,35,62,.13)}/* "Recomendado" NO es "elegido". Este selector pintaba la card entera con el
    mismo borde y el mismo fondo que el estado de elegido, así que el hotel que
    sugería el servidor y el que la persona eligió se veían idénticos: no había
    forma de saber cuál tenías reservado. El marco y el fondo son solo del

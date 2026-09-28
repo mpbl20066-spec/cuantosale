@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=89">
+<link rel="stylesheet" href="/style.css?v=90">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -156,12 +156,11 @@
      frescura. Si le pusiéramos version propia, volvería a pasar lo de app.js:
      un archivo actualizado que el cache sirve viejo para siempre. -->
 <script defer src="/daily-costs.js"></script>
-<!-- Contenido de la Guia Secreta, por destino. Va antes de app.js porque
-     guiaSecreta() lee window.CS_GUIAS al pintar la vista de detalle.
-     Mismo criterio que daily-costs.js: sin '?v=' a propósito, porque un query
-     propio invalida la clave del cache del service worker. Para actualizarlo
-     se sube CACHE_NAME en sw.js, no esta línea. -->
-<script defer src="/guias.js"></script>
+<!-- YA NO se carga la Guia Secreta como script. Vivía en public/guias.js y
+     eso la hacía pública: cualquiera la bajaba con curl y tenía la guía de los
+     88 destinos sin comprar nada. Ahora está en lib/guias.js, que el server no
+     sirve, y app.js la pide por /api/guia solo si trae el token que se firma
+     cuando el destino tiene hoteles con precio real de Booking. -->
 <!-- Créditos de las fotos de la guía. Generado por creditos-fotos.js: sin esto
      las imágenes de CC BY-SA se usan sin atribuir al autor. -->
 <script defer src="/creditos-fotos.generated.js"></script>
@@ -169,7 +168,7 @@
      con `npm run build:transfer`. Va antes de app.js porque las cards del
      transfer leen de acá cuando el server todavía no mandó meta.officialTransfer. -->
 <script defer src="/transfer-precios.js"></script>
-<script defer src="/app.js?v=112"></script>
+<script defer src="/app.js?v=116"></script>
 
 </body>
 </html>

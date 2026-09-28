@@ -27,6 +27,10 @@ function loadEnv() {
 loadEnv();
 
 const model = require('./lib/model');
+// Guia Secreta. Vive en lib/, no en public/: en public/ era un .js estatico y
+// cualquiera lo bajaba con curl, con la guia de los 88 destinos, sin comprar
+// nada. Ver guiaToken() mas abajo para como se decide quien la recibe.
+const guiSecreta = require('./lib/guias');
 // Vuelos reales. El agregador es el único que habla con SerpAPI: ahí viven el
 // cache, el dedupe de pedidos simultáneos y la pausa cuando se acaban los
 // créditos del mes. Si el server llamara al provider directo, cada endpoint
@@ -1305,6 +1309,76 @@ async function cotizar(req, res, url) {
   }, result));
 }
 
+/* Guia Secreta: el token que abre la puerta.
+ *
+ * QUE CONDICION ABRE LA GUIA
+ * Elegir un hotel con precio real de Booking. No "comprar": la app no tiene
+ * compra de hotel, el card abre Booking.com en otra pestana y el server nunca
+ * se entera de si el usuario reservo. La unica señal real que existe es que
+ * /api/hoteles devolvio al menos un hotel con source === 'booking', o sea algo
+ * que se puede reservar de verdad y no una estimacion del modelo.
+ *
+ * POR QUE UN TOKEN Y NO UN CHECK EN EL PARAMETRO
+ * Si /api/guia aceptara solo ?dest=rio, seria un endpoint publico: la guia
+ * completa se bajaria con una llamada curl, que es exactamente el problema que
+ * movimos el archivo a lib/ para arreglar. El token ata la guia a que el
+ * cliente haya pasado por la busqueda de hoteles de ESE destino, que es la
+ * unica forma de tener un hotel de Booking.
+ *
+ * LO QUE ESTO NO ES
+ * No es un secreto criptografico. Quien llame a /api/hoteles con fechas
+ * validas recibe un token y despues puede pedir la guia. La diferencia real con
+ * antes es que el contenido dejo de estar en el bundle de todo el mundo y en
+ * el precache del service worker, y que no se lee con el verificador de
+ * elementos ni sale con window.print(). Para que sea un secreto de verdad
+ * hace falta atarlo a la sesion del usuario, que es el paso siguiente.
+ *
+ * La firma usa BOOKING_API_KEY porque es un secreto que el server ya tiene y
+ * que nunca sale al cliente. Si falta, no se firma nada y la guia no se abre:
+ * falla cerrado, porque un token sin secreto seria un token que cualquiera
+ * puede fabricar.
+ */
+function guiaSecret() {
+  return String(process.env.GUIA_TOKEN_SECRET || process.env.BOOKING_API_KEY || '').trim();
+}
+function guiaToken(dest) {
+  const secret = guiaSecret();
+  if (!secret) return null;
+  const payload = String(dest) + '.' + (Date.now() + 30 * 60 * 1000);
+  const sig = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+  return payload + '.' + sig;
+}
+function guiaTokenValido(token, dest) {
+  const secret = guiaSecret();
+  if (!secret || !token) return false;
+  const parts = String(token).split('.');
+  if (parts.length !== 3) return false;
+  const [key, exp, sig] = parts;
+  if (key !== String(dest)) return false;
+  if (!/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
+  const esperado = crypto.createHmac('sha256', secret).update(key + '.' + exp).digest('hex');
+  // Comparacion de tiempo constante: no filtra cuanto coincidieron los
+  // caracteres, asi que un atacante no puede adivinar la firma probando.
+  const a = Buffer.from(sig);
+  const b = Buffer.from(esperado);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+/* GET /api/guia?dest=X&token=T
+ * Devuelve la guia de un destino, o 403 si el token no vale. Sin token
+ * valido responde 403 y no una lista vacia: vacia parece un destino sin guia
+ * escrito, que es otra cosa. */
+function servirGuiaSecreta(req, res, url) {
+  const dest = String(url.searchParams.get('dest') || '').toLowerCase();
+  if (!dest || !VALID_DESTINATION_KEYS.has(dest)) return sendJson(res, 400, { error: 'Destino desconocido.' });
+  if (!guiaTokenValido(url.searchParams.get('token'), dest)) {
+    return sendJson(res, 403, { error: 'La Guia Secreta se abre eligiendo un hotel con precio real de Booking.' });
+  }
+  const guia = guiSecreta.guiaPara(dest, model.DEST[dest].region);
+  if (!guia) return sendJson(res, 404, { error: ' todavia no hay una guia escrita para este destino.' });
+  return sendJson(res, 200, { guia: guia });
+}
+
 async function cotizarHoteles(req, res, url) {
   if (limited('hoteles:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas de alojamiento. Esperá un minuto y probá de nuevo.' });
   let v;
@@ -1317,22 +1391,76 @@ async function cotizarHoteles(req, res, url) {
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: url.searchParams.get('subcategory') || '' };
   if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
   const hotelDiag = {};
-  const hotels = await hotelRecommendations(v.S.dest, dest.name, v.S.style, extra, hotelDiag);
+  // Segunda parada del viaje combinado. Antes el endpoint solo miraba `dest`, y
+  // el alojamiento de la segunda parada se cobraba con el promedio del modelo
+  // (lodgingNightlyCosts) sin que el usuario lo pudiera ver ni cambiar: en la
+  // MISMA seccion, un hotel real de Booking en la primera parada y un numero
+  // inventado en la segunda, sin que nada lo dijera.
+  //
+  // La clave se valida con comboTransfer(), el mismo criterio que usa
+  // /api/cotizar: si el par no existe o queda muy lejos no se gasta una consulta
+  // de Booking en un destino que no se va a cotizar.
+  const secondKey = String(url.searchParams.get('second') || '').trim().toLowerCase();
+  let second = null;
+  if (secondKey) {
+    if (!VALID_DESTINATION_KEYS.has(secondKey) ||
+        !model.comboTransfer(secondKey, v.S.dest, v.S.pax, v.S.kmPerLiter, v.S.fuelPriceUsd)) {
+      return sendJson(res, 400, { error: 'Esa segunda parada no se puede combinar con el destino elegido.' });
+    }
+    second = model.DEST[secondKey];
+  }
+  const hotelDiagSecond = {};
+  // Las dos paradas se piden en paralelo. Encadenadas, una propuesta combinada
+  // tardaba el doble en pintar los hoteles, que es justo la seccion que la
+  // persona esta mirando para decidir.
+  const [hotels, hotelsSecond] = second
+    ? await Promise.all([
+      hotelRecommendations(v.S.dest, dest.name, v.S.style, extra, hotelDiag),
+      hotelRecommendations(secondKey, second.name, v.S.style, extra, hotelDiagSecond)
+    ])
+    : [await hotelRecommendations(v.S.dest, dest.name, v.S.style, extra, hotelDiag), []];
+  const nearbyOf = function (list, baseName) {
+    return (list.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== baseName; }) || {}).areaLabel || '';
+  };
+  // El selector de tipo de alojamiento es uno solo para las dos paradas, asi que
+  // solo puede ofrecer los tipos que existen en AMBAS. Con el de la primera nada
+  // mas, elegir "boutique" con una segunda parada sin boutique dejaba un grupo
+  // entero vacio al lado del otro lleno.
+  let tiposDisponibles = hotelDiag.tiposDisponibles || null;
+  if (second && Array.isArray(tiposDisponibles) && Array.isArray(hotelDiagSecond.tiposDisponibles)) {
+    tiposDisponibles = tiposDisponibles.filter(function (tipo) {
+      return hotelDiagSecond.tiposDisponibles.indexOf(tipo) >= 0;
+    });
+  }
   return sendJson(res, 200, {
     hotels: hotels,
     hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra), hotelType: hotelType,
-    hotelsNearby: (hotels.find(function (hotel) { return hotel.areaLabel && hotel.areaLabel !== dest.name; }) || {}).areaLabel || '',
+    hotelsNearby: nearbyOf(hotels, dest.name),
+    // Lo mismo para la segunda parada. Sin estos campos `hotelsSecond` seria []
+    // y el front no distinguiria "no hay hoteles ahi" de "no se consulto".
+    hotelsSecond: hotelsSecond,
+    hotelsNearbySecond: second ? nearbyOf(hotelsSecond, second.name) : '',
+    hotelBudgetPerNightSecond: second ? hotelBudgetTarget(secondKey, v.S.style, extra) : null,
+    secondKey: second ? secondKey : '',
+    secondName: second ? second.name : '',
     // Que el frontend pueda distinguir "precio real de Booking" de "estimado del
     // modelo" sin adivinar por la forma del dato. Con la key sin suscribir,
     // bookingCount viene 0 y bookingError explica por que.
     bookingCount: Number(hotelDiag.bookingCount) || 0,
     bookingError: hotelDiag.bookingError || null,
+    bookingCountSecond: Number(hotelDiagSecond.bookingCount) || 0,
+    bookingErrorSecond: hotelDiagSecond.bookingError || null,
     // Que tipos de alojamiento offering de verdad para este destino. El selector
     // los ofrece todos y con esto puede dejar de ofrecer los que no existen: en Rio
     // no hay ni un resort entre los 20 hoteles que trae Booking, y ofrecerlo
     // llevaba a una lista vacia. Sale gratis porque los 20 ya vienen sin filtrar
     // por tipo: se corre el mismo filtro que se usaria para mostrarlos.
-    tiposDisponibles: hotelDiag.tiposDisponibles || null
+    tiposDisponibles: tiposDisponibles,
+    // El token que abre la Guia Secreta. Solo se firma si hay al menos un hotel
+    // con precio real de Booking entre los que seDevuelven: sin booking no hay
+    // nada que reservar, asi que no hay guia que mostrar. El cliente lo guarda
+    // y lo presenta despues en /api/guia.
+    guiaToken: (hotels.some(function (h) { return h && h.source === 'booking'; }) ? guiaToken(v.S.dest) : null)
   });
 }
 
@@ -1871,6 +1999,9 @@ function handleRequest(req, res) {
         console.error('[hoteles]', e);
         sendJson(res, 502, { error: 'No pudimos cargar alojamientos ahora.' });
       });
+    }
+    if (url.pathname === '/api/guia') {
+      return servirGuiaSecreta(req, res, url);
     }
     if (url.pathname === '/api/actividades') {
       return listarActividades(req, res, url).catch(function (e) {

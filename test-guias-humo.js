@@ -24,7 +24,7 @@ const path = require('path');
 const cp = require('child_process');
 
 const RAIZ = __dirname;
-const GUIAS = path.join(RAIZ, 'public', 'guias.js');
+const GUIAS = path.join(RAIZ, 'lib', 'guias.js');
 const APP = path.join(RAIZ, 'public', 'app.js');
 const TEST = path.join(RAIZ, 'test.js');
 
@@ -65,7 +65,7 @@ const origApp = fs.readFileSync(APP, 'utf8');
    Por eso el baseline sale de git y no de disco. Si hay cambios sin
    commitear en los archivos que este script rompe, no se corre. */
 const COMMITTED = {};
-['public/guias.js', 'public/app.js'].forEach(function (rel) {
+['lib/guias.js', 'public/app.js'].forEach(function (rel) {
   try {
     COMMITTED[rel] = cp.execSync('git show HEAD:' + rel, { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
   } catch (e) { COMMITTED[rel] = null; }
@@ -74,7 +74,7 @@ const COMMITTED = {};
 // strings tal cual da "distinto" con el archivo perfectamente limpio.
 const sinEol = (s) => String(s == null ? '' : s).replace(/\r\n/g, '\n');
 const sucios = [];
-[['public/guias.js', origGuias], ['public/app.js', origApp]].forEach(function (par) {
+[['lib/guias.js', origGuias], ['public/app.js', origApp]].forEach(function (par) {
   const base = COMMITTED[par[0]];
   if (base !== null && sinEol(base) !== sinEol(par[1])) sucios.push(par[0]);
 });

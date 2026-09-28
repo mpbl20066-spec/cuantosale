@@ -18,7 +18,7 @@ if (!CLAVE || !SECCION || !ARCHIVO) {
   process.exit(1);
 }
 
-const DESTINO = path.join(__dirname, 'public', 'guias.js');
+const DESTINO = path.join(__dirname, 'lib', 'guias.js');
 const original = fs.readFileSync(DESTINO, 'utf8');
 
 delete require.cache[require.resolve(path.resolve(ARCHIVO))];
@@ -102,4 +102,4 @@ try {
   process.exit(1);
 }
 fs.writeFileSync(DESTINO, nuevo, 'utf8');
-console.log('escrito: public/guias.js');
+console.log('escrito: lib/guias.js');
