@@ -1,4 +1,4 @@
-/* version: 124
+/* version: 125
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1048,7 +1048,15 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .flight-filters{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.flight-filters div{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.flight-filters b{font-size:12px;margin-right:4px}.flight-filters button{min-height:44px;border:1px solid var(--control-line);border-radius:99px;background:var(--surface);padding:6px 14px;color:var(--ink);font-size:13px;cursor:pointer}.flight-filters button[aria-pressed="true"]{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}.transport-detail select,.transport-detail input[type="number"]{display:block;width:100%;max-width:320px;margin:6px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--control-bg);color:var(--ink)}.transport-detail label{display:block;margin-bottom:10px}
 @media (max-width:900px){.trip-summary{left:12px;right:12px;bottom:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;max-width:none}.trip-summary__head strong{font-size:36px}}
 @media (max-width:560px){.trip-summary__item{grid-template-columns:58px minmax(0,1fr) auto}.trip-summary__item b{white-space:normal}.trip-summary__cta{height:46px}}
-.daily-budget__planned{display:grid;gap:7px;padding:10px 0 2px}.daily-budget__planned>span{font-size:13px;font-weight:700;color:var(--ink)}.daily-budget__planned .daily-budget__input-wrap{max-width:280px;min-height:48px;border:1.5px solid var(--line);background:var(--surface);transition:border-color .16s ease,box-shadow .16s ease}.daily-budget__planned .daily-budget__input-wrap:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}.daily-budget__planned input{font-weight:700}.daily-budget__planned input::placeholder{color:var(--ink2);font-size:13px;font-weight:400;opacity:.8}
+.daily-budget__planned{display:grid;gap:7px;padding:10px 0 2px}.daily-budget__planned>span{font-size:13px;font-weight:700;color:var(--ink)}.daily-budget__planned .daily-budget__input-wrap{max-width:280px;min-height:48px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);transition:border-color .16s ease,box-shadow .16s ease}/* El radio va ACÁ y no solo en la regla base por una razón concreta: la regla de
+   .daily-budget__option--custom, más arriba, pone border-radius:0 para que la fila
+   del monto se lea como un precio y no como un formulario, y esta regla -- que va
+   después y le gana por orden -- le vuelve a poner el borde. Devolvía el borde sin
+   devolver el redondeo, y la caja quedaba cuadrada dentro de una tarjeta de 18px de
+   radio. 10px es el radio concéntrico aproximado: --card-radius (18) menos el
+   padding lateral de la tarjeta (12) da 6, y 6 se sigue leyendo como recto. */
+.daily-budget__planned .daily-budget__input-wrap{border-radius:10px}
+.daily-budget__planned .daily-budget__input-wrap:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}.daily-budget__planned input{font-weight:700}.daily-budget__planned input::placeholder{color:var(--ink2);font-size:13px;font-weight:400;opacity:.8}
 .transfer-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.transfer-choice{position:relative;display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}.transfer-choice:hover{transform:translateY(-2px);border-color:var(--ink2)}.transfer-choice__icon{display:grid;flex:0 0 auto;width:44px;height:44px;place-items:center;border-radius:12px;background:var(--cel-soft);font-size:22px}
 /* El dibujo del transfer va a 34px dentro del recuadro de 44: a 24 las cabezas
    de los pasajeros se perdían, que es justo el detalle que explica la

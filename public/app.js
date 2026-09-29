@@ -5201,7 +5201,7 @@
     }).join('');
     var hayEntre = tramos.some(function (tramo) { return tramo.key === 'entre'; });
     return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
-      '<div class="official-transfer__head"><div><h2>' + (hayEntre ? 'Tus traslados' : 'Transfer desde el aeropuerto') + '</h2>' +
+      '<div class="official-transfer__head"><div><h2>' + (hayEntre ? 'Tus traslados' : 'Traslados y Conexiones') + '</h2>' +
       '<p>' + (hayEntre
         ? 'Elegí cómo llegás a la primera parada. El traslado a la segunda se coordina aparte.'
         : 'Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.aeropuerto ? ' desde ' + esc(t.aeropuerto) + ' (' + esc(t.iata) + ')' : '') + (t.km ? ', a ' + t.km + ' km.' : '.')) + '</p>' +
@@ -5216,7 +5216,7 @@
     var selectedMode = typeof mode === 'string' ? mode : mode ? 'auto' : 'flight';
     if (selectedMode === 'auto') return roadtripCalculator(meta);
     if (selectedMode === 'bus') return '<section class="transport-options bus-itinerary" data-budget-anchor="bus"><h2>Bus semicama / cama</h2><p>Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
-    return '<section class="detail-section" data-budget-anchor="pasajes"><h2>Reservé tus Vuelos en vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
+    return '<section class="detail-section" data-budget-anchor="pasajes"><h2>Llegada a destino (Vuelos y Traslado)</h2>' + flightSearch(meta, budget) + transferCard(meta) + '</section>';
   }
   function localTransportDescription(meta) {
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
