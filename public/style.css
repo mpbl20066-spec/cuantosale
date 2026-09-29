@@ -2525,3 +2525,25 @@ h3.block-title, .block-title:is(h3) {
   .plate-block { margin-top: 44px; padding-top: 32px }
   .plate-block > .block-title:first-child { font-size: 26px }
 }
+
+/* ---------- Empresas de bus (EGA, TTL) ---------- */
+.bus-companies{display:grid;gap:14px;margin-top:16px}
+.bus-co{border:1.5px solid var(--card-border,var(--line));border-radius:18px;background:var(--surface);padding:16px}
+.bus-co__head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bus-co__head h4{margin:0;font-size:15px;font-weight:700;color:var(--ink2)}
+.bus-co__logo{display:inline-grid;place-items:center;min-width:52px;height:30px;padding:0 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-family:var(--fh);font-weight:800;font-style:italic;letter-spacing:.02em;color:var(--ink)}
+.bus-co__list{list-style:none;margin:0;padding:0;display:grid}
+.bus-co__row{display:grid;grid-template-columns:minmax(0,1.3fr) auto minmax(0,1.2fr);gap:8px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.bus-co__row:first-child{border-top:0}
+.bus-co__route{display:grid;gap:2px;min-width:0}
+.bus-co__route b{font-size:14px;color:var(--ink)}
+.bus-co__route span,.bus-co__note{font-size:12.5px;color:var(--ink2)}
+.bus-co__time{font-size:14px;white-space:nowrap;color:var(--ink)}
+.bus-co__time sup{font-size:10px;color:var(--ink2)}
+.bus-co__fares{display:grid;gap:2px;justify-items:end;text-align:right}
+.bus-co__fare{font-size:12.5px;color:var(--ink2)}
+.bus-co__price b{font-size:14px;color:var(--ink)}
+.bus-co__price em{font-style:normal;color:var(--ink2)}
+.bus-co__price.is-na{font-style:italic}
+.bus-co__note{margin:8px 0 0}
+@media (max-width:560px){.bus-co__row{grid-template-columns:1fr auto}.bus-co__fares{grid-column:1/-1;justify-items:start;text-align:left;grid-auto-flow:column;gap:14px}}
