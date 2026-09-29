@@ -4803,6 +4803,9 @@
     var foodTotal = Math.round(foodPerDay * nights * pax);
     var localTotal = Math.round(localPerDay * nights * pax);
     var flightTotal = Number(detailState.flight) || 0;
+    // Con un medio terrestre el resumen habla del bus y no exige vuelo.
+    var busMode = detailState.transportMode === 'bus';
+    var busTotal = Number(detailState.parts && detailState.parts.bus) || 0;
     var selectedTours = detailState.selectedTours || [];
     var toursTotal = Number(detailState.toursTotal) || 0;
     var toursLabel = selectedTours.length ? selectedTours.length + (selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
@@ -4810,7 +4813,7 @@
     var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal + toursTotal);
     var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
-    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + vueloNombreCorto(flightSummary) + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
+    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + (busMode ? '🚌 Bus: ' + busResumenCorto(detailState.meta) + ' · ' + money(busTotal) : '✈️ Vuelo: ' + vueloNombreCorto(flightSummary) + ' · ' + money(flightTotal)) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + (busMode ? '' : '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n') + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     /* El itinerario que se manda por WhatsApp lleva el link del grupo, cuando ya
        existe. Es el mismo texto que ve la persona, asi que la otra recibe el
        viaje entero y el lugar donde repartirse, en un solo mensaje y sin que
@@ -4825,6 +4828,11 @@
        cadena en tres. */
     summaryText += grupoTexto;
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
+    var busSel = busMode ? busElegido(detailState.meta) : null;
+    var busTitle = busSel ? 'Bus · ' + esc(busSel.empresa) + (busSel.clase ? ' ' + esc(busSel.clase) : '') : 'Bus · tarifa estimada';
+    var busLines = busSel
+      ? '<p class="voucher-item__ruta">' + esc(busSel.ruta.origen) + ' &harr; ' + esc(busSel.ruta.destino) + '</p><p class="voucher-item__horarios">Sale ' + esc(busSel.ruta.salida) + ' · llega ' + esc(busSel.ruta.llegada) + ' · ' + esc(busSel.ruta.dias) + '</p>'
+      : '<p class="voucher-item__detail">Ida y vuelta en bus semicama / cama.</p>' + (busServiceOptions(detailState.meta).length ? '<p class="voucher-item__aviso">Elegí un servicio en la sección de llegada para ver horarios.</p>' : '');
     // toursWhatsappUrl() ya no se usa acá y queda sin referencias: el "Reservar"
     // de tours abre el checkout, y checkoutWhatsappUrl() arma un mensaje que
     // incluye las actividades junto con lo demas. Se deja la funcion definida
@@ -5123,7 +5131,7 @@
        nota de canales de mas abajo lo explica en una frase. */
     function pasoExternoHecho(categoria) { return reservasDe(categoria); }
     function pasosMarkup() {
-      var extVuelo = pasoExternoHecho('pasajes');
+      var extVuelo = busMode ? true : pasoExternoHecho('pasajes');
       var extHotel = pasoExternoHecho('alojamiento');
       var terrChequeado = Boolean(pedido.count);
       var paso = function (n, titulo, bajada, hecho, actual, accion) {
@@ -5162,7 +5170,8 @@
       } else {
         vAccion = '<span class="voucher-step__hint">Elegilo en la secci&oacute;n de vuelos</span>';
       }
-      markup += paso(1, 'Vuelo', vBajada, extVuelo, !extVuelo, vAccion);
+      if (busMode) markup += paso(1, 'Bus', esc(busSel ? busResumenCorto(detailState.meta) : 'Tarifa estimada') + ' &middot; ' + money(busTotal), false, false, '<span class="voucher-step__hint">Compralo con la empresa</span>');
+      else markup += paso(1, 'Vuelo', vBajada, extVuelo, !extVuelo, vAccion);
 
       // Paso 2: el alojamiento.
       var hBajada = hotelBookUrl
@@ -5208,14 +5217,14 @@
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
-      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
+      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>' + (busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
       ventajasMarkup +
 
       '<ul class="voucher-list">' +
-      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>') +
+      (busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>')) +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
-      itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta) +
+      (busMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
       itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, reservarCta(selectedTours.length, 'Reservar las actividades', 'tours')) +
       '</ul>' +
       /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
@@ -6267,6 +6276,22 @@
     }).join('');
     var limpiar = elegido ? '<button type="button" class="bus-companies__clear" data-bus-clear>Volver a la tarifa estimada</button>' : '';
     return '<div class="bus-companies">' + cards + limpiar + '</div>';
+  }
+  /* El servicio de bus elegido en la seccion de llegada, o null si no hay. */
+  function busElegido(meta) {
+    var id = detailState && detailState.busChoice;
+    if (!id) return null;
+    var grupos = busServiceOptions(meta);
+    for (var i = 0; i < grupos.length; i++) {
+      for (var j = 0; j < grupos[i].opciones.length; j++) {
+        if (grupos[i].opciones[j].id === id) return { empresa: grupos[i].co.empresa, clase: grupos[i].opciones[j].clase, ruta: grupos[i].opciones[j].ruta };
+      }
+    }
+    return null;
+  }
+  function busResumenCorto(meta) {
+    var b = busElegido(meta);
+    return b ? b.empresa + (b.clase ? ' ' + b.clase : '') + ' · ' + b.ruta.salida + ' → ' + b.ruta.llegada : 'Bus semicama / cama (tarifa estimada)';
   }
   /* Aplica la eleccion al presupuesto. El precio base (la estimacion del
      modelo) se guarda la primera vez para poder volver a el. */
