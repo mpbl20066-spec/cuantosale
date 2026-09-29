@@ -4803,7 +4803,7 @@
            de quien es el precio, el precio es un numero sin dueno. */
         + (canal.canal ? '<p class="voucher-item__canal">' + esc(canal.canal) + '</p>' : '');
       var lado = controlReserva(category)
-        + (reservado ? detalleReservaCta(category) : (ctaMarkup || ''));
+        + (reservado ? '' : (ctaMarkup || ''));
       /* El color es del proveedor, no del rubro: con la paleta de rubros casi
          todas las filas salian del mismo azul. Va por parametro porque el
          style del span lo perdia contra el del svg. Ver categoryIcon(). */
