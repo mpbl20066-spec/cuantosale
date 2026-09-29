@@ -84,10 +84,26 @@ assert.ok(vSw >= 85, 'sw.js sin bumpear: daily-costs.js queda viejo (v=' + vSw +
 ok('cache: app.js?v=' + vApp + ', sw v' + vSw + ', daily-costs.js precacheado y cargado antes que app.js');
 
 // 6. hooks de npm
+// La comprobacion era `pretest === 'npm run build:costos'`, y quedo vieja cuando
+// los hooks pasaron a correr `build:todo` (que ademas genera el transfer). Lo que
+// importa no es la cadena exacta sino que build:costos se ejecute, y ahi hay un
+// nivel de indireccion: el hook llama a build:todo y build:todo llama a
+// build:costos. Comparar contra una cadena fija hacia que este validador fallara
+// sin que nada estuviera roto, asi que se resuelve la cadena.
 const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 assert.ok(pkg.scripts['build:costos'], 'falta build:costos');
-assert.strictEqual(pkg.scripts.pretest, 'npm run build:costos', 'pretest no regenera');
-assert.strictEqual(pkg.scripts.prestart, 'npm run build:costos', 'prestart no regenera');
+// Un nivel de indireccion: alcanza con el hook y el script al que apunta.
+function regenera(hook, objetivo) {
+  const directo = pkg.scripts[hook] || '';
+  if (new RegExp('run\\s+' + objetivo + '\\b').test(directo)) return true;
+  for (const nombre of directo.matchAll(/npm run ([\w:-]+)/g)) {
+    const cuerpo = pkg.scripts[nombre[1]] || '';
+    if (new RegExp('run\\s+' + objetivo + '\\b').test(cuerpo)) return true;
+  }
+  return false;
+}
+assert.ok(regenera('pretest', 'build:costos'), 'pretest no regenera los costos diarios');
+assert.ok(regenera('prestart', 'build:costos'), 'prestart no regenera los costos diarios');
 ok('npm: build:costos + pretest + prestart (el generado no se puede agingar)');
 
 console.log('\n' + n + ' verificaciones de mi parte: OK');

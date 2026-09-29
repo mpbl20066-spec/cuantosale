@@ -1204,7 +1204,14 @@ function haversineKm(a, b) {
 
     // Se corre la funcion real del cliente contra la tabla real.
     const tabla = require(path.join(__dirname, 'public', 'transfer-precios.js'));
-    const desde = app.indexOf('function transferPreciosDe(meta)');
+    const desdeFn = app.indexOf('function transferPreciosDe(meta)');
+    // transferPreciosDe() usa AIRPORT_NAMES para nombrar el aeropuerto, y esa
+    // tabla se declara unas lineas ANTES de la funcion. El corte arrancaba en la
+    // funcion, asi que la declaracion quedaba afuera del bloque evaluado y el
+    // test moria con "AIRPORT_NAMES is not defined" sin arrives a comprobar nada
+    // del transfer. Se sube el corte hasta la declaracion para que viajen juntas.
+    const desdeTabla = app.indexOf('var AIRPORT_NAMES =');
+    const desde = (desdeTabla > 0 && desdeTabla < desdeFn) ? desdeTabla : desdeFn;
     const hastaFn = app.indexOf('function getSelectedTransferAmount(state)');
     const hasta = app.indexOf('// Iconos por categoría', hastaFn);
     assert.ok(desde > 0 && hasta > desde, 'no se pudo extraer transferPreciosDe del cliente');
@@ -1521,6 +1528,128 @@ function haversineKm(a, b) {
     // El próximo feriado largo tiene que caer fuera de la ventana visible.
     const next = fechas.nextSpecialDateAfter(6);
     if (next) assert.ok(departures.indexOf(next.depIso) < 0, 'el "próximo feriado" ya está en la ventana visible');
+  });
+  await t('el calendario no ofrece fechas más allá de un año', async function () {
+    // El tope vive en el navegador (public/app.js), así que se evalúa la función
+    // real. El error que se corrige acá no daba ningún symptom visible: el
+    // calendario dejaba scrollear hasta meses que nadie viaja, y el precio de un
+    // vuelo a esa altura sale del modelo, no de una consulta. Lo que se fixe es
+    // que el último día habilitable sea exactamente hoy + 1 año, y no "el mes que
+    // viene" ni "12 meses", que son dos cosas distintas.
+    const fs = require('fs');
+    const path = require('path');
+    const source = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const fn = function (nombre) {
+      const desde = source.indexOf('function ' + nombre + '(');
+      assert.ok(desde >= 0, 'no se encontró ' + nombre + '() en app.js');
+      let nivel = 0;
+      for (let j = source.indexOf('{', desde); j < source.length; j++) {
+        if (source[j] === '{') nivel++;
+        else if (source[j] === '}') { nivel--; if (nivel === 0) return source.slice(desde, j + 1); }
+      }
+      throw new Error('llaves desbalanceadas en ' + nombre);
+    };
+    const iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+    const leer = function (value) { const p = String(value).split('-'); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12); };
+    // `today` es una constante del módulo de app.js, no un parámetro: se la pasa
+    // como argumento y se declara local adentro, para que la función evaluada
+    // (que es el código real) cierre sobre esa y no sobre un undefined.
+    const maxDepartureDate = new Function('hoy', 'iso',
+      'var today = hoy;\n' + fn('maxDepartureDate') + '\nreturn maxDepartureDate();');
+
+    for (const fecha of ['2026-09-28', '2026-12-31', '2027-01-01', '2026-02-27', '2024-02-29']) {
+      const h = leer(fecha);
+      const hoy = h;
+      const tope = maxDepartureDate(h, iso);
+      const esperado = new Date(hoy.getTime());
+      esperado.setFullYear(esperado.getFullYear() + 1);
+      assert.strictEqual(tope, iso(esperado), 'desde ' + fecha + ' el tope tendría que ser ' + iso(esperado) + ' y es ' + tope);
+      // Y el tope es un año exacto, no 365 días: en un año bisiesto son 366.
+      const dias = Math.round((leer(tope) - hoy) / 864e5);
+      assert.ok(dias === 365 || dias === 366, 'desde ' + fecha + ' el tope cae a ' + dias + ' días, no es un año');
+    }
+
+    // El día del tope todavía se puede elegir y el siguiente no. Se comprueba
+    // sobre el texto de calendarMonthMarkup(), que es donde se deshabilita: si
+    // el filtro disappears, la grilla vuelve a pintar meses enteros tachados.
+    const markup = fn('calendarMonthMarkup');
+    assert.ok(/value > maxDeparture/.test(markup),
+      'calendarMonthMarkup() no deshabilita los días que pasan del tope');
+    // Y la flecha de "mes siguiente" se apaga en el mismo límite, o el menú deja
+    // avanzar a un mes entero de días tachados.
+    const render = fn('renderDateRangeCalendar');
+    assert.ok(/next\.disabled = rangeCalendarMonth >= lastAllowedMonth/.test(render),
+      'renderDateRangeCalendar() no apaga la flecha de adelante en el tope');
+    // Y el tope se dice en pantalla: un calendario con la última fila en gris no
+    // explica por qué no se puede seguir.
+    const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    assert.ok(html.includes('data-calendar-limit'), 'el panel del calendario no tiene el aviso del tope');
+    assert.ok(/textContent = 'Elegí fechas de ida hasta el /.test(fn('renderDateRangeCalendar')),
+      'el aviso del tope no se está escribiendo');
+  });
+  await t('el menú de moneda y el de destinos se quedan dentro de la pantalla', async function () {
+    // Los dos desbordes de móvil. Ninguno daba error: el menú de moneda se
+    // cortaba por el borde de la ventana (anclado con right:0 a un botón que
+    // está en el medio del header, con 238px de ancho) y el de destinos se
+    // trababa al scrollear porque la cadena de scroll no estaba cortada y su
+    // alto era un número fijo que en un celular alto se pasaba de la pantalla.
+    const fs = require('fs');
+    const path = require('path');
+    const raiz = path.join(__dirname, 'public');
+    const app = fs.readFileSync(path.join(raiz, 'app.js'), 'utf8');
+    const css = fs.readFileSync(path.join(raiz, 'style.css'), 'utf8');
+    const sinComentarios = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+    const regla = function (sel) {
+      const m = sinComentarios.match(new RegExp('(?:^|[{},])\\s*' + sel + '\\s*\\{([^}]*)\\}'));
+      return m ? m[1] : null;
+    };
+
+    const moneda = regla('\\.currency-menu');
+    assert.ok(moneda, 'no se encontró la regla .currency-menu');
+    assert.ok(/position:fixed/.test(moneda),
+      '.currency-menu tiene que ser position:fixed: con absolute y right:0 el menú se ancla al botón, que en un celular está en el medio del header, y se sale por el otro borde');
+    assert.ok(/max-width:calc\(100vw - 24px\)/.test(moneda), '.currency-menu puede ser más ancho que la pantalla');
+    assert.ok(/max-height:min\(62vh/.test(moneda), '.currency-menu no tiene alto máximo: con muchas monedas se sale por abajo');
+    assert.ok(/overflow:auto/.test(moneda) && /overscroll-behavior:contain/.test(moneda),
+      '.currency-menu no scrollea contenido, o la lista se va de la pantalla');
+    // Y las coordenadas las pone JS, ya con el menu visible: en display:none no
+    // hay caja y la medida daria 0, con lo que la decision seria siempre "abajo".
+    assert.ok(/function posicionarMenuMoneda/.test(app), 'falta posicionarMenuMoneda()');
+    const pos = app.slice(app.indexOf('function posicionarMenuMoneda'), app.indexOf('function posicionarMenosMonedaAbiertos'));
+    assert.ok(/holguraAbajo|arriba/.test(pos) || /t\.bottom \+ separacion/.test(pos),
+      'posicionarMenuMoneda() no decide si el menu va arriba o abajo');
+    assert.ok(/left = margen/.test(pos) || /left < margen/.test(pos),
+      'posicionarMenuMoneda() no recorta el menú contra el borde de la ventana');
+    assert.ok(/addEventListener\('resize', posicionarMenosMonedaAbiertos\)/.test(app),
+      'el menú no se reposiciona al cambiar el tamaño de la ventana');
+    assert.ok(/addEventListener\('scroll', posicionarMenosMonedaAbiertos, true\)/.test(app),
+      'el menú no se reposiciona al scrollear: queda flotando lejos del botón');
+    assert.ok(/posicionarMenuMoneda\(menu, trigger\)/.test(app), 'abrir el menú no lo posiciona');
+
+    const destinos = regla('\\.custom-select__menu');
+    assert.ok(destinos, 'no se encontró la regla .custom-select__menu');
+    assert.ok(/overscroll-behavior:contain/.test(destinos),
+      '.custom-select__menu sin overscroll-behavior:contain: al llegar al final de la lista el dedo sigue scrolleando la página de atrás y la lista parece trabada');
+    assert.ok(/max-height:min\(420px,calc\(100dvh/.test(destinos),
+      '.custom-select__menu tiene un alto fijo: en un celular alto termina abajo de la pantalla y las últimas opciones no se alcanzan');
+    assert.ok(/touch-action:pan-y/.test(destinos), '.custom-select__menu no declara touch-action');
+    assert.ok(/-webkit-overflow-scrolling:touch/.test(destinos), 'falta el touch-scrolling para iOS');
+    // Y el menu se invierte cuando no hay lugar debajo.
+    assert.ok(regla('\\.custom-select\\.is-open-up \\.custom-select__menu'),
+      'falta la regla que dibuja el menu hacia arriba');
+    assert.ok(/function elegirLadoDelMenu/.test(app), 'falta elegirLadoDelMenu()');
+    assert.ok(/menu\.hidden\) return;/.test(app.slice(app.indexOf('function elegirLadoDelMenu'), app.indexOf('function clearActiveDestOption'))),
+      'elegirLadoDelMenu() mide un menu oculto y siempre elige abajo');
+    const elige = app.slice(app.indexOf('function elegirLadoDelMenu'), app.indexOf('function clearActiveDestOption'));
+    assert.ok(/holguraAbajo/.test(elige) && /holguraArriba/.test(elige), 'elegirLadoDelMenu() no mide el hueco de los dos lados');
+    assert.ok(/classList\.toggle\('is-open-up'/.test(elige), 'elegirLadoDelMenu() no deja la clase que invierte el menu');
+    assert.ok(/offsetHeight/.test(elige), 'elegirLadoDelMenu() no mide el alto real del menu');
+    ['openDestMenu', 'openComboMenu'].forEach(function (fn) {
+      const cuerpo = app.slice(app.indexOf('function ' + fn), app.indexOf('function ', app.indexOf('function ' + fn) + 10));
+      assert.ok(cuerpo.includes('elegirLadoDelMenu('), fn + '() no elige el lado del menu');
+    });
+    assert.ok(/classList\.remove\('is-open', 'is-open-up'\)/.test(app),
+      'cerrar el menu tiene que sacar is-open-up, o el siguiente queda invertido de una apertura anterior');
   });
   await t('sirve la web y bloquea rutas fuera de /public', async function () {
     const r = await get(port, '/');

@@ -50,8 +50,18 @@ function igual(a, b, msg) {
 
 const HOTEL_TYPE_LABELS = {
   'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique',
-  economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort'
+  economico: 'Económico', intermedio: 'Equilibrado', confort: 'Cómodo'
 };
+/* Los tipos que el selector sabe dibujar, leidos del fuente. No se copian a mano
+   a proposito: si la app cambia la lista, esta tiene que cambiar con ella o la
+   prueba estaria comparando contra un numero viejo. */
+function leerOpcionesDelFuente() {
+  const i = src.indexOf('var HOTEL_TYPE_OPTIONS = [');
+  if (i < 0) throw new Error('app.js no declara HOTEL_TYPE_OPTIONS: el selector y la resolucion tienen que compartir la lista');
+  const ini = src.indexOf('[', i);
+  return Function('return ' + src.slice(ini, src.indexOf(']', ini) + 1))();
+}
+const HOTEL_TYPE_OPTIONS = leerOpcionesDelFuente();
 function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -76,14 +86,15 @@ function hotelStyle(meta) {
 const cuerpo = ['resolveHotelTypeForMeta', 'hotelesQuePasanElTipo', 'hotelTypeSelectMarkup']
   .map(extraer).join('\n');
 const deps = 'var HOTEL_TYPE_LABELS = ' + JSON.stringify(HOTEL_TYPE_LABELS) + ';\n' +
+  'var HOTEL_TYPE_OPTIONS = ' + JSON.stringify(HOTEL_TYPE_OPTIONS) + ';\n' +
   'function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }\n' +
   'function hotelStyle(meta) {\n' +
   '  const p = { "all-inclusive": { tier: "all-inclusive", title: "All Inclusive", badge: "ALL INCLUSIVE", description: "d" },\n' +
   '    resort: { tier: "resort", title: "Resort", badge: "RESORT", description: "d" },\n' +
   '    boutique: { tier: "boutique", title: "Boutique", badge: "HOTEL BOUTIQUE", description: "d" },\n' +
   '    economico: { tier: "eco", title: "Económico", badge: "SUPER ECONOMICO", description: "d" },\n' +
-  '    intermedio: { tier: "moderado", title: "Intermedio", badge: "MEDIO", description: "d" },\n' +
-  '    confort: { tier: "alto", title: "Confort", badge: "ALTO", description: "d" } };\n' +
+  '    intermedio: { tier: "moderado", title: "Equilibrado", badge: "MEDIO", description: "d" },\n' +
+  '    confort: { tier: "alto", title: "Cómodo", badge: "ALTO", description: "d" } };\n' +
   '  if (p[meta.hotelType]) return p[meta.hotelType];\n' +
   '  const s = { ahorro: { tier: "eco", title: "Ahorrar al máximo", badge: "SUPER", description: "d" },\n' +
   '    eq: { tier: "moderado", title: "Equilibrado", badge: "MEDIO", description: "d" },\n' +
@@ -112,18 +123,26 @@ prueba('si el tipo pedido esta disponible, no se toca', function () {
   igual(meta.hotelType, 'confort', 'no puede mutar meta');
 });
 
-prueba('si no hay dato de disponibles, se respeta lo pedido', function () {
-  igual(resolveHotelTypeForMeta({ hotelType: 'boutique' }), 'boutique');
-  igual(resolveHotelTypeForMeta({ hotelType: 'boutique', tiposHotelDisponibles: [] }), 'boutique');
-  igual(resolveHotelTypeForMeta({ hotelType: 'boutique', tiposHotelDisponibles: null }), 'boutique');
+prueba('sin dato de disponibles se respeta lo pedido, si el selector lo tiene', function () {
+  // Lo pedido manda, pero solo si el <select> lo sabe dibujar. boutique y resort
+  // ya no estan en la lista del selector, asi que no pueden ser el tipo que se
+  // filtra: si lo fueran, el selector no tendria nada que marcar.
+  igual(resolveHotelTypeForMeta({ hotelType: 'confort', tiposHotelDisponibles: null }), 'confort');
+  igual(resolveHotelTypeForMeta({ hotelType: 'all-inclusive', tiposHotelDisponibles: [] }), 'all-inclusive');
+  igual(resolveHotelTypeForMeta({ hotelType: 'boutique', tiposHotelDisponibles: null }), HOTEL_TYPE_OPTIONS[0]);
+  igual(resolveHotelTypeForMeta({ hotelType: 'resort', tiposHotelDisponibles: [] }), HOTEL_TYPE_OPTIONS[0]);
   igual(resolveHotelTypeForMeta({}), 'intermedio', 'sin tipo se asume el de por defecto');
 });
 
-prueba('el tipo corregido siempre esta en la lista de disponibles', function () {
-  const tipos = ['economico', 'all-inclusive', 'resort'];
-  for (const pedido of ['intermedio', 'confort', 'boutique', 'resort', 'all-inclusive', 'economico']) {
-    const r = resolveHotelTypeForMeta({ hotelType: pedido, tiposHotelDisponibles: tipos });
-    if (tipos.indexOf(r) < 0) throw new Error('pedido ' + pedido + ' -> ' + r + ', que no esta en ' + tipos.join('/'));
+prueba('el tipo corregido siempre esta en lo que el selector ofrece', function () {
+  const tipos = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
+  for (const pedido of tipos) {
+    for (const disponibles of [tipos, ['economico', 'all-inclusive'], ['boutique', 'resort'], ['boutique'], ['resort']]) {
+      const r = resolveHotelTypeForMeta({ hotelType: pedido, tiposHotelDisponibles: disponibles });
+      if (!HOTEL_TYPE_OPTIONS.includes(r)) {
+        throw new Error('pedido ' + pedido + ' con ' + disponibles.join('/') + ' -> ' + r + ', que el selector no tiene');
+      }
+    }
   }
 });
 
@@ -149,26 +168,54 @@ prueba('el titulo, la insignia y el mensaje describen el tipo que se filtra', fu
   if (!profile.title) throw new Error('el perfil del tipo resuelto vino vacio');
 });
 
-prueba('el select ofrece solo los tipos disponibles y marca el resuelto', function () {
-  const tipo = resolveHotelTypeForMeta(metaCabo);
-  const markup = hotelTypeSelectMarkup(metaCabo, tipo);
-  const opciones = [...markup.matchAll(/<option value="([^"]+)"/g)].map((m) => m[1]);
-  igual(opciones, ['economico', 'all-inclusive']);
-  igual((markup.match(/ selected>/g) || []).length, 1, 'solo una opcion puede quedar marcada');
+prueba('el selector marca el tipo que se esta filtrando, siempre', function () {
+  // Este es el invariante que importa, y no depende de que el selector ofrezca
+  // cuatro o seis tipos: el <select> tiene que tener marcado el mismo tipo que
+  // filtra las tarjetas. Si no lo tiene, el navegador dibuja el primer option
+  // como elegido y la pantalla dice una cosa mientras muestra otra.
+  //
+  // Los casos quelgún traguen el bug: boutique y resort ya no estan en el
+  // selector pero siguen llegando por la subcategoria ("Maceio (Resort)"), y con
+  // meta.tiposHotelDisponibles encore no se acotaba a la lista del selector, la
+  // resolucion podia devolver uno de los dos. Medido: 6 de 7 casos con boutique
+  // o resort dejaban el selector sin marcar nada.
+  const tipos = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
+  const selectores = [
+    ['economico', 'intermedio', 'confort', 'all-inclusive'],
+    ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive']
+  ];
+  let casos = 0;
+  for (const pedido of tipos.concat([undefined])) {
+    for (const disponibles of [null, []].concat(
+      tipos.map((t) => [t]),
+      tipos.map((t) => [t, 'economico', 'all-inclusive']),
+      [['boutique', 'resort']], [['boutique']], [['resort']]
+    )) {
+      const meta = { hotelType: pedido, tiposHotelDisponibles: disponibles };
+      const tipo = resolveHotelTypeForMeta(meta);
+      casos++;
+      if (!HOTEL_TYPE_OPTIONS.includes(tipo)) {
+        throw new Error('pedido ' + pedido + ' con ' + JSON.stringify(disponibles) +
+          ' devolvio "' + tipo + '", que no esta en la lista del selector');
+      }
+      const marcado = (hotelTypeSelectMarkup(meta, tipo).match(/<option value="([^"]+)" selected>/) || [])[1];
+      if (marcado !== tipo) {
+        throw new Error('pedido ' + pedido + ' con ' + JSON.stringify(disponibles) +
+          ' filtro por "' + tipo + '" pero el selector marco "' + marcado + '"');
+      }
+      // El selector solo puede oferecer tipos de su propia lista.
+      const aunts = [...hotelTypeSelectMarkup(meta, tipo).matchAll(/<option value="([^"]+)"/g)].map((m) => m[1]);
+      if (aunts.join('/') !== selectores[0].join('/') && aunts.join('/') !== selectores[1].join('/')) {
+        throw new Error('el selector ofrecio ' + aunts.join('/'));
+      }
+    }
+  }
+  if (casos < 40) throw new Error('solo se probaron ' + casos + ' combinaciones; la grilla se achico sin querer');
 });
 
-prueba('el select marca el tipo que se le pasa, no el que esta en meta', function () {
-  // El bug era que el select decidia el tipo y mutaba meta. Ahora recibe el tipo
-  // ya resuelto: si se le pasara 'confort' con meta en 'intermedio', tiene que
-  // marcar 'confort'.
-  const markup = hotelTypeSelectMarkup({ hotelType: 'intermedio', tiposHotelDisponibles: ['intermedio', 'confort'] }, 'confort');
+prueba('el selector marca el tipo que se le pasa, no el que esta en meta', function () {
+  const markup = hotelTypeSelectMarkup({ hotelType: 'intermedio' }, 'confort');
   igual((markup.match(/<option value="([^"]+)" selected>/) || [])[1], 'confort');
-});
-
-prueba('sin dato de disponibles el select ofrece los seis', function () {
-  const markup = hotelTypeSelectMarkup({ hotelType: 'intermedio' }, 'intermedio');
-  igual([...markup.matchAll(/<option value="([^"]+)"/g)].map((m) => m[1]),
-    ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive']);
 });
 
 /* El filtro de las tarjetas. Para los tipos del espectro (economico, intermedio,

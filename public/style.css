@@ -552,10 +552,12 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    queden alineadas como una columna. margin-left:auto para que sigan al borde
    derecho cuando el pie envuelve y el precio se queda solo arriba. */
 .hotel-actions{display:grid;gap:8px;flex:0 0 auto;margin-left:auto;justify-items:stretch}
-/* Un solo boton de accion, relleno, con la misma tinta de --action-bg que el
-   resto de la app. El enlace de Booking va al lado, delineado: son dos gestos
-   distintos (elegir aca / mirar alla) y antes los dos eran slabs de ancho
-   completo con el navy de Booking dominating la ficha. */
+/* Elegir es tocar la ficha, asi que la ficha no selecciona texto. El nombre, la
+   descripcion y el precio estan dentro del <label> del radio, y en el celular
+   un toque largo sobre texto arma un resaltado azul que parece un error y deja
+   medio hecho el tap: la primera vez selecciona, la segundarecien elige.
+   user-select:none saca esa primerawqgesta sin quitar el texto de la ficha. */
+.hotel-option__pick{user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 /* inline-grid y no inline-flex: los dos textos del boton van apilados en la
    MISMA celda (grid-area:1/1, ver abajo), asi que el boton toma el ancho del mas
    largo y cambiar de estado no cambia ni el ancho ni el alto.
@@ -918,12 +920,20 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    de los pasajeros se perdían, que es justo el detalle que explica la
    diferencia entre las dos opciones. */
 .transfer-choice__art{display:block;width:34px;height:34px}.transfer-choice__body{flex:1;min-width:0;display:grid;gap:3px}.transfer-choice strong{font-size:14px}.transfer-choice__price{flex:0 0 auto;font-family:var(--fh);font-size:24px}.transfer-choice small{color:var(--ink2);line-height:1.35}
-/* Elegido se marca con los mismos tokens que las otras cuatro card elegibles de
-   la app (hoteles, tours, comidas, presupuesto diario). Antes el transfer era
-   el unico que se pintaba de celeste con borde navy, o sea el mismo gesto con
-   una regla distinta. El grosor del borde no cambia al marcar para que la
-   tarjeta no corra al elegirse. */
-.transfer-choice.is-selected{border-color:var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}.transfer-choice.is-selected .transfer-choice__icon{background:var(--card-sel-border);color:#fff}
+/* Elegido se marca igual que las otras cuatro card elegibles de la app
+   (hoteles, tours, comidas, presupuesto diario), con los mismos tokens.
+
+   El borde pasa a 2px como el resto. Antes el transfer iba 1.5px, el unico que
+   no engordaba al marcarse, y al lado de una card de 2px la diferencia se
+   notaba.
+
+   El padding de 15.5px existe solo para que la card NO crezca al elegirse. El
+   alto de una caja es borde + padding + contenido + padding + borde: con 1.5 y
+   16 da 35 + contenido, y con 2 el padding tiene que ser 15.5 para dar lo
+   mismo. Con 15 la card quedaba 1px mas baja al marcarse, que es justo el
+   salto que se nota cuando estas haciendo clic en varias. El borde suma 1px en
+   total (0.5 por lado) y el padding lo saca: el ancho tampoco se mueve. */
+.transfer-choice.is-selected{border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow);padding:15.5px}
 /* La tilde es la segunda senal de "elegido" y la que se ve de lejos. Es la misma
    que usan las tarjetas de pago del checkout, con la misma transicion. */
 .transfer-choice__check{position:absolute;top:8px;right:8px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--card-sel-border);color:#fff;opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}.transfer-choice__check svg{width:13px;height:13px}.transfer-choice.is-selected .transfer-choice__check{opacity:1;transform:scale(1)}

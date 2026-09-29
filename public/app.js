@@ -412,7 +412,31 @@
     { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }];
   var FX = { rates: null, base: 'USD', until: 0, cargando: true };
   var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
-  var HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
+  /* `intermedio` y `confort` se muestran como "Equilibrado" y "Cómodo" para que
+     el selector de alojamiento hable el mismo idioma que el selector de estilo
+     de viaje, que ya decía "Ahorrar al máximo / Equilibrado / Con comodidad".
+     Antes el mismo nivel se llamaba de dos formas ("Intermedio" en uno, "Eq" en
+     el otro) y "Confort" en un lado y "Con comodidad" en el otro.
+
+     La clave interna NO cambia: `intermedio` sigue siendo `intermedio` en el
+     modelo, en el server, en los viajes guardados y en el parametro
+     hotel_type. Renombrarla a `equilibrado` haria que cada viaje guardado con
+     el tipo viejo dejara de encontrar su tipo y cayera al primero de la lista. */
+  var HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Equilibrado', confort: 'Cómodo' };
+
+  /* Los tipos que el selector de alojamiento sabe dibujar. Vive aparte de
+     HOTEL_TYPE_LABELS porque son dos cosas distintas: en el modelo hay seis y
+     en el selector hay cuatro —boutique y resort no se ofrecen, aunque sigan
+     llegando por la subcategoria—. Y el orden es de mas barato a mas caro, que
+     es lo que hace que la caida a "el primero" sea la mas cercana.
+
+     Comparte lista con hotelTypeSelectMarkup() y resolveHotelTypeForMeta() a
+     proposito. Cuando cada una tenia la suya, resolver podia devolver un tipo
+     que el selector no tenia como dibujar: el <select> se quedaba sin nada
+     marcado y el navegador tomaba el primer option como elegido, con las
+     tarjetas ya filtradas por otro tipo. Es el mismo desajuste, entrando por
+     la otra puerta. */
+  var HOTEL_TYPE_OPTIONS = ['economico', 'intermedio', 'confort', 'all-inclusive'];
   function inferHotelType(value) {
     var text = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
     if (/all-inclusive|todo-incluido/.test(text)) return 'all-inclusive';
@@ -1723,8 +1747,8 @@
       resort: { tier: 'resort', title: 'Resort', badge: 'RESORT', description: 'Alojamientos tipo resort; el precio se estima con el régimen seleccionado.' },
       boutique: { tier: 'boutique', title: 'Boutique', badge: 'HOTEL BOUTIQUE', description: 'Alojamientos boutique con una selección de menor escala.' },
       economico: { tier: 'eco', title: 'Económico', badge: 'SÚPER ECONÓMICO', description: 'Opciones de bajo costo filtradas por el presupuesto por noche.' },
-      intermedio: { tier: 'moderado', title: 'Intermedio', badge: 'MEJOR RELACIÓN PRECIO-CALIDAD', description: 'Hoteles de gama media filtrados por presupuesto por noche.' },
-      confort: { tier: 'alto', title: 'Confort', badge: 'COMODIDAD PREMIUM', description: 'Hoteles de categoría superior filtrados por presupuesto.' }
+      intermedio: { tier: 'moderado', title: 'Equilibrado', badge: 'MEJOR RELACIÓN PRECIO-CALIDAD', description: 'Hoteles de gama media filtrados por presupuesto por noche.' },
+      confort: { tier: 'alto', title: 'Cómodo', badge: 'COMODIDAD PREMIUM', description: 'Hoteles de categoría superior filtrados por presupuesto.' }
     };
     if (typeProfiles[meta.hotelType]) return typeProfiles[meta.hotelType];
     var styles = {
@@ -1831,13 +1855,27 @@
      barato a mas caro, asi que ese primero es el mas cercano al que se pidio.
      Marcar un tipo que la lista de abajo no va a tener es peor que cambiarlo, y
      cambiarlo en silencio es lo que hay que evitar: por eso el cambio queda
-     escrito en meta y se ve en el selector. */
+     escrito en meta y se ve en el selector.
+
+     Y el tipo que devuelve tiene que estar SIEMPRE en lo que ofrece el <select>.
+     No es una sutileza: boutique y resort ya no estan en el selector, pero siguen
+     llegando por la subcategoria —elegir "Maceio (Resort)" los trae—, asi que
+     pedido puede ser uno de los dos. Si se devolviera tal cual, el selector no
+     tendria nada que marcar y el navegador dibujaria el primer option como
+     elegido: se veria "Económico" con las tarjetas filtradas por boutique. Es el
+     mismo desajuste de antes, entrando por otra puerta. La caida final es al
+     primero de la lista, y como esa lista va de mas barato a mas caro, es el
+     mas cercano. */
   function resolveHotelTypeForMeta(meta) {
     var pedido = meta.hotelType || 'intermedio';
     var disponibles = meta.tiposHotelDisponibles;
-    if (!Array.isArray(disponibles) || !disponibles.length) return pedido;
-    if (disponibles.indexOf(pedido) >= 0) return pedido;
-    return disponibles[0] || pedido;
+    var elegido = pedido;
+    if (Array.isArray(disponibles) && disponibles.length && disponibles.indexOf(pedido) < 0) {
+      elegido = disponibles[0] || pedido;
+    }
+    // Ultimo filtro: solo tipos que el selector sabe dibujar.
+    if (HOTEL_TYPE_OPTIONS.indexOf(elegido) < 0) elegido = HOTEL_TYPE_OPTIONS[0];
+    return elegido;
   }
   /* Que hoteles de los que mando el server se pueden mostrar bajo este tipo.
 
@@ -1879,15 +1917,22 @@
   // que .custom-select__control: con appearance:none el control nativo del
   // sistema queda con la flecha desalineada y el alto distinto al del resto.
   function hotelTypeSelectMarkup(meta, selected) {
-    var options = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
-    // Solo los tipos para los que este destino tiene algo de verdad, que es lo
-    // que dice meta.tiposHotelDisponibles. Sin el dato se ofrecen los seis: no
-    // saber no es lo mismo que no haber, y ofrecer de mas es mejor que dejar
-    // elegir algo que va a salir vacio.
-    if (Array.isArray(meta.tiposHotelDisponibles) && meta.tiposHotelDisponibles.length) {
-      var disponibles = options.filter(function (type) { return meta.tiposHotelDisponibles.indexOf(type) >= 0; });
-      if (disponibles.length) options = disponibles;
-    }
+    /* Cuatro tipos, y se ofrecen siempre los cuatro. Antes eran seis y ademas
+       se filtraban por `meta.tiposHotelDisponibles`, o sea que en un destino
+       con dos tipos el selector mostraba dos y no se entendia que los otros
+       existian: parecia que no habia mas opciones. Con el filtro, elegir un tipo
+       sin hoteles en ese destino caia a un estado vacio sin explicar que
+             ese tipo no tiene nada.
+
+       El precio de ofrecer de mas esta resuelto: si el tipo elegido no trae
+       nada en ese destino, el estado vacio de la lista lo dice y ofrece el
+       cercano, en vez de cambiarlo en silencio. Un selector que esconde opciones
+       no informa; uno que las ofrece y explica por que no queda es mejor.
+
+       `boutique` y `resort` salen de la lista. No se borran del modelo: siguen
+       llegando por la subcategoria (elegir "Maceio (Resort)" los trae) y
+       `resolveHotelTypeForMeta` los cae a un tipo de la lista si hace falta. */
+    var options = HOTEL_TYPE_OPTIONS;
     return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></span></label>';
   }
   /* Que hotel hay que marcar al redibujar la lista.
@@ -2067,17 +2112,23 @@
             '<span class="hotel-choice"><input type="radio" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
             '<span class="hotel-body">' +
             '<h3 class="hotel-name">' + esc(option.name) + '</h3>' + descriptionMarkup +
-            '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + (isPar ? ' · ' + stopNights + ' en ' + esc(stopName) : '') + '.</p>' +
+            // Con dos paradas el hotel deNatal es de las NOCHES DE NATAL, no de
+            // las del viaje. Decir "7 noches" era el total, y al lado del mismo
+            // texto decia "4 en Natal": dos numeros que no se podia ver que
+            // armaban. Ahora el texto de la ficha habla de las noches de esa
+            // parada, y el total del viaje ya esta en "Mi Viaje".
+            '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + (isPar ? stopNights : nights) + ((isPar ? stopNights : nights) === 1 ? ' noche' : ' noches') + (isPar ? ' en ' + esc(stopName) : '') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + (isPar ? '.' : '.') + '</p>' +
             '</span></label>' +
             '<div class="hotel-foot">' +
             '<p class="hotel-price"><span class="hotel-price__main"><span class="hotel-price__from">Desde</span><b>' + money(nightlyValue) + '</b><span class="hotel-price__unit">por noche</span></span>' +
             '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong></p>' +
             '<div class="hotel-actions">' +
-            // Los dos textos del boton conviven en el DOM y el CSS muestra uno u
-            // otro segun el estado. Antes el boton de la card elegida decia
-            // "Elegir este hotel" en amber, que es pedirle al usuario que elija
-            // algo que ya eligio; ahora dice "Elegido".
-            '<span class="hotel-pick-hint"><span class="hotel-pick-hint__off">Elegir este hotel</span><span class="hotel-pick-hint__on">Elegido</span></span>' +
+            // El boton "Elegir este hotel" se saco. Elegir ya es tocar la ficha:
+            // el nombre, la foto y la placa de la esquina son el <label> del
+            // radio. El boton era un segundo camino para la misma accion, y
+            // ademas era lo que rompia la geometria al cambiar de texto
+            // ("Elegir este hotel" / "Elegido") y lo que dejaba los dos textos
+            // superpuestos al elegir.
             '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' +
             '</div></div>' + similarMarkup + '</article>';
         }).join('') + '</div>'
@@ -2095,7 +2146,7 @@
         // Con dos paradas la nota tiene que nombrar las dos y decir que se elige
         // en cada una. Antes decía una sola ("por noche en Rio de Janeiro") y el
         // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
-        ? ' Elegí un alojamiento en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
+        ? ' Elegí o reservá tu hotel en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
         : ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.')
       + '</p></div>' + hotelTypeSelectMarkup(meta, hotelType) + '</div>';
 
@@ -3115,6 +3166,33 @@
    * Los tres caminos dan el mismo numero cuando la tabla esta sana: por eso el
    * test compara la tabla del cliente con TRANSFER_PRICES del modelo.
    */
+  /* Nombre de los quince aeropuertos de llegada, para poder escribir
+     "Aeropuerto Internacional de Natal (NAT)" en vez de solo "NAT".
+
+     Los datos de transfer traen el codigo IATA pero no el nombre, y no se
+     agrega ahi porque el nombre oficial de un aeropuerto es un dato que cambia
+     (se renombraron, se fusionaron) y el JSON de precios lo genera un script
+     que no consulta una fuente de nombres. Ademas el destino no siempre es el
+     que da nombre al aeropuerto: el vuelo a Gramado y el a Porto Alegre salen
+     los dos de POA, y el de Canela tambien, asi que el nombre va del
+     aeropuerto y no del pueblo. */
+  var AIRPORT_NAMES = {
+    CNF: 'Aeropuerto Internacional de Belo Horizonte',
+    CWB: 'Aeroporto Internacional de Curitiba',
+    EZE: 'Aeropuerto de Ezeiza',
+    FEN: 'Aeropuerto de Fernando de Noronha',
+    FLN: 'Aeroporto Internacional de Florianópolis',
+    FOR: 'Aeroporto Internacional de Fortaleza',
+    GIG: 'Aeroporto Internacional do Galeão',
+    GRU: 'Aeroporto Internacional de Guarulhos',
+    IGU: 'Aeropuerto Internacional de Foz do Iguaçu',
+    JPA: 'Aeroporto Presidente Castro Pinto',
+    MCZ: 'Aeroporto Internacional de Maceió',
+    NAT: 'Aeroporto Internacional de Natal',
+    POA: 'Aeroporto Internacional Salgado Filho',
+    REC: 'Aeroporto Internacional do Recife',
+    SSA: 'Aeroporto Internacional de Salvador'
+  };
   function transferPreciosDe(meta) {
     var oficial = meta && meta.officialTransfer;
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
@@ -3135,6 +3213,9 @@
       privado: Number(privado),
       km: primero(oficial && oficial.km, tabla && tabla.km, null),
       iata: primero(oficial && oficial.iata, tabla && tabla.iata, null),
+      // El nombre sale del codigo, no del destino: el vuelo a Gramado, a Canela
+      // y a Porto Alegre salen los tres de POA, asi que el pueblo no sirve.
+      aeropuerto: function () { var c = primero(oficial && oficial.iata, tabla && tabla.iata, null); return c ? (AIRPORT_NAMES[c] || c) : ''; }(),
       modo: primero(oficial && oficial.modo, tabla && tabla.modo, 'car'),
       soloPrivado: !!(oficial && oficial.soloPrivado) || !!(tabla && tabla.soloPrivado),
       appRideUsd: primero(oficial && oficial.appRideUsd, tabla && tabla.appRideUsd, null),
@@ -4445,7 +4526,7 @@
       return !(card.amount <= 0);
     }).map(function (card) {
       var isSelected = selected === card.key;
-      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b><span class="transfer-choice__check" aria-hidden="true">' + checkIcon() + '</span></button>';
+      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b></button>';
     }).join('');
     /* Sin boton de reservar aca. Elegir la modalidad suma al presupuesto —igual
        que una card de actividades— y la reserva se pide desde "Mi Viaje", que es
@@ -4454,10 +4535,15 @@
        de actividades ya estaba en la cabecera de su seccion, asi que la app
        tenia tres caminos distintos para la misma accion. */
     var total = getSelectedTransferAmount(detailState);
+    /* El total de arriba se saco. El monto ya esta en cada card, al lado del
+       nombre ("R$ 104,20" y "R$ 156,30"), asi que arriba repetia la misma
+       informacion en un tamano mas grande, y ademas era el unico numero de la
+       seccion que no se movia al cambiar de modalidad: se elegia el privado y
+       el total de arriba seguia diciendo el del compartido durante un instante.
+       El total del viaje, ese si, esta en "Mi Viaje". */
     return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
       '<div class="official-transfer__head"><div><h2>Transfer desde el aeropuerto</h2>' +
-      '<p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.km ? ' (' + t.km + ' km desde ' + esc(t.iata || 'el aeropuerto') + ')' : '') + '.</p>' +
-      (selected ? '<b class="official-transfer__total">' + money(total) + ' total</b>' : '') +
+      '<p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.aeropuerto ? ' desde ' + esc(t.aeropuerto) + ' (' + esc(t.iata) + ')' : '') + (t.km ? ', a ' + t.km + ' km.' : '.') + '</p>' +
       '</div></div>' +
       modoNota +
       '<div class="transfer-choice-grid">' + cards + '</div>' +

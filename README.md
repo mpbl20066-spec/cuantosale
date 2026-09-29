@@ -239,6 +239,38 @@ Lo que **no** se fue es la procedencia en los datos: `npm run build:costos` y `n
 
 **Lo que la calculadora de costos todavía no hace:** editar un rubro o agregar un margen, que es lo que hace la calculadora de Noma. Editar tiene que entrar por `getBudgetBreakdown()` (`public/app.js`), que es la única función que suma el total, para que un cambio mueva a la vez el número grande, el desglose, "A dónde va tu plata" y el voucher que se comparte.
 
+### Dos paradas, en los dos sentidos
+
+El control "¿Sumás una segunda parada?" ofrece **95 pares**, y un par va en los dos sentidos.
+
+**El filtro miraba una sola parada.** Cada par se escribe una vez en `DESTINATION_GROUPS`, con `key` = primera parada y `secondKey` = segunda, y el filtro comparaba el destino elegido **solo** contra `key`. El resultado era asimétrico y era el bug reportado: con Destino = Natal aparecía "Natal + Fortaleza" y con Destino = Fortaleza el menú se abría vacío con *"Desde Fortaleza no hay combinaciones de dos paradas"*. La misma ruta, en un sentido sí y en el otro no.
+
+**La lista de datos no se duplicó.** Lo que se invierte es la lectura:
+
+| Función | Qué hace |
+|---|---|
+| `comboPasaElFiltro()` | pasa el par si el destino elegido es **cualquiera** de las dos paradas |
+| `comboInvertido()` | dice si hay que leerlo al revés (el destino elegido es la segunda parada) |
+| `comboLabel()` | el nombre del par en el orden en que se va a cotizar, y es el único que lo arma |
+| `chooseCombo()` | al elegir un par invertido manda la segunda parada del dato como `secondKeyForzado` |
+| `selectDestination(…, secondKeyForzado)` | con ese argumento, `S.second` no se deduce del nombre sino de la opción elegida |
+
+El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la combinabilidad la decide `model.comboTransfer()`, que mira la geografía y es simétrica. El problema era solo de la lista. `prueba-pares.js` tiene un punto 8 que evalúa las cuatro funciones reales contra los 190 sentidos de los 95 pares.
+
+**"Fortaleza / Jericoacoara" eran dos ciudades con una barra.** Son 358 km una de la otra, con costos, traslados y actividades propias, y el nombre no decía a cuál de las dos pertenecía el precio. Ahora son dos destinos y un par: **Fortaleza** sola, **Jericoacoara** sola y **"Fortaleza + Jeri"** como viaje de dos paradas. Jericoacoara ya estaba en `DEST` con costos, traslados, guía y actividades: lo que no estaba era en la lista, o sea que era data que nadie podía cotizar. Pasó también a `HOME_DESTINATION_KEYS` en `server.js`.
+
+**Jericoacoara NO se sommó a las `keys` del Nordeste.** El modelo combina dos paradas a menos de `COMBO_MAX_KM` (1.100 km) por carretera: de Fortaleza a Jeri son 358, pero de Recife a Jeri son 1.100 y de Maceió 1.170. Un grupo es el conjunto de destinos que se combinan entre sí, así que Jeri va en grupo propio y solo ofrece los tres pares que se pueden cotizar (con Fortaleza, Natal y Pipa). Por eso `prueba-pares.js` ya **no** compara el total contra `C(n,2)`: ese cálculo da por hecho que todo par de un grupo se puede cotizar, que es falso, y obligaba a ofrecer combinaciones que el server rechaza con un 400. Ahora el total se cuenta con `comboTransfer()`.
+
+### El calendario no pasa de un año
+
+`maxDepartureDate()` es `hoy + 1 año` con `setFullYear`, y es el último día habilitable. El motivo: a esa altura el precio del vuelo sale del modelo, y `/api/vuelos/calendario` compara 15 fechas alrededor de la elegida, que a dos años caen todas fuera de cualquier temporada real. El tope se aplica a los dos pasos (ida y vuelta), la flecha de "mes siguiente" se apaga en el mismo límite —si no, se puede scrollear hasta un mes entero de días tachados— y el panel lo dice por texto en `[data-calendar-limit]`, porque una grilla con la última fila en gris no explica por qué no se puede seguir.
+
+### El tema sigue al sistema
+
+`prefers-color-scheme` manda **hasta que alguien toca el botón**, y después manda la elección. El bug era que `aplicarTema()` escribía siempre en `localStorage` y la llamaba también el arranque: con solo abrir la página en un celular en claro se guardaba `'light'`, y a partir de ahí la app dejaba de seguir al sistema para siempre. Ahora `aplicarTema(t, guardar)` solo escribe cuando `guardar` es `true`, y lo único que lo pasa es el click. Hay un listener de `change` sobre la media query para que el tema cambie en vivo al pasar el celular de claro a oscuro.
+
+`scripts/validar-tema.js` lo vigila: que exista `aplicarTema(t, guardar)`, que **un solo** lugar pase `true` (si el arranque o el listener guardaran, vuelve el bug) y que al menos uno pase `false`.
+
 ### Endpoints
 
 | Ruta | Qué hace | Costo |

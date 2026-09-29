@@ -21,6 +21,24 @@ function check(n, cond, d) {
 }
 
 const bloque = (txt, desde, hasta) => txt.slice(txt.indexOf(desde), txt.indexOf(hasta, txt.indexOf(desde)));
+/* Saca una función del fuente de app.js por nombre. Se usa para EVALUAR el
+   código real y no una copia: una copia puede quedar vieja y el test pasa igual
+   mientras la app está rota, que es el peor resultado posible para un test de
+   este tipo.
+
+   Brace matching a mano: las funciones que se evalúan acá no tienen llaves
+   adentro de un string, asi que contar {} alcanza y no hace falta traer un
+   parser. */
+function extraer(nombre) {
+  const desde = app.indexOf('function ' + nombre + '(');
+  if (desde < 0) return null;
+  let nivel = 0;
+  for (let j = app.indexOf('{', desde); j < app.length; j++) {
+    if (app[j] === '{') nivel++;
+    else if (app[j] === '}') { nivel--; if (nivel === 0) return app.slice(desde, j + 1); }
+  }
+  return null;
+}
 const gHub = bloque(app, 'var DESTINATION_HUBS = [', '\n  ];');
 const gGrupos = bloque(app, 'var DESTINATION_GROUPS = [', '\n  ];');
 
@@ -236,20 +254,7 @@ console.log('\n7) El control de segunda parada ofrece los mismos pares');
   // secondKeyForSubcategory(). Si uno de los dos deja de filtrar por secondKey,
   // la opción se sigue viendo pero abre un viaje de UNA sola parada: el error no
   // da error, cobras el precio de otra cosa. Por eso se evaluan las funciones
-  // reales del archivo y no una copia.
-  //
-  // Brace matching a mano: ninguna de las dos tiene llaves dentro de un string,
-  // asi que contar {} alcanza y no hace falta traer un parser.
-  function extraerFuncion(nombre) {
-    const desde = app.indexOf('function ' + nombre + '(');
-    if (desde < 0) return null;
-    let nivel = 0;
-    for (let j = app.indexOf('{', desde); j < app.length; j++) {
-      if (app[j] === '{') nivel++;
-      else if (app[j] === '}') { nivel--; if (nivel === 0) return app.slice(desde, j + 1); }
-    }
-    return null;
-  }
+  // reales del archivo y no una copia (helper `extraer`, arriba).
 
   const DESTINATION_GROUPS = [...gGrupos.matchAll(/\{ id: '([^']+)', label: '((?:[^'\\]|\\.)*)', image: '[^']*', keys: \[[^\]]*\], subcategories: \[([\s\S]*?)\n    \] \}/g)]
     .map(g => ({
@@ -258,8 +263,8 @@ console.log('\n7) El control de segunda parada ofrece los mismos pares');
         .map(s => ({ label: s[1], key: s[2], secondKey: s[3] || '' }))
     }));
 
-  const srcCombo = extraerFuncion('comboGroups');
-  const srcSecond = extraerFuncion('secondKeyForSubcategory');
+  const srcCombo = extraer('comboGroups');
+  const srcSecond = extraer('secondKeyForSubcategory');
   check('comboGroups() esta en app.js', !!srcCombo);
   check('secondKeyForSubcategory() esta en app.js', !!srcSecond);
   if (!srcCombo || !srcSecond) throw new Error('faltan las funciones del control');
@@ -312,6 +317,101 @@ console.log('\n7) El control de segunda parada ofrece los mismos pares');
   check('elegir por cualquiera de los dos lados sincroniza el otro',
     app.indexOf('syncComboDisplay();') > app.indexOf('function selectDestination'),
     'selectDestination() tiene que llamar a syncComboDisplay()');
+}
+
+console.log('\n8) Las rutas funcionan en los DOS sentidos');
+{
+  /* El bug que se reporto: con Destino = Natal aparecia "Natal + Fortaleza" y
+     con Destino = Fortaleza el menu se abria vacio con "Desde Fortaleza no hay
+     combinaciones de dos paradas". Los pares se escriben una vez, en un orden, y
+     el filtro miraba solo la primera parada, asi que el mismo viaje existia en
+     un sentido y no en el otro.
+
+     Se evaluan las funciones REALES de app.js —comboInvertido(), comboLabel(),
+     comboPasaElFiltro()— con un S de mentira, y se comprueban las dos
+     direcciones de cada par. Sin esto, volver a filtrar por `key` solo rompe en
+     la pantalla: no hay error, no hay 400, la lista simplemente queda corta.
+
+     No se corre en un navegador porque las tres funciones son puras sobre
+     atributos: con un objeto que devuelva getAttribute, alcanzan. */
+  const srcFiltra = extraer('comboFiltraPorDestino');
+  const srcInvertido = extraer('comboInvertido');
+  const srcLabel = extraer('comboLabel');
+  const srcPasa = extraer('comboPasaElFiltro');
+  check('comboFiltraPorDestino / comboInvertido / comboLabel / comboPasaElFiltro estan en app.js',
+    !!srcFiltra && !!srcInvertido && !!srcLabel && !!srcPasa);
+
+  if (srcFiltra && srcInvertido && srcLabel && srcPasa) {
+    const S = { dest: 'todos' };
+    const comboFiltraPorDestino = eval('(' + srcFiltra + ')');
+    const comboInvertido = eval('(' + srcInvertido + ')');
+    const comboLabel = eval('(' + srcLabel + ')');
+    const comboPasaElFiltro = eval('(' + srcPasa + ')');
+
+    const opcion = (key, second, label) => ({
+      _k: key, _s: second,
+      getAttribute: function (a) {
+        return a === 'data-combo-key' ? key : a === 'data-combo-second' ? second : a === 'data-combo-sub' ? label : null;
+      },
+      hasAttribute: function (a) { return a === 'data-combo-clear' ? false : false; }
+    });
+
+    const pares = [...segundaDe.values()].map(v => ({ a: v.a, b: v.b, label: v.a + ' + ' + v.b }));
+
+    let invisibles = 0, malNombre = 0, sinInvertir = 0, casos = 0;
+    for (const p of pares) {
+      const opt = opcion(p.a, p.b, p.label);
+      for (const lado of [p.a, p.b]) {
+        casos++;
+        S.dest = lado;
+        // 1. el par tiene que pasar el filtro con CUALQUIERA de sus dos paradas
+        if (!comboPasaElFiltro(opt)) { invisibles++; continue; }
+        // 2. si el destino elegido es la segunda parada, el par tiene que leerse
+        //    al reves
+        const invertido = lado === p.b && p.a !== p.b;
+        if (comboInvertido(opt) !== invertido) sinInvertir++;
+        // 3. y el nombre tiene que salir en el orden en que se va a cotizar
+        const esperado = invertido ? p.b + ' + ' + p.a : p.label;
+        if (comboLabel(opt) !== esperado) malNombre++;
+      }
+    }
+    console.log('   comprobados ' + casos + ' sentidos de ' + pares.length + ' pares');
+    check('todo par pasa el filtro con cualquiera de sus dos paradas', invisibles === 0, invisibles + ' sentidos sin offering');
+    check('el par se marca como invertido solo si el destino es la segunda parada', sinInvertir === 0, sinInvertir + ' mal marcados');
+    check('el nombre del par sale en el orden en que se va a cotizar', malNombre === 0, malNombre + ' nombres al reves de mas o de menos');
+
+    // Y el caso del reporte, escrito literal, para que quede a la vista.
+    S.dest = 'for';
+    const forNat = opcion('nat', 'for', 'Natal + Fortaleza');
+    check('con Destino = Fortaleza el par "Natal + Fortaleza" se ve como "Fortaleza + Natal"',
+      comboPasaElFiltro(forNat) && comboInvertido(forNat) && comboLabel(forNat) === 'Fortaleza + Natal');
+    S.dest = 'nat';
+    check('con Destino = Natal el mismo par se ve como "Natal + Fortaleza"',
+      comboPasaElFiltro(forNat) && !comboInvertido(forNat) && comboLabel(forNat) === 'Natal + Fortaleza');
+  }
+
+  // La eleccion tiene que llegar al server con las dos paradas en el orden
+  // correcto. Si el nombre invertido se buscara en DESTINATION_GROUPS, no
+  // existiria y el server cotizaria un viaje de UNA sola parada: el error no
+  // da error, se cobra menos.
+  const srcSel = extraer('selectDestination');
+  check('selectDestination() recibe la segunda parada cuando el par va al reves',
+    /function selectDestination\([^)]*secondKeyForzado/.test(app),
+    'falta el quinto argumento');
+  check('el par invertido se elige con la segunda parada del dato',
+    /comboInvertido\(option\) \? option\.getAttribute\('data-combo-key'\) : undefined/.test(app),
+    'chooseCombo() no invierte la segunda parada');
+  check('selectDestination() respeta la segunda parada forzada',
+    srcSel ? /secondKeyForzado != null/.test(srcSel) : false,
+    'S.second se sigue deduciendo solo del nombre');
+  check('"Un solo destino" decide por S.second y no por el nombre del par',
+    /var eraPar = !!S\.second;/.test(app),
+    'con un par invertido, secondKeyForSubcategory() daria vacio y no sacaria la segunda parada');
+  // Y el menu tiene que llevar las dos paradas en atributos, si no el filtro no
+  // tiene con que decidir.
+  check('cada opcion del menu lleva data-combo-second',
+    /data-combo-second="' \+ esc\(sub\.secondKey\) \+ '"/.test(app),
+    'renderComboMenu() no escribe la segunda parada');
 }
 
 console.log(fallos.length ? '\n' + fallos.length + ' FALLOS:\n - ' + fallos.join('\n - ') : '\nTODO OK');
