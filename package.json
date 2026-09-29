@@ -11,6 +11,8 @@
     "check:tema": "node scripts/validar-tema.js",
     "check:checkout": "node test-checkout.js",
     "check:hoteles": "node test-hoteles.js",
+    "merge": "node scripts/merge-ramas.js",
+    "push": "node scripts/merge-ramas.js --push",
     "build:todo": "npm run build:costos && npm run build:transfer",
     "check:todo": "npm run check:costos && npm run check:transfer && npm run check:tema && npm run check:checkout && npm run check:hoteles",
     "pull:aeropuertos": "node scripts/pull-aeropuertos.js",
