@@ -1,4 +1,4 @@
-/* version: 140
+/* version: 141
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -164,6 +164,13 @@ button,input,select{font:inherit;color:inherit}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
 .logo{display:flex;align-items:center;gap:9px;flex:0 1 auto;min-width:0;overflow:hidden;font-weight:700;font-size:21px;letter-spacing:-.02em;white-space:nowrap}
 .logo svg{display:block}
+/* El logo pasó de <div> a <button> para poder ser la salida de la vista de
+   propuesta (ver index.html). Sin este reset conserva el fondo, el borde y el
+   padding del navegador y se ve como un botón suelto en la barra. El anillo de
+   foco es el mismo de los demás controles, porque el logo se alcanza con el
+   teclado igual que cualquier otro. */
+button.logo{border:0;padding:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;-webkit-appearance:none;appearance:none}
+button.logo:focus-visible{outline:3px solid var(--focus);outline-offset:4px;border-radius:6px}
 .chip{font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;background:var(--cel-soft);color:var(--ink)}
 h1{font-family:var(--fh);font-weight:800;font-size:clamp(52px,14vw,92px);line-height:.9;letter-spacing:-.01em;margin:24px 0 18px}
 /* form */
@@ -411,27 +418,50 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .opt__price b{display:block;font-family:var(--fh);font-weight:800;font-size:32px;line-height:1}
 .opt__price span{font-size:13px;font-weight:600;color:var(--ink2)}
 /* margin-top:auto pega las acciones abajo: en el grid todas las tarjetas miden
-   lo mismo, así los CTA quedan alineados aunque unas tengan más etiquetas. */
-.opt__actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
-.btn-ver-propuesta{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin-left:auto;border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}
+   lo mismo, así los CTA quedan alineados aunque unas tengan más etiquetas.
+   space-between y no flex-end: con flex-end el botón secundario queda pegado al
+   primario por la derecha y los dos se leen como un bloque, sin saber cuál de
+   los dos esquinas es la acción. */
+.opt__actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.btn-ver-propuesta{display:inline-flex;align-items:center;gap:6px;min-height:44px;border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer}
 .opt__cta:hover{box-shadow:0 10px 22px rgba(16,35,62,.24);filter:brightness(1.1)}
 .opt__arrow{display:inline-block;font-size:17px;line-height:1}
-.opt__disclosure{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
-.opt__disclosure:hover,.opt__disclosure.is-open{border-color:var(--ink2);color:var(--ink)}
+/* El botón secundario se dibuja como un enlace, no como un botón: sin caja y sin
+   fondo, con un subrayado al pasar el mouse. La caja con borde y fondo --como
+   tenía-- lo ponía al mismo nivel que "Ver propuesta", y con dos botones de la
+   misma caja y el mismo alto no había forma de saber cuál abría el viaje y cuál
+   solo abría la lista de costos. El peso y el relleno los lleva el primario. */
+.opt__disclosure{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:10px 2px;border:0;border-radius:8px;background:transparent;color:var(--ink2);font-size:13px;font-weight:600;cursor:pointer}
+.opt__disclosure:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+/* Abierto cambia de color pero no se mueve: el bloque ya se está desplegando, y
+   un shift horizontal acá suma movimiento al que ya está pasando. */
+.opt__disclosure.is-open{color:var(--cel)}
+.opt__disclosure-text{white-space:nowrap}
 .opt__chevron{display:inline-block;font-size:18px;line-height:1}
 .opt__disclosure:focus-visible,.opt__cta:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* El desglose se despliega con la altura animada (ver alternarDesglose() en
+   app.js), así que necesita overflow:hidden mientras crece: sin eso las filas
+   se veían spilling por debajo del borde de la tarjeta antes de que terminara
+   de bajar. Con el alto que se borra al terminar el contenido nunca queda
+   recortado, porque la caja vuelve a medir lo que tiene adentro. */
+.opt__body{overflow:hidden;transition:height .28s ease}
 .opt__body>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
 /* El asterisco va pegado a la cifra, no al nombre del rubro: el nombre es lo que
    se compara entre tarjetas, y la marca tiene que estar donde se mira el número.
    Se dibuja arriba de la línea (sup) y con el mismo tono que la cifra, para que
    se lea como parte del número y no como una firma al pie. */
 .opt__est{margin-left:2px;font-size:.72em;line-height:0;vertical-align:super;color:var(--ink2);font-weight:700}
-/* La nota es una frase, no un conjunto de piezas: "* Precio estimado. Avanzá a
-   Ver propuesta para ver los precios reales." Con display:flex cada trozo de
-   texto se volvía un ítem de flex y la frase se repartía en columnas ("Ver" /
+/* La nota del asterisco. Es la última línea de la tarjeta y solo aparece cuando
+   hay algo estimado, así que no puede pedir atención: 12px y una línea de alto
+   la dejan como lo que es, una aclaración al pie. Antes ocupaba dos líneas con
+   12.5px y la frase completa, y eso empujaba la tarjeta hacia abajo para decir
+   lo mismo.
+
+   El texto es una frase y no un conjunto de piezas: con display:flex cada trozo
+   se volvía un ítem de flex y la frase se repartía en columnas ("Ver" /
    "propuesta" una al lado de la otra), con huecos entre palabras. Tiene que
    fluir como un párrafo; el asterisco ya se alinea solo con vertical-align. */
-.opt__nota{margin:10px 0 2px;padding-top:9px;border-top:1px solid var(--line);color:var(--ink2);font-size:12.5px;line-height:1.45}
+.opt__nota{margin:7px 0 0;padding-top:7px;border-top:1px solid var(--line);color:var(--ink2);font-size:12px;line-height:1.35}
 /* El <b> es el nombre de un botón ("Ver propuesta"), no una emphasised cualquier
    cosa: si la línea lo parte, queda "Ver" arriba y "propuesta" abajo, que ya se lee
    como dos cosas. El nombre va entero o no va. */
@@ -442,24 +472,34 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @media (prefers-reduced-motion:no-preference){
   .opt,.destination-card{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
   .opt:hover,.destination-card:hover{transform:translateY(-2px)}
-  .opt__disclosure{transition:color .18s ease,border-color .18s ease,transform .18s ease}
-  .opt__disclosure:hover{transform:translateY(-1px)}
+  .opt__disclosure{transition:color .18s ease}
   .opt__cta{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
   .opt__cta:hover{transform:translateY(-2px)}
   .opt__cta:hover .opt__arrow{transform:translateX(3px)}
   .opt__arrow,.opt__chevron{transition:transform .2s ease}
   .opt__disclosure.is-open .opt__chevron{transform:rotate(90deg)}
 }
-/* En pantallas chicas el precio y las acciones se apilan y los dos botones
-   toman el ancho disponible: 44px de alto, sin puntería fina. */
+/* Con prefers-reduced-motion la transición de altura no se aplica, y el alto
+   salta de golpe. Es el comportamiento que se pidió: menos movimiento, y el
+   desglose igual aparece y desaparece entero. El estado final (height libre y
+   `hidden`) lo resuelve igual alternarDesglose() en app.js. */
+@media (prefers-reduced-motion:reduce){
+  .opt__body{transition:none}
+}
+/* En pantallas chicas el precio y las acciones se apilan: 44px de alto, sin
+   puntería fina. El ancho disponible lo toma SOLO el botón principal. Con los dos
+   en flex:1 1 auto quedaban del mismo tamaño y con el mismo peso visual, que es
+   justo lo que la jerarquía de escritorio intenta evitar: "Ver desglose" tiene
+   que seguir siendo menos que "Ver propuesta" también acá abajo. */
 @media (max-width:520px){
   .opt{padding:14px;border-radius:18px;gap:12px}
   .opt__head{flex-direction:column;gap:10px}
   .opt__price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;text-align:left}
   .opt__price b{font-size:28px}
   .destination-total small{font-size:10px}
-  .opt__actions{gap:8px}
-  .opt__disclosure,.opt__cta{flex:1 1 auto;justify-content:center;margin:0}
+  .opt__actions{gap:10px}
+  .opt__disclosure{flex:0 0 auto;padding:10px 4px}
+  .opt__cta{flex:1 1 auto;justify-content:center;margin-left:auto}
 }
 .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px}
 .foot b{color:var(--ink)}
@@ -509,10 +549,11 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    y la explicacion quedaban en tres filas y el bloque se leia como tres
    secciones distintas. */
 .hotel-options{container-type:inline-size;container-name:hoteles;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05)}
-.hotel-options-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 20px;margin-bottom:16px}
-.hotel-options-head__text{flex:1 1 300px;min-width:0}
-.hotel-options-head h2{margin:0;font-family:var(--fh);font-size:clamp(24px,3vw,32px);font-weight:700;line-height:1.1}
-.hotel-options-head p{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
+/* La cabecera de la placa. Antes sostenia el h2 y la bajada; ahora los dos viven
+   AFUERA de la placa (ver plateBlock() en app.js) y aca queda solo el filtro de
+   tipo, pegado al contenido que filtra. Por eso el flex y el justify-content de
+   antes sobran: es un solo control, alineado a la derecha. */
+.hotel-options-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:12px 20px;margin-bottom:16px}
 /* auto-fill con piso de 420px, el mismo criterio que .local-tours__grid. La
    pagina vive en una columna de 760px, asi que aqui sale UNA ficha por fila y no
    tres de 220px: a 220px el nombre se partia en tres lineas y la foto de 160px
@@ -1467,9 +1508,22 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 
    .block-title es el nombre de un bloque (Vuelos, Traslados y Conexiones) y .sub
    su bajada: van fuera de la caja, asi que no necesitan el fondo ni el borde.
-   El h2 de la seccion (.detail-section>h2) queda para el agrupador. */
-.block-title{font-family:var(--fh);font-size:28px;font-weight:700;line-height:1.1;margin:0 0 4px;color:var(--ink)}
+   El h2 de la seccion (.detail-section>h2) queda para el agrupador.
+
+   La jerarquia real --tamaño, peso y altura de linea-- la pisa el bloque final
+   del archivo; estas reglas quedan solo para el margen, que el bloque final no
+   declara. Y la UBICACION se unifico despues: los hoteles y los tours tambien
+   sacaron el titulo de la caja (plateBlock() en app.js). */
+.block-title{margin:0 0 4px}
 .block-sub{margin:0 0 12px}
+/* El <div> que agrupa el titulo de un bloque con su placa. El del transfer ya
+   lo resuelve transferCard(); los de hoteles y tours usan .plate-block. Ninguno
+   lleva estilo: existen para que el repintado en caliente reemplace titulo y
+   caja juntos. Con el marcador puesto solo en la caja, cada cambio de
+   aeropuerto, de tramo, de hotel, de viajeros o de moneda reemplazaba la caja
+   por el markup completo y dejaba el titulo viejo, y los "Traslados y
+   Conexiones" se acumulaban uno debajo del otro. */
+.transfer-block,.plate-block{display:block}
 .daily-budget__group-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 8px;font-size:17px;font-weight:800;line-height:1.2;color:var(--ink)}
 .daily-budget__group-title small{color:var(--ink2);font-size:11px;font-weight:400}
 .official-transfer,.bus-itinerary{margin-top:0}
@@ -1682,7 +1736,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* El placeholder tiene la forma de lo que va a aparecer: una ficha por fila, no
    tres columnas angostas. Antes el shimmer era de 290px, la altura de la card
    vieja; con la ficha nueva de ~190px la espera se veía descuadrada. */
-.hotel-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}.hotel-skeleton-card{height:186px;border-radius:var(--card-radius);background:linear-gradient(100deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}.hotel-options-loading .hotel-options-head p{margin-bottom:0}
+.hotel-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}.hotel-skeleton-card{height:186px;border-radius:var(--card-radius);background:linear-gradient(100deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}
 @media(max-width:560px){.hotel-skeleton-card:nth-child(n+3){display:none}}
 @media(prefers-reduced-motion:reduce){
   /* El archivo tiene 35 transiciones y 7 animaciones, y solo 3 sitios
@@ -1706,11 +1760,10 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .hotel-nearby-link{display:inline-flex;margin-top:12px;padding:11px 15px;border-radius:12px;background:var(--cel);color:#fff;font-weight:700;text-decoration:none}
 .hotel-nearby-link:hover{color:#fff;filter:brightness(1.08)}
 .local-tours{min-width:0;margin-top:22px;padding:20px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 4px 12px rgba(16,35,62,.05);overflow:hidden;container-type:inline-size;container-name:tours}
-.local-tours__head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
-.local-tours__eyebrow{color:var(--cel);font-size:10px;font-weight:800;letter-spacing:.12em}
-.local-tours h2{margin:5px 0 0;font-family:var(--fh);font-size:clamp(24px,3vw,32px);line-height:1.1}
-.local-tours__summary{margin:7px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
-.local-tours__summary b{color:var(--ink)}
+/* .local-tours__head, .local-tours__summary y .local-tours h2 se fueron con el
+   titulo y el resumen: los dos viven ahora AFUERA de la placa (ver plateBlock()
+   en app.js), y por eso la placa ya no necesita una cabecera propia. El <h2> que
+   queda vive en el .plate-block y toma la jerarquia del bloque final. */
 /* El CTA de la cabecera (.local-tours__cta-wrap, __cta-total, __reserve) se fue
    con el boton: la reserva se pide desde "Mi Viaje". Se dejan las reglas de la
    tarjeta, que si se usan. */
@@ -2044,12 +2097,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    etiqueta que usa el resto de la app (--cel: 10.64:1 en night, 5.92:1 en
    claro) y sin el espaciado de sigla. */
 .destination-highlights__eyebrow{color:var(--cel);font-size:11.5px;font-weight:800;letter-spacing:.01em}
-/* La línea de contexto. El selector lleva el `p` del head porque
-   .destination-highlights__head p le gana en especificidad y se comía el margen:
-   la frase de los feriados quedaba pegada al párrafo de arriba, que es
-   justo lo que hace que las dos se lean como un bloque y no como dos datos. */
-.destination-highlights__head p.destination-highlights__next{margin:8px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
-.destination-highlights__next b{color:var(--ink)}
 /* Las seis ventanas de escapada. En vez de un select de doce meses, que
    obligaba a ofrecer meses ya pasados, son botones con la ocasión a la vista:
    el usuario ve de entrada que en marzo hay Carnaval. */
@@ -2128,7 +2175,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    foto quedaba metida en un marco y el bloque se veía más estrecho que las
    tarjetas de "Transporte local" y "Comidas". Acá ya no se apila la card, que
    lo hace la regla de contenedor: esta media query es solo de la cabecera. */
-@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}.local-tours__head{align-items:stretch;flex-direction:column;gap:12px}}
+@media(max-width:560px){.local-tours{padding:16px;border-radius:18px}}
 .flight-airline{flex-wrap:wrap}
 .flight-airline .cabin-badge{white-space:nowrap;background:var(--cel-soft);color:var(--ink)}
 /* z-index propio: #install-help es el ÚLTIMO modal del DOM, así que con el
@@ -2279,24 +2326,37 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    ======================================================================
    Un H2 y un H3 para toda la app, declarados UNA sola vez y sin excepciones
    por seccion. Antes cada bloque declaraba su propio tamano (36, 34, 30, 28,
-   20, 17, 11.5) y el mismo rol aparecia a cinco medidas distintas, con dos
-   titulos metidos dentro de su placa y los demas flotando.
+   20, 17, 11.5) y el mismo rol aparecia a cinco medidas distintas.
+
+   Y LA UBICACION, que es la otra mitad de lo mismo: el TITULO va SIEMPRE
+   FUERA de la placa. Los hoteles y los tours lo tenian metido adentro del
+   rectangulo con borde, el transfer y los vuelos lo tenian afuera, y con las
+   dos formas en la misma pantalla un rectangulo con nombre deja de decir si
+   es una tarjeta mas o el bloque de una seccion. Los dos casos de adentro ya
+   se movieron (ver plateBlock() en app.js) y por eso `.local-tours h2` y
+   `.hotel-options h2` no estan en la lista de abajo: ya no hay un h2 dentro
+   de esas placas, y si el selector se queda ya no protege nada: el proximo h2
+   que se meta adentro se queda sin jerarquia sin que nadie se entere.
 
    ESTE BLOQUE VA AL FINAL, y no por capricho. Con la especificidad empatada
    gana la regla que aparece despues: con este bloque en el medio, ".local-tours
    h2" (que esta mas abajo) lo pisaba y el H2 salia a 30px en vez de 32px. Al
    final gana siempre, y una placa nueva que se pinte con su propio <h2> hereda
    la jerarquia sola: no hay que acordarse de aplicarle el token. */
-h2, .block-title, .detail-section > h2, .local-tours h2, .hotel-options h2,
-.hotel-options-head h2, .flight-search h2, .transfer-options h2,
-.proposal-breakdown h2, .sec h2, .local-tours__head h2 {
+h2, .block-title, .detail-section > h2, .transport-options h2,
+.flight-search h2, .proposal-breakdown h2, .sec h2 {
   font-family: var(--fh);
   font-size: 32px;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.18;
   color: var(--ink);
   margin: 0 0 6px;
   letter-spacing: -.01em;
+  /* Balancea las lineas de un titulo largo en vez de dejar una sola palabra
+     colgada en la segunda. "Llegada a destino (Vuelos y Traslado)" partido a
+     lo bruto dejaba "Traslado)" solo abajo, que es lo que hace que un titulo
+     se lea como roto. */
+  text-wrap: balance;
 }
 /* El H3 es el nivel secundario: chico, en la familia de texto del cuerpo y en el
    gris de apoyo. Antes el titulo de un tour salia a 20px y en blanco, o sea mas
@@ -2311,17 +2371,62 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
   margin: 0 0 4px;
 }
 /* La bajada de un bloque va pegada a su titulo, y el margen de arriba es lo que
-   separa un bloque del anterior. El titulo no se mete dentro de la placa. */
-.sec > h2, .detail-section > h2, .local-tours > h2, .hotel-options > h2,
-.local-tours__head h2 { margin-top: 28px }
-.sec > h2:first-child, .detail-section:first-child > h2, .local-tours:first-child h2 { margin-top: 0 }
+   separa un bloque del anterior. El titulo no se mete dentro de la placa.
+
+   Los titulos de bloque ya no viven adentro de .local-tours ni de .hotel-options
+   (ver plateBlock() en app.js), asi que los selectores de esas dos placas y el
+   de `.local-tours__head` salen de la lista: no hacen falta para el markup de
+   hoy y si se dejaran, el proximo h2 que se meta adentro de una placa volveria
+   a tomar 28px sin que nadie lo note. */
+.sec > h2, .detail-section > h2 { margin-top: 28px }
+.sec > h2:first-child, .detail-section:first-child > h2 { margin-top: 0 }
+/* El bloque con titulo y placa. No lleva estilo propio: existe para que el
+   repintado en caliente reemplace los dos juntos y no deje el titulo viejo
+   afuera de la placa nueva. El margen de arriba del primer bloque lo trae el
+   .detail-section que lo contiene, no este <div>. */
+.plate-block > .block-sub { margin-top: -2px }
+.plate-block > .block-title:first-child { margin-top: 0 }
 /* La bajada (el sub del bloque) es siempre la misma voz: chica, gris, con la misma
    altura de linea, pegada a su titulo. */
-.block-sub, .local-tours__summary, .hotel-options__sub {
+.block-sub {
   font-family: var(--fb);
   font-size: 13px;
   font-weight: 500;
   line-height: 1.45;
   color: var(--ink2);
   margin: 0;
+}
+
+/* ======================================================================
+   TEXTOS LARGOS -- AL FINAL POR EL MISMO MOTIVO QUE LOS TITULOS
+   ======================================================================
+   Los bloques de prosa --la bajada de un titulo, la nota de un transfer, el
+   veredicto de una guia, el pie de pagina-- respetan el ancho de la tarjeta y
+   parten la linea donde toca. Antes cada uno se defendia por su cuenta con un
+   `overflow-wrap` o sin nada, y el resultado era que en 320px una palabra larga
+   (un nombre de aeropuerto, un "https://", un codigo de reserva) empujaba la
+   caja y las demas lineas del parrafo se amontonaban en una columna de una sola
+   palabra: no se leia como un texto roto sino como un bloque angosto pegado al
+   resto.
+
+   `anywhere` y no `break-word`: `break-word` solo parte la palabra cuando ya no
+   entra, o sea que la linea de arriba queda mas larga que las otras y el
+   parrafo se ve desigual. `anywhere` le dice al navegador que puede usar ese
+   espacio al calcular el ancho, asi que todas las lineas salen parejas.
+
+   `hyphens:auto` agrega el corte con guion para el castellano, que es lo que
+   hace que un texto largo se lea como prosa y no como una lista de trozos.
+   Los navegadores lo piden solo si el idioma esta declarado, y index.html lo
+   tiene.
+
+   Los titulos NO entran aqui: un titulo partido a la mitad de una palabra se
+   lee como roto, y para eso esta `text-wrap: balance` mas arriba. */
+.block-sub, .foot, .foot-credits, .cost-note, .transfer-hint,
+.transfer-leg__auto, .transfer-advice, .hotel-group__empty,
+.local-tour__description, .guia-nota, .guia-veredicto, .guia-tip p,
+.guia-lock__texto, .guia-lock__nota, .guia-pie, .guia-creditos,
+.daily-budget__logistics, .hotel-nearby-note, .block-h3,
+.transfer-choice-note, .opt__nota, .opt .s, .opt__disclosure-text {
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }

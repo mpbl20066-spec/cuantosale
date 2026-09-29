@@ -1225,9 +1225,10 @@ function haversineKm(a, b) {
     const hastaFn = app.indexOf('function getSelectedTransferAmount(state)');
     const hasta = app.indexOf('// Iconos por categoría', hastaFn);
     assert.ok(desde > 0 && hasta > desde, 'no se pudo extraer transferPreciosDe del cliente');
-    const fn = new Function('CS_TRANSFER_PRICES', 'Number',
+    // tasaDe (la tasa BRL de la pantalla) se simula sin tasa: cae al USD derivado.
+    const fn = new Function('CS_TRANSFER_PRICES', 'Number', 'tasaDe',
       app.slice(desde, hasta) + '; return { transferPreciosDe: transferPreciosDe, getSelectedTransferAmount: getSelectedTransferAmount };'
-    )(tabla, Number);
+    )(tabla, Number, function () { return null; });
 
     const precios = fn.transferPreciosDe({ dest: { key: 'fernando' }, pax: 2 });
     assert.strictEqual(precios.compartido, 0, 'la compartida de fernando deberia seguir en 0, no caer al piso');
@@ -1482,14 +1483,18 @@ function haversineKm(a, b) {
     const fs = require('fs');
     const path = require('path');
     const source = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
-    const block = source.match(/var MONTH_NAMES[\s\S]*?function featuredMonthContext[\s\S]*?\n  }/);
+    // El bloque termina en featuredMonthWindows(), que es la ultima funcion del
+    // grupo de fechas que esta prueba ejercita. featuredMonthContext() y
+    // nextSpecialDateAfter() se fueron con la linea de contexto de la seccion
+    // de escapadas, asi que ya no forman parte de lo que hay que ejecutar.
+    const block = source.match(/var MONTH_NAMES[\s\S]*?function featuredMonthWindows[\s\S]*?\n  }/);
     assert.ok(block, 'no se encontró el bloque de fechas en app.js');
     const today = new Date(); today.setHours(12, 0, 0, 0);
     const addDays = function (d, n) { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; };
     const iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
     const scope = { today: today, addDays: addDays, iso: iso, module: { exports: {} } };
     const factory = new Function('today', 'addDays', 'iso',
-      block[0] + '\nreturn { easterSunday: easterSunday, featuredMonthWindows: featuredMonthWindows, nextSpecialDateAfter: nextSpecialDateAfter, featuredMonthContext: featuredMonthContext, MONTH_NAMES: MONTH_NAMES };');
+      block[0] + '\nreturn { easterSunday: easterSunday, featuredMonthWindows: featuredMonthWindows, MONTH_NAMES: MONTH_NAMES };');
     const fechas = factory(today, addDays, iso);
 
     // Pascua contra el calendario gregoriano publicado. Si este algoritmo se
@@ -1535,43 +1540,17 @@ function haversineKm(a, b) {
       assert.ok(w.dep >= earliest && w.dep <= monthEnd,
         'la ventana de ' + MONTHS[w.month] + ' sale el ' + w.depIso + ', que no pertenece a ese mes');
     });
-    // El próximo feriado largo tiene que caer fuera de la ventana visible.
-    const next = fechas.nextSpecialDateAfter(6);
-    if (next) assert.ok(departures.indexOf(next.depIso) < 0, 'el "próximo feriado" ya está en la ventana visible');
-
-    // Y la línea de contexto tiene que hablar del mes que está MARCADO, no del
-    // feriado que viene después de los seis meses. Antes era una frase fija: con
-    // la pestaña de septiembre activa decía "Próximo feriado largo: Semana
-    // Santa, mié 24 mar", que al lado de un mes de septiembre se leía como una
-    // fecha equivocada en lugar de como dos cosas distintas. Este es el
-    // invariante que hace falta: el nombre del mes, el feriado y las fechas que
-    // salen al lado tienen que ser los de la ventana activa.
-    assert.strictEqual(typeof fechas.featuredMonthContext, 'function',
-      'app.js no tiene featuredMonthContext(): la línea de contexto no se puede atar a la pestaña activa');
+    // Y la etiqueta de cada ventana tiene que ser una ocasión que la app sepa
+    // nombrar. Antes estas fechas aparecían también en un párrafo arriba de la
+    // barra de meses, y se notaba que la pestaña y el párrafo contaban la misma
+    // salida con palabras distintas. La barra quedó como el único lugar donde
+    // aparece la fecha, así que ahora el nombre de la ocasión es la única pista
+    // de qué se está mirando, y un nombre mal escrito se vería tal cual en la
+    // pestaña del mes.
+    const OCASIONES = ['Año Nuevo', 'Día de la Independencia', 'Día de la Raza', 'Día de los Difuntos', 'Navidad', 'Carnaval', 'Semana Santa', 'Fin de año', 'Fin de semana'];
     windows.forEach(function (w) {
-      const ctx = fechas.featuredMonthContext(w, 6);
-      assert.ok(ctx, 'la ventana de ' + MONTHS[w.month] + ' no tiene línea de contexto');
-      assert.ok(ctx.lead.indexOf(fechas.MONTH_NAMES[w.month]) >= 0,
-        'la línea de ' + MONTHS[w.month] + ' no nombra ese mes: "' + ctx.lead + '"');
-      // El feriado que nombra es el de ESA ventana. Si difiere, la línea está
-      // describiendo otro mes aunque el texto sea cierto.
-      assert.ok(ctx.label.toLowerCase() === w.label.toLowerCase(),
-        'la línea de ' + MONTHS[w.month] + ' nombra "' + ctx.label + '" y la ventana es "' + w.label + '"');
-      if (w.label === 'Fin de semana') {
-        // Sin feriado en el mes, la línea tiene que decir cuándo viene el
-        // siguiente: "en abril no hay feriado largo" solo suena a que el año no
-        // tiene ninguno, que es justo lo que la sección viene a vender.
-        assert.ok(ctx.next, 'la línea de ' + MONTHS[w.month] + ' dice que no hay feriado y no dice cuándo viene el próximo');
-        assert.ok(ctx.next.label !== 'Fin de semana', 'el "próximo feriado largo" no puede ser un fin de semana');
-        assert.ok(ctx.next.dep > w.ret,
-          'el próximo feriado (' + ctx.next.depIso + ') es anterior a la ventana de ' + w.depIso);
-        assert.ok(departures.indexOf(ctx.next.depIso) < 0, 'el "próximo feriado largo" ya está entre las seis ventanas');
-      } else {
-        // Con feriado en el mes, la línea ya está completa: agregar un "y el
-        // próximo es..." la convierte en un párrafo que hay que leer dos veces.
-        assert.strictEqual(ctx.next, null,
-          'la línea de ' + MONTHS[w.month] + ' ya tiene feriado y además ofrece el siguiente');
-      }
+      assert.ok(OCASIONES.indexOf(w.label) >= 0,
+        'la etiqueta de ' + MONTHS[w.month] + ' es "' + w.label + '", que no es una ocasión conocida');
     });
   });
   await t('el calendario no ofrece fechas más allá de un año', async function () {

@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
 
   var CATS = [
@@ -1082,26 +1082,14 @@
         + '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">&rarr;</span></button>'
         + '</div></article>';
     }).join('');
-    // La linea de contexto se arma con la ventana ACTIVA, no con un feriado fijo:
-    // antes decia siempre el siguiente largo que venia despues de los seis meses,
-    // asi que con "Sep" marcado al lado se leia "Semana Santa, mié 24 mar" y
-    // parecian dos fechas que se contradecian en lugar de dos datos distintos:
-    // el del mes que se esta mirando y el del proximo feriado.
-    var context = featuredMonthContext(window, 6);
-    var nextLine = '';
-    if (context) {
-      var depLabel = shortDateLabel(window.depIso).replace(/\./g, '');
-      var retLabel = shortDateLabel(window.retIso).replace(/\./g, '');
-      nextLine = '<p class="destination-highlights__next">' + esc(context.lead) + '<b>' + esc(context.label) + '</b>, ' + esc(depLabel) + ' &rarr; ' + esc(retLabel) + '.'
-        // El año solo cuando cambia: "Semana Santa, mié 24 mar de 2027" al lado
-        // de septiembre se tiene que leer con el año, y al lado de enero del
-        // mismo año sobra.
-        + (context.next ? ' El pr&oacute;ximo feriado largo es <b>' + esc(context.next.label) + '</b>, '
-          + esc(shortDateLabel(context.next.depIso).replace(/\./g, ''))
-          + (context.next.dep.getFullYear() !== window.year ? ' de ' + context.next.dep.getFullYear() : '') + '.' : '')
-        + '</p>';
-    }
-    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">Oportunidades de la temporada</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona, para los pr&oacute;ximos seis meses. Toc&aacute; un destino y te mostramos la propuesta.</p>' + nextLine + '</div></div>'
+    // La seccion arranca con la etiqueta, el titulo y la bajada, y recien ahi
+    // la barra de meses. La linea de contexto que antes vivia entre la bajada y
+    // los filtros --"en septiembre no hay feriado largo: fin de semana, mié 30
+    // set - vie, 2 oct"-- se saco: repetia la fecha que la barra de meses ya
+    // tiene escrita en la pestana activa, asi que lo primero que se leia era un
+    // dato duplicado y una aclaracion ("no hay feriado largo") que sonaba a que
+    // el ano entero no tenia ninguno.
+    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">Oportunidades de la temporada</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona, para los pr&oacute;ximos seis meses. Toc&aacute; un destino y te mostramos la propuesta.</p></div></div>'
       + '<div class="featured-months" role="group" aria-label="Elegir mes de la escapada">' + tabs + '</div>'
       + '<div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">&lsaquo;</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">&rsaquo;</button></div>';
   }
@@ -1219,12 +1207,32 @@
     if (tasa == null) { m = monedaBase(); tasa = 1; }
     return m.simbolo + ' ' + formatoMiles(v * tasa, 0);
   }
-/* ---------------------------------------------------------------
-     Selector de moneda. Va arriba a la derecha del h2 de la seccion.
-     Se dibuja con markup plano, no con un <select>, para poder mostrar el
-     codigo grande con la etiqueta abajo, que es como se lee mejor en un
-     celu. Las opciones sin tasa llegan deshabilitadas con un guion.
-     --------------------------------------------------------------- */
+
+  /* Bloque con titulo y placa: la forma que sigue toda seccion de la app.
+
+     LA REGLA, en una linea: el titulo va FUERA de la placa y la placa es solo
+     el contenido. Antes cada seccion decidia por su cuenta --los hoteles y los
+     tours tenian el <h2> adentro del rectangulo con borde, el transfer y los
+     vuelos lo tenian afuera-- y con dos pantallas en la misma vista no hay forma
+     de saber si un rectangulo con nombre es una tarjeta mas o el bloque entero
+     de una seccion.
+
+     El <div> que agrupa a los dos existe por una razon mecanica, no de diseno: es
+     el nodo que reemplazan los repintados en caliente (cambiar de hotel, de
+     moneda, de numero de viajeros). Si el marcador quedara solo en la placa,
+     cada repintado meteria el markup COMPLETO adentro de la placa y el titulo
+     viejo se quedaria afuera: es el bug de los "Traslados y Conexiones" que se
+     acumulaban uno debajo del otro. Con el marcador en el <div> que envuelve a
+     los dos, se cambian juntos o no se cambia ninguno.
+
+     `sub` es opcional: muchas placas no llevan bajada. */
+  function plateBlock(attr, title, sub, body) {
+    return '<div class="plate-block"' + (attr ? ' ' + attr : '') + '>' +
+      (title || '') +
+      (sub ? '<p class="block-sub">' + sub + '</p>' : '') +
+      body + '</div>';
+  }
+
   // El header vive en el HTML, pero el selector depende del estado de la
   // moneda y de que ya llegaran las tasas, asi que se inyecta desde aca.
   function pintarHeader() {
@@ -1295,8 +1303,21 @@
      - se abre ABAJO si hay lugar y ARRIBA si no, que es lo que evita que se
        salga por abajo cuando el header queda pegado al final de una pagina
        scrolleada;
-     - en el eje horizontal se recorre lo que sobre, para que un boton pegado al
-       borde no lo mande al otro lado.
+     - en el eje horizontal el menu sale HACIA LA IZQUIERDA del boton, con sus
+       bordes derechos alineados, y solo se corrige si con ese ancla se sale de la
+       ventana.
+
+     Ese último punto tenía el recorte al revés y por eso el menu se abría del
+     lado contrario del boton. La condición era `t.right + margen < ancho`, o
+     sea "el botón todavía tiene aire a su derecha", que es el caso de todos los
+     botones del header salvo el último: el boton de moneda tiene adelante el
+     toggle de tema y "Iniciar sesión", asi que nunca llega al borde. Con eso
+     el menu se mandaba al extremo derecho de la ventana, a cientos de pixeles
+     del boton que lo abrio, y el `left < margen` de abajo no lo corregia
+     porque un menu pegado al borde derecho nunca se sale por la izquierda. El
+     recorte que hace falta es el de la izquierda: si el menu se sale por ahí es
+     porque el boton esta pegado al borde, y lo que corresponde es pegarlo al
+     margen, no llevarlo al otro extremo.
 
      Se recalcula al abrir, al cambiar el tamaño de la ventana y al scrollear con
      el menu abierto: el menu es fijo, asi que si la pagina se mueve y no se
@@ -1328,9 +1349,13 @@
       // header, arriba es el borde de la pagina y siempre pierde.
       top = (arriba >= margen) ? arriba : Math.max(margen, alto - margen - altoMenu);
     }
+    // Ancla: el borde derecho del menu contra el borde derecho del boton, asi el
+    // menu se despliega hacia la izquierda, que es el lado del que hay lugar en
+    // un boton que esta a la derecha del header.
     var left = t.right - anchoMenu;
-    if (left + anchoMenu + margen < ancho) left = ancho - margen - anchoMenu;  // muy a la izquierda
-    if (left < margen) left = margen;                                          // muy a la derecha
+    if (left < margen) left = margen;                                   // se sale por la izquierda
+    if (left + anchoMenu > ancho - margen) left = ancho - margen - anchoMenu;  // se sale por la derecha
+    if (left < margen) left = margen;                                   // ventana mas angosta que el menu
     menu.style.left = Math.round(left) + 'px';
     menu.style.top = Math.round(top) + 'px';
     menu.style.right = 'auto';
@@ -1668,46 +1693,6 @@
     return out;
   }
 
-  // Próximo feriado largo que cae FUERA de la ventana visible, para poder
-  // avisar cuándo toca Carnaval aunque todavía falte para llegar a él.
-  // Reusa la misma asignación: si no, devolvería el primero de los seis meses
-  // que ya están a la vista, que no es lo que el usuario necesita saber.
-  function nextSpecialDateAfter(visibleMonths) {
-    var visible = visibleMonths || 6;
-    var all = featuredMonthWindows(visible + 12);
-    for (var i = visible; i < all.length; i++) {
-      if (all[i].label !== 'Fin de semana' && all[i].dep > today) return all[i];
-    }
-    return null;
-  }
-
-  /* Que dice la linea de contexto de la seccion de escapadas.
-
-     Antes era una sola frase fija --el proximo feriado largo que venia DESPUES
-     de los seis meses-- y no se movia nunca. Al lado de la pestaña de mes
-     activa eso se leia como un error: con "Sep" marcado decia "Semana Santa,
-     mié 24 mar", que no es la fecha del mes que se esta mirando. Ahora la
-     linea describe la ventana elegida, que es la unica fecha que las tarjetas
-     de abajo van a mostrar.
-
-     Se devuelve en partes y no armada: el texto (los meses, el "de 2027") lo
-     arma el que pinta, con esc() y con el formato de fecha de la pantalla. */
-  function featuredMonthContext(window, visibleMonths) {
-    if (!window) return null;
-    var monthName = MONTH_NAMES[window.month];
-    var isHoliday = window.label !== 'Fin de semana';
-    return {
-      // El mes va con nombre propio en los dos casos: la pestaña "Este mes" ya
-      // usa esa palabra para el mes en curso y "Este mes:" arriba de un mes de
-      // diciembre se lee como un error del mismo tipo que se está corrigiendo.
-      lead: isHoliday ? 'En ' + monthName + ': ' : 'En ' + monthName + ' no hay feriado largo: ',
-      label: isHoliday ? window.label : 'fin de semana',
-      // Cuando el mes NO tiene feriado se avisa cuándo viene el siguiente. Sin
-      // esto "en abril no hay feriado largo" suena a que el año no tiene
-      // ninguno, que es justo lo que la app viene a vender.
-      next: isHoliday ? null : nextSpecialDateAfter(visibleMonths || 6)
-    };
-  }
   /* El calendario no offering fechas más allá de un año.
 
      Motivo: el precio de un vuelo a esta altura viene del modelo, y a dos años
@@ -2352,14 +2337,20 @@
        el tipo ya se lee solo, y lo que faltaba era el resto. "Equilibrado" en
        el h2 más el precio de esta media noche es toda la información que
        hace falta para decidir, y en una frase. */
-    var head = '<div class="hotel-options-head"><div class="hotel-options-head__text"><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>'
-      + '<p>' + (reparto
-        // Con dos paradas la nota tiene que nombrar las dos y decir que se elige
-        // en cada una. Antes decía una sola ("por noche en Rio de Janeiro") y el
-        // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
-        ? 'Elegí o reservá tu hotel en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
-        : 'Seleccionados para un viaje ' + esc(profile.title.toLowerCase()) + ' en ' + esc(meta.dest.name) + ', desde ' + money(average) + ' por noche.')
-      + '</p></div>' + hotelTypeSelectMarkup(meta, hotelType) + '</div>';
+    /* El titulo sale de la placa y la bajada pasa a ser un .block-sub, que es el
+       bloque de texto que acompaña a un titulo en toda la app. El <p> suelto que
+       estaba adentro de .hotel-options-head__text competia con el h2 por la
+       escala y por el margen: eran dos textos de distinto rol con el mismo
+       tratamiento. El filtro de tipo sigue dentro de la placa, al lado del
+       contenido que filtra. */
+    var titulo = '<h2 class="block-title" id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>';
+    var bajada = (reparto
+      // Con dos paradas la nota tiene que nombrar las dos y decir que se elige
+      // en cada una. Antes decía una sola ("por noche en Rio de Janeiro") y el
+      // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
+      ? 'Elegí o reservá tu hotel en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
+      : 'Seleccionados para un viaje ' + esc(profile.title.toLowerCase()) + ' en ' + esc(meta.dest.name) + ', desde ' + money(average) + ' por noche.');
+    var head = '<div class="hotel-options-head">' + hotelTypeSelectMarkup(meta, hotelType) + '</div>';
 
     // Un destino solo: el grupo único y, si no hay nada, la sección vacía de
     // siempre, sin cambio de comportamiento.
@@ -2378,14 +2369,17 @@
            en el grupo. */
         var nearbyName = meta.dest.key === 'ilha' || meta.dest.key === 'paraty' ? 'Angra dos Reis' : '';
         var nearbyLink = nearbyName ? '<a class="hotel-nearby-link hotel-nearby-link-secondary" href="https://www.booking.com/searchresults.es.html?ss=' + encodeURIComponent(nearbyName) + '" target="_blank" rel="noopener noreferrer">Ampliar a ' + esc(nearbyName) + ' ↗</a>' : '';
-        return '<section class="hotel-options hotel-options-empty" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + solo + nearbyLink + '</section>';
+        return plateBlock('data-hotels-block', titulo, bajada,
+          '<section class="hotel-options hotel-options-empty" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + solo + nearbyLink + '</section>');
       }
-      return '<section class="hotel-options" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + solo + '</section>';
+      return plateBlock('data-hotels-block', titulo, bajada,
+        '<section class="hotel-options" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + solo + '</section>');
     }
     // Viaje combinado: los dos grupos, cada uno con su radios y su nombre. El
     // reparto de noches lo ajusta el panel de arriba; lo que se elige aca es el
     // hotel de cada parada.
-    return '<section class="hotel-options hotel-options-split" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + grupo(1) + grupo(2) + '</section>';
+    return plateBlock('data-hotels-block', titulo, bajada,
+      '<section class="hotel-options hotel-options-split" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + grupo(1) + grupo(2) + '</section>');
   }
   /* El catalogo de tours. NO vive aca: vive en public/tours.generated.js, que
      se genera desde data/tours.json con `npm run build:tours`, y a su vez
@@ -2492,11 +2486,16 @@
        de que ciudad son las actividades: eran dos lineas de arriba para abajo
        y la primera no aportaba el dato, lo traducía. Ademas "en destino" es
        tautológico acá: la sección entera ES el destino. */
-    var head = '<div class="local-tours__head"><div>' +
-      '<h2 id="local-tours-title">' + (fuente !== 'local' ? 'Tours y experiencias reales en ' : 'Tours y experiencias en ') + esc(destinationName) + '</h2>' +
-      '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
-      (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
-      ' &middot; ' + esc(SOURCE_LABEL[fuente] || SOURCE_LABEL.local) + '</p></div></div>';
+    /* El titulo sale de la placa y el resumen pasa a ser un .block-sub, el bloque
+       de texto que acompaña a un titulo en toda la app. El <div>
+       .local-tours__head existia solo para sostener los dos; ahora no hace falta
+       porque los dos son hermanos de la placa, y el repintado cuando llegan los
+       tours reales reemplaza el bloque entero (data-tours-block) en vez de
+       meter un segundo titulo adentro de la seccion. */
+    var titulo = '<h2 class="block-title" id="local-tours-title">' + (fuente !== 'local' ? 'Tours y experiencias reales en ' : 'Tours y experiencias en ') + esc(destinationName) + '</h2>';
+    var bajada = tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias')
+      + (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '')
+      + ' &middot; ' + esc(SOURCE_LABEL[fuente] || SOURCE_LABEL.local);
     // Iconos de la tarjeta: trazo, como los de CATEGORY_ICONS, para que se
     // lean bien en el panel chico y hereden el color de cada tema.
     var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
@@ -2586,10 +2585,11 @@
     var creditsBlock = creditList
       ? '<details class="local-tours__credits"><summary>Créditos de las fotos</summary><p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre:</p><ul>' + creditList + '</ul></details>'
       : '';
-    return '<section class="local-tours" data-budget-anchor="tours" aria-labelledby="local-tours-title">' + head +
+    return plateBlock('data-tours-block', titulo, bajada,
+      '<section class="local-tours" data-budget-anchor="tours" aria-labelledby="local-tours-title">' +
       '<div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + cards + '</div>' +
       (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') +
-      creditsBlock + '</section>';
+      creditsBlock + '</section>');
   }
   // Duración estimada, sacada del texto de detalle que ya está cargado en
   // data/tours.json. Antes esa información sólo se veía abriendo el modal, y es
@@ -3377,14 +3377,22 @@
   var flightRequestId = 0;
   var flightController = null;
   function hotelLoading(meta) {
-    // Misma cabecera que hotelOptions(): el filtro a la derecha del título, para
-    // que el placeholder no se reorganice solo cuando llegan los datos.
-    return '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head"><div class="hotel-options-head__text"><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2><p>Buscando opciones disponibles…</p></div>' + hotelTypeSelectMarkup(meta) + '</div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
+    // Misma cabecera que hotelOptions() —el filtro al lado del contenido que
+    // filtra— para que el placeholder no se reorganice solo cuando llegan los
+    // datos. El data-hotels-block es el mismo para que el repintado que trae los
+    // hoteles reales reemplace el bloque entero y no deje el titulo viejo.
+    return plateBlock('data-hotels-block',
+      '<h2 class="block-title">Alojamientos en ' + esc(meta.dest.name) + '</h2>',
+      'Buscando opciones disponibles…',
+      '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head">' + hotelTypeSelectMarkup(meta) + '</div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>');
   }
   function loadHotelRecommendations(meta, accommodationTotal) {
     var requestId = ++hotelRequestId;
     if (meta.hotelsLoaded) {
-      var cached = document.querySelector('.hotel-options-loading');
+      // El marcador es el del bloque completo (titulo + placa), no el de la placa:
+      // reemplazar la placa sola metia el markup completo adentro de ella y
+      // dejaba el titulo del placeholder arriba del titulo nuevo.
+      var cached = document.querySelector('[data-hotels-block]');
       if (cached) cached.outerHTML = hotelOptions(meta, accommodationTotal);
       return;
     }
@@ -3428,7 +3436,7 @@
       // persona toca "Ver disponibilidad" de un hotel, que es el gesto de
       // reservar: verGuiaPorReserva() la busca y la pinta en el momento.
       if (data.guiaToken) guardarTokenGuia(meta.dest.key, data.guiaToken);
-      var current = document.querySelector('.hotel-options-loading');
+      var current = document.querySelector('[data-hotels-block]');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
       // Cada parada toma su recomendado. Con querySelector pelado solo se
       // marcaba el primero de la pagina: en un viaje combinado la segunda parada
@@ -3453,7 +3461,7 @@
       console.warn('[hoteles] No se pudieron cargar alojamientos:', error && error.message || 'error desconocido');
       meta.hotels = [];
       meta.hotelsLoaded = true;
-      var current = document.querySelector('.hotel-options-loading');
+      var current = document.querySelector('[data-hotels-block]');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
     });
   }
@@ -3509,6 +3517,16 @@
     };
     var compartido = primero(oficial && oficial.compartido, tabla && tabla.compartido, 20);
     var privado = primero(oficial && oficial.privado, tabla && tabla.privado, Number(compartido) * 3);
+    /* Precio propio en reales (compartido_brl / privado_brl, de la planilla de
+       transfers). El presupuesto se lleva en USD, asi que se convierte con la
+       tasa BRL de la pantalla: en reales vuelve exactamente al numero de la
+       planilla, sin la deriva de una cotizacion fija. Sin tasa cargada se queda
+       con el USD derivado que trae la tabla. */
+    var tasaBrl = tasaDe('BRL');
+    if (tabla && tasaBrl) {
+      if (tabla.compartido_brl > 0) compartido = tabla.compartido_brl / tasaBrl;
+      if (tabla.privado_brl > 0) privado = tabla.privado_brl / tasaBrl;
+    }
     return {
       compartido: Number(compartido),
       privado: Number(privado),
@@ -5470,7 +5488,7 @@
     // .hotel-options es lo que devuelve el generador una vez cargaron los hoteles;
     // .hotel-options-loading es solo el placeholder y lo maneja
     // loadHotelRecommendations.
-    var listaHoteles = document.querySelector('.hotel-options');
+    var listaHoteles = document.querySelector('[data-hotels-block]');
     if (listaHoteles && detailState.meta.hotelsLoaded) {
       listaHoteles.outerHTML = hotelOptions(detailState.meta, detailState.hotel);
     }
@@ -5486,7 +5504,10 @@
        restaurarlos por titulo, que es la misma clave que usa la carga de un
        viaje guardado. Si no se restauraran, cambiar de moneda deseleccionaba
        las actividades que la persona habia elegido y las sacaba del total. */
-    var tours = document.querySelector('.local-tours');
+    // El bloque entero (titulo + placa), no la placa: ver el comentario de
+    // loadHotelRecommendations(). Con la placa sola, este repintado metia un
+    // segundo "Tours y experiencias en ..." adentro de la seccion.
+    var tours = document.querySelector('[data-tours-block]');
     if (tours) {
       var markupTours = localToursMarkup(detailState.meta);
       // Si el marcado nuevo viniera vacio se deja la seccion como estaba:
@@ -6032,13 +6053,31 @@
       }
       return cabeza + '</div>';
     }).join('');
-    var hayEntre = tramos.some(function (tramo) { return tramo.key === 'entre'; });
-    /* El titulo y la descripción van FUERA de la caja, como hermano. Antes el h2 estaba
-       adentro de .official-transfer__head, o sea dentro del rectangulo con borde,
-       y la seccion se leia como una tarjeta mas en vez de como un bloque con su
-       nombre. El `data-official-transfer` queda solo en la caja porque es lo que
-       reemplazan las actualizaciones en caliente, y asi el titulo no se borra
-       cuando cambia el precio o el tramo elegido. */
+    /* Un solo nombre para la placa, siempre.
+
+       Antes el titulo salia del contenido: "Tus traslados" cuando el viaje tenia
+       tramo entre paradas y "Traslados y Conexiones" cuando no. Asi el mismo
+       bloque se llamaba de dos maneras segun el destino, y peor: cambiaba solo
+       al tocar un transfer, porque el repintado vuelve a armar el titulo desde
+       los tramos y en un viaje de dos paradas aparecia "Tus traslados" debajo
+       del "Traslados y Conexiones" que ya estaba en pantalla. El nombre de una
+       seccion no puede depender de lo que se eligio adentro: si el contenido
+       cambia, el titulo se queda. */
+    /* El titulo y la descripción van FUERA de la caja, como hermano. Antes el h2
+       estaba adentro de .official-transfer__head, o sea dentro del rectangulo con
+       borde, y la seccion se leia como una tarjeta mas en vez de como un bloque
+       con su nombre.
+
+       Y por eso los dos van juntos dentro de un <div data-official-transfer>, que
+       es lo que reemplazan las actualizaciones en caliente. El marcador estaba
+       solo en la caja y el titulo suelto afuera, así que cada repintado
+       (cambiar deAeropuerto, de tramo, de numero de viajeros, cambiar la
+       moneda) reemplazaba la caja por el markup COMPLETO y dejaba el titulo
+       viejo, con lo que el h3 se acumulaba: seis "Traslados y Conexiones" uno
+       abajo del otro después de seis cambios. El marcador tiene que alcanzar
+       todo lo que devuelve esta función, o el repintado tiene que devolver
+       solo la caja; y lo primero además evita que el titulo y la caja puedan
+       quedar desalineados por un error de a medio camino. */
     /* El titulo va solo, sin bajada.
 
        La bajada decia "Elegí cómo querés llegar a tu alojamiento en Búzios desde
@@ -6053,12 +6092,13 @@
        defecto no hay nada que elegir hasta que la persona quiera cambiarlo, y
        esa chance se anuncia con la nota de "Incluido para tu comodidad" que ya
        esta en cada card. */
-    return '<h3 class="block-title">' + (hayEntre ? 'Tus traslados' : 'Traslados y Conexiones') + '</h3>' +
-      '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
+    return '<div class="transfer-block" data-official-transfer>' +
+      '<h3 class="block-title">Traslados y Conexiones</h3>' +
+      '<section class="transport-options official-transfer" data-budget-anchor="traslados">' +
       modoNota +
       filasTramos +
       (selected ? '<p class="transfer-hint">El horario de recogida lo coordinás con el operador al reservar.</p>' : '') +
-      '</section>';
+      '</section></div>';
   }
 
   function transportFlow(meta, budget, mode) {
@@ -6222,9 +6262,7 @@
       '<div class="guia-lock__head"><span class="guia-lock__eyebrow">GUÍA SECRETA</span>' +
       '<h2 id="guia-lock-title">La Guía Secreta de ' + esc(destino) + '</h2></div>' +
       '<div class="guia-lock__body"><span class="guia-lock__icon" aria-hidden="true">' + guiaLockIcon() + '</span>' +
-      '<p class="guia-lock__texto">Dónde comer por menos plata, que el menú turístico no cuenta, y los precios que de verdad se pagan. ' +
-      'Se abre cuando elegís un hotel y tocás <b>Ver disponibilidad</b>: es el contenido que va con el hotel, no con el buscador.</p>' +
-      '<p class="guia-lock__nota">No se abre sola. Buscar un destino no la descarga.</p></div>' +
+      '<p class="guia-lock__texto">Desbloqueá los secretos de la ciudad al elegir tu hotel. Al reservar tu alojamiento, accederás automáticamente a nuestras recomendaciones exclusivas de gastronomía y experiencias locales, curadas por expertos, que no encontrarás en las guías tradicionales.</p></div>' +
       '</section>';
   }
   /* Se pide la guia recien cuando la persona toca la reserva de un hotel. Ese
@@ -6828,7 +6866,7 @@
         return '<div><span>' + c[1] + '</span><b>' + moneyCero(option.parts[c[0]]) + asterisco + '</b></div>';
       }).join('');
       var notaDesglose = hayEstimado
-        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado sujeto a disponibilidad. Hacé clic en <b>"Ver propuesta"</b> para congelar tu tarifa.</p>'
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. <b>"Ver propuesta"</b> lo congela.</p>'
         : '';
       var photo = DEST_PHOTOS[option.dest.key];
       var location = [option.dest.region, option.dest.country || 'Brasil'].filter(Boolean).join(' - ');
@@ -6849,7 +6887,7 @@
         '<div class="opt__price destination-total"><small>' + etiquetaTotal(data.meta.pax) + '</small><b>' + moneyCero(option.total) + '</b><span>' + moneyCero(option.pp) + ' por persona</span></div></div>' +
         '<div class="destination-card-tags"><span class="mini g">¡Entra en tu presupuesto!</span></div>' +
         '<div class="opt__actions">' +
-        '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
+        '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '"><span class="opt__disclosure-text">Ver desglose</span><span class="opt__chevron" aria-hidden="true">›</span></button>' +
         '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
         '</div>' +
         '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + notaDesglose + '</div>' +
@@ -7468,7 +7506,7 @@
         return '<div><span>' + c[1] + '</span><b>' + moneyCero(p.parts[c[0]]) + asterisco + '</b></div>';
       }).join('');
       var nota = hayEstimado
-        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado sujeto a disponibilidad. Hacé clic en <b>"Ver propuesta"</b> para congelar tu tarifa.</p>'
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. <b>"Ver propuesta"</b> lo congela.</p>'
         : '';
       var bodyId = 'opt-desglose-' + index;
       return '<article class="opt' + (p.id === selectedPropuestaId ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-card="' + esc(p.id) + '">' +
@@ -7477,7 +7515,7 @@
           '<div class="opt__price"><small>' + etiquetaTotal(data.meta.pax) + '</small><b>' + moneyCero(p.total) + '</b><span>' + moneyCero(p.pp) + ' por persona</span></div>' +
         '</div>' +
         '<div class="opt__actions">' +
-          '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
+          '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '"><span class="opt__disclosure-text">Ver desglose</span><span class="opt__chevron" aria-hidden="true">›</span></button>' +
           '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
         '</div>' +
         '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + nota + '</div>' +
@@ -7671,7 +7709,7 @@
       var title = document.querySelector('.detail-summary h2');
       if (title) title.textContent = titleOf(detailState.proposal);
     }
-    var hotelSection = document.querySelector('.hotel-options');
+    var hotelSection = document.querySelector('[data-hotels-block]');
     if (hotelSection) hotelSection.outerHTML = hotelLoading(detailState.meta);
     recalcularTotalViaje();
     loadHotelRecommendations(detailState.meta, detailState.hotel);
@@ -7981,6 +8019,10 @@
   // cambiar de vista. Vive en el documento y no en un contenedor porque el mismo
   // botón aparece en dos listas distintas: las propuestas de un destino
   // (#results) y los destinos que entran en el presupuesto (#destination-results).
+  //
+  // El texto del botón acompaña al estado ("Ver desglose" / "Ocultar desglose").
+  // Con un rótulo fijo, un botón que además abre y cierra se lee como un
+  // enlace a otra pantalla, que es justo lo que NO hace.
   function handleBreakdownToggle(e) {
     var toggle = e.target.closest && e.target.closest('[data-opt-toggle]');
     if (!toggle) return;
@@ -7988,11 +8030,61 @@
     var card = toggle.closest('[data-opt-card]');
     var body = card && card.querySelector('.opt__body');
     if (!body) return;
-    var open = toggle.getAttribute('aria-expanded') === 'true';
-    toggle.setAttribute('aria-expanded', String(!open));
-    toggle.classList.toggle('is-open', !open);
-    if (card) card.classList.toggle('is-open', !open);
-    body.hidden = open;
+    var abrir = toggle.getAttribute('aria-expanded') !== 'true';
+    toggle.setAttribute('aria-expanded', String(abrir));
+    toggle.classList.toggle('is-open', abrir);
+    if (card) card.classList.toggle('is-open', abrir);
+    var texto = toggle.querySelector('.opt__disclosure-text');
+    if (texto) texto.textContent = abrir ? 'Ocultar desglose' : 'Ver desglose';
+    alternarDesglose(body, abrir);
+  }
+
+  /* Abrir y cerrar el desglose con la altura animada.
+
+     Antes era `body.hidden = !abrir`: el contenido aparecía de golpe y la
+     tarjeta se estiraba de un tirón, con la tarjeta de abajo saltando en el
+     mismo fotograma. Con la altura animada el borde de la tarjeta se separa
+     solo mientras las filas van apareciendo, así que el desglose se despliega
+     DENTRO de su tarjeta y la de abajo baja a la vez, sin superponerse.
+
+     Se anima `height` y no `grid-template-rows: 0fr -> 1fr` porque el alto
+     final depende de cuántos rubros tenga la propuesta, de si la nota entra en
+     una línea o en dos y del ancho de la pantalla: el 1fr lo resuelve solo,
+     el alto hay que medirlo.
+
+     La medición va con `scrollHeight` DESPUÉS de sacar el `hidden`, porque con
+     `display:none` no hay caja y medir ahí da 0. Después de animar se borra el
+     `height` en línea para que la tarjeta vuelva a medir sola: si el texto se
+     reacomoda (se gira el celu, cambia el número de viajeros) un alto fijo se
+     queda corto y deja la última fila cortada.
+
+     Con `prefers-reduced-motion` la transición no se aplica y el alto salta de
+     golpe, que es lo que se pide al sistema; el estado final es el mismo. Por eso
+     la animación se resuelve enteramente en CSS y acá no hay que preguntar. */
+  var desgloseTimer = null;
+  function alternarDesglose(body, abrir) {
+    if (desgloseTimer) { clearTimeout(desgloseTimer); desgloseTimer = null; }
+    if (abrir) {
+      body.hidden = false;
+      // Dos fotogramas: uno para pintar el estado abierto y otro para aplicar el
+      // alto final. Con los dos cambios en el mismo, el navegador no tiene un
+      // valor anterior del que arrancar la transición y el desglose aparece de
+      // golpe.
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { body.style.height = body.scrollHeight + 'px'; });
+      });
+    } else {
+      // Al revés: primero se fija el alto actual como punto de partida, y en el
+      // siguiente fotograma se colapsa a cero. Sin el alto intermedio el cierre
+      // también es un salto.
+      body.style.height = body.scrollHeight + 'px';
+      requestAnimationFrame(function () { requestAnimationFrame(function () { body.style.height = '0px'; }); });
+    }
+    desgloseTimer = setTimeout(function () {
+      desgloseTimer = null;
+      body.style.height = '';
+      if (!abrir) body.hidden = true;
+    }, 320);
   }
 
   /* ---------- cuentas y viajes guardados ---------- */
@@ -8399,7 +8491,44 @@
   }
 
   function init() {
+    /* Volver a la vista de inicio.
+
+       La comparten el logo del header y el boton "Volver" de la vista de
+       detalle, y es una funcion y no dos porque los dos caminos tienen que
+       hacer lo mismo: si el logo cerrara el detalle sin tocar los filtros y el
+       boton los tocara, "ir a inicio" significaria dos cosas distintas segun por
+       donde se entre.
+
+       Vive adentro de init() porque el reset del destino usa `sel`, que es el
+       nodo del selector de Destino y se arma en esta misma funcion. Al ser una
+       declaracion de funcion, el hoisting la deja disponible para el listener
+       del logo, que se engancha antes de que llegue a este bloque. */
+    function volverAHome() {
+      var detalle = $('#vista-detalle'), inicio = $('#vista-principal');
+      if (detalle) detalle.classList.add('oculto');
+      if (inicio) inicio.classList.remove('oculto');
+      // Volviendo desde una busqueda de un solo destino, "el inicio" es la
+      // lista de todos: por eso el boton de volver dice "Volver a todos los
+      // destinos".
+      if (massSearch) { S.dest = 'todos'; if (sel) sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; setHighlightsVisible(true); }
+      // Al volver, la card del destino que se estaba mirando queda marcada. Se
+      // cambia la clase en el DOM en vez de renderizar la grilla entera: el
+      // repintado completo tira abajo los "ver desglose" abiertos y la
+      // posicion del scroll, y aca lo unico que cambia es un estado.
+      pintarDestinoSeleccionado();
+      pintarPropuestaSeleccionada();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     initThemeToggle();
+    // El logo del header es la salida de la vista de propuesta. Esa vista ocupa
+    // la pantalla entera y su unico boton para salir esta arriba de ella, asi
+    // que con la pagina scrolleada hay que subir hasta encontrarlo; el logo
+    // esta siempre visible. El listener va en el boton y no delegado en
+    // document porque el header no se repinta nunca y asi no se filtra ningun
+    // clic de los miles que hay abajo.
+    var logo = $('#logo-home');
+    if (logo) logo.addEventListener('click', function (e) { e.preventDefault(); volverAHome(); });
     var authButton = $('#auth-button'), tripsButton = $('#trips-button');
     if (authButton) authButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(function () { if (authUser) openTripsModal(); else openAuthModal(); }); });
     if (tripsButton) tripsButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(openTripsModal); });
@@ -9406,15 +9535,7 @@ function comboNombreDestino() {
       }
       if (e.target.closest('#btn-volver')) {
         e.preventDefault(); e.stopPropagation();
-        $('#vista-detalle').classList.add('oculto'); $('#vista-principal').classList.remove('oculto');
-        if (massSearch) { S.dest = 'todos'; sel.value = 'todos'; $('#btn-buscar-todos').hidden = false; setHighlightsVisible(true); }
-        // Al volver, la card del destino que se estaba mirando queda marcada. Se
-        // cambia la clase en el DOM en vez de renderizar la grilla entera: el
-        // repintado completo tira abajo los "ver desglose" abiertos y la
-        // posicion del scroll, y aca lo unico que cambia es un estado.
-        pintarDestinoSeleccionado();
-        pintarPropuestaSeleccionada();
-        window.scrollTo({ top: 0, behavior: 'smooth' }); return;
+        volverAHome(); return;
       }
       // Hotel: el input es un radio nativo, así que el clic repetido no lo
       // desmarca solo, y uno nuevo llega con checked=true en los dos casos. La
