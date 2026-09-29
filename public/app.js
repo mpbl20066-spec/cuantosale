@@ -3650,10 +3650,24 @@
     tours: '<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5V10a2 2 0 0 0 0 4v1.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 15.5V14a2 2 0 0 0 0-4Z"/><path d="M14 7v1.6M14 11.2v1.6M14 15.4V17" stroke-width="2.2"/>',
     auto: '<path d="M3 14.5h18v3.5H3z"/><path d="M5 14.5v-2.8A1.7 1.7 0 0 1 6.7 10h10.6a1.7 1.7 0 0 1 1.7 1.7v2.8"/><path d="M9 11V8.5M13 11V8.5"/>'
   };
+  /* El color se aplica EN EL SVG, no en un contenedor: el svg lleva su propio
+     style y una declaracion directa gana a la herencia, asi que poner el color
+     en el padre no hacia nada. Medido: los cuatro iconos del modal salian del
+     mismo azul aunque el padre trajera el color del proveedor.
+
+     Por eso colorProveedor() devuelve un valor entero: si trae almohadilla es
+     un hex y va tal cual, y si no es un token de la hoja y se envuelve en
+     var() como antes. Un "var(#7EA8E8)" seria invalido y el svg caeria a
+     heredar, que es el bug que estamos corrigiendo. */
+  function colorCss(valor) {
+    if (!valor) return null;
+    return valor.charAt(0) === '#' ? valor : 'var(' + valor + ')';
+  }
   function categoryIcon(key, colorVar) {
     var d = CATEGORY_ICONS[key];
     if (!d) return '';
-    return '<svg class="trip-summary__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:var(' + (colorVar || 'c1') + ')" aria-hidden="true">' + d + '</svg>';
+    var color = colorCss(colorVar) || 'var(--c1)';
+    return '<svg class="trip-summary__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="color:' + color + '" aria-hidden="true">' + d + '</svg>';
   }
   /* Logos de los botones del resumen. El resto de los iconos de la app son de
      trazo y salen de CATEGORY_ICONS; los de marca van dibujados porque es la
@@ -3670,6 +3684,27 @@
     compartir: '<circle cx="17.5" cy="6" r="2.6"/><circle cx="6.5" cy="12" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.8 10.8 6.4-3.5M8.8 13.2l6.4 3.5"/>',
     copiar: '<rect x="8.6" y="8.6" width="11.4" height="11.4" rx="2.2"/><path d="M15.4 5.6H6.2a2.2 2.2 0 0 0-2.2 2.2v9.2"/>'
   };
+  /* Los diferenciales de la agencia. No son marcas, asi que van aparte de
+     BRAND_ICONS: mismo dibujo stroked y misma clase, pero otra historia. */
+  var VENTAJA_ICONS = {
+    soporte: '<path d="M4 13v-1.5A8 8 0 0 1 20 11.5V13"/><rect x="2.6" y="12.4" width="4.2" height="7" rx="2.1"/><rect x="17.2" y="12.4" width="4.2" height="7" rx="2.1"/>',
+    curaduria: '<path d="M12 3.2 14.3 8l5.3.8-3.8 3.7.9 5.3-4.7-2.5-4.7 2.5.9-5.3L4.4 8.8 9.7 8Z"/>',
+    logistica: '<circle cx="8.4" cy="8.2" r="3.1"/><path d="M2.8 19.6c0-3.1 2.5-5.3 5.6-5.3s5.6 2.2 5.6 5.3"/><circle cx="17.2" cy="9.4" r="2.4"/><path d="M16 14.4c2.6.4 4.4 2.3 4.4 5.2"/>',
+  };
+  function ventajaIcon(key) {
+    var d = VENTAJA_ICONS[key];
+    if (!d) return '';
+    return '<svg class="voucher-btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+  }
+  /* La barra de diferenciales. Texto fijo: no depende del viaje ni del estado,
+     y es exactamente por eso que va en el modal y no en la seccion de la
+     propuesta, que se vuelve a pintar con cada cambio. */
+  var ventajasMarkup = '<ul class="voucher-ventajas">'
+    + '<li>' + ventajaIcon('soporte') + '<span>Soporte humano y local en Uruguay y en tu destino</span></li>'
+    + '<li>' + ventajaIcon('curaduria') + '<span>Curaduría y ahorro de tiempo</span></li>'
+    + '<li>' + ventajaIcon('logistica') + '<span>Gestión logística completa para grupos</span></li>'
+    + '</ul>';
+
   function brandIcon(key) {
     var d = BRAND_ICONS[key];
     if (!d) return '';
@@ -4241,6 +4276,47 @@
      http:// desde una IP de la app no lo es: se cae y no avisa. Por eso hay una
      vuelta con execCommand y, si tampoco funciona, se lo dice a la persona en
      vez de fingir que se copió. */
+  /* El mensaje al asesor, armado con lo que esta REALMENTE marcado.
+
+     La plantilla fija --"ya reserve mis vuelos y hotel"-- sirve solo cuando las
+     dos cosas son ciertas. Si la persona todavia no reservo el vuelo y el
+     mensaje se lo afirma, la primera frase del chat ya miente y el asesor
+     empieza a trabajar sobre datos falsos. Asi que el texto se arma aca: se
+     listan solo los rubros confirmados, y se pide lo que falta.
+
+     Los rubros confirmados van primero, porque son los que el asesor necesita
+     para avanzar. Los pendientes van al final como pedido, no como logro. */
+  function mensajeCoordinar() {
+    if (!detailState || !detailState.meta) return null;
+    var destino = detailState.meta.dest.name;
+    var fechas = esc(storyDateRange(detailState.meta));
+    var noches = Math.max(1, Number(detailState.meta.nights) || 1);
+    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
+    var hechos = [];
+    var faltan = [];
+    var marcar = function (cat, txt) {
+      if (reservasDe(cat)) hechos.push(txt); else faltan.push(txt);
+    };
+    marcar('pasajes', 'vuelo');
+    marcar('alojamiento', 'alojamiento');
+    var lineas = [];
+    lineas.push('Hola! Estoy armando un viaje a ' + destino + ' (' + fechas + ', ' + noches + (noches === 1 ? ' noche' : ' noches') + ', ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ').');
+    if (hechos.length) {
+      lineas.push('Ya tengo reservado: ' + hechos.join(' y ') + '.');
+    } else {
+      lineas.push(' Todavia no reserve nada.');
+    }
+    if (faltan.length) {
+      lineas.push('Me falta coordinar: ' + faltan.join(' y ') + '.');
+    } else {
+      lineas.push('El alojamiento y el vuelo ya estan listos; me queda coordinar los traslados y las actividades con ustedes.');
+    }
+    lineas.push('Quiero arrancar con los traslados y las actividades. \u00bfLos coordinan ustedes o necesito pedirlo por aca?');
+    lineas.push('');
+    lineas.push('Presupuesto estimado del cotizador: ' + money(Math.round((Number(getBudgetBreakdown(detailState).total) || 0))));
+    return lineas.join('\n');
+  }
+
   function copySummaryText(button) {
     var modal = $('#booking-modal');
     var texto = (modal && modal.dataset.summaryText) || '';
@@ -4398,6 +4474,28 @@
 
      La lista se lee sola: un rubro reservable es el que tiene canal. */
   function esReservable(categoria) { return !!CANAL_RESERVA[categoria]; }
+  /* El color del icono de la fila, y es el del PROVEEDOR y no el del rubro.
+
+     Con getCategoryColor() --la paleta de rubros-- casi todas las filas salian
+     del mismo azul y la columna izquierda no distinguia nada. Con el proveedor
+     se lee de un vistazo que el vuelo es de Google, el hotel es de Booking y los
+     otros dos los lleva la agencia.
+
+     Google y Booking compiten en el mismo mercado y los dos son azules, asi que
+     van en dos tonos del mismo azul y no en dos colores inventados: el de
+     Google mas claro y saturado, el de Booking mas frio y apagado. La silueta
+     del icono los separa igual, y el color solo tiene que subir el tono.
+
+     Lo que no es reservable no tiene proveedor, asi que cae en la paleta de
+     rubros: comida y transporte local no son de nadie. */
+  var COLOR_PROVEEDOR = { pasajes: '#7EA8E8', alojamiento: '#4E86C6', traslados: '--cel', tours: '--cel' };
+  /* Devuelve un hex o un nombre de token, sin resolver. Resolverlo lo hace
+     colorCss(), en el punto donde se arma el style. Un token sin almohadilla
+     y un hex con almohadilla: esa es la unica diferencia y por eso se prueba el
+     primer caracter y no se concatena nada. */
+  function colorProveedor(categoria) {
+    return COLOR_PROVEEDOR[categoria] || getCategoryColor(categoria);
+  }
   function canalDe(categoria) { return esReservable(categoria) ? CANAL_RESERVA[categoria] : { canal: '', externo: false }; }
   /* Devuelve el texto del estado, o null si el rubro no esta reservado.
 
@@ -4652,7 +4750,10 @@
         + (canal.canal ? '<p class="voucher-item__canal">' + esc(canal.canal) + '</p>' : '');
       var lado = controlReserva(category)
         + (reservado ? detalleReservaCta(category) : (ctaMarkup || ''));
-      return '<li class="voucher-item' + (reservado ? ' is-reservado' : '') + '"><span class="voucher-item__icon" style="color:var(' + getCategoryColor(category) + ')">' + categoryIcon(category) + '</span>' +
+      /* El color es del proveedor, no del rubro: con la paleta de rubros casi
+         todas las filas salian del mismo azul. Va por parametro porque el
+         style del span lo perdia contra el del svg. Ver categoryIcon(). */
+      return '<li class="voucher-item' + (reservado ? ' is-reservado' : '') + '"><span class="voucher-item__icon">' + categoryIcon(category, colorProveedor(category)) + '</span>' +
         '<div class="voucher-item__body"><p class="voucher-item__title">' + title
           /* La pastilla va en la linea del titulo, no en una propia. Antes ocupaba
              una linea entera y la fila reservada daba 83px contra los 58 de las
@@ -4737,10 +4838,22 @@
        codigo de aeropuerto de undefined —que es "—"— con un "sin fecha" al lado:
        "IDA — sin fecha → — sin fecha". Un tramo sin origen, sin destino y sin
        hora no informa nada, y la fila queda mejor diciendo que falta elegir. */
+    /* La ruta, y los horarios aparte.
+
+       Antes era una linea por tramo con su flecha y su etiqueta "Ida" /
+       "Vuelta", asi que en ida y vuelta salian dos flechas, dos etiquetas y
+       los mismos dos airports repetidos, para decir la misma ruta dos veces.
+
+       Ahora una sola linea con la ruta --con flecha doble cuando hay vuelta--
+       y los horarios en una linea apagada debajo. El numero de vuelo se cae:
+       es el dato que menos se lee de un voucher y el que mas ruido hace en
+       una fila de este ancho. */
     var flightLines = '';
     if (flightSummary.selected) {
-      flightLines = legLine('Ida', flightSummary.origin, flightSummary.destination, flightTime(outLeg.departure, flightSummary.departureText), flightTime(outLeg.arrival, flightSummary.arrivalText), flightSummary.flightNumber);
-      if (flightSummary.isRoundTrip) flightLines += legLine('Vuelta', flightSummary.returnOrigin, flightSummary.returnDestination, flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText), flightTime(inLeg && inLeg.arrival, flightSummary.returnArrivalText), flightSummary.inboundFlightNumber);
+      var ruta = esc(airportCode(flightSummary.origin)) + (flightSummary.isRoundTrip ? ' &#8596; ' : ' &rarr; ') + esc(airportCode(flightSummary.destination));
+      var horarios = 'Sale ' + esc(flightTime(outLeg.departure, flightSummary.departureText))
+        + (flightSummary.isRoundTrip ? ' \u00b7 vuelve ' + esc(flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText)) : '');
+      flightLines = '<p class="voucher-item__ruta">' + ruta + '</p><p class="voucher-item__horarios">' + horarios + '</p>';
     } else {
       flightLines = avisoVoucher('Elegí un vuelo en la sección de vuelos para ver sus horarios.');
     }
@@ -4814,6 +4927,91 @@
        nuevo ni un listener nuevo. */
     var pedido = checkoutPedido();
     var pedidoTotal = pedido.count ? money(checkoutTotals().total) : '';
+    /* La herramienta grupal, como bloque propio y antes del pie.
+
+       Abre la misma accion que el enlace chico del encabezado --data-split-trip
+       en los dos casos--: son dos entradas, no dos acciones. El bloque se
+       queda con la version larga, que es la que explica que hace, y el enlace
+       del encabezado con la corta, que es la que alcanza cuando ya elegiste
+       viajar acompañado.
+
+       Un <button> y no un <a>: no lleva a otra pagina, abre el reparto del
+       grupo. Un <a> sin href no es tabulable. */
+    /* El asistente, en tres pasos y en el orden en que hay que hacerlos.
+
+       El estado de cada paso sale de la misma marca de reserva que ya
+       usaba el resto del modal, para que no haya dos verdades: paso
+       seleccionado, paso pendiente. Lo unico nuevo es el boton de confirmar,
+       que hace falta en los dos externos y no en el tercero.
+
+       El paso externo lleva dos cosas: el link para abrir y el toque de
+       confirmacion. Se explica en el texto de la nota mas abajo, porque
+       Y no es un parche: es el unico momento en que el dato es cierto. La
+       nota de canales de mas abajo lo explica en una frase. */
+    function pasoExternoHecho(categoria) { return reservasDe(categoria); }
+    function pasosMarkup() {
+      var extVuelo = pasoExternoHecho('pasajes');
+      var extHotel = pasoExternoHecho('alojamiento');
+      var terrChequeado = Boolean(pedido.count);
+      var paso = function (n, titulo, bajada, hecho, actual, accion) {
+        return '<li class="voucher-step' + (hecho ? ' is-done' : '') + (actual ? ' is-now' : '') + '">'
+          + '<span class="voucher-step__n" aria-hidden="true">' + (hecho ? '&#10003;' : n) + '</span>'
+          + '<div class="voucher-step__text"><b>' + esc(titulo) + '</b><span>' + bajada + '</span></div>'
+          + (hecho ? '' : accion) + '</li>';
+      };
+      var confirma = function (cat, que) {
+        return '<button type="button" class="voucher-step__btn" data-confirmar-reserva="' + esc(cat) + '"'
+          + ' title="Confirm&aacute; que ya lo reservaste en ' + esc(que) + '">Ya lo reserv&eacute;</button>';
+      };
+      var markup = '<section class="voucher-steps"><h3 class="voucher-steps__title">Para completar tu viaje</h3><ol>';
+
+      // Paso 1: el vuelo.
+      var vBajada = flightSummary.selected
+        ? esc(flightSummary.airline || '') + ' &middot; ' + money(flightTotal)
+        : 'Todav&iacute;a no elegiste vuelo';
+      var vAccion = '';
+      if (flightSummary.selected && flightBookUrl) {
+        vAccion = '<a class="voucher-step__btn is-link" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="pasajes">Ver en Google Flights</a>';
+      } else if (flightSummary.selected) {
+        vAccion = confirma('pasajes', 'Google Flights');
+      } else {
+        vAccion = '<span class="voucher-step__hint">Elegilo en la secci&oacute;n de vuelos</span>';
+      }
+      markup += paso(1, 'Vuelo', vBajada, extVuelo, !extVuelo, vAccion);
+
+      // Paso 2: el alojamiento.
+      var hBajada = hotelBookUrl
+        ? esc(selectedHotelName) + ' &middot; ' + money(hotelTotal)
+        : 'Eleg&iacute; tu hotel';
+      var hAccion = '';
+      if (hotelBookUrl) {
+        hAccion = '<a class="voucher-step__btn is-link" href="' + esc(hotelBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="alojamiento">Ver en Booking</a>';
+      } else {
+        hAccion = confirma('alojamiento', 'Booking');
+      }
+      markup += paso(2, 'Alojamiento', hBajada, extHotel, !extVuelo && !extHotel, hAccion);
+
+      // Paso 3: el terrestrial, que es el unico que lleva la app.
+      var tAccion = terrChequeado
+        ? ''
+        : '<button type="button" class="voucher-step__btn" data-reservar-pedido>Coordinar</button>';
+      markup += paso(3, 'Traslados y actividades',
+        terrChequeado ? 'Coordinados con la agencia' : 'Los coordinamos nosotros',
+        terrChequeado, extVuelo && extHotel && !terrChequeado, tAccion);
+
+      markup += '</ol></section>';
+      return markup;
+    }
+
+    var dividirBloque = '<aside class="voucher-split">'
+      + '<div class="voucher-split__head">' + brandIcon('dividir')
+      + '<div class="voucher-split__text">'
+      + '<h3>¿Viajás en grupo?</h3>'
+      + '<p>Dividí el total automáticamente. Cada uno ve lo que puso, lo que le toca y lo que quedó a deber.</p>'
+      + '</div></div>'
+      + '<button type="button" class="voucher-split__btn" data-split-trip>Dividir gastos con amigos</button>'
+      + '</aside>';
+
     var reservarTodo = '<div class="voucher-reserve">'
       + '<button type="button" class="voucher-reserve__btn"' + (pedido.count ? ' data-reservar-pedido' : ' disabled') + '><span>'
       + (pedido.count ? 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades')) : 'Elegí algo para reservar')
@@ -4824,7 +5022,10 @@
       + '<button type="button" class="voucher-hero__split" data-split-trip>Ver cómo dividir este monto</button></span>';
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
-      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +
+      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
+         pregunta que uno se hace justo despues de ver el total. */
+      ventajasMarkup +
+
       '<ul class="voucher-list">' +
       itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '') +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
@@ -4842,6 +5043,32 @@
       + '<li><span class="voucher-destino__name">Gastronomía <em>' + foodLabel + '</em></span><span class="voucher-destino__dia">' + money(foodPerDay) + '/día</span><b class="voucher-destino__monto">' + money(foodTotal) + '</b></li>'
       + '</ul>'
       + '<p class="voucher-destino__total"><span>Total en destino</span><b>' + money(destinoTotal) + '</b></p></section>' +
+      /* La nota de canales, y es la que da la tranquilidad que se busca.
+
+       La idea de fondo --todo junto y alguien que lo coordine-- se dice
+       entera. Lo que no se hace es sostenerla con un proveedor que no existe:
+       no hay integracion con Duffel, ni ruta, ni clave, ni webhook, y
+       .env.example dice que se eligio SerpAPI porque Duffel y Amadeus piden
+       aprobacion. Decir "Respaldo Duffel" seria una promesa que el producto no
+       puede cumplir.
+
+       Y el vuelo tampoco es una gigante que te respalda: Google Flights es un
+       METABUSCADOR. El precio y el link son reales, pero la compra termina en
+       la aerolinea o en una agencia. Booking si es intermediario real, y ahi
+       el respaldo es cierto. */
+      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>Google Flights</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
+      /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
+
+       Porque el pago del vuelo y del hotel pasa por un sitio del que la app
+       no recibe ningun aviso: no hay transaccion propia ni webhook al que
+       colgar el cambio. El unico dato cierto es el que declara la persona, asi
+       que se lo preguntamos una vez y lo anotamos, en vez de suponerlo y
+       mostrarle un "Comprado" que podria ser falso.
+
+       El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
+       se marca solo al completar el checkout. */
+      '<p class="voucher-canales__nota">En el vuelo y el hotel te llevamos al sitio donde se paga, pero ese sitio no nos avisa cuando terminaste. Por eso el paso te pide confirmarlo: as&iacute; queda anotado de verdad.</p>' +
+      dividirBloque +
       reservarTodo +
       /* ABAJO, UN SOLO BOTON SOLIDO.
 
@@ -4856,14 +5083,18 @@
          menu "Compartir" junta WhatsApp, la tarjeta de Instagram y copiar el
          texto, que antes eran tres botones y uno de ellos gigante. */ +
       '<div class="voucher-actions">' +
+      /* Tres utilidades, misma caja. WhatsApp sale de la barra y se queda
+         adentro del menu: antes estaba en los dos lados, con el mismo icono
+         y el mismo texto, a 300px de distancia. En la barra queda por ser el
+         atajo de un toque, que es como se usa compartir un itinerario. */
       '<div class="voucher-share"><button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span><svg class="voucher-share__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
       '<div class="voucher-share__menu" id="voucher-share-menu" hidden>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '<button type="button" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Tarjeta para Instagram</span></button>' +
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
+      '<button type="button" class="voucher-chip voucher-chip--main" data-coordinar-asesor title="Abrir WhatsApp con el resumen y lo que falta coordinar">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">Coordinar con asesor</span></button>' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
-      '<button type="button" class="voucher-chip" data-split-trip aria-label="Dividir este total entre los pasajeros">' + brandIcon('dividir') + '<span class="voucher-btn__label">Dividir</span></button>' +
       '</div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -9518,6 +9749,35 @@ function comboNombreDestino() {
           Array.prototype.forEach.call(document.querySelectorAll('[data-share-menu]'), function (b) { b.setAttribute('aria-expanded', 'false'); });
         }, 0);
       }
+      /* El toque de confirmar del paso externo.
+
+         Es el unico momento en que el dato "este rubro esta reservado" es
+         cierto: el link externo no avisa cuando termino de pagarse, asi que lo
+         declara la persona. Se usa marcarReservadoManual, que ademas exige que
+         quien toca sea la agencia --es una afirmacion sobre una reserva, no una
+         accion de servicio--, y por lo tanto no le hace nada a un cliente.
+
+         Para el cliente esto se ve igual: el paso queda marcado y el boton pasa a
+         ser de la agencia. Un cliente que puede declararse una reserva propia
+         puede hacer que el cotizador diga "reservado" por algo que no existe. */
+      var confirmarPaso = e.target.closest('[data-confirmar-reserva]');
+      if (confirmarPaso) {
+        e.preventDefault();
+        marcarReservadoManual(confirmarPaso.getAttribute('data-confirmar-reserva'), {});
+        return;
+      }
+      /* El cierre: WhatsApp con el resumen y lo que falta. El mensaje lo arma
+         mensajeCoordinar() y sale con el estado real, no con una plantilla que
+         afirme reservas que todavia no pasaron. */
+      var coordinar = e.target.closest('[data-coordinar-asesor]');
+      if (coordinar) {
+        e.preventDefault();
+        var texto = mensajeCoordinar();
+        if (!texto) return;
+        window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank', 'noopener,noreferrer');
+        return;
+      }
+
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();

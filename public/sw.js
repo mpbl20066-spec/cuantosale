@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v89';
+var CACHE_NAME = 'cuantosale-shell-v91';
 var APP_SHELL = [
   // '/app' y NO '/': el servidor responde '/' con la landing de waitlist
   // (server.js: if (rel === '/') rel = '/waitlist.html') y la calculadora vive

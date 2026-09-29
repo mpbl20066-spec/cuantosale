@@ -1,4 +1,4 @@
-/* version: 133
+/* version: 135
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -917,6 +917,14 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    cuando esta reservado: un precio sin dueno es un numero. En el mismo lugar
    y con el mismo tono para los cuatro rubros, que es lo que hace que la fila
    se lea como la misma fila. */
+/* La ruta del vuelo, con la flecha doble cuando hay ida y vuelta. Reemplaza a
+   las dos lineas por tramo con su etiqueta "Ida" / "Vuelta", que repetian los
+   mismos dos airports y dos flechas para decir la misma ruta dos veces. */
+.voucher-item__ruta{margin:0;color:var(--ink);font-size:13.5px;font-weight:700;line-height:1.35;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Los horarios aparte y mas apagados: son el dato segundo de la fila, no el
+   primero. Antes compartian linea con la ruta y con el numero de vuelo. */
+.voucher-item__horarios{margin:0;color:var(--ink2);font-size:12px;font-weight:500;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 .voucher-item__canal{margin:0;color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.35;display:flex;align-items:center;gap:5px}
 .voucher-item__canal::before{content:"";flex:0 0 auto;width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.55}
 
@@ -937,9 +945,20 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    aire, no el del mas corto. 38px de alto mantiene el objetivo tactil comodo
    sin inflar la fila, que con el boton al lado del monto ya es alta. */
 .voucher-item__detalle,
-.voucher-item__side .voucher-item__cta{min-width:118px;min-height:38px;white-space:nowrap}
-.voucher-item__detalle:hover{border-color:var(--ink2);color:var(--ink)}
-.voucher-item__detalle:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.voucher-item__side .voucher-item__cta{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-width:118px;min-height:38px;padding:0 12px;
+  border:1px solid var(--line);border-radius:10px;background:transparent;
+  font-family:inherit;font-size:12px;font-weight:700;line-height:1;
+  white-space:nowrap;cursor:pointer;transition:border-color .18s ease,color .18s ease,background .18s ease}
+.voucher-item__detalle,
+.voucher-item__side .voucher-item__cta:hover{border-color:var(--ink2);color:var(--ink)}
+.voucher-item__side .voucher-item__cta:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* El boton de reservar es el mas primario de la columna, asi que se distingue
+   por el color del texto y no por el tamano: mismo alto, misma caja, misma
+   tipografia que el "Detalle" de al lado. Antes era mas grande y era el unico
+   que rompia la linea. */
+.voucher-item__side .voucher-item__cta{color:var(--cel)}
+.voucher-item__side .voucher-item__cta:hover{color:var(--ink);background:var(--cel-soft);border-color:var(--cel)}
 
 /* La fila reservada se apaga un poco en el titulo: el numero sigue siendo el
    dato, y el peso fuerte tiene que quedarse en el estado y no en el nombre,
@@ -995,9 +1014,127 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    fucsia de Instagram se fue: era el unico color ajeno de la app en modo
    oscuro, y ademas estaba al lado del boton que convierte, con el mismo
    peso visual. Compartir es util, no vende. */
-.voucher-actions{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:8px;margin-top:4px}
+/* Tres columnas iguales. Compartir / WhatsApp / Guardar: misma caja, mismo
+   alto, mismo texto, y el mismo ancho porque la grilla los reparte parejo.
+   Antes era 1.35fr 1fr 1fr y la primera columna, la de "Compartir", salia de
+   120px contra los 190 de las otras dos. */
+.voucher-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:4px}
+
 .voucher-chip{position:relative}
-.voucher-share{position:relative}
+/* min-width:0 para que el texto se pueda recortar. Sin eso, "Compartir" con su
+   chevron empuja a los vecinos y la grilla de tres columnas deja de ser de tres
+   columnas iguales. */
+.voucher-chip{min-width:0;padding:0 10px}
+.voucher-chip .voucher-btn__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* width:100% en el boton que vive dentro de .voucher-share. Medido: las tres
+   pistas de la grilla eran de 212px y los tres hijos tambien, pero el boton de
+   compartir daba 128. La razon es que .voucher-chip es inline-flex y, al no ser
+   hijo directo de la grilla, se ajustaba a su contenido en vez de estirarse a la
+   pista. Tres columnas iguales y tres botones de ancho distinto. */
+.voucher-share > .voucher-chip{width:100%}
+
+/* La nota que explica donde se paga cada rubro.
+
+   Va antes del bloque de dividir y con el tono de la bajada, no como un aviso:
+   no advierte de nada, explica el reparto de canales. Los tres nombres van en
+   --ink, no en --cel: si los tres brillan en color, el texto parece una lista de
+   precios y no una frase. La linea que dice "no se cobra nada aca" va en el CTA,
+   que es donde alguien la necesita. */
+.voucher-canales{margin:18px 0 0;padding:12px 14px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;line-height:1.5}
+.voucher-canales b{color:var(--ink);font-weight:700}
+/* La nota que explica el paso manual. Se separa de la de arriba con un borde
+   y no con mas padding: son dos cosas distintas --una explica el reparto de
+   canales, la otra explica por que hay un boton-- y pegadas se leen como una
+   sola frase larga. */
+.voucher-canales__nota{margin:8px 0 0;padding-top:10px;border-top:1px solid var(--line)}
+
+/* ---------- El asistente paso a paso ----------
+   Tres pasos en el orden en que hay que hacerlos. Cada uno dice que falta y
+   tiene una sola accion, que es lo que hace que un asistente sea un asistente
+   y no una lista.
+
+   El estado lo toma la misma marca de reserva que el resto del modal, asi que
+   no hay dos verdades: si el paso esta marcado, el numero es un check; si no,
+   el numero es el orden. El paso de al lado es el que esta en el aire, y se
+   distingue con el punto de --cel, no con un color propio. */
+/* ---------- Los diferenciales de la agencia ----------
+   Tres items en fila y a una banda, sin caja propia: van pegados al precio
+   porque es la pregunta que aparece justo despues de ver el total, y una
+   caja mas seria la tercera del modal.
+
+   Los tres iconos miden lo mismo y comparten esqueleto, para que se lean como
+   una serie y no como tres cosas sueltas. La punta del chevron es del mismo
+   color que la barra: el color de la accion principal. */
+.voucher-ventajas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:0 0 2px;list-style:none}
+.voucher-ventajas li{display:grid;gap:5px;min-width:0}
+.voucher-ventajas .voucher-btn__ico{width:19px;height:19px;color:var(--cel)}
+.voucher-ventajas span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.4}
+/* En una sola columna de texto el ancho de cada item es un tercio del modal y
+   las frases mas largas dan tres lineas. A 560px ya no entran tres lado a
+   lado con texto legible. */
+@media (max-width:560px){
+  .voucher-ventajas{grid-template-columns:minmax(0,1fr);gap:9px}
+  .voucher-ventajas li{grid-template-columns:19px minmax(0,1fr);gap:9px;align-items:center}
+}
+
+/* ---------- El boton de cierre ----------
+   El unico control del modal que pide atencion, y lo pide con el color de la
+   accion principal: el mismo --action-bg del boton de reservar y del alta. Hay
+   una sola palabra en toda la app para "esto es lo que quiero hacer".
+
+   Con --cel y fondo transparente se leia como un quinto boton mas de la barra,
+   que es justo lo que se queria evitar al sacar el boton de WhatsApp de ahi. */
+.voucher-actions .voucher-chip--main{border:0;background:var(--action-bg);color:var(--action-ink);font-weight:800}
+.voucher-actions .voucher-chip--main .voucher-btn__ico{color:currentColor;width:18px;height:18px}
+.voucher-actions .voucher-chip--main:hover{background:var(--action-bg);color:var(--action-ink);filter:brightness(1.1)}
+.voucher-actions .voucher-chip--main:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* Los dos laterales, mismo ancho fijo. El pedido era que los tres emparejen y
+   el del medio tiene un texto mas largo: sin min-width el centro crece y los
+   laterales se achican, que es el problema al reves. */
+.voucher-actions .voucher-chip{min-width:0;width:100%}
+
+.voucher-steps{margin-top:18px}
+.voucher-steps__title{margin:0 0 9px;color:var(--ink2);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.voucher-steps ol{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.voucher-step{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:11px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
+.voucher-step:first-child{border-top:0}
+.voucher-step__n{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--line);border-radius:50%;color:var(--ink2);font-size:11.5px;font-weight:800;line-height:1}
+.voucher-step.is-now .voucher-step__n{border-color:var(--cel);color:var(--cel);background:var(--cel-soft)}
+.voucher-step.is-done .voucher-step__n{border-color:transparent;background:var(--good-soft);color:var(--good);font-size:13px}
+.voucher-step__text{display:grid;gap:1px;min-width:0}
+.voucher-step__text b{color:var(--ink);font-size:13.5px;font-weight:700;line-height:1.3}
+.voucher-step.is-done .voucher-step__text b{color:var(--ink2)}
+.voucher-step__text span{color:var(--ink2);font-size:12px;font-weight:500;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.voucher-step__hint{color:var(--ink2);font-size:11.5px;font-weight:600;white-space:nowrap;opacity:.8}
+/* El boton del paso. Mismo language que el resto de los controles menores, y
+   el <a>--el que abre el proveedor-- con el borde de --cel para que se lea
+   como la accion que de verdad saca del modal. */
+.voucher-step__btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font-family:inherit;font-size:12px;font-weight:700;line-height:1;white-space:nowrap;text-decoration:none;cursor:pointer;transition:border-color .18s ease,color .18s ease,background .18s ease}
+.voucher-step__btn:hover{border-color:var(--ink2);color:var(--ink)}
+.voucher-step__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.voucher-step__btn.is-link{border-color:var(--cel);color:var(--cel)}
+.voucher-step__btn.is-link:hover{background:var(--cel-soft);color:var(--ink)}
+
+/* El boton central de la barra es la accion de cierre, asi que se distingue
+   por el borde de --cel. Los otros dos de la barra son utilidades y se quedan
+   con el borde neutro. */
+
+/* En pantallas angostas el paso no puede tener el boton al lado del texto: los
+   tres elementos en una fila de 320px dejan el texto en 90px y el boton lo
+   parte. El boton baja de renglon y ocupa el ancho del paso. */
+@media (max-width:420px){
+  .voucher-step{grid-template-columns:26px minmax(0,1fr)}
+  .voucher-step__btn,.voucher-step__hint{grid-column:2;justify-self:start}
+}
+
+
+/* position:relative SOLO no alcanza: hace falta tambien z-index, y con eso el
+   wrapper se convierte en el contexto de apilamiento del menu. Sin el, el
+   z-index del menu se resolvia contra un ancestro mas lejano y el bloque de
+   dividir, que esta despues en el flujo, lo tapaba. */
+.voucher-share{position:relative;z-index:2}
+
 .voucher-share__chev{width:15px;height:15px;flex:0 0 auto;margin-left:-2px;color:var(--ink2);transition:transform .2s ease}
 [data-share-menu][aria-expanded="true"] .voucher-share__chev{transform:rotate(180deg)}
 [data-share-menu][aria-expanded="true"]{border-color:var(--cel);color:var(--ink)}
@@ -1008,9 +1145,35 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    El ancho NO es el del boton: "Copiar el texto del viaje" no entra en los
    120px del boton y quedaria cortada. Medido: el menu sale 136px del boton y
    sigue adentro de la caja. */
-.voucher-share__menu{position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:3;display:grid;gap:2px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 18px 40px rgba(8,16,28,.5)}
+.voucher-share__menu{position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:3;isolation:isolate;display:grid;gap:2px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 18px 40px rgba(8,16,28,.5)}
 .voucher-share__menu[hidden]{display:none}
 .voucher-share__menu button{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:0 10px;border:0;border-radius:9px;background:transparent;color:var(--ink);font:inherit;font-size:13.5px;font-weight:600;text-align:left;cursor:pointer}
+/* ---------- El bloque de dividir gastos ----------
+
+   Va antes del pie y con su propia caja porque NO es una utilidad como
+   compartir o guardar: es una funcionalidad con pantalla propia --el reparto
+   por persona, que puso cada uno, cuanto le queda a deber-- y le sirve a una
+   parte de la gente nomas, la que viaja acompanada. Un chip de 44px al lado
+   de "Guardar" no dice ninguna de las dos cosas.
+
+   Borde de --cel y fondo --bg, sin relleno: en el mismo lugar esta el CTA
+   solido de reservar, y un bloque relleno compite con el. Asi se separa del
+   fondo sin subir de peso. El acento va solo en el icono y en el boton, que
+   son las dos partes que se tocan. */
+.voucher-split{display:grid;gap:13px;margin-top:20px;padding:15px 16px;border:1px solid var(--cel);border-radius:16px;background:var(--bg)}
+.voucher-split__head{display:flex;align-items:flex-start;gap:11px;min-width:0}
+.voucher-split__head .voucher-btn__ico{flex:0 0 auto;width:23px;height:23px;margin-top:1px;color:var(--cel)}
+.voucher-split__text{min-width:0}
+.voucher-split__text h3{margin:0;color:var(--ink);font-size:15px;font-weight:800;line-height:1.25}
+.voucher-split__text p{margin:4px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.45}
+/* El boton va a lo ancho del bloque, no al lado del texto: la frase ya tiene
+   dos lineas en el celu, y al lado el boton se leia como otra cosa y no como
+   su continuacion. */
+.voucher-split__btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;border:1.5px solid var(--cel);border-radius:12px;background:transparent;color:var(--cel);font-family:inherit;font-size:13.5px;font-weight:800;line-height:1.2;cursor:pointer;transition:background .18s ease,color .18s ease}
+.voucher-split__btn:hover{background:var(--cel-soft);color:var(--ink)}
+.voucher-split__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.voucher-split__btn:disabled{opacity:.6;cursor:wait}
+
 .voucher-share__menu button:hover{background:var(--cel-soft)}
 .voucher-share__menu button:focus-visible{outline:3px solid var(--focus);outline-offset:-2px}
 .voucher-share__menu .voucher-btn__ico{flex:0 0 auto}.voucher-chip{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .18s ease,border-color .18s ease}.voucher-chip:hover{background:var(--bg);border-color:var(--ink2)}
