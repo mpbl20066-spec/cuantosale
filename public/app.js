@@ -1155,6 +1155,12 @@
   // actual: si cambian las fechas o el presupuesto, la marca se cae sola.
   var selectedDestKey = null;
   var selectedDestFor = null;
+  // Propuesta abierta en la última visita, con los mismos filtros de control que
+  // selectedDestKey. El marco mostaza lo lleva la que se está mirando, no la
+  // recomendada: el servidor rotula una como "Recomendada" y a veces no es la que
+  // uno quiere, pero verla marcada hacía creer que ya era la elegida.
+  var selectedPropuestaId = null;
+  var selectedPropuestaFor = null;
   var rangeCalendarMonth = null;
   var rangeCalendarStep = 'dep';
 
@@ -5757,6 +5763,16 @@
       card.classList.toggle('is-selected', card.getAttribute('data-dest-key') === selectedDestKey);
     });
   }
+  // Misma idea que pintarDestinoSeleccionado, para las propuestas de un destino
+  // (#results). El id sale de data-propuesta-id, que se escribe en el <article>
+  // al armar la card, así el marcado se puede repintar sin volver a renderizar la
+  // lista entera (que tira abajo los "ver desglose" abiertos y el scroll).
+  function pintarPropuestaSeleccionada() {
+    var cards = document.querySelectorAll('#results .opt[data-propuesta-id]');
+    Array.prototype.forEach.call(cards, function (card) {
+      card.classList.toggle('propuesta-seleccionada', card.getAttribute('data-propuesta-id') === selectedPropuestaId);
+    });
+  }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
     // Destino que quedó abierto en la última visita. Al volver de "Volver a
@@ -5786,7 +5802,7 @@
         return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + asterisco + '</b></div>';
       }).join('');
       var notaDesglose = hayEstimado
-        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Avanzá a <b>Ver propuesta</b> para ver los precios reales.</p>'
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Hacé clic en <b>Ver propuesta</b> para ver el valor final.</p>'
         : '';
       var photo = DEST_PHOTOS[option.dest.key];
       var location = [option.dest.region, option.dest.country || 'Brasil'].filter(Boolean).join(' - ');
@@ -6189,6 +6205,14 @@
 
   function render(data) {
     lastData = data;
+    // La propuesta elegida ya no corresponde a esta búsqueda si cambiaron las
+    // fechas, la cantidad de gente o el presupuesto. Se cae la marca sola, como
+    // pasa con selectedDestKey: si no, el marco queda en una card que ya no es
+    // la que se está mirando.
+    if (selectedPropuestaId && selectedPropuestaFor !== (data.meta ? data.meta.dep + '|' + data.meta.ret + '|' + data.meta.pax + '|' + data.meta.budget : '')) {
+      selectedPropuestaId = null;
+      selectedPropuestaFor = null;
+    }
     S.hotelType = data.meta.hotelType || S.hotelType;
     var live = data.meta.mode === 'live';
     if (!isRoadtripDestinationAllowed(data.meta.dest.key) && S.transport === 'auto') S.transport = 'flight';
@@ -6301,16 +6325,14 @@
     // sin salir de la lista. Antes la única pista era que toda la tarjeta fuera
     // clickeable: en escritorio se adivinaba, en el celu no se veía, y el botón
     // real ("Ver propuesta") sólo aparecía después de desplegar la tarjeta.
-    // `otraGama` marca las cards que entraron por la regla de "la más barata" o
-    // por la del 20%, y no por ser del mismo nivel. Sin la etiqueta, una card de
-    // otra gama se sentaba al lado de las de tu nivel sin explicar por qué está
-    // ahí.
+    // `otraGama` ya no dibuja nada: antes ponía una pastilla "Otro nivel" en las
+    // cards que entraron por la regla de "la más barata" o por la del 20%. No
+    // decía nada que las otras no dijeran y comía el ancho de la fila de tags.
     var proposalMarkup = function (p, index, otraGama) {
       var tags = '';
       if (p.id === rec.id) tags += '<span class="mini y">Recomendada</span>';
       if (cheapest && p.id === cheapest.id) tags += '<span class="mini">Más barata</span>';
       if (cozy && p.id === cozy.id) tags += '<span class="mini">Más cómoda</span>';
-      if (otraGama) tags += '<span class="mini">Otro nivel</span>';
       if (live && p.sources && p.sources.pasajes === 'real') tags += '<span class="mini g">Pasaje real</span>';
       tags += p.total <= budget ? '<span class="mini g">Entra en tu presupuesto</span>' : '<span class="mini r">Se pasa por ' + money(p.total - budget) + '</span>';
       /* El desglose de la tarjeta marca con un asterisco lo que NO es un precio
@@ -6335,10 +6357,10 @@
         return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + asterisco + '</b></div>';
       }).join('');
       var nota = hayEstimado
-        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Avanzá a <b>Ver propuesta</b> para ver los precios reales.</p>'
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Hacé clic en <b>Ver propuesta</b> para ver el valor final.</p>'
         : '';
       var bodyId = 'opt-desglose-' + index;
-      return '<article class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '" data-opt-card>' +
+      return '<article class="opt' + (p.id === selectedPropuestaId ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-id="' + esc(p.id) + '">' +
         '<div class="opt__head">' +
           '<div class="opt__main"><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
           '<div class="opt__price"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div>' +
@@ -6799,6 +6821,13 @@
       return;
     }
     var proposalId = button.getAttribute('data-propuesta-id');
+    // Abrir una propuesta ES elegirla. El marco mostaza lo lleva la elegida, así
+    // que el estado se escribe acá y no en el handler de la card: esta es la
+    // única ruta por la que se abre una propuesta de #results.
+    if (proposalId) {
+      selectedPropuestaId = proposalId;
+      selectedPropuestaFor = S.dep + '|' + S.ret + '|' + S.pax + '|' + S.budget;
+    }
       var proposal = lastData && (byId(lastData.list, proposalId) || byId(lastData.alternatives, proposalId) || byId(lastData.roadtripList, proposalId));
     if (proposal) {
       try { showProposalView(proposal, lastData); } catch (error) { console.error('No pudimos abrir la propuesta', error); notice('No pudimos abrir esta propuesta. Probá nuevamente.'); }
@@ -8233,6 +8262,7 @@ function comboNombreDestino() {
         // repintado completo tira abajo los "ver desglose" abiertos y la
         // posicion del scroll, y aca lo unico que cambia es un estado.
         pintarDestinoSeleccionado();
+        pintarPropuestaSeleccionada();
         window.scrollTo({ top: 0, behavior: 'smooth' }); return;
       }
       // Hotel: el input es un radio nativo, así que el clic repetido no lo
