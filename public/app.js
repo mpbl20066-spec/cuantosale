@@ -3650,7 +3650,12 @@
     instagram: '<rect x="3.4" y="3.4" width="17.2" height="17.2" rx="5.4" stroke-width="1.9"/><circle cx="12" cy="12" r="4.1" stroke-width="1.9"/><circle cx="16.9" cy="7.1" r="1.15" fill="currentColor" stroke="none"/>',
     whatsapp: '<path fill="currentColor" stroke="none" d="M12.04 2.6a9.3 9.3 0 0 0-7.9 14.1l-1.3 4.7 4.8-1.25a9.3 9.3 0 1 0 4.4-17.55Zm0 1.9a7.4 7.4 0 0 1 6.3 11.3 7.4 7.4 0 0 1-8.9 3.05l-.25-.15-2.1.55.56-2.05-.2-.27a7.4 7.4 0 0 1 4.6-12.43Zm-3.03 4.3c-.13 0-.35.05-.53.25-.18.2-.7.68-.7 1.66 0 .98.72 1.93.82 2.07.1.13 1.4 2.22 3.45 3.02 1.7.67 2.05.54 2.42.5.37-.03 1.19-.48 1.36-.96.17-.48.17-.88.11-.96-.05-.09-.18-.14-.38-.22-.2-.09-1.19-.59-1.37-.65-.18-.07-.32-.11-.45.1-.14.22-.53.66-.65.79-.12.13-.24.15-.44.05-.2-.1-.85-.31-1.62-1-.6-.53-1-1.19-1.11-1.39-.12-.2-.02-.32.09-.42.09-.09.2-.23.3-.36.1-.12.14-.2.2-.33.07-.13.04-.25-.02-.35-.06-.1-.45-1.1-.62-1.5-.16-.39-.32-.34-.45-.35h-.38Z"/>',
     guardar: '<path d="M6.6 3.6h10.8v16.8L12 16.5l-5.4 3.9V3.6Z"/>',
-    dividir: '<circle cx="9.6" cy="8" r="3"/><path d="M4.2 19.4c0-3 2.4-5 5.4-5s5.4 2 5.4 5"/><path d="M16.2 5.7a3 3 0 0 1 0 5.6M17.6 14.9c1.4.7 2.2 2.1 2.2 4"/>'
+    dividir: '<circle cx="9.6" cy="8" r="3"/><path d="M4.2 19.4c0-3 2.4-5 5.4-5s5.4 2 5.4 5"/><path d="M16.2 5.7a3 3 0 0 1 0 5.6M17.6 14.9c1.4.7 2.2 2.1 2.2 4"/>',
+    /* El nodo del menu y el portapapeles, en la misma tinta que el resto. El
+       boton de menu es un <button> con un svg propio (el chevron) y no pasa por
+       brandIcon porque necesita girar, no tintarse. */
+    compartir: '<circle cx="17.5" cy="6" r="2.6"/><circle cx="6.5" cy="12" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.8 10.8 6.4-3.5M8.8 13.2l6.4 3.5"/>',
+    copiar: '<rect x="8.6" y="8.6" width="11.4" height="11.4" rx="2.2"/><path d="M15.4 5.6H6.2a2.2 2.2 0 0 0-2.2 2.2v9.2"/>'
   };
   function brandIcon(key) {
     var d = BRAND_ICONS[key];
@@ -4192,6 +4197,44 @@
     document.body.appendChild(link); link.click(); link.remove();
     window.setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
+  /* Copia el itinerario en texto plano.
+
+     Faltaba la forma de pasarlo sin generar imagen ni abrir WhatsApp, que es lo
+     que se usa para pegarlo en un mail o en un grupo. El texto ya estaba armado
+     (modal.dataset.summaryText) porque es el que va en el wa.me; solo faltaba
+     el botón.
+
+     navigator.clipboard necesita contexto seguro y localhost lo es, pero en
+     http:// desde una IP de la app no lo es: se cae y no avisa. Por eso hay una
+     vuelta con execCommand y, si tampoco funciona, se lo dice a la persona en
+     vez de fingir que se copió. */
+  function copySummaryText(button) {
+    var modal = $('#booking-modal');
+    var texto = (modal && modal.dataset.summaryText) || '';
+    if (!texto) return;
+    var label = button.querySelector('.voucher-btn__label') || button;
+    var original = label.textContent;
+    var avisar = function (ok) {
+      label.textContent = ok ? '¡Copiado!' : 'No se pudo copiar';
+      window.setTimeout(function () { label.textContent = original; }, 1800);
+    };
+    var fallback = function () {
+      var area = document.createElement('textarea');
+      area.value = texto;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      area.remove();
+      avisar(ok);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(function () { avisar(true); }, fallback);
+    } else fallback();
+  }
   function shareStoryCard(button) {
     if (!detailState || !detailState.meta) return;
     // El texto del botón va en un <span> adentro, con el logo de Instagram al
@@ -4529,11 +4572,27 @@
 
        Cuando la fila no tiene nada elegido no sale un boton que no abre nada:
        sale el aviso, con el mismo tono que las otras filas sin elegir. */
-    function reservarCta(activo, aviso, etiqueta, categoria) {
+    /* La columna de la derecha es la cifra y, cuando corresponde, un "Reservar"
+       de dos palabras. Nada mas.
+
+       Antes, cuando el rubro no tenia nada elegido, esta funcion devolvia un
+       <p> con el aviso entero y el itemRow lo ponia DEBAJO del monto, en la misma
+       columna. Ese texto largo se comia el ancho de la fila y el precio dejaba
+       de estar contra el margen derecho. En el vuelo era peor: la misma frase
+       aparecia dos veces en la misma fila, una en el cuerpo y otra al lado del
+       monto.
+
+       El aviso va ahora al cuerpo, con el resto de la bajada, y la derecha queda
+       para el numero. */
+    function reservarCta(activo, etiqueta, categoria) {
       if (reservasDe(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
-      return activo
-        ? '<button type="button" class="voucher-item__cta" data-reservar-pedido aria-label="' + esc(etiqueta) + '">Reservar</button>'
-        : '<p class="voucher-item__detail">' + esc(aviso) + '</p>';
+      if (!activo) return '';
+      return '<button type="button" class="voucher-item__cta" data-reservar-pedido aria-label="' + esc(etiqueta) + '">Reservar</button>';
+    }
+    /* "Falta elegir" al cuerpo, con su propio tono: es una instruccion, no un
+       dato del rubro, y por eso no comparte la tipografia de la bajada. */
+    function avisoVoucher(texto) {
+      return texto ? '<p class="voucher-item__aviso">' + esc(texto) + '</p>' : '';
     }
     /* Los tramos solo existen si hay vuelo. Sin oferta, legLine() imprimia el
        codigo de aeropuerto de undefined —que es "—"— con un "sin fecha" al lado:
@@ -4544,7 +4603,7 @@
       flightLines = legLine('Ida', flightSummary.origin, flightSummary.destination, flightTime(outLeg.departure, flightSummary.departureText), flightTime(outLeg.arrival, flightSummary.arrivalText), flightSummary.flightNumber);
       if (flightSummary.isRoundTrip) flightLines += legLine('Vuelta', flightSummary.returnOrigin, flightSummary.returnDestination, flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText), flightTime(inLeg && inLeg.arrival, flightSummary.returnArrivalText), flightSummary.inboundFlightNumber);
     } else {
-      flightLines = '<p class="voucher-item__detail">Elegí un vuelo en la sección de vuelos para ver sus horarios.</p>';
+      flightLines = avisoVoucher('Elegí un vuelo en la sección de vuelos para ver sus horarios.');
     }
     var flightTitle = flightSummary.selected && flightSummary.airline
       ? 'Vuelo · ' + esc(flightSummary.airline)
@@ -4569,7 +4628,12 @@
        modalidad elegida no hay nada que reservar, asi que en vez de un boton que
        no abre nada dice que falta elegirlo y lo dice con el mismo tono que las
        otras filas sin elegir ("Sin actividades seleccionadas"). */
-    var transferCta = reservarCta(tl2 || tv2, 'Elegí un transfer en la sección de traslados.', 'Reservar el traslado desde el aeropuerto', 'traslados');
+    /* Sin modalidad no hay nada que reservar. El aviso va al cuerpo de la fila
+       (antes iba debajo del monto, en la columna de la cifra) y el CTA de la
+       derecha desaparece en vez de quedar como un boton que no abre nada. */
+    var transferCta = reservarCta(tl2 || tv2, 'Reservar el traslado desde el aeropuerto', 'traslados');
+    var transferNoteHtml = (tl2 || tv2 ? '' : avisoVoucher('Elegí un transfer en la sección de traslados.'))
+      + '<p class="voucher-item__detail">' + transferNote + '</p>';
     // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
     // card; en ese caso no hay nada que decir y la fila queda solo con el monto.
     /* En un viaje combinado la fila de alojamiento necesita UNA linea por parada.
@@ -4621,18 +4685,45 @@
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div><span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span></div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +
       '<ul class="voucher-list">' +
-      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : reservarCta(false, 'Elegí un vuelo en la sección de vuelos.', 'Reservar el vuelo', 'pasajes')) +
+      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '') +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
-      itemRow('traslados', transferTitle, '<p class="voucher-item__detail">' + transferNote + '</p>', transferTotal, transferCta) +
-      itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, reservarCta(selectedTours.length, 'Sin actividades seleccionadas.', 'Reservar las actividades', 'tours')) +
+      itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta) +
+      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, reservarCta(selectedTours.length, 'Reservar las actividades', 'tours')) +
       '</ul>' +
-      '<section class="voucher-destino"><div class="voucher-destino__head"><h3>Gastos en destino</h3><p>Por día y total del viaje</p></div><ul class="voucher-destino__list"><li><span>Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + '</em></li><li><span>Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + '</em></li></ul><p class="voucher-destino__total">Total en destino <b>' + money(destinoTotal) + '</b></p></section>' +
+      /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
+         ya es una caja: caja dentro de caja, y el unico bloque del modal con
+         bordes propios. Ahora son las MISMAS filas del resto, separadas por una
+         linea y con un encabezado chico. El modal ya dice donde empieza cada
+         zona con un separador; no hace falta una segunda caja adentro. */
+      '<section class="voucher-destino"><h3 class="voucher-destino__title">Gastos en destino<span>Por día y total del viaje</span></h3>'
+      + '<ul class="voucher-destino__list">'
+      + '<li><span class="voucher-destino__name">Transporte local <em>' + transportLabel + '</em></span><span class="voucher-destino__dia">' + money(localPerDay) + '/día</span><b class="voucher-destino__monto">' + money(localTotal) + '</b></li>'
+      + '<li><span class="voucher-destino__name">Gastronomía <em>' + foodLabel + '</em></span><span class="voucher-destino__dia">' + money(foodPerDay) + '/día</span><b class="voucher-destino__monto">' + money(foodTotal) + '</b></li>'
+      + '</ul>'
+      + '<p class="voucher-destino__total"><span>Total en destino</span><b>' + money(destinoTotal) + '</b></p></section>' +
       reservarTodo +
-      '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Compartir en Instagram</span></button><div class="voucher-actions__more">' +
-      '<button type="button" class="voucher-chip" data-share-whatsapp aria-label="Enviar el itinerario por WhatsApp">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">WhatsApp</span></button>' +
+      /* ABAJO, UN SOLO BOTON SOLIDO.
+
+         Habia dos botones del mismo tamano compitiendo: "Elegi algo para
+         reservar" (mostaza) y "Compartir en Instagram" (52px, con degradado
+         fucsia de la marca y una sombra). Dos CTAs de igual peso en el pie, y el
+         de compartir encima del de comprar. El degradado, aparte, era el unico
+         color ajeno de toda la app en modo oscuro.
+
+         Ahora: el CTA de reserva arriba, solo, y las tres acciones de utilidad
+         en una barra de la misma altura, mismo borde fino y misma tinta. El
+         menu "Compartir" junta WhatsApp, la tarjeta de Instagram y copiar el
+         texto, que antes eran tres botones y uno de ellos gigante. */ +
+      '<div class="voucher-actions">' +
+      '<div class="voucher-share"><button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span><svg class="voucher-share__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      '<div class="voucher-share__menu" id="voucher-share-menu" hidden>' +
+      '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
+      '<button type="button" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Tarjeta para Instagram</span></button>' +
+      '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
+      '</div></div>' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
       '<button type="button" class="voucher-chip" data-split-trip aria-label="Dividir el viaje con amigos">' + brandIcon('dividir') + '<span class="voucher-btn__label">Dividir</span></button>' +
-      '</div></div>';
+      '</div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     /* Se pide la lista de reservados al abrir, no antes: es una lectura de
@@ -9244,6 +9335,40 @@ function comboNombreDestino() {
         }());
         return;
       }
+      /* El menu "Compartir" y el copiado.
+
+         El menu cierra solo cuando se elige algo y cuando se hace click afuera,
+         y Escape lo cierra y le devuelve el foco al boton. Sin eso queda un menu
+         abierto flotando sobre el modal sin forma obviousa de cerrarlo.
+
+         Lo que cierra primero es cualquier otro menu de compartir abierto: si la
+         persona abre el de otro rubro y toca este, los dos quedan abiertos. */
+      var shareMenuButton = e.target.closest('[data-share-menu]');
+      if (shareMenuButton) {
+        e.preventDefault();
+        var shareMenu = shareMenuButton.parentNode.querySelector('.voucher-share__menu');
+        var abrir = shareMenu.hidden;
+        Array.prototype.forEach.call(document.querySelectorAll('.voucher-share__menu'), function (otro) { otro.hidden = true; });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-share-menu]'), function (b) { b.setAttribute('aria-expanded', 'false'); });
+        shareMenu.hidden = !abrir;
+        shareMenuButton.setAttribute('aria-expanded', String(abrir));
+        return;
+      }
+      var copyButton = e.target.closest('[data-copy-summary]');
+      if (copyButton) {
+        e.preventDefault();
+        copySummaryText(copyButton);
+        return;
+      }
+      var shareMenuOpen = e.target.closest('.voucher-share__menu');
+      if (shareMenuOpen) {
+        /* Cualquier opcion del menu lo cierra al ejecutar: la accion ya se esta
+           haciendo y dejar el menu abierto encima tapa el resultado. */
+        setTimeout(function () {
+          Array.prototype.forEach.call(document.querySelectorAll('.voucher-share__menu'), function (m) { m.hidden = true; });
+          Array.prototype.forEach.call(document.querySelectorAll('[data-share-menu]'), function (b) { b.setAttribute('aria-expanded', 'false'); });
+        }, 0);
+      }
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();
@@ -9265,6 +9390,28 @@ function comboNombreDestino() {
         closeBookingForm();
         openCheckout();
       }
+    });
+    /* Click afuera y Escape cierran el menu de compartir.
+
+       El menu vive DENTRO del modal, asi que el listener va en document y no en
+       #booking-modal: el click que lo cierra cae fuera del modal —en el fondo, o
+       en la fila de arriba— y nunca llega al listener del modal. Sin esto el
+       menu se queda abierto pegado al boton con el modal entero arriba.
+
+       Escape devuelve el foco al boton que lo abrio, que es lo que espera
+       alguien que abrio un menu con el teclado. */
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.voucher-share')) return;
+      Array.prototype.forEach.call(document.querySelectorAll('.voucher-share__menu'), function (m) { m.hidden = true; });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-share-menu]'), function (b) { b.setAttribute('aria-expanded', 'false'); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      var abierto = document.querySelector('.voucher-share__menu:not([hidden])');
+      if (!abierto) return;
+      abierto.hidden = true;
+      var boton = abierto.parentNode.querySelector('[data-share-menu]');
+      if (boton) { boton.setAttribute('aria-expanded', 'false'); boton.focus(); }
     });
     // Un logo de Commons que no carga no puede quedar como un cuadrado roto en
     // la ultima pantalla antes de mandar el pedido. El evento 'error' de una
