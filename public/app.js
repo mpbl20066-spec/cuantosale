@@ -2502,7 +2502,7 @@
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
       // La foto sale de TOUR_PHOTOS, con su autor y su licencia.
-      var photo = tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour);
+      var photo = tour.foto || (tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour));
       if (photo && photo.url) creditos[photo.url] = photo;
       var skin = tourActivitySkin(tour.title);
       // Con foto: velo para que el texto se lea siempre. Sin foto: degradado
@@ -2596,6 +2596,13 @@
   // justo lo que hace decidir si un tour entra en el viaje.
   function tourDuration(tour) {
     var t = String((tour && tour.details) || '').toLowerCase();
+    /* Los tours del catalogo traen "Duración aproximada: 1 h 30 min." (ver
+       scripts/cargar-tours-scraper.py): se lee el numero y no un texto suelto. */
+    var dur = t.match(/duraci[oó]n aproximada:\s*(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?/);
+    if (dur && (dur[1] || dur[2])) {
+      var horas = (Number(dur[1]) || 0) + (Number(dur[2]) || 0) / 60;
+      return horas <= 2 ? 'Unas horas' : horas <= 5 ? 'Media jornada' : 'Jornada completa';
+    }
     if (/entre 3 y 4 horas|3 a 4 horas|4 horas/.test(t)) return 'Media jornada';
     if (/6 a 7 horas|jornada completa|full day|día completo|9 horas|6:30 a 19/.test(t)) return 'Jornada completa';
     if (/media jornada|5 horas|4 a 5 horas|6 horas|5 a 7/.test(t)) return 'Media jornada';
@@ -4568,13 +4575,6 @@
       + '<svg class="reserva-chip__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
       + esc(estado) + '</span>';
   }
-  /* El boton de detalle que reemplaza al de reservar cuando el rubro ya esta
-     reservado. Es secundario a proposito: la accion de reservar ya se hizo, asi
-     que lo unico que queda es volver a mirar el rubro. Un <button> y no un
-     <a>: no lleva a otra pagina, cierra el modal y lleva a la seccion. */
-  function detalleReservaCta(categoria) {
-    return '<button type="button" class="voucher-item__detalle" data-detalle-rubro="' + esc(categoria) + '" title="Volver a la seccion de ' + esc(categoria) + '">Detalle</button>';
-  }
   /* Lee los rubros ya reservados de este viaje. Es una lectura, no un render: si
      falla (sin config, sin red, o la función todavia no esta corrida en
      Supabase) el voucher muestra "Reservar" como antes, que es el estado en el
@@ -4804,7 +4804,7 @@
         /* El canal va siempre, reservado o no, y en el mismo lugar para los
            cuatro rubros. Es la bajada que da confianza: si el estado no dice
            de quien es el precio, el precio es un numero sin dueno. */
-        + (canal.canal ? '<p class="voucher-item__canal">' + esc(category === 'alojamiento' ? 'Reserva a través de ' + canal.canal : canal.canal) + '</p>' : '');
+        + (canal.canal ? '<p class="voucher-item__canal">' + esc(category === 'alojamiento' ? 'Reservado a través de ' + canal.canal : canal.canal) + '</p>' : '');
       var lado = controlReserva(category)
         + (reservado ? '' : (ctaMarkup || ''));
       /* El color es del proveedor, no del rubro: con la paleta de rubros casi
@@ -5020,7 +5020,7 @@
     // El titulo lleva el hotel cuando hay uno solo. Con dos ya no alcanza: el
     // nombre de arriba seria el de la ultima parada procesada y la lista de
     // abajo los dos, y se leeria como que el titulo ese de todo el viaje.
-    var hotelTitle = multiHotel ? 'Alojamiento · ' + hotelesElegidos.length + ' hoteles' : 'Alojamiento · ' + esc(selectedHotelName);
+    var hotelTitle = multiHotel ? 'Alojamiento - ' + hotelesElegidos.length + ' hoteles' : 'Alojamiento - ' + esc(selectedHotelName);
     var destinoTotal = localTotal + foodTotal;
     /* El boton de reservar SOLO va aca, no en la card "Mi Viaje".
        Aca esta el pedido completo —el total, que rubros hay y cuales no—, y el
@@ -8500,6 +8500,25 @@
     }
     else alert('No pudimos identificar el destino guardado. Volvé a buscar la propuesta y guardala nuevamente.');
   }
+  /* Bloqueo de scroll de la pagina: solo mientras haya un modal visible y con
+     contenido. Se recalcula cada vez que un modal cambia (hidden o contenido),
+     asi ningun camino de cierre --login, cerrar, reabrir el viaje-- deja el
+     documento trabado. */
+  function syncScrollLock() {
+    var abierto = Array.prototype.some.call(document.querySelectorAll('.booking-modal'), function (m) {
+      return !m.hidden && m.firstElementChild;
+    });
+    document.documentElement.classList.toggle('modal-lock', abierto);
+    if (!abierto) { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; }
+  }
+  (function vigilarModales() {
+    if (!window.MutationObserver) return;
+    var obs = new MutationObserver(syncScrollLock);
+    Array.prototype.forEach.call(document.querySelectorAll('.booking-modal'), function (m) {
+      obs.observe(m, { attributes: true, attributeFilter: ['hidden'], childList: true });
+    });
+    syncScrollLock();
+  })();
   function initAuth() {
     if (supabaseClient) return Promise.resolve();
     if (authInitPromise) return authInitPromise;
