@@ -4316,22 +4316,19 @@
     if (cheapest && cheapest.dep && cheapest.ret) return format(cheapest.dep) + ' - ' + format(cheapest.ret);
     return cheapest && cheapest.date ? format(cheapest.date) : 'Fecha más económica del mes';
   }
+  /* El pie de la tarjeta lista los rubros que el presupuesto suma de verdad,
+     con el mismo nombre corto y el mismo icono que el resto de la app
+     (CATEGORY_ICONS). Un rubro en cero no sale, y uno elegido sale aunque no
+     estuviera en la lista fija de antes (transporte local, tours, alquiler). */
   function storyCostLabel(entry) {
-    return { pasajes: 'Vuelos', bus: 'Bus', alojamiento: 'Alojamiento', comidas: 'Régimen', local: 'Transporte local', traslados: 'Traslados', tours: 'Tours', auto: 'Auto' }[entry.category] || entry.label;
+    return { pasajes: 'Vuelo', bus: 'Bus', alojamiento: 'Hotel', comidas: 'Comida', local: 'Transporte local', traslados: 'Transfer', tours: 'Tours', auto: 'Auto', alquiler: 'Auto alquilado' }[entry.category] || entry.label;
   }
   function storyInclusionIcon(category) {
-    var paths = {
-      pasajes: '<path d="M3 14.5 21 7l-2 5-6 3-1 5-2 1v-5l-5 1z"/><path d="m10 11-3-4"/>',
-      bus: '<rect x="4" y="4" width="16" height="14" rx="3"/><path d="M4 11h16M8 18l-2 3m10-3 2 3M8 8h.01M16 8h.01"/>',
-      auto: '<path d="m5 11 2-5h10l2 5 2 2v5h-2m-14 0H3v-5zM5 13h14M7 18h10"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/>',
-      alojamiento: '<path d="M3 20V5m0 10h18v5M3 11h5a3 3 0 0 1 3 3v1m0-4h6a4 4 0 0 1 4 4"/><path d="M7 8h.01"/>',
-      comidas: '<path d="M7 3v7m-3-7v4a3 3 0 0 0 6 0V3m-3 7v11m10-18v18m0-18a4 4 0 0 1 4 4v4h-4"/>',
-      traslados: '<path d="M4 16v-5l2-4h12l2 4v5M4 12h16M7 16h.01M17 16h.01M7 7l1-3h8l1 3"/>'
-    };
-    return '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (paths[category] || paths.alojamiento) + '</svg>';
+    var paths = CATEGORY_ICONS[category] || CATEGORY_ICONS[category === 'alquiler' ? 'auto' : 'alojamiento'];
+    return '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
   }
   function storyInclusionsMarkup(meta, entries) {
-    var order = ['pasajes', 'bus', 'auto', 'alojamiento', 'comidas', 'traslados'];
+    var order = ['pasajes', 'bus', 'auto', 'alquiler', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
     var present = Object.create(null);
     (entries || []).forEach(function (entry) {
       if (Number(entry.value) > 0 && order.indexOf(entry.category) >= 0) present[entry.category] = true;
@@ -4341,8 +4338,8 @@
       var label = category === 'comidas' && meta.hotelType === 'all-inclusive' ? 'All Inclusive' : storyCostLabel({ category: category });
       return '<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">' + storyInclusionIcon(category) + '<b style="font-weight:500;">' + esc(label) + '</b></span>';
     });
-    if (!items.length) items = ['<span style="display:inline-flex;align-items:center;gap:5px;">' + storyInclusionIcon('pasajes') + '<b style="font-weight:500;">Vuelos</b></span>', '<span style="display:inline-flex;align-items:center;gap:5px;">' + storyInclusionIcon('alojamiento') + '<b style="font-weight:500;">Alojamiento</b></span>'];
-    return '<div style="display:flex;align-items:center;gap:8px;margin:0 0 12px;color:rgba(255,255,255,.9);font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;"><span style="flex:none;color:rgba(255,255,255,.72);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Incluye</span>' + items.map(function (item, index) { return (index ? '<span style="flex:none;color:#F6B21B;font-weight:700;">+</span>' : '') + item; }).join('') + '</div>';
+    if (!items.length) return '';
+    return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 12px;color:rgba(255,255,255,.9);font-size:12px;line-height:1.3;"><span style="flex:none;color:rgba(255,255,255,.72);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Incluye</span>' + items.join('') + '</div>';
   }
   function loadStoryPhoto(photoUrl) {
     if (!photoUrl) return Promise.reject(new Error('No hay una foto disponible para este destino.'));
