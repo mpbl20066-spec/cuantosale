@@ -3525,11 +3525,20 @@
    * constantes: el compartido se cobra por persona y el privado por vehiculo, y
    * por eso el privado no se multiplica por la cantidad de viajeros.
    */
-  function getSelectedTransferAmount(state) {
+  /* El tipo elegido de un tramo. `leg` es 'llegada' (el que existia antes) o
+     'vuelta'. El de llegada se sigue leyendo de `transferType` a proposito: es lo
+     que se guarda en los viajes, lo que lee el checkout y lo que ya esta escrito
+     en la base de los viajes guardados. El de vuelta es un campo nuevo. */
+  function transferTypeDe(state, leg) {
+    if (!state) return '';
+    return (leg === 'vuelta' ? state.transferTypeVuelta : state.transferType) || '';
+  }
+  function getSelectedTransferAmount(state, leg) {
     if (!state || state.transportMode === 'auto') return 0;
     var precios = transferPreciosDe(state.meta || {});
-    if (state.transferType === 'private') return precios.privado;
-    if (state.transferType === 'shared') {
+    var tipo = transferTypeDe(state, leg);
+    if (tipo === 'private') return precios.privado;
+    if (tipo === 'shared') {
       // Un destino sin van compartida (soloPrivado) no tiene nada que cobrar por
       // este lado. Se puede llegar aqui sin que la persona lo elija: si marco
       // "compartido" en Rio y despues cambio el destino a Fernando de Noronha,
@@ -3569,8 +3578,12 @@
     if (!state) return 0;
     if (state.transportMode === 'auto') return Number(state.auto) || 0;
     var entre = state.multiStay ? Number(state.multiStay.transferBetweenUsd) || 0 : 0;
-    var elegido = getSelectedTransferAmount(state);
-    if (elegido > 0) return entre + elegido;
+    // Los dos tramos, cuando hay dos elegidos. Un tramo sin elegir NO cae a la
+    // estimacion del modelo: la estimacion es del conjunto, no de un lado, y
+    // repartirla entre los dos seria inventar como se armo.
+    var llegada = getSelectedTransferAmount(state, 'llegada');
+    var vuelta = getSelectedTransferAmount(state, 'vuelta');
+    if (llegada > 0 || vuelta > 0) return entre + llegada + vuelta;
     return (Number(state.baseTraslados) || 0) + entre;
   }
   // Iconos por categoría para el resumen de presupuesto. Se dibujan con trazo
@@ -3847,16 +3860,26 @@
     var flightLabel = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || 'Vuelo no seleccionado';
     var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
     var hotelName = findSelectedHotelLabel();
-    var transferAmount = getSelectedTransferAmount(detailState);
+    // El TOTAL de los dos tramos, no solo el de llegada: la fila del resumen tiene
+    // que mostrar lo mismo que el total de arriba, y con los dos tramos elegidos
+    // el de llegada solo es la mitad.
+    var transferAmount = trasladoDelViaje(detailState);
     var transferIncluded = transferAmount > 0;
     // Solo la modalidad. Antes esta fila decia "Compartido · 1 hora después de la
     // llegada · 15:20": una hora que la app derivaba de la llegada del vuelo y
     // que el operador iba a cambiar igual. El transfer no tiene horario hasta
     // que se coordina, asi que la fila dice la modalidad y el monto, que si
     // son datos.
-    var transferMeta = transferIncluded
-      ? (detailState.transferType === 'private' ? 'Privado' : 'Compartido')
-      : 'No incluido';
+    /* La modalidad, de los dos tramos. Con los dos iguales alcanza con decirla
+       una vez; si difieren, el resumen tiene que mostrar las dos, porque el monto
+       que tiene al lado es la suma y "Compartido" a secas no lo explica. */
+    var tLlegada = transferTypeDe(detailState, 'llegada');
+    var tVuelta = transferTypeDe(detailState, 'vuelta');
+    var nombreTipo = function (tipo) { return tipo === 'private' ? 'Privado' : 'Compartido'; };
+    var transferMeta = !transferIncluded ? 'No incluido'
+      : tLlegada && tVuelta && tLlegada !== tVuelta
+        ? 'Ida ' + nombreTipo(tLlegada) + ' · vuelta ' + nombreTipo(tVuelta)
+        : nombreTipo(tLlegada || tVuelta);
     var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
     var foodPerDay = Number(detailState.foodPerDay) || 0;
     var localPerDay = Number(detailState.localPerDay) || 0;
@@ -4277,14 +4300,24 @@
     // dice "a coordinar", que es lo que realmente es hasta que el operador
     // responda.
     var transferState = detailState.transferWizard || { hotelName: hotelParaElTransfer() };
-    var transferModeLabel = detailState.transferType === 'private' ? 'Transfer privado' : (detailState.transferType === 'shared' ? 'Transfer compartido' : 'A coordinar');
+    // La etiqueta del WhatsApp. Con los dos tramos elegidos puede ser que difieran,
+    // y mandarle al operador un solo "Transfer compartido" cuando uno de los dos
+    // es privado es el error que hace que el pedido no se pueda tomar.
+    var tl = transferTypeDe(detailState, 'llegada');
+    var tv = transferTypeDe(detailState, 'vuelta');
+    var nombreModo = function (tipo) { return tipo === 'private' ? 'privado' : 'compartido'; };
+    var transferModeLabel = !tl && !tv ? 'A coordinar'
+      : tl && tv && tl !== tv ? 'Ida ' + nombreModo(tl) + ' + vuelta ' + nombreModo(tv)
+        : nombreModo(tl || tv);
     var selectedHotelName = findSelectedHotelLabel();
     var selectedHotelDetail = findSelectedHotelDetail();
     var hotelTotal = Number(detailState.hotel) || 0;
     // Única fuente de verdad para el monto del traslado: la misma función que
     // ya usan el widget "Mi Viaje" y "A dónde va tu plata", para que este
     // voucher nunca muestre un número distinto al resto de la pantalla.
-    var transferTotal = getSelectedTransferAmount(detailState);
+    // Los dos tramos, para que el WhatsApp al operador y el total del voucher
+    // cuenten lo mismo que el total de la pantalla.
+    var transferTotal = trasladoDelViaje(detailState);
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var dailyCosts = getDestinationDailyCosts(detailState.meta.dest && detailState.meta.dest.key);
@@ -4408,18 +4441,27 @@
     var flightTitle = flightSummary.selected && flightSummary.airline
       ? 'Vuelo · ' + esc(flightSummary.airline)
       : 'Vuelo · sin seleccionar';
-    var transferTitle = detailState.transferType === 'private' ? 'Traslado privado' : (detailState.transferType === 'shared' ? 'Traslado compartido' : 'Traslado');
+    // El voucher se lleva la persona al hotel, asi que el titulo tiene que
+    // distinguir los dos tramos: con llegada y vuelta en modalidades distintas,
+    // un "Traslado compartido" a secas no dice cuál de los dos es.
+    var tl2 = transferTypeDe(detailState, 'llegada');
+    var tv2 = transferTypeDe(detailState, 'vuelta');
+    var transferTitle = !tl2 && !tv2 ? 'Traslado'
+      : tl2 && tv2 && tl2 !== tv2
+        ? 'Traslados · ida ' + (tl2 === 'private' ? 'privada' : 'compartida') + ', vuelta ' + (tv2 === 'private' ? 'privada' : 'compartida')
+        : (tl2 === 'private' ? 'Traslado privado' : 'Traslado compartido');
+    var notaVuelta = tv2 && tl2 && tv2 !== tl2 ? ' · incluye la vuelta' : '';
     var transferWhere = transferState.hotelName || hotelParaElTransfer();
     // "Recogida a coordinar" en vez de una hora derivada del vuelo. El voucher es
     // el documento que se lleva la persona al hotel y el que manda el operador:
     // ninguno de los dos puede dar por hecho una hora que todavia no existe.
-    var transferNote = 'Recogida a coordinar' + (transferWhere && transferWhere !== 'Sin alojamiento' ? ' · hacia ' + esc(transferWhere) : '');
+    var transferNote = 'Recogida a coordinar' + (transferWhere && transferWhere !== 'Sin alojamiento' ? ' · hacia ' + esc(transferWhere) : '') + notaVuelta;
     var toursTitle = 'Tours y actividades' + (selectedTours.length ? ' · ' + selectedTours.length + (selectedTours.length === 1 ? ' elegida' : ' elegidas') : '');
     /* El CTA del traslado va al MISMO checkout que el de actividades. Sin
        modalidad elegida no hay nada que reservar, asi que en vez de un boton que
        no abre nada dice que falta elegirlo y lo dice con el mismo tono que las
        otras filas sin elegir ("Sin actividades seleccionadas"). */
-    var transferCta = reservarCta(detailState.transferType, 'Elegí un transfer en la sección de traslados.', 'Reservar el traslado desde el aeropuerto', 'traslados');
+    var transferCta = reservarCta(tl2 || tv2, 'Elegí un transfer en la sección de traslados.', 'Reservar el traslado desde el aeropuerto', 'traslados');
     // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
     // card; en ese caso no hay nada que decir y la fila queda solo con el monto.
     /* En un viaje combinado la fila de alojamiento necesita UNA linea por parada.
@@ -4860,10 +4902,14 @@
     if (checked) checked.checked = false;
     sincronizarTrasladoOficial();
   }
-  function deseleccionarTransfer() {
+  function deseleccionarTransfer(leg) {
     if (!detailState) return;
-    detailState.transferType = '';
-    detailState.transfer = 0;
+    // Sin `leg` se limpian los dos tramos: es lo que llama el cambio de
+    // transporte y el "empezar de nuevo", donde ninguno debe quedar elegido.
+    if (leg === 'vuelta') detailState.transferTypeVuelta = '';
+    else if (leg === 'llegada') detailState.transferType = '';
+    else { detailState.transferType = ''; detailState.transferTypeVuelta = ''; }
+    detailState.transfer = trasladoDelViaje(detailState);
     var section = document.querySelector('[data-official-transfer]');
     if (section) section.outerHTML = transferCard(detailState.meta);
     sincronizarTrasladoOficial();
@@ -4927,8 +4973,12 @@
     // getSelectedTransferAmount() es la única fuente de verdad del monto, para
     // que este total nunca se desincronice del que muestran Mi Viaje y el
     // desglose "A dónde va tu plata".
-    detailState.transfer = detailState.transportMode === 'flight' && detailState.transferType
-      ? getSelectedTransferAmount(detailState)
+    // trasladoDelViaje() y no getSelectedTransferAmount(): con dos tramos, el
+    // monto guardado tiene que ser el de los dos. Y sin elegir ninguno devuelve
+    // 0, que es lo que esta linea tiene que dejar para que el total no sume un
+    // traslado que nadie pidio.
+    detailState.transfer = detailState.transportMode === 'flight'
+      ? (transferTypeDe(detailState, 'llegada') || transferTypeDe(detailState, 'vuelta') ? trasladoDelViaje(detailState) : 0)
       : 0;
     recalcularTotalViaje();
   }
@@ -5152,14 +5202,13 @@
     var pax = Math.max(1, Number((meta && meta.pax) || (state && state.pax) || (typeof S !== 'undefined' && S && S.pax)) || 1);
     var tramos = [];
     if (meta.dest) {
-      tramos.push({
-        key: 'llegada', auto: false, selected: (state && state.transferType) || '',
-        shared: precios.soloPrivado ? 0 : precios.compartido * pax,
-        private: precios.privado,
-        from: precios.aeropuerto ? 'Aeropuerto de ' + precios.aeropuerto + (precios.iata ? ' (' + precios.iata + ')' : '') : 'Aeropuerto',
-        to: meta.dest.name,
-        note: precios.km ? precios.km + ' km' : ''
-      });
+      var aero = precios.aeropuerto ? 'Aeropuerto de ' + precios.aeropuerto + (precios.iata ? ' (' + precios.iata + ')' : '') : 'Aeropuerto';
+      var comun = { auto: false, shared: precios.soloPrivado ? 0 : precios.compartido * pax, private: precios.privado, note: precios.km ? precios.km + ' km' : '' };
+      // Los tramos van en el orden en que se recorren: primero se llega, después
+      // se vuelve. Cada uno con SU modalidad elegida (transferType y
+      // transferTypeVuelta), y por eso se pueden cambiar por separado.
+      tramos.push(Object.assign({}, comun, { key: 'llegada', selected: transferTypeDe(state, 'llegada'), from: aero, to: meta.dest.name }));
+      tramos.push(Object.assign({}, comun, { key: 'vuelta', selected: transferTypeDe(state, 'vuelta'), from: meta.dest.name, to: aero }));
     }
     var ms = (state && state.multiStay) || (meta && meta.multiStay) || null;
     if (ms && ms.transfer && ms.stays && ms.stays.length === 2) {
@@ -5195,7 +5244,15 @@
     var modoNota = t.modo && t.modo !== 'car'
       ? '<p class="cost-note">' + esc(t.nota || 'A este destino no se llega en transfer por carretera.') + '</p>'
       : '';
-    var cards = [
+    var paxT = Math.max(1, Number((detailState && detailState.meta && detailState.meta.pax) || S.pax) || 1);
+    /* Las dos modalities, armadas UNA vez y despues pintadas por tramo.
+
+        Antes `cards` era un string ya、勤 escolhido con el `selected` de un solo
+        tramo, asi que con dos tramos habia que armarlo dos veces con el estado
+        distinto. Ahora es una funcion de (selected) y cada tramo la llama con lo
+        suyo: el boton lleva data-transfer-leg, y el click sabe a que tramo
+        pertenece. */
+    var opciones = [
       { key: 'shared', amount: t.compartido, title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros. Se cobra por persona.' },
       { key: 'private', amount: t.privado, title: 'Transfer privado', desc: 'Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.' }
     ].filter(function (card) {
@@ -5203,23 +5260,25 @@
       // la card con precio 0 seria ofrecer un transfer gratis.
       if (card.key === 'shared' && t.soloPrivado) return false;
       return !(card.amount <= 0);
-    }).map(function (card) {
-      var isSelected = selected === card.key;
-      /* El precio, con su unidad explicita.
+    });
+    function cardsDe(leg, selectedLeg) {
+      return opciones.map(function (card) {
+        var isSelected = selectedLeg === card.key;
+        /* El precio, con su unidad explicita.
 
-         El compartido se cobra POR PERSONA y el privado POR VEHICULO, asi que el
-         numero solo no dice cuanto le toca a cada uno: con dos personas, un
-         compartido de R$52 y un privado de R$104 son el mismo total, y sin la
-         unidad la comparacion invita a elegir el privado pensando que sale la
-         mitad. Se muestra el unitario en grande y, en el compartido, el total
-         del grupo debajo. En el privado no hay unitario porque no existe. */
-      var paxT = Math.max(1, Number((detailState && detailState.meta && detailState.meta.pax) || S.pax) || 1);
-      var precio = card.key === 'shared'
-        ? money(card.amount) + '<span class="transfer-choice__unit"> por persona</span>' +
-          (paxT > 1 ? '<span class="transfer-choice__total"> · ' + money(card.amount * paxT) + ' los ' + paxT + '</span>' : '')
-        : money(card.amount) + '<span class="transfer-choice__unit"> por vehículo</span>';
-      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + precio + '</b></button>';
-    }).join('');
+           El compartido se cobra POR PERSONA y el privado POR VEHICULO, asi que
+           el numero solo no dice cuanto le toca a cada uno: con dos personas, un
+           compartido de R$52 y un privado de R$104 son el mismo total, y sin la
+           unidad la comparacion invita a elegir el privado pensando que sale la
+           mitad. Se muestra el unitario en grande y, en el compartido, el total
+           del grupo debajo. En el privado no hay unitario porque no existe. */
+        var precio = card.key === 'shared'
+          ? money(card.amount) + '<span class="transfer-choice__unit"> por persona</span>' +
+            (paxT > 1 ? '<span class="transfer-choice__total"> · ' + money(card.amount * paxT) + ' los ' + paxT + '</span>' : '')
+          : money(card.amount) + '<span class="transfer-choice__unit"> por vehículo</span>';
+        return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-leg="' + leg + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + precio + '</b></button>';
+      }).join('');
+    }
     /* Sin boton de reservar aca. Elegir la modalidad suma al presupuesto —igual
        que una card de actividades— y la reserva se pide desde "Mi Viaje", que es
        donde ya estan los dos pedidos juntos: el de actividades y el de traslado.
@@ -5240,19 +5299,16 @@
        era falso, y antes el segundo ni siquiera aparecia como opcion: su monto
        entraba al total a ciegas, sin fila, sin modalidad y sin poder sacarlo. */
     var tramos = tramosTransfer(detailState);
-    /* La nota de "ya esta en tu total", y solo cuando el compartido esta elegido.
+    /* La nota de "ya esta en tu total" la dibuja cada tramo por su cuenta (ver
+       filasTramos), no una sola vez aca: con dos tramos, el de vuelta puede estar
+       en privado y el de llegada en compartido, y la nota tiene que ir donde
+       corresponde. Solo se rotula "ya incluido" el COMPARTIDO porque el privado se
+       elige por el usuario y no hay nada que aclarar.
 
-       Sin esto, marcar el compartido por defecto es una card amarilla que cambia
-       una cifra y no dice por que. Y el total SI cambia: la estimacion del modelo
-       queda reemplazada por el precio de la tabla (ver trasladoDelViaje), que en
-       los 45 destinos es mas caro -- entre 1% y 4% del total del viaje. Decirlo
-       es lo que hace que el numero ms alto no parezca un error.
-
-       "Podés cambiar a privado" va sin parentesis: entre parentesis se lee como
-       una disculpa, y ademas acá la alternativa es real, no una sugerencia. */
-    var notaDeEleccion = selected === 'shared'
-      ? '<p class="transfer-choice-note">Incluido para tu comodidad. Si preferís otro, podés cambiar a privado.</p>'
-      : '';
+       Sin la nota, marcar el compartido por defecto es una card amarilla que
+       cambia una cifra y no dice por que. Y el total SI cambia: la estimacion del
+       modelo queda reemplazada por el precio de la tabla (ver trasladoDelViaje),
+       que en los 45 destinos es mas caro -- entre 1% y 4% del total del viaje. */
     var filasTramos = tramos.map(function (tramo) {
       /* El badge dice SOLO el nombre del servicio. Antes repetia la ruta entera
          con los mismos kilometros que ya estan en la bajada de arriba
@@ -5268,8 +5324,10 @@
         // sin radio y sin "Agregar", porque no hay nada que agregar.
         return cabeza + '<p class="transfer-leg__auto">' + (tramo.ferry ? 'Un pasaje de ferry por persona' : 'Un transfer por persona entre las paradas') + ': <b>' + money(tramo.amount) + '</b>. Se coordina con el operador al reservar.</p></div>';
       }
-      if (tramo.key === 'llegada') {
-        return cabeza + '<div class="transfer-choice-grid">' + cards + '</div>' + notaDeEleccion + '</div>';
+      if (tramo.key === 'llegada' || tramo.key === 'vuelta') {
+        return cabeza + '<div class="transfer-choice-grid">' + cardsDe(tramo.key, tramo.selected) + '</div>' +
+          (tramo.selected === 'shared' ? '<p class="transfer-choice-note">Incluido para tu comodidad. Si preferís otro, podés cambiar a privado.</p>' : '') +
+          '</div>';
       }
       return cabeza + '</div>';
     }).join('');
@@ -6968,8 +7026,17 @@
     if (selectedTransportMode === 'flight' && detailState) {
       var preciosTransfer = transferPreciosDe(data.meta);
       if (!preciosTransfer.soloPrivado && preciosTransfer.compartido > 0) {
+        // Los DOS tramos arrancan en compartido. Es lo que hace que el total los
+        // incluya sin que la persona tenga que decidir nada, y es coherente con
+        // la nota "Incluido para tu comodidad" de cada tarjeta.
+        //
+        // ESTO DUPLICA EL COSTO DEL TRANSFER: la tabla es "solo ida" y ahora se
+        // cobran las dos. data/transfer-precios.json decia, en _meta, que la app
+        // solo sumaba el de llegada; esa decision quedo escrita y ahora es al
+        // reves. Es una decision de negocio, no un descuido.
         detailState.transferType = 'shared';
-        detailState.transfer = getSelectedTransferAmount(detailState);
+        detailState.transferTypeVuelta = 'shared';
+        detailState.transfer = trasladoDelViaje(detailState);
       }
     }
     var nights = Math.max(1, Number(data.meta.nights) || 1);
@@ -7319,7 +7386,7 @@
       local_per_day: Number(detailState.localPerDay) || 0,
       total_amount: Number(budget.total) || 0,
       currency: 'USD',
-      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, hotelType: detailState.meta.hotelType || S.hotelType, roadtrip: detailState.roadtrip || null }
+      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', transferTypeVuelta: detailState.transferTypeVuelta || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, hotelType: detailState.meta.hotelType || S.hotelType, roadtrip: detailState.roadtrip || null }
     };
   }
   async function saveCurrentTrip(options) {
@@ -7441,6 +7508,11 @@
     detailState.localPerDay = Number(trip.local_per_day) || Number(details.local_per_day) || Number(details.localPerDay) || detailState.localPerDay || 0;
     detailState.transfer = Number(details.transfer) || 0;
     detailState.transferType = details.transferType || detailState.transferType || '';
+    /* El tramo de vuelta se guarda aparte. Un viaje guardado antes de que
+       existiera no tiene el campo, y en ese caso se deja como estaba: se hereda
+       el de llegada para que un viaje viejo no aparezca con la mitad de los
+       traslados marcados como "no incluido". */
+    detailState.transferTypeVuelta = details.transferTypeVuelta || detailState.transferTypeVuelta || '';
     detailState.selectedTours = Array.isArray(details.tours) ? details.tours : [];
     detailState.toursTotal = detailState.selectedTours.reduce(function (sum, tour) { return sum + (Number(tour.price) || 0); }, 0);
     detailState.selectedTours.forEach(function (tour) {
@@ -8703,11 +8775,24 @@ function comboNombreDestino() {
         e.preventDefault(); e.stopPropagation();
         var mode = transferChoice.getAttribute('data-transfer-choice');
         var amount = Number(transferChoice.getAttribute('data-transfer-amount')) || 0;
-        // Segundo clic en la modalidad ya elegida: el transfer deja de estar en
-        // el presupuesto y la tarjeta vuelve al estado "elegí un tipo".
-        if (detailState.transferType === mode) { deseleccionarTransfer(); return; }
-        detailState.transferType = mode;
-        detailState.transfer = amount;
+        /* A que tramo pertenece el boton. Con un solo tramo venia sin atributo y
+           era siempre el de llegada; ahora cada card dice el suyo, asi que se
+           puede elegir el privado de ida y el compartido de vuelta sin que uno
+           pise al otro. */
+        var leg = transferChoice.getAttribute('data-transfer-leg') === 'vuelta' ? 'vuelta' : 'llegada';
+        // Segundo clic en la modalidad ya elegida: ESE tramo deja de estar en el
+        // presupuesto y su tarjeta vuelve al estado "elegí un tipo". Antes se
+        // deseleccionaba el transfer entero, lo que con dos tramos dejaba al
+        // otro sin eleccion.
+        if (transferTypeDe(detailState, leg) === mode) { deseleccionarTransfer(leg); return; }
+        if (leg === 'vuelta') detailState.transferTypeVuelta = mode;
+        else detailState.transferType = mode;
+        // El monto de `amount` es el UNITARIO de la modalidad. El total de los
+        // dos tramos lo calcula trasladoDelViaje() con getSelectedTransferAmount()
+        // de cada lado, que ya sabe multiplicar el compartido por la cantidad de
+        // gente. Guardar el unitario acá y sumarlo abajo era una via a que el
+        // total dejara de coincidir con el desglose.
+        detailState.transfer = getSelectedTransferAmount(detailState);
         // El hotel se deja anotado apenas se elige el transfer, para que el
         // checkout venga con el destino escrito. El horario ya no se guarda: no
         // hay horario hasta que el operador lo confirme.

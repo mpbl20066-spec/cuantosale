@@ -70,7 +70,7 @@
         "compartido": "USD por PERSONA, solo ida (airport -> hotel).",
         "privado": "USD por VEHICULO de hasta 4 personas, solo ida. No se multiplica por los pasajeros."
       },
-      "por_que_no_ida_y_vuelta": "El pasaje aereo se compra de ida y vuelta, pero el transfer se paga por trayecto. La app solo suma el de llegada.",
+      "por_que_no_ida_y_vuelta": "CAMBIADO. Antes decia: 'El pasaje aereo se compra de ida y vuelta, pero el transfer se paga por trayecto. La app solo suma el de llegada.' Los precios de esta tabla SIGUEN siendo de un solo trayecto (ver 'unidad'), pero la app ahora los cobra para los dos tramos: llegada y vuelta, cada uno con su propia modalidad elegible. Es una decision de negocio, no un cambio de como se calculan los precios. Medido sobre los 44 destinos con van y 2 personas, cobrar los dos tramos sube el total del viaje entre 2,4% y 9,0% (medio 4,0%), y en ninguno supera el 10%. Para volver al comportamiento anterior: dejar los dos tramos sin elegir por defecto en public/app.js (showProposalView), y el total vuelve a la estimacion del modelo.",
       "appRide": "Campo opcional con el precio de un pedido de app (Uber/99) por VEHICULO para la misma ruta, cuando se pudo verificar. No es un transfer: no hay meet & greet ni el chofer esperando, y el precio sube con la demanda. Se deja aparte a proposito, porque meterlo como si fuera el precio del transfer privado habia subestimando el privado a menos de la mitad. Cuando este disponible suele ser la forma mas barata de llegar, asi que la app puede ofrecerlo como alternativa.",
       "modelo": {
         "compartido": "US$ 18 + US$ 0.06 por km (por persona)",
