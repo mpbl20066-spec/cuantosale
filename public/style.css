@@ -1,4 +1,4 @@
-/* version: 137
+/* version: 138
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -619,6 +619,19 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .hotel-option{grid-template-columns:minmax(0,1fr)}
   .hotel-image-wrap{grid-column:1;grid-row:1;min-height:0;height:clamp(120px,38cqw,150px)}
   .hotel-option__pick{grid-column:1;grid-row:2}
+
+  /* La placa "Recomendada" sale del posicionamiento absoluto en el layout
+     angosto. Arriba es position:absolute con bottom:10px, y eso solo
+     funciona con la foto a la izquierda: la placa cae en la esquina de la
+     foto. Apilada la card, la foto va arriba y el texto abajo, asi que
+     bottom:10px apuntaba al texto y la placa quedaba encima del nombre.
+
+     En el flujo va arriba del nombre, que es donde se lee una placa de
+     "esta es la que recomendamos", y no depende de que la card tenga foto.
+     justify-content y flex:0 0 auto evitan que el fondo redondeado se
+     estire a lo ancho de la card. */
+  .hotel-choice{position:static;margin:15px 16px 0;justify-content:flex-start}
+  .hotel-badge{flex:0 0 auto}
   .hotel-foot{grid-column:1;grid-row:3}
   .hotel-similar{grid-column:1;grid-row:4}
 }
