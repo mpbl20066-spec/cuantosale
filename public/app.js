@@ -5197,6 +5197,14 @@
       return markup;
     }
 
+    /* Quien cobra cada rubro, segun el transporte elegido: con vuelo los pasajes
+       se pagan directo con la aerolinea; con bus, con la empresa de bus (y no hay
+       traslado de aeropuerto). El nombre sale de la eleccion cuando existe. */
+    var canalesNombre = busMode
+      ? (busSel ? '<b>' + esc(busSel.empresa) + '</b>' : 'la empresa de bus')
+      : (flightSummary.selected && flightSummary.airline ? 'la aerol\u00ednea <b>' + esc(flightSummary.airline) + '</b>' : 'la aerol\u00ednea');
+    var canalesTexto = '<p class="voucher-canales">El alojamiento se paga en <b>Booking</b>, los pasajes directo con ' + canalesNombre
+      + ', y ' + (busMode ? 'las actividades' : 'los traslados y actividades') + ' con nosotros.</p>';
     var dividirBloque = '<aside class="voucher-split">'
       + '<div class="voucher-split__head">' + brandIcon('dividir')
       + '<div class="voucher-split__text">'
@@ -5251,7 +5259,7 @@
        METABUSCADOR. El precio y el link son reales, pero la compra termina en
        la aerolinea o en una agencia. Booking si es intermediario real, y ahi
        el respaldo es cierto. */
-      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>laerol&iacute;nea</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
+      canalesTexto +
       /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
 
        Porque el pago del vuelo y del hotel pasa por un sitio del que la app
