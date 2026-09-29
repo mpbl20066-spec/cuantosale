@@ -1,5 +1,13 @@
 -- Ejecutar en el Supabase SQL Editor. Es idempotente: se puede correr de nuevo.
 --
+-- Trae lo que la pagina de /grupo y el voucher de /app necesitan y la base no
+-- tenia: poder volver a dividir un gasto ya cargado, que cada uno borre solo
+-- los suyos y el que creo el grupo borre todos, y que el "Reservar" del voucher
+-- pase a "Reservado" —a mano, desde la cuenta de la agencia.
+--
+-- Al final esta la linea para cargar el correo de la agencia. Sin esa fila la
+-- app anda normal, pero el boton de "Marcar reservado" no le aparece a nadie.
+--
 -- Guarda que rubros del viaje ya estan reservados, para que el boton del
 -- voucher pase de "Reservar" a "Reservado" y siga asi al recargar.
 --
@@ -248,4 +256,8 @@ revoke all on public.agencia from anon, authenticated;
 grant execute on function public.es_agencia() to anon, authenticated;
 grant execute on function public.reservas_marcar(uuid, text, text, jsonb) to anon, authenticated;
 grant execute on function public.reservas_leer(uuid) to anon, authenticated;
-grant execute on function public.reservas_marcar_manual(uuid, text, jsonb) to anon, authenticated;
+-- La firma tiene CUATRO argumentos (viaje, categoria, destino, detalle). Con tres
+-- el grant no encuentra la funcion y el "Marcar reservado" falla con permiso
+-- denegado, que es el error mas dificil de leer de todos.
+grant execute on function public.reservas_marcar_manual(uuid, text, text, jsonb) to anon, authenticated;
+grant execute on function public.reservas_desmarcar(uuid, text) to anon, authenticated;
