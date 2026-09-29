@@ -9192,7 +9192,37 @@
     var authButton = $('#auth-button'), tripsButton = $('#trips-button');
     if (authButton) authButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(function () { if (authUser) openTripsModal(); else openAuthModal(); }); });
     if (tripsButton) tripsButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(openTripsModal); });
-    if (window.location.search.indexOf('code=') >= 0 || window.location.hash.indexOf('access_token=') >= 0) { authReadyPromise = initAuth(); }
+    /* La sesion se restaura al cargar, no cuando alguien toca el boton.
+
+       Antes initAuth() solo corria al tocar "Iniciar sesion" o al volver de un
+       login (code= / access_token=). Al navegar con atras/adelante la pagina se
+       recarga o vuelve del bfcache, el header queda con el HTML de fabrica
+       ("Iniciar sesion") y nadie pedia la sesion: parecia deslogueado con el
+       token intacto en localStorage. Ahora, si hay un token guardado (o venimos
+       de un login), se levanta el cliente de una, y cada vez que la pagina vuelve
+       a mostrarse se revalida contra el storage. Sin token no se baja el SDK. */
+    function hayTokenGuardado() {
+      try {
+        for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && /^sb-.+-auth-token/.test(k)) return true; }
+      } catch (e) { /* storage bloqueado */ }
+      return false;
+    }
+    async function revalidarSesion() {
+      if (!supabaseClient) {
+        if (!hayTokenGuardado() && window.location.search.indexOf('code=') < 0 && window.location.hash.indexOf('access_token=') < 0) { if (authUser) renderAuthState(null); return; }
+        authReadyPromise = initAuth(); await authReadyPromise; return;
+      }
+      try {
+        var r = await supabaseClient.auth.getSession();
+        var u = r && r.data && r.data.session && r.data.session.user || null;
+        if ((u && u.id) !== (authUser && authUser.id)) renderAuthState(u);
+      } catch (e) { /* sin red: se deja lo que ya se mostraba */ }
+    }
+    revalidarSesion();
+    window.addEventListener('pageshow', function () { revalidarSesion(); });
+    window.addEventListener('popstate', function () { revalidarSesion(); });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) revalidarSesion(); });
+    window.addEventListener('storage', function (e) { if (e.key && /^sb-.+-auth-token/.test(e.key)) revalidarSesion(); });
     $('#trip-summary').addEventListener('click', function (e) {
       var toggle = e.target.closest('[data-trip-summary-toggle]');
       if (toggle) {
