@@ -331,17 +331,9 @@
   "titulo": "Show en el Teatro Tango Porteño",
   "descripcion": "El Teatro Tango Porteño, en Buenos Aires, es el lugar perfecto para disfrutar del famoso baile argentino junto a una deliciosa cena tradicional."
  },
- "arraial|Arraial do Cabo Boat Trip": {
-  "titulo": "Paseo en barco por Arraial do Cabo",
-  "descripcion": "En este paseo en barco por Arraial do Cabo descubrís lugares como la Ilha do Farol, Praia do Forno o la Gruta Azul."
- },
  "arraial|Arraial do Cabo Buggy Tour": {
   "titulo": "Tour en buggy por Arraial do Cabo",
   "descripcion": "En este tour en buggy por Arraial do Cabo recorremos los rincones encantadores de esta ciudad costera de Río de Janeiro y admiramos paisajes espectaculares."
- },
- "arraial|Arraial do Cabo Diving Introduction": {
-  "titulo": "Bautismo de buceo en Arraial do Cabo",
-  "descripcion": "Explorá el fondo marino que atrae a buzos de todo el mundo con esta introducción al buceo en Arraial do Cabo. El lugar perfecto para aprender."
  },
  "arraial|Arraial do Cabo Hiking Tour": {
   "titulo": "Caminata por Arraial do Cabo",
@@ -374,10 +366,6 @@
  "buz|Buzios Trolleybus Tour": {
   "titulo": "Tour en trolebús por Búzios",
   "descripcion": "Descubrí por qué Brigitte Bardot se enamoró de las playas de Búzios en este tour en trolebús por la ciudad brasileña."
- },
- "buz|Búzios Buggy Tour": {
-  "titulo": "Tour en buggy por Búzios",
-  "descripcion": "¿Querés explorar Búzios de una forma divertida? ¡No te pierdas este emocionante tour en buggy! Te vas a enamorar de la historia y la belleza de esta ciudad costera."
  },
  "buz|Búzios Canoe Tour": {
   "titulo": "Paseo en canoa por Búzios",
@@ -1767,14 +1755,6 @@
   "titulo": "Angra dos Reis e Ilha Grande: excursión de día completo",
   "descripcion": "Excursión de día completo a Angra dos Reis e Ilha Grande desde Río de Janeiro."
  },
- "rio|Best Half Day in Rio: Christ the Redeemer and Sugarloaf": {
-  "titulo": "Medio día en Río: Cristo Redentor y Pan de Azúcar",
-  "descripcion": "Medio día en Río de Janeiro con visita al Cristo Redentor y al Pan de Azúcar."
- },
- "rio|Christ the Redeemer and Sugarloaf Tour with…": {
-  "titulo": "Tour al Cristo Redentor y Pan de Azúcar",
-  "descripcion": "Recorrido por el Cristo Redentor y el Pan de Azúcar, dos de los íconos de Río de Janeiro."
- },
  "rio|Coffee Farm Tour with Tasting": {
   "titulo": "Tour por una finca de café con degustación",
   "descripcion": "Visita a una finca de café con degustación cerca de Río de Janeiro."
@@ -1786,10 +1766,6 @@
  "rio|Hang Gliding Adventure": {
   "titulo": "Aventura en ala delta",
   "descripcion": "Vuelo en ala delta sobre Río de Janeiro."
- },
- "rio|Hang Gliding Tandem Flight": {
-  "titulo": "Vuelo en ala delta en tándem",
-  "descripcion": "Vuelo en ala delta en tándem sobre Río de Janeiro."
  },
  "rio|Hang Gliding or Paragliding Flights": {
   "titulo": "Vuelo en ala delta o parapente",
@@ -1815,10 +1791,6 @@
   "titulo": "Vuelo privado en helicóptero de 30 minutos al Cristo Redentor",
   "descripcion": "Vuelo privado en helicóptero de 30 minutos hasta el Cristo Redentor."
  },
- "rio|Rio: Carnival 2027 Sambadrome Parade Ticket & Transfer": {
-  "titulo": "Carnaval 2027: entrada al desfile del Sambódromo y traslado",
-  "descripcion": "Entrada al desfile del Carnaval 2027 en el Sambódromo de Río de Janeiro, con traslado."
- },
  "rio|Rio: Christ the Redeemer, Sugarloaf, Selaron & BBQ Lunch": {
   "titulo": "Río: Cristo Redentor, Pan de Azúcar, Selarón y almuerzo con parrilla",
   "descripcion": "Recorrido por el Cristo Redentor, el Pan de Azúcar y la escalera Selarón, con almuerzo de parrilla."
@@ -1826,10 +1798,6 @@
  "rio|Rio: Half-Day with Christ, Selarón Steps & Sugarloaf Sunset": {
   "titulo": "Río: medio día con el Cristo, la escalera Selarón y atardecer en el Pan de Azúcar",
   "descripcion": "Medio día en Río con el Cristo Redentor, la escalera Selarón y el atardecer en el Pan de Azúcar."
- },
- "rio|Rio: Helicopter Doors Off Flight + Optional Hotel Transfer": {
-  "titulo": "Río: vuelo en helicóptero con puertas abiertas y traslado opcional al hotel",
-  "descripcion": "Vuelo en helicóptero con las puertas abiertas sobre Río de Janeiro, con traslado opcional al hotel."
  },
  "rio|Rio: Maracanã Stadium Football Match Ticket & Pvt Transport": {
   "titulo": "Río: entrada a un partido de fútbol en el Maracanã con transporte privado",
