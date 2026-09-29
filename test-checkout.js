@@ -328,6 +328,18 @@ prueba('lo escrito a mano pasa al estado del viaje y gana en el repintado', () =
   assert.strictEqual(fns.hotelParaElTransfer(), 'Otro hotel en el centro');
   estado.transferWizard = {};
 });
+/* El bug que esto cazó: la seccion de traslados guardaba findSelectedHotelLabel()
+   en transferWizard.hotelName. Como "Hotel recomendado" no es un nombre, quedaba
+   pegado en el estado y de ahi en adelante ningun filtro lo sacaba: el campo del
+   checkout salia con un hotel que nadie habia elegido. El filtro tiene que
+   mirar tambien lo guardado, no solo el hotel de la seccion. */
+prueba('una etiqueta ya guardada en el estado tampoco pasa por nombre', () => {
+  estado.selectedHotelName = 'Hotel recomendado';
+  estado.transferWizard = { hotelName: 'Hotel recomendado' };
+  assert.strictEqual(fns.hotelParaElTransfer(), '', 'el estado con la etiqueta se descarta');
+  estado.transferWizard = { hotelName: 'Sin alojamiento' };
+  assert.strictEqual(fns.hotelParaElTransfer(), '', 'tambien "Sin alojamiento"');
+});
 estado.selectedHotelName = 'Casa Joseph';
 
 console.log('\n' + (fallos ? fallos + ' FALLAS' : 'todo bien'));

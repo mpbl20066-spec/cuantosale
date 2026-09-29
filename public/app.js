@@ -2309,8 +2309,13 @@
   function hotelParaElTransfer() {
     if (!detailState || !detailState.meta) return '';
     if (detailState.selectedHotel === false) return '';
-    var guardado = detailState.transferWizard && detailState.transferWizard.hotelName;
-    if (guardado && String(guardado).trim()) return String(guardado).trim();
+    /* El filtro corre tambien sobre lo guardado en transferWizard, no solo
+       sobre el hotel de la seccion. Ese valor lo escribe el campo del checkout
+       —que si es una persona escribiendo, es un nombre de verdad—, pero tambien
+       lo pudo escribir otra cosa con la etiqueta adentro, y una vez guardado el
+       filtro no lo sacaria nunca. */
+    var guardado = String((detailState.transferWizard && detailState.transferWizard.hotelName) || '').trim();
+    if (guardado && !HOTELES_ETIQUETA.test(guardado)) return guardado;
     var elegido = String(detailState.selectedHotelName || '').trim();
     if (!elegido || HOTELES_ETIQUETA.test(elegido)) return '';
     return elegido;
@@ -3663,7 +3668,7 @@
     // llegada", una hora derivada del vuelo que el operador iba a cambiar. Ahora
     // dice "a coordinar", que es lo que realmente es hasta que el operador
     // responda.
-    var transferState = detailState.transferWizard || { hotelName: findSelectedHotelLabel() };
+    var transferState = detailState.transferWizard || { hotelName: hotelParaElTransfer() };
     var transferModeLabel = detailState.transferType === 'private' ? 'Transfer privado' : (detailState.transferType === 'shared' ? 'Transfer compartido' : 'A coordinar');
     var selectedHotelName = findSelectedHotelLabel();
     var selectedHotelDetail = findSelectedHotelDetail();
@@ -7221,7 +7226,13 @@ function comboNombreDestino() {
         // checkout venga con el destino escrito. El horario ya no se guarda: no
         // hay horario hasta que el operador lo confirme.
         detailState.transferWizard = detailState.transferWizard || {};
-        detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || findSelectedHotelLabel();
+        /* hotelParaElTransfer() y no findSelectedHotelLabel(): esta linea se
+           escribe una sola vez y el valor queda pegado en el estado. Si acá se
+           copia la etiqueta, "Hotel recomendado" queda guardado como si fuera el
+           nombre del hotel y de ahi en adelante ningun filtro lo saca mas: el
+           campo del checkout y el mensaje de WhatsApp salen con un hotel que
+           nadie eligio. */
+        detailState.transferWizard.hotelName = detailState.transferWizard.hotelName || hotelParaElTransfer();
         var transferSectionEl = transferChoice.closest('[data-official-transfer]');
         if (transferSectionEl) transferSectionEl.outerHTML = transferCard(detailState.meta);
         sincronizarTrasladoOficial();
