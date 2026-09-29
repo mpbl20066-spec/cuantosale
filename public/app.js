@@ -4552,16 +4552,19 @@
       });
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) closeSplitModal(); });
     }
-    if (!splitState.n) splitState.n = Math.max(2, Math.min(20, Number(detailState.meta.pax) || 2));
+    /* Las personas salen del viaje: son las que se eligieron al buscar. Cambiarlas
+       acá es un ajuste puntual del reparto y no toca el viaje. */
+    splitState.n = Math.max(1, Math.min(20, Number(detailState.meta.pax) || 1));
     el.innerHTML = '<div class="booking-dialog split-dialog" role="dialog" aria-modal="true" aria-labelledby="split-title">' +
       '<button type="button" class="booking-close" data-split-close aria-label="Cerrar">×</button>' +
-      '<span class="voucher-kicker">Dividir gastos</span>' +
-      '<h2 id="split-title">¿Entre cuántos se reparte?</h2>' +
-      '<div class="split-count"><button type="button" class="split-step" data-split-minus aria-label="Una persona menos">−</button>' +
-      '<div class="split-count__n"><output data-split-n>' + splitState.n + '</output><span>personas</span></div>' +
-      '<button type="button" class="split-step" data-split-plus aria-label="Una persona más">+</button></div>' +
-      '<details class="split-namesbox"><summary>Agregar nombres (opcional)</summary><div class="split-names" data-split-names>' + splitNombresMarkup() + '</div></details>' +
+      '<span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span>' +
+      '<h2 id="split-title">Dividir gastos</h2>' +
       '<div data-split-result>' + splitResultado() + '</div>' +
+      '<div class="split-adjust"><span>Personas en el reparto <small>(las del viaje; ajustalo si cambia)</small></span>' +
+      '<div class="split-adjust__ctl"><button type="button" class="split-step" data-split-minus aria-label="Una persona menos">\u2212</button>' +
+      '<output data-split-n>' + splitState.n + '</output>' +
+      '<button type="button" class="split-step" data-split-plus aria-label="Una persona m\u00e1s">+</button></div></div>' +
+      '<details class="split-namesbox"><summary>Agregar nombres (opcional)</summary><div class="split-names" data-split-names>' + splitNombresMarkup() + '</div></details>' +
       '<div class="split-actions">' +
       '<button type="button" class="split-btn split-btn--main" data-split-whatsapp>Enviar por WhatsApp</button>' +
       '<button type="button" class="split-btn" data-split-copy>Copiar resumen</button></div>' +
