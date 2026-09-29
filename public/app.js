@@ -4450,6 +4450,29 @@
     return mapa[huella];
   }
   function reservasDe(categoria) { return !!reservasViaje.categorias[categoria]; }
+  /* Estado que la base no guarda: la base solo sabe SI un rubro esta marcado, no
+     si es un pedido en curso o una reserva confirmada. Se anota aca, por viaje y
+     en este navegador:
+       'solicitado'  el pedido de traslado/actividades ya salio por WhatsApp;
+       'reservado'   la agencia confirmo (vuelo/hotel: sin esto, un rubro marcado
+                     por el clic del link es solo "Solicitado"). */
+  var ESTADOS_KEY = 'cuantosale_estados_viaje';
+  function estadosLocales() {
+    try { return JSON.parse(localStorage.getItem(ESTADOS_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function estadoLocal(categoria) {
+    var id = viajeReservaId();
+    var m = id ? estadosLocales()[id] : null;
+    return (m && m[categoria]) || '';
+  }
+  function guardarEstadoLocal(categoria, valor) {
+    var id = viajeReservaId();
+    if (!id) return;
+    var todos = estadosLocales();
+    todos[id] = todos[id] || {};
+    if (valor) todos[id][categoria] = valor; else delete todos[id][categoria];
+    try { localStorage.setItem(ESTADOS_KEY, JSON.stringify(todos)); } catch (e) { /* modo privado */ }
+  }
   /* ---------- De quien es cada rubro, y que se puede afirmar ----------
      El canal va al lado del precio porque responde la pregunta que la persona se
      hace al verlo: quien me lo cobra y donde se confirma.
@@ -4473,8 +4496,8 @@
   var CANAL_RESERVA = {
     pasajes: { canal: 'Aerolínea', externo: true },
     alojamiento: { canal: 'Booking', externo: true },
-    traslados: { canal: 'Gestion directa', externo: false },
-    tours: { canal: 'Gestion directa', externo: false }
+    traslados: { canal: 'Gestión directa', externo: false },
+    tours: { canal: 'Gestión directa', externo: false }
   };
   /* Lo que NO se reserva, dicho a la vista.
 
@@ -4522,8 +4545,10 @@
      Los dos verdes y con el mismo formato: la diferencia la cuenta la palabra,
      no el color. */
   function estadoReserva(categoria) {
-    if (!reservasDe(categoria)) return null;
-    return canalDe(categoria).externo ? 'Seleccionado' : 'Reservado';
+    var externo = canalDe(categoria).externo;
+    if (reservasDe(categoria)) return (!externo || estadoLocal(categoria) === 'reservado') ? 'Reservado' : 'Solicitado';
+    if (!externo && estadoLocal(categoria) === 'solicitado') return 'Solicitado';
+    return null;
   }
   /* La pastilla. Va con --good y no con un verde suelto: el proyecto usa mostaza
      para "elegido" y verde solo para "confirmado", que es un estado distinto y
@@ -4535,10 +4560,11 @@
     var estado = estadoReserva(categoria);
     if (!estado) return '';
     var canal = canalDe(categoria);
-    var title = canal.externo
-      ? 'Ya elegiste este rubro. La compra se completa en ' + canal.canal + ', que abre en otra pestaña.'
-      : 'Reserva confirmada por la agencia, coordinado por ' + canal.canal.toLowerCase() + '.';
-    return '<span class="reserva-chip" title="' + esc(title) + '">'
+    var pendiente = estado === 'Solicitado';
+    var title = pendiente
+      ? (canal.externo ? 'Abriste el link. La compra se completa en ' + canal.canal + ', que abre en otra pestaña.' : 'Tu solicitud está en proceso: la confirmamos con el operador.')
+      : 'Reserva confirmada, coordinada por ' + canal.canal.toLowerCase() + '.';
+    return '<span class="reserva-chip' + (pendiente ? ' is-wip' : '') + '" title="' + esc(title) + '">'
       + '<svg class="reserva-chip__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
       + esc(estado) + '</span>';
   }
@@ -4611,6 +4637,8 @@
     try {
       var result = await supabaseClient.rpc('reservas_marcar_manual', { p_viaje_id: viajeId, p_categoria: categoria, p_destino: reservaDestino(), p_detalle: detalle || {} });
       if (result.error) throw new Error(result.error.message);
+      guardarEstadoLocal(categoria, 'reservado');
+      pintarVoucherReservas();
     } catch (error) {
       delete reservasViaje.categorias[categoria];
       pintarVoucherReservas();
@@ -4622,6 +4650,7 @@
     if (!viajeId || !supabaseClient) return;
     if (!await esAgencia()) return;
     delete reservasViaje.categorias[categoria];
+    guardarEstadoLocal(categoria, '');
     pintarVoucherReservas();
     try {
       var result = await supabaseClient.rpc('reservas_desmarcar', { p_viaje_id: viajeId, p_categoria: categoria });
@@ -4817,12 +4846,14 @@
        pasa nada. El title aclara que en vuelo y hotel quiere decir "hay una
        reserva en curso", porque el link no avisa si la compra terminó. */
     function reservadoCta(categoria, aviso) {
-      var texto = '<span class="voucher-item__cta is-reserved" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</span>';
+      if (estadoReserva(categoria) === 'Solicitado' && !soyAgencia) aviso = 'Tu solicitud está en proceso: la confirmamos con el operador.';
+      var clase = estadoReserva(categoria) === 'Solicitado' ? ' is-solicitado' : '';
+      var texto = '<span class="voucher-item__cta is-reserved' + clase + '" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</span>';
       if (!soyAgencia) return texto;
-      return '<button type="button" class="voucher-item__cta is-reserved" data-deshacer-reserva="' + esc(categoria) + '" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</button>';
+      return '<button type="button" class="voucher-item__cta is-reserved' + clase + '" data-deshacer-reserva="' + esc(categoria) + '" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</button>';
     }
     function reservadoLabel(categoria) {
-      return categoria === 'pasajes' ? 'Vuelo reservado' : (categoria === 'alojamiento' ? 'Hotel reservado' : 'Reservado');
+      return estadoReserva(categoria) || 'Reservado';
     }
     /* El link de vuelta. Lo unico que hace es POSICIONAR: cuando la persona
        vuelve de Booking o de la aerolinea, el cotizador la trae a la fila que
@@ -4875,7 +4906,7 @@
       return url + sep + 'vuelta=' + encodeURIComponent(id) + '&rubro=' + encodeURIComponent(categoria);
     }
     function bookCta(url, label, labelFor, categoria) {
-      if (reservasDe(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a ' + label.toLowerCase() + '.');
+      if (estadoReserva(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a ' + label.toLowerCase() + '.');
       return url
         ? '<a class="voucher-item__cta" data-reservar-rubro="' + esc(categoria) + '" href="' + esc(conLinkDeVuelta(url, categoria)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(labelFor) + '">' + esc(label) + '</a>'
         : '<button type="button" class="voucher-item__cta is-off" disabled>' + esc(label) + '</button>';
@@ -4900,7 +4931,7 @@
        El aviso va ahora al cuerpo, con el resto de la bajada, y la derecha queda
        para el numero. */
     function reservarCta(activo, etiqueta, categoria) {
-      if (reservasDe(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
+      if (estadoReserva(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
       if (!activo) return '';
       return '<button type="button" class="voucher-item__cta" data-reservar-pedido aria-label="' + esc(etiqueta) + '">Reservar</button>';
     }
@@ -5114,7 +5145,7 @@
       ventajasMarkup +
 
       '<ul class="voucher-list">' +
-      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '') +
+      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>') +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
       itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta) +
       itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, reservarCta(selectedTours.length, 'Reservar las actividades', 'tours')) +
@@ -9854,6 +9885,9 @@ function comboNombreDestino() {
            coordina la agencia y el "Reservado" lo pone quien confirmó la
            reserva, desde el control del voucher. Si se marcara acá, el cliente
            vería su propio "Reservado" sin que nadie haya confirmado nada. */
+        var enviado = checkoutTotals();
+        if (enviado.tours.length) guardarEstadoLocal('tours', 'solicitado');
+        if (enviado.transfer) guardarEstadoLocal('traslados', 'solicitado');
         closeBookingForm();
         return;
       }

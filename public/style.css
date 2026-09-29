@@ -2430,3 +2430,43 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
   overflow-wrap: anywhere;
   hyphens: auto;
 }
+
+/* ---------- Voucher: estados, botones, beneficios y gastos en destino ---------- */
+
+/* La linea del canal ("Aerolínea", "Booking", "Gestión directa") va sin punto
+   suelto: el punto de ::before quedaba huerfano en una linea propia. */
+.voucher-item__canal{display:block}
+.voucher-item__canal::before{content:none}
+
+/* "Solicitado": mismo tamaño que "Reservado", pero abierto (sin relleno) para
+   que se lea como algo en proceso y no como algo cerrado. */
+.voucher-item__cta.is-solicitado{border-color:color-mix(in srgb,var(--good) 55%,transparent);background:transparent;color:var(--good)}
+
+/* Botones de accion de las filas de costos: borde y texto de la marca, fondo
+   suave y peso 800, para que se lean como accion sobre el fondo oscuro. */
+.voucher-item__side .voucher-item__cta:not(.is-reserved):not(.is-off){
+  border-color:var(--cel);background:var(--cel-soft);color:var(--cel);font-weight:800}
+.voucher-item__side .voucher-item__cta:not(.is-reserved):not(.is-off):hover{background:var(--cel);color:var(--bg);border-color:var(--cel)}
+
+/* Vuelo sin elegir: es un paso pendiente, no un item apagado. Borde de la marca
+   y un boton directo ("Elegir vuelos"). */
+.voucher-item:has(.is-elegir){padding:13px 12px;margin:0 -12px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--cel) 6%,transparent)}
+.voucher-item:has(.is-elegir) + .voucher-item{border-top:0}
+
+/* Beneficios: una barra de badges de una linea. En celular se desliza a los
+   costados en vez de apilar tres filas de texto chico antes de los precios. */
+.voucher-ventajas{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0 6px}
+.voucher-ventajas::-webkit-scrollbar{display:none}
+.voucher-ventajas li{display:flex;flex:0 0 auto;align-items:center;gap:8px;max-width:78vw;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;scroll-snap-align:start}
+.voucher-ventajas span{font-size:12px;font-weight:600;line-height:1.3;color:var(--ink)}
+@media (min-width:561px){.voucher-ventajas{flex-wrap:wrap;overflow:visible}}
+@media (max-width:560px){.voucher-ventajas{display:flex;grid-template-columns:none}.voucher-ventajas li{display:flex}}
+
+/* Gastos en destino: columnas numericas alineadas (dia y total) y un total que
+   cierra la suma con una linea firme y el mismo margen derecho que los montos. */
+.voucher-destino__title{flex-wrap:wrap;row-gap:2px}
+.voucher-destino__dia,.voucher-destino__monto,.voucher-destino__total b{font-variant-numeric:tabular-nums;text-align:right}
+.voucher-destino__dia{min-width:72px}
+.voucher-destino__monto{min-width:84px}
+.voucher-destino__total{margin-top:6px;padding-top:12px;border-top:2px solid var(--ink2)}
+.voucher-destino__total b{min-width:84px}
