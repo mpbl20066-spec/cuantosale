@@ -2570,3 +2570,11 @@ h3.block-title, .block-title:is(h3) {
 .budget{margin-top:28px;padding-bottom:10px}
 .budget p{margin-top:16px}
 .hero{padding-bottom:32px}
+
+/* ---------- Panel Mi Viaje: mas despejado ---------- */
+.trip-summary__detail{display:none}
+.trip-summary__item{gap:12px;padding:15px 0}
+.trip-summary__item:first-child{padding-top:4px}
+.trip-summary__sub{margin-top:4px}
+.trip-summary__meta b{font-size:14px}
+.trip-summary__actions{margin-top:8px}

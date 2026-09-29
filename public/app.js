@@ -4085,11 +4085,12 @@
       // Sólo el ícono: el cuadrado de color repetía la misma información y
       // ocupaba ancho al lado del texto. El botón entero lleva a la sección
       // donde ese rubro se configura, igual que las filas del desglose.
-      return '<button type="button" class="trip-summary__item' + (item.n ? '' : ' is-zero') + '" data-jump-category="' + item.cat + '" data-jump-label="' + esc(item.label) + '" aria-label="Ir a la sección de ' + esc(item.label) + '">'
+      return '<button type="button" class="trip-summary__item' + (item.n ? '' : ' is-zero') + '" data-jump-category="' + item.cat + '" data-jump-label="' + esc(item.label) + '"' + (item.detalle ? ' title="' + esc(String(item.detalle).replace(/<[^>]*>/g, '')) + '"' : '') + ' aria-label="Ir a la sección de ' + esc(item.label) + '">'
         + categoryIcon(item.cat, item.color)
         + '<div class="trip-summary__meta"><b>' + item.label + '</b>'
         + '<span class="trip-summary__sub"><span class="trip-summary__state is-' + item.estadoClave + '">' + item.estado + '</span>'
-        + (item.detalle ? '<span class="trip-summary__detail">' + item.detalle + '</span>' : '')
+        // Sin descripcion junto al estado: solo icono, nombre, estado y monto. El
+        // detalle (aerolinea, /dia, canal) queda en el title de la fila.
         + '</span></div>'
         + '<em>' + item.value + '</em>'
         + '</button>';
