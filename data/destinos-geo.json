@@ -1,17 +1,24 @@
 {
   "_meta": {
     "descripcion": "Coordenada de cada destino, para verificar que una foto sea de ese lugar y no de un homonimo.",
-    "para_que_no_se_calcula": "La primera version de la herramienta的地区 centro se media con los GPS de los propios candidatos, y por eso aprobo el Trancoso de Portugal. El centro tiene que ser una verdad externa a lo que se verifica.",
+    "para_que_no_se_calcula": "La primera version de la herramienta media el centro con los GPS de los propios candidatos, y por eso aprobo el Trancoso de Portugal. El centro tiene que ser una verdad externa a lo que se verifica.",
     "fuente": "OpenStreetMap via Nominatim (geocoding), filtrado con countrycodes=br.",
     "generado": "2026-09-29",
     "advertencias": [
-      "Un radio de 30 km acepta Nearby si el destino tiene una laguna o不是一个 un pueblo. Con radios menores aparecen los homonimos de barrio.",
+      "Un radio de 30 km acepta Nearby si el destino tiene una laguna o no es un pueblo. Con radios menores aparecen los homonimos de barrio.",
       "Toda coordenada tiene que revisarse a mano una vez. Un geocoder devuelve el pueblo mas conocido con ese nombre, no el que esta en la lista de destinos.",
-      "bue es Buenos Aires (Argentina) y NO esta en Brazil: el filtro countrycodes=br del geocoder lo traia a Pernambuco. Cualquier correccion al script tiene que tener en cuenta el pais por destino, no uno global."
+      "bue es Buenos Aires (Argentina) y NO esta en Brazil: el filtro countrycodes=br del geocoder lo traia a Pernambuco. Cualquier correccion al script tiene que tener en cuenta el pais por destino, no uno global.",
+      "Este archivo se cruza con DEST_COORDS de lib/model.js. Los dos dicen donde queda cada pueblo y hoy coinciden dentro de 30 km. Si uno se mueve, hay que mover el otro: trancoso y pip estaban a 411 y 52 km, y con la coordenada de pip a 12 km de Natal un par ofrecía un traslado con un tercio del precio real."
     ],
     "revisado": "2026-09-29"
   },
   "destinos": {
+    "for": {
+      "name": "Fortaleza",
+      "region": "Ceará",
+      "lat": -3.79322,
+      "lon": -38.52804
+    },
     "bue": {
       "name": "Buenos Aires",
       "region": "Buenos Aires",
