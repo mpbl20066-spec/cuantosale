@@ -728,6 +728,23 @@
      recálculo, así que colgarlo ahí lo borraba. Acá sobrevive a los dos.
      { viajeId: <uuid del viaje>, categorias: { traslados: true, ... } } */
   var reservasViaje = { viajeId: null, categorias: {} };
+  /* Si quien mira es de la agencia. Lo decide la base, no esta pagina: el
+     navegador es del cliente y se lo puede editar, asi que un `if` acá no
+     significaria nada. Es una consulta al JWT, se hace una vez por sesión y se
+     cachea acá. While esto sea false, el voucher no muestra los controles de
+     "Reservado" a mano. */
+  var soyAgencia = false;
+  var agenciaConsultado = false;
+  async function esAgencia() {
+    if (agenciaConsultado) return soyAgencia;
+    if (!supabaseClient) return false;
+    agenciaConsultado = true;
+    try {
+      var r = await supabaseClient.rpc('es_agencia');
+      soyAgencia = !!(r.data && r.data === true);
+    } catch (e) { soyAgencia = false; }
+    return soyAgencia;
+  }
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
   // Consumo (kWh cada 100 km) y capacidad de batería de modelos populares en
   // la región. Son specs de fábrica publicadas, no telemetría real: quedan
@@ -4003,6 +4020,13 @@
       if (yaLeidas) pintarVoucherReservas();
     } catch (e) { /* sin reservas guardadas: todos los rubros quedan en "Reservar" */ }
   }
+  /* El marcado automático, solo para vuelo y hotel. Se dispara con el clic en el
+     link, que abre WhatsApp o Booking: ahi la intención es del cliente y no hay
+     nada que confirmar, así que no hace falta que nadie de la agencia lo haga.
+
+     No dice que la reserva esté confirmada, y el botón lo aclara en el title: el
+     link no avisa si la persona terminó comprando, así que la app no lo sabe y
+     no lo inventa. Para traslado y tour esto no se usa nunca. */
   async function marcarReservado(categoria, detalle) {
     var viajeId = viajeReservaId();
     if (!viajeId || !supabaseClient) return;
@@ -4021,9 +4045,31 @@
       console.warn('[reservas] no se pudo guardar', categoria, error);
     }
   }
+  /* El marcado a mano, que es el de la agencia. Va por reservas_marcar_manual y
+     no por el mismo que usa el clic del link, porque la base los separa: la
+     abierta es la del clic de cualquiera, y la manual exige el correo de la
+     agencia en el JWT. Si se usara la misma, el control de la página no sería
+     más que una decoración —cualquiera que tocara el botón con las herramientas
+     de developer la saltaría. */
+  async function marcarReservadoManual(categoria, detalle) {
+    var viajeId = viajeReservaId();
+    if (!viajeId || !supabaseClient) return;
+    if (!await esAgencia()) return;
+    reservasViaje.categorias[categoria] = true;
+    pintarVoucherReservas();
+    try {
+      var result = await supabaseClient.rpc('reservas_marcar_manual', { p_viaje_id: viajeId, p_categoria: categoria, p_destino: reservaDestino(), p_detalle: detalle || {} });
+      if (result.error) throw new Error(result.error.message);
+    } catch (error) {
+      delete reservasViaje.categorias[categoria];
+      pintarVoucherReservas();
+      mostrarAvisoReserva(error.message || 'No pudimos guardar la reserva.');
+    }
+  }
   async function desmarcarReservado(categoria) {
     var viajeId = viajeReservaId();
     if (!viajeId || !supabaseClient) return;
+    if (!await esAgencia()) return;
     delete reservasViaje.categorias[categoria];
     pintarVoucherReservas();
     try {
@@ -4032,8 +4078,24 @@
     } catch (error) {
       reservasViaje.categorias[categoria] = true;
       pintarVoucherReservas();
-      console.warn('[reservas] no se pudo deshacer', categoria, error);
+      mostrarAvisoReserva(error.message || 'No pudimos sacar la marca.');
     }
+  }
+  /* El aviso va arriba de la lista de rubros, no en un alert: el alert parte la
+     pantalla y se pierde el scroll, y en un voucher de cuatro filas el error
+     tiene que quedar al lado de la fila que falló. */
+  function mostrarAvisoReserva(mensaje) {
+    var modal = $('#booking-modal');
+    if (!modal || modal.hidden || !modal.dataset.summaryText) return;
+    var lista = modal.querySelector('.voucher-list');
+    if (!lista) return;
+    var previo = lista.querySelector('[data-reserva-aviso]');
+    if (previo) previo.parentNode.removeChild(previo);
+    var nota = document.createElement('li');
+    nota.className = 'voucher-aviso';
+    nota.setAttribute('data-reserva-aviso', '');
+    nota.textContent = mensaje;
+    lista.appendChild(nota);
   }
   /* Repinta el voucher si está abierto. Se comprueba el dataset porque el modal
      se usa para el checkout también, y en ese momento no hay voucher que
@@ -4114,20 +4176,43 @@
     // que usa el panel "Mi Viaje" y el desglose, para que el mismo rubro se vea
     // igual en los tres lugares.
     function itemRow(category, title, detailMarkup, amount, ctaMarkup) {
+      // controlReserva() va antes del CTA: el CTA es lo que toca el cliente y
+      // no se quiere que el control de la agencia se confunda con esa acción.
       return '<li class="voucher-item"><span class="voucher-item__icon" style="color:var(' + getCategoryColor(category) + ')">' + categoryIcon(category) + '</span>' +
         '<div class="voucher-item__body"><p class="voucher-item__title">' + title + '</p>' + detailMarkup + '</div>' +
-        '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + money(amount) + '</b>' + (ctaMarkup || '') + '</div></li>';
+        '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + money(amount) + '</b>' + controlReserva(category) + (ctaMarkup || '') + '</div></li>';
     }
     // "Reservar" es un enlace cuando hay una URL y un botón apagado cuando no la
     // hay: que falte el vuelo o los tours se ve en el resumen, igual que se ve
     // en la lista de la página.
+    /* El control de la agencia para poner y sacar el "Reservado" a mano.
+       Solo se pinta si esAgencia(): para el resto es un string vacío, y el
+       "Reservado" que ve el cliente es un <span> sin acción, no un botón. No
+       alcanza con esconderlo acá —la base también lo rechaza— pero si se
+       dejara el botón visible el cliente tocaría algo que no hace nada, que es
+       peor que no mostrarlo.
+
+       Va arriba del CTA y no al lado del monto para no ensuciar la columna de
+       cifras, que es la que se lee de un vistazo. */
+    function controlReserva(categoria) {
+      if (!soyAgencia) return '';
+      var reservado = reservasDe(categoria);
+      return '<button type="button" class="voucher-marca' + (reservado ? ' is-on' : '') + '" data-marca-reserva="' + esc(categoria) + '" title="' +
+        esc(reservado ? 'Sacar la marca de reservado' : 'Marcar como reservado: la reserva ya está confirmada') + '">' +
+        '<span aria-hidden="true">' + (reservado ? '✓' : '+') + '</span>' +
+        (reservado ? 'Reservado' : 'Marcar reservado') + '</button>';
+    }
     /* Cuando el rubro ya está reservado, el enlace no se pinta: el link ya se
-       usó y dejarlo vivo invitaba a volver a abrir Booking. Sale un botón de
-       estado, que además sirve para deshacer. Sin salida, un "Reservado" mal
-       puesto —una reserva que después se canceló— no tenía arreglo desde la
-       página. El title aclara que para vuelo y hotel quiere decir "hay una
+       usó y dejarlo vivo invitaba a volver a abrir Booking. Sale el estado.
+
+       Para la agencia es un botón, que además sirve para deshacer. Para el
+       cliente es un <span>: el "Reservado" es un dato, no algo que pueda tocar,
+       y si fuera un botón el cliente vería algo pulsable que al tocar no le
+       pasa nada. El title aclara que en vuelo y hotel quiere decir "hay una
        reserva en curso", porque el link no avisa si la compra terminó. */
     function reservadoCta(categoria, aviso) {
+      var texto = '<span class="voucher-item__cta is-reserved" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</span>';
+      if (!soyAgencia) return texto;
       return '<button type="button" class="voucher-item__cta is-reserved" data-deshacer-reserva="' + esc(categoria) + '" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</button>';
     }
     function reservadoLabel(categoria) {
@@ -4249,6 +4334,11 @@
        nadie está mirando. Si la respuesta llega con el voucher ya abierto,
        cargarReservasViaje() lo repinta solo. */
     cargarReservasViaje();
+    /* Lo mismo con "soy de la agencia": decide si las filas traen el control de
+       marcar, así que tiene que estar resuelto antes del próximo repintado.
+       controlReserva() lee la variable, no espera: el chequeo se cachea y solo
+       vuelve a latir en el primer render. */
+    esAgencia().then(function (agencia) { if (agencia) pintarVoucherReservas(); });
   }
   function syncDailyBudgetState() {
     if (!detailState || !detailState.meta) return;
@@ -5100,15 +5190,39 @@
      se vea que la seccion existe: es el premio de llegar hasta el hotel, y sin
      la promesa a la vista no hay nada que empuje a tocar "Ver disponibilidad".
      No lleva contenido de la guia ni una parte: si alguien la lee con el
-     verificador de elementos, encuentra el mismo texto que la pagina de cierre. */
+     verificador de elementos, encuentra el mismo texto que la pagina de cierre.
+
+     El candado es un SVG con dos piezas —el arco y el cuerpo— en vez del emoji
+     🔒. El emoji se ve distinto en cada sistema operativo, que es el mismo
+     problema que ya se corrigio en los iconos de los transfers: dos personas en
+     la misma pantalla ven candados distintos. Ademas el emoji no se puede abrir.
+
+     Las dos piezas se separan porque el candado se ABRE: cuando la guia llega,
+     .is-open corre el arco hacia un costado y le da un giro, como el Cerrojo
+     de una caja fuerte. El giro es una rotacion de transform, no una transicion
+     de width, asi que no hay layout y no salta nada. */
+  /* El path del arco cierra en y=12, dos unidades ADENTRO del cuerpo (que
+     arranca en y=10). Con el cierre exacto en y=10 las patas se tocaban al
+     borde y medio trazo de cada una caia de un lado, asi que cerrado se veia
+     apenas rozando en lugar de metido en la cerradura. Con y=12 entra 1.8px
+     medidos, que es lo que hace que se lea "cerrado", y al abrir el translateY
+     de -5 lo saca entero del cuerpo. */
+  function guiaLockIcon() {
+    return '<svg class="guia-lock__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path class="guia-lock__shackle" d="M8 12V7.4a4 4 0 0 1 8 0V12"/>' +
+      '<rect class="guia-lock__body" x="4.5" y="10" width="15" height="10.5" rx="2.2"/>' +
+      '</svg>';
+  }
   function guiaCandado(meta) {
     var destino = meta && meta.dest ? meta.dest.name : '';
     return '<section class="guia-lock" data-guia-lock aria-labelledby="guia-lock-title">' +
-      '<div class="guia-lock__head"><span class="guia-lock__eyebrow">GUIA SECRETA</span>' +
-      '<h2 id="guia-lock-title">La Guia Secreta de ' + esc(destino) + '</h2></div>' +
-      '<p class="guia-lock__texto">Donde comer por menos plata, que el menu turistico no cuenta, y los precios que de verdad se pagan. ' +
-      'Se abre cuando elegis un hotel y toc&aacute; <b>Ver disponibilidad</b>: es el contenido que va con el hotel, no con el buscador.</p>' +
-      '<p class="guia-lock__nota">No se abre sola. Buscar un destino no la descarga.</p>' +
+      '<div class="guia-lock__head"><span class="guia-lock__eyebrow">GUÍA SECRETA</span>' +
+      '<h2 id="guia-lock-title">La Guía Secreta de ' + esc(destino) + '</h2></div>' +
+      '<div class="guia-lock__body"><span class="guia-lock__icon" aria-hidden="true">' + guiaLockIcon() + '</span>' +
+      '<p class="guia-lock__texto">Dónde comer por menos plata, que el menú turístico no cuenta, y los precios que de verdad se pagan. ' +
+      'Se abre cuando elegís un hotel y tocás <b>Ver disponibilidad</b>: es el contenido que va con el hotel, no con el buscador.</p>' +
+      '<p class="guia-lock__nota">No se abre sola. Buscar un destino no la descarga.</p></div>' +
       '</section>';
   }
   /* Se pide la guia recien cuando la persona toca la reserva de un hotel. Ese
@@ -5130,8 +5244,22 @@
         var seccion = envoltura.firstElementChild;
         if (seccion) {
           seccion.setAttribute('data-guia-destino', meta.dest.key);
-          lock.parentElement.replaceChild(seccion, lock);
-          if (seccion.scrollIntoView) seccion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          /* El candado se ABRE antes de ser cambiado por la guia.
+             Sin esta pausa el .is-open no llega a verse: el replaceChild es
+             sincronico y el siguiente frame ya tiene la guia en pantalla, asi
+             que la transicion de 340ms del arco se corta en el primer cuadro y
+             lo unico que se ve es un cambio seco. Con 420ms se alcanza a ver el
+             arco descuelgar y despues entra la guia —que es la recompensa, y
+             tiene que parecer que se abrio algo.
+
+             Si la persona cambio de destino o cerro el modal mientras tanto, el
+             candado ya no esta en el DOM y la comprobacion lo salta. */
+          lock.classList.add('is-open');
+          window.setTimeout(function () {
+            if (!lock.parentElement) return;
+            lock.parentElement.replaceChild(seccion, lock);
+            if (seccion.scrollIntoView) seccion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 420);
         }
         return;
       }
@@ -5157,7 +5285,18 @@
     var seccion = envoltura.firstElementChild;
     if (!seccion) return;
     seccion.setAttribute('data-guia-destino', meta.dest.key);
-    main.appendChild(seccion);
+    /* Este camino agrega la guia al final sin pasar por el candado — es el que
+       corre cuando la pagina se armo sin el (render que no pasa por
+       guiaCandado). Si el candado esta en pantalla, se abre igual y recien
+       despues se inserta la guia; si no esta, se inserta directo. */
+    var lockAbajo = main.querySelector('[data-guia-lock]');
+    if (!lockAbajo) { main.appendChild(seccion); return; }
+    lockAbajo.classList.add('is-open');
+    window.setTimeout(function () {
+      if (!lockAbajo.parentElement) return;
+      lockAbajo.parentElement.replaceChild(seccion, lockAbajo);
+      if (seccion.scrollIntoView) seccion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 420);
   }
   function guiaSecreta(meta, guia) {
     if (!meta || !meta.dest) return '';
@@ -8376,15 +8515,11 @@ function comboNombreDestino() {
         if (!checkoutUrl) { closeBookingForm(); return; }
         ckConfirm.disabled = true;
         window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
-        /* Los rubros que reserving la app —traslados y tours— quedan
-           reservados con el pedido enviado, no con el clic en el voucher. La
-           diferencia importa: hasta acá solo había una intención, y recién con
-           los datos del viajero y el medio de pago hay una reserva. Se marca
-           antes de cerrar el modal, pero no lo espera: guardar en Supabase no
-           puede frenar el pedido que ya salió por WhatsApp, y un fallo acá
-           revierte el "Reservado" sin tocar el mensaje que se mandó. */
-        if (detailState && detailState.transferType) marcarReservado('traslados', { tipo: detailState.transferType });
-        if (detailState && (detailState.selectedTours || []).length) marcarReservado('tours', { cantidad: detailState.selectedTours.length });
+        /* Acá NO se marca traslado ni tour. El pedido por WhatsApp es una
+           intención de la persona, no una reserva confirmada: esos dos rubros los
+           coordina la agencia y el "Reservado" lo pone quien confirmó la
+           reserva, desde el control del voucher. Si se marcara acá, el cliente
+           vería su propio "Reservado" sin que nadie haya confirmado nada. */
         closeBookingForm();
         return;
       }
@@ -8402,6 +8537,16 @@ function comboNombreDestino() {
       if (desmarcarRubro) {
         e.preventDefault();
         desmarcarReservado(desmarcarRubro.getAttribute('data-deshacer-reserva'));
+        return;
+      }
+      var marcarRubro = e.target.closest('[data-marca-reserva]');
+      if (marcarRubro) {
+        e.preventDefault();
+        var categoria = marcarRubro.getAttribute('data-marca-reserva');
+        // Es un toggle: el mismo botón pone y saca la marca, que es lo que
+        // hace falta para corregir una reserva mal puesta sin abrir otra cosa.
+        if (reservasDe(categoria)) desmarcarReservado(categoria);
+        else marcarReservadoManual(categoria, { por: 'agencia' });
         return;
       }
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
