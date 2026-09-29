@@ -8,7 +8,8 @@ Salida (data/_trabajo/):  tours-agencias.csv (UTF-8 con BOM, abre bien en Excel)
 
 Columnas: destino_key, destino, agencia, nombre, detalle, detalle_ampliado, precio,
 moneda, duracion, duracion_min, categoria, imagenes (maximo 3, separadas por " | "),
-url, fuente (sitio + como se leyo), completo (si/no), fecha.
+url, fuente (sitio + como se leyo), precio_origen (de donde sale el precio: catalogo/JSON-LD =
+fiable; 'texto ... (verificar)' = sacado del texto de la pagina), completo (si/no), fecha.
 
 Tambien escribe fuentes-tours-agencias.csv: una fila por agencia con el sitio, la
 URL exacta del catalogo que se leyo, el metodo, cuantos tours salieron y la fecha.
@@ -39,7 +40,7 @@ from pathlib import Path
 UA = 'Mozilla/5.0 (compatible; CuantoSaleBot/1.0)'
 PAUSA = 0.8
 MAX_FOTOS = 3
-NO_TOUR = re.compile(r'(?i)^\s*(transfer|traslado|translado|seguro)\b')
+NO_TOUR = re.compile(r'(?i)^\s*(transfer|transfers|traslado|translado|transporte|seguro)\b')
 RAIZ = Path(__file__).resolve().parent.parent
 SALIDA = RAIZ / 'data' / '_trabajo'
 
@@ -50,6 +51,7 @@ DESTINOS = {
     'fln': 'Florianópolis', 'bcm': 'Balneário Camboriú', 'camboriu': 'Camboriú',
     'bombinhas': 'Bombinhas', 'ssa': 'Salvador de Bahía', 'forte': 'Praia do Forte',
     'mcz': 'Maceió', 'maragogi': 'Maragogi', 'fernando': 'Fernando de Noronha',
+    'igu': 'Foz de Iguazú', 'gram': 'Gramado', 'canela': 'Canela',
 }
 
 # (subcadena en minusculas del titulo/categoria, key). La primera que coincide gana.
@@ -66,10 +68,37 @@ SITES = [
      'default': 'mcz', 'reglas': [('maragogi', 'maragogi')]},
     {'agencia': 'Noronha Total', 'tipo': 'woo', 'base': 'https://noronhatotal.com.br',
      'default': 'fernando', 'reglas': []},
+    # Sitios sin catalogo estructurado: se lee cada pagina de tour (tipo 'html').
+    # 'sitemaps' lista los sitemaps a recorrer; 'incluir' filtra las URLs que son un tour;
+    # una regla con key None descarta el tour (no es de un destino de la app).
+    {'agencia': 'Smart Rio Tour', 'tipo': 'html', 'base': 'https://www.smartriotour.com.br',
+     'sitemaps': ['https://www.smartriotour.com.br/passeio-sitemap.xml'],
+     'incluir': r'/passeios/[^/]+/?$', 'default': 'rio',
+     'reglas': [('búzios', 'buz'), ('buzios', 'buz'), ('arraial', 'arraial'), ('paraty', 'paraty'), ('ilha grande', 'ilha'), ('angra', 'angra')]},
+    {'agencia': 'Vans do Corcovado', 'tipo': 'html', 'base': 'https://vansdocorcovado.com.br',
+     'sitemaps': ['https://vansdocorcovado.com.br/sitemap.xml'],
+     'incluir': r'^https://vansdocorcovado\.com\.br/(?!$|faq|home|blog/|transfer|translado|quem-somos|contato|travelbot|politica|black-friday|seu-roteiro|bate-e-volta|passeios-|passeiosaquario|.*-lp$)[^/]+$',
+     'default': 'rio',
+     'reglas': [('búzios', 'buz'), ('buzios', 'buz'), ('arraial', 'arraial'), ('ilha grande', 'ilha'), ('petr', None)]},
+    {'agencia': 'Foz Atrativa', 'tipo': 'html', 'base': 'https://fozatrativa.com.br',
+     'sitemaps': ['https://fozatrativa.com.br/sitemap.xml'],
+     'incluir': r'/passeio/[^/]+$', 'default': 'igu',
+     'reglas': [('ilha do mel', None), ('beto carrero', None), ('concurso', None), ('iron maiden', None)]},
+    {'agencia': 'Loumar Turismo', 'tipo': 'html', 'base': 'https://www.loumarturismo.com.br',
+     'sitemaps': ['https://www.loumarturismo.com.br/sitemap.xml'],
+     'incluir': r'/passeios-em-foz-do-iguacu/\d+/', 'default': 'igu', 'reglas': []},
+    # Fragatur no se incluye: no publica precios en su HTML (los carga por JavaScript).
+    {'agencia': 'GNB Turismo', 'tipo': 'html', 'base': 'https://gnbturismo.com.br',
+     'sitemaps': ['https://gnbturismo.com.br/sitemap.xml'],
+     'incluir': r'/passeio/[^/]+$', 'default': 'gram', 'reglas': [('canela', 'canela')]},
+    {'agencia': 'Sergatur', 'tipo': 'html', 'base': 'https://sergatur.com.br',
+     'sitemaps': ['https://sergatur.com.br/sitemap.xml'],
+     'incluir': r'/passeio/[^/]+$', 'default': 'gram', 'reglas': [('canela', 'canela'), ('itaimbezinho', 'canela')]},
 ]
 
 
-METODOS = {'shopify': 'catalogo Shopify /products.json', 'woo': 'catalogo WooCommerce /wp-json/wc/store/v1/products'}
+METODOS = {'shopify': 'catalogo Shopify /products.json', 'woo': 'catalogo WooCommerce /wp-json/wc/store/v1/products',
+           'html': 'lectura de cada pagina de tour (sitemap.xml + datos estructurados/texto)'}
 
 
 def bajar(url):
@@ -149,7 +178,8 @@ def fila(site, titulo, desc_html, corto_html, precio, moneda, imgs, url, categor
         'completo': 'si' if (ampliado and imgs) else 'no',
         'precio': precio, 'moneda': moneda, 'duracion': dur, 'duracion_min': dur_min,
         'categoria': ' / '.join(categorias), 'imagenes': imgs[:MAX_FOTOS], 'url': url,
-        'fuente': '%s (%s)' % (site['base'].split('//')[1], METODOS[site['tipo']]), 'fecha': date.today().isoformat(),
+        'fuente': '%s (%s)' % (site['base'].split('//')[1], METODOS[site['tipo']]),
+        'precio_origen': 'catalogo del sitio (API)', 'fecha': date.today().isoformat(),
     }
 
 
@@ -190,10 +220,155 @@ def woo(site):
         pagina += 1
 
 
-TIPOS = {'shopify': shopify, 'woo': woo}
+def meta(h, prop):
+    for pat in (r'(?is)<meta[^>]+(?:property|name)=["\']%s["\'][^>]*content=["\']([^"\']*)["\']' % re.escape(prop),
+                r'(?is)<meta[^>]+content=["\']([^"\']*)["\'][^>]*(?:property|name)=["\']%s["\']' % re.escape(prop)):
+        m = re.search(pat, h)
+        if m:
+            return html.unescape(m.group(1)).strip()
+    return ''
+
+
+def nodos_jsonld(h):
+    out = []
+    for m in re.finditer(r'(?is)<script[^>]+application/ld\+json[^>]*>(.*?)</script>', h):
+        try:
+            j = json.loads(m.group(1))
+        except ValueError:
+            continue
+        pila = [j]
+        while pila:
+            x = pila.pop()
+            if isinstance(x, list):
+                pila += x
+            elif isinstance(x, dict):
+                out.append(x)
+                pila += [v for v in x.values() if isinstance(v, (dict, list))]
+    return out
+
+
+def precio_pagina(h, nodos, cuerpo):
+    """(precio, moneda, origen). JSON-LD primero; si no, texto de la pagina."""
+    precios = []
+    for n in nodos:
+        ofertas = n.get('offers')
+        for o in (ofertas if isinstance(ofertas, list) else [ofertas]):
+            if isinstance(o, dict):
+                for k in ('price', 'lowPrice'):
+                    try:
+                        v = float(str(o.get(k)).replace(',', '.'))
+                        if v > 0:
+                            precios.append((v, o.get('priceCurrency') or 'BRL'))
+                    except (TypeError, ValueError):
+                        pass
+    if precios:
+        v, mon = min(precios)
+        return v, mon, 'datos estructurados (JSON-LD)'
+
+    def num(s):
+        return float(s.replace('.', '').replace(',', '.'))
+    m = re.search(r'(?i)a partir de\s*(?:r\$|brl)?\s*R?\$?\s*([\d.]+,\d{2})', cuerpo)
+    if m:
+        return num(m.group(1)), 'BRL', 'texto "a partir de" (verificar)'
+    m = re.search(r'R\$\s*([\d.]+,\d{2})', cuerpo)
+    if m:
+        return num(m.group(1)), 'BRL', 'primer precio del texto (verificar)'
+    return 0, 'BRL', ''
+
+
+def fotos_pagina(h, base, nodos):
+    urls = []
+    og = meta(h, 'og:image')
+    if og:
+        urls.append(og)
+    for n in nodos:
+        im = n.get('image')
+        for i in (im if isinstance(im, list) else [im]):
+            if isinstance(i, str):
+                urls.append(i)
+            elif isinstance(i, dict) and i.get('url'):
+                urls.append(i['url'])
+    for m in re.finditer(r'(?is)<img[^>]+(?:data-src|data-lazy-src|src)=["\']([^"\']+\.(?:jpe?g|png|webp)[^"\']*)["\']', h):
+        urls.append(m.group(1))
+    vistas, res = set(), []
+    for u in urls:
+        u = html.unescape(u.strip())
+        if u.startswith('//'):
+            u = 'https:' + u
+        elif u.startswith('/'):
+            u = base + u
+        if not u.startswith('http') or re.search(r'(?i)logo|icon|favicon|sprite|avatar|whatsapp|banner-|placeholder|\.svg', u):
+            continue
+        clave = re.sub(r'[?#].*$', '', u).lower()
+        if clave in vistas:
+            continue
+        vistas.add(clave)
+        res.append(u)
+        if len(res) >= MAX_FOTOS:
+            break
+    return res
+
+
+def cuerpo_pagina(h):
+    h = re.sub(r'(?is)<(script|style|nav|header|footer|form|svg|noscript|iframe)[^>]*>.*?</\1>', ' ', h)
+    m = re.search(r'(?is)<main[^>]*>(.*?)</main>', h) or re.search(r'(?is)<article[^>]*>(.*?)</article>', h) or re.search(r'(?is)<body[^>]*>(.*?)</body>', h)
+    t = texto(m.group(1) if m else h)
+    vistas, lineas = set(), []
+    for ln in t.split('\n'):
+        ln = ln.strip()
+        if ln and ln not in vistas:
+            vistas.add(ln)
+            lineas.append(ln)
+    return '\n'.join(lineas)[:4000]
+
+
+def urls_sitemap(url, profundidad=0):
+    xml = bajar(url)
+    locs = [html.unescape(x) for x in re.findall(r'<loc>\s*([^<\s]+)\s*</loc>', xml)]
+    if profundidad < 1 and any(l.endswith('.xml') for l in locs):
+        res = []
+        for l in locs:
+            res += urls_sitemap(l, profundidad + 1) if l.endswith('.xml') else [l]
+        return res
+    return locs
+
+
+def htmlsite(site):
+    urls, vistas = [], set()
+    for sm in site['sitemaps']:
+        for u in urls_sitemap(sm):
+            if re.search(site['incluir'], u) and u not in vistas:
+                vistas.add(u)
+                urls.append(u)
+    filas = []
+    for u in urls:
+        try:
+            h = bajar(u)
+        except RuntimeError:
+            continue
+        nodos = nodos_jsonld(h)
+        titulo = meta(h, 'og:title') or (re.findall(r'(?is)<h1[^>]*>(.*?)</h1>', h) or [''])[0]
+        titulo = re.sub(r'<[^>]+>', '', html.unescape(titulo))
+        titulo = re.split(r'\s+[|–—-]\s+(?=[^|]*$)', titulo)[0].strip() if re.search(r'\s[|]\s', titulo) else titulo.strip()
+        cuerpo = cuerpo_pagina(h)
+        precio, moneda, origen = precio_pagina(h, nodos, cuerpo)
+        if not titulo or precio <= 0:
+            continue
+        descr = meta(h, 'og:description') or meta(h, 'description')
+        r = fila(site, titulo, cuerpo.replace('\n', '<br>'), descr, precio, moneda, fotos_pagina(h, site['base'], nodos), u, [])
+        if r['destino_key'] is None:
+            continue
+        r['precio_origen'] = origen
+        filas.append(r)
+    return filas
+
+
+TIPOS = {'shopify': shopify, 'woo': woo, 'html': htmlsite}
 
 
 def catalogo_url(s):
+    if s['tipo'] == 'html':
+        return ' ; '.join(s['sitemaps'])
     return s['base'] + ('/products.json' if s['tipo'] == 'shopify' else '/wp-json/wc/store/v1/products')
 
 
@@ -222,16 +397,17 @@ def main():
             fuentes.append({'agencia': s['agencia'], 'sitio': s['base'], 'catalogo_leido': catalogo_url(s), 'metodo': METODOS[s['tipo']],
                             'tours': 0, 'omitidos_transfers': 0, 'fecha': date.today().isoformat(), 'error': str(e)})
     SALIDA.mkdir(parents=True, exist_ok=True)
-    with open(SALIDA / 'tours-agencias.json', 'w', encoding='utf-8') as fh:
+    suf = '-parcial' if a.solo else ''
+    with open(SALIDA / ('tours-agencias%s.json' % suf), 'w', encoding='utf-8') as fh:
         json.dump(todo, fh, ensure_ascii=False, indent=1)
     cols = ['destino_key', 'destino', 'agencia', 'nombre', 'detalle', 'detalle_ampliado', 'precio', 'moneda',
-            'duracion', 'duracion_min', 'categoria', 'imagenes', 'url', 'fuente', 'completo', 'fecha']
-    with open(SALIDA / 'tours-agencias.csv', 'w', encoding='utf-8-sig', newline='') as fh:
+            'duracion', 'duracion_min', 'categoria', 'imagenes', 'url', 'fuente', 'precio_origen', 'completo', 'fecha']
+    with open(SALIDA / ('tours-agencias%s.csv' % suf), 'w', encoding='utf-8-sig', newline='') as fh:
         w = csv.DictWriter(fh, fieldnames=cols)
         w.writeheader()
         for r in todo:
             w.writerow(dict(r, imagenes=' | '.join(r['imagenes'])))
-    with open(SALIDA / 'fuentes-tours-agencias.csv', 'w', encoding='utf-8-sig', newline='') as fh:
+    with open(SALIDA / ('fuentes-tours-agencias%s.csv' % suf), 'w', encoding='utf-8-sig', newline='') as fh:
         w = csv.DictWriter(fh, fieldnames=['agencia', 'sitio', 'catalogo_leido', 'metodo', 'tours', 'omitidos_transfers', 'fecha', 'error'])
         w.writeheader()
         for r in fuentes:
