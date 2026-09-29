@@ -4650,14 +4650,24 @@
       var algunaReal = cats.some(function (c) { return rubroEsReal(null, c, detailState && detailState.meta); });
       return algunaReal ? '' : '<small>Valores estimados</small>';
     }
+    /* El titulo de cada bloque va FUERA de la caja, no adentro.
+
+       Antes cada grupo era una caja con borde que empezaba por su propio titulo
+       ("Transporte local" dentro del rectangulo, igual que "Comidas"), y con dos
+       grupos abajo los dos titulos quedaban encerrados y la pagina se leia como
+       dos bloques mas y no como dos secciones. Ahora el h2 es hermano de la caja:
+       el titulo manda y la caja es lo que se elige adentro.
+
+       El "Valores estimados" va con el titulo y no dentro de la caja por lo
+       mismo: es una aclaracion sobre la seccion, no sobre las tarjetas. */
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
+      '<h3 class="daily-budget__group-title">Transporte local' + etiquetaDeEstimado(['local']) + '</h3>' +
       '<div class="daily-budget__group" data-budget-anchor="local">' +
-      '<div class="daily-budget__header"><span>Transporte local</span>' + etiquetaDeEstimado(['local']) + '</div>' +
       optionsGrid(localOptions, 'local') +
       '</div>' +
+      '<h3 class="daily-budget__group-title">Comidas' + etiquetaDeEstimado(['comidas']) + '</h3>' +
       '<div class="daily-budget__group" data-budget-anchor="comidas">' +
-      '<div class="daily-budget__header"><span>Comidas</span>' + etiquetaDeEstimado(['comidas']) + '</div>' +
       optionsGrid(foodOptions, 'food') +
       '</div>' +
       /* La frase "Se recalcula automaticamente para toda la duracion del viaje"
@@ -5200,12 +5210,17 @@
       return cabeza + '</div>';
     }).join('');
     var hayEntre = tramos.some(function (tramo) { return tramo.key === 'entre'; });
-    return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
-      '<div class="official-transfer__head"><div><h2>' + (hayEntre ? 'Tus traslados' : 'Traslados y Conexiones') + '</h2>' +
-      '<p>' + (hayEntre
+    /* El titulo y la descripción van FUERA de la caja, como hermano. Antes el h2 estaba
+       adentro de .official-transfer__head, o sea dentro del rectangulo con borde,
+       y la seccion se leia como una tarjeta mas en vez de como un bloque con su
+       nombre. El `data-official-transfer` queda solo en la caja porque es lo que
+       reemplazan las actualizaciones en caliente, y asi el titulo no se borra
+       cuando cambia el precio o el tramo elegido. */
+    return '<h3 class="block-title">' + (hayEntre ? 'Tus traslados' : 'Traslados y Conexiones') + '</h3>' +
+      '<p class="sub block-sub">' + (hayEntre
         ? 'Elegí cómo llegás a la primera parada. El traslado a la segunda se coordina aparte.'
         : 'Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.aeropuerto ? ' desde ' + esc(t.aeropuerto) + ' (' + esc(t.iata) + ')' : '') + (t.km ? ', a ' + t.km + ' km.' : '.')) + '</p>' +
-      '</div></div>' +
+      '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
       modoNota +
       filasTramos +
       (selected ? '<p class="transfer-hint">El horario de recogida lo coordinás con el operador al reservar.</p>' : '') +
@@ -5215,8 +5230,17 @@
   function transportFlow(meta, budget, mode) {
     var selectedMode = typeof mode === 'string' ? mode : mode ? 'auto' : 'flight';
     if (selectedMode === 'auto') return roadtripCalculator(meta);
-    if (selectedMode === 'bus') return '<section class="transport-options bus-itinerary" data-budget-anchor="bus"><h2>Bus semicama / cama</h2><p>Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
-    return '<section class="detail-section" data-budget-anchor="pasajes"><h2>Llegada a destino (Vuelos y Traslado)</h2>' + flightSearch(meta, budget) + transferCard(meta) + '</section>';
+    if (selectedMode === 'bus') return '<h2 class="block-title">Llegada a destino (Bus)</h2>' + '<h3 class="block-title">Bus semicama / cama</h3>' + '<p class="sub block-sub">Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p>' + '<section class="transport-options bus-itinerary" data-budget-anchor="bus"><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
+    /* El h2 agrupa y los h3 nombran cada bloque; los tres van FUERA de las cajas.
+       Antes el h2 de vuelos y el h2 del transfer eran hermanos sueltos, cada uno
+       con su caja, y el de vuelo estaba duplicado: uno en el section de afuera y
+       otro adentro del box de busqueda. */
+    return '<section class="detail-section" data-budget-anchor="pasajes">' +
+      '<h2>Llegada a destino (Vuelos y Traslado)</h2>' +
+      '<h3 class="block-title">Vuelos</h3>' +
+      flightSearch(meta, budget) +
+      transferCard(meta) +
+      '</section>';
   }
   function localTransportDescription(meta) {
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
@@ -5591,7 +5615,7 @@
   }
 
   function flightSearch(meta, budget) {
-    return '<section class="flight-search" aria-labelledby="flight-title"><div><h2 id="flight-title">Vuelos</h2><p>Tarifas aéreas en tiempo real para tu viaje.</p></div>' +
+    return '<section class="flight-search" aria-label="Vuelos"><div><p>Precios reales directo de la aerolínea</p></div>' +
       '<div class="flight-filters" aria-label="Filtros de vuelos"><div><b>Escalas</b><button type="button" data-flight-stop="all" aria-pressed="true">Todos</button><button type="button" data-flight-stop="0">Directos</button><button type="button" data-flight-stop="1">1 escala</button><button type="button" data-flight-stop="2">2+ escalas</button></div><div><b>Horario de salida</b><button type="button" data-flight-time="all" aria-pressed="true">Todo el día</button><button type="button" data-flight-time="morning">Mañana</button><button type="button" data-flight-time="afternoon">Tarde</button><button type="button" data-flight-time="night">Noche</button></div></div>' +
       '<div class="flight-results" aria-live="polite"><div class="flight-search-prompt"><p>Buscá tarifas actuales y compará horarios y|scaleas para tu ruta.</p><button type="button" class="btn btn-primary" data-start-flight-search>Buscar vuelos disponibles</button></div></div></section>';
   }
