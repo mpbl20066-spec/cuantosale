@@ -45,8 +45,6 @@ const personas = {
 let group = null;
 let expenses = [];
 const participants = Object.keys(personas).map(id => ({ id, display_name: personas[id] }));
-// El codigo real llama a la lista "participantes" (con n), no "participants".
-const participantes = participants;
 function participantName(id) { return personas[id] || 'Alguien'; }
 function personById(id) { return participants.filter(p => p.id === id)[0]; }
 function splitIdsOf(e) { return Array.isArray(e.split_between) ? e.split_between.filter(id => !!personById(id)) : []; }
@@ -55,20 +53,25 @@ function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 function icon() { return '[icono]'; }
 function moneyVer(v) { return '$' + Number(v).toFixed(2); }
 
-const MODELO = new Function('participantes', 'expenses', 'group', 'personById', 'splitIdsOf', 'aMonedaGrupo',
+// El codigo real llama a la lista "participants", asi que el parametro del new
+// Function tiene que llamarse asi; con "participantes" el bloque corria con
+// participants indefinido y la prueba moria en la primera linea.
+const MODELO = new Function('participants', 'expenses', 'group', 'personById', 'splitIdsOf', 'aMonedaGrupo',
   modelo + '\n return { balances: computeBalances(), pendientes: saldoPendiente(computeBalances()),' +
   ' moves: settlements(saldoPendiente(computeBalances())), pagadas: saldosSaldados(),' +
   ' marcar: marcarSaldo, migrar: migrarSaldosPlan };');
 function correrModelo(saldos, gastos) {
   group = { currency: 'USD', saldos: saldos };
   expenses = gastos;
-  return MODELO(participantes, expenses, group, personById, splitIdsOf, aMonedaGrupo);
+  return MODELO(participants, expenses, group, personById, splitIdsOf, aMonedaGrupo);
 }
 
 const VISTA = new Function('me', 'moves', 'pagadas', 'expenses', 'currency', 'participantName', 'esc', 'icon',
-  'moneyVer', 'saldoKey', vista + '\n return { saldosMarkup: saldosMarkup, alDia: alDiaMarkup };');
+  'moneyVer', 'saldoKey', 'gastosSinConvertir', 'pendiente', vista +
+  '\n return { saldosMarkup: saldosMarkup, alDia: alDiaMarkup };');
 function correrVista(me, datos) {
-  return VISTA(me, datos.moves, datos.pagadas, expenses, 'USD', participantName, esc, icon, moneyVer, (m) => m.from + '|' + m.to);
+  return VISTA(me, datos.moves, datos.pagadas, expenses, 'USD', participantName, esc, icon, moneyVer,
+    (m) => m.from + '|' + m.to, datos.gastosSinConvertir || [], datos.pendiente || {});
 }
 // El markup solo, que es lo que revisa casi todo. El cartel de "todos al dia"
 // se pide aparte con alDiaDe(), porque es una pieza distinta de la pantalla.
@@ -167,19 +170,26 @@ console.log('\n3) La deuda que queda se descuenta del resumen de cada uno');
   check('los saldos pendientes siguen cerrando en cero', Math.abs(suma(d.pendientes)) < 0.01, String(suma(d.pendientes)));
 }
 
-console.log('\n4) Si se borra el gasto, el pago viejo no inventa plata');
+console.log('\n4) Si se borra el gasto, el pago no se pierde: sale como saldo a favor');
 {
-  // El clamp del modelo: si Bruno ya no debe nada (borraron el gasto), lo
-  // pagado se ignora. Sin esto, paola aparecia con un saldo positivo fantasma
-  // y el total no cerraba.
+  // Bruno pagó 250 de una deuda de 250 y después borran el gasto. La plata se
+  // le entrego: si el modelo la descarta, la cuenta cierra en cero y la pagina
+  // dice "están todos al día" con 250 de alguien. Con el pago descontado entero
+  // el saldo queda a favor de Bruno y la transferencia sale al reves, que es la
+  // unica lectura que no le hace perder plata a nadie.
   const ANTES = [unoPaga('paola', 1000, 4)];
   const brunoAntes = correrModelo({}, ANTES).moves.filter(m => m.from === 'bruno')[0];
   const pagado = correrModelo({}, ANTES).marcar(brunoAntes, 'pagar');
   const d = correrModelo(pagado, []);   // se borraron todos los gastos
-  check('sin gastos no queda saldo positivo de nadie',
-    Object.values(d.pendientes).every(v => Math.abs(v) < 0.01), JSON.stringify(d.pendientes));
-  check('y sigue cerrando en cero', Math.abs(suma(d.pendientes)) < 0.01, String(suma(d.pendientes)));
-  check('no hay transferencias que mostrar', d.moves.length === 0);
+  check('bruno queda con 250 a favor, no en cero', Math.abs(d.pendientes.bruno - 250) < 0.01,
+    JSON.stringify(d.pendientes));
+  check('y paola debe esos 250', Math.abs(d.pendientes.paola + 250) < 0.01, JSON.stringify(d.pendientes));
+  check('sigue cerrando en cero', Math.abs(suma(d.pendientes)) < 0.01, String(suma(d.pendientes)));
+  check('y la pagina no dice que estan todos al dia, porque hay que devolver plata',
+    !/todos al día/.test(alDiaDe({ id: 'paola' }, d)), alDiaDe({ id: 'paola' }, d));
+  check('la transferencia sale al reves: paola le paga a bruno',
+    d.moves.length === 1 && d.moves[0].from === 'paola' && d.moves[0].to === 'bruno' && d.moves[0].amount === 250,
+    JSON.stringify(d.moves));
 }
 
 console.log('\n5) Desmarcar saca el monto y devuelve la deuda');
@@ -363,26 +373,70 @@ console.log('\n13) Vista: cuando todos pagaron, lo dice');
   check('no inventa un titular de deuda', !/grupo-mine/.test(final), texto(final));
 }
 
-console.log('\n13) Vista: cuando todos pagaron, lo dice');
+/* 14) EL BUG QUE REPORTO EL USUARIO, textual: "cuando marco que Bruno me pagó y
+   agrego otro gasto no me aparece como pendiente".
+   El gasto se cargó con los dos marcados y el pago quedó más grande que lo que
+   ese gasto nuevo genera. El modelo recortaba lo pagado contra la deuda de
+   HOY, así que el pago se comía el gasto nuevo y la página quedaba diciendo
+   "están todos al día" con plata de por medio. La secuencia probada en el
+   navegador, con los mismos números que salen acá. */
+console.log('\n14) Marcar un pago y cargar otro gasto: el gasto nuevo se ve');
 {
-  const gastos = [unoPaga('paola', 1000, 4)];
-  // Se van marcando de a uno sobre el estado anterior, que es como pasa en la
-  // vida real: cada persona marca la suya desde su dispositivo.
-  let guardado = {};
-  for (let i = 0; i < 4; i++) {
-    const dd = correrModelo(guardado, gastos);
-    const m = dd.moves[0];
-    if (!m) break;
-    guardado = dd.marcar(m, 'pagar');
-  }
-  const d = correrModelo(guardado, gastos);
-  const final = markup({ id: 'paola' }, d);
-  check('no quedan transferencias pendientes', d.moves.length === 0, JSON.stringify(d.moves));
-  check('dice que estan todos al dia', /Están todos al día/.test(alDiaDe({ id: 'paola' }, d)), alDiaDe({ id: 'paola' }, d));
-  check('y lista las que se pagaron', /ya saldada/.test(final), texto(final));
-  check('las 3 pagadas aparecen tachadas', (final.match(/is-paid/g) || []).length === 3, texto(final));
-  check('no inventa un titular de deuda', !/grupo-mine/.test(final), texto(final));
+  // Paola paga 1000 entre los dos -> Bruno debe 500. Bruno paga esos 500.
+  const ANTES = [gasto('paola', 1000, ['bruno', 'paola'])];
+  const d0 = correrModelo({}, ANTES);
+  check('antes de pagar, bruno debe 500', d0.moves.length === 1 && d0.moves[0].amount === 500,
+    JSON.stringify(d0.moves));
+  const pagado = d0.marcar(d0.moves[0], 'pagar');
+  const d1 = correrModelo(pagado, ANTES);
+  check('marcado el pago, no queda nada pendiente', d1.moves.length === 0, JSON.stringify(d1.moves));
+  check('y la pagina dice que estan todos al dia', /todos al día/.test(alDiaDe({ id: 'paola' }, d1)),
+    alDiaDe({ id: 'paola' }, d1));
+
+  /* El gasto que se carga DESPUES del pago, pagado por el que debia. Es el caso
+     del reporte: Bruno debia 500, pago 500, y el gasto siguiente ya no se
+     tapaba con el pago viejo. La cuenta de este caso da 100, no 400, y esa
+     diferencia es justamente el bug: Bruno pago 200 de un taxi del que le
+     tocaba 100, asi que Paola le debe 100 a el. Antes el recorte de saldoPendiente
+     consumia los 500 del pago viejo contra ese saldo de -100 y el resultado era
+     cero: bruno "al dia", nadie le debia a nadie, y el taxi no aparecia en
+     ningun lado. Ahora sale al reves, que es la unica lectura que no pierde
+     plata. */
+  const nuevo = gasto('bruno', 200, ['bruno', 'paola']);
+  const despues = correrModelo(pagado, ANTES.concat([nuevo]));
+  check('bruno queda con 100 a favor por el taxi', Math.abs(despues.balances.bruno + 400) < 0.01,
+    JSON.stringify(despues.balances));
+  check('y el pago de 500 lo deja con 100 a favor, no en cero',
+    Math.abs(despues.pendientes.bruno - 100) < 0.01, JSON.stringify(despues.pendientes));
+  check('sale como pendiente al reves: paola le paga 100 a bruno',
+    despues.moves.length === 1 && despues.moves[0].from === 'paola' && despues.moves[0].to === 'bruno' &&
+    despues.moves[0].amount === 100, JSON.stringify(despues.moves));
+  check('la pagina NO dice que estan todos al dia', !/todos al día/.test(alDiaDe({ id: 'paola' }, despues)),
+    alDiaDe({ id: 'paola' }, despues));
+  check('paola lo ve como "lo que tenes que pagar"',
+    /Lo que tenés que pagar/.test(markup({ id: 'paola' }, despues)), texto(markup({ id: 'paola' }, despues)));
+  check('y bruno lo ve como "lo que te tienen que pagar"',
+    /Lo que te tienen que pagar/.test(markup({ id: 'bruno' }, despues)), texto(markup({ id: 'bruno' }, despues)));
+  check('el pago viejo sigue listado como saldado',
+    despues.pagadas.length === 1 && despues.pagadas[0].amount === 500, JSON.stringify(despues.pagadas));
+  check('el saldo pendiente cierra en cero', Math.abs(suma(despues.pendientes)) < 0.01, JSON.stringify(despues.pendientes));
+
+  // El caso de siempre, que el arreglo no puede romper: un gasto que ENGRODA la
+  // deuda del mismo par sigue mostrando solo lo que falta, sin doble conteo.
+  // Paola paga 2000 mas: bruno debe 1000 de eso, mas los 500 de antes que ya
+  // pago, o sea que todavia debe 1000.
+  check('un gasto que engorda la deuda muestra solo lo que falta',
+    (() => {
+      const d = correrModelo(pagado, ANTES.concat([gasto('paola', 2000, ['bruno', 'paola'])]));
+      return d.moves.length === 1 && d.moves[0].from === 'bruno' && d.moves[0].to === 'paola' &&
+        Math.abs(d.moves[0].amount - 1000) < 0.01;
+    })(), 'bruno debe 1500 en total y ya pago 500: quedan 1000');
+
+  // El caso inverso del reporte, para que el arreglo no lo haya tapado por el
+  // otro lado: si el pago viejo era mas Chico que la deuda nueva, la deuda
+  // nueva sale entera, no recortada.
+  const masChico = correrModelo({ 'bruno|paola': 100 }, [gasto('paola', 1000, ['bruno', 'paola'])]);
+  check('un pago mas chico que la deuda no la tapa entera',
+    masChico.moves.length === 1 && Math.abs(masChico.moves[0].amount - 400) < 0.01, JSON.stringify(masChico.moves));
 }
 
-console.log(fallos.length ? '\n' + fallos.length + ' FALLOS:\n - ' + fallos.join('\n - ') : '\nTODO OK');
-process.exit(fallos.length ? 1 : 0);

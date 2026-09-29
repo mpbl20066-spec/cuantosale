@@ -527,10 +527,16 @@
   }
   function saldoKey(move) { return move.from + '|' + move.to; }
   // Cuánto se le descuenta a cada quien de lo que ya pagó, para que el greedy
-  // reparta solo lo que falta. Se descuenta el mismo monto de los dos lados, y
-  // nunca más de lo que esa persona debe: si el gasto se borró, o el deudor ya
-  // está al día, el pago viejo se ignora en vez de dejar un saldo positivo
-  // fantasma que haría que el total no cierre.
+  // reparta solo lo que falta. Se descuenta el mismo monto de los dos lados.
+  //
+  // Y se descuenta ENTERO, sin recortarlo contra la deuda de hoy. Es lo que
+  // hace que la cuenta sea la cuenta: si alguien pagó 500 y después cargó un
+  // gasto del que le tocaba menos, ese diferencia no es plata perdida ni un
+  // "pagaste de más" que la página no sabe dónde poner: es que le devem a
+  // él, y sale como una transferencia en sentido contrario, con su botón de
+  // "Ya pagué". Recortarlo dejaba el caso de todos los días del viaje roto:
+  // se marcaba el pago, se cargaba el gasto siguiente y la página decía
+  // "están todos al día" con plata de nadie.
   function saldoPendiente(balances) {
     var pagado = saldosGuardados();
     var out = {};
@@ -539,44 +545,11 @@
       var partes = key.split('|');
       var deudor = partes[0], acreedor = partes[1];
       var monto = Number(pagado[key]);
+      // Solo se saltea lo que no se puede ubicar: un par con alguien que ya no
+      // está en el grupo no tiene a quién moverle el saldo.
       if (!(monto > 0) || out[deudor] == null || out[acreedor] == null) return;
-      var n = Math.min(monto, Math.max(0, -out[deudor]), Math.max(0, out[acreedor]));
-      if (n <= 0) return;
-      out[deudor] += n;
-      out[acreedor] -= n;
-    });
-    return out;
-  }
-  /* Lo que se pagó de más: el dinero de un pago que no cubre ninguna deuda de
-     ahora. No lo dejamos desaparecer.
-     El recorte de saldoPendiente() es lo correcto para el saldo —nunca se
-     descuenta más de lo que alguien debe, o un gasto borrado dejaría un saldo
-     positivo fantasma— pero el resto del importe no se pierde: es plata de
-     alguien. Pasó de verdad: se saldó una deuda de 248.735,48 y después se
-     cargó un gasto del que te tocaba menos, así que la deuda bajó y el pago
-     quedó sobrando. Sin esto la página decía "están todos al día" y esos
-     30.000 no aparecían en ningún lado: el que los había pagado no tenía forma
-     de saber que le correspondían ni de reclamarlo.
-     Se agrupa por persona, no por par, para que el sobrante se le diga a quien
-     lo pagó y el otro no lo lea como un saldo propio. */
-  function saldosSobrantes(balances) {
-    var pagado = saldosGuardados();
-    var out = {};
-    Object.keys(pagado).forEach(function (key) {
-      var partes = key.split('|');
-      var deudor = partes[0], acreedor = partes[1];
-      var monto = Number(pagado[key]) || 0;
-      if (!(monto > 0) || !personById(deudor) || !personById(acreedor)) return;
-      if (balances[deudor] == null || balances[acreedor] == null) return;
-      // Cuánto de ese pago se acreditó de verdad contra la posición de hoy de
-      // esas dos personas. Se lee de los saldos BRUTOS y no del resultado ya
-      // repartido: el greedy puede cambiar el par, y lo que se busca es si el
-      // pago todavía tapa algo, no una fila cualquiera del reparto.
-      var acreditado = Math.min(monto, Math.max(0, -balances[deudor]), Math.max(0, balances[acreedor]));
-      var sobra = Math.round((monto - acreditado) * 100) / 100;
-      if (!(sobra > 0.01)) return;
-      // El deudor del par es quien puso la plata, así que el sobrante es suyo.
-      out[deudor] = Math.round(((out[deudor] || 0) + sobra) * 100) / 100;
+      out[deudor] += monto;
+      out[acreedor] -= monto;
     });
     return out;
   }
@@ -659,10 +632,6 @@
     var pendiente = saldoPendiente(balances);
     var moves = settlements(pendiente);
     var pagadas = saldosSaldados();
-    // El dinero que se pagó y no cubre ninguna deuda de ahora. Se calcula una
-    // sola vez acá porque lo leen varias cosas: el aviso de arriba, la fila de
-    // quien lo pagó y el total de "al día".
-    var sobrantes = saldosSobrantes(balances);
     // Nada pendiente = todo lo cargado está saldado. Lo usan las filas de
     // gastos para tacharse, así que se decide acá y no en cada fila.
     var todoSaldado = !moves.length && !gastosSinConvertir.length;
@@ -748,6 +717,16 @@
     function splitEditorMarkup(expense) {
       if (!editandoSplit || editandoSplit.expenseId !== expense.id) return '';
       var guardando = editandoSplit.guardando;
+      // El nombre del gasto y el monto ya están en la fila de arriba, a la que
+      // el editor se pegó: repetirlos acá lo convertía en un formulario suelto
+      // en vez de la respuesta a la fila que se está tocando.
+      var n = editandoSplit.ids.length;
+      var cuantos = n === 0
+        ? 'No está dividido entre nadie todavía.'
+        : n === 1
+          ? 'Solo se le carga a ' + esc(participantName(editandoSplit.ids[0])) + ': el resto no debe nada de este gasto.'
+          : 'Entre ' + esc(splitNamesText(editandoSplit.ids)) + ': ' +
+            esc(moneyVer(Number(expense.amount) / n, expense.currency)) + ' c/u.';
       return '<div class="grupo-split">' +
         '<p class="grupo-split__title">¿Entre quiénes se divide?</p>' +
         '<div class="grupo-checks">' + participants.map(function (p) {
@@ -756,9 +735,14 @@
             (guardando ? ' disabled' : '') + '> ' + esc(p.display_name) + '</label>';
         }).join('') + '</div>' +
         '<div class="grupo-checks__tools"><button type="button" class="grupo-minibtn" data-split-all' + (guardando ? ' disabled' : '') + '>Seleccionar todos</button></div>' +
+        // La cuenta viva de lo que se está marcando. El editor se abre para
+        // cambiar el reparto, así que ver cuánto le toca a cada quien mientras
+        // se eligen las personas es el motivo de estar acá: sin esto había que
+        // marcar, guardar y recién ahí mirar el resultado en la fila.
+        '<p class="grupo-split__hint" aria-live="polite">' + cuantos + '</p>' +
         '<div class="grupo-split__actions">' +
         '<button type="button" class="grupo-btn grupo-btn--ghost" data-split-cancel' + (guardando ? ' disabled' : '') + '>Cancelar</button>' +
-        '<button type="button" class="grupo-btn" data-split-save' + (guardando ? ' disabled' : '') + '>' + (guardando ? 'Guardando...' : 'Guardar división') + '</button>' +
+        '<button type="button" class="grupo-btn grupo-btn--primary" data-split-save' + (guardando ? ' disabled' : '') + '>' + (guardando ? 'Guardando...' : 'Guardar división') + '</button>' +
         '</div></div>';
     }
     var expensesMarkup = expenses.length
@@ -885,21 +869,6 @@
         '<p class="grupo-note">Ya están pagadas. No cuentan como deuda pendiente.</p>' +
         pagadas.map(settledRow).join('') + '</details>'
       : '';
-    /* El pago que sobra. Va aunque quede algo pendiente, porque no es lo mismo
-       que una deuda: es plata que ya puso alguien y que hoy no le debe nadie.
-       Sin esta línea, marcar un pago más grande que la deuda y cargar después
-       un gasto más chico dejaba la página diciendo "están todos al día" y el
-       excedente —unos 30.000— sin aparecer en ningún lado. */
-    var sobrantesMarkup = (function () {
-      var gente = Object.keys(sobrantes).filter(function (id) { return (sobrantes[id] || 0) > 0.01; });
-      if (!gente.length) return '';
-      return '<div class="grupo-warn"><b>Pagaste de más.</b> ' +
-        gente.map(function (id) {
-          return esc(participantName(id)) + ' puso ' + esc(moneyVer(sobrantes[id], currency)) + ' de más y hoy no le debe nadie: ' +
-            'después se cargaron gastos que bajaron esa deuda, así que ese dinero quedó sin destino.';
-        }).join(' ') +
-        '</div>';
-    }());
     var saldosMarkup;
     // Cuando no queda ninguna transferencia pendiente se dice explícitamente:
     // es la pregunta que todos hacen al final del viaje y "no hay nada para
@@ -909,16 +878,14 @@
     // La excepcion es cuando quedaron gastos sin convertir: si ni esos entraron
     // en la cuenta, no se puede afirmar que no hay nada por pagar, porque en
     // realidad hay gastos que ni siquiera se pudieron mirar.
-    /* "Están todos al día" solo si además no quedó plata sin destino. Con un
-       pago que sobra, decir eso era mentir por omisión: la deuda estaba
-       cubierta, sí, pero el dinero que se puso de más no aparecía en ninguna
-       parte de la página y quien lo había pagado se quedaba sin saber cuánto
-       le devolvían. El aviso de "pagaste de más" va siempre, y el cartel verde
-       baja a "no queda nada por pagar", que es lo único que se puede afirmar. */
-    var haySobrante = Object.keys(sobrantes).some(function (id) { return (sobrantes[id] || 0) > 0.01; });
+    /* "Están todos al día" es lo único que se afirma acá, y solo cuando no
+       queda ninguna transferencia: con el pago descontado entero, que no
+       aparezca ninguna fila significa que las cuentas dan cero de verdad. Antes
+       el pago se recortaba contra la deuda del momento y lo que sobraba se
+       escondía en un aviso de "pagaste de más": el saldo cerraba en cero con
+       plata de alguien sin aparecer, que es peor que una cuenta que no cierra. */
     var alDiaMarkup = !moves.length && expenses.length && !gastosSinConvertir.length
-      ? '<div class="grupo-allday">' + icon('check') + '<span>' +
-        (haySobrante ? 'No queda nada por pagar.' : 'Están todos al día. No queda nada por pagar.') + '</span></div>'
+      ? '<div class="grupo-allday">' + icon('check') + '<span>Están todos al día. No queda nada por pagar.</span></div>'
       : '';
     if (!moves.length) {
       // No queda nada pendiente. Si hubo gastos, el cartel de "están todos al
@@ -1021,10 +988,6 @@
       '<div class="grupo-card"><h2>Cómo se salda</h2>' +
       (balancesSummary ? '<div class="grupo-subhead">Saldo de cada uno</div>' + balancesSummary : '') +
       saldosMarkup +
-      // El aviso de la plata sin destino va arriba del cartel verde, al lado de
-      // las transferencias: si queda al final, abajo del "no queda nada por
-      // pagar", se lee como un detalle menor cuando es plata que alguien puso.
-      sobrantesMarkup +
       alDiaMarkup +
       '</div>'
     );
@@ -1228,16 +1191,37 @@
           .filter(function (input) { return input.checked; })
           .map(function (input) { return input.value; });
       }
+      // La cuenta de "c/u" se escribe a mano, sin volver a pintar la página
+      // entera: marcar un checkbox no tiene que perder el scroll ni el foco de
+      // quien lo está haciendo, que es justo lo que pasa si se llama a
+      // renderGroup en cada cambio.
+      function pintarResumen() {
+        var hint = splitEditor.querySelector('.grupo-split__hint');
+        var expense = expenseById(editandoSplit.expenseId);
+        if (!hint || !expense) return;
+        var n = editandoSplit.ids.length;
+        hint.textContent = n === 0
+          ? 'No está dividido entre nadie todavía.'
+          : n === 1
+            ? 'Solo se le carga a ' + participantName(editandoSplit.ids[0]) + ': el resto no debe nada de este gasto.'
+            : 'Entre ' + splitNamesText(editandoSplit.ids) + ': ' + moneyVer(Number(expense.amount) / n, expense.currency) + ' c/u.';
+      }
       // La selección vive en editandoSplit, no en los inputs: el poll repinta
       // cada 12s y los checkboxes se voltarían de lo elegido.
       splitEditor.addEventListener('change', function (e) {
         if (!e.target.matches('[data-split-edit]')) return;
         editandoSplit.ids = editorIds();
+        pintarResumen();
       });
       var allButton = splitEditor.querySelector('[data-split-all]');
       if (allButton) allButton.addEventListener('click', function () {
         editandoSplit.ids = participants.map(function (p) { return p.id; });
-        renderGroup(groupId);
+        // Marcar todos ya está guardado en el estado: se repintan los
+        // checkboxes y el resumen, no la página entera.
+        Array.prototype.slice.call(splitEditor.querySelectorAll('[data-split-edit]')).forEach(function (input) {
+          input.checked = true;
+        });
+        pintarResumen();
       });
       var cancelButton = splitEditor.querySelector('[data-split-cancel]');
       if (cancelButton) cancelButton.addEventListener('click', function () { editandoSplit = null; renderGroup(groupId); });

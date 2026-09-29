@@ -173,11 +173,24 @@
   .grupo-expense.is-saldado .grupo-expense__name,.grupo-expense.is-saldado .grupo-expense__body{opacity:.6}
   /* El editor de la división va debajo de la fila, no en un modal: un modal
      tapaba justo la fila que se está corrigiendo. flex:1 1 100% lo manda a su
-     propia línea porque .grupo-expense es flex-wrap. */
+     propia línea porque .grupo-expense es flex-wrap.
+
+     Arriba va la pregunta, abajo los botones: primero se elige, después se
+     guarda. Y entre los dos, la cuenta de lo que le toca a cada quien, que es
+     lo que se está mirando mientras se marca. */
   .grupo-split{flex:1 1 100%;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
   .grupo-split__title{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ink)}
+  /* La cuenta de lo que le toca a cada quien, arriba de los botones. Es lo que
+     se está mirando mientras se marca, así que va en el tamaño de una nota
+     leída de un vistazo, no en el de un titular. */
+  .grupo-split__hint{margin:10px 0 0;color:var(--ink2);font-size:13px;line-height:1.4}
   .grupo-split__actions{display:flex;gap:8px;margin-top:14px}
   .grupo-split__actions .grupo-btn{flex:1 1 0}
+  /* "Cancelar" y "Guardar división" con el mismo peso los hacía parecer
+     intercambiables, y no lo son: uno descarta lo marcado y el otro lo
+     guarda. Guardar es la acción que casi siempre se quiere, así que es el
+     único que se pinta; cancelar se lee como el texto que acompaña. */
+  .grupo-split__actions .grupo-btn--primary{flex:1 1 auto}
   .grupo-expense__ico{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--bg);color:var(--ink2)}
   .grupo-expense__ico svg{width:19px;height:19px}
   /* flex:1 + min-width:0 para que un nombre largo de gasto o de persona
@@ -302,6 +315,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=24" defer></script>
+<script src="/grupo.js?v=25" defer></script>
 </body>
 </html>

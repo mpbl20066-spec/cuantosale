@@ -328,8 +328,8 @@
     tour(['nat'], 'Natal, Brasil', 'Pipa desde Natal con Baía dos Golfinhos', 'Excursión costera con miradores, playas y tiempo libre en Pipa.', 58, 'Incluye traslado ida y vuelta desde Natal y paradas en Tibau do Sul, Cacimbinhas y Praia do Amor. Jornada de 10 horas aproximadamente. La observación de delfines depende del mar y de la naturaleza.'),
     tour(['pip'], 'Praia do Pipa, Brasil', 'Paseo en Buggy de Playa en Playa', 'Chapadão, Baía dos Golfinhos, Sibaúma y miradores de Pipa.', 48, 'Incluye buggy con conductor y recorrido por playas y miradores del litoral. Duración aproximada de medio día, con salida por la mañana o la tarde. Llevar ropa cómoda, protector solar y agua; algunos accesos dependen de la marea.'),
     tour(['pip'], 'Praia do Pipa, Brasil', 'Paseo en lancha para ver delfines', 'Navegación costera con baño y búsqueda responsable de fauna marina.', 42, 'Incluye lancha compartida, guía y navegación frente a las playas de Pipa. La actividad dura entre 2 y 3 horas y la fauna no puede garantizarse. Llevar traje de baño, sombrero y seguir las indicaciones del tripulante.'),
-    tour(['trancoso'], 'Trancoso / Arraial d’Ajuda, Brasil', 'Praias do Espelho y Caraíva', 'Día completo por playas del litoral sur de Bahía.', 78, 'Incluye transporte ida y vuelta desde Trancoso, guía y paradas en Praia do Espelho y otros puntos de la costa. Salida temprano; el acceso puede tener tramos de camino irregular. Llevar calzado, agua y confirmar tasas o travesías incluidas.'),
-    tour(['trancoso'], 'Trancoso / Arraial d’Ajuda, Brasil', 'City tour de Trancoso y Quadrado', 'Historia local, miradores y playas cercanas con tiempo libre.', 45, 'Incluye guía y traslado por el Quadrado histórico, Igreja de São João, miradores y una playa cercana. Duración aproximada de 4 horas, ideal para la tarde. Los consumos en restaurantes y beach clubs no están incluidos.'),
+    tour(['trancoso'], 'Trancoso, Brasil', 'Praias do Espelho y Caraíva', 'Día completo por playas del litoral sur de Bahía.', 78, 'Incluye transporte ida y vuelta desde Trancoso, guía y paradas en Praia do Espelho y otros puntos de la costa. Salida temprano; el acceso puede tener tramos de camino irregular. Llevar calzado, agua y confirmar tasas o travesías incluidas.'),
+    tour(['trancoso'], 'Trancoso, Brasil', 'City tour de Trancoso y Quadrado', 'Historia local, miradores y playas cercanas con tiempo libre.', 45, 'Incluye guía y traslado por el Quadrado histórico, Igreja de São João, miradores y una playa cercana. Duración aproximada de 4 horas, ideal para la tarde. Los consumos en restaurantes y beach clubs no están incluidos.'),
     tour(['ssa'], 'Salvador de Bahía, Brasil', 'Pelourinho, Elevador Lacerda y Mercado Modelo', 'Recorrido histórico y cultural por las postales de Salvador.', 48, 'Incluye guía local y recorrido por Pelourinho, Igreja do Bonfim, Mercado Modelo y Elevador Lacerda según horarios. Duración aproximada de 5 horas. Se recomienda ropa liviana y atención a las pertenencias en áreas concurridas.'),
     tour(['ssa'], 'Salvador de Bahía, Brasil', 'Bahía de Todos los Santos en schooner', 'Navegación con islas, música y tiempo para nadar.', 58, 'Incluye navegación en schooner por la bahía y parada en una isla, según el itinerario del día. Jornada de 6 horas aproximadamente. El almuerzo y las bebidas pueden ser opcionales; confirmar antes de embarcar.'),
     tour(['for'], 'Fortaleza, Brasil', 'Praia de Cumbuco y dunas en buggy', 'Excursión desde Fortaleza con lagoas, dunas y paseo opcional.', 55, 'Incluye traslado desde Fortaleza y tiempo libre en Cumbuco. El buggy por las dunas se contrata como complemento, con opción con o sin emoción. Jornada de 8 horas; llevar protector solar y efectivo.'),
@@ -459,7 +459,7 @@
      Comparte lista con hotelTypeSelectMarkup() y resolveHotelTypeForMeta() a
      proposito. Cuando cada una tenia la suya, resolver podia devolver un tipo
      que el selector no tenia como dibujar: el <select> se quedaba sin nada
-     marcado y el navegador tomaba el primer option como elegido, con las
+     marcado y el navegador tomaba el primer option como elegido, con los
      tarjetas ya filtradas por otro tipo. Es el mismo desajuste, entrando por
      la otra puerta. */
   var HOTEL_TYPE_OPTIONS = ['economico', 'intermedio', 'confort', 'all-inclusive'];
@@ -531,6 +531,27 @@
       { label: 'Ilhabela + Angra dos Reis', key: 'ilhabela', secondKey: 'angra' },
       { label: 'Ilhabela + Ilha Grande', key: 'ilhabela', secondKey: 'ilha' },
       { label: 'Angra dos Reis + Ilha Grande', key: 'angra', secondKey: 'ilha' }
+    ] },
+    /* Las tres ciudades que faltan. Todas tenian precio, traslado, actividades,
+       guia regional y foto en DEST, pero ninguna estaba en esta lista: cotizaban
+       bien y no aparecian en ningun lado. Es el bug que motivo prueba-destinos.js.
+
+       Cada una es un grupo de una sola clave, como Rio, porque son ciudades con
+       aeropuerto propio y su propio hotel, no un corredor de playa. Los nombres de
+       zona salen de la guia: Sao Paulo tiene GUIAS[sao] escrita, con el Centro, la
+       Avenida Paulista, Vila Madalena y Barra Funda de verdad. */
+    { id: 'saopaulo', label: 'São Paulo', image: 'sao', keys: ['sao'], subcategories: [
+{ label: 'Centro / Avenida Paulista', key: 'sao' },
+{ label: 'Vila Madalena', key: 'sao' },
+{ label: 'Santana / Barra Funda', key: 'sao' }
+    ] },
+    { id: 'belohorizonte', label: 'Belo Horizonte', image: 'bho', keys: ['bho'], subcategories: [
+{ label: 'Centro / Savassi', key: 'bho' },
+{ label: 'Pampulha', key: 'bho' }
+    ] },
+    { id: 'curitiba', label: 'Curitiba', image: 'curitiba', keys: ['curitiba'], subcategories: [
+{ label: 'Centro / Batel', key: 'curitiba' },
+{ label: 'Morretes / Serra do Mar', key: 'curitiba' }
     ] },
     { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
 { label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
@@ -632,7 +653,7 @@
        combinaciones que el server rechaza con un 400. Va como grupo propio y
        los tres pares quedan en el Nordeste, que es el grupo de la primera
        parada. */
-    { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for'], subcategories: [
+    { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for', 'fernando'], subcategories: [
 { label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' },
 { label: 'Maragogi', key: 'maragogi' },
 { label: 'Maceió (Resort)', key: 'mcz', hotelType: 'resort' },
@@ -696,10 +717,13 @@
 { label: 'Palermo / Zona Norte', key: 'bue' },
 { label: 'Escapada de Fin de Semana', key: 'bue' }
     ] },
-    { id: 'gramado', label: 'Gramado / Canela', image: 'gram', keys: ['gram', 'canela'], subcategories: [
+    { id: 'gramado', label: 'Porto Alegre / Gramado / Canela', image: 'gram', keys: ['poa', 'gram', 'canela'], subcategories: [
+{ label: 'Porto Alegre', key: 'poa' },
 { label: 'Gramado Centro', key: 'gram' },
 { label: 'Vale dos Vinhedos', key: 'gram' },
 { label: 'Canela', key: 'canela' },
+      { label: 'Porto Alegre + Gramado', key: 'poa', secondKey: 'gram' },
+      { label: 'Porto Alegre + Canela', key: 'poa', secondKey: 'canela' },
       { label: 'Gramado + Canela', key: 'gram', secondKey: 'canela' }
     ] },
     { id: 'foz', label: 'Foz de Iguaçu', image: 'igu', keys: ['igu'], subcategories: [
@@ -763,11 +787,15 @@
   async function esAgencia() {
     if (agenciaConsultado) return soyAgencia;
     if (!supabaseClient) return false;
-    agenciaConsultado = true;
     try {
       var r = await supabaseClient.rpc('es_agencia');
       soyAgencia = !!(r.data && r.data === true);
     } catch (e) { soyAgencia = false; }
+    // Sin sesión no se cachea: es_agencia() responde por el JWT, así que sin
+    // token da false siempre y cachearlo dejaba ese false pegado. El false de
+    // verdad —logueado y no es de la agencia— sí se cachea, que para eso está el
+    // flag: es la consulta que decide si las filas traen el control.
+    agenciaConsultado = !!authUser;
     return soyAgencia;
   }
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
@@ -821,7 +849,7 @@
   }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
+  var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
   var DEST_IATA_ALIASES = { bue: 'EZE AEP BUE', rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
   // Segunda superficie: el desplegable de "destino" de arriba. Tiene que traer
   // los mismos 31 que la grilla, o el destino se ofrece en un lado y no en el
@@ -941,6 +969,9 @@
 { label: 'João Pessoa', key: 'joaopessoa', codes: 'JPA' },
 { label: 'Natal', key: 'nat', codes: 'NAT' },
 { label: 'Pipa', key: 'pip', codes: 'NAT' },
+// Fernando de Noronha vuela por FEN, su propio aeropuerto, y no se combina con
+// nadie en dos paradas porque no hay carretera. Ver el comentario en el grupo.
+{ label: 'Fernando de Noronha', key: 'fernando', codes: 'FEN' },
 // Fortaleza y Jericoacoara son dos destinos, no uno con barra. Volan al mismo
 // aeropuerto (FOR) y por eso van seguido en el mismo hub, pero están a 358 km
 // y se cotizan aparte. El par "Fortaleza + Jeri" va con los de dos paradas.
@@ -1205,7 +1236,7 @@
   // Propuesta abierta en la última visita, con los mismos filtros de control que
   // selectedDestKey. El marco mostaza lo lleva la que se está mirando, no la
   // recomendada: el servidor rotula una como "Recomendada" y a veces no es la que
-  // uno quiere, pero verla marcada hacía creer que ya era la elegida.
+  // uno quiere, pero verla marcada hacia creer que ya era la elegida.
   var selectedPropuestaId = null;
   var selectedPropuestaFor = null;
   var rangeCalendarMonth = null;
@@ -5811,14 +5842,40 @@
     });
   }
   // Misma idea que pintarDestinoSeleccionado, para las propuestas de un destino
-  // (#results). El id sale de data-propuesta-id, que se escribe en el <article>
+  // (#results). El id sale de data-propuesta-card, que se escribe en el <article>
   // al armar la card, así el marcado se puede repintar sin volver a renderizar la
   // lista entera (que tira abajo los "ver desglose" abiertos y el scroll).
+  //
+  // El atributo NO puede ser data-propuesta-id como el del botón: el handler que
+  // abre la propuesta matchea [data-propuesta-id] y, si el article lo llevara,
+  // cualquier clic dentro de la card abriría el detalle en vez de elegirla.
   function pintarPropuestaSeleccionada() {
-    var cards = document.querySelectorAll('#results .opt[data-propuesta-id]');
+    var cards = document.querySelectorAll('#results .opt[data-propuesta-card]');
     Array.prototype.forEach.call(cards, function (card) {
-      card.classList.toggle('propuesta-seleccionada', card.getAttribute('data-propuesta-id') === selectedPropuestaId);
+      card.classList.toggle('propuesta-seleccionada', card.getAttribute('data-propuesta-card') === selectedPropuestaId);
     });
+  }
+
+  // Elegir una tarjeta sin salir de la lista. La card entera es la zona sensible,
+  // menos los botones: "Ver propuesta" abre el detalle y "Ver desglose" despliega
+  // el reparto, y los dos tienen que seguir haciendo lo suyo.
+  //
+  // El clic es propio y no el de "Ver propuesta" a propósito. Atado a ese botón,
+  // marcar una card te sacaba de la lista y el cuadro amarillo no se veía nunca:
+  // el gesto de comparar dos propuestas es mirarlas, y para eso hay que quedarse.
+  function handleProposalSelect(e) {
+    var card = e.target.closest && e.target.closest('#results [data-propuesta-card]');
+    if (!card) return;
+    if (e.target.closest('button, a, input, label, select, textarea')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var id = card.getAttribute('data-propuesta-card');
+    // Segundo clic en la misma la desmarca: elegir no es un estado irreversible.
+    selectedPropuestaId = selectedPropuestaId === id ? null : id;
+    selectedPropuestaFor = selectedPropuestaId
+      ? S.dep + '|' + S.ret + '|' + S.pax + '|' + S.budget
+      : null;
+    pintarPropuestaSeleccionada();
   }
   function renderDestinationResults(data) {
     var el = $('#destination-results');
@@ -6407,7 +6464,7 @@
         ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Hacé clic en <b>Ver propuesta</b> para ver el valor final.</p>'
         : '';
       var bodyId = 'opt-desglose-' + index;
-      return '<article class="opt' + (p.id === selectedPropuestaId ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-id="' + esc(p.id) + '">' +
+      return '<article class="opt' + (p.id === selectedPropuestaId ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-card="' + esc(p.id) + '">' +
         '<div class="opt__head">' +
           '<div class="opt__main"><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
           '<div class="opt__price"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div>' +
@@ -6870,7 +6927,7 @@
     var proposalId = button.getAttribute('data-propuesta-id');
     // Abrir una propuesta ES elegirla. El marco mostaza lo lleva la elegida, así
     // que el estado se escribe acá y no en el handler de la card: esta es la
-    // única ruta por la que se abre una propuesta de #results.
+    // unica ruta por la que se abre una propuesta de #results.
     if (proposalId) {
       selectedPropuestaId = proposalId;
       selectedPropuestaFor = S.dep + '|' + S.ret + '|' + S.pax + '|' + S.budget;
@@ -6977,6 +7034,12 @@
   }
   function renderAuthState(user) {
     authUser = user || null;
+    // La respuesta de es_agencia() depende de quién está con sesión, así que se
+    // invalida cada vez que la sesión cambia. Sin esto el cache era un false
+    // eterno: si abría el voucher sin estar logueado, el botón de "Marcar
+    // reservado" no le aparecía nunca más ni después de loguearse, y la única
+    // forma de verlo era recargar con F5.
+    agenciaConsultado = false; soyAgencia = false;
     var button = $('#auth-button'), trips = $('#trips-button');
     if (button) { var avatar = authUser && authUser.user_metadata && (authUser.user_metadata.avatar_url || authUser.user_metadata.picture); button.innerHTML = authUser ? (avatar ? '<img class="account-avatar" src="' + esc(avatar) + '" alt="">' : '👤 ') + esc(authDisplayName(authUser)) : 'Iniciar sesión'; button.setAttribute('aria-label', authUser ? 'Abrir cuenta de ' + authDisplayName(authUser) : 'Iniciar sesión'); }
     if (trips) trips.hidden = !authUser;
@@ -8189,6 +8252,7 @@ function comboNombreDestino() {
     $('.form').addEventListener('keydown', function (e) { if (e.key === 'Enter' && S.dest === 'todos') { e.preventDefault(); $('#btn-buscar-todos').click(); } });
     document.addEventListener('click', handleProposalNavigation, true);
     document.addEventListener('click', handleBreakdownToggle, true);
+    document.addEventListener('click', handleProposalSelect, true);
     document.addEventListener('click', handleBudgetJump, true);
     $('#dep').addEventListener('change', function (e) {
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
