@@ -6275,10 +6275,83 @@
 
     var routeCard = '<div class="transport-card roadtrip-route"><div class="roadtrip-route__stat"><span>Ruta ida y vuelta</span><b>' + r.roundTripKm + ' km</b></div><div class="roadtrip-route__stat"><span>Manejo estimado</span><b>' + r.hours + ' hs</b></div><div class="roadtrip-route__stat"><span>Destino</span><b>' + esc(meta.dest.name) + '</b></div></div>';
 
+    // Buenos Aires no tiene trazado a propósito (el viaje es por el ferry de
+    // Colonia, no por tierra): ver scripts/pull-rutas-mapa.js.
+    var mapKey = meta.dest && meta.dest.key !== 'bue' ? meta.dest.key : '';
+    var mapCard = mapKey
+      ? '<div class="transport-card roadtrip-map-card"><div class="roadtrip-map-card__head"><b>🗺️ Tu ruta en auto</b><span>Montevideo → ' + esc(meta.dest.name) + '</span></div><div class="roadtrip-map" data-roadtrip-map="' + esc(mapKey) + '" data-map-dest="' + esc(meta.dest.name) + '" role="img" aria-label="Mapa de la ruta en auto desde Montevideo hasta ' + esc(meta.dest.name) + '"><span class="roadtrip-map__loading">Cargando mapa…</span></div></div>'
+      : '';
+
     var showStops = isEv || r.roundTripKm >= 600;
     var stopsPanel = showStops ? ('<details class="roadtrip-stops" data-roadtrip-stops' + (isEv ? ' open' : '') + '>' + roadtripStopsInnerHtml(stopsPlan, isEv) + '</details>') : '';
 
-    return '<section class="transport-options roadtrip-planner" data-budget-anchor="auto">' + vehicleTabs + combustionPanel + evPanel + routeCard + stopsPanel + '</section>';
+    return '<section class="transport-options roadtrip-planner" data-budget-anchor="auto">' + vehicleTabs + combustionPanel + evPanel + routeCard + mapCard + stopsPanel + '</section>';
+  }
+  /* Mapa de la ruta del roadtrip.
+     Leaflet, el trazado (rutas-auto.js) y el CSS son archivos propios y se bajan
+     recién cuando aparece una tarjeta de auto: el resto de la gente no paga esos
+     ~215 KB. Los tiles vienen de OpenStreetMap (gratis, sin clave; la atribución
+     es obligatoria). El trazado se precalcula con OSRM y no se pide en vivo. */
+  var roadtripMapAssets = null;
+  function loadRoadtripMapAssets() {
+    if (roadtripMapAssets) return roadtripMapAssets;
+    function script(src) {
+      return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = src; s.onload = resolve; s.onerror = function () { reject(new Error(src)); };
+        document.head.appendChild(s);
+      });
+    }
+    var css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css?v=1';
+    document.head.appendChild(css);
+    roadtripMapAssets = Promise.all([script('/vendor/leaflet/leaflet.js?v=1'), script('/rutas-auto.js?v=1')]);
+    roadtripMapAssets.catch(function () { roadtripMapAssets = null; });
+    return roadtripMapAssets;
+  }
+  function mountRoadtripMap(el) {
+    el.setAttribute('data-map-state', 'loading');
+    loadRoadtripMapAssets().then(function () {
+      if (!el.isConnected) return;
+      var key = el.getAttribute('data-roadtrip-map');
+      var pts = window.CS_ROUTES && window.CS_ROUTES[key];
+      if (!pts || !window.L) { el.closest('.roadtrip-map-card').remove(); return; }
+      el.innerHTML = '';
+      var origin = window.CS_ROUTE_ORIGIN, dest = pts[pts.length - 1];
+      var map = window.L.map(el, { scrollWheelZoom: false, dragging: !window.L.Browser.mobile, tap: false, attributionControl: true });
+      window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(map);
+      window.L.polyline(pts, { color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }).addTo(map);
+      var line = window.L.polyline(pts, { color: '#e8590c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' }).addTo(map);
+      function pin(latlng, cls, label) {
+        return window.L.marker(latlng, { keyboard: false, icon: window.L.divIcon({ className: 'roadtrip-pin ' + cls, html: '<i></i><span>' + label + '</span>', iconSize: null }) }).addTo(map);
+      }
+      pin(origin, 'roadtrip-pin--from', 'Montevideo');
+      pin(dest, 'roadtrip-pin--to', esc(el.getAttribute('data-map-dest')));
+      map.fitBounds(line.getBounds(), { padding: [28, 28] });
+      el.setAttribute('data-map-state', 'ready');
+      var gmaps = document.createElement('a');
+      gmaps.className = 'roadtrip-map__open';
+      gmaps.target = '_blank'; gmaps.rel = 'noopener noreferrer';
+      gmaps.href = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=' + origin[0] + ',' + origin[1] + '&destination=' + dest[0] + ',' + dest[1];
+      gmaps.textContent = 'Abrir en Google Maps ↗';
+      el.parentNode.appendChild(gmaps);
+    }).catch(function () {
+      // Sin red o bloqueado: mejor sin mapa que una caja vacía.
+      var card = el.closest('.roadtrip-map-card');
+      if (card) card.remove();
+    });
+  }
+  function installRoadtripMaps() {
+    var pending = false;
+    function scan() {
+      pending = false;
+      var els = document.querySelectorAll('[data-roadtrip-map]:not([data-map-state])');
+      for (var i = 0; i < els.length; i++) mountRoadtripMap(els[i]);
+    }
+    new MutationObserver(function () {
+      if (!pending) { pending = true; requestAnimationFrame(scan); }
+    }).observe(document.body, { childList: true, subtree: true });
+    scan();
   }
   /* Dibujo de las dos opciones de transfer, en lugar del emoji.
      El emoji (🚐 y 🚗) se veía distinto en cada sistema operativo y además
@@ -10883,5 +10956,6 @@ function comboNombreDestino() {
 
   cargarTasas();
   init();
+  installRoadtripMaps();
 
 })();
