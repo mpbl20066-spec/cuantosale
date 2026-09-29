@@ -65,7 +65,11 @@ const stubs = {
     }
     return 0;
   },
-  getSelectedFlightSummary: () => ({ airline: 'GOL', flightNumber: 'G3 1748', arrivalText: '17 dic., 02:20 p. m.', summary: 'x' }),
+  // selected:true es lo que decide si el mensaje de WhatsApp dice el vuelo o
+  // "Sin seleccionar". El stub lo trae desde que getSelectedFlightSummary()
+  // expone el flag; sin él, vueloNombreCorto() toma el camino de "no hay vuelo"
+  // y el mensaje sale con el texto equivocado.
+  getSelectedFlightSummary: () => ({ airline: 'GOL', flightNumber: 'G3 1748', arrivalText: '17 dic., 02:20 p. m.', summary: 'x', selected: true }),
   findSelectedHotelLabel: () => 'Casa Joseph',
   originCityName: () => 'Montevideo',
   storyDateRange: () => '17 – 24 dic. 2026',
@@ -85,7 +89,10 @@ const stubs = {
 const cuerpo = ['checkoutTours', 'checkoutTransferLine', 'checkoutPedido', 'checkoutTotals',
   'transferHotelName', 'checkoutAside', 'checkoutField', 'checkoutTransferBlock',
   'checkoutPanelDatos', 'checkoutPanelListo', 'checkoutWhatsappUrl', 'checkoutRef', 'whatsappUrl',
-  'nombreDeCuenta', 'hotelParaElTransfer']
+  'nombreDeCuenta', 'hotelParaElTransfer',
+  // checkoutWhatsappUrl() llama a vueloNombreCorto(), asi que tiene que venir con
+  // ella o el test explota con ReferenceError en vez de fallar una comprobacion.
+  'vueloNombreCorto']
   .map(extraer).join('\n');
 
 const deps =

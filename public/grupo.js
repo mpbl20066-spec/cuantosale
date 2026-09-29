@@ -15,7 +15,8 @@
   // Tasas de /api/tasas, iguais a las que usa la home. Si no llegan, el grupo
   // entero se muestra en su moneda y no se ofrece cambiar.
   var FX = { rates: null, base: 'USD', monedas: null };
-  // Moneda en la que se ve toda la página. Vacío = la del grupo.
+  // Moneda en la que se ve toda la página. Vacío = la del grupo; para compararla
+  // con un código está verEnActual(), no el vacío.
   var verEn = '';
   var nameDraft = null; // nombre del viaje precargado desde la app
   var nameFromAuth = ''; // nombre del usuario logueado, para no pedirlo de nuevo
@@ -145,6 +146,17 @@
   function verMoneda() {
     if (verEn && tasaDe(verEn) != null) return verEn;
     return groupCurrency();
+  }
+  /* La moneda elegida con el vacío ya resuelto a un código.
+     verEn se queda vacío hasta que alguien elige otra, y ese vacío siempre
+     quiso decir "la del grupo". Era el único lugar donde se traducía, así que
+     también es el único que lo tiene que seguir haciendo ahora que el selector
+     muestra la moneda del grupo como una opción más: si alguien compara
+     verEn con un código de la lista sin pasar por acá, "vacío" y "USD" dejan de
+     ser la misma cosa y el <select> vuelve a marcar una moneda que no es la que
+     se está usando. */
+  function verEnActual() {
+    return verEn || groupCurrency();
   }
   // Un importe cualquiera, ya expresado en la moneda en la que se ve. Las
   // tasas se piden para que "Ver en" funcione; sin ellas cae al importe tal
@@ -598,12 +610,26 @@
           return '<option value="' + esc(m.code) + '"' + (m.code === currency ? ' selected' : '') + '>' + esc(m.etiqueta || m.code) + '</option>';
         }).join('')
       : '';
+    /* "Ver en" ofrece la moneda del grupo como una opción más, con su código.
+       Antes era una opción aparte —"USD (del grupo)"— con value="", y eso
+       dejaba el <select> mintiendo: un value vacío no es una moneda, así que
+       con verEn vacío (nadie eligió otra todavía) el navegador marcaba la
+       primera opción de la lista y la página seguía mostrando los montos en la
+       del grupo. El desplegable decía una cosa y los números otra. Con la del
+       grupo en la lista usando su código de verdad, lo marcado y lo que se está
+       viendo siempre son lo mismo.
+
+       La del grupo entra aunque no tenga tasa: es la única moneda en la que los
+       montos se leen sin convertir, así que ofrecerla siempre es lo que evita
+       dejar a alguien sin números si /api/tasas viene flojo. */
+    var opcionesVer = [currency].concat(
+      disponibles.map(function (m) { return m.code; }).filter(function (code) { return code !== currency; })
+    );
     var verEnMarkup = disponibles.length
       ? '<span class="grupo-veren"><span class="grupo-veren__label">Ver en</span>' +
         '<select class="grupo-veren__sel" aria-label="Moneda para ver los montos">' +
-        '<option value="">' + esc(currency) + ' (del grupo)</option>' +
-        disponibles.filter(function (m) { return m.code !== currency; }).map(function (m) {
-          return '<option value="' + esc(m.code) + '"' + (verEn === m.code ? ' selected' : '') + '>' + esc(m.code) + '</option>';
+        opcionesVer.map(function (code) {
+          return '<option value="' + esc(code) + '"' + (verEnActual() === code ? ' selected' : '') + '>' + esc(code) + '</option>';
         }).join('') +
         '</select></span>'
       : '';
@@ -619,7 +645,13 @@
     var sinConvertir = expenses.filter(function (expense) {
       return aMonedaGrupo(expense.amount, expense.currency) == null;
     });
-    var faltaTasa = tasaDe(verMoneda()) == null;
+    /* "No hay tasa" es un aviso sobre una conversión, así que solo tiene sentido
+       cuando se pidió convertir de verdad. La moneda del grupo puede no tener
+       tasa —si /api/tasas no la trajo— y antes eso no se notaba porque no era
+       una opción del selector. Ahora que aparece con su código, chequear su
+       tasa complainía de un número que ya está bien: los montos se leen tal cual
+       en la moneda en la que se gastaron, que es exactamente lo correcto. */
+    var faltaTasa = verEnActual() !== currency && tasaDe(verEnActual()) == null;
     var sinConvertirMarkup = (sinConvertir.length || faltaTasa)
       ? '<p class="grupo-warn">' +
         (sinConvertir.length
@@ -628,8 +660,8 @@
             (sinConvertir.length === 1 ? 'está' : 'están') + ' en una moneda sin tasa y no ' +
             (sinConvertir.length === 1 ? 'cuenta' : 'cuentan') + ' en el total ni en los saldos.'
           : '') +
-        (faltaTasa && verEn
-          ? ' No hay tasa para pasar a ' + esc(verEn) + ': los montos se muestran en la moneda en la que se gastaron.'
+        (faltaTasa
+          ? ' No hay tasa para pasar a ' + esc(verEnActual()) + ': los montos se muestran en la moneda en la que se gastaron.'
           : '') +
         '</p>'
       : '';
