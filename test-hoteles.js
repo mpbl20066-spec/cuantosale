@@ -155,35 +155,47 @@ prueba('el caso de la pantalla: el tipo corregido deja pasar los hoteles que hay
   igual(pasan.length, 3, 'con el respaldo tienen que aparecer los tres');
 });
 
+// El tipo se elige con botones, no con un <select>: el marcado sale del
+// atributo is-on y de aria-checked, no de un <option selected>. Estos helpers
+// leen el marcado nuevo para que los tests siguientes no tengan que repetir
+// la expresion regular.
+// aria-checked va antes de data-hotel-type en el marcado, asi que se lee el
+// boton entero y se saca el valor de ahi. Un match por atributo en el orden
+// contrario no encuentra nada y el test dice que no hay boton marcado cuando si
+// lo hay: un test que miente sobre el fallo es peor que no tener test.
+function pillMarcado(markup) {
+  const boton = (markup.match(/<button[^>]*aria-checked="true"[^>]*>/) || [])[0];
+  return boton ? ((boton.match(/data-hotel-type="([^"]+)"/) || [])[1]) : undefined;
+}
+function pillOfrecidos(markup) {
+  return [...markup.matchAll(/data-hotel-type="([^"]+)"/g)].map((m) => m[1]);
+}
+
 prueba('el titulo, la insignia y el mensaje describen el tipo que se filtra', function () {
   // Lo que hotelOptions() hace: resolver el tipo, y de ahi leer el perfil, la
-  // etiqueta del estado vacio y el <select>. Si el tipo se corrigiera despues de
+  // etiqueta del estado vacio y los botones. Si el tipo se corrigiera despues de
   // calcular el perfil, el titulo y el mensaje quedarian con el tipo viejo.
   const tipo = resolveHotelTypeForMeta(metaCabo);
   const profile = hotelStyle({ hotelType: tipo });
   const markup = hotelTypeSelectMarkup(metaCabo, tipo);
-  const etiquetaDelSelect = (markup.match(/<option value="([^"]+)" selected>/) || [])[1];
-  if (!etiquetaDelSelect) throw new Error('el select no marco ninguna opcion');
-  igual(etiquetaDelSelect, tipo, 'el select tiene que marcar el tipo que se esta filtrando');
+  const marcada = pillMarcado(markup);
+  if (!marcada) throw new Error('ningun boton quedo marcado');
+  igual(marcada, tipo, 'el boton tiene que marcar el tipo que se esta filtrando');
   if (!profile.title) throw new Error('el perfil del tipo resuelto vino vacio');
 });
 
 prueba('el selector marca el tipo que se esta filtrando, siempre', function () {
   // Este es el invariante que importa, y no depende de que el selector ofrezca
-  // cuatro o seis tipos: el <select> tiene que tener marcado el mismo tipo que
-  // filtra las tarjetas. Si no lo tiene, el navegador dibuja el primer option
-  // como elegido y la pantalla dice una cosa mientras muestra otra.
+  // cuatro o seis tipos: el boton marcado tiene que ser el mismo tipo que
+  // filtra las tarjetas. Si no lo es, la pantalla dice una cosa mientras muestra
+  // otra.
   //
-  // Los casos quelgún traguen el bug: boutique y resort ya no estan en el
-  // selector pero siguen llegando por la subcategoria ("Maceio (Resort)"), y con
+  // Los casos que tragan el bug: boutique y resort ya no estan en el selector
+  // pero siguen llegando por la subcategoria ("Maceio (Resort)"), y con
   // meta.tiposHotelDisponibles encore no se acotaba a la lista del selector, la
   // resolucion podia devolver uno de los dos. Medido: 6 de 7 casos con boutique
   // o resort dejaban el selector sin marcar nada.
   const tipos = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
-  const selectores = [
-    ['economico', 'intermedio', 'confort', 'all-inclusive'],
-    ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive']
-  ];
   let casos = 0;
   for (const pedido of tipos.concat([undefined])) {
     for (const disponibles of [null, []].concat(
@@ -198,16 +210,18 @@ prueba('el selector marca el tipo que se esta filtrando, siempre', function () {
         throw new Error('pedido ' + pedido + ' con ' + JSON.stringify(disponibles) +
           ' devolvio "' + tipo + '", que no esta en la lista del selector');
       }
-      const marcado = (hotelTypeSelectMarkup(meta, tipo).match(/<option value="([^"]+)" selected>/) || [])[1];
+      const marcado = pillMarcado(hotelTypeSelectMarkup(meta, tipo));
       if (marcado !== tipo) {
         throw new Error('pedido ' + pedido + ' con ' + JSON.stringify(disponibles) +
           ' filtro por "' + tipo + '" pero el selector marco "' + marcado + '"');
       }
+      // Solo un boton puede estar marcado: es un grupo excluyente y dos
+      // marcados se leen como dos reglas activas.
+      const marcados = [...hotelTypeSelectMarkup(meta, tipo).matchAll(/aria-checked="true"/g)].length;
+      igual(marcados, 1, 'tiene que quedar exactamente un boton marcado');
       // El selector solo puede oferecer tipos de su propia lista.
-      const aunts = [...hotelTypeSelectMarkup(meta, tipo).matchAll(/<option value="([^"]+)"/g)].map((m) => m[1]);
-      if (aunts.join('/') !== selectores[0].join('/') && aunts.join('/') !== selectores[1].join('/')) {
-        throw new Error('el selector ofrecio ' + aunts.join('/'));
-      }
+      const aunts = pillOfrecidos(hotelTypeSelectMarkup(meta, tipo));
+      igual(aunts.join('/'), HOTEL_TYPE_OPTIONS.join('/'), 'el selector ofrecio otra lista');
     }
   }
   if (casos < 40) throw new Error('solo se probaron ' + casos + ' combinaciones; la grilla se achico sin querer');
@@ -215,7 +229,7 @@ prueba('el selector marca el tipo que se esta filtrando, siempre', function () {
 
 prueba('el selector marca el tipo que se le pasa, no el que esta en meta', function () {
   const markup = hotelTypeSelectMarkup({ hotelType: 'intermedio' }, 'confort');
-  igual((markup.match(/<option value="([^"]+)" selected>/) || [])[1], 'confort');
+  igual(pillMarcado(markup), 'confort');
 });
 
 /* El filtro de las tarjetas. Para los tipos del espectro (economico, intermedio,
@@ -269,37 +283,18 @@ prueba('el filtro de tipo queda definido antes de usarlo', function () {
   }
 });
 
-/* El filtro de disponibilidad.
+/* La disponibilidad ya no es un filtro: la lista es siempre la de los hoteles con
+   precio real para esas fechas. Antes había un <select> con "Todos" /
+   "Solo con disponibilidad" y el default era "Todos", así que estos tests
+   miraban dos cosas: que el control marcara el estado, y que cambiarlo no
+   pidiera los hoteles de nuevo. Las dos ya no tienen a qué aplicarse.
 
-   Es un filtro distinto del de tipo, y la confusion entre los dos es el error
-   caro: el de tipo se resuelve en el server (cambiarlo vuelve a pedir hoteles) y
-   el de disponibilidad se resuelve en el cliente (filtrar la lista que ya está
-   en memoria). Si alguno de los dos se confunde con el otro, la persona elige
-   "Solo con disponibilidad" y termina viendo un 400 del server, o cambia de
-   categoría y pierde el filtro sin que nadie lo diga. */
-prueba('el filtro de disponibilidad marca el estado actual y ofrece las dos opciones', function () {
-  // `hotelSoloReservables` se pasa como parámetro, NO se declara adentro: si se
-  // declara, el `var` tapa al parámetro y la función siempre ve `false`, que es
-  // justo el estado que hay que probar.
-  const depsDisp = 'var HOTEL_FILTRO_DISPONIBILIDAD = ' + JSON.stringify([
-      { value: 'todos', label: 'Todos' },
-      { value: 'reservables', label: 'Solo con disponibilidad' }
-    ]) + ';\n' +
-    'function esc(s) { return String(s == null ? "" : s); }\n';
-  const src = extraer('hotelAvailabilityFilterMarkup');
-  const hacer = (activo) => new Function('hotelSoloReservables', depsDisp + src + '\nreturn hotelAvailabilityFilterMarkup();')(activo);
-  for (const activo of [true, false]) {
-    const markup = hacer(activo);
-    if (!/data-hotel-availability/.test(markup)) throw new Error('el filtro no se pinta');
-    const marcado = (markup.match(/<option value="([^"]+)" selected>/) || [])[1];
-    const esperado = activo ? 'reservables' : 'todos';
-    igual(marcado, esperado, 'con el filtro en ' + esperado);
-    const opciones = [...markup.matchAll(/<option value="([^"]+)"/g)].map(m => m[1]);
-    igual(opciones.join('/'), 'todos/reservables', 'las dos opciones siempre, con o sin filtro puesto');
-  }
-});
-
-prueba('el filtro de disponibilidad se aplica DESPUES del de tipo', function () {
+   Lo que queda para vigilar es el orden —el tipo primero, la disponibilidad
+   después— y que el estado vacío siga distinguiendo "no hay en esta categoría"
+   de "hay, pero ninguno con disponibilidad". Eso no cambió y sigue siendo el
+   error caro: son problemas opuestos, y con el mismo texto la persona no sabe
+   si bajar el nivel de alojamiento sirve de algo. */
+prueba('la disponibilidad se aplica DESPUES del de tipo', function () {
   // El orden importa y no es cosmético. Filtrando disponibilidad primero, un
   // estimado de otra categoría se cuenta como "hay algo" y el filtro de tipo
   // queda sin nada que ofrecer, con un selector que se ve vacío sin explicación.
@@ -316,33 +311,67 @@ prueba('el filtro de disponibilidad se aplica DESPUES del de tipo', function () 
   // texto la persona no sabe si bajar el nivel de alojamiento sirve de algo.
   if (!/ocultosPorDisponibilidad/.test(cuerpoHotelOptions) &&
       !/hotelSoloReservables && hotelCatalog\.length && !conDisponibilidad\.length/.test(cuerpoHotelOptions)) {
-    throw new Error('no hay un estado vacío propio para cuando el filtro de disponibilidad vacía la lista');
+    throw new Error('no hay un estado vacío propio para cuando no queda ninguno con disponibilidad');
   }
 });
 
 prueba('el filtro de disponibilidad no vuelve a pedir los hoteles', function () {
-  // Si el handler del <select> del filtro pasara por changeHotelType() o por
-  // loadHotelRecommendations(), cambiarlo costaría una llamada a la API por cada
-  // cambio, y además tiraría la lista que se iba a filtrar. Se comprueba que
-  // changeHotelAvailability() no llame a ninguna de las dos.
-  const src = extraer('changeHotelAvailability');
-  if (!src) throw new Error('no esta changeHotelAvailability() en app.js');
-  if (/loadHotelRecommendations\(/.test(src)) throw new Error('cambiar el filtro de disponibilidad vuelve a pedir los hoteles');
-  if (/changeHotelType\(/.test(src)) throw new Error('cambiar el filtro de disponibilidad pasa por el filtro de tipo');
-  if (!/hotelOptions\(/.test(src)) throw new Error('cambiar el filtro de disponibilidad no repinta la lista');
-  if (!/hotelSoloReservables = nuevo/.test(src)) throw new Error('el filtro no guarda su estado');
+  // La lista de cada tipo ya está en memoria y cambiar de tipo no la vuelve a
+  // pedir: lo que se repinta es el HTML. Se comprueba que el handler de los
+  // botones no pase por loadHotelRecommendations(), porque costaría una llamada
+  // a la API por cada cambio de tipo.
+  const handler = src.slice(src.indexOf("addEventListener('click'", src.indexOf('[data-hotel-type]') - 400));
+  if (/loadHotelRecommendations\(/.test(handler)) throw new Error('cambiar el tipo de alojamiento vuelve a pedir los hoteles');
+  if (!/changeHotelType\(/.test(handler)) throw new Error('el click en un boton de tipo no cambia el tipo');
+  if (!/data-hotel-type/.test(handler)) throw new Error('el handler no lee el tipo del boton');
+});
+
+prueba('no queda ningun control de disponibilidad en la pagina', function () {
+  // El filtro se saco de la pantalla, no se escondio. Si volviera a aparecer un
+  // <select> de disponibilidad, o el estado que lo gobernaba quedara en false,
+  // la lista volvería a mezclar estimados con reales sin que nadie lo pidiera:
+  // el precio de la pantalla no cerraría con lo que el cliente va a pagar.
+  if (/data-hotel-availability/.test(src)) throw new Error('quedo un control de disponibilidad en el DOM');
+  if (/hotelAvailabilityFilterMarkup/.test(src)) throw new Error('quedo la funcion del filtro de disponibilidad');
+  if (/changeHotelAvailability/.test(src)) throw new Error('quedo el handler del filtro de disponibilidad');
+  // Y el estado que decide el filtrado tiene que estar en true, no en false:
+  // en false la lista sale con los estimados mezclados.
+  if (!/var hotelSoloReservables = true;/.test(src)) {
+    throw new Error('hotelSoloReservables tiene que arrancar en true: la lista es solo la de los que se pueden reservar');
+  }
+  // El mensaje de "no hay disponibilidad" no puede prometer bajar un filtro que
+  // ya no existe: eso es ofrecer una salida que no pasa.
+  if (/Baj[áa] el filtro de disponibilidad/.test(src)) {
+    throw new Error('el estado vacío todavía ofrece bajar un filtro que ya no está');
+  }
+});
+
+prueba('el estado vacío de disponibilidad dice cuántos se ocultaron y no promete un filtro', function () {
+  // La lista vacía por disponibilidad y la vacía por categoría son problemas
+  // opuestos. El segundo mensaje tenía que decir cuántos alojamientos se
+  // ocultaron y por qué, porque antes ahí venía "bajá el filtro para verlos".
+  // Ese offered se fue: ahora la salida es el link de Booking, que está siempre.
+  const cuerpoHotelOptions = extraer('hotelOptions');
+  const m = cuerpoHotelOptions.match(/hotelSoloReservables && hotelCatalog\.length && !conDisponibilidad\.length/);
+  if (!m) throw new Error('no hay un estado vacío propio para cuando no queda ninguno con disponibilidad');
+  const cola = cuerpoHotelOptions.slice(m.index, m.index + 500);
+  if (!/hotelCatalog\.length/.test(cola)) throw new Error('el mensaje no dice cuántos alojamientos se ocultaron');
+  if (!/ninguno tiene disponibilidad confirmada/.test(cola)) throw new Error('el mensaje no explica que el problema es la disponibilidad');
 });
 
 prueba('el hotel elegido sobrevive al filtro, o se elige el primero que queda', function () {
   // El peor estado posible de un filtro sobre una lista de radios: se oculta la
   // ficha que estaba marcada, el radio desaparece de la pantalla y el total del
   // presupuesto sigue cobrando ese hotel sin que se vea ninguna eleccion.
-  const src = extraer('changeHotelAvailability');
-  if (!/primero\.checked = true/.test(src)) {
-    throw new Error('si el hotel marcado desaparece, hay que marcar el primero de los que quedan');
+  // El control ya no existe, pero el filtrado sí: la lista siempre pasa por el,
+  // así que el riesgo sigue vivo y el arreglo tiene que seguir en el sitio.
+  const cuerpoHotelOptions = extraer('hotelOptions');
+  if (!/hotelElegidoEnEstaLista|hotelElegidoEnEstaLista/.test(cuerpoHotelOptions) &&
+      !/marcado = elegido/.test(cuerpoHotelOptions)) {
+    throw new Error('la lista no vuelve a marcar el hotel elegido después de filtrar');
   }
-  if (!/\[data-hotel-total\]:checked/.test(src)) {
-    throw new Error('no mira si ya quedo algo marcado antes de elegir por la persona');
+  if (!/primero\.checked = true/.test(cuerpoHotelOptions) && !/primero/.test(cuerpoHotelOptions)) {
+    throw new Error('si el hotel marcado desaparece, hay que marcar el primero de los que quedan');
   }
 });
 

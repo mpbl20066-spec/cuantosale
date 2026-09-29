@@ -910,10 +910,14 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
       // Solo las dos primeras llevan placa. La tercera se queda sin nada: con
       // tres, la de "Alternativa" competia con la de "Recomendado" por el mismo
       // ojo y ninguna decía nada que la otra no dijera. Un sello que no
-      // diferencia es ruido. Ademas estaba escrito "Buona opcion", con dos
-      // falta de tipeo y el acento roto: el archivo se genero con la
-      // codificacion double-codificada.
-      highlight: ['Recomendado', 'Buena opción', ''][index] || '',
+      // diferencia es ruido.
+      //
+      // "Destacado" y no "Buena opción": dice lo mismo con una sola palabra y
+      // sin pedirle al lector que se fije. "Buena opción" suena a que evaluamos
+      // el hotel y lo encontramos bueno, y eso no se sabe: lo que sabemos es
+      // que nos pareció una de las dos que destacamos al ordenar, que no es lo
+      // mismo que una calidad del hotel.
+      highlight: ['Recomendado', 'Destacado', ''][index] || '',
       recommended: index === 0
     });
   });
