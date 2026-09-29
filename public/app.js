@@ -1082,11 +1082,26 @@
         + '<button type="button" class="featured-destination__search" data-feature-search="' + esc(group.id) + '">Ver propuesta <span aria-hidden="true">&rarr;</span></button>'
         + '</div></article>';
     }).join('');
-    var next = nextSpecialDateAfter(6);
-    var nextLine = next
-      ? '<p class="destination-highlights__next">Pr&oacute;ximo feriado largo: <b>' + esc(next.label) + '</b>, ' + esc(shortDateLabel(next.depIso).replace(/\./g, '')) + '</p>'
-      : '';
-    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">M&Aacute;S ECON&Oacute;MICOS</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona, para los pr&oacute;ximos seis meses. Toc&aacute; un destino y te mostramos la propuesta.</p>' + nextLine + '</div></div>'
+    // La linea de contexto se arma con la ventana ACTIVA, no con un feriado fijo:
+    // antes decia siempre el siguiente largo que venia despues de los seis meses,
+    // asi que con "Sep" marcado al lado se leia "Semana Santa, mié 24 mar" y
+    // parecian dos fechas que se contradecian en lugar de dos datos distintos:
+    // el del mes que se esta mirando y el del proximo feriado.
+    var context = featuredMonthContext(window, 6);
+    var nextLine = '';
+    if (context) {
+      var depLabel = shortDateLabel(window.depIso).replace(/\./g, '');
+      var retLabel = shortDateLabel(window.retIso).replace(/\./g, '');
+      nextLine = '<p class="destination-highlights__next">' + esc(context.lead) + '<b>' + esc(context.label) + '</b>, ' + esc(depLabel) + ' &rarr; ' + esc(retLabel) + '.'
+        // El año solo cuando cambia: "Semana Santa, mié 24 mar de 2027" al lado
+        // de septiembre se tiene que leer con el año, y al lado de enero del
+        // mismo año sobra.
+        + (context.next ? ' El pr&oacute;ximo feriado largo es <b>' + esc(context.next.label) + '</b>, '
+          + esc(shortDateLabel(context.next.depIso).replace(/\./g, ''))
+          + (context.next.dep.getFullYear() !== window.year ? ' de ' + context.next.dep.getFullYear() : '') + '.' : '')
+        + '</p>';
+    }
+    root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">Oportunidades de la temporada</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona, para los pr&oacute;ximos seis meses. Toc&aacute; un destino y te mostramos la propuesta.</p>' + nextLine + '</div></div>'
       + '<div class="featured-months" role="group" aria-label="Elegir mes de la escapada">' + tabs + '</div>'
       + '<div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">&lsaquo;</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">&rsaquo;</button></div>';
   }
@@ -1664,6 +1679,34 @@
       if (all[i].label !== 'Fin de semana' && all[i].dep > today) return all[i];
     }
     return null;
+  }
+
+  /* Que dice la linea de contexto de la seccion de escapadas.
+
+     Antes era una sola frase fija --el proximo feriado largo que venia DESPUES
+     de los seis meses-- y no se movia nunca. Al lado de la pestaña de mes
+     activa eso se leia como un error: con "Sep" marcado decia "Semana Santa,
+     mié 24 mar", que no es la fecha del mes que se esta mirando. Ahora la
+     linea describe la ventana elegida, que es la unica fecha que las tarjetas
+     de abajo van a mostrar.
+
+     Se devuelve en partes y no armada: el texto (los meses, el "de 2027") lo
+     arma el que pinta, con esc() y con el formato de fecha de la pantalla. */
+  function featuredMonthContext(window, visibleMonths) {
+    if (!window) return null;
+    var monthName = MONTH_NAMES[window.month];
+    var isHoliday = window.label !== 'Fin de semana';
+    return {
+      // El mes va con nombre propio en los dos casos: la pestaña "Este mes" ya
+      // usa esa palabra para el mes en curso y "Este mes:" arriba de un mes de
+      // diciembre se lee como un error del mismo tipo que se está corrigiendo.
+      lead: isHoliday ? 'En ' + monthName + ': ' : 'En ' + monthName + ' no hay feriado largo: ',
+      label: isHoliday ? window.label : 'fin de semana',
+      // Cuando el mes NO tiene feriado se avisa cuándo viene el siguiente. Sin
+      // esto "en abril no hay feriado largo" suena a que el año no tiene
+      // ninguno, que es justo lo que la app viene a vender.
+      next: isHoliday ? null : nextSpecialDateAfter(visibleMonths || 6)
+    };
   }
   /* El calendario no offering fechas más allá de un año.
 

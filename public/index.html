@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=138">
+<link rel="stylesheet" href="/style.css?v=140">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -154,6 +154,13 @@
          updateDestinationMode() sigue pudiendo ocultarlo cuando se elige un
          destino concreto. -->
     <button type="button" id="btn-buscar-todos" class="btn-buscar-todos">🔍 Buscar destinos por presupuesto</button>
+    <!-- El diferencial, debajo del buscador y no escondido en el modal. Los
+         tres de la barra del modal se leen cuando la propuesta ya esta abierta,
+         o sea cuando el usuario ya decidio: "ideal para grupos" ahi no cambia
+         nada. Aca responde a la pregunta que aparece con el presupuesto recien
+         escrito, que es el unico momento en que sirve. Ver el reparto en
+         detalle sigue siendo accion de la propuesta (data-split-trip). -->
+    <p class="form__ventaja"><svg class="form__ventaja-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.2" cy="8.4" r="2.5"/><path d="M1.4 18c0-2.1 1.7-3.7 3.8-3.7S9 15.9 9 18"/><circle cx="18.8" cy="8.4" r="2.5"/><path d="M15 18c0-2.1 1.7-3.7 3.8-3.7s3.8 1.6 3.8 3.7"/><path d="M8.6 12.2h6.8"/><path d="M10.4 10.4 8.6 12.2l1.8 1.8M13.6 10.4l1.8 1.8-1.8 1.8"/></svg><span><b>Ideal para grupos:</b> armá el viaje una vez y dividí los gastos automáticamente.</span></p>
   </section>
 
   <section id="destination-highlights" class="destination-highlights" aria-labelledby="destination-highlights-title"></section>
@@ -215,7 +222,7 @@
      de app.js porque app.js lo lee al cargar. Sin '?v=' a propósito, por el
      mismo motivo que daily-costs.js: lo controla el CACHE_NAME del SW. -->
 <script defer src="/tours.generated.js"></script>
-<script defer src="/app.js?v=182"></script>
+<script defer src="/app.js?v=183"></script>
 
 </body>
 </html>

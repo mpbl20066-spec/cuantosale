@@ -1,4 +1,4 @@
-/* version: 138
+/* version: 140
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -279,6 +279,23 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .find-destinations{min-height:52px;border:1px solid var(--action-border);border-radius:16px;padding:12px 18px;background:var(--action-bg);color:var(--action-ink);font-weight:700;cursor:pointer;transition:transform .18s ease,filter .18s ease}
 .find-destinations:hover{filter:brightness(1.14);transform:translateY(-1px)}
 .btn-buscar-todos{width:100%;min-height:54px;border:1px solid var(--action-border);border-radius:16px;background:var(--action-bg);color:var(--action-ink);font-weight:700;font-size:15px;cursor:pointer;transition:transform .18s ease,filter .18s ease}.btn-buscar-todos:hover{filter:brightness(1.12);transform:translateY(-1px)}.btn-buscar-todos[hidden]{display:none}
+/* El diferencial de la plataforma, pegado al buscador.
+
+   Los tres diferenciales vivian en el modal de la propuesta, que se abre
+   DESPUES de elegir un vuelo: para entonces la decision ya esta tomada y
+   "ideal para grupos" no cambia nada. Este es el lugar donde la pregunta
+   "¿y si vamos varios?" aparece de verdad, con el presupuesto recien escrito,
+   asi que la respuesta va en la misma pantalla.
+
+   No es un control: el reparto se pide sobre el total de una propuesta
+   ("Ver como dividir este monto"), no antes de tener una. Por eso es un <p> y
+   no un boton, para que no se cuente como una accion mas del formulario. */
+.form__ventaja{display:flex;align-items:flex-start;gap:9px;margin:0;padding:10px 13px;border-radius:14px;background:var(--cel-soft);color:var(--ink2);font-size:12.5px;line-height:1.45}
+.form__ventaja b{color:var(--ink);font-weight:700}
+/* 20px y no 16: los dos circulos de las cabezas y la flecha doble del centro se
+   juntaban a 16 y el icono se leia como una mancha. Es el mismo dibujo de la
+   ventaja "logistica" del modal, al mismo peso de trazo. */
+.form__ventaja-ico{flex:0 0 auto;width:20px;height:20px;margin-top:1px;color:var(--cel)}
 /* results */
 #results{margin-top:34px;display:grid;grid-template-columns:minmax(0,1fr);gap:34px}
 #destination-results{margin-top:34px}
@@ -2020,8 +2037,18 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .destination-highlights__head>label{flex:0 0 auto;margin:0;color:var(--ink2);font-size:12px}
 .destination-highlights__head select,.featured-destination select{width:100%;min-height:44px;margin-top:6px;padding:8px 12px;border:1px solid var(--control-line);border-radius:12px;background:var(--control-bg);color:var(--ink);font:600 16px var(--fb)}
 .destination-highlights__head select{width:auto;min-width:140px}
-.destination-highlights__eyebrow{color:#087f70;font-size:10px;font-weight:800;letter-spacing:.12em}
-.destination-highlights__next{margin:8px 0 0;color:var(--ink2);font-size:12.5px}
+/* La etiqueta del titulo. Antes eran 10px con .12em de espaciado, que es la
+   forma de una sigla en mayusculas, y de ahi el #087f70 fijo: un verde que en
+   el tema night queda a 3.56:1 sobre --surface, o sea por debajo del 4.5:1 que
+   pide WCAG para texto normal. Ahora es una frase, con la misma tinta de
+   etiqueta que usa el resto de la app (--cel: 10.64:1 en night, 5.92:1 en
+   claro) y sin el espaciado de sigla. */
+.destination-highlights__eyebrow{color:var(--cel);font-size:11.5px;font-weight:800;letter-spacing:.01em}
+/* La línea de contexto. El selector lleva el `p` del head porque
+   .destination-highlights__head p le gana en especificidad y se comía el margen:
+   la frase de los feriados quedaba pegada al párrafo de arriba, que es
+   justo lo que hace que las dos se lean como un bloque y no como dos datos. */
+.destination-highlights__head p.destination-highlights__next{margin:8px 0 0;color:var(--ink2);font-size:13px;line-height:1.5}
 .destination-highlights__next b{color:var(--ink)}
 /* Las seis ventanas de escapada. En vez de un select de doce meses, que
    obligaba a ofrecer meses ya pasados, son botones con la ocasión a la vista:

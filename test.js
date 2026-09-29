@@ -1482,14 +1482,14 @@ function haversineKm(a, b) {
     const fs = require('fs');
     const path = require('path');
     const source = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
-    const block = source.match(/var MONTH_NAMES[\s\S]*?function nextSpecialDateAfter[\s\S]*?\n  }/);
+    const block = source.match(/var MONTH_NAMES[\s\S]*?function featuredMonthContext[\s\S]*?\n  }/);
     assert.ok(block, 'no se encontró el bloque de fechas en app.js');
     const today = new Date(); today.setHours(12, 0, 0, 0);
     const addDays = function (d, n) { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; };
     const iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
     const scope = { today: today, addDays: addDays, iso: iso, module: { exports: {} } };
     const factory = new Function('today', 'addDays', 'iso',
-      block[0] + '\nreturn { easterSunday: easterSunday, featuredMonthWindows: featuredMonthWindows, nextSpecialDateAfter: nextSpecialDateAfter, MONTH_NAMES: MONTH_NAMES };');
+      block[0] + '\nreturn { easterSunday: easterSunday, featuredMonthWindows: featuredMonthWindows, nextSpecialDateAfter: nextSpecialDateAfter, featuredMonthContext: featuredMonthContext, MONTH_NAMES: MONTH_NAMES };');
     const fechas = factory(today, addDays, iso);
 
     // Pascua contra el calendario gregoriano publicado. Si este algoritmo se
@@ -1538,6 +1538,41 @@ function haversineKm(a, b) {
     // El próximo feriado largo tiene que caer fuera de la ventana visible.
     const next = fechas.nextSpecialDateAfter(6);
     if (next) assert.ok(departures.indexOf(next.depIso) < 0, 'el "próximo feriado" ya está en la ventana visible');
+
+    // Y la línea de contexto tiene que hablar del mes que está MARCADO, no del
+    // feriado que viene después de los seis meses. Antes era una frase fija: con
+    // la pestaña de septiembre activa decía "Próximo feriado largo: Semana
+    // Santa, mié 24 mar", que al lado de un mes de septiembre se leía como una
+    // fecha equivocada en lugar de como dos cosas distintas. Este es el
+    // invariante que hace falta: el nombre del mes, el feriado y las fechas que
+    // salen al lado tienen que ser los de la ventana activa.
+    assert.strictEqual(typeof fechas.featuredMonthContext, 'function',
+      'app.js no tiene featuredMonthContext(): la línea de contexto no se puede atar a la pestaña activa');
+    windows.forEach(function (w) {
+      const ctx = fechas.featuredMonthContext(w, 6);
+      assert.ok(ctx, 'la ventana de ' + MONTHS[w.month] + ' no tiene línea de contexto');
+      assert.ok(ctx.lead.indexOf(fechas.MONTH_NAMES[w.month]) >= 0,
+        'la línea de ' + MONTHS[w.month] + ' no nombra ese mes: "' + ctx.lead + '"');
+      // El feriado que nombra es el de ESA ventana. Si difiere, la línea está
+      // describiendo otro mes aunque el texto sea cierto.
+      assert.ok(ctx.label.toLowerCase() === w.label.toLowerCase(),
+        'la línea de ' + MONTHS[w.month] + ' nombra "' + ctx.label + '" y la ventana es "' + w.label + '"');
+      if (w.label === 'Fin de semana') {
+        // Sin feriado en el mes, la línea tiene que decir cuándo viene el
+        // siguiente: "en abril no hay feriado largo" solo suena a que el año no
+        // tiene ninguno, que es justo lo que la sección viene a vender.
+        assert.ok(ctx.next, 'la línea de ' + MONTHS[w.month] + ' dice que no hay feriado y no dice cuándo viene el próximo');
+        assert.ok(ctx.next.label !== 'Fin de semana', 'el "próximo feriado largo" no puede ser un fin de semana');
+        assert.ok(ctx.next.dep > w.ret,
+          'el próximo feriado (' + ctx.next.depIso + ') es anterior a la ventana de ' + w.depIso);
+        assert.ok(departures.indexOf(ctx.next.depIso) < 0, 'el "próximo feriado largo" ya está entre las seis ventanas');
+      } else {
+        // Con feriado en el mes, la línea ya está completa: agregar un "y el
+        // próximo es..." la convierte en un párrafo que hay que leer dos veces.
+        assert.strictEqual(ctx.next, null,
+          'la línea de ' + MONTHS[w.month] + ' ya tiene feriado y además ofrece el siguiente');
+      }
+    });
   });
   await t('el calendario no ofrece fechas más allá de un año', async function () {
     // El tope vive en el navegador (public/app.js), así que se evalúa la función
