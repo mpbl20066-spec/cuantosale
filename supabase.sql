@@ -147,9 +147,19 @@ create table if not exists public.participantes (
   grupo_id uuid not null references public.grupos_viaje(id) on delete cascade,
   display_name text not null,
   device_id text not null,
+  -- El admin del grupo: el que lo creó, que es el primero que se sumó. Vive
+  -- acá y no en grupos_viaje.creator_user_id porque ese campo es un id de
+  -- auth.users y el grupo se puede crear sin sesión, así que quedaba siempre en
+  -- NULL. Quien lo tiene puede borrar cualquier gasto; el resto, solo los
+  -- propios. El admin se marca desde el navegador al crear el grupo.
+  es_admin boolean not null default false,
   joined_at timestamptz not null default now(),
   unique (grupo_id, device_id)
 );
+
+-- Para las tablas que ya existían sin la columna: create table if not exists no
+-- agrega columnas a una tabla que está.
+alter table public.participantes add column if not exists es_admin boolean not null default false;
 
 create table if not exists public.gastos (
   id uuid primary key default gen_random_uuid(),
@@ -186,6 +196,11 @@ create policy "Anyone with the link can add an expense"
   on public.gastos for insert with check (true);
 create policy "Anyone with the link can delete an expense"
   on public.gastos for delete using (true);
+-- Necesario para corregir, una vez cargado, entre quiénes se divide un gasto.
+-- El alcance es el mismo que el delete: qué fila puede tocar cada quien lo
+-- decide la página, no la base (ver la nota del link como contraseña más arriba).
+create policy "Anyone with the link can edit an expense"
+  on public.gastos for update using (true) with check (true);
 
 create index if not exists participantes_grupo_idx on public.participantes (grupo_id);
 create index if not exists gastos_grupo_idx on public.gastos (grupo_id);
@@ -194,8 +209,8 @@ create index if not exists gastos_grupo_idx on public.gastos (grupo_id);
 -- poder leer/escribir a nivel de tabla (las policies de arriba ya acotan qué
 -- filas puede tocar cada quien).
 grant select, insert, update on public.grupos_viaje to anon, authenticated;
-grant select, insert on public.participantes to anon, authenticated;
-grant select, insert, delete on public.gastos to anon, authenticated;
+grant select, insert, update on public.participantes to anon, authenticated;
+grant select, insert, update, delete on public.gastos to anon, authenticated;
 
 -- Waitlist de /waitlist con referidos. La tabla no tiene ninguna policy de
 -- select/insert para anon: toda lectura y escritura pasa por las funciones
@@ -269,6 +284,109 @@ $$;
 revoke all on public.waitlist from anon, authenticated;
 grant execute on function public.waitlist_count() to anon, authenticated;
 grant execute on function public.waitlist_signup(text, text) to anon, authenticated;
+
+-- Qué rubros del viaje quedaron reservados, para que el botón del voucher pase
+-- de "Reservar" a "Reservado" y siga así al recargar. Antes no se guardaba nada
+-- y al volver a la página el botón volvía a decir "Reservar".
+--
+-- Igual que waitlist, la tabla NO se le da permiso a nadie: se entra solo por
+-- las funciones de abajo, que son SECURITY DEFINER. Acá el motivo no es
+-- privacidad sino que la reserva tiene que funcionar SIN sesión: la mayoría de
+-- las personas que reservan todavía no se loguearon (el OTP del checkout se
+-- manda sin esperar), así que una RLS atada a auth.uid() no dejaría guardar
+-- nada. El id del viaje es un uuid que genera el navegador y guarda en
+-- localStorage, y hace de contraseña de la fila por el mismo motivo que el link
+-- en grupos_viaje.
+--
+-- Una fila por (viaje_id, categoria) y no un historial: la pantalla pregunta "este
+-- rubro está reservado sí o no", no cuándo se reservó.
+create table if not exists public.reservas_viaje (
+  id uuid primary key default gen_random_uuid(),
+  viaje_id uuid not null,
+  -- Se llena sola si la persona está logueada. Queda en null si no, y da igual:
+  -- la lectura es por viaje_id. Sirve para saber a quién preguntarle, no es la
+  -- llave.
+  user_id uuid references auth.users(id) on delete set null,
+  -- Las mismas cuatro claves que usa getCategoryColor()/categoryIcon() para las
+  -- filas del voucher, para que la reserva y la fila no se desincronicen por una
+  -- diferencia de nombre.
+  categoria text not null check (categoria in ('pasajes', 'alojamiento', 'traslados', 'tours')),
+  destino text,
+  detalle jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (viaje_id, categoria)
+);
+
+create index if not exists reservas_viaje_viaje_idx on public.reservas_viaje (viaje_id);
+
+-- RLS sin ninguna policy: la tabla no se lee ni se escribe directo, nunca.
+alter table public.reservas_viaje enable row level security;
+
+create or replace function public.reservas_marcar(
+  p_viaje_id uuid, p_categoria text, p_destino text default null, p_detalle jsonb default '{}'::jsonb
+) returns text
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_categoria text := lower(trim(coalesce(p_categoria, '')));
+begin
+  if p_viaje_id is null then return null; end if;
+  -- El check de la tabla ya lo rechaza, pero con un error de Postgres que en la
+  -- página no se entiende. Acá se contesta con el motivo.
+  if v_categoria not in ('pasajes', 'alojamiento', 'traslados', 'tours') then
+    raise exception 'Categoría inválida: %', p_categoria;
+  end if;
+  insert into public.reservas_viaje (viaje_id, user_id, categoria, destino, detalle)
+  values (p_viaje_id, auth.uid(), v_categoria, nullif(trim(p_destino), ''), coalesce(p_detalle, '{}'::jsonb))
+  on conflict (viaje_id, categoria) do update
+    set updated_at = now(),
+        destino = excluded.destino,
+        detalle = excluded.detalle,
+        -- Guardar dos veces el mismo rubro no tiene que borrar el user_id del
+        -- que lo marcó la primera vez.
+        user_id = coalesce(excluded.user_id, public.reservas_viaje.user_id);
+  return v_categoria;
+end;
+$$;
+
+-- Devuelve solo las categorías, no la fila entera: la pantalla solo necesita la
+-- lista, y devolver menos es devolver menos datos de los que hay.
+create or replace function public.reservas_leer(p_viaje_id uuid) returns text[]
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if p_viaje_id is null then return array[]::text[]; end if;
+  return coalesce(
+    (select array_agg(r.categoria order by r.categoria)
+       from public.reservas_viaje r
+      where r.viaje_id = p_viaje_id),
+    array[]::text[]
+  );
+end;
+$$;
+
+-- Para corregir una reserva mal puesta. El botón "Reservado" es la única vía de
+-- vuelta desde la página, y sin esto un "Reservado" cargado por error no
+-- tenía arreglo.
+create or replace function public.reservas_desmarcar(p_viaje_id uuid, p_categoria text) returns text
+language plpgsql security definer set search_path = public
+as $$
+declare
+  v_categoria text := lower(trim(coalesce(p_categoria, '')));
+begin
+  if p_viaje_id is null then return null; end if;
+  delete from public.reservas_viaje where viaje_id = p_viaje_id and categoria = v_categoria;
+  return v_categoria;
+end;
+$$;
+
+-- Se saca todo de la tabla y se da solo execute sobre las funciones: así no
+-- alcanza con un grant equivocado para que alguien lea la tabla entera.
+revoke all on public.reservas_viaje from anon, authenticated;
+grant execute on function public.reservas_marcar(uuid, text, text, jsonb) to anon, authenticated;
+grant execute on function public.reservas_leer(uuid) to anon, authenticated;
+grant execute on function public.reservas_desmarcar(uuid, text) to anon, authenticated;
 
 -- Órdenes de vuelo cobradas con tarjeta a través de Duffel.
 --
