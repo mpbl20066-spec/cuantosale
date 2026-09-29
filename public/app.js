@@ -2744,6 +2744,7 @@
   function openTourDetailModal(button) {
     var modal = $('#booking-modal');
     if (!modal || !button) return;
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span><h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2><p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p><div class="tour-detail-modal__copy"><p>' + esc(button.getAttribute('data-tour-detail')) + '</p></div><p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
@@ -3223,6 +3224,7 @@
       closeBookingForm();
       return;
     }
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title">' +
       '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<div class="checkout-layout">' +
@@ -5167,6 +5169,7 @@
       + '</div>';
     var dividirEnlace = '<span class="voucher-hero__pp"><span>' + money(Math.round(totalGeneral / pax)) + ' por persona</span>'
       + '<button type="button" class="voucher-hero__split" data-split-trip>Ver cómo dividir este monto</button></span>';
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
@@ -6814,8 +6817,22 @@
     detailState.selectedOffer = Object.assign({}, completeOffer || {}, { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds });
     return detailState.selectedOffer;
   }
+  /* Un modal abierto a la vez, y cerrar uno se lleva a todos.
+
+     No es una regla arbitraria: la hoja pone
+     html:has(.booking-modal:not([hidden])) body{overflow:hidden}, asi que con
+     CUALQUIER .booking-modal sin [hidden] la pagina entera deja de scrollear.
+     Los cinco de index.html comparten esa clase, con lo cual lo que apaga el
+     scroll no es el modal que se esta viendo sino cualquiera que quede
+     abierto. Si se abren dos y se cierra el de arriba, el de abajo sigue
+     apretando el scroll sin que haya nada a la vista que lo explique. */
+  function cerrarTodosLosModales() {
+    Array.prototype.forEach.call(document.querySelectorAll('.booking-modal'), function (m) {
+      m.hidden = true; m.setAttribute('aria-hidden', 'true'); m.innerHTML = '';
+    });
+  }
   function closeBookingForm() {
-    var modal = $('#booking-modal'); modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = '';
+    cerrarTodosLosModales();
   }
   // Pinta la marca de destino elegido sobre las cards que ya estan en el DOM.
   // Se usa al volver del detalle, donde la grilla no se vuelve a renderizar.
@@ -8122,13 +8139,13 @@
     return metadata.full_name || metadata.name || (user && user.email) || 'Mi cuenta';
   }
   function closeAccountModal(id) {
-    var modal = document.getElementById(id);
-    if (modal) { modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = ''; }
+    cerrarTodosLosModales();
   }
   function openAuthModal(message) {
     var modal = $('#auth-modal');
     if (!modal) return;
     if (authUser) { openTripsModal(); return; }
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><button type="button" class="booking-close" data-close-auth aria-label="Cerrar">×</button><span class="account-kicker">CuántoSale</span><h2 id="auth-title">Guardá tus viajes</h2><p class="booking-note">Creá una cuenta para conservar presupuestos e itinerarios en la nube.</p>' + (message ? '<p class="booking-error">' + esc(message) + '</p>' : '') + '<button type="button" class="oauth-button" data-google-auth>Continuar con Google</button><div class="account-divider"><span>o con tu email</span></div><form id="auth-form"><label>Correo electrónico<input required type="email" name="email" autocomplete="email"></label><label>Contraseña<input required minlength="6" type="password" name="password" autocomplete="current-password"></label><div class="account-form-actions"><button type="submit" class="confirm-booking" data-auth-action="signin">Iniciar sesión</button><button type="button" class="account-button account-button--secondary" data-auth-action="signup">Crear cuenta</button></div><p class="account-status" data-auth-status aria-live="polite"></p></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     var first = modal.querySelector('input'); if (first) first.focus();
@@ -8138,6 +8155,7 @@
     if (!modal) return;
     await authReadyPromise;
     if (!authUser) { pendingTripSave = false; openAuthModal('Iniciá sesión para ver tus viajes.'); return; }
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="trips-title"><button type="button" class="booking-close" data-close-trips aria-label="Cerrar">×</button><span class="account-kicker">Tu cuenta</span><h2 id="trips-title">Mis viajes</h2><p class="booking-note">Itinerarios guardados por ' + esc(authDisplayName(authUser)) + '.</p><div class="saved-trips" data-saved-trips><p class="account-status">Cargando tus viajes...</p></div><button type="button" class="account-button account-button--secondary" data-signout>Cerrar sesión</button></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     loadSavedTrips(modal);
