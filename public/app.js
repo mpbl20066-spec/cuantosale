@@ -4582,8 +4582,8 @@
       { key: 'gourmet', label: 'Gourmet / Alta cocina', description: 'Experiencias culinarias destacadas.', value: dailyCosts.food.gourmet }
     ];
     var localOptions = [
-      { key: 'econ', label: 'Económico', description: 'Ómnibus y Vans locales.', value: dailyCosts.transport.eco },
-      { key: 'confort', label: 'Confort', description: 'Uber, taxis y traslados privados urbanos.', value: dailyCosts.transport.confort }
+      { key: 'econ', label: 'Económico', description: 'Ómnibus y líneas urbanas', value: dailyCosts.transport.eco },
+      { key: 'confort', label: 'Confort', description: 'Taxis y transporte privado por app', value: dailyCosts.transport.confort }
     ];
     function optionMarkup(options, kind) {
       var mode = kind === 'food' ? detailState.foodBudgetMode : detailState.localBudgetMode;
@@ -4621,7 +4621,7 @@
       var input = '<label class="daily-budget__planned"><span>Monto planeado</span><div class="daily-budget__input-wrap"><span class="daily-budget__input-symbol">' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Monto diario planeado para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span class="daily-budget__input-unit">/día</span></div></label>';
       var custom = customSelected
         ? '<div class="daily-budget__option daily-budget__option--custom is-selected" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span>' + input + '</div>'
-        : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Escribí el monto que querés gastar.</span><strong>Ingresar monto</strong></button>';
+        : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Definí tu propio presupuesto</span><strong>Ingresar monto</strong></button>';
       return presets + custom;
     }
     // El nº de columnas sale de la cantidad de opciones. Con 3 columnas y
