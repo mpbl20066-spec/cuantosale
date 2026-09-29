@@ -4857,16 +4857,19 @@
   }
   /* Un tramo del transfer en un viaje de dos paradas.
 
-     shared  — solo en un destino sin van compartida no existe.
-     amount  — lo que suma al presupuesto si se elige. El compartido ya viene
-               multiplicado por los viajeros.
-     auto    — true para el tramo entre paradas: se cobra siempre y no se elige
-               modalidad, asi que se muestra como fila y no como cards.
+     Un tramo de llegada trae shared y private, que son los dos precios que se
+     ofrecen para elegir; el compartido ya viene multiplicado por los viajeros.
+     0 en shared significa que no hay van compartida a ese destino (isla), y la
+     card no se dibuja.
+     Un tramo entre paradas trae amount, porque no hay modalidad que elegir: se
+     cobra siempre y ya esta en el total. Por eso lleva auto:true y se pinta
+     como fila y no como cards.
 
-     Devolver 0 en vez de omitir la fila cuando no aplica: el rubric de traslados
-     tiene que seguir cuadrando con lo que ve la persona. Un tramo que no se
-     muestra porque no aplica y un tramo que se muestra en 0 son dos cosas
-     distintas, y solo la primera se puede permitir el lujo de desaparecer. */
+     El multiStay se lee de state y, si no esta, de meta. El server lo manda en
+     meta.multiStay y showProposalView lo copia a detailState.multiStay con el
+     reparto de noches, asi que los dos tienen los datos; el fallback es para
+     los caminos que llaman a transferCard(detailState.meta) sin haber pasado
+     por showProposalView. */
   function tramosTransfer(state) {
     var meta = (state && state.meta) || {};
     var precios = transferPreciosDe(meta);
@@ -4882,7 +4885,7 @@
         note: precios.km ? precios.km + ' km' : ''
       });
     }
-    var ms = state && state.multiStay;
+    var ms = (state && state.multiStay) || (meta && meta.multiStay) || null;
     if (ms && ms.transfer && ms.stays && ms.stays.length === 2) {
       var entre = ms.transfer;
       // El server ya lo calculo con la misma formula (model.comboTransfer), asi

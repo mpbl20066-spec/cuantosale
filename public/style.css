@@ -1,4 +1,4 @@
-/* version: 116
+/* version: 117
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1002,6 +1002,23 @@ html:has(.booking-modal:not([hidden])) body{overflow:hidden;overscroll-behavior:
    que la seccion ya no hace. Sin esta linea, quitar los chips de horario
    dejaba un hueco sin explicar. */
 .transfer-hint{margin:14px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
+/* Un tramo del transfer. El bloque se separa con borde y no con margen porque
+   en un viaje de dos paradas hay dos tramos y sin la linea entre ellos se leian
+   como un bloque solo con un subtitulo pegado en el medio. La insignia va con
+   --cel-soft y no con --action-bg: el ferry y el transfer son informacion, no la
+   accion principal, y con el par del boton competian con las cards de modalidad
+   que estan justo debajo. */
+.transfer-leg{padding:0 0 16px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.transfer-leg:last-of-type{padding-bottom:0;margin-bottom:0;border-bottom:0}
+.transfer-leg__head{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.transfer-leg__head strong{font-size:15px;line-height:1.3;color:var(--ink);overflow-wrap:anywhere}
+.transfer-leg__badge{flex:0 0 auto;padding:3px 8px;border-radius:99px;background:var(--cel-soft);color:var(--cel);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.transfer-leg__note{color:var(--ink2);font-size:12.5px}
+/* El tramo que no es eleccion. El monto va en <b> y no suelto porque es la unica
+   cifra de la fila: sin esfuerzo, es el dato. */
+.transfer-leg__auto{margin:0;color:var(--ink2);font-size:13px;line-height:1.5}
+.transfer-leg__auto b{color:var(--ink)}
+@media (max-width:560px){.transfer-leg__head{gap:6px 8px}}
 /* Los chips de horario de recogida (.transfer-pickup*) se fueron con la funcion
    que los justificaba: la app derivaba una hora de la llegada del vuelo y
    proponia "1 hora despues", pero el transfer no tiene hora hasta que el
