@@ -23,7 +23,7 @@
   bue: { name: 'Buenos Aires', transport: { eco: 18, confort: 38 }, food: { casual: 30, moderado: 58, gourmet: 100 } },
   bho: { name: 'Belo Horizonte', transport: { eco: 14, confort: 28 }, food: { casual: 22, moderado: 42, gourmet: 75 } },
   ssa: { name: 'Salvador de Bahía', transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
-  for: { name: 'Fortaleza / Jericoacoara', transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
+  for: { name: 'Fortaleza', transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
   nat: { name: 'Natal', transport: { eco: 15, confort: 32 }, food: { casual: 26, moderado: 48, gourmet: 80 } },
   mcz: { name: 'Maceió', transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 80 } },
   rec: { name: 'Recife', transport: { eco: 14, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 82 } },

@@ -39,7 +39,7 @@
   pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 20, privado: 31 },
   trancoso: { name: "Trancoso / Arraial d’Ajuda", iata: "SSA", modo: "car", km: 163, compartido: 30, privado: 113 },
   ssa: { name: "Salvador de Bahía", iata: "SSA", modo: "car", km: 24, compartido: 20, privado: 30, appRideUsd: 11 },
-  for: { name: "Fortaleza / Jericoacoara", iata: "FOR", modo: "car", km: 9, compartido: 20, privado: 30 },
+  for: { name: "Fortaleza", iata: "FOR", modo: "car", km: 9, compartido: 20, privado: 30 },
   jericoacoara: { name: "Jericoacoara", iata: "FOR", modo: "car", km: 295, compartido: 35, privado: 195 },
   morro: { name: "Morro de São Paulo", iata: "SSA", modo: "car", km: 242, compartido: 35, privado: 162 },
   portoseguro: { name: "Porto Seguro", iata: "SSA", modo: "car", km: 699, compartido: 60, privado: 445 },

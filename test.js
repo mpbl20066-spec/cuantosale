@@ -823,7 +823,7 @@ function haversineKm(a, b) {
       assert.strictEqual(segunda[0].name, 'Hotel Que Se Resolvio');
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
-  await t('un destino con dos ciudades prueba cada parte del nombre', async function () {
+  await t('el nombre sin barra va en una sola consulta y resuelve', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
     const consultas = [];
@@ -832,9 +832,12 @@ function haversineKm(a, b) {
       if (parsed.pathname.endsWith('/searchDestination')) {
         const q = parsed.searchParams.get('query');
         consultas.push(q);
-        // Booking no entiende "Fortaleza / Jericoacoara": con la barra entera no
-        // devuelve nada, y el destino caía al respaldo sin hoteles reales.
-        if (q === 'Fortaleza / Jericoacoara') return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+        // El nombre de 'for' ya es solo "Fortaleza", asi que la barra se fue de
+        // este destino. El caso que se prueba ahora es el de trancoso, que sigue
+        // siendo "Arraial d'Ajuda / Trancoso": Booking no entiende la barra y
+        // por eso hotelRecommendations() la parte y prueba cada parte por
+        // separado. Con el nombre viejo, este test pasaba probando un nombre que
+        // ya no existe; ahora prueba el que queda.
         if (q === 'Fortaleza') return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-9', search_type: 'city', name: 'Fortaleza' }] }; } };
         return { ok: true, status: 200, json: async function () { return { data: [] }; } };
       }
@@ -842,10 +845,10 @@ function haversineKm(a, b) {
       return { ok: true, status: 200, json: async function () { return { data: [] }; } };
     };
     try {
-      const list = await app.hotelRecommendations('for', 'Fortaleza / Jericoacoara', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
-      // No se gasta una llamada en el nombre con la barra: Booking siempre
-      // devuelve vacío para "Fortaleza / Jericoacoara", así que se prueba cada
-      // ciudad por separado y se corta en la primera que resuelva.
+      const list = await app.hotelRecommendations('for', 'Fortaleza', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      // El nombre ya no tiene barra, asi que va una sola consulta y resuelve al
+      // primer intento. La particion por "/" sigue existiendo para los otros
+      // destinos con dos ciudades (trancoso), no para este.
       assert.deepStrictEqual(consultas, ['Fortaleza']);
       assert.strictEqual(list[0].source, 'booking');
       assert.strictEqual(list[0].name, 'Hotel de Fortaleza');

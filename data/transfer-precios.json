@@ -377,7 +377,7 @@
       "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 24 km de OSRM da US$ 20 y US$ 30."
     },
     "for": {
-      "nombre": "Fortaleza / Jericoacoara",
+      "nombre": "Fortaleza",
       "iata": "FOR",
       "modo": "car",
       "km": 9,
