@@ -4114,7 +4114,13 @@
        sombrero: se dibuja arriba del renglon segun la fuente, no se centra, y
        en el peso que traia no se leia como flecha. El SVG gira con la clase. */
     var chevron = '<svg class="trip-summary__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-    summary.innerHTML = '<div class="trip-summary__inner">' +
+    /* El panel tiene su propio scroll (overflow:auto). Reemplazar el innerHTML
+       lo devuelve arriba, y como se repinta en cada recalculo --y hay recalculos
+       mientras la persona baja-- la vista "saltaba" al inicio. Se guarda el
+       scroll antes y se restaura despues; y si el markup es identico al de la
+       pasada anterior no se toca el DOM. */
+    var _scrollPrevio = summary.scrollTop;
+    var _markup = '<div class="trip-summary__inner">' +
       '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true" aria-controls="trip-summary-details"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong>' + chevron + '</button>' +
       /* El wrapper intermedio es lo que hace posible animar el cierre. Sin el,
        `display:none` en la fila cerrada y el panel salta de alto sin transicion. */
@@ -4126,6 +4132,14 @@
       '<button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div>' +
       '</div></div>' +
       '</div>';
+    if (summary.__markup !== _markup || !summary.firstElementChild) {
+      summary.innerHTML = _markup;
+      summary.__markup = _markup;
+      summary.scrollTop = _scrollPrevio;
+      // Una vez mas en el frame siguiente: la altura del panel se anima y el
+      // primer intento puede toparse con un contenido todavia mas corto.
+      if (_scrollPrevio && typeof requestAnimationFrame === 'function') requestAnimationFrame(function () { summary.scrollTop = _scrollPrevio; });
+    }
     if (estabaMin) summary.classList.add('minimized');
     summary.hidden = false;
     syncTripSummaryViewport();
