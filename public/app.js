@@ -6155,7 +6155,7 @@
   function busServicesMarkup(meta) {
     var servicios = typeof CS_BUS_SERVICES !== 'undefined' ? CS_BUS_SERVICES : null;
     var destKey = meta && meta.dest && meta.dest.key;
-    if (!servicios || !destKey || originCityName(meta.origin || S.origin) !== 'Montevideo') return '';
+    if (!servicios || !destKey || String(meta.origin || S.origin || 'MVD').toUpperCase() !== 'MVD') return '';
     var tasaUyu = tasaDe('UYU');
     function uyu(n) { return '$U ' + Number(n).toLocaleString('es-UY'); }
     function precio(n) {
