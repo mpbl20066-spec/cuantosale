@@ -269,5 +269,80 @@ prueba('el filtro de tipo queda definido antes de usarlo', function () {
   }
 });
 
+/* El filtro de disponibilidad.
+
+   Es un filtro distinto del de tipo, y la confusion entre los dos es el error
+   caro: el de tipo se resuelve en el server (cambiarlo vuelve a pedir hoteles) y
+   el de disponibilidad se resuelve en el cliente (filtrar la lista que ya está
+   en memoria). Si alguno de los dos se confunde con el otro, la persona elige
+   "Solo con disponibilidad" y termina viendo un 400 del server, o cambia de
+   categoría y pierde el filtro sin que nadie lo diga. */
+prueba('el filtro de disponibilidad marca el estado actual y ofrece las dos opciones', function () {
+  const depsDisp = 'var hotelSoloReservables = false;\n' +
+    'var HOTEL_FILTRO_DISPONIBILIDAD = ' + JSON.stringify([
+      { value: 'todos', label: 'Todos' },
+      { value: 'reservables', label: 'Solo con disponibilidad' }
+    ]) + ';\n' +
+    'function esc(s) { return String(s == null ? "" : s); }\n';
+  const src = extraer('hotelAvailabilityFilterMarkup');
+  const hacer = (activo) => new Function('hotelSoloReservables', depsDisp + src + '\nreturn hotelAvailabilityFilterMarkup();')(activo);
+  for (const activo of [true, false]) {
+    const markup = hacer(activo);
+    if (!/data-hotel-availability/.test(markup)) throw new Error('el filtro no se pinta');
+    const marcado = (markup.match(/<option value="([^"]+)" selected>/) || [])[1];
+    const esperado = activo ? 'reservables' : 'todos';
+    igual(marcado, esperado, 'con el filtro en ' + esperado);
+    const opciones = [...markup.matchAll(/<option value="([^"]+)"/g)].map(m => m[1]);
+    igual(opciones.join('/'), 'todos/reservables', 'las dos opciones siempre, con o sin filtro puesto');
+  }
+});
+
+prueba('el filtro de disponibilidad se aplica DESPUES del de tipo', function () {
+  // El orden importa y no es cosmético. Filtrando disponibilidad primero, un
+  // estimado de otra categoría se cuenta como "hay algo" y el filtro de tipo
+  // queda sin nada que ofrecer, con un selector que se ve vacío sin explicación.
+  const cuerpoHotelOptions = extraer('hotelOptions');
+  const iTipo = cuerpoHotelOptions.indexOf('hotelesQuePasanElTipo(');
+  const iDisponibilidad = cuerpoHotelOptions.indexOf('item.source === \'booking\'');
+  if (iTipo < 0) throw new Error('hotelOptions no filtra por tipo');
+  if (iDisponibilidad < 0) throw new Error('hotelOptions no filtra por disponibilidad');
+  if (iTipo > iDisponibilidad) {
+    throw new Error('el filtro de disponibilidad va antes del de tipo: puede tapar los hoteles de la categoría que se está eligiendo');
+  }
+  // Y el aviso de lista vacía tiene que distinguir "no hay en esta categoría" de
+  // "hay pero ninguno con disponibilidad": son problemas opuestos y con el mismo
+  // texto la persona no sabe si bajar el nivel de alojamiento sirve de algo.
+  if (!/ocultosPorDisponibilidad/.test(cuerpoHotelOptions) &&
+      !/hotelSoloReservables && hotelCatalog\.length && !conDisponibilidad\.length/.test(cuerpoHotelOptions)) {
+    throw new Error('no hay un estado vacío propio para cuando el filtro de disponibilidad vacía la lista');
+  }
+});
+
+prueba('el filtro de disponibilidad no vuelve a pedir los hoteles', function () {
+  // Si el handler del <select> del filtro pasara por changeHotelType() o por
+  // loadHotelRecommendations(), cambiarlo costaría una llamada a la API por cada
+  // cambio, y además tiraría la lista que se iba a filtrar. Se comprueba que
+  // changeHotelAvailability() no llame a ninguna de las dos.
+  const src = extraer('changeHotelAvailability');
+  if (!src) throw new Error('no esta changeHotelAvailability() en app.js');
+  if (/loadHotelRecommendations\(/.test(src)) throw new Error('cambiar el filtro de disponibilidad vuelve a pedir los hoteles');
+  if (/changeHotelType\(/.test(src)) throw new Error('cambiar el filtro de disponibilidad pasa por el filtro de tipo');
+  if (!/hotelOptions\(/.test(src)) throw new Error('cambiar el filtro de disponibilidad no repinta la lista');
+  if (!/hotelSoloReservables = nuevo/.test(src)) throw new Error('el filtro no guarda su estado');
+});
+
+prueba('el hotel elegido sobrevive al filtro, o se elige el primero que queda', function () {
+  // El peor estado posible de un filtro sobre una lista de radios: se oculta la
+  // ficha que estaba marcada, el radio desaparece de la pantalla y el total del
+  // presupuesto sigue cobrando ese hotel sin que se vea ninguna eleccion.
+  const src = extraer('changeHotelAvailability');
+  if (!/primero\.checked = true/.test(src)) {
+    throw new Error('si el hotel marcado desaparece, hay que marcar el primero de los que quedan');
+  }
+  if (!/\[data-hotel-total\]:checked/.test(src)) {
+    throw new Error('no mira si ya quedo algo marcado antes de elegir por la persona');
+  }
+});
+
 console.log(fallos ? '\n' + fallos + ' FALLAS' : '\ntodo bien');
 process.exit(fallos ? 1 : 0);

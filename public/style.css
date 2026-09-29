@@ -1,4 +1,4 @@
-/* version: 112
+/* version: 113
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -622,6 +622,18 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    titulo es el ancho de la seccion, no el de la ventana. El bloque de detalle va
    en una columna de 760px dentro de una pagina que puede ser mas angosta. */
 @container hoteles (max-width:600px){.hotel-type-filter{flex:1 1 100%}}
+/* El filtro de disponibilidad va al lado del de tipo y es más angosto, porque
+   sus dos opciones son cortas ("Todos" y "Solo con disponibilidad") y no
+   necesita el ancho de un tipo de hotel, que trae nombres largos. El ancho se
+   reparte con flex-basis y no con un ancho fijo: los dos filtros juntos tienen
+   que caber al lado del título, y con 264px fijos no entraban en 600px de
+   sección. Con basis, el de disponibilidad cede primero.
+
+   El contenedor se llama igual y se consulta el mismo `hoteles`, así que el
+   breakpoint es el de siempre: si el de tipo no entra, este tampoco. */
+.hotel-type-filter--availability{flex:0 1 210px;min-width:0}
+@container hoteles (max-width:600px){.hotel-type-filter--availability{flex:1 1 100%}}
+.hotel-type-filter--availability select{padding-right:52px}
 /* El radio ya no se ve, pero no se saca del DOM: sigue siendo el control que
    el teclado tabula, el que hace que un clic en cualquier punto de la ficha
    cambie el hotel y el que :has(:checked) mira para pintar el marco, el fondo y
@@ -1102,7 +1114,13 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    mas abajo. */
 .local-tour{position:relative;display:grid;grid-template-columns:minmax(140px,184px) minmax(0,1fr);min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
-.local-tour:has([data-tour-choice]:checked){border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
+/* Elegido se marca SOLO con el marco. El token --card-sel-bg pinta el interior
+   de la ficha con el ambar de la seleccion, y en una card de experiencia esa
+   mancha se come la foto (que queda al mismo tono que el texto) y hace que dos
+   elegidas de seguidas se lean como un bloque. Hotel, traslados y costos
+   diarios si usan el fondo: son bloques cortos, de una linea, donde el relleno
+   ayuda a ver el estado de un vistazo. Aca el marco alcanza. */
+.local-tour:has([data-tour-choice]:checked){border:2px solid var(--card-sel-border);background:var(--card-bg);box-shadow:var(--card-sel-glow)}
 /* La tarjeta completa es la zona sensible. El checkbox se estira con
    position:absolute sobre el article: el clic en cualquier punto lo activa y
    el teclado conserva un único control que tabula (Enter lo agrega el JS). */
@@ -1165,16 +1183,13 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    una seccion de 240px el boton de reservar se salia 21px. cediendo el ancho,
    los dos botones bajan de linea en vez de desbordar. */
 .local-tour__actions{display:flex;flex:0 1 auto;min-width:0;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:7px}
-/* Los dos botones quedan por encima del checkbox estirado (z-index), igual que
-   el de detalle antes: si no, el clic los atraviesa y cambia la seleccion en
-   vez de hacer lo que dicen. */
-.local-tour__info,.local-tour__book{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 13px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:800;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
+/* El boton de detalle queda por encima del checkbox estirado (z-index): si no,
+   el clic lo atraviesa y cambia la seleccion en vez de abrir los detalles. */
+.local-tour__info{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 13px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:800;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
 .local-tour__info{border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 .local-tour__info:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
 .local-tour__info-ico{flex:0 0 16px;width:16px;height:16px;color:var(--cel)}
-.local-tour__book{border:0;background:var(--action-bg);color:var(--action-ink);text-decoration:none}
-.local-tour__book:hover{color:var(--action-ink);filter:brightness(1.12)}
-.local-tour__info:focus-visible,.local-tour__book:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.local-tour__info:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .local-tours:not(.local-tours--expanded) .local-tour:nth-child(n+4){display:none}
 .local-tours__more{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:0;border:0;background:transparent;color:var(--cel);font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .local-tours__more:hover{color:var(--ink)}

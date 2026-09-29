@@ -155,7 +155,7 @@ La card es horizontal, con la foto a la izquierda y la ficha a la derecha: títu
 
 El botón se habilita solo cuando hay algo para reservar, y su etiqueta dice qué: "Reservar 2 actividades", "Reservar transfer", "Reservar actividades y transfer". Con nada elegido sale apagado y dice "Elegí algo para reservar", que es mejor que un botón encendido que no abre nada. El total que muestra al lado es el de **lo que se reserva**, no el del viaje: son dos cifras distintas y confundirlas sería el error más caro de la pantalla.
 
-La tarjeta de cada actividad conserva un atajo que dice "Agregar": agrega esa actividad y abre el checkout. Es distinto del botón del panel a propósito —uno reserva "esta" actividad, el otro manda el viaje entero— y mantiene la coherencia de que nunca se confirma algo que no suma al total.
+La tarjeta de cada actividad se elige entera: el checkbox va estirado sobre la ficha, así que un clic en cualquier punto la agrega al viaje y el marco ámbar dice que ya está. No hay botón "Agregar" por tarjeta —agregaba y abría el checkout, o sea que era otro camino al mismo pedido y obligaba a recordar en qué sección estabas—. El pedido sale del botón de "Mi Viaje".
 
 Reservar abre un checkout de tres pasos dentro de `#booking-modal`, con el mismo reparto de las agencias de viaje: un resumen del viaje fijo a la izquierda (`checkoutAside()`) y el paso a la derecha.
 
