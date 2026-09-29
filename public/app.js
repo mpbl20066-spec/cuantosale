@@ -3896,9 +3896,15 @@
     var budget = getBudgetBreakdown(detailState);
     var total = budget.total;
     var entries = budget.entries;
-    var flightLabel = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || 'Vuelo no seleccionado';
+    var flightDetalle = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || '';
     var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
     var hotelName = findSelectedHotelLabel();
+    /* El nombre del hotel va al dato, pero solo si es un nombre. "Hotel
+       seleccionado" y "Hotel recomendado" no son nombres: son los dos finales
+       que devolvía el finder cuando todavía no hay nada elegido, y como dato
+       hacían que la fila dijera Hotel → Hotel seleccionado. Ahora esa fila dice
+       Hotel → Sin elegir, y el estado alcanza. */
+    var hotelDetalle = (detailState.selectedHotel === false || !hotelName || hotelName === 'Hotel seleccionado' || hotelName === 'Hotel recomendado' || hotelName === 'Sin alojamiento') ? '' : esc(hotelName);
     // El TOTAL de los dos tramos, no solo el de llegada: la fila del resumen tiene
     // que mostrar lo mismo que el total de arriba, y con los dos tramos elegidos
     // el de llegada solo es la mitad.
@@ -3919,7 +3925,12 @@
       : tLlegada && tVuelta && tLlegada !== tVuelta
         ? 'Ida ' + nombreTipo(tLlegada) + ' · vuelta ' + nombreTipo(tVuelta)
         : nombreTipo(tLlegada || tVuelta);
-    var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
+    /* Cuantas, no si estan elegidas. "3 actividades seleccionadas" repetia en
+       cada fila lo que el estado ya dice una vez, y se comia 27 caracteres del
+       ancho. El dato es el numero; el verbo, no. */
+    var toursDetalle = detailState.selectedTours && detailState.selectedTours.length
+      ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad' : ' actividades')
+      : '';
     var foodPerDay = Number(detailState.foodPerDay) || 0;
     var localPerDay = Number(detailState.localPerDay) || 0;
     /* El transporte cambia segun el modo, y cada modo tiene SU fila. Antes solo
@@ -3931,18 +3942,35 @@
        entender que el primero estaba incluido en el total de arriba.
 
        En auto tampoco va la fila de vuelo: no hay vuelo, hay auto. */
+    /* Cada fila del resumen dice lo mismo, en el mismo orden: un ESTADO y un
+       DATO. Antes cada rubro traía su propia frase y ninguna se parecía a la de al
+       lado — "Vuelo no seleccionado" en una, "Hotel recomendado" en otra, "Sin
+       sumar" en una tercera, y el transfer sin texto cuando venía bien. Cuatro
+       maneras de decir si un rubro estaba en la cuenta, y la única que se leía
+       distinto era la que estaba mal.
+
+       El estado sale de un vocabulario cerrado de tres y está SIEMPRE. El dato es
+       lo específico del rubro (la airline, el hotel, los $/día, la modalidad) y se
+       puede truncar sin perder sentido, porque lo que no puede faltar es el
+       estado. "Excluido" y "sin elegir" son dos cosas distintas y se dicen
+       distinto: una es una decisión de la persona y la otra es que todavía no
+       llegó. */
+    var ESTADO = { ok: 'Sumado', vacio: 'Sin elegir', fuera: 'No incluido' };
     var transporteRow = detailState.transportMode === 'bus'
-      ? { cat: 'bus', label: 'Bus', meta: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(Number(detailState.parts && detailState.parts.bus) || 0), color: getCategoryColor('bus') }
+      ? { cat: 'bus', label: 'Bus', detalle: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(Number(detailState.parts && detailState.parts.bus) || 0), color: getCategoryColor('bus') }
       : detailState.transportMode === 'auto'
-        ? { cat: 'auto', label: 'Auto', meta: roadtripMeta(), value: money(Number(detailState.auto) || 0), color: getCategoryColor('auto') }
-        : { cat: 'pasajes', label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') };
+        ? { cat: 'auto', label: 'Auto', detalle: esc(roadtripMeta()), value: money(Number(detailState.auto) || 0), color: getCategoryColor('auto') }
+        /* El vuelo sin elegir ya no dice "Vuelo no seleccionado" en el dato: eso
+           es el estado, y repetirlo dos veces en la misma fila era el ruido que
+           se vino a sacar. El dato queda para el nombre de la airline. */
+        : { cat: 'pasajes', label: 'Vuelo', detalle: esc(flightDetalle), value: money(flightPrice), color: getCategoryColor('pasajes') };
     var summaryItems = [
       transporteRow,
-      ...(detailState.transportMode === 'flight' ? [{ cat: 'traslados', label: 'Transfer', meta: esc(transferMeta), value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') }] : []),
-      { cat: 'alojamiento', label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
-      { cat: 'comidas', label: 'Comida', meta: detailState.foodBudgetMode === 'none' ? 'Sin sumar' : (foodPerDay ? money(foodPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
-      { cat: 'local', label: 'Transporte local', meta: detailState.localBudgetMode === 'none' ? 'Sin sumar' : (localPerDay ? money(localPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
-      { cat: 'tours', label: 'Tours', meta: toursLabel, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
+      ...(detailState.transportMode === 'flight' ? [{ cat: 'traslados', label: 'Transfer', excluido: !transferIncluded, detalle: transferIncluded ? esc(transferMeta) : '', value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') }] : []),
+      { cat: 'alojamiento', label: 'Hotel', excluido: detailState.selectedHotel === false, detalle: hotelDetalle, value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
+      { cat: 'comidas', label: 'Comida', excluido: detailState.foodBudgetMode === 'none', detalle: detailState.foodBudgetMode === 'none' ? '' : (foodPerDay ? money(foodPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
+      { cat: 'local', label: 'Transporte local', excluido: detailState.localBudgetMode === 'none', detalle: detailState.localBudgetMode === 'none' ? '' : (localPerDay ? money(localPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
+      { cat: 'tours', label: 'Tours', detalle: toursDetalle, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
     ];
     // Mismo criterio que la barra: de mayor a menor monto. Los rubros en cero
     // quedan al final, que es donde el usuario tiene menos que mirar.
@@ -3957,16 +3985,39 @@
         : (Number(detailState.toursTotal) || 0);
     });
     summaryItems.sort(function (a, b) { return (Number(b.n) || 0) - (Number(a.n) || 0); });
-    var segments = entries.map(function (entry) {
-      return '<span style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
-    }).join('');
+    /* El estado sale del monto, con una sola excepcion: los rubros que la persona
+       apago a proposito (hotel, comida, transporte local, transfer) se marcan
+       "No incluido" aunque valgan 0, porque 0 tambien puede ser "todavia no lo
+       elegiste" y son dos pedidos distintos. */
+    summaryItems.forEach(function (item) {
+      item.estado = item.excluido ? ESTADO.fuera : (item.n > 0 ? ESTADO.ok : ESTADO.vacio);
+      item.estadoClave = item.excluido ? 'fuera' : (item.n > 0 ? 'ok' : 'vacio');
+    });
+    /* La barra es una sola, continua, con degradé.
+
+       Antes eran N segmentos con un color por rubro (var(--c1), --c5, --c3...), con
+       un borde de 2px entre ellos. En un panel de 360px quedaban 4 o 5 franjas de
+       pastel del mismo tono, y ninguna se leia: el alto de cada una era el mismo
+       dato que ya estaba en la fila de abajo, con su icono y su color. La barra
+       estaba repitiendo el desglose con menos informacion y mas ruido.
+
+       Ahora es una unica barra con el avance, en degradé de la marca. Deja de
+       intentar mostrar la composicion —para eso estan las filas— y pasa a mostrar
+       una sola cosa: cuanto de la cotizacion esta avanzado. El `title` y el
+       aria-label siguen llevando el desglose para quien lo necesite. */
+    var _cuantificado = entries.filter(function (e) { return Number(e.n) > 0; }).reduce(function (s, e) { return s + Number(e.n); }, 0);
+    var _avance = Math.min(100, Math.round((_cuantificado / Math.max(1, Number(total) || 1)) * 100));
+    var segments = '<div class="trip-summary__fill" style="width:' + _avance + '%" role="img" aria-label="Avance: ' + _avance + '% del total cotizado" title="Avance: ' + _avance + '% del total cotizado"></div>';
     var itemsHtml = summaryItems.map(function (item) {
       // Sólo el ícono: el cuadrado de color repetía la misma información y
       // ocupaba ancho al lado del texto. El botón entero lleva a la sección
       // donde ese rubro se configura, igual que las filas del desglose.
       return '<button type="button" class="trip-summary__item' + (item.n ? '' : ' is-zero') + '" data-jump-category="' + item.cat + '" data-jump-label="' + esc(item.label) + '" aria-label="Ir a la sección de ' + esc(item.label) + '">'
         + categoryIcon(item.cat, item.color)
-        + '<div class="trip-summary__meta"><b>' + item.label + '</b><span>' + item.meta + '</span></div>'
+        + '<div class="trip-summary__meta"><b>' + item.label + '</b>'
+        + '<span class="trip-summary__sub"><span class="trip-summary__state is-' + item.estadoClave + '">' + item.estado + '</span>'
+        + (item.detalle ? '<span class="trip-summary__detail">' + item.detalle + '</span>' : '')
+        + '</span></div>'
         + '<em>' + item.value + '</em>'
         + '</button>';
     }).join('');
@@ -3981,14 +4032,28 @@
 
        Esta card queda como lo que es: el resumen del presupuesto, con "Ver mi
        presupuesto" para ver el detalle y "Guardar viaje". */
+    /* El panel se repinta entero en cada recalculo (cambia un precio) y con el
+       innerHTML se va la clase `minimized`. Sin guardarla, la persona que cerro
+       el panel para ver la pagina lo ve abrirse solo cada vez que cambia un
+       numero, y el colapsar deja de servir. */
+    var estabaMin = summary.classList.contains('minimized');
+    /* Chevron de verdad y no el caracter ^ de antes. Un ^ es una punta de
+       sombrero: se dibuja arriba del renglon segun la fuente, no se centra, y
+       en el peso que traia no se leia como flecha. El SVG gira con la clase. */
+    var chevron = '<svg class="trip-summary__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     summary.innerHTML = '<div class="trip-summary__inner">' +
-      '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong><span class="trip-summary__toggle-icon" aria-hidden="true">⌃</span></button>' +
-      '<div class="trip-summary__details"><div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
+      '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true" aria-controls="trip-summary-details"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong>' + chevron + '</button>' +
+      /* El wrapper intermedio es lo que hace posible animar el cierre. Sin el,
+       `display:none` en la fila cerrada y el panel salta de alto sin transicion. */
+      '<div class="trip-summary__details" id="trip-summary-details"><div class="trip-summary__details-inner">'
+      + '<div class="trip-summary__bar" aria-label="Avance de la cotización">' + segments + '</div>' +
       '<div class="trip-summary__items">' + itemsHtml + '</div>' +
       '<div class="trip-summary__actions">' +
       '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
-      '<button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div></div>' +
+      '<button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div>' +
+      '</div></div>' +
       '</div>';
+    if (estabaMin) summary.classList.add('minimized');
     summary.hidden = false;
     syncTripSummaryViewport();
     // syncBudgetJumpTargets() NO va acá: es un querySelectorAll sobre todo el
@@ -4006,11 +4071,15 @@
     // coincidir con el del layout.
     var isMobile = window.innerWidth <= 900;
     var wasMobile = summary.getAttribute('data-mobile-viewport') === 'true';
+    /* Solo al ENTRAR a mobile se colapsa. El `if (!isMobile) remove` de antes
+       era peor que inutile: con el celu en vertical, la persona cerraba el
+       panel, lo giraba, y la otra rama lo re-abria sola. Y el aria-expanded de
+       abajo decia "expandido" porque el || con !isMobile ganaba siempre en
+       desktop, sobre un panel que despues se cerraba a mano. */
     if (isMobile && !wasMobile) summary.classList.add('minimized');
-    if (!isMobile) summary.classList.remove('minimized');
     summary.setAttribute('data-mobile-viewport', String(isMobile));
     var toggle = summary.querySelector('[data-trip-summary-toggle]');
-    if (toggle) toggle.setAttribute('aria-expanded', String(!isMobile || !summary.classList.contains('minimized')));
+    if (toggle) toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
   }
   /* ---------- tarjeta para Instagram Stories ---------- */
   var htmlToImagePromise = null;
@@ -5359,7 +5428,13 @@
           ? money(card.amount) + '<span class="transfer-choice__unit"> por persona</span>' +
             (paxT > 1 ? '<span class="transfer-choice__total"> · ' + money(card.amount * paxT) + ' los ' + paxT + '</span>' : '')
           : money(card.amount) + '<span class="transfer-choice__unit"> por vehículo</span>';
-        return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-leg="' + leg + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + precio + '</b></button>';
+        return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-leg="' + leg + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '">' +
+          /* Icono y titulo en una fila propia. El <strong> estaba dentro de
+             __body, que con la card en columna hacia que el titulo quedara en
+             una banda y el icono en otra. */
+          '<span class="transfer-choice__head">' + transferArt(card.key) + '<strong>' + card.title + '</strong></span>' +
+          '<span class="transfer-choice__body"><small>' + card.desc + '</small></span>' +
+          '<b class="transfer-choice__price">' + precio + '</b></button>';
       }).join('');
     }
     /* Sin boton de reservar aca. Elegir la modalidad suma al presupuesto —igual
@@ -7790,12 +7865,10 @@
     $('#trip-summary').addEventListener('click', function (e) {
       var toggle = e.target.closest('[data-trip-summary-toggle]');
       if (toggle) {
-        if (window.innerWidth <= 768) {
-          e.preventDefault();
-          var summary = $('#trip-summary');
-          summary.classList.toggle('minimized');
-          toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
-        }
+        e.preventDefault();
+        var summary = $('#trip-summary');
+        summary.classList.toggle('minimized');
+        toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
         return;
       }
       if (e.target.closest('[data-save-trip]')) { e.preventDefault(); saveCurrentTrip(); }

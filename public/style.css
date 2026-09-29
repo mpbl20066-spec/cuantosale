@@ -1,4 +1,4 @@
-/* version: 130
+/* version: 131
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -984,7 +984,30 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    compositor a difuminar el fondo en cada repintado de un elemento position:
    fixed que se repinta en cada recálculo del total. Costo de GPU en un Android
    de gama media, a cambio de nada visible. */
-.trip-summary{position:fixed;right:20px;bottom:20px;z-index:90;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--ink);box-shadow:0 18px 38px rgba(16,35,62,.18);padding:12px 12px 10px}.trip-summary__inner{display:grid;gap:10px}.trip-summary__head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.trip-summary__eyebrow{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:var(--cel-soft);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.trip-summary__head strong{font-family:var(--fh);font-size:48px;line-height:.86;letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__bar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line);gap:2px}.trip-summary__bar span{display:block;height:100%;min-width:3px}.trip-summary__items{display:grid;gap:4px}.trip-summary__item{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}.trip-summary__item em{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__ico{flex:0 0 20px;width:20px;height:20px;display:block;color:var(--c1);stroke-width:1.85}.trip-summary__meta{flex:1;display:grid;gap:1px;min-width:0}.trip-summary__meta b{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em}.trip-summary__meta span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trip-summary__item.is-zero{opacity:.45}.trip-summary__item em{font-style:normal;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap}.trip-summary__cta{width:100%;height:48px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer}.trip-summary__cta:hover{filter:brightness(1.05)}.trip-summary[hidden]{display:none}
+.trip-summary{position:fixed;right:20px;bottom:20px;z-index:90;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--ink);box-shadow:0 18px 38px rgba(16,35,62,.18);padding:12px 12px 10px}.trip-summary__inner{display:grid;gap:10px}.trip-summary__head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.trip-summary__eyebrow{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:var(--cel-soft);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}.trip-summary__head strong{font-family:var(--fh);font-size:48px;line-height:.86;letter-spacing:-.035em;color:var(--ink);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__bar{display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line);gap:2px}.trip-summary__bar span{display:block;height:100%;min-width:3px}
+/* Una sola barra continua, en degradé de la marca. Antes eran N segmentos de
+   pastel (uno por rubro) con un borde de 2px entre ellos: en 360px quedaban cuatro
+   o cinco franjas del mismo tono que no se leian, repitiendo con menos
+   informacion el desglose que ya estaba en las filas de abajo. Ahora la barra
+   muestra una sola cosa, el avance. */
+.trip-summary__fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--cel) 0%,color-mix(in srgb,var(--cel) 62%,var(--surface)) 100%);transition:width .3s ease}/* Sin gap en la lista: el separador de cada fila es su border-top, y con
+   gap:4px esos 4px caian TODOS arriba de la linea y ninguno abajo, que es
+   una separacion asimetrica. Con gap:0 el aire de arriba es el padding
+   inferior de la fila anterior y el de abajo es el padding superior de esta:
+   11px de los dos lados. */
+.trip-summary__items{display:grid;gap:0}.trip-summary__item{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line);font-size:13px}
+.trip-summary__item:first-child{border-top:0;padding-top:2px}.trip-summary__item em{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}.trip-summary__ico{flex:0 0 20px;width:20px;height:20px;display:block;color:var(--c1);stroke-width:1.85}.trip-summary__meta{flex:1;display:grid;gap:1px;min-width:0}.trip-summary__meta b{font-size:14px;font-weight:700;line-height:1.25;letter-spacing:-.01em}/* La segunda linea de cada fila tiene SIEMPRE la misma forma: un estado en
+   pastilla y, al lado, el dato especifico del rubro. El estado nunca falta
+   y el dato se puede truncar, que es el reparto correcto: lo que no puede
+   perderse por ancho es si el rubro esta en la cuenta, no como se llama el
+   hotel. La misma altura de linea y el mismo gris en las seis filas. */
+.trip-summary__sub{display:flex;align-items:center;gap:6px;min-width:0;line-height:1.3}
+.trip-summary__state{flex:0 0 auto;padding:2px 6px;border-radius:6px;background:var(--cel-soft);color:var(--ink2);font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+/* "No incluido" es una decision de la persona, no un dato pendiente: por eso
+   va en hueco, sin el celeste de lo que si esta sumando. */
+.trip-summary__state.is-fuera{background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.trip-summary__state.is-vacio{background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+.trip-summary__detail{flex:0 1 auto;min-width:0;color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.trip-summary__item.is-zero{opacity:.45}.trip-summary__item em{font-style:normal;font-weight:700;font-size:14px;color:var(--ink);white-space:nowrap}.trip-summary__cta{width:100%;height:48px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer}.trip-summary__cta:hover{filter:brightness(1.05)}.trip-summary[hidden]{display:none}
 .daily-budget{display:grid;gap:16px}.daily-budget__group{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}.daily-budget__header{display:flex;align-items:end;justify-content:space-between;gap:10px}.daily-budget__header span{font-weight:800;font-size:17px}.daily-budget__header small{color:var(--ink2);font-size:11px}/* El nº de columnas lo elige el JS segun cuantas opciones haya (--cols-2 /
    --cols-3) para que la reticula siempre quede cuadrada: con 3 columnas fijos y
    4 cajas, la cuarta caia sola en una fila. grid-auto-rows:1fr iguala el alto de
@@ -1106,7 +1129,29 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    (12) da 6, y 6 se sigue leyendo como recto. */
 .daily-budget__planned .daily-budget__input-wrap{border-radius:10px}
 .daily-budget__planned .daily-budget__input-wrap:focus-within{border-color:var(--cel);box-shadow:0 0 0 3px color-mix(in srgb,var(--cel) 18%,transparent)}.daily-budget__planned input{font-weight:700}.daily-budget__planned input::placeholder{color:var(--ink2);font-size:13px;font-weight:400;opacity:.8}
-.transfer-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.transfer-choice{position:relative;display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}.transfer-choice:hover{transform:translateY(-2px);border-color:var(--ink2)}.transfer-choice__icon{display:grid;flex:0 0 auto;width:44px;height:44px;place-items:center;border-radius:12px;background:var(--cel-soft);font-size:22px}
+.transfer-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}/* La card del transfer es una COLUMNA, no una fila.
+
+   En fila el precio y el texto peleaban por el mismo ancho, y perdian los dos.
+   Medido en el navegador a 300px de columna: la card daba 106px de ancho y el
+   texto se desbordaba 39px FUERA de la caja (llegaba a 355px con la caja
+   terminando en 316px). No era que el precio se cruzara con el texto: era que el
+   texto se salia de la tarjeta. En una grilla de dos columnas a ese ancho no hay
+   forma de poner icono + titulo + descripcion + precio en una linea sin que uno
+   de los dos se aplaste.
+
+   Ahora: icono y titulo arriba, descripcion en el medio con su ancho, y el
+   precio anclado al pie con margin-top:auto. El pie queda en la misma linea de
+   base en las dos cards, que es lo que hace que los dos precios se puedan
+   comparar de un vistazo. */
+.transfer-choice{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:16px;border:1.5px solid var(--line);border-radius:16px;background:var(--bg);text-align:left;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}.transfer-choice:hover{transform:translateY(-2px);border-color:var(--ink2)}/* El icono + el titulo van en una fila propia, arriba. Antes el <strong>
+   estaba dentro de __body, que al pasar la card a columna lo dejaba en una banda
+   sola, con el icono en otra. */
+.transfer-choice__head{display:flex;align-items:center;gap:12px;min-width:0}
+.transfer-choice__head strong{font-size:14px;font-weight:700;line-height:1.25;min-width:0}
+.transfer-choice__art{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;place-items:center;border-radius:12px;background:var(--cel-soft);color:var(--cel)}
+.transfer-choice__body{min-width:0;display:grid;gap:3px}
+.transfer-choice__body small{line-height:1.45}
+.transfer-choice__price{margin-top:auto;padding-top:10px}
 /* El dibujo del transfer va a 34px dentro del recuadro de 44: a 24 las cabezas
    de los pasajeros se perdían, que es justo el detalle que explica la
    diferencia entre las dos opciones. */
@@ -1206,7 +1251,10 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .theme-toggle svg{width:19px;height:19px}
 .theme-toggle__moon{display:none}
 :root[data-theme="light"] .theme-toggle__sun{display:none}
-:root[data-theme="light"] .theme-toggle__moon{display:block}.account-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 13px;border:0;border-radius:11px;background:var(--action-bg);color:var(--action-ink);font:600 12px Poppins,sans-serif;text-decoration:none;cursor:pointer}.account-button:hover{filter:brightness(1.1)}.account-button--secondary{border:1px solid var(--control-line);background:var(--bg);color:var(--ink)}.account-dialog{max-width:520px}.account-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.account-dialog h2{margin-top:8px}.account-dialog label{display:grid;gap:6px;margin-top:12px;font-size:13px;font-weight:700}.account-dialog input{width:100%;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}.oauth-button{width:100%;min-height:48px;border:1px solid var(--control-line);border-radius:13px;background:var(--bg);color:var(--ink);font-size:14px;font-weight:800;cursor:pointer}.account-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink2);font-size:12px}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:var(--line)}.account-form-actions{display:flex;gap:8px;margin-top:16px}.account-form-actions .confirm-booking{flex:1}.account-form-actions .account-button{flex:0 0 auto}.account-status{min-height:18px;margin:12px 0 0;color:var(--ink2);font-size:13px}.saved-trips{display:grid;gap:9px;margin:16px 0}.saved-trip{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.saved-trip>div{display:grid;gap:4px;min-width:0;flex:1 1 190px}.saved-trip strong{font-size:14px;overflow:hidden;text-overflow:ellipsis}.saved-trip span{color:var(--ink2);font-size:12px}.trip-summary__actions{display:grid;gap:8px}.trip-summary__save{width:100%;height:40px;border:1px solid var(--control-line);border-radius:12px;background:var(--bg);color:var(--ink);font-weight:800;cursor:pointer}.trip-summary__save:hover{border-color:var(--ink);background:var(--bg)}
+:root[data-theme="light"] .theme-toggle__moon{display:block}.account-button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 13px;border:0;border-radius:11px;background:var(--action-bg);color:var(--action-ink);font:600 12px Poppins,sans-serif;text-decoration:none;cursor:pointer}.account-button:hover{filter:brightness(1.1)}.account-button--secondary{border:1px solid var(--control-line);background:var(--bg);color:var(--ink)}.account-dialog{max-width:520px}.account-kicker{display:inline-block;color:#0b6bcb;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.account-dialog h2{margin-top:8px}.account-dialog label{display:grid;gap:6px;margin-top:12px;font-size:13px;font-weight:700}.account-dialog input{width:100%;height:46px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink)}.oauth-button{width:100%;min-height:48px;border:1px solid var(--control-line);border-radius:13px;background:var(--bg);color:var(--ink);font-size:14px;font-weight:800;cursor:pointer}.account-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink2);font-size:12px}.account-divider:before,.account-divider:after{content:"";height:1px;flex:1;background:var(--line)}.account-form-actions{display:flex;gap:8px;margin-top:16px}.account-form-actions .confirm-booking{flex:1}.account-form-actions .account-button{flex:0 0 auto}.account-status{min-height:18px;margin:12px 0 0;color:var(--ink2);font-size:13px}.saved-trips{display:grid;gap:9px;margin:16px 0}.saved-trip{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 12px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}.saved-trip>div{display:grid;gap:4px;min-width:0;flex:1 1 190px}.saved-trip strong{font-size:14px;overflow:hidden;text-overflow:ellipsis}.saved-trip span{color:var(--ink2);font-size:12px}/* 10px entre los dos botones y 44px de alto en el secundario: 40px queda
+   por debajo del minimo que un dedo comfortably apoya (44), y era el boton
+   de "Guardar viaje", o sea el que la persona toca en el celular. */
+.trip-summary__actions{display:grid;gap:10px;margin-top:4px}.trip-summary__save{width:100%;height:44px;border:1px solid var(--control-line);border-radius:12px;background:var(--bg);color:var(--ink);font-weight:800;cursor:pointer}.trip-summary__save:hover{border-color:var(--ink);background:var(--bg)}
 .account-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:5px}
 .card-brand-row{display:flex;align-items:center;gap:8px;color:var(--ink2)}.card-brand-row span{font-size:22px}.card-brand-row small{padding:4px 7px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-size:10px;font-weight:800}.card-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card-demo-note{margin:2px 0 0;color:var(--ink2);font-size:11px}
 .account-button--danger{min-width:38px;padding:0 8px;border:1px solid color-mix(in srgb,var(--coral) 45%,var(--surface));background:var(--coral-soft);color:#b42318}.account-button--danger:hover{background:color-mix(in srgb,var(--coral) 22%,var(--surface));border-color:#d92d20}
@@ -1231,9 +1279,38 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .official-transfer{background:var(--surface)}
 .card-brand-row small{background:var(--control-bg);color:var(--ink)}
 .trip-summary{background:var(--surface)}
-.trip-summary__head{width:100%;padding:0;border:0;background:transparent;color:var(--ink);font:inherit;text-align:left;box-shadow:none;cursor:default}
-.trip-summary__toggle-icon{display:none}
-.trip-summary__details{display:grid;gap:10px}
+/* La cabecera del panel es un BOTON, en todos los anchos.
+
+   Antes el cursor era "default" en desktop y la flecha estaba en
+   display:none, o sea que en la pantalla de una persona con notebook el
+   panel parecia una etiqueta de texto: sin manecilla, sin hover y sin que el
+   clic hiciera nada. Y el handler solo colapso por debajo de 768px, con el
+   CSS cortando a 900: en esa franja el boton tenia cursor de mano y no
+   respondia, que es la peor combinacion de las dos.
+
+   El margen negativo + padding compensan para que el hover se vea como una
+   banda y no como una caja metida adentro del panel. */
+.trip-summary__head{width:100%;margin:0 -6px;padding:6px;border:0;border-radius:12px;background:transparent;color:var(--ink);font:inherit;text-align:left;box-shadow:none;cursor:pointer;transition:background .16s ease}
+.trip-summary__head:hover{background:var(--cel-soft)}
+.trip-summary__head:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.trip-summary__head:active{background:color-mix(in srgb,var(--cel) 20%,var(--surface))}
+/* SVG, no el caracter ^ de antes. La punta de sombrero se dibujaba pegada
+   arriba del renglon segun la fuente y no se leia como flecha. Gira 180 al
+   cerrar, que es lo que comunica el estado. */
+.trip-summary__chevron{flex:0 0 auto;align-self:center;width:19px;height:19px;color:var(--ink2);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+.trip-summary.minimized .trip-summary__chevron{transform:rotate(180deg)}
+.trip-summary.minimized .trip-summary__head:hover .trip-summary__chevron{color:var(--cel)}
+
+/* El cierre se anima con grid-template-rows: 1fr -> 0fr sobre el wrapper
+   __details-inner, que es el unico hijo de la fila. Antes el panel cerrado
+   usaba display:none, y display:none no interpola: el panel desaparecia de
+   un tajo. 0fr con overflow:hidden en el hijo SI interpola. */
+.trip-summary__details{display:grid;grid-template-rows:1fr;transition:grid-template-rows .26s cubic-bezier(.4,0,.2,1),opacity .18s ease,margin-top .26s ease,visibility 0s linear 0s}
+.trip-summary__details-inner{min-height:0;overflow:hidden;display:grid;gap:10px}
+/* Fuera del media query a proposito: el handler responde en
+   todos los anchos, asi que el estado tiene que existir en todos los anchos.
+   Adentro, en 1200px el click toggleaba la clase y no se colapsaba nada. */
+.trip-summary.minimized .trip-summary__details{grid-template-rows:0fr;opacity:0;margin-top:0;pointer-events:none;visibility:hidden;transition:grid-template-rows .26s cubic-bezier(.4,0,.2,1),opacity .18s ease,margin-top .26s ease,visibility 0s linear .26s}
 /* 900px y no 768px: tiene que coincidir con (a) el breakpoint donde el panel
    pasa a ancho completo y (b) el corte que usa syncTripSummaryViewport() en
    app.js. Con 768 el iPhone en horizontal (844x390) quedaba con el panel
@@ -1241,13 +1318,9 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 @media (max-width:900px){
   .trip-summary{padding:9px 12px 10px;max-height:min(46vh,320px)}
   .trip-summary__inner{gap:0}
-  .trip-summary__head{min-height:38px;align-items:center;cursor:pointer}
-  .trip-summary__head:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:10px}
+  .trip-summary__head{min-height:38px;align-items:center}
   .trip-summary__head strong{font-size:30px}
-  .trip-summary__toggle-icon{display:block;font-size:20px;line-height:1;transition:transform .18s ease}
-  .trip-summary__details{gap:8px;margin-top:8px}
-  .trip-summary.minimized .trip-summary__details{display:none}
-  .trip-summary.minimized .trip-summary__toggle-icon{transform:rotate(180deg)}
+  .trip-summary__details{margin-top:8px}
 }
 .hotel-nearby-note{grid-column:1/-1;margin:0;padding:12px 14px;border-radius:12px;background:var(--cel-soft);color:var(--ink2);font-size:13px}
 .hotel-options-empty{padding:24px}
@@ -1836,3 +1909,55 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
   [data-budget-anchor]{scroll-margin-bottom:150px}
 }
 @media (prefers-reduced-motion:reduce){.origin__control button svg{transition:none}}
+
+/* ======================================================================
+   JERARQUIA DE TITULOS -- ULTIMO BLOQUE DEL ARCHIVO, A PROPOSITO
+   ======================================================================
+   Un H2 y un H3 para toda la app, declarados UNA sola vez y sin excepciones
+   por seccion. Antes cada bloque declaraba su propio tamano (36, 34, 30, 28,
+   20, 17, 11.5) y el mismo rol aparecia a cinco medidas distintas, con dos
+   titulos metidos dentro de su placa y los demas flotando.
+
+   ESTE BLOQUE VA AL FINAL, y no por capricho. Con la especificidad empatada
+   gana la regla que aparece despues: con este bloque en el medio, ".local-tours
+   h2" (que esta mas abajo) lo pisaba y el H2 salia a 30px en vez de 32px. Al
+   final gana siempre, y una placa nueva que se pinte con su propio <h2> hereda
+   la jerarquia sola: no hay que acordarse de aplicarle el token. */
+h2, .block-title, .detail-section > h2, .local-tours h2, .hotel-options h2,
+.hotel-options-head h2, .flight-search h2, .transfer-options h2,
+.proposal-breakdown h2, .sec h2, .local-tours__head h2 {
+  font-family: var(--fh);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  margin: 0 0 6px;
+  letter-spacing: -.01em;
+}
+/* El H3 es el nivel secundario: chico, en la familia de texto del cuerpo y en el
+   gris de apoyo. Antes el titulo de un tour salia a 20px y en blanco, o sea mas
+   grande que el H2 de su propia seccion. */
+h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
+.multistay-panel h3, .booking-dialog h3, .local-tour__title, .proposal-breakdown h3 {
+  font-family: var(--fb);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink2);
+  margin: 0 0 4px;
+}
+/* La bajada de un bloque va pegada a su titulo, y el margen de arriba es lo que
+   separa un bloque del anterior. El titulo no se mete dentro de la placa. */
+.sec > h2, .detail-section > h2, .local-tours > h2, .hotel-options > h2,
+.local-tours__head h2 { margin-top: 28px }
+.sec > h2:first-child, .detail-section:first-child > h2, .local-tours:first-child h2 { margin-top: 0 }
+/* La bajada (el sub del bloque) es siempre la misma voz: chica, gris, con la misma
+   altura de linea, pegada a su titulo. */
+.block-sub, .local-tours__summary, .hotel-options__sub {
+  font-family: var(--fb);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ink2);
+  margin: 0;
+}
