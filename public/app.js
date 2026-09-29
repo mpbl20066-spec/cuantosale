@@ -8785,7 +8785,7 @@
       local_per_day: Number(detailState.localPerDay) || 0,
       total_amount: Number(budget.total) || 0,
       currency: 'USD',
-      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', transferTypeVuelta: detailState.transferTypeVuelta || '', tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, hotelType: detailState.meta.hotelType || S.hotelType, roadtrip: detailState.roadtrip || null }
+      details: { destination_key: detailState.meta.dest && detailState.meta.dest.key || S.dest, origin: detailState.meta.origin || S.origin, subcategory: detailState.meta.subcategory || S.subcategory || '', parts: detailState.parts || {}, flight: detailState.selectedOffer || { id: detailState.selectedFlightId || '', airline: detailState.selectedFlight || '', price: detailState.flight || 0 }, hotel: { name: findSelectedHotelLabel(), total: detailState.hotel || 0 }, transfer: detailState.transfer || 0, transferType: detailState.transferType || '', transferTypeVuelta: detailState.transferTypeVuelta || '', busChoice: detailState.busChoice || '', busTotal: Number(detailState.parts && detailState.parts.bus) || 0, tours: detailState.selectedTours || [], budget: budget, queryBudget: S.budget, style: detailState.meta.style || S.style, hotelType: detailState.meta.hotelType || S.hotelType, roadtrip: detailState.roadtrip || null }
     };
   }
   async function saveCurrentTrip(options) {
@@ -8912,6 +8912,11 @@
        el de llegada para que un viaje viejo no aparezca con la mitad de los
        traslados marcados como "no incluido". */
     detailState.transferTypeVuelta = details.transferTypeVuelta || detailState.transferTypeVuelta || '';
+    if (details.busChoice) {
+      if (detailState.baseBus == null) detailState.baseBus = Number(detailState.parts && detailState.parts.bus) || 0;
+      detailState.busChoice = String(details.busChoice);
+      if (Number(details.busTotal) > 0 && detailState.parts) detailState.parts.bus = Math.round(Number(details.busTotal));
+    }
     detailState.selectedTours = Array.isArray(details.tours) ? details.tours : [];
     detailState.toursTotal = detailState.selectedTours.reduce(function (sum, tour) { return sum + (Number(tour.price) || 0); }, 0);
     detailState.selectedTours.forEach(function (tour) {
