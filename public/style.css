@@ -1,4 +1,4 @@
-/* version: 122
+/* version: 123
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -143,7 +143,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-s
    y caia a 13px en el celu. Es la unica linea que dice QUE viaje es este, asi
    que baja de tamano mientras el nombre destino no se lee es un problema. Se le
    da tamano explicito y line-height, y en el celu no baja de 14.5px. */
-.detail-summary p{margin:0;color:var(--hero-soft);font-size:15px;font-weight:500;line-height:1.5;letter-spacing:.005em}.detail-summary strong{display:block;margin-top:18px;color:var(--hero-accent);font-family:var(--fh);font-size:64px;line-height:1}.detail-section{margin:0 0 28px}.detail-section>h2{font-family:var(--fh);font-size:36px;line-height:1;margin:0 0 12px}.detail-breakdown{display:grid;gap:0}.detail-breakdown div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}.detail-breakdown div:last-child{border-bottom:0}
+.detail-summary p{margin:0;color:var(--hero-soft);font-size:15px;font-weight:500;line-height:1.5;letter-spacing:.005em}/* El destino se destaca dentro de la línea secundaria: si la persona está
+   comparando propuestas, el lugar es lo primero que busca y sin esto se perdía
+   en un renglón de todo el mismo tono. El resto (subcategoría, noches) sigue en
+   hero-soft para que el ojo vaya al nombre y después al resto. */
+.detail-summary__destino{color:var(--hero-ink);font-weight:700}
+.detail-summary strong{display:block;margin-top:18px;color:var(--hero-accent);font-family:var(--fh);font-size:64px;line-height:1}.detail-section{margin:0 0 28px}.detail-section>h2{font-family:var(--fh);font-size:36px;line-height:1;margin:0 0 12px}.detail-breakdown{display:grid;gap:0}.detail-breakdown div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}.detail-breakdown div:last-child{border-bottom:0}
 .detail-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;align-items:start}.detail-main{min-width:0}
 .proposal-breakdown{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;margin:0 0 24px}.proposal-breakdown h2{font-family:var(--fh);font-size:30px;line-height:1;margin:0 0 12px}.proposal-breakdown__stack{display:flex;width:100%;height:12px;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}.proposal-breakdown__segment{display:block;height:100%}.proposal-breakdown__list{display:grid;gap:8px;margin-top:12px}.proposal-breakdown__row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line)}.proposal-breakdown__label{display:flex;align-items:center;gap:8px;min-width:0}.proposal-breakdown__label .trip-summary__ico{flex:0 0 19px;width:19px;height:19px}.proposal-breakdown__label span{display:block;font-size:14px;font-weight:600;color:var(--ink)}.proposal-breakdown__row b{font-size:14px;color:var(--ink);font-weight:700}
 @media (max-width:820px){.detail-layout{grid-template-columns:1fr}}

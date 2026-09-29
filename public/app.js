@@ -6066,8 +6066,17 @@
     return 'Total para ' + n + (n === 1 ? ' pasajero' : ' pasajeros');
   }
 
+  /* El origen de la búsqueda. `detailState.meta.origin` es el que el server
+     devolvió para ESTA búsqueda; `S.origin` es el del formulario y se resetea al
+     abrir un viaje guardado. Dentro del detalle el que vale es el primero, así
+     que el título no puede leer solo S.origin: mostraba MVD en un viaje que
+     había arrancado en PDP. */
+  function origenDeLaBusqueda() {
+    return (detailState && detailState.meta && detailState.meta.origin) || S.origin;
+  }
+
   function titleOf(p) {
-    var originAirport = originLabel(S.origin);
+    var originAirport = originLabel(origenDeLaBusqueda());
     var mode = p.mode === 'auto' ? 'Viaje en auto desde ' + originAirport : p.mode === 'bus' ? 'Bus semicama/cama desde ' + originAirport : 'Vuelo desde ' + originAirport;
     // El nombre del hotel sale del TIER DE LA PROPUESTA y no de hotelType. Antes
     // usaba la seleccion global y por eso una misma card decia "Hotel
@@ -6095,7 +6104,7 @@
      nueve propuestas, así que si mandara sobre el texto las tres volverían a
      decir lo mismo. Solo manda cuando es un tipo con contenido propio
      (all-inclusive, resort, boutique), donde sí cambia lo que incluye. */
-  var ALOJAMIENTO_TIER = ['Hostel o hotel sencillo', 'Hotel 3 estrellas', 'Hotel 4 estrellas'];
+  var ALOJAMIENTO_TIER = ['Alojamiento económico', 'Hotel categoría estándar', 'Hotel categoría superior'];
   var ALOJAMIENTO_TIPO = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Hotel boutique' };
   function alojamientoDe(p) {
     if (!p) return ALOJAMIENTO_TIER[1];
@@ -6866,7 +6875,7 @@
     // recomendar.
     var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
-      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
+      '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p><b class="detail-summary__destino">' + esc(data.meta.dest.name) + '</b>' + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + foodMarkup +
