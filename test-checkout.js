@@ -75,13 +75,17 @@ const stubs = {
   CHECKOUT_STEPS: [{ label: 'Datos' }, { label: 'Pago' }, { label: 'Listo' }],
   // El numero al que llega la reserva. Va en los stubs y no hardcodeado en el
   // test para que cambiarlo en app.js no rompa la comprobacion.
-  WHATSAPP_RESERVAS: '5511920836306'
+  WHATSAPP_RESERVAS: '5511920836306',
+  // Las etiquetas que la app usa cuando todavia no hay un hotel real. Se copian
+  // del fuente con una expresion laxa a proposito: si en app.js cambia la
+  // lista, el test avisa en vez de dar verde con una copia vieja.
+  HOTELES_ETIQUETA: /^(Hotel recomendado|Hotel seleccionado|Alojamiento seleccionado|Estimación · Hotel|Sin alojamiento)/
 };
 
 const cuerpo = ['checkoutTours', 'checkoutTransferLine', 'checkoutPedido', 'checkoutTotals',
   'transferHotelName', 'checkoutAside', 'checkoutField', 'checkoutTransferBlock',
   'checkoutPanelDatos', 'checkoutPanelListo', 'checkoutWhatsappUrl', 'checkoutRef', 'whatsappUrl',
-  'nombreDeCuenta']
+  'nombreDeCuenta', 'hotelParaElTransfer']
   .map(extraer).join('\n');
 
 const deps =
@@ -92,13 +96,14 @@ const deps =
   'originCityName=stubs.originCityName, storyDateRange=stubs.storyDateRange, categoryIcon=stubs.categoryIcon;\n' +
   'var CHECKOUT_PAYMENTS=stubs.CHECKOUT_PAYMENTS, CHECKOUT_TITLES=stubs.CHECKOUT_TITLES,\n' +
   'CHECKOUT_DOC_TYPES=stubs.CHECKOUT_DOC_TYPES, CHECKOUT_COUNTRIES=stubs.CHECKOUT_COUNTRIES, CHECKOUT_STEPS=stubs.CHECKOUT_STEPS;\n' +
-  'var WHATSAPP_RESERVAS=stubs.WHATSAPP_RESERVAS;\n';
+  'var WHATSAPP_RESERVAS=stubs.WHATSAPP_RESERVAS;\n' +
+  'var HOTELES_ETIQUETA=stubs.HOTELES_ETIQUETA;\n';
 
 const checkoutState = { step: 0, form: {}, payment: 'brou' };
 /* authUser entra por parametro para poder simularse sesion iniciada y sesion
    cerrada en la misma corrida. setAuthUser reasigna el binding desde adentro. */
 const fns = new Function('checkoutState', 'detailState', 'S', 'stubs', 'authUser', deps + cuerpo +
-  '\nreturn {checkoutTotals, checkoutPedido, checkoutAside, checkoutWhatsappUrl, checkoutPanelDatos, checkoutPanelListo, checkoutTransferBlock, nombreDeCuenta, setAuthUser: function (u) { authUser = u; }};'
+  '\nreturn {checkoutTotals, checkoutPedido, checkoutAside, checkoutWhatsappUrl, checkoutPanelDatos, checkoutPanelListo, checkoutTransferBlock, nombreDeCuenta, hotelParaElTransfer, setAuthUser: function (u) { authUser = u; }};'
 )(checkoutState, estado, S, stubs, null);
 
 function ver(etiqueta) {
@@ -264,6 +269,66 @@ prueba('sin nombre en la cuenta no completa nada', () => {
   assert.strictEqual(fns.nombreDeCuenta(), null);
 });
 fns.setAuthUser(null);
+
+/* --- 7. El hotel del campo del traslado ---
+   El campo se precompleta con el hotel elegido, pero solo si hay un hotel de
+   verdad. Cuando la app no tiene uno —la API de hoteles no respondio, o la
+   persona todavia no eligio— el campo tiene que quedar vacio. Poner ahi
+   "Hotel recomendado" es mandar al operador un dato que no existe. */
+
+/* El fixture trae transferWizard.hotelName puesto, y eso tiene precedencia sobre
+   el hotel elegido a proposito: es lo que la persona escribio en el campo, y no
+   puede perderlo un repintado. Para probar la precompletacion desde la seccion
+   de alojamiento hay que vaciarlo. */
+estado.transferWizard = {};
+
+prueba('con hotel elegido el campo viene con el nombre', () => {
+  estado.selectedHotelName = 'Pousada do Porto';
+  assert.strictEqual(fns.hotelParaElTransfer(), 'Pousada do Porto');
+  const p = fns.checkoutPanelDatos();
+  assert.ok(/name="transferHotel"[^>]*value="Pousada do Porto"/.test(p), 'el campo trae el hotel');
+});
+prueba('con la etiqueta por defecto el campo NO trae nada inventado', () => {
+  estado.selectedHotelName = 'Hotel recomendado';
+  assert.strictEqual(fns.hotelParaElTransfer(), '', 'no devuelve la etiqueta');
+  const p = fns.checkoutPanelDatos();
+  assert.ok(!/name="transferHotel"[^>]*value=/.test(p), 'el campo sin value: se escribe a mano');
+  assert.ok(/name="transferHotel"[^>]*placeholder=/.test(p), 'pero con el ejemplo a la vista');
+});
+prueba('las otras etiquetas tampoco pasan como nombre de hotel', () => {
+  for (const etiqueta of ['Hotel seleccionado', 'Alojamiento seleccionado', 'Estimación · Hotel Intermedio', 'Sin alojamiento']) {
+    estado.selectedHotelName = etiqueta;
+    assert.strictEqual(fns.hotelParaElTransfer(), '', 'filtraria: ' + etiqueta);
+  }
+});
+prueba('sin alojamiento elegido el campo queda vacio', () => {
+  estado.selectedHotelName = 'Hotel recomendado';
+  estado.selectedHotel = false;
+  assert.strictEqual(fns.hotelParaElTransfer(), '');
+  estado.selectedHotel = true;
+});
+prueba('lo que la persona escribio en el campo gana sobre el hotel elegido', () => {
+  estado.selectedHotelName = 'Pousada do Porto';
+  checkoutState.form = { transferHotel: 'Otro hotel en el centro' };
+  assert.ok(/name="transferHotel"[^>]*value="Otro hotel en el centro"/.test(fns.checkoutPanelDatos()));
+  checkoutState.form = {};
+});
+prueba('un hotel escrito a mano sobrevive al cambio de paso', () => {
+  estado.selectedHotelName = 'Pousada do Porto';
+  checkoutState.form = { transferHotel: 'Otro hotel en el centro' };
+  assert.ok(/value="Otro hotel en el centro"/.test(fns.checkoutPanelDatos()), 'al volver al paso 1 sigue ahi');
+  assert.ok(/Otro hotel en el centro/.test(fns.checkoutWhatsappUrl() ? decodeURIComponent(fns.checkoutWhatsappUrl()) : ''), 'y va en el mensaje');
+  checkoutState.form = {};
+});
+/* Lo que se escribio a mano se copia al estado del viaje, y desde ahi gana sobre
+   el hotel de la seccion. Es el camino que usa el voucher. */
+prueba('lo escrito a mano pasa al estado del viaje y gana en el repintado', () => {
+  estado.selectedHotelName = 'Pousada do Porto';
+  estado.transferWizard = { hotelName: 'Otro hotel en el centro' };
+  assert.strictEqual(fns.hotelParaElTransfer(), 'Otro hotel en el centro');
+  estado.transferWizard = {};
+});
+estado.selectedHotelName = 'Casa Joseph';
 
 console.log('\n' + (fallos ? fallos + ' FALLAS' : 'todo bien'));
 process.exit(fallos ? 1 : 0);

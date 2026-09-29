@@ -2295,16 +2295,34 @@
       perPerson: tours.length ? toursUnit : null
     };
   }
-  /* Donde te deja el transfer. El hotel elegido en la seccion de alojamiento es
-     el valor por defecto, pero el campo es editable: el operador puede llevar a
-     otro hotel del mismo barrio y prefiero que se escriba a que se suponga. */
+  /* El hotel que se puede poner en el campo del traslado.
+     A diferencia del resumen —donde "Hotel seleccionado" es una etiqueta de
+     categoría y va bien—, este texto se manda al operador como si fuera el lugar
+     donde te van a buscar. findSelectedHotelLabel() devuelve "Hotel recomendado"
+     cuando la app todavia no tiene un alojamiento real, y escribir eso en el
+     campo es inventar el dato: el operador recibe "Hotel: Hotel recomendado" y
+     no puede hacer nada con eso.
+
+     Con hotel elegido va el nombre real. Sin hotel, no hay nada que preCompletar
+     y el campo queda vacio con su placeholder para que lo escriba la persona. */
+  var HOTELES_ETIQUETA = /^(Hotel recomendado|Hotel seleccionado|Alojamiento seleccionado|Estimación · Hotel|Sin alojamiento)/;
+  function hotelParaElTransfer() {
+    if (!detailState || !detailState.meta) return '';
+    if (detailState.selectedHotel === false) return '';
+    var guardado = detailState.transferWizard && detailState.transferWizard.hotelName;
+    if (guardado && String(guardado).trim()) return String(guardado).trim();
+    var elegido = String(detailState.selectedHotelName || '').trim();
+    if (!elegido || HOTELES_ETIQUETA.test(elegido)) return '';
+    return elegido;
+  }
+  /* Donde te deja el transfer. El hotel elegido en la seccion de alojamiento se
+     pone solo, pero el campo queda editable: el operador puede ir a otro hotel
+     del mismo barrio y prefiero que se escriba a que se suponga. */
   function transferHotelName() {
     var f = checkoutState.form || {};
     var escrito = String(f.transferHotel == null ? '' : f.transferHotel).trim();
     if (escrito) return escrito;
-    var guardado = detailState && detailState.transferWizard && detailState.transferWizard.hotelName;
-    if (guardado) return guardado;
-    return findSelectedHotelLabel();
+    return hotelParaElTransfer();
   }
   /* El resumen lateral. Se vuelve a pintar en cada paso porque el total cambia
      cuando se agrega o saca una actividad desde el panel, y la grilla de pagos
@@ -2392,8 +2410,11 @@
   }
   /* El pedido de transfer necesita un dato que las actividades no: donde te
      deja. Va en el mismo paso de los datos del viajero y con el hotel ya escrito
-     —el que elegiste en la seccion de alojamiento— porque casi siempre es el
-     mismo y dejarlo en blanco hace que la gente no avance.
+     si hay uno elegido de verdad, porque casi siempre es el mismo. Si la app no
+     tiene un alojamiento real —no cargaron hoteles, o la persona todavia no
+     eligio ninguno— el campo queda vacio con su ejemplo: la app no sabe donde
+     te alojás y ponerlo entre funciones seria inventarlo. Queda editable, que es
+     lo que hace falta para que se pueda corregir o cambiar.
 
      El horario de recogida NO se pregunta. Antes la app derivaba una hora de la
      llegada del vuelo y proponia "1 hora despues", con un campo para escribir
@@ -2747,7 +2768,7 @@
       message += 'Transfer: ' + t.transfer.title + ' · ' + money(t.transfer.total) +
         (t.transfer.porPersona ? ' (' + money(t.transfer.price) + ' por persona)' : '') + '\n' +
         'Vuelo: ' + vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '') + (vuelo.arrivalText ? ' · llega ' + vuelo.arrivalText : '') + '\n' +
-        'Hotel: ' + transferHotelName() + '\n\n';
+        'Hotel: ' + (transferHotelName() || 'sin confirmar, decime el hotel o pousada') + '\n\n';
     }
     message += 'Total a confirmar: ' + money(t.total) + '\n' +
       'Medio de pago preferido: ' + (pay ? pay.label : 'a coordinar') + '\n\n' +
@@ -3727,7 +3748,7 @@
     if (flightSummary.isRoundTrip) flightLines += legLine('Vuelta', flightSummary.returnOrigin, flightSummary.returnDestination, flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText), flightTime(inLeg && inLeg.arrival, flightSummary.returnArrivalText), flightSummary.inboundFlightNumber);
     var flightTitle = 'Vuelo' + (flightSummary.airline ? ' · ' + esc(flightSummary.airline) : '');
     var transferTitle = detailState.transferType === 'private' ? 'Traslado privado' : (detailState.transferType === 'shared' ? 'Traslado compartido' : 'Traslado');
-    var transferWhere = transferState.hotelName || selectedHotelName;
+    var transferWhere = transferState.hotelName || hotelParaElTransfer();
     // "Recogida a coordinar" en vez de una hora derivada del vuelo. El voucher es
     // el documento que se lleva la persona al hotel y el que manda el operador:
     // ninguno de los dos puede dar por hecho una hora que todavia no existe.
