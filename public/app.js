@@ -553,9 +553,16 @@
 { label: 'Centro / Batel', key: 'curitiba' },
 { label: 'Morretes / Serra do Mar', key: 'curitiba' }
     ] },
-    { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
+    { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'camboriu', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
 { label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
 { label: 'Balneário Camboriú', key: 'bcm' },
+      /* Camboriú estaba en el modelo con costo, traslado, guia, tres tours y
+         foto, y la app lo usaba para calcular el roadtrip y el bus. Lo que no
+         estaba era en ninguna de las dos superficies de eleccion, o sea que
+         nadie lo podia elegir: data completa que la app no ofrecia. Entra
+         aca y no en un grupo propio porque comparte aeropuerto (FLN) y costa
+         con todo el litoral. */
+{ label: 'Camboriú', key: 'camboriu' },
 { label: 'Itapema', key: 'itapema' },
 { label: 'Bombinhas', key: 'bombinhas' },
 { label: 'Garopaba', key: 'garopaba' },
@@ -563,18 +570,28 @@
 { label: 'Ferrugem', key: 'ferrugem' },
 { label: 'Piçarras', key: 'picarras' },
       { label: 'Florianópolis + Balneário Camboriú', key: 'fln', secondKey: 'bcm' },
+      { label: 'Florianópolis + Camboriú', key: 'fln', secondKey: 'camboriu' },
       { label: 'Florianópolis + Itapema', key: 'fln', secondKey: 'itapema' },
       { label: 'Florianópolis + Bombinhas', key: 'fln', secondKey: 'bombinhas' },
       { label: 'Florianópolis + Garopaba', key: 'fln', secondKey: 'garopaba' },
       { label: 'Florianópolis + Praia do Rosa', key: 'fln', secondKey: 'rosa' },
       { label: 'Florianópolis + Ferrugem', key: 'fln', secondKey: 'ferrugem' },
       { label: 'Florianópolis + Piçarras', key: 'fln', secondKey: 'picarras' },
+      /* Balneário Camboriú NO es par de Camboriú: son el mismo pueblo. Sus
+         coordenadas estan a 270 metros, asi que el par salia con un traslado de
+         0 km. El balneario es el distrito de playa dentro de la ciudad. */
       { label: 'Balneário Camboriú + Itapema', key: 'bcm', secondKey: 'itapema' },
       { label: 'Balneário Camboriú + Bombinhas', key: 'bcm', secondKey: 'bombinhas' },
       { label: 'Balneário Camboriú + Garopaba', key: 'bcm', secondKey: 'garopaba' },
       { label: 'Balneário Camboriú + Praia do Rosa', key: 'bcm', secondKey: 'rosa' },
       { label: 'Balneário Camboriú + Ferrugem', key: 'bcm', secondKey: 'ferrugem' },
       { label: 'Balneário Camboriú + Piçarras', key: 'bcm', secondKey: 'picarras' },
+      { label: 'Camboriú + Itapema', key: 'camboriu', secondKey: 'itapema' },
+      { label: 'Camboriú + Bombinhas', key: 'camboriu', secondKey: 'bombinhas' },
+      { label: 'Camboriú + Garopaba', key: 'camboriu', secondKey: 'garopaba' },
+      { label: 'Camboriú + Praia do Rosa', key: 'camboriu', secondKey: 'rosa' },
+      { label: 'Camboriú + Ferrugem', key: 'camboriu', secondKey: 'ferrugem' },
+      { label: 'Camboriú + Piçarras', key: 'camboriu', secondKey: 'picarras' },
       { label: 'Itapema + Bombinhas', key: 'itapema', secondKey: 'bombinhas' },
       { label: 'Itapema + Garopaba', key: 'itapema', secondKey: 'garopaba' },
       { label: 'Itapema + Praia do Rosa', key: 'itapema', secondKey: 'rosa' },
@@ -891,6 +908,7 @@
     { name: 'Santa Catarina', codes: 'FLN', options: [
 { label: 'Florianópolis', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis (Canasvieiras / Ingleses)' },
 { label: 'Balneário Camboriú', key: 'bcm', codes: 'FLN' },
+{ label: 'Camboriú', key: 'camboriu', codes: 'FLN' },
 { label: 'Itapema', key: 'itapema', codes: 'FLN' },
 { label: 'Bombinhas', key: 'bombinhas', codes: 'FLN' },
 { label: 'Garopaba', key: 'garopaba', codes: 'FLN' },
@@ -898,12 +916,19 @@
 { label: 'Ferrugem', key: 'ferrugem', codes: 'FLN' },
 { label: 'Piçarras', key: 'picarras', codes: 'FLN' },
       { label: 'Florianópolis + Balneário Camboriú', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Balneário Camboriú' },
+      { label: 'Florianópolis + Camboriú', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Camboriú' },
       { label: 'Florianópolis + Itapema', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Itapema' },
       { label: 'Florianópolis + Bombinhas', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Bombinhas' },
       { label: 'Florianópolis + Garopaba', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Garopaba' },
       { label: 'Florianópolis + Praia do Rosa', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Praia do Rosa' },
       { label: 'Florianópolis + Ferrugem', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Ferrugem' },
       { label: 'Florianópolis + Piçarras', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Piçarras' },
+      { label: 'Camboriú + Itapema', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Itapema' },
+      { label: 'Camboriú + Bombinhas', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Bombinhas' },
+      { label: 'Camboriú + Garopaba', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Garopaba' },
+      { label: 'Camboriú + Praia do Rosa', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Praia do Rosa' },
+      { label: 'Camboriú + Ferrugem', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Ferrugem' },
+      { label: 'Camboriú + Piçarras', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Piçarras' },
       { label: 'Balneário Camboriú + Itapema', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Itapema' },
       { label: 'Balneário Camboriú + Bombinhas', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Bombinhas' },
       { label: 'Balneário Camboriú + Garopaba', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Garopaba' },

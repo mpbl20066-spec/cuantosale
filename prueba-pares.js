@@ -237,7 +237,8 @@ console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a m
   for (const [, claves] of clavesPorGrupo) {
     for (let i = 0; i < claves.length; i++) {
       for (let j = i + 1; j < claves.length; j++) {
-        if (!model.comboTransfer(claves[j], claves[i], 1)) continue; // no se puede cotizar: no hace falta ofrecerlo
+        const t = model.comboTransfer(claves[j], claves[i], 1);
+        if (!t) continue; // no se puede cotizar: no hace falta ofrecerlo
         combinables++;
         if (!existentes.has(claves[i] + '|' + claves[j])) faltan.push(claves[i] + ' + ' + claves[j]);
       }
@@ -250,6 +251,25 @@ console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a m
   const imposibles = [...segundaDe.values()].filter(v => !model.comboTransfer(v.b, v.a, 1))
     .map(v => v.a + ' + ' + v.b);
   check('ningun par del listado es incombinable', imposibles.length === 0, imposibles.join(' | '));
+
+  /* Un par de dos paradas que estan en el mismo lugar no es un par, y el filtro
+     de distancia no lo ve: 0 km es una distancia valida. Balneário Camboriú y
+     Camboriú estan a 270 metros, asi que el par pasaba el techo de 1.100 km y se
+     ofrecia con un traslado de 0 dolares. El corte esta en COMBO_MIN_KM, y esta
+     comprobacion existe para que siga ahi: si alguien lo sube, avisa.
+
+     El piso es 3 km y no 20 porque hay pares cortos y de verdad: Trancoso y
+     Arraial d'Ajuda son 15, Porto Seguro y Arraial 19. Con 20 el filtro se
+     comia los tres. */
+  const mismoPueblo = [];
+  for (const v of segundaDe.values()) {
+    const a = model.DEST_COORDS[v.a], b = model.DEST_COORDS[v.b];
+    if (!a || !b) continue;
+    const km = Math.round(model.haversineKm(a, b) * 1.45);
+    if (km < 3) mismoPueblo.push(v.a + ' + ' + v.b + ' (' + km + ' km)');
+  }
+  check('ningun par del listado son el mismo pueblo', mismoPueblo.length === 0, mismoPueblo.join(' | '));
+
   check('el total es lo que dice la geografia: ' + (combinables + cruzan.length),
     subs.size === combinables + cruzan.length, 'hay ' + subs.size);
 }

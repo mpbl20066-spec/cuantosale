@@ -210,7 +210,7 @@ const HOME_DESTINATION_KEYS = [
   // no aparecian en ningun lado.
   'sao', 'bho', 'curitiba',
   // Litoral de Santa Catarina
-  'fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras',
+  'fln', 'bcm', 'camboriu', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras',
   // Litoral de Rio Grande do Sul
   'torres', 'canoa',
   // Bahia
