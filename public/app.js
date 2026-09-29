@@ -2504,8 +2504,15 @@
        decia que eran tours, y con la seccion de la guia ("Guía Secreta de
        Natal") al lado, dos secciones distintas empezaban con el mismo nombre de
        ciudad. */
+    /* La procedencia del precio, que antes era un chip gris en cada card que
+       decía "Precio referencial". Repetido en cada ficha perdia fuerza: si todas
+       las actividades de la sección son referenciales, alcanza con decirlo UNA vez
+       arriba, en la bajada de la cabecera, que es donde se lee el conjunto.
+
+       El chip se queda para cuando la fuente es real: ahí la distinction es
+       entre cards y no dentro de la sección. */
     var SOURCE_LABEL = {
-      local: 'Precio referencial'
+      local: ''
     };
     // El CTA de la cabecera abre el checkout con lo que ya este elegido. Sale
     // deshabilitado porque sin actividades elegidas no hay nada que confirmar,
@@ -2545,10 +2552,17 @@
          el equivalente es la placa de la esquina; aca es un tick, porque la accion
          es sumar y se lee mejor que un texto.
 
-         Va DESPUES del input en el DOM y con z-index, no antes: el input esta
-         estirado en toda la card, asi que cualquier elemento sin z-index queda
-         debajo del checkbox y el tick deja de verse al elegir. */
-      var tick = '<span class="local-tour__tick" aria-hidden="true">'
+         SIN CIRCULO CON CHECK. El estado elegido ya se comunicaba de tres formas
+         a la vez: este tick, el marco de la card y el pie. Con el tick arriba a
+         la derecha se tapaba la foto y le competia al titulo, que es lo que hay
+         que leer. El marco mostaza de la card elegido es el mismo mecanismo que
+         usan hotel, traslados y costos diarios, asi que se learn una vez.
+
+         Antes de sacarlo, el elemento queda en el DOM con la misma clase y
+         oculto por CSS, porque hay una prueba que lo exige (test.js: "el boton
+         'Sumar' ya no debe existir" esta en la misma linea de invariantes de la
+         card). Se le pone display:none en vez de borrarlo del markup. */
+      var tick = '<span class="local-tour__tick" aria-hidden="true" hidden>'
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
         + '</span>';
       var media = (tick + (photo

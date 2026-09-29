@@ -1,4 +1,4 @@
-/* version: 128
+/* version: 129
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1045,10 +1045,20 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .roadtrip-route{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}.roadtrip-route__stat{display:flex;flex-direction:column;gap:3px;text-align:center}.roadtrip-route__stat span{font-size:11px;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em;font-weight:700}.roadtrip-route__stat b{font-family:var(--fh);font-size:22px;line-height:1.1}
 .roadtrip-stops{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px 18px;overflow:hidden}.roadtrip-stops summary{cursor:pointer;font-weight:800;font-size:14px;list-style:none}.roadtrip-stops summary::-webkit-details-marker{display:none}.roadtrip-stops__body{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--ink2)}.roadtrip-stops__body p{margin:0 0 8px}.roadtrip-stops[open]{border-color:var(--accent)}
 @media (max-width:560px){.roadtrip-route{grid-template-columns:1fr}}
-.flight-filters{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.flight-filters div{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.flight-filters b{font-size:12px;margin-right:4px}.flight-filters button{min-height:44px;border:1px solid var(--control-line);border-radius:99px;background:var(--surface);padding:6px 14px;color:var(--ink);font-size:13px;cursor:pointer}.flight-filters button[aria-pressed="true"]{border-color:var(--good);background:var(--good-soft);color:var(--good);font-weight:700}.transport-detail select,.transport-detail input[type="number"]{display:block;width:100%;max-width:320px;margin:6px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--control-bg);color:var(--ink)}.transport-detail label{display:block;margin-bottom:10px}
+.flight-filters{display:grid;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.flight-filters div{display:flex;align-items:center;flex-wrap:wrap;gap:6px}.flight-filters b{font-size:12px;margin-right:4px}.flight-filters button{min-height:44px;border:1px solid var(--control-line);border-radius:99px;background:var(--surface);padding:6px 14px;color:var(--ink);font-size:13px;cursor:pointer}/* El filtro de vuelos seleccionaba en VERDE (--good), que es el token de "entra
+   en tu presupuesto" y de "dato real". Con eso la unica forma de marcar una opcion
+   elegida era verde, mientras el segmented control de arriba, las cards de hotel,
+   de tours, de traslados y de costos usan el marco mostaza. Dos colores para el
+   mismo gesto: se aprende una vez y despues hay quedashed adivinar.
+
+   Ahora usa los mismos tokens que el resto: --selected-border para el marco y
+   --selected-ink para el texto. El verde se queda para lo que SI significa
+   "esta disponible" y "esto es un dato real". */
+.flight-filters button[aria-pressed="true"]{border-color:var(--selected-border);background:var(--selected-bg);color:var(--selected-ink);font-weight:700}.transport-detail select,.transport-detail input[type="number"]{display:block;width:100%;max-width:320px;margin:6px 0 0;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--control-bg);color:var(--ink)}.transport-detail label{display:block;margin-bottom:10px}
 @media (max-width:900px){.trip-summary{left:12px;right:12px;bottom:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;max-width:none}.trip-summary__head strong{font-size:36px}}
 @media (max-width:560px){.trip-summary__item{grid-template-columns:58px minmax(0,1fr) auto}.trip-summary__item b{white-space:normal}.trip-summary__cta{height:46px}}
-.daily-budget__planned{display:grid;gap:7px;padding:10px 0 2px}.daily-budget__planned>span{font-size:13px;font-weight:700;color:var(--ink)}.daily-budget__planned .daily-budget__input-wrap{max-width:280px;min-height:48px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);transition:border-color .16s ease,box-shadow .16s ease}/* ---------- titulos de seccion, todos con la misma escala ----------
+.daily-budget__planned{display:grid;gap:7px;padding:10px 0 2px}.daily-budget__planned>span{font-size:13px;font-weight:700;color:var(--ink)}.daily-budget__planned .daily-budget__input-wrap{max-width:280px;min-height:48px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);transition:border-color .16s ease,box-shadow .16s ease}
+/* ---------- titulos de seccion, todos con la misma escala ----------
    Los seis titulos del detalle vivian en seis reglas distintas: .detail-section>h2
    en 36px, .flight-search h2 en 34px, .hotel-options-head h2 y .local-tours h2 en
    clamp(24,3vw,32), y los dos de costos diarios en 17px. Cuatro tamanos para el
