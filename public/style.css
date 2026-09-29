@@ -1262,16 +1262,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 
    Ahora es un link, asi que no imita una grilla y no se puede confundir con algo
    que sume. El bloque queda chico a proposito: es una salida, no una seccion. */
-.civitatis-affiliate{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px;margin-top:22px;padding:16px 20px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}
-.civitatis-affiliate__body{flex:1 1 260px;min-width:0}
-.civitatis-affiliate h2{margin:0;font-family:var(--fh);font-size:20px;line-height:1.15}
-.civitatis-affiliate p{margin:5px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
-.civitatis-affiliate__note{margin-top:6px!important;font-size:11.5px!important;opacity:.9}
-.civitatis-affiliate__link{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1.5px solid var(--control-line);border-radius:13px;color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap;text-decoration:none;transition:border-color .18s ease,color .18s ease,background .18s ease}
-.civitatis-affiliate__link:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
-.civitatis-affiliate__link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-@media (max-width:560px){.civitatis-affiliate{padding:14px 16px;border-radius:18px}.civitatis-affiliate__link{width:100%}}
-
 /* Créditos globales, al pie de la página: reunión de todas las fotos que la
    app cargó, no sólo las de los tours. */
 .foot-credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}

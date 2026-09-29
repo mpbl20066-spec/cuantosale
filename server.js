@@ -147,12 +147,10 @@ const CSP = "default-src 'self'; " +
   "font-src https://fonts.gstatic.com; " +
   "img-src 'self' data: https:; " +
   "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; " +
-  // civitatis.com es lo UNICO que se agrega, y solo para el widget de
-  // actividades. Es un iframe, asi que va en frame-src y no en script-src: el
-  // snippet que trae el panel de afiliados ademas carga un iframeResizer desde
-  // ahi, pero no hace falta porque el widget tiene alto fijo y lo medimos. O sea
-  // que el origen queda acotado a poder mostrar ese iframe y nada mas.
-  "frame-src https://*.supabase.co https://www.civitatis.com; " +
+  // civitatis.com se saco de aca cuando se fue el widget embebido. Era lo unico
+  // que se habia agregado, y sin iframe no hay frame que mostrar: dejar el
+  // origen abierto seria abrir la puerta a un tercero sin usar para nada.
+  "frame-src https://*.supabase.co; " +
   "base-uri 'none'; form-action 'self'";
 // Google Analytics (GA4). La etiqueta se inyecta una sola vez desde serveStatic
 // para todas las paginas HTML, en vez de pegada en cada archivo: asi no puede

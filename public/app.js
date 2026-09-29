@@ -140,6 +140,26 @@
    * foto de otro lugar o de otro país no lo es.
    */
   var TOUR_PHOTOS = {
+    'buz#Paseo en barco por las playas de Búzios': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Praia_da_Azeda_01.jpg/1280px-Praia_da_Azeda_01.jpg',
+      autor: 'Halley Pacheco de Oliveira',
+      licencia: 'CC BY-SA 3.0'
+    },
+    'buz#City tour de Búzios en buggy': {
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/B%C3%BAzios_RJ_Brasil_-_Rua_das_Pedras_-_panoramio.jpg/1280px-B%C3%BAzios_RJ_Brasil_-_Rua_das_Pedras_-_panoramio.jpg',
+      autor: 'Josue Marinho',
+      licencia: 'CC BY 3.0'
+    },
+    'buz#Kayak o stand up paddle en la costa': {
+      /* Commons no tiene foto de kayak de Búzios. Esta es el pier de
+         Manguinhos, a 3.7 km del centro: muestra la costa donde se hace la
+         actividad, no la actividad. Es el mismo criterio que el resto del
+         catalogo: la foto de un tour de dos horas muestra el lugar, porque
+         el operador no publica la foto de su propia salida. */
+      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Pier_da_Praia_de_Manguinhos.jpg/1280px-Pier_da_Praia_de_Manguinhos.jpg',
+      autor: 'Patrick Montenegro',
+      licencia: 'CC BY-SA 4.0'
+    },
     'rio#Cristo Redentor y Pan de Azúcar': {
       url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Unique_Moment_with_the_Moon_and_Christ_the_Redeemer_3.jpg/1280px-Unique_Moment_with_the_Moon_and_Christ_the_Redeemer_3.jpg',
       autor: 'Donatas Dabravolskas', licencia: 'CC BY-SA 4.0'
@@ -1982,42 +2002,6 @@
      grilla. El catalogo curado (public/actividades-civitatis.js) es la via que
      si suma al presupuesto, con las mismas fotos y los mismos precios que
      publica Civitatis. */
-  /* Lo que queda del widget embebido: un link de texto, nada mas.
-  
-     El widget era un <iframe> de civitatis.com con su grilla de 6 cards. Sacarlo
-     no fue por rendimiento ni por estilo: es que no puede hacer lo que la
-     pantalla de al lado promete.
-  
-     Un iframe es un documento de otro origen. Desde esta pagina no se lee que
-     actividad toco la persona, ni su titulo, ni su precio: no hay eventos ni
-     postMessage documentado. Cuando alguien tocaba "Reservar" adentro, navegaba
-     DENTRO del iframe y aca no pasaba nada —ni se sumaba al presupuesto, ni
-     aparecia en el checkout, ni en el mensaje de WhatsApp—. El click se perdia.
-     Un listener de clic sobre el <iframe> solo diria "tocaron algo", no que.
-  
-     Y el costo no era invisible: la grilla del widget se ve EXACTAMENTE como
-     la de "Los imperdibles de <destino>", que si suma. Dos grillas de cards con
-     foto, titulo, precio y btn, una que suma y otra que no, sin ninguna senal en
-     la card misma. El aviso existia, pero estaba en el subtitulo y en un link al
-     pie: texto que se lee una vez, cuando la persona todavia no hacia nada. Al
-     hacer click, lo unico que ve es que se fue de la pagina.
-  
-     La via que si funciona ya existe: el catalogo curado de afiliado
-     (public/actividades-civitatis.js, desde data/actividades-civitatis.json).
-     Son las MISMAS fotos y los MISMOS precios publicados de Civitatis, con el
-     enlace ?aid=, pero servidos por nosotros: cada card es una de las que suman
-     al presupuesto y entran al checkout. Por eso este bloque es un link y no una
-     grilla. */
-  function civitatisAffiliateLink() {
-    return '<section class="civitatis-affiliate" data-budget-anchor="civitatis">' +
-      '<div class="civitatis-affiliate__body">' +
-      '<h2>¿Buscabas más actividades?</h2>' +
-      '<p>Las de arriba tienen precio real de Civitatis y suman a tu presupuesto. En su catálogo hay muchas más, y ahí la reserva se hace en su sitio.</p>' +
-      '<p class="civitatis-affiliate__note">Con el enlace de acá cobramos una comisión si reservás. A vos no te cuesta nada.</p>' +
-      '</div>' +
-      '<a class="civitatis-affiliate__link" href="https://www.civitatis.com/?aid=' + esc(CIVITATIS_AFILIADO) + '" target="_blank" rel="noopener noreferrer sponsored">Ver el catálogo completo en Civitatis ↗</a>' +
-      '</section>';
-  }
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
     var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
@@ -3348,6 +3332,27 @@
     var detail = card && card.querySelector('.hotel-detail');
     return detail && detail.textContent ? detail.textContent.trim() : 'Alojamiento seleccionado';
   }
+  /* El subtitulo de la fila "Auto" del panel: el modelo que se eligio y si es a
+     nafta o electrico. El modelo importa porque el total depende entero de el
+     (13 km/l contra 9 cambia el combustible), asi que poner solo "Roadtrip"
+     dejaba a la persona sin forma de entender de donde sale el numero. Se lee
+     del <select> que ya esta en el DOM en vez de guardar el valor aparte: si
+     esos dos se desincronizan, el select es el que la persona esta mirando. */
+  function roadtripMeta() {
+    var isEv = detailState && detailState.roadtripVehicleType === 'ev';
+    if (isEv) {
+      var evSel = document.querySelector('[data-roadtrip-ev-model]');
+      var evLabel = evSel && evSel.options && evSel.selectedIndex >= 0
+        ? evSel.options[evSel.selectedIndex].textContent
+        : 'Eléctrico';
+      return 'Eléctrico · ' + evLabel;
+    }
+    var sel = document.querySelector('[data-roadtrip-model]');
+    var label = sel && sel.options && sel.selectedIndex >= 0
+      ? sel.options[sel.selectedIndex].textContent
+      : 'Auto';
+    return label.split(' · ')[0];
+  }
   function renderTripSummary() {
     var summary = $('#trip-summary');
     if (!summary) return;
@@ -3375,10 +3380,22 @@
     var toursLabel = detailState.selectedTours && detailState.selectedTours.length ? detailState.selectedTours.length + (detailState.selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
     var foodPerDay = Number(detailState.foodPerDay) || 0;
     var localPerDay = Number(detailState.localPerDay) || 0;
+    /* El transporte cambia segun el modo, y cada modo tiene SU fila. Antes solo
+       habia bus y vuelo: con el modo auto caia en la fila de "Vuelo" con 0 y el
+       auto no aparecia en ningun lado del panel. No era que estuviera en cero:
+       la seccion de auto estaba mostrando su total (combustible, peajes,
+       mantenimiento) y el presupuesto no loJamaba. La persona veia R$ 1.422 de
+       auto en su seccion y un "Vuelo R$ 0,00" en el resumen, sin forma de
+       entender que el primero estaba incluido en el total de arriba.
+
+       En auto tampoco va la fila de vuelo: no hay vuelo, hay auto. */
+    var transporteRow = detailState.transportMode === 'bus'
+      ? { cat: 'bus', label: 'Bus', meta: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(Number(detailState.parts && detailState.parts.bus) || 0), color: getCategoryColor('bus') }
+      : detailState.transportMode === 'auto'
+        ? { cat: 'auto', label: 'Auto', meta: roadtripMeta(), value: money(Number(detailState.auto) || 0), color: getCategoryColor('auto') }
+        : { cat: 'pasajes', label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') };
     var summaryItems = [
-      detailState.transportMode === 'bus'
-        ? { cat: 'bus', label: 'Bus', meta: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(Number(detailState.parts && detailState.parts.bus) || 0), color: getCategoryColor('bus') }
-        : { cat: 'pasajes', label: 'Vuelo', meta: esc(flightLabel), value: money(flightPrice), color: getCategoryColor('pasajes') },
+      transporteRow,
       ...(detailState.transportMode === 'flight' ? [{ cat: 'traslados', label: 'Transfer', meta: esc(transferMeta), value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') }] : []),
       { cat: 'alojamiento', label: 'Hotel', meta: esc(hotelName), value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
       { cat: 'comidas', label: 'Comida', meta: detailState.foodBudgetMode === 'none' ? 'Sin sumar' : (foodPerDay ? money(foodPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
@@ -3389,6 +3406,7 @@
     // quedan al final, que es donde el usuario tiene menos que mirar.
     summaryItems.forEach(function (item) {
       item.n = item.cat === 'bus' ? (Number(detailState.parts && detailState.parts.bus) || 0)
+        : item.cat === 'auto' ? (Number(detailState.auto) || 0)
         : item.cat === 'pasajes' ? flightPrice
         : item.cat === 'alojamiento' ? (Number(detailState.hotel) || 0)
         : item.cat === 'comidas' ? (Number(detailState.parts && detailState.parts.comidas) || 0)
@@ -5640,10 +5658,6 @@
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
     var toursMarkup = renderSafe(function () { return localToursMarkup(data.meta); }, '');
-    // El link de afiliado va DESPUES de los tours y en su propio bloque. Va
-    // aparte porque no suma al presupuesto y no puede: ver
-    // civitatisAffiliateLink() para por que.
-    var widgetMarkup = renderSafe(function () { return civitatisAffiliateLink(); }, '');
     // La Guia Secreta no se pinta todavia: depende de si el server nos abre la
     // puerta, y eso no se sabe hasta que responde /api/guia. Se pinta sola
     // cuando llega (pintarGuiaEnDetalle). El fallback del renderSafe era un
@@ -5654,7 +5668,7 @@
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + fuentesMarkup + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
-      hotelsMarkup + toursMarkup + widgetMarkup + foodMarkup +
+      hotelsMarkup + toursMarkup + foodMarkup +
       '</div></div>';
     updateMultiStayPricing();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
