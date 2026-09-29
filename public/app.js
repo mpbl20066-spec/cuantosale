@@ -5359,8 +5359,13 @@
       // aunque el estimado del destino coincida con algún preset.
       var current = mode === 'none' ? 0 : (kind === 'food' ? foodValue : localValue);
       var presets = options.map(function (option) {
-        var selected = mode === 'preset' && Math.abs(current - option.value) < 6;
-        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>' + money(option.value) + '/día</strong></button>';
+        /* El nivel preseleccionado sale del perfil del viaje (ver PRESET_POR_NIVEL),
+           no de parecerse al monto: los escalones del transporte local se separan
+           5-10 USD, menos que la tolerancia, y la marca caia en el vecino. La
+           tolerancia queda solo para viajes guardados sin nivel. */
+        var presetKey = kind === 'food' ? detailState.foodPresetKey : detailState.localPresetKey;
+        var selected = mode === 'preset' && (presetKey ? presetKey === option.key : Math.abs(current - option.value) < 6);
+        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-key="' + option.key + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>' + money(option.value) + '/día</strong></button>';
       }).join('');
       var customSelected = mode === 'custom';
       var customValue = kind === 'food' ? detailState.foodCustomValue : detailState.localCustomValue;
@@ -7089,7 +7094,8 @@
   function subtituloDe(p) {
     var modo = p.mode === 'auto' ? 'Auto' : p.mode === 'bus' ? 'Bus' : p.mode === 'ferry' ? 'Ferry' : 'Vuelo';
     var trayecto = trayectoDe(p);
-    var traslado = 'Transfer al hotel';
+    var horasTransfer = transferHorasDe(p);
+    var traslado = horasTransfer ? 'Transfer ~' + horasTransfer + ' h' : 'Transfer al hotel';
     var alojamiento = alojamientoDe(p);
     return [trayecto ? modo + ' ' + trayecto : modo, traslado, alojamiento].join(' · ');
   }
@@ -7275,10 +7281,29 @@
   function curIsCheapest(series) {
     var list = Array.isArray(series) ? series : [];
     var best = cheapestPoint(list);
+    /* "con escala" del modelo es un texto fijo por destino, no un dato del
+       vuelo: salia incluso con vuelo directo. Se saca, y la condicion la pone
+       la tarifa consultada (quote.transfers = cantidad de escalas). Sin tarifa
+       real no se sabe, asi que no se afirma nada. */
+    d = d.replace(/\s*con escala\.?$/i, '');
+    if (p.quote && typeof p.quote.transfers === 'number' && /^~\d+ h$/.test(d)) {
+      d += p.quote.transfers === 0 ? ' directo' : ' con escala';
+    }
     var cur = list.filter(function (x) { return x.shift === 0; })[0];
     return !!(cur && best && cur === best);
   }
   // La frase que avisa que no hay nada que mejorar. Va en el subtítulo del
+  /* Duracion estimada del transfer aeropuerto -> hotel, en horas enteras, a
+     ~60 km/h (el ritmo de los datos de data/distancias-aeropuerto.json). Sale de
+     los km de CS_TRANSFER_PRICES; sin km (barco, vuelo) no se inventa. */
+  function transferHorasDe(p) {
+    var tabla = (typeof CS_TRANSFER_PRICES !== 'undefined' && CS_TRANSFER_PRICES) ? CS_TRANSFER_PRICES[p && p.dk] : null;
+    if (!tabla) return 0;
+    if (tabla.modo === 'ferry') return 4;
+    if (tabla.modo !== 'car' || !(tabla.km > 0)) return 0;
+    return Math.max(1, Math.round(tabla.km / 60));
+  }
+
   // gráfico, que es donde se lee antes de mirar las barras.
   function cheapestIsCurNote(series) {
     var list = Array.isArray(series) ? series : [];
@@ -8028,6 +8053,15 @@
       // #dest es el <div> del combobox, no un <select>: su propiedad "value" está
       // definida con Object.defineProperty y el setter llama a setDestDisplay,
       // que es lo que refresca la etiqueta y marca la opción del menú.
+    /* Perfil del viaje -> nivel de los costos diarios. Es el mismo mapeo que usa
+       lib/model.js calc() para armar parts.comidas y parts.local (ti 0/1/2), asi
+       que la caja marcada coincide con el monto que ya esta en el total. */
+    var PRESET_POR_NIVEL = { food: ['casual', 'moderado', 'gourmet'], local: ['econ', 'medio', 'confort'] };
+    var nivelPerfil = Math.min(2, Math.max(0, Number(proposal.ti)));
+    if (Number.isFinite(nivelPerfil) && proposal.ti != null) {
+      detailState.foodPresetKey = PRESET_POR_NIVEL.food[nivelPerfil];
+      detailState.localPresetKey = PRESET_POR_NIVEL.local[nivelPerfil];
+    }
       S.dest = destination;
       $('#dest').value = destination;
       openDestinationProposal(destination);
@@ -9858,6 +9892,8 @@ function comboNombreDestino() {
         recalcularTotalViaje();
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
+        // Elegir a mano otro nivel (o "Personalizado", arriba) pisa el del perfil.
+        if (value != null) detailState[kind + 'PresetKey'] = dailyBudgetCard.getAttribute('data-daily-key') || '';
       if (dailyLocalInput && detailState) {
         detailState.localBudgetMode = 'custom';
         detailState.localCustomValue = aBase(dailyLocalInput.value);
