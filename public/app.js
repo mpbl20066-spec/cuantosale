@@ -417,27 +417,29 @@
     { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }];
   var FX = { rates: null, base: 'USD', until: 0, cargando: true };
   var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
-  /* El filtro de disponibilidad de los hoteles, y por que vive acá y no en el
-     DOM.
+  /* Solo se muestran los hoteles con disponibilidad confirmada. Antes esto era
+     un filtro con dos opciones ("Todos" / "Solo con disponibilidad") y el
+     default era mostrar todo. Ahora no hay opción: la lista es siempre la de los
+     que se pueden reservar de verdad.
 
-     No es una preferencia del viaje: es una forma de MIRAR la lista. Por eso no
-     va en `detailState` (que se reinicia en cada viaje nuevo) ni en el objeto
-     meta del server, y por eso se lee al pintar en vez de leerlo del input.
-     Lo que obliga a que sea una variable y no un atributo del <select> es que la
-     lista de hoteles se repinta sola: al cambiar el tipo, al mover el slider de
-     noches y en cada recálculo del total. Un valor guardado en el input se
-     perdía en el primer repintado, que es justo cuando la persona lo estaba
-     usando.
+     Por qué sin opción. El filtro respondía una pregunta que la app ya
+     respondía sola. Un hotel sin precio real para esas fechas no es una
+     opción: es una estimación del modelo, sin foto y sin nada confirmado.
+     Mezclarla con las que sí se pueden reserving hacía que el precio de la
+     pantalla no cerrara con lo que el cliente iba a pagar, y el caso peor era
+     el default: "Todos" salía marcado, así que la primera apertura mostraba la
+     mezcla y el error se pagaba solo.
 
-     'todos' es el default y deja la lista como estaba. Filtrar por defecto
-     escondería hoteles en la primera apertura, que es el peor primer
-     contacto: si no hay ninguno real, la sección se ve vacía sin explicación y
-     parece que la app no buscó. */
-  var hotelSoloReservables = false;
-  var HOTEL_FILTRO_DISPONIBILIDAD = [
-    { value: 'todos', label: 'Todos' },
-    { value: 'reservables', label: 'Solo con disponibilidad' }
-  ];
+     La lista llega mezclada:
+       - `source: 'booking'`: precio real consultado para el rango de fechas, con
+         foto y con link. Esto es lo que se puede reservar.
+       - `source: 'fallback'`: una entrada genérica (marca + ciudad) con el
+         precio del modelo, sin foto y sin disponibilidad comprobada.
+     Quedarse solo con la primera es lo que hace que "Ver disponibilidad"
+     signifique algo, y hace falta que el estado vacío de abajo lo explique
+     cuando no queda ninguno: ahí el mensaje dice cuántos se ocultaron y por
+     qué, que es lo único que puede decir. */
+  var hotelSoloReservables = true;
   /* `intermedio` y `confort` se muestran como "Equilibrado" y "Cómodo" para que
      el selector de alojamiento hable el mismo idioma que el selector de estilo
      de viaje, que ya decía "Ahorrar al máximo / Equilibrado / Con comodidad".
@@ -2105,38 +2107,25 @@
        llegando por la subcategoria (elegir "Maceio (Resort)" los trae) y
        `resolveHotelTypeForMeta` los cae a un tipo de la lista si hace falta. */
     var options = HOTEL_TYPE_OPTIONS;
-    return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></span></label>';
-  }
-  /* El segundo filtro, al lado del de tipo: "Solo con disponibilidad".
+    /* El tipo de alojamiento va como fila de botones, no como <select>.
+       El desplegable escondía las cuatro opciones detrás de un clic para ver
+       un menu, y encima el label de arriba y el borde del control quedaban a
+       dos pixeles: a 760px de columna, el bloque se partía en tres filas y el
+       control se leia como una seccion propia de la pagina. Los botones se
+       ven todos de una, y el que esta elegido se ve sin abrir nada.
 
-     Es distinto del de tipo y por eso va aparte. El de tipo responde "qué clase
-     de hotel", y el de disponibilidad responde "de estos, cuáles existen de
-     verdad para estas fechas". La lista que llega al navegador trae las dos
-     cosas mezcladas:
-
-       - `source: 'booking'`: precio real consultado para tu rango de fechas, con
-         foto y con link. Esto es lo que se puede reservar.
-       - `source: 'fallback'`: una entrada genérica (marca + ciudad) con el
-         precio del modelo, sin foto y sin disponibilidad comprobada. Existe para
-         que la sección no se vea vacía cuando Booking no devuelve nada.
-
-     La card ya lo dice ("Precio consultado para…" / "Estimación para…" y "total
-     en Booking" / "total estimado"), pero con eso solo la persona tiene que
-     leer las tres fichas para saber si algo es reservable. El filtro le da esa
-     respuesta de un clic.
-
-     Va en su propia función y NO pegado al return de hotelTypeSelectMarkup() a
-     propósito. Aquel se evalúa solo en test-hoteles.js para comprobar que marca
-     el tipo que se está filtrando, y si le agregáramos las opciones de
-     disponibilidad ese test empezaría a contar options que no son tipos, y la
-     función además cerraría sobre el estado del filtro. Separadas, cada una se
-     puede probar sola. */
-  function hotelAvailabilityFilterMarkup() {
-    return '<label class="hotel-type-filter hotel-type-filter--availability"><span>Disponibilidad</span>'
-      + '<span class="hotel-type-filter__control"><select data-hotel-availability aria-label="Filtrar alojamientos por disponibilidad">'
-      + HOTEL_FILTRO_DISPONIBILIDAD.map(function (o) {
-        return '<option value="' + esc(o.value) + '"' + (hotelSoloReservables === (o.value === 'reservables') ? ' selected' : '') + '>' + esc(o.label) + '</option>';
-      }).join('') + '</select></span></label>';
+       role="radio" + aria-checked y no un toggle suelto porque el grupo
+       excluyente es lo que es: elegir "Cómodo" saca "Económico", no lo
+       agrega. Con <input type=radio> nativo el estado marcado lo levaria el
+       navegador y no se veria en el repintado, que es lo que rompia el
+       filtro antes (ver el comentario de test-hoteles.js). Con aria-checked el
+       marcado se dibuja desde el estado de la pagina, y la navegacion con
+       flechas la resuelve el handler. */
+    return '<div class="hotel-type-picks"><span class="hotel-type-picks__label" id="hotel-type-label">Alojamiento</span>'
+      + '<div class="hotel-type-pills" role="radiogroup" aria-labelledby="hotel-type-label">' + options.map(function (type) {
+        var on = type === selected;
+        return '<button type="button" class="hotel-type-pill' + (on ? ' is-on' : '') + '" role="radio" aria-checked="' + (on ? 'true' : 'false') + '" tabindex="' + (on ? '0' : '-1') + '" data-hotel-type="' + type + '">' + esc(HOTEL_TYPE_LABELS[type]) + '</button>';
+      }).join('') + '</div></div>';
   }
   /* Que hotel hay que marcar al redibujar la lista.
      Devuelve true/false si el total guardado esta en la lista, y null si no se
@@ -2316,18 +2305,19 @@
       var vacio = strictType
         ? '<p class="hotel-group__empty">No encontramos alojamientos verificados de tipo ' + esc(typeLabel) + ' en ' + esc(stopName) + ' para estas fechas. No mostramos categorías distintas como reemplazo.</p>'
         : '<p class="hotel-group__empty">No encontramos alojamientos de categoría ' + esc(typeLabel) + ' en ' + esc(stopName) + ' dentro de tu presupuesto para estas fechas. Bajá el nivel de alojamiento o mirá los tipos que sí tienen opciones.</p>';
-      /* El mismo estado vacío, pero cuando la lista está vacía porque el filtro
-         de disponibilidad quitó lo que había, y no porque no haya nada.
+      /* El mismo estado vacío, pero cuando había hoteles y lo que se ocultó son
+         los que no tienen disponibilidad confirmada.
 
-         La diferencia importa: los dos se ven igual si no se dice nada, y son
-         problemas opuestos. Uno es "no hay en esta categoría" y se resuelve
-         bajando el nivel; el otro es "hay, pero ninguno tiene precio real para
-         estas fechas", y bajando el nivel no aparece nada. Por eso el mensaje
-         dice cuántos se ocultaron y ofrece volver a verlos, que es la única
-         salida cuando de verdad querés ver un estimado. */
+         Antes este mensaje decía "bajá el filtro de disponibilidad para
+         verlos", porque había un filtro para bajar. Ya no: la lista es siempre
+         la de los reservables, así que el mensaje no ofrece una salida que ya
+         no existe —decirla era prometer algo que no pasaba. Ahora dice cuántos
+         se ocultaron, por qué, y que el link de abajo los muestra: el
+         estimations siguen ahí, a un clic de Booking, que es donde el cliente
+         puede verlos de verdad. */
       if (hotelSoloReservables && hotelCatalog.length && !conDisponibilidad.length) {
         vacio = '<p class="hotel-group__empty">De los ' + hotelCatalog.length + ' alojamientos de categoría ' + esc(typeLabel)
-          + ' que encontramos en ' + esc(stopName) + ', ninguno tiene disponibilidad confirmada para estas fechas: los que había son estimaciones del modelo, no reservas. Bajá el filtro de disponibilidad para verlos.</p>';
+          + ' que encontramos en ' + esc(stopName) + ', ninguno tiene disponibilidad confirmada para estas fechas. Los que había eran estimaciones de precio, no reservas. Probá con otras fechas o mirá la disponibilidad real en Booking.</p>';
       }
       /* El link del estado vacío lleva el filtro de Booking cuando el tipo lo
          necesita. Para All Inclusive, mealplan=5 es lo que hace que la búsqueda
@@ -2415,19 +2405,27 @@
       return '<div class="hotel-group' + (isPar ? ' hotel-group--split' : '') + '" data-hotel-group="' + (isPar ? stop : 'solo') + '">' + subhead + body + '</div>';
     }
 
-    // El filtro de tipo va a la derecha del titulo, no entre el h2 y la nota: en
-    // una columna de 760px el <select> de 360px en medio partia el bloque en tres
-    // filas y dejaba la explicación abajo de un control que parece su propia
-    // sección.
+    /* El tipo de alojamiento va a la derecha del título, no entre el h2 y la
+       nota: en una columna de 760px el <select> de 360px en medio partía el
+       bloque en tres filas y dejaba la explicación abajo de un control que
+       parece su propia sección. Ahora son cuatro botones, que entran en una
+       línea y no ocupan el ancho completo.
+
+       La nota nombra el tipo ELEGIDO y el destino, en vez de repetir la
+       descripción genérica del tipo ("Opciones de bajo costo filtradas por el
+       presupuesto por noche"). Esa descripción era lo mismo para toda la
+       sección y no decía nada del viaje concreto: con los botones a la vista
+       el tipo ya se lee solo, y lo que faltaba era el resto. "Equilibrado" en
+       el h2 más el precio de esta media noche es toda la información que
+       hace falta para decidir, y en una frase. */
     var head = '<div class="hotel-options-head"><div class="hotel-options-head__text"><h2 id="hotel-options-title">Hoteles para viajar ' + esc(profile.title.toLowerCase()) + '</h2>'
-      + '<p>' + esc(profile.description)
-      + (reparto
+      + '<p>' + (reparto
         // Con dos paradas la nota tiene que nombrar las dos y decir que se elige
         // en cada una. Antes decía una sola ("por noche en Rio de Janeiro") y el
         // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
-        ? ' Elegí o reservá tu hotel en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
-        : ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.')
-      + '</p></div>' + hotelTypeSelectMarkup(meta, hotelType) + hotelAvailabilityFilterMarkup() + '</div>';
+        ? 'Elegí o reservá tu hotel en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
+        : 'Seleccionados para un viaje ' + esc(profile.title.toLowerCase()) + ' en ' + esc(meta.dest.name) + ', desde ' + money(average) + ' por noche.')
+      + '</p></div>' + hotelTypeSelectMarkup(meta, hotelType) + '</div>';
 
     // Un destino solo: el grupo único y, si no hay nada, la sección vacía de
     // siempre, sin cambio de comportamiento.
@@ -3416,7 +3414,7 @@
   function hotelLoading(meta) {
     // Misma cabecera que hotelOptions(): el filtro a la derecha del título, para
     // que el placeholder no se reorganice solo cuando llegan los datos.
-    return '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head"><div class="hotel-options-head__text"><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2><p>Buscando opciones disponibles…</p></div>' + hotelTypeSelectMarkup(meta) + hotelAvailabilityFilterMarkup() + '</div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
+    return '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head"><div class="hotel-options-head__text"><h2>Alojamientos en ' + esc(meta.dest.name) + '</h2><p>Buscando opciones disponibles…</p></div>' + hotelTypeSelectMarkup(meta) + '</div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>';
   }
   function loadHotelRecommendations(meta, accommodationTotal) {
     var requestId = ++hotelRequestId;
@@ -7075,23 +7073,6 @@
      Se repinta la sección entera en vez de esconder y mostrar cards: es lo que
      ya hacen el resto de los cambios de la lista, y el marcado del hotel elegido
      depende del DOM final. */
-  function changeHotelAvailability(value) {
-    var nuevo = value === 'reservables';
-    if (nuevo === hotelSoloReservables) return;
-    hotelSoloReservables = nuevo;
-    if (!detailState || !detailState.meta) return;
-    var section = document.querySelector('.hotel-options');
-    if (!section) return;
-    section.outerHTML = hotelOptions(detailState.meta, detailState.hotel);
-    // Recién con el DOM nuevo se puede preguntar cuál quedó marcado.
-    if (!nuevo) return;
-    var marcados = section.ownerDocument.querySelectorAll('.hotel-options [data-hotel-total]:checked');
-    if (marcados.length) return;
-    var primero = section.ownerDocument.querySelector('.hotel-options [data-hotel-total]');
-    if (!primero) return;
-    primero.checked = true;
-    actualizarAlojamiento(Number(primero.getAttribute('data-hotel-total')), true, Number(primero.getAttribute('data-hotel-stop')) || 0);
-  }
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
@@ -9007,16 +8988,35 @@ function comboNombreDestino() {
       tourInput.checked = !tourInput.checked;
       tourInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
-    $('#vista-detalle').addEventListener('change', function (e) {
-      var hotelTypeSelect = e.target.closest && e.target.closest('[data-hotel-type-select]');
-      if (hotelTypeSelect) { changeHotelType(hotelTypeSelect.value); return; }
-      // El filtro de disponibilidad. No llama a la API ni recarga nada: la lista
-      // que se acaba de filtrar ya está en memoria, y filtrarla al revés no
-      // cuesta una llamada. Recalcula el total solo si la lista quedó con
-      // opciones, porque si quedó vacía la selección anterior es la que sigue
-      // mandando en el presupuesto y no hay nada que recalcular.
-      var hotelAvail = e.target.closest && e.target.closest('[data-hotel-availability]');
-      if (hotelAvail) changeHotelAvailability(hotelAvail.value);
+    /* El tipo de alojamiento son botones, no un <select>, así que el cambio lo
+       atiende un click y no un change. No llama a la API: la lista de cada tipo
+       ya está en memoria, y filtrarla cuesta solo repintar, que es lo que ya
+       hacía el <select>. */
+    $('#vista-detalle').addEventListener('click', function (e) {
+      var pill = e.target.closest && e.target.closest('[data-hotel-type]');
+      if (!pill) return;
+      e.preventDefault();
+      changeHotelType(pill.getAttribute('data-hotel-type'));
+    });
+    /* Flechas para moverse entre los botones. Con role="radio" el teclado
+       espera que el grupo entero sea una sola parada del tabulador y que las
+       flechas lo recorran, como un grupo de radios de verdad. Sin esto los
+       cuatro botones entran en el tabulador y el que está elegido pierde el
+       foco tras cada repintado, porque tabindex se dibuja desde el estado y el
+       DOM se rehace. */
+    $('#vista-detalle').addEventListener('keydown', function (e) {
+      var pill = e.target.closest && e.target.closest('[data-hotel-type]');
+      if (!pill) return;
+      var dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1
+        : (e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0);
+      if (!dir) return;
+      e.preventDefault();
+      var pills = Array.prototype.slice.call(pill.parentNode.querySelectorAll('[data-hotel-type]'));
+      var i = pills.indexOf(pill);
+      if (i < 0) return;
+      var siguiente = pills[(i + dir + pills.length) % pills.length];
+      siguiente.focus();
+      changeHotelType(siguiente.getAttribute('data-hotel-type'));
     });
     $('#vista-detalle').addEventListener('input', function (e) {
       var staySlider = e.target.closest && e.target.closest('[data-multistay-split]');

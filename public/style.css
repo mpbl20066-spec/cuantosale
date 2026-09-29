@@ -1,4 +1,4 @@
-/* version: 129
+/* version: 130
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -628,29 +628,38 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    Va a la derecha del titulo (ver .hotel-options-head), asi que el ancho es el
    de un control de formulario, no los 360px que ocupaba cuando estaba solo en
    su propia fila. */
-.hotel-type-filter{display:grid;gap:7px;flex:0 0 264px;min-width:0;margin:0}
-.hotel-type-filter>span:first-child{font-size:13px;font-weight:700;color:var(--ink)}
-.hotel-type-filter__control{position:relative;display:block;min-width:0}
-.hotel-type-filter__control::after{position:absolute;top:50%;right:19px;width:8px;height:8px;border-right:1.8px solid var(--control-muted);border-bottom:1.8px solid var(--control-muted);content:"";pointer-events:none;transform:translateY(-75%) rotate(45deg)}
-.hotel-type-filter select{display:block;width:100%;min-height:52px;margin:0;padding:0 52px 0 17px;border:1.5px solid var(--control-line);border-radius:14px;background-color:var(--control-bg);box-shadow:0 2px 10px rgba(15,23,42,.04);color:var(--ink);font:500 16px var(--fb);appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}
-.hotel-type-filter select:hover{border-color:var(--control-muted)}
-.hotel-type-filter select:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-color:var(--focus)}
-/* Contenedor y no media query: lo que decide si el filtro entra al lado del
-   titulo es el ancho de la seccion, no el de la ventana. El bloque de detalle va
-   en una columna de 760px dentro de una pagina que puede ser mas angosta. */
-@container hoteles (max-width:600px){.hotel-type-filter{flex:1 1 100%}}
-/* El filtro de disponibilidad va al lado del de tipo y es más angosto, porque
-   sus dos opciones son cortas ("Todos" y "Solo con disponibilidad") y no
-   necesita el ancho de un tipo de hotel, que trae nombres largos. El ancho se
-   reparte con flex-basis y no con un ancho fijo: los dos filtros juntos tienen
-   que caber al lado del título, y con 264px fijos no entraban en 600px de
-   sección. Con basis, el de disponibilidad cede primero.
+/* El tipo de alojamiento: cuatro botones en una fila, al lado del título.
 
-   El contenedor se llama igual y se consulta el mismo `hoteles`, así que el
-   breakpoint es el de siempre: si el de tipo no entra, este tampoco. */
-.hotel-type-filter--availability{flex:0 1 210px;min-width:0}
-@container hoteles (max-width:600px){.hotel-type-filter--availability{flex:1 1 100%}}
-.hotel-type-filter--availability select{padding-right:52px}
+   Antes era un <select> de 264px con un label arriba. El problema no era el
+   ancho sino que un desplegable esconde las cuatro opciones detrás de un clic
+   y que el label y el borde del control quedaban pegados: en una columna de
+   760px el bloque se partía en tres filas y el control se leía como su propia
+   sección. Los botones se ven todos de una, ocupan menos ancho y el elegido
+   se ve sin abrir nada.
+
+   El label "Alojamiento" va en línea y no arriba porque arriba ocupaba una fila
+   entera para una palabra. nowrap en los dos: partir "All Inclusive" en dos
+   líneas dentro de un botón cambia su ancho y desalinea la fila. */
+.hotel-type-picks{display:flex;align-items:center;gap:9px;flex:0 0 auto;min-width:0;margin:0}
+.hotel-type-picks__label{flex:0 0 auto;font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.hotel-type-pills{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+/* min-height:44px y no el alto de una línea de texto. Estos botones eligen el
+   tipo de alojamiento, que es la decisión más cara de la pantalla después del
+   vuelo, y a 34px fallaban en el objetivo táctil en el celu. El <select> de
+   52px que estaba antes no tenía ese problema porque era un control de
+   formulario con su propio alto; un <button> con padding chico no lo tiene. */
+.hotel-type-pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 14px;border:1.5px solid var(--control-line);border-radius:22px;background:var(--control-bg);color:var(--ink);font:600 14px var(--fb);white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
+.hotel-type-pill:hover{border-color:var(--control-muted);background:var(--cel-soft)}
+.hotel-type-pill:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* El elegido se pinta del color de "elegido" de las cards del resto de la app
+   (--card-sel-*), no con la mostaza de --cel: acá no hay una acción para hacer,
+   es un estado ya aplicado, y el mismo señal que en las otras cinco secciones
+   es la que dice "esto ya está". */
+.hotel-type-pill.is-on{border-color:var(--card-sel-border);background:var(--card-sel-bg);color:var(--card-sel-ink);font-weight:800}
+/* Contenedor y no media query: lo que decide si el grupo entra al lado del
+   título es el ancho de la seccion, no el de la ventana. El bloque de detalle
+   va en una columna de 760px dentro de una pagina que puede ser mas angosta. */
+@container hoteles (max-width:600px){.hotel-type-picks{flex:1 1 100%}}
 /* El radio ya no se ve, pero no se saca del DOM: sigue siendo el control que
    el teclado tabula, el que hace que un clic en cualquier punto de la ficha
    cambie el hotel y el que :has(:checked) mira para pintar el marco, el fondo y
