@@ -1,4 +1,4 @@
-/* version: 115
+/* version: 116
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -816,6 +816,24 @@ html:has(.booking-modal:not([hidden])) body{overflow:hidden;overscroll-behavior:
    alto como la información que estaba arriba. El de Instagram conserva el
    degradado de la marca porque el botón ES esa acción; los otros usan el borde
    y el fondo de las cards del resto de la app. */
+/* El boton de reservar del voucher.
+   Vive aca y no en la card "Mi Viaje" porque necesita el total de lo que se
+   RESERVA, que no es el total del viaje que muestra la card, y la lista de
+   rubros elegidos, que recien esta completa dos pantallas mas arriba. En la
+   card decia "Reservar actividades y transfer" sin el numero, al lado de
+   "Ver mi presupuesto" que abre este mismo modal: dos caminos a la misma
+   accion, y el que tenia el precio no lo decia.
+
+   min-height:52px y el par --action-bg/--action-ink, el de las acciones que
+   cierran el viaje en el resto de la app. El <em> con el total va en
+   tabular-nums para que los numeros no bailen al cambiar de cifras. */
+.voucher-reserve{display:grid;gap:8px}
+.voucher-reserve__btn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:52px;padding:0 20px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:filter .16s ease,opacity .16s ease}
+.voucher-reserve__btn:hover{filter:brightness(1.08)}
+.voucher-reserve__btn:disabled{opacity:.55;cursor:not-allowed}
+.voucher-reserve__btn em{font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap}
+.voucher-reserve__nota{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.4}
+.voucher-reserve__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .voucher-actions{display:grid;gap:9px}.voucher-instagram{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:52px;border:0;border-radius:14px;background:linear-gradient(135deg,#feda75,#d62976 60%,#4f5bd5);color:#fff;box-shadow:0 10px 22px rgba(214,41,118,.28);font-family:inherit;font-size:15px;font-weight:800;cursor:pointer}.voucher-instagram:disabled{opacity:.7;cursor:wait}.voucher-actions__more{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.voucher-chip{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .18s ease,border-color .18s ease}.voucher-chip:hover{background:var(--bg);border-color:var(--ink2)}
 /* Los logos de marca van en el color de la marca: el WhatsApp en su verde (es
    lo que hace reconocible el botón a un vistazo) y los del resto en la tinta,
@@ -1089,24 +1107,9 @@ html:has(.booking-modal:not([hidden])) body{overflow:hidden;overscroll-behavior:
 /* El CTA de la cabecera (.local-tours__cta-wrap, __cta-total, __reserve) se fue
    con el boton: la reserva se pide desde "Mi Viaje". Se dejan las reglas de la
    tarjeta, que si se usan. */
-/* ---------- Reservar, en "Mi Viaje" ----------
-   El boton que cierra el viaje. Va arriba de "Ver mi presupuesto" porque tiene
-   su propio estado y su propio total —el de lo que se reserva, que no es el
-   total del viaje— y al lado, en dos columnas, el texto se partia.
-
-   Mismo relleno que el resto de las acciones de la app (--action-bg) y no el
-   ambar del CTA de tours: ese boton ya no existe, y el ambar de --accent es el
-   que usa "Ver mi presupuesto". Dos botones de la misma familia con el mismo
-   color de acento no dicen cual es el que cierra el viaje. */
-.trip-summary__reserve{position:relative;display:flex;width:100%;min-height:52px;align-items:center;justify-content:space-between;gap:10px;padding:0 15px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:inherit;font-size:14px;font-weight:800;line-height:1.2;cursor:pointer;transition:filter .18s ease,opacity .18s ease}
-.trip-summary__reserve:hover:not(:disabled){color:var(--action-ink);filter:brightness(1.12)}
-.trip-summary__reserve:disabled{opacity:.5;cursor:not-allowed}
-.trip-summary__reserve:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.trip-summary__reserve>span{text-align:left;min-width:0}
 /* El total de la reserva, en la misma cifra que el total del viaje para que las
    dos se lean como de la misma familia. tabular-nums para que no baile el ancho
    al cambiar de monto. */
-.trip-summary__reserve>em{flex:0 0 auto;font-family:var(--fh);font-size:21px;font-style:normal;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 /* La card es horizontal: foto a la izquierda, ficha a la derecha. Dos por fila
    porque con tres la ficha quedaba de ~280px y la foto de ~190px, que es una
    proporcion de postal. Con dos hay ancho para el titulo largo, la lista de

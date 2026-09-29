@@ -4855,6 +4855,50 @@
       '<circle cx="6.6" cy="17.4" r="2.1"/><circle cx="15.6" cy="17.4" r="2.1"/>' +
       '</svg>';
   }
+  /* Un tramo del transfer en un viaje de dos paradas.
+
+     shared  — solo en un destino sin van compartida no existe.
+     amount  — lo que suma al presupuesto si se elige. El compartido ya viene
+               multiplicado por los viajeros.
+     auto    — true para el tramo entre paradas: se cobra siempre y no se elige
+               modalidad, asi que se muestra como fila y no como cards.
+
+     Devolver 0 en vez de omitir la fila cuando no aplica: el rubric de traslados
+     tiene que seguir cuadrando con lo que ve la persona. Un tramo que no se
+     muestra porque no aplica y un tramo que se muestra en 0 son dos cosas
+     distintas, y solo la primera se puede permitir el lujo de desaparecer. */
+  function tramosTransfer(state) {
+    var meta = (state && state.meta) || {};
+    var precios = transferPreciosDe(meta);
+    var pax = Math.max(1, Number((meta && meta.pax) || (state && state.pax) || (typeof S !== 'undefined' && S && S.pax)) || 1);
+    var tramos = [];
+    if (meta.dest) {
+      tramos.push({
+        key: 'llegada', auto: false, selected: (state && state.transferType) || '',
+        shared: precios.soloPrivado ? 0 : precios.compartido * pax,
+        private: precios.privado,
+        from: precios.aeropuerto ? 'Aeropuerto de ' + precios.aeropuerto + (precios.iata ? ' (' + precios.iata + ')' : '') : 'Aeropuerto',
+        to: meta.dest.name,
+        note: precios.km ? precios.km + ' km' : ''
+      });
+    }
+    var ms = state && state.multiStay;
+    if (ms && ms.transfer && ms.stays && ms.stays.length === 2) {
+      var entre = ms.transfer;
+      // El server ya lo calculo con la misma formula (model.comboTransfer), asi
+      // que el numero no se reimprime aca: se usa el que vino. La modalidad es
+      // "auto" porque es un solo pasaje por persona y no hay nada que elegir.
+      tramos.push({
+        key: 'entre', auto: true, selected: '',
+        amount: Math.max(0, Number(entre.totalUsd) || 0),
+        from: ms.stays[0].name,
+        to: ms.stays[1].name,
+        note: entre.distanceKm ? entre.distanceKm + ' km' + (entre.hours ? ' · ' + entre.hours + ' h' : '') : '',
+        ferry: entre.mode === 'ferry'
+      });
+    }
+    return tramos;
+  }
   function transferCard(meta) {
     var selected = detailState && detailState.transferType || '';
     // Los precios salen de la tabla por destino (public/transfer-precios.js, que
@@ -4897,12 +4941,36 @@
        seccion que no se movia al cambiar de modalidad: se elegia el privado y
        el total de arriba seguia diciendo el del compartido durante un instante.
        El total del viaje, ese si, esta en "Mi Viaje". */
+    /* Los tramos. En un destino solo es el de siempre: una fila de llegadas y
+       las dos cards. En dos paradas son DOS traslados distintos y son de otra
+       naturaleza: el de la segunda parada no sale del aeropuerto, sino del hotel
+       de la primera. Presentarlos como si los dos fueran "desde el aeropuerto"
+       era falso, y antes el segundo ni siquiera aparecia como opcion: su monto
+       entraba al total a ciegas, sin fila, sin modalidad y sin poder sacarlo. */
+    var tramos = tramosTransfer(detailState);
+    var filasTramos = tramos.map(function (tramo) {
+      var cabeza = '<div class="transfer-leg"><div class="transfer-leg__head"><span class="transfer-leg__badge">' + esc(tramo.ferry ? 'Ferry' : 'Transfer') + '</span>' +
+        '<strong>' + esc(tramo.from) + ' → ' + esc(tramo.to) + '</strong>' +
+        (tramo.note ? '<span class="transfer-leg__note">' + esc(tramo.note) + '</span>' : '') + '</div>';
+      if (tramo.auto) {
+        // No es una eleccion: es un pasaje que ya esta en el total. Sin card,
+        // sin radio y sin "Agregar", porque no hay nada que agregar.
+        return cabeza + '<p class="transfer-leg__auto">' + (tramo.ferry ? 'Un pasaje de ferry por persona' : 'Un transfer por persona entre las paradas') + ': <b>' + money(tramo.amount) + '</b>. Se coordina con el operador al reservar.</p></div>';
+      }
+      if (tramo.key === 'llegada') {
+        return cabeza + '<div class="transfer-choice-grid">' + cards + '</div></div>';
+      }
+      return cabeza + '</div>';
+    }).join('');
+    var hayEntre = tramos.some(function (tramo) { return tramo.key === 'entre'; });
     return '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
-      '<div class="official-transfer__head"><div><h2>Transfer desde el aeropuerto</h2>' +
-      '<p>Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.aeropuerto ? ' desde ' + esc(t.aeropuerto) + ' (' + esc(t.iata) + ')' : '') + (t.km ? ', a ' + t.km + ' km.' : '.') + '</p>' +
+      '<div class="official-transfer__head"><div><h2>' + (hayEntre ? 'Tus traslados' : 'Transfer desde el aeropuerto') + '</h2>' +
+      '<p>' + (hayEntre
+        ? 'Elegí cómo llegás a la primera parada. El traslado a la segunda se coordina aparte.'
+        : 'Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.aeropuerto ? ' desde ' + esc(t.aeropuerto) + ' (' + esc(t.iata) + ')' : '') + (t.km ? ', a ' + t.km + ' km.' : '.')) + '</p>' +
       '</div></div>' +
       modoNota +
-      '<div class="transfer-choice-grid">' + cards + '</div>' +
+      filasTramos +
       (selected ? '<p class="transfer-hint">El horario de recogida lo coordinás con el operador al reservar.</p>' : '') +
       '</section>';
   }
@@ -6229,16 +6297,17 @@
     // mano. Estaba fija en "Búzios → Arraial do Cabo" porque el único par que
     // existía era ese; con los 88 la frase de logística le decía a alguien que
     // venía a Paraty + Ilha Grande que su vuelo iba a Búzios y Arraial.
-    /* La frase dice SOLO el aeropuerto por el que se entra y se sale. Antes
-      CELLA recitaba la ruta interna: "aeropuerto → Natal → Fortaleza /
-       Jericoacoara → aeropuerto, incluye transfers y el traslado entre paradas
-       (estimado, 43 por persona)". Eso mezclaba tres cosas distintas: por
-       dónde entra el vuelo, cómo se reparte el traslado y cuánto de eso es
-       estimado. La unica que es real de punta a punta es el aeropuerto, y es la
-       unica que se puede decir sin aclarar despues. Las paradas ya estan
-       nombradas arriba, cada una con sus noches, asi que la ruta no informa
-       nada nuevo: repite los mismos dos nombres. */
-    var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '). Incluye los transfers desde y hacia el aeropuerto.';
+    /* La frase nombra el aeropuerto por el que se entra y se sale, y NO promete
+       los transfers. Antes decia "Incluye los transfers desde y hacia el
+       aeropuerto", y con dos paradas eso era falso por partida doble: el
+       traslado a la segunda parada no sale del aeropuerto sino del hotel de la
+       primera, y el de la vuelta se hire aparte. Peor: se eligio la modalidad
+       del primer tramo, asi que el total de traslados cambia segun lo que se
+       toque en la seccion, y prometer un total cerrado en un cartel es mentir
+       mientras esa seccion siga abierta.
+
+       Lo que si es real y no cambia: el vuelo entra y sale por ese aeropuerto. */
+    var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '). El transfer a cada parada se elige y se coordina aparte.';
     return '<section class="multistay-panel" aria-labelledby="multistay-title" data-multistay-panel>' +
       '<div class="multistay-panel__head"><div><span class="multistay-panel__eyebrow">ITINERARIO MULTIDESTINO</span><h2 id="multistay-title">Distribuí tus noches</h2></div><span class="multistay-panel__total">' + nights + (nights === 1 ? ' noche' : ' noches') + ' en total</span></div>' +
       (nights > 1 ? '<div class="multistay-panel__stays"><div class="multistay-panel__stay"><strong>' + esc(first.name) + '</strong><span><b data-multistay-first-nights>' + firstNights + '</b> ' + (firstNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-first-cost>' + money(0) + ' alojamiento estimado</small></div>' +
