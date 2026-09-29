@@ -1,4 +1,4 @@
-/* version: 135
+/* version: 136
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1067,14 +1067,18 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    color que la barra: el color de la accion principal. */
 .voucher-ventajas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:0 0 2px;list-style:none}
 .voucher-ventajas li{display:grid;gap:5px;min-width:0}
-.voucher-ventajas .voucher-btn__ico{width:19px;height:19px;color:var(--cel)}
+/* 21px y no 19px: a 19 los dientes del engranaje y el interior del escudo se
+   perdian y los tres iconos se leian como tres manchas doradas del mismo peso.
+   Con mas caja las formas se distinguen, que es justo lo que un diferencial
+   tiene que hacer. */
+.voucher-ventajas .voucher-btn__ico{width:21px;height:21px;color:var(--cel)}
 .voucher-ventajas span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.4}
 /* En una sola columna de texto el ancho de cada item es un tercio del modal y
    las frases mas largas dan tres lineas. A 560px ya no entran tres lado a
    lado con texto legible. */
 @media (max-width:560px){
   .voucher-ventajas{grid-template-columns:minmax(0,1fr);gap:9px}
-  .voucher-ventajas li{grid-template-columns:19px minmax(0,1fr);gap:9px;align-items:center}
+  .voucher-ventajas li{grid-template-columns:21px minmax(0,1fr);gap:9px;align-items:center}
 }
 
 /* ---------- El boton de cierre ----------

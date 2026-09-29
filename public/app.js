@@ -3687,14 +3687,29 @@
   /* Los diferenciales de la agencia. No son marcas, asi que van aparte de
      BRAND_ICONS: mismo dibujo stroked y misma clase, pero otra historia. */
   var VENTAJA_ICONS = {
-    soporte: '<path d="M4 13v-1.5A8 8 0 0 1 20 11.5V13"/><rect x="2.6" y="12.4" width="4.2" height="7" rx="2.1"/><rect x="17.2" y="12.4" width="4.2" height="7" rx="2.1"/>',
-    curaduria: '<path d="M12 3.2 14.3 8l5.3.8-3.8 3.7.9 5.3-4.7-2.5-4.7 2.5.9-5.3L4.4 8.8 9.7 8Z"/>',
-    logistica: '<circle cx="8.4" cy="8.2" r="3.1"/><path d="M2.8 19.6c0-3.1 2.5-5.3 5.6-5.3s5.6 2.2 5.6 5.3"/><circle cx="17.2" cy="9.4" r="2.4"/><path d="M16 14.4c2.6.4 4.4 2.3 4.4 5.2"/>',
+
+    soporte: '<path d="M12 2.7 19.7 5.5v6c0 4.3-3.1 7.9-7.7 9.4-4.6-1.5-7.7-5.1-7.7-9.4v-6Z"/>'
+      + '<path d="M8.4 12.2l2-2a1.5 1.5 0 0 1 2.1 0l.5.5.5-.5a1.5 1.5 0 0 1 2.1 0l2 2"/>'
+      + '<path d="M8.4 12.2 6.8 13.8l2.7 2.7a1.5 1.5 0 0 0 2.1 0l.4-.4"/>'
+      + '<path d="M15.6 12.2 17.2 13.8l-2.7 2.7"/>',
+
+    curaduria: '<circle cx="10.4" cy="10.4" r="6.2"/>'
+      + '<path d="M14.8 14.8 20.4 20.4"/>'
+      + '<path d="M10.4 6.9l1.1 2.2 2.4.35-1.75 1.7.41 2.4-2.16-1.14-2.16 1.14.41-2.4L6.9 9.45l2.4-.35Z"/>',
+
+    logistica: '<circle cx="5.4" cy="8.6" r="2.4"/>'
+      + '<path d="M1.7 17.8c0-2 1.7-3.6 3.7-3.6s3.7 1.6 3.7 3.6"/>'
+      + '<circle cx="18.6" cy="8.6" r="2.4"/>'
+      + '<path d="M14.9 17.8c0-2 1.7-3.6 3.7-3.6s3.7 1.6 3.7 3.6"/>'
+      + '<path d="M9.3 12.3h5.4"/>'
+      + '<circle cx="12" cy="16.9" r="2.4"/>'
+      + '<path d="M12 12.8v1.3M12 19.7v1.3M7.9 16.9h1.3M14.8 16.9h1.3M9.2 14.1l.9.9M13.9 18.8l.9.9M9.2 19.7l.9-.9M13.9 14.9l.9-.9"/>',
   };
+
   function ventajaIcon(key) {
     var d = VENTAJA_ICONS[key];
     if (!d) return '';
-    return '<svg class="voucher-btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+    return '<svg class="voucher-btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
   }
   /* La barra de diferenciales. Texto fijo: no depende del viaje ni del estado,
      y es exactamente por eso que va en el modal y no en la seccion de la
@@ -4286,6 +4301,28 @@
 
      Los rubros confirmados van primero, porque son los que el asesor necesita
      para avanzar. Los pendientes van al final como pedido, no como logro. */
+  /* El link para sumarse al grupo, si el grupo ya existe.
+
+     El id lo escribe grupo.js la primera vez que alguien entra a /grupo, bajo
+     'cuantosale_grupo_ver_en'. Y /grupo/<id> es una ruta publica que ya
+     funciona: server.js la sirve y le inyecta los og:title para que WhatsApp
+     muestre la vista previa del reparto.
+
+     Devuelve null cuando todavia no hay grupo. No se inventa un id: un link a
+     un grupo que no existe abre una pagina vacia y el que la abre es el asesor,
+     que es la peor persona para mostrarle algo roto. Sin grupo, el mensaje
+     manda a /grupo, que es donde se arma y de ahi sale el link para compartir.
+
+     La clave que usa grupo.js se lee del mismo localStorage y con el mismo
+     nombre a proposito: si cambia de nombre, el link deja de funcionar y no
+     hay ningun test que lo note. */
+  function enlaceGrupo() {
+    var id = '';
+    try { id = localStorage.getItem('cuantosale_grupo_ver_en') || ''; } catch (e) { return null; }
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id))) return null;
+    return location.origin.replace(/\/$/, '') + '/grupo/' + id;
+  }
+
   function mensajeCoordinar() {
     if (!detailState || !detailState.meta) return null;
     var destino = detailState.meta.dest.name;
@@ -4312,6 +4349,13 @@
       lineas.push('El alojamiento y el vuelo ya estan listos; me queda coordinar los traslados y las actividades con ustedes.');
     }
     lineas.push('Quiero arrancar con los traslados y las actividades. \u00bfLos coordinan ustedes o necesito pedirlo por aca?');
+    var grupo = enlaceGrupo();
+    lineas.push('');
+    if (grupo) {
+      lineas.push('Para unirse al reparto: ' + grupo);
+    } else {
+      lineas.push('Para repartir entre los que viajan, armamos el grupo acá: ' + location.origin.replace(/\/$/, '') + '/grupo');
+    }
     lineas.push('');
     lineas.push('Presupuesto estimado del cotizador: ' + money(Math.round((Number(getBudgetBreakdown(detailState).total) || 0))));
     return lineas.join('\n');
@@ -4703,6 +4747,19 @@
     var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
     var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + vueloNombreCorto(flightSummary) + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
+    /* El itinerario que se manda por WhatsApp lleva el link del grupo, cuando ya
+       existe. Es el mismo texto que ve la persona, asi que la otra recibe el
+       viaje entero y el lugar donde repartirse, en un solo mensaje y sin que
+       haya que mandarle dos cosas separadas. */
+    var grupoTexto = enlaceGrupo()
+      ? '\n\n\U0001F465 Para repartirse el total: ' + enlaceGrupo()
+      : '';
+    /* El link del grupo va al final del itinerario, que es el mismo texto que se
+       manda por WhatsApp. Quedo definido despues de summaryText por que
+       summaryText es una sola expresion larga: agregar el link al final, en una
+       sentencia aparte, es mas barato de leer y de corregir que partir esa
+       cadena en tres. */
+    summaryText += grupoTexto;
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
     // toursWhatsappUrl() ya no se usa acá y queda sin referencias: el "Reservar"
     // de tours abre el checkout, y checkoutWhatsappUrl() arma un mensaje que
