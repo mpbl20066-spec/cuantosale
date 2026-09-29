@@ -4764,7 +4764,7 @@
     try { renderTripSummary(); } catch (e) { /* todavia no hay viaje que pintar */ }
     var modal = $('#booking-modal');
     if (!modal || modal.hidden) return;
-    if (modal.dataset.summaryText) openItinerarySummaryModal();
+    if (modal.dataset.summaryText) openItinerarySummaryModal({ repintado: true });
   }
 
   /* ---------- Resumen final del itinerario ----------
@@ -4772,7 +4772,12 @@
      botón de cerrar y scroll propio, y se llega con el CTA "Ver mi presupuesto"
      del panel "Mi Viaje". Se pinta cada vez que se abre, así que los números
      son los de este momento y no los de un recálculo anterior. */
-  function openItinerarySummaryModal() {
+  function openItinerarySummaryModal(opts) {
+    /* opts.repintado: lo llama pintarVoucherReservas() para refrescar un modal ya
+       abierto. Ese camino NO vuelve a pedir reservas ni a preguntar si es agencia:
+       cada una de esas respuestas repintaba el modal, que las volvia a pedir, y el
+       bucle reemplazaba los botones (X incluida) en medio del clic. */
+    var _repintado = !!(opts && opts.repintado);
     if (!detailState || !detailState.meta) return;
     var modal = $('#booking-modal');
     // Si ya estaba abierto, se repinta en el mismo lugar en vez de volver arriba.
@@ -5318,12 +5323,15 @@
        propuesta le sobra un round-trip a cada cambio de hotel o de fecha que
        nadie está mirando. Si la respuesta llega con el voucher ya abierto,
        cargarReservasViaje() lo repinta solo. */
-    initAuth().then(function () { cargarReservasViaje(); });
+    if (!_repintado) initAuth().then(function () { cargarReservasViaje(); });
     /* Lo mismo con "soy de la agencia": decide si las filas traen el control de
        marcar, así que tiene que estar resuelto antes del próximo repintado.
        controlReserva() lee la variable, no espera: el chequeo se cachea y solo
        vuelve a latir en el primer render. */
-    initAuth().then(esAgencia).then(function (agencia) { if (agencia) pintarVoucherReservas(); });
+    if (!_repintado) {
+      var _eraAgencia = soyAgencia;
+      initAuth().then(esAgencia).then(function (agencia) { if (agencia && !_eraAgencia) pintarVoucherReservas(); });
+    }
   }
   function syncDailyBudgetState() {
     if (!detailState || !detailState.meta) return;
