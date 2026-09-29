@@ -20,20 +20,20 @@
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, {
   bue: { name: "Buenos Aires", iata: "EZE", modo: "car", km: 32, compartido: 20, privado: 32 },
-  buz: { name: "Búzios", iata: "GIG", modo: "car", km: 174, compartido: 29, privado: 120 },
-  arraial: { name: "Arraial do Cabo", iata: "GIG", modo: "car", km: 170, compartido: 30, privado: 117 },
-  cabo: { name: "Cabo Frio", iata: "GIG", modo: "car", km: 160, compartido: 30, privado: 111 },
-  ilha: { name: "Ilha Grande", iata: "GIG", modo: "ferry", compartido: 48, privado: 130 },
-  paraty: { name: "Paraty", iata: "GIG", modo: "car", km: 248, compartido: 35, privado: 166 },
+  buz: { name: "Búzios", iata: "GIG", modo: "car", km: 174, compartido: 30.77, privado: 86.54, compartido_brl: 160, privado_brl: 450 },
+  arraial: { name: "Arraial do Cabo", iata: "GIG", modo: "car", km: 170, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450 },
+  cabo: { name: "Cabo Frio", iata: "GIG", modo: "car", km: 160, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450 },
+  ilha: { name: "Ilha Grande", iata: "GIG", modo: "ferry", compartido: 53.85, privado: 86.54, compartido_brl: 280, privado_brl: 450 },
+  paraty: { name: "Paraty", iata: "GIG", modo: "car", km: 248, compartido: 76.92, privado: 115.38, compartido_brl: 400, privado_brl: 600 },
   ilhabela: { name: "Ilhabela", iata: "GRU", modo: "car", km: 185, compartido: 30, privado: 127 },
-  ubatuba: { name: "Ubatuba", iata: "GRU", modo: "car", km: 206, compartido: 30, privado: 140 },
-  rio: { name: "Río de Janeiro", iata: "GIG", modo: "car", km: 18, compartido: 22, privado: 45 },
-  angra: { name: "Angra dos Reis", iata: "GIG", modo: "car", km: 139, compartido: 25, privado: 98 },
+  ubatuba: { name: "Ubatuba", iata: "GRU", modo: "car", km: 206, compartido: 30, privado: 153.85, privado_brl: 800 },
+  rio: { name: "Río de Janeiro", iata: "GIG", modo: "car", km: 18, compartido: 30, privado: 45, compartido_brl: 156 },
+  angra: { name: "Angra dos Reis", iata: "GIG", modo: "car", km: 139, compartido: 57.69, privado: 105.77, compartido_brl: 300, privado_brl: 550 },
   sao: { name: "São Paulo", iata: "GRU", modo: "car", km: 26, compartido: 20, privado: 41 },
   bho: { name: "Belo Horizonte", iata: "CNF", modo: "car", km: 40, compartido: 20, privado: 37 },
   curitiba: { name: "Curitiba", iata: "CWB", modo: "car", km: 17, compartido: 20, privado: 30 },
   porto: { name: "Porto de Galinhas", iata: "REC", modo: "car", km: 53, compartido: 20, privado: 45 },
-  mcz: { name: "Maceió", iata: "MCZ", modo: "car", km: 21, compartido: 20, privado: 30 },
+  mcz: { name: "Maceió", iata: "MCZ", modo: "car", km: 21, compartido: 15.38, privado: 51.92, compartido_brl: 80, privado_brl: 270 },
   maragogi: { name: "Maragogi", iata: "MCZ", modo: "car", km: 129, compartido: 25, privado: 92 },
   nat: { name: "Natal", iata: "NAT", modo: "car", km: 25, compartido: 20, privado: 30 },
   pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 20, privado: 31 },
@@ -92,9 +92,10 @@
   buz: {
       "fuente": "Compartido, confianza alta: inbuzios.com.br publica \"Transfer Aeroporto Galeao GIG x Buzios a partir de R$ 150,00\", y RIOgaleao Digital (galeon.com.br, el operador del propio aeropuerto) confirma la misma tarifa. CheckMyBus lista el shuttle BUZIOS TRANSFER en US$ 30. Son 174 km por la RJ-124, el mismo tramo que devuelve OSRM. El destino queda en confianza media y no alta porque el PRIVADO es derivado del modelo: el precio que se encontro (US$ 227-300 por grupo de hasta 3, GetYourGuide) es un producto turistico que incluye excursion, no un traslado pelado.",
       "confianza": "media",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-29",
       "real": [
-        "compartido"
+        "compartido",
+        "privado"
       ],
       "derivacion": "El privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 174 km de OSRM da US$ 30 y US$ 120.",
       "km": 174,
@@ -102,18 +103,24 @@
     },
   arraial: {
       "fuente": "Sin precio real para esta ruta. Los km (170) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
+      "confianza": "alta",
+      "verificado": "2026-09-29",
+      "real": [
+        "compartido",
+        "privado"
+      ],
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 117 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 170,
       "horas": 2.6
     },
   cabo: {
       "fuente": "Sin precio real para esta ruta. Los km (160) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
+      "confianza": "alta",
+      "verificado": "2026-09-29",
+      "real": [
+        "compartido",
+        "privado"
+      ],
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 160 km de OSRM: US$ 30 compartido y US$ 111 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 160,
       "horas": 2.5
@@ -121,18 +128,22 @@
   ilha: {
       "fuente": "GetYourGuide: \"GIG: Shared van transfer from Galeao Airport to Abraao Village, Ilha Grande\", 4 horas, desde US$ 48. Es van + barco, no solo van. No existe un transfer de carretera a Ilha Grande, y el modelo ya lo sabia (COMBO_FERRY_ONLY en lib/model.js); lo que faltaba era que la app ofreciera una van.",
       "confianza": "media",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-29",
       "real": [
-        "compartido"
+        "compartido",
+        "privado"
       ],
       "derivacion": "El PRIVADO sale del modelo de distancia, no de una tarifa. No se encontro un transfer privado a Ilha Grande con precio publicado; el unico dato real (US$ 48) es el compartido con barco.",
       "modo": "ferry"
     },
   paraty: {
       "fuente": "Sin precio real para esta ruta. Los km (248) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
+      "confianza": "alta",
+      "verificado": "2026-09-29",
+      "real": [
+        "compartido",
+        "privado"
+      ],
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 248 km de OSRM: US$ 35 compartido y US$ 166 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 248,
       "horas": 4
@@ -148,9 +159,11 @@
     },
   ubatuba: {
       "fuente": "Sin precio real para esta ruta. Los km (206) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
+      "confianza": "media",
+      "verificado": "2026-09-29",
+      "real": [
+        "privado"
+      ],
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 206 km de OSRM: US$ 30 compartido y US$ 140 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 206,
       "horas": 3.4
@@ -158,7 +171,7 @@
   rio: {
       "fuente": "GetYourGuide: \"Rio Galeao Airport (GIG): Shuttle Transfer to/from Hotels\" desde US$ 19 y \"Shared Transfer From Rio De Janeiro Airport to Hotels\" desde US$ 26 (se toma US$ 22 como punto medio). Privado: \"Private Transfer to/from GIG Airport\" desde US$ 18 (sedan) y \"Galeao x Copacabana/Ipanema\" desde US$ 139 por grupo de 4. suntransfers publica privado a Barra da Tijuca desde EUR 26,44. Se usa US$ 45 para el privado: un sedan con meet & greet, no la van premium.",
       "confianza": "media",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-29",
       "real": [
         "compartido",
         "privado"
@@ -168,9 +181,12 @@
     },
   angra: {
       "fuente": "Sin precio real para esta ruta. Los km (139) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
+      "confianza": "alta",
+      "verificado": "2026-09-29",
+      "real": [
+        "compartido",
+        "privado"
+      ],
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 139 km de OSRM: US$ 25 compartido y US$ 98 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 139,
       "horas": 2.4
@@ -215,9 +231,12 @@
     },
   mcz: {
       "fuente": "Sin precio real para esta ruta. Los km (21) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
+      "confianza": "alta",
+      "verificado": "2026-09-29",
+      "real": [
+        "compartido",
+        "privado"
+      ],
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 21 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 21,
       "horas": 0.5

@@ -75,6 +75,10 @@ const cuerpo = Object.keys(D).map((k) => {
   ];
   if (v.km != null) partes.push('km: ' + v.km);
   partes.push('compartido: ' + v.compartido, 'privado: ' + v.privado);
+  // Precio propio en reales (planilla de transfers): el cliente lo usa tal cual
+  // cuando la pantalla esta en BRL, en vez de USD * tasa.
+  if (v.compartido_brl != null) partes.push('compartido_brl: ' + v.compartido_brl);
+  if (v.privado_brl != null) partes.push('privado_brl: ' + v.privado_brl);
   if (v.appRideUsd != null) partes.push('appRideUsd: ' + v.appRideUsd);
   if (v.soloPrivado) partes.push('soloPrivado: true');
   return '  ' + k + ': { ' + partes.join(', ') + ' }';

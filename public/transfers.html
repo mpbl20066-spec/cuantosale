@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Transfers desde el aeropuerto · CuántoSale</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); }
+.tp-wrap { max-width: 900px; margin: 0 auto; padding: 20px 16px 80px; }
+.tp-wrap h1 { font-size: 22px; margin: 0 0 4px; }
+.tp-lead { margin: 0 0 16px; color: var(--muted, #666); font-size: 14px; max-width: 62ch; }
+.tp-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.tp-tabs { display: inline-flex; border: 1px solid var(--line, #ddd); border-radius: 10px; overflow: hidden; }
+.tp-tabs button { font: inherit; font-size: 14px; padding: 8px 14px; border: 0; background: var(--card, #fff); color: inherit; cursor: pointer; }
+.tp-tabs button + button { border-left: 1px solid var(--line, #ddd); }
+.tp-tabs button[aria-pressed="true"] { background: #0e6a6a; color: #fff; }
+.tp-bar input { flex: 1 1 200px; min-width: 160px; font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit; }
+.tp-count { font-size: 13px; color: var(--muted, #666); margin: 0 0 10px; }
+.tp-list { display: grid; gap: 8px; }
+.tp-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 10px; background: var(--card, #fff); }
+.tp-name { font-weight: 600; margin: 0; }
+.tp-meta { font-size: 12.5px; color: var(--muted, #666); }
+.tp-prices { display: flex; gap: 14px; text-align: right; }
+.tp-price b { display: block; font-size: 16px; }
+.tp-price span { font-size: 11.5px; color: var(--muted, #666); }
+.tp-empty { padding: 40px 12px; text-align: center; color: var(--muted, #666); }
+</style>
+</head>
+<body class="transfers-page">
+<div class="tp-wrap">
+  <h1>Transfers desde el aeropuerto</h1>
+  <p class="tp-lead">Elegí el tipo de transfer. El compartido se cobra por persona; el privado, por vehículo de hasta 4 personas. Precios de un solo trayecto (aeropuerto → hotel), en USD.</p>
+  <div class="tp-bar">
+    <div class="tp-tabs" role="group" aria-label="Tipo de transfer">
+      <button type="button" data-tipo="todos" aria-pressed="true">Todos</button>
+      <button type="button" data-tipo="privado" aria-pressed="false">Privado</button>
+      <button type="button" data-tipo="compartido" aria-pressed="false">Compartido</button>
+    </div>
+    <input type="search" id="tp-q" placeholder="Buscar destino" aria-label="Buscar destino" autocomplete="off">
+  </div>
+  <p class="tp-count" id="tp-count" aria-live="polite"></p>
+  <div class="tp-list" id="tp-list"></div>
+</div>
+<script src="/transfer-precios.js"></script>
+<script>
+(function () {
+  var DATA = window.CS_TRANSFER_PRICES || {};
+  var tipo = 'todos';
+  var listEl = document.getElementById('tp-list');
+  var countEl = document.getElementById('tp-count');
+  var qEl = document.getElementById('tp-q');
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function norm(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function usd(n) { return 'US$ ' + Number(n).toLocaleString('es-UY', { maximumFractionDigits: 0 }); }
+
+  function render() {
+    var q = norm(qEl.value.trim());
+    var items = Object.keys(DATA).map(function (k) { return DATA[k]; })
+      .filter(function (d) { return d && d.name; })
+      // Un destino sin ese tipo de transfer no aparece bajo su filtro: mostrarlo
+      // con precio vacio haria pensar que el servicio existe.
+      .filter(function (d) { return tipo === 'todos' || Number(d[tipo]) > 0; })
+      .filter(function (d) { return !q || norm(d.name).indexOf(q) >= 0; })
+      .sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); });
+
+    countEl.textContent = items.length + (items.length === 1 ? ' destino' : ' destinos');
+    if (!items.length) { listEl.innerHTML = '<div class="tp-empty">No hay destinos con ese filtro.</div>'; return; }
+    listEl.innerHTML = items.map(function (d) {
+      var precios = '';
+      if ((tipo === 'todos' || tipo === 'privado') && Number(d.privado) > 0)
+        precios += '<div class="tp-price"><b>' + usd(d.privado) + '</b><span>Privado · por vehículo</span></div>';
+      if ((tipo === 'todos' || tipo === 'compartido') && Number(d.compartido) > 0)
+        precios += '<div class="tp-price"><b>' + usd(d.compartido) + '</b><span>Compartido · por persona</span></div>';
+      var meta = 'Aeropuerto ' + esc(d.iata || '') + (d.km ? ' · ' + d.km + ' km' : '') + (d.modo === 'ferry' ? ' · ferry' : d.modo === 'vuelo' ? ' · vuelo' : '');
+      return '<div class="tp-row"><div><p class="tp-name">' + esc(d.name) + '</p><div class="tp-meta">' + meta + '</div></div>' +
+        '<div class="tp-prices">' + precios + '</div></div>';
+    }).join('');
+  }
+
+  document.querySelectorAll('.tp-tabs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      tipo = b.getAttribute('data-tipo');
+      document.querySelectorAll('.tp-tabs button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      render();
+    });
+  });
+  qEl.addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>
