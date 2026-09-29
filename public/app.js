@@ -1561,6 +1561,29 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       if (document.querySelector('.currency-menu:not([hidden])')) { cerrarMenusMoneda(); return; }
+      /* Escape cierra el modal que este abierto, si hay alguno.
+
+         Antes el handler solo miraba el menu de moneda y hacia return, asi
+         que ningun modal se cerraba con Escape. Los cinco se anuncian como
+         aria-modal="true", que es una promesa de que Escape los cierra, y
+         no se cumplia.
+
+         No es solo accesibilidad. La hoja apaga el scroll de la pagina
+         mientras hay un .booking-modal abierto, asi que el unico salida
+         mientras esta es el boton X: si no se alcanza, la pantalla queda
+         muerta y sin scroll. Escape pasa a ser la salida que siempre
+         existe.
+
+         Se le hace click al propio boton de cerrar del modal, para que
+         corra el mismo codigo que el X y no haya un segundo camino que se
+         pueda desincronizar del otro. Si un modal no tuviera boton, se
+         oculta igual: dejarlo abierto deja el scroll apagado. */
+      var abierto = document.querySelector('.booking-modal:not([hidden])');
+      if (abierto) {
+        var cerrar = abierto.querySelector('[data-close-auth],[data-close-trips],[data-close-booking]');
+        if (cerrar) cerrar.click();
+        else { abierto.hidden = true; abierto.setAttribute('aria-hidden', 'true'); abierto.innerHTML = ''; }
+      }
       return;
     }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -4498,8 +4521,15 @@
        completar el checkout de la app. Ahi si hay un hecho, y el estado es
        "Reservado" a secas.
 
-     (Duffel aparece solo en comentarios viejos, explicando que ya no esta: no
-     hay integracion con Duffel y no se puede poner en la cara del usuario.) */
+     Duffel todavia NO esta integrado, asi que no se le puede poner el nombre
+     al usuario: no hay nada que reservar todavia ahi.
+
+     Cuando este, el estado no va a venir de la URL. La orden nace en
+     nuestro servidor y el pago se procesa aca; Duffel devuelve la
+     confirmacion oficial y el PNR, y el webhook --firmado, del lado del
+     servidor-- es lo que marca el rubro como reservado. Por eso el
+     "?vuelta=" que se agrega al link sigue siendo SOLO posicionamiento:
+     un valor inventado en la barra no produce ningun cambio de estado. */
   var CANAL_RESERVA = {
     pasajes: { canal: 'Aerolínea', externo: true },
     alojamiento: { canal: 'Booking', externo: true },
