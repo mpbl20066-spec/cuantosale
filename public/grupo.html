@@ -5,15 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dividir gastos del viaje | CuántoSale</title>
 <meta name="description" content="Armá un grupo, compartí el link y dividí los gastos del viaje con tus amigos, sin necesidad de crear una cuenta.">
-<meta name="theme-color" content="#0A1830">
+<meta name="theme-color" content="#0A101A">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<!-- Mismo script que en /app: aplica el tema antes del CSS para que no haya
+     destello. Esta pagina no lleva el interruptor (no tiene barra de navegacion,
+     es un link de grupo), pero si respeta la eleccion: alguien que la eligio en
+     claro la ve en claro, y alguien sin eleccion sigue a su sistema. -->
+<script>
+(function () {
+  try {
+    var g = localStorage.getItem('cuantosale_tema');
+    if (g !== 'light' && g !== 'night') {
+      g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
+    }
+    document.documentElement.setAttribute('data-theme', g);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', g === 'light' ? '#F7F8FA' : '#0A101A');
+  } catch (e) { /* modo privado */ }
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- Misma versión que /app: el servidor marca las URLs con ?v= como
      immutable de un año, así que pedir un ?v= viejo deja al usuario pegado
      con el CSS viejo para siempre. Si tocás style.css, subí las dos páginas. -->
-<link rel="stylesheet" href="/style.css?v=103">
+<link rel="stylesheet" href="/style.css?v=105">
 <style>
   .grupo-wrap{max-width:620px;margin:0 auto;padding:24px 16px 64px}
   .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}

@@ -234,14 +234,60 @@ for (const [tinta, fondo, que] of BADGES) {
   }
 }
 
-/* 4. nadie reintroduce una tercera via al tema oscuro */
-for (const f of fs.readdirSync(path.join(RAIZ, 'public'))) {
-  if (!/\.(js|html)$/.test(f) || f === 'sw.js') continue;
-  const txt = fs.readFileSync(path.join(RAIZ, 'public', f), 'utf8');
-  if (txt.includes('data-theme')) {
-    av('public/' + f + ' menciona data-theme. Si eso setea el atributo, el bloque ' +
-      ':root[data-theme="dark"] pasa a ser real y hay que revisitar este script.');
-  }
+/* 4. el interruptor de tema existe y esta en las dos paginas.
+
+   Esto antes era un AVISO genérico: cualquier archivo de public/ que tocara
+   data-theme disparaba "revisitá este script". Con el toggle ese aviso se
+   dispara siempre y no dice nada, porque el toggle ES la forma legitima de
+   cambiar de tema. Se reemplaza por un chequeo positivo: que el boton, el
+   script del head y la funcion de app.js esten, y que los dos <link> de
+   style.css lleven la MISMA version.
+
+   Esa ultima parte es la que mas importa y no estaba cubierta: el servidor
+   marca ?v= como immutable por un ano (server.js:1782), asi que si index.html
+   pide ?v=105 y grupo.html ?v=103, uno de los dos sirve un CSS de hace un ano
+   para siempre. Pasa: se commiteo style.css a ?v=104 y un guardado del editor
+   dejo las dos paginas en ?v=103. */
+const PUB = path.join(RAIZ, 'public');
+const app = fs.readFileSync(path.join(PUB, 'app.js'), 'utf8');
+const idx = fs.readFileSync(path.join(PUB, 'index.html'), 'utf8');
+const grp = fs.readFileSync(path.join(PUB, 'grupo.html'), 'utf8');
+
+if (!/id="theme-toggle"/.test(idx)) {
+  err('public/index.html no tiene el boton #theme-toggle: no se puede cambiar de tema a mano.');
+}
+/* En app.js el boton se busca por SELECTOR (#theme-toggle), no por id="...":
+   el id vive en el HTML y aca lo que tiene que existir es la funcion y el
+   enganche del click. */
+if (!/function initThemeToggle/.test(app) || !/\$\('#theme-toggle'\)/.test(app)) {
+  err('public/app.js no tiene initThemeToggle enganchado al boton: el toggle no cambia el tema.');
+}
+/* El script del head tiene que estar ANTES del link del stylesheet. Si esta
+   despues, la pagina se pinta con :root y recien despues cambia de tema: un
+   destello en cada carga. */
+const posScript = idx.indexOf('cuantosale_tema');
+const posCss = idx.indexOf('style.css?v=');
+if (posScript < 0) {
+  err('public/index.html no aplica el tema antes de pintar.');
+} else if (posCss >= 0 && posScript > posCss) {
+  err('public/index.html carga style.css antes de aplicar el tema. Hay que aplicar el ' +
+    'tema antes del link del CSS o se ve un destello en cada carga.');
+}
+if (!/cuantosale_tema/.test(grp)) {
+  err('public/grupo.html no respeta el tema elegido en /app.');
+}
+
+const vIdx = (idx.match(/style\.css\?v=(\d+)/) || [])[1];
+const vGrp = (grp.match(/style\.css\?v=(\d+)/) || [])[1];
+if (!vIdx || !vGrp) {
+  err('Falta el ?v= en el link de style.css de una de las dos paginas. El server lo marca ' +
+    'immutable por un ano, asi que sin version no hay forma de sacar un CSS nuevo.');
+} else if (vIdx !== vGrp) {
+  err('index.html pide style.css?v=' + vIdx + ' y grupo.html pide ?v=' + vGrp + '. Con la misma ' +
+    'URL el server responde immutable por un ano, asi que las dos paginas tienen que pedir la ' +
+    'misma version o una de las dos queda con el CSS viejo para siempre.');
+} else {
+  console.log('  ok  las dos paginas piden style.css?v=' + vIdx);
 }
 
 console.log('\ntokens: ' + Object.keys(NIGHT).length + ' en :root (night), ' +

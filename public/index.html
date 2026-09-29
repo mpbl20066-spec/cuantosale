@@ -5,17 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CuántoSale | Cuánto cuesta realmente tu viaje</title>
 <meta name="description" content="Comparamos vuelos, buses y alojamiento desde Uruguay y te decimos cuánto cuesta realmente tu viaje.">
-<meta name="theme-color" content="#0A1830">
+<meta name="theme-color" content="#0A101A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CuántoSale">
+<!-- El tema va ANTES del stylesheet a proposito. Si se aplicara despues, la
+     pagina se pintaria una vez con los tokens de :root y recien despues
+     cambiaria al tema elegido: un destello blanco en cada carga de alguien
+     que esta en claro. Este script es sincrono y no espera nada.
+     Sin eleccion guardada se sigue al sistema: el que tiene el celular en
+     claro ve claro. Con eleccion guardada manda la eleccion. -->
+<script>
+(function () {
+  try {
+    var g = localStorage.getItem('cuantosale_tema');
+    if (g !== 'light' && g !== 'night') {
+      g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
+    }
+    document.documentElement.setAttribute('data-theme', g);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', g === 'light' ? '#F7F8FA' : '#0A101A');
+  } catch (e) { /* modo privado: se queda el night de :root */ }
+})();
+</script>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=103">
+<link rel="stylesheet" href="/style.css?v=105">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -30,6 +49,18 @@
     </div>
     <div class="account-actions" aria-label="Cuenta de usuario">
       <div id="currency-picker-slot"></div>
+      <!-- El icono NO es el tema actual sino el otro: en night se ve el sol
+           (invita a pasar a claro) y en claro la luna. aria-pressed dice si el
+           oscuro esta activo, que es el estado real del boton. -->
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="true" title="Cambiar a modo claro">
+        <svg class="theme-toggle__sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.4"/><path d="M12 2.6v2.2M12 19.2v2.2M4.2 12H2M22 12h-2.2M6.5 6.5 4.9 4.9M19.1 19.1l-1.6-1.6M6.5 17.5l-1.6 1.6M19.1 4.9l-1.6 1.6"/>
+        </svg>
+        <svg class="theme-toggle__moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/>
+        </svg>
+        <span class="sr-only">Cambiar entre modo claro y oscuro</span>
+      </button>
       <button type="button" id="auth-button" class="account-button">Iniciar sesión</button>
       <button type="button" id="trips-button" class="account-button account-button--secondary" hidden>Mis viajes</button>
     </div>
@@ -173,7 +204,7 @@
      Va antes de app.js porque toursFor() lo lee al cargar. Sin '?v=' a propósito:
      lo invalidaría el CACHE_NAME del service worker. -->
 <script defer src="/actividades-civitatis.js"></script>
-<script defer src="/app.js?v=137"></script>
+<script defer src="/app.js?v=139"></script>
 
 </body>
 </html>

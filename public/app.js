@@ -6157,7 +6157,57 @@
   }
 
   /* ---------- formulario ---------- */
+  /* ---------- Interruptor de tema claro / night ----------
+
+     El tema se aplica en el <head> de index.html, antes del CSS, para que la
+     pagina no se pinte con los tokens de :root y recien despues cambie (el
+     destello). Eso resuelve la carga. Acá solo esta el click y el estado del
+     boton.
+
+     Que este aca y no en el head es a proposito: el head no puede esperar a
+     que app.js exista, y el atributo ya puesto por el script del head es lo
+     que evita el parpadeo. Si alguien borra ese script del head, el tema
+     arranca en night y recien cuando carga app.js se corrige: se ve el
+     destello. Por eso el boton arranca con aria-pressed en el HTML y esta
+     funcion lo corrige de una.
+
+     Guardar en localStorage y no en cookie: no se manda en cada request y no
+     pesa. Se usa try/catch porque en modo privado localStorage tira, y en ese
+     caso el tema funciona igual, solo que no se recuerda. */
+  var THEME_KEY = 'cuantosale_tema';
+  function temaActual() {
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'night';
+  }
+  function aplicarTema(t) {
+    var nuevo = t === 'light' ? 'light' : 'night';
+    document.documentElement.setAttribute('data-theme', nuevo);
+    try { localStorage.setItem(THEME_KEY, nuevo); } catch (e) { /* modo privado */ }
+    // El color de la barra del celular lo toma el sistema del meta. Sin esto,
+    // en claro la barra de arriba queda de night y queda una franja oscura
+    // sobre una pagina clara.
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', nuevo === 'light' ? '#F7F8FA' : '#0A101A');
+    var btn = $('#theme-toggle');
+    if (btn) {
+      var noche = nuevo === 'night';
+      btn.setAttribute('aria-pressed', noche ? 'true' : 'false');
+      btn.setAttribute('title', noche ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    }
+  }
+  function initThemeToggle() {
+    // Primero se sincroniza el boton con lo que el head ya aplico. Si se
+    // hiciera solo en el click, el boton arrancaria diciendo night aunque la
+    // persona ya estaba en claro.
+    aplicarTema(temaActual());
+    var btn = $('#theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      aplicarTema(temaActual() === 'light' ? 'night' : 'light');
+    });
+  }
+
   function init() {
+    initThemeToggle();
     var authButton = $('#auth-button'), tripsButton = $('#trips-button');
     if (authButton) authButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(function () { if (authUser) openTripsModal(); else openAuthModal(); }); });
     if (tripsButton) tripsButton.addEventListener('click', function () { authReadyPromise = initAuth(); authReadyPromise.then(openTripsModal); });
