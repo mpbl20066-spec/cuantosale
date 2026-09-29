@@ -3724,6 +3724,21 @@
     if (!d) return '';
     return '<svg class="voucher-btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
   }
+  /* El vuelo solo suma al presupuesto cuando la persona lo eligio. Sin eleccion
+     el rubro dice "sin seleccionar" y vale 0: antes seguia sumando la
+     estimacion en el total como un costo fantasma. Con bus o auto el vuelo ya
+     esta en 0, asi que no cambia nada. */
+  function vueloElegido() {
+    if (!detailState) return false;
+    if (detailState.transportMode === 'bus' || detailState.transportMode === 'auto') return true;
+    var sel = getSelectedFlightSummary();
+    return !!(sel && sel.selected);
+  }
+  function vueloSumado(state) {
+    var v = Number(state && state.flight) || 0;
+    if (!v || state !== detailState) return v;
+    return vueloElegido() ? v : 0;
+  }
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
@@ -3742,13 +3757,13 @@
     var alquilerValue = Number(state.alquiler) || 0;
     var total = roadtrip
       ? Math.round((Number(state.auto) || 0) + alquilerValue + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
-      : Math.round((state.transportMode === 'bus' ? (Number(state.parts && state.parts.bus) || 0) : (Number(state.flight) || 0)) + (Number(state.hotel) || 0) +
+      : Math.round((state.transportMode === 'bus' ? (Number(state.parts && state.parts.bus) || 0) : vueloSumado(state)) + (Number(state.hotel) || 0) +
         (Number(state.parts.comidas) || 0) + (Number(state.parts.local) || 0) +
         trasladoValue + alquilerValue + (Number(state.toursTotal) || 0));
     var entries = categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return null;
       var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
-      var value = category === 'pasajes' ? (Number(state.flight) || 0)
+      var value = category === 'pasajes' ? vueloSumado(state)
         : category === 'bus' ? (Number(state.parts && state.parts.bus) || 0)
         : category === 'alojamiento' ? (Number(state.hotel) || 0)
         : category === 'traslados' ? trasladoValue
@@ -3975,7 +3990,7 @@
     var total = budget.total;
     var entries = budget.entries;
     var flightDetalle = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || '';
-    var flightPrice = detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0);
+    var flightPrice = !vueloElegido() ? 0 : (detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0));
     var hotelName = findSelectedHotelLabel();
     /* El nombre del hotel va al dato, pero solo si es un nombre. "Hotel
        seleccionado" y "Hotel recomendado" no son nombres: son los dos finales
@@ -4814,7 +4829,7 @@
     var localPerDay = Number(detailState.localPerDay) || dailyCosts.transport.eco;
     var foodTotal = Math.round(foodPerDay * nights * pax);
     var localTotal = Math.round(localPerDay * nights * pax);
-    var flightTotal = Number(detailState.flight) || 0;
+    var flightTotal = vueloSumado(detailState);
     // Con un medio terrestre el resumen habla del bus y no exige vuelo.
     var busMode = detailState.transportMode === 'bus';
     var busTotal = Number(detailState.parts && detailState.parts.bus) || 0;
@@ -5226,7 +5241,8 @@
       + '<button type="button" class="voucher-split__btn" data-split-trip>Dividir gastos con amigos</button>'
       + '</aside>';
 
-    var reservarTodo = '<div class="voucher-reserve">'
+    // Sin nada que reservar no se dibuja el boton apagado ni su nota: era ruido.
+    var reservarTodo = !pedido.count ? '' : '<div class="voucher-reserve">'
       + '<button type="button" class="voucher-reserve__btn"' + (pedido.count ? ' data-reservar-pedido' : ' disabled') + '><span>'
       + (pedido.count ? 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades')) : 'Elegí algo para reservar')
       + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
@@ -5307,7 +5323,7 @@
       '<button type="button" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Tarjeta para Instagram</span></button>' +
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
-      '<button type="button" class="voucher-chip voucher-chip--main" data-coordinar-asesor title="Abrir WhatsApp con el resumen y lo que falta coordinar">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">Coordinar con asesor</span></button>' +
+      '<button type="button" class="voucher-chip voucher-chip--main' + (pedido.count ? ' is-secondary' : '') + '" data-coordinar-asesor title="Abrir WhatsApp con el resumen y lo que falta coordinar">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">Coordinar con asesor</span></button>' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
       '</div>';
     modal.dataset.summaryText = summaryText;
@@ -5416,7 +5432,7 @@
     var rows = document.querySelectorAll('[data-cost-category]');
     Array.prototype.forEach.call(rows, function (row) {
       var category = row.getAttribute('data-cost-category');
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? (roadtrip ? detailState.auto : 0) : category === 'local' && roadtrip ? 0 : (parts[category] || 0);
+      var value = category === 'pasajes' ? vueloSumado(detailState) : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? (roadtrip ? detailState.auto : 0) : category === 'local' && roadtrip ? 0 : (parts[category] || 0);
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
@@ -6377,7 +6393,7 @@
     return categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return '';
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
-      var value = category === 'pasajes' ? detailState.flight : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + getSelectedTransferAmount(detailState) : category === 'auto' ? detailState.auto : detailState.parts[category];
+      var value = category === 'pasajes' ? vueloSumado(detailState) : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + getSelectedTransferAmount(detailState) : category === 'auto' ? detailState.auto : detailState.parts[category];
       return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
     }).join('');
   }

@@ -2588,3 +2588,10 @@ h3.block-title, .block-title:is(h3) {
 .voucher-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px;padding-bottom:4px}
 .voucher-actions .voucher-chip--main{grid-column:1/-1;order:-1;min-height:48px}
 .voucher-actions .voucher-chip{min-height:46px}
+
+/* ---------- Pie del resumen: una sola accion principal ----------
+   Con algo para reservar, "Reservar ..." es el boton solido y "Coordinar con
+   asesor" pasa a contorno. Sin nada para reservar, "Coordinar" es el principal. */
+.voucher-actions .voucher-chip--main.is-secondary{background:transparent;border:1.5px solid var(--action-bg);color:var(--action-bg);font-weight:700}
+.voucher-actions .voucher-chip--main.is-secondary:hover{background:color-mix(in srgb,var(--action-bg) 12%,transparent);color:var(--action-bg);filter:none}
+.voucher-actions .voucher-chip:not(.voucher-chip--main){border-color:var(--line);font-weight:600}
