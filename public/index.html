@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=106">
+<link rel="stylesheet" href="/style.css?v=111">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -90,7 +90,7 @@
         </div>
       </div>
     </div>
-    <!-- Los 88 pares de dos paradas. Antes solo se llegaban dentro del desplegable
+    <!-- Los 95 pares de dos paradas. Antes solo se llegaban dentro del desplegable
          de Destino, al final de cada hub: había que abrir el selector, bajar
          hasta el final de la lista y leer una línea de "Viajes de dos paradas".
          Un control propio en el formulario los deja a la vista sin tapar la
@@ -116,6 +116,11 @@
       <div id="date-range-panel" class="date-range-panel" role="dialog" aria-label="Elegí las fechas de tu viaje" hidden>
         <div class="date-range-panel__top"><button type="button" class="date-range-nav" data-calendar-nav="prev" aria-label="Mes anterior"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m15 6-6 6 6 6"/></svg></button><p id="date-range-instruction" aria-live="polite">Elegí la fecha de ida</p><button type="button" class="date-range-nav" data-calendar-nav="next" aria-label="Mes siguiente"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 6 6 6-6 6"/></svg></button></div>
         <div id="date-range-months" class="date-range-months"></div>
+        <!-- El tope de un año se escribe acá y no se deduce de los dias tachados:
+             un calendario con la ultima fila entera en gris no dice POR QUE no
+             se puede seguir, y lo mas leido de esa pantalla es "no hay mas
+             fechas", no "la app anda roto". app.js lo rellena con la fecha. -->
+        <p class="date-range-limit" data-calendar-limit></p>
       </div>
       <input id="dep" type="date" tabindex="-1" aria-hidden="true" hidden>
       <input id="ret" type="date" tabindex="-1" aria-hidden="true" hidden>
@@ -199,7 +204,7 @@
      con `npm run build:transfer`. Va antes de app.js porque las cards del
      transfer leen de acá cuando el server todavía no mandó meta.officialTransfer. -->
 <script defer src="/transfer-precios.js"></script>
-<script defer src="/app.js?v=145"></script>
+<script defer src="/app.js?v=148"></script>
 
 </body>
 </html>

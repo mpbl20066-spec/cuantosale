@@ -63,7 +63,9 @@ for (const m of gHub.matchAll(/\{ label: '((?:[^'\\]|\\.)*)', key: '(\w+)'/g)) {
 // Rio, Salvador y Fortaleza van cortos en los pares porque en el nombre del par
 // se leen mejor. Son las tres excepciones, y estan aca a proposito: si alguien
 // las cambia en los pares, el punto 3 avisa.
-const CORTO = { rio: 'Río', ssa: 'Salvador', for: 'Fortaleza' };
+// Jericoacoara se sumo cuarta porque el par se llama "Fortaleza + Jeri": el
+// nombre completo son 12 letras mas y en una fila de menu compite con el precio.
+const CORTO = { rio: 'Río', ssa: 'Salvador', for: 'Fortaleza', jericoacoara: 'Jeri' };
 for (const k in CORTO) if (NOM.has(k)) NOM.set(k, CORTO[k]);
 // Gramado tiene dos subcategorias ("Centro" y "Vale dos Vinhedos") pero es un
 // destino solo, asi que el par usa el nombre a secas.
@@ -145,36 +147,85 @@ console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a m
   // grupo: el id, la etiqueta y las claves estan en la misma linea, asi que
   // buscarlo hacia atras desde "keys" no encuentra nada.
   const grupoDe = new Map();
-  let posible = 0;
+  const clavesPorGrupo = new Map();
   for (const m of gGrupos.matchAll(/\{ id: '([^']+)', label: '[^']*', image: '[^']*', keys: \[([^\]]*)\], subcategories: \[/g)) {
     const claves = [...m[2].matchAll(/'([^']+)'/g)].map(x => x[1]);
     for (const k of claves) grupoDe.set(k, m[1]);
-    posible += claves.length * (claves.length - 1) / 2;
+    clavesPorGrupo.set(m[1], claves);
   }
-  console.log('   grupos leidos: ' + new Set(grupoDe.values()).size + ', destinos: ' + grupoDe.size + ', C(n,2) suma ' + posible);
-  check('se leen los 10 grupos', new Set(grupoDe.values()).size === 10, new Set(grupoDe.values()).size + ' grupos');
+  console.log('   grupos leidos: ' + new Set(grupoDe.values()).size + ', destinos: ' + grupoDe.size);
+  check('se leen los 11 grupos', new Set(grupoDe.values()).size === 11, new Set(grupoDe.values()).size + ' grupos');
   check('todos los destinos de un par pertenecen a un grupo',
     [...segundaDe.keys()].every(k => grupoDe.has(segundaDe.get(k).a) && grupoDe.has(segundaDe.get(k).b)),
     [...segundaDe.keys()].filter(k => !grupoDe.has(segundaDe.get(k).a) || !grupoDe.has(segundaDe.get(k).b)).join(', '));
 
-  // Un par cruza grupos cuando sus dos paradas no estan en el mismo. Solo los
-  // tiene Rio, y no por descuido: Rio es un grupo de una sola clave pero su hub
-  // (GIG) sirve todo el corredor, asi que Búzios, Arraial, Cabo Frio, Paraty,
-  // Ilha Grande y Angra se toman con el mismo vuelo redondo. Antes solo estaban
-  // Búzios y Angra y los otros cuatro quedaban sin poder combinar con la capital.
+  // Un par cruza grupos cuando sus dos paradas no estan en el mismo. Son dos
+  // motivos y ninguno es descuido.
+  //
+  // Rio: es un grupo de una sola clave pero su hub (GIG) sirve todo el corredor,
+  // asi que Búzios, Arraial, Cabo Frio, Paraty, Ilha Grande y Angra se toman con
+  // el mismo vuelo redondo. Antes solo estaban Búzios y Angra y los otros cuatro
+  // quedaban sin poder combinar con la capital.
+  //
+  // Jericoacoara: quedo en un grupo propio (esta a 358 km de Fortaleza y a mas de
+  // 1.100 de Recife, asi que no es un Nordeste mas) y los tres pares que si se
+  // pueden hacer quedan en el Nordeste, que es el grupo de la primera parada.
+  // O sea que si vuelve a cruzar, como los de Rio.
   const cruzan = [...segundaDe.entries()].filter(([, v]) => grupoDe.get(v.a) !== grupoDe.get(v.b))
     .map(([k]) => k.split('|')[0] + ' + ' + k.split('|')[1]);
-  check('cruzan grupos solo ' + cruzan.length + ': ' + cruzan.join(', '),
-    cruzan.length === 6 && cruzan.every(x => x.indexOf('rio + ') === 0), cruzan.join(', '));
-  // Y todos tienen que seguir vuelo por el mismo hub: un par Rio + Ubatuba
-  // (GRU) no es un vuelo redondo y no se puede ofrecer.
+  const cruzanRio = cruzan.filter(x => x.indexOf('rio + ') === 0);
+  const cruzanJeri = cruzan.filter(x => x.indexOf('+ Jeri') >= 0);
+  check('cruzan grupos solo Rio y Jericoacoara: ' + cruzan.length,
+    cruzan.length === 9 && cruzanRio.length === 6 && cruzanJeri.length === 3, cruzan.join(', '));
+  // Y los de Jeri son con las tres paradas del Nordeste que quedan a menos
+  // de 1.100 km: Fortaleza, Natal y Pipa. Cualquier otro seria un par que el
+  // server rechaza.
+  check('Jeri combina solo con Fortaleza, Natal y Pipa',
+    cruzanJeri.length === 3 && ['for', 'nat', 'pip'].every(k => cruzanJeri.some(x => x.indexOf(k + ' + ') === 0)),
+    cruzanJeri.join(', '));
+  // Y todos los de Rio tienen que seguir vuelo por el mismo hub: un par
+  // Rio + Ubatuba (GRU) no es un vuelo redondo y no se puede ofrecer.
   const HUBS_RIO = ['buz', 'arraial', 'cabo', 'paraty', 'ilha', 'angra'];
   const conRio = [...segundaDe.entries()].filter(([, v]) => v.a === 'rio').map(([, v]) => v.b);
   check('Rio combina solo con destinos que vuelan por su hub: ' + HUBS_RIO.join(', '),
     conRio.length === HUBS_RIO.length && HUBS_RIO.every(k => conRio.includes(k)),
     conRio.join(', '));
-  check('el total es C(n,2) de los grupos mas los ' + cruzan.length + ' de Rio: ' + (posible + cruzan.length),
-    subs.size === posible + cruzan.length, 'hay ' + subs.size + ', C(n,2) suma ' + posible);
+
+  /* QUE HAY QUE TENER TODOS LOS PARES COMBINABLES DE UN GRUPO, Y NO C(n,2).
+     Antes el total se comparaba contra la suma de C(n,2), que da por hecho que
+     cualquier par de destinos de un mismo grupo se puede cotizar. No es asi, y
+     el caso lo dio Jericoacoara: esta a 358 km de Fortaleza, asi que con ella
+     se puede, pero a mas de 1.100 de Recife y Maceió, asi que no. Con el
+     C(n,2) el total esperado era 8 pares mas de los que se pueden cotizar, y la
+     unica forma de pasarlo era offering combinaciones que el server rechaza con
+     un 400.
+
+     Ahora la pregunta es la que importa y es la misma que se le hace al server:
+     model.comboTransfer() devuelve null cuando el par no se puede hacer. Se
+     cuentan los pares combinables de cada grupo y se verifica que esten TODOS
+     en la lista. Un par que falta es exactamente el sintoma que reporto la
+     gente: "Fortaleza -> Natal" existe y "Natal -> Fortaleza" no. */
+  const existentes = new Set([...segundaDe.values()].map(v => v.a + '|' + v.b));
+  const faltan = [];
+  let combinables = 0;
+  for (const [, claves] of clavesPorGrupo) {
+    for (let i = 0; i < claves.length; i++) {
+      for (let j = i + 1; j < claves.length; j++) {
+        if (!model.comboTransfer(claves[j], claves[i], 1)) continue; // no se puede cotizar: no hace falta ofrecerlo
+        combinables++;
+        if (!existentes.has(claves[i] + '|' + claves[j])) faltan.push(claves[i] + ' + ' + claves[j]);
+      }
+    }
+  }
+  console.log('   pares combinables dentro de los grupos: ' + combinables + ', mas ' + cruzan.length + ' que cruzan');
+  check('dentro de cada grupo estan TODOS los pares que se pueden cotizar', faltan.length === 0, faltan.join(' | '));
+  // Y al reves: ningun par del listado puede ser incombinable. Si aparece uno,
+  // la persona elige una combinacion y el server le responde que no.
+  const imposibles = [...segundaDe.values()].filter(v => !model.comboTransfer(v.b, v.a, 1))
+    .map(v => v.a + ' + ' + v.b);
+  check('ningun par del listado es incombinable', imposibles.length === 0, imposibles.join(' | '));
+  check('el total es lo que dice la geografia: ' + (combinables + cruzan.length),
+    subs.size === combinables + cruzan.length, 'hay ' + subs.size);
 }
 
 console.log('\n7) El control de segunda parada ofrece los mismos pares');

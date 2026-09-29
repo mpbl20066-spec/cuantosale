@@ -666,6 +666,163 @@ function haversineKm(a, b) {
       assert.ok(list.slice(1).every(function (hotel) { return /^https:\/\/www\.booking\.com\//.test(hotel.bookingUrl); }));
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
+  /* Los tipos que el selector ofrece tienen que coincidir con los que la función
+     devuelve. Cuando no coincidian, el cliente los usaba para corregir el tipo
+     elegido —cambiandolo por el primero de la lista— y despues filtraba las
+     cards por ese tipo nuevo, con lo cual la lista quedaba en cero: en pantalla
+     "Hoteles para viajar intermedio" con el selector en "Económico" y abajo "No
+     encontramos alojamientos de categoría Intermedio".
+
+     El caso de abajo lo provocaba con datos que no tienen NADA en la banda de
+     "confort" (el objetivo era 200 y los 20 hoteles de Booking iban de 10 a 90).
+     La segunda pasada los acepta igual porque relaja el precio, asi que se
+     devolvian 3 hoteles de tipo "confort" mientras el server declaraba que
+     "confort" no era un tipo disponible en ese destino. */
+  await t('el tipo que se devuelve siempre esta declarado como disponible', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'a', property: { name: 'Pousada Barata 1' }, priceBreakdown: { grossPrice: { value: 70, currency: 'USD' } } },
+        { hotel_id: 'b', property: { name: 'Pousada Barata 2' }, priceBreakdown: { grossPrice: { value: 80, currency: 'USD' } } },
+        { hotel_id: 'c', property: { name: 'Pousada Barata 3' }, priceBreakdown: { grossPrice: { value: 90, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      for (const estilo of ['ahorro', 'eq', 'comodo']) {
+        const diag = {};
+        const list = await app.hotelRecommendations('cabo', 'Cabo Frío', estilo, { dep: dep, ret: ret, pax: 2, nights: 7 }, diag);
+        assert.ok(list.length > 0, estilo + ': la lista no puede volver vacia');
+        assert.ok(Array.isArray(diag.tiposDisponibles) && diag.tiposDisponibles.length, estilo + ': tiene que declarar los tipos disponibles');
+        const tiposDevueltos = [...new Set(list.map(function (hotel) { return hotel.hotelType; }))];
+        tiposDevueltos.forEach(function (tipo) {
+          assert.ok(diag.tiposDisponibles.indexOf(tipo) >= 0,
+            estilo + ': devuelve hoteles de tipo "' + tipo + '" pero tiposDisponibles es [' + diag.tiposDisponibles.join(', ') + ']');
+        });
+      }
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
+  /* Los tres tipos del espectro son bandas de precio, no categorias: el mismo
+     hotel puede ser economico, intermedio o confort segun cuanto cueste. Con al
+     menos un hotel con precio las tres bandas tienen que devolver algo, porque
+     la segunda pasada completa con cualquier real por debajo del techo y el
+     respaldo generico llena hasta tres. Si alguna volviera vacia, el selector
+     dejaria de ofrecerla y habria destinos donde la eleccion inicial del tipo
+     de viaje —que es lo que arma la pantalla al abrirla— no muestra nada. */
+  await t('con un hotel cargado, los tres tipos del espectro siempre devuelven 3', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'a', property: { name: 'Pousada Unica' }, priceBreakdown: { grossPrice: { value: 90, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      for (const tipo of ['economico', 'intermedio', 'confort']) {
+        const diag = {};
+        const list = await app.hotelRecommendations('cabo', 'Cabo Frío', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7, hotelType: tipo }, diag);
+        assert.strictEqual(list.length, 3, tipo + ': tiene que devolver 3, devolvio ' + list.length);
+        assert.ok(list.every(function (hotel) { return hotel.hotelType === tipo; }), tipo + ': los tres tienen que venir rotulados con ese tipo');
+        assert.ok(diag.tiposDisponibles.indexOf(tipo) >= 0, tipo + ': tiene que estar declarado como disponible');
+      }
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
+  /* Al reves: un tipo estricto que no tiene nada NO se declara disponible, para
+     que el cliente caiga a uno del espectro en vez de prometer una lista vacia.
+     Y no se rellena con lofts: el estado vacio dice que no se muestran
+     categorias distintas como reemplazo, asi que tiene que ser cierto. */
+  await t('un tipo estricto sin datos no se declara disponible ni se rellena', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'a', property: { name: 'Pousada Comum' }, priceBreakdown: { grossPrice: { value: 90, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      for (const tipo of ['boutique', 'resort']) {
+        const diag = {};
+        const list = await app.hotelRecommendations('cabo', 'Cabo Frío', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7, hotelType: tipo }, diag);
+        assert.strictEqual(list.length, 0, tipo + ': no hay nada de ese tipo, la lista tiene que venir vacia');
+        assert.ok(diag.tiposDisponibles.indexOf(tipo) < 0, tipo + ': no se puede declarar disponible si la lista esta vacia');
+        assert.ok(diag.tiposDisponibles.indexOf('intermedio') >= 0, 'los tipos del espectro tienen que seguir disponibles');
+      }
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
+  /* El dest_id de Booking no cambia, pero searchDestination falla de a ratos.
+     Cuando fallaba, el destino entero caia al respaldo de hoteles inventados
+     aunque las fechas y el tipo estuvieran bien: la seccion de alojamiento
+     mostraba tres estimados donde antes habia tres de Booking. Se cachea solo
+     el acierto, y el acierto tiene que evitar la segunda llamada. */
+  await t('el id de ciudad de Booking se consulta una vez y se reusa', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    // Se cuenta por query y no en total: Cabo Frio tiene una ciudad cercana
+    // asociada, asi que un pedido legitimo puede mirar dos.
+    const busquedas = [];
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) {
+        busquedas.push(parsed.searchParams.get('query'));
+        return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: 'dest-cache-' + busquedas.length, search_type: 'city', name: 'algo' }] }; } };
+      }
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'x', property: { name: 'Pousada da Praia' }, priceBreakdown: { grossPrice: { value: 500, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    const vecesQue = function (q) { return busquedas.filter(function (x) { return x === q; }).length; };
+    try {
+      app.resetBookingDestCache();
+      await app.hotelRecommendations('cabo', 'Cabo Frio', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      assert.strictEqual(vecesQue('Cabo Frio'), 1, 'la primera consulta tiene que buscar el id');
+      await app.hotelRecommendations('cabo', 'Cabo Frio', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      assert.strictEqual(vecesQue('Cabo Frio'), 1, 'la segunda no puede volver a buscar: el id ya se sabe');
+      await app.hotelRecommendations('cabo', 'Cabo Frio', 'comodo', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      assert.strictEqual(vecesQue('Cabo Frio'), 1, 'cambiar de estilo no puede volver a buscar el id');
+      await app.hotelRecommendations('cabo', 'Cabo Frio', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7, hotelType: 'boutique' });
+      assert.strictEqual(vecesQue('Cabo Frio'), 1, 'cambiar de tipo de alojamiento tampoco');
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
+  await t('un id de ciudad que no se pudo resolver no se cachea', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    const Torres = 'Destino Que Solo Existe Para Esta Prueba';
+    let intentos = 0;
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) {
+        if (parsed.searchParams.get('query') !== Torres) return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+        intentos++;
+        // Falla la primera vez y anda la segunda. Cachear el fallo dejaria este
+        // destino sin hoteles reales para el resto de la vida del proceso.
+        if (intentos === 1) return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+        return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: 'dest-flate-1', search_type: 'city', name: Torres }] }; } };
+      }
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'x', property: { name: 'Hotel Que Se Resolvio' }, priceBreakdown: { grossPrice: { value: 400, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      app.resetBookingDestCache();
+      const primera = await app.hotelRecommendations('tor', Torres, 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      assert.strictEqual(primera[0].source, 'fallback', 'con el id sin resolver solo hay respaldo');
+      const segunda = await app.hotelRecommendations('tor', Torres, 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      assert.strictEqual(intentos, 2, 'el fallo no se cachea: hay que volver a intentar');
+      assert.strictEqual(segunda[0].source, 'booking', 'con el id resuelto entran hoteles reales');
+      assert.strictEqual(segunda[0].name, 'Hotel Que Se Resolvio');
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
   await t('un destino con dos ciudades prueba cada parte del nombre', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';

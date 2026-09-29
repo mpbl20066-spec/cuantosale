@@ -190,6 +190,26 @@ for (const [tema, tokens] of [['night', NIGHT], ['light', LIGHT]]) {
       console.log('  ok  [' + tema + '] --focus ' + v + ' vs ' + fondo + ' = ' + r.toFixed(2) + ':1');
     }
   }
+  /* El hero es un panel con fondo propio, asi que sus dos tintas se miden
+     CONTRA ESE FONDO y no contra --bg. Cuando el hero paso a ser oscuro con
+     texto claro, --hero-soft se llevo el valor oscuro que tenia cuando el hero
+     era ambar con tinta oscura: #1A2433 sobre #111A28 daba 1.12:1 y la linea de
+     metadatos de la propuesta y el "por persona" se perdian. Ese token no lo
+     cubria ningun chequeo, por eso se rompio solo al cambiar el fondo del hero.
+     --hero-ink se mide tambien porque si cae, el titulo de la propuesta se va. */
+  for (const [tinta, minimo, que] of [['--hero-ink', 4.5, 'el titulo de la propuesta'], ['--hero-soft', 4.5, 'los metadatos y el "por persona"']]) {
+    const v = tokens[tinta], f = tokens['--hero-bg'];
+    if (!/^#[0-9a-f]{6}$/i.test(v || '') || !/^#[0-9a-f]{6}$/i.test(f || '')) {
+      err(tinta + ' o --hero-bg no son hex validos en el tema ' + tema + '.'); continue;
+    }
+    const r = ratio(v, f);
+    if (r < minimo) {
+      err(tinta + ' (' + v + ') sobre --hero-bg (' + f + ') da ' + r.toFixed(2) + ':1 en el tema ' + tema +
+        ', debajo de ' + minimo + ':1. ' + que + ' no se lee.');
+    } else {
+      console.log('  ok  [' + tema + '] ' + tinta + ' ' + v + ' vs --hero-bg = ' + r.toFixed(2) + ':1');
+    }
+  }
   /* La tinta del boton de accion va sobre su propio relleno. Con mostaza de
      fondo el blanco no sirve (1.64:1), asi que este chequeo existe para que
      nadie vuelva a poner --action-ink en blanco creyendo que el boton es
@@ -234,6 +254,97 @@ for (const [tinta, fondo, que] of BADGES) {
   }
 }
 
+/* 3c. El texto secundario de la BANDA DE LA PROPUESTA.
+
+   Es el único texto de la app que se dibuja sobre un fondo propio (--hero-bg)
+   en vez de sobre --surface, y por eso es el que se rompió dos veces:
+
+     - --hero-soft era un tono oscuro (#1A2433 en night, #2A3646 en light) sobre
+       un fondo oscuro: 1.12:1 y 1.45:1. No era "poco contraste", era
+       ilegible, y caía justo en la línea que dice qué viaje es este.
+     - Cuando la banda es oscura TAMBIÉN en modo claro, el gris tiene que ser
+       claro en los dos temas. Ponerlo oscuro "porque el tema es claro" lo
+       rompía al revés.
+
+   Se mide con el mismo criterio del punto 3 y con el mismo piso de 4.5:1, que es
+   el mínimo de WCAG para texto normal. Se mide en los dos temas porque este
+   token es el que más se ha movido solo. */
+for (const [nombre, tokens] of [['night', NIGHT], ['light', LIGHT]]) {
+  const a = tokens['--hero-soft'], b = tokens['--hero-bg'];
+  if (!/^#[0-9a-f]{6}$/i.test(a || '') || !/^#[0-9a-f]{6}$/i.test(b || '')) {
+    err('el tema ' + nombre + ' no declara --hero-soft o --hero-bg como hex de 6 digitos.');
+    continue;
+  }
+  const r = ratio(a, b);
+  if (r < 4.5) {
+    err('--hero-soft (' + a + ') sobre --hero-bg (' + b + ') da ' + r.toFixed(2) +
+      ':1 en el tema ' + nombre + ', debajo de 4.5:1. Es la linea de metadatos de la propuesta ' +
+      '(destino, noches) y el "por persona": ilegibles.');
+  } else {
+    console.log('  ok  [' + nombre + '] --hero-soft ' + a + ' vs --hero-bg = ' + r.toFixed(2) + ':1');
+  }
+  // Y tiene que seguir siendo distinguible del texto principal de la banda: si
+  // --hero-soft == --hero-ink se perdio la jerarquia, que es el otro extremo del
+  // mismo error.
+  if (tokens['--hero-ink'] && a.toLowerCase() === tokens['--hero-ink'].toLowerCase()) {
+    err('--hero-soft y --hero-ink son el mismo color en el tema ' + nombre +
+      ': no hay jerarquia entre el texto principal y el secundario de la banda.');
+  }
+}
+
+/* 3d. El tamaño mínimo del texto secundario de la propuesta.
+
+   El contraste estaba bien y la letra igual no se leía: 13px de metadata y 13px
+   de "por persona" en el celular. El contraste es una mitad del problema y el
+   cuerpo del texto es la otra, y un validador que solo mide contraste deja
+   pasar el segundo. Se comprueba que los cuatro selectores del área de propuesta
+   no bajen de 13px, que es el piso que se puede defender en un celular a metros
+   de distancia; en el móvil la media query los sube otra vez.
+
+   Se lee del CSS plano con un regex por selector, sin navegador: si alguien
+   cambia el selector, el validador avisa en vez de no mirar nada. */
+const CSS = sinComentarios.replace(/\s+/g, ' ');
+const MIN_PROPUESTA = [
+  ['.detail-summary p', 'los metadatos de la propuesta (destino, noches)'],
+  ['.detail-summary__per-person', 'el "por persona" de la propuesta'],
+  ['.opt .s', 'el subtitulo de la tarjeta de propuesta'],
+  ['.opt__price span', 'el "por persona" de la tarjeta de propuesta']
+];
+for (const [sel, que] of MIN_PROPUESTA) {
+  const re = new RegExp('(?:^|[{},])\\s*' + sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*(?:,[^{]*)?\\{([^}]*)\\}', 'g');
+  const reglas = [...CSS.matchAll(re)];
+  if (!reglas.length) {
+    err('style.css no tiene la regla "' + sel + '" (' + que + '). Si se renombro el selector, ' +
+      'hay que actualizar este script.');
+    continue;
+  }
+  for (const r of reglas) {
+    const cuerpo = r[1];
+    // Solo la regla base, no la de una media query: ahi se decide el cuerpo y
+    // la media query mobile solo puede subirlo. Se sabe contando llaves hasta
+    // la llave que ABRE esta regla: si hay algun bloque abierto todavia, la
+    // regla esta dentro de un @media y no es la base. Hay que contar hasta la
+    // llave de apertura y no hasta r.index, porque el match arranca en un
+    // caracter de borde ('}' anterior) y contarlo ahi daria un bloque de mas.
+    const antes = CSS.slice(0, r.index + r[0].lastIndexOf('{'));
+    let profundidad = 0;
+    for (let k = 0; k < antes.length; k++) {
+      if (antes[k] === '{') profundidad++;
+      else if (antes[k] === '}') profundidad--;
+    }
+    if (profundidad > 0) continue;
+    const m = cuerpo.match(/font-size:\s*([\d.]+)px/);
+    if (!m) continue;
+    const px = parseFloat(m[1]);
+    if (px < 13) {
+      err(sel + ' (' + que + ') usa ' + px + 'px en el tema base, debajo de 13px. ' +
+        'El contraste puede estar bien y la letra igual no leerse en el celular.');
+    } else {
+      console.log('  ok  ' + sel + ' = ' + px + 'px');
+    }
+  }
+}
+
 /* 4. el interruptor de tema existe y esta en las dos paginas.
 
    Esto antes era un AVISO genérico: cualquier archivo de public/ que tocara
@@ -262,6 +373,64 @@ if (!/id="theme-toggle"/.test(idx)) {
 if (!/function initThemeToggle/.test(app) || !/\$\('#theme-toggle'\)/.test(app)) {
   err('public/app.js no tiene initThemeToggle enganchado al boton: el toggle no cambia el tema.');
 }
+
+/* 4b. Seguir al sistema de verdad, no solo en la carga.
+
+   Este es el bug que rompia la adaptacion automatica: aplicarTema() escribia
+   SIEMPRE en localStorage, y la llamaba tambien initThemeToggle() al arrancar.
+   Con solo abrir la pagina en un celular en claro se guardaba 'light', asi que
+   a partir de ahi ya habia "eleccion guardada" y la app dejaba de seguir al
+   sistema para siempre. El que tiene el celular en claro a la manana, lo pasa a
+   oscuro a la tarde y vuelve a abrir la pagina, se quedaba viendo la version
+   clara sin ninguna forma de explicar por que.
+
+   Lo que se comprueba:
+     - aplicarTema() tiene el segundo parametro `guardar`, y es el que decide si
+       escribe en localStorage. Sin el, volver a escribir siempre.
+     - el UNICO lugar que pasa guardar=true es el click del boton. Si el arranque
+       o el listener del sistema guardaran, volveriamos a lo mismo.
+     - hay un listener de 'change' sobre prefers-color-scheme, para que el tema
+       siga al sistema en vivo y no solo en cada carga.
+     - el script del head resuelve lo mismo: si no hay eleccion guardada, usa
+       prefers-color-scheme. */
+if (!/function aplicarTema\(t, guardar\)/.test(app)) {
+  err('public/app.js no declara aplicarTema(t, guardar): no se puede seguir al sistema sin ' +
+    'guardar una eleccion que la persona nunca hizo.');
+} else {
+  // El argumento puede ser una llamada (temaActual()), asi que el patron tiene
+  // que tolerar un par de parentesis adentro. Con [^)]* se cortaba en el
+  // primer ")" y no encontraba ninguna llamada con dos argumentos.
+  // Ojo: el grupo captura SOLO los argumentos, sin el parentesis de cierre, asi
+  // que el segundo argumento se busca anclado al final de la cadena.
+  const guardan = [...app.matchAll(/aplicarTema\(((?:[^()]|\([^()]*\))*)\)/g)].map(m => m[1]);
+  const conGuardar = guardan.filter(a => /,\s*true\s*$/.test(a));
+  const sinGuardar = guardan.filter(a => /,\s*(false|true)\s*$/.test(a));
+  if (!conGuardar.length) {
+    err('nadie llama aplicarTema(..., true): el boton no guardaria la eleccion y al recargar ' +
+      'la pagina volveria al tema del sistema.');
+  }
+  if (conGuardar.length > 1) {
+    err('aplicarTema(..., true) se llama ' + conGuardar.length + ' veces. Solo el click del boton ' +
+      'es una eleccion: si el arranque o el listener del sistema guardan, la app deja de seguir ' +
+      'al sistema para siempre.');
+  }
+  if (!sinGuardar.length) {
+    err('nadie llama aplicarTema(..., false): el arranque y el listener del sistema estan ' +
+      'guardando el tema, que es exactamente el bug.');
+  }
+  console.log('  ok  aplicarTema() recibe guardar; ' + conGuardar.length + ' lo guarda y ' +
+    sinGuardar.length + ' no');
+}
+if (!/matchMedia\('\(prefers-color-scheme: light\)'\)/.test(app) || !/addEventListener\('change'/.test(app)) {
+  err('public/app.js no escucha los cambios de prefers-color-scheme: cambiar el celular de claro ' +
+    'a oscuro a la tarde deja la pagina como estaba.');
+} else {
+  console.log('  ok  app.js sigue los cambios de prefers-color-scheme en vivo');
+}
+if (!/function temaGuardado/.test(app)) {
+  err('public/app.js no tiene temaGuardado(): no puede distinguir "el usuario eligio" de "no hay ' +
+    'eleccion", y sin esa distincion el sistema deja de mandar.');
+}
 /* El script del head tiene que estar ANTES del link del stylesheet. Si esta
    despues, la pagina se pinta con :root y recien despues cambia de tema: un
    destello en cada carga. */
@@ -288,6 +457,25 @@ if (!vIdx || !vGrp) {
     'misma version o una de las dos queda con el CSS viejo para siempre.');
 } else {
   console.log('  ok  las dos paginas piden style.css?v=' + vIdx);
+}
+
+/* El mismo numero, escrito adentro de style.css. El ?v= solo no alcanza para
+   saber si esta bien: si se toca el CSS y no se sube el ?v=, el browser sigue
+   con la version vieja y el fix no llega a nadie, y no hay forma de enterarse
+   mirando el repo. Pasa siempre por la misma razon: el archivo se toco, se
+   commiteo, y el ?v= quedo atras. Con el numero adentro, el validador compara
+   las dos cosas y avisa. */
+const vCss = (css.match(/\/\*\s*version:\s*(\d+)/) || [])[1];
+if (!vCss) {
+  err('style.css no tiene el marcador "/* version: N */" al principio. Es lo que permite ' +
+    'comprobar que el ?v= de las paginas se subio junto con el CSS.');
+} else if (vCss !== vIdx) {
+  err('style.css dice "version: ' + vCss + '" pero las paginas piden ?v=' + vIdx + '. ' +
+    'Con el mismisimo archivo, el ?v= es lo unico que hace que el browser_descarte la ' +
+    'copia vieja: si no coinciden, el CSS nuevo no le llega a nadie y no se ve hasta ' +
+    'que alguien limpia la cache a mano.');
+} else {
+  console.log('  ok  style.css declara version ' + vCss + ' y las paginas piden la misma');
 }
 
 console.log('\ntokens: ' + Object.keys(NIGHT).length + ' en :root (night), ' +

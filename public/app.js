@@ -548,6 +548,29 @@
       { label: 'Morro de São Paulo + Arraial d\'Ajuda', key: 'morro', secondKey: 'trancoso' },
       { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', secondKey: 'trancoso' }
     ] },
+    /* Jericoacoara entra al Nordeste y "Fortaleza / Jericoacoara" se separa en
+       dos destinos y un par.
+
+       Antes la entrada de Fortaleza se llamaba "Fortaleza / Jericoacoara" y eso
+       no decía nada: son dos ciudades a 358 km una de la otra, con precios,
+       traslados y actividades propias. Presentadas con una barra, la persona no
+       podia saber si el precio era de la capital o del pueblo de las dunas.
+
+       Ahora están los tres: Fortaleza sola, Jericoacoara sola, y el par
+       "Fortaleza + Jeri", que es el viaje que de verdad se quiere hacer cuando
+       se va a esa costa (volar a FOR, dormir en Jeri y volver). Jericoacoara ya
+       estaba en el modelo, con costos, traslados, guia y actividades: lo que no
+       estaba era en la lista, o sea que era data muerta.
+
+       Jericoacoara NO entra en las keys del Nordeste, y es a propósito. El
+       modelo combina dos paradas si quedan a menos de COMBO_MAX_KM (1.100 km)
+       por carretera: de Fortaleza a Jeri son 358, pero de Recife a Jeri son
+       1.100 y de Maceío 1.170. Un grupo es un conjunto de destinos que se
+       combinan entre sí; Jericoacoara solo se combina con Fortaleza, Natal y
+       Pipa, así que si viviera en el Nordeste el grupo prometería ocho
+       combinaciones que el server rechaza con un 400. Va como grupo propio y
+       los tres pares quedan en el Nordeste, que es el grupo de la primera
+       parada. */
     { id: 'nordeste', label: 'Nordeste', image: 'porto', keys: ['porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for'], subcategories: [
 { label: 'Porto de Galinhas (All Inclusive)', key: 'porto', hotelType: 'all-inclusive' },
 { label: 'Maragogi', key: 'maragogi' },
@@ -556,7 +579,7 @@
 { label: 'João Pessoa', key: 'joaopessoa' },
 { label: 'Natal', key: 'nat' },
 { label: 'Pipa', key: 'pip' },
-{ label: 'Fortaleza / Jericoacoara', key: 'for' },
+{ label: 'Fortaleza', key: 'for' },
       { label: 'Porto de Galinhas + Maragogi', key: 'porto', secondKey: 'maragogi' },
       { label: 'Porto de Galinhas + Maceió', key: 'porto', secondKey: 'mcz' },
       { label: 'Porto de Galinhas + Recife', key: 'porto', secondKey: 'rec' },
@@ -584,7 +607,19 @@
       { label: 'João Pessoa + Fortaleza', key: 'joaopessoa', secondKey: 'for' },
       { label: 'Natal + Pipa', key: 'nat', secondKey: 'pip' },
       { label: 'Natal + Fortaleza', key: 'nat', secondKey: 'for' },
-      { label: 'Pipa + Fortaleza', key: 'pip', secondKey: 'for' }
+      { label: 'Pipa + Fortaleza', key: 'pip', secondKey: 'for' },
+      { label: 'Fortaleza + Jeri', key: 'for', secondKey: 'jericoacoara' },
+      { label: 'Natal + Jeri', key: 'nat', secondKey: 'jericoacoara' },
+      { label: 'Pipa + Jeri', key: 'pip', secondKey: 'jericoacoara' }
+    ] },
+    // Jericoacoara tiene grupo propio y no comparte con el Nordeste. Vive por
+    // su cuenta en Ceará, a 358 km de Fortaleza y a mas de 1.100 de Recife, asi
+    // que es el unico destino del grupo y por eso no tiene ni un par con nadie
+    // de Bahia ni del Noreste. Los tres pares que si se pueden hacer (con
+    // Fortaleza, Natal y Pipa) son subcategorias del Nordeste, que es el grupo de
+    // la primera parada, y por eso el menu de segunda parada los ofrece igual.
+    { id: 'jericoacoara', label: 'Jericoacoara', image: 'jericoacoara', keys: ['jericoacoara'], subcategories: [
+{ label: 'Jericoacoara', key: 'jericoacoara' }
     ] },
     { id: 'buenosaires', label: 'Buenos Aires', image: 'bue', keys: ['bue'], subcategories: [
 { label: 'Centro / Recoleta', key: 'bue' },
@@ -633,26 +668,13 @@
   if (!window.CS_DESTINATION_DAILY_COSTS) {
     console.error('Falta /daily-costs.js: corré npm run build:costos y serví el archivo generado.');
   }
-  // La procedencia de esos mismos números: de dónde sale, cuándo se verificó y
-  // cuánta confianza tiene. La genera el mismo script, en el mismo archivo, para
-  // que sea imposible que la tabla y su procedencia se desincronicen.
-  var DAILY_COSTS_PROVENANCE = window.CS_DESTINATION_DAILY_COSTS_PROVENANCE || {};
-  var TRANSFER_PROVENANCE = window.CS_TRANSFER_PRICES_PROVENANCE || {};
-  if (!window.CS_DESTINATION_DAILY_COSTS_PROVENANCE) {
-    console.error('Falta la procedencia en /daily-costs.js: corré npm run build:costos.');
-  }
+  // La procedencia de esos mismos números (de dónde sale, cuándo se verificó y
+  // cuánta confianza tiene) la sigue generando `npm run build:costos` y
+  // `npm run build:transfer` en el mismo archivo, y validar-costos.js y
+  // validar-transfer.js la siguen comprobando. Lo que ya no se dibuja es el
+  // panel "De dónde salen los valores": era el único consumidor, así que en el
+  // cliente ya no queda nadie que lea esos dos globales.
   function getDestinationDailyCosts(key) { return DESTINATION_DAILY_COSTS[String(key || '').toLowerCase()] || DESTINATION_DAILY_COSTS.rio; }
-  // La procedencia del destino, o null. Null es un caso real y no una excepción:
-  // si falta la tabla generada, el panel tiene que quedarse callado en vez de
-  // inventar una fuente.
-  function getDailyCostsProvenance(key) {
-    var p = DAILY_COSTS_PROVENANCE[String(key || '').toLowerCase()];
-    return p && p.fuente ? p : null;
-  }
-  function getTransferProvenance(key) {
-    var p = TRANSFER_PROVENANCE[String(key || '').toLowerCase()];
-    return p && p.fuente ? p : null;
-  }
   var massSearch = false;
   var detailState = null;
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
@@ -819,7 +841,11 @@
 { label: 'João Pessoa', key: 'joaopessoa', codes: 'JPA' },
 { label: 'Natal', key: 'nat', codes: 'NAT' },
 { label: 'Pipa', key: 'pip', codes: 'NAT' },
-{ label: 'Fortaleza / Jericoacoara', key: 'for', codes: 'FOR' },
+// Fortaleza y Jericoacoara son dos destinos, no uno con barra. Volan al mismo
+// aeropuerto (FOR) y por eso van seguido en el mismo hub, pero están a 358 km
+// y se cotizan aparte. El par "Fortaleza + Jeri" va con los de dos paradas.
+{ label: 'Fortaleza', key: 'for', codes: 'FOR' },
+{ label: 'Jericoacoara', key: 'jericoacoara', codes: 'FOR' },
       { label: 'Porto de Galinhas + Maragogi', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Maragogi' },
       { label: 'Porto de Galinhas + Maceió', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Maceió' },
       { label: 'Porto de Galinhas + Recife', key: 'porto', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Porto de Galinhas + Recife' },
@@ -847,7 +873,10 @@
       { label: 'João Pessoa + Fortaleza', key: 'joaopessoa', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'João Pessoa + Fortaleza' },
       { label: 'Natal + Pipa', key: 'nat', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Natal + Pipa' },
       { label: 'Natal + Fortaleza', key: 'nat', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Natal + Fortaleza' },
-      { label: 'Pipa + Fortaleza', key: 'pip', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Pipa + Fortaleza' }
+      { label: 'Pipa + Fortaleza', key: 'pip', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Pipa + Fortaleza' },
+      { label: 'Fortaleza + Jeri', key: 'for', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Fortaleza + Jeri' },
+      { label: 'Natal + Jeri', key: 'nat', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Natal + Jeri' },
+      { label: 'Pipa + Jeri', key: 'pip', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Pipa + Jeri' }
     ] },
     { name: 'Buenos Aires', codes: 'EZE / AEP', options: [
 { label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE' },
@@ -1160,6 +1189,67 @@
       if (trigger) trigger.setAttribute('aria-expanded', 'false');
     });
   }
+  /* Abre el menu de moneda sin que se salga de la pantalla.
+
+     El bug: el menu estaba anclado con right:0 al boton, y en un celular el
+     boton vive en el medio del header. Con 238px de ancho, el menu arrancaba
+     unos 58px antes del borde izquierdo de la ventana: la persona tocaba la
+     moneda, aparecian dos de las tres opciones y la tercera quedaba afuera, con
+     la pagina ensanchada y una barra de scroll horizontal.
+
+     Por eso el menu es position:fixed (ver style.css) y acá se le escriben
+     left/top en coordenadas de ventana, medidas de verdad:
+
+     - el ancho se limita a la ventana con 12px de aire a cada lado;
+     - se abre ABAJO si hay lugar y ARRIBA si no, que es lo que evita que se
+       salga por abajo cuando el header queda pegado al final de una pagina
+       scrolleada;
+     - en el eje horizontal se recorre lo que sobre, para que un boton pegado al
+       borde no lo mande al otro lado.
+
+     Se recalcula al abrir, al cambiar el tamaño de la ventana y al scrollear con
+     el menu abierto: el menu es fijo, asi que si la pagina se mueve y no se
+     recalcula, se queda flotando lejos del boton. */
+  function posicionarMenuMoneda(menu, trigger) {
+    if (!menu || !trigger) return;
+    var margen = 12;
+    var separacion = 8;
+    var ancho = window.innerWidth || document.documentElement.clientWidth;
+    var alto = window.innerHeight || document.documentElement.clientHeight;
+    var disponible = Math.max(160, Math.min(440, Math.round(alto * 0.62)));
+    // El ancho real se mide con el menu visible: en hidden no tiene caja. Se
+    // borra el width de la apertura anterior antes de medir, o el menu se
+    // quedaria pegado al ancho que tuvo la vez pasada y no volveria a crecer
+    // cuando la ventana crece.
+    menu.style.width = '';
+    menu.style.maxHeight = disponible + 'px';
+    var caja = menu.getBoundingClientRect();
+    var anchoMenu = Math.max(160, Math.min(caja.width || 238, ancho - margen * 2));
+    menu.style.width = Math.round(anchoMenu) + 'px';
+    menu.style.maxWidth = (ancho - margen * 2) + 'px';
+
+    var t = trigger.getBoundingClientRect();
+    var altoMenu = Math.min(menu.offsetHeight || caja.height || disponible, disponible);
+    var top = t.bottom + separacion;
+    if (top + altoMenu > alto - margen) {
+      var arriba = t.top - separacion - altoMenu;
+      // Arriba solo si el hueco de arriba es mayor que el de abajo: en el
+      // header, arriba es el borde de la pagina y siempre pierde.
+      top = (arriba >= margen) ? arriba : Math.max(margen, alto - margen - altoMenu);
+    }
+    var left = t.right - anchoMenu;
+    if (left + anchoMenu + margen < ancho) left = ancho - margen - anchoMenu;  // muy a la izquierda
+    if (left < margen) left = margen;                                          // muy a la derecha
+    menu.style.left = Math.round(left) + 'px';
+    menu.style.top = Math.round(top) + 'px';
+    menu.style.right = 'auto';
+  }
+  function posicionarMenosMonedaAbiertos() {
+    document.querySelectorAll('.currency-menu:not([hidden])').forEach(function (menu) {
+      var trigger = menu.parentElement && menu.parentElement.querySelector('[data-currency-toggle]');
+      posicionarMenuMoneda(menu, trigger);
+    });
+  }
   function aplicarMoneda(code) {
     if (tasaDe(code) == null && !(FX.rates && Object.keys(FX.rates).length)) {
       // todavia no llegaron las tasas: no dejamos cambiar a algo que no podemos calcular
@@ -1259,6 +1349,7 @@
       if (estabaAbierto) return;
       menu.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
+      posicionarMenuMoneda(menu, trigger);
       // El foco va a la opción activa para que con teclado se llegue con las
       // flechas, que es lo que se espera de un listbox.
       var activa = menu.querySelector('.currency-option.is-selected') || menu.querySelector('.currency-option:not([disabled])');
@@ -1284,6 +1375,13 @@
     var siguiente = e.key === 'ArrowDown' ? (i + 1) % opciones.length : (i - 1 + opciones.length) % opciones.length;
     opciones[siguiente].focus();
   });
+  // El menu es fijo: si la pagina scrollea o la ventana cambia de tamaño con el
+  // menu abierto, sus coordenadas de ventana quedan viejas y el menu se despega
+  // del boton. Se recalcula, y con scroll en capture para que tambien corra
+  // cuando el scroll viene de un contenedor interno y no de la ventana.
+  window.addEventListener('resize', posicionarMenosMonedaAbiertos);
+  window.addEventListener('orientationchange', posicionarMenosMonedaAbiertos);
+  window.addEventListener('scroll', posicionarMenosMonedaAbiertos, true);
 
   function money(n) {
     var v = Number(n);
@@ -1491,6 +1589,30 @@
     }
     return null;
   }
+  /* El calendario no offering fechas más allá de un año.
+
+     Motivo: el precio de un vuelo a esta altura viene del modelo, y a dos años
+     la estimación no dice nada. Peor: `/api/vuelos/calendario` compara 15
+     fechas alrededor de la elegida, y con la salida muy lejos esas 15 fechas caen
+     todas fuera de cualquier temporada real. La app terminaba mostrando
+     cotizaciones de un viaje que nadie viaja en ese momento, y el "más barato"
+     del gráfico era ruido.
+
+     El límite es EXACTO a un año: today + 1 año es el último día habilitable, y
+     el día siguiente ya no. No se calcula con "12 meses" (que no es un año: con
+     meses de 30 y 31 días se corre hasta varios días) sino con setFullYear(+1). El
+     caso raro es el 29 de febrero en año bisiesto: no hay 29 de febrero del año
+     siguiente, y JS se corre al 1 de marzo, que es el tope más cercano que
+     existe.
+
+     El mismo corte se aplica a los dos pasos: la vuelta no puede pasar del
+     límite, o un vuelo de ida de diciembre con vuelta en enero del año que
+     viene sería el único caso en que se rompería. */
+  function maxDepartureDate() {
+    var limite = new Date(today.getTime());
+    limite.setFullYear(limite.getFullYear() + 1);
+    return iso(limite);
+  }
   function calendarMonthMarkup(monthDate) {
     var year = monthDate.getFullYear();
     var month = monthDate.getMonth();
@@ -1498,11 +1620,12 @@
     var offset = (first.getDay() + 6) % 7;
     var count = new Date(year, month + 1, 0, 12).getDate();
     var minDeparture = iso(addDays(today, 1));
+    var maxDeparture = maxDepartureDate();
     var days = '';
     for (var blank = 0; blank < offset; blank++) days += '<span class="date-range-day date-range-day--blank" aria-hidden="true"></span>';
     for (var day = 1; day <= count; day++) {
       var value = iso(new Date(year, month, day, 12));
-      var disabled = value < minDeparture || (rangeCalendarStep === 'ret' && S.dep && value <= S.dep);
+      var disabled = value < minDeparture || value > maxDeparture || (rangeCalendarStep === 'ret' && S.dep && value <= S.dep);
       var inRange = !!(S.dep && S.ret && value >= S.dep && value <= S.ret);
       var endpoint = value === S.dep || value === S.ret;
       var classes = 'date-range-day' + (disabled ? ' is-disabled' : '') + (inRange ? ' is-in-range' : '') + (endpoint ? ' is-endpoint' : '') + (value === iso(today) ? ' is-today' : '');
@@ -1517,12 +1640,33 @@
     var months = document.getElementById('date-range-months');
     var instruction = document.getElementById('date-range-instruction');
     var previous = document.querySelector('[data-calendar-nav="prev"]');
+    var next = document.querySelector('[data-calendar-nav="next"]');
     if (!months || !rangeCalendarMonth) return;
     var second = new Date(rangeCalendarMonth.getFullYear(), rangeCalendarMonth.getMonth() + 1, 1, 12);
     months.innerHTML = calendarMonthMarkup(rangeCalendarMonth) + calendarMonthMarkup(second);
     if (instruction) instruction.textContent = rangeCalendarStep === 'dep' ? 'Elegí la fecha de ida' : 'Ahora elegí la fecha de vuelta';
     var firstAllowedMonth = new Date(today.getFullYear(), today.getMonth(), 1, 12);
     if (previous) previous.disabled = rangeCalendarMonth <= firstAllowedMonth;
+    // El "mes siguiente" se apaga en el mismo limite que los dias, por el mismo
+    // motivo: si la flecha deja avanzar, la persona puede scrollear hasta un mes
+    // entero de dias tachados, que es peor que un limite que no existe.
+    // El limite son dos meses antes del que contiene el tope, porque el panel
+    // dibuja dos: hay que poder llegar a ese mes para ver los ultimos dias
+    // habiles. Con tope en setiembre del año que viene, la ultima vista posible
+    // es agosto + septiembre, y en agosto la flecha ya esta apagada.
+    if (next) {
+      var tope = new Date(today.getTime());
+      tope.setFullYear(tope.getFullYear() + 1);
+      var mesTope = new Date(tope.getFullYear(), tope.getMonth(), 1, 12);
+      var lastAllowedMonth = new Date(mesTope.getFullYear(), mesTope.getMonth() - 1, 1, 12);
+      next.disabled = rangeCalendarMonth >= lastAllowedMonth;
+    }
+    var aviso = document.querySelector('[data-calendar-limit]');
+    if (aviso) {
+      var topeTexto = new Date(today.getTime());
+      topeTexto.setFullYear(topeTexto.getFullYear() + 1);
+      aviso.textContent = 'Elegí fechas de ida hasta el ' + shortDateLabel(iso(topeTexto)).replace(/\./g, '') + '.';
+    }
   }
   function closeDateRangeCalendar() {
     var panel = document.getElementById('date-range-panel');
@@ -1593,6 +1737,19 @@
   function hotelImageFallback(index, fallback) {
     return fallback || '';
   }
+  /* El nombre del tipo de viaje del segmented control de arriba ("¿Qué tipo de
+     viaje buscás?"). No sale de hotelStyle() a propósito: ese prioriza el tipo de
+     hotel (All Inclusive, Resort, Intermedio) y el texto de la sección tiene que
+     decir qué eligió la persona arriba, que es otra cosa.
+
+     Se escribe una vez porque el mismo nombre aparece en el subtítulo de
+     "Todas las propuestas" y en el aviso de que no hay más: si los dos textos tu
+    vieran la palabra escrita, cambiar "Equilibrado" por "Con comodidad" un día
+     dejaría la mitad de las pantallas diciendo la cosa vieja. */
+  var ESTILO_VIAJE = { ahorro: 'Ahorrar al máximo', eq: 'Equilibrado', comodo: 'Con comodidad' };
+  function nombreEstiloViaje(style) {
+    return ESTILO_VIAJE[String(style || 'eq')] || ESTILO_VIAJE.eq;
+  }
   function sanitizeHotelImageUrl(value, fallback) {
     if (typeof value !== 'string') return fallback || '';
     var text = value.trim();
@@ -1657,11 +1814,71 @@
     return unique;
   }
 
+  /* Que tipo de alojamiento se muestra, contra lo que el destino realmente tiene.
+     Devuelve el tipo ya resuelto; no toca meta.
+
+     El <select> se arma aparte, con el mismo criterio, y ya no decide nada: antes
+     esta correccion vivia DENTRO de hotelTypeSelectMarkup(), que se llama al final
+     de hotelOptions() y despues de que el titulo, la nota y el mensaje de estado
+     vacio se hubieran calculado con el tipo viejo. Como ademas mutaba
+     meta.hotelType, la lista de tarjetas se filtraba con el tipo NUEVO y el resto
+     de la seccion describia el VIEJO. En pantalla salia "Hoteles para viajar
+     intermedio" con el selector en "Económico" y, abajo, "No encontramos
+     alojamientos de categoría Intermedio": tres textos y un filtro que no decian
+     lo mismo. Resolverlo aca arriba deja las cuatro cosas hablando del mismo tipo.
+
+     La caida es al primer tipo disponible, y el orden de HOTEL_TYPES va de mas
+     barato a mas caro, asi que ese primero es el mas cercano al que se pidio.
+     Marcar un tipo que la lista de abajo no va a tener es peor que cambiarlo, y
+     cambiarlo en silencio es lo que hay que evitar: por eso el cambio queda
+     escrito en meta y se ve en el selector. */
+  function resolveHotelTypeForMeta(meta) {
+    var pedido = meta.hotelType || 'intermedio';
+    var disponibles = meta.tiposHotelDisponibles;
+    if (!Array.isArray(disponibles) || !disponibles.length) return pedido;
+    if (disponibles.indexOf(pedido) >= 0) return pedido;
+    return disponibles[0] || pedido;
+  }
+  /* Que hoteles de los que mando el server se pueden mostrar bajo este tipo.
+
+     Vive suelta y no adentro de grupo() a proposito: es la regla que sostiene la
+     promesa de que la seccion de alojamiento nunca arranca vacia, y una promesa
+     asi tiene que poder probarse sin montar la pantalla entera.
+
+     El server ya eligio estos hoteles por banda de precio y, para los tres tipos
+     del espectro, garantiza que nunca manda una lista vacia. Asi que si el filtro
+     de tipo deja TODO afuera, el que se equivoco es el filtro, no los hoteles: el
+     hotelType guardado en cada uno quedo desfasado respecto del tipo pedido, que
+     es justo lo que pasaba cuando el <select> corregia el tipo despues de que el
+     titulo y las cards ya se hubieran calculado. En ese caso se los deja pasar.
+     Una lista vacia ahi no seria "no hay hoteles de este tipo", que es lo que
+     diria el estado de abajo: seria un desajuste interno sostenido en pantalla
+     como si fuera una respuesta.
+
+     Solo para los tipos del espectro. En All Inclusive, Resort o Boutique la
+     lista vacia es la respuesta honesta y el estado de abajo la explica bien —que
+     no se muestran categorias distintas como reemplazo—, asi que ahi no se
+     rellena nada. */
+  function hotelesQuePasanElTipo(catalogo, tipo, strictType) {
+    var pasan = catalogo.filter(function (hotel) {
+      if (hotel.hotelType) return hotel.hotelType === tipo;
+      /* Sin tipo declarado solo pasan los tipos que son un ESPECTRO (mas barato,
+         mas caro). En All Inclusive, Resort o Boutique, un hotel sin clasificar no
+         es una opcion de ese tipo: son categorias que no admiten sustitucion.
+
+         Antes el filtro era !hotel.hotelType || ... y ese primer termino hacia
+         pasar TODO sin tipo a cualquier filtro, que es por lo que All Inclusive se
+         llenaba de estimados. strictType ya se calculaba para ese texto y no se
+         usaba para filtrar. */
+      return !strictType;
+    });
+    if (pasan.length || strictType || !catalogo.length) return pasan;
+    return catalogo;
+  }
   // El <select> va envuelto para poder dibujarle el chevron con ::after, igual
   // que .custom-select__control: con appearance:none el control nativo del
   // sistema queda con la flecha desalineada y el alto distinto al del resto.
-  function hotelTypeSelectMarkup(meta) {
-    var selected = meta.hotelType || 'intermedio';
+  function hotelTypeSelectMarkup(meta, selected) {
     var options = ['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive'];
     // Solo los tipos para los que este destino tiene algo de verdad, que es lo
     // que dice meta.tiposHotelDisponibles. Sin el dato se ofrecen los seis: no
@@ -1670,11 +1887,7 @@
     if (Array.isArray(meta.tiposHotelDisponibles) && meta.tiposHotelDisponibles.length) {
       var disponibles = options.filter(function (type) { return meta.tiposHotelDisponibles.indexOf(type) >= 0; });
       if (disponibles.length) options = disponibles;
-      // Si el tipo que estaba elegido no existe aca, se cae al primero que si.
-      // Marcar algo que la lista de abajo no va a tener es peor que cambiarlo.
-      if (options.indexOf(selected) < 0) selected = options[0];
     }
-    if (meta.hotelType !== selected) meta.hotelType = selected;
     return '<label class="hotel-type-filter"><span>Tipo de alojamiento</span><span class="hotel-type-filter__control"><select data-hotel-type-select aria-label="Filtrar alojamientos por tipo">' + options.map(function (type) { return '<option value="' + type + '"' + (type === selected ? ' selected' : '') + '>' + esc(HOTEL_TYPE_LABELS[type]) + '</option>'; }).join('') + '</select></span></label>';
   }
   /* Que hotel hay que marcar al redibujar la lista.
@@ -1733,10 +1946,17 @@
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var average = Math.max(1, Number(accommodationTotal) || 1) / nights / pax;
+    // El tipo se resuelve PRIMERO, antes de leer el perfil y la etiqueta. Todo lo
+    // que viene abajo —el titulo, la nota, la insignia, el filtro de las cards y
+    // el mensaje de lista vacia— lee meta.hotelType, y si el tipo se corrigiera
+    // despues de calcularlos quedarian describiendo una cosa mientras las cards
+    // muestran otra.
+    var hotelType = resolveHotelTypeForMeta(meta);
+    if (meta.hotelType !== hotelType) meta.hotelType = hotelType;
     var profile = hotelStyle(meta);
     var reparto = stayNights();
-    var strictType = ['all-inclusive', 'resort', 'boutique'].indexOf(meta.hotelType) >= 0;
-    var typeLabel = HOTEL_TYPE_LABELS[meta.hotelType] || meta.hotelType;
+    var strictType = ['all-inclusive', 'resort', 'boutique'].indexOf(hotelType) >= 0;
+    var typeLabel = HOTEL_TYPE_LABELS[hotelType] || hotelType;
 
     /* Un grupo de cards. stop es 1 o 2 en un viaje combinado y null en un destino
        solo, donde sale un unico grupo con el titulo de siempre.
@@ -1754,22 +1974,12 @@
       var stopName = stop === 1 ? reparto.firstName : (stop === 2 ? reparto.secondName : meta.dest.name);
       var stopNights = stop === 1 ? reparto.first : (stop === 2 ? reparto.second : nights);
       var defaultHotel = { tier: profile.tier, name: '', similar: [], image: '' };
-      var hotelCatalog = normalizeHotelCatalog(Array.isArray(catalog) ? catalog : [], defaultHotel)
-        .filter(function (hotel) {
-          if (hotel.hotelType) return hotel.hotelType === meta.hotelType;
-          /* Sin tipo declarado solo pasan los tipos que son un ESPECTRO (mas
-             barato, mas caro). En All Inclusive, Resort o Boutique, un hotel
-             sin clasificar no es una opcion de ese tipo: son categorias que no
-             admiten sustitucion, y ofrecer una es justo lo que el estado vacio
-             de abajo promete que no se hace ("No mostramos categorias distintas
-             como reemplazo").
-
-             Antes el filtro era !hotel.hotelType || ... y ese primer termino
-             hacia pasar TODO sin tipo a cualquier filtro, que es por lo que
-             All Inclusive se llenaba de estimados. strictType ya se calculaba
-             para ese texto y no se usaba para filtrar. */
-          return !strictType;
-        });
+      var catalog0 = normalizeHotelCatalog(Array.isArray(catalog) ? catalog : [], defaultHotel);
+      var hotelCatalog = hotelesQuePasanElTipo(catalog0, hotelType, strictType);
+      if (hotelCatalog.length < catalog0.length && !strictType) {
+        console.warn('[hoteles] el filtro de tipo dejo afuera ' + (catalog0.length - hotelCatalog.length) +
+          ' de ' + catalog0.length + ' hoteles de ' + typeLabel + '; se muestran igual porque el server ya los eligio por precio');
+      }
       var options = hotelCatalog.slice(0, 3).map(function (item, index) {
         return {
           name: item.name,
@@ -1808,7 +2018,7 @@
          buscando. Antes ese link vivia en el server, adentro de las entradas
          inventadas que ya no se generan. */
       var vacioQuery = new URLSearchParams({ ss: stopName });
-      if (meta.hotelType === 'all-inclusive') vacioQuery.set('nflt', 'mealplan=5');
+      if (hotelType === 'all-inclusive') vacioQuery.set('nflt', 'mealplan=5');
       var vacioLink = '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?' + vacioQuery.toString() + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(stopName) + ' ↗</a>';
       var body = options.length
         ? '<div class="hotel-grid">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + options.map(function (option) {
@@ -1887,7 +2097,7 @@
         // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
         ? ' Elegí un alojamiento en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
         : ' Seleccioná una alternativa de ' + money(average) + ' por noche en ' + esc(meta.dest.name) + '.')
-      + '</p></div>' + hotelTypeSelectMarkup(meta) + '</div>';
+      + '</p></div>' + hotelTypeSelectMarkup(meta, hotelType) + '</div>';
 
     // Un destino solo: el grupo único y, si no hay nada, la sección vacía de
     // siempre, sin cambio de comportamiento.
@@ -3058,171 +3268,6 @@
       proposalBreakdownContent(state) +
       '</section>';
   }
-  /* ---------- "De dónde salen los valores" ----------
-     El desglose de arriba dice CUÁNTO va a cada rubro. Este panel dice DE QUÉ
-     rubro sale cada número, que es la pregunta que sigue.
-
-     La diferencia con un "estimado" a secas: un estimado sin fuente no permite
-     decidir nada, porque no dice si se puede corregir. Acá cada fila dice el
-     proveedor o el nombre del operador del que salió el número, la fecha de
-     verificación y cuánta confianza tiene. Cuando el número sale de un modelo y
-     no de un precio publicado, se dice cuál modelo y con qué insumo.
-
-     Es la diferencia de fondo con una calculadora que multiplica 0,65 y 1,65
-     sobre un promedio ajeno: acá el 94% de los transfers tiene la fórmula
-     escrita al lado del precio. */
-
-  // El origen de cada rubro. Un objeto por categoría, con la misma clave que
-  // CATS, para que agregar un rubro al desglose no pueda olvidarse de declararlo
-  // acá: `fuentesDe` avisa por las categorías sin entrada.
-  function fuentesDe(state) {
-    var meta = (state && state.meta) || {};
-    var destKey = String((meta.dest && meta.dest.key) || '').toLowerCase();
-    var ciudad = (meta.dest && meta.dest.name) || 'tu destino';
-    var noches = Math.max(1, Number(meta.nights) || 1);
-    var pax = Math.max(1, Number(meta.pax) || 1);
-    var comidaProv = getDailyCostsProvenance(destKey);
-    var trasladoProv = getTransferProvenance(destKey);
-    // Un pasaje es real si la tarifa vino de SerpAPI al cotizar la propuesta, o
-    // si la persona eligió un vuelo de la búsqueda en vivo. Antes solo miraba lo
-    // segundo, y el panel llegaba a labeling "estimado" un pasaje que la app ya
-    // identificaba con el tag "Pasaje real" en la tarjeta: dos verdades
-    // opuestas en la misma pantalla, y la más visible era la equivocada.
-    var flightReal = !!(state && (state.flightAutoPriced ||
-      (state.proposal && state.proposal.sources && state.proposal.sources.pasajes === 'real')));
-    var hotelReal = !!meta.hotelsLoaded;
-
-    return {
-      pasajes: {
-        estado: flightReal ? 'real' : 'estimado',
-        origen: 'Google Flights',
-        detalle: 'Tarifa de la fecha que elegiste, consultada al cotizar. La reserva se completa en Google Flights, no acá.',
-        fecha: 'Consultada al cotizar este viaje.'
-      },
-      bus: {
-        estado: 'estimado',
-        origen: 'Modelo propio',
-        detalle: 'La tarifa de bus todavía no tiene una fuente en vivo: es un precio de planificación, no una cotización. Hay que confirmarlo con el operador para tus fechas.',
-        fecha: null
-      },
-      alojamiento: {
-        estado: hotelReal ? 'real' : 'estimado',
-        origen: 'Booking.com',
-        detalle: hotelReal
-          ? 'Tarifa del alojamiento que estás mirando, para tus fechas y tus ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ', con ' + noches + (noches === 1 ? ' noche' : ' noches') + '.'
-          : 'Todavía no cargamos los alojamientos de ' + ciudad + '. El número que ves es una estimación de mercado para ' + noches + (noches === 1 ? ' noche' : ' noches') + '.',
-        fecha: hotelReal ? 'Consultada al cotizar este viaje.' : null
-      },
-      comidas: null,
-      local: null,
-      // Comidas y transporte local comparten el MISMO `fuente` en
-      // data/costos-diarios.json: es un solo texto por destino que cubre las dos
-      // columnas. Pintarlas como dos filas repetía el mismo párrafo de 200
-      // caracteres dos veces seguidas. Van juntas, que además es como el voucher
-      // ya las agrupa ("Gastos en destino").
-      destino: {
-        estado: 'estimado',
-        origen: comidaProv ? 'Base de gastos de ' + ciudad : 'Base de gastos de la región',
-        detalle: comidaProv ? comidaProv.fuente : null,
-        confianza: comidaProv ? comidaProv.confianza : null,
-        verificado: comidaProv ? comidaProv.verificado : null,
-        nota: comidaProv ? comidaProv.nota : null,
-        derivacion: comidaProv ? comidaProv.derivacion : null,
-        formula: comidaProv ? 'Comida y transporte local: ' + noches + (noches === 1 ? ' noche' : ' noches') + ' × ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ' × el valor diario de cada uno.' : null
-      },
-      traslados: trasladoProv ? {
-        estado: 'estimado',
-        origen: 'OSRM + modelo de distancia',
-        detalle: trasladoProv.fuente,
-        confianza: trasladoProv.confianza,
-        verificado: trasladoProv.verificado,
-        derivacion: trasladoProv.derivacion,
-        km: trasladoProv.km,
-        real: trasladoProv.real || [],
-        nota: trasladoProv.modo && trasladoProv.modo !== 'car' ? 'No hay carretera hasta ' + ciudad + ': el traslado es en ' + trasladoProv.modo + '.' : null
-      } : {
-        estado: 'estimado',
-        origen: 'Modelo propio',
-        detalle: 'No tenemos el precio de traslado de ' + ciudad + ' verificado.'
-      },
-      tours: {
-        estado: 'real',
-        origen: 'estimado',
-        detalle: 'El precio es el de la fecha que estás mirando. Si no elegiste ninguna actividad, este rubro está en cero.',
-        fecha: null
-      },
-      auto: {
-        estado: 'estimado',
-        origen: 'Modelo propio',
-        detalle: 'Combustible y peajes de la ruta ida y vuelta, con el rendimiento del vehículo que elegiste. No es una cotización de alquiler.',
-        fecha: null
-      }
-    };
-  }
-
-  // El orden en que aparecen las filas, y a qué modo de transporte pertenece
-  // cada una. Es la misma taxonomía que getBudgetBreakdown() usa para el desglose,
-  // así que las dos vistas no pueden mostrar rubros distintos para el mismo viaje.
-  //
-  // 'destino' no es un rubro de CATS: es la fila que junta comidas y local, que
-  // salen de la misma fuente.
-  var FUENTES_POR_MODO = {
-    flight: ['pasajes', 'alojamiento', 'traslados', 'destino', 'tours'],
-    bus: ['bus', 'alojamiento', 'destino', 'tours'],
-    auto: ['auto', 'alojamiento', 'destino', 'tours']
-  };
-  var ETIQUETA_FUENTE = { destino: 'Gastos en destino' };
-
-  function fuenteBadge(estado, confianza) {
-    // El estado y la confianza son cosas distintas y no se mezclan: "real" dice
-    // si el número viene de una consulta; "confianza baja" dice cuánta fe merece
-    // una estimación. Un transfer con tarifa publicada es real y de confianza
-    // alta; uno del modelo de distancia es estimado y de confianza baja.
-    var clase = estado === 'real' ? 'fuente-badge es-real' : 'fuente-badge es-estimado';
-    var texto = estado === 'real' ? 'precio real' : 'estimado';
-    if (estado !== 'real' && confianza) {
-      return '<span class="' + clase + '">' + texto + '</span><span class="fuente-badge es-confianza conf-' + esc(confianza) + '">confianza ' + esc(confianza) + '</span>';
-    }
-    return '<span class="' + clase + '">' + texto + '</span>';
-  }
-
-  function fuentesPanel(state) {
-    if (!state || !state.meta) return '';
-    var fuentes = fuentesDe(state);
-    var orden = FUENTES_POR_MODO[state.transportMode] || FUENTES_POR_MODO.flight;
-    var visibles = orden.filter(function (cat) { return fuentes[cat]; });
-    if (!visibles.length) return '';
-
-    var hayReal = visibles.some(function (cat) { return fuentes[cat].estado === 'real'; });
-    var conteo = visibles.filter(function (cat) { return fuentes[cat].estado === 'real'; }).length;
-    var resumen = hayReal
-      ? conteo + ' de ' + visibles.length + ' rubros usan un precio real de proveedor. Los otros son estimaciones, y abajo está de dónde sale cada una.'
-      : 'Ninguno de los ' + visibles.length + ' rubros de este viaje tiene un precio real: son estimaciones. Abajo está de dónde sale cada una y cuánta confianza tiene.';
-
-    var filas = visibles.map(function (cat) {
-      var f = fuentes[cat];
-      var label = ETIQUETA_FUENTE[cat] || (CATS.filter(function (c) { return c[0] === cat; })[0] || ['', cat])[1];
-      return '<div class="fuente-fila">' +
-        '<div class="fuente-fila__head"><b>' + esc(label) + '</b>' + fuenteBadge(f.estado, f.confianza) + '</div>' +
-        '<p class="fuente-fila__origen">Origen: <b>' + esc(f.origen) + '</b></p>' +
-        (f.detalle ? '<p class="fuente-fila__detalle">' + esc(f.detalle) + '</p>' : '') +
-        (f.formula ? '<p class="fuente-fila__formula">' + esc(f.formula) + '</p>' : '') +
-        (f.km != null ? '<p class="fuente-fila__formula">' + f.km + ' km de carretera, medidos.</p>' : '') +
-        (f.real && f.real.length ? '<p class="fuente-fila__real">Tarifa publicada para: ' + esc(f.real.join(', ')) + '. El resto sale del modelo.</p>' : '') +
-        (f.nota ? '<p class="fuente-fila__nota">' + esc(f.nota) + '</p>' : '') +
-        (f.derivacion ? '<p class="fuente-fila__derivacion"><b>Cómo se calculó:</b> ' + esc(f.derivacion) + '</p>' : '') +
-        (f.verificado ? '<p class="fuente-fila__fecha">Verificado: ' + esc(f.verificado) + (f.fecha ? ' · ' + esc(f.fecha) : '') + '</p>' : (f.fecha ? '<p class="fuente-fila__fecha">' + esc(f.fecha) + '</p>' : '')) +
-        '</div>';
-    }).join('');
-
-    return '<section class="fuentes" data-fuentes>' +
-      '<details class="fuentes__details">' +
-      '<summary class="fuentes__summary"><span>De dónde salen los valores</span></summary>' +
-      '<p class="fuentes__intro">' + esc(resumen) + '</p>' +
-      '<div class="fuentes__lista">' + filas + '</div>' +
-      '<p class="fuentes__pie">Un número sin fuente publicada no se presenta como real. Cuando la fuente no alcanza, se escribe de qué se derivó y con qué confianza.</p>' +
-      '</details></section>';
-  }
   /* ---------- salto desde el desglose / "Mi Viaje" a la sección del rubro ----------
      El desglose y el panel "Mi Viaje" son el mapa del presupuesto: dicen cuánta
      plata va a cada rubro, pero la decisión se toma más abajo (elegir régimen,
@@ -3922,7 +3967,21 @@
       // ir con punto, porque la especifiacion descarta el valor si no es un
       // float valido. Con coma el campo se muestra vacio. El punto se ve junto
       // al símbolo, que es la convención de los campos numéricos.
-      var input = '<label class="daily-budget__planned"><span>Monto por día</span><div class="daily-budget__input-wrap"><span>' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Presupuesto personalizado diario para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span>/día</span></div></label>';
+      /* El monto del personalizado se escribe en la MISMA tipografia y el mismo
+         tamano del precio de los presets. Antes el <input> iba en 16px dentro de
+         una caja con borde, al lado de un "R$ 78,15/dia" de 24px: la tercera
+         card no parecia parte de la misma fila, parecia un formulario pegado
+         al lado de dos precios. La caja se saco para que se lea como un precio
+         mas; sigue siendo un input, asi que el foco se muestra con un anillo
+         para que se vea que se puede escribir ahi. */
+      /* "Monto planeado" y no "Monto por dia": la unidad ya aparece al lado
+         como "/dia", y el campo va dentro de una card que se llama
+         "Personalizado", una al lado de "Economico" y "Confort", que tambien
+         son montos diarios. Decirlo dos veces ("Monto por dia" y "/dia")
+        repetia la misma idea y hacia que la etiqueta se leyera como el titulo
+         de un sub-bloque, cuando es el nombre del campo. El aria-label sigue
+         diciendo "diario" porque ahi si describe el dato, no lo rotula. */
+      var input = '<label class="daily-budget__planned"><span>Monto planeado</span><div class="daily-budget__input-wrap"><span class="daily-budget__input-symbol">' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Monto diario planeado para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span class="daily-budget__input-unit">/día</span></div></label>';
       var custom = customSelected
         ? '<div class="daily-budget__option daily-budget__option--custom is-selected" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span>' + input + '</div>'
         : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Escribí el monto que querés gastar.</span><strong>Ingresar monto</strong></button>';
@@ -3948,7 +4007,11 @@
       '<div class="daily-budget__header"><span>Comidas</span></div>' +
       optionsGrid(foodOptions, 'food') +
       '</div>' +
-      '<p class="daily-budget__hint">Se recalcula automáticamente para toda la duración del viaje.</p>' +
+      /* La frase "Se recalcula automaticamente para toda la duracion del viaje"
+         se saco. No hacia falta decir: es lo que ya pasa, el monto se prorratea
+         por las noches de cada parada, y decirlo ocupaba una linea debajo de las
+         dos grillas de opciones, que es donde estaba el ojo. Si queda duda de si
+         el monto es diario o total, lo dicen los "/dia" de cada tarjeta. */
       '</section>';
   }
   // --- Deselección con un segundo clic -----------------------------------------
@@ -4406,7 +4469,7 @@
     var selectedMode = typeof mode === 'string' ? mode : mode ? 'auto' : 'flight';
     if (selectedMode === 'auto') return roadtripCalculator(meta);
     if (selectedMode === 'bus') return '<section class="transport-options bus-itinerary" data-budget-anchor="bus"><h2>Bus semicama / cama</h2><p>Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
-    return '<section class="detail-section" data-budget-anchor="pasajes"><h2>Reserva tus Vuelos en Vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
+    return '<section class="detail-section" data-budget-anchor="pasajes"><h2>Reservé tus Vuelos en vivo</h2>' + flightSearch(meta, budget) + '</section>' + transferCard(meta);
   }
   function localTransportDescription(meta) {
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
@@ -5059,9 +5122,20 @@
     var cards = fits.map(function (option, index) {
       // Sólo las categorías con costo: una fila en US$ 0 es ruido en un
       // desglose que la persona abre para entender de dónde sale el precio.
-      var rows = CATS.filter(function (c) { return Number(option.parts[c[0]]) > 0; }).map(function (c) {
-        return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + '</b></div>';
+      // El asterisco en los rubros estimados es el mismo que en la tarjeta de
+      // propuestas (una sola funcion decide), para que estas dos listas no
+      // expliquen lo mismo de dos maneras.
+      var rubros = CATS.filter(function (c) { return Number(option.parts[c[0]]) > 0; });
+      var hayEstimado = rubros.some(function (c) { return !rubroEsReal(option, c[0], data.meta); });
+      var rows = rubros.map(function (c) {
+        var asterisco = rubroEsReal(option, c[0], data.meta)
+          ? ''
+          : '<sup class="opt__est" aria-label="precio estimado" title="Precio estimado">*</sup>';
+        return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + asterisco + '</b></div>';
       }).join('');
+      var notaDesglose = hayEstimado
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Avanzá a <b>Ver propuesta</b> para ver los precios reales.</p>'
+        : '';
       var photo = DEST_PHOTOS[option.dest.key];
       var location = [option.dest.region, option.dest.country || 'Brasil'].filter(Boolean).join(' - ');
       // Comparte la anatomía de la tarjeta de propuesta (opt__*): precio arriba
@@ -5084,7 +5158,7 @@
         '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
         '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
         '</div>' +
-        '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + '</div>' +
+        '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + notaDesglose + '</div>' +
         '</div>' +
         '</article>';
     }).join('');
@@ -5168,11 +5242,31 @@
     var hotel = HOTEL_TYPE_LABELS[type] || (p.tierLabel ? p.tierLabel.charAt(0).toUpperCase() + p.tierLabel.slice(1) : 'Intermedio');
     return mode + ' + Hotel ' + hotel;
   }
+  /* Si un rubro de una propuesta viene de un precio real o de una estimación.
+
+     Es la única definición del tema, y la usan las dos vistas: la pastillita
+     "real"/"estimado" del desglose del detalle y el asterisco del desglose de la
+     tarjeta. Tenerlas separadas era pedir que se separaran: aparecio una vez una
+     pastilla que decia "estimado" al lado de un numero que ya era real, y la
+     contradiccion se leia como un error de la app.
+
+     Dos casos hacen que un rubro sea real, y ninguno viene de la lista:
+
+     - el model's `sources`, que solo marca 'real' para `pasajes` y solo cuando
+       hay tarifa de vuelo consultada (ver lib/model.js);
+     - el alojamiento, cuando ya se cargaron los hoteles de Booking para estas
+       fechas. Antes de cargarlos, el número es una estimación de mercado y por
+       eso no cuenta. */
+  function rubroEsReal(p, cat, meta) {
+    if (p && p.sources && p.sources[cat] === 'real') return true;
+    if (cat === 'alojamiento' && meta && meta.hotelsLoaded) return true;
+    return false;
+  }
   function srcTag(p, cat, live) {
     if (!live) return '';
     // Solo `pasajes` puede llegar como 'real' (ver lib/model.js). El resto de
     // categorias son estimaciones propias y se muestran como tales.
-    return p && p.sources && p.sources[cat] === 'real' ? '<span class="src real">real</span>' : '<span class="src">estimado</span>';
+    return rubroEsReal(p, cat) ? '<span class="src real">real</span>' : '<span class="src">estimado</span>';
   }
   function costNote(cat, meta, p) {
     var city = esc(meta.dest.name);
@@ -5277,7 +5371,7 @@
         return '<div class="tip"><div class="save">−' + money(t.save) + '</div><div><h4>' + esc(title) + '</h4><p>' + esc(text) + '</p>' + btn + '</div></div>';
       }).join('');
     } else {
-      out += '<p style="margin:0">Con estas fechas y esta ruta ya estás en una muy buena combinación. Probá con otro destino o cambiá el presupuesto.</p>';
+      out += '<p style="margin:0">Con estas fechas y esta ruta ya estás en una muy buena combinación.</p>';
     }
     return out + '</div></section>';
   }
@@ -5308,6 +5402,47 @@
     }
     data.tips = tips;
     host.outerHTML = tipsSectionHtml(data);
+  }
+
+  /*
+   * El punto más barato de la serie y, aparte, si la fecha elegida ES ese punto.
+   *
+   * Las dos cosas se usan juntas y por eso viven acá y no en la barra: cuando tu
+   * fecha ya es la más barata, "Tu fecha" y "La más barata" nombran la MISMA
+   * barra. Se las seguía mostrando como dos referencias y el gráfico quedaba
+   * contradiciéndose: una barra amarilla con dos llaves en la leyenda y la
+   * pregunta de por qué una fecha era las dos cosas.
+   */
+  function cheapestPoint(series) {
+    var best = null;
+    (Array.isArray(series) ? series : []).forEach(function (x) {
+      if (typeof x.total !== 'number' || !isFinite(x.total)) return;
+      if (!best || x.total < best.total) best = x;
+    });
+    return best;
+  }
+  function curIsCheapest(series) {
+    var list = Array.isArray(series) ? series : [];
+    var best = cheapestPoint(list);
+    var cur = list.filter(function (x) { return x.shift === 0; })[0];
+    return !!(cur && best && cur === best);
+  }
+  // La frase que avisa que no hay nada que mejorar. Va en el subtítulo del
+  // gráfico, que es donde se lee antes de mirar las barras.
+  function cheapestIsCurNote(series) {
+    var list = Array.isArray(series) ? series : [];
+    if (!curIsCheapest(list)) return '';
+    return ' Tu fecha ya es la más barata de las ' + list.length + (list.length === 1 ? ' fecha comparada.' : ' fechas comparadas.');
+  }
+  // Leyenda del gráfico. Cuando tu fecha es la más barata queda UNA sola
+  // pastilla, con el color que tiene la barra (mostaza), y no dos.
+  function priceChartLegend(series, realCount) {
+    var list = Array.isArray(series) ? series : [];
+    var todas = list.length > 0 && realCount === list.length;
+    var refs = curIsCheapest(list)
+      ? '<span class="l-merged">Tu fecha: ya es la más barata</span>'
+      : '<span class="l1">Tu fecha</span><span class="l2">La más barata</span>';
+    return '<div class="legend" data-calendar-legend>' + refs + '<span' + (todas ? ' class="l3"' : '') + '>Otras fechas</span></div>';
   }
 
   function priceChartBars(series) {
@@ -5378,13 +5513,20 @@
         });
         if (!real) return;
         box.innerHTML = priceChartBars(data.series);
+        // La leyenda se vuelve a pintar porque el cheapest puede cambiar con los
+        // precios reales: si la fecha elegida era la más barata por estimación y
+        // con los datos reales deja de serlo, la pastilla única tiene que volver
+        // a ser dos. Con la leyenda vieja quedaba diciendo "ya es la más barata"
+        // sobre un gráfico que ya mostraba otra barra amarilla.
+        var legendBox = document.querySelector('[data-calendar-legend]');
+        if (legendBox) legendBox.outerHTML = priceChartLegend(data.series, real);
 
         var note = document.querySelector('[data-calendar-note]');
         if (note) {
           note.textContent = 'Costo total en ' + monedaActiva().simbolo + ' si salís antes o después, con las mismas noches. ' +
             real + ' de ' + data.series.length + ' fechas con precio de vuelo real' +
             (real < data.series.length ? '; las demás son estimaciones.' : '.') +
-            ' Tocá una barra para usarla.';
+            ' Tocá una barra para usarla.' + cheapestIsCurNote(data.series);
         }
         // Se redibuja el "dónde podés ahorrar" porque el ahorro depende del
         // mínimo de la serie, que con precios reales puede haber cambiado.
@@ -5426,9 +5568,16 @@
 
     var chip = $('#chip');
     if (chip) chip.textContent = '';
+    // El pie dice qué es real y qué es de referencia, rubro por rubro. Decir
+    // "alojamiento, comidas, traslados y buses son valores de referencia" era
+    // falso para dos de los cuatro: el alojamiento llega con tarifa de Booking
+    // para tus fechas y el bus con la tarifa del operador, y los dos se pueden
+    // volver a consultar. Comidas y traslados dentro del destino son lo que
+    // sale del modelo de costos diarios, y eso no se puede corregir con una
+    // consulta: por eso son los dos que quedan como referencia.
     $('#foot').innerHTML = (live
       ? '<p><b>Vuelos:</b> tarifa aérea real al momento de la búsqueda, por persona. Puede cambiar hasta que reserves. <b>Alojamiento, comidas, traslados y buses:</b> valores de referencia.</p>'
-      : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento, comidas, traslados y buses son valores de referencia.</p>')
+      : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento y buses son valores reales; comidas y traslados en destino son valores de referencia.</p>')
       + '<details class="foot-credits" data-foot-credits><summary>Créditos de las fotos</summary>' +
       '<p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre. ' +
       'Cada autor y licencia se detalle más abajo.</p><ul data-foot-credits-list></ul></details>';
@@ -5491,23 +5640,51 @@
     // puede cumplir, y el gráfico dice textualmente que es una estimación.
     var calendarBox = '<div class="chart" data-calendar-chart>' + priceChartBars(data.series) + '</div>';
     var realCount = data.series.filter(function (x) { return x.realFlight; }).length;
-    h += '<section class="sec"><h2>Mismo viaje, otra fecha</h2><p class="sub" data-calendar-note>Costo total en ' + esc(monedaActiva().simbolo) + ' si salís antes o después, con las mismas noches. Tocá una barra para usarla.</p>' +
+    h += '<section class="sec"><h2>Mismo viaje, otra fecha</h2><p class="sub" data-calendar-note>Costo total en ' + esc(monedaActiva().simbolo) + ' si salís antes o después, con las mismas noches. Tocá una barra para usarla.' + esc(cheapestIsCurNote(data.series)) + '</p>' +
       '<div class="panel">' + calendarBox +
-      '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata</span><span' + (realCount === data.series.length ? ' class="l3"' : '') + '>Otras fechas</span></div></div></section>';
+      priceChartLegend(data.series, realCount) + '</div></section>';
 
     // La tarjeta tiene dos acciones y dos superficies distintas: "Ver propuesta"
     // abre el detalle completo y "Ver desglose" despliega el reparto por categoría
     // sin salir de la lista. Antes la única pista era que toda la tarjeta fuera
     // clickeable: en escritorio se adivinaba, en el celu no se veía, y el botón
     // real ("Ver propuesta") sólo aparecía después de desplegar la tarjeta.
-    var proposalMarkup = function (p, index) {
+    // `otraGama` marca las cards que entraron por la regla de "la más barata" o
+    // por la del 20%, y no por ser del mismo nivel. Sin la etiqueta, una card de
+    // otra gama se sentaba al lado de las de tu nivel sin explicar por qué está
+    // ahí.
+    var proposalMarkup = function (p, index, otraGama) {
       var tags = '';
       if (p.id === rec.id) tags += '<span class="mini y">Recomendada</span>';
       if (cheapest && p.id === cheapest.id) tags += '<span class="mini">Más barata</span>';
       if (cozy && p.id === cozy.id) tags += '<span class="mini">Más cómoda</span>';
+      if (otraGama) tags += '<span class="mini">Otro nivel</span>';
       if (live && p.sources && p.sources.pasajes === 'real') tags += '<span class="mini g">Pasaje real</span>';
       tags += p.total <= budget ? '<span class="mini g">Entra en tu presupuesto</span>' : '<span class="mini r">Se pasa por ' + money(p.total - budget) + '</span>';
-      var rows = CATS.filter(function (c) { return Number(p.parts[c[0]]) > 0; }).map(function (c) { return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + '</b></div>'; }).join('');
+      /* El desglose de la tarjeta marca con un asterisco lo que NO es un precio
+         real, y abajo dice qué hacer para ver los que sí lo son.
+
+         El asterisco va pegado a la cifra y no en el nombre del rubro a
+         propósito: el nombre se lee de un vistazo y es lo que la persona compara
+         entre tarjetas, mientras que el asterisco tiene que pegarse al número
+         que es el que se está mirando. Con un asterisco por rubro, la primera
+         fila con * invita a desconfiar de las cinco que vienen abajo.
+
+         La nota va siempre que haya un solo asterisco, y no en todas las cards:
+         si no hay nada estimado no hay nada que aclarar. `rubroEsReal()` es la
+         misma función que decide la pastillita "real/estimado" del detalle, así
+         que las dos vistas no pueden contradecirse. */
+      var rubros = CATS.filter(function (c) { return Number(p.parts[c[0]]) > 0; });
+      var hayEstimado = rubros.some(function (c) { return !rubroEsReal(p, c[0], data.meta); });
+      var rows = rubros.map(function (c) {
+        var asterisco = rubroEsReal(p, c[0], data.meta)
+          ? ''
+          : '<sup class="opt__est" aria-label="precio estimado" title="Precio estimado">*</sup>';
+        return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + asterisco + '</b></div>';
+      }).join('');
+      var nota = hayEstimado
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Avanzá a <b>Ver propuesta</b> para ver los precios reales.</p>'
+        : '';
       var bodyId = 'opt-desglose-' + index;
       return '<article class="opt' + (p.id === rec.id ? ' propuesta-seleccionada' : '') + '" data-opt-card>' +
         '<div class="opt__head">' +
@@ -5521,14 +5698,64 @@
         '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + '</div>' +
       '</article>';
     };
-    // Solo se comparan propuestas de la misma gama de alojamiento que la recomendada
-    // (la que ya refleja el estilo de viaje elegido arriba), para no mezclar tiers.
+    /* Qué propuestas se muestran y con qué título.
+
+       El filtro de siempre fue "misma gama que la recomendada", y con eso passaban
+       dos cosas malas. La primera es que el subtítulo hablaba de "nivel de
+       alojamiento", una palabra que no aparece en ningún control de la pantalla:
+       arriba se elige un TIPO DE VIAJE, no un nivel de hotel. Decir una cosa y
+       ofrecer otra es la razón de que el texto no significara nada.
+
+       La segunda es que el filtro era demasiado cerrado. Si estabas en
+       Equilibrado y el server te devolvía una sola propuesta de ese nivel, la
+       sección se quedaba con una sola card y no decías ni que ya estaba
+       optimizada ni que no había nada mejor. Con una lista de una, "Todas las
+       propuestas" no es información: es ruido.
+
+       Por eso ahora, además del mismo nivel, entran DOS cosas:
+
+       1. la propuesta más barata de todas, siempre. Si estás en Equilibrado y
+          solo hay una en ese nivel, igual querés ver la más barata: es la
+          respuesta a la pregunta que viniste a hacer.
+       2. las que se pasan por menos del 20% del presupuesto. Son las que
+          estabas a punto de comprar y el filtro por nivel te las ocultaba.
+
+       Con una sola propuesta la sección se llama "Tu propuesta" y dice que ya
+       está optimizada, porque con una card el título "Todas las propuestas"
+       promete una comparación que no existe. */
     var allProposals = list.concat(Array.isArray(data.alternatives) ? data.alternatives : []).filter(function (proposal, index, proposals) {
       return proposal.mode !== 'avion_ba' && proposals.findIndex(function (candidate) { return candidate.id === proposal.id; }) === index;
     });
-    var sameTier = allProposals.filter(function (p) { return p.ti === rec.ti; }).sort(function (a, b) { return a.total - b.total; });
-    var opts = sameTier.map(proposalMarkup).join('');
-    h += '<section class="sec"><div class="sec__head"><h2>Todas las propuestas</h2></div><p class="sub">Mismo nivel de alojamiento que elegiste, ordenadas de la más barata a la más cara. Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.</p><div class="opts">' + opts + '</div></section>';
+    var conPrecio = allProposals.filter(function (p) { return typeof p.total === 'number' && isFinite(p.total); });
+    var masBarata = conPrecio.slice().sort(function (a, b) { return a.total - b.total; })[0] || null;
+    // 20% del presupuesto, o 0 si no hay presupuesto puesto: con tope 0 la regla
+    // no deja pasar nada y el filtro queda en "mismo nivel", que es el
+    // comportamiento de antes y no inventa un margen sobre un número que no está.
+    var topeCerca = Number(budget) > 0 ? Number(budget) * 1.2 : 0;
+    var sameTier = conPrecio.filter(function (p) {
+      if (p.ti === rec.ti) return true;
+      if (masBarata && p.id === masBarata.id) return true;
+      return topeCerca > 0 && p.total <= topeCerca;
+    }).sort(function (a, b) { return a.total - b.total; });
+    // Las que entran por las dos reglas extra vienen de otra gama. El subtítulo
+    // no puede afirmar "del mismo nivel" si hay alguna de esas adentro, y la card
+    // lo dice con una etiqueta para que la diferencia se vea sin leer el texto.
+    var otrasGamas = sameTier.filter(function (p) { return p.ti !== rec.ti; });
+    var estilo = nombreEstiloViaje(data.meta.style || S.style);
+    var verDetalle = 'Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.';
+    var opts = sameTier.map(function (p) { return proposalMarkup(p, sameTier.indexOf(p), p.ti !== rec.ti); }).join('');
+    if (sameTier.length <= 1) {
+      h += '<section class="sec"><div class="sec__head"><h2>Tu propuesta</h2></div>' +
+        '<p class="sub">Esta propuesta ya está optimizada: es la más barata que encontramos para estas fechas y no hay una alternativa más barata. ' + verDetalle + '</p>' +
+        '<div class="opts">' + opts + '</div></section>';
+    } else {
+      var alcance = otrasGamas.length
+        ? 'Del mismo nivel que el tipo de viaje que elegiste (<b>' + esc(estilo) + '</b>), más las que quedan cerca de tu presupuesto.'
+        : 'Del mismo nivel que el tipo de viaje que elegiste (<b>' + esc(estilo) + '</b>).';
+      h += '<section class="sec"><div class="sec__head"><h2>Todas las propuestas</h2></div>' +
+        '<p class="sub">' + alcance + ' Ordenadas de la más barata a la más cara. ' + verDetalle + '</p>' +
+        '<div class="opts">' + opts + '</div></section>';
+    }
 
     var el = $('#results');
     el.innerHTML = h;
@@ -5560,13 +5787,22 @@
     // mano. Estaba fija en "Búzios → Arraial do Cabo" porque el único par que
     // existía era ese; con los 88 la frase de logística le decía a alguien que
     // venía a Paraty + Ilha Grande que su vuelo iba a Búzios y Arraial.
-    var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '): aeropuerto → ' + first.name + ' → ' + second.name + ' → aeropuerto. Incluye transfers de aeropuerto y ' + trip.transferBetweenLabel.toLowerCase() + ' (' + money(trip.transferBetweenUsd) + ' en total).';
+    /* La frase dice SOLO el aeropuerto por el que se entra y se sale. Antes
+      CELLA recitaba la ruta interna: "aeropuerto → Natal → Fortaleza /
+       Jericoacoara → aeropuerto, incluye transfers y el traslado entre paradas
+       (estimado, 43 por persona)". Eso mezclaba tres cosas distintas: por
+       dónde entra el vuelo, cómo se reparte el traslado y cuánto de eso es
+       estimado. La unica que es real de punta a punta es el aeropuerto, y es la
+       unica que se puede decir sin aclarar despues. Las paradas ya estan
+       nombradas arriba, cada una con sus noches, asi que la ruta no informa
+       nada nuevo: repite los mismos dos nombres. */
+    var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '). Incluye los transfers desde y hacia el aeropuerto.';
     return '<section class="multistay-panel" aria-labelledby="multistay-title" data-multistay-panel>' +
       '<div class="multistay-panel__head"><div><span class="multistay-panel__eyebrow">ITINERARIO MULTIDESTINO</span><h2 id="multistay-title">Distribuí tus noches</h2></div><span class="multistay-panel__total">' + nights + (nights === 1 ? ' noche' : ' noches') + ' en total</span></div>' +
       (nights > 1 ? '<div class="multistay-panel__stays"><div class="multistay-panel__stay"><strong>' + esc(first.name) + '</strong><span><b data-multistay-first-nights>' + firstNights + '</b> ' + (firstNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-first-cost>' + money(0) + ' alojamiento estimado</small></div>' +
       '<label class="multistay-panel__slider"><span class="sr-only">Noches en ' + esc(first.name) + '</span><input type="range" min="1" max="' + (nights - 1) + '" step="1" value="' + firstNights + '" data-multistay-split aria-valuetext="' + firstNights + ' noches en ' + esc(first.name) + ', ' + secondNights + ' en ' + esc(second.name) + '"></label>' +
       '<div class="multistay-panel__stay"><strong>' + esc(second.name) + '</strong><span><b data-multistay-second-nights>' + secondNights + '</b> ' + (secondNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-second-cost>' + money(0) + ' alojamiento estimado</small></div></div>' : '<p class="multistay-panel__hint">Para dividir la estadía entre localidades necesitás al menos 2 noches.</p>') +
-      '<p class="multistay-panel__logistics">✈️ ' + esc(logistics) + '</p><p class="multistay-panel__hint">El traslado entre paradas siempre es una estimación (lo calcula el modelo con la distancia entre las dos). El alojamiento pasa a ser real cuando elegís un hotel en cada parada.</p></section>';
+      '<p class="multistay-panel__logistics">✈️ ' + esc(logistics) + '</p><p class="multistay-panel__hint">El traslado entre las dos paradas se estima con la distancia entre ellas. El alojamiento pasa a ser real cuando elegís un hotel en cada parada.</p></section>';
   }
   function updateMultiStayPricing() {
     if (!detailState || !detailState.multiStay) return;
@@ -5684,10 +5920,6 @@
     if (selectedTransportMode === 'auto' || selectedTransportMode === 'flight') syncTransportState(isRoadtrip);
     var renderSafe = function (fn, fallback) { try { return fn(); } catch (error) { console.error('Error al renderizar detalle', error); return fallback; } };
     var breakdownMarkup = renderSafe(function () { return proposalBreakdownMarkup(detailState); }, '<section class="proposal-breakdown"><h2>Desglose del viaje</h2></section>');
-    // El panel de fuentes va FUERA de [data-proposal-breakdown] a propósito: ese
-    // section se repinta entero en cada recálculo (queueHeavyRepaint) y se
-    // comería el <details> abierto en cada movimiento de un campo.
-    var fuentesMarkup = renderSafe(function () { return fuentesPanel(detailState); }, '');
     var dailyBudgetMarkup = renderSafe(function () { return dailyBudgetControls(); }, '');
     var transportMarkup = renderSafe(function () { return transportFlow(detailState.meta, detailState.flight, selectedTransportMode); }, '');
     var hotelsMarkup = renderSafe(function () { return data.meta.hotelsLoaded ? hotelOptions(data.meta, proposal.parts.alojamiento) : hotelLoading(data.meta); }, '<section class="hotel-options">Cargando alojamientos…</section>');
@@ -5700,9 +5932,15 @@
     var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p>' + esc(data.meta.dest.name) + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · Salís desde ' + esc(originLabel(data.meta.origin)) + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
-      renderSafe(function () { return multiStayMarkup(detailState); }, '') + breakdownMarkup + fuentesMarkup + dailyBudgetMarkup +
+      renderSafe(function () { return multiStayMarkup(detailState); }, '') + dailyBudgetMarkup +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + foodMarkup +
+      /* "A donde va tu plata" va AL FINAL, despues de todas las secciones. Antes
+         estaba arriba, entre el resumen y el reparto de noches, y ahi competia
+         con la decision principal: ver el reparto antes de haber visto los
+         hoteles, los transfers o las actividades que lo componen. Al final se
+         lee como el cierre: primero elegis, despues miras donde fue la plata. */
+      breakdownMarkup +
       '</div></div>';
     updateMultiStayPricing();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
@@ -6211,10 +6449,34 @@
   function temaActual() {
     return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'night';
   }
-  function aplicarTema(t) {
+  // El tema que quiere el sistema operativo. El oscuro de la app (night mostaza)
+  // es el default, asi que la pregunta es de una: "acaba el sistema en claro".
+  function temaDelSistema() {
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
+  }
+  // La eleccion guardada, o null si la persona todavia no toco el boton.
+  // Null NO es lo mismo que 'night': null significa "no hay eleccion" y por eso
+  // el tema sigue al sistema; 'night' es una eleccion explicita y manda sobre
+  // el sistema para siempre.
+  function temaGuardado() {
+    try {
+      var g = localStorage.getItem(THEME_KEY);
+      return (g === 'light' || g === 'night') ? g : null;
+    } catch (e) { return null; }
+  }
+  // `guardar` separado del resto a proposito. Antes aplicarTema() escribia SIEMPRE
+  // en localStorage, y la llamaba tambien initThemeToggle() al arrancar: con solo
+  // abrir la pagina en un celular en claro se guardaba 'light'. A partir de ahi
+  // habia "eleccion guardada", asi que la app dejaba de seguir al sistema para
+  // siempre, y un usuario que passer de claro a oscuro a la tarde se quedaba
+  // viendo la pagina en claro sin poder explicar por que. Ahora seguir al sistema
+  // no deja rastro: se escribe unicamente cuando alguien toca el boton.
+  function aplicarTema(t, guardar) {
     var nuevo = t === 'light' ? 'light' : 'night';
     document.documentElement.setAttribute('data-theme', nuevo);
-    try { localStorage.setItem(THEME_KEY, nuevo); } catch (e) { /* modo privado */ }
+    if (guardar) {
+      try { localStorage.setItem(THEME_KEY, nuevo); } catch (e) { /* modo privado */ }
+    }
     // El color de la barra del celular lo toma el sistema del meta. Sin esto,
     // en claro la barra de arriba queda de night y queda una franja oscura
     // sobre una pagina clara.
@@ -6230,13 +6492,30 @@
   function initThemeToggle() {
     // Primero se sincroniza el boton con lo que el head ya aplico. Si se
     // hiciera solo en el click, el boton arrancaria diciendo night aunque la
-    // persona ya estaba en claro.
-    aplicarTema(temaActual());
+    // persona ya estaba en claro. Sin `guardar`: esto no es una eleccion, es
+    // el estado que el script del head ya resolvio.
+    aplicarTema(temaActual(), false);
     var btn = $('#theme-toggle');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      aplicarTema(temaActual() === 'light' ? 'night' : 'light');
-    });
+    if (btn) {
+      // Un click SI es una eleccion: se guarda y a partir de ahi manda sobre el
+      // sistema. Es la unica via por la que se escribe THEME_KEY.
+      btn.addEventListener('click', function () {
+        aplicarTema(temaActual() === 'light' ? 'night' : 'light', true);
+      });
+    }
+    // Y al revés: si NO hay eleccion guardada, la app sigue al sistema en vivo.
+    // Sin este listener el tema solo se resolvia en la carga, asi que cambiar el
+    // celular de claro a oscuro a la tarde dejaba la pagina como estaba. Con
+    // eleccion guardada el listener no hace nada: manda lo que la persona eligio.
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(prefers-color-scheme: light)');
+      var alCambiar = function () {
+        if (temaGuardado()) return;
+        aplicarTema(mq.matches ? 'light' : 'night', false);
+      };
+      if (mq.addEventListener) mq.addEventListener('change', alCambiar);
+      else if (mq.addListener) mq.addListener(alCambiar);
+    }
   }
 
   function init() {
@@ -6393,7 +6672,16 @@
     function setDestDisplay(value) {
       var item = destItems.filter(function (entry) { return entry.value === value && (!S.subcategory || entry.subcategory === S.subcategory); })[0] || destItems.filter(function (entry) { return entry.value === value; })[0];
       var text = item ? item.label : 'Todos los destinos (Buscar por mi presupuesto)';
-      if (S.subcategory && (!item || item.subcategory !== S.subcategory)) text += ' · ' + S.subcategory;
+      if (S.subcategory && (!item || item.subcategory !== S.subcategory)) {
+        // Un par invertido ya empieza con el nombre del destino: con destino
+        // Fortaleza y par "Fortaleza + Natal" la barra quedaba diciendo
+        // "Fortaleza · Fortaleza + Natal", que repite la palabra y no agrega nada.
+        // Se muestra solo la parte que aporta: la segunda parada.
+        var resto = S.subcategory;
+        var base = item ? String(item.label || '') : '';
+        if (base && resto.indexOf(base + ' + ') === 0) resto = resto.slice(base.length + 3);
+        if (resto) text += ' · ' + resto;
+      }
       if (trigger) trigger.value = text;
       if (menu) {
         Array.prototype.forEach.call(menu.querySelectorAll('.custom-select__option'), function (option) {
@@ -6412,6 +6700,33 @@
 
     function normalizeDestQuery(value) {
       return String(value || '').trim().toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    /* Decide si un desplegable (.custom-select) se abre hacia abajo o hacia
+       arriba, y le deja la clase que lo invierte.
+
+       El menu cuelga del control y por defecto se dibuja para abajo. En un
+       celular, con el teclado abierto y el destino mas abajo del formulario, no
+       hay lugar para 420px debajo del campo: el menu se salia de la pantalla y
+       las ultimas opciones no se alcanzaban nunca. Abriendolo hacia arriba se
+       ve entero y, si tampoco cabe, el max-height de la ventana (dvh) lo deja
+       scrollear adentro.
+
+       Se mide con la altura REAL del menu ya visible. Con display:none no hay
+       caja, asi que medir antes de mostrar daria 0 y la decision seria siempre
+       "abajo". Por eso openDestMenu()/openComboMenu() muestran primero y
+       despues llaman a esto. */
+    function elegirLadoDelMenu(root) {
+      if (!root) return;
+      var menu = root.querySelector('.custom-select__menu');
+      var control = root.querySelector('.custom-select__control');
+      if (!menu || !control || menu.hidden) return;
+      var holguraAbajo = window.innerHeight - control.getBoundingClientRect().bottom;
+      var holguraArriba = control.getBoundingClientRect().top;
+      var alto = menu.offsetHeight || 0;
+      // Se queda abajo mientras entre la mitad de la lista. Invertir por un
+      // margen de diez pixeles hace que el menu salte de lado con cada scrol.
+      root.classList.toggle('is-open-up', alto > 0 && holguraAbajo < alto && holguraArriba > holguraAbajo);
     }
 
     function clearActiveDestOption() {
@@ -6468,7 +6783,7 @@
       if (!menu || !trigger || !sel) return;
       menu.hidden = true;
       trigger.setAttribute('aria-expanded', 'false');
-      sel.classList.remove('is-open');
+      sel.classList.remove('is-open', 'is-open-up');
       setDestDisplay(S.dest);
     }
 
@@ -6477,6 +6792,9 @@
       menu.hidden = false;
       trigger.setAttribute('aria-expanded', 'true');
       sel.classList.add('is-open');
+      // Despues de mostrar, no antes: con el menu en hidden no tiene caja y la
+      // medida de alto daria 0, con lo que la decision seria siempre "abajo".
+      elegirLadoDelMenu(sel);
     }
 
     Object.defineProperty(sel, 'value', {
@@ -6519,12 +6837,23 @@ function secondKeyForSubcategory(subcategory, firstKey) {
   return found;
 }
 
-function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelType) {
+function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelType, secondKeyForzado) {
       var destinationKey = String(nextValue || 'todos');
       if (!destinationKey) return;
       if (!fromFeatured) featuredProposalSelection = null;
       S.dest = destinationKey; S.proposalId = ''; S.subcategory = String(subcategory || '');
-  S.second = secondKeyForSubcategory(S.subcategory, destinationKey);
+  /* La segunda parada sale de la subcategoría, que es la fuente de verdad de qué
+     pares se ofrecen. `secondKeyForzado` existe para el caso en que la subcategoria
+     no está en la lista con ese nombre: un par leído al revés ("Fortaleza +
+     Natal" cuando el dato dice "Natal + Fortaleza"). Ahí la segunda parada no se
+     deduce del nombre sino de la opción que se eligió, y mandarla a buscar al
+     nombre haría que el server cotizara un viaje de una sola parada.
+
+     Se distingue "no vine" de "viene vacío" con undefined: si no viene nada se
+     deduce del nombre, y un string vacío se respeta como "sin segunda parada". */
+  S.second = secondKeyForzado != null
+    ? String(secondKeyForzado)
+    : secondKeyForSubcategory(S.subcategory, destinationKey);
       var inferredHotelType = requestedHotelType || inferHotelType(S.subcategory);
       S.hotelTypeExplicit = !!inferredHotelType;
       S.hotelType = inferredHotelType || hotelTypeForStyle(S.style);
@@ -6771,17 +7100,23 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       if (comboRoot && !comboRoot.contains(e.target)) closeComboMenu();
     });
 
-    /* ---------- segunda parada: los 88 pares ---------- */
+    /* ---------- segunda parada: los 95 pares ---------- */
     // El menú se arma una vez, al arrancar, con la misma data que el desplegable
     // de Destino (comboGroups()). No hay precios acá: el total de un par depende
     // de cuántas noches van en cada parada, así que un número en el menú sería
     // inventado.
+    //
+    // Cada opción lleva las DOS paradas en atributos: `data-combo-key` es la
+    // primera y `data-combo-second` la segunda. El filtro usa las dos, que es lo
+    // que hace que la ruta funcione en los dos sentidos, y el nombre visible lo
+    // reescribe comboLabel() cuando el destino elegido es la segunda parada.
     function renderComboMenu() {
       if (!comboMenu) return;
       var bloques = comboGroups().map(function (entry) {
         var opciones = entry.pairs.map(function (sub) {
           return '<button type="button" class="custom-select__option" role="option" aria-selected="false"'
-            + ' data-combo-key="' + esc(sub.key) + '" data-combo-sub="' + esc(sub.label) + '"'
+            + ' data-combo-key="' + esc(sub.key) + '" data-combo-second="' + esc(sub.secondKey) + '"'
+            + ' data-combo-sub="' + esc(sub.label) + '"'
             + ' id="combo-option-' + esc(sub.key) + '-' + entry.pairs.indexOf(sub) + '">'
             + '<span class="custom-select__option-main">' + esc(sub.label) + '</span></button>';
         }).join('');
@@ -6800,17 +7135,51 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
 
     /* El menú se filtra por el destino elegido, no solo por lo que se tipea.
        El control dice "¿Sumás una segunda parada?", asi que su pregunta es
-       "sumarle otra a ESTE destino". Con Destino = Búzios offering los 92 pares
-       del pais no era un filtro: "Angra dos Reis + Ilha Grande" no es una
-       segunda parada de Búzios, es otro viaje entero, y escribir Rio alli
-       rompia la promesa del campo de arriba.
+       "sumarle otra a ESTE destino". Con Destino = Búzios ofrecer los pares del
+       país entero no era un filtro: "Angra dos Reis + Ilha Grande" no es una
+       segunda parada de Búzios, es otro viaje entero, y escribir Río ahí
+       rompía la promesa del campo de arriba.
 
-       Un par define las DOS paradas (su primera parada es `key`), asi que el
-       filtro es por esa primera parada, no por la region del grupo. Rio+Búzios
-       aparece con Destino = Rio; Búzios+Arraial aparece con Destino = Búzios.
-       Sin destino elegido (todos) no se filtra: todavia no hay con que. */
+       EL FILTRO ES POR LAS DOS PARADAS, no solo por la primera. Un par define las
+       dos paradas, así que pasa el filtro si el destino elegido es cualquiera de
+       las dos: con Destino = Natal tiene que aparecer "Natal + Fortaleza", y con
+       Destino = Fortaleza el mismo viaje al revés, "Fortaleza + Natal".
+
+       Antes solo miraba key (la primera parada), y por eso el filtro era
+       asimétrico: los pares se escriben una vez, en un orden, y desde el otro
+       lado no había nada que mostrar. Con Destino = Fortaleza el menú quedaba
+       vacío ("Desde Fortaleza no hay combinaciones de dos paradas") mientras que
+       con Destino = Natal sí aparecía "Natal + Fortaleza". La misma ruta, en un
+       sentido sí y en el otro no.
+
+       La lista de datos NO se duplica: un par sigue siendo una entrada y lo que
+       se invierte es la lectura, con comboInvertido() y comboLabel(). El server
+       ya sabía ir en cualquier orden —cotiza con dest y second, y la
+       combinabilidad la decide la geografía, que es simétrica—, así que el
+       problema era solo de la lista. */
     function comboFiltraPorDestino() {
       return S.dest && S.dest !== 'todos' ? S.dest : '';
+    }
+    // ¿Este par se tiene que leer al reves? Sí cuando el destino elegido es la
+    // SEGUNDA parada del par. El caso en que las dos sean iguales se excluye
+    // explícitamente aunque no exista (prueba-pares.js lo corta): si existiera,
+    // el par se mostraría dos veces y se cotizaría al reves sin querer.
+    function comboInvertido(option) {
+      var elegido = comboFiltraPorDestino();
+      if (!elegido) return false;
+      var a = option.getAttribute('data-combo-key');
+      var b = option.getAttribute('data-combo-second');
+      return !!b && b === elegido && a !== elegido;
+    }
+    // El nombre del par en el orden en que se va a cotizar. Es el único lugar
+    // donde se decide el texto, y lo usan el filtro, la marca de "elegida" y la
+    // elección. Si cada uno armara su propio nombre, el menú podría mostrar
+    // "Fortaleza + Natal" y elegir una opción que cotiza Natal -> Fortaleza.
+    function comboLabel(option) {
+      var sub = option.getAttribute('data-combo-sub') || '';
+      if (!comboInvertido(option)) return sub;
+      var partes = sub.split(' + ');
+      return partes.length === 2 ? partes[1] + ' + ' + partes[0] : sub;
     }
 function comboNombreDestino() {
       var key = comboFiltraPorDestino();
@@ -6830,9 +7199,13 @@ function comboNombreDestino() {
       // "Un solo destino" no es un par: es una accion, y tiene que quedar
       // disponible siempre que haya algo que deshacer.
       if (option.hasAttribute('data-combo-clear')) return true;
-      var primero = comboFiltraPorDestino();
-      if (!primero) return true;
-      return option.getAttribute('data-combo-key') === primero;
+      var elegido = comboFiltraPorDestino();
+      if (!elegido) return true;
+      // Las dos paradas, no solo la primera: este es el arreglo de la
+      // bidireccionalidad. Con el destino elegido como segunda parada del par, el
+      // par pasa igual y se muestra al reves.
+      return option.getAttribute('data-combo-key') === elegido
+        || option.getAttribute('data-combo-second') === elegido;
     }
 
     // El texto del control sale de S.subcategory en vez de guardarse aparte: es
@@ -6846,7 +7219,11 @@ function comboNombreDestino() {
       if (comboMenu.hidden || document.activeElement !== comboTrigger) comboTrigger.value = label;
       if (!comboMenu) return;
       Array.prototype.forEach.call(comboMenu.querySelectorAll('.custom-select__option'), function (option) {
-        var selected = !!label && option.getAttribute('data-combo-sub') === label;
+        // Se compara contra comboLabel() y no contra el atributo: si el par está
+        // invertido, el texto guardado es "Fortaleza + Natal" y el atributo
+        // canonico sigue diciendo "Natal + Fortaleza". Comparando el atributo,
+        // cambiar de dirección dejaba el control sin marcar nada.
+        var selected = !!label && comboLabel(option) === label;
         option.classList.toggle('is-selected', selected);
         option.setAttribute('aria-selected', selected ? 'true' : 'false');
       });
@@ -6862,15 +7239,27 @@ function comboNombreDestino() {
       if (!comboMenu) return [];
       var normalized = normalizeDestQuery(query);
       var visible = [];
+      var pares = [];
       Array.prototype.forEach.call(comboMenu.querySelectorAll('.custom-select__option'), function (option) {
         // Los dos filtros van juntos: el de destino es el que hace la lista
         // corta, y el de texto solo acota mas lo que ya quedo.
         var porDestino = comboPasaElFiltro(option);
-        var porTexto = !normalized || normalizeDestQuery(option.textContent).indexOf(normalized) >= 0;
+        // El nombre se reescribe ANTES de filtrar por texto, y no solo si la
+        // opción va a quedar visible: se reescribe siempre que el par quede
+        // invertido. Con el nombre canonico, buscar "Fortaleza" con Destino =
+        // Fortaleza no encontraba "Fortaleza + Natal" (decia "Natal +
+        // Fortaleza") y el menu se leia como que no habia ningun resultado.
+        var etiqueta = comboLabel(option);
+        var texto = option.querySelector('.custom-select__option-main');
+        if (texto && texto.textContent !== etiqueta) texto.textContent = etiqueta;
+        var porTexto = !normalized || normalizeDestQuery(etiqueta).indexOf(normalized) >= 0;
         var matches = porDestino && porTexto;
         option.hidden = !matches;
         option.style.display = matches ? 'flex' : 'none';
-        if (matches) visible.push(option);
+        if (matches) {
+          visible.push(option);
+          if (!option.hasAttribute('data-combo-clear')) pares.push(option);
+        }
       });
       // El grupo entero se va con sus opciones: un encabezado de región con
       // cero opciones debajo se lee como algo roto.
@@ -6885,13 +7274,16 @@ function comboNombreDestino() {
       var hint = comboMenu.querySelector('[data-combo-hint]');
       if (hint) {
         var destino = comboNombreDestino();
-        var hayPares = visible.length > 1 || (visible.length === 1 && !visible[0].hasAttribute('data-combo-clear'));
-        if (hayPares) {
-          hint.textContent = destino ? 'Combinaciones que arrancan en ' + destino : 'Elegí las dos paradas';
+        if (pares.length) {
+          // "que arrancan en" era correcto solo cuando todos los pares tenian al
+          // destino como primera parada. Con la bidireccionalidad puede estar
+          // como segunda, asi que el texto tiene que cubrir los dos casos sin
+          // mentir en ninguno: "con <destino>" sirve para los dos.
+          hint.textContent = destino ? 'Combinaciones con ' + destino : 'Elegí las dos paradas';
           hint.hidden = !destino;
         } else {
           hint.textContent = destino
-            ? 'Desde ' + destino + ' no hay combinaciones de dos paradas.'
+            ? 'Con ' + destino + ' no hay combinaciones de dos paradas.'
             : 'Elegí las dos paradas.';
           hint.hidden = false;
         }
@@ -6913,7 +7305,7 @@ function comboNombreDestino() {
       if (!comboMenu || !comboTrigger || !comboRoot) return;
       comboMenu.hidden = true;
       comboTrigger.setAttribute('aria-expanded', 'false');
-      comboRoot.classList.remove('is-open');
+      comboRoot.classList.remove('is-open', 'is-open-up');
       syncComboDisplay();
     }
 
@@ -6922,6 +7314,7 @@ function comboNombreDestino() {
       comboMenu.hidden = false;
       comboTrigger.setAttribute('aria-expanded', 'true');
       comboRoot.classList.add('is-open');
+      elegirLadoDelMenu(comboRoot);
     }
 
     function chooseCombo(option) {
@@ -6929,16 +7322,36 @@ function comboNombreDestino() {
       if (option.hasAttribute('data-combo-clear')) {
         // Sacar la segunda parada sin perder la zona: si la subcategoría actual
         // es un par se va, y si era una zona ("Ruta de Playas") se queda.
-        var eraPar = !!secondKeyForSubcategory(S.subcategory, S.dest);
+        //
+        // La pregunta se hace con S.second y no con secondKeyForSubcategory(): un
+        // par invertido ("Fortaleza + Natal" con Natal de primera) no existe en
+        // DESTINATION_GROUPS con ese nombre, así que la busqueda daba vacio,
+        // eraPar salia falso y "Un solo destino" no sacaba la segunda parada.
+        // S.second es el estado real: si hay segunda parada, se saca.
+        var eraPar = !!S.second;
         selectDestination(S.dest, eraPar ? '' : S.subcategory);
         return;
       }
-      // selectDestination() es el único camino para cotizar: saca el secondKey
-      // de la subcategoría, arma la query con ?second= y dispara la búsqueda.
-      // Escribir la query a mano saltearía los dos primeros pasos y el par se
-      // cotizaría como si fuera de una sola parada.
+      /* selectDestination() es el único camino para cotizar: saca el secondKey,
+         arma la query con ?second= y dispara la búsqueda. Escribir la query a
+         mano saltearía los dos primeros pasos y el par se cotizaría como si fuera
+         de una sola parada.
+
+         Cuando el par está invertido, el destino elegido ES la segunda parada del
+         dato, así que cotizar el par tal cual cambiaría el destino por el otro
+         sin avisar. Por eso se llama con la primera parada del dato como
+         `secondKeyForzado`: el server recibe dest=<elegido> y second=<la otra>, que
+         es el viaje que se está mostrando en pantalla. Sin ese quinto argumento
+         el server buscaría el nombre invertido en DESTINATION_GROUPS, no lo
+         encontraría y mandaría un viaje de una sola parada. */
       pendingDestinationScroll = true;
-      selectDestination(option.getAttribute('data-combo-key'), option.getAttribute('data-combo-sub'));
+      selectDestination(
+        comboFiltraPorDestino() || option.getAttribute('data-combo-key'),
+        comboLabel(option),
+        false,
+        undefined,
+        comboInvertido(option) ? option.getAttribute('data-combo-key') : undefined
+      );
     }
 
     if (comboRoot && comboTrigger && comboMenu) {

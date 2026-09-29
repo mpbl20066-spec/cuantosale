@@ -87,6 +87,21 @@ La aplicación resuelve el destino con `/api/v1/hotels/searchDestination`, consu
 
 Configura en Vercel `BOOKING_API_KEY` y `BOOKING_API_HOST=booking-com15.p.rapidapi.com`. El endpoint de búsqueda se define por defecto en el código; `BOOKING_API_URL` es opcional.
 
+El `dest_id` que devuelve `searchDestination` se cachea en memoria por host y por nombre (`bookingDestIdCache`): es un id de ciudad, no un precio, así que no cambia. Consultarlo en cada consulta de hoteles era gastar una llamada de más por render, y lo que fallaba peor era que la consulta falla de a ratos —cuando eso pasa el destino entero cae al respaldo de hoteles inventados aunque las fechas y el tipo estén bien. Solo se cachean los aciertos: un fallo puede ser del proveedor o del throttle, y cachearlo dejaría un destino roto para el resto de la vida del proceso.
+
+#### Los seis tipos de alojamiento, y por qué la sección nunca arranca vacía
+
+Al abrir un destino la app elige sola el tipo de alojamiento a partir del estilo de viaje: `ahorro` → económico, `eq` → intermedio, `comodo` → confort (`hotelTypeForStyle`). De ahí vienen los tres tipos del **espectro** —`economico`, `intermedio`, `confort`—, que no son categorías sino bandas de precio: el mismo hotel puede ser uno u otro según cuánto cueste, y `hotelEsDelTipo()` los acepta a todos sin mirar nada. Los otros tres —`boutique`, `resort`, `all-inclusive`— son categorías cerradas, y por eso no admiten sustitución: un loft no es un resort por barato que sea.
+
+Esa distinción es la que sostiene la promesa de que la sección de alojamiento siempre muestra algo:
+
+- **El server nunca devuelve una lista vacía para un tipo del espectro.** La primera pasada pide la banda ajustada, la segunda relaja el precio y completa con cualquier hotel real por debajo del techo de 1,6, y si todavía falta, el respaldo genérico llena hasta tres.
+- **`tiposDisponibles` tiene que coincidir con eso.** Es la lista que el `<select>` ofrece y con la que el cliente corrige el tipo elegido si no está. Antes se calculaba con la banda ajustada, que es más estricta que la selección, así que el server podía devolver tres hoteles de tipo `confort` y a la vez declarar que `confort` no era un tipo disponible en ese destino. El cliente cambiaba a `economico` y después filtraba las tres tarjetas por `hotelType === "economico"`: la lista quedaba en cero y en pantalla se leía *"Hoteles para viajar intermedio"* con el selector en *Económico* y *"No encontramos alojamientos de categoría Intermedio"*. Medido antes del arreglo: 9 de 60 combinaciones destino × estilo.
+- **El cliente resuelve el tipo una sola vez y antes de calcular nada.** `resolveHotelTypeForMeta()` corre al principio de `hotelOptions()`, así que el título, la insignia, la nota, el mensaje de lista vacía, el selector y el filtro de tarjetas hablan todos del mismo tipo. Antes la corrección vivía dentro de `hotelTypeSelectMarkup()`, que se llama al final y mutaba `meta.hotelType` después de que el perfil ya estuviera calculado.
+- **`hotelesQuePasanElTipo()` es el respaldo del respaldo.** Si el filtro de tipo deja todo afuera en un tipo del espectro, se muestran los hoteles igual y se avisa por consola: el server ya los eligió por precio, así que una lista vacía ahí no sería una respuesta sino un desajuste. En los tipos estrictos no se rellena nada, porque el estado vacío dice que no se muestran categorías distintas como reemplazo y tiene que ser cierto.
+
+`test-hoteles.js` (`npm run check:hoteles`) recorta esas tres funciones del `public/app.js` real y las prueba, incluida una guarda que falla si `hotelTypeSelectMarkup` vuelve a escribir `meta.hotelType` o si `hotelOptions` calcula el perfil antes de resolver el tipo. `test.js` cubre del lado del servidor que el tipo devuelto siempre esté declarado como disponible, que los tres tipos del espectro devuelvan tres con un solo hotel cargado, y que un tipo estricto sin datos no se declare ni se rellene.
+
 ### Transfer desde el aeropuerto
 
 `data/transfer-precios.json` es la fuente de verdad del precio del transfer. `npm run build:transfer` la reparte a `TRANSFER_PRICES` en `lib/model.js` (la que cotiza el server) y a `public/transfer-precios.js` (la que dibuja las cards). `npm run check:transfer` la valida.
@@ -214,20 +229,15 @@ El schema y las reglas de contenido están documentados en la cabecera del archi
 
 El gráfico de fechas mezcla las dos cosas a propósito, pero las marca: las barras con precio real van sólidas y las estimadas con borde punteado, y el subtítulo dice cuántas de las N fechas son reales. Un precio inventado presentado como real sería peor que no mostrar el gráfico.
 
-### "De dónde salen los valores"
+### "De dónde salen los valores" (se quitó de la pantalla)
 
-El desglose dice **cuánto** va a cada rubro. El panel que va debajo, en `<details>` y cerrado por defecto, dice **de qué** sale cada número: el proveedor o el operador del que salió, la fecha de verificación y cuánta confianza tiene. Para Búzios, el rubro de traslados muestra la fuente real (inbuzios.com.br y el operador del propio aeropuerto), los 174 km de OSRM, que el compartido tiene tarifa publicada y el privado no, y la fórmula del modelo que genera el privado.
+El desglose dice **cuánto** va a cada rubro. Debajo hubo un panel en `<details>` que decía **de qué** sale cada número: el proveedor del que salió, la fecha de verificación y cuánta confianza tenía. **Ya no se dibuja.** Era el único consumidor de la procedencia en el cliente, así que se fueron con él `fuentesPanel()`, `fuentesDe()`, `fuenteBadge()`, `getDailyCostsProvenance()`, `getTransferProvenance()` y las reglas `.fuentes*` / `.fuente-fila*` / `.conf-*` de `public/style.css`.
 
-**Por qué existe.** Un "estimado" a secas no deja decidir nada, porque no dice si se puede corregir. Este panel separa dos cosas que antes iban mezcladas: si el número viene de una consulta (`precio real`) y cuánta fe merece una estimación (`confianza alta/media/baja`). La diferencia importa en esta tabla: 5 de las 88 celdas de transfer tienen tarifa publicada y las otras 83 salen de un modelo de distancia. Mostrarlas todas como "estimado" sería menos preciso de lo que permiten los datos.
+Lo que **no** se fue es la procedencia en los datos: `npm run build:costos` y `npm run build:transfer` siguen emitiendo `CS_DESTINATION_DAILY_COSTS_PROVENANCE` y `CS_TRANSFER_PRICES_PROVENANCE` en el mismo archivo generado, y `validar-costos.js` y `validar-transfer.js` la siguen validando. En `lib/model.js` y en `data/*.json` el `fuente`, el `confianza`, el `verificado` y el `derivacion` de cada destino siguen siendo la fuente de verdad. Lo que cambió es que hoy no se muestran en la web: si el panel vuelve, el trabajo de datos está hecho.
 
-**La procedencia se genera, no se escribe.** `data/costos-diarios.json` y `data/transfer-precios.json` ya tenían `fuente`, `confianza`, `verificado` y `derivacion` por destino. Hasta ahora no llegaban al navegador: los dos generadores escribían solo los números. Ahora `npm run build:costos` y `npm run build:transfer` emiten además un segundo global (`CS_DESTINATION_DAILY_COSTS_PROVENANCE` y `CS_TRANSFER_PRICES_PROVENANCE`) en el mismo archivo.
+**Por qué se quitó.** Ocupaba el lugar entre el desglose y los hoteles, que es donde están las decisiones que hacen avanzar el viaje, y empujaba hacia abajo las secciones que sí convierten. Un "estimado" a secas no deja decidir nada, pero la respuesta estaba costingiendo el recorrido completo.
 
-Dos decisiones que no son obvias:
-
-- **Va en un segundo objeto, no como campos de la tabla.** `test.js` y `check-daily-costs.js` comparan `Object.keys(cliente)` contra las claves del modelo; una clave enumerable extra los rompe. En node se expone con `Object.defineProperty(..., { enumerable: false })`, que tampoco aparece en `Object.keys()`.
-- **Comidas y transporte local son una sola fila** ("Gastos en destino"), porque en el JSON comparten el mismo `fuente`: son dos columnas del mismo texto por destino. Pintarlas separadas repetía el mismo párrafo de 200 caracteres dos veces.
-
-**Lo que el panel todavía no hace:** es de solo lectura. No permite editar un rubro ni agregar un margen, que es lo que hace la calculadora de Noma. Editar tiene que entrar por `getBudgetBreakdown()` (`public/app.js`), que es la única función que suma el total, para que un cambio mueva a la vez el número grande, el desglose, "A dónde va tu plata" y el voucher que se comparte.
+**Lo que la calculadora de costos todavía no hace:** editar un rubro o agregar un margen, que es lo que hace la calculadora de Noma. Editar tiene que entrar por `getBudgetBreakdown()` (`public/app.js`), que es la única función que suma el total, para que un cambio mueva a la vez el número grande, el desglose, "A dónde va tu plata" y el voucher que se comparte.
 
 ### Endpoints
 

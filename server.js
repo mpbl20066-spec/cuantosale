@@ -211,8 +211,11 @@ const HOME_DESTINATION_KEYS = [
   'torres', 'canoa',
   // Bahia
   'ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso',
-  // Nordeste
-  'porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for',
+  // Nordeste. 'jericoacoara' se sumo cuando la entrada "Fortaleza /
+  // Jericoacoara" se separo en dos destinos mas el par "Fortaleza + Jeri": la
+  // clave existia en el modelo con costos, traslados y actividades desde antes,
+  // pero no estaba en ninguna lista, o sea que era data que nadie podia cotizar.
+  'porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for', 'jericoacoara',
   // Buenos Aires, Serra gaucha y Foz
   'bue', 'gram', 'canela', 'igu'
 ];
@@ -496,6 +499,17 @@ const HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', 
 // modulo: hotelRecommendations() tambien los necesita, para saber que tipos hay de
 // verdad en un destino. Dentro de resolveHotelType no se ve desde ahi.
 const HOTEL_TYPES = new Set(['economico', 'intermedio', 'confort', 'boutique', 'resort', 'all-inclusive']);
+/* Los tres tipos que son un ESPECTRO de precio y no una categoria: el mismo
+   hotel puede ser economico, intermedio o confort segun cuanto cueste, asi que
+   hotelEsDelTipo() los acepta a todos sin mirar nada y lo unico que los separa
+   es hotelPasaElPrecio(). Los otros tres (boutique, resort, all-inclusive) son
+   categorias cerradas: un loft no es un resort por mas barato que sea.
+
+   Vive en un Set porque el mismo criterio aparece en cuatro lugares y ya se
+   desincronizo: hotelPasaElPrecio, hotelEsDelTipo, el canUseGenericFallback de
+   hotelRecommendations() y el tiposDisponibles que se le manda al selector
+   comparaban cada uno contra su propia lista escrita a mano. */
+const HOTEL_SPECTRUM_TYPES = new Set(['economico', 'intermedio', 'confort']);
 function resolveHotelType(value, subcategory, style) {
   const normalized = String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[_ ]+/g, '-');
   // La eleccion explicita del selector gana siempre. Antes se concatenaba con
@@ -521,7 +535,7 @@ function hotelTypeMultiplier(type) {
 // un mal dato) pero el tipo no se relaja nunca, porque un loft no es un resort
 // por mas barato que sea.
 function hotelPasaElPrecio(hotel, type, budgetTarget) {
-  if (!type || type === 'intermedio' || type === 'confort' || type === 'economico') {
+  if (!type || HOTEL_SPECTRUM_TYPES.has(type)) {
     const rate = Number(hotel.perNight) || 0;
     if (!rate || !budgetTarget) return type !== 'economico';
     if (type === 'economico') return rate <= budgetTarget * 0.85;
@@ -533,7 +547,7 @@ function hotelPasaElPrecio(hotel, type, budgetTarget) {
   return true;
 }
 function hotelEsDelTipo(hotel, type) {
-  if (!type || type === 'intermedio' || type === 'confort' || type === 'economico') return true;
+  if (!type || HOTEL_SPECTRUM_TYPES.has(type)) return true;
   const text = normalizeHotelKey([hotel.name, hotel.propertyType, hotel.description, hotel.categoryText].filter(Boolean).join(' '));
   if (type === 'all-inclusive') {
     // Priorizar el campo mealPlan extraido directamente de la API de Booking
@@ -613,6 +627,23 @@ function responseRows(payload) {
   if (Array.isArray(payload && payload.data)) return payload.data;
   return [];
 }
+/* El dest_id de Booking para una ciudad no cambia: es un id de la ciudad, no un
+   precio ni una disponibilidad. Consultarlo en cada pedido de hoteles era tirar
+   una llamada extra por cada render, y lo que hacia peor era que la consulta
+   falla de a ratos: cuando searchDestination no devolvia nada, el destino entero
+   caia al respaldo de hoteles inventados —con precio estimado y sin foto—
+   aunque las fechas y el tipo estuvieran bien. Paso en Cabo Frio durante las
+   pruebas de esto, y no es un caso raro.
+
+   Solo se cachean los aciertos. Un fallo puede ser del proveedor, del throttle o
+   de un nombre mal escrito, y cachear un fallo convertiria un tropiezo de un
+   segundo en un destino roto para siempre en ese proceso. */
+const bookingDestIdCache = new Map();
+function bookingCacheKey(host, candidate) { return host + '|' + candidate.toLowerCase(); }
+/* Vacia el cache. Lo usan las pruebas, que simulan distintas respuestas de
+   searchDestination para la misma ciudad y sin esto dependerian del orden en que
+   corren. */
+function resetBookingDestCache() { bookingDestIdCache.clear(); }
 async function fetchBookingHotels(destKey, destName, style, extra) {
   const settings = bookingSettings();
   if (!settings.key) throw new Error('Falta configurar BOOKING_API_KEY en las variables de entorno de Vercel.');
@@ -631,13 +662,21 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   let target = null;
   let consultado = null;
   for (const candidato of candidatos) {
+    const cacheKey = bookingCacheKey(settings.host, candidato);
+    const guardado = bookingDestIdCache.get(cacheKey);
+    if (guardado) { target = guardado; consultado = candidato; break; }
     const destinationUrl = new URL('/api/v1/hotels/searchDestination', 'https://' + settings.host);
     destinationUrl.searchParams.set('query', candidato);
     destinationUrl.searchParams.set('locale', 'es');
     const destinationPayload = await bookingApiJson(destinationUrl.toString(), settings);
     const destinationRows = responseRows(destinationPayload);
     const elegido = destinationRows.find(function (item) { return item && /city/i.test(String(item.search_type || item.dest_type || '')); }) || destinationRows[0];
-    if (elegido && elegido.dest_id != null && elegido.search_type) { target = elegido; consultado = candidato; break; }
+    if (elegido && elegido.dest_id != null && elegido.search_type) {
+      target = elegido;
+      consultado = candidato;
+      bookingDestIdCache.set(cacheKey, elegido);
+      break;
+    }
   }
   if (!target) throw new Error('Booking API no encontró la ciudad "' + hotelName + '" (probó: ' + candidatos.join(', ') + ').');
   const isAllInclusive = extra && extra.hotelType === 'all-inclusive';
@@ -734,15 +773,47 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   // cuantos vinieron con precio real de Booking: si es 0, lo que se muestra en
   // pantalla es estimacion del modelo, y el front tiene que poder decirlo.
   if (diag) diag.bookingCount = priced.length;
-  // Que tipos hay de verdad entre los hoteles reales que llegaron. Es la misma
-  // comprobacion que despues decide que se muestra, corrida sobre los 20 en vez
-  // de sobre los 3: asi el selector puede ofrecer solo lo que existe. Con
-  // bookingCount en 0 (sin key o caida de la API) no se dice nada, porque no
-  // sabemos nada, y el selector ofrece los seis como antes.
+  /* Que tipos hay de verdad entre los hoteles reales que llegaron.
+
+     Esto tiene que COINCIDIR con lo que la seleccion de abajo devuelve, porque el
+     cliente usa la lista para dos cosas: llenar el <select> y, si el tipo que
+     esta elegido no esta en la lista, cambiarlo por el primero que si. Con los
+     dos criterios distintos, el server devolvia 3 hoteles de tipo "confort" y de
+     paso declaraba que "confort" no era un tipo disponible en ese destino: el
+     cliente cambiaba a "economico" y despues filtraba los 3 hoteles por
+     hotelType === "economico", con lo cual la lista quedaba en cero y la pantalla
+     decia "No encontramos alojamientos de categoría Confort" al lado de un
+     selector que mostraba Económico.
+
+     La causa era hotelMatchesType() acá, que usa la banda de precio ajustada
+     (0.75 a 1.25 del objetivo), mientras que la segunda pasada de abajo relaja
+     el precio y solo pide no pasar del techo (1.6). Lo que la banda deja afuera,
+     la segunda pasada lo levanta. Medido antes del arreglo: 9 de 60
+     combinaciones destino x estilo con esa contradiccion — Cabo Frío, Rio,
+     Salvador, Recife, Porto Alegre y Florianópolis en "cómodo", y Búzios, Porto
+     Alegre y Buenos Aires en "ahorro" — y el dato del hotel mas barato era el
+     engano, porque era el que la segunda pasada devolvia.
+
+     Los tres tipos del espectro (economico, intermedio, confort) se declaran
+     siempre disponibles cuando vino al menos un hotel con precio. No es una
+     simplificacion: para esos tipos el precio ES la banda, la segunda pasada
+     completa con cualquier hotel real por debajo del techo y, si todavia falta,
+     el respaldo generico llena hasta tres. O sea que con un hotel cargado las
+     tres bandas siempre devuelven algo, y declararlas vacias seria mentir en el
+     otro sentido. Ademas es lo que sostiene la eleccion inicial: la pantalla
+     arma el tipo de alojamiento a partir del estilo de viaje, y sin esta
+     garantia hay destinos donde esa eleccion se queda sin nada que mostrar.
+
+     Los tipos estrictos (boutique, resort) se comprueban con hotelEsDelTipo,
+     que es el mismo criterio que usa la seleccion: hotelPasaElPrecio devuelve
+     true para ellos, asi que la banda de precio no los toca. Con bookingCount en
+     0 (sin key o caida de la API) no se dice nada, porque no sabemos nada, y el
+     selector ofrece los seis como antes. */
   if (diag && priced.length) {
     diag.tiposDisponibles = Array.from(HOTEL_TYPES).filter(function (type) {
-      if (type === 'all-inclusive') return true;   // tiene su propio respaldo
-      return priced.some(function (hotel) { return hotelMatchesType(hotel, type, budgetTarget); });
+      if (type === 'all-inclusive') return true;      // tiene su propio respaldo
+      if (HOTEL_SPECTRUM_TYPES.has(type)) return true; // el precio es la banda
+      return priced.some(function (hotel) { return hotelEsDelTipo(hotel, type); });
     });
   }
   // Un hotel real más barato que el objetivo de la categoría sigue siendo válido
@@ -788,7 +859,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   }
   const combinedReales = matchingCategory.concat(realesExtra);
   const missing = 3 - combinedReales.length;
-  const canUseGenericFallback = hotelType === 'economico' || hotelType === 'intermedio' || hotelType === 'confort';
+  const canUseGenericFallback = HOTEL_SPECTRUM_TYPES.has(hotelType);
   /* Para all-inclusive no hay fallback: antes se fabricaban tres entradas con
      nombres tipo "Complejo Todo Incluido" y el precio puesto en budgetTarget, sin
      foto y con un link de Booking. Se veian igual que un hotel real y con el
@@ -2038,3 +2109,4 @@ module.exports.hotelRecommendations = hotelRecommendations;
 module.exports.fetchBookingHotels = fetchBookingHotels;
 module.exports.normalizeHotelApiResponse = normalizeHotelApiResponse;
 module.exports.selectThreeHotelsByBudget = selectThreeHotelsByBudget;
+module.exports.resetBookingDestCache = resetBookingDestCache;

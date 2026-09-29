@@ -14,6 +14,7 @@ node_modules
 # Salidas de scripts: material de reels, historias, logs de corridas. Todo se
 # regenera, nada de esto se versiona.
 outputs/
+REELS.md
 
 # Logs de corridas locales. Salen de Start-Process con redirect, no son de
 # ningun script del repo.
