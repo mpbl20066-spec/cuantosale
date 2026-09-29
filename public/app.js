@@ -6290,8 +6290,9 @@
   /* Mapa de la ruta del roadtrip.
      Leaflet, el trazado (rutas-auto.js) y el CSS son archivos propios y se bajan
      recién cuando aparece una tarjeta de auto: el resto de la gente no paga esos
-     ~215 KB. Los tiles vienen de OpenStreetMap (gratis, sin clave; la atribución
-     es obligatoria). El trazado se precalcula con OSRM y no se pide en vivo. */
+     ~275 KB. El mapa base (países y estados) y el trazado de la ruta son datos
+     propios precalculados (scripts/build-mapa-base.js y pull-rutas-mapa.js): no
+     hay servidor de tiles ni pedidos en vivo. */
   var roadtripMapAssets = null;
   function loadRoadtripMapAssets() {
     if (roadtripMapAssets) return roadtripMapAssets;
@@ -6305,29 +6306,49 @@
     var css = document.createElement('link');
     css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css?v=1';
     document.head.appendChild(css);
-    roadtripMapAssets = Promise.all([script('/vendor/leaflet/leaflet.js?v=1'), script('/rutas-auto.js?v=1')]);
+    roadtripMapAssets = Promise.all([script('/vendor/leaflet/leaflet.js?v=1'), script('/rutas-auto.js?v=1'), script('/mapa-base.js?v=1')]);
     roadtripMapAssets.catch(function () { roadtripMapAssets = null; });
     return roadtripMapAssets;
   }
+  // Referencias del mapa: países y ciudades que ubican la ruta. Van fijas y no
+  // salen de DEST_COORDS porque esto es cartografía, no un dato del cálculo.
+  var ROADTRIP_MAP_COUNTRIES = [['URUGUAY', -32.7, -56.3], ['ARGENTINA', -33.2, -61.6], ['BRASIL', -27.6, -53.4], ['PARAGUAY', -23.2, -58.6]];
+  var ROADTRIP_MAP_CITIES = [['Buenos Aires', -34.61, -58.38], ['Punta del Este', -34.96, -54.95], ['Porto Alegre', -30.03, -51.22], ['Curitiba', -25.43, -49.27], ['Florianópolis', -27.6, -48.55], ['Foz do Iguaçu', -25.55, -54.59], ['São Paulo', -23.55, -46.63], ['Asunción', -25.26, -57.58]];
   function mountRoadtripMap(el) {
     el.setAttribute('data-map-state', 'loading');
     loadRoadtripMapAssets().then(function () {
       if (!el.isConnected) return;
       var key = el.getAttribute('data-roadtrip-map');
       var pts = window.CS_ROUTES && window.CS_ROUTES[key];
-      if (!pts || !window.L) { el.closest('.roadtrip-map-card').remove(); return; }
+      var base = window.CS_BASEMAP;
+      var L = window.L;
+      if (!pts || !base || !L) { el.closest('.roadtrip-map-card').remove(); return; }
       el.innerHTML = '';
       var origin = window.CS_ROUTE_ORIGIN, dest = pts[pts.length - 1];
-      var map = window.L.map(el, { scrollWheelZoom: false, dragging: !window.L.Browser.mobile, tap: false, attributionControl: true });
-      window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, referrerPolicy: 'origin', attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(map);
-      window.L.polyline(pts, { color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }).addTo(map);
-      var line = window.L.polyline(pts, { color: '#e8590c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' }).addTo(map);
-      function pin(latlng, cls, label) {
-        return window.L.marker(latlng, { keyboard: false, icon: window.L.divIcon({ className: 'roadtrip-pin ' + cls, html: '<i></i><span>' + label + '</span>', iconSize: null }) }).addTo(map);
+      // Mapa político propio (sin tiles de terceros): tierra, fronteras y la ruta.
+      var map = L.map(el, { zoomSnap: 0.25, scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false, attributionControl: true,
+        maxBounds: base.bbox, maxBoundsViscosity: 1 });
+      map.attributionControl.setPrefix(false);
+      map.attributionControl.addAttribution('Ruta © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · Límites: Natural Earth');
+      var noHit = { interactive: false, smoothFactor: 1 };
+      L.polygon(base.tierra, L.extend({ className: 'rt-land', stroke: false }, noHit)).addTo(map);
+      L.polygon(base.limites, L.extend({ className: 'rt-state', fill: false }, noHit)).addTo(map);
+      L.polygon(base.tierra, L.extend({ className: 'rt-country', fill: false }, noHit)).addTo(map);
+      function label(latlng, cls, html) {
+        return L.marker(latlng, { interactive: false, keyboard: false, icon: L.divIcon({ className: cls, html: html, iconSize: null }) }).addTo(map);
       }
-      pin(origin, 'roadtrip-pin--from', 'Montevideo');
-      pin(dest, 'roadtrip-pin--to', esc(el.getAttribute('data-map-dest')));
-      map.fitBounds(line.getBounds(), { padding: [28, 28] });
+      L.polyline(pts, { color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
+      var line = L.polyline(pts, { color: '#e8590c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
+      map.fitBounds(line.getBounds(), { paddingTopLeft: [34, 60], paddingBottomRight: [34, 58] });
+      map.setMinZoom(Math.max(map.getBoundsZoom(base.bbox, true), map.getZoom() - 1.5));
+      var view = map.getBounds();
+      ROADTRIP_MAP_COUNTRIES.forEach(function (c) { if (view.contains([c[1], c[2]])) label([c[1], c[2]], 'rt-country-name', c[0]); });
+      ROADTRIP_MAP_CITIES.forEach(function (c) {
+        var far = Math.hypot(c[1] - dest[0], c[2] - dest[1]) > 0.6 && Math.hypot(c[1] - origin[0], c[2] - origin[1]) > 0.6;
+        if (far && view.contains([c[1], c[2]])) label([c[1], c[2]], 'rt-city', '<i></i><span>' + c[0] + '</span>');
+      });
+      label(origin, 'roadtrip-pin roadtrip-pin--from', '<i></i><span>Montevideo</span>');
+      label(dest, 'roadtrip-pin roadtrip-pin--to', '<i></i><span>' + esc(el.getAttribute('data-map-dest')) + '</span>');
       el.setAttribute('data-map-state', 'ready');
       var gmaps = document.createElement('a');
       gmaps.className = 'roadtrip-map__open';
