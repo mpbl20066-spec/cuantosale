@@ -4647,6 +4647,7 @@
     var viajeId = viajeReservaId();
     if (!viajeId || !supabaseClient) return;
     var yaLeidas = reservasViaje.viajeId === viajeId;
+    var antesJson = yaLeidas ? JSON.stringify(reservasViaje.categorias || {}) : '';
     try {
       var result = await supabaseClient.rpc('reservas_leer', { p_viaje_id: viajeId });
       if (result.error) return;
@@ -4658,7 +4659,10 @@
       reservasViaje = { viajeId: viajeId, categorias: categorias };
       // Si el voucher está abierto se repinta, para que el "Reservado" aparezca
       // sin tener que cerrarlo y abrirlo de nuevo.
-      if (yaLeidas) pintarVoucherReservas();
+      /* Solo si cambiaron. Abrir el voucher pide las reservas y, al llegar, las
+         repintaba aunque fueran las mismas; el repintado volvia a pedirlas y asi
+         en bucle, reiniciando el scroll del modal cada vez (no dejaba bajar). */
+      if (yaLeidas && JSON.stringify(categorias) !== antesJson) pintarVoucherReservas();
     } catch (e) { /* sin reservas guardadas: todos los rubros quedan en "Reservar" */ }
   }
   /* El marcado automático, solo para vuelo y hotel. Se dispara con el clic en el
@@ -4771,6 +4775,9 @@
   function openItinerarySummaryModal() {
     if (!detailState || !detailState.meta) return;
     var modal = $('#booking-modal');
+    // Si ya estaba abierto, se repinta en el mismo lugar en vez de volver arriba.
+    var _dlgPrev = modal && !modal.hidden && modal.dataset.summaryText ? modal.querySelector('.booking-dialog') : null;
+    var _scrollDlg = _dlgPrev ? _dlgPrev.scrollTop : 0, _scrollModal = _dlgPrev ? modal.scrollTop : 0;
     var flightSummary = getSelectedFlightSummary();
     // Solo la modalidad. El voucher antes decia "Recogida 1 hora después de la
     // llegada", una hora derivada del vuelo que el operador iba a cambiar. Ahora
@@ -5270,7 +5277,6 @@
 
        El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
        se marca solo al completar el checkout. */
-      '<p class="voucher-canales__nota">Recordá confirmar cada reserva una vez realizada para mantener el estado de tu viaje actualizado.</p>' +
       dividirBloque +
       reservarTodo +
       /* ABAJO, UN SOLO BOTON SOLIDO.
@@ -5301,6 +5307,11 @@
       '</div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    if (_dlgPrev && (_scrollDlg || _scrollModal)) {
+      var _dlgNuevo = modal.querySelector('.booking-dialog');
+      if (_dlgNuevo) _dlgNuevo.scrollTop = _scrollDlg;
+      modal.scrollTop = _scrollModal;
+    }
     honrarLinkDeVuelta(modal);
     /* Se pide la lista de reservados al abrir, no antes: es una lectura de
        red y el voucher se abre desde un botón, así que pedirla con la

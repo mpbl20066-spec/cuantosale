@@ -2578,3 +2578,13 @@ h3.block-title, .block-title:is(h3) {
 .trip-summary__sub{margin-top:4px}
 .trip-summary__meta b{font-size:14px}
 .trip-summary__actions{margin-top:8px}
+
+/* ---------- Resumen del presupuesto: pie del modal ---------- */
+/* Las filas del grid no se estiran ni se aprietan: cada bloque toma su alto y
+   el modal scrollea, en vez de solaparse contra el borde de abajo. */
+.voucher-dialog{align-content:start;grid-auto-rows:max-content;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+.voucher-reserve{margin-top:8px}
+/* CTA principal arriba y a todo el ancho; Compartir y Guardar debajo, en dos columnas. */
+.voucher-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px;padding-bottom:4px}
+.voucher-actions .voucher-chip--main{grid-column:1/-1;order:-1;min-height:48px}
+.voucher-actions .voucher-chip{min-height:46px}
