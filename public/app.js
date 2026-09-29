@@ -2298,7 +2298,7 @@
           // si dependiera de recommended la eleccion se perderia y el presupuesto
           // saltaria solo. recommended queda de respaldo cuando no hay eleccion.
           var elegido = hotelElegidoEnEstaLista(totalValue, stop);
-          var marcado = elegido != null ? elegido : !!option.recommended;
+          var marcado = hotelElegido() ? (elegido != null ? elegido : !!option.recommended) : false;
           /* La placa solo se pinta si hay algo que decir. Antes caia al badge
              del tipo (SÚPER ECONÓMICO, MEJOR RELACIÓN PRECIO-CALIDAD) cuando el
              server no mandaba highlight, y con eso la tercera hotel, que ya no
@@ -3739,6 +3739,79 @@
     if (!v || state !== detailState) return v;
     return vueloElegido() ? v : 0;
   }
+  /* ---------- Pasos del presupuesto ----------
+     Transporte -> Alojamiento -> Traslados y actividades. Un rubro solo suma al
+     total cuando la persona lo eligio de verdad: antes el vuelo, el hotel
+     "recomendado" y el traslado compartido entraban precargados y el total
+     mostraba plata que nadie habia decidido. Estos helpers dicen si hubo
+     decision; los *Sumado() devuelven el monto o 0. Solo aplican al viaje que se
+     esta armando (detailState): los resultados de busqueda no cambian. */
+  function busDecidido() {
+    if (!detailState || detailState.transportMode !== 'bus') return true;
+    return !!detailState.busChoice || !busServiceOptions(detailState.meta).length;
+  }
+  function transporteElegido() {
+    if (!detailState) return false;
+    if (detailState.transportMode === 'auto') return true;
+    if (detailState.transportMode === 'bus') return busDecidido();
+    return vueloElegido();
+  }
+  function hotelElegido() { return !!(detailState && (detailState.hotelDecided || detailState.selectedHotel === false)); }
+  function trasladoElegido() { return !!(detailState && (detailState.transferType || detailState.transferTypeVuelta)); }
+  function busSumado(state) {
+    var v = Number(state && state.parts && state.parts.bus) || 0;
+    return (!v || state !== detailState || busDecidido()) ? v : 0;
+  }
+  function hotelSumado(state) {
+    var v = Number(state && state.hotel) || 0;
+    return (!v || state !== detailState || hotelElegido()) ? v : 0;
+  }
+  function trasladoSumado(state) {
+    return (state !== detailState || state.transportMode === 'auto' || trasladoElegido()) ? trasladoDelViaje(state) : 0;
+  }
+  function pasosEstado() {
+    var d = detailState, m = d.transportMode, tours = (d.selectedTours || []).length;
+    var vuelo = m !== 'bus' && m !== 'auto';
+    var t = transporteElegido();
+    var bus = m === 'bus' ? busElegido(d.meta) : null;
+    var tTxt = t ? (m === 'bus' ? (bus ? bus.empresa + (bus.clase ? ' ' + bus.clase : '') : 'Bus') : m === 'auto' ? 'Auto propio' : (getSelectedFlightSummary().airline || 'Vuelo elegido'))
+      : 'Falta elegir';
+    var h = hotelElegido();
+    var nombreHotel = String(d.selectedHotelName || '');
+    var hTxt = h ? (d.selectedHotel === false ? 'Sin hotel' : (nombreHotel && !/recomendado|seleccionado/i.test(nombreHotel) ? nombreHotel : 'Hotel elegido')) : 'Falta elegir';
+    var tr = (vuelo && trasladoElegido()) || tours > 0;
+    var partes = [];
+    if (vuelo && trasladoElegido()) partes.push('Traslado');
+    if (tours) partes.push(tours + (tours === 1 ? ' actividad' : ' actividades'));
+    return [
+      { n: 1, titulo: 'Transporte', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
+      { n: 2, titulo: 'Alojamiento', texto: hTxt, hecho: h, anc: 'alojamiento', cta: 'Elegí tu hotel' },
+      { n: 3, titulo: vuelo ? 'Traslados y actividades' : 'Actividades', texto: tr ? partes.join(' + ') : 'Opcional', hecho: tr, opcional: true, anc: vuelo ? 'traslados' : 'tours', cta: vuelo ? 'Sumá traslados y actividades' : 'Sumá actividades' }
+    ];
+  }
+  function pasosMarkup() {
+    if (!detailState) return '';
+    var p = pasosEstado();
+    var actual = -1;
+    for (var i = 0; i < p.length; i++) { if (!p[i].hecho) { actual = i; break; } }
+    var lis = p.map(function (s, i) {
+      var cls = s.hecho ? 'is-done' : (i === actual ? 'is-current' : 'is-pending');
+      return '<li class="steps__item ' + cls + '"><button type="button" class="steps__btn" data-jump-category="' + s.anc + '" data-jump-label="' + esc(s.titulo) + '"' + (i === actual ? ' aria-current="step"' : '') + '>'
+        + '<span class="steps__n" aria-hidden="true">' + (s.hecho ? '✓' : s.n) + '</span>'
+        + '<span class="steps__t"><b>' + esc(s.titulo) + '</b><small>' + esc(s.texto) + (s.opcional && !s.hecho ? '' : '') + '</small></span></button></li>';
+    }).join('');
+    var sig = actual >= 0 ? p[actual] : null;
+    var cta = sig
+      ? '<button type="button" class="steps__next" data-jump-category="' + sig.anc + '">' + esc(sig.cta) + (sig.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>'
+      : '<p class="steps__ok">Listo: revisá el total en “Mi Viaje”.</p>';
+    return '<ol class="steps__list">' + lis + '</ol>' + cta;
+  }
+  function pintarPasos() {
+    var el = document.querySelector('[data-steps]');
+    if (!el || !detailState) return;
+    var html = pasosMarkup();
+    if (el.__html !== html) { el.innerHTML = html; el.__html = html; try { syncBudgetJumpTargets(); } catch (e) { /* sin DOM todavia */ } }
+  }
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
@@ -3753,19 +3826,19 @@
     // pisan porque la app no ofrece el alquiler transfronterizo.
     var categories = roadtrip ? ['auto', 'alquiler', 'alojamiento', 'comidas', 'tours'] : state.transportMode === 'bus' ? ['bus', 'alquiler', 'alojamiento', 'comidas', 'local', 'tours'] : ['pasajes', 'alquiler', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
     var transferValue = getSelectedTransferAmount(state);
-    var trasladoValue = (Number(state.parts && state.parts.traslados) || 0) + transferValue;
+    var trasladoValue = (state === detailState && state.transportMode !== 'auto' && !trasladoElegido()) ? 0 : (Number(state.parts && state.parts.traslados) || 0) + transferValue;
     var alquilerValue = Number(state.alquiler) || 0;
     var total = roadtrip
-      ? Math.round((Number(state.auto) || 0) + alquilerValue + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
-      : Math.round((state.transportMode === 'bus' ? (Number(state.parts && state.parts.bus) || 0) : vueloSumado(state)) + (Number(state.hotel) || 0) +
+      ? Math.round((Number(state.auto) || 0) + alquilerValue + hotelSumado(state) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
+      : Math.round((state.transportMode === 'bus' ? busSumado(state) : vueloSumado(state)) + hotelSumado(state) +
         (Number(state.parts.comidas) || 0) + (Number(state.parts.local) || 0) +
         trasladoValue + alquilerValue + (Number(state.toursTotal) || 0));
     var entries = categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return null;
       var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
       var value = category === 'pasajes' ? vueloSumado(state)
-        : category === 'bus' ? (Number(state.parts && state.parts.bus) || 0)
-        : category === 'alojamiento' ? (Number(state.hotel) || 0)
+        : category === 'bus' ? busSumado(state)
+        : category === 'alojamiento' ? hotelSumado(state)
         : category === 'traslados' ? trasladoValue
         : category === 'auto' ? (Number(state.auto) || 0)
         : category === 'alquiler' ? alquilerValue
@@ -3979,6 +4052,7 @@
     return label.split(' · ')[0];
   }
   function renderTripSummary() {
+    try { pintarPasos(); } catch (e) { /* todavia no hay viaje */ }
     var summary = $('#trip-summary');
     if (!summary) return;
     if (!detailState || !detailState.meta) {
@@ -4001,7 +4075,7 @@
     // El TOTAL de los dos tramos, no solo el de llegada: la fila del resumen tiene
     // que mostrar lo mismo que el total de arriba, y con los dos tramos elegidos
     // el de llegada solo es la mitad.
-    var transferAmount = trasladoDelViaje(detailState);
+    var transferAmount = trasladoSumado(detailState);
     var transferIncluded = transferAmount > 0;
     // Solo la modalidad. Antes esta fila decia "Compartido · 1 hora después de la
     // llegada · 15:20": una hora que la app derivaba de la llegada del vuelo y
@@ -4050,7 +4124,7 @@
        llegó. */
     var ESTADO = { ok: 'Sumado', vacio: 'Sin elegir', fuera: 'No incluido' };
     var transporteRow = detailState.transportMode === 'bus'
-      ? { cat: 'bus', label: 'Bus', detalle: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(Number(detailState.parts && detailState.parts.bus) || 0), color: getCategoryColor('bus') }
+      ? { cat: 'bus', label: 'Bus', detalle: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(busSumado(detailState)), color: getCategoryColor('bus') }
       : detailState.transportMode === 'auto'
         ? { cat: 'auto', label: 'Auto', detalle: esc(roadtripMeta()), value: money(Number(detailState.auto) || 0), color: getCategoryColor('auto') }
         /* El vuelo sin elegir ya no dice "Vuelo no seleccionado" en el dato: eso
@@ -4060,7 +4134,7 @@
     var summaryItems = [
       transporteRow,
       ...(detailState.transportMode === 'flight' ? [{ cat: 'traslados', label: 'Transfer', excluido: !transferIncluded, detalle: transferIncluded ? esc(transferMeta) : '', value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') }] : []),
-      { cat: 'alojamiento', label: 'Hotel', excluido: detailState.selectedHotel === false, detalle: hotelDetalle, value: money(Number(detailState.hotel) || 0), color: getCategoryColor('alojamiento') },
+      { cat: 'alojamiento', label: 'Hotel', excluido: detailState.selectedHotel === false, detalle: hotelDetalle, value: money(hotelSumado(detailState)), color: getCategoryColor('alojamiento') },
       { cat: 'comidas', label: 'Comida', excluido: detailState.foodBudgetMode === 'none', detalle: detailState.foodBudgetMode === 'none' ? '' : (foodPerDay ? money(foodPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
       { cat: 'local', label: 'Transporte local', excluido: detailState.localBudgetMode === 'none', detalle: detailState.localBudgetMode === 'none' ? '' : (localPerDay ? money(localPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
       { cat: 'tours', label: 'Tours', detalle: toursDetalle, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
@@ -4068,10 +4142,10 @@
     // Mismo criterio que la barra: de mayor a menor monto. Los rubros en cero
     // quedan al final, que es donde el usuario tiene menos que mirar.
     summaryItems.forEach(function (item) {
-      item.n = item.cat === 'bus' ? (Number(detailState.parts && detailState.parts.bus) || 0)
+      item.n = item.cat === 'bus' ? busSumado(detailState)
         : item.cat === 'auto' ? (Number(detailState.auto) || 0)
         : item.cat === 'pasajes' ? flightPrice
-        : item.cat === 'alojamiento' ? (Number(detailState.hotel) || 0)
+        : item.cat === 'alojamiento' ? hotelSumado(detailState)
         : item.cat === 'comidas' ? (Number(detailState.parts && detailState.parts.comidas) || 0)
         : item.cat === 'local' ? (Number(detailState.parts && detailState.parts.local) || 0)
         : item.cat === 'traslados' ? (transferIncluded ? transferAmount : 0)
@@ -4950,13 +5024,13 @@
         : nombreModo(tl || tv);
     var selectedHotelName = findSelectedHotelLabel();
     var selectedHotelDetail = findSelectedHotelDetail();
-    var hotelTotal = Number(detailState.hotel) || 0;
+    var hotelTotal = hotelSumado(detailState);
     // Única fuente de verdad para el monto del traslado: la misma función que
     // ya usan el widget "Mi Viaje" y "A dónde va tu plata", para que este
     // voucher nunca muestre un número distinto al resto de la pantalla.
     // Los dos tramos, para que el WhatsApp al operador y el total del voucher
     // cuenten lo mismo que el total de la pantalla.
-    var transferTotal = trasladoDelViaje(detailState);
+    var transferTotal = trasladoSumado(detailState);
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var dailyCosts = getDestinationDailyCosts(detailState.meta.dest && detailState.meta.dest.key);
@@ -4967,7 +5041,7 @@
     var flightTotal = vueloSumado(detailState);
     // Con un medio terrestre el resumen habla del bus y no exige vuelo.
     var busMode = detailState.transportMode === 'bus';
-    var busTotal = Number(detailState.parts && detailState.parts.bus) || 0;
+    var busTotal = busSumado(detailState);
     var selectedTours = detailState.selectedTours || [];
     var toursTotal = Number(detailState.toursTotal) || 0;
     var toursLabel = selectedTours.length ? selectedTours.length + (selectedTours.length === 1 ? ' actividad seleccionada' : ' actividades seleccionadas') : 'Sin actividades seleccionadas';
@@ -5226,7 +5300,9 @@
     /* Sin modalidad no hay nada que reservar. El aviso va al cuerpo de la fila
        (antes iba debajo del monto, en la columna de la cifra) y el CTA de la
        derecha desaparece en vez de quedar como un boton que no abre nada. */
-    var transferCta = reservarCta(tl2 || tv2, 'Reservar el traslado desde el aeropuerto', 'traslados');
+    var transferCta = !(tl2 || tv2) && detailState.transportMode !== 'bus' && detailState.transportMode !== 'auto'
+      ? '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="traslados">Elegir traslado</button>'
+      : reservarCta(tl2 || tv2, 'Reservar el traslado desde el aeropuerto', 'traslados');
     var transferNoteHtml = (tl2 || tv2 ? '' : avisoVoucher('Elegí un transfer en la sección de traslados.'))
       + '<p class="voucher-item__detail">' + transferNote + '</p>';
     // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
@@ -5254,7 +5330,7 @@
     // El titulo lleva el hotel cuando hay uno solo. Con dos ya no alcanza: el
     // nombre de arriba seria el de la ultima parada procesada y la lista de
     // abajo los dos, y se leeria como que el titulo ese de todo el viaje.
-    var hotelTitle = multiHotel ? 'Alojamiento - ' + hotelesElegidos.length + ' hoteles' : 'Alojamiento - ' + esc(selectedHotelName);
+    var hotelTitle = multiHotel ? 'Alojamiento - ' + hotelesElegidos.length + ' hoteles' : (hotelElegido() ? 'Alojamiento - ' + esc(selectedHotelName) : 'Alojamiento - sin seleccionar');
     var destinoTotal = localTotal + foodTotal;
     /* El boton de reservar SOLO va aca, no en la card "Mi Viaje".
        Aca esta el pedido completo —el total, que rubros hay y cuales no—, y el
@@ -5394,7 +5470,7 @@
 
       '<ul class="voucher-list">' +
       (busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>')) +
-      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
+      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, !hotelElegido() ? '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="alojamiento">Elegir hotel</button>' : hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
       (busMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
       itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, reservarCta(selectedTours.length, 'Reservar las actividades', 'tours')) +
       '</ul>' +
@@ -5557,7 +5633,7 @@
     // trasladoDelViaje() reemplaza la estimacion del modelo cuando hay modalidad
     // elegida, en vez de sumarle el precio de la tabla encima. Sumar las dos era
     // el doble conteo: ver el comentario de la funcion.
-    var transport = roadtrip ? detailState.auto : trasladoDelViaje(detailState);
+    var transport = roadtrip ? detailState.auto : trasladoSumado(detailState);
     var budget = getBudgetBreakdown(detailState);
     var total = budget.total;
     var totalEl = document.querySelector('[data-detail-total]');
@@ -5567,7 +5643,7 @@
     var rows = document.querySelectorAll('[data-cost-category]');
     Array.prototype.forEach.call(rows, function (row) {
       var category = row.getAttribute('data-cost-category');
-      var value = category === 'pasajes' ? vueloSumado(detailState) : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? transport : category === 'auto' ? (roadtrip ? detailState.auto : 0) : category === 'local' && roadtrip ? 0 : (parts[category] || 0);
+      var value = category === 'bus' ? busSumado(detailState) : category === 'pasajes' ? vueloSumado(detailState) : category === 'alojamiento' ? hotelSumado(detailState) : category === 'traslados' ? transport : category === 'auto' ? (roadtrip ? detailState.auto : 0) : category === 'local' && roadtrip ? 0 : (parts[category] || 0);
       var valueEl = row.querySelector('[data-cost-value]');
       if (valueEl) valueEl.textContent = money(Number(value) || 0);
     });
@@ -5848,6 +5924,7 @@
       return;
     }
     detailState.selectedHotel = false;
+    detailState.hotelDecided = true;
     detailState.selectedHotelTotal = null;
     detailState.selectedHotelName = '';
     detailState.hotel = 0;
@@ -5947,7 +6024,7 @@
     // El flag se levanta antes de recalcular el reparto multihotel: si el
     // alojamiento estaba deseleccionado, updateMultiStayPricing() necesita saber
     // que esta vez hay una elección real y no un 0 heredado.
-    if (selectedByUser) { detailState.selectedHotel = true; detailState.selectedHotelTotal = Math.round(price); }
+    if (selectedByUser) { detailState.selectedHotel = true; detailState.hotelDecided = true; detailState.selectedHotelTotal = Math.round(price); }
     if (detailState.multiStay && selectedByUser) {
       // stop 1 o 2: cada parada guarda su propio hotel. Con un solo numero
       // compartido, elegir en el segundo grupo pisaba el primero y la primera
@@ -6528,7 +6605,7 @@
     return categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return '';
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
-      var value = category === 'pasajes' ? vueloSumado(detailState) : category === 'alojamiento' ? detailState.hotel : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + getSelectedTransferAmount(detailState) : category === 'auto' ? detailState.auto : detailState.parts[category];
+      var value = category === 'bus' ? busSumado(detailState) : category === 'pasajes' ? vueloSumado(detailState) : category === 'alojamiento' ? hotelSumado(detailState) : category === 'traslados' ? (Number(detailState.parts.traslados) || 0) + getSelectedTransferAmount(detailState) : category === 'auto' ? detailState.auto : detailState.parts[category];
       return '<div data-cost-category="' + category + '"><span>' + label + '</span><b data-cost-value>' + money(Number(value) || 0) + '</b></div>';
     }).join('');
   }
@@ -8196,9 +8273,8 @@
            _meta, que la app solo sumaba el de llegada; esa decision quedo
            escrita y ahora es al reves. Es una decision de negocio, no un
            descuido. */
-        detailState.transferType = 'shared';
-        detailState.transferTypeVuelta = 'shared';
-        detailState.transfer = trasladoDelViaje(detailState);
+        // Sin precarga: el traslado suma cuando la persona elige una modalidad
+        // (ver trasladoElegido()). Antes arrancaba en 'shared' en los dos tramos.
       }
     }
     var nights = Math.max(1, Number(data.meta.nights) || 1);
@@ -8240,9 +8316,10 @@
     var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p><b class="detail-summary__destino">' + esc(data.meta.dest.name) + '</b>' + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
-      renderSafe(function () { return multiStayMarkup(detailState); }, '') + dailyBudgetMarkup +
+      '<nav class="steps" data-steps aria-label="Pasos del presupuesto">' + renderSafe(function () { return pasosMarkup(); }, '') + '</nav>' +
+      renderSafe(function () { return multiStayMarkup(detailState); }, '') +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
-      hotelsMarkup + toursMarkup +
+      hotelsMarkup + toursMarkup + dailyBudgetMarkup +
       /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
 
          Antes estaba al final de todo y el comentario de arriba explicaba por
@@ -8616,7 +8693,7 @@
      confirmacion del correo suele abrirse en otra pestana. */
   var ACCION_KEY = 'cuantosale_accion_pendiente';
   var ACCION_TTL_MS = 30 * 60 * 1000;
-  var ACCIONES_CON_LOGIN = ['data-reservar-rubro', 'data-detalle-rubro', 'data-marca-reserva', 'data-confirmar-reserva', 'data-deshacer-reserva', 'data-reservar-pedido', 'data-split-trip'];
+  var ACCIONES_CON_LOGIN = ['data-reservar-rubro', 'data-marca-reserva', 'data-confirmar-reserva', 'data-deshacer-reserva', 'data-reservar-pedido', 'data-split-trip'];
   var MENSAJE_LOGIN = 'Iniciá sesión para guardar los cambios en tu viaje y gestionar tus reservas.';
   var authInitTerminado = false;
   function describirAccion(el) {
@@ -8842,7 +8919,7 @@
       if (input) input.checked = true;
     });
     if (details.hotel) {
-      detailState.hotel = Number(details.hotel.total) || detailState.hotel;
+      detailState.hotel = Number(details.hotel.total) || detailState.hotel; detailState.hotelDecided = true;
       detailState.selectedHotel = true;
       detailState.selectedHotelTotal = Math.round(Number(details.hotel.total) || 0) || null;
       detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName;
