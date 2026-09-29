@@ -1,4 +1,4 @@
-/* version: 123
+/* version: 124
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -986,7 +986,26 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* Mismo bloque de card elegible que .hotel-option y .local-tour. Antes el
    estado de elegido era navy de 1px acá y navy de 2px en los otros dos, con
    el mismo color de fondo: el mismo gesto, dos grosores distintos. */
-.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}.daily-budget__option-copy{font-size:11px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
+.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}/* El contraste del --ink2 sobre el fondo de la card esta bien (6.99:1 en el peor
+   caso, la caja elegida en tema claro; AA pide 4.5:1). Lo que no estaba bien era
+   el TAMANO: 11px es la misma cifra que usa el placeholder del input, y en un
+   celu con brillo bajo esa linea de dos renglones se perdia. A 12px con el mismo
+   color: mismo contraste, un punto mas de cuerpo. */
+.daily-budget__option-copy{font-size:12px;line-height:1.45;color:var(--ink2)}.daily-budget__option strong{margin-top:auto;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}
+/* "Ingresar monto" NO es un precio: es un campo esperando que lo escribas. Con la
+   misma tipografía y el mismo --ink que los precios se leia como un cuarto monto de
+   la lista, y la caja no parecia un lugar del que se puede tipear. Se lo baja al
+   --ink2 --el mismo del placeholder del input de verdad-- y se le pone el lapiz,
+   para que el gesto se vea sin tener que tocar la caja para descubrirlo.
+
+   SIN opacity a proposito: con opacity .75 el tono efectivo cae a #76808f sobre
+   fondo claro y queda en 3.85:1, por debajo de AA (que pide 4.5:1). Medido en los
+   cuatro casos --tema claro y oscuro, card normal y elegida-- el --ink2 solo da
+   6.99:1 de peor. La diferencia de color con el precio alcanza para leerlo como
+   campo, y el hover lo sube a --ink para confirmar que se puede tocar. */
+.daily-budget__prompt{display:flex;align-items:center;gap:7px;margin-top:auto;color:var(--ink2)}
+.daily-budget__prompt-ico{font-family:var(--fb);font-size:17px;line-height:1;font-style:normal}
+.daily-budget__option:hover .daily-budget__prompt{color:var(--ink)}.daily-budget__options>.daily-budget__planned{grid-column:1/-1;width:100%;padding:4px 0 2px}.daily-budget__hint{margin:0;color:var(--ink2);font-size:12px}
 /* En un celu las dos rejillas caen a una columna: 2 arriba quedaria una fila
    de 3 y otra de 1, que es justo lo que se vino a corregir. */
 @media (max-width:560px){.daily-budget__options--cols-2,.daily-budget__options--cols-3{grid-template-columns:minmax(0,1fr)}}

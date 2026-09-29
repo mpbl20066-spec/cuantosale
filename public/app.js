@@ -4577,9 +4577,9 @@
     var foodValue = Number(detailState.foodPerDay) || Number(detailState.parts && detailState.parts.comidas ? (detailState.parts.comidas / Math.max(1, nights * pax)) : 0) || dailyCosts.food.moderado;
     var localValue = Number(detailState.localPerDay) || Number(detailState.parts && detailState.parts.local ? (detailState.parts.local / Math.max(1, nights * pax)) : 0) || dailyCosts.transport.eco;
     var foodOptions = [
-      { key: 'casual', label: 'Casual / Street Food', description: 'Picadas, mercados y locales accesibles.', value: dailyCosts.food.casual },
-      { key: 'moderado', label: 'Moderado (Restaurantes estándar)', description: 'Presupuesto equilibrado para almuerzos y cenas.', value: dailyCosts.food.moderado },
-      { key: 'gourmet', label: 'Gourmet / Alta cocina', description: 'Experiencias culinarias destacadas.', value: dailyCosts.food.gourmet }
+      { key: 'casual', label: 'Económico', description: 'Supermercado, panaderías y puestos.', value: dailyCosts.food.casual },
+      { key: 'moderado', label: 'Medio (Recomendado)', description: 'Buffets por kilo y restaurantes.', value: dailyCosts.food.moderado },
+      { key: 'gourmet', label: 'Gourmet', description: 'Restaurantes top y paradores de playa.', value: dailyCosts.food.gourmet }
     ];
     var localOptions = [
       { key: 'econ', label: 'Económico', description: 'Ómnibus y líneas urbanas', value: dailyCosts.transport.eco },
@@ -4621,7 +4621,7 @@
       var input = '<label class="daily-budget__planned"><span>Monto planeado</span><div class="daily-budget__input-wrap"><span class="daily-budget__input-symbol">' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Monto diario planeado para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span class="daily-budget__input-unit">/día</span></div></label>';
       var custom = customSelected
         ? '<div class="daily-budget__option daily-budget__option--custom is-selected" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span>' + input + '</div>'
-        : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Definí tu propio presupuesto</span><strong>Ingresar monto</strong></button>';
+        : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Definí tu propio presupuesto</span><strong class="daily-budget__prompt"><span class="daily-budget__prompt-ico" aria-hidden="true">✎</span>Ingresar monto</strong></button>';
       return presets + custom;
     }
     // El nº de columnas sale de la cantidad de opciones. Con 3 columnas y
