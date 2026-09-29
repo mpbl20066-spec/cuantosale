@@ -4464,8 +4464,79 @@
     for (var i = 0; i < n; i++) l.push('• ' + splitNombre(i) + ': ' + money(por));
     var g = enlaceGrupo();
     l.push('');
-    l.push(g ? 'Cuenta del grupo: ' + g : 'Armado con CuántoSale: ' + location.origin);
+    if (g) l.push('Cuenta del grupo: ' + g);
+    l.push(SPLIT_FOOTER + ': ' + SPLIT_URL);
     return l.join('\n');
+  }
+  var SPLIT_FOOTER = 'Calculado sencillito con cuántosale.uy';
+  var SPLIT_URL = 'https://cuantosale.uy';
+  /* La tarjeta que se manda por WhatsApp en vez del texto plano: destino y
+     fechas, total, lo que pone cada persona y el desglose por rubro. Se arma con
+     los mismos datos que el modal (splitDatos / splitNombre), asi que la imagen
+     y lo que se ve en pantalla no pueden diferir. Alto variable: crece con la
+     cantidad de rubros y de personas, y se mide antes de exportar. */
+  function buildSplitCardNode() {
+    var d = splitDatos(), n = splitState.n, meta = detailState.meta, por = d.total / n;
+    var fila = function (a, b, gold) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:15px;">'
+        + '<span style="display:inline-flex;align-items:center;gap:8px;min-width:0;">' + a + '</span><b style="font-weight:800;' + (gold ? 'color:#F6B21B;' : '') + 'white-space:nowrap;">' + b + '</b></div>';
+    };
+    var rubros = d.filas.map(function (f) {
+      return fila(storyInclusionIcon(f.category) + '<span>' + esc(storyCostLabel(f)) + '</span>', esc(money(f.value)), false);
+    }).join('');
+    var gente = '';
+    for (var i = 0; i < n; i++) gente += fila('<span>' + esc(splitNombre(i)) + '</span>', esc(money(por)), true);
+    var wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;pointer-events:none;z-index:-1;';
+    var node = document.createElement('div');
+    node.style.cssText = 'width:540px;font-family:Poppins,Arial,sans-serif;background:#0B1B2B;color:#fff;padding:38px 36px 32px;box-sizing:border-box;';
+    node.innerHTML =
+      '<div style="display:flex;align-items:center;gap:9px;margin-bottom:26px;">'
+      + '<svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>'
+      + '<span style="font-weight:700;letter-spacing:-.02em;font-size:22px;">cuántosale</span></div>'
+      + '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:6px;">Dividir gastos</div>'
+      + '<div style="font-size:34px;font-weight:800;line-height:1.05;margin-bottom:8px;">' + esc(meta.dest.name) + '</div>'
+      + '<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:22px;">📅 ' + esc(storyDateRange(meta)) + ' · 👥 ' + n + (n === 1 ? ' persona' : ' personas') + '</div>'
+      + '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 20px;margin-bottom:22px;">'
+      + '<div style="font-size:11px;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Total del viaje</div>'
+      + '<div style="font-size:44px;font-weight:800;line-height:1;letter-spacing:-.03em;">' + esc(money(d.total)) + '</div>'
+      + '<div style="font-size:14px;color:#F6B21B;font-weight:700;margin-top:8px;">' + esc(money(por)) + ' por persona</div></div>'
+      + '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:2px;">Cuánto pone cada uno</div>' + gente
+      + '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:20px 0 2px;">Qué cubre el presupuesto</div>' + rubros
+      + '<div style="margin-top:24px;font-size:14px;font-weight:800;line-height:1.35;">Calculado sencillito con <span style="color:#F6B21B;">cuántosale.uy</span></div>';
+    wrapper.appendChild(node);
+    document.body.appendChild(wrapper);
+    return wrapper;
+  }
+  function enviarTarjetaSplit(btn) {
+    var original = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Generando tarjeta…';
+    var meta = detailState.meta, wrapper = null;
+    var texto = splitTexto();
+    var waTexto = function () { window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank', 'noopener'); };
+    loadHtmlToImage().then(function (htmlToImage) {
+      wrapper = buildSplitCardNode();
+      var node = wrapper.firstChild;
+      return htmlToImage.toBlob(node, { width: 540, height: node.offsetHeight, pixelRatio: 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' });
+    }).then(function (blob) {
+      if (!blob) throw new Error('sin imagen');
+      var fileName = 'cuantosale-dividir-' + (meta.dest.key || 'viaje') + '.png';
+      var file = typeof File === 'function' ? new File([blob], fileName, { type: 'image/png' }) : null;
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        return navigator.share({ files: [file], title: 'Dividir gastos · ' + meta.dest.name, text: SPLIT_FOOTER + ': ' + SPLIT_URL }).catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          downloadBlob(blob, fileName); waTexto();
+        });
+      }
+      /* Sin compartir de archivos (escritorio): wa.me no adjunta imagenes, asi que
+         se baja la tarjeta y se abre WhatsApp para adjuntarla. */
+      downloadBlob(blob, fileName); waTexto();
+    }).catch(function () {
+      waTexto();
+    }).finally(function () {
+      if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+      btn.disabled = false; btn.textContent = original;
+    });
   }
   function splitResultado() {
     var d = splitDatos(), n = splitState.n, por = d.total / n;
@@ -4554,7 +4625,7 @@
         if (e.target === el || e.target.closest('[data-split-close]')) { closeSplitModal(); return; }
         if (e.target.closest('[data-split-minus]')) { splitState.n = Math.max(1, splitState.n - 1); splitPintar(true); return; }
         if (e.target.closest('[data-split-plus]')) { splitState.n = Math.min(20, splitState.n + 1); splitPintar(true); return; }
-        if (e.target.closest('[data-split-whatsapp]')) { window.open('https://wa.me/?text=' + encodeURIComponent(splitTexto()), '_blank', 'noopener'); return; }
+        var w = e.target.closest('[data-split-whatsapp]'); if (w) { enviarTarjetaSplit(w); return; }
         var c = e.target.closest('[data-split-copy]'); if (c) { copiarTextoSplit(c); return; }
         var g = e.target.closest('[data-split-grupo]'); if (g) { irAlGrupo(g); return; }
       });
