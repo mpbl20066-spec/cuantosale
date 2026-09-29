@@ -278,8 +278,10 @@ prueba('el filtro de tipo queda definido antes de usarlo', function () {
    "Solo con disponibilidad" y termina viendo un 400 del server, o cambia de
    categoría y pierde el filtro sin que nadie lo diga. */
 prueba('el filtro de disponibilidad marca el estado actual y ofrece las dos opciones', function () {
-  const depsDisp = 'var hotelSoloReservables = false;\n' +
-    'var HOTEL_FILTRO_DISPONIBILIDAD = ' + JSON.stringify([
+  // `hotelSoloReservables` se pasa como parámetro, NO se declara adentro: si se
+  // declara, el `var` tapa al parámetro y la función siempre ve `false`, que es
+  // justo el estado que hay que probar.
+  const depsDisp = 'var HOTEL_FILTRO_DISPONIBILIDAD = ' + JSON.stringify([
       { value: 'todos', label: 'Todos' },
       { value: 'reservables', label: 'Solo con disponibilidad' }
     ]) + ';\n' +
