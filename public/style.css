@@ -2670,8 +2670,8 @@ h3.block-title, .block-title:is(h3) {
 /* Mapa de la ruta del roadtrip: mapa politico dibujado con poligonos (ver scripts/build-mapa-base.js). */
 .roadtrip-map-card{padding:0;overflow:hidden;position:relative}
 .roadtrip-map-card__head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;padding:14px 16px 12px}.roadtrip-map-card__head b{font-family:var(--fh);font-size:16px}.roadtrip-map-card__head span{font-size:12px;font-weight:700;color:var(--ink2)}
-.roadtrip-map{--sea:#bfe0f5;--land:#d9edd3;--country:#6f7f6c;--state:#9fb09b;--lbl:#55665a;--halo:#e9f5e5;height:320px;isolation:isolate;background:var(--sea);display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line)}
-:root:not([data-theme="light"]) .roadtrip-map{--sea:#0e1c2e;--land:#27493f;--country:#6f9488;--state:#3f635a;--lbl:#b2d2c6;--halo:#27493f}
+.roadtrip-map{--sea:#cfe6f3;--land:#f5f3ee;--country:#9aa1a9;--state:#cfd3d8;--lbl:#5f6b78;--halo:#f5f3ee;height:320px;isolation:isolate;background:var(--sea);display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line)}
+/* El mapa va siempre claro (tono Waze de dia), tambien con el tema oscuro de la app. */
 .roadtrip-map__loading{font-size:13px;color:var(--ink2)}
 .roadtrip-map.leaflet-container{font:inherit;display:block;background:var(--sea);animation:roadtrip-map-in .5s ease both}
 @keyframes roadtrip-map-in{from{opacity:0}to{opacity:1}}
