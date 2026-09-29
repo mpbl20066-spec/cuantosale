@@ -2221,6 +2221,19 @@
     for (var i = 0; i < lista.length; i++) if (lista[i].stop === stop) return lista[i].name;
     return lista.length ? lista[0].name : findSelectedHotelLabel();
   }
+  /* Que hotel hay que marcar al redibujar la lista.
+     Devuelve true/false si el total guardado esta en la lista, y null si no se
+     sabe (todavia no se eligio ninguno, o el hotel guardado ya no se ofrece).
+     El null es distinto de false a proposito: false seria "no marcar ninguno" y
+     dejaria la lista sin radio marcado, que es peor que marcar el recomendado. */
+  function hotelElegidoEnEstaLista(totalValue) {
+    if (!detailState || !detailState.selectedHotel) return null;
+    var guardado = Number(detailState.selectedHotelTotal);
+    if (!Number.isFinite(guardado) || guardado <= 0) return null;
+    // Margen de 1 porque el total guardado viene de un data-hotel-total ya
+    // redondeado al pintarse.
+    return Math.abs(guardado - totalValue) < 1;
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
