@@ -995,7 +995,21 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* Mismo bloque de card elegible que .hotel-option y .local-tour. Antes el
    estado de elegido era navy de 1px acá y navy de 2px en los otros dos, con
    el mismo color de fondo: el mismo gesto, dos grosores distintos. */
-.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:118px;padding:14px 12px;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}/* El contraste del --ink2 sobre el fondo de la card esta bien (6.99:1 en el peor
+/* El molde de la caja. Las dos secciones tienen que medir lo mismo, y no lo
+   define el contenido.
+
+   Medido en el navegador a 340px con las dos grillas reales:
+     transporte  169px   (descripciones de 1 renglon)
+     comidas     174px   (descripciones de 2 renglones)
+   O sea que NO median lo mismo, y lo decidia la longitud del copy: 5px de una
+   fila de texto. Es el tipo de desajuste que no se ve en una captura y se siente
+   al scrollear, porque las dos mitades del bloque no cierran a la misma altura.
+
+   190px cubre el caso real con margen, y no es un molde rigido: la caja sigue
+   creciendo si el texto necesita mas (con una descripcion de 3 renglones se va a
+   261px). `grid-auto-rows:1fr` sigue igualando los altos de una misma fila, asi
+   que dentro de la grilla no hay cajas que midan distinto. */
+.daily-budget__option{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:190px;padding:14px 12px;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}.daily-budget__option:hover{transform:translateY(-1px);border-color:var(--ink2)}.daily-budget__option.is-selected{border:2px solid var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}.daily-budget__option-title{font-size:15px;font-weight:800;color:var(--ink)}/* El contraste del --ink2 sobre el fondo de la card esta bien (6.99:1 en el peor
    caso, la caja elegida en tema claro; AA pide 4.5:1). Lo que no estaba bien era
    el TAMANO: 11px es la misma cifra que usa el placeholder del input, y en un
    celu con brillo bajo esa linea de dos renglones se perdia. A 12px con el mismo

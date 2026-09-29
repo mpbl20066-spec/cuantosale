@@ -5431,10 +5431,21 @@
        nombre. El `data-official-transfer` queda solo en la caja porque es lo que
        reemplazan las actualizaciones en caliente, y asi el titulo no se borra
        cuando cambia el precio o el tramo elegido. */
+    /* El titulo va solo, sin bajada.
+
+       La bajada decia "Elegí cómo querés llegar a tu alojamiento en Búzios desde
+       Aeroporto Internacional do Galeão (GIG), a 174 km." y repetia el nombre del
+       destino, el aeropuerto con su código y los kilómetros: los tres datos ya
+       estan en el encabezado de cada tramo ("Aeropuerto de Galeão (GIG) →
+       Búzios") y el km vive ahi como nota. Encima el titulo de la seccion se
+       llama "Traslados y Conexiones", o sea que la bajada no aportaba ni el
+       destino ni el precio ni la accion: era la misma frase con mas palabras.
+
+       Y la accion ("Elegí") ya no hacía falta: con el compartido elegido por
+       defecto no hay nada que elegir hasta que la persona quiera cambiarlo, y
+       esa chance se anuncia con la nota de "Incluido para tu comodidad" que ya
+       esta en cada card. */
     return '<h3 class="block-title">' + (hayEntre ? 'Tus traslados' : 'Traslados y Conexiones') + '</h3>' +
-      '<p class="sub block-sub">' + (hayEntre
-        ? 'Elegí cómo llegás a la primera parada. El traslado a la segunda se coordina aparte.'
-        : 'Elegí cómo querés llegar a tu alojamiento en ' + esc(meta.dest.name) + (t.aeropuerto ? ' desde ' + esc(t.aeropuerto) + ' (' + esc(t.iata) + ')' : '') + (t.km ? ', a ' + t.km + ' km.' : '.')) + '</p>' +
       '<section class="transport-options official-transfer" data-official-transfer data-budget-anchor="traslados">' +
       modoNota +
       filasTramos +
