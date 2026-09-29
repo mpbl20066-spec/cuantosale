@@ -6147,10 +6147,48 @@
       '</section></div>';
   }
 
+  /* Empresas de bus con horario y tarifa publicados (public/buses.js). Solo hay
+     datos para Montevideo -> Porto Alegre y Florianopolis; en cualquier otro
+     origen o destino no se dibuja nada y queda la estimacion de siempre. Los
+     $U se muestran tal cual y, si hay tasa, con su equivalente en la moneda
+     activa. Una tarifa null (TTL no la publica) dice "Consultar tarifa". */
+  function busServicesMarkup(meta) {
+    var servicios = typeof CS_BUS_SERVICES !== 'undefined' ? CS_BUS_SERVICES : null;
+    var destKey = meta && meta.dest && meta.dest.key;
+    if (!servicios || !destKey || originCityName(meta.origin || S.origin) !== 'Montevideo') return '';
+    var tasaUyu = tasaDe('UYU');
+    function uyu(n) { return '$U ' + Number(n).toLocaleString('es-UY'); }
+    function precio(n) {
+      if (n == null) return '<span class="bus-co__price is-na">Consultar tarifa</span>';
+      return '<span class="bus-co__price"><b>' + uyu(n) + '</b>' + (tasaUyu ? ' <em>&asymp; ' + money(n / tasaUyu) + '</em>' : '') + '</span>';
+    }
+    var hoy = new Date().toISOString().slice(0, 10);
+    var cards = servicios.map(function (co) {
+      var rutas = co.rutas.filter(function (r) { return r.dest === destKey; });
+      if (!rutas.length) return '';
+      var vencido = co.vigencia && co.vigencia < hoy;
+      var filas = rutas.map(function (r) {
+        var sigDia = r.llegada < r.salida ? ' <sup title="Llega al día siguiente">+1</sup>' : '';
+        var tarifas = r.idaDiamanteUyu != null
+          ? '<span class="bus-co__fare">Semicama ' + precio(r.idaUyu) + '</span><span class="bus-co__fare">Diamante ' + precio(r.idaDiamanteUyu) + '</span>'
+          : '<span class="bus-co__fare">Tarifa ida ' + precio(r.idaUyu) + '</span>';
+        return '<li class="bus-co__row"><div class="bus-co__route"><b>' + esc(r.origen) + ' &rarr; ' + esc(r.destino) + '</b><span>' + esc(r.dias) + '</span></div>'
+          + '<div class="bus-co__time"><b>' + esc(r.salida) + '</b> &rarr; <b>' + esc(r.llegada) + '</b>' + sigDia + '</div>'
+          + '<div class="bus-co__fares">' + tarifas + '</div></li>';
+      }).join('');
+      var aviso = vencido
+        ? 'Horario publicado hasta el ' + co.vigencia.split('-').reverse().join('/') + ': confirmalo con la empresa.'
+        : 'Tarifas por tramo de ida. Confirmalas con la empresa antes de comprar.';
+      return '<article class="bus-co"><header class="bus-co__head"><span class="bus-co__logo" aria-hidden="true">' + esc(co.empresa) + '</span><h4>' + esc(co.empresa) + '</h4></header>'
+        + '<ul class="bus-co__list">' + filas + '</ul><p class="bus-co__note">' + esc(aviso) + '</p></article>';
+    }).join('');
+    return cards ? '<div class="bus-companies">' + cards + '</div>' : '';
+  }
+
   function transportFlow(meta, budget, mode) {
     var selectedMode = typeof mode === 'string' ? mode : mode ? 'auto' : 'flight';
     if (selectedMode === 'auto') return roadtripCalculator(meta);
-    if (selectedMode === 'bus') return '<h2 class="block-title">Llegada a destino (Bus)</h2>' + '<h3 class="block-title">Bus semicama / cama</h3>' + '<p class="sub block-sub">Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p>' + '<section class="transport-options bus-itinerary" data-budget-anchor="bus"><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p></section>';
+    if (selectedMode === 'bus') return '<h2 class="block-title">Llegada a destino (Bus)</h2>' + '<h3 class="block-title">Bus semicama / cama</h3>' + '<p class="sub block-sub">Estimación de pasaje ida y vuelta desde ' + esc(originCityName(meta.origin || S.origin)) + ' hasta ' + esc(meta.dest.name) + '.</p>' + '<section class="transport-options bus-itinerary" data-budget-anchor="bus"><p>El presupuesto incluye el pasaje terrestre; no requiere transfer de aeropuerto.</p><p class="cost-note">La tarifa de bus es estimada y debe confirmarse con el operador para las fechas elegidas.</p>' + busServicesMarkup(meta) + '</section>';
     /* El h2 agrupa y los h3 nombran cada bloque; los tres van FUERA de las cajas.
        Antes el h2 de vuelos y el h2 del transfer eran hermanos sueltos, cada uno
        con su caja, y el de vuelo estaba duplicado: uno en el section de afuera y
