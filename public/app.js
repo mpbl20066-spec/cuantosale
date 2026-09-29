@@ -5033,7 +5033,7 @@
     // voucher nunca muestre un número distinto al resto de la pantalla.
     // Los dos tramos, para que el WhatsApp al operador y el total del voucher
     // cuenten lo mismo que el total de la pantalla.
-    var transferTotal = trasladoSumado(detailState);
+    var transferTotal = detailState.transportMode === 'auto' ? 0 : trasladoSumado(detailState);
     var nights = Math.max(1, Number(detailState.meta.nights) || 1);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var dailyCosts = getDestinationDailyCosts(detailState.meta.dest && detailState.meta.dest.key);
@@ -5044,6 +5044,10 @@
     var flightTotal = vueloSumado(detailState);
     // Con un medio terrestre el resumen habla del bus y no exige vuelo.
     var busMode = detailState.transportMode === 'bus';
+    // Con auto propio el costo (combustible y peajes) es el transporte principal:
+    // no es un traslado ni deja lugar para un vuelo sin elegir.
+    var autoMode = detailState.transportMode === 'auto';
+    var autoTotal = autoMode ? Math.round(Number(detailState.auto) || 0) : 0;
     var busTotal = busSumado(detailState);
     var selectedTours = detailState.selectedTours || [];
     var toursTotal = Number(detailState.toursTotal) || 0;
@@ -5052,7 +5056,7 @@
     var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal + toursTotal);
     var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
-    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + (busMode ? '🚌 Bus: ' + busResumenCorto(detailState.meta) + ' · ' + money(busTotal) : '✈️ Vuelo: ' + vueloNombreCorto(flightSummary) + ' · ' + money(flightTotal)) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + (busMode ? '' : '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n') + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
+    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + (autoMode ? '🚗 Auto: ' + roadtripMeta() + ' · ' + money(autoTotal) : busMode ? '🚌 Bus: ' + busResumenCorto(detailState.meta) + ' · ' + money(busTotal) : '✈️ Vuelo: ' + vueloNombreCorto(flightSummary) + ' · ' + money(flightTotal)) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + (busMode || autoMode ? '' : '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n') + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     /* El itinerario que se manda por WhatsApp lleva el link del grupo, cuando ya
        existe. Es el mismo texto que ve la persona, asi que la otra recibe el
        viaje entero y el lugar donde repartirse, en un solo mensaje y sin que
@@ -5467,14 +5471,14 @@
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
-      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>' + (busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
+      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
       ventajasMarkup +
 
       '<ul class="voucher-list">' +
-      (busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>')) +
+      (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>')) +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, !hotelElegido() ? '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="alojamiento">Elegir hotel</button>' : hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
-      (busMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
+      (busMode || autoMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
       itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, reservarCta(selectedTours.length, 'Reservar las actividades', 'tours')) +
       '</ul>' +
       /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
