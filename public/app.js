@@ -9,6 +9,7 @@
     ['local', 'Transporte local', '--c5'],
     ['traslados', 'Traslados', '--c4'],
     ['auto', 'Auto / Roadtrip', '--c4'],
+    ['alquiler', 'Alquiler de auto', '--c7'],
     ['tours', 'Tours y actividades', '--c6']
   ];
   // Fotos reales de cada destino (Wikimedia Commons, licencia libre) para la cabecera de las tarjetas.
@@ -1479,6 +1480,24 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       if (document.querySelector('.currency-menu:not([hidden])')) { cerrarMenusMoneda(); return; }
+      /* Escape cierra el modal abierto, si hay uno. Antes el handler solo
+         miraba el menu de moneda y hacia return, asi que ningun modal se
+         cerraba con Escape, y los cinco se anuncian como
+         aria-modal="true", que es una promesa de que Escape los cierra.
+
+         Importa mas que accesibilidad: con un modal abierto la pagina no
+         scrollea, y el unico salida es el boton X. Si ese X no se alcanza
+         con el dedo, la pantalla queda muerta sin scroll y sin salida.
+
+         Se le hace click al propio boton del modal, para que corra el mismo
+         codigo que el X y no quede un segundo camino que se desincronice. */
+      var abierto = document.querySelector('.booking-modal:not([hidden])');
+      if (abierto) {
+        var cerrar = abierto.querySelector('[data-close-auth],[data-close-trips],[data-close-booking]');
+        if (cerrar) cerrar.click();
+        else { abierto.hidden = true; abierto.setAttribute('aria-hidden', 'true'); abierto.innerHTML = ''; }
+      }
+      return;
       return;
     }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -2683,6 +2702,7 @@
   function openTourDetailModal(button) {
     var modal = $('#booking-modal');
     if (!modal || !button) return;
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span><h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2><p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p><div class="tour-detail-modal__copy"><p>' + esc(button.getAttribute('data-tour-detail')) + '</p></div><p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
@@ -3162,6 +3182,7 @@
       closeBookingForm();
       return;
     }
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title">' +
       '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<div class="checkout-layout">' +
@@ -3706,14 +3727,24 @@
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
     var roadtrip = state.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas', 'tours'] : state.transportMode === 'bus' ? ['bus', 'alojamiento', 'comidas', 'local', 'tours'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
+    // El alquiler es un opt-in INDEPENDIENTE del medio de transporte: se puede
+    // volar y arrancar en el aeropuerto de llegada, o tomar el bus y alquilar en
+    // destino. Por eso va en las tres listas de categorias y no solo en una.
+    //
+    // Ojo con el cruce con el roadtrip: `auto` es el combustible y los peajes de
+    // un auto PROPIO que se lleva de Montevideo, y `alquiler` es la tarifa de un
+    // auto alquilado EN DESTINO. Son cosas distintas y pueden convivir: alquilas
+    // en Brasil y ademas pagaste los peajes de tu propio auto para llegar. No se
+    // pisan porque la app no ofrece el alquiler transfronterizo.
+    var categories = roadtrip ? ['auto', 'alquiler', 'alojamiento', 'comidas', 'tours'] : state.transportMode === 'bus' ? ['bus', 'alquiler', 'alojamiento', 'comidas', 'local', 'tours'] : ['pasajes', 'alquiler', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
     var transferValue = getSelectedTransferAmount(state);
     var trasladoValue = (Number(state.parts && state.parts.traslados) || 0) + transferValue;
+    var alquilerValue = Number(state.alquiler) || 0;
     var total = roadtrip
-      ? Math.round((Number(state.auto) || 0) + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
+      ? Math.round((Number(state.auto) || 0) + alquilerValue + (Number(state.hotel) || 0) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
       : Math.round((state.transportMode === 'bus' ? (Number(state.parts && state.parts.bus) || 0) : (Number(state.flight) || 0)) + (Number(state.hotel) || 0) +
         (Number(state.parts.comidas) || 0) + (Number(state.parts.local) || 0) +
-        trasladoValue + (Number(state.toursTotal) || 0));
+        trasladoValue + alquilerValue + (Number(state.toursTotal) || 0));
     var entries = categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return null;
       var info = CATS.filter(function (c) { return c[0] === category; })[0] || ['', category, '--c1'];
@@ -3722,6 +3753,7 @@
         : category === 'alojamiento' ? (Number(state.hotel) || 0)
         : category === 'traslados' ? trasladoValue
         : category === 'auto' ? (Number(state.auto) || 0)
+        : category === 'alquiler' ? alquilerValue
         : category === 'tours' ? (Number(state.toursTotal) || 0)
         : (Number(state.parts && state.parts[category]) || 0);
       // Tours siempre se lista en "A dónde va tu plata", aunque todavía no se
@@ -4523,8 +4555,15 @@
        completar el checkout de la app. Ahi si hay un hecho, y el estado es
        "Reservado" a secas.
 
-     (Duffel aparece solo en comentarios viejos, explicando que ya no esta: no
-     hay integracion con Duffel y no se puede poner en la cara del usuario.) */
+     Duffel todavia NO esta integrado, asi que no se le puede poner el nombre
+     al usuario: no hay nada que reservar todavia ahi.
+
+     Cuando este, el estado no va a venir de la URL. La orden nace en
+     nuestro servidor y el pago se procesa aca; Duffel devuelve la
+     confirmacion oficial y el PNR, y el webhook --firmado, del lado del
+     servidor-- es lo que marca el rubro como reservado. Por eso el
+     "?vuelta=" que se agrega al link sigue siendo SOLO posicionamiento:
+     un valor inventado en la barra no produce ningun cambio de estado. */
   var CANAL_RESERVA = {
     pasajes: { canal: 'Aerolínea', externo: true },
     alojamiento: { canal: 'Booking', externo: true },
@@ -5119,7 +5158,7 @@
       if (flightSummary.selected && flightBookUrl) {
         vAccion = '<a class="voucher-step__btn is-link" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="pasajes">Ver en Google Flights</a>';
       } else if (flightSummary.selected) {
-        vAccion = confirma('pasajes', 'Google Flights');
+        vAccion = confirma('pasajes', 'laerol&iacute;nea');
       } else {
         vAccion = '<span class="voucher-step__hint">Elegilo en la secci&oacute;n de vuelos</span>';
       }
@@ -5166,6 +5205,7 @@
       + '</div>';
     var dividirEnlace = '<span class="voucher-hero__pp"><span>' + money(Math.round(totalGeneral / pax)) + ' por persona</span>'
       + '<button type="button" class="voucher-hero__split" data-split-trip>Ver cómo dividir este monto</button></span>';
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
@@ -5202,7 +5242,7 @@
        METABUSCADOR. El precio y el link son reales, pero la compra termina en
        la aerolinea o en una agencia. Booking si es intermediario real, y ahi
        el respaldo es cierto. */
-      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>Google Flights</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
+      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>laerol&iacute;nea</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
       /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
 
        Porque el pago del vuelo y del hotel pasa por un sitio del que la app
@@ -6281,7 +6321,7 @@
   function breakdownRows() {
     if (!detailState) return '';
     var roadtrip = detailState.transportMode === 'auto';
-    var categories = roadtrip ? ['auto', 'alojamiento', 'comidas'] : detailState.transportMode === 'bus' ? ['bus', 'alojamiento', 'comidas', 'local'] : ['pasajes', 'alojamiento', 'comidas', 'local', 'traslados'];
+    var categories = roadtrip ? ['auto', 'alquiler', 'alojamiento', 'comidas'] : detailState.transportMode === 'bus' ? ['bus', 'alquiler', 'alojamiento', 'comidas', 'local'] : ['pasajes', 'alquiler', 'alojamiento', 'comidas', 'local', 'traslados'];
     return categories.map(function (category) {
       if (category === 'auto' && !roadtrip) return '';
       var label = CATS.filter(function (c) { return c[0] === category; })[0][1];
@@ -6928,8 +6968,22 @@
     detailState.selectedOffer = Object.assign({}, completeOffer || {}, { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds });
     return detailState.selectedOffer;
   }
+  /* Un modal abierto a la vez, y cerrar uno se lleva a todos.
+
+     No es arbitrario: la hoja pone
+     html:has(.booking-modal:not([hidden])) body{overflow:hidden}, asi que con
+     CUALQUIER .booking-modal sin [hidden] la pagina entera deja de scrollear.
+     Los cinco de index.html comparten esa clase, con lo cual lo que apaga el
+     scroll no es el modal que se esta viendo sino cualquiera que quede
+     abierto. Si se abren dos y se cierra el de arriba, el de abajo sigue
+     apretando el scroll sin que haya nada a la vista que lo explique. */
+  function cerrarTodosLosModales() {
+    Array.prototype.forEach.call(document.querySelectorAll('.booking-modal'), function (m) {
+      m.hidden = true; m.setAttribute('aria-hidden', 'true'); m.innerHTML = '';
+    });
+  }
   function closeBookingForm() {
-    var modal = $('#booking-modal'); modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = '';
+    cerrarTodosLosModales();
   }
   // Pinta la marca de destino elegido sobre las cards que ya estan en el DOM.
   // Se usa al volver del detalle, donde la grilla no se vuelve a renderizar.
@@ -8314,13 +8368,13 @@
     return metadata.full_name || metadata.name || (user && user.email) || 'Mi cuenta';
   }
   function closeAccountModal(id) {
-    var modal = document.getElementById(id);
-    if (modal) { modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = ''; }
+    cerrarTodosLosModales();
   }
   function openAuthModal(message) {
     var modal = $('#auth-modal');
     if (!modal) return;
     if (authUser) { openTripsModal(); return; }
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><button type="button" class="booking-close" data-close-auth aria-label="Cerrar">×</button><span class="account-kicker">CuántoSale</span><h2 id="auth-title">Guardá tus viajes</h2><p class="booking-note">Creá una cuenta para conservar presupuestos e itinerarios en la nube.</p>' + (message ? '<p class="booking-error">' + esc(message) + '</p>' : '') + '<button type="button" class="oauth-button" data-google-auth>Continuar con Google</button><div class="account-divider"><span>o con tu email</span></div><form id="auth-form"><label>Correo electrónico<input required type="email" name="email" autocomplete="email"></label><label>Contraseña<input required minlength="6" type="password" name="password" autocomplete="current-password"></label><div class="account-form-actions"><button type="submit" class="confirm-booking" data-auth-action="signin">Iniciar sesión</button><button type="button" class="account-button account-button--secondary" data-auth-action="signup">Crear cuenta</button></div><p class="account-status" data-auth-status aria-live="polite"></p></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     var first = modal.querySelector('input'); if (first) first.focus();
@@ -8330,6 +8384,7 @@
     if (!modal) return;
     await authReadyPromise;
     if (!authUser) { pendingTripSave = false; openAuthModal('Iniciá sesión para ver tus viajes.'); return; }
+    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="trips-title"><button type="button" class="booking-close" data-close-trips aria-label="Cerrar">×</button><span class="account-kicker">Tu cuenta</span><h2 id="trips-title">Mis viajes</h2><p class="booking-note">Itinerarios guardados por ' + esc(authDisplayName(authUser)) + '.</p><div class="saved-trips" data-saved-trips><p class="account-status">Cargando tus viajes...</p></div><button type="button" class="account-button account-button--secondary" data-signout>Cerrar sesión</button></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     loadSavedTrips(modal);
