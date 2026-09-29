@@ -2802,24 +2802,51 @@
      lugar donde apareceria la contradiccion seria la pantalla de confirmacion,
      que es justo donde no puede haberla. */
   function checkoutTransferLine() {
-    if (!detailState || !detailState.meta || !detailState.transferType) return null;
+    if (!detailState || !detailState.meta) return null;
+    /* Los DOS tramos. Antes solo miraba transferType, asi que con llegada privada
+       y vuelta compartida el checkout mostraba una sola linea por el tramo de
+       llegada y el total no cuadraba con el de la pantalla: la pantalla cobraba
+       los dos y el pedido pedia uno. */
+    var tLlegada = transferTypeDe(detailState, 'llegada');
+    var tVuelta = transferTypeDe(detailState, 'vuelta');
+    if (!tLlegada && !tVuelta) return null;
     var precios = transferPreciosDe(detailState.meta);
-    var privado = detailState.transferType === 'private';
-    var unit = Number(privado ? precios.privado : precios.compartido) || 0;
+    var privadaL = tLlegada === 'private';
+    var privadaV = tVuelta === 'private';
+    /* El unitario es el de la modalidad mas cara de las elegidas, porque es el que
+       se muestra en grande. Con las dos iguales es el de esa modalidad; con una
+       privada y otra compartida, mostrar el compartido en grande y el privado solo
+       en el total es la lectura que hace pensar que el privado no esta. */
+    var unit = Math.max(
+      tLlegada ? (Number(privadaL ? precios.privado : precios.compartido) || 0) : 0,
+      tVuelta ? (Number(privadaV ? precios.privado : precios.compartido) || 0) : 0
+    );
     // Se mira el TOTAL y no el precio unitario, porque el estado puede quedar
     // desactualizado: si marcaste "compartido" en Rio y despues cambiaste el
-    // destino a uno sin van compartida, detailState.transferType sigue diciendo
-    // 'shared' y la tabla ya no tiene compartido. getSelectedTransferAmount()
-    // devuelve 0 en ese caso, y una linea de R$ 0 en el pedido es un pedido que
-    // el operador no puede tomar.
-    var total = getSelectedTransferAmount(detailState);
+    // destino a uno sin van compartida, el estado sigue diciendo 'shared' y la
+    // tabla ya no tiene compartido. trasladoDelViaje() devuelve 0 en ese caso, y
+    // una linea de R$ 0 en el pedido es un pedido que el operador no puede tomar.
+    var total = trasladoDelViaje(detailState);
     if (!(unit > 0) || !(total > 0)) return null;
+    var mismoTipo = tLlegada === tVuelta;
+    var titulo = !tVuelta
+      ? (privadaL ? 'Transfer privado' : 'Transfer compartido')
+      : !tLlegada
+        ? (privadaV ? 'Transfer privado de vuelta' : 'Transfer compartido de vuelta')
+        : privadaL && privadaV ? 'Transfer privado · ida y vuelta'
+          : mismoTipo ? (privadaL ? 'Transfer privado · ida y vuelta' : 'Transfer compartido · ida y vuelta')
+            : 'Transfer mixto · ida ' + (privadaL ? 'privada' : 'compartida') + ', vuelta ' + (privadaV ? 'privada' : 'compartida');
     return {
-      title: privado ? 'Transfer privado' : 'Transfer compartido',
-      detail: privado ? 'Vehículo exclusivo para los que viajan' : 'Compartís el vehículo con otros pasajeros',
+      title: titulo,
+      detail: mismoTipo
+        ? (privadaL ? 'Vehículo exclusivo para los que viajan' : 'Compartís el vehículo con otros pasajeros')
+        : 'Un tramo privado y el otro compartido',
       price: unit,
       total: total,
-      porPersona: !privado,
+      // Solo se puede dividir por persona si NINGUN tramo es privado: el privado
+      // se cobra por vehiculo. Con un privado al lado, "X por persona" seria una
+      // division que no existe.
+      porPersona: !privadaL && !privadaV,
       pax: Math.max(1, Number(detailState.meta.pax) || 1)
     };
   }
@@ -5227,6 +5254,50 @@
     }
     return tramos;
   }
+  /* ¿Este tramo conviene con Uber en vez de con transfer?
+
+     El criterio son DOS condiciones, no una sola distancia. La distancia sola no
+     alcanza: un transfer de 12 km cuesta lo mismo que uno de 20 (el piso de la
+     tabla), asi que el numero de km no explica por que conviene una cosa u otra.
+     Lo que decide es el PRECIO, y la distancia es la que dice si un transfer
+     corto tiene sentido o si ya es un viaje en si mismo.
+
+     Los dos numeros salen de data/transfer-precios.json y no estan puestos a ojo:
+     `appRideUsd` es el precio de un Uber/99 verificado para la ruta (5 destinos lo
+     tienen) y el resto cae en el modelo de distancia, con el mismo piso de US$ 20
+     que la tabla. Con los 5 destinos que sí tienen precio de app verificado, el
+     corte cae limpio y no hay zona gris:
+
+       ssa   24 km   app US$ 11   vs compartido US$ 20  -> Uber gana
+       igu   14 km   app US$  8   vs compartido US$ 20  -> Uber gana
+       poa    9 km   app US$  7   vs compartido US$ 20  -> Uber gana
+       bcm   96 km   app US$ 42   vs compartido US$ 25  -> transfer gana
+       gram 109 km   app US$ 43   vs compartido US$ 25  -> transfer gana
+
+     O sea que el precio ya separa los casos sin necesitar el km: donde el Uber
+     gana es porque es un piso de app contra un piso de transfer, y donde pierde
+     es porque la distancia sube el precio. El km se consulta igual, porque en un
+     destino sin precio de app verificado es la unica señal disponible.
+
+     El margen es deliberado: 12 km y 25 km, de los dos lados. Un tramo de 20 km
+     queda en "cercano" y uno de 30 en "transfer", que es donde不能让 el umbral
+     depender de un decimal. */
+  var UMBRAL_CERCANO_KM = 25;
+  var UMBRAL_LEJOS_KM = 12;
+  function tramoEsCercano(precios, pax) {
+    if (!precios || precios.soloPrivado) return false;
+    var km = Number(precios.km) || 0;
+    if (km <= 0) return false;
+    var app = Number(precios.appRideUsd) || 0;
+    var compartido = Number(precios.compartido) || 0;
+    // Con precio de app verificado manda el precio, que es el dato real.
+    if (app > 0) return app < compartido;
+    // Sin el, la distancia con un margen a cada lado. Un tramo de menos de 12 km
+    // es un traslado de barrio y uno de mas de 25 km ya es un viaje: en el medio
+    // no hay dato para decidir y se ofrece el transfer, que es lo seguro.
+    return km <= UMBRAL_CERCANO_KM;
+  }
+
   function transferCard(meta) {
     var selected = detailState && detailState.transferType || '';
     // Los precios salen de la tabla por destino (public/transfer-precios.js, que
@@ -5325,7 +5396,17 @@
         return cabeza + '<p class="transfer-leg__auto">' + (tramo.ferry ? 'Un pasaje de ferry por persona' : 'Un transfer por persona entre las paradas') + ': <b>' + money(tramo.amount) + '</b>. Se coordina con el operador al reservar.</p></div>';
       }
       if (tramo.key === 'llegada' || tramo.key === 'vuelta') {
-        return cabeza + '<div class="transfer-choice-grid">' + cardsDe(tramo.key, tramo.selected) + '</div>' +
+        /* El tramo corto se dice ANTES de las cards, no despues. Es una
+           recomendacion sobre si conviene o no contratar un transfer, asi que si
+           va debajo se lee como el pie de un formulario que la persona ya dio por
+           hired. Con el transfer por defecto de este modulo, sin este bloque
+           estaria ofreciendo un traslado corto sin decir que no hace falta. */
+        var cercano = tramoEsCercano(t, paxT);
+        var consejo = cercano
+          ? '<p class="transfer-advice"><span class="transfer-advice__ico" aria-hidden="true">💡</span><b>Para este tramo estás cerquísima.</b> Te conviene más tomarte un Uber o taxi local ' +
+            (tramo.key === 'vuelta' ? 'para volver al aeropuerto' : 'al llegar') + ': sale menos que el transfer y no tenés que reservarlo. Si igual preferís que te recojan, elegí una opción abajo.</p>'
+          : '';
+        return cabeza + consejo + '<div class="transfer-choice-grid">' + cardsDe(tramo.key, tramo.selected) + '</div>' +
           (tramo.selected === 'shared' ? '<p class="transfer-choice-note">Incluido para tu comodidad. Si preferís otro, podés cambiar a privado.</p>' : '') +
           '</div>';
       }
@@ -7025,15 +7106,23 @@
        quedaria una card marcada con un precio de 0. */
     if (selectedTransportMode === 'flight' && detailState) {
       var preciosTransfer = transferPreciosDe(data.meta);
-      if (!preciosTransfer.soloPrivado && preciosTransfer.compartido > 0) {
-        // Los DOS tramos arrancan en compartido. Es lo que hace que el total los
-        // incluya sin que la persona tenga que decidir nada, y es coherente con
-        // la nota "Incluido para tu comodidad" de cada tarjeta.
-        //
-        // ESTO DUPLICA EL COSTO DEL TRANSFER: la tabla es "solo ida" y ahora se
-        // cobran las dos. data/transfer-precios.json decia, en _meta, que la app
-        // solo sumaba el de llegada; esa decision quedo escrita y ahora es al
-        // reves. Es una decision de negocio, no un descuido.
+      if (!preciosTransfer.soloPrivado && preciosTransfer.compartido > 0 && !tramoEsCercano(preciosTransfer, pax)) {
+        /* Los DOS tramos arrancan en compartido. Es lo que hace que el total los
+           incluya sin que la persona tenga que decidir nada, y es coherente con
+           la nota "Incluido para tu comodidad" de cada tarjeta.
+
+           EXCEPTO en un tramo corto. Si el sistema le esta diciendo "acá te
+           conviene un Uber", dejarle preseleccionado un transfer seria
+           contradecirse en la misma pantalla: la card amarilla y el consejo
+           "--Para este tramo estás cerquísima--" diciendo cosas opuestas. En ese
+           caso no se preselecciona nada y el total no suma el traslado, que es
+           lo que el consejo invite a hacer.
+
+           ESTO DUPLICA EL COSTO DEL TRANSFER cuando aplica: la tabla es "solo
+           ida" y ahora se cobran las dos. data/transfer-precios.json decia, en
+           _meta, que la app solo sumaba el de llegada; esa decision quedo
+           escrita y ahora es al reves. Es una decision de negocio, no un
+           descuido. */
         detailState.transferType = 'shared';
         detailState.transferTypeVuelta = 'shared';
         detailState.transfer = trasladoDelViaje(detailState);

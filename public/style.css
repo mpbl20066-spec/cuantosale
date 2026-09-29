@@ -1,4 +1,4 @@
-/* version: 127
+/* version: 128
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1087,6 +1087,14 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    mismo --ink2 del resto del texto secundario: explica, no vende, y si tuviera
    mas peso competiria con el precio. */
 .transfer-choice-note{margin:10px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
+/* El consejo de tramo corto. Va arriba de las cards porque es una
+   recomendacion sobre si conviene contratar un transfer, no el pie de un
+   formulario. Con --cel-soft de fondo para que se lea como una nota y no como
+   otra card mas, y el "cerquísima" en --ink para que la frase que decide sea la
+   primera que se lee. */
+.transfer-advice{display:flex;align-items:flex-start;gap:9px;margin:0 0 12px;padding:11px 13px;border-radius:12px;background:var(--cel-soft);color:var(--ink2);font-size:12.5px;line-height:1.5}
+.transfer-advice b{color:var(--ink);font-weight:700}
+.transfer-advice__ico{flex:0 0 auto;font-size:14px;line-height:1.35}
 /* Elegido se marca igual que las otras cuatro card elegibles de la app
    (hoteles, tours, comidas, presupuesto diario), con los mismos tokens.
 

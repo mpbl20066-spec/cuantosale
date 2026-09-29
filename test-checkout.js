@@ -65,6 +65,22 @@ const stubs = {
     }
     return 0;
   },
+  // El tipo de un tramo. `leg` ausente o distinto de 'vuelta' es la llegada.
+  transferTypeDe: (state, leg) => (leg === 'vuelta' ? state.transferTypeVuelta : state.transferType) || '',
+  // El total de los dos tramos, con la misma logica que trasladoDelViaje().
+  trasladoDelViaje: (state) => {
+    const pax = Math.max(1, Number(state.meta && state.meta.pax) || 1);
+    const uno = (leg) => {
+      const tipo = leg === 'vuelta' ? state.transferTypeVuelta : state.transferType;
+      if (tipo === 'private') return PRECIOS.privado;
+      if (tipo === 'shared') return PRECIOS.soloPrivado ? 0 : PRECIOS.compartido * pax;
+      return 0;
+    };
+    const llegada = uno('llegada');
+    const vuelta = uno('vuelta');
+    if (llegada > 0 || vuelta > 0) return llegada + vuelta;
+    return Number(state.baseTraslados) || 0;
+  },
   // selected:true es lo que decide si el mensaje de WhatsApp dice el vuelo o
   // "Sin seleccionar". El stub lo trae desde que getSelectedFlightSummary()
   // expone el flag; sin él, vueloNombreCorto() toma el camino de "no hay vuelo"
@@ -98,7 +114,12 @@ const cuerpo = ['checkoutTours', 'checkoutTransferLine', 'checkoutPedido', 'chec
 const deps =
   'function money(n){ var v=Number(n); return "R$ " + (Number.isFinite(v)?v:0).toFixed(2).replace(".", ","); }\n' +
   'function esc(s){ return String(s == null ? "" : s); }\n' +
+  // checkoutTransferLine() ahora lee los DOS tramos (transferType y
+  // transferTypeVuelta) y pide el total a trasladoDelViaje(). Los dos stubs van
+  // con la misma logica que las funciones reales, o el test estaria probando un
+  // camino que la app ya no tiene.
   'var transferPreciosDe=stubs.transferPreciosDe, getSelectedTransferAmount=stubs.getSelectedTransferAmount;\n' +
+  'var transferTypeDe=stubs.transferTypeDe, trasladoDelViaje=stubs.trasladoDelViaje;\n' +
   'getSelectedFlightSummary=stubs.getSelectedFlightSummary, findSelectedHotelLabel=stubs.findSelectedHotelLabel,\n' +
   'originCityName=stubs.originCityName, storyDateRange=stubs.storyDateRange, categoryIcon=stubs.categoryIcon;\n' +
   'var CHECKOUT_PAYMENTS=stubs.CHECKOUT_PAYMENTS, CHECKOUT_TITLES=stubs.CHECKOUT_TITLES,\n' +
@@ -206,8 +227,31 @@ prueba('el privado no dice "por persona" en el whatsapp', () => {
 
 /* --- 4. Nada elegido --- */
 estado.transferType = '';
+estado.transferTypeVuelta = '';
 prueba('sin nada elegido no hay mensaje', () => assert.ok(fns.checkoutWhatsappUrl() === null));
 prueba('sin nada elegido count es 0', () => assert.strictEqual(fns.checkoutTotals().count, 0));
+
+/* --- 4b. Los dos tramos, en modalidades distintas ---
+   El bug que esto caza: checkoutTransferLine() miraba solo transferType, asi que
+   con llegada compartida y vuelta privada el checkout pedia 35 x 2 = 70 cuando
+   la pantalla cobraba 70 + 118 = 188. El pedido no cuadraba con el total de
+   arriba, que es justo donde no puede haber esa contradiccion. */
+PRECIOS.soloPrivado = false;
+estado.transferType = 'shared';
+estado.transferTypeVuelta = 'private';
+r = ver('llegada compartida + vuelta privada');
+prueba('los dos tramos suman al total del pedido', () => assert.strictEqual(r.t.total, 35 * 2 + 118));
+prueba('la linea nombra las dos modalidades', () => {
+  const b = fns.checkoutTransferBlock();
+  assert.ok(/mixto/i.test(b), 'el titulo no dice que es mixto: ' + b.replace(/<[^>]+>/g, ' ').slice(0, 120));
+  assert.ok(/privada/.test(b) && /compartida/.test(b), 'no nombra las dos');
+});
+prueba('con un privado al lado NO dice "por persona"', () => {
+  const b = fns.checkoutTransferBlock();
+  assert.ok(!/por persona/.test(b), 'no se puede dividir por persona con un privado');
+});
+/* Volver a un solo tramo para los casos que siguen. */
+estado.transferTypeVuelta = '';
 
 /* --- 5. Destino sin van compartida --- */
 estado.transferType = 'shared';
