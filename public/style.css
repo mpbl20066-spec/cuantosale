@@ -400,7 +400,12 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    Se dibuja arriba de la línea (sup) y con el mismo tono que la cifra, para que
    se lea como parte del número y no como una firma al pie. */
 .opt__est{margin-left:2px;font-size:.72em;line-height:0;vertical-align:super;color:var(--ink2);font-weight:700}
-.opt__nota{display:flex;align-items:baseline;gap:0;margin:10px 0 2px;padding-top:9px;border-top:1px solid var(--line);color:var(--ink2);font-size:12.5px;line-height:1.45}
+/* La nota es una frase, no un conjunto de piezas: "* Precio estimado. Avanzá a
+   Ver propuesta para ver los precios reales." Con display:flex cada trozo de
+   texto se volvía un ítem de flex y la frase se repartía en columnas ("Ver" /
+   "propuesta" una al lado de la otra), con huecos entre palabras. Tiene que
+   fluir como un párrafo; el asterisco ya se alinea solo con vertical-align. */
+.opt__nota{margin:10px 0 2px;padding-top:9px;border-top:1px solid var(--line);color:var(--ink2);font-size:12.5px;line-height:1.45}
 .opt__nota b{color:var(--ink);font-weight:700}
 .propuesta-seleccionada{border:2px solid var(--card-sel-border)!important;background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
 /* El movimiento (elevación, flecha, chevron) sólo si el sistema no pide menos
