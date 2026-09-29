@@ -40,6 +40,12 @@ const flightProviders = require('./lib/providers');
 // reservas generen comision. Es independiente de los precios: la API de
 // precios (RapidAPI o partner) y la de afiliados son dos cuentas distintas.
 const travelpayouts = require('./lib/providers/travelpayouts');
+// Catalogo de tours. Mismo caso que la guia: son precios vendibles, asi que
+// salen de la tabla de Supabase y no de un archivo publico. Si la base no
+// responde, esta capa cae a public/tours.generated.js, que es la copia local
+// commiteada: sin ella, un problema de Supabase sacaria la seccion de tours de
+// todas las propuestas.
+const tours = require('./lib/tours');
 
 /*
  * Tasas de cambio para el selector de moneda.
@@ -1388,13 +1394,40 @@ async function cotizar(req, res, url) {
   const hotelExtra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: subcategory };
   if (Number.isFinite(hotelBudgetPerNight) && hotelBudgetPerNight >= 0) hotelExtra.hotelBudgetPerNight = hotelBudgetPerNight;
   const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
+  /* Los tours se piden aca y NO en /api/hoteles, que es el otro candidato
+     natural: /api/hoteles se llama DESPUES, para pintar los hoteles, y la
+     seccion de tours se dibuja junto con el resto del detalle. Si esperaran a
+     esa segunda respuesta, la seccion apareceria un instante despues del resto
+     del detalle, que es la sensacion de "algo todavia esta cargando" que la
+     pagina no quiere.
+   */
+  const [toursList, toursSecond] = await Promise.all([
+    tours.destino(v.S.dest),
+    secondKey ? tours.destino(secondKey) : Promise.resolve([])
+  ]);
   sendJson(res, 200, Object.assign({
     meta: {
       mode: liveQuoteApplied ? 'live' : 'estimated',
        dest: { key: v.S.dest, name: model.DEST[v.S.dest].name, region: model.DEST[v.S.dest].region || '', country: model.DEST[v.S.dest].country || 'Brasil' }, origin: origin, subcategory: subcategory, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio', multiStay: multiStay,
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
-      hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString()
+      hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString(),
+      /* Los tours del destino, ya con el precio convertido a USD.
+         *
+         * Van en el meta de /api/cotizar y no en un endpoint aparte a proposito:
+         * esta respuesta ya se pide una vez por propuesta, asi que no suma
+         * ninguna request ni latency nueva. Un /api/tours seria un request mas
+         * que la pagina tiene que esperar antes de pintar las cards.
+         *
+         * Con segundo destino van los suyos en toursSecond, con la misma logica
+         * que los hoteles: sin ese campo el front no podria distinguir "no hay
+         * tours ahi" de "no se consulto". */
+      tours: toursList,
+      toursSecond: toursSecond,
+      /* De donde salieron: 'supabase' si se leyo la tabla, 'json' si cayo al
+         respaldo local. Sirve para diagnosticar desde la consola si la tabla
+         esta bien cargada, sin tener que abrir Supabase. */
+      toursSource: tours.estado()
     },
     localTransport: localTransport
   }, result));
@@ -2086,6 +2119,21 @@ function handleRequest(req, res) {
     if (/^\/waitlist\/?$/i.test(url.pathname)) {
       try { serveStatic(req, res, '/waitlist.html'); } catch (e) { res.writeHead(400); res.end(); }
       return;
+    }
+    /* El panel de edicion del catalogo de tours.
+     *
+     * Se declara como ruta propia y no cae en el serveStatic del final por
+     * dos motivos. El primero es que el candado de prelanzamiento esta en
+     * serveStatic: si /tours no pasara por aca, serviria el panel sin pedir
+     * usuario y contrasena, o sea abierto a cualquiera que pruebe la ruta. El
+     * segundo es que el panel tiene que quedar fuera del service worker y del
+     * precache: es una pantalla de la agencia, no parte de la app.
+     *
+     * El permiso real no es este: el panel pide sesion de Supabase y las
+     * funciones tours_guardar() comprueban es_agencia() dentro de la base. Esto
+     * solo evita que la pagina se vea en una maquina que no es la del equipo. */
+    if (/^\/tours\/?$/i.test(url.pathname)) {
+      return serveStatic(req, res, '/tours.html');
     }
     // La raíz del dominio es la landing de waitlist mientras dure el
     // prelanzamiento; la app real de cotización queda corrida a /app, sin

@@ -255,20 +255,23 @@ function haversineKm(a, b) {
     assert.match(app, /window\.CS_TOURS = toursFor/, 'falta exponer CS_TOURS para la guia');
   });
 
-  await t('fotos de tours: toda clave de SUBJECTS coincide con un tour de app.js', function () {
+  await t('fotos de tours: toda clave de SUBJECTS coincide con un tour del catalogo', function () {
     // buscar-fotos-tours.js cruza sus claves "destino#Titulo" contra los
-    // tour() de app.js con un indexOf literal. Si el titulo no calza al
+    // tours con un indexOf literal. Si el titulo no calza al
     // caracter, el cruce no falla: la clave simplemente no aparece y ese tour
     // se queda sin foto sin error ni aviso. Por eso 15 claves estaban rotas y
     // nadie lo notaba: 3 por acentos que quedaron en latin1 ("JaponÃªs" en vez
     // de "Japonês") y 12 porque el titulo se escribio en Portuguese ("em", "e",
     // "os") mientras el de app.js esta en Castellano ("en", "y", "los").
-    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
-    const tours = new Set();
-    for (const m of app.matchAll(/tour\(\['([a-z]+)'\],\s*'[^']*',\s*'((?:[^'\\]|\\.)*)'/g)) {
-      tours.add(m[1] + '#' + m[2]);
-    }
-    assert.ok(tours.size > 100, 'no se pudieron leer los tour() de app.js: ' + tours.size);
+    //
+    // El catalogo paso de estar escrito en app.js a estar GENERADO en
+    // public/tours.generated.js, asi que la lista sale de ahi. Si esta prueba
+    // se queda leyendo app.js, el cruce se hace contra un archivo que ya no
+    // tiene el catalogo y pasa con 0 tours, que es justo el fallo silencioso
+    // que la prueba existe para detectar.
+    const catalogo = require(path.join(__dirname, 'public', 'tours.generated.js'));
+    assert.ok(catalogo.length > 100, 'tours.generated.js tiene ' + catalogo.length + ' entradas');
+    const tours = new Set(catalogo.map(function (x) { return x.destinations[0] + '#' + x.title; }));
 
     const script = fs.readFileSync(path.join(__dirname, 'buscar-fotos-tours.js'), 'utf8');
     const bloque = script.slice(script.indexOf('const SUBJECTS'), script.indexOf('const UA'));
@@ -1668,7 +1671,24 @@ function haversineKm(a, b) {
     assert.ok(bad2.status === 403 || bad2.status === 404);
     const appScript = await get(port, '/app.js');
     assert.strictEqual(appScript.status, 200);
-    ['Cristo Redentor', 'Isla de Campeche', 'Piscinas Naturales', 'Playa en Playa', 'Tour del Vino', 'data-tour-choice', 'data-tour-detail-open', 'Los imperdibles de', 'Créditos de las fotos'].forEach(function (copy) { assert.ok(appScript.body.includes(copy), 'Falta contenido de tours: ' + copy); });
+    /* El contenido de los tours se partio en dos archivos: los DATOS viven en
+       public/tours.generated.js (generado desde data/tours.json, que a su vez
+       viene de la Sheet de Drive) y el CODIGO que los dibuja sigue en app.js.
+
+       Por eso se piden los dos. Pedir los textos del catalogo en app.js ya no
+       tiene sentido: no los tiene, y el fallo que encuentra seria "el archivo
+       se sirvio vacio", no "faltan tours". Y al reves: si app.js se sirviera
+       bien pero el generado no, la seccion de tours sale vacia en silencio. */
+    const toursScript = await get(port, '/tours.generated.js');
+    assert.strictEqual(toursScript.status, 200);
+    ['Cristo Redentor', 'Isla de Campeche', 'Piscinas Naturales', 'Playa en Playa', 'Tour del Vino'].forEach(function (copy) { assert.ok(toursScript.body.includes(copy), 'Falta contenido de tours en tours.generated.js: ' + copy); });
+    ['data-tour-choice', 'data-tour-detail-open', 'Los imperdibles de', 'Créditos de las fotos'].forEach(function (copy) { assert.ok(appScript.body.includes(copy), 'Falta la mecanica de tours en app.js: ' + copy); });
+    // app.js ya no debe llevar el catalogo: si vuelve a entrar, alguien copio
+    // tours a mano y quedan dos fuentes que se van a divergir. Se busca el
+    // helper tour(), no un titulo suelto: los titulos siguen apareciendo en
+    // app.js como claves de TOUR_PHOTOS, que es lo correcto.
+    assert.ok(!/tour\(\['[a-z]+'\]/.test(appScript.body),
+      'app.js volvio a traer el catalogo de tours escrito a mano. La unica fuente es data/tours.json');
     // La tarjeta entera es la zona sensible: el checkbox se estira sobre el
     // article y sólo el botón de detalle queda por encima.
     assert.ok(appScript.body.includes('class="local-tour__input"'), 'el checkbox del tour debe ser hijo directo de la tarjeta');

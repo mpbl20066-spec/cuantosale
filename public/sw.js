@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v95';
+var CACHE_NAME = 'cuantosale-shell-v96';
 var APP_SHELL = [
   // '/app' y NO '/': el servidor responde '/' con la landing de waitlist
   // (server.js: if (rel === '/') rel = '/waitlist.html') y la calculadora vive
@@ -29,6 +29,10 @@ var APP_SHELL = [
   // del transfer leen este global apenas carga app.js, y sin el precache la
   // primera apertura sin senal cae al piso de 20/60 en vez del precio real.
   '/transfer-precios.js',
+  // Catalogo de tours. Mismo motivo: app.js lee window.CS_TOURS_DATA al cargar
+  // y sin el precache la seccion de tours desaparece en la primera apertura sin
+  // senal, que es justo cuando se esta mirando el precio de un viaje.
+  '/tours.generated.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',

@@ -11,12 +11,6 @@
     ['auto', 'Auto / Roadtrip', '--c4'],
     ['tours', 'Tours y actividades', '--c6']
   ];
-  function tour(destinations, destination, title, description, price, details) {
-    return { destinations: destinations, destination: destination, title: title, description: description, price: price, details: details };
-  }
-  // Los precios recibidos para Florianópolis están en BRL; convertimos con la
-  // cotización de venta PTAX del 23/09/2026 (R$5,1414 por US$1) y sumamos US$5.
-  function florianopolisTourPrice(brl) { return Number((brl / 5.1414 + 5).toFixed(2)); }
   // Fotos reales de cada destino (Wikimedia Commons, licencia libre) para la cabecera de las tarjetas.
   var DEST_PHOTOS = {
     buz: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg/1920px-Praia_de_Manguinhos_-_Arma%C3%A7%C3%A3o_de_B%C3%BAzios_-_Rio_de_Janeiro_-_Brasil.jpg',
@@ -291,123 +285,7 @@
   function tourPhoto(destinationKey, tour) {
     return TOUR_PHOTOS[String(destinationKey).toLowerCase() + '#' + String(tour && tour.title || '')] || null;
   }
-  // Precios referenciales por persona en USD: incluyen margen operativo para venta manual.
-  // Se muestran como orientación y siempre deben confirmarse según fecha, cupo y operador.
-  var LOCAL_TOURS = [
-    tour(['rio'], 'Río de Janeiro, Brasil', 'Cristo Redentor y Pan de Azúcar', 'Excursión guiada de día completo con entradas prioritarias y transporte.', 65, 'Incluye traslado desde hoteles de la zona sur, guía bilingüe y entradas al Corcovado y Pan de Azúcar. Salida aproximada a las 7:30 y regreso por la tarde. Llevar calzado cómodo, protector solar y una campera liviana.'),
-    tour(['rio'], 'Río de Janeiro, Brasil', 'Full Day a Arraial do Cabo con paseo en barco', 'Playas de aguas cristalinas, navegación y parada para snorkel.', 55, 'Incluye traslado ida y vuelta desde Río, paseo en barco compartido y paradas en playas según las condiciones del mar. Jornada completa, normalmente de 6:30 a 19:00. Llevar traje de baño, toalla y efectivo para tasas locales o alimentación.'),
-    tour(['buz'], 'Búzios, Brasil', 'Paseo en barco por las playas de Búzios', 'Navegación por João Fernandes, Azeda, Azedinha y otras calas de la península.', 48, 'Incluye embarque en el centro de Búzios, navegación con paradas para nadar y bebida de cortesía. La salida suele durar entre 3 y 4 horas y depende del viento. Se recomienda reservar por la mañana y llevar protector solar.'),
-    tour(['buz'], 'Búzios, Brasil', 'City tour de Búzios en buggy', 'Recorrido panorámico por miradores, playas y la Rua das Pedras.', 42, 'Incluye buggy con conductor habilitado y recorrido por Orla Bardot, João Fernandes, Ferradura y Geribá. Duración aproximada de 4 horas, con horarios de mañana o tarde. Llevar ropa cómoda; el vehículo puede salpicar en algunos tramos.'),
-    tour(['arraial'], 'Arraial do Cabo, Brasil', 'Passeio de barco por las Prainhas y Gruta Azul', 'Navegación por el Caribe brasileño con paradas para baño y fotos.', 50, 'Incluye transporte local hasta el muelle, paseo en barco y paradas en Praia do Farol, Prainhas do Pontal do Atalaia y Gruta Azul cuando el mar lo permite. Duración aproximada de 4 horas. El acceso a algunas playas depende de la Capitanía y del clima.'),
-    tour(['arraial'], 'Arraial do Cabo, Brasil', 'Buceo de bautismo en aguas cristalinas', 'Experiencia introductoria con instructor y equipo completo.', 78, 'Incluye briefing, equipo de buceo, acompañamiento de instructor y una inmersión de iniciación. La actividad suele ocupar media jornada y requiere completar una ficha de salud. No se recomienda volar durante las horas posteriores al buceo.'),
-    tour(['cabo'], 'Cabo Frio, Brasil', 'City tour histórico y playas de Cabo Frio', 'Recorrido por Praia do Forte, Canal do Itajuru y el barrio da Passagem.', 38, 'Incluye traslado urbano, guía local y paradas para fotos en Praia do Forte, Forte São Mateus y el centro histórico. Duración aproximada de 4 horas, con salida por la mañana. Ideal para combinar con un día libre de playa.'),
-    tour(['cabo'], 'Cabo Frio, Brasil', 'Paseo en barco por el Canal y la Ilha do Japonês', 'Navegación corta con tiempo libre para baño y playa.', 35, 'Incluye embarcación compartida y parada en Ilha do Japonês, sujeta a la marea y al viento. Duración aproximada de 3 horas. Llevar agua, protector solar y efectivo para consumos en la playa.'),
-    tour(['ilha'], 'Ilha Grande, Brasil', 'Vuelta a la isla en lancha rápida', 'Día de playas y calas con agua transparente alrededor de Ilha Grande.', 72, 'Incluye traslado en lancha compartida y paradas en Lagoa Azul, Caxadaço, Dois Rios o Lopes Mendes según el itinerario. Jornada de 6 a 7 horas. Llevar calzado para rocas, protector solar y una bolsa impermeable.'),
-    tour(['ilha'], 'Ilha Grande, Brasil', 'Trilha guiada a Lopes Mendes', 'Caminata por la Mata Atlántica hasta una de las playas más famosas de la isla.', 35, 'Incluye guía local, orientación en la trilha y apoyo durante el recorrido. La caminata dura entre 4 y 5 horas con desniveles moderados. Usar calzado cerrado, llevar repelente, agua y algo para comer.'),
-    tour(['paraty'], 'Paraty, Brasil', 'Schooner por las islas de Paraty', 'Paseo en barco por bahías, playas y aguas tranquilas de la Costa Verde.', 58, 'Incluye navegación en escuna, paradas para nadar y tiempo libre en playas protegidas. La actividad dura aproximadamente 5 horas y sale del centro histórico. Llevar toalla, protector solar y dinero para consumos a bordo.'),
-    tour(['paraty'], 'Paraty, Brasil', 'City tour histórico y Cachoeira do Tobogã', 'Historia colonial, cachaçaria y naturaleza en un mismo recorrido.', 45, 'Incluye guía, caminata por el centro histórico, visita a una cachaçaria y traslado a la cascada del Tobogã. Duración aproximada de 5 horas. Usar calzado cómodo y tener en cuenta que la visita a la cascada depende de la lluvia.'),
-    tour(['ilhabela'], 'Ilhabela, Brasil', 'Jeep tour por playas y cascadas', 'Recorrido 4x4 por la costa y la Mata Atlántica de Ilhabela.', 62, 'Incluye vehículo 4x4, conductor-guía y paradas en Praia da Fome, Jabaquara y una cascada del parque. Duración de 6 horas aproximadamente. Llevar repelente, calzado que pueda mojarse y protección contra el sol.'),
-    tour(['ilhabela'], 'Ilhabela, Brasil', 'Paseo de barco a Castelhanos', 'Navegación y acceso a una de las playas más preservadas de la isla.', 82, 'Incluye transporte marítimo ida y vuelta, guía de navegación y tiempo libre en Castelhanos. Jornada completa, condicionada por oleaje y autorización del parque. Llevar comida ligera, agua y bolsa impermeable.'),
-    tour(['ubatuba'], 'Ubatuba, Brasil', 'Paseo en barco por las islas de Ubatuba', 'Paradas para baño y snorkel en playas de la costa norte.', 58, 'Incluye embarcación compartida y paradas en Ilha Anchieta, Praia do Flamengo u otras playas según el mar. Duración aproximada de 5 horas. El acceso al parque puede requerir tasa local; confirmar antes de embarcar.'),
-    tour(['ubatuba'], 'Ubatuba, Brasil', 'Trilha guiada a las cascadas de Ubatuba', 'Caminata de naturaleza con baño en piscinas naturales.', 40, 'Incluye guía local, orientación por senderos y entrada al área visitada cuando corresponde. Actividad de medio día con ritmo moderado. Llevar zapatillas con buen agarre, repelente, agua y traje de baño.'),
-    tour(['angra'], 'Angra dos Reis, Brasil', 'Ilhas Paradisíacas en lancha', 'Día de navegación por Ilha Grande, Lagoa Azul y playas de Angra.', 75, 'Incluye lancha compartida, marinero y paradas para nadar en islas y calas seleccionadas por el operador. Duración de 6 a 7 horas. La ruta puede variar por viento; llevar toalla, protector solar y efectivo.'),
-    tour(['angra'], 'Angra dos Reis, Brasil', 'Paseo de barco a Ilha de Cataguases', 'Experiencia de medio día con playas tranquilas y aguas transparentes.', 48, 'Incluye traslado al muelle y navegación con tiempo libre en Ilha de Cataguases y alrededores. Salidas por la mañana o la tarde según disponibilidad. No incluye almuerzo ni consumos personales.'),
-    tour(['sao'], 'São Paulo, Brasil', 'City tour por Avenida Paulista y Centro Histórico', 'Arquitectura, mercados, barrios culturales y principales postales de la ciudad.', 52, 'Incluye guía local y recorrido por Avenida Paulista, Liberdade, Mercado Municipal, Sé y Beco do Batman según el tiempo. Duración aproximada de 6 horas. Usar calzado cómodo y conservar pertenencias en zonas concurridas.'),
-    tour(['sao'], 'São Paulo, Brasil', 'Ruta gastronómica por Liberdade y Mercado Municipal', 'Degustación de sabores brasileños y asiáticos con acompañamiento local.', 68, 'Incluye guía gastronómico y degustaciones seleccionadas en Liberdade y el Mercado Municipal. Actividad de 4 horas, generalmente al mediodía. Avisar alergias o restricciones y confirmar qué consumos están incluidos.'),
-    tour(['bho'], 'Belo Horizonte, Brasil', 'Pampulha y arquitectura de Niemeyer', 'Circuito cultural por el conjunto de Pampulha y sus jardines.', 45, 'Incluye transporte, guía y paradas en la Igreja de São Francisco, Museo de Arte y Casa do Baile. Duración aproximada de 4 horas. Los museos pueden tener horarios especiales; confirmar calendario antes de reservar.'),
-    tour(['bho'], 'Belo Horizonte, Brasil', 'Experiencia de bares y comida mineira', 'Recorrido por mercados y bares tradicionales con sabores de Minas Gerais.', 62, 'Incluye acompañamiento local y degustaciones de porciones típicas en dos o tres paradas. Duración estimada de 3 horas, al final de la tarde. El menú puede variar y conviene informar restricciones alimentarias.'),
-    tour(['curitiba'], 'Curitiba, Brasil', 'City tour en la Linha Turismo', 'Jardín Botánico, Ópera de Arame, Museo Oscar Niemeyer y parques.', 42, 'Incluye orientación de guía y recorrido por los principales puntos de Curitiba, con paradas para fotos. Duración aproximada de 5 horas. El orden puede cambiar por tránsito y horarios de museos.'),
-    tour(['curitiba'], 'Curitiba, Brasil', 'Morretes en tren por la Serra do Mar', 'Viaje escénico en tren y almuerzo típico del litoral paranaense.', 98, 'Incluye traslado, tramo en tren panorámico sujeto a disponibilidad y orientación en Morretes. Jornada de día completo. El precio puede cambiar según la categoría del vagón; reservar con anticipación en fines de semana.'),
-    tour(['porto'], 'Porto de Galinhas, Brasil', 'Piscinas naturales de Porto de Galinhas', 'Paseo en jangada con snorkel en arrecifes durante la marea baja.', 42, 'Incluye jangada y tiempo de baño en las piscinas naturales cuando la marea lo permite. La salida se define por la tabla de mareas y dura entre 1,5 y 2 horas. Llevar protector solar y confirmar si se requiere tasa ambiental.'),
-    tour(['porto'], 'Porto de Galinhas, Brasil', 'Praia dos Carneiros y paseo en catamarán', 'Excursión de día completo a una de las playas más famosas de Pernambuco.', 65, 'Incluye traslado ida y vuelta, paseo en catamarán y paradas en bancos de arena o baño de arcilla cuando están disponibles. Salida temprano y regreso al atardecer. No siempre incluye almuerzo o bebidas.'),
-    tour(['mcz'], 'Maceió, Brasil', 'Maragogi y piscinas naturales desde Maceió', 'Full day de playa con catamarán y aguas cristalinas del litoral norte.', 58, 'Incluye traslado desde Maceió y orientación para el paseo opcional a las Galés, siempre sujeto a marea baja. Jornada de 10 a 12 horas. Llevar efectivo, protector solar y confirmar el suplemento de catamarán.'),
-    tour(['mcz'], 'Maceió, Brasil', 'São Miguel dos Milagres y Ruta Ecológica', 'Playas tranquilas, pueblos pesqueros y piscinas naturales del litoral alagoano.', 62, 'Incluye transporte ida y vuelta y paradas en playas de la Ruta Ecológica dos Milagres. Día completo con horarios sujetos a marea y clima. Se recomienda llevar agua, sombrero y reservar el paseo en jangada aparte si se desea.'),
-    tour(['maragogi'], 'Maragogi, Brasil', 'Catamarán a las Piscinas Naturales (Galés)', 'Navegación con snorkel en arrecifes durante la marea baja.', 38, 'Incluye catamarán y tiempo en las piscinas naturales, sujeto a la tabla de mareas y autorización local. El embarque suele ser temprano. Equipo de snorkel puede tener costo adicional; llevar protector solar y no tocar el coral.'),
-    tour(['maragogi'], 'Maragogi, Brasil', 'Buggy por playas del litoral norte', 'Recorrido por Antunes, Ponta do Mangue y playas cercanas.', 48, 'Incluye buggy con conductor y paradas panorámicas en playas del litoral norte. Duración aproximada de 4 horas. El paseo no incluye consumos en los beach clubs y puede cambiar por el estado de la arena.'),
-    tour(['nat'], 'Natal, Brasil', 'Dunas de Genipabu en buggy', 'Aventura entre dunas, lagunas y playas con opción de emoción o paseo tranquilo.', 62, 'Incluye buggy con conductor habilitado, visita a Genipabu y paradas en lagunas y miradores. Jornada de medio día o día completo. Elegir con o sin emoción al contratar y llevar gafas de sol, pañuelo y agua.'),
-    tour(['nat'], 'Natal, Brasil', 'Pipa desde Natal con Baía dos Golfinhos', 'Excursión costera con miradores, playas y tiempo libre en Pipa.', 58, 'Incluye traslado ida y vuelta desde Natal y paradas en Tibau do Sul, Cacimbinhas y Praia do Amor. Jornada de 10 horas aproximadamente. La observación de delfines depende del mar y de la naturaleza.'),
-    tour(['pip'], 'Praia do Pipa, Brasil', 'Paseo en Buggy de Playa en Playa', 'Chapadão, Baía dos Golfinhos, Sibaúma y miradores de Pipa.', 48, 'Incluye buggy con conductor y recorrido por playas y miradores del litoral. Duración aproximada de medio día, con salida por la mañana o la tarde. Llevar ropa cómoda, protector solar y agua; algunos accesos dependen de la marea.'),
-    tour(['pip'], 'Praia do Pipa, Brasil', 'Paseo en lancha para ver delfines', 'Navegación costera con baño y búsqueda responsable de fauna marina.', 42, 'Incluye lancha compartida, guía y navegación frente a las playas de Pipa. La actividad dura entre 2 y 3 horas y la fauna no puede garantizarse. Llevar traje de baño, sombrero y seguir las indicaciones del tripulante.'),
-    tour(['trancoso'], 'Trancoso, Brasil', 'Praias do Espelho y Caraíva', 'Día completo por playas del litoral sur de Bahía.', 78, 'Incluye transporte ida y vuelta desde Trancoso, guía y paradas en Praia do Espelho y otros puntos de la costa. Salida temprano; el acceso puede tener tramos de camino irregular. Llevar calzado, agua y confirmar tasas o travesías incluidas.'),
-    tour(['trancoso'], 'Trancoso, Brasil', 'City tour de Trancoso y Quadrado', 'Historia local, miradores y playas cercanas con tiempo libre.', 45, 'Incluye guía y traslado por el Quadrado histórico, Igreja de São João, miradores y una playa cercana. Duración aproximada de 4 horas, ideal para la tarde. Los consumos en restaurantes y beach clubs no están incluidos.'),
-    tour(['ssa'], 'Salvador de Bahía, Brasil', 'Pelourinho, Elevador Lacerda y Mercado Modelo', 'Recorrido histórico y cultural por las postales de Salvador.', 48, 'Incluye guía local y recorrido por Pelourinho, Igreja do Bonfim, Mercado Modelo y Elevador Lacerda según horarios. Duración aproximada de 5 horas. Se recomienda ropa liviana y atención a las pertenencias en áreas concurridas.'),
-    tour(['ssa'], 'Salvador de Bahía, Brasil', 'Bahía de Todos los Santos en schooner', 'Navegación con islas, música y tiempo para nadar.', 58, 'Incluye navegación en schooner por la bahía y parada en una isla, según el itinerario del día. Jornada de 6 horas aproximadamente. El almuerzo y las bebidas pueden ser opcionales; confirmar antes de embarcar.'),
-    tour(['for'], 'Fortaleza, Brasil', 'Praia de Cumbuco y dunas en buggy', 'Excursión desde Fortaleza con lagoas, dunas y paseo opcional.', 55, 'Incluye traslado desde Fortaleza y tiempo libre en Cumbuco. El buggy por las dunas se contrata como complemento, con opción con o sin emoción. Jornada de 8 horas; llevar protector solar y efectivo.'),
-    tour(['for'], 'Fortaleza, Brasil', 'Beach Park y costa de Aquiraz', 'Día de playa y parque acuático en la costa este de Ceará.', 72, 'Incluye traslado ida y vuelta desde Fortaleza y acceso al área seleccionada del parque si está disponible en la tarifa. Jornada completa. Confirmar calendario de funcionamiento y restricciones de altura de las atracciones.'),
-    tour(['jericoacoara'], 'Jericoacoara, Brasil', 'Lagoa do Paraíso y Lagoa Azul en 4x4', 'Día de dunas, lagunas y hamacas sobre el agua.', 58, 'Incluye buggy o vehículo 4x4 compartido y paradas en las principales lagunas de Jeri. Duración aproximada de 7 horas. El itinerario depende del viento y del nivel de agua; llevar efectivo y protección solar.'),
-    tour(['jericoacoara'], 'Jericoacoara, Brasil', 'Pôr do sol en la Duna y Pedra Furada', 'Circuito de tarde por los íconos naturales de Jericoacoara.', 35, 'Incluye traslado en buggy y acompañamiento local hasta Pedra Furada y la Duna do Pôr do Sol. Actividad de 4 horas, con regreso después del atardecer. Usar calzado para arena y llevar agua.'),
-    tour(['morro'], 'Morro de São Paulo, Brasil', 'Volta à Ilha en lancha', 'Piscinas naturales, playas de Boipeba y paradas para baño.', 82, 'Incluye lancha compartida, guía y paradas en piscinas naturales de Moreré, Cueira y Cairu, según la marea. Jornada completa y sujeta al estado del mar. Llevar toalla, protector solar y efectivo para tasas o almuerzo.'),
-    tour(['morro'], 'Morro de São Paulo, Brasil', 'Tirolesa y miradores de Morro', 'Aventura suave con vistas a la Primeira y Segunda Praia.', 38, 'Incluye orientación para la tirolesa y recorrido por los miradores principales. Actividad de medio día; la tirolesa puede cerrar por viento o lluvia. Usar calzado cómodo y guardar objetos sueltos.'),
-    tour(['fernando'], 'Fernando de Noronha, Brasil', 'Baía dos Porcos y playas del Mar de Dentro', 'Circuito guiado por miradores y playas de aguas transparentes.', 88, 'Incluye traslado interno, guía ambiental y paradas en Sancho, Baía dos Porcos y miradores según acceso. Jornada de 6 horas. Las tasas del parque y preservación pueden cobrarse aparte; llevar snorkel y agua.'),
-    tour(['fernando'], 'Fernando de Noronha, Brasil', 'Paseo en barco con snorkel y puesta de sol', 'Navegación por la costa con posibilidad de avistar delfines.', 98, 'Incluye embarcación, guía y equipo básico de flotación para una parada de snorkel. Duración de 4 horas, con horario condicionado por el mar. La observación de fauna no se garantiza; confirmar tasas y restricciones ambientales.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Paseo en escuna pirata', 'Navegación costera en escuna desde Florianópolis.', florianopolisTourPrice(190), 'Precio de referencia: R$190. Presentá tu reserva en la boletería. Duración y recorrido sujetos a disponibilidad y condiciones del mar.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Catamarán con almuerzo', 'Excursión en catamarán con almuerzo incluido.', florianopolisTourPrice(250), 'Precio de referencia: R$250. La excursión incluye almuerzo según la opción seleccionada. Confirmá horarios, menú y punto de embarque al reservar.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Excursión en barco a Isla de Campeche', 'Navegación desde Armação hacia el Caribe catarinense.', florianopolisTourPrice(100), 'Precio de referencia: R$100. Incluye navegación y tiempo libre en la isla. Salidas sujetas al clima, oleaje y autorización del parque; confirmá si el traslado hasta el embarque está incluido.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Bautismo de buceo', 'Primera inmersión con barco, equipo e instructor.', florianopolisTourPrice(495), 'Precio de referencia: R$495. La captura indica barco, equipamiento e instructor. La actividad depende de las condiciones del mar y puede requerir una ficha de salud.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Bombinhas y Praia de Quatro Ilhas', 'Excursión de día completo a playas de Bombinhas.', florianopolisTourPrice(120), 'Precio de referencia: R$120. La captura indica traslado de ida y vuelta y visita a las playas. Confirmá itinerario, horarios y servicios incluidos.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Tour de playas de Florianópolis', 'Recorrido por las playas y paisajes más conocidos de la isla.', florianopolisTourPrice(80), 'Precio de referencia: R$80. La captura indica traslado de ida y vuelta. El recorrido y las paradas dependen del operador y las condiciones del día.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'City tour de Florianópolis', 'Recorrido guiado por los puntos destacados de la ciudad.', florianopolisTourPrice(110), 'Precio de referencia: R$110. La captura indica traslado de ida y vuelta. Confirmá los lugares visitados, horarios y punto de salida.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Beto Carrero World', 'Excursión al parque temático Beto Carrero World.', florianopolisTourPrice(110), 'Precio de referencia: R$110. La captura muestra traslado y entrada; verificá qué tipo de ingreso incluye la tarifa y la disponibilidad para la fecha elegida.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Balneário Camboriú', 'Excursión a Balneário Camboriú con traslado y entradas.', florianopolisTourPrice(190), 'Precio de referencia: R$190. La captura indica traslado de ida y vuelta y entradas. Confirmá qué atracciones están incluidas.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Guarda do Embaú', 'Excursión a Guarda do Embaú y sus paisajes costeros.', florianopolisTourPrice(100), 'Precio de referencia: R$100. La captura indica traslado de ida y vuelta y guía. Confirmá horarios, recorrido y servicios incluidos.'),
-    tour(['camboriu'], 'Camboriú, Brasil', 'Parque Unipraias y teleférico', 'Vistas de la costa, senderos y acceso al parque de atracciones.', 52, 'Incluye traslado local y acceso al circuito principal del Parque Unipraias, según disponibilidad. Medio día de actividad. Las atracciones adicionales se pagan aparte; llevar calzado cómodo y consultar altura mínima.'),
-    tour(['camboriu'], 'Camboriú, Brasil', 'Paseo en barco por la costa de Balneário', 'Navegación panorámica desde la Barra Sul con música y paradas.', 40, 'Incluye embarcación compartida y recorrido frente a las playas centrales. Duración aproximada de 3 horas, sujeta al clima. Bebidas y consumos a bordo no están incluidos.'),
-    tour(['bombinhas'], 'Bombinhas, Brasil', 'Snorkel en Ilha do Arvoredo', 'Navegación y bautismo de snorkel en aguas transparentes.', 62, 'Incluye embarcación, máscara, chaleco y acompañamiento de instructor durante el snorkel. La salida depende de la visibilidad y del oleaje. Llevar traje de baño, toalla y confirmar requisitos para la reserva.'),
-    tour(['bombinhas'], 'Bombinhas, Brasil', 'Trilha de la Costa Esmeralda', 'Caminata guiada por playas, miradores y senderos de Mata Atlántica.', 38, 'Incluye guía local y recorrido por playas y senderos de Bombinhas, con dificultad moderada. Duración aproximada de 4 horas. Usar zapatillas, llevar agua y respetar las áreas protegidas.'),
-    tour(['rosa'], 'Praia do Rosa, Brasil', 'Avistaje de ballenas desde los miradores', 'Recorrido costero y observación responsable durante la temporada.', 42, 'Incluye guía local y traslado entre miradores de Praia do Rosa y Garopaba. La actividad es estacional y la observación de ballenas no puede garantizarse. Llevar abrigo, calzado cómodo y consultar la temporada.'),
-    tour(['rosa'], 'Praia do Rosa, Brasil', 'Trilha a Praia Vermelha y Ouvidor', 'Senderismo entre playas aisladas y paisajes de la costa sur.', 35, 'Incluye guía y orientación por senderos costeros entre Praia do Rosa, Vermelha y Ouvidor. Duración de 4 a 5 horas según el ritmo. Llevar agua, protector solar y calzado con agarre.'),
-    tour(['bcm'], 'Balneário Camboriú, Brasil', 'City tour y Cristo Luz', 'Miradores, playas centrales y el monumento iluminado de la ciudad.', 45, 'Incluye traslado, guía y acceso al complejo Cristo Luz cuando esté operativo. Recorrido de medio día, con salida por la tarde para aprovechar la iluminación. Los horarios pueden variar por eventos o clima.'),
-    tour(['bcm'], 'Balneário Camboriú, Brasil', 'Beto Carrero World desde Camboriú', 'Día completo en el principal parque temático de Santa Catarina.', 92, 'Incluye traslado ida y vuelta y entrada estándar al parque. Jornada completa con salida temprano. Las filas, atracciones premium y comidas no están incluidas; confirmar calendario antes de comprar.'),
-    tour(['gram'], 'Gramado, Brasil', 'Tour del Vino en Bento Gonçalves y Vale dos Vinhedos', 'Cata de vinos, espumantes, almuerzo colonial y paisaje de la Serra Gaúcha.', 78, 'Incluye transporte desde Gramado, degustaciones seleccionadas y visita a bodegas. Jornada de 10 a 12 horas; algunas versiones suman Tren del Vino y almuerzo. Confirmar el itinerario exacto y avisar restricciones alimentarias.'),
-    tour(['gram'], 'Gramado, Brasil', 'City tour de Gramado y parques de Canela', 'Lago Negro, centro de Gramado, Catedral de Piedra y Cascata do Caracol.', 55, 'Incluye transporte y guía por las principales postales de Gramado y Canela. Duración aproximada de 7 horas. Entradas a parques o museos pueden cobrarse aparte según el circuito elegido.'),
-    tour(['canela'], 'Canela, Brasil', 'Cascata do Caracol y Skyglass', 'Naturaleza, miradores y una de las atracciones más fotografiadas de la Serra.', 62, 'Incluye traslado desde Canela, visita a Caracol y orientación para Skyglass; la entrada puede variar según el paquete. Medio día o día completo. Consultar condiciones de viento y restricciones de acceso.'),
-    tour(['canela'], 'Canela, Brasil', 'Tren del Vino y cultura italiana', 'Bento Gonçalves, degustaciones y experiencia de Maria Fumaça.', 88, 'Incluye transporte desde Canela, visita a bodegas, degustaciones y experiencia del Tren del Vino cuando haya disponibilidad. Excursión de día completo. Reservar con anticipación; el tren puede reemplazarse por otra actividad según el calendario.'),
-    tour(['igu'], 'Foz de Iguazú, Brasil', 'Cataratas del lado brasileño y Parque das Aves', 'Pasarelas panorámicas, selva y fauna de la región de Iguazú.', 62, 'Incluye traslado, guía y entradas al circuito brasileño y Parque das Aves si el paquete seleccionado lo contempla. Medio día de actividad. Llevar calzado cómodo, capa de lluvia y documento para los accesos.'),
-    tour(['igu'], 'Foz de Iguazú, Brasil', 'Cataratas argentinas con Garganta del Diablo', 'Día completo por los circuitos superior e inferior del parque argentino.', 72, 'Incluye traslado desde Foz, guía y orientación dentro del Parque Nacional Iguazú. Jornada completa; la entrada y el tren interno pueden cobrarse por separado según la tarifa. Llevar documento, agua y protección contra la lluvia.'),
-    tour(['rec'], 'Recife, Brasil', 'Olinda histórica y Recife Antigo', 'Iglesias, casonas coloridas, arte y miradores del litoral pernambucano.', 48, 'Incluye transporte y guía por Recife Antigo, Marco Zero y el centro histórico de Olinda. Duración aproximada de 6 horas. Usar calzado cómodo y confirmar qué entradas o consumos están incluidos.'),
-    tour(['rec'], 'Recife, Brasil', 'Porto de Galinhas desde Recife', 'Playa, jangada y tiempo libre en las piscinas naturales.', 58, 'Incluye traslado ida y vuelta desde Recife y orientación para la jangada en Porto de Galinhas. Día completo, con horario definido por la marea. La jangada, comidas y actividades opcionales pueden cobrarse aparte.'),
-    tour(['poa'], 'Porto Alegre, Brasil', 'Gramado y Canela desde Porto Alegre', 'Excursión por la Serra Gaúcha con parques, arquitectura y gastronomía.', 82, 'Incluye transporte ida y vuelta y paradas panorámicas en Gramado y Canela. Jornada de 12 horas aproximadamente. Las entradas a parques y museos no están incluidas salvo indicación del operador.'),
-    tour(['poa'], 'Porto Alegre, Brasil', 'Bento Gonçalves y Vale dos Vinhedos', 'Bodegas, degustaciones y cultura italiana de la Serra Gaúcha.', 88, 'Incluye traslado desde Porto Alegre, visita a bodegas y degustaciones seleccionadas. Excursión de día completo. El Tren del Vino y el almuerzo pueden formar parte de un paquete superior; confirmar al reservar.'),
-    tour(['buz'], 'Búzios, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['arraial'], 'Arraial do Cabo, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['cabo'], 'Cabo Frio, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['ilha'], 'Ilha Grande, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['paraty'], 'Paraty, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['ilhabela'], 'Ilhabela, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['ubatuba'], 'Ubatuba, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['rio'], 'Río de Janeiro, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['angra'], 'Angra dos Reis, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['sao'], 'São Paulo, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
-    tour(['bho'], 'Belo Horizonte, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
-    tour(['curitiba'], 'Curitiba, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
-    tour(['porto'], 'Porto de Galinhas, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['mcz'], 'Maceió, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['maragogi'], 'Maragogi, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['nat'], 'Natal, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['pip'], 'Praia do Pipa, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['trancoso'], 'Trancoso, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['ssa'], 'Salvador de Bahía, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['for'], 'Fortaleza, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['jericoacoara'], 'Jericoacoara, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['morro'], 'Morro de São Paulo, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['fernando'], 'Fernando de Noronha, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['fln'], 'Florianópolis, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['camboriu'], 'Camboriú, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['bombinhas'], 'Bombinhas, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['rosa'], 'Praia do Rosa, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['bcm'], 'Balneário Camboriú, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['gram'], 'Gramado, Brasil', 'Snowland, el parque de nieve indoor', 'Nieve, trineo y clima frío bajo techo en pleno verano gaúcho.', 55, 'Incluye traslado y entrada general al parque temático de nieve artificial, con zona de trineos y bar de hielo. Actividad de medio día. Llevar ropa de abrigo; el parque provee camperas para la zona de nieve.'),
-    tour(['canela'], 'Canela, Brasil', 'Parque do Caracol y su cascada', 'Mirador y torre de observación frente a la cascada más conocida de Canela.', 25, 'Incluye traslado y entrada al parque, con acceso al mirador de la cascada del Caracol y sendero corto por el bosque nativo. Actividad de medio día. Llevar calzado cómodo y cámara de fotos.'),
-    tour(['igu'], 'Foz de Iguazú, Brasil', 'Represa de Itaipú', 'Visita guiada a una de las mayores hidroeléctricas del mundo.', 45, 'Incluye traslado y recorrido panorámico por el circuito de visitantes de Itaipú Binacional, con parada en el mirador y proyección institucional. Duración aproximada de 2 horas y media. Llevar documento de identidad, es obligatorio para el ingreso.'),
-    tour(['rec'], 'Recife, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['poa'], 'Porto Alegre, Brasil', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
-    // Buenos Aires estaba sin una sola experiencia: la seccion de tours no se
-    // dibujaba para ese destino y la Guia Secreta quedaba pegada a los hoteles.
-    tour(['bue'], 'Buenos Aires, Argentina', 'Teatro Colón, Casa Rosada y el centro histórico', 'Los tres íconos de la ciudad con guía y entrada al Teatro Colón.', 28, 'Incluye guía local y recorrido por el Teatro Colón, la Plaza de Mayo, la Casa Rosada y el Cabildo, con entrada al Teatro Colón sujeta a disponibilidad. Duración aproximada de 3 horas. Llevar documento para el acceso.'),
-    tour(['bue'], 'Buenos Aires, Argentina', 'City tour en bici por La Boca y Puerto Madero', 'Pedaleo por el barrio del tango, los muelles y la Costanera Sur.', 32, 'Incluye bicicleta, casco y guía. Recorrido por Caminito, la Vuelta de Rocha, Puerto Madero y la Costanera, con paradas para fotos. Duración aproximada de 3 horas. El circuito es de asfalto urbano y conviene circular con precaución.'),
-    tour(['bue'], 'Buenos Aires, Argentina', 'Mercado de San Telmo y Antigüedades', 'Puestos de antigüedades, librerías de mapa y mogules del barrio.', 24, 'Incluye acompañamiento de guía por el Mercado de Antigüedades de San Telmo y las calles vecinas. Duración aproximada de 2 horas. El consume y las compras no están incluidos, y hay que negociar el precio con el vendedor.'),
-    tour(['bue'], 'Buenos Aires, Argentina', 'Free tour a pie por el centro histórico', 'Recorrido guiado por los principales puntos históricos y culturales de la ciudad.', 20, 'Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio.'),
-  ];
+
   function tourDetailText(tour) {
     return tour.details || 'Incluye la actividad principal y acompañamiento local. Confirmá horarios, punto de encuentro, disponibilidad y valor final antes de reservar.';
   }
@@ -1561,29 +1439,6 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       if (document.querySelector('.currency-menu:not([hidden])')) { cerrarMenusMoneda(); return; }
-      /* Escape cierra el modal que este abierto, si hay alguno.
-
-         Antes el handler solo miraba el menu de moneda y hacia return, asi
-         que ningun modal se cerraba con Escape. Los cinco se anuncian como
-         aria-modal="true", que es una promesa de que Escape los cierra, y
-         no se cumplia.
-
-         No es solo accesibilidad. La hoja apaga el scroll de la pagina
-         mientras hay un .booking-modal abierto, asi que el unico salida
-         mientras esta es el boton X: si no se alcanza, la pantalla queda
-         muerta y sin scroll. Escape pasa a ser la salida que siempre
-         existe.
-
-         Se le hace click al propio boton de cerrar del modal, para que
-         corra el mismo codigo que el X y no haya un segundo camino que se
-         pueda desincronizar del otro. Si un modal no tuviera boton, se
-         oculta igual: dejarlo abierto deja el scroll apagado. */
-      var abierto = document.querySelector('.booking-modal:not([hidden])');
-      if (abierto) {
-        var cerrar = abierto.querySelector('[data-close-auth],[data-close-trips],[data-close-booking]');
-        if (cerrar) cerrar.click();
-        else { abierto.hidden = true; abierto.setAttribute('aria-hidden', 'true'); abierto.innerHTML = ''; }
-      }
       return;
     }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
@@ -2489,22 +2344,53 @@
     // hotel de cada parada.
     return '<section class="hotel-options hotel-options-split" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + grupo(1) + grupo(2) + '</section>';
   }
+  /* El catalogo de tours. NO vive aca: vive en public/tours.generated.js, que
+     se genera desde data/tours.json con `npm run build:tours`, y a su vez
+     data/tours.json se actualiza desde la Sheet de Google Drive.
+
+     Antes eran 111 lineas escritas a mano en este archivo. El problema no era
+     solo editarlas: un tour nuevo era un cambio de codigo, con lo que eso
+     implica de revisar y deployar. Ahora es una fila en una tabla que edita
+     quien arma los tours.
+
+     Mismo criterio que los otros generados del proyecto (daily-costs.js,
+     transfer-precios.js): index.html carga el archivo antes que app.js, y si no
+     esta, se avisa en consola y se sigue. Un catalogo vacio saca la seccion de
+     tours de la pagina, pero no rompe el resto. */
+  var LOCAL_TOURS = window.CS_TOURS_DATA || [];
+  /* Los tours del destino. Ahora salen de la respuesta de /api/cotizar (meta.tours),
+     que el server arma leyendo la tabla de Supabase.
+     *
+     * Antes eran 111 lineas escritas en este archivo, o sea publicas: cualquiera
+     * que bajara el JS con curl tenia el catalogo entero con precios. Ahora hay
+     * una copia local en /tours.generated.js que se usa SOLO cuando la propuesta
+     * no trajo ninguno, que pasa cuando se esta armando un viaje sin cotizar todavia.
+     *
+     * Por que el fallback sigue siendo un archivo publico y no se eliminated:
+     * es el respaldo de cuando la tabla no responde, y sacar el dato del
+     * navegador deja la seccion vacia sin explicacion. La diferencia con antes
+     * es que ahora es la EXCEPCION y no lo normal. */
+  function toursDeMeta(meta) {
+    var delServer = meta && meta.tours;
+    if (Array.isArray(delServer)) return delServer;
+    return LOCAL_TOURS;
+  }
+
   /* Los tours de un destino. Vive aparte de localToursMarkup porque la Guia
      Secreta tambien los dibuja, y duplicar esta logica hacia que un dia una
      diga una cosa y la otra otra. */
-  function toursFor(destinationKey, destinationName) {
+  function toursFor(destinationKey, destinationName, meta) {
     var key = String(destinationKey || '').toLowerCase();
     if (!key) return [];
     destinationName = destinationName || key;
-    /* Los tours del destino, con precio estimado. De LOCAL_TOURS, y son los
-       unicos: no queda ninguna fuente de precio real para actividades.
+    /* Los tours del destino, con precio estimado. Vienen de meta.tours, que el
+       server arma leyendo la tabla de Supabase; si no hay meta todavia (la
+       pagina recien abierta, sin propuesta) se usa la copia local.
 
-       O sea que las actividades vuelven a ser orientacion y no una reserva: el
-       boton abre el checkout, que junta los datos del viajero y arma el pedido
-       por WhatsApp, pero no hay operador de tours que lo tome. El precio se
-       rotula "Precio referencial" en la card y el mensaje de WhatsApp dice que
-       es estimado, que es lo unico que permite mostrarlo sin mentir. */
-    return LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(key) >= 0; })
+       El precio sigue siendo REFERENCIAL: no hay operador de tours que lo
+       tome. El boton abre el checkout, que junta los datos del viajero y arma el
+       pedido por WhatsApp. Por eso la card lo rotula como estimacion. */
+    return toursDeMeta(meta).filter(function (tour) { return tour.destinations.indexOf(key) >= 0; })
       .map(function (tour) { return Object.assign({}, tour, { source: 'local' }); });
   }
 
@@ -2515,7 +2401,7 @@
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
     var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
-    var tours = toursFor(destinationKey, destinationName);
+    var tours = toursFor(destinationKey, destinationName, meta);
     if (!tours.length) return '';
     // Todas las fotos salen de TOUR_PHOTOS, con autor y licencia: el pie global
     // los reagrupa.
@@ -2526,8 +2412,8 @@
     var creditos = {};
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
     var fuente = (tours[0] && tours[0].source) || 'local';
-    /* Un solo origen queda: LOCAL_TOURS, con precio estimado. La fuente se lee
-       igual, porque es la que decide el titulo de la seccion ("Tours y
+    /* Un solo origen queda: el catalogo de data/tours.json, con precio estimado.
+       La fuente se lee igual, porque es la que decide el titulo de la seccion ("Tours y
        experiencias en" contra "Tours y experiencias reales en") y asi queda en un
        solo lugar si manana vuelve a haber actividades de otro origen con precio
        real.
@@ -2663,7 +2549,7 @@
       creditsBlock + '</section>';
   }
   // Duración estimada, sacada del texto de detalle que ya está cargado en
-  // LOCAL_TOURS. Antes esa información sólo se veía abriendo el modal, y es
+  // data/tours.json. Antes esa información sólo se veía abriendo el modal, y es
   // justo lo que hace decidir si un tour entra en el viaje.
   function tourDuration(tour) {
     var t = String((tour && tour.details) || '').toLowerCase();
@@ -2744,7 +2630,6 @@
   function openTourDetailModal(button) {
     var modal = $('#booking-modal');
     if (!modal || !button) return;
-    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span><h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2><p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p><div class="tour-detail-modal__copy"><p>' + esc(button.getAttribute('data-tour-detail')) + '</p></div><p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
@@ -3224,7 +3109,6 @@
       closeBookingForm();
       return;
     }
-    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog checkout-dialog" role="dialog" aria-modal="true" aria-labelledby="checkout-title">' +
       '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<div class="checkout-layout">' +
@@ -4523,15 +4407,8 @@
        completar el checkout de la app. Ahi si hay un hecho, y el estado es
        "Reservado" a secas.
 
-     Duffel todavia NO esta integrado, asi que no se le puede poner el nombre
-     al usuario: no hay nada que reservar todavia ahi.
-
-     Cuando este, el estado no va a venir de la URL. La orden nace en
-     nuestro servidor y el pago se procesa aca; Duffel devuelve la
-     confirmacion oficial y el PNR, y el webhook --firmado, del lado del
-     servidor-- es lo que marca el rubro como reservado. Por eso el
-     "?vuelta=" que se agrega al link sigue siendo SOLO posicionamiento:
-     un valor inventado en la barra no produce ningun cambio de estado. */
+     (Duffel aparece solo en comentarios viejos, explicando que ya no esta: no
+     hay integracion con Duffel y no se puede poner en la cara del usuario.) */
   var CANAL_RESERVA = {
     pasajes: { canal: 'Aerolínea', externo: true },
     alojamiento: { canal: 'Booking', externo: true },
@@ -4890,29 +4767,21 @@
        vuelve de Booking o de la aerolinea, el cotizador la trae a la fila que
        estaba configurando y le saca el parametro de la barra.
 
-       Deliberadamente NO lleva ningun estado adentro, y esto sigue valiendo
-       cuando este el vuelo con Duffel: un "?status=success" en la URL lo
-       puede escribir cualquiera, y convertia "Reservado" en una declaracion
-       del visitante. Con Duffel el estado real llega por webhook, del lado del
-       servidor y firmado por el proveedor --que es otra cosa--; este
-       parametro sigue siendo solo de posicion, y un valor inventado no
-       produce nada. */
-    function conLinkDeVuelta(url, categoria) {
-      if (!url) return url;
-      var id = viajeReservaId();
-      if (!id) return url;
-      var sep = url.indexOf('?') >= 0 ? '&' : '?';
-      return url + sep + 'vuelta=' + encodeURIComponent(id) + '&rubro=' + encodeURIComponent(categoria);
-    }
+       Deliberadamente NO lleva ningun estado adentro. Un "?status=success" en
+       la URL lo puede escribir cualquiera, y convertia "Reservado" en una
+       declaracion del visitante: el mensaje al asesor decia "ya reserve vuelo y
+       hotel" sobre reservas que no existian, y el CTA de reservar desaparecia
+       como si estuviera pagado.
+
+       Este parametro no mueve ningun estado, asi que un valor inventado no
+       produce nada: la fila se resalta, se limpia la URL y el estado sigue
+       siendo el de antes. La verdad la sigue poniendo la agencia. */
     /* Al volver de afuera: senalar la fila y limpiar la barra.
      *
-     * Se valida el "vuelta" contra el id del viaje que ya esta en esta pagina,
-     * no contra nada externo. Si no coincide--o el viaje no existe-- se ignora
-     * el parametro y se limpia igual: es mas honesto dejar la pantalla como
-     * estaba que fingir que se volvio de un lado que no corresponde.
-     *
-     * Se limpia con history.replaceState y no con location: replaceState
-     * cambia la barra sin recargar, y recargar perderia el scroll y el modal. */
+     * La validacion del "vuelta" es contra el id del viaje que ya esta en esta
+     * pagina, no contra nada externo. Si no coincide --o el viaje no existe-- se
+     * ignora el parametro y se limpia igual: es mas honesto dejar la pantalla como
+     * estaba que fingir que volvio de un lado que no corresponde. */
     function honrarLinkDeVuelta(modal) {
       if (!modal || !window.location.search) return;
       var params = new URLSearchParams(window.location.search);
@@ -4920,8 +4789,8 @@
       var volver = params.get('vuelta');
       var rubro = params.get('rubro');
       var viaje = viajeReservaId();
-      // Se limpia SIEMPRE, haya coincidido o no: dejar "?vuelta=..." en la
-      // barra invita a la gente a inventar parametros despues.
+      // Se limpia SIEMPRE, haya coincidido o no: dejar "?vuelta=..." en la barra
+      // Invita a la gente a inventar parametros despues.
       var limpio = new URLSearchParams(window.location.search);
       limpio.delete('vuelta'); limpio.delete('rubro');
       var qs = limpio.toString();
@@ -4937,6 +4806,13 @@
       window.setTimeout(function () { fila.classList.remove('is-tras-vuelta'); }, 2600);
     }
 
+    function conLinkDeVuelta(url, categoria) {
+      if (!url) return url;
+      var id = viajeReservaId();
+      if (!id) return url;
+      var sep = url.indexOf('?') >= 0 ? '&' : '?';
+      return url + sep + 'vuelta=' + encodeURIComponent(id) + '&rubro=' + encodeURIComponent(categoria);
+    }
     function bookCta(url, label, labelFor, categoria) {
       if (reservasDe(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a ' + label.toLowerCase() + '.');
       return url
@@ -5097,16 +4973,17 @@
           + '<div class="voucher-step__text"><b>' + esc(titulo) + '</b><span>' + bajada + '</span></div>'
           + (hecho ? '' : accion) + '</li>';
       };
-      /* El boton de confirmar es de la agencia, no del cliente.
+      /* El botón de confirmar es de la agencia, no del cliente.
 
-         Antes se pintaba para cualquiera, y la RPC que lo atiende--
-         reservas_marcar_manual-- arranca con "if (!await esAgencia()) return",
-         asi que un cliente lo veia, lo apretaba y no pasaba nada. Sin error y
-         sin aviso: el control se apagaba en silencio. Eso es peor que no
-         tenerlo, porque promete una confirmacion y se la traga.
+         Antes se pintaba para cualquiera y la RPC que lo atiende --
+         reservas_marcar_manual -- arranca con "if (!await esAgencia()) return",
+         así que un cliente lo veía, lo apretaba y no pasaba nada. Sin error, sin
+         aviso: el control se apagaba en silencio. Eso es peor que no tenerlo,
+         porque promete una confirmación y se la traga.
 
-         Para el cliente queda un texto que ademas explica de donde sale la
-         marca, en vez de dejarlo adivinar. */
+         Para el cliente queda un texto que además explica de dónde sale la marca
+         en vez de dejarlo adivinar. Lo que marca la reserva sigue siendo el
+         link externo que abre la persona y la confirmación que hace la agencia. */
       var confirma = function (cat, que) {
         if (!soyAgencia) return '<span class="voucher-step__hint">La marca la pone la agencia</span>';
         return '<button type="button" class="voucher-step__btn" data-confirmar-reserva="' + esc(cat) + '"'
@@ -5169,7 +5046,6 @@
       + '</div>';
     var dividirEnlace = '<span class="voucher-hero__pp"><span>' + money(Math.round(totalGeneral / pax)) + ' por persona</span>'
       + '<button type="button" class="voucher-hero__split" data-split-trip>Ver cómo dividir este monto</button></span>';
-    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
@@ -5206,7 +5082,18 @@
        METABUSCADOR. El precio y el link son reales, pero la compra termina en
        la aerolinea o en una agencia. Booking si es intermediario real, y ahi
        el respaldo es cierto. */
-      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>la aerol&iacute;nea</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
+      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>Google Flights</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
+      /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
+
+       Porque el pago del vuelo y del hotel pasa por un sitio del que la app
+       no recibe ningun aviso: no hay transaccion propia ni webhook al que
+       colgar el cambio. El unico dato cierto es el que declara la persona, asi
+       que se lo preguntamos una vez y lo anotamos, en vez de suponerlo y
+       mostrarle un "Comprado" que podria ser falso.
+
+       El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
+       se marca solo al completar el checkout. */
+      '<p class="voucher-canales__nota">En el vuelo y el hotel te llevamos al sitio donde se paga, pero ese sitio no nos avisa cuando terminaste. Por eso el paso te pide confirmarlo: as&iacute; queda anotado de verdad.</p>' +
       dividirBloque +
       reservarTodo +
       /* ABAJO, UN SOLO BOTON SOLIDO.
@@ -6459,10 +6346,10 @@
       cuerpo += bloque('comer', '🍽️ Dónde comer', '<div class="guia-lista">' + comer + '</div>');
     }
 
-    // Tours: datos reales, no escritos a mano.
-    var tours = toursFor(meta.dest.key, meta.dest.name) || [];
+    // Tours: salen de meta.tours, que el server leyo de Supabase.
+    var tours = toursFor(meta.dest.key, meta.dest.name, meta) || [];
     if (tours.length) {
-      var precioReal = false; // todos los tours son de LOCAL_TOURS: precio estimado
+      var precioReal = false; // el precio es referencial, no de un operador que reserve
       var lista = tours.slice(0, 3).map(function (t) {
         var datos = [];
         if (t.rating) datos.push('★ ' + Number(t.rating).toFixed(1));
@@ -6817,22 +6704,8 @@
     detailState.selectedOffer = Object.assign({}, completeOffer || {}, { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds });
     return detailState.selectedOffer;
   }
-  /* Un modal abierto a la vez, y cerrar uno se lleva a todos.
-
-     No es una regla arbitraria: la hoja pone
-     html:has(.booking-modal:not([hidden])) body{overflow:hidden}, asi que con
-     CUALQUIER .booking-modal sin [hidden] la pagina entera deja de scrollear.
-     Los cinco de index.html comparten esa clase, con lo cual lo que apaga el
-     scroll no es el modal que se esta viendo sino cualquiera que quede
-     abierto. Si se abren dos y se cierra el de arriba, el de abajo sigue
-     apretando el scroll sin que haya nada a la vista que lo explique. */
-  function cerrarTodosLosModales() {
-    Array.prototype.forEach.call(document.querySelectorAll('.booking-modal'), function (m) {
-      m.hidden = true; m.setAttribute('aria-hidden', 'true'); m.innerHTML = '';
-    });
-  }
   function closeBookingForm() {
-    cerrarTodosLosModales();
+    var modal = $('#booking-modal'); modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = '';
   }
   // Pinta la marca de destino elegido sobre las cards que ya estan en el DOM.
   // Se usa al volver del detalle, donde la grilla no se vuelve a renderizar.
@@ -7857,7 +7730,8 @@
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p><b class="detail-summary__destino">' + esc(data.meta.dest.name) + '</b>' + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + dailyBudgetMarkup +
-      '<div data-transport-flow>' + transportMarkup + '</div>' +      hotelsMarkup + toursMarkup +
+      '<div data-transport-flow>' + transportMarkup + '</div>' +
+      hotelsMarkup + toursMarkup +
       /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
 
          Antes estaba al final de todo y el comentario de arriba explicaba por
@@ -7873,13 +7747,6 @@
          cosas responden la misma pregunta --donde va la plata-- y el reparto
          primero: ahi estan las cuentas, y la guia dice como cuidarlas. */
       breakdownMarkup + foodMarkup +
-
-      /* "A donde va tu plata" va AL FINAL, despues de todas las secciones. Antes
-         estaba arriba, entre el resumen y el reparto de noches, y ahi competia
-         con la decision principal: ver el reparto antes de haber visto los
-         hoteles, los transfers o las actividades que lo componen. Al final se
-         lee como el cierre: primero elegis, despues miras donde fue la plata. */
-      breakdownMarkup +
       '</div></div>';
     updateMultiStayPricing();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
@@ -8139,13 +8006,13 @@
     return metadata.full_name || metadata.name || (user && user.email) || 'Mi cuenta';
   }
   function closeAccountModal(id) {
-    cerrarTodosLosModales();
+    var modal = document.getElementById(id);
+    if (modal) { modal.hidden = true; modal.setAttribute('aria-hidden', 'true'); modal.innerHTML = ''; }
   }
   function openAuthModal(message) {
     var modal = $('#auth-modal');
     if (!modal) return;
     if (authUser) { openTripsModal(); return; }
-    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><button type="button" class="booking-close" data-close-auth aria-label="Cerrar">×</button><span class="account-kicker">CuántoSale</span><h2 id="auth-title">Guardá tus viajes</h2><p class="booking-note">Creá una cuenta para conservar presupuestos e itinerarios en la nube.</p>' + (message ? '<p class="booking-error">' + esc(message) + '</p>' : '') + '<button type="button" class="oauth-button" data-google-auth>Continuar con Google</button><div class="account-divider"><span>o con tu email</span></div><form id="auth-form"><label>Correo electrónico<input required type="email" name="email" autocomplete="email"></label><label>Contraseña<input required minlength="6" type="password" name="password" autocomplete="current-password"></label><div class="account-form-actions"><button type="submit" class="confirm-booking" data-auth-action="signin">Iniciar sesión</button><button type="button" class="account-button account-button--secondary" data-auth-action="signup">Crear cuenta</button></div><p class="account-status" data-auth-status aria-live="polite"></p></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     var first = modal.querySelector('input'); if (first) first.focus();
@@ -8155,7 +8022,6 @@
     if (!modal) return;
     await authReadyPromise;
     if (!authUser) { pendingTripSave = false; openAuthModal('Iniciá sesión para ver tus viajes.'); return; }
-    cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="trips-title"><button type="button" class="booking-close" data-close-trips aria-label="Cerrar">×</button><span class="account-kicker">Tu cuenta</span><h2 id="trips-title">Mis viajes</h2><p class="booking-note">Itinerarios guardados por ' + esc(authDisplayName(authUser)) + '.</p><div class="saved-trips" data-saved-trips><p class="account-status">Cargando tus viajes...</p></div><button type="button" class="account-button account-button--secondary" data-signout>Cerrar sesión</button></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     loadSavedTrips(modal);

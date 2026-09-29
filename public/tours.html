@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Catálogo de tours · CuántoSale</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+/* El panel reusa los tokens del tema. No es una pagina nueva con su propio
+   estilo: si el tema oscuro se rompe aca, se rompe en toda la app, y son los
+   mismos usuarios los que van a estar en las dos pantallas. */
+body.tours-panel { padding: 0; background: var(--bg, #f7f6f2); }
+.panel-wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 80px; }
+.panel-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+.panel-head h1 { font-size: 22px; margin: 0 0 4px; }
+.panel-head p { margin: 0; color: var(--muted, #666); font-size: 14px; max-width: 62ch; }
+.panel-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+.panel-bar input, .panel-bar select, .panel-bar button {
+  font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit;
+}
+.panel-bar input[type=search] { flex: 1 1 220px; min-width: 180px; }
+.panel-bar button { cursor: pointer; }
+.panel-bar button[disabled] { opacity: .55; cursor: default; }
+.tours-list { display: grid; gap: 8px; }
+.tour-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center;
+  padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 10px; background: var(--card, #fff);
+}
+.tour-row.is-off { opacity: .55; }
+.tour-row__main { min-width: 0; }
+.tour-row__title { font-weight: 600; margin: 0 0 2px; }
+.tour-row__meta { font-size: 12.5px; color: var(--muted, #666); display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.tour-row__meta code { font-size: 12px; background: rgba(127,127,127,.13); padding: 1px 5px; border-radius: 4px; }
+.tour-row__actions { display: flex; gap: 6px; }
+.tour-row__actions button { font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 7px; border: 1px solid var(--line, #ddd); background: transparent; color: inherit; cursor: pointer; }
+.tour-row__actions button.danger { color: #b3261e; }
+.tour-row__warn { grid-column: 1 / -1; font-size: 12.5px; color: #9a5b00; }
+.panel-status { margin: 14px 0; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+.panel-status.is-error { background: rgba(179,38,30,.1); color: #b3261e; }
+.panel-status.is-ok { background: rgba(1,121,72,.1); color: #046c4e; }
+.panel-note { font-size: 13px; color: var(--muted, #666); background: rgba(127,127,127,.09); padding: 10px 12px; border-radius: 8px; margin: 0 0 16px; }
+.editor { border: 1px solid var(--line, #ddd); border-radius: 10px; padding: 16px; margin-top: 20px; background: var(--card, #fff); }
+.editor h2 { font-size: 17px; margin: 0 0 12px; }
+.editor label { display: block; font-size: 13px; margin-bottom: 10px; }
+.editor label > span { display: block; margin-bottom: 4px; color: var(--muted, #666); }
+.editor input, .editor textarea, .editor select { width: 100%; font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit; }
+.editor textarea { min-height: 76px; resize: vertical; }
+.editor__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
+.editor__actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.editor__actions button { font: inherit; font-size: 14px; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit; cursor: pointer; }
+.editor__actions button.primary { background: #0e6a6a; border-color: #0e6a6a; color: #fff; }
+.empty { padding: 40px 12px; text-align: center; color: var(--muted, #666); }
+</style>
+</head>
+<body class="tours-panel">
+<div class="panel-wrap">
+  <div class="panel-head">
+    <div>
+      <h1>Catálogo de tours</h1>
+      <p>Lo que se muestra en la sección “Tours y actividades” de cada destino. El precio es referencial: no hay operador que reserve, el pedido se confirma por WhatsApp.</p>
+    </div>
+    <button type="button" data-signout hidden>Cerrar sesión</button>
+  </div>
+
+  <div class="panel-status is-error" data-status hidden></div>
+
+  <div class="panel-bar" data-bar hidden>
+    <input type="search" id="q" placeholder="Buscar por título o destino…" aria-label="Buscar tours">
+    <select id="filtroDestino" aria-label="Filtrar por destino"></select>
+    <label style="display:flex;gap:6px;align-items:center;font-size:14px;">
+      <input type="checkbox" id="soloInactivos" style="width:auto;"> Solo desactivados
+    </label>
+    <span data-count style="font-size:14px;color:var(--muted,#666);"></span>
+  </div>
+
+  <p class="panel-note" data-nota hidden></p>
+
+  <div class="tours-list" data-list>
+    <div class="empty" data-vacio>Iniciando sesión…</div>
+  </div>
+
+  <form class="editor" data-editor hidden>
+    <h2 data-editor-title>Nuevo tour</h2>
+    <label>
+      <span>Destino (la key del modelo: <code>buz</code>, <code>rio</code>, <code>fln</code>, <code>bue</code>…)</span>
+      <input name="destino" required list="destinos" autocomplete="off">
+      <datalist id="destinos"></datalist>
+    </label>
+    <label>
+      <span>Título (exacto como se muestra)</span>
+      <input name="titulo" required>
+    </label>
+    <label>
+      <span>Descripción corta (la bajada de la card)</span>
+      <input name="descripcion">
+    </label>
+    <div class="editor__grid">
+      <label>
+        <span>Precio USD</span>
+        <input name="precio" type="number" step="0.01" min="0" inputmode="decimal">
+      </label>
+      <label>
+        <span>Precio BRL (opcional, gana sobre USD)</span>
+        <input name="precio_brl" type="number" step="0.01" min="0" inputmode="decimal">
+      </label>
+      <label>
+        <span>Fuente del precio</span>
+        <input name="fuente" placeholder="Booking, página del operador, set/2026">
+      </label>
+    </div>
+    <label>
+      <span>Detalle (el párrafo que se abre en el modal)</span>
+      <textarea name="detalle"></textarea>
+    </label>
+    <label style="display:flex;gap:8px;align-items:center;">
+      <input type="checkbox" name="activo" checked style="width:auto;"> Activo
+    </label>
+    <div class="editor__actions">
+      <button type="submit" class="primary" data-guardar>Guardar</button>
+      <button type="button" data-cancelar>Cancelar</button>
+    </div>
+  </form>
+</div>
+
+<script src="/tours.js"></script>
+</body>
+</html>

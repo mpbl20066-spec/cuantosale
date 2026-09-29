@@ -1,0 +1,1181 @@
+{
+  "_meta": {
+    "descripcion": "Catalogo de tours y actividades por destino. Es la UNICA fuente de verdad: public/tours.generated.js se genera desde acá con `npm run build:tours`, y ese archivo es el que dibuja las cards.",
+    "unidad": "USD por persona, con el margen operativo para la venta manual ya incluido. El precio se muestra como REFERENCIAL: no hay operador de tours que lo tome.",
+    "tipo_cambio_ref": "R$5,1414 = US$1 (PTAX 23/09/2026). Se uso solo para los tours de Florianopolis, que vienen en reales.",
+    "cotizacion_brl_usd": 5.1414,
+    "margen_usd": 5,
+    "campos_precio": "precio_brl gana sobre precio: es el precio que cobra el operador de verdad y el que hay que re-cotizar cuando cambia la moneda. El build lo convierte con _meta.cotizacion_brl_usd y le suma _meta.margen_usd. precio se usa solo cuando no hay precio_brl.",
+    "actualizado": "2026-09-29",
+    "origen_de_esta_migracion": "Los 111 tours estaban escritos a mano en public/app.js (array LOCAL_TOURS) y se movieron acá con scripts/migrar-tours.js el 2026-09-29. A partir de este archivo los edita la Sheet de Google Drive.",
+    "aviso": "El precio es REFERENCIAL, no un precio de reserva. No hay operador de tours que lo tome: el boton arma el pedido por WhatsApp y el precio se confirma segun fecha, cupo y operador. La card lo rotula como estimacion justamente por esto.",
+    "aviso_fotos": "TOUR_PHOTOS se indexa por \"destinoKey#titulo\" con el titulo EXACTO. Cambiar un titulo deja la card sin foto (cae al degradado con el icono) sin que nada falle. Para fotos de un tour nuevo: node buscar-fotos-tours.js",
+    "columnas": {
+      "destinos": "Key del destino, como en lib/model.js. Solo uno por tour: si un tour sirve a dos ciudades, se duplica la fila.",
+      "destino": "Nombre para mostrar, con pais. Sale del mapa _destinos si se deja vacio.",
+      "titulo": "EXACTO como se muestra. Es la clave de la foto: no lo reescribas sin correr antes buscar-fotos-tours.js.",
+      "descripcion": "Una linea, la que va en la bajada de la card.",
+      "precio": "Numero en USD por persona. Sin signo ni separador de miles. Acepta \"45.50\", \"45,50\" y \"US$ 45\".",
+      "precio_brl": "Opcional. El precio real en reales. Gana sobre \"precio\": el build lo convierte con la cotizacion de _meta y le suma el margen. Llenalo cuando el precio venga de un operador brasilero.",
+      "detalle": "El parrafo largo que se abre en el modal. Ahi van incluidas, duracion y qué llevar."
+    }
+  },
+  "_destinos": {
+    "rio": "Río de Janeiro, Brasil",
+    "buz": "Búzios, Brasil",
+    "arraial": "Arraial do Cabo, Brasil",
+    "cabo": "Cabo Frio, Brasil",
+    "ilha": "Ilha Grande, Brasil",
+    "paraty": "Paraty, Brasil",
+    "ilhabela": "Ilhabela, Brasil",
+    "ubatuba": "Ubatuba, Brasil",
+    "angra": "Angra dos Reis, Brasil",
+    "sao": "São Paulo, Brasil",
+    "bho": "Belo Horizonte, Brasil",
+    "curitiba": "Curitiba, Brasil",
+    "porto": "Porto de Galinhas, Brasil",
+    "mcz": "Maceió, Brasil",
+    "maragogi": "Maragogi, Brasil",
+    "nat": "Natal, Brasil",
+    "pip": "Praia do Pipa, Brasil",
+    "trancoso": "Trancoso, Brasil",
+    "ssa": "Salvador de Bahía, Brasil",
+    "for": "Fortaleza, Brasil",
+    "jericoacoara": "Jericoacoara, Brasil",
+    "morro": "Morro de São Paulo, Brasil",
+    "fernando": "Fernando de Noronha, Brasil",
+    "fln": "Florianópolis, Brasil",
+    "camboriu": "Camboriú, Brasil",
+    "bombinhas": "Bombinhas, Brasil",
+    "rosa": "Praia do Rosa, Brasil",
+    "bcm": "Balneário Camboriú, Brasil",
+    "gram": "Gramado, Brasil",
+    "canela": "Canela, Brasil",
+    "igu": "Foz de Iguazú, Brasil",
+    "rec": "Recife, Brasil",
+    "poa": "Porto Alegre, Brasil",
+    "bue": "Buenos Aires, Argentina"
+  },
+  "tours": [
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Cristo Redentor y Pan de Azúcar",
+      "descripcion": "Excursión guiada de día completo con entradas prioritarias y transporte.",
+      "precio": 65,
+      "detalle": "Incluye traslado desde hoteles de la zona sur, guía bilingüe y entradas al Corcovado y Pan de Azúcar. Salida aproximada a las 7:30 y regreso por la tarde. Llevar calzado cómodo, protector solar y una campera liviana."
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Full Day a Arraial do Cabo con paseo en barco",
+      "descripcion": "Playas de aguas cristalinas, navegación y parada para snorkel.",
+      "precio": 55,
+      "detalle": "Incluye traslado ida y vuelta desde Río, paseo en barco compartido y paradas en playas según las condiciones del mar. Jornada completa, normalmente de 6:30 a 19:00. Llevar traje de baño, toalla y efectivo para tasas locales o alimentación."
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Paseo en barco por las playas de Búzios",
+      "descripcion": "Navegación por João Fernandes, Azeda, Azedinha y otras calas de la península.",
+      "precio": 48,
+      "detalle": "Incluye embarque en el centro de Búzios, navegación con paradas para nadar y bebida de cortesía. La salida suele durar entre 3 y 4 horas y depende del viento. Se recomienda reservar por la mañana y llevar protector solar."
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "City tour de Búzios en buggy",
+      "descripcion": "Recorrido panorámico por miradores, playas y la Rua das Pedras.",
+      "precio": 42,
+      "detalle": "Incluye buggy con conductor habilitado y recorrido por Orla Bardot, João Fernandes, Ferradura y Geribá. Duración aproximada de 4 horas, con horarios de mañana o tarde. Llevar ropa cómoda; el vehículo puede salpicar en algunos tramos."
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Passeio de barco por las Prainhas y Gruta Azul",
+      "descripcion": "Navegación por el Caribe brasileño con paradas para baño y fotos.",
+      "precio": 50,
+      "detalle": "Incluye transporte local hasta el muelle, paseo en barco y paradas en Praia do Farol, Prainhas do Pontal do Atalaia y Gruta Azul cuando el mar lo permite. Duración aproximada de 4 horas. El acceso a algunas playas depende de la Capitanía y del clima."
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Buceo de bautismo en aguas cristalinas",
+      "descripcion": "Experiencia introductoria con instructor y equipo completo.",
+      "precio": 78,
+      "detalle": "Incluye briefing, equipo de buceo, acompañamiento de instructor y una inmersión de iniciación. La actividad suele ocupar media jornada y requiere completar una ficha de salud. No se recomienda volar durante las horas posteriores al buceo."
+    },
+    {
+      "destinos": [
+        "cabo"
+      ],
+      "destino": "Cabo Frio, Brasil",
+      "titulo": "City tour histórico y playas de Cabo Frio",
+      "descripcion": "Recorrido por Praia do Forte, Canal do Itajuru y el barrio da Passagem.",
+      "precio": 38,
+      "detalle": "Incluye traslado urbano, guía local y paradas para fotos en Praia do Forte, Forte São Mateus y el centro histórico. Duración aproximada de 4 horas, con salida por la mañana. Ideal para combinar con un día libre de playa."
+    },
+    {
+      "destinos": [
+        "cabo"
+      ],
+      "destino": "Cabo Frio, Brasil",
+      "titulo": "Paseo en barco por el Canal y la Ilha do Japonês",
+      "descripcion": "Navegación corta con tiempo libre para baño y playa.",
+      "precio": 35,
+      "detalle": "Incluye embarcación compartida y parada en Ilha do Japonês, sujeta a la marea y al viento. Duración aproximada de 3 horas. Llevar agua, protector solar y efectivo para consumos en la playa."
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Vuelta a la isla en lancha rápida",
+      "descripcion": "Día de playas y calas con agua transparente alrededor de Ilha Grande.",
+      "precio": 72,
+      "detalle": "Incluye traslado en lancha compartida y paradas en Lagoa Azul, Caxadaço, Dois Rios o Lopes Mendes según el itinerario. Jornada de 6 a 7 horas. Llevar calzado para rocas, protector solar y una bolsa impermeable."
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Trilha guiada a Lopes Mendes",
+      "descripcion": "Caminata por la Mata Atlántica hasta una de las playas más famosas de la isla.",
+      "precio": 35,
+      "detalle": "Incluye guía local, orientación en la trilha y apoyo durante el recorrido. La caminata dura entre 4 y 5 horas con desniveles moderados. Usar calzado cerrado, llevar repelente, agua y algo para comer."
+    },
+    {
+      "destinos": [
+        "paraty"
+      ],
+      "destino": "Paraty, Brasil",
+      "titulo": "Schooner por las islas de Paraty",
+      "descripcion": "Paseo en barco por bahías, playas y aguas tranquilas de la Costa Verde.",
+      "precio": 58,
+      "detalle": "Incluye navegación en escuna, paradas para nadar y tiempo libre en playas protegidas. La actividad dura aproximadamente 5 horas y sale del centro histórico. Llevar toalla, protector solar y dinero para consumos a bordo."
+    },
+    {
+      "destinos": [
+        "paraty"
+      ],
+      "destino": "Paraty, Brasil",
+      "titulo": "City tour histórico y Cachoeira do Tobogã",
+      "descripcion": "Historia colonial, cachaçaria y naturaleza en un mismo recorrido.",
+      "precio": 45,
+      "detalle": "Incluye guía, caminata por el centro histórico, visita a una cachaçaria y traslado a la cascada del Tobogã. Duración aproximada de 5 horas. Usar calzado cómodo y tener en cuenta que la visita a la cascada depende de la lluvia."
+    },
+    {
+      "destinos": [
+        "ilhabela"
+      ],
+      "destino": "Ilhabela, Brasil",
+      "titulo": "Jeep tour por playas y cascadas",
+      "descripcion": "Recorrido 4x4 por la costa y la Mata Atlántica de Ilhabela.",
+      "precio": 62,
+      "detalle": "Incluye vehículo 4x4, conductor-guía y paradas en Praia da Fome, Jabaquara y una cascada del parque. Duración de 6 horas aproximadamente. Llevar repelente, calzado que pueda mojarse y protección contra el sol."
+    },
+    {
+      "destinos": [
+        "ilhabela"
+      ],
+      "destino": "Ilhabela, Brasil",
+      "titulo": "Paseo de barco a Castelhanos",
+      "descripcion": "Navegación y acceso a una de las playas más preservadas de la isla.",
+      "precio": 82,
+      "detalle": "Incluye transporte marítimo ida y vuelta, guía de navegación y tiempo libre en Castelhanos. Jornada completa, condicionada por oleaje y autorización del parque. Llevar comida ligera, agua y bolsa impermeable."
+    },
+    {
+      "destinos": [
+        "ubatuba"
+      ],
+      "destino": "Ubatuba, Brasil",
+      "titulo": "Paseo en barco por las islas de Ubatuba",
+      "descripcion": "Paradas para baño y snorkel en playas de la costa norte.",
+      "precio": 58,
+      "detalle": "Incluye embarcación compartida y paradas en Ilha Anchieta, Praia do Flamengo u otras playas según el mar. Duración aproximada de 5 horas. El acceso al parque puede requerir tasa local; confirmar antes de embarcar."
+    },
+    {
+      "destinos": [
+        "ubatuba"
+      ],
+      "destino": "Ubatuba, Brasil",
+      "titulo": "Trilha guiada a las cascadas de Ubatuba",
+      "descripcion": "Caminata de naturaleza con baño en piscinas naturales.",
+      "precio": 40,
+      "detalle": "Incluye guía local, orientación por senderos y entrada al área visitada cuando corresponde. Actividad de medio día con ritmo moderado. Llevar zapatillas con buen agarre, repelente, agua y traje de baño."
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Ilhas Paradisíacas en lancha",
+      "descripcion": "Día de navegación por Ilha Grande, Lagoa Azul y playas de Angra.",
+      "precio": 75,
+      "detalle": "Incluye lancha compartida, marinero y paradas para nadar en islas y calas seleccionadas por el operador. Duración de 6 a 7 horas. La ruta puede variar por viento; llevar toalla, protector solar y efectivo."
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Paseo de barco a Ilha de Cataguases",
+      "descripcion": "Experiencia de medio día con playas tranquilas y aguas transparentes.",
+      "precio": 48,
+      "detalle": "Incluye traslado al muelle y navegación con tiempo libre en Ilha de Cataguases y alrededores. Salidas por la mañana o la tarde según disponibilidad. No incluye almuerzo ni consumos personales."
+    },
+    {
+      "destinos": [
+        "sao"
+      ],
+      "destino": "São Paulo, Brasil",
+      "titulo": "City tour por Avenida Paulista y Centro Histórico",
+      "descripcion": "Arquitectura, mercados, barrios culturales y principales postales de la ciudad.",
+      "precio": 52,
+      "detalle": "Incluye guía local y recorrido por Avenida Paulista, Liberdade, Mercado Municipal, Sé y Beco do Batman según el tiempo. Duración aproximada de 6 horas. Usar calzado cómodo y conservar pertenencias en zonas concurridas."
+    },
+    {
+      "destinos": [
+        "sao"
+      ],
+      "destino": "São Paulo, Brasil",
+      "titulo": "Ruta gastronómica por Liberdade y Mercado Municipal",
+      "descripcion": "Degustación de sabores brasileños y asiáticos con acompañamiento local.",
+      "precio": 68,
+      "detalle": "Incluye guía gastronómico y degustaciones seleccionadas en Liberdade y el Mercado Municipal. Actividad de 4 horas, generalmente al mediodía. Avisar alergias o restricciones y confirmar qué consumos están incluidos."
+    },
+    {
+      "destinos": [
+        "bho"
+      ],
+      "destino": "Belo Horizonte, Brasil",
+      "titulo": "Pampulha y arquitectura de Niemeyer",
+      "descripcion": "Circuito cultural por el conjunto de Pampulha y sus jardines.",
+      "precio": 45,
+      "detalle": "Incluye transporte, guía y paradas en la Igreja de São Francisco, Museo de Arte y Casa do Baile. Duración aproximada de 4 horas. Los museos pueden tener horarios especiales; confirmar calendario antes de reservar."
+    },
+    {
+      "destinos": [
+        "bho"
+      ],
+      "destino": "Belo Horizonte, Brasil",
+      "titulo": "Experiencia de bares y comida mineira",
+      "descripcion": "Recorrido por mercados y bares tradicionales con sabores de Minas Gerais.",
+      "precio": 62,
+      "detalle": "Incluye acompañamiento local y degustaciones de porciones típicas en dos o tres paradas. Duración estimada de 3 horas, al final de la tarde. El menú puede variar y conviene informar restricciones alimentarias."
+    },
+    {
+      "destinos": [
+        "curitiba"
+      ],
+      "destino": "Curitiba, Brasil",
+      "titulo": "City tour en la Linha Turismo",
+      "descripcion": "Jardín Botánico, Ópera de Arame, Museo Oscar Niemeyer y parques.",
+      "precio": 42,
+      "detalle": "Incluye orientación de guía y recorrido por los principales puntos de Curitiba, con paradas para fotos. Duración aproximada de 5 horas. El orden puede cambiar por tránsito y horarios de museos."
+    },
+    {
+      "destinos": [
+        "curitiba"
+      ],
+      "destino": "Curitiba, Brasil",
+      "titulo": "Morretes en tren por la Serra do Mar",
+      "descripcion": "Viaje escénico en tren y almuerzo típico del litoral paranaense.",
+      "precio": 98,
+      "detalle": "Incluye traslado, tramo en tren panorámico sujeto a disponibilidad y orientación en Morretes. Jornada de día completo. El precio puede cambiar según la categoría del vagón; reservar con anticipación en fines de semana."
+    },
+    {
+      "destinos": [
+        "porto"
+      ],
+      "destino": "Porto de Galinhas, Brasil",
+      "titulo": "Piscinas naturales de Porto de Galinhas",
+      "descripcion": "Paseo en jangada con snorkel en arrecifes durante la marea baja.",
+      "precio": 42,
+      "detalle": "Incluye jangada y tiempo de baño en las piscinas naturales cuando la marea lo permite. La salida se define por la tabla de mareas y dura entre 1,5 y 2 horas. Llevar protector solar y confirmar si se requiere tasa ambiental."
+    },
+    {
+      "destinos": [
+        "porto"
+      ],
+      "destino": "Porto de Galinhas, Brasil",
+      "titulo": "Praia dos Carneiros y paseo en catamarán",
+      "descripcion": "Excursión de día completo a una de las playas más famosas de Pernambuco.",
+      "precio": 65,
+      "detalle": "Incluye traslado ida y vuelta, paseo en catamarán y paradas en bancos de arena o baño de arcilla cuando están disponibles. Salida temprano y regreso al atardecer. No siempre incluye almuerzo o bebidas."
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Maragogi y piscinas naturales desde Maceió",
+      "descripcion": "Full day de playa con catamarán y aguas cristalinas del litoral norte.",
+      "precio": 58,
+      "detalle": "Incluye traslado desde Maceió y orientación para el paseo opcional a las Galés, siempre sujeto a marea baja. Jornada de 10 a 12 horas. Llevar efectivo, protector solar y confirmar el suplemento de catamarán."
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "São Miguel dos Milagres y Ruta Ecológica",
+      "descripcion": "Playas tranquilas, pueblos pesqueros y piscinas naturales del litoral alagoano.",
+      "precio": 62,
+      "detalle": "Incluye transporte ida y vuelta y paradas en playas de la Ruta Ecológica dos Milagres. Día completo con horarios sujetos a marea y clima. Se recomienda llevar agua, sombrero y reservar el paseo en jangada aparte si se desea."
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Catamarán a las Piscinas Naturales (Galés)",
+      "descripcion": "Navegación con snorkel en arrecifes durante la marea baja.",
+      "precio": 38,
+      "detalle": "Incluye catamarán y tiempo en las piscinas naturales, sujeto a la tabla de mareas y autorización local. El embarque suele ser temprano. Equipo de snorkel puede tener costo adicional; llevar protector solar y no tocar el coral."
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Buggy por playas del litoral norte",
+      "descripcion": "Recorrido por Antunes, Ponta do Mangue y playas cercanas.",
+      "precio": 48,
+      "detalle": "Incluye buggy con conductor y paradas panorámicas en playas del litoral norte. Duración aproximada de 4 horas. El paseo no incluye consumos en los beach clubs y puede cambiar por el estado de la arena."
+    },
+    {
+      "destinos": [
+        "nat"
+      ],
+      "destino": "Natal, Brasil",
+      "titulo": "Dunas de Genipabu en buggy",
+      "descripcion": "Aventura entre dunas, lagunas y playas con opción de emoción o paseo tranquilo.",
+      "precio": 62,
+      "detalle": "Incluye buggy con conductor habilitado, visita a Genipabu y paradas en lagunas y miradores. Jornada de medio día o día completo. Elegir con o sin emoción al contratar y llevar gafas de sol, pañuelo y agua."
+    },
+    {
+      "destinos": [
+        "nat"
+      ],
+      "destino": "Natal, Brasil",
+      "titulo": "Pipa desde Natal con Baía dos Golfinhos",
+      "descripcion": "Excursión costera con miradores, playas y tiempo libre en Pipa.",
+      "precio": 58,
+      "detalle": "Incluye traslado ida y vuelta desde Natal y paradas en Tibau do Sul, Cacimbinhas y Praia do Amor. Jornada de 10 horas aproximadamente. La observación de delfines depende del mar y de la naturaleza."
+    },
+    {
+      "destinos": [
+        "pip"
+      ],
+      "destino": "Praia do Pipa, Brasil",
+      "titulo": "Paseo en Buggy de Playa en Playa",
+      "descripcion": "Chapadão, Baía dos Golfinhos, Sibaúma y miradores de Pipa.",
+      "precio": 48,
+      "detalle": "Incluye buggy con conductor y recorrido por playas y miradores del litoral. Duración aproximada de medio día, con salida por la mañana o la tarde. Llevar ropa cómoda, protector solar y agua; algunos accesos dependen de la marea."
+    },
+    {
+      "destinos": [
+        "pip"
+      ],
+      "destino": "Praia do Pipa, Brasil",
+      "titulo": "Paseo en lancha para ver delfines",
+      "descripcion": "Navegación costera con baño y búsqueda responsable de fauna marina.",
+      "precio": 42,
+      "detalle": "Incluye lancha compartida, guía y navegación frente a las playas de Pipa. La actividad dura entre 2 y 3 horas y la fauna no puede garantizarse. Llevar traje de baño, sombrero y seguir las indicaciones del tripulante."
+    },
+    {
+      "destinos": [
+        "trancoso"
+      ],
+      "destino": "Trancoso, Brasil",
+      "titulo": "Praias do Espelho y Caraíva",
+      "descripcion": "Día completo por playas del litoral sur de Bahía.",
+      "precio": 78,
+      "detalle": "Incluye transporte ida y vuelta desde Trancoso, guía y paradas en Praia do Espelho y otros puntos de la costa. Salida temprano; el acceso puede tener tramos de camino irregular. Llevar calzado, agua y confirmar tasas o travesías incluidas."
+    },
+    {
+      "destinos": [
+        "trancoso"
+      ],
+      "destino": "Trancoso, Brasil",
+      "titulo": "City tour de Trancoso y Quadrado",
+      "descripcion": "Historia local, miradores y playas cercanas con tiempo libre.",
+      "precio": 45,
+      "detalle": "Incluye guía y traslado por el Quadrado histórico, Igreja de São João, miradores y una playa cercana. Duración aproximada de 4 horas, ideal para la tarde. Los consumos en restaurantes y beach clubs no están incluidos."
+    },
+    {
+      "destinos": [
+        "ssa"
+      ],
+      "destino": "Salvador de Bahía, Brasil",
+      "titulo": "Pelourinho, Elevador Lacerda y Mercado Modelo",
+      "descripcion": "Recorrido histórico y cultural por las postales de Salvador.",
+      "precio": 48,
+      "detalle": "Incluye guía local y recorrido por Pelourinho, Igreja do Bonfim, Mercado Modelo y Elevador Lacerda según horarios. Duración aproximada de 5 horas. Se recomienda ropa liviana y atención a las pertenencias en áreas concurridas."
+    },
+    {
+      "destinos": [
+        "ssa"
+      ],
+      "destino": "Salvador de Bahía, Brasil",
+      "titulo": "Bahía de Todos los Santos en schooner",
+      "descripcion": "Navegación con islas, música y tiempo para nadar.",
+      "precio": 58,
+      "detalle": "Incluye navegación en schooner por la bahía y parada en una isla, según el itinerario del día. Jornada de 6 horas aproximadamente. El almuerzo y las bebidas pueden ser opcionales; confirmar antes de embarcar."
+    },
+    {
+      "destinos": [
+        "for"
+      ],
+      "destino": "Fortaleza, Brasil",
+      "titulo": "Praia de Cumbuco y dunas en buggy",
+      "descripcion": "Excursión desde Fortaleza con lagoas, dunas y paseo opcional.",
+      "precio": 55,
+      "detalle": "Incluye traslado desde Fortaleza y tiempo libre en Cumbuco. El buggy por las dunas se contrata como complemento, con opción con o sin emoción. Jornada de 8 horas; llevar protector solar y efectivo."
+    },
+    {
+      "destinos": [
+        "for"
+      ],
+      "destino": "Fortaleza, Brasil",
+      "titulo": "Beach Park y costa de Aquiraz",
+      "descripcion": "Día de playa y parque acuático en la costa este de Ceará.",
+      "precio": 72,
+      "detalle": "Incluye traslado ida y vuelta desde Fortaleza y acceso al área seleccionada del parque si está disponible en la tarifa. Jornada completa. Confirmar calendario de funcionamiento y restricciones de altura de las atracciones."
+    },
+    {
+      "destinos": [
+        "jericoacoara"
+      ],
+      "destino": "Jericoacoara, Brasil",
+      "titulo": "Lagoa do Paraíso y Lagoa Azul en 4x4",
+      "descripcion": "Día de dunas, lagunas y hamacas sobre el agua.",
+      "precio": 58,
+      "detalle": "Incluye buggy o vehículo 4x4 compartido y paradas en las principales lagunas de Jeri. Duración aproximada de 7 horas. El itinerario depende del viento y del nivel de agua; llevar efectivo y protección solar."
+    },
+    {
+      "destinos": [
+        "jericoacoara"
+      ],
+      "destino": "Jericoacoara, Brasil",
+      "titulo": "Pôr do sol en la Duna y Pedra Furada",
+      "descripcion": "Circuito de tarde por los íconos naturales de Jericoacoara.",
+      "precio": 35,
+      "detalle": "Incluye traslado en buggy y acompañamiento local hasta Pedra Furada y la Duna do Pôr do Sol. Actividad de 4 horas, con regreso después del atardecer. Usar calzado para arena y llevar agua."
+    },
+    {
+      "destinos": [
+        "morro"
+      ],
+      "destino": "Morro de São Paulo, Brasil",
+      "titulo": "Volta à Ilha en lancha",
+      "descripcion": "Piscinas naturales, playas de Boipeba y paradas para baño.",
+      "precio": 82,
+      "detalle": "Incluye lancha compartida, guía y paradas en piscinas naturales de Moreré, Cueira y Cairu, según la marea. Jornada completa y sujeta al estado del mar. Llevar toalla, protector solar y efectivo para tasas o almuerzo."
+    },
+    {
+      "destinos": [
+        "morro"
+      ],
+      "destino": "Morro de São Paulo, Brasil",
+      "titulo": "Tirolesa y miradores de Morro",
+      "descripcion": "Aventura suave con vistas a la Primeira y Segunda Praia.",
+      "precio": 38,
+      "detalle": "Incluye orientación para la tirolesa y recorrido por los miradores principales. Actividad de medio día; la tirolesa puede cerrar por viento o lluvia. Usar calzado cómodo y guardar objetos sueltos."
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Baía dos Porcos y playas del Mar de Dentro",
+      "descripcion": "Circuito guiado por miradores y playas de aguas transparentes.",
+      "precio": 88,
+      "detalle": "Incluye traslado interno, guía ambiental y paradas en Sancho, Baía dos Porcos y miradores según acceso. Jornada de 6 horas. Las tasas del parque y preservación pueden cobrarse aparte; llevar snorkel y agua."
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Paseo en barco con snorkel y puesta de sol",
+      "descripcion": "Navegación por la costa con posibilidad de avistar delfines.",
+      "precio": 98,
+      "detalle": "Incluye embarcación, guía y equipo básico de flotación para una parada de snorkel. Duración de 4 horas, con horario condicionado por el mar. La observación de fauna no se garantiza; confirmar tasas y restricciones ambientales."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Paseo en escuna pirata",
+      "descripcion": "Navegación costera en escuna desde Florianópolis.",
+      "precio": 41.95,
+      "precio_brl": 190,
+      "detalle": "Precio de referencia: R$190. Presentá tu reserva en la boletería. Duración y recorrido sujetos a disponibilidad y condiciones del mar."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Catamarán con almuerzo",
+      "descripcion": "Excursión en catamarán con almuerzo incluido.",
+      "precio": 53.62,
+      "precio_brl": 250,
+      "detalle": "Precio de referencia: R$250. La excursión incluye almuerzo según la opción seleccionada. Confirmá horarios, menú y punto de embarque al reservar."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Excursión en barco a Isla de Campeche",
+      "descripcion": "Navegación desde Armação hacia el Caribe catarinense.",
+      "precio": 24.45,
+      "precio_brl": 100,
+      "detalle": "Precio de referencia: R$100. Incluye navegación y tiempo libre en la isla. Salidas sujetas al clima, oleaje y autorización del parque; confirmá si el traslado hasta el embarque está incluido."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Bautismo de buceo",
+      "descripcion": "Primera inmersión con barco, equipo e instructor.",
+      "precio": 101.28,
+      "precio_brl": 495,
+      "detalle": "Precio de referencia: R$495. La captura indica barco, equipamiento e instructor. La actividad depende de las condiciones del mar y puede requerir una ficha de salud."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Bombinhas y Praia de Quatro Ilhas",
+      "descripcion": "Excursión de día completo a playas de Bombinhas.",
+      "precio": 28.34,
+      "precio_brl": 120,
+      "detalle": "Precio de referencia: R$120. La captura indica traslado de ida y vuelta y visita a las playas. Confirmá itinerario, horarios y servicios incluidos."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Tour de playas de Florianópolis",
+      "descripcion": "Recorrido por las playas y paisajes más conocidos de la isla.",
+      "precio": 20.56,
+      "precio_brl": 80,
+      "detalle": "Precio de referencia: R$80. La captura indica traslado de ida y vuelta. El recorrido y las paradas dependen del operador y las condiciones del día."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "City tour de Florianópolis",
+      "descripcion": "Recorrido guiado por los puntos destacados de la ciudad.",
+      "precio": 26.39,
+      "precio_brl": 110,
+      "detalle": "Precio de referencia: R$110. La captura indica traslado de ida y vuelta. Confirmá los lugares visitados, horarios y punto de salida."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Beto Carrero World",
+      "descripcion": "Excursión al parque temático Beto Carrero World.",
+      "precio": 26.39,
+      "precio_brl": 110,
+      "detalle": "Precio de referencia: R$110. La captura muestra traslado y entrada; verificá qué tipo de ingreso incluye la tarifa y la disponibilidad para la fecha elegida."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Balneário Camboriú",
+      "descripcion": "Excursión a Balneário Camboriú con traslado y entradas.",
+      "precio": 41.95,
+      "precio_brl": 190,
+      "detalle": "Precio de referencia: R$190. La captura indica traslado de ida y vuelta y entradas. Confirmá qué atracciones están incluidas."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Guarda do Embaú",
+      "descripcion": "Excursión a Guarda do Embaú y sus paisajes costeros.",
+      "precio": 24.45,
+      "precio_brl": 100,
+      "detalle": "Precio de referencia: R$100. La captura indica traslado de ida y vuelta y guía. Confirmá horarios, recorrido y servicios incluidos."
+    },
+    {
+      "destinos": [
+        "camboriu"
+      ],
+      "destino": "Camboriú, Brasil",
+      "titulo": "Parque Unipraias y teleférico",
+      "descripcion": "Vistas de la costa, senderos y acceso al parque de atracciones.",
+      "precio": 52,
+      "detalle": "Incluye traslado local y acceso al circuito principal del Parque Unipraias, según disponibilidad. Medio día de actividad. Las atracciones adicionales se pagan aparte; llevar calzado cómodo y consultar altura mínima."
+    },
+    {
+      "destinos": [
+        "camboriu"
+      ],
+      "destino": "Camboriú, Brasil",
+      "titulo": "Paseo en barco por la costa de Balneário",
+      "descripcion": "Navegación panorámica desde la Barra Sul con música y paradas.",
+      "precio": 40,
+      "detalle": "Incluye embarcación compartida y recorrido frente a las playas centrales. Duración aproximada de 3 horas, sujeta al clima. Bebidas y consumos a bordo no están incluidos."
+    },
+    {
+      "destinos": [
+        "bombinhas"
+      ],
+      "destino": "Bombinhas, Brasil",
+      "titulo": "Snorkel en Ilha do Arvoredo",
+      "descripcion": "Navegación y bautismo de snorkel en aguas transparentes.",
+      "precio": 62,
+      "detalle": "Incluye embarcación, máscara, chaleco y acompañamiento de instructor durante el snorkel. La salida depende de la visibilidad y del oleaje. Llevar traje de baño, toalla y confirmar requisitos para la reserva."
+    },
+    {
+      "destinos": [
+        "bombinhas"
+      ],
+      "destino": "Bombinhas, Brasil",
+      "titulo": "Trilha de la Costa Esmeralda",
+      "descripcion": "Caminata guiada por playas, miradores y senderos de Mata Atlántica.",
+      "precio": 38,
+      "detalle": "Incluye guía local y recorrido por playas y senderos de Bombinhas, con dificultad moderada. Duración aproximada de 4 horas. Usar zapatillas, llevar agua y respetar las áreas protegidas."
+    },
+    {
+      "destinos": [
+        "rosa"
+      ],
+      "destino": "Praia do Rosa, Brasil",
+      "titulo": "Avistaje de ballenas desde los miradores",
+      "descripcion": "Recorrido costero y observación responsable durante la temporada.",
+      "precio": 42,
+      "detalle": "Incluye guía local y traslado entre miradores de Praia do Rosa y Garopaba. La actividad es estacional y la observación de ballenas no puede garantizarse. Llevar abrigo, calzado cómodo y consultar la temporada."
+    },
+    {
+      "destinos": [
+        "rosa"
+      ],
+      "destino": "Praia do Rosa, Brasil",
+      "titulo": "Trilha a Praia Vermelha y Ouvidor",
+      "descripcion": "Senderismo entre playas aisladas y paisajes de la costa sur.",
+      "precio": 35,
+      "detalle": "Incluye guía y orientación por senderos costeros entre Praia do Rosa, Vermelha y Ouvidor. Duración de 4 a 5 horas según el ritmo. Llevar agua, protector solar y calzado con agarre."
+    },
+    {
+      "destinos": [
+        "bcm"
+      ],
+      "destino": "Balneário Camboriú, Brasil",
+      "titulo": "City tour y Cristo Luz",
+      "descripcion": "Miradores, playas centrales y el monumento iluminado de la ciudad.",
+      "precio": 45,
+      "detalle": "Incluye traslado, guía y acceso al complejo Cristo Luz cuando esté operativo. Recorrido de medio día, con salida por la tarde para aprovechar la iluminación. Los horarios pueden variar por eventos o clima."
+    },
+    {
+      "destinos": [
+        "bcm"
+      ],
+      "destino": "Balneário Camboriú, Brasil",
+      "titulo": "Beto Carrero World desde Camboriú",
+      "descripcion": "Día completo en el principal parque temático de Santa Catarina.",
+      "precio": 92,
+      "detalle": "Incluye traslado ida y vuelta y entrada estándar al parque. Jornada completa con salida temprano. Las filas, atracciones premium y comidas no están incluidas; confirmar calendario antes de comprar."
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Tour del Vino en Bento Gonçalves y Vale dos Vinhedos",
+      "descripcion": "Cata de vinos, espumantes, almuerzo colonial y paisaje de la Serra Gaúcha.",
+      "precio": 78,
+      "detalle": "Incluye transporte desde Gramado, degustaciones seleccionadas y visita a bodegas. Jornada de 10 a 12 horas; algunas versiones suman Tren del Vino y almuerzo. Confirmar el itinerario exacto y avisar restricciones alimentarias."
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "City tour de Gramado y parques de Canela",
+      "descripcion": "Lago Negro, centro de Gramado, Catedral de Piedra y Cascata do Caracol.",
+      "precio": 55,
+      "detalle": "Incluye transporte y guía por las principales postales de Gramado y Canela. Duración aproximada de 7 horas. Entradas a parques o museos pueden cobrarse aparte según el circuito elegido."
+    },
+    {
+      "destinos": [
+        "canela"
+      ],
+      "destino": "Canela, Brasil",
+      "titulo": "Cascata do Caracol y Skyglass",
+      "descripcion": "Naturaleza, miradores y una de las atracciones más fotografiadas de la Serra.",
+      "precio": 62,
+      "detalle": "Incluye traslado desde Canela, visita a Caracol y orientación para Skyglass; la entrada puede variar según el paquete. Medio día o día completo. Consultar condiciones de viento y restricciones de acceso."
+    },
+    {
+      "destinos": [
+        "canela"
+      ],
+      "destino": "Canela, Brasil",
+      "titulo": "Tren del Vino y cultura italiana",
+      "descripcion": "Bento Gonçalves, degustaciones y experiencia de Maria Fumaça.",
+      "precio": 88,
+      "detalle": "Incluye transporte desde Canela, visita a bodegas, degustaciones y experiencia del Tren del Vino cuando haya disponibilidad. Excursión de día completo. Reservar con anticipación; el tren puede reemplazarse por otra actividad según el calendario."
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Cataratas del lado brasileño y Parque das Aves",
+      "descripcion": "Pasarelas panorámicas, selva y fauna de la región de Iguazú.",
+      "precio": 62,
+      "detalle": "Incluye traslado, guía y entradas al circuito brasileño y Parque das Aves si el paquete seleccionado lo contempla. Medio día de actividad. Llevar calzado cómodo, capa de lluvia y documento para los accesos."
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Cataratas argentinas con Garganta del Diablo",
+      "descripcion": "Día completo por los circuitos superior e inferior del parque argentino.",
+      "precio": 72,
+      "detalle": "Incluye traslado desde Foz, guía y orientación dentro del Parque Nacional Iguazú. Jornada completa; la entrada y el tren interno pueden cobrarse por separado según la tarifa. Llevar documento, agua y protección contra la lluvia."
+    },
+    {
+      "destinos": [
+        "rec"
+      ],
+      "destino": "Recife, Brasil",
+      "titulo": "Olinda histórica y Recife Antigo",
+      "descripcion": "Iglesias, casonas coloridas, arte y miradores del litoral pernambucano.",
+      "precio": 48,
+      "detalle": "Incluye transporte y guía por Recife Antigo, Marco Zero y el centro histórico de Olinda. Duración aproximada de 6 horas. Usar calzado cómodo y confirmar qué entradas o consumos están incluidos."
+    },
+    {
+      "destinos": [
+        "rec"
+      ],
+      "destino": "Recife, Brasil",
+      "titulo": "Porto de Galinhas desde Recife",
+      "descripcion": "Playa, jangada y tiempo libre en las piscinas naturales.",
+      "precio": 58,
+      "detalle": "Incluye traslado ida y vuelta desde Recife y orientación para la jangada en Porto de Galinhas. Día completo, con horario definido por la marea. La jangada, comidas y actividades opcionales pueden cobrarse aparte."
+    },
+    {
+      "destinos": [
+        "poa"
+      ],
+      "destino": "Porto Alegre, Brasil",
+      "titulo": "Gramado y Canela desde Porto Alegre",
+      "descripcion": "Excursión por la Serra Gaúcha con parques, arquitectura y gastronomía.",
+      "precio": 82,
+      "detalle": "Incluye transporte ida y vuelta y paradas panorámicas en Gramado y Canela. Jornada de 12 horas aproximadamente. Las entradas a parques y museos no están incluidas salvo indicación del operador."
+    },
+    {
+      "destinos": [
+        "poa"
+      ],
+      "destino": "Porto Alegre, Brasil",
+      "titulo": "Bento Gonçalves y Vale dos Vinhedos",
+      "descripcion": "Bodegas, degustaciones y cultura italiana de la Serra Gaúcha.",
+      "precio": 88,
+      "detalle": "Incluye traslado desde Porto Alegre, visita a bodegas y degustaciones seleccionadas. Excursión de día completo. El Tren del Vino y el almuerzo pueden formar parte de un paquete superior; confirmar al reservar."
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "cabo"
+      ],
+      "destino": "Cabo Frio, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "paraty"
+      ],
+      "destino": "Paraty, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "ilhabela"
+      ],
+      "destino": "Ilhabela, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "ubatuba"
+      ],
+      "destino": "Ubatuba, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "sao"
+      ],
+      "destino": "São Paulo, Brasil",
+      "titulo": "Free tour a pie por el centro histórico",
+      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
+      "precio": 20,
+      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
+    },
+    {
+      "destinos": [
+        "bho"
+      ],
+      "destino": "Belo Horizonte, Brasil",
+      "titulo": "Free tour a pie por el centro histórico",
+      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
+      "precio": 20,
+      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
+    },
+    {
+      "destinos": [
+        "curitiba"
+      ],
+      "destino": "Curitiba, Brasil",
+      "titulo": "Free tour a pie por el centro histórico",
+      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
+      "precio": 20,
+      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
+    },
+    {
+      "destinos": [
+        "porto"
+      ],
+      "destino": "Porto de Galinhas, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "nat"
+      ],
+      "destino": "Natal, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "pip"
+      ],
+      "destino": "Praia do Pipa, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "trancoso"
+      ],
+      "destino": "Trancoso, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "ssa"
+      ],
+      "destino": "Salvador de Bahía, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "for"
+      ],
+      "destino": "Fortaleza, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "jericoacoara"
+      ],
+      "destino": "Jericoacoara, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "morro"
+      ],
+      "destino": "Morro de São Paulo, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "fln"
+      ],
+      "destino": "Florianópolis, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "camboriu"
+      ],
+      "destino": "Camboriú, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "bombinhas"
+      ],
+      "destino": "Bombinhas, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "rosa"
+      ],
+      "destino": "Praia do Rosa, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "bcm"
+      ],
+      "destino": "Balneário Camboriú, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Snowland, el parque de nieve indoor",
+      "descripcion": "Nieve, trineo y clima frío bajo techo en pleno verano gaúcho.",
+      "precio": 55,
+      "detalle": "Incluye traslado y entrada general al parque temático de nieve artificial, con zona de trineos y bar de hielo. Actividad de medio día. Llevar ropa de abrigo; el parque provee camperas para la zona de nieve."
+    },
+    {
+      "destinos": [
+        "canela"
+      ],
+      "destino": "Canela, Brasil",
+      "titulo": "Parque do Caracol y su cascada",
+      "descripcion": "Mirador y torre de observación frente a la cascada más conocida de Canela.",
+      "precio": 25,
+      "detalle": "Incluye traslado y entrada al parque, con acceso al mirador de la cascada del Caracol y sendero corto por el bosque nativo. Actividad de medio día. Llevar calzado cómodo y cámara de fotos."
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Represa de Itaipú",
+      "descripcion": "Visita guiada a una de las mayores hidroeléctricas del mundo.",
+      "precio": 45,
+      "detalle": "Incluye traslado y recorrido panorámico por el circuito de visitantes de Itaipú Binacional, con parada en el mirador y proyección institucional. Duración aproximada de 2 horas y media. Llevar documento de identidad, es obligatorio para el ingreso."
+    },
+    {
+      "destinos": [
+        "rec"
+      ],
+      "destino": "Recife, Brasil",
+      "titulo": "Kayak o stand up paddle en la costa",
+      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
+      "precio": 30,
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+    },
+    {
+      "destinos": [
+        "poa"
+      ],
+      "destino": "Porto Alegre, Brasil",
+      "titulo": "Free tour a pie por el centro histórico",
+      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
+      "precio": 20,
+      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
+    },
+    {
+      "destinos": [
+        "bue"
+      ],
+      "destino": "Buenos Aires, Argentina",
+      "titulo": "Teatro Colón, Casa Rosada y el centro histórico",
+      "descripcion": "Los tres íconos de la ciudad con guía y entrada al Teatro Colón.",
+      "precio": 28,
+      "detalle": "Incluye guía local y recorrido por el Teatro Colón, la Plaza de Mayo, la Casa Rosada y el Cabildo, con entrada al Teatro Colón sujeta a disponibilidad. Duración aproximada de 3 horas. Llevar documento para el acceso."
+    },
+    {
+      "destinos": [
+        "bue"
+      ],
+      "destino": "Buenos Aires, Argentina",
+      "titulo": "City tour en bici por La Boca y Puerto Madero",
+      "descripcion": "Pedaleo por el barrio del tango, los muelles y la Costanera Sur.",
+      "precio": 32,
+      "detalle": "Incluye bicicleta, casco y guía. Recorrido por Caminito, la Vuelta de Rocha, Puerto Madero y la Costanera, con paradas para fotos. Duración aproximada de 3 horas. El circuito es de asfalto urbano y conviene circular con precaución."
+    },
+    {
+      "destinos": [
+        "bue"
+      ],
+      "destino": "Buenos Aires, Argentina",
+      "titulo": "Mercado de San Telmo y Antigüedades",
+      "descripcion": "Puestos de antigüedades, librerías de mapa y mogules del barrio.",
+      "precio": 24,
+      "detalle": "Incluye acompañamiento de guía por el Mercado de Antigüedades de San Telmo y las calles vecinas. Duración aproximada de 2 horas. El consume y las compras no están incluidos, y hay que negociar el precio con el vendedor."
+    },
+    {
+      "destinos": [
+        "bue"
+      ],
+      "destino": "Buenos Aires, Argentina",
+      "titulo": "Free tour a pie por el centro histórico",
+      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
+      "precio": 20,
+      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
+    }
+  ]
+}

@@ -20,3 +20,9 @@ REELS.md
 # ningun script del repo.
 _s.log
 _s.err
+
+# Planillas de trabajo con precios de agencia: no van al repo. Son material de
+# trabajo, no fuente de verdad, y los precios en reales cambian cada vez que la
+# agencia manda uno nuevo. Versionarlas mete conflictos en cada reenvio.
+data/*.xlsx
+!data/tabla-transfers.xlsx
