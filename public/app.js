@@ -7470,8 +7470,8 @@
 
     var h = '';
     h += '<section class="sec"><div class="hero">' +
-      '<div class="tags"><span class="tag">' + (data.fits ? 'La más conveniente para vos' : 'La más barata que encontramos') + '</span>' +
-      '<span class="tag ghost">' + esc(data.meta.dest.name) + '</span>' +
+      '<div class="tags tags--main"><span class="tag">' + (data.fits ? 'La más conveniente para vos' : 'La más barata que encontramos') + '</span></div>' +
+      '<div class="tags tags--meta"><span class="tag ghost">' + esc(data.meta.dest.name) + '</span>' +
       '<span class="tag ghost">' + data.meta.nights + ' noches</span>' + sourcePill + '</div>' +
       '<h3>' + esc(titleOf(rec)) + '</h3>' +
       '<p class="meta">' + dLong(dep) + ' a ' + dLong(ret) + ', ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '. Trayecto ' + esc(trayectoDe(rec)) + '.</p>' +
