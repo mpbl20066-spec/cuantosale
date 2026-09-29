@@ -274,6 +274,45 @@ console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a m
     subs.size === combinables + cruzan.length, 'hay ' + subs.size);
 }
 
+console.log('\n6b) El precio del tramo responde a la distancia');
+{
+  /* La app pone los km del tramo al lado de su precio, asi que el precio tiene
+     que depender de esos km. No lo hacia: la formula era
+     35 * (0,6 + 0,4 * (km/300)^0,6) y el 0,6 inicial era un piso tan alto que
+     a 7 km el termino de distancia valia 0,11. Los 18 pares mas cortos del
+     menu pagaban entre $12 y $25 por persona: trece dolares de diferencia en 31
+     km, y la etiqueta decia algo que el numero no media.
+
+     Ahora la curva va de un piso explicito (COMBO_TRANSFER_MIN_USD) al tope de
+     un traslado de aeropuerto (COMBO_TRANSFER_FULL_USD) a 300 km. Estas
+     comprobaciones existen para que los dos extremos no vuelvan a mentir. */
+  const precioEn = (km) => {
+    // mismo camino que comboTransfer, sin tener que buscar un par real
+    const t = Math.pow(km / 300, 0.6);
+    return Math.round(12 + (35 - 12) * t);
+  };
+  check('a 300 km sale lo que un traslado de aeropuerto', precioEn(300) === 35, precioEn(300) + ' vs 35');
+  check('cerca de 0 km sale el piso', precioEn(0) === 12, precioEn(0) + ' vs 12');
+  check('7 km y 37 km dan numeros distintos', precioEn(7) !== precioEn(37),
+    '7 km = $' + precioEn(7) + ', 37 km = $' + precioEn(37));
+
+  let anterior = 0, monotona = true;
+  for (let km = 3; km <= 1100; km += 7) { const v = precioEn(km); if (v < anterior) monotona = false; anterior = v; }
+  check('el precio crece con la distancia, sin saltos', monotona);
+
+  // Y sobre los pares reales, que es donde se nota: el mas corto y el mas largo
+  // del menu no pueden costar lo mismo.
+  const conPrecio = [...segundaDe.values()]
+    .map(v => ({ v, t: model.comboTransfer(v.b, v.a, 1) }))
+    .filter(x => x.t)
+    .sort((x, y) => x.t.distanceKm - y.t.distanceKm);
+  const corto = conPrecio[0], largo = conPrecio[conPrecio.length - 1];
+  check('el par mas corto del menu no cuesta lo mismo que el mas largo',
+    corto.t.perPaxUsd !== largo.t.perPaxUsd,
+    corto.v.a + ' + ' + corto.v.b + ' ($' + corto.t.perPaxUsd + ') contra ' +
+    largo.v.a + ' + ' + largo.v.b + ' ($' + largo.t.perPaxUsd + ')');
+}
+
 console.log('\n7) El control de segunda parada ofrece los mismos pares');
 {
   // El control "¿Sumás una segunda parada?" y el desplegable de Destino leen
