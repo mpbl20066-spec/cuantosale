@@ -722,6 +722,12 @@
   function getDestinationDailyCosts(key) { return DESTINATION_DAILY_COSTS[String(key || '').toLowerCase()] || DESTINATION_DAILY_COSTS.rio; }
   var massSearch = false;
   var detailState = null;
+  /* Qué rubros del viaje ya están reservados, para el "Reservado" del voucher.
+     Vive fuera de detailState a propósito: detailState se re-crea entero con
+     cada propuesta nueva (showProposalView), y se re-pinta entero con cada
+     recálculo, así que colgarlo ahí lo borraba. Acá sobrevive a los dos.
+     { viajeId: <uuid del viaje>, categorias: { traslados: true, ... } } */
+  var reservasViaje = { viajeId: null, categorias: {} };
   var ROADTRIP_VEHICLES = { onix: 13, gol: 12, argo: 12.5, hilux: 9, kwid: 15 };
   // Consumo (kWh cada 100 km) y capacidad de batería de modelos populares en
   // la región. Son specs de fábrica publicadas, no telemetría real: quedan
@@ -2342,9 +2348,17 @@
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
     var fuente = (tours[0] && tours[0].source) || 'local';
     /* Un solo origen queda: LOCAL_TOURS, con precio estimado. La fuente se lee
-       igual, porque es la que decide el titulo de la seccion ("Los imperdibles
-       de" contra "Actividades reales en") y asi queda en un solo lugar si manana
-       vuelve a haber actividades de otro origen con precio real. */
+       igual, porque es la que decide el titulo de la seccion ("Tours y
+       experiencias en" contra "Tours y experiencias reales en") y asi queda en un
+       solo lugar si manana vuelve a haber actividades de otro origen con precio
+       real.
+
+       El titulo dice QUE es la seccion, no el nombre de la ciudad: el resto de
+       las secciones del detalle nombran su categoria —"Vuelos", "Transfer desde
+       el aeropuerto", "A dónde va tu plata"—. "Los imperdibles de Natal" no
+       decia que eran tours, y con la seccion de la guia ("Guía Secreta de
+       Natal") al lado, dos secciones distintas empezaban con el mismo nombre de
+       ciudad. */
     var SOURCE_LABEL = {
       local: 'Precio referencial'
     };
@@ -2359,8 +2373,12 @@
        para no mandar el pedido a otro lado, y con dos pedidos posibles el error
        era facil. La seccion queda en "elegi lo que quieras"; quien elige decide
        cuando. */
-    var head = '<div class="local-tours__head"><div><span class="local-tours__eyebrow">EXPERIENCIAS EN DESTINO</span>' +
-      '<h2 id="local-tours-title">' + (fuente !== 'local' ? 'Actividades reales en ' : 'Los imperdibles de ') + esc(destinationName) + '</h2>' +
+    /* Sin eyebrow. Decia "EXPERIENCIAS EN DESTINO" arriba del h2, que ya decia
+       de que ciudad son las actividades: eran dos lineas de arriba para abajo
+       y la primera no aportaba el dato, lo traducía. Ademas "en destino" es
+       tautológico acá: la sección entera ES el destino. */
+    var head = '<div class="local-tours__head"><div>' +
+      '<h2 id="local-tours-title">' + (fuente !== 'local' ? 'Tours y experiencias reales en ' : 'Tours y experiencias en ') + esc(destinationName) + '</h2>' +
       '<p class="local-tours__summary">' + tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias') +
       (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '') +
       ' &middot; ' + esc(SOURCE_LABEL[fuente] || SOURCE_LABEL.local) + '</p></div></div>';
@@ -3716,26 +3734,22 @@
         + '<em>' + item.value + '</em>'
         + '</button>';
     }).join('');
-    /* "Reservar" va arriba de "Ver mi presupuesto", no al lado. Es la accion que
-       cierra el viaje y tiene su propio estado —se habilita solo cuando hay algo
-       reservable y lleva el total de lo que se reserva, que no es el total del
-       viaje— asi que necesita el ancho de la fila. Al lado, en dos columnas,
-       seria un boton con el texto partido.
+    /* "Reservar" no va mas en esta card. Se mude al voucher —el modal que abre
+       "Ver mi presupuesto", aca al lado— porque el boton necesita dos cosas que
+       aca no estan: el total de lo que se reserva, que NO es el total del viaje
+       que muestra esta card, y la lista de rubros elegidos, querecien esta
+       completa al lado. Mostrar "Reservar actividades y transfer" sin el numero
+       al lado de un boton que abre este mismo modal era el peor de los dos
+       caminos: dos botones a la misma accion, separados por nada, y el que
+       decia el precio no lo decia.
 
-       El boton se escribe entero aca, con su estado y su total, en vez de
-       actualizarse por partes desde un handler: este panel se repinta completo
-       en cada cambio, asi que un update parcial solo serviria para volver a
-       buscar en el DOM lo que se acaba de calcular. */
-    var pedido = checkoutPedido();
-    var reservaTotal = pedido.count ? money(checkoutTotals().total) : '';
+       Esta card queda como lo que es: el resumen del presupuesto, con "Ver mi
+       presupuesto" para ver el detalle y "Guardar viaje". */
     summary.innerHTML = '<div class="trip-summary__inner">' +
       '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong><span class="trip-summary__toggle-icon" aria-hidden="true">⌃</span></button>' +
       '<div class="trip-summary__details"><div class="trip-summary__bar" aria-label="Distribución del presupuesto">' + segments + '</div>' +
       '<div class="trip-summary__items">' + itemsHtml + '</div>' +
       '<div class="trip-summary__actions">' +
-      '<button type="button" class="trip-summary__reserve" data-book-reserve' + (pedido.count ? '' : ' disabled') + '><span>' +
-      (pedido.count ? 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades')) : 'Elegí algo para reservar') +
-      '</span>' + (reservaTotal ? '<em>' + reservaTotal + '</em>' : '') + '</button>' +
       '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
       '<button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div></div>' +
       '</div>';
@@ -3920,6 +3934,116 @@
       }
     });
   }
+  /* ---------- reservas: "Reservar" -> "Reservado" ----------
+     Un rubro del voucher cambia a "Reservado" cuando la persona completa la
+     acción que lo reservaba: el clic en el link de vuelo o de hotel (que abre
+     WhatsApp o Booking), o el confirmar del checkout para traslados y tours.
+
+     OJO con lo que esta marca dice: para vuelo y hotel significa "hay una
+     reserva en curso", no "esta confirmado". El link de Booking no avisa si la
+     persona termino comprando, así que la app no lo sabe y no lo inventa. Por
+     eso el boton deja poder deshacer y el title lo aclara.
+
+     Se guarda en Supabase, no en localStorage, para que el "Reservado" siga
+     ahí si la persona entra desde el celu después de reservarlo en la
+     computadora. Como la escritura va por una función SECURITY DEFINER y no
+     por la tabla, funciona sin sesion: la mayoria de las personas que reservan
+     no estan logueadas todavia, y con una RLS atada a auth.uid() no habria
+     forma de guardar nada. El id del viaje es un uuid que el navegador genera y
+     guarda por localStorage, y funciona como la contraseña de la fila igual que
+     el link en grupos_viaje. */
+  var RESERVAS_KEY = 'cuantosale_reservas_viaje';
+  function reservaDestino() {
+    var d = detailState && detailState.meta && detailState.meta.dest;
+    return d ? (d.name || d.key || '') : '';
+  }
+  /* El id del viaje, uno por combinación de destino + fechas + personas. Se
+     guarda en un mapa por huella para que el mismo viaje conserve su id entre
+     recargas y otro viaje del mismo navegador tenga el suyo. */
+  function viajeReservaId() {
+    if (!detailState || !detailState.meta) return null;
+    var m = detailState.meta;
+    var huella = [m.dest && m.dest.key, m.dep, m.ret, m.pax, m.origin].join('|');
+    var mapa = {};
+    try { mapa = JSON.parse(localStorage.getItem(RESERVAS_KEY) || '{}') || {}; } catch (e) { mapa = {}; }
+    if (!mapa[huella] || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(mapa[huella]))) {
+      mapa[huella] = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        // Sin randomUUID (http viejo) se arma un v4 a mano: el id tiene que ser
+        // un uuid de verdad porque la columna es uuid y un string arbitrario lo
+        // rechaza Postgres con un error que no dice nada en la pagina.
+        : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+          var r = Math.random() * 16 | 0;
+          return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+      try { localStorage.setItem(RESERVAS_KEY, JSON.stringify(mapa)); } catch (e) { /* modo privado */ }
+    }
+    return mapa[huella];
+  }
+  function reservasDe(categoria) { return !!reservasViaje.categorias[categoria]; }
+  /* Lee los rubros ya reservados de este viaje. Es una lectura, no un render: si
+     falla (sin config, sin red, o la función todavia no esta corrida en
+     Supabase) el voucher muestra "Reservar" como antes, que es el estado en el
+     que uno no se equivoca. */
+  async function cargarReservasViaje() {
+    var viajeId = viajeReservaId();
+    if (!viajeId || !supabaseClient) return;
+    var yaLeidas = reservasViaje.viajeId === viajeId;
+    try {
+      var result = await supabaseClient.rpc('reservas_leer', { p_viaje_id: viajeId });
+      if (result.error) return;
+      // El viaje pudo cambiar mientras esperaba la respuesta: se descarta la
+      // lectura vieja para no pintar "Reservado" de un rubro de otro viaje.
+      if (viajeReservaId() !== viajeId) return;
+      var categorias = {};
+      (result.data || []).forEach(function (c) { categorias[c] = true; });
+      reservasViaje = { viajeId: viajeId, categorias: categorias };
+      // Si el voucher está abierto se repinta, para que el "Reservado" aparezca
+      // sin tener que cerrarlo y abrirlo de nuevo.
+      if (yaLeidas) pintarVoucherReservas();
+    } catch (e) { /* sin reservas guardadas: todos los rubros quedan en "Reservar" */ }
+  }
+  async function marcarReservado(categoria, detalle) {
+    var viajeId = viajeReservaId();
+    if (!viajeId || !supabaseClient) return;
+    // Primero el botón, después la base. Se pinta al toque y se revierte si la
+    // escritura falla, para que no haya que esperar el round-trip a Supabase
+    // para ver que el toque entró. Y revierte de verdad: un "Reservado" que no
+    // se guardó se leería en la próxima carga como reservado sin serlo.
+    reservasViaje.categorias[categoria] = true;
+    pintarVoucherReservas();
+    try {
+      var result = await supabaseClient.rpc('reservas_marcar', { p_viaje_id: viajeId, p_categoria: categoria, p_destino: reservaDestino(), p_detalle: detalle || {} });
+      if (result.error) throw new Error(result.error.message);
+    } catch (error) {
+      delete reservasViaje.categorias[categoria];
+      pintarVoucherReservas();
+      console.warn('[reservas] no se pudo guardar', categoria, error);
+    }
+  }
+  async function desmarcarReservado(categoria) {
+    var viajeId = viajeReservaId();
+    if (!viajeId || !supabaseClient) return;
+    delete reservasViaje.categorias[categoria];
+    pintarVoucherReservas();
+    try {
+      var result = await supabaseClient.rpc('reservas_desmarcar', { p_viaje_id: viajeId, p_categoria: categoria });
+      if (result.error) throw new Error(result.error.message);
+    } catch (error) {
+      reservasViaje.categorias[categoria] = true;
+      pintarVoucherReservas();
+      console.warn('[reservas] no se pudo deshacer', categoria, error);
+    }
+  }
+  /* Repinta el voucher si está abierto. Se comprueba el dataset porque el modal
+     se usa para el checkout también, y en ese momento no hay voucher que
+     repintar: el innerHTML del checkout se perdería. */
+  function pintarVoucherReservas() {
+    var modal = $('#booking-modal');
+    if (!modal || modal.hidden) return;
+    if (modal.dataset.summaryText) openItinerarySummaryModal();
+  }
+
   /* ---------- Resumen final del itinerario ----------
      Flota sobre la página: se abre en #booking-modal, con fondo oscurecido,
      botón de cerrar y scroll propio, y se llega con el CTA "Ver mi presupuesto"
@@ -3997,9 +4121,22 @@
     // "Reservar" es un enlace cuando hay una URL y un botón apagado cuando no la
     // hay: que falte el vuelo o los tours se ve en el resumen, igual que se ve
     // en la lista de la página.
-    function bookCta(url, label, labelFor) {
+    /* Cuando el rubro ya está reservado, el enlace no se pinta: el link ya se
+       usó y dejarlo vivo invitaba a volver a abrir Booking. Sale un botón de
+       estado, que además sirve para deshacer. Sin salida, un "Reservado" mal
+       puesto —una reserva que después se canceló— no tenía arreglo desde la
+       página. El title aclara que para vuelo y hotel quiere decir "hay una
+       reserva en curso", porque el link no avisa si la compra terminó. */
+    function reservadoCta(categoria, aviso) {
+      return '<button type="button" class="voucher-item__cta is-reserved" data-deshacer-reserva="' + esc(categoria) + '" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</button>';
+    }
+    function reservadoLabel(categoria) {
+      return categoria === 'pasajes' ? 'Vuelo reservado' : (categoria === 'alojamiento' ? 'Hotel reservado' : 'Reservado');
+    }
+    function bookCta(url, label, labelFor, categoria) {
+      if (reservasDe(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a ' + label.toLowerCase() + '.');
       return url
-        ? '<a class="voucher-item__cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(labelFor) + '">' + esc(label) + '</a>'
+        ? '<a class="voucher-item__cta" data-reservar-rubro="' + esc(categoria) + '" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(labelFor) + '">' + esc(label) + '</a>'
         : '<button type="button" class="voucher-item__cta is-off" disabled>' + esc(label) + '</button>';
     }
     /* Las dos filas que reserva la app —tours y traslados— abren el checkout en
@@ -4009,7 +4146,8 @@
 
        Cuando la fila no tiene nada elegido no sale un boton que no abre nada:
        sale el aviso, con el mismo tono que las otras filas sin elegir. */
-    function reservarCta(activo, aviso, etiqueta) {
+    function reservarCta(activo, aviso, etiqueta, categoria) {
+      if (reservasDe(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
       return activo
         ? '<button type="button" class="voucher-item__cta" data-reservar-pedido aria-label="' + esc(etiqueta) + '">Reservar</button>'
         : '<p class="voucher-item__detail">' + esc(aviso) + '</p>';
@@ -4039,7 +4177,7 @@
        modalidad elegida no hay nada que reservar, asi que en vez de un boton que
        no abre nada dice que falta elegirlo y lo dice con el mismo tono que las
        otras filas sin elegir ("Sin actividades seleccionadas"). */
-    var transferCta = reservarCta(detailState.transferType, 'Elegí un transfer en la sección de traslados.', 'Reservar el traslado desde el aeropuerto');
+    var transferCta = reservarCta(detailState.transferType, 'Elegí un transfer en la sección de traslados.', 'Reservar el traslado desde el aeropuerto', 'traslados');
     // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
     // card; en ese caso no hay nada que decir y la fila queda solo con el monto.
     /* En un viaje combinado la fila de alojamiento necesita UNA linea por parada.
@@ -4067,16 +4205,37 @@
     // abajo los dos, y se leeria como que el titulo ese de todo el viaje.
     var hotelTitle = multiHotel ? 'Alojamiento · ' + hotelesElegidos.length + ' hoteles' : 'Alojamiento · ' + esc(selectedHotelName);
     var destinoTotal = localTotal + foodTotal;
+    /* El boton de reservar SOLO va aca, no en la card "Mi Viaje".
+       Aca esta el pedido completo —el total, que rubros hay y cuales no—, y el
+       boton muestra el total de lo que se reserva, que no es el total del viaje.
+       En la card ese numero no aparecia en ningun lado: la accion decia
+       "Reservar actividades y transfer" sin que se supiera por cuanto, al lado
+       de "Ver mi presupuesto", que abre este mismo modal. Dos caminos para el
+       mismo checkout, uno pegado al otro, y el que no decia el precio.
+
+       data-reservar-pedido es el mismo atributo que usan los "Reservar" de las
+       filas de traslado y actividades, con el mismo handler: los tres abren el
+       checkout con el mismo pedido, asi que el voucher no necesita un camino
+       nuevo ni un listener nuevo. */
+    var pedido = checkoutPedido();
+    var pedidoTotal = pedido.count ? money(checkoutTotals().total) : '';
+    var reservarTodo = '<div class="voucher-reserve">'
+      + '<button type="button" class="voucher-reserve__btn"' + (pedido.count ? ' data-reservar-pedido' : ' disabled') + '><span>'
+      + (pedido.count ? 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades')) : 'Elegí algo para reservar')
+      + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
+      + (pedido.count ? '' : '<p class="voucher-reserve__nota">Elegí un transfer o una actividad para poder reservar.</p>')
+      + '</div>';
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div><span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span></div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +
       '<ul class="voucher-list">' +
-      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline) : reservarCta(false, 'Elegí un vuelo en la sección de vuelos.', 'Reservar el vuelo')) +
-      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName) : '') +
+      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : reservarCta(false, 'Elegí un vuelo en la sección de vuelos.', 'Reservar el vuelo', 'pasajes')) +
+      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
       itemRow('traslados', transferTitle, '<p class="voucher-item__detail">' + transferNote + '</p>', transferTotal, transferCta) +
-      itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, reservarCta(selectedTours.length, 'Sin actividades seleccionadas.', 'Reservar las actividades')) +
+      itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, reservarCta(selectedTours.length, 'Sin actividades seleccionadas.', 'Reservar las actividades', 'tours')) +
       '</ul>' +
       '<section class="voucher-destino"><div class="voucher-destino__head"><h3>Gastos en destino</h3><p>Por día y total del viaje</p></div><ul class="voucher-destino__list"><li><span>Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + '</em></li><li><span>Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + '</em></li></ul><p class="voucher-destino__total">Total en destino <b>' + money(destinoTotal) + '</b></p></section>' +
+      reservarTodo +
       '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Compartir en Instagram</span></button><div class="voucher-actions__more">' +
       '<button type="button" class="voucher-chip" data-share-whatsapp aria-label="Enviar el itinerario por WhatsApp">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">WhatsApp</span></button>' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
@@ -4084,6 +4243,12 @@
       '</div></div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    /* Se pide la lista de reservados al abrir, no antes: es una lectura de
+       red y el voucher se abre desde un botón, así que pedirla con la
+       propuesta le sobra un round-trip a cada cambio de hotel o de fecha que
+       nadie está mirando. Si la respuesta llega con el voucher ya abierto,
+       cargarReservasViaje() lo repinta solo. */
+    cargarReservasViaje();
   }
   function syncDailyBudgetState() {
     if (!detailState || !detailState.meta) return;
@@ -6858,15 +7023,6 @@
         }
         return;
       }
-      /* El boton de reservar del panel. Va en este listener y no en el de
-         #vista-detalle porque #trip-summary es hermano de la vista, no esta
-         dentro: un listener puesto alla nunca lo ve. Es el mismo motivo por el
-         que los botones del checkout viven en el del modal. */
-      if (e.target.closest('[data-book-reserve]')) {
-        e.preventDefault();
-        openCheckout();
-        return;
-      }
       if (e.target.closest('[data-save-trip]')) { e.preventDefault(); saveCurrentTrip(); }
     });
     window.addEventListener('resize', syncTripSummaryViewport);
@@ -8148,7 +8304,32 @@ function comboNombreDestino() {
         if (!checkoutUrl) { closeBookingForm(); return; }
         ckConfirm.disabled = true;
         window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+        /* Los rubros que reserving la app —traslados y tours— quedan
+           reservados con el pedido enviado, no con el clic en el voucher. La
+           diferencia importa: hasta acá solo había una intención, y recién con
+           los datos del viajero y el medio de pago hay una reserva. Se marca
+           antes de cerrar el modal, pero no lo espera: guardar en Supabase no
+           puede frenar el pedido que ya salió por WhatsApp, y un fallo acá
+           revierte el "Reservado" sin tocar el mensaje que se mandó. */
+        if (detailState && detailState.transferType) marcarReservado('traslados', { tipo: detailState.transferType });
+        if (detailState && (detailState.selectedTours || []).length) marcarReservado('tours', { cantidad: detailState.selectedTours.length });
         closeBookingForm();
+        return;
+      }
+      /* Vuelo y hotel: el clic en el link ES la reserva. El link abre WhatsApp o
+         Booking en otra pestaña, así que este listener no lo cancela ni lo
+         espera: marca y deja que el navegador siga su curso. Con preventDefault
+         el voucher dejaría de servir para lo único que sirve, que es llegar al
+         link. */
+      var reservarRubro = e.target.closest('[data-reservar-rubro]');
+      if (reservarRubro) {
+        marcarReservado(reservarRubro.getAttribute('data-reservar-rubro'), {});
+        return;
+      }
+      var desmarcarRubro = e.target.closest('[data-deshacer-reserva]');
+      if (desmarcarRubro) {
+        e.preventDefault();
+        desmarcarReservado(desmarcarRubro.getAttribute('data-deshacer-reserva'));
         return;
       }
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
