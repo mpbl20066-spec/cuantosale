@@ -1,4 +1,4 @@
-/* version: 142
+/* version: 143
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2470,3 +2470,8 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
 .voucher-destino__monto{min-width:84px}
 .voucher-destino__total{margin-top:6px;padding-top:12px;border-top:2px solid var(--ink2)}
 .voucher-destino__total b{min-width:84px}
+
+/* Pie del voucher: mismo espacio entre bloques (16px) y entre botones (8px). */
+.voucher-split{margin-top:16px}
+.voucher-reserve{margin-top:12px}
+.voucher-actions{margin-top:12px;gap:8px}

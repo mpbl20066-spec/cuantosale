@@ -5185,7 +5185,7 @@
 
        El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
        se marca solo al completar el checkout. */
-      '<p class="voucher-canales__nota">En el vuelo y el hotel te llevamos al sitio donde se paga, pero ese sitio no nos avisa cuando terminaste. Por eso el paso te pide confirmarlo: as&iacute; queda anotado de verdad.</p>' +
+      '<p class="voucher-canales__nota">Recordá confirmar cada reserva una vez realizada para mantener el estado de tu viaje actualizado.</p>' +
       dividirBloque +
       reservarTodo +
       /* ABAJO, UN SOLO BOTON SOLIDO.
@@ -5199,7 +5199,7 @@
          Ahora: el CTA de reserva arriba, solo, y las tres acciones de utilidad
          en una barra de la misma altura, mismo borde fino y misma tinta. El
          menu "Compartir" junta WhatsApp, la tarjeta de Instagram y copiar el
-         texto, que antes eran tres botones y uno de ellos gigante. */ +
+         texto, que antes eran tres botones y uno de ellos gigante. */
       '<div class="voucher-actions">' +
       /* Tres utilidades, misma caja. WhatsApp sale de la barra y se queda
          adentro del menu: antes estaba en los dos lados, con el mismo icono
