@@ -2142,9 +2142,11 @@
          hotel de la ciudad y perdía justo el motivo por el que se está
          buscando. Antes ese link vivía en el server, adentro de las entradas
          inventadas que ya no se generan. */
+      var vacioQuery = new URLSearchParams({ ss: stopName });
+      if (hotelType === 'all-inclusive') vacioQuery.set('nflt', 'mealplan=5');
       var vacioLink = '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?' + vacioQuery.toString() + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(stopName) + ' ↗</a>';
-      var body = options.length
-        ? '<div class="hotel-grid">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + options.map(function (option) {
+      var body = opciones.length
+        ? '<div class="hotel-grid">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + opciones.map(function (option) {
           var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
           var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
           var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
