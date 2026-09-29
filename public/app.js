@@ -4003,14 +4003,34 @@
         : (Number(detailState.toursTotal) || 0);
     });
     summaryItems.sort(function (a, b) { return (Number(b.n) || 0) - (Number(a.n) || 0); });
-    /* El estado sale del monto, con una sola excepcion: los rubros que la persona
-       apago a proposito (hotel, comida, transporte local, transfer) se marcan
-       "No incluido" aunque valgan 0, porque 0 tambien puede ser "todavia no lo
-       elegiste" y son dos pedidos distintos. */
+    /* El estado sale del monto, con dos excepciones.
+
+       Una: los rubros que la persona apago a proposito (hotel, comida,
+       transporte local, transfer) se marcan "No incluido" aunque valgan 0,
+       porque 0 tambien puede ser "todavia no lo elegiste" y son dos pedidos
+       distintos.
+
+       La otra pesa mas que el monto. Si el rubro ya esta reservado, el estado
+       NO es "Sumado": "Sumado" dice que la cifra esta en el total, que es
+       cierto, pero no dice que esa plata ya quedo comprometida, y deja a la
+       persona con la duda de si tiene que reservarlo otra vez. El estado
+       reservado pisa al "Sumado" y lleva el canal al lado --de Booking, de
+       Google Flights o gestion directa-- que es la pregunta que aparece
+       justo en ese momento. */
     summaryItems.forEach(function (item) {
+      var reserva = estadoReserva(item.cat);
+      if (reserva) {
+        item.estado = reserva;
+        item.estadoClave = reserva === 'Reservado' ? 'confirmado' : 'wip';
+        var canal = canalDe(item.cat).canal;
+        item.detalle = item.detalle ? item.detalle + ' \u00b7 ' + canal : canal;
+        return;
+      }
       item.estado = item.excluido ? ESTADO.fuera : (item.n > 0 ? ESTADO.ok : ESTADO.vacio);
       item.estadoClave = item.excluido ? 'fuera' : (item.n > 0 ? 'ok' : 'vacio');
-    });
+    }
+
+);
     /* La barra es una sola, continua, con degradé.
 
        Antes eran N segmentos con un color por rubro (var(--c1), --c5, --c3...), con
@@ -4342,6 +4362,60 @@
     return mapa[huella];
   }
   function reservasDe(categoria) { return !!reservasViaje.categorias[categoria]; }
+  /* ---------- De quien es cada rubro, y que se puede afirmar ----------
+     El canal va al lado del precio porque responde la pregunta que la persona se
+     hace al verlo: quien me lo cobra y donde se confirma.
+
+     Los cuatro canales NO son del mismo tipo, y por eso el estado de reserva
+     tampoco:
+
+     - alojamiento: el boton arma un link a booking.com (bookingUrl()). La app
+       abre el link y no se entera de si la persona termino pagando. Marcar el
+       rubro no alcanza para decir "Comprado": seria inventar una confirmacion
+       que nadie nos dio. El estado es "En curso" y el title lo aclara.
+     - pasajes: el boton lleva a Google Flights con la busqueda armada. Los
+       precios que muestra la tarjeta son de SerpAPI, que es busqueda, no venta.
+       Mismo caso que el hotel: "En curso", nunca "Comprado".
+     - traslados y tours: la reserva los lleva la agencia y la app la marca al
+       completar el checkout de la app. Ahi si hay un hecho, y el estado es
+       "Reservado" a secas.
+
+     (Duffel aparece solo en comentarios viejos, explicando que ya no esta: no
+     hay integracion con Duffel y no se puede poner en la cara del usuario.) */
+  var CANAL_RESERVA = {
+    pasajes: { canal: 'Google Flights', externo: true },
+    alojamiento: { canal: 'Booking', externo: true },
+    traslados: { canal: 'Gestion directa', externo: false },
+    tours: { canal: 'Gestion directa', externo: false }
+  };
+  function canalDe(categoria) { return CANAL_RESERVA[categoria] || { canal: '', externo: false }; }
+  /* Devuelve el texto del estado, o null si el rubro no esta reservado. */
+  function estadoReserva(categoria) {
+    if (!reservasDe(categoria)) return null;
+    return canalDe(categoria).externo ? 'En curso' : 'Reservado';
+  }
+  /* La pastilla. Va con --good y no con un verde suelto: el proyecto usa mostaza
+     para "elegido" y verde solo para "confirmado", que es un estado distinto y
+     no compite con el. El que esta en curso lleva el mismo verde con el borde
+     punteado, para que se lea como algo abierto y no como algo cerrado. */
+  function chipReserva(categoria) {
+    var estado = estadoReserva(categoria);
+    if (!estado) return '';
+    var canal = canalDe(categoria);
+    var title = canal.externo
+      ? 'Hay una reserva abierta en ' + canal.canal + '. La app abre el sitio pero no puede confirmar el pago desde acá.'
+      : 'Reserva confirmada por la agencia, coordinated por ' + canal.canal.toLowerCase() + '.';
+    return '<span class="reserva-chip' + (canal.externo ? ' is-wip' : '') + '" title="' + esc(title) + '">'
+      + '<svg class="reserva-chip__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
+      + esc(estado) + '</span>';
+  }
+  /* El boton de detalle que reemplaza al de reservar cuando el rubro ya esta
+     reservado. Es secundario a proposito: la accion de reservar ya se hizo, asi
+     que lo unico que queda es volver a mirar el rubro. Un <button> y no un
+     <a>: no lleva a otra pagina, cierra el modal y lleva a la seccion. */
+  function detalleReservaCta(categoria) {
+    return '<button type="button" class="voucher-item__detalle" data-detalle-rubro="' + esc(categoria) + '" title="Volver a la seccion de ' + esc(categoria) + '">Detalle</button>';
+  }
   /* Lee los rubros ya reservados de este viaje. Es una lectura, no un render: si
      falla (sin config, sin red, o la función todavia no esta corrida en
      Supabase) el voucher muestra "Reservar" como antes, que es el estado en el
@@ -4445,6 +4519,16 @@
      se usa para el checkout también, y en ese momento no hay voucher que
      repintar: el innerHTML del checkout se perdería. */
   function pintarVoucherReservas() {
+    /* Las reservas se leen de la red y llegan despues del primer pintado. Las dos
+       cosas que dependen de ellas tienen que repintarse cuando llegan: el modal,
+       que ya lo hacia, y el panel "Mi Viaje", que no. Sin esto el panel seguia
+       diciendo "Sumado" en un vuelo que ya estaba reservado hasta que otra cosa
+       hiciera recalcular el total, que no tiene por que pasar nunca.
+
+       El panel se repinta siempre y sin mirar si esta visible: renderTripSummary
+       es barato y el early return por "no hay datos" lo hace inocuo cuando
+       todavia no hay viaje. */
+    try { renderTripSummary(); } catch (e) { /* todavia no hay viaje que pintar */ }
     var modal = $('#booking-modal');
     if (!modal || modal.hidden) return;
     if (modal.dataset.summaryText) openItinerarySummaryModal();
@@ -4530,12 +4614,31 @@
     // que usa el panel "Mi Viaje" y el desglose, para que el mismo rubro se vea
     // igual en los tres lugares.
     function itemRow(category, title, detailMarkup, amount, ctaMarkup) {
-      // controlReserva() va antes del CTA: el CTA es lo que toca el cliente y
-      // no se quiere que el control de la agencia se confunda con esa acción.
-      return '<li class="voucher-item"><span class="voucher-item__icon" style="color:var(' + getCategoryColor(category) + ')">' + categoryIcon(category) + '</span>' +
-        '<div class="voucher-item__body"><p class="voucher-item__title">' + title + '</p>' + detailMarkup + '</div>' +
-        '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + money(amount) + '</b>' + controlReserva(category) + (ctaMarkup || '') + '</div></li>';
+      /* Cuando el rubro esta reservado la fila cambia de forma, no solo de
+         texto: la pastilla de estado entra arriba de la bajada, en el lugar
+         del aviso de "sin seleccionar", que ya no aplica, y el boton de
+         reservar se va. En su lugar quedan el monto —que es el dato fijo, el
+         que ya se pago o se debe— y un "Detalle" secundario. El monto nunca
+         desaparece: es lo que la persona necesita para controlar. */
+      var reservado = estadoReserva(category);
+      var canal = canalDe(category);
+      var cuerpo = detailMarkup
+        /* El canal va siempre, reservado o no, y en el mismo lugar para los
+           cuatro rubros. Es la bajada que da confianza: si el estado no dice
+           de quien es el precio, el precio es un numero sin dueno. */
+        + (canal.canal ? '<p class="voucher-item__canal">' + esc(canal.canal) + '</p>' : '');
+      var lado = controlReserva(category)
+        + (reservado ? detalleReservaCta(category) : (ctaMarkup || ''));
+      return '<li class="voucher-item' + (reservado ? ' is-reservado' : '') + '"><span class="voucher-item__icon" style="color:var(' + getCategoryColor(category) + ')">' + categoryIcon(category) + '</span>' +
+        '<div class="voucher-item__body"><p class="voucher-item__title">' + title
+          /* La pastilla va en la linea del titulo, no en una propia. Antes ocupaba
+             una linea entera y la fila reservada daba 83px contra los 58 de las
+             demas, cuando el pedido era de una linea o dos con bajada. */
+          + (reservado ? '<span class="voucher-item__estado">' + chipReserva(category) + '</span>' : '')
+          + '</p>' + cuerpo + '</div>' +
+        '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + money(amount) + '</b>' + lado + '</div></li>';
     }
+
     // "Reservar" es un enlace cuando hay una URL y un botón apagado cuando no la
     // hay: que falte el vuelo o los tours se ve en el resumen, igual que se ve
     // en la lista de la página.
@@ -9412,6 +9515,22 @@ function comboNombreDestino() {
         e.preventDefault();
         closeBookingForm();
         openCheckout();
+      }
+      /* El "Detalle" de un rubro ya reservado.
+
+         Cierra el modal antes de saltar, y en ese orden: saltar primero dejaba
+         la pagina haciendo scroll detrás del modal, que sigue abierto encima, y
+         elcloseBookingForm() devolvia el foco al boton que abrio el voucher, que
+         ya no existia. Cerrando primero, el scroll se ve.
+
+         Reusa el salto del panel "Mi Viaje" y el del desglose, asi que el
+         destino es el mismo que el de las otras dos entradas. */
+      var detalleRubro = e.target.closest('[data-detalle-rubro]');
+      if (detalleRubro) {
+        e.preventDefault();
+        var categoria = detalleRubro.getAttribute('data-detalle-rubro');
+        closeBookingForm();
+        jumpToBudgetSection(categoria);
       }
     });
     /* Click afuera y Escape cierran el menu de compartir.

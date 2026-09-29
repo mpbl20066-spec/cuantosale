@@ -1,4 +1,4 @@
-/* version: 132
+/* version: 133
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -873,6 +873,55 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    algo que queda por hacer. Sigue siendo pulsable para deshacer, así que el
    hover tiene que delatarlo, si no parece un elemento muerto. */
 .voucher-item__cta.is-reserved{border-color:transparent;background:var(--good-soft);color:var(--good);cursor:pointer}
+/* ---------- Estado de reserva ----------
+
+   La pastilla con el check. Es la unica pastilla de la app que lleva un SVG
+   adentro: el "ok" tiene que leerse en la primera pasada, y una letra sola
+   con sans-serif chico se pierde entre el titulo y el precio. El check va en
+   currentColor, asi que el color lo pone el padre y no hace falta una clase
+   por estado. */
+.reserva-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;background:var(--good-soft);color:var(--good);font-size:10.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+.reserva-chip__ico{flex:0 0 auto;width:11px;height:11px;stroke-width:3.2}
+/* "En curso" no es lo mismo que "Reservado". El primero es de vuelo y hotel:
+   hay una reserva abierta en un sitio externo y la app no sabe si se pago.
+   Mismo verde, borde punteado, para que se lea como algo abierto y no como
+   algo cerrado. */
+.reserva-chip.is-wip{background:transparent;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 55%,transparent);color:var(--good)}
+/* La pastilla vive dentro del <p> del titulo, asi que el parrafo tiene que ser
+   una fila: con el flujo normal el <span> se caia a la linea de abajo y la fila
+   reservada daba 83px en vez de 58. flex-wrap por el nombre largo del hotel. */
+.voucher-item__title{display:flex;flex-wrap:wrap;align-items:center;gap:4px 7px}
+.voucher-item__estado{display:inline-flex;flex:0 0 auto;margin:0}
+
+/* De quien es el precio. Es la bajada que da confianza y va siempre, no solo
+   cuando esta reservado: un precio sin dueno es un numero. En el mismo lugar
+   y con el mismo tono para los cuatro rubros, que es lo que hace que la fila
+   se lea como la misma fila. */
+.voucher-item__canal{margin:0;color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.35;display:flex;align-items:center;gap:5px}
+.voucher-item__canal::before{content:"";flex:0 0 auto;width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.55}
+
+/* El "Detalle" que aparece en el lugar del boton de reservar. Es del mismo
+   tamanho que la pastilla, no del boton: la accion de reservar ya se hizo y
+   esto es mirar, no convertir. Por eso no toma el color de la marca —usar
+   --cel lo ponia al mismo nivel que el CTA del pie— y va con borde de 1px
+   como el resto de los controles menores del modal. */
+.voucher-item__detalle{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--ink2);font-family:inherit;font-size:11.5px;font-weight:700;line-height:1;cursor:pointer;transition:border-color .18s ease,color .18s ease}
+.voucher-item__detalle:hover{border-color:var(--ink2);color:var(--ink)}
+.voucher-item__detalle:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* La fila reservada se apaga un poco en el titulo: el numero sigue siendo el
+   dato, y el peso fuerte tiene que quedarse en el estado y no en el nombre,
+   que ya no se esta eligiendo. */
+.voucher-item.is-reservado .voucher-item__title{color:var(--ink2)}
+.voucher-item.is-reservado .voucher-item__amount{color:var(--ink)}
+
+/* En el panel "Mi Viaje" el estado reservado reemplaza a "Sumado" y usa el
+   mismo verde. El "En curso" mantiene el fondo hueco para no gastar el mismo
+   token dos veces con dos significados distintos. */
+.trip-summary__state.is-confirmado{background:var(--good-soft);color:var(--good);box-shadow:none}
+.trip-summary__state.is-wip{background:transparent;color:var(--good);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--good) 55%,transparent)}
+.trip-summary__item.is-reservado .trip-summary__meta b{color:var(--ink2)}
+
 .voucher-item__cta.is-reserved:hover{border-color:var(--good);background:var(--good-soft);color:var(--good)}
 /* Esta seccion era la unica del modal con fondo y radio propios, o sea una
    caja dentro de la caja: el unico bloque que se leia como otra pantalla.
