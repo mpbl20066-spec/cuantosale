@@ -3544,6 +3544,35 @@
     }
     return Math.max(0, Number(state.transfer) || 0);
   }
+
+  /* El traslado, partido en lo que el modelo estima y lo que se elige.
+
+     Antes `parts.traslados` traia la ESTIMACION del modelo (lib/model.js, con
+     una formula de km y un factor por tier) y recalcularTotalViaje() le SUMABA
+     el precio de la tabla. O sea que el traslado se contaba dos veces: la
+     estimacion y el precio real de la tabla, uno encima del otro.
+
+     Con el compartido elegido por defecto eso no es un detalle de redondeo: es
+     un total inflado en todos los destinos, sin que nada en pantalla lo explique.
+
+     Por eso la estimacion se separa del precio real. `estimadoAeropuerto` es la
+     parte que cubre el salto aeropuerto -> alojamiento y `entreParadas` la del
+     salto entre las dos paradas de un viaje combinado. Cuando hay modalidad
+     elegida, la primera se REEMPLAZA por el precio de la tabla y la segunda se
+     deja como estaba: el tramo entre paradas no tiene una modalidad que elegir
+     (es un solo pasaje por persona, ver tramosTransfer) y no se puede sustituir
+     por nada.
+
+     Cuando no hay nada elegido vuelve la estimacion completa, que es lo que
+     pasaba antes de este cambio. */
+  function trasladoDelViaje(state) {
+    if (!state) return 0;
+    if (state.transportMode === 'auto') return Number(state.auto) || 0;
+    var entre = state.multiStay ? Number(state.multiStay.transferBetweenUsd) || 0 : 0;
+    var elegido = getSelectedTransferAmount(state);
+    if (elegido > 0) return entre + elegido;
+    return (Number(state.baseTraslados) || 0) + entre;
+  }
   // Iconos por categoría para el resumen de presupuesto. Se dibujan con trazo
   // para que leguen bien en el panel chico, y heredan el color de la categoría.
   var CATEGORY_ICONS = {
@@ -4538,7 +4567,10 @@
     var parts = detailState.parts;
     var roadtrip = detailState.transportMode === 'auto';
     var transferCost = getSelectedTransferAmount(detailState);
-    var transport = roadtrip ? detailState.auto : (Number(parts.traslados) || 0) + transferCost;
+    // trasladoDelViaje() reemplaza la estimacion del modelo cuando hay modalidad
+    // elegida, en vez de sumarle el precio de la tabla encima. Sumar las dos era
+    // el doble conteo: ver el comentario de la funcion.
+    var transport = roadtrip ? detailState.auto : trasladoDelViaje(detailState);
     var budget = getBudgetBreakdown(detailState);
     var total = budget.total;
     var totalEl = document.querySelector('[data-detail-total]');
@@ -5173,7 +5205,20 @@
       return !(card.amount <= 0);
     }).map(function (card) {
       var isSelected = selected === card.key;
-      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + money(card.amount) + '</b></button>';
+      /* El precio, con su unidad explicita.
+
+         El compartido se cobra POR PERSONA y el privado POR VEHICULO, asi que el
+         numero solo no dice cuanto le toca a cada uno: con dos personas, un
+         compartido de R$52 y un privado de R$104 son el mismo total, y sin la
+         unidad la comparacion invita a elegir el privado pensando que sale la
+         mitad. Se muestra el unitario en grande y, en el compartido, el total
+         del grupo debajo. En el privado no hay unitario porque no existe. */
+      var paxT = Math.max(1, Number((detailState && detailState.meta && detailState.meta.pax) || S.pax) || 1);
+      var precio = card.key === 'shared'
+        ? money(card.amount) + '<span class="transfer-choice__unit"> por persona</span>' +
+          (paxT > 1 ? '<span class="transfer-choice__total"> · ' + money(card.amount * paxT) + ' los ' + paxT + '</span>' : '')
+        : money(card.amount) + '<span class="transfer-choice__unit"> por vehículo</span>';
+      return '<button type="button" class="transfer-choice' + (isSelected ? ' is-selected' : '') + '" data-transfer-choice="' + card.key + '" data-transfer-amount="' + card.amount + '" aria-pressed="' + (isSelected ? 'true' : 'false') + '"><span class="transfer-choice__icon">' + transferArt(card.key) + '</span><span class="transfer-choice__body"><strong>' + card.title + '</strong><small>' + card.desc + '</small></span><b class="transfer-choice__price">' + precio + '</b></button>';
     }).join('');
     /* Sin boton de reservar aca. Elegir la modalidad suma al presupuesto —igual
        que una card de actividades— y la reserva se pide desde "Mi Viaje", que es
@@ -5195,17 +5240,36 @@
        era falso, y antes el segundo ni siquiera aparecia como opcion: su monto
        entraba al total a ciegas, sin fila, sin modalidad y sin poder sacarlo. */
     var tramos = tramosTransfer(detailState);
+    /* La nota de "ya esta en tu total", y solo cuando el compartido esta elegido.
+
+       Sin esto, marcar el compartido por defecto es una card amarilla que cambia
+       una cifra y no dice por que. Y el total SI cambia: la estimacion del modelo
+       queda reemplazada por el precio de la tabla (ver trasladoDelViaje), que en
+       los 45 destinos es mas caro -- entre 1% y 4% del total del viaje. Decirlo
+       es lo que hace que el numero ms alto no parezca un error.
+
+       "Podés cambiar a privado" va sin parentesis: entre parentesis se lee como
+       una disculpa, y ademas acá la alternativa es real, no una sugerencia. */
+    var notaDeEleccion = selected === 'shared'
+      ? '<p class="transfer-choice-note">Incluido para tu comodidad. Si preferís otro, podés cambiar a privado.</p>'
+      : '';
     var filasTramos = tramos.map(function (tramo) {
+      /* El badge dice SOLO el nombre del servicio. Antes repetia la ruta entera
+         con los mismos kilometros que ya estan en la bajada de arriba
+         ("Aeropuerto Internacional de Salvador (SSA) → Praia do Forte, 62 km"),
+         y con eso la fila de cada tramo tenia la misma informacion dos veces a
+         distinta escala. La ruta y los km viven arriba; el badge identifica el
+         tipo de traslado y nada mas. */
       var cabeza = '<div class="transfer-leg"><div class="transfer-leg__head"><span class="transfer-leg__badge">' + esc(tramo.ferry ? 'Ferry' : 'Transfer') + '</span>' +
         '<strong>' + esc(tramo.from) + ' → ' + esc(tramo.to) + '</strong>' +
-        (tramo.note ? '<span class="transfer-leg__note">' + esc(tramo.note) + '</span>' : '') + '</div>';
+        '</div>';
       if (tramo.auto) {
         // No es una eleccion: es un pasaje que ya esta en el total. Sin card,
         // sin radio y sin "Agregar", porque no hay nada que agregar.
         return cabeza + '<p class="transfer-leg__auto">' + (tramo.ferry ? 'Un pasaje de ferry por persona' : 'Un transfer por persona entre las paradas') + ': <b>' + money(tramo.amount) + '</b>. Se coordina con el operador al reservar.</p></div>';
       }
       if (tramo.key === 'llegada') {
-        return cabeza + '<div class="transfer-choice-grid">' + cards + '</div></div>';
+        return cabeza + '<div class="transfer-choice-grid">' + cards + '</div>' + notaDeEleccion + '</div>';
       }
       return cabeza + '</div>';
     }).join('');
@@ -6886,6 +6950,28 @@
     // vieja pegada al mensaje de WhatsApp seria el error mas dificil de ver.
     checkoutState = { step: 0, form: {}, payment: '' };
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null, flightAutoPriced: false };
+    /* El compartido arranca elegido.
+
+       El total del traslado ya lo tiene el modelo como estimacion, y desde que
+       trasladoDelViaje() REEMPLAZA esa estimacion por el precio de la tabla
+       cuando hay modalidad, elegir el compartido no pisa el total: lo cambia por
+       el dato real, que es mas barato en la mayoria de los destinos.
+
+       Se elige el compartido y no el privado porque el privado no escala con la
+       cantidad de gente: se cobra por vehiculo, asi que para cuatro personas sale
+       mucho mas caro que cuatro pasajes de van. Arrancar en el mas caro seria
+       arrancar por la opcion que casi nadie quiere.
+
+       A un destino sin van compartida (una isla) NO se preselecciona nada:
+       getSelectedTransferAmount() devuelve 0 para 'shared' si soloPrivado, y
+       quedaria una card marcada con un precio de 0. */
+    if (selectedTransportMode === 'flight' && detailState) {
+      var preciosTransfer = transferPreciosDe(data.meta);
+      if (!preciosTransfer.soloPrivado && preciosTransfer.compartido > 0) {
+        detailState.transferType = 'shared';
+        detailState.transfer = getSelectedTransferAmount(detailState);
+      }
+    }
     var nights = Math.max(1, Number(data.meta.nights) || 1);
     var pax = Math.max(1, Number(data.meta.pax) || 1);
     if (data.meta.multiStay && data.meta.multiStay.stays && data.meta.multiStay.stays.length === 2) {

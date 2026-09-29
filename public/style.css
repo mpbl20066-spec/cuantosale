@@ -1,4 +1,4 @@
-/* version: 126
+/* version: 127
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1077,7 +1077,16 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* El dibujo del transfer va a 34px dentro del recuadro de 44: a 24 las cabezas
    de los pasajeros se perdían, que es justo el detalle que explica la
    diferencia entre las dos opciones. */
-.transfer-choice__art{display:block;width:34px;height:34px}.transfer-choice__body{flex:1;min-width:0;display:grid;gap:3px}.transfer-choice strong{font-size:14px}.transfer-choice__price{flex:0 0 auto;font-family:var(--fh);font-size:24px}.transfer-choice small{color:var(--ink2);line-height:1.35}
+.transfer-choice__art{display:block;width:34px;height:34px}.transfer-choice__body{flex:1;min-width:0;display:grid;gap:3px}.transfer-choice strong{font-size:14px}.transfer-choice__price{flex:0 0 auto;font-family:var(--fh);font-size:24px;line-height:1.1;white-space:nowrap}
+/* La unidad va pegada al numero pero en la tipografia del cuerpo, y el total del
+   grupo debajo. Sin esto, dos personas ven "R$ 52" y "R$ 104" y eligen el privado
+   pensando que es mas barato, cuando son el mismo total. */
+.transfer-choice__unit{font-family:var(--fb);font-size:11px;font-weight:600;color:var(--ink2);letter-spacing:0}
+.transfer-choice__total{display:block;font-family:var(--fb);font-size:11px;font-weight:600;color:var(--ink2);letter-spacing:0;margin-top:2px}.transfer-choice small{color:var(--ink2);line-height:1.35}
+/* La nota de "ya esta en tu total". Va DESPUES de la grilla de cards y con el
+   mismo --ink2 del resto del texto secundario: explica, no vende, y si tuviera
+   mas peso competiria con el precio. */
+.transfer-choice-note{margin:10px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.5}
 /* Elegido se marca igual que las otras cuatro card elegibles de la app
    (hoteles, tours, comidas, presupuesto diario), con los mismos tokens.
 
