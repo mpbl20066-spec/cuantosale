@@ -13,6 +13,12 @@
     "revisado": "2026-09-29"
   },
   "destinos": {
+    "ajuda": {
+      "name": "Arraial d’Ajuda",
+      "region": "Bahía",
+      "lat": -16.49041,
+      "lon": -39.17713
+    },
     "for": {
       "name": "Fortaleza",
       "region": "Ceará",
@@ -134,7 +140,7 @@
       "lon": -35.04416
     },
     "trancoso": {
-      "name": "Trancoso / Arraial d’Ajuda",
+      "name": "Trancoso",
       "region": "Bahía",
       "lat": -16.4832,
       "lon": -39.08369

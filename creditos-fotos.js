@@ -147,6 +147,26 @@ if (typeof module !== 'undefined' && module.exports) module.exports = FOTO_CREDI
     sinFicha.forEach((u) => console.log('   ' + u));
   }
 
+  /* Perder una foto concreta importa aunque el total suba.
+
+     El guard de abajo compara cantidades, y con eso no alcanza: al sumar la
+     foto de Arraial d'Ajuda, 11 fotos que estaban acreditadas Losing el
+     credito y el total subio de 49 a 61, asi que el guard lo dio por bueno y
+     escribio la tabla. Once fotos de la guia quedaron sin acreditar y
+     test.js se entero: "fln / Praia do Campeche: la foto no esta en la tabla
+     de creditos".
+
+     Commons devuelve "no devolvio ficha" en fotos que SI existen, por lo que
+     parece un corte de tasa o un 429 parcial. El sintoma es el mismo que el
+     Ctrl+C que el guard original buscaba, asi que la regla correcta es la misma:
+     una corrida incompleta no escribe nada. */
+  if (sinFicha.length) {
+    console.log('\nNO SE ESCRIBIO NADA: ' + sinFicha.length + ' de las ' + urls.length +
+      ' fotos de la app quedaron sin ficha en Commons. Suele ser un 429 a mitad de camino.');
+    console.log('Volvé a correrlo. No borres el archivo a mano: este es el que hay que conservar.');
+    process.exit(1);
+  }
+
   if (nuevas < previas) {
     console.log('\nNO SE ESCRIBIO NADA: la corrida dio ' + nuevas + ' creditos y el archivo ' +
       'tiene ' + previas + '. Suele ser un 429 de Commons a mitad de camino.');

@@ -55,7 +55,8 @@
   igu: { name: 'Foz de Iguazú', transport: { eco: 12, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } },
   fernando: { name: 'Fernando de Noronha', transport: { eco: 30, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } },
   pip: { name: 'Pipa', transport: { eco: 16, confort: 35 }, food: { casual: 30, moderado: 55, gourmet: 90 } },
-  trancoso: { name: 'Trancoso / Arraial d’Ajuda', transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
+  trancoso: { name: 'Trancoso', transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
+  ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 19, confort: 42 }, food: { casual: 37, moderado: 68, gourmet: 115 } },
   morro: { name: 'Morro de São Paulo', transport: { eco: 20, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
   portoseguro: { name: 'Porto Seguro', transport: { eco: 18, confort: 40 }, food: { casual: 33, moderado: 60, gourmet: 105 } },
   itacare: { name: 'Itacaré', transport: { eco: 18, confort: 40 }, food: { casual: 32, moderado: 58, gourmet: 100 } },
@@ -304,6 +305,12 @@
       "confianza": "media",
       "verificado": "2026-09-27",
       "nota": "Pueblo de playa con vida nocturna y jetset, el mas caro de Bahia despues de Salvador. El contraste entre el almuerzo a R$19,90 y la cena en la playa a R$150 por mesa es el rango real."
+    },
+  ajuda: {
+      "fuente": "No hay dato propio de Arraial d'Ajuda. Se deriva de Trancoso, que esta a 7 km por la misma costa y con la misma balsa: mismo tipo de pueblo, misma escala de beach clubs. Instagram y TikTok de la zona de Porto Seguro arman el mismo rango que el de Trancoso.",
+      "confianza": "baja",
+      "verificado": "2026-09-29",
+      "derivacion": "Copia de trancoso con un escalon menos. Arraial d'Ajuda es el pueblo mas chico de los dos y sin la vida nocturna de Trancoso, asi que come un poco mejor, pero la diferencia es chica: son 7 km. Si Trancoso esta bien calibrado, Arraial tambien."
     },
   morro: {
       "fuente": "Se buscaron cartas de restaurante y guias de la Bahia. Morro de Sao Paulo es un pueblo de playa a una hora por tierra de Salvador, con muelle y vida nocturna, del mismo tipo que Trancoso. Lo unico publicado que se le acerca es un menu de almuerzo en la praia a R$55 por persona y una cena de happy hour a R$99 para dos, que es la misma escala de Trancoso. No hay dato propio: el valor es copia de Trancoso.",

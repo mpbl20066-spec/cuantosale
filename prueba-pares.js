@@ -41,6 +41,9 @@ function extraer(nombre) {
 }
 const gHub = bloque(app, 'var DESTINATION_HUBS = [', '\n  ];');
 const gGrupos = bloque(app, 'var DESTINATION_GROUPS = [', '\n  ];');
+// Cuantos grupos hay, contado del fuente. Ver la comprobacion que lo usa: el
+// numero estaba escrito a mano y ya no coincidia con la app.
+const GRUPOS_ESPERADOS = [...gGrupos.matchAll(/\{ id: '[^']+', label: '[^']*', image: '[^']*', keys: \[/g)].length;
 
 // Los pares que ofrece el desplegable. Los grupos del patron son 1=label,
 // 2=key, 3=subcategory.
@@ -172,7 +175,12 @@ console.log('\n6) Los ' + subs.size + ' salen de los grupos, no de una lista a m
     clavesPorGrupo.set(m[1], claves);
   }
   console.log('   grupos leidos: ' + new Set(grupoDe.values()).size + ', destinos: ' + grupoDe.size);
-  check('se leen los 11 grupos', new Set(grupoDe.values()).size === 11, new Set(grupoDe.values()).size + ' grupos');
+  // El numero de grupos no se escribe a mano: se cuenta sobre DESTINATION_GROUPS.
+  // Estaba en 11 y hacia tiempo que son mas, asi que la comprobacion fallaba por
+  // un numero viejo y no por un grupo roto, que es peor: entrena a leer el rojo
+  // como ruido.
+  check('se leen todos los grupos', new Set(grupoDe.values()).size === GRUPOS_ESPERADOS,
+    new Set(grupoDe.values()).size + ' grupos, esperados ' + GRUPOS_ESPERADOS);
   check('todos los destinos de un par pertenecen a un grupo',
     [...segundaDe.keys()].every(k => grupoDe.has(segundaDe.get(k).a) && grupoDe.has(segundaDe.get(k).b)),
     [...segundaDe.keys()].filter(k => !grupoDe.has(segundaDe.get(k).a) || !grupoDe.has(segundaDe.get(k).b)).join(', '));

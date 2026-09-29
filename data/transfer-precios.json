@@ -347,8 +347,22 @@
       "confianza": "baja",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 30 km de OSRM: US$ 20 compartido y US$ 31 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
     },
+    "ajuda": {
+      "nombre": "Arraial d’Ajuda",
+      "iata": "SSA",
+      "modo": "car",
+      "km": 170,
+      "horas": 2.8,
+      "compartido": 30,
+      "privado": 118,
+      "real": [],
+      "fuente": "Sin precio real para esta ruta. Los km salen de OSRM: 170 desde SSA, 7 mas que Trancoso porque Arraial esta 7 km mas adelante por la misma ruta. Los dos precios salen del modelo de distancia de _meta.modelo.",
+      "verificado": "2026-09-29",
+      "confianza": "baja",
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 118 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+    },
     "trancoso": {
-      "nombre": "Trancoso / Arraial d’Ajuda",
+      "nombre": "Trancoso",
       "iata": "SSA",
       "modo": "car",
       "km": 163,

@@ -39,6 +39,11 @@
     nat: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg/1920px-Natal%2C_capital_do_Rio_Grande_do_Norte%2C_Brasil.jpg',
     pip: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/PipaBeachView.JPG/1920px-PipaBeachView.JPG',
     trancoso: 'https://upload.wikimedia.org/wikipedia/commons/0/0b/Trancoso%2C_Porto_Seguro%2C_Bahia_Brazil.jpg',
+    /* La foto de Arraial d'Ajuda es la balsa del cruce desde Porto Seguro, que es
+       la imagen que identifica al pueblo: la balsa es la unica forma de llegar
+       sin carro. La otra cara de la entrada era una sola clave, asi que no
+       habia ninguna foto propia de este pueblo. */
+    ajuda: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Arraial_D%27ajuda%2C_Porto_Seguro-BA.jpg/1920px-Arraial_D%27ajuda%2C_Porto_Seguro-BA.jpg',
     ssa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Salvador_BA_%28cropped%29_2.jpg/1920px-Salvador_BA_%28cropped%29_2.jpg',
     for: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Fortaleza%2C_Brazil_%284%29_%28cropped%29.jpg',
     jericoacoara: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/Anderps_067.JPG/1920px-Anderps_067.JPG',
@@ -380,7 +385,7 @@
     tour(['maragogi'], 'Maragogi, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
     tour(['nat'], 'Natal, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
     tour(['pip'], 'Praia do Pipa, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
-    tour(['trancoso'], 'Trancoso / Arraial d’Ajuda, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
+    tour(['trancoso'], 'Trancoso, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
     tour(['ssa'], 'Salvador de Bahía, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
     tour(['for'], 'Fortaleza, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
     tour(['jericoacoara'], 'Jericoacoara, Brasil', 'Kayak o stand up paddle en la costa', 'Alquiler de equipo con instructor para recorrer la costa a tu ritmo.', 30, 'Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.'),
@@ -570,28 +575,39 @@
 { label: 'Capão da Canoa', key: 'canoa' },
       { label: 'Torres + Capão da Canoa', key: 'torres', secondKey: 'canoa' }
     ] },
-    { id: 'bahia', label: 'Bahía', image: 'ssa', keys: ['ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso'], subcategories: [
+    { id: 'bahia', label: 'Bahía', image: 'ssa', keys: ['ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso', 'ajuda'], subcategories: [
 { label: 'Salvador de Bahía', key: 'ssa' },
 { label: 'Porto Seguro', key: 'portoseguro' },
 { label: 'Praia do Forte', key: 'forte' },
 { label: 'Morro de São Paulo', key: 'morro' },
 { label: 'Itacaré', key: 'itacare' },
-{ label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso' },
+{ label: 'Trancoso', key: 'trancoso' },
+{ label: 'Arraial d\'Ajuda', key: 'ajuda' },
       { label: 'Salvador + Porto Seguro', key: 'ssa', secondKey: 'portoseguro' },
       { label: 'Salvador + Praia do Forte', key: 'ssa', secondKey: 'forte' },
       { label: 'Salvador + Morro de São Paulo', key: 'ssa', secondKey: 'morro' },
       { label: 'Salvador + Itacaré', key: 'ssa', secondKey: 'itacare' },
-      { label: 'Salvador + Arraial d\'Ajuda', key: 'ssa', secondKey: 'trancoso' },
+      { label: 'Salvador + Arraial d\'Ajuda', key: 'ssa', secondKey: 'ajuda' },
+      { label: 'Salvador + Trancoso', key: 'ssa', secondKey: 'trancoso' },
       { label: 'Porto Seguro + Praia do Forte', key: 'portoseguro', secondKey: 'forte' },
       { label: 'Porto Seguro + Morro de São Paulo', key: 'portoseguro', secondKey: 'morro' },
       { label: 'Porto Seguro + Itacaré', key: 'portoseguro', secondKey: 'itacare' },
-      { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', secondKey: 'trancoso' },
+      { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', secondKey: 'ajuda' },
+      { label: 'Porto Seguro + Trancoso', key: 'portoseguro', secondKey: 'trancoso' },
       { label: 'Praia do Forte + Morro de São Paulo', key: 'forte', secondKey: 'morro' },
       { label: 'Praia do Forte + Itacaré', key: 'forte', secondKey: 'itacare' },
-      { label: 'Praia do Forte + Arraial d\'Ajuda', key: 'forte', secondKey: 'trancoso' },
+      { label: 'Praia do Forte + Arraial d\'Ajuda', key: 'forte', secondKey: 'ajuda' },
+      { label: 'Praia do Forte + Trancoso', key: 'forte', secondKey: 'trancoso' },
       { label: 'Morro de São Paulo + Itacaré', key: 'morro', secondKey: 'itacare' },
-      { label: 'Morro de São Paulo + Arraial d\'Ajuda', key: 'morro', secondKey: 'trancoso' },
-      { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', secondKey: 'trancoso' }
+      { label: 'Morro de São Paulo + Arraial d\'Ajuda', key: 'morro', secondKey: 'ajuda' },
+      { label: 'Morro de São Paulo + Trancoso', key: 'morro', secondKey: 'trancoso' },
+      { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', secondKey: 'ajuda' },
+      { label: 'Itacaré + Trancoso', key: 'itacare', secondKey: 'trancoso' },
+      /* El par de los dos pueblo juntos. Son 7 km por la misma ruta, asi que el
+         server lo acepta facil, pero es el viaje que de verdad se hace cuando se
+         va a esa costa: dos noches, una en cada uno, y el traslado entre ellos
+         son veinte minutos. */
+      { label: 'Trancoso + Arraial d\'Ajuda', key: 'trancoso', secondKey: 'ajuda' }
     ] },
     /* Jericoacoara entra al Nordeste y "Fortaleza / Jericoacoara" se separa en
        dos destinos y un par.
@@ -625,6 +641,15 @@
 { label: 'Natal', key: 'nat' },
 { label: 'Pipa', key: 'pip' },
 { label: 'Fortaleza', key: 'for' },
+/* Fernando de Noronha entra al Nordeste pero SIN pares de dos paradas, y eso es
+   correcto: es una isla a 350 km de la costa y se llega en vuelo desde REC. No
+   tiene coordenadas en DEST_COORDS a proposito, y por eso comboTransfer()
+   devuelve null para cualquier par que lo toque. Es el mismo criterio que
+   Jericoacoara, que esta en este grupo de pares pero tiene grupo propio para la
+   tarjeta. Si se le agregara la coordenada, la distancia en linea recta la
+   pondria a menos de 1.100 km de Recife y habria que offerentar un "Fernando +
+   Recife" que es un vuelo de una hora, no un transfer. */
+{ label: 'Fernando de Noronha', key: 'fernando' },
       { label: 'Porto de Galinhas + Maragogi', key: 'porto', secondKey: 'maragogi' },
       { label: 'Porto de Galinhas + Maceió', key: 'porto', secondKey: 'mcz' },
       { label: 'Porto de Galinhas + Recife', key: 'porto', secondKey: 'rec' },
@@ -884,22 +909,29 @@
 { label: 'Praia do Forte', key: 'forte', codes: 'SSA' },
 { label: 'Morro de São Paulo', key: 'morro', codes: 'SSA' },
 { label: 'Itacaré', key: 'itacare', codes: 'SSA' },
-{ label: 'Arraial d\'Ajuda / Trancoso', key: 'trancoso', codes: 'SSA' },
+{ label: 'Trancoso', key: 'trancoso', codes: 'SSA' },
+{ label: 'Arraial d\'Ajuda', key: 'ajuda', codes: 'SSA' },
       { label: 'Salvador + Porto Seguro', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Porto Seguro' },
       { label: 'Salvador + Praia do Forte', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Praia do Forte' },
       { label: 'Salvador + Morro de São Paulo', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Morro de São Paulo' },
       { label: 'Salvador + Itacaré', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Itacaré' },
       { label: 'Salvador + Arraial d\'Ajuda', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Arraial d\'Ajuda' },
+      { label: 'Salvador + Trancoso', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Trancoso' },
       { label: 'Porto Seguro + Praia do Forte', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Praia do Forte' },
       { label: 'Porto Seguro + Morro de São Paulo', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Morro de São Paulo' },
       { label: 'Porto Seguro + Itacaré', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Itacaré' },
       { label: 'Porto Seguro + Arraial d\'Ajuda', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Arraial d\'Ajuda' },
+      { label: 'Porto Seguro + Trancoso', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Trancoso' },
       { label: 'Praia do Forte + Morro de São Paulo', key: 'forte', codes: 'SSA', subcategory: 'Praia do Forte + Morro de São Paulo' },
       { label: 'Praia do Forte + Itacaré', key: 'forte', codes: 'SSA', subcategory: 'Praia do Forte + Itacaré' },
       { label: 'Praia do Forte + Arraial d\'Ajuda', key: 'forte', codes: 'SSA', subcategory: 'Praia do Forte + Arraial d\'Ajuda' },
+      { label: 'Praia do Forte + Trancoso', key: 'forte', codes: 'SSA', subcategory: 'Praia do Forte + Trancoso' },
       { label: 'Morro de São Paulo + Itacaré', key: 'morro', codes: 'SSA', subcategory: 'Morro de São Paulo + Itacaré' },
       { label: 'Morro de São Paulo + Arraial d\'Ajuda', key: 'morro', codes: 'SSA', subcategory: 'Morro de São Paulo + Arraial d\'Ajuda' },
-      { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', codes: 'SSA', subcategory: 'Itacaré + Arraial d\'Ajuda' }
+      { label: 'Morro de São Paulo + Trancoso', key: 'morro', codes: 'SSA', subcategory: 'Morro de São Paulo + Trancoso' },
+      { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', codes: 'SSA', subcategory: 'Itacaré + Arraial d\'Ajuda' },
+      { label: 'Itacaré + Trancoso', key: 'itacare', codes: 'SSA', subcategory: 'Itacaré + Trancoso' },
+      { label: 'Trancoso + Arraial d\'Ajuda', key: 'trancoso', codes: 'SSA', subcategory: 'Trancoso + Arraial d\'Ajuda' }
     ] },
     { name: 'Nordeste', codes: 'REC / MCZ / SSA / NAT / JPA / FOR', options: [
 { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' },
@@ -952,10 +984,25 @@
 { label: 'Escapada de Fin de Semana', key: 'bue', codes: 'EZE AEP BUE', subcategory: 'Escapada de Fin de Semana' }
     ] },
     { name: 'Gramado', codes: 'POA', options: [
+      { label: 'Porto Alegre', key: 'poa', codes: 'POA' },
       { label: 'Gramado Centro', key: 'gram', codes: 'POA', subcategory: 'Gramado Centro' },
       { label: 'Vale dos Vinhedos', key: 'gram', codes: 'POA', subcategory: 'Vale dos Vinhedos' },
       { label: 'Canela', key: 'canela', codes: 'POA' },
+      { label: 'Porto Alegre + Gramado', key: 'poa', codes: 'POA', subcategory: 'Porto Alegre + Gramado' },
+      { label: 'Porto Alegre + Canela', key: 'poa', codes: 'POA', subcategory: 'Porto Alegre + Canela' },
       { label: 'Gramado + Canela', key: 'gram', codes: 'POA', subcategory: 'Gramado + Canela' }
+    ] },
+    /* Las tres ciudades que se agregaron a la grilla. Cada hub es de una sola
+       opcion porque no se combinan con nadie: cada una tiene su aeropuerto
+       propio y su corredor, asi que un par de dos paradas seria dos billetes. */
+    { name: 'São Paulo', codes: 'GRU', options: [
+      { label: 'São Paulo', key: 'sao', codes: 'GRU' }
+    ] },
+    { name: 'Belo Horizonte', codes: 'CNF', options: [
+      { label: 'Belo Horizonte', key: 'bho', codes: 'CNF' }
+    ] },
+    { name: 'Curitiba', codes: 'CWB', options: [
+      { label: 'Curitiba', key: 'curitiba', codes: 'CWB' }
     ] }
   ];
   var ORIGIN_AIRPORTS = { MVD: 'Montevideo (MVD)', PDP: 'Punta del Este (PDP)' };

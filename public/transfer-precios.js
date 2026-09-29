@@ -37,7 +37,8 @@
   maragogi: { name: "Maragogi", iata: "MCZ", modo: "car", km: 129, compartido: 25, privado: 92 },
   nat: { name: "Natal", iata: "NAT", modo: "car", km: 25, compartido: 20, privado: 30 },
   pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 20, privado: 31 },
-  trancoso: { name: "Trancoso / Arraial d’Ajuda", iata: "SSA", modo: "car", km: 163, compartido: 30, privado: 113 },
+  ajuda: { name: "Arraial d’Ajuda", iata: "SSA", modo: "car", km: 170, compartido: 30, privado: 118 },
+  trancoso: { name: "Trancoso", iata: "SSA", modo: "car", km: 163, compartido: 30, privado: 113 },
   ssa: { name: "Salvador de Bahía", iata: "SSA", modo: "car", km: 24, compartido: 20, privado: 30, appRideUsd: 11 },
   for: { name: "Fortaleza", iata: "FOR", modo: "car", km: 9, compartido: 20, privado: 30 },
   jericoacoara: { name: "Jericoacoara", iata: "FOR", modo: "car", km: 295, compartido: 35, privado: 195 },
@@ -247,6 +248,15 @@
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 30 km de OSRM: US$ 20 compartido y US$ 31 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 30,
       "horas": 0.5
+    },
+  ajuda: {
+      "fuente": "Sin precio real para esta ruta. Los km salen de OSRM: 170 desde SSA, 7 mas que Trancoso porque Arraial esta 7 km mas adelante por la misma ruta. Los dos precios salen del modelo de distancia de _meta.modelo.",
+      "confianza": "baja",
+      "verificado": "2026-09-29",
+      "real": [],
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 118 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "km": 170,
+      "horas": 2.8
     },
   trancoso: {
       "fuente": "Sin precio real para esta ruta. Los km (163) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",

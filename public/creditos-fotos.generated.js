@@ -31,6 +31,7 @@ var FOTO_CREDITOS = {
   "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg/1920px-Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg": { autor: "Sarah Helena Linke", licencia: "CC BY-SA 3.0" },
   "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg/1280px-Torres_RS_Brasil_-_Vista_da_Torre_Sul_e_do_Parque_da_Guarita_-_panoramio.jpg": { autor: "Josue Marinho", licencia: "CC BY 3.0" },
   "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Praia_do_Rosa%2C_SC.JPG/1920px-Praia_do_Rosa%2C_SC.JPG": { autor: "SIMONE SOPCHAKI", licencia: "CC BY-SA 3.0" },
+  "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Arraial_D%27ajuda%2C_Porto_Seguro-BA.jpg/1920px-Arraial_D%27ajuda%2C_Porto_Seguro-BA.jpg": { autor: "Douglas Aguiar da Silva", licencia: "CC BY-SA 4.0" },
   "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg/1920px-Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg": { autor: "Gruhh", licencia: "CC BY-SA 4.0" },
   "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Beira_mar_norte_Florian%C3%B3polis_SC.jpg/1280px-Beira_mar_norte_Florian%C3%B3polis_SC.jpg": { autor: "Alex Fabiano João", licencia: "CC BY-SA 4.0" },
   "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Praia_de_Itapema_-_Orla.jpg/1280px-Praia_de_Itapema_-_Orla.jpg": { autor: "Rodrigo de Oliveira Santos", licencia: "CC BY-SA 4.0" },

@@ -179,7 +179,7 @@ function injectAnalytics(payload, ext) {
 // aca, /api/vuelos/buscar la rechaza con "!destination" y el destino no puede
 // buscar vuelo real aunque el modelo, el desplegable y la grilla lo ofrezcan.
 // Tiene que coincidir con HOME_DESTINATION_KEYS.
-const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
+const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
 // Los destinos que la app ofrece, agrupados por región. Esta lista estaba
 // desincronizada del picker de public/app.js en las dos direcciones: tenía
 // 'ilha', que el picker nunca ofrece (la búsqueda por presupuesto cotizaba un
@@ -205,19 +205,25 @@ const HOME_DESTINATION_KEYS = [
   'buz', 'arraial', 'cabo',
   // Costa Verde
   'paraty', 'ubatuba', 'ilhabela', 'angra', 'ilha',
+  // Ciudades con aeropuerto propio. Estaban en DEST con precio, traslado,
+  // actividades y foto, pero no en ninguna de las dos listas: cotizaban bien y
+  // no aparecian en ningun lado.
+  'sao', 'bho', 'curitiba',
   // Litoral de Santa Catarina
   'fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras',
   // Litoral de Rio Grande do Sul
   'torres', 'canoa',
   // Bahia
-  'ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso',
+  'ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso', 'ajuda',
   // Nordeste. 'jericoacoara' se sumo cuando la entrada "Fortaleza /
   // Jericoacoara" se separo en dos destinos mas el par "Fortaleza + Jeri": la
   // clave existia en el modelo con costos, traslados y actividades desde antes,
   // pero no estaba en ninguna lista, o sea que era data que nadie podia cotizar.
-  'porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for', 'jericoacoara',
-  // Buenos Aires, Serra gaucha y Foz
-  'bue', 'gram', 'canela', 'igu'
+  'porto', 'maragogi', 'mcz', 'rec', 'joaopessoa', 'nat', 'pip', 'for', 'jericoacoara', 'fernando',
+  // Buenos Aires, Porto Alegre, Serra gaucha y Foz. Porto Alegre entra con
+  // Gramado y Canela: los tres vuelan por POA y POA a Gramado son 80 km de
+  // ruta, asi que el par de dos paradas existe y se cotiza.
+  'bue', 'poa', 'gram', 'canela', 'igu'
 ];
 const SEARCH_DESTINATION_KEYS = HOME_DESTINATION_KEYS;
 // Un destino es válido si existe en el modelo. La lista de arriba define qué se

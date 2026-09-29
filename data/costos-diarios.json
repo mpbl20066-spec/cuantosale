@@ -614,6 +614,21 @@
       "confianza": "media",
       "nota": "Pueblo de playa con vida nocturna y jetset, el mas caro de Bahia despues de Salvador. El contraste entre el almuerzo a R$19,90 y la cena en la playa a R$150 por mesa es el rango real."
     },
+    "ajuda": {
+      "comida": {
+        "casual": 37,
+        "moderado": 68,
+        "gourmet": 115
+      },
+      "traslado": {
+        "eco": 19,
+        "confort": 42
+      },
+      "fuente": "No hay dato propio de Arraial d'Ajuda. Se deriva de Trancoso, que esta a 7 km por la misma costa y con la misma balsa: mismo tipo de pueblo, misma escala de beach clubs. Instagram y TikTok de la zona de Porto Seguro arman el mismo rango que el de Trancoso.",
+      "verificado": "2026-09-29",
+      "confianza": "baja",
+      "derivacion": "Copia de trancoso con un escalon menos. Arraial d'Ajuda es el pueblo mas chico de los dos y sin la vida nocturna de Trancoso, asi que come un poco mejor, pero la diferencia es chica: son 7 km. Si Trancoso esta bien calibrado, Arraial tambien."
+    },
     "morro": {
       "comida": {
         "casual": 38,
