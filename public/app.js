@@ -2375,10 +2375,23 @@
       var skin = tourActivitySkin(tour.title);
       // Con foto: velo para que el texto se lea siempre. Sin foto: degradado
       // con el icono de la actividad, que no miente sobre lo que es.
-      var media = photo
+      /* El tick de "agregada". El checkbox de la card es opacity:0 y estirado
+         sobre toda la superficie —es el area tactil de elegir—, asi que el estado
+         elegido no se podia ver: solo cambiaba el borde de la card, y un borde
+         mas grueso es un detalle que hay que saber buscar. En las cards de hotel
+         el equivalente es la placa de la esquina; aca es un tick, porque la accion
+         es sumar y se lee mejor que un texto.
+
+         Va DESPUES del input en el DOM y con z-index, no antes: el input esta
+         estirado en toda la card, asi que cualquier elemento sin z-index queda
+         debajo del checkbox y el tick deja de verse al elegir. */
+      var tick = '<span class="local-tour__tick" aria-hidden="true">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+        + '</span>';
+      var media = (tick + (photo
         ? '<div class="local-tour__media"><img src="' + esc(photo.url) + '" alt="' + esc(tour.title) + '" loading="lazy"></div>'
         : '<div class="local-tour__media local-tour__media-plain" style="background:linear-gradient(150deg,' + skin.from + ',' + skin.to + ')">' +
-          '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg></div>';
+          '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg></div>'));
       var duration = tourDuration(tour);
       // Sin cinta de "elegido". Cuando una card se selecciona cambia el marco y
       // el fondo, igual que en transporte local, comidas y hotel. La cinta era
