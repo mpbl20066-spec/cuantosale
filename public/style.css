@@ -1,4 +1,4 @@
-/* version: 111
+/* version: 112
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -569,7 +569,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    foto abarca las dos filas de la grilla (grid-row:1/-1), la ficha se achicaba
    52px y los botones de abajo parecian subir. El estado de elegido se
    comunicaba con un texto mas corto, o sea con una ficha mas chica. */
-.hotel-pick-hint{display:inline-grid;place-items:center;min-height:40px;padding:0 16px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:12.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:background .16s ease,color .16s ease}
 .hotel-booking{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1.5px solid var(--control-line);border-radius:12px;background:transparent;color:var(--ink);font-size:12.5px;font-weight:700;white-space:nowrap;text-decoration:none;transition:border-color .16s ease,color .16s ease,background .16s ease}
 .hotel-booking:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
 .hotel-booking:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -586,8 +585,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 @container hoteles (max-width:430px){
   .hotel-foot{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
   .hotel-actions{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);margin-left:0}
-  .hotel-pick-hint,.hotel-booking{min-width:0;padding:0 10px}
-}
+  }
 /* Y por debajo de 330 las dos pastillas vuelven a una columna: a mitad de ancho
    no entra "Ver disponibilidad" y es preferible que bajen a que se corten. */
 @container hoteles (max-width:330px){
@@ -667,8 +665,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    un BORDE, y con #fff encima daba 3.63:1, debajo del 4.5:1 de WCAG para texto
    de 13px. El boton va en su propio tono, con 5.9:1 en claro y 7.5:1 en
    oscuro. */
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint{background:var(--pick-sel-bg);color:var(--pick-sel-ink)}
-/* Los dos textos del boton conviven en el DOM y el estado muestra uno u otro:
+.hotel-option:has(.hotel-option__pick input:checked) /* Los dos textos del boton conviven en el DOM y el estado muestra uno u otro:
    el de la ficha elegida decia "Elegir este hotel" en relleno, que es pedirle
    al usuario que elija algo que ya eligio.
 
@@ -676,9 +673,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    celda, asi que el ancho del boton es el del texto mas largo en los dos
    estados. Con display:none el perdedor salia del flujo y el boton se
    encogia al cambiar de estado, que es lo que hacia que la ficha se achicara. */
-.hotel-pick-hint__off,.hotel-pick-hint__on{grid-area:1/1;visibility:hidden}
-.hotel-pick-hint__off{visibility:visible}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-pick-hint__on{visibility:visible}
 .hotel-option:has(.hotel-option__pick input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
 /* Resultados de vuelos */
 .flight-search{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:20px}.flight-search>div:first-child{display:flex;justify-content:space-between;gap:16px;align-items:center}.flight-search h2{font-family:var(--fh);font-size:34px;line-height:1;margin:0}.flight-search p{margin:5px 0 0;color:var(--ink2);font-size:13px}

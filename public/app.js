@@ -412,6 +412,27 @@
     { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }];
   var FX = { rates: null, base: 'USD', until: 0, cargando: true };
   var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
+  /* El filtro de disponibilidad de los hoteles, y por que vive acá y no en el
+     DOM.
+
+     No es una preferencia del viaje: es una forma de MIRAR la lista. Por eso no
+     va en `detailState` (que se reinicia en cada viaje nuevo) ni en el objeto
+     meta del server, y por eso se lee al pintar en vez de.backup de un input.
+     Lo que obliga a que sea una variable y no un atributo del <select> es que la
+     lista de hoteles se repinta sola: al cambiar el tipo, al mover el slider de
+     noches y en cada recálculo del total. Un valor guardado en el input se
+     perdía en el primer repintado, que es justo cuando la persona lo estaba
+     usando.
+
+     'todos' es el default y deja la lista como estaba. Filtrar por defecto
+     escondería hoteles en la primera apertura, que es el peor primer
+     contacto: si no hay ninguno real, la sección se ve vacía sin explicación y
+     parece que la app no buscó. */
+  var hotelSoloReservables = false;
+  var HOTEL_FILTRO_DISPONIBILIDAD = [
+    { value: 'todos', label: 'Todos' },
+    { value: 'reservables', label: 'Solo con disponibilidad' }
+  ];
   /* `intermedio` y `confort` se muestran como "Equilibrado" y "Cómodo" para que
      el selector de alojamiento hable el mismo idioma que el selector de estilo
      de viaje, que ya decía "Ahorrar al máximo / Equilibrado / Con comodidad".
@@ -2098,6 +2119,12 @@
           // saltaria solo. recommended queda de respaldo cuando no hay eleccion.
           var elegido = hotelElegidoEnEstaLista(totalValue, stop);
           var marcado = elegido != null ? elegido : !!option.recommended;
+          /* La placa solo se pinta si hay algo que decir. Antes caia al badge
+             del tipo (SÚPER ECONÓMICO, MEJOR RELACIÓN PRECIO-CALIDAD) cuando el
+             server no mandaba highlight, y con eso la tercera hotel, que ya no
+             lleva placa, se quedaba con una que no le correspondia. Un sello
+             vacío no se dibuja: la foto se ve sola. */
+          var badge = option.highlight || '';
           // El name del radio lleva la parada: con un solo "hotel-choice" los
           // grupos se deseleccionarian entre si, porque son el mismo grupo de
           // radios y en HTML solo puede haber uno marcado.
@@ -2109,7 +2136,7 @@
           // experiencias, así las dos secciones de la página se leen igual.
           return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option data-hotel-stop="' + (isPar ? stop : '') + '">' + imageMarkup +
             '<label class="hotel-option__pick">' +
-            '<span class="hotel-choice"><input type="radio" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '><span class="hotel-badge">' + esc(option.highlight || profile.badge) + '</span></span>' +
+            '<span class="hotel-choice"><input type="radio" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '>' + (badge ? '<span class="hotel-badge">' + esc(badge) + '</span>' : '') + '</span>' +
             '<span class="hotel-body">' +
             '<h3 class="hotel-name">' + esc(option.name) + '</h3>' + descriptionMarkup +
             // Con dos paradas el hotel deNatal es de las NOCHES DE NATAL, no de

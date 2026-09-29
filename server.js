@@ -901,7 +901,13 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
       bookingUrl: convertido || hotel.bookingUrl,
       affiliate: convertido ? 'travelpayouts' : '',
       tier: selectedTier, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio',
-      highlight: ['Recomendado', 'Buona opción', 'Alternativa'][index],
+      // Solo las dos primeras llevan placa. La tercera se queda sin nada: con
+      // tres, la de "Alternativa" competia con la de "Recomendado" por el mismo
+      // ojo y ninguna decía nada que la otra no dijera. Un sello que no
+      // diferencia es ruido. Ademas estaba escrito "Buona opcion", con dos
+      // falta de tipeo y el acento roto: el archivo se genero con la
+      // codificacion double-codificada.
+      highlight: ['Recomendado', 'Buena opción', ''][index] || '',
       recommended: index === 0
     });
   });
