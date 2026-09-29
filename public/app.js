@@ -2567,8 +2567,11 @@
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         (includes ? '<ul class="local-tour__tags">' + includes + '</ul>' : '') +
         '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
-        '<span class="local-tour__chip' + (tour.source !== 'local' ? ' is-real' : '') + '">' +
-        esc(SOURCE_LABEL[tour.source] || SOURCE_LABEL.local) + '</span>' +
+        // Sin texto no hay pastilla: SOURCE_LABEL.local es '' y dibujarla dejaba
+        // un contorno vacio flotando al lado de la duracion.
+        (SOURCE_LABEL[tour.source] || SOURCE_LABEL.local
+          ? '<span class="local-tour__chip' + (tour.source !== 'local' ? ' is-real' : '') + '">' + esc(SOURCE_LABEL[tour.source] || SOURCE_LABEL.local) + '</span>'
+          : '') +
         (tour.freeCancellation ? '<span class="local-tour__chip">Cancelación gratis</span>' : '') + '</div>' +
         '<div class="local-tour__foot">' +
         '<p class="local-tour__price"><span class="local-tour__from">Desde</span><b>' + money(tour.price) + '</b><span>por persona</span></p>' +
@@ -2660,16 +2663,16 @@
       return text.split(/[.;]\s*/).map(function (s) { return s.trim(); })
         .filter(function (s) { return s.length > 3 && s.length < 70; });
     }
-    phrases(posPart).forEach(function (s) { if (incluye.length < 3) incluye.push(s); });
-    phrases(negPart).forEach(function (s) { if (noIncluye.length < 2) noIncluye.push(s); });
-    function tag(ok, text) {
-      return '<li class="local-tour__tag' + (ok ? '' : ' is-no') + '">' +
-        '<span class="local-tour__tag-ico" aria-hidden="true">' + (ok ? checkIcon() : crossIcon()) + '</span>' +
-        esc(text.charAt(0).toUpperCase() + text.slice(1)) + '</li>';
-    }
-    var out = incluye.map(function (t) { return tag(true, t); }).join('') +
-      noIncluye.map(function (t) { return tag(false, t.replace(/^no (incluye|son|comprende|est[áa]n)\s*/i, '')); }).join('');
-    return out;
+    phrases(posPart).forEach(function (s) { if (incluye.length < 2) incluye.push(s); });
+    /* Una sola linea con un solo tilde: "Incluye: a · b". Antes eran hasta tres
+       tildes verdes y dos cruces, una por frase, y la card se leia como una
+       lista de control. Lo que NO incluye sigue en el modal de detalles
+       (tourDetailText), que es donde se lee con calma. */
+    if (!incluye.length) return '';
+    var frases = incluye.map(function (t) { return t.charAt(0).toLowerCase() + t.slice(1); }).join(' \u00b7 ');
+    return '<li class="local-tour__tag">' +
+      '<span class="local-tour__tag-ico" aria-hidden="true">' + checkIcon() + '</span>' +
+      '<span>Incluye: ' + esc(frases) + '</span></li>';
   }
   function checkIcon() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>';
@@ -6148,41 +6151,82 @@
   }
 
   /* Empresas de bus con horario y tarifa publicados (public/buses.js). Solo hay
-     datos para Montevideo -> Porto Alegre y Florianopolis; en cualquier otro
-     origen o destino no se dibuja nada y queda la estimacion de siempre. Los
-     $U se muestran tal cual y, si hay tasa, con su equivalente en la moneda
-     activa. Una tarifa null (TTL no la publica) dice "Consultar tarifa". */
-  function busServicesMarkup(meta) {
+     datos para Montevideo -> Porto Alegre y Florianopolis. Cada servicio (empresa
+     + clase) es una opcion elegible: al elegirla, el pasaje del presupuesto pasa
+     a ser su tarifa de ida x2 (ida y vuelta) x personas, convertida de $U con la
+     tasa de la app. Una tarifa null (TTL no la publica) se puede elegir igual,
+     pero el presupuesto conserva la estimacion y la tarjeta dice "Consultar". */
+  function busServiceOptions(meta) {
     var servicios = typeof CS_BUS_SERVICES !== 'undefined' ? CS_BUS_SERVICES : null;
     var destKey = meta && meta.dest && meta.dest.key;
-    if (!servicios || !destKey || String(meta.origin || S.origin || 'MVD').toUpperCase() !== 'MVD') return '';
+    if (!servicios || !destKey || String(meta.origin || S.origin || 'MVD').toUpperCase() !== 'MVD') return [];
+    var out = [];
+    servicios.forEach(function (co) {
+      var ida = co.rutas.filter(function (r) { return r.dest === destKey && r.origen === 'Montevideo'; });
+      var vuelta = co.rutas.filter(function (r) { return r.dest === destKey && r.origen !== 'Montevideo'; });
+      if (!ida.length) return;
+      var opciones = [];
+      ida.forEach(function (r) {
+        if (r.idaDiamanteUyu != null) {
+          opciones.push({ id: co.empresa + '|' + destKey + '|semicama', clase: 'Semicama', uyu: r.idaUyu, ruta: r });
+          opciones.push({ id: co.empresa + '|' + destKey + '|diamante', clase: 'Diamante', uyu: r.idaDiamanteUyu, ruta: r });
+        } else {
+          opciones.push({ id: co.empresa + '|' + destKey + '|unica', clase: '', uyu: r.idaUyu, ruta: r });
+        }
+      });
+      out.push({ co: co, opciones: opciones, vuelta: vuelta });
+    });
+    return out;
+  }
+  function busServicesMarkup(meta) {
+    var grupos = busServiceOptions(meta);
+    if (!grupos.length) return '';
     var tasaUyu = tasaDe('UYU');
-    function uyu(n) { return '$U ' + Number(n).toLocaleString('es-UY'); }
-    function precio(n) {
-      if (n == null) return '<span class="bus-co__price is-na">Consultar tarifa</span>';
-      return '<span class="bus-co__price"><b>' + uyu(n) + '</b>' + (tasaUyu ? ' <em>&asymp; ' + money(n / tasaUyu) + '</em>' : '') + '</span>';
-    }
+    var elegido = detailState && detailState.busChoice;
     var hoy = new Date().toISOString().slice(0, 10);
-    var cards = servicios.map(function (co) {
-      var rutas = co.rutas.filter(function (r) { return r.dest === destKey; });
-      if (!rutas.length) return '';
+    function uyu(n) { return '$U ' + Number(n).toLocaleString('es-UY'); }
+    var cards = grupos.map(function (g) {
+      var co = g.co;
       var vencido = co.vigencia && co.vigencia < hoy;
-      var filas = rutas.map(function (r) {
-        var sigDia = r.llegada < r.salida ? ' <sup title="Llega al día siguiente">+1</sup>' : '';
-        var tarifas = r.idaDiamanteUyu != null
-          ? '<span class="bus-co__fare">Semicama ' + precio(r.idaUyu) + '</span><span class="bus-co__fare">Diamante ' + precio(r.idaDiamanteUyu) + '</span>'
-          : '<span class="bus-co__fare">Tarifa ida ' + precio(r.idaUyu) + '</span>';
-        return '<li class="bus-co__row"><div class="bus-co__route"><b>' + esc(r.origen) + ' &rarr; ' + esc(r.destino) + '</b><span>' + esc(r.dias) + '</span></div>'
-          + '<div class="bus-co__time"><b>' + esc(r.salida) + '</b> &rarr; <b>' + esc(r.llegada) + '</b>' + sigDia + '</div>'
-          + '<div class="bus-co__fares">' + tarifas + '</div></li>';
+      var filas = g.opciones.map(function (o) {
+        var r = o.ruta;
+        var sigDia = r.llegada < r.salida ? '<sup title="Llega al día siguiente">+1</sup>' : '';
+        var tarifa = o.uyu != null
+          ? '<b>' + uyu(o.uyu) + '</b>' + (tasaUyu ? '<small>&asymp; ' + money(o.uyu / tasaUyu) + '</small>' : '')
+          : '<span class="bus-opt__na">Consultar tarifa</span>';
+        return '<li><label class="bus-opt">'
+          + '<input class="bus-opt__input" type="radio" name="bus-choice" data-bus-choice="' + esc(o.id) + '" data-bus-uyu="' + (o.uyu == null ? '' : o.uyu) + '"' + (elegido === o.id ? ' checked' : '') + '>'
+          + '<span class="bus-opt__main"><span class="bus-opt__times">' + esc(r.salida) + ' <i aria-hidden="true">&rarr;</i> ' + esc(r.llegada) + sigDia + '</span>'
+          + '<span class="bus-opt__days">' + esc(r.dias) + (o.clase ? ' &middot; ' + esc(o.clase) : '') + '</span></span>'
+          + '<span class="bus-opt__fare">' + tarifa + '</span></label></li>';
       }).join('');
+      var vueltaTxt = g.vuelta.length
+        ? '<p class="bus-co__ret">Vuelta: ' + g.vuelta.map(function (r) { return esc(r.dias) + ' ' + esc(r.salida) + ' &rarr; ' + esc(r.llegada); }).join(' &middot; ') + '</p>'
+        : '';
       var aviso = vencido
         ? 'Horario publicado hasta el ' + co.vigencia.split('-').reverse().join('/') + ': confirmalo con la empresa.'
         : 'Tarifas por tramo de ida. Confirmalas con la empresa antes de comprar.';
-      return '<article class="bus-co"><header class="bus-co__head"><span class="bus-co__logo" aria-hidden="true">' + esc(co.empresa) + '</span><h4>' + esc(co.empresa) + '</h4></header>'
-        + '<ul class="bus-co__list">' + filas + '</ul><p class="bus-co__note">' + esc(aviso) + '</p></article>';
+      return '<article class="bus-co"><header class="bus-co__head"><span class="bus-co__logo">' + esc(co.empresa) + '</span>'
+        + '<span class="bus-co__route">Montevideo &rarr; ' + esc(meta.dest.name) + '</span></header>'
+        + '<ul class="bus-co__list">' + filas + '</ul>' + vueltaTxt + '<p class="bus-co__note">' + esc(aviso) + '</p></article>';
     }).join('');
-    return cards ? '<div class="bus-companies">' + cards + '</div>' : '';
+    var limpiar = elegido ? '<button type="button" class="bus-companies__clear" data-bus-clear>Volver a la tarifa estimada</button>' : '';
+    return '<div class="bus-companies">' + cards + limpiar + '</div>';
+  }
+  /* Aplica la eleccion al presupuesto. El precio base (la estimacion del
+     modelo) se guarda la primera vez para poder volver a el. */
+  function actualizarBus(id, uyuTxt) {
+    if (!detailState || !detailState.parts) return;
+    if (detailState.baseBus == null) detailState.baseBus = Number(detailState.parts.bus) || 0;
+    var uyuN = uyuTxt === '' || uyuTxt == null ? null : Number(uyuTxt);
+    var tasa = tasaDe('UYU');
+    var pax = Math.max(1, Number(detailState.meta && detailState.meta.pax) || 1);
+    detailState.busChoice = id || null;
+    detailState.parts.bus = id && uyuN != null && Number.isFinite(uyuN) && tasa
+      ? Math.round(uyuN / tasa * 2 * pax)
+      : detailState.baseBus;
+    renderTripSummary();
+    recalcularTotalViaje();
   }
 
   function transportFlow(meta, budget, mode) {
@@ -7249,7 +7293,8 @@
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();
-    var busDestinations = ['bue', 'fln', 'bcm', 'camboriu', 'bombinhas', 'rosa', 'gram', 'canela', 'igu', 'poa'];
+    // El bus solo se ofrece donde hay empresas con horario y tarifa cargados (public/buses.js).
+    var busDestinations = ['fln', 'poa'];
     var modes = [{ value: 'flight', label: 'Vuelo' }];
     if (busDestinations.indexOf(key) >= 0) modes.push({ value: 'bus', label: 'Bus' });
     if (isRoadtripDestinationAllowed(key)) modes.push({ value: 'auto', label: 'Auto / Roadtrip' });
@@ -7544,7 +7589,7 @@
       '<div class="tags tags--meta"><span class="tag ghost">' + esc(data.meta.dest.name) + '</span>' +
       '<span class="tag ghost">' + data.meta.nights + ' noches</span>' + sourcePill + '</div>' +
       '<h3>' + esc(titleOf(rec)) + '</h3>' +
-      '<p class="meta">' + dLong(dep) + ' a ' + dLong(ret) + ', ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '. Trayecto ' + esc(trayectoDe(rec)) + '.</p>' +
+      '<p class="meta">' + dLong(dep) + ' a ' + dLong(ret) + ', ' + pax + (pax === 1 ? ' persona' : ' personas') + '. Trayecto ' + esc(trayectoDe(rec)) + '.</p>' +
       '<div class="perf"><i></i><i></i></div>' +
       '<div class="nums"><div><small>Costo total del viaje</small><span class="big">' + money(rec.total) + '</span></div>' +
       '<div><small>Por persona</small><span class="pp">' + money(rec.pp) + '</span></div></div>' +
@@ -9700,6 +9745,14 @@ function comboNombreDestino() {
         if (detailState) searchFlights(detailState.meta, startFlightSearch.closest('.flight-search'));
         return;
       }
+      var busClear = e.target.closest('[data-bus-clear]');
+      if (busClear && detailState) {
+        e.preventDefault();
+        Array.prototype.forEach.call(document.querySelectorAll('[data-bus-choice]'), function (r) { r.checked = false; });
+        actualizarBus(null, '');
+        var caja = busClear.closest('.bus-companies'); if (caja) busClear.remove();
+        return;
+      }
       var dailyBudgetCard = e.target.closest('[data-daily-kind]');
       if (dailyBudgetCard && detailState) {
         if (e.target.closest('input')) return;
@@ -9918,6 +9971,8 @@ function comboNombreDestino() {
         recalcularTotalViaje();
         return;
       }
+      var busChoice = e.target.closest && e.target.closest('[data-bus-choice]');
+      if (busChoice && busChoice.checked) { actualizarBus(busChoice.getAttribute('data-bus-choice'), busChoice.getAttribute('data-bus-uyu')); return; }
       var hotelChoice = e.target.closest && e.target.closest('[data-hotel-total]');
       if (hotelChoice && hotelChoice.checked) actualizarAlojamiento(Number(hotelChoice.getAttribute('data-hotel-total')), true);
       var consumption = e.target.closest && e.target.closest('[data-roadtrip-consumption]');

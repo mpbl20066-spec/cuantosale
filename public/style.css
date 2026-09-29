@@ -2527,23 +2527,46 @@ h3.block-title, .block-title:is(h3) {
 }
 
 /* ---------- Empresas de bus (EGA, TTL) ---------- */
-.bus-companies{display:grid;gap:14px;margin-top:16px}
-.bus-co{border:1.5px solid var(--card-border,var(--line));border-radius:18px;background:var(--surface);padding:16px}
-.bus-co__head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.bus-co__head h4{margin:0;font-size:15px;font-weight:700;color:var(--ink2)}
-.bus-co__logo{display:inline-grid;place-items:center;min-width:52px;height:30px;padding:0 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-family:var(--fh);font-weight:800;font-style:italic;letter-spacing:.02em;color:var(--ink)}
-.bus-co__list{list-style:none;margin:0;padding:0;display:grid}
-.bus-co__row{display:grid;grid-template-columns:minmax(0,1.3fr) auto minmax(0,1.2fr);gap:8px 16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
-.bus-co__row:first-child{border-top:0}
-.bus-co__route{display:grid;gap:2px;min-width:0}
-.bus-co__route b{font-size:14px;color:var(--ink)}
-.bus-co__route span,.bus-co__note{font-size:12.5px;color:var(--ink2)}
-.bus-co__time{font-size:14px;white-space:nowrap;color:var(--ink)}
-.bus-co__time sup{font-size:10px;color:var(--ink2)}
-.bus-co__fares{display:grid;gap:2px;justify-items:end;text-align:right}
-.bus-co__fare{font-size:12.5px;color:var(--ink2)}
-.bus-co__price b{font-size:14px;color:var(--ink)}
-.bus-co__price em{font-style:normal;color:var(--ink2)}
-.bus-co__price.is-na{font-style:italic}
-.bus-co__note{margin:8px 0 0}
-@media (max-width:560px){.bus-co__row{grid-template-columns:1fr auto}.bus-co__fares{grid-column:1/-1;justify-items:start;text-align:left;grid-auto-flow:column;gap:14px}}
+.bus-companies{display:grid;gap:16px;margin-top:18px}
+.bus-co{border:1px solid var(--line);border-radius:20px;background:var(--surface);padding:18px}
+.bus-co__head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.bus-co__logo{display:inline-grid;place-items:center;min-width:56px;height:30px;padding:0 12px;border-radius:9px;background:var(--bg);border:1px solid var(--line);font-family:var(--fh);font-weight:800;font-style:italic;letter-spacing:.03em;color:var(--ink)}
+.bus-co__route{font-size:13px;font-weight:600;color:var(--ink2)}
+.bus-co__list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.bus-opt{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 16px;padding:14px 16px;border:1.5px solid var(--card-border,var(--line));border-radius:16px;background:var(--card-bg,transparent);cursor:pointer;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.bus-opt:hover{border-color:var(--ink2)}
+.bus-opt:has(.bus-opt__input:checked){border-color:var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
+.bus-opt:has(.bus-opt__input:focus-visible){outline:3px solid var(--focus);outline-offset:3px}
+.bus-opt__input{position:absolute;opacity:0;pointer-events:none}
+.bus-opt__main{display:grid;gap:3px;min-width:0}
+.bus-opt__times{font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.bus-opt__times i{font-style:normal;color:var(--ink2);font-weight:600;margin:0 2px}
+.bus-opt__times sup{font-family:var(--fb);font-size:10px;font-weight:700;color:var(--ink2);margin-left:2px}
+.bus-opt__days{font-size:12.5px;color:var(--ink2)}
+.bus-opt__fare{display:grid;justify-items:end;text-align:right;gap:1px}
+.bus-opt__fare b{font-family:var(--fh);font-size:19px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.bus-opt__fare small,.bus-opt__na{font-size:11.5px;color:var(--ink2)}
+.bus-opt__na{font-style:italic}
+.bus-co__ret{margin:12px 0 0;font-size:12.5px;color:var(--ink2)}
+.bus-co__note{margin:6px 0 0;font-size:11.5px;color:var(--ink2);opacity:.85}
+.bus-companies__clear{justify-self:start;padding:0;border:0;background:none;color:var(--ink2);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer}
+@media (max-width:560px){.bus-co{padding:14px}.bus-opt{padding:12px 14px}.bus-opt__times{font-size:18px}.bus-opt__fare b{font-size:17px}}
+
+/* ---------- Card de tour: limpieza ---------- */
+.local-tour__tags{margin-top:8px}
+.local-tour__tag{align-items:flex-start;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.local-tour__tag > span:not(.local-tour__tag-ico){display:inline}
+/* El pie es una fila propia con filete arriba: precio a la izquierda y
+   "Detalles" a la derecha, alineados al centro, sin hueco en blanco antes. */
+.local-tour__foot{align-items:center;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+.local-tour__meta{margin-top:10px;margin-bottom:12px}
+.local-tour__info{min-height:38px;padding:0 14px}
+
+/* ---------- Hero del paquete: titulo mas liviano y mas aire ---------- */
+.hero h3{font-size:clamp(24px,6vw,34px);line-height:1.2;margin:18px 0 10px;text-wrap:balance}
+.hero .tags--meta{gap:8px;margin-top:14px}
+.hero .meta{margin-top:2px;line-height:1.5}
+.hero .nums{margin-top:4px}
+.budget{margin-top:28px;padding-bottom:10px}
+.budget p{margin-top:16px}
+.hero{padding-bottom:32px}
