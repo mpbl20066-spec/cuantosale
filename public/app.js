@@ -4388,24 +4388,47 @@
     traslados: { canal: 'Gestion directa', externo: false },
     tours: { canal: 'Gestion directa', externo: false }
   };
-  function canalDe(categoria) { return CANAL_RESERVA[categoria] || { canal: '', externo: false }; }
-  /* Devuelve el texto del estado, o null si el rubro no esta reservado. */
+  /* Lo que NO se reserva, dicho a la vista.
+
+     Comida y transporte local no son un producto que alguien te venda: son un
+     calculo diario del destino, un estimado que uno mismo va gastando. No hay
+     canal, no hay pastilla de reserva y no hay boton que abrir. Y no alcanza con
+     que hoy no salgan: Canales ya no crece, y con esto sigue siendo explicito
+     que si manana aparece una fila de Comida en el modal, no hereda nada.
+
+     La lista se lee sola: un rubro reservable es el que tiene canal. */
+  function esReservable(categoria) { return !!CANAL_RESERVA[categoria]; }
+  function canalDe(categoria) { return esReservable(categoria) ? CANAL_RESERVA[categoria] : { canal: '', externo: false }; }
+  /* Devuelve el texto del estado, o null si el rubro no esta reservado.
+
+     "Seleccionado" y no "Confirmado" para vuelo y hotel: el link abre Google
+     Flights o Booking y la app no se entera de si la persona termino pagando, asi
+     que "Confirmado" afirmaria un pago que nadie nos notifico. "Seleccionado" es
+     exactamente lo que se sabe —este vuelo, este hotel, ya estan elegidos— y es
+     el mismo criterio con el que el resto de la app llama "elegido" a un rubro.
+     Para traslados y tours, donde la reserva la lleva la agencia y la app la
+     marca al completar el checkout, si hay hecho y dice "Reservado".
+
+     Los dos verdes y con el mismo formato: la diferencia la cuenta la palabra,
+     no el color. */
   function estadoReserva(categoria) {
     if (!reservasDe(categoria)) return null;
-    return canalDe(categoria).externo ? 'En curso' : 'Reservado';
+    return canalDe(categoria).externo ? 'Seleccionado' : 'Reservado';
   }
   /* La pastilla. Va con --good y no con un verde suelto: el proyecto usa mostaza
      para "elegido" y verde solo para "confirmado", que es un estado distinto y
-     no compite con el. El que esta en curso lleva el mismo verde con el borde
-     punteado, para que se lea como algo abierto y no como algo cerrado. */
+     no compite con el. Los dos estados —Seleccionado y Reservado— comparten
+     formato a proposito: son el mismo tipo decosa, con la diferencia en la
+     palabra. La distincion fina la cuenta el title, que si explica de que
+     se trata. */
   function chipReserva(categoria) {
     var estado = estadoReserva(categoria);
     if (!estado) return '';
     var canal = canalDe(categoria);
     var title = canal.externo
-      ? 'Hay una reserva abierta en ' + canal.canal + '. La app abre el sitio pero no puede confirmar el pago desde acá.'
+      ? 'Ya elegiste este rubro. La compra se completa en ' + canal.canal + ', que abre en otra pestaña.'
       : 'Reserva confirmada por la agencia, coordinated por ' + canal.canal.toLowerCase() + '.';
-    return '<span class="reserva-chip' + (canal.externo ? ' is-wip' : '') + '" title="' + esc(title) + '">'
+    return '<span class="reserva-chip" title="' + esc(title) + '">'
       + '<svg class="reserva-chip__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
       + esc(estado) + '</span>';
   }

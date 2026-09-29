@@ -834,13 +834,33 @@ html:has(.booking-modal:not([hidden])) body{overflow:hidden;overscroll-behavior:
    La del medio es minmax(0,1fr) para que el texto largo se envuelva en vez
    de ensanchar la fila, y la ultima lleva el ancho que necesita SOLO el
    numero, que con tabular-nums no se mueve al cambiar de cifra. */
-.voucher-item{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line)}
+/* 24px en vez de los 38 que ocupaba la caja teñida. El icono es de 22 y la
+   columna queda apenas un poco mas ancha que el, asi que los bordes de los
+   elementos quedan alineados entre filas. */
+.voucher-item{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:13px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line)}
 .voucher-item__side{display:grid;justify-items:end;gap:6px;align-self:stretch;align-content:start}
-.voucher-item__side .voucher-item__amount{align-self:end}.voucher-item__icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,currentColor 13%,transparent)}.voucher-item__icon .trip-summary__ico{width:20px;height:20px;flex:none}.voucher-item__body{display:grid;align-content:start;gap:3px;min-width:0}
+.voucher-item__side .voucher-item__amount{align-self:end}/* El icono va pelado. La caja con fondo al 13% y radio de 12px se leia como
+   un radio button: seis capsulas identicas a la izquierda de seis filas, y lo
+   unico que las distinguia era el color, que es justo lo que hace un boton de
+   opcion. Los pictogramas ya son los correctos (avion, hotel, auto, ticket,
+   cubiertos) y se leen solos; solo hacia falta sacarles la capsula. */
+.voucher-item__icon{display:block;flex:0 0 auto;width:22px;height:22px;margin-top:1px;background:none;border-radius:0}
+.voucher-item__icon .trip-summary__ico{width:22px;height:22px;flex:none}.voucher-item__body{display:grid;align-content:start;gap:3px;min-width:0}
 /* "Falta elegir" no es un dato del rubro: es una instruccion. Por eso no
    comparte la tipografia de la bajada, que es gris de apoyo. Con mostaza
    al 12%: se lee como algo para hacer y no como parte de la fila. */
-.voucher-item__aviso{margin:0;color:color-mix(in srgb,var(--mostaza,var(--cel)) 78%,var(--ink));font-size:12.5px;font-weight:600;line-height:1.4}
+/* Gris neutro, no mostaza.
+
+   El selector era color-mix(in srgb, var(--mostaza,var(--cel)) 78%,var(--ink)) y
+   --mostaza no existe en la hoja: el token de la marca es --cel. O sea que caia
+   al fallback y salia #F9D055, un amarillo al 78% de intensidad, que era el
+   unico color cálido de un modal que es todo gris, azul y verde. Medido.
+
+   Ahora es --ink2, el mismo gris de toda la bajada. Para que el aviso se lea
+   igual de atencion que el resto sin necesidad del color, se sube el peso a
+   600: el aviso es una instruccion ("elegi un vuelo...") y la bajada es un
+   dato. */
+.voucher-item__aviso{margin:0;color:var(--ink2);font-size:12.5px;font-weight:600;line-height:1.4}
 .voucher-item__aviso:empty{display:none}.voucher-item__title{margin:0;font-size:14.5px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}.voucher-item__detail{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.voucher-item__line{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin:0;color:var(--ink2);font-size:12.5px;line-height:1.4}.voucher-item__tag{flex:0 0 auto;padding:1px 6px;border-radius:6px;background:var(--cel-soft);color:var(--cel);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.voucher-item__side{display:grid;align-content:start;justify-items:end;gap:8px;min-width:92px}.voucher-item__amount{font-family:var(--fh);font-size:19px;line-height:1.1;white-space:nowrap}.voucher-item__amount.is-zero{color:var(--ink2);font-size:15px}.voucher-item__cta{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1.5px solid var(--control-line);border-radius:12px;background:transparent;color:var(--ink);font-size:12.5px;font-weight:700;line-height:1;white-space:nowrap;text-decoration:none;cursor:pointer;transition:border-color .16s ease,color .16s ease,background .16s ease}.voucher-item__cta:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}.voucher-item__cta.is-off{opacity:.5;cursor:not-allowed}
 /* Rubro ya reservado. No es un botón apagado ni uno de acción: es un estado, y
    se pinta como tal —relleno suave, sin borde marcado— para que no se lea como
@@ -905,7 +925,19 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    esto es mirar, no convertir. Por eso no toma el color de la marca —usar
    --cel lo ponia al mismo nivel que el CTA del pie— y va con borde de 1px
    como el resto de los controles menores del modal. */
-.voucher-item__detalle{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--ink2);font-family:inherit;font-size:11.5px;font-weight:700;line-height:1;cursor:pointer;transition:border-color .18s ease,color .18s ease}
+/* Un min-width y un min-height para TODOS los controles de la columna.
+
+   Medido antes del cambio: "Detalle" 60x28 y "Reservar actividades" 150x40.
+   Cuatro botones que no se alineaban entre si en una columna que existe para
+   que las cifras caigan al mismo lugar. El texto ya no decide el ancho: si
+   una etiqueta es mas larga que el min-width, crece, y las cortas no se
+   encogen. Igual el alto, que era la otra mitad del desalineo.
+
+   118px es el ancho del mas largo de los frecuentes ("Reservar hotel") con
+   aire, no el del mas corto. 38px de alto mantiene el objetivo tactil comodo
+   sin inflar la fila, que con el boton al lado del monto ya es alta. */
+.voucher-item__detalle,
+.voucher-item__side .voucher-item__cta{min-width:118px;min-height:38px;white-space:nowrap}
 .voucher-item__detalle:hover{border-color:var(--ink2);color:var(--ink)}
 .voucher-item__detalle:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
