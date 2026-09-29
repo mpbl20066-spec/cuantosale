@@ -4801,7 +4801,7 @@
         /* El canal va siempre, reservado o no, y en el mismo lugar para los
            cuatro rubros. Es la bajada que da confianza: si el estado no dice
            de quien es el precio, el precio es un numero sin dueno. */
-        + (canal.canal ? '<p class="voucher-item__canal">' + esc(canal.canal) + '</p>' : '');
+        + (canal.canal ? '<p class="voucher-item__canal">' + esc(category === 'alojamiento' ? 'Reserva a través de ' + canal.canal : canal.canal) + '</p>' : '');
       var lado = controlReserva(category)
         + (reservado ? '' : (ctaMarkup || ''));
       /* El color es del proveedor, no del rubro: con la paleta de rubros casi
@@ -5013,7 +5013,7 @@
     }
     var hotelNote = multiHotel
       ? hotelesElegidos.map(hotelLine).join('')
-      : (selectedHotelDetail && selectedHotelDetail !== 'Alojamiento seleccionado' ? '<p class="voucher-item__detail">' + esc(selectedHotelDetail) + '</p>' : '');
+      : '';  // "Precio consultado para N noches y N viajeros" ya esta en la cabecera del resumen
     // El titulo lleva el hotel cuando hay uno solo. Con dos ya no alcanza: el
     // nombre de arriba seria el de la ultima parada procesada y la lista de
     // abajo los dos, y se leeria como que el titulo ese de todo el viaje.
