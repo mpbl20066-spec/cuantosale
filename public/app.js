@@ -1305,6 +1305,25 @@
     if (code !== 'BRL') return 0;
     return Math.abs(total) >= 1000 ? 0 : 2;
   }
+  /* Igual que money() pero SIEMPRE sin decimales.
+
+     El desglose de una tarjeta es una lista de rubros que se comparan entre sí, y
+     la regla de decimalesDe los mezclaba: en la misma card "Pasajes R$ 6.724" y
+     "Traslados R$ 130,25". Se ve desprolijo porque el ojo ve dos formatos en
+     columnas que alinea.
+
+     Redondear ademas es lo honesto para estos numeros: son estimaciones (llevan
+     el asterisco), y dos decimales en un estimado son precision falsa. Los
+     precios por unidad --por noche, por kWh-- NO pasan por acá: esos si
+     necesitan centavos. */
+  function moneyCero(n) {
+    var v = Number(n);
+    if (!Number.isFinite(v)) return '';
+    var m = monedaActiva();
+    var tasa = tasaDe(m.code);
+    if (tasa == null) { m = monedaBase(); tasa = 1; }
+    return m.simbolo + ' ' + formatoMiles(v * tasa, 0);
+  }
 /* ---------------------------------------------------------------
      Selector de moneda. Va arriba a la derecha del h2 de la seccion.
      Se dibuja con markup plano, no con un <select>, para poder mostrar el
@@ -1905,9 +1924,9 @@
     };
     if (typeProfiles[meta.hotelType]) return typeProfiles[meta.hotelType];
     var styles = {
-      ahorro: { tier: 'eco', title: 'Ahorrar al máximo', badge: 'SÚPER ECONÓMICO', description: 'Posadas, hosteles boutique y opciones de bajo costo.' },
-      eq: { tier: 'moderado', title: 'Equilibrado', badge: 'MEJOR RELACIÓN PRECIO-CALIDAD', description: 'Hoteles de gama media con buena ubicación y servicios.' },
-      comodo: { tier: 'alto', title: 'Con comodidad', badge: 'COMODIDAD PREMIUM', description: 'Hoteles exclusivos, resorts y posadas de alta gama.' }
+      ahorro: { tier: 'eco', title: 'Económica', badge: 'SÚPER ECONÓMICO', description: 'Posadas, hosteles boutique y opciones de bajo costo.' },
+      eq: { tier: 'moderado', title: 'Equilibrada', badge: 'MEJOR RELACIÓN PRECIO-CALIDAD', description: 'Hoteles de gama media con buena ubicación y servicios.' },
+      comodo: { tier: 'alto', title: 'Premium', badge: 'COMODIDAD PREMIUM', description: 'Hoteles exclusivos, resorts y posadas de alta gama.' }
     };
     return styles[meta.style] || styles.eq;
   }
@@ -1923,7 +1942,7 @@
      "Todas las propuestas" y en el aviso de que no hay más: si los dos textos tu
     vieran la palabra escrita, cambiar "Equilibrado" por "Con comodidad" un día
      dejaría la mitad de las pantallas diciendo la cosa vieja. */
-  var ESTILO_VIAJE = { ahorro: 'Ahorrar al máximo', eq: 'Equilibrado', comodo: 'Con comodidad' };
+  var ESTILO_VIAJE = { ahorro: 'Económica', eq: 'Equilibrada', comodo: 'Premium' };
   function nombreEstiloViaje(style) {
     return ESTILO_VIAJE[String(style || 'eq')] || ESTILO_VIAJE.eq;
   }
@@ -5881,9 +5900,13 @@
     });
   }
 
-  // Elegir una tarjeta sin salir de la lista. La card entera es la zona sensible,
-  // menos los botones: "Ver propuesta" abre el detalle y "Ver desglose" despliega
-  // el reparto, y los dos tienen que seguir haciendo lo suyo.
+  // Elegir una tarjeta sin salir de la lista. La card entera es la zona sensible:
+  // el clic elige, esté donde esté. También sobre "Ver desglose", que además
+  // despliega el reparto, porque elegir y mirar el reparto son el mismo gesto.
+  //
+  // Lo único que se excluye es "Ver propuesta": ese abre el detalle, y ahí la
+  // card queda elegida igual (lo escribe handleProposalNavigation), pero la
+  // navegación no se puede cancelar.
   //
   // El clic es propio y no el de "Ver propuesta" a propósito. Atado a ese botón,
   // marcar una card te sacaba de la lista y el cuadro amarillo no se veía nunca:
@@ -5891,7 +5914,7 @@
   function handleProposalSelect(e) {
     var card = e.target.closest && e.target.closest('#results [data-propuesta-card]');
     if (!card) return;
-    if (e.target.closest('button, a, input, label, select, textarea')) return;
+    if (e.target.closest('.btn-ver-propuesta, a, input, label, select, textarea')) return;
     e.preventDefault();
     e.stopPropagation();
     var id = card.getAttribute('data-propuesta-card');
@@ -5928,10 +5951,10 @@
         var asterisco = rubroEsReal(option, c[0], data.meta)
           ? ''
           : '<sup class="opt__est" aria-label="precio estimado" title="Precio estimado">*</sup>';
-        return '<div><span>' + c[1] + '</span><b>' + money(option.parts[c[0]]) + asterisco + '</b></div>';
+        return '<div><span>' + c[1] + '</span><b>' + moneyCero(option.parts[c[0]]) + asterisco + '</b></div>';
       }).join('');
       var notaDesglose = hayEstimado
-        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Hacé clic en <b>Ver propuesta</b> para ver el valor final.</p>'
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado sujeto a disponibilidad. Hacé clic en <b>"Ver propuesta"</b> para congelar tu tarifa.</p>'
         : '';
       var photo = DEST_PHOTOS[option.dest.key];
       var location = [option.dest.region, option.dest.country || 'Brasil'].filter(Boolean).join(' - ');
@@ -5948,8 +5971,8 @@
         '<div class="opt__head destination-card-top"><div class="opt__main">' +
         '<h3>' + esc(option.dest.name) + '</h3>' +
         (location ? '<p class="destination-location">' + esc(location) + '</p>' : '') +
-        '<p>' + esc(option.title.replace(/Vuelo desde Montevideo/g, 'Vuelo desde ' + originCityName(data.meta.origin))) + '. ' + esc(option.tierDesc) + '.</p></div>' +
-        '<div class="opt__price destination-total"><small>Gran total</small><b>' + money(option.total) + '</b><span>' + money(option.pp) + ' por persona</span></div></div>' +
+        '<p>' + esc(option.title.replace(/Vuelo desde Montevideo/g, 'Vuelo desde ' + originCityName(data.meta.origin))) + '. ' + esc(subtituloDe(option)) + '</p></div>' +
+        '<div class="opt__price destination-total"><small>' + etiquetaTotal(data.meta.pax) + '</small><b>' + moneyCero(option.total) + '</b><span>' + moneyCero(option.pp) + ' por persona</span></div></div>' +
         '<div class="destination-card-tags"><span class="mini g">¡Entra en tu presupuesto!</span></div>' +
         '<div class="opt__actions">' +
         '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
@@ -6031,13 +6054,89 @@
 
   /* ---------- pantalla ---------- */
   function byId(list, id) { if (!Array.isArray(list)) return null; for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(id)) return list[i]; return null; }
+  /* La etiqueta del número grande de la card.
+
+     El precio grande es el TOTAL del grupo y abajo va el de una persona, sin
+    decirlo: "R$ 13.848" y "R$ 6.924 por persona" se leen como un número y su
+     mitad, y en una lista de alternativas la confusión es entre cards. La
+     tarjeta de destino ya decía "Gran total"; la de propuesta no decía nada y
+     por eso una se entendía y la otra no. Las dos usan esta. */
+  function etiquetaTotal(pax) {
+    var n = Number(pax) || 1;
+    return 'Total para ' + n + (n === 1 ? ' pasajero' : ' pasajeros');
+  }
+
   function titleOf(p) {
-    var origin = originCityName(detailState && detailState.meta && detailState.meta.origin || S.origin);
-    var originAirport = originLabel(detailState && detailState.meta && detailState.meta.origin || S.origin);
+    var originAirport = originLabel(S.origin);
     var mode = p.mode === 'auto' ? 'Viaje en auto desde ' + originAirport : p.mode === 'bus' ? 'Bus semicama/cama desde ' + originAirport : 'Vuelo desde ' + originAirport;
-    var type = detailState && detailState.meta && detailState.meta.hotelType || S.hotelType || 'intermedio';
-    var hotel = HOTEL_TYPE_LABELS[type] || (p.tierLabel ? p.tierLabel.charAt(0).toUpperCase() + p.tierLabel.slice(1) : 'Intermedio');
-    return mode + ' + Hotel ' + hotel;
+    // El nombre del hotel sale del TIER DE LA PROPUESTA y no de hotelType. Antes
+    // usaba la seleccion global y por eso una misma card decia "Hotel
+    // Equilibrado" en el titulo y "Hostel u hotel simple" en el subtitulo: dos
+    // Accommodation tiers distintos en dos lineas de la misma tarjeta. El
+    // hotelType elegido arriba es el filtro de la busqueda, no lo que trae esta
+    // propuesta.
+    var hotel = alojamientoDe(p);
+    return mode + ' + ' + hotel;
+  }
+
+  /* El alojamiento de una propuesta, con nombre comercial.
+
+     `tierDesc` (lib/model.js) es el dato crudo: "Hostel u hotel simple", "Hotel 3
+     estrellas", "Hotel 4 estrellas". Sirve para el modelo, no para una tarjeta: el
+     primero es una categoría amplia, no un producto, y "Hotel 3 estrellas" no dice
+     nada de por qué una propuesta cuesta más que la de al lado.
+
+     El nombre tiene que ser el mismo en el título y en el subtítulo. Antes cada
+     uno lo sacaba de un lado distinto y por eso se contradecían.
+
+     OJO con `ti`: es el ÍNDICE del for de lib/model.js (`for (let t = 0; ...)`),
+     no la clave. Por eso el mapa es un array y no un objeto. Y `hotelType` NO
+     describe el nivel: es el filtro que eligió la persona y viene igual en las
+     nueve propuestas, así que si mandara sobre el texto las tres volverían a
+     decir lo mismo. Solo manda cuando es un tipo con contenido propio
+     (all-inclusive, resort, boutique), donde sí cambia lo que incluye. */
+  var ALOJAMIENTO_TIER = ['Hostel o hotel sencillo', 'Hotel 3 estrellas', 'Hotel 4 estrellas'];
+  var ALOJAMIENTO_TIPO = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Hotel boutique' };
+  function alojamientoDe(p) {
+    if (!p) return ALOJAMIENTO_TIER[1];
+    if (p.hotelType && ALOJAMIENTO_TIPO[p.hotelType]) return ALOJAMIENTO_TIPO[p.hotelType];
+    if (typeof p.ti === 'number') return ALOJAMIENTO_TIER[p.ti] || ALOJAMIENTO_TIER[1];
+    // Por si `ti` llegara como clave y no como índice.
+    return { eco: ALOJAMIENTO_TIER[0], medio: ALOJAMIENTO_TIER[1], confort: ALOJAMIENTO_TIER[2] }[p.ti] || ALOJAMIENTO_TIER[1];
+  }
+
+  /* El trayecto del subtitulo, en una sola forma para los cinco modos.
+
+     `dur` viene del modelo como un texto ya armado y con el modo repetido
+     adentro: "unas 1 h de vuelo", "unas 6 h con escala", "unas 8 h en total",
+     "unas 22 h", "unas 11 h de manejo". Al anteponerle el modo se leia "Vuelo
+     unas 1 h de vuelo". Se saca la parte que el modo ya dice y se deja el dato
+     comparativo: "~1 h", "~6 h con escala". */
+  function trayectoDe(p) {
+    var d = String((p && p.dur) || '').trim();
+    if (!d) return '';
+    var soloModo = /^(de vuelo|por tierra|en total|con escala|de manejo)\.?$/i;
+    d = d.replace(/\s+(de vuelo|por tierra|de manejo)\.?$/i, '');
+    d = d.replace(/^en total$/i, 'en total');
+    var m = d.match(/(\d+)\s*h/);
+    if (m) d = '~' + m[1] + ' h' + d.slice(m.index + m[0].length);
+    if (soloModo.test(d)) d = '';
+    return d;
+  }
+
+  /* El subtitulo de la tarjeta, con la misma estructura para los tres niveles:
+     [trayecto] · [traslado] · [alojamiento].
+
+     El traslado va sin duracion a proposito: `parts.traslados` es un monto y en
+     todo el modelo no existe cuando tarda el transfer del aeropuerto. Inventar
+     "2 h de traslado" seria el mismo problema que marcar como real un precio
+     estimado. */
+  function subtituloDe(p) {
+    var modo = p.mode === 'auto' ? 'Auto' : p.mode === 'bus' ? 'Bus' : p.mode === 'ferry' ? 'Ferry' : 'Vuelo';
+    var trayecto = trayectoDe(p);
+    var traslado = 'Transfer al hotel';
+    var alojamiento = alojamientoDe(p);
+    return [trayecto ? modo + ' ' + trayecto : modo, traslado, alojamiento].join(' · ');
   }
   /* Si un rubro de una propuesta viene de un precio real o de una estimación.
 
@@ -6420,7 +6519,7 @@
       '<span class="tag ghost">' + esc(data.meta.dest.name) + '</span>' +
       '<span class="tag ghost">' + data.meta.nights + ' noches</span>' + sourcePill + '</div>' +
       '<h3>' + esc(titleOf(rec)) + '</h3>' +
-      '<p class="meta">' + dLong(dep) + ' a ' + dLong(ret) + ', ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '. Trayecto ' + esc(rec.dur) + '.</p>' +
+      '<p class="meta">' + dLong(dep) + ' a ' + dLong(ret) + ', ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '. Trayecto ' + esc(trayectoDe(rec)) + '.</p>' +
       '<div class="perf"><i></i><i></i></div>' +
       '<div class="nums"><div><small>Costo total del viaje</small><span class="big">' + money(rec.total) + '</span></div>' +
       '<div><small>Por persona</small><span class="pp">' + money(rec.pp) + '</span></div></div>' +
@@ -6483,16 +6582,16 @@
         var asterisco = rubroEsReal(p, c[0], data.meta)
           ? ''
           : '<sup class="opt__est" aria-label="precio estimado" title="Precio estimado">*</sup>';
-        return '<div><span>' + c[1] + '</span><b>' + money(p.parts[c[0]]) + asterisco + '</b></div>';
+        return '<div><span>' + c[1] + '</span><b>' + moneyCero(p.parts[c[0]]) + asterisco + '</b></div>';
       }).join('');
       var nota = hayEstimado
-        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. Hacé clic en <b>Ver propuesta</b> para ver el valor final.</p>'
+        ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado sujeto a disponibilidad. Hacé clic en <b>"Ver propuesta"</b> para congelar tu tarifa.</p>'
         : '';
       var bodyId = 'opt-desglose-' + index;
       return '<article class="opt' + (p.id === selectedPropuestaId ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-card="' + esc(p.id) + '">' +
         '<div class="opt__head">' +
-          '<div class="opt__main"><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(p.tierDesc) + '. Trayecto ' + esc(p.dur) + '.</div><div class="tg">' + tags + '</div></div>' +
-          '<div class="opt__price"><b>' + money(p.total) + '</b><span>' + money(p.pp) + ' por persona</span></div>' +
+          '<div class="opt__main"><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(subtituloDe(p)) + '</div><div class="tg">' + tags + '</div></div>' +
+          '<div class="opt__price"><small>' + etiquetaTotal(data.meta.pax) + '</small><b>' + moneyCero(p.total) + '</b><span>' + moneyCero(p.pp) + ' por persona</span></div>' +
         '</div>' +
         '<div class="opt__actions">' +
           '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
@@ -6540,10 +6639,6 @@
       if (masBarata && p.id === masBarata.id) return true;
       return topeCerca > 0 && p.total <= topeCerca;
     }).sort(function (a, b) { return a.total - b.total; });
-    // Las que entran por las dos reglas extra vienen de otra gama. El subtítulo
-    // no puede afirmar "del mismo nivel" si hay alguna de esas adentro, y la card
-    // lo dice con una etiqueta para que la diferencia se vea sin leer el texto.
-    var otrasGamas = sameTier.filter(function (p) { return p.ti !== rec.ti; });
     var estilo = nombreEstiloViaje(data.meta.style || S.style);
     var verDetalle = 'Tocá <b>Ver propuesta</b> para abrir el detalle o <b>Ver desglose</b> para ver cómo se arma el precio.';
     var opts = sameTier.map(function (p) { return proposalMarkup(p, sameTier.indexOf(p), p.ti !== rec.ti); }).join('');
@@ -6552,11 +6647,14 @@
         '<p class="sub">Esta propuesta ya está optimizada: es la más barata que encontramos para estas fechas y no hay una alternativa más barata. ' + verDetalle + '</p>' +
         '<div class="opts">' + opts + '</div></section>';
     } else {
-      var alcance = otrasGamas.length
-        ? 'Del mismo nivel que el tipo de viaje que elegiste (<b>' + esc(estilo) + '</b>), más las que quedan cerca de tu presupuesto.'
-        : 'Del mismo nivel que el tipo de viaje que elegiste (<b>' + esc(estilo) + '</b>).';
+      // El texto del encabezado es UNO para las dos variantes. Decía "del mismo
+      // nivel que el tipo de viaje que elegiste" followed de una frase sobre el
+      // orden, y con el orden dentro de la misma oración se leía como una sola
+      // frase larga. La regla del filtro (mismo tier, más la más barata, más lo
+      // que cae cerca del presupuesto) ya la dice el código de arriba; acá alcanza
+      // con decir qué se muestra y cómo viene.
       h += '<section class="sec"><div class="sec__head"><h2>Todas las propuestas</h2></div>' +
-        '<p class="sub">' + alcance + ' Ordenadas de la más barata a la más cara. ' + verDetalle + '</p>' +
+        '<p class="sub">Mostramos alternativas <b>' + esc(estilo) + '</b> adaptadas a tu presupuesto, ordenadas de menor a mayor precio.</p>' +
         '<div class="opts">' + opts + '</div></section>';
     }
 
