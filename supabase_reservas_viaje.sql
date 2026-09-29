@@ -116,8 +116,14 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Sacar la marca, para poder corregir una reserva mal puesta
 --
--- El boton "Reservado" es la unica forma de que una reserva cargada por error
+-- El boton de la agencia es la unica forma de que una reserva cargada por error
 -- (una transferencia que despues se cancelo) tenga arreglo desde la pagina.
+--
+-- Solo la agencia, y no es un detalle: el boton de deshacer aparece en el
+-- voucher que ve el cliente, asi que si esta funcion saliera abierta el
+-- cliente podria sacarse el "Reservado" de un tour que la agencia ya coordino.
+-- Es la contraparte del gate de marcar: si se puede poner, solo la agencia lo
+-- saca.
 -- ---------------------------------------------------------------------------
 create or replace function public.reservas_desmarcar(p_viaje_id uuid, p_categoria text)
 returns text
@@ -128,6 +134,9 @@ as $$
 declare
   v_categoria text := lower(trim(coalesce(p_categoria, '')));
 begin
+  if not public.es_agencia() then
+    raise exception 'Solo la agencia puede sacar la marca de reserva';
+  end if;
   if p_viaje_id is null then
     return null;
   end if;
@@ -140,12 +149,103 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
+-- Quien puede poner la marca a mano
+--
+-- El vuelo y el hotel se marcan solos cuando la persona toca el link, porque
+-- ahi no hay nada que decidir: el link abre WhatsApp o Booking y la intencion
+-- esta clara. Los traslados y los tours NO: eso los coordina la agencia, y el
+-- "Reservado" tiene que ponerlo quien confirmo la reserva, no el cliente. Por
+-- eso hay una tabla de correos y las funciones de a mano la consultan.
+--
+-- Es una tabla y no un hardcode en el codigo para poder sumar a otra persona
+-- (un agente, un socio) sin tocar la app ni volver a desplegar.
+-- ---------------------------------------------------------------------------
+create table if not exists public.agencia (
+  email text primary key,
+  nombre text,
+  created_at timestamptz not null default now()
+);
+
+-- Sin policies, como waitlist y como reservas_viaje: nadie lee esta tabla
+-- desde el cliente, solo la consultan las funciones de abajo.
+alter table public.agencia enable row level security;
+
+-- ---------------------------------------------------------------------------
+-- PONER TU CORREO ACA
+--
+-- Cambiá el valor y corré esta línea. Tiene que ser el mismo correo con el que
+-- iniciás sesión en la web, porque es contra ese correo que se decide si los
+-- controles de "Reservado" se muestran. Sin esta fila la app anda normal y solo
+-- que no le aparece nada a nadie para marcar.
+--
+-- Para sumar a otra persona (un agente, un socio), repetí la línea con su
+-- correo: la tabla no tiene tope.
+-- ---------------------------------------------------------------------------
+-- insert into public.agencia (email, nombre) values ('TU@EMAIL.COM', 'Agencia');
+
+
+-- Dice si quien esta mirando es de la agencia. La respuesta sale del JWT, no
+-- de un parametro: si el parametro lo mandara el navegador, cualquiera que
+-- lo pasara en false y el control de la pagina no valdria nada.
+create or replace function public.es_agencia()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.agencia a
+     where lower(a.email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+$$;
+
+
+-- Marcar a mano. Solo la agencia; el error sale de la base y no de un if del
+-- navegador, porque el navegador es del cliente y se lo puede editar.
+create or replace function public.reservas_marcar_manual(
+  p_viaje_id uuid, p_categoria text, p_destino text default null, p_detalle jsonb default '{}'::jsonb
+)
+returns text
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_categoria text := lower(trim(coalesce(p_categoria, '')));
+begin
+  if not public.es_agencia() then
+    raise exception 'Solo la agencia puede marcar reservas';
+  end if;
+  if p_viaje_id is null then return null; end if;
+  if v_categoria not in ('pasajes', 'alojamiento', 'traslados', 'tours') then
+    raise exception 'Categoría inválida: %', p_categoria;
+  end if;
+
+  insert into public.reservas_viaje (viaje_id, user_id, categoria, destino, detalle)
+  values (p_viaje_id, auth.uid(), v_categoria, nullif(trim(p_destino), ''), coalesce(p_detalle, '{}'::jsonb))
+  on conflict (viaje_id, categoria) do update
+    set updated_at = now(),
+        destino = excluded.destino,
+        detalle = excluded.detalle,
+        user_id = coalesce(excluded.user_id, public.reservas_viaje.user_id);
+  return v_categoria;
+end;
+$$;
+
+
+-- ---------------------------------------------------------------------------
 -- Permisos
 --
 -- Se saca todo de la tabla y se da solo execute sobre las funciones: asi no
 -- alcanza con un grant equivocado para que alguien lea la tabla entera.
+--
+-- reservas_marcar queda abierta a proposito: es la del clic en el link de
+-- vuelo y hotel, que hace cualquiera. Lo que se gatea es la de a mano.
 -- ---------------------------------------------------------------------------
 revoke all on public.reservas_viaje from anon, authenticated;
+revoke all on public.agencia from anon, authenticated;
+grant execute on function public.es_agencia() to anon, authenticated;
 grant execute on function public.reservas_marcar(uuid, text, text, jsonb) to anon, authenticated;
 grant execute on function public.reservas_leer(uuid) to anon, authenticated;
-grant execute on function public.reservas_desmarcar(uuid, text) to anon, authenticated;
+grant execute on function public.reservas_marcar_manual(uuid, text, jsonb) to anon, authenticated;
