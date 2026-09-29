@@ -4501,7 +4501,7 @@
      (Duffel aparece solo en comentarios viejos, explicando que ya no esta: no
      hay integracion con Duffel y no se puede poner en la cara del usuario.) */
   var CANAL_RESERVA = {
-    pasajes: { canal: 'Google Flights', externo: true },
+    pasajes: { canal: 'Aerolínea', externo: true },
     alojamiento: { canal: 'Booking', externo: true },
     traslados: { canal: 'Gestion directa', externo: false },
     tours: { canal: 'Gestion directa', externo: false }
@@ -4808,7 +4808,7 @@
       /* El color es del proveedor, no del rubro: con la paleta de rubros casi
          todas las filas salian del mismo azul. Va por parametro porque el
          style del span lo perdia contra el del svg. Ver categoryIcon(). */
-      return '<li class="voucher-item' + (reservado ? ' is-reservado' : '') + '"><span class="voucher-item__icon">' + categoryIcon(category, colorProveedor(category)) + '</span>' +
+      return '<li class="voucher-item' + (reservado ? ' is-reservado' : '') + '" data-rubro="' + esc(category) + '"><span class="voucher-item__icon">' + categoryIcon(category, colorProveedor(category)) + '</span>' +
         '<div class="voucher-item__body"><p class="voucher-item__title">' + title
           /* La pastilla va en la linea del titulo, no en una propia. Antes ocupaba
              una linea entera y la fila reservada daba 83px contra los 58 de las
@@ -4854,10 +4854,61 @@
     function reservadoLabel(categoria) {
       return categoria === 'pasajes' ? 'Vuelo reservado' : (categoria === 'alojamiento' ? 'Hotel reservado' : 'Reservado');
     }
+    /* El link de vuelta. Lo unico que hace es POSICIONAR: cuando la persona
+       vuelve de Booking o de la aerolinea, el cotizador la trae a la fila que
+       estaba configurando y le saca el parametro de la barra.
+
+       Deliberadamente NO lleva ningun estado adentro, y esto sigue valiendo
+       cuando este el vuelo con Duffel: un "?status=success" en la URL lo
+       puede escribir cualquiera, y convertia "Reservado" en una declaracion
+       del visitante. Con Duffel el estado real llega por webhook, del lado del
+       servidor y firmado por el proveedor --que es otra cosa--; este
+       parametro sigue siendo solo de posicion, y un valor inventado no
+       produce nada. */
+    function conLinkDeVuelta(url, categoria) {
+      if (!url) return url;
+      var id = viajeReservaId();
+      if (!id) return url;
+      var sep = url.indexOf('?') >= 0 ? '&' : '?';
+      return url + sep + 'vuelta=' + encodeURIComponent(id) + '&rubro=' + encodeURIComponent(categoria);
+    }
+    /* Al volver de afuera: senalar la fila y limpiar la barra.
+     *
+     * Se valida el "vuelta" contra el id del viaje que ya esta en esta pagina,
+     * no contra nada externo. Si no coincide--o el viaje no existe-- se ignora
+     * el parametro y se limpia igual: es mas honesto dejar la pantalla como
+     * estaba que fingir que se volvio de un lado que no corresponde.
+     *
+     * Se limpia con history.replaceState y no con location: replaceState
+     * cambia la barra sin recargar, y recargar perderia el scroll y el modal. */
+    function honrarLinkDeVuelta(modal) {
+      if (!modal || !window.location.search) return;
+      var params = new URLSearchParams(window.location.search);
+      if (!params.has('vuelta') || !params.has('rubro')) return;
+      var volver = params.get('vuelta');
+      var rubro = params.get('rubro');
+      var viaje = viajeReservaId();
+      // Se limpia SIEMPRE, haya coincidido o no: dejar "?vuelta=..." en la
+      // barra invita a la gente a inventar parametros despues.
+      var limpio = new URLSearchParams(window.location.search);
+      limpio.delete('vuelta'); limpio.delete('rubro');
+      var qs = limpio.toString();
+      try {
+        history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash);
+      } catch (e) { /* sin history: se deja la barra como estaba */ }
+      if (!viaje || volver !== viaje) return;
+      if (['pasajes', 'alojamiento', 'traslados', 'tours'].indexOf(rubro) < 0) return;
+      var fila = modal.querySelector('.voucher-item[data-rubro="' + rubro + '"]');
+      if (!fila) return;
+      fila.classList.add('is-tras-vuelta');
+      try { fila.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) { fila.scrollIntoView(); }
+      window.setTimeout(function () { fila.classList.remove('is-tras-vuelta'); }, 2600);
+    }
+
     function bookCta(url, label, labelFor, categoria) {
       if (reservasDe(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a ' + label.toLowerCase() + '.');
       return url
-        ? '<a class="voucher-item__cta" data-reservar-rubro="' + esc(categoria) + '" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(labelFor) + '">' + esc(label) + '</a>'
+        ? '<a class="voucher-item__cta" data-reservar-rubro="' + esc(categoria) + '" href="' + esc(conLinkDeVuelta(url, categoria)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(labelFor) + '">' + esc(label) + '</a>'
         : '<button type="button" class="voucher-item__cta is-off" disabled>' + esc(label) + '</button>';
     }
     /* Las dos filas que reserva la app —tours y traslados— abren el checkout en
@@ -5014,7 +5065,18 @@
           + '<div class="voucher-step__text"><b>' + esc(titulo) + '</b><span>' + bajada + '</span></div>'
           + (hecho ? '' : accion) + '</li>';
       };
+      /* El boton de confirmar es de la agencia, no del cliente.
+
+         Antes se pintaba para cualquiera, y la RPC que lo atiende--
+         reservas_marcar_manual-- arranca con "if (!await esAgencia()) return",
+         asi que un cliente lo veia, lo apretaba y no pasaba nada. Sin error y
+         sin aviso: el control se apagaba en silencio. Eso es peor que no
+         tenerlo, porque promete una confirmacion y se la traga.
+
+         Para el cliente queda un texto que ademas explica de donde sale la
+         marca, en vez de dejarlo adivinar. */
       var confirma = function (cat, que) {
+        if (!soyAgencia) return '<span class="voucher-step__hint">La marca la pone la agencia</span>';
         return '<button type="button" class="voucher-step__btn" data-confirmar-reserva="' + esc(cat) + '"'
           + ' title="Confirm&aacute; que ya lo reservaste en ' + esc(que) + '">Ya lo reserv&eacute;</button>';
       };
@@ -5111,18 +5173,7 @@
        METABUSCADOR. El precio y el link son reales, pero la compra termina en
        la aerolinea o en una agencia. Booking si es intermediario real, y ahi
        el respaldo es cierto. */
-      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>Google Flights</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
-      /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
-
-       Porque el pago del vuelo y del hotel pasa por un sitio del que la app
-       no recibe ningun aviso: no hay transaccion propia ni webhook al que
-       colgar el cambio. El unico dato cierto es el que declara la persona, asi
-       que se lo preguntamos una vez y lo anotamos, en vez de suponerlo y
-       mostrarle un "Comprado" que podria ser falso.
-
-       El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
-       se marca solo al completar el checkout. */
-      '<p class="voucher-canales__nota">En el vuelo y el hotel te llevamos al sitio donde se paga, pero ese sitio no nos avisa cuando terminaste. Por eso el paso te pide confirmarlo: as&iacute; queda anotado de verdad.</p>' +
+      '<p class="voucher-canales">Cada rubro se paga donde corresponde: el hotel en <b>Booking</b>, el vuelo en <b>la aerol&iacute;nea</b> y los traslados y actividades directo con nosotros. Nosotros coordinamos.</p>' +
       dividirBloque +
       reservarTodo +
       /* ABAJO, UN SOLO BOTON SOLIDO.
@@ -5153,6 +5204,7 @@
       '</div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
+    honrarLinkDeVuelta(modal);
     /* Se pide la lista de reservados al abrir, no antes: es una lectura de
        red y el voucher se abre desde un botón, así que pedirla con la
        propuesta le sobra un round-trip a cada cambio de hotel o de fecha que
@@ -7758,8 +7810,23 @@
     content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p><b class="detail-summary__destino">' + esc(data.meta.dest.name) + '</b>' + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') + dailyBudgetMarkup +
-      '<div data-transport-flow>' + transportMarkup + '</div>' +
-      hotelsMarkup + toursMarkup + foodMarkup +
+      '<div data-transport-flow>' + transportMarkup + '</div>' +      hotelsMarkup + toursMarkup +
+      /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
+
+         Antes estaba al final de todo y el comentario de arriba explicaba por
+         que: primero elegis, despues miras donde fue la plata. Ese
+         razonamiento era bueno cuando la guia era un bloque de texto al final,
+         y dejo de serlo cuando la guia se puso arriba por su cuenta y quedo
+         siendo el bloque mas alto de la seccion: el desglose quedo debajo de
+         un muro de texto, y para ver el reparto de la plata habia que
+         scrollear toda la guia.
+
+         Ademas el desglose es el bloque accionable: cada fila salta a la
+         seccion donde esa plata se cambia. Va antes de la guia porque las dos
+         cosas responden la misma pregunta --donde va la plata-- y el reparto
+         primero: ahi estan las cuentas, y la guia dice como cuidarlas. */
+      breakdownMarkup + foodMarkup +
+
       /* "A donde va tu plata" va AL FINAL, despues de todas las secciones. Antes
          estaba arriba, entre el resumen y el reparto de noches, y ahi competia
          con la decision principal: ver el reparto antes de haber visto los

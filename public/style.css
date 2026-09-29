@@ -966,6 +966,24 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .voucher-item.is-reservado .voucher-item__title{color:var(--ink2)}
 .voucher-item.is-reservado .voucher-item__amount{color:var(--ink)}
 
+/* La fila que quedó señalada al volver de afuera. Es una señal de POSICIÓN, no
+   de estado: aparece, dura un rato y se va sola.
+
+   El color es el de la marca --action-bg, el mismo del botón de reservar, para
+   que se lea como "acá estabas mirando". Y NO es el verde de la pastilla de
+   reserva: ese color significa una sola cosa, que la reserva está confirmada, y
+   usar acá mezclaría una señal de navegación con un estado de pago. Cuando el
+   vuelo pase por Duffel el estado real va a llegar por webhook, del lado del
+   servidor, y esta animación sigue siendo solo posicionamiento. */
+.voucher-item.is-tras-vuelta{animation:voucher-vuelta 2.6s ease-out;border-radius:12px}
+@keyframes voucher-vuelta{
+  0%,55%{box-shadow:0 0 0 2px var(--action-bg);background:color-mix(in srgb,var(--action-bg) 8%,transparent)}
+  100%{box-shadow:0 0 0 0 transparent;background:transparent}
+}
+@media (prefers-reduced-motion:reduce){
+  .voucher-item.is-tras-vuelta{animation:none;box-shadow:0 0 0 2px var(--action-bg)}
+}
+
 /* En el panel "Mi Viaje" el estado reservado reemplaza a "Sumado" y usa el
    mismo verde. El "En curso" mantiene el fondo hueco para no gastar el mismo
    token dos veces con dos significados distintos. */
@@ -1046,7 +1064,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    y no con mas padding: son dos cosas distintas --una explica el reparto de
    canales, la otra explica por que hay un boton-- y pegadas se leen como una
    sola frase larga. */
-.voucher-canales__nota{margin:8px 0 0;padding-top:10px;border-top:1px solid var(--line)}
 
 /* ---------- El asistente paso a paso ----------
    Tres pasos en el orden en que hay que hacerlos. Cada uno dice que falta y
