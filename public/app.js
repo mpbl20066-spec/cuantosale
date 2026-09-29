@@ -2039,6 +2039,48 @@
     if (total == null) delete detailState.multiStay.selectedStayTotals[stop];
     else detailState.multiStay.selectedStayTotals[stop] = Math.round(total);
   }
+  /* Los hoteles ELEGIDOS, uno por parada.
+     existed findSelectedHotelLabel() para esto, pero devuelve un solo nombre: en un
+     viaje combinado hay un radio marcado por parada y la funcion leia el
+     primero con querySelector. El resumen decia "Hotel Aquarius" y abajo
+     "3 en Fortaleza / Jericoacoara", o sea un hotel y dos destinos, sin decir
+     cual era de cual. El nombre unico seguia siendo necesario para el campo del
+     checkout y para "Mi Viaje", asi que esta funcion no lo reemplaza: agrega la
+     informacion que el nombre unico no puede dar.
+
+     Devuelve [{ stop, name, nights, name2 }] con una entrada por parada con hotel
+     elegido, en orden. Sin multiStay es una sola entrada con stop 0. */
+  function selectedHotelsByStop() {
+    var salida = [];
+    if (!detailState) return salida;
+    if (detailState.selectedHotel === false) return salida;
+    var checked = Array.prototype.slice.call(document.querySelectorAll('[data-hotel-total]:checked'));
+    var reparto = stayNights();
+    checked.forEach(function (input) {
+      var card = input.closest('[data-hotel-option]');
+      if (!card) return;
+      var nombre = card.querySelector('h3');
+      var nombre = nombre && nombre.textContent ? nombre.textContent.trim() : '';
+      if (!nombre) return;
+      var stop = Number(input.getAttribute('data-hotel-stop')) || 0;
+      salida.push({
+        stop: stop,
+        name: nombre,
+        // Las noches de ESA parada. En un viaje combinado el texto de la ficha
+        // ya dice las suyas, y el resumen las juntaba todas en un solo numero.
+        nights: reparto ? (stop === 2 ? reparto.second : reparto.first) : null
+      });
+    });
+    salida.sort(function (a, b) { return a.stop - b.stop; });
+    return salida;
+  }
+  /* El nombre del hotel de una parada, para los textos que son de string y no
+     de markup (el mensaje de WhatsApp, el guardado). */
+  function hotelNameForStop(stop) {
+    var lista = selectedHotelsByStop();
+    for (var i = 0; i < lista.length; i++) if (lista[i].stop === stop) return lista[i].name;
+    return lista.length ? lista[0].name : findSelectedHotelLabel();
+  }
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
@@ -2708,7 +2750,7 @@
     if (t.transfer) {
       var vuelo = getSelectedFlightSummary();
       facts += '<li><span>Transfer</span><b>' + esc(t.transfer.title) + '</b></li>' +
-        '<li><span>Vuelo</span><b>' + esc(vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '')) + '</b></li>' +
+        '<li><span>Vuelo</span><b>' + esc(vueloNombreCorto(vuelo)) + '</b></li>' +
         '<li><span>Hotel</span><b>' + esc(transferHotelName()) + '</b></li>';
     }
     return '<aside class="checkout-aside">' +
@@ -2885,7 +2927,7 @@
       pedido += '<h3>El traslado</h3><ul>' +
         dataRow('Transfer', t.transfer.title + ' · ' + money(t.transfer.total)) +
         dataRow('Hotel', transferHotelName()) +
-        dataRow('Vuelo', vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '')) +
+        dataRow('Vuelo', vueloNombreCorto(vuelo)) +
         dataRow('Horario de recogida', 'A coordinar con el operador') +
         '</ul>';
     }
@@ -3112,7 +3154,7 @@
       var vuelo = getSelectedFlightSummary();
       message += 'Transfer: ' + t.transfer.title + ' · ' + money(t.transfer.total) +
         (t.transfer.porPersona ? ' (' + money(t.transfer.price) + ' por persona)' : '') + '\n' +
-        'Vuelo: ' + vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '') + (vuelo.arrivalText ? ' · llega ' + vuelo.arrivalText : '') + '\n' +
+        'Vuelo: ' + vueloNombreCorto(vuelo) + (vuelo.arrivalText && vuelo.selected ? ' · llega ' + vuelo.arrivalText : '') + '\n' +
         'Hotel: ' + (transferHotelName() || 'sin confirmar, decime el hotel o pousada') + '\n\n';
     }
     message += 'Total a confirmar: ' + money(t.total) + '\n' +
@@ -3519,6 +3561,11 @@
   }
   function flightWhatsappUrl(state, flightSummary, flightTotal) {
     if (!state || !state.meta) return null;
+    /* Sin vuelo elegido no hay nada que reservar: mandar por WhatsApp un mensaje
+       con "undefined · Origen" y "sin fecha" obligaba a la persona a explicar por
+       chat lo que ya se elige en la pagina. Devolver null deja el boton apagado
+       y el aviso en su lugar. */
+    if (!flightSummary || !flightSummary.selected) return null;
     var route = ((flightSummary.origin && (flightSummary.origin.name || flightSummary.origin.code)) || 'Origen') + ' → ' + ((flightSummary.destination && (flightSummary.destination.name || flightSummary.destination.code)) || state.meta.dest.name);
     var message = 'Hola, quiero reservar este vuelo para mi viaje a ' + state.meta.dest.name + ':\n' + flightSummary.airline + ' · ' + route + '\n' + flightSummary.summary + '\nPrecio de referencia: ' + money(flightTotal) + '\nFechas: ' + state.meta.dep + ' al ' + state.meta.ret + ' · ' + state.meta.pax + (Number(state.meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '. ¿Podrían confirmar disponibilidad y emitir?';
     // Al mismo numero que el checkout: los dos son pedidos que tiene que tomar
@@ -3897,7 +3944,7 @@
     var totalGeneral = Number(getBudgetBreakdown(detailState).total) || (flightTotal + hotelTotal + transferTotal + foodTotal + localTotal + toursTotal);
     var transportLabel = Math.abs(localPerDay - dailyCosts.transport.confort) < Math.abs(localPerDay - dailyCosts.transport.eco) ? 'Confort' : 'Económico';
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
-    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
+    var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + vueloNombreCorto(flightSummary) + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
     // toursWhatsappUrl() ya no se usa acá y queda sin referencias: el "Reservar"
     // de tours abre el checkout, y checkoutWhatsappUrl() arma un mensaje que
@@ -3954,9 +4001,20 @@
         ? '<button type="button" class="voucher-item__cta" data-reservar-pedido aria-label="' + esc(etiqueta) + '">Reservar</button>'
         : '<p class="voucher-item__detail">' + esc(aviso) + '</p>';
     }
-    var flightLines = legLine('Ida', flightSummary.origin, flightSummary.destination, flightTime(outLeg.departure, flightSummary.departureText), flightTime(outLeg.arrival, flightSummary.arrivalText), flightSummary.flightNumber);
-    if (flightSummary.isRoundTrip) flightLines += legLine('Vuelta', flightSummary.returnOrigin, flightSummary.returnDestination, flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText), flightTime(inLeg && inLeg.arrival, flightSummary.returnArrivalText), flightSummary.inboundFlightNumber);
-    var flightTitle = 'Vuelo' + (flightSummary.airline ? ' · ' + esc(flightSummary.airline) : '');
+    /* Los tramos solo existen si hay vuelo. Sin oferta, legLine() imprimia el
+       codigo de aeropuerto de undefined —que es "—"— con un "sin fecha" al lado:
+       "IDA — sin fecha → — sin fecha". Un tramo sin origen, sin destino y sin
+       hora no informa nada, y la fila queda mejor diciendo que falta elegir. */
+    var flightLines = '';
+    if (flightSummary.selected) {
+      flightLines = legLine('Ida', flightSummary.origin, flightSummary.destination, flightTime(outLeg.departure, flightSummary.departureText), flightTime(outLeg.arrival, flightSummary.arrivalText), flightSummary.flightNumber);
+      if (flightSummary.isRoundTrip) flightLines += legLine('Vuelta', flightSummary.returnOrigin, flightSummary.returnDestination, flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText), flightTime(inLeg && inLeg.arrival, flightSummary.returnArrivalText), flightSummary.inboundFlightNumber);
+    } else {
+      flightLines = '<p class="voucher-item__detail">Elegí un vuelo en la sección de vuelos para ver sus horarios.</p>';
+    }
+    var flightTitle = flightSummary.selected && flightSummary.airline
+      ? 'Vuelo · ' + esc(flightSummary.airline)
+      : 'Vuelo · sin seleccionar';
     var transferTitle = detailState.transferType === 'private' ? 'Traslado privado' : (detailState.transferType === 'shared' ? 'Traslado compartido' : 'Traslado');
     var transferWhere = transferState.hotelName || hotelParaElTransfer();
     // "Recogida a coordinar" en vez de una hora derivada del vuelo. El voucher es
@@ -3969,16 +4027,39 @@
        no abre nada dice que falta elegirlo y lo dice con el mismo tono que las
        otras filas sin elegir ("Sin actividades seleccionadas"). */
     var transferCta = reservarCta(detailState.transferType, 'Elegí un transfer en la sección de traslados.', 'Reservar el traslado desde el aeropuerto');
-    // findSelectedHotelDetail() devuelve un texto genérico cuando no encontró la
+    // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
     // card; en ese caso no hay nada que decir y la fila queda solo con el monto.
-    var hotelNote = selectedHotelDetail && selectedHotelDetail !== 'Alojamiento seleccionado' ? '<p class="voucher-item__detail">' + esc(selectedHotelDetail) + '</p>' : '';
+    /* En un viaje combinado la fila de alojamiento necesita UNA linea por parada.
+       El detalle de la ficha ya sabe las noches de su parada, asi que se leen de
+       ahi en vez de recomputarlas: el resumen no puede decir 7 noches para un
+       hotel del que 3 son en la otra parada. */
+    var hotelesElegidos = selectedHotelsByStop();
+    var multiHotel = hotelesElegidos.length > 1;
+    var reparto = stayNights();
+    function detalleParada(stop) {
+      if (!multiHotel) return 'Hotel';
+      if (reparto) return stop === 2 ? reparto.secondName : reparto.firstName;
+      return 'Parada ' + (stop || 1);
+    }
+    function hotelLine(h) {
+      var noches = h.nights != null ? h.nights : nights;
+      return '<p class="voucher-item__line"><span class="voucher-item__tag">' + esc(detalleParada(h.stop)) + '</span>'
+        + esc(h.name) + ' · ' + noches + (noches === 1 ? ' noche' : ' noches') + '</p>';
+    }
+    var hotelNote = multiHotel
+      ? hotelesElegidos.map(hotelLine).join('')
+      : (selectedHotelDetail && selectedHotelDetail !== 'Alojamiento seleccionado' ? '<p class="voucher-item__detail">' + esc(selectedHotelDetail) + '</p>' : '');
+    // El titulo lleva el hotel cuando hay uno solo. Con dos ya no alcanza: el
+    // nombre de arriba seria el de la ultima parada procesada y la lista de
+    // abajo los dos, y se leeria como que el titulo ese de todo el viaje.
+    var hotelTitle = multiHotel ? 'Alojamiento · ' + hotelesElegidos.length + ' hoteles' : 'Alojamiento · ' + esc(selectedHotelName);
     var destinoTotal = localTotal + foodTotal;
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div><span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span></div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +
       '<ul class="voucher-list">' +
-      itemRow('pasajes', flightTitle, flightLines, flightTotal, bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline)) +
-      itemRow('alojamiento', 'Alojamiento · ' + esc(selectedHotelName), hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName) : '') +
+      itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline) : reservarCta(false, 'Elegí un vuelo en la sección de vuelos.', 'Reservar el vuelo')) +
+      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName) : '') +
       itemRow('traslados', transferTitle, '<p class="voucher-item__detail">' + transferNote + '</p>', transferTotal, transferCta) +
       itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, reservarCta(selectedTours.length, 'Sin actividades seleccionadas.', 'Reservar las actividades')) +
       '</ul>' +
@@ -4341,9 +4422,17 @@
     return date.toLocaleString('es-UY', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
   function getSelectedFlightSummary() {
-    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'Todavía no elegiste un vuelo.' };
+    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'Todavía no elegiste un vuelo.', selected: false };
     var offer = getSelectedFlightOffer();
-    var airline = (offer && offer.airline) || detailState.selectedFlight || 'Vuelo seleccionado';
+    /* Antes el relleno de "airline" era la palabra "Vuelo seleccionado" y el
+       resumen armaba igual la linea de tramos, asi que sin vuelo elegido la fila
+       decia "Vuelo · Vuelo seleccionado" y debajo "IDA — sin fecha → — sin fecha":
+       dos em dash de airportCode(undefined) con un "sin fecha" al lado. Decir que
+       algo esta seleccionado cuando no lo esta es peor que no decir nada: la
+       persona cree que ya eligio. Ahora hay un selected explicito y cada que usa
+       el resumen decide que decir. */
+    if (!offer) return { airline: '', summary: 'Todavía no elegiste un vuelo.', selected: false };
+    var airline = offer.airline || detailState.selectedFlight || 'Vuelo sin nombre';
     var outbound = offer && (offer.outbound || offer);
     var departureValue = outbound && outbound.departure ? outbound.departure : (offer && offer.departure);
     var arrivalValue = outbound && outbound.arrival ? outbound.arrival : (offer && offer.arrival);
@@ -4364,8 +4453,18 @@
       summary: 'Transfer sincronizado para ' + airline + route + ' · Vuelo seleccionado el ' + departureText + (arrivalText && arrivalText !== 'sin fecha' ? ' · llegada ' + arrivalText : ''),
       departureText: departureText,
       arrivalText: arrivalText,
+      selected: true,
       route: route
     };
+  }
+  /* Como se nombra un vuelo en un dato corto: "_aerolinea_ · _numero_".
+     Tres lugares (el resumen del checkout, el bloque del transfer y el mensaje de
+     WhatsApp) concatenaban vuelo.airline y vuelo.flightNumber a mano, y con
+     airline vacio eso daba " · " o "undefined · AR1234" en el mensaje. Cuando no
+     hay vuelo elegido dice "Sin seleccionar", que es lo que es. */
+  function vueloNombreCorto(vuelo) {
+    if (!vuelo || !vuelo.selected || !vuelo.airline) return 'Sin seleccionar';
+    return vuelo.airline + (vuelo.flightNumber ? ' · ' + vuelo.flightNumber : '');
   }
   function sincronizarTrasladoOficial() {
     if (!detailState) return;
@@ -6202,10 +6301,23 @@
   }
 
   // Voucher round-trip summary: keep both legs and the original offer total.
+  /* Esta es la TERCERA declaracion de getSelectedFlightSummary() en el archivo
+     (las otras dos estan mas arriba, en la zona de los helpers) y como es una
+     function declaration la ULTIMA que gana: las de arriba nunca se ejecutan. No
+     se tocan porque no se van a borrar sin revisar los otros usos — hay ocho
+     llamadas—, pero el selected:false de acá si es el que ve el resumen. */
   function getSelectedFlightSummary() {
-    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'No hay un vuelo seleccionado.' };
-    var offer = getSelectedFlightOffer() || detailState.selectedOffer || {};
-    var airline = offer.airline || detailState.selectedFlight || 'Vuelo seleccionado';
+    /* offer = getSelectedFlightOffer() || detailState.selectedOffer || {}: con el
+       {} del final, offer nunca es null y por eso "Vuelo seleccionado" salia
+       SIEMPRE,-elected o no. Un vuelo sin elegir no tienecodigo de aeropuerto, y
+       airportCode(undefined) devuelve "—", asi que el tramo se imprimia como
+       "IDA — sin fecha → — sin fecha". selected:false es lo que le permite al
+       resumen no armar el tramo y decir que falta elegir. */
+    if (!detailState) return { airline: '', summary: 'No hay un vuelo seleccionado.', selected: false };
+    var picked = getSelectedFlightOffer();
+    var offer = picked || detailState.selectedOffer || {};
+    if (!picked && !offer.airline) return { airline: '', summary: 'No hay un vuelo seleccionado.', selected: false };
+    var airline = offer.airline || detailState.selectedFlight || 'Vuelo sin nombre';
     function normalizeLeg(leg, slice) {
       leg = leg || {};
       var hasMappedData = (leg.origin && (leg.origin.code || leg.origin.iata_code || leg.origin.name)) ||
@@ -6244,7 +6356,7 @@
     var isRoundTrip = offer.trip_type === 'round_trip' || slices.length > 1 || !!(inbound.departure || inbound.arrival);
     var outboundText = (flightNumber ? 'Vuelo ' + flightNumber : 'Numero de vuelo no informado') + ' · ' + (origin.name || origin.code || 'Origen') + ' (' + (airportCode(origin) || '---') + ') -> ' + (destination.name || destination.code || 'Destino') + ' (' + (airportCode(destination) || '---') + ') · salida ' + formatFlightDateTime(departure) + ' · llegada ' + formatFlightDateTime(arrival);
     var inboundText = isRoundTrip ? ((inboundFlightNumber ? 'Vuelo ' + inboundFlightNumber : 'Numero de vuelo no informado') + ' · ' + (returnOrigin.name || returnOrigin.code || 'Destino') + ' (' + (airportCode(returnOrigin) || '---') + ') -> ' + (returnDestination.name || returnDestination.code || 'Origen') + ' (' + (airportCode(returnDestination) || '---') + ') · salida ' + formatFlightDateTime(returnDeparture) + ' · llegada ' + formatFlightDateTime(returnArrival)) : '';
-    return { airline: airline, outboundAirline: outbound.airline || airline, inboundAirline: inboundAirline, summary: isRoundTrip ? 'Ida: ' + outboundText + ' | Vuelta: ' + inboundText + ' · tarifa ida y vuelta incluida' : outboundText, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), returnDepartureText: formatFlightDateTime(returnDeparture), returnArrivalText: formatFlightDateTime(returnArrival), route: ' · ' + airportCode(origin) + ' -> ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination, returnOrigin: returnOrigin, returnDestination: returnDestination, isRoundTrip: isRoundTrip, outboundText: outboundText, inboundText: inboundText };
+    return { airline: airline, outboundAirline: outbound.airline || airline, inboundAirline: inboundAirline, summary: isRoundTrip ? 'Ida: ' + outboundText + ' | Vuelta: ' + inboundText + ' · tarifa ida y vuelta incluida' : outboundText, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), returnDepartureText: formatFlightDateTime(returnDeparture), returnArrivalText: formatFlightDateTime(returnArrival), route: ' · ' + airportCode(origin) + ' -> ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination, returnOrigin: returnOrigin, returnDestination: returnDestination, isRoundTrip: isRoundTrip, outboundText: outboundText, inboundText: inboundText, selected: true };
   }
 
   function openDestinationProposal(key, savedTrip) {
