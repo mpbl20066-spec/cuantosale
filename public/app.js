@@ -4605,6 +4605,7 @@
      link no avisa si la persona terminó comprando, así que la app no lo sabe y
      no lo inventa. Para traslado y tour esto no se usa nunca. */
   async function marcarReservado(categoria, detalle) {
+    if (!supabaseClient) await initAuth();
     var viajeId = viajeReservaId();
     if (!viajeId || !supabaseClient) return;
     // Primero el botón, después la base. Se pinta al toque y se revierte si la
@@ -4629,6 +4630,7 @@
      más que una decoración —cualquiera que tocara el botón con las herramientas
      de developer la saltaría. */
   async function marcarReservadoManual(categoria, detalle) {
+    if (!supabaseClient) await initAuth();
     var viajeId = viajeReservaId();
     if (!viajeId || !supabaseClient) return;
     if (!await esAgencia()) return;
@@ -4646,6 +4648,7 @@
     }
   }
   async function desmarcarReservado(categoria) {
+    if (!supabaseClient) await initAuth();
     var viajeId = viajeReservaId();
     if (!viajeId || !supabaseClient) return;
     if (!await esAgencia()) return;
@@ -4664,7 +4667,7 @@
   /* El aviso va arriba de la lista de rubros, no en un alert: el alert parte la
      pantalla y se pierde el scroll, y en un voucher de cuatro filas el error
      tiene que quedar al lado de la fila que falló. */
-  function mostrarAvisoReserva(mensaje) {
+  function mostrarAvisoReserva(mensaje, tipo) {
     var modal = $('#booking-modal');
     if (!modal || modal.hidden || !modal.dataset.summaryText) return;
     var lista = modal.querySelector('.voucher-list');
@@ -4672,7 +4675,7 @@
     var previo = lista.querySelector('[data-reserva-aviso]');
     if (previo) previo.parentNode.removeChild(previo);
     var nota = document.createElement('li');
-    nota.className = 'voucher-aviso';
+    nota.className = 'voucher-aviso' + (tipo === 'ok' ? ' is-ok' : '');
     nota.setAttribute('data-reserva-aviso', '');
     nota.textContent = mensaje;
     lista.appendChild(nota);
@@ -5222,12 +5225,12 @@
        propuesta le sobra un round-trip a cada cambio de hotel o de fecha que
        nadie está mirando. Si la respuesta llega con el voucher ya abierto,
        cargarReservasViaje() lo repinta solo. */
-    cargarReservasViaje();
+    initAuth().then(function () { cargarReservasViaje(); });
     /* Lo mismo con "soy de la agencia": decide si las filas traen el control de
        marcar, así que tiene que estar resuelto antes del próximo repintado.
        controlReserva() lee la variable, no espera: el chequeo se cachea y solo
        vuelve a latir en el primer render. */
-    esAgencia().then(function (agencia) { if (agencia) pintarVoucherReservas(); });
+    initAuth().then(esAgencia).then(function (agencia) { if (agencia) pintarVoucherReservas(); });
   }
   function syncDailyBudgetState() {
     if (!detailState || !detailState.meta) return;
@@ -8204,6 +8207,93 @@
     if (button) { var avatar = authUser && authUser.user_metadata && (authUser.user_metadata.avatar_url || authUser.user_metadata.picture); button.innerHTML = authUser ? (avatar ? '<img class="account-avatar" src="' + esc(avatar) + '" alt="">' : '👤 ') + esc(authDisplayName(authUser)) : 'Iniciar sesión'; button.setAttribute('aria-label', authUser ? 'Abrir cuenta de ' + authDisplayName(authUser) : 'Iniciar sesión'); }
     if (trips) trips.hidden = !authUser;
   }
+  /* ---------- Login para las acciones del resumen ----------
+     Ver el resumen es libre. Lo que pide cuenta es lo que cambia un estado o abre
+     una reserva: Reservar (hotel, vuelo, traslado, actividades), Elegir vuelos y
+     Dividir gastos. Al tocarlo sin sesion no se ejecuta: se anota que se queria
+     hacer (y el viaje, para poder reabrirlo aunque el login recargue la pagina,
+     como con Google o la confirmacion por correo) y se abre el modal de cuenta.
+     Con la sesion iniciada se vuelve al resumen, a la misma fila.
+
+     Se guarda en localStorage y no en sessionStorage a proposito: el link de
+     confirmacion del correo suele abrirse en otra pestana. */
+  var ACCION_KEY = 'cuantosale_accion_pendiente';
+  var ACCION_TTL_MS = 30 * 60 * 1000;
+  var ACCIONES_CON_LOGIN = ['data-reservar-rubro', 'data-detalle-rubro', 'data-marca-reserva', 'data-confirmar-reserva', 'data-deshacer-reserva', 'data-reservar-pedido', 'data-split-trip'];
+  var MENSAJE_LOGIN = 'Iniciá sesión para guardar los cambios en tu viaje y gestionar tus reservas.';
+  var authInitTerminado = false;
+  function describirAccion(el) {
+    var attr = ACCIONES_CON_LOGIN.filter(function (a) { return el.hasAttribute(a); })[0] || '';
+    var fila = el.closest('[data-rubro]');
+    return { attr: attr, valor: attr ? el.getAttribute(attr) || '' : '', rubro: fila ? fila.getAttribute('data-rubro') : '' };
+  }
+  async function pedirLogin(accion) {
+    var ctx = null;
+    try { ctx = tripPayload(); } catch (e) { ctx = null; }
+    try { localStorage.setItem(ACCION_KEY, JSON.stringify({ accion: accion, ctx: ctx, t: Date.now() })); } catch (e) { /* modo privado */ }
+    authReadyPromise = initAuth();
+    await authReadyPromise;
+    if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
+    if (authUser) { retomarAccionPendiente(); return; }
+    openAuthModal(MENSAJE_LOGIN);
+  }
+  // Devuelve true si frena la accion. Sin Supabase configurado no hay forma de
+  // pedir cuenta: no se bloquea, para no dejar el resumen sin acciones.
+  function exigirLogin(e, el) {
+    if (authUser) return false;
+    if (authInitTerminado && !supabaseClient) return false;
+    e.preventDefault(); e.stopPropagation();
+    pedirLogin(describirAccion(el));
+    return true;
+  }
+  function esperarVoucher(ms) {
+    return new Promise(function (resolve) {
+      var t0 = Date.now();
+      (function mirar() {
+        var modal = $('#booking-modal');
+        if (modal && !modal.hidden && modal.dataset.summaryText && modal.querySelector('.voucher-list')) return resolve(true);
+        if (Date.now() - t0 > ms) return resolve(false);
+        window.setTimeout(mirar, 120);
+      })();
+    });
+  }
+  async function retomarAccionPendiente() {
+    var raw = null;
+    try { raw = localStorage.getItem(ACCION_KEY); } catch (e) { raw = null; }
+    if (!raw || !authUser) return;
+    try { localStorage.removeItem(ACCION_KEY); } catch (e) { /* nada */ }
+    var pend = null;
+    try { pend = JSON.parse(raw); } catch (e) { pend = null; }
+    if (!pend || !pend.accion || Date.now() - (pend.t || 0) > ACCION_TTL_MS) return;
+    closeAccountModal('auth-modal');
+    var ctx = pend.ctx;
+    var meta = detailState && detailState.meta;
+    var mismoViaje = !!(meta && ctx && meta.dest && meta.dest.key === ctx.destination_key && meta.dep === ctx.departure_date && meta.ret === ctx.return_date);
+    var modal = $('#booking-modal');
+    if (!mismoViaje) {
+      if (!ctx) return;
+      try { await loadTrip(ctx); } catch (e) { notice(e && e.message || 'No pudimos reabrir tu viaje.'); return; }
+    } else if (modal && (modal.hidden || !modal.dataset.summaryText)) {
+      openItinerarySummaryModal();
+    }
+    if (!await esperarVoucher(5000)) return;
+    var a = pend.accion, attr = a.attr, valor = a.valor;
+    if (attr === 'data-detalle-rubro') { closeBookingForm(); jumpToBudgetSection(valor); return; }
+    if (attr === 'data-split-trip' || attr === 'data-marca-reserva' || attr === 'data-confirmar-reserva' || attr === 'data-deshacer-reserva') {
+      var boton = modal.querySelector('[' + attr + (attr === 'data-split-trip' ? '' : '="' + valor + '"') + ']');
+      if (boton) boton.click();
+      return;
+    }
+    // Reservar hotel/vuelo abre otra pestana y el navegador no la deja abrir sin
+    // un toque de la persona: se la deja en la misma fila, lista para tocar.
+    var fila = a.rubro ? modal.querySelector('[data-rubro="' + a.rubro + '"]') : null;
+    if (fila) {
+      try { fila.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { fila.scrollIntoView(); }
+      fila.classList.add('is-tras-vuelta');
+      window.setTimeout(function () { fila.classList.remove('is-tras-vuelta'); }, 2600);
+    }
+    mostrarAvisoReserva('Listo, ya iniciaste sesión. Tocá de nuevo el botón para reservar.', 'ok');
+  }
   function tripPayload() {
     if (!detailState || !detailState.meta) return null;
     var budget = getBudgetBreakdown(detailState);
@@ -8424,9 +8514,11 @@
         var sessionResult = await supabaseClient.auth.getSession();
         renderAuthState(sessionResult.data && sessionResult.data.session && sessionResult.data.session.user);
         if (pendingTripSave && authUser) window.setTimeout(saveCurrentTrip, 0);
-        supabaseClient.auth.onAuthStateChange(function (_event, session) { renderAuthState(session && session.user); if (pendingTripSave && session && session.user) window.setTimeout(saveCurrentTrip, 0); });
+        if (authUser) window.setTimeout(retomarAccionPendiente, 0);
+        supabaseClient.auth.onAuthStateChange(function (_event, session) { renderAuthState(session && session.user); if (pendingTripSave && session && session.user) window.setTimeout(saveCurrentTrip, 0); if (session && session.user) window.setTimeout(retomarAccionPendiente, 0); });
       } catch (error) { authInitPromise = null; console.error('Supabase Auth no disponible', error); }
     })();
+    authInitPromise.then(function () { authInitTerminado = true; });
     return authInitPromise;
   }
 
@@ -9829,6 +9921,10 @@ function comboNombreDestino() {
     });
     // Acciones del resumen final del itinerario, que se pinta adentro del modal.
     $('#booking-modal').addEventListener('click', function (e) {
+      /* El resumen se mira sin cuenta; lo que cambia un estado o abre una reserva
+         pide iniciar sesion. Solo en el resumen: el checkout comparte este modal. */
+      var conLogin = e.target.closest(ACCIONES_CON_LOGIN.map(function (a) { return '[' + a + ']'; }).join(','));
+      if (conLogin && this.dataset.summaryText && exigirLogin(e, conLogin)) return;
       /* Los botones del checkout viven acá adentro, no en #vista-detalle: el
          modal es hermano de la vista, asi que un listener puesto alla nunca
          los ve. Estaban primero en el de #vista-detalle y por eso "Continuar"

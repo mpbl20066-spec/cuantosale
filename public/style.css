@@ -1,4 +1,4 @@
-/* version: 143
+/* version: 144
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2475,3 +2475,14 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
 .voucher-split{margin-top:16px}
 .voucher-reserve{margin-top:12px}
 .voucher-actions{margin-top:12px;gap:8px}
+
+/* Aviso de "ya iniciaste sesion" en el resumen: tono de confirmacion, no de error. */
+.voucher-aviso.is-ok{border-style:solid;border-color:var(--good);background:var(--good-soft);color:var(--good)}
+
+/* La pagina solo se bloquea mientras haya un modal visible CON contenido: un
+   modal vacio (cerrado a medias o a la espera de su contenido) no debe dejar el
+   documento sin scroll. */
+html:has(.booking-modal:not([hidden])){overflow:visible}
+html:has(.booking-modal:not([hidden]):not(:empty)){overflow:hidden}
+html:has(.booking-modal:not([hidden])) body{overflow:visible;overscroll-behavior:auto}
+html:has(.booking-modal:not([hidden]):not(:empty)) body{overflow:hidden;overscroll-behavior:none}
