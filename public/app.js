@@ -4363,6 +4363,141 @@
      La clave que usa grupo.js se lee del mismo localStorage y con el mismo
      nombre a proposito: si cambia de nombre, el link deja de funcionar y no
      hay ningun test que lo note. */
+  /* ---------- Dividir gastos con amigos ----------
+     Un modal propio, sin salir de la app: se elige cuantas personas son (y,
+     si se quiere, sus nombres), y se ve al toque cuanto le toca a cada una y que
+     cubre ese monto. El reparto es en partes iguales sobre el total que ya
+     muestra el presupuesto (getBudgetBreakdown), asi que es el mismo numero que
+     el resto de la pagina. Se comparte por WhatsApp o se copia el resumen.
+     Llevar la cuenta de quien pago que sigue en /grupo (irAlGrupo). */
+  var splitState = { n: 0, nombres: [] };
+  function splitDatos() {
+    var b = getBudgetBreakdown(detailState);
+    return { total: Number(b.total) || 0, filas: b.entries.filter(function (e) { return e.value > 0; }) };
+  }
+  function splitNombre(i) {
+    var t = String(splitState.nombres[i] || '').trim();
+    return t || 'Persona ' + (i + 1);
+  }
+  function splitTexto() {
+    var d = splitDatos(), n = splitState.n;
+    var meta = detailState.meta;
+    var por = d.total / n;
+    var l = [];
+    l.push('💸 Dividir gastos · Viaje a ' + meta.dest.name + ' (' + storyDateRange(meta) + ')');
+    l.push('Total ' + money(d.total) + ' / ' + n + (n === 1 ? ' persona' : ' personas') + ' = ' + money(por) + ' por persona');
+    l.push('');
+    l.push('Cada uno cubre:');
+    d.filas.forEach(function (f) { l.push('• ' + f.label + ': ' + money(f.value / n)); });
+    l.push('');
+    for (var i = 0; i < n; i++) l.push('• ' + splitNombre(i) + ': ' + money(por));
+    var g = enlaceGrupo();
+    l.push('');
+    l.push(g ? 'Cuenta del grupo: ' + g : 'Armado con CuántoSale: ' + location.origin);
+    return l.join('\n');
+  }
+  function splitResultado() {
+    var d = splitDatos(), n = splitState.n, por = d.total / n;
+    var filas = d.filas.map(function (f) {
+      return '<li><span>' + esc(f.label) + '</span><em>' + money(f.value) + ' en total</em><b>' + money(f.value / n) + '</b></li>';
+    }).join('');
+    var gente = '';
+    for (var i = 0; i < n; i++) gente += '<li><span>' + esc(splitNombre(i)) + '</span><b>' + money(por) + '</b></li>';
+    return '<p class="split-eq">' + money(d.total) + ' <span>/ ' + n + (n === 1 ? ' persona' : ' personas') + '</span> = <b>' + money(por) + ' por persona</b></p>' +
+      '<h3 class="split-sub">Qué cubre cada parte</h3><ul class="split-rows">' + filas + '</ul>' +
+      '<h3 class="split-sub">Cuánto pone cada uno</h3><ul class="split-people">' + gente + '</ul>' +
+      '<p class="split-note">Partes iguales sobre el total estimado del presupuesto. Los montos pueden variar si cambiás tus elecciones.</p>';
+  }
+  function splitNombresMarkup() {
+    var h = '';
+    for (var i = 0; i < splitState.n; i++) {
+      h += '<label class="split-name"><span>' + (i + 1) + '</span><input type="text" maxlength="24" placeholder="Persona ' + (i + 1) + '" value="' + esc(splitState.nombres[i] || '') + '" data-split-name="' + i + '" autocomplete="off"></label>';
+    }
+    return h;
+  }
+  function splitPintar(completo) {
+    var el = document.getElementById('split-modal');
+    if (!el) return;
+    var out = el.querySelector('[data-split-n]');
+    if (out) out.textContent = splitState.n;
+    if (completo) { var nombres = el.querySelector('[data-split-names]'); if (nombres) nombres.innerHTML = splitNombresMarkup(); }
+    var res = el.querySelector('[data-split-result]');
+    if (res) res.innerHTML = splitResultado();
+    var menos = el.querySelector('[data-split-minus]'); if (menos) menos.disabled = splitState.n <= 1;
+    var mas = el.querySelector('[data-split-plus]'); if (mas) mas.disabled = splitState.n >= 20;
+  }
+  function closeSplitModal() {
+    var el = document.getElementById('split-modal');
+    if (!el) return;
+    el.hidden = true; el.setAttribute('aria-hidden', 'true'); el.innerHTML = '';
+    syncScrollLock();
+  }
+  function copiarTextoSplit(btn) {
+    var texto = splitTexto();
+    var original = btn.textContent;
+    var avisar = function (ok) { btn.textContent = ok ? '¡Copiado!' : 'No se pudo copiar'; window.setTimeout(function () { btn.textContent = original; }, 1800); };
+    var fallback = function () {
+      var area = document.createElement('textarea');
+      area.value = texto; area.setAttribute('readonly', ''); area.style.position = 'fixed'; area.style.opacity = '0';
+      document.body.appendChild(area); area.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(area); avisar(ok);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(function () { avisar(true); }, fallback);
+    else fallback();
+  }
+  async function irAlGrupo(btn) {
+    var texto = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Guardando...';
+    var draft = tripPayload();
+    if (draft) { try { sessionStorage.setItem('cuantosale_grupo_preset', JSON.stringify({ name: draft.title, destination_key: draft.destination_key })); } catch (error) {} }
+    var saved = await saveCurrentTrip({ skipTripsModal: true });
+    if (saved) { window.location.href = '/grupo'; return; }
+    btn.disabled = false; btn.textContent = texto;
+  }
+  function openSplitModal() {
+    if (!detailState || !detailState.meta) return;
+    var el = document.getElementById('split-modal');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'split-modal'; el.className = 'booking-modal'; el.hidden = true; el.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(el);
+      el.addEventListener('click', function (e) {
+        if (e.target === el || e.target.closest('[data-split-close]')) { closeSplitModal(); return; }
+        if (e.target.closest('[data-split-minus]')) { splitState.n = Math.max(1, splitState.n - 1); splitPintar(true); return; }
+        if (e.target.closest('[data-split-plus]')) { splitState.n = Math.min(20, splitState.n + 1); splitPintar(true); return; }
+        if (e.target.closest('[data-split-whatsapp]')) { window.open('https://wa.me/?text=' + encodeURIComponent(splitTexto()), '_blank', 'noopener'); return; }
+        var c = e.target.closest('[data-split-copy]'); if (c) { copiarTextoSplit(c); return; }
+        var g = e.target.closest('[data-split-grupo]'); if (g) { irAlGrupo(g); return; }
+      });
+      el.addEventListener('input', function (e) {
+        var inp = e.target.closest && e.target.closest('[data-split-name]');
+        if (!inp) return;
+        splitState.nombres[Number(inp.getAttribute('data-split-name'))] = inp.value;
+        splitPintar(false);
+      });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !el.hidden) closeSplitModal(); });
+    }
+    if (!splitState.n) splitState.n = Math.max(2, Math.min(20, Number(detailState.meta.pax) || 2));
+    el.innerHTML = '<div class="booking-dialog split-dialog" role="dialog" aria-modal="true" aria-labelledby="split-title">' +
+      '<button type="button" class="booking-close" data-split-close aria-label="Cerrar">×</button>' +
+      '<span class="voucher-kicker">Dividir gastos</span>' +
+      '<h2 id="split-title">¿Entre cuántos se reparte?</h2>' +
+      '<div class="split-count"><button type="button" class="split-step" data-split-minus aria-label="Una persona menos">−</button>' +
+      '<div class="split-count__n"><output data-split-n>' + splitState.n + '</output><span>personas</span></div>' +
+      '<button type="button" class="split-step" data-split-plus aria-label="Una persona más">+</button></div>' +
+      '<details class="split-namesbox"><summary>Agregar nombres (opcional)</summary><div class="split-names" data-split-names>' + splitNombresMarkup() + '</div></details>' +
+      '<div data-split-result>' + splitResultado() + '</div>' +
+      '<div class="split-actions">' +
+      '<button type="button" class="split-btn split-btn--main" data-split-whatsapp>Enviar por WhatsApp</button>' +
+      '<button type="button" class="split-btn" data-split-copy>Copiar resumen</button></div>' +
+      '<button type="button" class="split-link" data-split-grupo>Llevar la cuenta de quién pagó →</button>' +
+      '</div>';
+    el.hidden = false; el.setAttribute('aria-hidden', 'false');
+    syncScrollLock();
+    splitPintar(false);
+  }
+
   function enlaceGrupo() {
     var id = '';
     try { id = localStorage.getItem('cuantosale_grupo_ver_en') || ''; } catch (e) { return null; }
@@ -10310,34 +10445,7 @@ function comboNombreDestino() {
       var saveTripButton = e.target.closest('[data-save-trip]');
       if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
       var splitTripButton = e.target.closest('[data-split-trip]');
-      if (splitTripButton) {
-        e.preventDefault();
-        (async function () {
-          /* Hay DOS entradas a esta acción —el enlace junto al "por persona" y
-             el bloque de abajo—, así que se deshabilitan las dos. Con una sola
-             deshabilitada, apretar el otro durante el guardado abría dos veces
-             /grupo: el segundo groupResult no encuentra el preset ya consumido y
-             el nombre del viaje queda en blanco. */
-          var botones = Array.prototype.slice.call(
-            document.querySelectorAll('#booking-modal [data-split-trip]'));
-          var textos = botones.map(function (b) { return b.textContent; });
-          botones.forEach(function (b) { b.disabled = true; });
-          splitTripButton.textContent = 'Guardando...';
-          // Se pasa el nombre del viaje antes de saltar, para que /grupo abra
-          // con el nombre ya puesto en vez de pedirlo de cero.
-          var draft = tripPayload();
-          if (draft) { try { sessionStorage.setItem('cuantosale_grupo_preset', JSON.stringify({ name: draft.title, destination_key: draft.destination_key })); } catch (error) {} }
-          var saved = await saveCurrentTrip({ skipTripsModal: true });
-          if (saved) {
-            window.location.href = '/grupo';
-            return;
-          }
-          // Solo el que se apretó cambia de texto: el otro ya decía lo que
-          // decía y no tiene que parpadear a "Guardando..." y volver.
-          botones.forEach(function (b, i) { b.disabled = false; b.textContent = textos[i]; });
-        }());
-        return;
-      }
+      if (splitTripButton) { e.preventDefault(); openSplitModal(); return; }
       /* El menu "Compartir" y el copiado.
 
          El menu cierra solo cuando se elige algo y cuando se hace click afuera,
