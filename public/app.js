@@ -4548,9 +4548,33 @@
       + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
       + (pedido.count ? '' : '<p class="voucher-reserve__nota">Elegí un transfer o una actividad para poder reservar.</p>')
       + '</div>';
+    /* "Dividir" estaba apretado en la fila de botones secundarios, al lado de
+       WhatsApp y Guardar: un chip de 44px entre otros dos, con un ícono de dos
+       personas que no dice que la función es entera. Encima quedaba en la misma
+       altura que compartir el itinerario, que es una acción de una persona, y
+       dividir es la acción de un grupo entero.
+
+       Por eso vive en dos lugares y no en uno. El enlace chico va pegado al
+       "por persona", que es justo el número que alguien que viaja acompañado
+       quiere fraccionar: ahí la pregunta ya está hecha, y el enlace contesta.
+       Y el bloque va después de "Reservar ahora", que es la acción de cierre, y
+       antes de compartir. Ahí lo ve quien llegó al final del presupuesto a
+       coordinar el plata, que es el momento en que dividir tiene sentido.
+
+       Los dos abren exactamente lo mismo (data-split-trip) y el handler no
+       cambió: son dos entradas a una acción, no dos acciones. */
+    var dividirBloque = '<aside class="voucher-split" aria-labelledby="voucher-split-title">'
+      + '<div class="voucher-split__head">' + brandIcon('dividir') + '<div>'
+      + '<h3 id="voucher-split-title">¿Viajan en grupo?</h3>'
+      + '<p>Dividí este total entre todos los pasajeros. Cada uno ve su parte, lo que puso y lo que le quedó a deber.</p>'
+      + '</div></div>'
+      + '<button type="button" class="voucher-split__btn" data-split-trip>Dividir gastos con amigos</button>'
+      + '</aside>';
+    var dividirEnlace = '<span class="voucher-hero__pp"><span>' + money(Math.round(totalGeneral / pax)) + ' por persona</span>'
+      + '<button type="button" class="voucher-hero__split" data-split-trip>Ver cómo dividir este monto</button></span>';
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
-      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div><span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span></div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +
+      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.</p></div>' +
       '<ul class="voucher-list">' +
       itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : reservarCta(false, 'Elegí un vuelo en la sección de vuelos.', 'Reservar el vuelo', 'pasajes')) +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
@@ -4559,10 +4583,10 @@
       '</ul>' +
       '<section class="voucher-destino"><div class="voucher-destino__head"><h3>Gastos en destino</h3><p>Por día y total del viaje</p></div><ul class="voucher-destino__list"><li><span>Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + '</em></li><li><span>Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + '</em></li></ul><p class="voucher-destino__total">Total en destino <b>' + money(destinoTotal) + '</b></p></section>' +
       reservarTodo +
+      dividirBloque +
       '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Compartir en Instagram</span></button><div class="voucher-actions__more">' +
       '<button type="button" class="voucher-chip" data-share-whatsapp aria-label="Enviar el itinerario por WhatsApp">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">WhatsApp</span></button>' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
-      '<button type="button" class="voucher-chip" data-split-trip aria-label="Dividir el viaje con amigos">' + brandIcon('dividir') + '<span class="voucher-btn__label">Dividir</span></button>' +
       '</div></div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -9154,8 +9178,15 @@ function comboNombreDestino() {
       if (splitTripButton) {
         e.preventDefault();
         (async function () {
-          var originalLabel = splitTripButton.textContent;
-          splitTripButton.disabled = true;
+          /* Hay DOS entradas a esta acción —el enlace junto al "por persona" y
+             el bloque de abajo—, así que se deshabilitan las dos. Con una sola
+             deshabilitada, apretar el otro durante el guardado abría dos veces
+             /grupo: el segundo groupResult no encuentra el preset ya consumido y
+             el nombre del viaje queda en blanco. */
+          var botones = Array.prototype.slice.call(
+            document.querySelectorAll('#booking-modal [data-split-trip]'));
+          var textos = botones.map(function (b) { return b.textContent; });
+          botones.forEach(function (b) { b.disabled = true; });
           splitTripButton.textContent = 'Guardando...';
           // Se pasa el nombre del viaje antes de saltar, para que /grupo abra
           // con el nombre ya puesto en vez de pedirlo de cero.
@@ -9166,8 +9197,9 @@ function comboNombreDestino() {
             window.location.href = '/grupo';
             return;
           }
-          splitTripButton.disabled = false;
-          splitTripButton.textContent = originalLabel;
+          // Solo el que se apretó cambia de texto: el otro ya decía lo que
+          // decía y no tiene que parpadear a "Guardando..." y volver.
+          botones.forEach(function (b, i) { b.disabled = false; b.textContent = textos[i]; });
         }());
         return;
       }
