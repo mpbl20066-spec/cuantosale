@@ -2670,8 +2670,8 @@ h3.block-title, .block-title:is(h3) {
 /* Mapa de la ruta del roadtrip: mapa politico dibujado con poligonos (ver scripts/build-mapa-base.js). */
 .roadtrip-map-card{padding:0;overflow:hidden;position:relative}
 .roadtrip-map-card__head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;padding:14px 16px 12px}.roadtrip-map-card__head b{font-family:var(--fh);font-size:16px}.roadtrip-map-card__head span{font-size:12px;font-weight:700;color:var(--ink2)}
-.roadtrip-map{--sea:#cfe6f3;--land:#f5f3ee;--country:#9aa1a9;--state:#cfd3d8;--lbl:#5f6b78;--halo:#f5f3ee;height:320px;isolation:isolate;background:var(--sea);display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line)}
-/* El mapa va siempre claro (tono Waze de dia), tambien con el tema oscuro de la app. */
+.roadtrip-map{--sea:#bfe0f5;--land:#d9edd3;--country:#6f7f6c;--state:#9fb09b;--lbl:#55665a;--halo:#e9f5e5;height:320px;isolation:isolate;background:var(--sea);display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line)}
+:root:not([data-theme="light"]) .roadtrip-map{--sea:#0e1c2e;--land:#27493f;--country:#6f9488;--state:#3f635a;--lbl:#b2d2c6;--halo:#27493f}
 .roadtrip-map__loading{font-size:13px;color:var(--ink2)}
 .roadtrip-map.leaflet-container{font:inherit;display:block;background:var(--sea);animation:roadtrip-map-in .5s ease both}
 @keyframes roadtrip-map-in{from{opacity:0}to{opacity:1}}
@@ -2685,3 +2685,42 @@ h3.block-title, .block-title:is(h3) {
 .roadtrip-pin span{position:absolute;left:0;top:0;transform:translate(-50%,-190%);white-space:nowrap;padding:3px 9px;border-radius:999px;background:#fff;color:#111;font-size:11px;font-weight:800;box-shadow:0 1px 5px rgba(0,0,0,.35)}
 .roadtrip-pin--from span{transform:translate(-8px,60%)}.roadtrip-pin--to i{background:#e8590c;border-color:#fff;width:18px;height:18px;left:-9px;top:-9px}.roadtrip-pin--to span{background:#e8590c;color:#fff;transform:translate(-50%,-165%)}
 .roadtrip-map__open{display:block;padding:12px 16px;font-size:13px;font-weight:800;text-align:center;border-top:1px solid var(--line);text-decoration:none}.roadtrip-map__open:hover{background:var(--line)}
+
+/* ---------- Auditoria mobile ----------
+   Correcciones de una pasada por 320-430px. Van al final a proposito: pisan
+   reglas anteriores con la misma especificidad sin tocarlas. */
+/* Carrusel de escapadas: la tarjeta arrancaba pegada al borde y la flecha le
+   tapaba el precio. scroll-padding hace que el snap deje el hueco de las flechas. */
+@media(max-width:640px){
+  .destination-highlights__carousel{scroll-padding-inline:54px}
+  .featured-destination__meta>span:last-child{flex:none;white-space:nowrap}
+}
+/* Tag "Incluye: ..." de los tours: el line-clamp estaba en el <li> y lo sacaba de
+   flex, con lo que el tilde quedaba en su propia linea. El recorte va al texto. */
+.local-tour__tag{display:flex;overflow:visible}
+.local-tour__tag > span:not(.local-tour__tag-ico){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0}
+/* El selector de destino corta el placeholder: que termine en puntos suspensivos. */
+.custom-select__trigger{text-overflow:ellipsis}
+/* Stepper fijo: en 320px ocupaba mas de la mitad de la pantalla. En celu son tres
+   fichas en una fila (numero + nombre) y el boton de siguiente. */
+@media (max-width:560px){
+  .steps{padding:8px;top:6px}
+  .steps__list{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .steps__btn{flex-direction:column;justify-content:center;gap:3px;min-height:58px;padding:7px 4px;text-align:center}
+  .steps__n{flex-basis:22px;width:22px;height:22px;font-size:11.5px}
+  .steps__t{justify-items:center}
+  .steps__t b{white-space:normal;overflow:visible;font-size:11px;line-height:1.15}
+  .steps__t small,.steps__item:not(.is-current) .steps__t small{display:none}
+  .steps__next{margin-top:8px;min-height:44px}
+}
+/* Zonas de toque de al menos 44px en los enlaces que quedaban en 17-30px. */
+button.logo{min-height:44px}
+.voucher-hero__split{min-height:44px;display:inline-flex;align-items:center;margin-top:0}
+.split-link{min-height:44px;padding:0 12px}
+.split-namesbox summary{padding:12px 0}
+.local-tours__credits summary,.foot-credits summary{padding:13px 0}
+@media(max-width:400px){
+  .destination-highlights__carousel{padding-inline:46px;scroll-padding-inline:46px}
+  .destination-highlights__arrow{width:38px;height:38px}
+  .featured-destination__search{padding:0 10px;font-size:12.5px}
+}
