@@ -1023,8 +1023,8 @@ function haversineKm(a, b) {
     for (const k of Object.keys(server)) {
       const s = server[k], c = cliente[k];
       assert.deepStrictEqual(
-        [c.transport.eco, c.transport.confort, c.food.casual, c.food.moderado, c.food.gourmet],
-        [s.transport.eco, s.transport.confort, s.food.casual, s.food.moderado, s.food.gourmet],
+        [c.transport.eco, c.transport.medio, c.transport.confort, c.food.casual, c.food.moderado, c.food.gourmet],
+        [s.transport.eco, s.transport.medio, s.transport.confort, s.food.casual, s.food.moderado, s.food.gourmet],
         'costos distintos en ' + k + ' (' + (model.DEST[k] && model.DEST[k].name) + ')'
       );
     }
@@ -1051,8 +1051,12 @@ function haversineKm(a, b) {
       if (k !== 'rio') assert.notStrictEqual(model.destinationCosts(k), fallback, k + ' resuelve al fallback de Rio');
       assert.ok(c.food.casual < c.food.moderado && c.food.moderado < c.food.gourmet,
         k + ': la comida tiene que crecer de casual a moderado a gourmet, es ' + JSON.stringify(c.food));
-      assert.ok(c.transport.eco < c.transport.confort,
-        k + ': el traslado tiene que crecer de eco a confort, es ' + JSON.stringify(c.transport));
+      assert.ok(c.transport.eco < c.transport.medio && c.transport.medio < c.transport.confort,
+        k + ': el traslado tiene que crecer de eco a medio a confort, es ' + JSON.stringify(c.transport));
+      // El nivel medio es derivado. Si deja de serlo, la comprobacion de arriba
+      // sigue pasando y nadie se entera de que el numero cambio de origen.
+      assert.strictEqual(c.transport.medio, Math.round(Math.sqrt(c.transport.eco * c.transport.confort)),
+        k + ': el traslado medio tiene que seguir siendo la media geometrica de los otros dos, es ' + c.transport.medio);
     }
   });
   /* ---------- transfer desde el aeropuerto ---------- */
@@ -1291,8 +1295,8 @@ function haversineKm(a, b) {
       // Y los numeros del JSON tienen que ser los que quedaron en el codigo.
       const c = model.DESTINATION_COSTS[k];
       assert.deepStrictEqual(
-        [c.transport.eco, c.transport.confort, c.food.casual, c.food.moderado, c.food.gourmet],
-        [v.traslado.eco, v.traslado.confort, v.comida.casual, v.comida.moderado, v.comida.gourmet],
+        [c.transport.eco, c.transport.medio, c.transport.confort, c.food.casual, c.food.moderado, c.food.gourmet],
+        [v.traslado.eco, v.traslado.medio, v.traslado.confort, v.comida.casual, v.comida.moderado, v.comida.gourmet],
         k + ': el codigo no coincide con data/costos-diarios.json. Corré npm run build:costos');
     }
     assert.deepStrictEqual(Object.keys(D).filter((k) => !model.DEST[k]), [],

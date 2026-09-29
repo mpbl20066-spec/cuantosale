@@ -44,7 +44,7 @@ const D = datos.destinos;
 // --- 1. bloque del modelo, entre marcadores ---------------------------
 const lineas = Object.keys(D).map((k) => {
   const v = D[k];
-  return '  ' + k + ': { transport: { eco: ' + v.traslado.eco + ', confort: ' + v.traslado.confort +
+  return '  ' + k + ': { transport: { eco: ' + v.traslado.eco + ', medio: ' + v.traslado.medio + ', confort: ' + v.traslado.confort +
     ' }, food: { casual: ' + v.comida.casual + ', moderado: ' + v.comida.moderado + ', gourmet: ' + v.comida.gourmet + ' } },';
 }).join('\n');
 
@@ -63,7 +63,7 @@ const cuerpo = Object.keys(D).map((k) => {
   const v = D[k];
   const nombre = (model.DEST[k] && model.DEST[k].name) || '?';
   return '  ' + k + ': { name: \'' + nombre.replace(/'/g, "\\'") + '\',' +
-    ' transport: { eco: ' + v.traslado.eco + ', confort: ' + v.traslado.confort + ' },' +
+    ' transport: { eco: ' + v.traslado.eco + ', medio: ' + v.traslado.medio + ', confort: ' + v.traslado.confort + ' },' +
     ' food: { casual: ' + v.comida.casual + ', moderado: ' + v.comida.moderado + ', gourmet: ' + v.comida.gourmet + ' } },';
 }).join('\n');
 

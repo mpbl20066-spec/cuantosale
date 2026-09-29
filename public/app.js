@@ -4583,6 +4583,7 @@
     ];
     var localOptions = [
       { key: 'econ', label: 'Económico', description: 'Ómnibus y líneas urbanas', value: dailyCosts.transport.eco },
+      { key: 'medio', label: 'Medio', description: 'Mixto: algo de ómnibus y algo de app', value: dailyCosts.transport.medio },
       { key: 'confort', label: 'Confort', description: 'Taxis y transporte privado por app', value: dailyCosts.transport.confort }
     ];
     function optionMarkup(options, kind) {
@@ -4634,14 +4635,29 @@
       var total = options.length + 1;
       return '<div class="daily-budget__options daily-budget__options--cols-' + (total >= 4 ? 2 : total) + '">' + optionMarkup(options, kind) + '</div>';
     }
+    /* La etiqueta "Valores estimados" del encabezado.
+
+       Estos dos rubros NO son precios reales y la app lo dice en todas partes
+       menos acá: `rubroEsReal()` los marca 'estimado' en el desglose del detalle
+       y el modelo solo admite 'real' para 'pasajes' (ver lib/model.js). Un
+       encabezado de la sección que no lo aclara deja que estas cajas se lean con
+       la misma confianza que el vuelo, que sí viene consultado.
+
+       Sale de la MISMA regla que el desglose y no de una constante escrita a
+       mano: si un día estos rubros pasan a ser reales, la etiqueta se cae sola en
+       vez de quedar mintiendo. */
+    function etiquetaDeEstimado(cats) {
+      var algunaReal = cats.some(function (c) { return rubroEsReal(null, c, detailState && detailState.meta); });
+      return algunaReal ? '' : '<small>Valores estimados</small>';
+    }
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
       '<div class="daily-budget__group" data-budget-anchor="local">' +
-      '<div class="daily-budget__header"><span>Transporte local</span></div>' +
+      '<div class="daily-budget__header"><span>Transporte local</span>' + etiquetaDeEstimado(['local']) + '</div>' +
       optionsGrid(localOptions, 'local') +
       '</div>' +
       '<div class="daily-budget__group" data-budget-anchor="comidas">' +
-      '<div class="daily-budget__header"><span>Comidas</span></div>' +
+      '<div class="daily-budget__header"><span>Comidas</span>' + etiquetaDeEstimado(['comidas']) + '</div>' +
       optionsGrid(foodOptions, 'food') +
       '</div>' +
       /* La frase "Se recalcula automaticamente para toda la duracion del viaje"

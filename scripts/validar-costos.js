@@ -39,7 +39,16 @@ for (const [k, v] of Object.entries(D)) {
   const c = v.comida, t = v.traslado;
   if (c && t) {
     if (!(c.casual < c.moderado && c.moderado < c.gourmet)) err(k + ': comida no crece ' + JSON.stringify(c));
-    if (!(t.eco < t.confort)) err(k + ': traslado no crece ' + JSON.stringify(t));
+    // El traslado tiene TRES niveles desde que se agrego el medio. Con dos, el
+    // tier intermedio caia a "eco" y por eso la comprobacion de abajo es de tres
+    // eslabones y no de dos.
+    if (!(t.eco < t.medio && t.medio < t.confort)) err(k + ': traslado no crece ' + JSON.stringify(t));
+    // El medio es DERIVADO (media geometrica de los otros dos). Si alguien lo
+    // cambia a mano, tiene que decidir si sigue siendo derivado o si ahora hay
+    // una fuente nueva que documentar en "fuente".
+    if (t.medio !== Math.round(Math.sqrt(t.eco * t.confort)) && !v.fuenteMedio) {
+      err(k + ': traslado.medio (' + t.medio + ') no es la media geometrica de ' + t.eco + ' y ' + t.confort + ' y no hay "fuenteMedio" que lo respalde');
+    }
   }
   if (!v.fuente) err(k + ' sin "fuente"');
   if (!v.verificado) err(k + ' sin "verificado"');
