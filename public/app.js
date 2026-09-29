@@ -6319,7 +6319,7 @@
       el.innerHTML = '';
       var origin = window.CS_ROUTE_ORIGIN, dest = pts[pts.length - 1];
       var map = window.L.map(el, { scrollWheelZoom: false, dragging: !window.L.Browser.mobile, tap: false, attributionControl: true });
-      window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(map);
+      window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, referrerPolicy: 'origin', attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(map);
       window.L.polyline(pts, { color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }).addTo(map);
       var line = window.L.polyline(pts, { color: '#e8590c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round' }).addTo(map);
       function pin(latlng, cls, label) {
