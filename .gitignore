@@ -26,3 +26,10 @@ _s.err
 # agencia manda uno nuevo. Versionarlas mete conflictos en cada reenvio.
 data/*.xlsx
 !data/tabla-transfers.xlsx
+
+__pycache__/
+*.pyc
+
+# tabla-transfers.xlsx en la raiz: es una copia de trabajo de la de data/, que es
+# la que leen los scripts. Dos copias del mismo .xlsx divergen solas.
+tabla-transfers.xlsx

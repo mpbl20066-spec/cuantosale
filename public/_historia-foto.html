@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Historia · 2 días · CuantoSale.uy</title>
+<style>
+  /* Tokens de public/waitlist.html. Sin excepciones. */
+  :root{--wl-bg:#0B1330;--wl-card:#12193A;--wl-line:#26305C;--wl-amber:#F2A93B;--wl-ink:#F3F6FC;--wl-ink2:#9AA6C7}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05091c;font-family:Poppins,system-ui,sans-serif}
+  .story{width:1080px;height:1920px;position:relative;overflow:hidden;background:var(--wl-bg)}
+
+  /* La foto va al fondo, con el recorte corrido a la izquierda: la fuente es
+     horizontal y el marco es vertical, asi que "cover"come el medio y deja el
+     sujeto —la costa— fuera de cuadro. Con el 26% de desplazamiento vuelve a
+     entrar la tierra y el mar deja de ser una franja vacia.
+     La posicion va en porcentaje del eje, no en px, para que siga valiendo si
+     se cambia de foto. */
+  .bg{position:absolute;inset:0;background-size:cover;background-position:26% 42%}
+  .veil{position:absolute;inset:0;background:linear-gradient(180deg,
+      rgba(11,19,48,.66) 0%,rgba(11,19,48,0) 18%,rgba(11,19,48,0) 40%,rgba(11,19,48,.55) 62%,rgba(11,19,48,.94) 78%)}
+
+  /* Cromo de la historia. Va arriba porque en Instagram la barra de progreso y
+     el perfil ocupan esa franja: si el texto arrancara en 200 px, la story lo
+     taparia. */
+  .bars{position:absolute;top:52px;left:60px;right:60px;display:flex;gap:10px;z-index:6}
+  .bars i{flex:1;height:7px;border-radius:99px;background:rgba(243,246,252,.34)}
+  .bars i.on{background:var(--wl-ink)}
+  .who{position:absolute;top:84px;left:60px;right:60px;display:flex;align-items:center;gap:14px;z-index:6;font-size:27px;font-weight:700}
+  .who span{margin-left:auto;font-size:24px;font-weight:600;color:rgba(243,246,252,.75)}
+  /* El logo va en blanco: es el color de la app (waitlist.html) y ademas es lo
+     unico que se lee sobre una foto. Sin esto el texto heredaba el negro del
+     body y el nombre quedaba tapado contra la imagen. El pin lo dibuja el SVG,
+     que ya trae el ambar de --wl-amber adentro. */
+  .logo{display:flex;align-items:center;gap:11px;font-weight:800;color:var(--wl-ink)}
+
+  /* El bloque de texto va en un PANEL, no sobre la foto. La primera version
+     usaba solo un velo en degradado y el titular negro se perdia contra la
+     roca de Jericoacoara. Un panel del color de la app es opaco, se lee sobre
+     cualquier foto y no compite con ella. */
+  .panel{
+    position:absolute;left:0;right:0;bottom:0;z-index:5;
+    padding:56px 76px 84px;background:var(--wl-card);
+    border-top:5px solid var(--wl-amber);
+    box-shadow:0 -30px 70px -20px rgba(6,10,28,.8);
+  }
+  .label{color:var(--wl-ink2);font-size:22px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:16px}
+
+  /* El contador: tres cajas, pero angostas y alineadas a la izquierda. Antes
+     ocupaban todo el ancho y empujaban el titular fuera de la pantalla util. */
+  .cd{display:flex;gap:14px;margin-bottom:28px}
+  .cd u{flex:0 0 150px;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:5px;
+        padding:18px 8px;border:1px solid rgba(242,169,59,.42);border-radius:16px;background:rgba(11,19,48,.72)}
+  .cd b{font-weight:800;font-size:62px;color:var(--wl-amber);line-height:1;font-variant-numeric:tabular-nums}
+  .cd u i{font-style:normal;font-size:16px;color:var(--wl-ink2);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+
+  h1{font-size:70px;font-weight:800;line-height:1.02;letter-spacing:-.02em;color:var(--wl-ink)}
+  h1 em{font-style:normal;color:var(--wl-amber)}
+  p.sub{color:var(--wl-ink2);font-size:29px;line-height:1.4;margin-top:18px}
+  .cta{margin-top:30px;display:inline-flex;align-items:center;gap:12px;padding:19px 34px;border-radius:99px;
+       background:var(--wl-amber);color:#1A1200;font-weight:800;font-size:27px;
+       box-shadow:0 14px 34px -10px rgba(242,169,59,.55)}
+  .credit{position:absolute;right:76px;bottom:22px;z-index:6;font-size:17px;color:var(--wl-ink2);opacity:.7}
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg" id="bg"></div>
+  <div class="veil"></div>
+  <div class="bars"><i class="on"></i></div>
+  <div class="who">
+    <div class="logo">
+      <svg width="22" height="27" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#FFFFFF"/><circle cx="12" cy="11.5" r="4.6" fill="#F2A93B"/></svg>
+      CuantoSale.uy
+    </div>
+    <span>Ahora</span>
+  </div>
+
+  <div class="panel">
+    <p class="label">Lanzamiento oficial en</p>
+    <div class="cd">
+      <u><b>2</b><i>días</i></u>
+      <u><b>14</b><i>hs</i></u>
+      <u><b>33</b><i>min</i></u>
+    </div>
+    <h1>Faltan <em>2 días</em><br>para saber<br>cuánto sale<br>de verdad</h1>
+    <p class="sub">Vuelos, hotel, comidas y nafta.<br>El total, no solo el pasaje.</p>
+    <div class="cta">Entrá a la lista →</div>
+  </div>
+
+  <p class="credit" id="credit"></p>
+</div>
+
+<script>
+/* La foto llega por query, para cambiar de destino sin editar el archivo.
+   FOTOS se inyecta desde DEST_PHOTOS (public/app.js), que es donde la app ya
+   tiene las suyas con autor y licencia. Escribirlas a mano aca fue un error: la
+   de buz apuntaba a un nombre de archivo inexistente y la story salio con el
+   cuadro en negro sin avisar. */
+const FOTOS = window.FOTOS_HISTORIA || {};
+const q = new URLSearchParams(location.search);
+const url = q.get('url') || FOTOS[q.get('foto')] || '';
+const bg = document.getElementById('bg');
+document.getElementById('credit').textContent = 'Wikimedia Commons';
+if (url) {
+  bg.style.backgroundImage = 'url("' + url + '")';
+  if (q.get('pos')) bg.style.backgroundPosition = q.get('pos');
+  const im = new Image();
+  im.onload = function () { document.documentElement.dataset.fotoOk = '1'; };
+  im.onerror = function () { document.documentElement.dataset.fotoOk = '0'; };
+  im.src = url;
+} else {
+  document.documentElement.dataset.fotoOk = '0';
+}
+</script>
+</body>
+</html>

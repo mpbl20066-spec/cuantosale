@@ -979,15 +979,12 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .voucher-item.is-reservado .voucher-item__title{color:var(--ink2)}
 .voucher-item.is-reservado .voucher-item__amount{color:var(--ink)}
 
-/* La fila que quedó señalada al volver de afuera. Es una señal de POSICIÓN, no
-   de estado: aparece, dura un rato y se va sola.
-
+/* La fila que quedó señalada al volver de Booking o de la aerolínea.
+   Es una señal de POSICIÓN, no de estado: aparece, dura un rato y se va sola.
    El color es el de la marca --action-bg, el mismo del botón de reservar, para
-   que se lea como "acá estabas mirando". Y NO es el verde de la pastilla de
-   reserva: ese color significa una sola cosa, que la reserva está confirmada, y
-   usar acá mezclaría una señal de navegación con un estado de pago. Cuando el
-   vuelo pase por Duffel el estado real va a llegar por webhook, del lado del
-   servidor, y esta animación sigue siendo solo posicionamiento. */
+   que se lea como "acá estabas mirando" y no como un estado nuevo que se
+   pudiera confundir con un "Reservado". Por eso NO usa el verde de la pastilla
+   de reserva: ese color significa una sola cosa y esta no la significa. */
 .voucher-item.is-tras-vuelta{animation:voucher-vuelta 2.6s ease-out;border-radius:12px}
 @keyframes voucher-vuelta{
   0%,55%{box-shadow:0 0 0 2px var(--action-bg);background:color-mix(in srgb,var(--action-bg) 8%,transparent)}
@@ -1077,6 +1074,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    y no con mas padding: son dos cosas distintas --una explica el reparto de
    canales, la otra explica por que hay un boton-- y pegadas se leen como una
    sola frase larga. */
+.voucher-canales__nota{margin:8px 0 0;padding-top:10px;border-top:1px solid var(--line)}
 
 /* ---------- El asistente paso a paso ----------
    Tres pasos en el orden en que hay que hacerlos. Cada uno dice que falta y
@@ -1285,8 +1283,13 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .guia-precio--pasa{color:var(--ink2)}
 .guia-nota{margin:0;color:var(--ink2);font-size:14px;line-height:1.45}
 .guia-nota--chica{font-size:12.5px;margin-top:4px}
-.guia-veredicto{background:var(--warn-soft);border-left:4px solid var(--warn);border-radius:0 12px 12px 0;padding:13px 17px;font-size:14.5px;line-height:1.45}
-.guia-veredicto b{color:var(--warn)}
+/* --warn-soft y --warn no existen en :root ni en el bloque light: el token del
+   aviso es --warn-ink. Con var(--warn) sin definir, el navegador no cae a
+   ningun color y esta caja salia sin fondo y con el texto del color del
+   cuerpo, que en el celu se leia como un bloque roto. Se usan los tokens que
+   si existen. */
+.guia-veredicto{background:var(--cel-soft);border-left:4px solid var(--warn-ink);border-radius:0 12px 12px 0;padding:13px 17px;font-size:14.5px;line-height:1.45}
+.guia-veredicto b{color:var(--warn-ink)}
 .guia-veredicto--malo{background:var(--coral-soft);border-left-color:#c0392b}
 .guia-veredicto--malo b{color:#c0392b}
 .guia-tips{display:grid;gap:9px}

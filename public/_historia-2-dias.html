@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Historia · faltan 2 días · CuantoSale.uy</title>
+<style>
+  /* Tokens copiados de public/waitlist.html. Si la app cambia el color, esta
+     historia cambia con ella: no hay ningun color escrito a mano aca. */
+  :root{
+    --wl-bg:#0B1330; --wl-card:#12193A; --wl-line:#26305C; --wl-amber:#F2A93B;
+    --wl-ink:#F3F6FC; --wl-ink2:#9AA6C7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05091c;font-family:Poppins,system-ui,sans-serif;color:var(--wl-ink)}
+
+  /* 1080x1920 es el lienzo de una historia. Se abre en el navegador y se saca
+     la captura de ahi: el tamano exacto es el que sube Instagram. */
+  .story{
+    width:1080px;height:1920px;position:relative;overflow:hidden;
+    background:
+      radial-gradient(900px 900px at 18% 8%, #1B2A5E 0%, transparent 62%),
+      radial-gradient(800px 800px at 88% 92%, #23306B 0%, transparent 58%),
+      var(--wl-bg);
+  }
+
+  /* ---- cromo de la historia ---- */
+  .bars{position:absolute;top:44px;left:56px;right:56px;display:flex;gap:10px;z-index:5}
+  .bars i{flex:1;height:6px;border-radius:99px;background:rgba(243,246,252,.3)}
+  .bars i.on{background:var(--wl-ink)}
+  .who{position:absolute;top:74px;left:56px;right:56px;display:flex;
+       align-items:center;gap:14px;z-index:5;font-size:26px;font-weight:700}
+  .who span{margin-left:auto;font-size:23px;font-weight:600;color:rgba(243,246,252,.72)}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800}
+
+  /* ---- el celu con la app real ---- */
+  .phone{
+    position:absolute;left:50%;top:262px;transform:translateX(-50%);
+    width:520px;border-radius:56px;padding:16px;
+    background:#1A1F3D;
+    box-shadow:0 0 0 3px #333A63, 0 60px 120px -30px rgba(0,0,0,.85);
+  }
+  .screen{
+    border-radius:42px;overflow:hidden;background:var(--wl-bg);
+    padding:52px 34px 40px;
+  }
+  .notch{width:150px;height:34px;border-radius:99px;background:#0A0F26;
+         margin:-26px auto 30px;position:relative;z-index:2}
+
+  /* ---- la tarjeta de espera, con el CSS de waitlist.html ---- */
+  .card{background:var(--wl-card);border:3px solid var(--wl-amber);border-radius:28px;
+        padding:42px 32px;box-shadow:0 0 0 1px rgba(242,169,59,.18),0 32px 80px -24px rgba(242,169,59,.4)}
+  .card .logo{justify-content:center;font-size:24px;margin-bottom:22px}
+  .cd-label{text-align:center;color:var(--wl-ink2);font-size:12px;letter-spacing:.06em;
+            text-transform:uppercase;font-weight:600;margin-bottom:14px}
+  .cd{display:flex;justify-content:center;gap:11px;margin-bottom:28px}
+  .cd u{flex:1;text-decoration:none;display:flex;flex-direction:column;align-items:center;
+        gap:3px;min-width:0;padding:14px 6px;border:1px solid var(--wl-line);
+        border-radius:16px;background:#0E1533}
+  .cd b{font-weight:800;font-size:40px;color:var(--wl-amber);line-height:1;
+        font-variant-numeric:tabular-nums}
+  .cd u i{font-style:normal;font-size:10px;color:var(--wl-ink2);
+          text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .card h1{font-size:23px;line-height:1.22;text-align:center;font-weight:800;margin-bottom:14px}
+  .card p.sub{color:var(--wl-ink2);font-size:15px;line-height:1.5;text-align:center;margin-bottom:24px}
+  .field{display:block;width:100%;padding:16px;border:1px solid var(--wl-line);
+         border-radius:14px;background:#0E1533;color:var(--wl-ink);font-size:15px;
+         font-family:inherit;text-align:center}
+  .btn{display:block;width:100%;border:0;border-radius:14px;background:var(--wl-amber);
+       color:#1A1200;padding:18px;font-weight:800;font-size:17px;margin-top:13px;
+       font-family:inherit;box-shadow:0 12px 28px -8px rgba(242,169,59,.6)}
+  .free{text-align:center;font-size:12px;color:#B7C2E0;margin-top:10px}
+  .urg{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;font-weight:600;
+       line-height:1.45;margin-top:20px;padding:13px 14px;border-radius:14px;
+       background:rgba(242,169,59,.1);border:1px solid rgba(242,169,59,.3)}
+  .urg b{color:var(--wl-amber)}
+
+  /* ---- el remate de la historia ---- */
+  .kick{
+    position:absolute;left:80px;right:80px;top:1400px;text-align:center;z-index:4;
+  }
+  .kick h2{font-size:60px;font-weight:800;line-height:1.02;letter-spacing:-.02em}
+  .kick h2 em{font-style:normal;color:var(--wl-amber)}
+  .kick p{color:var(--wl-ink2);font-size:27px;line-height:1.45;margin-top:20px}
+  .swipe{
+    position:absolute;left:0;right:0;bottom:104px;text-align:center;z-index:4;
+    color:rgba(243,246,252,.62);font-size:22px;font-weight:600;
+  }
+  .swipe i{font-style:normal;animation:up 1.9s ease-in-out infinite}
+  @keyframes up{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(-9px);opacity:1}}
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bars"><i class="on"></i></div>
+  <div class="who">
+    <div class="logo">
+      <svg width="22" height="27" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#FFFFFF"/><circle cx="12" cy="11.5" r="4.6" fill="#F2A93B"/></svg>
+      CuantoSale.uy
+    </div>
+    <span>Ahora</span>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="notch"></div>
+      <div class="card">
+        <div class="logo">
+          <svg width="22" height="27" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#FFFFFF"/><circle cx="12" cy="11.5" r="4.6" fill="#F2A93B"/></svg>
+          CuantoSale.uy
+        </div>
+
+        <p class="cd-label">Lanzamiento oficial en</p>
+        <div class="cd">
+          <u><b>2</b><i>días</i></u>
+          <u><b>14</b><i>hs</i></u>
+          <u><b>33</b><i>min</i></u>
+        </div>
+
+        <h1>🚀 Llegamos a Uruguay. Preparate para viajar inteligente</h1>
+        <p class="sub">Calculá el costo total de tu viaje y dividilo entre todos sin vueltas.</p>
+
+        <span class="field">tu@email.com</span>
+        <span class="btn">¡Quiero unirme ahora!</span>
+        <p class="free">Gratis, sin tarjeta de crédito.</p>
+
+        <p class="urg">⚠️ <span><b>Acceso limitado:</b> solo 100 cupos disponibles para la versión Beta. ¡Los lugares se están llenando rápido!</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="kick">
+    <h2>Faltan <em>2 días</em><br>para que vueles con el<br>precio a la vista</h2>
+    <p>Vuelos, hotel, comidas y nafta.<br>El total, no solo el pasaje.</p>
+  </div>
+
+  <div class="swipe"><i>Deslizá para entrar en la lista ↑</i></div>
+</div>
+</body>
+</html>
