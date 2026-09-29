@@ -6347,7 +6347,7 @@
           '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '">Ver desglose<span class="opt__chevron" aria-hidden="true">›</span></button>' +
           '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-id="' + esc(p.id) + '">Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
         '</div>' +
-        '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + '</div>' +
+        '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + nota + '</div>' +
       '</article>';
     };
     /* Qué propuestas se muestran y con qué título.

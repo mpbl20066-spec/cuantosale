@@ -406,7 +406,10 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
    "propuesta" una al lado de la otra), con huecos entre palabras. Tiene que
    fluir como un párrafo; el asterisco ya se alinea solo con vertical-align. */
 .opt__nota{margin:10px 0 2px;padding-top:9px;border-top:1px solid var(--line);color:var(--ink2);font-size:12.5px;line-height:1.45}
-.opt__nota b{color:var(--ink);font-weight:700}
+/* El <b> es el nombre de un botón ("Ver propuesta"), no una emphasised cualquier
+   cosa: si la línea lo parte, queda "Ver" arriba y "propuesta" abajo, que ya se lee
+   como dos cosas. El nombre va entero o no va. */
+.opt__nota b{color:var(--ink);font-weight:700;white-space:nowrap}
 .propuesta-seleccionada{border:2px solid var(--card-sel-border)!important;background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
 /* El movimiento (elevación, flecha, chevron) sólo si el sistema no pide menos
    movimiento: el color del hover sí se mantiene, no informa nada nuevo. */
