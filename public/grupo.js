@@ -261,6 +261,25 @@
     } catch (error) {}
     return nameDraft;
   }
+  /* Lo que el presupuesto dejo para la cuenta: los rubros elegidos (con el monto
+     del presupuesto) y las personas del viaje. Se lee aparte del nombre porque
+     "Cambiar" en el banner solo suelta el nombre; los gastos iniciales siguen
+     siendo del presupuesto. Devuelve listas vacias si no hay nada o esta roto. */
+  function readBudgetPreset() {
+    var out = { items: [], people: [] };
+    try {
+      var raw = sessionStorage.getItem(PRESET_KEY);
+      var preset = raw ? JSON.parse(raw) : null;
+      if (preset && Array.isArray(preset.items)) {
+        out.items = preset.items.map(function (it) { return { label: String(it && it.label || '').trim().slice(0, 80), amount: Math.round(Number(it && it.amount)) }; })
+          .filter(function (it) { return it.label && it.amount > 0; }).slice(0, 20);
+      }
+      if (preset && Array.isArray(preset.people)) {
+        out.people = preset.people.slice(0, 20).map(function (n) { return String(n || '').trim().slice(0, 40); });
+      }
+    } catch (error) {}
+    return out;
+  }
   function clearTripPreset() {
     try { sessionStorage.removeItem(PRESET_KEY); } catch (error) {}
   }
@@ -358,7 +377,8 @@
       (errorMessage ? '<p class="grupo-error">' + esc(errorMessage) + '</p>' : '') +
       '<form id="create-form">' +
       '<label class="grupo-field">Nombre del viaje o grupo<input required name="groupName" placeholder="Ej: Finde en Florianópolis" maxlength="80" value="' + esc(preset) + '"></label>' +
-      '<label class="grupo-field">Tu nombre<input required name="yourName" placeholder="Ej: Bruno" maxlength="40" value="' + esc(nameFromAuth) + '"></label>' +
+      '<label class="grupo-field">Tu nombre<input required name="yourName" placeholder="Ej: Bruno" maxlength="40" value="' + esc(nameFromAuth || (readBudgetPreset().people[0] || '')) + '"></label>' +
+      (readBudgetPreset().items.length ? '<p class="grupo-note">Vamos a cargar ' + readBudgetPreset().items.length + ' gastos del presupuesto y ' + Math.max(1, readBudgetPreset().people.length) + (readBudgetPreset().people.length === 1 ? ' persona' : ' personas') + '.</p>' : '') +
       '<button type="submit" class="grupo-btn grupo-btn--primary">Crear grupo y obtener link</button>' +
       '</form></div>'
     );
@@ -374,6 +394,7 @@
       var groupName = form.groupName.value.trim();
       var yourName = form.yourName.value.trim();
       if (!groupName || !yourName) return;
+      var budget = readBudgetPreset();
       form.querySelector('button').disabled = true;
       try {
         await loadSupabaseSdk();
@@ -387,6 +408,30 @@
         // loguearse a nadie.
         var participantResult = await supabaseClient.from('participantes').insert({ grupo_id: groupResult.data.id, display_name: yourName, device_id: deviceId(), es_admin: true }).select().single();
         if (participantResult.error) throw new Error(participantResult.error.message);
+        /* Los gastos iniciales salen del presupuesto: un gasto por rubro elegido,
+           pagado por quien crea el grupo (es quien lo arma; el pagador real se
+           corrige borrando y recargando el gasto) y repartido entre todas las
+           personas del viaje. Las demas personas entran con el nombre que se
+           escribio en el reparto, o "Persona N", y despues cada una puede
+           reclamar su nombre desde el link. Si esto falla el grupo ya existe y
+           sirve: no se tira abajo por no poder precargar. */
+        try {
+          var creatorId = participantResult.data.id;
+          var allIds = [creatorId];
+          var others = [];
+          for (var i = 1; i < budget.people.length; i++) {
+            others.push({ grupo_id: groupResult.data.id, display_name: budget.people[i] || 'Persona ' + (i + 1), device_id: 'manual-' + randomId() });
+          }
+          if (others.length) {
+            var othersResult = await supabaseClient.from('participantes').insert(others).select();
+            if (!othersResult.error) allIds = allIds.concat((othersResult.data || []).map(function (p) { return p.id; }));
+          }
+          if (budget.items.length) {
+            await supabaseClient.from('gastos').insert(budget.items.map(function (it) {
+              return { grupo_id: groupResult.data.id, paid_by_participante_id: creatorId, description: it.label, amount: it.amount, currency: 'USD', split_between: allIds };
+            }));
+          }
+        } catch (seedError) { /* el grupo queda creado sin gastos iniciales */ }
         clearTripPreset();
         window.location.href = '/grupo/' + groupResult.data.id;
       } catch (error) {

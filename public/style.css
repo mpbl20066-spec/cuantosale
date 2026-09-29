@@ -1263,6 +1263,13 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .voucher-split__btn:hover{background:var(--cel-soft);color:var(--ink)}
 .voucher-split__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .voucher-split__btn:disabled{opacity:.6;cursor:wait}
+.voucher-split{margin:14px 0 4px;border-width:1.5px}
+.voucher-split.is-activo{background:var(--cel-soft)}
+.voucher-split__actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.voucher-split__actions .voucher-split__btn{text-decoration:none;box-sizing:border-box}
+.voucher-split__btn.is-main{background:var(--cel);color:#fff}
+.voucher-split__btn.is-main:hover{background:var(--cel);color:#fff;filter:brightness(1.08)}
+.voucher-split__link{width:100%;box-sizing:border-box;min-height:40px;padding:0 12px;border:1px solid var(--cel);border-radius:10px;background:var(--bg);color:var(--ink);font-family:inherit;font-size:12.5px}
 
 .voucher-share__menu button:hover{background:var(--cel-soft)}
 .voucher-share__menu button:focus-visible{outline:3px solid var(--focus);outline-offset:-2px}

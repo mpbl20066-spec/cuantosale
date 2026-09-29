@@ -4506,8 +4506,8 @@
     el.hidden = true; el.setAttribute('aria-hidden', 'true'); el.innerHTML = '';
     syncScrollLock();
   }
-  function copiarTextoSplit(btn) {
-    var texto = splitTexto();
+  function copiarTextoSplit(btn, textoPropio) {
+    var texto = textoPropio || splitTexto();
     var original = btn.textContent;
     var avisar = function (ok) { btn.textContent = ok ? '¡Copiado!' : 'No se pudo copiar'; window.setTimeout(function () { btn.textContent = original; }, 1800); };
     var fallback = function () {
@@ -4520,11 +4520,28 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(function () { avisar(true); }, fallback);
     else fallback();
   }
+  /* Lo que el presupuesto le deja a la cuenta del grupo: cada rubro elegido
+     (los mismos que suma getBudgetBreakdown, con el mismo monto) y las personas
+     del viaje con los nombres que se hayan escrito. grupo.js lo vuelca como
+     gastos iniciales al crear el grupo, para que nadie recargue a mano lo que ya
+     esta en el presupuesto. Desde el modal de reparto valen los nombres y la
+     cantidad que se ajustaron ahi; desde el resumen, los pax del viaje. */
+  function grupoPresetDatos(desdeModal) {
+    var n = desdeModal && splitState.n ? splitState.n : Math.max(1, Math.min(20, Number(detailState.meta.pax) || 1));
+    var people = [];
+    for (var i = 0; i < n; i++) people.push(desdeModal ? String(splitState.nombres[i] || '').trim() : '');
+    var items = splitDatos().filas.map(function (f) { return { label: f.label, amount: Math.round(f.value) }; })
+      .filter(function (it) { return it.amount > 0; });
+    return { items: items, people: people };
+  }
   async function irAlGrupo(btn) {
     var texto = btn.textContent;
     btn.disabled = true; btn.textContent = 'Guardando...';
     var draft = tripPayload();
-    if (draft) { try { sessionStorage.setItem('cuantosale_grupo_preset', JSON.stringify({ name: draft.title, destination_key: draft.destination_key })); } catch (error) {} }
+    if (draft) {
+      var extra = grupoPresetDatos(btn.hasAttribute('data-split-grupo'));
+      try { sessionStorage.setItem('cuantosale_grupo_preset', JSON.stringify({ name: draft.title, destination_key: draft.destination_key, items: extra.items, people: extra.people })); } catch (error) {}
+    }
     var saved = await saveCurrentTrip({ skipTripsModal: true });
     if (saved) { window.location.href = '/grupo'; return; }
     btn.disabled = false; btn.textContent = texto;
@@ -5450,13 +5467,28 @@
       : (flightSummary.selected && flightSummary.airline ? 'la aerol\u00ednea <b>' + esc(flightSummary.airline) + '</b>' : 'la aerol\u00ednea');
     var canalesTexto = '<p class="voucher-canales">El alojamiento se paga en <b>Booking</b>, los pasajes directo con ' + canalesNombre
       + ', y ' + (busMode ? 'las actividades' : 'los traslados y actividades') + ' con nosotros.</p>';
-    var dividirBloque = '<aside class="voucher-split">'
+    /* El grupo va arriba, pegado al total: es lo que se hace apenas se ve el
+       numero. Con grupo creado el bloque es el link para invitar (copiar,
+       WhatsApp, abrir la cuenta); sin grupo, un solo boton que lo crea con este
+       presupuesto ya cargado como gastos iniciales (ver grupoPresetDatos). */
+    var linkGrupo = enlaceGrupo();
+    var dividirBloque = '<aside class="voucher-split' + (linkGrupo ? ' is-activo' : '') + '">'
       + '<div class="voucher-split__head">' + brandIcon('dividir')
       + '<div class="voucher-split__text">'
-      + '<h3>¿Viajás en grupo?</h3>'
-      + '<p>Dividí el total automáticamente. Cada uno ve lo que puso, lo que le toca y lo que quedó a deber.</p>'
+      + '<h3>' + (linkGrupo ? 'Invitá a tus amigos al grupo' : '¿Viajás en grupo?') + '</h3>'
+      + '<p>' + (linkGrupo
+        ? 'Compartí este link: cada uno se suma con su nombre y carga lo que pagó. El presupuesto ya está como gastos iniciales.'
+        : 'Creá la cuenta del grupo con este presupuesto ya cargado y llevá la cuenta de quién pagó cada cosa.') + '</p>'
       + '</div></div>'
-      + '<button type="button" class="voucher-split__btn" data-split-trip>Dividir gastos con amigos</button>'
+      + (linkGrupo
+        ? '<input class="voucher-split__link" type="text" readonly value="' + esc(linkGrupo) + '" aria-label="Link del grupo" onfocus="this.select()">'
+          + '<div class="voucher-split__actions">'
+          + '<button type="button" class="voucher-split__btn is-main" data-grupo-copiar="' + esc(linkGrupo) + '">Copiar link</button>'
+          + '<a class="voucher-split__btn" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Sumate a la cuenta del viaje a ' + detailState.meta.dest.name + ': ' + linkGrupo) + '">WhatsApp</a>'
+          + '<a class="voucher-split__btn" href="' + esc(linkGrupo) + '">Ver la cuenta</a></div>'
+        : '<div class="voucher-split__actions">'
+          + '<button type="button" class="voucher-split__btn is-main" data-grupo-crear>Crear cuenta e invitar amigos</button>'
+          + '<button type="button" class="voucher-split__btn" data-split-trip>Ver cómo dividir</button></div>')
       + '</aside>';
 
     // Sin nada que reservar no se dibuja el boton apagado ni su nota: era ruido.
@@ -5473,6 +5505,7 @@
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
+      dividirBloque +
       ventajasMarkup +
 
       '<ul class="voucher-list">' +
@@ -5516,7 +5549,6 @@
 
        El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
        se marca solo al completar el checkout. */
-      dividirBloque +
       reservarTodo +
       /* ABAJO, UN SOLO BOTON SOLIDO.
 
@@ -10533,6 +10565,10 @@ function comboNombreDestino() {
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var saveTripButton = e.target.closest('[data-save-trip]');
       if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
+      var grupoCrearButton = e.target.closest('[data-grupo-crear]');
+      if (grupoCrearButton) { e.preventDefault(); irAlGrupo(grupoCrearButton); return; }
+      var grupoCopiarButton = e.target.closest('[data-grupo-copiar]');
+      if (grupoCopiarButton) { e.preventDefault(); copiarTextoSplit(grupoCopiarButton, grupoCopiarButton.getAttribute('data-grupo-copiar')); return; }
       var splitTripButton = e.target.closest('[data-split-trip]');
       if (splitTripButton) { e.preventDefault(); openSplitModal(); return; }
       /* El menu "Compartir" y el copiado.
