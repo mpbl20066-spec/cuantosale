@@ -2485,3 +2485,43 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
    espacios dejaba la pagina sin scroll tras el login. */
 html.modal-lock,html.modal-lock body{overflow:hidden}
 html.modal-lock body{overscroll-behavior:none}
+
+/* ---------- Jerarquia de titulos del presupuesto ----------
+   El bloque de arriba pone h2 y .block-title en los mismos 32px, asi que el
+   nombre de un bloque ("Vuelos", "Traslados y Conexiones") competia con el de
+   su seccion ("Llegada a destino"). Aca se separan: la seccion manda, el bloque
+   es un subtitulo sutil. Va al final para ganar por orden. */
+.detail-section > h2, .sec > h2 {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+h3.block-title, .block-title:is(h3) {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--ink2);
+  margin: 22px 0 4px;
+}
+.detail-section > h2 + h3.block-title, .detail-section > h2 + .plate-block > h3.block-title:first-child { margin-top: 0 }
+/* Aire y corte entre secciones (Costos diarios, Llegada a destino, Hoteles...). */
+.detail-section { margin: 0 0 24px }
+.detail-section + .detail-section {
+  margin-top: 56px;
+  padding-top: 40px;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 560px) {
+  .detail-section > h2, .sec > h2 { font-size: 26px }
+  .detail-section + .detail-section { margin-top: 44px; padding-top: 32px }
+}
+/* Hoteles y Tours: su titulo vive en un .plate-block, fuera de la caja. Mismo
+   aire arriba que el resto de las secciones. */
+.plate-block { margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--line) }
+.plate-block > .block-title:first-child { font-size: 30px; font-weight: 800; line-height: 1.15; margin: 0 0 6px }
+@media (max-width: 560px) {
+  .plate-block { margin-top: 44px; padding-top: 32px }
+  .plate-block > .block-title:first-child { font-size: 26px }
+}

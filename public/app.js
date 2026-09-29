@@ -4070,7 +4070,14 @@
        aria-label siguen llevando el desglose para quien lo necesite. */
     var _cuantificado = entries.filter(function (e) { return Number(e.n) > 0; }).reduce(function (s, e) { return s + Number(e.n); }, 0);
     var _avance = Math.min(100, Math.round((_cuantificado / Math.max(1, Number(total) || 1)) * 100));
-    var segments = '<div class="trip-summary__fill" style="width:' + _avance + '%" role="img" aria-label="Avance: ' + _avance + '% del total cotizado" title="Avance: ' + _avance + '% del total cotizado"></div>';
+    /* Segmentos proporcionales, uno por rubro con monto, en el color del rubro
+       (el mismo del icono de la fila). Los rubros en cero no ocupan lugar. */
+    var _base = summaryItems.reduce(function (s, it) { return s + (Number(it.n) > 0 ? Number(it.n) : 0); }, 0);
+    var segments = _base > 0
+      ? summaryItems.filter(function (it) { return Number(it.n) > 0; }).map(function (it) {
+          return '<span style="width:' + (Number(it.n) / _base * 100).toFixed(2) + '%;background:var(' + it.color + ')" title="' + esc(it.label) + '"></span>';
+        }).join('')
+      : '';
     var itemsHtml = summaryItems.map(function (item) {
       // Sólo el ícono: el cuadrado de color repetía la misma información y
       // ocupaba ancho al lado del texto. El botón entero lleva a la sección
@@ -7080,8 +7087,27 @@
     d = d.replace(/^en total$/i, 'en total');
     var m = d.match(/(\d+)\s*h/);
     if (m) d = '~' + m[1] + ' h' + d.slice(m.index + m[0].length);
+    /* "con escala" del modelo es un texto fijo por destino, no un dato del
+       vuelo: salia incluso con vuelo directo. Se saca, y la condicion la pone
+       la tarifa consultada (quote.transfers = cantidad de escalas). Sin tarifa
+       real no se sabe, asi que no se afirma nada. */
+    d = d.replace(/\s*con escala\.?$/i, '');
+    if (p.quote && typeof p.quote.transfers === 'number' && /^~\d+ h$/.test(d)) {
+      d += p.quote.transfers === 0 ? ' directo' : ' con escala';
+    }
     if (soloModo.test(d)) d = '';
     return d;
+  }
+
+  /* Duracion estimada del transfer aeropuerto -> hotel, en horas enteras, a
+     ~60 km/h (el ritmo de los datos de data/distancias-aeropuerto.json). Sale de
+     los km de CS_TRANSFER_PRICES; sin km (barco, vuelo) no se inventa. */
+  function transferHorasDe(p) {
+    var tabla = (typeof CS_TRANSFER_PRICES !== 'undefined' && CS_TRANSFER_PRICES) ? CS_TRANSFER_PRICES[p && p.dk] : null;
+    if (!tabla) return 0;
+    if (tabla.modo === 'ferry') return 4;
+    if (tabla.modo !== 'car' || !(tabla.km > 0)) return 0;
+    return Math.max(1, Math.round(tabla.km / 60));
   }
 
   /* El subtitulo de la tarjeta, con la misma estructura para los tres niveles:
@@ -7281,29 +7307,10 @@
   function curIsCheapest(series) {
     var list = Array.isArray(series) ? series : [];
     var best = cheapestPoint(list);
-    /* "con escala" del modelo es un texto fijo por destino, no un dato del
-       vuelo: salia incluso con vuelo directo. Se saca, y la condicion la pone
-       la tarifa consultada (quote.transfers = cantidad de escalas). Sin tarifa
-       real no se sabe, asi que no se afirma nada. */
-    d = d.replace(/\s*con escala\.?$/i, '');
-    if (p.quote && typeof p.quote.transfers === 'number' && /^~\d+ h$/.test(d)) {
-      d += p.quote.transfers === 0 ? ' directo' : ' con escala';
-    }
     var cur = list.filter(function (x) { return x.shift === 0; })[0];
     return !!(cur && best && cur === best);
   }
   // La frase que avisa que no hay nada que mejorar. Va en el subtítulo del
-  /* Duracion estimada del transfer aeropuerto -> hotel, en horas enteras, a
-     ~60 km/h (el ritmo de los datos de data/distancias-aeropuerto.json). Sale de
-     los km de CS_TRANSFER_PRICES; sin km (barco, vuelo) no se inventa. */
-  function transferHorasDe(p) {
-    var tabla = (typeof CS_TRANSFER_PRICES !== 'undefined' && CS_TRANSFER_PRICES) ? CS_TRANSFER_PRICES[p && p.dk] : null;
-    if (!tabla) return 0;
-    if (tabla.modo === 'ferry') return 4;
-    if (tabla.modo !== 'car' || !(tabla.km > 0)) return 0;
-    return Math.max(1, Math.round(tabla.km / 60));
-  }
-
   // gráfico, que es donde se lee antes de mirar las barras.
   function cheapestIsCurNote(series) {
     var list = Array.isArray(series) ? series : [];
@@ -7847,6 +7854,15 @@
       detailState.parts.traslados = detailState.baseTraslados + (Number(detailState.multiStay.transferBetweenUsd) || 0);
       updateMultiStayPricing();
     }
+    /* Perfil del viaje -> nivel de los costos diarios. Es el mismo mapeo que usa
+       lib/model.js calc() para armar parts.comidas y parts.local (ti 0/1/2), asi
+       que la caja marcada coincide con el monto que ya esta en el total. */
+    var PRESET_POR_NIVEL = { food: ['casual', 'moderado', 'gourmet'], local: ['econ', 'medio', 'confort'] };
+    var nivelPerfil = Math.min(2, Math.max(0, Number(proposal.ti)));
+    if (Number.isFinite(nivelPerfil) && proposal.ti != null) {
+      detailState.foodPresetKey = PRESET_POR_NIVEL.food[nivelPerfil];
+      detailState.localPresetKey = PRESET_POR_NIVEL.local[nivelPerfil];
+    }
     detailState.foodPerDay = Number((Number(detailState.parts.comidas) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     detailState.localPerDay = Number((Number(detailState.parts.local) / Math.max(1, nights * pax)).toFixed(2)) || 0;
     data.meta.officialTransfer = data.meta.officialTransfer || { compartido: 0, privado: 0, personas: 0, appRideUsd: null };
@@ -8053,15 +8069,6 @@
       // #dest es el <div> del combobox, no un <select>: su propiedad "value" está
       // definida con Object.defineProperty y el setter llama a setDestDisplay,
       // que es lo que refresca la etiqueta y marca la opción del menú.
-    /* Perfil del viaje -> nivel de los costos diarios. Es el mismo mapeo que usa
-       lib/model.js calc() para armar parts.comidas y parts.local (ti 0/1/2), asi
-       que la caja marcada coincide con el monto que ya esta en el total. */
-    var PRESET_POR_NIVEL = { food: ['casual', 'moderado', 'gourmet'], local: ['econ', 'medio', 'confort'] };
-    var nivelPerfil = Math.min(2, Math.max(0, Number(proposal.ti)));
-    if (Number.isFinite(nivelPerfil) && proposal.ti != null) {
-      detailState.foodPresetKey = PRESET_POR_NIVEL.food[nivelPerfil];
-      detailState.localPresetKey = PRESET_POR_NIVEL.local[nivelPerfil];
-    }
       S.dest = destination;
       $('#dest').value = destination;
       openDestinationProposal(destination);
@@ -9686,6 +9693,8 @@ function comboNombreDestino() {
         // aproximación y puede señalar un preset vecino del estimado, y ese
         // primer clic tiene que elegir, no borrar.
         if (isSelected && Math.abs(currentDailyValue(kind) - value) < 0.5) value = null;
+        // Elegir a mano otro nivel (o "Personalizado", arriba) pisa el del perfil.
+        if (value != null) detailState[kind + 'PresetKey'] = dailyBudgetCard.getAttribute('data-daily-key') || '';
         aplicarPresupuestoDiario(kind, value == null ? 'none' : 'preset', value);
         repintarPresupuestoDiario();
         return;
@@ -9892,8 +9901,6 @@ function comboNombreDestino() {
         recalcularTotalViaje();
       }
       var dailyLocalInput = e.target.closest && e.target.closest('[data-daily-local]');
-        // Elegir a mano otro nivel (o "Personalizado", arriba) pisa el del perfil.
-        if (value != null) detailState[kind + 'PresetKey'] = dailyBudgetCard.getAttribute('data-daily-key') || '';
       if (dailyLocalInput && detailState) {
         detailState.localBudgetMode = 'custom';
         detailState.localCustomValue = aBase(dailyLocalInput.value);
