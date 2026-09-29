@@ -6,6 +6,11 @@
   var participants = [];
   var expenses = [];
   var me = null; // fila de "participantes" que corresponde a este dispositivo
+  // Gasto cuya división se está editando, con las personas ya marcadas.
+  // Vive acá y no en el DOM a propósito: la página se repinta sola cada 12s
+  // (poll) y cada vez que alguien carga un gasto, así que guardar la
+  // selección en los inputs la perdería en mitad de la elección.
+  var editandoSplit = null;
   var currentGroupId = null;
   var pollTimer = null;
   var lastSignature = '';
@@ -318,6 +323,27 @@
     return 'Sumate a dividir los gastos de "' + group.name + '". No hace falta crear una cuenta: ' + shareUrl();
   }
   function personById(id) { return participants.filter(function (p) { return p.id === id; })[0]; }
+  function expenseById(id) { return expenses.filter(function (e) { return e.id === id; })[0]; }
+  /* Quién puede borrar qué. El admin es la persona que creó el grupo, que es la
+     que tiene es_admin. No se deduce de "el primero de la lista" porque el orden
+     de joined_at no está garantizado en cada respuesta, y equivocarse acá
+     significaría darle permiso de borrar a cualquiera.
+     Sin `me` no se borra nada. La pantalla de suma siempre lo define antes de
+     pintar la lista, así que es una red de seguridad, no un camino normal. */
+  function esAdmin() { return !!(me && me.es_admin); }
+  function puedeBorrarGasto(expense) {
+    if (!me || !expense) return false;
+    return esAdmin() || expense.paid_by_participante_id === me.id;
+  }
+  /* Los nombres de entre quienes se divide un gasto, con "y" antes del último.
+     "Entre 2 personas" no alcanza: quien carga el gasto tiene que poder ver a
+     quién le está pasando la parte, y en un viaje de seis es la única forma de
+     revisar que el reparto esté bien sin hacer la cuenta a mano. */
+  function splitNamesText(ids) {
+    if (!ids.length) return '';
+    if (ids.length === 1) return participantName(ids[0]);
+    return ids.slice(0, -1).map(function (id) { return participantName(id); }).join(', ') + ' y ' + participantName(ids[ids.length - 1]);
+  }
 
   function renderCreateForm(errorMessage) {
     var preset = readTripPreset();
@@ -353,7 +379,13 @@
         await loadSupabaseSdk();
         var groupResult = await supabaseClient.from('grupos_viaje').insert({ name: groupName }).select().single();
         if (groupResult.error) throw new Error(groupResult.error.message);
-        var participantResult = await supabaseClient.from('participantes').insert({ grupo_id: groupResult.data.id, display_name: yourName, device_id: deviceId() }).select().single();
+        // es_admin en la fila de quien CREE el grupo, no en grupos_viaje. Lo del
+        // grupo (creator_user_id) no servía: es un id de auth.users y el grupo se
+        // puede crear sin sesión, así que quedaba siempre en NULL. Acá la fila
+        // del creador se inserta en el mismo acto del alta, y con ella ya se
+        // sabe quién es: es la única forma de tener admin sin obligar a
+        // loguearse a nadie.
+        var participantResult = await supabaseClient.from('participantes').insert({ grupo_id: groupResult.data.id, display_name: yourName, device_id: deviceId(), es_admin: true }).select().single();
         if (participantResult.error) throw new Error(participantResult.error.message);
         clearTripPreset();
         window.location.href = '/grupo/' + groupResult.data.id;
@@ -366,17 +398,17 @@
   function renderJoinForm(groupId, errorMessage, showAddForm) {
     syncDocumentTitle();
     var existingMarkup = participants.length
-      ? '<p class="grupo-note" style="margin-top:18px">¿Quién sos?</p><div class="grupo-participants" id="join-existing">' +
-        participants.map(function (p) { return '<button type="button" class="grupo-chip" data-claim-participant="' + esc(p.id) + '">' + esc(p.display_name) + '</button>'; }).join('') +
+      ? '<p class="grupo-ask">¿Quién sos?</p><div class="grupo-participants" id="join-existing">' +
+        participants.map(function (p) { return '<button type="button" class="grupo-claim" data-claim-participant="' + esc(p.id) + '" aria-label="Elegir a ' + esc(p.display_name) + '">' + esc(p.display_name) + '</button>'; }).join('') +
         '</div>'
-      : '<p class="grupo-note" style="margin-top:18px">Todavía no hay nadie en este grupo. Sé el primero:</p>';
+      : '<p class="grupo-ask">Todavía no hay nadie en este grupo. Sé el primero:</p>';
     render(
       '<div class="grupo-card"><h1>' + esc(group.name) + '</h1>' +
       '<p class="grupo-sub">Te compartieron el link de este viaje. Elegí tu nombre para empezar a cargar los gastos.</p>' +
       (errorMessage ? '<p class="grupo-error">' + esc(errorMessage) + '</p>' : '') +
       existingMarkup +
       (participants.length && !showAddForm
-        ? '<button type="button" class="grupo-btn grupo-btn--ghost" id="join-not-listed" style="width:100%;margin-top:14px">No estoy en la lista / Agregarme</button>'
+        ? '<button type="button" class="grupo-altbtn" id="join-not-listed">No estoy en la lista, agregarme</button>'
         : '<form id="join-form"><label class="grupo-field">Tu nombre<input required name="yourName" placeholder="¿Cómo te llamás?" maxlength="40"></label>' +
           '<button type="submit" class="grupo-btn grupo-btn--primary">Sumarme al grupo</button></form>') +
       '</div>'
@@ -515,6 +547,39 @@
     });
     return out;
   }
+  /* Lo que se pagó de más: el dinero de un pago que no cubre ninguna deuda de
+     ahora. No lo dejamos desaparecer.
+     El recorte de saldoPendiente() es lo correcto para el saldo —nunca se
+     descuenta más de lo que alguien debe, o un gasto borrado dejaría un saldo
+     positivo fantasma— pero el resto del importe no se pierde: es plata de
+     alguien. Pasó de verdad: se saldó una deuda de 248.735,48 y después se
+     cargó un gasto del que te tocaba menos, así que la deuda bajó y el pago
+     quedó sobrando. Sin esto la página decía "están todos al día" y esos
+     30.000 no aparecían en ningún lado: el que los había pagado no tenía forma
+     de saber que le correspondían ni de reclamarlo.
+     Se agrupa por persona, no por par, para que el sobrante se le diga a quien
+     lo pagó y el otro no lo lea como un saldo propio. */
+  function saldosSobrantes(balances) {
+    var pagado = saldosGuardados();
+    var out = {};
+    Object.keys(pagado).forEach(function (key) {
+      var partes = key.split('|');
+      var deudor = partes[0], acreedor = partes[1];
+      var monto = Number(pagado[key]) || 0;
+      if (!(monto > 0) || !personById(deudor) || !personById(acreedor)) return;
+      if (balances[deudor] == null || balances[acreedor] == null) return;
+      // Cuánto de ese pago se acreditó de verdad contra la posición de hoy de
+      // esas dos personas. Se lee de los saldos BRUTOS y no del resultado ya
+      // repartido: el greedy puede cambiar el par, y lo que se busca es si el
+      // pago todavía tapa algo, no una fila cualquiera del reparto.
+      var acreditado = Math.min(monto, Math.max(0, -balances[deudor]), Math.max(0, balances[acreedor]));
+      var sobra = Math.round((monto - acreditado) * 100) / 100;
+      if (!(sobra > 0.01)) return;
+      // El deudor del par es quien puso la plata, así que el sobrante es suyo.
+      out[deudor] = Math.round(((out[deudor] || 0) + sobra) * 100) / 100;
+    });
+    return out;
+  }
   // Las transferencias ya saldadas, para mostrarlas tachadas y para poder
   // deshacerlas. Una entrada sin monto (formato viejo sin migrar todavía) no se
   // muestra: no hay cifra que tachar.
@@ -594,6 +659,13 @@
     var pendiente = saldoPendiente(balances);
     var moves = settlements(pendiente);
     var pagadas = saldosSaldados();
+    // El dinero que se pagó y no cubre ninguna deuda de ahora. Se calcula una
+    // sola vez acá porque lo leen varias cosas: el aviso de arriba, la fila de
+    // quien lo pagó y el total de "al día".
+    var sobrantes = saldosSobrantes(balances);
+    // Nada pendiente = todo lo cargado está saldado. Lo usan las filas de
+    // gastos para tacharse, así que se decide acá y no en cada fila.
+    var todoSaldado = !moves.length && !gastosSinConvertir.length;
     var total = totalSpent();
     var checksMarkup = participants.map(function (p) {
       return '<label><input type="checkbox" name="split" value="' + esc(p.id) + '" checked> ' + esc(p.display_name) + '</label>';
@@ -666,35 +738,84 @@
         '</p>'
       : '';
 
+    /* El editor de la división, abajo de la fila que se tocó y no en un modal:
+       un modal tapaba justo la fila que se está corrigiendo, que es la que hay
+       que poder comparar mientras se decide. Reutiliza .grupo-checks y
+       .grupo-btn del formulario de gasto para que "entre quiénes se divide" se
+       vea igual cargándolo y corrigiéndolo.
+       Los marcados salen de editandoSplit.ids y no del gasto: mientras se elige
+       no se guardó nada, y el poll repinta la página cada 12s. */
+    function splitEditorMarkup(expense) {
+      if (!editandoSplit || editandoSplit.expenseId !== expense.id) return '';
+      var guardando = editandoSplit.guardando;
+      return '<div class="grupo-split">' +
+        '<p class="grupo-split__title">¿Entre quiénes se divide?</p>' +
+        '<div class="grupo-checks">' + participants.map(function (p) {
+          return '<label><input type="checkbox" data-split-edit value="' + esc(p.id) + '"' +
+            (editandoSplit.ids.indexOf(p.id) !== -1 ? ' checked' : '') +
+            (guardando ? ' disabled' : '') + '> ' + esc(p.display_name) + '</label>';
+        }).join('') + '</div>' +
+        '<div class="grupo-checks__tools"><button type="button" class="grupo-minibtn" data-split-all' + (guardando ? ' disabled' : '') + '>Seleccionar todos</button></div>' +
+        '<div class="grupo-split__actions">' +
+        '<button type="button" class="grupo-btn grupo-btn--ghost" data-split-cancel' + (guardando ? ' disabled' : '') + '>Cancelar</button>' +
+        '<button type="button" class="grupo-btn" data-split-save' + (guardando ? ' disabled' : '') + '>' + (guardando ? 'Guardando...' : 'Guardar división') + '</button>' +
+        '</div></div>';
+    }
     var expensesMarkup = expenses.length
       ? expenses.map(function (expense) {
           // "dividido entre 3" no dice quiénes. Con los nombres al lado, cada
           // quien puede revisar su parte sin tener que hacer la cuenta mental.
           var splitIds = splitIdsOf(expense);
-          return '<div class="grupo-expense">' +
+          // Cuando no queda nada pendiente, todos los gastos están saldados y
+          // la lista entera se apaga con un tachado. Antes solo se tachaba la
+          // fila de la transferencia: el que cargó un gasto de 500.000 no
+          // tenía forma de saber que ese gasto ya estaba saldado.
+          var saldoneado = todoSaldado && splitIds.length > 0;
+          var abierto = !!(editandoSplit && editandoSplit.expenseId === expense.id);
+          /* La fila entera es el botón de "cambiar la división", salvo la
+             papelera. La papelera va AFUERA del botón y no adentro: un
+             <button> dentro de otro <button> es HTML inválido y, más acá,
+             haría que tocar la papelera abriera el editor. Como hermanos, el
+             área táctil de editar es toda la fila y la de borrar sigue siendo
+             la papelera.
+             Los hijos van como <span> porque el modelo de contenido de un
+             <button> es contenido de frase: los <div> que tenía la fila antes
+             eran HTML inválido adentro de un botón. */
+          return '<div class="grupo-expense' + (saldoneado ? ' is-saldado' : '') + '">' +
+            '<button type="button" class="grupo-expense__edit" data-edit-split="' + esc(expense.id) + '" aria-expanded="' + (abierto ? 'true' : 'false') + '" aria-label="Cambiar entre quiénes se divide ' + esc(expense.description) + '">' +
             '<span class="grupo-expense__ico">' + icon(guessCategory(expense.description)) + '</span>' +
-            '<div class="grupo-expense__body">' +
+            '<span class="grupo-expense__body">' +
             // El monto va en la MISMA fila que el título, con justify-between.
             // Antes estaba en una columna aparte con align-items:center, así
             // que el precio quedaba flotando en el medio de una fila de tres
             // líneas mientras el ícono y el título quedaban arriba: eso es
             // exactamente la desalineación que se veía.
-            '<div class="grupo-expense__top">' +
-            '<div class="grupo-expense__name">' + esc(expense.description) + '</div>' +
+            '<span class="grupo-expense__top">' +
+            '<span class="grupo-expense__name">' + esc(expense.description) + '</span>' +
             '<span class="grupo-expense__amount">' + esc(moneyVer(expense.amount, expense.currency)) + '</span>' +
-            '</div>' +
+            '</span>' +
             // Las dos líneas de detalle van dentro de la columna de contenido,
             // debajo del título, y nunca debajo del ícono.
-            '<div class="grupo-expense__meta">Pagó ' + esc(participantName(expense.paid_by_participante_id)) + '</div>' +
-            '<div class="grupo-expense__meta">Entre ' + (splitIds.length === 1 ? '1 persona' : splitIds.length + ' personas') +
-            (splitIds.length ? ': ' + esc(moneyVer(Number(expense.amount) / splitIds.length, expense.currency)) + ' c/u' : '') + '</div>' +
-            '</div>' +
-            // La papelera va en todas las filas, no solo en las que pagó la
-            // persona que mira: en un viaje entre amigos el que cargo el gasto
-            // no siempre es quien lo escribe, y esconderle la papelera lo
-            // dejaba sin poder corregir un numero mal cargado. Borrar pide
-            // confirmacion, asi que no pasa por un clic a secas.
-            '<button type="button" class="grupo-trash" data-delete-expense="' + esc(expense.id) + '" aria-label="Borrar ' + esc(expense.description) + '">' + icon('trash') + '</button>' +
+            '<span class="grupo-expense__meta">Pagó ' + esc(participantName(expense.paid_by_participante_id)) + '</span>' +
+            // Con los nombres, y no solo el número. Entre una sola persona se
+            // dice que no se divide, porque "Entre 1 persona: X c/u" parece un
+            // reparto y es solo el gasto entero de esa persona.
+            '<span class="grupo-expense__meta">' + (splitIds.length
+              ? (splitIds.length === 1
+                ? 'No se divide · solo ' + esc(participantName(splitIds[0]))
+                : 'Entre ' + esc(splitNamesText(splitIds)) + ': ' + esc(moneyVer(Number(expense.amount) / splitIds.length, expense.currency)) + ' c/u')
+              : 'Sin personas para dividir') + '</span>' +
+            '</span>' +
+            '</button>' +
+            splitEditorMarkup(expense) +
+            // La papelera se muestra según quién puede borrar: cada uno borra los
+            // gastos que cargó, y el que creó el grupo borra cualquiera. Antes
+            // salía en todas las filas y cualquiera con el link podía borrar el
+            // gasto de otro. Borrar igual pide confirmación, así que no pasa por
+            // un clic a secas.
+            (puedeBorrarGasto(expense)
+              ? '<button type="button" class="grupo-trash" data-delete-expense="' + esc(expense.id) + '" aria-label="Borrar ' + esc(expense.description) + '">' + icon('trash') + '</button>'
+              : '') +
             '</div>';
         }).join('')
       : '<p class="grupo-note" style="margin-top:0">Todavía no hay gastos cargados.</p>';
@@ -755,12 +876,30 @@
     function saldosDe(arr) {
       return arr.reduce(function (sum, move) { return Math.round((sum + move.amount) * 100) / 100; }, 0);
     }
+    /* Plural: "La 1 transferencia ya saldada", no "Las 1 transferencias ya
+       saldada". El "Las" fijo con la palabra en plural se veía en pantalla
+       como "Las 1 transferencias ya saldada", que es exactamente la clase de
+       cosa que hace dudar de si la página está bien. */
     var pagadosMarkup = pagadas.length
-      ? '<details class="grupo-other" open><summary>Las ' + pagadas.length + ' ' +
-        (pagadas.length === 1 ? 'transferencia ya saldada' : 'transferencias ya saldadas') + '</summary>' +
+      ? '<details class="grupo-other" open><summary>' + (pagadas.length === 1 ? 'La transferencia ya saldada' : 'Las ' + pagadas.length + ' transferencias ya saldadas') + '</summary>' +
         '<p class="grupo-note">Ya están pagadas. No cuentan como deuda pendiente.</p>' +
         pagadas.map(settledRow).join('') + '</details>'
       : '';
+    /* El pago que sobra. Va aunque quede algo pendiente, porque no es lo mismo
+       que una deuda: es plata que ya puso alguien y que hoy no le debe nadie.
+       Sin esta línea, marcar un pago más grande que la deuda y cargar después
+       un gasto más chico dejaba la página diciendo "están todos al día" y el
+       excedente —unos 30.000— sin aparecer en ningún lado. */
+    var sobrantesMarkup = (function () {
+      var gente = Object.keys(sobrantes).filter(function (id) { return (sobrantes[id] || 0) > 0.01; });
+      if (!gente.length) return '';
+      return '<div class="grupo-warn"><b>Pagaste de más.</b> ' +
+        gente.map(function (id) {
+          return esc(participantName(id)) + ' puso ' + esc(moneyVer(sobrantes[id], currency)) + ' de más y hoy no le debe nadie: ' +
+            'después se cargaron gastos que bajaron esa deuda, así que ese dinero quedó sin destino.';
+        }).join(' ') +
+        '</div>';
+    }());
     var saldosMarkup;
     // Cuando no queda ninguna transferencia pendiente se dice explícitamente:
     // es la pregunta que todos hacen al final del viaje y "no hay nada para
@@ -770,8 +909,16 @@
     // La excepcion es cuando quedaron gastos sin convertir: si ni esos entraron
     // en la cuenta, no se puede afirmar que no hay nada por pagar, porque en
     // realidad hay gastos que ni siquiera se pudieron mirar.
+    /* "Están todos al día" solo si además no quedó plata sin destino. Con un
+       pago que sobra, decir eso era mentir por omisión: la deuda estaba
+       cubierta, sí, pero el dinero que se puso de más no aparecía en ninguna
+       parte de la página y quien lo había pagado se quedaba sin saber cuánto
+       le devolvían. El aviso de "pagaste de más" va siempre, y el cartel verde
+       baja a "no queda nada por pagar", que es lo único que se puede afirmar. */
+    var haySobrante = Object.keys(sobrantes).some(function (id) { return (sobrantes[id] || 0) > 0.01; });
     var alDiaMarkup = !moves.length && expenses.length && !gastosSinConvertir.length
-      ? '<div class="grupo-allday">' + icon('check') + '<span>Están todos al día. No queda nada por pagar.</span></div>'
+      ? '<div class="grupo-allday">' + icon('check') + '<span>' +
+        (haySobrante ? 'No queda nada por pagar.' : 'Están todos al día. No queda nada por pagar.') + '</span></div>'
       : '';
     if (!moves.length) {
       // No queda nada pendiente. Si hubo gastos, el cartel de "están todos al
@@ -874,6 +1021,10 @@
       '<div class="grupo-card"><h2>Cómo se salda</h2>' +
       (balancesSummary ? '<div class="grupo-subhead">Saldo de cada uno</div>' + balancesSummary : '') +
       saldosMarkup +
+      // El aviso de la plata sin destino va arriba del cartel verde, al lado de
+      // las transferencias: si queda al final, abajo del "no queda nada por
+      // pagar", se lee como un detalle menor cuando es plata que alguien puso.
+      sobrantesMarkup +
       alDiaMarkup +
       '</div>'
     );
@@ -1051,8 +1202,80 @@
       }
     });
 
+    /* Un gasto que se borró no puede quedar con el editor abierto: el editor se
+       pinta por id, así que sin esto editandoSplit apuntaría a una fila que ya
+       no existe y no habría forma de cerrarlo. */
+    if (editandoSplit && !expenseById(editandoSplit.expenseId)) editandoSplit = null;
+
+    /* Abrir y cerrar el editor de división. El click en la fila es un toggle:
+       tocarla de nuevo la cierra, así que el mismo botón hace las dos cosas y
+       no hace falta un "cerrar" en la fila. */
+    Array.prototype.forEach.call(app.querySelectorAll('[data-edit-split]'), function (editButton) {
+      editButton.addEventListener('click', function () {
+        var expenseId = editButton.getAttribute('data-edit-split');
+        var expense = expenseById(expenseId);
+        if (!expense) return;
+        if (editandoSplit && editandoSplit.expenseId === expenseId) editandoSplit = null;
+        else editandoSplit = { expenseId: expenseId, ids: splitIdsOf(expense), guardando: false };
+        renderGroup(groupId);
+      });
+    });
+
+    var splitEditor = app.querySelector('.grupo-split');
+    if (splitEditor && editandoSplit) {
+      function editorIds() {
+        return Array.prototype.slice.call(splitEditor.querySelectorAll('[data-split-edit]'))
+          .filter(function (input) { return input.checked; })
+          .map(function (input) { return input.value; });
+      }
+      // La selección vive en editandoSplit, no en los inputs: el poll repinta
+      // cada 12s y los checkboxes se voltarían de lo elegido.
+      splitEditor.addEventListener('change', function (e) {
+        if (!e.target.matches('[data-split-edit]')) return;
+        editandoSplit.ids = editorIds();
+      });
+      var allButton = splitEditor.querySelector('[data-split-all]');
+      if (allButton) allButton.addEventListener('click', function () {
+        editandoSplit.ids = participants.map(function (p) { return p.id; });
+        renderGroup(groupId);
+      });
+      var cancelButton = splitEditor.querySelector('[data-split-cancel]');
+      if (cancelButton) cancelButton.addEventListener('click', function () { editandoSplit = null; renderGroup(groupId); });
+      var saveButton = splitEditor.querySelector('[data-split-save]');
+      if (saveButton) saveButton.addEventListener('click', async function () {
+        var ids = editorIds();
+        // Nadie es dueño de un gasto sin reparto: sin esto se guardaría una
+        // fila que no genera deuda y el total dejaría de cerrar con la lista.
+        if (!ids.length) { window.alert('Elegí al menos una persona para dividir.'); return; }
+        var expenseId = editandoSplit.expenseId;
+        var restoringScroll = window.scrollY || window.pageYOffset || 0;
+        editandoSplit.guardando = true;
+        renderGroup(groupId);
+        try {
+          var result = await supabaseClient.from('gastos').update({ split_between: ids }).eq('id', expenseId);
+          if (result.error) throw new Error(result.error.message);
+          editandoSplit = null;
+          await loadGroupData(groupId);
+          renderGroup(groupId);
+          window.scrollTo(0, restoringScroll);
+        } catch (error) {
+          // Se deja el editor abierto con lo que la persona había marcado, para
+          // que pueda reintentar sin volver a elegir todo desde cero.
+          editandoSplit.guardando = false;
+          renderGroup(groupId);
+          window.scrollTo(0, restoringScroll);
+          window.alert(error.message || 'No pudimos cambiar la división.');
+        }
+      });
+    }
+
     Array.prototype.forEach.call(app.querySelectorAll('[data-delete-expense]'), function (deleteButton) {
       deleteButton.addEventListener('click', async function () {
+        var expense = expenseById(deleteButton.getAttribute('data-delete-expense'));
+        // El botón no se pinta si no corresponde, pero el chequeo va igual: es
+        // una regla de permisos y no tiene que depender de que el marcado se
+        // haya generado bien.
+        if (!puedeBorrarGasto(expense)) return;
         if (!window.confirm('¿Borrar este gasto?')) return;
         deleteButton.disabled = true;
         try {

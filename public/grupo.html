@@ -105,6 +105,31 @@
 
   .grupo-participants{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 0}
   .grupo-chip{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+  /* El "¿Quién sos?" de la pantalla de suma. acá tocar tu nombre es LA acción
+     de la tarjeta, así que el prompt no puede ser un .grupo-note: ese está
+     pensado para aclaraciones ("Todavía no hay gastos cargados") y va en 12px
+     sobre --ink2, que es el tamaño más chico de la pantalla. Con el prompt así,
+     la instrucción quedaba por debajo de la intro y el nombre —lo único que hay
+     que tocar— era lo más apagado del conjunto. */
+  .grupo-ask{margin:20px 0 0;color:var(--ink);font-size:15px;font-weight:800;line-height:1.35}
+  /* Los nombres de la lista son botones, no insignias: se tocan para decir "soy
+     yo". Por eso van con los 44px de altura táctil que ya usan la papelera y el
+     botón de "ya pagué" en esta misma página, y con font-family explícita
+     porque los <button> no heredan la tipografía: ese chip era la única cosa de
+     la página que no salía en Poppins, y por eso el nombre se leía distinto a
+     todo lo que estaba alrededor. */
+  .grupo-claim{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1.5px solid var(--control-line);border-radius:99px;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px;font-weight:700;cursor:pointer;transition:border-color .16s ease,background .16s ease,color .16s ease}
+  .grupo-claim:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
+  .grupo-claim:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  /* "No estoy en la lista": es la salida de emergencia, no la acción, y antes
+     salía como un botón de ancho completo y 15px —más grande que los nombres,
+     que eran un chip chico—, así que lo primero que veía el ojo era la salida
+     y no la acción. Ahora es ancho completo para que sea fácil de tocar, pero
+     punteado y en tinta secundaria, que es el mismo tratamiento que ya tiene el
+     link de compartir (grupo-linkchip). */
+  .grupo-altbtn{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:16px;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:13px;font-weight:600;cursor:pointer;transition:border-color .16s ease,color .16s ease,background .16s ease}
+  .grupo-altbtn:hover{border-color:var(--ink2);color:var(--ink);background:var(--bg)}
+  .grupo-altbtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .grupo-add{display:flex;gap:8px;margin-top:10px}
   .grupo-add input{flex:1;min-width:0;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px}
   .grupo-add input::placeholder{color:var(--ink2);opacity:.55}
@@ -129,16 +154,41 @@
      botón quedaban desalineados de los de las filas que no los tenían, y
      apelando a eso para esconder la papelera no quedaba. El título y el monto
      siguen compartiendo línea base adentro de la columna de contenido. */
-  .grupo-expense{display:flex;align-items:center;gap:10px;padding:13px 0;border-top:1px solid var(--line)}
+  .grupo-expense{display:flex;align-items:center;gap:10px;padding:13px 0;border-top:1px solid var(--line);flex-wrap:wrap}
   .grupo-expense:first-child{border-top:0}
+  /* Botón de la fila, para cambiar la división. Es <button> y no un <div> con
+     onclick para que entre solo en el orden de tabulación. Los hijos van como
+     <span> porque el modelo de contenido de un <button> es contenido de frase,
+     y los <div> que tenía la fila antes eran HTML inválido adentro de un botón.
+     El font-family va explícito por la misma razón de siempre en un <button>:
+     los controles de formulario no heredan la tipografía. */
+  .grupo-expense__edit{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px;margin:0;padding:0;border:0;border-radius:12px;background:transparent;color:inherit;font-family:var(--fb);font-size:15px;text-align:left;cursor:pointer;transition:background .16s ease}
+  .grupo-expense__edit:hover{background:var(--cel-soft)}
+  .grupo-expense__edit:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  /* Todo saldado: la lista entera se apaga con un tachado. Antes solo se
+     tachaba la fila de la transferencia, así que quien cargó un gasto grande
+     no tenía forma de ver que ese gasto ya estaba saldado. El .is-paid de las
+     transferencias ya usaba este tachado, así que es la misma señal. */
+  .grupo-expense.is-saldado .grupo-expense__name,.grupo-expense.is-saldado .grupo-expense__amount{text-decoration:line-through}
+  .grupo-expense.is-saldado .grupo-expense__name,.grupo-expense.is-saldado .grupo-expense__body{opacity:.6}
+  /* El editor de la división va debajo de la fila, no en un modal: un modal
+     tapaba justo la fila que se está corrigiendo. flex:1 1 100% lo manda a su
+     propia línea porque .grupo-expense es flex-wrap. */
+  .grupo-split{flex:1 1 100%;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+  .grupo-split__title{margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ink)}
+  .grupo-split__actions{display:flex;gap:8px;margin-top:14px}
+  .grupo-split__actions .grupo-btn{flex:1 1 0}
   .grupo-expense__ico{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--bg);color:var(--ink2)}
   .grupo-expense__ico svg{width:19px;height:19px}
   /* flex:1 + min-width:0 para que un nombre largo de gasto o de persona
      encoja el texto y no empuje el monto ni desborde la fila. */
   .grupo-expense__body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
   .grupo-expense__top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-  .grupo-expense__name{min-width:0;font-size:15px;font-weight:700;word-break:break-word}
-  .grupo-expense__meta{margin-top:4px;color:var(--ink2);font-size:12.5px;overflow-wrap:anywhere}
+  /* display:block en los dos: son <span> porque viven adentro de un <button>
+     (que solo admite contenido de frase), y sin esto el margin-top de la línea
+     de detalle y el ancho del título no aplican: en un inline no cuentan. */
+  .grupo-expense__name{display:block;min-width:0;font-size:15px;font-weight:700;word-break:break-word}
+  .grupo-expense__meta{display:block;margin-top:4px;color:var(--ink2);font-size:12.5px;overflow-wrap:anywhere}
   .grupo-expense__amount{flex:0 0 auto;font-size:15.5px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
   /* La papelera se revela al hover en puntero, pero en pantalla táctil no hay
      hover: se quedaba en opacity:0 y no había forma de borrar un gasto desde
