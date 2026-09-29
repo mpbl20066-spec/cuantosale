@@ -1,0 +1,280 @@
+{
+  "_meta": {
+    "descripcion": "Coordenada de cada destino, para verificar que una foto sea de ese lugar y no de un homonimo.",
+    "para_que_no_se_calcula": "La primera version de la herramienta的地区 centro se media con los GPS de los propios candidatos, y por eso aprobo el Trancoso de Portugal. El centro tiene que ser una verdad externa a lo que se verifica.",
+    "fuente": "OpenStreetMap via Nominatim (geocoding), filtrado con countrycodes=br.",
+    "generado": "2026-09-29",
+    "advertencias": [
+      "Un radio de 30 km acepta Nearby si el destino tiene una laguna o不是一个 un pueblo. Con radios menores aparecen los homonimos de barrio.",
+      "Toda coordenada tiene que revisarse a mano una vez. Un geocoder devuelve el pueblo mas conocido con ese nombre, no el que esta en la lista de destinos.",
+      "bue es Buenos Aires (Argentina) y NO esta en Brazil: el filtro countrycodes=br del geocoder lo traia a Pernambuco. Cualquier correccion al script tiene que tener en cuenta el pais por destino, no uno global."
+    ],
+    "revisado": "2026-09-29"
+  },
+  "destinos": {
+    "bue": {
+      "name": "Buenos Aires",
+      "region": "Buenos Aires",
+      "lat": -34.6037,
+      "lon": -58.3816,
+      "corregido": true,
+      "correccion": "Buenos Aires, ARGENTINA. El geocoder devolvio \"Buenos Aires, Pernambuco, Brasil\" porque el script forzaba countrycodes=br, y hay un Buenos Aires en Pernambuco. Es el unico destino fuera de Brasil del modelo."
+    },
+    "buz": {
+      "name": "Búzios",
+      "region": "Río de Janeiro",
+      "lat": -22.75978,
+      "lon": -41.88753
+    },
+    "arraial": {
+      "name": "Arraial do Cabo",
+      "region": "Río de Janeiro",
+      "lat": -22.96628,
+      "lon": -42.02443
+    },
+    "cabo": {
+      "name": "Cabo Frio",
+      "region": "Río de Janeiro",
+      "lat": -22.73783,
+      "lon": -42.02409
+    },
+    "ilha": {
+      "name": "Ilha Grande",
+      "region": "Río de Janeiro",
+      "lat": -23.14,
+      "lon": -44.12,
+      "corregido": true,
+      "correccion": "Centro de Ilha Grande, dentro de la isla. El geocoder daba un punto 11 km al oeste, ya del otro lado del canal: con un radio de 30 km las fotos de Angra pasarian el filtro de Ilha Grande."
+    },
+    "paraty": {
+      "name": "Paraty",
+      "region": "Río de Janeiro",
+      "lat": -23.21965,
+      "lon": -44.71542
+    },
+    "ilhabela": {
+      "name": "Ilhabela",
+      "region": "São Paulo",
+      "lat": -23.81663,
+      "lon": -45.36868
+    },
+    "ubatuba": {
+      "name": "Ubatuba",
+      "region": "São Paulo",
+      "lat": -23.43316,
+      "lon": -45.08342
+    },
+    "rio": {
+      "name": "Río de Janeiro",
+      "region": "Río de Janeiro",
+      "lat": -22.91101,
+      "lon": -43.20937
+    },
+    "angra": {
+      "name": "Angra dos Reis",
+      "region": "Río de Janeiro",
+      "lat": -22.9628,
+      "lon": -44.1717,
+      "corregido": true,
+      "correccion": "Angra dos Reis (la ciudad, en la entrada de la bahia). El geocoder devolvia exactamente la misma coordenada que Ilha Grande, a 22 km: no puede ser que dos pueblos distintos coincidan al centesimo."
+    },
+    "sao": {
+      "name": "São Paulo",
+      "region": "São Paulo",
+      "lat": -23.55065,
+      "lon": -46.63338
+    },
+    "bho": {
+      "name": "Belo Horizonte",
+      "region": "Minas Gerais",
+      "lat": -19.92273,
+      "lon": -43.94509
+    },
+    "curitiba": {
+      "name": "Curitiba",
+      "region": "Paraná",
+      "lat": -25.4296,
+      "lon": -49.27127
+    },
+    "porto": {
+      "name": "Porto de Galinhas",
+      "region": "Pernambuco",
+      "lat": -8.50079,
+      "lon": -35.00303
+    },
+    "mcz": {
+      "name": "Maceió",
+      "region": "Alagoas",
+      "lat": -9.64768,
+      "lon": -35.73393
+    },
+    "maragogi": {
+      "name": "Maragogi",
+      "region": "Alagoas",
+      "lat": -9.01183,
+      "lon": -35.22251
+    },
+    "nat": {
+      "name": "Natal",
+      "region": "Río Grande do Norte",
+      "lat": -5.8054,
+      "lon": -35.20809
+    },
+    "pip": {
+      "name": "Pipa",
+      "region": "Río Grande do Norte",
+      "lat": -6.23726,
+      "lon": -35.04416
+    },
+    "trancoso": {
+      "name": "Trancoso / Arraial d’Ajuda",
+      "region": "Bahía",
+      "lat": -16.4832,
+      "lon": -39.08369
+    },
+    "ssa": {
+      "name": "Salvador de Bahía",
+      "region": "Bahía",
+      "lat": -12.98225,
+      "lon": -38.48128
+    },
+    "jericoacoara": {
+      "name": "Jericoacoara",
+      "region": "Ceará",
+      "lat": -2.89863,
+      "lon": -40.45061
+    },
+    "morro": {
+      "name": "Morro de São Paulo",
+      "region": "Bahía",
+      "lat": -13.37755,
+      "lon": -38.916
+    },
+    "portoseguro": {
+      "name": "Porto Seguro",
+      "region": "Bahía",
+      "lat": -16.44347,
+      "lon": -39.06425
+    },
+    "itacare": {
+      "name": "Itacaré",
+      "region": "Bahía",
+      "lat": -14.27794,
+      "lon": -38.99557
+    },
+    "forte": {
+      "name": "Praia do Forte",
+      "region": "Bahía",
+      "lat": -12.57754,
+      "lon": -38.00636
+    },
+    "fernando": {
+      "name": "Fernando de Noronha",
+      "region": "Pernambuco",
+      "lat": -3.85375,
+      "lon": -32.4198
+    },
+    "fln": {
+      "name": "Florianópolis",
+      "region": "Santa Catarina",
+      "lat": -27.5973,
+      "lon": -48.54961
+    },
+    "camboriu": {
+      "name": "Camboriú",
+      "region": "Santa Catarina",
+      "lat": -27.02736,
+      "lon": -48.65357
+    },
+    "bombinhas": {
+      "name": "Bombinhas",
+      "region": "Santa Catarina",
+      "lat": -27.15192,
+      "lon": -48.48757
+    },
+    "rosa": {
+      "name": "Praia do Rosa",
+      "region": "Santa Catarina",
+      "lat": -28.12945,
+      "lon": -48.6417
+    },
+    "bcm": {
+      "name": "Balneário Camboriú",
+      "region": "Santa Catarina",
+      "lat": -27.00755,
+      "lon": -48.61393
+    },
+    "itapema": {
+      "name": "Itapema",
+      "region": "Santa Catarina",
+      "lat": -27.09472,
+      "lon": -48.61378
+    },
+    "garopaba": {
+      "name": "Garopaba",
+      "region": "Santa Catarina",
+      "lat": -28.02748,
+      "lon": -48.62402
+    },
+    "ferrugem": {
+      "name": "Ferrugem",
+      "region": "Santa Catarina",
+      "lat": -28.07287,
+      "lon": -48.62616
+    },
+    "picarras": {
+      "name": "Piçarras",
+      "region": "Santa Catarina",
+      "lat": -26.76389,
+      "lon": -48.67167
+    },
+    "gram": {
+      "name": "Gramado",
+      "region": "Río Grande do Sul",
+      "lat": -29.37929,
+      "lon": -50.8737
+    },
+    "canela": {
+      "name": "Canela",
+      "region": "Río Grande do Sul",
+      "lat": -29.36361,
+      "lon": -50.80968
+    },
+    "torres": {
+      "name": "Torres",
+      "region": "Río Grande do Sul",
+      "lat": -29.33737,
+      "lon": -49.72996
+    },
+    "canoa": {
+      "name": "Capão da Canoa",
+      "region": "Río Grande do Sul",
+      "lat": -29.75083,
+      "lon": -50.02107
+    },
+    "igu": {
+      "name": "Foz de Iguazú",
+      "region": "Paraná",
+      "lat": -25.5304,
+      "lon": -54.58307
+    },
+    "rec": {
+      "name": "Recife",
+      "region": "Pernambuco",
+      "lat": -8.05849,
+      "lon": -34.88482
+    },
+    "joaopessoa": {
+      "name": "João Pessoa",
+      "region": "Paraíba",
+      "lat": -7.1216,
+      "lon": -34.88203
+    },
+    "poa": {
+      "name": "Porto Alegre",
+      "region": "Río Grande do Sul",
+      "lat": -30.0325,
+      "lon": -51.23038
+    }
+  }
+}
