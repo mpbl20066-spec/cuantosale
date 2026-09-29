@@ -40,9 +40,6 @@ const flightProviders = require('./lib/providers');
 // reservas generen comision. Es independiente de los precios: la API de
 // precios (RapidAPI o partner) y la de afiliados son dos cuentas distintas.
 const travelpayouts = require('./lib/providers/travelpayouts');
-// Actividades y tours con precio real de Civitatis. Si no hay credenciales, el
-// provider queda inerte y la seccion de tours sigue con la lista local.
-const civitatis = require('./lib/providers/civitatis');
 
 /*
  * Tasas de cambio para el selector de moneda.
@@ -147,9 +144,6 @@ const CSP = "default-src 'self'; " +
   "font-src https://fonts.gstatic.com; " +
   "img-src 'self' data: https:; " +
   "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; " +
-  // civitatis.com se saco de aca cuando se fue el widget embebido. Era lo unico
-  // que se habia agregado, y sin iframe no hay frame que mostrar: dejar el
-  // origen abierto seria abrir la puerta a un tercero sin usar para nada.
   "frame-src https://*.supabase.co; " +
   "base-uri 'none'; form-action 'self'";
 // Google Analytics (GA4). La etiqueta se inyecta una sola vez desde serveStatic
@@ -185,7 +179,7 @@ function injectAnalytics(payload, ext) {
 // aca, /api/vuelos/buscar la rechaza con "!destination" y el destino no puede
 // buscar vuelo real aunque el modelo, el desplegable y la grilla lo ofrezcan.
 // Tiene que coincidir con HOME_DESTINATION_KEYS.
-const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'NVT', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
+const AIR_DESTINATIONS = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
 // Los destinos que la app ofrece, agrupados por región. Esta lista estaba
 // desincronizada del picker de public/app.js en las dos direcciones: tenía
 // 'ilha', que el picker nunca ofrece (la búsqueda por presupuesto cotizaba un
@@ -1474,39 +1468,6 @@ async function cotizarHoteles(req, res, url) {
   });
 }
 
-/*
- * Actividades del destino (Civitatis), para la seccion de tours.
- *
- * Es un endpoint aparte y no va dentro de /api/cotizar-todos a proposito: los
- * hotspots se piden aparte y llegan aparte, y este tambien. Ademas Civitatis
- * depende de credenciales que pueden no estar: si faltan, este endpoint
- * devuelve 200 con una lista vacia y la pantalla sigue mostrando los tours
- * locales. Un 502 obligaria al front a decidir que hacer, y el fallback ya
- * esta resuelto del lado del cliente.
- */
-async function listarActividades(req, res, url) {
-  if (limited('actividades:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
-  const destKey = String(url.searchParams.get('dest') || '').trim().toLowerCase();
-  // Un destino que no existe en el modelo no se consulta: evita que alguien
-  ///pega nombres raros y nos haga gastar cuota de Civitatis.
-  if (!destKey || !model.DEST[destKey]) return sendJson(res, 200, { activities: [], source: 'local' });
-  if (!civitatis.isConfigured()) return sendJson(res, 200, { activities: [], source: 'local', reason: 'civitatis sin configurar' });
-
-  const extra = {
-    dep: String(url.searchParams.get('dep') || '').trim(),
-    ret: String(url.searchParams.get('ret') || '').trim(),
-    pax: Math.max(1, Number(url.searchParams.get('pax')) || 1),
-    currency: String(url.searchParams.get('currency') || 'USD').toUpperCase()
-  };
-  const actividades = await civitatis.actividades(destKey, extra);
-  return sendJson(res, 200, {
-    activities: actividades,
-    // Si vuelve vacio no es un error: el front cae a los tours locales y no
-    // tiene por que distinctionar "no hay" de "no pudimos preguntar".
-    source: actividades.length ? 'civitatis' : 'local'
-  });
-}
-
 function cotizarTodos(req, res, url) {
   if (limited('cotizar-todos:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
   const today = model.getToday();
@@ -2012,12 +1973,6 @@ function handleRequest(req, res) {
     }
     if (url.pathname === '/api/guia') {
       return servirGuiaSecreta(req, res, url);
-    }
-    if (url.pathname === '/api/actividades') {
-      return listarActividades(req, res, url).catch(function (e) {
-        console.error('[actividades]', e);
-        sendJson(res, 502, { error: 'No pudimos cargar las actividades ahora.' });
-      });
     }
     if (url.pathname === '/api/cotizar-todos') {
       return cotizarTodos(req, res, url);

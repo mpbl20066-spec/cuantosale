@@ -978,6 +978,46 @@ function haversineKm(a, b) {
     // 2.900 km: con NVT la busqueda de vuelos mandaba a otra provincia.
     assert.strictEqual(fernando.iata, 'FEN', 'fernando deberia llegar por FEN, no por NVT (que es Navegantes/SC)');
   });
+  await t('AIR_DESTINATIONS y el iata del modelo no pueden contradecirse', function () {
+    /* Por que este test existe: el de arriba PASABA con NVT en el modelo, y el
+       bug seguia vivo. Motivo: `fernando.iata` sale de la tabla de transfer, que
+       ya decia FEN, mientras el vuelo se pedia con `AIR_DESTINATIONS`, que
+       decia NVT. Los dos tests leian tablas distintas y los dosgive "ok" con
+       el bug puesto. El unico que lo ve es comparar las dos tablas entre si. */
+    const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
+    const bloque = server.match(/const AIR_DESTINATIONS = \{([^}]*)\}/);
+    assert.ok(bloque, 'no se encontro AIR_DESTINATIONS en server.js');
+    const air = {};
+    for (const m of bloque[1].matchAll(/(\w+):\s*'([A-Z]{3})'/g)) air[m[1]] = m[2];
+
+    const falta = Object.keys(model.DEST).filter((k) => !air[k]);
+    assert.deepStrictEqual(falta, [], 'destinos del modelo sin codigo en AIR_DESTINATIONS: ' + falta.join(' '));
+
+    /* Rio y Sao Paulo son la excepcion conocida y a proposito: el modelo guarda
+       "RIO" y "SAO" para mostrar, que son areas metropolitanas y no
+       aeropuertos, y AIR_DESTINATIONS guarda el aeropuerto real (GIG, GRU).
+       Ver la nota de airportFor() en server.js. */
+    const EXCEPCIONES = { rio: ['RIO', 'GIG'], sao: ['SAO', 'GRU'] };
+    const malas = [];
+    for (const k of Object.keys(air)) {
+      const iata = model.DEST[k] && model.DEST[k].iata;
+      if (!iata) continue;
+      const ex = EXCEPCIONES[k];
+      if (ex) {
+        if (iata !== ex[0] || air[k] !== ex[1]) malas.push(k + ' deberia ser ' + ex[0] + '/' + ex[1] + ' y es ' + iata + '/' + air[k]);
+      } else if (iata !== air[k]) {
+        malas.push(k + ': modelo dice ' + iata + ', busqueda de vuelo usa ' + air[k]);
+      }
+    }
+    assert.deepStrictEqual(malas, [], 'las dos tablas de aeropuerto se contradicen: ' + malas.join(' | '));
+
+    /* Un shorthand de area metropolitana en AIR_DESTINATIONS hace que SerpAPI
+       devuelva vacio SIN error, y la app cae a estimado en silencio. Estos son
+       los que existen en el mundo; si alguno aparece aqui, es un NVT. */
+    const SHORTHANDS = ['RIO', 'SAO', 'NYC', 'LON', 'PAR', 'BER', 'MAD', 'ROM', 'MIL', 'WAS', 'TYO', 'BUE'];
+    const metro = Object.keys(air).filter((k) => SHORTHANDS.includes(air[k]));
+    assert.deepStrictEqual(metro, [], 'AIR_DESTINATIONS con codigo de area metropolitana, no de aeropuerto: ' + metro.join(' '));
+  });
   await t('el precio del transfer crece con la distancia al aeropuerto', function () {
     // El bug de fondo: el mismo precio para todos los destinos. De GIG a Rio hay
     // 18 km y de GIG a Buzios hay 174 por la RJ-124, y antes los dos costaban lo

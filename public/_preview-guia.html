@@ -238,16 +238,14 @@
     // del texto del archivo. Es un artefacto de desarrollo, no produccion.
     var tours = (typeof CS_TOURS_PREVIEW === 'undefined') ? null : CS_TOURS_PREVIEW(DEST.key);
     if (tours && tours.length) {
-      var reales = tours.some(function (t) { return t.source === 'civitatis'; });
       out.push('<h2>Tours recomendados</h2>');
       out.push('<p class="nota" style="margin:-6px 0 10px">' + tours.length +
-        (reales ? ' con precio real para tus fechas.' : ' con precio referencial.') +
-        ' Salen de la misma fuente que la sección de experiencias.</p>');
+        ' con precio referencial. Salen de la misma fuente que la sección de experiencias.</p>');
       tours.slice(0, 4).forEach(function(t){
         var meta = [];
         if (t.rating) meta.push('★ ' + Number(t.rating).toFixed(1));
         if (t.freeCancellation) meta.push('Cancelación gratis');
-        meta.push(t.source === 'civitatis' ? 'Precio real' : 'Precio referencial');
+        meta.push('Precio referencial');
         out.push('<div class="item"><div class="head"><b>' + esc(t.title) + '</b>' +
           '<span class="precio">' + mm(t.price) + '</span></div>' +
           '<p class="precios">' + esc(t.destination) + ' · ' + esc(meta.join(' · ')) + '</p>' +

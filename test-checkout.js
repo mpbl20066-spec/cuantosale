@@ -72,12 +72,16 @@ const stubs = {
   categoryIcon: () => '<svg class="trip-summary__ico"></svg>',
   CHECKOUT_PAYMENTS: [{ id: 'brou', label: 'Banco República', kind: 'Transferencia', mark: 'BROU', brand: '#0d3b8f' }],
   CHECKOUT_TITLES: ['Sr.'], CHECKOUT_DOC_TYPES: ['Cédula'], CHECKOUT_COUNTRIES: ['Uruguay'],
-  CHECKOUT_STEPS: [{ label: 'Datos' }, { label: 'Pago' }, { label: 'Listo' }]
+  CHECKOUT_STEPS: [{ label: 'Datos' }, { label: 'Pago' }, { label: 'Listo' }],
+  // El numero al que llega la reserva. Va en los stubs y no hardcodeado en el
+  // test para que cambiarlo en app.js no rompa la comprobacion.
+  WHATSAPP_RESERVAS: '5511920836306'
 };
 
 const cuerpo = ['checkoutTours', 'checkoutTransferLine', 'checkoutPedido', 'checkoutTotals',
   'transferHotelName', 'checkoutAside', 'checkoutField', 'checkoutTransferBlock',
-  'checkoutPanelDatos', 'checkoutPanelListo', 'checkoutWhatsappUrl', 'checkoutRef']
+  'checkoutPanelDatos', 'checkoutPanelListo', 'checkoutWhatsappUrl', 'checkoutRef', 'whatsappUrl',
+  'nombreDeCuenta']
   .map(extraer).join('\n');
 
 const deps =
@@ -87,22 +91,29 @@ const deps =
   'getSelectedFlightSummary=stubs.getSelectedFlightSummary, findSelectedHotelLabel=stubs.findSelectedHotelLabel,\n' +
   'originCityName=stubs.originCityName, storyDateRange=stubs.storyDateRange, categoryIcon=stubs.categoryIcon;\n' +
   'var CHECKOUT_PAYMENTS=stubs.CHECKOUT_PAYMENTS, CHECKOUT_TITLES=stubs.CHECKOUT_TITLES,\n' +
-  'CHECKOUT_DOC_TYPES=stubs.CHECKOUT_DOC_TYPES, CHECKOUT_COUNTRIES=stubs.CHECKOUT_COUNTRIES, CHECKOUT_STEPS=stubs.CHECKOUT_STEPS;\n';
+  'CHECKOUT_DOC_TYPES=stubs.CHECKOUT_DOC_TYPES, CHECKOUT_COUNTRIES=stubs.CHECKOUT_COUNTRIES, CHECKOUT_STEPS=stubs.CHECKOUT_STEPS;\n' +
+  'var WHATSAPP_RESERVAS=stubs.WHATSAPP_RESERVAS;\n';
 
 const checkoutState = { step: 0, form: {}, payment: 'brou' };
-const fns = new Function('checkoutState', 'detailState', 'S', 'stubs', deps + cuerpo +
-  '\nreturn {checkoutTotals, checkoutPedido, checkoutAside, checkoutWhatsappUrl, checkoutPanelDatos, checkoutPanelListo, checkoutTransferBlock};'
-)(checkoutState, estado, S, stubs);
+/* authUser entra por parametro para poder simularse sesion iniciada y sesion
+   cerrada en la misma corrida. setAuthUser reasigna el binding desde adentro. */
+const fns = new Function('checkoutState', 'detailState', 'S', 'stubs', 'authUser', deps + cuerpo +
+  '\nreturn {checkoutTotals, checkoutPedido, checkoutAside, checkoutWhatsappUrl, checkoutPanelDatos, checkoutPanelListo, checkoutTransferBlock, nombreDeCuenta, setAuthUser: function (u) { authUser = u; }};'
+)(checkoutState, estado, S, stubs, null);
 
 function ver(etiqueta) {
   const t = fns.checkoutTotals();
-  const wa = decodeURIComponent(fns.checkoutWhatsappUrl().replace('https://wa.me/?text=', ''));
+  // El link ahora lleva el numero del operador en el path, asi que se saca con
+  // una expresion y no con un replace fijo: si el numero no estuviera, el texto
+  // saldria con el "https://wa.me/" pegado y la comparacion de abajo no serviria.
+  const waCrudo = fns.checkoutWhatsappUrl();
+  const wa = decodeURIComponent(waCrudo.replace(/^https:\/\/wa\.me\/\d*\?text=/, ''));
   console.log('\n=== ' + etiqueta + ' ===');
   console.log('  total ' + t.total + ' · count ' + t.count + ' · porPersona ' + t.perPersona);
   console.log('  aside: ' + fns.checkoutAside().replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 240));
   console.log('  whatsapp:\n    ' + wa.split('\n').join('\n    '));
   console.log('');
-  return { t, wa };
+  return { t, wa, waCrudo };
 }
 
 /* --- 1. Los dos pedidos juntos --- */
@@ -120,6 +131,12 @@ prueba('el aside lista las dos cosas', () => {
 });
 prueba('el aside no inventa horario de recogida', () => assert.ok(!fns.checkoutAside().includes('Recogida')));
 prueba('el whatsapp abre pidiendo las dos cosas', () => assert.ok(/actividades y un transfer/.test(r.wa)));
+/* El link tiene que ir al numero del operador. Sin esto, un "wa.me/?text=" a
+   proposito —un cambio para que el mensaje lo mande la persona a quien quiera—
+   pasaria todos los tests de arriba, porque el texto armarlo igual. */
+prueba('el link va al numero del operador y no al selector de contactos', () => {
+  assert.ok(r.waCrudo.startsWith('https://wa.me/5511920836306?text='), 'queda: ' + r.waCrudo.slice(0, 40));
+});
 prueba('el whatsapp lista actividades y transfer', () => {
   assert.ok(/Actividades:\n- Paseo en escuna \(R\$ 42,00 por persona\)/.test(r.wa), 'actividades');
   assert.ok(/Transfer: Transfer compartido · R\$ 70,00/.test(r.wa), 'transfer');
@@ -202,6 +219,51 @@ prueba('el compartido no entra al pedido si el destino no tiene van', () => {
 });
 PRECIOS.soloPrivado = false;
 estado.transferType = '';
+
+/* --- 6. Autocompletado con sesion iniciada ---
+   Con sesion, el checkout ya sabe el nombre, el apellido y el correo. Lo que
+   se prueba aca es que los complete y que NO pise lo que la persona ya
+   escribio: si vuelve atras a corregir su nombre, corregirlo tiene que servir. */
+estado.transferType = 'shared';
+estado.selectedTours = [{ title: 'Paseo en escuna', price: 42 }];
+
+prueba('sin sesion no completa nada', () => {
+  fns.setAuthUser(null);
+  const p = fns.checkoutPanelDatos();
+  assert.ok(!/id="ck-nombre" name="nombre"[^>]*value="/.test(p), 'nombre sin value');
+  assert.ok(!/id="ck-apellido" name="apellido"[^>]*value="/.test(p), 'apellido sin value');
+  assert.ok(!/id="ck-email" name="email"[^>]*value="/.test(p), 'correo sin value');
+});
+prueba('con sesion completa nombre, apellido y correo', () => {
+  fns.setAuthUser({ email: 'ana@correo.com', user_metadata: { full_name: 'Ana Perez' } });
+  const p = fns.checkoutPanelDatos();
+  assert.ok(/id="ck-nombre" name="nombre" required value="Ana"/.test(p), 'nombre: Ana');
+  assert.ok(/id="ck-apellido" name="apellido" required value="Perez"/.test(p), 'apellido: Perez');
+  assert.ok(/id="ck-email" name="email" required value="ana@correo\.com"/.test(p), 'correo');
+});
+prueba('lo que la persona escribio gana sobre el dato de la cuenta', () => {
+  fns.setAuthUser({ email: 'ana@correo.com', user_metadata: { full_name: 'Ana Perez' } });
+  checkoutState.form = { nombre: 'Ana María', apellido: 'Pérez Soto' };
+  const p = fns.checkoutPanelDatos();
+  assert.ok(/name="nombre" required value="Ana María"/.test(p), 'gana lo escrito');
+  assert.ok(/name="apellido" required value="Pérez Soto"/.test(p), 'gana lo escrito');
+  checkoutState.form = {};
+});
+prueba('con un solo nombre el apellido queda vacio para que lo escriba', () => {
+  fns.setAuthUser({ email: 'ana@correo.com', user_metadata: { full_name: 'Ana' } });
+  assert.deepStrictEqual(fns.nombreDeCuenta(), { nombre: 'Ana', apellido: '' });
+  const p = fns.checkoutPanelDatos();
+  assert.ok(!/name="apellido"[^>]*value="/.test(p), 'apellido sin value: se completa a mano');
+});
+prueba('"Apellido, Nombre" se parte bien', () => {
+  fns.setAuthUser({ email: 'a@c.com', user_metadata: { full_name: 'Perez, Ana' } });
+  assert.deepStrictEqual(fns.nombreDeCuenta(), { nombre: 'Ana', apellido: 'Perez' });
+});
+prueba('sin nombre en la cuenta no completa nada', () => {
+  fns.setAuthUser({ email: 'ana@correo.com', user_metadata: {} });
+  assert.strictEqual(fns.nombreDeCuenta(), null);
+});
+fns.setAuthUser(null);
 
 console.log('\n' + (fallos ? fallos + ' FALLAS' : 'todo bien'));
 process.exit(fallos ? 1 : 0);

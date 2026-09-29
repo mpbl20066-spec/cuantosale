@@ -1271,16 +1271,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .checkout-dialog{border-radius:25px 25px 0 0;max-height:94vh;overflow:auto}
   .checkout-layout{min-height:0}
 }
-/* ---------- Link de afiliado a Civitatis ----------
-   Antes esto era un <iframe> con la grilla de Civitatis adentro, y por eso el
-   bloque se veia casi igual que la seccion de tours de arriba: mismas cards,
-   misma foto, mismo precio, mismo boton. La diferencia era invisible y la que
-   importaba: el iframe no suma al presupuesto, porque es un documento de otro
-   origen del que no se puede leer nada. Al hacer click la persona se iba de la
-   pagina sin que el total se moviera.
-
-   Ahora es un link, asi que no imita una grilla y no se puede confundir con algo
-   que sume. El bloque queda chico a proposito: es una salida, no una seccion. */
 /* Créditos globales, al pie de la página: reunión de todas las fotos que la
    app cargó, no sólo las de los tours. */
 .foot-credits{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:11px;line-height:1.55}

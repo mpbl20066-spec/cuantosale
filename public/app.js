@@ -1915,100 +1915,36 @@
     // hotel de cada parada.
     return '<section class="hotel-options hotel-options-split" data-budget-anchor="alojamiento" aria-labelledby="hotel-options-title">' + head + grupo(1) + grupo(2) + '</section>';
   }
-  /* Los tours de un destino, con el precio real de las fechas que esta
-     mirando el usuario si hay Civitatis, y la lista local si no.
-     Vive aparte de localToursMarkup porque la Guia Secreta tambien los
-     muestra, y duplicar la logica de Civitatis hacia que un dia una diga
-     una cosa y la otra otra. */
+  /* Los tours de un destino. Vive aparte de localToursMarkup porque la Guia
+     Secreta tambien los dibuja, y duplicar esta logica hacia que un dia una
+     diga una cosa y la otra otra. */
   function toursFor(destinationKey, destinationName) {
     var key = String(destinationKey || '').toLowerCase();
     if (!key) return [];
     destinationName = destinationName || key;
-    /* Tres escalones, de mas nuevo a mas viejo:
+    /* Los tours del destino, con precio estimado. De LOCAL_TOURS, y son los
+       unicos: no queda ninguna fuente de precio real para actividades.
 
-       1. La API B2B (window.__civitatisTours). Es el unico que da el precio DE
-          LA FECHA que esta mirando la persona, porque consulta dynamic-prices.
-          Necesita CIVITATIS_API_KEY.
-
-       2. El catalogo curado de afiliado (public/actividades-civitatis.js). Foto
-          y precio reales de Civitatis, con el enlace ?aid=. Es lo que hace que
-          la card sume al presupuesto y abra el checkout, que el widget embebido
-          no puede hacer por ser un iframe. No necesita ninguna clave.
-
-       3. La lista local de LOCAL_TOURS, con precio estimado. Sigue siendo el
-          piso: sin 1 ni 2, o con una API caida, el destino muestra igual.
-
-       Los tres se SIRVEN, no se reemplazan: la lista local sigue al final para
-       los destinos que todavia no tienen catalogo curado. La API va primero
-       porque su precio es el unico que es de la fecha. */
-    var remote = window.__civitatisTours && window.__civitatisTours.destinationKey === key
-      ? (window.__civitatisTours.items || [])
-      : [];
-    var locales = LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(key) >= 0; })
+       O sea que las actividades vuelven a ser orientacion y no una reserva: el
+       boton abre el checkout, que junta los datos del viajero y arma el pedido
+       por WhatsApp, pero no hay operador de tours que lo tome. El precio se
+       rotula "Precio referencial" en la card y el mensaje de WhatsApp dice que
+       es estimado, que es lo unico que permite mostrarlo sin mentir. */
+    return LOCAL_TOURS.filter(function (tour) { return tour.destinations.indexOf(key) >= 0; })
       .map(function (tour) { return Object.assign({}, tour, { source: 'local' }); });
-    var curadas = ((window.CS_ACTIVIDADES_CIVITATIS || {})[key] || []).map(function (a) {
-      return {
-        destinations: [key], destination: destinationName,
-        title: a.titulo, description: a.descripcion, price: Number(a.precio) || 0,
-        details: '', image: a.imagen || '', rating: a.rating || 0,
-        reviewsCount: a.resenas || 0, url: a.url || '', source: 'civitatis-afiliado',
-        freeCancellation: !!a.cancelacionGratis,
-        autor: a.autor || '', licencia: a.licencia || ''
-      };
-    });
-    var deApi = remote.map(function (a) {
-      return {
-        destinations: [key], destination: destinationName,
-        title: a.title, description: a.description, price: Number(a.price) || 0,
-        details: a.details || '', image: a.image || '', rating: a.rating || 0,
-        reviewsCount: a.reviewsCount || 0, url: a.url || '', source: 'civitatis',
-        freeCancellation: !!a.freeCancellation
-      };
-    });
-    // Sin API, la curada va primero: precio real antes que estimado. Con API, la
-    // de la API va primero porque es la unica de la fecha pedida.
-    return deApi.length ? deApi.concat(curadas, locales) : curadas.concat(locales);
   }
+
   // Se expone porque la Guia Secreta tambien dibuja los tours y su preview
   // los necesita. Mismo criterio que los otros globales del proyecto: datos
   // que se leen, no logica que se ejecuta.
   window.CS_TOURS = toursFor;
-  /* ID de afiliado de Civitatis. Va aca y no pegado en el markup porque asi no
-     hay que tocar el link para cambiar el ID. */
-  var CIVITATIS_AFILIADO = '115515';
-  /* ---------- Activities de Civitatis ----------
-     Tenia un widget embebido y ahora tiene un link. El widget era un <iframe>
-     de civitatis.com, y eso define lo que se puede hacer con el:
-
-     - No se puede sumar nada al presupuesto. El iframe es un documento de otro
-       origen: desde esta pagina no se lee que actividad se selecciono, ni su
-       titulo, ni su precio. No hay eventos ni postMessage documentado. Cuando
-       alguien toca "Reservar" adentro, se navega DENTRO del iframe y aca no
-       pasa nada. Poner un listener de clic sobre el <iframe> solo diria
-       "tocaron algo", no que. Y el costo no era invisible: la grilla del widget
-       se veia igual que la de los tours de arriba, que si suma, asi que al
-       hacer click lo unico que se veia era que se iba de la pagina.
-     - Tampoco acepta filtro por destino en su URL: el parametro no existe. Con
-       typeSelection=all mostraba su catalogo global, que al probarlo daba
-       Tenerife y Roma para un viajero que iba a Rio.
-     - currency=USD y no BRL como venia: el widget toma una sola moneda fija,
-       no sigue el selector del encabezado.
-     - Los links son de afiliado: la reserva se hace en Civitatis y nosotros
-       cobramos comision. Se declara, que en Uruguay es parte de la informacion
-       al consumidor y ademas es lo unico que sostiene el "no mentimos" del
-       proyecto.
-
-     Lo que queda es un link de texto, que se puede leer entero y no imita una
-     grilla. El catalogo curado (public/actividades-civitatis.js) es la via que
-     si suma al presupuesto, con las mismas fotos y los mismos precios que
-     publica Civitatis. */
   function localToursMarkup(meta) {
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
     var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
     var tours = toursFor(destinationKey, destinationName);
     if (!tours.length) return '';
-    // Los tours locales guardan autor y licencia en TOUR_PHOTOS; el pie global
-    // los reagrupa. Los de Civitatis traen su propia foto, sin crédito que dar.
+    // Todas las fotos salen de TOUR_PHOTOS, con autor y licencia: el pie global
+    // los reagrupa.
     // Los curados de afiliado SIEMPRE traen foto de Commons con su autor y su
     // licencia, asi que se acreditan tambien: el build no deja generar una
     // actividad con foto sin acreditar, pero la card no puede confiar en eso
@@ -2016,15 +1952,11 @@
     var creditos = {};
     var lowest = tours.reduce(function (min, t) { return Math.min(min, Number(t.price) || Infinity); }, Infinity);
     var fuente = (tours[0] && tours[0].source) || 'local';
-    /* Tres etiquetas y no dos. Antes alcanzaba con real/referencial, y con el
-       catalogo curado de afiliado esa division mentia en los dos sentidos: el
-       precio del catalogo es real (lo publica Civitatis) pero no es el de la
-       fecha que esta mirando la persona, y el de la API si lo es. Decir
-       "Precio real" para los dos tapa justo la diferencia que sirve para
-       decidir cual de los dos arrives. */
+    /* Un solo origen queda: LOCAL_TOURS, con precio estimado. La fuente se lee
+       igual, porque es la que decide el titulo de la seccion ("Los imperdibles
+       de" contra "Actividades reales en") y asi queda en un solo lugar si manana
+       vuelve a haber actividades de otro origen con precio real. */
     var SOURCE_LABEL = {
-      civitatis: 'Precio de la fecha',
-      'civitatis-afiliado': 'Precio publicado · Civitatis',
       local: 'Precio referencial'
     };
     // El CTA de la cabecera abre el checkout con lo que ya este elegido. Sale
@@ -2048,7 +1980,7 @@
     var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
-      // Las de Civitatis traen foto propia; las locales salen de TOUR_PHOTOS.
+      // La foto sale de TOUR_PHOTOS, con su autor y su licencia.
       var photo = tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour);
       if (photo && photo.url) creditos[photo.url] = photo;
       var skin = tourActivitySkin(tour.title);
@@ -2108,12 +2040,7 @@
            mensajes con dos conversaciones para el mismo viaje. Este mantiene el
            atajo que ya tenia: si la actividad todavia no esta elegida, el clic la
            agrega antes de abrir el checkout, para que nunca se confirme algo que
-           no suma al total.
-
-           Y el enlace a Civitatis viaja DENTRO del checkout (detalle y mensaje
-           final), no desde la card. Antes el boton era un <a> que se iba directo
-           al sitio: la persona perdia el paso de confirmar y nosotros perdiamos
-           sus datos de viajero. */
+           no suma al total. */
         '<button type="button" class="local-tour__book" data-tour-add>Agregar</button>' +
         '</div></div></div></article>';
     }).join('');
@@ -2485,20 +2412,50 @@
       '<span><b>' + esc(line.title) + '</b> · ' + money(line.total) +
       '. El horario de recogida y el punto de encuentro los confirma el operador.</span></p>';
   }
+  /* ---------- Lo que ya sabemos de la cuenta ----------
+     El checkout pide nombre, apellido y correo. Si hay sesion iniciada, los tres
+     ya estan respondidos y volver a preguntarlos es hacer escribir dos veces lo
+     mismo. Se completan y quedan editables: este nombre y este apellido van al
+     mensaje que lee la persona que te busca, y adivinar es peor que preguntar. */
+  function nombreDeCuenta() {
+    var user = authUser;
+    if (!user) return null;
+    var meta = user.user_metadata || {};
+    // Google manda un solo string con el nombre entero. Partirlo en dos campos es
+    // una adivinanza: "Ana Perez" sale bien, "Ana Maria Perez" deja "Maria Perez"
+    // en el apellido, y "Ana Perez Sosa" deja "Perez Sosa". Con un solo nombre
+    // el apellido queda vacio y el campo lo completa la persona, que para eso
+    // sigue editable.
+    var full = String(meta.full_name || meta.name || '').trim();
+    if (!full) return null;
+    // "'Perez, Ana'": hay cuentas de Google con el apellido primero.
+    if (full.indexOf(',') > -1) {
+      var partes = full.split(',');
+      return { nombre: (partes[1] || '').trim(), apellido: (partes[0] || '').trim() };
+    }
+    var palabras = full.split(/\s+/);
+    return { nombre: palabras[0] || '', apellido: palabras.slice(1).join(' ') };
+  }
   function checkoutPanelDatos() {
     var f = checkoutState.form;
+    // Lo que la persona ya escribio gana sobre lo que tenemos de la cuenta: si
+    // vuelve atras a corregir algo, no se le pisa con el dato de Google.
+    var cuenta = nombreDeCuenta();
+    var nombre = String(f.nombre || (cuenta && cuenta.nombre) || '');
+    var apellido = String(f.apellido || (cuenta && cuenta.apellido) || '');
+    var correo = String(f.email || (authUser && authUser.email) || '');
     return '<div class="checkout-panel" data-checkout-panel="datos">' +
       '<h2 class="checkout-panel__title">Contanos quién viaja</h2>' +
       '<p class="checkout-panel__lead">Con esto el operador te confirma disponibilidad y el punto de encuentro.</p>' +
       '<div class="checkout-grid">' +
       checkoutField({ name: 'titulo', label: 'Título', type: 'select', options: CHECKOUT_TITLES, value: f.titulo || CHECKOUT_TITLES[0] }) +
-      checkoutField({ name: 'nombre', label: 'Nombre', required: true, value: f.nombre, autocomplete: 'given-name' }) +
-      checkoutField({ name: 'apellido', label: 'Apellido', required: true, value: f.apellido, autocomplete: 'family-name' }) +
+      checkoutField({ name: 'nombre', label: 'Nombre', required: true, value: nombre, autocomplete: 'given-name' }) +
+      checkoutField({ name: 'apellido', label: 'Apellido', required: true, value: apellido, autocomplete: 'family-name' }) +
       checkoutField({ name: 'docTipo', label: 'Tipo de documento', type: 'select', options: CHECKOUT_DOC_TYPES, value: f.docTipo || CHECKOUT_DOC_TYPES[0] }) +
       checkoutField({ name: 'docNumero', label: 'Número de documento', required: true, value: f.docNumero, placeholder: 'Solo números', maxlength: 12 }) +
       checkoutField({ name: 'nacimiento', label: 'Fecha de nacimiento', type: 'date', value: f.nacimiento }) +
       checkoutField({ name: 'nacionalidad', label: 'Nacionalidad', type: 'select', options: CHECKOUT_COUNTRIES, value: f.nacionalidad || CHECKOUT_COUNTRIES[0] }) +
-      checkoutField({ name: 'email', label: 'Correo electrónico', type: 'email', required: true, value: f.email, placeholder: 'nombre@correo.com', autocomplete: 'email' }) +
+      checkoutField({ name: 'email', label: 'Correo electrónico', type: 'email', required: true, value: correo, placeholder: 'nombre@correo.com', autocomplete: 'email' }) +
       checkoutField({ name: 'telefono', label: 'Teléfono', type: 'tel', required: true, value: f.telefono, placeholder: '09X XXX XXX', autocomplete: 'tel' }) +
       checkoutField({ name: 'direccion', label: 'Dirección', value: f.direccion, autocomplete: 'street-address', wide: true }) +
       '</div>' +
@@ -2668,11 +2625,71 @@
     // El hotel del transfer se copia al estado del viaje en cuanto se escribe.
     // El voucher y el resumen de "Mi Viaje" leen de ahi, y sin esto mostrarian
     // "a coordinar" al lado de un checkout que ya tiene el hotel puesto.
-    if (checkoutIsTransfer() && detailState && checkoutState.form.transferHotel) {
+    /* La condición es la misma que decide si el campo existe:
+       checkoutTransferBlock() solo pinta el bloque del traslado cuando
+       checkoutTransferLine() devuelve una linea. Preguntar por el transfer con
+       otra funcion era una referencia a algo que no existe —checkoutIsTransfer()
+       se llamaba acá y no estaba definida en ningun lado—, y el ReferenceError
+       que tiraba en cada click de "Continuar" se comia el resto del handler:
+       el panel no avanzaba de paso y no se veia ningun aviso. */
+    if (checkoutTransferLine() && detailState && checkoutState.form.transferHotel) {
       detailState.transferWizard = detailState.transferWizard || {};
       detailState.transferWizard.hotelName = String(checkoutState.form.transferHotel).trim();
     }
     return pending;
+  }
+  /* ---------- Crear la cuenta desde la reserva ----------
+     El checkout ya pide el correo y es required, o sea que la persona lo escribe
+     igual. Con ese correo se puede crear la cuenta sin preguntarle nada más.
+
+     Y va por magic link, no por signUp: signUp exige una contraseña, y una
+     contraseña inventada por nosotros es una contraseña que la persona no
+     conoce y después no puede cambiar. signInWithOtp con shouldCreateUser crea la
+     cuenta y manda un link para entrar más adelante.
+
+     NO frena la reserva. Si la cuenta falla, se pierde la cuenta y no el pedido,
+     que se manda por WhatsApp igual. Un checkout que no avanza porque no se pudo
+     crear una cuenta es un checkout que pierde ventas.
+
+     El aviso se mete en el DOM en vez de repintar el panel: en el paso 2 la
+     persona ya está eligiendo medio de pago y un repintado le saltea el foco. */
+  function mostrarAvisoCheckout(texto) {
+    var modal = $('#booking-modal');
+    if (!modal) return;
+    var aviso = modal.querySelector('[data-checkout-notice]');
+    if (!aviso) {
+      aviso = document.createElement('p');
+      aviso.className = 'checkout-notice';
+      aviso.setAttribute('data-checkout-notice', '');
+      var acciones = modal.querySelector('.checkout-actions');
+      if (!acciones || !acciones.parentNode) return;
+      acciones.parentNode.insertBefore(aviso, acciones);
+    }
+    aviso.textContent = texto;
+  }
+  async function crearCuentaDesdeCheckout() {
+    try {
+      if (!supabaseClient) { authReadyPromise = initAuth(); await authReadyPromise; }
+      // Con sesion abierta no hay nada que crear: la cuenta ya existe.
+      if (authUser) return;
+      /* Sin Supabase desplegado no hay cuenta, y hay que decirlo. Volver en
+         silencio es peor que avisar: la persona cree que quedó con cuenta y
+         después no puede volver a entrar ni a guardar el viaje. */
+      if (!supabaseClient) { mostrarAvisoCheckout('No pudimos crear la cuenta (falta configurarla en el despliegue). Podés seguir con la reserva igual.'); return; }
+      var email = String((checkoutState.form && checkoutState.form.email) || '').trim();
+      if (!email) return;
+      mostrarAvisoCheckout('Creando tu cuenta…');
+      var r = await supabaseClient.auth.signInWithOtp({
+        email: email,
+        options: { shouldCreateUser: true, emailRedirectTo: window.location.origin + window.location.pathname }
+      });
+      if (r && r.error) { mostrarAvisoCheckout('No pudimos crear la cuenta, pero podés seguir con la reserva igual.'); return; }
+      mostrarAvisoCheckout('Listo: te enviamos un link a ' + email + ' para entrar. La reserva sigue igual.');
+    } catch (error) {
+      // Una excepcion acá no puede dejar el checkout clavado. El pedido va por
+      // WhatsApp y no depende de la cuenta.
+      mostrarAvisoCheckout('No pudimos crear la cuenta, pero podés seguir con la reserva igual.');
+    }
   }
   function gotoCheckoutStep(step) {
     if (step < 0 || step >= CHECKOUT_STEPS.length) return;
@@ -2713,21 +2730,17 @@
       'Contacto: ' + [f.email, f.telefono].filter(Boolean).join(' · ') + '\n' +
       'Fechas: ' + meta.dep + ' al ' + meta.ret + ' · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '\n\n';
     if (t.tours.length) {
-      /* El enlace de Civitatis viaja DENTRO del pedido, no en la card. Es lo que
-         permite que el boton "Reservar" abra el checkout en vez de irse al sitio
-         de Civitatis: la persona primero se compromete aca (y deja sus datos) y
-         recien ahi recibe el link para terminar la reserva. A la vez queda el
-         rastro de que la comision existe, que es lo que hay que declarar. */
+      /* El precio de estos tours es estimado, asi que el mensaje lo dice. Quien
+         lo recibe tiene que saber que el numero es de referencia y que el valor
+         final lo confirma quien lo tome: sin esa linea, un WhatsApp que dice
+         "Total de actividades: US$ 240" se lee como una cotizacion firme. */
       var lineas = t.tours.map(function (tour) {
         var linea = '- ' + tour.title + ' (' + money(tour.price) + ' por persona)';
         return tour.url ? linea + '\n  ' + tour.url : linea;
       }).join('\n');
       message += 'Actividades:\n' + lineas + '\n';
       message += 'Total de actividades: ' + money(t.unitTotal * t.pax) + '\n\n';
-      if (t.tours.some(function (tour) { return !!tour.url; })) {
-        message += 'Precio publicado por Civitatis (enlace de afiliado). ' +
-          'El precio final lo confirma el operador.\n\n';
-      }
+      message += 'Precio estimado, a confirmar por quien lo tome.\n\n';
     }
     if (t.transfer) {
       var vuelo = getSelectedFlightSummary();
@@ -2739,7 +2752,24 @@
     message += 'Total a confirmar: ' + money(t.total) + '\n' +
       'Medio de pago preferido: ' + (pay ? pay.label : 'a coordinar') + '\n\n' +
       '¿Me confirman disponibilidad, horario, punto de encuentro y el valor final?';
-    return 'https://wa.me/?text=' + encodeURIComponent(message);
+    return whatsappUrl(message, WHATSAPP_RESERVAS);
+  }
+  /* A quien le llega la reserva. Vive en una sola variable porque el link se arma
+     en dos lugares —el checkout y el boton de reservar el vuelo— y si el numero
+     estuviera escrito en los dos, cambiarlo seria cambiarlo en los dos.
+
+     El formato es el que espera wa.me: pais, area y numero pegados, sin +, sin
+     espacios y sin guiones. Con el + o con espacios el link igual abre la
+     conversacion, pero sin el texto pegado, y el mensaje es justamente la parte
+     que hay que leer.
+
+     OJO con el boton de compartir del voucher: ese NO lleva numero. Es para
+     mandarle el itinerario a un amigo, y con numero destino le llega a la
+     empresa en lugar del amigo. Compartir y hacer un pedido son dos cosas
+     distintas. */
+  var WHATSAPP_RESERVAS = '5511920836306';
+  function whatsappUrl(message, numero) {
+    return 'https://wa.me/' + (numero || '') + '?text=' + encodeURIComponent(message);
   }
   /* Referencia corta y legible. No es un comprobante de nada: sirve para que el
      operador y la persona en el mismo chat puedan nombrar el pedido. */
@@ -2840,42 +2870,7 @@
     });
   }
 
-  /*
-   * Actividades de Civitatis para el destino que se esta viendo.
-   *
-   * Se dispara aparte de los hoteles y a proposito despues del primer render:
-   * la pantalla tiene que pintar rapido con la lista local y recien despues
-   * reemplazar por las actividades reales si llegaron. Es el mismo criterio que
-   * usa la section de hoteles con meta.hotelsLoaded.
-   *
-   * Si Civitatis no esta configurado, o el destino no esta mapeado (Búzios, o
-   * cualquiera sin destinoId), el server contesta 200 con lista vacia y no pasa
-   * nada: quedan los tours locales.
-   */
-  function cargarActividades(meta) {
-    if (!meta || meta.actividadesCargadas) return;
-    meta.actividadesCargadas = true;
-    var destinationKey = String(meta.dest && meta.dest.key || '').toLowerCase();
-    // Búzios se queda con la lista local, pedido explicito.
-    if (destinationKey === 'buz') return;
-    var params = new URLSearchParams({ dest: destinationKey, dep: meta.dep, ret: meta.ret, pax: meta.pax, currency: (window.state && window.state.currency) || 'USD' });
-    fetch('/api/actividades?' + params.toString()).then(function (r) { return r.json(); }).then(function (data) {
-      var items = (data && data.activities) || [];
-      if (!items.length) return;
-      window.__civitatisTours = { destinationKey: destinationKey, items: items };
-      repintarTours();
-    }).catch(function (error) {
-      console.warn('[actividades] No se pudieron cargar:', error && error.message || 'error desconocido');
-    });
-  }
-  // Re-pinta solo la seccion de tours. Se repinta entera la pantalla porque el
-  // total del viaje cambia: las actividades son opt-in y ya pueden estar
-  // marcadas, asi que hay que recarregar el estado.
-  function repintarTours() {
-    if (typeof renderDetail !== 'function' || !detailState) return;
-    try { renderDetail(); } catch (e) { /* si falla, queda la lista local */ }
-  }
-  /*
+  /*/*
    * Precio de transfer del destino, para el render. Prioridad:
    *   1. lo que mando el server en meta.officialTransfer (que sale de la tabla);
    *   2. la tabla del cliente, public/transfer-precios.js;
@@ -3126,7 +3121,7 @@
       },
       tours: {
         estado: 'real',
-        origen: 'Civitatis',
+        origen: 'estimado',
         detalle: 'El precio es el de la fecha que estás mirando. Si no elegiste ninguna actividad, este rubro está en cero.',
         fecha: null
       },
@@ -3295,7 +3290,9 @@
     if (!state || !state.meta) return null;
     var route = ((flightSummary.origin && (flightSummary.origin.name || flightSummary.origin.code)) || 'Origen') + ' → ' + ((flightSummary.destination && (flightSummary.destination.name || flightSummary.destination.code)) || state.meta.dest.name);
     var message = 'Hola, quiero reservar este vuelo para mi viaje a ' + state.meta.dest.name + ':\n' + flightSummary.airline + ' · ' + route + '\n' + flightSummary.summary + '\nPrecio de referencia: ' + money(flightTotal) + '\nFechas: ' + state.meta.dep + ' al ' + state.meta.ret + ' · ' + state.meta.pax + (Number(state.meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '. ¿Podrían confirmar disponibilidad y emitir?';
-    return 'https://wa.me/?text=' + encodeURIComponent(message);
+    // Al mismo numero que el checkout: los dos son pedidos que tiene que tomar
+    // una persona, no mensajes para un amigo.
+    return whatsappUrl(message, WHATSAPP_RESERVAS);
   }
   function getCategoryColor(category) {
     var match = CATS.filter(function (item) { return item[0] === category; })[0];
@@ -3671,7 +3668,10 @@
     var foodLabel = Math.abs(foodPerDay - dailyCosts.food.gourmet) < 3 ? 'Gourmet' : (Math.abs(foodPerDay - dailyCosts.food.casual) < 3 ? 'Casual' : 'Moderado');
     var summaryText = '✈️ ITINERARIO · ' + detailState.meta.dest.name + '\n' + '📅 Fechas: ' + detailState.meta.dep + ' → ' + detailState.meta.ret + ' (' + nights + ' noches)\n' + '👥 Viajeros: ' + pax + '\n\n' + '✈️ Vuelo: ' + flightSummary.airline + ' · ' + flightSummary.summary + ' · ' + money(flightTotal) + '\n' + '🏨 Hotel: ' + selectedHotelName + ' · ' + money(hotelTotal) + '\n' + '🚐 Traslado: ' + transferModeLabel + ' · ' + money(transferTotal) + '\n' + '🎟️ Tours: ' + toursLabel + ' · ' + money(toursTotal) + '\n\n' + '📍 PRESUPUESTO OPERATIVO EN DESTINO\n' + '🚕 Transporte local (' + transportLabel + '): ' + money(localPerDay) + '/día · ' + money(localTotal) + ' total\n' + '🍽️ Gastronomía (' + foodLabel + '): ' + money(foodPerDay) + '/día · ' + money(foodTotal) + ' total\n\n' + '💳 TOTAL GENERAL ESTIMADO: ' + money(totalGeneral);
     var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
-    var toursBookUrl = toursWhatsappUrl(detailState);
+    // toursWhatsappUrl() ya no se usa acá y queda sin referencias: el "Reservar"
+    // de tours abre el checkout, y checkoutWhatsappUrl() arma un mensaje que
+    // incluye las actividades junto con lo demas. Se deja la funcion definida
+    // hasta que se decida si se borra.
     // El alojamiento no tenía acción propia en la versión anterior, solo el
     // precio de referencia. Con la fila en una línea, el enlace de
     // disponibilidad entra en el mismo lugar que el de los otros rubros.
@@ -3711,6 +3711,18 @@
         ? '<a class="voucher-item__cta" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(labelFor) + '">' + esc(label) + '</a>'
         : '<button type="button" class="voucher-item__cta is-off" disabled>' + esc(label) + '</button>';
     }
+    /* Las dos filas que reserva la app —tours y traslados— abren el checkout en
+       su propia tarjeta, no un link afuera. El voucher lo abre "Ver mi
+       presupuesto" y su trabajo es mostrar el total; reservar es otra accion y
+       necesita los datos del viajero y el medio de pago.
+
+       Cuando la fila no tiene nada elegido no sale un boton que no abre nada:
+       sale el aviso, con el mismo tono que las otras filas sin elegir. */
+    function reservarCta(activo, aviso, etiqueta) {
+      return activo
+        ? '<button type="button" class="voucher-item__cta" data-reservar-pedido aria-label="' + esc(etiqueta) + '">Reservar</button>'
+        : '<p class="voucher-item__detail">' + esc(aviso) + '</p>';
+    }
     var flightLines = legLine('Ida', flightSummary.origin, flightSummary.destination, flightTime(outLeg.departure, flightSummary.departureText), flightTime(outLeg.arrival, flightSummary.arrivalText), flightSummary.flightNumber);
     if (flightSummary.isRoundTrip) flightLines += legLine('Vuelta', flightSummary.returnOrigin, flightSummary.returnDestination, flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText), flightTime(inLeg && inLeg.arrival, flightSummary.returnArrivalText), flightSummary.inboundFlightNumber);
     var flightTitle = 'Vuelo' + (flightSummary.airline ? ' · ' + esc(flightSummary.airline) : '');
@@ -3725,9 +3737,7 @@
        modalidad elegida no hay nada que reservar, asi que en vez de un boton que
        no abre nada dice que falta elegirlo y lo dice con el mismo tono que las
        otras filas sin elegir ("Sin actividades seleccionadas"). */
-    var transferCta = detailState.transferType
-      ? '<button type="button" class="voucher-item__cta" data-coordinate-transfer aria-label="Reservar el traslado desde el aeropuerto">Reservar</button>'
-      : '<p class="voucher-item__detail">Elegí un transfer en la sección de traslados.</p>';
+    var transferCta = reservarCta(detailState.transferType, 'Elegí un transfer en la sección de traslados.', 'Reservar el traslado desde el aeropuerto');
     // findSelectedHotelDetail() devuelve un texto genérico cuando no encontró la
     // card; en ese caso no hay nada que decir y la fila queda solo con el monto.
     var hotelNote = selectedHotelDetail && selectedHotelDetail !== 'Alojamiento seleccionado' ? '<p class="voucher-item__detail">' + esc(selectedHotelDetail) + '</p>' : '';
@@ -3739,7 +3749,7 @@
       itemRow('pasajes', flightTitle, flightLines, flightTotal, bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline)) +
       itemRow('alojamiento', 'Alojamiento · ' + esc(selectedHotelName), hotelNote, hotelTotal, hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName) : '') +
       itemRow('traslados', transferTitle, '<p class="voucher-item__detail">' + transferNote + '</p>', transferTotal, transferCta) +
-      itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, bookCta(toursBookUrl, 'Reservar tours', 'Reservar las actividades')) +
+      itemRow('tours', toursTitle, '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>', toursTotal, reservarCta(selectedTours.length, 'Sin actividades seleccionadas.', 'Reservar las actividades')) +
       '</ul>' +
       '<section class="voucher-destino"><div class="voucher-destino__head"><h3>Gastos en destino</h3><p>Por día y total del viaje</p></div><ul class="voucher-destino__list"><li><span>Transporte local · ' + transportLabel + '</span><b>' + money(localPerDay) + '/día</b><em>' + money(localTotal) + '</em></li><li><span>Gastronomía · ' + foodLabel + '</span><b>' + money(foodPerDay) + '/día</b><em>' + money(foodTotal) + '</em></li></ul><p class="voucher-destino__total">Total en destino <b>' + money(destinoTotal) + '</b></p></section>' +
       '<div class="voucher-actions"><button type="button" class="voucher-instagram" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Compartir en Instagram</span></button><div class="voucher-actions__more">' +
@@ -4039,7 +4049,7 @@
           }
         }
         // El panel "Mi Viaje" lleva el boton de reservar, y las elegidas que
-        // llegan de Civitatis cambian lo que hay que confirmar.
+        // cambian lo que hay que confirmar.
         renderTripSummary();
       }
     }
@@ -4432,10 +4442,8 @@
        eso, una lista de lugares no dice si el viaje le alcanza a la persona.
 
      - Los tours no vienen en la guia. Se piden con toursFor(), la misma
-       funcion de la seccion de experiencias, asi que salen con el precio real
-       de las fechas que esta mirando el usuario. Escribirlos en la guia los
-       convertiria en precio estimado, que es lo que Civitatis vino a
-       reemplazar.
+       funcion de la seccion de experiencias, asi que hay una sola lista de
+       actividades y un solo lugar donde se rotula el precio.
      ------------------------------------------------------------------ */
   /* La guia se pide sola y se guarda por destino. Es una llamada que va a
     earer al travel summary y a re-pintar la seccion, asi que no se puede
@@ -4641,7 +4649,7 @@
     // Tours: datos reales, no escritos a mano.
     var tours = toursFor(meta.dest.key, meta.dest.name) || [];
     if (tours.length) {
-      var precioReal = tours[0] && tours[0].source === 'civitatis';
+      var precioReal = false; // todos los tours son de LOCAL_TOURS: precio estimado
       var lista = tours.slice(0, 3).map(function (t) {
         var datos = [];
         if (t.rating) datos.push('★ ' + Number(t.rating).toFixed(1));
@@ -5692,11 +5700,10 @@
     if (!data.meta.hotelsLoaded) {
       pending.push(function () { return loadHotelRecommendations(data.meta, proposal.parts.alojamiento); });
     }
-    // Las actividades de Civitatis van aparte de los hoteles: siyvuelven, la
+    // Las actividades van aparte de los hoteles: si vuelven, la
     // pantalla ya esta pintada con los tours locales y recien despues se
     // reemplazan por los reales.
     if (!data.meta.actividadesCargadas) {
-      pending.push(function () { cargarActividades(data.meta); });
     }
     if (detailState.transportMode === 'flight' && liveFlightSection) {
       pending.push(function () { return searchFlights(data.meta, liveFlightSection); });
@@ -7343,6 +7350,10 @@ function comboNombreDestino() {
         // DOM y reportValidity() sobre el noaria posible.
         var invalid = readCheckoutForm();
         if (invalid) { invalid.reportValidity(); invalid.focus(); return; }
+        /* La cuenta se crea desde el paso 1, que es el único momento en que el
+           correo recién escrito está a mano. No se espera al resultado: el paso 2
+           se abre igual y el aviso aparece cuando la cuenta esté lista. */
+        if (checkoutState.step === 0) crearCuentaDesdeCheckout();
         gotoCheckoutStep(checkoutState.step + 1);
         return;
       }
@@ -7420,7 +7431,7 @@ function comboNombreDestino() {
 
          Solo el boton del voucher: el de "Mi Viaje" esta en su propio listener,
          porque #trip-summary es hermano de la vista y no vive dentro del modal. */
-      var reserveFromVoucher = e.target.closest('[data-coordinate-transfer]');
+      var reserveFromVoucher = e.target.closest('[data-reservar-pedido]');
       if (reserveFromVoucher) {
         e.preventDefault();
         closeBookingForm();

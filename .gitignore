@@ -4,6 +4,18 @@
 .env.bak
 node_modules
 .DS_Store
-# Fotos de destino que bajan las historias. Son 20 MB de imagenes de Wikimedia
-# que se regeneran con el extractor: no van al repo.
-outputs/stories/fotos/
+
+# Cache de SerpAPI. Lo escribe lib/providers/index.js en cada consulta de
+# vuelo, asi que cambia en cada uso: versionarlo mete precios viejos en cada
+# commit y garantiza conflictos de merge. En Vercel no sirve de nada porque el
+# filesystem es efimero entre invocaciones: ahi el cache vive en Supabase.
+.serpapi-cache.json
+
+# Salidas de scripts: material de reels, historias, logs de corridas. Todo se
+# regenera, nada de esto se versiona.
+outputs/
+
+# Logs de corridas locales. Salen de Start-Process con redirect, no son de
+# ningun script del repo.
+_s.log
+_s.err

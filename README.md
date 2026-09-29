@@ -14,7 +14,6 @@ cuantosale/
 │  └─ providers/
 │     ├─ index.js             Agregador de vuelos: cache, dedupe y pausa por cuota
 │     ├─ serpapi.js           Vuelos: búsqueda y normalización de Google Flights
-│     ├─ civitatis.js         Tours: precio real de la fecha que se está mirando
 │     ├─ busbud.js            Buses: pendiente (por ahora estimado)
 │     └─ hotels.js            Hoteles: Booking.com / RapidAPI
 ├─ data/
@@ -131,7 +130,7 @@ El compartido casi no crece con la distancia, y los datos lo confirman: entre GI
 
 ### Tours y experiencias locales
 
-`toursFor()` decide qué se muestra y es la única fuente: el catálogo de Civitatis con el precio de la fecha que está mirando la persona si hay credenciales, y si no la lista local de `LOCAL_TOURS` como piso. Es un merge con piso, no un reemplazo: un destino sin mapear en Civitatis o una API caída muestran igual.
+`toursFor()` decide qué se muestra y es la única fuente: la lista local de `LOCAL_TOURS`, con precio estimado. Estuvo tres escalones —la API B2B que daba el precio de la fecha, un catálogo curado de afiliado, y la lista local al final— y los tres se servían sin reemplazarse entre sí. Civitatis se fue del proyecto (provider, endpoint y catálogo), así que las actividades vuelven a ser orientación y no una reserva: la card rotula "Precio referencial" y el mensaje de WhatsApp dice que el precio es estimado y lo confirma quien lo tome.
 
 La card es horizontal, con la foto a la izquierda y la ficha a la derecha: título, ubicación, estrellas con reseñas (solo si el origen las trae), las etiquetas "Incluye / No incluye" que se sacan del texto de detalle, el precio y las acciones. `tourIncludes()` no inventa: si la frase no está en el detalle, la etiqueta no aparece.
 
@@ -193,7 +192,7 @@ Las regiones se comparan en **slug** y no con el nombre de `DEST[]`: "Ceará" y 
 
 **Secciones:** `beaches`, `atracciones`, `comer`, `hacer`, `tips`, más `temporada` y `resumen`. `atracciones` y `hacer` están separadas a propósito: si se empieza y termina en menos de una hora es atracción, si hay que reservar media jornada es un plan. Mezcladas no se puede responder "tengo dos horas, qué hago".
 
-**No hay sección de tours a propósito.** En `app.js` hay 111 tours escritos y encima el catálogo de Civitatis con el precio de la fecha que está mirando el usuario. Escribirlos también en la guía los convertiría en precio estimado, que es justo lo que Civitatis vino a reemplazar. La guía pide los tours al render con `toursFor()`, la misma función que usa la sección de experiencias.
+**No hay sección de tours a propósito.** En `app.js` hay 111 tours escritos, y la guía los volvería a escribir. La guía pide los tours al render con `toursFor()`, la misma función que usa la sección de experiencias: una sola lista y un solo lugar donde se rotula el precio.
 
 Con la estructura actual, 13 guías regionales cubren los 44 destinos. Agregar una guía de ciudad es sumar una entrada; agregar una región es cubrir un estado entero sin tocar nada más.
 
@@ -208,7 +207,7 @@ El schema y las reglas de contenido están documentados en la cabecera del archi
 | Pasajes de avión desde Montevideo | Google Flights vía SerpAPI cuando hay `SERPAPI_API_KEY`; el presupuesto suma tarifas en USD |
 | Comparador de fechas ("mismo viaje, otra fecha") | Precio real de vuelo por fecha cuando el punto se pudo consultar; estimado en los puntos que fallaron |
 | Alojamiento | Booking.com / RapidAPI, con tarifa y foto reales |
-| Tours | Civitatis, con el precio de la fecha que está mirando el usuario |
+| Tours | **Estimado** (`LOCAL_TOURS` en `public/app.js`); la card lo rotula "Precio referencial" |
 | **Transfer de aeropuerto** | **5 de 88 celdas con precio publicado** (`data/transfer-precios.json`); el resto sale de un modelo de distancia con km reales de OSRM y está marcado `confianza: 'baja'` |
 | Cruce a Buenos Aires, buses y ferry | Estimado (pendiente: Busbud u otra fuente) |
 | Comidas, transporte local, valijas, seguro | Estimado (`lib/model.js` y `data/costos-diarios.json`) |
