@@ -4694,28 +4694,6 @@
       + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
       + (pedido.count ? '' : '<p class="voucher-reserve__nota">Elegí un transfer o una actividad para poder reservar.</p>')
       + '</div>';
-    /* "Dividir" estaba apretado en la fila de botones secundarios, al lado de
-       WhatsApp y Guardar: un chip de 44px entre otros dos, con un ícono de dos
-       personas que no dice que la función es entera. Encima quedaba en la misma
-       altura que compartir el itinerario, que es una acción de una persona, y
-       dividir es la acción de un grupo entero.
-
-       Por eso vive en dos lugares y no en uno. El enlace chico va pegado al
-       "por persona", que es justo el número que alguien que viaja acompañado
-       quiere fraccionar: ahí la pregunta ya está hecha, y el enlace contesta.
-       Y el bloque va después de "Reservar ahora", que es la acción de cierre, y
-       antes de compartir. Ahí lo ve quien llegó al final del presupuesto a
-       coordinar el plata, que es el momento en que dividir tiene sentido.
-
-       Los dos abren exactamente lo mismo (data-split-trip) y el handler no
-       cambió: son dos entradas a una acción, no dos acciones. */
-    var dividirBloque = '<aside class="voucher-split" aria-labelledby="voucher-split-title">'
-      + '<div class="voucher-split__head">' + brandIcon('dividir') + '<div>'
-      + '<h3 id="voucher-split-title">¿Viajan en grupo?</h3>'
-      + '<p>Dividí este total entre todos los pasajeros. Cada uno ve su parte, lo que puso y lo que le quedó a deber.</p>'
-      + '</div></div>'
-      + '<button type="button" class="voucher-split__btn" data-split-trip>Dividir gastos con amigos</button>'
-      + '</aside>';
     var dividirEnlace = '<span class="voucher-hero__pp"><span>' + money(Math.round(totalGeneral / pax)) + ' por persona</span>'
       + '<button type="button" class="voucher-hero__split" data-split-trip>Ver cómo dividir este monto</button></span>';
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
@@ -4739,7 +4717,6 @@
       + '</ul>'
       + '<p class="voucher-destino__total"><span>Total en destino</span><b>' + money(destinoTotal) + '</b></p></section>' +
       reservarTodo +
-      dividirBloque +
       /* ABAJO, UN SOLO BOTON SOLIDO.
 
          Habia dos botones del mismo tamano compitiendo: "Elegi algo para
@@ -4760,6 +4737,7 @@
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
+      '<button type="button" class="voucher-chip" data-split-trip aria-label="Dividir este total entre los pasajeros">' + brandIcon('dividir') + '<span class="voucher-btn__label">Dividir</span></button>' +
       '</div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');

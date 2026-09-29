@@ -934,25 +934,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .voucher-share__menu button:focus-visible{outline:3px solid var(--focus);outline-offset:-2px}
 .voucher-share__menu .voucher-btn__ico{flex:0 0 auto}.voucher-chip{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .18s ease,border-color .18s ease}.voucher-chip:hover{background:var(--bg);border-color:var(--ink2)}
 
-/* El bloque de dividir, entre "Reservar ahora" y la barra de acciones.
-
-   Va con borde de --cel y no relleno: en el mismo lugar hay un botón
-   sólido ("Reservar ahora") y una barra de botones del mismo borde, y un
-   bloque relleno de un tercero competía con los dos. El borde lo saca
-   del fondo sin subir de peso, que es lo que hace que se vea sin tapar
-   la acción de cierre. El acento va solo en el ícono y en el botón, que
-   son las dos partes que se tocan. */
-.voucher-split{margin-top:14px;padding:16px;border:1px solid var(--cel);border-radius:16px;background:var(--bg)}
-.voucher-split__head{display:flex;align-items:flex-start;gap:11px}
-.voucher-split__head .voucher-btn__ico{flex:0 0 auto;width:24px;height:24px;margin-top:2px;color:var(--cel)}
-.voucher-split__head h3{margin:0;font-size:15.5px;font-weight:800;line-height:1.25}
-.voucher-split__head p{margin:4px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.45}
-/* El botón va a lo ancho del bloque, no al lado del texto: la frase de
-   arriba ya tiene dos líneas en el celu, y al lado el botón se leía como
-   algo aparte del texto y no como su continuación. */
-.voucher-split__btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:14px;border:1.5px solid var(--cel);border-radius:12px;background:transparent;color:var(--cel);font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:background .18s ease,color .18s ease}
-.voucher-split__btn:hover{background:var(--cel-soft);color:var(--cel)}
-.voucher-split__btn:disabled{opacity:.6;cursor:wait}
 
 /* El enlace al lado del "por persona".
 
