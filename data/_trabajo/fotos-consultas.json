@@ -1,0 +1,162 @@
+{
+ "rio#Medio día en Río: Cristo Redentor y Pan de Azúcar": [
+  "Cristo Redentor Corcovado",
+  "cristo|redentor|redeemer|corcovado"
+ ],
+ "rio#Tour por una finca de café con degustación": [
+  "fazenda café Vassouras",
+  "fazenda|cafe|coffee"
+ ],
+ "rio#Aventura en ala delta": [
+  "Pedra Bonita Rio de Janeiro",
+  "pedra bonita"
+ ],
+ "rio#Vuelo en ala delta en tándem": [
+  "Praia do Pepino São Conrado",
+  "pepino|conrado"
+ ],
+ "rio#Vuelo en ala delta o parapente": [
+  "parapente Rio de Janeiro",
+  "parapente|paraglid"
+ ],
+ "rio#Experiencia en moto de agua con caipirinha": [
+  "Baía de Guanabara",
+  "guanabara"
+ ],
+ "rio#Helicóptero premium con puertas abiertas (precio por persona)": [
+  "helicóptero Rio de Janeiro Cristo Redentor",
+  "helic"
+ ],
+ "rio#Río: Cristo Redentor, Pan de Azúcar, Selarón y almuerzo con parrilla": [
+  "Escadaria Selarón",
+  "selaron|selarón"
+ ],
+ "rio#Río: medio día con el Cristo, la escalera Selarón y atardecer en el Pan de Azúcar": [
+  "Pão de Açúcar pôr do sol",
+  "sugarloaf|acucar|açúcar|pao de|pôr|por do sol|sunset"
+ ],
+ "rio#Río: vuelo en helicóptero con puertas abiertas y traslado opcional al hotel": [
+  "helicóptero Rio de Janeiro Copacabana",
+  "helic"
+ ],
+ "rio#Río: entrada a un partido de fútbol en el Maracanã con transporte privado": [
+  "Estádio do Maracanã",
+  "maracan"
+ ],
+ "rio#Paseo en velero al atardecer con barra libre": [
+  "veleiro Baía de Guanabara",
+  "veleiro|sailboat|sailing|guanabara"
+ ],
+ "rio#Vuelo en ala delta en tándem (GoPro incluida)": [
+  "Pedra da Gávea",
+  "gavea|gávea"
+ ],
+ "rio#Excursión a Angra dos Reis con paseo en goleta": [
+  "Angra dos Reis escuna",
+  "angra|escuna|schooner"
+ ],
+ "rio#Cristo Redentor y Parque Nacional da Tijuca": [
+  "Parque Nacional da Tijuca",
+  "tijuca"
+ ],
+ "rio#Tour en moto por Río y visita a la favela Santa Marta": [
+  "favela Santa Marta Botafogo",
+  "santa marta"
+ ],
+ "rio#Partido de fútbol en Río con guía local": [
+  "Maracanã estádio torcida",
+  "maracan"
+ ],
+ "rio#Río de Janeiro: día completo con Cristo Redentor y Pan de Azúcar en minibús": [
+  "Pão de Açúcar Urca",
+  "sugarloaf|acucar|açúcar|pao de|urca"
+ ],
+ "rio#Barco de fiesta en Río de Janeiro": [
+  "Baía de Guanabara barco",
+  "guanabara|barco|boat"
+ ],
+ "rio#Paddle surf al amanecer en Río de Janeiro": [
+  "stand up paddle Rio de Janeiro",
+  "paddle|sup |stand up"
+ ],
+ "rio#Entradas al Roxy Dinner Show": [
+  "Copacabana Rio de Janeiro",
+  "copacabana"
+ ],
+ "rio#Tour de arte urbano por Río de Janeiro": [
+  "Porto Maravilha grafite Rio de Janeiro",
+  "porto maravilha|boulevard olimpico|boulevard olímpico|grafite|graffiti"
+ ],
+ "rio#Favela Santa Marta: tour, partido de fútbol y almuerzo tradicional": [
+  "Santa Marta Rio de Janeiro mirante",
+  "santa marta"
+ ],
+ "rio#Tour por el Teatro Municipal, la Biblioteca Nacional y el Real Gabinete Portugués de Lectura": [
+  "Theatro Municipal Rio de Janeiro",
+  "theatro|teatro|municipal"
+ ],
+ "rio#Tour en mototaxi por la favela Vidigal": [
+  "Vidigal favela",
+  "vidigal"
+ ],
+ "rio#Avistaje de ballenas en Río de Janeiro": [
+  "baleia jubarte",
+  "baleia|whale|jubarte|humpback"
+ ],
+ "rio#Tour Carioca": [
+  "Escadaria Selarón Lapa",
+  "selaron|selarón|lapa"
+ ],
+ "rio#Paseo en barco por las islas de Río": [
+  "Ilhas Cagarras",
+  "cagarras"
+ ],
+ "buz#Tour en trolebús por Búzios": [
+  "Rua das Pedras Búzios",
+  "pedras"
+ ],
+ "buz#Paseo en canoa por Búzios": [
+  "Praia de João Fernandes Búzios",
+  "fernandes"
+ ],
+ "buz#Bautismo de buceo en Búzios": [
+  "Praia dos Ossos Búzios",
+  "ossos"
+ ],
+ "buz#Caminata por Búzios": [
+  "Praia da Ferradura Búzios",
+  "ferradura"
+ ],
+ "buz#Tour en jardineira y paseo en goleta por Búzios": [
+  "Orla Bardot Búzios",
+  "bardot"
+ ],
+ "buz#Snorkel nocturno en Búzios": [
+  "Praia da Tartaruga Búzios",
+  "tartaruga"
+ ],
+ "buz#Paseo en goleta por Búzios": [
+  "escuna Búzios",
+  "escuna|schooner"
+ ],
+ "buz#Clase de surf en Búzios": [
+  "Praia de Geribá Búzios",
+  "geriba|geribá"
+ ],
+ "buz#Caminata a Ponta do Pai Vitório": [
+  "Praia da Azeda Búzios",
+  "azeda"
+ ],
+ "buz#Tour a Río de Janeiro desde Búzios": [
+  "Cristo Redentor",
+  "cristo|redentor|redeemer"
+ ],
+ "buz#Tour por Búzios con paseo en catamarán": [
+  "Praia Brava Búzios",
+  "brava"
+ ],
+ "arraial#Excursión de un día a Río de Janeiro": [
+  "Cristo Redentor",
+  "cristo|redentor|redeemer"
+ ]
+}

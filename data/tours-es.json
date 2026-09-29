@@ -1,0 +1,1994 @@
+{
+ "ajuda|Arraial D'Ajuda Paragliding": {
+  "titulo": "Vuelo en parapente en Arraial d'Ajuda",
+  "descripcion": "Si te considerás una persona aventurera, no te pierdas este vuelo en parapente sobre Arraial d'Ajuda. ¡Las vistas te dejarán sin palabras!"
+ },
+ "ajuda|Arraial d'Ajuda Quad Bike Tour": {
+  "titulo": "Recorrido en cuatriciclo por Arraial d'Ajuda",
+  "descripcion": "En este recorrido vas a sentir la libertad de manejar un cuatriciclo por los paisajes de Arraial d'Ajuda, entre vegetación exótica, hasta la playa de Mucugê."
+ },
+ "ajuda|Arraial d’Ajuda Night Tour": {
+  "titulo": "Paseo nocturno por Arraial d'Ajuda",
+  "descripcion": "En este paseo por Arraial d'Ajuda vas a conocer los atractivos del pueblo y admirar el encanto único de sus calles, monumentos y plazas al caer la noche."
+ },
+ "ajuda|Caraíva Day Trip": {
+  "titulo": "Excursión de un día a Caraíva",
+  "descripcion": "Descubrí la magia de Bahía en esta excursión a Caraíva, con una ruta panorámica que combina playas vírgenes, un pueblo rústico y relax total."
+ },
+ "ajuda|Coroa Vermelha Beach & Pataxó Coroa Indigenous Village Day Trip": {
+  "titulo": "Playa Coroa Vermelha y aldea indígena Pataxó: excursión de un día",
+  "descripcion": "En esta excursión vas a conocer la cultura de la comunidad indígena Pataxó en la Reserva da Jaqueira y a relajarte en la playa Coroa Vermelha."
+ },
+ "ajuda|Coroa Vermelha Day Trip & Visit to Pataxó Community": {
+  "titulo": "Excursión de un día a Coroa Vermelha y comunidad Pataxó",
+  "descripcion": "En esta excursión a Coroa Vermelha disfrutás de un lindo día de playa y visitás la comunidad Pataxó para conocer la cultura indígena de Brasil."
+ },
+ "ajuda|From Porto Seguro : Trancoso Day Trip": {
+  "titulo": "Excursión de un día a Trancoso desde Porto Seguro",
+  "descripcion": "En esta excursión visitamos Trancoso, un pueblo lleno de historia y rincones curiosos, con paseo por su casco antiguo y playas de ensueño."
+ },
+ "ajuda|Pataxó da Jaqueira Excursion": {
+  "titulo": "Excursión a la Reserva Pataxó da Jaqueira",
+  "descripcion": "Conocé la historia y las costumbres de los pueblos indígenas Pataxó en esta excursión a la reserva Pataxó da Jaqueira. ¡Una experiencia inolvidable!"
+ },
+ "ajuda|Porto Seguro Guided Tour": {
+  "titulo": "Tour guiado por Porto Seguro",
+  "descripcion": "Descubrí el centro histórico de Porto Seguro en este tour guiado: casas y iglesias coloniales, y hasta un show de capoeira."
+ },
+ "ajuda|Porto Seguro Intro to Diving": {
+  "titulo": "Bautismo de buceo en Porto Seguro",
+  "descripcion": "Descubrí el mundo submarino con este curso introductorio de buceo en Porto Seguro: aguas cristalinas y una gran variedad de peces de colores."
+ },
+ "ajuda|Porto Seguro Sailing Course": {
+  "titulo": "Curso de navegación a vela en Porto Seguro",
+  "descripcion": "¿Querés aprender a navegar? En este curso de vela en Porto Seguro, un destino ideal para los deportes acuáticos, vas a aprender a manejarte en el mar."
+ },
+ "ajuda|Porto Seguro Whale Watching": {
+  "titulo": "Avistaje de ballenas en Porto Seguro",
+  "descripcion": "En esta inolvidable actividad de avistaje vas a aprender sobre estos magníficos animales y hasta verlos salir a la superficie."
+ },
+ "ajuda|Recife de Fora Marine Park Day Trip": {
+  "titulo": "Excursión al Parque Marino Recife de Fora",
+  "descripcion": "En esta excursión al Parque Marino Recife de Fora vamos a conocer una de las reservas más exclusivas de Brasil. ¡La vida marina de Porto Seguro te espera!"
+ },
+ "ajuda|Trancoso Day Trip": {
+  "titulo": "Excursión de un día a Trancoso",
+  "descripcion": "En esta excursión a Trancoso te relajás en la playa Rio Verde, admirás los acantilados de Taípe y disfrutás de un beach club exclusivo."
+ },
+ "itacare|De Contas River Boat Ride": {
+  "titulo": "Paseo en barco por el río de Contas",
+  "descripcion": "Navegá por las aguas tranquilas del río de Contas en este paseo en barco desde Itacaré, entre manglares y las cascadas de Cleandro."
+ },
+ "itacare|De Contas River Rafting": {
+  "titulo": "Rafting en el río de Contas",
+  "descripcion": "Sumate a esta actividad de rafting en el río de Contas, en Taboquinhas. Remá contra rápidos de clase 3 y 4 en el lugar perfecto para practicar este deporte."
+ },
+ "itacare|Island Hopping Day Trip": {
+  "titulo": "Excursión de un día por las islas",
+  "descripcion": "Disfrutá del encanto de la península de Maraú en esta excursión a la playa Taipu de Fora, la isla Pedra Furada y la isla Goió. Un día navegando en el paraíso."
+ },
+ "itacare|Itacaré Beaches + Tijuípe Waterfall Hike": {
+  "titulo": "Playas de Itacaré y caminata a la cascada Tijuípe",
+  "descripcion": "Explorá el paraíso de la Mata Atlántica en esta caminata a la cascada Tijuípe y a las playas de Itacarezinho, Camboinha, Havaizinho y Engenhoca."
+ },
+ "itacare|Jeribucaçu Beach & Arruda Beach + Usina Waterfall Hike": {
+  "titulo": "Playas Jeribucaçu y Arruda y caminata a la cascada Usina",
+  "descripcion": "Caminá por la exuberante Mata Atlántica y sus manglares de aguas someras en esta ruta hasta la cascada Usina y las playas de Jeribucaçu y Arruda."
+ },
+ "morro|Boipeba: Moreré, Bainema, & Cueira Beaches Day Trip": {
+  "titulo": "Excursión a Boipeba: playas Moreré, Bainema y Cueira",
+  "descripcion": "En esta excursión a la isla de Boipeba disfrutamos de las hermosas playas de Moreré, Bainema y Cueira. ¡No te la pierdas!"
+ },
+ "morro|Cairu Archipelago + Boipeba Island Speedboat Tour": {
+  "titulo": "Archipiélago de Cairu e isla Boipeba en lancha rápida",
+  "descripcion": "En este tour exploramos la isla de Boipeba, en el archipiélago de Cairu, y visitamos las piscinas naturales de Garapuá y Moreré."
+ },
+ "morro|Gamboa Beach Boat Trip": {
+  "titulo": "Paseo en barco a la playa Gamboa",
+  "descripcion": "Disfrutá de un día de sol y playa con este paseo en barco a Gamboa desde Morro de São Paulo. Hasta podés darte un baño de barro."
+ },
+ "morro|Garapua Beach Trip": {
+  "titulo": "Excursión a la playa Garapuá",
+  "descripcion": "Explorá la playa Garapuá y descubrí sus hermosas piscinas naturales en esta excursión desde Morro de São Paulo. Los paisajes te van a encantar."
+ },
+ "morro|Guarapuá Off-Roading Tour": {
+  "titulo": "Tour todoterreno por Guarapuá",
+  "descripcion": "Este tour todoterreno por Guarapuá te lleva a descubrir piscinas naturales, manglares y la naturaleza intacta de esta playa de la costa de Morro de São Paulo."
+ },
+ "morro|Morro de Sao Paulo Private Boat Trip": {
+  "titulo": "Paseo privado en barco por Morro de São Paulo",
+  "descripcion": "En este paseo privado en barco alrededor de Morro de São Paulo visitás piscinas naturales, playas y un convento. Es la forma más exclusiva de recorrer este paraíso."
+ },
+ "morro|Morro de São Paulo Diving Introuction": {
+  "titulo": "Bautismo de buceo en Morro de São Paulo",
+  "descripcion": "En esta actividad vivimos una inolvidable experiencia de buceo en la isla de Caité, explorando el fondo marino de Morro de São Paulo."
+ },
+ "morro|Praia de Garapuá Quad Tour": {
+  "titulo": "Recorrido en cuatriciclo por Praia de Garapuá",
+  "descripcion": "Si querés combinar aventura y relax, este recorrido en cuatriciclo por Praia de Garapuá es el plan ideal para conocer el lado más salvaje de Morro de São Paulo."
+ },
+ "morro|Trip to Boca da Barra Beach in Boipeba": {
+  "titulo": "Excursión a la playa Boca da Barra, en Boipeba",
+  "descripcion": "Descubrí una de las playas más espectaculares de la isla de Boipeba con este tour desde Morro de São Paulo. Boca da Barra te va a dejar sin palabras."
+ },
+ "portoseguro|Arraial d'Ajuda Eco Park Day Trip": {
+  "titulo": "Excursión de un día al Eco Parque de Arraial d'Ajuda",
+  "descripcion": "Diversión asegurada en esta excursión al Eco Parque de Arraial d'Ajuda, uno de los parques acuáticos más grandes de América Latina."
+ },
+ "portoseguro|Caraíva Day Trip": {
+  "titulo": "Excursión de un día a Caraíva desde Porto Seguro",
+  "descripcion": "¿Un día en el paraíso? Sumergite en playas cristalinas, calles de arena y casas de colores en esta excursión a Caraíva desde Porto Seguro."
+ },
+ "portoseguro|Coroa Alta Marine Park Day Trip": {
+  "titulo": "Excursión al Parque Marino Coroa Alta",
+  "descripcion": "Arrecifes de coral y piscinas naturales son las protagonistas de esta excursión al Parque Marino Coroa Alta, con un lindo paseo en velero."
+ },
+ "portoseguro|Praia do Espelho Beach Day Trip": {
+  "titulo": "Excursión de un día a Praia do Espelho",
+  "descripcion": "En esta excursión a Praia do Espelho desde Porto Seguro pasás un día inolvidable en una de las playas más lindas y famosas de Brasil."
+ },
+ "forte|Salvador Day Trip": {
+  "titulo": "Excursión de un día a Salvador",
+  "descripcion": "Historia, playas y cultura se combinan en esta excursión a Salvador de Bahía, con un recorrido panorámico para conocer su rico patrimonio histórico."
+ },
+ "ssa|Afro-Brazilian Cooking Class": {
+  "titulo": "Clase de cocina afrobrasileña",
+  "descripcion": "¿Te gusta probar sabores nuevos? En esta clase de cocina en Salvador de Bahía aprendés a preparar platos tradicionales afrobrasileños con una familia local."
+ },
+ "ssa|Bay of All Saints Outrigger Canoe Ride": {
+  "titulo": "Paseo en canoa polinesia por la Bahía de Todos los Santos",
+  "descripcion": "No te pierdas la oportunidad de remar en una canoa polinesia por la Bahía de Todos los Santos. Hasta podés hacer snorkel."
+ },
+ "ssa|Cachoeira Day Trip": {
+  "titulo": "Excursión de un día a Cachoeira",
+  "descripcion": "Descubrí la historia del estado de Bahía en esta excursión a Cachoeira. Visitamos casas coloniales y conocemos su fascinante pasado."
+ },
+ "ssa|Morro de São Paulo Day Trip": {
+  "titulo": "Excursión de un día a Morro de São Paulo",
+  "descripcion": "En esta excursión a Morro de São Paulo conocés un auténtico paraíso de aguas cristalinas, playas de arena blanca y palmeras para un día de sol y diversión."
+ },
+ "ssa|Pelourinho African Culture Tour": {
+  "titulo": "Tour por Pelourinho: cultura africana",
+  "descripcion": "En este recorrido por Pelourinho descubrimos la cultura africana en el centro de esta ciudad brasileña y aprendemos sobre la esclavitud y la liberación."
+ },
+ "ssa|Pelourinho Folkloric Dinner Show": {
+  "titulo": "Cena con show folclórico en Pelourinho",
+  "descripcion": "Salvador de Bahía es una ciudad llena de cultura y sabor. Viví una noche inolvidable en el barrio de Pelourinho con esta cena y show folclórico."
+ },
+ "ssa|Percussion + Samba-Reggae Class": {
+  "titulo": "Clase de percusión y samba-reggae",
+  "descripcion": "Descubrí y disfrutá los ritmos pegadizos de Salvador en esta clase de percusión y samba-reggae. Una experiencia única."
+ },
+ "ssa|Private Tour of Salvador": {
+  "titulo": "Tour privado por Salvador",
+  "descripcion": "Con nuestro tour privado por Salvador, un guía estará exclusivamente a disposición tuya, de tu pareja, familia o amigos para mostrarles la ciudad."
+ },
+ "ssa|Salvador Islands Trip": {
+  "titulo": "Excursión a las islas de Salvador",
+  "descripcion": "Disfrutá de un día completo descubriendo las islas paradisíacas de Frades e Itaparica, en la costa de Salvador, en esta excursión en barco."
+ },
+ "ssa|Salvador da Bahia Historic Centre & Barra Lighthouse Tour": {
+  "titulo": "Centro histórico de Salvador y Faro da Barra",
+  "descripcion": "La primera capital de Brasil fue Salvador de Bahía. Descubrí sus hermosos monumentos en este tour por el centro histórico y el Faro da Barra."
+ },
+ "ssa|Salvador da Bahia Sightseeing Bus Tour": {
+  "titulo": "Tour de Salvador de Bahía en bus turístico",
+  "descripcion": "Descubrí lo mejor de Salvador de Bahía en este cómodo tour en bus turístico por una de las ciudades más cautivantes de Brasil, un lugar de fuertes contrastes."
+ },
+ "ssa|Salvador de Bahia City + Beaches Tour": {
+  "titulo": "Salvador de Bahía: ciudad y playas",
+  "descripcion": "En este tour por Salvador podés elegir entre 2 o 3 rutas por la ciudad y las playas de Imbassaí, Itacimirim o Frades."
+ },
+ "ssa|Salvador de Bahia Instagram Private Photo Tour": {
+  "titulo": "Tour fotográfico privado por Salvador de Bahía",
+  "descripcion": "Disfrutá de un recorrido fotográfico por Salvador de Bahía con un fotógrafo profesional. ¿Listo para tu primer plano?"
+ },
+ "ssa|Salvador de Bahía Tour + Flamengo & Stella Maris Beaches": {
+  "titulo": "Salvador de Bahía y playas Flamengo y Stella Maris",
+  "descripcion": "En este tour por Salvador de Bahía nos dirigimos a las afueras para que te relajes en las paradisíacas playas de Flamengo y Stella Maris."
+ },
+ "ssa|Scuba Dive for Beginners": {
+  "titulo": "Buceo para principiantes",
+  "descripcion": "Si nunca probaste el buceo pero querés saber de qué se trata, este curso básico de iniciación es la introducción perfecta."
+ },
+ "ssa|Tour of the Candomblé Region": {
+  "titulo": "Tour por la región del Candomblé",
+  "descripcion": "Adentrate en el corazón de la religión del Candomblé y descubrí su rica historia y sus profundas y vivas tradiciones africanas."
+ },
+ "ssa|Visit to the Quilombo Kaonge Afro-Brazilian Community": {
+  "titulo": "Visita a la comunidad afrobrasileña Quilombo Kaonge",
+  "descripcion": "En esta excursión a Quilombo Kaonge nos adentramos en las raíces históricas y culturales de esta comunidad afrobrasileña. ¡No te la pierdas!"
+ },
+ "trancoso|Arraial d'Ajuda & Mucugê Beach Day Trip": {
+  "titulo": "Excursión a Arraial d'Ajuda y la playa Mucugê",
+  "descripcion": "En esta excursión a Arraial d'Ajuda y a Praia do Mucugê descubrimos una de las maravillas del estado de Bahía y conocemos su rica historia."
+ },
+ "trancoso|Guaiú Beach Private Day Trip": {
+  "titulo": "Excursión privada a la playa Guaiú",
+  "descripcion": "En esta excursión privada a la playa Guaiú desde Porto Seguro descubrimos un rinconcito de paraíso en la Costa do Descobrimento."
+ },
+ "trancoso|João de Tiba River Boat Trip": {
+  "titulo": "Paseo en barco por el río João de Tiba",
+  "descripcion": "En este paseo en barco por el río João de Tiba desde Porto Seguro conocemos otros lugares del estado de Bahía y disfrutamos de paisajes increíbles."
+ },
+ "bho|Belo Horizonte Guided Tour": {
+  "titulo": "Tour guiado por Belo Horizonte",
+  "descripcion": "Descubrí la importancia histórica de la capital de Minas Gerais en este tour guiado por Belo Horizonte, uno de los grandes destinos turísticos de Brasil."
+ },
+ "bho|Belo Horizonte Markets Tour": {
+  "titulo": "Tour por los mercados de Belo Horizonte",
+  "descripcion": "Aromas, sabores, creencias, cultura, arte, urbanismo… Todo eso se reúne en este recorrido por el Mercado Central y el Mercado Nuevo de Belo Horizonte."
+ },
+ "bho|Belo Horizonte Private Tour": {
+  "titulo": "Tour privado por Belo Horizonte",
+  "descripcion": "¿Querés conocer la capital de Minas Gerais en un grupo exclusivo? En este tour privado por Belo Horizonte tenés un guía solo para vos."
+ },
+ "bho|Capitólio & Furnas Lake Day Trip": {
+  "titulo": "Excursión a Capitólio y el Lago de Furnas",
+  "descripcion": "Explorá dos sitios increíbles de Minas Gerais en esta excursión desde Belo Horizonte: las famosas cascadas de Capitólio y una navegación por el Lago de Furnas."
+ },
+ "bho|Casa Palma Tour + Paint Workshop": {
+  "titulo": "Tour por Casa Palma y taller de pintura",
+  "descripcion": "En este tour guiado por Casa Palma conocemos el legado del artista Fernando Palma y disfrutamos de un taller de pintura. Te llevás tu obra a casa."
+ },
+ "bho|Cavernas do Peruaçu National Park 5-Day Trip": {
+  "titulo": "Viaje de 5 días al Parque Nacional Cavernas do Peruaçu",
+  "descripcion": "En este viaje de 5 días por el Parque Nacional Cavernas do Peruaçu exploramos cuevas prehistóricas con arte rupestre, cañones imponentes, miradores increíbles y más."
+ },
+ "bho|Inhotim Institute Tour": {
+  "titulo": "Tour por el Instituto Inhotim",
+  "descripcion": "Si te gusta el arte contemporáneo no podés perderte esta visita al museo a cielo abierto Instituto Inhotim, uno de los centros culturales de Minas Gerais."
+ },
+ "bho|Ouro Preto & Mariana Day Trip": {
+  "titulo": "Excursión a Ouro Preto y Mariana",
+  "descripcion": "En esta excursión a Ouro Preto y Mariana desde Belo Horizonte conocemos su gran patrimonio artístico y religioso. ¡Imperdible!"
+ },
+ "bho|Private Tours from Belo Horizonte": {
+  "titulo": "Tours privados desde Belo Horizonte",
+  "descripcion": "Con nuestros tours privados desde Belo Horizonte podés descubrir ciudades históricas o disfrutar de la naturaleza local. ¡Vos elegís!"
+ },
+ "bho|Rei do Mato and Maquiné Caves + Guimaraes Rosa Museum Tour": {
+  "titulo": "Cuevas Rei do Mato y Maquiné y Museo Guimarães Rosa",
+  "descripcion": "Este viaje a las cuevas Rei do Mato y Maquiné es ideal para vivir una verdadera experiencia de espeleología. También visitamos el Museo Guimarães Rosa."
+ },
+ "bho|Sabará + Congonhas Tour": {
+  "titulo": "Tour por Sabará y Congonhas",
+  "descripcion": "En este tour a Sabará y Congonhas desde Belo Horizonte descubrimos el pasado colonial del hermoso estado de Minas Gerais."
+ },
+ "bho|Santuario de Caraça Tour": {
+  "titulo": "Tour al Santuario de Caraça",
+  "descripcion": "Si estás en Belo Horizonte, no podés perderte esta excursión al Santuario de Caraça, uno de los grandes centros de culto del estado de Minas Gerais."
+ },
+ "bho|Serra do Cipó Day Trip + Gruta da Lapinha": {
+  "titulo": "Excursión a Serra do Cipó y Gruta da Lapinha",
+  "descripcion": "En esta excursión explorás la naturaleza de la Serra do Cipó y visitás la Gruta da Lapinha, una de las cuevas más increíbles de la región."
+ },
+ "bho|São João del Rei & Tiradentes Day Trip": {
+  "titulo": "Excursión a São João del Rei y Tiradentes",
+  "descripcion": "Para entender la fascinante historia de Minas Gerais, esta excursión a São João del Rei y Tiradentes desde Belo Horizonte es imperdible."
+ },
+ "bue|Alijibe Tango Show": {
+  "titulo": "Show de tango en Aljibe Tango",
+  "descripcion": "Dejate seducir por la pasión del baile más popular de Argentina con un show de tango en Aljibe Tango, una tradicional tanguería."
+ },
+ "bue|Authentic Argentine Barbeque": {
+  "titulo": "Auténtico asado argentino",
+  "descripcion": "Disfrutá de un típico asado argentino en Palermo, uno de los barrios más populares de Buenos Aires. Una experiencia gastronómica auténtica."
+ },
+ "bue|Buenos Aires Private Layover Tour": {
+  "titulo": "Tour privado para escala en Buenos Aires",
+  "descripcion": "Este tour privado es perfecto para viajeros con una escala en el aeropuerto de Buenos Aires que quieren aprovechar el tiempo para conocer esta encantadora ciudad."
+ },
+ "bue|Café de los Angelitos Tango Show": {
+  "titulo": "Show de tango en el Café de los Angelitos",
+  "descripcion": "Dejate seducir por el sensual baile del tango en este fantástico show en el Café de los Angelitos, uno de los locales más emblemáticos de Buenos Aires."
+ },
+ "bue|Campanopolis Day Trip": {
+  "titulo": "Excursión de un día a Campanópolis",
+  "descripcion": "En esta excursión a Campanópolis desde Buenos Aires te llevamos a conocer un pueblo de estilo medieval construido a mediados del siglo XX."
+ },
+ "bue|Capilla del Señor Horseback Riding": {
+  "titulo": "Cabalgata en Capilla del Señor",
+  "descripcion": "Viví una aventura campestre con una cabalgata por Capilla del Señor, acompañada de un auténtico asado argentino."
+ },
+ "bue|Fileteado Porteño: Buenos Aires Folk Art Workshop": {
+  "titulo": "Taller de fileteado porteño: arte popular de Buenos Aires",
+  "descripcion": "Descubrí una de las expresiones culturales más emblemáticas de Argentina en este taller de fileteado porteño en San Telmo. Aprendé los secretos de este arte colorido."
+ },
+ "bue|Gaucho Cultural Experience Tour": {
+  "titulo": "Experiencia cultural gaucha",
+  "descripcion": "En este tour conocés las costumbres gauchas en San Antonio de Areco, un pueblo en el corazón de Argentina. ¡No te lo pierdas!"
+ },
+ "bue|La Bomba de Tiempo Show Ticket": {
+  "titulo": "Entrada al show de La Bomba de Tiempo",
+  "descripcion": "Sentí la electrizante mezcla de ritmo y energía de La Bomba de Tiempo, el show de percusión improvisada que revolucionó la escena musical de Buenos Aires."
+ },
+ "bue|Mendoza Wine Tasting Experience": {
+  "titulo": "Degustación de vinos de Mendoza",
+  "descripcion": "Sumate a una degustación de vinos en la Bodega Florio, en el encantador barrio de La Boca, con vinos de la reconocida provincia de Mendoza."
+ },
+ "bue|Museo River Plate Tickets + Estadio Monumental Stadium Visit": {
+  "titulo": "Museo River Plate y visita al Estadio Monumental",
+  "descripcion": "Explorá el Museo River Plate y conocé los orígenes y la historia del Club Atlético River Plate. Completá la visita con un recorrido por el Estadio Monumental."
+ },
+ "bue|Polo Match in Buenos Aires with a Local Guide": {
+  "titulo": "Partido de polo en Buenos Aires con guía local",
+  "descripcion": "Después del fútbol, ¿sabés cuál es el deporte más popular de Argentina? Lo vas a descubrir con esta entrada a un partido de polo en Buenos Aires."
+ },
+ "bue|Private Tour of Buenos Aires": {
+  "titulo": "Tour privado por Buenos Aires",
+  "descripcion": "En este tour privado por Buenos Aires tenés tu propio guía y la libertad de explorar los lugares más emblemáticos de la capital argentina."
+ },
+ "bue|Retiro Neighborhood Mate Workshop": {
+  "titulo": "Taller de mate en Retiro",
+  "descripcion": "Descubrí una de las tradiciones más importantes de Argentina en este taller de mate en Retiro, el barrio más vibrante de Buenos Aires."
+ },
+ "bue|Show at Señor Tango": {
+  "titulo": "Show en Señor Tango",
+  "descripcion": "Disfrutá del ambiente más auténtico de Buenos Aires de la época dorada del tango, en un escenario de primer nivel, con este show en Señor Tango."
+ },
+ "bue|Tango Porteño Theatre Show": {
+  "titulo": "Show en el Teatro Tango Porteño",
+  "descripcion": "El Teatro Tango Porteño, en Buenos Aires, es el lugar perfecto para disfrutar del famoso baile argentino junto a una deliciosa cena tradicional."
+ },
+ "arraial|Arraial do Cabo Boat Trip": {
+  "titulo": "Paseo en barco por Arraial do Cabo",
+  "descripcion": "En este paseo en barco por Arraial do Cabo descubrís lugares como la Ilha do Farol, Praia do Forno o la Gruta Azul."
+ },
+ "arraial|Arraial do Cabo Buggy Tour": {
+  "titulo": "Tour en buggy por Arraial do Cabo",
+  "descripcion": "En este tour en buggy por Arraial do Cabo recorremos los rincones encantadores de esta ciudad costera de Río de Janeiro y admiramos paisajes espectaculares."
+ },
+ "arraial|Arraial do Cabo Diving Introduction": {
+  "titulo": "Bautismo de buceo en Arraial do Cabo",
+  "descripcion": "Explorá el fondo marino que atrae a buzos de todo el mundo con esta introducción al buceo en Arraial do Cabo. El lugar perfecto para aprender."
+ },
+ "arraial|Arraial do Cabo Hiking Tour": {
+  "titulo": "Caminata por Arraial do Cabo",
+  "descripcion": "Combiná deporte y naturaleza en esta caminata por las playas y miradores de Arraial do Cabo. Disfrutamos de la ciudad desde distintas perspectivas."
+ },
+ "arraial|Arraial do Cabo Quad Tour": {
+  "titulo": "Recorrido en cuatriciclo por Arraial do Cabo",
+  "descripcion": "Si estás en Arraial do Cabo y querés conocer sus principales atractivos naturales de una forma divertida y original, no te pierdas este recorrido en cuatriciclo."
+ },
+ "arraial|Arubinha Buggy Tour": {
+  "titulo": "Tour en buggy por Arubinha",
+  "descripcion": "¿Buscás adrenalina? En este tour en buggy por Arubinha recorremos la hermosa zona natural de Arraial do Cabo junto a la laguna de Araruama."
+ },
+ "arraial|Day Trip to Búzios": {
+  "titulo": "Excursión de un día a Búzios",
+  "descripcion": "En esta excursión a Búzios desde Arraial do Cabo viajamos en un barco de época y en bus a los lugares más emblemáticos de la ciudad."
+ },
+ "arraial|Praia Grande & Janela do Paraíso Hiking Tour": {
+  "titulo": "Caminata a Praia Grande y Janela do Paraíso",
+  "descripcion": "Sumate a esta aventura de senderismo a Praia Grande y Janela do Paraíso, dos lugares impresionantes de la costa de Arraial do Cabo."
+ },
+ "arraial|Río de Janeiro Day Trip": {
+  "titulo": "Excursión de un día a Río de Janeiro",
+  "descripcion": "Tour de un día desde Arraial do Cabo a Río de Janeiro: visitá el Cristo Redentor, el Sambódromo y más para un día inolvidable."
+ },
+ "buz|Arraial do Cabo Day Trip + Boat Ride": {
+  "titulo": "Excursión a Arraial do Cabo con paseo en barco",
+  "descripcion": "¿Querés conocer uno de los lugares más lindos de Río de Janeiro? En esta excursión a Arraial do Cabo visitamos sus playas de arena blanca en un divertido paseo en barco."
+ },
+ "buz|Buzios Trolleybus Tour": {
+  "titulo": "Tour en trolebús por Búzios",
+  "descripcion": "Descubrí por qué Brigitte Bardot se enamoró de las playas de Búzios en este tour en trolebús por la ciudad brasileña."
+ },
+ "buz|Búzios Buggy Tour": {
+  "titulo": "Tour en buggy por Búzios",
+  "descripcion": "¿Querés explorar Búzios de una forma divertida? ¡No te pierdas este emocionante tour en buggy! Te vas a enamorar de la historia y la belleza de esta ciudad costera."
+ },
+ "buz|Búzios Canoe Tour": {
+  "titulo": "Paseo en canoa por Búzios",
+  "descripcion": "Admirá la costa de Búzios desde una perspectiva única en un paseo en canoa. Sentí la brisa del mar mientras remamos por algunas de las playas más famosas de la península."
+ },
+ "buz|Búzios Catamaran Tour": {
+  "titulo": "Paseo en catamarán por Búzios",
+  "descripcion": "Sumate a un relajante paseo en catamarán para admirar playas de arena dorada y una isla de vegetación salvaje frente a la costa de Búzios."
+ },
+ "buz|Búzios Diving Introduction": {
+  "titulo": "Bautismo de buceo en Búzios",
+  "descripcion": "¿Querés explorar los tesoros del fondo marino brasileño? Sumate a esta clase de buceo en Búzios, una introducción a esta emocionante actividad en un entorno de ensueño."
+ },
+ "buz|Búzios Hiking Tour": {
+  "titulo": "Caminata por Búzios",
+  "descripcion": "¡Explorá los paisajes impresionantes de Río de Janeiro! Sumate a esta aventura a pie por las playas y piscinas naturales de Búzios."
+ },
+ "buz|Búzios Jardineira Tour & Schooner Ride": {
+  "titulo": "Tour en jardineira y paseo en goleta por Búzios",
+  "descripcion": "Este tour en jardineira por Búzios combina vistas increíbles, almuerzo sobre la Orla Bardot, un baño en la playa Ferradura y un divertido paseo en goleta."
+ },
+ "buz|Búzios Night Snorkelling Tour": {
+  "titulo": "Snorkel nocturno en Búzios",
+  "descripcion": "Viví esta experiencia de snorkel nocturno en Búzios y explorá la vida submarina que despierta de noche en los arrecifes de João Fernandinho."
+ },
+ "buz|Búzios Schooner Trip": {
+  "titulo": "Paseo en goleta por Búzios",
+  "descripcion": "Navegá por la hermosa costa de la península de Búzios en este paseo en goleta. También podés darte un baño en algunas de las playas atlánticas del pueblo."
+ },
+ "buz|Búzios Surf Lesson": {
+  "titulo": "Clase de surf en Búzios",
+  "descripcion": "Con esta clase de surf en Búzios descubrís la emoción de este deporte mientras aprendés a dominar la tabla y las olas del océano Atlántico."
+ },
+ "buz|Cabo Frío Day Trip": {
+  "titulo": "Excursión de un día a Cabo Frío",
+  "descripcion": "Una isla paradisíaca, playas de ensueño y un casco antiguo te esperan en esta excursión a Cabo Frío, uno de los destinos más lindos de Río de Janeiro."
+ },
+ "buz|Ponta do Pai Vitório Hiking Tour": {
+  "titulo": "Caminata a Ponta do Pai Vitório",
+  "descripcion": "No pierdas la oportunidad de explorar la naturaleza impresionante de Búzios con nuestra caminata a Ponta do Pai Vitório. Cruzamos colinas, playas y hasta manglares."
+ },
+ "buz|Rio de Janeiro Tour": {
+  "titulo": "Tour a Río de Janeiro desde Búzios",
+  "descripcion": "Si estás en Búzios y querés conocer la Ciudad Maravillosa de Brasil, no te pierdas esta excursión a Río de Janeiro. ¡Vamos a descubrir todos sus encantos!"
+ },
+ "buz|Serra das Emerências Hiking Tour": {
+  "titulo": "Caminata por la Serra das Emerências",
+  "descripcion": "Subí al punto más alto de Búzios en esta caminata por la Serra das Emerências. Además, visitás la playa José Gonçalves y sacás fotos increíbles."
+ },
+ "buz|Tour of Búzios + Catamaran Ride": {
+  "titulo": "Tour por Búzios con paseo en catamarán",
+  "descripcion": "En este tour por Búzios exploramos la ciudad por tierra y por mar, conocemos sus playas más famosas y nos adentramos en su historia."
+ },
+ "cabo|Búzios Day Trip": {
+  "titulo": "Excursión de un día a Búzios",
+  "descripcion": "En esta excursión a Búzios navegamos en un barco de estilo tradicional por las playas paradisíacas de Río de Janeiro y disfrutamos de un rico almuerzo junto al mar."
+ },
+ "cabo|Cabo Frio Beach Hiking Tour": {
+  "titulo": "Caminata por las playas de Cabo Frío",
+  "descripcion": "Sumate a esta aventura a pie por las impresionantes playas y miradores de Cabo Frío. Cruzamos cuevas marinas, bahías de arena blanca, acantilados y piscinas naturales."
+ },
+ "cabo|Cabo Frio Catamaran Ride": {
+  "titulo": "Paseo en catamarán por Cabo Frío",
+  "descripcion": "Descubrí los paisajes paradisíacos del estado de Río de Janeiro en este paseo en catamarán alrededor de Cabo Frío. ¡Te esperan los rincones más lindos de esta ciudad costera!"
+ },
+ "cabo|Day Trip to Arraial do Cabo": {
+  "titulo": "Excursión de un día a Arraial do Cabo",
+  "descripcion": "Playas y monumentos naturales son lo más destacado de esta excursión a Arraial do Cabo. Exploramos la ciudad con un inolvidable paseo en barco."
+ },
+ "angra|Angra dos Reis Beaches Boat Tour": {
+  "titulo": "Paseo en barco por las playas de Angra dos Reis",
+  "descripcion": "Salí al mar en un velero en nuestro paseo por las playas de Angra dos Reis. Explorá las increíbles playas de esta parte de Brasil y date un chapuzón en el paraíso."
+ },
+ "angra|Angra dos Reis Private Boat Trip": {
+  "titulo": "Paseo privado en barco por Angra dos Reis",
+  "descripcion": "Ilhas Botinas, Lagoa Azul, Lagoa Verde… En este paseo privado en barco te llevamos a descubrir los grandes encantos de Angra dos Reis de forma divertida y exclusiva."
+ },
+ "angra|Angra dos Reis Waterfalls Hiking Tour": {
+  "titulo": "Caminata a las cascadas de Angra dos Reis",
+  "descripcion": "Emprendé un emocionante viaje a las cascadas de Angra dos Reis y sumergite en la impresionante naturaleza de Río de Janeiro en un día de exploración."
+ },
+ "angra|Banqueta Waterfalls Hiking Tour": {
+  "titulo": "Caminata a las cascadas de Banqueta",
+  "descripcion": "En esta ruta por las cascadas de Banqueta admiramos las cascadas Véu de Noiva, Borboleta Azul y Escorrega. Te espera una naturaleza impresionante."
+ },
+ "angra|Day Trip to Mangaratiba & São João Marcos Archeological Park": {
+  "titulo": "Excursión a Mangaratiba y al Parque Arqueológico São João Marcos",
+  "descripcion": "En esta excursión a Mangaratiba y al Parque Arqueológico São João Marcos nos sumergimos en la Mata Atlántica y viajamos en el tiempo."
+ },
+ "angra|Day Trip to the Ponta Leste Tourist Route": {
+  "titulo": "Excursión por la Ruta Turística Ponta Leste",
+  "descripcion": "Conocé la Ruta Turística Ponta Leste, en Angra dos Reis, un paraíso con hermosas playas, miradores y cascadas. ¡Una excursión inolvidable!"
+ },
+ "angra|Hang Gliding in Angra dos Reis": {
+  "titulo": "Vuelo en ala delta en Angra dos Reis",
+  "descripcion": "¿Te interesa ver Angra dos Reis desde el cielo? Sentí la máxima adrenalina y admirá hermosas playas e islas con esta aventura en ala delta."
+ },
+ "angra|Ilhas Botinas Boat Trip + Angra dos Reis Beaches": {
+  "titulo": "Paseo en barco por las Ilhas Botinas y playas de Angra dos Reis",
+  "descripcion": "Descubrí algunas de las maravillas naturales del estado de Río de Janeiro en este paseo en barco por las Ilhas Botinas y las playas de Angra dos Reis."
+ },
+ "angra|Lagoa Azul Boat Ride + Ilha Grande Beaches": {
+  "titulo": "Paseo en barco a Lagoa Azul y playas de Ilha Grande",
+  "descripcion": "Calas de aguas turquesa, arena blanca y virgen… Descubrí los paisajes paradisíacos de Angra dos Reis en este paseo en barco a Lagoa Azul e Ilha Grande."
+ },
+ "angra|Lagoa Verde Boat Ride + Ilha Grande Beaches": {
+  "titulo": "Paseo en barco a Lagoa Verde y playas de Ilha Grande",
+  "descripcion": "Si estás en Angra dos Reis, no te pierdas la oportunidad de hacer un paseo en barco por Lagoa Verde y las playas de Ilha Grande. Te esperan paisajes de ensueño."
+ },
+ "angra|Mata Atlântica Greenway Hiking Tour": {
+  "titulo": "Caminata por la Vía Verde de la Mata Atlántica",
+  "descripcion": "Emprendé un fascinante viaje que combina naturaleza e historia por la Vía Verde de la Mata Atlántica. Sumate a explorar estas antiguas vías de tren."
+ },
+ "angra|Nuclear Observatory & Southern Tourist Route Tour": {
+  "titulo": "Observatorio nuclear y Ruta Turística del Sur",
+  "descripcion": "En este tour por el observatorio nuclear vemos las únicas centrales nucleares de Brasil junto a algunas de las playas más lindas del sur de Angra dos Reis."
+ },
+ "angra|The Islands of Angra dos Reis Private Boat Tour": {
+  "titulo": "Paseo privado en barco por las islas de Angra dos Reis",
+  "descripcion": "En este paseo en barco por Angra dos Reis navegamos junto a las islas Duas Irmãs, Cavaco y Pelegrino, rodeados de los exuberantes paisajes de la Mata Atlántica."
+ },
+ "ilha|Abraão, Preta Beach + Ilha Grande Aqueduct Tour": {
+  "titulo": "Abraão, playa Preta y Acueducto de Ilha Grande",
+  "descripcion": "En este tour exploramos el pueblo de Abraão, la playa Preta y el Acueducto de Ilha Grande, tres de los principales atractivos turísticos de la isla."
+ },
+ "ilha|Acaiá Cave+ Ilha Grande Lagoons Tour": {
+  "titulo": "Gruta Acaiá y lagunas de Ilha Grande",
+  "descripcion": "Si estás en Ilha Grande, no pierdas la oportunidad de recorrer la Gruta Acaiá y sus principales lagunas. Te vas a enamorar de sus paisajes."
+ },
+ "ilha|Angra dos Reis Islands Boat Tour": {
+  "titulo": "Paseo en barco por las islas de Angra dos Reis",
+  "descripcion": "En este paseo en barco por las islas de Angra dos Reis navegamos por el canal que une el continente con Ilha Grande. ¡Preparate para descubrir el paraíso!"
+ },
+ "ilha|Boat Tour of Lagoa Azul + Lagoa Verde": {
+  "titulo": "Paseo en barco por Lagoa Azul y Lagoa Verde",
+  "descripcion": "Disfrutá de los paisajes increíbles del norte de Ilha Grande en este paseo en barco por las lagunas Azul y Verde. Date un chapuzón en aguas cristalinas."
+ },
+ "ilha|Ilha Grande Private Boat Tour": {
+  "titulo": "Paseo privado en barco por Ilha Grande",
+  "descripcion": "En este paseo privado en barco por Ilha Grande descubrís los atractivos de esta isla paradisíaca de forma exclusiva. Un tour solo para tu grupo."
+ },
+ "ilhabela|Bonete & Indaiaúba Boat Ride": {
+  "titulo": "Paseo en barco a Bonete e Indaiaúba",
+  "descripcion": "Visitá las playas de Bonete e Indaiaúba en este paseo en barco desde Ilhabela. Tenés tiempo libre para nadar en sus espectaculares aguas cristalinas."
+ },
+ "ilhabela|Diving at Ilhabela Shipwrecks": {
+  "titulo": "Buceo en los naufragios de Ilhabela",
+  "descripcion": "Explorá los restos de barcos hundidos frente a la costa brasileña con esta actividad de buceo en naufragios en Ilhabela. ¿Qué secretos se esconderán entre los restos?"
+ },
+ "ilhabela|Ilhabela Beaches 4x4 Tour + Scuba Diving or Snorkeling": {
+  "titulo": "Tour 4x4 por las playas de Ilhabela con buceo o snorkel",
+  "descripcion": "En este tour 4x4 por las playas de Ilhabela visitamos los lugares más paradisíacos del litoral norte de Brasil y tenés la posibilidad de hacer snorkel o buceo."
+ },
+ "ilhabela|NAUI Open Water Diving Course in Ilhabela": {
+  "titulo": "Curso NAUI Open Water en Ilhabela",
+  "descripcion": "Aprendé a ser un buzo autónomo con el curso NAUI Open Water Diver en Ilhabela. Al terminarlo, vas a poder bucear en cualquier parte del mundo."
+ },
+ "ilhabela|Night Diving in Ilhabela": {
+  "titulo": "Buceo nocturno en Ilhabela",
+  "descripcion": "Con esta actividad de buceo nocturno en Ilhabela exploramos a oscuras el santuario de flora y fauna marina de la Ilha das Cabras. Una experiencia inolvidable."
+ },
+ "ilhabela|Scuba Diving Lesson in Ilhabela": {
+  "titulo": "Clase de buceo en Ilhabela",
+  "descripcion": "Con esta clase de buceo para principiantes en Ilhabela vas a admirar la gran biodiversidad del fondo marino brasileño mientras aprendés de forma segura y divertida."
+ },
+ "ilhabela|Snorkeling Class in Ilhabela": {
+  "titulo": "Clase de snorkel en Ilhabela",
+  "descripcion": "Tomá esta clase de snorkel en Ilhabela y descubrí el mundo submarino de la costa brasileña acompañado por los mejores instructores."
+ },
+ "ilhabela|Whale Watching in Ilhabela": {
+  "titulo": "Avistaje de ballenas en Ilhabela",
+  "descripcion": "La mejor época para ver ballenas en Ilhabela es entre mayo y agosto. Viví esta experiencia única con un inolvidable paseo en barco."
+ },
+ "paraty|Bike Rental in Paraty": {
+  "titulo": "Alquiler de bicicletas en Paraty",
+  "descripcion": "¿Hay una mejor forma de explorar una ciudad que sobre dos ruedas? Con nuestro alquiler de bicicletas descubrís Paraty y todos sus tesoros escondidos a tu ritmo."
+ },
+ "paraty|Day Trip to Trindade": {
+  "titulo": "Excursión de un día a Trindade",
+  "descripcion": "Aguas cristalinas y playas celestiales te esperan. Descubrí la costa natural y salvaje de Brasil con esta excursión a Trindade desde Paraty."
+ },
+ "paraty|Paraty Bay Kayak Tour": {
+  "titulo": "Kayak por la Bahía de Paraty",
+  "descripcion": "En este recorrido en kayak remamos por las aguas de la Bahía de Paraty y descubrimos lugares como la Isla Pombas y el río Perequê. Una aventura única."
+ },
+ "paraty|Paraty Bike Tour": {
+  "titulo": "Tour en bicicleta por Paraty",
+  "descripcion": "Explorá Paraty en este tour en bicicleta con guía de habla inglesa. Descubrí sobre dos ruedas el encanto de una de las ciudades más lindas de Brasil."
+ },
+ "paraty|Paraty Cachaça Tour": {
+  "titulo": "Tour de la cachaça en Paraty",
+  "descripcion": "En este tour de la cachaça por Paraty descubrimos la ciudad desde una perspectiva única y probamos distintos tipos de esta bebida destilada brasileña."
+ },
+ "paraty|Paraty Islands Tour": {
+  "titulo": "Tour por las islas de Paraty",
+  "descripcion": "Relajate en algunas de las mejores playas de Brasil y date un chapuzón en aguas cristalinas en este maravilloso tour por las islas de Paraty."
+ },
+ "paraty|Paraty Waterfalls Off-Roading Tour + Cachaça Distillery Visit": {
+  "titulo": "Tour todoterreno a cascadas de Paraty y visita a una destilería de cachaça",
+  "descripcion": "En este tour todoterreno visitamos las cascadas más lindas de Paraty, una fábrica artesanal de quesos y una destilería de cachaça. Te va a encantar."
+ },
+ "paraty|Praia do Sono Hiking Tour": {
+  "titulo": "Caminata a Praia do Sono",
+  "descripcion": "En esta caminata a Praia do Sono exploramos una de las costas más lindas y mejor conservadas de Paraty, con vistas espléndidas de la Mata Atlántica."
+ },
+ "paraty|Private Tour of Paraty": {
+  "titulo": "Tour privado por Paraty",
+  "descripcion": "Descubrí una de las ciudades coloniales más lindas de Brasil y conocé sus secretos con este tour privado en inglés."
+ },
+ "paraty|Saco do Mamanguá Boat Tour": {
+  "titulo": "Paseo en barco por Saco do Mamanguá",
+  "descripcion": "Navegá por el único fiordo tropical de Brasil en este paseo en barco por Saco do Mamanguá. Te esperan naturaleza, playas paradisíacas y cultura caiçara."
+ },
+ "paraty|Saco do Mamanguá Day Trip": {
+  "titulo": "Excursión de un día a Saco do Mamanguá",
+  "descripcion": "Paisajes verdes y snorkel en el Atlántico. Enamorate de una de las áreas naturales más encantadoras de Brasil con esta excursión a Saco do Mamanguá."
+ },
+ "paraty|Serra da Bocaina Jeep Tour": {
+  "titulo": "Tour en jeep por la Serra da Bocaina",
+  "descripcion": "Adentrate en la naturaleza salvaje de Brasil con este tour en jeep por la Serra da Bocaina, uno de los parques nacionales más impresionantes del país."
+ },
+ "paraty|Sugarloaf Mountain Hiking Tour": {
+  "titulo": "Caminata al Pão de Açúcar de Mamanguá",
+  "descripcion": "En esta caminata al Pão de Açúcar tenemos las mejores vistas del Saco do Mamanguá. Después, podés relajarte en la playa paradisíaca de Cruzeiro."
+ },
+ "paraty|Trindade Day Trip by Off-Roading Vehicle": {
+  "titulo": "Excursión a Trindade en vehículo todoterreno",
+  "descripcion": "Prepará una experiencia increíble en plena Mata Atlántica y las playas paradisíacas de Trindade en esta excursión de un día en vehículo todoterreno."
+ },
+ "ubatuba|Anchieta Island & Sete Fontes Beach Cruise": {
+  "titulo": "Crucero a Ilha Anchieta y playa Sete Fontes",
+  "descripcion": "Si estás en Ubatuba, aprovechá para visitar la Isla Anchieta y la playa Sete Fontes en este tour. Te vas a enamorar de los paisajes idílicos."
+ },
+ "ubatuba|Couves & Prumirim Islands Boat Tour": {
+  "titulo": "Paseo en barco a las islas Couves y Prumirim",
+  "descripcion": "En este paseo en barco a las islas Couves y Prumirim desde Ubatuba nadás en aguas cristalinas y ves la exuberante naturaleza de la Serra do Mar."
+ },
+ "ubatuba|Couves Island & Prumirim Island Day Trip": {
+  "titulo": "Excursión de un día a las islas Couves y Prumirim",
+  "descripcion": "Conectá con la naturaleza en esta excursión a las islas Couves y Prumirim, donde descubrís dos de los lugares más lindos de la región de Ubatuba."
+ },
+ "ubatuba|Day Trip to Anchieta Island": {
+  "titulo": "Excursión de un día a Ilha Anchieta",
+  "descripcion": "Si estás en Ubatuba, no te pierdas este paseo en barco a Ilha Anchieta: exploramos las playas de ensueño de esta área protegida."
+ },
+ "ubatuba|Hike Through the Ruins of Lagoinha": {
+  "titulo": "Caminata por las ruinas de Lagoinha",
+  "descripcion": "En esta caminata por las ruinas de Lagoinha descubrimos fascinantes restos arqueológicos de São Paulo y aprendemos historia recorriendo una antigua hacienda."
+ },
+ "ubatuba|North Ubatuba Boat Tour": {
+  "titulo": "Paseo en barco por el norte de Ubatuba",
+  "descripcion": "Si estás en Ubatuba, no podés perderte este paseo en barco por las islas del norte. ¿Listo para descubrir paisajes naturales impresionantes? ¡Vamos!"
+ },
+ "ubatuba|Prumirim Excursion": {
+  "titulo": "Excursión a Prumirim",
+  "descripcion": "En esta excursión a Prumirim visitamos una cascada y su piscina natural, una playa paradisíaca y una isla de aguas cristalinas."
+ },
+ "ubatuba|Snorkeling in Ubatuba": {
+  "titulo": "Snorkel en Ubatuba",
+  "descripcion": "Con esta actividad de snorkel en Ubatuba exploramos el impresionante fondo marino de la costa de São Paulo y vemos mucha vida marina endémica."
+ },
+ "ubatuba|Ubatuba Beach Hike": {
+  "titulo": "Caminata por las playas de Ubatuba",
+  "descripcion": "En esta ruta a pie por las playas de Ubatuba nos sumergimos en algunos de los paisajes más espectaculares del litoral brasileño."
+ },
+ "ubatuba|Ubatuba Beginner Scuba Diving": {
+  "titulo": "Bautismo de buceo en Ubatuba",
+  "descripcion": "Explorá el fascinante mundo submarino de São Paulo con esta introducción al buceo en Ubatuba y descubrí mucha vida marina endémica."
+ },
+ "ubatuba|Ubatuba Northern Islands Boat Tour": {
+  "titulo": "Paseo en barco por las islas del norte de Ubatuba",
+  "descripcion": "No te pierdas este paseo en barco por las islas del norte de Ubatuba, donde navegamos entre paisajes naturales impresionantes y vivimos una aventura deliciosa."
+ },
+ "ubatuba|Ubatuba Southern Beaches Boat Tour": {
+  "titulo": "Paseo en barco por las playas del sur de Ubatuba",
+  "descripcion": "En este paseo en barco por las playas del sur de Ubatuba disfrutamos de la belleza de la costa de São Paulo y de sus paisajes impresionantes. ¡Imperdible!"
+ },
+ "ubatuba|Ubatuba Waterfalls Hiking Tour": {
+  "titulo": "Caminata por las cascadas de Ubatuba",
+  "descripcion": "Durante esta caminata por las cascadas de Ubatuba exploramos las piscinas naturales de la región y recorremos senderos llenos de belleza."
+ },
+ "curitiba|Araucária Winery Tour": {
+  "titulo": "Visita a la bodega Araucária",
+  "descripcion": "En esta visita a la bodega Araucária conocemos una de las bodegas más famosas de São José dos Pinhais. Vemos sus viñedos y probamos quesos y vinos."
+ },
+ "curitiba|Beto Carrero World Day Trip": {
+  "titulo": "Excursión de un día a Beto Carrero World",
+  "descripcion": "En esta excursión a Beto Carrero World pasás un día en el parque temático más grande de América Latina, con transporte desde Curitiba y entradas incluidas."
+ },
+ "curitiba|Campo Largo Hot Air Balloon Ride": {
+  "titulo": "Paseo en globo aerostático en Campo Largo",
+  "descripcion": "Viví la sensación de volar con este paseo en globo sobre Campo Largo y mirá el amanecer sobre la campiña de Paraná. ¡Imperdible!"
+ },
+ "curitiba|Carambeí + Castrolanda Tour": {
+  "titulo": "Tour por Carambeí y Castrolanda",
+  "descripcion": "Sumate a esta excursión a Carambeí y Castrolanda, donde descubrimos la historia de los inmigrantes de los Países Bajos que llegaron a Brasil."
+ },
+ "curitiba|Curitiba Beer Tour": {
+  "titulo": "Tour cervecero por Curitiba",
+  "descripcion": "Sumate a este tour cervecero por Curitiba, donde visitamos tres cervecerías con degustación incluida. Aprendemos todo sobre cómo se elabora esta bebida."
+ },
+ "curitiba|Curitiba Food Tour": {
+  "titulo": "Tour gastronómico por Curitiba",
+  "descripcion": "Este tour gastronómico por Curitiba ofrece un viaje de aromas y sabores. Disfrutamos de la cocina de las distintas culturas de la ciudad."
+ },
+ "curitiba|Curitiba Private Tour": {
+  "titulo": "Tour privado por Curitiba",
+  "descripcion": "Viví de cerca la naturaleza, la arquitectura y la cultura de Curitiba con un tour privado hecho exclusivamente para vos. Podés elegir un tour diurno o nocturno."
+ },
+ "curitiba|Curitiba Pub Crawl": {
+  "titulo": "Ruta de bares por Curitiba",
+  "descripcion": "Disfrutá de la vida nocturna de la capital de Paraná en esta ruta de bares por Curitiba. Visitás los bares más famosos y probás una variedad de cervezas."
+ },
+ "curitiba|Curitiba Sightseeing Tour": {
+  "titulo": "Tour panorámico por Curitiba",
+  "descripcion": "En este recorrido panorámico por Curitiba conocemos la historia y los principales monumentos de esta ciudad que llegó a ser capital de Brasil."
+ },
+ "curitiba|Faxina Caynon or Araçatuba Peak Hike": {
+  "titulo": "Caminata al Cañón de Faxina o al Pico Araçatuba",
+  "descripcion": "Escapate del bullicio de Curitiba en esta ruta a pie, ya sea por el Cañón de Faxina o hasta la cima del Pico Araçatuba."
+ },
+ "curitiba|Hiking Morro Capivari Mirim": {
+  "titulo": "Caminata al Morro Capivari Mirim",
+  "descripcion": "En esta caminata al Morro Capivari Mirim subimos a un pico de la Serra do Capivari mientras disfrutamos de un paisaje de montaña increíble."
+ },
+ "curitiba|Horse Riding in Curitiba + Zoo Visit": {
+  "titulo": "Cabalgata en Curitiba y visita al zoológico",
+  "descripcion": "¿Sos amante de los animales? ¡Esta actividad es perfecta para vos! Disfrutamos de una cabalgata por Curitiba y visitamos el zoológico para ver más de 120 especies."
+ },
+ "curitiba|Ilha do Mel Tour": {
+  "titulo": "Tour a Ilha do Mel",
+  "descripcion": "En este tour a la Ilha do Mel (Isla de la Miel) visitamos Pontal do Paraná, desde donde vemos los paisajes de esta isla en la bahía de Paranaguá."
+ },
+ "curitiba|Joinville, Balneario Camboriú + Blumenau Tour": {
+  "titulo": "Tour por Joinville, Balneário Camboriú y Blumenau",
+  "descripcion": "En este tour viajamos a Santa Catarina para visitar el Valle de Itajaí y sus ciudades más famosas: Joinville, Balneário Camboriú y Blumenau."
+ },
+ "curitiba|Lapa & Monge State Park Tour": {
+  "titulo": "Tour por Lapa y el Parque Estadual do Monge",
+  "descripcion": "En este tour a Lapa viajamos al siglo XIX para conocer el pasado del pueblo. También visitamos el Parque Estadual do Monge."
+ },
+ "curitiba|Morretes & Antonina Day Trip by Train": {
+  "titulo": "Excursión en tren a Morretes y Antonina",
+  "descripcion": "Sumate a esta excursión desde Curitiba: viajamos en tren hasta Morretes y además recorremos la cercana ciudad de Antonina. ¡La experiencia completa!"
+ },
+ "curitiba|Vale do Gigante Kayak Tour": {
+  "titulo": "Kayak por el Vale do Gigante",
+  "descripcion": "Adentrate en la exótica Mata Atlántica en este recorrido en kayak por el Vale do Gigante y admirá el Pico Paraná, uno de los más altos del sur de Brasil."
+ },
+ "curitiba|Vila Velha Park Tour": {
+  "titulo": "Tour por el Parque Vila Velha",
+  "descripcion": "Vegetación y gigantescas formaciones rocosas son lo más destacado de este tour al Parque Vila Velha. Exploramos este sitio natural y visitamos la Colônia Witmarsum."
+ },
+ "igu|Catamaran Dinner Cruise": {
+  "titulo": "Crucero en catamarán con cena",
+  "descripcion": "Emprendé un viaje único por los ríos Paraná e Iguazú con este paseo en catamarán con cena. ¡Una velada inolvidable!"
+ },
+ "igu|Folk Show & Dinner at Rafain Churrascaria": {
+  "titulo": "Show folclórico y cena en la churrasquería Rafain",
+  "descripcion": "Viví un increíble show folclórico latinoamericano mientras disfrutás de la cocina local en uno de los restaurantes más famosos de Foz do Iguaçu."
+ },
+ "igu|Foz de Iguacu Guided Tour": {
+  "titulo": "Tour guiado por Foz do Iguaçu",
+  "descripcion": "Este tour guiado por Foz do Iguaçu es la mejor forma de conocer la historia y los monumentos más emblemáticos de la entrada a las cataratas."
+ },
+ "igu|Hito de las Tres Fronteras Tour": {
+  "titulo": "Tour al Hito de las Tres Fronteras",
+  "descripcion": "Disfrutá de un hermoso paisaje mientras paseás por tres países en este increíble tour al Hito de las Tres Fronteras desde Foz de Iguazú."
+ },
+ "igu|Iguazu Falls Adventure Tour": {
+  "titulo": "Aventura en las Cataratas del Iguazú",
+  "descripcion": "No te pierdas esta divertida aventura por las Cataratas del Iguazú del lado argentino. Explorá la zona a pie y en barco, con vistas maravillosas en todo el recorrido."
+ },
+ "igu|Iguazu Falls Tickets": {
+  "titulo": "Entrada a las Cataratas del Iguazú",
+  "descripcion": "Maravillate con uno de los sitios naturales más fascinantes del mundo con esta entrada sin filas al lado brasileño de las Cataratas del Iguazú. Una experiencia única."
+ },
+ "igu|Iguazu River Kayaking or Paddle Surfing + Hiking": {
+  "titulo": "Kayak o paddle surf en el río Iguazú y caminata",
+  "descripcion": "Viví una aventura por el Parque Nacional Iguazú con esta actividad que combina caminata con kayak o paddle surf en el río Iguazú."
+ },
+ "igu|Iguazú Falls Argentine Side Tour": {
+  "titulo": "Tour por las Cataratas del Iguazú: lado argentino",
+  "descripcion": "Explorá las impresionantes Cataratas del Iguazú del lado argentino. Descubrí la zona más espectacular de esta maravilla natural y disfrutá de vistas increíbles."
+ },
+ "igu|Iguazú Falls Brazilian Side Tour": {
+  "titulo": "Tour por las Cataratas del Iguazú: lado brasileño",
+  "descripcion": "En este tour exploramos el lado brasileño de las Cataratas del Iguazú y disfrutamos de las mejores vistas de esta impresionante maravilla de la naturaleza."
+ },
+ "igu|Iguaçu Falls Bike Tour": {
+  "titulo": "Tour en bicicleta a las Cataratas del Iguazú",
+  "descripcion": "Recorré en bicicleta los paisajes tropicales y salvajes del Parque Nacional do Iguaçu hasta llegar a las imponentes Cataratas del Iguazú."
+ },
+ "igu|Iguaçu Falls Helicopter Ride": {
+  "titulo": "Sobrevuelo en helicóptero de las Cataratas del Iguazú",
+  "descripcion": "Disfrutá de una vista panorámica inolvidable de las Cataratas del Iguazú a vista de pájaro con este vuelo en helicóptero."
+ },
+ "igu|Itaipu Dam Sightseeing Tour": {
+  "titulo": "Tour por la represa de Itaipú",
+  "descripcion": "Visitá un embalse con una caída vertiginosa de 120 metros en nuestro tour por la represa de Itaipú. Conocemos esta central hidroeléctrica binacional y aprendemos todo sobre ella."
+ },
+ "igu|Itaipu Dam and Saltos del Monday Day Trip": {
+  "titulo": "Excursión a Itaipú y los Saltos del Monday",
+  "descripcion": "En esta excursión a Paraguay cruzamos la frontera desde Brasil para visitar la represa de Itaipú y los Saltos del Monday. ¡Prepará la aventura!"
+ },
+ "igu|Macuco Safari Adventure Tour": {
+  "titulo": "Aventura Macuco Safari",
+  "descripcion": "En esta aventura con Macuco Safari exploramos la selva tropical del Parque Nacional Iguazú a bordo de un vehículo eléctrico y una lancha rápida."
+ },
+ "igu|Madero Tango Show and Dinner": {
+  "titulo": "Show de tango y cena en Madero Tango",
+  "descripcion": "Enamorate de los bailes y ritmos de Argentina con un brillante show en Madero Tango y una deliciosa cena tradicional."
+ },
+ "igu|Parque das Aves Ticket": {
+  "titulo": "Entrada al Parque das Aves",
+  "descripcion": "¿Querés visitar el parque de aves más grande de Sudamérica y ver 900 especies de todo el mundo? ¡Reservá tu entrada al Parque das Aves en Foz do Iguaçu!"
+ },
+ "igu|San Ignacio Ruins + Wanda Mines Trip": {
+  "titulo": "Ruinas de San Ignacio y Minas de Wanda",
+  "descripcion": "Visitá las fascinantes ruinas de la misión jesuítica de San Ignacio y la mina de piedras semipreciosas de Wanda en este increíble tour."
+ },
+ "jericoacoara|Amâncio Lagoon Quad Tour": {
+  "titulo": "Cuatriciclo por la Laguna Amâncio",
+  "descripcion": "En este recorrido en cuatriciclo por la Laguna Amâncio cruzás las dunas del Parque Nacional de Jericoacoara y te deslizás por sus suaves pendientes al atardecer. ¡Mágico!"
+ },
+ "jericoacoara|Jericoacaora West Coast & Tatajuba Tour": {
+  "titulo": "Costa oeste de Jericoacoara y Tatajuba",
+  "descripcion": "Playas vírgenes, manglares paradisíacos, lagunas y mucho más te esperan en este fantástico tour por la costa oeste de Jericoacoara y Tatajuba."
+ },
+ "jericoacoara|Jericoacoara East Coast Buggy Tour": {
+  "titulo": "Tour en buggy por la costa este de Jericoacoara",
+  "descripcion": "Recorré dunas y lagunas en este tour en buggy por la costa este de Jericoacoara y disfrutá de un día lleno de diversión y adrenalina."
+ },
+ "jericoacoara|Jericoacoara East Coast Off-Roading Tour: Paradise & Blue Lagoon": {
+  "titulo": "Costa este de Jericoacoara: Laguna del Paraíso y Laguna Azul",
+  "descripcion": "En este tour por el este de Jericoacoara descubrís el árbol de la pereza, la Laguna del Paraíso y la Laguna Azul, y ves paisajes de playas vírgenes."
+ },
+ "jericoacoara|Jericoacoara East Coast Tour + Sunset in Barrinha": {
+  "titulo": "Costa este de Jericoacoara y atardecer en Barrinha",
+  "descripcion": "En este tour exploramos la costa este de Jericoacoara a bordo de un vehículo todoterreno y vemos un romántico atardecer sobre el litoral de Barrinha."
+ },
+ "jericoacoara|Jericoacoara Private 4x4 Tour": {
+  "titulo": "Tour privado 4x4 por Jericoacoara",
+  "descripcion": "En este tour 4x4 disfrutamos de la naturaleza de Jericoacoara. Vos decidís si visitás la costa este o la oeste para admirar los encantos de la zona."
+ },
+ "jericoacoara|Jericoacoara Private Buggy Tour": {
+  "titulo": "Tour privado en buggy por Jericoacoara",
+  "descripcion": "En este tour en buggy por Jericoacoara exploramos las dunas y playas que rodean este pueblo brasileño a bordo de estos divertidos vehículos."
+ },
+ "jericoacoara|Jericoacoara Private Off-Road Buggy Tour": {
+  "titulo": "Tour privado en buggy todoterreno por Jericoacoara",
+  "descripcion": "Este tour privado en buggy todoterreno por Jericoacoara es la forma perfecta de sentir la adrenalina en una de las zonas más espectaculares de Brasil."
+ },
+ "jericoacoara|Jericoacoara Private Tour in a Jardineira": {
+  "titulo": "Tour privado en jardineira por Jericoacoara",
+  "descripcion": "En este tour privado descubrís la costa este u oeste de Jericoacoara en jardineira, un vehículo 4x4 adaptado a las dunas de la región."
+ },
+ "jericoacoara|Jericoacoara Quad Tour": {
+  "titulo": "Recorrido en cuatriciclo por Jericoacoara",
+  "descripcion": "En este recorrido en cuatriciclo por Jericoacoara descubrimos increíbles paisajes de dunas con lagunas turquesa escondidas, a toda velocidad."
+ },
+ "torres|4x4 Tour and Hike in the Mampituba Canyons": {
+  "titulo": "Tour 4x4 y caminata por los cañones de Mampituba",
+  "descripcion": "Si buscás aventura, probá este tour 4x4 y de senderismo por los cañones de Mampituba, donde descubrirás hermosos paisajes y antiguas leyendas."
+ },
+ "torres|Buggy Tour in Praia Grande": {
+  "titulo": "Tour en buggy por Praia Grande",
+  "descripcion": "En este emocionante tour en buggy por Praia Grande admirás los cañones y miradores de la región mientras recorrés paisajes naturales."
+ },
+ "torres|Horseback Riding in Praia Grande": {
+  "titulo": "Cabalgata en Praia Grande",
+  "descripcion": "En esta cabalgata por Praia Grande recorremos hermosos paisajes naturales y disfrutamos de las vistas del Cañón Itaimbezinho."
+ },
+ "torres|Hot-Air Balloon Ride over Aparados da Serra National Park": {
+  "titulo": "Paseo en globo sobre el Parque Nacional Aparados da Serra",
+  "descripcion": "La naturaleza de Santa Catarina es aún más espectacular desde el aire. La descubrimos en este paseo en globo sobre el Parque Nacional Aparados da Serra."
+ },
+ "torres|Itaimbezinho Canyon Day Trip": {
+  "titulo": "Excursión al Cañón Itaimbezinho",
+  "descripcion": "Si estás en Mampituba, no te pierdas esta excursión al Cañón Itaimbezinho: paisajes increíbles con paredes de roca épicas y cascadas."
+ },
+ "torres|Kayak on Três Forquilhas River": {
+  "titulo": "Kayak por el río Três Forquilhas",
+  "descripcion": "Emprendé este recorrido en kayak por el río Três Forquilhas y sumergite en la variada fauna y flora que rodea sus orillas."
+ },
+ "torres|Mampituba Hot Air Balloon Ride": {
+  "titulo": "Paseo en globo aerostático en Mampituba",
+  "descripcion": "Durante este paseo en globo al amanecer sobre Mampituba vemos los espectaculares cañones que rodean el pueblo, bañados por la suave luz del alba."
+ },
+ "torres|Mampituba Rural Tour": {
+  "titulo": "Tour rural por Mampituba",
+  "descripcion": "En este tour rural por Mampituba nos sumergimos en la cultura y la cocina tradicional de Rio Grande do Sul, el estado más austral de Brasil."
+ },
+ "torres|Mampituba Waterfalls 4x4 Tour and Hike": {
+  "titulo": "Tour 4x4 y caminata a las cascadas de Mampituba",
+  "descripcion": "En esta ruta de senderismo por las cascadas de Mampituba llegamos a las cascadas más famosas de Rio Grande do Sul a bordo de un vehículo 4x4."
+ },
+ "torres|Praia Grande Quad Tour": {
+  "titulo": "Recorrido en cuatriciclo por Praia Grande",
+  "descripcion": "¿Buscás emoción? En este recorrido en cuatriciclo por Praia Grande sentimos la adrenalina mientras exploramos paisajes rurales escarpados entre cañones imponentes."
+ },
+ "torres|Skybike in Praia Grande": {
+  "titulo": "Skybike en Praia Grande",
+  "descripcion": "No pierdas la oportunidad de andar en «skybike» en Praia Grande. Volá sobre la selva en una bicicleta suspendida a 60 metros del suelo."
+ },
+ "torres|Skytable Picnic at Sunset": {
+  "titulo": "Picnic en la Skytable al atardecer",
+  "descripcion": "¿Buscás algo diferente para hacer en Praia Grande? En este picnic en la Skytable al atardecer disfrutás de la puesta de sol desde una mesa suspendida en el aire."
+ },
+ "torres|Sítio Cultural Museu da Estância Guided Tour": {
+  "titulo": "Visita guiada al Sítio Cultural Museu da Estância",
+  "descripcion": "¿Te interesan las tradiciones y costumbres de Mampituba? Conocé la región en esta visita guiada al Sítio Cultural Museu da Estância."
+ },
+ "torres|The Infinite Swing of Praia Grande": {
+  "titulo": "El Columpio Infinito de Praia Grande",
+  "descripcion": "El Columpio Infinito de Praia Grande es una de sus grandes atracciones turísticas. Disfrutá de las vistas de la selva a 60 metros de altura."
+ },
+ "torres|Traditional Gaucho Dinner + Live Music": {
+  "titulo": "Cena gaucha tradicional con música en vivo",
+  "descripcion": "¿Querés vivir una noche inolvidable en Mampituba? Reservá esta cena gaucha con excelente comida y música en vivo."
+ },
+ "torres|Via do Café Canyoning": {
+  "titulo": "Canyoning en la Via do Café",
+  "descripcion": "Si buscás un poco de emoción, no te pierdas esta actividad de canyoning en la Via do Café: disfrutá de vistas espectaculares mientras sentís la adrenalina."
+ },
+ "torres|Waterfall Abseiling": {
+  "titulo": "Rapel en cascadas",
+  "descripcion": "Disfrutá de una belleza natural increíble mientras sentís la adrenalina en esta emocionante actividad de rapel en las cascadas de Praia Grande."
+ },
+ "torres|Ziplining in Praia Grande": {
+  "titulo": "Tirolesa en Praia Grande",
+  "descripcion": "En esta actividad de tirolesa en Praia Grande admirás paisajes impresionantes mientras descargás adrenalina desde el cielo."
+ },
+ "bcm|Aventura Jurassica Ticket": {
+  "titulo": "Entrada a Aventura Jurássica",
+  "descripcion": "¿Sos fanático de los dinosaurios? Con tu entrada a Aventura Jurássica explorás el reconocido parque temático dedicado a fascinantes criaturas prehistóricas."
+ },
+ "bcm|Balneario Camboriú Multiparque Tickets": {
+  "titulo": "Entradas al Multiparque de Balneário Camboriú",
+  "descripcion": "Con tus entradas al Multiparque, en el corazón de Balneário Camboriú, accedés a un mundo de toboganes, piscinas y atracciones para toda la familia."
+ },
+ "bcm|Balneário Camboriú Ferris Wheel Ticket": {
+  "titulo": "Entrada a la Rueda Gigante de Balneário Camboriú",
+  "descripcion": "¿Querés ver desde arriba la llamada «Dubái brasileña»? Con esta entrada a la rueda gigante de Balneário Camboriú disfrutás de hermosas vistas panorámicas de la ciudad."
+ },
+ "bcm|Beto Carrero World Day Trip": {
+  "titulo": "Excursión de un día a Beto Carrero World",
+  "descripcion": "Disfrutá de un día emocionante en Beto Carrero World, el parque temático más grande de Brasil. Te esperan montañas rusas y mucha diversión."
+ },
+ "bcm|Blumenau & Pomerode Excursion": {
+  "titulo": "Excursión a Blumenau y Pomerode",
+  "descripcion": "Explorá el Valle Europeo de Brasil en esta excursión a Blumenau y Pomerode, ciudades famosas por su celebración de la Oktoberfest."
+ },
+ "bcm|Blumenau Day Trip": {
+  "titulo": "Excursión de un día a Blumenau",
+  "descripcion": "En este tour a Blumenau vemos los principales atractivos y la herencia alemana de esta ciudad conocida como la capital brasileña de la cerveza."
+ },
+ "bcm|Bombinhas Day Trip": {
+  "titulo": "Excursión de un día a Bombinhas",
+  "descripcion": "Si tenés ganas de pasar un día en Bombinhas, nos ocupamos del transporte para que te relajes y disfrutes de esta playa paradisíaca de aguas cristalinas."
+ },
+ "bcm|Bombinhas Day Trip + Sepultura Beach Snorkeling": {
+  "titulo": "Excursión a Bombinhas con snorkel en la playa Sepultura",
+  "descripcion": "¿Buscás diversión bajo el sol? Sumate a este tour desde Balneário Camboriú para hacer snorkel en la playa Sepultura y disfrutar de tiempo libre en Bombinhas."
+ },
+ "bcm|Classic Car Show Ticket": {
+  "titulo": "Entrada al Classic Car Show",
+  "descripcion": "Si estás loco por los autos, no podés irte de Balneário Camboriú sin visitar el Classic Car Show: vas a ver autos como Rolls-Royce, Cadillac o Mustang."
+ },
+ "bcm|Cristo Luz Ticket": {
+  "titulo": "Entrada al Cristo Luz",
+  "descripcion": "Con esta entrada visitás una de las principales atracciones de Balneário Camboriú: el complejo Cristo Luz. ¡No te lo pierdas!"
+ },
+ "bcm|Florianópolis Day Trip": {
+  "titulo": "Excursión de un día a Florianópolis",
+  "descripcion": "En esta excursión a Florianópolis exploramos su centro histórico, visitamos el mercado público y nos damos un chapuzón en la Praia da Barra da Lagoa."
+ },
+ "bcm|Navegantes, Penha & Piçarras Tour": {
+  "titulo": "Tour por Navegantes, Penha y Piçarras",
+  "descripcion": "¿Querés explorar el este de Santa Catarina? En este tour por Navegantes, Penha y Piçarras disfrutamos de naturaleza y cultura en un solo viaje."
+ },
+ "bcm|Oceanic Aquarium Ticket": {
+  "titulo": "Entrada al Acuario Oceánico",
+  "descripcion": "Si buscás un plan divertido para toda la familia, con la entrada al Acuario Oceánico vas a ver más de 140 especies acuáticas."
+ },
+ "bcm|Pirate Adventure Ticket": {
+  "titulo": "Entrada a Aventura Pirata",
+  "descripcion": "Salí a la caza de un tesoro con tu entrada al Museo Aventura Pirata. Sumergite en el misterioso mundo de las leyendas y aventuras piratas."
+ },
+ "bcm|Pomerode Day Trip": {
+  "titulo": "Excursión de un día a Pomerode",
+  "descripcion": "En esta excursión a Pomerode descubrimos el legado alemán de esta ciudad brasileña. Además, visitamos sus tiendas más famosas y el zoológico."
+ },
+ "bcm|Summit BC Observation Deck Tickets": {
+  "titulo": "Entradas al mirador Summit BC",
+  "descripcion": "¿Querés sacar fotos increíbles? Con esta entrada a Summit BC disfrutás de las mejores vistas de Balneário Camboriú desde una plataforma a 120 metros de altura."
+ },
+ "bcm|Unipraias Park Cable Car + Pirate Boat Ride": {
+  "titulo": "Teleférico Unipraias y paseo en barco pirata",
+  "descripcion": "Subí en el teleférico Unipraias hasta la playa Laranjeiras y disfrutá de un paseo en barco pirata: aguas cristalinas, naturaleza exuberante y vistas impresionantes en Balneário Camboriú."
+ },
+ "bombinhas|Beto Carrero World Day Trip": {
+  "titulo": "Excursión de un día a Beto Carrero World",
+  "descripcion": "¿Buscás un plan divertido y diferente cerca de Bombinhas? Conocé el parque Beto Carrero World con esta excursión de un día, con traslado incluido."
+ },
+ "bombinhas|Bombinhas 4x4 Tour": {
+  "titulo": "Tour 4x4 por Bombinhas",
+  "descripcion": "Playas paradisíacas, miradores impresionantes, paisajes exuberantes… En este tour por Bombinhas descubrís toda la belleza natural de este oasis en un vehículo 4x4."
+ },
+ "bombinhas|Bombinhas Beaches Day Trip": {
+  "titulo": "Excursión de un día a las playas de Bombinhas",
+  "descripcion": "Esta excursión a las playas de Bombinhas te lleva por un espectacular recorrido de la costa más linda del sur de Brasil. ¡No te lo pierdas!"
+ },
+ "bombinhas|Pirate Boat Ride Bombinhas": {
+  "titulo": "Paseo en barco pirata por Bombinhas",
+  "descripcion": "En este paseo en barco pirata por Bombinhas tenés diversión asegurada a bordo y podés nadar en la Ilha do Macuco y la playa de Cacao."
+ },
+ "bombinhas|Private Excursions from Bombinhas": {
+  "titulo": "Excursiones privadas desde Bombinhas",
+  "descripcion": "Blumenau y Pomerode, Nova Trento, Balneário Camboriú… Descubrí la magia del sur de Brasil con una de nuestras excursiones privadas desde Bombinhas."
+ },
+ "bombinhas|Snorkeling at Sepultura Beach": {
+  "titulo": "Snorkel en la playa Sepultura",
+  "descripcion": "Con esta actividad de snorkel en la playa Sepultura te vas a sentir como un pez en el agua mientras disfrutás de la fauna y flora marina de Bombinhas."
+ },
+ "bombinhas|Surfing Course in Bombinhas": {
+  "titulo": "Curso de surf en Bombinhas",
+  "descripcion": "¿Buscás una actividad diferente en Bombinhas? ¡Este curso de surf es perfecto! Aprendés a surfear las olas como un verdadero experto."
+ },
+ "fln|Beto Carrero World Day Trip": {
+  "titulo": "Excursión de un día a Beto Carrero World",
+  "descripcion": "Pasá un día lleno de diversión disfrutando de las atracciones y los shows del parque temático más grande de América Latina con esta excursión a Beto Carrero World."
+ },
+ "fln|Blumenau & Pomerode Day Trip": {
+  "titulo": "Excursión de un día a Blumenau y Pomerode",
+  "descripcion": "Descubrí un pedacito de Alemania en Brasil en esta excursión a Blumenau y Pomerode desde Florianópolis. ¡Será un día increíble!"
+ },
+ "fln|Brazilian Camino de Santiago Hike": {
+  "titulo": "Caminata por el Camino de Santiago brasileño",
+  "descripcion": "En esta ruta de senderismo por la Ruta Brasileña del Camino de Santiago de Compostela recorremos 22 km descubriendo riqueza natural, cultural y espiritual."
+ },
+ "fln|Costa da Lagoa Hiking Tour + Boat Ride": {
+  "titulo": "Caminata por Costa da Lagoa y paseo en barco",
+  "descripcion": "En esta ruta a pie por Costa da Lagoa descubrís una de las zonas más populares para caminar en Florianópolis. Además, disfrutás de un relajante paseo en barco."
+ },
+ "fln|Florianopolis Tourist Bus": {
+  "titulo": "Bus turístico de Florianópolis",
+  "descripcion": "Disfrutá de un cómodo recorrido panorámico en el bus turístico de Florianópolis. Pasás por todos los lugares imperdibles de esta ciudad brasileña."
+ },
+ "fln|Florianópolis Cycling Tour": {
+  "titulo": "Tour en bicicleta por Florianópolis",
+  "descripcion": "Paisajes hermosos y una historia apasionante nos esperan en este tour en bicicleta por Florianópolis. Pedaleá por una de las ciudades costeras más lindas de Brasil."
+ },
+ "fln|Florianópolis Food Tour": {
+  "titulo": "Tour gastronómico por Florianópolis",
+  "descripcion": "En este tour gastronómico por Florianópolis probás los platos más tradicionales de la cocina brasileña y conocés la cultura y los secretos de la ciudad."
+ },
+ "fln|Florianópolis Pirate Ship Ride": {
+  "titulo": "Paseo en barco pirata por Florianópolis",
+  "descripcion": "En este paseo en barco pirata por Florianópolis visitamos la Ilha de Anhatomirim. Te espera una aventura entre fortalezas históricas."
+ },
+ "fln|French Island Kayak, Snorkeling & Paddle Boarding Tour": {
+  "titulo": "Kayak, snorkel y paddle surf en la Ilha do Francês",
+  "descripcion": "Disfrutá de kayak, paddle surf y snorkel en la Ilha do Francês desde Florianópolis, combinando deporte y naturaleza en uno de los rincones costeros más pintorescos de Brasil."
+ },
+ "fln|Lagoinha do Leste National Park Sunrise Hike": {
+  "titulo": "Caminata al amanecer en Lagoinha do Leste",
+  "descripcion": "Caminá por Lagoinha do Leste para ver el amanecer desde el Morro da Coroa y terminá con un baño en un entorno espectacular, al sur de Florianópolis."
+ },
+ "fln|Lagoinha do Leste Natural Park Hiking Route": {
+  "titulo": "Ruta de senderismo por el Parque Natural Lagoinha do Leste",
+  "descripcion": "En esta ruta por el Parque Natural Lagoinha do Leste exploramos la variada fauna y flora de una de las hermosas áreas naturales de Santa Catarina."
+ },
+ "fln|Matadeiro, Lagoinha do Leste & Morro da Coroa Hike": {
+  "titulo": "Caminata: Matadeiro, Lagoinha do Leste y Morro da Coroa",
+  "descripcion": "Caminá desde Armação hasta Pântano do Sul, visitando las playas Matadeiro y Lagoinha do Leste, y subí al Morro da Coroa para ver vistas increíbles de la Isla de Santa Catarina."
+ },
+ "fln|Nova Trento & Brusque Excursion": {
+  "titulo": "Excursión a Nova Trento y Brusque",
+  "descripcion": "Viajá a Nova Trento y descubrí el legado italiano en este pueblo del interior de Brasil. Visitamos sus santuarios y conocemos la ciudad de Brusque."
+ },
+ "fln|Oktoberfest of Blumenau Day Trip": {
+  "titulo": "Excursión a la Oktoberfest de Blumenau",
+  "descripcion": "Viví la fiesta alemana más grande en el corazón de Brasil con esta excursión a la Oktoberfest de Blumenau. Una mezcla de culturas en Brasil."
+ },
+ "fln|Santo Antônio de Lisboa Sunset Tour": {
+  "titulo": "Atardecer en Santo Antônio de Lisboa",
+  "descripcion": "Sumate a nosotros al caer la noche para disfrutar de un romántico atardecer en Santo Antônio de Lisboa, uno de los más lindos de Brasil."
+ },
+ "fln|Surf Lesson in Florianópolis": {
+  "titulo": "Clase de surf en Florianópolis",
+  "descripcion": "¿Buscás planes divertidos en Florianópolis? Probá una clase de surf en Barra da Lagoa o Campeche y atrapá unas olas en dos de los mejores spots de Brasil."
+ },
+ "garopaba|Garopaba Beaches Tour": {
+  "titulo": "Tour por las playas de Garopaba",
+  "descripcion": "Visitá los rincones más lindos del estado de Santa Catarina en este tour por las playas de Garopaba. Te esperan hermosas calas y vistas impresionantes del océano."
+ },
+ "garopaba|Garopaba Cachaça Tour": {
+  "titulo": "Tour de la cachaça en Garopaba",
+  "descripcion": "Descubrí el destilado más popular del estado de Santa Catarina y cómo se elabora en este tour de la cachaça por Garopaba, con visita a una destilería tradicional."
+ },
+ "garopaba|Guarda do Embaú Excursion": {
+  "titulo": "Excursión a Guarda do Embaú",
+  "descripcion": "La belleza de la costa de Santa Catarina no se puede describir, solo vivir. Descubrí los paisajes emblemáticos de la zona en esta excursión a Guarda do Embaú."
+ },
+ "garopaba|Laguna Excursion": {
+  "titulo": "Excursión a Laguna",
+  "descripcion": "En esta excursión a Laguna visitamos un santuario de delfines, vemos un faro histórico y conocemos el lugar de nacimiento de la célebre revolucionaria Anita Garibaldi."
+ },
+ "garopaba|Pedra Branca Hiking Tour": {
+  "titulo": "Caminata a Pedra Branca",
+  "descripcion": "Si te gusta la naturaleza, no te pierdas esta ruta a pie a Pedra Branca, una roca famosa desde donde admirás extraordinarias vistas panorámicas de Garopaba."
+ },
+ "picarras|Univali Oceanographic Museum Tickets": {
+  "titulo": "Entradas al Museo Oceanográfico Univali",
+  "descripcion": "¿Te encanta la vida submarina? Esta entrada te da acceso al Museo Oceanográfico Univali. Diversión asegurada para toda la familia."
+ },
+ "fernando|Baía dos Golfinhos Hiking Tour": {
+  "titulo": "Caminata a la Bahía de los Delfines",
+  "descripcion": "Disfrutá de ver a los delfines de Fernando de Noronha con esta caminata a la Baía dos Golfinhos. El plan perfecto para los amantes de la naturaleza."
+ },
+ "fernando|Blue Coast Trail": {
+  "titulo": "Sendero de la Costa Azul",
+  "descripcion": "Esta ruta de senderismo por la Costa Azul de Fernando de Noronha combina geología, vida marina y cultura local en una experiencia educativa e inspiradora."
+ },
+ "fernando|Boat Ride + Snorkeling at Sancho Beach": {
+  "titulo": "Paseo en barco y snorkel en la playa Sancho",
+  "descripcion": "Descubrí el archipiélago de Fernando de Noronha desde otra perspectiva en este paseo en barco. Podés observar delfines y hasta hacer snorkel en la playa Sancho."
+ },
+ "fernando|Capim Açu + Leão Beach Hiking Tour": {
+  "titulo": "Caminata a Capim Açu y playa Leão",
+  "descripcion": "Ejercicio, naturaleza, mar y arena se unen en esta ruta a pie por Capim Açu con visita a la playa Leão. ¡No te la pierdas!"
+ },
+ "fernando|Emerald Coast Hiking Tour": {
+  "titulo": "Caminata por la Costa Esmeralda",
+  "descripcion": "Esta ruta de senderismo por la Costa Esmeralda de Fernando de Noronha recorre playas casi desiertas, roca volcánica, acantilados y miradores impresionantes."
+ },
+ "fernando|Enseada dos Abreus Hiking Excursion": {
+  "titulo": "Excursión a pie por Enseada dos Abreus",
+  "descripcion": "En esta excursión a pie por Enseada dos Abreus descubrís algunos de los paisajes más impresionantes de Fernando de Noronha."
+ },
+ "fernando|Fernando de Noronha Beginners Scuba Diving Lesson": {
+  "titulo": "Bautismo de buceo en Fernando de Noronha",
+  "descripcion": "Aprendé uno de los deportes acuáticos más divertidos con esta clase de buceo para principiantes en Fernando de Noronha, uno de los lugares más paradisíacos de Brasil."
+ },
+ "fernando|Fernando de Noronha Diving Excursion": {
+  "titulo": "Excursión de buceo en Fernando de Noronha",
+  "descripcion": "Descubrí el fondo del océano con esta excursión de buceo en Fernando de Noronha. Te van a sorprender las aguas brasileñas y su gran diversidad."
+ },
+ "fernando|Fernando de Noronha Island Tour": {
+  "titulo": "Tour por la isla de Fernando de Noronha",
+  "descripcion": "Conocé lo mejor de Fernando de Noronha en este tour completo por las principales playas, monumentos naturales y miradores de la isla."
+ },
+ "fernando|Fernando de Noronha Polynesian Canoe Tour": {
+  "titulo": "Paseo en canoa polinesia por Fernando de Noronha",
+  "descripcion": "Con este paseo en canoa por Fernando de Noronha remás a través de una aventura en este archipiélago brasileño. ¡Te va a encantar!"
+ },
+ "fernando|Fernando de Noronha Private Hiking Tour": {
+  "titulo": "Caminata privada por Fernando de Noronha",
+  "descripcion": "Si estás en Fernando de Noronha y tenés ganas de caminar, sumate a un tour personalizado para explorar la naturaleza salvaje de este impresionante archipiélago brasileño."
+ },
+ "fernando|Fernando de Noronha Private Tour": {
+  "titulo": "Tour privado por Fernando de Noronha",
+  "descripcion": "¡Descubrí los encantos sin límites del archipiélago de Fernando de Noronha en este tour privado! Tenés un guía de habla inglesa solo para vos."
+ },
+ "fernando|Fernando de Noronha Trekking Tour": {
+  "titulo": "Trekking por Fernando de Noronha",
+  "descripcion": "No te pierdas este espectacular trekking por los miradores mágicos de Fernando de Noronha. Te vas a enamorar de estos paisajes increíbles."
+ },
+ "fernando|Fernando de Noronha Water Bike Tour": {
+  "titulo": "Paseo en bicicleta acuática por Fernando de Noronha",
+  "descripcion": "Pedaleá tranquilo sobre el mar en este paseo en bicicleta acuática por Fernando de Noronha. Visitamos la hermosa playa Meio y admiramos sus formaciones rocosas."
+ },
+ "fernando|Morro Dois Irmãos Boat Ride": {
+  "titulo": "Paseo en barco al Morro Dois Irmãos",
+  "descripcion": "Descubrí los increíbles paisajes de Fernando de Noronha con este paseo en barco al Morro Dois Irmãos. También podés participar en una actividad de subwing."
+ },
+ "fernando|Pedra Alta & Pontinha Viewpoints Hike": {
+  "titulo": "Caminata a los miradores Pedra Alta y Pontinha",
+  "descripcion": "En esta caminata a los miradores de Pedra Alta y Pontinha disfrutamos de vistas increíbles de Fernando de Noronha y descubrimos hermosas piscinas naturales."
+ },
+ "fernando|See-through Kayak Tour of Fernando de Noronha": {
+  "titulo": "Kayak transparente en Fernando de Noronha",
+  "descripcion": "Si estás en Fernando de Noronha, no te pierdas este paseo en kayak transparente. Una forma única de observar la vida marina de sus islas."
+ },
+ "for|Alchymist Lagoa Encantada Beach Club Day Trip": {
+  "titulo": "Excursión al beach club Alchymist Lagoa Encantada",
+  "descripcion": "Relajate en el exclusivo beach club Alchymist Lagoa Encantada, cerca de Cumbuco, y disfrutá de un oasis de paz con traslado de ida y vuelta desde Fortaleza."
+ },
+ "for|Beach Park Day Trip + Tickets": {
+  "titulo": "Excursión a Beach Park con entradas",
+  "descripcion": "Disfrutá de un día completo en Beach Park, un popular complejo costero con parque acuático, restaurantes, tiendas y playas idílicas. ¡Entradas incluidas!"
+ },
+ "for|Canoa Quebrada Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa Canoa Quebrada",
+  "descripcion": "Canoa Quebrada respira libertad. Se hizo famosa en los años 60 por ser elegida por cineastas franceses y en los 70 fue adoptada por los hippies."
+ },
+ "for|Canoa Quebrada Beach Day Trip + Buggy Tour": {
+  "titulo": "Canoa Quebrada y tour en buggy",
+  "descripcion": "Explorá Canoa Quebrada en un tour en buggy hasta Refúgio Dourado y admirá las dunas y los acantilados de la costa atlántica de Brasil."
+ },
+ "for|Cumbuco Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa Cumbuco",
+  "descripcion": "Enamorate de Cumbuco en esta excursión de día completo desde Fortaleza. En este paraíso podés relajarte junto al intenso mar azul o aventurarte por las dunas."
+ },
+ "for|Fortaleza Guided Tour": {
+  "titulo": "Tour guiado por Fortaleza",
+  "descripcion": "¿Querés saber más sobre la historia y la cultura de Ceará? No te pierdas este tour guiado por Fortaleza: monumentos del siglo XVIII y un baobab centenario te esperan."
+ },
+ "for|Fortaleza Tour + Central & Fish Markets": {
+  "titulo": "Tour por Fortaleza: Mercado Central y Mercado de Pescado",
+  "descripcion": "Sumate a este tour guiado por Fortaleza para explorar sus plazas y monumentos más lindos, con visitas al Mercado Central y al Mercado de Pescado."
+ },
+ "for|Jericoacoara Day Trip": {
+  "titulo": "Excursión de un día a Jericoacoara",
+  "descripcion": "Explorá los pintorescos paisajes de playa del Parque Nacional de Jericoacoara en este tour. Vas a descubrir hermosas dunas y monumentos naturales."
+ },
+ "for|Jericoacoara Day Trip & Sunset at the Amâncio Dunes": {
+  "titulo": "Jericoacoara y atardecer en las dunas de Amâncio",
+  "descripcion": "Sumate a esta excursión a Jericoacoara y disfrutá de sus hermosas lagunas y dunas doradas. Además, admirás un atardecer mágico sobre la Laguna Amâncio."
+ },
+ "for|Lagoinha Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa Lagoinha",
+  "descripcion": "Arena blanca, cocoteros y aguas cristalinas te esperan en Lagoinha. Descubrí este hermoso paraíso con nuestra excursión desde Fortaleza."
+ },
+ "for|Lagoinha Beach Day Trip + 3 in 1 Adventure Tour": {
+  "titulo": "Lagoinha: excursión y aventura 3 en 1",
+  "descripcion": "¿Estás en Fortaleza y buscás actividades emocionantes? Sumate a nuestra excursión a la playa Lagoinha, con un emocionante tour en buggy y paseo en barco."
+ },
+ "for|Morro Branco Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa Morro Branco",
+  "descripcion": "En esta excursión a la playa Morro Branco descubrís una de las zonas más lindas de Ceará. Además, podés completar la experiencia con un tour en buggy."
+ },
+ "for|Morro Branco, Fontes & Canoa Quebrada Beaches Tour": {
+  "titulo": "Playas de Morro Branco, Fontes y Canoa Quebrada",
+  "descripcion": "Descubrí las playas más lindas de Ceará en un mismo día. Disfrutá de las espectaculares costas de Morro Branco, Praia das Fontes y Canoa Quebrada."
+ },
+ "for|Paracuru Day Trip": {
+  "titulo": "Excursión de un día a Paracuru",
+  "descripcion": "¿Buscás qué hacer en la costa de Ceará? Reservá esta excursión a Paracuru, donde también disfrutás de un tour en buggy por los Lençóis Paracuruenses."
+ },
+ "for|Águas Belas + Barra Nova Excursion": {
+  "titulo": "Excursión a Águas Belas y Barra Nova",
+  "descripcion": "En esta excursión a Águas Belas y Barra Nova te subís a un buggy para explorar las playas pintorescas de Ceará y disfrutar de la belleza natural de Fortaleza."
+ },
+ "joaopessoa|Areia Vermelha Island Catamaran Trip": {
+  "titulo": "Paseo en catamarán a la isla Areia Vermelha",
+  "descripcion": "En João Pessoa hay un misterioso islote que solo aparece con la marea baja. ¡Descubrilo con este paseo en catamarán a la isla Areia Vermelha!"
+ },
+ "joaopessoa|Barra de Mamanguape Private Day Trip": {
+  "titulo": "Excursión privada a Barra de Mamanguape",
+  "descripcion": "¿Buscás un lugar para relajarte en Paraíba? Esta excursión privada a Barra de Mamanguape es el plan perfecto. Te esperan piscinas naturales y manglares."
+ },
+ "joaopessoa|Buggy Tour Along the South Coast of Paraíba": {
+  "titulo": "Tour en buggy por la costa sur de Paraíba",
+  "descripcion": "Emprendé un emocionante tour en buggy por la cautivante costa sur de Paraíba y explorá los paisajes y playas más encantadores de la región."
+ },
+ "joaopessoa|Cabaceiras, the Roliúde Nordestina Private Day Trip": {
+  "titulo": "Excursión privada a Cabaceiras, la «Roliúde Nordestina»",
+  "descripcion": "No te pierdas este tour privado por Cabaceiras, la «Hollywood» del nordeste de Brasil, donde visitás lugares imperdibles para los amantes del cine."
+ },
+ "joaopessoa|Carapibus, Tabatinga & Bela Beach Day Trip": {
+  "titulo": "Excursión a las playas Carapibus, Tabatinga y Bela",
+  "descripcion": "Sumate a esta excursión a Carapibus, Tabatinga y Praia Bela, tres lugares paradisíacos al sur de João Pessoa. Disfrutá de paisajes de ensueño."
+ },
+ "joaopessoa|Costa do Conde Beaches Day Trip": {
+  "titulo": "Excursión a las playas de la Costa do Conde",
+  "descripcion": "Sumate a esta excursión a las playas de la Costa do Conde para disfrutar de algunos de los paraísos más lindos de Brasil. Visitamos Coqueirinho, Bela y Tambaba."
+ },
+ "joaopessoa|Day Trip to Cabaceiras, the Hollywood of the Northeast": {
+  "titulo": "Excursión a Cabaceiras, la Hollywood del Nordeste",
+  "descripcion": "¡Fanáticos del cine brasileño! Si estás en João Pessoa, sumate a esta excursión a Cabaceiras, llamada «Roliúde Nordestina», y conocé locaciones de películas."
+ },
+ "joaopessoa|Day Trip to Pipa": {
+  "titulo": "Excursión de un día a Pipa",
+  "descripcion": "En esta excursión a Pipa exploramos increíbles paisajes naturales y playas paradisíacas. Te vas a enamorar de esta joya de Rio Grande do Norte."
+ },
+ "joaopessoa|Day Trip to Tambaba & Coqueirinho Beaches": {
+  "titulo": "Excursión a las playas Tambaba y Coqueirinho",
+  "descripcion": "Acompañanos en una relajante excursión a la costa de João Pessoa. Exploramos las impresionantes playas de Tambaba y Coqueirinho."
+ },
+ "joaopessoa|João Pessoa Private Tour": {
+  "titulo": "Tour privado por João Pessoa",
+  "descripcion": "Descubrí los secretos de João Pessoa con este tour privado. Vas a conocer un lugar mágico lleno de historia y hermosa arquitectura."
+ },
+ "joaopessoa|Lucena + Bonsucesso Cliffs Tour": {
+  "titulo": "Tour por Lucena y los acantilados de Bonsucesso",
+  "descripcion": "En este tour a Lucena y los acantilados de Bonsucesso exploramos las grandes joyas naturales y patrimoniales de la costa de Paraíba."
+ },
+ "joaopessoa|Natal Private Day Trip": {
+  "titulo": "Excursión privada a Natal",
+  "descripcion": "Descubrí la espectacular ciudad del sol y las dunas con esta excursión privada a Natal, la capital del estado brasileño de Rio Grande do Norte."
+ },
+ "joaopessoa|Ponta do Seixas Natural Pools Day Trip": {
+  "titulo": "Excursión a Ponta do Seixas y sus piscinas naturales",
+  "descripcion": "Descubrí el punto más oriental del continente americano con esta excursión a Ponta do Seixas y Penha. Vas a ver sus impresionantes playas y piscinas naturales."
+ },
+ "joaopessoa|Porto de Galinhas Excursion": {
+  "titulo": "Excursión a Porto de Galinhas",
+  "descripcion": "Descubrí uno de los principales destinos turísticos del estado de Pernambuco en esta excursión a Porto de Galinhas. Te espera una ciudad con un litoral de ensueño."
+ },
+ "joaopessoa|Potiguara Indigenous Reserve Private Day Trip": {
+  "titulo": "Excursión privada a la Reserva Indígena Potiguara",
+  "descripcion": "Viví una experiencia cultural inolvidable en esta excursión a la Reserva Indígena Potiguara, en Baía da Traição, donde conocemos su historia y costumbres."
+ },
+ "joaopessoa|Praia Bela Day Trip": {
+  "titulo": "Excursión de un día a Praia Bela",
+  "descripcion": "Enamorate de la costa sur de Brasil con este tour por el sur de Paraíba. Visitás la hermosa Praia Bela, un lugar realmente paradisíaco."
+ },
+ "joaopessoa|Praia do Capitão & Coroa do Avião Islands Day Trip": {
+  "titulo": "Excursión a Praia do Capitão y las islas Coroa do Avião",
+  "descripcion": "Paisajes de paraíso, aguas cristalinas y mucha historia. En esta excursión a Praia do Capitão y las islas Coroa do Avião, ¡lo descubrimos todo!"
+ },
+ "joaopessoa|Sunset at Jacaré Beach": {
+  "titulo": "Atardecer en la playa Jacaré",
+  "descripcion": "Disfrutá del atardecer más lindo con esta experiencia mágica en la famosa playa Jacaré, con música brasileña en vivo y baile."
+ },
+ "mcz|Barra de São Miguel & Frances Private Beach Day Trip": {
+  "titulo": "Excursión privada a Barra de São Miguel y playa Francês",
+  "descripcion": "Explorá el paraíso de las aguas del sur de Alagoas en esta excursión privada a Barra de São Miguel y a las playas de Francês y Gunga desde Maceió."
+ },
+ "mcz|Chã Preta + Serra Lisa Tour": {
+  "titulo": "Tour por Chã Preta y Serra Lisa",
+  "descripcion": "En esta excursión a Chã Preta y Serra Lisa exploramos dos lugares increíbles del interior del estado de Alagoas, un día en plena naturaleza."
+ },
+ "mcz|Day Trip to Quilombo dos Palmares": {
+  "titulo": "Excursión al Quilombo dos Palmares",
+  "descripcion": "En esta excursión descubrimos el Quilombo dos Palmares, una zona con un fuerte patrimonio cultural afrobrasileño, y la histórica Serra da Barriga."
+ },
+ "mcz|Delmiro Gouveia Tour": {
+  "titulo": "Tour a Delmiro Gouveia",
+  "descripcion": "Si querés descubrir paisajes increíbles, no te pierdas este tour a Delmiro Gouveia, un lugar de belleza natural impresionante en el estado de Alagoas."
+ },
+ "mcz|Gunga Beach Boat Trip": {
+  "titulo": "Paseo en barco a la playa Gunga",
+  "descripcion": "Pasá un día de ensueño en este paseo en barco a la playa Gunga desde Maceió. Prepará para disfrutar del paisaje idílico de una de las playas más lindas de Brasil."
+ },
+ "mcz|Ipioca Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa Ipioca",
+  "descripcion": "En esta excursión a la playa Ipioca visitamos uno de los mejores destinos turísticos del norte de Maceió. Prepará para pasar el día en el paraíso."
+ },
+ "mcz|Maragogi Day Trip": {
+  "titulo": "Excursión de un día a Maragogi",
+  "descripcion": "Relajate y desconectate en esta excursión a Maragogi, un paraíso tropical de Alagoas con playas de arena blanca y aguas turquesa."
+ },
+ "mcz|Marapé Dunes Day Trip": {
+  "titulo": "Excursión a las dunas de Marapé",
+  "descripcion": "En esta excursión viajamos hacia el sur para descubrir las dunas de Marapé: un paraíso lleno de fauna y flora donde el río se encuentra con el mar."
+ },
+ "mcz|Nine Islands of Maceió Boat Ride": {
+  "titulo": "Paseo en barco por las Nueve Islas de Maceió",
+  "descripcion": "En este paseo en barco por las Nueve Islas descubrimos manglares e islotes y vemos el atardecer sobre la laguna Mundaú."
+ },
+ "mcz|Paripueira Day Trip": {
+  "titulo": "Excursión de un día a Paripueira",
+  "descripcion": "Descubrí una de las mejores playas de Alagoas, cuyo nombre significa «aguas tranquilas» en el idioma indígena tupí, en esta excursión a Paripueira desde Maceió."
+ },
+ "mcz|Penedo Tour": {
+  "titulo": "Tour a Penedo",
+  "descripcion": "Historia y naturaleza se combinan a la perfección en esta excursión a Penedo. En este pueblo también disfrutamos de un paseo junto al río São Francisco."
+ },
+ "mcz|Pontal da Barra + Mundaú & Manguaba Lakes Tour": {
+  "titulo": "Tour por Pontal da Barra y las lagunas Mundaú y Manguaba",
+  "descripcion": "En este tour visitamos Pontal da Barra, uno de los barrios más populares de Maceió. También hacemos un paseo en barco por las lagunas Mundaú y Manguaba."
+ },
+ "mcz|Praia do Francês Day Trip + Maceió Scenic Tour": {
+  "titulo": "Praia do Francês y recorrido panorámico por Maceió",
+  "descripcion": "Descubrí la playa más famosa de Alagoas en esta excursión a Praia do Francês. Además, disfrutás de un recorrido por lo mejor de Maceió, la capital de Alagoas."
+ },
+ "mcz|Pratagy Acqua Park Tickets": {
+  "titulo": "Entradas al Pratagy Acqua Park",
+  "descripcion": "¡Sumergite en la diversión en el Pratagy Acqua Park! Disfrutá de toboganes, piscinas y atracciones emocionantes en un ambiente vibrante de temática marina. Un plan perfecto para la familia."
+ },
+ "mcz|São Francisco River Delta Day Trip": {
+  "titulo": "Excursión al delta del río São Francisco",
+  "descripcion": "Si estás en Maceió, no te pierdas la oportunidad de ver un cauce único en esta excursión al río São Francisco. También visitamos Piaçabuçu y sus dunas."
+ },
+ "mcz|São Miguel dos Milagres Day Trip": {
+  "titulo": "Excursión de un día a São Miguel dos Milagres",
+  "descripcion": "Si estás en Maceió y buscás un día en una playa idílica, no te pierdas esta excursión a São Miguel dos Milagres. Bienvenido al paraíso."
+ },
+ "mcz|Viçosa Tour": {
+  "titulo": "Tour a Viçosa",
+  "descripcion": "En esta excursión a Viçosa desde Maceió visitamos la segunda ciudad más grande del estado de Alagoas. También vemos una famosa cascada local."
+ },
+ "maragogi|Carneiros Beach Tour": {
+  "titulo": "Tour a la playa Carneiros",
+  "descripcion": "En esta excursión a la playa Carneiros descubrís uno de los lugares más idílicos de Pernambuco, donde te vas a enamorar de sus aguas verde esmeralda."
+ },
+ "maragogi|Croa de São Bento Boat Tour": {
+  "titulo": "Paseo en barco por Croa de São Bento",
+  "descripcion": "En este paseo en barco por Croa de São Bento navegamos por las aguas turquesa de las piscinas naturales de Maragogi. Es la forma perfecta de relajarse."
+ },
+ "maragogi|Japaratinga Natural Pools Boat Tour": {
+  "titulo": "Paseo en barco a las piscinas naturales de Japaratinga",
+  "descripcion": "En este paseo en barco a las piscinas naturales de Japaratinga descubrís un paraíso de aguas cristalinas en la costa de Brasil."
+ },
+ "maragogi|Maragogi + São Miguel dos Milagres Buggy Tour": {
+  "titulo": "Tour en buggy por Maragogi y São Miguel dos Milagres",
+  "descripcion": "¿Conocés la costa de Alagoas? Descubrimos sus paisajes en este tour en buggy por Maragogi y São Miguel dos Milagres, dos lugares impresionantes."
+ },
+ "maragogi|Maragogi Coastline Buggy Tour": {
+  "titulo": "Tour en buggy por la costa de Maragogi",
+  "descripcion": "Los paisajes costeros del estado de Alagoas te van a cautivar desde el primer segundo. ¡Te va a encantar descubrir Maragogi en buggy en esta aventura!"
+ },
+ "maragogi|Maragogi Eco Park Tour": {
+  "titulo": "Tour por el Eco Parque de Maragogi",
+  "descripcion": "Conocé la fauna de Brasil en este tour guiado por el Eco Parque de Maragogi y sumergite de lleno en la belleza natural de Brasil."
+ },
+ "maragogi|Maragogi Natural Pools Boat Tour": {
+  "titulo": "Paseo en barco por las piscinas naturales de Maragogi",
+  "descripcion": "¿Querés descubrir el hermoso tesoro natural que es el estado de Alagoas? Entonces no te pierdas este paseo en barco por las piscinas naturales de Maragogi."
+ },
+ "maragogi|Porto de Galinhas Excursion": {
+  "titulo": "Excursión a Porto de Galinhas desde Maragogi",
+  "descripcion": "En esta excursión a Porto de Galinhas desde Maragogi cruzamos el límite de Alagoas para descubrir una de las maravillas naturales de Pernambuco."
+ },
+ "maragogi|São Miguel dos Milagres Tour": {
+  "titulo": "Tour a São Miguel dos Milagres",
+  "descripcion": "Sumate a descubrir un escenario idílico en Alagoas en esta excursión a São Miguel dos Milagres. Podés nadar en sus playas y conocer a los manatíes."
+ },
+ "nat|Arituba Lagoon & Camurupim Beach Day Trip": {
+  "titulo": "Laguna Arituba y playa Camurupim",
+  "descripcion": "En esta excursión descubrimos los lugares más lindos de la costa sur de Natal y visitamos la Laguna Arituba y el cajueiro más grande del mundo."
+ },
+ "nat|Barra do Cunhau Trip + Boat Trip": {
+  "titulo": "Excursión a Barra do Cunhaú con paseo en barco",
+  "descripcion": "Viví un día en un verdadero paraíso de playas con esta fantástica excursión a Barra do Cunhaú: nadás en hermosas playas de aguas esmeralda."
+ },
+ "nat|Boat Tour & Snorkelling at Maracajaú Reef": {
+  "titulo": "Paseo en barco y snorkel en el arrecife de Maracajaú",
+  "descripcion": "Aguas cristalinas, peces tropicales, corales… En este paseo en barco con snorkel tenés la oportunidad de explorar los hermosos arrecifes de Maracajaú."
+ },
+ "nat|Complete Tour of Natal": {
+  "titulo": "Tour completo por Natal",
+  "descripcion": "En este tour por Natal descubrimos los hermosos paisajes y atractivos únicos de la ciudad del sol. Te va a encantar esta impresionante ciudad costera brasileña."
+ },
+ "nat|Galinhos Day Trip & Boat Cruise": {
+  "titulo": "Excursión a Galinhos con crucero en barco",
+  "descripcion": "Esta excursión es la oportunidad perfecta para descubrir el pueblo costero de Galinhos, al que además llegás en un maravilloso crucero en barco. ¡Imperdible!"
+ },
+ "nat|Genipabu Day Trip": {
+  "titulo": "Excursión de un día a Genipabu",
+  "descripcion": "En esta emocionante excursión a Genipabu desde Natal visitamos un increíble paraíso de dunas, aguas cristalinas y naturaleza."
+ },
+ "nat|João Pessoa Day Trip + Jacaré Beach Visit": {
+  "titulo": "Excursión a João Pessoa y playa Jacaré",
+  "descripcion": "Conocé una ciudad tropical rodeada de hermosas playas y cocoteros en esta excursión a João Pessoa desde Natal. ¡Te va a encantar!"
+ },
+ "nat|Maracajaú + Snorkeling on the Reefs Day Trip": {
+  "titulo": "Excursión a Maracajaú con snorkel en los arrecifes",
+  "descripcion": "Explorá el Caribe brasileño y dejate cautivar por sus arrecifes de coral en esta excursión con snorkel a Maracajaú, con salida desde Natal."
+ },
+ "nat|Morro do Careca Boat Trip": {
+  "titulo": "Paseo en barco al Morro do Careca",
+  "descripcion": "Sumate a un fantástico paseo en barco junto a la hermosa duna Morro do Careca, una excursión esencial en cualquier viaje a Natal."
+ },
+ "nat|Natal Buggy Ride": {
+  "titulo": "Paseo en buggy por Natal",
+  "descripcion": "Explorá las hermosas playas urbanas de Natal y dejá correr la adrenalina en un paseo en buggy por las famosas dunas de Genipabu."
+ },
+ "nat|Natal: City & Beaches Tour": {
+  "titulo": "Natal: tour por la ciudad y las playas",
+  "descripcion": "En este tour por Natal podés elegir dos o tres rutas por la ciudad y su impresionante costa, con las playas de Pipa, Genipabu y Camurupim como protagonistas."
+ },
+ "nat|Parrachos Pirangi Catamaran Ride + Snorkelling": {
+  "titulo": "Catamarán a los Parrachos de Pirangi con snorkel",
+  "descripcion": "Descubrí la costa de Rio Grande do Norte en este paseo en catamarán por los Parrachos de Pirangi. También podés hacer snorkel."
+ },
+ "nat|Pipa Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa Pipa",
+  "descripcion": "Visitá Pipa, hogar de algunas de las mejores playas de todo Brasil. Esta excursión te lleva a las arenas doradas de Madeiro y Praia do Amor."
+ },
+ "nat|Pitangui Lagoon & Porto Mirim Beach Day Trip": {
+  "titulo": "Laguna Pitangui y playa Porto Mirim",
+  "descripcion": "Enamorate de la hermosa costa de Natal en esta excursión a la Laguna Pitangui y la playa Porto Mirim, dos lugares idílicos del litoral potiguar."
+ },
+ "nat|Rota dos Nativos Off-Roading Tour": {
+  "titulo": "Tour todoterreno por la Rota dos Nativos",
+  "descripcion": "Dunas, lagunas y hermosas playas… Admirá la diversidad de la costa este de Rio Grande do Norte con este tour todoterreno por la Rota dos Nativos."
+ },
+ "nat|South Coast Quad Bike Tour": {
+  "titulo": "Tour en cuatriciclo por la costa sur",
+  "descripcion": "Descubrí los paisajes de la costa sur de una forma única en este divertido tour en cuatriciclo. Te esperan un paisaje increíble y surreal de dunas y lagunas."
+ },
+ "nat|São Miguel do Gostoso Self-Guided Trip in an Off-Roading Vehicle": {
+  "titulo": "São Miguel do Gostoso: excursión autoguiada en vehículo todoterreno",
+  "descripcion": "En esta excursión a São Miguel do Gostoso descubrimos por qué se convirtió en un atractivo turístico en los últimos años. ¡Te va a encantar!"
+ },
+ "pip|Guaraíras Lagoon Boat Ride": {
+  "titulo": "Paseo en barco por la Laguna Guaraíras",
+  "descripcion": "Si buscás una experiencia completa en la costa de Rio Grande do Norte, no te pierdas este paseo en barco por la Laguna Guaraíras al atardecer."
+ },
+ "pip|Pipa 4x4 Tour": {
+  "titulo": "Tour 4x4 por Pipa",
+  "descripcion": "En este tour 4x4 por Pipa vemos las playas Minas y Amor y descubrimos la rica historia y naturaleza de este balneario. ¡No te lo pierdas!"
+ },
+ "pip|Pipa Quad Tour": {
+  "titulo": "Recorrido en cuatriciclo por Pipa",
+  "descripcion": "Sumate a una emocionante experiencia en la costa de Rio Grande do Norte: un inolvidable recorrido en cuatriciclo por Pipa, con las playas más lindas de la zona."
+ },
+ "pip|Pipa Ziplining": {
+  "titulo": "Tirolesa en Pipa",
+  "descripcion": "¿Buscás adrenalina durante tu estadía en Rio Grande do Norte? Este circuito de tirolesa en Pipa es la opción perfecta para quienes buscan emociones en Brasil."
+ },
+ "porto|2 or 3-Day Trip from Porto de Galinhas": {
+  "titulo": "Playas de Porto de Galinhas: rutas de 2 o 3 destinos",
+  "descripcion": "Explorá la costa de Pernambuco en este tour por las playas de Porto de Galinhas. Podés elegir dos o tres rutas para descubrir rincones de ensueño."
+ },
+ "porto|Acquaventura Carneiros Tickets": {
+  "titulo": "Entradas a Acquaventura Carneiros",
+  "descripcion": "Disfrutá de un día inolvidable en el parque acuático de la playa Carneiros con esta entrada a Acquaventura. Te vas a divertir con tu familia."
+ },
+ "porto|Cabo de Santo Agostinho Beaches Day Trip": {
+  "titulo": "Excursión a las playas de Cabo de Santo Agostinho",
+  "descripcion": "En esta excursión a las playas de Cabo de Santo Agostinho pasás un día rodeado de naturaleza y paisajes de ensueño en uno de los lugares más lindos de Brasil."
+ },
+ "porto|Carneiros Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa Carneiros",
+  "descripcion": "Descubrí uno de los lugares más idílicos del nordeste de Brasil con esta excursión a la playa Carneiros. Te espera un verdadero paraíso natural."
+ },
+ "porto|LUP Beach Club Ticket": {
+  "titulo": "Entrada al LUP Beach Club",
+  "descripcion": "Disfrutá de un día lleno de relax con tu entrada al LUP Beach Club. Relajate en este exclusivo beach club de Sirinhaém, a solo 40 minutos de Porto de Galinhas."
+ },
+ "porto|Maragogi Beach Day Trip": {
+  "titulo": "Excursión de un día a la playa de Maragogi",
+  "descripcion": "Explorá el Caribe brasileño y descubrí un pedacito de paraíso en esta excursión a la playa de Maragogi. Pasamos el día relajándonos en esta hermosa playa."
+ },
+ "porto|Northern Pernambuco Beaches Day Trip": {
+  "titulo": "Excursión a las playas del norte de Pernambuco",
+  "descripcion": "Playas paradisíacas, paisajes impresionantes y una isla tropical… ¡Sumate a esta excursión desde Porto de Galinhas a Igarassu e Itamaracá!"
+ },
+ "porto|Olinda Day Trip": {
+  "titulo": "Excursión de un día a Olinda",
+  "descripcion": "Enamorate de Olinda al atardecer en esta excursión desde Porto de Galinhas y disfrutá de las mejores vistas de esta ciudad Patrimonio de la Humanidad de la UNESCO."
+ },
+ "porto|Olinda Day Trip + Francisco Brennand Museum": {
+  "titulo": "Excursión a Olinda y Museo Francisco Brennand",
+  "descripcion": "En esta excursión desde Porto de Galinhas descubrimos el patrimonio colonial de Olinda y nos adentramos en el mundo surrealista de Francisco Brennand."
+ },
+ "porto|Porto de Galinhas Bike Tour": {
+  "titulo": "Tour en bicicleta por Porto de Galinhas",
+  "descripcion": "Turismo y deporte se unen en este tour en bicicleta por Porto de Galinhas. Pedaleás por senderos que te llevan hasta donde el mar se encuentra con el río Maracaípe."
+ },
+ "porto|Porto de Galinhas Helicopter Ride": {
+  "titulo": "Paseo en helicóptero por Porto de Galinhas",
+  "descripcion": "En este paseo en helicóptero por Porto de Galinhas sobrevolás su impresionante costa de playas de arena blanca y los tonos turquesa del océano."
+ },
+ "porto|Porto de Galinhas Jangada Boat Ride": {
+  "titulo": "Paseo en jangada por Porto de Galinhas",
+  "descripcion": "Navegá por las aguas paradisíacas de Porto de Galinhas en una tradicional jangada. Explorá una de las zonas más lindas de Brasil de una forma única."
+ },
+ "porto|Porto de Galinhas Paramotor Flight": {
+  "titulo": "Vuelo en paramotor sobre Porto de Galinhas",
+  "descripcion": "En este vuelo en paramotor sobre Porto de Galinhas disfrutás de una vista única de esta costa conocida por su barrera de arrecifes de coral y sus piscinas naturales."
+ },
+ "porto|Porto de Galinhas Private Day Trips": {
+  "titulo": "Excursiones privadas desde Porto de Galinhas",
+  "descripcion": "Si tenés uno o dos días libres en tus vacaciones, te van a encantar nuestras excursiones privadas desde Porto de Galinhas. ¡Te vas a divertir mucho!"
+ },
+ "porto|Praia de São José da Coroa Grande Day Trip": {
+  "titulo": "Excursión a Praia de São José da Coroa Grande",
+  "descripcion": "Aprovechá tu estadía en Porto de Galinhas y descubrí un hermoso pedacito de paraíso en nuestra excursión a Praia de São José da Coroa Grande."
+ },
+ "porto|Recife & Olinda Day Trip": {
+  "titulo": "Excursión de un día a Recife y Olinda",
+  "descripcion": "¿Querés explorar dos joyas del nordeste de Brasil? Con esta excursión a Recife y Olinda disfrutamos de los muchos encantos de dos ciudades ricas en historia y patrimonio."
+ },
+ "porto|Recife Day Trip + Ricardo Brennand Institute": {
+  "titulo": "Excursión a Recife e Instituto Ricardo Brennand",
+  "descripcion": "En esta excursión a Recife desde Porto de Galinhas visitamos iglesias históricas, exploramos una antigua prisión y recorremos el impresionante Instituto Ricardo Brennand."
+ },
+ "porto|Scuba Diving in Porto de Galinhas": {
+  "titulo": "Buceo en Porto de Galinhas",
+  "descripcion": "En esta actividad de buceo en Porto de Galinhas descubrís un mundo submarino lleno de vida, con peces tropicales, arrecifes de coral y aguas cristalinas."
+ },
+ "rec|Cabo Santo Agostinho Day Trip": {
+  "titulo": "Excursión de un día a Cabo de Santo Agostinho",
+  "descripcion": "En este tour en buggy exploramos Cabo de Santo Agostinho, un paraíso natural conocido por sus aguas cristalinas, en una ruta que combina paisajes y aventura."
+ },
+ "rec|Capibaribe River Boat Tour": {
+  "titulo": "Paseo en barco por el río Capibaribe",
+  "descripcion": "Navegá por el río Capibaribe en catamarán al atardecer o de noche y admirá los emblemas de Recife desde una perspectiva única e inolvidable junto al agua."
+ },
+ "rec|Carneiros Day Trip": {
+  "titulo": "Excursión de un día a Carneiros",
+  "descripcion": "Alejate de las playas de siempre y descubrí la playa Carneiros en esta excursión desde Recife, un entorno natural ideal para relajarse."
+ },
+ "rec|Caruaru Day Trip": {
+  "titulo": "Excursión de un día a Caruaru",
+  "descripcion": "¡Sumate a descubrir la ciudad de Caruaru! En esta excursión vamos al corazón de Pernambuco para explorar sus tradiciones más arraigadas."
+ },
+ "rec|Gilberto Freyre Foundation Guided Tour": {
+  "titulo": "Visita guiada a la Fundación Gilberto Freyre",
+  "descripcion": "En esta visita guiada a la Fundación Gilberto Freyre descubrimos numerosas obras de arte de valor que decoran la casa-museo de este autor brasileño."
+ },
+ "rec|Igarassu & Itamaracá Day Trip": {
+  "titulo": "Excursión a Igarassu e Itamaracá",
+  "descripcion": "Descubrí playas paradisíacas en esta increíble excursión a Igarassu e Itamaracá. Pasamos el día explorando estos hermosos rincones de la costa brasileña."
+ },
+ "rec|João Pessoa Day Trip": {
+  "titulo": "Excursión de un día a João Pessoa",
+  "descripcion": "Descubrí la espectacular João Pessoa en nuestra excursión desde Recife. Exploramos el centro histórico y vemos el atardecer desde la impresionante playa Jacaré."
+ },
+ "rec|Maragogi Day Trip": {
+  "titulo": "Excursión de un día a Maragogi",
+  "descripcion": "Arrecifes de coral, playas cristalinas… En esta excursión a Maragogi desde Recife disfrutás de uno de los lugares más idílicos de la costa de Brasil."
+ },
+ "rec|Olinda + Ricardo Brennard Institute Day Trip": {
+  "titulo": "Excursión a Olinda e Instituto Ricardo Brennand",
+  "descripcion": "En esta excursión a Olinda vemos los principales atractivos de esta ciudad famosa por sus muñecos de Carnaval y visitamos el Instituto Ricardo Brennand."
+ },
+ "rec|Olinda Sunset Day Trip": {
+  "titulo": "Olinda al atardecer",
+  "descripcion": "En esta excursión a Olinda al atardecer dejamos atrás el bullicio de Recife y nos sumergimos en el encanto de esta ciudad Patrimonio de la Humanidad."
+ },
+ "rec|Porto de Galinhas Day Trip": {
+  "titulo": "Excursión de un día a Porto de Galinhas",
+  "descripcion": "Pasá un día relajándote en un paraíso tropical en esta excursión a Porto de Galinhas. Dejamos Recife atrás y visitamos el destino de playa favorito de Brasil."
+ },
+ "rec|Recife & Olinda Tour": {
+  "titulo": "Tour a pie por Recife y Olinda",
+  "descripcion": "Descubrí el rico patrimonio de Recife y Olinda en este tour a pie en el que conocés el origen y la evolución de estas dos ciudades."
+ },
+ "rec|Recife & Ricardo Brennand Institute Guided Tour": {
+  "titulo": "Tour guiado por Recife e Instituto Ricardo Brennand",
+  "descripcion": "Conocé lo más destacado de Recife y visitá el Instituto Ricardo Brennand en este tour que combina el centro histórico y uno de los mejores museos de América Latina."
+ },
+ "rec|Recife City + Beaches Tour": {
+  "titulo": "Recife: ciudad y playas",
+  "descripcion": "Explorá la capital de Pernambuco con este tour por Recife. Podés hacer 2 o 3 rutas por la ciudad y las playas de Maragogi, Porto de Galinhas o João Pessoa."
+ },
+ "rec|Santo Aleixo Island Day Trip": {
+  "titulo": "Excursión a la isla Santo Aleixo",
+  "descripcion": "Sumate a explorar un rincón especial del paraíso en esta excursión a la isla Santo Aleixo. Descubrimos un paraíso volcánico rodeado de aguas verde esmeralda."
+ },
+ "rec|São José da Coroa Grande Beach Day Trip": {
+  "titulo": "Excursión a la playa São José da Coroa Grande",
+  "descripcion": "Disfrutá de una excursión a la playa São José da Coroa Grande desde Recife y descubrí la joya escondida de la Costa dos Corais con sus impresionantes piscinas naturales."
+ },
+ "canela|Alpen Park Ticket": {
+  "titulo": "Entrada al Alpen Park",
+  "descripcion": "¿Querés sentir una verdadera descarga de adrenalina en la Serra Gaúcha? Con esta entrada al Alpen Park te divertís con increíbles montañas rusas."
+ },
+ "canela|Canela Egyptian Museum Tickets": {
+  "titulo": "Entradas al Museo Egipcio de Canela",
+  "descripcion": "Desentrañá los misterios del Antiguo Egipto con esta entrada al Museo Egipcio de Canela. Descubrí los secretos mejor guardados de hace miles de años."
+ },
+ "canela|Cristais de Gramado Factory Tickets + Transport": {
+  "titulo": "Fábrica Cristais de Gramado: entradas y traslado",
+  "descripcion": "Si estás en Gramado o Canela, no podés perderte una visita a la fábrica Cristais de Gramado, una auténtica inmersión en el arte del vidrio soplado."
+ },
+ "canela|Gaucha Dinner + Folkloric Show": {
+  "titulo": "Cena gaucha y show folclórico",
+  "descripcion": "¿Conocés la comida y los bailes del sur de Brasil? Esta comida gaucha con show folclórico te permite descubrir su cultura musical y gastronómica."
+ },
+ "canela|Gramado & Canela Day Trip": {
+  "titulo": "Excursión de un día a Gramado y Canela",
+  "descripcion": "Chalés alpinos, edificios de estilo bávaro y hermosas cascadas te esperan en esta excursión a Gramado y Canela, en plena Serra Gaúcha de Brasil."
+ },
+ "canela|Gramado Chocobus Tour": {
+  "titulo": "Tour Chocobus por Gramado",
+  "descripcion": "Si tenés debilidad por lo dulce, este tour del chocolate por Gramado es para vos. Subimos al Chocobus para descubrir los secretos de este delicioso producto."
+ },
+ "canela|Gramado Dreams Passport": {
+  "titulo": "Pase Gramado Dreams",
+  "descripcion": "Reservá tu Pase Gramado Dreams y disfrutá de 7 de las mejores atracciones de Gramado y Canela. Tenés un 60% de descuento en todas las entradas."
+ },
+ "canela|Gramado and Canela Sightseeing Bus": {
+  "titulo": "Bus turístico de Gramado y Canela",
+  "descripcion": "Con este ticket del bus turístico de Gramado y Canela recorrés estas dos ciudades brasileñas de la forma más cómoda, sin límite de viajes durante 1, 2 o 3 días."
+ },
+ "canela|Itaimbezinho Canyon Day Trip": {
+  "titulo": "Excursión al Cañón Itaimbezinho",
+  "descripcion": "Sumate a descubrir uno de los paisajes más exuberantes de Brasil en esta excursión al Cañón Itaimbezinho. Vemos el cañón más grande de América Latina."
+ },
+ "canela|Italian Dinner & Folklore Show in Gramado": {
+  "titulo": "Cena italiana y show folclórico en Gramado",
+  "descripcion": "Disfrutá de un verdadero banquete en Gramado con esta cena italiana y show folclórico en el restaurante Cantina Linha Bella. Escuchamos canciones y vemos una obra de teatro."
+ },
+ "canela|Maria Fumaça Train Ride + Tour of Aurora Winery": {
+  "titulo": "Tren Maria Fumaça y visita a la Vinícola Aurora",
+  "descripcion": "Explorá los paisajes más pintorescos de la Serra Gaúcha a bordo del tren Maria Fumaça. Además, tenés la oportunidad de recorrer la Vinícola Aurora."
+ },
+ "canela|Nova Petrópolis Day Trip": {
+  "titulo": "Excursión de un día a Nova Petrópolis",
+  "descripcion": "Explorá la historia de la inmigración alemana en Rio Grande do Sul en esta excursión a Nova Petrópolis, donde paseás por sus calles pintorescas."
+ },
+ "canela|Off-roading + Hiking at the Caracol Waterfall": {
+  "titulo": "Todoterreno y caminata a la cascada del Caracol",
+  "descripcion": "En esta caminata a la cascada del Caracol recorremos el frondoso bosque y viajamos en un vehículo todoterreno para explorar las zonas más remotas de Rio Grande."
+ },
+ "canela|Paranhana River Rafting": {
+  "titulo": "Rafting en el río Paranhana",
+  "descripcion": "En esta actividad de aventura en el Brasil Raft Park disfrutás de una emocionante experiencia de rafting en el río Paranhana. Adrenalina pura."
+ },
+ "canela|Ticket to Bell Museum in Canela": {
+  "titulo": "Entrada al Museo de las Campanas de Canela",
+  "descripcion": "Con esta entrada al Museo de las Campanas podés subir a la torre de la Catedral de Piedra de Canela y admirar la ciudad desde arriba."
+ },
+ "canela|Ticket to Skyglass Canela": {
+  "titulo": "Entrada al Skyglass Canela",
+  "descripcion": "Si estás en Canela y querés aventura emocionante con vistas impresionantes, no te pierdas esta inolvidable experiencia en el Skyglass."
+ },
+ "canela|Vale dos Vinhedos Wine Tour": {
+  "titulo": "Tour de vinos por el Vale dos Vinhedos",
+  "descripcion": "Sumate a explorar los vínculos de Rio Grande do Sul con Italia en este tour de vinos por el Vale dos Vinhedos. Visitamos varias bodegas con degustación incluida."
+ },
+ "gram|Cristais de Gramado Factory Tickets + Transport": {
+  "titulo": "Fábrica Cristais de Gramado: entradas y traslado",
+  "descripcion": "Si estás en Gramado o Canela, no podés perderte una visita a la fábrica Cristais de Gramado, una auténtica inmersión en el arte del vidrio soplado."
+ },
+ "gram|German Dinner & Traditional Folk Show": {
+  "titulo": "Cena alemana y show folclórico tradicional",
+  "descripcion": "Probá lo mejor de la cocina alemana y sumergite en las costumbres de Nova Petrópolis con esta cena y espectáculo folclórico tradicional."
+ },
+ "gram|Gramado + Linha Nova Italian Immigration Tour": {
+  "titulo": "Tour de la inmigración italiana en Gramado y Linha Nova",
+  "descripcion": "Los colonos europeos dejaron una huella innegable en el sur de Brasil. Descubrila en este tour de la inmigración italiana en Gramado y Linha Nova."
+ },
+ "gram|Itaimbezinho Canyon Day Trip": {
+  "titulo": "Excursión al Cañón Itaimbezinho",
+  "descripcion": "Sumate a descubrir uno de los paisajes más exuberantes de Brasil en esta excursión al Cañón Itaimbezinho. Vemos el cañón más grande de América Latina."
+ },
+ "gram|Italian Culture Tour": {
+  "titulo": "Tour de la cultura italiana",
+  "descripcion": "Sumergite en el patrimonio cultural de los colonos italianos en el tour de la inmigración italiana de Gramado, la mejor forma de explorar el pasado de esta región."
+ },
+ "gram|Joaquin Restaurant Fondue + Cathedral of Stone": {
+  "titulo": "Fondue en el restaurante Joaquina y Catedral de Piedra",
+  "descripcion": "Disfrutá de una velada inolvidable con una fondue en el restaurante Joaquina. Para cerrar la noche, vas a ver la Catedral de Piedra iluminada."
+ },
+ "gram|Lumni Experience Tickets": {
+  "titulo": "Entradas a Lumni Experience",
+  "descripcion": "En Lumni Experience te sumergís en un universo de luz, color, tecnología y sensaciones. Una experiencia inmersiva que estimula todos tus sentidos."
+ },
+ "gram|Maria Fumaça Train Ride + Tour of Aurora Winery": {
+  "titulo": "Tren Maria Fumaça y visita a la Vinícola Aurora",
+  "descripcion": "Explorá los paisajes más pintorescos de la Serra Gaúcha a bordo del tren Maria Fumaça. Además, tenés la oportunidad de recorrer la Vinícola Aurora."
+ },
+ "gram|Mundo Criamigos Tickets": {
+  "titulo": "Entradas a Mundo Criamigos",
+  "descripcion": "Disfrutá de un ambiente lleno de color y diversión sin límites para grandes y chicos con esta entrada a Mundo Criamigos, donde conocés al Clubinho Criamigos."
+ },
+ "gram|Paranhana River Rafting": {
+  "titulo": "Rafting en el río Paranhana",
+  "descripcion": "En esta actividad de aventura en el Brasil Raft Park disfrutás de una emocionante experiencia de rafting en el río Paranhana. Adrenalina pura."
+ },
+ "gram|Quilombo Valley Tour": {
+  "titulo": "Tour por el Valle del Quilombo",
+  "descripcion": "En este tour por el Valle del Quilombo entramos en un mundo de tradiciones y cultura, visitando familias italianas y alemanas y probando productos locales."
+ },
+ "gram|Shopping Tour of Gramado & Canela": {
+  "titulo": "Tour de compras por Gramado y Canela",
+  "descripcion": "Si buscás las mejores ofertas y los lugares de compras más exclusivos de Gramado y Canela, este tour de compras es para vos."
+ },
+ "gram|Snowland Tickets": {
+  "titulo": "Entradas a Snowland",
+  "descripcion": "Con tu entrada a Snowland disfrutás de un rato divertido en la nieve sin salir de Gramado y en cualquier época del año. ¡Te vas a divertir!"
+ },
+ "gram|Ticket to Skyglass Canela": {
+  "titulo": "Entrada al Skyglass Canela",
+  "descripcion": "Si estás en Canela y querés aventura emocionante con vistas impresionantes, no te pierdas esta inolvidable experiencia en el Skyglass."
+ },
+ "gram|Tour of the Sets of 'The Quartet'": {
+  "titulo": "Tour por los escenarios de «O Quatrilho»",
+  "descripcion": "«O Quatrilho» fue la segunda película brasileña nominada al Oscar. En este tour desde Gramado exploramos los paisajes que inspiraron este famoso film."
+ },
+ "gram|Vale dos Vinhedos Wine Tour": {
+  "titulo": "Tour de vinos por el Vale dos Vinhedos",
+  "descripcion": "Sumate a explorar los vínculos de Rio Grande do Sul con Italia en este tour de vinos por el Vale dos Vinhedos. Visitamos varias bodegas con degustación incluida."
+ },
+ "poa|Best of Porto Alegre Tour": {
+  "titulo": "Lo mejor de Porto Alegre",
+  "descripcion": "En este tour por Porto Alegre conocemos los principales atractivos históricos y culturales de la ciudad y disfrutamos del atardecer en el Cais Embarcadero."
+ },
+ "poa|Porto Alegre Bike Tour": {
+  "titulo": "Tour en bicicleta por Porto Alegre",
+  "descripcion": "En este tour en bicicleta por Porto Alegre conocemos la ciudad de una forma única mientras hacemos ejercicio. ¡Una gran manera de explorarla!"
+ },
+ "poa|Porto Alegre Guided Tour": {
+  "titulo": "Tour guiado por Porto Alegre",
+  "descripcion": "En este tour guiado por Porto Alegre conocés la historia de la ciudad y visitás lugares emblemáticos como la Esquina Democrática y la Praça Alfândega."
+ },
+ "rio|Angra dos Reis and Ilha Grande Full-Day Tour": {
+  "titulo": "Angra dos Reis e Ilha Grande: excursión de día completo",
+  "descripcion": "Excursión de día completo a Angra dos Reis e Ilha Grande desde Río de Janeiro."
+ },
+ "rio|Best Half Day in Rio: Christ the Redeemer and Sugarloaf": {
+  "titulo": "Medio día en Río: Cristo Redentor y Pan de Azúcar",
+  "descripcion": "Medio día en Río de Janeiro con visita al Cristo Redentor y al Pan de Azúcar."
+ },
+ "rio|Christ the Redeemer and Sugarloaf Tour with…": {
+  "titulo": "Tour al Cristo Redentor y Pan de Azúcar",
+  "descripcion": "Recorrido por el Cristo Redentor y el Pan de Azúcar, dos de los íconos de Río de Janeiro."
+ },
+ "rio|Coffee Farm Tour with Tasting": {
+  "titulo": "Tour por una finca de café con degustación",
+  "descripcion": "Visita a una finca de café con degustación cerca de Río de Janeiro."
+ },
+ "rio|Dois irmãos sunrise hike /day hike & drone video": {
+  "titulo": "Caminata al amanecer al Morro Dois Irmãos con video con dron",
+  "descripcion": "Caminata al Morro Dois Irmãos, con salida al amanecer o durante el día, y video con dron."
+ },
+ "rio|Hang Gliding Adventure": {
+  "titulo": "Aventura en ala delta",
+  "descripcion": "Vuelo en ala delta sobre Río de Janeiro."
+ },
+ "rio|Hang Gliding Tandem Flight": {
+  "titulo": "Vuelo en ala delta en tándem",
+  "descripcion": "Vuelo en ala delta en tándem sobre Río de Janeiro."
+ },
+ "rio|Hang Gliding or Paragliding Flights": {
+  "titulo": "Vuelo en ala delta o parapente",
+  "descripcion": "Vuelo en ala delta o parapente sobre Río de Janeiro."
+ },
+ "rio|Helicopter Tour": {
+  "titulo": "Tour en helicóptero",
+  "descripcion": "Sobrevuelo en helicóptero por Río de Janeiro."
+ },
+ "rio|Jet Ski Experience with Caipirinha": {
+  "titulo": "Experiencia en moto de agua con caipirinha",
+  "descripcion": "Experiencia en moto de agua con caipirinha en Río de Janeiro."
+ },
+ "rio|Premium Helicopter Doors Off - Price for One Person": {
+  "titulo": "Helicóptero premium con puertas abiertas (precio por persona)",
+  "descripcion": "Vuelo premium en helicóptero con las puertas abiertas sobre Río de Janeiro. El precio es por persona."
+ },
+ "rio|Rio Carnival 2027: Sambadrome Parade + Transfer": {
+  "titulo": "Carnaval de Río 2027: desfile en el Sambódromo y traslado",
+  "descripcion": "Entrada al desfile del Carnaval de Río 2027 en el Sambódromo, con traslado."
+ },
+ "rio|Rio: 30 minutes PRIVATE Helicopter Flight to Christ": {
+  "titulo": "Vuelo privado en helicóptero de 30 minutos al Cristo Redentor",
+  "descripcion": "Vuelo privado en helicóptero de 30 minutos hasta el Cristo Redentor."
+ },
+ "rio|Rio: Carnival 2027 Sambadrome Parade Ticket & Transfer": {
+  "titulo": "Carnaval 2027: entrada al desfile del Sambódromo y traslado",
+  "descripcion": "Entrada al desfile del Carnaval 2027 en el Sambódromo de Río de Janeiro, con traslado."
+ },
+ "rio|Rio: Christ the Redeemer, Sugarloaf, Selaron & BBQ Lunch": {
+  "titulo": "Río: Cristo Redentor, Pan de Azúcar, Selarón y almuerzo con parrilla",
+  "descripcion": "Recorrido por el Cristo Redentor, el Pan de Azúcar y la escalera Selarón, con almuerzo de parrilla."
+ },
+ "rio|Rio: Half-Day with Christ, Selarón Steps & Sugarloaf Sunset": {
+  "titulo": "Río: medio día con el Cristo, la escalera Selarón y atardecer en el Pan de Azúcar",
+  "descripcion": "Medio día en Río con el Cristo Redentor, la escalera Selarón y el atardecer en el Pan de Azúcar."
+ },
+ "rio|Rio: Helicopter Doors Off Flight + Optional Hotel Transfer": {
+  "titulo": "Río: vuelo en helicóptero con puertas abiertas y traslado opcional al hotel",
+  "descripcion": "Vuelo en helicóptero con las puertas abiertas sobre Río de Janeiro, con traslado opcional al hotel."
+ },
+ "rio|Rio: Maracanã Stadium Football Match Ticket & Pvt Transport": {
+  "titulo": "Río: entrada a un partido de fútbol en el Maracanã con transporte privado",
+  "descripcion": "Entrada a un partido de fútbol en el estadio Maracanã, con transporte privado."
+ },
+ "rio|Sunset Sailboat Tour with Open Bar": {
+  "titulo": "Paseo en velero al atardecer con barra libre",
+  "descripcion": "Paseo en velero al atardecer, con barra libre, en Río de Janeiro."
+ },
+ "rio|Tandem Hang Gliding Flight (GoPro included)": {
+  "titulo": "Vuelo en ala delta en tándem (GoPro incluida)",
+  "descripcion": "Vuelo en ala delta en tándem sobre Río de Janeiro, con GoPro incluida."
+ },
+ "rio|Angra dos Reis Day Trip + Goleta Boat Ride": {
+  "titulo": "Excursión a Angra dos Reis con paseo en goleta",
+  "descripcion": "Descubrí el paraíso brasileño de Angra dos Reis y date un baño en sus playas de ensueño. Navegás en una goleta brasileña y probás la cocina local."
+ },
+ "rio|Christ the Redeemer and Tijuca National Park Tour": {
+  "titulo": "Cristo Redentor y Parque Nacional da Tijuca",
+  "descripcion": "Disfrutá de los majestuosos paisajes que rodean Río en este tour por el Parque Nacional da Tijuca y sus alrededores. ¡Increíble!"
+ },
+ "rio|Footvolley at Copacabana Beach": {
+  "titulo": "Futevôlei en la playa de Copacabana",
+  "descripcion": "Una mezcla de técnicas de fútbol y voleibol da origen al futevôlei, y con esta actividad podés practicar este deporte en su cuna: la playa de Copacabana."
+ },
+ "rio|Ilha Grande Hike": {
+  "titulo": "Excursión a Ilha Grande desde Río",
+  "descripcion": "El increíble Caribe brasileño y sus playas paradisíacas te esperan en este paseo en barco a Ilha Grande desde Río de Janeiro."
+ },
+ "rio|Pavão-Pavãozinho & Cantagalo Tour": {
+  "titulo": "Tour por Pavão-Pavãozinho y Cantagalo",
+  "descripcion": "En este recorrido por los barrios Pavão-Pavãozinho y Cantagalo te sumergís en las raíces culturales de una comunidad que respira arte y resiliencia."
+ },
+ "rio|Rio Motorcycle Tour + Santa Marta Favela Visit": {
+  "titulo": "Tour en moto por Río y visita a la favela Santa Marta",
+  "descripcion": "Explorá Río de Janeiro en un emocionante tour en moto por sus playas, el centro histórico y el corazón de la favela Santa Marta para conocer la cultura local."
+ },
+ "rio|Rio de Janeiro Football Match + Local Guide": {
+  "titulo": "Partido de fútbol en Río con guía local",
+  "descripcion": "Con estas entradas a un partido de fútbol en Río de Janeiro vivís la pasión de los cariocas por este deporte en el estadio Maracanã."
+ },
+ "rio|Rio de Janeiro Full-Day Tour + Christ the Redeemer and Sugarloaf Mountain by Minibus": {
+  "titulo": "Río de Janeiro: día completo con Cristo Redentor y Pan de Azúcar en minibús",
+  "descripcion": "Descubrí Río de Janeiro en este tour completo. Ves en persona la famosa estatua del Cristo Redentor, el Pan de Azúcar y el estadio Maracanã."
+ },
+ "rio|Rio de Janeiro Party Boat": {
+  "titulo": "Barco de fiesta en Río de Janeiro",
+  "descripcion": "Prepará la mejor noche de tu viaje a Río de Janeiro con este barco de fiesta. Te esperan música, caipirinhas y las mejores vistas de la ciudad."
+ },
+ "rio|Rio de Janeiro Rocinha Favela Walking Tour": {
+  "titulo": "Tour a pie por la favela Rocinha",
+  "descripcion": "Viví el otro lado de Río de Janeiro con este tour guiado por la favela Rocinha, donde descubrís sus rincones menos conocidos."
+ },
+ "rio|Rio de Janeiro Sunrise Paddle Surf": {
+  "titulo": "Paddle surf al amanecer en Río de Janeiro",
+  "descripcion": "Si querés disfrutar de una experiencia única al amanecer, no te pierdas esta actividad de paddle surf en Río de Janeiro. Será un momento mágico."
+ },
+ "rio|Roxy Dinner Show Tickets": {
+  "titulo": "Entradas al Roxy Dinner Show",
+  "descripcion": "En el Roxy Dinner Show disfrutás de un espectáculo lleno de tradiciones brasileñas con una puesta en escena increíble. Además, cenás muy bien."
+ },
+ "rio|Río de Janeiro Street Art Tour": {
+  "titulo": "Tour de arte urbano por Río de Janeiro",
+  "descripcion": "Explorá las calles de Río de Janeiro para admirar su increíble arte urbano en este tour guiado y descubrí los famosos murales del Boulevard Olímpico."
+ },
+ "rio|Santa Marta Favela Tour, Football Game + Traditional Lunch": {
+  "titulo": "Favela Santa Marta: tour, partido de fútbol y almuerzo tradicional",
+  "descripcion": "En este tour por la favela Santa Marta, en Río de Janeiro, descubrís el día a día de esta comunidad carioca. Disfrutás de un rico almuerzo y un partido de fútbol."
+ },
+ "rio|The Municipal Theatre, the National Library and the Royal Portuguese Cabinet Tour": {
+  "titulo": "Tour por el Teatro Municipal, la Biblioteca Nacional y el Real Gabinete Portugués de Lectura",
+  "descripcion": "Explorá los edificios más emblemáticos de la cultura brasileña con este tour por el Teatro Municipal, la Biblioteca Nacional y el Real Gabinete Portugués de Lectura."
+ },
+ "rio|Vidigal Favela Motorcycle Taxi Tour": {
+  "titulo": "Tour en mototaxi por la favela Vidigal",
+  "descripcion": "Coloridos murales y miradores increíbles son lo más destacado de este tour en mototaxi por Vidigal, una de las favelas más grandes de Río de Janeiro."
+ },
+ "rio|Whale Watching in Rio de Janeiro": {
+  "titulo": "Avistaje de ballenas en Río de Janeiro",
+  "descripcion": "Si estás en Río de Janeiro, no te pierdas la oportunidad de disfrutar de esta experiencia de avistaje de ballenas en la costa carioca. ¡Te va a encantar!"
+ },
+ "rio|Carioca Tour | cariocatours": {
+  "titulo": "Tour Carioca",
+  "descripcion": "Explorá Río de Janeiro más allá de los puntos turísticos tradicionales, con una inmersión en las nuevas tendencias del turismo sostenible y experiencias auténticas. Este paquete está pensado para el viajero moderno que quiere conectarse profundamente con la cultura local y contribuir a la preservación ambiental y cultural de la ciudad. Recorrido: Cristo Redentor, Escalera Selarón, Catedral de San Sebastián…"
+ },
+ "rio|Pão de Açúcar | cariocatours": {
+  "titulo": "Pan de Azúcar",
+  "descripcion": "No es casualidad que el Pan de Azúcar sea uno de los puntos turísticos más buscados de Río de Janeiro. Muy bien ubicado, en el barrio de Urca, el conjunto de cerros Pan de Azúcar y Morro da Urca es uno de los paisajes naturales más lindos, con una vasta flora y fauna tropical. La emoción del paseo empieza mucho antes de llegar a la cima, a 396 metros sobre el nivel del mar…"
+ },
+ "rio|RIO ISLAND BOAT TOUR | cariocatours": {
+  "titulo": "Paseo en barco por las islas de Río",
+  "descripcion": "Salidas regulares todos los días del año, de 10:00 a 13:00 y de 14:30 a 17:30 (atardecer). Recorrido de hasta 3 horas: Muelle da Urca, Urca, Fuerte São João, Pan de Azúcar, Praia Vermelha, Copacabana, Arpoador, Islas Cagarras, Praia de Adão e Eva, MAC, Ilha Fiscal, Aeropuerto SDU y regreso al Muelle da Urca. El itinerario puede cambiar según las condiciones climáticas…"
+ },
+ "sao|Day Trip to Aparecida": {
+  "titulo": "Excursión de un día a Aparecida",
+  "descripcion": "Explorá la ciudad de Aparecida y visitá la Basílica del Santuario Nacional de Nuestra Señora de Aparecida, una de las más grandes del mundo."
+ },
+ "sao|Day Trip to Campos do Jordão": {
+  "titulo": "Excursión de un día a Campos do Jordão",
+  "descripcion": "Conocida como la «Suiza brasileña», escapate del calor de São Paulo y enamorate de sus paisajes alpinos en esta excursión a Campos do Jordão."
+ },
+ "sao|Day Trip to Santos, Sao Vicente and Guarujá": {
+  "titulo": "Excursión a Santos, São Vicente y Guarujá",
+  "descripcion": "Disfrutá de un día explorando la costa de São Paulo y descubriendo las increíbles playas y ciudades de Santos, São Vicente y Guarujá."
+ },
+ "sao|Higienópolis Neighborhood Guided Tour": {
+  "titulo": "Tour guiado por el barrio Higienópolis",
+  "descripcion": "En este tour guiado por el barrio Higienópolis descubrís uno de los distritos que mejor representan la arquitectura del siglo XX en São Paulo."
+ },
+ "sao|Private Helicopter Tour of Sao Paulo": {
+  "titulo": "Tour privado en helicóptero por São Paulo",
+  "descripcion": "Admirá el skyline de São Paulo y sus alrededores desde una vista única a vuelo de pájaro. Disfrutá de un inolvidable paseo en helicóptero sobre la hermosa ciudad brasileña."
+ },
+ "sao|Private Tour of Sao Paulo": {
+  "titulo": "Tour privado por São Paulo",
+  "descripcion": "Descubrí lo mejor de una de las ciudades más grandes del mundo con tu propio guía de habla inglesa en este tour privado por São Paulo."
+ },
+ "sao|Santo Amaro Island Day Trip": {
+  "titulo": "Excursión a la isla Santo Amaro",
+  "descripcion": "Con esta excursión a la isla Santo Amaro visitás tres playas salvajes de la costa de São Paulo y descubrís que el paraíso en la tierra existe."
+ },
+ "sao|Sao Paulo Ayrton Senna Private Tour": {
+  "titulo": "Tour privado de Ayrton Senna en São Paulo",
+  "descripcion": "Si sos fanático de la Fórmula 1, no te pierdas este tour privado de Ayrton Senna por São Paulo: conocés el legado del inolvidable piloto brasileño."
+ },
+ "sao|Sao Paulo City Top Attractions Tour": {
+  "titulo": "Tour por los principales atractivos de São Paulo",
+  "descripcion": "Descubrí la ciudad brasileña desde otro punto de vista con este tour por São Paulo. No te pierdas los monumentos más importantes y los atractivos imprescindibles."
+ },
+ "sao|Sao Paulo Guided Tour": {
+  "titulo": "Tour guiado por São Paulo",
+  "descripcion": "Descubrí el patrimonio cultural y el legado de una ciudad vibrante en este tour por São Paulo. Exploramos el centro histórico y viajamos a través de los siglos."
+ },
+ "sao|Sao Roque Day Trip": {
+  "titulo": "Excursión de un día a São Roque",
+  "descripcion": "¿Sos entusiasta del vino? Con esta excursión a São Roque probás los excelentes vinos de la región y además vas al Santa Catarina Fashion Outlet."
+ },
+ "sao|Serra da Cantareira Trekking Experience": {
+  "titulo": "Trekking por la Serra da Cantareira",
+  "descripcion": "Disfrutá de la aventura de una experiencia de trekking en la Serra da Cantareira. Además, tenés vistas inmejorables de São Paulo."
+ },
+ "sao|São Paulo Bike Tour": {
+  "titulo": "Tour en bicicleta por São Paulo",
+  "descripcion": "¿Querés explorar el centro histórico de São Paulo en bicicleta? ¿O el hermoso Parque Ibirapuera? Esta es tu oportunidad."
+ },
+ "sao|São Paulo Complete Tour": {
+  "titulo": "Tour completo por São Paulo",
+  "descripcion": "Acompañanos a descubrir los lugares más emblemáticos de São Paulo. En el camino vas a ver edificios fantásticos y mucho arte de nivel mundial."
+ },
+ "sao|São Paulo Layover Private Tour": {
+  "titulo": "Tour privado para escala en São Paulo",
+  "descripcion": "¿Tenés una escala de seis horas o más? Es tiempo de sobra para descubrir la historia, los rascacielos, las iglesias y el encanto de São Paulo en este tour privado."
+ },
+ "sao|São Paulo Pub Crawl": {
+  "titulo": "Ruta de bares por São Paulo",
+  "descripcion": "En esta ruta de bares por São Paulo bailás toda la noche y salís de fiesta en una de las ciudades más grandes de Brasil. ¡La mejor forma de terminar el día!"
+ },
+ "sao|Vila Madalena Art Tour & Pub Crawl": {
+  "titulo": "Arte en Vila Madalena y ruta de bares",
+  "descripcion": "Viví el auténtico espíritu bohemio de São Paulo con este recorrido de arte y bares por Vila Madalena. Disfrutá del barrio con más ambiente de la ciudad."
+ }
+}
