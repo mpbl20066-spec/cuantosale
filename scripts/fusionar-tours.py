@@ -50,6 +50,9 @@ for n in nuevos:
     n['titulo'] = n['titulo'].strip()
     if n.pop('sin_precio', False):
         n['activo'] = False
+    elif n.pop('consultar', False):
+        # Precio a confirmar al reservar: precio 0 sin precio_brl; la app lo muestra como "Consultar".
+        n['precio'] = 0
     else:
         n['precio'] = round(n['precio_brl'] / cot + margen, 2)
     if n.get('foto'):

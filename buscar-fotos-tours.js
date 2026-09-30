@@ -25,7 +25,7 @@ const FREE = /^(cc0|cc by|cc by-sa|public domain|pd-|no restrictions)/i;
 // casi siempre.
 const SUBJECTS = {
 
-  'bcm#Beto Carrero World desde Camboriú': ['Beto Carrero', 'Beto Carrero World'],
+  'bcm#Ingreso Beto Carrero World': ['Beto Carrero', 'Beto Carrero World'],
 };
 
 const UA = 'cuantosale-tour-photos/1.0 (fotos para el catalogo de tours)';

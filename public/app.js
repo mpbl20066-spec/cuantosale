@@ -1488,6 +1488,9 @@
     var total = v * tasa;
     return m.simbolo + ' ' + formatoMiles(total, decimalesDe(m.code, total));
   }
+  /* Precio de una actividad. Un tour con precio 0 no es gratis: es un precio que se
+     confirma al reservar (ej. entradas de parques), y se muestra como "Consultar". */
+  function precioTour(n) { return Number(n) > 0 ? money(n) : 'Consultar'; }
   // money() redondea a entero (por defecto en dolares) y trunca
   // tarifas fraccionarias como US$/kWh a "US$ 0" — esta conserva decimales.
   function moneyPrecise(n) {
@@ -2564,7 +2567,7 @@
         ratingRow +
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__foot">' +
-        '<p class="local-tour__price"><span class="local-tour__from">Precio por persona</span><b>' + money(tour.price) + '</b></p>' +
+        '<p class="local-tour__price"><span class="local-tour__from">Precio por persona</span><b>' + precioTour(tour.price) + '</b></p>' +
         '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '" data-tour-facts="' + esc(JSON.stringify(tourFacts(tour))) + '" data-tour-sections="' + esc(JSON.stringify({ incluye: tour.incluye || [], noIncluye: tour.noIncluye || [], llevar: tour.llevar || [] })) + '">' +
         '<span>Ver detalles</span><span aria-hidden="true">→</span></button>' +
         '</div></div></article>';
@@ -3036,7 +3039,7 @@
     var cover = (meta.dest && meta.dest.photo) || '';
     function linea(item, total) {
       return '<li class="checkout-aside__row"><span class="checkout-aside__row-name">' + esc(item.title) + '</span>' +
-        '<b>' + money(total) + '</b></li>';
+        '<b>' + (Number(total) > 0 ? money(total) : 'Consultar') + '</b></li>';
     }
     var rows = t.count
       ? t.tours.map(function (tour) { return linea(tour, tour.price); }).join('') +
@@ -3226,7 +3229,7 @@
     var pedido = '';
     if (t.tours.length) {
       pedido += '<h3>Actividades en ' + esc(destino) + '</h3><ul>' +
-        t.tours.map(function (tour) { return dataRow(tour.title, money(tour.price) + ' c/u'); }).join('') +
+        t.tours.map(function (tour) { return dataRow(tour.title, (Number(tour.price) > 0 ? money(tour.price) + ' c/u' : 'Consultar')); }).join('') +
         '</ul>';
     }
     if (t.transfer) {
@@ -3451,7 +3454,7 @@
          final lo confirma quien lo tome: sin esa linea, un WhatsApp que dice
          "Total de actividades: US$ 240" se lee como una cotizacion firme. */
       var lineas = t.tours.map(function (tour) {
-        var linea = '- ' + tour.title + ' (' + money(tour.price) + ' por persona)';
+        var linea = '- ' + tour.title + ' (' + (Number(tour.price) > 0 ? money(tour.price) + ' por persona' : 'precio a consultar') + ')';
         return tour.url ? linea + '\n  ' + tour.url : linea;
       }).join('\n');
       message += 'Actividades:\n' + lineas + '\n';
@@ -4070,7 +4073,7 @@
   function toursWhatsappUrl(state) {
     var selectedTours = (state && state.selectedTours) || [];
     if (!selectedTours.length || !state.meta) return null;
-    var tourLines = selectedTours.map(function (tour) { return '- ' + tour.title + ' (' + money(tour.price) + ')'; }).join('\n');
+    var tourLines = selectedTours.map(function (tour) { return '- ' + tour.title + ' (' + (Number(tour.price) > 0 ? money(tour.price) : 'precio a consultar') + ')'; }).join('\n');
     var message = 'Hola, quiero reservar estos tours para mi viaje a ' + state.meta.dest.name + ':\n' + tourLines + '\n\nTotal referencial de tours: ' + money(state.toursTotal) + '\nViajamos ' + state.meta.pax + (Number(state.meta.pax) === 1 ? ' persona' : ' personas') + ' del ' + state.meta.dep + ' al ' + state.meta.ret + '. ¿Podrían confirmar disponibilidad y valor final?';
     return 'https://wa.me/?text=' + encodeURIComponent(message);
   }
@@ -7297,7 +7300,7 @@
         if (t.freeCancellation) datos.push('Cancelación gratis');
         datos.push(precioReal ? 'Precio real' : 'Precio referencial');
         return '<article class="guia-item">' +
-          '<div class="guia-item__head"><b>' + esc(t.title) + '</b><span class="guia-precio">' + money(t.price) + '</span></div>' +
+          '<div class="guia-item__head"><b>' + esc(t.title) + '</b><span class="guia-precio">' + precioTour(t.price) + '</span></div>' +
           '<p class="guia-nota guia-nota--chica">' + esc(datos.join(' · ')) + '</p>' +
           (t.description ? '<p class="guia-nota">' + esc(t.description) + '</p>' : '') + '</article>';
       }).join('');

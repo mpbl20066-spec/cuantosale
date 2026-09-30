@@ -116,7 +116,8 @@
       "titulo": "Beto Carrero World desde Camboriú",
       "descripcion": "Día completo en el principal parque temático de Santa Catarina.",
       "precio": 92,
-      "detalle": "Incluye traslado ida y vuelta y entrada estándar al parque. Jornada completa con salida temprano. Las filas, atracciones premium y comidas no están incluidas; confirmar calendario antes de comprar."
+      "detalle": "Incluye traslado ida y vuelta y entrada estándar al parque. Jornada completa con salida temprano. Las filas, atracciones premium y comidas no están incluidas; confirmar calendario antes de comprar.",
+      "activo": false
     },
     {
       "destinos": [
@@ -391,7 +392,7 @@
       "titulo": "Ingreso Beto Carrero World",
       "descripcion": "¡Viví un día mágico y lleno de adrenalina en el Beto Carrero World! El parque multitemático más grande de América Latina te espera con espectáculos increíbles y montañas rusas.",
       "detalle": "Disfrutá de una jornada inolvidable en el mayor parque temático de América Latina, ubicado en Penha, Santa Catarina. El complejo ofrece una experiencia fantástica para todas las edades, dividida en áreas temáticas inmersivas, espectáculos internacionales de gran nivel, zoológico y una gran variedad de atracciones que van desde juegos infantiles hasta montañas rusas de gran intensidad. Ideal para compartir en familia o con amigos.\n\n(Precio solo al reservar)",
-      "activo": false,
+      "precio": 0,
       "duracion": "1 día",
       "edad": "Desde 2 años",
       "incluye": [
@@ -684,6 +685,65 @@
       "detalle": "Aguas cristalinas y playas paradisíacas de Arraial do Cabo.",
       "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2020/07/Praias-Arraial-do-Cabo.png?fit=1396%2C800&ssl=1",
       "activo": false
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Paseo de Buggy",
+      "descripcion": "¡Recorré los mejores miradores y playas de Arraial do Cabo en un emocionante y divertido paseo en buggy!",
+      "detalle": "Descubrí los paisajes más impresionantes de Arraial do Cabo por tierra a bordo de un buggy. Este tour te lleva a recorrer los puntos panorámicos más altos, miradores de aguas cristalinas y playas de arena blanca de la región con la comodidad y la adrenalina de un vehículo abierto. Ideal para obtener las mejores vistas panorámicas y conocer la historia local de la mano de conductores experimentados.",
+      "precio": 82.8,
+      "precio_brl": 400,
+      "duracion": "2 hs",
+      "grupo": "Hasta 4 personas por buggy",
+      "edad": "Desde 2 años",
+      "incluye": [
+        "Recorrido en buggy oficial con conductor/guía local especializado",
+        "Visita a los principales puntos panorámicos, miradores y playas de Arraial do Cabo (como Pontal do Atalaia, Praia Grande y Prainha, según la ruta establecida)"
+      ],
+      "no_incluye": [
+        "Almuerzo",
+        "Bebidas",
+        "Entradas a parques o tasas ambientales, si las hubiera",
+        "Propinas"
+      ],
+      "llevar": [
+        "Ropa cómoda o traje de baño",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero o gorra",
+        "Cámara o celular para fotos"
+      ]
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Bautismo de Buceo",
+      "descripcion": "¡Viví la experiencia del Bautismo de Buceo en Arraial do Cabo! Sumergite con un instructor exclusivo y descubrí la vida marina cristalina.",
+      "detalle": "Disfrutá de una inmersión inolvidable en las transparentes aguas de Arraial do Cabo. El servicio incluye una clase teórica de 20 a 30 minutos impartida directamente en la embarcación y un mínimo de 30 minutos de buceo con un instructor dedicado exclusivamente para vos.\n\nNota de seguridad: no apto para personas con asma, bronquitis, diabetes, epilepsia, problemas de presión, problemas circulatorios o cirugías recientes.",
+      "precio": 73.07,
+      "precio_brl": 350,
+      "duracion": "Clase de 20 a 30 min + 30 min de buceo",
+      "grupo": "Un instructor por cada buceador",
+      "incluye": [
+        "Clase teórica a bordo (20 a 30 minutos)",
+        "Mínimo 30 minutos de buceo",
+        "Acompañamiento exclusivo de un instructor profesional por cada participante",
+        "Profundidad máxima regulada"
+      ],
+      "no_incluye": [
+        "Traslado a la embarcación u otros servicios de barco no especificados"
+      ],
+      "llevar": [
+        "Traje de baño",
+        "Toalla",
+        "Protector solar",
+        "Ropa cómoda"
+      ]
     },
     {
       "destinos": [

@@ -55,7 +55,7 @@
     "destinos": ["bcm"],
     "destino": "Balneário Camboriú, Brasil",
     "titulo": "Ingreso Beto Carrero World",
-    "sin_precio": true,
+    "consultar": true,
     "descripcion": "¡Viví un día mágico y lleno de adrenalina en el Beto Carrero World! El parque multitemático más grande de América Latina te espera con espectáculos increíbles y montañas rusas.",
     "detalle": "Disfrutá de una jornada inolvidable en el mayor parque temático de América Latina, ubicado en Penha, Santa Catarina. El complejo ofrece una experiencia fantástica para todas las edades, dividida en áreas temáticas inmersivas, espectáculos internacionales de gran nivel, zoológico y una gran variedad de atracciones que van desde juegos infantiles hasta montañas rusas de gran intensidad. Ideal para compartir en familia o con amigos.\n\n(Precio solo al reservar)",
     "duracion": "1 día",

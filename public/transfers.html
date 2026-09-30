@@ -30,7 +30,7 @@ body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); }
 <body class="transfers-page">
 <div class="tp-wrap">
   <h1>Transfers desde el aeropuerto</h1>
-  <p class="tp-lead">Elegí el tipo de transfer. El compartido se cobra por persona; el privado, por vehículo de hasta 4 personas. Precios de un solo trayecto (aeropuerto → hotel), en USD.</p>
+  <p class="tp-lead">Elegí el tipo de transfer. El compartido se cobra por persona; el privado, por vehículo, y su precio depende de la cantidad de personas. Precios de un solo trayecto (aeropuerto → hotel), en reales. Donde dice «Consultar», el precio se confirma al reservar.</p>
   <div class="tp-bar">
     <div class="tp-tabs" role="group" aria-label="Tipo de transfer">
       <button type="button" data-tipo="todos" aria-pressed="true">Todos</button>
@@ -54,6 +54,10 @@ body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function norm(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   function usd(n) { return 'US$ ' + Number(n).toLocaleString('es-UY', { maximumFractionDigits: 0 }); }
+  function brl(n) { return 'R$ ' + Number(n).toLocaleString('es-UY', { maximumFractionDigits: 0 }); }
+  function personas(e) { return e.min === e.max ? e.min + (e.min === 1 ? ' persona' : ' personas') : e.min + ' a ' + e.max + ' personas'; }
+  // Un tipo de transfer existe en el destino aunque su precio todavia no este cargado.
+  function tiene(d, t) { return t === 'privado' ? true : !d.soloPrivado && (Number(d.compartido) > 0 || !!d.compartidoConsultar); }
 
   function render() {
     var q = norm(qEl.value.trim());
@@ -61,7 +65,7 @@ body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); }
       .filter(function (d) { return d && d.name; })
       // Un destino sin ese tipo de transfer no aparece bajo su filtro: mostrarlo
       // con precio vacio haria pensar que el servicio existe.
-      .filter(function (d) { return tipo === 'todos' || Number(d[tipo]) > 0; })
+      .filter(function (d) { return tipo === 'todos' || tiene(d, tipo); })
       .filter(function (d) { return !q || norm(d.name).indexOf(q) >= 0; })
       .sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); });
 
@@ -69,10 +73,21 @@ body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); }
     if (!items.length) { listEl.innerHTML = '<div class="tp-empty">No hay destinos con ese filtro.</div>'; return; }
     listEl.innerHTML = items.map(function (d) {
       var precios = '';
-      if ((tipo === 'todos' || tipo === 'privado') && Number(d.privado) > 0)
-        precios += '<div class="tp-price"><b>' + usd(d.privado) + '</b><span>Privado · por vehículo</span></div>';
-      if ((tipo === 'todos' || tipo === 'compartido') && Number(d.compartido) > 0)
-        precios += '<div class="tp-price"><b>' + usd(d.compartido) + '</b><span>Compartido · por persona</span></div>';
+      var fila = function (monto, rotulo) { return '<div class="tp-price"><b>' + monto + '</b><span>' + rotulo + '</span></div>'; };
+      if (tipo === 'todos' || tipo === 'privado') {
+        // El privado se cobra por vehiculo y cambia segun la cantidad de personas:
+        // un renglon por escalon. Sin escalones cargados no se inventa un numero.
+        if (d.escalones && d.escalones.length) {
+          d.escalones.forEach(function (e) { precios += fila(brl(e.brl), 'Privado · ' + esc(e.vehiculo.toLowerCase()) + ' · ' + personas(e) + ' · por vehículo'); });
+        } else {
+          precios += fila('Consultar', 'Privado · por vehículo');
+        }
+      }
+      if ((tipo === 'todos' || tipo === 'compartido') && tiene(d, 'compartido')) {
+        precios += d.compartidoConsultar || !(Number(d.compartido) > 0)
+          ? fila('Consultar', 'Compartido · por persona')
+          : fila(d.compartido_brl ? brl(d.compartido_brl) : usd(d.compartido), 'Compartido · por persona');
+      }
       var meta = 'Aeropuerto ' + esc(d.iata || '') + (d.km ? ' · ' + d.km + ' km' : '') + (d.modo === 'ferry' ? ' · ferry' : d.modo === 'vuelo' ? ' · vuelo' : '');
       return '<div class="tp-row"><div><p class="tp-name">' + esc(d.name) + '</p><div class="tp-meta">' + meta + '</div></div>' +
         '<div class="tp-prices">' + precios + '</div></div>';
