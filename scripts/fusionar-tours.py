@@ -30,7 +30,7 @@ APAGAR = '--apagar-viejos' in sys.argv
 ORIGEN = [a for a in sys.argv[1:] if not a.startswith('--')][0]
 
 # destino (key) -> carpeta en el bucket
-CARPETAS = {'angra': 'Angra', 'bombinhas': 'Bombinhas', 'ubatuba': 'Ubatuba', 'buz': 'Buzios', 'ilhabela': 'Ilhabela'}
+CARPETAS = {'angra': 'Angra', 'bombinhas': 'Bombinhas', 'ubatuba': 'Ubatuba', 'buz': 'Buzios', 'ilhabela': 'Ilhabela', 'ilha': 'Isla Grande', 'mcz': 'Maceio', 'maragogi': 'Maragogi', 'nat': 'Natal', 'porto': 'Porto Galinhas', 'arraial': 'Arraial do Cabo'}
 
 def supabase_url():
     for l in open(os.path.join(RAIZ, '.env'), encoding='utf8'):

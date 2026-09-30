@@ -1,6 +1,8 @@
 [
   {
-    "destinos": ["mcz"],
+    "destinos": [
+      "mcz"
+    ],
     "destino": "Maceió, Brasil",
     "titulo": "Praia do Carro Quebrado",
     "descripcion": "Excursión de día completo al norte de Maceió para descubrir la virgen y deslumbrante Praia do Carro Quebrado, famosa por sus imponentes acantilados de arcilla multicolor.",
@@ -28,10 +30,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "carro quebrado.jpg"
   },
   {
-    "destinos": ["mcz"],
+    "destinos": [
+      "mcz"
+    ],
     "destino": "Maceió, Brasil",
     "titulo": "Praia do Gunga",
     "descripcion": "Excursión de día completo al litoral sur de Alagoas para conocer la impresionante Praia do Gunga, famosa por sus miles de cocoteros y acantilados.",
@@ -61,10 +66,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "gunga.jpg"
   },
   {
-    "destinos": ["mcz"],
+    "destinos": [
+      "mcz"
+    ],
     "destino": "Maceió, Brasil",
     "titulo": "Day Tour a Maragogi",
     "descripcion": "Excursión de día completo desde Maceió hacia el famoso litoral norte de Alagoas, disfrutando de las cristalinas aguas de Maragogi y un cómodo club de playa.",
@@ -94,6 +102,7 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "maragogi.jpg"
   }
 ]

@@ -1,6 +1,8 @@
 [
   {
-    "destinos": ["nat"],
+    "destinos": [
+      "nat"
+    ],
     "destino": "Natal, Brasil",
     "titulo": "Dunas de Genipabu en buggy",
     "descripcion": "Excursión imperdible a la postal más famosa de Río Grande del Norte, reconocida por sus imponentes dunas móviles, paseo en buggy y la laguna de Genipabu.",
@@ -29,10 +31,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "Genipabu  1.jpg"
   },
   {
-    "destinos": ["nat"],
+    "destinos": [
+      "nat"
+    ],
     "destino": "Natal, Brasil",
     "titulo": "São Miguel do Gostoso en 4x4",
     "descripcion": "Excursión de día completo al encantador pueblo de vientos y tranquilidad de São Miguel do Gostoso, combinando traslado y un recorrido completo en vehículo 4x4.",
@@ -61,10 +66,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "Sao Miguel do Gostoso 1.jpg"
   },
   {
-    "destinos": ["nat"],
+    "destinos": [
+      "nat"
+    ],
     "destino": "Natal, Brasil",
     "titulo": "Paseos de Lancha a Perobas",
     "descripcion": "Excursión de día completo al litoral norte para navegar en lancha hacia las cristalinas piscinas naturales de Perobas y hacer snorkel entre peces.",
@@ -93,6 +101,7 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "perobas 1.jpg"
   }
 ]

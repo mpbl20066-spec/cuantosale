@@ -1,6 +1,8 @@
 [
   {
-    "destinos": ["maragogi"],
+    "destinos": [
+      "maragogi"
+    ],
     "destino": "Maragogi, Brasil",
     "titulo": "Paseo a Porto de Galinhas (saliendo de Maragogi)",
     "descripcion": "Excursión de día completo saliendo desde Maragogi para descubrir el famoso litoral sur de Pernambuco, sus piscinas naturales y el encantador centro de Porto de Galinhas.",
@@ -28,10 +30,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "porto galinhas 1.jpeg"
   },
   {
-    "destinos": ["maragogi"],
+    "destinos": [
+      "maragogi"
+    ],
     "destino": "Maragogi, Brasil",
     "titulo": "Paseo de Buggy",
     "descripcion": "Aventura privada en buggy por el bellísimo litoral norte de Maragogi, explorando playas vírgenes, cocoteros y paisajes paradisíacos con total exclusividad.",
@@ -60,10 +65,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales"
-    ]
+    ],
+    "foto": "buggy 1.jpg"
   },
   {
-    "destinos": ["maragogi"],
+    "destinos": [
+      "maragogi"
+    ],
     "destino": "Maragogi, Brasil",
     "titulo": "Praia do Patacho",
     "descripcion": "Excursión imperdible a una de las playas vírgenes más hermosas, tranquilas y premiadas de Brasil, conocida por sus piscinas naturales y cocoteros.",
@@ -91,10 +99,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "patacho.jpg"
   },
   {
-    "destinos": ["maragogi"],
+    "destinos": [
+      "maragogi"
+    ],
     "destino": "Maragogi, Brasil",
     "titulo": "São Miguel dos Milagres",
     "descripcion": "Excursión de día completo hacia uno de los refugios costeros más encantadores, vírgenes y pacíficos de la Costa dos Corais en Alagoas.",
@@ -122,6 +133,7 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "san miguel.jpg"
   }
 ]

@@ -1,6 +1,8 @@
 [
   {
-    "destinos": ["ilha"],
+    "destinos": [
+      "ilha"
+    ],
     "destino": "Ilha Grande, Brasil",
     "titulo": "Super Sur",
     "descripcion": "Expedición imperdible por el lado más salvaje, preservado y auténtico de Ilha Grande, incluyendo paradas en Jorge Grego y Dois Rios.",
@@ -31,10 +33,13 @@
       "Traje de baño y muda de ropa seca",
       "Repelente de insectos",
       "Efectivo o tarjeta para el almuerzo y gastos personales"
-    ]
+    ],
+    "foto": "super-sul-01_720x.webp"
   },
   {
-    "destinos": ["ilha"],
+    "destinos": [
+      "ilha"
+    ],
     "destino": "Ilha Grande, Brasil",
     "titulo": "Paseo Ilhas Paradisíacas en lancha",
     "descripcion": "Recorrido imperdible en lancha rápida por los rincones más vírgenes y exclusivos de la bahía de Angra dos Reis.",
@@ -66,10 +71,13 @@
       "Traje de baño y muda de ropa seca",
       "Repelente de insectos",
       "Efectivo o tarjeta para el almuerzo y gastos personales"
-    ]
+    ],
+    "foto": "ilhas-paradisiacas-01_720x.webp"
   },
   {
-    "destinos": ["ilha"],
+    "destinos": [
+      "ilha"
+    ],
     "destino": "Ilha Grande, Brasil",
     "titulo": "Volta Ilha",
     "descripcion": "El circuito definitivo y más completo de Ilha Grande: una vuelta entera a toda la isla descubriendo sus playas oceánicas más vírgenes y famosas.",
@@ -100,10 +108,13 @@
       "Traje de baño y muda de ropa seca",
       "Repelente de insectos",
       "Efectivo o tarjeta para el almuerzo y gastos personales"
-    ]
+    ],
+    "foto": "volta-a-ilha-lancha-01_720x.webp"
   },
   {
-    "destinos": ["ilha"],
+    "destinos": [
+      "ilha"
+    ],
     "destino": "Ilha Grande, Brasil",
     "titulo": "Media Vuelta",
     "descripcion": "El recorrido clásico e imperdible por las famosas lagunas de aguas cristalinas y el norte protegido de Ilha Grande.",
@@ -134,6 +145,7 @@
       "Traje de baño y muda de ropa seca",
       "Repelente de insectos",
       "Efectivo o tarjeta para el almuerzo y gastos personales"
-    ]
+    ],
+    "foto": "meia-volta-01_720x.webp"
   }
 ]

@@ -1,6 +1,8 @@
 [
   {
-    "destinos": ["arraial"],
+    "destinos": [
+      "arraial"
+    ],
     "destino": "Arraial do Cabo, Brasil",
     "titulo": "Paseo de Buggy",
     "descripcion": "¡Recorré los mejores miradores y playas de Arraial do Cabo en un emocionante y divertido paseo en buggy!",
@@ -25,10 +27,13 @@
       "Gafas de sol",
       "Sombrero o gorra",
       "Cámara o celular para fotos"
-    ]
+    ],
+    "foto": "paseo de buggy 1.jpeg"
   },
   {
-    "destinos": ["arraial"],
+    "destinos": [
+      "arraial"
+    ],
     "destino": "Arraial do Cabo, Brasil",
     "titulo": "Bautismo de Buceo",
     "descripcion": "¡Viví la experiencia del Bautismo de Buceo en Arraial do Cabo! Sumergite con un instructor exclusivo y descubrí la vida marina cristalina.",
@@ -50,6 +55,7 @@
       "Toalla",
       "Protector solar",
       "Ropa cómoda"
-    ]
+    ],
+    "foto": "buceo 1.webp"
   }
 ]

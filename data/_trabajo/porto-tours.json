@@ -1,6 +1,8 @@
 [
   {
-    "destinos": ["porto"],
+    "destinos": [
+      "porto"
+    ],
     "destino": "Porto de Galinhas, Brasil",
     "titulo": "Praia dos Carneiros y paseo en catamarán",
     "descripcion": "Excursión de día completo al sur de Pernambuco para descubrir la famosa y paradisíaca Praia dos Carneiros, sus aguas calmas y su icónica iglesia costera.",
@@ -29,10 +31,13 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "carneiros.jpg"
   },
   {
-    "destinos": ["porto"],
+    "destinos": [
+      "porto"
+    ],
     "destino": "Porto de Galinhas, Brasil",
     "titulo": "Paseo a Maragogi saliendo de Porto de Galinhas",
     "descripcion": "Excursión de día completo cruzando hacia el litoral de Alagoas para disfrutar de las aguas cristalinas y la costa caribeña de Maragogi.",
@@ -60,6 +65,7 @@
       "Sombrero o gorra",
       "Repelente de insectos",
       "Efectivo o tarjeta para gastos personales y almuerzo"
-    ]
+    ],
+    "foto": "maragogi 1.jpg"
   }
 ]
