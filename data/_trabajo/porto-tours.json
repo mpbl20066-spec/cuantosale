@@ -1,0 +1,65 @@
+[
+  {
+    "destinos": ["porto"],
+    "destino": "Porto de Galinhas, Brasil",
+    "titulo": "Praia dos Carneiros y paseo en catamarán",
+    "descripcion": "Excursión de día completo al sur de Pernambuco para descubrir la famosa y paradisíaca Praia dos Carneiros, sus aguas calmas y su icónica iglesia costera.",
+    "detalle": "Disfrutá de uno de los paisajes más bellos y codiciados de Brasil. Saliendo desde Porto de Galinhas, el recorrido te lleva a la Praia dos Carneiros, conocida por su franja de cocoteros inclinados, su mar cristalino de aguas cálidas y tranquilas, y la famosa y fotografiada Capela de São Benedito a la orilla del mar. Tendrás tiempo libre para relajarte, disfrutar de la estructura de apoyo y realizar opcionalmente el paseo en catamarán que recorre los manglares y los bancos de arena.",
+    "precio_brl": 180,
+    "duracion": "7 hs",
+    "grupo": "Hasta 10 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles/posadas en Porto de Galinhas",
+      "Parada en el punto de apoyo a la playa",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseo tradicional opcional en catamarán o lancha por los manglares y bancos de arena",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  },
+  {
+    "destinos": ["porto"],
+    "destino": "Porto de Galinhas, Brasil",
+    "titulo": "Paseo a Maragogi saliendo de Porto de Galinhas",
+    "descripcion": "Excursión de día completo cruzando hacia el litoral de Alagoas para disfrutar de las aguas cristalinas y la costa caribeña de Maragogi.",
+    "detalle": "Visitá el mundialmente famoso \"Caribe brasileño\" cruzando desde Pernambuco hacia el estado de Alagoas. Saliendo desde Porto de Galinhas, el recorrido te lleva hasta Maragogi, donde podrás disfrutar de un mar de tonos turquesa e increíble transparencia. Tendrás tiempo libre para relajarte en la estructura de apoyo junto a la playa y realizar opcionalmente el paseo en catamarán hacia las piscinas naturales (galés) para hacer snorkel y nadar entre peces.",
+    "precio_brl": 180,
+    "duracion": "8 hs",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles/posadas en Porto de Galinhas",
+      "Uso de la estructura de apoyo en la playa",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseo tradicional opcional en catamarán o lancha hacia las piscinas naturales (galés) de Maragogi",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  }
+]
