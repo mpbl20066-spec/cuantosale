@@ -2852,3 +2852,9 @@ button.logo{min-height:44px}
 .trip-summary__head .trip-summary__chevron{grid-area:chev}
 .voucher-hero__figure .voucher-hero__pp{display:block;margin:6px 0 0;font-size:13.5px;font-weight:600}
 .voucher-split__btn--link{border-color:transparent;min-height:40px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+/* Celular: el menu de destino y de segunda parada va fijo y con la zona visible
+   de la ventana (ver posicionarMenuFijo en app.js). Por encima de la barra
+   flotante "Mi Viaje" (z-index 90) y de los controles de la pagina. */
+@media (max-width:700px){
+  .custom-select.is-menu-fixed .custom-select__menu{position:fixed;right:auto;bottom:auto;z-index:200;margin:0;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+}

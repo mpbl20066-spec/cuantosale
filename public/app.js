@@ -9986,11 +9986,69 @@
        caja, asi que medir antes de mostrar daria 0 y la decision seria siempre
        "abajo". Por eso openDestMenu()/openComboMenu() muestran primero y
        despues llaman a esto. */
+    /* En el celular el menu NO cuelga del control: se dibuja position:fixed
+       (ver style.css) y se posiciona con la zona VISIBLE de la ventana.
+
+       Colgado del control con position:absolute, el menu dependia de los
+       ancestros (overflow, stacking context), se cortaba contra el fondo de la
+       pagina, se metia debajo de las secciones de arriba y, con el teclado
+       abierto, no tenia lugar para scrollear. Fijo y medido con visualViewport
+       (que descuenta el teclado) queda siempre dentro de la pantalla, por
+       encima de todo, con su propio scroll. Si debajo del campo no entra ni una
+       lista minima, se sube el campo al tope de la pantalla en vez de abrir el
+       menu hacia arriba encima del header. */
+    function esPantallaChica() {
+      return !!(window.matchMedia && window.matchMedia('(max-width:700px)').matches);
+    }
+    function posicionarMenuFijo(menu, control, yaSubido) {
+      var vv = window.visualViewport;
+      var altoVisible = vv ? vv.height : window.innerHeight;
+      var arribaVisible = vv ? vv.offsetTop : 0;
+      var anchoVisible = vv ? vv.width : window.innerWidth;
+      var caja = control.getBoundingClientRect();
+      var margen = 8;
+      var top = caja.bottom + 6;
+      var disponible = arribaVisible + altoVisible - top - margen;
+      if (disponible < 200 && !yaSubido) {
+        // No entra una lista decente: se sube el campo y se mide de nuevo.
+        window.scrollBy(0, caja.top - (arribaVisible + 76));
+        window.requestAnimationFrame(function () { posicionarMenuFijo(menu, control, true); });
+        return;
+      }
+      var left = Math.max(margen, Math.min(caja.left, anchoVisible - margen - 120));
+      menu.style.left = Math.round(left) + 'px';
+      menu.style.width = Math.round(Math.min(caja.width, anchoVisible - left - margen)) + 'px';
+      menu.style.top = Math.round(top) + 'px';
+      menu.style.maxHeight = Math.max(140, Math.round(disponible)) + 'px';
+    }
+    function reposicionarMenusFijos() {
+      Array.prototype.forEach.call(document.querySelectorAll('.custom-select.is-menu-fixed.is-open'), function (root) {
+        var menu = root.querySelector('.custom-select__menu');
+        var control = root.querySelector('.custom-select__control');
+        if (menu && control && !menu.hidden) posicionarMenuFijo(menu, control, true);
+      });
+    }
+    window.addEventListener('scroll', reposicionarMenusFijos, { passive: true });
+    window.addEventListener('resize', reposicionarMenusFijos);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', reposicionarMenusFijos);
+      window.visualViewport.addEventListener('scroll', reposicionarMenusFijos);
+    }
     function elegirLadoDelMenu(root) {
       if (!root) return;
       var menu = root.querySelector('.custom-select__menu');
       var control = root.querySelector('.custom-select__control');
       if (!menu || !control || menu.hidden) return;
+      if (esPantallaChica()) {
+        root.classList.remove('is-open-up');
+        root.classList.add('is-menu-fixed');
+        posicionarMenuFijo(menu, control, false);
+        return;
+      }
+      if (root.classList.contains('is-menu-fixed')) {
+        root.classList.remove('is-menu-fixed');
+        menu.style.left = menu.style.top = menu.style.width = menu.style.maxHeight = '';
+      }
       var holguraAbajo = window.innerHeight - control.getBoundingClientRect().bottom;
       var holguraArriba = control.getBoundingClientRect().top;
       var alto = menu.offsetHeight || 0;
