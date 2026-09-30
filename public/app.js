@@ -4003,7 +4003,7 @@
     return [
       { n: 1, titulo: 'Transporte', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
       { n: 2, titulo: 'Alojamiento', texto: hTxt, hecho: h, anc: 'alojamiento', cta: 'Elegí tu hotel' },
-      { n: 3, titulo: vuelo ? 'Traslados y actividades' : 'Actividades', texto: tr ? partes.join(' + ') : 'Opcional', hecho: tr, opcional: true, anc: vuelo ? 'traslados' : 'tours', cta: vuelo ? 'Sumá traslados y actividades' : 'Sumá actividades' }
+      { n: 3, titulo: vuelo ? 'Traslados y extras' : 'Extras', texto: tr ? partes.join(' + ') : 'Opcional', hecho: tr, opcional: true, anc: vuelo ? 'traslados' : 'tours', cta: vuelo ? 'Sumá traslados y extras' : 'Sumá extras' }
     ];
   }
   function pasosMarkup() {
@@ -4011,17 +4011,11 @@
     var p = pasosEstado();
     var actual = -1;
     for (var i = 0; i < p.length; i++) { if (!p[i].hecho) { actual = i; break; } }
-    var lis = p.map(function (s, i) {
-      var cls = s.hecho ? 'is-done' : (i === actual ? 'is-current' : 'is-pending');
-      return '<li class="steps__item ' + cls + '"><button type="button" class="steps__btn" data-jump-category="' + s.anc + '" data-jump-label="' + esc(s.titulo) + '"' + (i === actual ? ' aria-current="step"' : '') + '>'
-        + '<span class="steps__n" aria-hidden="true">' + (s.hecho ? '✓' : s.n) + '</span>'
-        + '<span class="steps__t"><b>' + esc(s.titulo) + '</b><small>' + esc(s.texto) + (s.opcional && !s.hecho ? '' : '') + '</small></span></button></li>';
-    }).join('');
     var sig = actual >= 0 ? p[actual] : null;
     var cta = sig
       ? '<button type="button" class="steps__next" data-jump-category="' + sig.anc + '">' + esc(sig.cta) + (sig.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>'
       : '<p class="steps__ok">Listo: revisá el total en “Mi Viaje”.</p>';
-    return '<ol class="steps__list">' + lis + '</ol>' + cta;
+    return cta;
   }
   function pintarPasos() {
     var el = document.querySelector('[data-steps]');
@@ -5781,7 +5775,7 @@
       var tAccion = terrChequeado
         ? ''
         : '<button type="button" class="voucher-step__btn" data-reservar-pedido>Coordinar</button>';
-      markup += paso(3, 'Traslados y actividades',
+      markup += paso(3, 'Traslados y extras',
         terrChequeado ? 'Coordinados con la agencia' : 'Los coordinamos nosotros',
         terrChequeado, extVuelo && extHotel && !terrChequeado, tAccion);
 
@@ -8278,6 +8272,10 @@
           title = 'Salí el ' + dLong(parse(t.dep));
           text = n + (n === 1 ? ' día ' : ' días ') + (t.shift < 0 ? 'antes' : 'después') + ', con la misma cantidad de noches.';
           btn = '<button type="button" class="apply" data-shift="' + t.shift + '">Usar estas fechas</button>';
+        } else if (t.id) {
+          // Ruta y alojamiento apuntan a una propuesta de la lista: el boton la
+          // abre, igual que "Ver propuesta" en las tarjetas.
+          btn = '<button type="button" class="apply" data-propuesta-id="' + esc(t.id) + '">Ver propuesta</button>';
         }
         return '<div class="tip"><div class="save">−' + money(t.save) + '</div><div><h4>' + esc(title) + '</h4><p>' + esc(text) + '</p>' + btn + '</div></div>';
       }).join('');
@@ -8603,7 +8601,7 @@
         ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. <b>"Ver propuesta"</b> lo congela.</p>'
         : '';
       var bodyId = 'opt-desglose-' + index;
-      return '<article class="opt' + (p.id === selectedPropuestaId ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-card="' + esc(p.id) + '">' +
+      return '<article class="opt' + (p.id === selectedPropuestaId || p.id === rec.id ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-card="' + esc(p.id) + '">' +
         '<div class="opt__head">' +
           '<div class="opt__main"><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(subtituloDe(p)) + '</div><div class="tg">' + tags + '</div></div>' +
           '<div class="opt__price"><small>' + etiquetaTotal(data.meta.pax) + '</small><b>' + moneyCero(p.total) + '</b><span>' + moneyCero(p.pp) + ' por persona</span></div>' +
