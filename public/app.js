@@ -7248,6 +7248,55 @@
       if (seccion.scrollIntoView) seccion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 420);
   }
+  /* Mapa de playas de la Guia Secreta.
+     Leaflet propio (el mismo del mapa del roadtrip, se baja recien cuando hay un
+     mapa en pantalla) con tiles de OpenStreetMap: a escala de ciudad hace falta
+     calle y costa, y el mapa base propio solo llega a paises y estados. Los pines
+     salen de lat/lng de cada playa en lib/guias.js. Un observador los monta
+     donde sea que la guia se inserte (al abrirse el candado o al repintar). */
+  var guiaMapaAssets = null;
+  function cargarLeaflet() {
+    if (window.L && window.L.map) return Promise.resolve();
+    if (guiaMapaAssets) return guiaMapaAssets;
+    guiaMapaAssets = new Promise(function (resolve, reject) {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css?v=1';
+      document.head.appendChild(css);
+      var s = document.createElement('script');
+      s.src = '/vendor/leaflet/leaflet.js?v=1'; s.onload = resolve; s.onerror = function () { reject(new Error('leaflet')); };
+      document.head.appendChild(s);
+    });
+    guiaMapaAssets.catch(function () { guiaMapaAssets = null; });
+    return guiaMapaAssets;
+  }
+  function montarMapaGuia(el) {
+    if (el.getAttribute('data-guia-mapa-estado')) return;
+    el.setAttribute('data-guia-mapa-estado', 'cargando');
+    var pines;
+    try { pines = JSON.parse(el.getAttribute('data-guia-mapa')); } catch (e) { pines = null; }
+    if (!pines || !pines.length) { el.remove(); return; }
+    cargarLeaflet().then(function () {
+      if (!el.isConnected) return;
+      var L = window.L;
+      el.innerHTML = '';
+      var map = L.map(el, { scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false });
+      L.tileLayer('https://tile.openstreetmap.org/' + '{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(map);
+      var puntos = pines.map(function (p) {
+        var m = L.marker([p.lat, p.lng], { title: p.name, icon: L.divIcon({ className: 'guia-pin', html: '<span>' + p.n + '</span>', iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(map);
+        m.bindPopup('<b>' + esc(p.n + '. ' + p.name) + '</b><br><a href="https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng + '" target="_blank" rel="noopener noreferrer">Abrir en Google Maps ↗</a>');
+        return [p.lat, p.lng];
+      });
+      map.fitBounds(L.latLngBounds(puntos), { padding: [28, 28], maxZoom: 13 });
+      el.setAttribute('data-guia-mapa-estado', 'listo');
+    }).catch(function () { el.remove(); });
+  }
+  function montarMapasGuia() {
+    var pend = document.querySelectorAll('[data-guia-mapa]:not([data-guia-mapa-estado])');
+    for (var i = 0; i < pend.length; i++) montarMapaGuia(pend[i]);
+  }
+  if (window.MutationObserver) {
+    new MutationObserver(function () { montarMapasGuia(); }).observe(document.body, { childList: true, subtree: true });
+  }
   function guiaSecreta(meta, guia) {
     if (!meta || !meta.dest) return '';
     // Sin guia se dibuja el CANDADO, no nada. La Guia Secreta es el premio de
@@ -7303,15 +7352,17 @@
     }
 
     if ((guia.beaches || []).length) {
-      var beaches = guia.beaches.map(function (b) {
+      var beaches = guia.beaches.map(function (b, i) {
         return '<article class="guia-item' + (b.foto ? ' guia-item--foto' : '') + '">' + fotoDe(b) +
           '<div class="guia-item__cuerpo">' +
-          '<div class="guia-item__head"><b>' + esc(b.name) + '</b>' + chips([b.zona]) + '</div>' +
+          '<div class="guia-item__head">' + (typeof b.lat === 'number' ? '<span class="guia-num" aria-hidden="true">' + (i + 1) + '</span>' : '') + '<b>' + esc(b.name) + '</b>' + chips([b.zona]) + '</div>' +
           '<p class="guia-nota">' + esc(b.vibe) + '</p>' +
           (b.cuando ? '<p class="guia-nota guia-nota--chica"><b>Cuándo:</b> ' + esc(b.cuando) + '</p>' : '') +
           '</div></article>';
       }).join('');
-      cuerpo += bloque('beaches', '🏖️ Qué playa ir', '<div class="guia-lista">' + beaches + '</div>');
+      var pines = guia.beaches.map(function (b, i) { return typeof b.lat === 'number' && typeof b.lng === 'number' ? { n: i + 1, name: b.name, lat: b.lat, lng: b.lng } : null; }).filter(Boolean);
+      var mapa = pines.length ? '<div class="guia-mapa" data-guia-mapa="' + esc(JSON.stringify(pines)) + '" role="img" aria-label="Mapa de las playas de ' + esc(meta.dest.name) + '"><span class="guia-mapa__cargando">Cargando mapa…</span></div>' : '';
+      cuerpo += bloque('beaches', '🏖️ Qué playa ir', mapa + '<div class="guia-lista">' + beaches + '</div>');
     }
 
     if ((guia.atracciones || []).length) {
