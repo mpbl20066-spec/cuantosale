@@ -60,6 +60,8 @@ for row in ws.iter_rows(min_row=2, values_only=True):
     VACIABLES = ('image', 'duracion', 'grupo', 'salida', 'edad', 'cancelacion', 'incluye', 'no_incluye', 'llevar')
     antes = {k: (t.get(k) or None) if k in VACIABLES else t.get(k) for k in nuevo}
     antes['activo'] = False if t.get('activo') is False else None
+    for k in ('descripcion', 'detalle'):
+        antes[k] = antes[k] or ''  # ausente y vacio son lo mismo
     for k in VACIABLES:
         nuevo[k] = nuevo[k] or None
     if brl is not None:

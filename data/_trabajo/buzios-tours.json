@@ -1,0 +1,128 @@
+[
+  {
+    "destinos": ["buz"],
+    "destino": "Búzios, Brasil",
+    "titulo": "Clases de Surf",
+    "descripcion": "¡Aprende a surfear en las hermosas playas de Búzios! Clases dinámicas y seguras para todos los niveles con instructores profesionales.",
+    "detalle": "Atrévete a dominar las olas en un entorno paradisíaco. Esta clase de surf está diseñada tanto para principiantes que nunca han subido a una tabla como para quienes desean perfeccionar su técnica. Los instructores profesionales guían paso a paso los fundamentos de la remada, la postura y el equilibrio sobre las olas en una de las playas más propicias de la península.",
+    "precio_brl": 170,
+    "duracion": "1 hs",
+    "grupo": "Hasta 2 personas",
+    "edad": "Sin restricciones",
+    "incluye": [
+      "Alquiler de tabla de surf adecuada para nivel inicial/intermedio",
+      "Uso de la ropa de protección/licra (según el caso)",
+      "Enseñanza práctica y teórica a cargo de un instructor de surf certificado"
+    ],
+    "no_incluye": [
+      "Alimentos",
+      "Bebidas",
+      "Protector solar personal",
+      "Traslados hasta la playa donde se imparte la clase (a menos que se contrate por separado)"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar resistente al agua",
+      "Agua para hidratarse",
+      "Ropa cómoda"
+    ],
+    "foto": "surf.webp"
+  },
+  {
+    "destinos": ["buz"],
+    "destino": "Búzios, Brasil",
+    "titulo": "Paseo de Barco",
+    "descripcion": "¡Navega por las aguas cristalinas de Búzios! Un paseo en barco inolvidable para descubrir playas paradisíacas con paradas para nadar y disfrutar del paisaje.",
+    "precio_brl": 100,
+    "duracion": "4 hs",
+    "grupo": "Hasta 150 personas",
+    "edad": "Desde 3 años",
+    "incluye": [
+      "Navegación panorámica por las principales playas e islas de la península (como Praia de João Fernandes, Azeda, Azedinha, Tartaruga y la Isla do Cabrito)",
+      "Paradas estratégicas para nadar o hacer snorkel",
+      "Acompañamiento de guía turístico a bordo"
+    ],
+    "no_incluye": [
+      "Alimentos",
+      "Bebidas a bordo (disponibles para compra en el barco)",
+      "Alquiler de equipos de snorkel",
+      "Tasa de embarque portuaria (si aplica)",
+      "Traslados terrestres hasta el muelle"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Ropa cómoda",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Dinero o tarjeta para consumos a bordo"
+    ],
+    "foto": "barco buzios.jpg"
+  },
+  {
+    "destinos": ["buz"],
+    "destino": "Búzios, Brasil",
+    "titulo": "Full Day Arraial do Cabo",
+    "descripcion": "¡Conoce el Caribe brasileño! Una excursión imperdible desde Búzios para descubrir las aguas cristalinas y las arenas blancas de Arraial do Cabo, incluyendo almuerzo.",
+    "detalle": "Disfruta de un día de excursión hacia Arraial do Cabo, mundialmente conocido por sus transparentes aguas turquesas y su fina arena blanca. Este tour conecta Búzios con uno de los destinos más bellos del litoral fluminense, permitiéndote disfrutar de paisajes paradisíacos, vistas panorámicas y un delicioso almuerzo buffet libre incluido para recargar energías.",
+    "precio_brl": 250,
+    "duracion": "8 hs",
+    "grupo": "Hasta 30 personas",
+    "edad": "Desde 3 años",
+    "incluye": [
+      "Transporte terrestre ida y vuelta desde Búzios hacia Arraial do Cabo",
+      "Acompañamiento de guía especializado",
+      "Traslado hacia las zonas de interés",
+      "Almuerzo buffet libre"
+    ],
+    "no_incluye": [
+      "Bebidas",
+      "Postres",
+      "Tasa portuaria o ambiental de embarque local (si aplica)",
+      "Alquiler de equipos de snorkel",
+      "Gastos personales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Ropa cómoda",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Dinero o tarjeta para consumos"
+    ],
+    "foto": "arraial 1.webp"
+  },
+  {
+    "destinos": ["buz"],
+    "destino": "Búzios, Brasil",
+    "titulo": "City Tour Rio de Janeiro",
+    "descripcion": "¡Disfruta de un día inolvidable en Río de Janeiro! Una excursión completa saliendo desde Búzios para conocer los lugares más emblemáticos de la Ciudad Maravilhosa.",
+    "detalle": "Una experiencia fantástica de día completo que te permite conectar las playas de Búzios con la inigualable energía, cultura y monumentos históricos de Río de Janeiro. El tour incluye el traslado terrestre de ida y vuelta con guías especializados, ofreciendo un recorrido panorámico por los puntos más famosos de la metrópoli carioca para que disfrutes al máximo de tu visita.",
+    "precio_brl": 400,
+    "duracion": "8 hs",
+    "grupo": "Hasta 30 personas",
+    "edad": "Sin restricciones",
+    "incluye": [
+      "Transporte terrestre ida y vuelta desde Búzios hacia Río de Janeiro",
+      "Acompañamiento de guía de turismo acreditado durante el recorrido por los principales atractivos de la ciudad"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Consumos personales",
+      "Entradas a atracciones específicas o monumentos que requieran ticket de acceso (según el itinerario contratado)"
+    ],
+    "llevar": [
+      "Ropa y calzado muy cómodos",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Documento de identidad",
+      "Cámara o teléfono para fotos"
+    ],
+    "foto": "city tour rio 1.webp"
+  }
+]

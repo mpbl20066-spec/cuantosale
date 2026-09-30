@@ -36,7 +36,7 @@ azul = Font(name=F, color='0000FF')
 negro = Font(name=F)
 gris = PatternFill('solid', fgColor='EDEDED')
 for r, t in enumerate(d['tours'], 2):
-    vals = [t['destinos'][0], t['destino'], t['titulo'], t['descripcion'], t['detalle'],
+    vals = [t['destinos'][0], t['destino'], t['titulo'], t.get('descripcion', ''), t.get('detalle', ''),
             t.get('precio_brl'), t.get('precio'), t.get('image', ''), t.get('duracion', ''),
             t.get('grupo', ''), t.get('salida', ''), t.get('edad', ''), t.get('cancelacion', ''),
             '\n'.join(t.get('incluye', [])), '\n'.join(t.get('no_incluye', [])), '\n'.join(t.get('llevar', [])),
