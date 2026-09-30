@@ -19,7 +19,9 @@ ws = wb.active
 ws.title = 'Tours'
 F = 'Arial'
 cols = [('Código destino', 10), ('Destino', 24), ('Título', 42), ('Descripción', 50),
-        ('Detalle', 60), ('Precio R$ (origen)', 14), ('Precio USD', 12)]
+        ('Detalle', 60), ('Precio R$ (origen)', 14), ('Precio USD', 12),
+        ('Foto (link)', 40), ('Duración', 16), ('Tamaño del grupo', 20),
+        ('Punto de salida', 20), ('Edad permitida', 16), ('Activo (Sí/No)', 10)]
 for i, (n, w) in enumerate(cols, 1):
     c = ws.cell(row=1, column=i, value=n)
     c.font = Font(name=F, bold=True, color='FFFFFF')
@@ -33,7 +35,9 @@ negro = Font(name=F)
 gris = PatternFill('solid', fgColor='EDEDED')
 for r, t in enumerate(d['tours'], 2):
     vals = [t['destinos'][0], t['destino'], t['titulo'], t['descripcion'], t['detalle'],
-            t.get('precio_brl'), t['precio']]
+            t.get('precio_brl'), t['precio'], t.get('image', ''), t.get('duracion', ''),
+            t.get('grupo', ''), t.get('salida', ''), t.get('edad', ''),
+            'No' if t.get('activo') is False else 'Sí']
     for i, v in enumerate(vals, 1):
         c = ws.cell(row=r, column=i, value=v)
         c.font = azul if i >= 4 else negro
@@ -43,14 +47,14 @@ for r, t in enumerate(d['tours'], 2):
         if i >= 6:
             c.number_format = '#,##0.00'
 ws.freeze_panes = 'D2'
-ws.auto_filter.ref = f'A1:G{len(d["tours"]) + 1}'
+ws.auto_filter.ref = f'A1:M{len(d["tours"]) + 1}'
 
 L = wb.create_sheet('Leeme')
 L.column_dimensions['A'].width = 110
 lineas = [
     'CÓMO USAR ESTA PLANILLA',
     '',
-    'Editá solo las columnas en azul: Descripción, Detalle, Precio R$ y Precio USD.',
+    'Editá solo las columnas en azul: Descripción, Detalle, precios, Foto, Duración, Tamaño del grupo, Punto de salida, Edad permitida y Activo.',
     'NO cambies Código destino, Destino ni Título (columnas grises): son la clave con la que se identifica cada tour en Supabase.',
     'No borres ni agregues filas: el importador solo actualiza tours que ya existen.',
     '',
@@ -59,11 +63,20 @@ lineas = [
     '- Si Precio R$ está vacío, el Precio USD que escribas es el que se usa (ya con margen incluido).',
     '- Para pasar un tour de reales a dólares, vaciá Precio R$ y escribí el Precio USD.',
     '',
+    'FICHA DEL MODAL "VER DETALLES" (Duración, Tamaño del grupo, Punto de salida, Edad permitida)',
+    '- Escribí el texto tal cual se va a ver: "24 horas", "4 personas por grupo", "En la agencia", "Desde 21 años".',
+    '- Celda vacía = esa parte no se muestra. No se inventa nada.',
+    '- Si Duración queda vacía, se intenta leer de Detalle ("Duración aproximada: ...").',
+    '',
+    'FOTO Y ACTIVO',
+    '- Foto: link https público (por ejemplo de Supabase Storage). Vacío = la card usa el degradado.',
+    '- Activo: escribí No para sacar el tour de la web sin borrarlo. Cualquier otra cosa = activo.',
+    '',
     'PARA APLICAR LOS CAMBIOS (guardá el xlsx y cerralo antes):',
     '  python scripts/importar-tours-xlsx.py --dry-run     (muestra qué cambiaría)',
     '  python scripts/importar-tours-xlsx.py               (escribe data/tours.json)',
     '  npm run build:tours                                 (regenera la web)',
-    '  node scripts/cargar-tours.js                        (sube a Supabase)',
+    '  node scripts/cargar-tours.js                        (sube a Supabase; conserva lo que ya estaba cargado)',
 ]
 for i, t in enumerate(lineas, 1):
     c = L.cell(row=i, column=1, value=t)

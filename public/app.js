@@ -2598,7 +2598,7 @@
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__foot">' +
         '<p class="local-tour__price"><span class="local-tour__from">Precio por persona</span><b>' + money(tour.price) + '</b></p>' +
-        '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">' +
+        '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '" data-tour-facts="' + esc(JSON.stringify(tourFacts(tour))) + '">' +
         '<span>Ver detalles</span><span aria-hidden="true">→</span></button>' +
         '</div></div></article>';
     }).join('');
@@ -2671,11 +2671,70 @@
   function crossIcon() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
   }
+  /* La ficha de la experiencia: los cuatro datos que se miran antes de leer nada
+     (duracion, grupo, salida, edad). Solo entran los que el catalogo trae: un
+     "4 personas por grupo" inventado es peor que no mostrar la celda. La
+     duracion tiene un segundo origen, el "Duracion aproximada: ..." del detalle,
+     que es lo que traen los tours cargados por scraping. */
+  function tourFacts(tour) {
+    var d = String((tour && tour.duracion) || '').trim();
+    if (!d) {
+      var m = String((tour && tour.details) || '').match(/duraci[oó]n aproximada(?: de|:)?\s*([^.,;]{2,30})/i);
+      if (m) d = m[1].trim();
+    }
+    return {
+      duracion: d,
+      grupo: String((tour && tour.grupo) || '').trim(),
+      salida: String((tour && tour.salida) || '').trim(),
+      edad: String((tour && tour.edad) || '').trim()
+    };
+  }
+  var FACT_ICONS = {
+    duracion: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    grupo: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.2 5.5-5.2s5.5 2 5.5 5.2"/><path d="M16 5.2a3.1 3.1 0 0 1 0 5.8M17.5 14.2c2 .6 3.5 2.3 3.5 4.8"/>',
+    salida: '<path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>',
+    edad: '<circle cx="12" cy="4.6" r="1.8"/><path d="M5 8.4h14M12 8.4V14m0 0-3.4 6.4M12 14l3.4 6.4"/>'
+  };
+  var FACT_LABELS = { duracion: 'Duración', grupo: 'Tamaño del grupo', salida: 'Punto de salida', edad: 'Edad permitida' };
+  function tourFactsHtml(facts) {
+    var cells = ['duracion', 'grupo', 'salida', 'edad'].filter(function (k) { return facts && facts[k]; }).map(function (k) {
+      return '<li class="tour-facts__cell"><svg class="tour-facts__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FACT_ICONS[k] + '</svg>'
+        + '<span class="tour-facts__txt"><span class="tour-facts__label">' + FACT_LABELS[k] + '</span><b>' + esc(facts[k]) + '</b></span></li>';
+    });
+    return cells.length ? '<ul class="tour-facts">' + cells.join('') + '</ul>' : '';
+  }
+  /* El detalle como lista legible. Cada frase es una fila: las que empiezan con
+     "Incluye" llevan tilde, las de "No incluye" llevan cruz y el resto va como
+     parrafo. No se parte por comas ("paradas en A, B y C" no son tres cosas). */
+  function tourDetailHtml(text, facts) {
+    var out = [];
+    String(text || '').split(/\n+/).forEach(function (linea) {
+      linea.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¡¿0-9])/).forEach(function (f) {
+        f = f.trim();
+        if (!f) return;
+        if (facts && facts.duracion && /^duraci[oó]n aproximada/i.test(f)) return;
+        var kind = /^no (incluye|son|comprende|est[aá]n)/i.test(f) ? 'no' : /^incluye/i.test(f) ? 'si' : '';
+        out.push(kind
+          ? '<li class="tour-detail-modal__row is-' + kind + '"><span class="tour-detail-modal__mark" aria-hidden="true">' + (kind === 'si' ? checkIcon() : crossIcon()) + '</span><span>' + esc(f) + '</span></li>'
+          : '<li class="tour-detail-modal__row"><span>' + esc(f) + '</span></li>');
+      });
+    });
+    return '<ul class="tour-detail-modal__rows">' + out.join('') + '</ul>';
+  }
   function openTourDetailModal(button) {
     var modal = $('#booking-modal');
     if (!modal || !button) return;
-    cerrarTodosLosModales();
-    modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button><span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span><h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2><p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p><div class="tour-detail-modal__copy"><p>' + esc(button.getAttribute('data-tour-detail')) + '</p></div><p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
+    var facts = {};
+    try { facts = JSON.parse(button.getAttribute('data-tour-facts') || '{}') || {}; } catch (e) { facts = {}; }
+    modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>'
+      + '<span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span>'
+      + '<h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2>'
+      + '<h3 class="tour-detail-modal__h">Acerca de esta experiencia</h3>'
+      + '<p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p>'
+      + tourFactsHtml(facts)
+      + '<h3 class="tour-detail-modal__h">Detalles</h3>'
+      + '<div class="tour-detail-modal__copy">' + tourDetailHtml(button.getAttribute('data-tour-detail'), facts) + '</div>'
+      + '<p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
   }

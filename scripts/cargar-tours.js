@@ -153,7 +153,7 @@ async function rpc(fn, body) {
      config(), no existe en este scope, y el ReferenceError salta recien en la
      corrida real porque el --dry-run vuelve antes de llegar aca. */
   const cfg = config();
-  const existentes = await fetch(cfg.url + '/rest/v1/tours?select=destino,titulo', {
+  const existentes = await fetch(cfg.url + '/rest/v1/tours?select=*', {
     headers: { apikey: cfg.key, authorization: 'Bearer ' + cfg.key }
   }).then((r) => {
     if (!r.ok) throw new Error('no se pudo leer la tabla: ' + r.status + ' ' + r.text().slice(0, 200));
@@ -171,6 +171,31 @@ async function rpc(fn, body) {
 
   console.log('  ' + nuevos.length + ' nuevos, ' + aActualizar.length + ' a actualizar');
 
+  /* NO PISAR LO QUE EL JSON NO TRAE.
+     tours_guardar_lote() reescribe TODAS las columnas de la fila con lo que
+     llega: lo que no se manda se guarda como '' o null. Y en la base hay datos
+     que no viven en data/tours.json (pvp, link_web, agencia, estado_scrapeo,
+     politica_cancelacion, si el tour esta apagado...). Sin este paso, correr el
+     script los borraba para todos los tours. Se copian de la fila existente;
+     duracion, url_imagen y la ficha (grupo, salida, edad) salen del JSON cuando
+     el JSON los trae, y si no, se deja lo que ya habia. */
+  const previa = new Map(existentes.map((e) => [clave(e), e]));
+  const porClave = new Map(datos.tours.map((t) => [t.destinos[0] + '#' + t.titulo, t]));
+  const CONSERVAR = ['pvp', 'comision', 'neto', 'tipo_servicio', 'incluye', 'no_incluye',
+    'politica_cancelacion', 'dias_salida', 'link_web', 'agencia', 'estado_scrapeo', 'activo'];
+  filas.forEach((f) => {
+    const e = previa.get(clave(f));
+    const t = porClave.get(clave(f)) || {};
+    if (e) {
+      CONSERVAR.forEach((c) => { if (e[c] !== null && e[c] !== undefined) f[c] = e[c]; });
+      f.duracion = t.duracion || e.duracion || '';
+      f.url_imagen = t.image || e.url_imagen || '';
+    } else {
+      f.duracion = t.duracion || '';
+      f.url_imagen = t.image || '';
+    }
+  });
+
   // El upsert va por lotes porque un solo pedido con 111 filas de detalle largo
   // puede acercarse del limite de PostgREST, y el error que devuelve no dice que
   // fila fue la que fallo.
@@ -184,6 +209,29 @@ async function rpc(fn, body) {
 
   console.log('');
   console.log('cargados ' + escritas + ' tours en public.tours');
+
+  /* La ficha (grupo, punto de salida, edad y el apagado) va por su propia
+     funcion, tours_ficha_lote(), que solo actualiza filas existentes. Solo se
+     manda lo que el JSON trae: una clave ausente deja la columna como esta. Si
+     la migracion supabase_tours_ficha.sql no se corrio, avisa y sigue. */
+  const ficha = datos.tours.map((t) => {
+    const f = { destino: t.destinos[0], titulo: t.titulo };
+    if (t.grupo) f.grupo = t.grupo;
+    if (t.salida) f.punto_salida = t.salida;
+    if (t.edad) f.edad_minima = t.edad;
+    if (t.activo === false) f.activo = false;
+    return f;
+  }).filter((f) => Object.keys(f).length > 2);
+  if (ficha.length) {
+    try {
+      for (let i = 0; i < ficha.length; i += LOTE) await rpc('tours_ficha_lote', { p_filas: ficha.slice(i, i + LOTE) });
+      console.log('ficha (grupo, salida, edad, apagados) actualizada en ' + ficha.length + ' tours');
+    } catch (e) {
+      console.log('');
+      console.log('AVISO: no se pudo guardar la ficha (' + e.message.slice(0, 160) + ')');
+      console.log('Si dice que la funcion no existe, corré supabase_tours_ficha.sql en el SQL Editor de Supabase y volvé a correr este script.');
+    }
+  }
 
   if (sobrantes.length) {
     console.log('');

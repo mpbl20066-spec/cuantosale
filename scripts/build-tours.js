@@ -125,7 +125,12 @@ const filas = datos.tours.map((t, i) => {
 
   // Foto de la agencia (con permiso): una URL http(s). Sin ella la card usa TOUR_PHOTOS o el degradado.
   const imagen = /^https?:\/\//i.test(String(t.image == null ? '' : t.image).trim()) ? String(t.image).trim() : '';
-  return { destinos: destinos, destino: destino, titulo: titulo, descripcion: descripcion, precio: precio, details: detalle, image: imagen };
+  // Un tour apagado (activo: false) no se dibuja: es la forma de sacarlo de la web sin borrarlo.
+  if (t.activo === false) return null;
+  // Ficha del modal de detalle: texto tal cual se muestra; vacio = no se dibuja la celda.
+  const txt = (v) => String(v == null ? '' : v).trim();
+  return { destinos: destinos, destino: destino, titulo: titulo, descripcion: descripcion, precio: precio, details: detalle, image: imagen,
+    duracion: txt(t.duracion), grupo: txt(t.grupo), salida: txt(t.salida), edad: txt(t.edad) };
 });
 
 function aNumero(valor, donde, campo, colector) {
@@ -214,7 +219,11 @@ const cuerpo = validos.map((t) => {
     ', description: ' + JSON.stringify(t.descripcion) +
     ', price: ' + JSON.stringify(t.precio) +
     ', details: ' + JSON.stringify(t.details) +
-    (t.image ? ', image: ' + JSON.stringify(t.image) : '') + ' }';
+    (t.image ? ', image: ' + JSON.stringify(t.image) : '') +
+    (t.duracion ? ', duracion: ' + JSON.stringify(t.duracion) : '') +
+    (t.grupo ? ', grupo: ' + JSON.stringify(t.grupo) : '') +
+    (t.salida ? ', salida: ' + JSON.stringify(t.salida) : '') +
+    (t.edad ? ', edad: ' + JSON.stringify(t.edad) : '') + ' }';
 }).join(',\n');
 
 /* Los destinos van como cuarto parametro, y no dentro de _meta, porque no son
