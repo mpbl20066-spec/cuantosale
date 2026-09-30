@@ -182,7 +182,9 @@ async function rpc(fn, body) {
   const previa = new Map(existentes.map((e) => [clave(e), e]));
   const porClave = new Map(datos.tours.map((t) => [t.destinos[0] + '#' + t.titulo, t]));
   const CONSERVAR = ['pvp', 'comision', 'neto', 'tipo_servicio', 'incluye', 'no_incluye',
-    'politica_cancelacion', 'dias_salida', 'link_web', 'agencia', 'estado_scrapeo', 'activo'];
+    'politica_cancelacion', 'dias_salida', 'link_web', 'agencia', 'estado_scrapeo', 'activo',
+    // De donde salio el dato, cuando se verifico y en que orden se ve: no cambian por re-subir.
+    'fuente', 'verificado', 'orden'];
   filas.forEach((f) => {
     const e = previa.get(clave(f));
     const t = porClave.get(clave(f)) || {};
