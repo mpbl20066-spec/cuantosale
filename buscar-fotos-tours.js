@@ -25,7 +25,6 @@ const FREE = /^(cc0|cc by|cc by-sa|public domain|pd-|no restrictions)/i;
 // casi siempre.
 const SUBJECTS = {
 
-  'bcm#City tour y Cristo Luz': ['Cristo Luz', 'Balneario Camboriu'],
   'bcm#Beto Carrero World desde Camboriú': ['Beto Carrero', 'Beto Carrero World'],
 };
 

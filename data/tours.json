@@ -105,7 +105,8 @@
       "titulo": "City tour y Cristo Luz",
       "descripcion": "Miradores, playas centrales y el monumento iluminado de la ciudad.",
       "precio": 45,
-      "detalle": "Incluye traslado, guía y acceso al complejo Cristo Luz cuando esté operativo. Recorrido de medio día, con salida por la tarde para aprovechar la iluminación. Los horarios pueden variar por eventos o clima."
+      "detalle": "Incluye traslado, guía y acceso al complejo Cristo Luz cuando esté operativo. Recorrido de medio día, con salida por la tarde para aprovechar la iluminación. Los horarios pueden variar por eventos o clima.",
+      "activo": false
     },
     {
       "destinos": [
@@ -321,7 +322,94 @@
       "titulo": "Kayak o stand up paddle en la costa",
       "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
       "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
+      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua.",
+      "activo": false
+    },
+    {
+      "destinos": [
+        "bcm"
+      ],
+      "destino": "Balneário Camboriú, Brasil",
+      "titulo": "Pasaporte de la Diversión (5 Atracciones)",
+      "descripcion": "¡Disfrutá al máximo con el Pasaporte de la Diversión! Elegí y disfrutá de 5 de tus atracciones favoritas en una jornada inolvidable.",
+      "detalle": "Una opción ideal para quienes buscan diversión a su medida. Este pasaporte te permite acceder y disfrutar de 5 atracciones principales dentro del parque, combinando entretenimiento, adrenalina o paseos recreativos según tus preferencias. Una manera práctica de vivir una gran experiencia sin necesidad de adquirir el acceso total a todos los juegos.",
+      "precio": 41.95,
+      "precio_brl": 190,
+      "duracion": "1 día",
+      "edad": "Desde 2 años",
+      "incluye": [
+        "Pasaporte general con derecho a hasta 5 atracciones o juegos a elección dentro del complejo recreativo"
+      ],
+      "no_incluye": [
+        "Alimentos y bebidas",
+        "Estacionamiento",
+        "Alquiler de lockers o cochecitos",
+        "Atracciones opcionales fuera del paquete de 5 elegidas"
+      ],
+      "llevar": [
+        "Ropa y calzado cómodos para caminar",
+        "Protector solar",
+        "Gorra o sombrero",
+        "Impermeable (según el clima)",
+        "Dinero o tarjeta para consumos"
+      ]
+    },
+    {
+      "destinos": [
+        "bcm"
+      ],
+      "destino": "Balneário Camboriú, Brasil",
+      "titulo": "Ingreso al Parque Unipraias",
+      "descripcion": "¡Volá sobre la costa en el Parque Unipraias! Disfrutá del único teleférico de Brasil que conecta una playa con la cima de un cerro y una playa virgen.",
+      "detalle": "Una de las atracciones imperdibles de Santa Catarina. El Parque Unipraias en Balneário Camboriú te invita a recorrer sus tres estaciones a través de un moderno sistema de teleféricos. Podrás descender en la estación Laranjeiras para disfrutar de la playa, explorar los senderos ecológicos y miradores en la estación Mata Atlântica, y contemplar paisajes naturales únicos entre el mar y la selva.",
+      "precio": 24.45,
+      "precio_brl": 100,
+      "duracion": "1 día",
+      "edad": "Desde 2 años",
+      "incluye": [
+        "Boleto de ingreso al teleférico que conecta las estaciones (Barra Sul, Mata Atlântica y Laranjeiras)",
+        "Vistas panorámicas de la costa y descenso/paseo por las estaciones del complejo"
+      ],
+      "no_incluye": [
+        "Alimentos y bebidas",
+        "Estacionamiento",
+        "Atracciones opcionales de aventura extrema dentro del parque (como Ziprider, Fantastic Forest o Youhooo!)"
+      ],
+      "llevar": [
+        "Ropa y calzado cómodos",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero o gorra",
+        "Cámara o teléfono para fotos"
+      ]
+    },
+    {
+      "destinos": [
+        "bcm"
+      ],
+      "destino": "Balneário Camboriú, Brasil",
+      "titulo": "Ingreso Beto Carrero World",
+      "descripcion": "¡Viví un día mágico y lleno de adrenalina en el Beto Carrero World! El parque multitemático más grande de América Latina te espera con espectáculos increíbles y montañas rusas.",
+      "detalle": "Disfrutá de una jornada inolvidable en el mayor parque temático de América Latina, ubicado en Penha, Santa Catarina. El complejo ofrece una experiencia fantástica para todas las edades, dividida en áreas temáticas inmersivas, espectáculos internacionales de gran nivel, zoológico y una gran variedad de atracciones que van desde juegos infantiles hasta montañas rusas de gran intensidad. Ideal para compartir en familia o con amigos.\n\n(Precio solo al reservar)",
+      "activo": false,
+      "duracion": "1 día",
+      "edad": "Desde 2 años",
+      "incluye": [
+        "Pasaporte de acceso general por un día a las áreas temáticas y a la gran mayoría de las atracciones, juegos mecánicos y espectáculos en vivo del complejo"
+      ],
+      "no_incluye": [
+        "Alimentos y bebidas",
+        "Estacionamiento",
+        "Alquiler de lockers o cochecitos",
+        "Atracciones opcionales VIP o de pago diferenciado (como pase rápido, helicóptero, karting, etc.)"
+      ],
+      "llevar": [
+        "Ropa y calzado muy cómodos para caminar",
+        "Protector solar",
+        "Gorra o sombrero",
+        "Impermeable (muy útil para los juegos de agua)",
+        "Tarjeta o dinero para consumos dentro del parque"
+      ]
     },
     {
       "destinos": [
