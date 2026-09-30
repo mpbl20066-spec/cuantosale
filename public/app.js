@@ -2587,8 +2587,8 @@
       return hh <= 2 ? 'Unas horas' : hh <= 5 ? 'Media jornada' : 'Jornada completa';
     }
     if (/d[ií]a/.test(fd)) return 'Jornada completa';
-    /* Los tours del catalogo traen "Duración aproximada: 1 h 30 min." (ver
-       scripts/cargar-tours-scraper.py): se lee el numero y no un texto suelto. */
+    /* Los tours del catalogo traen "Duración aproximada: 1 h 30 min.": se lee el numero y no un
+       texto suelto. */
     var dur = t.match(/duraci[oó]n aproximada:\s*(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?/);
     if (dur && (dur[1] || dur[2])) {
       var horas = (Number(dur[1]) || 0) + (Number(dur[2]) || 0) / 60;
