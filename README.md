@@ -14,7 +14,7 @@ cuantosale/
 │  └─ providers/
 │     ├─ index.js             Agregador de vuelos: cache, dedupe y pausa por cuota
 │     ├─ serpapi.js           Vuelos: búsqueda y normalización de Google Flights
-│     ├─ busbud.js            Buses: pendiente (por ahora estimado)
+│     ├─ (buses)              Buses: estimado (sin proveedor por ahora)
 │     └─ hotels.js            Hoteles: Booking.com / RapidAPI
 ├─ data/
 │  ├─ costos-diarios.json     Comida y transporte local por destino (fuente + confianza)
@@ -224,7 +224,7 @@ El schema y las reglas de contenido están documentados en la cabecera del archi
 | Alojamiento | Booking.com / RapidAPI, con tarifa y foto reales |
 | Tours | **Estimado** (`LOCAL_TOURS` en `public/app.js`); la card lo rotula "Precio referencial" |
 | **Transfer de aeropuerto** | **5 de 88 celdas con precio publicado** (`data/transfer-precios.json`); el resto sale de un modelo de distancia con km reales de OSRM y está marcado `confianza: 'baja'` |
-| Cruce a Buenos Aires, buses y ferry | Estimado (pendiente: Busbud u otra fuente) |
+| Cruce a Buenos Aires, buses y ferry | Estimado (sin proveedor por ahora) |
 | Comidas, transporte local, valijas, seguro | Estimado (`lib/model.js` y `data/costos-diarios.json`) |
 
 El gráfico de fechas mezcla las dos cosas a propósito, pero las marca: las barras con precio real van sólidas y las estimadas con borde punteado, y el subtítulo dice cuántas de las N fechas son reales. Un precio inventado presentado como real sería peor que no mostrar el gráfico.
@@ -317,8 +317,8 @@ Conviene correrla después de tocar `public/guias.js` o `public/app.js`. Los dos
 
 ## 5. Qué falta para una versión completa
 
-- **Buses y ferry reales:** Busbud da acceso a sus datos a socios; hay que pedirles un convenio. Completá `lib/providers/busbud.js`.
-- **Arreglar `AIR_DESTINATIONS` para `fernando`:** dice `NVT` (Navegantes, Santa Catarina) cuando el código de la isla es `FEN`. La tabla de transfer ya usa `FEN` y hay un test que lo fija, pero la búsqueda de vuelos sigue mandando a la provincia equivocada.
+- **Buses y ferry reales:** Sin proveedor por ahora. Si se integra una fuente, viviría en `lib/providers/`.
+- **~~Arreglar `AIR_DESTINATIONS` para `fernando`~~:** Ya arreglado. El código ahora es `FEN` (Fernando de Noronha). Antes decía `NVT` (Navegantes, Santa Catarina).
 - **Bajar los precios de transfer del modelo:** 83 de 88 celdas salen de la fórmula de distancia. Cada vez que se encuentre una tarifa publicada, se agrega el ancla a `ANCHORS` en `scripts/build-transfer-precios.js` con su fuente, se corre `npm run pull:transfer` y `npm run build:transfer`, y la celda pasa de `confianza: 'baja'` a `media`.
 - **Cobrar de verdad:** el checkout pide los datos del viajero y el medio de pago preferido, pero no cobra. Hoy cierra por WhatsApp. Sumar una pasarela real es un proyecto aparte: hay que elegir proveedor, firmar contrato, guardar el pedido en el servidor, manejar el webhooks de confirmación y devolución, y decidir quién es el merchant of record, porque el precio se pacta con cada operador y no con nosotros.
 - **Los datos del checkout no se guardan:** `checkoutState` vive en memoria y se reinicia al cambiar de viaje. Si hay que recordarlos entre visitas, van a `localStorage` (siguen siendo de la persona, no salen del navegador) o al backend, y ese backend es el mismo que hace falta para cobrar.

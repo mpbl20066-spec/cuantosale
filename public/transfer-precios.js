@@ -324,7 +324,7 @@
       "confianza": "baja",
       "verificado": "2026-09-27",
       "real": [],
-      "derivacion": "No hay carretera ni ferry comercial: se llega en vuelo desde REC. El precio sale de una estimacion propia, no de una tarifa publicada. Ver la nota sobre NVT/FEN en _meta.aeropuertoErrores: el codigo de esta isla es FEN, no NVT.",
+      "derivacion": "No hay carretera ni ferry comercial: se llega en vuelo desde REC. El precio sale de una estimacion propia, no de una tarifa publicada. El codigo de esta isla es FEN (ya arreglado en AIR_DESTINATIONS).",
       "modo": "vuelo",
       "soloPrivado": true
     },

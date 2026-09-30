@@ -51,10 +51,9 @@ const AEROPUERTO_COORD = {
   JPA: { lat: -7.148691, lng: -34.950554 }, FEN: { lat: -3.854534, lng: -32.423017 }
 };
 
-// Fernando de Noronha no se busca desde NVT: NVT es Navegantes, en Santa
-// Catarina, a 2.900 km de la isla. AIR_DESTINATIONS dice NVT (server.js:148) y
-// esta equivocado; el codigo de la isla es FEN. Se pisa aca para que las
-// distancias sean correctas, y el bug se reporta aparte.
+// Fernando de Noronha: el codigo correcto es FEN. Antes AIR_DESTINATIONS en
+// server.js decia NVT (Navegantes, Santa Catarina, a 2.900 km de la isla);
+// ya esta arreglado. Se pisa aca por las dudas por si vuelve a pasar.
 const IATA_CORREGIDO = { fernando: 'FEN' };
 
 const SIN_CARRETERA = {

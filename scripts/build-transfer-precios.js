@@ -195,8 +195,7 @@ for (const k of claves) {
   if (anchor && anchor.iata) iata = anchor.iata;
   if (anchor && anchor.modo) modo = anchor.modo;
   // Fernando de Noronha no tiene ruta, pero si tiene aeropuerto: el codigo de la
-  // isla es FEN. AIR_DESTINATIONS en server.js dice NVT, que es Navegantes, en
-  // Santa Catarina, a 2.900 km de aca. Ver _meta.aeropuertoErrores.
+  // isla es FEN. Ya esta arreglado en AIR_DESTINATIONS (server.js).
   if (k === 'fernando') iata = 'FEN';
 
   const fuente = anchor && anchor.fuente;
@@ -316,9 +315,8 @@ const salida = {
     aviso: 'Estos precios NO salen de un provider: son de una pasada de investigacion, con la fuente escrita y la ' +
       'fecha de verificacion. No se actualizan solos. Para el precio de una reserva hay que confirmarlo con el operador.',
     aeropuertoErrores: {
-      FEN: 'AIR_DESTINATIONS en server.js dice que fernando llega por NVT. NVT es el aeropuerto de Navegantes, ' +
-        'en Santa Catarina, a 2.900 km de la isla. El codigo de Fernando de Noronha es FEN. Este archivo usa FEN; ' +
-        'el arreglo en server.js esta pendiente de hacerse.'
+      FEN: 'Antes AIR_DESTINATIONS en server.js decia NVT (Navegantes, Santa Catarina, a 2.900 km de la isla). ' +
+        'Ya esta arreglado: el codigo correcto de Fernando de Noronha es FEN.'
     },
     argentina: 'bue es el unico destino fuera de Brasil y el unico sin ancla. Todo lo demas esta calibrado con ' +
       'precios de Brasil, asi que conviene tomarlo con mas reserva que el resto.'
