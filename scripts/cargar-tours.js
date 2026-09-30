@@ -33,6 +33,9 @@ const path = require('path');
 const RAIZ = path.join(__dirname, '..');
 const JSON_PATH = path.join(RAIZ, 'data', 'tours.json');
 const DRY = process.argv.includes('--dry-run');
+// --solo=ilhabela,maragogi: sube solo esos destinos y no toca el resto de la tabla
+// (para no pisar lo que se edito a mano en el panel en los demas tours).
+const SOLO = ((process.argv.find((a) => a.startsWith('--solo=')) || '').slice(7)).split(',').filter(Boolean);
 
 /* Leer .env, igual que hace server.js al arrancar (ver loadEnv() en server.js).
  *
@@ -110,7 +113,7 @@ async function rpc(fn, body) {
      tours_guardar_lote de la base rechaza cualquier fila sin precio, apagada o no, y
      tira abajo el lote entero. Queda en data/tours.json y se sube cuando tenga precio. */
   const sinPrecioApagados = datos.tours.filter((t) => t.activo === false && t.precio == null && t.precio_brl == null);
-  const filas = datos.tours.map((t, i) => {
+  let filas = datos.tours.map((t, i) => {
     if (sinPrecioApagados.includes(t)) return null;
     const f = {
       destino: t.destinos[0],
@@ -126,6 +129,7 @@ async function rpc(fn, body) {
     else f.precio = t.precio;
     return f;
   }).filter(Boolean);
+  if (SOLO.length) filas = filas.filter((f) => SOLO.includes(f.destino));
   if (sinPrecioApagados.length) console.log('  no se suben (apagados y sin precio): ' + sinPrecioApagados.map((t) => t.titulo).join(' | '));
 
   // Un destino sin nombre en el mapa es un key mal escrito, y sube igual pero
@@ -138,7 +142,7 @@ async function rpc(fn, body) {
 
   // El mismo filtro del pull, por el mismo motivo: si el JSON vino con pocas
   // filas, algo fallo antes y subir eso vacia el catalogo de la base.
-  if (filas.length < 20) {
+  if (!SOLO.length && filas.length < 20) {
     console.error('');
     console.error('data/tours.json tiene ' + filas.length + ' filas. No se sube nada.');
     console.error('Con menos de 20 el problema esta antes, en el pull o en la migracion.');
@@ -236,7 +240,7 @@ async function rpc(fn, body) {
     if (t.llevar && t.llevar.length) f.que_llevar = t.llevar.join('\n');
     if (t.activo === false) f.activo = false;
     return f;
-  }).filter((f) => Object.keys(f).length > 2);
+  }).filter((f) => Object.keys(f).length > 2 && (!SOLO.length || SOLO.includes(f.destino)));
   if (ficha.length) {
     try {
       for (let i = 0; i < ficha.length; i += LOTE) await rpc('tours_ficha_lote', { p_filas: ficha.slice(i, i + LOTE) });
@@ -248,7 +252,7 @@ async function rpc(fn, body) {
     }
   }
 
-  if (sobrantes.length) {
+  if (sobrantes.length && !SOLO.length) {
     console.log('');
     console.log(sobrantes.length + ' fila(s) quedaron en la base y NO estan en el JSON:');
     sobrantes.slice(0, 20).forEach((k) => console.log('    - ' + k));

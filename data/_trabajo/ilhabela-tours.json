@@ -1,0 +1,65 @@
+[
+  {
+    "destinos": ["ilhabela"],
+    "destino": "Ilhabela, Brasil",
+    "titulo": "Super Boat Bonete e Indaiaúba",
+    "descripcion": "Excursión en lancha rápida (Super Boat) hacia el sur de Ilhabela para descubrir la impresionante Praia do Bonete y la paradisíaca Praia de Indaiaúba.",
+    "detalle": "Navegación costeña hacia el sur de la isla. Incluye una parada panorámica en el Buraco do Cação, visita a la Praia de Indaiaúba para buceo (40 minutos) y una parada principal de 3h30 en la Praia do Bonete para disfrutar de su comunidad caiçara y la Cachoeira do Poço Fundo.",
+    "precio_brl": 320,
+    "duracion": "7 hs",
+    "grupo": "12 a 15 personas",
+    "edad": "Desde 5 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado de ida y vuelta en lancha rápida (Super Boat)",
+      "Conductor/guía experimentado",
+      "Seguro de accidentes personales"
+    ],
+    "no_incluye": [
+      "Almuerzo y bebidas (prohibido ingresar con conservadora o isopor)",
+      "Gastos personales"
+    ],
+    "llevar": [
+      "Toalla de baño",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Ropa de baño",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para el almuerzo en los restaurantes locales"
+    ],
+    "foto": "bonete 3.webp"
+  },
+  {
+    "destinos": ["ilhabela"],
+    "destino": "Ilhabela, Brasil",
+    "titulo": "Off Road Ilhabela",
+    "descripcion": "Emocionante travesía 4x4 en jeep Land Rover rumbo a la famosa Praia de Castelhanos, cruzando 22 km de selva atlántica preservada con paradas estratégicas en cascadas, piscinas naturales y miradores panorámicos.",
+    "detalle": "Aventura off-road de día completo a bordo de un cómodo jeep Land Rover que atraviesa 22 km de paisajes de selva preservada, fauna y flora abundante de la Mata Atlántica. El trayecto en sí mismo es una atracción imperdible que incluye paradas estratégicas: un refrescante baño en una piscina natural de la Trilha da Água Branca, una vista panorámica espectacular de la bahía en el Mirante de Castelhanos y una parada en la Cachoeira do Chuveirinho (una caída de 6 metros ideal para fotos).\n\nUna vez en la Praia de Castelhanos, dispondrás de 3 horas y media de tiempo libre para explorar el mar cristalino, subir al Mirante do Coração y disfrutar de la gastronomía local en los restaurantes de la playa. El regreso se realiza también en jeep, completando una jornada inolvidable en la naturaleza de Ilhabela.",
+    "precio_brl": 200,
+    "duracion": "8 hs",
+    "grupo": "Hasta 12 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo en jeep Land Rover 4x4, en grupo (colectivo) o exclusivo (privado)",
+      "Guiado profesional",
+      "Equipamiento especializado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Tasas portuarias o ambientales locales (a menos que se especifique en el tour particular)"
+    ],
+    "llevar": [
+      "Ropa cómoda",
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero",
+      "Efectivo o tarjeta para gastos personales"
+    ],
+    "foto": "jeep-praia-castelhanos.webp"
+  }
+]

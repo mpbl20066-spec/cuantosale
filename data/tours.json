@@ -979,6 +979,212 @@
         "Repelente de insectos",
         "Efectivo o tarjeta para el almuerzo y gastos personales"
       ]
+    },
+    {
+      "destinos": [
+        "ilhabela"
+      ],
+      "destino": "Ilhabela, Brasil",
+      "titulo": "Super Boat Bonete e Indaiaúba",
+      "descripcion": "Excursión en lancha rápida (Super Boat) hacia el sur de Ilhabela para descubrir la impresionante Praia do Bonete y la paradisíaca Praia de Indaiaúba.",
+      "detalle": "Navegación costeña hacia el sur de la isla. Incluye una parada panorámica en el Buraco do Cação, visita a la Praia de Indaiaúba para buceo (40 minutos) y una parada principal de 3h30 en la Praia do Bonete para disfrutar de su comunidad caiçara y la Cachoeira do Poço Fundo.",
+      "precio": 67.24,
+      "precio_brl": 320,
+      "image": "https://hqyzmeordvjccytgltse.supabase.co/storage/v1/object/public/tours/Ilhabela/bonete%203.webp",
+      "duracion": "7 hs",
+      "grupo": "12 a 15 personas",
+      "edad": "Desde 5 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Traslado de ida y vuelta en lancha rápida (Super Boat)",
+        "Conductor/guía experimentado",
+        "Seguro de accidentes personales"
+      ],
+      "no_incluye": [
+        "Almuerzo y bebidas (prohibido ingresar con conservadora o isopor)",
+        "Gastos personales"
+      ],
+      "llevar": [
+        "Toalla de baño",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero o gorra",
+        "Ropa de baño",
+        "Repelente de insectos",
+        "Efectivo o tarjeta para el almuerzo en los restaurantes locales"
+      ]
+    },
+    {
+      "destinos": [
+        "ilhabela"
+      ],
+      "destino": "Ilhabela, Brasil",
+      "titulo": "Off Road Ilhabela",
+      "descripcion": "Emocionante travesía 4x4 en jeep Land Rover rumbo a la famosa Praia de Castelhanos, cruzando 22 km de selva atlántica preservada con paradas estratégicas en cascadas, piscinas naturales y miradores panorámicos.",
+      "detalle": "Aventura off-road de día completo a bordo de un cómodo jeep Land Rover que atraviesa 22 km de paisajes de selva preservada, fauna y flora abundante de la Mata Atlántica. El trayecto en sí mismo es una atracción imperdible que incluye paradas estratégicas: un refrescante baño en una piscina natural de la Trilha da Água Branca, una vista panorámica espectacular de la bahía en el Mirante de Castelhanos y una parada en la Cachoeira do Chuveirinho (una caída de 6 metros ideal para fotos).\n\nUna vez en la Praia de Castelhanos, dispondrás de 3 horas y media de tiempo libre para explorar el mar cristalino, subir al Mirante do Coração y disfrutar de la gastronomía local en los restaurantes de la playa. El regreso se realiza también en jeep, completando una jornada inolvidable en la naturaleza de Ilhabela.",
+      "precio": 43.9,
+      "precio_brl": 200,
+      "image": "https://hqyzmeordvjccytgltse.supabase.co/storage/v1/object/public/tours/Ilhabela/jeep-praia-castelhanos.webp",
+      "duracion": "8 hs",
+      "grupo": "Hasta 12 personas",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Paseo en jeep Land Rover 4x4, en grupo (colectivo) o exclusivo (privado)",
+        "Guiado profesional",
+        "Equipamiento especializado"
+      ],
+      "no_incluye": [
+        "Almuerzo",
+        "Bebidas",
+        "Tasas portuarias o ambientales locales (a menos que se especifique en el tour particular)"
+      ],
+      "llevar": [
+        "Ropa cómoda",
+        "Traje de baño",
+        "Toalla",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero",
+        "Efectivo o tarjeta para gastos personales"
+      ]
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Paseo a Porto de Galinhas (saliendo de Maragogi)",
+      "descripcion": "Excursión de día completo saliendo desde Maragogi para descubrir el famoso litoral sur de Pernambuco, sus piscinas naturales y el encantador centro de Porto de Galinhas.",
+      "detalle": "Visitá uno de los destinos más codiciados de Brasil saliendo cómodamente desde Maragogi. El recorrido te lleva a la famosa Praia de Porto de Galinhas, donde podrás disfrutar de un mar cálido y cristalino, hacer opcionalmente un paseo en jangada hasta los arrecifes con peces coloridos, paseos en buggy por las playas de la región o explorar el pintoresco y animado centro de la vila, repleto de artesanías y bares acogedores.",
+      "precio": 57.51,
+      "precio_brl": 270,
+      "duracion": "8 hs",
+      "grupo": "Sin límite de personas",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Asistencia de guía de turismo en idioma portugués",
+        "Traslado compartido de ida y vuelta desde hoteles/posadas en Maragogi",
+        "Uso de la estructura de apoyo de un restaurante"
+      ],
+      "no_incluye": [
+        "Almuerzo",
+        "Paseos opcionales (jangada a las piscinas naturales, buggy por las playas, buceo o catamarán)",
+        "Tasas locales"
+      ],
+      "llevar": [
+        "Traje de baño",
+        "Toalla",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero o gorra",
+        "Repelente de insectos",
+        "Efectivo o tarjeta para gastos personales y almuerzo"
+      ]
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Paseo de Buggy",
+      "descripcion": "Aventura privada en buggy por el bellísimo litoral norte de Maragogi, explorando playas vírgenes, cocoteros y paisajes paradisíacos con total exclusividad.",
+      "detalle": "Descubrí lo mejor del litoral norte de Maragogi a bordo de un buggy privado con capacidad para hasta 4 pasajeros. El recorrido exclusivo permite explorar playas desiertas, extensas franjas de cocoteros y puntos turísticos deslumbrantes de la región norte, con paradas estratégicas para baño y fotografías, garantizando total comodidad, flexibilidad y privacidad para vos y tu grupo.",
+      "precio": 69.18,
+      "precio_brl": 330,
+      "duracion": "4 hs",
+      "grupo": "Privado, hasta 4 personas",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Paseo privado en buggy",
+        "Conductor/guía local acreditado",
+        "Recorrido por las playas del litoral norte de Maragogi"
+      ],
+      "no_incluye": [
+        "Almuerzo",
+        "Bebidas",
+        "Tasas ambientales locales",
+        "Paseos náuticos opcionales"
+      ],
+      "llevar": [
+        "Traje de baño",
+        "Toalla",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero o gorra",
+        "Repelente de insectos",
+        "Efectivo o tarjeta para gastos personales"
+      ]
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Praia do Patacho",
+      "descripcion": "Excursión imperdible a una de las playas vírgenes más hermosas, tranquilas y premiadas de Brasil, famosa por sus piscinas naturales y cocoteros.",
+      "detalle": "Descubrí la paradisíaca Praia do Patacho, ubicada en el municipio vecino de Porto de Pedras. Es un verdadero santuario ecológico de aguas cristalinas, arena blanca y cocoteros, ideal para quienes buscan tranquilidad absoluta. Durante la marea baja, se forman piscinas naturales perfectas para un baño relajante y avistaje de peces. El recorrido incluye el traslado cómodo desde Maragogi y tiempo libre para disfrutar del paisaje y la gastronomía local.",
+      "precio": 30.28,
+      "precio_brl": 130,
+      "duracion": "7 hs",
+      "grupo": "Sin límite de personas",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Traslado compartido de ida y vuelta desde hoteles/posadas en Maragogi",
+        "Asistencia de guía de turismo local acreditado"
+      ],
+      "no_incluye": [
+        "Almuerzo",
+        "Bebidas",
+        "Paseos náuticos opcionales (como jangada o balsa hacia las piscinas naturales)",
+        "Tasas ambientales locales"
+      ],
+      "llevar": [
+        "Traje de baño",
+        "Toalla",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero o gorra",
+        "Repelente de insectos",
+        "Efectivo o tarjeta para gastos personales y almuerzo"
+      ]
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "São Miguel dos Milagres",
+      "descripcion": "Excursión de día completo hacia uno de los refugios costeros más encantadores, vírgenes y pacíficos de la Costa dos Corais en Alagoas.",
+      "detalle": "Visitá el famoso y paradisíaco municipio de São Miguel dos Milagres saliendo cómodamente desde Maragogi. Este destino es conocido por preservar un ambiente rústico y sumamente tranquilo, con extensas playas de arena clara, mar cálido de tonos verdosos y piscinas naturales de aguas cristalinas ideales para el relax y el snorkel. El paseo incluye traslado y tiempo libre para disfrutar del paisaje y la gastronomía regional.",
+      "precio": 30.28,
+      "precio_brl": 130,
+      "duracion": "7 hs",
+      "grupo": "Sin límite de personas",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Traslado compartido de ida y vuelta desde hoteles/posadas en Maragogi",
+        "Asistencia de guía de turismo local acreditado"
+      ],
+      "no_incluye": [
+        "Almuerzo",
+        "Bebidas",
+        "Paseos náuticos opcionales (como jangadas a las piscinas naturales)",
+        "Tasas ambientales locales"
+      ],
+      "llevar": [
+        "Traje de baño",
+        "Toalla",
+        "Protector solar",
+        "Gafas de sol",
+        "Sombrero o gorra",
+        "Repelente de insectos",
+        "Efectivo o tarjeta para gastos personales y almuerzo"
+      ]
     }
   ]
 }

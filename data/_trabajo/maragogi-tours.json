@@ -1,0 +1,127 @@
+[
+  {
+    "destinos": ["maragogi"],
+    "destino": "Maragogi, Brasil",
+    "titulo": "Paseo a Porto de Galinhas (saliendo de Maragogi)",
+    "descripcion": "Excursión de día completo saliendo desde Maragogi para descubrir el famoso litoral sur de Pernambuco, sus piscinas naturales y el encantador centro de Porto de Galinhas.",
+    "detalle": "Visitá uno de los destinos más codiciados de Brasil saliendo cómodamente desde Maragogi. El recorrido te lleva a la famosa Praia de Porto de Galinhas, donde podrás disfrutar de un mar cálido y cristalino, hacer opcionalmente un paseo en jangada hasta los arrecifes con peces coloridos, paseos en buggy por las playas de la región o explorar el pintoresco y animado centro de la vila, repleto de artesanías y bares acogedores.",
+    "precio_brl": 270,
+    "duracion": "8 hs",
+    "grupo": "Sin límite de personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Asistencia de guía de turismo en idioma portugués",
+      "Traslado compartido de ida y vuelta desde hoteles/posadas en Maragogi",
+      "Uso de la estructura de apoyo de un restaurante"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Paseos opcionales (jangada a las piscinas naturales, buggy por las playas, buceo o catamarán)",
+      "Tasas locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  },
+  {
+    "destinos": ["maragogi"],
+    "destino": "Maragogi, Brasil",
+    "titulo": "Paseo de Buggy",
+    "descripcion": "Aventura privada en buggy por el bellísimo litoral norte de Maragogi, explorando playas vírgenes, cocoteros y paisajes paradisíacos con total exclusividad.",
+    "detalle": "Descubrí lo mejor del litoral norte de Maragogi a bordo de un buggy privado con capacidad para hasta 4 pasajeros. El recorrido exclusivo permite explorar playas desiertas, extensas franjas de cocoteros y puntos turísticos deslumbrantes de la región norte, con paradas estratégicas para baño y fotografías, garantizando total comodidad, flexibilidad y privacidad para vos y tu grupo.",
+    "precio_brl": 330,
+    "duracion": "4 hs",
+    "grupo": "Privado, hasta 4 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo privado en buggy",
+      "Conductor/guía local acreditado",
+      "Recorrido por las playas del litoral norte de Maragogi"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Tasas ambientales locales",
+      "Paseos náuticos opcionales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales"
+    ]
+  },
+  {
+    "destinos": ["maragogi"],
+    "destino": "Maragogi, Brasil",
+    "titulo": "Praia do Patacho",
+    "descripcion": "Excursión imperdible a una de las playas vírgenes más hermosas, tranquilas y premiadas de Brasil, famosa por sus piscinas naturales y cocoteros.",
+    "detalle": "Descubrí la paradisíaca Praia do Patacho, ubicada en el municipio vecino de Porto de Pedras. Es un verdadero santuario ecológico de aguas cristalinas, arena blanca y cocoteros, ideal para quienes buscan tranquilidad absoluta. Durante la marea baja, se forman piscinas naturales perfectas para un baño relajante y avistaje de peces. El recorrido incluye el traslado cómodo desde Maragogi y tiempo libre para disfrutar del paisaje y la gastronomía local.",
+    "precio_brl": 130,
+    "duracion": "7 hs",
+    "grupo": "Sin límite de personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles/posadas en Maragogi",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseos náuticos opcionales (como jangada o balsa hacia las piscinas naturales)",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  },
+  {
+    "destinos": ["maragogi"],
+    "destino": "Maragogi, Brasil",
+    "titulo": "São Miguel dos Milagres",
+    "descripcion": "Excursión de día completo hacia uno de los refugios costeros más encantadores, vírgenes y pacíficos de la Costa dos Corais en Alagoas.",
+    "detalle": "Visitá el famoso y paradisíaco municipio de São Miguel dos Milagres saliendo cómodamente desde Maragogi. Este destino es conocido por preservar un ambiente rústico y sumamente tranquilo, con extensas playas de arena clara, mar cálido de tonos verdosos y piscinas naturales de aguas cristalinas ideales para el relax y el snorkel. El paseo incluye traslado y tiempo libre para disfrutar del paisaje y la gastronomía regional.",
+    "precio_brl": 130,
+    "duracion": "7 hs",
+    "grupo": "Sin límite de personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles/posadas en Maragogi",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseos náuticos opcionales (como jangadas a las piscinas naturales)",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  }
+]
