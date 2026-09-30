@@ -1,4 +1,4 @@
-/* version: 190
+/* version: 191
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2883,7 +2883,7 @@ button.logo{min-height:44px}
 .mini.g,.mini.r{padding:5px 13px;line-height:1.35}
 .destination-card-tags,.proposal-tags{display:flex;flex-wrap:wrap;gap:6px 8px}
 /* + y - del reparto: 48px tambien en celular (antes una regla los bajaba a 38px). */
-.split-step{width:48px;height:48px;font-size:24px;touch-action:manipulation}
+.split-step,.split-adjust .split-step{width:48px;height:48px;font-size:24px;touch-action:manipulation}
 /* Botones que generan una imagen: spinner mientras trabajan. */
 @keyframes cs-spin{to{transform:rotate(360deg)}}
 .is-loading::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:cs-spin .7s linear infinite}
