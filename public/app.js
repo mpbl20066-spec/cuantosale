@@ -2523,7 +2523,9 @@
       var id = 'tour-' + destinationKey + '-' + index;
       // La foto sale de TOUR_PHOTOS, con su autor y su licencia.
       var photo = tour.foto || (tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour));
-      if (photo && photo.url) creditos[photo.url] = photo;
+      // Solo se acreditan las fotos con autor y licencia (Wikimedia). La foto de la agencia, que se
+      // usa con su permiso, no lleva credito: sin este filtro salia "undefined · undefined".
+      if (photo && photo.url && photo.autor) creditos[photo.url] = photo;
       var skin = tourActivitySkin(tour.title);
       // Con foto: velo para que el texto se lea siempre. Sin foto: degradado
       // con el icono de la actividad, que no miente sobre lo que es.

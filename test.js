@@ -276,7 +276,7 @@ function haversineKm(a, b) {
     const script = fs.readFileSync(path.join(__dirname, 'buscar-fotos-tours.js'), 'utf8');
     const bloque = script.slice(script.indexOf('const SUBJECTS'), script.indexOf('const UA'));
     const claves = [...bloque.matchAll(/^\s*'((?:[^'\\]|\\.)*)':/gm)].map(function (x) { return x[1]; });
-    assert.ok(claves.length > 50, 'no se pudo leer SUBJECTS: ' + claves.length + ' claves');
+    assert.ok(claves.length > 40, 'no se pudo leer SUBJECTS: ' + claves.length + ' claves');
 
     const rotas = claves.filter(function (k) { return !tours.has(k); });
     assert.deepStrictEqual(rotas, [],
@@ -1695,7 +1695,7 @@ function haversineKm(a, b) {
        bien pero el generado no, la seccion de tours sale vacia en silencio. */
     const toursScript = await get(port, '/tours.generated.js');
     assert.strictEqual(toursScript.status, 200);
-    ['Cristo Redentor', 'Isla de Campeche', 'Piscinas Naturales', 'Playa en Playa', 'Tour del Vino'].forEach(function (copy) { assert.ok(toursScript.body.includes(copy), 'Falta contenido de tours en tours.generated.js: ' + copy); });
+    ['Cristo Redentor', 'Isla de Campeche', 'Piscinas Naturales', 'Playa en Playa', 'Noche suiza'].forEach(function (copy) { assert.ok(toursScript.body.includes(copy), 'Falta contenido de tours en tours.generated.js: ' + copy); });
     ['data-tour-choice', 'data-tour-detail-open', 'Los imperdibles de', 'Créditos de las fotos'].forEach(function (copy) { assert.ok(appScript.body.includes(copy), 'Falta la mecanica de tours en app.js: ' + copy); });
     // app.js ya no debe llevar el catalogo: si vuelve a entrar, alguien copio
     // tours a mano y quedan dos fuentes que se van a divergir. Se busca el

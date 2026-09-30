@@ -59,66 +59,6 @@
   "tours": [
     {
       "destinos": [
-        "rio"
-      ],
-      "destino": "Río de Janeiro, Brasil",
-      "titulo": "Cristo Redentor y Pan de Azúcar",
-      "descripcion": "Excursión guiada de día completo con entradas prioritarias y transporte.",
-      "precio": 65,
-      "detalle": "Incluye traslado desde hoteles de la zona sur, guía bilingüe y entradas al Corcovado y Pan de Azúcar. Salida aproximada a las 7:30 y regreso por la tarde. Llevar calzado cómodo, protector solar y una campera liviana."
-    },
-    {
-      "destinos": [
-        "rio"
-      ],
-      "destino": "Río de Janeiro, Brasil",
-      "titulo": "Full Day a Arraial do Cabo con paseo en barco",
-      "descripcion": "Playas de aguas cristalinas, navegación y parada para snorkel.",
-      "precio": 55,
-      "detalle": "Incluye traslado ida y vuelta desde Río, paseo en barco compartido y paradas en playas según las condiciones del mar. Jornada completa, normalmente de 6:30 a 19:00. Llevar traje de baño, toalla y efectivo para tasas locales o alimentación."
-    },
-    {
-      "destinos": [
-        "buz"
-      ],
-      "destino": "Búzios, Brasil",
-      "titulo": "Paseo en barco por las playas de Búzios",
-      "descripcion": "Navegación por João Fernandes, Azeda, Azedinha y otras calas de la península.",
-      "precio": 48,
-      "detalle": "Incluye embarque en el centro de Búzios, navegación con paradas para nadar y bebida de cortesía. La salida suele durar entre 3 y 4 horas y depende del viento. Se recomienda reservar por la mañana y llevar protector solar."
-    },
-    {
-      "destinos": [
-        "buz"
-      ],
-      "destino": "Búzios, Brasil",
-      "titulo": "City tour de Búzios en buggy",
-      "descripcion": "Recorrido panorámico por miradores, playas y la Rua das Pedras.",
-      "precio": 42,
-      "detalle": "Incluye buggy con conductor habilitado y recorrido por Orla Bardot, João Fernandes, Ferradura y Geribá. Duración aproximada de 4 horas, con horarios de mañana o tarde. Llevar ropa cómoda; el vehículo puede salpicar en algunos tramos."
-    },
-    {
-      "destinos": [
-        "arraial"
-      ],
-      "destino": "Arraial do Cabo, Brasil",
-      "titulo": "Passeio de barco por las Prainhas y Gruta Azul",
-      "descripcion": "Navegación por el Caribe brasileño con paradas para baño y fotos.",
-      "precio": 50,
-      "detalle": "Incluye transporte local hasta el muelle, paseo en barco y paradas en Praia do Farol, Prainhas do Pontal do Atalaia y Gruta Azul cuando el mar lo permite. Duración aproximada de 4 horas. El acceso a algunas playas depende de la Capitanía y del clima."
-    },
-    {
-      "destinos": [
-        "arraial"
-      ],
-      "destino": "Arraial do Cabo, Brasil",
-      "titulo": "Buceo de bautismo en aguas cristalinas",
-      "descripcion": "Experiencia introductoria con instructor y equipo completo.",
-      "precio": 78,
-      "detalle": "Incluye briefing, equipo de buceo, acompañamiento de instructor y una inmersión de iniciación. La actividad suele ocupar media jornada y requiere completar una ficha de salud. No se recomienda volar durante las horas posteriores al buceo."
-    },
-    {
-      "destinos": [
         "cabo"
       ],
       "destino": "Cabo Frio, Brasil",
@@ -136,46 +76,6 @@
       "descripcion": "Navegación corta con tiempo libre para baño y playa.",
       "precio": 35,
       "detalle": "Incluye embarcación compartida y parada en Ilha do Japonês, sujeta a la marea y al viento. Duración aproximada de 3 horas. Llevar agua, protector solar y efectivo para consumos en la playa."
-    },
-    {
-      "destinos": [
-        "ilha"
-      ],
-      "destino": "Ilha Grande, Brasil",
-      "titulo": "Vuelta a la isla en lancha rápida",
-      "descripcion": "Día de playas y calas con agua transparente alrededor de Ilha Grande.",
-      "precio": 72,
-      "detalle": "Incluye traslado en lancha compartida y paradas en Lagoa Azul, Caxadaço, Dois Rios o Lopes Mendes según el itinerario. Jornada de 6 a 7 horas. Llevar calzado para rocas, protector solar y una bolsa impermeable."
-    },
-    {
-      "destinos": [
-        "ilha"
-      ],
-      "destino": "Ilha Grande, Brasil",
-      "titulo": "Trilha guiada a Lopes Mendes",
-      "descripcion": "Caminata por la Mata Atlántica hasta una de las playas más famosas de la isla.",
-      "precio": 35,
-      "detalle": "Incluye guía local, orientación en la trilha y apoyo durante el recorrido. La caminata dura entre 4 y 5 horas con desniveles moderados. Usar calzado cerrado, llevar repelente, agua y algo para comer."
-    },
-    {
-      "destinos": [
-        "paraty"
-      ],
-      "destino": "Paraty, Brasil",
-      "titulo": "Schooner por las islas de Paraty",
-      "descripcion": "Paseo en barco por bahías, playas y aguas tranquilas de la Costa Verde.",
-      "precio": 58,
-      "detalle": "Incluye navegación en escuna, paradas para nadar y tiempo libre en playas protegidas. La actividad dura aproximadamente 5 horas y sale del centro histórico. Llevar toalla, protector solar y dinero para consumos a bordo."
-    },
-    {
-      "destinos": [
-        "paraty"
-      ],
-      "destino": "Paraty, Brasil",
-      "titulo": "City tour histórico y Cachoeira do Tobogã",
-      "descripcion": "Historia colonial, cachaçaria y naturaleza en un mismo recorrido.",
-      "precio": 45,
-      "detalle": "Incluye guía, caminata por el centro histórico, visita a una cachaçaria y traslado a la cascada del Tobogã. Duración aproximada de 5 horas. Usar calzado cómodo y tener en cuenta que la visita a la cascada depende de la lluvia."
     },
     {
       "destinos": [
@@ -216,26 +116,6 @@
       "descripcion": "Caminata de naturaleza con baño en piscinas naturales.",
       "precio": 40,
       "detalle": "Incluye guía local, orientación por senderos y entrada al área visitada cuando corresponde. Actividad de medio día con ritmo moderado. Llevar zapatillas con buen agarre, repelente, agua y traje de baño."
-    },
-    {
-      "destinos": [
-        "angra"
-      ],
-      "destino": "Angra dos Reis, Brasil",
-      "titulo": "Ilhas Paradisíacas en lancha",
-      "descripcion": "Día de navegación por Ilha Grande, Lagoa Azul y playas de Angra.",
-      "precio": 75,
-      "detalle": "Incluye lancha compartida, marinero y paradas para nadar en islas y calas seleccionadas por el operador. Duración de 6 a 7 horas. La ruta puede variar por viento; llevar toalla, protector solar y efectivo."
-    },
-    {
-      "destinos": [
-        "angra"
-      ],
-      "destino": "Angra dos Reis, Brasil",
-      "titulo": "Paseo de barco a Ilha de Cataguases",
-      "descripcion": "Experiencia de medio día con playas tranquilas y aguas transparentes.",
-      "precio": 48,
-      "detalle": "Incluye traslado al muelle y navegación con tiempo libre en Ilha de Cataguases y alrededores. Salidas por la mañana o la tarde según disponibilidad. No incluye almuerzo ni consumos personales."
     },
     {
       "destinos": [
@@ -316,26 +196,6 @@
       "descripcion": "Excursión de día completo a una de las playas más famosas de Pernambuco.",
       "precio": 65,
       "detalle": "Incluye traslado ida y vuelta, paseo en catamarán y paradas en bancos de arena o baño de arcilla cuando están disponibles. Salida temprano y regreso al atardecer. No siempre incluye almuerzo o bebidas."
-    },
-    {
-      "destinos": [
-        "mcz"
-      ],
-      "destino": "Maceió, Brasil",
-      "titulo": "Maragogi y piscinas naturales desde Maceió",
-      "descripcion": "Full day de playa con catamarán y aguas cristalinas del litoral norte.",
-      "precio": 58,
-      "detalle": "Incluye traslado desde Maceió y orientación para el paseo opcional a las Galés, siempre sujeto a marea baja. Jornada de 10 a 12 horas. Llevar efectivo, protector solar y confirmar el suplemento de catamarán."
-    },
-    {
-      "destinos": [
-        "mcz"
-      ],
-      "destino": "Maceió, Brasil",
-      "titulo": "São Miguel dos Milagres y Ruta Ecológica",
-      "descripcion": "Playas tranquilas, pueblos pesqueros y piscinas naturales del litoral alagoano.",
-      "precio": 62,
-      "detalle": "Incluye transporte ida y vuelta y paradas en playas de la Ruta Ecológica dos Milagres. Día completo con horarios sujetos a marea y clima. Se recomienda llevar agua, sombrero y reservar el paseo en jangada aparte si se desea."
     },
     {
       "destinos": [
@@ -496,26 +356,6 @@
       "descripcion": "Aventura suave con vistas a la Primeira y Segunda Praia.",
       "precio": 38,
       "detalle": "Incluye orientación para la tirolesa y recorrido por los miradores principales. Actividad de medio día; la tirolesa puede cerrar por viento o lluvia. Usar calzado cómodo y guardar objetos sueltos."
-    },
-    {
-      "destinos": [
-        "fernando"
-      ],
-      "destino": "Fernando de Noronha, Brasil",
-      "titulo": "Baía dos Porcos y playas del Mar de Dentro",
-      "descripcion": "Circuito guiado por miradores y playas de aguas transparentes.",
-      "precio": 88,
-      "detalle": "Incluye traslado interno, guía ambiental y paradas en Sancho, Baía dos Porcos y miradores según acceso. Jornada de 6 horas. Las tasas del parque y preservación pueden cobrarse aparte; llevar snorkel y agua."
-    },
-    {
-      "destinos": [
-        "fernando"
-      ],
-      "destino": "Fernando de Noronha, Brasil",
-      "titulo": "Paseo en barco con snorkel y puesta de sol",
-      "descripcion": "Navegación por la costa con posibilidad de avistar delfines.",
-      "precio": 98,
-      "detalle": "Incluye embarcación, guía y equipo básico de flotación para una parada de snorkel. Duración de 4 horas, con horario condicionado por el mar. La observación de fauna no se garantiza; confirmar tasas y restricciones ambientales."
     },
     {
       "destinos": [
@@ -709,26 +549,6 @@
     },
     {
       "destinos": [
-        "gram"
-      ],
-      "destino": "Gramado, Brasil",
-      "titulo": "Tour del Vino en Bento Gonçalves y Vale dos Vinhedos",
-      "descripcion": "Cata de vinos, espumantes, almuerzo colonial y paisaje de la Serra Gaúcha.",
-      "precio": 78,
-      "detalle": "Incluye transporte desde Gramado, degustaciones seleccionadas y visita a bodegas. Jornada de 10 a 12 horas; algunas versiones suman Tren del Vino y almuerzo. Confirmar el itinerario exacto y avisar restricciones alimentarias."
-    },
-    {
-      "destinos": [
-        "gram"
-      ],
-      "destino": "Gramado, Brasil",
-      "titulo": "City tour de Gramado y parques de Canela",
-      "descripcion": "Lago Negro, centro de Gramado, Catedral de Piedra y Cascata do Caracol.",
-      "precio": 55,
-      "detalle": "Incluye transporte y guía por las principales postales de Gramado y Canela. Duración aproximada de 7 horas. Entradas a parques o museos pueden cobrarse aparte según el circuito elegido."
-    },
-    {
-      "destinos": [
         "canela"
       ],
       "destino": "Canela, Brasil",
@@ -746,26 +566,6 @@
       "descripcion": "Bento Gonçalves, degustaciones y experiencia de Maria Fumaça.",
       "precio": 88,
       "detalle": "Incluye transporte desde Canela, visita a bodegas, degustaciones y experiencia del Tren del Vino cuando haya disponibilidad. Excursión de día completo. Reservar con anticipación; el tren puede reemplazarse por otra actividad según el calendario."
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Cataratas del lado brasileño y Parque das Aves",
-      "descripcion": "Pasarelas panorámicas, selva y fauna de la región de Iguazú.",
-      "precio": 62,
-      "detalle": "Incluye traslado, guía y entradas al circuito brasileño y Parque das Aves si el paquete seleccionado lo contempla. Medio día de actividad. Llevar calzado cómodo, capa de lluvia y documento para los accesos."
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Cataratas argentinas con Garganta del Diablo",
-      "descripcion": "Día completo por los circuitos superior e inferior del parque argentino.",
-      "precio": 72,
-      "detalle": "Incluye traslado desde Foz, guía y orientación dentro del Parque Nacional Iguazú. Jornada completa; la entrada y el tren interno pueden cobrarse por separado según la tarifa. Llevar documento, agua y protección contra la lluvia."
     },
     {
       "destinos": [
@@ -809,49 +609,9 @@
     },
     {
       "destinos": [
-        "buz"
-      ],
-      "destino": "Búzios, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
-        "arraial"
-      ],
-      "destino": "Arraial do Cabo, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
         "cabo"
       ],
       "destino": "Cabo Frio, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
-        "ilha"
-      ],
-      "destino": "Ilha Grande, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
-        "paraty"
-      ],
-      "destino": "Paraty, Brasil",
       "titulo": "Kayak o stand up paddle en la costa",
       "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
       "precio": 30,
@@ -872,26 +632,6 @@
         "ubatuba"
       ],
       "destino": "Ubatuba, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
-        "rio"
-      ],
-      "destino": "Río de Janeiro, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
-        "angra"
-      ],
-      "destino": "Angra dos Reis, Brasil",
       "titulo": "Kayak o stand up paddle en la costa",
       "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
       "precio": 30,
@@ -932,16 +672,6 @@
         "porto"
       ],
       "destino": "Porto de Galinhas, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
-        "mcz"
-      ],
-      "destino": "Maceió, Brasil",
       "titulo": "Kayak o stand up paddle en la costa",
       "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
       "precio": 30,
@@ -1029,16 +759,6 @@
     },
     {
       "destinos": [
-        "fernando"
-      ],
-      "destino": "Fernando de Noronha, Brasil",
-      "titulo": "Kayak o stand up paddle en la costa",
-      "descripcion": "Alquiler de equipo con instructor para recorrer la costa a tu ritmo.",
-      "precio": 30,
-      "detalle": "Incluye equipo, chaleco salvavidas y una breve introducción de manejo antes de salir al agua. Actividad de 1 a 2 horas según el paquete elegido. Se recomienda reservar temprano en temporada alta y llevar protector solar resistente al agua."
-    },
-    {
-      "destinos": [
         "fln"
       ],
       "destino": "Florianópolis, Brasil",
@@ -1089,16 +809,6 @@
     },
     {
       "destinos": [
-        "gram"
-      ],
-      "destino": "Gramado, Brasil",
-      "titulo": "Snowland, el parque de nieve indoor",
-      "descripcion": "Nieve, trineo y clima frío bajo techo en pleno verano gaúcho.",
-      "precio": 55,
-      "detalle": "Incluye traslado y entrada general al parque temático de nieve artificial, con zona de trineos y bar de hielo. Actividad de medio día. Llevar ropa de abrigo; el parque provee camperas para la zona de nieve."
-    },
-    {
-      "destinos": [
         "canela"
       ],
       "destino": "Canela, Brasil",
@@ -1106,16 +816,6 @@
       "descripcion": "Mirador y torre de observación frente a la cascada más conocida de Canela.",
       "precio": 25,
       "detalle": "Incluye traslado y entrada al parque, con acceso al mirador de la cascada del Caracol y sendero corto por el bosque nativo. Actividad de medio día. Llevar calzado cómodo y cámara de fotos."
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Represa de Itaipú",
-      "descripcion": "Visita guiada a una de las mayores hidroeléctricas del mundo.",
-      "precio": 45,
-      "detalle": "Incluye traslado y recorrido panorámico por el circuito de visitantes de Itaipú Binacional, con parada en el mirador y proyección institucional. Duración aproximada de 2 horas y media. Llevar documento de identidad, es obligatorio para el ingreso."
     },
     {
       "destinos": [
@@ -1176,6 +876,1182 @@
       "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
       "precio": 20,
       "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Paseo en goleta por Angra dos Reis",
+      "descripcion": "Paseo en goleta por las islas de Angra dos Reis, con opción de almuerzo a bordo.",
+      "precio": 10,
+      "precio_brl": 49.0,
+      "detalle": "Sale de la Estación Santa Luzia (centro de Angra), embarque a las 11:15 y regreso previsto a las 17:00. Precio de adulto sin almuerzo; la opción con almuerzo buffet (pescado frito, pollo frito, feijão, arroz, ensaladas, pirão y pasta) cuesta desde R$ 99.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/escuna-04.jpg?v=1661882608"
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Angra dos Reis desde Río de Janeiro con paseo en barco",
+      "descripcion": "Excursión desde Río a Angra dos Reis con paseo en goleta incluido y recogida en el hotel.",
+      "precio": 56,
+      "precio_brl": 290.0,
+      "detalle": "Transporte con aire acondicionado en van, microbús u ómnibus, con recogida en hoteles de la zona sur y el centro de Río. Incluye el paseo en barco tipo goleta.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/passeio-angra-dos-reis-passeios-de-barcos-no-rio-de-janeiro-rio-de-janeiro.webp"
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Paseo Aguas Calientes en lancha",
+      "descripcion": "Recorrido en lancha por las islas de Angra dos Reis.",
+      "precio": 19,
+      "precio_brl": 99.0,
+      "detalle": "Duración aproximada: 5 h. Embarque a las 11:15 desde la Estación Santa Luzia (centro de Angra), duración aproximada de 5 horas. El almuerzo en la Praia das Flechas no está incluido. Estacionamiento gratis.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/files/1.jpg?v=1761081621"
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Goleta de lujo por Angra dos Reis",
+      "descripcion": "Paseo en goleta de lujo por las islas de Angra, con opción de open bar.",
+      "precio": 19,
+      "precio_brl": 100.0,
+      "detalle": "Sale de la Estación Santa Luzia (centro de Angra), embarque a las 11:15 y regreso previsto a las 17:00. Precio de adulto sin open bar; con open bar cuesta R$ 200. Hay opción de almuerzo buffet self service.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/files/aluguel-de-escuna_9472-1600x1200.jpg?v=1774913885"
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Day use en Angra dos Reis desde Río: lancha compartida a las islas",
+      "descripcion": "Día completo desde Río de Janeiro en lancha compartida por las islas de Angra, con parada en la Ilha da Gipoia.",
+      "precio": 64,
+      "precio_brl": 330.0,
+      "detalle": "Duración aproximada: 12 h. La salida es temprano desde Río y el viaje a Angra dura unas 3 horas; el embarque es en el Cais de Santa Luzia.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/ponta-da-piedade-03_c4b2cbb8-1eb8-4a56-afcb-157295c1c261.jpg?v=1774913885"
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Un día en Angra dos Reis con salida desde Río",
+      "descripcion": "Excursión de un día desde Río de Janeiro a Angra dos Reis con paseo en barco.",
+      "precio": 61,
+      "precio_brl": 315.0,
+      "detalle": "Duración aproximada: 5 h. Traslado desde Río, playas de aguas cristalinas y paseo en barco.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2019/12/Angra-Praia-de-Cataquages.jpg?fit=645%2C430&ssl=1"
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Media vuelta a Ilha Grande desde Vila do Abraão",
+      "descripcion": "Paseo en lancha de aguas calmas por Lagoa Azul, Lagoa Verde y las playas do Amor y Camiranga.",
+      "precio": 35,
+      "precio_brl": 180.0,
+      "detalle": "Duración aproximada: 5 h. Embarque a las 10:30 desde el muelle de Vila do Abraão (Ilha Grande), duración aproximada de 5 horas. Incluye una parada para almorzar (el almuerzo no está incluido).",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/lagoa-azul-02_d834a487-def3-461b-ad0d-9919f9d11501.jpg?v=1661885762"
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Islas paradisíacas desde Vila do Abraão",
+      "descripcion": "Paseo en lancha por las paradas más famosas del archipiélago, de mar verde esmeralda.",
+      "precio": 39,
+      "precio_brl": 200.0,
+      "detalle": "Duración aproximada: 6 h. Embarque a las 10:30 desde el muelle de Vila do Abraão (Ilha Grande), duración aproximada de 6 horas. Incluye una parada para almorzar (el almuerzo no está incluido).",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/ponta-da-piedade-01_529a3dd4-7e3e-41c1-8fa1-b3ceb814da38.jpg?v=1661884926"
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Playa de Lopes Mendes (Ilha Grande)",
+      "descripcion": "Paseo en barco y trilha hasta Lopes Mendes, una de las 10 playas más lindas de Brasil.",
+      "precio": 52,
+      "precio_brl": 265.0,
+      "detalle": "La playa tiene casi 3 km de arena blanca y mar con olas. Combina el paseo en barco con una trilha moderada de unos 30 minutos. Hay salidas diarias desde el centro de Angra.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/lopes-mendes.jpg?v=1583933110"
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Media vuelta a Ilha Grande desde Angra",
+      "descripcion": "Paseo en lancha de aguas calmas por Lagoa Verde y varias playas de Ilha Grande.",
+      "precio": 19,
+      "precio_brl": 99.0,
+      "detalle": "Duración aproximada: 5 h. Embarque a las 11:15 desde la Estación Santa Luzia (centro de Angra), duración aproximada de 5 horas. Pasa por las playas de Manguariquessaba, Aripeba y Fazenda Marinha de Jaconema. El almuerzo no está incluido y el estacionamiento es gratis.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/lagoa-azul-min.jpg?v=1712861660"
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Ilha Grande completo desde Río en barco pirata",
+      "descripcion": "Excursión desde Río de Janeiro a Ilha Grande con paseo en barco pirata temático y guía.",
+      "precio": 69,
+      "precio_brl": 354.0,
+      "detalle": "Incluye transporte con recogida en la puerta del hotel, entrada y guía.",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/764c59d1-1912-4324-d92f-3052c9ca4400/w=400"
+    },
+    {
+      "destinos": [
+        "ilha"
+      ],
+      "destino": "Ilha Grande, Brasil",
+      "titulo": "Day use Angra dos Reis + Ilha Grande en goleta",
+      "descripcion": "Día completo desde Río de Janeiro con paseo en goleta por las islas de Angra y Ilha Grande.",
+      "precio": 49,
+      "precio_brl": 250.0,
+      "detalle": "Duración aproximada: 12 h. Salida temprano desde Río; el viaje a Angra dura unas 3 horas y el embarque es en el Cais de Santa Luzia.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/freguesia-de-santana-02-2_0351d273-02fa-4848-81ea-af712ff46c83.jpg?v=1661887305"
+    },
+    {
+      "destinos": [
+        "paraty"
+      ],
+      "destino": "Paraty, Brasil",
+      "titulo": "City tour por Paraty",
+      "descripcion": "Caminata guiada por el centro histórico colonial de Paraty.",
+      "precio": 8,
+      "precio_brl": 40.0,
+      "detalle": "Recorrido a pie con guía especializado por las calles del centro histórico, con su arquitectura colonial.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/city-tour-em-paraty-passeio-historico-em-paraty-walking-tour-paraty-rj-1-800x600.jpg?v=1637366608"
+    },
+    {
+      "destinos": [
+        "paraty"
+      ],
+      "destino": "Paraty, Brasil",
+      "titulo": "Jeep tour por Paraty",
+      "descripcion": "Recorrido en jeep 4x4 por cascadas y el Parque Nacional Serra da Bocaina, con visita a un alambique.",
+      "precio": 29,
+      "precio_brl": 150.0,
+      "detalle": "Duración aproximada: 6 h. Pasa por cascadas cercanas a la ciudad, el Marco del Camino del Oro y un alambique donde se conoce la producción de la cachaça de Paraty, con opción de degustar licores.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/jeep-tour-em-paraty_passeio-para-cachoeira-e-alambique-800x600-min.png?v=1637365083"
+    },
+    {
+      "destinos": [
+        "paraty"
+      ],
+      "destino": "Paraty, Brasil",
+      "titulo": "Paseo en goleta por Paraty",
+      "descripcion": "Paseo en goleta por las islas paradisíacas de Paraty, con tiempo para nadar y hacer snorkel.",
+      "precio": 29,
+      "precio_brl": 150.0,
+      "detalle": "Duración aproximada: 5 h. Visita 4 islas y 1 playa, con paradas de 30 a 40 minutos en cada una.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/passeio-de-escuna-roteiro-lagoa-azul-em-paraty-rj-24-800x600-min.png?v=1637362919"
+    },
+    {
+      "destinos": [
+        "cabo"
+      ],
+      "destino": "Cabo Frio, Brasil",
+      "titulo": "City tour por Cabo Frio desde Búzios",
+      "descripcion": "Día en Cabo Frio con salida desde Búzios, con playas y un barrio histórico.",
+      "precio": 51,
+      "precio_brl": 260.0,
+      "detalle": "Duración aproximada: 9 h. Recorrido de día completo por Cabo Frio con la agencia Costa do Sol Tour.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2020/06/instagram_1591918164687-01.jpeg?fit=1047%2C1047&ssl=1"
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Arraial do Cabo desde Búzios: el Caribe brasileño",
+      "descripcion": "Día completo en Arraial do Cabo con salida desde Búzios, entre playas de arena blanca y aguas cristalinas.",
+      "precio": 45,
+      "precio_brl": 230.0,
+      "detalle": "Duración aproximada: 8 h. Paseo de unas 8 horas con salida desde Búzios.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2019/11/Praia-do-farol-3-e1592684608214.jpg?fit=611%2C611&ssl=1"
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Arraial do Cabo desde Río de Janeiro con paseo en barco",
+      "descripcion": "Excursión desde Río a Arraial do Cabo con paseo en goleta incluido y recogida en el hotel.",
+      "precio": 60,
+      "precio_brl": 310.0,
+      "detalle": "Transporte con aire acondicionado en van, microbús u ómnibus, con recogida en hoteles de la zona sur y el centro de Río.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/passeio-arraial-do-cabo-passeios-de-barcos-no-rio-de-janeiro-rio-de-janeiro.webp"
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Arraial do Cabo completo desde Río: barco y almuerzo",
+      "descripcion": "Excursión desde Río a Arraial do Cabo con paseo en barco y almuerzo buffet libre incluidos.",
+      "precio": 73,
+      "precio_brl": 375.0,
+      "detalle": "Te buscan en la puerta del hotel. Mar azul celeste, capital nacional del buceo, y con suerte se ven tortugas, delfines o ballenas.",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/cd9ffe8f-a213-4ae7-ae5a-3115b8673600/w=400"
+    },
+    {
+      "destinos": [
+        "arraial"
+      ],
+      "destino": "Arraial do Cabo, Brasil",
+      "titulo": "Un día en Arraial do Cabo con salida desde Río",
+      "descripcion": "Día completo en el Caribe brasileño con salida desde Río de Janeiro.",
+      "precio": 61,
+      "precio_brl": 315.0,
+      "detalle": "Aguas cristalinas y playas paradisíacas de Arraial do Cabo.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2020/07/Praias-Arraial-do-Cabo.png?fit=1396%2C800&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Paseo en barco temático Grand Pérola Negra",
+      "descripcion": "Paseo por Búzios en una goleta con ambientación temática.",
+      "precio": 19,
+      "precio_brl": 100.0,
+      "detalle": "Duración aproximada: 2 h. Duración aproximada de 2 horas y 30 minutos.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2021/05/06A1C96C-F215-4AFD-9AAB-4D6C9FD4BAFB_batcheditor_fotor.jpeg?fit=1600%2C1200&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Búzios desde Río de Janeiro con paseo en barco",
+      "descripcion": "Excursión desde Río a Búzios con paseo en goleta incluido y recogida en el hotel.",
+      "precio": 56,
+      "precio_brl": 290.0,
+      "detalle": "Transporte con aire acondicionado en van, microbús u ómnibus, con recogida en hoteles de la zona sur y el centro de Río.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/passeio-buzios-passeios-de-barcos-no-rio-de-janeiro-rio-de-janeiro.webp"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Paseo en catamarán por Búzios",
+      "descripcion": "Catamarán de lujo con música y DJ, con paradas para bañarse.",
+      "precio": 29,
+      "precio_brl": 150.0,
+      "detalle": "Duración aproximada: 3 h. Recorre 12 playas y 3 islas, con tres paradas para snorkel en aguas cristalinas. Dura unas 3 horas.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2025/02/IMG_1866.jpg?fit=1284%2C2195&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Paseo a caballo por Búzios",
+      "descripcion": "Cabalgata por senderos y playas de Búzios.",
+      "precio": 36,
+      "precio_brl": 185.0,
+      "detalle": "Duración aproximada: 1 h. Caballos dóciles y bien entrenados. Dura aproximadamente 1 hora.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2025/02/Imagem-cavalo-praia.jpg?fit=1284%2C1600&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Paseo en buggy por Búzios",
+      "descripcion": "Recorrido en buggy por las playas y miradores más lindos de la península.",
+      "precio": 49,
+      "precio_brl": 250.0,
+      "detalle": "Duración aproximada: 1 h. Incluye paradas para fotos. Dura aproximadamente 1 hora.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2021/05/Passeio-de-Buggy-em-B%C3%BAzios1.jpeg?fit=718%2C717&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Tour Super Búzios",
+      "descripcion": "City tour completo por las playas y puntos históricos de Búzios.",
+      "precio": 51,
+      "precio_brl": 260.0,
+      "detalle": "Duración aproximada: 8 h. Pasa por las playas João Fernandes, João Fernandinho, Brava y do Forno, el Mirante de João Fernandes y la Orla Bardot, entre otros puntos. Dura unas 8 horas.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2018/04/Cliente-mirante-joao-Fernandes.jpg?fit=612%2C612&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Un día en Búzios con paseo en barco y almuerzo, desde Río",
+      "descripcion": "Día completo desde Río de Janeiro con paseo en goleta y almuerzo en Búzios.",
+      "precio": 61,
+      "precio_brl": 315.0,
+      "detalle": "Duración aproximada: 14 h. Búzios queda a unos 180 km de Río, a unas 3 horas de viaje. Dura unas 14 horas contando el traslado.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2018/04/azeda-azedinha3.jpg?fit=1024%2C732&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Bautismo de buceo en Búzios",
+      "descripcion": "Primera experiencia de buceo en Búzios, sin necesidad de saber nadar.",
+      "precio": 75,
+      "precio_brl": 385.0,
+      "detalle": "Duración aproximada: 4 h. Los instructores acompañan todo el tiempo. Dura aproximadamente 4 horas y 30 minutos.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2021/03/Mergulho-de-Batismo-em-B%C3%BAzios.jpeg?fit=719%2C335&ssl=1"
+    },
+    {
+      "destinos": [
+        "buz"
+      ],
+      "destino": "Búzios, Brasil",
+      "titulo": "Un día en Búzios gourmet, desde Río",
+      "descripcion": "Full day en Búzios con salida desde Río de Janeiro y guía.",
+      "precio": 76,
+      "precio_brl": 390.0,
+      "detalle": "Duración aproximada: 14 h. Traslado en ómnibus o microbús desde el hotel, con guía. Dura unas 14 horas contando el traslado.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2019/12/buzin.png?fit=720%2C501&ssl=1"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Cristo Redentor con transporte oficial y entrada",
+      "descripcion": "Visita al Cristo Redentor con entrada y transporte oficial incluidos.",
+      "precio": 26,
+      "precio_brl": 132.0,
+      "detalle": "El traslado sale del Largo do Machado (Catete) y de la Praça do Lido (Copacabana).",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/78ef858c-6ed7-47e2-327f-ea1641e72900/w=400"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "AquaRio: entrada y transporte",
+      "descripcion": "Entrada al acuario más grande de Sudamérica, con transporte desde Copacabana.",
+      "precio": 35,
+      "precio_brl": 181.0,
+      "detalle": "El embarque es en la Praça do Lido, en Copacabana, todos los días a las 9:00.",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/00e32216-f1f2-4625-5744-7c331ab33b00/w=400"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Cristo Redentor y city tour",
+      "descripcion": "Cristo Redentor con entrada incluida y recorrido por la ciudad, con recogida en el hotel.",
+      "precio": 53,
+      "precio_brl": 270.0,
+      "detalle": "Incluye las entradas del Cristo Redentor y transporte con aire acondicionado.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/passeio-cristo-city-tour-melhor-city-tour-rio-de-janeiro-rio-de-janeiro.webp"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "AquaRio + YupStar con transporte",
+      "descripcion": "Acuario AquaRio y la rueda gigante YupStar, con traslado y entradas incluidos.",
+      "precio": 51,
+      "precio_brl": 260.0,
+      "detalle": "Duración aproximada: 2 h. Parte desde Copacabana. Dura aproximadamente 2 horas.",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/044f3520-cd82-4b40-4b9c-d4c1643e3900/w=400"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Petrópolis imperial",
+      "descripcion": "Excursión a Petrópolis, la ciudad imperial, con entrada al Museo Imperial incluida.",
+      "precio": 53,
+      "precio_brl": 270.0,
+      "detalle": "Recogida en el hotel y transporte con aire acondicionado.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/petropolis-imperial-tours-em-petropolis-rio-de-janeiro.jpg"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Pedra do Telégrafo: traslado y trilha",
+      "descripcion": "Caminata guiada hasta la Pedra do Telégrafo, con vista panorámica.",
+      "precio": 53,
+      "precio_brl": 270.0,
+      "detalle": "Duración aproximada: 5 h. Incluye traslado y guía especializado. Dura aproximadamente 5 horas.",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/43102d4b-2147-4813-297b-00824223d300/w=400"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Petrópolis con cervecería Bohemia",
+      "descripcion": "Petrópolis con entrada al Museo Imperial y visita a la fábrica de cerveza Bohemia.",
+      "precio": 64,
+      "precio_brl": 330.0,
+      "detalle": "Recogida en el hotel y transporte con aire acondicionado.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/passeio-petropolis-com-bohemia-tours-em-petropolis-rio-de-janeiro.jpg"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Pan de Azúcar: entrada y guía",
+      "descripcion": "Visita al Parque Bondinho Pão de Açúcar, con entrada y guía incluidos.",
+      "precio": 53,
+      "precio_brl": 272.0,
+      "detalle": "Duración aproximada: 2 h. Incluye el paseo en el teleférico que une el Pão de Açúcar con el Morro da Urca, a 396 metros de altura. Dura aproximadamente 2 horas y 30 minutos.",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/0f65af91-59ce-4c4c-2415-5ac2fc8ed300/w=400"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Cristo Redentor y Pan de Azúcar",
+      "descripcion": "Los dos íconos de Río en una excursión, con entradas y transporte desde el hotel.",
+      "precio": 86,
+      "precio_brl": 440.0,
+      "detalle": "Incluye las entradas del Cristo Redentor y del Pão de Açúcar y transporte con aire acondicionado.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/cristo-redentor-pao-de-acucar-melhor-city-tour-rio-de-janeiro-rio-de-janeiro.jpg"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Combo Cristo Redentor y AquaRio",
+      "descripcion": "Combo del Cristo Redentor y el acuario AquaRio, con entradas y transporte incluidos.",
+      "precio": 58,
+      "precio_brl": 296.0,
+      "detalle": "Duración aproximada: 5 h. Se puede hacer en dos días distintos o en uno solo. Dura aproximadamente 5 horas.",
+      "image": "https://imagedelivery.net/EafvxYlk8cSUsWEWsetEdQ/e164239a-8460-4fe4-20df-ff17d0bf4200/w=400"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "City tour completo por Río",
+      "descripcion": "City tour completo con las entradas del Cristo Redentor y del Pão de Açúcar incluidas.",
+      "precio": 93,
+      "precio_brl": 480.0,
+      "detalle": "Incluye transporte con aire acondicionado y recogida en el hotel.",
+      "image": "https://www.smartriotour.com.br/wp-content/uploads/2025/10/passeio-city-tour-completo-melhor-city-tour-rio-de-janeiro-rio-de-janeiro.jpg"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Un día en Río: city tour completo",
+      "descripcion": "City tour de un día por los principales puntos turísticos de Río de Janeiro.",
+      "precio": 101,
+      "precio_brl": 520.0,
+      "detalle": "Duración aproximada: 9 h. Incluye el Cristo Redentor (con subida en van por la Floresta da Tijuca), el Bondinho del Pão de Açúcar, una visita externa al Maracanã, la Escalera Selarón, el Sambódromo y la Catedral Metropolitana. Dura unas 9 horas.",
+      "image": "https://cdn.shopify.com/s/files/1/2115/1981/products/urd-capa_1080x_ad51dd27-6ef0-4646-bb87-6540e50a6ff8.jpg?v=1637105511"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Noche de samba en el Salgueiro (By Night)",
+      "descripcion": "Noche en la escuela de samba Salgueiro, con transporte ejecutivo y entrada garantizada.",
+      "precio": 63,
+      "precio_brl": 325.0,
+      "detalle": "Duración aproximada: 4 h. Sumergite en la cultura del samba carioca. Dura aproximadamente 4 horas.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2019/12/IMG_1750.jpg?fit=1284%2C1284&ssl=1"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Petrópolis: espectáculo Sonido y Luz",
+      "descripcion": "Excursión nocturna a Petrópolis con visita a dos palacios, entre ellos el Quitandinha.",
+      "precio": 68,
+      "precio_brl": 350.0,
+      "detalle": "Duración aproximada: 10 h. El Quitandinha fue construido en los años cuarenta para ser el mayor casino de Sudamérica. Dura aproximadamente 10 horas.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2019/12/quitandinha-som-e-luz.jpg?fit=900%2C374&ssl=1"
+    },
+    {
+      "destinos": [
+        "rio"
+      ],
+      "destino": "Río de Janeiro, Brasil",
+      "titulo": "Mangueira Samba Show",
+      "descripcion": "Espectáculo \"Matrices\" de la Estación Primeira de Mangueira, dentro de su barracón de alegorías.",
+      "precio": 74,
+      "precio_brl": 380.0,
+      "detalle": "Duración aproximada: 5 h. Producción exclusiva a cargo del carnavalesco Leandro Vieira. Dura aproximadamente 5 horas.",
+      "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2019/12/mangueira-apresentara-o-espetaculo-matrizes-1562101639305_v2_900x506.jpg?fit=900%2C506&ssl=1"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Canoa hawaiana en Fernando de Noronha",
+      "descripcion": "Expedición en canoa polinesia (Va'a) exclusiva para tu grupo, con un capitán experimentado.",
+      "precio": 39,
+      "precio_brl": 200.0,
+      "detalle": "Duración aproximada: 2 h. Sale de la Praia do Porto y pasa por Air France y Rugido do Leão, entre otros puntos. Dura aproximadamente 2 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/canoa.havaiana.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Trilha Costa Azul",
+      "descripcion": "Caminata por el lado del Mar de Fuera, el más salvaje y preservado de la isla.",
+      "precio": 39,
+      "precio_brl": 200.0,
+      "detalle": "Duración aproximada: 4 h. Pasa por miradores, playas aisladas y puntos históricos poco visitados. Dura aproximadamente 4 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/42c8dd79-f985-4893-8b1b-ee110c9d7c22-scaled.webp"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Trilha del Piquinho",
+      "descripcion": "Caminata hasta la base del Morro do Piquinho, uno de los miradores naturales de la isla.",
+      "precio": 39,
+      "precio_brl": 200.0,
+      "detalle": "Duración aproximada: 2 h. Sendero parcialmente sombreado por vegetación nativa. Dura aproximadamente 2 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/entardecer-no-piquinho-1.jpeg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Ilha Tour en Fernando de Noronha",
+      "descripcion": "El paseo más completo para conocer las principales postales de la isla en un solo día.",
+      "precio": 39,
+      "precio_brl": 200.0,
+      "detalle": "La guía de Noronha Total te lleva por algunas de las playas y miradores más impresionantes del archipiélago.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/carro.1-100.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Paseo en barco con delfines (tradicional)",
+      "descripcion": "Navegación con posibilidad de ver a los delfines rotadores.",
+      "precio": 45,
+      "precio_brl": 230.0,
+      "detalle": "Duración aproximada: 3 h. Sale de la Praia do Porto, donde también se alquilan equipos de buceo. Dura aproximadamente 3 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/barco.golfinhos.escuna.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Buceo libre (apnea)",
+      "descripcion": "Trilha acuática con snorkel por lajas de coral, observando de cerca la vida marina.",
+      "precio": 49,
+      "precio_brl": 250.0,
+      "detalle": "Duración aproximada: 2 h. La ruta se define según las condiciones del mar. Según el día se pueden ver naufragios y piscinas naturales. Dura aproximadamente 2 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/mergulho.apneia.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Trilha de las piscinas naturales",
+      "descripcion": "Recorrido por piscinas naturales de Noronha, solo con marea baja.",
+      "precio": 49,
+      "precio_brl": 250.0,
+      "detalle": "Visita la piscina natural del Morro de Fora (Praia da Conceição), el Buraco do Galego en la Praia do Cachorro y termina en la Lasca da Velha.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/trilha.piscinas.naturais.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Trilha del Morro São José",
+      "descripcion": "Travesía a pie hasta la única isla secundaria que se puede visitar fuera de la isla principal.",
+      "precio": 49,
+      "precio_brl": 250.0,
+      "detalle": "Duración aproximada: 2 h. Se hace con marea baja, cuando se forma un camino natural de piedras. Dura aproximadamente 2 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/trilha.morro_.saojose.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Trilha de Atalaia y Pontinha Caieiras",
+      "descripcion": "Caminata dentro del Parque Nacional Marino hasta la piscina natural de Atalaia.",
+      "precio": 49,
+      "precio_brl": 250.0,
+      "detalle": "Duración aproximada: 5 h. Es un lugar de acceso controlado, considerado un criadero marino. La trilha empieza en la Vila do Trinta. Dura aproximadamente 5 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/atalaia.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Atardecer VIP en Fernando de Noronha",
+      "descripcion": "Navegación al atardecer con actividad de planasub.",
+      "precio": 49,
+      "precio_brl": 250.0,
+      "detalle": "Sale del Porto de Santo Antônio. Empieza con planasub en la zona del puerto y la Praia da Biboca, y termina con una comida de pescado a la parrilla.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/DJI_00-30-650x650-1.png"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Trilha Capim Açu",
+      "descripcion": "La trilha más larga de la isla, con miradores a los dos lados de Noronha.",
+      "precio": 58,
+      "precio_brl": 300.0,
+      "detalle": "Duración aproximada: 7 h. Exige buena condición física, con subidas y bajadas fuertes. Empieza cerca de la entrada de la playa del Sancho. Dura aproximadamente 7 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/trilha.capimacu.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Buceo con cilindro en el Porto",
+      "descripcion": "Buceo en el Porto de Santo Antônio, donde hay un naufragio artificial con mucha vida marina.",
+      "precio": 88,
+      "precio_brl": 450.0,
+      "detalle": "Se pueden ver peces de colores y tortugas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/mergulho.porto_.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Paseo en catamarán Trovão dos Mares",
+      "descripcion": "Catamarán por los paisajes más impresionantes del archipiélago.",
+      "precio": 126,
+      "precio_brl": 650.0,
+      "detalle": "Duración aproximada: 5 h. Pasa cerca del Morro Dois Irmãos, la Baía dos Golfinhos y la Praia da Conceição. Dura aproximadamente 5 horas.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/barco.trovaodosmares.jpg"
+    },
+    {
+      "destinos": [
+        "fernando"
+      ],
+      "destino": "Fernando de Noronha, Brasil",
+      "titulo": "Buceo embarcado en Fernando de Noronha",
+      "descripcion": "Buceo en algunos de los puntos más ricos en vida marina de la isla.",
+      "precio": 224,
+      "precio_brl": 1150.0,
+      "detalle": "A bordo se da una charla sobre equipos, técnicas de respiración, flotabilidad y seguridad.",
+      "image": "https://noronhatotal.com.br/wp-content/uploads/2023/11/embarcado.jpg"
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Maragogi desde Maceió",
+      "descripcion": "Excursión de un día a Maragogi desde Maceió, con guía.",
+      "precio": 25,
+      "precio_brl": 130.0,
+      "detalle": "La salida es entre las 4:00 y las 7:00 según la tabla de mareas. El destino es la Praia de Barra Grande y el guía acompaña todo el día hasta el regreso a Maceió.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/0462f9a9-00c5-45c7-8561-c700099bad59.jpg"
+    },
+    {
+      "destinos": [
+        "maragogi"
+      ],
+      "destino": "Maragogi, Brasil",
+      "titulo": "Paquete tranquilidad: Maragogi, Milagres y Gunga",
+      "descripcion": "Recorrido por Maragogi, São Miguel dos Milagres y la Praia do Gunga desde Maceió.",
+      "precio": 31,
+      "precio_brl": 159.9,
+      "detalle": "El guía acompaña todo el viaje, desde la salida hasta el regreso a Maceió.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/26481b15-d4cf-4437-b715-8f8ff99fd1d7.jpg"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Paripueira desde Maceió",
+      "descripcion": "Día de playa en Paripueira con traslado y guía desde Maceió.",
+      "precio": 7,
+      "precio_brl": 35.0,
+      "detalle": "Salida entre las 7:00 y las 7:30, unos 45 minutos de viaje y regreso alrededor de las 15:00. Incluye traslado de ida y vuelta y guía acreditado. No incluye day use, comidas ni bebidas.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/imagem_5_34.jpg"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Ipioca desde Maceió",
+      "descripcion": "Día de playa en Ipioca, en el litoral norte de Alagoas, con traslado y guía.",
+      "precio": 7,
+      "precio_brl": 35.0,
+      "detalle": "Salida entre las 7:00 y las 7:30, alrededor de 1 hora de viaje, y regreso hacia las 15:00. Incluye traslado de ida y vuelta y guía acreditado.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/estou-no-hibiscus.jpg"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Praia do Gunga y Barra de São Miguel desde Maceió",
+      "descripcion": "Día en Barra de São Miguel y la Praia do Gunga con traslado y guía.",
+      "precio": 7,
+      "precio_brl": 35.0,
+      "detalle": "Salida entre las 7:00 y las 7:30 de la mañana. El guía acompaña todo el viaje hasta el regreso a Maceió.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/62c7da0e-ed16-4110-8435-6e3949162b58.jpg"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Praia do Francês desde Maceió",
+      "descripcion": "Día de playa en la Praia do Francês con traslado desde Maceió.",
+      "precio": 7,
+      "precio_brl": 35.0,
+      "detalle": "Incluye traslado de ida y vuelta, embarque en el lugar que prefieras y guía acreditado. Salida alrededor de las 7:00 y regreso hacia las 15:00.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/praia-do-frances-1.jpg"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "São Miguel dos Milagres desde Maceió",
+      "descripcion": "Excursión a São Miguel dos Milagres con guía desde Maceió.",
+      "precio": 14,
+      "precio_brl": 70.0,
+      "detalle": "La salida es entre las 6:30 y las 7:00 según la tabla de mareas de Milagres. El guía acompaña todo el viaje.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/7-2.png"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Las 9 islas: paseo en catamarán desde Maceió",
+      "descripcion": "Catamarán por la Rota das Lagoas con parada en un banco de arena.",
+      "precio": 23,
+      "precio_brl": 120.0,
+      "detalle": "Salida entre las 11:00 y las 11:30 hacia Pontal da Barra. Hay una parada para bañarse en el banco de arena de la Prainha.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/11-4.png"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Porto de Galinhas desde Maceió",
+      "descripcion": "Excursión a Porto de Galinhas con guía desde Maceió.",
+      "precio": 29,
+      "precio_brl": 150.0,
+      "detalle": "Salida entre las 5:00 y las 5:30 de la mañana. El guía acompaña todo el viaje hasta el regreso a Maceió.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/920578a2-dc25-456a-828a-298355f4b487.jpg"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Foz del São Francisco desde Maceió",
+      "descripcion": "Viaje a Piaçabuçu y paseo en barco por el río São Francisco hasta su desembocadura.",
+      "precio": 35,
+      "precio_brl": 180.0,
+      "detalle": "Duración aproximada: 2 h. Salida entre las 7:00 y las 7:30. El viaje hasta Piaçabuçu dura unas 2 horas y 10 minutos y el paseo en barco unas 3 horas.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/8-4.png"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Dunas de Marapé desde Maceió",
+      "descripcion": "Excursión a las dunas de Marapé desde Maceió.",
+      "precio": 35,
+      "precio_brl": 180.0,
+      "detalle": "Salida alrededor de las 7:00. El viaje hasta la playa dura aproximadamente 1 hora y 40 minutos.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/c4ab3ffc-678b-41a6-a260-861a64671bce.jpg"
+    },
+    {
+      "destinos": [
+        "mcz"
+      ],
+      "destino": "Maceió, Brasil",
+      "titulo": "Cañones del São Francisco desde Maceió",
+      "descripcion": "Paseo en catamarán entre los paredones rocosos de los cañones de Xingó.",
+      "precio": 61,
+      "precio_brl": 315.0,
+      "detalle": "Salida entre las 5:00 y las 6:00 de la orilla de Maceió. El viaje hasta Xingó dura unas 4 horas y el paseo en catamarán 1 hora de ida hasta los cañones. Para reservar hay que contactar a la agencia por WhatsApp.",
+      "image": "https://avbtur.com.br/wp-content/uploads/2023/10/Rio-3.png"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "City tour colectivo por Gramado y Canela",
+      "descripcion": "Recorrido en grupo por los principales puntos de Gramado y Canela.",
+      "precio": 8,
+      "precio_brl": 39.0,
+      "detalle": "Te buscan en el alojamiento (zona urbana) todos los días. Incluye transporte y conductor/guía. No incluye comidas, bebidas ni entradas a los puntos turísticos. Un niño menor de 5 años no paga si va con 2 adultos.",
+      "image": "https://admin.paytour.com.br/thumbnails/2146/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Noche suiza: secuencia de fondue",
+      "descripcion": "Cena de fondue con transporte incluido, ideal para parejas.",
+      "precio": 27,
+      "precio_brl": 139.0,
+      "detalle": "Incluye fondue de queso, carnes y dulces. Se puede pagar en hasta 4 cuotas con tarjeta.",
+      "image": "https://admin.paytour.com.br/thumbnails/2226/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Ruta cervecera: Serra Bier",
+      "descripcion": "Recorrido cervecero en kombi personalizada con chopp libre dentro del transporte.",
+      "precio": 31,
+      "precio_brl": 159.0,
+      "detalle": "Te buscan en el hotel (centro de Gramado y Canela) e incluye transporte de ida y vuelta. No incluye las tasas de visita a los lugares.",
+      "image": "https://admin.paytour.com.br/thumbnails/2214/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Noche alemana en Nova Petrópolis (Kerbfest)",
+      "descripcion": "Cena típica alemana con shows temáticos y danzas típicas en Nova Petrópolis.",
+      "precio": 37,
+      "precio_brl": 189.0,
+      "detalle": "Se hace lunes y viernes. Te buscan en el alojamiento (zona urbana). Los menores de 6 años no pagan.",
+      "image": "https://admin.paytour.com.br/thumbnails/2153/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Tour al cañón Itaimbezinho",
+      "descripcion": "Excursión al Cañón Itaimbezinho, en Cambará do Sul, uno de los paisajes más impresionantes de Brasil.",
+      "precio": 43,
+      "precio_brl": 220.0,
+      "detalle": "Se puede pagar en hasta 4 cuotas sin interés. La agencia da soporte por WhatsApp.",
+      "image": "https://admin.paytour.com.br/thumbnails/2205/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Noche alemana en el restaurante Torquês",
+      "descripcion": "Cena alemana con café colonial, postre y show folclórico de danzas alemanas.",
+      "precio": 44,
+      "precio_brl": 225.0,
+      "detalle": "Se puede pagar en hasta 4 cuotas sin interés.",
+      "image": "https://admin.paytour.com.br/thumbnails/2206/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Noche italiana: cena típica",
+      "descripcion": "Cena italiana con teatro y shows durante la noche.",
+      "precio": 52,
+      "precio_brl": 269.0,
+      "detalle": "Se hace los jueves.",
+      "image": "https://admin.paytour.com.br/thumbnails/2154/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Tour Raíces Coloniales con café colonial",
+      "descripcion": "Recorrido cultural por la colonización italiana, con café colonial y degustaciones incluidos.",
+      "precio": 46,
+      "precio_brl": 239.0,
+      "detalle": "Incluye el café colonial de la Nona. Se puede pagar en hasta 4 cuotas sin interés.",
+      "image": "https://admin.paytour.com.br/thumbnails/2210/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Tour rural Linha Bella con almuerzo italiano",
+      "descripcion": "Recorrido rural por Linha Bella con almuerzo italiano, en grupo.",
+      "precio": 54,
+      "precio_brl": 279.0,
+      "detalle": "Almuerzo italiano incluido en el recorrido, en grupo.",
+      "image": "https://admin.paytour.com.br/thumbnails/2145/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Pasaporte de museos: 7 atracciones",
+      "descripcion": "Un único ingreso para 7 atracciones de Gramado.",
+      "precio": 51,
+      "precio_brl": 260.0,
+      "detalle": "Se puede pagar en hasta 4 cuotas sin interés.",
+      "image": "https://admin.paytour.com.br/thumbnails/2290/thumbnail"
+    },
+    {
+      "destinos": [
+        "gram"
+      ],
+      "destino": "Gramado, Brasil",
+      "titulo": "Noche gaucha: churrascaría Garfo e Bombacha",
+      "descripcion": "Asado con costillar cocinado durante 8 horas, mate y show folclórico gaucho en vivo.",
+      "precio": 77,
+      "precio_brl": 395.0,
+      "detalle": "Incluye chimarrão, danzas y música tradicionalista del Rio Grande do Sul. Se puede pagar en hasta 4 cuotas sin interés.",
+      "image": "https://admin.paytour.com.br/thumbnails/2208/thumbnail"
+    },
+    {
+      "destinos": [
+        "canela"
+      ],
+      "destino": "Canela, Brasil",
+      "titulo": "Sabores de Canela: Skyglass, bondinhos, bodega y chocolates",
+      "descripcion": "Recorrido en grupo por atracciones y sabores de Canela.",
+      "precio": 13,
+      "precio_brl": 69.0,
+      "detalle": "Se hace martes, jueves y domingo. Te buscan en el hospedaje. Incluye transporte con guía; no incluye comidas, bebidas ni entradas.",
+      "image": "https://admin.paytour.com.br/thumbnails/2525098/thumbnail"
+    },
+    {
+      "destinos": [
+        "canela"
+      ],
+      "destino": "Canela, Brasil",
+      "titulo": "Noche gaucha en Canela con transporte",
+      "descripcion": "Cena típica gaucha con shows temáticos y presentaciones folclóricas.",
+      "precio": 67,
+      "precio_brl": 345.0,
+      "detalle": "Se hace martes, jueves y sábado. Te buscan en el alojamiento (zona urbana). Los menores de 6 años no pagan.",
+      "image": "https://admin.paytour.com.br/thumbnails/2152/thumbnail"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Circuito Cataratas Brasil (entradas aparte)",
+      "descripcion": "Circuito en ómnibus panorámico Redbus por el Parque das Aves y las Cataratas del lado brasileño, con guía.",
+      "precio": 21,
+      "precio_brl": 109.0,
+      "detalle": "El precio incluye el transporte y el acompañamiento de guía. Las entradas al Parque das Aves y a las Cataratas NO están incluidas y se compran por separado.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00099/4340-circuitocataratas7.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Circuito Cataratas Argentina",
+      "descripcion": "Excursión al Parque Nacional Iguazú, del lado argentino, con transporte, guía y entradas incluidos.",
+      "precio": 117,
+      "precio_brl": 599.0,
+      "detalle": "Las entradas al Parque Nacional Iguazú están incluidas en el precio.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00005/2101-cataratasdoladoargentino.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Macuco Safari: paseo en barco",
+      "descripcion": "Trilha por la selva y paseo en barco hasta las Cataratas del Iguazú.",
+      "precio": 74,
+      "precio_brl": 382.0,
+      "detalle": "Combina un paseo en barco muy cerca de las caídas de agua con una trilha por el bosque subtropical del Parque Nacional do Iguaçu.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00003/1946-passeiodebarcoemfoz.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Parque das Aves",
+      "descripcion": "Parque de conservación de aves de la Mata Atlántica, con más de 1.400 aves de unas 130 especies.",
+      "precio": 21,
+      "precio_brl": 109.0,
+      "detalle": "Una visita educativa y de contacto cercano con la naturaleza, ideal para familias.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00014/4349-parquedasaves10.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Atardecer en las Cataratas",
+      "descripcion": "Visita a las Cataratas al final del día, con un cóctel en el Espaço Naipi.",
+      "precio": 48,
+      "precio_brl": 245.0,
+      "detalle": "Permite ver las caídas iluminadas por la luz dorada del atardecer.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00118/4086-pordosolcataratas4.jpeg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Amanecer en las Cataratas",
+      "descripcion": "Ingreso al Parque Nacional do Iguaçu en las primeras horas del día, con desayuno incluido.",
+      "precio": 57,
+      "precio_brl": 295.0,
+      "detalle": "Permite ver las Cataratas cuando la luz del sol recién ilumina las caídas.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00080/4020-amanhecernascataratasemfoz.jpeg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Circuito Itaipu",
+      "descripcion": "Visita a la Itaipu Panorámica en el ómnibus panorámico Redbus, con guía.",
+      "precio": 44,
+      "precio_brl": 228.0,
+      "detalle": "Vista privilegiada de una de las mayores obras de ingeniería del mundo.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00128/4239-circuitoitaipu4.jpeg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Marco de las 3 Fronteras",
+      "descripcion": "Visita al obelisco donde se encuentran Brasil, Argentina y Paraguay, en la confluencia de los ríos Iguazú y Paraná.",
+      "precio": 14,
+      "precio_brl": 70.5,
+      "detalle": "Cada país tiene su propio hito.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00013/1922-passeiomarcodastresfronteirasemfozdoigua.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "City tour por Foz do Iguaçu",
+      "descripcion": "Recorrido por el centro histórico, el Templo Budista y la Mezquita Árabe, en ómnibus panorámico con guía.",
+      "precio": 31,
+      "precio_brl": 159.0,
+      "detalle": "Se hace a bordo del Redbus, con acompañamiento de guía.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00007/2015-passeionamesquitadefozdoiguacu.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "City tour por Puerto Iguazú (Argentina)",
+      "descripcion": "Recorrido por Puerto Iguazú, con el Marco de las Tres Fronteras, La Aripuca y el centro de la ciudad.",
+      "precio": 37,
+      "precio_brl": 189.0,
+      "detalle": "Incluye visitas a varios puntos de interés de la ciudad argentina.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00040/4360-citytourargentina6.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "City tour por Ciudad del Este (Paraguay)",
+      "descripcion": "Recorrido por Ciudad del Este, con la Catedral San Blas y los Saltos del Monday.",
+      "precio": 43,
+      "precio_brl": 219.0,
+      "detalle": "Incluye visitas a los principales puntos turísticos de la ciudad.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00001/2035-passeionaciudaddelesteparaguai.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Kattamaram II: navegación por el Paraná con almuerzo",
+      "descripcion": "Paseo en barco por el Río Paraná con almuerzo a bordo.",
+      "precio": 58,
+      "precio_brl": 300.0,
+      "detalle": "Navegación relajada con almuerzo incluido.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00067/2665-kattamarampordosol.jpeg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Dreams Park Show: pasaporte de 5 atracciones",
+      "descripcion": "Entrada al Museo de Cera, Bar de Hielo, Valle de los Dinosaurios, Maravillas del Mundo y Motor Show.",
+      "precio": 46,
+      "precio_brl": 239.0,
+      "detalle": "Un solo pase para cinco atracciones del Dreams Park Show.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00053/4005-combodepasseiosemfozdoiguacu.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Rafain Churrascaría Show: cena",
+      "descripcion": "Rodízio de carnes con espectáculo cultural de varios países de América Latina.",
+      "precio": 60,
+      "precio_brl": 309.0,
+      "detalle": "Cena show en la churrascaría Rafain.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00011/2007-restaurantesbonsemfozdoiguacu.jpg"
+    },
+    {
+      "destinos": [
+        "igu"
+      ],
+      "destino": "Foz de Iguazú, Brasil",
+      "titulo": "Aquamania: parque acuático",
+      "descripcion": "Parque acuático con más de 15 atracciones, 7 piscinas y 8 toboganes.",
+      "precio": 14,
+      "precio_brl": 70.0,
+      "detalle": "Abre de martes a domingo, de 10:00 a 18:00, en la Avenida das Cataratas 7120, a pocos minutos de las Cataratas.",
+      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00063/2478-parqueaquaticoemfoz.jpg"
     }
   ]
 }

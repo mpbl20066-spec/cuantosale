@@ -123,7 +123,9 @@ const filas = datos.tours.map((t, i) => {
   if (!destino && destinos.length === 1) destino = NOMBRES[destinos[0]] || '';
   if (!destino) errores.push(donde + ': sin nombre de destino y no se puede deducir de _destinos');
 
-  return { destinos: destinos, destino: destino, titulo: titulo, descripcion: descripcion, precio: precio, details: detalle };
+  // Foto de la agencia (con permiso): una URL http(s). Sin ella la card usa TOUR_PHOTOS o el degradado.
+  const imagen = /^https?:\/\//i.test(String(t.image == null ? '' : t.image).trim()) ? String(t.image).trim() : '';
+  return { destinos: destinos, destino: destino, titulo: titulo, descripcion: descripcion, precio: precio, details: detalle, image: imagen };
 });
 
 function aNumero(valor, donde, campo, colector) {
@@ -211,7 +213,8 @@ const cuerpo = validos.map((t) => {
     ', title: ' + JSON.stringify(t.titulo) +
     ', description: ' + JSON.stringify(t.descripcion) +
     ', price: ' + JSON.stringify(t.precio) +
-    ', details: ' + JSON.stringify(t.details) + ' }';
+    ', details: ' + JSON.stringify(t.details) +
+    (t.image ? ', image: ' + JSON.stringify(t.image) : '') + ' }';
 }).join(',\n');
 
 /* Los destinos van como cuarto parametro, y no dentro de _meta, porque no son
