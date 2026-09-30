@@ -4347,7 +4347,7 @@
       ...(detailState.transportMode === 'flight' ? [{ cat: 'traslados', label: 'Transfer', excluido: !transferIncluded, detalle: transferIncluded ? esc(transferMeta) : '', value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') }] : []),
       { cat: 'alojamiento', label: 'Hotel', excluido: detailState.selectedHotel === false, detalle: hotelDetalle, value: money(hotelSumado(detailState)), color: getCategoryColor('alojamiento') },
       { cat: 'comidas', label: 'Comida', excluido: detailState.foodBudgetMode === 'none', detalle: detailState.foodBudgetMode === 'none' ? '' : (foodPerDay ? money(foodPerDay) + ' por persona/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
-      { cat: 'local', label: 'Transporte local', excluido: detailState.localBudgetMode === 'none', detalle: detailState.localBudgetMode === 'none' ? '' : (localPerDay ? money(localPerDay) + ' por persona/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
+      { cat: 'local', label: 'Transporte local', excluido: detailState.localBudgetMode === 'none' || detailState.transportMode === 'auto', detalle: detailState.localBudgetMode === 'none' ? '' : (localPerDay ? money(localPerDay) + ' por persona/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
       { cat: 'tours', label: 'Tours', detalle: toursDetalle, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
     ];
     // Mismo criterio que la barra: de mayor a menor monto. Los rubros en cero
@@ -5676,7 +5676,10 @@
     // nombre de arriba seria el de la ultima parada procesada y la lista de
     // abajo los dos, y se leeria como que el titulo ese de todo el viaje.
     var hotelTitle = multiHotel ? 'Alojamiento - ' + hotelesElegidos.length + ' hoteles' : (hotelElegido() ? 'Alojamiento - ' + esc(selectedHotelName) : 'Alojamiento - sin seleccionar');
-    var destinoTotal = localTotal + foodTotal;
+    /* En auto propio el transporte local no se suma al total (ver categories de
+       proposalTotals: el auto ya cubre los traslados), asi que tampoco se lista
+       ni se cuenta aca: si no, la fila decia que estaba en el total y no estaba. */
+    var destinoTotal = (autoMode ? 0 : localTotal) + foodTotal;
     /* El boton de reservar SOLO va aca, no en la card "Mi Viaje".
        Aca esta el pedido completo —el total, que rubros hay y cuales no—, y el
        boton muestra el total de lo que se reserva, que no es el total del viaje.
@@ -5839,7 +5842,7 @@
          zona con un separador; no hace falta una segunda caja adentro. */
       '<section class="voucher-destino"><h3 class="voucher-destino__title">Gastos en destino<span>Por día y total del viaje</span></h3>'
       + '<ul class="voucher-destino__list">'
-      + '<li><span class="voucher-destino__name">Transporte local <em>' + transportLabel + '</em></span><span class="voucher-destino__dia">' + money(localPerDay) + '/día</span><b class="voucher-destino__monto">' + money(localTotal) + '</b></li>'
+      + (autoMode ? '' : '<li><span class="voucher-destino__name">Transporte local <em>' + transportLabel + '</em></span><span class="voucher-destino__dia">' + money(localPerDay) + '/día</span><b class="voucher-destino__monto">' + money(localTotal) + '</b></li>')
       + '<li><span class="voucher-destino__name">Gastronomía <em>' + foodLabel + '</em></span><span class="voucher-destino__dia">' + money(foodPerDay) + '/día</span><b class="voucher-destino__monto">' + money(foodTotal) + '</b></li>'
       + '</ul>'
       + '<p class="voucher-destino__total"><span>Total en destino <em>(ya está en el total)</em></span><b>' + money(destinoTotal) + '</b></p></section>' +
