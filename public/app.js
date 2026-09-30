@@ -2489,8 +2489,22 @@
     // Iconos de la tarjeta: trazo, como los de CATEGORY_ICONS, para que se
     // lean bien en el panel chico y hereden el color de cada tema.
     var icoBase = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+    /* Etiquetas de la foto, calculadas con datos reales del catalogo: no hay
+       dato de ventas, asi que "mas reseñado" (la cantidad de reseñas) y "mejor
+       puntuado" (nota con al menos 10 reseñas) salen de rating y reviewsCount. */
+    var tagMasResenado = -1, tagMejorNota = -1;
+    tours.forEach(function (t, i) {
+      var rc = Number(t.reviewsCount) || 0, rt = Number(t.rating) || 0;
+      if (rc >= 10 && (tagMasResenado < 0 || rc > Number(tours[tagMasResenado].reviewsCount))) tagMasResenado = i;
+    });
+    tours.forEach(function (t, i) {
+      var rc = Number(t.reviewsCount) || 0, rt = Number(t.rating) || 0;
+      if (i !== tagMasResenado && rc >= 10 && (tagMejorNota < 0 || rt > Number(tours[tagMejorNota].rating))) tagMejorNota = i;
+    });
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
+      var tourTag = index === tagMasResenado ? '<span class="local-tour__tag">🔥 Más reseñado</span>'
+        : index === tagMejorNota ? '<span class="local-tour__tag">⭐ Mejor puntuado</span>' : '';
       // La foto sale de TOUR_PHOTOS, con su autor y su licencia.
       var photo = tour.foto || (tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour));
       // Solo se acreditan las fotos con autor y licencia (Wikimedia). La foto de la agencia, que se
@@ -2520,9 +2534,9 @@
         + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
         + '</span>';
       var media = (tick + (photo
-        ? '<div class="local-tour__media"><img src="' + esc(photo.url) + '" alt="' + esc(tour.title) + '" loading="lazy"></div>'
+        ? '<div class="local-tour__media"><img src="' + esc(photo.url) + '" alt="' + esc(tour.title) + '" loading="lazy">' + tourTag + '</div>'
         : '<div class="local-tour__media local-tour__media-plain" style="background:linear-gradient(150deg,' + skin.from + ',' + skin.to + ')">' +
-          '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg></div>'));
+          '<svg class="local-tour__ico" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + skin.ico + '</svg>' + tourTag + '</div>'));
       var duration = tourDuration(tour);
       // Sin cinta de "elegido". Cuando una card se selecciona cambia el marco y
       // el fondo, igual que en transporte local, comidas y hotel. La cinta era
