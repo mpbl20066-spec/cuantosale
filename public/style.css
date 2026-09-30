@@ -1143,30 +1143,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    no hay dos verdades: si el paso esta marcado, el numero es un check; si no,
    el numero es el orden. El paso de al lado es el que esta en el aire, y se
    distingue con el punto de --cel, no con un color propio. */
-/* ---------- Los diferenciales de la agencia ----------
-   Tres items en fila y a una banda, sin caja propia: van pegados al precio
-   porque es la pregunta que aparece justo despues de ver el total, y una
-   caja mas seria la tercera del modal.
-
-   Los tres iconos miden lo mismo y comparten esqueleto, para que se lean como
-   una serie y no como tres cosas sueltas. La punta del chevron es del mismo
-   color que la barra: el color de la accion principal. */
-.voucher-ventajas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:0 0 2px;list-style:none}
-.voucher-ventajas li{display:grid;gap:5px;min-width:0}
-/* 21px y no 19px: a 19 los dientes del engranaje y el interior del escudo se
-   perdian y los tres iconos se leian como tres manchas doradas del mismo peso.
-   Con mas caja las formas se distinguen, que es justo lo que un diferencial
-   tiene que hacer. */
-.voucher-ventajas .voucher-btn__ico{width:21px;height:21px;color:var(--cel)}
-.voucher-ventajas span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.4}
-/* En una sola columna de texto el ancho de cada item es un tercio del modal y
-   las frases mas largas dan tres lineas. A 560px ya no entran tres lado a
-   lado con texto legible. */
-@media (max-width:560px){
-  .voucher-ventajas{grid-template-columns:minmax(0,1fr);gap:9px}
-  .voucher-ventajas li{grid-template-columns:21px minmax(0,1fr);gap:9px;align-items:center}
-}
-
 /* ---------- El boton de cierre ----------
    El unico control del modal que pide atencion, y lo pide con el color de la
    accion principal: el mismo --action-bg del boton de reservar y del alta. Hay
@@ -2459,15 +2435,6 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
    y un boton directo ("Elegir vuelos"). */
 .voucher-item:has(.is-elegir){padding:13px 12px;margin:0 -12px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--cel) 6%,transparent)}
 .voucher-item:has(.is-elegir) + .voucher-item{border-top:0}
-
-/* Beneficios: una barra de badges de una linea. En celular se desliza a los
-   costados en vez de apilar tres filas de texto chico antes de los precios. */
-.voucher-ventajas{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0 6px}
-.voucher-ventajas::-webkit-scrollbar{display:none}
-.voucher-ventajas li{display:flex;flex:0 0 auto;align-items:center;gap:8px;max-width:78vw;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;scroll-snap-align:start}
-.voucher-ventajas span{font-size:12px;font-weight:600;line-height:1.3;color:var(--ink)}
-@media (min-width:561px){.voucher-ventajas{flex-wrap:wrap;overflow:visible}}
-@media (max-width:560px){.voucher-ventajas{display:flex;grid-template-columns:none}.voucher-ventajas li{display:flex}}
 
 /* Gastos en destino: columnas numericas alineadas (dia y total) y un total que
    cierra la suma con una linea firme y el mismo margen derecho que los montos. */

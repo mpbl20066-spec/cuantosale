@@ -3688,40 +3688,6 @@
     compartir: '<circle cx="17.5" cy="6" r="2.6"/><circle cx="6.5" cy="12" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.8 10.8 6.4-3.5M8.8 13.2l6.4 3.5"/>',
     copiar: '<rect x="8.6" y="8.6" width="11.4" height="11.4" rx="2.2"/><path d="M15.4 5.6H6.2a2.2 2.2 0 0 0-2.2 2.2v9.2"/>'
   };
-  /* Los diferenciales de la agencia. No son marcas, asi que van aparte de
-     BRAND_ICONS: mismo dibujo stroked y misma clase, pero otra historia. */
-  var VENTAJA_ICONS = {
-
-    soporte: '<path d="M12 2.7 19.7 5.5v6c0 4.3-3.1 7.9-7.7 9.4-4.6-1.5-7.7-5.1-7.7-9.4v-6Z"/>'
-      + '<path d="M8.1 13.4 10.6 10.9l1.4 1.4 1.4-1.4 2.5 2.5"/>',
-
-    curaduria: '<path d="M10.2 3.6a6.6 6.6 0 1 1 0 13.2 6.6 6.6 0 1 1 0-13.2Z"/>'
-      + '<path d="M15.2 15.2 20.8 20.8"/>'
-      + '<path d="M10.2 7.5l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2-1.45-1.4 2-.3Z"/>',
-
-    logistica: '<circle cx="5.2" cy="8.4" r="2.5"/>'
-      + '<path d="M1.4 18c0-2.1 1.7-3.7 3.8-3.7S9 15.9 9 18"/>'
-      + '<circle cx="18.8" cy="8.4" r="2.5"/>'
-      + '<path d="M15 18c0-2.1 1.7-3.7 3.8-3.7s3.8 1.6 3.8 3.7"/>'
-      + '<path d="M8.6 12.2h6.8"/>'
-      + '<path d="M10.4 10.4 8.6 12.2l1.8 1.8M13.6 10.4l1.8 1.8-1.8 1.8"/>',
-  };
-
-
-  function ventajaIcon(key) {
-    var d = VENTAJA_ICONS[key];
-    if (!d) return '';
-    return '<svg class="voucher-btn__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
-  }
-  /* La barra de diferenciales. Texto fijo: no depende del viaje ni del estado,
-     y es exactamente por eso que va en el modal y no en la seccion de la
-     propuesta, que se vuelve a pintar con cada cambio. */
-  var ventajasMarkup = '<ul class="voucher-ventajas">'
-    + '<li>' + ventajaIcon('soporte') + '<span>Soporte humano y local en Uruguay y en tu destino</span></li>'
-    + '<li>' + ventajaIcon('curaduria') + '<span>Curaduría y ahorro de tiempo</span></li>'
-    + '<li>' + ventajaIcon('logistica') + '<span>Gestión logística completa para grupos</span></li>'
-    + '</ul>';
-
   function brandIcon(key) {
     var d = BRAND_ICONS[key];
     if (!d) return '';
@@ -5577,8 +5543,7 @@
           + '<a class="voucher-split__btn" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Sumate a la cuenta del viaje a ' + detailState.meta.dest.name + ': ' + linkGrupo) + '">WhatsApp</a>'
           + '<a class="voucher-split__btn" href="' + esc(linkGrupo) + '">Ver la cuenta</a></div>'
         : '<div class="voucher-split__actions">'
-          + '<button type="button" class="voucher-split__btn is-main" data-grupo-crear>Crear cuenta e invitar amigos</button>'
-          + '<button type="button" class="voucher-split__btn" data-split-trip>Ver cómo dividir</button></div>')
+          + '<button type="button" class="voucher-split__btn is-main" data-grupo-crear>Crear cuenta e invitar amigos</button></div>')
       + '</aside>';
 
     // Sin nada que reservar no se dibuja el boton apagado ni su nota: era ruido.
@@ -5596,7 +5561,6 @@
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
       dividirBloque +
-      ventajasMarkup +
 
       '<ul class="voucher-list">' +
       (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>')) +
