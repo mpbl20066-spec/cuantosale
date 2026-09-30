@@ -1,4 +1,4 @@
-/* version: 184
+/* version: 185
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2836,3 +2836,5 @@ button.logo{min-height:44px}
 .trip-summary__head .trip-summary__eyebrow{grid-area:eb;justify-self:start;white-space:nowrap}
 .trip-summary__head strong{grid-area:amt;white-space:nowrap;min-width:0}
 .trip-summary__head .trip-summary__chevron{grid-area:chev}
+.voucher-hero__figure .voucher-hero__pp{display:block;margin:6px 0 0;font-size:13.5px;font-weight:600}
+.voucher-split__btn--link{border-color:transparent;min-height:40px;font-weight:600;text-decoration:underline;text-underline-offset:3px}

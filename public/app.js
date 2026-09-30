@@ -5737,7 +5737,8 @@
           + '<a class="voucher-split__btn" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Sumate a la cuenta del viaje a ' + detailState.meta.dest.name + ': ' + linkGrupo) + '">WhatsApp</a>'
           + '<a class="voucher-split__btn" href="' + esc(linkGrupo) + '">Ver la cuenta</a></div>'
         : '<div class="voucher-split__actions">'
-          + '<button type="button" class="voucher-split__btn is-main" data-grupo-crear>Crear cuenta e invitar amigos</button></div>')
+          + '<button type="button" class="voucher-split__btn is-main" data-grupo-crear>Crear cuenta e invitar amigos</button>'
+          + '<button type="button" class="voucher-split__btn voucher-split__btn--link" data-split-trip>Ver cómo dividir este monto</button></div>')
       + '</aside>';
 
     // Sin nada que reservar no se dibuja el boton apagado ni su nota: era ruido.
@@ -5747,12 +5748,11 @@
       + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
       + (pedido.count ? '' : '<p class="voucher-reserve__nota">Elegí un transfer o una actividad para poder reservar.</p>')
       + '</div>';
-    var dividirEnlace = '<span class="voucher-hero__pp"><span>' + money(Math.round(totalGeneral / pax)) + ' por persona</span>'
-      + '<button type="button" class="voucher-hero__split" data-split-trip>Ver cómo dividir este monto</button></span>';
+    var porPersona = pax > 1 ? '<span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span>' : '';
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
-      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
+      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong>' + porPersona + '</div></div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
 
       '<ul class="voucher-list">' +
