@@ -11484,18 +11484,14 @@ function comboNombreDestino() {
           groupTitle.className = 'custom-select__group-title';
           groupTitle.innerHTML = '<span class="custom-select__hub-icon" aria-hidden="true">🛬</span><span>' + esc(hub.name) + '</span><strong class="custom-select__hub-code">' + esc(hub.codes) + '</strong>';
           groupWrap.appendChild(groupTitle);
-          // Los pares van al final del hub. Antes del primero va una linea que
-          // los separa de los destinos sueltos: con 28 pares en Santa Catarina,
-          // "Balneário Camboriú" al lado de "Balneário Camboriú + Itapema" se
-          // confunden, y el filtro los deja pegados igual.
-          var pairNoteDone = false;
           hub.options.forEach(function (item, optionIndex) {
-            if (!pairNoteDone && item.subcategory && item.subcategory.indexOf(' + ') >= 0) {
-              pairNoteDone = true;
-              var pairNote = document.createElement('span');
-              pairNote.className = 'custom-select__pairs-note';
-              pairNote.textContent = 'Viajes de dos paradas';
-              groupWrap.appendChild(pairNote);
+            /* Este desplegable ofrece un solo destino. Los pares de dos paradas
+               se eligen en "¿Sumás una segunda parada?". El par sigue en
+               destItems: setDestDisplay lo necesita para rotular el campo cuando
+               el par se elige desde ese otro control. */
+            if (item.subcategory && item.subcategory.indexOf(' + ') >= 0) {
+              destItems.push({ value: item.key, label: item.label, subcategory: item.subcategory });
+              return;
             }
             var option = document.createElement('button');
             option.type = 'button';
