@@ -2598,7 +2598,7 @@
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__foot">' +
         '<p class="local-tour__price"><span class="local-tour__from">Precio por persona</span><b>' + money(tour.price) + '</b></p>' +
-        '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '" data-tour-facts="' + esc(JSON.stringify(tourFacts(tour))) + '">' +
+        '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '" data-tour-facts="' + esc(JSON.stringify(tourFacts(tour))) + '" data-tour-sections="' + esc(JSON.stringify({ incluye: tour.incluye || [], noIncluye: tour.noIncluye || [], llevar: tour.llevar || [] })) + '">' +
         '<span>Ver detalles</span><span aria-hidden="true">→</span></button>' +
         '</div></div></article>';
     }).join('');
@@ -2620,6 +2620,14 @@
   // justo lo que hace decidir si un tour entra en el viaje.
   function tourDuration(tour) {
     var t = String((tour && tour.details) || '').toLowerCase();
+    // Si la ficha trae la duracion ("6 hs", "1 dia"), manda sobre lo que se adivina del texto.
+    var fd = String((tour && tour.duracion) || '').toLowerCase();
+    var fh = fd.match(/(\d+(?:[.,]\d+)?)\s*(?:h\b|hs\b|hora)/);
+    if (fh) {
+      var hh = Number(fh[1].replace(',', '.'));
+      return hh <= 2 ? 'Unas horas' : hh <= 5 ? 'Media jornada' : 'Jornada completa';
+    }
+    if (/d[ií]a/.test(fd)) return 'Jornada completa';
     /* Los tours del catalogo traen "Duración aproximada: 1 h 30 min." (ver
        scripts/cargar-tours-scraper.py): se lee el numero y no un texto suelto. */
     var dur = t.match(/duraci[oó]n aproximada:\s*(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?/);
@@ -2686,22 +2694,41 @@
       duracion: d,
       grupo: String((tour && tour.grupo) || '').trim(),
       salida: String((tour && tour.salida) || '').trim(),
-      edad: String((tour && tour.edad) || '').trim()
+      edad: String((tour && tour.edad) || '').trim(),
+      cancelacion: String((tour && tour.cancelacion) || '').trim()
     };
   }
   var FACT_ICONS = {
     duracion: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     grupo: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c0-3.2 2.5-5.2 5.5-5.2s5.5 2 5.5 5.2"/><path d="M16 5.2a3.1 3.1 0 0 1 0 5.8M17.5 14.2c2 .6 3.5 2.3 3.5 4.8"/>',
     salida: '<path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>',
-    edad: '<circle cx="12" cy="4.6" r="1.8"/><path d="M5 8.4h14M12 8.4V14m0 0-3.4 6.4M12 14l3.4 6.4"/>'
+    edad: '<circle cx="12" cy="4.6" r="1.8"/><path d="M5 8.4h14M12 8.4V14m0 0-3.4 6.4M12 14l3.4 6.4"/>',
+    cancelacion: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/>'
   };
-  var FACT_LABELS = { duracion: 'Duración', grupo: 'Tamaño del grupo', salida: 'Punto de salida', edad: 'Edad permitida' };
+  var FACT_LABELS = { duracion: 'Duración', grupo: 'Tamaño del grupo', salida: 'Punto de salida', edad: 'Edad permitida', cancelacion: 'Cancelación gratis' };
   function tourFactsHtml(facts) {
-    var cells = ['duracion', 'grupo', 'salida', 'edad'].filter(function (k) { return facts && facts[k]; }).map(function (k) {
+    var cells = ['duracion', 'grupo', 'salida', 'edad', 'cancelacion'].filter(function (k) { return facts && facts[k]; }).map(function (k) {
       return '<li class="tour-facts__cell"><svg class="tour-facts__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + FACT_ICONS[k] + '</svg>'
         + '<span class="tour-facts__txt"><span class="tour-facts__label">' + FACT_LABELS[k] + '</span><b>' + esc(facts[k]) + '</b></span></li>';
     });
     return cells.length ? '<ul class="tour-facts">' + cells.join('') + '</ul>' : '';
+  }
+  /* Las listas de la ficha (incluye / no incluye / que llevar). Una fila por
+     frase: tilde verde, cruz roja o punto, segun la lista. */
+  function tourListHtml(items, kind) {
+    var mark = kind === 'si' ? checkIcon() : kind === 'no' ? crossIcon() : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="3"/></svg>';
+    return '<ul class="tour-detail-modal__rows">' + items.map(function (t) {
+      return '<li class="tour-detail-modal__row is-' + kind + '"><span class="tour-detail-modal__mark" aria-hidden="true">' + mark + '</span><span>' + esc(t) + '</span></li>';
+    }).join('') + '</ul>';
+  }
+  /* El texto largo como parrafos: una linea = un parrafo. "Titulo: texto" lleva
+     el titulo en negrita y una linea que termina en ":" es un subtitulo. */
+  function tourParagraphsHtml(text) {
+    return String(text || '').split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+      if (/:$/.test(l) && l.length <= 60) return '<h4 class="tour-detail-modal__sub">' + esc(l.slice(0, -1)) + '</h4>';
+      var m = l.match(/^([^:.!?¿¡]{2,30}):\s+(\S.*)$/);
+      return m ? '<p class="tour-detail-modal__p"><b>' + esc(m[1]) + ':</b> ' + esc(m[2]) + '</p>' : '<p class="tour-detail-modal__p">' + esc(l) + '</p>';
+    }).join('');
   }
   /* El detalle como lista legible. Cada frase es una fila: las que empiezan con
      "Incluye" llevan tilde, las de "No incluye" llevan cruz y el resto va como
@@ -2725,15 +2752,27 @@
     var modal = $('#booking-modal');
     if (!modal || !button) return;
     var facts = {};
+    var sec = {};
     try { facts = JSON.parse(button.getAttribute('data-tour-facts') || '{}') || {}; } catch (e) { facts = {}; }
+    try { sec = JSON.parse(button.getAttribute('data-tour-sections') || '{}') || {}; } catch (e) { sec = {}; }
+    var detalleTxt = button.getAttribute('data-tour-detail') || '';
+    var hayListas = (sec.incluye && sec.incluye.length) || (sec.noIncluye && sec.noIncluye.length) || (sec.llevar && sec.llevar.length);
+    var cuerpo;
+    if (hayListas || /\n/.test(detalleTxt)) {
+      cuerpo = '<h3 class="tour-detail-modal__h">Detalles</h3><div class="tour-detail-modal__copy tour-detail-modal__text">' + tourParagraphsHtml(detalleTxt) + '</div>'
+        + (sec.incluye && sec.incluye.length ? '<h3 class="tour-detail-modal__h">Qué incluye</h3><div class="tour-detail-modal__copy">' + tourListHtml(sec.incluye, 'si') + '</div>' : '')
+        + (sec.noIncluye && sec.noIncluye.length ? '<h3 class="tour-detail-modal__h">No incluye</h3><div class="tour-detail-modal__copy">' + tourListHtml(sec.noIncluye, 'no') + '</div>' : '')
+        + (sec.llevar && sec.llevar.length ? '<h3 class="tour-detail-modal__h">Qué llevar</h3><div class="tour-detail-modal__copy">' + tourListHtml(sec.llevar, 'dot') + '</div>' : '');
+    } else {
+      cuerpo = '<h3 class="tour-detail-modal__h">Detalles</h3><div class="tour-detail-modal__copy">' + tourDetailHtml(detalleTxt, facts) + '</div>';
+    }
     modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>'
       + '<span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span>'
       + '<h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2>'
       + '<h3 class="tour-detail-modal__h">Acerca de esta experiencia</h3>'
       + '<p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p>'
       + tourFactsHtml(facts)
-      + '<h3 class="tour-detail-modal__h">Detalles</h3>'
-      + '<div class="tour-detail-modal__copy">' + tourDetailHtml(button.getAttribute('data-tour-detail'), facts) + '</div>'
+      + cuerpo
       + '<p class="tour-detail-modal__hint">Los horarios y la disponibilidad pueden variar. Confirmá el punto de encuentro y el valor final antes de reservar.</p></div>';
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');

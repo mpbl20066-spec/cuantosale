@@ -129,8 +129,11 @@ const filas = datos.tours.map((t, i) => {
   if (t.activo === false) return null;
   // Ficha del modal de detalle: texto tal cual se muestra; vacio = no se dibuja la celda.
   const txt = (v) => String(v == null ? '' : v).trim();
+  // Listas (incluye / no incluye / que llevar): un arreglo de frases; se descartan las vacias.
+  const lista = (v) => (Array.isArray(v) ? v : []).map(txt).filter(Boolean);
   return { destinos: destinos, destino: destino, titulo: titulo, descripcion: descripcion, precio: precio, details: detalle, image: imagen,
-    duracion: txt(t.duracion), grupo: txt(t.grupo), salida: txt(t.salida), edad: txt(t.edad) };
+    duracion: txt(t.duracion), grupo: txt(t.grupo), salida: txt(t.salida), edad: txt(t.edad), cancelacion: txt(t.cancelacion),
+    incluye: lista(t.incluye), noIncluye: lista(t.no_incluye), llevar: lista(t.llevar) };
 });
 
 function aNumero(valor, donde, campo, colector) {
@@ -223,7 +226,11 @@ const cuerpo = validos.map((t) => {
     (t.duracion ? ', duracion: ' + JSON.stringify(t.duracion) : '') +
     (t.grupo ? ', grupo: ' + JSON.stringify(t.grupo) : '') +
     (t.salida ? ', salida: ' + JSON.stringify(t.salida) : '') +
-    (t.edad ? ', edad: ' + JSON.stringify(t.edad) : '') + ' }';
+    (t.edad ? ', edad: ' + JSON.stringify(t.edad) : '') +
+    (t.cancelacion ? ', cancelacion: ' + JSON.stringify(t.cancelacion) : '') +
+    (t.incluye.length ? ', incluye: ' + JSON.stringify(t.incluye) : '') +
+    (t.noIncluye.length ? ', noIncluye: ' + JSON.stringify(t.noIncluye) : '') +
+    (t.llevar.length ? ', llevar: ' + JSON.stringify(t.llevar) : '') + ' }';
 }).join(',\n');
 
 /* Los destinos van como cuarto parametro, y no dentro de _meta, porque no son

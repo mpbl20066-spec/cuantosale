@@ -219,6 +219,13 @@ async function rpc(fn, body) {
     if (t.grupo) f.grupo = t.grupo;
     if (t.salida) f.punto_salida = t.salida;
     if (t.edad) f.edad_minima = t.edad;
+    if (t.duracion) f.duracion = t.duracion;
+    if (t.image) f.url_imagen = t.image;
+    if (t.cancelacion) f.politica_cancelacion = t.cancelacion;
+    // Las listas viajan como texto, una frase por linea.
+    if (t.incluye && t.incluye.length) f.incluye = t.incluye.join('\n');
+    if (t.no_incluye && t.no_incluye.length) f.no_incluye = t.no_incluye.join('\n');
+    if (t.llevar && t.llevar.length) f.que_llevar = t.llevar.join('\n');
     if (t.activo === false) f.activo = false;
     return f;
   }).filter((f) => Object.keys(f).length > 2);

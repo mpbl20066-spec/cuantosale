@@ -907,11 +907,38 @@
       ],
       "destino": "Angra dos Reis, Brasil",
       "titulo": "Paseo Aguas Calientes en lancha",
-      "descripcion": "Recorrido en lancha por las islas de Angra dos Reis.",
-      "precio": 19,
-      "precio_brl": 99.0,
-      "detalle": "Duración aproximada: 5 h. Embarque a las 11:15 desde la Estación Santa Luzia (centro de Angra), duración aproximada de 5 horas. El almuerzo en la Praia das Flechas no está incluido. Estacionamiento gratis.",
-      "image": "https://cdn.shopify.com/s/files/1/2115/1981/files/1.jpg?v=1761081621"
+      "descripcion": "Disfruta de un recorrido inolvidable por las aguas cálidas y cristalinas de Angra dos Reis! Visita la famosa Praia do Laboratório, Pingo D'água y hermosas islas en lancha rápida.",
+      "detalle": "Navega por las aguas más templadas y cristalinas de la región en un emocionante tour en lancha compartida. El recorrido incluye paradas imperdibles en la Praia do Laboratório (de aguas agradablemente cálidas ideales para toda la familia), la Ilha de Paquetá, las tonalidades azules intensas de Pingo D'água, la Ilha de Itanhangá y la Praia das Flechas, además de tiempo para el almuerzo.\n\nOperativa: Check-in obligatorio en la agencia ubicada frente a la Estación Santa Luzia (Centro de Angra dos Reis). El embarque comienza a las 11:15 h y la salida es a las 11:30 h. Los paseos se realizan incluso con lluvia, a menos que existan restricciones de la Capitanía de Puertos.",
+      "precio": 28.34,
+      "precio_brl": 120,
+      "image": "https://hqyzmeordvjccytgltse.supabase.co/storage/v1/object/public/tours/Angra/passeio-aguas-calentitas1.jpg",
+      "duracion": "5 hs",
+      "grupo": "De 12 a 30 pasajeros por embarcación (según la lancha designada)",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Paseo en lancha rápida compartida (5 paradas)",
+        "Marinero y combustible",
+        "Flotadores de piscina (fideos/macarrão)",
+        "Música ambiente (Bluetooth/Pendrive)",
+        "Seguro de responsabilidad civil (RC)",
+        "Visita a la Praia do Laboratório, Ilha de Paquetá, Pingo D'água, Ilha de Itanhangá y Praia das Flechas (con parada para almuerzo)."
+      ],
+      "no_incluye": [
+        "Almuerzo (menú y servicio disponibles bajo consulta)",
+        "Equipo de esnórquel y máscara (disponible bajo consulta)",
+        "Gelo (hielo) o guía de turismo (servicios extras)",
+        "Taxa de Turismo Sustentável (TTS) municipal u otros impuestos portuarios."
+      ],
+      "llevar": [
+        "Toalla de baño",
+        "Protector solar",
+        "Sombrero o gorra",
+        "Muda de ropa seca",
+        "Gafas de sol",
+        "Repelente de insectos",
+        "Bebidas permitidas en latas/plástico y un cooler de máximo 20 litros (prohibido vidrio y música externa)."
+      ]
     },
     {
       "destinos": [
@@ -948,6 +975,120 @@
       "precio_brl": 315.0,
       "detalle": "Duración aproximada: 5 h. Traslado desde Río, playas de aguas cristalinas y paseo en barco.",
       "image": "https://i0.wp.com/costadosol.tur.br/wp-content/uploads/2019/12/Angra-Praia-de-Cataquages.jpg?fit=645%2C430&ssl=1"
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Paseo de Escuna",
+      "descripcion": "Descubre el paraíso escondido de Río de Janeiro! Navega en un emocionante barco hacia la Laguna Azul, las Islas Botinas y playas de ensueño con todo incluido.",
+      "detalle": "¡Vive la experiencia inolvidable del paseo en goleta por Angra dos Reis!\n\nConsiderada la tercera atracción turística de pago más visitada del estado de Río de Janeiro —solo por detrás del Cristo Redentor y el Pan de Azúcar—, esta travesía te invita a descubrir los rincones más paradisíacos de la costa brasileña.\n\nPrepárate para explorar las aguas cristalinas y paisajes de postal en nuestros cuatro puntos turísticos más famosos:\n\nLagoa Azul: Una piscina natural perfecta para nadar rodeado de peces de colores.\nPraia de Araçá: Un refugio de paz y belleza natural.\nIlhas Botinas: Postales clásicas de aguas turquesas y traslúcidas.\nPraia das Flechas: Arena blanca y exuberante vegetación atlántica.\n\nSale de la Estación Santa Luzia (centro de Angra), embarque a las 11:15 y regreso previsto a las 17:00. Precio de adulto sin almuerzo; la opción con almuerzo buffet (pescado frito, pollo frito, feijão, arroz, ensaladas, pirão y pasta) cuesta desde R$ 99.\n\nItinerario y recomendaciones:\nCada parada de baño tiene una duración estimada de 30 a 40 minutos. La parada especial para el almuerzo se realiza entre las 15:30 y las 16:00 horas, con una duración aproximada de 1 hora.\nRecomendación de viaje: Acomoda tus pertenencias en bolsos o mochilas, de preferencia impermeables.\n\nNota de operación: Nuestros tours operan con normalidad incluso en días de lluvia, garantizando la seguridad (salvo cancelaciones de fuerza mayor dictadas por la Capitanía de Puertos). Los horarios de embarque pueden sufrir variaciones menores debido a condiciones climáticas, tráfico en el muelle, inspecciones navales u otros factores operativos imprevistos.",
+      "precio": 16.67,
+      "precio_brl": 60,
+      "image": "https://hqyzmeordvjccytgltse.supabase.co/storage/v1/object/public/tours/Angra/Paseo%20en%20barco%20por%20Angra%20dos%20Reis.jpg",
+      "duracion": "6 hs",
+      "grupo": "Hasta 100 personas",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 24 hs antes",
+      "incluye": [
+        "Flotador (Fideos de piscina)",
+        "Sonido ambiente (Bluetooth/Pendrive)",
+        "Baño (Masculino y Femenino)",
+        "Seguro (RC)"
+      ],
+      "no_incluye": [
+        "Almuerzo en el restaurante (se puede contratar antes por 50 reales)",
+        "Esnórquel y máscara",
+        "Bar a bordo (consumo)",
+        "Fotografía subacuática"
+      ],
+      "llevar": [
+        "Toalla de baño",
+        "Protector solar",
+        "Sombrero o gorra",
+        "Muda de ropa seca",
+        "Gafas de sol",
+        "Repelente de insectos"
+      ]
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Passeio Ilhas Paradisíacas",
+      "descripcion": "Navega en lancha rápida hacia las islas más hermosas de Angra dos Reis e Ilha Grande! Descubre la Praia do Dentista, las Islas Botinas y aguas cristalinas en un tour inolvidable.",
+      "detalle": "Vive una experiencia exclusiva recorriendo los rincones más hermosos de la costa de Río de Janeiro en un tour compartido en lancha rápida. El itinerario incluye 5 paradas imperdibles: Ilhas Botinas, Praia do Dentista (I. Gipóia), Praia da Pitangueira, Praia das Flechas y Ponta da Piedade, además de tiempo para almorzar.\n\nOperativa: Check-in obligatorio frente a la Estación Santa Luzia (Angra dos Reis). Embarque a las 11:15 h y salida a las 11:30 h. Los tours operan con normalidad incluso con lluvia o cielo nublado, salvo restricciones de la Capitanía de Puertos.",
+      "precio": 28.34,
+      "precio_brl": 120,
+      "image": "https://hqyzmeordvjccytgltse.supabase.co/storage/v1/object/public/tours/Angra/islas%20paradisiacas%201.png",
+      "duracion": "5 hs",
+      "grupo": "De 12 a 30 pasajeros por embarcación (según la lancha designada)",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Paseo en lancha rápida compartida",
+        "Marinero y combustible",
+        "Flotadores de piscina (fideos/macarrão)",
+        "Música ambiente (Bluetooth/Pendrive)",
+        "Seguro de responsabilidad civil (RC)",
+        "Visita a Ilhas Botinas, Praia do Dentista, Praia da Pitangueira, Praia das Flechas y Ponta da Piedade."
+      ],
+      "no_incluye": [
+        "Almuerzo (se puede adquirir de forma extra)",
+        "Equipo de esnórquel y máscara (disponible bajo consulta)",
+        "Hielo o guía de turismo (servicios extras)",
+        "Taxa de Turismo Sustentável (TTS) municipal u otros impuestos portuarios."
+      ],
+      "llevar": [
+        "Toalla de baño",
+        "Protector solar",
+        "Sombrero o gorra",
+        "Muda de ropa seca",
+        "Gafas de sol",
+        "Repelente de insectos",
+        "Bebidas permitidas en latas/plástico y un cooler de máximo 20 litros (prohibido vidrio y música externa)."
+      ]
+    },
+    {
+      "destinos": [
+        "angra"
+      ],
+      "destino": "Angra dos Reis, Brasil",
+      "titulo": "Paseo Media Vuelta a Ilha Grande",
+      "descripcion": "¡Explora la mítica Laguna Azul y los rincones más paradisíacos en el tour de Media Volta a Ilha Grande! Una travesía imperdible en lancha rápida por Angra dos Reis.",
+      "detalle": "Vive una experiencia inigualable recorriendo la famosa ruta de media vuelta alrededor de Ilha Grande en una lancha rápida compartida. Este tour te lleva a conocer aguas cristalinas de tonalidades turquesas únicas, incluyendo la mundialmente conocida Lagoa Azul y paradas estratégicas para disfrutar del paisaje, nadar y almorzar.\n\nOperativa: Check-in obligatorio en la agencia situada frente a la Estación Santa Luzia (Centro de Angra dos Reis). Embarque a las 11:15 h y salida puntual a las 11:30 h. Los paseos se realizan con normalidad incluso en días de lluvia, salvo restricciones operativas de la Capitanía de Puertos.",
+      "precio": 28.34,
+      "precio_brl": 120,
+      "image": "https://hqyzmeordvjccytgltse.supabase.co/storage/v1/object/public/tours/Angra/media%20vuelta%202.webp",
+      "duracion": "5 hs",
+      "grupo": "De 12 a 30 pasajeros por embarcación (según la lancha designada)",
+      "edad": "Desde 2 años",
+      "cancelacion": "Gratis hasta 72 hs antes",
+      "incluye": [
+        "Paseo en lancha rápida compartida (recorrido de media vuelta por Ilha Grande)",
+        "Marinero y combustible",
+        "Flotadores de piscina (fideos/macarrão)",
+        "Música ambiente (Bluetooth/Pendrive)",
+        "Seguro de responsabilidad civil (RC)",
+        "Visita a puntos destacados como Lagoa Azul, Praia do Amor, Saco do Céu (o zonas emblemáticas de la región según el itinerario de media vuelta) y parada para almuerzo."
+      ],
+      "no_incluye": [
+        "Almuerzo (menú disponible bajo consulta)",
+        "Equipo de esnórquel y máscara (disponible bajo consulta)",
+        "Hielo o guía de turismo (servicios extras)",
+        "Taxa de Turismo Sustentável (TTS) municipal u otros gravámenes de embarque/desembarque."
+      ],
+      "llevar": [
+        "Toalla de baño",
+        "Protector solar",
+        "Sombrero o gorra",
+        "Muda de ropa seca",
+        "Gafas de sol",
+        "Repelente de insectos",
+        "Bebidas en envases de lata o plástico y un cooler de máximo 20 litros (prohibido vidrio y cajas de sonido externas)."
+      ]
     },
     {
       "destinos": [

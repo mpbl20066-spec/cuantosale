@@ -18,7 +18,8 @@
 alter table public.tours
   add column if not exists grupo text not null default '',
   add column if not exists punto_salida text not null default '',
-  add column if not exists edad_minima text not null default '';
+  add column if not exists edad_minima text not null default '',
+  add column if not exists que_llevar text not null default '';
 
 comment on column public.tours.grupo is
   'Texto tal cual se muestra, ej. "4 personas por grupo". Vacio = no se dibuja la celda.';
@@ -27,7 +28,16 @@ comment on column public.tours.punto_salida is
 comment on column public.tours.edad_minima is
   'Texto tal cual se muestra, ej. "Desde 21 años". Vacio = no se dibuja la celda.';
 
+comment on column public.tours.que_llevar is
+  'Una frase por linea. Vacio = no se dibuja la seccion "Que llevar".';
+
+-- incluye, no_incluye y politica_cancelacion ya existian como columnas de texto
+-- (una frase por linea las listas); aca pasan a leerse y a escribirse.
+
 -- Lectura: solo tours activos, igual que tours_todos.
+-- Se borra antes porque cambia la lista de columnas que devuelve, y create or
+-- replace no puede cambiar eso: asi el script se puede correr aunque ya se haya corrido.
+drop function if exists public.tours_ficha();
 create or replace function public.tours_ficha()
 returns table (
   destino text,
@@ -36,20 +46,25 @@ returns table (
   duracion text,
   grupo text,
   punto_salida text,
-  edad_minima text
+  edad_minima text,
+  politica_cancelacion text,
+  incluye text,
+  no_incluye text,
+  que_llevar text
 )
 language sql
 stable
 security definer
 set search_path = public
 as $$
-  select t.destino, t.titulo, t.url_imagen, t.duracion, t.grupo, t.punto_salida, t.edad_minima
+  select t.destino, t.titulo, t.url_imagen, t.duracion, t.grupo, t.punto_salida, t.edad_minima,
+         t.politica_cancelacion, t.incluye, t.no_incluye, t.que_llevar
   from public.tours t
   where t.activo;
 $$;
 
 comment on function public.tours_ficha() is
-  'Datos de la ficha de cada tour activo (foto, duracion, grupo, salida, edad). Se une con tours_todos() por (destino, titulo).';
+  'Datos de la ficha de cada tour activo (foto, duracion, grupo, salida, edad, cancelacion, incluye, no incluye, que llevar). Se une con tours_todos() por (destino, titulo).';
 
 -- Escritura: solo actualiza filas que YA existen; no crea ni borra tours.
 -- Una clave que no viene en la fila se deja como esta (coalesce con la
@@ -72,6 +87,10 @@ begin
       grupo        = coalesce(f->>'grupo', t.grupo),
       punto_salida = coalesce(f->>'punto_salida', t.punto_salida),
       edad_minima  = coalesce(f->>'edad_minima', t.edad_minima),
+      politica_cancelacion = coalesce(f->>'politica_cancelacion', t.politica_cancelacion),
+      incluye      = coalesce(f->>'incluye', t.incluye),
+      no_incluye   = coalesce(f->>'no_incluye', t.no_incluye),
+      que_llevar   = coalesce(f->>'que_llevar', t.que_llevar),
       activo       = coalesce((f->>'activo')::boolean, t.activo),
       updated_at   = now()
     where t.destino = f->>'destino' and t.titulo = f->>'titulo';

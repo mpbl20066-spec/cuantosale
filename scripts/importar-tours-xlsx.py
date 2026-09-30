@@ -21,6 +21,11 @@ d = json.load(open(JSON_PATH, encoding='utf8'))
 cot, margen = d['_meta']['cotizacion_brl_usd'], d['_meta']['margen_usd']
 idx = {(t['destinos'][0], t['titulo']): t for t in d['tours']}
 
+def lineas(v):
+    # Una frase por linea; se ignoran vacias y viñetas sueltas.
+    return [x.strip().lstrip('•-').strip() for x in ('' if v is None else str(v)).splitlines() if x.strip().lstrip('•-').strip()]
+
+
 def num(v):
     if v is None or str(v).strip() == '':
         return None
@@ -29,7 +34,7 @@ def num(v):
 cambios, sin_match, vistos = [], [], set()
 ws = load_workbook(XLSX, data_only=True)['Tours']
 for row in ws.iter_rows(min_row=2, values_only=True):
-    cod, _dest, tit, desc, det, brl, usd, foto, dur, grupo, salida, edad, activo = (list(row[:13]) + [None] * 13)[:13]
+    cod, _dest, tit, desc, det, brl, usd, foto, dur, grupo, salida, edad, cancel, inc, noinc, llev, activo = (list(row[:17]) + [None] * 17)[:17]
     if not tit:
         continue
     t = idx.get((cod, tit))
@@ -48,12 +53,14 @@ for row in ws.iter_rows(min_row=2, values_only=True):
     if foto and not foto.lower().startswith(('http://', 'https://')):
         print('FOTO IGNORADA (no es un link http/https):', cod, tit); foto = t.get('image', '')
     nuevo = {'descripcion': desc or '', 'detalle': det or '', 'precio': usd,
-             'image': foto, 'duracion': txt(dur), 'grupo': txt(grupo), 'salida': txt(salida), 'edad': txt(edad)}
+             'image': foto, 'duracion': txt(dur), 'grupo': txt(grupo), 'salida': txt(salida), 'edad': txt(edad), 'cancelacion': txt(cancel),
+             'incluye': lineas(inc), 'no_incluye': lineas(noinc), 'llevar': lineas(llev)}
     nuevo['activo'] = False if txt(activo).lower() == 'no' else None
     # Vacio y ausente son lo mismo: no se escribe '' en el JSON.
-    antes = {k: (t.get(k) or None) if k in ('image', 'duracion', 'grupo', 'salida', 'edad') else t.get(k) for k in nuevo}
+    VACIABLES = ('image', 'duracion', 'grupo', 'salida', 'edad', 'cancelacion', 'incluye', 'no_incluye', 'llevar')
+    antes = {k: (t.get(k) or None) if k in VACIABLES else t.get(k) for k in nuevo}
     antes['activo'] = False if t.get('activo') is False else None
-    for k in ('image', 'duracion', 'grupo', 'salida', 'edad'):
+    for k in VACIABLES:
         nuevo[k] = nuevo[k] or None
     if brl is not None:
         nuevo['precio_brl'] = brl; antes['precio_brl'] = t.get('precio_brl')
@@ -64,7 +71,7 @@ for row in ws.iter_rows(min_row=2, values_only=True):
         cambios.append((cod, tit, dif))
         if not DRY:
             for k, v in nuevo.items():
-                if v is None or v == '' and k in ('image', 'duracion', 'grupo', 'salida', 'edad'): t.pop(k, None)
+                if v is None: t.pop(k, None)
                 else: t[k] = v
 
 for cod, tit, dif in cambios:

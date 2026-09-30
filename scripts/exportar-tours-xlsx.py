@@ -21,7 +21,9 @@ F = 'Arial'
 cols = [('Código destino', 10), ('Destino', 24), ('Título', 42), ('Descripción', 50),
         ('Detalle', 60), ('Precio R$ (origen)', 14), ('Precio USD', 12),
         ('Foto (link)', 40), ('Duración', 16), ('Tamaño del grupo', 20),
-        ('Punto de salida', 20), ('Edad permitida', 16), ('Activo (Sí/No)', 10)]
+        ('Punto de salida', 20), ('Edad permitida', 16), ('Cancelación gratis', 22),
+        ('Qué incluye (1 por línea)', 45), ('No incluye (1 por línea)', 45), ('Qué llevar (1 por línea)', 40),
+        ('Activo (Sí/No)', 10)]
 for i, (n, w) in enumerate(cols, 1):
     c = ws.cell(row=1, column=i, value=n)
     c.font = Font(name=F, bold=True, color='FFFFFF')
@@ -36,18 +38,19 @@ gris = PatternFill('solid', fgColor='EDEDED')
 for r, t in enumerate(d['tours'], 2):
     vals = [t['destinos'][0], t['destino'], t['titulo'], t['descripcion'], t['detalle'],
             t.get('precio_brl'), t['precio'], t.get('image', ''), t.get('duracion', ''),
-            t.get('grupo', ''), t.get('salida', ''), t.get('edad', ''),
+            t.get('grupo', ''), t.get('salida', ''), t.get('edad', ''), t.get('cancelacion', ''),
+            '\n'.join(t.get('incluye', [])), '\n'.join(t.get('no_incluye', [])), '\n'.join(t.get('llevar', [])),
             'No' if t.get('activo') is False else 'Sí']
     for i, v in enumerate(vals, 1):
         c = ws.cell(row=r, column=i, value=v)
         c.font = azul if i >= 4 else negro
-        c.alignment = Alignment(wrap_text=i in (4, 5), vertical='top')
+        c.alignment = Alignment(wrap_text=i in (4, 5, 14, 15, 16), vertical='top')
         if i <= 3:
             c.fill = gris  # clave de la fila: no se edita
         if i >= 6:
             c.number_format = '#,##0.00'
 ws.freeze_panes = 'D2'
-ws.auto_filter.ref = f'A1:M{len(d["tours"]) + 1}'
+ws.auto_filter.ref = f'A1:Q{len(d["tours"]) + 1}'
 
 L = wb.create_sheet('Leeme')
 L.column_dimensions['A'].width = 110
@@ -66,6 +69,8 @@ lineas = [
     'FICHA DEL MODAL "VER DETALLES" (Duración, Tamaño del grupo, Punto de salida, Edad permitida)',
     '- Escribí el texto tal cual se va a ver: "24 horas", "4 personas por grupo", "En la agencia", "Desde 21 años".',
     '- Celda vacía = esa parte no se muestra. No se inventa nada.',
+    '- Cancelación gratis: escribí el texto que se muestra, por ejemplo "Gratis hasta 24 hs antes".',
+    '- Qué incluye / No incluye / Qué llevar: una frase por línea dentro de la celda (Alt+Enter en Excel).',
     '- Si Duración queda vacía, se intenta leer de Detalle ("Duración aproximada: ...").',
     '',
     'FOTO Y ACTIVO',
