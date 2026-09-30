@@ -2729,3 +2729,11 @@ button.logo{min-height:44px}
   .destination-highlights__arrow{width:38px;height:38px}
   .featured-destination__search{padding:0 10px;font-size:12.5px}
 }
+/* Escapadas en celular chico: la fila de fechas apila "viajeros" debajo (el texto
+   ya no se corta) y los bordes del carrusel son solidos, asi que la tarjeta
+   siguiente no asoma por debajo de las flechas. */
+@media(max-width:400px){
+  .featured-destination__meta{flex-direction:column;align-items:flex-start;gap:2px}
+  .featured-destination__when{white-space:normal;overflow:visible;text-overflow:clip}
+  .destination-highlights__slider::before,.destination-highlights__slider::after{width:46px;background:var(--surface)}
+}
