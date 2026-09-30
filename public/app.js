@@ -3996,7 +3996,7 @@
     return vueloElegido() ? v : 0;
   }
   /* ---------- Pasos del presupuesto ----------
-     Transporte -> Alojamiento -> Traslados y actividades. Un rubro solo suma al
+     Vuelo/Auto + Traslados -> Alojamiento -> Extras (tours, comida y transporte local). Un rubro solo suma al
      total cuando la persona lo eligio de verdad: antes el vuelo, el hotel
      "recomendado" y el traslado compartido entraban precargados y el total
      mostraba plata que nadie habia decidido. Estos helpers dicen si hubo
@@ -4035,21 +4035,23 @@
     var h = hotelElegido();
     var nombreHotel = String(d.selectedHotelName || '');
     var hTxt = h ? (d.selectedHotel === false ? 'Sin hotel' : (nombreHotel && !/recomendado|seleccionado/i.test(nombreHotel) ? nombreHotel : 'Hotel elegido')) : 'Falta elegir';
-    var tr = (vuelo && trasladoElegido()) || tours > 0;
+    // El traslado aeropuerto <-> hotel es parte del paso 1, no de Extras.
+    if (t && vuelo && trasladoElegido()) tTxt += ' + Traslado';
+    var tr = tours > 0;
     var partes = [];
-    if (vuelo && trasladoElegido()) partes.push('Traslado');
     if (tours) partes.push(tours + (tours === 1 ? ' actividad' : ' actividades'));
+    // Extras: tours, comidas y transporte local. Los traslados viven en el paso 1.
     return [
-      { n: 1, titulo: 'Transporte', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
+      { n: 1, titulo: (m === 'bus' ? 'Bus' : m === 'auto' ? 'Auto' : 'Vuelo') + ' + Traslados', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
       { n: 2, titulo: 'Alojamiento', texto: hTxt, hecho: h, anc: 'alojamiento', cta: 'Elegí tu hotel' },
-      { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Opcional', hecho: tr, opcional: true, anc: vuelo ? 'traslados' : 'tours', cta: 'Sumá extras' }
+      { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Tours, comida y transporte local', hecho: tr, opcional: true, anc: 'tours', cta: 'Sumá extras' }
     ];
   }
   /* Un paso a la vez. La propuesta se muestra en tres pasos y cada uno enseña
      solo lo suyo (ver el CSS de .detail-main[data-paso]):
-       1 Transporte: vuelo, bus, auto y traslado (aeropuerto <-> hotel)
-       2 Alojamiento: el hotel (y el reparto de noches si hay dos paradas)
-       3 Extras: todo lo demas (tours, transporte local, comidas, la guia)
+       1 Vuelo/Auto/Bus + Traslados: el transporte y el traslado (aeropuerto <-> hotel)
+       2 Alojamiento: solo hoteles (y el reparto de noches si hay dos paradas)
+       3 Extras: tours, comidas, transporte local y la guia
      El desglose "A donde va tu plata" queda siempre abajo de todo. El paso
      actual vive en detailState.pasoActual. */
   function pasoActualNum() {
