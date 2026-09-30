@@ -4657,11 +4657,11 @@
      los mismos datos que el modal (splitDatos / splitNombre), asi que la imagen
      y lo que se ve en pantalla no pueden diferir. Alto variable: crece con la
      cantidad de rubros y de personas, y se mide antes de exportar. */
-  function buildSplitCardNode() {
+  function buildSplitCardNode(photo) {
     var d = splitDatos(), n = splitState.n, meta = detailState.meta, por = d.total / n;
     var fila = function (a, b, gold) {
       return '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:15px;">'
-        + '<span style="display:inline-flex;align-items:center;gap:8px;min-width:0;">' + a + '</span><b style="font-weight:800;' + (gold ? 'color:#F6B21B;' : '') + 'white-space:nowrap;">' + b + '</b></div>';
+        + '<span style="display:inline-flex;align-items:center;gap:8px;min-width:0;">' + a + '</span><b style="flex:none;min-width:120px;display:flex;justify-content:flex-end;font-weight:800;font-variant-numeric:tabular-nums;' + (gold ? 'color:#F6B21B;' : '') + 'white-space:nowrap;">' + b + '</b></div>';
     };
     var rubros = d.filas.map(function (f) {
       return fila(storyInclusionIcon(f.category) + '<span>' + esc(storyCostLabel(f)) + '</span>', esc(money(f.value)), false);
@@ -4671,9 +4671,11 @@
     var wrapper = document.createElement('div');
     wrapper.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;pointer-events:none;z-index:-1;';
     var node = document.createElement('div');
-    node.style.cssText = 'width:540px;font-family:Poppins,Arial,sans-serif;background:#0B1B2B;color:#fff;padding:38px 36px 32px;box-sizing:border-box;';
+    node.style.cssText = 'width:540px;font-family:Arial,Helvetica,sans-serif;background:#0B1B2B;color:#fff;box-sizing:border-box;';
     node.innerHTML =
-      '<div style="display:flex;align-items:center;gap:9px;margin-bottom:26px;">'
+      (photo ? '<div style="position:relative;height:200px;overflow:hidden;"><img src="' + photo + '" alt="" style="width:540px;height:200px;object-fit:cover;display:block;"><div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(to bottom,rgba(11,27,43,0),#0B1B2B);"></div></div>' : '')
+      + '<div style="padding:' + (photo ? '0 36px 32px' : '38px 36px 32px') + ';">'
+      + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:26px;' + (photo ? 'margin-top:-6px;' : '') + '">'
       + '<svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>'
       + '<span style="font-weight:700;letter-spacing:-.02em;font-size:22px;">cuántosale</span></div>'
       + '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:6px;">Dividir gastos</div>'
@@ -4685,7 +4687,7 @@
       + '<div style="font-size:14px;color:#F6B21B;font-weight:700;margin-top:8px;">' + esc(money(por)) + ' por persona</div></div>'
       + '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:2px;">Cuánto pone cada uno</div>' + gente
       + '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:20px 0 2px;">Qué cubre el presupuesto</div>' + rubros
-      + '<div style="margin-top:24px;font-size:14px;font-weight:800;line-height:1.35;">Calculado sencillito con <span style="color:#F6B21B;">cuántosale.uy</span></div>';
+      + '<div style="margin-top:24px;font-size:14px;font-weight:800;line-height:1.35;">Calculado sencillito con <span style="color:#F6B21B;">cuántosale.uy</span></div></div>';
     wrapper.appendChild(node);
     document.body.appendChild(wrapper);
     return wrapper;
@@ -4696,10 +4698,14 @@
     var meta = detailState.meta, wrapper = null;
     var texto = splitTexto();
     var waTexto = function () { window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank', 'noopener'); };
-    loadHtmlToImage().then(function (htmlToImage) {
-      wrapper = buildSplitCardNode();
+    Promise.all([loadHtmlToImage(), loadStoryPhoto(DEST_PHOTOS[meta.dest.key] || '').catch(function () { return ''; })]).then(function (loaded) {
+      var htmlToImage = loaded[0];
+      wrapper = buildSplitCardNode(loaded[1]);
       var node = wrapper.firstChild;
-      return htmlToImage.toBlob(node, { width: 540, height: node.offsetHeight, pixelRatio: 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' });
+      var img = node.querySelector('img');
+      return (img && img.decode ? img.decode().catch(function () {}) : Promise.resolve()).then(function () {
+        return htmlToImage.toBlob(node, { width: 540, height: node.offsetHeight, pixelRatio: 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' });
+      });
     }).then(function (blob) {
       if (!blob) throw new Error('sin imagen');
       var fileName = 'cuantosale-dividir-' + (meta.dest.key || 'viaje') + '.png';
