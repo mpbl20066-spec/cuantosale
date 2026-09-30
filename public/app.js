@@ -1490,7 +1490,7 @@
   }
   /* Precio de una actividad. Un tour con precio 0 no es gratis: es un precio que se
      confirma al reservar (ej. entradas de parques), y se muestra como "Consultar". */
-  function precioTour(n) { return Number(n) > 0 ? money(n) : 'Consultar'; }
+  function precioTour(n) { return Number(n) > 0 ? moneyCero(n) : 'Consultar'; }
   // money() redondea a entero (por defecto en dolares) y trunca
   // tarifas fraccionarias como US$/kWh a "US$ 0" — esta conserva decimales.
   function moneyPrecise(n) {

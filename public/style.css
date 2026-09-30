@@ -2762,3 +2762,36 @@ button.logo{min-height:44px}
    a la izquierda de la foto, con un velo para que se lea sobre cualquier imagen. */
 .hotel-badge,.local-tour__tag{background:rgba(10,16,26,.78);color:#F4F6FA;border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:none}
 .local-tour__tag{position:absolute;z-index:1;top:12px;left:12px;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1.2;pointer-events:none}
+
+/* ---------- Tours compactos: miniatura a la izquierda, datos a la derecha ----------
+   Mobile primero: 104px de foto y el cuerpo al lado, sin descripcion (esta en el
+   detalle), asi entran dos tours en la primera pantalla. De 640px para arriba la
+   foto crece a 200px y vuelve la descripcion. */
+.local-tours__grid{gap:12px}
+.local-tour{display:grid;grid-template-columns:104px minmax(0,1fr);align-items:stretch}
+.local-tour__media,.local-tour__media-plain{height:auto;min-height:118px;aspect-ratio:auto}
+.local-tour__media img{position:absolute;inset:0;height:100%}
+.local-tour__media-plain .local-tour__ico{width:30px;height:30px}
+.local-tour__body{padding:10px 12px;gap:0}
+.local-tour__meta{gap:2px 10px;margin:0}
+.local-tour__chip{font-size:11px}
+.local-tour__meta .local-tour__chip:nth-child(n+3){display:none}
+.local-tour__title{margin:5px 0 0;font-size:16px;line-height:1.2}
+.local-tour__rating{margin:4px 0 0}
+.local-tour__description{display:none}
+.local-tour__foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:8px;border-top:0}
+.local-tour__price b{font-size:22px}
+:root:not([data-theme="light"]) .local-tour__price b{color:var(--action-bg)}
+.local-tour__from{font-size:9.5px}
+.local-tour__info{width:auto;min-height:36px;padding:0 12px;font-size:11px}
+.local-tour__tag{top:6px;left:6px;max-width:calc(100% - 12px);padding:3px 7px;font-size:10px}
+@media(min-width:640px){
+  .local-tour{grid-template-columns:200px minmax(0,1fr)}
+  .local-tour__body{padding:14px 16px}
+  .local-tour__title{font-size:19px}
+  .local-tour__description{display:-webkit-box;margin-top:6px}
+  .local-tour__meta .local-tour__chip:nth-child(n+3){display:inline-flex}
+  .local-tour__foot{padding-top:10px}
+  .local-tour__tag{top:10px;left:10px;font-size:11px}
+}
+.local-tours{margin-bottom:40px}
