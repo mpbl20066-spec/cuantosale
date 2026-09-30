@@ -2948,7 +2948,33 @@
      Se recuerda entre aperturas: recargar el formulario entero cada vez que se
      vuelve de un paso seria un castigo. No se guarda en disco ni sale del
      navegador. */
-  var checkoutState = { step: 0, form: {}, payment: '' };
+  var checkoutState = { step: 0, form: {}, payment: '', promo: '' };
+  /* Codigo de descuento de las Guias Secretas: 5 % en las actividades cuando se
+     reservan DOS O MAS. Cada destino tiene el suyo, el mismo que dice su guia en
+     PDF, y solo vale para el destino del viaje: FLORIPA5 no descuenta en Rio.
+
+     El descuento se aplica al subtotal de ACTIVIDADES, no al transfer, y se
+     recalcula en cada repintado: si la persona saca una actividad y queda una
+     sola, el descuento desaparece solo y el aside dice por que. La reserva la
+     confirma la agencia por WhatsApp, asi que el mensaje lleva el codigo y el
+     descuento aplicado, y es quien lo recibe el que termina de honrarlo. */
+  var DESCUENTO_TOURS_PCT = 5;
+  var DESCUENTO_TOURS_MIN = 2;
+  var DESCUENTO_TOURS_CODIGOS = { buz: 'BUZIOS5', arraial: 'ARRAIAL5', cabo: 'CABOFRIO5', ilha: 'ILHAGRANDE5', paraty: 'PARATY5', ilhabela: 'ILHABELA5', ubatuba: 'UBATUBA5', rio: 'RIO5', angra: 'ANGRA5', sao: 'SAOPAULO5', porto: 'PORTODEGALINHAS5', mcz: 'MACEIO5', maragogi: 'MARAGOGI5', nat: 'NATAL5', pip: 'PIPA5', trancoso: 'TRANCOSO5', ssa: 'SALVADOR5', 'for': 'FORTALEZA5', jericoacoara: 'JERI5', morro: 'MORRO5', portoseguro: 'PORTOSEGURO5', itacare: 'ITACARE5', forte: 'PRAIADOFORTE5', ajuda: 'AJUDA5', fernando: 'NORONHA5', fln: 'FLORIPA5', camboriu: 'CAMBORIU5', bombinhas: 'BOMBINHAS5', rosa: 'ROSA5', bcm: 'BC5', itapema: 'ITAPEMA5', garopaba: 'GAROPABA5', ferrugem: 'FERRUGEM5', picarras: 'PICARRAS5', gram: 'GRAMADO5', canela: 'CANELA5', torres: 'TORRES5', canoa: 'CANOA5', rec: 'RECIFE5', joaopessoa: 'JOAOPESSOA5', poa: 'PORTOALEGRE5' };
+  /* Estado del codigo para el pedido actual. `estado` dice por que no se aplica:
+       'sin'       no escribio ningun codigo;
+       'invalido'  el codigo no es el de este destino;
+       'faltan'    es valido pero hay menos de DESCUENTO_TOURS_MIN actividades;
+       'aplicado'  descuenta. */
+  function descuentoToursDe(toursCount, toursSubtotal) {
+    var escrito = String(checkoutState.promo || '').trim().toUpperCase();
+    var destKey = detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.key;
+    var esperado = destKey ? DESCUENTO_TOURS_CODIGOS[destKey] : '';
+    if (!escrito) return { estado: 'sin', codigo: '', monto: 0 };
+    if (!esperado || escrito !== esperado) return { estado: 'invalido', codigo: escrito, monto: 0 };
+    if (toursCount < DESCUENTO_TOURS_MIN) return { estado: 'faltan', codigo: escrito, monto: 0 };
+    return { estado: 'aplicado', codigo: escrito, monto: Math.round(toursSubtotal * DESCUENTO_TOURS_PCT) / 100 };
+  }
   function checkoutTours() {
     return (detailState && detailState.selectedTours) || [];
   }
@@ -3041,7 +3067,10 @@
     // privado ya viene escalado por getSelectedTransferAmount() y no se vuelve a
     // tocar: es el unico lugar donde se decide cuanto suma un auto.
     var transfer = pedido.transfer;
-    var total = toursUnit * pax + (transfer ? transfer.total : 0);
+    // Solo las actividades con precio entran en el subtotal del descuento: una
+    // "a consultar" no tiene un monto sobre el cual descontar.
+    var descuento = descuentoToursDe(tours.length, toursUnit * pax);
+    var total = toursUnit * pax - descuento.monto + (transfer ? transfer.total : 0);
     return {
       pax: pax,
       tours: tours,
@@ -3050,6 +3079,7 @@
       count: pedido.count,
       unitTotal: toursUnit,
       transferTotal: transfer ? transfer.total : 0,
+      descuento: descuento,
       total: total,
       perPerson: tours.length ? toursUnit : null
     };
@@ -3110,8 +3140,26 @@
     }
     var rows = t.count
       ? t.tours.map(function (tour) { return linea(tour, tour.price); }).join('') +
-        (t.transfer ? linea(t.transfer, t.transfer.total) : '')
+        (t.transfer ? linea(t.transfer, t.transfer.total) : '') +
+        (t.descuento.estado === 'aplicado'
+          ? '<li class="checkout-aside__row checkout-aside__row--descuento"><span class="checkout-aside__row-name">Código ' + esc(t.descuento.codigo) + ' · −' + DESCUENTO_TOURS_PCT + ' % en actividades</span><b>−' + money(t.descuento.monto) + '</b></li>'
+          : '')
       : '<li class="checkout-aside__row is-empty">Todavía no elegiste nada para reservar.</li>';
+    /* La caja del codigo solo aparece si hay actividades: el descuento es de las
+       actividades, y mostrarla con solo un transfer prometeria algo que no aplica. */
+    var avisoCodigo = {
+      sin: 'Descuento del ' + DESCUENTO_TOURS_PCT + ' % al reservar ' + DESCUENTO_TOURS_MIN + ' o más actividades.',
+      invalido: 'Ese código no corresponde a este destino.',
+      faltan: 'Código válido: elegí ' + DESCUENTO_TOURS_MIN + ' o más actividades para aplicar el ' + DESCUENTO_TOURS_PCT + ' %.',
+      aplicado: 'Código aplicado.'
+    }[t.descuento.estado];
+    var cajaCodigo = t.tours.length
+      ? '<div class="checkout-promo checkout-promo--' + t.descuento.estado + '">' +
+        '<label for="ck-promo">Código de descuento</label>' +
+        '<div class="checkout-promo__row"><input id="ck-promo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24" placeholder="Ej: FLORIPA5" value="' + esc(checkoutState.promo || '') + '" data-checkout-promo-input>' +
+        '<button type="button" class="checkout-promo__btn" data-checkout-promo>Aplicar</button></div>' +
+        '<p class="checkout-promo__msg" role="status">' + esc(avisoCodigo) + '</p></div>'
+      : '';
     // El precio del transfer se muestra como total del viaje, no por persona: el
     // privado es un auto. El "por persona" es el de las actividades, que si se
     // dividen, y al lado va cuantos viajan.
@@ -3141,6 +3189,7 @@
       '<ul class="checkout-aside__facts">' + facts + '</ul>' +
       '<div class="checkout-aside__list"><h3>Tu reserva</h3><ul class="checkout-aside__rows">' + rows + '</ul>' +
       '<p class="checkout-aside__total-line"><span>Total</span><b>' + money(t.total) + '</b></p></div>' +
+      cajaCodigo +
       '</aside>';
   }
   function checkoutStepper() {
@@ -3297,6 +3346,7 @@
     if (t.tours.length) {
       pedido += '<h3>Actividades en ' + esc(destino) + '</h3><ul>' +
         t.tours.map(function (tour) { return dataRow(tour.title, (Number(tour.price) > 0 ? money(tour.price) + ' c/u' : 'Consultar')); }).join('') +
+        (t.descuento.estado === 'aplicado' ? dataRow('Descuento ' + t.descuento.codigo + ' (' + DESCUENTO_TOURS_PCT + ' %)', '−' + money(t.descuento.monto)) : '') +
         '</ul>';
     }
     if (t.transfer) {
@@ -3477,6 +3527,18 @@
       mostrarAvisoCheckout('No pudimos crear la cuenta, pero podés seguir con la reserva igual.');
     }
   }
+  /* Aplica el codigo escrito en el resumen lateral. Se guarda lo escrito en el
+     panel antes de repintar: el repintado reconstruye los campos desde
+     checkoutState.form, y sin guardarlo se perderia lo que ya se habia tipeado
+     en el paso de los datos. El codigo vale o no al calcular los totales, no
+     aca: si despues cambia el destino o el numero de actividades, se reevalua. */
+  function aplicarCodigoCheckout() {
+    var input = $('#booking-modal [data-checkout-promo-input]');
+    if (!input) return;
+    readCheckoutForm();
+    checkoutState.promo = String(input.value || '').trim().toUpperCase();
+    renderCheckout();
+  }
   function gotoCheckoutStep(step) {
     if (step < 0 || step >= CHECKOUT_STEPS.length) return;
     checkoutState.step = step;
@@ -3525,7 +3587,13 @@
         return tour.url ? linea + '\n  ' + tour.url : linea;
       }).join('\n');
       message += 'Actividades:\n' + lineas + '\n';
-      message += 'Total de actividades: ' + money(t.unitTotal * t.pax) + '\n\n';
+      message += 'Total de actividades: ' + money(t.unitTotal * t.pax) + '\n';
+      /* El codigo solo viaja en el mensaje si descuenta: con una sola actividad
+         el descuento no aplica y escribirlo pediria algo que no corresponde. */
+      if (t.descuento.estado === 'aplicado') {
+        message += 'Código de descuento ' + t.descuento.codigo + ' (' + DESCUENTO_TOURS_PCT + ' % por reservar ' + DESCUENTO_TOURS_MIN + ' o más actividades): −' + money(t.descuento.monto) + '\n';
+      }
+      message += '\n';
       message += 'Precio estimado, a confirmar por quien lo tome.\n\n';
     }
     if (t.transfer) {
@@ -4538,19 +4606,12 @@
       });
     });
   }
-  /* La foto de una tarjeta para compartir: la del destino y, si no baja, las de
-     sus tours (las que subimos a Supabase). Prueba una por una hasta que alguna
-     se descarga; sin ninguna, rechaza y cada tarjeta decide si sale sin foto. */
+  /* La foto de una tarjeta para compartir: solo el paisaje del destino
+     (DEST_PHOTOS). No se usan fotos de tours: suelen tener gente encima. Si no
+     baja, rechaza y cada tarjeta decide si sale sin foto. */
   function fotoParaTarjeta(meta) {
     var key = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
-    var candidatas = [DEST_PHOTOS[key]];
-    try {
-      toursFor(key, '', meta).forEach(function (tour) { if (tour.image && /supabase\.co/.test(tour.image)) candidatas.push(tour.image); });
-    } catch (e) { /* sin tours cargados */ }
-    candidatas = candidatas.filter(Boolean).slice(0, 5);
-    return candidatas.reduce(function (previa, url) {
-      return previa.catch(function () { return loadStoryPhoto(url); });
-    }, Promise.reject(new Error('No hay una foto disponible para este destino.')));
+    return loadStoryPhoto(DEST_PHOTOS[key] || '');
   }
   function buildStoryCardNode(meta, totals, photo) {
     var location = [meta.dest.region, meta.dest.country || 'Brasil'].filter(Boolean).join(' - ');
@@ -11037,6 +11098,13 @@ function comboNombreDestino() {
         recalcularTotalViaje();
       }
     });
+    // Enter en el campo del codigo lo aplica, igual que el boton.
+    $('#booking-modal').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target && e.target.hasAttribute && e.target.hasAttribute('data-checkout-promo-input')) {
+        e.preventDefault();
+        aplicarCodigoCheckout();
+      }
+    });
     // Acciones del resumen final del itinerario, que se pinta adentro del modal.
     $('#booking-modal').addEventListener('click', function (e) {
       /* El resumen se mira sin cuenta; lo que cambia un estado o abre una reserva
@@ -11060,6 +11128,12 @@ function comboNombreDestino() {
            se abre igual y el aviso aparece cuando la cuenta esté lista. */
         if (checkoutState.step === 0) crearCuentaDesdeCheckout();
         gotoCheckoutStep(checkoutState.step + 1);
+        return;
+      }
+      var ckPromo = e.target.closest('[data-checkout-promo]');
+      if (ckPromo) {
+        e.preventDefault();
+        aplicarCodigoCheckout();
         return;
       }
       var ckBack = e.target.closest('[data-checkout-back]');
