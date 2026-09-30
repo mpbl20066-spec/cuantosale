@@ -1765,7 +1765,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    queda en 60px. min(100%,400px) es el piso de una card legible, y el 100%
    evita que la propia pista desborde cuando el contenedor es mas angosto que
    ese piso. */
-.local-tours__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:14px;min-width:0}
+.local-tours__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px;min-width:0}
 /* El borde no cambia de grosor al marcar (solo de color), asi que la tarjeta
    no corre nada. Relleno de color + borde duro se leia como un boton de
    escritorio; la marca real va en el marco. */
@@ -1779,7 +1779,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    overflow:hidden. Ahora la foto cede antes de que el texto quede ilegible.
    La foto vuelve a ser de ancho completo recien en la regla de contenedor de
    mas abajo. */
-.local-tour{position:relative;display:grid;grid-template-columns:minmax(140px,184px) minmax(0,1fr);min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
+.local-tour{position:relative;display:flex;flex-direction:column;min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
 /* Elegido se marca SOLO con el marco. El token --card-sel-bg pinta el interior
    de la ficha con el ambar de la seleccion, y en una card de experiencia esa
@@ -1797,18 +1797,14 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    sin que el recorte se coma la escena, y object-position abajo porque la
    parte de abajo de estas fotos es la que dice de la experiencia: la persona,
    la lancha, la arena. */
-.local-tour__media{position:relative;min-height:100%;background:var(--bg)}
+.local-tour__media{position:relative;height:170px;flex:0 0 auto;background:var(--bg)}
 .local-tour__media img{display:block;width:100%;height:100%;object-fit:cover;object-position:center bottom}
 /* Sin foto: degradado con el ícono de la actividad, que no miente sobre lo
    que es. Se estira a toda la altura de la columna. */
-.local-tour__media-plain{display:grid;place-items:center;align-content:center;gap:10px;padding:16px}
+.local-tour__media-plain{display:grid;place-items:center;align-content:center;gap:10px;height:110px;padding:16px}
 .local-tour__ico{width:38px;height:38px;opacity:.9}
-.local-tour__body{display:flex;flex-direction:column;min-width:0;padding:15px 16px}
-.local-tour__head{display:grid;gap:2px;min-width:0}
-.local-tour__title{margin:0;color:var(--ink);font-family:var(--fh);font-size:20px;line-height:1.15;overflow-wrap:anywhere}
-.local-tour__destination{display:flex;align-items:center;gap:4px;margin:0;color:var(--ink2);font-size:11.5px;font-weight:700;line-height:1.4}
-.local-tour__pin{display:grid;place-items:center;flex:0 0 12px;width:12px;height:12px;color:var(--cel)}
-.local-tour__pin svg{width:12px;height:12px}
+.local-tour__body{display:flex;flex:1;flex-direction:column;min-width:0;padding:16px}
+.local-tour__title{margin:12px 0 0;color:var(--ink);font-family:var(--fh);font-size:22px;line-height:1.15;overflow-wrap:anywhere}
 /* Estrellas. Cada estrella es una ranura de 13px con la base en --line y, si
    toca, la misma forma encima en el color de la marca recortada al ancho de la
    ranura. Un 4.6 se lee como cuatro enteras y media sin redondearlo a cinco, y
@@ -1821,18 +1817,13 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .local-tour__star-fill{fill:#f0a92a}
 .local-tour__rating b{color:var(--ink);font-size:12px;font-weight:800}
 .local-tour__reviews{color:var(--ink2);font-size:11.5px}
-.local-tour__description{margin:8px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
-.local-tour__tags{display:grid;gap:3px;margin:9px 0 0;padding:0;list-style:none}
-.local-tour__tag{display:flex;align-items:flex-start;gap:5px;color:var(--ink2);font-size:11.5px;line-height:1.4}
-.local-tour__tag-ico{display:grid;place-items:center;flex:0 0 13px;width:13px;height:13px;margin-top:1px;color:var(--good)}
-.local-tour__tag-ico svg{width:13px;height:13px}
-.local-tour__tag.is-no{opacity:.85}
-.local-tour__tag.is-no .local-tour__tag-ico{color:var(--coral)}
-.local-tour__meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
-.local-tour__chip{padding:4px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);font-size:10.5px;font-weight:700;white-space:nowrap}
+.local-tour__description{margin:8px 0 0;color:var(--ink2);font-size:13px;line-height:1.55;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.local-tour__meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0}
+.local-tour__chip{display:inline-flex;align-items:center;gap:5px;color:var(--ink2);font-size:12px;font-weight:600;line-height:1.3}
+.local-tour__chip svg{flex:0 0 15px;width:15px;height:15px;color:var(--cel)}
 /* "Precio real" es la unica pastilla que distingue una ficha de la API de una
    estimada. Sin el borde de color se leia como cualquiera de las otras dos. */
-.local-tour__chip.is-real{border-color:color-mix(in srgb,var(--good) 45%,transparent);color:var(--good);background:color-mix(in srgb,var(--good) 12%,transparent)}
+.local-tour__chip.is-real{color:var(--good)}
 /* Pie de la card: precio a la izquierda, acciones a la derecha. El precio va
    en el pie y no arriba a proposito: el "desde" que se lee primero es el del
    resumen de la seccion, y repetirlo en cada card pone tres cifras compitiendo
@@ -1840,10 +1831,11 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* flex-wrap y no solo space-between: a 200px de seccion el precio y el boton no
    entran en la misma linea y el boton se salia del borde. Con wrap bajan de
    linea recien ahi; en cualquier ancho normal siguen en una sola. */
-.local-tour__foot{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:12px}
+.local-tour__foot{display:grid;gap:12px;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.local-tour__description+.local-tour__foot{margin-top:16px}
 .local-tour__price{display:grid;align-content:end;margin:0;min-width:0}
 .local-tour__from{color:var(--ink2);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.local-tour__price b{color:var(--ink);font-family:var(--fh);font-size:23px;font-weight:800;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.local-tour__price b{color:var(--ink);font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .local-tour__price span{color:var(--ink2);font-size:11px}
 /* flex:0 1 auto y no 0 0 auto: con basis auto el bloque tomaba su ancho
    max-content y no podia angostarse, asi que el wrap nunca se activaba y en
@@ -1853,9 +1845,8 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* El boton de detalle queda por encima del checkbox estirado (z-index): si no,
    el clic lo atraviesa y cambia la seleccion en vez de abrir los detalles. */
 .local-tour__info{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 13px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:800;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
-.local-tour__info{border:1.5px solid var(--control-line);background:transparent;color:var(--ink);font-size:12.5px;font-weight:700;min-height:40px;padding:0 14px;border-radius:12px}
-.local-tour__info:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
-.local-tour__info-ico{flex:0 0 16px;width:16px;height:16px;color:var(--cel)}
+.local-tour__info{width:100%;border:0;background:var(--action-bg);color:var(--action-ink);font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;min-height:46px;padding:0 14px;border-radius:12px}
+.local-tour__info:hover{filter:brightness(1.1)}
 .local-tour__info:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* El tick de "agregada". El checkbox de la card es opacity:0 y estirado
    sobre toda la superficie —es el area tactil de elegir—, asi que el estado
@@ -2149,10 +2140,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    El piso es 400px, el mismo que el min() del grid, asi que las dos reglas
    cuentan la misma historia: mientras haya lugar para dos cards, no hay lugar
    para apilar. */
-@container tours (max-width:400px){
-  .local-tour{grid-template-columns:minmax(0,1fr)}
-  .local-tour__media{height:160px;min-height:0}
-}
 /* La card sin padding propio: la foto va a sangre hasta los bordes y el
    padding lo aporta el cuerpo. Con padding en la card (lo que había antes) la
    foto quedaba metida en un marco y el bloque se veía más estrecho que las
@@ -2527,9 +2514,6 @@ h3.block-title, .block-title:is(h3) {
 @media (max-width:560px){.bus-co{padding:14px}.bus-opt{padding:12px 14px}.bus-opt__times{font-size:18px}.bus-opt__fare b{font-size:17px}}
 
 /* ---------- Card de tour: limpieza ---------- */
-.local-tour__tags{margin-top:8px}
-.local-tour__tag{align-items:flex-start;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-.local-tour__tag > span:not(.local-tour__tag-ico){display:inline}
 /* El pie es una fila propia con filete arriba: precio a la izquierda y
    "Detalles" a la derecha, alineados al centro, sin hueco en blanco antes. */
 .local-tour__foot{align-items:center;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
@@ -2669,8 +2653,6 @@ h3.block-title, .block-title:is(h3) {
 }
 /* Tag "Incluye: ..." de los tours: el line-clamp estaba en el <li> y lo sacaba de
    flex, con lo que el tilde quedaba en su propia linea. El recorte va al texto. */
-.local-tour__tag{display:flex;overflow:visible}
-.local-tour__tag > span:not(.local-tour__tag-ico){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0}
 /* El selector de destino corta el placeholder: que termine en puntos suspensivos. */
 .custom-select__trigger{text-overflow:ellipsis}
 /* Stepper fijo: en 320px ocupaba mas de la mitad de la pantalla. En celu son tres

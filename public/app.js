@@ -2576,32 +2576,31 @@
         ? '<p class="local-tour__rating"><span class="local-tour__stars" aria-hidden="true">' + starsRow(rating) + '</span>' +
           '<b>' + rating.toFixed(1) + '</b>' + (reviews ? '<span class="local-tour__reviews">' + reviews + (reviews === 1 ? ' reseña' : ' reseñas') + '</span>' : '') + '</p>'
         : '';
-      var includes = tourIncludes(tour);
       return '<article class="local-tour" data-tour-card>' +
         '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '">' +
         media +
         '<div class="local-tour__body">' +
-        '<div class="local-tour__head">' +
-        '<h3 class="local-tour__title">' + esc(tour.title) + '</h3>' +
-        '<p class="local-tour__destination"><span class="local-tour__pin" aria-hidden="true">' + pinIcon() + '</span>' + esc(tour.destination) + '</p>' +
-        '</div>' +
-        ratingRow +
-        '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
-        (includes ? '<ul class="local-tour__tags">' + includes + '</ul>' : '') +
-        '<div class="local-tour__meta"><span class="local-tour__chip">' + esc(duration) + '</span>' +
+        /* Ficha vertical: chips con icono arriba (duracion, destino, lo que sume),
+           titulo, bajada y al pie el precio grande con un unico boton a todo el
+           ancho. No se dibujan chips de datos que el catalogo no tiene (cupo,
+           edad): la duracion sale del detalle y si no hay, no hay chip. */
+        '<div class="local-tour__meta">' +
+        (duration !== 'Consultar duración' ? '<span class="local-tour__chip"><svg ' + icoBase + ' aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>' + esc(duration) + '</span>' : '') +
+        '<span class="local-tour__chip"><svg ' + icoBase + ' aria-hidden="true"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + esc(tour.destination) + '</span>' +
         // Sin texto no hay pastilla: SOURCE_LABEL.local es '' y dibujarla dejaba
         // un contorno vacio flotando al lado de la duracion.
         (SOURCE_LABEL[tour.source] || SOURCE_LABEL.local
           ? '<span class="local-tour__chip' + (tour.source !== 'local' ? ' is-real' : '') + '">' + esc(SOURCE_LABEL[tour.source] || SOURCE_LABEL.local) + '</span>'
           : '') +
-        (tour.freeCancellation ? '<span class="local-tour__chip">Cancelación gratis</span>' : '') + '</div>' +
+        (tour.freeCancellation ? '<span class="local-tour__chip is-real">Cancelación gratis</span>' : '') + '</div>' +
+        '<h3 class="local-tour__title">' + esc(tour.title) + '</h3>' +
+        ratingRow +
+        '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__foot">' +
-        '<p class="local-tour__price"><span class="local-tour__from">Desde</span><b>' + money(tour.price) + '</b><span>por persona</span></p>' +
-        '<div class="local-tour__actions">' +
+        '<p class="local-tour__price"><span class="local-tour__from">Precio por persona</span><b>' + money(tour.price) + '</b></p>' +
         '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '">' +
-        '<svg class="local-tour__info-ico" ' + icoBase + ' aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11.2v5.4"/><path d="M12 7.4h.01"/></svg>' +
-        '<span>Detalles</span></button>' +
-        '</div></div></div></article>';
+        '<span>Ver detalles</span><span aria-hidden="true">→</span></button>' +
+        '</div></div></article>';
     }).join('');
     var creditList = Object.keys(creditos).map(function (url) {
       var c = creditos[url];
@@ -2665,36 +2664,6 @@
     if (half) out += star('half');
     for (var j = full + half; j < 5; j++) out += star('empty');
     return out;
-  }
-  function pinIcon() {
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>';
-  }
-  /* Las etiquetas "Incluye / No incluye" de la ficha. Se sacan del texto de
-     detalle que ya esta cargado, con las mismo criterio que tourDuration(): si
-     la frase no esta, no se inventa la etiqueta. Una lista vacia es mejor que
-     un "Incluye: traslados" que no se sabe si incluye. */
-  function tourIncludes(tour) {
-    var raw = String((tour && tour.details) || '');
-    if (!raw.trim()) return '';
-    var incluye = [], noIncluye = [];
-    // Corte en el primer "no incluye"/"no son": ahi empieza la lista negativa.
-    var corte = raw.search(/no (incluye|son|comprende|est[áa]n)/i);
-    var posPart = corte >= 0 ? raw.slice(0, corte) : raw;
-    var negPart = corte >= 0 ? raw.slice(corte) : '';
-    function phrases(text) {
-      return text.split(/[.;]\s*/).map(function (s) { return s.trim(); })
-        .filter(function (s) { return s.length > 3 && s.length < 70; });
-    }
-    phrases(posPart).forEach(function (s) { if (incluye.length < 2) incluye.push(s); });
-    /* Una sola linea con un solo tilde: "Incluye: a · b". Antes eran hasta tres
-       tildes verdes y dos cruces, una por frase, y la card se leia como una
-       lista de control. Lo que NO incluye sigue en el modal de detalles
-       (tourDetailText), que es donde se lee con calma. */
-    if (!incluye.length) return '';
-    var frases = incluye.map(function (t) { return t.charAt(0).toLowerCase() + t.slice(1); }).join(' \u00b7 ');
-    return '<li class="local-tour__tag">' +
-      '<span class="local-tour__tag-ico" aria-hidden="true">' + checkIcon() + '</span>' +
-      '<span>Incluye: ' + esc(frases) + '</span></li>';
   }
   function checkIcon() {
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-11"/></svg>';
