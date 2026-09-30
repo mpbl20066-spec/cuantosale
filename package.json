@@ -20,6 +20,7 @@
     "pull:aeropuertos": "node scripts/pull-aeropuertos.js",
     "pull:distancias": "node scripts/pull-distancias.js",
     "pull:rutas-mapa": "node scripts/pull-rutas-mapa.js",
+    "build:paradas-auto": "node scripts/build-paradas-auto.js",
     "pull:transfer": "node scripts/build-transfer-precios.js",
     "build:sql-costos": "node scripts/build-transfer-costos-sql.js",
     "costos:sql": "python scripts/build-costos-desde-xlsx.py",

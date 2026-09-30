@@ -739,6 +739,7 @@
       (stopsPlan.stops > 0
         ? '<p>Te conviene parar cada <b>~' + stopsPlan.everyKm + ' km</b>, unos <b>' + stopsPlan.minutesPerStop + ' min</b> por parada' + (isEv ? ' para recargar.' : ' para descansar.') + '</p>'
         : '<p>La distancia entra en un solo tramo sin paradas obligatorias' + (isEv ? ', pero salir con la batería llena es buena idea.' : '.') + '</p>') +
+      (stopsPlan.stops > 0 ? '<div class="roadtrip-stops__list" data-stops-list data-every="' + stopsPlan.everyKm + '"></div>' : '') +
       (isEv
         ? '<p>Son <b>' + stopsPlan.stops + ' cargas</b> de ida y vuelta. Para elegir dónde recargar, mirá el trayecto en <a href="https://www.google.com/maps/dir/?api=1" target="_blank" rel="noopener noreferrer">Google Maps</a> filtrando por "carga de vehículos eléctricos", o usá <a href="https://www.electromaps.com" target="_blank" rel="noopener noreferrer">Electromaps</a> o <a href="https://www.plugshare.com" target="_blank" rel="noopener noreferrer">PlugShare</a>, que tienen el mapa de todo el camino.</p>'
           + '<p class="cost-note">* No te mostramos una lista de estaciones a propósito: no tenemos una fuente con los cargadores del corredor y una lista incompleta haría creer que el viaje está cubierto. La autonomía y el número de carga son un cálculo con el rango real del modelo, no una consulta.</p>'
@@ -6229,7 +6230,7 @@
     // La autonomía cambia con el modelo elegido, así que el plan de paradas
     // tiene que recalcularse acá y no quedarse con el del modelo anterior.
     var stopsEl = document.querySelector('[data-roadtrip-stops]');
-    if (stopsEl) stopsEl.innerHTML = roadtripStopsInnerHtml(roadtripStopsPlan(detailState.roadtrip.roundTripKm, true, figures.usableRangeKm), true);
+    if (stopsEl) { stopsEl.innerHTML = roadtripStopsInnerHtml(roadtripStopsPlan(detailState.roadtrip.roundTripKm, true, figures.usableRangeKm), true); fillRoadtripStops(); }
     if (detailState.transportMode === 'auto' && detailState.roadtripVehicleType === 'ev') detailState.auto = figures.totalUsd;
     recalcularTotalViaje();
   }
@@ -6283,7 +6284,7 @@
       : '';
 
     var showStops = isEv || r.roundTripKm >= 600;
-    var stopsPanel = showStops ? ('<details class="roadtrip-stops" data-roadtrip-stops' + (isEv ? ' open' : '') + '>' + roadtripStopsInnerHtml(stopsPlan, isEv) + '</details>') : '';
+    var stopsPanel = showStops ? ('<details class="roadtrip-stops" data-roadtrip-stops data-dest="' + esc(meta.dest.key) + '" data-oneway="' + r.distanceKm + '"' + (isEv ? ' open' : '') + '>' + roadtripStopsInnerHtml(stopsPlan, isEv) + '</details>') : '';
 
     return '<section class="transport-options roadtrip-planner" data-budget-anchor="auto">' + vehicleTabs + combustionPanel + evPanel + routeCard + mapCard + stopsPanel + '</section>';
   }
@@ -6306,7 +6307,7 @@
     var css = document.createElement('link');
     css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css?v=1';
     document.head.appendChild(css);
-    roadtripMapAssets = Promise.all([script('/vendor/leaflet/leaflet.js?v=1'), script('/rutas-auto.js?v=1'), script('/mapa-base.js?v=2')]);
+    roadtripMapAssets = Promise.all([script('/vendor/leaflet/leaflet.js?v=1'), script('/rutas-auto.js?v=1'), script('/mapa-base.js?v=2'), script('/paradas-auto.js?v=1')]);
     roadtripMapAssets.catch(function () { roadtripMapAssets = null; });
     return roadtripMapAssets;
   }
@@ -6365,12 +6366,16 @@
       ROADTRIP_MAP_COUNTRIES.forEach(function (c) {
         if (claim([c[1], c[2]], c[0].length * 9 + 8, 18, -(c[0].length * 4.5 + 4), -9)) label([c[1], c[2]], 'rt-country-name', c[0]);
       });
+      var cityMarks = {};
       ROADTRIP_MAP_CITIES.forEach(function (c) {
-        if (claim([c[1], c[2]], c[0].length * 6.4 + 16, 16, -4, -9)) label([c[1], c[2]], 'rt-city', '<i></i><span>' + c[0] + '</span>');
+        if (claim([c[1], c[2]], c[0].length * 6.4 + 16, 16, -4, -9)) cityMarks[c[0]] = label([c[1], c[2]], 'rt-city', '<i></i><span>' + c[0] + '</span>');
       });
       (base.nombres || []).forEach(function (n) {
         if (claim([n[1], n[2]], n[0].length * 7 + 8, 14, -(n[0].length * 3.5 + 4), -7)) label([n[1], n[2]], 'rt-state-name', esc(n[0]));
       });
+      // Lo que necesita fillRoadtripStops para dibujar las paradas recomendadas.
+      el._rt = { L: L, map: map, label: label, claim: claim, taken: taken, baseTaken: taken.length, cityMarks: cityMarks, stops: L.layerGroup().addTo(map) };
+      fillRoadtripStops();
       el.setAttribute('data-map-state', 'ready');
       var gmaps = document.createElement('a');
       gmaps.className = 'roadtrip-map__open';
@@ -6382,6 +6387,56 @@
       // Sin red o bloqueado: mejor sin mapa que una caja vacía.
       var card = el.closest('.roadtrip-map-card');
       if (card) card.remove();
+    });
+  }
+  /* Paradas de descanso recomendadas: ciudades reales sobre la ruta (paradas-auto.js,
+     generado con Natural Earth + el trazado de OSRM) cerca de cada punto sugerido
+     "cada X km". Se elige una ciudad a menos de 80 km del punto, prefiriendo las
+     más grandes (hay dónde cargar nafta y comer), y siempre a más de 40 km del
+     origen, del destino y de la parada anterior. Solo se listan las de la IDA: a
+     la vuelta se repiten en orden inverso. No se afirma qué servicios tiene cada
+     ciudad ni si hay cargadores: eso lo dice la población, no una consulta. */
+  function roadtripPickStops(key, everyKm, oneWayKm) {
+    var cities = window.CS_STOPS && window.CS_STOPS[key];
+    if (!cities || !(everyKm > 0) || !(oneWayKm > 0)) return [];
+    var out = [], last = 0;
+    for (var t = everyKm; t < oneWayKm - 40; t += everyKm) {
+      var best = null, bestScore = Infinity;
+      for (var i = 0; i < cities.length; i++) {
+        var c = cities[i], d = Math.abs(c[1] - t);
+        if (d > 80 || c[1] < last + 40 || c[1] < 40 || c[1] > oneWayKm - 40) continue;
+        var score = d - 30 * Math.log10(c[4] / 15000);
+        if (score < bestScore) { best = c; bestScore = score; }
+      }
+      if (best) { out.push({ name: best[0], km: best[1], lat: best[2], lng: best[3], country: best[5] }); last = best[1]; }
+    }
+    return out;
+  }
+  function fillRoadtripStops() {
+    var list = document.querySelector('[data-stops-list]');
+    if (!list || !window.CS_STOPS) return;
+    var box = list.closest('[data-roadtrip-stops]');
+    if (!box) return;
+    var stops = roadtripPickStops(box.getAttribute('data-dest'), Number(list.getAttribute('data-every')), Number(box.getAttribute('data-oneway')));
+    list.innerHTML = stops.length
+      ? '<p class="roadtrip-stops__lead">Paradas sugeridas a la ida (a la vuelta son las mismas, al revés):</p><ol>' +
+        stops.map(function (s, i) {
+          return '<li><span class="rt-stop__n">' + (i + 1) + '</span><div><b>' + esc(s.name) + '</b><small>km ' + s.km + ' desde Montevideo · ' + esc(s.country) + '</small></div></li>';
+        }).join('') + '</ol>'
+      : '<p class="roadtrip-stops__lead">No hay una ciudad grande cerca de esos puntos: parar donde veas estaciones de servicio.</p>';
+    var mapEl = document.querySelector('[data-roadtrip-map]');
+    var rt = mapEl && mapEl._rt;
+    if (!rt) return;
+    rt.stops.clearLayers();
+    rt.taken.length = rt.baseTaken;
+    Object.keys(rt.cityMarks).forEach(function (n) { rt.cityMarks[n].setOpacity(1); });
+    stops.forEach(function (s, i) {
+      var at = [s.lat, s.lng];
+      rt.L.marker(at, { interactive: false, keyboard: false, zIndexOffset: 500, icon: rt.L.divIcon({ className: 'rt-stop', html: '<b>' + (i + 1) + '</b>', iconSize: null }) }).addTo(rt.stops);
+      if (rt.cityMarks[s.name]) rt.cityMarks[s.name].setOpacity(0);
+      if (rt.claim(at, s.name.length * 6.4 + 26, 16, 12, -8)) {
+        rt.L.marker(at, { interactive: false, keyboard: false, zIndexOffset: 400, icon: rt.L.divIcon({ className: 'rt-city rt-city--stop', html: '<span>' + esc(s.name) + '</span>', iconSize: null }) }).addTo(rt.stops);
+      }
     });
   }
   function installRoadtripMaps() {
