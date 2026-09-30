@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=177">
+<link rel="stylesheet" href="/style.css?v=178">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -74,7 +74,7 @@
 
   <h1>¿Cuánto sale realmente tu viaje?</h1>
 
-  <div id="vista-principal">
+  <main id="vista-principal">
   <section class="form" aria-label="Datos de tu viaje">
     <div class="origin" id="origin-picker">
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
@@ -178,7 +178,7 @@
   <div id="vista-detalle" class="oculto" aria-live="polite">
     <button type="button" id="btn-volver">⬅ Volver a las propuestas</button>
     <div id="detalle-contenido"></div>
-  </div>
+  </main>
 
   <aside id="trip-summary" class="trip-summary" aria-live="polite" hidden></aside>
 
@@ -229,7 +229,7 @@
      de app.js porque app.js lo lee al cargar. Sin '?v=' a propósito, por el
      mismo motivo que daily-costs.js: lo controla el CACHE_NAME del SW. -->
 <script defer src="/tours.generated.js"></script>
-<script defer src="/app.js?v=230"></script>
+<script defer src="/app.js?v=231"></script>
 
 </body>
 </html>

@@ -6925,8 +6925,15 @@
       var filas = g.opciones.map(function (o) {
         var r = o.ruta;
         var sigDia = r.llegada < r.salida ? '<sup title="Llega al día siguiente">+1</sup>' : '';
+        /* El precio grande va en la moneda activa de la app; la tarifa publicada
+           por la empresa ($U) queda de referencia, salvo que la moneda ya sea UYU
+           o no haya tasa para convertir. Antes era al reves: con la app en reales
+           la cifra grande salia en pesos uruguayos. */
+        var enUyu = monedaActiva().code === 'UYU' || !tasaUyu;
         var tarifa = o.uyu != null
-          ? '<b>' + uyu(o.uyu) + '</b>' + (tasaUyu ? '<small>&asymp; ' + money(o.uyu / tasaUyu) + '</small>' : '')
+          ? (enUyu
+            ? '<b>' + uyu(o.uyu) + '</b>'
+            : '<b>' + money(o.uyu / tasaUyu) + '</b><small>Tarifa: ' + uyu(o.uyu) + '</small>')
           : '<span class="bus-opt__na">Consultar tarifa</span>';
         return '<li><label class="bus-opt">'
           + '<input class="bus-opt__input" type="radio" name="bus-choice" data-bus-choice="' + esc(o.id) + '" data-bus-uyu="' + (o.uyu == null ? '' : o.uyu) + '"' + (elegido === o.id ? ' checked' : '') + '>'
