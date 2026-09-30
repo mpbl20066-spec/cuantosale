@@ -1978,20 +1978,6 @@
   // El <select> va envuelto para poder dibujarle el chevron con ::after, igual
   // que .custom-select__control: con appearance:none el control nativo del
   // sistema queda con la flecha desalineada y el alto distinto al del resto.
-  /* Filtro por playa. Solo en un destino solo (con dos paradas las playas de una
-     no existen en la otra) y solo con las playas que tienen hoteles con precio:
-     el server las cuenta y las manda en meta.playasDisponibles. */
-  function playaFilterMarkup(meta) {
-    var lista = meta && Array.isArray(meta.playasDisponibles) ? meta.playasDisponibles : [];
-    if (!lista.length || (meta.multiStay && meta.multiStay.stays && meta.multiStay.stays.length === 2)) return '';
-    var elegida = meta.playa || '';
-    function pill(valor, texto) {
-      var on = valor === elegida;
-      return '<button type="button" class="hotel-type-pill hotel-playa-pill' + (on ? ' is-on' : '') + '" aria-pressed="' + (on ? 'true' : 'false') + '" data-hotel-playa="' + esc(valor) + '">' + esc(texto) + '</button>';
-    }
-    return '<div class="hotel-type-picks hotel-playa-picks"><span class="hotel-type-picks__label">Playa</span>'
-      + '<div class="hotel-type-pills">' + pill('', 'Todas') + lista.map(function (p) { return pill(p.name, p.name + ' (' + p.count + ')'); }).join('') + '</div></div>';
-  }
   function hotelTypeSelectMarkup(meta, selected) {
     /* Cuatro tipos, y se ofrecen siempre los cuatro. Antes eran seis y ademas
        se filtraban por `meta.tiposHotelDisponibles`, o sea que en un destino
@@ -2189,7 +2175,7 @@
         ? hotelCatalog.filter(function (item) { return item.source === 'booking'; })
         : hotelCatalog;
       var ocultosPorDisponibilidad = hotelCatalog.length - conDisponibilidad.length;
-      var opciones = conDisponibilidad.slice(0, 3).map(function (item, index) {
+      function aOpcion(item, index) {
         return {
           name: item.name,
           multiplier: index === 0 ? 1 : (index === 1 ? 0.92 : 1.08),
@@ -2207,7 +2193,8 @@
           centroKm: item.centroKm,
           centroNombre: item.centroNombre || ''
         };
-      });
+      }
+      var opciones = conDisponibilidad.slice(0, 3).map(aOpcion);
       // El encabezado del grupo: en un destino solo no hace falta (el h2 de la
       // seccion ya dice de que ciudad es). En un combinado hace falta, porque hay
       // dos ciudades en la misma caja.
@@ -2247,8 +2234,7 @@
       var vacioQuery = new URLSearchParams({ ss: stopName });
       if (hotelType === 'all-inclusive') vacioQuery.set('nflt', 'mealplan=5');
       var vacioLink = '<a class="hotel-nearby-link" href="https://www.booking.com/searchresults.es.html?' + vacioQuery.toString() + '" target="_blank" rel="noopener noreferrer">Buscar en ' + esc(stopName) + ' ↗</a>';
-      var body = opciones.length
-        ? '<div class="hotel-grid">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + opciones.map(function (option) {
+      function cardDe(option) {
           var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
           var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
           var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
@@ -2325,7 +2311,50 @@
             // superpuestos al elegir.
             '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' +
             '</div></div>' + similarMarkup + '</article>';
-        }).join('') + '</div>'
+      }
+      /* Un destino solo con playas: los hoteles en una seccion por playa, con 3 a
+         la vista y el resto tras "Ver mas". La lista sale de meta.hotelsPorPlaya
+         (la arma el server con el mismo criterio de tipo y precio) y pasa por los
+         mismos filtros que la lista plana. Si ninguna playa queda con hoteles, se
+         cae a la lista plana de siempre, con su estado vacio. */
+      var secciones = [];
+      if (!isPar && Array.isArray(meta.hotelsPorPlaya)) {
+        meta.hotelsPorPlaya.forEach(function (g) {
+          var lista = hotelesQuePasanElTipo(normalizeHotelCatalog(g.hotels, defaultHotel), hotelType, strictType);
+          if (hotelSoloReservables) lista = lista.filter(function (item) { return item.source === 'booking'; });
+          if (lista.length) secciones.push({ playa: g.playa, lista: lista });
+        });
+      }
+      function seccionesMarkup() {
+        /* El recomendado es el mismo de la lista plana (el que entra al
+           presupuesto); si no esta en ninguna seccion, el primero de la primera. */
+        var top = opciones[0] ? opciones[0].name : '';
+        var hayTop = secciones.some(function (sec) { return sec.lista.some(function (item) { return item.name === top; }); });
+        var abiertas = (detailState && detailState.playasAbiertas) || {};
+        return '<div class="hotel-playas">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + secciones.map(function (sec, si) {
+          var cards = sec.lista.map(function (item, ii) {
+            var o = aOpcion(item, ii);
+            o.recommended = hayTop ? item.name === top : (si === 0 && ii === 0);
+            o.highlight = o.recommended ? 'Recomendado' : '';
+            return cardDe(o);
+          });
+          var abierta = !!abiertas[sec.playa];
+          var resto = cards.length - 3;
+          return '<section class="hotel-playa" data-hotel-playa-section aria-label="Alojamientos en ' + esc(sec.playa) + '">'
+            + '<header class="hotel-playa__head"><h3 class="hotel-playa__title">' + (sec.playa === 'Otras zonas' ? '📍 ' : '🏖️ ') + esc(sec.playa) + '</h3>'
+            + '<span class="hotel-playa__count">' + cards.length + (cards.length === 1 ? ' alojamiento' : ' alojamientos') + '</span></header>'
+            + '<div class="hotel-grid">' + cards.slice(0, 3).join('') + '</div>'
+            + (resto > 0
+              ? '<div class="hotel-grid hotel-playa__more"' + (abierta ? '' : ' hidden') + '>' + cards.slice(3).join('') + '</div>'
+                + '<button type="button" class="hotel-playa__toggle" data-hotel-playa-toggle="' + esc(sec.playa) + '" data-mas="Ver más (' + resto + ')" aria-expanded="' + (abierta ? 'true' : 'false') + '">' + (abierta ? 'Ver menos' : 'Ver más (' + resto + ')') + '</button>'
+              : '')
+            + '</section>';
+        }).join('') + '</div>';
+      }
+      var body = secciones.length
+        ? seccionesMarkup()
+        : opciones.length
+        ? '<div class="hotel-grid">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + opciones.map(cardDe).join('') + '</div>'
         : vacio + vacioLink;
       return '<div class="hotel-group' + (isPar ? ' hotel-group--split' : '') + '" data-hotel-group="' + (isPar ? stop : 'solo') + '">' + subhead + body + '</div>';
     }
@@ -2356,7 +2385,7 @@
       // traveler leia un solo grupo de hoteles creyendo que era todo el viaje.
       ? 'Elegí o reservá tu hotel en cada parada: ' + esc(reparto.firstName) + ' y ' + esc(reparto.secondName) + '.'
       : 'Seleccionados para un viaje ' + esc(profile.title.toLowerCase()) + ' en ' + esc(meta.dest.name) + ', desde ' + money(average) + ' por noche.');
-    var head = '<div class="hotel-options-head">' + hotelTypeSelectMarkup(meta, hotelType) + playaFilterMarkup(meta) + '</div>';
+    var head = '<div class="hotel-options-head">' + hotelTypeSelectMarkup(meta, hotelType) + '</div>';
 
     // Un destino solo: el grupo único y, si no hay nada, la sección vacía de
     // siempre, sin cambio de comportamiento.
@@ -3553,7 +3582,7 @@
     return plateBlock('data-hotels-block',
       '<h2 class="block-title">Alojamientos en ' + esc(meta.dest.name) + '</h2>',
       'Buscando opciones disponibles…',
-      '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head">' + hotelTypeSelectMarkup(meta) + playaFilterMarkup(meta) + '</div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>');
+      '<section class="hotel-options hotel-options-loading" data-budget-anchor="alojamiento" aria-live="polite"><div class="hotel-options-head">' + hotelTypeSelectMarkup(meta) + '</div><div class="hotel-skeleton-grid" aria-hidden="true"><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div><div class="hotel-skeleton-card"></div></div></section>');
   }
   function loadHotelRecommendations(meta, accommodationTotal) {
     var requestId = ++hotelRequestId;
@@ -3574,7 +3603,6 @@
       var segunda = String(meta.multiStay.stays[1].key || '').toLowerCase();
       if (segunda) params.set('second', segunda);
     }
-    if (meta.playa) params.set('playa', meta.playa);
     if (meta.hotelBudgetPerNight != null && Number.isFinite(Number(meta.hotelBudgetPerNight))) params.set('hotel_budget_per_night', String(meta.hotelBudgetPerNight));
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
     var timeout = window.setTimeout(function () { if (controller) controller.abort(); }, 30000);
@@ -3585,7 +3613,7 @@
       if (requestId !== hotelRequestId || !detailState || detailState.meta !== meta) return;
       meta.hotels = Array.isArray(data.hotels) ? data.hotels : [];
       meta.hotelsNearby = data.hotelsNearby || '';
-      meta.playasDisponibles = Array.isArray(data.playasDisponibles) ? data.playasDisponibles : [];
+      meta.hotelsPorPlaya = Array.isArray(data.hotelsPorPlaya) ? data.hotelsPorPlaya : [];
       // Los hoteles de la segunda parada. Vienen en el mismo request; si el viaje
       // es de un solo destino quedan vacios y hotelOptions() ni los mira.
       meta.hotelsSecond = Array.isArray(data.hotelsSecond) ? data.hotelsSecond : [];
@@ -8676,8 +8704,8 @@
     if (current === type) return;
     detailState.meta.hotelType = type;
     detailState.hotelType = type;
-    detailState.meta.playa = '';
-    detailState.meta.playasDisponibles = [];
+    detailState.meta.hotelsPorPlaya = [];
+    detailState.playasAbiertas = {};
     detailState.meta.hotelsLoaded = false;
     detailState.meta.hotels = [];
     detailState.meta.hotelBudgetPerNight = null;
@@ -8711,24 +8739,6 @@
     if (hotelSection) hotelSection.outerHTML = hotelLoading(detailState.meta);
     recalcularTotalViaje();
     loadHotelRecommendations(detailState.meta, detailState.hotel);
-  }
-  /* El filtro por playa. Vuelve a pedir los hoteles al server con la playa
-     elegida ('' = todas); la seleccion de hotel se descarta como al cambiar de
-     tipo, porque el hotel elegido puede no estar en la lista nueva. */
-  function changePlaya(playa) {
-    if (!detailState || !detailState.meta) return;
-    var meta = detailState.meta;
-    playa = String(playa || '');
-    if ((meta.playa || '') === playa) return;
-    meta.playa = playa;
-    meta.hotelsLoaded = false;
-    meta.hotels = [];
-    detailState.selectedHotel = true;
-    detailState.selectedHotelTotal = null;
-    var hotelSection = document.querySelector('[data-hotels-block]');
-    if (hotelSection) hotelSection.outerHTML = hotelLoading(meta);
-    recalcularTotalViaje();
-    loadHotelRecommendations(meta, detailState.hotel);
   }
   /* El filtro de disponibilidad. A diferencia del de tipo, NO invalida los
      hoteles ni vuelve a pedir nada: la lista con los reales y los estimados ya
@@ -10923,11 +10933,23 @@ function comboNombreDestino() {
       tourInput.checked = !tourInput.checked;
       tourInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
+    /* "Ver más" de cada playa: muestra u oculta los alojamientos que pasan de
+       3. No repinta ni pide nada; el estado se guarda para que un repintado de
+       la sección (cambio de moneda) no la vuelva a cerrar. */
     $('#vista-detalle').addEventListener('click', function (e) {
-      var playaPill = e.target.closest && e.target.closest('[data-hotel-playa]');
-      if (!playaPill) return;
+      var toggle = e.target.closest && e.target.closest('[data-hotel-playa-toggle]');
+      if (!toggle) return;
       e.preventDefault();
-      changePlaya(playaPill.getAttribute('data-hotel-playa'));
+      var more = toggle.previousElementSibling;
+      if (!more) return;
+      var abrir = more.hasAttribute('hidden');
+      if (abrir) more.removeAttribute('hidden'); else more.setAttribute('hidden', '');
+      toggle.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+      toggle.textContent = abrir ? 'Ver menos' : toggle.getAttribute('data-mas');
+      if (detailState) {
+        detailState.playasAbiertas = detailState.playasAbiertas || {};
+        detailState.playasAbiertas[toggle.getAttribute('data-hotel-playa-toggle')] = abrir;
+      }
     });
     /* El tipo de alojamiento son botones, no un <select>, así que el cambio lo
        atiende un click y no un change. No llama a la API: la lista de cada tipo

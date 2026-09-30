@@ -791,16 +791,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
       const ubicacion = playas.ubicacionDeHotel(hotel.geoKey || destKey, hotel.lat, hotel.lng);
       return ubicacion ? Object.assign({}, hotel, ubicacion) : hotel;
     });
-  // Las playas que de verdad tienen hoteles con precio, para armar el filtro. Se
-  // cuenta ANTES de filtrar por playa, si no al elegir una el resto desaparecia.
-  if (diag) {
-    const cuentas = new Map();
-    pricedTodos.forEach(function (hotel) { if (hotel.playa) cuentas.set(hotel.playa, (cuentas.get(hotel.playa) || 0) + 1); });
-    diag.playasDisponibles = playas.nombresDePlayas(destKey).filter(function (name) { return cuentas.has(name); })
-      .map(function (name) { return { name: name, count: cuentas.get(name) }; });
-  }
-  const playaPedida = String((extra && extra.playa) || '').trim();
-  const priced = playaPedida ? pricedTodos.filter(function (hotel) { return hotel.playa === playaPedida; }) : pricedTodos;
+  const priced = pricedTodos;
   // cuantos vinieron con precio real de Booking: si es 0, lo que se muestra en
   // pantalla es estimacion del modelo, y el front tiene que poder decirlo.
   if (diag) diag.bookingCount = priced.length;
@@ -890,7 +881,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   }
   const combinedReales = matchingCategory.concat(realesExtra);
   const missing = 3 - combinedReales.length;
-  const canUseGenericFallback = HOTEL_SPECTRUM_TYPES.has(hotelType) && !playaPedida;
+  const canUseGenericFallback = HOTEL_SPECTRUM_TYPES.has(hotelType);
   /* Para all-inclusive no hay fallback: antes se fabricaban tres entradas con
      nombres tipo "Complejo Todo Incluido" y el precio puesto en budgetTarget, sin
      foto y con un link de Booking. Se veian igual que un hotel real y con el
@@ -921,6 +912,53 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
     }
   } catch (error) {
     console.warn('[hotelRecommendations] Travelpayouts no disponible:', error && error.message ? error.message : error);
+  }
+  /* Los hoteles agrupados por playa, para que la pantalla los muestre en una
+     seccion por playa (hasta 3 a la vista y el resto tras "Ver mas"). Solo en un
+     destino que tiene playas cargadas (lib/playas.js) y con al menos un hotel
+     ubicado en alguna. Usa el mismo criterio de tipo y precio que la lista de
+     arriba, pero sin el tope de 3 y sin respaldo generico: una playa sin hoteles
+     reales de ese tipo no tiene seccion. Los que no quedan cerca de ninguna
+     playa van juntos en "Otras zonas". */
+  if (diag && !(extra && extra.noGroups) && playas.nombresDePlayas(destKey).length && priced.some(function (hotel) { return hotel.playa; })) {
+    const POR_PLAYA_MAX = 12;
+    const porPlaya = new Map();
+    priced
+      .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget); })
+      .sort(porDistancia)
+      .forEach(function (hotel) {
+        const clave = hotel.playa || 'Otras zonas';
+        if (!porPlaya.has(clave)) porPlaya.set(clave, []);
+        if (porPlaya.get(clave).length < POR_PLAYA_MAX) porPlaya.get(clave).push(hotel);
+      });
+    const grupos = Array.from(porPlaya.entries())
+      .filter(function (par) { return par[0] !== 'Otras zonas'; })
+      .sort(function (a, b) { return b[1].length - a[1].length; });
+    if (porPlaya.has('Otras zonas') && grupos.length) grupos.push(['Otras zonas', porPlaya.get('Otras zonas')]);
+    let conversion = null;
+    try {
+      if (travelpayouts.isConfigured()) {
+        const urls = [];
+        grupos.forEach(function (par) { par[1].forEach(function (hotel) { urls.push(hotel.bookingUrl); }); });
+        conversion = await travelpayouts.toPartnerUrls(urls);
+      }
+    } catch (error) {
+      console.warn('[hotelRecommendations] Travelpayouts no disponible (playas):', error && error.message ? error.message : error);
+    }
+    diag.hotelsPorPlaya = grupos.map(function (par) {
+      return {
+        playa: par[0],
+        hotels: par[1].map(function (hotel) {
+          const convertido = conversion && conversion.get(hotel.bookingUrl) ? conversion.get(hotel.bookingUrl) : '';
+          return Object.assign({}, hotel, {
+            bookingUrl: convertido || hotel.bookingUrl,
+            affiliate: convertido ? 'travelpayouts' : '',
+            tier: selectedTier, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio',
+            similar: [], areaLabel: hotel.areaLabel || destName, highlight: '', recommended: false
+          });
+        })
+      };
+    });
   }
   return combined.map(function (hotel, index) {
     // El provider solo deja la entrada en el Map si el link se CONVIRTIO de
@@ -1532,10 +1570,9 @@ async function cotizarHoteles(req, res, url) {
   const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), url.searchParams.get('subcategory'), v.S.style);
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: url.searchParams.get('subcategory') || '' };
-  // Filtro por playa: solo vale para un destino solo. Con dos paradas las playas
-  // de una no existen en la otra.
-  const playaPedida = String(url.searchParams.get('playa') || '').slice(0, 60);
-  if (playaPedida && !url.searchParams.get('second')) extra.playa = playaPedida;
+  // Las secciones por playa solo valen para un destino solo. Con dos paradas las
+  // playas de una no existen en la otra.
+  if (url.searchParams.get('second')) extra.noGroups = true;
   if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
   const hotelDiag = {};
   // Segunda parada del viaje combinado. Antes el endpoint solo miraba `dest`, y
@@ -1583,7 +1620,7 @@ async function cotizarHoteles(req, res, url) {
     hotels: hotels,
     hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra), hotelType: hotelType,
     hotelsNearby: nearbyOf(hotels, dest.name),
-    playasDisponibles: hotelDiag.playasDisponibles || [],
+    hotelsPorPlaya: hotelDiag.hotelsPorPlaya || [],
     // Lo mismo para la segunda parada. Sin estos campos `hotelsSecond` seria []
     // y el front no distinguiria "no hay hoteles ahi" de "no se consulto".
     hotelsSecond: hotelsSecond,
