@@ -1,0 +1,99 @@
+[
+  {
+    "destinos": ["mcz"],
+    "destino": "Maceió, Brasil",
+    "titulo": "Praia do Carro Quebrado",
+    "descripcion": "Excursión de día completo al norte de Maceió para descubrir la virgen y deslumbrante Praia do Carro Quebrado, famosa por sus imponentes acantilados de arcilla multicolor.",
+    "detalle": "Visitá uno de los rincones más agrestes, hermosos y vírgenes del litoral alagoano. Saliendo desde Maceió, el recorrido te lleva hasta Barra de Santo Antônio y sus alrededores para conocer la Praia do Carro Quebrado. Este paraíso destaca por su atmósfera de tranquilidad absoluta, casi sin construcciones a la vista, rodeado por un mar de tonos azulados y formaciones de impresionantes acantilados de arcilla colorida esculpidos por la naturaleza. Tendrás tiempo para relajarte y la opción de recorrer la costa en buggy o vehículo 4x4.",
+    "precio_brl": 72,
+    "duracion": "8 hs",
+    "grupo": "Hasta 8 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles en Maceió",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseo tradicional opcional en buggy, vehículos 4x4 o lancha por la costa y acantilados",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  },
+  {
+    "destinos": ["mcz"],
+    "destino": "Maceió, Brasil",
+    "titulo": "Praia do Gunga",
+    "descripcion": "Excursión de día completo al litoral sur de Alagoas para conocer la impresionante Praia do Gunga, famosa por sus miles de cocoteros y acantilados.",
+    "detalle": "Descubrí uno de los postales más hermosas del litoral brasileño saliendo desde Maceió. La Praia do Gunga impresiona por su gigantesca franja de cocoteros que se extiende hasta donde alcanza la vista, donde el mar tranquilo se encuentra con la laguna do Acaú. El recorrido incluye una parada en el famoso mirador para fotos panorámicas y tiempo libre en la playa para disfrutar de su infraestructura, bañarse en sus aguas cálidas y realizar opcionalmente paseos en buggy, cuatriciclo o lancha hacia los coloridos acantilados de arcilla.",
+    "precio_brl": 90,
+    "duracion": "8 hs",
+    "grupo": "Hasta 8 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles en Maceió",
+      "Parada panorámica en el Mirador de Do Francês",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseo tradicional en buggy o cuatriciclo por los acantilados",
+      "Paseo en lancha/barco",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  },
+  {
+    "destinos": ["mcz"],
+    "destino": "Maceió, Brasil",
+    "titulo": "Day Tour a Maragogi",
+    "descripcion": "Excursión de día completo desde Maceió hacia el famoso litoral norte de Alagoas, disfrutando de las cristalinas aguas de Maragogi y un cómodo club de playa.",
+    "detalle": "Descubrí el famoso \"Caribe brasileño\" partiendo cómodamente desde Maceió. El recorrido te lleva hacia el norte del estado de Alagoas hasta llegar a Maragogi, un paraíso de arenas claras y mar turquesa. El paquete incluye el acceso a la cómoda estructura de un club de playa asociado, ideal para relajarse y disfrutar del día. Además, tendrás tiempo libre para pasear por la costa o realizar opcionalmente el clásico paseo en catamarán hacia las piscinas naturales (galés) para hacer snorkel entre corales y peces.",
+    "precio_brl": 150,
+    "duracion": "8 hs",
+    "grupo": "Hasta 8 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles en Maceió",
+      "Acceso a la estructura de un club de playa asociado",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Consumiciones en el club de playa",
+      "Paseo tradicional opcional en catamarán o lancha hacia las piscinas naturales (galés)",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  }
+]

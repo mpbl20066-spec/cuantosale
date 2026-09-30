@@ -1714,7 +1714,7 @@ function haversineKm(a, b) {
        bien pero el generado no, la seccion de tours sale vacia en silencio. */
     const toursScript = await get(port, '/tours.generated.js');
     assert.strictEqual(toursScript.status, 200);
-    ['Paseo de Escuna', 'Clases de Surf', 'Bautismo de Buceo', 'Paseo de Barco', 'Full Day Arraial do Cabo'].forEach(function (copy) { assert.ok(toursScript.body.includes(copy), 'Falta contenido de tours en tours.generated.js: ' + copy); });
+    ['Off Road Ilhabela', 'Praia do Gunga', 'Dunas de Genipabu en buggy', 'Praia do Patacho', 'Praia dos Carneiros'].forEach(function (copy) { assert.ok(toursScript.body.includes(copy), 'Falta contenido de tours en tours.generated.js: ' + copy); });
     ['data-tour-choice', 'data-tour-detail-open', 'Los imperdibles de', 'Créditos de las fotos'].forEach(function (copy) { assert.ok(appScript.body.includes(copy), 'Falta la mecanica de tours en app.js: ' + copy); });
     // app.js ya no debe llevar el catalogo: si vuelve a entrar, alguien copio
     // tours a mano y quedan dos fuentes que se van a divergir. Se busca el
