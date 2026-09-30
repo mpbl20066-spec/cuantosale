@@ -2734,3 +2734,25 @@ button.logo{min-height:44px}
 
 /* Transfer privado sin precio para esta cantidad de personas: informativo, no se elige. */
 .transfer-choice--consultar{cursor:default;opacity:.85;border-style:dashed}.transfer-choice--consultar:hover{transform:none;border-color:var(--line)}
+
+
+/* ---------- Pulido de consistencia: hoteles y tours ----------
+   1) Un solo CTA primario: fondo --action-bg (amarillo) + texto --action-ink,
+      el mismo par que ya usaba .local-tour__info. "Ver disponibilidad" era el
+      unico boton con contorno y hacia que las dos secciones se leyeran distinto.
+   2) Tours siempre en una columna: la foto toma el ancho de la card y es la
+      protagonista (16:9 en vez de una franja de 170px).
+   3) Mismo padding interno (16px) en el cuerpo de hoteles y tours.
+   4) Aire debajo de "Ver mas tours" antes de "Personaliza tus costos diarios". */
+.hotel-booking{border:0;background:var(--action-bg);color:var(--action-ink);font-weight:800;min-height:44px;border-radius:12px}
+.hotel-booking:hover{background:var(--action-bg);color:var(--action-ink);filter:brightness(1.1)}
+.hotel-body{padding:16px 16px 0}
+.hotel-foot{padding:12px 16px 16px}
+.local-tours__grid{grid-template-columns:minmax(0,1fr);gap:16px}
+.local-tour__media{height:auto;aspect-ratio:16/9}
+.local-tour__media-plain{height:auto;aspect-ratio:16/9}
+.local-tour__body{padding:16px}
+.local-tour__info{min-height:44px;border-radius:12px}
+.local-tours{margin-bottom:32px}
+.local-tours__more{margin-top:18px;padding:6px 0}
+.local-tours + .detail-section,.plate-block + .daily-budget{margin-top:48px}
