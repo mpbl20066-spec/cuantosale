@@ -2418,7 +2418,15 @@
     var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
     var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
     var tours = toursFor(destinationKey, destinationName, meta);
-    if (!tours.length) return '';
+    /* Un destino sin tours cargados no esconde la seccion: dice que vienen. Un hueco
+       sin explicacion se lee como un error de la pagina, y "Proximamente" es lo que es. */
+    if (!tours.length) {
+      return plateBlock('data-tours-block',
+        '<h2 class="block-title" id="local-tours-title">Tours y experiencias en ' + esc(destinationName) + '</h2>', '',
+        '<section class="local-tours local-tours--soon" data-budget-anchor="tours" aria-labelledby="local-tours-title">'
+        + '<div class="local-tours__soon"><span class="local-tours__soon-badge">Próximamente</span>'
+        + '<p>Estamos armando las experiencias locales de ' + esc(destinationName) + '. Muy pronto vas a poder sumarlas a tu viaje desde acá.</p></div></section>');
+    }
     // Todas las fotos salen de TOUR_PHOTOS, con autor y licencia: el pie global
     // los reagrupa.
     // Los curados de afiliado SIEMPRE traen foto de Commons con su autor y su

@@ -50,7 +50,8 @@ function conEnv(vars, fn) {
     await conEnv({ SUPABASE_URL: null, SUPABASE_SERVICE_ROLE_KEY: null }, async function (tours) {
       assert.strictEqual(tours.disponible(), false);
       const lista = await tours.todos();
-      assert.ok(lista.length > 100, 'trae ' + lista.length + ' tours');
+      const esperados = require('./public/tours.generated.js').length;
+      assert.ok(esperados > 0 && lista.length === esperados, 'trae ' + lista.length + ' tours y la copia generada tiene ' + esperados);
       assert.strictEqual(tours.estado(), 'json');
     });
   });
@@ -62,7 +63,7 @@ function conEnv(vars, fn) {
     await conEnv({ SUPABASE_URL: 'https://x.supabase.co', SUPABASE_SERVICE_ROLE_KEY: null, SUPABASE_ANON_KEY: 'anon-123' }, async function (tours) {
       assert.strictEqual(tours.disponible(), false, 'con la anon no puede leer');
       const lista = await tours.todos();
-      assert.ok(lista.length > 100, 'tiene que caer al respaldo');
+      assert.strictEqual(lista.length, require('./public/tours.generated.js').length, 'tiene que caer al respaldo');
     });
   });
 
@@ -70,19 +71,19 @@ function conEnv(vars, fn) {
     await conEnv({ SUPABASE_URL: 'https://no-existe.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'service-x' }, async function (tours) {
       // No hay red hacia ese host, asi que fetch tira o devuelve error: en los
       // dos casos tiene que caer al respaldo en vez de romper /api/cotizar.
-      const lista = await tours.destino('fln');
-      assert.ok(lista.length >= 10, 'tiene que devolver los 11 de Florianópolis, devolvio ' + lista.length);
+      const lista = await tours.destino('buz');
+      assert.ok(lista.length >= 10, 'tiene que devolver los de Búzios, devolvio ' + lista.length);
     });
   });
 
-  await t('el respaldo trae los 111 con los precios ya convertidos', async function () {
+  await t('el respaldo trae todos los tours con los precios ya convertidos', async function () {
     await conEnv({ SUPABASE_URL: null, SUPABASE_SERVICE_ROLE_KEY: null }, async function (tours) {
       const lista = await tours.todos();
-      assert.strictEqual(lista.length, 111, 'trae ' + lista.length);
-      const escuna = lista.find((t) => /escuna pirata/.test(t.title));
-      assert.ok(escuna, 'no esta el Paseo en escuna pirata');
-      // R$ 190 con la cotizacion de 5,1414 y US$ 5 de margen.
-      assert.strictEqual(escuna.price, 41.95, 'precio: ' + escuna.price);
+      assert.strictEqual(lista.length, require('./public/tours.generated.js').length, 'trae ' + lista.length);
+      const escuna = lista.find((t) => t.title === 'Paseo de Escuna');
+      assert.ok(escuna, 'no esta el Paseo de Escuna');
+      // R$ 60 con la cotizacion de 5,1414 y US$ 5 de margen.
+      assert.strictEqual(escuna.price, 16.67, 'precio: ' + escuna.price);
     });
   });
 
@@ -91,16 +92,18 @@ function conEnv(vars, fn) {
     // igual publicar precios viejos cuando Supabase no responde.
     const generado = require('./public/tours.generated.js');
     const json = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'tours.json'), 'utf8'));
-    assert.strictEqual(generado.length, json.tours.length, 'tours: ' + generado.length + ' vs ' + json.tours.length);
+    // Los apagados (activo: false) no se dibujan: el generado trae solo los activos.
+    const activos = json.tours.filter((t) => t.activo !== false);
+    assert.strictEqual(generado.length, activos.length, 'tours: ' + generado.length + ' vs ' + activos.length);
     generado.forEach((t, i) => {
-      assert.strictEqual(t.title, json.tours[i].titulo, 'titulo en la posicion ' + i);
+      assert.strictEqual(t.title, activos[i].titulo, 'titulo en la posicion ' + i);
     });
   });
 
   await t('el respaldo expone el mapa de destinos para el panel', function () {
     const generado = require('./public/tours.generated.js');
     const d = generado.destinos;
-    assert.ok(d && Object.keys(d).length > 30, 'el mapa tiene ' + Object.keys(d || {}).length + ' destinos');
+    assert.ok(d && Object.keys(d).length >= 25, 'el mapa tiene ' + Object.keys(d || {}).length + ' destinos');
     // El panel ofrece estas keys, asi que tienen que existir en el modelo.
     const model = require('./lib/model.js');
     Object.keys(d).forEach((k) => {

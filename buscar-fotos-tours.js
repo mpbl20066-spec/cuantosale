@@ -24,46 +24,9 @@ const FREE = /^(cc0|cc by|cc by-sa|public domain|pd-|no restrictions)/i;
 // específica a la más genérica. Con dos o tres palabras distintivas acierta
 // casi siempre.
 const SUBJECTS = {
-  'rio#Cristo Redentor y Pan de Azúcar': ['Cristo Redentor', 'Corcovado Rio'],
 
   'bcm#City tour y Cristo Luz': ['Cristo Luz', 'Balneario Camboriu'],
   'bcm#Beto Carrero World desde Camboriú': ['Beto Carrero', 'Beto Carrero World'],
-  'cabo#City tour histórico y playas de Cabo Frio': ['Praia do Forte Cabo Frio', 'Cabo Frio'],
-  'cabo#Paseo en barco por el Canal y la Ilha do Japonês': ['Ilha do Japones', 'Cabo Frio canal'],
-  'camboriu#Parque Unipraias y teleférico': ['Unipraias', 'Camboriu teleférico'],
-  'camboriu#Paseo en barco por la costa de Balneário': ['Balneario Camboriu', 'Camboriu praia'],
-  'canela#Cascata do Caracol y Skyglass': ['Cascata do Caracol', 'Caracol Canela'],
-  'canela#Tren del Vino y cultura italiana': ['Trem do Vinho', 'Vale dos Vinhedos'],
-  'for#Praia de Cumbuco y dunas en buggy': ['Cumbuco', 'Cumbuco dunes'],
-  'for#Beach Park y costa de Aquiraz': ['Beach Park', 'Aquiraz'],
-  'ilhabela#Jeep tour por playas y cascadas': ['Ilhabela', 'Ilhabela praia'],
-  'ilhabela#Paseo de barco a Castelhanos': ['Castelhanos', 'Castelhanos praia'],
-  'jericoacoara#Lagoa do Paraíso y Lagoa Azul en 4x4': ['Lagoa do Paraiso', 'Jericoacoara lagoa'],
-  'jericoacoara#Pôr do sol en la Duna y Pedra Furada': ['Pedra Furada', 'Jericoacoara duna'],
-  'maragogi#Catamarán a las Piscinas Naturales (Galés)': ['Piscinas Naturais', 'Maragogi'],
-  'maragogi#Buggy por playas del litoral norte': ['Maragogi praia', 'Maragogi'],
-  'morro#Volta à Ilha en lancha': ['Morro de Sao Paulo', 'Morro de Sao Paulo ilha'],
-  'morro#Tirolesa y miradores de Morro': ['Morro de Sao Paulo', 'Morro de Sao Paulo vista'],
-  'nat#Dunas de Genipabu en buggy': ['Genipabu', 'Genipabu dunes'],
-  'nat#Pipa desde Natal con Baía dos Golfinhos': ['Baia dos Golfinhos', 'Pipa'],
-  'pip#Paseo en Buggy de Playa en Playa': ['Pipa beach', 'Pipa'],
-  'pip#Paseo en lancha para ver delfines': ['Pipa golfinhos', 'Pipa'],
-  'porto#Piscinas naturales de Porto de Galinhas': ['Porto de Galinhas', 'Porto de Galinhas pools'],
-  'porto#Praia dos Carneiros y paseo en catamarán': ['Praia dos Carneiros', 'Carneiros catamaran'],
-  'rec#Olinda histórica y Recife Antigo': ['Olinda', 'Olinda Pernambuco'],
-  'rec#Porto de Galinhas desde Recife': ['Recife', 'Recife Antigo'],
-  'rosa#Avistaje de ballenas desde los miradores': ['Praia Vermelha', 'Santa Catarina beach'],
-  'rosa#Trilha a Praia Vermelha y Ouvidor': ['ouvidor beach', 'Santa Catarina praia'],
-  'sao#City tour por Avenida Paulista y Centro Histórico': ['Avenida Paulista', 'Paulista Sao Paulo'],
-  'sao#Ruta gastronómica por Liberdade y Mercado Municipal': ['Mercado Municipal Sao Paulo', 'Liberdade'],
-  'ssa#Pelourinho, Elevador Lacerda y Mercado Modelo': ['Pelourinho', 'Elevador Lacerda'],
-  'ssa#Bahía de Todos los Santos en schooner': ['Baia de Todos os Santos', 'Salvador bahia'],
-  'trancoso#Praias do Espelho y Caraíva': ['Caraiva', 'Praia do Espelho'],
-  'trancoso#City tour de Trancoso y Quadrado': ['Trancoso', 'Trancoso quadrado'],
-  'poa#Free tour a pie por el centro histórico': ['Porto Alegre centro', 'Porto Alegre'],
-  'sao#Free tour a pie por el centro histórico': ['Sao Paulo centro', 'Sao Paulo'],
-  'poa#Gramado y Canela desde Porto Alegre': ['Porto Alegre', 'Porto Alegre skyline'],
-  'poa#Bento Gonçalves y Vale dos Vinhedos': ['Bento Goncalves', 'Vale dos Vinhedos']
 };
 
 const UA = 'cuantosale-tour-photos/1.0 (fotos para el catalogo de tours)';

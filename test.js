@@ -270,7 +270,7 @@ function haversineKm(a, b) {
     // tiene el catalogo y pasa con 0 tours, que es justo el fallo silencioso
     // que la prueba existe para detectar.
     const catalogo = require(path.join(__dirname, 'public', 'tours.generated.js'));
-    assert.ok(catalogo.length > 100, 'tours.generated.js tiene ' + catalogo.length + ' entradas');
+    assert.ok(catalogo.length > 20, 'tours.generated.js tiene ' + catalogo.length + ' entradas');
     const tours = new Set(catalogo.map(function (x) { return x.destinations[0] + '#' + x.title; }));
 
     const script = fs.readFileSync(path.join(__dirname, 'buscar-fotos-tours.js'), 'utf8');
@@ -278,7 +278,7 @@ function haversineKm(a, b) {
     const claves = [...bloque.matchAll(/^\s*'((?:[^'\\]|\\.)*)':/gm)].map(function (x) { return x[1]; });
     // El piso es solo para detectar que el regex no leyo el bloque (daria 0 claves).
     // No es un conteo de tours: SUBJECTS solo lista los que se buscan en Commons.
-    assert.ok(claves.length > 20, 'no se pudo leer SUBJECTS: ' + claves.length + ' claves');
+    assert.ok(claves.length > 0, 'no se pudo leer SUBJECTS: ' + claves.length + ' claves');
 
     const rotas = claves.filter(function (k) { return !tours.has(k); });
     assert.deepStrictEqual(rotas, [],
@@ -1693,7 +1693,7 @@ function haversineKm(a, b) {
        bien pero el generado no, la seccion de tours sale vacia en silencio. */
     const toursScript = await get(port, '/tours.generated.js');
     assert.strictEqual(toursScript.status, 200);
-    ['Cristo Redentor', 'Isla de Campeche', 'Piscinas Naturales', 'Playa en Playa', 'Noche suiza'].forEach(function (copy) { assert.ok(toursScript.body.includes(copy), 'Falta contenido de tours en tours.generated.js: ' + copy); });
+    ['Paseo de Escuna', 'Clases de Surf', 'Bautismo de Buceo', 'Paseo de Barco', 'Full Day Arraial do Cabo'].forEach(function (copy) { assert.ok(toursScript.body.includes(copy), 'Falta contenido de tours en tours.generated.js: ' + copy); });
     ['data-tour-choice', 'data-tour-detail-open', 'Los imperdibles de', 'Créditos de las fotos'].forEach(function (copy) { assert.ok(appScript.body.includes(copy), 'Falta la mecanica de tours en app.js: ' + copy); });
     // app.js ya no debe llevar el catalogo: si vuelve a entrar, alguien copio
     // tours a mano y quedan dos fuentes que se van a divergir. Se busca el

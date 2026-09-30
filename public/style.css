@@ -1861,6 +1861,9 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .local-tour__tick svg{width:16px;height:16px}
 .local-tour:has(.local-tour__input:checked) .local-tour__tick{opacity:1;transform:scale(1)}
 .local-tours:not(.local-tours--expanded) .local-tour:nth-child(n+4){display:none}
+.local-tours__soon{display:grid;justify-items:center;gap:12px;padding:34px 20px;border:1.5px dashed var(--line);border-radius:18px;text-align:center}
+.local-tours__soon-badge{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;background:var(--cel-soft);color:var(--cel);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.local-tours__soon p{max-width:440px;margin:0;color:var(--ink2);font-size:14px;line-height:1.6}
 .local-tours__more{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:0;border:0;background:transparent;color:var(--cel);font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .local-tours__more:hover{color:var(--ink)}
 .local-tours__more:focus-visible{outline:3px solid var(--focus);outline-offset:4px;border-radius:4px}

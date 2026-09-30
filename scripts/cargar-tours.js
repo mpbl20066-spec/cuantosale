@@ -138,10 +138,10 @@ async function rpc(fn, body) {
 
   // El mismo filtro del pull, por el mismo motivo: si el JSON vino con pocas
   // filas, algo fallo antes y subir eso vacia el catalogo de la base.
-  if (filas.length < 60) {
+  if (filas.length < 20) {
     console.error('');
     console.error('data/tours.json tiene ' + filas.length + ' filas. No se sube nada.');
-    console.error('Con menos de 60 el problema esta antes, en el pull o en la migracion.');
+    console.error('Con menos de 20 el problema esta antes, en el pull o en la migracion.');
     process.exit(1);
   }
 
