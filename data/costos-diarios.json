@@ -43,15 +43,16 @@
         "gourmet": 95
       },
       "traslado": {
-        "eco": 16,
+        "eco": 14,
         "confort": 35,
-        "medio": 24
+        "medio": 22
       },
       "fuente": "Numbeo Rio de Janeiro: comida barata R$37,50, cena media para 2 R$200. Pack Lightly: comida callejera R$8-15, por kilo R$20-40, media R$40-90. food&drink para 14 dias: USD 308/770/1540.",
       "verificado": "2026-09-27",
       "confianza": "media",
-      "nota": "La Zona Sur (Copacabana/Ipanema/Leblon) sube bastante por encima: en la Avenida Atlantica un plato va R$65-100 y a dos cuadras R$40.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
+      "nota": "Metro, VLT, buses y apps baratos y frecuentes: el traslado diario es de los mas eficientes del catalogo. La Zona Sur sube bastante en comida por encima de este valor.",
+      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
+      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa."
     },
     "sao": {
       "comida": {
@@ -211,32 +212,35 @@
         "gourmet": 100
       },
       "traslado": {
-        "eco": 18,
-        "confort": 40,
-        "medio": 27
+        "eco": 10,
+        "confort": 38,
+        "medio": 19
       },
       "fuente": "TikTok de precios en Jericoacoara (2026): baiao de dois R$98, crepe de carne seca R$48, picanha R$93, ceviche R$73, drink R$45. Instagram (2026): picanha R$93, ceviche R$73, R$9,90 picanha trinchada.",
       "verificado": "2026-09-27",
       "confianza": "media",
-      "nota": "Barato en la playa pero caro en restaurante. Comparte valores con for por el mismo aeropuerto, aunque Jericoacoara como destino turistico es bastante mas caro que Fortaleza.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
+      "nota": "La villa no admite autos y se camina. El traslado diario es bajo; los buggies a Pedra Furada o Lagoa Azul son una excursion aparte. Barato en la playa pero caro en restaurante.",
+      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
+      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa."
     },
     "buz": {
       "comida": {
-        "casual": 32,
-        "moderado": 60,
-        "gourmet": 100
+        "casual": 36,
+        "moderado": 66,
+        "gourmet": 110
       },
       "traslado": {
-        "eco": 18,
-        "confort": 38,
-        "medio": 26
+        "eco": 20,
+        "confort": 45,
+        "medio": 30
       },
       "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara.",
       "verificado": "2026-09-27",
       "confianza": "baja",
       "derivacion": "Sin dato especifico de Búzios. Copia práctica de for/jericoacoara. Búzios es pueblo de playa con vida nocturna, asi que la escala es plausible, pero deberia ser un poco mas caro que el promedioNordeste: es el balneario mas caro de Rio de Janeiro.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
+      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
+      "nota": "Las playas estan dispersas y el taxi es de los mas caros de la costa (sin app fuerte): el traslado diario sube respecto del promedio. Balneario mas caro de Rio de Janeiro, por eso tambien sube la comida.",
+      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa."
     },
     "arraial": {
       "comida": {
@@ -599,15 +603,17 @@
         "gourmet": 90
       },
       "traslado": {
-        "eco": 16,
-        "confort": 35,
-        "medio": 24
+        "eco": 6,
+        "confort": 22,
+        "medio": 12
       },
       "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal.",
       "verificado": "2026-09-27",
       "confianza": "baja",
       "derivacion": "Pipa es un pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara pero en Rio Grande do Norte. Copia de nat con recargo por la vida nocturna. Lo que si hay dato (un menu de R$94,90 en un restaurante de la zona) sugiere que la cena es mas cara que la media de Natal, que es lo que ya se refleja.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
+      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
+      "nota": "Pueblo chico y caminable: el centro, la playa y los restaurantes se recorren a pie. Transporte diario bajo; solo se suman taxis/mototaxi a Chapadao, Madeiro o Sibauma.",
+      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa."
     },
     "trancoso": {
       "comida": {

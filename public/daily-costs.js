@@ -17,7 +17,7 @@
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, {
   poa: { name: 'Porto Alegre', transport: { eco: 13, medio: 20, confort: 30 }, food: { casual: 27, moderado: 50, gourmet: 90 } },
-  rio: { name: 'Río de Janeiro', transport: { eco: 16, medio: 24, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 95 } },
+  rio: { name: 'Río de Janeiro', transport: { eco: 14, medio: 22, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 95 } },
   sao: { name: 'São Paulo', transport: { eco: 22, medio: 32, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } },
   ssa: { name: 'Salvador de Bahía', transport: { eco: 14, medio: 20, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
   for: { name: 'Fortaleza', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
@@ -27,8 +27,8 @@
   joaopessoa: { name: 'João Pessoa', transport: { eco: 14, medio: 20, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
   porto: { name: 'Porto de Galinhas', transport: { eco: 15, medio: 22, confort: 32 }, food: { casual: 28, moderado: 52, gourmet: 85 } },
   maragogi: { name: 'Maragogi', transport: { eco: 13, medio: 19, confort: 28 }, food: { casual: 24, moderado: 45, gourmet: 75 } },
-  jericoacoara: { name: 'Jericoacoara', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
-  buz: { name: 'Búzios', transport: { eco: 18, medio: 26, confort: 38 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
+  jericoacoara: { name: 'Jericoacoara', transport: { eco: 10, medio: 19, confort: 38 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
+  buz: { name: 'Búzios', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 36, moderado: 66, gourmet: 110 } },
   arraial: { name: 'Arraial do Cabo', transport: { eco: 14, medio: 20, confort: 28 }, food: { casual: 25, moderado: 45, gourmet: 75 } },
   cabo: { name: 'Cabo Frio', transport: { eco: 12, medio: 17, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } },
   angra: { name: 'Angra dos Reis', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 105 } },
@@ -50,7 +50,7 @@
   torres: { name: 'Torres', transport: { eco: 15, medio: 22, confort: 33 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
   canoa: { name: 'Capão da Canoa', transport: { eco: 14, medio: 21, confort: 31 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
   fernando: { name: 'Fernando de Noronha', transport: { eco: 30, medio: 47, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } },
-  pip: { name: 'Pipa', transport: { eco: 16, medio: 24, confort: 35 }, food: { casual: 30, moderado: 55, gourmet: 90 } },
+  pip: { name: 'Pipa', transport: { eco: 6, medio: 12, confort: 22 }, food: { casual: 30, moderado: 55, gourmet: 90 } },
   trancoso: { name: 'Trancoso', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
   ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 19, medio: 28, confort: 42 }, food: { casual: 37, moderado: 68, gourmet: 115 } },
   morro: { name: 'Morro de São Paulo', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
@@ -77,7 +77,7 @@
       "fuente": "Numbeo Rio de Janeiro: comida barata R$37,50, cena media para 2 R$200. Pack Lightly: comida callejera R$8-15, por kilo R$20-40, media R$40-90. food&drink para 14 dias: USD 308/770/1540.",
       "confianza": "media",
       "verificado": "2026-09-27",
-      "nota": "La Zona Sur (Copacabana/Ipanema/Leblon) sube bastante por encima: en la Avenida Atlantica un plato va R$65-100 y a dos cuadras R$40."
+      "nota": "Metro, VLT, buses y apps baratos y frecuentes: el traslado diario es de los mas eficientes del catalogo. La Zona Sur sube bastante en comida por encima de este valor."
     },
   sao: {
       "fuente": "Serasa (jun/2026): self-service por kilo R$86,86 medio de la ciudad, PF R$38,65. Restaurante casual R$50-120. Numbeo/Tolatam (may/2026): cena media para 2 R$200-350. world-prices: comida en restau R$40.",
@@ -135,12 +135,13 @@
       "fuente": "TikTok de precios en Jericoacoara (2026): baiao de dois R$98, crepe de carne seca R$48, picanha R$93, ceviche R$73, drink R$45. Instagram (2026): picanha R$93, ceviche R$73, R$9,90 picanha trinchada.",
       "confianza": "media",
       "verificado": "2026-09-27",
-      "nota": "Barato en la playa pero caro en restaurante. Comparte valores con for por el mismo aeropuerto, aunque Jericoacoara como destino turistico es bastante mas caro que Fortaleza."
+      "nota": "La villa no admite autos y se camina. El traslado diario es bajo; los buggies a Pedra Furada o Lagoa Azul son una excursion aparte. Barato en la playa pero caro en restaurante."
     },
   buz: {
       "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara.",
       "confianza": "baja",
       "verificado": "2026-09-27",
+      "nota": "Las playas estan dispersas y el taxi es de los mas caros de la costa (sin app fuerte): el traslado diario sube respecto del promedio. Balneario mas caro de Rio de Janeiro, por eso tambien sube la comida.",
       "derivacion": "Sin dato especifico de Búzios. Copia práctica de for/jericoacoara. Búzios es pueblo de playa con vida nocturna, asi que la escala es plausible, pero deberia ser un poco mas caro que el promedioNordeste: es el balneario mas caro de Rio de Janeiro."
     },
   arraial: {
@@ -270,6 +271,7 @@
       "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal.",
       "confianza": "baja",
       "verificado": "2026-09-27",
+      "nota": "Pueblo chico y caminable: el centro, la playa y los restaurantes se recorren a pie. Transporte diario bajo; solo se suman taxis/mototaxi a Chapadao, Madeiro o Sibauma.",
       "derivacion": "Pipa es un pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara pero en Rio Grande do Norte. Copia de nat con recargo por la vida nocturna. Lo que si hay dato (un menu de R$94,90 en un restaurante de la zona) sugiere que la cena es mas cara que la media de Natal, que es lo que ya se refleja."
     },
   trancoso: {
