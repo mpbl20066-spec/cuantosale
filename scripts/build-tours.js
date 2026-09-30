@@ -88,6 +88,9 @@ const filas = datos.tours.map((t, i) => {
     return null;
   }
 
+  // Un tour apagado (activo: false) no se dibuja ni se valida: puede estar esperando su precio.
+  if (t.activo === false) return null;
+
   const titulo = String(t.titulo == null ? '' : t.titulo).trim();
   if (!titulo) errores.push(donde + ': sin titulo');
 
@@ -125,8 +128,6 @@ const filas = datos.tours.map((t, i) => {
 
   // Foto de la agencia (con permiso): una URL http(s). Sin ella la card usa TOUR_PHOTOS o el degradado.
   const imagen = /^https?:\/\//i.test(String(t.image == null ? '' : t.image).trim()) ? String(t.image).trim() : '';
-  // Un tour apagado (activo: false) no se dibuja: es la forma de sacarlo de la web sin borrarlo.
-  if (t.activo === false) return null;
   // Ficha del modal de detalle: texto tal cual se muestra; vacio = no se dibuja la celda.
   const txt = (v) => String(v == null ? '' : v).trim();
   // Listas (incluye / no incluye / que llevar): un arreglo de frases; se descartan las vacias.

@@ -112,7 +112,7 @@ async function rpc(fn, body) {
       titulo: t.titulo,
       descripcion: t.descripcion || '',
       detalle: t.detalle || '',
-      activo: true,
+      activo: t.activo !== false,
       fuente: fuente,
       verificado: (datos._meta && datos._meta.actualizado) || null,
       orden: (i + 1) * 10

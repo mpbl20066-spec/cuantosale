@@ -28,8 +28,6 @@ const SUBJECTS = {
 
   'bcm#City tour y Cristo Luz': ['Cristo Luz', 'Balneario Camboriu'],
   'bcm#Beto Carrero World desde Camboriú': ['Beto Carrero', 'Beto Carrero World'],
-  'bombinhas#Snorkel en Ilha do Arvoredo': ['Ilha do Arvoredo', 'Arvoredo'],
-  'bombinhas#Trilha de la Costa Esmeralda': ['Costa Esmeralda', 'Bombinhas'],
   'cabo#City tour histórico y playas de Cabo Frio': ['Praia do Forte Cabo Frio', 'Cabo Frio'],
   'cabo#Paseo en barco por el Canal y la Ilha do Japonês': ['Ilha do Japones', 'Cabo Frio canal'],
   'camboriu#Parque Unipraias y teleférico': ['Unipraias', 'Camboriu teleférico'],
@@ -64,8 +62,6 @@ const SUBJECTS = {
   'ssa#Bahía de Todos los Santos en schooner': ['Baia de Todos os Santos', 'Salvador bahia'],
   'trancoso#Praias do Espelho y Caraíva': ['Caraiva', 'Praia do Espelho'],
   'trancoso#City tour de Trancoso y Quadrado': ['Trancoso', 'Trancoso quadrado'],
-  'ubatuba#Paseo en barco por las islas de Ubatuba': ['Ubatuba', 'Ubatuba praia'],
-  'ubatuba#Trilha guiada a las cascadas de Ubatuba': ['Ubatuba queda dagua', 'Ubatuba trilhas'],
   'bho#Pampulha y arquitectura de Niemeyer': ['Pampulha', 'Pampulha Belo Horizonte'],
   'bho#Experiencia de bares y comida mineira': ['Belo Horizonte', 'BH bares'],
   'bho#Free tour a pie por el centro histórico': ['Belo Horizonte centro', 'Belo Horizonte'],

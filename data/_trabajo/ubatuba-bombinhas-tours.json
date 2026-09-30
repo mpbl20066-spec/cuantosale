@@ -1,0 +1,158 @@
+[
+  {
+    "destinos": ["bombinhas"],
+    "destino": "Bombinhas, Brasil",
+    "titulo": "Bautismo de Buceo (Bombinhas)",
+    "descripcion": "¡Descubre el paraíso del buceo en Bombinhas! Realiza tu bautismo submarino con instructores profesionales en aguas cristalinas repletas de vida marina.",
+    "detalle": "Sumérgete en la Capital del Buceo Ecológico de Brasil. Esta experiencia está diseñada especialmente para principiantes sin experiencia previa, comenzando con una completa instrucción teórica a bordo o en base, seguida de una inmersión supervisada mano a mano con un instructor especializado para explorar la fascinante fauna y flora marina de la reserva biológica local.",
+    "precio_brl": 400,
+    "duracion": "3 hs",
+    "grupo": "Hasta 5 personas",
+    "edad": "Con restricciones",
+    "incluye": [
+      "Salida en embarcación especializada",
+      "Clase teórica explicativa a cargo de instructores certificados",
+      "Equipo completo de buceo autónomo (traje, cilindro, regulador, máscara)",
+      "Acompañamiento subacuático exclusivo de un instructor profesional durante la inmersión"
+    ],
+    "no_incluye": [
+      "Alimentos",
+      "Bebidas",
+      "Fotos/videos subacuáticos profesionales (opcionales con costo extra)",
+      "Traslados terrestres no especificados"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Ropa cómoda de abrigo ligero para después del buceo",
+      "Protector solar",
+      "Gafas de sol"
+    ],
+    "foto": "mergulho 1.jpeg"
+  },
+  {
+    "destinos": ["bombinhas"],
+    "destino": "Bombinhas, Brasil",
+    "titulo": "Trilha Subacuática y Snorkel",
+    "descripcion": "¡Explora la vida marina de Bombinhas a flor de agua! Realiza un sendero subacuático guiado con snorkel en playas de aguas cristalinas y protegidas.",
+    "detalle": "Una opción fantástica para quienes prefieren la superficie pero quieren disfrutar al máximo de la riqueza marina de la Capital del Buceo. La actividad consiste en un paseo en barco hasta una reserva o playa protegida, donde el guía conduce una \"trilha\" o recorrido flotante con máscara y tubo, facilitando la observación de coloridos peces y formaciones rocosas de manera segura y divertida.",
+    "precio_brl": 250,
+    "duracion": "3 hs",
+    "grupo": "Hasta 10 personas",
+    "edad": "Desde 5 años",
+    "incluye": [
+      "Navegación en embarcación hacia puntos protegidos de aguas cristalinas",
+      "Equipo básico de superficie (máscara y tubo de snorkel, además de chaleco salvavidas/flotación)",
+      "Acompañamiento de un guía especializado durante el recorrido en el agua"
+    ],
+    "no_incluye": [
+      "Alimentos",
+      "Bebidas",
+      "Alquiler de traje de neopreno (opcional)",
+      "Fotos o videos subacuáticos profesionales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Ropa cómoda",
+      "Protector solar ecológico (o remera con protección UV)",
+      "Gafas de sol",
+      "Agua para hidratarse"
+    ],
+    "foto": "snorkeling 1.jpeg"
+  },
+  {
+    "destinos": ["bombinhas"],
+    "destino": "Bombinhas, Brasil",
+    "titulo": "Passeio a Ilha de Porto Belo (Barco Pirata)",
+    "descripcion": "¡Navega a bordo de un divertido barco pirata hacia la paradisíaca Ilha de Porto Belo! Música, animación y paisajes increíbles para toda la familia.",
+    "detalle": "Disfruta de un recorrido inolvidable navegando en un barco pirata totalmente tematizado, donde la tripulación ofrece animación, música y diversión durante todo el trayecto marítimo. El destino final es la hermosa Ilha de Porto Belo, un refugio ecológico de aguas tranquilas y cristalinas ideal para relajarse, nadar y recorrer sus senderos naturales en familia.",
+    "precio_brl": 130,
+    "duracion": "5 hs",
+    "grupo": "Hasta 120 personas",
+    "edad": "Desde 2 años",
+    "incluye": [
+      "Navegación a bordo de un barco pirata tematizado con animación y espectáculos durante el trayecto",
+      "Traslado ida y vuelta por agua",
+      "Tiempo libre para disfrutar de la infraestructura y playas de la Ilha de Porto Belo"
+    ],
+    "no_incluye": [
+      "Alimentos y bebidas a bordo o en la isla",
+      "Alquiler de equipos de playa (sillas, sombrillas)",
+      "Tasa ambiental o de preservación si la hubiera",
+      "Actividades náuticas opcionales en el lugar"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Ropa cómoda",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Dinero o tarjeta para consumos"
+    ],
+    "foto": "bombinhas barco pirata.png"
+  },
+  {
+    "destinos": ["ubatuba"],
+    "destino": "Ubatuba, Brasil",
+    "titulo": "Passeio para Ilha das Couves",
+    "descripcion": "Navega en lancha rápida hacia la Ilha das Couves con desembarque autorizado, visitando islas paradisíacas y playas increíbles.",
+    "detalle": "Vive una aventura inolvidable en el Litoral Norte de São Paulo, empresa con embarcaciones homologadas y autorización oficial de desembarque para la Ilha das Couves (un privilegio que no todas las agencias poseen). El itinerario incluye una navegación segura desde la Praia do Itaguá pasando por vistas panorámicas de la Toca da Velha, Ilha dos Porcos, Ilha do Prumirim, Ilha Rachada, además de una parada perfecta para el almuerzo en la hermosa Praia da Almada.",
+    "sin_precio": true,
+    "duracion": "6 hs",
+    "grupo": "Hasta 15 personas",
+    "edad": "Desde 3 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo en lancha rápida con embarque en Praia do Itaguá (Ubatuba)",
+      "Tripulación habilitada y experimentada",
+      "Equipos de salvatagem conformes a la Marina de Brasil",
+      "Desembarque autorizado en la Ilha das Couves",
+      "Visita panorámica por puntos destacados como Toca da Velha, Ilha dos Porcos, Ilha do Prumirim e Ilha Rachada",
+      "Parada para almuerzo en la Praia da Almada"
+    ],
+    "no_incluye": [
+      "Tasa de desembarque obligatoria en la Ilha das Couves (R$ 10,00 por persona, niños hasta 3 años exentos)",
+      "Almuerzo",
+      "Bebidas"
+    ],
+    "llevar": [
+      "Protector solar",
+      "Sombrero o gorra",
+      "Cámara a prueba de agua"
+    ],
+    "foto": "Couves 1.webp"
+  },
+  {
+    "destinos": ["ubatuba"],
+    "destino": "Ubatuba, Brasil",
+    "titulo": "Roteiro Sul - Ilha Anchieta",
+    "descripcion": "¡Navega hacia la histórica e increíble Ilha Anchieta! Un paseo privado rodeado de naturaleza, ruinas del antiguo presidio y aguas cristalinas en Ubatuba.",
+    "detalle": "Sumérgete en la historia y la biodiversidad del Litoral Sur con un recorrido en lancha exclusivamente privado. La Ilha Anchieta combina la riqueza cultural de sus antiguas ruinas con un entorno natural protegido, senderos ecológicos y playas paradisíacas ideales para el buceo de superficie y la observación de fauna marina. El embarque se realiza de forma cómoda en Praia do Itaguá.",
+    "precio_brl": 30,
+    "duracion": "6 hs",
+    "grupo": "Hasta 15 personas",
+    "edad": "Desde 3 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo en lancha con embarque en Praia do Itaguá (Ubatuba)",
+      "Equipos de salvamento en conformidad con la Marina de Brasil",
+      "Visita a la Ilha Anchieta (santuario de biodiversidad, parque de conservación, ruinas de la antigua prisión y hermosas playas como Praia do Presídio y Praia do Sul)"
+    ],
+    "no_incluye": [
+      "Entrada/Ingreso a la Ilha Anchieta (debe adquirirse de forma anticipada en el sitio oficial de Parques Paulistas, aprox. R$ 19,00 por persona)",
+      "Almuerzo",
+      "Bebidas"
+    ],
+    "llevar": [
+      "Protector solar",
+      "Sombrero o gorra",
+      "Repelente",
+      "Toalla",
+      "Cooler pequeño con snacks/bebidas",
+      "Cámara a prueba de agua"
+    ],
+    "foto": "anchitea 1.webp"
+  }
+]
