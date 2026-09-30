@@ -23,11 +23,8 @@
     ubatuba: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/20230725_084402.jpg',
     rio: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Cidade_Maravilhosa.jpg/1920px-Cidade_Maravilhosa.jpg',
     // Gobierno de la Ciudad Autónoma de Buenos Aires, CC BY 2.5 AR.
-    bue: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Panorama_9_de_Julio_y_el_Obelisco.jpg/960px-Panorama_9_de_Julio_y_el_Obelisco.jpg',
     angra: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/Angra_dos_Reis%2C_Brazil_2018_116.jpg/1920px-Angra_dos_Reis%2C_Brazil_2018_116.jpg',
     sao: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Vista_da_Avenida_Paulista_-_Sesc_Avenida_Paulista_por_Rodrigo_Tetsuo_Argenton_%281%29.jpg/1920px-Vista_da_Avenida_Paulista_-_Sesc_Avenida_Paulista_por_Rodrigo_Tetsuo_Argenton_%281%29.jpg',
-    bho: 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Praca_do_Papa%2C_Belo_Horizonte_%28cropped%292.jpg',
-    curitiba: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Tangu%C3%A1_Curitiba.jpg/1920px-Tangu%C3%A1_Curitiba.jpg',
     porto: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Porto_de_Galinhas_piscinas_naturais.jpg',
     mcz: 'https://upload.wikimedia.org/wikipedia/commons/7/7f/Praia_de_Ipioca_-_Macei%C3%B3_-_Alagoas_%2811394603505%29.jpg',
     maragogi: 'https://upload.wikimedia.org/wikipedia/commons/6/63/Sargentinho_-_Piscinas_naturais_de_Maragogi_-_Alagoas.jpg',
@@ -51,7 +48,6 @@
     bcm: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG/1920px-Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG',
     gram: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/GRAMADO_-_RIO_GRANDE_DO_SUL_-_BRASIL_BY_AUGUSTO_JANISCKI_JUNIOR_%2814281900109%29.jpg/1920px-GRAMADO_-_RIO_GRANDE_DO_SUL_-_BRASIL_BY_AUGUSTO_JANISCKI_JUNIOR_%2814281900109%29.jpg',
     canela: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Catedral_Nossa_Senhora_de_Lourdes.JPG/1920px-Catedral_Nossa_Senhora_de_Lourdes.JPG',
-    igu: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/79/Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg/1920px-Cataratas_do_Igua%C3%A7u%2C_Iguazu_Falls.jpg',
     rec: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg',
     poa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg/1920px-IBPA_17398_-_Vista_a%C3%A9rea_da_Orla_Moacyr_Scliar%2C_na_capital._O_-_2018-10-02_-_Luciano_Lanes-PMPA_%28cropped%29.jpg',
     // Los 10 que faltaban. Todos verificados contra la DESCRIPCION del
@@ -167,18 +163,6 @@
     'ssa#Pelourinho, Elevador Lacerda e Mercado Modelo': {
       url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Pelourinho_Salvador_Bahia_2018-0601.jpg/1280px-Pelourinho_Salvador_Bahia_2018-0601.jpg',
       autor: 'Paul R. Burley', licencia: 'CC BY-SA 4.0'
-    },
-    'bho#Pampulha e arquitetura de Niemeyer': {
-      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/PedroVilela_Lagoa_da_Pampulha_Belo_Horizonte_MG_%2840158074024%29.jpg/1280px-PedroVilela_Lagoa_da_Pampulha_Belo_Horizonte_MG_%2840158074024%29.jpg',
-      autor: 'MTur Destinos', licencia: 'Dominio público'
-    },
-    'igu#Cataratas del lado brasileño e Parque das Aves': {
-      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/00_1838_Iguazu_Falls_from_the_Brazilian_side.jpg/1280px-00_1838_Iguazu_Falls_from_the_Brazilian_side.jpg',
-      autor: 'W. Bulach', licencia: 'CC BY-SA 4.0'
-    },
-    'igu#Cataratas argentinas com Garganta del Diablo': {
-      url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Boca_de_la_Garganta_del_Diablo_en_Cataratas_del_Iguaz%C3%BA_01.jpg/1280px-Boca_de_la_Garganta_del_Diablo_en_Cataratas_del_Iguaz%C3%BA_01.jpg',
-      autor: 'MIKEMDP', licencia: 'CC BY-SA 4.0'
     },
     'bcm#Beto Carrero World desde Camboriú': {
       url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Vista_do_Beto_Carrero_World_a_partir_da_roda-gigante%2C_Penha_SC.JPG/1280px-Vista_do_Beto_Carrero_World_a_partir_da_roda-gigante%2C_Penha_SC.JPG',
@@ -426,14 +410,6 @@
 { label: 'Vila Madalena', key: 'sao' },
 { label: 'Santana / Barra Funda', key: 'sao' }
     ] },
-    { id: 'belohorizonte', label: 'Belo Horizonte', image: 'bho', keys: ['bho'], subcategories: [
-{ label: 'Centro / Savassi', key: 'bho' },
-{ label: 'Pampulha', key: 'bho' }
-    ] },
-    { id: 'curitiba', label: 'Curitiba', image: 'curitiba', keys: ['curitiba'], subcategories: [
-{ label: 'Centro / Batel', key: 'curitiba' },
-{ label: 'Morretes / Serra do Mar', key: 'curitiba' }
-    ] },
     { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'camboriu', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
 { label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
 { label: 'Balneário Camboriú', key: 'bcm' },
@@ -610,11 +586,6 @@
     { id: 'jericoacoara', label: 'Jericoacoara', image: 'jericoacoara', keys: ['jericoacoara'], subcategories: [
 { label: 'Jericoacoara', key: 'jericoacoara' }
     ] },
-    { id: 'buenosaires', label: 'Buenos Aires', image: 'bue', keys: ['bue'], subcategories: [
-{ label: 'Centro / Recoleta', key: 'bue' },
-{ label: 'Palermo / Zona Norte', key: 'bue' },
-{ label: 'Escapada de Fin de Semana', key: 'bue' }
-    ] },
     { id: 'gramado', label: 'Porto Alegre / Gramado / Canela', image: 'gram', keys: ['poa', 'gram', 'canela'], subcategories: [
 { label: 'Porto Alegre', key: 'poa' },
 { label: 'Gramado Centro', key: 'gram' },
@@ -623,10 +594,6 @@
       { label: 'Porto Alegre + Gramado', key: 'poa', secondKey: 'gram' },
       { label: 'Porto Alegre + Canela', key: 'poa', secondKey: 'canela' },
       { label: 'Gramado + Canela', key: 'gram', secondKey: 'canela' }
-    ] },
-    { id: 'foz', label: 'Foz de Iguaçu', image: 'igu', keys: ['igu'], subcategories: [
-{ label: 'Cataratas (lado brasileño)', key: 'igu' },
-{ label: 'Parque das Aves', key: 'igu' }
     ] }
   ];
   // Antes esta seccion rotaba 3 o 4 destinos por mes (esta tabla) para que la
@@ -748,8 +715,8 @@
   }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { bue: 'EZE', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', bho: 'CNF', curitiba: 'CWB', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', igu: 'IGU', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
-  var DEST_IATA_ALIASES = { bue: 'EZE AEP BUE', rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
+  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
+  var DEST_IATA_ALIASES = { rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
   // Segunda superficie: el desplegable de "destino" de arriba. Tiene que traer
   // los mismos 31 que la grilla, o el destino se ofrece en un lado y no en el
   // otro. Se organiza por hub de vuelo, que es como la persona elige de verdad
@@ -916,11 +883,6 @@
       { label: 'Natal + Jeri', key: 'nat', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Natal + Jeri' },
       { label: 'Pipa + Jeri', key: 'pip', codes: 'REC MCZ SSA NAT JPA FOR', subcategory: 'Pipa + Jeri' }
     ] },
-    { name: 'Buenos Aires', codes: 'EZE / AEP', options: [
-{ label: 'Centro / Recoleta', key: 'bue', codes: 'EZE AEP BUE' },
-{ label: 'Palermo / Zona Norte', key: 'bue', codes: 'EZE AEP BUE' },
-{ label: 'Escapada de Fin de Semana', key: 'bue', codes: 'EZE AEP BUE', subcategory: 'Escapada de Fin de Semana' }
-    ] },
     { name: 'Gramado', codes: 'POA', options: [
       { label: 'Porto Alegre', key: 'poa', codes: 'POA' },
       { label: 'Gramado Centro', key: 'gram', codes: 'POA', subcategory: 'Gramado Centro' },
@@ -935,12 +897,6 @@
        propio y su corredor, asi que un par de dos paradas seria dos billetes. */
     { name: 'São Paulo', codes: 'GRU', options: [
       { label: 'São Paulo', key: 'sao', codes: 'GRU' }
-    ] },
-    { name: 'Belo Horizonte', codes: 'CNF', options: [
-      { label: 'Belo Horizonte', key: 'bho', codes: 'CNF' }
-    ] },
-    { name: 'Curitiba', codes: 'CWB', options: [
-      { label: 'Curitiba', key: 'curitiba', codes: 'CWB' }
     ] }
   ];
   var ORIGIN_AIRPORTS = { MVD: 'Montevideo (MVD)', PDP: 'Punta del Este (PDP)' };
@@ -6391,9 +6347,7 @@
 
     var routeCard = '<div class="transport-card roadtrip-route"><div class="roadtrip-route__stat"><span>Ruta ida y vuelta</span><b>' + r.roundTripKm + ' km</b></div><div class="roadtrip-route__stat"><span>Manejo estimado</span><b>' + r.hours + ' hs</b></div><div class="roadtrip-route__stat"><span>Destino</span><b>' + esc(meta.dest.name) + '</b></div></div>';
 
-    // Buenos Aires no tiene trazado a propósito (el viaje es por el ferry de
-    // Colonia, no por tierra): ver scripts/pull-rutas-mapa.js.
-    var mapKey = meta.dest && meta.dest.key !== 'bue' ? meta.dest.key : '';
+    var mapKey = meta.dest ? meta.dest.key : '';
     var mapCard = mapKey
       ? '<div class="transport-card roadtrip-map-card"><div class="roadtrip-map-card__head"><b>🗺️ Tu ruta en auto</b><span>Montevideo → ' + esc(meta.dest.name) + '</span></div><div class="roadtrip-map" data-roadtrip-map="' + esc(mapKey) + '" data-map-dest="' + esc(meta.dest.name) + '" role="img" aria-label="Mapa de la ruta en auto desde Montevideo hasta ' + esc(meta.dest.name) + '"><span class="roadtrip-map__loading">Cargando mapa…</span></div></div>'
       : '';
@@ -6984,7 +6938,6 @@
       fln: 'Movilidad en vans, taxis y caminatas.',
       sao: 'Movilidad en metro, Uber y caminatas.',
       ssa: 'Movilidad en vans, taxis y caminatas.',
-      igu: 'Movilidad en taxis, vans y caminatas.',
       poa: 'Movilidad en colectivos, taxis y caminatas.',
       rec: 'Movilidad en taxis, vans y caminatas.',
       for: 'Movilidad en taxis, vans y caminatas.',
@@ -7752,7 +7705,7 @@
       return '<article class="destination-card' + (option.fits ? ' fits' : '') + (selectedDestKey === option.dest.key ? ' is-selected' : '') + '" data-opt-card data-dest-key="' + esc(option.dest.key) + '">' +
         (photo
           ? '<div class="destination-banner destination-banner-photo"><img src="' + esc(photo) + '" alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
-          : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : option.dest.key === 'igu' ? '🌊' : '☀️') + '</span></div>') +
+          : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : '☀️') + '</span></div>') +
         '<div class="destination-card-body">' +
         '<div class="opt__head destination-card-top"><div class="opt__main">' +
         '<h3>' + esc(option.dest.name) + '</h3>' +
@@ -7987,7 +7940,6 @@
       fln: 'Movilidad en vans, taxis y caminatas.',
       sao: 'Movilidad en metro, Uber y caminatas.',
       ssa: 'Movilidad en vans, taxis y caminatas.',
-      igu: 'Movilidad en taxis, vans y caminatas.',
       poa: 'Movilidad en colectivos, taxis y caminatas.',
       rec: 'Movilidad en taxis, vans y caminatas.',
       for: 'Movilidad en taxis, vans y caminatas.',
@@ -8035,7 +7987,7 @@
   }
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
-    return ['rio', 'bue', 'fln', 'bcm', 'gram', 'canela', 'igu', 'poa', 'camboriu', 'bombinhas', 'rosa'].indexOf(key) >= 0;
+    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'poa', 'camboriu', 'bombinhas', 'rosa'].indexOf(key) >= 0;
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();

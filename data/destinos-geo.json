@@ -25,14 +25,6 @@
       "lat": -3.79322,
       "lon": -38.52804
     },
-    "bue": {
-      "name": "Buenos Aires",
-      "region": "Buenos Aires",
-      "lat": -34.6037,
-      "lon": -58.3816,
-      "corregido": true,
-      "correccion": "Buenos Aires, ARGENTINA. El geocoder devolvio \"Buenos Aires, Pernambuco, Brasil\" porque el script forzaba countrycodes=br, y hay un Buenos Aires en Pernambuco. Es el unico destino fuera de Brasil del modelo."
-    },
     "buz": {
       "name": "Búzios",
       "region": "Río de Janeiro",
@@ -96,18 +88,6 @@
       "region": "São Paulo",
       "lat": -23.55065,
       "lon": -46.63338
-    },
-    "bho": {
-      "name": "Belo Horizonte",
-      "region": "Minas Gerais",
-      "lat": -19.92273,
-      "lon": -43.94509
-    },
-    "curitiba": {
-      "name": "Curitiba",
-      "region": "Paraná",
-      "lat": -25.4296,
-      "lon": -49.27127
     },
     "porto": {
       "name": "Porto de Galinhas",
@@ -264,12 +244,6 @@
       "region": "Río Grande do Sul",
       "lat": -29.75083,
       "lon": -50.02107
-    },
-    "igu": {
-      "name": "Foz de Iguazú",
-      "region": "Paraná",
-      "lat": -25.5304,
-      "lon": -54.58307
     },
     "rec": {
       "name": "Recife",

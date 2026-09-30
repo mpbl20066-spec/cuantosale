@@ -70,57 +70,6 @@
       "nota": "La mas cara del pais junto con Curitiba, y con el PF mas caro entre las capitales: el promedio por kilo de la ciudad es R$86,86, un 30% mas que el PF nacional.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
     },
-    "curitiba": {
-      "comida": {
-        "casual": 35,
-        "moderado": 70,
-        "gourmet": 125
-      },
-      "traslado": {
-        "eco": 22,
-        "confort": 48,
-        "medio": 32
-      },
-      "fuente": "Igual que Sao Paulo: mismo nivel de mercado, misma region (Sudeste), y es la capital mas barata de vivir segun Numbeo/Expatistan (USD 800-1.100 por mes para una persona).",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Copia de sao. Se verificó que Curitiba tiene el costo de vida mas bajo entre las capitales grandes (Numbeo, Expatistan, Score Cidades), pero no se encontro una fuente de precios de restaurantes propia. Si se agrega, conviene bajarla: la tabla actual la deja igual que Sao Paulo, y el alojamiento ya la pone mas barata (lodging 42/80/140 contra 50/90/160).",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
-    },
-    "bue": {
-      "comida": {
-        "casual": 30,
-        "moderado": 58,
-        "gourmet": 100
-      },
-      "traslado": {
-        "eco": 18,
-        "confort": 38,
-        "medio": 26
-      },
-      "fuente": "No verificado contra una fuente de precios de restaurantes de Buenos Aires. Escala tomada de que el precio general de Argentina es menor al de Brasil en la region.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin fuente directa. Es el unico destino fuera de Brasil del catalogo (el unico con iata EZE) y el unico con 'country: Argentina', asi que conviene revisarlo con datos propios.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
-    },
-    "bho": {
-      "comida": {
-        "casual": 22,
-        "moderado": 42,
-        "gourmet": 75
-      },
-      "traslado": {
-        "eco": 14,
-        "confort": 28,
-        "medio": 20
-      },
-      "fuente": "Numbeo Belo Horizonte: comida barata R$30, cena media para 2 R$190. O Tempo: PF R$31,95 con bebida R$39,80; self-service desde R$19,99 y hasta R$179,90 segun la region. Instagram/almoce bh: gasto mensual de almuerzo con bebida R$1.421,61.",
-      "verificado": "2026-09-27",
-      "confianza": "media",
-      "nota": "El self-service varia fortisimo por zona (R$19,99 a R$179,90). Se toma el extremo barato porque el perfil de gasto es de traveler con hotel simple.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
-    },
     "ssa": {
       "comida": {
         "casual": 25,
@@ -624,23 +573,6 @@
       "verificado": "2026-09-27",
       "confianza": "media",
       "nota": "100 km al sur de Torres, asi que baja un poco: mismo mercado, precios mas bajos.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
-    },
-    "igu": {
-      "comida": {
-        "casual": 22,
-        "moderado": 40,
-        "gourmet": 70
-      },
-      "traslado": {
-        "eco": 12,
-        "confort": 25,
-        "medio": 17
-      },
-      "fuente": "budgetyourtrip Foz do Iguacu vs Manaus: Foz USD 39 por dia de comida contra USD 22 de Manaus. Es el destino mas barato del catalogo junto con Porto Alegre.",
-      "verificado": "2026-09-27",
-      "confianza": "media",
-      "nota": "Destino de Naturaleza, no de playa ni de vida urbana: no hay vida nocturna que infle los precios.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
     },
     "fernando": {

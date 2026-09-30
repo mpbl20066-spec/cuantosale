@@ -31,8 +31,6 @@
     "ubatuba": "Ubatuba, Brasil",
     "angra": "Angra dos Reis, Brasil",
     "sao": "São Paulo, Brasil",
-    "bho": "Belo Horizonte, Brasil",
-    "curitiba": "Curitiba, Brasil",
     "porto": "Porto de Galinhas, Brasil",
     "mcz": "Maceió, Brasil",
     "maragogi": "Maragogi, Brasil",
@@ -51,10 +49,8 @@
     "bcm": "Balneário Camboriú, Brasil",
     "gram": "Gramado, Brasil",
     "canela": "Canela, Brasil",
-    "igu": "Foz de Iguazú, Brasil",
     "rec": "Recife, Brasil",
-    "poa": "Porto Alegre, Brasil",
-    "bue": "Buenos Aires, Argentina"
+    "poa": "Porto Alegre, Brasil"
   },
   "tours": [
     {
@@ -138,46 +134,6 @@
       "descripcion": "Degustación de sabores brasileños y asiáticos con acompañamiento local.",
       "precio": 68,
       "detalle": "Incluye guía gastronómico y degustaciones seleccionadas en Liberdade y el Mercado Municipal. Actividad de 4 horas, generalmente al mediodía. Avisar alergias o restricciones y confirmar qué consumos están incluidos."
-    },
-    {
-      "destinos": [
-        "bho"
-      ],
-      "destino": "Belo Horizonte, Brasil",
-      "titulo": "Pampulha y arquitectura de Niemeyer",
-      "descripcion": "Circuito cultural por el conjunto de Pampulha y sus jardines.",
-      "precio": 45,
-      "detalle": "Incluye transporte, guía y paradas en la Igreja de São Francisco, Museo de Arte y Casa do Baile. Duración aproximada de 4 horas. Los museos pueden tener horarios especiales; confirmar calendario antes de reservar."
-    },
-    {
-      "destinos": [
-        "bho"
-      ],
-      "destino": "Belo Horizonte, Brasil",
-      "titulo": "Experiencia de bares y comida mineira",
-      "descripcion": "Recorrido por mercados y bares tradicionales con sabores de Minas Gerais.",
-      "precio": 62,
-      "detalle": "Incluye acompañamiento local y degustaciones de porciones típicas en dos o tres paradas. Duración estimada de 3 horas, al final de la tarde. El menú puede variar y conviene informar restricciones alimentarias."
-    },
-    {
-      "destinos": [
-        "curitiba"
-      ],
-      "destino": "Curitiba, Brasil",
-      "titulo": "City tour en la Linha Turismo",
-      "descripcion": "Jardín Botánico, Ópera de Arame, Museo Oscar Niemeyer y parques.",
-      "precio": 42,
-      "detalle": "Incluye orientación de guía y recorrido por los principales puntos de Curitiba, con paradas para fotos. Duración aproximada de 5 horas. El orden puede cambiar por tránsito y horarios de museos."
-    },
-    {
-      "destinos": [
-        "curitiba"
-      ],
-      "destino": "Curitiba, Brasil",
-      "titulo": "Morretes en tren por la Serra do Mar",
-      "descripcion": "Viaje escénico en tren y almuerzo típico del litoral paranaense.",
-      "precio": 98,
-      "detalle": "Incluye traslado, tramo en tren panorámico sujeto a disponibilidad y orientación en Morretes. Jornada de día completo. El precio puede cambiar según la categoría del vagón; reservar con anticipación en fines de semana."
     },
     {
       "destinos": [
@@ -721,26 +677,6 @@
     },
     {
       "destinos": [
-        "bho"
-      ],
-      "destino": "Belo Horizonte, Brasil",
-      "titulo": "Free tour a pie por el centro histórico",
-      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
-      "precio": 20,
-      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
-    },
-    {
-      "destinos": [
-        "curitiba"
-      ],
-      "destino": "Curitiba, Brasil",
-      "titulo": "Free tour a pie por el centro histórico",
-      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
-      "precio": 20,
-      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
-    },
-    {
-      "destinos": [
         "porto"
       ],
       "destino": "Porto de Galinhas, Brasil",
@@ -1008,46 +944,6 @@
         "poa"
       ],
       "destino": "Porto Alegre, Brasil",
-      "titulo": "Free tour a pie por el centro histórico",
-      "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
-      "precio": 20,
-      "detalle": "Incluye guía local en español o portugués y recorrido a pie por plazas, edificios históricos y miradores del centro. Duración aproximada de 2 a 3 horas. El monto es una propina sugerida al guía; no hay costo fijo obligatorio."
-    },
-    {
-      "destinos": [
-        "bue"
-      ],
-      "destino": "Buenos Aires, Argentina",
-      "titulo": "Teatro Colón, Casa Rosada y el centro histórico",
-      "descripcion": "Los tres íconos de la ciudad con guía y entrada al Teatro Colón.",
-      "precio": 28,
-      "detalle": "Incluye guía local y recorrido por el Teatro Colón, la Plaza de Mayo, la Casa Rosada y el Cabildo, con entrada al Teatro Colón sujeta a disponibilidad. Duración aproximada de 3 horas. Llevar documento para el acceso."
-    },
-    {
-      "destinos": [
-        "bue"
-      ],
-      "destino": "Buenos Aires, Argentina",
-      "titulo": "City tour en bici por La Boca y Puerto Madero",
-      "descripcion": "Pedaleo por el barrio del tango, los muelles y la Costanera Sur.",
-      "precio": 32,
-      "detalle": "Incluye bicicleta, casco y guía. Recorrido por Caminito, la Vuelta de Rocha, Puerto Madero y la Costanera, con paradas para fotos. Duración aproximada de 3 horas. El circuito es de asfalto urbano y conviene circular con precaución."
-    },
-    {
-      "destinos": [
-        "bue"
-      ],
-      "destino": "Buenos Aires, Argentina",
-      "titulo": "Mercado de San Telmo y Antigüedades",
-      "descripcion": "Puestos de antigüedades, librerías de mapa y mogules del barrio.",
-      "precio": 24,
-      "detalle": "Incluye acompañamiento de guía por el Mercado de Antigüedades de San Telmo y las calles vecinas. Duración aproximada de 2 horas. El consume y las compras no están incluidos, y hay que negociar el precio con el vendedor."
-    },
-    {
-      "destinos": [
-        "bue"
-      ],
-      "destino": "Buenos Aires, Argentina",
       "titulo": "Free tour a pie por el centro histórico",
       "descripcion": "Recorrido guiado por los principales puntos históricos y culturales de la ciudad.",
       "precio": 20,
@@ -2194,186 +2090,6 @@
       "precio_brl": 345.0,
       "detalle": "Se hace martes, jueves y sábado. Te buscan en el alojamiento (zona urbana). Los menores de 6 años no pagan.",
       "image": "https://admin.paytour.com.br/thumbnails/2152/thumbnail"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Circuito Cataratas Brasil (entradas aparte)",
-      "descripcion": "Circuito en ómnibus panorámico Redbus por el Parque das Aves y las Cataratas del lado brasileño, con guía.",
-      "precio": 21,
-      "precio_brl": 109.0,
-      "detalle": "El precio incluye el transporte y el acompañamiento de guía. Las entradas al Parque das Aves y a las Cataratas NO están incluidas y se compran por separado.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00099/4340-circuitocataratas7.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Circuito Cataratas Argentina",
-      "descripcion": "Excursión al Parque Nacional Iguazú, del lado argentino, con transporte, guía y entradas incluidos.",
-      "precio": 117,
-      "precio_brl": 599.0,
-      "detalle": "Las entradas al Parque Nacional Iguazú están incluidas en el precio.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00005/2101-cataratasdoladoargentino.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Macuco Safari: paseo en barco",
-      "descripcion": "Trilha por la selva y paseo en barco hasta las Cataratas del Iguazú.",
-      "precio": 74,
-      "precio_brl": 382.0,
-      "detalle": "Combina un paseo en barco muy cerca de las caídas de agua con una trilha por el bosque subtropical del Parque Nacional do Iguaçu.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00003/1946-passeiodebarcoemfoz.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Parque das Aves",
-      "descripcion": "Parque de conservación de aves de la Mata Atlántica, con más de 1.400 aves de unas 130 especies.",
-      "precio": 21,
-      "precio_brl": 109.0,
-      "detalle": "Una visita educativa y de contacto cercano con la naturaleza, ideal para familias.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00014/4349-parquedasaves10.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Atardecer en las Cataratas",
-      "descripcion": "Visita a las Cataratas al final del día, con un cóctel en el Espaço Naipi.",
-      "precio": 48,
-      "precio_brl": 245.0,
-      "detalle": "Permite ver las caídas iluminadas por la luz dorada del atardecer.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00118/4086-pordosolcataratas4.jpeg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Amanecer en las Cataratas",
-      "descripcion": "Ingreso al Parque Nacional do Iguaçu en las primeras horas del día, con desayuno incluido.",
-      "precio": 57,
-      "precio_brl": 295.0,
-      "detalle": "Permite ver las Cataratas cuando la luz del sol recién ilumina las caídas.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00080/4020-amanhecernascataratasemfoz.jpeg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Circuito Itaipu",
-      "descripcion": "Visita a la Itaipu Panorámica en el ómnibus panorámico Redbus, con guía.",
-      "precio": 44,
-      "precio_brl": 228.0,
-      "detalle": "Vista privilegiada de una de las mayores obras de ingeniería del mundo.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00128/4239-circuitoitaipu4.jpeg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Marco de las 3 Fronteras",
-      "descripcion": "Visita al obelisco donde se encuentran Brasil, Argentina y Paraguay, en la confluencia de los ríos Iguazú y Paraná.",
-      "precio": 14,
-      "precio_brl": 70.5,
-      "detalle": "Cada país tiene su propio hito.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00013/1922-passeiomarcodastresfronteirasemfozdoigua.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "City tour por Foz do Iguaçu",
-      "descripcion": "Recorrido por el centro histórico, el Templo Budista y la Mezquita Árabe, en ómnibus panorámico con guía.",
-      "precio": 31,
-      "precio_brl": 159.0,
-      "detalle": "Se hace a bordo del Redbus, con acompañamiento de guía.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00007/2015-passeionamesquitadefozdoiguacu.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "City tour por Puerto Iguazú (Argentina)",
-      "descripcion": "Recorrido por Puerto Iguazú, con el Marco de las Tres Fronteras, La Aripuca y el centro de la ciudad.",
-      "precio": 37,
-      "precio_brl": 189.0,
-      "detalle": "Incluye visitas a varios puntos de interés de la ciudad argentina.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00040/4360-citytourargentina6.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "City tour por Ciudad del Este (Paraguay)",
-      "descripcion": "Recorrido por Ciudad del Este, con la Catedral San Blas y los Saltos del Monday.",
-      "precio": 43,
-      "precio_brl": 219.0,
-      "detalle": "Incluye visitas a los principales puntos turísticos de la ciudad.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00001/2035-passeionaciudaddelesteparaguai.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Kattamaram II: navegación por el Paraná con almuerzo",
-      "descripcion": "Paseo en barco por el Río Paraná con almuerzo a bordo.",
-      "precio": 58,
-      "precio_brl": 300.0,
-      "detalle": "Navegación relajada con almuerzo incluido.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00067/2665-kattamarampordosol.jpeg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Dreams Park Show: pasaporte de 5 atracciones",
-      "descripcion": "Entrada al Museo de Cera, Bar de Hielo, Valle de los Dinosaurios, Maravillas del Mundo y Motor Show.",
-      "precio": 46,
-      "precio_brl": 239.0,
-      "detalle": "Un solo pase para cinco atracciones del Dreams Park Show.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00053/4005-combodepasseiosemfozdoiguacu.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Rafain Churrascaría Show: cena",
-      "descripcion": "Rodízio de carnes con espectáculo cultural de varios países de América Latina.",
-      "precio": 60,
-      "precio_brl": 309.0,
-      "detalle": "Cena show en la churrascaría Rafain.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00011/2007-restaurantesbonsemfozdoiguacu.jpg"
-    },
-    {
-      "destinos": [
-        "igu"
-      ],
-      "destino": "Foz de Iguazú, Brasil",
-      "titulo": "Aquamania: parque acuático",
-      "descripcion": "Parque acuático con más de 15 atracciones, 7 piscinas y 8 toboganes.",
-      "precio": 14,
-      "precio_brl": 70.0,
-      "detalle": "Abre de martes a domingo, de 10:00 a 18:00, en la Avenida das Cataratas 7120, a pocos minutos de las Cataratas.",
-      "image": "https://assets.loumarturismo.com.br//passeios/imagens/00063/2478-parqueaquaticoemfoz.jpg"
     }
   ]
 }

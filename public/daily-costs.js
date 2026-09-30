@@ -19,9 +19,6 @@
   poa: { name: 'Porto Alegre', transport: { eco: 13, medio: 20, confort: 30 }, food: { casual: 27, moderado: 50, gourmet: 90 } },
   rio: { name: 'Río de Janeiro', transport: { eco: 16, medio: 24, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 95 } },
   sao: { name: 'São Paulo', transport: { eco: 22, medio: 32, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } },
-  curitiba: { name: 'Curitiba', transport: { eco: 22, medio: 32, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } },
-  bue: { name: 'Buenos Aires', transport: { eco: 18, medio: 26, confort: 38 }, food: { casual: 30, moderado: 58, gourmet: 100 } },
-  bho: { name: 'Belo Horizonte', transport: { eco: 14, medio: 20, confort: 28 }, food: { casual: 22, moderado: 42, gourmet: 75 } },
   ssa: { name: 'Salvador de Bahía', transport: { eco: 14, medio: 20, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
   for: { name: 'Fortaleza', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
   nat: { name: 'Natal', transport: { eco: 15, medio: 22, confort: 32 }, food: { casual: 26, moderado: 48, gourmet: 80 } },
@@ -52,7 +49,6 @@
   canela: { name: 'Canela', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 32, moderado: 62, gourmet: 110 } },
   torres: { name: 'Torres', transport: { eco: 15, medio: 22, confort: 33 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
   canoa: { name: 'Capão da Canoa', transport: { eco: 14, medio: 21, confort: 31 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
-  igu: { name: 'Foz de Iguazú', transport: { eco: 12, medio: 17, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } },
   fernando: { name: 'Fernando de Noronha', transport: { eco: 30, medio: 47, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } },
   pip: { name: 'Pipa', transport: { eco: 16, medio: 24, confort: 35 }, food: { casual: 30, moderado: 55, gourmet: 90 } },
   trancoso: { name: 'Trancoso', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
@@ -88,24 +84,6 @@
       "confianza": "media",
       "verificado": "2026-09-27",
       "nota": "La mas cara del pais junto con Curitiba, y con el PF mas caro entre las capitales: el promedio por kilo de la ciudad es R$86,86, un 30% mas que el PF nacional."
-    },
-  curitiba: {
-      "fuente": "Igual que Sao Paulo: mismo nivel de mercado, misma region (Sudeste), y es la capital mas barata de vivir segun Numbeo/Expatistan (USD 800-1.100 por mes para una persona).",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "derivacion": "Copia de sao. Se verificó que Curitiba tiene el costo de vida mas bajo entre las capitales grandes (Numbeo, Expatistan, Score Cidades), pero no se encontro una fuente de precios de restaurantes propia. Si se agrega, conviene bajarla: la tabla actual la deja igual que Sao Paulo, y el alojamiento ya la pone mas barata (lodging 42/80/140 contra 50/90/160)."
-    },
-  bue: {
-      "fuente": "No verificado contra una fuente de precios de restaurantes de Buenos Aires. Escala tomada de que el precio general de Argentina es menor al de Brasil en la region.",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "derivacion": "Sin fuente directa. Es el unico destino fuera de Brasil del catalogo (el unico con iata EZE) y el unico con 'country: Argentina', asi que conviene revisarlo con datos propios."
-    },
-  bho: {
-      "fuente": "Numbeo Belo Horizonte: comida barata R$30, cena media para 2 R$190. O Tempo: PF R$31,95 con bebida R$39,80; self-service desde R$19,99 y hasta R$179,90 segun la region. Instagram/almoce bh: gasto mensual de almuerzo con bebida R$1.421,61.",
-      "confianza": "media",
-      "verificado": "2026-09-27",
-      "nota": "El self-service varia fortisimo por zona (R$19,99 a R$179,90). Se toma el extremo barato porque el perfil de gasto es de traveler con hotel simple."
     },
   ssa: {
       "fuente": "pack-lightly: PF en el Mercado Sao Joaquim desde R$18, por kilo R$20-40, moqueca en el mercado USD 6 y a la calle USD 15. latamtravellers: acaraje R$10-20, moqueca en restaurante de barrio USD 10-16, por kilo R$33-57.",
@@ -281,12 +259,6 @@
       "confianza": "media",
       "verificado": "2026-09-27",
       "nota": "100 km al sur de Torres, asi que baja un poco: mismo mercado, precios mas bajos."
-    },
-  igu: {
-      "fuente": "budgetyourtrip Foz do Iguacu vs Manaus: Foz USD 39 por dia de comida contra USD 22 de Manaus. Es el destino mas barato del catalogo junto con Porto Alegre.",
-      "confianza": "media",
-      "verificado": "2026-09-27",
-      "nota": "Destino de Naturaleza, no de playa ni de vida urbana: no hay vida nocturna que infle los precios."
     },
   fernando: {
       "fuente": "malaprontanoronha (2026): quentinhas R$25-35, restaurante do Valdenio R$30, tapioca da Babalu R$13-18, self-service R$27-35; carta de restaurante medio R$70-100; premium R$150-250; los mas caros (Mesa da Ana, Pousada Maravilha) R$250-400. Presupuesto diario: economico R$50-80, medio R$180-250. Infobrazil: +60%, el destino mas caro de Brasil.",

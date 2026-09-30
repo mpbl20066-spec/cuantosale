@@ -276,7 +276,9 @@ function haversineKm(a, b) {
     const script = fs.readFileSync(path.join(__dirname, 'buscar-fotos-tours.js'), 'utf8');
     const bloque = script.slice(script.indexOf('const SUBJECTS'), script.indexOf('const UA'));
     const claves = [...bloque.matchAll(/^\s*'((?:[^'\\]|\\.)*)':/gm)].map(function (x) { return x[1]; });
-    assert.ok(claves.length > 40, 'no se pudo leer SUBJECTS: ' + claves.length + ' claves');
+    // El piso es solo para detectar que el regex no leyo el bloque (daria 0 claves).
+    // No es un conteo de tours: SUBJECTS solo lista los que se buscan en Commons.
+    assert.ok(claves.length > 20, 'no se pudo leer SUBJECTS: ' + claves.length + ' claves');
 
     const rotas = claves.filter(function (k) { return !tours.has(k); });
     assert.deepStrictEqual(rotas, [],
@@ -347,8 +349,8 @@ function haversineKm(a, b) {
     assert.throws(function () { model.validate({ dest: 'ssa', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today); }, /roadtrip|auto/i);
     const florianopolisBus = model.validate({ dest: 'fln', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'bus' }, today);
     assert.strictEqual(florianopolisBus.S.transport, 'bus');
-    const buenosAiresAuto = model.validate({ dest: 'bue', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today);
-    assert.strictEqual(buenosAiresAuto.S.transport, 'auto');
+    const gramadoAuto = model.validate({ dest: 'gram', dep: dep, ret: ret, pax: '2', budget: '3000', style: 'eq', transport: 'auto' }, today);
+    assert.strictEqual(gramadoAuto.S.transport, 'auto');
   });
 
   console.log('Servidor y proveedores');
@@ -979,17 +981,15 @@ function haversineKm(a, b) {
     }
     assert.ok(expected.size >= 30, 'no se pudo leer DESTINATION_GROUPS: ' + expected.size + ' claves');
     assert.ok(j.some(function (d) { return d.key === 'fln'; }));
-    assert.ok(j.some(function (d) { return d.key === 'bue' && d.name === 'Buenos Aires'; }));
     assert.deepStrictEqual(j.map(function (d) { return d.key; }).sort(), [...expected].sort());
   });
-  await t('todo destino del buscador existe en el modelo y es de Brasil salvo Buenos Aires', async function () {
+  await t('todo destino del buscador existe en el modelo y es de Brasil', async function () {
     // Esta es la que habría detectado el desfase de Gramado y Foz: la lista
     // de arriba se desactualiza en silencio, pero el modelo no.
     const j = JSON.parse((await get(port, '/api/destinos')).body);
     j.forEach(function (d) {
       assert.ok(model.DEST[d.key], 'destino del buscador ausente del modelo: ' + d.key);
-      const country = d.key === 'bue' ? 'Argentina' : 'Brasil';
-      assert.strictEqual(model.DEST[d.key].country || 'Brasil', country, 'país inesperado en ' + d.key);
+      assert.strictEqual(model.DEST[d.key].country || 'Brasil', 'Brasil', 'país inesperado en ' + d.key);
       assert.ok(d.name && typeof d.name === 'string', 'destino sin nombre: ' + d.key);
     });
   });
@@ -1306,12 +1306,6 @@ function haversineKm(a, b) {
     assert.deepStrictEqual(Object.keys(D).filter((k) => !model.DEST[k]), [],
       'hay destinos en el JSON que no existen en el modelo');
   });
-  await t('cotiza Buenos Aires como destino de Argentina', async function () {
-    const r = await get(port, '/api/cotizar?dest=bue&dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
-    const j = JSON.parse(r.body);
-    assert.strictEqual(r.status, 200); assert.strictEqual(j.meta.dest.key, 'bue');
-    assert.strictEqual(j.meta.dest.country, 'Argentina'); assert.ok(j.list.length >= 3);
-  });
   await t('cotiza todos los destinos de la grilla, ordenados por total', async function () {
     const r = await get(port, '/api/cotizar-todos?dep=' + dep + '&ret=' + ret + '&pax=2&budget=3000&style=eq');
     const j = JSON.parse(r.body);
@@ -1341,7 +1335,7 @@ function haversineKm(a, b) {
     assert.strictEqual(r.status, 400); assert.ok(JSON.parse(r.body).error);
   });
   await t('precifica las tarjetas de destinos destacados con el modelo real', async function () {
-    const items = ['rio', 'fln', 'bue'].map(function (k) { return k + '~' + dep + '~' + ret + '~intermedio'; }).join(',');
+    const items = ['rio', 'fln', 'sao'].map(function (k) { return k + '~' + dep + '~' + ret + '~intermedio'; }).join(',');
     const j = JSON.parse((await get(port, '/api/destinos-destacados?items=' + items + '&pax=2&style=eq&origin=MVD')).body);
     assert.strictEqual(j.items.length, 3);
     assert.ok(j.items.every(function (i) { return i.pp > 0 && i.total >= i.pp; }));

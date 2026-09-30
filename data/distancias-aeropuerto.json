@@ -1,9 +1,4 @@
 {
-  "bue|EZE": {
-    "km": 32,
-    "horas": 0.5,
-    "lineaRecta": 28.1
-  },
   "buz|GIG": {
     "km": 174,
     "horas": 2.7,
@@ -48,16 +43,6 @@
     "km": 26,
     "horas": 0.5,
     "lineaRecta": 21.3
-  },
-  "bho|CNF": {
-    "km": 40,
-    "horas": 0.6,
-    "lineaRecta": 32
-  },
-  "curitiba|CWB": {
-    "km": 17,
-    "horas": 0.4,
-    "lineaRecta": 14.6
   },
   "porto|REC": {
     "km": 53,
@@ -188,11 +173,6 @@
     "km": 135,
     "horas": 1.8,
     "lineaRecta": 113.8
-  },
-  "igu|IGU": {
-    "km": 14,
-    "horas": 0.3,
-    "lineaRecta": 11.2
   },
   "rec|REC": {
     "km": 13,

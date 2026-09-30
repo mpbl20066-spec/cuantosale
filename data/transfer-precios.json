@@ -88,20 +88,6 @@
     "argentina": "bue es el unico destino fuera de Brasil y el unico sin ancla. Todo lo demas esta calibrado con precios de Brasil, asi que conviene tomarlo con mas reserva que el resto."
   },
   "destinos": {
-    "bue": {
-      "nombre": "Buenos Aires",
-      "iata": "EZE",
-      "modo": "car",
-      "km": 32,
-      "horas": 0.5,
-      "compartido": 20,
-      "privado": 32,
-      "real": [],
-      "fuente": "Sin fuente. Es el unico destino fuera de Brasil del catalogo, asi que no hay ni Uber ni operador local que publique un precio. Ambos los valores salen del modelo de distancia calibrado en los otros 14 aeropuerto. Si se agrega, conviene revisarlo con datos propios: ver la nota de _meta.argentina.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 32 km de OSRM da US$ 20 y US$ 32."
-    },
     "buz": {
       "nombre": "Búzios",
       "iata": "GIG",
@@ -286,34 +272,6 @@
       "verificado": "2026-09-27",
       "confianza": "media",
       "derivacion": "El compartido sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 26 km de OSRM da US$ 20 y US$ 30."
-    },
-    "bho": {
-      "nombre": "Belo Horizonte",
-      "iata": "CNF",
-      "modo": "car",
-      "km": 40,
-      "horas": 0.6,
-      "compartido": 20,
-      "privado": 37,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (40) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 40 km de OSRM: US$ 20 compartido y US$ 37 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
-    },
-    "curitiba": {
-      "nombre": "Curitiba",
-      "iata": "CWB",
-      "modo": "car",
-      "km": 17,
-      "horas": 0.4,
-      "compartido": 20,
-      "privado": 30,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (17) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 17 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
     },
     "porto": {
       "nombre": "Porto de Galinhas",
@@ -715,21 +673,6 @@
       "verificado": "2026-09-27",
       "confianza": "baja",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 135 km de OSRM: US$ 25 compartido y US$ 96 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
-    },
-    "igu": {
-      "nombre": "Foz de Iguazú",
-      "iata": "IGU",
-      "modo": "car",
-      "km": 14,
-      "horas": 0.3,
-      "appRideUsd": 8,
-      "compartido": 20,
-      "privado": 30,
-      "real": [],
-      "fuente": "Uber publica IGU -> Foz do Iguacu en R$ 40 (21 min, 12 km), por vehiculo.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 14 km de OSRM da US$ 20 y US$ 30."
     },
     "rec": {
       "nombre": "Recife",

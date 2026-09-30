@@ -19,7 +19,6 @@
     Object.defineProperty(module.exports, 'provenance', { value: proc, enumerable: false });
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, {
-  bue: { name: "Buenos Aires", iata: "EZE", modo: "car", km: 32, compartido: 20, privado: 32 },
   buz: { name: "Búzios", iata: "GIG", modo: "car", km: 174, compartido: 30.77, privado: 86.54, compartido_brl: 160, privado_brl: 450 },
   arraial: { name: "Arraial do Cabo", iata: "GIG", modo: "car", km: 170, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450 },
   cabo: { name: "Cabo Frio", iata: "GIG", modo: "car", km: 160, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450 },
@@ -30,8 +29,6 @@
   rio: { name: "Río de Janeiro", iata: "GIG", modo: "car", km: 18, compartido: 30, privado: 45, compartido_brl: 156 },
   angra: { name: "Angra dos Reis", iata: "GIG", modo: "car", km: 139, compartido: 57.69, privado: 105.77, compartido_brl: 300, privado_brl: 550 },
   sao: { name: "São Paulo", iata: "GRU", modo: "car", km: 26, compartido: 20, privado: 41 },
-  bho: { name: "Belo Horizonte", iata: "CNF", modo: "car", km: 40, compartido: 20, privado: 37 },
-  curitiba: { name: "Curitiba", iata: "CWB", modo: "car", km: 17, compartido: 20, privado: 30 },
   porto: { name: "Porto de Galinhas", iata: "REC", modo: "car", km: 53, compartido: 20, privado: 45 },
   mcz: { name: "Maceió", iata: "MCZ", modo: "car", km: 21, compartido: 15.38, privado: 51.92, compartido_brl: 80, privado_brl: 270 },
   maragogi: { name: "Maragogi", iata: "MCZ", modo: "car", km: 129, compartido: 25, privado: 92 },
@@ -60,7 +57,6 @@
   canela: { name: "Canela", iata: "POA", modo: "car", km: 115, compartido: 25, privado: 83 },
   torres: { name: "Torres", iata: "POA", modo: "car", km: 184, compartido: 30, privado: 126 },
   canoa: { name: "Capão da Canoa", iata: "POA", modo: "car", km: 135, compartido: 25, privado: 96 },
-  igu: { name: "Foz de Iguazú", iata: "IGU", modo: "car", km: 14, compartido: 20, privado: 30, appRideUsd: 8 },
   rec: { name: "Recife", iata: "REC", modo: "car", km: 13, compartido: 20, privado: 30 },
   joaopessoa: { name: "João Pessoa", iata: "JPA", modo: "car", km: 13, compartido: 20, privado: 30 },
   poa: { name: "Porto Alegre", iata: "POA", modo: "car", km: 9, compartido: 20, privado: 30, appRideUsd: 7 }
@@ -79,15 +75,6 @@
         "calibracion": "El compartido casi no crece con la distancia porque lo que se paga es el chofer y el vehiculo, repartidos entre los pasajeros: entre GIG->rio (18 km, US$ 22) y GIG->buz (174 km, US$ 29) hay 156 km de diferencia y solo 7 dolares de precio.",
         "privado_no_es_uber": "El privado es un transfer reservado (meet & greet, el chofer espera, peajes incluidos), no un pedido de app. Por eso sale mas caro que el appRide aunque el vehiculo sea el mismo. El modelo del privado se calibro con la tarifa publicada de un operador (GRU->sao, R$ 215) y con un promedio de Uber de ruta larga (POA->gram, R$ 225), y queda por debajo de los dos porque el transfert turistico de larga distancia que se encontro (GIG->buz, US$ 227-300) es un producto con excursion, no un traslado."
       }
-    },
-  bue: {
-      "fuente": "Sin fuente. Es el unico destino fuera de Brasil del catalogo, asi que no hay ni Uber ni operador local que publique un precio. Ambos los valores salen del modelo de distancia calibrado en los otros 14 aeropuerto. Si se agrega, conviene revisarlo con datos propios: ver la nota de _meta.argentina.",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 32 km de OSRM da US$ 20 y US$ 32.",
-      "km": 32,
-      "horas": 0.5
     },
   buz: {
       "fuente": "Compartido, confianza alta: inbuzios.com.br publica \"Transfer Aeroporto Galeao GIG x Buzios a partir de R$ 150,00\", y RIOgaleao Digital (galeon.com.br, el operador del propio aeropuerto) confirma la misma tarifa. CheckMyBus lista el shuttle BUZIOS TRANSFER en US$ 30. Son 174 km por la RJ-124, el mismo tramo que devuelve OSRM. El destino queda en confianza media y no alta porque el PRIVADO es derivado del modelo: el precio que se encontro (US$ 227-300 por grupo de hasta 3, GetYourGuide) es un producto turistico que incluye excursion, no un traslado pelado.",
@@ -201,24 +188,6 @@
       "derivacion": "El compartido sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 26 km de OSRM da US$ 20 y US$ 30.",
       "km": 26,
       "horas": 0.5
-    },
-  bho: {
-      "fuente": "Sin precio real para esta ruta. Los km (40) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 40 km de OSRM: US$ 20 compartido y US$ 37 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "km": 40,
-      "horas": 0.6
-    },
-  curitiba: {
-      "fuente": "Sin precio real para esta ruta. Los km (17) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 17 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "km": 17,
-      "horas": 0.4
     },
   porto: {
       "fuente": "Sin precio real para esta ruta. Los km (53) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
@@ -477,16 +446,6 @@
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 135 km de OSRM: US$ 25 compartido y US$ 96 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 135,
       "horas": 1.8
-    },
-  igu: {
-      "fuente": "Uber publica IGU -> Foz do Iguacu en R$ 40 (21 min, 12 km), por vehiculo.",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 14 km de OSRM da US$ 20 y US$ 30.",
-      "km": 14,
-      "horas": 0.3,
-      "appRideUsd": 8
     },
   rec: {
       "fuente": "Sin precio real para esta ruta. Los km (13) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
