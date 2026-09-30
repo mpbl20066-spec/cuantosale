@@ -4754,7 +4754,7 @@
   }
   function enviarTarjetaSplit(btn) {
     var original = btn.textContent;
-    btn.disabled = true; btn.textContent = 'Generando tarjeta…';
+    btn.disabled = true; btn.classList.add('is-loading'); btn.textContent = 'Generando tarjeta…';
     var meta = detailState.meta, wrapper = null;
     var texto = splitTexto();
     var waTexto = function () { window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank', 'noopener'); };
@@ -4783,7 +4783,7 @@
       waTexto();
     }).finally(function () {
       if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-      btn.disabled = false; btn.textContent = original;
+      btn.disabled = false; btn.classList.remove('is-loading'); btn.textContent = original;
     });
   }
   function splitResultado() {
@@ -4992,7 +4992,7 @@
     // el svg y el botón se quedaría sin logo para el resto de la sesión.
     var labelNode = button && button.querySelector('.voucher-btn__label');
     var originalLabel = labelNode ? labelNode.textContent : (button ? button.textContent : '');
-    if (button) { button.disabled = true; if (labelNode) labelNode.textContent = 'Generando imagen…'; else button.textContent = '⏳ Generando imagen…'; }
+    if (button) { button.disabled = true; button.classList.add('is-loading'); if (labelNode) labelNode.textContent = 'Generando imagen…'; else button.textContent = '⏳ Generando imagen…'; }
     var budget = getBudgetBreakdown(detailState);
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var totals = {
@@ -5026,7 +5026,7 @@
     }).finally(function () {
       if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
       if (button) {
-        button.disabled = false;
+        button.disabled = false; button.classList.remove('is-loading');
         if (labelNode) labelNode.textContent = originalLabel || 'Compartir en Instagram';
         else button.textContent = originalLabel;
       }
@@ -10389,6 +10389,23 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         var t = e.touches && e.touches[0];
         inicio = t ? { x: t.clientX, y: t.clientY } : null;
       }, { passive: true });
+      /* Al enfocar un campo de texto con el dedo, el teclado se abre y puede tapar
+         el campo (los nombres de "Dividir gastos", el de la segunda parada). Se
+         lo centra con scroll suave cuando el teclado ya termino de abrirse, y de
+         nuevo si la ventana visible cambia de alto. El destino ya posiciona su
+         propio menu, asi que queda afuera. */
+      var centrarCampo = function (el) {
+        if (!esCampoDeTexto(el) || (el.closest && el.closest('.custom-select'))) return;
+        try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+      };
+      document.addEventListener('focusin', function (e) {
+        if (!window.matchMedia || !window.matchMedia('(pointer:coarse)').matches) return;
+        var el = e.target;
+        window.setTimeout(function () { if (document.activeElement === el) centrarCampo(el); }, 320);
+      });
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', function () {
+        if (window.matchMedia && window.matchMedia('(pointer:coarse)').matches) centrarCampo(document.activeElement);
+      });
       document.addEventListener('touchmove', function (e) {
         var activo = document.activeElement;
         var t = e.touches && e.touches[0];

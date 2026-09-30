@@ -1,4 +1,4 @@
-/* version: 189
+/* version: 190
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -73,7 +73,7 @@
      hace que los botones se lean como los de la referencia. */
   --action-bg:#F7C325; --action-ink:#0A101A; --action-border:#F7C325;
   --control-bg:#111A28; --control-border:#5A6B7E; --control-hover:#1A2433;
-  --control-muted:#8A97A8; --control-selected:#1E2A3A; --control-selected-ink:#FFFFFF;
+  --control-muted:#A9B5C6; --control-selected:#1E2A3A; --control-selected-ink:#FFFFFF;
   --selected-bg:#1E2A3A; --selected-border:#F7C325; --selected-ink:#FFFFFF;
   /* Card elegible. Un solo bloque de estilo para los cinco grupos donde se
      elige algo (destinos, propuestas, hotel, tours, presupuesto diario),
@@ -2866,3 +2866,29 @@ button.logo{min-height:44px}
   .hotel-type-pills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
   .hotel-type-pill{width:100%;padding:0 10px}
 }
+
+/* ---- Pulido movil ---------------------------------------------------------
+   Respiro, botones secundarios parejos, etiquetas con padding, zonas tactiles
+   y carga visible. Todo en un bloque para poder verlo junto. */
+/* Fecha elegida: aire entre el calendario, la linea que confirma los dias y lo que sigue. */
+.date-range-limit{margin:18px 0 6px;padding:14px 8px 4px}
+/* "Ver mas" de hoteles por playa y de tours: mismo boton, mismo margen. */
+.hotel-playa__toggle,.local-tours__more{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;margin:16px 0 0;padding:0 16px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}
+.hotel-playa__toggle:hover,.hotel-playa__toggle:focus-visible,.local-tours__more:hover,.local-tours__more:focus-visible{border-color:var(--cel);color:var(--cel);outline:none}
+@media(min-width:640px){.hotel-playa__toggle,.local-tours__more{width:auto;min-width:220px;margin-left:auto;margin-right:auto;padding:0 28px}}
+/* Seccion de hoteles "Otras zonas": el titulo con emoji y el de las playas alineados igual. */
+.hotel-playa__title{display:flex;align-items:center;gap:8px}
+/* Etiquetas de estado de las propuestas: aire adentro y entre ellas. */
+.mini{padding:4px 12px}
+.mini.g,.mini.r{padding:5px 13px;line-height:1.35}
+.destination-card-tags,.proposal-tags{display:flex;flex-wrap:wrap;gap:6px 8px}
+/* + y - del reparto: 48px tambien en celular (antes una regla los bajaba a 38px). */
+.split-step{width:48px;height:48px;font-size:24px;touch-action:manipulation}
+/* Botones que generan una imagen: spinner mientras trabajan. */
+@keyframes cs-spin{to{transform:rotate(360deg)}}
+.is-loading::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:cs-spin .7s linear infinite}
+.is-loading .voucher-btn__label::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:cs-spin .7s linear infinite}
+.is-loading:has(.voucher-btn__label)::before{display:none}
+@media (prefers-reduced-motion:reduce){.is-loading::before,.is-loading .voucher-btn__label::before{animation-duration:2.4s}}
+/* Barra "Mi viaje": en celular deja aire abajo y la pagina deja espacio para que no tape lo ultimo. */
+@media (max-width:900px){.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}}
