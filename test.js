@@ -1509,8 +1509,12 @@ function haversineKm(a, b) {
     const windows = fechas.featuredMonthWindows(6);
     assert.strictEqual(windows.length, 6, 'deben ofrecerse seis meses');
     // Empiezan en el mes actual, que es lo que se pidió: nada de meses pasados.
-    assert.strictEqual(windows[0].month, today.getMonth());
-    assert.strictEqual(windows[0].year, today.getFullYear());
+    // Salvo el ultimo dia del mes: ahi ya no queda ninguna fecha futura en el mes
+    // actual y la primera ventana es la del mes que viene.
+    const esUltimoDia = today.getDate() === new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const primero = new Date(today.getFullYear(), today.getMonth() + (esUltimoDia ? 1 : 0), 1, 12);
+    assert.strictEqual(windows[0].month, primero.getMonth());
+    assert.strictEqual(windows[0].year, primero.getFullYear());
     // Ninguna ventana en el pasado y ninguna repetida: si Fin de año saliera
     // en diciembre y en enero con las mismas fechas, cambiar de mes no
     // cambiaría nada.

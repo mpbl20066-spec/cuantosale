@@ -1670,7 +1670,7 @@
     }
     var used = {};
     var out = [];
-    for (var i = 0; i < count; i++) {
+    for (var i = 0; out.length < count; i++) {
       var cursor = new Date(today.getFullYear(), today.getMonth() + i, 1, 12);
       var month = cursor.getMonth(), year = cursor.getFullYear();
       // El año importa tanto como el mes. Comparar sólo getMonth() dejaba pasar
@@ -1699,9 +1699,12 @@
       }
       if (pick.dep <= today) {
         var nextDay = addDays(today, 1);
-        if (nextDay <= new Date(year, month + 1, 0, 12)) {
-          pick = { dep: nextDay, ret: addDays(nextDay, 2), label: 'Fin de semana' };
-        }
+        /* Hoy es el ultimo dia del mes: este mes ya no tiene ninguna fecha futura,
+           y una ventana que dice el mes actual con fechas del siguiente (o vencidas)
+           es peor que no ofrecerla. Se sigue con el mes que viene, y el bucle da
+           una vuelta mas para completar la cantidad pedida. */
+        if (nextDay > new Date(year, month + 1, 0, 12)) continue;
+        pick = { dep: nextDay, ret: addDays(nextDay, 2), label: 'Fin de semana' };
       }
       out.push({
         month: month, year: year, label: pick.label,
