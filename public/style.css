@@ -1,4 +1,4 @@
-/* version: 193
+/* version: 194
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2914,3 +2914,19 @@ button.logo{min-height:44px}
 .featured-search input::placeholder{color:var(--control-muted);opacity:1}
 .featured-destination[hidden],.featured-empty[hidden],.destination-highlights__slider[hidden]{display:none!important}
 .featured-empty{margin:4px 0 0;padding:14px 16px;border-radius:14px;background:var(--surface);color:var(--ink2);font-size:14px}
+
+/* ---- Propuesta en tres pasos -----------------------------------------------
+   Cada paso muestra solo lo suyo. El paso actual va en .detail-main[data-paso]:
+   1 Transporte (vuelo/bus/auto/traslado), 2 Alojamiento (hotel), 3 Extras (el
+   resto). El desglose "A donde va tu plata" no se oculta nunca y va al final. */
+.steps{position:static;top:auto;margin:0 0 18px}
+.steps__now{margin:0 0 8px;font-size:13px;color:var(--ink2)}
+.steps__now b{color:var(--ink);font-weight:800}
+.steps__nav{display:flex;gap:8px;align-items:stretch}
+.steps__nav .steps__next{flex:1 1 auto;width:auto;margin-top:0}
+.steps__prev{flex:0 0 auto;min-height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.steps__prev:hover,.steps__prev:focus-visible{border-color:var(--cel);color:var(--cel);outline:none}
+.steps__nav .steps__ok{margin:0;flex:1}
+.detail-main[data-paso="1"] :is([data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
+.detail-main[data-paso="2"] :is([data-transport-flow],[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
+.detail-main[data-paso="3"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel){display:none !important}

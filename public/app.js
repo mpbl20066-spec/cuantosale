@@ -4042,24 +4042,52 @@
     return [
       { n: 1, titulo: 'Transporte', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
       { n: 2, titulo: 'Alojamiento', texto: hTxt, hecho: h, anc: 'alojamiento', cta: 'Elegí tu hotel' },
-      { n: 3, titulo: vuelo ? 'Traslados y extras' : 'Extras', texto: tr ? partes.join(' + ') : 'Opcional', hecho: tr, opcional: true, anc: vuelo ? 'traslados' : 'tours', cta: vuelo ? 'Sumá traslados y extras' : 'Sumá extras' }
+      { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Opcional', hecho: tr, opcional: true, anc: vuelo ? 'traslados' : 'tours', cta: 'Sumá extras' }
     ];
+  }
+  /* Un paso a la vez. La propuesta se muestra en tres pasos y cada uno enseña
+     solo lo suyo (ver el CSS de .detail-main[data-paso]):
+       1 Transporte: vuelo, bus, auto y traslado (aeropuerto <-> hotel)
+       2 Alojamiento: el hotel (y el reparto de noches si hay dos paradas)
+       3 Extras: todo lo demas (tours, transporte local, comidas, la guia)
+     El desglose "A donde va tu plata" queda siempre abajo de todo. El paso
+     actual vive en detailState.pasoActual. */
+  function pasoActualNum() {
+    var n = Number(detailState && detailState.pasoActual) || 1;
+    return Math.max(1, Math.min(3, Math.round(n)));
   }
   function pasosMarkup() {
     if (!detailState) return '';
     var p = pasosEstado();
-    var actual = -1;
-    for (var i = 0; i < p.length; i++) { if (!p[i].hecho) { actual = i; break; } }
-    var sig = actual >= 0 ? p[actual] : null;
-    var cta = sig
-      ? '<button type="button" class="steps__next" data-jump-category="' + sig.anc + '">' + esc(sig.cta) + (sig.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>'
+    var n = pasoActualNum();
+    var prev = p[n - 2], next = p[n];
+    var botones = '';
+    if (prev) botones += '<button type="button" class="steps__prev" data-paso-ir="' + (n - 1) + '"><span aria-hidden="true">←</span> ' + esc(prev.titulo) + '</button>';
+    botones += next
+      ? '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + esc(next.cta) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>'
       : '<p class="steps__ok">Listo: revisá el total en “Mi Viaje”.</p>';
-    return cta;
+    return '<p class="steps__now"><b>Paso ' + n + ' de 3</b> · ' + esc(p[n - 1].titulo) + '</p><div class="steps__nav">' + botones + '</div>';
+  }
+  function irAlPaso(n) {
+    if (!detailState) return;
+    detailState.pasoActual = Math.max(1, Math.min(3, Number(n) || 1));
+    pintarPasos();
+    var nav = document.querySelector('[data-steps]');
+    if (nav && nav.scrollIntoView) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function pasoDeSeccion(el) {
+    if (!el || !el.closest) return 0;
+    if (el.closest('.proposal-breakdown')) return 0;
+    if (el.closest('[data-transport-flow]')) return 1;
+    if (el.closest('[data-hotels-block],.hotel-options,.multistay-panel')) return 2;
+    return 3;
   }
   function pintarPasos() {
     var el = document.querySelector('[data-steps]');
     if (!el || !detailState) return;
     var html = pasosMarkup();
+    var principal = document.querySelector('.detail-main');
+    if (principal) principal.setAttribute('data-paso', String(pasoActualNum()));
     if (el.__html !== html) { el.innerHTML = html; el.__html = html; try { syncBudgetJumpTargets(); } catch (e) { /* sin DOM todavia */ } }
   }
   function getBudgetBreakdown(state) {
@@ -4188,6 +4216,9 @@
   function jumpToBudgetSection(category) {
     var target = budgetAnchorFor(category);
     if (!target) return false;
+    // Si la seccion es de otro paso, primero se pasa a ese paso: estan ocultas.
+    var pasoDestino = pasoDeSeccion(target);
+    if (pasoDestino && detailState && pasoActualNum() !== pasoDestino) { detailState.pasoActual = pasoDestino; pintarPasos(); }
     // Se lleva el foco al destino para que el salto también se pueda seguir con
     // el teclado desde ahí, no sólo con el mouse.
     if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
@@ -4216,6 +4247,13 @@
     // siempre, que es lo que importa para un salto pedido por la persona.
     window.setTimeout(function () { go('smooth', false); }, 0);
     return true;
+  }
+  function handlePasoIr(e) {
+    var b = e.target.closest && e.target.closest('[data-paso-ir]');
+    if (!b) return;
+    e.preventDefault();
+    e.stopPropagation();
+    irAlPaso(b.getAttribute('data-paso-ir'));
   }
   function handleBudgetJump(e) {
     var trigger = e.target.closest && e.target.closest('[data-jump-category]');
@@ -5814,7 +5852,7 @@
       var tAccion = terrChequeado
         ? ''
         : '<button type="button" class="voucher-step__btn" data-reservar-pedido>Coordinar</button>';
-      markup += paso(3, 'Traslados y extras',
+      markup += paso(3, 'Extras',
         terrChequeado ? 'Coordinados con la agencia' : 'Los coordinamos nosotros',
         terrChequeado, extVuelo && extHotel && !terrChequeado, tAccion);
 
@@ -7382,7 +7420,8 @@
        guiaCandado). Si el candado esta en pantalla, se abre igual y recien
        despues se inserta la guia; si no esta, se inserta directo. */
     var lockAbajo = main.querySelector('[data-guia-lock]');
-    if (!lockAbajo) { main.appendChild(seccion); return; }
+    // "A donde va tu plata" va siempre al final: la guia entra antes.
+    if (!lockAbajo) { var desglose = main.querySelector('.proposal-breakdown'); if (desglose) main.insertBefore(seccion, desglose); else main.appendChild(seccion); return; }
     lockAbajo.classList.add('is-open');
     window.setTimeout(function () {
       if (!lockAbajo.parentElement) return;
@@ -8950,7 +8989,7 @@
     // "Recomendaciones" vacio que ademas mentia: sin guia no hay nada que
     // recomendar.
     var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
-    content.innerHTML = '<div class="detail-layout"><div class="detail-main">' +
+    content.innerHTML = '<div class="detail-layout"><div class="detail-main" data-paso="' + pasoActualNum() + '">' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p><b class="detail-summary__destino">' + esc(data.meta.dest.name) + '</b>' + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
       '<nav class="steps" data-steps aria-label="Pasos del presupuesto">' + renderSafe(function () { return pasosMarkup(); }, '') + '</nav>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') +
@@ -8970,7 +9009,7 @@
          seccion donde esa plata se cambia. Va antes de la guia porque las dos
          cosas responden la misma pregunta --donde va la plata-- y el reparto
          primero: ahi estan las cuentas, y la guia dice como cuidarlas. */
-      breakdownMarkup + foodMarkup +
+      foodMarkup + breakdownMarkup +
       '</div></div>';
     updateMultiStayPricing();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
@@ -10838,6 +10877,7 @@ function comboNombreDestino() {
     document.addEventListener('click', handleProposalNavigation, true);
     document.addEventListener('click', handleBreakdownToggle, true);
     document.addEventListener('click', handleProposalSelect, true);
+    document.addEventListener('click', handlePasoIr, true);
     document.addEventListener('click', handleBudgetJump, true);
     $('#dep').addEventListener('change', function (e) {
       var old = S.dep && S.ret ? Math.round((parse(S.ret) - parse(S.dep)) / 864e5) : 7;
