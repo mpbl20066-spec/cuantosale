@@ -449,9 +449,9 @@
     },
     "rosa": {
       "comida": {
-        "casual": 28,
-        "moderado": 55,
-        "gourmet": 90
+        "casual": 26,
+        "moderado": 50,
+        "gourmet": 85
       },
       "traslado": {
         "eco": 18,
@@ -463,7 +463,8 @@
       "confianza": "baja",
       "derivacion": "Copia de fln. Pueblo chico al norte del estado, a 80 km de la capital de Santa Catarina.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Sin transporte publico util y playas separadas: depende de taxi o auto. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Sin transporte publico util y playas separadas: depende de taxi o auto. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 28/55/90 -> 26/50/85 (misma comida que camboriu, por pedido)."
     },
     "itapema": {
       "comida": {
@@ -654,22 +655,21 @@
         "gourmet": 120
       },
       "traslado": {
-        "eco": 18,
-        "medio": 29,
-        "confort": 48
+        "eco": 20,
+        "medio": 30,
+        "confort": 45
       },
       "fuente": "Instagram Trancoso: en las playas el consumo va de R$100 a R$150 por mesa, la cerveza Brahma desde R$12. viagenselugaress: restaurantes y beach clubs elevados, de R$120 a R$300 por persona. TikTok Porto Seguro: almuerzo a la voluntad desde R$19,90.",
       "verificado": "2026-09-27",
       "confianza": "media",
       "nota": "Pueblo de playa con vida nocturna y jetset, el mas caro de Bahia despues de Salvador. El contraste entre el almuerzo a R$19,90 y la cena en la playa a R$150 por mesa es el rango real.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Quadrado peatonal pero las playas estan lejos y el taxi es caro. Estimacion, no fuente directa."
+      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
     },
     "ajuda": {
       "comida": {
-        "casual": 37,
-        "moderado": 68,
-        "gourmet": 115
+        "casual": 38,
+        "moderado": 70,
+        "gourmet": 120
       },
       "traslado": {
         "eco": 14,
@@ -681,7 +681,8 @@
       "confianza": "baja",
       "derivacion": "Copia de trancoso con un escalon menos. Arraial d'Ajuda es el pueblo mas chico de los dos y sin la vida nocturna de Trancoso, asi que come un poco mejor, pero la diferencia es chica: son 7 km. Si Trancoso esta bien calibrado, Arraial tambien.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Centro caminable; las playas se alcanzan en buggy o taxi. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Centro caminable; las playas se alcanzan en buggy o taxi. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 37/68/115 -> 38/70/120 (misma comida que trancoso, por pedido)."
     },
     "morro": {
       "comida": {
@@ -738,9 +739,9 @@
     },
     "forte": {
       "comida": {
-        "casual": 34,
-        "moderado": 62,
-        "gourmet": 105
+        "casual": 38,
+        "moderado": 70,
+        "gourmet": 120
       },
       "traslado": {
         "eco": 12,
@@ -752,7 +753,8 @@
       "confianza": "baja",
       "derivacion": "Resort turistico a 100 km de la capital de Bahia. Comida mas cara que un pueblo de playa pero traslado mas barato, porque esta todo concentrado. Copia de portoseguro con un poco mas.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Vila chica y caminable, con bicicleta; traslado diario bajo. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Vila chica y caminable, con bicicleta; traslado diario bajo. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 34/62/105 -> 38/70/120 (misma comida que trancoso, por pedido)."
     }
   }
 }

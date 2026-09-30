@@ -40,7 +40,7 @@
   bcm: { name: 'Balneário Camboriú', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
   camboriu: { name: 'Camboriú', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
   bombinhas: { name: 'Bombinhas', transport: { eco: 17, medio: 25, confort: 38 }, food: { casual: 23, moderado: 46, gourmet: 86 } },
-  rosa: { name: 'Praia do Rosa', transport: { eco: 18, medio: 27, confort: 42 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
+  rosa: { name: 'Praia do Rosa', transport: { eco: 18, medio: 27, confort: 42 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
   itapema: { name: 'Itapema', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 28, moderado: 54, gourmet: 92 } },
   garopaba: { name: 'Garopaba', transport: { eco: 15, medio: 23, confort: 36 }, food: { casual: 25, moderado: 50, gourmet: 86 } },
   ferrugem: { name: 'Ferrugem', transport: { eco: 14, medio: 22, confort: 34 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
@@ -51,12 +51,12 @@
   canoa: { name: 'Capão da Canoa', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
   fernando: { name: 'Fernando de Noronha', transport: { eco: 30, medio: 47, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } },
   pip: { name: 'Pipa', transport: { eco: 6, medio: 12, confort: 22 }, food: { casual: 23, moderado: 45, gourmet: 82 } },
-  trancoso: { name: 'Trancoso', transport: { eco: 18, medio: 29, confort: 48 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
-  ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 14, medio: 23, confort: 38 }, food: { casual: 37, moderado: 68, gourmet: 115 } },
+  trancoso: { name: 'Trancoso', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
+  ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 14, medio: 23, confort: 38 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
   morro: { name: 'Morro de São Paulo', transport: { eco: 6, medio: 11, confort: 22 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
   portoseguro: { name: 'Porto Seguro', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 33, moderado: 60, gourmet: 105 } },
   itacare: { name: 'Itacaré', transport: { eco: 12, medio: 20, confort: 34 }, food: { casual: 32, moderado: 58, gourmet: 100 } },
-  forte: { name: 'Praia do Forte', transport: { eco: 12, medio: 20, confort: 35 }, food: { casual: 34, moderado: 62, gourmet: 105 } },
+  forte: { name: 'Praia do Forte', transport: { eco: 12, medio: 20, confort: 35 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
 }, {
   _meta: {
       "confianza": {
