@@ -1,0 +1,98 @@
+[
+  {
+    "destinos": ["nat"],
+    "destino": "Natal, Brasil",
+    "titulo": "Dunas de Genipabu en buggy",
+    "descripcion": "Excursión imperdible a la postal más famosa de Río Grande del Norte, famosa por sus imponentes dunas móviles, paseo en buggy y la laguna de Genipabu.",
+    "detalle": "Descubrí el mundialmente famoso litoral norte de Natal visitando Genipabu, un verdadero paraíso de dunas gigantes y lagunas de agua dulce. Tendrás la oportunidad de realizar el clásico y emocionante paseo en buggy por las dunas (opcional), cruzar en balsa por el río Ceará Mirim y disfrutar de un baño relajante en la laguna y las cálidas playas de la región.",
+    "precio_brl": 160,
+    "duracion": "6 hs",
+    "grupo": "Hasta 4 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles en Natal",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseo tradicional en buggy por las dunas (con o sin emoción)",
+      "Travesía en dromedario",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  },
+  {
+    "destinos": ["nat"],
+    "destino": "Natal, Brasil",
+    "titulo": "São Miguel do Gostoso en 4x4",
+    "descripcion": "Excursión de día completo al encantador pueblo de vientos y tranquilidad de São Miguel do Gostoso, combinando traslado y un recorrido completo en vehículo 4x4.",
+    "detalle": "Una travesía imperdible rumbo al extremo norte del estado. São Miguel do Gostoso es famoso por su atmósfera rústica, sus extensas playas vírgenes y por ser un paraíso mundial para los deportes de viento. Este paseo incluye un circuito completo en vehículos 4x4 que permite adentrarse por senderos, playas agrestes y paisajes costeros únicos, disfrutando de tiempo libre para el relax y la gastronomía local.",
+    "precio_brl": 280,
+    "duracion": "8 hs",
+    "grupo": "Hasta 4 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles en Natal",
+      "Recorrido especializado en vehículo 4x4",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Bebidas",
+      "Paseos o actividades opcionales adicionales",
+      "Tasas locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  },
+  {
+    "destinos": ["nat"],
+    "destino": "Natal, Brasil",
+    "titulo": "Paseos de Lancha a Perobas",
+    "descripcion": "Excursión de día completo al litoral norte para navegar en lancha hacia las cristalinas piscinas naturales de Perobas y hacer snorkel entre peces.",
+    "detalle": "Descubrí uno de los secretos mejor guardados del litoral norte potiguar. El tour sale desde Natal rumbo a Perobas, donde tomarás una lancha rápida hacia los arrecifes de coral ubicados a pocos kilómetros de la costa. Durante la marea baja, disfrutarás de un baño inolvidable en piscinas naturales de aguas transparentes y cálidas, ideales para el buceo de superficie y la observación de fauna marina en un entorno tranquilo y preservado.",
+    "precio_brl": 350,
+    "duracion": "8 hs",
+    "grupo": "Hasta 4 personas",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Traslado compartido de ida y vuelta desde hoteles en Natal",
+      "Paseo en lancha rápida hacia los parachos (piscinas naturales)",
+      "Asistencia de guía de turismo local acreditado"
+    ],
+    "no_incluye": [
+      "Alquiler de equipo de snorkel y máscara",
+      "Almuerzo",
+      "Bebidas",
+      "Tasas ambientales locales"
+    ],
+    "llevar": [
+      "Traje de baño",
+      "Toalla",
+      "Protector solar biodegradable",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para gastos personales y almuerzo"
+    ]
+  }
+]
