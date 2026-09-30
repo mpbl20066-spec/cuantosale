@@ -658,22 +658,6 @@
       "privado_escalones": [],
       "compartido_consultar": true
     },
-    "camboriu": {
-      "nombre": "Camboriú",
-      "iata": "FLN",
-      "modo": "car",
-      "km": 96,
-      "horas": 1.4,
-      "compartido": 0,
-      "privado": 72,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (96) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 96 km de OSRM: US$ 25 compartido y US$ 72 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
-    },
     "bombinhas": {
       "nombre": "Bombinhas",
       "iata": "FLN",

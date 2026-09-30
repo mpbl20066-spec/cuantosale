@@ -38,7 +38,6 @@
   ilhabela: { name: 'Ilhabela', transport: { eco: 6, medio: 11, confort: 22 }, food: { casual: 26, moderado: 48, gourmet: 83 } },
   fln: { name: 'Florianópolis', transport: { eco: 6, medio: 13, confort: 27 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
   bcm: { name: 'Balneário Camboriú', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
-  camboriu: { name: 'Camboriú', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
   bombinhas: { name: 'Bombinhas', transport: { eco: 5, medio: 10, confort: 19 }, food: { casual: 23, moderado: 46, gourmet: 86 } },
   rosa: { name: 'Praia do Rosa', transport: { eco: 3, medio: 8, confort: 19 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
   itapema: { name: 'Itapema', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 28, moderado: 54, gourmet: 92 } },
@@ -195,12 +194,6 @@
       "confianza": "media",
       "verificado": "2026-09-27",
       "nota": "La fuente es de 2025 y agrupa Camboriu con Florianopolis. El lodging de Balneario (52/92/165) esta por encima del de Floripa (50/90/160) porque es el balneario premium de la costa norte; la comida tambien deberia ir un poco mas arriba."
-    },
-  camboriu: {
-      "fuente": "milione.net (2025), mismo bloque que Balneario Camboriu.",
-      "confianza": "media",
-      "verificado": "2026-09-27",
-      "nota": "Copia de bcm. Los dos nombres se refieren a la misma ciudad; el catalogo los tiene separados por la diferencia de lodging."
     },
   bombinhas: {
       "fuente": "Se buscaron cartas de restaurante, precios de pousada y comparadores. Lo que hay publicado es de hospedaje en general: el balneario familiar de Santa Catarina, a 120 km de Floripa por la BR-101, con un pueblo chico y sin vida de resort. El lodging del catalogo ya lo pone por arriba de Floripa (52/96/170 contra 50/90/160), asi que la comida tambien. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$60/91.2/151.2 por dia.",

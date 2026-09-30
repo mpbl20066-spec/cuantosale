@@ -50,7 +50,6 @@
   "bombinhas": "Bombinhas, Brasil",
   "buz": "Búzios, Brasil",
   "cabo": "Cabo Frio, Brasil",
-  "camboriu": "Camboriú, Brasil",
   "canela": "Canela, Brasil",
   "fernando": "Fernando de Noronha, Brasil",
   "fln": "Florianópolis, Brasil",

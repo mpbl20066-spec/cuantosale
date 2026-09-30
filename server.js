@@ -186,7 +186,7 @@ function injectAnalytics(payload, ext) {
 // aca, /api/vuelos/buscar la rechaza con "!destination" y el destino no puede
 // buscar vuelo real aunque el modelo, el desplegable y la grilla lo ofrezcan.
 // Tiene que coincidir con HOME_DESTINATION_KEYS.
-const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
+const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
 // Los destinos que la app ofrece, agrupados por región. Esta lista estaba
 // desincronizada del picker de public/app.js en las dos direcciones: tenía
 // 'ilha', que el picker nunca ofrece (la búsqueda por presupuesto cotizaba un
@@ -217,7 +217,7 @@ const HOME_DESTINATION_KEYS = [
   // no aparecian en ningun lado.
   'sao', 
   // Litoral de Santa Catarina
-  'fln', 'bcm', 'camboriu', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras',
+  'fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras',
   // Litoral de Rio Grande do Sul
   'torres', 'canoa',
   // Bahia

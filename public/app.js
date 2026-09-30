@@ -42,7 +42,6 @@
     morro: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/MARCIO_FILHO_FAROL_DO_MORRO_MORRO_DE_S%C3%83O_PAULO_BAHIA_%2839166725080%29.jpg/1920px-MARCIO_FILHO_FAROL_DO_MORRO_MORRO_DE_S%C3%83O_PAULO_BAHIA_%2839166725080%29.jpg',
     fernando: 'https://upload.wikimedia.org/wikipedia/commons/9/91/EDUARDO_MURUCI_-_BAIA_DOS_PORCOS-%28recorte%29.jpg',
     fln: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg/1920px-Morro_da_Cruz%2C_Florian%C3%B3polis_-_SC%2C_Brazil_-_panoramio_%28cropped%29.jpg',
-    camboriu: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d4/Praia_dos_amores.jpg/1920px-Praia_dos_amores.jpg',
     bombinhas: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg/1920px-Praia_da_Sepultura%2C_Bombinhas%2C_Santa_Catarina.jpg',
     rosa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Praia_do_Rosa%2C_SC.JPG/1920px-Praia_do_Rosa%2C_SC.JPG',
     bcm: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG/1920px-Orla_da_Praia_Central%2C_Balne%C3%A1rio_Cambori%C3%BA_SC.JPG',
@@ -410,16 +409,9 @@
 { label: 'Vila Madalena', key: 'sao' },
 { label: 'Santana / Barra Funda', key: 'sao' }
     ] },
-    { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'camboriu', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
+    { id: 'litoralsc', label: 'Litoral de Santa Catarina', image: 'fln', keys: ['fln', 'bcm', 'itapema', 'bombinhas', 'garopaba', 'rosa', 'ferrugem', 'picarras'], subcategories: [
 { label: 'Florianópolis (Canasvieiras / Ingleses)', key: 'fln' },
 { label: 'Balneário Camboriú', key: 'bcm' },
-      /* Camboriú estaba en el modelo con costo, traslado, guia, tres tours y
-         foto, y la app lo usaba para calcular el roadtrip y el bus. Lo que no
-         estaba era en ninguna de las dos superficies de eleccion, o sea que
-         nadie lo podia elegir: data completa que la app no ofrecia. Entra
-         aca y no en un grupo propio porque comparte aeropuerto (FLN) y costa
-         con todo el litoral. */
-{ label: 'Camboriú', key: 'camboriu' },
 { label: 'Itapema', key: 'itapema' },
 { label: 'Bombinhas', key: 'bombinhas' },
 { label: 'Garopaba', key: 'garopaba' },
@@ -427,7 +419,6 @@
 { label: 'Ferrugem', key: 'ferrugem' },
 { label: 'Piçarras', key: 'picarras' },
       { label: 'Florianópolis + Balneário Camboriú', key: 'fln', secondKey: 'bcm' },
-      { label: 'Florianópolis + Camboriú', key: 'fln', secondKey: 'camboriu' },
       { label: 'Florianópolis + Itapema', key: 'fln', secondKey: 'itapema' },
       { label: 'Florianópolis + Bombinhas', key: 'fln', secondKey: 'bombinhas' },
       { label: 'Florianópolis + Garopaba', key: 'fln', secondKey: 'garopaba' },
@@ -443,12 +434,6 @@
       { label: 'Balneário Camboriú + Praia do Rosa', key: 'bcm', secondKey: 'rosa' },
       { label: 'Balneário Camboriú + Ferrugem', key: 'bcm', secondKey: 'ferrugem' },
       { label: 'Balneário Camboriú + Piçarras', key: 'bcm', secondKey: 'picarras' },
-      { label: 'Camboriú + Itapema', key: 'camboriu', secondKey: 'itapema' },
-      { label: 'Camboriú + Bombinhas', key: 'camboriu', secondKey: 'bombinhas' },
-      { label: 'Camboriú + Garopaba', key: 'camboriu', secondKey: 'garopaba' },
-      { label: 'Camboriú + Praia do Rosa', key: 'camboriu', secondKey: 'rosa' },
-      { label: 'Camboriú + Ferrugem', key: 'camboriu', secondKey: 'ferrugem' },
-      { label: 'Camboriú + Piçarras', key: 'camboriu', secondKey: 'picarras' },
       { label: 'Itapema + Bombinhas', key: 'itapema', secondKey: 'bombinhas' },
       { label: 'Itapema + Garopaba', key: 'itapema', secondKey: 'garopaba' },
       { label: 'Itapema + Praia do Rosa', key: 'itapema', secondKey: 'rosa' },
@@ -715,7 +700,7 @@
   }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', camboriu: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
+  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
   var DEST_IATA_ALIASES = { rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
   // Segunda superficie: el desplegable de "destino" de arriba. Tiene que traer
   // los mismos 31 que la grilla, o el destino se ofrece en un lado y no en el
@@ -757,7 +742,6 @@
     { name: 'Santa Catarina', codes: 'FLN', options: [
 { label: 'Florianópolis', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis (Canasvieiras / Ingleses)' },
 { label: 'Balneário Camboriú', key: 'bcm', codes: 'FLN' },
-{ label: 'Camboriú', key: 'camboriu', codes: 'FLN' },
 { label: 'Itapema', key: 'itapema', codes: 'FLN' },
 { label: 'Bombinhas', key: 'bombinhas', codes: 'FLN' },
 { label: 'Garopaba', key: 'garopaba', codes: 'FLN' },
@@ -765,19 +749,12 @@
 { label: 'Ferrugem', key: 'ferrugem', codes: 'FLN' },
 { label: 'Piçarras', key: 'picarras', codes: 'FLN' },
       { label: 'Florianópolis + Balneário Camboriú', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Balneário Camboriú' },
-      { label: 'Florianópolis + Camboriú', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Camboriú' },
       { label: 'Florianópolis + Itapema', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Itapema' },
       { label: 'Florianópolis + Bombinhas', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Bombinhas' },
       { label: 'Florianópolis + Garopaba', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Garopaba' },
       { label: 'Florianópolis + Praia do Rosa', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Praia do Rosa' },
       { label: 'Florianópolis + Ferrugem', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Ferrugem' },
       { label: 'Florianópolis + Piçarras', key: 'fln', codes: 'FLN', subcategory: 'Florianópolis + Piçarras' },
-      { label: 'Camboriú + Itapema', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Itapema' },
-      { label: 'Camboriú + Bombinhas', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Bombinhas' },
-      { label: 'Camboriú + Garopaba', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Garopaba' },
-      { label: 'Camboriú + Praia do Rosa', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Praia do Rosa' },
-      { label: 'Camboriú + Ferrugem', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Ferrugem' },
-      { label: 'Camboriú + Piçarras', key: 'camboriu', codes: 'FLN', subcategory: 'Camboriú + Piçarras' },
       { label: 'Balneário Camboriú + Itapema', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Itapema' },
       { label: 'Balneário Camboriú + Bombinhas', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Bombinhas' },
       { label: 'Balneário Camboriú + Garopaba', key: 'bcm', codes: 'FLN', subcategory: 'Balneário Camboriú + Garopaba' },
@@ -2960,7 +2937,7 @@
      descuento aplicado, y es quien lo recibe el que termina de honrarlo. */
   var DESCUENTO_TOURS_PCT = 5;
   var DESCUENTO_TOURS_MIN = 2;
-  var DESCUENTO_TOURS_CODIGOS = { buz: 'BUZIOS5', arraial: 'ARRAIAL5', cabo: 'CABOFRIO5', ilha: 'ILHAGRANDE5', paraty: 'PARATY5', ilhabela: 'ILHABELA5', ubatuba: 'UBATUBA5', rio: 'RIO5', angra: 'ANGRA5', sao: 'SAOPAULO5', porto: 'PORTODEGALINHAS5', mcz: 'MACEIO5', maragogi: 'MARAGOGI5', nat: 'NATAL5', pip: 'PIPA5', trancoso: 'TRANCOSO5', ssa: 'SALVADOR5', 'for': 'FORTALEZA5', jericoacoara: 'JERI5', morro: 'MORRO5', portoseguro: 'PORTOSEGURO5', itacare: 'ITACARE5', forte: 'PRAIADOFORTE5', ajuda: 'AJUDA5', fernando: 'NORONHA5', fln: 'FLORIPA5', camboriu: 'CAMBORIU5', bombinhas: 'BOMBINHAS5', rosa: 'ROSA5', bcm: 'BC5', itapema: 'ITAPEMA5', garopaba: 'GAROPABA5', ferrugem: 'FERRUGEM5', picarras: 'PICARRAS5', gram: 'GRAMADO5', canela: 'CANELA5', torres: 'TORRES5', canoa: 'CANOA5', rec: 'RECIFE5', joaopessoa: 'JOAOPESSOA5', poa: 'PORTOALEGRE5' };
+  var DESCUENTO_TOURS_CODIGOS = { buz: 'BUZIOS5', arraial: 'ARRAIAL5', cabo: 'CABOFRIO5', ilha: 'ILHAGRANDE5', paraty: 'PARATY5', ilhabela: 'ILHABELA5', ubatuba: 'UBATUBA5', rio: 'RIO5', angra: 'ANGRA5', sao: 'SAOPAULO5', porto: 'PORTODEGALINHAS5', mcz: 'MACEIO5', maragogi: 'MARAGOGI5', nat: 'NATAL5', pip: 'PIPA5', trancoso: 'TRANCOSO5', ssa: 'SALVADOR5', 'for': 'FORTALEZA5', jericoacoara: 'JERI5', morro: 'MORRO5', portoseguro: 'PORTOSEGURO5', itacare: 'ITACARE5', forte: 'PRAIADOFORTE5', ajuda: 'AJUDA5', fernando: 'NORONHA5', fln: 'FLORIPA5', bombinhas: 'BOMBINHAS5', rosa: 'ROSA5', bcm: 'BC5', itapema: 'ITAPEMA5', garopaba: 'GAROPABA5', ferrugem: 'FERRUGEM5', picarras: 'PICARRAS5', gram: 'GRAMADO5', canela: 'CANELA5', torres: 'TORRES5', canoa: 'CANOA5', rec: 'RECIFE5', joaopessoa: 'JOAOPESSOA5', poa: 'PORTOALEGRE5' };
   /* Estado del codigo para el pedido actual. `estado` dice por que no se aplica:
        'sin'       no escribio ningun codigo;
        'invalido'  el codigo no es el de este destino;
@@ -8250,7 +8227,7 @@
   }
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
-    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'poa', 'camboriu', 'bombinhas', 'rosa'].indexOf(key) >= 0;
+    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'poa', 'bombinhas', 'rosa'].indexOf(key) >= 0;
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();
@@ -9574,6 +9551,8 @@
   }
   async function resolveSavedDestinationKey(trip, details) {
     var key = trip.destination_key || details.destination_key || '';
+    // Camboriu se fusiono con bcm: los viajes guardados con la clave vieja abren en bcm.
+    if (key === 'camboriu') key = 'bcm';
     if (key && key !== 'todos') return key;
     var name = normalizeDestinationText(trip.destination || trip.destination_name || '');
     try {

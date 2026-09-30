@@ -63,7 +63,7 @@ const ANCHORS = {
   bcm: {
     km: 96, appRide: 42, confianza: 'baja',
     fuente: 'Uber publica FLN -> Balneario Camboriu con precio medio R$ 216, 100 km, 1,7 h. Son los mismos 96 km ' +
-      'que da OSRM, asi que el valor sirve para bcm, camboriu e itapema. OJO: el precio de Uber es POR VEHICULO y ' +
+      'que da OSRM, asi que el valor sirve para bcm e itapema. OJO: el precio de Uber es POR VEHICULO y ' +
       'es un pedido por app, no un transfer reservado, asi que va en appRide y no como ancla del privado. ' +
       'TourFacil tiene el "Transfer Aeroporto Florianopolis para Balneario Camboriu", que solo sale con dos ' +
       'reservas minimas, o sea compartido, pero no publica tarifa.'

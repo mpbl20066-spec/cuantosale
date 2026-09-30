@@ -45,7 +45,6 @@
   forte: { name: "Praia do Forte", iata: "SSA", modo: "car", km: 62, compartido: 30.77, privado: 50, compartido_brl: 160, escalones: [] },
   fernando: { name: "Fernando de Noronha", iata: "FEN", modo: "vuelo", compartido: 0, privado: 95, soloPrivado: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":538},{"min":5,"max":6,"vehiculo":"Auto","brl":966},{"min":6,"max":12,"vehiculo":"Van","brl":1739}] },
   fln: { name: "Florianópolis", iata: "FLN", modo: "car", km: 17, compartido: 0, privado: 30, compartidoConsultar: true, escalones: [] },
-  camboriu: { name: "Camboriú", iata: "FLN", modo: "car", km: 96, compartido: 0, privado: 72, compartidoConsultar: true, escalones: [] },
   bombinhas: { name: "Bombinhas", iata: "FLN", modo: "car", km: 89, compartido: 0, privado: 67, compartidoConsultar: true, escalones: [] },
   rosa: { name: "Praia do Rosa", iata: "FLN", modo: "car", km: 96, compartido: 0, privado: 72, compartidoConsultar: true, escalones: [] },
   bcm: { name: "Balneário Camboriú", iata: "FLN", modo: "car", km: 96, compartido: 0, privado: 72, appRideUsd: 42, compartidoConsultar: true, escalones: [] },
@@ -324,7 +323,7 @@
       "confianza": "baja",
       "verificado": "2026-09-27",
       "real": [],
-      "derivacion": "No hay carretera ni ferry comercial: se llega en vuelo desde REC. El precio sale de una estimacion propia, no de una tarifa publicada. El codigo de esta isla es FEN (ya arreglado en AIR_DESTINATIONS).",
+      "derivacion": "No hay carretera ni ferry comercial: se llega en vuelo desde REC. El precio sale de una estimacion propia, no de una tarifa publicada. Ver la nota sobre NVT/FEN en _meta.aeropuertoErrores: el codigo de esta isla es FEN, no NVT.",
       "modo": "vuelo",
       "soloPrivado": true
     },
@@ -336,15 +335,6 @@
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 17 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "km": 17,
       "horas": 0.4
-    },
-  camboriu: {
-      "fuente": "Sin precio real para esta ruta. Los km (96) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "real": [],
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 96 km de OSRM: US$ 25 compartido y US$ 72 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "km": 96,
-      "horas": 1.4
     },
   bombinhas: {
       "fuente": "Sin precio real para esta ruta. Los km (89) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",

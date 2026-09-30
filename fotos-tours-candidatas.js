@@ -50,7 +50,6 @@ const CATEGORIAS = {
   poa: ['Porto Alegre'],
   ssa: ['Salvador', 'Pelourinho'],
   rec: ['Recife'],
-  camboriu: ['Camboriú', 'Balneário Camboriú'],
   bombinhas: ['Bombinhas', 'Costa Esmeralda'],
   rosa: ['Praia do Rosa', 'Praia Grande (Rosa, Santa Catarina)']
 };
@@ -66,7 +65,7 @@ const RAIZ = __dirname;
 const RADIO_NORMAL = 30;
 const RADIO_PAR_CERCANO = 12;
 const VECINOS = { buz: 'cabo', cabo: 'buz', ilha: 'angra', angra: 'ilha', trancoso: 'portoseguro',
-  portoseguro: 'trancoso', camboriu: 'bcm', bcm: 'camboriu', camboriu: 'itapema', itapema: 'camboriu',
+  portoseguro: 'trancoso', bcm: 'itapema', itapema: 'bcm',
   bombinhas: 'bcm', bcm: 'bombinhas', bombinhas: 'itapema', itapema: 'bombinhas',
   rosa: 'garopaba', garopaba: 'rosa', rosa: 'ferrugem', ferrugem: 'rosa', garopaba: 'ferrugem',
   ferrugem: 'garopaba', gram: 'canela', canela: 'gram' };

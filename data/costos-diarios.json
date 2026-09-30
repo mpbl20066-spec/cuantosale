@@ -420,24 +420,6 @@
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
       "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$24 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$80 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): bus R$6, apps R$20. Antes {\"eco\":12,\"medio\":19,\"confort\":30}. Estimacion de uso, no fuente directa del total."
     },
-    "camboriu": {
-      "comida": {
-        "casual": 26,
-        "moderado": 50,
-        "gourmet": 85
-      },
-      "traslado": {
-        "eco": 5,
-        "medio": 9,
-        "confort": 15
-      },
-      "fuente": "milione.net (2025), mismo bloque que Balneario Camboriu.",
-      "verificado": "2026-09-27",
-      "confianza": "media",
-      "nota": "Copia de bcm. Los dos nombres se refieren a la misma ciudad; el catalogo los tiene separados por la diferencia de lodging.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$24 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$80 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): igual que bcm. Antes {\"eco\":12,\"medio\":19,\"confort\":30}. Estimacion de uso, no fuente directa del total."
-    },
     "bombinhas": {
       "comida": {
         "casual": 23,
@@ -474,7 +456,7 @@
       "derivacion": "Copia de fln. Pueblo chico al norte del estado, a 80 km de la capital de Santa Catarina.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
       "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$17 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$100 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): bus a Garopaba R$4,15 poco frecuente, Uber R$30. Antes {\"eco\":18,\"medio\":27,\"confort\":42}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 28/55/90 -> 26/50/85 (misma comida que camboriu, por pedido)."
+      "ajusteComida": "2026-09-30: 28/55/90 -> 26/50/85 (misma comida que bcm, por pedido)."
     },
     "itapema": {
       "comida": {

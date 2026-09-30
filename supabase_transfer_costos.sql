@@ -160,8 +160,6 @@ values
     -- Balneário Camboriú: 96 km | la app cobra US$ 25 pax / US$ 72 vehiculo,
   ('bombinhas', 'Bombinhas', 'FLN', 'car', 89, 25, 67, null, null, null, null)
     -- Bombinhas: 89 km | la app cobra US$ 25 pax / US$ 67 vehiculo,
-  ('camboriu', 'Camboriú', 'FLN', 'car', 96, 25, 72, null, null, null, null)
-    -- Camboriú: 96 km | la app cobra US$ 25 pax / US$ 72 vehiculo,
   ('ferrugem', 'Ferrugem', 'FLN', 'car', 100, 25, 74, null, null, null, null)
     -- Ferrugem: 100 km | la app cobra US$ 25 pax / US$ 74 vehiculo,
   ('garopaba', 'Garopaba', 'FLN', 'car', 89, 25, 67, null, null, null, null)
