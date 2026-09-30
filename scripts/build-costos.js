@@ -88,6 +88,11 @@ const cuerpoProv = Object.keys(D).map((k) => {
   // "derivacion" es lo que hace falta para entender un valor de confianza baja:
   // si el número salió de otro destino, hay que decir cuál y por qué ese.
   if (v.derivacion) p.derivacion = v.derivacion;
+  // "fuenteMedio" es la excepción a la media geométrica del traslado medio.
+  // Sin esto viaja el número (12 en Pipa) sin la razón por la que no es el 11
+  // que la fórmula daría, y en la web no hay forma de saber que se apartó a
+  // mano. Viaja con la procedencia por la misma razón que "nota".
+  if (v.fuenteMedio) p.fuenteMedio = v.fuenteMedio;
   return '  ' + k + ': ' + literal(p, 4);
 }).join(',\n');
 

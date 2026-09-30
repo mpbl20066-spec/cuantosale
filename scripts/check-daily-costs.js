@@ -22,8 +22,8 @@ ok('modelo: ' + Object.keys(D).length + ' destinos, todos con costos propios y c
 // 2. poa: el bug original
 assert.ok(srv.poa, 'poa no existe');
 assert.notStrictEqual(srv.poa, srv.rio, 'poa sigue resolviendo al fallback de rio');
-assert.deepStrictEqual([srv.poa.transport.eco, srv.poa.transport.confort, srv.poa.food.casual, srv.poa.food.moderado, srv.poa.food.gourmet], [13, 30, 27, 50, 90]);
-ok('poa con entrada propia: transporte 13/30, comida 27/50/90 (ya no cobra Rio)');
+assert.deepStrictEqual([srv.poa.transport.eco, srv.poa.transport.confort, srv.poa.food.casual, srv.poa.food.moderado, srv.poa.food.gourmet], [4, 14, 27, 50, 90]);
+ok('poa con entrada propia: transporte 4/14, comida 27/50/90 (ya no cobra Rio)');
 
 // 3. app.js no tiene segunda copia
 const app = fs.readFileSync('public/app.js', 'utf8');

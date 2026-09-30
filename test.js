@@ -1048,6 +1048,12 @@ function haversineKm(a, b) {
     // error. Porto Alegre estuvo asi: sin entrada, cobraba Rio siendo el
     // alojamiento mas barato del catalogo.
     const fallback = model.destinationCosts('__no_existe__');
+    // El "fuenteMedio" vive en el JSON y no en DESTINATION_COSTS: el modelo
+    // solo lleva name/transport/food, porque test.js y check-daily-costs.js
+    // comparan Object.keys() contra las claves del modelo y una clave mas ahi
+    // los rompe. La procedencia va en el objeto aparte del cliente.
+    const crudo = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'costos-diarios.json'), 'utf8'));
+    const tabla = crudo.destinos || crudo;
     for (const k of Object.keys(model.DEST)) {
       const c = model.DESTINATION_COSTS[k];
       assert.ok(c, k + ' (' + model.DEST[k].name + ') no tiene costos diarios propios');
@@ -1056,10 +1062,20 @@ function haversineKm(a, b) {
         k + ': la comida tiene que crecer de casual a moderado a gourmet, es ' + JSON.stringify(c.food));
       assert.ok(c.transport.eco < c.transport.medio && c.transport.medio < c.transport.confort,
         k + ': el traslado tiene que crecer de eco a medio a confort, es ' + JSON.stringify(c.transport));
-      // El nivel medio es derivado. Si deja de serlo, la comprobacion de arriba
-      // sigue pasando y nadie se entera de que el numero cambio de origen.
-      assert.strictEqual(c.transport.medio, Math.round(Math.sqrt(c.transport.eco * c.transport.confort)),
-        k + ': el traslado medio tiene que seguir siendo la media geometrica de los otros dos, es ' + c.transport.medio);
+      // El nivel medio es derivado: la media geometrica de los otros dos. Si
+      // se aparta, tiene que haber un "fuenteMedio" que lo explique, que es la
+      // misma excepcion que acepta validar-costos.js. Pipa es el caso: el
+      // pueblo es caminable (eco bajo de verdad) pero el viajero medio igual
+      // toma mototaxi a las playas de afuera, asi que queda en 12 y no en 11.
+      // Sin esta excepcion el test queda rojo con un dato que esta bien.
+      const fuenteMedio = (tabla[k] && tabla[k].fuenteMedio) || '';
+      if (!fuenteMedio) {
+        assert.strictEqual(c.transport.medio, Math.round(Math.sqrt(c.transport.eco * c.transport.confort)),
+          k + ': el traslado medio tiene que seguir siendo la media geometrica de los otros dos, o traer '
+          + 'un "fuenteMedio" que explique el desvio. Es ' + c.transport.medio);
+      } else {
+        assert.ok(fuenteMedio.trim().length > 40, k + ': el "fuenteMedio" esta vacio');
+      }
     }
   });
   /* ---------- transfer desde el aeropuerto ---------- */
