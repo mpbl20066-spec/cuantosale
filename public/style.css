@@ -1917,6 +1917,20 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .checkout-aside__row b{color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
 .checkout-aside__row.is-empty{display:block;color:var(--ink2);font-style:italic}
 .checkout-aside__total-line{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:10px 0 0;color:var(--ink2);font-size:12.5px}
+/* Codigo de descuento de las actividades. El estado va en el modificador para que
+   el color diga lo mismo que el texto: verde si descuenta, coral si no es valido. */
+.checkout-aside__row--descuento b{color:var(--good)}
+.checkout-promo{margin:14px 13px 4px;padding:11px 12px;border:1px dashed var(--control-line);border-radius:12px}
+.checkout-promo label{display:block;margin:0 0 6px;font-size:12px;font-weight:700;color:var(--ink)}
+.checkout-promo__row{display:flex;gap:8px}
+.checkout-promo__row input{flex:1;min-width:0;height:38px;padding:0 10px;border:1px solid var(--control-line);border-radius:10px;background:var(--bg);color:var(--ink);font:600 13px Poppins,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.checkout-promo__btn{height:38px;padding:0 14px;border:0;border-radius:10px;background:var(--action-bg);color:var(--action-ink);font:600 12px Poppins,sans-serif;cursor:pointer}
+.checkout-promo__btn:hover{filter:brightness(1.1)}
+.checkout-promo__msg{margin:7px 0 0;font-size:11.5px;line-height:1.35;color:var(--ink2)}
+.checkout-promo--aplicado{border-style:solid;border-color:var(--good)}
+.checkout-promo--aplicado .checkout-promo__msg{color:var(--good);font-weight:700}
+.checkout-promo--invalido .checkout-promo__msg{color:var(--coral);font-weight:700}
+.checkout-promo--faltan .checkout-promo__msg{color:var(--warn-ink);font-weight:700}
 .checkout-aside__total-line b{color:var(--ink);font-family:var(--fh);font-size:17px;font-variant-numeric:tabular-nums}
 /* ---- Columna de los pasos ---- */
 .checkout-main{display:flex;min-width:0;flex-direction:column;max-height:92vh}
