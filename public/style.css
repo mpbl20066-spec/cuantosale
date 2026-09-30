@@ -1,4 +1,4 @@
-/* version: 183
+/* version: 184
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2817,3 +2817,15 @@ button.logo{min-height:44px}
 .hotel-playa__toggle{width:100%;min-height:46px;padding:0 16px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
 .hotel-playa__toggle:hover,.hotel-playa__toggle:focus-visible{border-color:var(--cel);color:var(--cel)}
 @media(min-width:640px){.hotel-playa__toggle{width:auto;justify-self:center;padding:0 28px}}
+
+/* Resumen del presupuesto: menos ruido y texto mas legible en movil. */
+.voucher-split{margin:18px 0 6px;border:1px solid var(--line);background:transparent}
+.voucher-split.is-activo{background:transparent;border-color:var(--cel)}
+.voucher-split__text h3{font-size:14.5px}
+.voucher-split__text p{font-size:13px}
+.voucher-split__btn.is-main{background:transparent;color:var(--cel)}
+.voucher-split__btn.is-main:hover{background:var(--cel-soft);color:var(--ink);filter:none}
+.voucher-destino__title span,.voucher-destino__name em,.voucher-destino__dia,.voucher-destino__total span{font-size:13px}
+.voucher-destino__total span em{font-style:normal;font-weight:500;opacity:.8}
+.voucher-item__canal,.voucher-item__detail{font-size:12.5px}
+.voucher-item__amount.is-zero{font-size:13px;font-weight:600;color:var(--ink2)}

@@ -5386,7 +5386,7 @@
         /* El canal va siempre, reservado o no, y en el mismo lugar para los
            cuatro rubros. Es la bajada que da confianza: si el estado no dice
            de quien es el precio, el precio es un numero sin dueno. */
-        + (canal.canal ? '<p class="voucher-item__canal">' + esc(category === 'alojamiento' ? 'Reservado a través de ' + canal.canal : canal.canal) + '</p>' : '');
+        + (canal.canal ? '<p class="voucher-item__canal">' + esc(category === 'alojamiento' ? (reservado ? 'Reservado a través de ' : 'Se reserva en ') + canal.canal : canal.canal) + '</p>' : '');
       var lado = controlReserva(category)
         + (reservado ? '' : (ctaMarkup || ''));
       /* El color es del proveedor, no del rubro: con la paleta de rubros casi
@@ -5399,7 +5399,7 @@
              demas, cuando el pedido era de una linea o dos con bajada. */
           + (reservado ? '<span class="voucher-item__estado">' + chipReserva(category) + '</span>' : '')
           + '</p>' + cuerpo + '</div>' +
-        '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + money(amount) + '</b>' + lado + '</div></li>';
+        '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + (!amount && category === 'tours' ? 'Opcional' : money(amount)) + '</b>' + lado + '</div></li>';
     }
 
     // "Reservar" es un enlace cuando hay una URL y un botón apagado cuando no la
@@ -5754,7 +5754,6 @@
       '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong></div>' + dividirEnlace + '</div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
-      dividirBloque +
 
       '<ul class="voucher-list">' +
       (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>')) +
@@ -5772,7 +5771,7 @@
       + '<li><span class="voucher-destino__name">Transporte local <em>' + transportLabel + '</em></span><span class="voucher-destino__dia">' + money(localPerDay) + '/día</span><b class="voucher-destino__monto">' + money(localTotal) + '</b></li>'
       + '<li><span class="voucher-destino__name">Gastronomía <em>' + foodLabel + '</em></span><span class="voucher-destino__dia">' + money(foodPerDay) + '/día</span><b class="voucher-destino__monto">' + money(foodTotal) + '</b></li>'
       + '</ul>'
-      + '<p class="voucher-destino__total"><span>Total en destino</span><b>' + money(destinoTotal) + '</b></p></section>' +
+      + '<p class="voucher-destino__total"><span>Total en destino <em>(ya está en el total)</em></span><b>' + money(destinoTotal) + '</b></p></section>' +
       /* La nota de canales, y es la que da la tranquilidad que se busca.
 
        La idea de fondo --todo junto y alguien que lo coordine-- se dice
@@ -5787,6 +5786,7 @@
        la aerolinea o en una agencia. Booking si es intermediario real, y ahi
        el respaldo es cierto. */
       canalesTexto +
+      dividirBloque +
       /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
 
        Porque el pago del vuelo y del hotel pasa por un sitio del que la app
