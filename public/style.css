@@ -1,4 +1,4 @@
-/* version: 188
+/* version: 189
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2822,9 +2822,9 @@ button.logo{min-height:44px}
 .daily-budget__option--custom .daily-budget__input-unit{flex-basis:100%;margin-top:5px;white-space:normal}
 
 /* Alojamientos por playa: una seccion por playa, 3 a la vista y "Ver mas". */
-.hotel-playas{display:grid;gap:26px}
+.hotel-playas{display:grid;gap:40px}
 .hotel-playa{display:grid;gap:12px;min-width:0}
-.hotel-playa__head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.hotel-playa__head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .hotel-playa__title{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em;color:var(--ink);min-width:0}
 .hotel-playa__count{flex:none;padding:3px 9px;border-radius:999px;background:var(--cel-soft);color:var(--cel);font-size:11px;font-weight:800;white-space:nowrap}
 .hotel-playa__more[hidden]{display:none}

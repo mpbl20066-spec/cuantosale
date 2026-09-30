@@ -508,6 +508,7 @@ function selectThreeHotelsByBudget(hotels, dailyBudget) {
     });
   });
 }
+const PLAYAS_CONSULTADAS = 12; // busquedas extra por playa a Booking (cada una gasta cuota)
 const HOTEL_TYPE_LABELS = { 'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique', economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
 // Los seis tipos del selector. La lista vive tambien en hotelTypeSelectMarkup()
 // (public/app.js); si se agrega uno hay que tocar los dos lados. Aca, en scope de
@@ -685,7 +686,13 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
     destinationUrl.searchParams.set('locale', 'es');
     const destinationPayload = await bookingApiJson(destinationUrl.toString(), settings);
     const destinationRows = responseRows(destinationPayload);
-    const elegido = destinationRows.find(function (item) { return item && /city/i.test(String(item.search_type || item.dest_type || '')); }) || destinationRows[0];
+    /* Una busqueda por playa (extra.soloDistrito) necesita el barrio: si Booking
+       no tiene un distrito con ese nombre no se cae a la ciudad, porque traeria
+       los mismos hoteles de siempre y repetiria la consulta para nada. */
+    const esDistrito = function (item) { return item && /district/i.test(String(item.search_type || item.dest_type || '')); };
+    const elegido = extra && extra.soloDistrito
+      ? destinationRows.find(esDistrito)
+      : destinationRows.find(function (item) { return item && /city/i.test(String(item.search_type || item.dest_type || '')); }) || destinationRows[0];
     if (elegido && elegido.dest_id != null && elegido.search_type) {
       target = elegido;
       consultado = candidato;
@@ -773,6 +780,22 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
           console.warn('[hotelRecommendations] Búsqueda regional no disponible:', regionalError && regionalError.message ? regionalError.message : regionalError);
         }
       }
+    }
+    /* Booking devuelve 20 hoteles por busqueda, y la de la ciudad entera no los
+       reparte por playa: en Florianopolis (9.566 alojamientos) alcanzaba para 1 o
+       2 por playa. Con la pantalla agrupada por playa se consulta ademas el
+       distrito de cada una (Canasvieiras, Ingleses...), que trae 20 propios. Van
+       en paralelo y una que falle se ignora; los repetidos los saca
+       uniqueHotelList. */
+    if (diag && !(extra && extra.noGroups) && realHotels.length) {
+      const nombres = playas.nombresDePlayas(destKey).slice(0, PLAYAS_CONSULTADAS);
+      const porPlaya = await Promise.all(nombres.map(function (nombre) {
+        return fetchBookingHotels(destKey, nombre + ', ' + destName, selectedTier, Object.assign({}, hotelExtra, { soloDistrito: true }))
+          .catch(function () { return []; });
+      }));
+      porPlaya.forEach(function (lista) {
+        realHotels = realHotels.concat(lista.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName, geoKey: destKey }); }));
+      });
     }
   } catch (error) {
     const motivo = error && error.message ? error.message : String(error);
@@ -923,14 +946,31 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   if (diag && !(extra && extra.noGroups) && playas.nombresDePlayas(destKey).length && priced.some(function (hotel) { return hotel.playa; })) {
     const POR_PLAYA_MAX = 12;
     const porPlaya = new Map();
+    const coinciden = new Set();
     priced
       .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget); })
       .sort(porDistancia)
       .forEach(function (hotel) {
         const clave = hotel.playa || 'Otras zonas';
         if (!porPlaya.has(clave)) porPlaya.set(clave, []);
+        coinciden.add(hotel);
         if (porPlaya.get(clave).length < POR_PLAYA_MAX) porPlaya.get(clave).push(hotel);
       });
+    /* Cada playa muestra al menos 3 hoteles: si el tipo y el precio elegidos dejan
+       menos, se completa con los demas hoteles de esa misma playa, los mas cercanos
+       al presupuesto primero. Solo en tipos de espectro (economico, equilibrado,
+       comodo); All Inclusive, Resort y Boutique no admiten sustitucion. */
+    if (['all-inclusive', 'resort', 'boutique'].indexOf(hotelType) < 0) {
+      const resto = priced.filter(function (hotel) { return !coinciden.has(hotel); }).sort(porDistancia);
+      const claves = new Set(priced.map(function (hotel) { return hotel.playa || 'Otras zonas'; }));
+      claves.forEach(function (clave) {
+        const lista = porPlaya.get(clave) || [];
+        resto.forEach(function (hotel) {
+          if (lista.length < 3 && (hotel.playa || 'Otras zonas') === clave) lista.push(hotel);
+        });
+        if (lista.length) porPlaya.set(clave, lista);
+      });
+    }
     const grupos = Array.from(porPlaya.entries())
       .filter(function (par) { return par[0] !== 'Otras zonas'; })
       .sort(function (a, b) { return b[1].length - a[1].length; });
