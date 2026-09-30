@@ -2716,11 +2716,69 @@
     });
     return cells.length ? '<ul class="tour-facts">' + cells.join('') + '</ul>' : '';
   }
+  /* Iconos de "Que llevar": uno por objeto, elegido por palabra clave. Lo que no
+     se reconoce lleva un punto, asi nunca sale un icono que diga otra cosa. */
+  var LLEVAR_ICONS = [
+    [/toalla/, '<path d="M6 3h12v18H6z"/><path d="M6 8h12M6 16h12"/>'],
+    [/protector|bloqueador|filtro solar|bronceador/, '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M5.3 18.7l1.5-1.5M17.2 6.8l1.5-1.5"/>'],
+    [/sombrero|gorra|gorro|visera/, '<path d="M3 16.5h18"/><path d="M5.5 16.5c0-4.2 2.9-8 6.5-8s6.5 3.800 6.500 8"/>'],
+    [/muda|ropa|remera|camiseta|traje de ba/, '<path d="M8.500 3 3 6l2 4.200 2-.9V20h10V9.300l2 .9L21 6l-5.500-3c-.5 1.400-1.800 2.200-3.500 2.200S9 4.400 8.500 3Z"/>'],
+    [/gafas|lentes|anteojos/, '<circle cx="6.500" cy="14" r="3.500"/><circle cx="17.500" cy="14" r="3.500"/><path d="M10 14h4M3.200 13.200 4.500 8M20.800 13.200 19.500 8"/>'],
+    [/repelente|insecto|mosquito/, '<rect x="8" y="8.500" width="8" height="11" rx="4"/><path d="M9 7.500a3 3 0 0 1 6 0M12 8.500v11M4 12.500h4M16 12.500h4M5.500 7.500 8.200 9.500M18.500 7.500 15.800 9.500M5.500 18l2.700-1.800M18.500 18l-2.700-1.800"/>'],
+    [/bebida|cooler|agua|hielo|botella|termo/, '<path d="M10 2.500h4V5l1.500 3v11.500a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2V8L10 5z"/><path d="M8.500 12.500h7"/>'],
+    [/mochila|bolso|bolsa|equipaje/, '<path d="M6 8h12l1 12.500H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'],
+    [/camara|foto/, '<path d="M3.500 8h3.500l1.800-3h6.400L17 8h3.500v11.500h-17z"/><circle cx="12" cy="13.500" r="3.500"/>'],
+    [/documento|pasaporte|dni|cedula|identidad/, '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M14 10h4M14 14h4M6.500 16.500c.6-1.600 4.400-1.600 5 0"/>'],
+    [/efectivo|dinero|plata|reales|pesos|dolares/, '<rect x="2.500" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.500"/><path d="M6 9.500v.01M18 14.500v.01"/>'],
+    [/calzado|zapatilla|sandalia|zapato|championes|ojotas/, '<path d="M3 16.500v-3l4-1 3 2 6 1c3 .5 5 1 5 3v1H3z"/>']
+  ];
+  function tourLlevarIcon(texto) {
+    var t = String(texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    for (var i = 0; i < LLEVAR_ICONS.length; i++) {
+      if (LLEVAR_ICONS[i][0].test(t)) {
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + LLEVAR_ICONS[i][1] + '</svg>';
+      }
+    }
+    return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="3"/></svg>';
+  }
+  /* La informacion operativa (check-in, embarque, punto de encuentro, lluvia) es
+     lo que el pasajero no se puede perder, y en el texto largo queda enterrada.
+     Se separa por FRASES: las que hablan de horario, encuentro o clima van a la
+     caja de aviso y el resto sigue en "Detalles". Un prefijo "Operativa:" o
+     "Nota de operacion:" se saca porque la caja ya dice que es operativo. */
+  var OPERATIVA_RE = /check-?in|embarque|punto de encuentro|lluvia|capitan[ií]a|boleter[ií]a|salida (?:puntual )?a las/i;
+  function tourSplitOperativa(text) {
+    var op = [], rest = [];
+    String(text || '').split(/\n+/).forEach(function (linea) {
+      var l = linea.trim();
+      if (!l) return;
+      var keep = [];
+      l.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¡¿0-9])/).forEach(function (f) {
+        var limpio = f.replace(/^(?:operativa|nota de operaci[oó]n)\s*:\s*/i, '');
+        if (limpio !== f || OPERATIVA_RE.test(f)) op.push(limpio); else keep.push(f);
+      });
+      if (keep.length) rest.push(keep.join(' '));
+    });
+    return { op: op, rest: rest.join('\n') };
+  }
+  var OPERATIVA_ICONS = {
+    reloj: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    lugar: '<path d="M12 21s7-6.300 7-11a7 7 0 1 0-14 0c0 4.700 7 11 7 11Z"/><circle cx="12" cy="10" r="2.600"/>',
+    clima: '<path d="M7 15.500a4.500 4.500 0 1 1 1.200-8.800A5.500 5.500 0 0 1 18.800 8.500 3.500 3.500 0 0 1 18 15.500z"/><path d="M8.500 18.500l-1 2M12.500 18.500l-1 2M16.500 18.500l-1 2"/>'
+  };
+  function tourOperativaHtml(items) {
+    if (!items || !items.length) return '';
+    return '<aside class="tour-operativa" role="note"><h3 class="tour-operativa__title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.500M12 7.600v.01"/></svg>Información operativa</h3><ul class="tour-operativa__list">'
+      + items.map(function (t) {
+        var k = /lluvia|capitan[ií]a|clima/i.test(t) ? 'clima' : /encuentro|estaci[oó]n|agencia|boleter[ií]a|muelle/i.test(t) ? 'lugar' : 'reloj';
+        return '<li><svg class="tour-operativa__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + OPERATIVA_ICONS[k] + '</svg><span>' + esc(t) + '</span></li>';
+      }).join('') + '</ul></aside>';
+  }
   /* Las listas de la ficha (incluye / no incluye / que llevar). Una fila por
      frase: tilde verde, cruz roja o punto, segun la lista. */
   function tourListHtml(items, kind) {
-    var mark = kind === 'si' ? checkIcon() : kind === 'no' ? crossIcon() : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="3"/></svg>';
     return '<ul class="tour-detail-modal__rows">' + items.map(function (t) {
+      var mark = kind === 'si' ? checkIcon() : kind === 'no' ? crossIcon() : tourLlevarIcon(t);
       return '<li class="tour-detail-modal__row is-' + kind + '"><span class="tour-detail-modal__mark" aria-hidden="true">' + mark + '</span><span>' + esc(t) + '</span></li>';
     }).join('') + '</ul>';
   }
@@ -2762,7 +2820,9 @@
     var hayListas = (sec.incluye && sec.incluye.length) || (sec.noIncluye && sec.noIncluye.length) || (sec.llevar && sec.llevar.length);
     var cuerpo;
     if (hayListas || /\n/.test(detalleTxt)) {
-      cuerpo = '<h3 class="tour-detail-modal__h">Detalles</h3><div class="tour-detail-modal__copy tour-detail-modal__text">' + tourParagraphsHtml(detalleTxt) + '</div>'
+      var partes = tourSplitOperativa(detalleTxt);
+      cuerpo = tourOperativaHtml(partes.op)
+        + (partes.rest ? '<h3 class="tour-detail-modal__h">Detalles</h3><div class="tour-detail-modal__copy tour-detail-modal__text">' + tourParagraphsHtml(partes.rest) + '</div>' : '')
         + (sec.incluye && sec.incluye.length ? '<h3 class="tour-detail-modal__h">Qué incluye</h3><div class="tour-detail-modal__copy">' + tourListHtml(sec.incluye, 'si') + '</div>' : '')
         + (sec.noIncluye && sec.noIncluye.length ? '<h3 class="tour-detail-modal__h">No incluye</h3><div class="tour-detail-modal__copy">' + tourListHtml(sec.noIncluye, 'no') + '</div>' : '')
         + (sec.llevar && sec.llevar.length ? '<h3 class="tour-detail-modal__h">Qué llevar</h3><div class="tour-detail-modal__copy">' + tourListHtml(sec.llevar, 'dot') + '</div>' : '');
