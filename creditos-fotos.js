@@ -47,28 +47,66 @@ const OUTROS = {
   'Gobierno de la Ciudad Autónoma de Buenos Aires': 'Gobierno de la Ciudad Autónoma de Buenos Aires'
 };
 
-async function ficha(fileName) {
+async function fichasLote(titulos) {
+  /* Consulta VARIOS archivos en un solo request.
+
+     Antes era un request por foto, con 900 ms de pausa entre cada uno. Con 69
+     fotos eso son 69 requests contra Commons, que corta con 429 a partir de
+     cierta cantidad: la corrida terminaba con 9 a 12 fotos sin ficha y, como
+     el script es todo-o-nada, no escribía NADA. Dos corridas seguidas
+     empeoraron (9 y luego 12 sin ficha) porque el límite se había cansado.
+
+     La API acepta hasta 50 títulos separados por "|" en un mismo
+     action=query&titles=. Con eso 69 fotos son 2 requests y desaparece el
+     rate limit. Los reintentos se dejan por si aparece, pero ya no es el
+     camino normal. */
   const url = new URL('https://commons.wikimedia.org/w/api.php');
   url.searchParams.set('action', 'query');
   url.searchParams.set('format', 'json');
-  url.searchParams.set('titles', fileName);
+  url.searchParams.set('titles', titulos.join('|'));
   url.searchParams.set('prop', 'imageinfo');
   url.searchParams.set('iiprop', 'extmetadata');
   const r = await fetch(url, { headers: { 'User-Agent': UA } });
-  // La API de Commons corta con 429 si se la consulta muy rápido, y devuelve
-  // texto plano en lugar de JSON. Sin esto el script reportaba "no encontrada"
-  // para casi todo y parecía un problema de nombres de archivo.
+  // Commons corta con 429 si se la consulta muy rápido, y devuelve texto plano
+  // en lugar de JSON. Sin esto el script reportaba "no encontrada" para casi
+  // todo y parecía un problema de nombres de archivo.
   if (r.status === 429) { const e = new Error('RATE'); e.rate = true; throw e; }
   if (!r.ok) throw new Error('HTTP ' + r.status);
   const j = await r.json();
   const pages = (j.query && j.query.pages) ? Object.values(j.query.pages) : [];
-  const info = pages[0] && pages[0].imageinfo && pages[0].imageinfo[0];
-  if (!info) return null;
-  const m = info.extmetadata || {};
-  const autor = String((m.Artist && m.Artist.value) || '')
-    .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
-  const licencia = String((m.LicenseShortName && m.LicenseShortName.value) || '').trim();
-  return { autor: autor, licencia: licencia };
+  const salida = new Map();
+  for (const p of pages) {
+    if (!p || p.missing !== undefined) continue;
+    const info = p.imageinfo && p.imageinfo[0];
+    if (!info) continue;
+    const m = info.extmetadata || {};
+    const autor = String((m.Artist && m.Artist.value) || '')
+      .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
+    const licencia = String((m.LicenseShortName && m.LicenseShortName.value) || '').trim();
+    // MediaWiki normaliza el título: "Foo_bar.jpg" y "Foo bar.jpg" son el
+    // mismo archivo. Por eso la clave se busca sin guiones bajos y en
+    // minúsculas, no con el texto tal como vino en la URL.
+    salida.set(String(p.title || '').replace(/_/g, ' ').toLowerCase(),
+      { autor: autor, licencia: licencia });
+  }
+  return salida;
+}
+
+const LOTE = 40;   // la API acepta 50; 40 deja margen para los títulos largos
+
+async function fichaConReintento(fileName) {
+  /* Un solo archivo, para cuando el lote no se pudo pedir. */
+  for (let intento = 0; intento < 4; intento++) {
+    try {
+      const r = await fichasLote([fileName]);
+      const v = r.get(fileName.replace(/_/g, ' ').toLowerCase());
+      return v || null;
+    } catch (e) {
+      if (!e.rate) return null;
+      await new Promise((res) => setTimeout(res, 2000 * (intento + 1)));
+    }
+  }
+  return null;
 }
 
 (async function () {
@@ -76,27 +114,59 @@ async function ficha(fileName) {
   const urls = [...new Set([...src.matchAll(/'(https?:\/\/[^']+\.(?:jpg|jpeg|JPG|png|webp))'/g)].map((m) => m[1]))];
   const creditos = {};
   const sinFicha = [];
+
+  /* La tabla que ya está escrita sirve de cache. Un crédito ya verificado y
+     anotado no se vuelve a pedir: si la licencia de una foto no va a cambiar
+     entre corridas, volver a consultarla solo gasta cuota y chances de que un
+     429 tumbe la corrida entera. Esto además hace que una corrida que falla a
+     medias no pierda el trabajo de la anterior. */
+  let known = {};
+  try {
+    delete require.cache[require.resolve(OUT)];
+    known = require(OUT) || {};
+  } catch (e) { known = {}; }
+
+  const porConsultar = [];
   for (const u of urls) {
-    const file = commonsFileName(u);
-    if (!file) { sinFicha.push(u); continue; }
-    let datos = null;
-    // Se reintenta con pausas crecientes: Commons corta con 429 y la espera
-    // tiene que ser de segundos, no de milisegundos.
-    for (let intento = 0; intento < 5 && !datos; intento++) {
-      try { datos = await ficha(file); }
-      catch (e) { if (!e.rate) break; }
-      if (!datos) await new Promise((r) => setTimeout(r, 1500 * (intento + 1)));
+    if (known[u] && known[u].autor && known[u].licencia) { creditos[u] = known[u]; continue; }
+    porConsultar.push(u);
+  }
+  console.log('fotos en el codigo: ' + urls.length +
+    ' | ya acreditadas: ' + Object.keys(creditos).length +
+    ' | a consultar: ' + porConsultar.length);
+
+  for (let i = 0; i < porConsultar.length; i += LOTE) {
+    const grupo = porConsultar.slice(i, i + LOTE);
+    const titulos = [];
+    const porTitulo = new Map();
+    for (const u of grupo) {
+      const f = commonsFileName(u);
+      if (!f) { sinFicha.push(u); continue; }
+      titulos.push(f);
+      porTitulo.set(f.replace(/_/g, ' ').toLowerCase(), u);
     }
-    if (datos && datos.autor && datos.licencia) {
-      creditos[u] = { autor: datos.autor, licencia: datos.licencia };
-    } else {
-      // Se guarda también el título consultado: sin él es imposible saber si
-      // falló la extracción del nombre o si el archivo no tiene metadatos.
-      sinFicha.push(u + '   [titulo consultado: ' + file + ']' +
-        (datos ? '  (ficha ok pero sin autor o licencia)' : '  (no devolvio ficha)'));
+    let respuesta = new Map();
+    for (let intento = 0; intento < 4 && !respuesta.size; intento++) {
+      try { respuesta = await fichasLote(titulos); }
+      catch (e) { if (!e.rate) { console.warn('  lote: ' + e.message); break; } }
+      if (!respuesta.size) await new Promise((r) => setTimeout(r, 2500 * (intento + 1)));
     }
-    process.stdout.write('\r' + (Object.keys(creditos).length + sinFicha.length) + '/' + urls.length + '   ');
-    await new Promise((r) => setTimeout(r, 900));
+    for (const u of grupo) {
+      if (sinFicha.indexOf(u) >= 0) continue;
+      const file = commonsFileName(u);
+      const clave = file.replace(/_/g, ' ').toLowerCase();
+      const datos = respuesta.get(clave) || (respuesta.size ? null : await fichaConReintento(file));
+      if (datos && datos.autor && datos.licencia) {
+        creditos[u] = { autor: datos.autor, licencia: datos.licencia };
+      } else {
+        // Se guarda también el título consultado: sin él es imposible saber si
+        // falló la extracción del nombre o si el archivo no tiene metadatos.
+        sinFicha.push(u + '   [titulo consultado: ' + file + ']' +
+          (datos ? '  (ficha ok pero sin autor o licencia)' : '  (no devolvio ficha)'));
+      }
+    }
+    console.log('  lote ' + Math.min(i + LOTE, porConsultar.length) + '/' + porConsultar.length +
+      ' | acreditadas: ' + Object.keys(creditos).length + '/' + urls.length);
   }
 
   const lineas = Object.keys(creditos).sort().map((u) => {
