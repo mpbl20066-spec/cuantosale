@@ -6306,14 +6306,15 @@
     var css = document.createElement('link');
     css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css?v=1';
     document.head.appendChild(css);
-    roadtripMapAssets = Promise.all([script('/vendor/leaflet/leaflet.js?v=1'), script('/rutas-auto.js?v=1'), script('/mapa-base.js?v=1')]);
+    roadtripMapAssets = Promise.all([script('/vendor/leaflet/leaflet.js?v=1'), script('/rutas-auto.js?v=1'), script('/mapa-base.js?v=2')]);
     roadtripMapAssets.catch(function () { roadtripMapAssets = null; });
     return roadtripMapAssets;
   }
-  // Referencias del mapa: países y ciudades que ubican la ruta. Van fijas y no
-  // salen de DEST_COORDS porque esto es cartografía, no un dato del cálculo.
-  var ROADTRIP_MAP_COUNTRIES = [['URUGUAY', -32.7, -56.3], ['ARGENTINA', -33.2, -61.6], ['BRASIL', -27.6, -53.4], ['PARAGUAY', -23.2, -58.6]];
-  var ROADTRIP_MAP_CITIES = [['Buenos Aires', -34.61, -58.38], ['Punta del Este', -34.96, -54.95], ['Porto Alegre', -30.03, -51.22], ['Curitiba', -25.43, -49.27], ['Florianópolis', -27.6, -48.55], ['Foz do Iguaçu', -25.55, -54.59], ['São Paulo', -23.55, -46.63], ['Asunción', -25.26, -57.58]];
+  // Referencias del mapa: países y ciudades que ubican la ruta, en orden de
+  // prioridad (si dos textos se pisan, queda el primero). Van fijas y no salen de
+  // DEST_COORDS porque esto es cartografía, no un dato del cálculo.
+  var ROADTRIP_MAP_COUNTRIES = [['Uruguay', -32.7, -56.3], ['Argentina', -33.2, -61.6], ['Brasil', -26.6, -52.6], ['Paraguay', -23.2, -58.6]];
+  var ROADTRIP_MAP_CITIES = [['Porto Alegre', -30.03, -51.22], ['Florianópolis', -27.6, -48.55], ['Curitiba', -25.43, -49.27], ['Buenos Aires', -34.61, -58.38], ['Punta del Este', -34.96, -54.95], ['Foz do Iguaçu', -25.55, -54.59], ['São Paulo', -23.55, -46.63], ['Santa Maria', -29.68, -53.81], ['Passo Fundo', -28.26, -52.41], ['Pelotas', -31.77, -52.34], ['Criciúma', -28.68, -49.37], ['Uruguaiana', -29.76, -57.09], ['Caxias do Sul', -29.17, -51.18], ['Joinville', -26.3, -48.85], ['Paysandú', -32.32, -58.08], ['Rivera', -30.9, -55.55], ['Tacuarembó', -31.72, -55.98], ['Melo', -32.37, -54.17], ['Colonia', -34.47, -57.84], ['Asunción', -25.26, -57.58], ['Posadas', -27.37, -55.9], ['Corrientes', -27.47, -58.83], ['Rosario', -32.95, -60.65], ['Concordia', -31.39, -58.02], ['Lages', -27.82, -50.33], ['Blumenau', -26.92, -49.07], ['Ponta Grossa', -25.09, -50.16]];
   function mountRoadtripMap(el) {
     el.setAttribute('data-map-state', 'loading');
     loadRoadtripMapAssets().then(function () {
@@ -6325,7 +6326,8 @@
       if (!pts || !base || !L) { el.closest('.roadtrip-map-card').remove(); return; }
       el.innerHTML = '';
       var origin = window.CS_ROUTE_ORIGIN, dest = pts[pts.length - 1];
-      // Mapa político propio (sin tiles de terceros): tierra, fronteras y la ruta.
+      var destName = el.getAttribute('data-map-dest');
+      // Mapa político propio (sin tiles de terceros): tierra, agua, fronteras y la ruta.
       var map = L.map(el, { zoomSnap: 0.25, scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false, attributionControl: true,
         maxBounds: base.bbox, maxBoundsViscosity: 1 });
       map.attributionControl.setPrefix(false);
@@ -6333,22 +6335,42 @@
       var noHit = { interactive: false, smoothFactor: 1 };
       L.polygon(base.tierra, L.extend({ className: 'rt-land', stroke: false }, noHit)).addTo(map);
       L.polygon(base.limites, L.extend({ className: 'rt-state', fill: false }, noHit)).addTo(map);
+      L.polygon(base.agua, L.extend({ className: 'rt-water', stroke: false }, noHit)).addTo(map);
+      L.polyline(base.rios, L.extend({ className: 'rt-river' }, noHit)).addTo(map);
       L.polygon(base.tierra, L.extend({ className: 'rt-country', fill: false }, noHit)).addTo(map);
-      function label(latlng, cls, html) {
-        return L.marker(latlng, { interactive: false, keyboard: false, icon: L.divIcon({ className: cls, html: html, iconSize: null }) }).addTo(map);
-      }
       L.polyline(pts, { color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
       var line = L.polyline(pts, { color: '#e8590c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
       map.fitBounds(line.getBounds(), { paddingTopLeft: [34, 60], paddingBottomRight: [34, 58] });
       map.setMinZoom(Math.max(map.getBoundsZoom(base.bbox, true), map.getZoom() - 1.5));
-      var view = map.getBounds();
-      ROADTRIP_MAP_COUNTRIES.forEach(function (c) { if (view.contains([c[1], c[2]])) label([c[1], c[2]], 'rt-country-name', c[0]); });
-      ROADTRIP_MAP_CITIES.forEach(function (c) {
-        var far = Math.hypot(c[1] - dest[0], c[2] - dest[1]) > 0.6 && Math.hypot(c[1] - origin[0], c[2] - origin[1]) > 0.6;
-        if (far && view.contains([c[1], c[2]])) label([c[1], c[2]], 'rt-city', '<i></i><span>' + c[0] + '</span>');
-      });
+      function label(latlng, cls, html) {
+        return L.marker(latlng, { interactive: false, keyboard: false, icon: L.divIcon({ className: cls, html: html, iconSize: null }) }).addTo(map);
+      }
+      // Los textos se acomodan en orden de prioridad y se descarta el que pisa a
+      // uno ya puesto: primero los pines, después países, ciudades y estados.
+      var size = map.getSize(), taken = [];
+      function claim(latlng, w, h, dx, dy) {
+        var p = map.latLngToContainerPoint(latlng);
+        var r = { x0: p.x + dx, y0: p.y + dy, x1: p.x + dx + w, y1: p.y + dy + h };
+        if (r.x0 < 4 || r.y0 < 4 || r.x1 > size.x - 4 || r.y1 > size.y - 22) return false;
+        for (var i = 0; i < taken.length; i++) {
+          var t = taken[i];
+          if (r.x0 < t.x1 && r.x1 > t.x0 && r.y0 < t.y1 && r.y1 > t.y0) return false;
+        }
+        taken.push(r);
+        return true;
+      }
+      claim(origin, 90, 46, -45, -6); claim(dest, destName.length * 7 + 26, 46, -(destName.length * 3.5 + 13), -42);
       label(origin, 'roadtrip-pin roadtrip-pin--from', '<i></i><span>Montevideo</span>');
-      label(dest, 'roadtrip-pin roadtrip-pin--to', '<i></i><span>' + esc(el.getAttribute('data-map-dest')) + '</span>');
+      label(dest, 'roadtrip-pin roadtrip-pin--to', '<i></i><span>' + esc(destName) + '</span>');
+      ROADTRIP_MAP_COUNTRIES.forEach(function (c) {
+        if (claim([c[1], c[2]], c[0].length * 9 + 8, 18, -(c[0].length * 4.5 + 4), -9)) label([c[1], c[2]], 'rt-country-name', c[0]);
+      });
+      ROADTRIP_MAP_CITIES.forEach(function (c) {
+        if (claim([c[1], c[2]], c[0].length * 6.4 + 16, 16, -4, -9)) label([c[1], c[2]], 'rt-city', '<i></i><span>' + c[0] + '</span>');
+      });
+      (base.nombres || []).forEach(function (n) {
+        if (claim([n[1], n[2]], n[0].length * 7 + 8, 14, -(n[0].length * 3.5 + 4), -7)) label([n[1], n[2]], 'rt-state-name', esc(n[0]));
+      });
       el.setAttribute('data-map-state', 'ready');
       var gmaps = document.createElement('a');
       gmaps.className = 'roadtrip-map__open';

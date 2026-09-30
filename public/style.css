@@ -2667,20 +2667,22 @@ h3.block-title, .block-title:is(h3) {
 .split-adjust__ctl{display:flex;align-items:center;gap:10px;flex:0 0 auto}
 .split-adjust__ctl output{min-width:26px;text-align:center;font-family:var(--fh);font-size:22px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
 .split-adjust .split-step{width:38px;height:38px;font-size:20px}
-/* Mapa de la ruta del roadtrip: mapa politico dibujado con poligonos (ver scripts/build-mapa-base.js). */
+/* Mapa de la ruta del roadtrip: mapa politico dibujado con poligonos (ver scripts/build-mapa-base.js). Siempre claro (tierra verde, agua celeste), tambien con el tema oscuro de la app. */
 .roadtrip-map-card{padding:0;overflow:hidden;position:relative}
 .roadtrip-map-card__head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;padding:14px 16px 12px}.roadtrip-map-card__head b{font-family:var(--fh);font-size:16px}.roadtrip-map-card__head span{font-size:12px;font-weight:700;color:var(--ink2)}
-.roadtrip-map{--sea:#cfe6f3;--land:#f5f3ee;--country:#9aa1a9;--state:#cfd3d8;--lbl:#5f6b78;--halo:#f5f3ee;height:320px;isolation:isolate;background:var(--sea);display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line)}
-/* El mapa va siempre claro (tono Waze de dia), tambien con el tema oscuro de la app. */
-.roadtrip-map__loading{font-size:13px;color:var(--ink2)}
+.roadtrip-map{--sea:#a9d4f5;--land:#cde8c9;--country:#4f5b57;--state:#8fa08f;--lbl:#4a5560;--halo:#e3f2df;height:320px;isolation:isolate;background:var(--sea);display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line)}
+.roadtrip-map__loading{font-size:13px;color:#4a5560}
 .roadtrip-map.leaflet-container{font:inherit;display:block;background:var(--sea);animation:roadtrip-map-in .5s ease both}
 @keyframes roadtrip-map-in{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.roadtrip-map.leaflet-container{animation:none}}
-.roadtrip-map .rt-land{fill:var(--land);fill-opacity:1}.roadtrip-map .rt-state{stroke:var(--state);stroke-width:1;stroke-dasharray:4 4}.roadtrip-map .rt-country{stroke:var(--country);stroke-width:1.4;stroke-linejoin:round}
+.roadtrip-map .rt-land{fill:var(--land);fill-opacity:1}.roadtrip-map .rt-water{fill:var(--sea);fill-opacity:1}.roadtrip-map .rt-river{fill:none;stroke:var(--sea);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.roadtrip-map .rt-state{stroke:var(--state);stroke-width:1;stroke-dasharray:4 4}.roadtrip-map .rt-country{stroke:var(--country);stroke-width:1.2;stroke-linejoin:round}
 .roadtrip-map .leaflet-control-attribution{font-size:10px;background:rgba(255,255,255,.75);color:#333}.roadtrip-map .leaflet-control-zoom a{color:#111}
-.rt-country-name,.rt-city,.roadtrip-pin{background:none;border:0;width:0;height:0;overflow:visible}
-.rt-country-name{color:var(--lbl);font-size:12px;font-weight:800;letter-spacing:.28em;white-space:nowrap;transform:translate(-50%,-50%);text-shadow:0 0 3px var(--halo),0 0 3px var(--halo);opacity:.85}
-.rt-city i{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:var(--country)}.rt-city span{position:absolute;left:8px;top:-8px;white-space:nowrap;font-size:11px;font-weight:700;color:var(--lbl);text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 3px var(--halo)}
+.rt-country-name,.rt-city,.rt-state-name,.roadtrip-pin{background:none;border:0;width:0;height:0;overflow:visible}
+.rt-country-name,.rt-state-name{position:relative;white-space:nowrap;text-align:center;text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 3px var(--halo)}
+.rt-country-name{color:#2f3a36;font-size:13px;font-weight:800;letter-spacing:.02em;transform:translate(-50%,-50%)}
+.rt-state-name{color:var(--lbl);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;transform:translate(-50%,-50%);opacity:.8}
+.rt-city i{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:#fff;border:1.5px solid var(--country)}.rt-city span{position:absolute;left:7px;top:-8px;white-space:nowrap;font-size:11px;font-weight:600;color:#3a4650;text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 3px var(--halo)}
 .roadtrip-pin i{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:#fff;border:4px solid #e8590c;box-shadow:0 1px 5px rgba(0,0,0,.4)}
 .roadtrip-pin span{position:absolute;left:0;top:0;transform:translate(-50%,-190%);white-space:nowrap;padding:3px 9px;border-radius:999px;background:#fff;color:#111;font-size:11px;font-weight:800;box-shadow:0 1px 5px rgba(0,0,0,.35)}
 .roadtrip-pin--from span{transform:translate(-8px,60%)}.roadtrip-pin--to i{background:#e8590c;border-color:#fff;width:18px;height:18px;left:-9px;top:-9px}.roadtrip-pin--to span{background:#e8590c;color:#fff;transform:translate(-50%,-165%)}

@@ -89,9 +89,25 @@ function anillos(geom, tol) {
   return out;
 }
 
+// Lineas (rios): se queda con los tramos que caen dentro de la caja.
+function lineas(geom, tol) {
+  const ls = geom.type === 'LineString' ? [geom.coordinates] : geom.type === 'MultiLineString' ? geom.coordinates : [];
+  const dentro = (p) => p[0] >= CAJA.w && p[0] <= CAJA.e && p[1] >= CAJA.s && p[1] <= CAJA.n;
+  const out = [];
+  for (const l of ls) {
+    let run = [];
+    const cerrar = () => { if (run.length > 1) out.push(simplificar(run, tol).map(([lng, lat]) => [Math.round(lat * 100) / 100, Math.round(lng * 100) / 100])); run = []; };
+    for (const p of l) { if (dentro(p)) run.push(p); else cerrar(); }
+    cerrar();
+  }
+  return out;
+}
+
 (async function () {
   const paises = await bajar('ne_10m_admin_0_countries');
   const estados = await bajar('ne_10m_admin_1_states_provinces');
+  const lagos = await bajar('ne_10m_lakes');
+  const rios = await bajar('ne_10m_rivers_lake_centerlines');
   const tierra = [];
   for (const f of paises.features) {
     const iso = f.properties.ISO_A2 !== '-99' ? f.properties.ISO_A2 : f.properties.ISO_A2_EH;
@@ -102,8 +118,21 @@ function anillos(geom, tol) {
     if (!['UY', 'AR', 'BR', 'PY'].includes(f.properties.iso_a2)) continue;
     limites.push(...anillos(f.geometry, 0.02));
   }
+  // Lagunas y embalses grandes (Lagoa Mirim, Iberá, Itaipú...) y ríos principales.
+  const agua = [];
+  for (const f of lagos.features) if (f.geometry && f.properties.scalerank <= 8) agua.push(...anillos(f.geometry, 0.01));
+  const rioslin = [];
+  for (const f of rios.features) if (f.geometry && f.properties.scalerank <= 6) rioslin.push(...lineas(f.geometry, 0.01));
+  // Nombres de estados y provincias, en el punto de etiqueta que trae Natural Earth.
+  const nombres = [];
+  for (const f of estados.features) {
+    const p = f.properties;
+    if (!['AR', 'BR'].includes(p.iso_a2) || p.labelrank > 7 || p.name === 'Ciudad de Buenos Aires') continue;
+    if (p.longitude < CAJA.w || p.longitude > CAJA.e || p.latitude < CAJA.s || p.latitude > CAJA.n) continue;
+    nombres.push([p.name, Math.round(p.latitude * 100) / 100, Math.round(p.longitude * 100) / 100]);
+  }
   const cuerpo = '/* Generado por scripts/build-mapa-base.js con datos de Natural Earth (dominio publico). No editar a mano. */\n' +
-    'window.CS_BASEMAP = ' + JSON.stringify({ bbox: [[CAJA.s, CAJA.w], [CAJA.n, CAJA.e]], tierra, limites }) + ';\n';
+    'window.CS_BASEMAP = ' + JSON.stringify({ bbox: [[CAJA.s, CAJA.w], [CAJA.n, CAJA.e]], tierra, limites, agua, rios: rioslin, nombres }) + ';\n';
   fs.writeFileSync(SALIDA, cuerpo, 'utf8');
-  console.log('tierra: ' + tierra.length + ' poligonos | estados: ' + limites.length + ' | ' + (cuerpo.length / 1024).toFixed(0) + ' KB -> ' + SALIDA);
+  console.log('tierra: ' + tierra.length + ' | estados: ' + limites.length + ' | agua: ' + agua.length + ' | rios: ' + rioslin.length + ' | nombres: ' + nombres.length + ' | ' + (cuerpo.length / 1024).toFixed(0) + ' KB -> ' + SALIDA);
 })().catch((e) => { console.error('fallo: ' + e.message); process.exit(1); });
