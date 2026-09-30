@@ -25,6 +25,11 @@
   var verEn = '';
   var nameDraft = null; // nombre del viaje precargado desde la app
   var nameFromAuth = ''; // nombre del usuario logueado, para no pedirlo de nuevo
+  var authUser = null; // cuenta de Google logueada (opcional: el grupo funciona sin ella)
+  var cuentasOk = null; // la base tiene participantes.user_id (supabase_grupo_cuentas.sql)
+  var agregadoPorOk = null; // la base tiene gastos.agregado_por
+  var vinculados = {}; // participantes ya vinculados a la cuenta en esta carga de pagina
+  var otrosGruposVinculados = false;
   var PRESET_KEY = 'cuantosale_grupo_preset';
   var POLL_MS = 12000;
   // Íconos de categoría. La categoría NO se elige: se deduce de la descripción
@@ -245,6 +250,113 @@
     return (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
   }
 
+  /* ---------- cuenta opcional con Google ----------
+     Nada de esto es obligatorio: sin cuenta el grupo funciona igual que siempre.
+     Con cuenta, la persona del grupo queda vinculada a la cuenta
+     (participantes.user_id) y TODO lo que cargó como esa persona pasa a ser de
+     la cuenta, incluso lo que cargó antes de entrar. Eso se hace vinculando a la
+     persona y no gasto por gasto: un gasto pertenece a un participante. */
+  var GOOGLE_OMITIDO_KEY = 'cuantosale_grupo_google_omitido';
+  var ME_PREFIX = 'cuantosale_grupo_me_';
+  function googleOmitido() {
+    try { return localStorage.getItem(GOOGLE_OMITIDO_KEY) === '1'; } catch (error) { return false; }
+  }
+  function omitirGoogle() {
+    try { localStorage.setItem(GOOGLE_OMITIDO_KEY, '1'); } catch (error) {}
+  }
+  // Las columnas nuevas llegan con supabase_grupo_cuentas.sql. Si todavia no se
+  // corrio, la pagina sigue como antes: no se ofrece la cuenta ni se escriben
+  // columnas que no existen (un insert con una columna desconocida falla entero).
+  async function soportaCuentas() {
+    if (cuentasOk === null) {
+      try { cuentasOk = !(await supabaseClient.from('participantes').select('user_id').limit(1)).error; } catch (error) { cuentasOk = false; }
+    }
+    return cuentasOk;
+  }
+  async function soportaAgregadoPor() {
+    if (agregadoPorOk === null) {
+      try { agregadoPorOk = !(await supabaseClient.from('gastos').select('agregado_por').limit(1)).error; } catch (error) { agregadoPorOk = false; }
+    }
+    return agregadoPorOk;
+  }
+  async function loadAuthUser() {
+    try {
+      var result = await supabaseClient.auth.getUser();
+      authUser = (result && result.data && result.data.user) || null;
+    } catch (error) { authUser = null; }
+  }
+  function authLabel() {
+    if (!authUser) return '';
+    var metadata = authUser.user_metadata || {};
+    return String(metadata.full_name || metadata.name || authUser.email || '').trim();
+  }
+  async function entrarConGoogle(button) {
+    if (button) button.disabled = true;
+    // Vuelve a esta misma pagina: el grupo se abre solo y la persona ya esta.
+    var result = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
+    if (result.error) {
+      if (button) button.disabled = false;
+      window.alert(result.error.message || 'No pudimos iniciar sesión con Google.');
+    }
+  }
+  /* Vincula a `me` con la cuenta logueada. Cuatro casos:
+       - la cuenta ya es una persona de este grupo: es esa, en cualquier
+         dispositivo (se elige sola, sin volver a decir quién sos);
+       - `me` no tiene cuenta: se le vincula (lo que cargó antes queda a su nombre);
+       - `me` es de otra cuenta (otra persona usando este navegador): no es esta
+         persona, se suelta;
+       - sin sesion o sin las columnas nuevas: no pasa nada.
+     Después se intenta lo mismo con los otros grupos que este navegador recuerda. */
+  async function vincularCuenta(groupId) {
+    if (!authUser || !(await soportaCuentas())) return;
+    var propia = participants.filter(function (p) { return p.user_id === authUser.id; })[0];
+    if (propia) {
+      me = propia;
+      rememberParticipant(groupId, propia.id);
+    } else if (me && !me.user_id && !vinculados[me.id]) {
+      vinculados[me.id] = true;
+      try {
+        var result = await supabaseClient.rpc('grupo_reclamar_participante', { p_participante: me.id });
+        if (!result.error && result.data === true) me.user_id = authUser.id;
+      } catch (error) { /* queda sin vincular, se reintenta en la proxima carga */ }
+    } else if (me && me.user_id && me.user_id !== authUser.id) {
+      try { localStorage.removeItem(ME_PREFIX + groupId); } catch (error) {}
+      me = null;
+    }
+    if (otrosGruposVinculados) return;
+    otrosGruposVinculados = true;
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf(ME_PREFIX) !== 0 || key === ME_PREFIX + groupId) continue;
+        supabaseClient.rpc('grupo_reclamar_participante', { p_participante: localStorage.getItem(key) }).then(function () {}, function () {});
+      }
+    } catch (error) {}
+  }
+  // Bloque que invita a entrar con Google. Va solo si se puede vincular (las
+  // columnas existen), no hay sesión y la persona no dijo que no.
+  function googleOfferMarkup(texto) {
+    if (authUser) {
+      return '<p class="grupo-account">Entraste con Google como <b>' + esc(authLabel()) + '</b>. Tus gastos quedan a tu nombre y los ves desde cualquier dispositivo.</p>';
+    }
+    if (cuentasOk !== true || googleOmitido()) return '';
+    return '<div class="grupo-google"><p>' + texto + '</p>' +
+      '<div class="grupo-google__actions"><button type="button" class="grupo-btn" data-google-login>Continuar con Google</button>' +
+      '<button type="button" class="grupo-minibtn" data-google-skip>Seguir sin cuenta</button></div></div>';
+  }
+  function bindGoogleOffer(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-google-login]'), function (button) {
+      button.addEventListener('click', function () { entrarConGoogle(button); });
+    });
+    Array.prototype.forEach.call(root.querySelectorAll('[data-google-skip]'), function (button) {
+      button.addEventListener('click', function () {
+        omitirGoogle();
+        var box = button.closest('.grupo-google');
+        if (box) box.parentNode.removeChild(box);
+      });
+    });
+  }
+
   // La app deja el nombre del viaje guardado un instante antes de saltar acá,
   // para que el grupo no arranque pidiéndole a cada uno que lo vuelva a
   // escribir. Se lee una sola vez y se conserva en memoria: si el alta falla y
@@ -343,16 +455,19 @@
   }
   function personById(id) { return participants.filter(function (p) { return p.id === id; })[0]; }
   function expenseById(id) { return expenses.filter(function (e) { return e.id === id; })[0]; }
-  /* Quién puede borrar qué. El admin es la persona que creó el grupo, que es la
-     que tiene es_admin. No se deduce de "el primero de la lista" porque el orden
-     de joined_at no está garantizado en cada respuesta, y equivocarse acá
-     significaría darle permiso de borrar a cualquiera.
+  /* Quién puede borrar qué: cada persona, solamente lo que ella agregó. El dueño
+     de un gasto es quien lo cargó (gastos.agregado_por) y, en los gastos viejos
+     que no lo tienen, quien pagó. Ni el admin borra lo de otro: si hay un error
+     en un gasto ajeno se le pide a quien lo cargó.
      Sin `me` no se borra nada. La pantalla de suma siempre lo define antes de
-     pintar la lista, así que es una red de seguridad, no un camino normal. */
-  function esAdmin() { return !!(me && me.es_admin); }
+     pintar la lista, así que es una red de seguridad, no un camino normal.
+     Es una regla de la pantalla. La base la hace cumplir solo para gastos cuyo
+     dueño tiene cuenta (supabase_grupo_cuentas.sql); para el resto el link sigue
+     siendo la contraseña. */
+  function duenoDeGasto(expense) { return expense.agregado_por || expense.paid_by_participante_id; }
   function puedeBorrarGasto(expense) {
     if (!me || !expense) return false;
-    return esAdmin() || expense.paid_by_participante_id === me.id;
+    return duenoDeGasto(expense) === me.id;
   }
   /* Los nombres de entre quienes se divide un gasto, con "y" antes del último.
      "Entre 2 personas" no alcanza: quien carga el gasto tiene que poder ver a
@@ -406,7 +521,10 @@
         // del creador se inserta en el mismo acto del alta, y con ella ya se
         // sabe quién es: es la única forma de tener admin sin obligar a
         // loguearse a nadie.
-        var participantResult = await supabaseClient.from('participantes').insert({ grupo_id: groupResult.data.id, display_name: yourName, device_id: deviceId(), es_admin: true }).select().single();
+        var creatorRow = { grupo_id: groupResult.data.id, display_name: yourName, device_id: deviceId(), es_admin: true };
+        // Con sesion, el creador queda vinculado a su cuenta desde el alta.
+        if (authUser && await soportaCuentas()) creatorRow.user_id = authUser.id;
+        var participantResult = await supabaseClient.from('participantes').insert(creatorRow).select().single();
         if (participantResult.error) throw new Error(participantResult.error.message);
         /* Los gastos iniciales salen del presupuesto: un gasto por rubro elegido,
            pagado por quien crea el grupo (es quien lo arma; el pagador real se
@@ -427,8 +545,11 @@
             if (!othersResult.error) allIds = allIds.concat((othersResult.data || []).map(function (p) { return p.id; }));
           }
           if (budget.items.length) {
+            var conAgregadoPor = await soportaAgregadoPor();
             await supabaseClient.from('gastos').insert(budget.items.map(function (it) {
-              return { grupo_id: groupResult.data.id, paid_by_participante_id: creatorId, description: it.label, amount: it.amount, currency: 'USD', split_between: allIds };
+              var fila = { grupo_id: groupResult.data.id, paid_by_participante_id: creatorId, description: it.label, amount: it.amount, currency: 'USD', split_between: allIds };
+              if (conAgregadoPor) fila.agregado_por = creatorId;
+              return fila;
             }));
           }
         } catch (seedError) { /* el grupo queda creado sin gastos iniciales */ }
@@ -450,6 +571,7 @@
     render(
       '<div class="grupo-card"><h1>' + esc(group.name) + '</h1>' +
       '<p class="grupo-sub">Te compartieron el link de este viaje. Elegí tu nombre para empezar a cargar los gastos.</p>' +
+      googleOfferMarkup('¿Querés que tus gastos queden a tu nombre? <b>Entrá con Google</b> (es opcional).') +
       (errorMessage ? '<p class="grupo-error">' + esc(errorMessage) + '</p>' : '') +
       existingMarkup +
       (participants.length && !showAddForm
@@ -458,6 +580,7 @@
           '<button type="submit" class="grupo-btn grupo-btn--primary">Sumarme al grupo</button></form>') +
       '</div>'
     );
+    bindGoogleOffer(app);
     var claimButtons = document.getElementById('join-existing');
     if (claimButtons) {
       claimButtons.addEventListener('click', function (e) {
@@ -480,7 +603,9 @@
       if (!yourName) return;
       e.target.querySelector('button').disabled = true;
       try {
-        var result = await supabaseClient.from('participantes').insert({ grupo_id: groupId, display_name: yourName, device_id: deviceId() }).select().single();
+        var newRow = { grupo_id: groupId, display_name: yourName, device_id: deviceId() };
+        if (authUser && await soportaCuentas()) newRow.user_id = authUser.id;
+        var result = await supabaseClient.from('participantes').insert(newRow).select().single();
         if (result.error) throw new Error(result.error.message);
         rememberParticipant(groupId, result.data.id);
         me = result.data;
@@ -898,9 +1023,14 @@
         // (se marcó la transferencia equivocada) dejaba al resto del grupo
         // viendo una deuda que ya estaba saldada, y sin esto no había cómo
         // arreglarlo.
-        '<button type="button" class="grupo-settledon is-undo" data-saldo="' + esc(saldoKey(move)) + '" data-saldo-monto="' + esc(move.amount) + '" data-saldo-accion="deshacer" aria-pressed="true">' +
-        '<span class="grupo-settledon__box" aria-hidden="true">✓</span>' +
-        'Deshacer</button></div>';
+        // Solo deshace un pago quien lo hizo: el que paga es el `from` de la
+        // transferencia. El resto ve la fila tachada, sin boton.
+        (me && move.from === me.id
+          ? '<button type="button" class="grupo-settledon is-undo" data-saldo="' + esc(saldoKey(move)) + '" data-saldo-monto="' + esc(move.amount) + '" data-saldo-accion="deshacer" aria-pressed="true">' +
+            '<span class="grupo-settledon__box" aria-hidden="true">✓</span>' +
+            'Deshacer</button>'
+          : '<span class="grupo-settledon is-static" aria-label="Pagado"><span class="grupo-settledon__box" aria-hidden="true">✓</span>Pagado</span>') +
+        '</div>';
     }
     function saldosDe(arr) {
       return arr.reduce(function (sum, move) { return Math.round((sum + move.amount) * 100) / 100; }, 0);
@@ -1000,7 +1130,9 @@
       '<button type="submit" class="grupo-btn">+ Agregar</button></form>' +
       '<p class="grupo-error" id="participant-error" role="alert"></p></div>' +
 
-      '<div class="grupo-card"><h2 style="margin-bottom:18px">Agregar gasto</h2><form id="expense-form">' +
+      '<div class="grupo-card"><h2 style="margin-bottom:18px">Agregar gasto</h2>' +
+      googleOfferMarkup('<b>Entrá con Google</b> para que los gastos que cargues queden a tu nombre y los veas desde cualquier dispositivo. Es opcional: podés seguir sin cuenta.') +
+      '<form id="expense-form">' +
       '<div class="grupo-cats" id="cat-picker">' + CATEGORIAS.map(function (cat) {
         return '<button type="button" class="grupo-cat" data-cat="' + esc(cat.key) + '" data-cat-label="' + esc(cat.label) + '" aria-pressed="false">' +
           '<span class="grupo-cat__ico" style="color:' + cat.color + '">' + icon(cat.icon) + '</span>' +
@@ -1103,6 +1235,9 @@
         var monto = Number(button.getAttribute('data-saldo-monto')) || 0;
         var accion = button.getAttribute('data-saldo-accion');
         var partes = key.split('|');
+        // Marcar o deshacer un pago es cosa de quien paga (el `from`). El boton
+        // no se pinta para nadie mas, pero la regla va tambien aca.
+        if (!me || partes[0] !== me.id) return;
         button.disabled = true;
         try {
           var siguiente = marcarSaldo({ from: partes[0], to: partes[1], amount: monto }, accion);
@@ -1117,6 +1252,7 @@
       });
     });
 
+    bindGoogleOffer(app);
     document.getElementById('share-button').addEventListener('click', function () {
       var status = document.getElementById('copy-status');
       var payload = { title: group.name + ' · CuántoSale', text: shareMessage(), url: url };
@@ -1190,10 +1326,13 @@
         // Se guarda en la moneda en la que se pagó, no en la del grupo: el
         // saldo de cada quien se calculahr converting, pero el importe original
         // es el que de verdad se gastó y conviene no perderlo.
-        var result = await supabaseClient.from('gastos').insert({
+        var nuevoGasto = {
           grupo_id: groupId, paid_by_participante_id: form.paidBy.value, description: description,
           amount: amount, currency: expenseCurrency(), split_between: splitIds
-        });
+        };
+        // Quién lo agregó (no siempre es quien pagó): es el dueño para poder borrarlo.
+        if (await soportaAgregadoPor()) nuevoGasto.agregado_por = me.id;
+        var result = await supabaseClient.from('gastos').insert(nuevoGasto);
         if (result.error) throw new Error(result.error.message);
         await loadGroupData(groupId);
         // Se repinta para que el gasto nuevo se vea al instante, y después se
@@ -1379,6 +1518,9 @@
       // cuando "quién soy" todavía se resolvía por device_id.
       || participants.find(function (p) { return p.device_id === deviceId(); })
       || null;
+    await soportaCuentas();
+    await soportaAgregadoPor();
+    await vincularCuenta(groupId);
     if (me) rememberParticipant(groupId, me.id);
     // Los grupos creados antes de que la marca guardara el monto tienen
     // ["quien|quien"] en vez de {"quien|quien": monto}. Esos pagos existen, así
@@ -1411,6 +1553,7 @@
     var groupId = groupIdFromPath();
     try {
       await loadSupabaseSdk();
+      await loadAuthUser();
       if (!groupId) {
         renderCreateForm();
         // El formulario se pinta ya, sin esperar el lookup de la sesión: el

@@ -1694,6 +1694,77 @@ function haversineKm(a, b) {
     assert.ok(/classList\.remove\('is-open', 'is-open-up'\)/.test(app),
       'cerrar el menu tiene que sacar is-open-up, o el siguiente queda invertido de una apertura anterior');
   });
+  await t('grupo de gastos: cada uno borra solo lo suyo y la cuenta de Google es opcional', async function () {
+    const src = fs.readFileSync(path.join(__dirname, 'public', 'grupo.js'), 'utf8');
+    // Se extraen las funciones tal cual estan en grupo.js y se corren contra un
+    // estado de juguete: no hay navegador, pero la regla es la misma.
+    const desde = src.indexOf('  /* ---------- cuenta opcional con Google');
+    const hasta = src.indexOf('  // Bloque que invita a entrar con Google');
+    const permisos = src.indexOf('  function duenoDeGasto(expense)');
+    const permisosFin = src.indexOf('  /* Los nombres de entre quienes se divide un gasto');
+    assert.ok(desde > 0 && hasta > desde && permisos > 0 && permisosFin > permisos, 'no se pudo extraer la logica de cuentas de grupo.js');
+    const make = new Function('ctx', [
+      'var participants = ctx.participants, me = ctx.me, authUser = ctx.authUser, supabaseClient = ctx.supabaseClient, localStorage = ctx.localStorage;',
+      'var cuentasOk = ctx.cuentasOk, agregadoPorOk = true, vinculados = {}, otrosGruposVinculados = false;',
+      'function rememberParticipant(g, id) { ctx.recordado[g] = id; }',
+      'function esc(x) { return String(x); }',
+      src.slice(desde, hasta),
+      src.slice(permisos, permisosFin),
+      'return { vincularCuenta: vincularCuenta, puedeBorrarGasto: puedeBorrarGasto, getMe: function () { return me; } };'
+    ].join('\n'));
+    const cliente = (rpcResultado) => {
+      const llamadas = [];
+      return {
+        llamadas,
+        rpc: async (fn, args) => { llamadas.push([fn, args.p_participante]); return { data: rpcResultado, error: null }; }
+      };
+    };
+    const store = () => ({ length: 0, key: () => null, getItem: () => null, removeItem: () => {} });
+
+    // Borrar: solo lo que uno agrego (o, en gastos viejos, lo que pago). Ni el admin borra lo de otro.
+    const ana = { id: 'ana', es_admin: true }, beto = { id: 'beto', es_admin: false };
+    const g = make({ participants: [ana, beto], me: ana, authUser: null, cuentasOk: true, supabaseClient: cliente(true), localStorage: store(), recordado: {} });
+    assert.strictEqual(g.puedeBorrarGasto({ agregado_por: 'ana', paid_by_participante_id: 'beto' }), true, 'quien lo agrego lo borra');
+    assert.strictEqual(g.puedeBorrarGasto({ agregado_por: 'beto', paid_by_participante_id: 'ana' }), false, 'el que solo pago no borra lo que agrego otro');
+    assert.strictEqual(g.puedeBorrarGasto({ paid_by_participante_id: 'beto' }), false, 'el admin no borra un gasto ajeno');
+    assert.strictEqual(g.puedeBorrarGasto({ paid_by_participante_id: 'ana' }), true, 'gasto viejo: lo borra quien pago');
+
+    // Sin sesion no se toca nada.
+    const c1 = cliente(true);
+    const sinSesion = make({ participants: [{ id: 'ana', user_id: null }], me: { id: 'ana', user_id: null }, authUser: null, cuentasOk: true, supabaseClient: c1, localStorage: store(), recordado: {} });
+    await sinSesion.vincularCuenta('g1');
+    assert.strictEqual(c1.llamadas.length, 0, 'sin sesion no hay nada que vincular');
+
+    // Con sesion, la persona que cargo gastos sin cuenta queda vinculada: sus gastos pasan a ser de la cuenta.
+    const c2 = cliente(true);
+    const yo = { id: 'ana', user_id: null };
+    const conSesion = make({ participants: [yo], me: yo, authUser: { id: 'u1' }, cuentasOk: true, supabaseClient: c2, localStorage: store(), recordado: {} });
+    await conSesion.vincularCuenta('g1');
+    assert.deepStrictEqual(c2.llamadas[0], ['grupo_reclamar_participante', 'ana']);
+    assert.strictEqual(yo.user_id, 'u1', 'la persona queda vinculada a la cuenta');
+
+    // En otro dispositivo, la cuenta ya es alguien del grupo: se elige sola.
+    const recordado = {};
+    const otra = make({ participants: [{ id: 'ana', user_id: 'u1' }, { id: 'beto', user_id: null }], me: null, authUser: { id: 'u1' }, cuentasOk: true, supabaseClient: cliente(true), localStorage: store(), recordado });
+    await otra.vincularCuenta('g1');
+    assert.strictEqual(otra.getMe().id, 'ana');
+    assert.strictEqual(recordado.g1, 'ana');
+
+    // Este navegador recordaba a una persona que es de OTRA cuenta: no es esta persona.
+    const ajena = make({ participants: [{ id: 'ana', user_id: 'u9' }], me: { id: 'ana', user_id: 'u9' }, authUser: { id: 'u1' }, cuentasOk: true, supabaseClient: cliente(true), localStorage: store(), recordado: {} });
+    await ajena.vincularCuenta('g1');
+    assert.strictEqual(ajena.getMe(), null);
+
+    // Sin las columnas nuevas en la base (SQL sin correr) todo sigue como antes.
+    const c3 = cliente(true);
+    const sinSql = make({ participants: [{ id: 'ana' }], me: { id: 'ana' }, authUser: { id: 'u1' }, cuentasOk: false, supabaseClient: { rpc: c3.rpc, from: () => ({ select: () => ({ limit: async () => ({ error: { message: 'no existe' } }) }) }) }, localStorage: store(), recordado: {} });
+    await sinSql.vincularCuenta('g1');
+    assert.strictEqual(c3.llamadas.length, 0);
+
+    // El pago solo lo deshace quien pago.
+    assert.ok(/me && move\.from === me\.id\s*\?\s*'<button type="button" class="grupo-settledon is-undo"/.test(src), 'Deshacer tiene que verse solo para quien hizo el pago');
+    assert.ok(/partes\[0\] !== me\.id\) return;/.test(src), 'el click de marcar/deshacer tiene que revisar quien paga');
+  });
   await t('sirve la web y bloquea rutas fuera de /public', async function () {
     const r = await get(port, '/');
     assert.strictEqual(r.status, 200); assert.ok(r.body.indexOf('cuántosale') >= 0);

@@ -305,6 +305,14 @@
   .grupo-warn{margin:12px 0 0;padding:10px 12px;border:1px dashed var(--line);border-radius:12px;background:var(--bg);color:var(--ink2);font-size:12.5px;line-height:1.45}
   .grupo-preset{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 16px;padding:11px 13px;border:1px dashed var(--line);border-radius:12px;font-size:13px}
   .grupo-preset button{border:0;background:transparent;color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline}
+  /* Entrar con Google: opcional, nunca bloquea cargar gastos */
+  .grupo-google{margin:0 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+  .grupo-google p{margin:0 0 12px;color:var(--ink2);font-size:14px;line-height:1.45}
+  .grupo-google p b{color:var(--ink)}
+  .grupo-google__actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .grupo-account{margin:0 0 18px;padding:10px 14px;border-radius:12px;background:var(--bg);color:var(--ink2);font-size:13.5px;line-height:1.45}
+  .grupo-account b{color:var(--ink)}
+  .grupo-settledon.is-static{cursor:default;opacity:.75}
 </style>
 </head>
 <body>
@@ -315,6 +323,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=26" defer></script>
+<script src="/grupo.js?v=27" defer></script>
 </body>
 </html>
