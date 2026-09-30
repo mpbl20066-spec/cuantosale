@@ -90,20 +90,21 @@
     },
     "for": {
       "comida": {
-        "casual": 32,
-        "moderado": 60,
-        "gourmet": 100
+        "casual": 26,
+        "moderado": 47,
+        "gourmet": 83
       },
       "traslado": {
         "eco": 18,
         "confort": 40,
         "medio": 27
       },
-      "fuente": "infobrazil.org la marca como la ciudad-playa mas barata de Brasil (-15% de recargo). Cesta basica de O POVO + Procon Fortaleza (ago/2026): R$630,71, la mas cara del Nordeste, pero con mucho super barato (Atacadao).",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
+      "fuente": "infobrazil.org la marca como la ciudad-playa mas barata de Brasil (-15% de recargo). Cesta basica de O POVO + Procon Fortaleza (ago/2026): R$630,71, la mas cara del Nordeste, pero con mucho super barato (Atacadao). || 2026-09-30, busqueda de precios: Numbeo Fortaleza (sep/2026, 30 colaboradores): comida barata R$30, cena media para 2 R$163,46, bus R$4,75, taxi bajada R$7 + R$4,06/km. Promediado con quantocustaviajar Fortaleza (abr/2025): R$92/122/163 por dia.",
+      "verificado": "2026-09-30",
+      "confianza": "media",
       "derivacion": "Comparte valores con jericoacoara (mismo estado y mismo aeropuerto, IATA FOR). El dato de la cesta basica apunta a que Fortaleza deberia ser MAS BARATA de lo que esta aca, no mas cara: el indice de recargo -15% de infobrazil es del gasto turistico total, no solo de comida. Conviene revisar.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
+      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
+      "ajusteComida": "2026-09-30: 32/60/100 -> 26/47/83"
     },
     "nat": {
       "comida": {
@@ -156,39 +157,41 @@
     },
     "joaopessoa": {
       "comida": {
-        "casual": 25,
-        "moderado": 48,
-        "gourmet": 82
+        "casual": 26,
+        "moderado": 44,
+        "gourmet": 71
       },
       "traslado": {
         "eco": 13,
         "medio": 19,
         "confort": 28
       },
-      "fuente": "O POVO + Procon Joao Pessoa (mar/2026): cesta basica R$538,67, la mas barata del Nordeste, con la mayor dispersion entre supermercados (R$377 a R$507 en la misma cadena).",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
+      "fuente": "O POVO + Procon Joao Pessoa (mar/2026): cesta basica R$538,67, la mas barata del Nordeste, con la mayor dispersion entre supermercados (R$377 a R$507 en la misma cadena). || 2026-09-30, busqueda de precios: Numbeo Joao Pessoa (jun/2026, 20 colaboradores): comida barata R$35, cena media para 2 R$150. quantocustaviajar (R$52/61/82 por dia) se descarto por inconsistente.",
+      "verificado": "2026-09-30",
+      "confianza": "media",
       "derivacion": "Copia de rec. Joao Pessoa esta 300 km al norte y comparte corredor de vuelo, pero su cesta basica es R$92 mas barata, asi que deberia estar un poco por DEBAJO de Recife, no igual.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Orla plana y continua, buses y apps baratos. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Orla plana y continua, buses y apps baratos. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 25/48/82 -> 26/44/71 (Numbeo). quantocustaviajar da R$52/61/82 por dia, demasiado bajo frente a Numbeo, y se descarto."
     },
     "porto": {
       "comida": {
-        "casual": 28,
-        "moderado": 52,
-        "gourmet": 85
+        "casual": 24,
+        "moderado": 43,
+        "gourmet": 73
       },
       "traslado": {
         "eco": 10,
         "medio": 17,
         "confort": 28
       },
-      "fuente": "Se buscaron precios de restaurante de Porto de Galinhas. Lo que hay publicado es sobre el resort con todo incluido, que no separa la comida: el costo real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte. Por eso el numero no se puede derivar. Se lo pone un poco por encima de Recife (28 contra 25) porque el perfil de gasto es de resort de playa.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron precios de restaurante de Porto de Galinhas. Lo que hay publicado es sobre el resort con todo incluido, que no separa la comida: el costo real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte. Por eso el numero no se puede derivar. Se lo pone un poco por encima de Recife (28 contra 25) porque el perfil de gasto es de resort de playa. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$64.5/86.5/112.4 por dia.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Resort de playa con todo incluido en la zona, asi que se pone por encima de Recife. Pero no hay dato: el precio real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Villa caminable; las piscinas naturales son jangada/excursion aparte. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Villa caminable; las piscinas naturales son jangada/excursion aparte. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 28/52/85 -> 24/43/73"
     },
     "maragogi": {
       "comida": {
@@ -228,40 +231,42 @@
     },
     "buz": {
       "comida": {
-        "casual": 36,
-        "moderado": 66,
-        "gourmet": 110
+        "casual": 34,
+        "moderado": 59,
+        "gourmet": 104
       },
       "traslado": {
         "eco": 20,
         "confort": 45,
         "medio": 30
       },
-      "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$102.04/131/181 por dia. Menus ejecutivos R$49,90, PF R$25-35, casas de R$60 por persona.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Sin dato especifico de Búzios. Copia práctica de for/jericoacoara. Búzios es pueblo de playa con vida nocturna, asi que la escala es plausible, pero deberia ser un poco mas caro que el promedioNordeste: es el balneario mas caro de Rio de Janeiro.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
       "nota": "Las playas estan dispersas y el taxi es de los mas caros de la costa (sin app fuerte): el traslado diario sube respecto del promedio. Balneario mas caro de Rio de Janeiro, por eso tambien sube la comida.",
-      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 36/66/110 -> 34/59/104"
     },
     "arraial": {
       "comida": {
-        "casual": 25,
-        "moderado": 45,
-        "gourmet": 75
+        "casual": 23,
+        "moderado": 41,
+        "gourmet": 78
       },
       "traslado": {
         "eco": 11,
         "medio": 17,
         "confort": 27
       },
-      "fuente": "Se buscaron cartas de restaurante de la region de Lagos, guias de viaje y comparadores de costo de vida. Lo unico que aparece es el distrito turistico Arraial do Cabo como conjunto, que es mas caro que Cabo Frio porque tiene las mejores playas. No hay precio publicado para el pueblo, asi que el valor es una copia de Cabo Frio.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron cartas de restaurante de la region de Lagos, guias de viaje y comparadores de costo de vida. Lo unico que aparece es el distrito turistico Arraial do Cabo como conjunto, que es mas caro que Cabo Frio porque tiene las mejores playas. No hay precio publicado para el pueblo, asi que el valor es una copia de Cabo Frio. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$67.6/93.2/149.6 por dia.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Copia de cabo. Ambos son balnearios de la.region de Lagos (RJ) con economia turistica. Sin dato propio.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Pueblo chico y caminable; las playas se ven en paseo de barco o taxi corto. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Pueblo chico y caminable; las playas se ven en paseo de barco o taxi corto. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 25/45/75 -> 23/41/78"
     },
     "cabo": {
       "comida": {
@@ -281,20 +286,21 @@
     },
     "angra": {
       "comida": {
-        "casual": 32,
-        "moderado": 60,
-        "gourmet": 105
+        "casual": 25,
+        "moderado": 45,
+        "gourmet": 85
       },
       "traslado": {
         "eco": 18,
         "confort": 40,
         "medio": 27
       },
-      "fuente": "Numbeo Angra dos Reis: comida barata R$37,50, cena media para 2 R$170, McMenu R$27,50, cerveza de tirada R$12,40, capuchino R$8, pasaje de transporte R$6.",
-      "verificado": "2026-09-27",
+      "fuente": "Numbeo Angra dos Reis: comida barata R$37,50, cena media para 2 R$170, McMenu R$27,50, cerveza de tirada R$12,40, capuchino R$8, pasaje de transporte R$6. || 2026-09-30, busqueda de precios: quantocustaviajar Angra (sep/2025): R$69/102/163 por dia, promediado con la estimacion de Numbeo ya citada.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "nota": "OJO con este dato: Numbeo marca 28 entradas pero SOLO 6 colaboradores unicos y la ultima actualizacion es de abril de 2025. Es crowdsourced finito: sirve como orden de magnitud, no como precio. Por eso la confianza es baja pese a que haya fuente directa.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos."
+      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
+      "ajusteComida": "2026-09-30: 32/60/105 -> 25/45/85"
     },
     "paraty": {
       "comida": {
@@ -352,21 +358,22 @@
     },
     "ilhabela": {
       "comida": {
-        "casual": 30,
-        "moderado": 58,
-        "gourmet": 95
+        "casual": 26,
+        "moderado": 48,
+        "gourmet": 83
       },
       "traslado": {
         "eco": 20,
         "medio": 30,
         "confort": 45
       },
-      "fuente": "Se buscaron precios de restaurante. Lo que hay es una lista de comida economica en Ilhabela (Wanderlog) que recomienda un self-service frente al foro, y el relato de un turista que vivio un mes sin gastar mucho usando transporte publico, pero ninguno con precios. La isla se llega solo por ferry, como Ilha Grande, asi que el costo viene de ahi con un recargo por turismo de verano.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron precios de restaurante. Lo que hay es una lista de comida economica en Ilhabela (Wanderlog) que recomienda un self-service frente al foro, y el relato de un turista que vivio un mes sin gastar mucho usando transporte publico, pero ninguno con precios. La isla se llega solo por ferry, como Ilha Grande, asi que el costo viene de ahi con un recargo por turismo de verano. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$72.12/93.96/130.98 por dia.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Ilhabela es la segunda isla de Sao Paulo, accesible solo por ferry (como Ilha Grande). Copia de ilha con un poco mas: la isla es mas grande y el turismo es mas caro, pero no hay dato de precios.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Una sola ruta costera con playas lejanas, bus escaso y taxi caro. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Una sola ruta costera con playas lejanas, bus escaso y taxi caro. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 30/58/95 -> 26/48/83"
     },
     "fln": {
       "comida": {
@@ -423,21 +430,22 @@
     },
     "bombinhas": {
       "comida": {
-        "casual": 28,
-        "moderado": 55,
-        "gourmet": 90
+        "casual": 23,
+        "moderado": 46,
+        "gourmet": 86
       },
       "traslado": {
         "eco": 17,
         "medio": 25,
         "confort": 38
       },
-      "fuente": "Se buscaron cartas de restaurante, precios de pousada y comparadores. Lo que hay publicado es de hospedaje en general: el balneario familiar de Santa Catarina, a 120 km de Floripa por la BR-101, con un pueblo chico y sin vida de resort. El lodging del catalogo ya lo pone por arriba de Floripa (52/96/170 contra 50/90/160), asi que la comida tambien.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron cartas de restaurante, precios de pousada y comparadores. Lo que hay publicado es de hospedaje en general: el balneario familiar de Santa Catarina, a 120 km de Floripa por la BR-101, con un pueblo chico y sin vida de resort. El lodging del catalogo ya lo pone por arriba de Floripa (52/96/170 contra 50/90/160), asi que la comida tambien. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$60/91.2/151.2 por dia.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Copia de fln. Bombinhas esta en el mismo corredor de la BR-101 y a 120 km de Floripa, con un pueblo mas chico y precios algo mas bajos: el lodging va 52/96/170 contra 50/90/160, o sea que esta CARO y la comida tambien. Es el balneario familiar de la zona.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Playas dispersas con poco transporte publico: pesa el taxi o el auto. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Playas dispersas con poco transporte publico: pesa el taxi o el auto. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 28/55/90 -> 23/46/86"
     },
     "rosa": {
       "comida": {
@@ -530,39 +538,41 @@
     },
     "gram": {
       "comida": {
-        "casual": 32,
-        "moderado": 62,
-        "gourmet": 110
+        "casual": 33,
+        "moderado": 59,
+        "gourmet": 102
       },
       "traslado": {
         "eco": 16,
         "medio": 26,
         "confort": 42
       },
-      "fuente": "Se buscaron cartas de restaurante de Gramado y comparadores de costo de vida. El dato solido que hay es regional, no de la ciudad: el IPF de la ACSP (jun/2026) da R$34,90 para el plato feito del Sur, la region mas cara del pais, frente a R$31,90 del promedio nacional. Los agregadores la ponen entre las ciudades mas caras de la region, con la misma combinacion de almuerzo caro y cena de resort. No hay carta propia: el valor es copia de Canela.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron cartas de restaurante de Gramado y comparadores de costo de vida. El dato solido que hay es regional, no de la ciudad: el IPF de la ACSP (jun/2026) da R$34,90 para el plato feito del Sur, la region mas cara del pais, frente a R$31,90 del promedio nacional. Los agregadores la ponen entre las ciudades mas caras de la region, con la misma combinacion de almuerzo caro y cena de resort. No hay carta propia: el valor es copia de Canela. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$109/138.5/171 por dia.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Copia de canela. Ambas vuelan a POA y son destinos turisticos de la misma provincia, con la misma combinacion de PF caro y cena de resort. Gramado es mas caro como alojamiento (48/89/155 contra 50/90/160, parecido).",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Centro caminable; las atracciones quedan fuera y piden taxi o app. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Centro caminable; las atracciones quedan fuera y piden taxi o app. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 32/62/110 -> 33/59/102"
     },
     "canela": {
       "comida": {
-        "casual": 32,
-        "moderado": 62,
-        "gourmet": 110
+        "casual": 31,
+        "moderado": 56,
+        "gourmet": 97
       },
       "traslado": {
         "eco": 17,
         "medio": 27,
         "confort": 42
       },
-      "fuente": "Se buscaron cartas de restaurante de Canela. Comparte aeropuerto (POA) con Gramado y esta 15 km, asi que comparten el mismo mercado turistico y los mismos precios. Canela es mas chica y con mas hoteleria de temporada. No hay dato propio: el valor es copia de Gramado.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron cartas de restaurante de Canela. Comparte aeropuerto (POA) con Gramado y esta 15 km, asi que comparten el mismo mercado turistico y los mismos precios. Canela es mas chica y con mas hoteleria de temporada. No hay dato propio: el valor es copia de Gramado. || 2026-09-30, busqueda de precios: quantocustaviajar Canela da R$51/64/76 por dia, valor inverosimil porque excluye fondue (R$100-160) y cafe colonial (R$80-120). Se deriva de Gramado (15 km) con -5%.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Copia de gram. Canela esta 15 km de Gramado y comparte el mercado turistico.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: Atracciones (Caracol, Ferradura) lejos del centro: mas taxi que Gramado. Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: Atracciones (Caracol, Ferradura) lejos del centro: mas taxi que Gramado. Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 32/62/110 -> 31/56/97"
     },
     "torres": {
       "comida": {
@@ -619,22 +629,23 @@
     },
     "pip": {
       "comida": {
-        "casual": 30,
-        "moderado": 55,
-        "gourmet": 90
+        "casual": 23,
+        "moderado": 45,
+        "gourmet": 82
       },
       "traslado": {
         "eco": 6,
         "confort": 22,
         "medio": 12
       },
-      "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal.",
-      "verificado": "2026-09-27",
+      "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$51.6/86.4/134.4 por dia. El unico precio de carta (menu R$94,90) indica cena cara, por eso pesa el valor previo.",
+      "verificado": "2026-09-30",
       "confianza": "baja",
       "derivacion": "Pipa es un pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara pero en Rio Grande do Norte. Copia de nat con recargo por la vida nocturna. Lo que si hay dato (un menu de R$94,90 en un restaurante de la zona) sugiere que la cena es mas cara que la media de Natal, que es lo que ya se refleja.",
       "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
       "nota": "Pueblo chico y caminable: el centro, la playa y los restaurantes se recorren a pie. Transporte diario bajo; solo se suman taxis/mototaxi a Chapadao, Madeiro o Sibauma.",
-      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa."
+      "ajusteTraslado": "2026-09-30: ajuste de criterio por tipo de destino (ver nota). Estimacion, no fuente directa.",
+      "ajusteComida": "2026-09-30: 30/55/90 -> 23/45/82"
     },
     "trancoso": {
       "comida": {

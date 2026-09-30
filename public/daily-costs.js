@@ -20,37 +20,37 @@
   rio: { name: 'Río de Janeiro', transport: { eco: 14, medio: 22, confort: 35 }, food: { casual: 28, moderado: 55, gourmet: 95 } },
   sao: { name: 'São Paulo', transport: { eco: 22, medio: 32, confort: 48 }, food: { casual: 35, moderado: 70, gourmet: 125 } },
   ssa: { name: 'Salvador de Bahía', transport: { eco: 14, medio: 20, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
-  for: { name: 'Fortaleza', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
+  for: { name: 'Fortaleza', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 26, moderado: 47, gourmet: 83 } },
   nat: { name: 'Natal', transport: { eco: 15, medio: 22, confort: 32 }, food: { casual: 26, moderado: 48, gourmet: 80 } },
   mcz: { name: 'Maceió', transport: { eco: 14, medio: 20, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 80 } },
   rec: { name: 'Recife', transport: { eco: 14, medio: 20, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
-  joaopessoa: { name: 'João Pessoa', transport: { eco: 13, medio: 19, confort: 28 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
-  porto: { name: 'Porto de Galinhas', transport: { eco: 10, medio: 17, confort: 28 }, food: { casual: 28, moderado: 52, gourmet: 85 } },
+  joaopessoa: { name: 'João Pessoa', transport: { eco: 13, medio: 19, confort: 28 }, food: { casual: 26, moderado: 44, gourmet: 71 } },
+  porto: { name: 'Porto de Galinhas', transport: { eco: 10, medio: 17, confort: 28 }, food: { casual: 24, moderado: 43, gourmet: 73 } },
   maragogi: { name: 'Maragogi', transport: { eco: 10, medio: 16, confort: 26 }, food: { casual: 24, moderado: 45, gourmet: 75 } },
   jericoacoara: { name: 'Jericoacoara', transport: { eco: 10, medio: 19, confort: 38 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
-  buz: { name: 'Búzios', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 36, moderado: 66, gourmet: 110 } },
-  arraial: { name: 'Arraial do Cabo', transport: { eco: 11, medio: 17, confort: 27 }, food: { casual: 25, moderado: 45, gourmet: 75 } },
+  buz: { name: 'Búzios', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 34, moderado: 59, gourmet: 104 } },
+  arraial: { name: 'Arraial do Cabo', transport: { eco: 11, medio: 17, confort: 27 }, food: { casual: 23, moderado: 41, gourmet: 78 } },
   cabo: { name: 'Cabo Frio', transport: { eco: 12, medio: 17, confort: 25 }, food: { casual: 22, moderado: 40, gourmet: 70 } },
-  angra: { name: 'Angra dos Reis', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 32, moderado: 60, gourmet: 105 } },
+  angra: { name: 'Angra dos Reis', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 25, moderado: 45, gourmet: 85 } },
   paraty: { name: 'Paraty', transport: { eco: 10, medio: 17, confort: 28 }, food: { casual: 21, moderado: 42, gourmet: 74 } },
   ilha: { name: 'Ilha Grande', transport: { eco: 10, medio: 17, confort: 30 }, food: { casual: 28, moderado: 52, gourmet: 90 } },
   ubatuba: { name: 'Ubatuba', transport: { eco: 18, medio: 27, confort: 40 }, food: { casual: 25, moderado: 48, gourmet: 80 } },
-  ilhabela: { name: 'Ilhabela', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 30, moderado: 58, gourmet: 95 } },
+  ilhabela: { name: 'Ilhabela', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 26, moderado: 48, gourmet: 83 } },
   fln: { name: 'Florianópolis', transport: { eco: 20, medio: 30, confort: 45 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
   bcm: { name: 'Balneário Camboriú', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
   camboriu: { name: 'Camboriú', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
-  bombinhas: { name: 'Bombinhas', transport: { eco: 17, medio: 25, confort: 38 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
+  bombinhas: { name: 'Bombinhas', transport: { eco: 17, medio: 25, confort: 38 }, food: { casual: 23, moderado: 46, gourmet: 86 } },
   rosa: { name: 'Praia do Rosa', transport: { eco: 18, medio: 27, confort: 42 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
   itapema: { name: 'Itapema', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 28, moderado: 54, gourmet: 92 } },
   garopaba: { name: 'Garopaba', transport: { eco: 15, medio: 23, confort: 36 }, food: { casual: 25, moderado: 50, gourmet: 86 } },
   ferrugem: { name: 'Ferrugem', transport: { eco: 14, medio: 22, confort: 34 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
   picarras: { name: 'Piçarras', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
-  gram: { name: 'Gramado', transport: { eco: 16, medio: 26, confort: 42 }, food: { casual: 32, moderado: 62, gourmet: 110 } },
-  canela: { name: 'Canela', transport: { eco: 17, medio: 27, confort: 42 }, food: { casual: 32, moderado: 62, gourmet: 110 } },
+  gram: { name: 'Gramado', transport: { eco: 16, medio: 26, confort: 42 }, food: { casual: 33, moderado: 59, gourmet: 102 } },
+  canela: { name: 'Canela', transport: { eco: 17, medio: 27, confort: 42 }, food: { casual: 31, moderado: 56, gourmet: 97 } },
   torres: { name: 'Torres', transport: { eco: 11, medio: 18, confort: 30 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
   canoa: { name: 'Capão da Canoa', transport: { eco: 12, medio: 19, confort: 30 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
   fernando: { name: 'Fernando de Noronha', transport: { eco: 30, medio: 47, confort: 75 }, food: { casual: 50, moderado: 95, gourmet: 160 } },
-  pip: { name: 'Pipa', transport: { eco: 6, medio: 12, confort: 22 }, food: { casual: 30, moderado: 55, gourmet: 90 } },
+  pip: { name: 'Pipa', transport: { eco: 6, medio: 12, confort: 22 }, food: { casual: 23, moderado: 45, gourmet: 82 } },
   trancoso: { name: 'Trancoso', transport: { eco: 18, medio: 29, confort: 48 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
   ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 14, medio: 23, confort: 38 }, food: { casual: 37, moderado: 68, gourmet: 115 } },
   morro: { name: 'Morro de São Paulo', transport: { eco: 6, medio: 11, confort: 22 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
@@ -92,9 +92,9 @@
       "nota": "Es de los mas baratos de Brasil junto con la costa del Nordeste. El dato de Salvador es de los mas solidos: varias fuentes independientes coinciden."
     },
   for: {
-      "fuente": "infobrazil.org la marca como la ciudad-playa mas barata de Brasil (-15% de recargo). Cesta basica de O POVO + Procon Fortaleza (ago/2026): R$630,71, la mas cara del Nordeste, pero con mucho super barato (Atacadao).",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
+      "fuente": "infobrazil.org la marca como la ciudad-playa mas barata de Brasil (-15% de recargo). Cesta basica de O POVO + Procon Fortaleza (ago/2026): R$630,71, la mas cara del Nordeste, pero con mucho super barato (Atacadao). || 2026-09-30, busqueda de precios: Numbeo Fortaleza (sep/2026, 30 colaboradores): comida barata R$30, cena media para 2 R$163,46, bus R$4,75, taxi bajada R$7 + R$4,06/km. Promediado con quantocustaviajar Fortaleza (abr/2025): R$92/122/163 por dia.",
+      "confianza": "media",
+      "verificado": "2026-09-30",
       "derivacion": "Comparte valores con jericoacoara (mismo estado y mismo aeropuerto, IATA FOR). El dato de la cesta basica apunta a que Fortaleza deberia ser MAS BARATA de lo que esta aca, no mas cara: el indice de recargo -15% de infobrazil es del gasto turistico total, no solo de comida. Conviene revisar."
     },
   nat: {
@@ -114,15 +114,15 @@
       "verificado": "2026-09-27"
     },
   joaopessoa: {
-      "fuente": "O POVO + Procon Joao Pessoa (mar/2026): cesta basica R$538,67, la mas barata del Nordeste, con la mayor dispersion entre supermercados (R$377 a R$507 en la misma cadena).",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
+      "fuente": "O POVO + Procon Joao Pessoa (mar/2026): cesta basica R$538,67, la mas barata del Nordeste, con la mayor dispersion entre supermercados (R$377 a R$507 en la misma cadena). || 2026-09-30, busqueda de precios: Numbeo Joao Pessoa (jun/2026, 20 colaboradores): comida barata R$35, cena media para 2 R$150. quantocustaviajar (R$52/61/82 por dia) se descarto por inconsistente.",
+      "confianza": "media",
+      "verificado": "2026-09-30",
       "derivacion": "Copia de rec. Joao Pessoa esta 300 km al norte y comparte corredor de vuelo, pero su cesta basica es R$92 mas barata, asi que deberia estar un poco por DEBAJO de Recife, no igual."
     },
   porto: {
-      "fuente": "Se buscaron precios de restaurante de Porto de Galinhas. Lo que hay publicado es sobre el resort con todo incluido, que no separa la comida: el costo real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte. Por eso el numero no se puede derivar. Se lo pone un poco por encima de Recife (28 contra 25) porque el perfil de gasto es de resort de playa.",
+      "fuente": "Se buscaron precios de restaurante de Porto de Galinhas. Lo que hay publicado es sobre el resort con todo incluido, que no separa la comida: el costo real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte. Por eso el numero no se puede derivar. Se lo pone un poco por encima de Recife (28 contra 25) porque el perfil de gasto es de resort de playa. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$64.5/86.5/112.4 por dia.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "derivacion": "Resort de playa con todo incluido en la zona, asi que se pone por encima de Recife. Pero no hay dato: el precio real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte."
     },
   maragogi: {
@@ -138,16 +138,16 @@
       "nota": "La villa no admite autos y se camina. El traslado diario es bajo; los buggies a Pedra Furada o Lagoa Azul son una excursion aparte. Barato en la playa pero caro en restaurante."
     },
   buz: {
-      "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara.",
+      "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$102.04/131/181 por dia. Menus ejecutivos R$49,90, PF R$25-35, casas de R$60 por persona.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "nota": "Las playas estan dispersas y el taxi es de los mas caros de la costa (sin app fuerte): el traslado diario sube respecto del promedio. Balneario mas caro de Rio de Janeiro, por eso tambien sube la comida.",
       "derivacion": "Sin dato especifico de Búzios. Copia práctica de for/jericoacoara. Búzios es pueblo de playa con vida nocturna, asi que la escala es plausible, pero deberia ser un poco mas caro que el promedioNordeste: es el balneario mas caro de Rio de Janeiro."
     },
   arraial: {
-      "fuente": "Se buscaron cartas de restaurante de la region de Lagos, guias de viaje y comparadores de costo de vida. Lo unico que aparece es el distrito turistico Arraial do Cabo como conjunto, que es mas caro que Cabo Frio porque tiene las mejores playas. No hay precio publicado para el pueblo, asi que el valor es una copia de Cabo Frio.",
+      "fuente": "Se buscaron cartas de restaurante de la region de Lagos, guias de viaje y comparadores de costo de vida. Lo unico que aparece es el distrito turistico Arraial do Cabo como conjunto, que es mas caro que Cabo Frio porque tiene las mejores playas. No hay precio publicado para el pueblo, asi que el valor es una copia de Cabo Frio. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$67.6/93.2/149.6 por dia.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "derivacion": "Copia de cabo. Ambos son balnearios de la.region de Lagos (RJ) con economia turistica. Sin dato propio."
     },
   cabo: {
@@ -156,9 +156,9 @@
       "verificado": "2026-09-27"
     },
   angra: {
-      "fuente": "Numbeo Angra dos Reis: comida barata R$37,50, cena media para 2 R$170, McMenu R$27,50, cerveza de tirada R$12,40, capuchino R$8, pasaje de transporte R$6.",
+      "fuente": "Numbeo Angra dos Reis: comida barata R$37,50, cena media para 2 R$170, McMenu R$27,50, cerveza de tirada R$12,40, capuchino R$8, pasaje de transporte R$6. || 2026-09-30, busqueda de precios: quantocustaviajar Angra (sep/2025): R$69/102/163 por dia, promediado con la estimacion de Numbeo ya citada.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "nota": "OJO con este dato: Numbeo marca 28 entradas pero SOLO 6 colaboradores unicos y la ultima actualizacion es de abril de 2025. Es crowdsourced finito: sirve como orden de magnitud, no como precio. Por eso la confianza es baja pese a que haya fuente directa."
     },
   paraty: {
@@ -180,9 +180,9 @@
       "nota": "Los precios de comida rapida son de los mas baratos del litoral de Sao Paulo, lo que sugiere que casual 25 (R$130/dia) esta alto. Con PF a R$25-33 y self-service a R$23,90, un dia completo da R$60-90, o sea USD 12-17."
     },
   ilhabela: {
-      "fuente": "Se buscaron precios de restaurante. Lo que hay es una lista de comida economica en Ilhabela (Wanderlog) que recomienda un self-service frente al foro, y el relato de un turista que vivio un mes sin gastar mucho usando transporte publico, pero ninguno con precios. La isla se llega solo por ferry, como Ilha Grande, asi que el costo viene de ahi con un recargo por turismo de verano.",
+      "fuente": "Se buscaron precios de restaurante. Lo que hay es una lista de comida economica en Ilhabela (Wanderlog) que recomienda un self-service frente al foro, y el relato de un turista que vivio un mes sin gastar mucho usando transporte publico, pero ninguno con precios. La isla se llega solo por ferry, como Ilha Grande, asi que el costo viene de ahi con un recargo por turismo de verano. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$72.12/93.96/130.98 por dia.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "derivacion": "Ilhabela es la segunda isla de Sao Paulo, accesible solo por ferry (como Ilha Grande). Copia de ilha con un poco mas: la isla es mas grande y el turismo es mas caro, pero no hay dato de precios."
     },
   fln: {
@@ -203,9 +203,9 @@
       "nota": "Copia de bcm. Los dos nombres se refieren a la misma ciudad; el catalogo los tiene separados por la diferencia de lodging."
     },
   bombinhas: {
-      "fuente": "Se buscaron cartas de restaurante, precios de pousada y comparadores. Lo que hay publicado es de hospedaje en general: el balneario familiar de Santa Catarina, a 120 km de Floripa por la BR-101, con un pueblo chico y sin vida de resort. El lodging del catalogo ya lo pone por arriba de Floripa (52/96/170 contra 50/90/160), asi que la comida tambien.",
+      "fuente": "Se buscaron cartas de restaurante, precios de pousada y comparadores. Lo que hay publicado es de hospedaje en general: el balneario familiar de Santa Catarina, a 120 km de Floripa por la BR-101, con un pueblo chico y sin vida de resort. El lodging del catalogo ya lo pone por arriba de Floripa (52/96/170 contra 50/90/160), asi que la comida tambien. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$60/91.2/151.2 por dia.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "derivacion": "Copia de fln. Bombinhas esta en el mismo corredor de la BR-101 y a 120 km de Floripa, con un pueblo mas chico y precios algo mas bajos: el lodging va 52/96/170 contra 50/90/160, o sea que esta CARO y la comida tambien. Es el balneario familiar de la zona."
     },
   rosa: {
@@ -238,15 +238,15 @@
       "verificado": "2026-09-27"
     },
   gram: {
-      "fuente": "Se buscaron cartas de restaurante de Gramado y comparadores de costo de vida. El dato solido que hay es regional, no de la ciudad: el IPF de la ACSP (jun/2026) da R$34,90 para el plato feito del Sur, la region mas cara del pais, frente a R$31,90 del promedio nacional. Los agregadores la ponen entre las ciudades mas caras de la region, con la misma combinacion de almuerzo caro y cena de resort. No hay carta propia: el valor es copia de Canela.",
+      "fuente": "Se buscaron cartas de restaurante de Gramado y comparadores de costo de vida. El dato solido que hay es regional, no de la ciudad: el IPF de la ACSP (jun/2026) da R$34,90 para el plato feito del Sur, la region mas cara del pais, frente a R$31,90 del promedio nacional. Los agregadores la ponen entre las ciudades mas caras de la region, con la misma combinacion de almuerzo caro y cena de resort. No hay carta propia: el valor es copia de Canela. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$109/138.5/171 por dia.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "derivacion": "Copia de canela. Ambas vuelan a POA y son destinos turisticos de la misma provincia, con la misma combinacion de PF caro y cena de resort. Gramado es mas caro como alojamiento (48/89/155 contra 50/90/160, parecido)."
     },
   canela: {
-      "fuente": "Se buscaron cartas de restaurante de Canela. Comparte aeropuerto (POA) con Gramado y esta 15 km, asi que comparten el mismo mercado turistico y los mismos precios. Canela es mas chica y con mas hoteleria de temporada. No hay dato propio: el valor es copia de Gramado.",
+      "fuente": "Se buscaron cartas de restaurante de Canela. Comparte aeropuerto (POA) con Gramado y esta 15 km, asi que comparten el mismo mercado turistico y los mismos precios. Canela es mas chica y con mas hoteleria de temporada. No hay dato propio: el valor es copia de Gramado. || 2026-09-30, busqueda de precios: quantocustaviajar Canela da R$51/64/76 por dia, valor inverosimil porque excluye fondue (R$100-160) y cafe colonial (R$80-120). Se deriva de Gramado (15 km) con -5%.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "derivacion": "Copia de gram. Canela esta 15 km de Gramado y comparte el mercado turistico."
     },
   torres: {
@@ -268,9 +268,9 @@
       "nota": "El mejor documentado de todo el catalogo, y con razon: todo llega por barco o avion desde Recife, 540 km. Mas la TPA y el ingreso al parque, que se cobran aparte."
     },
   pip: {
-      "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal.",
+      "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$51.6/86.4/134.4 por dia. El unico precio de carta (menu R$94,90) indica cena cara, por eso pesa el valor previo.",
       "confianza": "baja",
-      "verificado": "2026-09-27",
+      "verificado": "2026-09-30",
       "nota": "Pueblo chico y caminable: el centro, la playa y los restaurantes se recorren a pie. Transporte diario bajo; solo se suman taxis/mototaxi a Chapadao, Madeiro o Sibauma.",
       "derivacion": "Pipa es un pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara pero en Rio Grande do Norte. Copia de nat con recargo por la vida nocturna. Lo que si hay dato (un menu de R$94,90 en un restaurante de la zona) sugiere que la cena es mas cara que la media de Natal, que es lo que ya se refleja."
     },
