@@ -6933,7 +6933,7 @@
         var tarifa = o.uyu != null
           ? (enUyu
             ? '<b>' + uyu(o.uyu) + '</b>'
-            : '<b>' + money(o.uyu / tasaUyu) + '</b><small>Tarifa: ' + uyu(o.uyu) + '</small>')
+            : '<b title="Tarifa publicada por la empresa: ' + uyu(o.uyu) + '">' + money(o.uyu / tasaUyu) + '</b>')
           : '<span class="bus-opt__na">Consultar tarifa</span>';
         return '<li><label class="bus-opt">'
           + '<input class="bus-opt__input" type="radio" name="bus-choice" data-bus-choice="' + esc(o.id) + '" data-bus-uyu="' + (o.uyu == null ? '' : o.uyu) + '"' + (elegido === o.id ? ' checked' : '') + '>'
