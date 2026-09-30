@@ -863,7 +863,7 @@
       "destino": "Ilha Grande, Brasil",
       "titulo": "Super Sur",
       "descripcion": "Expedición imperdible por el lado más salvaje, preservado y auténtico de Ilha Grande, incluyendo paradas en Jorge Grego y Dois Rios.",
-      "detalle": "Recorrido único por el circuito sur de Ilha Grande. El itinerario incluye la increíble Ilha de Jorge Grego (ideal para buceo), la histórica Praia de Dois Rios (famoso antiguo presidio), la paradisíaca Caxadaço y la mundialmente famosa Praia de Lopes Mendes.",
+      "detalle": "Recorrido único por el circuito sur de Ilha Grande. El itinerario incluye la increíble Ilha de Jorge Grego (ideal para buceo), la histórica Praia de Dois Rios (famosa por su antiguo presidio), la paradisíaca Caxadaço y la mundialmente famosa Praia de Lopes Mendes.",
       "precio": 69.18,
       "precio_brl": 330,
       "duracion": "7 hs",
@@ -910,7 +910,7 @@
       "incluye": [
         "Paseo en lancha rápida compartida",
         "Marinero y combustible",
-        "Flotadores de piscina (fideos/macarrão)",
+        "Flotadores de piscina (fideos de piscina)",
         "Música ambiente",
         "Visita a Praia do Dentista, Ilhas de Botinas, Ilha de Cataguases y Praia da Piedade"
       ],
@@ -1026,7 +1026,7 @@
         "Seguro de accidentes personales"
       ],
       "no_incluye": [
-        "Almuerzo y bebidas (prohibido ingresar con conservadora o isopor)",
+        "Almuerzo y bebidas (prohibido ingresar con conservadora o heladera portátil)",
         "Gastos personales"
       ],
       "llevar": [
@@ -1149,7 +1149,7 @@
       ],
       "destino": "Maragogi, Brasil",
       "titulo": "Praia do Patacho",
-      "descripcion": "Excursión imperdible a una de las playas vírgenes más hermosas, tranquilas y premiadas de Brasil, famosa por sus piscinas naturales y cocoteros.",
+      "descripcion": "Excursión imperdible a una de las playas vírgenes más hermosas, tranquilas y premiadas de Brasil, conocida por sus piscinas naturales y cocoteros.",
       "detalle": "Descubrí la paradisíaca Praia do Patacho, ubicada en el municipio vecino de Porto de Pedras. Es un verdadero santuario ecológico de aguas cristalinas, arena blanca y cocoteros, ideal para quienes buscan tranquilidad absoluta. Durante la marea baja, se forman piscinas naturales perfectas para un baño relajante y avistaje de peces. El recorrido incluye el traslado cómodo desde Maragogi y tiempo libre para disfrutar del paisaje y la gastronomía local.",
       "precio": 30.28,
       "precio_brl": 130,
@@ -1217,7 +1217,7 @@
       ],
       "destino": "Natal, Brasil",
       "titulo": "Dunas de Genipabu en buggy",
-      "descripcion": "Excursión imperdible a la postal más famosa de Río Grande del Norte, famosa por sus imponentes dunas móviles, paseo en buggy y la laguna de Genipabu.",
+      "descripcion": "Excursión imperdible a la postal más famosa de Río Grande del Norte, reconocida por sus imponentes dunas móviles, paseo en buggy y la laguna de Genipabu.",
       "detalle": "Descubrí el mundialmente famoso litoral norte de Natal visitando Genipabu, un verdadero paraíso de dunas gigantes y lagunas de agua dulce. Tendrás la oportunidad de realizar el clásico y emocionante paseo en buggy por las dunas (opcional), cruzar en balsa por el río Ceará Mirim y disfrutar de un baño relajante en la laguna y las cálidas playas de la región.",
       "precio": 37.68,
       "precio_brl": 168,
@@ -1426,7 +1426,7 @@
       "destino": "Maceió, Brasil",
       "titulo": "Praia do Gunga",
       "descripcion": "Excursión de día completo al litoral sur de Alagoas para conocer la impresionante Praia do Gunga, famosa por sus miles de cocoteros y acantilados.",
-      "detalle": "Descubrí uno de los postales más hermosas del litoral brasileño saliendo desde Maceió. La Praia do Gunga impresiona por su gigantesca franja de cocoteros que se extiende hasta donde alcanza la vista, donde el mar tranquilo se encuentra con la laguna do Acaú. El recorrido incluye una parada en el famoso mirador para fotos panorámicas y tiempo libre en la playa para disfrutar de su infraestructura, bañarse en sus aguas cálidas y realizar opcionalmente paseos en buggy, cuatriciclo o lancha hacia los coloridos acantilados de arcilla.",
+      "detalle": "Descubrí una de las postales más hermosas del litoral brasileño saliendo desde Maceió. La Praia do Gunga impresiona por su gigantesca franja de cocoteros que se extiende hasta donde alcanza la vista, donde el mar tranquilo se encuentra con la laguna do Acaú. El recorrido incluye una parada en el famoso mirador para fotos panorámicas y tiempo libre en la playa para disfrutar de su infraestructura, bañarse en sus aguas cálidas y realizar opcionalmente paseos en buggy, cuatriciclo o lancha hacia los coloridos acantilados de arcilla.",
       "precio": 22.5,
       "precio_brl": 90,
       "duracion": "8 hs",
@@ -1435,7 +1435,7 @@
       "cancelacion": "Gratis hasta 72 hs antes",
       "incluye": [
         "Traslado compartido de ida y vuelta desde hoteles en Maceió",
-        "Parada panorámica en el Mirador de Do Francês",
+        "Parada panorámica en el Mirador do Francês",
         "Asistencia de guía de turismo local acreditado"
       ],
       "no_incluye": [

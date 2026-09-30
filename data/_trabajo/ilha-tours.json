@@ -4,7 +4,7 @@
     "destino": "Ilha Grande, Brasil",
     "titulo": "Super Sur",
     "descripcion": "Expedición imperdible por el lado más salvaje, preservado y auténtico de Ilha Grande, incluyendo paradas en Jorge Grego y Dois Rios.",
-    "detalle": "Recorrido único por el circuito sur de Ilha Grande. El itinerario incluye la increíble Ilha de Jorge Grego (ideal para buceo), la histórica Praia de Dois Rios (famoso antiguo presidio), la paradisíaca Caxadaço y la mundialmente famosa Praia de Lopes Mendes.",
+    "detalle": "Recorrido único por el circuito sur de Ilha Grande. El itinerario incluye la increíble Ilha de Jorge Grego (ideal para buceo), la histórica Praia de Dois Rios (famosa por su antiguo presidio), la paradisíaca Caxadaço y la mundialmente famosa Praia de Lopes Mendes.",
     "precio_brl": 330,
     "duracion": "7 hs",
     "grupo": "12 a 20 pasajeros por lancha",
@@ -47,7 +47,7 @@
     "incluye": [
       "Paseo en lancha rápida compartida",
       "Marinero y combustible",
-      "Flotadores de piscina (fideos/macarrão)",
+      "Flotadores de piscina (fideos de piscina)",
       "Música ambiente",
       "Visita a Praia do Dentista, Ilhas de Botinas, Ilha de Cataguases y Praia da Piedade"
     ],
