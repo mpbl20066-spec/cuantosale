@@ -8862,6 +8862,11 @@
     // primero, y renderTripSummary() se volvía a llamar acá: tres breakdowns y
     // tres paneles "Mi Viaje" para abrir una propuesta.
     sincronizarTrasladoOficial();
+    /* El titulo gigante de la home vive FUERA de #vista-principal, asi que al
+       abrir una propuesta quedaba arriba y la persona tenia que scrollear un
+       pantallazo entero para llegar al detalle. Se oculta junto con la home; el
+       header con el logo se queda, que es la salida. */
+    $('#titulo-home').classList.add('oculto');
     $('#vista-principal').classList.add('oculto');
     view.classList.remove('oculto');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -9646,6 +9651,8 @@
       var detalle = $('#vista-detalle'), inicio = $('#vista-principal');
       if (detalle) detalle.classList.add('oculto');
       if (inicio) inicio.classList.remove('oculto');
+      var tituloHome = $('#titulo-home');
+      if (tituloHome) tituloHome.classList.remove('oculto');
       // Volviendo desde una busqueda de un solo destino, "el inicio" es la
       // lista de todos: por eso el boton de volver dice "Volver a todos los
       // destinos".
