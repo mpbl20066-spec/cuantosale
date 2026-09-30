@@ -1,4 +1,4 @@
-/* version: 144
+/* version: 180
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2795,3 +2795,5 @@ button.logo{min-height:44px}
   .local-tour__tag{top:10px;left:10px;font-size:11px}
 }
 .local-tours{margin-bottom:40px}
+.hotel-playa-picks{flex:1 1 100%;align-items:flex-start;margin-top:2px}
+.hotel-ubic{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0;color:var(--ink2);font-size:12.5px;font-weight:600;line-height:1.4}

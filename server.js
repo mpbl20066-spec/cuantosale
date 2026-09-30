@@ -31,6 +31,7 @@ const model = require('./lib/model');
 // cualquiera lo bajaba con curl, con la guia de los 88 destinos, sin comprar
 // nada. Ver guiaToken() mas abajo para como se decide quien la recibe.
 const guiSecreta = require('./lib/guias');
+const playas = require('./lib/playas');
 // Vuelos reales. El agregador es el único que habla con SerpAPI: ahí viven el
 // cache, el dedupe de pedidos simultáneos y la pausa cuando se acaban los
 // créditos del mes. Si el server llamara al provider directo, cada endpoint
@@ -464,6 +465,8 @@ function normalizeHotelApiResponse(payload, extra, source) {
       total: total,
       perNight: hasNightly ? Math.round(nightlyRaw * 100) / 100 : Math.round((total / nights) * 100) / 100,
       currency: currency,
+      lat: Number(property.latitude || hotel.latitude || hotel.lat || 0) || 0,
+      lng: Number(property.longitude || hotel.longitude || hotel.lng || hotel.lon || 0) || 0,
       rating: Number(property.reviewScore || property.review_score || hotel.review_score || hotel.rating || 0),
       propertyType: String(property.propertyType || property.property_type || hotel.property_type || hotel.hotel_type || ''),
       description: String(property.description || hotel.description || ''),
@@ -754,7 +757,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   const budgetTarget = hotelBudgetTarget(destKey, style, hotelExtra);
   let realHotels = [];
   try {
-    realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, hotelExtra)).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName }); });
+    realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, hotelExtra)).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName, geoKey: destKey }); });
     if (realHotels.length < 3) {
       const nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
       if (nearby) {
@@ -765,7 +768,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
           // avisar. fixMojibake ya corre sobre los nombres que vuelven; este es
           // el mismo problema del otro lado del cable.
           const regionalHotels = await fetchBookingHotels(nearby.key, fixMojibake(nearby.name), selectedTier, hotelExtra);
-          realHotels = realHotels.concat(regionalHotels.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: nearby.label }); }));
+          realHotels = realHotels.concat(regionalHotels.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: nearby.label, geoKey: nearby.key }); }));
         } catch (regionalError) {
           console.warn('[hotelRecommendations] Búsqueda regional no disponible:', regionalError && regionalError.message ? regionalError.message : regionalError);
         }
@@ -781,7 +784,23 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
     //como si fueran cotizaciones. Con `diag` el front puede decirlo.
     if (diag) diag.bookingError = motivo;
   }
-  const priced = uniqueHotelList(realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; }));
+  const pricedTodos = uniqueHotelList(realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; }))
+    .map(function (hotel) {
+      // Playa mas cercana y distancia al centro, calculadas con las coordenadas
+      // que manda Booking (ver lib/playas.js).
+      const ubicacion = playas.ubicacionDeHotel(hotel.geoKey || destKey, hotel.lat, hotel.lng);
+      return ubicacion ? Object.assign({}, hotel, ubicacion) : hotel;
+    });
+  // Las playas que de verdad tienen hoteles con precio, para armar el filtro. Se
+  // cuenta ANTES de filtrar por playa, si no al elegir una el resto desaparecia.
+  if (diag) {
+    const cuentas = new Map();
+    pricedTodos.forEach(function (hotel) { if (hotel.playa) cuentas.set(hotel.playa, (cuentas.get(hotel.playa) || 0) + 1); });
+    diag.playasDisponibles = playas.nombresDePlayas(destKey).filter(function (name) { return cuentas.has(name); })
+      .map(function (name) { return { name: name, count: cuentas.get(name) }; });
+  }
+  const playaPedida = String((extra && extra.playa) || '').trim();
+  const priced = playaPedida ? pricedTodos.filter(function (hotel) { return hotel.playa === playaPedida; }) : pricedTodos;
   // cuantos vinieron con precio real de Booking: si es 0, lo que se muestra en
   // pantalla es estimacion del modelo, y el front tiene que poder decirlo.
   if (diag) diag.bookingCount = priced.length;
@@ -871,7 +890,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   }
   const combinedReales = matchingCategory.concat(realesExtra);
   const missing = 3 - combinedReales.length;
-  const canUseGenericFallback = HOTEL_SPECTRUM_TYPES.has(hotelType);
+  const canUseGenericFallback = HOTEL_SPECTRUM_TYPES.has(hotelType) && !playaPedida;
   /* Para all-inclusive no hay fallback: antes se fabricaban tres entradas con
      nombres tipo "Complejo Todo Incluido" y el precio puesto en budgetTarget, sin
      foto y con un link de Booking. Se veian igual que un hotel real y con el
@@ -1513,6 +1532,10 @@ async function cotizarHoteles(req, res, url) {
   const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), url.searchParams.get('subcategory'), v.S.style);
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: url.searchParams.get('subcategory') || '' };
+  // Filtro por playa: solo vale para un destino solo. Con dos paradas las playas
+  // de una no existen en la otra.
+  const playaPedida = String(url.searchParams.get('playa') || '').slice(0, 60);
+  if (playaPedida && !url.searchParams.get('second')) extra.playa = playaPedida;
   if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
   const hotelDiag = {};
   // Segunda parada del viaje combinado. Antes el endpoint solo miraba `dest`, y
@@ -1560,6 +1583,7 @@ async function cotizarHoteles(req, res, url) {
     hotels: hotels,
     hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra), hotelType: hotelType,
     hotelsNearby: nearbyOf(hotels, dest.name),
+    playasDisponibles: hotelDiag.playasDisponibles || [],
     // Lo mismo para la segunda parada. Sin estos campos `hotelsSecond` seria []
     // y el front no distinguiria "no hay hoteles ahi" de "no se consulto".
     hotelsSecond: hotelsSecond,
