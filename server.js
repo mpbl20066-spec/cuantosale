@@ -1570,9 +1570,6 @@ async function cotizarHoteles(req, res, url) {
   const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), url.searchParams.get('subcategory'), v.S.style);
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: url.searchParams.get('subcategory') || '' };
-  // Las secciones por playa solo valen para un destino solo. Con dos paradas las
-  // playas de una no existen en la otra.
-  if (url.searchParams.get('second')) extra.noGroups = true;
   if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
   const hotelDiag = {};
   // Segunda parada del viaje combinado. Antes el endpoint solo miraba `dest`, y
@@ -1621,6 +1618,7 @@ async function cotizarHoteles(req, res, url) {
     hotelBudgetPerNight: hotelBudgetTarget(v.S.dest, v.S.style, extra), hotelType: hotelType,
     hotelsNearby: nearbyOf(hotels, dest.name),
     hotelsPorPlaya: hotelDiag.hotelsPorPlaya || [],
+    hotelsPorPlayaSecond: hotelDiagSecond.hotelsPorPlaya || [],
     // Lo mismo para la segunda parada. Sin estos campos `hotelsSecond` seria []
     // y el front no distinguiria "no hay hoteles ahi" de "no se consulto".
     hotelsSecond: hotelsSecond,
