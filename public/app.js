@@ -4270,8 +4270,8 @@
       transporteRow,
       ...(detailState.transportMode === 'flight' ? [{ cat: 'traslados', label: 'Transfer', excluido: !transferIncluded, detalle: transferIncluded ? esc(transferMeta) : '', value: transferIncluded ? money(transferAmount) : '—', color: getCategoryColor('traslados') }] : []),
       { cat: 'alojamiento', label: 'Hotel', excluido: detailState.selectedHotel === false, detalle: hotelDetalle, value: money(hotelSumado(detailState)), color: getCategoryColor('alojamiento') },
-      { cat: 'comidas', label: 'Comida', excluido: detailState.foodBudgetMode === 'none', detalle: detailState.foodBudgetMode === 'none' ? '' : (foodPerDay ? money(foodPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
-      { cat: 'local', label: 'Transporte local', excluido: detailState.localBudgetMode === 'none', detalle: detailState.localBudgetMode === 'none' ? '' : (localPerDay ? money(localPerDay) + '/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
+      { cat: 'comidas', label: 'Comida', excluido: detailState.foodBudgetMode === 'none', detalle: detailState.foodBudgetMode === 'none' ? '' : (foodPerDay ? money(foodPerDay) + ' por persona/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.comidas) || 0), color: getCategoryColor('comidas') },
+      { cat: 'local', label: 'Transporte local', excluido: detailState.localBudgetMode === 'none', detalle: detailState.localBudgetMode === 'none' ? '' : (localPerDay ? money(localPerDay) + ' por persona/día' : 'Estimado'), value: money(Number(detailState.parts && detailState.parts.local) || 0), color: getCategoryColor('local') },
       { cat: 'tours', label: 'Tours', detalle: toursDetalle, value: money(Number(detailState.toursTotal) || 0), color: getCategoryColor('tours') }
     ];
     // Mismo criterio que la barra: de mayor a menor monto. Los rubros en cero
@@ -5952,7 +5952,7 @@
            tolerancia queda solo para viajes guardados sin nivel. */
         var presetKey = kind === 'food' ? detailState.foodPresetKey : detailState.localPresetKey;
         var selected = mode === 'preset' && (presetKey ? presetKey === option.key : Math.abs(current - option.value) < 6);
-        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-key="' + option.key + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>' + money(option.value) + '/día</strong></button>';
+        return '<button type="button" class="daily-budget__option' + (selected ? ' is-selected' : '') + '" aria-pressed="' + selected + '" data-daily-kind="' + kind + '" data-daily-key="' + option.key + '" data-daily-value="' + option.value + '"><span class="daily-budget__option-title">' + esc(option.label) + '</span><span class="daily-budget__option-copy">' + esc(option.description) + '</span><strong>' + money(option.value) + '<span class="daily-budget__unit">por persona / día</span></strong></button>';
       }).join('');
       var customSelected = mode === 'custom';
       var customValue = kind === 'food' ? detailState.foodCustomValue : detailState.localCustomValue;
@@ -5978,7 +5978,7 @@
         repetia la misma idea y hacia que la etiqueta se leyera como el titulo
          de un sub-bloque, cuando es el nombre del campo. El aria-label sigue
          diciendo "diario" porque ahi si describe el dato, no lo rotula. */
-      var input = '<label class="daily-budget__planned"><span>Monto planeado</span><div class="daily-budget__input-wrap"><span class="daily-budget__input-symbol">' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Monto diario planeado para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span class="daily-budget__input-unit">/día</span></div></label>';
+      var input = '<label class="daily-budget__planned"><span>Monto planeado</span><div class="daily-budget__input-wrap"><span class="daily-budget__input-symbol">' + esc(monedaActiva().simbolo) + '</span><input type="number" min="0" step="1" inputmode="decimal" value="' + (customValue == null ? '' : esc(aMoneda(customValue).toFixed(decimalesDe(monedaActiva().code, aMoneda(customValue))))) + '" placeholder="Ej: 30" data-daily-' + (kind === 'food' ? 'food' : 'local') + ' aria-label="Monto diario por persona planeado para ' + (kind === 'food' ? 'comidas' : 'transporte local') + '"><span class="daily-budget__input-unit">por persona / día</span></div></label>';
       var custom = customSelected
         ? '<div class="daily-budget__option daily-budget__option--custom is-selected" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span>' + input + '</div>'
         : '<button type="button" class="daily-budget__option daily-budget__option--custom" aria-pressed="false" data-daily-kind="' + kind + '-custom"><span class="daily-budget__option-title">Personalizado</span><span class="daily-budget__option-copy">Definí tu propio presupuesto</span><strong class="daily-budget__prompt"><span class="daily-budget__prompt-ico" aria-hidden="true">✎</span>Ingresar monto</strong></button>';
@@ -6021,6 +6021,7 @@
        mismo: es una aclaracion sobre la seccion, no sobre las tarjetas. */
     return '<section class="detail-section daily-budget" aria-label="Presupuesto diario configurado">' +
       '<h2>Personalizá tus costos diarios</h2>' +
+      '<p class="daily-budget__note">Los montos son <b>por persona y por día</b>. ' + (pax > 1 ? 'En el presupuesto se multiplican por los <b>' + pax + ' viajeros</b> y las noches del viaje.' : 'En el presupuesto se multiplican por las noches del viaje.') + '</p>' +
       '<h3 class="daily-budget__group-title">Transporte local' + etiquetaDeEstimado(['local']) + '</h3>' +
       '<div class="daily-budget__group" data-budget-anchor="local">' +
       optionsGrid(localOptions, 'local') +
