@@ -4199,13 +4199,14 @@
     var _avance = Math.min(100, Math.round((_cuantificado / Math.max(1, Number(total) || 1)) * 100));
     /* Segmentos proporcionales, uno por rubro con monto, en el color del rubro
        (el mismo del icono de la fila). Los rubros en cero no ocupan lugar. */
-    var _base = summaryItems.reduce(function (s, it) { return s + (Number(it.n) > 0 ? Number(it.n) : 0); }, 0);
+    var _sumados = summaryItems.filter(function (it) { return Number(it.n) > 0 && it.estadoClave !== 'fuera' && it.estadoClave !== 'vacio'; });
+    var _base = _sumados.reduce(function (s, it) { return s + Number(it.n); }, 0);
     var segments = _base > 0
-      ? summaryItems.filter(function (it) { return Number(it.n) > 0; }).map(function (it) {
+      ? _sumados.map(function (it) {
           return '<span style="width:' + (Number(it.n) / _base * 100).toFixed(2) + '%;background:var(' + it.color + ')" title="' + esc(it.label) + '"></span>';
         }).join('')
       : '';
-    var itemsHtml = summaryItems.map(function (item) {
+    var filaResumen = function (item) {
       // Sólo el ícono: el cuadrado de color repetía la misma información y
       // ocupaba ancho al lado del texto. El botón entero lleva a la sección
       // donde ese rubro se configura, igual que las filas del desglose.
@@ -4218,7 +4219,25 @@
         + '</span></div>'
         + '<em>' + item.value + '</em>'
         + '</button>';
-    }).join('');
+    };
+    /* La lista principal es solo lo que ya está en la cuenta ("Sumado" y los
+       reservados). Los rubros "Sin elegir" y "No incluido" valen 0 y no le dicen
+       nada a quien mira el total: ocupaban la mitad del panel. Van al final, en un
+       desplegable cerrado, y siguen siendo botones que llevan a su sección. Si
+       todavía no hay nada sumado el desplegable arranca abierto, porque sin él no
+       quedaría por dónde empezar. Se conserva lo que la persona abrió o cerró,
+       porque el panel se repinta entero en cada recálculo. */
+    var _activos = summaryItems.filter(function (it) { return it.estadoClave !== 'vacio' && it.estadoClave !== 'fuera'; });
+    var _pendientes = summaryItems.filter(function (it) { return it.estadoClave === 'vacio' || it.estadoClave === 'fuera'; });
+    var _prevMas = summary.querySelector('.trip-summary__more');
+    var _masAbierto = _prevMas ? _prevMas.open : !_activos.length;
+    var itemsHtml = _activos.length
+      ? _activos.map(filaResumen).join('')
+      : '<p class="trip-summary__empty">Todavía no sumaste nada al presupuesto. Elegí un servicio para empezar.</p>';
+    var moreHtml = _pendientes.length
+      ? '<details class="trip-summary__more"' + (_masAbierto ? ' open' : '') + '><summary>Otros servicios no seleccionados <span>' + _pendientes.length + '</span></summary>' +
+        '<div class="trip-summary__items trip-summary__items--more">' + _pendientes.map(filaResumen).join('') + '</div></details>'
+      : '';
     /* "Reservar" no va mas en esta card. Se mude al voucher —el modal que abre
        "Ver mi presupuesto", aca al lado— porque el boton necesita dos cosas que
        aca no estan: el total de lo que se reserva, que NO es el total del viaje
@@ -4251,7 +4270,7 @@
        `display:none` en la fila cerrada y el panel salta de alto sin transicion. */
       '<div class="trip-summary__details" id="trip-summary-details"><div class="trip-summary__details-inner">'
       + '<div class="trip-summary__bar" aria-label="Avance de la cotización">' + segments + '</div>' +
-      '<div class="trip-summary__items">' + itemsHtml + '</div>' +
+      '<div class="trip-summary__items">' + itemsHtml + '</div>' + moreHtml +
       '<div class="trip-summary__actions">' +
       '<button type="button" class="trip-summary__cta" data-summary-book>Ver mi presupuesto</button>' +
       '<button type="button" class="trip-summary__save" data-save-trip>Guardar viaje</button></div>' +
