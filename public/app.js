@@ -2618,13 +2618,7 @@
         '<span>Ver detalles</span><span aria-hidden="true">→</span></button>' +
         '</div></div></article>';
     }).join('');
-    var creditList = Object.keys(creditos).map(function (url) {
-      var c = creditos[url];
-      return '<li>' + esc(c.autor) + ' &middot; ' + esc(c.licencia) + '</li>';
-    }).join('');
-    var creditsBlock = creditList
-      ? '<details class="local-tours__credits"><summary>Créditos de las fotos</summary><p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre:</p><ul>' + creditList + '</ul></details>'
-      : '';
+    var creditsBlock = '';
     return plateBlock('data-tours-block', titulo, bajada,
       '<section class="local-tours" data-budget-anchor="tours" aria-labelledby="local-tours-title">' +
       '<div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + cards + '</div>' +
@@ -7529,16 +7523,6 @@
     var pie = '<div class="guia-pie">Precios de comida orientativos, confirmá en el lugar. ' +
       (meta.dest.region ? 'Región: ' + esc(meta.dest.region) + '. ' : '') + 'Generado por CuántoSale.</div>';
 
-    // Créditos de fotos. CC BY y CC BY-SA no permiten usar una imagen sin
-    // atribuir al autor y nombrar la licencia.
-    var creditos = (typeof FOTO_CREDITOS !== 'undefined' && FOTO_CREDITOS) ? FOTO_CREDITOS : {};
-    var usadas = (guia.beaches || []).filter(function (b) { return b.foto && creditos[b.foto]; });
-    if (usadas.length) {
-      pie += '<div class="guia-creditos"><b>Fotos</b> (Wikimedia Commons): ' +
-        usadas.map(function (b) {
-          return esc(b.name) + ' — ' + esc(creditos[b.foto].autor) + ', ' + esc(creditos[b.foto].licencia);
-        }).join(' · ') + '.</div>';
-    }
 
     return '<section class="food-guide guia" aria-labelledby="guia-title">' +
       '<div class="food-guide-head"><span aria-hidden="true">🧭</span><div>' +
@@ -8497,30 +8481,7 @@
     // consulta: por eso son los dos que quedan como referencia.
     $('#foot').innerHTML = (live
       ? '<p><b>Vuelos:</b> tarifa aérea real al momento de la búsqueda, por persona. Puede cambiar hasta que reserves. <b>Alojamiento, comidas, traslados y buses:</b> valores de referencia.</p>'
-      : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento y buses son valores reales; comidas y traslados en destino son valores de referencia.</p>')
-      + '<details class="foot-credits" data-foot-credits><summary>Créditos de las fotos</summary>' +
-      '<p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre. ' +
-      'Cada autor y licencia se detalle más abajo.</p><ul data-foot-credits-list></ul></details>';
-
-    // Los créditos se cargan después de pintar para no frenar el primer render.
-    cargarCreditosFotos().then(function () {
-      var lista = document.querySelector('[data-foot-credits-list]');
-      if (!lista) return;
-      // El DOM se serializaba UNA VEZ POR CREDITO: documentElement.innerHTML
-      // fuerza un recorrido completo de nodos, atributos y src de cada <img> de
-      // la página, y FOTO_CREDITOS tiene 35 entradas. Eran 35 serializaciones
-      // completas por cada render(), y render() corre en cada búsqueda y en
-      // cada cambio de moneda. Ahora se lee una sola vez y se busca en el texto.
-      var htmlPagina = document.documentElement.innerHTML;
-      var usadas = Object.keys(FOTO_CREDITOS).filter(function (url) {
-        return htmlPagina.indexOf(url) >= 0;
-      });
-      if (!usadas.length) return;
-      lista.innerHTML = usadas.sort().map(function (url) {
-        var c = fotoCreditosDe(url);
-        return '<li>' + esc(c.autor) + ' &middot; ' + esc(c.licencia) + '</li>';
-      }).join('');
-    });
+      : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento y buses son valores reales; comidas y traslados en destino son valores de referencia.</p>');
 
     var pct = Math.min(100, Math.round(rec.total / Math.max(budget, 1) * 100));
     var status = data.fits
