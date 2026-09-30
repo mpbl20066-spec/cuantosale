@@ -1,4 +1,4 @@
-/* version: 185
+/* version: 188
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2857,4 +2857,12 @@ button.logo{min-height:44px}
    flotante "Mi Viaje" (z-index 90) y de los controles de la pagina. */
 @media (max-width:700px){
   .custom-select.is-menu-fixed .custom-select__menu{position:fixed;right:auto;bottom:auto;z-index:200;margin:0;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+}
+/* Celular: el rotulo "Alojamiento" arriba y los cuatro tipos en una grilla de 2x2.
+   En una fila con el rotulo, las pildoras quedaban en una columna angosta al lado
+   de la palabra y el filtro se veia roto. Con ancho completo caben de a dos. */
+@container hoteles (max-width:600px){
+  .hotel-type-picks{flex-direction:column;align-items:stretch;gap:8px;width:100%}
+  .hotel-type-pills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+  .hotel-type-pill{width:100%;padding:0 10px}
 }

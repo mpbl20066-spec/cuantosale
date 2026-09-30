@@ -4885,6 +4885,11 @@
     /* Las personas salen del viaje: son las que se eligieron al buscar. Cambiarlas
        acá es un ajuste puntual del reparto y no toca el viaje. */
     splitState.n = Math.max(1, Math.min(20, Number(detailState.meta.pax) || 1));
+    /* La persona 1 es quien mira: con sesion, su nombre sale de la cuenta (Google)
+       en vez de quedar como "Persona 1". Solo si el campo esta vacio: lo que la
+       persona ya escribio no se pisa. */
+    var miNombre = authUser ? String((authUser.user_metadata && (authUser.user_metadata.full_name || authUser.user_metadata.name)) || String(authUser.email || '').split('@')[0] || '').trim().slice(0, 24) : '';
+    if (miNombre && !String(splitState.nombres[0] || '').trim()) splitState.nombres[0] = miNombre;
     el.innerHTML = '<div class="booking-dialog split-dialog" role="dialog" aria-modal="true" aria-labelledby="split-title">' +
       '<button type="button" class="booking-close" data-split-close aria-label="Cerrar">×</button>' +
       '<span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span>' +

@@ -465,6 +465,14 @@
      dueño tiene cuenta (supabase_grupo_cuentas.sql); para el resto el link sigue
      siendo la contraseña. */
   function duenoDeGasto(expense) { return expense.agregado_por || expense.paid_by_participante_id; }
+  /* Cambiar quién pagó: lo puede hacer quien creó el grupo (es_admin) y quien
+     cargó el gasto. Los gastos que arma el presupuesto salen pagados por quien
+     crea el grupo, y el pagador real casi nunca es el mismo: antes habia que
+     borrar el gasto y volver a cargarlo. */
+  function puedeCambiarPagador(expense) {
+    if (!me || !expense) return false;
+    return !!me.es_admin || duenoDeGasto(expense) === me.id;
+  }
   function puedeBorrarGasto(expense) {
     if (!me || !expense) return false;
     return duenoDeGasto(expense) === me.id;
@@ -492,7 +500,7 @@
       (errorMessage ? '<p class="grupo-error">' + esc(errorMessage) + '</p>' : '') +
       '<form id="create-form">' +
       '<label class="grupo-field">Nombre del viaje o grupo<input required name="groupName" placeholder="Ej: Finde en Florianópolis" maxlength="80" value="' + esc(preset) + '"></label>' +
-      '<label class="grupo-field">Tu nombre<input required name="yourName" placeholder="Ej: Bruno" maxlength="40" value="' + esc(nameFromAuth || (readBudgetPreset().people[0] || '')) + '"></label>' +
+      '<label class="grupo-field">Tu nombre<input required name="yourName" placeholder="Ej: Bruno" maxlength="40" value="' + esc((readBudgetPreset().people[0] || '') || nameFromAuth) + '"></label>' +
       (readBudgetPreset().items.length ? '<p class="grupo-note">Vamos a cargar ' + readBudgetPreset().items.length + ' gastos del presupuesto y ' + Math.max(1, readBudgetPreset().people.length) + (readBudgetPreset().people.length === 1 ? ' persona' : ' personas') + '.</p>' : '') +
       '<button type="submit" class="grupo-btn grupo-btn--primary">Crear grupo y obtener link</button>' +
       '</form></div>'
@@ -898,6 +906,12 @@
           : 'Entre ' + esc(splitNamesText(editandoSplit.ids)) + ': ' +
             esc(moneyVer(Number(expense.amount) / n, expense.currency)) + ' c/u.';
       return '<div class="grupo-split">' +
+        (puedeCambiarPagador(expense)
+          ? '<p class="grupo-split__title">¿Quién pagó?</p>' +
+            '<select class="grupo-select" data-payer-edit' + (guardando ? ' disabled' : '') + ' aria-label="Quién pagó">' + participants.map(function (p) {
+              return '<option value="' + esc(p.id) + '"' + (editandoSplit.paidBy === p.id ? ' selected' : '') + '>' + esc(p.display_name) + '</option>';
+            }).join('') + '</select>'
+          : '') +
         '<p class="grupo-split__title">¿Entre quiénes se divide?</p>' +
         '<div class="grupo-checks">' + participants.map(function (p) {
           return '<label><input type="checkbox" data-split-edit value="' + esc(p.id) + '"' +
@@ -912,7 +926,7 @@
         '<p class="grupo-split__hint" aria-live="polite">' + cuantos + '</p>' +
         '<div class="grupo-split__actions">' +
         '<button type="button" class="grupo-btn grupo-btn--ghost" data-split-cancel' + (guardando ? ' disabled' : '') + '>Cancelar</button>' +
-        '<button type="button" class="grupo-btn grupo-btn--primary" data-split-save' + (guardando ? ' disabled' : '') + '>' + (guardando ? 'Guardando...' : 'Guardar división') + '</button>' +
+        '<button type="button" class="grupo-btn grupo-btn--primary" data-split-save' + (guardando ? ' disabled' : '') + '>' + (guardando ? 'Guardando...' : 'Guardar cambios') + '</button>' +
         '</div></div>';
     }
     var expensesMarkup = expenses.length
@@ -1363,7 +1377,7 @@
         var expense = expenseById(expenseId);
         if (!expense) return;
         if (editandoSplit && editandoSplit.expenseId === expenseId) editandoSplit = null;
-        else editandoSplit = { expenseId: expenseId, ids: splitIdsOf(expense), guardando: false };
+        else editandoSplit = { expenseId: expenseId, ids: splitIdsOf(expense), paidBy: expense.paid_by_participante_id, guardando: false };
         renderGroup(groupId);
       });
     });
@@ -1397,6 +1411,8 @@
         editandoSplit.ids = editorIds();
         pintarResumen();
       });
+      var payerSelect = splitEditor.querySelector('[data-payer-edit]');
+      if (payerSelect) payerSelect.addEventListener('change', function () { editandoSplit.paidBy = payerSelect.value; });
       var allButton = splitEditor.querySelector('[data-split-all]');
       if (allButton) allButton.addEventListener('click', function () {
         editandoSplit.ids = participants.map(function (p) { return p.id; });
@@ -1420,7 +1436,10 @@
         editandoSplit.guardando = true;
         renderGroup(groupId);
         try {
-          var result = await supabaseClient.from('gastos').update({ split_between: ids }).eq('id', expenseId);
+          var cambios = { split_between: ids };
+          var gastoActual = expenseById(expenseId);
+          if (gastoActual && editandoSplit.paidBy && editandoSplit.paidBy !== gastoActual.paid_by_participante_id && puedeCambiarPagador(gastoActual)) cambios.paid_by_participante_id = editandoSplit.paidBy;
+          var result = await supabaseClient.from('gastos').update(cambios).eq('id', expenseId);
           if (result.error) throw new Error(result.error.message);
           editandoSplit = null;
           await loadGroupData(groupId);
@@ -1554,6 +1573,9 @@
     try {
       await loadSupabaseSdk();
       await loadAuthUser();
+      // El nombre de la cuenta ya se conoce aca (loadAuthUser acaba de leerla):
+      // se usa ANTES de pintar el formulario, sin esperar el segundo lookup.
+      nameFromAuth = authLabel();
       if (!groupId) {
         renderCreateForm();
         // El formulario se pinta ya, sin esperar el lookup de la sesión: el

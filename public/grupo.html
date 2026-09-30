@@ -30,7 +30,7 @@
 <!-- Misma versión que /app: el servidor marca las URLs con ?v= como
      immutable de un año, así que pedir un ?v= viejo deja al usuario pegado
      con el CSS viejo para siempre. Si tocás style.css, subí las dos páginas. -->
-<link rel="stylesheet" href="/style.css?v=185">
+<link rel="stylesheet" href="/style.css?v=188">
 <style>
   .grupo-wrap{max-width:620px;margin:0 auto;padding:24px 16px 64px}
   .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
@@ -77,6 +77,8 @@
   @media (max-width:380px){.grupo-cats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
   .grupo-field{display:block;margin-bottom:16px;font-weight:700;font-size:13px}
+  .grupo-select{display:block;width:100%;margin:6px 0 14px;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px}
+  .grupo-select:focus{outline:none;border-color:var(--action-bg);box-shadow:0 0 0 4px rgba(16,35,62,.08)}
   .grupo-field input,.grupo-field select{display:block;width:100%;margin-top:6px;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:15px;transition:border-color .18s ease,box-shadow .18s ease}
   .grupo-field input::placeholder{color:var(--ink2);opacity:.55}
   .grupo-field input:focus,.grupo-field select:focus{outline:none;border-color:var(--action-bg);box-shadow:0 0 0 4px rgba(16,35,62,.08)}
@@ -323,6 +325,6 @@
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
 </div>
-<script src="/grupo.js?v=27" defer></script>
+<script src="/grupo.js?v=28" defer></script>
 </body>
 </html>
