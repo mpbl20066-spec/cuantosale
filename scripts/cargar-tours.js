@@ -106,7 +106,12 @@ async function rpc(fn, body) {
   // La fila va con precio_brl si el JSON lo trae, y con precio solo si no. Es
   // al reves de lo que hace el build del cliente, y a proposito: aca se sube
   // el dato crudo, la conversion la hace tours_todos() cuando se lee.
+  /* Un tour apagado y sin precio (esperando que le pongan uno) no se sube: la funcion
+     tours_guardar_lote de la base rechaza cualquier fila sin precio, apagada o no, y
+     tira abajo el lote entero. Queda en data/tours.json y se sube cuando tenga precio. */
+  const sinPrecioApagados = datos.tours.filter((t) => t.activo === false && t.precio == null && t.precio_brl == null);
   const filas = datos.tours.map((t, i) => {
+    if (sinPrecioApagados.includes(t)) return null;
     const f = {
       destino: t.destinos[0],
       titulo: t.titulo,
@@ -120,7 +125,8 @@ async function rpc(fn, body) {
     if (t.precio_brl != null) f.precio_brl = t.precio_brl;
     else f.precio = t.precio;
     return f;
-  });
+  }).filter(Boolean);
+  if (sinPrecioApagados.length) console.log('  no se suben (apagados y sin precio): ' + sinPrecioApagados.map((t) => t.titulo).join(' | '));
 
   // Un destino sin nombre en el mapa es un key mal escrito, y sube igual pero
   // queda marcado en el log: la UI lo va a mostrar como "key" en mayusculas.
