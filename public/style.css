@@ -1,4 +1,4 @@
-/* version: 191
+/* version: 192
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2892,3 +2892,12 @@ button.logo{min-height:44px}
 @media (prefers-reduced-motion:reduce){.is-loading::before,.is-loading .voucher-btn__label::before{animation-duration:2.4s}}
 /* Barra "Mi viaje": en celular deja aire abajo y la pagina deja espacio para que no tape lo ultimo. */
 @media (max-width:900px){.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}}
+
+/* Escritorio: el panel "Mi viaje" es fijo a la derecha (360px + 20px de margen).
+   Con el contenido centrado en 760px, en pantallas de ~1100 a 1560px quedaba
+   justo debajo y tapaba el borde derecho de las tarjetas (el boton "Ver
+   disponibilidad"). Mientras el panel este visible, el contenido se corre a la
+   izquierda lo justo para no pisarlo; con mas ancho sigue centrado. */
+@media (min-width:901px){
+  body:has(#trip-summary:not([hidden])) .wrap{margin-left:max(20px,min(calc((100vw - 760px) / 2),calc(100vw - 1160px)));margin-right:auto}
+}

@@ -2274,7 +2274,13 @@
             // texto decia "4 en Natal": dos numeros que no se podia ver que
             // armaban. Ahora el texto de la ficha habla de las noches de esa
             // parada, y el total del viaje ya esta en "Mi Viaje".
-            '<p class="hotel-detail">' + (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + (isPar ? stopNights : nights) + ((isPar ? stopNights : nights) === 1 ? ' noche' : ' noches') + (isPar ? ' en ' + esc(stopName) : '') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + (isPar ? '.' : '.') + '</p>' +
+            '<p class="hotel-detail">' + /* El total de Booking es el del rango de fechas completo (ver la nota de
+            grupo()), no el de las noches de esta parada: decir "3 noches" al lado de
+            un total de 7 era contradecirse. En un combinado se aclara cuantas son
+            de esta parada. */
+            (option.source === 'booking' && isPar
+              ? 'Precio consultado para ' + nights + (nights === 1 ? ' noche' : ' noches') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ' (' + stopNights + (stopNights === 1 ? ' noche' : ' noches') + ' en ' + esc(stopName) + ').'
+              : (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + (isPar ? stopNights : nights) + ((isPar ? stopNights : nights) === 1 ? ' noche' : ' noches') + (isPar ? ' en ' + esc(stopName) : '') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.') + '</p>' +
             '</span></label>' +
             '<div class="hotel-foot">' +
             '<p class="hotel-price"><span class="hotel-price__main"><span class="hotel-price__from">Desde</span><b>' + money(nightlyValue) + '</b><span class="hotel-price__unit">por noche</span></span>' +

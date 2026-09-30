@@ -1297,6 +1297,9 @@ async function buscarVuelos(req, res, body) {
       departureDate: date, returnDate: returnDate,
       passengers: passengers, style: style
     });
+    if (!result.offers.length && typeof flightProviders.enPausa === 'function' && flightProviders.enPausa()) {
+      return sendJson(res, 503, { provider: flightProviders.providerName(), offers: [], error: 'La búsqueda de vuelos está saturada en este momento. Probá de nuevo en unos minutos o mirá los vuelos directo en Google Flights.' });
+    }
     return sendJson(res, 200, {
       provider: flightProviders.providerName(), origin: origin, destination: destination,
       // El precio de cada tarjeta ya es el TOTAL de ida y vuelta, no solo la
@@ -1310,6 +1313,11 @@ async function buscarVuelos(req, res, body) {
     });
   } catch (e) {
     console.error('[browse vuelos]', e.message);
+    /* Cuota agotada o limite de la API: el mensaje crudo viene en ingles ("Your
+       account has run out of searches") y no es culpa de las fechas. */
+    if (e.status === 429 || e.quotaExhausted) {
+      return sendJson(res, 503, { provider: flightProviders.providerName(), offers: [], error: 'La búsqueda de vuelos está saturada en este momento. Probá de nuevo en unos minutos o mirá los vuelos directo en Google Flights.' });
+    }
     return sendJson(res, e.status || 502, { provider: flightProviders.providerName(), offers: [], error: e.message || 'No pudimos consultar disponibilidad de vuelos.' });
   }
 }
