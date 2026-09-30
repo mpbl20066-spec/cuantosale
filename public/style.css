@@ -1,4 +1,4 @@
-/* version: 192
+/* version: 193
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2901,3 +2901,16 @@ button.logo{min-height:44px}
 @media (min-width:901px){
   body:has(#trip-summary:not([hidden])) .wrap{margin-left:max(20px,min(calc((100vw - 760px) / 2),calc(100vw - 1160px)));margin-right:auto}
 }
+
+/* Lupa en el campo Destino: avisa que se puede escribir para buscar. El campo ya
+   filtra la lista al tipear; sin la lupa parecia un valor fijo. */
+#dest .custom-select__control::before{content:"";flex:none;width:18px;height:18px;margin-left:16px;background-color:var(--control-muted);pointer-events:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat}
+#dest .custom-select__trigger{padding-left:10px}
+
+/* Buscador de las escapadas (sobre el carrusel de destinos destacados). */
+.featured-search{display:flex;align-items:center;gap:10px;min-height:48px;margin:0 0 14px;padding:0 16px;border:1.5px solid var(--control-line);border-radius:14px;background:var(--control-bg);color:var(--control-muted)}
+.featured-search:focus-within{border-color:var(--focus);outline:3px solid var(--focus);outline-offset:2px}
+.featured-search input{flex:1 1 auto;min-width:0;min-height:46px;border:0;background:transparent;color:var(--ink);font:500 16px var(--fb);outline:none}
+.featured-search input::placeholder{color:var(--control-muted);opacity:1}
+.featured-destination[hidden],.featured-empty[hidden],.destination-highlights__slider[hidden]{display:none!important}
+.featured-empty{margin:4px 0 0;padding:14px 16px;border-radius:14px;background:var(--surface);color:var(--ink2);font-size:14px}

@@ -1004,7 +1004,7 @@
       var priceLine = price != null
         ? '<p class="featured-destination__price"><b>' + money(price) + '</b><span class="featured-destination__price-tag">desde, por persona</span><span class="featured-destination__price-mode">' + esc(price.modeShort || '') + '</span></p>'
         : '<p class="featured-destination__price is-loading" aria-hidden="true"><span class="featured-destination__skeleton"></span></p>';
-      return '<article class="featured-destination' + (isCheapest ? ' is-cheapest' : '') + '" data-featured-destination="' + esc(group.id) + '"'
+      return '<article class="featured-destination' + (isCheapest ? ' is-cheapest' : '') + '" data-featured-destination="' + esc(group.id) + '" data-search="' + esc(featuredSearchText(group)) + '"'
         + ' data-feature-price-key="' + esc(first.key) + '" data-feature-dates="' + esc(travel.depIso) + '|' + esc(travel.retIso) + '">'
         + (isCheapest ? '<span class="featured-destination__flag">M&aacute;s barato</span>' : '')
         + '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy">'
@@ -1025,9 +1025,48 @@
     // dato duplicado y una aclaracion ("no hay feriado largo") que sonaba a que
     // el ano entero no tenia ninguno.
     root.innerHTML = '<div class="destination-highlights__head"><div><span class="destination-highlights__eyebrow">Oportunidades de la temporada</span><h2 id="destination-highlights-title">Escapadas que salen menos</h2><p>Ordenadas por precio estimado por persona, para los pr&oacute;ximos seis meses. Toc&aacute; un destino y te mostramos la propuesta.</p></div></div>'
+      + '<label class="featured-search"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
+      + '<input id="featured-search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false" placeholder="Buscá un destino" aria-label="Buscar un destino entre las escapadas" value="' + esc(featuredQuery) + '"></label>'
       + '<div class="featured-months" role="group" aria-label="Elegir mes de la escapada">' + tabs + '</div>'
-      + '<div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">&lsaquo;</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">&rsaquo;</button></div>';
+      + '<div class="destination-highlights__slider"><button type="button" class="destination-highlights__arrow destination-highlights__arrow--prev" data-feature-prev aria-label="Ver destino anterior">&lsaquo;</button><div class="destination-highlights__carousel" aria-live="polite">' + cards + '</div><button type="button" class="destination-highlights__arrow destination-highlights__arrow--next" data-feature-next aria-label="Ver destino siguiente">&rsaquo;</button></div>'
+      + '<p class="featured-empty" hidden>No encontramos ese destino entre las escapadas. Probá con otro nombre o usá el campo Destino.</p>';
+    aplicarFiltroDestacados();
   }
+  /* Buscador de las escapadas. El texto de cada tarjeta incluye el nombre del
+     grupo y sus zonas y pares ("Búzios + Cabo Frio"), asi que escribir "cabo
+     frio" encuentra el grupo que lo incluye. La consulta vive en featuredQuery:
+     el carrusel se repinta al cambiar de mes o llegar los precios, y sin esto
+     el campo se vaciaba solo. */
+  var featuredQuery = '';
+  function normalizarBusqueda(value) {
+    return String(value || '').trim().toLocaleLowerCase('es').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  function featuredSearchText(group) {
+    var partes = [group.label];
+    (group.subcategories || []).forEach(function (sub) { partes.push(sub.label); });
+    return normalizarBusqueda(partes.join(' '));
+  }
+  function aplicarFiltroDestacados() {
+    var root = document.getElementById('destination-highlights');
+    if (!root) return;
+    var q = normalizarBusqueda(featuredQuery);
+    var cards = root.querySelectorAll('.featured-destination');
+    var visibles = 0;
+    Array.prototype.forEach.call(cards, function (card) {
+      var ok = !q || (card.getAttribute('data-search') || '').indexOf(q) >= 0;
+      card.hidden = !ok;
+      if (ok) visibles++;
+    });
+    var vacio = root.querySelector('.featured-empty');
+    if (vacio) vacio.hidden = !q || visibles > 0;
+    var slider = root.querySelector('.destination-highlights__slider');
+    if (slider) slider.hidden = !!q && visibles === 0;
+  }
+  document.addEventListener('input', function (e) {
+    if (!e.target || e.target.id !== 'featured-search-input') return;
+    featuredQuery = e.target.value;
+    aplicarFiltroDestacados();
+  });
   // Precios de las tarjetas. Se piden una vez por mes/viajeros/estilo y se
   // cachean: el carrusel se vuelve a pintar al cambiar de mes, y sin cache cada
   // repintado volvería a pegarle al servidor.
