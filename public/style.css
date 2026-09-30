@@ -1,4 +1,4 @@
-/* version: 195
+/* version: 196
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2907,3 +2907,12 @@ button.logo{min-height:44px}
 #dest .custom-select__control::before{content:"";flex:none;width:18px;height:18px;margin-left:16px;background-color:var(--control-muted);pointer-events:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat}
 #dest .custom-select__trigger{padding-left:10px}
 
+
+/* ---- Propuesta en tres pasos -----------------------------------------------
+   Cada paso muestra solo lo suyo. El paso actual va en .detail-main[data-paso]:
+   1 Vuelo/Auto + Traslados, 2 Alojamiento (hotel), 3 Extras (tours, comida,
+   transporte local). El desglose "A donde va tu plata" no se oculta nunca y va
+   al final. Las pestañas .steps usan el visual de siempre (ver .steps__list). */
+.detail-main[data-paso="1"] :is([data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
+.detail-main[data-paso="2"] :is([data-transport-flow],[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
+.detail-main[data-paso="3"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel){display:none !important}

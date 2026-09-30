@@ -4023,13 +4023,21 @@
     if (!detailState) return '';
     var p = pasosEstado();
     var n = pasoActualNum();
-    var prev = p[n - 2], next = p[n];
-    var botones = '';
-    if (prev) botones += '<button type="button" class="steps__prev" data-paso-ir="' + (n - 1) + '"><span aria-hidden="true">←</span> ' + esc(prev.titulo) + '</button>';
-    botones += next
+    // Las tres pestañas de siempre (tilde si ya se eligio, numero si falta), ahora
+    // cada una lleva a su paso y muestra solo lo suyo. La activa es la que se
+    // esta mirando, no la primera pendiente.
+    var lis = p.map(function (s, i) {
+      var actual = i === n - 1;
+      var cls = (s.hecho ? 'is-done ' : '') + (actual ? 'is-current' : (s.hecho ? '' : 'is-pending'));
+      return '<li class="steps__item ' + cls + '"><button type="button" class="steps__btn" data-paso-ir="' + s.n + '"' + (actual ? ' aria-current="step"' : '') + '>'
+        + '<span class="steps__n" aria-hidden="true">' + (s.hecho ? '✓' : s.n) + '</span>'
+        + '<span class="steps__t"><b>' + esc(s.titulo) + '</b><small>' + esc(s.texto) + '</small></span></button></li>';
+    }).join('');
+    var next = p[n];
+    var cta = next
       ? '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + esc(next.cta) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>'
       : '<p class="steps__ok">Listo: revisá el total en “Mi Viaje”.</p>';
-    return '<p class="steps__now"><b>Paso ' + n + ' de 3</b> · ' + esc(p[n - 1].titulo) + '</p><div class="steps__nav">' + botones + '</div>';
+    return '<ol class="steps__list">' + lis + '</ol>' + cta;
   }
   function irAlPaso(n) {
     if (!detailState) return;
