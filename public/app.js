@@ -10299,13 +10299,58 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
         selectDestination(option.getAttribute('data-dest-value'), option.getAttribute('data-subcategory'));
       };
     }
-    document.addEventListener('pointerdown', function (event) {
+    /* Elegir en pointerdown es lo que evita perder el clic cuando el campo
+       pierde el foco y la lista se reacomoda, pero con el dedo rompe el scroll:
+       el dedo toca una opcion para arrastrar la lista y la opcion ya quedo
+       elegida (y el menu cerrado) antes de que empiece el gesto. Con mouse se
+       elige al apretar; con dedo, al levantarlo y solo si casi no se movio. Si
+       el navegador toma el gesto como scroll manda pointercancel y no se elige
+       nada. */
+    var toqueEnDestino = null;
+    function opcionDeDestino(event) {
       var option = event.target.closest && event.target.closest('#dest-menu button[data-dest-value]');
-      if (!option || option.hidden) return;
+      return option && !option.hidden ? option : null;
+    }
+    document.addEventListener('pointerdown', function (event) {
+      var option = opcionDeDestino(event);
+      if (!option) return;
+      if (event.pointerType === 'touch') { toqueEnDestino = { option: option, x: event.clientX, y: event.clientY }; return; }
       event.preventDefault();
       event.stopPropagation();
       selectDestination(option.getAttribute('data-dest-value'), option.getAttribute('data-subcategory'));
     }, true);
+    document.addEventListener('pointerup', function (event) {
+      var toque = toqueEnDestino; toqueEnDestino = null;
+      if (!toque || event.pointerType !== 'touch') return;
+      var option = opcionDeDestino(event);
+      if (option !== toque.option) return;
+      if (Math.abs(event.clientX - toque.x) > 10 || Math.abs(event.clientY - toque.y) > 10) return;
+      event.preventDefault();
+      selectDestination(option.getAttribute('data-dest-value'), option.getAttribute('data-subcategory'));
+    }, true);
+    document.addEventListener('pointercancel', function () { toqueEnDestino = null; }, true);
+    /* Teclado virtual: si la persona arrastra la pantalla o una lista sin estar
+       escribiendo, se baja el teclado, que ocupa media pantalla. Solo con el
+       dedo (touchmove no existe con mouse) y pasado un umbral, para que un
+       toque con un temblor no lo cierre. Arrastrar dentro del propio campo no
+       lo cierra. */
+    (function bajarTecladoAlScrollear() {
+      var inicio = null;
+      var esCampoDeTexto = function (el) {
+        return !!el && el.matches && el.matches('textarea,[contenteditable="true"],input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"])');
+      };
+      document.addEventListener('touchstart', function (e) {
+        var t = e.touches && e.touches[0];
+        inicio = t ? { x: t.clientX, y: t.clientY } : null;
+      }, { passive: true });
+      document.addEventListener('touchmove', function (e) {
+        var activo = document.activeElement;
+        var t = e.touches && e.touches[0];
+        if (!inicio || !t || !esCampoDeTexto(activo) || activo.contains(e.target)) return;
+        if (Math.abs(t.clientY - inicio.y) < 12 && Math.abs(t.clientX - inicio.x) < 12) return;
+        activo.blur();
+      }, { passive: true });
+    })();
     if (trigger) {
       trigger.addEventListener('click', function () {
         if (menu && menu.hidden) {
