@@ -3630,6 +3630,16 @@
     REC: 'Aeroporto Internacional do Recife',
     SSA: 'Aeroporto Internacional de Salvador'
   };
+  /* Escalon del transfer privado para `pax` personas: el mas barato cuyo rango
+     [min, max] la incluye, o null si no hay (sin precio cargado, o mas gente que
+     el ultimo escalon). Es la misma cuenta que model.transferPrivadoPara(). */
+  function privadoPorPax(escalones, pax) {
+    var mejor = null;
+    (escalones || []).forEach(function (e) {
+      if (pax >= e.min && pax <= e.max && (!mejor || e.brl < mejor.brl)) mejor = e;
+    });
+    return mejor;
+  }
   function transferPreciosDe(meta) {
     var oficial = meta && meta.officialTransfer;
     var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
@@ -3655,9 +3665,28 @@
       if (tabla.compartido_brl > 0) compartido = tabla.compartido_brl / tasaBrl;
       if (tabla.privado_brl > 0) privado = tabla.privado_brl / tasaBrl;
     }
+    /* El privado depende de la cantidad de personas: se cobra por VEHICULO y el
+       vehiculo cambia (auto hasta 4, van despues). Sale de los escalones de la
+       planilla (tabla.escalones, BRL por vehiculo) segun los viajeros de la
+       pantalla principal. Sin escalon con precio para esa cantidad no se inventa
+       nada: privado queda en 0 y privadoConsultar en true, y la card dice
+       "Consultar". Si la tabla no trae escalones (cliente viejo) se conserva el
+       precio de arriba. */
+    var paxT = Math.max(1, Math.floor(Number((meta && meta.pax) || (typeof S !== 'undefined' && S && S.pax))) || 1);
+    var escalon = null, privadoConsultar = false;
+    if (tabla && Array.isArray(tabla.escalones)) {
+      escalon = privadoPorPax(tabla.escalones, paxT);
+      privadoConsultar = !escalon;
+      // Sin tasa cargada se usa la misma con la que se calcularon los USD de la tabla.
+      privado = escalon ? escalon.brl / (tasaBrl || 5.2) : 0;
+    }
     return {
       compartido: Number(compartido),
       privado: Number(privado),
+      privadoConsultar: privadoConsultar,
+      // Compartido sin precio cargado (no confundir con soloPrivado, que es una isla).
+      compartidoConsultar: !!(tabla && tabla.compartidoConsultar),
+      privadoVehiculo: escalon ? escalon.vehiculo : '',
       km: primero(oficial && oficial.km, tabla && tabla.km, null),
       iata: primero(oficial && oficial.iata, tabla && tabla.iata, null),
       // El nombre sale del codigo, no del destino: el vuelo a Gramado, a Canela
@@ -6686,16 +6715,26 @@
         suyo: el boton lleva data-transfer-leg, y el click sabe a que tramo
         pertenece. */
     var opciones = [
-      { key: 'shared', amount: t.compartido, title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros. Se cobra por persona.' },
-      { key: 'private', amount: t.privado, title: 'Transfer privado', desc: 'Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.' }
+      { key: 'shared', amount: t.compartido, consultar: !!t.compartidoConsultar, title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros. Se cobra por persona.' },
+      { key: 'private', amount: t.privado, consultar: !!t.privadoConsultar, title: 'Transfer privado', desc: 'Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.' + (t.privadoVehiculo ? ' Para ' + paxT + ' ' + (paxT === 1 ? 'persona' : 'personas') + ': ' + t.privadoVehiculo.toLowerCase() + '.' : '') }
     ].filter(function (card) {
       // A una isla no hay van compartida: el unico traslado es el vuelo. Mostrar
       // la card con precio 0 seria ofrecer un transfer gratis.
       if (card.key === 'shared' && t.soloPrivado) return false;
-      return !(card.amount <= 0);
+      // El privado sin precio para esta cantidad de personas se muestra igual,
+      // como "Consultar": no es un transfer gratis, es un precio que falta.
+      return card.consultar || !(card.amount <= 0);
     });
     function cardsDe(leg, selectedLeg) {
       return opciones.map(function (card) {
+        /* Sin precio para esta cantidad de personas: no es un boton. Elegirlo
+           sumaria R$ 0 al viaje y mandaria un pedido sin monto. */
+        if (card.consultar) {
+          return '<div class="transfer-choice transfer-choice--consultar" data-transfer-consultar="' + card.key + '">' +
+            '<span class="transfer-choice__head">' + transferArt(card.key) + '<strong>' + card.title + '</strong></span>' +
+            '<span class="transfer-choice__body"><small>' + card.desc + '</small></span>' +
+            '<b class="transfer-choice__price">Consultar' + (card.key === 'private' ? '<span class="transfer-choice__unit"> para ' + paxT + ' ' + (paxT === 1 ? 'persona' : 'personas') + '</span>' : '') + '</b></div>';
+        }
         var isSelected = selectedLeg === card.key;
         /* El precio, con su unidad explicita.
 

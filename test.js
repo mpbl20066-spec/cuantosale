@@ -1118,8 +1118,8 @@ function haversineKm(a, b) {
       const t = model.transferOptions(k);
       assert.ok(t, k + ' (' + model.DEST[k].name + ') no tiene entrada en la tabla de transfer');
       assert.ok(!t.sinTabla, k + ' cae al piso de OFFICIAL_TRANSFER_PRICE_USD en vez de a la tabla');
-      assert.ok(t.compartido > 0 || t.soloPrivado,
-        k + ' no tiene traslado compartido y no declara soloPrivado');
+      assert.ok(t.compartido > 0 || t.soloPrivado || t.compartidoConsultar,
+        k + ' no tiene traslado compartido y no declara soloPrivado ni compartidoConsultar');
       assert.ok(t.privado > 0, k + ' no tiene precio de transfer privado');
       assert.ok(t.privado >= t.compartido,
         k + ': el privado (' + t.privado + ') sale menos que el compartido (' + t.compartido + ')');
@@ -1133,7 +1133,7 @@ function haversineKm(a, b) {
     // app ofrecia las dos cards de van igual que para Rio, que no existe.
     const ilha = model.transferOptions('ilha');
     assert.strictEqual(ilha.modo, 'ferry', 'ilha deberia declararse ferry');
-    assert.ok(ilha.compartido > 0, 'a Ilha Grande se llega en barco, pero con precio');
+    assert.ok(ilha.compartido > 0 || ilha.compartidoConsultar, 'a Ilha Grande se llega en barco: con precio o "Consultar", nunca gratis');
     assert.strictEqual(ilha.km, null, 'ilha no deberia tener km de carretera');
 
     const fernando = model.transferOptions('fernando');
@@ -1192,14 +1192,8 @@ function haversineKm(a, b) {
     // se reparte) mientras que el privado crece con la distancia.
     const rio = model.transferOptions('rio'), buz = model.transferOptions('buz');
     assert.ok(rio.km < buz.km, 'Rio deberia estar mas cerca del aeropuerto que Buzios');
-    assert.ok(buz.compartido > rio.compartido, 'el compartido de Buzios deberia costar mas que el de Rio');
     assert.ok(buz.privado > rio.privado * 1.5,
       'el privado de Buzios (' + buz.privado + ') deberia subir bastante mas que el de Rio (' + rio.privado + ')');
-    // El compartido no puede depender tanto de la distancia como el privado.
-    const subidaCompartido = buz.compartido / rio.compartido;
-    const subidaPrivado = buz.privado / rio.privado;
-    assert.ok(subidaCompartido < subidaPrivado,
-      'el compartido (' + subidaCompartido.toFixed(1) + 'x) no deberia subir tanto como el privado (' + subidaPrivado.toFixed(1) + 'x)');
   });
   await t('un destino sin van compartida nunca cobra el precio de la compartida', function () {
     // Regresión: fernando tiene compartido: 0 con soloPrivado, porque a la isla
@@ -1250,6 +1244,33 @@ function haversineKm(a, b) {
     const rio = fn.transferPreciosDe({ dest: { key: 'rio' }, pax: 3 });
     assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'shared' }), rio.compartido * 3);
     assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'private' }), rio.privado);
+    // El privado sale de los escalones segun la cantidad de personas (Buzios:
+    // auto 1-4 a R$ 426 y 5-6 a R$ 541 (enteros)), y sin escalon es "Consultar".
+    const usd = function (brl) { return brl / 5.2; };
+    const buz = function (pax) { return fn.transferPreciosDe({ dest: { key: 'buz' }, pax: pax }); };
+    assert.strictEqual(buz(1).privado, usd(426));
+    assert.strictEqual(buz(4).privado, usd(426));
+    assert.strictEqual(buz(5).privado, usd(541), 'con 5 personas el privado de Buzios cambia de escalon');
+    assert.strictEqual(buz(7).privadoConsultar, true, 'mas personas que el ultimo escalon: Consultar');
+    assert.strictEqual(buz(7).privado, 0);
+    assert.strictEqual(rio.privadoConsultar, true, 'Rio no tiene precio de privado cargado: Consultar');
+    assert.strictEqual(rio.compartidoConsultar, true, 'Rio no tiene precio de compartido cargado: Consultar');
+    assert.strictEqual(rio.compartido, 0);
+    assert.strictEqual(fn.transferPreciosDe({ dest: { key: 'mcz' }, pax: 2 }).compartido, Math.round(147 / 5.2 * 100) / 100, 'Maceio compartido: R$ 147 entero');
+    // Los precios de la planilla son enteros.
+    for (const k of Object.keys(tabla)) {
+      for (const e of tabla[k].escalones) assert.ok(Number.isInteger(e.brl), k + ': el escalon ' + e.min + '-' + e.max + ' no es entero: ' + e.brl);
+      if (tabla[k].compartido_brl != null) assert.ok(Number.isInteger(tabla[k].compartido_brl), k + ': compartido_brl no es entero');
+    }
+    // Cliente y modelo tienen que dar lo mismo para toda cantidad de personas.
+    for (const k of Object.keys(tabla)) {
+      for (const pax of [1, 2, 3, 4, 5, 6, 7, 8, 12]) {
+        const m = model.transferPrivadoPara(k, pax);
+        const c = fn.transferPreciosDe({ dest: { key: k }, pax: pax });
+        assert.strictEqual(c.privadoConsultar, !m, k + ' con ' + pax + ' personas: el cliente y el modelo no coinciden en "Consultar"');
+        if (m) assert.strictEqual(c.privado, usd(m.brl), k + ' con ' + pax + ' personas');
+      }
+    }
   });
   await t('el server manda el precio de transfer del destino en el meta', async function () {
     // Ojo con la query: `subcategory` es el nombre que se muestra, no el destino

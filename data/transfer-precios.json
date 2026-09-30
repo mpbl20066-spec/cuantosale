@@ -94,7 +94,7 @@
       "modo": "car",
       "km": 174,
       "horas": 2.7,
-      "compartido": 30.77,
+      "compartido": 0,
       "privado": 86.54,
       "real": [
         "compartido",
@@ -104,9 +104,23 @@
       "verificado": "2026-09-29",
       "confianza": "media",
       "derivacion": "El privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 174 km de OSRM da US$ 30 y US$ 120.",
-      "compartido_brl": 160,
       "privado_brl": 450,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 426
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Auto",
+          "brl": 541
+        }
+      ],
+      "compartido_consultar": true
     },
     "arraial": {
       "nombre": "Arraial do Cabo",
@@ -114,7 +128,7 @@
       "modo": "car",
       "km": 170,
       "horas": 2.6,
-      "compartido": 44.23,
+      "compartido": 0,
       "privado": 86.54,
       "real": [
         "compartido",
@@ -124,9 +138,23 @@
       "verificado": "2026-09-29",
       "confianza": "alta",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 117 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "compartido_brl": 230,
       "privado_brl": 450,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 426
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Auto",
+          "brl": 541
+        }
+      ],
+      "compartido_consultar": true
     },
     "cabo": {
       "nombre": "Cabo Frio",
@@ -134,7 +162,7 @@
       "modo": "car",
       "km": 160,
       "horas": 2.5,
-      "compartido": 44.23,
+      "compartido": 0,
       "privado": 86.54,
       "real": [
         "compartido",
@@ -144,15 +172,29 @@
       "verificado": "2026-09-29",
       "confianza": "alta",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 160 km de OSRM: US$ 30 compartido y US$ 111 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "compartido_brl": 230,
       "privado_brl": 450,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 426
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Auto",
+          "brl": 541
+        }
+      ],
+      "compartido_consultar": true
     },
     "ilha": {
       "nombre": "Ilha Grande",
       "iata": "GIG",
       "modo": "ferry",
-      "compartido": 53.85,
+      "compartido": 0,
       "privado": 86.54,
       "real": [
         "compartido",
@@ -163,9 +205,23 @@
       "confianza": "media",
       "derivacion": "El PRIVADO sale del modelo de distancia, no de una tarifa. No se encontro un transfer privado a Ilha Grande con precio publicado; el unico dato real (US$ 48) es el compartido con barco.",
       "nota": "No es un traslado por carretera: se llega en barco desde Rio o Angra (90 min por la bahia).",
-      "compartido_brl": 280,
       "privado_brl": 450,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 426
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Van",
+          "brl": 541
+        }
+      ],
+      "compartido_consultar": true
     },
     "paraty": {
       "nombre": "Paraty",
@@ -173,7 +229,7 @@
       "modo": "car",
       "km": 248,
       "horas": 4,
-      "compartido": 76.92,
+      "compartido": 0,
       "privado": 115.38,
       "real": [
         "compartido",
@@ -183,9 +239,10 @@
       "verificado": "2026-09-29",
       "confianza": "alta",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 248 km de OSRM: US$ 35 compartido y US$ 166 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "compartido_brl": 400,
       "privado_brl": 600,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "ilhabela": {
       "nombre": "Ilhabela",
@@ -193,13 +250,15 @@
       "modo": "car",
       "km": 185,
       "horas": 3.7,
-      "compartido": 30,
+      "compartido": 0,
       "privado": 127,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (185) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 185 km de OSRM: US$ 30 compartido y US$ 127 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 185 km de OSRM: US$ 30 compartido y US$ 127 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "ubatuba": {
       "nombre": "Ubatuba",
@@ -207,7 +266,7 @@
       "modo": "car",
       "km": 206,
       "horas": 3.4,
-      "compartido": 30,
+      "compartido": 0,
       "privado": 153.85,
       "real": [
         "privado"
@@ -217,7 +276,9 @@
       "confianza": "media",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 206 km de OSRM: US$ 30 compartido y US$ 140 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
       "privado_brl": 800,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "rio": {
       "nombre": "Río de Janeiro",
@@ -225,7 +286,7 @@
       "modo": "car",
       "km": 18,
       "horas": 0.3,
-      "compartido": 30.0,
+      "compartido": 0,
       "privado": 45,
       "real": [
         "compartido",
@@ -234,8 +295,9 @@
       "fuente": "GetYourGuide: \"Rio Galeao Airport (GIG): Shuttle Transfer to/from Hotels\" desde US$ 19 y \"Shared Transfer From Rio De Janeiro Airport to Hotels\" desde US$ 26 (se toma US$ 22 como punto medio). Privado: \"Private Transfer to/from GIG Airport\" desde US$ 18 (sedan) y \"Galeao x Copacabana/Ipanema\" desde US$ 139 por grupo de 4. suntransfers publica privado a Barra da Tijuca desde EUR 26,44. Se usa US$ 45 para el privado: un sedan con meet & greet, no la van premium.",
       "verificado": "2026-09-29",
       "confianza": "media",
-      "compartido_brl": 156,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "angra": {
       "nombre": "Angra dos Reis",
@@ -243,7 +305,7 @@
       "modo": "car",
       "km": 139,
       "horas": 2.4,
-      "compartido": 57.69,
+      "compartido": 0,
       "privado": 105.77,
       "real": [
         "compartido",
@@ -253,9 +315,29 @@
       "verificado": "2026-09-29",
       "confianza": "alta",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 139 km de OSRM: US$ 25 compartido y US$ 98 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "compartido_brl": 300,
       "privado_brl": 550,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 483
+        },
+        {
+          "min": 5,
+          "max": 5,
+          "vehiculo": "Auto",
+          "brl": 598
+        },
+        {
+          "min": 6,
+          "max": 6,
+          "vehiculo": "Auto",
+          "brl": 656
+        }
+      ],
+      "compartido_consultar": true
     },
     "sao": {
       "nombre": "São Paulo",
@@ -263,7 +345,7 @@
       "modo": "car",
       "km": 26,
       "horas": 0.5,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 41,
       "real": [
         "privado"
@@ -271,7 +353,9 @@
       "fuente": "portalgruairport.com.br (Portal GRU Airport) publica el \"Transfer Executivo CHM\" privativo Guarulhos -> Sao Paulo en \"Preco estimado R$ 215\", sedan hasta 4 pasajeros, 25 km. airporttransferportal dice que el privado GRU -> centro de Sao Paulo va \"from EUR 74 for 2 passengers\" y que el precio es el mismo con 30 o con 90 minutos de transito (BRL 180-280). Es el ancla privada mas limpia que hay: un operador que publica la tarifa. El compartido sale del modelo.",
       "verificado": "2026-09-27",
       "confianza": "media",
-      "derivacion": "El compartido sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 26 km de OSRM da US$ 20 y US$ 30."
+      "derivacion": "El compartido sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 26 km de OSRM da US$ 20 y US$ 30.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "porto": {
       "nombre": "Porto de Galinhas",
@@ -279,13 +363,15 @@
       "modo": "car",
       "km": 53,
       "horas": 0.8,
-      "compartido": 20,
+      "compartido": 30,
       "privado": 45,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (53) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 53 km de OSRM: US$ 20 compartido y US$ 45 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 53 km de OSRM: US$ 20 compartido y US$ 45 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_brl": 156
     },
     "mcz": {
       "nombre": "Maceió",
@@ -293,7 +379,7 @@
       "modo": "car",
       "km": 21,
       "horas": 0.5,
-      "compartido": 15.38,
+      "compartido": 28.27,
       "privado": 51.92,
       "real": [
         "compartido",
@@ -303,9 +389,10 @@
       "verificado": "2026-09-29",
       "confianza": "alta",
       "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 21 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "compartido_brl": 80,
+      "compartido_brl": 147,
       "privado_brl": 270,
-      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2."
+      "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
+      "privado_escalones": []
     },
     "maragogi": {
       "nombre": "Maragogi",
@@ -313,13 +400,15 @@
       "modo": "car",
       "km": 129,
       "horas": 2.1,
-      "compartido": 25,
+      "compartido": 64.23,
       "privado": 92,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (129) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 129 km de OSRM: US$ 25 compartido y US$ 92 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 129 km de OSRM: US$ 25 compartido y US$ 92 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_brl": 334
     },
     "nat": {
       "nombre": "Natal",
@@ -327,13 +416,15 @@
       "modo": "car",
       "km": 25,
       "horas": 0.4,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 30,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (25) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 25 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 25 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "pip": {
       "nombre": "Pipa",
@@ -341,13 +432,22 @@
       "modo": "car",
       "km": 30,
       "horas": 0.5,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 31,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (30) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 30 km de OSRM: US$ 20 compartido y US$ 31 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 30 km de OSRM: US$ 20 compartido y US$ 31 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 288
+        }
+      ],
+      "compartido_consultar": true
     },
     "ajuda": {
       "nombre": "Arraial d’Ajuda",
@@ -355,13 +455,15 @@
       "modo": "car",
       "km": 170,
       "horas": 2.8,
-      "compartido": 30,
+      "compartido": 0,
       "privado": 118,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km salen de OSRM: 170 desde SSA, 7 mas que Trancoso porque Arraial esta 7 km mas adelante por la misma ruta. Los dos precios salen del modelo de distancia de _meta.modelo.",
       "verificado": "2026-09-29",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 118 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 118 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "trancoso": {
       "nombre": "Trancoso",
@@ -369,13 +471,22 @@
       "modo": "car",
       "km": 163,
       "horas": 2.7,
-      "compartido": 30,
+      "compartido": 0,
       "privado": 113,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (163) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 163 km de OSRM: US$ 30 compartido y US$ 113 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 163 km de OSRM: US$ 30 compartido y US$ 113 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 437
+        }
+      ],
+      "compartido_consultar": true
     },
     "ssa": {
       "nombre": "Salvador de Bahía",
@@ -384,13 +495,15 @@
       "km": 24,
       "horas": 0.5,
       "appRideUsd": 11,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 30,
       "real": [],
       "fuente": "Uber publica SSA -> Salvador en R$ 54-55 (27 min, 20 km) con UberX, R$ 72 con Comfort y R$ 95 con Black. El UberX va a appRide. Para el compartido no hay fuente: los numeros de Uber que se encontraron son todos por vehiculo y meterlos como si fueran por persona subestimaba el precio a la mitad.",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 24 km de OSRM da US$ 20 y US$ 30."
+      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 24 km de OSRM da US$ 20 y US$ 30.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "for": {
       "nombre": "Fortaleza",
@@ -398,13 +511,15 @@
       "modo": "car",
       "km": 9,
       "horas": 0.2,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 30,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (9) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 9 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 9 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "jericoacoara": {
       "nombre": "Jericoacoara",
@@ -412,13 +527,22 @@
       "modo": "car",
       "km": 295,
       "horas": 5.6,
-      "compartido": 35,
+      "compartido": 55.38,
       "privado": 195,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (295) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 295 km de OSRM: US$ 35 compartido y US$ 195 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 295 km de OSRM: US$ 35 compartido y US$ 195 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 6,
+          "vehiculo": "4 x 4",
+          "brl": 1955
+        }
+      ],
+      "compartido_brl": 288
     },
     "morro": {
       "nombre": "Morro de São Paulo",
@@ -426,13 +550,15 @@
       "modo": "car",
       "km": 242,
       "horas": 3.9,
-      "compartido": 35,
+      "compartido": 0,
       "privado": 162,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (242) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 242 km de OSRM: US$ 35 compartido y US$ 162 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 242 km de OSRM: US$ 35 compartido y US$ 162 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "portoseguro": {
       "nombre": "Porto Seguro",
@@ -440,13 +566,15 @@
       "modo": "car",
       "km": 699,
       "horas": 11.4,
-      "compartido": 60,
+      "compartido": 0,
       "privado": 445,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (699) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 699 km de OSRM: US$ 60 compartido y US$ 445 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 699 km de OSRM: US$ 60 compartido y US$ 445 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "itacare": {
       "nombre": "Itacaré",
@@ -454,13 +582,15 @@
       "modo": "car",
       "km": 359,
       "horas": 5.7,
-      "compartido": 40,
+      "compartido": 0,
       "privado": 235,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (359) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 359 km de OSRM: US$ 40 compartido y US$ 235 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 359 km de OSRM: US$ 40 compartido y US$ 235 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "forte": {
       "nombre": "Praia do Forte",
@@ -468,13 +598,15 @@
       "modo": "car",
       "km": 62,
       "horas": 1.1,
-      "compartido": 20,
+      "compartido": 30.77,
       "privado": 50,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (62) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 62 km de OSRM: US$ 20 compartido y US$ 50 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 62 km de OSRM: US$ 20 compartido y US$ 50 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_brl": 160
     },
     "fernando": {
       "nombre": "Fernando de Noronha",
@@ -488,7 +620,27 @@
       "verificado": "2026-09-27",
       "confianza": "baja",
       "derivacion": "No hay carretera ni ferry comercial: se llega en vuelo desde REC. El precio sale de una estimacion propia, no de una tarifa publicada. Ver la nota sobre NVT/FEN en _meta.aeropuertoErrores: el codigo de esta isla es FEN, no NVT.",
-      "nota": "No es un traslado por carretera: isla a 350 km de la costa, se llega en vuelo corto desde REC."
+      "nota": "No es un traslado por carretera: isla a 350 km de la costa, se llega en vuelo corto desde REC.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 538
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Auto",
+          "brl": 966
+        },
+        {
+          "min": 6,
+          "max": 12,
+          "vehiculo": "Van",
+          "brl": 1739
+        }
+      ]
     },
     "fln": {
       "nombre": "Florianópolis",
@@ -496,13 +648,15 @@
       "modo": "car",
       "km": 17,
       "horas": 0.4,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 30,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (17) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 17 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 17 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "camboriu": {
       "nombre": "Camboriú",
@@ -510,13 +664,15 @@
       "modo": "car",
       "km": 96,
       "horas": 1.4,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 72,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (96) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 96 km de OSRM: US$ 25 compartido y US$ 72 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 96 km de OSRM: US$ 25 compartido y US$ 72 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "bombinhas": {
       "nombre": "Bombinhas",
@@ -524,13 +680,15 @@
       "modo": "car",
       "km": 89,
       "horas": 1.5,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 67,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (89) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 89 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 89 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "rosa": {
       "nombre": "Praia do Rosa",
@@ -538,13 +696,15 @@
       "modo": "car",
       "km": 96,
       "horas": 1.6,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 72,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (96) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 96 km de OSRM: US$ 25 compartido y US$ 72 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 96 km de OSRM: US$ 25 compartido y US$ 72 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "bcm": {
       "nombre": "Balneário Camboriú",
@@ -553,13 +713,15 @@
       "km": 96,
       "horas": 1.4,
       "appRideUsd": 42,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 72,
       "real": [],
       "fuente": "Uber publica FLN -> Balneario Camboriu con precio medio R$ 216, 100 km, 1,7 h. Son los mismos 96 km que da OSRM, asi que el valor sirve para bcm, camboriu e itapema. OJO: el precio de Uber es POR VEHICULO y es un pedido por app, no un transfer reservado, asi que va en appRide y no como ancla del privado. TourFacil tiene el \"Transfer Aeroporto Florianopolis para Balneario Camboriu\", que solo sale con dos reservas minimas, o sea compartido, pero no publica tarifa.",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 96 km de OSRM da US$ 25 y US$ 72."
+      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 96 km de OSRM da US$ 25 y US$ 72.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "itapema": {
       "nombre": "Itapema",
@@ -567,13 +729,15 @@
       "modo": "car",
       "km": 88,
       "horas": 1.4,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 67,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (88) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 88 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 88 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "garopaba": {
       "nombre": "Garopaba",
@@ -581,13 +745,15 @@
       "modo": "car",
       "km": 89,
       "horas": 1.5,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 67,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (89) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 89 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 89 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "ferrugem": {
       "nombre": "Ferrugem",
@@ -595,13 +761,15 @@
       "modo": "car",
       "km": 100,
       "horas": 1.6,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 74,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (100) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 100 km de OSRM: US$ 25 compartido y US$ 74 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 100 km de OSRM: US$ 25 compartido y US$ 74 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "picarras": {
       "nombre": "Piçarras",
@@ -609,13 +777,15 @@
       "modo": "car",
       "km": 129,
       "horas": 1.8,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 92,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (129) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 129 km de OSRM: US$ 25 compartido y US$ 92 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 129 km de OSRM: US$ 25 compartido y US$ 92 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "gram": {
       "nombre": "Gramado",
@@ -624,13 +794,15 @@
       "km": 109,
       "horas": 1.9,
       "appRideUsd": 43,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 80,
       "real": [],
       "fuente": "Uber publica POA -> Gramado con precio medio R$ 225, por vehiculo. Los 109 km de OSRM coinciden con el tramo, asi que el mismo valor sirve para gram y canela.",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 109 km de OSRM da US$ 25 y US$ 80."
+      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 109 km de OSRM da US$ 25 y US$ 80.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "canela": {
       "nombre": "Canela",
@@ -638,13 +810,15 @@
       "modo": "car",
       "km": 115,
       "horas": 2.1,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 83,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (115) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 115 km de OSRM: US$ 25 compartido y US$ 83 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 115 km de OSRM: US$ 25 compartido y US$ 83 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "torres": {
       "nombre": "Torres",
@@ -652,13 +826,15 @@
       "modo": "car",
       "km": 184,
       "horas": 2.5,
-      "compartido": 30,
+      "compartido": 0,
       "privado": 126,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (184) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 184 km de OSRM: US$ 30 compartido y US$ 126 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 184 km de OSRM: US$ 30 compartido y US$ 126 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "canoa": {
       "nombre": "Capão da Canoa",
@@ -666,13 +842,15 @@
       "modo": "car",
       "km": 135,
       "horas": 1.8,
-      "compartido": 25,
+      "compartido": 0,
       "privado": 96,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (135) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 135 km de OSRM: US$ 25 compartido y US$ 96 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 135 km de OSRM: US$ 25 compartido y US$ 96 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "rec": {
       "nombre": "Recife",
@@ -680,13 +858,15 @@
       "modo": "car",
       "km": 13,
       "horas": 0.3,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 30,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (13) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 13 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 13 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "joaopessoa": {
       "nombre": "João Pessoa",
@@ -694,13 +874,15 @@
       "modo": "car",
       "km": 13,
       "horas": 0.3,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 30,
       "real": [],
       "fuente": "Sin precio real para esta ruta. Los km (13) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 13 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado."
+      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 13 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     },
     "poa": {
       "nombre": "Porto Alegre",
@@ -709,13 +891,15 @@
       "km": 9,
       "horas": 0.2,
       "appRideUsd": 7,
-      "compartido": 20,
+      "compartido": 0,
       "privado": 30,
       "real": [],
       "fuente": "Uber publica POA <-> Porto Alegre en R$ 37 (18 min), por vehiculo.",
       "verificado": "2026-09-27",
       "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 9 km de OSRM da US$ 20 y US$ 30."
+      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 9 km de OSRM da US$ 20 y US$ 30.",
+      "privado_escalones": [],
+      "compartido_consultar": true
     }
   }
 }

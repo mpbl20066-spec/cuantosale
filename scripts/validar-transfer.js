@@ -64,6 +64,8 @@ for (const [k, v] of Object.entries(D)) {
     // gratis. Un 0 en privado no tiene sentido en ningun caso.
     if (n === 0) {
       if (campo === 'compartido' && v.soloPrivado) continue;
+      // Sin precio cargado: la app dice "Consultar". Tiene que ser explicito.
+      if (campo === 'compartido' && v.compartido_consultar) continue;
       err(k + '.' + campo + ' es 0. Si el destino no tiene traslado compartido, declaralo con "soloPrivado": true; ' +
         'un 0 sin esa bandera es un transfer gratis.');
       continue;

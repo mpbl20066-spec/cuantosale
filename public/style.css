@@ -2731,3 +2731,6 @@ button.logo{min-height:44px}
 .trip-summary__more>summary:hover{color:var(--ink)}.trip-summary__more>summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .trip-summary__items--more .trip-summary__item{padding-top:9px;padding-bottom:9px}
 @media (prefers-reduced-motion:reduce){.trip-summary__more>summary::after{transition:none}}
+
+/* Transfer privado sin precio para esta cantidad de personas: informativo, no se elige. */
+.transfer-choice--consultar{cursor:default;opacity:.85;border-style:dashed}.transfer-choice--consultar:hover{transform:none;border-color:var(--line)}

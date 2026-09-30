@@ -52,6 +52,10 @@ const lineas = Object.keys(D).map((k) => {
   partes.push('privado: ' + v.privado);
   if (v.appRideUsd != null) partes.push('appRideUsd: ' + v.appRideUsd);
   if (v.soloPrivado) partes.push('soloPrivado: true');
+  // Precio del privado segun la cantidad de personas (BRL por vehiculo). Lista
+  // vacia = sin precio cargado: la app muestra "Consultar".
+  if (v.compartido_consultar) partes.push('compartidoConsultar: true');
+  partes.push('escalones: ' + JSON.stringify(v.privado_escalones || []));
   return '  ' + k + ': { ' + partes.join(', ') + ' },';
 }).join('\n');
 
@@ -81,6 +85,8 @@ const cuerpo = Object.keys(D).map((k) => {
   if (v.privado_brl != null) partes.push('privado_brl: ' + v.privado_brl);
   if (v.appRideUsd != null) partes.push('appRideUsd: ' + v.appRideUsd);
   if (v.soloPrivado) partes.push('soloPrivado: true');
+  if (v.compartido_consultar) partes.push('compartidoConsultar: true');
+  partes.push('escalones: ' + JSON.stringify(v.privado_escalones || []));
   return '  ' + k + ': { ' + partes.join(', ') + ' }';
 }).join(',\n');
 

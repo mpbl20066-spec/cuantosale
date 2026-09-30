@@ -1,0 +1,24 @@
+Aeropuerto	Destino	Km	Duracion	Modalidad	Vehiculo	Cap Min	Cap Max	Costo Base BRL	Comision	Precio Final BRL	Unidad de Cobro
+FEN	Fernando de Noronha			Compartido	Van	1	4	55	15%	63.25	Por vehiculo
+MCZ	Maceió	21	0.5	Compartido	Van	1	15	128	15%	147.2	Por persona
+REC	Porto de Galinhas	53	0.8	Compartido	Van	1	6	136	15%	156.4	Por persona
+SSA	Praia do Forte	62	1.1	Compartido	Van	1	6	139	15%	159.85	Por persona
+FOR	Jericoacoara	295	5.6	Compartido	4 x 4	2	5	250	15%	287.5	Por persona
+NAT	Pipa	30	0.5	Privado	Auto	1	4	250	15%	287.5	Por vehiculo
+MCZ	Maragogi	129	2.1	Compartido	Van	1	6	290	15%	333.5	Por persona
+GIG	Arraial do Cabo	170	2.6	Privado	Auto	1	4	370	15%	425.5	Por vehiculo
+GIG	Búzios	174	2.7	Privado	Auto	1	4	370	15%	425.5	Por vehiculo
+GIG	Cabo Frio	160	2.5	Privado	Auto	1	4	370	15%	425.5	Por vehiculo
+GIG	Ilha Grande			Privado	Auto	1	4	370	15%	425.5	Por vehiculo
+SSA	Trancoso	163	2.7	Privado	Auto	1	4	380	15%	437	Por vehiculo
+GIG	Angra dos Reis	139	2.4	Privado	Auto	1	4	420	15%	483	Por vehiculo
+FEN	Fernando de Noronha			Privado	Auto	1	4	468	15%	538.2	Por vehiculo
+GIG	Arraial do Cabo	170	2.6	Privado	Auto	5	6	470	15%	540.5	Por vehiculo
+GIG	Búzios	174	2.7	Privado	Auto	5	6	470	15%	540.5	Por vehiculo
+GIG	Cabo Frio	160	2.5	Privado	Auto	5	6	470	15%	540.5	Por vehiculo
+GIG	Ilha Grande			Privado	Van	5	6	470	15%	540.5	Por vehiculo
+GIG	Angra dos Reis	139	2.4	Privado	Auto	5	5	520	15%	598	Por vehiculo
+GIG	Angra dos Reis	139	2.4	Privado	Auto	6	6	570	15%	655.5	Por vehiculo
+FEN	Fernando de Noronha			Privado	Auto	5	6	840	15%	966	Por vehiculo
+FEN	Fernando de Noronha			Privado	Van	6	12	1512	15%	1738.8	Por vehiculo
+FOR	Jericoacoara	295	5.6	Privado	4 x 4	1	6	1700	15%	1955	Por vehiculo
