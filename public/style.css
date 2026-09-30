@@ -2829,3 +2829,10 @@ button.logo{min-height:44px}
 .voucher-destino__total span em{font-style:normal;font-weight:500;opacity:.8}
 .voucher-item__canal,.voucher-item__detail{font-size:12.5px}
 .voucher-item__amount.is-zero{font-size:13px;font-weight:600;color:var(--ink2)}
+/* El monto y el pill compartian fila con la flecha: en un panel de ~300px el
+   monto se partia ("R$" / "10.508") y el pill tambien. Ahora el pill va arriba,
+   el monto abajo en una sola linea y la flecha a la derecha, centrada. */
+.trip-summary__head{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"eb chev" "amt chev";align-items:center;row-gap:8px}
+.trip-summary__head .trip-summary__eyebrow{grid-area:eb;justify-self:start;white-space:nowrap}
+.trip-summary__head strong{grid-area:amt;white-space:nowrap;min-width:0}
+.trip-summary__head .trip-summary__chevron{grid-area:chev}
