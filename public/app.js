@@ -8598,15 +8598,29 @@
     });
 
     var pct = Math.min(100, Math.round(rec.total / Math.max(budget, 1) * 100));
-    var status = data.fits
-      ? 'Entra en tu presupuesto. Te sobran ' + money(budget - rec.total) + '.'
-      : 'Ninguna opción entra en ' + money(budget) + '. La más barata te deja ' + money(rec.total - budget) + ' por encima.';
+    /* El banner se evalua contra la LISTA real y no contra data.fits. data.fits lo
+       calcula el server sobre SU propuesta recomendada y antes del ajuste de
+       transporte local que hace el cliente, asi que podia decir "Ninguna opcion
+       entra" mientras la lista de abajo tenia propuestas con la etiqueta verde
+       "Entra en tu presupuesto" (mismas cuentas: p.total <= budget). Aca se usa el
+       mismo criterio que esas etiquetas. */
+    var dentroDelPresupuesto = list.filter(function (p) { return Number(p.total) <= budget; });
+    var masBarata = list.reduce(function (min, p) { return (!min || Number(p.total) < Number(min.total)) ? p : min; }, null);
+    var fitsRec = Number(rec.total) <= budget;
+    var status;
+    if (fitsRec) {
+      status = 'Entra en tu presupuesto. Te sobran ' + money(budget - rec.total) + '.';
+    } else if (dentroDelPresupuesto.length && masBarata) {
+      status = 'Esta propuesta se pasa por ' + money(rec.total - budget) + ', pero ' + (dentroDelPresupuesto.length === 1 ? 'hay 1 opción' : 'hay ' + dentroDelPresupuesto.length + ' opciones') + ' que sí entra' + (dentroDelPresupuesto.length === 1 ? '' : 'n') + ' en ' + money(budget) + ': la más barata sale ' + money(masBarata.total) + '.';
+    } else {
+      status = 'Ninguna opción entra en ' + money(budget) + ', así que te mostramos las más baratas. La mejor sale ' + money(masBarata ? masBarata.total : rec.total) + ' (' + money((masBarata ? masBarata.total : rec.total) - budget) + ' por encima).';
+    }
     var sourceBadge = live ? 'Precios reales' : 'Precios estimados';
     var sourcePill = '<span class="tag ghost source-pill">' + esc(sourceBadge) + '</span>';
 
     var h = '';
     h += '<section class="sec"><div class="hero">' +
-      '<div class="tags tags--main"><span class="tag">' + (data.fits ? 'La más conveniente para vos' : 'La más barata que encontramos') + '</span></div>' +
+      '<div class="tags tags--main"><span class="tag">' + (fitsRec ? 'La más conveniente para vos' : (dentroDelPresupuesto.length ? 'Propuesta seleccionada' : 'La más barata que encontramos')) + '</span></div>' +
       '<div class="tags tags--meta"><span class="tag ghost">' + esc(data.meta.dest.name) + '</span>' +
       '<span class="tag ghost">' + data.meta.nights + ' noches</span>' + sourcePill + '</div>' +
       '<h3>' + esc(titleOf(rec)) + '</h3>' +
@@ -8614,7 +8628,7 @@
       '<div class="perf"><i></i><i></i></div>' +
       '<div class="nums"><div><small>Costo total del viaje</small><span class="big">' + money(rec.total) + '</span></div>' +
       '<div><small>Por persona</small><span class="pp">' + money(rec.pp) + '</span></div></div>' +
-      '<div class="budget"><div class="track"><div class="fill' + (data.fits ? '' : ' over') + '" style="width:' + pct + '%"></div></div><p>' + status + '</p></div>' +
+      '<div class="budget"><div class="track"><div class="fill' + (fitsRec ? '' : ' over') + '" style="width:' + pct + '%"></div></div><p>' + status + '</p></div>' +
       '</div></section>';
 
     var activeCats = CATS.filter(function (c) { return Number(rec.parts[c[0]]) > 0; });
