@@ -1,0 +1,139 @@
+[
+  {
+    "destinos": ["ilha"],
+    "destino": "Ilha Grande, Brasil",
+    "titulo": "Super Sur",
+    "descripcion": "Expedición imperdible por el lado más salvaje, preservado y auténtico de Ilha Grande, incluyendo paradas en Jorge Grego y Dois Rios.",
+    "detalle": "Recorrido único por el circuito sur de Ilha Grande. El itinerario incluye la increíble Ilha de Jorge Grego (ideal para buceo), la histórica Praia de Dois Rios (famoso antiguo presidio), la paradisíaca Caxadaço y la mundialmente famosa Praia de Lopes Mendes.",
+    "precio_brl": 330,
+    "duracion": "7 hs",
+    "grupo": "12 a 20 pasajeros por lancha",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo en lancha rápida compartida",
+      "Marinero profesional y combustible",
+      "Visita a la Ilha de Jorge Grego, Praia de Dois Rios, Caxadaço y Praia de Lopes Mendes",
+      "Flotadores de piscina",
+      "Música ambiente"
+    ],
+    "no_incluye": [
+      "Almuerzo (parada en la Praia de Dois Rios)",
+      "Equipo de snorkel y máscara",
+      "Bebidas y snacks adicionales",
+      "Tasa de turismo sustentable municipal u otros impuestos portuarios"
+    ],
+    "llevar": [
+      "Toalla de baño",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Traje de baño y muda de ropa seca",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para el almuerzo y gastos personales"
+    ]
+  },
+  {
+    "destinos": ["ilha"],
+    "destino": "Ilha Grande, Brasil",
+    "titulo": "Paseo Ilhas Paradisíacas en lancha",
+    "descripcion": "Recorrido imperdible en lancha rápida por los rincones más vírgenes y exclusivos de la bahía de Angra dos Reis.",
+    "detalle": "Navegá por las aguas más cristalinas de la región en un emocionante tour. El recorrido incluye paradas con tiempo para nadar en Praia do Dentista, el acuario natural de las Ilhas de Botinas, la Ilha de Cataguases y la Praia da Piedade, además de una parada estratégica de tiempo libre para almorzar.",
+    "precio_brl": 200,
+    "duracion": "7 hs",
+    "grupo": "12 a 20 pasajeros por lancha",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo en lancha rápida compartida",
+      "Marinero y combustible",
+      "Flotadores de piscina (fideos/macarrão)",
+      "Música ambiente",
+      "Visita a Praia do Dentista, Ilhas de Botinas, Ilha de Cataguases y Praia da Piedade"
+    ],
+    "no_incluye": [
+      "Almuerzo",
+      "Equipo de snorkel y máscara",
+      "Bebidas y snacks adicionales",
+      "Hielo o conservadoras",
+      "Tasa de turismo sustentable municipal u otros impuestos portuarios"
+    ],
+    "llevar": [
+      "Toalla de baño",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Traje de baño y muda de ropa seca",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para el almuerzo y gastos personales"
+    ]
+  },
+  {
+    "destinos": ["ilha"],
+    "destino": "Ilha Grande, Brasil",
+    "titulo": "Volta Ilha",
+    "descripcion": "El circuito definitivo y más completo de Ilha Grande: una vuelta entera a toda la isla descubriendo sus playas oceánicas más vírgenes y famosas.",
+    "detalle": "Expedición de día completo que circunnavega la isla entera. Ideal para quienes quieren conocer lo mejor y más agreste de Ilha Grande en un solo recorrido, visitando joyas paradisíacas como la icónica playa de Aventureiro, Parnaióca y las piscinas naturales del sur.",
+    "precio_brl": 250,
+    "duracion": "8 hs",
+    "grupo": "12 a 20 pasajeros por lancha",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo completo circundando toda la isla en lancha rápida compartida",
+      "Marinero profesional y combustible",
+      "Paradas en las playas y piscinas naturales más famosas del circuito (Aventureiro, Parnaióca, Caxadaço y Lopes Mendes)",
+      "Flotadores de piscina",
+      "Música ambiente"
+    ],
+    "no_incluye": [
+      "Almuerzo (parada estratégica en puntos gastronómicos habilitados)",
+      "Equipo de snorkel y máscara",
+      "Bebidas y snacks adicionales",
+      "Tasa de turismo sustentable municipal u otros impuestos portuarios"
+    ],
+    "llevar": [
+      "Toalla de baño",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Traje de baño y muda de ropa seca",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para el almuerzo y gastos personales"
+    ]
+  },
+  {
+    "destinos": ["ilha"],
+    "destino": "Ilha Grande, Brasil",
+    "titulo": "Media Vuelta",
+    "descripcion": "El recorrido clásico e imperdible por las famosas lagunas de aguas cristalinas y el norte protegido de Ilha Grande.",
+    "detalle": "Una excursión fantástica que recorre la mitad de la isla enfocándose en sus aguas calmas y transparentes, ideales para el avistaje de fauna marina y snorkel. Incluye paradas imperdibles en las mundialmente conocidas Lagoa Azul y Lagoa Verde, además de playas paradisíacas de la región.",
+    "precio_brl": 180,
+    "duracion": "7 hs",
+    "grupo": "12 a 20 pasajeros por lancha",
+    "edad": "Desde 2 años",
+    "cancelacion": "Gratis hasta 72 hs antes",
+    "incluye": [
+      "Paseo en lancha rápida compartida cubriendo el semicircuito de la isla",
+      "Marinero profesional y combustible",
+      "Paradas en puntos destacados (Lagoa Azul, Lagoa Verde, Praia de Japariz o Freguesia de Santana)",
+      "Flotadores de piscina",
+      "Música ambiente"
+    ],
+    "no_incluye": [
+      "Almuerzo (parada estratégica en un restaurante costero con opción local)",
+      "Equipo de snorkel y máscara",
+      "Bebidas y snacks adicionales",
+      "Tasa de turismo sustentable municipal u otros impuestos portuarios"
+    ],
+    "llevar": [
+      "Toalla de baño",
+      "Protector solar",
+      "Gafas de sol",
+      "Sombrero o gorra",
+      "Traje de baño y muda de ropa seca",
+      "Repelente de insectos",
+      "Efectivo o tarjeta para el almuerzo y gastos personales"
+    ]
+  }
+]

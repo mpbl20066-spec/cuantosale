@@ -55,7 +55,8 @@ if (!fs.existsSync(JSON_PATH)) {
 
 const datos = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8'));
 const NOMBRES = datos._destinos || {};
-const tours = datos.tours || [];
+// Un tour apagado (activo: false) no se genera ni se valida, igual que en build-tours.js.
+const tours = (datos.tours || []).filter((t) => t.activo !== false);
 
 // --- 1. el generado esta al dia -----------------------------------------
 if (!fs.existsSync(CLIENTE_PATH)) {

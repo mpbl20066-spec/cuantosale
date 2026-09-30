@@ -62,7 +62,8 @@ for n in nuevos:
         d['tours'][pos] = n
         print('ACTUALIZA', clave, '| precio USD', viejo.get('precio'), '->', n.get('precio', '-'))
     else:
-        ult = max(i for i, t in enumerate(d['tours']) if t['destinos'][0] == n['destinos'][0])
+        # Un destino sin tours todavia (ej. ilha) va al final del catalogo.
+        ult = max((i for i, t in enumerate(d['tours']) if t['destinos'][0] == n['destinos'][0]), default=len(d['tours']) - 1)
         d['tours'].insert(ult + 1, n)
         print('AGREGA   ', clave, '| R$', n.get('precio_brl', '-'), '= US$', n.get('precio', '-'), '' if n.get('activo') is not False else '| APAGADO (sin precio)')
 
