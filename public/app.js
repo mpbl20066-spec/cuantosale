@@ -4538,6 +4538,20 @@
       });
     });
   }
+  /* La foto de una tarjeta para compartir: la del destino y, si no baja, las de
+     sus tours (las que subimos a Supabase). Prueba una por una hasta que alguna
+     se descarga; sin ninguna, rechaza y cada tarjeta decide si sale sin foto. */
+  function fotoParaTarjeta(meta) {
+    var key = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
+    var candidatas = [DEST_PHOTOS[key]];
+    try {
+      toursFor(key, '', meta).forEach(function (tour) { if (tour.image && /supabase\.co/.test(tour.image)) candidatas.push(tour.image); });
+    } catch (e) { /* sin tours cargados */ }
+    candidatas = candidatas.filter(Boolean).slice(0, 5);
+    return candidatas.reduce(function (previa, url) {
+      return previa.catch(function () { return loadStoryPhoto(url); });
+    }, Promise.reject(new Error('No hay una foto disponible para este destino.')));
+  }
   function buildStoryCardNode(meta, totals, photo) {
     var location = [meta.dest.region, meta.dest.country || 'Brasil'].filter(Boolean).join(' - ');
     var inclusionsMarkup = storyInclusionsMarkup(meta, totals.entries);
@@ -4668,18 +4682,23 @@
     }).join('');
     var gente = '';
     for (var i = 0; i < n; i++) gente += fila('<span>' + esc(splitNombre(i)) + '</span>', esc(money(por)), true);
+    var cardLogo = '<svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>'
+      + '<span style="font-weight:700;letter-spacing:-.02em;font-size:22px;">cuántosale</span>';
     var wrapper = document.createElement('div');
     wrapper.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;pointer-events:none;z-index:-1;';
     var node = document.createElement('div');
     node.style.cssText = 'width:540px;font-family:Arial,Helvetica,sans-serif;background:#0B1B2B;color:#fff;box-sizing:border-box;';
     node.innerHTML =
-      (photo ? '<div style="position:relative;height:200px;overflow:hidden;"><img src="' + photo + '" alt="" style="width:540px;height:200px;object-fit:cover;display:block;"><div style="position:absolute;left:0;right:0;bottom:0;height:110px;background:linear-gradient(to bottom,rgba(11,27,43,0),#0B1B2B);"></div></div>' : '')
-      + '<div style="padding:' + (photo ? '0 36px 32px' : '38px 36px 32px') + ';">'
-      + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:26px;' + (photo ? 'margin-top:-6px;' : '') + '">'
-      + '<svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>'
-      + '<span style="font-weight:700;letter-spacing:-.02em;font-size:22px;">cuántosale</span></div>'
-      + '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:6px;">Dividir gastos</div>'
-      + '<div style="font-size:34px;font-weight:800;line-height:1.05;margin-bottom:8px;">' + esc(meta.dest.name) + '</div>'
+      (photo ? '<div style="position:relative;height:270px;overflow:hidden;"><img src="' + photo + '" alt="" style="width:540px;height:270px;object-fit:cover;display:block;">'
+        + '<div style="position:absolute;left:0;right:0;top:0;height:110px;background:linear-gradient(to bottom,rgba(11,27,43,.65),rgba(11,27,43,0));"></div>'
+        + '<div style="position:absolute;left:0;right:0;bottom:0;height:170px;background:linear-gradient(to bottom,rgba(11,27,43,0),#0B1B2B);"></div>'
+        + '<div style="position:absolute;left:36px;top:28px;display:flex;align-items:center;gap:9px;">' + cardLogo + '</div>'
+        + '<div style="position:absolute;left:36px;right:36px;bottom:6px;"><div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:6px;">Dividir gastos</div>'
+        + '<div style="font-size:38px;font-weight:800;line-height:1.05;">' + esc(meta.dest.name) + '</div></div></div>' : '')
+      + '<div style="padding:' + (photo ? '10px 36px 32px' : '38px 36px 32px') + ';">'
+      + (photo ? '' : '<div style="display:flex;align-items:center;gap:9px;margin-bottom:26px;">' + cardLogo + '</div>'
+        + '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:6px;">Dividir gastos</div>'
+        + '<div style="font-size:34px;font-weight:800;line-height:1.05;margin-bottom:8px;">' + esc(meta.dest.name) + '</div>')
       + '<div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:22px;">📅 ' + esc(storyDateRange(meta)) + ' · 👥 ' + n + (n === 1 ? ' persona' : ' personas') + '</div>'
       + '<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:16px 20px;margin-bottom:22px;">'
       + '<div style="font-size:11px;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Total del viaje</div>'
@@ -4698,7 +4717,7 @@
     var meta = detailState.meta, wrapper = null;
     var texto = splitTexto();
     var waTexto = function () { window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank', 'noopener'); };
-    Promise.all([loadHtmlToImage(), loadStoryPhoto(DEST_PHOTOS[meta.dest.key] || '').catch(function () { return ''; })]).then(function (loaded) {
+    Promise.all([loadHtmlToImage(), fotoParaTarjeta(meta).catch(function () { return ''; })]).then(function (loaded) {
       var htmlToImage = loaded[0];
       wrapper = buildSplitCardNode(loaded[1]);
       var node = wrapper.firstChild;
@@ -4937,7 +4956,7 @@
     };
     var meta = detailState.meta;
     var wrapper = null;
-    Promise.all([loadHtmlToImage(), loadStoryPhoto(DEST_PHOTOS[meta.dest.key] || '')]).then(function (loaded) {
+    Promise.all([loadHtmlToImage(), fotoParaTarjeta(meta)]).then(function (loaded) {
       var htmlToImage = loaded[0];
       wrapper = buildStoryCardNode(meta, totals, loaded[1]);
       var photoNode = wrapper.querySelector('img');
