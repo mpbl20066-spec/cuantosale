@@ -6418,6 +6418,10 @@
     var box = list.closest('[data-roadtrip-stops]');
     if (!box) return;
     var stops = roadtripPickStops(box.getAttribute('data-dest'), Number(list.getAttribute('data-every')), Number(box.getAttribute('data-oneway')));
+    // El título contaba las paradas de ida y vuelta (por eso decía 4 con 2 en el
+    // mapa). Con la lista armada se corrige: N a la ida y las mismas N a la vuelta.
+    var head = box.querySelector('summary');
+    if (head && stops.length && head.textContent.indexOf('☕') === 0) head.textContent = '☕ Paradas de descanso en la ruta (' + stops.length + ' a la ida, ' + stops.length + ' a la vuelta)';
     list.innerHTML = stops.length
       ? '<p class="roadtrip-stops__lead">Paradas sugeridas a la ida (a la vuelta son las mismas, al revés):</p><ol>' +
         stops.map(function (s, i) {
