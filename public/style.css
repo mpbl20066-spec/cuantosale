@@ -3090,7 +3090,12 @@ button.logo{min-height:44px}
 .recent-searches[hidden]{display:none}
 .recent-searches__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
 .recent-searches__head h2{margin:0;font-size:20px}
-.recent-searches__clear{border:0;background:transparent;color:var(--ink2);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;min-height:36px;padding:0 4px}
+/* 36px era un area tactil por debajo del minimo, y este boton esta al lado de la
+   busqueda guardada: es el que se toca con el mismo dedo y al mismo tiempo que
+   la tarjeta. 44px visibles y 48 de area efectiva por el pseudo-elemento, como
+   el resto de los controles chicos. */
+.recent-searches__clear{border:0;background:transparent;color:var(--ink2);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;min-height:44px;padding:0 4px;position:relative}
+.recent-searches__clear::after{content:"";position:absolute;inset:-2px -6px}
 .recent-searches__list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
 .recent-search{width:100%;height:100%;display:grid;gap:4px;text-align:left;padding:14px 16px;border:1.5px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .18s ease,transform .18s ease}
 .recent-search:hover,.recent-search:focus-visible{border-color:var(--cel);transform:translateY(-1px);outline:none}

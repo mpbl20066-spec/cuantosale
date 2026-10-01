@@ -1607,6 +1607,14 @@
     if (returning) returning.value = S.ret;
     if (departure) departure.min = iso(addDays(today, 1));
     if (returning) returning.min = S.dep ? iso(addDays(parse(S.dep), 1)) : iso(addDays(today, 2));
+    /* El max tambien va en los inputs nativos, no solo en el calendario custom.
+       El calendario de la app ya tachaba lo que pasa de un año, pero los <input
+       type="date"> no lo sabian: el picker nativo dejaba elegir una fecha a dos
+       años y recien ahi se rechazaba. Con max, el navegador directamente no
+       ofrece esas fechas. Es el mismo limite que ya aplica maxDepartureDate(),
+       escrito en el lugar donde el teclado del movil lo lee. */
+    if (departure) departure.max = maxDepartureDate();
+    if (returning) returning.max = maxDepartureDate();
     if (departureLabel) departureLabel.textContent = shortDateLabel(S.dep);
     if (returnLabel) returnLabel.textContent = shortDateLabel(S.ret);
   }
@@ -2836,6 +2844,20 @@
        tours reales reemplaza el bloque entero (data-tours-block) en vez de
        meter un segundo titulo adentro de la seccion. */
     var titulo = '<h2 class="block-title" id="local-tours-title">' + (fuente !== 'local' ? 'Tours y experiencias reales en ' : 'Tours y experiencias en ') + esc(destinationName) + '</h2>';
+    /* Aviso de catalogo en construccion, para los destinos con pocos tours.
+     *
+        El caso de cero tours ya tiene su cartel (el bloque "Proximamente" de mas
+        arriba). El que faltaba era el intermedio: un destino con un solo tour
+        carga la seccion de cards y se ve igual de cerrada que uno con diez, sin
+        ninguna señal de que la seleccion esta creciendo. Para quien esta armando
+        el catalogo eso importa, porque la pregunta "cuantos le faltan" no tiene
+        respuesta mirando la pagina.
+     *
+        El umbral son 3 porque es la cantidad de cards que se ven sin tocar "Ver
+        mas": por debajo, la grilla nunca muestra el borde y el aviso es la
+        unica señal de que hay mas para venir. */
+    var POCOS = 3;
+    var enConstruccion = tours.length < POCOS;
     var bajada = tours.length + (tours.length === 1 ? ' experiencia' : ' experiencias')
       + (lowest !== Infinity ? ' &middot; desde <b>' + money(lowest) + '</b>' : '')
       + ' &middot; ' + esc(SOURCE_LABEL[fuente] || SOURCE_LABEL.local);
@@ -2946,8 +2968,16 @@
     var creditsBlock = creditList
       ? '<details class="local-tours__credits"><summary>Créditos de las fotos</summary><p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre:</p><ul>' + creditList + '</ul></details>'
       : '';
+    /* El aviso va arriba de la grilla, no abajo: es el estado del catalogo, y la
+       grilla es el contenido. Abajo se lee despues de que la persona ya eligio,
+       cuando ya no puede cambiar la decision. */
+    var avisoConstruccion = enConstruccion
+      ? '<p class="local-tours__growing"><span class="local-tours__growing-badge">Estamos completando</span>'
+        + 'Sumamos experiencias nuevas a ' + esc(destinationName) + ' seguido.</p>'
+      : '';
     return plateBlock('data-tours-block', titulo, bajada,
       '<section class="local-tours" data-budget-anchor="tours" aria-labelledby="local-tours-title">' +
+      avisoConstruccion +
       '<div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + cards + '</div>' +
       (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') +
       creditsBlock + '</section>');

@@ -33,7 +33,10 @@ const path = require('path');
 const RAIZ = path.join(__dirname, '..');
 const JSON_PATH = path.join(RAIZ, 'data', 'tours.json');
 const CLIENTE_PATH = path.join(RAIZ, 'public', 'tours.generated.js');
-const APP_PATH = path.join(RAIZ, 'public', 'app.js');
+// public/app.js ya no se lee desde aca. Antes se usaba para el chequeo de
+// cobertura de fotos, mirando el bloque TOUR_PHOTOS; ese bloque no es de donde
+// sale la foto que ve el usuario (ver la seccion de fotos mas abajo), asi que la
+// constante se fue con el uso.
 
 const datos = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8'));
 const meta = datos._meta || {};
@@ -192,22 +195,38 @@ const validos = filas.filter(Boolean);
 // la actividad, que es lo que ya pasaba. Se reporta porque es la falla
 // silenciosa tipica de este catalogo: un tour nuevo del Drive entra a publicar
 // sin foto y no se nota hasta que alguien lo mira.
+//
+// QUE FUENTE MIRA ESTE CHEQUEO
+//
+// data/tour-photos.json, que es de donde fotoDe() saca la foto cuando el server
+// arma meta.tours (ver lib/tours.js). Antes miraba TOUR_PHOTOS, el bloque de
+// public/app.js, y por eso reportaba "0 con foto" sobre un catalogo que tiene 20
+// de 23 con foto: son dos fuentes distintas y la que importa es la del server.
+// Un chequeo que mira el lugar equivocado no es solo impreciso, es actively
+// contrario: da "0 con foto" y el que lo lee busca fotos para tours que ya las
+// tienen.
+//
+// Las otras dos que cuentan como foto: la galeria del bucket
+// (data/tour-galerias.json, que es lo que el server manda como tour.images) y la
+// url_imagen que el tour trae de la base. Las tres son las que fotoDe() o el
+// campo images pueden resolver en el cliente.
 let conFoto = 0;
 const sinFoto = [];
 try {
-  const app = fs.readFileSync(APP_PATH, 'utf8');
-  const s = app.indexOf('var TOUR_PHOTOS = {');
-  const e = app.indexOf('\n  };', s);
-  if (s >= 0 && e > 0) {
-    const fotos = new Set(Object.keys(eval('(' + app.slice(s + 'var TOUR_PHOTOS = '.length, e + 4) + ')')));
-    validos.forEach((t) => {
-      const clave = t.destinos[0] + '#' + t.titulo;
-      if (fotos.has(clave)) conFoto++;
-      else sinFoto.push(clave);
-    });
-  }
+  const fotos = new Set();
+  try {
+    Object.keys(JSON.parse(fs.readFileSync(path.join(RAIZ, 'data', 'tour-photos.json'), 'utf8'))).forEach((k) => fotos.add(k));
+  } catch (e) { /* sin el archivo: solo cuentan galeria y url_imagen */ }
+  try {
+    Object.keys(JSON.parse(fs.readFileSync(path.join(RAIZ, 'data', 'tour-galerias.json'), 'utf8'))).forEach((k) => fotos.add(k));
+  } catch (e) { /* idem */ }
+  validos.forEach((t) => {
+    const clave = t.destinos[0] + '#' + t.titulo;
+    if (fotos.has(clave) || (t.image && /^https?:\/\//i.test(t.image))) conFoto++;
+    else sinFoto.push(clave);
+  });
 } catch (e) {
-  console.warn('aviso: no se pudo leer TOUR_PHOTOS de app.js (' + e.message + ')');
+  console.warn('aviso: no se pudo leer la cobertura de fotos (' + e.message + ')');
 }
 
 // --- archivo del cliente ------------------------------------------------
