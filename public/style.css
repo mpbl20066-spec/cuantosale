@@ -2924,3 +2924,8 @@ button.logo{min-height:44px}
 .detail-main[data-paso="4"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock,[data-steps-foot]){display:none !important}
 .detail-main:not([data-paso="4"]) .confirm-step{display:none}
 .confirm-step{margin:0 0 22px}
+
+.tour-detail-modal__gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 16px}
+.tour-detail-modal__gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:var(--cel-soft)}
+.tour-detail-modal__gallery.is-single{grid-template-columns:1fr}
+.tour-detail-modal__gallery.is-single img{aspect-ratio:16/9}

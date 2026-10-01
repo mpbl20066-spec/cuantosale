@@ -216,6 +216,9 @@ const literal = (valor, sangria) => {
   return JSON.stringify(valor, null, 2).split('\n').map((l, i) => (i === 0 ? l : pre + l)).join('\n');
 };
 
+// Fotos extra por tour (data/tour-galerias.json, lo arma scripts/galerias-tours.js).
+let galerias = {};
+try { galerias = JSON.parse(fs.readFileSync(path.join(RAIZ, 'data', 'tour-galerias.json'), 'utf8')); } catch (e) { galerias = {}; }
 const cuerpo = validos.map((t) => {
   return '  { destinations: ' + JSON.stringify(t.destinos) +
     ', destination: ' + JSON.stringify(t.destino) +
@@ -224,6 +227,7 @@ const cuerpo = validos.map((t) => {
     ', price: ' + JSON.stringify(t.precio) +
     ', details: ' + JSON.stringify(t.details) +
     (t.image ? ', image: ' + JSON.stringify(t.image) : '') +
+    (galerias[t.destinos[0] + '#' + t.titulo] ? ', images: ' + JSON.stringify(galerias[t.destinos[0] + '#' + t.titulo].slice(0, 3)) : '') +
     (t.duracion ? ', duracion: ' + JSON.stringify(t.duracion) : '') +
     (t.grupo ? ', grupo: ' + JSON.stringify(t.grupo) : '') +
     (t.salida ? ', salida: ' + JSON.stringify(t.salida) : '') +

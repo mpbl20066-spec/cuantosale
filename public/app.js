@@ -2636,7 +2636,7 @@
         '<p class="local-tour__description">' + esc(tour.description) + '</p>' +
         '<div class="local-tour__foot">' +
         '<p class="local-tour__price"><span class="local-tour__from">Precio por persona</span><b>' + precioTour(tour.price) + '</b></p>' +
-        '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '" data-tour-facts="' + esc(JSON.stringify(tourFacts(tour))) + '" data-tour-sections="' + esc(JSON.stringify({ incluye: tour.incluye || [], noIncluye: tour.noIncluye || [], llevar: tour.llevar || [] })) + '">' +
+        '<button type="button" class="local-tour__info" data-tour-detail-open data-tour-title="' + esc(tour.title) + '" data-tour-description="' + esc(tour.description) + '" data-tour-detail="' + esc(tourDetailText(tour)) + '" data-tour-images="' + esc(JSON.stringify((Array.isArray(tour.images) ? tour.images : []).slice(0, 3))) + '" data-tour-facts="' + esc(JSON.stringify(tourFacts(tour))) + '" data-tour-sections="' + esc(JSON.stringify({ incluye: tour.incluye || [], noIncluye: tour.noIncluye || [], llevar: tour.llevar || [] })) + '">' +
         '<span>Ver detalles</span><span aria-hidden="true">→</span></button>' +
         '</div></div></article>';
     }).join('');
@@ -2851,6 +2851,10 @@
     var sec = {};
     try { facts = JSON.parse(button.getAttribute('data-tour-facts') || '{}') || {}; } catch (e) { facts = {}; }
     try { sec = JSON.parse(button.getAttribute('data-tour-sections') || '{}') || {}; } catch (e) { sec = {}; }
+    var imgs = [];
+    try { imgs = JSON.parse(button.getAttribute('data-tour-images') || '[]') || []; } catch (e) { imgs = []; }
+    var titulo = button.getAttribute('data-tour-title') || '';
+    var galeria = imgs.length ? '<div class="tour-detail-modal__gallery' + (imgs.length === 1 ? ' is-single' : '') + '">' + imgs.map(function (u, i) { return '<img src="' + esc(u) + '" alt="' + esc(titulo) + ' (foto ' + (i + 1) + ')" loading="lazy">'; }).join('') + '</div>' : '';
     var detalleTxt = button.getAttribute('data-tour-detail') || '';
     var hayListas = (sec.incluye && sec.incluye.length) || (sec.noIncluye && sec.noIncluye.length) || (sec.llevar && sec.llevar.length);
     var cuerpo;
@@ -2867,6 +2871,7 @@
     modal.innerHTML = '<div class="booking-dialog tour-detail-modal" role="dialog" aria-modal="true" aria-labelledby="tour-detail-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>'
       + '<span class="tour-detail-modal__eyebrow">DETALLE DE LA EXPERIENCIA</span>'
       + '<h2 id="tour-detail-title">' + esc(button.getAttribute('data-tour-title')) + '</h2>'
+      + galeria
       + '<h3 class="tour-detail-modal__h">Acerca de esta experiencia</h3>'
       + '<p class="tour-detail-modal__description">' + esc(button.getAttribute('data-tour-description')) + '</p>'
       + tourFactsHtml(facts)
