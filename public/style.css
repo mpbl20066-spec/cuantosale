@@ -1,4 +1,4 @@
-/* version: 225
+/* version: 226
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3257,3 +3257,14 @@ button.logo{min-height:44px}
 .guia-banner__text small{color:var(--ink2);font-size:13px;line-height:1.4}
 .guia-banner__cta{white-space:nowrap;font-size:13px;font-weight:800;color:var(--cel)}
 @media (max-width:560px){.guia-banner{grid-template-columns:auto minmax(0,1fr);padding:14px}.guia-banner__cta{grid-column:1/-1}}
+
+/* ---- Toast de guardado / enlace copiado -------------------------------------- */
+.cs-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:400;display:flex;align-items:center;gap:12px;max-width:min(92vw,420px);padding:12px 16px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:var(--r-card,16px);background:var(--surface);color:var(--ink);box-shadow:0 14px 40px rgba(0,0,0,.45);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.cs-toast.is-visible{opacity:1;transform:translate(-50%,0)}
+.cs-toast__ico{flex:0 0 auto;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--cel);color:var(--cel-ink,#0A101A);font-size:15px;font-weight:800}
+.cs-toast.is-error{border-color:var(--coral)}
+.cs-toast.is-error .cs-toast__ico{background:var(--coral);color:#0A101A}
+.cs-toast__txt{display:grid;gap:2px;min-width:0}
+.cs-toast__txt b{font-size:14px;line-height:1.25}
+.cs-toast__txt small{color:var(--ink2);font-size:12.5px;line-height:1.35}
+@media (prefers-reduced-motion:reduce){.cs-toast{transition:none}}

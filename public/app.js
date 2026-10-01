@@ -6320,6 +6320,7 @@
       '<button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span><svg class="voucher-share__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
       '<button type="button" class="voucher-chip voucher-chip--asesor" data-coordinar-asesor title="Abrir WhatsApp con el resumen y lo que falta coordinar" aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">Coordinar con asesor</span></button>' +
       '<div class="voucher-share__menu" id="voucher-share-menu" hidden>' +
+      '<button type="button" data-share-link>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar enlace del viaje</span></button>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '<button type="button" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Tarjeta para Instagram</span></button>' +
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
@@ -9903,6 +9904,129 @@
     }
     mostrarAvisoReserva('Listo, ya iniciaste sesión. Tocá de nuevo el botón para reservar.', 'ok');
   }
+  /* ---------- Enlace del viaje: guardar y compartir sin perder nada ----------
+     El viaje entero (destino, fechas, personas y lo que se eligio: hotel, vuelo,
+     traslados, bus, actividades) viaja DENTRO del enlace, codificado en
+     base64url en ?viaje=. No hace falta cuenta ni servidor: quien abre el enlace
+     recibe exactamente este presupuesto y lo reabre con loadTrip(), el mismo
+     camino que los viajes guardados. Se guardan solo los datos chicos de cada
+     eleccion; los precios y el resto se recotizan al abrir. */
+  function b64urlEncode(texto) {
+    var bytes = new TextEncoder().encode(texto), bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function b64urlDecode(token) {
+    var b64 = String(token).replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    var bin = atob(b64), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function tokenDelViaje() {
+    if (!detailState || !detailState.meta) return '';
+    var p = tripPayload();
+    if (!p) return '';
+    var d = p.details || {};
+    var corto = { v: 1, d: p.destination_key, a: p.departure_date, b: p.return_date, p: p.travelers, m: p.transport_mode,
+      fd: p.food_per_day, lp: p.local_per_day, o: d.origin, s: d.style, g: d.queryBudget, sc: d.subcategory, ht: d.hotelType };
+    if (hotelElegido() && d.hotel && d.hotel.name) corto.h = { n: d.hotel.name, t: Math.round(Number(d.hotel.total) || 0) };
+    if (d.flight && d.flight.id && vueloElegido()) {
+      var vuelo = {};
+      Object.keys(d.flight).forEach(function (k) { var v = d.flight[k]; if (v == null || typeof v === 'object') return; vuelo[k] = v; });
+      corto.f = vuelo;
+    }
+    if (d.transferType || d.transferTypeVuelta) { corto.tt = [d.transferType || '', d.transferTypeVuelta || '']; corto.tx = Number(d.transfer) || 0; }
+    if (d.busChoice) { corto.bc = d.busChoice; corto.bt = Number(d.busTotal) || 0; }
+    if (Array.isArray(d.tours) && d.tours.length) corto.tr = d.tours.map(function (t) { return [t.title, Number(t.price) || 0]; });
+    return b64urlEncode(JSON.stringify(corto));
+  }
+  function enlaceDelViaje() {
+    var token = tokenDelViaje();
+    return token ? window.location.origin + '/?viaje=' + token : '';
+  }
+  function viajeDesdeToken(token) {
+    var c;
+    try { c = JSON.parse(b64urlDecode(token)); } catch (e) { return null; }
+    if (!c || c.v !== 1 || !c.d || !c.a || !c.b) return null;
+    return {
+      destination_key: c.d, departure_date: c.a, return_date: c.b, travelers: Number(c.p) || 1, transport_mode: c.m || 'flight',
+      food_per_day: Number(c.fd) || 0, local_per_day: Number(c.lp) || 0,
+      details: { destination_key: c.d, origin: c.o, style: c.s, queryBudget: c.g, subcategory: c.sc || '', hotelType: c.ht || '', travelers: Number(c.p) || 1,
+        hotel: c.h ? { name: c.h.n, total: c.h.t } : null, flight: c.f || null,
+        transfer: Number(c.tx) || 0, transferType: c.tt ? c.tt[0] : '', transferTypeVuelta: c.tt ? c.tt[1] : '',
+        busChoice: c.bc || '', busTotal: Number(c.bt) || 0,
+        tours: (c.tr || []).map(function (t) { return { title: t[0], price: Number(t[1]) || 0 }; }) }
+    };
+  }
+  async function abrirViajeCompartido() {
+    var params = new URLSearchParams(window.location.search);
+    var token = params.get('viaje');
+    if (!token) return;
+    params.delete('viaje');
+    try { var qs = params.toString(); history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash); } catch (e) { /* sin history */ }
+    var trip = viajeDesdeToken(token);
+    if (!trip) { mostrarToast('No pudimos abrir ese enlace', 'Pedile a quien te lo mandó que lo comparta de nuevo.', true); return; }
+    try { await loadTrip(trip); } catch (error) { mostrarToast('No pudimos abrir el viaje', (error && error.message) || '', true); }
+  }
+  function copiarAlPortapapeles(texto) {
+    return new Promise(function (resolve) {
+      var respaldo = function () {
+        var area = document.createElement('textarea');
+        area.value = texto; area.setAttribute('readonly', '');
+        area.style.position = 'fixed'; area.style.opacity = '0';
+        document.body.appendChild(area); area.select();
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+        area.remove();
+        resolve(ok);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(function () { resolve(true); }, respaldo);
+      else respaldo();
+    });
+  }
+  /* Toast flotante: abajo al centro, sobre los modales, se va solo. */
+  function mostrarToast(titulo, detalle, error) {
+    var el = document.getElementById('cs-toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'cs-toast'; el.className = 'cs-toast';
+      el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+      document.body.appendChild(el);
+    }
+    el.classList.toggle('is-error', !!error);
+    el.innerHTML = '<span class="cs-toast__ico" aria-hidden="true">' + (error ? '!' : '✓') + '</span><span class="cs-toast__txt"><b>' + esc(titulo) + '</b>' + (detalle ? '<small>' + esc(detalle) + '</small>' : '') + '</span>';
+    el.classList.remove('is-visible');
+    void el.offsetWidth;
+    el.classList.add('is-visible');
+    window.clearTimeout(mostrarToast.timer);
+    mostrarToast.timer = window.setTimeout(function () { el.classList.remove('is-visible'); }, 4200);
+  }
+  /* Guardar = guardar + enlace. El enlace se copia siempre (es la copia del
+     presupuesto que sirve sin cuenta); con sesion ademas queda en "Mis viajes"
+     y sin sesion queda pendiente para guardarse cuando inicie sesion. */
+  async function guardarYCopiarEnlace() {
+    var enlace = enlaceDelViaje();
+    if (!enlace) { mostrarToast('Abrí una propuesta antes de guardar', '', true); return; }
+    var copiado = await copiarAlPortapapeles(enlace);
+    if (authUser) {
+      var guardado = await saveCurrentTrip({ skipTripsModal: true });
+      if (!guardado) return; // saveCurrentTrip ya mostro el motivo
+    } else {
+      try {
+        var borrador = tripPayload();
+        if (borrador) { sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(borrador)); sessionStorage.setItem('cuantosale_pending_trip', '1'); }
+        pendingTripSave = true;
+      } catch (error) { /* sin sessionStorage: queda el enlace */ }
+    }
+    mostrarToast('Presupuesto guardado con éxito', copiado ? 'Enlace copiado al portapapeles' : 'No pudimos copiar el enlace solo; probá con Compartir');
+  }
+  async function copiarEnlaceDelViaje() {
+    var enlace = enlaceDelViaje();
+    if (!enlace) return;
+    var ok = await copiarAlPortapapeles(enlace);
+    mostrarToast(ok ? 'Enlace copiado al portapapeles' : 'No pudimos copiar el enlace', ok ? 'Quien lo abra ve este mismo presupuesto' : '', !ok);
+  }
   function tripPayload() {
     if (!detailState || !detailState.meta) return null;
     var budget = getBudgetBreakdown(detailState);
@@ -10506,7 +10630,7 @@
         toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
         return;
       }
-      if (e.target.closest('[data-save-trip]')) { e.preventDefault(); saveCurrentTrip(); }
+      if (e.target.closest('[data-save-trip]')) { e.preventDefault(); guardarYCopiarEnlace(); }
     });
     window.addEventListener('resize', syncTripSummaryViewport);
     $('#auth-modal').addEventListener('click', async function (e) {
@@ -12095,7 +12219,7 @@ function comboNombreDestino() {
       }
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var saveTripButton = e.target.closest('[data-save-trip]');
-      if (saveTripButton) { e.preventDefault(); saveCurrentTrip(); return; }
+      if (saveTripButton) { e.preventDefault(); guardarYCopiarEnlace(); return; }
       var grupoCrearButton = e.target.closest('[data-grupo-crear]');
       if (grupoCrearButton) { e.preventDefault(); irAlGrupo(grupoCrearButton); return; }
       var grupoCopiarButton = e.target.closest('[data-grupo-copiar]');
@@ -12122,6 +12246,7 @@ function comboNombreDestino() {
         shareMenuButton.setAttribute('aria-expanded', String(abrir));
         return;
       }
+      if (e.target.closest('[data-share-link]')) { e.preventDefault(); copiarEnlaceDelViaje(); }
       var copyButton = e.target.closest('[data-copy-summary]');
       if (copyButton) {
         e.preventDefault();
@@ -12169,7 +12294,8 @@ function comboNombreDestino() {
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();
-        var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent($('#booking-modal').dataset.summaryText || '');
+        var enlaceWa = enlaceDelViaje();
+        var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(($('#booking-modal').dataset.summaryText || '') + (enlaceWa ? '\n\nAbrí este presupuesto: ' + enlaceWa : ''));
         window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
       }
       var storyButton = e.target.closest('[data-share-story]');
@@ -12308,6 +12434,7 @@ function comboNombreDestino() {
       filterDestOptions('');
       updateDestinationMode();
       run();
+      abrirViajeCompartido();
     }).catch(function () { notice('No pudimos cargar los destinos. Recargá la página.'); });
   }
 
