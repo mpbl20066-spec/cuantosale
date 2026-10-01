@@ -4021,7 +4021,10 @@
     return [
       { n: 1, titulo: m === 'bus' ? 'Bus' : m === 'auto' ? 'Auto' : 'Vuelo + Traslados', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
       { n: 2, titulo: 'Alojamiento', texto: hTxt, hecho: h, anc: 'alojamiento', cta: 'Elegí tu hotel' },
-      { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Tours, comida y transporte local', hecho: tr, opcional: true, anc: 'tours', cta: 'Sumá extras' }
+      { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Tours, comida y transporte local', hecho: tr, opcional: true, anc: 'tours', cta: 'Sumá extras' },
+      /* Cuarto paso: la confirmacion, donde la persona ve su viaje completo (el
+         voucher que abre "Ver mi presupuesto"). No se "completa": es el cierre. */
+      { n: 4, titulo: 'Confirmar', texto: 'Mirá tu viaje', hecho: false, anc: '', cta: 'Ver mi viaje' }
     ];
   }
   /* Un paso a la vez. La propuesta se muestra en tres pasos y cada uno enseña
@@ -4033,7 +4036,7 @@
      actual vive en detailState.pasoActual. */
   function pasoActualNum() {
     var n = Number(detailState && detailState.pasoActual) || 1;
-    return Math.max(1, Math.min(3, Math.round(n)));
+    return Math.max(1, Math.min(4, Math.round(n)));
   }
   function pasosMarkup() {
     if (!detailState) return '';
@@ -4059,13 +4062,15 @@
     var p = pasosEstado();
     var n = pasoActualNum();
     var next = p[n];
-    if (!next || !p[n - 1].hecho) return '';
+    if (!next || !(p[n - 1].hecho || p[n - 1].opcional)) return '';
     return '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + esc(next.cta) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>';
   }
   function irAlPaso(n) {
     if (!detailState) return;
-    detailState.pasoActual = Math.max(1, Math.min(3, Number(n) || 1));
+    detailState.pasoActual = Math.max(1, Math.min(4, Number(n) || 1));
     pintarPasos();
+    // El paso 4 es la confirmacion: abre el voucher con el viaje completo.
+    if (detailState.pasoActual === 4) { try { openItinerarySummaryModal(); } catch (e) { console.error(e); } }
     var nav = document.querySelector('[data-steps]');
     if (nav && nav.scrollIntoView) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -4074,6 +4079,7 @@
     if (el.closest('.proposal-breakdown')) return 0;
     if (el.closest('[data-transport-flow]')) return 1;
     if (el.closest('[data-hotels-block],.hotel-options,.multistay-panel')) return 2;
+    if (el.closest('[data-confirm-step]')) return 4;
     return 3;
   }
   function pintarPasos() {
@@ -9007,6 +9013,7 @@
       renderSafe(function () { return multiStayMarkup(detailState); }, '') +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + dailyBudgetMarkup +
+      '<section class="confirm-step" data-confirm-step><h2 class="block-title">Confirmá tu viaje</h2><p class="sub block-sub">Este es el resumen de todo lo que armaste: transporte, alojamiento y extras, con el total.</p><button type="button" class="steps__next" data-paso-ir="4">Ver mi viaje <span aria-hidden="true">→</span></button></section>' +
       '<div class="steps__foot" data-steps-foot>' + renderSafe(function () { return pasoSiguienteMarkup(); }, '') + '</div>' +
       /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
 
