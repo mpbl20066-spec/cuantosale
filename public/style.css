@@ -1,4 +1,4 @@
-/* version: 236
+/* version: 239
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -323,9 +323,9 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .perf::before{content:"";position:absolute;left:24px;right:24px;top:-1px;border-top:3px dashed var(--hero-ink);opacity:.3}
 .perf i{position:absolute;top:-14px;width:28px;height:28px;border-radius:50%;background:var(--bg)}
 .perf i:first-child{left:-14px}.perf i:last-child{right:-14px}
-.nums{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
-.nums small{display:block;color:var(--hero-soft);font-size:13px;font-weight:500}
-.nums .big{font-family:var(--fh);font-weight:800;font-size:clamp(56px,16vw,88px);line-height:.9;color:var(--hero-accent);display:block}
+.nums{display:flex;justify-content:space-between;align-items:flex-end;gap:20px 16px;flex-wrap:wrap}
+.nums small{display:block;color:var(--hero-soft);font-size:13px;font-weight:500;margin-bottom:2px}
+.nums .big{font-family:var(--fh);font-weight:800;font-size:clamp(40px,12vw,88px);line-height:1;margin-top:8px;color:var(--hero-accent);display:block;overflow-wrap:anywhere}
 .nums .pp{font-family:var(--fh);font-weight:700;font-size:34px;line-height:1;display:block}
 .budget{margin-top:22px;padding-bottom:6px}
 .budget .track{height:10px;border-radius:99px;background:color-mix(in srgb,var(--hero-ink) 20%,transparent);overflow:hidden}
@@ -2696,6 +2696,7 @@ h3.block-title, .block-title:is(h3) {
 .steps__foot{position:sticky;bottom:0;z-index:19;margin:0 -4px;padding:10px 4px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg,var(--surface)) 70%,transparent)}
 .steps__foot:empty{display:none}
 .steps__foot .steps__next{margin-top:0;min-height:54px;font-size:16px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.steps__skip{display:block;margin:10px auto 0;padding:8px 12px;border:0;background:none;color:var(--ink2);font:inherit;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .steps__next.is-locked{background:var(--surface);color:var(--ink2);border:1.5px dashed var(--line);box-shadow:none;font-weight:700}
 @media (max-width:560px){
   .steps{padding:10px;border-radius:16px}
@@ -3291,7 +3292,7 @@ button.logo{min-height:44px}
 .steps{position:sticky;top:0;z-index:40}
 .steps__mini-total{display:none}
 .steps.is-compact{display:flex;align-items:center;gap:10px;max-height:60px;padding:6px 10px;border-radius:0 0 14px 14px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
-.steps.is-compact .steps__mini-total{display:block;flex:none;font-family:var(--fh);font-size:18px;font-weight:800;line-height:1;color:var(--action-bg);white-space:nowrap}
+.steps.is-compact .steps__mini-total:not(:empty){display:block;flex:none;font-family:var(--fh);font-size:18px;font-weight:800;line-height:1;color:var(--action-bg);white-space:nowrap}
 :root[data-theme="light"] .steps.is-compact .steps__mini-total{color:var(--ink)}
 .steps.is-compact .steps__progress,.steps.is-compact .steps__pct,.steps.is-compact .steps__t{display:none}
 .steps.is-compact .steps__list{display:flex;gap:6px;margin-left:auto}

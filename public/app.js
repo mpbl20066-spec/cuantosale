@@ -4390,13 +4390,20 @@
   function vueloElegido() {
     if (!detailState) return false;
     if (detailState.transportMode === 'bus' || detailState.transportMode === 'auto') return true;
+    // "Continuar sin vuelo" da el paso por resuelto, pero el vuelo sigue valiendo 0.
+    return vueloReal() || !!detailState.sinVuelo;
+  }
+  // Hay un vuelo marcado de verdad (a diferencia de haber decidido seguir sin uno).
+  function vueloReal() {
+    if (!detailState) return false;
+    if (detailState.transportMode === 'bus' || detailState.transportMode === 'auto') return true;
     var sel = getSelectedFlightSummary();
     return !!(sel && sel.selected);
   }
   function vueloSumado(state) {
     var v = Number(state && state.flight) || 0;
     if (!v || state !== detailState) return v;
-    return vueloElegido() ? v : 0;
+    return vueloReal() ? v : 0;
   }
   /* ---------- Pasos del presupuesto ----------
      Vuelo/Auto + Traslados -> Alojamiento -> Extras (tours, comida y transporte local). Un rubro solo suma al
@@ -4433,7 +4440,7 @@
     var vuelo = m !== 'bus' && m !== 'auto';
     var t = transporteElegido();
     var bus = m === 'bus' ? busElegido(d.meta) : null;
-    var tTxt = t ? (m === 'bus' ? (bus ? bus.empresa + (bus.clase ? ' ' + bus.clase : '') : 'Bus') : m === 'auto' ? 'Auto propio' : (getSelectedFlightSummary().airline || 'Vuelo elegido'))
+    var tTxt = t ? (m === 'bus' ? (bus ? bus.empresa + (bus.clase ? ' ' + bus.clase : '') : 'Bus') : m === 'auto' ? 'Auto propio' : (!vueloReal() ? 'Sin vuelo' : (getSelectedFlightSummary().airline || 'Vuelo elegido')))
       : 'Falta elegir';
     var h = hotelElegido();
     var nombreHotel = String(d.selectedHotelName || '');
@@ -4485,7 +4492,12 @@
       + '<p class="steps__pct"><b>' + pct + '%</b> armado &middot; paso ' + n + ' de 4</p>';
     // Total resumido: solo se ve en la barra compacta (ver .steps.is-compact).
     var totalMini = '';
-    try { totalMini = money(getBudgetBreakdown(detailState).total); } catch (e) { totalMini = ''; }
+    // Sin vuelo ni hotel elegidos el total solo junta comida y transporte local
+    // (R$ 2.007 al lado de un viaje de R$ 13.640): una cifra sin sentido. Se
+    // muestra cuando ya estan los dos pilares; antes, el boton queda vacio y oculto.
+    if (p[0].hecho && p[1].hecho) {
+      try { totalMini = money(getBudgetBreakdown(detailState).total); } catch (e) { totalMini = ''; }
+    }
     return '<button type="button" class="steps__mini-total" data-ver-resumen aria-label="Ver el resumen del presupuesto">' + totalMini + '</button>' + progreso + '<ol class="steps__list">' + lis + '</ol>';
   }
   /* El boton para pasar al paso siguiente va ABAJO de lo que se esta eligiendo
@@ -4503,7 +4515,9 @@
        no disabled, para que el toque igual la lleve a lo que falta) y dice que
        falta. Con el paso resuelto se enciende en ambar con "Continuar a ...". */
     if (!listo) {
-      return '<button type="button" class="steps__next is-locked" data-paso-faltante="' + n + '" aria-disabled="true">' + esc(p[n - 1].cta) + ' para continuar</button>';
+      var sinVuelo = (n === 1 && detailState.transportMode !== 'bus' && detailState.transportMode !== 'auto')
+        ? '<button type="button" class="steps__skip" data-sin-vuelo>Continuar sin vuelo</button>' : '';
+      return '<button type="button" class="steps__next is-locked" data-paso-faltante="' + n + '" aria-disabled="true">' + esc(p[n - 1].cta) + ' para continuar</button>' + sinVuelo;
     }
     /* Extras es un pilar de la venta, no un anexo: el boton para llegar ahi no
        dice "opcional" y pide la accion en lugar de ofrecer un paso mas. */
@@ -4714,6 +4728,16 @@
     return true;
   }
   function handlePasoIr(e) {
+    // Solo aparece mientras no hay vuelo marcado (ver pasoSiguienteMarkup).
+    var skip = e.target.closest && e.target.closest('[data-sin-vuelo]');
+    if (skip) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!detailState || vueloReal()) return;
+      detailState.sinVuelo = true;
+      irAlPaso(2);
+      return;
+    }
     var falta = e.target.closest && e.target.closest('[data-paso-faltante]');
     if (falta) {
       // Barra apagada: no avanza, lleva a lo que hay que elegir en este paso.
@@ -4825,7 +4849,7 @@
     var total = budget.total;
     var entries = budget.entries;
     var flightDetalle = (detailState.selectedOffer && detailState.selectedOffer.airline) || detailState.selectedFlight || '';
-    var flightPrice = !vueloElegido() ? 0 : (detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0));
+    var flightPrice = !vueloReal() ? 0 : (detailState.selectedOffer && detailState.selectedOffer.price ? Number(detailState.selectedOffer.price) : (Number(detailState.flight) || 0));
     var hotelName = findSelectedHotelLabel();
     /* El nombre del hotel va al dato, pero solo si es un nombre. "Hotel
        seleccionado" y "Hotel recomendado" no son nombres: son los dos finales
@@ -9081,6 +9105,10 @@
           title = 'Salí el ' + dLong(parse(t.dep));
           text = n + (n === 1 ? ' día ' : ' días ') + (t.shift < 0 ? 'antes' : 'después') + ', con la misma cantidad de noches.';
           btn = '<button type="button" class="apply" data-shift="' + t.shift + '">Usar estas fechas</button>';
+        } else if (t.kind === 'alojamiento' && typeof t.ti === 'number') {
+          // Cambiar la categoria se queda en esta pagina y recotiza: abrir la
+          // propuesta lo llevaba al detalle y le sacaba la lista de vuelos.
+          btn = '<button type="button" class="apply" data-hotel-tier="' + t.ti + '">Cambiar categoría de hotel</button>';
         } else if (t.id) {
           // Ruta y alojamiento apuntan a una propuesta de la lista: el boton la
           // abre, igual que "Ver propuesta" en las tarjetas.
@@ -10271,7 +10299,7 @@
     var corto = { v: 1, d: p.destination_key, a: p.departure_date, b: p.return_date, p: p.travelers, m: p.transport_mode,
       fd: p.food_per_day, lp: p.local_per_day, o: d.origin, s: d.style, g: d.queryBudget, sc: d.subcategory, ht: d.hotelType };
     if (hotelElegido() && d.hotel && d.hotel.name) corto.h = { n: d.hotel.name, t: Math.round(Number(d.hotel.total) || 0) };
-    if (d.flight && d.flight.id && vueloElegido()) {
+    if (d.flight && d.flight.id && vueloReal()) {
       var vuelo = {};
       Object.keys(d.flight).forEach(function (k) { var v = d.flight[k]; if (v == null || typeof v === 'object') return; vuelo[k] = v; });
       corto.f = vuelo;
@@ -12083,6 +12111,19 @@ function comboNombreDestino() {
       openItinerarySummaryModal();
     });
     $('#results').addEventListener('click', function (e) {
+      var tierBtn = e.target.closest('[data-hotel-tier]');
+      if (tierBtn) {
+        e.preventDefault(); e.stopPropagation();
+        var estilo = ['ahorro', 'eq', 'comodo'][Number(tierBtn.getAttribute('data-hotel-tier'))];
+        if (estilo) {
+          S.style = estilo;
+          S.hotelTypeExplicit = false;
+          S.hotelType = hotelTypeForStyle(estilo);
+          Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-v') === estilo ? 'true' : 'false'); });
+          schedule();
+        }
+        return;
+      }
       var proposal = e.target.closest('[data-propuesta-id]');
       if (proposal) { e.preventDefault(); e.stopPropagation(); var proposalId = proposal.getAttribute('data-propuesta-id'); var selected = lastData && (byId(lastData.list, proposalId) || byId(lastData.alternatives, proposalId) || byId(lastData.roadtripList, proposalId)); if (selected) showProposalView(selected, lastData); return; }
       var selectedFlight = e.target.closest('[data-select-flight]');
