@@ -3340,6 +3340,11 @@
   function checkoutStateInicial() {
     return { step: 0, form: leerViajero(), payment: '', promo: '', ref: null };
   }
+  /* La declaracion tiene que existir: showProposalView() solo asigna, y en modo
+     estricto asignar una variable sin declarar tira ReferenceError y "Ver
+     propuesta" no abre. Se arma con datos vacios; los de la persona entran en
+     el primer checkoutStateInicial(), al abrir cada propuesta. */
+  var checkoutState = { step: 0, form: {}, payment: '', promo: '', ref: null };
   /* Codigo de descuento de las Guias Secretas: 5 % en las actividades cuando se
      reservan DOS O MAS. Cada destino tiene el suyo, el mismo que dice su guia en
      PDF, y solo vale para el destino del viaje: FLORIPA5 no descuenta en Rio.
