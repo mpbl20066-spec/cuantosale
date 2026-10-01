@@ -75,6 +75,20 @@
     joaopessoa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg/1280px-Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg'
   };
   /*
+   * Las tarjetas muestran una copia propia y chica (960 px, ~100 KB) de cada
+   * foto, en /fotos/<clave>.jpg (scripts/optimizar-fotos.py). Antes cargaban el
+   * original de Wikimedia (300 KB a 1,6 MB cada uno, y Wikimedia responde 429 si
+   * se le piden muchos juntos). La URL original sigue en data-foto-origen: de ahi
+   * salen los creditos del pie (cargarCreditosFotos busca la URL en el HTML) y es
+   * el respaldo si la copia local falta. Subir FOTOS_V al rehacer las fotos.
+   */
+  var FOTOS_V = 1;
+  function fotoTarjetaAttrs(key) {
+    var origen = DEST_PHOTOS[key];
+    if (!origen) return '';
+    return 'src="/fotos/' + encodeURIComponent(key) + '.jpg?v=' + FOTOS_V + '" data-foto-origen="' + esc(origen) + '" decoding="async" onerror="this.onerror=null;this.src=this.dataset.fotoOrigen"';
+  }
+  /*
    * Créditos de las fotos. Archivo GENERADO por creditos-fotos.js.
    *
    * Se cargan aparte y no van en línea en app.js: son 35 entradas de texto
@@ -1007,7 +1021,7 @@
       return '<article class="featured-destination' + (isCheapest ? ' is-cheapest' : '') + '" data-featured-destination="' + esc(group.id) + '"'
         + ' data-feature-price-key="' + esc(first.key) + '" data-feature-dates="' + esc(travel.depIso) + '|' + esc(travel.retIso) + '">'
         + (isCheapest ? '<span class="featured-destination__flag">M&aacute;s barato</span>' : '')
-        + '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy">'
+        + '<div class="featured-destination__image"><img ' + fotoTarjetaAttrs(group.image) + ' alt="Paisaje de ' + esc(group.label) + '" loading="lazy">'
         + '<div class="featured-destination__scrim"></div>'
         + '<div class="featured-destination__overlay"><h3>' + esc(cardLabel) + '</h3>' + priceLine + '</div></div>'
         + '<div class="featured-destination__meta">'
@@ -2155,6 +2169,7 @@
     var id = btn.getAttribute('data-hotel-rooms');
     var nombre = btn.getAttribute('data-hotel-name') || 'Hotel';
     var url = btn.getAttribute('data-hotel-url') || '';
+    var totalTarjeta = Number(btn.getAttribute('data-hotel-card-total')) || 0;
     var cuerpo = function (html) {
       modal.innerHTML = '<div class="booking-dialog rooms-modal" role="dialog" aria-modal="true" aria-labelledby="rooms-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>'
         + '<span class="tour-detail-modal__eyebrow">HABITACIONES DISPONIBLES</span><h2 id="rooms-title">' + esc(nombre) + '</h2>' + html + '</div>';
@@ -2185,7 +2200,14 @@
           + (r.cancelText ? '<span class="hotel-line' + (cancelOk ? ' is-good' : '') + '">' + esc(r.cancelText) + '</span>' : '')
           + '</div><div class="rooms-modal__price"><b>' + money(r.total) + '</b><small>' + (nights ? 'total ' + nights + (nights === 1 ? ' noche' : ' noches') : 'total') + '</small></div></li>';
       }).join('');
-      cuerpo('<p class="rooms-modal__msg">Precios totales con impuestos para tus fechas. La reserva se hace en Booking.</p><ul class="rooms-modal__list">' + items + '</ul>' + link);
+      /* El precio de la ficha viene de la busqueda de Booking y esta lista de otra
+         consulta: a veces la habitacion mas barata de la busqueda ya no figura
+         aca. Si la lista sale mas cara que la ficha se avisa, en vez de dejar dos
+         numeros que parecen contradecirse. */
+      var aviso = totalTarjeta && rooms[0].total > totalTarjeta * 1.02
+        ? '<p class="rooms-modal__msg">El precio de la ficha (' + money(totalTarjeta) + ') es el más bajo que mostró Booking en la búsqueda; esa opción puede no figurar en esta lista. Confirmá el valor final en Booking.</p>'
+        : '';
+      cuerpo('<p class="rooms-modal__msg">Precios totales con impuestos para tus fechas. La reserva se hace en Booking.</p>' + aviso + '<ul class="rooms-modal__list">' + items + '</ul>' + link);
     }).catch(function () {
       cuerpo('<p class="rooms-modal__msg">No pudimos cargar las habitaciones ahora.</p>' + (url ? '<a class="rooms-modal__book" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking ↗</a>' : ''));
     });
@@ -2415,7 +2437,7 @@
             // ("Elegir este hotel" / "Elegido") y lo que dejaba los dos textos
             // superpuestos al elegir.
             (option.hotelId && option.source === 'booking'
-              ? '<button type="button" class="hotel-booking" data-hotel-rooms="' + esc(option.hotelId) + '" data-hotel-name="' + esc(option.name) + '" data-hotel-url="' + esc(url) + '">Ver habitaciones</button>'
+              ? '<button type="button" class="hotel-booking" data-hotel-rooms="' + esc(option.hotelId) + '" data-hotel-name="' + esc(option.name) + '" data-hotel-card-total="' + totalValue + '" data-hotel-url="' + esc(url) + '">Ver habitaciones</button>'
               : '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver opciones ↗</a>') +
             '<label class="hotel-select" for="' + selectId + '"><span class="hotel-select__off">Seleccionar</span><span class="hotel-select__on">✓ Seleccionado</span></label>' +
             '</div></div>' + similarMarkup + '</article>';
@@ -8158,7 +8180,7 @@
       var bodyId = 'destino-desglose-' + index;
       return '<article class="destination-card' + (option.fits ? ' fits' : '') + (selectedDestKey === option.dest.key ? ' is-selected' : '') + '" data-opt-card data-dest-key="' + esc(option.dest.key) + '">' +
         (photo
-          ? '<div class="destination-banner destination-banner-photo"><img src="' + esc(photo) + '" alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
+          ? '<div class="destination-banner destination-banner-photo"><img ' + fotoTarjetaAttrs(option.dest.key) + ' alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
           : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : '☀️') + '</span></div>') +
         '<div class="destination-card-body">' +
         '<div class="opt__head destination-card-top"><div class="opt__main">' +
