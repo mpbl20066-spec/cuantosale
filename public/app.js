@@ -2228,9 +2228,9 @@
     input.checked = true;
     var nights = Math.max(1, Number(detailState.meta && detailState.meta.nights) || 1);
     var totalTxt = card.querySelector('.hotel-total');
-    if (totalTxt) totalTxt.textContent = money(room.total) + ' total · ' + room.name;
-    var nightly = card.querySelector('.hotel-price__main b');
-    if (nightly) nightly.textContent = money(room.total / nights);
+    if (totalTxt) totalTxt.textContent = money(room.total / nights) + ' por noche · ' + room.name;
+    var totalGrande = card.querySelector('.hotel-price__main b');
+    if (totalGrande) totalGrande.textContent = money(room.total);
     var roomLine = card.querySelector('[data-room-line] span');
     if (roomLine) roomLine.textContent = room.name;
     var h3 = card.querySelector('h3');
@@ -2536,8 +2536,10 @@
               : (option.source === 'booking' ? 'Precio consultado para ' : 'Estimación para ') + (isPar ? stopNights : nights) + ((isPar ? stopNights : nights) === 1 ? ' noche' : ' noches') + (isPar ? ' en ' + esc(stopName) : '') + ' y ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '.') + '</p>' +
             '</span></label>' +
             '<div class="hotel-foot">' +
-            '<p class="hotel-price"><span class="hotel-price__main"><span class="hotel-price__from">Desde</span><b>' + money(nightlyValue) + '</b><span class="hotel-price__unit">por noche</span></span>' +
-            '<strong class="hotel-total">' + money(totalValue) + (option.source === 'booking' ? ' total en Booking' : ' total estimado') + '</strong></p>' +
+            /* Siempre "total" primero y grande, "por noche" al lado en chico: el
+               total es lo que suma al presupuesto, la noche es solo la referencia. */
+            '<p class="hotel-price"><span class="hotel-price__main"><b>' + money(totalValue) + '</b><span class="hotel-price__unit">total</span></span>' +
+            '<strong class="hotel-total">' + money(nightlyValue) + ' por noche · ' + (option.source === 'booking' ? 'precio de Booking' : 'estimado') + '</strong></p>' +
             '<div class="hotel-actions">' +
             // El boton "Elegir este hotel" se saco. Elegir ya es tocar la ficha:
             // el nombre, la foto y la placa de la esquina son el <label> del
@@ -4312,7 +4314,12 @@
         + '<span class="steps__n" aria-hidden="true">' + (s.hecho ? '✓' : s.n) + '</span>'
         + '<span class="steps__t"><b>' + esc(s.titulo) + '</b><small>' + esc(s.texto) + '</small></span></button></li>';
     }).join('');
-    return '<ol class="steps__list">' + lis + '</ol>';
+    /* Avance global del armado: vuelo/bus/auto y hotel pesan 40% cada uno, los
+       extras (opcionales) 20%. Es lo que llena la barra fija de arriba. */
+    var pct = (p[0].hecho ? 40 : 0) + (p[1].hecho ? 40 : 0) + (p[2].hecho ? 20 : 0);
+    var progreso = '<div class="steps__progress" role="progressbar" aria-label="Avance del armado del viaje" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + pct + '%"></span></div>'
+      + '<p class="steps__pct"><b>' + pct + '%</b> armado &middot; paso ' + n + ' de 4</p>';
+    return progreso + '<ol class="steps__list">' + lis + '</ol>';
   }
   /* El boton para pasar al paso siguiente va ABAJO de lo que se esta eligiendo
      y aparece recien cuando ese paso quedo resuelto (ej: elegido el bus o el
@@ -6155,7 +6162,7 @@
 
       // Paso 1: el vuelo.
       var vBajada = flightSummary.selected
-        ? esc(flightSummary.airline || '') + ' &middot; ' + money(flightTotal)
+        ? esc(flightSummary.airline || '') + ' &middot; ' + money(flightTotal) + ' total &middot; incluido en tu presupuesto (gesti&oacute;n externa)'
         : 'Todav&iacute;a no agregaste vuelo';
       var vAccion = '';
       if (flightSummary.selected && flightBookUrl) {
@@ -6170,7 +6177,7 @@
 
       // Paso 2: el alojamiento.
       var hBajada = hotelBookUrl
-        ? esc(selectedHotelName) + ' &middot; ' + money(hotelTotal)
+        ? esc(selectedHotelName) + ' &middot; ' + money(hotelTotal) + ' total &middot; incluido en tu presupuesto (gesti&oacute;n externa)'
         : 'Todav&iacute;a no agregaste hotel';
       var hAccion = '';
       if (!hotelElegido()) {
@@ -8086,7 +8093,7 @@
       '</div>' +
       '<div class="flight-summary-total"><span class="flight-summary-total-label">Tarifa final · Ida y vuelta</span>' +
         '<b class="flight-summary-total-value">' + priceText + '</b>' + priceSub + '</div>' +
-      (offer.book_url ? '<a class="btn btn-primary flight-summary-book" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Reservar en Google Flights</a>' : '') +
+      (offer.book_url ? '<a class="btn btn-primary flight-summary-book" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver en Google Flights</a>' : '') +
       '<button type="button" class="flight-summary-change" data-change-flight>' + iconSwap + 'Elegir otro vuelo</button>' +
       '<p class="flight-summary-foot">' + iconInfo + '<span>Tarifa final de ida y vuelta con ' + esc(offer.airline) + '. Al hacer clic, completás la reserva de forma segura en Google Flights.</span></p>' +
       '</div>';

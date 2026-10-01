@@ -2667,6 +2667,12 @@ h3.block-title, .block-title:is(h3) {
 .steps__item.is-current .steps__n{background:var(--cel);border-color:var(--cel);color:var(--cel-ink,#0A101A)}
 .steps__item.is-done .steps__n{background:var(--good);border-color:var(--good);color:#fff}
 .steps__item.is-pending .steps__t b{color:var(--ink2)}
+.steps__progress{height:6px;margin:0 0 6px;border-radius:99px;background:var(--line);overflow:hidden}
+.steps__progress span{display:block;height:100%;border-radius:99px;background:var(--cel);transition:width .3s ease}
+.steps__pct{margin:0 0 10px;font-size:12px;color:var(--ink2)}
+.steps__pct b{color:var(--cel);font-weight:800}
+.steps__item.is-current .steps__btn{border-width:2px}
+.steps__item.is-pending .steps__btn{border-style:dashed}
 .steps__next{width:100%;margin-top:10px;min-height:44px;border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
 .steps__next em{font-style:normal;font-weight:600;opacity:.8}
 .steps__ok{margin:10px 0 0;font-size:13px;color:var(--ink2);text-align:center}
