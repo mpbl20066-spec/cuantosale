@@ -2929,3 +2929,8 @@ button.logo{min-height:44px}
 .tour-detail-modal__gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:var(--cel-soft)}
 .tour-detail-modal__gallery.is-single{grid-template-columns:1fr}
 .tour-detail-modal__gallery.is-single img{aspect-ratio:16/9}
+
+/* Logos de medios de pago sobre una pastilla blanca pareja: los logos oficiales
+   son oscuros o de color y no se leen sobre el fondo oscuro de la tarjeta. */
+.checkout-pay__brand:has(.checkout-pay__logo:not(.is-broken)){background:#fff;border-radius:8px;padding:0 10px;box-sizing:border-box;height:calc(var(--pay-logo-h) + 14px)}
+.checkout-pay__logo:not(.is-broken){background:transparent}
