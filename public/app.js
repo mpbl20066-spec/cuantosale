@@ -6273,7 +6273,6 @@
        la aerolinea o en una agencia. Booking si es intermediario real, y ahi
        el respaldo es cierto. */
       canalesTexto +
-      dividirBloque +
       /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
 
        Porque el pago del vuelo y del hotel pasa por un sitio del que la app
@@ -6298,18 +6297,21 @@
          menu "Compartir" junta WhatsApp, la tarjeta de Instagram y copiar el
          texto, que antes eran tres botones y uno de ellos gigante. */
       '<div class="voucher-actions">' +
-      /* Tres utilidades, misma caja. WhatsApp sale de la barra y se queda
-         adentro del menu: antes estaba en los dos lados, con el mismo icono
-         y el mismo texto, a 300px de distancia. En la barra queda por ser el
-         atajo de un toque, que es como se usa compartir un itinerario. */
-      '<div class="voucher-share"><button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span><svg class="voucher-share__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      /* Pie del resumen, de arriba abajo: el CTA de reserva (arriba, solo), una
+         barra de herramientas con Guardar, Compartir y Coordinar con asesor, y
+         al final el bloque de grupo, colapsado. El menu de Compartir se abre
+         EN LINEA debajo de la barra, empujando el contenido: asi nunca tapa
+         otro boton. */
+      '<div class="voucher-tools voucher-share">' +
+      '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
+      '<button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span><svg class="voucher-share__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      '<button type="button" class="voucher-chip voucher-chip--asesor" data-coordinar-asesor title="Abrir WhatsApp con el resumen y lo que falta coordinar" aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">Coordinar con asesor</span></button>' +
       '<div class="voucher-share__menu" id="voucher-share-menu" hidden>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '<button type="button" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Tarjeta para Instagram</span></button>' +
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
-      '<button type="button" class="voucher-chip voucher-chip--main' + (pedido.count ? ' is-secondary' : '') + '" data-coordinar-asesor title="Abrir WhatsApp con el resumen y lo que falta coordinar">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">Coordinar con asesor</span></button>' +
-      '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
+      '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
       '</div>';
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');

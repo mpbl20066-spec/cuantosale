@@ -3143,3 +3143,21 @@ button.logo{min-height:44px}
 .trip-summary__state.is-wip{background:var(--cel-soft);color:var(--cel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cel) 40%,transparent)}
 .voucher-item__cta.is-reserved.is-solicitado{border-color:color-mix(in srgb,var(--cel) 55%,transparent);background:transparent;color:var(--cel)}
 .voucher-item__cta.is-reserved.is-solicitado:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
+
+/* Pie del resumen: barra de herramientas (Guardar, Compartir, Asesor), menu de
+   Compartir en linea y grupo colapsado. Misma linea sobria del modo oscuro. */
+.voucher-actions{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+.voucher-actions>*{grid-column:1/-1}
+.voucher-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;position:static}
+.voucher-tools .voucher-chip{min-height:48px;width:100%;padding:0 8px;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--surface)}
+.voucher-tools .voucher-chip:hover{border-color:var(--cel)}
+.voucher-tools .voucher-chip--asesor .voucher-btn__label{white-space:normal;line-height:1.15;text-align:left;overflow:visible}
+.voucher-tools .voucher-share__menu{position:static;grid-column:1/-1;box-shadow:none;border:1px solid var(--line);background:var(--surface);margin:0}
+.voucher-grupo{border:1px solid var(--line);border-radius:14px;background:transparent}
+.voucher-grupo>summary{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;color:var(--ink2);font-size:13.5px;font-weight:600;cursor:pointer;list-style:none}
+.voucher-grupo>summary::-webkit-details-marker{display:none}
+.voucher-grupo>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s ease}
+.voucher-grupo[open]>summary::after{transform:rotate(-135deg)}
+.voucher-grupo>summary .voucher-btn__ico{width:18px;height:18px;color:var(--cel)}
+.voucher-grupo>.voucher-split{margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px;background:transparent}
+@media (max-width:420px){.voucher-tools .voucher-chip{flex-direction:column;gap:3px;padding:6px 4px;font-size:12px}.voucher-tools .voucher-chip--asesor .voucher-btn__label{text-align:center}}
