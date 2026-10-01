@@ -1,4 +1,4 @@
-/* version: 196
+/* version: 205
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -277,8 +277,8 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .money{position:relative}
 .money span{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:600;color:var(--ink2)}
 .money .inp{padding-left:58px}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.seg button{border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 8px;font-size:14px;font-weight:600;cursor:pointer;line-height:1.25;min-height:56px}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.seg button{min-width:0;overflow-wrap:anywhere;border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 8px;font-size:14px;font-weight:600;cursor:pointer;line-height:1.25;min-height:56px}
 .seg button[aria-pressed="true"]{background:var(--selected-bg);color:var(--selected-ink);border-color:var(--selected-border)}
 .transport-seg{grid-template-columns:repeat(3,1fr)}
 .transport-seg button{min-height:48px}
@@ -2813,6 +2813,37 @@ button.logo{min-height:44px}
   .local-tour__tag{top:10px;left:10px;font-size:11px}
 }
 .local-tours{margin-bottom:40px}
+/* Tarjeta de tour en celulares angostos (o con letra grande del sistema): el
+   pie ya no pelea precio y boton por la misma fila. Si no entran juntos, el
+   boton baja y ocupa todo el ancho, y la etiqueta de precio no se corta. */
+@media(max-width:639px){
+  .local-tour__foot{flex-wrap:wrap;align-items:flex-end;row-gap:8px}
+  .local-tour__price{flex:1 1 auto;min-width:max-content}
+  .local-tour__from{white-space:nowrap}
+  .local-tour__info{flex:1 1 auto;white-space:nowrap}
+}
+@media(max-width:380px){
+  .local-tour{grid-template-columns:88px minmax(0,1fr)}
+  .local-tour__body{padding:10px}
+}
+@media(max-width:340px){
+  .local-tour__from{white-space:normal}
+  .steps__btn{font-size:11px;padding:7px 2px;overflow-wrap:anywhere;hyphens:auto}
+}
+/* Cabecera en pantallas muy angostas: logo y botones pasan a dos filas en vez
+   de aplastarse, y los titulos largos parten palabra antes que ensanchar la
+   pagina. */
+@media(max-width:340px){
+  .top{flex-wrap:wrap;row-gap:8px}
+  .account-actions{flex-wrap:wrap;justify-content:flex-end}
+  .account-button{white-space:nowrap}
+  h1{font-size:40px}
+  h2,h3{overflow-wrap:anywhere}
+}
+/* Modal de la experiencia: aire entre la grilla de datos, cada titulo de
+   seccion y la caja anterior, y relleno parejo en la caja de "Detalles". */
+.tour-detail-modal .tour-facts + .tour-detail-modal__h,.tour-detail-modal .tour-detail-modal__copy + .tour-detail-modal__h{margin-top:24px}
+.tour-detail-modal .tour-detail-modal__copy.tour-detail-modal__text{padding:14px}
 .hotel-ubic{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0;color:var(--ink2);font-size:12.5px;font-weight:600;line-height:1.4}
 
 .daily-budget__note{margin:-2px 0 12px;font-size:13px;line-height:1.45;color:var(--ink2)}.daily-budget__note b{color:var(--ink);font-weight:700}

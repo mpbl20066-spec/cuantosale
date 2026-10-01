@@ -18,10 +18,11 @@ body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); }
 .tp-bar input { flex: 1 1 200px; min-width: 160px; font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit; }
 .tp-count { font-size: 13px; color: var(--muted, #666); margin: 0 0 10px; }
 .tp-list { display: grid; gap: 8px; }
-.tp-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 10px; background: var(--card, #fff); }
+.tp-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 10px; background: var(--card, #fff); }
 .tp-name { font-weight: 600; margin: 0; }
 .tp-meta { font-size: 12.5px; color: var(--muted, #666); }
-.tp-prices { display: flex; gap: 14px; text-align: right; }
+.tp-prices { display: flex; flex-wrap: wrap; gap: 4px 14px; text-align: right; }
+@media (max-width: 480px) { .tp-row { grid-template-columns: minmax(0, 1fr); } .tp-prices { justify-content: flex-start; text-align: left; } }
 .tp-price b { display: block; font-size: 16px; }
 .tp-price span { font-size: 11.5px; color: var(--muted, #666); }
 .tp-empty { padding: 40px 12px; text-align: center; color: var(--muted, #666); }
