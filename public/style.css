@@ -3642,7 +3642,9 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 
 /* "Recomendado" de los hoteles: badge arriba a la derecha de la ficha. Estaba
    anclado abajo a la izquierda y se montaba sobre "Ver habitaciones". */
-.hotel-option .hotel-choice{position:absolute;top:12px;right:12px;left:auto;bottom:auto;margin:0}
+.hotel-option .hotel-choice{position:absolute;top:8px;left:8px;right:auto;bottom:auto;margin:0}
+/* Con "Recomendado" arriba a la izquierda, las etiquetas de la foto pasan a la fila de abajo. */
+.hotel-option.recommended .hotel-tags{top:42px}
 
 /* Resumen: el boton "Reservar viaje completo" es sticky con margenes negativos
    para llegar a los bordes; el max-width:100% generico lo dejaba corrido. */

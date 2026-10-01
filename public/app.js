@@ -4140,6 +4140,11 @@
           candidatos.forEach(function (inp) { if (!mejor || Number(inp.getAttribute('data-hotel-total')) < Number(mejor.getAttribute('data-hotel-total'))) mejor = inp; });
           if (!mejor) return;
           mejor.checked = true;
+          // Queda primero en su lista, asi se ve de entrada sin buscarlo.
+          var fichaElegida = mejor.closest('[data-hotel-option]');
+          var contenedor = fichaElegida && fichaElegida.parentNode;
+          var primera = contenedor && contenedor.querySelector(':scope > [data-hotel-option]');
+          if (primera && primera !== fichaElegida) contenedor.insertBefore(fichaElegida, primera);
           var tit = mejor.closest('[data-hotel-option]').querySelector('h3');
           if (tit) detailState.selectedHotelName = tit.textContent.trim();
           actualizarAlojamiento(Math.round(Number(mejor.getAttribute('data-hotel-total'))), true, Number(stop) || 0);
@@ -6221,7 +6226,8 @@
           /* La pastilla va en la linea del titulo, no en una propia. Antes ocupaba
              una linea entera y la fila reservada daba 83px contra los 58 de las
              demas, cuando el pedido era de una linea o dos con bajada. */
-          + (reservado ? '<span class="voucher-item__estado">' + chipReserva(category) + '</span>' : '')
+          + (reservado ? '<span class="voucher-item__estado">' + chipReserva(category) + '</span>'
+            : (amount > 0 ? '<span class="voucher-item__estado"><span class="reserva-chip is-sel">Seleccionado</span></span>' : ''))
           + '</p>' + cuerpo + '</div>' +
         '<div class="voucher-item__side"><b class="voucher-item__amount' + (amount ? '' : ' is-zero') + '">' + (!amount && category === 'tours' ? 'Opcional' : money(amount)) + '</b>' + lado + '</div></li>';
     }
