@@ -3655,12 +3655,6 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 
 /* Codigo de presupuesto (#CS-XXXX-XXXXX): una pastilla tocable bajo el titulo del
    resumen; un toque lo copia. */
-.voucher-code{display:inline-flex;align-items:center;gap:8px;max-width:100%;min-height:40px;margin:2px 0 10px;padding:6px 12px;border:1px dashed var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
-.voucher-code span{color:var(--ink2);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.voucher-code b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;font-weight:800;letter-spacing:.02em;overflow-wrap:anywhere}
-.voucher-code svg{flex:none;color:var(--cel)}
-.voucher-code:hover{border-color:var(--cel)}
-.voucher-code:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
 /* Asistencia: tarjeta con icono, mensaje y un solo boton, en lugar de un chip
    mas en la fila de herramientas. */
@@ -3723,3 +3717,11 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .flight-summary-change{margin-top:12px;min-height:var(--tap,48px);border:0;border-radius:var(--btn-r,12px);background:var(--action-bg);color:var(--action-ink);font:800 14px Poppins,sans-serif}
 .flight-summary-change:hover{border:0;background:var(--action-bg);color:var(--action-ink);filter:brightness(1.08)}
 .flight-summary-change:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* Fila del resumen: "Reservar" como accion y, debajo, un enlace chico para
+   cambiar la seleccion. */
+.voucher-item__side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.voucher-item__edit{display:inline-flex;align-items:center;justify-content:flex-end;min-height:36px;padding:0 2px;border:0;background:transparent;color:var(--ink2);font:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.voucher-item__edit:hover{color:var(--ink)}
+.voucher-item__edit:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.voucher-item__side .voucher-item__cta:not(.is-reserved):not(.is-elegir){background:var(--action-bg);color:var(--action-ink);border-color:var(--action-bg);font-weight:800}

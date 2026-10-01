@@ -5304,7 +5304,6 @@
       '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total del viaje: ' + esc(money(totals.total)) + '</div>' +
       '</div>' +
       inclusionsMarkup +
-      '<div style="font-size:11px;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.7);margin-bottom:5px;">PRESUPUESTO ' + esc(codigoPresupuesto(meta)) + '</div>' +
       '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">Abrí el presupuesto completo en <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
       '</div></div>';
     wrapper.appendChild(node);
@@ -5770,7 +5769,6 @@
     var enlace = enlaceDelViaje();
     return [
       'Mi viaje a ' + meta.dest.name + ' · ' + storyDateRange(meta) + ' · ' + money(total),
-      'Código de presupuesto: ' + codigoPresupuesto(meta),
       enlace ? 'Abrí el presupuesto: ' + enlace : 'Calculá el tuyo en cuantosale.uy'
     ].join('\n');
   }
@@ -5903,16 +5901,33 @@
   function estadosLocales() {
     try { return JSON.parse(localStorage.getItem(ESTADOS_KEY) || '{}') || {}; } catch (e) { return {}; }
   }
+  /* "Solicitado" solo vale mientras el pedido sea el mismo que se envio: la marca
+     guarda una firma de lo elegido (actividades o traslado) y, si despues cambia
+     la seleccion, deja de mostrarse. Las marcas viejas sin firma tampoco valen:
+     eran "solicitud enviada" sin que nadie hubiera confirmado esa seleccion. */
+  function firmaSolicitud(categoria) {
+    var p = checkoutPedido();
+    var base = categoria === 'tours'
+      ? p.tours.map(function (t) { return t.title + ':' + t.price; }).sort().join('|')
+      : (p.transfer ? JSON.stringify(p.transfer) : '');
+    base += '#' + (Number(detailState && detailState.meta && detailState.meta.pax) || 1);
+    var h = 5381;
+    for (var k = 0; k < base.length; k++) h = ((h * 33) ^ base.charCodeAt(k)) >>> 0;
+    return h.toString(36);
+  }
   function estadoLocal(categoria) {
     var id = viajeReservaId();
     var m = id ? estadosLocales()[id] : null;
-    return (m && m[categoria]) || '';
+    var v = (m && m[categoria]) || '';
+    if (v.indexOf('solicitado:') === 0) return v === 'solicitado:' + firmaSolicitud(categoria) ? 'solicitado' : '';
+    return v === 'solicitado' ? '' : v;
   }
   function guardarEstadoLocal(categoria, valor) {
     var id = viajeReservaId();
     if (!id) return;
     var todos = estadosLocales();
     todos[id] = todos[id] || {};
+    if (valor === 'solicitado') valor += ':' + firmaSolicitud(categoria);
     if (valor) todos[id][categoria] = valor; else delete todos[id][categoria];
     try { localStorage.setItem(ESTADOS_KEY, JSON.stringify(todos)); } catch (e) { /* modo privado */ }
   }
@@ -6435,11 +6450,13 @@
          - reservado: el estado, como siempre.
        Reservar afuera (Google Flights, Booking) vive en "Para completar tu
        viaje" y en el boton de reservar del pie, no en cada fila. */
-    function filaCta(categoria, elegido, agregar) {
+    function filaCta(categoria, elegido, agregar, reservar) {
       if (estadoReserva(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
-      return elegido
-        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Ver o editar</button>'
-        : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="' + categoria + '">' + agregar + '</button>';
+      if (!elegido) return '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="' + categoria + '">' + agregar + '</button>';
+      /* Elegido: "Reservar" es la accion y, debajo, un enlace chico para cambiar la
+         seleccion. Vuelo y hotel reservan afuera (link); traslado y tours abren el
+         checkout. */
+      return (reservar || '') + '<button type="button" class="voucher-item__edit" data-detalle-rubro="' + categoria + '">Cambiar selección</button>';
     }
     /* "Falta elegir" al cuerpo, con su propio tono: es una instruccion, no un
        dato del rubro, y por eso no comparte la tipografia de la bajada. */
@@ -6495,7 +6512,7 @@
     /* Sin modalidad no hay nada que reservar. El aviso va al cuerpo de la fila
        (antes iba debajo del monto, en la columna de la cifra) y el CTA de la
        derecha desaparece en vez de quedar como un boton que no abre nada. */
-    var transferCta = filaCta('traslados', !!(tl2 || tv2), 'Elegir traslado');
+    var transferCta = filaCta('traslados', !!(tl2 || tv2), 'Elegir traslado', reservarCta(true, 'Reservar traslado', 'traslados'));
     var transferNoteHtml = (tl2 || tv2 ? '' : avisoVoucher('Elegí un transfer en la sección de traslados.'))
       + '<p class="voucher-item__detail">' + transferNote + '</p>';
     // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
@@ -6676,7 +6693,7 @@
     var porPersona = pax > 1 ? '<span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span>' : '';
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><button type="button" class="voucher-code" data-copiar-codigo="' + esc(codigoPresupuesto(detailState.meta)) + '" aria-label="Copiar el código de presupuesto ' + esc(codigoPresupuesto(detailState.meta)) + '"><span>Código de presupuesto</span><b>' + esc(codigoPresupuesto(detailState.meta)) + '</b><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
+      '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong>' + porPersona + '</div></div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
 
@@ -6684,10 +6701,10 @@
          antes de viajar, y lo que se gasta en destino (abajo). */
       '<div class="voucher-bloque"><h3 class="voucher-bloque__title">Costos previos al viaje<span>' + (autoMode ? 'Auto, alojamiento y actividades' : busMode ? 'Bus, alojamiento y actividades' : 'Vuelo, alojamiento, traslado y actividades') + '</span></h3><b class="voucher-bloque__monto">' + money(Math.max(0, totalGeneral - destinoTotal)) + '</b></div>' +
       '<ul class="voucher-list">' +
-      (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, filaCta('pasajes', !!flightSummary.selected, 'Agregar vuelos'))) +
-      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Elegir hotel')) +
+      (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, filaCta('pasajes', !!flightSummary.selected, 'Agregar vuelos', bookCta(flightBookUrl, 'Reservar', 'Reservar vuelo', 'pasajes')))) +
+      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Elegir hotel', bookCta(hotelBookUrl, 'Reservar', 'Reservar alojamiento', 'alojamiento'))) +
       (busMode || autoMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
-      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Agregar tours')) +
+      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Agregar tours', reservarCta(true, 'Reservar actividades', 'tours'))) +
       '</ul>' +
       /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
          ya es una caja: caja dentro de caja, y el unico bloque del modal con
@@ -6751,7 +6768,7 @@
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
-      '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos. Va tu código ' + esc(codigoPresupuesto(detailState.meta)) + '.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">Coordinar con asesor</button></aside>' +
+      '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos y te contacta por WhatsApp.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">Coordinar con asesor</button></aside>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
       '</div>' + reservarTodo;
     modal.dataset.summaryText = summaryText;
@@ -10264,6 +10281,7 @@
     var modal = $('#auth-modal');
     if (!modal) return;
     if (authUser) { openTripsModal(); return; }
+    guardarRetornoLogin();
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><button type="button" class="booking-close" data-close-auth aria-label="Cerrar">×</button><span class="account-kicker">CuántoSale</span><h2 id="auth-title">Guardá tus viajes</h2><p class="booking-note">Creá una cuenta para conservar presupuestos e itinerarios en la nube.</p>' + (message ? '<p class="booking-error">' + esc(message) + '</p>' : '') + '<button type="button" class="oauth-button" data-google-auth>Continuar con Google</button><div class="account-divider"><span>o con tu email</span></div><form id="auth-form"><label>Correo electrónico<input required type="email" name="email" autocomplete="email"></label><label>Contraseña<input required minlength="6" type="password" name="password" autocomplete="current-password"></label><div class="account-form-actions"><button type="submit" class="confirm-booking" data-auth-action="signin">Iniciar sesión</button><button type="button" class="account-button account-button--secondary" data-auth-action="signup">Crear cuenta</button></div><p class="account-status" data-auth-status aria-live="polite"></p></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
@@ -10316,6 +10334,19 @@
     var fila = el.closest('[data-rubro]');
     return { attr: attr, valor: attr ? el.getAttribute(attr) || '' : '', rubro: fila ? fila.getAttribute('data-rubro') : '' };
   }
+  /* Volver a donde estabas: al abrir el login desde cualquier lado (cabecera,
+     Guardar, etc.) se guarda el viaje abierto. Google o el link del correo
+     recargan la pagina en el inicio, y retomarAccionPendiente() reabre ese viaje
+     al terminar de iniciar sesion. No pisa una accion mas especifica (reservar). */
+  function guardarRetornoLogin() {
+    var existente = null;
+    try { existente = localStorage.getItem(ACCION_KEY); } catch (e) { existente = null; }
+    if (existente) { try { var prev = JSON.parse(existente); if (prev && Date.now() - (prev.t || 0) < ACCION_TTL_MS && prev.accion && prev.accion.attr) return; } catch (e) { /* se pisa */ } }
+    var ctx = null;
+    try { ctx = tripPayload(); } catch (e) { ctx = null; }
+    if (!ctx) return;
+    try { localStorage.setItem(ACCION_KEY, JSON.stringify({ accion: { attr: '', valor: '', rubro: '' }, ctx: ctx, t: Date.now() })); } catch (e) { /* modo privado */ }
+  }
   async function pedirLogin(accion) {
     var ctx = null;
     try { ctx = tripPayload(); } catch (e) { ctx = null; }
@@ -10365,6 +10396,8 @@
     } else if (modal && (modal.hidden || !modal.dataset.summaryText)) {
       openItinerarySummaryModal();
     }
+    // Sin accion concreta (solo se queria volver al viaje): ya esta abierto.
+    if (!pend.accion.attr) return;
     if (!await esperarVoucher(5000)) return;
     var a = pend.accion, attr = a.attr, valor = a.valor;
     if (attr === 'data-detalle-rubro') { closeBookingForm(); jumpToBudgetSection(valor); return; }
@@ -12880,13 +12913,6 @@ function comboNombreDestino() {
       /* El cierre: WhatsApp con el resumen y lo que falta. El mensaje lo arma
          mensajeCoordinar() y sale con el estado real, no con una plantilla que
          afirme reservas que todavia no pasaron. */
-      var codigoBtn = e.target.closest('[data-copiar-codigo]');
-      if (codigoBtn) {
-        e.preventDefault();
-        var cod = codigoBtn.getAttribute('data-copiar-codigo');
-        copiarAlPortapapeles(cod).then(function (ok) { mostrarToast(ok ? 'Código copiado' : 'No pudimos copiar el código', ok ? cod : 'Seleccionalo y copialo a mano', !ok); });
-        return;
-      }
       var coordinar = e.target.closest('[data-coordinar-asesor]');
       if (coordinar) {
         e.preventDefault();
