@@ -3260,27 +3260,21 @@ button.logo{min-height:44px}
 .guia-banner__cta{white-space:nowrap;font-size:13px;font-weight:800;color:var(--cel)}
 @media (max-width:560px){.guia-banner{grid-template-columns:auto minmax(0,1fr);padding:14px}.guia-banner__cta{grid-column:1/-1}}
 
-/* ---- Cabecera pegajosa del detalle (Smart Sticky) ----
-   Titulo + total + pasos quedan pegados arriba; al bajar se compactan a una
-   sola linea: titulo corto, total chico y los cuatro pasos en miniatura. */
-.detail-head{position:sticky;top:0;z-index:30;margin:0 0 22px;padding-top:env(safe-area-inset-top,0px)}
+/* ---- Barra de pasos pegajosa ----
+   La propuesta (titulo y total grande) se va con el scroll de forma natural;
+   solo la barra de pasos queda fija arriba y, al pegarse, se reduce a una tira
+   de unos 52px con el total resumido y los cuatro pasos en miniatura. Son dos
+   bloques independientes: no hay un contenedor gigante pegado. */
 .detail-head__sentinel{height:1px;margin-bottom:-1px;pointer-events:none}
-.detail-head .detail-summary{margin-bottom:12px;transition:padding .25s ease,border-radius .25s ease}
-.detail-head .steps{position:static;margin:0;box-shadow:none}
-.detail-head.is-compact{display:flex;align-items:center;gap:8px;padding:6px 0;margin-bottom:14px;background:var(--bg)}
-.detail-head.is-compact .detail-summary{flex:1 1 auto;min-width:0;margin:0;padding:7px 12px;border-radius:14px;display:flex;align-items:center;gap:8px}
-.detail-head.is-compact .detail-summary .tag,.detail-head.is-compact .detail-summary p,.detail-head.is-compact .detail-summary__per-person{display:none}
-.detail-head.is-compact .detail-summary h2{flex:1 1 auto;min-width:0;margin:0;font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.detail-head.is-compact .detail-summary strong[data-detail-total]{flex:none;display:block;margin:0;font-size:19px;line-height:1}
-.detail-head.is-compact .steps{flex:none;padding:5px 6px;border-radius:14px}
-.detail-head.is-compact .steps__list{display:flex;gap:4px}
-.detail-head.is-compact .steps__btn{width:auto;min-height:34px;padding:2px;gap:0;justify-content:center;border-width:1px}
-.detail-head.is-compact .steps__t{display:none}
-.detail-head.is-compact .steps__n{margin:0}
-.detail-head.is-compact .steps__progress,.detail-head.is-compact .steps__pct{display:none}
-.detail-head.is-compact .detail-summary h2{display:none}
-.detail-head.is-compact .detail-summary p{display:block;flex:1 1 auto;min-width:0;font-size:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.detail-head.is-compact .detail-summary__destino{font-size:14px}
+.steps{position:sticky;top:0;z-index:40}
+.steps__mini-total{display:none}
+.steps.is-compact{display:flex;align-items:center;gap:10px;max-height:60px;padding:6px 10px;border-radius:0 0 14px 14px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.steps.is-compact .steps__mini-total{display:block;flex:none;font-family:var(--fh);font-size:18px;font-weight:800;line-height:1;color:var(--action-bg);white-space:nowrap}
+:root[data-theme="light"] .steps.is-compact .steps__mini-total{color:var(--ink)}
+.steps.is-compact .steps__progress,.steps.is-compact .steps__pct,.steps.is-compact .steps__t{display:none}
+.steps.is-compact .steps__list{display:flex;gap:6px;margin-left:auto}
+.steps.is-compact .steps__btn{width:40px;min-width:40px;height:40px;min-height:40px;padding:0;gap:0;justify-content:center;border-width:1px;border-radius:50%}
+.steps.is-compact .steps__n{margin:0}
 
 /* ---- Toast de guardado / enlace copiado -------------------------------------- */
 .cs-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:400;display:flex;align-items:center;gap:12px;max-width:min(92vw,420px);padding:12px 16px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:var(--r-card,16px);background:var(--surface);color:var(--ink);box-shadow:0 14px 40px rgba(0,0,0,.45);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
@@ -3332,7 +3326,7 @@ button.logo{min-height:44px}
 summary{min-height:var(--tap);display:flex;align-items:center}
 summary::-webkit-details-marker{display:none}
 /* Barra de pasos compacta (al hacer scroll): 4 toques de 48px */
-.detail-head.is-compact .steps__btn{min-height:var(--tap);min-width:var(--tap)}
+.steps.is-compact .steps__btn{min-height:40px;min-width:40px}
 
 /* Seleccion: mismo grosor y color en toda la plataforma */
 .steps__item.is-current .steps__btn,.seg button[aria-pressed="true"],.hotel-type-pill.is-on,.hotel-playa-chip.is-on{border-width:var(--bw-on);border-color:var(--card-sel-border,var(--cel))}

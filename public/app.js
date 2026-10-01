@@ -4334,7 +4334,10 @@
     var pct = (p[0].hecho ? 40 : 0) + (p[1].hecho ? 40 : 0) + (p[2].hecho ? 20 : 0);
     var progreso = '<div class="steps__progress" role="progressbar" aria-label="Avance del armado del viaje" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + pct + '%"></span></div>'
       + '<p class="steps__pct"><b>' + pct + '%</b> armado &middot; paso ' + n + ' de 4</p>';
-    return progreso + '<ol class="steps__list">' + lis + '</ol>';
+    // Total resumido: solo se ve en la barra compacta (ver .steps.is-compact).
+    var totalMini = '';
+    try { totalMini = money(getBudgetBreakdown(detailState).total); } catch (e) { totalMini = ''; }
+    return '<span class="steps__mini-total" aria-hidden="true">' + totalMini + '</span>' + progreso + '<ol class="steps__list">' + lis + '</ol>';
   }
   /* El boton para pasar al paso siguiente va ABAJO de lo que se esta eligiendo
      y aparece recien cuando ese paso quedo resuelto (ej: elegido el bus o el
@@ -9506,9 +9509,8 @@
     // recomendar.
     var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main" data-paso="' + pasoActualNum() + '">' +
-      '<div class="detail-head__sentinel" data-detail-head-sentinel></div><div class="detail-head" data-detail-head>' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p><b class="detail-summary__destino">' + esc(data.meta.dest.name) + '</b>' + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
-      '<nav class="steps" data-steps aria-label="Pasos del presupuesto">' + renderSafe(function () { return pasosMarkup(); }, '') + '</nav></div>' +
+      '<div class="detail-head__sentinel" data-detail-head-sentinel></div><nav class="steps" data-steps aria-label="Pasos del presupuesto">' + renderSafe(function () { return pasosMarkup(); }, '') + '</nav>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + dailyBudgetMarkup +
@@ -9535,7 +9537,7 @@
     // .detail-head en el CSS). El centinela esta justo arriba de ella: cuando sale
     // de la pantalla por arriba, la cabecera esta pegada y se compacta.
     (function () {
-      var head = document.querySelector('[data-detail-head]');
+      var head = document.querySelector('[data-steps]');
       var sentinel = document.querySelector('[data-detail-head-sentinel]');
       if (cabeceraObserver) { cabeceraObserver.disconnect(); cabeceraObserver = null; }
       if (!head || !sentinel || typeof IntersectionObserver !== 'function') return;
