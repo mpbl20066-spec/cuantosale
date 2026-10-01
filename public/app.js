@@ -1309,6 +1309,7 @@
     S.currency = code;
     try { localStorage.setItem('cuantosale_moneda', code); } catch (e) { /* modo privado */ }
     refrescarSelectorMoneda();
+    sincronizarPresupuesto();
     // Tres lugares muestran precios: el total grande de la vista de detalle, el
     // panel flotante "Mi viaje" y el desglose "A donde va tu plata".
     //
@@ -1374,6 +1375,7 @@
     if (guardada && tasaDe(guardada) != null) S.currency = guardada;
     pintarHeader();
     refrescarSelectorMoneda();
+    sincronizarPresupuesto();
     if (lastData) { try { render(lastData); } catch (e) { } }
   }
   // Un clic en el badge abre la lista; un clic en una opción elige y cierra.
@@ -1502,6 +1504,20 @@
     var tasa = tasaDe(monedaActiva().code);
     if (tasa == null || tasa === 0) return v;
     return v / tasa;
+  }
+  /* El presupuesto se guarda siempre en la base (USD, S.budget) porque asi lo
+     espera el server, pero el campo lo muestra y lo edita en la moneda elegida
+     arriba: con reales se escribe y se lee en R$. aBase()/aMoneda() son el
+     puente. Si la persona esta escribiendo en el campo no se le pisa el valor. */
+  function sincronizarPresupuesto() {
+    var campo = $('#bud');
+    if (!campo) return;
+    var m = monedaActiva();
+    if (tasaDe(m.code) == null) m = monedaBase();
+    var simbolo = campo.parentElement && campo.parentElement.querySelector('span');
+    if (simbolo) simbolo.textContent = m.simbolo;
+    if (document.activeElement === campo) return;
+    campo.value = S.budget ? Math.round(aMoneda(S.budget)) : '';
   }
   function dLong(d) { return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' }); }
   function shortDateLabel(value) {
@@ -8191,7 +8207,7 @@
     var titleBudget = Number(data.meta.budget).toLocaleString('es-UY');
     var monedaBaseTit = monedaBase(), monedaTit = monedaActiva();
     var enOtraMoneda = monedaTit.code !== monedaBaseTit.code && tasaDe(monedaTit.code) != null;
-    var budgetTxt = 'USD $' + titleBudget + (enOtraMoneda ? ' (≈ ' + money(data.meta.budget) + ')' : '');
+    var budgetTxt = enOtraMoneda ? money(data.meta.budget) + ' (≈ USD $' + titleBudget + ')' : 'USD $' + titleBudget;
     el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos disponibles para tu presupuesto de ' + budgetTxt + '</h2>' +
       '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo' + (enOtraMoneda ? '. Precios en ' + monedaTit.etiqueta.toLowerCase() + ' (' + monedaTit.simbolo + ')' : '') + '.</p>' +
       (fits.length ? '<div class="destination-cards">' + cards + '</div>' : '<div class="notice">No encontramos destinos dentro de ese presupuesto. Probá aumentando el monto o ajustando las fechas.</div>') + '</section>';
@@ -10279,7 +10295,7 @@
         $('#dep-trigger').focus();
       }
     });
-    $('#bud').value = S.budget;
+    sincronizarPresupuesto();
     $('#pax').textContent = S.pax;
     renderTransportSelector();
 
@@ -11174,7 +11190,7 @@ function comboNombreDestino() {
       schedule();
     });
     $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; syncDateRangeFields(); schedule(); });
-    $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Number(e.target.value) || 0); schedule(); });
+    $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Math.round(aBase(Math.max(0, Number(e.target.value) || 0)))); schedule(); });
     $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
     $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
     $('#seg').addEventListener('click', function (e) {
