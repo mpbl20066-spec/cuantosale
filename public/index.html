@@ -217,7 +217,7 @@
      con `npm run build:transfer`. Va antes de app.js porque las cards del
      transfer leen de acá cuando el server todavía no mandó meta.officialTransfer. -->
 <script defer src="/transfer-precios.js"></script>
-<script defer src="/buses.js?v=1"></script>
+<script defer src="/buses.js?v=2"></script>
 <!-- Catálogo de tours y actividades. Generado desde data/tours.json con
      `npm run build:tours`, y ese JSON se actualiza desde la Sheet de Google
      Drive. Va antes de app.js porque app.js lee window.CS_TOURS_DATA al
@@ -229,7 +229,7 @@
      de app.js porque app.js lo lee al cargar. Sin '?v=' a propósito, por el
      mismo motivo que daily-costs.js: lo controla el CACHE_NAME del SW. -->
 <script defer src="/tours.generated.js"></script>
-<script defer src="/app.js?v=260"></script>
+<script defer src="/app.js?v=261"></script>
 
 </body>
 </html>

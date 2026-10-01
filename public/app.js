@@ -4003,7 +4003,7 @@
     if (tours) partes.push(tours + (tours === 1 ? ' actividad' : ' actividades'));
     // Extras: tours, comidas y transporte local. Los traslados viven en el paso 1.
     return [
-      { n: 1, titulo: (m === 'bus' ? 'Bus' : m === 'auto' ? 'Auto' : 'Vuelo') + ' + Traslados', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
+      { n: 1, titulo: m === 'bus' ? 'Bus' : m === 'auto' ? 'Auto' : 'Vuelo + Traslados', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
       { n: 2, titulo: 'Alojamiento', texto: hTxt, hecho: h, anc: 'alojamiento', cta: 'Elegí tu hotel' },
       { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Tours, comida y transporte local', hecho: tr, opcional: true, anc: 'tours', cta: 'Sumá extras' }
     ];
@@ -4033,11 +4033,18 @@
         + '<span class="steps__n" aria-hidden="true">' + (s.hecho ? '✓' : s.n) + '</span>'
         + '<span class="steps__t"><b>' + esc(s.titulo) + '</b><small>' + esc(s.texto) + '</small></span></button></li>';
     }).join('');
+    return '<ol class="steps__list">' + lis + '</ol>';
+  }
+  /* El boton para pasar al paso siguiente va ABAJO de lo que se esta eligiendo
+     y aparece recien cuando ese paso quedo resuelto (ej: elegido el bus o el
+     vuelo, aparece "Elegi tu hotel"). */
+  function pasoSiguienteMarkup() {
+    if (!detailState) return '';
+    var p = pasosEstado();
+    var n = pasoActualNum();
     var next = p[n];
-    var cta = next
-      ? '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + esc(next.cta) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>'
-      : '<p class="steps__ok">Listo: revisá el total en “Mi Viaje”.</p>';
-    return '<ol class="steps__list">' + lis + '</ol>' + cta;
+    if (!next || !p[n - 1].hecho) return '';
+    return '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + esc(next.cta) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>';
   }
   function irAlPaso(n) {
     if (!detailState) return;
@@ -4060,6 +4067,11 @@
     var principal = document.querySelector('.detail-main');
     if (principal) principal.setAttribute('data-paso', String(pasoActualNum()));
     if (el.__html !== html) { el.innerHTML = html; el.__html = html; try { syncBudgetJumpTargets(); } catch (e) { /* sin DOM todavia */ } }
+    var foot = document.querySelector('[data-steps-foot]');
+    if (foot) {
+      var fh = pasoSiguienteMarkup();
+      if (foot.__html !== fh) { foot.innerHTML = fh; foot.__html = fh; }
+    }
   }
   function getBudgetBreakdown(state) {
     if (!state) return { total: 0, entries: [] };
@@ -8777,9 +8789,9 @@
     var logistics = 'Vuelo ida y vuelta por ' + trip.hub.name + ' (' + trip.hub.iata + '). El transfer a cada parada se elige y se coordina aparte.';
     return '<section class="multistay-panel" aria-labelledby="multistay-title" data-multistay-panel>' +
       '<div class="multistay-panel__head"><div><span class="multistay-panel__eyebrow">ITINERARIO MULTIDESTINO</span><h2 id="multistay-title">Distribuí tus noches</h2></div><span class="multistay-panel__total">' + nights + (nights === 1 ? ' noche' : ' noches') + ' en total</span></div>' +
-      (nights > 1 ? '<div class="multistay-panel__stays"><div class="multistay-panel__stay"><strong>' + esc(first.name) + '</strong><span><b data-multistay-first-nights>' + firstNights + '</b> ' + (firstNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-first-cost>' + money(0) + ' alojamiento estimado</small></div>' +
+      (nights > 1 ? '<div class="multistay-panel__stays"><div class="multistay-panel__stay"><strong>' + esc(first.name) + '</strong><span><b data-multistay-first-nights>' + firstNights + '</b> ' + (firstNights === 1 ? 'noche' : 'noches') + '</span></div>' +
       '<label class="multistay-panel__slider"><span class="sr-only">Noches en ' + esc(first.name) + '</span><input type="range" min="1" max="' + (nights - 1) + '" step="1" value="' + firstNights + '" data-multistay-split aria-valuetext="' + firstNights + ' noches en ' + esc(first.name) + ', ' + secondNights + ' en ' + esc(second.name) + '"></label>' +
-      '<div class="multistay-panel__stay"><strong>' + esc(second.name) + '</strong><span><b data-multistay-second-nights>' + secondNights + '</b> ' + (secondNights === 1 ? 'noche' : 'noches') + '</span><small data-multistay-second-cost>' + money(0) + ' alojamiento estimado</small></div></div>' : '<p class="multistay-panel__hint">Para dividir la estadía entre localidades necesitás al menos 2 noches.</p>') +
+      '<div class="multistay-panel__stay"><strong>' + esc(second.name) + '</strong><span><b data-multistay-second-nights>' + secondNights + '</b> ' + (secondNights === 1 ? 'noche' : 'noches') + '</span></div></div>' : '<p class="multistay-panel__hint">Para dividir la estadía entre localidades necesitás al menos 2 noches.</p>') +
       '<p class="multistay-panel__logistics">✈️ ' + esc(logistics) + '</p><p class="multistay-panel__hint">El traslado entre las dos paradas se estima con la distancia entre ellas. El alojamiento pasa a ser real cuando elegís un hotel en cada parada.</p></section>';
   }
   function updateMultiStayPricing() {
@@ -8825,8 +8837,6 @@
     // "alojamiento estimado" al lado de un hotel real de Booking es mentir por
     // omision, y era lo que pasaba con la segunda parada: era siempre estimado y
     // decia lo mismo que la primera, que si era real.
-    if (firstCost) firstCost.textContent = money(firstStayCost) + (elegido1 != null ? ' elegido en Booking' : ' alojamiento estimado');
-    if (secondCost) secondCost.textContent = money(secondStayCost) + (elegido2 != null ? ' elegido en Booking' : ' alojamiento estimado');
     if (slider) slider.setAttribute('aria-valuetext', firstNights + ' noches en ' + trip.stays[0].name + ', ' + secondNights + ' en ' + trip.stays[1].name);
   }
   function changeHotelType(type) {
@@ -8980,6 +8990,7 @@
       renderSafe(function () { return multiStayMarkup(detailState); }, '') +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + dailyBudgetMarkup +
+      '<div class="steps__foot" data-steps-foot>' + renderSafe(function () { return pasoSiguienteMarkup(); }, '') + '</div>' +
       /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
 
          Antes estaba al final de todo y el comentario de arriba explicaba por

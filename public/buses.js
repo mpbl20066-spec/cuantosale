@@ -3,9 +3,9 @@
    Fuentes: EGA (pagina de Horarios y Tarifas, salidas de domingo) y TTL
    (cuadro de horarios "Actualizado: Hasta 1/3/26").
 
-   Precios en pesos uruguayos ($U), SOLO IDA. TTL no publica tarifa en ese
-   cuadro: queda en null y la app muestra "Consultar tarifa" en vez de inventar
-   un numero. `vigencia` es hasta cuando la empresa dice que el horario vale. */
+   Precios en pesos uruguayos ($U), SOLO IDA. TTL no publica tarifa en su
+   cuadro: por pedido del dueño se usa la misma tarifa de EGA para la misma
+   ruta (si una ruta queda en null la app muestra "Consultar tarifa"). `vigencia` es hasta cuando la empresa dice que el horario vale. */
 window.CS_BUS_SERVICES = [
   {
     empresa: 'EGA', fuente: 'Horarios y Tarifas de EGA (salidas de domingo)', vigencia: null,
@@ -17,9 +17,9 @@ window.CS_BUS_SERVICES = [
   {
     empresa: 'TTL', fuente: 'Cuadro de horarios de TTL', vigencia: '2026-03-01',
     rutas: [
-      { dest: 'poa', origen: 'Montevideo', destino: 'Porto Alegre', dias: 'Todos los días', salida: '21:00', llegada: '09:30', idaUyu: null },
+      { dest: 'poa', origen: 'Montevideo', destino: 'Porto Alegre', dias: 'Todos los días', salida: '21:00', llegada: '09:30', idaUyu: 4125 },
       { dest: 'poa', origen: 'Porto Alegre', destino: 'Montevideo', dias: 'Todos los días', salida: '20:00', llegada: '09:00', idaUyu: null },
-      { dest: 'fln', origen: 'Montevideo', destino: 'Florianópolis', dias: 'Ma, Vi, Do', salida: '16:30', llegada: '13:00', idaUyu: null },
+      { dest: 'fln', origen: 'Montevideo', destino: 'Florianópolis', dias: 'Ma, Vi, Do', salida: '16:30', llegada: '13:00', idaUyu: 5845 },
       { dest: 'fln', origen: 'Florianópolis', destino: 'Montevideo', dias: 'Lu, Ju, Sa', salida: '15:00', llegada: '10:00', idaUyu: null }
     ]
   }
