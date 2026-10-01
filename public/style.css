@@ -1,4 +1,4 @@
-/* version: 247
+/* version: 248
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2674,7 +2674,7 @@ h3.block-title, .block-title:is(h3) {
 @media (max-width:560px){.split-dialog h2{font-size:24px}.split-rows li{grid-template-columns:1fr auto}.split-rows li em{grid-column:1}}
 
 /* ---------- Pasos del presupuesto ---------- */
-.steps{position:sticky;top:8px;z-index:20;margin:0 0 22px;padding:12px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;margin:0 0 22px;padding:12px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .steps__list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .steps__btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:14px;background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:border-color .18s ease,background .18s ease}
 .steps__btn:hover:not(:disabled){border-color:var(--ink2)}
@@ -3291,7 +3291,7 @@ button.logo{min-height:44px}
    de unos 52px con el total resumido y los cuatro pasos en miniatura. Son dos
    bloques independientes: no hay un contenedor gigante pegado. */
 .detail-head__sentinel{height:1px;margin-bottom:-1px;pointer-events:none}
-.steps{position:sticky;top:0;z-index:40}
+.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:40}
 .steps__mini-total{display:none}
 .steps.is-compact{display:flex;align-items:center;gap:10px;max-height:60px;padding:6px 10px;border-radius:0 0 14px 14px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
 .steps.is-compact .steps__mini-total:not(:empty){display:block;flex:none;font-family:var(--fh);font-size:18px;font-weight:800;line-height:1;color:var(--action-bg);white-space:nowrap}
@@ -3523,3 +3523,14 @@ summary::-webkit-details-marker{display:none}
   .logo{font-size:20px}
   #auth-button{padding:0 12px;font-size:13px}
 }
+
+/* Barra de pasos: sticky puro de CSS, pegada arriba y por debajo del notch
+   (env(safe-area-inset-top)). Ningun ancestro tiene overflow/transform/contain,
+   asi que el scroll es solo el del documento. */
+.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:40}
+
+/* Los carruseles y el grafico de barras solo scrollean en horizontal. Con
+   overflow-x:auto el eje Y pasa a "auto" por defecto y cada uno queda como un
+   contenedor de scroll vertical (vacio) que compite con el de la pagina cuando
+   el dedo empieza el gesto encima. */
+.chart,.featured-months,.destination-highlights__carousel,.recent-searches__list{overflow-y:hidden}
