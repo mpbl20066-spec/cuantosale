@@ -17,15 +17,23 @@
      claro ve claro. Con eleccion guardada manda la eleccion. -->
 <script>
 (function () {
-  try {
-    var g = localStorage.getItem('cuantosale_tema');
-    if (g !== 'light' && g !== 'night') {
-      g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
-    }
-    document.documentElement.setAttribute('data-theme', g);
-    var m = document.querySelector('meta[name="theme-color"]');
-    if (m) m.setAttribute('content', g === 'light' ? '#F7F8FA' : '#0A101A');
-  } catch (e) { /* modo privado: se queda el night de :root */ }
+  // Leer el tema guardado va en su propio try/catch, separado del que aplica el
+  // atributo. Antes los dos estaban juntos: si localStorage.getItem tiraba, el
+  // throw se comia el setAttribute y el atributo NUNCA se escribia, dejando la
+  // pagina en el night de :root para siempre.
+  //
+  // Donde tira: modo privado de Safari, y los navegadores in-app de Instagram
+  // y Facebook, que es como se abre la pagina desde un enlace en un chat. En
+  // Chrome de escritorio no tira nunca, y por eso el bug se ve "solo en el
+  // celular": en la compu localStorage siempre responde.
+  var g = null;
+  try { g = localStorage.getItem('cuantosale_tema'); } catch (e) { g = null; }
+  if (g !== 'light' && g !== 'night') {
+    g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
+  }
+  document.documentElement.setAttribute('data-theme', g);
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', g === 'light' ? '#F7F8FA' : '#0A101A');
 })();
 </script>
 <link rel="manifest" href="/manifest.json">

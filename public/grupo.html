@@ -13,15 +13,17 @@
      claro la ve en claro, y alguien sin eleccion sigue a su sistema. -->
 <script>
 (function () {
-  try {
-    var g = localStorage.getItem('cuantosale_tema');
-    if (g !== 'light' && g !== 'night') {
-      g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
-    }
-    document.documentElement.setAttribute('data-theme', g);
-    var m = document.querySelector('meta[name="theme-color"]');
-    if (m) m.setAttribute('content', g === 'light' ? '#F7F8FA' : '#0A101A');
-  } catch (e) { /* modo privado */ }
+  // Mismo arrangement que /app: la lectura va en su propio try/catch para que un
+  // localStorage que tire no se coma el setAttribute. Ver el comentario de
+  // index.html.
+  var g = null;
+  try { g = localStorage.getItem('cuantosale_tema'); } catch (e) { g = null; }
+  if (g !== 'light' && g !== 'night') {
+    g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
+  }
+  document.documentElement.setAttribute('data-theme', g);
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', g === 'light' ? '#F7F8FA' : '#0A101A');
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
