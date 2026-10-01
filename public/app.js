@@ -2099,6 +2099,7 @@
     // redondeado al pintarse.
     return Math.abs(guardado - totalValue) < 1;
   }
+  var hotelCardSeq = 0;
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
@@ -2168,7 +2169,16 @@
           playa: item.playa || '',
           playaKm: item.playaKm,
           centroKm: item.centroKm,
-          centroNombre: item.centroNombre || ''
+          centroNombre: item.centroNombre || '',
+          reviewCount: Number(item.reviewCount) || 0,
+          reviewWord: item.reviewWord || '',
+          rating: Number(item.rating) || 0,
+          stars: Number(item.stars) || 0,
+          roomLabel: item.roomLabel || '',
+          zonaTxt: item.zonaTxt || '',
+          comidaTxt: item.comidaTxt || '',
+          playaTxt: item.playaTxt || '',
+          badges: Array.isArray(item.badges) ? item.badges : []
         };
       }
       var opciones = conDisponibilidad.slice(0, 3).map(aOpcion);
@@ -2231,7 +2241,23 @@
           var ubicacionPartes = [];
           if (option.playa) ubicacionPartes.push('<span class="hotel-ubic__playa">🏖️ ' + esc(option.playa) + (option.playaKm != null ? ' · a ' + (option.playaKm < 1 ? Math.round(option.playaKm * 1000) + ' m' : String(option.playaKm).replace('.', ',') + ' km') : '') + '</span>');
           if (option.centroKm != null) ubicacionPartes.push('<span class="hotel-ubic__centro">📍 ' + String(option.centroKm).replace('.', ',') + ' km del ' + esc(option.centroNombre ? option.centroNombre.charAt(0).toLowerCase() + option.centroNombre.slice(1) : 'centro') + '</span>');
+          if (option.zonaTxt) ubicacionPartes = ['<span class="hotel-ubic__centro">📍 ' + esc(option.zonaTxt.replace(/s*•s*/, ' · ')) + '</span>'];
           var ubicacionMarkup = ubicacionPartes.length ? '<p class="hotel-ubic" title="Distancias en línea recta">' + ubicacionPartes.join('') + '</p>' : '';
+          /* Ficha estilo Booking con lo que la busqueda ya trae: estrellas, puntaje y
+             comentarios, tipo de habitacion, comidas y cancelacion. Cada fila se
+             dibuja solo si el dato existe; no se inventa ninguno. */
+          var scoreN = Number(option.rating) || 0;
+          var scoreCls = scoreN >= 9 ? ' is-top' : scoreN >= 8 ? ' is-good' : scoreN >= 7 ? ' is-ok' : ' is-low';
+          var reviewMarkup = scoreN ? '<div class="hotel-review"><span class="hotel-review__txt">' + (option.reviewWord ? '<b>' + esc(option.reviewWord) + '</b>' : '') + (option.reviewCount ? '<small>' + option.reviewCount.toLocaleString('es-UY') + (option.reviewCount === 1 ? ' comentario' : ' comentarios') + '</small>' : '') + '</span><span class="hotel-review__score' + scoreCls + '">' + String(scoreN.toFixed(1)).replace('.', ',') + '</span></div>' : '';
+          var starsMarkup = option.stars ? '<p class="hotel-stars" aria-label="' + option.stars + ' estrellas">' + '★'.repeat(option.stars) + '</p>' : '';
+          var cancelBadge = (option.badges || []).filter(function (b) { return /cancel/i.test(b); })[0];
+          var extrasLines = [];
+          if (option.roomLabel) extrasLines.push('<li class="hotel-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/></svg><span>' + esc(option.roomLabel) + '</span></li>');
+          if (option.comidaTxt) extrasLines.push('<li class="hotel-line is-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v8a2 2 0 0 0 2 2v8M9 3v8M19 3c-2 2-3 5-3 8h3v10"/></svg><span>' + esc(option.comidaTxt) + '</span></li>');
+          if (option.playaTxt) extrasLines.push('<li class="hotel-line is-good"><span aria-hidden="true">🏖️</span><span>' + esc(option.playaTxt) + '</span></li>');
+          if (cancelBadge) extrasLines.push('<li class="hotel-line is-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>' + esc(cancelBadge) + '</span></li>');
+          var extrasMarkup = extrasLines.length ? '<ul class="hotel-lines">' + extrasLines.join('') + '</ul>' : '';
+          var selectId = 'hotel-sel-' + (++hotelCardSeq);
           var descriptionMarkup = option.description ? '<p class="hotel-description">' + esc(option.description) + '</p>' : '';
           // La card entera es la etiqueta del radio. Antes el <label> envolvía solo
           // el radio y el badge: una tira de ~26px dentro de una card de más de
@@ -2266,9 +2292,9 @@
           // experiencias, así las dos secciones de la página se leen igual.
           return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option data-hotel-stop="' + (isPar ? stop : '') + '">' + imageMarkup +
             '<label class="hotel-option__pick">' +
-            '<span class="hotel-choice"><input type="radio" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '>' + (badge ? '<span class="hotel-badge">' + esc(badge) + '</span>' : '') + '</span>' +
+            '<span class="hotel-choice"><input type="radio" id="' + selectId + '" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '>' + (badge ? '<span class="hotel-badge">' + esc(badge) + '</span>' : '') + '</span>' +
             '<span class="hotel-body">' +
-            '<h3 class="hotel-name">' + esc(option.name) + '</h3>' + ubicacionMarkup + descriptionMarkup +
+            '<div class="hotel-top"><h3 class="hotel-name">' + esc(option.name) + '</h3>' + reviewMarkup + '</div>' + starsMarkup + ubicacionMarkup + extrasMarkup + descriptionMarkup +
             // Con dos paradas el hotel deNatal es de las NOCHES DE NATAL, no de
             // las del viaje. Decir "7 noches" era el total, y al lado del mismo
             // texto decia "4 en Natal": dos numeros que no se podia ver que
@@ -2292,7 +2318,8 @@
             // ademas era lo que rompia la geometria al cambiar de texto
             // ("Elegir este hotel" / "Elegido") y lo que dejaba los dos textos
             // superpuestos al elegir.
-            '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver disponibilidad ↗</a>' +
+            '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver opciones ↗</a>' +
+            '<label class="hotel-select" for="' + selectId + '"><span class="hotel-select__off">Seleccionar</span><span class="hotel-select__on">✓ Seleccionado</span></label>' +
             '</div></div>' + similarMarkup + '</article>';
       }
       /* Un destino solo con playas: los hoteles en una seccion por playa, con 3 a

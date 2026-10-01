@@ -2965,3 +2965,38 @@ button.logo{min-height:44px}
    son oscuros o de color y no se leen sobre el fondo oscuro de la tarjeta. */
 .checkout-pay__brand:has(.checkout-pay__logo:not(.is-broken)){background:#fff;border-radius:8px;padding:0 10px;box-sizing:border-box;height:calc(var(--pay-logo-h) + 14px)}
 .checkout-pay__logo:not(.is-broken){background:transparent}
+
+/* ---- Ficha de hotel vertical, estilo Booking -------------------------------
+   Foto arriba, nombre con el puntaje a la derecha, estrellas, zona, tipo de
+   habitacion, comidas y precio abajo con dos botones: Ver opciones (Booking) y
+   Seleccionar. Va al final para pisar el layout horizontal de arriba. */
+.hotel-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));align-items:stretch}
+.hotel-option{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto}
+.hotel-image-wrap{grid-column:1;grid-row:1;min-height:0;height:170px}
+.hotel-option__pick{grid-column:1;grid-row:2}
+.hotel-foot{grid-column:1;grid-row:3;flex-direction:column;align-items:stretch;padding:10px 14px 14px}
+.hotel-body{padding:12px 14px 0}
+.hotel-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.hotel-top .hotel-name{font-size:17px;flex:1 1 auto;min-width:0}
+.hotel-review{display:flex;align-items:flex-start;gap:6px;flex:none}
+.hotel-review__txt{display:grid;justify-items:end;line-height:1.2;text-align:right}
+.hotel-review__txt b{font-size:11px;font-weight:800;color:var(--ink)}
+.hotel-review__txt small{font-size:10.5px;color:var(--ink2);white-space:nowrap}
+.hotel-review__score{display:grid;place-items:center;min-width:34px;height:30px;padding:0 6px;border-radius:8px 8px 8px 2px;font-size:14px;font-weight:800;color:#fff;background:#3f9d44}
+.hotel-review__score.is-ok{background:#7a9a2e}
+.hotel-review__score.is-low{background:#b0883a}
+.hotel-stars{margin:4px 0 0;color:#f5b301;font-size:13px;letter-spacing:1px;line-height:1}
+.hotel-lines{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
+.hotel-line{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;line-height:1.35;color:var(--ink);font-weight:600}
+.hotel-line svg{flex:none;width:15px;height:15px;margin-top:1px}
+.hotel-line.is-good{color:#2f8a3a}
+.hotel-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 0}
+.hotel-actions .hotel-booking{background:transparent;color:var(--ink);border:1.5px solid var(--control-line);font-weight:700;font-size:13px;min-height:42px}
+.hotel-actions .hotel-booking:hover{border-color:var(--cel);color:var(--cel);filter:none}
+.hotel-select{display:grid;place-items:center;min-height:42px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:13px;font-weight:800;cursor:pointer;text-align:center}
+.hotel-select>span{grid-area:1/1}
+.hotel-select__on{visibility:hidden}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-select{background:transparent;color:#2f8a3a;border:1.5px solid #3f9d44}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-select__off{visibility:hidden}
+.hotel-option:has(.hotel-option__pick input:checked) .hotel-select__on{visibility:visible}
+.hotel-price__main b{font-size:22px}

@@ -458,8 +458,27 @@ function normalizeHotelApiResponse(payload, extra, source) {
       hotel.meal_plan || hotel.mealPlan || hotel.board_type || hotel.board || hotel.meal_type ||
       (property && (property.meal_plan || property.mealPlan || property.board_type)) || ''
     ).toLowerCase().trim();
+    /* Datos de la ficha que Booking ya manda en la busqueda (sin gastar otra
+       consulta): puntaje, palabra y cantidad de comentarios, estrellas, el tipo
+       de habitacion y lo que dice el accessibilityLabel (zona, distancia,
+       comidas incluidas). Cada dato sale vacio si Booking no lo trae. */
+    const etiqueta = String(hotel.accessibilityLabel || '').replace(/[\u200e\u200f\u202a-\u202e]/g, '');
+    const lineasEtiqueta = etiqueta.split(/\n/).map(function (l) { return l.trim().replace(/\.$/, ''); }).filter(Boolean);
+    const lineaZona = lineasEtiqueta.filter(function (l) { return /km|m del centro|del centro/i.test(l) && l.indexOf('•') >= 0; })[0] || '';
+    const lineaComida = lineasEtiqueta.filter(function (l) { return /desayuno|almuerzo|cena|todo incluido|media pensi/i.test(l) && /incluid/i.test(l); })[0] || '';
+    const lineaPlaya = lineasEtiqueta.filter(function (l) { return /l[ií]nea de playa/i.test(l); })[0] || '';
+    const badges = (breakdown.benefitBadges || []).map(function (b) { return String((b && (b.text || b.identifier)) || '').trim(); }).filter(Boolean);
+    const estrellas = Number(property.accuratePropertyClass || property.propertyClass || 0);
     return {
       name: name,
+      reviewCount: Number(property.reviewCount || 0) || 0,
+      reviewWord: String(property.reviewScoreWord || ''),
+      stars: estrellas > 0 && estrellas <= 5 ? Math.round(estrellas) : 0,
+      roomLabel: String(property.recommendedUnitsConfigurationLabel || '').replace(/<[^>]*>/g, '').replace(/s+/g, ' ').trim(),
+      zonaTxt: lineaZona,
+      comidaTxt: lineaComida,
+      playaTxt: lineaPlaya,
+      badges: badges,
       hotelId: String(hotel.hotel_id || hotel.hotelId || property.hotel_id || property.id || hotel.id || ''),
       image: image,
       total: total,
