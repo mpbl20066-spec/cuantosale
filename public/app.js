@@ -6830,12 +6830,12 @@
          otro boton. */
       '<div class="voucher-tools voucher-share">' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
-      '<button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span><svg class="voucher-share__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+      '<div class="voucher-share-wrap">' +
+      '<button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span></button>' +
       '<div class="voucher-share__menu" id="voucher-share-menu" hidden>' +
       '<button type="button" data-share-link>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar enlace del viaje</span></button>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
-      '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
-      '</div></div>' +
+      '</div></div></div>' +
       '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos y te contacta por WhatsApp.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">Coordinar con asesor</button></aside>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
       '</div>' + reservarTodo;
@@ -13035,12 +13035,6 @@ function comboNombreDestino() {
         return;
       }
       if (e.target.closest('[data-share-link]')) { e.preventDefault(); copiarEnlaceDelViaje(); }
-      var copyButton = e.target.closest('[data-copy-summary]');
-      if (copyButton) {
-        e.preventDefault();
-        copySummaryText(copyButton);
-        return;
-      }
       var shareMenuOpen = e.target.closest('.voucher-share__menu');
       if (shareMenuOpen) {
         /* Cualquier opcion del menu lo cierra al ejecutar: la accion ya se esta
