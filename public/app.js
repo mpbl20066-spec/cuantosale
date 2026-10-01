@@ -10690,14 +10690,70 @@
       return '<article class="saved-trip">'
         + '<div class="saved-trip__info"><h3 class="saved-trip__dest">' + esc(trip.destination || 'Viaje guardado') + '</h3>'
         + '<p class="saved-trip__fechas">' + esc(fechas) + (noches > 0 ? ' · ' + noches + (noches === 1 ? ' noche' : ' noches') : '') + '</p></div>'
+        + '<div class="saved-trip__menu-wrap"><button type="button" class="saved-trip__menu" data-trip-menu aria-haspopup="menu" aria-expanded="false" aria-label="Más opciones del viaje a ' + esc(trip.destination || 'este destino') + '">'
+        + '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>'
+        + '<div class="saved-trip__popover" role="menu" hidden>'
+        + '<button type="button" role="menuitem" data-refresh-trip="' + id + '">Actualizar precio</button>'
+        + '<button type="button" role="menuitem" class="is-danger" data-delete-trip="' + id + '" data-trip-nombre="' + esc(trip.destination || 'este viaje') + '">Eliminar viaje</button>'
+        + '</div></div>'
         + '<div class="saved-trip__precio"><small>Total estimado</small><b data-trip-total="' + id + '">' + money(Number(trip.total_price || trip.total_amount) || 0) + '</b></div>'
         + '<button type="button" class="saved-trip__cargar" data-load-trip="' + id + '">Cargar viaje</button>'
-        + '<div class="saved-trip__pie"><button type="button" class="saved-trip__link" data-refresh-trip="' + id + '">Actualizar precio</button>'
-        + '<button type="button" class="saved-trip__link saved-trip__link--danger" data-delete-trip="' + id + '" aria-label="Borrar viaje">Eliminar</button></div>'
         + '</article>';
     }).join('');
     box._trips = uniqueTrips;
     return;
+  }
+  /* Menu de la tarjeta (los tres puntos): Actualizar y Eliminar salen de la
+     tarjeta para que la unica accion a la vista sea "Cargar viaje". Se cierra al
+     tocar afuera, al elegir una opcion y con Escape. */
+  function cerrarMenusDeViaje(salvo) {
+    Array.prototype.forEach.call(document.querySelectorAll('#trips-modal .saved-trip__menu[aria-expanded="true"]'), function (btn) {
+      if (btn === salvo) return;
+      btn.setAttribute('aria-expanded', 'false');
+      var pop = btn.parentNode && btn.parentNode.querySelector('.saved-trip__popover');
+      if (pop) pop.hidden = true;
+    });
+  }
+  function alternarMenuDeViaje(btn) {
+    var abrir = btn.getAttribute('aria-expanded') !== 'true';
+    cerrarMenusDeViaje(abrir ? btn : null);
+    btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    var pop = btn.parentNode.querySelector('.saved-trip__popover');
+    if (pop) pop.hidden = !abrir;
+    if (abrir && pop) { var primero = pop.querySelector('button'); if (primero) primero.focus(); }
+  }
+  /* Confirmacion propia (no window.confirm): borrar un viaje no se deshace, y el
+     dialogo del navegador no deja decir de que viaje se trata. Devuelve una
+     promesa con true/false. El foco arranca en "Cancelar", asi un Enter
+     distraido no borra nada. */
+  function confirmarBorrarViaje(nombre) {
+    return new Promise(function (resolve) {
+      var previo = document.activeElement;
+      var capa = document.createElement('div');
+      capa.className = 'trip-confirm';
+      capa.innerHTML = '<div class="trip-confirm__box" role="alertdialog" aria-modal="true" aria-labelledby="trip-confirm-title" aria-describedby="trip-confirm-desc">'
+        + '<h3 id="trip-confirm-title">¿Estás seguro de eliminar este viaje?</h3>'
+        + '<p id="trip-confirm-desc">Vas a eliminar tu viaje a <b>' + esc(nombre || 'este destino') + '</b>. No se puede deshacer.</p>'
+        + '<div class="trip-confirm__actions"><button type="button" class="trip-confirm__cancel" data-trip-confirm="no">Cancelar</button>'
+        + '<button type="button" class="trip-confirm__ok" data-trip-confirm="si">Eliminar</button></div></div>';
+      var cerrar = function (valor) {
+        document.removeEventListener('keydown', teclas, true);
+        if (capa.parentNode) capa.parentNode.removeChild(capa);
+        if (previo && previo.isConnected && previo.focus) previo.focus();
+        resolve(valor);
+      };
+      var teclas = function (ev) {
+        if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); cerrar(false); }
+      };
+      capa.addEventListener('click', function (ev) {
+        var b = ev.target.closest('[data-trip-confirm]');
+        if (b) { ev.stopPropagation(); cerrar(b.getAttribute('data-trip-confirm') === 'si'); }
+        else if (ev.target === capa) { ev.stopPropagation(); cerrar(false); }
+      });
+      document.addEventListener('keydown', teclas, true);
+      document.body.appendChild(capa);
+      capa.querySelector('.trip-confirm__cancel').focus();
+    });
   }
   async function deleteSavedTrip(tripId) {
     if (!supabaseClient || !tripId) return;
@@ -11316,10 +11372,20 @@
         }());
         return;
       }
+      var menuButton = e.target.closest('[data-trip-menu]');
+      if (menuButton) { e.preventDefault(); e.stopPropagation(); alternarMenuDeViaje(menuButton); return; }
       var refreshButton = e.target.closest('[data-refresh-trip]');
-      if (refreshButton) { e.preventDefault(); e.stopPropagation(); refreshTripPrice(refreshButton.getAttribute('data-refresh-trip'), refreshButton); return; }
+      if (refreshButton) { e.preventDefault(); e.stopPropagation(); cerrarMenusDeViaje(null); refreshTripPrice(refreshButton.getAttribute('data-refresh-trip'), refreshButton); return; }
       var deleteButton = e.target.closest('[data-delete-trip]');
-      if (deleteButton) { e.preventDefault(); e.stopPropagation(); if (window.confirm('¿Borrar este viaje guardado?')) deleteSavedTrip(deleteButton.getAttribute('data-delete-trip')); return; }
+      if (deleteButton) {
+        e.preventDefault(); e.stopPropagation();
+        cerrarMenusDeViaje(null);
+        var idBorrar = deleteButton.getAttribute('data-delete-trip');
+        confirmarBorrarViaje(deleteButton.getAttribute('data-trip-nombre')).then(function (si) { if (si) deleteSavedTrip(idBorrar); });
+        return;
+      }
+      // Tocar fuera del menu abierto lo cierra.
+      cerrarMenusDeViaje(null);
       var logout = e.target.closest('[data-signout]');
       if (logout) { await supabaseClient.auth.signOut(); closeAccountModal('trips-modal'); }
     });
