@@ -132,7 +132,8 @@ async function getTasas() {
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
-  '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon'
+  '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2'
 };
 // Los precios de vuelo llegan por el server y los links de reserva apuntan a
 // Google Flights, así que el browser no necesita hablar con ningun proveedor de
@@ -148,7 +149,7 @@ const CSP = "default-src 'self'; " +
   "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; " +
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
   "style-src-attr 'unsafe-inline'; " +
-  "font-src https://fonts.gstatic.com; " +
+  "font-src 'self' https://fonts.gstatic.com; " +
   "img-src 'self' data: https:; " +
   "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; " +
   "frame-src https://*.supabase.co; " +
@@ -2015,6 +2016,44 @@ function gzipCached(file, mtimeMs, payload) {
   gzipCache.set(key, compressed);
   return compressed;
 }
+// app.js (~780 KB) y style.css (~270 KB) se sirven sin minificar. En el
+// despliegue se minifican una vez por instancia con esbuild (solo espacios,
+// sintaxis e identificadores locales: los globales no se renombran) y se
+// cachean por archivo+mtime. Fuera de Vercel se sirven tal cual para poder
+// depurar; MINIFY_STATIC=1 lo fuerza y MINIFY_STATIC=0 lo apaga. Si esbuild no
+// esta o falla, se manda el archivo original.
+let esbuild = null;
+try { esbuild = require('esbuild'); } catch (e) { /* sin esbuild: se sirve sin minificar */ }
+const MINIFICAR = !!esbuild && (process.env.MINIFY_STATIC === '1' || (process.env.MINIFY_STATIC !== '0' && !!process.env.VERCEL));
+const minCache = new Map();
+function minificado(file, mtimeMs, ext, payload) {
+  if (!MINIFICAR || (ext !== '.js' && ext !== '.css') || payload.length < 20000) return payload;
+  const key = file + '|' + mtimeMs;
+  const hit = minCache.get(key);
+  if (hit) return hit;
+  let out = payload;
+  try {
+    out = Buffer.from(esbuild.transformSync(payload.toString('utf8'), {
+      loader: ext === '.js' ? 'js' : 'css', minify: true, legalComments: 'none'
+    }).code, 'utf8');
+  } catch (e) { console.error('minificar ' + path.basename(file) + ':', e.message); }
+  if (minCache.size > 24) minCache.clear();
+  minCache.set(key, out);
+  return out;
+}
+// Los estaticos pasan por esta funcion (vercel.json rutea todo a server.js), y
+// sin s-maxage el CDN de Vercel no los guardaba: cada archivo hacia el viaje
+// hasta la funcion (iad1) aunque el usuario este en Montevideo. La cache del CDN
+// se vacia en cada despliegue, asi que s-maxage largo es seguro para todo lo que
+// no sea HTML. El HTML (y index.html, que esta detras del acceso prelanzamiento)
+// queda siempre sin cachear en el CDN: lleva analytics inyectado y puede
+// responder 401.
+function cacheControlEstatico(req, ext, rel) {
+  const versionado = /[?&]v=\d+/.test(req.url);
+  const cdn = ext !== '.html' && !PRELAUNCH_FILES.has(path.basename(rel).toLowerCase());
+  if (versionado) return 'public, max-age=31536000, ' + (cdn ? 's-maxage=31536000, ' : '') + 'immutable';
+  return cdn ? 'public, max-age=0, must-revalidate, s-maxage=31536000' : 'no-cache';
+}
 function serveStatic(req, res, pathname, transform) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/waitlist.html';
@@ -2030,6 +2069,7 @@ function serveStatic(req, res, pathname, transform) {
     //Analytics, asi que no mandan datos de una pagina que no existe.
     const esPreview = path.basename(file).charAt(0) === '_';
     const send = function (payload) {
+      payload = minificado(file, stat.mtimeMs, ext, payload);
       const headers = {
         'Content-Type': MIME[ext] || 'application/octet-stream',
         // Solo lo que lleva un `?v=N` explicito es inmutable: cambiar el archivo
@@ -2045,7 +2085,7 @@ function serveStatic(req, res, pathname, transform) {
         // Instagram dejaba pineado el app shell entero: un ?v=71 futuro nunca
         // llegaba a ese usuario. Para una app que se abre desde WhatsApp e
         // Instagram, el caso con utm es el caso normal, no el borde.
-        'Cache-Control': /[?&]v=\d+/.test(req.url) ? 'public, max-age=31536000, immutable' : 'no-cache',
+        'Cache-Control': cacheControlEstatico(req, ext, rel),
         'Content-Security-Policy': CSP,
         'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
         // Vary tiene que ir en AMBAS variantes (comprimida y sin comprimir): si
