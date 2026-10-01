@@ -8553,9 +8553,8 @@
       '</div>' +
       '<div class="flight-summary-total"><span class="flight-summary-total-label">Tarifa final · Ida y vuelta</span>' +
         '<b class="flight-summary-total-value">' + priceText + '</b>' + priceSub + '</div>' +
-      (offer.book_url ? '<a class="btn btn-primary flight-summary-book" href="' + hrefSeguro(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver en Google Flights</a>' : '') +
       '<button type="button" class="flight-summary-change" data-change-flight>' + iconSwap + 'Elegir otro vuelo</button>' +
-      '<p class="flight-summary-foot">' + iconInfo + '<span>Tarifa final de ida y vuelta con ' + esc(offer.airline) + '. Al hacer clic, completás la reserva de forma segura en Google Flights.</span></p>' +
+      '<p class="flight-summary-foot">' + iconInfo + '<span>Tarifa final de ida y vuelta con ' + esc(offer.airline) + '. Si preferís otro horario o aerolínea, elegí otro vuelo.</span></p>' +
       '</div>';
   }
 

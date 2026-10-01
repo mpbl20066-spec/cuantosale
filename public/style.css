@@ -1,4 +1,4 @@
-/* version: 253
+/* version: 255
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3716,3 +3716,10 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
   .flight-footer{align-items:center}
   .flight-price{margin-left:auto}
 }
+
+/* Tarjeta de vuelo elegido: sin enlace a Google Flights, "Elegir otro vuelo" es
+   la accion de la tarjeta y va en amarillo, como el resto de las acciones
+   principales. */
+.flight-summary-change{margin-top:12px;min-height:var(--tap,48px);border:0;border-radius:var(--btn-r,12px);background:var(--action-bg);color:var(--action-ink);font:800 14px Poppins,sans-serif}
+.flight-summary-change:hover{border:0;background:var(--action-bg);color:var(--action-ink);filter:brightness(1.08)}
+.flight-summary-change:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
