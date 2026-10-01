@@ -2207,15 +2207,51 @@
     setTimeout(function () { comparativaPendiente = false; try { actualizarComparativa(); } catch (e) { console.error(e); } }, 60);
   }
   /* Modal de habitaciones de un hotel (getRoomList de Booking, via el server).
-     Muestra tipo, camas, comida, cancelacion y total; reservar sigue siendo en
-     Booking, con el mismo link de la ficha. */
+     Muestra tipo, camas, comida, cancelacion y total. No hay reserva ni links a
+     Booking: la app arma un presupuesto. Elegir una habitacion la deja como la
+     seleccionada del hotel, cierra el modal y suma su total al viaje. */
+  var roomsHandlerListo = false;
+  function elegirHabitacion(card, hotelId, room) {
+    if (!detailState || !card || !card.isConnected) {
+      card = document.querySelector('[data-hotel-rooms="' + hotelId + '"]');
+      card = card && card.closest('[data-hotel-option]');
+    }
+    var input = card && card.querySelector('[data-hotel-total]');
+    if (!input || !(room.total > 0)) return;
+    var parada = Number(input.getAttribute('data-hotel-stop')) || 0;
+    var total = Math.round(room.total);
+    detailState.roomChoice = detailState.roomChoice || {};
+    detailState.roomChoice[parada] = { hotelId: hotelId, name: room.name, total: room.total };
+    // La ficha pasa a mostrar la habitacion elegida y su total.
+    input.setAttribute('data-hotel-total', String(total));
+    input.value = String(total);
+    input.checked = true;
+    var nights = Math.max(1, Number(detailState.meta && detailState.meta.nights) || 1);
+    var totalTxt = card.querySelector('.hotel-total');
+    if (totalTxt) totalTxt.textContent = money(room.total) + ' total · ' + room.name;
+    var nightly = card.querySelector('.hotel-price__main b');
+    if (nightly) nightly.textContent = money(room.total / nights);
+    var roomLine = card.querySelector('[data-room-line] span');
+    if (roomLine) roomLine.textContent = room.name;
+    var h3 = card.querySelector('h3');
+    if (h3) detailState.selectedHotelName = h3.textContent.trim();
+    actualizarAlojamiento(total, true, parada);
+    try { recalcularTotalViaje(); } catch (e) { /* ya se recalcula en actualizarAlojamiento */ }
+    pedirComparativa();
+    closeBookingForm();
+    // El hotel quedo elegido: el paso de Alojamiento se puede confirmar abajo.
+    setTimeout(function () {
+      var foot = document.querySelector('[data-steps-foot]');
+      if (foot && foot.scrollIntoView) foot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 200);
+  }
   function abrirHabitaciones(btn) {
     var modal = $('#booking-modal');
     if (!modal || !btn) return;
     var id = btn.getAttribute('data-hotel-rooms');
     var nombre = btn.getAttribute('data-hotel-name') || 'Hotel';
-    var url = btn.getAttribute('data-hotel-url') || '';
     var totalTarjeta = Number(btn.getAttribute('data-hotel-card-total')) || 0;
+    var cardRef = btn.closest('[data-hotel-option]');
     var cuerpo = function (html) {
       modal.innerHTML = '<div class="booking-dialog rooms-modal" role="dialog" aria-modal="true" aria-labelledby="rooms-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>'
         + '<span class="tour-detail-modal__eyebrow">HABITACIONES DISPONIBLES</span><h2 id="rooms-title">' + esc(nombre) + '</h2>' + html + '</div>';
@@ -2223,39 +2259,59 @@
     cuerpo('<p class="rooms-modal__msg">Buscando habitaciones…</p>');
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
+    modal.__rooms = null;
+    if (!roomsHandlerListo) {
+      roomsHandlerListo = true;
+      modal.addEventListener('click', function (e) {
+        var pick = e.target.closest && e.target.closest('[data-room-pick]');
+        var ctx = modal.__rooms;
+        if (!pick || !ctx) return;
+        e.preventDefault();
+        var room = ctx.rooms[Number(pick.getAttribute('data-room-pick'))];
+        if (room) elegirHabitacion(ctx.card, ctx.id, room);
+      });
+      modal.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var pick = e.target.closest && e.target.closest('[data-room-pick]');
+        if (pick) { e.preventDefault(); pick.click(); }
+      });
+    }
     var nights = (detailState && detailState.meta && detailState.meta.nights) || 0;
     var q = new URLSearchParams({ hotel_id: id, dep: S.dep, ret: S.ret, pax: String(S.pax) });
     fetch('/api/hotel-habitaciones?' + q.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       var rooms = res.ok && res.j && Array.isArray(res.j.rooms) ? res.j.rooms : null;
-      var link = url ? '<a class="rooms-modal__book" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Reservar en Booking ↗</a>' : '';
       if (!rooms || !rooms.length) {
-        cuerpo('<p class="rooms-modal__msg">' + esc((res.j && res.j.error) || 'No encontramos habitaciones disponibles para estas fechas.') + '</p>' + link);
+        cuerpo('<p class="rooms-modal__msg">' + esc((res.j && res.j.error) || 'No encontramos habitaciones disponibles para estas fechas.') + ' Podés elegir este hotel igual tocando su ficha.</p>');
         return;
       }
-      var items = rooms.map(function (r) {
+      modal.__rooms = { rooms: rooms, card: cardRef, id: id };
+      var actual = detailState && detailState.roomChoice && detailState.roomChoice[Number(cardRef && cardRef.querySelector('[data-hotel-total]') && cardRef.querySelector('[data-hotel-total]').getAttribute('data-hotel-stop')) || 0];
+      var items = rooms.map(function (r, i) {
         var cancelOk = /free|gratu/i.test(r.cancelType + ' ' + r.cancelText) || r.cancelType === 'free_cancellation';
         var meta = [];
         if (r.beds) meta.push(esc(r.beds));
         if (r.surface) meta.push(r.surface + ' m²');
         if (r.maxOccupancy) meta.push('hasta ' + r.maxOccupancy + (r.maxOccupancy === 1 ? ' persona' : ' personas'));
-        return '<li class="rooms-modal__room">'
+        var elegida = !!(actual && actual.hotelId === id && actual.name === r.name && Math.abs(actual.total - r.total) < 1);
+        return '<li class="rooms-modal__room' + (elegida ? ' is-picked' : '') + '" data-room-pick="' + i + '" role="button" tabindex="0" aria-pressed="' + (elegida ? 'true' : 'false') + '">'
           + (r.photo ? '<img src="' + esc(r.photo) + '" alt="" loading="lazy">' : '<span class="rooms-modal__nophoto"></span>')
           + '<div class="rooms-modal__info"><b>' + esc(r.name) + '</b>'
           + (meta.length ? '<small>' + meta.join(' · ') + '</small>' : '')
           + (r.meal ? '<span class="hotel-line is-good">' + esc(r.meal) + '</span>' : '')
           + (r.cancelText ? '<span class="hotel-line' + (cancelOk ? ' is-good' : '') + '">' + esc(r.cancelText) + '</span>' : '')
-          + '</div><div class="rooms-modal__price"><b>' + money(r.total) + '</b><small>' + (nights ? 'total ' + nights + (nights === 1 ? ' noche' : ' noches') : 'total') + '</small></div></li>';
+          + '</div><div class="rooms-modal__price"><b>' + money(r.total) + '</b><small>' + (nights ? 'total ' + nights + (nights === 1 ? ' noche' : ' noches') : 'total') + '</small></div>'
+          + '</li>';
       }).join('');
       /* El precio de la ficha viene de la busqueda de Booking y esta lista de otra
          consulta: a veces la habitacion mas barata de la busqueda ya no figura
          aca. Si la lista sale mas cara que la ficha se avisa, en vez de dejar dos
          numeros que parecen contradecirse. */
       var aviso = totalTarjeta && rooms[0].total > totalTarjeta * 1.02
-        ? '<p class="rooms-modal__msg">El precio de la ficha (' + money(totalTarjeta) + ') es el más bajo que mostró Booking en la búsqueda; esa opción puede no figurar en esta lista. Confirmá el valor final en Booking.</p>'
+        ? '<p class="rooms-modal__msg">El precio de la ficha (' + money(totalTarjeta) + ') es el más bajo que mostró la búsqueda; esa opción puede no figurar en esta lista.</p>'
         : '';
-      cuerpo('<p class="rooms-modal__msg">Precios totales con impuestos para tus fechas. La reserva se hace en Booking.</p>' + aviso + '<ul class="rooms-modal__list">' + items + '</ul>' + link);
+      cuerpo('<p class="rooms-modal__msg">Precios totales con impuestos para tus fechas. Tocá una habitación para sumarla a tu presupuesto.</p>' + aviso + '<ul class="rooms-modal__list">' + items + '</ul>');
     }).catch(function () {
-      cuerpo('<p class="rooms-modal__msg">No pudimos cargar las habitaciones ahora.</p>' + (url ? '<a class="rooms-modal__book" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking ↗</a>' : ''));
+      cuerpo('<p class="rooms-modal__msg">No pudimos cargar las habitaciones ahora. Podés elegir este hotel igual tocando su ficha.</p>');
     });
   }
   var hotelCardSeq = 0;
@@ -2384,6 +2440,13 @@
       function cardDe(option) {
           var nightlyValue = Number(option.perNight) || Math.max(1, Math.round(average * option.multiplier));
           var totalValue = Number(option.total) || hotelTotalForRate(meta, accommodationTotal, option.multiplier);
+          // Habitacion elegida en el modal: la ficha muestra su nombre y su total.
+          var rc = detailState && detailState.roomChoice && detailState.roomChoice[stop || 0];
+          if (rc && option.hotelId && rc.hotelId === option.hotelId) {
+            totalValue = rc.total;
+            nightlyValue = Math.round(rc.total / nights * 100) / 100;
+            option = Object.assign({}, option, { roomLabel: rc.name });
+          }
           var url = option.bookingUrl || bookingUrl(meta, { hotel: option.name });
           var imageUrl = sanitizeHotelImageUrl(option && option.image && typeof option.image === 'string' ? option.image : '', '');
           // La foto es una columna de la card, no una franja: va FUERA del <label>
@@ -2416,7 +2479,7 @@
           var starsMarkup = option.stars ? '<p class="hotel-stars" aria-label="' + option.stars + ' estrellas">' + '★'.repeat(option.stars) + '</p>' : '';
           var cancelBadge = (option.badges || []).filter(function (b) { return /cancel/i.test(b); })[0];
           var extrasLines = [];
-          if (option.roomLabel) extrasLines.push('<li class="hotel-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/></svg><span>' + esc(option.roomLabel) + '</span></li>');
+          if (option.roomLabel) extrasLines.push('<li class="hotel-line" data-room-line><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.6"/></svg><span>' + esc(option.roomLabel) + '</span></li>');
           if (option.comidaTxt) extrasLines.push('<li class="hotel-line is-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v8a2 2 0 0 0 2 2v8M9 3v8M19 3c-2 2-3 5-3 8h3v10"/></svg><span>' + esc(option.comidaTxt) + '</span></li>');
           if (option.playaTxt) extrasLines.push('<li class="hotel-line is-good"><span aria-hidden="true">🏖️</span><span>' + esc(option.playaTxt) + '</span></li>');
           if (cancelBadge) extrasLines.push('<li class="hotel-line is-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>' + esc(cancelBadge) + '</span></li>');
@@ -9133,6 +9196,7 @@
     detailState.meta.hotels = [];
     detailState.meta.hotelBudgetPerNight = null;
     detailState.selectedHotelName = 'Estimación · Hotel ' + HOTEL_TYPE_LABELS[type];
+    detailState.roomChoice = {};
     // Cambiar el tipo vuelve a cargar los hoteles con el recomendado elegido, así
     // que acá sí hay una selección (la anterior deseleccionada se descarta).
     detailState.selectedHotel = true;

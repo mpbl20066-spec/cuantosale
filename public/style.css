@@ -3116,3 +3116,10 @@ button.logo{min-height:44px}
    viven en el paso 4, asi que aca no hay nada mas debajo. */
 .detail-main[data-paso="3"] .steps__foot{position:static;margin:24px 0 8px;padding:0;background:none}
 .detail-main[data-paso="3"] .steps__foot .steps__next{box-shadow:none}
+
+/* Modal de habitaciones: cada una es una tarjeta que se toca para elegirla,
+   con el marco amarillo de "elegido" como el resto de la app. */
+.rooms-modal__room{grid-template-columns:96px minmax(0,1fr) auto;cursor:pointer;transition:border-color .18s ease,background .18s ease}
+.rooms-modal__room:hover{border-color:var(--card-sel-border)}
+.rooms-modal__room:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.rooms-modal__room.is-picked{border-color:var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
