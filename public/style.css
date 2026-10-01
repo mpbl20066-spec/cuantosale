@@ -1,4 +1,4 @@
-/* version: 229
+/* version: 227
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3362,3 +3362,10 @@ summary{min-height:var(--tap) !important}
 .is-loading{opacity:.9;cursor:progress;pointer-events:none}
 .is-loading:disabled{opacity:.9}
 @media (prefers-reduced-motion:reduce){.btn-spinner{animation-duration:2.4s}}
+
+/* Fila Viajeros / Presupuesto: el encabezado del presupuesto lleva la pastilla
+   Total / Por persona y es mas alto que la etiqueta de Viajeros, asi que el
+   campo de plata quedaba mas abajo que el contador. Los dos encabezados miden
+   lo mismo y van centrados, y los campos arrancan a la misma altura. */
+.row2>div>.lbl,.row2>div>.bud-head{display:flex;align-items:center;min-height:32px;margin-bottom:6px}
+.row2>div>.bud-head{justify-content:space-between}
