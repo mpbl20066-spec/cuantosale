@@ -1,4 +1,4 @@
-/* version: 226
+/* version: 228
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3290,3 +3290,66 @@ button.logo{min-height:44px}
 .detail-head.is-compact .detail-summary h2{display:none}
 .detail-head.is-compact .detail-summary p{display:block;flex:1 1 auto;min-width:0;font-size:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .detail-head.is-compact .detail-summary__destino{font-size:14px}
+
+/* ======================================================================
+   Capa de uniformidad (geometria, areas tactiles y seleccion)
+   Va al final a proposito: normaliza lo que se definio suelto arriba.
+   - Escala de espacios: multiplos de 4 (4, 8, 12, 16, 24).
+   - Todo lo que se toca mide al menos 48px de alto (--tap).
+   - Botones de accion y pestanas de pasos: mismo radio (--btn-r) y mismo
+     padding horizontal (--btn-px). Las pastillas/filtros siguen redondas
+     porque son otro tipo de control.
+   - Seleccion: borde de 2px en el color de seleccion, en toda la plataforma;
+     lo no seleccionado, 1.5px.
+   ====================================================================== */
+:root{--tap:48px;--btn-r:12px;--btn-px:16px;--bw:1.5px;--bw-on:2px}
+
+/* Acciones (principales y secundarias) */
+.btn-buscar-todos,.btn-ver-propuesta,.steps__next,.local-tour__info,.hotel-booking,.hotel-playa__toggle,.local-tours__more,.voucher-item__cta,.voucher-split__btn,.btn,.account-button,#btn-volver,.checkout-btn,.trip-summary__cta,.trip-summary__save,.hotel-select,.rooms-modal__btn{
+  min-height:var(--tap) !important;height:auto;border-radius:var(--btn-r) !important;padding-left:var(--btn-px);padding-right:var(--btn-px);box-sizing:border-box}
+.opt__disclosure{min-height:var(--tap)}
+
+/* Cabecera: los cuatro controles a la misma altura */
+.logo,.currency-badge,.trip-pill,.account-button{min-height:var(--tap)}
+.theme-toggle{width:var(--tap);height:var(--tap);border-radius:var(--btn-r)}
+.booking-close{width:var(--tap);height:var(--tap)}
+
+/* Pestanas de pasos: mismo alto entre si, mismo radio que los botones */
+.steps__btn{min-height:56px;border-radius:var(--btn-r);border-width:var(--bw)}
+.steps__list{gap:8px}
+@media(max-width:560px){.steps__list{gap:8px}.steps__btn{min-height:56px}}
+
+/* Pastillas y filtros: 48px de area tactil */
+.hotel-type-pill,.hotel-playa-chip,.seg button,.filters button,[data-filter] {min-height:var(--tap)}
+.hotel-playa-chip{border-radius:999px}
+/* El selector Total / Por persona es chico a la vista, pero su toque llega a 48px */
+.bud-mode button{position:relative}
+.bud-mode button::after{content:"";position:absolute;inset:-12px -4px}
+/* Filas tocables del desglose y resumenes desplegables */
+.proposal-breakdown__row.is-jumpable{min-height:var(--tap)}
+summary{min-height:var(--tap);display:flex;align-items:center}
+summary::-webkit-details-marker{display:none}
+/* Barra de pasos compacta (al hacer scroll): 4 toques de 48px */
+.detail-head.is-compact .steps__btn{min-height:var(--tap);min-width:var(--tap)}
+
+/* Seleccion: mismo grosor y color en toda la plataforma */
+.steps__item.is-current .steps__btn,.seg button[aria-pressed="true"],.hotel-type-pill.is-on,.hotel-playa-chip.is-on{border-width:var(--bw-on);border-color:var(--card-sel-border,var(--cel))}
+.seg button,.hotel-type-pill,.hotel-playa-chip{border-width:var(--bw)}
+
+/* Espacios: contenedor de pasos y barra inferior en la escala de 4 */
+.steps{padding:12px;margin-bottom:24px}
+@media(max-width:560px){.steps{padding:8px}}
+.steps__next{margin-top:12px}
+.steps__foot{padding:12px 4px calc(12px + env(safe-area-inset-bottom,0px))}
+@media(max-width:900px){.trip-summary{padding:12px}.trip-summary__details{margin-top:8px}}
+
+/* Zona segura inferior: el contenido de los modales y de los pasos no queda
+   debajo de la barra del navegador ni del indicador del sistema. */
+.booking-dialog{padding-bottom:max(24px,calc(16px + env(safe-area-inset-bottom,0px)))}
+.checkout-actions{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+.flight-filters button{min-height:var(--tap);border-width:var(--bw)}
+.flight-filters button[aria-pressed="true"]{border-width:var(--bw-on);border-color:var(--card-sel-border,var(--cel))}
+.logo{min-height:var(--tap) !important}
+summary{min-height:var(--tap) !important}
