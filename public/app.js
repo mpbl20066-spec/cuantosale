@@ -5979,6 +5979,18 @@
       if (!activo) return '';
       return '<button type="button" class="voucher-item__cta" data-reservar-pedido aria-label="' + esc(etiqueta) + '">Reservar</button>';
     }
+    /* Un solo criterio para el boton de cada fila del resumen:
+         - sin elegir: "Agregar ..." (lleva a la seccion donde se elige)
+         - ya elegido: "Modificar" (vuelve a esa seccion para cambiarlo)
+         - reservado: el estado, como siempre.
+       Reservar afuera (Google Flights, Booking) vive en "Para completar tu
+       viaje" y en el boton de reservar del pie, no en cada fila. */
+    function filaCta(categoria, elegido, agregar) {
+      if (estadoReserva(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
+      return elegido
+        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Modificar</button>'
+        : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="' + categoria + '">' + agregar + '</button>';
+    }
     /* "Falta elegir" al cuerpo, con su propio tono: es una instruccion, no un
        dato del rubro, y por eso no comparte la tipografia de la bajada. */
     function avisoVoucher(texto) {
@@ -6033,9 +6045,7 @@
     /* Sin modalidad no hay nada que reservar. El aviso va al cuerpo de la fila
        (antes iba debajo del monto, en la columna de la cifra) y el CTA de la
        derecha desaparece en vez de quedar como un boton que no abre nada. */
-    var transferCta = !(tl2 || tv2) && detailState.transportMode !== 'bus' && detailState.transportMode !== 'auto'
-      ? '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="traslados">Elegir traslado</button>'
-      : reservarCta(tl2 || tv2, 'Reservar el traslado desde el aeropuerto', 'traslados');
+    var transferCta = filaCta('traslados', !!(tl2 || tv2), 'Agregar traslado');
     var transferNoteHtml = (tl2 || tv2 ? '' : avisoVoucher('Elegí un transfer en la sección de traslados.'))
       + '<p class="voucher-item__detail">' + transferNote + '</p>';
     // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
@@ -6135,14 +6145,14 @@
       // Paso 1: el vuelo.
       var vBajada = flightSummary.selected
         ? esc(flightSummary.airline || '') + ' &middot; ' + money(flightTotal)
-        : 'Todav&iacute;a no elegiste vuelo';
+        : 'Todav&iacute;a no agregaste vuelo';
       var vAccion = '';
       if (flightSummary.selected && flightBookUrl) {
         vAccion = '<a class="voucher-step__btn is-link" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="pasajes">Ver en Google Flights</a>';
       } else if (flightSummary.selected) {
         vAccion = confirma('pasajes', 'laerol&iacute;nea');
       } else {
-        vAccion = '<span class="voucher-step__hint">Elegilo en la secci&oacute;n de vuelos</span>';
+        vAccion = '<button type="button" class="voucher-step__btn" data-detalle-rubro="pasajes">Agregar vuelos</button>';
       }
       if (busMode) markup += paso(1, 'Bus', esc(busSel ? busResumenCorto(detailState.meta) : 'Tarifa estimada') + ' &middot; ' + money(busTotal), false, false, '<span class="voucher-step__hint">Compralo con la empresa</span>');
       else markup += paso(1, 'Vuelo', vBajada, extVuelo, !extVuelo, vAccion);
@@ -6150,9 +6160,11 @@
       // Paso 2: el alojamiento.
       var hBajada = hotelBookUrl
         ? esc(selectedHotelName) + ' &middot; ' + money(hotelTotal)
-        : 'Eleg&iacute; tu hotel';
+        : 'Todav&iacute;a no agregaste hotel';
       var hAccion = '';
-      if (hotelBookUrl) {
+      if (!hotelElegido()) {
+        hAccion = '<button type="button" class="voucher-step__btn" data-detalle-rubro="alojamiento">Agregar hotel</button>';
+      } else if (hotelBookUrl) {
         hAccion = '<a class="voucher-step__btn is-link" href="' + esc(hotelBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="alojamiento">Ver en Booking</a>';
       } else {
         hAccion = confirma('alojamiento', 'Booking');
@@ -6213,10 +6225,10 @@
          pregunta que uno se hace justo despues de ver el total. */
 
       '<ul class="voucher-list">' +
-      (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, flightSummary.selected ? bookCta(flightBookUrl, 'Reservar vuelo', 'Reservar el vuelo en ' + flightSummary.airline, 'pasajes') : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="pasajes">Elegir vuelos</button>')) +
-      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, !hotelElegido() ? '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="alojamiento">Elegir hotel</button>' : hotelBookUrl ? bookCta(hotelBookUrl, 'Reservar hotel', 'Ver disponibilidad de ' + selectedHotelName, 'alojamiento') : '') +
+      (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, filaCta('pasajes', !!flightSummary.selected, 'Agregar vuelos'))) +
+      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Agregar hotel')) +
       (busMode || autoMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
-      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, reservarCta(selectedTours.length, 'Reservar las actividades', 'tours')) +
+      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Agregar actividades')) +
       '</ul>' +
       /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
          ya es una caja: caja dentro de caja, y el unico bloque del modal con

@@ -2477,6 +2477,13 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
   border-color:var(--cel);background:var(--cel-soft);color:var(--cel);font-weight:800}
 .voucher-item__side .voucher-item__cta:not(.is-reserved):not(.is-off):hover{background:var(--cel);color:var(--bg);border-color:var(--cel)}
 
+/* Botones secundarios del resumen: mismo borde ambar, peso y tamano en las filas
+   (Agregar / Modificar) y en "Para completar tu viaje". */
+.voucher-step__btn,.voucher-step__btn.is-link{min-width:118px;min-height:38px;border-color:var(--cel);background:var(--cel-soft);color:var(--cel);font-weight:800}
+.voucher-step__btn:hover,.voucher-step__btn.is-link:hover{background:var(--cel);color:var(--bg);border-color:var(--cel)}
+.voucher-item__side .voucher-item__cta.is-modificar{background:transparent}
+.voucher-item__side .voucher-item__cta.is-modificar:hover{background:var(--cel);color:var(--bg)}
+
 /* Vuelo sin elegir: es un paso pendiente, no un item apagado. Borde de la marca
    y un boton directo ("Elegir vuelos"). */
 .voucher-item:has(.is-elegir){padding:13px 12px;margin:0 -12px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--cel) 6%,transparent)}
