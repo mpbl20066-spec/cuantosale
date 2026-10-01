@@ -1,4 +1,4 @@
-/* version: 228
+/* version: 229
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3124,18 +3124,18 @@ button.logo{min-height:44px}
 .steps__item--extras.is-pending .steps__btn{border-color:color-mix(in srgb,var(--cel) 55%,var(--line));background:var(--cel-soft)}
 .steps__item--extras.is-pending .steps__n{border-color:var(--cel);color:var(--cel)}
 
-/* Extras: el boton de avance va al pie del contenido, en el flujo normal de la
-   pagina (sin barra pegada ni sombra flotante). La Guia Secreta y el desglose
-   viven en el paso 4, asi que aca no hay nada mas debajo. */
-.detail-main[data-paso="3"] .steps__foot{position:static;margin:24px 0 8px;padding:0;background:none}
-.detail-main[data-paso="3"] .steps__foot .steps__next{box-shadow:none}
-
 /* Modal de habitaciones: cada una es una tarjeta que se toca para elegirla,
    con el marco amarillo de "elegido" como el resto de la app. */
 .rooms-modal__room{grid-template-columns:96px minmax(0,1fr) auto;cursor:pointer;transition:border-color .18s ease,background .18s ease}
 .rooms-modal__room:hover{border-color:var(--card-sel-border)}
 .rooms-modal__room:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .rooms-modal__room.is-picked{border-color:var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
+
+/* Extras: el boton de avance va al pie del contenido, en el flujo normal de la
+   pagina (sin barra pegada ni sombra flotante). La Guia Secreta y el desglose
+   viven en el paso 4, asi que aca no hay nada mas debajo. */
+.detail-main[data-paso="3"] .steps__foot{position:static;margin:24px 0 8px;padding:0;background:none}
+.detail-main[data-paso="3"] .steps__foot .steps__next{box-shadow:none}
 
 /* Estados de un rubro: ambar (en curso / pendiente de gestionar) y verde solo
    para lo confirmado. Sin check ni tono de exito mientras no este cerrado. */
@@ -3160,6 +3160,8 @@ button.logo{min-height:44px}
 .voucher-grupo[open]>summary::after{transform:rotate(-135deg)}
 .voucher-grupo>summary .voucher-btn__ico{width:18px;height:18px;color:var(--cel)}
 .voucher-grupo>.voucher-split{margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px;background:transparent}
+.voucher-tools .voucher-share__chev{width:14px;height:14px}
+@media (max-width:480px){.voucher-tools .voucher-share__chev{display:none}.voucher-tools .voucher-chip{padding:0 4px;gap:5px;font-size:12.5px}}
 @media (max-width:420px){.voucher-tools .voucher-chip{flex-direction:column;gap:3px;padding:6px 4px;font-size:12px}.voucher-tools .voucher-chip--asesor .voucher-btn__label{text-align:center}}
 
 /* ---- Pie del resumen y checkout: sin cortes ni scroll lateral ---------------
@@ -3258,17 +3260,6 @@ button.logo{min-height:44px}
 .guia-banner__cta{white-space:nowrap;font-size:13px;font-weight:800;color:var(--cel)}
 @media (max-width:560px){.guia-banner{grid-template-columns:auto minmax(0,1fr);padding:14px}.guia-banner__cta{grid-column:1/-1}}
 
-/* ---- Toast de guardado / enlace copiado -------------------------------------- */
-.cs-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:400;display:flex;align-items:center;gap:12px;max-width:min(92vw,420px);padding:12px 16px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:var(--r-card,16px);background:var(--surface);color:var(--ink);box-shadow:0 14px 40px rgba(0,0,0,.45);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
-.cs-toast.is-visible{opacity:1;transform:translate(-50%,0)}
-.cs-toast__ico{flex:0 0 auto;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--cel);color:var(--cel-ink,#0A101A);font-size:15px;font-weight:800}
-.cs-toast.is-error{border-color:var(--coral)}
-.cs-toast.is-error .cs-toast__ico{background:var(--coral);color:#0A101A}
-.cs-toast__txt{display:grid;gap:2px;min-width:0}
-.cs-toast__txt b{font-size:14px;line-height:1.25}
-.cs-toast__txt small{color:var(--ink2);font-size:12.5px;line-height:1.35}
-@media (prefers-reduced-motion:reduce){.cs-toast{transition:none}}
-
 /* ---- Cabecera pegajosa del detalle (Smart Sticky) ----
    Titulo + total + pasos quedan pegados arriba; al bajar se compactan a una
    sola linea: titulo corto, total chico y los cuatro pasos en miniatura. */
@@ -3290,6 +3281,17 @@ button.logo{min-height:44px}
 .detail-head.is-compact .detail-summary h2{display:none}
 .detail-head.is-compact .detail-summary p{display:block;flex:1 1 auto;min-width:0;font-size:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .detail-head.is-compact .detail-summary__destino{font-size:14px}
+
+/* ---- Toast de guardado / enlace copiado -------------------------------------- */
+.cs-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:400;display:flex;align-items:center;gap:12px;max-width:min(92vw,420px);padding:12px 16px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:var(--r-card,16px);background:var(--surface);color:var(--ink);box-shadow:0 14px 40px rgba(0,0,0,.45);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
+.cs-toast.is-visible{opacity:1;transform:translate(-50%,0)}
+.cs-toast__ico{flex:0 0 auto;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--cel);color:var(--cel-ink,#0A101A);font-size:15px;font-weight:800}
+.cs-toast.is-error{border-color:var(--coral)}
+.cs-toast.is-error .cs-toast__ico{background:var(--coral);color:#0A101A}
+.cs-toast__txt{display:grid;gap:2px;min-width:0}
+.cs-toast__txt b{font-size:14px;line-height:1.25}
+.cs-toast__txt small{color:var(--ink2);font-size:12.5px;line-height:1.35}
+@media (prefers-reduced-motion:reduce){.cs-toast{transition:none}}
 
 /* ======================================================================
    Capa de uniformidad (geometria, areas tactiles y seleccion)
