@@ -2144,7 +2144,7 @@
   function pedirComparativa() {
     if (comparativaPendiente) return;
     comparativaPendiente = true;
-    setTimeout(function () { comparativaPendiente = false; try { actualizarComparativa(); } catch (e) { console.error(e); } }, 0);
+    setTimeout(function () { comparativaPendiente = false; try { actualizarComparativa(); } catch (e) { console.error(e); } }, 60);
   }
   /* Modal de habitaciones de un hotel (getRoomList de Booking, via el server).
      Muestra tipo, camas, comida, cancelacion y total; reservar sigue siendo en
@@ -8175,9 +8175,17 @@
         '</div>' +
         '</article>';
     }).join('');
+    /* El presupuesto se tipea en la base (US$) pero los precios de las cards se
+       muestran en la moneda elegida. Con reales, "USD $700" arriba y "R$ 2.761"
+       abajo parecia que la lista pasaba el presupuesto (2.761 > 700) cuando son
+       ~US$ 500. El titulo dice las dos cosas y la linea de abajo aclara en que
+       moneda estan los precios. */
     var titleBudget = Number(data.meta.budget).toLocaleString('es-UY');
-    el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos disponibles para tu presupuesto de USD $' + titleBudget + '</h2>' +
-      '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo.</p>' +
+    var monedaBaseTit = monedaBase(), monedaTit = monedaActiva();
+    var enOtraMoneda = monedaTit.code !== monedaBaseTit.code && tasaDe(monedaTit.code) != null;
+    var budgetTxt = 'USD $' + titleBudget + (enOtraMoneda ? ' (≈ ' + money(data.meta.budget) + ')' : '');
+    el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos disponibles para tu presupuesto de ' + budgetTxt + '</h2>' +
+      '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo' + (enOtraMoneda ? '. Precios en ' + monedaTit.etiqueta.toLowerCase() + ' (' + monedaTit.simbolo + ')' : '') + '.</p>' +
       (fits.length ? '<div class="destination-cards">' + cards + '</div>' : '<div class="notice">No encontramos destinos dentro de ese presupuesto. Probá aumentando el monto o ajustando las fechas.</div>') + '</section>';
   }
   function findDestinations() {
@@ -11520,8 +11528,13 @@ function comboNombreDestino() {
     });
     /* Comparativa de las fichas de hotel: se recalcula al elegir otra y cada vez
        que la seccion se repinta (cambio de tipo, de moneda, carga de hoteles). */
+    // Elegir un hotel se resuelve en el click de la card (el handler cancela el
+    // change nativo), asi que se escucha el click ademas del change.
     $('#vista-detalle').addEventListener('change', function (e) {
       if (e.target && e.target.matches && e.target.matches('[data-hotel-total]')) pedirComparativa();
+    });
+    $('#vista-detalle').addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-hotel-option]')) pedirComparativa();
     });
     $('#vista-detalle').addEventListener('click', function (e) {
       var rooms = e.target.closest && e.target.closest('[data-hotel-rooms]');

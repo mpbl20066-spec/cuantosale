@@ -3034,3 +3034,7 @@ button.logo{min-height:44px}
 .rooms-modal__price small{font-size:11px;color:var(--ink2)}
 .rooms-modal__book{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-weight:800;text-decoration:none}
 @media (max-width:520px){.rooms-modal__room{grid-template-columns:72px minmax(0,1fr)}.rooms-modal__room img,.rooms-modal__nophoto{width:72px;height:56px}.rooms-modal__price{grid-column:1/-1;justify-items:start;text-align:left}}
+
+/* El filtro por playa en una sola fila con scroll horizontal, no apilado. */
+.hotel-playa-filter{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-bottom:4px}
+.hotel-playa-filter .hotel-type-pill{width:auto;flex:none;padding:0 14px;white-space:nowrap}
