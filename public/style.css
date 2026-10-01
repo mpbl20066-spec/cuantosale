@@ -1,4 +1,4 @@
-/* version: 208
+/* version: 209
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3038,3 +3038,12 @@ button.logo{min-height:44px}
 /* El filtro por playa en una sola fila con scroll horizontal, no apilado. */
 .hotel-playa-filter{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-bottom:4px}
 .hotel-playa-filter .hotel-type-pill{width:auto;flex:none;padding:0 14px;white-space:nowrap}
+
+/* Selector Total / Por persona del presupuesto: chico y discreto, al lado de la etiqueta. */
+.bud-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px;margin-bottom:6px}
+.bud-head label{margin:0}
+.bud-mode{display:inline-flex;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.bud-mode button{min-height:26px;padding:0 9px;border:0;border-radius:999px;background:transparent;color:var(--ink2);font:inherit;font-size:11px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer}
+.bud-mode button[aria-pressed="true"]{background:var(--selected-bg);color:var(--selected-ink)}
+.bud-mode button:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
+.bud-calc{display:block;margin-top:6px;color:var(--ink2);font-size:12px;line-height:1.35;grid-column:1/-1}

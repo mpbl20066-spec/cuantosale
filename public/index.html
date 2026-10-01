@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/style.css?v=208">
+<link rel="stylesheet" href="/style.css?v=209">
 <!-- Los precios de vuelo se consultan en el server y la reserva se completa en
      Google Flights, así que la página no carga ningún script de terceros para
      vuelos. El CSP del server no lo permite. -->
@@ -141,8 +141,15 @@
         </div>
       </div>
       <div>
-        <label for="bud">Presupuesto total</label>
+        <div class="bud-head">
+          <label for="bud" id="bud-label">Presupuesto total</label>
+          <div class="bud-mode" role="group" aria-label="Tipo de presupuesto">
+            <button type="button" data-bud-mode="total" aria-pressed="true">Total</button>
+            <button type="button" data-bud-mode="pp" aria-pressed="false">Por persona</button>
+          </div>
+        </div>
         <div class="money"><span>US$</span><input id="bud" class="inp" type="number" inputmode="numeric" min="0" step="100"></div>
+        <small id="bud-calc" class="bud-calc" aria-live="polite" hidden></small>
       </div>
     </div>
     <div>
@@ -229,7 +236,7 @@
      de app.js porque app.js lo lee al cargar. Sin '?v=' a propósito, por el
      mismo motivo que daily-costs.js: lo controla el CACHE_NAME del SW. -->
 <script defer src="/tours.generated.js"></script>
-<script defer src="/app.js?v=272"></script>
+<script defer src="/app.js?v=273"></script>
 
 </body>
 </html>

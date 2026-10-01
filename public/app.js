@@ -278,7 +278,7 @@
     { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
     { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }];
   var FX = { rates: null, base: 'USD', until: 0, cargando: true };
-  var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
+  var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, budgetMode: 'total', budgetPP: 0, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
   /* Solo se muestran los hoteles con disponibilidad confirmada. Antes esto era
      un filtro con dos opciones ("Todos" / "Solo con disponibilidad") y el
      default era mostrar todo. Ahora no hay opción: la lista es siempre la de los
@@ -1516,8 +1516,39 @@
     if (tasaDe(m.code) == null) m = monedaBase();
     var simbolo = campo.parentElement && campo.parentElement.querySelector('span');
     if (simbolo) simbolo.textContent = m.simbolo;
+    var pp = S.budgetMode === 'pp';
+    var etiqueta = $('#bud-label');
+    if (etiqueta) etiqueta.textContent = pp ? 'Presupuesto por persona' : 'Presupuesto total';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-bud-mode]'), function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-bud-mode') === S.budgetMode));
+    });
+    var calc = $('#bud-calc');
+    if (calc) {
+      calc.hidden = !pp || !S.budget;
+      if (pp) calc.textContent = '= ' + money(S.budget) + ' en total · ' + S.pax + (S.pax === 1 ? ' viajero' : ' viajeros');
+    }
     if (document.activeElement === campo) return;
-    campo.value = S.budget ? Math.round(aMoneda(S.budget)) : '';
+    var base = pp ? S.budgetPP : S.budget;
+    campo.value = base ? Math.round(aMoneda(base)) : '';
+  }
+  /* "Por persona": el campo guarda cuanto pone cada viajero (S.budgetPP) y el
+     motor sigue recibiendo el total (S.budget = por persona x viajeros), que es
+     lo unico que entiende el server. Si cambian los viajeros se recalcula el
+     total y el monto por persona no se toca. */
+  function presupuestoDesdeCampo(valorEnMoneda) {
+    var base = Math.max(0, aBase(Math.max(0, Number(valorEnMoneda) || 0)));
+    if (S.budgetMode === 'pp') { S.budgetPP = base; S.budget = Math.round(base * S.pax); }
+    else { S.budget = Math.round(base); }
+  }
+  function recalcularPresupuestoPorViajeros() {
+    if (S.budgetMode === 'pp') S.budget = Math.round(S.budgetPP * S.pax);
+    sincronizarPresupuesto();
+  }
+  function cambiarModoPresupuesto(modo) {
+    if (modo === S.budgetMode) return;
+    if (modo === 'pp') S.budgetPP = S.budget / Math.max(1, S.pax);
+    S.budgetMode = modo;
+    sincronizarPresupuesto();
   }
   function dLong(d) { return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' }); }
   function shortDateLabel(value) {
@@ -6427,6 +6458,7 @@
      deja en cero: recalcular un cero porque cambio el numero de viajeros seria
      desconocer su decision. */
   function alCambiarViajeros() {
+    recalcularPresupuestoPorViajeros();
     if (detailState && detailState.meta) {
       var noches = Math.max(1, Number(detailState.meta.nights) || 1);
       var pax = Math.max(1, Number(S.pax) || 1);
@@ -9832,7 +9864,7 @@
     var details = trip.details || trip.flight_details || {};
     S.dest = await resolveSavedDestinationKey(trip, details) || S.dest; S.dep = trip.departure_date || S.dep; S.ret = trip.return_date || S.ret; S.pax = Number(trip.travelers) || Number(details.travelers) || S.pax; S.style = details.style || S.style; S.budget = Number(details.queryBudget) || S.budget; S.transport = trip.transport_mode || details.transport_mode || S.transport; S.origin = details.origin === 'PDP' ? 'PDP' : (details.origin === 'MVD' ? 'MVD' : S.origin); S.subcategory = details.subcategory || ''; S.hotelType = details.hotelType || inferHotelType(S.subcategory) || hotelTypeForStyle(S.style);
     var originInput = $('#origin-input'); if (originInput) originInput.value = originLabel(S.origin);
-    if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; syncDateRangeFields(); if ($('#pax')) $('#pax').textContent = S.pax; if ($('#bud')) $('#bud').value = S.budget;
+    if ($('#dep')) $('#dep').value = S.dep; if ($('#ret')) $('#ret').value = S.ret; syncDateRangeFields(); if ($('#pax')) $('#pax').textContent = S.pax; S.budgetMode = 'total'; sincronizarPresupuesto();
     if (typeof openDestinationProposal === 'function' && S.dest !== 'todos') {
       closeAccountModal('trips-modal');
       var opened = await openDestinationProposal(S.dest, trip);
@@ -11190,7 +11222,10 @@ function comboNombreDestino() {
       schedule();
     });
     $('#ret').addEventListener('change', function (e) { S.ret = e.target.value; syncDateRangeFields(); schedule(); });
-    $('#bud').addEventListener('input', function (e) { S.budget = Math.max(0, Math.round(aBase(Math.max(0, Number(e.target.value) || 0)))); schedule(); });
+    $('#bud').addEventListener('input', function (e) { presupuestoDesdeCampo(e.target.value); sincronizarPresupuesto(); schedule(); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-bud-mode]'), function (b) {
+      b.addEventListener('click', function () { cambiarModoPresupuesto(b.getAttribute('data-bud-mode')); schedule(); });
+    });
     $('#pm').addEventListener('click', function () { S.pax = Math.max(1, S.pax - 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
     $('#pp').addEventListener('click', function () { S.pax = Math.min(10, S.pax + 1); $('#pax').textContent = S.pax; alCambiarViajeros(); });
     $('#seg').addEventListener('click', function (e) {
