@@ -2061,18 +2061,18 @@ function featuredPriceItems(req, res, url) {
 // toca ninguno de los dos (sólo /api/config, que ya es público, y Supabase
 // directo con la anon key). El acceso a los datos de un grupo lo protege el
 // uuid de la URL, no el candado: es el mismo modelo que ya estaba antes.
-/* tours.html entra con index.html y no porque si. Antes el comentario de la ruta
-   /tours afirmaba que el panel quedaba protegido "porque el candado de
-   prelanzamiento esta en serveStatic", pero el set solo tenia index.html: el
-   panel se servia sin pedir usuario ni contrasena a cualquiera que probara la
-   ruta, y antes de abrir al publico eso significa mostrar el catalogo completo
-   de tours con precios a un visitante cualquiera.
+/* tours.html NO va acado, a proposito.
+   El panel de edicion de tours tiene su propio permiso y es mas fuerte que el
+   candado: exige sesion de Supabase y que tours_guardar() compruebe es_agencia()
+   dentro de la base. Ponerlo en este set lo dejaba imposible de abrir desde otra
+   maquina, que es justo donde hace falta entrar: la agencia edita el catalogo
+   desde donde este, y con basic auth habia que pasarle usuario y contrasena por
+   un link que se manda por WhatsApp.
 
-   El permiso real del panel sigue siendo la sesion de Supabase y que
-   tours_guardar() compruebe es_agencia() en la base: esto solo evita que la
-   pagina se vea en una maquina que no es la del equipo, que es exactamente lo
-   que el comentario decia y no lo que hacia. */
-const PRELAUNCH_FILES = new Set(['index.html', 'tours.html']);
+   Lo que si importa es que la pagina no sea un gaping hole de datos: por eso
+   tours.html lleva noindex en su head y robots.txt lo tiene con Disallow. Ver
+   el_catalogo no es lo mismo que editarlo, y editarlo esta protegido dos veces. */
+const PRELAUNCH_FILES = new Set(['index.html']);
 
 function prelaunchGuard() {
   const user = String(process.env.APP_USER || '').trim();

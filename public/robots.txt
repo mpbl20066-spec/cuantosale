@@ -4,10 +4,13 @@ User-agent: *
 # hay candado y todo es publico, que es el caso del desarrollo local.
 # Allow: /
 
-# Estas dos no son paraindexar. /tours es el panel de edicion del catalogo de
-# la agencia: no aporta nada en buscadores y no queremos que el link sea un
-# punto de entrada visible a cualquiera que lo pruebe.
-Disallow: /tours
+# /api/ no se indexa nunca.
+#
+# /tours NO va con Disallow a proposito: es el panel de edicion del catalogo de
+# la agencia y la agencia tiene que poder entrar desde cualquier maquina. El
+# permiso lo pone la sesion de Supabase y es_agencia() en la base, no el
+# candado de pre-lanzamiento. La pagina lleva noindex en su head, asi que tampoco
+# se ofrece a un buscador.
 Disallow: /api/
 
 # La raiz sirve la waitlist durante el pre-lanzamiento, no la app. Es la landing
