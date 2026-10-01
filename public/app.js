@@ -3048,15 +3048,15 @@
      desde el exterior. Entra Prex en su lugar, que es una red de cajeros que la
      gente efectivamente usa para sacar y para transferir. */
   var CHECKOUT_PAYMENTS = [
-    { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/86/LogoBROU.png', lw: 753, lh: 206 },
-    { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Grupo_Santander_Logo.svg', lw: 512, lh: 83 },
-    { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/98/BBVA_logo_2025.svg', lw: 600, lh: 180 },
+    { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f', logo: '/pagos/brou.png', lw: 93, lh: 21 },
+    { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000', logo: '/pagos/santander.png', lw: 110, lh: 19 },
+    { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481', logo: '/pagos/bbva.png', lw: 125, lh: 55 },
     { id: 'scotiabank', label: 'Scotiabank', kind: 'Transferencia bancaria', mark: 'Scotiabank', brand: '#ec111a', logo: '/pagos/scotiabank.png', lw: 209, lh: 41 },
     { id: 'prex', label: 'Prex', kind: 'Transferencia bancaria', mark: 'Prex', brand: '#f5a800', logo: '/pagos/prex.png', lw: 152, lh: 54 },
     { id: 'oca', label: 'OCA', kind: 'Transferencia bancaria', mark: 'OCA', brand: '#e30613', logo: '/pagos/oca.png', lw: 177, lh: 62 },
     { id: 'pix', label: 'Pix', kind: 'Transferencia inmediata', mark: 'Pix', brand: '#00b1e0', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Pix_%28Brazil%29_logo.svg', lw: 899, lh: 318 },
-    { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Visa_Inc._logo_%282021%E2%80%93present%29.svg', lw: 512, lh: 166 },
-    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg', lw: 1000, lh: 618 }
+    { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71', logo: '/pagos/visa.png', lw: 85, lh: 56 },
+    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b', logo: '/pagos/mastercard.png', lw: 93, lh: 56 }
   ];
   var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
   var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
@@ -10064,127 +10064,6 @@
     reponer();
   }
 
-  /* ---------- Boton "atras" del celular ----------
-     Las ventanas (.booking-modal) y la vista de propuesta no tocaban el
-     historial: el gesto o el boton de atras del telefono sacaba a la persona
-     de la pagina entera en vez de cerrar la ventana. Cada capa que se abre
-     suma una entrada al historial y "atras" cierra la de arriba.
-
-     No toca el codigo que abre y cierra cada ventana: mira el atributo
-     `hidden` (y la clase `oculto` de la vista) con un MutationObserver. Asi
-     cubre tambien las que se crean despues, como #split-modal, y el cierre por
-     X, por Escape o por "atras" corre siempre el mismo codigo. */
-  function initBackLayers() {
-    if (!window.history || !history.pushState || !window.MutationObserver) return;
-    var pila = [];       // capas abiertas, la ultima es la de arriba
-    var ignorar = 0;     // popstate que provocamos nosotros con history.back()
-    var huerfanas = 0;   // entradas de historial cuya capa se cerro por debajo de otra
-    function capas() {
-      var out = Array.prototype.slice.call(document.querySelectorAll('.booking-modal')).map(function (el) {
-        return { el: el, abierta: !el.hidden, cerrar: function () {
-          var x = el.querySelector('[data-close-auth],[data-close-trips],[data-close-booking]');
-          if (x) x.click(); else { el.hidden = true; el.setAttribute('aria-hidden', 'true'); el.innerHTML = ''; }
-        } };
-      });
-      var vista = document.getElementById('vista-detalle');
-      if (vista) out.push({ el: vista, abierta: !vista.classList.contains('oculto'), cerrar: function () {
-        var b = document.getElementById('btn-volver'); if (b) b.click();
-      } });
-      return out;
-    }
-    function reconciliar() {
-      var todas = capas();
-      todas.forEach(function (c) {
-        var idx = pila.indexOf(c.el);
-        if (c.abierta && idx < 0) {
-          pila.push(c.el);
-          try { history.pushState({ csCapa: true }, ''); } catch (e) { pila.pop(); }
-        } else if (!c.abierta && idx >= 0) {
-          pila.splice(idx, 1);
-          if (idx === pila.length) { ignorar++; history.back(); } else { huerfanas++; }
-        }
-      });
-    }
-    var observador = new MutationObserver(reconciliar);
-    function observar(el) { observador.observe(el, { attributes: true, attributeFilter: ['hidden', 'class'] }); }
-    Array.prototype.forEach.call(document.querySelectorAll('.booking-modal'), observar);
-    var vista = document.getElementById('vista-detalle'); if (vista) observar(vista);
-    // Modales que se agregan despues (p. ej. #split-modal).
-    new MutationObserver(function (muts) {
-      muts.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains('booking-modal')) { observar(n); reconciliar(); } }); });
-    }).observe(document.body, { childList: true, subtree: true });
-    window.addEventListener('popstate', function () {
-      if (ignorar > 0) { ignorar--; return; }
-      if (huerfanas > 0) { huerfanas--; return; }
-      var top = pila.pop();
-      if (!top) return;
-      var capa = capas().filter(function (c) { return c.el === top; })[0];
-      if (capa && capa.abierta) capa.cerrar();
-    });
-    reconciliar();
-  }
-
-  /* ---------- "Mi viaje": se puede arrastrar arriba y abajo ----------
-     En el celu la barra va fija abajo y a veces tapa lo que se esta mirando o
-     queda debajo del gesto del sistema. Se agarra de la barra (o de la rayita)
-     y se arrastra en vertical; la posicion se recuerda en la sesion. El toque
-     corto sigue abriendo y cerrando el panel. */
-  function initTripBarDrag() {
-    var bar = document.getElementById('trip-summary');
-    if (!bar || !window.PointerEvent) return;
-    var KEY = 'cuantosale_tripbar_bottom';
-    var MARGEN = 8;
-    function movil() { return window.innerWidth <= 900; }
-    function limitar(px) {
-      var max = window.innerHeight - bar.offsetHeight - MARGEN;
-      return Math.max(MARGEN, Math.min(px, Math.max(MARGEN, max)));
-    }
-    function aplicar(px) { bar.style.bottom = limitar(px) + 'px'; }
-    function reponer() {
-      if (!movil()) { bar.style.bottom = ''; return; }
-      var g = null; try { g = sessionStorage.getItem(KEY); } catch (e) { }
-      if (g !== null && g !== '' && isFinite(Number(g))) aplicar(Number(g)); else bar.style.bottom = '';
-    }
-    var drag = null, huboArrastre = false;
-    bar.addEventListener('pointerdown', function (e) {
-      if (!movil() || (e.pointerType === 'mouse' && e.button !== 0)) return;
-      if (!(e.target === bar || e.target.closest('.trip-summary__head'))) return;
-      var r = bar.getBoundingClientRect();
-      drag = { y: e.clientY, bottom: window.innerHeight - r.bottom, id: e.pointerId, activo: false };
-    });
-    bar.addEventListener('pointermove', function (e) {
-      if (!drag || e.pointerId !== drag.id) return;
-      var dy = e.clientY - drag.y;
-      if (!drag.activo) {
-        if (Math.abs(dy) < 8) return;
-        drag.activo = true; bar.classList.add('is-dragging');
-        try { bar.setPointerCapture(e.pointerId); } catch (x) { }
-      }
-      e.preventDefault();
-      aplicar(drag.bottom - dy);
-    });
-    function soltar(e) {
-      if (!drag || e.pointerId !== drag.id) return;
-      if (drag.activo) {
-        huboArrastre = true;
-        setTimeout(function () { huboArrastre = false; }, 350);
-        try { sessionStorage.setItem(KEY, String(parseFloat(bar.style.bottom) || MARGEN)); } catch (x) { }
-        bar.classList.remove('is-dragging');
-      }
-      drag = null;
-    }
-    bar.addEventListener('pointerup', soltar);
-    bar.addEventListener('pointercancel', soltar);
-    // Despues de arrastrar, el click que sigue no tiene que abrir/cerrar el panel.
-    bar.addEventListener('click', function (e) {
-      if (huboArrastre) { e.preventDefault(); e.stopPropagation(); }
-    }, true);
-    window.addEventListener('resize', reponer);
-    // El alto cambia al abrir/cerrar el panel: se revalida para no salirse de la pantalla.
-    new MutationObserver(function () { if (movil() && bar.style.bottom) aplicar(parseFloat(bar.style.bottom)); }).observe(bar, { attributes: true, attributeFilter: ['class'] });
-    reponer();
-  }
-
   function init() {
     /* Volver a la vista de inicio.
 
@@ -12047,8 +11926,6 @@ function comboNombreDestino() {
   }
 
   cargarTasas();
-  initBackLayers();
-  initTripBarDrag();
   initBackLayers();
   initTripBarDrag();
   init();
