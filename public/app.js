@@ -1096,6 +1096,9 @@
   // uno quiere, pero verla marcada hacia creer que ya era la elegida.
   var selectedPropuestaId = null;
   var selectedPropuestaFor = null;
+  // Sin una eleccion explicita, la lista arranca con la propuesta MAS BARATA
+  // marcada (el marco mostaza), no con la "Recomendada" del servidor.
+  var propuestaPorDefectoId = null;
   var rangeCalendarMonth = null;
   var rangeCalendarStep = 'dep';
 
@@ -8739,7 +8742,7 @@
   function pintarPropuestaSeleccionada() {
     var cards = document.querySelectorAll('#results .opt[data-propuesta-card]');
     Array.prototype.forEach.call(cards, function (card) {
-      card.classList.toggle('propuesta-seleccionada', card.getAttribute('data-propuesta-card') === selectedPropuestaId);
+      card.classList.toggle('propuesta-seleccionada', card.getAttribute('data-propuesta-card') === (selectedPropuestaId || propuestaPorDefectoId));
     });
   }
 
@@ -9448,6 +9451,10 @@
     if (!rec.sources) rec.sources = {};
     var dep = parse(data.meta.dep), ret = parse(data.meta.ret), pax = data.meta.pax, budget = data.meta.budget;
     var cheapest = byId(list, data.cheapestId), cozy = byId(list, data.cozyId);
+    // La marcada por defecto es la de menor total de la lista, aunque el servidor
+    // no haya mandado cheapestId.
+    var masBarata = cheapest || list.reduce(function (min, p) { return (!min || Number(p.total) < Number(min.total)) ? p : min; }, null);
+    propuestaPorDefectoId = masBarata ? masBarata.id : rec.id;
 
     var chip = $('#chip');
     if (chip) chip.textContent = '';
@@ -9589,7 +9596,7 @@
         ? '<p class="opt__nota"><sup class="opt__est">*</sup> Precio estimado. <b>"Ver propuesta"</b> lo congela.</p>'
         : '';
       var bodyId = 'opt-desglose-' + index;
-      return '<article class="opt' + (p.id === selectedPropuestaId || p.id === rec.id ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-card="' + esc(p.id) + '">' +
+      return '<article class="opt' + (p.id === (selectedPropuestaId || propuestaPorDefectoId) ? ' propuesta-seleccionada' : '') + '" data-opt-card data-propuesta-card="' + esc(p.id) + '">' +
         '<div class="opt__head">' +
           '<div class="opt__main"><div class="t">' + esc(titleOf(p)) + '</div><div class="s">' + esc(subtituloDe(p)) + '</div><div class="tg">' + tags + '</div></div>' +
           '<div class="opt__price"><small>' + etiquetaTotal(data.meta.pax) + '</small><b>' + moneyCero(p.total) + '</b><span>' + moneyCero(p.pp) + ' por persona</span></div>' +
