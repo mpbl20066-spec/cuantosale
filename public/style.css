@@ -3613,3 +3613,29 @@ summary::-webkit-details-marker{display:none}
 .saved-trip__link:disabled{opacity:.6;cursor:progress}
 .saved-trip button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
 @media(max-width:380px){.saved-trip{grid-template-columns:minmax(0,1fr)}.saved-trip__precio{text-align:left}}
+
+/* ---- Toast / snackbar ----
+   Una sola pieza: icono circular verde (rojo en error) y dos lineas de texto
+   alineadas al centro vertical, esquinas suaves, sombra difusa y aire. Sube por
+   encima del boton fijo "Reservar viaje completo" cuando el resumen esta abierto. */
+.cs-toast{box-sizing:border-box;width:max-content;min-width:min(280px,92vw);max-width:min(92vw,440px);gap:14px;padding:14px 20px 14px 14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.16)}
+.cs-toast__ico{width:34px;height:34px;font-size:17px;line-height:1;background:var(--good,#2fb67c);color:#fff}
+.cs-toast.is-error{border-color:var(--line)}
+.cs-toast.is-error .cs-toast__ico{background:var(--coral);color:#fff}
+.cs-toast__txt{gap:3px}
+.cs-toast__txt b{font-size:15px;font-weight:700;line-height:1.25}
+.cs-toast__txt small{font-size:13px;line-height:1.35}
+body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+/* ---- Resumen: Guardar / Compartir / Asesor en UNA fila ----
+   En celular se apilaban como tres botones a todo el ancho (la "torre"). Ahora
+   son tres columnas iguales, con el icono arriba y el texto debajo; el menu de
+   Compartir se abre en linea ocupando todo el ancho. */
+@media(max-width:560px){
+  .voucher-tools{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .voucher-tools>*{grid-column:auto;width:100%}
+  .voucher-tools>.voucher-share__menu{grid-column:1 / -1}
+  .voucher-tools .voucher-chip{flex-direction:column;justify-content:center;gap:4px;min-height:64px;padding:8px 4px;font-size:12px;line-height:1.15;text-align:center}
+  .voucher-tools .voucher-chip .voucher-btn__label{white-space:normal;text-align:center;overflow:visible}
+  .voucher-tools .voucher-share__chev{display:none}
+}
