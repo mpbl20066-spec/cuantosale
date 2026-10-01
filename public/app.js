@@ -4407,16 +4407,21 @@
 
      Cuando no hay nada elegido vuelve la estimacion completa, que es lo que
      pasaba antes de este cambio. */
+  /* El traslado entre las dos paradas es opcional: solo suma al presupuesto si la
+     persona lo elige (state.entreElegido). Antes se contaba siempre. */
+  function montoEntreParadas(state) {
+    return state && state.multiStay && state.entreElegido ? Number(state.multiStay.transferBetweenUsd) || 0 : 0;
+  }
   function trasladoDelViaje(state) {
     if (!state) return 0;
     if (state.transportMode === 'auto') return Number(state.auto) || 0;
-    var entre = state.multiStay ? Number(state.multiStay.transferBetweenUsd) || 0 : 0;
+    var entre = montoEntreParadas(state);
     // Los dos tramos, cuando hay dos elegidos. Un tramo sin elegir NO cae a la
     // estimacion del modelo: la estimacion es del conjunto, no de un lado, y
     // repartirla entre los dos seria inventar como se armo.
     var llegada = getSelectedTransferAmount(state, 'llegada');
     var vuelta = getSelectedTransferAmount(state, 'vuelta');
-    if (llegada > 0 || vuelta > 0) return entre + llegada + vuelta;
+    if (llegada > 0 || vuelta > 0 || entre > 0) return entre + llegada + vuelta;
     return (Number(state.baseTraslados) || 0) + entre;
   }
   // Iconos por categoría para el resumen de presupuesto. Se dibujan con trazo
@@ -4510,7 +4515,7 @@
     return vueloElegido();
   }
   function hotelElegido() { return !!(detailState && (detailState.hotelDecided || detailState.selectedHotel === false)); }
-  function trasladoElegido() { return !!(detailState && (detailState.transferType || detailState.transferTypeVuelta)); }
+  function trasladoElegido() { return !!(detailState && (detailState.transferType || detailState.transferTypeVuelta || detailState.entreElegido)); }
   function busSumado(state) {
     var v = Number(state && state.parts && state.parts.bus) || 0;
     return (!v || state !== detailState || busDecidido()) ? v : 0;
@@ -7250,7 +7255,7 @@
     // transporte y el "empezar de nuevo", donde ninguno debe quedar elegido.
     if (leg === 'vuelta') detailState.transferTypeVuelta = '';
     else if (leg === 'llegada') detailState.transferType = '';
-    else { detailState.transferType = ''; detailState.transferTypeVuelta = ''; }
+    else { detailState.transferType = ''; detailState.transferTypeVuelta = ''; detailState.entreElegido = false; }
     detailState.transfer = trasladoDelViaje(detailState);
     var section = document.querySelector('[data-official-transfer]');
     if (section) section.outerHTML = transferCard(detailState.meta);
@@ -7284,7 +7289,7 @@
     // 0, que es lo que esta linea tiene que dejar para que el total no sume un
     // traslado que nadie pidio.
     detailState.transfer = detailState.transportMode === 'flight'
-      ? (transferTypeDe(detailState, 'llegada') || transferTypeDe(detailState, 'vuelta') ? trasladoDelViaje(detailState) : 0)
+      ? (transferTypeDe(detailState, 'llegada') || transferTypeDe(detailState, 'vuelta') || detailState.entreElegido ? trasladoDelViaje(detailState) : 0)
       : 0;
     recalcularTotalViaje();
   }
@@ -7336,7 +7341,7 @@
     detailState.transportMode = autoEnabled ? 'auto' : 'flight';
     detailState.auto = autoEnabled ? currentRoadtripTotal() : 0;
     detailState.flight = autoEnabled ? 0 : detailState.baseFlight;
-    detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados + (detailState.multiStay ? Number(detailState.multiStay.transferBetweenUsd) || 0 : 0);
+    detailState.parts.traslados = autoEnabled ? 0 : detailState.baseTraslados + montoEntreParadas(detailState);
   }
   function actualizarTransporte(autoEnabled) {
     if (!detailState) return;
@@ -7863,9 +7868,15 @@
         '<strong>' + esc(tramo.from) + ' → ' + esc(tramo.to) + '</strong>' +
         '</div>';
       if (tramo.auto) {
-        // No es una eleccion: es un pasaje que ya esta en el total. Sin card,
-        // sin radio y sin "Agregar", porque no hay nada que agregar.
-        return cabeza + '<p class="transfer-leg__auto">' + (tramo.ferry ? 'Un pasaje de ferry entre las paradas' : 'Un transfer entre las paradas') + ': <b>' + money(tramo.perPax || tramo.amount / paxT) + ' por persona</b>' + (paxT > 1 ? ' · ' + money(tramo.amount) + ' los ' + paxT : '') + '. Ya está en tu total. Se coordina con el operador al reservar.</p></div>';
+        /* El tramo entre paradas es opcional: la persona lo elige (un solo pasaje por
+           persona) y recien ahi suma al presupuesto. */
+        var entreSel = !!(detailState && detailState.entreElegido);
+        var tituloEntre = tramo.ferry ? 'Ferry entre las paradas' : 'Transfer entre las paradas';
+        return cabeza + '<div class="transfer-choice-grid transfer-choice-grid--uno"><button type="button" class="transfer-choice' + (entreSel ? ' is-selected' : '') + '" data-transfer-entre aria-pressed="' + (entreSel ? 'true' : 'false') + '">' +
+          '<span class="transfer-choice__head">' + transferArt('shared') + '<strong>' + tituloEntre + '</strong></span>' +
+          '<span class="transfer-choice__body"><small>Un solo ' + (tramo.ferry ? 'pasaje' : 'transfer') + ' por persona' + (tramo.note ? ' · ' + esc(tramo.note) : '') + '. Se coordina con el operador al reservar.</small></span>' +
+          '<b class="transfer-choice__price">' + money(tramo.perPax || (tramo.amount / paxT)) + '<span class="transfer-choice__unit"> por persona</span>' + (paxT > 1 ? '<span class="transfer-choice__total"> · ' + money(tramo.amount) + ' los ' + paxT + '</span>' : '') + '</b></button></div>' +
+          (entreSel ? '<p class="transfer-choice-note">Sumado a tu presupuesto. Tocalo de nuevo para sacarlo.</p>' : '') + '</div>';
       }
       if (tramo.key === 'llegada' || tramo.key === 'vuelta') {
         /* El tramo corto se dice ANTES de las cards, no despues. Es una
@@ -9967,7 +9978,7 @@
     if (data.meta.multiStay && data.meta.multiStay.stays && data.meta.multiStay.stays.length === 2) {
       detailState.multiStay = Object.assign({}, data.meta.multiStay, { totalNights: nights, firstNights: Math.max(1, Math.floor(nights / 2)) });
       detailState.baseTraslados = Number(proposal.parts.traslados) || 0;
-      detailState.parts.traslados = detailState.baseTraslados + (Number(detailState.multiStay.transferBetweenUsd) || 0);
+      detailState.parts.traslados = detailState.baseTraslados + montoEntreParadas(detailState);
       updateMultiStayPricing();
     }
     /* Perfil del viaje -> nivel de los costos diarios. Es el mismo mapeo que usa
@@ -12607,6 +12618,16 @@ function comboNombreDestino() {
         Array.prototype.forEach.call(flightSection.querySelectorAll('[data-flight-stop]'), function (button) { button.setAttribute('aria-pressed', String(button.getAttribute('data-flight-stop') === (flightSection.getAttribute('data-flight-stop') || 'all'))); });
         Array.prototype.forEach.call(flightSection.querySelectorAll('[data-flight-time]'), function (button) { button.setAttribute('aria-pressed', String(button.getAttribute('data-flight-time') === (flightSection.getAttribute('data-flight-time') || 'all'))); });
         if (detailState && detailState.flightOffers) renderFlightOffers(flightSection.querySelector('.flight-results'), { offers: detailState.flightOffers });
+        return;
+      }
+      var entreChoice = e.target.closest('[data-transfer-entre]');
+      if (entreChoice && detailState) {
+        e.preventDefault(); e.stopPropagation();
+        detailState.entreElegido = !detailState.entreElegido;
+        var entreSectionEl = entreChoice.closest('[data-official-transfer]');
+        if (entreSectionEl) entreSectionEl.outerHTML = transferCard(detailState.meta);
+        sincronizarTrasladoOficial();
+        renderTripSummary();
         return;
       }
       var transferChoice = e.target.closest('[data-transfer-choice]');

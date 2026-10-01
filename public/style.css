@@ -3706,3 +3706,6 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .voucher-item__edit:hover{color:var(--ink)}
 .voucher-item__edit:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
 .voucher-item__side .voucher-item__cta:not(.is-reserved):not(.is-elegir){background:var(--action-bg);color:var(--action-ink);border-color:var(--action-bg);font-weight:800}
+
+/* Traslado entre paradas: una sola opcion elegible, a todo el ancho. */
+.transfer-leg .transfer-choice-grid--uno{grid-template-columns:minmax(0,1fr)}
