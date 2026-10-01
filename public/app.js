@@ -6320,7 +6320,7 @@
     function filaCta(categoria, elegido, agregar) {
       if (estadoReserva(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
       return elegido
-        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Editar</button>'
+        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Ver o editar</button>'
         : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="' + categoria + '">' + agregar + '</button>';
     }
     /* "Falta elegir" al cuerpo, con su propio tono: es una instruccion, no un
@@ -6423,7 +6423,6 @@
        checkout con el mismo pedido, asi que el voucher no necesita un camino
        nuevo ni un listener nuevo. */
     var pedido = checkoutPedido();
-    var pedidoTotal = pedido.count ? money(checkoutTotals().total) : '';
     /* La herramienta grupal, como bloque propio y antes del pie.
 
        Abre la misma accion que el enlace chico del encabezado --data-split-trip
@@ -6549,12 +6548,12 @@
        no encontraba como avanzar. Con algo para reservar abre el checkout; si no
        (por ejemplo falta el vuelo, que se compra afuera) lleva a coordinar con
        el asesor, asi nunca queda trabada esperando un servicio externo. */
+    /* Un solo boton de conversion para todo el paquete: siempre "Reservar viaje
+       completo" y siempre con el total global (vuelo + alojamiento + traslado +
+       actividades), nunca el parcial de lo que se reserva por la app. Con algo para
+       reservar en la app abre el checkout; si no, lleva al asesor. */
     var reservarTodo = '<div class="voucher-reserve voucher-reserve--fijo">'
-      + (pedido.count
-        ? '<button type="button" class="voucher-reserve__btn" data-reservar-pedido><span>'
-          + 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades'))
-          + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
-        : '<button type="button" class="voucher-reserve__btn" data-coordinar-asesor><span>Coordinar mi viaje con un asesor</span></button>')
+      + '<button type="button" class="voucher-reserve__btn" ' + (pedido.count ? 'data-reservar-pedido' : 'data-coordinar-asesor') + '><span>Reservar viaje completo</span><em>' + money(totalGeneral) + '</em></button>'
       + '</div>';
     var porPersona = pax > 1 ? '<span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span>' : '';
     cerrarTodosLosModales();
@@ -6570,7 +6569,7 @@
       (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, filaCta('pasajes', !!flightSummary.selected, 'Agregar vuelos'))) +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Elegir hotel')) +
       (busMode || autoMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
-      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Elegir actividades')) +
+      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Agregar tours')) +
       '</ul>' +
       /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
          ya es una caja: caja dentro de caja, y el unico bloque del modal con
