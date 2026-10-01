@@ -4221,7 +4221,7 @@
       { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Tours y experiencias', hecho: tr, opcional: true, anc: 'tours', cta: 'Sumá experiencias' },
       /* Cuarto paso: la confirmacion, donde la persona ve su viaje completo (el
          voucher que abre "Ver mi presupuesto"). No se "completa": es el cierre. */
-      { n: 4, titulo: 'Confirmar', texto: 'Mirá tu viaje', hecho: false, anc: '', cta: 'Ver mi viaje' }
+      { n: 4, titulo: 'Confirmar', texto: 'Mirá tu viaje', hecho: false, anc: '', cta: 'Revisá y confirmá tu viaje' }
     ];
   }
   /* Un paso a la vez. La propuesta se muestra en tres pasos y cada uno enseña
@@ -7575,10 +7575,10 @@
   function guiaCandado(meta) {
     var destino = meta && meta.dest ? meta.dest.name : '';
     return '<section class="guia-lock" data-guia-lock aria-labelledby="guia-lock-title">' +
-      '<div class="guia-lock__head"><span class="guia-lock__eyebrow">GUÍA SECRETA</span>' +
+      '<div class="guia-lock__head"><span class="guia-lock__eyebrow">BENEFICIO EXCLUSIVO</span>' +
       '<h2 id="guia-lock-title">La Guía Secreta de ' + esc(destino) + '</h2></div>' +
       '<div class="guia-lock__body"><span class="guia-lock__icon" aria-hidden="true">' + guiaLockIcon() + '</span>' +
-      '<p class="guia-lock__texto">Desbloqueá los secretos de la ciudad al elegir tu hotel. Al reservar tu alojamiento, accederás automáticamente a nuestras recomendaciones exclusivas de gastronomía y experiencias locales, curadas por expertos, que no encontrarás en las guías tradicionales.</p></div>' +
+      '<p class="guia-lock__texto">Es tuyo al completar tu viaje: cuando reservás tu alojamiento se desbloquea automáticamente y accedés a nuestras recomendaciones exclusivas de gastronomía y experiencias locales, curadas por expertos, que no encontrarás en las guías tradicionales.</p></div>' +
       '</section>';
   }
   /* Se pide la guia recien cuando la persona toca la reserva de un hotel. Ese

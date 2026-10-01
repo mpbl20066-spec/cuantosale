@@ -1,4 +1,4 @@
-/* version: 214
+/* version: 215
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2959,13 +2959,13 @@ button.logo{min-height:44px}
    al final. Las pestañas .steps usan el visual de siempre (ver .steps__list). */
 .detail-main[data-paso="1"] :is(.proposal-breakdown,[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
 .detail-main[data-paso="2"] :is(.proposal-breakdown,[data-transport-flow],[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
-.detail-main[data-paso="3"] :is(.proposal-breakdown,[data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel){display:none !important}
+.detail-main[data-paso="3"] :is(.proposal-breakdown,.guia-lock,.food-guide,[data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel){display:none !important}
 
 .hotel-playas{gap:16px}
 .hotel-playa-filter{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
 .hotel-option[hidden]{display:none !important}
 
-.detail-main[data-paso="4"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock,[data-steps-foot]){display:none !important}
+.detail-main[data-paso="4"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,[data-steps-foot]){display:none !important}
 .detail-main:not([data-paso="4"]) .confirm-step{display:none}
 .confirm-step{margin:0 0 22px}
 
@@ -3110,3 +3110,9 @@ button.logo{min-height:44px}
 .steps__next--extras:hover{filter:brightness(1.06)}
 .steps__item--extras.is-pending .steps__btn{border-color:color-mix(in srgb,var(--cel) 55%,var(--line));background:var(--cel-soft)}
 .steps__item--extras.is-pending .steps__n{border-color:var(--cel);color:var(--cel)}
+
+/* Extras: el boton de avance va al pie del contenido, en el flujo normal de la
+   pagina (sin barra pegada ni sombra flotante). La Guia Secreta y el desglose
+   viven en el paso 4, asi que aca no hay nada mas debajo. */
+.detail-main[data-paso="3"] .steps__foot{position:static;margin:24px 0 8px;padding:0;background:none}
+.detail-main[data-paso="3"] .steps__foot .steps__next{box-shadow:none}
