@@ -1,4 +1,4 @@
-/* version: 223
+/* version: 225
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3243,3 +3243,17 @@ button.logo{min-height:44px}
 .checkout-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
 .checkout-pay{--pay-logo-h:22px;min-height:66px;padding:8px 6px;gap:3px}
 .checkout-pay__kind{font-size:9.5px}
+
+/* ---- Banner de la Guia Secreta (paso 4) -------------------------------------- */
+.guia-banner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;margin:18px 0 0;padding:16px 18px;box-sizing:border-box;text-align:left;font:inherit;color:var(--ink);cursor:pointer;border:1.5px solid color-mix(in srgb,var(--cel) 60%,transparent);border-radius:var(--r-card,16px);background:linear-gradient(135deg,color-mix(in srgb,var(--cel) 16%,var(--surface)),var(--surface) 70%);box-shadow:0 10px 28px rgba(0,0,0,.25)}
+.guia-banner:hover{border-color:var(--cel)}
+.guia-banner:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.guia-banner__icon{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--cel);color:var(--cel-ink,#0A101A)}
+.guia-banner__icon svg{width:24px;height:24px;display:block}
+.guia-banner.is-abierta .guia-banner__icon .guia-lock__shackle{transform:translateY(-5px) rotate(-25deg)}
+.guia-banner__text{display:grid;gap:3px;min-width:0}
+.guia-banner__text em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cel)}
+.guia-banner__text b{font-family:var(--fh);font-size:17px;line-height:1.2}
+.guia-banner__text small{color:var(--ink2);font-size:13px;line-height:1.4}
+.guia-banner__cta{white-space:nowrap;font-size:13px;font-weight:800;color:var(--cel)}
+@media (max-width:560px){.guia-banner{grid-template-columns:auto minmax(0,1fr);padding:14px}.guia-banner__cta{grid-column:1/-1}}

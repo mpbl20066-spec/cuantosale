@@ -7706,6 +7706,34 @@
       '<rect class="guia-lock__body" x="4.5" y="10" width="15" height="10.5" rx="2.2"/>' +
       '</svg>';
   }
+  /* Banner de la Guia Secreta en el paso 4 (confirmacion): el beneficio de haber
+     armado el viaje aca, a la vista justo donde se cierra. Con la guia ya
+     abierta dice "desbloqueada" y lleva a leerla; sin abrir, promete lo que
+     incluye y como se desbloquea (al reservar el alojamiento), sin mostrar
+     contenido: el candado de mas abajo sigue siendo el que protege la guia. */
+  function guiaBannerMarkup(meta) {
+    var destino = meta && meta.dest ? meta.dest.name : '';
+    if (!destino) return '';
+    var abierta = !!guiaYaDe(meta.dest.key);
+    return '<button type="button" class="guia-banner' + (abierta ? ' is-abierta' : '') + '" data-guia-banner data-guia-ir>'
+      + '<span class="guia-banner__icon" aria-hidden="true">' + guiaLockIcon() + '</span>'
+      + '<span class="guia-banner__text"><em>Beneficio exclusivo</em>'
+      + '<b>' + (abierta ? 'Tu Guía Secreta de ' + esc(destino) + ' desbloqueada' : 'Tu Guía Secreta de ' + esc(destino)) + '</b>'
+      + '<small>' + (abierta ? 'Gastronomía y experiencias locales curadas por expertos. Tocá para leerla.' : 'Se desbloquea sola al reservar tu alojamiento: dónde comer, qué hacer y qué evitar, curado por expertos.') + '</small></span>'
+      + '<span class="guia-banner__cta">' + (abierta ? 'Ver guía' : 'Qué incluye') + ' <span aria-hidden="true">→</span></span></button>';
+  }
+  function actualizarGuiaBanner() {
+    var el = document.querySelector('[data-guia-banner]');
+    if (!el || !detailState || !detailState.meta) return;
+    var tmp = document.createElement('div');
+    tmp.innerHTML = guiaBannerMarkup(detailState.meta);
+    if (tmp.firstElementChild) el.replaceWith(tmp.firstElementChild);
+  }
+  function irALaGuia() {
+    var destino = detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.key;
+    var objetivo = (destino && document.querySelector('[data-guia-destino="' + destino + '"]')) || document.querySelector('[data-guia-lock],.food-guide');
+    if (objetivo && objetivo.scrollIntoView) objetivo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   function guiaCandado(meta) {
     var destino = meta && meta.dest ? meta.dest.name : '';
     return '<section class="guia-lock" data-guia-lock aria-labelledby="guia-lock-title">' +
@@ -7724,6 +7752,7 @@
     if (!meta.dest || meta.dest.key !== destKey) return;
     pedirGuiaSecreta(destKey, function (guia) {
       if (!guia) return;
+      window.setTimeout(actualizarGuiaBanner, 0);
       // Reemplaza el candado en el lugar que ya ocupaba. Si el render inicial
       // ya habia pintado la guia (porque ya estaba en cache de una sesion
       // anterior), pintarGuiaEnDetalle() no hace nada y el candado no esta.
@@ -7762,6 +7791,7 @@
      mirando. Solo se agrega el bloque que faltaba. */
   function pintarGuiaEnDetalle(guia, meta) {
     if (!guia || !meta || !meta.dest) return;
+    window.setTimeout(actualizarGuiaBanner, 0);
     var main = document.querySelector('.detail-main');
     if (!main) return;
     // Si el render inicial ya la habia pintado, no hay nada que hacer.
@@ -9406,7 +9436,7 @@
       renderSafe(function () { return multiStayMarkup(detailState); }, '') +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + dailyBudgetMarkup +
-      '<section class="confirm-step" data-confirm-step><h2 class="block-title">Confirmá tu viaje</h2><p class="sub block-sub">Este es el resumen de todo lo que armaste: transporte, alojamiento y extras, con el total.</p><button type="button" class="steps__next" data-paso-ir="4">Ver mi viaje <span aria-hidden="true">→</span></button></section>' +
+      '<section class="confirm-step" data-confirm-step><h2 class="block-title">Confirmá tu viaje</h2><p class="sub block-sub">Este es el resumen de todo lo que armaste: transporte, alojamiento y extras, con el total.</p><button type="button" class="steps__next" data-paso-ir="4">Ver mi viaje <span aria-hidden="true">→</span></button>' + renderSafe(function () { return guiaBannerMarkup(data.meta); }, '') + '</section>' +
       '<div class="steps__foot" data-steps-foot>' + renderSafe(function () { return pasoSiguienteMarkup(); }, '') + '</div>' +
       /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
 
@@ -12070,6 +12100,7 @@ function comboNombreDestino() {
       if (grupoCrearButton) { e.preventDefault(); irAlGrupo(grupoCrearButton); return; }
       var grupoCopiarButton = e.target.closest('[data-grupo-copiar]');
       if (grupoCopiarButton) { e.preventDefault(); copiarTextoSplit(grupoCopiarButton, grupoCopiarButton.getAttribute('data-grupo-copiar')); return; }
+      if (e.target.closest('[data-guia-ir]')) { e.preventDefault(); irALaGuia(); return; }
       var splitTripButton = e.target.closest('[data-split-trip]');
       if (splitTripButton) { e.preventDefault(); openSplitModal(); return; }
       /* El menu "Compartir" y el copiado.
