@@ -3161,3 +3161,28 @@ button.logo{min-height:44px}
 .voucher-grupo>summary .voucher-btn__ico{width:18px;height:18px;color:var(--cel)}
 .voucher-grupo>.voucher-split{margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px;background:transparent}
 @media (max-width:420px){.voucher-tools .voucher-chip{flex-direction:column;gap:3px;padding:6px 4px;font-size:12px}.voucher-tools .voucher-chip--asesor .voucher-btn__label{text-align:center}}
+
+/* ---- Pie del resumen y checkout: sin cortes ni scroll lateral ---------------
+   El dialogo scrollea solo en vertical, con alto medido en dvh (el vh de los
+   celulares incluye la barra del navegador y cortaba el pie), y deja 80px de
+   aire abajo para que los botones principales no queden pegados al borde.
+   Los menus de compartir salen en el flujo, dentro del dialogo, en vez de
+   flotar y quedar recortados. Todo lo de abajo se apila en una columna y puede
+   partir el texto, sin sobrepasar el ancho de la pantalla. */
+.booking-dialog{max-height:calc(100dvh - 24px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.voucher-dialog{box-sizing:border-box;max-width:100%;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+.voucher-dialog>*,.voucher-dialog :is(.voucher-split,.voucher-split__actions,.voucher-reserve,.voucher-actions,.voucher-tools,.voucher-share,.voucher-canales,.voucher-steps){min-width:0;max-width:100%;box-sizing:border-box}
+.voucher-dialog :is(button,a,input,.voucher-chip,.voucher-tile){max-width:100%;box-sizing:border-box}
+.voucher-dialog :is(.voucher-split__btn,.voucher-chip,.voucher-tile,.voucher-reserve__btn,.voucher-step__btn){white-space:normal;overflow-wrap:anywhere}
+.voucher-share__menu{position:static;margin-top:8px;box-shadow:none}
+@media (max-width:560px){
+  .booking-dialog{max-height:calc(100dvh - 8px)}
+  .voucher-dialog{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .voucher-split__actions,.voucher-actions,.voucher-tools{grid-template-columns:minmax(0,1fr)}
+  .voucher-split__actions>*,.voucher-actions>*,.voucher-tools>*{grid-column:1/-1;width:100%}
+  .checkout-panel{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:900px){
+  .checkout-dialog{max-height:calc(100dvh - 8px);overflow-x:hidden;overflow-y:auto}
+  .checkout-dialog :is(.checkout-layout,.checkout-main,.checkout-panel,.checkout-grid,.checkout-actions){min-width:0;max-width:100%}
+}
