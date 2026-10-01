@@ -5299,7 +5299,8 @@
       '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total del viaje: ' + esc(money(totals.total)) + '</div>' +
       '</div>' +
       inclusionsMarkup +
-      '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">Calculá tu presupuesto exacto en <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.7);margin-bottom:5px;">PRESUPUESTO ' + esc(codigoPresupuesto(meta)) + '</div>' +
+      '<div style="font-size:15px;font-weight:800;line-height:1.35;color:#fff;">Abrí el presupuesto completo en <span style="color:#F6B21B;">cuantosale.uy</span></div>' +
       '</div></div>';
     wrapper.appendChild(node);
     document.body.appendChild(wrapper);
@@ -5695,52 +5696,126 @@
       navigator.clipboard.writeText(texto).then(function () { avisar(true); }, fallback);
     } else fallback();
   }
-  function shareStoryCard(button) {
-    if (!detailState || !detailState.meta) return;
-    // El texto del botón va en un <span> adentro, con el logo de Instagram al
-    // lado: cambiar button.textContent en los estados de "generando" borraría
-    // el svg y el botón se quedaría sin logo para el resto de la sesión.
-    var labelNode = button && button.querySelector('.voucher-btn__label');
-    var originalLabel = labelNode ? labelNode.textContent : (button ? button.textContent : '');
-    if (button) { button.disabled = true; button.classList.add('is-loading'); if (labelNode) labelNode.textContent = 'Generando imagen…'; else button.textContent = '⏳ Generando imagen…'; }
-    var budget = getBudgetBreakdown(detailState);
-    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
-    var totals = {
-      total: Number(budget.total) || 0,
-      pp: Math.round((Number(budget.total) || 0) / pax),
-      entries: budget.entries || []
-    };
+  /* ---------- compartir por WhatsApp: tarjeta + link ----------
+     La tarjeta (formato historia 9:16, la que antes colgaba de "Tarjeta para
+     Instagram") se arma sola y viaja con el link y el codigo del presupuesto.
+
+     RAPIDEZ: se renderiza de antemano, cuando se abre el resumen, y queda en
+     tarjetaCache. Al tocar "Enviar por WhatsApp" el blob ya esta y el compartir
+     arranca en el mismo gesto. Eso importa de verdad: navigator.share solo se
+     deja llamar mientras el toque del usuario sigue "fresco" (unos segundos);
+     generar la imagen DESPUES del toque lo pierde en varios navegadores.
+
+     LIMITE DE LA WEB: wa.me no puede adjuntar imagenes. En celular, la unica via
+     es la hoja de compartir del sistema con archivos (Web Share): abre WhatsApp
+     con la imagen y el texto cargados. En escritorio eso no existe, asi que se
+     abre WhatsApp con el texto y la imagen queda copiada para pegarla (Ctrl+V)
+     o, si el navegador no deja copiar, descargada. */
+  var tarjetaCache = null; // { clave, promesa, blob }
+  function puedeCompartirArchivos() {
+    try { return typeof File === 'function' && !!navigator.canShare && navigator.canShare({ files: [new File(['x'], 'a.png', { type: 'image/png' })] }); } catch (e) { return false; }
+  }
+  function claveTarjeta(meta, total) {
+    return [meta.dest && meta.dest.key, meta.dep, meta.ret, meta.pax, Math.round(total)].join('|');
+  }
+  function datosTarjeta() {
     var meta = detailState.meta;
+    var budget = getBudgetBreakdown(detailState);
+    var pax = Math.max(1, Number(meta.pax) || 1);
+    var total = Number(budget.total) || 0;
+    return { meta: meta, totals: { total: total, pp: Math.round(total / pax), entries: budget.entries || [] } };
+  }
+  function tarjetaBlob() {
+    var d = datosTarjeta();
+    var clave = claveTarjeta(d.meta, d.totals.total);
+    if (tarjetaCache && tarjetaCache.clave === clave) return tarjetaCache;
     var wrapper = null;
-    Promise.all([loadHtmlToImage(), fotoParaTarjeta(meta)]).then(function (loaded) {
-      var htmlToImage = loaded[0];
-      wrapper = buildStoryCardNode(meta, totals, loaded[1]);
+    var entrada = { clave: clave, blob: null };
+    entrada.promesa = Promise.all([loadHtmlToImage(), fotoParaTarjeta(d.meta).catch(function () { return ''; })]).then(function (loaded) {
+      wrapper = buildStoryCardNode(d.meta, d.totals, loaded[1]);
       var photoNode = wrapper.querySelector('img');
-      return (photoNode && photoNode.decode ? photoNode.decode() : Promise.resolve()).then(function () {
-        return htmlToImage.toBlob(wrapper.firstChild, { width: 540, height: 960, pixelRatio: 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' });
+      return (photoNode && photoNode.decode ? photoNode.decode().catch(function () {}) : Promise.resolve()).then(function () {
+        // Celular: JPEG a 810x1440 (~300 KB, sale rapido por el chat). Escritorio: PNG,
+        // que es el unico formato que el portapapeles acepta.
+        var jpeg = puedeCompartirArchivos();
+        return loaded[0].toCanvas(wrapper.firstChild, { width: 540, height: 960, pixelRatio: jpeg ? 1.5 : 2, cacheBust: true, skipFonts: true, fontEmbedCSS: '' }).then(function (canvas) {
+          return new Promise(function (resolve) { canvas.toBlob(resolve, jpeg ? 'image/jpeg' : 'image/png', 0.88); });
+        });
       });
     }).then(function (blob) {
       if (!blob) throw new Error('No se pudo generar la imagen.');
-      var fileName = 'cuantosale-' + (meta.dest.key || 'viaje') + '.png';
-      var file = typeof File === 'function' ? new File([blob], fileName, { type: 'image/png' }) : null;
-      var shareData = file ? { files: [file], title: 'Mi viaje a ' + meta.dest.name, text: 'Mirá cuánto sale mi viaje a ' + meta.dest.name + ' con cuantosale.uy' } : null;
-      if (shareData && navigator.canShare && navigator.canShare({ files: shareData.files })) {
-        return navigator.share(shareData).catch(function (err) {
-          if (err && err.name === 'AbortError') return;
-          downloadBlob(blob, fileName);
-        });
-      }
-      downloadBlob(blob, fileName);
-    }).catch(function (e) {
-      alert(e && e.message || 'No pudimos generar la imagen para compartir. Probá de nuevo en un momento.');
+      entrada.blob = blob;
+      return blob;
     }).finally(function () {
       if (wrapper && wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-      if (button) {
-        button.disabled = false; button.classList.remove('is-loading');
-        if (labelNode) labelNode.textContent = originalLabel || 'Compartir en Instagram';
-        else button.textContent = originalLabel;
-      }
     });
+    // Si falla, no se queda guardado el error: el proximo toque lo reintenta.
+    entrada.promesa.catch(function () { if (tarjetaCache === entrada) tarjetaCache = null; });
+    tarjetaCache = entrada;
+    return entrada;
+  }
+  function precalentarTarjeta() {
+    var arrancar = function () { try { if (detailState && detailState.meta) tarjetaBlob().promesa.catch(function () {}); } catch (e) { /* sin tarjeta previa: se arma al tocar */ } };
+    if (window.requestIdleCallback) window.requestIdleCallback(arrancar, { timeout: 1500 });
+    else window.setTimeout(arrancar, 500);
+  }
+  function textoWhatsApp() {
+    var meta = detailState.meta;
+    var total = Math.round(Number(getBudgetBreakdown(detailState).total) || 0);
+    var enlace = enlaceDelViaje();
+    return [
+      'Mi viaje a ' + meta.dest.name + ' · ' + storyDateRange(meta) + ' · ' + money(total),
+      'Código de presupuesto: ' + codigoPresupuesto(meta),
+      enlace ? 'Abrí el presupuesto: ' + enlace : 'Calculá el tuyo en cuantosale.uy'
+    ].join('\n');
+  }
+  function compartirPorWhatsApp(button) {
+    if (!detailState || !detailState.meta) return;
+    var labelNode = button && button.querySelector('span');
+    var etiqueta = labelNode ? labelNode.textContent : '';
+    var ocupado = function (si) {
+      if (!button) return;
+      button.disabled = si; button.classList.toggle('is-loading', si);
+      if (labelNode) labelNode.textContent = si ? 'Preparando imagen…' : etiqueta;
+    };
+    var texto = textoWhatsApp();
+    var urlWa = 'https://wa.me/?text=' + encodeURIComponent(texto);
+    var fileName = 'cuantosale-' + (detailState.meta.dest.key || 'viaje') + (puedeCompartirArchivos() ? '.jpg' : '.png');
+    var entrada = tarjetaBlob();
+    var puedeArchivos = puedeCompartirArchivos();
+    if (puedeArchivos) {
+      // Celular: hoja de compartir con la imagen y el texto. Con la tarjeta ya
+      // lista corre dentro del toque; si no, espera a que termine.
+      if (!entrada.blob) ocupado(true);
+      entrada.promesa.then(function (blob) {
+        var file = new File([blob], fileName, { type: blob.type || 'image/jpeg' });
+        return navigator.share({ files: [file], title: 'Mi viaje a ' + detailState.meta.dest.name, text: texto }).catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          // Sin permiso para abrir la hoja (el toque ya vencio): queda el camino de escritorio.
+          downloadBlob(blob, fileName);
+          window.open(urlWa, '_blank', 'noopener,noreferrer');
+        });
+      }).catch(function () {
+        window.open(urlWa, '_blank', 'noopener,noreferrer');
+      }).finally(function () { ocupado(false); });
+      return;
+    }
+    // Escritorio: WhatsApp se abre en el acto (con el toque vivo, sin que lo bloquee
+    // el navegador) y la imagen se copia al portapapeles; si no se puede, se descarga.
+    window.open(urlWa, '_blank', 'noopener,noreferrer');
+    var copiada = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem === 'function') {
+        copiada = navigator.clipboard.write([new ClipboardItem({ 'image/png': entrada.promesa })]).then(function () { return true; }, function () { return false; });
+      }
+    } catch (e) { copiada = false; }
+    Promise.resolve(copiada).then(function (ok) {
+      if (ok) { mostrarToast('Imagen copiada', 'Pegala en el chat de WhatsApp con Ctrl+V.'); return; }
+      return entrada.promesa.then(function (blob) {
+        downloadBlob(blob, fileName);
+        mostrarToast('Imagen descargada', 'Adjuntala en el chat de WhatsApp.');
+      });
+    }).catch(function () { mostrarToast('No pudimos generar la imagen', 'El texto con el link ya está en WhatsApp.', true); });
   }
   /* ---------- reservas: "Reservar" -> "Reservado" ----------
      Un rubro del voucher cambia a "Reservado" cuando la persona completa la
@@ -6669,13 +6744,13 @@
       '<div class="voucher-share__menu" id="voucher-share-menu" hidden>' +
       '<button type="button" data-share-link>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar enlace del viaje</span></button>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
-      '<button type="button" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Tarjeta para Instagram</span></button>' +
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
       '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos. Va tu código ' + esc(codigoPresupuesto(detailState.meta)) + '.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">Coordinar con asesor</button></aside>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
       '</div>' + reservarTodo;
     modal.dataset.summaryText = summaryText;
+    precalentarTarjeta();
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     if (_dlgPrev && (_scrollDlg || _scrollModal)) {
       var _dlgNuevo = modal.querySelector('.booking-dialog');
@@ -12824,12 +12899,8 @@ function comboNombreDestino() {
       var whatsappButton = e.target.closest('[data-share-whatsapp]');
       if (whatsappButton) {
         e.preventDefault();
-        var enlaceWa = enlaceDelViaje();
-        var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(($('#booking-modal').dataset.summaryText || '') + (enlaceWa ? '\n\nAbrí este presupuesto: ' + enlaceWa : ''));
-        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        compartirPorWhatsApp(whatsappButton);
       }
-      var storyButton = e.target.closest('[data-share-story]');
-      if (storyButton) { e.preventDefault(); shareStoryCard(storyButton); }
       /* El "Reservar" de la fila de traslados del voucher. Va al mismo checkout
          que el de "Mi Viaje", con los dos pedidos juntos. Antes abria un
          asistente propio del transfer, con otro formulario, y el voucher era el
