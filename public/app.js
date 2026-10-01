@@ -10524,7 +10524,20 @@
     });
     if (!uniqueTrips.length) { box.innerHTML = '<p class="account-status">Todavía no guardaste viajes.</p>'; return; }
     // Render deduplicated trips directly so every button maps to box._trips.
-    box.innerHTML = uniqueTrips.map(function (trip) { return '<article class="saved-trip"><div><strong>' + esc(trip.destination || 'Viaje guardado') + '</strong><span data-trip-total="' + esc(trip.id) + '">' + esc(trip.departure_date || '') + ' → ' + esc(trip.return_date || '') + ' · ' + money(Number(trip.total_price || trip.total_amount) || 0) + '</span></div><button type="button" class="account-button" data-load-trip="' + esc(trip.id) + '">Cargar</button><button type="button" class="account-button account-button--secondary" data-refresh-trip="' + esc(trip.id) + '">Actualizar precio</button><button type="button" class="account-button account-button--danger" data-delete-trip="' + esc(trip.id) + '" aria-label="Borrar viaje">🗑️</button></article>'; }).join('');
+    box.innerHTML = uniqueTrips.map(function (trip) {
+      var id = esc(trip.id);
+      var dep = trip.departure_date || '', ret = trip.return_date || '';
+      var noches = dep && ret ? Math.round((parse(ret) - parse(dep)) / 864e5) : 0;
+      var fechas = (dep ? fechaCortaViaje(dep) : '') + (dep && ret ? ' → ' : '') + (ret ? fechaCortaViaje(ret) : '');
+      return '<article class="saved-trip">'
+        + '<div class="saved-trip__info"><h3 class="saved-trip__dest">' + esc(trip.destination || 'Viaje guardado') + '</h3>'
+        + '<p class="saved-trip__fechas">' + esc(fechas) + (noches > 0 ? ' · ' + noches + (noches === 1 ? ' noche' : ' noches') : '') + '</p></div>'
+        + '<div class="saved-trip__precio"><small>Total estimado</small><b data-trip-total="' + id + '">' + money(Number(trip.total_price || trip.total_amount) || 0) + '</b></div>'
+        + '<button type="button" class="saved-trip__cargar" data-load-trip="' + id + '">Cargar viaje</button>'
+        + '<div class="saved-trip__pie"><button type="button" class="saved-trip__link" data-refresh-trip="' + id + '">Actualizar precio</button>'
+        + '<button type="button" class="saved-trip__link saved-trip__link--danger" data-delete-trip="' + id + '" aria-label="Borrar viaje">Eliminar</button></div>'
+        + '</article>';
+    }).join('');
     box._trips = uniqueTrips;
     return;
   }
@@ -10541,6 +10554,11 @@
   // Reconsulta /api/cotizar con los mismos parámetros de búsqueda guardados y
   // persiste el total recalculado, sin tocar el resto del snapshot (hotel,
   // vuelo o traslado elegidos siguen siendo los que el usuario ya confirmó).
+  var MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  function fechaCortaViaje(iso) {
+    var d = parse(iso);
+    return isNaN(d) ? String(iso) : d.getDate() + ' ' + MESES_CORTOS[d.getMonth()];
+  }
   async function refreshTripPrice(tripId, button) {
     if (!supabaseClient || !tripId) return;
     var box = $('#trips-modal').querySelector('[data-saved-trips]');
@@ -10578,7 +10596,7 @@
       if (updateResult.error) throw new Error('No pudimos guardar el precio actualizado: ' + updateResult.error.message);
       trip.total_amount = rec.total; trip.total_price = rec.total;
       var totalLabel = box.querySelector('[data-trip-total="' + tripId + '"]');
-      if (totalLabel) totalLabel.textContent = (trip.departure_date || '') + ' → ' + (trip.return_date || '') + ' · ' + money(rec.total);
+      if (totalLabel) totalLabel.textContent = money(rec.total);
     } catch (error) {
       notice(error.message || 'No pudimos actualizar el precio.');
     } finally {
