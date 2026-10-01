@@ -1,4 +1,4 @@
-/* version: 249
+/* version: 250
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3456,7 +3456,6 @@ summary::-webkit-details-marker{display:none}
 /* Area segura superior: el padding vive en body (antes solo estaba en el
    tema oscuro) para que el header no quede bajo la barra de estado / notch en
    ningun tema. Ademas, un piso de 16px sobre el logo en celular. */
-@media(max-width:560px){.top{padding-top:4px}}
 
 /* Android (Huawei, Motorola): env(safe-area-inset-top) suele valer 0 aunque la
    barra de estado tape la pagina (app instalada / pantalla completa). En ese
@@ -3501,27 +3500,44 @@ summary::-webkit-details-marker{display:none}
 .bud-mode button::after,.steps.is-compact .steps__btn::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:48px;transform:translateY(-50%)}
 .steps.is-compact .steps__btn{min-width:44px;min-height:44px}
 
-/* Header en celular, dos filas (la zona segura superior la pone el padding-top
-   del body con env(safe-area-inset-top), con viewport-fit=cover):
-     fila 1: logo completo a la izquierda y el boton de la cuenta a la derecha;
-     fila 2: herramientas (moneda, tema y Mis viajes) en una tira compacta;
-     fila 3: la pildora "tu viaje", a todo el ancho.
-   .account-actions pasa a display:contents para poder ordenar cada boton por
-   separado; el salto de fila es un ::after de ancho completo. */
+/* Header en celular: UNA sola linea de 56px (mas la zona segura, que la pone el
+   padding-top del body con env(safe-area-inset-top)). Logo a la izquierda; a la
+   derecha, iconos compactos: moneda, tema, Mis viajes y cuenta. Los textos de
+   "Mis viajes" y de la cuenta pasan a icono (font-size:0 + mascara); siguen
+   siendo botones con aria-label. La pildora "tu viaje" solo aparece, en una
+   fila fina debajo, cuando hay una propuesta abierta. */
 @media(max-width:560px){
-  .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px 12px}
-  .account-actions{display:contents}
-  .logo{order:1;flex:1 1 auto;min-width:max-content;overflow:visible;font-size:22px}
-  #auth-button{order:2;flex:0 0 auto;margin-left:auto;max-width:none;padding:0 16px;font-size:14px}
-  .top::after{content:"";order:3;flex:0 0 100%;height:0}
-  #currency-picker-slot{order:4;flex:0 0 auto}
-  .top .theme-toggle{order:5;flex:0 0 auto}
-  #trips-button{order:6;flex:0 0 auto;margin-left:auto;max-width:none;padding:0 14px;font-size:13px}
-  .top .trip-pill{order:7;flex:1 1 100%;max-width:none;margin:0;justify-content:center;min-height:var(--tap)}
+  .top{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:0 8px;height:56px;min-height:56px;max-height:56px}
+  .account-actions{display:flex;align-items:center;gap:4px;margin-left:auto;flex:0 0 auto;min-width:0}
+  .top .logo{order:1;flex:0 1 auto;min-width:0;overflow:visible;font-size:19px;gap:7px}
+  .top .logo svg{width:20px;height:25px}
+  .top .account-actions{order:2}
+  .top::after{content:none}
+  #currency-picker-slot{order:0;flex:0 0 auto}
+  .top .currency-badge{min-width:52px;padding:0 4px}
+  .top .theme-toggle{order:0;width:44px;height:var(--tap)}
+  #trips-button,#auth-button{flex:0 0 auto;width:44px;min-width:44px;max-width:none;height:var(--tap);padding:0;font-size:0;gap:0;overflow:hidden}
+  #trips-button::before,#auth-button:not(:has(.account-avatar))::before{content:"";display:block;width:22px;height:22px;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
+  #trips-button{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='7' width='20' height='14' rx='2'/%3E%3Cpath d='M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16'/%3E%3C/svg%3E")}
+  #auth-button{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E")}
+  #auth-button .account-avatar{width:32px;height:32px;margin:0;font-size:14px}
+  /* Pildora: oculta sin viaje (el formulario esta justo debajo); con viaje, fila fina */
+  .top .trip-pill{order:3;flex:1 1 100%;max-width:none;margin:0 0 8px;justify-content:center;min-height:40px}
+  .top .trip-pill,.top .trip-pill[data-estado="vacio"]{display:none}
 }
-@media(max-width:320px){
-  .logo{font-size:20px}
-  #auth-button{padding:0 12px;font-size:13px}
+/* Con cuenta iniciada hay cuatro iconos: en <=400px se compactan para que entren
+   en una sola linea junto al logo. */
+@media(max-width:400px){
+  .top{gap:0 4px}
+  .top .logo{font-size:17px;gap:5px}
+  .top .logo svg{width:18px;height:22px}
+  .top .currency-badge{min-width:44px;padding:0 2px}
+  .top .theme-toggle,#trips-button,#auth-button{width:40px;min-width:40px}
+  #auth-button .account-avatar{width:28px;height:28px}
+  .account-actions{gap:2px}
+}
+#trips-button{order:1}
+#auth-button{order:2}
 }
 
 /* Barra de pasos: sticky puro de CSS, pegada arriba y por debajo del notch
@@ -3540,3 +3556,8 @@ summary::-webkit-details-marker{display:none}
    apretaba a unos pocos px y se partia por silabas). */
 .transfer-advice{overflow-wrap:normal;hyphens:manual;word-break:normal}
 .transfer-advice__txt{flex:1 1 0;min-width:0;overflow-wrap:break-word;hyphens:manual}
+
+/* Header de UNA sola linea en celular: la pildora "tu viaje" ya no baja a una
+   segunda fila (el resumen "Mi viaje" sigue accesible desde su panel flotante)
+   y la barra de pasos no se compacta por JS: es sticky puro y mantiene su alto,
+   asi nada cambia de tamano mientras se scrollea. */

@@ -1496,6 +1496,7 @@
   window.addEventListener('resize', posicionarMenosMonedaAbiertos);
   window.addEventListener('orientationchange', posicionarMenosMonedaAbiertos);
   window.addEventListener('scroll', conRaf(posicionarMenosMonedaAbiertos), scrollDeMenu());
+  // (conRaf ya limita a una ejecucion por frame; con ningun menu abierto no hay nada que medir.)
 
   function money(n) {
     var v = Number(n);
@@ -9804,35 +9805,10 @@
       foodMarkup + breakdownMarkup +
       '</div></div>';
     updateMultiStayPricing();
-    // Cabecera pegajosa: pasa a una version compacta de una linea al bajar (ver
-    // .detail-head en el CSS). El centinela esta justo arriba de ella: cuando sale
-    // de la pantalla por arriba, la cabecera esta pegada y se compacta.
-    (function () {
-      var head = document.querySelector('[data-steps]');
-      var sentinel = document.querySelector('[data-detail-head-sentinel]');
-      if (cabeceraObserver) { cabeceraObserver.disconnect(); cabeceraObserver = null; }
-      if (!head || !sentinel || typeof IntersectionObserver !== 'function') return;
-      /* Al compactarse, la cabecera pierde ~130px de alto EN el flujo y todo lo de
-         abajo salta hacia arriba justo mientras la persona scrollea: se sentia como
-         un tirón y el gesto "se trababa". El centinela (que va justo arriba) se
-         estira con la diferencia, asi el hueco que ocupaba la cabecera se
-         conserva y el contenido no se mueve; la cabecera sigue pegada arriba. */
-      cabeceraObserver = new IntersectionObserver(function (entries) {
-        var e = entries[0];
-        var compacta = !e.isIntersecting && e.boundingClientRect.top < 0;
-        if (compacta === head.classList.contains('is-compact')) return;
-        if (compacta) {
-          var antes = head.offsetHeight;
-          head.classList.add('is-compact');
-          var dif = antes - head.offsetHeight;
-          if (dif > 0) sentinel.style.marginBottom = (dif - 1) + 'px';
-        } else {
-          head.classList.remove('is-compact');
-          sentinel.style.marginBottom = '';
-        }
-      }, { threshold: 0 });
-      cabeceraObserver.observe(sentinel);
-    })();
+    /* Barra de pasos: pegada arriba solo con CSS (position:sticky en .steps). Antes
+       un IntersectionObserver la compactaba al bajar y reacomodaba el flujo en
+       pleno scroll; eso se sentia como tirones, asi que ya no hay JS de scroll. */
+    if (cabeceraObserver) { cabeceraObserver.disconnect(); cabeceraObserver = null; }
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     // El estado ya está fijado arriba: acá solo queda reflejar el traslado
     // oficial y pintar los totales UNA vez. Antes, actualizarTransporte()
@@ -11296,7 +11272,9 @@
 
        Se registra passive en los eventos de scroll: estos handlers no llaman
        preventDefault, asi que no tienen por que frenar la composicion. */
-    var reposicionarSuave = conRaf(reposicionarMenusFijos);
+    var reposicionarSuave = conRaf(function () {
+      if (document.querySelector('.custom-select__menu:not([hidden])')) reposicionarMenusFijos();
+    });
     window.addEventListener('scroll', reposicionarSuave, { capture: true, passive: true });
     window.addEventListener('resize', reposicionarSuave);
     if (window.visualViewport) {
