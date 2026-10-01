@@ -4127,6 +4127,24 @@
       // se quedaba sin hotel y volvia al estimado del modelo, que es
       // exactamente el bug que hizo falta partir esto en dos grupos.
       var paradas = meta.multiStay && meta.multiStay.stays && meta.multiStay.stays.length === 2 ? ['1', '2'] : [''];
+      /* Llegada desde "Ver hoteles de esta categoria": se deja elegido el hotel
+         optimizado de cada parada (el de menor total de la lista visible), como si
+         la persona lo hubiera tocado, para que pueda seguir sin buscar nada. */
+      if (detailState.autoElegirHotel) {
+        detailState.autoElegirHotel = false;
+        paradas.forEach(function (stop) {
+          var candidatos = Array.prototype.filter.call(
+            document.querySelectorAll(stop ? '[data-hotel-stop="' + stop + '"][data-hotel-total]' : '[data-hotel-total]'),
+            function (inp) { var c = inp.closest('[data-hotel-option]'); return c && !c.hasAttribute('hidden') && Number(inp.getAttribute('data-hotel-total')) > 0; });
+          var mejor = null;
+          candidatos.forEach(function (inp) { if (!mejor || Number(inp.getAttribute('data-hotel-total')) < Number(mejor.getAttribute('data-hotel-total'))) mejor = inp; });
+          if (!mejor) return;
+          mejor.checked = true;
+          var tit = mejor.closest('[data-hotel-option]').querySelector('h3');
+          if (tit) detailState.selectedHotelName = tit.textContent.trim();
+          actualizarAlojamiento(Math.round(Number(mejor.getAttribute('data-hotel-total'))), true, Number(stop) || 0);
+        });
+      }
       paradas.forEach(function (stop) {
         var selector = stop ? '[data-hotel-stop="' + stop + '"][data-hotel-total]:checked' : '[data-hotel-total]:checked';
         var recommended = document.querySelector(selector);
@@ -8831,6 +8849,21 @@
   /* ---------- pedido al servidor ---------- */
   function schedule() { clearTimeout(timer); timer = setTimeout(run, 250); }
 
+  /* "Ver hoteles de esta categoria" (tip de ahorro): despues de recotizar con la
+     categoria sugerida se abre la propuesta recomendada ya en el paso de
+     alojamiento. El hotel recomendado de la categoria llega marcado y contado
+     como elegido apenas cargan los hoteles (loadHotelRecommendations), asi que
+     la persona puede seguir al paso siguiente sin buscar ni filtrar nada. */
+  var irAlHotelPendiente = false;
+  function abrirHotelSugerido(data) {
+    if (!irAlHotelPendiente) return;
+    irAlHotelPendiente = false;
+    var rec = data && data.list && (byId(data.list, data.recId) || data.list[0]);
+    if (!rec) return;
+    selectedPropuestaId = rec.id;
+    selectedPropuestaFor = S.dep + '|' + S.ret + '|' + S.pax + '|' + S.budget;
+    try { showProposalView(rec, data); if (detailState) detailState.autoElegirHotel = true; irAlPaso(2); } catch (error) { console.error('No pudimos abrir el paso de alojamiento', error); }
+  }
   function run() {
     var el = $('#results');
     if (!S.dep || !S.ret) {
@@ -8857,14 +8890,17 @@
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         if (!res.ok) {
+          irAlHotelPendiente = false;
           mostrarError($('#results'), 'No pudimos calcular tu viaje', res.j.error || 'Probá de nuevo en un momento.', run);
           if (pendingDestinationScroll) scrollToDestinationResults();
           return;
         }
         render(res.j);
+        abrirHotelSugerido(res.j);
       })
       .catch(function (e) {
         if (e.name === 'AbortError') return;
+        irAlHotelPendiente = false;
         var errRed = errorDeRed(e, 'No pudimos calcular ahora');
         mostrarError($('#results'), errRed.titulo, errRed.detalle, run);
         if (pendingDestinationScroll) scrollToDestinationResults();
@@ -9115,7 +9151,7 @@
         } else if (t.kind === 'alojamiento' && typeof t.ti === 'number') {
           // Cambiar la categoria se queda en esta pagina y recotiza: abrir la
           // propuesta lo llevaba al detalle y le sacaba la lista de vuelos.
-          btn = '<button type="button" class="apply" data-hotel-tier="' + t.ti + '">Cambiar categoría de hotel</button>';
+          btn = '<button type="button" class="apply" data-hotel-tier="' + t.ti + '">Ver hoteles de esta categoría</button>';
         } else if (t.id) {
           // Ruta y alojamiento apuntan a una propuesta de la lista: el boton la
           // abre, igual que "Ver propuesta" en las tarjetas.
@@ -12119,6 +12155,9 @@ function comboNombreDestino() {
           S.hotelTypeExplicit = false;
           S.hotelType = hotelTypeForStyle(estilo);
           Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-v') === estilo ? 'true' : 'false'); });
+          // Al recotizar con la categoria nueva, la propuesta recomendada se abre
+          // directo en el paso de alojamiento, con su hotel ya elegido.
+          irAlHotelPendiente = true;
           schedule();
         }
         return;
