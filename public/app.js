@@ -4698,7 +4698,7 @@
        estado. "Excluido" y "sin elegir" son dos cosas distintas y se dicen
        distinto: una es una decisión de la persona y la otra es que todavía no
        llegó. */
-    var ESTADO = { ok: 'Sumado', vacio: 'Sin elegir', fuera: 'No incluido' };
+    var ESTADO = { ok: 'Seleccionado', vacio: 'Sin elegir', fuera: 'No incluido' };
     var transporteRow = detailState.transportMode === 'bus'
       ? { cat: 'bus', label: 'Bus', detalle: 'Semicama / cama desde ' + esc(originCityName(detailState.meta.origin || S.origin)), value: money(busSumado(detailState)), color: getCategoryColor('bus') }
       : detailState.transportMode === 'auto'
@@ -4745,7 +4745,7 @@
     summaryItems.forEach(function (item) {
       var reserva = estadoReserva(item.cat);
       if (reserva) {
-        item.estado = reserva;
+        item.estado = etiquetaEstadoReserva(item.cat, reserva);
         item.estadoClave = reserva === 'Reservado' ? 'confirmado' : 'wip';
         var canal = canalDe(item.cat).canal;
         item.detalle = item.detalle ? item.detalle + ' \u00b7 ' + canal : canal;
@@ -5566,6 +5566,18 @@
      formato a proposito: son el mismo tipo decosa, con la diferencia en la
      palabra. La distincion fina la cuenta el title, que si explica de que
      se trata. */
+  /* Lo que dice la etiqueta tiene que ser lo que paso de verdad. "Solicitado"
+     con check verde parecia una reserva cerrada cuando solo es un rubro elegido
+     cuya gestion sigue abierta. El verde y "Confirmado" quedan para la reserva
+     cerrada; lo que esta en curso va en ambar y dice que falta: en un sitio
+     externo (Booking, aerolinea) "Pendiente de reserva"; en lo que coordinamos
+     por WhatsApp, "Solicitud enviada". El valor interno de estadoReserva()
+     no cambia, solo lo que se muestra. */
+  function etiquetaEstadoReserva(categoria, estado) {
+    if (estado === 'Reservado') return 'Confirmado';
+    if (estado === 'Solicitado') return canalDe(categoria).externo ? 'Pendiente de reserva' : 'Solicitud enviada';
+    return estado;
+  }
   function chipReserva(categoria) {
     var estado = estadoReserva(categoria);
     if (!estado) return '';
@@ -5574,9 +5586,11 @@
     var title = pendiente
       ? (canal.externo ? 'Abriste el link. La compra se completa en ' + canal.canal + ', que abre en otra pestaña.' : 'Tu solicitud está en proceso: la confirmamos con el operador.')
       : 'Reserva confirmada, coordinada por ' + canal.canal.toLowerCase() + '.';
+    var icono = pendiente
+      ? '<svg class="reserva-chip__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+      : '<svg class="reserva-chip__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
     return '<span class="reserva-chip' + (pendiente ? ' is-wip' : '') + '" title="' + esc(title) + '">'
-      + '<svg class="reserva-chip__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
-      + esc(estado) + '</span>';
+      + icono + esc(etiquetaEstadoReserva(categoria, estado)) + '</span>';
   }
   /* Lee los rubros ya reservados de este viaje. Es una lectura, no un render: si
      falla (sin config, sin red, o la función todavia no esta corrida en
@@ -5883,7 +5897,7 @@
       return '<button type="button" class="voucher-item__cta is-reserved' + clase + '" data-deshacer-reserva="' + esc(categoria) + '" title="' + esc(aviso) + '">' + esc(reservadoLabel(categoria)) + '</button>';
     }
     function reservadoLabel(categoria) {
-      return estadoReserva(categoria) || 'Reservado';
+      return etiquetaEstadoReserva(categoria, estadoReserva(categoria) || 'Reservado');
     }
     /* El link de vuelta. Lo unico que hace es POSICIONAR: cuando la persona
        vuelve de Booking o de la aerolinea, el cotizador la trae a la fila que
@@ -6157,14 +6171,9 @@
       return markup;
     }
 
-    /* Quien cobra cada rubro, segun el transporte elegido: con vuelo los pasajes
-       se pagan directo con la aerolinea; con bus, con la empresa de bus (y no hay
-       traslado de aeropuerto). El nombre sale de la eleccion cuando existe. */
-    var canalesNombre = busMode
-      ? (busSel ? '<b>' + esc(busSel.empresa) + '</b>' : 'la empresa de bus')
-      : (flightSummary.selected && flightSummary.airline ? 'la aerol\u00ednea <b>' + esc(flightSummary.airline) + '</b>' : 'la aerol\u00ednea');
-    var canalesTexto = '<p class="voucher-canales">El alojamiento se paga en <b>Booking</b>, los pasajes directo con ' + canalesNombre
-      + ', y ' + (busMode ? 'las actividades' : 'los traslados y actividades') + ' con nosotros.</p>';
+    /* Una sola linea, sin detallar quien cobra cada rubro: la app cotiza y
+       coordina, cada servicio se gestiona con su proveedor. */
+    var canalesTexto = '<p class="voucher-canales">Cotización integral estimada. Gestionás cada servicio de forma directa y segura con nuestros proveedores asociados.</p>';
     /* El grupo va arriba, pegado al total: es lo que se hace apenas se ve el
        numero. Con grupo creado el bloque es el link para invitar (copiar,
        WhatsApp, abrir la cuenta); sin grupo, un solo boton que lo crea con este
