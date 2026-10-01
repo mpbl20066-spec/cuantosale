@@ -85,7 +85,8 @@
     "aeropuertoErrores": {
       "FEN": "Antes AIR_DESTINATIONS en server.js decia NVT (Navegantes, Santa Catarina, a 2.900 km de la isla). Ya esta arreglado: el codigo correcto de Fernando de Noronha es FEN."
     },
-    "argentina": "bue es el unico destino fuera de Brasil y el unico sin ancla. Todo lo demas esta calibrado con precios de Brasil, asi que conviene tomarlo con mas reserva que el resto."
+    "argentina": "bue es el unico destino fuera de Brasil y el unico sin ancla. Todo lo demas esta calibrado con precios de Brasil, asi que conviene tomarlo con mas reserva que el resto.",
+    "anotaciones": "La van compartida de Gramado esta en la planilla a R$ 108 por persona. El precio de app que antes se ofrecia como alternativa (US$ 43, promedio de Uber) se saco: es mas del doble que la van, y la app comparaba contra el piso del modelo, no contra el precio real."
   },
   "destinos": {
     "buz": {
@@ -94,33 +95,32 @@
       "modo": "car",
       "km": 174,
       "horas": 2.7,
-      "compartido": 0,
-      "privado": 86.54,
+      "compartido": 57.69,
+      "privado": 85.38,
       "real": [
-        "compartido",
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "fuente": "Compartido, confianza alta: inbuzios.com.br publica \"Transfer Aeroporto Galeao GIG x Buzios a partir de R$ 150,00\", y RIOgaleao Digital (galeon.com.br, el operador del propio aeropuerto) confirma la misma tarifa. CheckMyBus lista el shuttle BUZIOS TRANSFER en US$ 30. Son 174 km por la RJ-124, el mismo tramo que devuelve OSRM. El destino queda en confianza media y no alta porque el PRIVADO es derivado del modelo: el precio que se encontro (US$ 227-300 por grupo de hasta 3, GetYourGuide) es un producto turistico que incluye excursion, no un traslado pelado.",
-      "verificado": "2026-09-29",
-      "confianza": "media",
-      "derivacion": "El privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 174 km de OSRM da US$ 30 y US$ 120.",
-      "privado_brl": 450,
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Búzios. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Auto, R$ 564. Compartido por persona (base R$ 250 + 20%): R$ 300 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 174 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_brl": 444,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 426
+          "brl": 444
         },
         {
           "min": 5,
           "max": 6,
           "vehiculo": "Auto",
-          "brl": 541
+          "brl": 564
         }
       ],
-      "compartido_consultar": true
+      "compartido_brl": 300
     },
     "arraial": {
       "nombre": "Arraial do Cabo",
@@ -128,33 +128,32 @@
       "modo": "car",
       "km": 170,
       "horas": 2.6,
-      "compartido": 0,
-      "privado": 86.54,
+      "compartido": 60,
+      "privado": 85.38,
       "real": [
-        "compartido",
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "fuente": "Sin precio real para esta ruta. Los km (170) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-29",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Arraial do Cabo. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Auto, R$ 564. Compartido por persona (base R$ 260 + 20%): R$ 312 (Van). Los precios ya incluyen la comision. Trayecto de 170 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
       "confianza": "alta",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 117 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_brl": 450,
+      "privado_brl": 444,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 426
+          "brl": 444
         },
         {
           "min": 5,
           "max": 6,
           "vehiculo": "Auto",
-          "brl": 541
+          "brl": 564
         }
       ],
-      "compartido_consultar": true
+      "compartido_brl": 312
     },
     "cabo": {
       "nombre": "Cabo Frio",
@@ -162,66 +161,64 @@
       "modo": "car",
       "km": 160,
       "horas": 2.5,
-      "compartido": 0,
-      "privado": 86.54,
+      "compartido": 60,
+      "privado": 85.38,
       "real": [
-        "compartido",
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "fuente": "Sin precio real para esta ruta. Los km (160) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-29",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Cabo Frio. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Auto, R$ 564. Compartido por persona (base R$ 260 + 20%): R$ 312 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 160 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
       "confianza": "alta",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 160 km de OSRM: US$ 30 compartido y US$ 111 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_brl": 450,
+      "privado_brl": 444,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 426
+          "brl": 444
         },
         {
           "min": 5,
           "max": 6,
           "vehiculo": "Auto",
-          "brl": 541
+          "brl": 564
         }
       ],
-      "compartido_consultar": true
+      "compartido_brl": 312
     },
     "ilha": {
       "nombre": "Ilha Grande",
       "iata": "GIG",
       "modo": "ferry",
       "compartido": 0,
-      "privado": 86.54,
+      "privado": 85.38,
       "real": [
-        "compartido",
         "privado"
       ],
-      "fuente": "GetYourGuide: \"GIG: Shared van transfer from Galeao Airport to Abraao Village, Ilha Grande\", 4 horas, desde US$ 48. Es van + barco, no solo van. No existe un transfer de carretera a Ilha Grande, y el modelo ya lo sabia (COMBO_FERRY_ONLY en lib/model.js); lo que faltaba era que la app ofreciera una van.",
-      "verificado": "2026-09-29",
-      "confianza": "media",
-      "derivacion": "El PRIVADO sale del modelo de distancia, no de una tarifa. No se encontro un transfer privado a Ilha Grande con precio publicado; el unico dato real (US$ 48) es el compartido con barco.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Ilha Grande. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Van, R$ 564. Los precios ya incluyen la comision. No hay carretera: se llega en barco desde Rio o Angra. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
       "nota": "No es un traslado por carretera: se llega en barco desde Rio o Angra (90 min por la bahia).",
-      "privado_brl": 450,
+      "privado_brl": 444,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 426
+          "brl": 444
         },
         {
           "min": 5,
           "max": 6,
           "vehiculo": "Van",
-          "brl": 541
+          "brl": 564
         }
       ],
-      "compartido_consultar": true
+      "compartido_consultar": true,
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
     },
     "paraty": {
       "nombre": "Paraty",
@@ -229,20 +226,26 @@
       "modo": "car",
       "km": 248,
       "horas": 4,
-      "compartido": 0,
-      "privado": 115.38,
+      "compartido": 73.85,
+      "privado": 265.38,
       "real": [
-        "compartido",
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "fuente": "Sin precio real para esta ruta. Los km (248) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-29",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Paraty. Privado por vehiculo (base R$ 1150 + 20%): 1 a 4 personas, Auto, R$ 1380. Compartido por persona (base R$ 320 + 20%): R$ 384 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 248 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
       "confianza": "alta",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 248 km de OSRM: US$ 35 compartido y US$ 166 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_brl": 600,
+      "privado_brl": 1380,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 1380
+        }
+      ],
+      "compartido_brl": 384
     },
     "ilhabela": {
       "nombre": "Ilhabela",
@@ -251,14 +254,24 @@
       "km": 185,
       "horas": 3.7,
       "compartido": 0,
-      "privado": 127,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (185) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 185 km de OSRM: US$ 30 compartido y US$ 127 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 507.69,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GRU a Ilhabela. Privado por vehiculo (base R$ 2200 + 20%): 1 a 3 personas, Auto, R$ 2640. Los precios ya incluyen la comision. Trayecto de 185 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 3,
+          "vehiculo": "Auto",
+          "brl": 2640
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 2640
     },
     "ubatuba": {
       "nombre": "Ubatuba",
@@ -267,17 +280,24 @@
       "km": 206,
       "horas": 3.4,
       "compartido": 0,
-      "privado": 153.85,
+      "privado": 184.62,
       "real": [
         "privado"
       ],
-      "fuente": "Sin precio real para esta ruta. Los km (206) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-29",
-      "confianza": "media",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 206 km de OSRM: US$ 30 compartido y US$ 140 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_brl": 800,
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GRU a Ubatuba. Privado por vehiculo (base R$ 800 + 20%): 1 a 4 personas, Auto, R$ 960. Los precios ya incluyen la comision. Trayecto de 206 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_brl": 960,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
-      "privado_escalones": [],
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 960
+        }
+      ],
       "compartido_consultar": true
     },
     "rio": {
@@ -288,16 +308,14 @@
       "horas": 0.3,
       "compartido": 0,
       "privado": 45,
-      "real": [
-        "compartido",
-        "privado"
-      ],
-      "fuente": "GetYourGuide: \"Rio Galeao Airport (GIG): Shuttle Transfer to/from Hotels\" desde US$ 19 y \"Shared Transfer From Rio De Janeiro Airport to Hotels\" desde US$ 26 (se toma US$ 22 como punto medio). Privado: \"Private Transfer to/from GIG Airport\" desde US$ 18 (sedan) y \"Galeao x Copacabana/Ipanema\" desde US$ 139 por grupo de 4. suntransfers publica privado a Barra da Tijuca desde EUR 26,44. Se usa US$ 45 para el privado: un sedan con meet & greet, no la van premium.",
-      "verificado": "2026-09-29",
-      "confianza": "media",
+      "real": [],
+      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 18 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
+      "verificado": "2026-10-01",
+      "confianza": "baja",
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
       "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido_consultar": true,
+      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (18 km de OSRM) no alcanza para calcular un precio de mercado."
     },
     "angra": {
       "nombre": "Angra dos Reis",
@@ -305,39 +323,38 @@
       "modo": "car",
       "km": 139,
       "horas": 2.4,
-      "compartido": 0,
-      "privado": 105.77,
+      "compartido": 69.23,
+      "privado": 96.92,
       "real": [
-        "compartido",
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "fuente": "Sin precio real para esta ruta. Los km (139) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-29",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Angra dos Reis. Privado por vehiculo (base R$ 420 + 20% y R$ 520 + 20% y R$ 570 + 20%): 1 a 4 personas, Auto, R$ 504; 5 personas, Auto, R$ 624; 6 personas, Auto, R$ 684. Compartido por persona (base R$ 300 + 20%): R$ 360 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 139 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
       "confianza": "alta",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 139 km de OSRM: US$ 25 compartido y US$ 98 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_brl": 550,
+      "privado_brl": 504,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 483
+          "brl": 504
         },
         {
           "min": 5,
           "max": 5,
           "vehiculo": "Auto",
-          "brl": 598
+          "brl": 624
         },
         {
           "min": 6,
           "max": 6,
           "vehiculo": "Auto",
-          "brl": 656
+          "brl": 684
         }
       ],
-      "compartido_consultar": true
+      "compartido_brl": 360
     },
     "sao": {
       "nombre": "São Paulo",
@@ -347,13 +364,11 @@
       "horas": 0.5,
       "compartido": 0,
       "privado": 41,
-      "real": [
-        "privado"
-      ],
-      "fuente": "portalgruairport.com.br (Portal GRU Airport) publica el \"Transfer Executivo CHM\" privativo Guarulhos -> Sao Paulo en \"Preco estimado R$ 215\", sedan hasta 4 pasajeros, 25 km. airporttransferportal dice que el privado GRU -> centro de Sao Paulo va \"from EUR 74 for 2 passengers\" y que el precio es el mismo con 30 o con 90 minutos de transito (BRL 180-280). Es el ancla privada mas limpia que hay: un operador que publica la tarifa. El compartido sale del modelo.",
-      "verificado": "2026-09-27",
-      "confianza": "media",
-      "derivacion": "El compartido sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 26 km de OSRM da US$ 20 y US$ 30.",
+      "real": [],
+      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 26 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
+      "verificado": "2026-10-01",
+      "confianza": "baja",
+      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (26 km de OSRM) no alcanza para calcular un precio de mercado.",
       "privado_escalones": [],
       "compartido_consultar": true
     },
@@ -363,15 +378,31 @@
       "modo": "car",
       "km": 53,
       "horas": 0.8,
-      "compartido": 30,
-      "privado": 45,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (53) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 53 km de OSRM: US$ 20 compartido y US$ 45 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_brl": 156
+      "compartido": 31.35,
+      "privado": 41.54,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Porto de Galinhas. Privado por vehiculo (base R$ 180 + 20% y R$ 270 + 20%): 1 a 4 personas, Auto, R$ 216; 5 a 6 personas, Van, R$ 324. Compartido por persona (base R$ 136 + 20%): R$ 163 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 53 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 216
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Van",
+          "brl": 324
+        }
+      ],
+      "compartido_brl": 163,
+      "privado_brl": 216
     },
     "mcz": {
       "nombre": "Maceió",
@@ -379,20 +410,26 @@
       "modo": "car",
       "km": 21,
       "horas": 0.5,
-      "compartido": 28.27,
-      "privado": 51.92,
+      "compartido": 29.62,
+      "privado": 143.08,
       "real": [
-        "compartido",
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "fuente": "Sin precio real para esta ruta. Los km (21) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-29",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maceió. Privado por vehiculo (base R$ 620 + 20%): 1 a 4 personas, Auto, R$ 744. Compartido por persona (base R$ 128 + 20%): R$ 154 (Van, 1 a 15 personas). Los precios ya incluyen la comision. Trayecto de 21 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
       "confianza": "alta",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 21 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "compartido_brl": 147,
-      "privado_brl": 270,
+      "compartido_brl": 154,
+      "privado_brl": 744,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
-      "privado_escalones": []
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 744
+        }
+      ]
     },
     "maragogi": {
       "nombre": "Maragogi",
@@ -400,15 +437,25 @@
       "modo": "car",
       "km": 129,
       "horas": 2.1,
-      "compartido": 64.23,
-      "privado": 92,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (129) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 129 km de OSRM: US$ 25 compartido y US$ 92 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_brl": 334
+      "compartido": 66.92,
+      "privado": 78.46,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maragogi. Privado por vehiculo (base R$ 340 + 20%): 1 a 4 personas, Auto, R$ 408. Compartido por persona (base R$ 290 + 20%): R$ 348 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 408
+        }
+      ],
+      "compartido_brl": 348,
+      "privado_brl": 408
     },
     "nat": {
       "nombre": "Natal",
@@ -419,10 +466,10 @@
       "compartido": 0,
       "privado": 30,
       "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (25) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
+      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 25 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
+      "verificado": "2026-10-01",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 25 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (25 km de OSRM) no alcanza para calcular un precio de mercado.",
       "privado_escalones": [],
       "compartido_consultar": true
     },
@@ -433,21 +480,30 @@
       "km": 30,
       "horas": 0.5,
       "compartido": 0,
-      "privado": 31,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (30) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 30 km de OSRM: US$ 20 compartido y US$ 31 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado": 57.69,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila NAT a Pipa. Privado por vehiculo (base R$ 250 + 20% y R$ 250 + 20%): 1 a 4 personas, Auto, R$ 300; 5 a 6 personas, Van, R$ 300. Los precios ya incluyen la comision. Trayecto de 30 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 288
+          "brl": 300
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Van",
+          "brl": 300
         }
       ],
-      "compartido_consultar": true
+      "compartido_consultar": true,
+      "privado_brl": 300
     },
     "ajuda": {
       "nombre": "Arraial d’Ajuda",
@@ -456,14 +512,24 @@
       "km": 170,
       "horas": 2.8,
       "compartido": 0,
-      "privado": 118,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km salen de OSRM: 170 desde SSA, 7 mas que Trancoso porque Arraial esta 7 km mas adelante por la misma ruta. Los dos precios salen del modelo de distancia de _meta.modelo.",
-      "verificado": "2026-09-29",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 170 km de OSRM: US$ 30 compartido y US$ 118 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 69.23,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Arraial d’Ajuda. Privado por vehiculo (base R$ 300 + 20%): 1 a 4 personas, Auto, R$ 360. Los precios ya incluyen la comision. Trayecto de 170 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 360
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 360
     },
     "trancoso": {
       "nombre": "Trancoso",
@@ -472,21 +538,24 @@
       "km": 163,
       "horas": 2.7,
       "compartido": 0,
-      "privado": 113,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (163) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 163 km de OSRM: US$ 30 compartido y US$ 113 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "privado": 87.69,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Trancoso. Privado por vehiculo (base R$ 380 + 20%): 1 a 4 personas, Auto, R$ 456. Los precios ya incluyen la comision. Trayecto de 163 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 437
+          "brl": 456
         }
       ],
-      "compartido_consultar": true
+      "compartido_consultar": true,
+      "privado_brl": 456
     },
     "ssa": {
       "nombre": "Salvador de Bahía",
@@ -496,14 +565,24 @@
       "horas": 0.5,
       "appRideUsd": 11,
       "compartido": 0,
-      "privado": 30,
-      "real": [],
-      "fuente": "Uber publica SSA -> Salvador en R$ 54-55 (27 min, 20 km) con UberX, R$ 72 con Comfort y R$ 95 con Black. El UberX va a appRide. Para el compartido no hay fuente: los numeros de Uber que se encontraron son todos por vehiculo y meterlos como si fueran por persona subestimaba el precio a la mitad.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 24 km de OSRM da US$ 20 y US$ 30.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 34.62,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Salvador de Bahía. Privado por vehiculo (base R$ 150 + 20%): 1 a 4 personas, Auto, R$ 180. Los precios ya incluyen la comision. Trayecto de 24 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 180
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 180
     },
     "for": {
       "nombre": "Fortaleza",
@@ -514,10 +593,10 @@
       "compartido": 0,
       "privado": 30,
       "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (9) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
+      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 9 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
+      "verificado": "2026-10-01",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 9 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (9 km de OSRM) no alcanza para calcular un precio de mercado.",
       "privado_escalones": [],
       "compartido_consultar": true
     },
@@ -527,22 +606,25 @@
       "modo": "car",
       "km": 295,
       "horas": 5.6,
-      "compartido": 55.38,
-      "privado": 195,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (295) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 295 km de OSRM: US$ 35 compartido y US$ 195 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "compartido": 57.69,
+      "privado": 392.31,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FOR a Jericoacoara. Privado por vehiculo (base R$ 1700 + 20%): 1 a 6 personas, 4 x 4, R$ 2040. Compartido por persona (base R$ 250 + 20%): R$ 300 (4 x 4, 2 a 5 personas). Los precios ya incluyen la comision. Trayecto de 295 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
       "privado_escalones": [
         {
           "min": 1,
           "max": 6,
           "vehiculo": "4 x 4",
-          "brl": 1955
+          "brl": 2040
         }
       ],
-      "compartido_brl": 288
+      "compartido_brl": 300,
+      "privado_brl": 2040
     },
     "morro": {
       "nombre": "Morro de São Paulo",
@@ -551,14 +633,24 @@
       "km": 242,
       "horas": 3.9,
       "compartido": 0,
-      "privado": 162,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (242) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 242 km de OSRM: US$ 35 compartido y US$ 162 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 35.77,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Morro de São Paulo. Privado por vehiculo (base R$ 155 + 20%): 1 a 4 personas, Auto, R$ 186. Los precios ya incluyen la comision. Trayecto de 242 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 186
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 186
     },
     "portoseguro": {
       "nombre": "Porto Seguro",
@@ -567,14 +659,24 @@
       "km": 699,
       "horas": 11.4,
       "compartido": 0,
-      "privado": 445,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (699) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 699 km de OSRM: US$ 60 compartido y US$ 445 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 92.31,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Porto Seguro. Privado por vehiculo (base R$ 400 + 20%): 1 a 4 personas, Auto, R$ 480. Los precios ya incluyen la comision. Trayecto de 699 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 480
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 480
     },
     "itacare": {
       "nombre": "Itacaré",
@@ -583,14 +685,24 @@
       "km": 359,
       "horas": 5.7,
       "compartido": 0,
-      "privado": 235,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (359) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 359 km de OSRM: US$ 40 compartido y US$ 235 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 242.31,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Itacaré. Privado por vehiculo (base R$ 1050 + 20%): 1 a 4 personas, Auto, R$ 1260. Los precios ya incluyen la comision. Trayecto de 359 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 1260
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 1260
     },
     "forte": {
       "nombre": "Praia do Forte",
@@ -598,49 +710,62 @@
       "modo": "car",
       "km": 62,
       "horas": 1.1,
-      "compartido": 30.77,
-      "privado": 50,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (62) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 62 km de OSRM: US$ 20 compartido y US$ 50 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_brl": 160
+      "compartido": 32.12,
+      "privado": 46.15,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Privado por vehiculo (base R$ 200 + 20%): 1 a 4 personas, Auto, R$ 240. Compartido por persona (base R$ 139 + 20%): R$ 167 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 240
+        }
+      ],
+      "compartido_brl": 167,
+      "privado_brl": 240
     },
     "fernando": {
       "nombre": "Fernando de Noronha",
       "iata": "FEN",
       "modo": "vuelo",
       "compartido": 0,
-      "privado": 95,
-      "real": [],
+      "privado": 108.08,
+      "real": [
+        "privado"
+      ],
       "soloPrivado": true,
-      "fuente": "Sin fuente directa de precio. Lo habitual es salir en vuelo desde REC, no en van. El valor es una estimacion para una hora de vuelo en una isla donde todo es caro, no el dato de un operador.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "No hay carretera ni ferry comercial: se llega en vuelo desde REC. El precio sale de una estimacion propia, no de una tarifa publicada. Ver la nota sobre NVT/FEN en _meta.aeropuertoErrores: el codigo de esta isla es FEN, no NVT.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FEN a Fernando de Noronha. Privado por vehiculo (base R$ 468 + 20% y R$ 840 + 20% y R$ 1512 + 20%): 1 a 4 personas, Auto, R$ 562; 5 a 6 personas, Auto, R$ 1008; 6 a 12 personas, Van, R$ 1814. Los precios ya incluyen la comision. No hay carretera: es una isla, se llega en vuelo corto desde REC. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "nota": "No es un traslado por carretera: isla a 350 km de la costa, se llega en vuelo corto desde REC.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 538
+          "brl": 562
         },
         {
           "min": 5,
           "max": 6,
           "vehiculo": "Auto",
-          "brl": 966
+          "brl": 1008
         },
         {
           "min": 6,
           "max": 12,
           "vehiculo": "Van",
-          "brl": 1739
+          "brl": 1814
         }
-      ]
+      ],
+      "privado_brl": 562
     },
     "fln": {
       "nombre": "Florianópolis",
@@ -648,15 +773,25 @@
       "modo": "car",
       "km": 17,
       "horas": 0.4,
-      "compartido": 0,
-      "privado": 30,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (17) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 17 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido": 57.69,
+      "privado": 92.31,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Florianópolis. Privado por vehiculo (base R$ 400 + 20%): 1 a 4 personas, Auto, R$ 480. Compartido por persona (base R$ 250 + 20%): R$ 300 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 17 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 480
+        }
+      ],
+      "privado_brl": 480,
+      "compartido_brl": 300
     },
     "bombinhas": {
       "nombre": "Bombinhas",
@@ -664,15 +799,25 @@
       "modo": "car",
       "km": 89,
       "horas": 1.5,
-      "compartido": 0,
-      "privado": 67,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (89) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 89 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido": 34.42,
+      "privado": 131.54,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Bombinhas. Privado por vehiculo (base R$ 570 + 20%): 1 a 4 personas, Auto, R$ 684. Compartido por persona (base R$ 149 + 20%): R$ 179 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 89 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 684
+        }
+      ],
+      "privado_brl": 684,
+      "compartido_brl": 179
     },
     "rosa": {
       "nombre": "Praia do Rosa",
@@ -680,15 +825,31 @@
       "modo": "car",
       "km": 96,
       "horas": 1.6,
-      "compartido": 0,
-      "privado": 72,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (96) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 96 km de OSRM: US$ 25 compartido y US$ 72 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido": 48.46,
+      "privado": 133.85,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Praia do Rosa. Privado por vehiculo (base R$ 580 + 20% y R$ 1150 + 20%): 1 a 3 personas, Auto, R$ 696; 4 a 12 personas, Van, R$ 1380. Compartido por persona (base R$ 210 + 20%): R$ 252 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 96 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 3,
+          "vehiculo": "Auto",
+          "brl": 696
+        },
+        {
+          "min": 4,
+          "max": 12,
+          "vehiculo": "Van",
+          "brl": 1380
+        }
+      ],
+      "privado_brl": 696,
+      "compartido_brl": 252
     },
     "bcm": {
       "nombre": "Balneário Camboriú",
@@ -697,15 +858,25 @@
       "km": 96,
       "horas": 1.4,
       "appRideUsd": 42,
-      "compartido": 0,
-      "privado": 72,
-      "real": [],
-      "fuente": "Uber publica FLN -> Balneario Camboriu con precio medio R$ 216, 100 km, 1,7 h. Son los mismos 96 km que da OSRM, asi que el valor sirve para bcm, camboriu e itapema. OJO: el precio de Uber es POR VEHICULO y es un pedido por app, no un transfer reservado, asi que va en appRide y no como ancla del privado. TourFacil tiene el \"Transfer Aeroporto Florianopolis para Balneario Camboriu\", que solo sale con dos reservas minimas, o sea compartido, pero no publica tarifa.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 96 km de OSRM da US$ 25 y US$ 72.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido": 38.85,
+      "privado": 111.92,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Balneário Camboriú. Privado por vehiculo (base R$ 485 + 20%): 1 a 4 personas, Auto, R$ 582. Compartido por persona (base R$ 168 + 20%): R$ 202 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 96 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 582
+        }
+      ],
+      "privado_brl": 582,
+      "compartido_brl": 202
     },
     "itapema": {
       "nombre": "Itapema",
@@ -716,10 +887,10 @@
       "compartido": 0,
       "privado": 67,
       "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (88) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
+      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 88 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
+      "verificado": "2026-10-01",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 88 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (88 km de OSRM) no alcanza para calcular un precio de mercado.",
       "privado_escalones": [],
       "compartido_consultar": true
     },
@@ -729,15 +900,31 @@
       "modo": "car",
       "km": 89,
       "horas": 1.5,
-      "compartido": 0,
-      "privado": 67,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (89) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 89 km de OSRM: US$ 25 compartido y US$ 67 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido": 48.46,
+      "privado": 133.85,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Garopaba. Privado por vehiculo (base R$ 580 + 20% y R$ 1150 + 20%): 1 a 3 personas, Auto, R$ 696; 4 a 12 personas, Van, R$ 1380. Compartido por persona (base R$ 210 + 20%): R$ 252 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 89 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 3,
+          "vehiculo": "Auto",
+          "brl": 696
+        },
+        {
+          "min": 4,
+          "max": 12,
+          "vehiculo": "Van",
+          "brl": 1380
+        }
+      ],
+      "privado_brl": 696,
+      "compartido_brl": 252
     },
     "ferrugem": {
       "nombre": "Ferrugem",
@@ -745,15 +932,31 @@
       "modo": "car",
       "km": 100,
       "horas": 1.6,
-      "compartido": 0,
-      "privado": 74,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (100) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 100 km de OSRM: US$ 25 compartido y US$ 74 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido": 48.46,
+      "privado": 133.85,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Ferrugem. Privado por vehiculo (base R$ 580 + 20% y R$ 1150 + 20%): 1 a 3 personas, Auto, R$ 696; 4 a 12 personas, Van, R$ 1380. Compartido por persona (base R$ 210 + 20%): R$ 252 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 100 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 3,
+          "vehiculo": "Auto",
+          "brl": 696
+        },
+        {
+          "min": 4,
+          "max": 12,
+          "vehiculo": "Van",
+          "brl": 1380
+        }
+      ],
+      "privado_brl": 696,
+      "compartido_brl": 252
     },
     "picarras": {
       "nombre": "Piçarras",
@@ -762,14 +965,24 @@
       "km": 129,
       "horas": 1.8,
       "compartido": 0,
-      "privado": 92,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (129) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 129 km de OSRM: US$ 25 compartido y US$ 92 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 64.62,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Piçarras. Privado por vehiculo (base R$ 280 + 20%): 1 a 4 personas, Auto, R$ 336. Los precios ya incluyen la comision. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 336
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 336
     },
     "gram": {
       "nombre": "Gramado",
@@ -777,16 +990,25 @@
       "modo": "car",
       "km": 109,
       "horas": 1.9,
-      "appRideUsd": 43,
-      "compartido": 0,
-      "privado": 80,
-      "real": [],
-      "fuente": "Uber publica POA -> Gramado con precio medio R$ 225, por vehiculo. Los 109 km de OSRM coinciden con el tramo, asi que el mismo valor sirve para gram y canela.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 109 km de OSRM da US$ 25 y US$ 80.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "compartido": 20.77,
+      "privado": 253.85,
+      "real": [
+        "privado",
+        "compartido"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Gramado. Privado por vehiculo (base R$ 1100 + 20%): 1 a 4 personas, Auto, R$ 1320. Compartido por persona (base R$ 90 + 20%): R$ 108 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 109 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 1320
+        }
+      ],
+      "privado_brl": 1320,
+      "compartido_brl": 108
     },
     "canela": {
       "nombre": "Canela",
@@ -795,14 +1017,24 @@
       "km": 115,
       "horas": 2.1,
       "compartido": 0,
-      "privado": 83,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (115) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 115 km de OSRM: US$ 25 compartido y US$ 83 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 96.92,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Canela. Privado por vehiculo (base R$ 420 + 20%): 1 a 4 personas, Auto, R$ 504. Los precios ya incluyen la comision. Trayecto de 115 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 504
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 504
     },
     "torres": {
       "nombre": "Torres",
@@ -811,14 +1043,24 @@
       "km": 184,
       "horas": 2.5,
       "compartido": 0,
-      "privado": 126,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (184) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 184 km de OSRM: US$ 30 compartido y US$ 126 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 92.31,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Torres. Privado por vehiculo (base R$ 400 + 20%): 1 a 4 personas, Auto, R$ 480. Los precios ya incluyen la comision. Trayecto de 184 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 480
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 480
     },
     "canoa": {
       "nombre": "Capão da Canoa",
@@ -827,14 +1069,24 @@
       "km": 135,
       "horas": 1.8,
       "compartido": 0,
-      "privado": 96,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (135) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 135 km de OSRM: US$ 25 compartido y US$ 96 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 103.85,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Capão da Canoa. Privado por vehiculo (base R$ 450 + 20%): 1 a 4 personas, Auto, R$ 540. Los precios ya incluyen la comision. Trayecto de 135 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 540
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 540
     },
     "rec": {
       "nombre": "Recife",
@@ -845,10 +1097,10 @@
       "compartido": 0,
       "privado": 30,
       "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (13) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
+      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 13 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
+      "verificado": "2026-10-01",
       "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 13 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
+      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (13 km de OSRM) no alcanza para calcular un precio de mercado.",
       "privado_escalones": [],
       "compartido_consultar": true
     },
@@ -859,14 +1111,24 @@
       "km": 13,
       "horas": 0.3,
       "compartido": 0,
-      "privado": 30,
-      "real": [],
-      "fuente": "Sin precio real para esta ruta. Los km (13) salen de OSRM y los dos precios salen del modelo de distancia de _meta.modelo. Ver \"derivacion\".",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Sin ancla de precio. Sale del modelo de distancia con 13 km de OSRM: US$ 20 compartido y US$ 30 privado. Es una conjetura calibrada contra los precios reales de la seccion _meta.anclas, no un precio de mercado.",
-      "privado_escalones": [],
-      "compartido_consultar": true
+      "privado": 25.38,
+      "real": [
+        "privado"
+      ],
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila JPA a João Pessoa. Privado por vehiculo (base R$ 110 + 20%): 1 a 4 personas, Auto, R$ 132. Los precios ya incluyen la comision. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-01",
+      "confianza": "alta",
+      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 132
+        }
+      ],
+      "compartido_consultar": true,
+      "privado_brl": 132
     },
     "poa": {
       "nombre": "Porto Alegre",
@@ -878,10 +1140,10 @@
       "compartido": 0,
       "privado": 30,
       "real": [],
-      "fuente": "Uber publica POA <-> Porto Alegre en R$ 37 (18 min), por vehiculo.",
-      "verificado": "2026-09-27",
+      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 9 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
+      "verificado": "2026-10-01",
       "confianza": "baja",
-      "derivacion": "El compartido y el privado sale del modelo de distancia (compartido = 18 + 0.06*km; privado = 12 + 0.62*km). Con los 9 km de OSRM da US$ 20 y US$ 30.",
+      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (9 km de OSRM) no alcanza para calcular un precio de mercado.",
       "privado_escalones": [],
       "compartido_consultar": true
     }

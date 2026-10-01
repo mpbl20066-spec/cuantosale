@@ -80,8 +80,20 @@ for (const [k, v] of Object.entries(D)) {
   // Si el privado sale mas barato que el compartido, alguna de las dos columnas
   // esta mal puesta: es el error que se cometio al meter un precio de Uber (por
   // vehiculo) en la columna de compartido (por persona).
+  //
+  // Solo se exige cuando las dos columnas NO vienen de la planilla. Si las dos son
+  // tarifas reales de la agencia, la relacion de precios es su negocio y no un
+  // error de unidades: Ilha Grande cobra R$ 468 la van compartida por persona y
+  // R$ 444 el auto privado para 4, y puede ser cierto, porque el compartido de la
+  // isla incluye el barco. Ese caso se declara, no se corrige.
+  const ambasReales = Array.isArray(v.real) && v.real.includes('compartido') && v.real.includes('privado');
   if (typeof v.compartido === 'number' && typeof v.privado === 'number' && v.privado < v.compartido) {
-    err(k + ': el privado (' + v.privado + ') sale menos que el compartido (' + v.compartido + ')');
+    if (ambasReales) {
+      av(k + ': el privado (' + v.privado + ') sale menos que el compartido (' + v.compartido +
+        '). Las dos son tarifas de la planilla, asi que se deja como esta; revisar si el precio es el correcto.');
+    } else {
+      err(k + ': el privado (' + v.privado + ') sale menos que el compartido (' + v.compartido + ')');
+    }
   }
   if (v.appRideUsd != null && (typeof v.appRideUsd !== 'number' || v.appRideUsd <= 0)) {
     err(k + '.appRideUsd invalido: ' + v.appRideUsd);
@@ -123,11 +135,16 @@ for (const [k, v] of Object.entries(D)) {
   }
   // Una columna real tiene que estar en 'real', y al reves. Si aparece un numero
   // con fuente en una columna que no esta en 'real', la fuente no se esta usando.
-  for (const campo of ['compartido', 'privado']) {
-    const declarada = v.real.includes(campo);
-    if (!declarada && v.confianza === 'alta') {
-      err(k + '.' + campo + ' no esta en "real" pero el destino es de confianza alta, que exige precio publicado');
-    }
+  //
+  // Confianza 'alta' pide AL MENOS una columna con tarifa publicada, no las dos:
+  // hay destinos donde la agencia solo vende una modalidad (Itacaré solo tiene
+  // privado, Maceió solo Van y las dos), y en ese caso la columna que falta no es
+  // una conjetura sino un "Consultar" sin precio cargado. Exigir las dos daba
+  // error en un destino con un solo producto, que no es un error de datos.
+  // Lo que no puede pasar es 'alta' sin ninguna tarifa real, y eso lo cubre la
+  // rama de `real: []` de mas arriba.
+  if (v.confianza === 'alta' && !v.real.length) {
+    err(k + ' es de confianza alta pero no declara ninguna tarifa publicada');
   }
 }
 

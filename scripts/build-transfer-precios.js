@@ -29,6 +29,70 @@ const VERIFICADO = process.env.TRANSFER_VERIFICADO || '2026-09-27';
 const TIPO_CAMBIO = 5.2; // R$5,2 = US$1, el mismo que usa data/costos-diarios.json
 
 /* ----------------------------------------------------------------------
+ * ESTE SCRIPT REGENERA EL JSON DESDE CERO, Y ESO BORRA LOS PRECIOS DE LA PLANILLA.
+ *
+ * Los precios de verdad ya no salen de las ANCHORS de mas abajo: salen de
+ * data/transfer-escalones.tsv, y los mete importar-transfer-escalones.js. Este
+ * script arma el objeto `salida` entero y lo escribe encima, asi que los escalones
+ * y los `*_brl` de la planilla desaparecen y todos los destinos vuelven al modelo
+ * de distancia.
+ *
+ * Antes de la planilla eso no rompia nada, porque todo el archivo venia de aca. Ahora
+ * es el pie de gancete mas caro del repo: correr `npm run pull:transfer` para
+ * refrescar un kilometro borra los precios de los 33 destinos que tienen tarifa
+ * cargada, y no hay ningun error visible, solo numeros que vuelven a ser conjeturas.
+ *
+ * Por eso el script se niega a correr si encuentra datos de planilla, salvo que se
+ * pase --force, que es cuando uno sabe que los esta pisando a proposito.
+ * -------------------------------------------------------------------- */
+function pedirForce() {
+  if (process.argv.includes('--force')) return;
+
+  let conEscalones = 0, conCompartido = 0, total = 0;
+  const detalle = [];
+  try {
+    const actual = JSON.parse(fs.readFileSync(SALIDA, 'utf8')).destinos || {};
+    total = Object.keys(actual).length;
+    for (const [k, v] of Object.entries(actual)) {
+      const e = (v.privado_escalones || []).length;
+      if (e) conEscalones++;
+      if (v.compartido_brl != null) conCompartido++;
+      if ((e || v.compartido_brl != null) && detalle.length < 8) {
+        detalle.push('    ' + k + ': ' + (e ? e + ' escalon(es) de privado' : 'sin privado') +
+          (v.compartido_brl != null ? ', compartido R$ ' + v.compartido_brl : ''));
+      }
+    }
+  } catch (e) {
+    return; // todavia no existe el JSON: no hay nada que pisar
+  }
+
+  if (!conEscalones && !conCompartido) return; // todavia no se cargo la planilla
+
+  console.error('\n  NO SE CORRE: data/transfer-precios.json ya tiene precios de la planilla de transfers.\n');
+  console.error('  Este script regenera el archivo desde cero y los borraria:\n');
+  console.error('    destinos con escalones de privado: ' + conEscalones + ' de ' + total);
+  console.error('    destinos con compartido en reales:  ' + conCompartido + ' de ' + total);
+  console.error('\n  algunos de esos:\n' + detalle.join('\n'));
+  console.error('\n  Para actualizar solo los km de OSRM no corras esto: los km ya estan');
+  console.error('  en data/transfer-precios.json y se refrescan con npm run pull:distancias,');
+  console.error('  que no toca los precios.');
+  console.error('\n  OJO con --force: no es reversible con la planilla. Regenerar desde cero');
+  console.error('  tambien pierde los km que no estan en data/distancias-aeropuerto.json,');
+  console.error('  porque el cache de OSRM tiene 37 de los 40 destinos (a Arraial d\'Ajuda le');
+  console.error('  falta, entre otros). Volver a correr importar-transfer-escalones.js no los');
+  console.error('  recupera: solo restaura los PRECIOS.');
+  console.error('\n  Para pisar la planilla igual, a sabiendas, y con el JSON a mano por si acaso:\n');
+  console.error('    node scripts/build-transfer-precios.js --force');
+  console.error('\n  y despues hay que volver a correr, en este orden:');
+  console.error('    node scripts/importar-transfer-escalones.js');
+  console.error('    npm run build:transfer');
+  console.error('\n  La salida limpia es volver el archivo a la ultima version buena:\n');
+  console.error('    git checkout data/transfer-precios.json\n');
+  process.exit(1);
+}
+pedirForce();
+
+/* ----------------------------------------------------------------------
  * ANCLAS: precios reales leidos de fuentes publicas.
  *
  * Cada una dice de donde sale. `brl` se convierte con TIPO_CAMBIO. Cuando el
@@ -69,9 +133,16 @@ const ANCHORS = {
       'reservas minimas, o sea compartido, pero no publica tarifa.'
   },
   gram: {
-    km: 109, appRide: 43, confianza: 'baja',
-    fuente: 'Uber publica POA -> Gramado con precio medio R$ 225, por vehiculo. Los 109 km de OSRM coinciden con ' +
-      'el tramo, asi que el mismo valor sirve para gram y canela.'
+    km: 109, confianza: 'baja',
+    // SIN appRide a proposito. Antes estaba el promedio de Uber a Gramado (R$ 225,
+    // US$ 43) y la app lo ofrecia como alternativa, pero la tarifa real de la
+    // agencia para la van compartida es de R$ 108 por persona: el pedido de app
+    // sale el doble. La app comparaba el Uber contra el piso de US$ 20 del modelo
+    // de distancia y por eso decia "conviene el Uber"; con el precio de la planilla
+    // cargado, la comparacion ya no da. Ver el comentario de _meta.appRide.
+    fuente: 'Sin appRide. El precio de la agencia para la van compartida esta en la planilla de transfers ' +
+      '(data/transfer-escalones.tsv): R$ 108 por persona. El promedio de Uber que se encontro antes ' +
+      '(R$ 225 por vehiculo) no se ofrece como alternativa porque sale mas caro que la van.'
   },
   ssa: {
     km: 24, appRide: 11, confianza: 'baja',
