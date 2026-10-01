@@ -2256,7 +2256,7 @@
       modal.innerHTML = '<div class="booking-dialog rooms-modal" role="dialog" aria-modal="true" aria-labelledby="rooms-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>'
         + '<span class="tour-detail-modal__eyebrow">HABITACIONES DISPONIBLES</span><h2 id="rooms-title">' + esc(nombre) + '</h2>' + html + '</div>';
     };
-    cuerpo('<p class="rooms-modal__msg">Buscando habitaciones…</p>');
+    cuerpo('<p class="rooms-modal__msg">Buscando habitaciones…</p><div class="rooms-skel" aria-hidden="true"><div class="rooms-skel__row"></div><div class="rooms-skel__row"></div><div class="rooms-skel__row"></div></div>');
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
     modal.__rooms = null;
@@ -2311,7 +2311,10 @@
         : '';
       cuerpo('<p class="rooms-modal__msg">Precios totales con impuestos para tus fechas. Tocá una habitación para sumarla a tu presupuesto.</p>' + aviso + '<ul class="rooms-modal__list">' + items + '</ul>');
     }).catch(function () {
-      cuerpo('<p class="rooms-modal__msg">No pudimos cargar las habitaciones ahora. Podés elegir este hotel igual tocando su ficha.</p>');
+      var errHab = errorDeRed(null, 'No pudimos cargar las habitaciones');
+      var claveHab = 'r' + (++reintentoSeq);
+      REINTENTOS[claveHab] = function () { abrirHabitaciones(btn); };
+      cuerpo(bloqueError(errHab.titulo, errHab.detalle + ' Podés elegir este hotel igual tocando su ficha.', claveHab));
     });
   }
   var hotelCardSeq = 0;
@@ -3994,6 +3997,18 @@
       meta.hotelsLoaded = true;
       var current = document.querySelector('[data-hotels-block]');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
+      var nuevoBloque = document.querySelector('[data-hotels-block]');
+      if (nuevoBloque) {
+        var errHot = errorDeRed(error, 'No pudimos cargar los hoteles');
+        var claveHot = 'r' + (++reintentoSeq);
+        REINTENTOS[claveHot] = function () {
+          meta.hotelsLoaded = false;
+          var bloque = document.querySelector('[data-hotels-block]');
+          if (bloque) bloque.outerHTML = hotelLoading(meta);
+          loadHotelRecommendations(meta, accommodationTotal);
+        };
+        nuevoBloque.insertAdjacentHTML('afterbegin', bloqueError(errHot.titulo, 'Mientras tanto te mostramos estimaciones. ' + errHot.detalle, claveHot));
+      }
     });
   }
 
@@ -4369,7 +4384,18 @@
     if (!el || !detailState) return;
     var html = pasosMarkup();
     var principal = document.querySelector('.detail-main');
-    if (principal) principal.setAttribute('data-paso', String(pasoActualNum()));
+    if (principal) {
+      var pasoAntes = principal.getAttribute('data-paso');
+      var pasoAhora = String(pasoActualNum());
+      principal.setAttribute('data-paso', pasoAhora);
+      // Al cambiar de paso el contenido nuevo entra con un fundido corto.
+      if (pasoAntes && pasoAntes !== pasoAhora) {
+        principal.classList.remove('paso-anim');
+        void principal.offsetWidth;
+        principal.classList.add('paso-anim');
+        setTimeout(function () { principal.classList.remove('paso-anim'); }, 320);
+      }
+    }
     if (el.__html !== html) { el.innerHTML = html; el.__html = html; try { syncBudgetJumpTargets(); } catch (e) { /* sin DOM todavia */ } }
     var foot = document.querySelector('[data-steps-foot]');
     if (foot) {
@@ -8498,8 +8524,43 @@
         if (!res.ok) throw new Error(res.j.error || 'No pudimos buscar destinos.');
         renderDestinationResults(res.j);
       })
-      .catch(function (e) { el.innerHTML = '<div class="notice">' + esc(e.message || 'No pudimos buscar destinos ahora.') + '</div>'; });
+      .catch(function (e) {
+        var errDest = errorDeRed(e, 'No pudimos buscar destinos');
+        mostrarError(el, errDest.titulo, (e && e.message && !/failed to fetch|networkerror|load failed/i.test(e.message)) ? e.message : errDest.detalle, findDestinations);
+      });
   }
+  /* Errores amables con reintento. Cuando falla la red o la API, la seccion
+     muestra un bloque con lo ocurrido y "Volver a intentar", que repite SOLO esa
+     carga: el formulario y el presupuesto armado no se tocan. */
+  var REINTENTOS = {};
+  var reintentoSeq = 0;
+  function bloqueError(titulo, detalle, clave) {
+    return '<div class="error-block" role="alert">'
+      + '<svg class="error-block__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>'
+      + '<div class="error-block__body"><h3>' + esc(titulo) + '</h3><p>' + esc(detalle) + '</p></div>'
+      + '<button type="button" class="error-block__retry" data-reintentar="' + esc(clave) + '">Volver a intentar</button></div>';
+  }
+  function errorDeRed(e, quePaso) {
+    var sinRed = (typeof navigator !== 'undefined' && navigator.onLine === false) || /failed to fetch|networkerror|load failed|network request failed/i.test(String(e && e.message || ''));
+    return sinRed
+      ? { titulo: 'Sin conexión', detalle: 'No pudimos conectarnos. Revisá tu internet y volvé a intentar: lo que armaste sigue acá.' }
+      : { titulo: quePaso, detalle: 'Algo falló de nuestro lado. Probá de nuevo en un momento; no perdiste nada de lo que armaste.' };
+  }
+  function mostrarError(el, titulo, detalle, fn) {
+    if (!el) return;
+    var clave = 'r' + (++reintentoSeq);
+    REINTENTOS[clave] = fn;
+    el.innerHTML = bloqueError(titulo, detalle, clave);
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-reintentar]');
+    if (!b) return;
+    var fn = REINTENTOS[b.getAttribute('data-reintentar')];
+    if (!fn) return;
+    e.preventDefault();
+    conCarga(b, 'Reintentando…', function () { return fn(); }, 700);
+  });
+
   function notice(msg) { $('#results').innerHTML = '<div class="notice">' + esc(msg) + '</div>'; }
   function renderLoadingState(label) {
     var text = label || 'Buscando la mejor propuesta…';
@@ -8535,7 +8596,7 @@
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         if (!res.ok) {
-          notice(res.j.error || 'No pudimos calcular tu viaje.');
+          mostrarError($('#results'), 'No pudimos calcular tu viaje', res.j.error || 'Probá de nuevo en un momento.', run);
           if (pendingDestinationScroll) scrollToDestinationResults();
           return;
         }
@@ -8543,7 +8604,8 @@
       })
       .catch(function (e) {
         if (e.name === 'AbortError') return;
-        notice('No pudimos calcular ahora. Probá de nuevo en un momento.');
+        var errRed = errorDeRed(e, 'No pudimos calcular ahora');
+        mostrarError($('#results'), errRed.titulo, errRed.detalle, run);
         if (pendingDestinationScroll) scrollToDestinationResults();
       })
       .then(function () { if (ctrl === mine) el.classList.remove('loading'); });
