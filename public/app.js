@@ -8279,6 +8279,8 @@
       return;
     }
     if (S.dest === 'todos') { return; }
+    // Una busqueda real: se anota en "Busquedas recientes" de la Home.
+    try { if (window.CS_RECIENTES) window.CS_RECIENTES.registrar(); } catch (e) { /* accesorio */ }
     // Hay una búsqueda real en marcha: los destacados ya cumplieron su función
     // de puerta de entrada, así que se van de la vista.
     setHighlightsVisible(false);
@@ -9491,6 +9493,10 @@
   /* ---------- cuentas y viajes guardados ---------- */
   var supabaseClient = null;
   var authUser = null;
+  /* Puerta para recientes.js (busquedas recientes de la Home): le da el estado
+     del formulario, la sesion y el cliente de Supabase, y mas abajo se le agrega
+     aplicar(), que rellena el formulario y relanza la cotizacion. */
+  window.CS_APP = { estado: S, usuario: function () { return authUser; }, cliente: function () { return supabaseClient; } };
   var pendingTripSave = false;
   var tripSaveInProgress = false;
   var authReadyPromise = Promise.resolve();
@@ -9574,6 +9580,7 @@
     var button = $('#auth-button'), trips = $('#trips-button');
     if (button) { var avatar = authUser && authUser.user_metadata && (authUser.user_metadata.avatar_url || authUser.user_metadata.picture); button.innerHTML = authUser ? (avatar ? '<img class="account-avatar" src="' + esc(avatar) + '" alt="">' : '<span class="account-avatar account-avatar--inicial" aria-hidden="true">' + esc(String(authDisplayName(authUser) || 'P').trim().charAt(0).toUpperCase() || 'P') + '</span>') + 'Mi perfil' : 'Iniciar sesión'; button.setAttribute('aria-label', authUser ? 'Abrir cuenta de ' + authDisplayName(authUser) : 'Iniciar sesión'); }
     if (trips) trips.hidden = !authUser;
+    try { if (window.CS_RECIENTES) window.CS_RECIENTES.alCambiarSesion(); } catch (e) { /* las recientes son accesorias */ }
   }
   /* ---------- Login para las acciones del resumen ----------
      Ver el resumen es libre. Lo que pide cuenta es lo que cambia un estado o abre
@@ -10634,6 +10641,25 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       }
       if (originToggle) originToggle.setAttribute('aria-expanded', 'false');
     }
+    /* Rellena el formulario con una busqueda guardada y la relanza. Las fechas
+       solo se pisan si siguen en el futuro; si ya pasaron se dejan las que el
+       formulario tiene, para no cotizar un viaje que ya fue. */
+    window.CS_APP.aplicar = function (b) {
+      if (!b || !b.dest) return;
+      var manana = iso(addDays(today, 1));
+      if (b.origin === 'MVD' || b.origin === 'PDP') { S.origin = b.origin; if (originInput) originInput.value = originLabel(b.origin); }
+      S.pax = Math.max(1, Math.min(10, Number(b.pax) || S.pax)); $('#pax').textContent = S.pax;
+      if (b.style === 'ahorro' || b.style === 'eq' || b.style === 'comodo') {
+        S.style = b.style;
+        Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-v') === b.style ? 'true' : 'false'); });
+      }
+      if (b.transport) S.transport = b.transport;
+      if (b.dep && b.ret && b.dep >= manana && b.ret > b.dep) { S.dep = b.dep; S.ret = b.ret; syncDateRangeFields(); }
+      selectDestination(b.dest, b.subcategory || '', false, b.hotelType || undefined, b.second != null ? b.second : undefined);
+      try { alCambiarViajeros(); } catch (e) { /* ya se agenda la busqueda */ }
+      var res = document.getElementById('results');
+      if (res && res.scrollIntoView) setTimeout(function () { res.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
+    };
     function selectOrigin(code) {
       if (code !== 'MVD' && code !== 'PDP') return;
       var changed = S.origin !== code;
