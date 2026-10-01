@@ -3461,3 +3461,14 @@ summary::-webkit-details-marker{display:none}
 @media(display-mode:standalone),(display-mode:fullscreen),(display-mode:minimal-ui){
   body{padding-top:max(env(safe-area-inset-top,0px),28px)}
 }
+
+/* Filtros de vuelos: la etiqueta (Escalas / Horario de salida) va sola arriba y
+   las cuatro opciones debajo en una grilla pareja (2x2 en celular, 4 en una
+   fila desde 560px), todas del mismo ancho y alto. Antes compartian linea con
+   la etiqueta y se escalonaban al cortar. */
+.flight-filters{gap:18px}
+.flight-filters > div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch}
+.flight-filters b{grid-column:1 / -1;margin:0 0 2px;font-size:13px;letter-spacing:.02em}
+.flight-filters button{width:100%;min-width:0;padding:0 8px;justify-content:center;text-align:center;white-space:nowrap;font-size:13.5px}
+@media(min-width:560px){.flight-filters > div{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:340px){.flight-filters button{font-size:12.5px;padding:0 4px}}
