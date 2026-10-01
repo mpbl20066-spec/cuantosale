@@ -4261,8 +4261,16 @@
     var p = pasosEstado();
     var n = pasoActualNum();
     var next = p[n];
-    if (!next || !(p[n - 1].hecho || p[n - 1].opcional)) return '';
-    return '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + esc(next.cta) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>';
+    if (!next) return '';
+    var listo = p[n - 1].hecho || p[n - 1].opcional;
+    /* La barra se ve siempre, aun con el paso sin resolver: sin ella la persona
+       no sabia como avanzar. Mientras falta elegir queda apagada (aria-disabled,
+       no disabled, para que el toque igual la lleve a lo que falta) y dice que
+       falta. Con el paso resuelto se enciende en ambar con "Continuar a ...". */
+    if (!listo) {
+      return '<button type="button" class="steps__next is-locked" data-paso-faltante="' + n + '" aria-disabled="true">' + esc(p[n - 1].cta) + ' para continuar</button>';
+    }
+    return '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + (next.n === 4 ? esc(next.cta) : 'Continuar a ' + esc(next.titulo)) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>';
   }
   function irAlPaso(n) {
     if (!detailState) return;
@@ -4453,6 +4461,16 @@
     return true;
   }
   function handlePasoIr(e) {
+    var falta = e.target.closest && e.target.closest('[data-paso-faltante]');
+    if (falta) {
+      // Barra apagada: no avanza, lleva a lo que hay que elegir en este paso.
+      e.preventDefault();
+      e.stopPropagation();
+      var n = Number(falta.getAttribute('data-paso-faltante'));
+      var destino = document.querySelector(n === 1 ? '[data-transport-flow]' : n === 2 ? '[data-hotels-block],.hotel-options' : '[data-steps]');
+      if (destino && destino.scrollIntoView) destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     var b = e.target.closest && e.target.closest('[data-paso-ir]');
     if (!b) return;
     e.preventDefault();

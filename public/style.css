@@ -2663,6 +2663,10 @@ h3.block-title, .block-title:is(h3) {
 .steps__next{width:100%;margin-top:10px;min-height:44px;border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
 .steps__next em{font-style:normal;font-weight:600;opacity:.8}
 .steps__ok{margin:10px 0 0;font-size:13px;color:var(--ink2);text-align:center}
+.steps__foot{position:sticky;bottom:0;z-index:19;margin:0 -4px;padding:10px 4px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg,var(--surface)) 70%,transparent)}
+.steps__foot:empty{display:none}
+.steps__foot .steps__next{margin-top:0;min-height:54px;font-size:16px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.steps__next.is-locked{background:var(--surface);color:var(--ink2);border:1.5px dashed var(--line);box-shadow:none;font-weight:700}
 @media (max-width:560px){
   .steps{padding:10px;border-radius:16px}
   .steps__list{grid-template-columns:1fr;gap:6px}
