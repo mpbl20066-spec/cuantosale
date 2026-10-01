@@ -1,4 +1,4 @@
-/* version: 239
+/* version: 241
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1097,6 +1097,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .voucher-reserve__btn:hover{filter:brightness(1.08)}
 .voucher-reserve__btn:disabled{opacity:.55;cursor:not-allowed}
 .voucher-reserve__btn em{font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap}
+.voucher-reserve--fijo{position:sticky;bottom:0;z-index:6;margin:14px -4px 0;padding:12px 4px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--surface,#fff) 80%,transparent)}
 .voucher-reserve__nota{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.4}
 .voucher-reserve__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* Tres botones del mismo tamano, mismo borde y misma tinta. El degradado
@@ -1718,8 +1719,10 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
   /* Se arrastra en vertical (ver initTripBarDrag en app.js): la rayita de arriba
      avisa que se puede mover y touch-action:none en la cabecera evita que el
      navegador scrollee la pagina mientras se arrastra desde ella. */
-  .trip-summary::before{content:"";display:block;width:38px;height:4px;margin:0 auto 4px;border-radius:99px;background:var(--line)}
-  .trip-summary__head{touch-action:none}
+  .trip-summary__grip{display:flex;align-items:center;justify-content:center;height:24px;margin:-9px -12px 0;touch-action:none;cursor:grab}
+  .trip-summary__grip::before{content:"";display:block;width:38px;height:4px;border-radius:99px;background:var(--line)}
+  .trip-summary:not(.minimized){overscroll-behavior:auto}
+  .trip-summary.minimized{overflow:hidden;touch-action:pan-y}
   .trip-summary.is-dragging{transition:none;user-select:none;-webkit-user-select:none;box-shadow:0 22px 44px rgba(16,35,62,.3)}
   .trip-summary{padding:9px 12px 10px;max-height:min(46vh,320px)}
   .trip-summary__inner{gap:0}
@@ -2818,7 +2821,7 @@ button.logo{min-height:44px}
 /* Etiquetas sobre la foto. Hoteles: pastilla oscura con texto claro, discreta, sin
    amarillo (el amarillo queda para CTAs y activos). Tours: misma pastilla arriba
    a la izquierda de la foto, con un velo para que se lea sobre cualquier imagen. */
-.hotel-badge,.local-tour__tag{background:rgba(10,16,26,.78);color:#F4F6FA;border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:none}
+.hotel-badge,.local-tour__tag{background:rgba(10,16,26,.78);color:#F4F6FA;border:1px solid rgba(255,255,255,.14);box-shadow:none}
 .local-tour__tag{position:absolute;z-index:1;top:12px;left:12px;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1.2;pointer-events:none}
 
 /* ---------- Tours compactos: miniatura a la izquierda, datos a la derecha ----------
@@ -3472,3 +3475,28 @@ summary::-webkit-details-marker{display:none}
 .flight-filters button{width:100%;min-width:0;padding:0 8px;justify-content:center;text-align:center;white-space:nowrap;font-size:13.5px}
 @media(min-width:560px){.flight-filters > div{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:340px){.flight-filters button{font-size:12.5px;padding:0 4px}}
+
+/* ---- Estados vacios y de carga ----
+   Antes eran una linea de texto gris pegada al borde de la tarjeta. Ahora cada
+   uno es un bloque con aire, borde punteado y texto centrado que parte
+   palabras largas en vez de tocar los bordes; y los de carga llevan un
+   spinner para que se note que la app sigue trabajando. */
+.flight-empty,.hotel-group__empty,.trip-summary__empty,.rooms-modal__msg,.flight-loading{
+  display:block;box-sizing:border-box;max-width:100%;margin:12px 0;padding:18px 16px;border:1.5px dashed var(--line);border-radius:14px;
+  background:color-mix(in srgb,var(--surface) 70%,transparent);color:var(--ink2);font-size:14px;line-height:1.55;text-align:center;overflow-wrap:anywhere}
+.flight-empty > p{margin:0 0 12px}
+.flight-empty > p:last-child{margin-bottom:0}
+.flight-empty .btn{margin-top:4px}
+.loading-status,.flight-loading,.rooms-modal__msg:has(+ .rooms-skel){display:flex;align-items:center;justify-content:center;gap:10px;text-align:center}
+.loading-status::before,.flight-loading::before,.rooms-modal__msg:has(+ .rooms-skel)::before{content:"";flex:none;width:16px;height:16px;border:2.5px solid var(--line);border-top-color:var(--cel);border-radius:50%;animation:btn-spin .8s linear infinite}
+.loading-status{padding:4px 0 2px;font-size:14px}
+@media (prefers-reduced-motion:reduce){.loading-status::before,.flight-loading::before,.rooms-modal__msg:has(+ .rooms-skel)::before{animation-duration:2.4s}}
+
+/* ---- Areas tactiles: 48px minimo ----
+   Los filtros y selectores chicos mantienen su aspecto pero miden 48px de alto
+   (o ganan un area invisible que llega a 48px) para acertar con el dedo. */
+.hotel-type-pill,.hotel-playa-chip,.featured-month,.seg button,.flight-filters button,.hotel-booking,.hotel-select,.voucher-step__btn,.voucher-split__link,.voucher-split__btn--link,.roadtrip-vtab,.trip-summary__head,.voucher-share__menu button{min-height:48px}
+.local-tour__info{min-height:48px}
+.bud-mode button,.steps.is-compact .steps__btn{position:relative}
+.bud-mode button::after,.steps.is-compact .steps__btn::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:48px;transform:translateY(-50%)}
+.steps.is-compact .steps__btn{min-width:44px;min-height:44px}
