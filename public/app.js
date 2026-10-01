@@ -7667,8 +7667,8 @@
            estaria ofreciendo un traslado corto sin decir que no hace falta. */
         var cercano = tramoEsCercano(t, paxT);
         var consejo = cercano
-          ? '<p class="transfer-advice"><span class="transfer-advice__ico" aria-hidden="true">💡</span><b>Para este tramo estás cerquísima.</b> Te conviene más tomarte un Uber o taxi local ' +
-            (tramo.key === 'vuelta' ? 'para volver al aeropuerto' : 'al llegar') + ': sale menos que el transfer y no tenés que reservarlo. Si igual preferís que te recojan, elegí una opción abajo.</p>'
+          ? '<p class="transfer-advice"><span class="transfer-advice__ico" aria-hidden="true">💡</span><span class="transfer-advice__txt"><b>Para este tramo estás cerquísima.</b> Te conviene más tomarte un Uber o taxi local ' +
+            (tramo.key === 'vuelta' ? 'para volver al aeropuerto' : 'al llegar') + ': sale menos que el transfer y no tenés que reservarlo. Si igual preferís que te recojan, elegí una opción abajo.</span></p>'
           : '';
         return cabeza + consejo + '<div class="transfer-choice-grid">' + cardsDe(tramo.key, tramo.selected) + '</div>' +
           (tramo.selected === 'shared' ? '<p class="transfer-choice-note">Incluido para tu comodidad. Si preferís otro, podés cambiar a privado.</p>' : '') +

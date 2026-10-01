@@ -1,4 +1,4 @@
-/* version: 248
+/* version: 249
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3534,3 +3534,9 @@ summary::-webkit-details-marker{display:none}
    contenedor de scroll vertical (vacio) que compite con el de la pagina cuando
    el dedo empieza el gesto encima. */
 .chart,.featured-months,.destination-highlights__carousel,.recent-searches__list{overflow-y:hidden}
+
+/* Aviso "estas cerquisima": el texto va en UN bloque (antes cada trozo de texto
+   era un item flex propio y, con overflow-wrap:anywhere + hyphens:auto, se
+   apretaba a unos pocos px y se partia por silabas). */
+.transfer-advice{overflow-wrap:normal;hyphens:manual;word-break:normal}
+.transfer-advice__txt{flex:1 1 0;min-width:0;overflow-wrap:break-word;hyphens:manual}
