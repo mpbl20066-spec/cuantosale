@@ -3433,3 +3433,20 @@ summary::-webkit-details-marker{display:none}
   .bud-field .bud-mode button::after{content:none}
   .bud-field .bud-calc{order:4;margin-top:10px;text-align:center}
 }
+
+/* Tarjeta de tour en celular: la foto toma ~42% del ancho (antes 104px, una
+   tira angosta), la bajada de la seccion ("3 experiencias · desde ...") deja
+   aire arriba y el pie apila precio y boton alineados a la izquierda del cuerpo,
+   con el boton del ancho del texto y no estirado de borde a borde de la fila. */
+@media(max-width:639px){
+  .plate-block[data-tours-block]{margin-top:36px;padding-top:28px}
+  .plate-block[data-tours-block] > .block-sub{margin:4px 0 16px;padding:0 2px;line-height:1.5}
+  .local-tours{padding:14px}
+  .local-tour{grid-template-columns:42% minmax(0,1fr)}
+  .local-tour__media,.local-tour__media-plain{min-height:150px}
+  .local-tour__body{padding:14px 14px 14px 16px}
+  .local-tour__title{margin:6px 0 0;font-size:17px}
+  .local-tour__foot{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:10px;padding-top:10px}
+  .local-tour__price{flex:0 0 auto;min-width:0}
+  .local-tour__info{flex:0 0 auto;width:100%;max-width:200px;min-height:40px;justify-content:center;text-align:center}
+}
