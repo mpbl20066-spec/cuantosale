@@ -4754,7 +4754,7 @@
       if (reserva) {
         item.estado = etiquetaEstadoReserva(item.cat, reserva);
         item.estadoClave = reserva === 'Reservado' ? 'confirmado' : 'wip';
-        var canal = canalDe(item.cat).canal;
+        var canal = etiquetaCanal(item.cat);
         item.detalle = item.detalle ? item.detalle + ' \u00b7 ' + canal : canal;
         return;
       }
@@ -4857,7 +4857,12 @@
       '</div></div>' +
       '</div>';
     if (summary.__markup !== _markup || !summary.firstElementChild) {
+      var _totalPrevio = summary.querySelector('.trip-summary__head strong');
+      _totalPrevio = _totalPrevio ? _totalPrevio.textContent : '';
       summary.innerHTML = _markup;
+      // El panel se repinta entero: si el total cambio, el numero nuevo destella.
+      var _totalNuevo = summary.querySelector('.trip-summary__head strong');
+      if (_totalPrevio && _totalNuevo && _totalNuevo.textContent !== _totalPrevio) destelloTotal(_totalNuevo);
       summary.__markup = _markup;
       summary.scrollTop = _scrollPrevio;
       // Una vez mas en el frame siguiente: la altura del panel se anima y el
@@ -5522,11 +5527,15 @@
      "?vuelta=" que se agrega al link sigue siendo SOLO posicionamiento:
      un valor inventado en la barra no produce ningun cambio de estado. */
   var CANAL_RESERVA = {
-    pasajes: { canal: 'Aerolínea', externo: true },
-    alojamiento: { canal: 'Booking', externo: true },
-    traslados: { canal: 'Gestión directa', externo: false },
-    tours: { canal: 'Gestión directa', externo: false }
+    pasajes: { canal: 'Aerolínea', etiqueta: 'Reserva externa · venta directa del proveedor', externo: true },
+    alojamiento: { canal: 'Booking', etiqueta: 'Reserva externa · venta directa del proveedor', externo: true },
+    traslados: { canal: 'Gestión directa', etiqueta: 'Asistencia y gestión local', externo: false },
+    tours: { canal: 'Gestión directa', etiqueta: 'Asistencia y gestión local', externo: false }
   };
+  /* Solo dos etiquetas a la vista, para que no se mezclen: lo que vende un
+     tercero (reserva externa) y lo que opera la plataforma (asistencia y
+     gestion local). El nombre del proveedor (canal) queda para los avisos. */
+  function etiquetaCanal(categoria) { var c = canalDe(categoria); return c.etiqueta || c.canal || ''; }
   /* Lo que NO se reserva, dicho a la vista.
 
      Comida y transporte local no son un producto que alguien te venda: son un
@@ -5863,7 +5872,7 @@
         /* El canal va siempre, reservado o no, y en el mismo lugar para los
            cuatro rubros. Es la bajada que da confianza: si el estado no dice
            de quien es el precio, el precio es un numero sin dueno. */
-        + (canal.canal ? '<p class="voucher-item__canal">' + esc(category === 'alojamiento' ? (reservado ? 'Reservado a través de ' : 'Se reserva en ') + canal.canal : canal.canal) + '</p>' : '');
+        + (canal.canal ? '<p class="voucher-item__canal' + (canal.externo ? ' is-externo' : ' is-plataforma') + '">' + esc(canal.etiqueta || canal.canal) + '</p>' : '');
       var lado = controlReserva(category)
         + (reservado ? '' : (ctaMarkup || ''));
       /* El color es del proveedor, no del rubro: con la paleta de rubros casi
@@ -6242,6 +6251,9 @@
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong>' + porPersona + '</div></div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
 
+      /* Dos bloques separados por el momento del pago: lo que se arma y se paga
+         antes de viajar, y lo que se gasta en destino (abajo). */
+      '<div class="voucher-bloque"><h3 class="voucher-bloque__title">Costos previos al viaje<span>' + (autoMode ? 'Auto, alojamiento y actividades' : busMode ? 'Bus, alojamiento y actividades' : 'Vuelo, alojamiento, traslado y actividades') + '</span></h3><b class="voucher-bloque__monto">' + money(Math.max(0, totalGeneral - destinoTotal)) + '</b></div>' +
       '<ul class="voucher-list">' +
       (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, filaCta('pasajes', !!flightSummary.selected, 'Agregar vuelos'))) +
       itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Agregar hotel')) +
@@ -6253,7 +6265,8 @@
          bordes propios. Ahora son las MISMAS filas del resto, separadas por una
          linea y con un encabezado chico. El modal ya dice donde empieza cada
          zona con un separador; no hace falta una segunda caja adentro. */
-      '<section class="voucher-destino"><h3 class="voucher-destino__title">Gastos en destino<span>Por día y total del viaje</span></h3>'
+      '<section class="voucher-destino"><h3 class="voucher-destino__title">Gastos estimados en destino<span>Por día y total del viaje</span></h3>'
+      + '<p class="voucher-destino__aviso"><span aria-hidden="true">i</span>Es una estimación orientativa para que te organices: comida y transporte local los pagás vos en destino. No es un cobro de la plataforma.</p>'
       + '<ul class="voucher-destino__list">'
       + (autoMode ? '' : '<li><span class="voucher-destino__name">Transporte local <em>' + transportLabel + '</em></span><span class="voucher-destino__dia">' + money(localPerDay) + '/día</span><b class="voucher-destino__monto">' + money(localTotal) + '</b></li>')
       + '<li><span class="voucher-destino__name">Gastronomía <em>' + foodLabel + '</em></span><span class="voucher-destino__dia">' + money(foodPerDay) + '/día</span><b class="voucher-destino__monto">' + money(foodTotal) + '</b></li>'
@@ -6400,6 +6413,14 @@
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
     window.setTimeout(run, 50);
   }
+  /* Micro-animacion del total: un destello corto cada vez que el numero cambia,
+     para que se note que la accion recien hecha movio el presupuesto. */
+  function destelloTotal(el) {
+    if (!el) return;
+    el.classList.remove('is-bump');
+    void el.offsetWidth; // reinicia la animacion si cambia dos veces seguidas
+    el.classList.add('is-bump');
+  }
   function recalcularTotalViaje() {
     if (!detailState) return;
     syncDailyBudgetState();
@@ -6413,7 +6434,7 @@
     var budget = getBudgetBreakdown(detailState);
     var total = budget.total;
     var totalEl = document.querySelector('[data-detail-total]');
-    if (totalEl) totalEl.textContent = money(total);
+    if (totalEl) { var totalTxt = money(total); if (totalEl.textContent !== totalTxt) { totalEl.textContent = totalTxt; destelloTotal(totalEl); } }
     var perPersonEl = document.querySelector('[data-detail-total-pp]');
     if (perPersonEl) perPersonEl.textContent = money(Math.round(total / Math.max(1, Number(detailState.meta.pax) || 1))) + ' por persona';
     var rows = document.querySelectorAll('[data-cost-category]');

@@ -3186,3 +3186,31 @@ button.logo{min-height:44px}
   .checkout-dialog{max-height:calc(100dvh - 8px);overflow-x:hidden;overflow-y:auto}
   .checkout-dialog :is(.checkout-layout,.checkout-main,.checkout-panel,.checkout-grid,.checkout-actions){min-width:0;max-width:100%}
 }
+
+/* ---- Micro-animacion del total y etiquetas de gestion ----------------------- */
+@keyframes total-bump{0%{transform:scale(1);text-shadow:0 0 0 transparent}35%{transform:scale(1.08);color:var(--cel);text-shadow:0 0 14px color-mix(in srgb,var(--cel) 55%,transparent)}100%{transform:scale(1);text-shadow:0 0 0 transparent}}
+.is-bump{display:inline-block;transform-origin:left center;animation:total-bump .7s ease-out}
+@media (prefers-reduced-motion:reduce){.is-bump{animation:none}}
+/* Dos etiquetas y nada mas: externo (tercero) en tono neutro, plataforma en ambar. */
+.voucher-item__canal.is-externo{color:var(--ink2)}
+.voucher-item__canal.is-plataforma{color:var(--cel);font-weight:600}
+
+/* ---- Gastos en destino: mas aire y columnas alineadas ----------------------- */
+.voucher-destino{margin-top:24px;padding-top:20px}
+.voucher-destino__title{margin-bottom:10px;row-gap:4px}
+.voucher-destino__title span{display:block}
+.voucher-destino__list li{grid-template-columns:minmax(0,1fr) 92px 100px;column-gap:16px;padding:16px 0;align-items:center}
+.voucher-destino__dia,.voucher-destino__monto,.voucher-destino__list b{text-align:right;font-variant-numeric:tabular-nums;min-width:0}
+.voucher-destino__monto,.voucher-destino__list b{font-size:16px}
+.voucher-destino__total{margin-top:8px;padding-top:16px}
+.voucher-destino__total b{min-width:100px;font-size:20px}
+@media (max-width:560px){.voucher-destino__list li{grid-template-columns:minmax(0,1fr) 78px 84px;column-gap:10px;padding:14px 0}}
+
+/* Costos previos vs gastos en destino: cada bloque con su encabezado y su monto. */
+.voucher-bloque{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:22px 0 6px;padding-bottom:10px;border-bottom:2px solid var(--ink2)}
+.voucher-bloque__title{display:grid;gap:2px;margin:0;font-size:15px;line-height:1.2}
+.voucher-bloque__title span{color:var(--ink2);font-size:12.5px;font-weight:500}
+.voucher-bloque__monto{font-family:var(--fh);font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.voucher-destino{border-top:2px solid var(--ink2)}
+.voucher-destino__aviso{display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;color:var(--ink2);font-size:12.5px;line-height:1.45}
+.voucher-destino__aviso span{flex:0 0 auto;display:inline-grid;place-items:center;width:18px;height:18px;margin-top:1px;border:1.5px solid var(--ink2);border-radius:50%;font-size:11px;font-weight:800;font-style:italic;font-family:Georgia,serif}
