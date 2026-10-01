@@ -191,6 +191,30 @@ El estado vive en `checkoutState` y se reinicia con cada viaje nuevo (`renderDet
 
 `node test-checkout.js` corre las cinco combinaciones del checkout —las dos cosas juntas, solo actividades, solo transfer privado, nada elegido, y un destino sin van compartida— sobre los totales, el aside, el panel de datos, el recap y el mensaje de WhatsApp, con las funciones reales extraídas de `app.js` y las dependencias simuladas. Es lo que impide que un cambio en un pedido rompa el otro: las dos ramas comparten el mismo DOM y el mismo código, y un error ahí no se ve como error de sintaxis sino como un checkout que manda la mitad del pedido.
 
+### Guía Secreta: cuándo se abre
+
+**Se abre cuando la persona entra a Booking desde el hotel que eligió.** Es el clic en "Ver opciones" de una ficha de hotel real.
+
+Antes el token de la guía viajaba en la respuesta de `/api/hoteles`, con la sola condición de que algún hotel viniera de Booking (`source === 'booking'`). Con eso la guía se abría **al ver precios**: cualquiera que abriera un destino con la API configurada la tenía, sin tocar nada.
+
+Ahora son dos pasos:
+
+| Paso | Qué pasa |
+|---|---|
+| `GET /api/guia/token?dest=X` | Emite un token firmado de 30 min. Falla cerrado sin `GUIA_TOKEN_SECRET` ni `BOOKING_API_KEY` |
+| `GET /api/guia?dest=X&token=T` | Devuelve la guía. 403 sin token válido, y un token de un destino no abre otro |
+
+El cliente los pide en cadena desde `abrirGuiaPorReserva()`, que solo corre con el click del hotel. El token vive en memoria, no en `localStorage`: es una credencial de 30 minutos y guardarla en disco sería lo que el token evita.
+
+**Lo que esto NO verifica:** que la persona haya reservado. La app abre Booking en otra pestaña y no se entera sola de si la compra se completó — Booking no avisa al sitio. El click es la señal más fuerte que el navegador puede observar.
+
+**Para el "reservado de verdad" está el postback de Travelpayouts** (`POST /api/travelpayouts/postback`), que es lo único que confirma una venta. Marca el rubro `alojamiento` con `confirmado: true` en `reservas_viaje`, y como vive en la base, la guía sigue abierta aunque la persona vuelva al día siguiente. Requiere:
+
+1. Poner esa URL en el panel de Travelpayouts (proyecto → postback).
+2. Que el link de hotel lleve el `viaje_id` dentro del marker; con el marker estático actual el postback llega pero no se correlaciona con un viaje y solo queda en el log.
+
+Mientras no se configure, el producto funciona: el click cubre el estado "quiero reservar".
+
 ### Guía Secreta
 
 `public/guias.js` tiene el contenido por destino. Se resuelve en tres pasos y se corta en el primero que existe:

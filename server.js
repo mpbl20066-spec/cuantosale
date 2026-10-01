@@ -1687,6 +1687,154 @@ async function habitacionesHotel(req, res, url) {
   return sendJson(res, 200, { rooms: rooms });
 }
 
+/* GET /api/guia/token?dest=X
+ *
+ * Emite el token de la Guia Secreta, y es el unico lugar que lo emite.
+ *
+ * POR QUE UN ENDPOINT DEDICADO Y NO EL /api/hoteles
+ * El token antes viajaba en la respuesta de hoteles, y se entregaba con que
+ * alguno viniera de Booking. Con eso la guia se abria al VER precios: cualquiera
+ * que abriera un destino con la API configurada la tenia. Aqui en cambio se
+ * pide cuando la persona toca "Ver opciones" de un hotel, o sea que hay un
+ * gesto deliberado.
+ *
+ * LO QUE ESTO NO ES
+ * Sigue sin ser una comprobacion de que la persona reservo. La app abre Booking
+ * en otra pestana y no se entera de si la compra se completo: Booking no avisa
+ * al sitio. Por eso el token se pide en el click, que es la señal mas fuerte
+ * que el navegador puede observar, y para la confirmacion real esta el postback
+ * de Travelpayouts (ver /api/travelpayouts/postback).
+ *
+ * Falla cerrado: sin GUIA_TOKEN_SECRET ni BOOKING_API_KEY no hay firma y no se
+ * devuelve token.
+ */
+function emitirTokenGuia(req, res, url) {
+  const dest = String(url.searchParams.get('dest') || '').toLowerCase();
+  if (!dest || !VALID_DESTINATION_KEYS.has(dest)) return sendJson(res, 400, { error: 'Destino desconocido.' });
+  const token = guiaToken(dest);
+  if (!token) return sendJson(res, 503, { error: 'La Guia Secreta no esta disponible ahora.' });
+  return sendJson(res, 200, { dest: dest, token: token });
+}
+
+/* POST /api/travelpayouts/postback
+ *
+ * Lo llama Travelpayouts cuando hay una venta confirmada en Booking.com. Es lo
+ * UNICO que puede decir con certeza que la persona reservo: la app abre Booking
+ * en otra pestana y nunca se entera sola.
+ *
+ * COMO SE CORRELACIONA CON UN VIAJE
+ * El postback trae el marker con el que seClicked el link. Si ese marker lleva
+ * el viaje_id (ver lib/providers/travelpayouts.js y la nota de toPartnerUrl),
+ * el viaje se identifica sin pedirle nada a la persona.
+ *
+ * PENDIENTE DE CONFIGURAR (una vez, en el panel de Travelpayouts)
+ *   1. Poner esta URL como postback: https://cuantosale.uy/api/travelpayouts/postback
+ *   2. Poner el viaje_id dentro del marker de cada link de hotel.
+ * Sin los dos, este endpoint nunca recibe nada y no rompe nada: por eso el
+ * fallo silencioso y no una excepcion.
+ *
+ * Si el marker no trae un uuid de viaje, se guarda igual como evento suelto para
+ * que se pueda cruzar con los reportes de Travelpayouts, pero no se marca ningun
+ * viaje como confirmado.
+ */
+async function postbackTravelpayouts(req, res, url) {
+  const evento = {};
+  url.searchParams.forEach(function (v, k) { evento[k] = v; });
+  // Travelpayouts tambien manda POST form-encoded. Se lee con el helper que ya
+  // tiene el server; si el cuerpo no es JSON se ignora y siguen valiendo los
+  // parametros de la query, que para GET es lo unico que hay.
+  if (req.method === 'POST') {
+    try {
+      const crudo = await leerForm(req);
+      if (crudo) crudo.forEach(function (v, k) { evento[k] = v; });
+    } catch (e) { /* cuerpo ilegible: se sigue con la query */ }
+  }
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  // El marker es con lo que mas se parece al viaje_id. Se prueban los tres
+  // nombres porque segun la version del panel viaja en alguno de ellos.
+  const viajeId = [evento.partner_id, evento.marker, evento.booking_id]
+    .map(function (x) { return String(x || '').trim(); })
+    .find(function (x) { return UUID.test(x); }) || '';
+  if (!viajeId) {
+    /* Evento sin viaje identificable. Se responde 200 igual: un postback que
+       devuelve error hace que Travelpayouts lo reintente, y asi se recibe el
+       mismo evento varias veces sin poder actuar sobre ninguno. */
+    console.log('[postback] venta sin viaje_id en el marker:', JSON.stringify(evento).slice(0, 200));
+    return sendJson(res, 200, { ok: true, viaje: null });
+  }
+  /* Marcar el rubro confirmado.
+     La escritura va por el RPC reservas_marcar, el mismo que usa el cliente, y
+     por eso necesita SUPABASE_SERVICE_KEY (la anon key no puede escribir en una
+     tabla con RLS que no la deja). Sin esa variable el postback se responde
+     igual con 200 y se avisa por log: perder la confirmacion es malo, pero tirar
+     un error hace que el panel de Travelpayouts lo marque como fallido y no
+     avise. */
+  const guardada = await marcarReservaServidor(viajeId, 'alojamiento', {
+    confirmado: true,
+    canal: 'booking.com',
+    booking_id: evento.booking_id || null,
+    precio: evento.price ? Number(evento.price) : null,
+    fecha: new Date().toISOString().slice(0, 10)
+  }, String(evento.destination || evento.destino || ''));
+  return sendJson(res, 200, { ok: true, viaje: viajeId, guardado: guardada });
+}
+
+/* Lee un cuerpo form-encoded. Distinto de readJson(): este NO tira si el cuerpo
+   no es JSON, porque en un postback un cuerpo raro no es un error del cliente
+   sino que viaja en la query. */
+function leerForm(req, maxBytes) {
+  maxBytes = maxBytes || 32768;
+  return new Promise(function (resolve) {
+    let body = '', size = 0;
+    req.on('data', function (chunk) {
+      size += chunk.length;
+      if (size > maxBytes) { req.destroy(); return; }
+      body += chunk;
+    });
+    req.on('end', function () {
+      try { resolve(body ? new URLSearchParams(body) : null); } catch (e) { resolve(null); }
+    });
+    req.on('error', function () { resolve(null); });
+  });
+}
+
+/* Escribe en reservas_viaje desde el server. Devuelve true/false y nunca tira:
+   un postback es una llamada de un tercero y no puede permitirse responder con
+   una excepcion sin contexto. */
+async function marcarReservaServidor(viajeId, categoria, detalle, destino) {
+  const url = String(process.env.SUPABASE_URL || '').trim();
+  const key = String(process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  if (!url || !key) {
+    console.warn('[postback] falta SUPABASE_URL o SUPABASE_SERVICE_KEY: la venta llega pero no se marca el viaje.');
+    return false;
+  }
+  try {
+    const r = await fetch(url + '/rest/v1/rpc/reservas_marcar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: key,
+        Authorization: 'Bearer ' + key
+      },
+      /* Cuatro argumentos, no tres: el grant de la funcion es
+         (uuid, text, text, jsonb) y con tres el grant no encuentra la funcion y
+         la llamada falla con permiso denegado. El cuarto es el detalle. */
+      body: JSON.stringify({
+        p_viaje_id: viajeId, p_categoria: categoria,
+        p_destino: destino || null, p_detalle: detalle
+      })
+    });
+    if (!r.ok) {
+      console.warn('[postback] reservas_marcar respondio HTTP ' + r.status + ': ' + (await r.text()).slice(0, 160));
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn('[postback] no se pudo llamar a Supabase:', e.message);
+    return false;
+  }
+}
+
 async function cotizarHoteles(req, res, url) {
   if (limited('hoteles:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas de alojamiento. Esperá un minuto y probá de nuevo.' });
   let v;
@@ -1770,7 +1918,18 @@ async function cotizarHoteles(req, res, url) {
     // con precio real de Booking entre los que seDevuelven: sin booking no hay
     // nada que reservar, asi que no hay guia que mostrar. El cliente lo guarda
     // y lo presenta despues en /api/guia.
-    guiaToken: (hotels.some(function (h) { return h && h.source === 'booking'; }) ? guiaToken(v.S.dest) : null)
+    /* El token de la guia NO va mas acá.
+       Antes se mandaba junto con los hoteles, con la sola condicion de que
+       alguno viniera de Booking (source === 'booking'). Eso hacia que la Guia
+       Secreta se abriera al VER precios: con la API configurada, cualquier
+       persona que abriera un destino la tenia, sin tocar nada.
+
+       Ahora el token se pide aparte, en POST /api/guia/token, y el cliente lo
+       pide cuando la persona toca "Ver opciones" de un hotel real, o sea que
+       hay un gesto deliberado de por medio. El contenido de la guia tampoco
+       esta en el bundle (ver guiaSecret), asi que el candado real sigue siendo
+       la guia, no este token. */
+    guiaToken: null
   });
 }
 
@@ -1902,7 +2061,18 @@ function featuredPriceItems(req, res, url) {
 // toca ninguno de los dos (sólo /api/config, que ya es público, y Supabase
 // directo con la anon key). El acceso a los datos de un grupo lo protege el
 // uuid de la URL, no el candado: es el mismo modelo que ya estaba antes.
-const PRELAUNCH_FILES = new Set(['index.html']);
+/* tours.html entra con index.html y no porque si. Antes el comentario de la ruta
+   /tours afirmaba que el panel quedaba protegido "porque el candado de
+   prelanzamiento esta en serveStatic", pero el set solo tenia index.html: el
+   panel se servia sin pedir usuario ni contrasena a cualquiera que probara la
+   ruta, y antes de abrir al publico eso significa mostrar el catalogo completo
+   de tours con precios a un visitante cualquiera.
+
+   El permiso real del panel sigue siendo la sesion de Supabase y que
+   tours_guardar() compruebe es_agencia() en la base: esto solo evita que la
+   pagina se vea en una maquina que no es la del equipo, que es exactamente lo
+   que el comentario decia y no lo que hacia. */
+const PRELAUNCH_FILES = new Set(['index.html', 'tours.html']);
 
 function prelaunchGuard() {
   const user = String(process.env.APP_USER || '').trim();
@@ -1967,7 +2137,17 @@ function prelaunchAuthorized(req) {
  * guardar el email (ver public/waitlist.js). La clave anónima está pensada
  * para ser pública y la protege el RLS de Supabase.
  */
-const PRELAUNCH_PUBLIC_API = new Set(['/api/config']);
+/* Rutas que NO pasan por el candado de pre-lanzamiento.
+   - /api/config: el cliente lo lee al arrancar y si pidiera user/pass la pagina
+     no arrancaria.
+   - /api/guia/token: es lo que abre la Guia Secreta cuando la persona toca
+     "Ver opciones" de un hotel. Si estuviera candado, pedir el token fallaria
+     con 401 y la guia no se abriria nunca, que es al reves de lo que quiere el
+     candado (el candado protege la app, no la recompensa).
+   - /api/travelpayouts/postback: lo llama el panel de Travelpayouts desde
+     afuera, sin sesion ni basic auth. Si estuviera candado, la venta nunca se
+     confirmaria y ademas el panel lo marcaria como error. */
+const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/travelpayouts/postback']);
 
 // Rutas que NO pasan por el candado de pre-lanzamiento. Queda vacío a propósito:
 // el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
@@ -2286,6 +2466,14 @@ function handleRequest(req, res) {
     if (url.pathname === '/api/cache') {
       return sendJson(res, 200, flightProviders.stats());
     }
+    if (url.pathname === '/api/guia/token') {
+      return emitirTokenGuia(req, res, url);
+    }
+    // Acepta GET y POST: el panel de Travelpayouts manda POST form-encoded y
+    // algunos gateways lo prueban con GET.
+    if (url.pathname === '/api/travelpayouts/postback') {
+      return postbackTravelpayouts(req, res, url);
+    }
     if (url.pathname === '/api/tasas') {
     return getTasas().then(function (t) {
       return sendJson(res, 200, {
@@ -2379,6 +2567,15 @@ function handleRequest(req, res) {
     }
     if (/^\/tours\/?$/i.test(url.pathname)) {
       return serveStatic(req, res, '/tours.html');
+    }
+    /* La tabla de precios de transfer. Se agregaba /transfers.html sin ruta:
+       el archivo existia pero /transfers daba 404, y ese 404 es facil de
+       escribir cuando alguien linkea la pagina. Ahora las dos formas andan.
+       No entra en el candado ni al sitemap: es una pagina interna de precios
+       estimated, sin nada que un buscador deba indexar. */
+    if (/^\/transfers\/?$/i.test(url.pathname)) {
+      try { serveStatic(req, res, '/transfers.html'); } catch (e) { res.writeHead(400); res.end(); }
+      return;
     }
     // La raíz del dominio es la landing de waitlist mientras dure el
     // prelanzamiento; la app real de cotización queda corrida a /app, sin
