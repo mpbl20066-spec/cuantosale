@@ -1,4 +1,4 @@
-/* version: 251
+/* version: 252
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3638,4 +3638,39 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
   .voucher-tools .voucher-chip{flex-direction:column;justify-content:center;gap:4px;min-height:64px;padding:8px 4px;font-size:12px;line-height:1.15;text-align:center}
   .voucher-tools .voucher-chip .voucher-btn__label{white-space:normal;text-align:center;overflow:visible}
   .voucher-tools .voucher-share__chev{display:none}
+}
+
+/* "Recomendado" de los hoteles: badge arriba a la derecha de la ficha. Estaba
+   anclado abajo a la izquierda y se montaba sobre "Ver habitaciones". */
+.hotel-option .hotel-choice{position:absolute;top:12px;right:12px;left:auto;bottom:auto;margin:0}
+
+/* Resumen: el boton "Reservar viaje completo" es sticky con margenes negativos
+   para llegar a los bordes; el max-width:100% generico lo dejaba corrido. */
+.voucher-dialog .voucher-reserve--fijo{max-width:none;width:auto}
+
+/* Rubros cargados: "Seleccionado" en gris neutro (ni verde ni de exito). */
+.reserva-chip.is-sel{background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* Codigo de presupuesto (#CS-XXXX-XXXXX): una pastilla tocable bajo el titulo del
+   resumen; un toque lo copia. */
+.voucher-code{display:inline-flex;align-items:center;gap:8px;max-width:100%;min-height:40px;margin:2px 0 10px;padding:6px 12px;border:1px dashed var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
+.voucher-code span{color:var(--ink2);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.voucher-code b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;font-weight:800;letter-spacing:.02em;overflow-wrap:anywhere}
+.voucher-code svg{flex:none;color:var(--cel)}
+.voucher-code:hover{border-color:var(--cel)}
+.voucher-code:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* Asistencia: tarjeta con icono, mensaje y un solo boton, en lugar de un chip
+   mas en la fila de herramientas. */
+.voucher-asesor{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:center;margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--cel) 10%,var(--surface)),var(--surface))}
+.voucher-asesor__ico{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:color-mix(in srgb,#25d366 18%,transparent);color:#25d366}
+.voucher-asesor__ico svg{width:24px;height:24px}
+.voucher-asesor__txt{display:grid;gap:2px;min-width:0}
+.voucher-asesor__txt b{font-size:15px;line-height:1.25}
+.voucher-asesor__txt small{color:var(--ink2);font-size:12.5px;line-height:1.4;overflow-wrap:anywhere}
+.voucher-asesor__btn{grid-column:1 / -1;min-height:48px;margin-top:10px;padding:0 16px;border:1.5px solid var(--action-bg);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.voucher-asesor__btn:hover{background:var(--action-bg);color:var(--action-ink)}
+.voucher-asesor__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+@media(max-width:560px){
+  .voucher-tools{grid-template-columns:repeat(2,minmax(0,1fr))}
 }

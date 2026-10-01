@@ -5611,42 +5611,57 @@
     return location.origin.replace(/\/$/, '') + '/grupo/' + id;
   }
 
+  /* Codigo de seguimiento del presupuesto: "#CS-ILHA-7K3QX". Sale del destino
+     (4 letras) y de un hash corto de destino + fechas + viajeros, asi que el mismo
+     viaje siempre da el mismo codigo y dos viajes distintos no se pisan. */
+  function codigoPresupuesto(meta) {
+    meta = meta || (detailState && detailState.meta);
+    if (!meta || !meta.dest) return '';
+    var nombre = String(meta.dest.name || 'VIAJE').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z]/g, '').toUpperCase();
+    var base = [meta.dest.name, meta.dep, meta.ret, meta.pax].join('|');
+    var h = 5381;
+    for (var k = 0; k < base.length; k++) h = ((h * 33) ^ base.charCodeAt(k)) >>> 0;
+    var hash = h.toString(36).toUpperCase().padStart(5, '0').slice(-5);
+    return '#CS-' + (nombre.slice(0, 4) || 'VIAJ') + '-' + hash;
+  }
+
+  /* Mensaje para el asesor: estructura fija, sin enlaces ni referencias al grupo
+     de gastos. El estado sale de lo que esta elegido en el viaje. */
   function mensajeCoordinar() {
     if (!detailState || !detailState.meta) return null;
-    var destino = detailState.meta.dest.name;
-    var fechas = esc(storyDateRange(detailState.meta));
-    var noches = Math.max(1, Number(detailState.meta.nights) || 1);
-    var pax = Math.max(1, Number(detailState.meta.pax) || 1);
-    var hechos = [];
-    var faltan = [];
-    var marcar = function (cat, txt) {
-      if (reservasDe(cat)) hechos.push(txt); else faltan.push(txt);
-    };
-    marcar('pasajes', 'vuelo');
-    marcar('alojamiento', 'alojamiento');
-    var lineas = [];
-    lineas.push('Hola! Estoy armando un viaje a ' + destino + ' (' + fechas + ', ' + noches + (noches === 1 ? ' noche' : ' noches') + ', ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + ').');
-    if (hechos.length) {
-      lineas.push('Ya tengo reservado: ' + hechos.join(' y ') + '.');
-    } else {
-      lineas.push(' Todavia no reserve nada.');
-    }
-    if (faltan.length) {
-      lineas.push('Me falta coordinar: ' + faltan.join(' y ') + '.');
-    } else {
-      lineas.push('El alojamiento y el vuelo ya estan listos; me queda coordinar los traslados y las actividades con ustedes.');
-    }
-    lineas.push('Quiero arrancar con los traslados y las actividades. \u00bfLos coordinan ustedes o necesito pedirlo por aca?');
-    var grupo = enlaceGrupo();
-    lineas.push('');
-    if (grupo) {
-      lineas.push('Para unirse al reparto: ' + grupo);
-    } else {
-      lineas.push('Para repartir entre los que viajan, armamos el grupo acá: ' + location.origin.replace(/\/$/, '') + '/grupo');
-    }
-    lineas.push('');
-    lineas.push('Presupuesto estimado del cotizador: ' + money(Math.round((Number(getBudgetBreakdown(detailState).total) || 0))));
-    return lineas.join('\n');
+    var meta = detailState.meta;
+    var destino = meta.dest.name + (meta.dest.country || 'Brasil' ? ' (' + (meta.dest.country || 'Brasil') + ')' : '');
+    var noches = Math.max(1, Number(meta.nights) || 1);
+    var pax = Math.max(1, Number(meta.pax) || 1);
+    var pedido = checkoutPedido();
+    var faltan = [], listos = [];
+    var modo = detailState.transportMode;
+    if (modo !== 'auto' && modo !== 'bus') (getSelectedFlightSummary().selected ? listos : faltan).push('vuelos');
+    (hotelElegido() ? listos : faltan).push('alojamiento');
+    (pedido.hasTransfer ? listos : faltan).push('traslados');
+    (pedido.tours.length ? listos : faltan).push('actividades');
+    var unir = function (xs) { return xs.length > 1 ? xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1] : xs[0]; };
+    var estado = [];
+    if (faltan.length) estado.push('Faltan definir ' + unir(faltan));
+    if (listos.length) estado.push(unir(listos) + (listos.length > 1 ? ' seleccionados' : ' seleccionado'));
+    var total = Math.round(Number(getBudgetBreakdown(detailState).total) || 0);
+    return [
+      'Hola, quiero coordinar mi viaje con la asistencia de un experto.',
+      '',
+      'Código de Presupuesto: ' + codigoPresupuesto(meta),
+      '',
+      'Destino: ' + destino,
+      '',
+      'Fechas: ' + storyDateRange(meta) + ' (' + noches + (noches === 1 ? ' noche' : ' noches') + ')',
+      '',
+      'Viajeros: ' + pax + (pax === 1 ? ' adulto' : ' adultos'),
+      '',
+      'Presupuesto Estimado: ' + money(total),
+      '',
+      'Estado actual: ' + estado.join('; ') + '.',
+      '',
+      'Por favor, contáctenme para avanzar con las reservas.'
+    ].join('\n');
   }
 
   function copySummaryText(button) {
@@ -6576,7 +6591,7 @@
     var porPersona = pax > 1 ? '<span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span>' : '';
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
+      '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><button type="button" class="voucher-code" data-copiar-codigo="' + esc(codigoPresupuesto(detailState.meta)) + '" aria-label="Copiar el código de presupuesto ' + esc(codigoPresupuesto(detailState.meta)) + '"><span>Código de presupuesto</span><b>' + esc(codigoPresupuesto(detailState.meta)) + '</b><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
       '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong>' + porPersona + '</div></div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
          pregunta que uno se hace justo despues de ver el total. */
 
@@ -6646,13 +6661,13 @@
       '<div class="voucher-tools voucher-share">' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
       '<button type="button" class="voucher-chip" data-share-menu aria-expanded="false" aria-controls="voucher-share-menu">' + brandIcon('compartir') + '<span class="voucher-btn__label">Compartir</span><svg class="voucher-share__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
-      '<button type="button" class="voucher-chip voucher-chip--asesor" data-coordinar-asesor title="Abrir WhatsApp con el resumen y lo que falta coordinar" aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span class="voucher-btn__label">Coordinar con asesor</span></button>' +
       '<div class="voucher-share__menu" id="voucher-share-menu" hidden>' +
       '<button type="button" data-share-link>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar enlace del viaje</span></button>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '<button type="button" data-share-story>' + brandIcon('instagram') + '<span class="voucher-btn__label">Tarjeta para Instagram</span></button>' +
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
+      '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos. Va tu código ' + esc(codigoPresupuesto(detailState.meta)) + '.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">Coordinar con asesor</button></aside>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
       '</div>' + reservarTodo;
     modal.dataset.summaryText = summaryText;
@@ -12785,6 +12800,13 @@ function comboNombreDestino() {
       /* El cierre: WhatsApp con el resumen y lo que falta. El mensaje lo arma
          mensajeCoordinar() y sale con el estado real, no con una plantilla que
          afirme reservas que todavia no pasaron. */
+      var codigoBtn = e.target.closest('[data-copiar-codigo]');
+      if (codigoBtn) {
+        e.preventDefault();
+        var cod = codigoBtn.getAttribute('data-copiar-codigo');
+        copiarAlPortapapeles(cod).then(function (ok) { mostrarToast(ok ? 'Código copiado' : 'No pudimos copiar el código', ok ? cod : 'Seleccionalo y copialo a mano', !ok); });
+        return;
+      }
       var coordinar = e.target.closest('[data-coordinar-asesor]');
       if (coordinar) {
         e.preventDefault();
