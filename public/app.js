@@ -4600,6 +4600,10 @@
     var p = pasosEstado();
     var n = pasoActualNum();
     var next = p[n];
+    /* Paso 4 (Mirá tu viaje): no hay paso siguiente, el cierre es "Finalizar viaje",
+       que recién ahí abre el voucher con la reserva. Antes llegar al paso 4 abría
+       el voucher solo y la persona nunca veía la pantalla de confirmación. */
+    if (n === 4) return '<button type="button" class="steps__next steps__next--finalizar" data-finalizar-viaje>Finalizar viaje <span aria-hidden="true">→</span></button>';
     if (!next) return '';
     var listo = p[n - 1].hecho || p[n - 1].opcional;
     /* La barra se ve siempre, aun con el paso sin resolver: sin ella la persona
@@ -4622,8 +4626,7 @@
     if (!detailState) return;
     detailState.pasoActual = Math.max(1, Math.min(4, Number(n) || 1));
     pintarPasos();
-    // El paso 4 es la confirmacion: abre el voucher con el viaje completo.
-    if (detailState.pasoActual === 4) { try { openItinerarySummaryModal(); } catch (e) { console.error(e); } }
+    // El paso 4 es la confirmacion: se muestra la pantalla; el voucher lo abre "Finalizar viaje".
     // Al cambiar de paso se vuelve al comienzo del contenido (la cabecera compacta
     // se expande sola al llegar arriba).
     var nav = document.querySelector('[data-detail-head-sentinel]') || document.querySelector('[data-steps]');
@@ -8224,14 +8227,16 @@
     var destino = meta && meta.dest ? meta.dest.name : '';
     if (!destino) return '';
     var abierta = !!guiaYaDe(meta.dest.key);
-    return '<div class="guia-banner' + (abierta ? ' is-abierta' : '') + '" data-guia-banner>'
+    /* El candado va siempre abierto: la guia se ofrece como desbloqueada por tiempo
+       limitado para esta cotizacion. Con is-abierta el arco sube (ver el CSS). */
+    return '<div class="guia-banner is-abierta' + (abierta ? ' is-leible' : '') + '" data-guia-banner>'
       + '<button type="button" class="guia-banner__head" data-guia-ir aria-expanded="false" aria-controls="guia-banner-mas">'
       + '<span class="guia-banner__icon" aria-hidden="true">' + guiaLockIcon() + '</span>'
       + '<span class="guia-banner__text"><em>Beneficio exclusivo</em>'
-      + '<b>' + (abierta ? 'Tu Guía Secreta de ' + esc(destino) + ' desbloqueada' : 'Tu Guía Secreta de ' + esc(destino)) + '</b>'
-      + '<small>' + (abierta ? 'Gastronomía y experiencias locales curadas por expertos. Tocá para leerla.' : 'Se desbloquea sola al reservar tu alojamiento.') + '</small></span>'
+      + '<b>Tu Guía Secreta de ' + esc(destino) + '</b>'
+      + '<small>' + 'Desbloqueada por tiempo limitado para tu cotización. Accedé a recomendaciones únicas curadas por expertos.' + '</small></span>'
       + '<span class="guia-banner__cta">' + (abierta ? 'Ver guía' : 'Qué incluye') + ' <span class="guia-banner__arrow" aria-hidden="true">' + (abierta ? '→' : '▾') + '</span></span></button>'
-      + (abierta ? '' : '<div class="guia-banner__more" id="guia-banner-mas" hidden><p>Cuando reservás tu alojamiento se desbloquea automáticamente y accedés a recomendaciones exclusivas de gastronomía y experiencias locales, curadas por expertos, que no encontrarás en las guías tradicionales.</p></div>')
+      + (abierta ? '' : '<div class="guia-banner__more" id="guia-banner-mas" hidden><p>Dónde comer, qué hacer, playas y tips locales, curados por expertos y que no encontrarás en las guías tradicionales.</p></div>')
       + '</div>';
   }
   function actualizarGuiaBanner() {
@@ -13006,6 +13011,7 @@ function comboNombreDestino() {
       if (grupoCrearButton) { e.preventDefault(); irAlGrupo(grupoCrearButton); return; }
       var grupoCopiarButton = e.target.closest('[data-grupo-copiar]');
       if (grupoCopiarButton) { e.preventDefault(); copiarTextoSplit(grupoCopiarButton, grupoCopiarButton.getAttribute('data-grupo-copiar')); return; }
+      if (e.target.closest('[data-finalizar-viaje]')) { e.preventDefault(); try { openItinerarySummaryModal(); } catch (err) { console.error(err); } return; }
       var guiaIr = e.target.closest('[data-guia-ir]');
       if (guiaIr) {
         e.preventDefault();

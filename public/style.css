@@ -2961,7 +2961,7 @@ button.logo{min-height:44px}
 .hotel-playa-filter{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
 .hotel-option[hidden]{display:none !important}
 
-.detail-main[data-paso="4"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,[data-steps-foot]){display:none !important}
+.detail-main[data-paso="4"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget){display:none !important}
 .detail-main:not([data-paso="4"]) .confirm-step{display:none}
 .confirm-step{margin:0 0 22px}
 
