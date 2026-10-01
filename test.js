@@ -106,6 +106,69 @@ function haversineKm(a, b) {
       'marcarReservaServidor() tiene que devolver false sin key, no lanzar');
   });
 
+  await t('los datos del viajero se guardan en el navegador y se pueden borrar', function () {
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const appSinComentarios = app.replace(/\/\*[\s\S]*?\*\//g, '');
+
+    /* Lo que No se hacia antes: checkoutState vivia solo en memoria y se
+       reiniciaba con cada viaje. Con el celular, completar el paso 1 y perder
+       la pestana era perder el nombre y el documento. */
+    assert.ok(/function leerViajero/.test(app), 'falta leerViajero()');
+    assert.ok(/function guardarViajero/.test(app), 'falta guardarViajero()');
+    assert.ok(/function borrarDatosViajero/.test(app), 'falta borrarDatosViajero()');
+
+    // Se guarda al escribir, no solo al pasar de paso: si la persona cierra la
+    // pestana a mitad del formulario, lo escrito tiene que estar.
+    assert.ok(/guardarViajero\(checkoutState\.form\)/.test(app),
+      'guardarViajer() no se llama al escribir en el formulario');
+
+    // Y hay una forma de borrarlos a mano.
+    assert.ok(/data-borrar-datos/.test(app), 'no hay boton para borrar los datos');
+    assert.ok(/function olvidarMisDatos/.test(app), 'falta olvidarMisDatos()');
+
+    /* Lo que NO se guarda es lo del pedido. Si se guardara, una referencia
+       vieja podria quedar pegada al mensaje de WhatsApp del viaje siguiente. */
+    const ref = app.slice(app.indexOf('function checkoutStateInicial'),
+      app.indexOf('function checkoutStateInicial') + 400);
+    assert.ok(/ref:\s*null/.test(ref),
+      'la referencia del pedido tiene que arrancar en null en cada viaje');
+    assert.ok(/payment:\s*''/.test(ref), 'el medio de pago tiene que arrancar vacio');
+
+    // Los campos guardados son los de la persona, y no incluyen el hotel de
+    // destino: ese es del viaje, no de quien viaja.
+    const campos = app.match(/var CAMPOS_VIAJERO = \[([\s\S]*?)\];/);
+    assert.ok(campos, 'falta CAMPOS_VIAJERO');
+    const lista = campos[1];
+    ['nombre', 'apellido', 'documento', 'email', 'telefono'].forEach(function (c) {
+      // El nombre del campo puede ser docNumero y no documento.
+      const existe = new RegExp("'" + (c === 'documento' ? 'docNumero' : c) + "'").test(lista);
+      assert.ok(existe, 'CAMPOS_VIAJERO no incluye ' + c);
+    });
+    assert.ok(!/transferHotel/.test(lista),
+      'el hotel de destino es del viaje y no tiene que guardarse con los datos de la persona');
+  });
+
+  await t('el aviso de privacidad del checkout dice la verdad', function () {
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const priv = fs.readFileSync(path.join(__dirname, 'public', 'privacidad.html'), 'utf8');
+    /* Decía "No los guardamos en el servidor". Eso era cierto pero estaba
+       incompleto: el paso 3 manda el pedido por WhatsApp, así que los datos sí
+       salen de la app. Y ahora además se guardan en el navegador. Un aviso que
+       omite las dos cosas es un aviso que no informa. */
+    const lineaVieja = /Usamos estos datos solo para coordinar la reserva\. No los guardamos en el servidor\./;
+    assert.ok(!lineaVieja.test(app),
+      'el aviso del checkout sigue diciendo que los datos no se guardan en ningun lado');
+    assert.ok(/manda por WhatsApp al operador/.test(app),
+      'el aviso del checkout tiene que decir que los datos salen por WhatsApp');
+    assert.ok(/guardamos en este navegador/.test(app),
+      'el aviso del checkout tiene que decir que se guardan en el navegador');
+    /* Y la politica de privacidad tiene que contar lo mismo. */
+    assert.ok(/Olvidar mis datos/.test(priv),
+      'la politica de privacidad tiene que mencionar el boton de borrar los datos');
+    assert.ok(/WhatsApp al operador/.test(priv),
+      'la politica de privacidad tiene que decir que el pedido sale por WhatsApp');
+  });
+
   const GUIAS_SECCIONES = ['beaches', 'atracciones', 'comer', 'hacer', 'tips'];
   const GUIAS_FUENTE = path.join(__dirname, 'lib', 'guias.js');
 
@@ -1193,8 +1256,17 @@ function haversineKm(a, b) {
       assert.ok(t.compartido > 0 || t.soloPrivado || t.compartidoConsultar,
         k + ' no tiene traslado compartido y no declara soloPrivado ni compartidoConsultar');
       assert.ok(t.privado > 0, k + ' no tiene precio de transfer privado');
-      assert.ok(t.privado >= t.compartido,
-        k + ': el privado (' + t.privado + ') sale menos que el compartido (' + t.compartido + ')');
+      // El privado tiene que salir mas caro que el compartido, salvo cuando los dos
+      // son tarifas reales de la planilla: ahi la relacion es de la agencia, no un
+      // error de unidades. Ilha Grande cobra R$ 468 la van compartida por persona
+      // (incluye el barco) y R$ 444 el auto para 4, y puede ser cierto. Se
+      // reconoce por los escalones (el privado sale de la planilla) y por un
+      // compartido con precio y sin "Consultar".
+      const ambosReales = t.escalones && t.escalones.length && t.compartido > 0 && !t.compartidoConsultar;
+      if (!ambosReales) {
+        assert.ok(t.privado >= t.compartido,
+          k + ': el privado (' + t.privado + ') sale menos que el compartido (' + t.compartido + ')');
+      }
     }
     assert.strictEqual(model.transferOptions('__no_existe__'), null,
       'un destino inexistente no deberia devolver precios');
@@ -1317,18 +1389,20 @@ function haversineKm(a, b) {
     assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'shared' }), rio.compartido * 3);
     assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'private' }), rio.privado);
     // El privado sale de los escalones segun la cantidad de personas (Buzios:
-    // auto 1-4 a R$ 426 y 5-6 a R$ 541 (enteros)), y sin escalon es "Consultar".
+    // auto 1-4 a R$ 444 y 5-6 a R$ 564, enteros de la planilla), y sin escalon
+    // para esa cantidad es "Consultar". Los numeros van pineados a proposito: si
+    // cambian, es que la planilla cambio, y hay que revisarlo a mano.
     const usd = function (brl) { return brl / 5.2; };
     const buz = function (pax) { return fn.transferPreciosDe({ dest: { key: 'buz' }, pax: pax }); };
-    assert.strictEqual(buz(1).privado, usd(426));
-    assert.strictEqual(buz(4).privado, usd(426));
-    assert.strictEqual(buz(5).privado, usd(541), 'con 5 personas el privado de Buzios cambia de escalon');
+    assert.strictEqual(buz(1).privado, usd(444));
+    assert.strictEqual(buz(4).privado, usd(444));
+    assert.strictEqual(buz(5).privado, usd(564), 'con 5 personas el privado de Buzios cambia de escalon');
     assert.strictEqual(buz(7).privadoConsultar, true, 'mas personas que el ultimo escalon: Consultar');
     assert.strictEqual(buz(7).privado, 0);
     assert.strictEqual(rio.privadoConsultar, true, 'Rio no tiene precio de privado cargado: Consultar');
     assert.strictEqual(rio.compartidoConsultar, true, 'Rio no tiene precio de compartido cargado: Consultar');
     assert.strictEqual(rio.compartido, 0);
-    assert.strictEqual(fn.transferPreciosDe({ dest: { key: 'mcz' }, pax: 2 }).compartido, Math.round(147 / 5.2 * 100) / 100, 'Maceio compartido: R$ 147 entero');
+    assert.strictEqual(fn.transferPreciosDe({ dest: { key: 'mcz' }, pax: 2 }).compartido, Math.round(154 / 5.2 * 100) / 100, 'Maceio compartido: R$ 154 entero');
     // Los precios de la planilla son enteros.
     for (const k of Object.keys(tabla)) {
       for (const e of tabla[k].escalones) assert.ok(Number.isInteger(e.brl), k + ': el escalon ' + e.min + '-' + e.max + ' no es entero: ' + e.brl);

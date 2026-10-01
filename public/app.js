@@ -3251,9 +3251,65 @@
      abrian tres formularios distintos para la misma accion.
 
      Se recuerda entre aperturas: recargar el formulario entero cada vez que se
-     vuelve de un paso seria un castigo. No se guarda en disco ni sale del
-     navegador. */
-  var checkoutState = { step: 0, form: {}, payment: '', promo: '' };
+     vuelve de un paso seria un castigo. */
+  /* ---------- los datos del viajero, en disco ----------
+     El comentario de arriba decia "no se guarda en disco ni sale del
+     navegador". Eso era cierto y quedo viejo: el paso 3 manda el pedido por
+     WhatsApp, asi que los datos SI salen de la app. Lo que no hacia el server
+     era guardarlos, y eso sigue igual.
+
+     Se guardan en localStorage por dos razones, y las dos son de uso:
+
+       1. Si la persona completa el paso 1 y se le traba el celular, o cierra la
+          pestana, perder nombre, documento y telefono es volver a empezar de
+          cero. En un celular eso pasa.
+       2. Es la MISMA persona la que viaja: si vuelve a cotizar otro destino,
+          no tiene que reescribir sus datos. Son de la persona, no del pedido.
+
+     Lo que NO se guarda es lo que pertenece al pedido: el paso, el medio de
+     pago, el codigo de descuento y la referencia. Eso se reinicia con cada
+     viaje, como antes.
+
+     Los datos no salen del navegador: no se mandan a ningun lado salvo el
+     WhatsApp que la persona dispara en el paso 3. Y hay un boton para
+     borrarlos (borrarDatosViajero), porque si quedan guardados tiene que
+     haber forma de que se vayan. */
+  var VIAJERO_KEY = 'cuantosale_viajero';
+  /* Solo estos. El hotel de destino NO entra: es del viaje, no de la persona,
+     y por la misma razon que el resto del pedido no se conserva. */
+  var CAMPOS_VIAJERO = ['titulo', 'nombre', 'apellido', 'docTipo', 'docNumero',
+    'nacimiento', 'nacionalidad', 'email', 'telefono', 'direccion'];
+  function leerViajero() {
+    try {
+      var crudo = JSON.parse(localStorage.getItem(VIAJERO_KEY) || '{}') || {};
+      var out = {};
+      CAMPOS_VIAJERO.forEach(function (k) {
+        if (typeof crudo[k] === 'string' && crudo[k] !== '') out[k] = crudo[k];
+      });
+      return out;
+    } catch (e) { return {}; }
+  }
+  function guardarViajero(form) {
+    try {
+      if (!form) return;
+      var out = {};
+      var hayAlgo = false;
+      CAMPOS_VIAJERO.forEach(function (k) {
+        var v = form[k];
+        if (typeof v === 'string' && v !== '') { out[k] = v; hayAlgo = true; }
+      });
+      if (hayAlgo) localStorage.setItem(VIAJERO_KEY, JSON.stringify(out));
+    } catch (e) { /* modo privado */ }
+  }
+  function borrarDatosViajero() {
+    try { localStorage.removeItem(VIAJERO_KEY); } catch (e) { /* modo privado */ }
+  }
+  /* Devuelve el estado de checkout recien creado, con los datos de la persona
+     ya cargados. Es el unico lugar donde se arma un checkoutState nuevo, para
+     que el reset de viaje y la carga de datos no puedan desincronizarse. */
+  function checkoutStateInicial() {
+    return { step: 0, form: leerViajero(), payment: '', promo: '', ref: null };
+  }
   /* Codigo de descuento de las Guias Secretas: 5 % en las actividades cuando se
      reservan DOS O MAS. Cada destino tiene el suyo, el mismo que dice su guia en
      PDF, y solo vale para el destino del viaje: FLORIPA5 no descuenta en Rio.
@@ -3599,8 +3655,20 @@
       checkoutField({ name: 'direccion', label: 'Dirección', value: f.direccion, autocomplete: 'street-address', wide: true }) +
       '</div>' +
       checkoutTransferBlock() +
-      '<p class="checkout-legal">Usamos estos datos solo para coordinar la reserva. No los guardamos en el servidor.</p>' +
+      '<p class="checkout-legal">Estos datos los usa el operador para confirmar tu reserva. ' +
+        'Los guardamos en este navegador para que no tengas que escribirlos otra vez, y el paso final ' +
+        'los manda por WhatsApp al operador. No los guardamos en nuestros servidores.</p>' +
+        '<p class="checkout-legal"><button type="button" class="checkout-legal__borrar" data-borrar-datos>Olvidar mis datos</button></p>' +
       '</div>';
+  }
+  /* Borra lo que quedo guardado en este navegador. Si los datos se quedan
+     guardados tiene que haber una forma de que se vayan, y no esperar a
+     limpiar el navegador entero. Los vacia de memoria y de disco, y repinta el
+     paso para que los campos queden limpios de verdad y no solo "sin guardar". */
+  function olvidarMisDatos() {
+    borrarDatosViajero();
+    CAMPOS_VIAJERO.forEach(function (k) { delete checkoutState.form[k]; });
+    renderCheckout();
   }
   function checkoutPanelPago() {
     var t = checkoutTotals();
@@ -3763,6 +3831,10 @@
       // nodo ya no existe y no se puede llamar reportValidity sobre el.
       if (!pending && !el.checkValidity()) pending = el;
     }
+    // A disco, pero solo los campos del viajero: si la persona cierra la
+    // pestana a mitad del paso 1, al volver no tiene que reescribir su nombre
+    // ni su documento. Los campos del pedido no van.
+    guardarViajero(checkoutState.form);
     // El hotel del transfer se copia al estado del viaje en cuanto se escribe.
     // El voucher y el resumen de "Mi Viaje" leen de ahi, y sin esto mostrarian
     // "a coordinar" al lado de un checkout que ya tiene el hotel puesto.
@@ -9556,10 +9628,12 @@
     var selectedTransportMode = proposal.mode === 'auto' ? 'auto' : proposal.mode === 'bus' ? 'bus' : 'flight';
     proposal = normalizeLocalTransportInProposal(data, proposal);
     var selectedHotelTotal = hotelTotalForRate(data.meta, proposal.parts.alojamiento, 1);
-    // El checkout arranca de cero con cada viaje: los datos del viajero que
-    // quedaron del pedido anterior no son del viaje nuevo, y una referencia
-    // vieja pegada al mensaje de WhatsApp seria el error mas dificil de ver.
-    checkoutState = { step: 0, form: {}, payment: '' };
+    /* El pedido arranca de cero con cada viaje: una referencia vieja pegada al
+       mensaje de WhatsApp seria el error mas dificil de ver. Los datos de la
+       persona si se conservan (ver leerViajero): nombre y documento son de
+       quien viaja, no del pedido, y hacerlos escribir otra vez para cada
+       destino es lo que hace que la gente abandone. */
+    checkoutState = checkoutStateInicial();
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null, flightAutoPriced: false };
     /* El compartido arranca elegido.
 
@@ -12422,6 +12496,8 @@ function comboNombreDestino() {
          modal es hermano de la vista, asi que un listener puesto alla nunca
          los ve. Estaban primero en el de #vista-detalle y por eso "Continuar"
          no hacia nada. */
+      var ckBorrar = e.target.closest('[data-borrar-datos]');
+      if (ckBorrar) { e.preventDefault(); olvidarMisDatos(); return; }
       var ckNext = e.target.closest('[data-checkout-next]');
       if (ckNext) {
         e.preventDefault();

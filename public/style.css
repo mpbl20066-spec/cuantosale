@@ -1,4 +1,4 @@
-/* version: 232
+/* version: 233
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1983,7 +1983,13 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .checkout-transfer-note{display:flex;align-items:flex-start;gap:9px;margin:12px 0 0;padding:11px 13px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;line-height:1.5}
 .checkout-transfer-note .trip-summary__ico{flex:0 0 19px;width:19px;height:19px;margin-top:1px}
 .checkout-transfer-note b{color:var(--ink)}
-.checkout-legal{margin:16px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.5}/* ---- Grilla de medios de pago ---- */
+.checkout-legal{margin:16px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.5}
+/* "Olvidar mis datos": enlace, no boton de accion. Que se vea distinto de los
+   botones del checkout para que nadie lo confunda con el paso siguiente. El area
+   tactil se lleva a 48px como todo lo demas. */
+.checkout-legal__borrar{background:none;border:0;padding:8px 0;min-height:44px;color:var(--ink2);font:inherit;font-size:11.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.checkout-legal__borrar:hover{color:var(--ink)}
+.checkout-legal__borrar:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}/* ---- Grilla de medios de pago ---- */
 .checkout-pay-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
 .checkout-pay{--pay-logo-h:26px;position:relative;display:grid;justify-items:center;align-content:center;gap:4px;min-height:88px;padding:10px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .18s ease,background .18s ease}
 .checkout-pay:hover{border-color:var(--cel)}
