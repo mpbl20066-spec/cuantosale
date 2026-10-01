@@ -7652,7 +7652,8 @@
          y con eso la fila de cada tramo tenia la misma informacion dos veces a
          distinta escala. La ruta y los km viven arriba; el badge identifica el
          tipo de traslado y nada mas. */
-      var cabeza = '<div class="transfer-leg"><div class="transfer-leg__head"><span class="transfer-leg__badge">' + esc(tramo.ferry ? 'Ferry' : 'Transfer') + '</span>' +
+      var sentido = tramo.key === 'vuelta' ? 'vuelta' : tramo.key === 'llegada' ? 'ida' : '';
+      var cabeza = '<div class="transfer-leg' + (sentido ? ' transfer-leg--' + sentido : '') + '"><div class="transfer-leg__head"><span class="transfer-leg__badge">' + esc(sentido === 'ida' ? 'Ida' : sentido === 'vuelta' ? 'Vuelta' : tramo.ferry ? 'Ferry' : 'Transfer') + '</span>' +
         '<strong>' + esc(tramo.from) + ' → ' + esc(tramo.to) + '</strong>' +
         '</div>';
       if (tramo.auto) {

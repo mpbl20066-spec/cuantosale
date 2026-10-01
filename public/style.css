@@ -3538,7 +3538,6 @@ summary::-webkit-details-marker{display:none}
 }
 #trips-button{order:1}
 #auth-button{order:2}
-}
 
 /* Barra de pasos: sticky puro de CSS, pegada arriba y por debajo del notch
    (env(safe-area-inset-top)). Ningun ancestro tiene overflow/transform/contain,
@@ -3585,3 +3584,9 @@ summary::-webkit-details-marker{display:none}
   .transfer-leg .transfer-choice-grid{grid-template-columns:minmax(0,1fr)}
   .transfer-leg__head strong{flex-basis:100%}
 }
+
+/* Fluidez al scrollear: las tarjetas de tours fuera de pantalla no se pintan ni
+   se miden hasta que se acercan (content-visibility), con un alto estimado para
+   que la barra de scroll no salte. Sin JS. */
+.local-tour{content-visibility:auto;contain-intrinsic-size:auto 160px}
+@media(prefers-reduced-motion:reduce){.skeleton,.rooms-skel__row,.hotel-skeleton-card{animation:none}}
