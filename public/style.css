@@ -1291,26 +1291,14 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    por debajo de y=10 y nunca se libera. Con translateY(-5) sube entero. El
    overflow:visible del svg es por lo mismo: el arco girado se sale del
    viewBox de 24x24 y sin esto el navegador lo recorta. */
-.guia-lock{margin-top:22px;padding:22px;border:1.5px dashed var(--control-line);border-radius:20px;background:var(--surface);transition:border-color .3s ease}
-.guia-lock__eyebrow{color:var(--ink2);font-size:10px;font-weight:800;letter-spacing:.12em}
-.guia-lock__head h2{margin:5px 0 12px;font-family:var(--fh);font-size:30px;line-height:1.05}
-.guia-lock__body{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start}
-.guia-lock__icon{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:var(--bg);color:var(--cel)}
 .guia-lock__ico{width:22px;height:22px;overflow:visible}
 .guia-lock__shackle,.guia-lock__body{transform-box:fill-box;transition:transform .34s cubic-bezier(.34,1.4,.5,1)}
 .guia-lock__shackle{transform-origin:50% 100%}
-.guia-lock__texto{margin:0;color:var(--ink);font-size:13.5px;line-height:1.55}
-.guia-lock__nota{margin:10px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.45}
 /* Abierto: el marco pasa de punteado a entero, que es lo que ya dice el resto
    de la app cuando algo esta resuelto. */
-.guia-lock.is-open{border-style:solid;border-color:var(--cel)}
-.guia-lock.is-open .guia-lock__shackle{transform:translateY(-5px) rotate(-25deg)}
-.guia-lock.is-open .guia-lock__body{transform:translateY(2px)}
-.guia-lock.is-open .guia-lock__icon{background:var(--cel-soft)}
 /* En el celu el candado se va arriba del texto en vez de al lado: con 34px al
    lado el parrafo pierde 46px de ancho y quedan tres lineas cortas al lado de
    un icono. Arriba se lee como un encabezado. */
-@media (max-width:520px){.guia-lock__body{grid-template-columns:minmax(0,1fr);gap:9px}}
 .guia-bloque{margin-top:26px}
 .guia-bloque:first-child{margin-top:18px}
 .guia-bloque__titulo{font-family:var(--fh);font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0 0 11px;padding-bottom:8px;border-bottom:1px solid var(--line)}
@@ -2448,7 +2436,6 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
 .block-sub, .foot, .foot-credits, .cost-note, .transfer-hint,
 .transfer-leg__auto, .transfer-advice, .hotel-group__empty,
 .local-tour__description, .guia-nota, .guia-veredicto, .guia-tip p,
-.guia-lock__texto, .guia-lock__nota, .guia-pie, .guia-creditos,
 .daily-budget__logistics, .hotel-nearby-note, .block-h3,
 .transfer-choice-note, .opt__nota, .opt .s, .opt__disclosure-text {
   overflow-wrap: anywhere;
@@ -3242,9 +3229,14 @@ button.logo{min-height:44px}
 :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.8);cursor:pointer}
 
 /* ---- Banner de la Guia Secreta (paso 4) -------------------------------------- */
-.guia-banner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;margin:18px 0 0;padding:16px 18px;box-sizing:border-box;text-align:left;font:inherit;color:var(--ink);cursor:pointer;border:1.5px solid color-mix(in srgb,var(--cel) 60%,transparent);border-radius:var(--r-card,16px);background:linear-gradient(135deg,color-mix(in srgb,var(--cel) 16%,var(--surface)),var(--surface) 70%);box-shadow:0 10px 28px rgba(0,0,0,.25)}
+.guia-banner{width:100%;margin:18px 0 0;box-sizing:border-box;color:var(--ink);overflow:hidden;border:1.5px solid color-mix(in srgb,var(--cel) 60%,transparent);border-radius:var(--r-card,16px);background:linear-gradient(135deg,color-mix(in srgb,var(--cel) 16%,var(--surface)),var(--surface) 70%);box-shadow:0 10px 28px rgba(0,0,0,.25)}
 .guia-banner:hover{border-color:var(--cel)}
-.guia-banner:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.guia-banner__head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;padding:16px 18px;box-sizing:border-box;border:0;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.guia-banner__more{padding:0 18px 18px 78px}
+.guia-banner__more p{margin:0;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px;line-height:1.55}
+.guia-banner__arrow{display:inline-block;transition:transform .2s ease}
+.guia-banner.is-desplegada .guia-banner__arrow{transform:rotate(180deg)}
+.guia-banner__head:focus-visible{outline:3px solid var(--focus);outline-offset:-3px;border-radius:var(--r-card,16px)}
 .guia-banner__icon{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--cel);color:var(--cel-ink,#0A101A)}
 .guia-banner__icon svg{width:24px;height:24px;display:block}
 .guia-banner.is-abierta .guia-banner__icon .guia-lock__shackle{transform:translateY(-5px) rotate(-25deg)}
@@ -3253,7 +3245,7 @@ button.logo{min-height:44px}
 .guia-banner__text b{font-family:var(--fh);font-size:17px;line-height:1.2}
 .guia-banner__text small{color:var(--ink2);font-size:13px;line-height:1.4}
 .guia-banner__cta{white-space:nowrap;font-size:13px;font-weight:800;color:var(--cel)}
-@media (max-width:560px){.guia-banner{grid-template-columns:auto minmax(0,1fr);padding:14px}.guia-banner__cta{grid-column:1/-1}}
+@media (max-width:560px){.guia-banner__head{grid-template-columns:auto minmax(0,1fr);padding:14px}.guia-banner__cta{grid-column:1/-1}.guia-banner__more{padding:0 14px 16px}}
 
 /* ---- Barra de pasos pegajosa ----
    La propuesta (titulo y total grande) se va con el scroll de forma natural;
@@ -3655,12 +3647,12 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 /* "A donde va tu plata": barra segmentada (un tramo por rubro, con espacio entre
    tramos) y, debajo, una lista limpia: punto de color, nombre y monto a la
    derecha, sin lineas divisorias. */
-.proposal-breakdown{padding:24px 20px}
-.proposal-breakdown h2{margin:0 0 20px}
+.proposal-breakdown{padding:30px 28px}
+.proposal-breakdown h2{margin:0 0 26px;font-size:28px;letter-spacing:-.01em}
 .proposal-breakdown__stack{gap:3px;height:14px;border:0;background:transparent;overflow:visible}
 .proposal-breakdown__segment{min-width:6px;border-radius:999px;flex-shrink:1}
-.proposal-breakdown__list{gap:2px;margin-top:20px}
-.proposal-breakdown__row{min-height:var(--tap,48px);padding:6px 0;border:0;background:transparent;color:inherit;font:inherit;text-align:left}
+.proposal-breakdown__list{gap:6px;margin-top:26px}
+.proposal-breakdown__row{min-height:var(--tap,48px);padding:8px 0;border:0;background:transparent;color:inherit;font:inherit;text-align:left}
 .proposal-breakdown__row+.proposal-breakdown__row{border-top:0}
 .proposal-breakdown__label{gap:12px}
 .proposal-breakdown__dot{flex:0 0 12px;width:12px;height:12px;border-radius:50%}
@@ -3715,6 +3707,6 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
    lo dejaban en linea (position:static) ocupando toda la fila de la barra. */
 .voucher-tools .voucher-share-wrap{position:relative;display:grid;min-width:0}
 .voucher-tools .voucher-share-wrap>.voucher-chip{width:100%;height:100%}
-.voucher-tools .voucher-share-wrap>.voucher-share__menu{position:absolute;grid-column:auto;top:auto;bottom:calc(100% + 8px);left:50%;right:auto;transform:translateX(-50%);width:max-content;min-width:230px;max-width:calc(100vw - 40px);margin:0;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 12px 28px rgba(0,0,0,.28);z-index:20}
+.voucher-tools .voucher-share-wrap>.voucher-share__menu{position:absolute;grid-column:auto;top:auto;bottom:calc(100% + 8px);left:auto;right:0;transform:none;width:max-content;min-width:230px;max-width:calc(100vw - 40px);margin:0;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 12px 28px rgba(0,0,0,.28);z-index:20}
 .voucher-tools .voucher-share-wrap>.voucher-share__menu[hidden]{display:none}
 .voucher-tools .voucher-share-wrap>.voucher-share__menu button{min-height:44px;white-space:nowrap}

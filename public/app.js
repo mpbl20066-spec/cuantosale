@@ -8224,12 +8224,15 @@
     var destino = meta && meta.dest ? meta.dest.name : '';
     if (!destino) return '';
     var abierta = !!guiaYaDe(meta.dest.key);
-    return '<button type="button" class="guia-banner' + (abierta ? ' is-abierta' : '') + '" data-guia-banner data-guia-ir>'
+    return '<div class="guia-banner' + (abierta ? ' is-abierta' : '') + '" data-guia-banner>'
+      + '<button type="button" class="guia-banner__head" data-guia-ir aria-expanded="false" aria-controls="guia-banner-mas">'
       + '<span class="guia-banner__icon" aria-hidden="true">' + guiaLockIcon() + '</span>'
       + '<span class="guia-banner__text"><em>Beneficio exclusivo</em>'
       + '<b>' + (abierta ? 'Tu Guía Secreta de ' + esc(destino) + ' desbloqueada' : 'Tu Guía Secreta de ' + esc(destino)) + '</b>'
-      + '<small>' + (abierta ? 'Gastronomía y experiencias locales curadas por expertos. Tocá para leerla.' : 'Se desbloquea sola al reservar tu alojamiento: dónde comer, qué hacer y qué evitar, curado por expertos.') + '</small></span>'
-      + '<span class="guia-banner__cta">' + (abierta ? 'Ver guía' : 'Qué incluye') + ' <span aria-hidden="true">→</span></span></button>';
+      + '<small>' + (abierta ? 'Gastronomía y experiencias locales curadas por expertos. Tocá para leerla.' : 'Se desbloquea sola al reservar tu alojamiento.') + '</small></span>'
+      + '<span class="guia-banner__cta">' + (abierta ? 'Ver guía' : 'Qué incluye') + ' <span class="guia-banner__arrow" aria-hidden="true">' + (abierta ? '→' : '▾') + '</span></span></button>'
+      + (abierta ? '' : '<div class="guia-banner__more" id="guia-banner-mas" hidden><p>Cuando reservás tu alojamiento se desbloquea automáticamente y accedés a recomendaciones exclusivas de gastronomía y experiencias locales, curadas por expertos, que no encontrarás en las guías tradicionales.</p></div>')
+      + '</div>';
   }
   function actualizarGuiaBanner() {
     var el = document.querySelector('[data-guia-banner]');
@@ -8242,15 +8245,6 @@
     var destino = detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.key;
     var objetivo = (destino && document.querySelector('[data-guia-destino="' + destino + '"]')) || document.querySelector('[data-guia-lock],.food-guide');
     if (objetivo && objetivo.scrollIntoView) objetivo.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-  function guiaCandado(meta) {
-    var destino = meta && meta.dest ? meta.dest.name : '';
-    return '<section class="guia-lock" data-guia-lock aria-labelledby="guia-lock-title">' +
-      '<div class="guia-lock__head"><span class="guia-lock__eyebrow">BENEFICIO EXCLUSIVO</span>' +
-      '<h2 id="guia-lock-title">La Guía Secreta de ' + esc(destino) + '</h2></div>' +
-      '<div class="guia-lock__body"><span class="guia-lock__icon" aria-hidden="true">' + guiaLockIcon() + '</span>' +
-      '<p class="guia-lock__texto">Es tuyo al completar tu viaje: cuando reservás tu alojamiento se desbloquea automáticamente y accedés a nuestras recomendaciones exclusivas de gastronomía y experiencias locales, curadas por expertos, que no encontrarás en las guías tradicionales.</p></div>' +
-      '</section>';
   }
   /* Se pide la guia recien cuando la persona toca la reserva de un hotel. Ese
      gesto es el que el server quiere como prueba: no "busco este destino" sino
@@ -8387,7 +8381,7 @@
     // El fallback de antes era la guia de Florianopolis, asi que Gramado veia
     // "busca prato executivo en el centro de Florianopolis": un destino
     // mostrando los consejos de otro.
-    if (!guia) return guiaCandado(meta);
+    if (!guia) return '';
 
     var foodPerDay = Math.round(Number(detailState && detailState.foodPerDay) || 0);
 
@@ -10016,7 +10010,7 @@
       renderSafe(function () { return multiStayMarkup(detailState); }, '') +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + dailyBudgetMarkup +
-      '<section class="confirm-step" data-confirm-step><h2 class="block-title">Confirmá tu viaje</h2><p class="sub block-sub">Este es el resumen de todo lo que armaste: transporte, alojamiento y extras, con el total.</p><button type="button" class="steps__next" data-paso-ir="4">Ver mi viaje <span aria-hidden="true">→</span></button>' + renderSafe(function () { return guiaBannerMarkup(data.meta); }, '') + '</section>' +
+      '<section class="confirm-step" data-confirm-step><h2 class="block-title">Confirmá tu viaje</h2><p class="sub block-sub">Este es el resumen de todo lo que armaste: transporte, alojamiento y extras, con el total.</p>' + renderSafe(function () { return guiaBannerMarkup(data.meta); }, '') + '</section>' +
       '<div class="steps__foot" data-steps-foot>' + renderSafe(function () { return pasoSiguienteMarkup(); }, '') + '</div>' +
       /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
 
@@ -13012,7 +13006,20 @@ function comboNombreDestino() {
       if (grupoCrearButton) { e.preventDefault(); irAlGrupo(grupoCrearButton); return; }
       var grupoCopiarButton = e.target.closest('[data-grupo-copiar]');
       if (grupoCopiarButton) { e.preventDefault(); copiarTextoSplit(grupoCopiarButton, grupoCopiarButton.getAttribute('data-grupo-copiar')); return; }
-      if (e.target.closest('[data-guia-ir]')) { e.preventDefault(); irALaGuia(); return; }
+      var guiaIr = e.target.closest('[data-guia-ir]');
+      if (guiaIr) {
+        e.preventDefault();
+        var guiaBanner = guiaIr.closest('[data-guia-banner]');
+        var guiaMas = guiaBanner && guiaBanner.querySelector('.guia-banner__more');
+        if (guiaMas) {
+          // Con la guia bloqueada "Qué incluye" despliega el detalle en el lugar.
+          var abrir = guiaMas.hidden;
+          guiaMas.hidden = !abrir;
+          guiaIr.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+          guiaBanner.classList.toggle('is-desplegada', abrir);
+        } else irALaGuia();
+        return;
+      }
       var splitTripButton = e.target.closest('[data-split-trip]');
       if (splitTripButton) { e.preventDefault(); openSplitModal(); return; }
       /* El menu "Compartir" y el copiado.
