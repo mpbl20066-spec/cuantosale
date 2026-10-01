@@ -3,13 +3,11 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v146';
+var CACHE_NAME = 'cuantosale-shell-v147';
 var APP_SHELL = [
-  // '/app' y NO '/': el servidor responde '/' con la landing de waitlist
-  // (server.js: if (rel === '/') rel = '/waitlist.html') y la calculadora vive
-  // en '/app'. Precachear '/' guardaba el mail-capture como si fuera el app
-  // shell, así que quien instalaba la PWA y perdía señal al abrirla veía
-  // "coming soon" en vez de la calculadora.
+  // '/app' (la start_url de la PWA): el servidor responde lo mismo en '/' y en
+  // '/app'. La landing de waitlist se sacó; se sube CACHE_NAME para que nadie
+  // conserve la copia vieja de '/' que guardaba esa landing.
   '/app',
   '/manifest.json',
   '/pwa.js',
@@ -75,7 +73,7 @@ self.addEventListener('fetch', function (event) {
     }).catch(function () {
       return caches.match(request).then(function (cached) {
         // Sin red: primero la URL exacta, después el shell de la app. La
-        // waitlist queda como último recurso, no como respuesta principal.
+        // '/' queda como último recurso, no como respuesta principal.
         return cached || caches.match('/app') || caches.match('/');
       });
     }));

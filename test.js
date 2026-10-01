@@ -179,7 +179,6 @@ function haversineKm(a, b) {
   await t('mobile: areas tactiles, textos legibles y fechas con tope real', function () {
     const css = fs.readFileSync(path.join(__dirname, 'public', 'style.css'), 'utf8');
     const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
-    const wl = fs.readFileSync(path.join(__dirname, 'public', 'waitlist.html'), 'utf8');
     const cssSinComentarios = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
     /* 1. Ningun control interactivo con area tactil menor a 40px. Los que se
@@ -216,15 +215,6 @@ function haversineKm(a, b) {
     assert.strictEqual(chicos.length, 0,
       'controles con area tactil chica y sin pseudo-elemento que la amplie:\n    ' + chicos.join('\n    '));
 
-    /* 2. Ningun texto por debajo de 10px en la waitlist: en pantalla chica una
-       unidad de 9.5px no se lee, y el contador es justamente el que tiene que
-       comunicar algo. */
-    const nueveYMedio = /\.wl-[a-z-]+\s*\{[^}]*font-size:\s*(9(\.\d+)?|10)px/.exec(wl);
-    assert.ok(!nueveYMedio,
-      'la waitlist tiene texto de ' + (nueveYMedio ? nueveYMedio[1] : '?') + 'px, ilegible en un celular');
-    const diez = /\.wl-[a-z-]+\s*\{[^}]*font-size:10px/.exec(wl);
-    assert.ok(!diez, 'la waitlist tiene texto de 10px, ilegible en un celular');
-
     /* 3. El tope de un año tiene que estar en los inputs nativos, no solo en el
        calendario custom. Con el max, el picker del celu no ofrece esas fechas:
        sin el, dejaba elegir una a dos años y recien ahi se rechazaba. */
@@ -235,29 +225,6 @@ function haversineKm(a, b) {
       'el input de ida no tiene max: el picker nativo deja elegir mas de un año');
     assert.ok(/returning\.max\s*=\s*maxDepartureDate\(\)/.test(app),
       'el input de vuelta no tiene max: el picker nativo deja elegir mas de un año');
-
-    /* 4. La waitlist tiene landmark y el aviso de privacidad va junto al campo
-       de correo, no despues de enviar. */
-    assert.ok(/<main id="waitlist-app">/.test(wl), 'la waitlist necesita <main>');
-    const jsWl = fs.readFileSync(path.join(__dirname, 'public', 'waitlist.js'), 'utf8');
-    const idxForm = jsWl.indexOf('id="waitlist-form"');
-    const idxLegal = jsWl.indexOf('wl-legal');
-    assert.ok(idxForm > 0 && idxLegal > 0, 'falta el aviso de privacidad en la waitlist');
-    /* Se comparan las FUNCIONES donde viven, no su distancia en el archivo: el
-       aviso tiene que estar en el MISMO render que el campo. Una distancia
-       cortaoria no prueba nada, porque entre el campo y el aviso puede haber
-       otra cosa que los separe en pantalla. */
-    function bloqueDesde(txt, i) {
-      // El render arranca con render( y todo el contenido vive hasta que cierra.
-      const inicio = txt.lastIndexOf('render(', i);
-      const fin = txt.indexOf('\n  }', i);
-      return { inicio: inicio, fin: fin === -1 ? txt.length : fin };
-    }
-    const bForm = bloqueDesde(jsWl, idxForm);
-    const bLegal = bloqueDesde(jsWl, idxLegal);
-    assert.ok(bLegal.inicio === bForm.inicio && bForm.inicio >= 0,
-      'el aviso de privacidad esta en un render distinto al del campo de correo: '
-      + 'tiene que estar en el paso de alta, no en la pantalla de confirmacion');
   });
 
   await t('los scripts versionados declaren su numero y suben, nunca bajan', function () {

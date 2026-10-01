@@ -13,8 +13,7 @@ User-agent: *
 # se ofrece a un buscador.
 Disallow: /api/
 
-# La raiz sirve la waitlist durante el pre-lanzamiento, no la app. Es la landing
-# que se comparte y la unica que tiene contenido para un buscador.
+# La raiz es la app de cotizacion.
 Allow: /
 
 Sitemap: https://cuantosale.uy/sitemap.xml

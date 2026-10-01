@@ -42,7 +42,7 @@ const PUBLIC = path.join(__dirname, '..', 'public');
 // Solo las paginas que se sirven publicamente. Las que arrancan con "_" son
 // mockups privados de desarrollo y no van a produccion.
 const HTML = ['index.html', 'grupo.html', 'tours.html', 'transfers.html',
-              'waitlist.html', 'privacidad.html', 'terminos.html'];
+              'privacidad.html', 'terminos.html'];
 
 // El numero maestro esta adentro del CSS. El de app.js se toma del HTML
 // porque app.js no lo declara.
@@ -60,7 +60,6 @@ const CSS = path.join(PUBLIC, 'style.css');
    Estos archivos declaran su version adentro, asi que el numero maestro es el
    de ellos y se copia al HTML, al reves que con el CSS. */
 const SCRIPTS = [
-  { archivo: 'waitlist.js', nombre: 'waitlist.js' },
   { archivo: 'grupo.js', nombre: 'grupo.js' }
 ];
 
@@ -172,7 +171,7 @@ function main() {
     console.log('style.css y los scripts son los maestros: se suben a mano solo cuando se tocan.');
   }
   if (!subir.length) {
-    console.log('Para subir el numero de un script que editaste: npm run fix:version -- waitlist.js');
+    console.log('Para subir el numero de un script que editaste: npm run fix:version -- grupo.js');
   }
 }
 

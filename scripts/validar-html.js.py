@@ -14,7 +14,6 @@ PAGINAS = [
     'public/grupo.html',
     'public/tours.html',
     'public/transfers.html',
-    'public/waitlist.html',
     'public/privacidad.html',
     'public/terminos.html',
 ]

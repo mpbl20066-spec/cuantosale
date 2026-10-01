@@ -2044,8 +2044,8 @@ function featuredPriceItems(req, res, url) {
 }
 
 // Páginas que sólo existen durante el prelanzamiento: la app de cotización. La
-// raíz del dominio muestra la waitlist al público, así que ésta no puede quedar
-// accesible sólo por adivinar la URL.
+// raíz del dominio sirve esta misma app, así que mientras estén APP_USER y APP_PASS
+// la raíz también pide usuario y contraseña (sin ellas, todo es público).
 //
 // El candado va por ARCHIVO y no por ruta a propósito: la app también se alcanza
 // como /app, como /app/ y como /index.html (el catch-all de más abajo sirve ese
@@ -2132,7 +2132,7 @@ function prelaunchAuthorized(req) {
  * candado salvo lo que esté acá, así que un endpoint nuevo nace protegido y
  * hay que abrirlo a propósito.
  *
- * /api/config es la única excepción real. La waitlist es la cara pública del
+ * /api/config es la única excepción real. Antes la waitlist era la cara pública del
  * sitio y necesita leer de ahí la URL y la clave anónima de Supabase para
  * guardar el email (ver public/waitlist.js). La clave anónima está pensada
  * para ser pública y la protege el RLS de Supabase.
@@ -2246,7 +2246,7 @@ function cacheControlEstatico(req, ext, rel) {
 }
 function serveStatic(req, res, pathname, transform) {
   let rel = decodeURIComponent(pathname);
-  if (rel === '/') rel = '/waitlist.html';
+  if (rel === '/') rel = '/index.html';
   if (checkPrelaunchAccess(req, res, rel)) return;
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (file !== PUBLIC_DIR && file.indexOf(PUBLIC_DIR + path.sep) !== 0) { res.writeHead(403); return res.end('Prohibido'); }
@@ -2545,8 +2545,10 @@ function handleRequest(req, res) {
       try { serveGrupoPage(req, res, grupoRoute[1] || null); } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
-    if (/^\/waitlist\/?$/i.test(url.pathname)) {
-      try { serveStatic(req, res, '/waitlist.html'); } catch (e) { res.writeHead(400); res.end(); }
+    // La landing de waitlist ya no existe: quien llegue a un link viejo va a la raiz.
+    if (/^\/waitlist(\.html)?\/?$/i.test(url.pathname)) {
+      res.writeHead(301, { Location: '/' });
+      res.end();
       return;
     }
     /* El panel de edicion del catalogo de tours.
@@ -2577,9 +2579,8 @@ function handleRequest(req, res) {
       try { serveStatic(req, res, '/transfers.html'); } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
-    // La raíz del dominio es la landing de waitlist mientras dure el
-    // prelanzamiento; la app real de cotización queda corrida a /app, sin
-    // link público hacia ella (nadie llega ahí por accidente).
+    // La raíz del dominio es la app. /app sigue sirviendo lo mismo porque es la
+    // start_url de la PWA ya instalada y lo que precachea el service worker.
     if (/^\/app\/?$/i.test(url.pathname)) {
       try { serveStatic(req, res, '/index.html'); } catch (e) { res.writeHead(400); res.end(); }
       return;
