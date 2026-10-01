@@ -2182,7 +2182,6 @@
         var diff = d.c.querySelector('[data-hotel-diff]');
         if (tags) {
           var t = [];
-          if (d.sel) t.push('<span class="hotel-tag is-sel">✓ Tu selección</span>');
           if (barata && d === barata) t.push('<span class="hotel-tag">Mejor precio</span>');
           if (popular && d === popular) t.push('<span class="hotel-tag">Más popular</span>');
           var html = t.join('');
