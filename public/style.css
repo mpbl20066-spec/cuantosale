@@ -97,7 +97,6 @@
   --fb:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   color-scheme:dark;
   box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 :root[data-theme="light"]{
@@ -132,7 +131,7 @@
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.5}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.5;padding-top:env(safe-area-inset-top,0px)}
 .oculto{display:none !important}
 [hidden]{display:none !important}
 .vista-detalle{min-width:0}
@@ -3450,3 +3449,8 @@ summary::-webkit-details-marker{display:none}
   .local-tour__price{flex:0 0 auto;min-width:0}
   .local-tour__info{flex:0 0 auto;width:100%;max-width:200px;min-height:40px;justify-content:center;text-align:center}
 }
+
+/* Area segura superior: el padding vive en body (antes solo estaba en el
+   tema oscuro) para que el header no quede bajo la barra de estado / notch en
+   ningun tema. Ademas, un piso de 16px sobre el logo en celular. */
+@media(max-width:560px){.top{padding-top:4px}}
