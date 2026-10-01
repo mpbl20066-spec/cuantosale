@@ -5046,7 +5046,7 @@
        scroll antes y se restaura despues; y si el markup es identico al de la
        pasada anterior no se toca el DOM. */
     var _scrollPrevio = summary.scrollTop;
-    var _markup = '<div class="trip-summary__inner">' +
+    var _markup = '<div class="trip-summary__grip" aria-hidden="true"></div><div class="trip-summary__inner">' +
       '<button type="button" class="trip-summary__head" data-trip-summary-toggle aria-expanded="true" aria-controls="trip-summary-details"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(total) + '</strong>' + chevron + '</button>' +
       /* El wrapper intermedio es lo que hace posible animar el cierre. Sin el,
        `display:none` en la fila cerrada y el panel salta de alto sin transicion. */
@@ -6319,7 +6319,7 @@
     function filaCta(categoria, elegido, agregar) {
       if (estadoReserva(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
       return elegido
-        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Cambiar</button>'
+        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Editar</button>'
         : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="' + categoria + '">' + agregar + '</button>';
     }
     /* "Falta elegir" al cuerpo, con su propio tono: es una instruccion, no un
@@ -6542,11 +6542,18 @@
       + '</aside>';
 
     // Sin nada que reservar no se dibuja el boton apagado ni su nota: era ruido.
-    var reservarTodo = !pedido.count ? '' : '<div class="voucher-reserve">'
-      + '<button type="button" class="voucher-reserve__btn"' + (pedido.count ? ' data-reservar-pedido' : ' disabled') + '><span>'
-      + (pedido.count ? 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades')) : 'Elegí algo para reservar')
-      + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
-      + (pedido.count ? '' : '<p class="voucher-reserve__nota">Elegí un transfer o una actividad para poder reservar.</p>')
+    /* El CTA principal del resumen va pegado al pie del modal y se ve SIEMPRE.
+       Antes solo existia con un transfer o una actividad elegidos, y dentro del
+       scroll: sin eso el resumen terminaba en Guardar / Compartir y la persona
+       no encontraba como avanzar. Con algo para reservar abre el checkout; si no
+       (por ejemplo falta el vuelo, que se compra afuera) lleva a coordinar con
+       el asesor, asi nunca queda trabada esperando un servicio externo. */
+    var reservarTodo = '<div class="voucher-reserve voucher-reserve--fijo">'
+      + (pedido.count
+        ? '<button type="button" class="voucher-reserve__btn" data-reservar-pedido><span>'
+          + 'Reservar ' + (pedido.tours.length && pedido.hasTransfer ? 'actividades y transfer' : pedido.hasTransfer ? 'transfer' : pedido.tours.length + (pedido.tours.length === 1 ? ' actividad' : ' actividades'))
+          + '</span>' + (pedidoTotal ? '<em>' + pedidoTotal + '</em>' : '') + '</button>'
+        : '<button type="button" class="voucher-reserve__btn" data-coordinar-asesor><span>Coordinar mi viaje con un asesor</span></button>')
       + '</div>';
     var porPersona = pax > 1 ? '<span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span>' : '';
     cerrarTodosLosModales();
@@ -6600,7 +6607,6 @@
 
        El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
        se marca solo al completar el checkout. */
-      reservarTodo +
       /* ABAJO, UN SOLO BOTON SOLIDO.
 
          Habia dos botones del mismo tamano compitiendo: "Elegi algo para
@@ -6630,7 +6636,7 @@
       '<button type="button" data-copy-summary>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar el texto del viaje</span></button>' +
       '</div></div>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
-      '</div>';
+      '</div>' + reservarTodo;
     modal.dataset.summaryText = summaryText;
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     if (_dlgPrev && (_scrollDlg || _scrollModal)) {
@@ -9806,9 +9812,24 @@
       var sentinel = document.querySelector('[data-detail-head-sentinel]');
       if (cabeceraObserver) { cabeceraObserver.disconnect(); cabeceraObserver = null; }
       if (!head || !sentinel || typeof IntersectionObserver !== 'function') return;
+      /* Al compactarse, la cabecera pierde ~130px de alto EN el flujo y todo lo de
+         abajo salta hacia arriba justo mientras la persona scrollea: se sentia como
+         un tirón y el gesto "se trababa". El centinela (que va justo arriba) se
+         estira con la diferencia, asi el hueco que ocupaba la cabecera se
+         conserva y el contenido no se mueve; la cabecera sigue pegada arriba. */
       cabeceraObserver = new IntersectionObserver(function (entries) {
         var e = entries[0];
-        head.classList.toggle('is-compact', !e.isIntersecting && e.boundingClientRect.top < 0);
+        var compacta = !e.isIntersecting && e.boundingClientRect.top < 0;
+        if (compacta === head.classList.contains('is-compact')) return;
+        if (compacta) {
+          var antes = head.offsetHeight;
+          head.classList.add('is-compact');
+          var dif = antes - head.offsetHeight;
+          if (dif > 0) sentinel.style.marginBottom = (dif - 1) + 'px';
+        } else {
+          head.classList.remove('is-compact');
+          sentinel.style.marginBottom = '';
+        }
       }, { threshold: 0 });
       cabeceraObserver.observe(sentinel);
     })();
@@ -10815,7 +10836,7 @@
     // Modales que se agregan despues (p. ej. #split-modal).
     new MutationObserver(function (muts) {
       muts.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains('booking-modal')) { observar(n); reconciliar(); } }); });
-    }).observe(document.body, { childList: true, subtree: true });
+    }).observe(document.body, { childList: true });
     window.addEventListener('popstate', function () {
       if (ignorar > 0) { ignorar--; return; }
       if (huerfanas > 0) { huerfanas--; return; }
@@ -10851,7 +10872,7 @@
     var drag = null, huboArrastre = false;
     bar.addEventListener('pointerdown', function (e) {
       if (!movil() || (e.pointerType === 'mouse' && e.button !== 0)) return;
-      if (!(e.target === bar || e.target.closest('.trip-summary__head'))) return;
+      if (!e.target.closest('.trip-summary__grip')) return;
       var r = bar.getBoundingClientRect();
       drag = { y: e.clientY, bottom: window.innerHeight - r.bottom, id: e.pointerId, activo: false };
     });
