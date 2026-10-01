@@ -9572,7 +9572,7 @@
     // forma de verlo era recargar con F5.
     agenciaConsultado = false; soyAgencia = false;
     var button = $('#auth-button'), trips = $('#trips-button');
-    if (button) { var avatar = authUser && authUser.user_metadata && (authUser.user_metadata.avatar_url || authUser.user_metadata.picture); button.innerHTML = authUser ? (avatar ? '<img class="account-avatar" src="' + esc(avatar) + '" alt="">' : '👤 ') + esc(authDisplayName(authUser)) : 'Iniciar sesión'; button.setAttribute('aria-label', authUser ? 'Abrir cuenta de ' + authDisplayName(authUser) : 'Iniciar sesión'); }
+    if (button) { var avatar = authUser && authUser.user_metadata && (authUser.user_metadata.avatar_url || authUser.user_metadata.picture); button.innerHTML = authUser ? (avatar ? '<img class="account-avatar" src="' + esc(avatar) + '" alt="">' : '<span class="account-avatar account-avatar--inicial" aria-hidden="true">' + esc(String(authDisplayName(authUser) || 'P').trim().charAt(0).toUpperCase() || 'P') + '</span>') + 'Mi perfil' : 'Iniciar sesión'; button.setAttribute('aria-label', authUser ? 'Abrir cuenta de ' + authDisplayName(authUser) : 'Iniciar sesión'); }
     if (trips) trips.hidden = !authUser;
   }
   /* ---------- Login para las acciones del resumen ----------

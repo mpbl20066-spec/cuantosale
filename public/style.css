@@ -3047,3 +3047,6 @@ button.logo{min-height:44px}
 .bud-mode button[aria-pressed="true"]{background:var(--selected-bg);color:var(--selected-ink)}
 .bud-mode button:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
 .bud-calc{display:block;margin-top:6px;color:var(--ink2);font-size:12px;line-height:1.35;grid-column:1/-1}
+
+/* Boton de cuenta: avatar circular (foto o inicial) + "Mi perfil". */
+.account-avatar--inicial{display:inline-grid;place-items:center;vertical-align:middle;background:rgba(10,16,26,.88);color:#fff;font-size:12px;font-weight:800;line-height:1;flex:none}
