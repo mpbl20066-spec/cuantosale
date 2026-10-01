@@ -1796,12 +1796,22 @@ function cotizarTodos(req, res, url) {
   // cada destino dispararía hasta 19 requests externos en un solo clic.
   const options = HOME_DESTINATION_KEYS.map(function (key) {
     const trip = Object.assign({}, v.S, { dest: key });
-    const result = adaptPackagesToStyle(model.compute(trip, v.dep, v.ret, today, {}), trip, v.dep, v.ret, today);
+    const base = model.compute(trip, v.dep, v.ret, today, {});
+    const result = adaptPackagesToStyle(base, trip, v.dep, v.ret, today);
     const rec = result.list.find(function (p) { return p.id === result.recId; });
+    /* `fits` mira SOLO la categoria elegida arriba (Equilibrada, Premium...). Con
+       un presupuesto que esa categoria no cubre, el destino salia como "no entra"
+       aunque su categoria mas barata si entrara de sobra. `cheapest` es el minimo
+       real de TODAS las propuestas del destino y `fitsAny` dice si ese minimo
+       entra, que es lo que decide si el destino se ofrece o no. */
+    const cheapest = base.list.filter(function (p) { return p.mode !== 'avion_ba'; })
+      .reduce(function (min, p) { return !min || p.total < min.total ? p : min; }, null) || rec;
     return {
       dest: { key: key, name: model.DEST[key].name, region: model.DEST[key].region || '', country: model.DEST[key].country || 'Brasil' }, total: rec.total, pp: rec.pp,
       parts: rec.parts, title: rec.modeShort + ' + hotel ' + rec.tierLabel,
-      tierDesc: rec.tierDesc, fits: result.fits
+      tierDesc: rec.tierDesc, fits: result.fits,
+      fitsAny: cheapest.total <= v.S.budget,
+      cheapest: { total: cheapest.total, pp: cheapest.pp, parts: cheapest.parts, title: cheapest.modeShort + ' + hotel ' + cheapest.tierLabel, tierLabel: cheapest.tierLabel, tierDesc: cheapest.tierDesc }
     };
   }).sort(function (a, b) { return a.total - b.total; });
 

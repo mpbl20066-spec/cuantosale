@@ -8196,12 +8196,34 @@
     // porque con otros dates el destino elegido puede no ser el mismo.
     var mismatch = selectedDestKey && selectedDestFor !== (data.meta ? data.meta.dep + '|' + data.meta.ret + '|' + data.meta.pax + '|' + data.meta.budget : '');
     if (mismatch) { selectedDestKey = null; selectedDestFor = null; }
-    var fits = DESTINATION_GROUPS.map(function (group) {
-      var options = data.options.filter(function (option) { return group.keys.indexOf(option.dest.key) >= 0 && option.fits; });
-      if (!options.length) return null;
-      var best = options.slice().sort(function (a, b) { return a.total - b.total; })[0];
-      return Object.assign({}, best, { dest: Object.assign({}, best.dest, { name: group.label }), featuredGroup: group.id });
-    }).filter(Boolean).sort(function (a, b) { return a.total - b.total; });
+    /* Cada destino se evalua contra su opcion MAS BARATA real, no solo contra la
+       categoria elegida arriba: si Premium no entra pero Economica si, el destino
+       se ofrece con la categoria que entra (marcada con `alt`). Si ningun destino
+       entra ni siquiera en su categoria mas barata, no se bloquea: se muestran
+       los mas baratos con cuanto se pasan (`sobra`). */
+    function nombreCategoria(t) { return ({ 'económico': 'Económica', intermedio: 'Equilibrada', confort: 'Premium' })[String(t || '').toLowerCase()] || 'Económica'; }
+    function visualDe(option) {
+      if (option.fits) return option;
+      var c = option.cheapest;
+      if (c && (option.fitsAny || option.fitsAny === undefined)) return Object.assign({}, option, { total: c.total, pp: c.pp, parts: c.parts, title: c.title, tierDesc: c.tierDesc, alt: c.tierLabel });
+      return null;
+    }
+    function porGrupo(elegir) {
+      return DESTINATION_GROUPS.map(function (group) {
+        var opts = data.options.filter(function (option) { return group.keys.indexOf(option.dest.key) >= 0; }).map(elegir).filter(Boolean);
+        if (!opts.length) return null;
+        var best = opts.slice().sort(function (a, b) { return a.total - b.total; })[0];
+        return Object.assign({}, best, { dest: Object.assign({}, best.dest, { name: group.label }), featuredGroup: group.id });
+      }).filter(Boolean).sort(function (a, b) { return a.total - b.total; });
+    }
+    var fits = porGrupo(visualDe);
+    var sinOpcionQueEntre = !fits.length;
+    if (sinOpcionQueEntre) {
+      fits = porGrupo(function (option) {
+        var c = option.cheapest;
+        return c ? Object.assign({}, option, { total: c.total, pp: c.pp, parts: c.parts, title: c.title, tierDesc: c.tierDesc, alt: c.tierLabel, sobra: Number(c.total) - Number(data.meta.budget) }) : option;
+      }).slice(0, 3);
+    }
     var cards = fits.map(function (option, index) {
       // Sólo las categorías con costo: una fila en US$ 0 es ruido en un
       // desglose que la persona abre para entender de dónde sale el precio.
@@ -8236,10 +8258,12 @@
         (location ? '<p class="destination-location">' + esc(location) + '</p>' : '') +
         '<p>' + esc(option.title.replace(/Vuelo desde Montevideo/g, 'Vuelo desde ' + originCityName(data.meta.origin))) + '. ' + esc(subtituloDe(option)) + '</p></div>' +
         '<div class="opt__price destination-total"><small>' + etiquetaTotal(data.meta.pax) + '</small><b>' + moneyCero(option.total) + '</b><span>' + moneyCero(option.pp) + ' por persona</span></div></div>' +
-        '<div class="destination-card-tags"><span class="mini g">¡Entra en tu presupuesto!</span></div>' +
+        '<div class="destination-card-tags">' + (option.sobra > 0
+          ? '<span class="mini r">Se pasa por ' + money(option.sobra) + (option.alt ? ' · categoría ' + esc(nombreCategoria(option.alt)) : '') + '</span>'
+          : option.alt ? '<span class="mini g">¡Entra con categoría ' + esc(nombreCategoria(option.alt)) + '!</span>' : '<span class="mini g">¡Entra en tu presupuesto!</span>') + '</div>' +
         '<div class="opt__actions">' +
         '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '"><span class="opt__disclosure-text">Ver desglose</span><span class="opt__chevron" aria-hidden="true">›</span></button>' +
-        '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-dest="' + esc(option.dest.key) + '">Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
+        '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-dest="' + esc(option.dest.key) + '"' + (option.alt ? ' data-alt-style="' + (({ 'económico': 'ahorro', intermedio: 'eq', confort: 'comodo' })[String(option.alt).toLowerCase()] || '') + '"' : '') + '>Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
         '</div>' +
         '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + notaDesglose + '</div>' +
         '</div>' +
@@ -8256,7 +8280,10 @@
     var budgetTxt = enOtraMoneda ? money(data.meta.budget) + ' (≈ USD $' + titleBudget + ')' : 'USD $' + titleBudget;
     el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos disponibles para tu presupuesto de ' + budgetTxt + '</h2>' +
       '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo' + (enOtraMoneda ? '. Precios en ' + monedaTit.etiqueta.toLowerCase() + ' (' + monedaTit.simbolo + ')' : '') + '.</p>' +
-      (fits.length ? '<div class="destination-cards">' + cards + '</div>' : '<div class="notice">No encontramos destinos dentro de ese presupuesto. Probá aumentando el monto o ajustando las fechas.</div>') + '</section>';
+      (sinOpcionQueEntre && fits.length
+        ? '<div class="notice">Estás cerca: con ' + money(data.meta.budget) + ' todavía no alcanza para ningún destino, pero lo más económico sale ' + money(fits[0].total) + ' (' + esc(fits[0].dest.name) + ', categoría ' + esc(nombreCategoria(fits[0].alt)) + ') y se pasa por ' + money(fits[0].sobra) + '. Subí un poco el monto, bajá la cantidad de viajeros o probá otras fechas. Te dejamos las 3 más baratas.</div>'
+        : '') +
+      (fits.length ? '<div class="destination-cards">' + cards + '</div>' : '<div class="notice">No encontramos destinos para esas fechas. Probá ajustando las fechas o la cantidad de viajeros.</div>') + '</section>';
   }
   function findDestinations() {
     var budget = S.budget;
@@ -9413,6 +9440,13 @@
       // que es lo que refresca la etiqueta y marca la opción del menú.
       S.dest = destination;
       $('#dest').value = destination;
+      // La card mostraba la categoria mas barata que entra en el presupuesto: se
+      // abre esa misma, no la que estaba elegida arriba.
+      var altStyle = button.getAttribute('data-alt-style');
+      if (altStyle === 'ahorro' || altStyle === 'eq' || altStyle === 'comodo') {
+        S.style = altStyle;
+        Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-v') === altStyle ? 'true' : 'false'); });
+      }
       openDestinationProposal(destination);
       return;
     }
