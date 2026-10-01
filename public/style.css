@@ -1097,7 +1097,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .voucher-reserve__btn:hover{filter:brightness(1.08)}
 .voucher-reserve__btn:disabled{opacity:.55;cursor:not-allowed}
 .voucher-reserve__btn em{font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap}
-.voucher-reserve--fijo{position:sticky;bottom:0;z-index:6;margin:14px -4px 0;padding:12px 4px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--surface,#fff) 80%,transparent)}
+.voucher-reserve--fijo{position:sticky;bottom:0;z-index:6;margin:14px -17px 0;padding:12px 17px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--surface,#fff) 80%,transparent)}
 .voucher-reserve__nota{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.4}
 .voucher-reserve__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* Tres botones del mismo tamano, mismo borde y misma tinta. El degradado
