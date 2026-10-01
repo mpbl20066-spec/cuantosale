@@ -32,7 +32,7 @@
 <!-- Misma versión que /app: el servidor marca las URLs con ?v= como
      immutable de un año, así que pedir un ?v= viejo deja al usuario pegado
      con el CSS viejo para siempre. Si tocás style.css, subí las dos páginas. -->
-<link rel="stylesheet" href="/style.css?v=230">
+<link rel="stylesheet" href="/style.css?v=232">
 <style>
   .grupo-wrap{max-width:620px;margin:0 auto;padding:24px 16px 64px}
   .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
@@ -326,6 +326,11 @@
     <span class="grupo-kicker">Dividir gastos</span>
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
+  <!-- Legal a mano y no por JS: esta pagina es un shell que se completa con
+       grupo.js, y si el script falla la persona igual tiene que poder llegar a
+       la politica de privacidad. Sin .html porque el server sirve /privacidad y
+       /terminos con esas rutas (ver server.js). -->
+  <p class="foot-legal"><a href="/privacidad">Política de privacidad</a> · <a href="/terminos">Condiciones del servicio</a></p>
 </div>
 <script src="/grupo.js?v=28" defer></script>
 </body>

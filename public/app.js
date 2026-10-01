@@ -1460,13 +1460,42 @@
     var siguiente = e.key === 'ArrowDown' ? (i + 1) % opciones.length : (i - 1 + opciones.length) % opciones.length;
     opciones[siguiente].focus();
   });
+  /* ---------- scroll sin trabadas ----------
+     Todo listener de scroll que reposiciona un menu hace lo mismo: mide con
+     getBoundingClientRect y despues escribe estilos. Medir-escribir-medir en
+     el mismo tick es layout thrashing, y en un scroll táctil eso se traduce en
+     el dedo "pegado": el frame tarda en salir y la pagina parece no seguir al
+     gesto.
+
+     ConRaf deja pasar como mucho una ejecucion por frame. No pierde nada: el
+     objetivo es seguir al menu pegado al boton mientras la pagina se mueve, y
+     eso se cumple igual con una medicion por frame.
+
+     El patron ya existia en el archivo para otro caso (el scan de destinos, con
+     un flag 'pending'); aqui faltaba para los dos caminos de scroll. */
+  function conRaf(fn) {
+    var pendiente = false;
+    return function () {
+      if (pendiente) return;
+      pendiente = true;
+      var correr = function () { pendiente = false; fn(); };
+      if (typeof requestAnimationFrame === 'function') requestAnimationFrame(correr);
+      else window.setTimeout(correr, 16);
+    };
+  }
+  /* Capture para que tambien corra cuando el scroll viene de un contenedor
+     interno. Passive porque ninguno de estos handlers llama preventDefault: sin
+     eso el navegador tiene que esperar al JS antes de componer cada frame, que
+     es justo lo que produce el scroll trabado. */
+  function scrollDeMenu() { return { capture: true, passive: true }; }
+
   // El menu es fijo: si la pagina scrollea o la ventana cambia de tamaño con el
   // menu abierto, sus coordenadas de ventana quedan viejas y el menu se despega
   // del boton. Se recalcula, y con scroll en capture para que tambien corra
   // cuando el scroll viene de un contenedor interno y no de la ventana.
   window.addEventListener('resize', posicionarMenosMonedaAbiertos);
   window.addEventListener('orientationchange', posicionarMenosMonedaAbiertos);
-  window.addEventListener('scroll', posicionarMenosMonedaAbiertos, true);
+  window.addEventListener('scroll', conRaf(posicionarMenosMonedaAbiertos), scrollDeMenu());
 
   function money(n) {
     var v = Number(n);
@@ -1805,6 +1834,41 @@
     // "undefined"/"null" literalmente en la interfaz.
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
   }
+  /* esc() sirve para TEXTO. Para un href hace falta una cosa mas: decidir si la
+     URL es de un tipo que se pueda abrir.
+
+     esc() escapa & < > " ' y nada mas, asi que un javascript:alert(1) pasa
+     intacto: no tiene ninguno de esos caracteres. Puesto en un href con
+     target="_blank", el click lo ejecuta. Las URLs de hotel y de vuelo vienen de
+     Booking y de SerpAPI, o sea de terceros: no son datos que nosotros elegimos.
+
+     Devuelve la URL solo si es http/https, y si no, cadena vacia. Un href=""
+     con texto sigue siendo un enlace visible pero no navega, que es preferible a
+     un enlace que ejecuta codigo. mailto: queda permitido porque es un tipo de
+     href legitimo y no ejecuta script.
+
+     El servidor ya hacia esto del lado suyo con safeBookingHotelUrl() para las
+     URLs de Booking; faltaba el lado del cliente. */
+  function safeUrl(valor) {
+    var crudo = String(valor == null ? '' : valor).trim();
+    if (!crudo) return '';
+    // Rechaza antes de pasar por new URL(): "javascript&#58;alert(1)" y otras
+    // variantes con entity no parsean como URL y asi que no llegan abajo.
+    if (/^[a-z][a-z0-9+.-]*:/i.test(crudo) && !/^https?:/i.test(crudo) && !/^mailto:/i.test(crudo)) return '';
+    try {
+      var u = new URL(crudo);
+      return (u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'mailto:') ? u.href : '';
+    } catch (e) {
+      // Sin esquema: es una ruta relativa interna (/grupo, /privacidad), valida.
+      return /^[./#?]/.test(crudo) ? crudo : '';
+    }
+  }
+  /* href ya armado: escapa el valor y descarta los esquemas peligrosos. Es la
+     forma de usarlo que evita el error clasico de pasar por safeUrl y despues
+     esc, o al reves, y que cada call site se acuerde de las dos. */
+  function hrefSeguro(valor) {
+    return esc(safeUrl(valor));
+  }
   function bookingUrl(meta, extra) {
     var query = new URLSearchParams({
       ss: meta.dest.name + ', Brasil',
@@ -1825,15 +1889,6 @@
     var dep = meta.dep.slice(8, 10) + meta.dep.slice(5, 7);
     var ret = meta.ret.slice(8, 10) + meta.ret.slice(5, 7);
     return 'https://www.aviasales.com/search/' + String(meta.origin || 'MVD').toUpperCase() + dep + iata + ret + meta.pax;
-  }
-  function ctas(meta) {
-    var city = esc(meta.dest.name);
-    return '<section class="cta-section" aria-label="Reservá tu viaje">' +
-      '<p class="cta-title">¿Listo para avanzar con tu viaje?</p>' +
-      '<div class="cta-actions">' +
-      '<a class="cta-link cta-flights" href="' + esc(flightUrl(meta)) + '" target="_blank" rel="noopener noreferrer">' +
-      '<span aria-hidden="true">✈️</span> Buscar y comparar vuelos a ' + city + '</a>' +
-      '</div></section>';
   }
   function hotelTotalForRate(meta, accommodationTotal, multiplier) {
     var nights = Math.max(1, Number(meta && meta.nights) || 1);
@@ -1857,9 +1912,6 @@
       comodo: { tier: 'alto', title: 'Premium', badge: 'COMODIDAD PREMIUM', description: 'Hoteles exclusivos, resorts y posadas de alta gama.' }
     };
     return styles[meta.style] || styles.eq;
-  }
-  function hotelImageFallback(index, fallback) {
-    return fallback || '';
   }
   /* El nombre del tipo de viaje del segmented control de arriba ("¿Qué tipo de
      viaje buscás?"). No sale de hotelStyle() a propósito: ese prioriza el tipo de
@@ -2146,19 +2198,6 @@
     var lista = selectedHotelsByStop();
     for (var i = 0; i < lista.length; i++) if (lista[i].stop === stop) return lista[i].name;
     return lista.length ? lista[0].name : findSelectedHotelLabel();
-  }
-  /* Que hotel hay que marcar al redibujar la lista.
-     Devuelve true/false si el total guardado esta en la lista, y null si no se
-     sabe (todavia no se eligio ninguno, o el hotel guardado ya no se ofrece).
-     El null es distinto de false a proposito: false seria "no marcar ninguno" y
-     dejaria la lista sin radio marcado, que es peor que marcar el recomendado. */
-  function hotelElegidoEnEstaLista(totalValue) {
-    if (!detailState || !detailState.selectedHotel) return null;
-    var guardado = Number(detailState.selectedHotelTotal);
-    if (!Number.isFinite(guardado) || guardado <= 0) return null;
-    // Margen de 1 porque el total guardado viene de un data-hotel-total ya
-    // redondeado al pintarse.
-    return Math.abs(guardado - totalValue) < 1;
   }
   /* Comparativa entre las fichas de hotel de un mismo grupo (una parada, o todo
      el destino): "Tu selección" en la elegida, "Mejor precio" en la mas barata,
@@ -2875,7 +2914,7 @@
           '<b>' + rating.toFixed(1) + '</b>' + (reviews ? '<span class="local-tour__reviews">' + reviews + (reviews === 1 ? ' reseña' : ' reseñas') + '</span>' : '') + '</p>'
         : '';
       return '<article class="local-tour" data-tour-card>' +
-        '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + tour.price + '">' +
+        '<input class="local-tour__input" type="checkbox" id="' + id + '" aria-label="Agregar ' + esc(tour.title) + ' al viaje" data-tour-choice data-tour-title="' + esc(tour.title) + '" data-tour-destination="' + esc(tour.destination) + '" data-tour-price="' + esc(tour.price) + '">' +
         media +
         '<div class="local-tour__body">' +
         /* Ficha vertical: chips con icono arriba (duracion, destino, lo que sume),
@@ -3968,8 +4007,11 @@
       // sola, con lo que cualquier persona que buscaba hoteles de un destino
       // leia la guia entera sin tocar nada. Ahora la guia se pide cuando la
       // persona toca "Ver disponibilidad" de un hotel, que es el gesto de
-      // reservar: verGuiaPorReserva() la busca y la pinta en el momento.
-      if (data.guiaToken) guardarTokenGuia(meta.dest.key, data.guiaToken);
+      // reservar: abrirGuiaPorReserva() la pide y la pinta en el momento.
+      /* El token ya NO se guarda acá. Antes venía en data.guiaToken con la sola
+         condición de que algún hotel fuera de Booking, y eso hacía que la guía se
+         abriera al VER precios. Ahora el server manda guiaToken:null siempre y
+         el token se pide en /api/guia/token, en el click. */
       var current = document.querySelector('[data-hotels-block]');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
       // Cada parada toma su recomendado. Con querySelector pelado solo se
@@ -4337,7 +4379,7 @@
     // Total resumido: solo se ve en la barra compacta (ver .steps.is-compact).
     var totalMini = '';
     try { totalMini = money(getBudgetBreakdown(detailState).total); } catch (e) { totalMini = ''; }
-    return '<span class="steps__mini-total" aria-hidden="true">' + totalMini + '</span>' + progreso + '<ol class="steps__list">' + lis + '</ol>';
+    return '<button type="button" class="steps__mini-total" data-ver-resumen aria-label="Ver el resumen del presupuesto">' + totalMini + '</button>' + progreso + '<ol class="steps__list">' + lis + '</ol>';
   }
   /* El boton para pasar al paso siguiente va ABAJO de lo que se esta eligiendo
      y aparece recien cuando ese paso quedo resuelto (ej: elegido el bus o el
@@ -4598,13 +4640,6 @@
       e.stopPropagation();
     }
   }
-  function toursWhatsappUrl(state) {
-    var selectedTours = (state && state.selectedTours) || [];
-    if (!selectedTours.length || !state.meta) return null;
-    var tourLines = selectedTours.map(function (tour) { return '- ' + tour.title + ' (' + (Number(tour.price) > 0 ? money(tour.price) : 'precio a consultar') + ')'; }).join('\n');
-    var message = 'Hola, quiero reservar estos tours para mi viaje a ' + state.meta.dest.name + ':\n' + tourLines + '\n\nTotal referencial de tours: ' + money(state.toursTotal) + '\nViajamos ' + state.meta.pax + (Number(state.meta.pax) === 1 ? ' persona' : ' personas') + ' del ' + state.meta.dep + ' al ' + state.meta.ret + '. ¿Podrían confirmar disponibilidad y valor final?';
-    return 'https://wa.me/?text=' + encodeURIComponent(message);
-  }
   function flightWhatsappUrl(state, flightSummary, flightTotal) {
     if (!state || !state.meta) return null;
     /* Sin vuelo elegido no hay nada que reservar: mandar por WhatsApp un mensaje
@@ -4627,10 +4662,6 @@
     var beachKeys = ['buz', 'rio', 'fln', 'ssa', 'rec', 'for', 'mcz', 'nat', 'pip', 'brazil'];
     var isBeach = beachKeys.indexOf(key) >= 0 || key.indexOf('beach') >= 0 || key.indexOf('playa') >= 0;
     return isBeach ? BRASIL_DEFAULT_COSTS.beach : BRASIL_DEFAULT_COSTS.city;
-  }
-  function getActiveBreakdownEntries() {
-    if (!detailState) return [];
-    return getBudgetBreakdown(detailState).entries;
   }
   function findSelectedHotelLabel() {
     if (detailState && detailState.selectedHotel === false) return 'Sin alojamiento';
@@ -4917,6 +4948,69 @@
     // de renderTripSummary y otra en el llamador). Ahora corre una vez por frame
     // desde queueHeavyRepaint(), que es quien sabe cuándo cambió la estructura.
   }
+  /* La barra "Mi Viaje" vive fija abajo en el celular, y el contenido tiene que
+     dejarle lugar. Ese lugar estaba escrito como un numero fijo en el CSS
+     (padding-bottom: 96px), y un numero fijo no puede ser correcto: el panel
+     cambia de alto según si esta minimizado, si la persona lo abre, cuantos
+     rubros tiene y cuanto texto hay en cada fila. Con 96px hardcodeados, abrir
+     el panel tapaba los ultimos botones de la pagina, que es exactamente el
+     sintoma reportado.
+
+     Se mide el panel y se publica en --reserva-alto. El CSS lo usa para el
+     padding. Cuando la barra esta oculta el padding vuelve a su minimo, asi
+     que no queda aire de mas cuando no hay nada que tapar.
+
+     --reserva-alto + 18px de holgura: el gap entre el final del contenido y el
+     borde superior del panel. */
+  function medirEspacioDeLaBarra() {
+    var summary = $('#trip-summary');
+    if (!summary) return;
+    // Solo <=900px. En escritorio la barra esta fija a la derecha y el contenido
+    // ya se corre con margin-left (la regla :has del CSS), asi que su alto no
+    // hay que reservarlo en vertical: ponerlo ahi dejaba aire de mas abajo con el
+    // viaje abierto. En el celu es al reves, la barra es de ancho completo pegada
+    // abajo y el padding SI tiene que seguirla.
+    var aplica = window.innerWidth <= 900;
+    var alto = 0;
+    if (aplica && !summary.hidden) {
+      var r = summary.getBoundingClientRect();
+      // +12 es el offset de la barra contra el borde (bottom:12px) y +6 el aire
+      // que se deja entre el final del contenido y el borde superior del panel.
+      if (r.height > 1) alto = Math.round(r.height) + 12 + 6;
+    }
+    var previo = document.documentElement.style.getPropertyValue('--reserva-alto');
+    // Sin barra visible NO se pone un 0: se borra la variable para que el CSS
+    // caiga en su valor por defecto. Un 0 explicito dejaba el padding-bottom del
+    // celu en cero y el ultimo elemento de la pagina pegado al borde.
+    if (alto === 0) {
+      if (previo === '') return;
+      document.documentElement.style.removeProperty('--reserva-alto');
+      return;
+    }
+    var siguiente = alto + 'px';
+    if (previo === siguiente) return;
+    document.documentElement.style.setProperty('--reserva-alto', siguiente);
+  }
+
+  /* La barra se repinta entero (innerHTML) y le cambian la clase `minimized`,
+     las dos cosas que cambian su alto. Un MutationObserver alcanza para las dos
+     y evita tener que acordarse de llamar a la medicion en cada repintado: si
+     alguien agrega una fila nueva al panel y no llama a esta funcion, el
+     padding se actualiza solo. El listener de resize cubre el giro del celu
+     y el ancho, que cambian el alto del panel al re-wrapear el texto. */
+  (function observarBarra() {
+    if (!window.MutationObserver) return;
+    var summary = $('#trip-summary');
+    if (!summary) return;
+    new MutationObserver(medirEspacioDeLaBarra).observe(summary, {
+      childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'hidden']
+    });
+    window.addEventListener('resize', conRaf(medirEspacioDeLaBarra));
+    // Una pasada diferida: cuando se registra todavia no hay nada pintado y
+    // getBoundingClientRect da 0.
+    window.setTimeout(medirEspacioDeLaBarra, 0);
+  })();
+
   function syncTripSummaryViewport() {
     var summary = $('#trip-summary');
     if (!summary) return;
@@ -4936,6 +5030,9 @@
     summary.setAttribute('data-mobile-viewport', String(isMobile));
     var toggle = summary.querySelector('[data-trip-summary-toggle]');
     if (toggle) toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
+    // La clase minimized es lo que decide el alto del panel, asi que la
+    // medicion va despues de tocarla y no antes.
+    medirEspacioDeLaBarra();
   }
   /* ---------- tarjeta para Instagram Stories ---------- */
   var htmlToImagePromise = null;
@@ -5325,6 +5422,13 @@
     /* Las personas salen del viaje: son las que se eligieron al buscar. Cambiarlas
        acá es un ajuste puntual del reparto y no toca el viaje. */
     splitState.n = Math.max(1, Math.min(20, Number(detailState.meta.pax) || 1));
+    /* Los nombres tambien se reinician, no solo la cantidad. Antes solo se
+       reseteaba n: si en el viaje A se cargaron 5 nombres y en el B se abre con 2,
+       los 3 sobrantes quedaban en el array. Con n de nuevo en 5 (el boton + llega
+       hasta 20) se renderizaban y se enviaban al grupo nombres del viaje A: el
+       reparto de un viaje terminaba con gente de otro. Los nombres son del reparto
+       puntual, asi que mueren con el modal. */
+    splitState.nombres = [];
     /* La persona 1 es quien mira: con sesion, su nombre sale de la cuenta (Google)
        en vez de quedar como "Persona 1". Solo si el campo esta vacio: lo que la
        persona ya escribio no se pisa. */
@@ -5511,9 +5615,33 @@
           var r = Math.random() * 16 | 0;
           return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
         });
-      try { localStorage.setItem(RESERVAS_KEY, JSON.stringify(mapa)); } catch (e) { /* modo privado */ }
+      // Se poda recien cuando entra una huella nueva, no en cada lectura.
+      try { localStorage.setItem(RESERVAS_KEY, JSON.stringify(podarMapaViajes(mapa))); } catch (e) { /* modo privado */ }
     }
     return mapa[huella];
+  }
+  /* El mapa de viajes crece sin limite: la clave es destino+fechas+personas, asi
+     que cada combinacion que alguien busca deja un UUID para siempre. Y este
+     UUID hace de contraseña de la fila en Supabase (ver el comentario de
+     viajeReservaId), o sea que son credenciales de viajes que ya no existen.
+
+     El problema concreto no es el tamano del archivo: es que viajeReservaId() se
+     llama en cada repintado (renderTripSummary -> estadoReserva -> ...) y hace un
+     JSON.parse del mapa entero. Con cientos de entradas, cada toque de un contador
+     o un cambio de moneda parsea el archivo completo.
+
+     Se poda al agregar una entrada nueva, no en cada llamada: podar en cada
+     lectura seria escribir en localStorage en cada repintado. Se conservan las
+     MAS RECIENTES porque son las que se pueden volver a abrir. */
+  var RESERVAS_MAX = 40;
+  function podarMapaViajes(mapa) {
+    var claves = Object.keys(mapa);
+    if (claves.length <= RESERVAS_MAX) return mapa;
+    // Object.keys mantiene el orden de insercion en claves string, y el mapa se
+    // arma de a una, asi que la ultima es la mas reciente.
+    var conservar = {};
+    claves.slice(-RESERVAS_MAX).forEach(function (k) { conservar[k] = mapa[k]; });
+    return conservar;
   }
   function reservasDe(categoria) { return !!reservasViaje.categorias[categoria]; }
   /* Estado que la base no guarda: la base solo sabe SI un rubro esta marcado, no
@@ -5668,6 +5796,12 @@
     if (!viajeId || !supabaseClient) return;
     var yaLeidas = reservasViaje.viajeId === viajeId;
     var antesJson = yaLeidas ? JSON.stringify(reservasViaje.categorias || {}) : '';
+    /* Si el viaje no es el que ya esta cargado, se vacia ANTES de esperar la
+       respuesta. Sin esto, entre que se abre la propuesta B y llega el RPC de B,
+       estadoReserva() sigue leyendo categorias del viaje A y el voucher de B
+       muestra "Reservado" en rubros que no reservo: con red lenta son segundos
+       visibles de un dato que no es de ese viaje. */
+    if (!yaLeidas) reservasViaje = { viajeId: viajeId, categorias: {} };
     try {
       var result = await supabaseClient.rpc('reservas_leer', { p_viaje_id: viajeId });
       if (result.error) return;
@@ -5869,10 +6003,9 @@
     var busLines = busSel
       ? '<p class="voucher-item__ruta">' + esc(busSel.ruta.origen) + ' &harr; ' + esc(busSel.ruta.destino) + '</p><p class="voucher-item__horarios">Sale ' + esc(busSel.ruta.salida) + ' · llega ' + esc(busSel.ruta.llegada) + ' · ' + esc(busSel.ruta.dias) + '</p>'
       : '<p class="voucher-item__detail">Ida y vuelta en bus semicama / cama.</p>' + (busServiceOptions(detailState.meta).length ? '<p class="voucher-item__aviso">Elegí un servicio en la sección de llegada para ver horarios.</p>' : '');
-    // toursWhatsappUrl() ya no se usa acá y queda sin referencias: el "Reservar"
+    // toursWhatsappUrl() se borro por quedar sin referencias: el "Reservar"
     // de tours abre el checkout, y checkoutWhatsappUrl() arma un mensaje que
-    // incluye las actividades junto con lo demas. Se deja la funcion definida
-    // hasta que se decida si se borra.
+    // incluye las actividades junto con lo demas.
     // El alojamiento no tenía acción propia en la versión anterior, solo el
     // precio de referencia. Con la fila en una línea, el enlace de
     // disponibilidad entra en el mismo lugar que el de los otros rubros.
@@ -6215,7 +6348,7 @@
         : 'Todav&iacute;a no agregaste vuelo';
       var vAccion = '';
       if (flightSummary.selected && flightBookUrl) {
-        vAccion = '<a class="voucher-step__btn is-link" href="' + esc(flightBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="pasajes">Ver en Google Flights</a>';
+        vAccion = '<a class="voucher-step__btn is-link" href="' + hrefSeguro(flightBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="pasajes">Ver en Google Flights</a>';
       } else if (flightSummary.selected) {
         vAccion = confirma('pasajes', 'laerol&iacute;nea');
       } else {
@@ -6232,7 +6365,7 @@
       if (!hotelElegido()) {
         hAccion = '<button type="button" class="voucher-step__btn" data-detalle-rubro="alojamiento">Elegir hotel</button>';
       } else if (hotelBookUrl) {
-        hAccion = '<a class="voucher-step__btn is-link" href="' + esc(hotelBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="alojamiento">Ver en Booking</a>';
+        hAccion = '<a class="voucher-step__btn is-link" href="' + hrefSeguro(hotelBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="alojamiento">Ver en Booking</a>';
       } else {
         hAccion = confirma('alojamiento', 'Booking');
       }
@@ -6791,42 +6924,6 @@
     if (Number.isNaN(date.getTime())) return String(value);
     return date.toLocaleString('es-UY', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
-  function getSelectedFlightSummary() {
-    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'Todavía no elegiste un vuelo.', selected: false };
-    var offer = getSelectedFlightOffer();
-    /* Antes el relleno de "airline" era la palabra "Vuelo seleccionado" y el
-       resumen armaba igual la linea de tramos, asi que sin vuelo elegido la fila
-       decia "Vuelo · Vuelo seleccionado" y debajo "IDA — sin fecha → — sin fecha":
-       dos em dash de airportCode(undefined) con un "sin fecha" al lado. Decir que
-       algo esta seleccionado cuando no lo esta es peor que no decir nada: la
-       persona cree que ya eligio. Ahora hay un selected explicito y cada que usa
-       el resumen decide que decir. */
-    if (!offer) return { airline: '', summary: 'Todavía no elegiste un vuelo.', selected: false };
-    var airline = offer.airline || detailState.selectedFlight || 'Vuelo sin nombre';
-    var outbound = offer && (offer.outbound || offer);
-    var departureValue = outbound && outbound.departure ? outbound.departure : (offer && offer.departure);
-    var arrivalValue = outbound && outbound.arrival ? outbound.arrival : (offer && offer.arrival);
-    var departureText = formatFlightDateTime(departureValue);
-    var arrivalText = formatFlightDateTime(arrivalValue);
-    var flightNumber = (offer && (offer.flight_number || (offer.outbound && offer.outbound.flight_number))) || '';
-    var inboundFlightNumber = offer && offer.inbound && offer.inbound.flight_number || '';
-    var originAirport = offer && (offer.departure_airport || (offer.outbound && offer.outbound.origin));
-    var destinationAirport = offer && (offer.arrival_airport || (offer.outbound && offer.outbound.destination));
-    var route = '';
-    if (offer) {
-      var origin = airportCode(originAirport);
-      var destination = airportCode(destinationAirport);
-      route = ' · ' + origin + ' → ' + destination;
-    }
-    return {
-      airline: airline,
-      summary: 'Transfer sincronizado para ' + airline + route + ' · Vuelo seleccionado el ' + departureText + (arrivalText && arrivalText !== 'sin fecha' ? ' · llegada ' + arrivalText : ''),
-      departureText: departureText,
-      arrivalText: arrivalText,
-      selected: true,
-      route: route
-    };
-  }
   /* Como se nombra un vuelo en un dato corto: "_aerolinea_ · _numero_".
      Tres lugares (el resumen del checkout, el bloque del transfer y el mensaje de
      WhatsApp) concatenaban vuelo.airline y vuelo.flightNumber a mano, y con
@@ -6974,9 +7071,6 @@
     var flow = document.querySelector('[data-transport-flow]');
     if (flow) flow.innerHTML = transportFlow(detailState.meta, detailState.flight, true);
     recalcularTotalViaje();
-  }
-  function roadtripCard(meta, autoSelected) {
-    return '';
   }
   function roadtripEvFigures(r, ev) {
     var preset = EV_VEHICLES[ev.modelKey] || EV_VEHICLES.byd_dolphin;
@@ -7545,7 +7639,7 @@
             : '<b title="Tarifa publicada por la empresa: ' + uyu(o.uyu) + '">' + money(o.uyu / tasaUyu) + '</b>')
           : '<span class="bus-opt__na">Consultar tarifa</span>';
         return '<li><label class="bus-opt">'
-          + '<input class="bus-opt__input" type="radio" name="bus-choice" data-bus-choice="' + esc(o.id) + '" data-bus-uyu="' + (o.uyu == null ? '' : o.uyu) + '"' + (elegido === o.id ? ' checked' : '') + '>'
+          + '<input class="bus-opt__input" type="radio" name="bus-choice" data-bus-choice="' + esc(o.id) + '" data-bus-uyu="' + esc(o.uyu == null ? '' : o.uyu) + '"' + (elegido === o.id ? ' checked' : '') + '>'
           + '<span class="bus-opt__main"><span class="bus-opt__times">' + esc(r.salida) + ' <i aria-hidden="true">&rarr;</i> ' + esc(r.llegada) + sigDia + '</span>'
           + '<span class="bus-opt__days">' + esc(r.dias) + (o.clase ? ' &middot; ' + esc(o.clase) : '') + '</span></span>'
           + '<span class="bus-opt__fare">' + tarifa + '</span></label></li>';
@@ -7684,40 +7778,56 @@
   var guiaPedidas = {};
   function pedirGuiaSecreta(destKey, done) {
     if (!destKey) return;
-    // El guard mira la GUIA, no la entrada. guardarTokenGuia() crea la entrada
-    // con el token solo, antes de que haya guia: si el guard preguntara por la
-    // entrada, creeria que ya la tiene, devolveria null y no volveria a pedir
-    // nunca. La entrada sin guia es justamente el estado normal de partida.
+    /* El guard mira la GUIA, no la entrada, porque la entrada sin guia es el
+       estado normal de partida. */
     var yaEsta = guiaCache[destKey] && guiaCache[destKey].guia;
     if (yaEsta) { done(yaEsta); return; }
     if (guiaPedidas[destKey]) return;
     guiaPedidas[destKey] = true;
-    var token = guiaCache[destKey] && guiaCache[destKey].token;
-    var url = '/api/guia?dest=' + encodeURIComponent(destKey) + (token ? '&token=' + encodeURIComponent(token) : '');
-    fetch(url).then(function (r) {
-      // 403 es la respuesta normal de quien no reservo con Booking: no es un
-      // error que haya que reportar, es la guia cerrada.
-      if (r.status === 403 || r.status === 404) return null;
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    }).then(function (data) {
-      if (data && data.guia) { guiaCache[destKey] = { guia: data.guia, token: token || null }; done(data.guia); return; }
-      // 403 o 404 no es un fallo: es la guia cerrada para este destino. Se
-      // marca como resuelta para no repreguntar en cada repintado.
-      guiaPedidas[destKey] = false;
-      done(null);
-    }).catch(function () {
-      // Un fallo de red si se reintenta: si no, un 500 dejaria la guia
-      // cerrada para siempre en esta sesion.
-      guiaPedidas[destKey] = false;
-      done(null);
-    });
+
+    /* Se pide el token y la guia en dos pasos, y el primero es lo nuevo.
+       Antes el token venia en la respuesta de /api/hoteles y la guia se podia
+       pedir en cualquier momento: es decir, se abria al VER precios de hotel,
+       sin que la persona tocara nada. Ahora el token sale de /api/guia/token y
+       esta funcion solo se llama desde el click en "Ver opciones" de un hotel
+       real (ver abrirGuiaPorReserva), o sea que hay un gesto deliberado de por
+       medio.
+
+       El token dura 30 minutos y vive en memoria, no en localStorage: es una
+       credencial y guardarla en disco seria justamente lo que el token evita. */
+    var destino = encodeURIComponent(destKey);
+    fetch('/api/guia/token?dest=' + destino)
+      .then(function (r) {
+        // 503 es la respuesta normal cuando el server no tiene secreto para
+        // firmar: la guia se queda cerrada y no es un error que mostrar.
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then(function (tk) {
+        if (!tk || !tk.token) { guiaPedidas[destKey] = false; done(null); return; }
+        return fetch('/api/guia?dest=' + destino + '&token=' + encodeURIComponent(tk.token))
+          .then(function (r) {
+            // 403 es la guia cerrada: no es un error que haya que reportar.
+            if (r.status === 403 || r.status === 404) return null;
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          })
+          .then(function (data) {
+            if (data && data.guia) { guiaCache[destKey] = { guia: data.guia, token: tk.token }; done(data.guia); return; }
+            guiaPedidas[destKey] = false;
+            done(null);
+          });
+      })
+      .catch(function () {
+        // Un fallo de red si se reintenta: si no, un 500 dejaria la guia
+        // cerrada para siempre en esta sesion.
+        guiaPedidas[destKey] = false;
+        done(null);
+      });
   }
-  function guardarTokenGuia(destKey, token) {
-    if (!destKey || !token) return;
-    guiaCache[destKey] = guiaCache[destKey] || {};
-    guiaCache[destKey].token = token;
-  }
+  /* La funcion que guardaba el token de la guia en el cache se borro: el token ya
+     no viene en la respuesta de hoteles sino de /api/guia/token, y se usa en el
+     mismo fetch que pide la guia. Quedaba sin referencias. */
   function guiaYaDe(destKey) {
     return (guiaCache[destKey] && guiaCache[destKey].guia) || null;
   }
@@ -8189,7 +8299,7 @@
       '</div>' +
       '<div class="flight-summary-total"><span class="flight-summary-total-label">Tarifa final · Ida y vuelta</span>' +
         '<b class="flight-summary-total-value">' + priceText + '</b>' + priceSub + '</div>' +
-      (offer.book_url ? '<a class="btn btn-primary flight-summary-book" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver en Google Flights</a>' : '') +
+      (offer.book_url ? '<a class="btn btn-primary flight-summary-book" href="' + hrefSeguro(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver en Google Flights</a>' : '') +
       '<button type="button" class="flight-summary-change" data-change-flight>' + iconSwap + 'Elegir otro vuelo</button>' +
       '<p class="flight-summary-foot">' + iconInfo + '<span>Tarifa final de ida y vuelta con ' + esc(offer.airline) + '. Al hacer clic, completás la reserva de forma segura en Google Flights.</span></p>' +
       '</div>';
@@ -8292,7 +8402,7 @@
       // link, no una oferta que reserving. El botón lleva a Google Flights con
       // la búsqueda ya armada, que es donde el usuario termina comprando.
       var bookLink = offer.book_url
-        ? '<a class="btn btn-secondary flight-buy-link" href="' + esc(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver y reservar en Google Flights</a>'
+        ? '<a class="btn btn-secondary flight-buy-link" href="' + hrefSeguro(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver y reservar en Google Flights</a>'
         : '';
       return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + cabinBadge + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div>' + (isRoundTrip ? '<small class="flight-route__note">Horarios de la ida. El precio es del viaje completo.</small>' : '') + '</div>' +
@@ -8564,6 +8674,14 @@
     if (!fn) return;
     e.preventDefault();
     conCarga(b, 'Reintentando…', function () { return fn(); }, 700);
+  });
+  // El total de la barra compacta abre el resumen del presupuesto (en celular
+  // reemplaza al panel flotante "Mi viaje", que ya no se muestra ahi).
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-ver-resumen]');
+    if (!t) return;
+    e.preventDefault();
+    try { openItinerarySummaryModal(); } catch (err) { console.error(err); }
   });
 
   function notice(msg) { $('#results').innerHTML = '<div class="notice">' + esc(msg) + '</div>'; }
@@ -9081,7 +9199,15 @@
       : '<p><b>Estimaciones iniciales.</b> Consultá la sección de vuelos en el detalle para buscar tarifas en tiempo real. Alojamiento y buses son valores reales; comidas y traslados en destino son valores de referencia.</p>')
       + '<details class="foot-credits" data-foot-credits><summary>Créditos de las fotos</summary>' +
       '<p>Fotos de <a href="https://commons.wikimedia.org" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, bajo licencia libre. ' +
-      'Cada autor y licencia se detalle más abajo.</p><ul data-foot-credits-list></ul></details>';
+      'Cada autor y licencia se detalle más abajo.</p><ul data-foot-credits-list></ul></details>'
+      /* Aviso de cuota y enlace a las legales. El server expone /privacidad y
+         /terminos sin extension (ver la ruta legal en server.js), asi que van sin
+         .html: si el dia de mañana cambia el nombre del archivo, el link sigue
+         funcionando. Las dos paginas existian pero no habia ningun link a ellas
+         desde la app, que es justo lo que hace que una politica de privacidad no
+         cuente. */
+      + '<p class="foot-legal"><a href="/privacidad">Política de privacidad</a>'
+      + ' · <a href="/terminos">Condiciones del servicio</a></p>';
 
     // Los créditos se cargan después de pintar para no frenar el primer render.
     cargarCreditosFotos().then(function () {
@@ -9575,11 +9701,13 @@
     if (!data.meta.hotelsLoaded) {
       pending.push(function () { return loadHotelRecommendations(data.meta, proposal.parts.alojamiento); });
     }
-    // Las actividades van aparte de los hoteles: si vuelven, la
-    // pantalla ya esta pintada con los tours locales y recien despues se
-    // reemplazan por los reales.
-    if (!data.meta.actividadesCargadas) {
-    }
+    /* Las actividades van aparte de los hoteles: la pantalla ya se pinta con los
+       tours locales de public/tours.generated.js y despues, si vuelven los reales
+       de la base, los reemplazan. No hay nada que encolar aca porque la seccion de
+       experiencias se pinta siempre con la lista local.
+       Antes habia un `if (!data.meta.actividadesCargadas) { }` vacio con un
+       comentario que describia esa intencion: un if sin cuerpo no hace nada y
+       `actividadesCargadas` no existe en ningun otro lado del archivo. */
     if (detailState.transportMode === 'flight' && liveFlightSection) {
       pending.push(function () { return searchFlights(data.meta, liveFlightSection); });
     }
@@ -9596,30 +9724,15 @@
     }
   }
 
-  // Resumen de vuelo real: reemplaza cualquier texto genérico del voucher.
-  function getSelectedFlightSummary() {
-    if (!detailState) return { airline: 'Vuelo seleccionado', summary: 'Todavía no elegiste un vuelo.' };
-    var offer = getSelectedFlightOffer();
-    var airline = offer && offer.airline || detailState.selectedFlight || 'Vuelo seleccionado';
-    var outbound = offer && (offer.outbound || offer) || {};
-    var inbound = offer && offer.inbound || {};
-    var departure = outbound.departure || offer && offer.departure;
-    var arrival = inbound.arrival || offer && offer.arrival || outbound.arrival;
-    var origin = outbound.origin || offer && offer.departure_airport || {};
-    var destination = outbound.destination || offer && offer.arrival_airport || {};
-    var flightNumber = offer && (offer.flight_number || outbound.flight_number) || '';
-    var inboundFlightNumber = inbound.flight_number || '';
-    var numbers = flightNumber ? 'Vuelo ' + flightNumber + (inboundFlightNumber ? ' · regreso ' + inboundFlightNumber : '') : 'Número de vuelo no informado';
-    var summary = numbers + ' · ' + (origin.name || origin.code || 'Origen no informado') + ' → ' + (destination.name || destination.code || 'Destino no informado') + ' · salida ' + formatFlightDateTime(departure) + ' · llegada ' + formatFlightDateTime(arrival);
-    return { airline: airline, summary: summary, departureText: formatFlightDateTime(departure), arrivalText: formatFlightDateTime(arrival), route: ' · ' + airportCode(origin) + ' → ' + airportCode(destination), flightNumber: flightNumber, inboundFlightNumber: inboundFlightNumber, origin: origin, destination: destination };
-  }
-
   // Voucher round-trip summary: keep both legs and the original offer total.
-  /* Esta es la TERCERA declaracion de getSelectedFlightSummary() en el archivo
-     (las otras dos estan mas arriba, en la zona de los helpers) y como es una
-     function declaration la ULTIMA que gana: las de arriba nunca se ejecutan. No
-     se tocan porque no se van a borrar sin revisar los otros usos — hay ocho
-     llamadas—, pero el selected:false de acá si es el que ve el resumen. */
+  /* Esta es la UNICA declaracion de getSelectedFlightSummary().Habia tres: dos mas
+     arriba, en la zona de los helpers, y como en una function declaration gana la
+     ULTIMA, esas dos nunca se ejecutaron. La que va aca es la que ve el resumen,
+     y es la que tiene el selected:false que permite decir "falta elegir vuelo" en
+     vez de imprimir un tramo con "—" en los aeropuertos. Las otras dos devolvian
+     un objeto con otro contrato ({summary, departureText, arrivalText} sin
+     selected ni outboundText), asi que dejarlas era una trampa para el que
+     edits el archivo creyendo que la primera es la que corre. */
   function getSelectedFlightSummary() {
     /* offer = getSelectedFlightOffer() || detailState.selectedOffer || {}: con el
        {} del final, offer nunca es null y por eso "Vuelo seleccionado" salia
@@ -9792,9 +9905,14 @@
      Con `prefers-reduced-motion` la transición no se aplica y el alto salta de
      golpe, que es lo que se pide al sistema; el estado final es el mismo. Por eso
      la animación se resuelve enteramente en CSS y acá no hay que preguntar. */
-  var desgloseTimer = null;
+  /* El timer va en el body, no en una variable global.
+     Con un unico desgloseTimer compartido, abrir el detalle de la tarjeta B
+     durante los 320ms de la A cancelaba el timer de la A: el `body.hidden = true`
+     final nunca corria para A, y quedaba con el <div> visible sin el boton
+     marcado como expandido. Se notaba como una tarjeta que "se abrio sola".
+     Un timer por elemento elimina el conflicto: abrir B no toca el de A. */
   function alternarDesglose(body, abrir) {
-    if (desgloseTimer) { clearTimeout(desgloseTimer); desgloseTimer = null; }
+    if (body.__desgloseTimer) { clearTimeout(body.__desgloseTimer); body.__desgloseTimer = null; }
     if (abrir) {
       body.hidden = false;
       // Dos fotogramas: uno para pintar el estado abierto y otro para aplicar el
@@ -9811,8 +9929,8 @@
       body.style.height = body.scrollHeight + 'px';
       requestAnimationFrame(function () { requestAnimationFrame(function () { body.style.height = '0px'; }); });
     }
-    desgloseTimer = setTimeout(function () {
-      desgloseTimer = null;
+    body.__desgloseTimer = setTimeout(function () {
+      body.__desgloseTimer = null;
       body.style.height = '';
       if (!abrir) body.hidden = true;
     }, 320);
@@ -9922,7 +10040,11 @@
      confirmacion del correo suele abrirse en otra pestana. */
   var ACCION_KEY = 'cuantosale_accion_pendiente';
   var ACCION_TTL_MS = 30 * 60 * 1000;
-  var ACCIONES_CON_LOGIN = ['data-reservar-rubro', 'data-marca-reserva', 'data-confirmar-reserva', 'data-deshacer-reserva', 'data-reservar-pedido'];
+  /* Allowlist de los atributos que retomarAccionPendiente() acepta para armar un
+     selector. data-split-trip entra aca porque se usa en esa misma rama: sin el,
+     la validacion que se agrego para no interpolar valores de localStorage en un
+     selector cortaria justamente la accion de dividir el gasto. */
+  var ACCIONES_CON_LOGIN = ['data-reservar-rubro', 'data-marca-reserva', 'data-confirmar-reserva', 'data-deshacer-reserva', 'data-reservar-pedido', 'data-split-trip'];
   var MENSAJE_LOGIN = 'Iniciá sesión para guardar los cambios en tu viaje y gestionar tus reservas.';
   var authInitTerminado = false;
   function describirAccion(el) {
@@ -9983,13 +10105,29 @@
     var a = pend.accion, attr = a.attr, valor = a.valor;
     if (attr === 'data-detalle-rubro') { closeBookingForm(); jumpToBudgetSection(valor); return; }
     if (attr === 'data-split-trip' || attr === 'data-marca-reserva' || attr === 'data-confirmar-reserva' || attr === 'data-deshacer-reserva') {
-      var boton = modal.querySelector('[' + attr + (attr === 'data-split-trip' ? '' : '="' + valor + '"') + ']');
+      /* attr y valor vienen de localStorage, o sea que los escribio el navegador, no el
+       codigo. Antes de interpolarlos en un selector CSS se validan: sin esto, un
+       valor con una comilla hace que querySelector tire SyntaxError, y como esto
+       corre dentro de un async sin catch, la accion pendiente se corta a la mitad
+       (el modal ya cerrado y la accion sin ejecutar, sin mensaje).
+
+       El patron importa mas que el valor: el problema no es que localStorage sea
+       modificable a mano, es que un dato de entrada se mete en un selector sin
+       validar. Con las dos allowlists, un valor raro cae en el `return` y no
+       rompe nada. */
+    if (ACCIONES_CON_LOGIN.indexOf(attr) < 0) return;
+    if (typeof valor !== 'string' || !/^[\w-]*$/.test(valor)) return;
+    var boton = null;
+    try { boton = modal.querySelector('[' + attr + (attr === 'data-split-trip' ? '' : '="' + valor + '"') + ']'); } catch (e) { boton = null; }
       if (boton) boton.click();
       return;
     }
     // Reservar hotel/vuelo abre otra pestana y el navegador no la deja abrir sin
     // un toque de la persona: se la deja en la misma fila, lista para tocar.
-    var fila = a.rubro ? modal.querySelector('[data-rubro="' + a.rubro + '"]') : null;
+    var fila = null;
+    if (a.rubro && /^[\w-]+$/.test(String(a.rubro))) {
+      try { fila = modal.querySelector('[data-rubro="' + a.rubro + '"]'); } catch (e) { fila = null; }
+    }
     if (fila) {
       try { fila.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { fila.scrollIntoView(); }
       fila.classList.add('is-tras-vuelta');
@@ -10756,7 +10894,24 @@
     $('#auth-modal').addEventListener('click', async function (e) {
       if (e.target.closest('[data-close-auth]') || e.target === $('#auth-modal')) return closeAccountModal('auth-modal');
       var google = e.target.closest('[data-google-auth]');
-      if (google) { if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; } google.disabled = true; var oauth = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } }); if (oauth.error) openAuthModal(oauth.error.message); return; }
+      if (google) {
+        if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
+        google.disabled = true;
+        /* El try/catch va porque signInWithOAuth() puede LANZAR (error de red,
+           SDK sin inicializar) en vez de devolver { error }. Sin esto el throw
+           escapingaba de un handler async sin catch, y como el disabled ya
+           estaba puesto, el boton se quedaba muerto hasta que se cerrara y
+           reabriera el modal. Con el catch se rehabilita siempre. */
+        try {
+          var oauth = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
+          if (oauth && oauth.error) openAuthModal(oauth.error.message);
+        } catch (e) {
+          openAuthModal('No pudimos conectar con Google. Revisá la conexión y probá de nuevo.');
+        } finally {
+          google.disabled = false;
+        }
+        return;
+      }
       var signup = e.target.closest('[data-auth-action="signup"]');
       if (signup) {
         if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return; }
@@ -10798,6 +10953,15 @@
             }
             if (!trip) throw new Error('No pudimos encontrar ese viaje guardado.');
             await loadTrip(trip);
+            /* loadTrip() no siempre lanza cuando algo sale mal: openDestinationProposal()
+               se traga su error y devuelve { error }, asi que un viaje con una fecha
+               vieja deja el boton en "Cargando..." para siempre con el modal abierto.
+               Por eso el caso feliz tambien rehabilita: si el boton todavia esta en el
+               DOM (o sea, el modal no se cerro) es que la carga no pudo terminar. */
+            if (loadButton.isConnected) {
+              loadButton.disabled = false;
+              loadButton.textContent = loadButton.dataset.originalText || 'Cargar';
+            }
           } catch (error) {
             loadButton.disabled = false;
             loadButton.textContent = loadButton.dataset.originalText || 'Cargar';
@@ -10964,11 +11128,22 @@
         if (menu && control && !menu.hidden) posicionarMenuFijo(menu, control, true);
       });
     }
-    window.addEventListener('scroll', reposicionarMenusFijos, { passive: true });
-    window.addEventListener('resize', reposicionarMenusFijos);
+    /* Un solo manejador para los cuatro eventos, y con rAF.
+       El visualViewport dispara 'scroll' MUCHISIMAS veces — no solo cuando
+       scrollea la pagina, sino en el pinch-zoom y en cada cuadro de la
+       animacion del teclado — y antes de esto cada uno de esos eventos
+       recorria todos los .custom-select del documento con querySelectorAll y
+       midiendo. Con cuatro eventos sin limite, abrir un desplegable en el
+       celular hacia que el scroll se sintiera trabado.
+
+       Se registra passive en los eventos de scroll: estos handlers no llaman
+       preventDefault, asi que no tienen por que frenar la composicion. */
+    var reposicionarSuave = conRaf(reposicionarMenusFijos);
+    window.addEventListener('scroll', reposicionarSuave, { capture: true, passive: true });
+    window.addEventListener('resize', reposicionarSuave);
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', reposicionarMenusFijos);
-      window.visualViewport.addEventListener('scroll', reposicionarMenusFijos);
+      window.visualViewport.addEventListener('resize', reposicionarSuave);
+      window.visualViewport.addEventListener('scroll', reposicionarSuave, { passive: true });
     }
     function elegirLadoDelMenu(root) {
       if (!root) return;

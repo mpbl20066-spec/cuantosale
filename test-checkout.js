@@ -108,12 +108,23 @@ const cuerpo = ['checkoutTours', 'checkoutTransferLine', 'checkoutPedido', 'chec
   'nombreDeCuenta', 'hotelParaElTransfer',
   // checkoutWhatsappUrl() llama a vueloNombreCorto(), asi que tiene que venir con
   // ella o el test explota con ReferenceError en vez de fallar una comprobacion.
-  'vueloNombreCorto']
+  'vueloNombreCorto',
+  // checkoutTours() llama a descuentoToursDe(), que calcula el descuento por
+  // codigo de promo sobre el subtotal de actividades. Sin ella el test muere con
+  // ReferenceError antes de comprobar nada del checkout.
+  'descuentoToursDe']
   .map(extraer).join('\n');
 
 const deps =
   'function money(n){ var v=Number(n); return "R$ " + (Number.isFinite(v)?v:0).toFixed(2).replace(".", ","); }\n' +
   'function esc(s){ return String(s == null ? "" : s); }\n' +
+  // Las tres constantes del descuento por promo. descuentoToursDe() las lee y
+  // vienen de app.js como var sueltas, asi que hay que declararlas aca: si
+  // faltan, el checkout se rompe con ReferenceError antes de comprobar nada.
+  // Los valores son los de app.js; si cambian alla, el test tiene que saber.
+  'var DESCUENTO_TOURS_PCT = 5;\n' +
+  'var DESCUENTO_TOURS_MIN = 2;\n' +
+  'var DESCUENTO_TOURS_CODIGOS = { buz: "BUZIOS5", arraial: "ARRAIAL5", cabo: "CABOFRIO5", ilha: "ILHAGRANDE5" };\n' +
   // checkoutTransferLine() ahora lee los DOS tramos (transferType y
   // transferTypeVuelta) y pide el total a trasladoDelViaje(). Los dos stubs van
   // con la misma logica que las funciones reales, o el test estaria probando un

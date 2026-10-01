@@ -50,6 +50,62 @@ function haversineKm(a, b) {
 
 (async function main() {
   console.log('Guia Secreta');
+
+  await t('la guia se abre al tocar un hotel, no al ver los precios', function () {
+    /* Este es el cambio de negocio: antes el token de la guia viaia en la
+       respuesta de /api/hoteles con la sola condicion de que algun hotel fuera
+       de Booking. Con eso la Guia Secreta se abria al VER precios: cualquiera
+       que abriera un destino con la API configurada la tenia, sin tocar nada.
+
+       Ahora el token sale de /api/guia/token, que se pide en el click sobre
+       "Ver opciones". */
+    const srv = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+
+    // 1. El server ya no emite el token junto con los hoteles.
+    assert.ok(/guiaToken:\s*null/.test(srv),
+      'la respuesta de hoteles vuelve a traer el token: la guia se abriria al ver los precios');
+
+    // 2. Existe el endpoint que lo emite.
+    assert.ok(/api\/guia\/token/.test(srv), 'falta el endpoint /api/guia/token');
+    assert.ok(/function emitirTokenGuia/.test(srv), 'falta emitirTokenGuia()');
+
+    // 3. El cliente lo pide en el click del hotel, no al cargar los hoteles.
+    assert.ok(/\/api\/guia\/token\?dest=/.test(app),
+      'el cliente no pide el token a /api/guia/token');
+    assert.ok(/abrirGuiaPorReserva/.test(app), 'no queda abrirGuiaPorReserva()');
+    // La llamada al token tiene que estar dentro del camino del click, que es
+    // pedirGuiaSecreta(). Antes esa funcion usaba un token ya guardado.
+    const pedir = app.slice(app.indexOf('function pedirGuiaSecreta'),
+      app.indexOf('function guiaYaDe'));
+    assert.ok(/\/api\/guia\/token/.test(pedir),
+      'pedirGuiaSecreta() tiene que pedir el token, no usar uno guardado');
+    /* Se busca en el codigo SIN comentarios: guardarTokenGuia quedo sin uso
+       cuando el token dejo de viajar con los hoteles, pero el nombre sigue
+       apareciendo en el comentario que explica por que se borro, y buscarlo en
+       el fuente crudo daria un falso negativo cada vez que se documente. */
+    const appSinComentarios = app.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    assert.ok(/guardarTokenGuia/.test(appSinComentarios) === false,
+      'la funcion que guardaba el token de la guia quedo sin uso: el token ya no viaja con los hoteles');
+
+    // 4. El postback existe y esta fuera del candado, para que el panel lo pueda
+    //    llamar sin user/pass.
+    assert.ok(/api\/travelpayouts\/postback/.test(srv), 'falta el postback de Travelpayouts');
+    assert.ok(/PRELAUNCH_PUBLIC_API = new Set\(\[[^\]]*travelpayouts\/postback/.test(srv),
+      'el postback tiene que estar en PRELAUNCH_PUBLIC_API: con el candado puesto nunca llegaria');
+  });
+
+  await t('el postback de Booking marca el viaje y no rompe si le falta todo', async function () {
+    const srv = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
+    // El RPC reservas_marcar pide CUATRO argumentos; con tres el grant no
+    // encuentra la funcion y la escritura falla con permiso denegado.
+    assert.ok(/p_viaje_id[\s\S]{0,120}p_categoria[\s\S]{0,120}p_destino[\s\S]{0,120}p_detalle/.test(srv),
+      'reservas_marcar se llama con menos de los cuatro parametros que pide el SQL');
+    // Sin service key no puede escribir, pero tampoco debe tirar.
+    assert.ok(/marcarReservaServidor/.test(srv) && /return false/.test(srv),
+      'marcarReservaServidor() tiene que devolver false sin key, no lanzar');
+  });
+
   const GUIAS_SECCIONES = ['beaches', 'atracciones', 'comer', 'hacer', 'tips'];
   const GUIAS_FUENTE = path.join(__dirname, 'lib', 'guias.js');
 
@@ -1681,8 +1737,33 @@ function haversineKm(a, b) {
       'posicionarMenuMoneda() no recorta el menú contra el borde de la ventana');
     assert.ok(/addEventListener\('resize', posicionarMenosMonedaAbiertos\)/.test(app),
       'el menú no se reposiciona al cambiar el tamaño de la ventana');
-    assert.ok(/addEventListener\('scroll', posicionarMenosMonedaAbiertos, true\)/.test(app),
+    /* El listener de scroll se verifica por lo que TIENE que garantizar, no por
+       la forma literal de la llamada. Antes el test buscaba el texto exacto
+       `addEventListener('scroll', posicionarMenosMonedaAbiertos, true)`, y
+       cuando el scroll se paso a requestAnimationFrame —para que el menu se
+       reposicionara una vez por frame en vez de en cada evento, que es lo que
+       hacia que el scroll se sintiera trabado en el celular— el test fallo sin
+       que se hubiera roto nada: la garantia seguía estando.
+
+       Se sigue exigiendo lo mismo: que el scroll repoicione el menu, que sea
+       en capture para que tambien cuente el scroll de un contenedor interno, y
+       que no bloquee la composicion. */
+    const scrollMoneda = app.match(/addEventListener\('scroll',[^;]+;/g) || [];
+    const registraMoneda = scrollMoneda.some((linea) =>
+      linea.indexOf('posicionarMenosMonedaAbiertos') >= 0
+      // capture: tiene que estar, para que tambien cuente el scroll de un
+      // contenedor interno. Puede venir literal o envuelto en scrollDeMenu(),
+      // que es lo que hace ahora; las dos formas cumplen.
+      && (/capture:\s*true/.test(linea) || /,\s*true\)/.test(linea) || /scrollDeMenu\(\)/.test(linea)));
+    assert.ok(registraMoneda,
       'el menú no se reposiciona al scrollear: queda flotando lejos del botón');
+    assert.ok(/function conRaf/.test(app) && /function scrollDeMenu/.test(app),
+      'el scroll que reposiciona menus tiene que pasar por requestAnimationFrame y ser passive, '
+      + 'si no cada evento de scroll fuerza layout y el dedo se siente trabado');
+    const cuerpoScrollDeMenu = app.slice(app.indexOf('function scrollDeMenu'),
+      app.indexOf('function scrollDeMenu') + 220);
+    assert.ok(/capture:\s*true/.test(cuerpoScrollDeMenu) && /passive:\s*true/.test(cuerpoScrollDeMenu),
+      'scrollDeMenu() tiene que devolver capture:true y passive:true');
     assert.ok(/posicionarMenuMoneda\(menu, trigger\)/.test(app), 'abrir el menú no lo posiciona');
 
     const destinos = regla('\\.custom-select__menu');

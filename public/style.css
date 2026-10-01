@@ -1,4 +1,4 @@
-/* version: 230
+/* version: 232
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -504,6 +504,10 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .opt__cta{flex:1 1 auto;justify-content:center;margin-left:auto}
 }
 .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px}
+.foot-legal{margin:14px 0 0;font-size:12.5px;line-height:1.6}
+.foot-legal a{color:var(--cel);text-decoration:underline;text-underline-offset:2px}
+:root[data-theme="light"] .foot-legal a{color:var(--ink)}
+.foot-legal a:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
 .foot b{color:var(--ink)}
 .loading-shell{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px 16px;display:grid;gap:14px}
 .loading-status{font-size:13px;font-weight:700;color:var(--ink2)}
@@ -2948,7 +2952,7 @@ button.logo{min-height:44px}
 .is-loading:has(.voucher-btn__label)::before{display:none}
 @media (prefers-reduced-motion:reduce){.is-loading::before,.is-loading .voucher-btn__label::before{animation-duration:2.4s}}
 /* Barra "Mi viaje": en celular deja aire abajo y la pagina deja espacio para que no tape lo ultimo. */
-@media (max-width:900px){.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:900px){.wrap{padding-bottom:calc(var(--reserva-alto, 96px) + env(safe-area-inset-bottom,0px))}}
 
 /* Escritorio: el panel "Mi viaje" es fijo a la derecha (360px + 20px de margen).
    Con el contenido centrado en 760px, en pantallas de ~1100 a 1560px quedaba
@@ -3321,6 +3325,15 @@ button.logo{min-height:44px}
 /* El selector Total / Por persona es chico a la vista, pero su toque llega a 48px */
 .bud-mode button{position:relative}
 .bud-mode button::after{content:"";position:absolute;inset:-12px -4px}
+/* La barra de pasos compacta achica el rectangulo visible (40px, y 34px por
+   debajo de 360px) para que los 4 pasos entren en una pantalla chica. El area
+   TACTIL se mantiene en 48px con el mismo truco que .bud-mode: un
+   pseudo-elemento centrado de 48x48 que se sale del boton pero no se ve. Sin
+   esto el boton era de 40/34 de verdad, por debajo del minimo, y el comentario
+   de arriba decia 48px: el numero y la promesa no coincidian y no se notaba
+   porque "se ve bien". */
+.steps.is-compact .steps__btn{position:relative}
+.steps.is-compact .steps__btn::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px}
 /* Filas tocables del desglose y resumenes desplegables */
 .proposal-breakdown__row.is-jumpable{min-height:var(--tap)}
 summary{min-height:var(--tap);display:flex;align-items:center}
