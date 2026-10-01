@@ -2311,30 +2311,46 @@
       }
       function seccionesMarkup() {
         /* El recomendado es el mismo de la lista plana (el que entra al
-           presupuesto); si no esta en ninguna seccion, el primero de la primera. */
+           presupuesto); si no esta en ninguna seccion, el primero de la primera.
+           Se muestran SOLO 3 hoteles a la vez, con un filtro por playa arriba
+           ("Todas" + una pastilla por playa) y "Ver mas" para el resto. Antes
+           cada playa tenia su seccion con 3 cards y con varias playas era un
+           scroll interminable. El filtro y el "Ver mas" no repintan: ocultan
+           cards (ver aplicarVistaPlayas). */
         var top = opciones[0] ? opciones[0].name : '';
         var hayTop = secciones.some(function (sec) { return sec.lista.some(function (item) { return item.name === top; }); });
-        var abiertas = (detailState && detailState.playasAbiertas) || {};
-        return '<div class="hotel-playas">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + secciones.map(function (sec, si) {
-          var cards = sec.lista.map(function (item, ii) {
+        var clave = stop || 0;
+        var sel = (detailState && detailState.playaSel && detailState.playaSel[clave]) || '';
+        if (sel && !secciones.some(function (sec) { return sec.playa === sel; })) sel = '';
+        var abierta = !!(detailState && detailState.playasAbiertas && detailState.playasAbiertas[clave]);
+        var cards = [];
+        secciones.forEach(function (sec, si) {
+          sec.lista.forEach(function (item, ii) {
             var o = aOpcion(item, ii);
             o.recommended = hayTop ? item.name === top : (si === 0 && ii === 0);
             o.highlight = o.recommended ? 'Recomendado' : '';
-            return cardDe(o);
+            cards.push({ playa: sec.playa, html: cardDe(o) });
           });
-          var claveAbierta = (stop || 0) + '|' + sec.playa;
-          var abierta = !!abiertas[claveAbierta];
-          var resto = cards.length - 3;
-          return '<section class="hotel-playa" data-hotel-playa-section aria-label="Alojamientos en ' + esc(sec.playa) + '">'
-            + '<header class="hotel-playa__head"><h3 class="hotel-playa__title">' + (sec.playa === 'Otras zonas' ? '📍 ' : '🏖️ ') + esc(sec.playa) + '</h3>'
-            + '<span class="hotel-playa__count">' + cards.length + (cards.length === 1 ? ' alojamiento' : ' alojamientos') + '</span></header>'
-            + '<div class="hotel-grid">' + cards.slice(0, 3).join('') + '</div>'
-            + (resto > 0
-              ? '<div class="hotel-grid hotel-playa__more"' + (abierta ? '' : ' hidden') + '>' + cards.slice(3).join('') + '</div>'
-                + '<button type="button" class="hotel-playa__toggle" data-hotel-playa-toggle="' + esc(claveAbierta) + '" data-mas="Ver más (' + resto + ')" aria-expanded="' + (abierta ? 'true' : 'false') + '">' + (abierta ? 'Ver menos' : 'Ver más (' + resto + ')') + '</button>'
-              : '')
-            + '</section>';
-        }).join('') + '</div>';
+        });
+        var visibles = 0;
+        var cardsHtml = cards.map(function (c) {
+          var coincide = !sel || c.playa === sel;
+          var oculta = true;
+          if (coincide) { visibles++; oculta = !abierta && visibles > 3; }
+          return c.html.replace('<article ', '<article data-playa="' + esc(c.playa) + '"' + (oculta ? ' hidden' : '') + ' ');
+        }).join('');
+        var resto = Math.max(0, visibles - 3);
+        var chips = secciones.length > 1
+          ? '<div class="hotel-playa-filter" role="group" aria-label="Filtrar por playa">'
+            + '<button type="button" class="hotel-type-pill' + (!sel ? ' is-on' : '') + '" data-hotel-playa-filter="" aria-pressed="' + (!sel ? 'true' : 'false') + '">Todas</button>'
+            + secciones.map(function (sec) {
+              var on = sec.playa === sel;
+              return '<button type="button" class="hotel-type-pill' + (on ? ' is-on' : '') + '" data-hotel-playa-filter="' + esc(sec.playa) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + (sec.playa === 'Otras zonas' ? '📍 ' : '🏖️ ') + esc(sec.playa) + '</button>';
+            }).join('') + '</div>'
+          : '';
+        return '<div class="hotel-playas" data-hotel-playas="' + clave + '">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + chips
+          + '<div class="hotel-grid">' + cardsHtml + '</div>'
+          + '<button type="button" class="hotel-playa__toggle" data-hotel-playa-toggle="' + clave + '"' + (resto > 0 ? '' : ' hidden') + ' aria-expanded="' + (abierta ? 'true' : 'false') + '">' + (abierta ? 'Ver menos' : 'Ver más (' + resto + ')') + '</button></div>';
       }
       var body = secciones.length
         ? seccionesMarkup()
@@ -8848,6 +8864,7 @@
     detailState.meta.hotelsPorPlaya = [];
     detailState.meta.hotelsPorPlayaSecond = [];
     detailState.playasAbiertas = {};
+    detailState.playaSel = {};
     detailState.meta.hotelsLoaded = false;
     detailState.meta.hotels = [];
     detailState.meta.hotelBudgetPerNight = null;
@@ -11199,23 +11216,48 @@ function comboNombreDestino() {
       tourInput.checked = !tourInput.checked;
       tourInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
-    /* "Ver más" de cada playa: muestra u oculta los alojamientos que pasan de
-       3. No repinta ni pide nada; el estado se guarda para que un repintado de
-       la sección (cambio de moneda) no la vuelva a cerrar. */
+    /* Filtro por playa y "Ver mas" del listado de hoteles: muestran como maximo
+       3 cards de la playa elegida (o de todas) y el resto tras "Ver mas". No
+       repinta ni pide nada; el estado se guarda en detailState para que un
+       repintado de la seccion (cambio de moneda) no lo pierda. */
+    function aplicarVistaPlayas(cont) {
+      if (!cont || !detailState) return;
+      var clave = cont.getAttribute('data-hotel-playas');
+      var sel = (detailState.playaSel && detailState.playaSel[clave]) || '';
+      var abierta = !!(detailState.playasAbiertas && detailState.playasAbiertas[clave]);
+      var n = 0;
+      Array.prototype.forEach.call(cont.querySelectorAll('[data-hotel-option]'), function (card) {
+        var coincide = !sel || card.getAttribute('data-playa') === sel;
+        var oculta = true;
+        if (coincide) { n++; oculta = !abierta && n > 3; }
+        if (oculta) card.setAttribute('hidden', ''); else card.removeAttribute('hidden');
+      });
+      Array.prototype.forEach.call(cont.querySelectorAll('[data-hotel-playa-filter]'), function (b) {
+        var on = b.getAttribute('data-hotel-playa-filter') === sel;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      var toggle = cont.querySelector('[data-hotel-playa-toggle]');
+      if (toggle) {
+        if (n > 3) toggle.removeAttribute('hidden'); else toggle.setAttribute('hidden', '');
+        toggle.setAttribute('aria-expanded', abierta ? 'true' : 'false');
+        toggle.textContent = abierta ? 'Ver menos' : 'Ver más (' + Math.max(0, n - 3) + ')';
+      }
+    }
     $('#vista-detalle').addEventListener('click', function (e) {
       var toggle = e.target.closest && e.target.closest('[data-hotel-playa-toggle]');
-      if (!toggle) return;
+      var chip = e.target.closest && e.target.closest('[data-hotel-playa-filter]');
+      var btn = toggle || chip;
+      if (!btn || !detailState) return;
       e.preventDefault();
-      var more = toggle.previousElementSibling;
-      if (!more) return;
-      var abrir = more.hasAttribute('hidden');
-      if (abrir) more.removeAttribute('hidden'); else more.setAttribute('hidden', '');
-      toggle.setAttribute('aria-expanded', abrir ? 'true' : 'false');
-      toggle.textContent = abrir ? 'Ver menos' : toggle.getAttribute('data-mas');
-      if (detailState) {
-        detailState.playasAbiertas = detailState.playasAbiertas || {};
-        detailState.playasAbiertas[toggle.getAttribute('data-hotel-playa-toggle')] = abrir;
-      }
+      var cont = btn.closest('[data-hotel-playas]');
+      if (!cont) return;
+      var clave = cont.getAttribute('data-hotel-playas');
+      detailState.playasAbiertas = detailState.playasAbiertas || {};
+      detailState.playaSel = detailState.playaSel || {};
+      if (toggle) detailState.playasAbiertas[clave] = !detailState.playasAbiertas[clave];
+      else { detailState.playaSel[clave] = chip.getAttribute('data-hotel-playa-filter') || ''; detailState.playasAbiertas[clave] = false; }
+      aplicarVistaPlayas(cont);
     });
     /* El tipo de alojamiento son botones, no un <select>, así que el cambio lo
        atiende un click y no un change. No llama a la API: la lista de cada tipo

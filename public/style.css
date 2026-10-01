@@ -2916,3 +2916,7 @@ button.logo{min-height:44px}
 .detail-main[data-paso="1"] :is([data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
 .detail-main[data-paso="2"] :is([data-transport-flow],[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
 .detail-main[data-paso="3"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel){display:none !important}
+
+.hotel-playas{gap:16px}
+.hotel-playa-filter{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.hotel-option[hidden]{display:none !important}
