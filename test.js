@@ -169,6 +169,110 @@ function haversineKm(a, b) {
       'la politica de privacidad tiene que decir que el pedido sale por WhatsApp');
   });
 
+  await t('mobile: areas tactiles, textos legibles y fechas con tope real', function () {
+    const css = fs.readFileSync(path.join(__dirname, 'public', 'style.css'), 'utf8');
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const wl = fs.readFileSync(path.join(__dirname, 'public', 'waitlist.html'), 'utf8');
+    const cssSinComentarios = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+    /* 1. Ningun control interactivo con area tactil menor a 40px. Los que se
+       achican por diseno llevan un pseudo-elemento que amplia el area real sin
+       ocupar mas espacio, que es lo que hay que verificar: un min-height chico
+       solo con el ::after decia bien, sin el se quedaba chico. */
+    const chicos = [];
+    const re = /([^{}]+)\{([^}]*)\}/g;
+    let m;
+    while ((m = re.exec(cssSinComentarios))) {
+      const sel = m[1].trim();
+      const cuerpo = m[2];
+      if (!/button|\.btn|-clear|-toggle|\.chip/.test(sel)) continue;
+      const h = cuerpo.match(/min-height:\s*(\d+)px/);
+      if (!h) continue;
+      const alto = Number(h[1]);
+      if (alto >= 40) continue;
+      const selPlano = sel.replace(/\s+/g, ' ');
+      /* Tres formas de que el area real llegue a 40px o mas, y solo una de
+         ellas es从小: un ::after que la amplia, o una regla posterior que le
+         pone un min-height mayor. La capa de uniformidad del final del archivo
+         hace lo segundo con var(--tap), asi que mirar la regla chica en
+         aislamiento daria falsos positivos: account-button es 38px en una linea
+         y 48px en elComputed, y eso esta bien. */
+      const esc = selPlano.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const ampliadoporAfter = new RegExp(esc + '\\s*::after').test(cssSinComentarios);
+      /* Se busca cualquier otra regla del mismo selector con un min-height
+         mayor. Es la aproximacion correcta para CSS plano: el que gana es el
+         ultimo, y la capa de uniformidad siempre esta al final. */
+      const otraMasAlta = (cssSinComentarios.match(new RegExp(esc + '\\s*\\{[^}]*min-height:\\s*(\\d+)px', 'g')) || [])
+        .some(function (r) { return Number(r.match(/min-height:\s*(\d+)px/)[1]) >= 40; });
+      if (!ampliadoporAfter && !otraMasAlta) chicos.push(selPlano + ' -> ' + alto + 'px sin nada que la amplie');
+    }
+    assert.strictEqual(chicos.length, 0,
+      'controles con area tactil chica y sin pseudo-elemento que la amplie:\n    ' + chicos.join('\n    '));
+
+    /* 2. Ningun texto por debajo de 10px en la waitlist: en pantalla chica una
+       unidad de 9.5px no se lee, y el contador es justamente el que tiene que
+       comunicar algo. */
+    const nueveYMedio = /\.wl-[a-z-]+\s*\{[^}]*font-size:\s*(9(\.\d+)?|10)px/.exec(wl);
+    assert.ok(!nueveYMedio,
+      'la waitlist tiene texto de ' + (nueveYMedio ? nueveYMedio[1] : '?') + 'px, ilegible en un celular');
+    const diez = /\.wl-[a-z-]+\s*\{[^}]*font-size:10px/.exec(wl);
+    assert.ok(!diez, 'la waitlist tiene texto de 10px, ilegible en un celular');
+
+    /* 3. El tope de un año tiene que estar en los inputs nativos, no solo en el
+       calendario custom. Con el max, el picker del celu no ofrece esas fechas:
+       sin el, dejaba elegir una a dos años y recien ahi se rechazaba. */
+    /* Se busca en toda la app y no en una ventana de caracteres: el bloque de
+       fechas tiene un comentario largo en el medio y un recorte corto cortaba
+       justo antes del max. */
+    assert.ok(/departure\.max\s*=\s*maxDepartureDate\(\)/.test(app),
+      'el input de ida no tiene max: el picker nativo deja elegir mas de un año');
+    assert.ok(/returning\.max\s*=\s*maxDepartureDate\(\)/.test(app),
+      'el input de vuelta no tiene max: el picker nativo deja elegir mas de un año');
+
+    /* 4. La waitlist tiene landmark y el aviso de privacidad va junto al campo
+       de correo, no despues de enviar. */
+    assert.ok(/<main id="waitlist-app">/.test(wl), 'la waitlist necesita <main>');
+    const jsWl = fs.readFileSync(path.join(__dirname, 'public', 'waitlist.js'), 'utf8');
+    const idxForm = jsWl.indexOf('id="waitlist-form"');
+    const idxLegal = jsWl.indexOf('wl-legal');
+    assert.ok(idxForm > 0 && idxLegal > 0, 'falta el aviso de privacidad en la waitlist');
+    /* Se comparan las FUNCIONES donde viven, no su distancia en el archivo: el
+       aviso tiene que estar en el MISMO render que el campo. Una distancia
+       cortaoria no prueba nada, porque entre el campo y el aviso puede haber
+       otra cosa que los separe en pantalla. */
+    function bloqueDesde(txt, i) {
+      // El render arranca con render( y todo el contenido vive hasta que cierra.
+      const inicio = txt.lastIndexOf('render(', i);
+      const fin = txt.indexOf('\n  }', i);
+      return { inicio: inicio, fin: fin === -1 ? txt.length : fin };
+    }
+    const bForm = bloqueDesde(jsWl, idxForm);
+    const bLegal = bloqueDesde(jsWl, idxLegal);
+    assert.ok(bLegal.inicio === bForm.inicio && bForm.inicio >= 0,
+      'el aviso de privacidad esta en un render distinto al del campo de correo: '
+      + 'tiene que estar en el paso de alta, no en la pantalla de confirmacion');
+  });
+
+  await t('los scripts versionados declaren su numero y suben, nunca bajan', function () {
+    const sync = fs.readFileSync(path.join(__dirname, 'scripts', 'sync-version.js'), 'utf8');
+    ['waitlist.js', 'grupo.js'].forEach(function (js) {
+      const ruta = path.join(__dirname, 'public', js);
+      if (!fs.existsSync(ruta)) return;
+      const txt = fs.readFileSync(ruta, 'utf8');
+      assert.ok(/^\s*(?:\/\*|\/\/)\s*version:\s*\d+/m.test(txt),
+        js + ' no declara su numero de version: sin eso el ?v= se sube a mano y se desincroniza');
+      const html = path.join(__dirname, 'public', js.replace('.js', '.html'));
+      if (!fs.existsSync(html)) return;
+      const pedido = (fs.readFileSync(html, 'utf8').match(new RegExp(js.replace('.', '\\.') + '\\?v=(\\d+)')) || [])[1];
+      const maestro = (txt.match(/version:\s*(\d+)/) || [])[1];
+      assert.ok(pedido === maestro,
+        js + ': la pagina pide v=' + pedido + ' y el archivo declara ' + maestro + '. Con immutable de un año no llegan a coincidir');
+    });
+    // Y el script se niega a bajar un numero.
+    assert.ok(/Bajar un \?v=/.test(sync),
+      'sync-version.js tiene que refuse bajar un ?v=: deja copias viejas sirviéndose para siempre');
+  });
+
   const GUIAS_SECCIONES = ['beaches', 'atracciones', 'comer', 'hacer', 'tips'];
   const GUIAS_FUENTE = path.join(__dirname, 'lib', 'guias.js');
 

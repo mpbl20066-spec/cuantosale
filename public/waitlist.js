@@ -1,3 +1,4 @@
+/* version: 8 */
 (function () {
   'use strict';
   var app = document.getElementById('waitlist-app');
@@ -120,6 +121,11 @@
       '<input required id="wl-email" type="email" name="email" placeholder="tu@email.com" autocomplete="email"></label>' +
       '<button type="submit" class="wl-btn">¡Quiero unirme ahora!</button>' +
       '<p class="wl-free-note">Gratis, sin tarjeta de crédito.</p>' +
+      /* El aviso de privacidad va ACÁ, junto al campo, y no en la pantalla de
+         confirmación: el momento de la decisión es cuando alguien lee si acepta
+         que guardemos su correo. Puesto despues, llega tarde. */
+      '<p class="wl-legal">Al anotarte aceptás nuestra <a href="/privacidad">política de privacidad</a> ' +
+      'y las <a href="/terminos">condiciones del servicio</a>.</p>' +
       '</form>' +
 // No va "Ya somos N personas en la lista": con el tope en 100, publicar el
       // conteo dice cuantos quedan sin que nadie lo calcule. El tope (BETA_CAP) si
@@ -193,14 +199,7 @@
       '<div class="wl-stat"><span>Personas invitadas</span><b>' + esc(invitedCount) + '</b></div>' +
       '<div class="wl-reward"><p>' + rewardCopy + '</p>' +
       '<div class="wl-reward__track"><div class="wl-reward__fill" style="width:' + Math.round((unlockedPct / REWARD_MAX_PCT) * 100) + '%"></div></div>' +
-      '<div class="wl-reward__steps"><span>0%</span><span>' + REWARD_MAX_PCT + '% off</span></div></div>'
-      /* Aviso de privacidad junto al campo, y no solo en un pie: esta es la
-         pagina donde se pide el correo. La politica dice que se guarda, asi que
-         el enlace tiene que estar a la vista en el momento de la decision, no
-         escondido tres pantallas mas abajo. Sin .html porque el server sirve
-         /privacidad y /terminos con esas rutas. */
-      + '<p class="wl-legal">Al anotarte aceptás nuestra <a href="/privacidad">política de privacidad</a>'
-      + ' y las <a href="/terminos">condiciones del servicio</a>.</p>' +
+      '<div class="wl-reward__steps"><span>0%</span><span>' + REWARD_MAX_PCT + '% off</span></div></div>' +
       '</div>'
     );
     document.getElementById('share-primary').addEventListener('click', function () {

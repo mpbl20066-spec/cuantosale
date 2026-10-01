@@ -40,7 +40,11 @@
   .wl-countdown{display:flex;justify-content:center;gap:14px;margin:0 0 32px}
   .wl-countdown__unit{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:72px;padding:16px 10px;border:1px solid var(--wl-line);border-radius:16px;background:#0E1533}
   .wl-countdown__unit b{font-family:'Poppins',sans-serif;font-weight:800;font-size:42px;color:var(--wl-amber);line-height:1;font-variant-numeric:tabular-nums}
-  .wl-countdown__unit span{font-size:11px;color:var(--wl-ink2);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  /* 12px es el piso legible en un celular: por debajo el texto se ve borroso y
+     las unidades del contador dejan de leerse, que es justo lo que el contador
+     tiene que comunicar. El numero grande es lo que se ve de entrada, asi que
+     subir la unidad no le roba espacio al mensaje. */
+  .wl-countdown__unit span{font-size:12px;color:var(--wl-ink2);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
   h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:44px;line-height:1.04;margin:0 0 16px;text-wrap:balance;text-align:center}
   .wl-sub{color:var(--wl-ink2);font-size:17px;line-height:1.55;margin:0 0 30px;text-align:center}
   .wl-field{display:block;margin-bottom:14px}
@@ -64,7 +68,9 @@
   .wl-reward p b{color:var(--wl-amber)}
   .wl-reward__track{height:8px;border-radius:99px;background:var(--wl-line);overflow:hidden}
   .wl-reward__fill{height:100%;background:var(--wl-amber);border-radius:99px;transition:width .4s ease}
-  .wl-reward__steps{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--wl-ink2)}
+  /* Eran 10px: ilegibles en el celu. Es la escala del premio, asi que a 12px
+     sigue leyendose como apoyo y no compite con el numero del contador. */
+  .wl-reward__steps{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--wl-ink2)}
   .wl-confirm-position{font-family:'Poppins',sans-serif;font-weight:800;font-size:64px;color:var(--wl-amber);line-height:1;text-align:center;margin:6px 0}
   .wl-confirm-label{text-align:center;color:var(--wl-ink2);font-size:13px;margin-bottom:22px}
   .wl-share{display:flex;gap:8px;align-items:center;background:#0E1533;border:1px solid var(--wl-line);border-radius:12px;padding:10px}
@@ -92,7 +98,7 @@
     .wl-countdown{gap:6px;margin:0 0 14px}
     .wl-countdown__unit{min-width:0;flex:1;padding:8px 3px;border-radius:12px;gap:2px}
     .wl-countdown__unit b{font-size:24px}
-    .wl-countdown__unit span{font-size:9.5px}
+    .wl-countdown__unit span{font-size:11px}
     h1{font-size:26px;line-height:1.06;margin:0 0 10px}
     .wl-sub{font-size:15px;line-height:1.45;margin-bottom:16px}
     .wl-field{margin-bottom:9px}
@@ -141,10 +147,14 @@
 </head>
 <body>
 <div class="wl-wrap">
-  <div id="waitlist-app"><p class="wl-status">cuántosale — cargando…</p></div>
+  <!-- main y no un div suelto: sin landmark, un lector de pantalla no tiene por
+       donde empezar en una pagina que es toda contenido. La pagina es un shell
+       y waitlist.js inyecta el h1 adentro, asi que el landmark se declara
+       alrededor del contenedor. -->
+  <main id="waitlist-app"><p class="wl-status">cuántosale — cargando…</p></main>
 </div>
 <!-- El ?v= tiene que bumpearse en cada cambio de waitlist.js: el servidor
      cachea las rutas con ?v= como inmutables durante un año. -->
-<script src="/waitlist.js?v=6" defer></script>
+<script src="/waitlist.js?v=8" defer></script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+/* version: 28 */
 (function () {
   'use strict';
   var app = document.getElementById('grupo-app');
