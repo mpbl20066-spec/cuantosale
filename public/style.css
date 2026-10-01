@@ -3692,3 +3692,27 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .proposal-breakdown__label>span:not(.proposal-breakdown__dot){font-size:15px;font-weight:600;color:var(--ink)}
 .proposal-breakdown__pct{flex:0 0 auto;color:var(--ink2);font-size:12px;font-weight:600}
 .proposal-breakdown__row b{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* Tarjeta de vuelo: toda la tarjeta es el elemento elegible (sin botones), igual
+   que traslados y tours: borde y sombra amarillos al elegirla. El boton real es
+   una capa transparente sobre la tarjeta, asi que sigue siendo accesible. */
+.flight-card{position:relative;padding:16px;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));box-shadow:0 3px 10px rgba(16,35,62,.08);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.flight-card:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
+.flight-card.is-selected{border:2px solid var(--card-sel-border);background:var(--card-bg,var(--surface));box-shadow:var(--card-sel-glow);padding:15.5px}
+.flight-card__pick{position:absolute;z-index:1;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:inherit;background:transparent;color:transparent;font-size:0;cursor:pointer;-webkit-appearance:none;appearance:none}
+.flight-card__pick:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.flight-card__pick:disabled{cursor:not-allowed}
+.flight-card__noprice{position:absolute;right:14px;bottom:12px;color:var(--ink2);font-size:12px;font-weight:700}
+.flight-card__tick{position:absolute;z-index:2;top:12px;right:12px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;opacity:0;transform:scale(.6);transition:opacity .16s ease,transform .16s ease;pointer-events:none}
+.flight-card.is-selected .flight-card__tick{opacity:1;transform:none}
+.flight-airline{padding-right:34px}
+@media(max-width:560px){
+  .flight-route{flex-direction:column;align-items:stretch;gap:0;margin:12px 0}
+  .flight-route>div{flex:none;padding:10px 0}
+  .flight-route>div + span{display:none}
+  .flight-route>div:nth-of-type(2){border-top:1px dashed var(--line)}
+  .flight-route small{font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+  .flight-route b{margin-top:2px;font-size:15px}
+  .flight-footer{align-items:center}
+  .flight-price{margin-left:auto}
+}

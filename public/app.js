@@ -8640,26 +8640,17 @@
       var routeLabel = esc(airportCode(originAirport) || '---') + ' → ' + esc(airportCode(destinationAirport) || '---');
       var departText = flightTime((displayedLeg && displayedLeg.departure) || offer.departure);
       var arrivalText = flightTime((displayedLeg && displayedLeg.arrival) || offer.arrival);
-      var primaryButtonText = isRoundTrip
-        ? (flightStep === 'done' ? 'Itinerario seleccionado' : 'Sumar al presupuesto')
-        : (flightStep === 'done' ? 'Vuelo seleccionado' : 'Agregar a presupuesto');
       var stageBadge = isRoundTrip
         ? '<span class="flight-badge">Ida y vuelta</span>'
         : '<span class="flight-badge">' + esc(offer.recommendation || 'Opción estratégica') + '</span>';
       var cabinBadge = '<span class="flight-badge cabin-badge">' + esc(offer.cabin_label || cabinClassLabel(offer.cabin_class)) + '</span>';
       var isSelected = !!(detailState && detailState.selectedFlightId && String(detailState.selectedFlightId) === String(offer.id));
       var priceKnown = offer.price_usd !== null && Number.isFinite(Number(offer.price_usd));
-      // El vuelo NO se vende acá: SerpAPI devuelve precios de búsqueda y un
-      // link, no una oferta que reserving. El botón lleva a Google Flights con
-      // la búsqueda ya armada, que es donde el usuario termina comprando.
-      var bookLink = offer.book_url
-        ? '<a class="btn btn-secondary flight-buy-link" href="' + hrefSeguro(offer.book_url) + '" target="_blank" rel="noopener noreferrer">Ver y reservar en Google Flights</a>'
-        : '';
-      return '<article class="flight-card within-budget' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + cabinBadge + stageBadge + '</div>' +
+      return '<article class="flight-card' + (isSelected ? ' is-selected' : '') + '"><div class="flight-airline">' + logo + '<b>' + esc(offer.airline) + '</b>' + cabinBadge + stageBadge + '</div>' +
         '<div class="flight-route"><div><small>' + routeLabel + '</small><small>Salida · ' + esc(airportLabel(originAirport)) + '</small><b>' + esc(departText) + '</b></div><span aria-hidden="true">→</span><div><small>Llegada · ' + esc(airportLabel(destinationAirport)) + '</small><b>' + esc(arrivalText) + '</b></div>' + (isRoundTrip ? '<small class="flight-route__note">Horarios de la ida. El precio es del viaje completo.</small>' : '') + '</div>' +
         '<div class="flight-footer"><span class="flight-badge' + (offer.stops === 0 ? ' direct' : '') + '">' + (offer.stops === 0 ? 'Directo' : offer.stops + (offer.stops === 1 ? ' escala' : ' escalas')) + '</span><span class="flight-duration">' + esc(offer.duration || '') + '</span>' +
         '<div class="flight-price"><small>' + (offer.trip_type === 'round_trip' ? 'Precio final · Ida y vuelta' : 'Precio final · Solo ida') + '</small><b>' + price + '</b></div></div>' +
-        '<div class="flight-card__actions"><button type="button" class="select-flight btn btn-primary"' + (priceKnown ? '' : ' disabled title="No pudimos obtener un precio en USD para esta opción."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (isSelected ? 'Vuelo seleccionado' : (priceKnown ? primaryButtonText : 'Sin precio en USD')) + '</button>' + bookLink + '</div></article>';
+        '<button type="button" class="select-flight flight-card__pick" aria-label="' + esc((isSelected ? 'Vuelo seleccionado: ' : 'Elegir vuelo ') + offer.airline + ', ' + price) + '"' + (priceKnown ? '' : ' disabled title="No pudimos obtener un precio en USD para esta opción."') + ' aria-pressed="' + (isSelected ? 'true' : 'false') + '" data-select-flight="' + esc(offer.id) + '" data-passenger-ids="' + esc(JSON.stringify(offer.passenger_ids || [])) + '" data-offer-price="' + esc(priceKnown ? offer.price_usd : '') + '" data-offer-currency="' + esc(offer.original_currency || 'USD') + '" data-offer-airline="' + esc(offer.airline) + '">' + (priceKnown ? '' : '<span class="flight-card__noprice">Sin precio en USD</span>') + '</button><span class="flight-card__tick" aria-hidden="true">✓</span></article>';
     }).join('') + '</div>';
   }
   function searchFlights(meta, section) {
