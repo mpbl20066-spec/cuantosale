@@ -4218,7 +4218,7 @@
     return [
       { n: 1, titulo: m === 'bus' ? 'Bus' : m === 'auto' ? 'Auto' : 'Vuelo + Traslados', texto: tTxt, hecho: t, anc: m === 'bus' ? 'bus' : m === 'auto' ? 'auto' : 'pasajes', cta: 'Elegí tu ' + (m === 'bus' ? 'bus' : m === 'auto' ? 'ruta' : 'vuelo') },
       { n: 2, titulo: 'Alojamiento', texto: hTxt, hecho: h, anc: 'alojamiento', cta: 'Elegí tu hotel' },
-      { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Tours, comida y transporte local', hecho: tr, opcional: true, anc: 'tours', cta: 'Sumá extras' },
+      { n: 3, titulo: 'Extras', texto: tr ? partes.join(' + ') : 'Tours y experiencias', hecho: tr, opcional: true, anc: 'tours', cta: 'Sumá experiencias' },
       /* Cuarto paso: la confirmacion, donde la persona ve su viaje completo (el
          voucher que abre "Ver mi presupuesto"). No se "completa": es el cierre. */
       { n: 4, titulo: 'Confirmar', texto: 'Mirá tu viaje', hecho: false, anc: '', cta: 'Ver mi viaje' }
@@ -4244,7 +4244,7 @@
     // esta mirando, no la primera pendiente.
     var lis = p.map(function (s, i) {
       var actual = i === n - 1;
-      var cls = (s.hecho ? 'is-done ' : '') + (actual ? 'is-current' : (s.hecho ? '' : 'is-pending'));
+      var cls = (s.hecho ? 'is-done ' : '') + (actual ? 'is-current' : (s.hecho ? '' : 'is-pending')) + (s.n === 3 ? ' steps__item--extras' : '');
       return '<li class="steps__item ' + cls + '"><button type="button" class="steps__btn" data-paso-ir="' + s.n + '"' + (actual ? ' aria-current="step"' : '') + '>'
         + '<span class="steps__n" aria-hidden="true">' + (s.hecho ? '✓' : s.n) + '</span>'
         + '<span class="steps__t"><b>' + esc(s.titulo) + '</b><small>' + esc(s.texto) + '</small></span></button></li>';
@@ -4268,7 +4268,12 @@
     if (!listo) {
       return '<button type="button" class="steps__next is-locked" data-paso-faltante="' + n + '" aria-disabled="true">' + esc(p[n - 1].cta) + ' para continuar</button>';
     }
-    return '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + (next.n === 4 ? esc(next.cta) : 'Continuar a ' + esc(next.titulo)) + (next.opcional ? ' <em>(opcional)</em>' : '') + ' <span aria-hidden="true">→</span></button>';
+    /* Extras es un pilar de la venta, no un anexo: el boton para llegar ahi no
+       dice "opcional" y pide la accion en lugar de ofrecer un paso mas. */
+    if (next.n === 3) {
+      return '<button type="button" class="steps__next steps__next--extras" data-paso-ir="3">Sumá experiencias y potenciá tu viaje <span aria-hidden="true">✨</span></button>';
+    }
+    return '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + (next.n === 4 ? esc(next.cta) : 'Continuar a ' + esc(next.titulo)) + ' <span aria-hidden="true">→</span></button>';
   }
   function irAlPaso(n) {
     if (!detailState) return;

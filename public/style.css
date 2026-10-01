@@ -1,4 +1,4 @@
-/* version: 211
+/* version: 214
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3102,3 +3102,11 @@ button.logo{min-height:44px}
 .hotel-playa-chip:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .hotel-playa-chip.is-on{border-color:var(--cel);background:var(--cel-soft);color:var(--ink);font-weight:800}
 .hotel-actions{grid-template-columns:1fr}
+
+/* Extras: pilar comercial. El boton para llegar al paso destaca sobre el resto
+   (mas alto, con brillo ambar) y la pestana pendiente lleva acento propio, para
+   que pese lo mismo que Vuelo y Alojamiento. */
+.steps__next--extras{min-height:58px;padding:10px 16px;font-size:15px;line-height:1.25;background:linear-gradient(135deg,var(--action-bg),color-mix(in srgb,var(--action-bg) 70%,#fff));box-shadow:0 8px 26px color-mix(in srgb,var(--action-bg) 45%,transparent)}
+.steps__next--extras:hover{filter:brightness(1.06)}
+.steps__item--extras.is-pending .steps__btn{border-color:color-mix(in srgb,var(--cel) 55%,var(--line));background:var(--cel-soft)}
+.steps__item--extras.is-pending .steps__n{border-color:var(--cel);color:var(--cel)}
