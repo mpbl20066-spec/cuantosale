@@ -75,6 +75,20 @@
     joaopessoa: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg/1280px-Jo%C3%A3o_Pessoa%2C_Para%C3%ADba%2C_Brasil.jpg'
   };
   /*
+   * Las tarjetas muestran una copia propia y chica (960 px, ~100 KB) de cada
+   * foto, en /fotos/<clave>.jpg (scripts/optimizar-fotos.py). Antes cargaban el
+   * original de Wikimedia (300 KB a 1,6 MB cada uno, y Wikimedia responde 429 si
+   * se le piden muchos juntos). La URL original sigue en data-foto-origen: de ahi
+   * salen los creditos del pie (cargarCreditosFotos busca la URL en el HTML) y es
+   * el respaldo si la copia local falta. Subir FOTOS_V al rehacer las fotos.
+   */
+  var FOTOS_V = 1;
+  function fotoTarjetaAttrs(key) {
+    var origen = DEST_PHOTOS[key];
+    if (!origen) return '';
+    return 'src="/fotos/' + encodeURIComponent(key) + '.jpg?v=' + FOTOS_V + '" data-foto-origen="' + esc(origen) + '" decoding="async" onerror="this.onerror=null;this.src=this.dataset.fotoOrigen"';
+  }
+  /*
    * Créditos de las fotos. Archivo GENERADO por creditos-fotos.js.
    *
    * Se cargan aparte y no van en línea en app.js: son 35 entradas de texto
@@ -1007,7 +1021,7 @@
       return '<article class="featured-destination' + (isCheapest ? ' is-cheapest' : '') + '" data-featured-destination="' + esc(group.id) + '"'
         + ' data-feature-price-key="' + esc(first.key) + '" data-feature-dates="' + esc(travel.depIso) + '|' + esc(travel.retIso) + '">'
         + (isCheapest ? '<span class="featured-destination__flag">M&aacute;s barato</span>' : '')
-        + '<div class="featured-destination__image"><img src="' + esc(photo) + '" alt="Paisaje de ' + esc(group.label) + '" loading="lazy">'
+        + '<div class="featured-destination__image"><img ' + fotoTarjetaAttrs(group.image) + ' alt="Paisaje de ' + esc(group.label) + '" loading="lazy">'
         + '<div class="featured-destination__scrim"></div>'
         + '<div class="featured-destination__overlay"><h3>' + esc(cardLabel) + '</h3>' + priceLine + '</div></div>'
         + '<div class="featured-destination__meta">'
@@ -8214,7 +8228,7 @@
       var bodyId = 'destino-desglose-' + index;
       return '<article class="destination-card' + (option.fits ? ' fits' : '') + (selectedDestKey === option.dest.key ? ' is-selected' : '') + '" data-opt-card data-dest-key="' + esc(option.dest.key) + '">' +
         (photo
-          ? '<div class="destination-banner destination-banner-photo"><img src="' + esc(photo) + '" alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
+          ? '<div class="destination-banner destination-banner-photo"><img ' + fotoTarjetaAttrs(option.dest.key) + ' alt="' + esc(option.dest.name) + '" loading="lazy"></div>'
           : '<div class="destination-banner destination-banner-' + esc(option.dest.key) + '" aria-hidden="true"><span>' + (option.dest.key === 'rio' ? '🌴' : option.dest.key === 'sao' ? '🏙️' : '☀️') + '</span></div>') +
         '<div class="destination-card-body">' +
         '<div class="opt__head destination-card-top"><div class="opt__main">' +
