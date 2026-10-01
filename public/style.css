@@ -1,4 +1,4 @@
-/* version: 252
+/* version: 253
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3676,3 +3676,19 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 @media(max-width:560px){
   .voucher-tools{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* "A donde va tu plata": barra segmentada (un tramo por rubro, con espacio entre
+   tramos) y, debajo, una lista limpia: punto de color, nombre y monto a la
+   derecha, sin lineas divisorias. */
+.proposal-breakdown{padding:24px 20px}
+.proposal-breakdown h2{margin:0 0 20px}
+.proposal-breakdown__stack{gap:3px;height:14px;border:0;background:transparent;overflow:visible}
+.proposal-breakdown__segment{min-width:6px;border-radius:999px;flex-shrink:1}
+.proposal-breakdown__list{gap:2px;margin-top:20px}
+.proposal-breakdown__row{min-height:var(--tap,48px);padding:6px 0;border:0;background:transparent;color:inherit;font:inherit;text-align:left}
+.proposal-breakdown__row+.proposal-breakdown__row{border-top:0}
+.proposal-breakdown__label{gap:12px}
+.proposal-breakdown__dot{flex:0 0 12px;width:12px;height:12px;border-radius:50%}
+.proposal-breakdown__label>span:not(.proposal-breakdown__dot){font-size:15px;font-weight:600;color:var(--ink)}
+.proposal-breakdown__pct{flex:0 0 auto;color:var(--ink2);font-size:12px;font-weight:600}
+.proposal-breakdown__row b{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}

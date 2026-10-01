@@ -4646,16 +4646,15 @@
       return '<span class="proposal-breakdown__segment" style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
     }).join('');
     var rows = entries.map(function (entry) {
-      // Mismo ícono que usa el panel "MI VIAJE", en vez de un cuadrado de
-      // color: las dos vistas ya se leen con la misma clave visual.
-      var icon = categoryIcon(entry.category, entry.color);
+      // Un punto del color del segmento de la barra: une la fila con su tramo.
+      var pct = entry.width >= 1 ? Math.round(entry.width) + '%' : '';
       // La fila es un botón: el desglose dice cuánta plata va a cada rubro, y
       // el lugar donde esa plata se cambia o se revisa es unos centímetros más
       // abajo. syncBudgetJumpTargets() desactiva las filas cuya sección todavía
       // no existe (tours sin actividades cargadas, traslados fuera de vuelo) y
       // les saca el "Ir a la sección", para no anunciarle al lector de pantalla
       // un salto que el clic no va a hacer.
-      return '<button type="button" class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '" data-jump-category="' + entry.category + '" data-jump-label="' + esc(entry.label) + '" aria-label="Ir a la sección de ' + esc(entry.label) + '"><div class="proposal-breakdown__label">' + icon + '<span>' + esc(entry.label) + '</span></div><b data-breakdown-value>' + money(entry.value) + '</b></button>';
+      return '<button type="button" class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '" data-jump-category="' + entry.category + '" data-jump-label="' + esc(entry.label) + '" aria-label="Ir a la sección de ' + esc(entry.label) + '"><div class="proposal-breakdown__label"><span class="proposal-breakdown__dot" style="background:var(' + entry.color + ')" aria-hidden="true"></span><span>' + esc(entry.label) + '</span>' + (pct ? '<small class="proposal-breakdown__pct">' + pct + '</small>' : '') + '</div><b data-breakdown-value>' + money(entry.value) + '</b></button>';
     }).join('');
     return '<div class="proposal-breakdown__stack" role="img" aria-label="Distribución del costo">' + segments + '</div>' +
       '<div class="proposal-breakdown__list">' + rows + '</div>';
