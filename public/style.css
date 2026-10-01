@@ -3268,3 +3268,25 @@ button.logo{min-height:44px}
 .cs-toast__txt b{font-size:14px;line-height:1.25}
 .cs-toast__txt small{color:var(--ink2);font-size:12.5px;line-height:1.35}
 @media (prefers-reduced-motion:reduce){.cs-toast{transition:none}}
+
+/* ---- Cabecera pegajosa del detalle (Smart Sticky) ----
+   Titulo + total + pasos quedan pegados arriba; al bajar se compactan a una
+   sola linea: titulo corto, total chico y los cuatro pasos en miniatura. */
+.detail-head{position:sticky;top:0;z-index:30;margin:0 0 22px;padding-top:env(safe-area-inset-top,0px)}
+.detail-head__sentinel{height:1px;margin-bottom:-1px;pointer-events:none}
+.detail-head .detail-summary{margin-bottom:12px;transition:padding .25s ease,border-radius .25s ease}
+.detail-head .steps{position:static;margin:0;box-shadow:none}
+.detail-head.is-compact{display:flex;align-items:center;gap:8px;padding:6px 0;margin-bottom:14px;background:var(--bg)}
+.detail-head.is-compact .detail-summary{flex:1 1 auto;min-width:0;margin:0;padding:7px 12px;border-radius:14px;display:flex;align-items:center;gap:8px}
+.detail-head.is-compact .detail-summary .tag,.detail-head.is-compact .detail-summary p,.detail-head.is-compact .detail-summary__per-person{display:none}
+.detail-head.is-compact .detail-summary h2{flex:1 1 auto;min-width:0;margin:0;font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-head.is-compact .detail-summary strong[data-detail-total]{flex:none;display:block;margin:0;font-size:19px;line-height:1}
+.detail-head.is-compact .steps{flex:none;padding:5px 6px;border-radius:14px}
+.detail-head.is-compact .steps__list{display:flex;gap:4px}
+.detail-head.is-compact .steps__btn{width:auto;min-height:34px;padding:2px;gap:0;justify-content:center;border-width:1px}
+.detail-head.is-compact .steps__t{display:none}
+.detail-head.is-compact .steps__n{margin:0}
+.detail-head.is-compact .steps__progress,.detail-head.is-compact .steps__pct{display:none}
+.detail-head.is-compact .detail-summary h2{display:none}
+.detail-head.is-compact .detail-summary p{display:block;flex:1 1 auto;min-width:0;font-size:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-head.is-compact .detail-summary__destino{font-size:14px}

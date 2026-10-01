@@ -4351,7 +4351,9 @@
     pintarPasos();
     // El paso 4 es la confirmacion: abre el voucher con el viaje completo.
     if (detailState.pasoActual === 4) { try { openItinerarySummaryModal(); } catch (e) { console.error(e); } }
-    var nav = document.querySelector('[data-steps]');
+    // Al cambiar de paso se vuelve al comienzo del contenido (la cabecera compacta
+    // se expande sola al llegar arriba).
+    var nav = document.querySelector('[data-detail-head-sentinel]') || document.querySelector('[data-steps]');
     if (nav && nav.scrollIntoView) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function pasoDeSeccion(el) {
@@ -9345,6 +9347,7 @@
      Se repinta la sección entera en vez de esconder y mostrar cards: es lo que
      ya hacen el resto de los cambios de la lista, y el marcado del hotel elegido
      depende del DOM final. */
+  var cabeceraObserver = null;
   function showProposalView(proposal, data) {
     var view = $('#vista-detalle'), content = $('#detalle-contenido');
     var isRoadtrip = proposal.mode === 'auto';
@@ -9432,8 +9435,9 @@
     // recomendar.
     var foodMarkup = renderSafe(function () { return guiaSecreta(data.meta, guiaYaDe(data.meta.dest.key)); }, '');
     content.innerHTML = '<div class="detail-layout"><div class="detail-main" data-paso="' + pasoActualNum() + '">' +
+      '<div class="detail-head__sentinel" data-detail-head-sentinel></div><div class="detail-head" data-detail-head>' +
       '<section class="detail-summary"><span class="tag">Propuesta seleccionada</span><h2>' + esc(titleOf(proposal)) + '</h2><p><b class="detail-summary__destino">' + esc(data.meta.dest.name) + '</b>' + (data.meta.subcategory ? ' · ' + esc(data.meta.subcategory) : '') + ' · ' + data.meta.nights + (data.meta.nights === 1 ? ' noche' : ' noches') + '</p><strong data-detail-total>' + money(proposal.total) + '</strong><span class="detail-summary__per-person" data-detail-total-pp>' + money(Math.round(proposal.total / pax)) + ' por persona</span></section>' +
-      '<nav class="steps" data-steps aria-label="Pasos del presupuesto">' + renderSafe(function () { return pasosMarkup(); }, '') + '</nav>' +
+      '<nav class="steps" data-steps aria-label="Pasos del presupuesto">' + renderSafe(function () { return pasosMarkup(); }, '') + '</nav></div>' +
       renderSafe(function () { return multiStayMarkup(detailState); }, '') +
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + dailyBudgetMarkup +
@@ -9456,6 +9460,20 @@
       foodMarkup + breakdownMarkup +
       '</div></div>';
     updateMultiStayPricing();
+    // Cabecera pegajosa: pasa a una version compacta de una linea al bajar (ver
+    // .detail-head en el CSS). El centinela esta justo arriba de ella: cuando sale
+    // de la pantalla por arriba, la cabecera esta pegada y se compacta.
+    (function () {
+      var head = document.querySelector('[data-detail-head]');
+      var sentinel = document.querySelector('[data-detail-head-sentinel]');
+      if (cabeceraObserver) { cabeceraObserver.disconnect(); cabeceraObserver = null; }
+      if (!head || !sentinel || typeof IntersectionObserver !== 'function') return;
+      cabeceraObserver = new IntersectionObserver(function (entries) {
+        var e = entries[0];
+        head.classList.toggle('is-compact', !e.isIntersecting && e.boundingClientRect.top < 0);
+      }, { threshold: 0 });
+      cabeceraObserver.observe(sentinel);
+    })();
     $('#btn-volver').textContent = massSearch ? '⬅ Volver a todos los destinos' : '⬅ Volver a las propuestas';
     // El estado ya está fijado arriba: acá solo queda reflejar el traslado
     // oficial y pintar los totales UNA vez. Antes, actualizarTransporte()
