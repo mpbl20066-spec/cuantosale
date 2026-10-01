@@ -2047,7 +2047,7 @@
        filtro antes (ver el comentario de test-hoteles.js). Con aria-checked el
        marcado se dibuja desde el estado de la pagina, y la navegacion con
        flechas la resuelve el handler. */
-    return '<div class="hotel-type-picks"><span class="hotel-type-picks__label" id="hotel-type-label">Alojamiento</span>'
+    return '<div class="hotel-type-picks"><span class="hotel-type-picks__label" id="hotel-type-label">Categoría de alojamiento</span>'
       + '<div class="hotel-type-pills" role="radiogroup" aria-labelledby="hotel-type-label">' + options.map(function (type) {
         var on = type === selected;
         return '<button type="button" class="hotel-type-pill' + (on ? ' is-on' : '') + '" role="radio" aria-checked="' + (on ? 'true' : 'false') + '" tabindex="' + (on ? '0' : '-1') + '" data-hotel-type="' + type + '">' + esc(HOTEL_TYPE_LABELS[type]) + '</button>';
@@ -2485,7 +2485,6 @@
             (option.hotelId && option.source === 'booking'
               ? '<button type="button" class="hotel-booking" data-hotel-rooms="' + esc(option.hotelId) + '" data-hotel-name="' + esc(option.name) + '" data-hotel-card-total="' + totalValue + '" data-hotel-url="' + esc(url) + '">Ver habitaciones</button>'
               : '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver opciones ↗</a>') +
-            '<label class="hotel-select" for="' + selectId + '"><span class="hotel-select__off">Seleccionar</span><span class="hotel-select__on">✓ Seleccionado</span></label>' +
             '</div></div>' + similarMarkup + '</article>';
       }
       /* Un destino solo con playas: los hoteles en una seccion por playa, con 3 a
@@ -2534,12 +2533,12 @@
         }).join('');
         var resto = Math.max(0, visibles - 3);
         var chips = secciones.length > 1
-          ? '<div class="hotel-playa-filter" role="group" aria-label="Filtrar por playa">'
-            + '<button type="button" class="hotel-type-pill' + (!sel ? ' is-on' : '') + '" data-hotel-playa-filter="" aria-pressed="' + (!sel ? 'true' : 'false') + '">Todas</button>'
+          ? '<div class="hotel-zona"><span class="hotel-type-picks__label" id="hotel-zona-label">Zona o playa</span><div class="hotel-playa-filter" role="group" aria-labelledby="hotel-zona-label">'
+            + '<button type="button" class="hotel-playa-chip' + (!sel ? ' is-on' : '') + '" data-hotel-playa-filter="" aria-pressed="' + (!sel ? 'true' : 'false') + '">Todas</button>'
             + secciones.map(function (sec) {
               var on = sec.playa === sel;
-              return '<button type="button" class="hotel-type-pill' + (on ? ' is-on' : '') + '" data-hotel-playa-filter="' + esc(sec.playa) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + (sec.playa === 'Otras zonas' ? '📍 ' : '🏖️ ') + esc(sec.playa) + '</button>';
-            }).join('') + '</div>'
+              return '<button type="button" class="hotel-playa-chip' + (on ? ' is-on' : '') + '" data-hotel-playa-filter="' + esc(sec.playa) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + (sec.playa === 'Otras zonas' ? '📍 ' : '🏖️ ') + esc(sec.playa) + '</button>';
+            }).join('') + '</div></div>'
           : '';
         return '<div class="hotel-playas" data-hotel-playas="' + clave + '">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + chips
           + '<div class="hotel-grid">' + cardsHtml + '</div>'

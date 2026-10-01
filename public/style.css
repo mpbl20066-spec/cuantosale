@@ -3090,3 +3090,15 @@ button.logo{min-height:44px}
   .trip-pill{grid-row:3}
 }
 @media(max-width:340px){.bud-mode{max-width:100%}.bud-mode button{padding:0 6px;font-size:10.5px}}
+
+/* ---- Los dos filtros de hoteles, bien separados ----
+   Arriba la CATEGORIA (Economico, Equilibrado...): pastillas grandes.
+   Abajo la ZONA o PLAYA: chips chicos, de contorno, con su propia etiqueta. */
+.hotel-options-head{margin-bottom:12px}
+.hotel-zona{display:grid;gap:8px;margin:16px 0 14px;padding-top:14px;border-top:1px dashed var(--line)}
+.hotel-zona .hotel-type-picks__label{font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.hotel-playa-chip{flex:none;display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font:600 13px var(--fb,inherit);white-space:nowrap;cursor:pointer}
+.hotel-playa-chip:hover{border-color:var(--control-muted)}
+.hotel-playa-chip:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.hotel-playa-chip.is-on{border-color:var(--cel);background:var(--cel-soft);color:var(--ink);font-weight:800}
+.hotel-actions{grid-template-columns:1fr}
