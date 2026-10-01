@@ -796,7 +796,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .flight-search-prompt{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}.flight-search-prompt p{margin:0;color:var(--ink2);font-size:13px}.flight-skeleton{display:grid;gap:10px;margin-top:16px}.flight-skeleton .skeleton-box{height:122px;border:1px solid var(--line);background:linear-gradient(90deg,var(--bg) 25%,rgba(122,148,176,.18) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}.flight-empty p{margin:0 0 10px}.flight-buy-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.flight-buy-link:hover{color:var(--ink)}
 @media (max-width:560px){.flight-search>div:first-child{display:block}.flight-footer{align-items:flex-end}.flight-price{margin-left:0}.select-flight{margin-left:auto}.flight-card__actions{flex-direction:column}.btn{width:100%}}
 
-.flight-summary-card{border:1px solid var(--good);border-radius:18px;padding:16px;margin-top:16px;background:var(--good-soft);box-shadow:0 5px 16px color-mix(in srgb,var(--good) 16%,transparent)}
+.flight-summary-card{border:1px solid var(--cel);border-radius:18px;padding:16px;margin-top:16px;background:var(--cel-soft);box-shadow:0 5px 16px color-mix(in srgb,var(--cel) 16%,transparent)}
 /* Cabecera:adeon, nombre y cabina en una sola línea. */
 .flight-summary-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .flight-summary-head b{font-size:15px}
