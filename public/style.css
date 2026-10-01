@@ -1,4 +1,4 @@
-/* version: 205
+/* version: 206
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1712,6 +1712,12 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    app.js. Con 768 el iPhone en horizontal (844x390) quedaba con el panel
    abierto a todo el ancho, sin max-height y sin manera de cerrarlo. */
 @media (max-width:900px){
+  /* Se arrastra en vertical (ver initTripBarDrag en app.js): la rayita de arriba
+     avisa que se puede mover y touch-action:none en la cabecera evita que el
+     navegador scrollee la pagina mientras se arrastra desde ella. */
+  .trip-summary::before{content:"";display:block;width:38px;height:4px;margin:0 auto 4px;border-radius:99px;background:var(--line)}
+  .trip-summary__head{touch-action:none}
+  .trip-summary.is-dragging{transition:none;user-select:none;-webkit-user-select:none;box-shadow:0 22px 44px rgba(16,35,62,.3)}
   .trip-summary{padding:9px 12px 10px;max-height:min(46vh,320px)}
   .trip-summary__inner{gap:0}
   .trip-summary__head{min-height:38px;align-items:center}
@@ -3000,3 +3006,28 @@ button.logo{min-height:44px}
 .hotel-option:has(.hotel-option__pick input:checked) .hotel-select__off{visibility:hidden}
 .hotel-option:has(.hotel-option__pick input:checked) .hotel-select__on{visibility:visible}
 .hotel-price__main b{font-size:22px}
+
+/* Etiquetas y diferencia de precio sobre la foto; modal de habitaciones. */
+.hotel-image-wrap{overflow:hidden}
+.hotel-tags{position:absolute;left:8px;top:8px;right:8px;z-index:2;display:flex;flex-wrap:wrap;gap:5px;pointer-events:none}
+.hotel-tag{padding:4px 9px;border-radius:99px;background:rgba(10,16,26,.78);color:#F4F6FA;border:1px solid rgba(255,255,255,.14);font-size:10.5px;font-weight:800;letter-spacing:.03em;line-height:1.2;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.hotel-tag.is-sel{background:#2f8a3a;border-color:#2f8a3a}
+.hotel-diff{position:absolute;right:8px;bottom:8px;z-index:2;display:grid;justify-items:center;padding:5px 10px;border-radius:10px;background:rgba(10,16,26,.78);color:#fff;line-height:1.15;pointer-events:none}
+.hotel-diff[hidden]{display:none}
+.hotel-diff b{font-size:15px;font-weight:800}
+.hotel-diff small{font-size:10px;opacity:.85}
+.hotel-diff.is-less b{color:#7be08a}
+.hotel-diff.is-more b{color:#ffb4a8}
+.rooms-modal{max-width:640px;width:calc(100% - 24px);max-height:88vh;overflow:auto}
+.rooms-modal__msg{margin:8px 0 12px;color:var(--ink2);font-size:13.5px}
+.rooms-modal__list{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:10px}
+.rooms-modal__room{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px;border:1.5px solid var(--line);border-radius:14px}
+.rooms-modal__room img,.rooms-modal__nophoto{width:96px;height:72px;border-radius:10px;object-fit:cover;background:var(--cel-soft);display:block}
+.rooms-modal__info{display:grid;gap:3px;min-width:0}
+.rooms-modal__info b{font-size:14px;color:var(--ink)}
+.rooms-modal__info small{font-size:12px;color:var(--ink2)}
+.rooms-modal__price{display:grid;justify-items:end;text-align:right}
+.rooms-modal__price b{font-size:17px;color:var(--ink)}
+.rooms-modal__price small{font-size:11px;color:var(--ink2)}
+.rooms-modal__book{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-weight:800;text-decoration:none}
+@media (max-width:520px){.rooms-modal__room{grid-template-columns:72px minmax(0,1fr)}.rooms-modal__room img,.rooms-modal__nophoto{width:72px;height:56px}.rooms-modal__price{grid-column:1/-1;justify-items:start;text-align:left}}

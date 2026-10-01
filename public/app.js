@@ -2099,6 +2099,97 @@
     // redondeado al pintarse.
     return Math.abs(guardado - totalValue) < 1;
   }
+  /* Comparativa entre las fichas de hotel de un mismo grupo (una parada, o todo
+     el destino): "Tu selección" en la elegida, "Mejor precio" en la mas barata,
+     "Más popular" en la de mas comentarios, y sobre la foto cuanto mas cara o
+     barata es cada una respecto de la elegida. Solo usa lo que ya esta en el
+     DOM, no consulta nada. */
+  function actualizarComparativa() {
+    Array.prototype.forEach.call(document.querySelectorAll('.hotel-group'), function (grupo) {
+      var cards = Array.prototype.filter.call(grupo.querySelectorAll('[data-hotel-option]'), function (c) { return !c.hasAttribute('hidden'); });
+      var dato = function (c) {
+        var input = c.querySelector('[data-hotel-total]');
+        return { c: c, total: input ? Number(input.getAttribute('data-hotel-total')) || 0 : 0, resenas: Number(c.getAttribute('data-hotel-reviews')) || 0, sel: !!(input && input.checked) };
+      };
+      var ds = cards.map(dato).filter(function (d) { return d.total > 0; });
+      var barata = ds.length > 1 ? ds.reduce(function (m, d) { return d.total < m.total ? d : m; }, ds[0]) : null;
+      var popular = ds.length > 1 ? ds.reduce(function (m, d) { return d.resenas > m.resenas ? d : m; }, ds[0]) : null;
+      if (popular && !(popular.resenas > 0)) popular = null;
+      var elegida = ds.filter(function (d) { return d.sel; })[0] || null;
+      ds.forEach(function (d) {
+        var tags = d.c.querySelector('[data-hotel-tags]');
+        var diff = d.c.querySelector('[data-hotel-diff]');
+        if (tags) {
+          var t = [];
+          if (d.sel) t.push('<span class="hotel-tag is-sel">✓ Tu selección</span>');
+          if (barata && d === barata) t.push('<span class="hotel-tag">Mejor precio</span>');
+          if (popular && d === popular) t.push('<span class="hotel-tag">Más popular</span>');
+          var html = t.join('');
+          if (tags.__html !== html) { tags.innerHTML = html; tags.__html = html; }
+        }
+        if (diff) {
+          var delta = elegida && !d.sel ? Math.round(d.total - elegida.total) : 0;
+          if (delta) {
+            diff.hidden = false;
+            diff.className = 'hotel-diff ' + (delta < 0 ? 'is-less' : 'is-more');
+            diff.innerHTML = '<b>' + (delta < 0 ? '−' : '+') + money(Math.abs(delta)) + '</b><small>Precio total</small>';
+          } else {
+            diff.hidden = true;
+          }
+        }
+      });
+    });
+  }
+  var comparativaPendiente = false;
+  function pedirComparativa() {
+    if (comparativaPendiente) return;
+    comparativaPendiente = true;
+    setTimeout(function () { comparativaPendiente = false; try { actualizarComparativa(); } catch (e) { console.error(e); } }, 0);
+  }
+  /* Modal de habitaciones de un hotel (getRoomList de Booking, via el server).
+     Muestra tipo, camas, comida, cancelacion y total; reservar sigue siendo en
+     Booking, con el mismo link de la ficha. */
+  function abrirHabitaciones(btn) {
+    var modal = $('#booking-modal');
+    if (!modal || !btn) return;
+    var id = btn.getAttribute('data-hotel-rooms');
+    var nombre = btn.getAttribute('data-hotel-name') || 'Hotel';
+    var url = btn.getAttribute('data-hotel-url') || '';
+    var cuerpo = function (html) {
+      modal.innerHTML = '<div class="booking-dialog rooms-modal" role="dialog" aria-modal="true" aria-labelledby="rooms-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>'
+        + '<span class="tour-detail-modal__eyebrow">HABITACIONES DISPONIBLES</span><h2 id="rooms-title">' + esc(nombre) + '</h2>' + html + '</div>';
+    };
+    cuerpo('<p class="rooms-modal__msg">Buscando habitaciones…</p>');
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    var nights = (detailState && detailState.meta && detailState.meta.nights) || 0;
+    var q = new URLSearchParams({ hotel_id: id, dep: S.dep, ret: S.ret, pax: String(S.pax) });
+    fetch('/api/hotel-habitaciones?' + q.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
+      var rooms = res.ok && res.j && Array.isArray(res.j.rooms) ? res.j.rooms : null;
+      var link = url ? '<a class="rooms-modal__book" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Reservar en Booking ↗</a>' : '';
+      if (!rooms || !rooms.length) {
+        cuerpo('<p class="rooms-modal__msg">' + esc((res.j && res.j.error) || 'No encontramos habitaciones disponibles para estas fechas.') + '</p>' + link);
+        return;
+      }
+      var items = rooms.map(function (r) {
+        var cancelOk = /free|gratu/i.test(r.cancelType + ' ' + r.cancelText) || r.cancelType === 'free_cancellation';
+        var meta = [];
+        if (r.beds) meta.push(esc(r.beds));
+        if (r.surface) meta.push(r.surface + ' m²');
+        if (r.maxOccupancy) meta.push('hasta ' + r.maxOccupancy + (r.maxOccupancy === 1 ? ' persona' : ' personas'));
+        return '<li class="rooms-modal__room">'
+          + (r.photo ? '<img src="' + esc(r.photo) + '" alt="" loading="lazy">' : '<span class="rooms-modal__nophoto"></span>')
+          + '<div class="rooms-modal__info"><b>' + esc(r.name) + '</b>'
+          + (meta.length ? '<small>' + meta.join(' · ') + '</small>' : '')
+          + (r.meal ? '<span class="hotel-line is-good">' + esc(r.meal) + '</span>' : '')
+          + (r.cancelText ? '<span class="hotel-line' + (cancelOk ? ' is-good' : '') + '">' + esc(r.cancelText) + '</span>' : '')
+          + '</div><div class="rooms-modal__price"><b>' + money(r.total) + '</b><small>' + (nights ? 'total ' + nights + (nights === 1 ? ' noche' : ' noches') : 'total') + '</small></div></li>';
+      }).join('');
+      cuerpo('<p class="rooms-modal__msg">Precios totales con impuestos para tus fechas. La reserva se hace en Booking.</p><ul class="rooms-modal__list">' + items + '</ul>' + link);
+    }).catch(function () {
+      cuerpo('<p class="rooms-modal__msg">No pudimos cargar las habitaciones ahora.</p>' + (url ? '<a class="rooms-modal__book" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver en Booking ↗</a>' : ''));
+    });
+  }
   var hotelCardSeq = 0;
   function hotelOptions(meta, accommodationTotal) {
     var nights = Math.max(1, Number(meta.nights) || 1);
@@ -2170,6 +2261,7 @@
           playaKm: item.playaKm,
           centroKm: item.centroKm,
           centroNombre: item.centroNombre || '',
+          hotelId: item.hotelId || '',
           reviewCount: Number(item.reviewCount) || 0,
           reviewWord: item.reviewWord || '',
           rating: Number(item.rating) || 0,
@@ -2234,6 +2326,10 @@
           // (ver el bloque de hotelCard más abajo). Fuera del label el alt deja de
           // duplicar el nombre que ya dice el h3.
           var imageMarkup = imageUrl ? '<span class="hotel-image-wrap"><img class="hotel-image" src="' + esc(imageUrl) + '" alt="' + esc(option.name) + '" loading="lazy" onerror="this.onerror=null;this.removeAttribute(\'src\');"></span>' : '<span class="hotel-image-wrap hotel-image-empty"><span>Sin foto disponible</span></span>';
+          // Etiquetas y diferencia de precio: contenedores vacios sobre la foto; los
+          // llena actualizarComparativa() segun cual es la elegida y cual la mas
+          // barata o la mas comentada de la lista.
+          imageMarkup = imageMarkup.slice(0, -7) + '<span class="hotel-tags" data-hotel-tags></span><span class="hotel-diff" data-hotel-diff hidden></span></span>';
           var similar = option.similar.map(function (name) { return '<li><a href="' + esc(bookingUrl(meta, { hotel: name })) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + ' ↗</a></li>'; }).join('');
           var similarMarkup = similar ? '<details class="hotel-similar"><summary>Ver hoteles similares</summary><ul>' + similar + '</ul></details>' : '';
           /* Donde queda: playa mas cercana y distancia al centro, en linea recta
@@ -2241,7 +2337,7 @@
           var ubicacionPartes = [];
           if (option.playa) ubicacionPartes.push('<span class="hotel-ubic__playa">🏖️ ' + esc(option.playa) + (option.playaKm != null ? ' · a ' + (option.playaKm < 1 ? Math.round(option.playaKm * 1000) + ' m' : String(option.playaKm).replace('.', ',') + ' km') : '') + '</span>');
           if (option.centroKm != null) ubicacionPartes.push('<span class="hotel-ubic__centro">📍 ' + String(option.centroKm).replace('.', ',') + ' km del ' + esc(option.centroNombre ? option.centroNombre.charAt(0).toLowerCase() + option.centroNombre.slice(1) : 'centro') + '</span>');
-          if (option.zonaTxt) ubicacionPartes = ['<span class="hotel-ubic__centro">📍 ' + esc(option.zonaTxt.replace(/s*•s*/, ' · ')) + '</span>'];
+          if (option.zonaTxt) ubicacionPartes = ['<span class="hotel-ubic__centro">📍 ' + esc(option.zonaTxt.replace(/\s*•\s*/, ' · ')) + '</span>'];
           var ubicacionMarkup = ubicacionPartes.length ? '<p class="hotel-ubic" title="Distancias en línea recta">' + ubicacionPartes.join('') + '</p>' : '';
           /* Ficha estilo Booking con lo que la busqueda ya trae: estrellas, puntaje y
              comentarios, tipo de habitacion, comidas y cancelacion. Cada fila se
@@ -2290,7 +2386,7 @@
           // que quedar fuera. El pie es una fila con el precio a la izquierda y
           // las dos acciones a la derecha, igual que .local-tour__foot de las
           // experiencias, así las dos secciones de la página se leen igual.
-          return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option data-hotel-stop="' + (isPar ? stop : '') + '">' + imageMarkup +
+          return '<article class="hotel-option' + (option.recommended ? ' recommended' : '') + '" data-hotel-option data-hotel-reviews="' + (Number(option.reviewCount) || 0) + '" data-hotel-stop="' + (isPar ? stop : '') + '">' + imageMarkup +
             '<label class="hotel-option__pick">' +
             '<span class="hotel-choice"><input type="radio" id="' + selectId + '" name="hotel-choice-' + (isPar ? stop : 'solo') + '" value="' + totalValue + '" data-hotel-total="' + totalValue + '" data-hotel-stop="' + (isPar ? stop : '') + '"' + (marcado ? ' checked' : '') + '>' + (badge ? '<span class="hotel-badge">' + esc(badge) + '</span>' : '') + '</span>' +
             '<span class="hotel-body">' +
@@ -2318,7 +2414,9 @@
             // ademas era lo que rompia la geometria al cambiar de texto
             // ("Elegir este hotel" / "Elegido") y lo que dejaba los dos textos
             // superpuestos al elegir.
-            '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver opciones ↗</a>' +
+            (option.hotelId && option.source === 'booking'
+              ? '<button type="button" class="hotel-booking" data-hotel-rooms="' + esc(option.hotelId) + '" data-hotel-name="' + esc(option.name) + '" data-hotel-url="' + esc(url) + '">Ver habitaciones</button>'
+              : '<a class="hotel-booking" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Ver opciones ↗</a>') +
             '<label class="hotel-select" for="' + selectId + '"><span class="hotel-select__off">Seleccionar</span><span class="hotel-select__on">✓ Seleccionado</span></label>' +
             '</div></div>' + similarMarkup + '</article>';
       }
@@ -9845,6 +9943,127 @@
     }
   }
 
+  /* ---------- Boton "atras" del celular ----------
+     Las ventanas (.booking-modal) y la vista de propuesta no tocaban el
+     historial: el gesto o el boton de atras del telefono sacaba a la persona
+     de la pagina entera en vez de cerrar la ventana. Cada capa que se abre
+     suma una entrada al historial y "atras" cierra la de arriba.
+
+     No toca el codigo que abre y cierra cada ventana: mira el atributo
+     `hidden` (y la clase `oculto` de la vista) con un MutationObserver. Asi
+     cubre tambien las que se crean despues, como #split-modal, y el cierre por
+     X, por Escape o por "atras" corre siempre el mismo codigo. */
+  function initBackLayers() {
+    if (!window.history || !history.pushState || !window.MutationObserver) return;
+    var pila = [];       // capas abiertas, la ultima es la de arriba
+    var ignorar = 0;     // popstate que provocamos nosotros con history.back()
+    var huerfanas = 0;   // entradas de historial cuya capa se cerro por debajo de otra
+    function capas() {
+      var out = Array.prototype.slice.call(document.querySelectorAll('.booking-modal')).map(function (el) {
+        return { el: el, abierta: !el.hidden, cerrar: function () {
+          var x = el.querySelector('[data-close-auth],[data-close-trips],[data-close-booking]');
+          if (x) x.click(); else { el.hidden = true; el.setAttribute('aria-hidden', 'true'); el.innerHTML = ''; }
+        } };
+      });
+      var vista = document.getElementById('vista-detalle');
+      if (vista) out.push({ el: vista, abierta: !vista.classList.contains('oculto'), cerrar: function () {
+        var b = document.getElementById('btn-volver'); if (b) b.click();
+      } });
+      return out;
+    }
+    function reconciliar() {
+      var todas = capas();
+      todas.forEach(function (c) {
+        var idx = pila.indexOf(c.el);
+        if (c.abierta && idx < 0) {
+          pila.push(c.el);
+          try { history.pushState({ csCapa: true }, ''); } catch (e) { pila.pop(); }
+        } else if (!c.abierta && idx >= 0) {
+          pila.splice(idx, 1);
+          if (idx === pila.length) { ignorar++; history.back(); } else { huerfanas++; }
+        }
+      });
+    }
+    var observador = new MutationObserver(reconciliar);
+    function observar(el) { observador.observe(el, { attributes: true, attributeFilter: ['hidden', 'class'] }); }
+    Array.prototype.forEach.call(document.querySelectorAll('.booking-modal'), observar);
+    var vista = document.getElementById('vista-detalle'); if (vista) observar(vista);
+    // Modales que se agregan despues (p. ej. #split-modal).
+    new MutationObserver(function (muts) {
+      muts.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains('booking-modal')) { observar(n); reconciliar(); } }); });
+    }).observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('popstate', function () {
+      if (ignorar > 0) { ignorar--; return; }
+      if (huerfanas > 0) { huerfanas--; return; }
+      var top = pila.pop();
+      if (!top) return;
+      var capa = capas().filter(function (c) { return c.el === top; })[0];
+      if (capa && capa.abierta) capa.cerrar();
+    });
+    reconciliar();
+  }
+
+  /* ---------- "Mi viaje": se puede arrastrar arriba y abajo ----------
+     En el celu la barra va fija abajo y a veces tapa lo que se esta mirando o
+     queda debajo del gesto del sistema. Se agarra de la barra (o de la rayita)
+     y se arrastra en vertical; la posicion se recuerda en la sesion. El toque
+     corto sigue abriendo y cerrando el panel. */
+  function initTripBarDrag() {
+    var bar = document.getElementById('trip-summary');
+    if (!bar || !window.PointerEvent) return;
+    var KEY = 'cuantosale_tripbar_bottom';
+    var MARGEN = 8;
+    function movil() { return window.innerWidth <= 900; }
+    function limitar(px) {
+      var max = window.innerHeight - bar.offsetHeight - MARGEN;
+      return Math.max(MARGEN, Math.min(px, Math.max(MARGEN, max)));
+    }
+    function aplicar(px) { bar.style.bottom = limitar(px) + 'px'; }
+    function reponer() {
+      if (!movil()) { bar.style.bottom = ''; return; }
+      var g = null; try { g = sessionStorage.getItem(KEY); } catch (e) { }
+      if (g !== null && g !== '' && isFinite(Number(g))) aplicar(Number(g)); else bar.style.bottom = '';
+    }
+    var drag = null, huboArrastre = false;
+    bar.addEventListener('pointerdown', function (e) {
+      if (!movil() || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      if (!(e.target === bar || e.target.closest('.trip-summary__head'))) return;
+      var r = bar.getBoundingClientRect();
+      drag = { y: e.clientY, bottom: window.innerHeight - r.bottom, id: e.pointerId, activo: false };
+    });
+    bar.addEventListener('pointermove', function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var dy = e.clientY - drag.y;
+      if (!drag.activo) {
+        if (Math.abs(dy) < 8) return;
+        drag.activo = true; bar.classList.add('is-dragging');
+        try { bar.setPointerCapture(e.pointerId); } catch (x) { }
+      }
+      e.preventDefault();
+      aplicar(drag.bottom - dy);
+    });
+    function soltar(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      if (drag.activo) {
+        huboArrastre = true;
+        setTimeout(function () { huboArrastre = false; }, 350);
+        try { sessionStorage.setItem(KEY, String(parseFloat(bar.style.bottom) || MARGEN)); } catch (x) { }
+        bar.classList.remove('is-dragging');
+      }
+      drag = null;
+    }
+    bar.addEventListener('pointerup', soltar);
+    bar.addEventListener('pointercancel', soltar);
+    // Despues de arrastrar, el click que sigue no tiene que abrir/cerrar el panel.
+    bar.addEventListener('click', function (e) {
+      if (huboArrastre) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+    window.addEventListener('resize', reponer);
+    // El alto cambia al abrir/cerrar el panel: se revalida para no salirse de la pantalla.
+    new MutationObserver(function () { if (movil() && bar.style.bottom) aplicar(parseFloat(bar.style.bottom)); }).observe(bar, { attributes: true, attributeFilter: ['class'] });
+    reponer();
+  }
+
   function init() {
     /* Volver a la vista de inicio.
 
@@ -11064,7 +11283,7 @@ function comboNombreDestino() {
       // a proposito (dentro de un <label> el enlace no se puede pulsar bien), y
       // por lo tanto esta rama es la unica que lo ve.
       var reservar = e.target.closest && e.target.closest('.hotel-booking');
-      if (reservar && detailState && detailState.meta && detailState.meta.dest) {
+      if (reservar && !reservar.hasAttribute('data-hotel-rooms') && detailState && detailState.meta && detailState.meta.dest) {
         abrirGuiaPorReserva(detailState.meta.dest.key);
       }
       var hotelCard = e.target.closest('[data-hotel-option]');
@@ -11297,7 +11516,30 @@ function comboNombreDestino() {
       if (toggle) detailState.playasAbiertas[clave] = !detailState.playasAbiertas[clave];
       else { detailState.playaSel[clave] = chip.getAttribute('data-hotel-playa-filter') || ''; detailState.playasAbiertas[clave] = false; }
       aplicarVistaPlayas(cont);
+      pedirComparativa();
     });
+    /* Comparativa de las fichas de hotel: se recalcula al elegir otra y cada vez
+       que la seccion se repinta (cambio de tipo, de moneda, carga de hoteles). */
+    $('#vista-detalle').addEventListener('change', function (e) {
+      if (e.target && e.target.matches && e.target.matches('[data-hotel-total]')) pedirComparativa();
+    });
+    $('#vista-detalle').addEventListener('click', function (e) {
+      var rooms = e.target.closest && e.target.closest('[data-hotel-rooms]');
+      if (!rooms) return;
+      e.preventDefault(); e.stopPropagation();
+      abrirHabitaciones(rooms);
+    });
+    if (typeof MutationObserver === 'function') {
+      new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var added = muts[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            var n = added[j];
+            if (n.nodeType === 1 && (n.matches('.hotel-group,.hotel-options,[data-hotel-option],[data-hotels-block],.detail-layout') || n.querySelector('[data-hotel-option]'))) { pedirComparativa(); return; }
+          }
+        }
+      }).observe($('#vista-detalle'), { childList: true, subtree: true });
+    }
     /* El tipo de alojamiento son botones, no un <select>, así que el cambio lo
        atiende un click y no un change. No llama a la API: la lista de cada tipo
        ya está en memoria, y filtrarla cuesta solo repintar, que es lo que ya
@@ -11684,6 +11926,8 @@ function comboNombreDestino() {
   }
 
   cargarTasas();
+  initBackLayers();
+  initTripBarDrag();
   init();
   installRoadtripMaps();
 

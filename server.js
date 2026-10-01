@@ -474,7 +474,7 @@ function normalizeHotelApiResponse(payload, extra, source) {
       reviewCount: Number(property.reviewCount || 0) || 0,
       reviewWord: String(property.reviewScoreWord || ''),
       stars: estrellas > 0 && estrellas <= 5 ? Math.round(estrellas) : 0,
-      roomLabel: String(property.recommendedUnitsConfigurationLabel || '').replace(/<[^>]*>/g, '').replace(/s+/g, ' ').trim(),
+      roomLabel: String(property.recommendedUnitsConfigurationLabel || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(),
       zonaTxt: lineaZona,
       comidaTxt: lineaComida,
       playaTxt: lineaPlaya,
@@ -1627,6 +1627,65 @@ function servirGuiaSecreta(req, res, url) {
   return sendJson(res, 200, { guia: guia });
 }
 
+/* Habitaciones de UN hotel, para el modal "Ver habitaciones". Una consulta a
+   getRoomList por hotel y por fechas: se guarda 15 minutos en memoria y tiene su
+   propio cubo de limite, porque cada una gasta cuota de Booking. Devuelve solo
+   lo que se muestra: nombre, camas, superficie, comida, cancelacion, foto y el
+   total con impuestos en USD. La reserva sigue siendo en Booking. */
+const habitacionesCache = new Map();
+async function habitacionesHotel(req, res, url) {
+  if (limited('habitaciones:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas consultas de habitaciones. Esperá un minuto y probá de nuevo.' });
+  const hotelId = String(url.searchParams.get('hotel_id') || '').trim();
+  const dep = String(url.searchParams.get('dep') || '').trim();
+  const ret = String(url.searchParams.get('ret') || '').trim();
+  const pax = Math.max(1, Math.min(10, Math.round(Number(url.searchParams.get('pax')) || 2)));
+  const iso = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
+  if (!/^[0-9]{1,12}$/.test(hotelId) || !iso.test(dep) || !iso.test(ret) || ret <= dep) return sendJson(res, 400, { error: 'Faltan datos del hotel o de las fechas.' });
+  const settings = bookingSettings();
+  if (!settings.key) return sendJson(res, 503, { error: 'Las habitaciones no están disponibles ahora.' });
+  const clave = [hotelId, dep, ret, pax].join('|');
+  const guardado = habitacionesCache.get(clave);
+  if (guardado && Date.now() - guardado.t < 15 * 60000) return sendJson(res, 200, { rooms: guardado.rooms });
+  const u = new URL('/api/v1/hotels/getRoomList', 'https://' + settings.host);
+  u.searchParams.set('hotel_id', hotelId); u.searchParams.set('arrival_date', dep); u.searchParams.set('departure_date', ret);
+  u.searchParams.set('adults', String(pax)); u.searchParams.set('room_qty', '1'); u.searchParams.set('units', 'metric');
+  u.searchParams.set('languagecode', 'es'); u.searchParams.set('currency_code', 'USD');
+  const payload = await bookingApiJson(u.toString(), settings);
+  const d = (payload && payload.data) || {};
+  const detalle = d.rooms || {};
+  const vistos = new Set();
+  const rooms = (Array.isArray(d.block) ? d.block : []).map(function (b) {
+    const det = detalle[String(b.room_id)] || {};
+    const pb = b.product_price_breakdown || {};
+    const total = Number((pb.all_inclusive_amount && pb.all_inclusive_amount.value) || (pb.gross_amount && pb.gross_amount.value) || 0);
+    const canc = (b.paymentterms && b.paymentterms.cancellation) || {};
+    const fotos = Array.isArray(det.photos) ? det.photos : [];
+    const beds = (det.bed_configurations && det.bed_configurations[0] && det.bed_configurations[0].bed_types || []).map(function (t) { return t.name_with_count; }).filter(Boolean).join(' + ');
+    const comida = String(b.mealplan || '').trim() || (b.breakfast_included ? 'Desayuno incluido' : '');
+    return {
+      id: String(b.block_id || b.room_id),
+      name: String(b.room_name || b.name || '').trim(),
+      beds: beds,
+      surface: Number(b.room_surface_in_m2) || 0,
+      meal: comida,
+      cancelType: String(canc.type || ''),
+      cancelText: String(canc.type_translation || ''),
+      total: Math.round(total * 100) / 100,
+      photo: fotos[0] ? String(fotos[0].url_max750 || fotos[0].url_max300 || '') : '',
+      maxOccupancy: Number(b.max_occupancy) || 0
+    };
+  }).filter(function (r) {
+    if (!r.name || !(r.total > 0)) return false;
+    const k = r.name + '|' + r.total + '|' + r.cancelType + '|' + r.meal;
+    if (vistos.has(k)) return false;
+    vistos.add(k);
+    return true;
+  }).sort(function (a, b) { return a.total - b.total; }).slice(0, 8);
+  habitacionesCache.set(clave, { t: Date.now(), rooms: rooms });
+  if (habitacionesCache.size > 300) habitacionesCache.delete(habitacionesCache.keys().next().value);
+  return sendJson(res, 200, { rooms: rooms });
+}
+
 async function cotizarHoteles(req, res, url) {
   if (limited('hoteles:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas de alojamiento. Esperá un minuto y probá de nuevo.' });
   let v;
@@ -2209,6 +2268,12 @@ function handleRequest(req, res) {
       return cotizar(req, res, url).catch(function (e) {
         console.error('[cotizar]', e);
         sendJson(res, 500, { error: 'Error inesperado. Probá de nuevo en un momento.' });
+      });
+    }
+    if (url.pathname === '/api/hotel-habitaciones') {
+      return habitacionesHotel(req, res, url).catch(function (e) {
+        console.error('[habitaciones]', e);
+        sendJson(res, 502, { error: 'No pudimos cargar las habitaciones ahora.' });
       });
     }
     if (url.pathname === '/api/hoteles') {
