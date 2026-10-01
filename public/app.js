@@ -8211,6 +8211,16 @@
      apenas rozando en lugar de metido en la cerradura. Con y=12 entra 1.8px
      medidos, que es lo que hace que se lea "cerrado", y al abrir el translateY
      de -5 lo saca entero del cuerpo. */
+  /* Candado ABIERTO dibujado como tal (arco levantado del lado derecho): no depende
+     de ninguna transformacion CSS, que era lo que lo dejaba viéndose cerrado. */
+  function guiaUnlockIcon() {
+    return '<svg class="guia-lock__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M8 10.5V7.4a4 4 0 0 1 7.6-1.7"/>' +
+      '<rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/>' +
+      '<path d="M12 14.5v2.5"/>' +
+      '</svg>';
+  }
   function guiaLockIcon() {
     return '<svg class="guia-lock__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
       'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -8231,7 +8241,7 @@
        limitado para esta cotizacion. Con is-abierta el arco sube (ver el CSS). */
     return '<div class="guia-banner is-abierta' + (abierta ? ' is-leible' : '') + '" data-guia-banner>'
       + '<button type="button" class="guia-banner__head" data-guia-ir aria-expanded="false" aria-controls="guia-banner-mas">'
-      + '<span class="guia-banner__icon" aria-hidden="true">' + guiaLockIcon() + '</span>'
+      + '<span class="guia-banner__icon" aria-hidden="true">' + guiaUnlockIcon() + '</span>'
       + '<span class="guia-banner__text"><em>Beneficio exclusivo</em>'
       + '<b>Tu Guía Secreta de ' + esc(destino) + '</b>'
       + '<small>' + 'Desbloqueada por tiempo limitado para tu cotización. Accedé a recomendaciones únicas curadas por expertos.' + '</small></span>'
