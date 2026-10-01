@@ -3355,3 +3355,10 @@ summary::-webkit-details-marker{display:none}
 .flight-filters button[aria-pressed="true"]{border-width:var(--bw-on);border-color:var(--card-sel-border,var(--cel))}
 .logo{min-height:var(--tap) !important}
 summary{min-height:var(--tap) !important}
+
+/* Estados de carga de los botones de accion. */
+.btn-spinner{display:inline-block;flex:none;width:14px;height:14px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:btn-spin .7s linear infinite;vertical-align:-2px}
+@keyframes btn-spin{to{transform:rotate(360deg)}}
+.is-loading{opacity:.9;cursor:progress;pointer-events:none}
+.is-loading:disabled{opacity:.9}
+@media (prefers-reduced-motion:reduce){.btn-spinner{animation-duration:2.4s}}

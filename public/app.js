@@ -4550,8 +4550,17 @@
     if (!b) return;
     e.preventDefault();
     e.stopPropagation();
+    // Un doble toque en "Elegí tu hotel" caia sobre el boton del paso siguiente y
+    // se salteaba un paso: se ignora el segundo toque y el boton nuevo queda en
+    // estado de carga un instante.
+    var ahoraPaso = Date.now();
+    if (ahoraPaso - ultimoCambioPaso < 450) return;
+    ultimoCambioPaso = ahoraPaso;
     irAlPaso(b.getAttribute('data-paso-ir'));
+    var botonNuevo = document.querySelector('[data-steps-foot] button');
+    if (botonNuevo) conCarga(botonNuevo, 'Cargando…', null, 450);
   }
+  var ultimoCambioPaso = 0;
   function handleBudgetJump(e) {
     var trigger = e.target.closest && e.target.closest('[data-jump-category]');
     if (!trigger || trigger.disabled) return;
@@ -10023,6 +10032,33 @@
   /* Guardar = guardar + enlace. El enlace se copia siempre (es la copia del
      presupuesto que sirve sin cuenta); con sesion ademas queda en "Mis viajes"
      y sin sesion queda pendiente para guardarse cuando inicie sesion. */
+  /* Estado de carga de un boton de accion: se deshabilita al instante y muestra
+     un spinner con un texto ("Guardando…", "Procesando…") hasta que termina la
+     tarea; asi no hay clics duplicados y se ve que el sistema trabaja. Dura al
+     menos minMs para que no parpadee cuando la tarea es instantanea. */
+  function conCarga(btn, texto, tarea, minMs) {
+    if (!btn || btn.__cargando) return Promise.resolve();
+    btn.__cargando = true;
+    var html = btn.innerHTML;
+    btn.disabled = true;
+    btn.classList.add('is-loading');
+    btn.setAttribute('aria-busy', 'true');
+    btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span><span class="btn-loading-txt">' + esc(texto || 'Procesando…') + '</span>';
+    var ini = Date.now();
+    var fin = function () {
+      var resto = Math.max(0, (minMs || 350) - (Date.now() - ini));
+      setTimeout(function () {
+        btn.__cargando = false;
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+        btn.removeAttribute('aria-busy');
+        if (btn.isConnected) btn.innerHTML = html;
+      }, resto);
+    };
+    var p;
+    try { p = Promise.resolve(tarea ? tarea() : null); } catch (e) { p = Promise.reject(e); }
+    return p.then(function (r) { fin(); return r; }, function (e) { fin(); throw e; });
+  }
   async function guardarYCopiarEnlace() {
     var enlace = enlaceDelViaje();
     if (!enlace) { mostrarToast('Abrí una propuesta antes de guardar', '', true); return; }
@@ -10648,7 +10684,7 @@
         toggle.setAttribute('aria-expanded', String(!summary.classList.contains('minimized')));
         return;
       }
-      if (e.target.closest('[data-save-trip]')) { e.preventDefault(); guardarYCopiarEnlace(); }
+      var stb = e.target.closest('[data-save-trip]'); if (stb) { e.preventDefault(); conCarga(stb, 'Guardando…', guardarYCopiarEnlace); }
     });
     window.addEventListener('resize', syncTripSummaryViewport);
     $('#auth-modal').addEventListener('click', async function (e) {
@@ -12196,7 +12232,7 @@ function comboNombreDestino() {
         }
         var checkoutUrl = checkoutWhatsappUrl();
         if (!checkoutUrl) { closeBookingForm(); return; }
-        ckConfirm.disabled = true;
+        conCarga(ckConfirm, 'Procesando…', null, 1500);
         window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
         /* Acá NO se marca traslado ni tour. El pedido por WhatsApp es una
            intención de la persona, no una reserva confirmada: esos dos rubros los
@@ -12237,7 +12273,7 @@ function comboNombreDestino() {
       }
       if (e.target.closest('[data-close-booking]') || e.target === $('#booking-modal')) closeBookingForm();
       var saveTripButton = e.target.closest('[data-save-trip]');
-      if (saveTripButton) { e.preventDefault(); guardarYCopiarEnlace(); return; }
+      if (saveTripButton) { e.preventDefault(); conCarga(saveTripButton, 'Guardando…', guardarYCopiarEnlace); return; }
       var grupoCrearButton = e.target.closest('[data-grupo-crear]');
       if (grupoCrearButton) { e.preventDefault(); irAlGrupo(grupoCrearButton); return; }
       var grupoCopiarButton = e.target.closest('[data-grupo-copiar]');
