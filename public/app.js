@@ -10183,6 +10183,59 @@
     reponer();
   }
 
+  /* ---------- Pildora "tu viaje" de la cabecera ----------
+     Una sola pastilla junto al perfil: con una propuesta abierta dice destino y
+     fechas cortas ("Buzios • 20-27 dic"); sin viaje armado invita a armarlo.
+     Con viaje, el toque abre/cierra el resumen "Mi viaje" (itinerario y costos);
+     sin viaje lleva al formulario. Se actualiza sola mirando los mismos nodos
+     que cambian cuando se arma o se cierra una propuesta. */
+  function initTripPill() {
+    var pill = document.getElementById('trip-pill');
+    var texto = document.getElementById('trip-pill-text');
+    if (!pill || !texto) return;
+    var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    function fechasCortas(dep, ret) {
+      if (!dep) return '';
+      var a = parse(dep), b = ret ? parse(ret) : null;
+      if (!b || isNaN(b)) return a.getDate() + ' ' + MESES[a.getMonth()];
+      if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) return a.getDate() + '-' + b.getDate() + ' ' + MESES[b.getMonth()];
+      return a.getDate() + ' ' + MESES[a.getMonth()] + ' - ' + b.getDate() + ' ' + MESES[b.getMonth()];
+    }
+    function viajeAbierto() {
+      var vista = document.getElementById('vista-detalle');
+      return !!(detailState && detailState.meta && detailState.meta.dest && vista && !vista.classList.contains('oculto'));
+    }
+    function actualizar() {
+      if (viajeAbierto()) {
+        var m = detailState.meta, f = fechasCortas(m.dep, m.ret);
+        var t = m.dest.name + (f ? ' • ' + f : '');
+        if (texto.textContent !== t) texto.textContent = t;
+        pill.setAttribute('data-estado', 'activo');
+        pill.setAttribute('aria-label', 'Tu viaje: ' + t + '. Ver resumen y costos');
+      } else {
+        if (texto.textContent !== 'Armá tu viaje') texto.textContent = 'Armá tu viaje';
+        pill.setAttribute('data-estado', 'vacio');
+        pill.setAttribute('aria-label', 'Armá tu viaje');
+      }
+    }
+    pill.addEventListener('click', function () {
+      if (viajeAbierto()) {
+        var panel = document.getElementById('trip-summary');
+        var toggle = panel && panel.querySelector('[data-trip-summary-toggle]');
+        if (toggle) toggle.click();
+      } else {
+        var form = document.querySelector('.form');
+        if (form && form.scrollIntoView) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var dest = document.getElementById('dest-trigger');
+        if (dest) { try { dest.focus({ preventScroll: true }); } catch (e) { dest.focus(); } }
+      }
+    });
+    var obs = new MutationObserver(actualizar);
+    var panel = document.getElementById('trip-summary'); if (panel) obs.observe(panel, { childList: true, attributes: true, attributeFilter: ['hidden'] });
+    var vista = document.getElementById('vista-detalle'); if (vista) obs.observe(vista, { attributes: true, attributeFilter: ['class'] });
+    actualizar();
+  }
+
   function init() {
     /* Volver a la vista de inicio.
 
@@ -12074,6 +12127,7 @@ function comboNombreDestino() {
   cargarTasas();
   initBackLayers();
   initTripBarDrag();
+  initTripPill();
   init();
   installRoadtripMaps();
 

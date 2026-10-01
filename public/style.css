@@ -1,4 +1,4 @@
-/* version: 210
+/* version: 211
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3065,3 +3065,24 @@ button.logo{min-height:44px}
 .recent-search__meta{font-size:12px;color:var(--ink2)}
 .recent-search__go{margin-top:6px;font-size:13px;font-weight:800;color:var(--cel)}
 @media (max-width:600px){.recent-searches__list{display:flex;overflow-x:auto;gap:10px;scroll-snap-type:x proximity;padding-bottom:6px}.recent-searches__list>li{flex:0 0 72%;scroll-snap-align:start}}
+
+/* Pildora "tu viaje" de la cabecera: destino + fechas, o "Arma tu viaje". Misma
+   altura y radio que los botones de la cuenta, fondo oscuro y acento ambar. */
+.trip-pill{display:inline-flex;align-items:center;gap:7px;flex:0 1 auto;min-width:0;max-width:260px;min-height:38px;margin-left:auto;padding:0 14px;border:1px solid color-mix(in srgb,var(--cel) 40%,var(--line));border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;line-height:1;cursor:pointer;transition:background .16s ease,border-color .16s ease}
+.trip-pill svg{flex:0 0 auto;color:var(--cel)}
+.trip-pill span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trip-pill:hover{background:var(--cel-soft);border-color:var(--cel)}
+.trip-pill:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.trip-pill[data-estado="vacio"]{color:var(--ink2);font-weight:600}
+.trip-pill + .account-actions{margin-left:0}
+@media(max-width:560px){
+  .top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;row-gap:10px}
+  .trip-pill{grid-column:1/-1;grid-row:2;max-width:none;justify-content:center;min-height:40px;margin:0}
+  .trip-pill + .account-actions{grid-row:1;grid-column:2}
+}
+@media(max-width:300px){
+  .top{grid-template-columns:minmax(0,1fr)}
+  .trip-pill + .account-actions{grid-row:2;grid-column:1;justify-content:flex-start}
+  .trip-pill{grid-row:3}
+}
+@media(max-width:340px){.bud-mode{max-width:100%}.bud-mode button{padding:0 6px;font-size:10.5px}}
