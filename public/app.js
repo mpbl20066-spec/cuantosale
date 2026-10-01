@@ -2286,6 +2286,7 @@
     if (roomLine) roomLine.textContent = room.name;
     var h3 = card.querySelector('h3');
     if (h3) detailState.selectedHotelName = h3.textContent.trim();
+    detailState.hotelElegidoPorUsuario = true;
     actualizarAlojamiento(total, true, parada);
     try { recalcularTotalViaje(); } catch (e) { /* ya se recalcula en actualizarAlojamiento */ }
     pedirComparativa();
@@ -4070,6 +4071,7 @@
   }
   function loadHotelRecommendations(meta, accommodationTotal) {
     var requestId = ++hotelRequestId;
+    if (!meta.hotelsLoaded && detailState) detailState.hotelElegidoPorUsuario = false;
     if (meta.hotelsLoaded) {
       // El marcador es el del bloque completo (titulo + placa), no el de la placa:
       // reemplazar la placa sola metia el markup completo adentro de ella y
@@ -4133,7 +4135,7 @@
       /* Llegada desde "Ver hoteles de esta categoria": se deja elegido el hotel
          optimizado de cada parada (el de menor total de la lista visible), como si
          la persona lo hubiera tocado, para que pueda seguir sin buscar nada. */
-      if (detailState.autoElegirHotel) {
+      if (detailState.autoElegirHotel || !detailState.hotelElegidoPorUsuario) {
         detailState.autoElegirHotel = false;
         paradas.forEach(function (stop) {
           var candidatos = Array.prototype.filter.call(
@@ -10721,7 +10723,7 @@
       if (input) input.checked = true;
     });
     if (details.hotel) {
-      detailState.hotel = Number(details.hotel.total) || detailState.hotel; detailState.hotelDecided = true;
+      detailState.hotel = Number(details.hotel.total) || detailState.hotel; detailState.hotelDecided = true; detailState.hotelElegidoPorUsuario = true;
       detailState.selectedHotel = true;
       detailState.selectedHotelTotal = Math.round(Number(details.hotel.total) || 0) || null;
       detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName;
@@ -12404,6 +12406,7 @@ function comboNombreDestino() {
           var parada = Number(hotelInput.getAttribute('data-hotel-stop')) || 0;
           var elegido = parada ? staySelectedTotal(parada) : detailState.selectedHotelTotal;
           var isActive = hotelInput.checked && (parada ? elegido != null : detailState.selectedHotel !== false) && elegido != null && Math.round(Number(elegido)) === total;
+          detailState.hotelElegidoPorUsuario = true;
           if (isActive) { hotelInput.checked = false; deseleccionarHotel(parada); return; }
           hotelInput.checked = true;
           var hotelName = card.querySelector('h3');
