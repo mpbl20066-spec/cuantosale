@@ -5238,6 +5238,17 @@
   }
   function openSplitModal() {
     if (!detailState || !detailState.meta) return;
+    /* Sin sesion se puede dividir igual. Para que el viaje (con sus rubros, que
+       son los gastos del reparto) no se pierda, se deja anotado como pendiente:
+       cuando la persona inicie sesion mas adelante, el viaje se guarda solo en
+       su cuenta (ver saveCurrentTrip / onAuthStateChange). */
+    if (!authUser) {
+      try {
+        var borrador = tripPayload();
+        if (borrador) { sessionStorage.setItem('cuantosale_pending_trip_data', JSON.stringify(borrador)); sessionStorage.setItem('cuantosale_pending_trip', '1'); }
+        pendingTripSave = true;
+      } catch (error) { /* sin sessionStorage: se divide igual, sin guardado diferido */ }
+    }
     var el = document.getElementById('split-modal');
     if (!el) {
       el = document.createElement('div');
@@ -9746,9 +9757,9 @@
     try { if (window.CS_RECIENTES) window.CS_RECIENTES.alCambiarSesion(); } catch (e) { /* las recientes son accesorias */ }
   }
   /* ---------- Login para las acciones del resumen ----------
-     Ver el resumen es libre. Lo que pide cuenta es lo que cambia un estado o abre
-     una reserva: Reservar (hotel, vuelo, traslado, actividades), Elegir vuelos y
-     Dividir gastos. Al tocarlo sin sesion no se ejecuta: se anota que se queria
+     Ver el resumen es libre, y ver como dividir el monto tambien (no pide
+     cuenta: ver openSplitModal). Lo que pide cuenta es lo que cambia un estado o
+     abre una reserva: Reservar (hotel, vuelo, traslado, actividades). Al tocarlo sin sesion no se ejecuta: se anota que se queria
      hacer (y el viaje, para poder reabrirlo aunque el login recargue la pagina,
      como con Google o la confirmacion por correo) y se abre el modal de cuenta.
      Con la sesion iniciada se vuelve al resumen, a la misma fila.
@@ -9757,7 +9768,7 @@
      confirmacion del correo suele abrirse en otra pestana. */
   var ACCION_KEY = 'cuantosale_accion_pendiente';
   var ACCION_TTL_MS = 30 * 60 * 1000;
-  var ACCIONES_CON_LOGIN = ['data-reservar-rubro', 'data-marca-reserva', 'data-confirmar-reserva', 'data-deshacer-reserva', 'data-reservar-pedido', 'data-split-trip'];
+  var ACCIONES_CON_LOGIN = ['data-reservar-rubro', 'data-marca-reserva', 'data-confirmar-reserva', 'data-deshacer-reserva', 'data-reservar-pedido'];
   var MENSAJE_LOGIN = 'Iniciá sesión para guardar los cambios en tu viaje y gestionar tus reservas.';
   var authInitTerminado = false;
   function describirAccion(el) {
