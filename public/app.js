@@ -2757,7 +2757,9 @@
      * es que ahora es la EXCEPCION y no lo normal. */
   function toursDeMeta(meta) {
     var delServer = meta && meta.tours;
-    if (Array.isArray(delServer)) return delServer;
+    // Viaje de dos paradas: el server manda los tours de la segunda en toursSecond.
+    // toursFor() filtra por destino, asi que alcanza con juntar las dos listas.
+    if (Array.isArray(delServer)) return Array.isArray(meta.toursSecond) ? delServer.concat(meta.toursSecond) : delServer;
     return LOCAL_TOURS;
   }
 
@@ -2783,16 +2785,25 @@
   // los necesita. Mismo criterio que los otros globales del proyecto: datos
   // que se leen, no logica que se ejecuta.
   window.CS_TOURS = toursFor;
+  /* Con dos paradas hay una seccion de tours por destino (la del primero y la del
+     segundo), cada una con su titulo; con un destino, la de siempre. */
   function localToursMarkup(meta) {
-    var destinationKey = String(meta && meta.dest && meta.dest.key || '').toLowerCase();
-    var destinationName = (meta && meta.dest && meta.dest.name) || 'tu destino';
+    var ms = meta && meta.multiStay;
+    if (ms && ms.stays && ms.stays.length === 2) {
+      return ms.stays.map(function (st) { return localToursMarkupDe(meta, st.key, st.name); }).join('');
+    }
+    return localToursMarkupDe(meta, meta && meta.dest && meta.dest.key, meta && meta.dest && meta.dest.name);
+  }
+  function localToursMarkupDe(meta, destinationKey, destinationName) {
+    destinationKey = String(destinationKey || '').toLowerCase();
+    destinationName = destinationName || 'tu destino';
     var tours = toursFor(destinationKey, destinationName, meta);
     /* Un destino sin tours cargados no esconde la seccion: dice que vienen. Un hueco
        sin explicacion se lee como un error de la pagina, y "Proximamente" es lo que es. */
     if (!tours.length) {
       return plateBlock('data-tours-block',
-        '<h2 class="block-title" id="local-tours-title">Tours y experiencias en ' + esc(destinationName) + '</h2>', '',
-        '<section class="local-tours local-tours--soon" data-budget-anchor="tours" aria-labelledby="local-tours-title">'
+        '<h2 class="block-title" id="local-tours-title-' + destinationKey + '">Tours y experiencias en ' + esc(destinationName) + '</h2>', '',
+        '<section class="local-tours local-tours--soon" data-budget-anchor="tours" aria-labelledby="local-tours-title-' + destinationKey + '">'
         + '<div class="local-tours__soon"><span class="local-tours__soon-badge">Próximamente</span>'
         + '<p>Estamos armando las experiencias locales de ' + esc(destinationName) + '. Muy pronto vas a poder sumarlas a tu viaje desde acá.</p></div></section>');
     }
@@ -2848,7 +2859,7 @@
        porque los dos son hermanos de la placa, y el repintado cuando llegan los
        tours reales reemplaza el bloque entero (data-tours-block) en vez de
        meter un segundo titulo adentro de la seccion. */
-    var titulo = '<h2 class="block-title" id="local-tours-title">' + (fuente !== 'local' ? 'Tours y experiencias reales en ' : 'Tours y experiencias en ') + esc(destinationName) + '</h2>';
+    var titulo = '<h2 class="block-title" id="local-tours-title-' + destinationKey + '">' + (fuente !== 'local' ? 'Tours y experiencias reales en ' : 'Tours y experiencias en ') + esc(destinationName) + '</h2>';
     /* Aviso de catalogo en construccion, para los destinos con pocos tours.
      *
         El caso de cero tours ya tiene su cartel (el bloque "Proximamente" de mas
@@ -2981,7 +2992,7 @@
         + 'Sumamos experiencias nuevas a ' + esc(destinationName) + ' seguido.</p>'
       : '';
     return plateBlock('data-tours-block', titulo, bajada,
-      '<section class="local-tours" data-budget-anchor="tours" aria-labelledby="local-tours-title">' +
+      '<section class="local-tours" data-budget-anchor="tours" aria-labelledby="local-tours-title-' + destinationKey + '">' +
       avisoConstruccion +
       '<div class="local-tours__grid" id="local-tours-grid-' + esc(destinationKey) + '">' + cards + '</div>' +
       (tours.length > 3 ? '<button type="button" class="local-tours__more" data-toggle-more-tours aria-expanded="false" aria-controls="local-tours-grid-' + esc(destinationKey) + '">Ver más tours (' + (tours.length - 3) + ') <span aria-hidden="true">⌄</span></button>' : '') +
@@ -4308,9 +4319,20 @@
     if (!state) return '';
     return (leg === 'vuelta' ? state.transferTypeVuelta : state.transferType) || '';
   }
+  /* En un viaje de dos paradas la vuelta sale de la SEGUNDA (Arraial -> aeropuerto),
+     no de la primera: se cobra con la tabla de ese destino. El oficial del server
+     (meta.officialTransfer) es el del primer destino, asi que no se usa. */
+  function preciosDeVuelta(meta) {
+    var ms = meta && meta.multiStay;
+    if (ms && ms.stays && ms.stays.length === 2) {
+      var ultima = ms.stays[1];
+      return transferPreciosDe(Object.assign({}, meta, { dest: { key: ultima.key, name: ultima.name }, officialTransfer: null }));
+    }
+    return transferPreciosDe(meta);
+  }
   function getSelectedTransferAmount(state, leg) {
     if (!state || state.transportMode === 'auto') return 0;
-    var precios = transferPreciosDe(state.meta || {});
+    var precios = leg === 'vuelta' ? preciosDeVuelta(state.meta || {}) : transferPreciosDe(state.meta || {});
     var tipo = transferTypeDe(state, leg);
     if (tipo === 'private') return precios.privado;
     if (tipo === 'shared') {
@@ -7119,7 +7141,8 @@
     // El bloque entero (titulo + placa), no la placa: ver el comentario de
     // loadHotelRecommendations(). Con la placa sola, este repintado metia un
     // segundo "Tours y experiencias en ..." adentro de la seccion.
-    var tours = document.querySelector('[data-tours-block]');
+    var bloquesTours = document.querySelectorAll('[data-tours-block]');
+    var tours = bloquesTours[0];
     if (tours) {
       var markupTours = localToursMarkup(detailState.meta);
       // Si el marcado nuevo viniera vacio se deja la seccion como estaba:
@@ -7128,9 +7151,12 @@
         var elegidos = (detailState.selectedTours || []).map(function (t) { return t.title; });
         var estabaAbierto = tours.classList.contains('local-tours--expanded');
         tours.outerHTML = markupTours;
+        // Con dos paradas el marcado nuevo trae las dos secciones: las que
+        // quedaban de antes (la segunda) se sacan para no duplicarlas.
+        Array.prototype.forEach.call(bloquesTours, function (b, i) { if (i > 0 && b.isConnected) b.remove(); });
         var toursNuevos = document.querySelector('.local-tours');
-        if (toursNuevos && elegidos.length) {
-          Array.prototype.slice.call(toursNuevos.querySelectorAll('[data-tour-choice]')).forEach(function (input) {
+        if (elegidos.length) {
+          Array.prototype.slice.call(document.querySelectorAll('.local-tours [data-tour-choice]')).forEach(function (input) {
             if (elegidos.indexOf(input.getAttribute('data-tour-title')) < 0) return;
             input.checked = true;
             var card = input.closest('[data-tour-card]');
@@ -7609,31 +7635,35 @@
     var precios = transferPreciosDe(meta);
     var pax = Math.max(1, Number((meta && meta.pax) || (state && state.pax) || (typeof S !== 'undefined' && S && S.pax)) || 1);
     var tramos = [];
+    var ms = (state && state.multiStay) || (meta && meta.multiStay) || null;
+    var dosParadas = !!(ms && ms.transfer && ms.stays && ms.stays.length === 2);
     if (meta.dest) {
       // El nombre ya trae "Aeroporto/Aeropuerto ..." (ver AIRPORT_NAMES): no se le
       // antepone otro "Aeropuerto de", que daba "Aeropuerto de Aeroporto ...".
       var aero = precios.aeropuerto ? (/^aero(puerto|porto) /i.test(precios.aeropuerto) ? precios.aeropuerto : 'Aeropuerto ' + precios.aeropuerto) + (precios.iata ? ' (' + precios.iata + ')' : '') : 'Aeropuerto';
-      var comun = { auto: false, shared: precios.soloPrivado ? 0 : precios.compartido * pax, private: precios.privado, note: precios.km ? precios.km + ' km' : '' };
-      // Los tramos van en el orden en que se recorren: primero se llega, después
-      // se vuelve. Cada uno con SU modalidad elegida (transferType y
-      // transferTypeVuelta), y por eso se pueden cambiar por separado.
-      tramos.push(Object.assign({}, comun, { key: 'llegada', selected: transferTypeDe(state, 'llegada'), from: aero, to: meta.dest.name }));
-      tramos.push(Object.assign({}, comun, { key: 'vuelta', selected: transferTypeDe(state, 'vuelta'), from: meta.dest.name, to: aero }));
-    }
-    var ms = (state && state.multiStay) || (meta && meta.multiStay) || null;
-    if (ms && ms.transfer && ms.stays && ms.stays.length === 2) {
-      var entre = ms.transfer;
-      // El server ya lo calculo con la misma formula (model.comboTransfer), asi
-      // que el numero no se reimprime aca: se usa el que vino. La modalidad es
-      // "auto" porque es un solo pasaje por persona y no hay nada que elegir.
-      tramos.push({
-        key: 'entre', auto: true, selected: '',
-        amount: Math.max(0, Number(entre.totalUsd) || 0),
-        from: ms.stays[0].name,
-        to: ms.stays[1].name,
-        note: entre.distanceKm ? entre.distanceKm + ' km' + (entre.hours ? ' · ' + entre.hours + ' h' : '') : '',
-        ferry: entre.mode === 'ferry'
-      });
+      var comunDe = function (pr) { return { auto: false, shared: pr.soloPrivado ? 0 : pr.compartido * pax, private: pr.privado, note: pr.km ? pr.km + ' km' : '', precios: pr }; };
+      // Los tramos van en el orden en que se recorren: se llega, (con dos paradas)
+      // se pasa de la primera a la segunda y se vuelve DESDE LA ULTIMA. Cada uno con
+      // SU modalidad elegida (transferType y transferTypeVuelta), y por eso se
+      // pueden cambiar por separado.
+      tramos.push(Object.assign({}, comunDe(precios), { key: 'llegada', selected: transferTypeDe(state, 'llegada'), from: aero, to: meta.dest.name }));
+      if (dosParadas) {
+        var entre = ms.transfer;
+        // El server ya lo calculo con la misma formula (model.comboTransfer), asi
+        // que el numero no se reimprime aca: se usa el que vino. La modalidad es
+        // "auto" porque es un solo pasaje por persona y no hay nada que elegir.
+        tramos.push({
+          key: 'entre', auto: true, selected: '',
+          amount: Math.max(0, Number(entre.totalUsd) || 0),
+          perPax: Math.max(0, Number(entre.perPaxUsd) || 0),
+          from: ms.stays[0].name,
+          to: ms.stays[1].name,
+          note: entre.distanceKm ? entre.distanceKm + ' km' + (entre.hours ? ' · ' + entre.hours + ' h' : '') : '',
+          ferry: entre.mode === 'ferry'
+        });
+      }
+      var preciosVuelta = dosParadas ? preciosDeVuelta(meta) : precios;
+      tramos.push(Object.assign({}, comunDe(preciosVuelta), { key: 'vuelta', selected: transferTypeDe(state, 'vuelta'), from: dosParadas ? ms.stays[1].name : meta.dest.name, to: aero }));
     }
     return tramos;
   }
@@ -7706,7 +7736,7 @@
         distinto. Ahora es una funcion de (selected) y cada tramo la llama con lo
         suyo: el boton lleva data-transfer-leg, y el click sabe a que tramo
         pertenece. */
-    var opciones = [
+    function opcionesDe(t) { return [
       { key: 'shared', amount: t.compartido, consultar: !!t.compartidoConsultar, title: 'Transfer compartido', desc: 'Compartís el vehículo con otros pasajeros. Se cobra por persona.' },
       { key: 'private', amount: t.privado, consultar: !!t.privadoConsultar, title: 'Transfer privado', desc: 'Vehículo exclusivo para los que viajan. Se cobra el auto, no por persona.' + (t.privadoVehiculo ? ' Para ' + paxT + ' ' + (paxT === 1 ? 'persona' : 'personas') + ': ' + t.privadoVehiculo.toLowerCase() + '.' : '') }
     ].filter(function (card) {
@@ -7716,9 +7746,10 @@
       // El privado sin precio para esta cantidad de personas se muestra igual,
       // como "Consultar": no es un transfer gratis, es un precio que falta.
       return card.consultar || !(card.amount <= 0);
-    });
-    function cardsDe(leg, selectedLeg) {
-      return opciones.map(function (card) {
+    }); }
+    var opciones = opcionesDe(t);
+    function cardsDe(leg, selectedLeg, tt) {
+      return (tt && tt !== t ? opcionesDe(tt) : opciones).map(function (card) {
         /* Sin precio para esta cantidad de personas: no es un boton. Elegirlo
            sumaria R$ 0 al viaje y mandaria un pedido sin monto. */
         if (card.consultar) {
@@ -7793,7 +7824,7 @@
       if (tramo.auto) {
         // No es una eleccion: es un pasaje que ya esta en el total. Sin card,
         // sin radio y sin "Agregar", porque no hay nada que agregar.
-        return cabeza + '<p class="transfer-leg__auto">' + (tramo.ferry ? 'Un pasaje de ferry por persona' : 'Un transfer por persona entre las paradas') + ': <b>' + money(tramo.amount) + '</b>. Se coordina con el operador al reservar.</p></div>';
+        return cabeza + '<p class="transfer-leg__auto">' + (tramo.ferry ? 'Un pasaje de ferry entre las paradas' : 'Un transfer entre las paradas') + ': <b>' + money(tramo.perPax || tramo.amount / paxT) + ' por persona</b>' + (paxT > 1 ? ' · ' + money(tramo.amount) + ' los ' + paxT : '') + '. Ya está en tu total. Se coordina con el operador al reservar.</p></div>';
       }
       if (tramo.key === 'llegada' || tramo.key === 'vuelta') {
         /* El tramo corto se dice ANTES de las cards, no despues. Es una
@@ -7801,12 +7832,12 @@
            va debajo se lee como el pie de un formulario que la persona ya dio por
            hired. Con el transfer por defecto de este modulo, sin este bloque
            estaria ofreciendo un traslado corto sin decir que no hace falta. */
-        var cercano = tramoEsCercano(t, paxT);
+        var cercano = tramoEsCercano(tramo.precios || t, paxT);
         var consejo = cercano
           ? '<p class="transfer-advice"><span class="transfer-advice__ico" aria-hidden="true">💡</span><span class="transfer-advice__txt"><b>Para este tramo estás cerquísima.</b> Te conviene más tomarte un Uber o taxi local ' +
             (tramo.key === 'vuelta' ? 'para volver al aeropuerto' : 'al llegar') + ': sale menos que el transfer y no tenés que reservarlo. Si igual preferís que te recojan, elegí una opción abajo.</span></p>'
           : '';
-        return cabeza + consejo + '<div class="transfer-choice-grid">' + cardsDe(tramo.key, tramo.selected) + '</div>' +
+        return cabeza + consejo + '<div class="transfer-choice-grid">' + cardsDe(tramo.key, tramo.selected, tramo.precios) + '</div>' +
           (tramo.selected === 'shared' ? '<p class="transfer-choice-note">Incluido para tu comodidad. Si preferís otro, podés cambiar a privado.</p>' : '') +
           '</div>';
       }
