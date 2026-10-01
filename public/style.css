@@ -1,4 +1,4 @@
-/* version: 217
+/* version: 223
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -40,7 +40,7 @@
      el BORDE de un control hace falta 3:1 (WCAG 1.4.11), y de ahi --control-line
      aparte: 3.31:1 sobre --bg. */
   --control-line:#5A6779;
-  --ink:#FFFFFF; --ink2:#C9D4E2;
+  --ink:#FFFFFF; --ink2:#D3DCE8;
   /* Mostaza de marca. #F7C325 da 11.60:1 sobre --bg, asi que sirve para
      texto de cualquier tamano, no solo para titulos grandes. */
   --accent:#F7C325; --accent-ink:#0A101A;
@@ -3214,3 +3214,23 @@ button.logo{min-height:44px}
 .voucher-destino{border-top:2px solid var(--ink2)}
 .voucher-destino__aviso{display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;color:var(--ink2);font-size:12.5px;line-height:1.45}
 .voucher-destino__aviso span{flex:0 0 auto;display:inline-grid;place-items:center;width:18px;height:18px;margin-top:1px;border:1.5px solid var(--ink2);border-radius:50%;font-size:11px;font-weight:800;font-style:italic;font-family:Georgia,serif}
+
+/* ---- Acabado: contraste, radios y alineacion de iconos -----------------------
+   Contraste: el gris secundario (--ink2) ya da ~12:1 sobre el fondo oscuro, pero
+   varios textos chicos lo bajaban con opacity y quedaban apagados. Sin opacity,
+   y --ink2 un punto mas claro, para que los subtitulos se lean con el sol.
+   Radios: una escala de tres: 12px controles y botones, 16px tarjetas y
+   contenedores, 24px dialogos. Las pastillas (99/999px) no se tocan.
+   Alineacion: todo boton con icono es inline-flex centrado y el icono no se
+   encoge ni baja de la linea. */
+:root,:root[data-theme="light"]{--r-control:12px;--r-card:16px;--r-dialog:24px}
+.voucher-canales,.voucher-step__hint,.bus-co__note,.flight-summary-line.is-muted .flight-summary-tag{opacity:1}
+.daily-budget__option--custom .daily-budget__input-wrap input::placeholder{opacity:1}
+:is(.voucher-chip,.voucher-tile,.voucher-step__btn,.voucher-item__cta,.voucher-split__btn,.steps__next,.hotel-booking,.checkout-btn,.split-btn,.voucher-reserve__btn,.trip-summary__save,.trip-summary__head,.voucher-share__menu button){border-radius:var(--r-control)}
+:is(.hotel-option,.local-tour,.voucher-split,.steps,.steps__btn,.proposal-breakdown,.transfer-choice,.detail-summary,.saved-trip,.split-adjust,.voucher-item:has(.is-elegir)){border-radius:var(--r-card)}
+.booking-dialog{border-radius:var(--r-dialog)}
+@media (max-width:560px){.booking-dialog{border-radius:var(--r-dialog) var(--r-dialog) 0 0}}
+:is(.voucher-chip,.voucher-tile,.voucher-step__btn,.voucher-item__cta,.voucher-split__btn,.steps__next,.hotel-booking,.checkout-btn,.split-btn,.voucher-reserve__btn,.trip-summary__save,.voucher-share__menu button){display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.2}
+.voucher-share__menu button{justify-content:flex-start}
+:is(.voucher-chip,.voucher-tile,.voucher-share__menu button,.voucher-reserve__btn,.steps__next) :is(svg,.voucher-btn__ico){flex:0 0 auto;display:block}
+:is(.voucher-chip,.voucher-tile,.voucher-share__menu button) .voucher-btn__label{display:inline-block;line-height:1.2}
