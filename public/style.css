@@ -3413,18 +3413,23 @@ summary::-webkit-details-marker{display:none}
 .detail-main.paso-anim>*:not(.detail-head):not(.detail-head__sentinel){animation:paso-fade .22s ease both}
 @media (prefers-reduced-motion:reduce){.detail-main.paso-anim>*{animation:none}.rooms-skel__row{animation:none}}
 
-/* Presupuesto en celular: el selector Total / Por persona baja debajo del
-   monto, a todo el ancho de su columna y con botones de 48px; el titulo queda
-   solo arriba. En escritorio sigue al lado de la etiqueta. */
+/* Presupuesto en celular: Viajeros arriba a todo el ancho y debajo el bloque
+   de presupuesto en columna: titulo, cifra grande centrada y el selector
+   Total / Por persona a todo el ancho (botones de 48px). En escritorio el
+   selector sigue al lado de la etiqueta. */
 @media(max-width:560px){
-  .row2:has(> .bud-field){grid-auto-flow:row;row-gap:0}
-  .row2 > .bud-field,.row2 > .bud-field > .bud-head{display:contents}
-  .row2:has(> .bud-field) > div:not(.bud-field){grid-column:1;grid-row:1 / span 2}
-  .bud-field .bud-head label{grid-column:2;grid-row:1;display:flex;align-items:center;min-height:44px;margin:0 0 6px}
-  .row2:has(> .bud-field) > div:not(.bud-field) > .lbl{min-height:44px}
-  .bud-field .money{grid-column:2;grid-row:2;align-self:start}
-  .bud-field .bud-mode{grid-column:1 / -1;grid-row:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;max-width:none;margin-top:12px;padding:4px;border-radius:var(--btn-r);box-sizing:border-box}
+  .wrap{padding-left:16px;padding-right:16px}
+  .panel{padding:20px 16px}
+  .row2{grid-template-columns:minmax(0,1fr);gap:20px}
+  .row2>div>.lbl{min-height:0;margin-bottom:8px}
+  .row2 > .bud-field{display:flex;flex-direction:column;align-items:stretch;min-width:0}
+  .row2 > .bud-field > .bud-head{display:contents}
+  .bud-field .bud-head label{order:1;display:block;min-height:0;margin:0 0 8px;text-align:center}
+  .bud-field .money{order:2}
+  .bud-field .money span{left:16px;font-size:18px}
+  .bud-field .money .inp{height:64px;padding:0 16px 0 64px;font-size:28px;font-weight:700;text-align:center}
+  .bud-field .bud-mode{order:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;max-width:none;margin-top:12px;padding:4px;border-radius:var(--btn-r);box-sizing:border-box}
   .bud-field .bud-mode button{min-height:48px;padding:0 8px;border-radius:calc(var(--btn-r) - 4px);font-size:14px}
   .bud-field .bud-mode button::after{content:none}
-  .bud-field .bud-calc{grid-column:1 / -1;grid-row:4}
+  .bud-field .bud-calc{order:4;margin-top:10px;text-align:center}
 }
