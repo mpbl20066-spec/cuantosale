@@ -3454,3 +3454,10 @@ summary::-webkit-details-marker{display:none}
    tema oscuro) para que el header no quede bajo la barra de estado / notch en
    ningun tema. Ademas, un piso de 16px sobre el logo en celular. */
 @media(max-width:560px){.top{padding-top:4px}}
+
+/* Android (Huawei, Motorola): env(safe-area-inset-top) suele valer 0 aunque la
+   barra de estado tape la pagina (app instalada / pantalla completa). En ese
+   modo se reserva un piso de 28px arriba, sin tocar la vista en navegador. */
+@media(display-mode:standalone),(display-mode:fullscreen),(display-mode:minimal-ui){
+  body{padding-top:max(env(safe-area-inset-top,0px),28px)}
+}
