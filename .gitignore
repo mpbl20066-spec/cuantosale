@@ -33,3 +33,14 @@ __pycache__/
 # tabla-transfers.xlsx en la raiz: es una copia de trabajo de la de data/, que es
 # la que leen los scripts. Dos copias del mismo .xlsx divergen solas.
 tabla-transfers.xlsx
+
+# Material de trabajo del scraper de tours: breadcrumbs del scraping, cache de
+# paginas, dumps intermedios y scripts de seleccion. El catalogo que sale de
+# aca (data/tours.json) si se versiona; esto no, porque se regenera con cada
+# corrida y pesa mas que el resultado.
+data/_trabajo/
+
+# OJO: data/tours-borrados.json y data/tours-apagados.json SI se versionan, y a
+# proposito. Son las unicas copias de las 188 filas que se borraron de
+# public.tours y de las 40 que se retiraron de data/tours.json: un DELETE no se
+# deshace con git, asi que sin esos archivos no hay vuelta atras.

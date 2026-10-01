@@ -42,7 +42,7 @@
     "unidad": "USD por persona, con el margen operativo para la venta manual ya incluido. El precio se muestra como REFERENCIAL: no hay operador de tours que lo tome.",
     "aviso": "El precio es REFERENCIAL, no un precio de reserva. No hay operador de tours que lo tome: el boton arma el pedido por WhatsApp y el precio se confirma segun fecha, cupo y operador. La card lo rotula como estimacion justamente por esto.",
     "aviso_fotos": "TOUR_PHOTOS se indexa por \"destinoKey#titulo\" con el titulo EXACTO. Cambiar un titulo deja la card sin foto (cae al degradado con el icono) sin que nada falle. Para fotos de un tour nuevo: node buscar-fotos-tours.js",
-    "actualizado": "2026-09-29"
+    "actualizado": "2026-10-01"
   }, {
   "angra": "Angra dos Reis, Brasil",
   "arraial": "Arraial do Cabo, Brasil",

@@ -67,12 +67,34 @@ function conEnv(vars, fn) {
     });
   });
 
+  /* Estas dos pruebas eligen el destino y el tour mirando data/tours.json, y
+   * no con un key y un titulo escritos a mano.
+   *
+   * Estaban fijas a Búzios y a "Paseo de Escuna", y quedaron rojas cuando esos
+   * tours se marcaron activo: false: el respaldo se genera solo con los
+   * activos, asi que de Búzios no queda nada y la prueba pedia 10. Un test que
+   * depende de que un tour concreto siga publicado no prueba el respaldo: se
+   * rompe cada vez que se cura el catalogo, y lo que hay que revisar entonces es
+   * el catalogo, no el codigo. */
+  const jsonCatalogo = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'tours.json'), 'utf8'));
+  const activos = jsonCatalogo.tours.filter((t) => t.activo !== false);
+  // El destino con mas tours activos: si el respaldo funciona, tiene que traer
+  // todos los suyos. Con >= 2, para que un destino de un tour solo no alcance.
+  const porDestino = new Map();
+  activos.forEach((t) => {
+    const d = t.destinos[0];
+    porDestino.set(d, (porDestino.get(d) || 0) + 1);
+  });
+  const destinoMasTours = [...porDestino.entries()].sort((a, b) => b[1] - a[1])[0];
+  assert.ok(destinoMasTours && destinoMasTours[1] >= 2,
+    'data/tours.json no tiene ningun destino con 2 tours activos: la prueba del respaldo no tendria nada que comprobar');
+
   await t('si Supabase falla, devuelve la copia local y no tira', async function () {
     await conEnv({ SUPABASE_URL: 'https://no-existe.supabase.co', SUPABASE_SERVICE_ROLE_KEY: 'service-x' }, async function (tours) {
       // No hay red hacia ese host, asi que fetch tira o devuelve error: en los
       // dos casos tiene que caer al respaldo en vez de romper /api/cotizar.
-      const lista = await tours.destino('buz');
-      assert.ok(lista.length >= 10, 'tiene que devolver los de Búzios, devolvio ' + lista.length);
+      const lista = await tours.destino(destinoMasTours[0]);
+      assert.ok(lista.length >= 2, 'tiene que devolver los de ' + destinoMasTours[0] + ', devolvio ' + lista.length);
     });
   });
 
@@ -80,10 +102,16 @@ function conEnv(vars, fn) {
     await conEnv({ SUPABASE_URL: null, SUPABASE_SERVICE_ROLE_KEY: null }, async function (tours) {
       const lista = await tours.todos();
       assert.strictEqual(lista.length, require('./public/tours.generated.js').length, 'trae ' + lista.length);
-      const escuna = lista.find((t) => t.title === 'Paseo de Escuna');
-      assert.ok(escuna, 'no esta el Paseo de Escuna');
-      // R$ 60 con la cotizacion de 5,1414 y US$ 5 de margen.
-      assert.strictEqual(escuna.price, 16.67, 'precio: ' + escuna.price);
+      // Un tour activo con precio de origen en reales: el respaldo tiene que
+      // traerlo convertido, no el numero crudo.
+      const conBrl = activos.find((t) => t.precio_brl != null);
+      assert.ok(conBrl, 'ningun tour activo trae precio_brl: no hay conversion que verificar');
+      const publicado = lista.find((t) => t.destinations.indexOf(conBrl.destinos[0]) >= 0 && t.title === conBrl.titulo);
+      assert.ok(publicado, 'no esta "' + conBrl.titulo + '" (' + conBrl.destinos[0] + ')');
+      const meta = jsonCatalogo._meta || {};
+      // R$ -> US$ con la cotizacion de _meta, mas el margen por persona.
+      const esperado = Number((Number(conBrl.precio_brl) / Number(meta.cotizacion_brl_usd) + Number(meta.margen_usd)).toFixed(2));
+      assert.strictEqual(publicado.price, esperado, 'precio de "' + conBrl.titulo + '": ' + publicado.price + ' vs ' + esperado);
     });
   });
 
