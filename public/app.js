@@ -3268,15 +3268,9 @@
      desde el exterior. Entra Prex en su lugar, que es una red de cajeros que la
      gente efectivamente usa para sacar y para transferir. */
   var CHECKOUT_PAYMENTS = [
-    { id: 'brou', label: 'Banco República', kind: 'Transferencia bancaria', mark: 'BROU', brand: '#0d3b8f', logo: '/pagos/brou.png', lw: 93, lh: 21 },
-    { id: 'santander', label: 'Santander', kind: 'Transferencia bancaria', mark: 'Santander', brand: '#ec0000', logo: '/pagos/santander.png', lw: 110, lh: 19 },
-    { id: 'bbva', label: 'BBVA', kind: 'Transferencia bancaria', mark: 'BBVA', brand: '#004481', logo: '/pagos/bbva.png', lw: 125, lh: 55 },
-    { id: 'scotiabank', label: 'Scotiabank', kind: 'Transferencia bancaria', mark: 'Scotiabank', brand: '#ec111a', logo: '/pagos/scotiabank.png', lw: 209, lh: 41 },
-    { id: 'prex', label: 'Prex', kind: 'Transferencia bancaria', mark: 'Prex', brand: '#f5a800', logo: '/pagos/prex.png', lw: 152, lh: 54 },
-    { id: 'oca', label: 'OCA', kind: 'Transferencia bancaria', mark: 'OCA', brand: '#e30613', logo: '/pagos/oca.png', lw: 177, lh: 62 },
-    { id: 'pix', label: 'Pix', kind: 'Transferencia inmediata', mark: 'Pix', brand: '#00b1e0', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Pix_%28Brazil%29_logo.svg', lw: 899, lh: 318 },
-    { id: 'visa', label: 'Visa', kind: 'Tarjeta de crédito o débito', mark: 'VISA', brand: '#1a1f71', logo: '/pagos/visa.png', lw: 85, lh: 56 },
-    { id: 'mastercard', label: 'Mastercard', kind: 'Tarjeta de crédito o débito', mark: 'MasterCard', brand: '#eb001b', logo: '/pagos/mastercard.png', lw: 93, lh: 56 }
+    { id: 'tarjeta', label: 'Tarjeta de crédito (Mercado Pago, +5,99 % de comisión)', title: 'Tarjeta de crédito', detail: 'A través de Mercado Pago · aplica 5,99 % de comisión', icon: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>' },
+    { id: 'transferencia', label: 'Transferencia bancaria', title: 'Transferencia bancaria', detail: 'Locales y cuentas habilitadas', icon: '<path d="M3 10 12 4l9 6M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18"/>' },
+    { id: 'pix', label: 'Pix', title: 'Pix', detail: 'Pago inmediato', icon: '<path d="M13 3 5 13.5h6L10 21l9-11.5h-6z"/>' }
   ];
   var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
   var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
@@ -3324,7 +3318,7 @@
   /* Solo estos. El hotel de destino NO entra: es del viaje, no de la persona,
      y por la misma razon que el resto del pedido no se conserva. */
   var CAMPOS_VIAJERO = ['titulo', 'nombre', 'apellido', 'docTipo', 'docNumero',
-    'nacimiento', 'nacionalidad', 'email', 'telefono', 'direccion'];
+    'nacimiento', 'nacionalidad', 'email', 'telefono'];
   function leerViajero() {
     try {
       var crudo = JSON.parse(localStorage.getItem(VIAJERO_KEY) || '{}') || {};
@@ -3617,13 +3611,40 @@
   }
   /* Un campo. El label va arriba y el asterisco se separa del texto para que el
      placeholder no tenga que repetir el nombre del campo. */
+  /* Fecha de nacimiento: solo mayores de 18. El tope es hoy menos 18 anios, y el
+     selector no deja elegir nada posterior. Para quien nace un 29 de febrero y
+     el anio de hoy no es bisiesto se usa el 28: setFullYear() lo pasaria al 1 de
+     marzo y dejaria entrar a alguien un dia antes de cumplir. El minimo evita
+     anios absurdos (120 atras). */
+  function nacimientoLimite(aniosAtras) {
+    var hoy = new Date();
+    var d = new Date(hoy.getFullYear() - aniosAtras, hoy.getMonth(), hoy.getDate());
+    if (d.getMonth() !== hoy.getMonth()) d = new Date(hoy.getFullYear() - aniosAtras, hoy.getMonth() + 1, 0);
+    return iso(d);
+  }
+  var EDAD_MINIMA = 18;
+  /* Celular uruguayo: 09X XXX XXX (9 digitos, 091 a 099) o con el codigo de pais,
+     +598 9X XXX XXX. Devuelve el numero ya con formato, o '' si no es valido. Los
+     fijos (2xxx xxxx, 4xxx xxxx) no valen: el mensaje de reserva sale por
+     WhatsApp y el asesor necesita un celular. */
+  function celularUruguayo(valor) {
+    var d = String(valor || '').replace(/[\s-]/g, '');
+    var m = /^09([1-9]\d{6})$/.exec(d);
+    if (m) return '09' + d.charAt(2) + ' ' + d.slice(3, 6) + ' ' + d.slice(6);
+    m = /^\+?5989([1-9]\d{6})$/.exec(d);
+    if (m) { var r = d.slice(-8); return '+598 ' + r.slice(0, 2) + ' ' + r.slice(2, 5) + ' ' + r.slice(5); }
+    return '';
+  }
   function checkoutField(cfg) {
     var id = 'ck-' + cfg.name;
     var common = 'id="' + id + '" name="' + esc(cfg.name) + '"' + (cfg.required ? ' required' : '') +
       (cfg.value ? ' value="' + esc(cfg.value) + '"' : '') +
       (cfg.placeholder ? ' placeholder="' + esc(cfg.placeholder) + '"' : '') +
       (cfg.autocomplete ? ' autocomplete="' + esc(cfg.autocomplete) + '"' : '') +
-      (cfg.maxlength ? ' maxlength="' + cfg.maxlength + '"' : '');
+      (cfg.maxlength ? ' maxlength="' + cfg.maxlength + '"' : '') +
+      (cfg.inputmode ? ' inputmode="' + esc(cfg.inputmode) + '"' : '') +
+      (cfg.min ? ' min="' + esc(cfg.min) + '"' : '') +
+      (cfg.max ? ' max="' + esc(cfg.max) + '"' : '');
     var control = cfg.type === 'select'
       ? '<select ' + common + '>' + cfg.options.map(function (o) {
           return '<option value="' + esc(o) + '"' + (o === cfg.value ? ' selected' : '') + '>' + esc(o) + '</option>';
@@ -3699,54 +3720,31 @@
       checkoutField({ name: 'apellido', label: 'Apellido', required: true, value: apellido, autocomplete: 'family-name' }) +
       checkoutField({ name: 'docTipo', label: 'Tipo de documento', type: 'select', options: CHECKOUT_DOC_TYPES, value: f.docTipo || CHECKOUT_DOC_TYPES[0] }) +
       checkoutField({ name: 'docNumero', label: 'Número de documento', required: true, value: f.docNumero, placeholder: 'Solo números', maxlength: 12 }) +
-      checkoutField({ name: 'nacimiento', label: 'Fecha de nacimiento', type: 'date', value: f.nacimiento }) +
+      checkoutField({ name: 'nacimiento', label: 'Fecha de nacimiento (mayor de ' + EDAD_MINIMA + ')', type: 'date', value: f.nacimiento, max: nacimientoLimite(EDAD_MINIMA), min: nacimientoLimite(120), autocomplete: 'bday' }) +
       checkoutField({ name: 'nacionalidad', label: 'Nacionalidad', type: 'select', options: CHECKOUT_COUNTRIES, value: f.nacionalidad || CHECKOUT_COUNTRIES[0] }) +
       checkoutField({ name: 'email', label: 'Correo electrónico', type: 'email', required: true, value: correo, placeholder: 'nombre@correo.com', autocomplete: 'email' }) +
-      checkoutField({ name: 'telefono', label: 'Teléfono', type: 'tel', required: true, value: f.telefono, placeholder: '09X XXX XXX', autocomplete: 'tel' }) +
-      checkoutField({ name: 'direccion', label: 'Dirección', value: f.direccion, autocomplete: 'street-address', wide: true }) +
+      checkoutField({ name: 'telefono', label: 'Celular (Uruguay)', type: 'tel', required: true, value: f.telefono, placeholder: '09X XXX XXX', autocomplete: 'tel', maxlength: 16, inputmode: 'tel' }) +
       '</div>' +
       checkoutTransferBlock() +
       '<p class="checkout-legal">Estos datos los usa el operador para confirmar tu reserva. ' +
         'Los guardamos en este navegador para que no tengas que escribirlos otra vez, y el paso final ' +
         'los manda por WhatsApp al operador. No los guardamos en nuestros servidores.</p>' +
-        '<p class="checkout-legal"><button type="button" class="checkout-legal__borrar" data-borrar-datos>Olvidar mis datos</button></p>' +
       '</div>';
-  }
-  /* Borra lo que quedo guardado en este navegador. Si los datos se quedan
-     guardados tiene que haber una forma de que se vayan, y no esperar a
-     limpiar el navegador entero. Los vacia de memoria y de disco, y repinta el
-     paso para que los campos queden limpios de verdad y no solo "sin guardar". */
-  function olvidarMisDatos() {
-    borrarDatosViajero();
-    CAMPOS_VIAJERO.forEach(function (k) { delete checkoutState.form[k]; });
-    renderCheckout();
   }
   function checkoutPanelPago() {
     var t = checkoutTotals();
     return '<div class="checkout-panel" data-checkout-panel="pago">' +
       '<h2 class="checkout-panel__title">¿Cómo te queda más cómodo pagar?</h2>' +
-      '<p class="checkout-panel__lead">Elegí tu medio de pago para que el operador te diga por dónde hacerlo.</p>' +
-      '<p class="checkout-notice"><strong>Aún no procesamos pagos.</strong> Esta app cotiza y coordina, pero no cobra: la reserva se confirma con el operador y recién ahí se paga.</p>' +
-      '<div class="checkout-pay-grid" role="radiogroup" aria-label="Medio de pago">' +
+      '<p class="checkout-panel__lead">Elegí tu preferencia y el operador te indica cómo completar el pago.</p>' +
+      '<p class="checkout-notice"><strong>Aún no procesamos pagos.</strong> Esta app cotiza y coordina, pero no cobra: la reserva se confirma y se abona a través del operador.</p>' +
+      '<div class="checkout-pay-card" role="radiogroup" aria-label="Medio de pago">' +
+      '<p class="checkout-pay-card__eyebrow">Opciones disponibles</p>' +
       CHECKOUT_PAYMENTS.map(function (p) {
         var checked = checkoutState.payment === p.id;
-        // El logo va en una caja de alto fijo. Los lockups tienen proporciones
-        // muy distintas entre si: Scotiabank es 6.8:1 y Mastercard 1.6:1. Sin
-        // la caja, cada fila de la grilla tomaria la altura de su logo mas alto
-        // y el 3x3 quedaria con filas desiguales. Adentro, object-fit:contain
-        // recorta al logo angosto sin deformarlo.
-        //
-        // El nombre de la marca queda en sr-only y el wordmark pintado queda
-        // oculto: si el <img> esta, el logo; si falla, el handler de 'error'
-        // le pone is-broken y la tarjeta vuelve a pintar `mark` en su color.
         return '<label class="checkout-pay' + (checked ? ' is-selected' : '') + '" data-checkout-pay>' +
           '<input type="radio" name="checkout-payment" value="' + esc(p.id) + '"' + (checked ? ' checked' : '') + '>' +
-          '<span class="checkout-pay__brand">' +
-          '<img class="checkout-pay__logo" src="' + esc(p.logo) + '" alt="" width="' + p.lw + '" height="' + p.lh + '" loading="lazy" decoding="async" referrerpolicy="no-referrer">' +
-          '<span class="checkout-pay__mark" style="--pay-brand:' + p.brand + '">' + esc(p.mark) + '</span>' +
-          '</span>' +
-          '<span class="checkout-pay__kind">' + esc(p.kind) + '</span>' +
-          '<span class="sr-only">' + esc(p.label) + '</span>' +
+          '<span class="checkout-pay__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + p.icon + '</svg></span>' +
+          '<span class="checkout-pay__text"><b>' + esc(p.title) + '</b><small>' + esc(p.detail) + '</small></span>' +
           '<span class="checkout-pay__check" aria-hidden="true">' + checkIcon() + '</span>' +
           '</label>';
       }).join('') + '</div>' +
@@ -3868,6 +3866,13 @@
   /* Guarda lo escrito antes de validar el paso. Sin esto, el navegador valida
      los campos del paso anterior que ya no estan en el DOM y no puede focusing
      el que falta. */
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (!t || t.name !== 'telefono' || !t.closest || !t.closest('.checkout-panel')) return;
+    var limpio = t.value.replace(/[^\d+\s-]/g, '');
+    if (limpio !== t.value) t.value = limpio;
+    t.setCustomValidity('');
+  });
   function readCheckoutForm() {
     var modal = $('#booking-modal');
     if (!modal) return true;
@@ -3878,6 +3883,16 @@
     for (var i = 0; i < inputs.length; i++) {
       var el = inputs[i];
       checkoutState.form[el.name] = el.value;
+      if (el.name === 'telefono') {
+        var tel = celularUruguayo(el.value);
+        if (tel) { el.value = tel; checkoutState.form[el.name] = tel; }
+        el.setCustomValidity(!el.value || tel ? '' : 'Ingresá un celular uruguayo válido: 09X XXX XXX o +598 9X XXX XXX.');
+      }
+      if (el.name === 'nacimiento') {
+        // Una fecha tipeada a mano, o una guardada de otra sesion, se salta el max del
+        // selector: se revisa aca con el mismo tope y un mensaje que se entienda.
+        el.setCustomValidity(el.value && el.value > nacimientoLimite(EDAD_MINIMA) ? 'Tenés que ser mayor de ' + EDAD_MINIMA + ' años para reservar.' : '');
+      }
       // El primer control invalido se busca aca, porque al vaciar el panel ese
       // nodo ya no existe y no se puede llamar reportValidity sobre el.
       if (!pending && !el.checkValidity()) pending = el;
@@ -12858,8 +12873,6 @@ function comboNombreDestino() {
          modal es hermano de la vista, asi que un listener puesto alla nunca
          los ve. Estaban primero en el de #vista-detalle y por eso "Continuar"
          no hacia nada. */
-      var ckBorrar = e.target.closest('[data-borrar-datos]');
-      if (ckBorrar) { e.preventDefault(); olvidarMisDatos(); return; }
       var ckNext = e.target.closest('[data-checkout-next]');
       if (ckNext) {
         e.preventDefault();

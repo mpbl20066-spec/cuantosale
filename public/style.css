@@ -1,4 +1,4 @@
-/* version: 258
+/* version: 259
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -1996,41 +1996,21 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* "Olvidar mis datos": enlace, no boton de accion. Que se vea distinto de los
    botones del checkout para que nadie lo confunda con el paso siguiente. El area
    tactil se lleva a 48px como todo lo demas. */
-.checkout-legal__borrar{background:none;border:0;padding:8px 0;min-height:44px;color:var(--ink2);font:inherit;font-size:11.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
-.checkout-legal__borrar:hover{color:var(--ink)}
-.checkout-legal__borrar:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}/* ---- Grilla de medios de pago ---- */
-.checkout-pay-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
-.checkout-pay{--pay-logo-h:26px;position:relative;display:grid;justify-items:center;align-content:center;gap:4px;min-height:88px;padding:10px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .18s ease,background .18s ease}
-.checkout-pay:hover{border-color:var(--cel)}
-/* El input real se oculta pero se conserva focusable, para que el teclado
-   llegue a la grilla y las flechas funcionen como un radiogroup de verdad. */
+/* ---- Medios de pago: tarjeta unica con tres filas ---- */
+.checkout-pay-card{display:grid;gap:4px;margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.checkout-pay-card__eyebrow{margin:0 2px 6px;color:var(--cel);font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.checkout-pay{position:relative;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid transparent;border-radius:13px;cursor:pointer;transition:border-color .18s ease,background .18s ease}
+.checkout-pay+.checkout-pay{margin-top:2px}
+.checkout-pay:hover{background:var(--cel-soft)}
 .checkout-pay input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
 .checkout-pay.is-selected{border-color:var(--cel);background:var(--cel-soft)}
 .checkout-pay:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
-/* La caja del logo. Alto fijo y ancho completo: es lo que mantiene parejas las
-   tres filas del 3x3. El wordmark pintado queda como base y se oculta mientras
-   haya <img>; si la imagen falla, el handler de 'error' le pone is-broken y
-   esta regla lo saca de la vista para que aparezca el texto de la marca. */
-.checkout-pay__brand{display:grid;place-items:center;width:100%;height:calc(var(--pay-logo-h) + 2px)}
-/* El alto va en px y NO en porcentaje a proposito. La caja es un grid cuya fila
-   es 'auto', y un max-height:100% contra una pista de tamano automatico no se
-   resuelve: el navegador lo ignora y el logo se sale de la caja. Con Mastercard
-   (proporcion 1.6:1) eso daba 92px de alto dentro de una caja de 28.
-   Alto fijo + width:auto deja que el SVG escale por su relacion intrinseca, y
-   max-width recorta los lockups muy anchos (Scotiabank es 6.8:1) sin deformar:
-   object-fit:contain los centra en la caja. */
-.checkout-pay__logo{display:block;height:var(--pay-logo-h);width:auto;max-width:100%;object-fit:contain}
-/* Placeholder mientras descarga: sin esto la imagen aparece de golpe y empuja
-   el subtitulo. El color es el mismo fondo de la tarjeta, no un gris, para que
-   un logo lento no se note como un bloque raro. */
-.checkout-pay__logo:not(.is-broken){background:var(--surface);border-radius:4px}
-.checkout-pay:has(.checkout-pay__logo.is-broken) .checkout-pay__logo{display:none}
-.checkout-pay:has(.checkout-pay__logo.is-broken) .checkout-pay__mark{display:block}
-/* El respaldo: el nombre de la marca en su color de marca, como estaba antes
-   de los logos. Se mantiene porque las URLs de Commons se rompen. */
-.checkout-pay__mark{display:none;color:var(--pay-brand,var(--ink));font-size:15px;font-weight:800;letter-spacing:-.01em;text-align:center;line-height:1.1}
-.checkout-pay__kind{color:var(--ink2);font-size:10px;font-weight:700;text-align:center;line-height:1.3}
-.checkout-pay__check{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--cel);color:#fff;opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}
+.checkout-pay__icon{display:grid;place-items:center;flex:0 0 auto;width:38px;height:38px;border:1px solid var(--line);border-radius:11px;color:var(--cel)}
+.checkout-pay__icon svg{width:20px;height:20px}
+.checkout-pay__text{display:grid;gap:2px;min-width:0;flex:1}
+.checkout-pay__text b{color:var(--ink);font-size:14px;font-weight:700;line-height:1.25}
+.checkout-pay__text small{color:var(--ink2);font-size:12px;line-height:1.4}
+.checkout-pay__check{display:grid;place-items:center;flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--cel);color:var(--cel-ink);opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}
 .checkout-pay__check svg{width:12px;height:12px}
 .checkout-pay.is-selected .checkout-pay__check{opacity:1;transform:scale(1)}
 .checkout-pay-total{margin:14px 0 0;padding:11px 13px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;text-align:right}
@@ -2072,10 +2052,8 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
   .checkout-actions{padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
   .checkout-steps__text em{display:none}
   .checkout-grid{grid-template-columns:minmax(0,1fr)}
-  .checkout-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   /* En dos columnas la tarjeta es mas ancha que en el 3x3 de escritorio, asi
      que el logo puede ocupar un poco mas sin empujar el subtitulo. */
-  .checkout-pay{--pay-logo-h:30px}
   .checkout-btn{min-height:46px;padding:0 14px;font-size:13.5px}
   .checkout-btn--next,.checkout-btn--pay{max-width:none}
 }
@@ -3009,8 +2987,6 @@ button.logo{min-height:44px}
 
 /* Logos de medios de pago sobre una pastilla blanca pareja: los logos oficiales
    son oscuros o de color y no se leen sobre el fondo oscuro de la tarjeta. */
-.checkout-pay__brand:has(.checkout-pay__logo:not(.is-broken)){background:#fff;border-radius:8px;padding:0 10px;box-sizing:border-box;height:calc(var(--pay-logo-h) + 14px)}
-.checkout-pay__logo:not(.is-broken){background:transparent}
 
 /* ---- Ficha de hotel vertical, estilo Booking -------------------------------
    Foto arriba, nombre con el puntaje a la derecha, estrellas, zona, tipo de
@@ -3267,9 +3243,6 @@ button.logo{min-height:44px}
 :root[data-theme="light"] :is(input,select,textarea){color-scheme:light}
 :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.8);cursor:pointer}
 /* Medios de pago: siempre 2 columnas y fichas compactas, para no scrollear de mas. */
-.checkout-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
-.checkout-pay{--pay-logo-h:22px;min-height:66px;padding:8px 6px;gap:3px}
-.checkout-pay__kind{font-size:9.5px}
 
 /* ---- Banner de la Guia Secreta (paso 4) -------------------------------------- */
 .guia-banner{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;margin:18px 0 0;padding:16px 18px;box-sizing:border-box;text-align:left;font:inherit;color:var(--ink);cursor:pointer;border:1.5px solid color-mix(in srgb,var(--cel) 60%,transparent);border-radius:var(--r-card,16px);background:linear-gradient(135deg,color-mix(in srgb,var(--cel) 16%,var(--surface)),var(--surface) 70%);box-shadow:0 10px 28px rgba(0,0,0,.25)}

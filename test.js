@@ -122,9 +122,16 @@ function haversineKm(a, b) {
     assert.ok(/guardarViajero\(checkoutState\.form\)/.test(app),
       'guardarViajer() no se llama al escribir en el formulario');
 
-    // Y hay una forma de borrarlos a mano.
-    assert.ok(/data-borrar-datos/.test(app), 'no hay boton para borrar los datos');
-    assert.ok(/function olvidarMisDatos/.test(app), 'falta olvidarMisDatos()');
+    // El boton "Olvidar mis datos" se saco del formulario por pedido del dueno: el
+    // borrado queda en el navegador (la politica de privacidad lo explica). Que
+    // no vuelva a quedar un boton a medias sin su handler.
+    assert.ok(!/data-borrar-datos/.test(app) || /function olvidarMisDatos/.test(app),
+      'hay un boton de borrar datos sin su funcion');
+    // La direccion ya no se pide ni se guarda.
+    assert.ok(!/name: 'direccion'/.test(app), 'el formulario no deberia pedir la direccion');
+    // Celular uruguayo y mayoria de edad se validan en el paso de datos.
+    assert.ok(/function celularUruguayo/.test(app), 'falta la validacion del celular uruguayo');
+    assert.ok(/function nacimientoLimite/.test(app), 'falta el tope de la fecha de nacimiento (mayores de 18)');
 
     /* Lo que NO se guarda es lo del pedido. Si se guardara, una referencia
        vieja podria quedar pegada al mensaje de WhatsApp del viaje siguiente. */
@@ -163,8 +170,8 @@ function haversineKm(a, b) {
     assert.ok(/guardamos en este navegador/.test(app),
       'el aviso del checkout tiene que decir que se guardan en el navegador');
     /* Y la politica de privacidad tiene que contar lo mismo. */
-    assert.ok(/Olvidar mis datos/.test(priv),
-      'la politica de privacidad tiene que mencionar el boton de borrar los datos');
+    assert.ok(/limpiando el almacenamiento del sitio/.test(priv),
+      'la politica de privacidad tiene que decir como borrar los datos guardados en el navegador');
     assert.ok(/WhatsApp al operador/.test(priv),
       'la politica de privacidad tiene que decir que el pedido sale por WhatsApp');
   });
