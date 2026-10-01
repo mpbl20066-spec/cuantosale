@@ -85,7 +85,12 @@
       '<div class="wl-card">' +
       '<div class="wl-logo"><svg width="22" height="27" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#FFFFFF"/><circle cx="12" cy="11.5" r="4.6" fill="#F2A93B"/></svg>CuantoSale.uy</div>' +
       '<p class="wl-countdown__label">Lanzamiento oficial en</p>' +
-      '<div class="wl-countdown" id="wl-countdown" aria-live="polite">' +
+      /* Sin aria-live, y a proposito: el contador se actualiza cada segundo y un
+         polite en esa region hace que el lector de pantalla anuncie "58 segundos"
+         60 veces por minuto. Interrumpe cualquier otra cosa que este leyendo y
+         deja la pagina inutil para quien navega con lector. El texto se lee
+         igual, solo deja de anunciar cada tick. */
+      '<div class="wl-countdown" id="wl-countdown" role="timer" aria-live="off">' +
       '<div class="wl-countdown__unit"><b id="wl-cd-d">–</b><span>días</span></div>' +
       '<div class="wl-countdown__unit"><b id="wl-cd-h">–</b><span>hs</span></div>' +
       '<div class="wl-countdown__unit"><b id="wl-cd-m">–</b><span>min</span></div>' +
@@ -97,9 +102,22 @@
       // no que la letra se vuelva ilegible. En compu se ve la versión corta
       // de la descripción.
       '<p class="wl-sub">Olvidate de las peleas de plata con tus amigos.<span class="wl-long"> </span>Calculá el costo total de tu viaje<span class="wl-long"> &mdash; vuelos, alojamiento, comidas y nafta incluidos &mdash;</span> y dividilo entre todos sin vueltas.</p>' +
-      (errorMessage ? '<p class="wl-error">' + esc(errorMessage) + '</p>' : '') +
+      (errorMessage ? '<p class="wl-error" role="alert">' + esc(errorMessage) + '</p>' : '') +
+      /* El submit va por el listener de mas abajo contra el RPC waitlist_signup de
+         Supabase, no contra un endpoint propio. Por eso el <form> no lleva
+         action: con JS roto, el fallback del navegador haria un GET a la pagina
+         actual con el correo en la query string, o sea que dejaria de ser privado
+         justo en el caso donde el JS no anda. */
       '<form id="waitlist-form">' +
-      '<label class="wl-field"><input required type="email" name="email" placeholder="tu@email.com" autocomplete="email"></label>' +
+      /* El label envuelve al input pero no tiene texto, asi que el nombre
+         accesible caia al placeholder. Un placeholder no es un nombre accesible
+         fiable (se borra al escribir, y varios lectores no lo anuncian), y en
+         este caso era el unico campo del formulario. Con un span visible y un
+         sr-only para el texto largo, el campo tiene nombre propio y el
+         formulario se lee bien con y sin lector. */
+      '<label class="wl-field" for="wl-email">' +
+      '<span class="wl-field__label">Tu correo</span>' +
+      '<input required id="wl-email" type="email" name="email" placeholder="tu@email.com" autocomplete="email"></label>' +
       '<button type="submit" class="wl-btn">¡Quiero unirme ahora!</button>' +
       '<p class="wl-free-note">Gratis, sin tarjeta de crédito.</p>' +
       '</form>' +
@@ -175,7 +193,14 @@
       '<div class="wl-stat"><span>Personas invitadas</span><b>' + esc(invitedCount) + '</b></div>' +
       '<div class="wl-reward"><p>' + rewardCopy + '</p>' +
       '<div class="wl-reward__track"><div class="wl-reward__fill" style="width:' + Math.round((unlockedPct / REWARD_MAX_PCT) * 100) + '%"></div></div>' +
-      '<div class="wl-reward__steps"><span>0%</span><span>' + REWARD_MAX_PCT + '% off</span></div></div>' +
+      '<div class="wl-reward__steps"><span>0%</span><span>' + REWARD_MAX_PCT + '% off</span></div></div>'
+      /* Aviso de privacidad junto al campo, y no solo en un pie: esta es la
+         pagina donde se pide el correo. La politica dice que se guarda, asi que
+         el enlace tiene que estar a la vista en el momento de la decision, no
+         escondido tres pantallas mas abajo. Sin .html porque el server sirve
+         /privacidad y /terminos con esas rutas. */
+      + '<p class="wl-legal">Al anotarte aceptás nuestra <a href="/privacidad">política de privacidad</a>'
+      + ' y las <a href="/terminos">condiciones del servicio</a>.</p>' +
       '</div>'
     );
     document.getElementById('share-primary').addEventListener('click', function () {

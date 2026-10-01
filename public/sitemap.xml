@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap de cuantosale.uy
+
+  Solo van las rutas que el server sirve de verdad y que tienen contenido para
+  un buscador:
+    - /            la waitlist (raiz publica durante el pre-lanzamiento)
+    - /app         la app de cotizacion
+    - /privacidad  y /terminos, que el server expone sin .html
+    - /grupo       el reparto de gastos, que ademas es el link que la gente
+                   manda por WhatsApp: /grupo/<uuid> no se lista porque cada uno
+                   es el gasto de un viaje puntual y no tiene nada que buscar.
+
+  /tours queda afuera a proposito: es el panel de edicion del catalogo de la
+  agencia, y esta en robots.txt con Disallow.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://cuantosale.uy/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://cuantosale.uy/app</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://cuantosale.uy/grupo</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://cuantosale.uy/privacidad</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://cuantosale.uy/terminos</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>

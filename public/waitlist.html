@@ -6,6 +6,25 @@
 <title>Sumate a la waitlist | CuántoSale</title>
 <meta name="description" content="El lanzamiento oficial de CuántoSale está cerca. Anotate gratis a la lista de espera y sé el primero en usarla.">
 <meta name="theme-color" content="#0B1330">
+<!-- Esta es la pagina PUBLICA del proyecto: "/" la sirve el server cuando esta el
+     candado de pre-lanzamiento (ver server.js). Es decir, el link que la gente
+     comparte por WhatsApp es este, y sin og: el preview salia como una URL pelada:
+     sin imagen, sin titulo y sin descripcion, que es la primera impression que
+     se lleva el que todavia no conoce la pagina. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CuántoSale">
+<meta property="og:title" content="CuántoSale — Mirá cuánto cuesta realmente tu viaje">
+<meta property="og:description" content="Comparamos vuelos, buses y alojamiento desde Uruguay. Anotate gratis a la lista de espera y sé el primero en usarla.">
+<meta property="og:url" content="https://cuantosale.uy/">
+<meta property="og:image" content="https://cuantosale.uy/og-cuantosale.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_UY">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://cuantosale.uy/og-cuantosale.jpg">
+<meta name="twitter:title" content="CuántoSale — Mirá cuánto cuesta realmente tu viaje">
+<meta name="twitter:description" content="Comparamos vuelos, buses y alojamiento desde Uruguay. Anotate gratis a la lista de espera.">
+<link rel="canonical" href="https://cuantosale.uy/">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,6 +44,13 @@
   h1{font-family:'Poppins',sans-serif;font-weight:800;font-size:44px;line-height:1.04;margin:0 0 16px;text-wrap:balance;text-align:center}
   .wl-sub{color:var(--wl-ink2);font-size:17px;line-height:1.55;margin:0 0 30px;text-align:center}
   .wl-field{display:block;margin-bottom:14px}
+  .wl-field__label{display:block;margin-bottom:6px;color:var(--wl-ink2);font-size:13px;font-weight:600}
+  /* Aviso de privacidad: chico y bajo el boton, con los links subrayados para
+     que se entienda que se pueden tocar. Contraste medido sobre el fondo de la
+     tarjeta. */
+  .wl-legal{margin:14px 0 0;color:#9AA6C7;font-size:12.5px;line-height:1.6;text-align:center}
+  .wl-legal a{color:var(--wl-amber);text-decoration:underline;text-underline-offset:2px}
+  .wl-legal a:focus-visible{outline:2px solid var(--wl-amber);outline-offset:2px;border-radius:3px}
   .wl-field input{display:block;width:100%;padding:18px;border:1px solid var(--wl-line);border-radius:14px;background:#0E1533;color:var(--wl-ink);font-size:17px}
   .wl-field input::placeholder{color:var(--wl-ink2)}
   .wl-btn{display:block;width:100%;border:0;border-radius:14px;background:var(--wl-amber);color:#1A1200;padding:19px;font-weight:800;font-size:18px;cursor:pointer;box-shadow:0 12px 28px -8px rgba(242,169,59,.6)}

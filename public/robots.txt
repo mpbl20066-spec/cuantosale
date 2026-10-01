@@ -1,0 +1,17 @@
+User-agent: *
+# La app esta detras del candado de pre-lanzamiento hasta que se saquen
+# APP_USER y APP_PASS en el despliegue (ver server.js). Sin esas dos variables no
+# hay candado y todo es publico, que es el caso del desarrollo local.
+# Allow: /
+
+# Estas dos no son paraindexar. /tours es el panel de edicion del catalogo de
+# la agencia: no aporta nada en buscadores y no queremos que el link sea un
+# punto de entrada visible a cualquiera que lo pruebe.
+Disallow: /tours
+Disallow: /api/
+
+# La raiz sirve la waitlist durante el pre-lanzamiento, no la app. Es la landing
+# que se comparte y la unica que tiene contenido para un buscador.
+Allow: /
+
+Sitemap: https://cuantosale.uy/sitemap.xml
