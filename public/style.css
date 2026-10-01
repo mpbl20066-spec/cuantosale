@@ -3234,3 +3234,12 @@ button.logo{min-height:44px}
 .voucher-share__menu button{justify-content:flex-start}
 :is(.voucher-chip,.voucher-tile,.voucher-share__menu button,.voucher-reserve__btn,.steps__next) :is(svg,.voucher-btn__ico){flex:0 0 auto;display:block}
 :is(.voucher-chip,.voucher-tile,.voucher-share__menu button) .voucher-btn__label{display:inline-block;line-height:1.2}
+
+/* Selectores nativos (calendario, listas) siguen el tema: oscuros en modo oscuro. */
+:root:not([data-theme="light"]) :is(input,select,textarea){color-scheme:dark}
+:root[data-theme="light"] :is(input,select,textarea){color-scheme:light}
+:root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.8);cursor:pointer}
+/* Medios de pago: siempre 2 columnas y fichas compactas, para no scrollear de mas. */
+.checkout-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.checkout-pay{--pay-logo-h:22px;min-height:66px;padding:8px 6px;gap:3px}
+.checkout-pay__kind{font-size:9.5px}

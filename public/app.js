@@ -6015,7 +6015,7 @@
     function filaCta(categoria, elegido, agregar) {
       if (estadoReserva(categoria)) return reservadoCta(categoria, 'Quitar la marca de reservado y volver a reservar.');
       return elegido
-        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Modificar</button>'
+        ? '<button type="button" class="voucher-item__cta is-modificar" data-detalle-rubro="' + categoria + '">Cambiar</button>'
         : '<button type="button" class="voucher-item__cta is-elegir" data-detalle-rubro="' + categoria + '">' + agregar + '</button>';
     }
     /* "Falta elegir" al cuerpo, con su propio tono: es una instruccion, no un
@@ -6048,7 +6048,7 @@
     }
     var flightTitle = flightSummary.selected && flightSummary.airline
       ? 'Vuelo · ' + esc(flightSummary.airline)
-      : 'Vuelo · sin seleccionar';
+      : 'Vuelo · sin elegir';
     // El voucher se lleva la persona al hotel, asi que el titulo tiene que
     // distinguir los dos tramos: con llegada y vuelta en modalidades distintas,
     // un "Traslado compartido" a secas no dice cuál de los dos es.
@@ -6072,7 +6072,7 @@
     /* Sin modalidad no hay nada que reservar. El aviso va al cuerpo de la fila
        (antes iba debajo del monto, en la columna de la cifra) y el CTA de la
        derecha desaparece en vez de quedar como un boton que no abre nada. */
-    var transferCta = filaCta('traslados', !!(tl2 || tv2), 'Agregar traslado');
+    var transferCta = filaCta('traslados', !!(tl2 || tv2), 'Elegir traslado');
     var transferNoteHtml = (tl2 || tv2 ? '' : avisoVoucher('Elegí un transfer en la sección de traslados.'))
       + '<p class="voucher-item__detail">' + transferNote + '</p>';
     // findSelectedHotelDetail() devuelve un texto generico cuando no encontró la
@@ -6100,7 +6100,7 @@
     // El titulo lleva el hotel cuando hay uno solo. Con dos ya no alcanza: el
     // nombre de arriba seria el de la ultima parada procesada y la lista de
     // abajo los dos, y se leeria como que el titulo ese de todo el viaje.
-    var hotelTitle = multiHotel ? 'Alojamiento - ' + hotelesElegidos.length + ' hoteles' : (hotelElegido() ? 'Alojamiento - ' + esc(selectedHotelName) : 'Alojamiento - sin seleccionar');
+    var hotelTitle = multiHotel ? 'Alojamiento · ' + hotelesElegidos.length + ' hoteles' : (hotelElegido() ? 'Alojamiento · ' + esc(selectedHotelName) : 'Alojamiento · sin elegir');
     /* En auto propio el transporte local no se suma al total (ver categories de
        proposalTotals: el auto ya cubre los traslados), asi que tampoco se lista
        ni se cuenta aca: si no, la fila decia que estaba en el total y no estaba. */
@@ -6179,7 +6179,7 @@
       } else if (flightSummary.selected) {
         vAccion = confirma('pasajes', 'laerol&iacute;nea');
       } else {
-        vAccion = '<button type="button" class="voucher-step__btn" data-detalle-rubro="pasajes">Agregar vuelos</button>';
+        vAccion = '<button type="button" class="voucher-step__btn" data-detalle-rubro="pasajes">Elegir vuelo</button>';
       }
       if (busMode) markup += paso(1, 'Bus', esc(busSel ? busResumenCorto(detailState.meta) : 'Tarifa estimada') + ' &middot; ' + money(busTotal), false, false, '<span class="voucher-step__hint">Compralo con la empresa</span>');
       else markup += paso(1, 'Vuelo', vBajada, extVuelo, !extVuelo, vAccion);
@@ -6190,7 +6190,7 @@
         : 'Todav&iacute;a no agregaste hotel';
       var hAccion = '';
       if (!hotelElegido()) {
-        hAccion = '<button type="button" class="voucher-step__btn" data-detalle-rubro="alojamiento">Agregar hotel</button>';
+        hAccion = '<button type="button" class="voucher-step__btn" data-detalle-rubro="alojamiento">Elegir hotel</button>';
       } else if (hotelBookUrl) {
         hAccion = '<a class="voucher-step__btn is-link" href="' + esc(hotelBookUrl) + '" target="_blank" rel="noopener noreferrer" data-reservar-rubro="alojamiento">Ver en Booking</a>';
       } else {
@@ -6256,9 +6256,9 @@
       '<div class="voucher-bloque"><h3 class="voucher-bloque__title">Costos previos al viaje<span>' + (autoMode ? 'Auto, alojamiento y actividades' : busMode ? 'Bus, alojamiento y actividades' : 'Vuelo, alojamiento, traslado y actividades') + '</span></h3><b class="voucher-bloque__monto">' + money(Math.max(0, totalGeneral - destinoTotal)) + '</b></div>' +
       '<ul class="voucher-list">' +
       (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, filaCta('pasajes', !!flightSummary.selected, 'Agregar vuelos'))) +
-      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Agregar hotel')) +
+      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Elegir hotel')) +
       (busMode || autoMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
-      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Agregar actividades')) +
+      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Elegir actividades')) +
       '</ul>' +
       /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
          ya es una caja: caja dentro de caja, y el unico bloque del modal con
@@ -8433,7 +8433,7 @@
     var monedaBaseTit = monedaBase(), monedaTit = monedaActiva();
     var enOtraMoneda = monedaTit.code !== monedaBaseTit.code && tasaDe(monedaTit.code) != null;
     var budgetTxt = enOtraMoneda ? money(data.meta.budget) + ' (≈ USD $' + titleBudget + ')' : 'USD $' + titleBudget;
-    el.innerHTML = '<section class="destination-results-section"><h2>🌍 Destinos disponibles para tu presupuesto de ' + budgetTxt + '</h2>' +
+    el.innerHTML = '<section class="destination-results-section"><h2>Destinos disponibles para tu presupuesto de ' + budgetTxt + '</h2>' +
       '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo' + (enOtraMoneda ? '. Precios en ' + monedaTit.etiqueta.toLowerCase() + ' (' + monedaTit.simbolo + ')' : '') + '.</p>' +
       (sinOpcionQueEntre && fits.length
         ? '<div class="notice">Estás cerca: con ' + money(data.meta.budget) + ' todavía no alcanza para ningún destino, pero lo más económico sale ' + money(fits[0].total) + ' (' + esc(fits[0].dest.name) + ', categoría ' + esc(nombreCategoria(fits[0].alt)) + ') y se pasa por ' + money(fits[0].sobra) + '. Subí un poco el monto, bajá la cantidad de viajeros o probá otras fechas. Te dejamos las 3 más baratas.</div>'
@@ -10603,7 +10603,7 @@
 
     function setDestDisplay(value) {
       var item = destItems.filter(function (entry) { return entry.value === value && (!S.subcategory || entry.subcategory === S.subcategory); })[0] || destItems.filter(function (entry) { return entry.value === value; })[0];
-      var text = item ? item.label : 'Todos los destinos (Buscar por mi presupuesto)';
+      var text = item ? item.label : 'Todos los destinos';
       if (S.subcategory && (!item || item.subcategory !== S.subcategory)) {
         // Un par invertido ya empieza con el nombre del destino: con destino
         // Fortaleza y par "Fortaleza + Natal" la barra quedaba diciendo
@@ -12231,9 +12231,9 @@ function comboNombreDestino() {
 
     fetch('/api/destinos').then(function (r) { return r.json(); }).then(function () {
       var menu = document.getElementById('dest-menu');
-      destItems = [{ value: 'todos', label: 'Todos los destinos (Buscar por mi presupuesto)' }];
+      destItems = [{ value: 'todos', label: 'Todos los destinos' }];
       if (menu) {
-        menu.innerHTML = '<button id="dest-option-todos" type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true"><span class="custom-select__option-main">🌍 Todos los destinos</span><span class="custom-select__option-sub">Buscar por mi presupuesto</span></button>';
+        menu.innerHTML = '<button id="dest-option-todos" type="button" class="custom-select__option is-selected" data-dest-value="todos" role="option" aria-selected="true"><span class="custom-select__option-main">Todos los destinos</span><span class="custom-select__option-sub">Buscar por mi presupuesto</span></button>';
         bindDestinationOption(menu.querySelector('#dest-option-todos'));
       }
       DESTINATION_HUBS.forEach(function (hub, hubIndex) {
@@ -12242,7 +12242,7 @@ function comboNombreDestino() {
           groupWrap.className = 'custom-select__group';
           var groupTitle = document.createElement('span');
           groupTitle.className = 'custom-select__group-title';
-          groupTitle.innerHTML = '<span class="custom-select__hub-icon" aria-hidden="true">🛬</span><span>' + esc(hub.name) + '</span><strong class="custom-select__hub-code">' + esc(hub.codes) + '</strong>';
+          groupTitle.innerHTML = '<svg class="custom-select__hub-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg><span>' + esc(hub.name) + '</span><strong class="custom-select__hub-code">' + esc(hub.codes) + '</strong>';
           groupWrap.appendChild(groupTitle);
           hub.options.forEach(function (item, optionIndex) {
             /* Este desplegable ofrece un solo destino. Los pares de dos paradas
