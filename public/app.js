@@ -3996,6 +3996,19 @@
      fechas, personas, medio de pago— y cambian solo el bloque de lo que se pide.
      El del transfer lleva ademas vuelo y hotel, que es lo primero que mira el
      operador para decir si puede ir a buscarte. */
+  /* El emoji de cada actividad en el mensaje, por palabras del titulo. Sin una
+     coincidencia sale el ticket: mejor un icono neutro que uno equivocado. */
+  function emojiDeActividad(titulo) {
+    var x = String(titulo || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    if (/buggy|4x4|off ?road|jeep|cuatriciclo|quadriciclo/.test(x)) return '🛞';
+    if (/bucea|mergulho|snorkel/.test(x)) return '🤿';
+    if (/surf|paddle|kayak/.test(x)) return '🏄';
+    if (/barco|lancha|escuna|goleta|catamaran|jangada|paseo a|passeio|ilha|isla|volta|vuelta/.test(x)) return '⛵';
+    if (/parque|ingreso|entrada|mundo|pasaporte|world/.test(x)) return '🎢';
+    if (/praia|playa/.test(x)) return '🏖️';
+    if (/ballena|delfin|tamar|fauna/.test(x)) return '🐬';
+    return '🎟️';
+  }
   function checkoutWhatsappUrl() {
     var t = checkoutTotals();
     if (!t.count || !detailState || !detailState.meta) return null;
@@ -4010,45 +4023,53 @@
 
        La pregunta final pide punto de encuentro y horario siempre. Un transfer
        sin hora no es un pedido incompleto, es una pregunta. */
-    var abre = t.tours.length && t.transfer
-      ? 'Hola, quiero reservar actividades y un transfer'
-      : (t.transfer ? 'Hola, quiero coordinar un transfer desde el aeropuerto' : 'Hola, quiero reservar actividades');
-    var message =
-      abre + ' para mi viaje a ' + meta.dest.name + '.\n\n' +
-      'Pedido ' + ref + '\n' +
-      'Viajero: ' + nombre + '\n' +
-      'Documento: ' + (f.docTipo || '') + (f.docNumero ? ' ' + f.docNumero : '') + '\n' +
-      'Contacto: ' + [f.email, f.telefono].filter(Boolean).join(' · ') + '\n' +
-      'Fechas: ' + meta.dep + ' al ' + meta.ret + ' · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '\n\n';
+    var vuelo = getSelectedFlightSummary();
+    var hotel = transferHotelName();
+    var fecha = function (iso) { var d = parse(iso); return isNaN(d) ? String(iso) : dLong(d); };
+    var L = [];
+    L.push('🌴 NUEVA SOLICITUD DE RESERVA 🌊');
+    L.push('*Pedido: ' + ref + '*');
+    L.push('');
+    L.push('👤 DATOS DEL VIAJERO');
+    L.push('• Nombre: ' + nombre);
+    L.push('• Doc: ' + [f.docTipo, f.docNumero].filter(Boolean).join(' '));
+    L.push('• Contacto: ' + [f.email, f.telefono].filter(Boolean).join(' · '));
+    L.push('');
+    L.push('📅 DETALLES DEL VIAJE');
+    L.push('• Fechas: ' + fecha(meta.dep) + ' al ' + fecha(meta.ret) + ' (' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + ')');
+    L.push('• Hotel: ' + (hotel || 'a definir') + ' 🏖️');
+    L.push('• Vuelo: ' + (vuelo && vuelo.selected && vuelo.airline
+      ? vueloNombreCorto(vuelo) + (vuelo.arrivalText ? ' (Llega ' + vuelo.arrivalText + ')' : '')
+      : 'a definir') + ' ✈️');
     if (t.tours.length) {
-      /* El precio de estos tours es estimado, asi que el mensaje lo dice. Quien
-         lo recibe tiene que saber que el numero es de referencia y que el valor
-         final lo confirma quien lo tome: sin esa linea, un WhatsApp que dice
-         "Total de actividades: US$ 240" se lee como una cotizacion firme. */
-      var lineas = t.tours.map(function (tour) {
-        var linea = '- ' + tour.title + ' (' + (Number(tour.price) > 0 ? money(tour.price) + ' por persona' : 'precio a consultar') + ')';
-        return tour.url ? linea + '\n  ' + tour.url : linea;
-      }).join('\n');
-      message += 'Actividades:\n' + lineas + '\n';
-      message += 'Total de actividades: ' + money(t.unitTotal * t.pax) + '\n';
-      /* El codigo solo viaja en el mensaje si descuenta: con una sola actividad
-         el descuento no aplica y escribirlo pediria algo que no corresponde. */
+      /* El precio de estos tours es estimado: el cierre del mensaje lo dice
+         ("A confirmar") para que no se lea como una cotizacion firme. */
+      L.push('');
+      L.push('🏄‍♂️ ACTIVIDADES SELECCIONADAS');
+      t.tours.forEach(function (tour) {
+        L.push('• ' + emojiDeActividad(tour.title) + ' ' + tour.title + ' (' + (Number(tour.price) > 0 ? money(tour.price) : 'precio a consultar') + ')');
+      });
+      L.push('👉 *Subtotal actividades: ' + money(t.unitTotal * t.pax) + '*');
+      // El codigo solo viaja si descuenta: con una sola actividad no aplica.
       if (t.descuento.estado === 'aplicado') {
-        message += 'Código de descuento ' + t.descuento.codigo + ' (' + DESCUENTO_TOURS_PCT + ' % por reservar ' + DESCUENTO_TOURS_MIN + ' o más actividades): −' + money(t.descuento.monto) + '\n';
+        L.push('🏷️ Código ' + t.descuento.codigo + ' (' + DESCUENTO_TOURS_PCT + ' % por ' + DESCUENTO_TOURS_MIN + ' o más actividades): −' + money(t.descuento.monto));
       }
-      message += '\n';
-      message += 'Precio estimado, a confirmar por quien lo tome.\n\n';
     }
     if (t.transfer) {
-      var vuelo = getSelectedFlightSummary();
-      message += 'Transfer: ' + t.transfer.title + ' · ' + money(t.transfer.total) +
-        (t.transfer.porPersona ? ' (' + money(t.transfer.price) + ' por persona)' : '') + '\n' +
-        'Vuelo: ' + vueloNombreCorto(vuelo) + (vuelo.arrivalText && vuelo.selected ? ' · llega ' + vuelo.arrivalText : '') + '\n' +
-        'Hotel: ' + (transferHotelName() || 'sin confirmar, decime el hotel o pousada') + '\n\n';
+      L.push('');
+      L.push('🚐 TRANSFER');
+      L.push('• ' + t.transfer.title + ' — *' + money(t.transfer.total) + (t.transfer.porPersona ? ' (' + money(t.transfer.price) + ' por pers.)' : '') + '*');
     }
-    message += 'Total a confirmar: ' + money(t.total) + '\n' +
-      'Medio de pago preferido: ' + (pay ? pay.label : 'a coordinar') + '\n\n' +
-      '¿Me confirman disponibilidad, horario, punto de encuentro y el valor final?';
+    L.push('');
+    L.push('💳 MÉTODO DE PAGO');
+    L.push(pay ? '• ' + pay.label + ' *(Prefiere este medio)*' : '• A coordinar');
+    L.push('');
+    L.push('---');
+    L.push('💰 TOTAL ESTIMADO: **' + money(t.total) + '** *(A confirmar)*');
+    L.push('---');
+    L.push('');
+    L.push('💬 ¿Nos confirman disponibilidad, horarios, puntos de encuentro y el valor final, por favor? ¡Muchas gracias! ✨');
+    var message = L.join('\n');
     return whatsappUrl(message, WHATSAPP_RESERVAS);
   }
   /* A quien le llega la reserva. Vive en una sola variable porque el link se arma

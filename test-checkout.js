@@ -109,6 +109,10 @@ const cuerpo = ['checkoutTours', 'checkoutTransferLine', 'checkoutPedido', 'chec
   // checkoutWhatsappUrl() llama a vueloNombreCorto(), asi que tiene que venir con
   // ella o el test explota con ReferenceError en vez de fallar una comprobacion.
   'vueloNombreCorto',
+  // El mensaje arma las fechas con parse() y dLong(), y el emoji de cada actividad con emojiDeActividad().
+  'parse', 'dLong', 'emojiDeActividad',
+  // El campo de nacimiento fija el tope de 18 anios con nacimientoLimite() e iso().
+  'iso', 'nacimientoLimite',
   // checkoutTours() llama a descuentoToursDe(), que calcula el descuento por
   // codigo de promo sobre el subtotal de actividades. Sin ella el test muere con
   // ReferenceError antes de comprobar nada del checkout.
@@ -122,6 +126,7 @@ const deps =
   // vienen de app.js como var sueltas, asi que hay que declararlas aca: si
   // faltan, el checkout se rompe con ReferenceError antes de comprobar nada.
   // Los valores son los de app.js; si cambian alla, el test tiene que saber.
+  'var EDAD_MINIMA = 18;\n' +
   'var DESCUENTO_TOURS_PCT = 5;\n' +
   'var DESCUENTO_TOURS_MIN = 2;\n' +
   'var DESCUENTO_TOURS_CODIGOS = { buz: "BUZIOS5", arraial: "ARRAIAL5", cabo: "CABOFRIO5", ilha: "ILHAGRANDE5" };\n' +
@@ -174,7 +179,7 @@ prueba('el aside lista las dos cosas', () => {
   assert.ok(a.includes('154,00'), 'el total de los dos');
 });
 prueba('el aside no inventa horario de recogida', () => assert.ok(!fns.checkoutAside().includes('Recogida')));
-prueba('el whatsapp abre pidiendo las dos cosas', () => assert.ok(/actividades y un transfer/.test(r.wa)));
+prueba('el whatsapp abre pidiendo las dos cosas', () => assert.ok(/ACTIVIDADES SELECCIONADAS/.test(r.wa) && /🚐 TRANSFER/.test(r.wa)));
 /* El link tiene que ir al numero del operador. Sin esto, un "wa.me/?text=" a
    proposito —un cambio para que el mensaje lo mande la persona a quien quiera—
    pasaria todos los tests de arriba, porque el texto armarlo igual. */
@@ -182,12 +187,12 @@ prueba('el link va al numero del operador y no al selector de contactos', () => 
   assert.ok(r.waCrudo.startsWith('https://wa.me/5511920836306?text='), 'queda: ' + r.waCrudo.slice(0, 40));
 });
 prueba('el whatsapp lista actividades y transfer', () => {
-  assert.ok(/Actividades:\n- Paseo en escuna \(R\$ 42,00 por persona\)/.test(r.wa), 'actividades');
-  assert.ok(/Transfer: Transfer compartido · R\$ 70,00/.test(r.wa), 'transfer');
-  assert.ok(/Total de actividades: R\$ 84,00/.test(r.wa), 'subtotal de actividades escalado');
-  assert.ok(/Total a confirmar: R\$ 154,00/.test(r.wa), 'total de todo');
+  assert.ok(/ACTIVIDADES SELECCIONADAS\n• ⛵ Paseo en escuna \(R\$ 42,00\)/.test(r.wa), 'actividades');
+  assert.ok(/🚐 TRANSFER\n• Transfer compartido — \*R\$ 70,00/.test(r.wa), 'transfer');
+  assert.ok(/Subtotal actividades: R\$ 84,00\*/.test(r.wa), 'subtotal de actividades escalado');
+  assert.ok(/TOTAL ESTIMADO: \*\*R\$ 154,00\*\* \*\(A confirmar\)\*/.test(r.wa), 'total de todo');
 });
-prueba('el whatsapp pide punto de encuentro y horario', () => assert.ok(/punto de encuentro y el valor final/.test(r.wa)));
+prueba('el whatsapp pide punto de encuentro y horario', () => assert.ok(/puntos de encuentro y el valor final/.test(r.wa)));
 prueba('el panel de datos pide el hotel y no la hora', () => {
   const d = fns.checkoutPanelDatos();
   assert.ok(/name="transferHotel"/.test(d));
@@ -215,8 +220,8 @@ prueba('sin transfer el aside no muestra datos de traslado', () => {
 });
 prueba('sin transfer el panel de datos no pide hotel', () => assert.ok(!fns.checkoutPanelDatos().includes('transferHotel')));
 prueba('sin transfer el whatsapp es el de actividades', () => {
-  assert.ok(/reservar actividades/.test(r.wa));
-  assert.ok(!/Transfer:/.test(r.wa));
+  assert.ok(/ACTIVIDADES SELECCIONADAS/.test(r.wa));
+  assert.ok(!/🚐 TRANSFER/.test(r.wa));
 });
 
 /* --- 3. Solo transfer privado --- */
@@ -232,8 +237,8 @@ prueba('el privado no muestra precio por persona', () => {
   assert.ok(/2 personas/.test(a), 'dice cuantos viajan y nada mas');
 });
 prueba('el privado no dice "por persona" en el whatsapp', () => {
-  assert.ok(/Transfer: Transfer privado · R\$ 118,00/.test(r.wa));
-  assert.ok(!/por persona\)/.test(r.wa.split('Transfer:')[1].split('\n')[0]));
+  assert.ok(/🚐 TRANSFER\n• Transfer privado — \*R\$ 118,00\*/.test(r.wa));
+  assert.ok(!/por pers\./.test(r.wa.split('🚐 TRANSFER')[1].split('\n')[1]));
 });
 
 /* --- 4. Nada elegido --- */
