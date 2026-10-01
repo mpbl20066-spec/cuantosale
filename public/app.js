@@ -6283,7 +6283,12 @@
        sentencia aparte, es mas barato de leer y de corregir que partir esa
        cadena en tres. */
     summaryText += grupoTexto;
-    var flightBookUrl = flightWhatsappUrl(detailState, flightSummary, flightTotal);
+    /* Con SerpAPI conectado la oferta trae book_url (Google Flights con la busqueda
+       armada) y la reserva del vuelo va por ahi. WhatsApp queda solo como respaldo
+       cuando la oferta no tiene link: vuelos que no vienen de SerpAPI. */
+    var flightOfferSel = flightSummary && flightSummary.selected ? getSelectedFlightOffer() : null;
+    var flightProviderUrl = flightOfferSel && flightOfferSel.book_url && /^https:\/\/www\.google\.com\/travel\/flights/.test(String(flightOfferSel.book_url)) ? flightOfferSel.book_url : null;
+    var flightBookUrl = flightProviderUrl || flightWhatsappUrl(detailState, flightSummary, flightTotal);
     var busSel = busMode ? busElegido(detailState.meta) : null;
     var busTitle = busSel ? 'Bus · ' + esc(busSel.empresa) + (busSel.clase ? ' ' + esc(busSel.clase) : '') : 'Bus · tarifa estimada';
     var busLines = busSel
