@@ -7244,7 +7244,9 @@
     var pax = Math.max(1, Number((meta && meta.pax) || (state && state.pax) || (typeof S !== 'undefined' && S && S.pax)) || 1);
     var tramos = [];
     if (meta.dest) {
-      var aero = precios.aeropuerto ? 'Aeropuerto de ' + precios.aeropuerto + (precios.iata ? ' (' + precios.iata + ')' : '') : 'Aeropuerto';
+      // El nombre ya trae "Aeroporto/Aeropuerto ..." (ver AIRPORT_NAMES): no se le
+      // antepone otro "Aeropuerto de", que daba "Aeropuerto de Aeroporto ...".
+      var aero = precios.aeropuerto ? (/^aero(puerto|porto) /i.test(precios.aeropuerto) ? precios.aeropuerto : 'Aeropuerto ' + precios.aeropuerto) + (precios.iata ? ' (' + precios.iata + ')' : '') : 'Aeropuerto';
       var comun = { auto: false, shared: precios.soloPrivado ? 0 : precios.compartido * pax, private: precios.privado, note: precios.km ? precios.km + ' km' : '' };
       // Los tramos van en el orden en que se recorren: primero se llega, después
       // se vuelve. Cada uno con SU modalidad elegida (transferType y
