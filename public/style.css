@@ -3561,3 +3561,27 @@ summary::-webkit-details-marker{display:none}
    segunda fila (el resumen "Mi viaje" sigue accesible desde su panel flotante)
    y la barra de pasos no se compacta por JS: es sticky puro y mantiene su alto,
    asi nada cambia de tamano mientras se scrollea. */
+/* En pantallas muy chicas con cuenta iniciada (cuatro iconos) el logo queda solo
+   con el isotipo para no cortarse. */
+@media(max-width:320px){.top:has(#trips-button:not([hidden])) .logo{font-size:0;gap:0}.top:has(#trips-button:not([hidden])) .logo svg{width:22px;height:28px}}
+
+/* Traslados ida / vuelta: cada tramo es su propia tarjeta, con separacion
+   marcada, un encabezado grande con flecha y color propio (ida = azul, vuelta =
+   ambar) y el precio de cada opcion separado del texto por una linea, para que
+   "por persona" / "por vehiculo" no se mezcle con el tramo de abajo. */
+.transfer-leg{--leg:var(--cel);--leg-soft:var(--cel-soft);margin:0 0 24px;padding:0 0 16px;border:1.5px solid var(--line);border-top:4px solid var(--leg);border-radius:18px;background:var(--surface);overflow:hidden}
+.transfer-leg:last-of-type{margin-bottom:0;padding-bottom:16px;border-bottom:1.5px solid var(--line)}
+.transfer-leg--vuelta{--leg:#F0A92A;--leg-soft:color-mix(in srgb,#F0A92A 16%,transparent)}
+.transfer-leg > :not(.transfer-leg__head){margin-left:14px;margin-right:14px}
+.transfer-leg__head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 14px;padding:14px;background:var(--leg-soft)}
+.transfer-leg__head strong{flex:1 1 180px;min-width:0;font-size:17px;font-weight:800;line-height:1.25}
+.transfer-leg__badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;background:var(--leg);color:#fff;font-size:12px;letter-spacing:.05em}
+.transfer-leg--vuelta .transfer-leg__badge{color:#1a1204}
+.transfer-leg--ida .transfer-leg__badge::before{content:"\2794";font-size:14px;line-height:1}
+.transfer-leg--vuelta .transfer-leg__badge::before{content:"\2B05";font-size:14px;line-height:1}
+.transfer-leg .transfer-choice-grid{gap:12px}
+.transfer-leg .transfer-choice__price{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line)}
+@media(max-width:560px){
+  .transfer-leg .transfer-choice-grid{grid-template-columns:minmax(0,1fr)}
+  .transfer-leg__head strong{flex-basis:100%}
+}
