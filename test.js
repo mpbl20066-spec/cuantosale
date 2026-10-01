@@ -1386,9 +1386,11 @@ function haversineKm(a, b) {
 
     const fernando = model.transferOptions('fernando');
     assert.strictEqual(fernando.modo, 'vuelo', 'fernando deberia declararse vuelo');
-    assert.ok(fernando.soloPrivado, 'a Fernando de Noronha no hay van compartida');
-    assert.strictEqual(fernando.compartido, 0, 'sin van compartida, el compartido es 0');
-    assert.ok(fernando.privado > 0, 'pero el vuelo tiene precio');
+    // La planilla de octubre carga Noronha con un compartido en vuelo (R$ 95 por
+    // persona) y sin privado: no hay van por carretera, pero si un compartido.
+    assert.ok(!fernando.soloPrivado, 'la planilla trae un compartido en vuelo para Fernando de Noronha');
+    assert.ok(fernando.compartido > 0, 'el compartido en vuelo tiene precio');
+    assert.ok(fernando.escalones.length === 0, 'sin privado en la planilla: "Consultar", no un precio inventado');
     // El codigo de la isla es FEN. NVT es Navegantes, en Santa Catarina, a
     // 2.900 km: con NVT la busqueda de vuelos mandaba a otra provincia.
     assert.strictEqual(fernando.iata, 'FEN', 'fernando deberia llegar por FEN, no por NVT (que es Navegantes/SC)');
@@ -1467,10 +1469,14 @@ function haversineKm(a, b) {
     const hastaFn = app.indexOf('function getSelectedTransferAmount(state)');
     const hasta = app.indexOf('// Iconos por categoría', hastaFn);
     assert.ok(desde > 0 && hasta > desde, 'no se pudo extraer transferPreciosDe del cliente');
+    // Hoy ningun destino de la tabla real es "solo privado" (la planilla de octubre
+    // le carga un compartido en vuelo a Noronha), asi que la regresion se prueba con
+    // una copia de la tabla donde Noronha vuelve a no tener compartida.
+    const tablaSinVan = Object.assign({}, tabla, { fernando: Object.assign({}, tabla.fernando, { compartido: 0, soloPrivado: true, privado: 108.08, escalones: [{ min: 1, max: 4, vehiculo: 'Auto', brl: 562 }] }) });
     // tasaDe (la tasa BRL de la pantalla) se simula sin tasa: cae al USD derivado.
     const fn = new Function('CS_TRANSFER_PRICES', 'Number', 'tasaDe',
       app.slice(desde, hasta) + '; return { transferPreciosDe: transferPreciosDe, getSelectedTransferAmount: getSelectedTransferAmount };'
-    )(tabla, Number, function () { return null; });
+    )(tablaSinVan, Number, function () { return null; });
 
     const precios = fn.transferPreciosDe({ dest: { key: 'fernando' }, pax: 2 });
     assert.strictEqual(precios.compartido, 0, 'la compartida de fernando deberia seguir en 0, no caer al piso');
@@ -1492,28 +1498,30 @@ function haversineKm(a, b) {
     const rio = fn.transferPreciosDe({ dest: { key: 'rio' }, pax: 3 });
     assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'shared' }), rio.compartido * 3);
     assert.strictEqual(fn.getSelectedTransferAmount({ meta: { dest: { key: 'rio' }, pax: 3 }, transportMode: 'flight', transferType: 'private' }), rio.privado);
-    // El privado sale de los escalones segun la cantidad de personas (Buzios:
-    // auto 1-4 a R$ 444 y 5-6 a R$ 564, enteros de la planilla), y sin escalon
-    // para esa cantidad es "Consultar". Los numeros van pineados a proposito: si
-    // cambian, es que la planilla cambio, y hay que revisarlo a mano.
+    // El privado sale de los escalones segun la cantidad de personas (Buzios: auto
+    // de 1 a 4 a R$ 450, enteros de la planilla de octubre), y sin escalon para esa
+    // cantidad es "Consultar". Los numeros van pineados a proposito: si cambian, es
+    // que la planilla cambio, y hay que revisarlo a mano.
     const usd = function (brl) { return brl / 5.2; };
     const buz = function (pax) { return fn.transferPreciosDe({ dest: { key: 'buz' }, pax: pax }); };
-    assert.strictEqual(buz(1).privado, usd(444));
-    assert.strictEqual(buz(4).privado, usd(444));
-    assert.strictEqual(buz(5).privado, usd(564), 'con 5 personas el privado de Buzios cambia de escalon');
+    assert.strictEqual(buz(1).privado, usd(450));
+    assert.strictEqual(buz(4).privado, usd(450));
+    assert.strictEqual(buz(5).privadoConsultar, true, 'con 5 personas no hay escalon de Buzios: Consultar');
     assert.strictEqual(buz(7).privadoConsultar, true, 'mas personas que el ultimo escalon: Consultar');
     assert.strictEqual(buz(7).privado, 0);
-    assert.strictEqual(rio.privadoConsultar, true, 'Rio no tiene precio de privado cargado: Consultar');
-    assert.strictEqual(rio.compartidoConsultar, true, 'Rio no tiene precio de compartido cargado: Consultar');
-    assert.strictEqual(rio.compartido, 0);
-    assert.strictEqual(fn.transferPreciosDe({ dest: { key: 'mcz' }, pax: 2 }).compartido, Math.round(154 / 5.2 * 100) / 100, 'Maceio compartido: R$ 154 entero');
+    assert.strictEqual(rio.privadoConsultar, false, 'Rio tiene privado cargado (R$ 110)');
+    assert.strictEqual(fn.transferPreciosDe({ dest: { key: 'rio' }, pax: 2 }).privado, usd(110));
+    assert.strictEqual(rio.compartidoConsultar, false, 'Rio tiene compartido cargado (R$ 156)');
+    assert.strictEqual(rio.compartido, Math.round(156 / 5.2 * 100) / 100);
+    assert.strictEqual(fn.transferPreciosDe({ dest: { key: 'mcz' }, pax: 2 }).compartido, Math.round(80 / 5.2 * 100) / 100, 'Maceio compartido: R$ 80 entero');
     // Los precios de la planilla son enteros.
     for (const k of Object.keys(tabla)) {
       for (const e of tabla[k].escalones) assert.ok(Number.isInteger(e.brl), k + ': el escalon ' + e.min + '-' + e.max + ' no es entero: ' + e.brl);
       if (tabla[k].compartido_brl != null) assert.ok(Number.isInteger(tabla[k].compartido_brl), k + ': compartido_brl no es entero');
     }
     // Cliente y modelo tienen que dar lo mismo para toda cantidad de personas.
-    for (const k of Object.keys(tabla)) {
+    // (fernando se saltea: aca el cliente corre con la copia sintetica sin van.)
+    for (const k of Object.keys(tabla).filter(function (x) { return x !== 'fernando'; })) {
       for (const pax of [1, 2, 3, 4, 5, 6, 7, 8, 12]) {
         const m = model.transferPrivadoPara(k, pax);
         const c = fn.transferPreciosDe({ dest: { key: k }, pax: pax });

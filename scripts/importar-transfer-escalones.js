@@ -84,8 +84,12 @@ for (const f of filas) {
   } else if (modalidad === 'Compartido') {
     // "Por vehiculo" en una van compartida no significa nada, y Noronha no tiene
     // van compartida a la isla: en los dos casos la fila se descarta.
-    if (unidad !== 'Por persona' || D[k].soloPrivado) {
-      problemas.push('compartido omitido (' + (D[k].soloPrivado ? 'solo privado' : 'unidad "' + unidad + '"') + '): ' + destino);
+    // Una fila "Por persona" con precio es la agencia diciendo que SI hay
+    // compartido (la planilla de octubre carga Noronha en vuelo compartido a R$ 95):
+    // manda la planilla y el destino deja de ser solo privado.
+    if (unidad === 'Por persona' && D[k].soloPrivado) delete D[k].soloPrivado;
+    if (unidad !== 'Por persona') {
+      problemas.push('compartido omitido (unidad "' + unidad + '"): ' + destino);
       continue;
     }
     compartido[k] = brl;
@@ -168,23 +172,23 @@ function actualizarProcedencia(k) {
     // El costo base va con su propia modalidad. Poner el de una al lado del precio
     // de la otra se lee como si el auto de Gramado costara R$ 90, que es el base
     // de la van compartida.
-    const bases = planilla[k].privado.map((p) => 'R$ ' + (p.base || '?') + ' + ' + (p.comision || '?')).join(' y ');
-    citas.push('Privado por vehiculo (base ' + bases + '): ' + rango.join('; ') + '.');
+    const bases = planilla[k].privado.filter((p) => p.base).map((p) => 'R$ ' + p.base + ' + ' + (p.comision || '?')).join(' y ');
+    citas.push('Privado por vehiculo' + (bases ? ' (base ' + bases + ')' : '') + ': ' + rango.join('; ') + '.');
   }
   if (real.includes('compartido')) {
     const c = planilla[k].compartido;
     const det = [];
     if (c.vehiculo) det.push(c.vehiculo);
     if (c.min && c.max) det.push(c.min === c.max ? c.min + ' persona' : c.min + ' a ' + c.max + ' personas');
-    citas.push('Compartido por persona (base R$ ' + (c.base || '?') + ' + ' + (c.comision || '?') +
-      '): R$ ' + compartido[k] + (det.length ? ' (' + det.join(', ') + ')' : '') + '.');
+    citas.push('Compartido por persona' + (c.base ? ' (base R$ ' + c.base + ' + ' + (c.comision || '?') + ')' : '') +
+      ': R$ ' + compartido[k] + (det.length ? ' (' + det.join(', ') + ')' : '') + '.');
   }
 
   v.confianza = 'alta';
   v.verificado = VERIFICADO;
   v.fuente = 'Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila ' +
     (de.iata || v.iata || '?') + ' a ' + nombre + '. ' + citas.join(' ') +
-    ' Los precios ya incluyen la comision. ' + (como || (kmTxt ? 'Trayecto de ' + kmTxt + '.' : '')) +
+    ' Precio final de venta, en reales. ' + (como || (kmTxt ? 'Trayecto de ' + kmTxt + '.' : '')) +
     ' Un solo trayecto (aeropuerto a hotel), en reales.';
 
   const faltan = ['compartido', 'privado'].filter((c) => !real.includes(c));

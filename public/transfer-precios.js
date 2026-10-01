@@ -19,46 +19,46 @@
     Object.defineProperty(module.exports, 'provenance', { value: proc, enumerable: false });
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, {
-  buz: { name: "Búzios", iata: "GIG", modo: "car", km: 174, compartido: 57.69, privado: 85.38, compartido_brl: 300, privado_brl: 444, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":444},{"min":5,"max":6,"vehiculo":"Auto","brl":564}] },
-  arraial: { name: "Arraial do Cabo", iata: "GIG", modo: "car", km: 170, compartido: 60, privado: 85.38, compartido_brl: 312, privado_brl: 444, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":444},{"min":5,"max":6,"vehiculo":"Auto","brl":564}] },
-  cabo: { name: "Cabo Frio", iata: "GIG", modo: "car", km: 160, compartido: 60, privado: 85.38, compartido_brl: 312, privado_brl: 444, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":444},{"min":5,"max":6,"vehiculo":"Auto","brl":564}] },
-  ilha: { name: "Ilha Grande", iata: "GIG", modo: "ferry", compartido: 0, privado: 85.38, privado_brl: 444, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":444},{"min":5,"max":6,"vehiculo":"Van","brl":564}] },
-  paraty: { name: "Paraty", iata: "GIG", modo: "car", km: 248, compartido: 73.85, privado: 265.38, compartido_brl: 384, privado_brl: 1380, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":1380}] },
-  ilhabela: { name: "Ilhabela", iata: "GRU", modo: "car", km: 185, compartido: 0, privado: 507.69, privado_brl: 2640, compartidoConsultar: true, escalones: [{"min":1,"max":3,"vehiculo":"Auto","brl":2640}] },
-  ubatuba: { name: "Ubatuba", iata: "GRU", modo: "car", km: 206, compartido: 0, privado: 184.62, privado_brl: 960, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":960}] },
-  rio: { name: "Río de Janeiro", iata: "GIG", modo: "car", km: 18, compartido: 0, privado: 45, compartidoConsultar: true, escalones: [] },
-  angra: { name: "Angra dos Reis", iata: "GIG", modo: "car", km: 139, compartido: 69.23, privado: 96.92, compartido_brl: 360, privado_brl: 504, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":504},{"min":5,"max":5,"vehiculo":"Auto","brl":624},{"min":6,"max":6,"vehiculo":"Auto","brl":684}] },
-  sao: { name: "São Paulo", iata: "GRU", modo: "car", km: 26, compartido: 0, privado: 41, compartidoConsultar: true, escalones: [] },
-  porto: { name: "Porto de Galinhas", iata: "REC", modo: "car", km: 53, compartido: 31.35, privado: 41.54, compartido_brl: 163, privado_brl: 216, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":216},{"min":5,"max":6,"vehiculo":"Van","brl":324}] },
-  mcz: { name: "Maceió", iata: "MCZ", modo: "car", km: 21, compartido: 29.62, privado: 143.08, compartido_brl: 154, privado_brl: 744, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":744}] },
-  maragogi: { name: "Maragogi", iata: "MCZ", modo: "car", km: 129, compartido: 66.92, privado: 78.46, compartido_brl: 348, privado_brl: 408, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":408}] },
-  nat: { name: "Natal", iata: "NAT", modo: "car", km: 25, compartido: 0, privado: 30, compartidoConsultar: true, escalones: [] },
-  pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 0, privado: 57.69, privado_brl: 300, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":300},{"min":5,"max":6,"vehiculo":"Van","brl":300}] },
-  ajuda: { name: "Arraial d’Ajuda", iata: "SSA", modo: "car", km: 170, compartido: 0, privado: 69.23, privado_brl: 360, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":360}] },
-  trancoso: { name: "Trancoso", iata: "SSA", modo: "car", km: 163, compartido: 0, privado: 87.69, privado_brl: 456, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":456}] },
-  ssa: { name: "Salvador de Bahía", iata: "SSA", modo: "car", km: 24, compartido: 0, privado: 34.62, privado_brl: 180, appRideUsd: 11, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":180}] },
-  for: { name: "Fortaleza", iata: "FOR", modo: "car", km: 9, compartido: 0, privado: 30, compartidoConsultar: true, escalones: [] },
-  jericoacoara: { name: "Jericoacoara", iata: "FOR", modo: "car", km: 295, compartido: 57.69, privado: 392.31, compartido_brl: 300, privado_brl: 2040, escalones: [{"min":1,"max":6,"vehiculo":"4 x 4","brl":2040}] },
-  morro: { name: "Morro de São Paulo", iata: "SSA", modo: "car", km: 242, compartido: 0, privado: 35.77, privado_brl: 186, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":186}] },
-  portoseguro: { name: "Porto Seguro", iata: "SSA", modo: "car", km: 699, compartido: 0, privado: 92.31, privado_brl: 480, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":480}] },
-  itacare: { name: "Itacaré", iata: "SSA", modo: "car", km: 359, compartido: 0, privado: 242.31, privado_brl: 1260, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":1260}] },
-  forte: { name: "Praia do Forte", iata: "SSA", modo: "car", km: 62, compartido: 32.12, privado: 46.15, compartido_brl: 167, privado_brl: 240, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":240}] },
-  fernando: { name: "Fernando de Noronha", iata: "FEN", modo: "vuelo", compartido: 0, privado: 108.08, privado_brl: 562, soloPrivado: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":562},{"min":5,"max":6,"vehiculo":"Auto","brl":1008},{"min":6,"max":12,"vehiculo":"Van","brl":1814}] },
-  fln: { name: "Florianópolis", iata: "FLN", modo: "car", km: 17, compartido: 57.69, privado: 92.31, compartido_brl: 300, privado_brl: 480, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":480}] },
-  bombinhas: { name: "Bombinhas", iata: "FLN", modo: "car", km: 89, compartido: 34.42, privado: 131.54, compartido_brl: 179, privado_brl: 684, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":684}] },
-  rosa: { name: "Praia do Rosa", iata: "FLN", modo: "car", km: 96, compartido: 48.46, privado: 133.85, compartido_brl: 252, privado_brl: 696, escalones: [{"min":1,"max":3,"vehiculo":"Auto","brl":696},{"min":4,"max":12,"vehiculo":"Van","brl":1380}] },
-  bcm: { name: "Balneário Camboriú", iata: "FLN", modo: "car", km: 96, compartido: 38.85, privado: 111.92, compartido_brl: 202, privado_brl: 582, appRideUsd: 42, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":582}] },
-  itapema: { name: "Itapema", iata: "FLN", modo: "car", km: 88, compartido: 0, privado: 67, compartidoConsultar: true, escalones: [] },
-  garopaba: { name: "Garopaba", iata: "FLN", modo: "car", km: 89, compartido: 48.46, privado: 133.85, compartido_brl: 252, privado_brl: 696, escalones: [{"min":1,"max":3,"vehiculo":"Auto","brl":696},{"min":4,"max":12,"vehiculo":"Van","brl":1380}] },
-  ferrugem: { name: "Ferrugem", iata: "FLN", modo: "car", km: 100, compartido: 48.46, privado: 133.85, compartido_brl: 252, privado_brl: 696, escalones: [{"min":1,"max":3,"vehiculo":"Auto","brl":696},{"min":4,"max":12,"vehiculo":"Van","brl":1380}] },
-  picarras: { name: "Piçarras", iata: "FLN", modo: "car", km: 129, compartido: 0, privado: 64.62, privado_brl: 336, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":336}] },
-  gram: { name: "Gramado", iata: "POA", modo: "car", km: 109, compartido: 20.77, privado: 253.85, compartido_brl: 108, privado_brl: 1320, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":1320}] },
-  canela: { name: "Canela", iata: "POA", modo: "car", km: 115, compartido: 0, privado: 96.92, privado_brl: 504, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":504}] },
-  torres: { name: "Torres", iata: "POA", modo: "car", km: 184, compartido: 0, privado: 92.31, privado_brl: 480, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":480}] },
-  canoa: { name: "Capão da Canoa", iata: "POA", modo: "car", km: 135, compartido: 0, privado: 103.85, privado_brl: 540, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":540}] },
-  rec: { name: "Recife", iata: "REC", modo: "car", km: 13, compartido: 0, privado: 30, compartidoConsultar: true, escalones: [] },
-  joaopessoa: { name: "João Pessoa", iata: "JPA", modo: "car", km: 13, compartido: 0, privado: 25.38, privado_brl: 132, compartidoConsultar: true, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":132}] },
-  poa: { name: "Porto Alegre", iata: "POA", modo: "car", km: 9, compartido: 0, privado: 30, appRideUsd: 7, compartidoConsultar: true, escalones: [] }
+  buz: { name: "Búzios", iata: "GIG", modo: "car", km: 174, compartido: 30.77, privado: 86.54, compartido_brl: 160, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
+  arraial: { name: "Arraial do Cabo", iata: "GIG", modo: "car", km: 170, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
+  cabo: { name: "Cabo Frio", iata: "GIG", modo: "car", km: 160, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
+  ilha: { name: "Ilha Grande", iata: "GIG", modo: "ferry", compartido: 53.85, privado: 86.54, compartido_brl: 280, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
+  paraty: { name: "Paraty", iata: "GIG", modo: "car", km: 248, compartido: 76.92, privado: 115.38, compartido_brl: 400, privado_brl: 600, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":600}] },
+  ilhabela: { name: "Ilhabela", iata: "GRU", modo: "car", km: 185, compartido: 24.42, privado: 507.69, compartido_brl: 127, privado_brl: 2640, escalones: [] },
+  ubatuba: { name: "Ubatuba", iata: "GRU", modo: "car", km: 206, compartido: 26.92, privado: 153.85, compartido_brl: 140, privado_brl: 800, escalones: [{"min":1,"max":5,"vehiculo":"Auto","brl":800}] },
+  rio: { name: "Río de Janeiro", iata: "GIG", modo: "car", km: 18, compartido: 30, privado: 21.15, compartido_brl: 156, privado_brl: 110, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":110}] },
+  angra: { name: "Angra dos Reis", iata: "GIG", modo: "car", km: 139, compartido: 57.69, privado: 105.77, compartido_brl: 300, privado_brl: 550, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":550}] },
+  sao: { name: "São Paulo", iata: "GRU", modo: "car", km: 26, compartido: 7.88, privado: 41, compartido_brl: 41, escalones: [] },
+  porto: { name: "Porto de Galinhas", iata: "REC", modo: "car", km: 53, compartido: 8.65, privado: 41.54, compartido_brl: 45, privado_brl: 216, escalones: [] },
+  mcz: { name: "Maceió", iata: "MCZ", modo: "car", km: 21, compartido: 15.38, privado: 51.92, compartido_brl: 80, privado_brl: 270, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":270}] },
+  maragogi: { name: "Maragogi", iata: "MCZ", modo: "car", km: 129, compartido: 17.69, privado: 78.46, compartido_brl: 92, privado_brl: 408, escalones: [] },
+  nat: { name: "Natal", iata: "NAT", modo: "car", km: 25, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
+  pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 5.96, privado: 57.69, compartido_brl: 31, privado_brl: 300, escalones: [] },
+  ajuda: { name: "Arraial d’Ajuda", iata: "SSA", modo: "car", km: 170, compartido: 22.69, privado: 69.23, compartido_brl: 118, privado_brl: 360, escalones: [] },
+  trancoso: { name: "Trancoso", iata: "SSA", modo: "car", km: 163, compartido: 21.73, privado: 87.69, compartido_brl: 113, privado_brl: 456, escalones: [] },
+  ssa: { name: "Salvador de Bahía", iata: "SSA", modo: "car", km: 24, compartido: 5.77, privado: 34.62, compartido_brl: 30, privado_brl: 180, appRideUsd: 11, escalones: [] },
+  for: { name: "Fortaleza", iata: "FOR", modo: "car", km: 9, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
+  jericoacoara: { name: "Jericoacoara", iata: "FOR", modo: "car", km: 295, compartido: 37.5, privado: 392.31, compartido_brl: 195, privado_brl: 2040, escalones: [] },
+  morro: { name: "Morro de São Paulo", iata: "SSA", modo: "car", km: 242, compartido: 31.15, privado: 35.77, compartido_brl: 162, privado_brl: 186, escalones: [] },
+  portoseguro: { name: "Porto Seguro", iata: "SSA", modo: "car", km: 699, compartido: 85.58, privado: 92.31, compartido_brl: 445, privado_brl: 480, escalones: [] },
+  itacare: { name: "Itacaré", iata: "SSA", modo: "car", km: 359, compartido: 45.19, privado: 242.31, compartido_brl: 235, privado_brl: 1260, escalones: [] },
+  forte: { name: "Praia do Forte", iata: "SSA", modo: "car", km: 62, compartido: 9.62, privado: 46.15, compartido_brl: 50, privado_brl: 240, escalones: [] },
+  fernando: { name: "Fernando de Noronha", iata: "FEN", modo: "vuelo", compartido: 18.27, privado: 108.08, compartido_brl: 95, privado_brl: 562, escalones: [] },
+  fln: { name: "Florianópolis", iata: "FLN", modo: "car", km: 17, compartido: 5.77, privado: 92.31, compartido_brl: 30, privado_brl: 480, escalones: [] },
+  bombinhas: { name: "Bombinhas", iata: "FLN", modo: "car", km: 89, compartido: 12.88, privado: 131.54, compartido_brl: 67, privado_brl: 684, escalones: [] },
+  rosa: { name: "Praia do Rosa", iata: "FLN", modo: "car", km: 96, compartido: 13.85, privado: 133.85, compartido_brl: 72, privado_brl: 696, escalones: [] },
+  bcm: { name: "Balneário Camboriú", iata: "FLN", modo: "car", km: 96, compartido: 13.85, privado: 111.92, compartido_brl: 72, privado_brl: 582, appRideUsd: 42, escalones: [] },
+  itapema: { name: "Itapema", iata: "FLN", modo: "car", km: 88, compartido: 12.88, privado: 67, compartido_brl: 67, escalones: [] },
+  garopaba: { name: "Garopaba", iata: "FLN", modo: "car", km: 89, compartido: 12.88, privado: 133.85, compartido_brl: 67, privado_brl: 696, escalones: [] },
+  ferrugem: { name: "Ferrugem", iata: "FLN", modo: "car", km: 100, compartido: 14.23, privado: 133.85, compartido_brl: 74, privado_brl: 696, escalones: [] },
+  picarras: { name: "Piçarras", iata: "FLN", modo: "car", km: 129, compartido: 17.69, privado: 64.62, compartido_brl: 92, privado_brl: 336, escalones: [] },
+  gram: { name: "Gramado", iata: "POA", modo: "car", km: 109, compartido: 15.38, privado: 253.85, compartido_brl: 80, privado_brl: 1320, escalones: [] },
+  canela: { name: "Canela", iata: "POA", modo: "car", km: 115, compartido: 15.96, privado: 96.92, compartido_brl: 83, privado_brl: 504, escalones: [] },
+  torres: { name: "Torres", iata: "POA", modo: "car", km: 184, compartido: 24.23, privado: 92.31, compartido_brl: 126, privado_brl: 480, escalones: [] },
+  canoa: { name: "Capão da Canoa", iata: "POA", modo: "car", km: 135, compartido: 18.46, privado: 103.85, compartido_brl: 96, privado_brl: 540, escalones: [] },
+  rec: { name: "Recife", iata: "REC", modo: "car", km: 13, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
+  joaopessoa: { name: "João Pessoa", iata: "JPA", modo: "car", km: 13, compartido: 5.77, privado: 25.38, compartido_brl: 30, privado_brl: 132, escalones: [] },
+  poa: { name: "Porto Alegre", iata: "POA", modo: "car", km: 9, compartido: 5.77, privado: 30, compartido_brl: 30, appRideUsd: 7, escalones: [] }
 }, {
   _meta: {
       "unidad": {
@@ -76,7 +76,7 @@
       }
     },
   buz: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Búzios. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Auto, R$ 564. Compartido por persona (base R$ 250 + 20%): R$ 300 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 174 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Búzios. Privado por vehiculo: 1 a 4 personas, Auto, R$ 450. Compartido por persona: R$ 160 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 174 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
@@ -87,7 +87,7 @@
       "horas": 2.7
     },
   arraial: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Arraial do Cabo. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Auto, R$ 564. Compartido por persona (base R$ 260 + 20%): R$ 312 (Van). Los precios ya incluyen la comision. Trayecto de 170 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Arraial do Cabo. Privado por vehiculo: 1 a 4 personas, Auto, R$ 450. Compartido por persona: R$ 230 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 170 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
@@ -98,7 +98,7 @@
       "horas": 2.6
     },
   cabo: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Cabo Frio. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Auto, R$ 564. Compartido por persona (base R$ 260 + 20%): R$ 312 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 160 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Cabo Frio. Privado por vehiculo: 1 a 4 personas, Auto, R$ 450. Compartido por persona: R$ 230 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 160 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
@@ -109,17 +109,17 @@
       "horas": 2.5
     },
   ilha: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Ilha Grande. Privado por vehiculo (base R$ 370 + 20% y R$ 470 + 20%): 1 a 4 personas, Auto, R$ 444; 5 a 6 personas, Van, R$ 564. Los precios ya incluyen la comision. No hay carretera: se llega en barco desde Rio o Angra. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Ilha Grande. Privado por vehiculo: 1 a 4 personas, Auto, R$ 450. Compartido por persona: R$ 280 (Micro, 1 a 10 personas). Precio final de venta, en reales. No hay carretera: se llega en barco desde Rio o Angra. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "modo": "ferry"
     },
   paraty: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Paraty. Privado por vehiculo (base R$ 1150 + 20%): 1 a 4 personas, Auto, R$ 1380. Compartido por persona (base R$ 320 + 20%): R$ 384 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 248 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Paraty. Privado por vehiculo: 1 a 4 personas, Auto, R$ 600. Compartido por persona: R$ 400 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 248 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
@@ -130,38 +130,40 @@
       "horas": 4
     },
   ilhabela: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GRU a Ilhabela. Privado por vehiculo (base R$ 2200 + 20%): 1 a 3 personas, Auto, R$ 2640. Los precios ya incluyen la comision. Trayecto de 185 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GRU a Ilhabela. Compartido por persona: R$ 127 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 185 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 185,
       "horas": 3.7
     },
   ubatuba: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GRU a Ubatuba. Privado por vehiculo (base R$ 800 + 20%): 1 a 4 personas, Auto, R$ 960. Los precios ya incluyen la comision. Trayecto de 206 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GRU a Ubatuba. Privado por vehiculo: 1 a 5 personas, Auto, R$ 800. Compartido por persona: R$ 140 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 206 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "privado",
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 206,
       "horas": 3.4
     },
   rio: {
-      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 18 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
-      "confianza": "baja",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Río de Janeiro. Privado por vehiculo: 1 a 4 personas, Auto, R$ 110. Compartido por persona (base R$ 130 + 20%): R$ 156 (Auto). Precio final de venta, en reales. Trayecto de 18 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
       "verificado": "2026-10-01",
-      "real": [],
-      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (18 km de OSRM) no alcanza para calcular un precio de mercado.",
+      "real": [
+        "privado",
+        "compartido"
+      ],
       "km": 18,
       "horas": 0.3
     },
   angra: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Angra dos Reis. Privado por vehiculo (base R$ 420 + 20% y R$ 520 + 20% y R$ 570 + 20%): 1 a 4 personas, Auto, R$ 504; 5 personas, Auto, R$ 624; 6 personas, Auto, R$ 684. Compartido por persona (base R$ 300 + 20%): R$ 360 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 139 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Angra dos Reis. Privado por vehiculo: 1 a 4 personas, Auto, R$ 550. Compartido por persona: R$ 300 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 139 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
@@ -172,27 +174,29 @@
       "horas": 2.4
     },
   sao: {
-      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 26 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
-      "confianza": "baja",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GRU a São Paulo. Compartido por persona: R$ 41 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 26 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
       "verificado": "2026-10-01",
-      "real": [],
-      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (26 km de OSRM) no alcanza para calcular un precio de mercado.",
+      "real": [
+        "compartido"
+      ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 26,
       "horas": 0.5
     },
   porto: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Porto de Galinhas. Privado por vehiculo (base R$ 180 + 20% y R$ 270 + 20%): 1 a 4 personas, Auto, R$ 216; 5 a 6 personas, Van, R$ 324. Compartido por persona (base R$ 136 + 20%): R$ 163 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 53 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Porto de Galinhas. Compartido por persona: R$ 45 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 53 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 53,
       "horas": 0.8
     },
   mcz: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maceió. Privado por vehiculo (base R$ 620 + 20%): 1 a 4 personas, Auto, R$ 744. Compartido por persona (base R$ 128 + 20%): R$ 154 (Van, 1 a 15 personas). Los precios ya incluyen la comision. Trayecto de 21 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maceió. Privado por vehiculo: 1 a 4 personas, Auto, R$ 270. Compartido por persona: R$ 80 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 21 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
@@ -203,302 +207,311 @@
       "horas": 0.5
     },
   maragogi: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maragogi. Privado por vehiculo (base R$ 340 + 20%): 1 a 4 personas, Auto, R$ 408. Compartido por persona (base R$ 290 + 20%): R$ 348 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maragogi. Compartido por persona: R$ 92 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 129,
       "horas": 2.1
     },
   nat: {
-      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 25 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
-      "confianza": "baja",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila NAT a Natal. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 25 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
       "verificado": "2026-10-01",
-      "real": [],
-      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (25 km de OSRM) no alcanza para calcular un precio de mercado.",
+      "real": [
+        "compartido"
+      ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 25,
       "horas": 0.4
     },
   pip: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila NAT a Pipa. Privado por vehiculo (base R$ 250 + 20% y R$ 250 + 20%): 1 a 4 personas, Auto, R$ 300; 5 a 6 personas, Van, R$ 300. Los precios ya incluyen la comision. Trayecto de 30 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila NAT a Pipa. Compartido por persona: R$ 31 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 30 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 30,
       "horas": 0.5
     },
   ajuda: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Arraial d’Ajuda. Privado por vehiculo (base R$ 300 + 20%): 1 a 4 personas, Auto, R$ 360. Los precios ya incluyen la comision. Trayecto de 170 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Arraial d’Ajuda. Compartido por persona: R$ 118 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 170 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 170,
       "horas": 2.8
     },
   trancoso: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Trancoso. Privado por vehiculo (base R$ 380 + 20%): 1 a 4 personas, Auto, R$ 456. Los precios ya incluyen la comision. Trayecto de 163 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Trancoso. Compartido por persona: R$ 113 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 163 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 163,
       "horas": 2.7
     },
   ssa: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Salvador de Bahía. Privado por vehiculo (base R$ 150 + 20%): 1 a 4 personas, Auto, R$ 180. Los precios ya incluyen la comision. Trayecto de 24 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Salvador de Bahía. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 24 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 24,
       "horas": 0.5,
       "appRideUsd": 11
     },
   for: {
-      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 9 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
-      "confianza": "baja",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FOR a Fortaleza. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 9 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
       "verificado": "2026-10-01",
-      "real": [],
-      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (9 km de OSRM) no alcanza para calcular un precio de mercado.",
+      "real": [
+        "compartido"
+      ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 9,
       "horas": 0.2
     },
   jericoacoara: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FOR a Jericoacoara. Privado por vehiculo (base R$ 1700 + 20%): 1 a 6 personas, 4 x 4, R$ 2040. Compartido por persona (base R$ 250 + 20%): R$ 300 (4 x 4, 2 a 5 personas). Los precios ya incluyen la comision. Trayecto de 295 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FOR a Jericoacoara. Compartido por persona: R$ 195 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 295 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 295,
       "horas": 5.6
     },
   morro: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Morro de São Paulo. Privado por vehiculo (base R$ 155 + 20%): 1 a 4 personas, Auto, R$ 186. Los precios ya incluyen la comision. Trayecto de 242 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Morro de São Paulo. Compartido por persona: R$ 162 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 242 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 242,
       "horas": 3.9
     },
   portoseguro: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Porto Seguro. Privado por vehiculo (base R$ 400 + 20%): 1 a 4 personas, Auto, R$ 480. Los precios ya incluyen la comision. Trayecto de 699 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Porto Seguro. Compartido por persona: R$ 445 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 699 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 699,
       "horas": 11.4
     },
   itacare: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Itacaré. Privado por vehiculo (base R$ 1050 + 20%): 1 a 4 personas, Auto, R$ 1260. Los precios ya incluyen la comision. Trayecto de 359 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Itacaré. Compartido por persona: R$ 235 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 359 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 359,
       "horas": 5.7
     },
   forte: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Privado por vehiculo (base R$ 200 + 20%): 1 a 4 personas, Auto, R$ 240. Compartido por persona (base R$ 139 + 20%): R$ 167 (Van, 1 a 6 personas). Los precios ya incluyen la comision. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Compartido por persona: R$ 50 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 62,
       "horas": 1.1
     },
   fernando: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FEN a Fernando de Noronha. Privado por vehiculo (base R$ 468 + 20% y R$ 840 + 20% y R$ 1512 + 20%): 1 a 4 personas, Auto, R$ 562; 5 a 6 personas, Auto, R$ 1008; 6 a 12 personas, Van, R$ 1814. Los precios ya incluyen la comision. No hay carretera: es una isla, se llega en vuelo corto desde REC. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FEN a Fernando de Noronha. Compartido por persona: R$ 95 (Vuelo). Precio final de venta, en reales. No hay carretera: es una isla, se llega en vuelo corto desde REC. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
-      ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
-      "modo": "vuelo",
-      "soloPrivado": true
-    },
-  fln: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Florianópolis. Privado por vehiculo (base R$ 400 + 20%): 1 a 4 personas, Auto, R$ 480. Compartido por persona (base R$ 250 + 20%): R$ 300 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 17 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "confianza": "alta",
-      "verificado": "2026-10-01",
-      "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "modo": "vuelo"
+    },
+  fln: {
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Florianópolis. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 17 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
+      "verificado": "2026-10-01",
+      "real": [
+        "compartido"
+      ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 17,
       "horas": 0.4
     },
   bombinhas: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Bombinhas. Privado por vehiculo (base R$ 570 + 20%): 1 a 4 personas, Auto, R$ 684. Compartido por persona (base R$ 149 + 20%): R$ 179 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 89 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Bombinhas. Compartido por persona: R$ 67 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 89 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 89,
       "horas": 1.5
     },
   rosa: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Praia do Rosa. Privado por vehiculo (base R$ 580 + 20% y R$ 1150 + 20%): 1 a 3 personas, Auto, R$ 696; 4 a 12 personas, Van, R$ 1380. Compartido por persona (base R$ 210 + 20%): R$ 252 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 96 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Praia do Rosa. Compartido por persona: R$ 72 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 96 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 96,
       "horas": 1.6
     },
   bcm: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Balneário Camboriú. Privado por vehiculo (base R$ 485 + 20%): 1 a 4 personas, Auto, R$ 582. Compartido por persona (base R$ 168 + 20%): R$ 202 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 96 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Balneário Camboriú. Compartido por persona: R$ 72 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 96 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 96,
       "horas": 1.4,
       "appRideUsd": 42
     },
   itapema: {
-      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 88 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
-      "confianza": "baja",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Itapema. Compartido por persona: R$ 67 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 88 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
       "verificado": "2026-10-01",
-      "real": [],
-      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (88 km de OSRM) no alcanza para calcular un precio de mercado.",
+      "real": [
+        "compartido"
+      ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 88,
       "horas": 1.4
     },
   garopaba: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Garopaba. Privado por vehiculo (base R$ 580 + 20% y R$ 1150 + 20%): 1 a 3 personas, Auto, R$ 696; 4 a 12 personas, Van, R$ 1380. Compartido por persona (base R$ 210 + 20%): R$ 252 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 89 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Garopaba. Compartido por persona: R$ 67 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 89 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 89,
       "horas": 1.5
     },
   ferrugem: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Ferrugem. Privado por vehiculo (base R$ 580 + 20% y R$ 1150 + 20%): 1 a 3 personas, Auto, R$ 696; 4 a 12 personas, Van, R$ 1380. Compartido por persona (base R$ 210 + 20%): R$ 252 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 100 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Ferrugem. Compartido por persona: R$ 74 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 100 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 100,
       "horas": 1.6
     },
   picarras: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Piçarras. Privado por vehiculo (base R$ 280 + 20%): 1 a 4 personas, Auto, R$ 336. Los precios ya incluyen la comision. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila FLN a Piçarras. Compartido por persona: R$ 92 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 129,
       "horas": 1.8
     },
   gram: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Gramado. Privado por vehiculo (base R$ 1100 + 20%): 1 a 4 personas, Auto, R$ 1320. Compartido por persona (base R$ 90 + 20%): R$ 108 (Van, 1 a 12 personas). Los precios ya incluyen la comision. Trayecto de 109 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Gramado. Compartido por persona: R$ 80 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 109 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado",
         "compartido"
       ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 109,
       "horas": 1.9
     },
   canela: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Canela. Privado por vehiculo (base R$ 420 + 20%): 1 a 4 personas, Auto, R$ 504. Los precios ya incluyen la comision. Trayecto de 115 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Canela. Compartido por persona: R$ 83 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 115 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 115,
       "horas": 2.1
     },
   torres: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Torres. Privado por vehiculo (base R$ 400 + 20%): 1 a 4 personas, Auto, R$ 480. Los precios ya incluyen la comision. Trayecto de 184 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Torres. Compartido por persona: R$ 126 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 184 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 184,
       "horas": 2.5
     },
   canoa: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Capão da Canoa. Privado por vehiculo (base R$ 450 + 20%): 1 a 4 personas, Auto, R$ 540. Los precios ya incluyen la comision. Trayecto de 135 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Capão da Canoa. Compartido por persona: R$ 96 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 135 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 135,
       "horas": 1.8
     },
   rec: {
-      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 13 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
-      "confianza": "baja",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Recife. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
       "verificado": "2026-10-01",
-      "real": [],
-      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (13 km de OSRM) no alcanza para calcular un precio de mercado.",
+      "real": [
+        "compartido"
+      ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 13,
       "horas": 0.3
     },
   joaopessoa: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila JPA a João Pessoa. Privado por vehiculo (base R$ 110 + 20%): 1 a 4 personas, Auto, R$ 132. Los precios ya incluyen la comision. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila JPA a João Pessoa. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
       "verificado": "2026-10-01",
       "real": [
-        "privado"
+        "compartido"
       ],
-      "derivacion": "La modalidad compartido no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 13,
       "horas": 0.3
     },
   poa: {
-      "fuente": "Sin fila con precio para esta ruta en la planilla de transfers (data/transfer-escalones.tsv). Los 9 km de OSRM. El precio real de las dos modalidades se confirma con la agencia al reservar.",
-      "confianza": "baja",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila POA a Porto Alegre. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 9 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "confianza": "alta",
       "verificado": "2026-10-01",
-      "real": [],
-      "derivacion": "Sin fila con precio en la planilla de transfers. Ninguna de las dos modalidades tiene precio cargado y la app muestra \"Consultar\" en las dos: no es que sean gratis, es que el precio se confirma al reservar. La distancia (9 km de OSRM) no alcanza para calcular un precio de mercado.",
+      "real": [
+        "compartido"
+      ],
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 9,
       "horas": 0.2,
       "appRideUsd": 7
