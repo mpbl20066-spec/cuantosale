@@ -4900,16 +4900,25 @@
     return htmlToImagePromise;
   }
   function storyDateRange(meta) {
-    function format(value) {
-      if (!value) return '';
-      var date = parse(value);
-      return isNaN(date) ? String(value) : String(date.getDate()).padStart(2, '0') + '-' + date.toLocaleDateString('es-UY', { month: 'short' }).replace(/\./g, '');
+    /* "22 al 29 de diciembre", sin guiones ni mayusculas forzadas. Si las dos
+       fechas caen en meses distintos se nombra cada mes ("28 de diciembre al 4
+       de enero") y si cambia el año se agrega el año. */
+    function mes(date) { return date.toLocaleDateString('es-UY', { month: 'long' }).toLowerCase(); }
+    function rango(depValue, retValue) {
+      var a = parse(depValue), b = parse(retValue);
+      if (isNaN(a) || isNaN(b)) return String(depValue) + ' al ' + String(retValue);
+      if (a.getFullYear() !== b.getFullYear()) return a.getDate() + ' de ' + mes(a) + ' de ' + a.getFullYear() + ' al ' + b.getDate() + ' de ' + mes(b) + ' de ' + b.getFullYear();
+      if (a.getMonth() !== b.getMonth()) return a.getDate() + ' de ' + mes(a) + ' al ' + b.getDate() + ' de ' + mes(b);
+      return a.getDate() + ' al ' + b.getDate() + ' de ' + mes(b);
     }
-    var departure = format(meta.dep), returning = format(meta.ret);
-    if (departure && returning) return departure + ' - ' + returning;
+    function uno(value) {
+      var date = parse(value);
+      return isNaN(date) ? String(value) : date.getDate() + ' de ' + mes(date);
+    }
+    if (meta.dep && meta.ret) return rango(meta.dep, meta.ret);
     var cheapest = meta.cheapestDateRange || meta.cheapestDates;
-    if (cheapest && cheapest.dep && cheapest.ret) return format(cheapest.dep) + ' - ' + format(cheapest.ret);
-    return cheapest && cheapest.date ? format(cheapest.date) : 'Fecha más económica del mes';
+    if (cheapest && cheapest.dep && cheapest.ret) return rango(cheapest.dep, cheapest.ret);
+    return cheapest && cheapest.date ? uno(cheapest.date) : 'Fecha más económica del mes';
   }
   /* El pie de la tarjeta lista los rubros que el presupuesto suma de verdad,
      con el mismo nombre corto y el mismo icono que el resto de la app
