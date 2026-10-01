@@ -1,4 +1,4 @@
-/* version: 246
+/* version: 247
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3500,3 +3500,26 @@ summary::-webkit-details-marker{display:none}
 .bud-mode button,.steps.is-compact .steps__btn{position:relative}
 .bud-mode button::after,.steps.is-compact .steps__btn::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:48px;transform:translateY(-50%)}
 .steps.is-compact .steps__btn{min-width:44px;min-height:44px}
+
+/* Header en celular, dos filas (la zona segura superior la pone el padding-top
+   del body con env(safe-area-inset-top), con viewport-fit=cover):
+     fila 1: logo completo a la izquierda y el boton de la cuenta a la derecha;
+     fila 2: herramientas (moneda, tema y Mis viajes) en una tira compacta;
+     fila 3: la pildora "tu viaje", a todo el ancho.
+   .account-actions pasa a display:contents para poder ordenar cada boton por
+   separado; el salto de fila es un ::after de ancho completo. */
+@media(max-width:560px){
+  .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px 12px}
+  .account-actions{display:contents}
+  .logo{order:1;flex:1 1 auto;min-width:max-content;overflow:visible;font-size:22px}
+  #auth-button{order:2;flex:0 0 auto;margin-left:auto;max-width:none;padding:0 16px;font-size:14px}
+  .top::after{content:"";order:3;flex:0 0 100%;height:0}
+  #currency-picker-slot{order:4;flex:0 0 auto}
+  .top .theme-toggle{order:5;flex:0 0 auto}
+  #trips-button{order:6;flex:0 0 auto;margin-left:auto;max-width:none;padding:0 14px;font-size:13px}
+  .top .trip-pill{order:7;flex:1 1 100%;max-width:none;margin:0;justify-content:center;min-height:var(--tap)}
+}
+@media(max-width:320px){
+  .logo{font-size:20px}
+  #auth-button{padding:0 12px;font-size:13px}
+}
