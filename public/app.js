@@ -4677,8 +4677,13 @@
     // en Brasil y ademas pagaste los peajes de tu propio auto para llegar. No se
     // pisan porque la app no ofrece el alquiler transfronterizo.
     var categories = roadtrip ? ['auto', 'alquiler', 'alojamiento', 'comidas', 'tours'] : state.transportMode === 'bus' ? ['bus', 'alquiler', 'alojamiento', 'comidas', 'local', 'tours'] : ['pasajes', 'alquiler', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
-    var transferValue = getSelectedTransferAmount(state);
-    var trasladoValue = (state === detailState && state.transportMode !== 'auto' && !trasladoElegido()) ? 0 : (Number(state.parts && state.parts.traslados) || 0) + transferValue;
+    /* En el viaje abierto el traslado sale de trasladoSumado(), la misma funcion
+       de la fila "Transfer" de Mi Viaje y del resumen: suma los DOS tramos. Antes
+       el total usaba getSelectedTransferAmount() sin tramo, que es solo la
+       llegada, y Mi Viaje decia un total menor que la suma de sus filas. */
+    var trasladoValue = state === detailState
+      ? (state.transportMode === 'auto' ? 0 : trasladoSumado(state))
+      : (Number(state.parts && state.parts.traslados) || 0) + getSelectedTransferAmount(state);
     var alquilerValue = Number(state.alquiler) || 0;
     var total = roadtrip
       ? Math.round((Number(state.auto) || 0) + alquilerValue + hotelSumado(state) + (Number(state.parts.comidas) || 0) + (Number(state.toursTotal) || 0))
