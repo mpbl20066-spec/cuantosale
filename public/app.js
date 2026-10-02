@@ -6812,11 +6812,14 @@
     }
     function precio(monto, aprox, nota) {
       if (!(monto > 0)) return '<div class="vplan-row__side"><b class="is-zero">' + esc(nota || 'A elegir') + '</b></div>';
-      return '<div class="vplan-row__side"><b>' + (aprox ? '~' : '') + money(monto) + '</b>' + (aprox ? '<small>precio de referencia</small>' : '') + '</div>';
+      return '<div class="vplan-row__side"><b>' + (aprox ? '~' : '') + money(monto) + '</b>' + '' + '</div>';
     }
-    function fila(cat, titulo, cuerpo, lado) {
+    function badge(tipo) {
+      return tipo === 'externo' ? '<span class="vplan-badge is-externo">Externo &#8599;</span>' : '<span class="vplan-badge is-nuestro">Con nosotros</span>';
+    }
+    function fila(cat, titulo, cuerpo, lado, tipo) {
       return '<div class="vplan-row" data-rubro="' + esc(cat) + '">' + tile(cat)
-        + '<div class="vplan-row__body"><p class="vplan-row__title">' + titulo
+        + '<div class="vplan-row__body">' + (tipo ? badge(tipo) : '') + '<p class="vplan-row__title">' + titulo
         + (estadoReserva(cat) ? ' <span class="vplan-row__estado">' + chipReserva(cat) + '</span>' : '')
         + '</p>' + cuerpo + '</div>' + lado + '</div>';
     }
@@ -6851,8 +6854,7 @@
     // Paso: el vuelo (o el bus).
     var cardTransporte = '';
     if (busMode) {
-      cardTransporte = '<article class="vplan-card">' + fila('bus', busTitle, busLines, precio(busTotal, true))
-        + '<p class="vplan-card__hint is-externo">Se compra directo con la empresa de bus</p></article>';
+      cardTransporte = '<article class="vplan-card">' + fila('bus', busTitle, busLines, precio(busTotal, true), 'externo') + '</article>';
     } else if (!autoMode) {
       var vTitulo = flightSummary.selected
         ? 'Vuelo' + (flightSummary.airline ? ' ' + esc(flightSummary.airline) : '') + ' &middot; ' + esc(airportCode(flightSummary.origin)) + (flightSummary.isRoundTrip ? ' &#8596; ' : ' &rarr; ') + esc(airportCode(flightSummary.destination))
@@ -6861,9 +6863,9 @@
       var vVuelta = flightSummary.selected && flightSummary.isRoundTrip ? esc(flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText)) : '';
       if (/sin fecha/i.test(vVuelta)) vVuelta = '';  // sin hora real se pide elegirla
       var vCuerpo = flightSummary.selected
-        ? (flightProviderUrl ? sub('Se reserva en Google Flights', 'is-externo') : '') + sub(vIda ? 'Ida ' + vIda : '') + (flightSummary.isRoundTrip ? (vVuelta ? sub('Vuelta ' + vVuelta) : sub('Vuelta: elegí la fecha', 'is-warn')) : '')
+        ? sub(vIda ? 'Ida ' + vIda : '') + (flightSummary.isRoundTrip ? (vVuelta ? sub('Vuelta ' + vVuelta) : sub('Vuelta: elegí la fecha', 'is-warn')) : '')
         : sub('Elegí un vuelo para ver horarios y precio', 'is-warn');
-      cardTransporte = '<article class="vplan-card" data-rubro="pasajes">' + fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true))
+      cardTransporte = '<article class="vplan-card" data-rubro="pasajes">' + fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true), 'externo')
         + accionExterna('pasajes', flightBookUrl, flightProviderUrl ? 'Google Flights' : 'WhatsApp', !!flightSummary.selected, 'Elegir vuelo')
         + pieExterno('pasajes', !!flightSummary.selected, 'Cambiar vuelo') + '</article>';
     }
@@ -6871,9 +6873,9 @@
     // Paso: el alojamiento.
     var hTitulo = multiHotel ? hotelesElegidos.length + ' alojamientos' : (hotelElegido() ? esc(selectedHotelName) : 'Alojamiento &middot; sin elegir');
     var hCuerpo = hotelElegido()
-      ? (multiHotel ? hotelNote : '') + sub('Se reserva en Booking.com', 'is-externo')
+      ? (multiHotel ? hotelNote : '')
       : sub('Elegí dónde dormir para ver el precio', 'is-warn');
-    var cardHotel = '<article class="vplan-card" data-rubro="alojamiento">' + fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true))
+    var cardHotel = '<article class="vplan-card" data-rubro="alojamiento">' + fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true), 'externo')
       + accionExterna('alojamiento', hotelBookUrl, 'Booking.com', hotelElegido(), 'Elegir hotel')
       + pieExterno('alojamiento', hotelElegido(), 'Cambiar hotel') + '</article>';
 
@@ -6882,18 +6884,18 @@
     if (!busMode && !autoMode) {
       filaTraslado = fila('traslados', hayTraslado ? transferTitle : 'Traslado',
         hayTraslado
-          ? sub(transferNote, 'is-nuestro') + (estadoReserva('traslados') ? '' : cambiar('traslados', 'Cambiar traslado'))
-          : sub('Del aeropuerto a tu alojamiento', 'is-nuestro') + cambiar('traslados', 'Elegir traslado'),
-        precio(transferTotal, false, 'A elegir'));
+          ? sub(transferNote) + (estadoReserva('traslados') ? '' : cambiar('traslados', 'Cambiar traslado'))
+          : sub('Del aeropuerto a tu alojamiento') + cambiar('traslados', 'Elegir traslado'),
+        precio(transferTotal, false, 'A elegir'), 'nuestro');
     }
     var tTitulo = selectedTours.length === 1 ? esc(selectedTours[0].title)
       : selectedTours.length ? 'Tours y actividades &middot; ' + selectedTours.length
         : 'Tours y actividades';
     var filaTours = fila('tours', tTitulo,
       selectedTours.length
-        ? sub(selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail), 'is-nuestro') + (estadoReserva('tours') ? '' : cambiar('tours', 'Cambiar tours'))
-        : sub('Sumá excursiones del destino', 'is-nuestro') + cambiar('tours', 'Agregar tours'),
-      precio(toursTotal, false, 'Opcional'));
+        ? sub(selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail)) + (estadoReserva('tours') ? '' : cambiar('tours', 'Cambiar tours'))
+        : sub('Sumá excursiones del destino') + cambiar('tours', 'Agregar tours'),
+      precio(toursTotal, false, 'Opcional'), 'nuestro');
     var cardNuestro = '<article class="vplan-card is-nuestro">' + filaTraslado + filaTours + '</article>';
 
     // Lo que no se reserva: se gasta en destino.
@@ -6905,7 +6907,7 @@
       + '</ul>';
     var cardDestino = '<article class="vplan-card is-destino">'
       + '<div class="vplan-row">' + tile('comidas') + '<div class="vplan-row__body"><p class="vplan-row__title">Comida y gastos en destino</p>'
-      + sub('Estimado &middot; se paga en el lugar') + sub('No incluye reserva', 'is-muted') + '</div>'
+      + sub('Estimado &middot; se paga en el lugar') + '</div>'
       + '<div class="vplan-row__side"><b>~' + money(enDestino) + '</b></div></div>'
       + destinoLineas + '</article>';
 
@@ -6935,7 +6937,7 @@
           /* Sin nada elegido para reservar con nosotros, el CTA lleva a elegirlo:
              el asesor ya tiene su propio boton en el pie. */
           : '<button type="button" class="voucher-reserve__btn" data-detalle-rubro="' + (busMode || autoMode ? 'tours' : 'traslados') + '"><span>' + (busMode || autoMode ? 'Elegir tours' : 'Elegir traslado y tours') + '</span></button>')
-      + '<p class="vplan-cta__nota">' + notaCta + '</p></div>';
+      + '</div>';
 
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog vplan" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +

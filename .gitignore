@@ -44,3 +44,5 @@ data/_trabajo/
 # proposito. Son las unicas copias de las 188 filas que se borraron de
 # public.tours y de las 40 que se retiraron de data/tours.json: un DELETE no se
 # deshace con git, asi que sin esos archivos no hay vuelta atras.
+.vercel
+.env*

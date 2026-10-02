@@ -1,4 +1,9 @@
-/* version: 273
+<!doctype html><html data-theme="light"><head><meta charset="utf-8"><style>
+:root{--bg:#0A101A;--surface:#111A28;--line:#2A3646;--ink:#fff;--ink2:#C9D4E2;--fh:sans-serif}
+:root[data-theme="light"]{--bg:#F7F8FA;--surface:#fff;--line:#E2E6EC;--ink:#111;--ink2:#444}
+body{background:var(--bg);color:var(--ink);font-family:sans-serif;margin:0;padding:16px;width:520px}
+.transport-card{background:var(--surface);border:1px solid var(--line);border-radius:20px}
+/* version: 144
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -40,7 +45,7 @@
      el BORDE de un control hace falta 3:1 (WCAG 1.4.11), y de ahi --control-line
      aparte: 3.31:1 sobre --bg. */
   --control-line:#5A6779;
-  --ink:#FFFFFF; --ink2:#D3DCE8;
+  --ink:#FFFFFF; --ink2:#C9D4E2;
   /* Mostaza de marca. #F7C325 da 11.60:1 sobre --bg, asi que sirve para
      texto de cualquier tamano, no solo para titulos grandes. */
   --accent:#F7C325; --accent-ink:#0A101A;
@@ -73,7 +78,7 @@
      hace que los botones se lean como los de la referencia. */
   --action-bg:#F7C325; --action-ink:#0A101A; --action-border:#F7C325;
   --control-bg:#111A28; --control-border:#5A6B7E; --control-hover:#1A2433;
-  --control-muted:#A9B5C6; --control-selected:#1E2A3A; --control-selected-ink:#FFFFFF;
+  --control-muted:#8A97A8; --control-selected:#1E2A3A; --control-selected-ink:#FFFFFF;
   --selected-bg:#1E2A3A; --selected-border:#F7C325; --selected-ink:#FFFFFF;
   /* Card elegible. Un solo bloque de estilo para los cinco grupos donde se
      elige algo (destinos, propuestas, hotel, tours, presupuesto diario),
@@ -97,6 +102,7 @@
   --fb:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   color-scheme:dark;
   box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 :root[data-theme="light"]{
@@ -131,7 +137,7 @@
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.5;padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.5}
 .oculto{display:none !important}
 [hidden]{display:none !important}
 .vista-detalle{min-width:0}
@@ -276,8 +282,8 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .money{position:relative}
 .money span{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:600;color:var(--ink2)}
 .money .inp{padding-left:58px}
-.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.seg button{min-width:0;border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 8px;font-size:14px;font-weight:600;cursor:pointer;line-height:1.25;min-height:56px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:12px 8px;font-size:14px;font-weight:600;cursor:pointer;line-height:1.25;min-height:56px}
 .seg button[aria-pressed="true"]{background:var(--selected-bg);color:var(--selected-ink);border-color:var(--selected-border)}
 .transport-seg{grid-template-columns:repeat(3,1fr)}
 .transport-seg button{min-height:48px}
@@ -322,9 +328,9 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .perf::before{content:"";position:absolute;left:24px;right:24px;top:-1px;border-top:3px dashed var(--hero-ink);opacity:.3}
 .perf i{position:absolute;top:-14px;width:28px;height:28px;border-radius:50%;background:var(--bg)}
 .perf i:first-child{left:-14px}.perf i:last-child{right:-14px}
-.nums{display:flex;justify-content:space-between;align-items:flex-end;gap:20px 16px;flex-wrap:wrap}
-.nums small{display:block;color:var(--hero-soft);font-size:13px;font-weight:500;margin-bottom:2px}
-.nums .big{font-family:var(--fh);font-weight:800;font-size:clamp(40px,12vw,88px);line-height:1;margin-top:8px;color:var(--hero-accent);display:block;overflow-wrap:anywhere}
+.nums{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.nums small{display:block;color:var(--hero-soft);font-size:13px;font-weight:500}
+.nums .big{font-family:var(--fh);font-weight:800;font-size:clamp(56px,16vw,88px);line-height:.9;color:var(--hero-accent);display:block}
 .nums .pp{font-family:var(--fh);font-weight:700;font-size:34px;line-height:1;display:block}
 .budget{margin-top:22px;padding-bottom:6px}
 .budget .track{height:10px;border-radius:99px;background:color-mix(in srgb,var(--hero-ink) 20%,transparent);overflow:hidden}
@@ -367,8 +373,8 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--cel-soft);border:1.5px solid var(--line)}
 .legend .l1::before{background:var(--ink);border-color:var(--ink)}
 .legend .l2::before{background:var(--accent);border-color:var(--accent)}
-/* "Otras fechas" va del color de sus barras, no mostaza: el amarillo es solo de la más barata. */
-.legend .l3::before{background:var(--cel-soft);border-color:var(--line)}
+
+.legend .l3::before{background:var(--accent);border-color:var(--accent)}
 /* Cuando tu fecha ES la más barata hay una sola referencia y la leyenda dice las
    dos cosas en una pastilla. El color es el de la barra que se está marcando
    (.bar.best), no el de "Tu fecha": la barra se pinta mostaza cuando coincide
@@ -503,10 +509,6 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
   .opt__cta{flex:1 1 auto;justify-content:center;margin-left:auto}
 }
 .foot{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px}
-.foot-legal{margin:14px 0 0;font-size:12.5px;line-height:1.6}
-.foot-legal a{color:var(--cel);text-decoration:underline;text-underline-offset:2px}
-:root[data-theme="light"] .foot-legal a{color:var(--ink)}
-.foot-legal a:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
 .foot b{color:var(--ink)}
 .loading-shell{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px 16px;display:grid;gap:14px}
 .loading-status{font-size:13px;font-weight:700;color:var(--ink2)}
@@ -796,7 +798,7 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .flight-search-prompt{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}.flight-search-prompt p{margin:0;color:var(--ink2);font-size:13px}.flight-skeleton{display:grid;gap:10px;margin-top:16px}.flight-skeleton .skeleton-box{height:122px;border:1px solid var(--line);background:linear-gradient(90deg,var(--bg) 25%,rgba(122,148,176,.18) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}.flight-empty p{margin:0 0 10px}.flight-buy-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.flight-buy-link:hover{color:var(--ink)}
 @media (max-width:560px){.flight-search>div:first-child{display:block}.flight-footer{align-items:flex-end}.flight-price{margin-left:0}.select-flight{margin-left:auto}.flight-card__actions{flex-direction:column}.btn{width:100%}}
 
-.flight-summary-card{border:1px solid var(--cel);border-radius:18px;padding:16px;margin-top:16px;background:var(--cel-soft);box-shadow:0 5px 16px color-mix(in srgb,var(--cel) 16%,transparent)}
+.flight-summary-card{border:1px solid var(--good);border-radius:18px;padding:16px;margin-top:16px;background:var(--good-soft);box-shadow:0 5px 16px color-mix(in srgb,var(--good) 16%,transparent)}
 /* Cabecera:adeon, nombre y cabina en una sola línea. */
 .flight-summary-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
 .flight-summary-head b{font-size:15px}
@@ -1097,7 +1099,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .voucher-reserve__btn:hover{filter:brightness(1.08)}
 .voucher-reserve__btn:disabled{opacity:.55;cursor:not-allowed}
 .voucher-reserve__btn em{font-style:normal;font-variant-numeric:tabular-nums;white-space:nowrap}
-.voucher-reserve--fijo{position:sticky;bottom:0;z-index:6;margin:14px -17px 0;padding:12px 17px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--surface,#fff) 80%,transparent)}
 .voucher-reserve__nota{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.4}
 .voucher-reserve__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* Tres botones del mismo tamano, mismo borde y misma tinta. El degradado
@@ -1130,7 +1131,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    --ink, no en --cel: si los tres brillan en color, el texto parece una lista de
    precios y no una frase. La linea que dice "no se cobra nada aca" va en el CTA,
    que es donde alguien la necesita. */
-.voucher-canales{margin:18px 0 0;padding:0 4px;background:none;color:var(--ink2);opacity:.85;font-size:12px;line-height:1.5;text-align:center;text-wrap:balance}
+.voucher-canales{margin:18px 0 0;padding:12px 14px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;line-height:1.5}
 .voucher-canales b{color:var(--ink);font-weight:700}
 /* La nota que explica el paso manual. Se separa de la de arriba con un borde
    y no con mas padding: son dos cosas distintas --una explica el reparto de
@@ -1147,6 +1148,30 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    no hay dos verdades: si el paso esta marcado, el numero es un check; si no,
    el numero es el orden. El paso de al lado es el que esta en el aire, y se
    distingue con el punto de --cel, no con un color propio. */
+/* ---------- Los diferenciales de la agencia ----------
+   Tres items en fila y a una banda, sin caja propia: van pegados al precio
+   porque es la pregunta que aparece justo despues de ver el total, y una
+   caja mas seria la tercera del modal.
+
+   Los tres iconos miden lo mismo y comparten esqueleto, para que se lean como
+   una serie y no como tres cosas sueltas. La punta del chevron es del mismo
+   color que la barra: el color de la accion principal. */
+.voucher-ventajas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:0 0 2px;list-style:none}
+.voucher-ventajas li{display:grid;gap:5px;min-width:0}
+/* 21px y no 19px: a 19 los dientes del engranaje y el interior del escudo se
+   perdian y los tres iconos se leian como tres manchas doradas del mismo peso.
+   Con mas caja las formas se distinguen, que es justo lo que un diferencial
+   tiene que hacer. */
+.voucher-ventajas .voucher-btn__ico{width:21px;height:21px;color:var(--cel)}
+.voucher-ventajas span{color:var(--ink2);font-size:11.5px;font-weight:500;line-height:1.4}
+/* En una sola columna de texto el ancho de cada item es un tercio del modal y
+   las frases mas largas dan tres lineas. A 560px ya no entran tres lado a
+   lado con texto legible. */
+@media (max-width:560px){
+  .voucher-ventajas{grid-template-columns:minmax(0,1fr);gap:9px}
+  .voucher-ventajas li{grid-template-columns:21px minmax(0,1fr);gap:9px;align-items:center}
+}
+
 /* ---------- El boton de cierre ----------
    El unico control del modal que pide atencion, y lo pide con el color de la
    accion principal: el mismo --action-bg del boton de reservar y del alta. Hay
@@ -1291,22 +1316,29 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    por debajo de y=10 y nunca se libera. Con translateY(-5) sube entero. El
    overflow:visible del svg es por lo mismo: el arco girado se sale del
    viewBox de 24x24 y sin esto el navegador lo recorta. */
+.guia-lock{margin-top:22px;padding:22px;border:1.5px dashed var(--control-line);border-radius:20px;background:var(--surface);transition:border-color .3s ease}
+.guia-lock__eyebrow{color:var(--ink2);font-size:10px;font-weight:800;letter-spacing:.12em}
+.guia-lock__head h2{margin:5px 0 12px;font-family:var(--fh);font-size:30px;line-height:1.05}
+.guia-lock__body{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start}
+.guia-lock__icon{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:var(--bg);color:var(--cel)}
 .guia-lock__ico{width:22px;height:22px;overflow:visible}
 .guia-lock__shackle,.guia-lock__body{transform-box:fill-box;transition:transform .34s cubic-bezier(.34,1.4,.5,1)}
 .guia-lock__shackle{transform-origin:50% 100%}
+.guia-lock__texto{margin:0;color:var(--ink);font-size:13.5px;line-height:1.55}
+.guia-lock__nota{margin:10px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.45}
 /* Abierto: el marco pasa de punteado a entero, que es lo que ya dice el resto
    de la app cuando algo esta resuelto. */
+.guia-lock.is-open{border-style:solid;border-color:var(--cel)}
+.guia-lock.is-open .guia-lock__shackle{transform:translateY(-5px) rotate(-25deg)}
+.guia-lock.is-open .guia-lock__body{transform:translateY(2px)}
+.guia-lock.is-open .guia-lock__icon{background:var(--cel-soft)}
 /* En el celu el candado se va arriba del texto en vez de al lado: con 34px al
    lado el parrafo pierde 46px de ancho y quedan tres lineas cortas al lado de
    un icono. Arriba se lee como un encabezado. */
+@media (max-width:520px){.guia-lock__body{grid-template-columns:minmax(0,1fr);gap:9px}}
 .guia-bloque{margin-top:26px}
 .guia-bloque:first-child{margin-top:18px}
 .guia-bloque__titulo{font-family:var(--fh);font-size:19px;font-weight:700;letter-spacing:-.01em;margin:0 0 11px;padding-bottom:8px;border-bottom:1px solid var(--line)}
-.guia-mapa{height:300px;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin-bottom:12px;background:var(--line);position:relative;z-index:0}
-.guia-mapa__cargando{display:flex;height:100%;align-items:center;justify-content:center;font-size:13px;color:var(--ink2)}
-.guia-pin span{display:flex;width:28px;height:28px;border-radius:50%;background:var(--cel);color:#fff;font:700 13px/1 var(--fh);align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
-.guia-num{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--cel);color:#fff;font-size:12px;font-weight:700;align-items:center;justify-content:center;flex:none}
-@media print{.guia-mapa{display:none}}
 .guia-lista{display:grid;gap:10px}
 .guia-item{border:1px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--surface)}
 .guia-item--foto{padding:0;overflow:hidden}
@@ -1704,14 +1736,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    app.js. Con 768 el iPhone en horizontal (844x390) quedaba con el panel
    abierto a todo el ancho, sin max-height y sin manera de cerrarlo. */
 @media (max-width:900px){
-  /* Se arrastra en vertical (ver initTripBarDrag en app.js): la rayita de arriba
-     avisa que se puede mover y touch-action:none en la cabecera evita que el
-     navegador scrollee la pagina mientras se arrastra desde ella. */
-  .trip-summary__grip{display:flex;align-items:center;justify-content:center;height:24px;margin:-9px -12px 0;touch-action:none;cursor:grab}
-  .trip-summary__grip::before{content:"";display:block;width:38px;height:4px;border-radius:99px;background:var(--line)}
-  .trip-summary{overscroll-behavior:auto}
-  .trip-summary.minimized{overflow:hidden;touch-action:pan-y}
-  .trip-summary.is-dragging{transition:none;user-select:none;-webkit-user-select:none;box-shadow:0 22px 44px rgba(16,35,62,.3)}
   .trip-summary{padding:9px 12px 10px;max-height:min(46vh,320px)}
   .trip-summary__inner{gap:0}
   .trip-summary__head{min-height:38px;align-items:center}
@@ -1770,7 +1794,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    queda en 60px. min(100%,400px) es el piso de una card legible, y el 100%
    evita que la propia pista desborde cuando el contenedor es mas angosto que
    ese piso. */
-.local-tours__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px;min-width:0}
+.local-tours__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:14px;min-width:0}
 /* El borde no cambia de grosor al marcar (solo de color), asi que la tarjeta
    no corre nada. Relleno de color + borde duro se leia como un boton de
    escritorio; la marca real va en el marco. */
@@ -1784,7 +1808,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    overflow:hidden. Ahora la foto cede antes de que el texto quede ilegible.
    La foto vuelve a ser de ancho completo recien en la regla de contenedor de
    mas abajo. */
-.local-tour{position:relative;display:flex;flex-direction:column;min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
+.local-tour{position:relative;display:grid;grid-template-columns:minmax(140px,184px) minmax(0,1fr);min-width:0;padding:0;border:1.5px solid var(--card-border);border-radius:var(--card-radius);background:var(--card-bg);box-shadow:0 3px 10px rgba(16,35,62,.05);overflow:hidden;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
 .local-tour:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
 /* Elegido se marca SOLO con el marco. El token --card-sel-bg pinta el interior
    de la ficha con el ambar de la seleccion, y en una card de experiencia esa
@@ -1802,14 +1826,18 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    sin que el recorte se coma la escena, y object-position abajo porque la
    parte de abajo de estas fotos es la que dice de la experiencia: la persona,
    la lancha, la arena. */
-.local-tour__media{position:relative;height:170px;flex:0 0 auto;background:var(--bg)}
+.local-tour__media{position:relative;min-height:100%;background:var(--bg)}
 .local-tour__media img{display:block;width:100%;height:100%;object-fit:cover;object-position:center bottom}
 /* Sin foto: degradado con el ícono de la actividad, que no miente sobre lo
    que es. Se estira a toda la altura de la columna. */
-.local-tour__media-plain{display:grid;place-items:center;align-content:center;gap:10px;height:110px;padding:16px}
+.local-tour__media-plain{display:grid;place-items:center;align-content:center;gap:10px;padding:16px}
 .local-tour__ico{width:38px;height:38px;opacity:.9}
-.local-tour__body{display:flex;flex:1;flex-direction:column;min-width:0;padding:16px}
-.local-tour__title{margin:12px 0 0;color:var(--ink);font-family:var(--fh);font-size:22px;line-height:1.15;overflow-wrap:anywhere}
+.local-tour__body{display:flex;flex-direction:column;min-width:0;padding:15px 16px}
+.local-tour__head{display:grid;gap:2px;min-width:0}
+.local-tour__title{margin:0;color:var(--ink);font-family:var(--fh);font-size:20px;line-height:1.15;overflow-wrap:anywhere}
+.local-tour__destination{display:flex;align-items:center;gap:4px;margin:0;color:var(--ink2);font-size:11.5px;font-weight:700;line-height:1.4}
+.local-tour__pin{display:grid;place-items:center;flex:0 0 12px;width:12px;height:12px;color:var(--cel)}
+.local-tour__pin svg{width:12px;height:12px}
 /* Estrellas. Cada estrella es una ranura de 13px con la base en --line y, si
    toca, la misma forma encima en el color de la marca recortada al ancho de la
    ranura. Un 4.6 se lee como cuatro enteras y media sin redondearlo a cinco, y
@@ -1822,13 +1850,18 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .local-tour__star-fill{fill:#f0a92a}
 .local-tour__rating b{color:var(--ink);font-size:12px;font-weight:800}
 .local-tour__reviews{color:var(--ink2);font-size:11.5px}
-.local-tour__description{margin:8px 0 0;color:var(--ink2);font-size:13px;line-height:1.55;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
-.local-tour__meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0}
-.local-tour__chip{display:inline-flex;align-items:center;gap:5px;color:var(--ink2);font-size:12px;font-weight:600;line-height:1.3}
-.local-tour__chip svg{flex:0 0 15px;width:15px;height:15px;color:var(--cel)}
+.local-tour__description{margin:8px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
+.local-tour__tags{display:grid;gap:3px;margin:9px 0 0;padding:0;list-style:none}
+.local-tour__tag{display:flex;align-items:flex-start;gap:5px;color:var(--ink2);font-size:11.5px;line-height:1.4}
+.local-tour__tag-ico{display:grid;place-items:center;flex:0 0 13px;width:13px;height:13px;margin-top:1px;color:var(--good)}
+.local-tour__tag-ico svg{width:13px;height:13px}
+.local-tour__tag.is-no{opacity:.85}
+.local-tour__tag.is-no .local-tour__tag-ico{color:var(--coral)}
+.local-tour__meta{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.local-tour__chip{padding:4px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--ink2);font-size:10.5px;font-weight:700;white-space:nowrap}
 /* "Precio real" es la unica pastilla que distingue una ficha de la API de una
    estimada. Sin el borde de color se leia como cualquiera de las otras dos. */
-.local-tour__chip.is-real{color:var(--good)}
+.local-tour__chip.is-real{border-color:color-mix(in srgb,var(--good) 45%,transparent);color:var(--good);background:color-mix(in srgb,var(--good) 12%,transparent)}
 /* Pie de la card: precio a la izquierda, acciones a la derecha. El precio va
    en el pie y no arriba a proposito: el "desde" que se lee primero es el del
    resumen de la seccion, y repetirlo en cada card pone tres cifras compitiendo
@@ -1836,11 +1869,10 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* flex-wrap y no solo space-between: a 200px de seccion el precio y el boton no
    entran en la misma linea y el boton se salia del borde. Con wrap bajan de
    linea recien ahi; en cualquier ancho normal siguen en una sola. */
-.local-tour__foot{display:grid;gap:12px;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
-.local-tour__description+.local-tour__foot{margin-top:16px}
+.local-tour__foot{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto;padding-top:12px}
 .local-tour__price{display:grid;align-content:end;margin:0;min-width:0}
 .local-tour__from{color:var(--ink2);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.local-tour__price b{color:var(--ink);font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.local-tour__price b{color:var(--ink);font-family:var(--fh);font-size:23px;font-weight:800;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .local-tour__price span{color:var(--ink2);font-size:11px}
 /* flex:0 1 auto y no 0 0 auto: con basis auto el bloque tomaba su ancho
    max-content y no podia angostarse, asi que el wrap nunca se activaba y en
@@ -1850,8 +1882,9 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 /* El boton de detalle queda por encima del checkbox estirado (z-index): si no,
    el clic lo atraviesa y cambia la seleccion en vez de abrir los detalles. */
 .local-tour__info{position:relative;z-index:2;display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 13px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:800;line-height:1;white-space:nowrap;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease}
-.local-tour__info{width:100%;border:0;background:var(--action-bg);color:var(--action-ink);font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;min-height:46px;padding:0 14px;border-radius:12px}
-.local-tour__info:hover{filter:brightness(1.1)}
+.local-tour__info{border:1.5px solid var(--control-line);background:transparent;color:var(--ink);font-size:12.5px;font-weight:700;min-height:40px;padding:0 14px;border-radius:12px}
+.local-tour__info:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
+.local-tour__info-ico{flex:0 0 16px;width:16px;height:16px;color:var(--cel)}
 .local-tour__info:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* El tick de "agregada". El checkbox de la card es opacity:0 y estirado
    sobre toda la superficie —es el area tactil de elegir—, asi que el estado
@@ -1866,16 +1899,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .local-tour__tick svg{width:16px;height:16px}
 .local-tour:has(.local-tour__input:checked) .local-tour__tick{opacity:1;transform:scale(1)}
 .local-tours:not(.local-tours--expanded) .local-tour:nth-child(n+4){display:none}
-.local-tours__soon{display:grid;justify-items:center;gap:12px;padding:34px 20px;border:1.5px dashed var(--line);border-radius:18px;text-align:center}
-.local-tours__soon-badge{display:inline-flex;align-items:center;padding:6px 14px;border-radius:999px;background:var(--cel-soft);color:var(--cel);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-.local-tours__soon p{max-width:440px;margin:0;color:var(--ink2);font-size:14px;line-height:1.6}
-/* Aviso de "estamos completando", para los destinos con menos tours que los que
-   se ven sin tocar "Ver más". Deliberadamente mas discreto que el cartel de
-   "Próximamente": acá ya hay cards y hay algo que elegir, así que el aviso
-   acompaña en vez de ocupar la seccion entera. Sin fondo propio: solo el badge,
-   que es lo que hay que mirar. */
-.local-tours__growing{display:flex;align-items:center;gap:9px;margin:0 0 14px;color:var(--ink2);font-size:13px;line-height:1.5}
-.local-tours__growing-badge{flex:0 0 auto;padding:4px 11px;border-radius:999px;background:var(--cel-soft);color:var(--cel);font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
 .local-tours__more{display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:0;border:0;background:transparent;color:var(--cel);font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .local-tours__more:hover{color:var(--ink)}
 .local-tours__more:focus-visible{outline:3px solid var(--focus);outline-offset:4px;border-radius:4px}
@@ -1924,20 +1947,6 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .checkout-aside__row b{color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
 .checkout-aside__row.is-empty{display:block;color:var(--ink2);font-style:italic}
 .checkout-aside__total-line{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:10px 0 0;color:var(--ink2);font-size:12.5px}
-/* Codigo de descuento de las actividades. El estado va en el modificador para que
-   el color diga lo mismo que el texto: verde si descuenta, coral si no es valido. */
-.checkout-aside__row--descuento b{color:var(--good)}
-.checkout-promo{margin:14px 13px 4px;padding:11px 12px;border:1px dashed var(--control-line);border-radius:12px}
-.checkout-promo label{display:block;margin:0 0 6px;font-size:12px;font-weight:700;color:var(--ink)}
-.checkout-promo__row{display:flex;gap:8px}
-.checkout-promo__row input{flex:1;min-width:0;height:38px;padding:0 10px;border:1px solid var(--control-line);border-radius:10px;background:var(--bg);color:var(--ink);font:600 13px Poppins,sans-serif;letter-spacing:.04em;text-transform:uppercase}
-.checkout-promo__btn{height:38px;padding:0 14px;border:0;border-radius:10px;background:var(--action-bg);color:var(--action-ink);font:600 12px Poppins,sans-serif;cursor:pointer}
-.checkout-promo__btn:hover{filter:brightness(1.1)}
-.checkout-promo__msg{margin:7px 0 0;font-size:11.5px;line-height:1.35;color:var(--ink2)}
-.checkout-promo--aplicado{border-style:solid;border-color:var(--good)}
-.checkout-promo--aplicado .checkout-promo__msg{color:var(--good);font-weight:700}
-.checkout-promo--invalido .checkout-promo__msg{color:var(--coral);font-weight:700}
-.checkout-promo--faltan .checkout-promo__msg{color:var(--warn-ink);font-weight:700}
 .checkout-aside__total-line b{color:var(--ink);font-family:var(--fh);font-size:17px;font-variant-numeric:tabular-nums}
 /* ---- Columna de los pasos ---- */
 .checkout-main{display:flex;min-width:0;flex-direction:column;max-height:92vh}
@@ -1980,25 +1989,39 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .checkout-transfer-note{display:flex;align-items:flex-start;gap:9px;margin:12px 0 0;padding:11px 13px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;line-height:1.5}
 .checkout-transfer-note .trip-summary__ico{flex:0 0 19px;width:19px;height:19px;margin-top:1px}
 .checkout-transfer-note b{color:var(--ink)}
-.checkout-legal{margin:16px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.5}
-/* "Olvidar mis datos": enlace, no boton de accion. Que se vea distinto de los
-   botones del checkout para que nadie lo confunda con el paso siguiente. El area
-   tactil se lleva a 48px como todo lo demas. */
-/* ---- Medios de pago: tarjeta unica con tres filas ---- */
-.checkout-pay-card{display:grid;gap:4px;margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.28)}
-.checkout-pay-card__eyebrow{margin:0 2px 6px;color:var(--cel);font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-.checkout-pay{position:relative;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid transparent;border-radius:13px;cursor:pointer;transition:border-color .18s ease,background .18s ease}
-.checkout-pay+.checkout-pay{margin-top:2px}
-.checkout-pay:hover{background:var(--cel-soft)}
+.checkout-legal{margin:16px 0 0;color:var(--ink2);font-size:11.5px;line-height:1.5}/* ---- Grilla de medios de pago ---- */
+.checkout-pay-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
+.checkout-pay{--pay-logo-h:26px;position:relative;display:grid;justify-items:center;align-content:center;gap:4px;min-height:88px;padding:10px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:border-color .18s ease,background .18s ease}
+.checkout-pay:hover{border-color:var(--cel)}
+/* El input real se oculta pero se conserva focusable, para que el teclado
+   llegue a la grilla y las flechas funcionen como un radiogroup de verdad. */
 .checkout-pay input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
 .checkout-pay.is-selected{border-color:var(--cel);background:var(--cel-soft)}
 .checkout-pay:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
-.checkout-pay__icon{display:grid;place-items:center;flex:0 0 auto;width:38px;height:38px;border:1px solid var(--line);border-radius:11px;color:var(--cel)}
-.checkout-pay__icon svg{width:20px;height:20px}
-.checkout-pay__text{display:grid;gap:2px;min-width:0;flex:1}
-.checkout-pay__text b{color:var(--ink);font-size:14px;font-weight:700;line-height:1.25}
-.checkout-pay__text small{color:var(--ink2);font-size:12px;line-height:1.4}
-.checkout-pay__check{display:grid;place-items:center;flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--cel);color:var(--cel-ink);opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}
+/* La caja del logo. Alto fijo y ancho completo: es lo que mantiene parejas las
+   tres filas del 3x3. El wordmark pintado queda como base y se oculta mientras
+   haya <img>; si la imagen falla, el handler de 'error' le pone is-broken y
+   esta regla lo saca de la vista para que aparezca el texto de la marca. */
+.checkout-pay__brand{display:grid;place-items:center;width:100%;height:calc(var(--pay-logo-h) + 2px)}
+/* El alto va en px y NO en porcentaje a proposito. La caja es un grid cuya fila
+   es 'auto', y un max-height:100% contra una pista de tamano automatico no se
+   resuelve: el navegador lo ignora y el logo se sale de la caja. Con Mastercard
+   (proporcion 1.6:1) eso daba 92px de alto dentro de una caja de 28.
+   Alto fijo + width:auto deja que el SVG escale por su relacion intrinseca, y
+   max-width recorta los lockups muy anchos (Scotiabank es 6.8:1) sin deformar:
+   object-fit:contain los centra en la caja. */
+.checkout-pay__logo{display:block;height:var(--pay-logo-h);width:auto;max-width:100%;object-fit:contain}
+/* Placeholder mientras descarga: sin esto la imagen aparece de golpe y empuja
+   el subtitulo. El color es el mismo fondo de la tarjeta, no un gris, para que
+   un logo lento no se note como un bloque raro. */
+.checkout-pay__logo:not(.is-broken){background:var(--surface);border-radius:4px}
+.checkout-pay:has(.checkout-pay__logo.is-broken) .checkout-pay__logo{display:none}
+.checkout-pay:has(.checkout-pay__logo.is-broken) .checkout-pay__mark{display:block}
+/* El respaldo: el nombre de la marca en su color de marca, como estaba antes
+   de los logos. Se mantiene porque las URLs de Commons se rompen. */
+.checkout-pay__mark{display:none;color:var(--pay-brand,var(--ink));font-size:15px;font-weight:800;letter-spacing:-.01em;text-align:center;line-height:1.1}
+.checkout-pay__kind{color:var(--ink2);font-size:10px;font-weight:700;text-align:center;line-height:1.3}
+.checkout-pay__check{position:absolute;top:6px;right:6px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--cel);color:#fff;opacity:0;transform:scale(.6);transition:opacity .18s ease,transform .18s ease}
 .checkout-pay__check svg{width:12px;height:12px}
 .checkout-pay.is-selected .checkout-pay__check{opacity:1;transform:scale(1)}
 .checkout-pay-total{margin:14px 0 0;padding:11px 13px;border-radius:13px;background:var(--bg);color:var(--ink2);font-size:12.5px;text-align:right}
@@ -2040,6 +2063,10 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
   .checkout-actions{padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
   .checkout-steps__text em{display:none}
   .checkout-grid{grid-template-columns:minmax(0,1fr)}
+  .checkout-pay-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* En dos columnas la tarjeta es mas ancha que en el 3x3 de escritorio, asi
+     que el logo puede ocupar un poco mas sin empujar el subtitulo. */
+  .checkout-pay{--pay-logo-h:30px}
   .checkout-btn{min-height:46px;padding:0 14px;font-size:13.5px}
   .checkout-btn--next,.checkout-btn--pay{max-width:none}
 }
@@ -2061,39 +2088,8 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .tour-detail-modal__eyebrow{display:block;margin-bottom:8px;color:var(--cel);font-size:11px;font-weight:800;letter-spacing:.12em}
 .tour-detail-modal h2{max-width:580px;margin-bottom:12px}
 .tour-detail-modal__description{margin:0 0 16px;color:var(--ink2);font-size:14px;line-height:1.55}
-.tour-detail-modal__h{margin:30px 0 12px;color:var(--ink);font-family:var(--fh);font-size:22px;line-height:1.2}
-.tour-detail-modal__h:first-of-type{margin-top:6px}
-.tour-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:0 0 6px;padding:0;list-style:none;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
-.tour-facts__cell{display:flex;align-items:center;gap:11px;min-width:0;padding:14px 16px;border-left:1px solid var(--line)}
-.tour-facts__cell:first-child{border-left:0}
-.tour-facts__ico{flex:0 0 26px;width:26px;height:26px;color:var(--ink)}
-.tour-facts__txt{display:grid;gap:2px;min-width:0}
-.tour-facts__label{color:var(--ink2);font-size:11px;font-weight:700}
-.tour-facts__txt b{color:var(--ink);font-size:13.5px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
-.tour-detail-modal__copy{padding:4px 18px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
-.tour-detail-modal__rows{margin:0;padding:0;list-style:none}
-.tour-detail-modal__text{padding:14px 16px}
-.tour-detail-modal__p{margin:0 0 10px;color:var(--ink);font-size:14px;line-height:1.65}
-.tour-detail-modal__p:last-child{margin-bottom:0}
-.tour-detail-modal__sub{margin:14px 0 6px;color:var(--ink);font-size:14px;font-weight:800}
-.tour-detail-modal__sub:first-child{margin-top:0}
-.tour-detail-modal__row.is-dot{align-items:center}
-.tour-detail-modal__row.is-dot .tour-detail-modal__mark{flex:0 0 32px;width:32px;height:32px;margin-top:0;border-radius:50%;background:var(--cel-soft);color:var(--cel)}
-.tour-detail-modal__row.is-dot .tour-detail-modal__mark svg{width:18px;height:18px}
-.tour-facts{margin-bottom:0}
-.tour-operativa{margin:20px 0 0;padding:16px 18px;border:1px solid color-mix(in srgb,var(--cel) 35%,transparent);border-left:4px solid var(--cel);border-radius:14px;background:color-mix(in srgb,var(--cel) 9%,transparent)}
-.tour-operativa__title{display:flex;align-items:center;gap:8px;margin:0 0 10px;color:var(--ink);font-family:var(--fh);font-size:16px;line-height:1.2}
-.tour-operativa__title svg{flex:0 0 20px;width:20px;height:20px;color:var(--cel)}
-.tour-operativa__list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
-.tour-operativa__list li{display:flex;align-items:flex-start;gap:10px;color:var(--ink);font-size:14px;line-height:1.55}
-.tour-operativa__ico{flex:0 0 18px;width:18px;height:18px;margin-top:2px;color:var(--cel)}
-.tour-detail-modal__row{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-top:1px solid var(--line);color:var(--ink);font-size:14.5px;line-height:1.6}
-.tour-detail-modal__row:first-child{border-top:0}
-.tour-detail-modal__mark{display:grid;place-items:center;flex:0 0 18px;width:18px;height:18px;margin-top:3px}
-.tour-detail-modal__mark svg{width:16px;height:16px}
-.tour-detail-modal__row.is-si .tour-detail-modal__mark{color:var(--good)}
-.tour-detail-modal__row.is-no .tour-detail-modal__mark{color:var(--coral)}
-@media(max-width:560px){.tour-detail-modal__h{margin:26px 0 10px;font-size:20px}.tour-detail-modal__copy{padding:2px 14px}.tour-detail-modal__row{padding:12px 0;font-size:14px}.tour-operativa{padding:14px}.tour-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.tour-facts__cell:nth-child(odd){border-left:0}.tour-facts__cell:nth-child(n+3){border-top:1px solid var(--line)}}
+.tour-detail-modal__copy{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.tour-detail-modal__copy p{margin:0;color:var(--ink);font-size:14px;line-height:1.7}
 .tour-detail-modal__hint{margin:16px 0 0;color:var(--ink2);font-size:12px;line-height:1.5}
 /* Destinos destacados para explorar antes de cotizar.
    La tarjeta es una "foto con texto encima": imagen arriba, scrim para que el
@@ -2182,6 +2178,10 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
    El piso es 400px, el mismo que el min() del grid, asi que las dos reglas
    cuentan la misma historia: mientras haya lugar para dos cards, no hay lugar
    para apilar. */
+@container tours (max-width:400px){
+  .local-tour{grid-template-columns:minmax(0,1fr)}
+  .local-tour__media{height:160px;min-height:0}
+}
 /* La card sin padding propio: la foto va a sangre hasta los bordes y el
    padding lo aporta el cuerpo. Con padding en la card (lo que había antes) la
    foto quedaba metida en un marco y el bloque se veía más estrecho que las
@@ -2436,6 +2436,7 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
 .block-sub, .foot, .foot-credits, .cost-note, .transfer-hint,
 .transfer-leg__auto, .transfer-advice, .hotel-group__empty,
 .local-tour__description, .guia-nota, .guia-veredicto, .guia-tip p,
+.guia-lock__texto, .guia-lock__nota, .guia-pie, .guia-creditos,
 .daily-budget__logistics, .hotel-nearby-note, .block-h3,
 .transfer-choice-note, .opt__nota, .opt .s, .opt__disclosure-text {
   overflow-wrap: anywhere;
@@ -2459,17 +2460,19 @@ h3, .daily-budget__group-title, .block-h3, .transfer-leg__head strong,
   border-color:var(--cel);background:var(--cel-soft);color:var(--cel);font-weight:800}
 .voucher-item__side .voucher-item__cta:not(.is-reserved):not(.is-off):hover{background:var(--cel);color:var(--bg);border-color:var(--cel)}
 
-/* Botones secundarios del resumen: mismo borde ambar, peso y tamano en las filas
-   (Agregar / Modificar) y en "Para completar tu viaje". */
-.voucher-step__btn,.voucher-step__btn.is-link{min-width:118px;min-height:38px;border-color:var(--cel);background:var(--cel-soft);color:var(--cel);font-weight:800}
-.voucher-step__btn:hover,.voucher-step__btn.is-link:hover{background:var(--cel);color:var(--bg);border-color:var(--cel)}
-.voucher-item__side .voucher-item__cta.is-modificar{background:transparent}
-.voucher-item__side .voucher-item__cta.is-modificar:hover{background:var(--cel);color:var(--bg)}
-
 /* Vuelo sin elegir: es un paso pendiente, no un item apagado. Borde de la marca
    y un boton directo ("Elegir vuelos"). */
 .voucher-item:has(.is-elegir){padding:13px 12px;margin:0 -12px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:14px;background:color-mix(in srgb,var(--cel) 6%,transparent)}
 .voucher-item:has(.is-elegir) + .voucher-item{border-top:0}
+
+/* Beneficios: una barra de badges de una linea. En celular se desliza a los
+   costados en vez de apilar tres filas de texto chico antes de los precios. */
+.voucher-ventajas{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 0 6px}
+.voucher-ventajas::-webkit-scrollbar{display:none}
+.voucher-ventajas li{display:flex;flex:0 0 auto;align-items:center;gap:8px;max-width:78vw;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;scroll-snap-align:start}
+.voucher-ventajas span{font-size:12px;font-weight:600;line-height:1.3;color:var(--ink)}
+@media (min-width:561px){.voucher-ventajas{flex-wrap:wrap;overflow:visible}}
+@media (max-width:560px){.voucher-ventajas{display:flex;grid-template-columns:none}.voucher-ventajas li{display:flex}}
 
 /* Gastos en destino: columnas numericas alineadas (dia y total) y un total que
    cierra la suma con una linea firme y el mismo margen derecho que los montos. */
@@ -2562,6 +2565,9 @@ h3.block-title, .block-title:is(h3) {
 @media (max-width:560px){.bus-co{padding:14px}.bus-opt{padding:12px 14px}.bus-opt__times{font-size:18px}.bus-opt__fare b{font-size:17px}}
 
 /* ---------- Card de tour: limpieza ---------- */
+.local-tour__tags{margin-top:8px}
+.local-tour__tag{align-items:flex-start;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.local-tour__tag > span:not(.local-tour__tag-ico){display:inline}
 /* El pie es una fila propia con filete arriba: precio a la izquierda y
    "Detalles" a la derecha, alineados al centro, sin hueco en blanco antes. */
 .local-tour__foot{align-items:center;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
@@ -2637,8 +2643,8 @@ h3.block-title, .block-title:is(h3) {
 @media (max-width:560px){.split-dialog h2{font-size:24px}.split-rows li{grid-template-columns:1fr auto}.split-rows li em{grid-column:1}}
 
 /* ---------- Pasos del presupuesto ---------- */
-.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;margin:0 0 22px;padding:12px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.18)}
-.steps__list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.steps{position:sticky;top:8px;z-index:20;margin:0 0 22px;padding:12px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.steps__list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .steps__btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:14px;background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:border-color .18s ease,background .18s ease}
 .steps__btn:hover:not(:disabled){border-color:var(--ink2)}
 .steps__n{flex:0 0 26px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;border:1.5px solid var(--line);font-size:12.5px;font-weight:800;color:var(--ink2)}
@@ -2649,23 +2655,9 @@ h3.block-title, .block-title:is(h3) {
 .steps__item.is-current .steps__n{background:var(--cel);border-color:var(--cel);color:var(--cel-ink,#0A101A)}
 .steps__item.is-done .steps__n{background:var(--good);border-color:var(--good);color:#fff}
 .steps__item.is-pending .steps__t b{color:var(--ink2)}
-.steps__progress{height:6px;margin:0 0 6px;border-radius:99px;background:var(--line);overflow:hidden}
-.steps__progress span{display:block;height:100%;border-radius:99px;background:var(--cel);transition:width .3s ease}
-.steps__pct{margin:0 0 10px;font-size:12px;color:var(--ink2)}
-.steps__pct b{color:var(--cel);font-weight:800}
-.steps__item.is-current .steps__btn{border-width:2px}
-.steps__item.is-pending .steps__btn{border-style:dashed}
 .steps__next{width:100%;margin-top:10px;min-height:44px;border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
 .steps__next em{font-style:normal;font-weight:600;opacity:.8}
 .steps__ok{margin:10px 0 0;font-size:13px;color:var(--ink2);text-align:center}
-.steps__foot{position:sticky;bottom:0;z-index:19;margin:0 -4px;padding:10px 4px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg,var(--surface)) 70%,transparent)}
-.steps__foot:empty{display:none}
-.steps__foot .steps__next{margin-top:0;min-height:54px;font-size:16px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.steps__skip{display:block;margin:10px auto 0;padding:8px 12px;border:0;background:none;color:var(--ink2);font:inherit;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-/* "Elegí tu vuelo para continuar" va en amarillo, como el boton activo: es la
-   accion que toca hacer, no un boton apagado. Antes era gris punteado y se leia
-   como deshabilitado. */
-.steps__next.is-locked{background:var(--action-bg);color:var(--action-ink);border:0;font-weight:800}
 @media (max-width:560px){
   .steps{padding:10px;border-radius:16px}
   .steps__list{grid-template-columns:1fr;gap:6px}
@@ -2703,6 +2695,9 @@ h3.block-title, .block-title:is(h3) {
 .rt-stop{background:none;border:0;width:0;height:0;overflow:visible}.rt-stop b{position:absolute;left:-10px;top:-10px;width:20px;height:20px;border-radius:50%;background:#1f2937;color:#fff;border:2px solid #fff;font-size:11px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 1px 5px rgba(0,0,0,.45)}
 .rt-city--stop span{left:14px;font-weight:800;color:#1f2937}
 .roadtrip-stops__lead{margin:0 0 6px}.roadtrip-stops__list ol{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:8px}.roadtrip-stops__list li{display:flex;align-items:center;gap:10px}.roadtrip-stops__list li b{display:block;color:var(--ink);font-size:14px}.roadtrip-stops__list li small{display:block;font-size:12px;color:var(--ink2)}.rt-stop__n{flex:none;width:24px;height:24px;border-radius:50%;background:#1f2937;color:#fff;border:2px solid var(--line);font-size:12px;font-weight:800;line-height:20px;text-align:center}
+.rt-stop{background:none;border:0;width:0;height:0;overflow:visible}.rt-stop b{position:absolute;left:-10px;top:-10px;width:20px;height:20px;border-radius:50%;background:#1f2937;color:#fff;border:2px solid #fff;font-size:11px;font-weight:800;line-height:16px;text-align:center;box-shadow:0 1px 5px rgba(0,0,0,.45)}
+.rt-city--stop span{left:14px;font-weight:800;color:#1f2937}
+.roadtrip-stops__lead{margin:0 0 6px}.roadtrip-stops__list ol{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:8px}.roadtrip-stops__list li{display:flex;align-items:center;gap:10px}.roadtrip-stops__list li b{display:block;color:var(--ink);font-size:14px}.roadtrip-stops__list li small{display:block;font-size:12px;color:var(--ink2)}.rt-stop__n{flex:none;width:24px;height:24px;border-radius:50%;background:#1f2937;color:#fff;border:2px solid var(--line);font-size:12px;font-weight:800;line-height:20px;text-align:center}
 
 /* ---------- Auditoria mobile ----------
    Correcciones de una pasada por 320-430px. Van al final a proposito: pisan
@@ -2715,13 +2710,15 @@ h3.block-title, .block-title:is(h3) {
 }
 /* Tag "Incluye: ..." de los tours: el line-clamp estaba en el <li> y lo sacaba de
    flex, con lo que el tilde quedaba en su propia linea. El recorte va al texto. */
+.local-tour__tag{display:flex;overflow:visible}
+.local-tour__tag > span:not(.local-tour__tag-ico){display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0}
 /* El selector de destino corta el placeholder: que termine en puntos suspensivos. */
 .custom-select__trigger{text-overflow:ellipsis}
 /* Stepper fijo: en 320px ocupaba mas de la mitad de la pantalla. En celu son tres
    fichas en una fila (numero + nombre) y el boton de siguiente. */
 @media (max-width:560px){
   .steps{padding:8px;top:6px}
-  .steps__list{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .steps__list{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
   .steps__btn{flex-direction:column;justify-content:center;gap:3px;min-height:58px;padding:7px 4px;text-align:center}
   .steps__n{flex-basis:22px;width:22px;height:22px;font-size:11.5px}
   .steps__t{justify-items:center}
@@ -2748,1138 +2745,158 @@ button.logo{min-height:44px}
   .featured-destination__when{white-space:normal;overflow:visible;text-overflow:clip}
   .destination-highlights__slider::before,.destination-highlights__slider::after{width:46px;background:var(--surface)}
 }
-/* Panel resumen: lo sumado arriba; "sin elegir" y "no incluido" en un desplegable al final. */
-.trip-summary__empty{margin:0 0 4px;font-size:13px;line-height:1.4;color:var(--ink2)}
-.trip-summary__more{margin-top:6px;border-top:1px solid var(--line)}
-.trip-summary__more>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:11px 2px 9px;font-size:12px;font-weight:700;color:var(--ink2);border-radius:8px}
-.trip-summary__more>summary::-webkit-details-marker{display:none}
-.trip-summary__more>summary span{padding:1px 7px;border-radius:999px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--line);font-size:11px;font-weight:800}
-.trip-summary__more>summary::after{content:"";margin-left:auto;margin-right:4px;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s}
-.trip-summary__more[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
-.trip-summary__more>summary:hover{color:var(--ink)}.trip-summary__more>summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.trip-summary__items--more .trip-summary__item{padding-top:9px;padding-bottom:9px}
-@media (prefers-reduced-motion:reduce){.trip-summary__more>summary::after{transition:none}}
-
-/* Transfer privado sin precio para esta cantidad de personas: informativo, no se elige. */
-.transfer-choice--consultar{cursor:default;opacity:.85;border-style:dashed}.transfer-choice--consultar:hover{transform:none;border-color:var(--line)}
-
-/* ---------- Pulido de consistencia: hoteles y tours ----------
-   1) Un solo CTA primario: fondo --action-bg (amarillo) + texto --action-ink,
-      el mismo par que ya usaba .local-tour__info. "Ver disponibilidad" era el
-      unico boton con contorno y hacia que las dos secciones se leyeran distinto.
-   2) Tours siempre en una columna: la foto toma el ancho de la card y es la
-      protagonista (16:9 en vez de una franja de 170px).
-   3) Mismo padding interno (16px) en el cuerpo de hoteles y tours.
-   4) Aire debajo de "Ver mas tours" antes de "Personaliza tus costos diarios". */
-.hotel-booking{border:0;background:var(--action-bg);color:var(--action-ink);font-weight:800;min-height:44px;border-radius:12px}
-.hotel-booking:hover{background:var(--action-bg);color:var(--action-ink);filter:brightness(1.1)}
-.hotel-body{padding:16px 16px 0}
-.hotel-foot{padding:12px 16px 16px}
-.local-tours__grid{grid-template-columns:minmax(0,1fr);gap:16px}
-.local-tour__media{height:auto;aspect-ratio:16/9}
-.local-tour__media-plain{height:auto;aspect-ratio:16/9}
-.local-tour__body{padding:16px}
-.local-tour__info{min-height:44px;border-radius:12px}
-.local-tours{margin-bottom:32px}
-.local-tours__more{margin-top:18px;padding:6px 0}
-.local-tours + .detail-section,.plate-block + .daily-budget{margin-top:48px}
-
-/* Etiquetas sobre la foto. Hoteles: pastilla oscura con texto claro, discreta, sin
-   amarillo (el amarillo queda para CTAs y activos). Tours: misma pastilla arriba
-   a la izquierda de la foto, con un velo para que se lea sobre cualquier imagen. */
-.hotel-badge,.local-tour__tag{background:rgba(10,16,26,.78);color:#F4F6FA;border:1px solid rgba(255,255,255,.14);box-shadow:none}
-.local-tour__tag{position:absolute;z-index:1;top:12px;left:12px;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1.2;pointer-events:none}
-
-/* ---------- Tours compactos: miniatura a la izquierda, datos a la derecha ----------
-   Mobile primero: 104px de foto y el cuerpo al lado, sin descripcion (esta en el
-   detalle), asi entran dos tours en la primera pantalla. De 640px para arriba la
-   foto crece a 200px y vuelve la descripcion. */
-.local-tours__grid{gap:12px}
-.local-tour{display:grid;grid-template-columns:104px minmax(0,1fr);align-items:stretch}
-.local-tour__media,.local-tour__media-plain{height:auto;min-height:118px;aspect-ratio:auto}
-.local-tour__media img{position:absolute;inset:0;height:100%}
-.local-tour__media-plain .local-tour__ico{width:30px;height:30px}
-.local-tour__body{padding:10px 12px;gap:0}
-.local-tour__meta{gap:2px 10px;margin:0}
-.local-tour__chip{font-size:11px}
-.local-tour__meta .local-tour__chip:nth-child(n+3){display:none}
-.local-tour__title{margin:5px 0 0;font-size:16px;line-height:1.2}
-.local-tour__rating{margin:4px 0 0}
-.local-tour__description{display:none}
-.local-tour__foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:8px;border-top:0}
-.local-tour__price b{font-size:22px}
-:root:not([data-theme="light"]) .local-tour__price b{color:var(--action-bg)}
-.local-tour__from{font-size:9.5px}
-.local-tour__info{width:auto;min-height:36px;padding:0 12px;font-size:11px}
-.local-tour__tag{top:6px;left:6px;max-width:calc(100% - 12px);padding:3px 7px;font-size:10px}
-@media(min-width:640px){
-  .local-tour{grid-template-columns:200px minmax(0,1fr)}
-  .local-tour__body{padding:14px 16px}
-  .local-tour__title{font-size:19px}
-  .local-tour__description{display:-webkit-box;margin-top:6px}
-  .local-tour__meta .local-tour__chip:nth-child(n+3){display:inline-flex}
-  .local-tour__foot{padding-top:10px}
-  .local-tour__tag{top:10px;left:10px;font-size:11px}
-}
-.local-tours{margin-bottom:40px}
-/* Tarjeta de tour en celulares angostos (o con letra grande del sistema): el
-   pie ya no pelea precio y boton por la misma fila. Si no entran juntos, el
-   boton baja y ocupa todo el ancho, y la etiqueta de precio no se corta. */
-@media(max-width:639px){
-  .local-tour__foot{flex-wrap:wrap;align-items:flex-end;row-gap:8px}
-  .local-tour__price{flex:1 1 auto;min-width:max-content}
-  .local-tour__from{white-space:nowrap}
-  .local-tour__info{flex:1 1 auto;white-space:nowrap}
-}
-@media(max-width:380px){
-  .local-tour{grid-template-columns:88px minmax(0,1fr)}
-  .local-tour__body{padding:10px}
-}
-@media(max-width:340px){
-  .local-tour__from{white-space:normal}
-  .steps__btn{font-size:11px;padding:7px 2px;overflow-wrap:anywhere;hyphens:auto}
-}
-/* Cabecera en pantallas muy angostas: logo y botones pasan a dos filas en vez
-   de aplastarse, y los titulos largos parten palabra antes que ensanchar la
-   pagina. */
-@media(max-width:400px){.seg button{padding:12px 4px;font-size:13px}}
-@media(max-width:300px){.seg{gap:4px}.seg button{font-size:10.5px}}
-@media(max-width:340px){
-  .seg button{font-size:11.5px;padding:12px 2px}
-  .top{flex-wrap:wrap;row-gap:8px}
-  .account-actions{flex-wrap:wrap;justify-content:flex-end}
-  .account-button{white-space:nowrap}
-  h1{font-size:40px}
-  h2,h3{overflow-wrap:anywhere}
-}
-/* Modal de la experiencia: aire entre la grilla de datos, cada titulo de
-   seccion y la caja anterior, y relleno parejo en la caja de "Detalles". */
-.tour-detail-modal .tour-facts + .tour-detail-modal__h,.tour-detail-modal .tour-detail-modal__copy + .tour-detail-modal__h{margin-top:24px}
-.tour-detail-modal .tour-detail-modal__copy.tour-detail-modal__text{padding:14px}
-.hotel-ubic{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0;color:var(--ink2);font-size:12.5px;font-weight:600;line-height:1.4}
-
-.daily-budget__note{margin:-2px 0 12px;font-size:13px;line-height:1.45;color:var(--ink2)}.daily-budget__note b{color:var(--ink);font-weight:700}
-.daily-budget__option strong .daily-budget__unit{display:block;margin-top:5px;font-family:inherit;font-size:11px;font-weight:400;line-height:1.2;color:var(--ink2)}
-.daily-budget__option--custom .daily-budget__input-unit{font-family:inherit;font-size:11px;font-weight:400;color:var(--ink2)}
-.daily-budget__option--custom .daily-budget__input-wrap{flex-wrap:wrap;align-items:baseline}
-.daily-budget__option--custom .daily-budget__input-unit{flex-basis:100%;margin-top:5px;white-space:normal}
-
-/* Alojamientos por playa: una seccion por playa, 3 a la vista y "Ver mas". */
-.hotel-playas{display:grid;gap:40px}
-.hotel-playa{display:grid;gap:12px;min-width:0}
-.hotel-playa__head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.hotel-playa__title{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em;color:var(--ink);min-width:0}
-.hotel-playa__count{flex:none;padding:3px 9px;border-radius:999px;background:var(--cel-soft);color:var(--cel);font-size:11px;font-weight:800;white-space:nowrap}
-.hotel-playa__more[hidden]{display:none}
-.hotel-playa__toggle{width:100%;min-height:46px;padding:0 16px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
-.hotel-playa__toggle:hover,.hotel-playa__toggle:focus-visible{border-color:var(--cel);color:var(--cel)}
-@media(min-width:640px){.hotel-playa__toggle{width:auto;justify-self:center;padding:0 28px}}
-
-/* Resumen del presupuesto: menos ruido y texto mas legible en movil. */
-.voucher-split{margin:18px 0 6px;border:1px solid var(--line);background:transparent}
-.voucher-split.is-activo{background:transparent;border-color:var(--cel)}
-.voucher-split__text h3{font-size:14.5px}
-.voucher-split__text p{font-size:13px}
-.voucher-split__btn.is-main{background:transparent;color:var(--cel)}
-.voucher-split__btn.is-main:hover{background:var(--cel-soft);color:var(--ink);filter:none}
-.voucher-destino__title span,.voucher-destino__name em,.voucher-destino__dia,.voucher-destino__total span{font-size:13px}
-.voucher-destino__total span em{font-style:normal;font-weight:500;opacity:.8}
-.voucher-item__canal,.voucher-item__detail{font-size:12.5px}
-.voucher-item__amount.is-zero{font-size:13px;font-weight:600;color:var(--ink2)}
-/* El monto y el pill compartian fila con la flecha: en un panel de ~300px el
-   monto se partia ("R$" / "10.508") y el pill tambien. Ahora el pill va arriba,
-   el monto abajo en una sola linea y la flecha a la derecha, centrada. */
-.trip-summary__head{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"eb chev" "amt chev";align-items:center;row-gap:8px}
-.trip-summary__head .trip-summary__eyebrow{grid-area:eb;justify-self:start;white-space:nowrap}
-.trip-summary__head strong{grid-area:amt;white-space:nowrap;min-width:0}
-.trip-summary__head .trip-summary__chevron{grid-area:chev}
-.voucher-hero__figure .voucher-hero__pp{display:block;margin:6px 0 0;font-size:13.5px;font-weight:600}
-.voucher-split__btn--link{border-color:transparent;min-height:40px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
-/* Celular: el menu de destino y de segunda parada va fijo y con la zona visible
-   de la ventana (ver posicionarMenuFijo en app.js). Por encima de la barra
-   flotante "Mi Viaje" (z-index 90) y de los controles de la pagina. */
-@media (max-width:700px){
-  .custom-select.is-menu-fixed .custom-select__menu{position:fixed;right:auto;bottom:auto;z-index:200;margin:0;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
-}
-/* Celular: el rotulo "Alojamiento" arriba y los cuatro tipos en una grilla de 2x2.
-   En una fila con el rotulo, las pildoras quedaban en una columna angosta al lado
-   de la palabra y el filtro se veia roto. Con ancho completo caben de a dos. */
-@container hoteles (max-width:600px){
-  .hotel-type-picks{flex-direction:column;align-items:stretch;gap:8px;width:100%}
-  .hotel-type-pills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
-  .hotel-type-pill{width:100%;padding:0 10px}
-}
-
-/* ---- Pulido movil ---------------------------------------------------------
-   Respiro, botones secundarios parejos, etiquetas con padding, zonas tactiles
-   y carga visible. Todo en un bloque para poder verlo junto. */
-/* Fecha elegida: aire entre el calendario, la linea que confirma los dias y lo que sigue. */
-.date-range-limit{margin:18px 0 6px;padding:14px 8px 4px}
-/* "Ver mas" de hoteles por playa y de tours: mismo boton, mismo margen. */
-.hotel-playa__toggle,.local-tours__more{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;margin:16px 0 0;padding:0 16px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}
-.hotel-playa__toggle:hover,.hotel-playa__toggle:focus-visible,.local-tours__more:hover,.local-tours__more:focus-visible{border-color:var(--cel);color:var(--cel);outline:none}
-@media(min-width:640px){.hotel-playa__toggle,.local-tours__more{width:auto;min-width:220px;margin-left:auto;margin-right:auto;padding:0 28px}}
-/* Seccion de hoteles "Otras zonas": el titulo con emoji y el de las playas alineados igual. */
-.hotel-playa__title{display:flex;align-items:center;gap:8px}
-/* Etiquetas de estado de las propuestas: aire adentro y entre ellas. */
-.mini{padding:4px 12px}
-.mini.g,.mini.r{padding:5px 13px;line-height:1.35}
-.destination-card-tags,.proposal-tags{display:flex;flex-wrap:wrap;gap:6px 8px}
-/* + y - del reparto: 48px tambien en celular (antes una regla los bajaba a 38px). */
-.split-step,.split-adjust .split-step{width:48px;height:48px;font-size:24px;touch-action:manipulation}
-/* Botones que generan una imagen: spinner mientras trabajan. */
-@keyframes cs-spin{to{transform:rotate(360deg)}}
-.is-loading::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:cs-spin .7s linear infinite}
-.is-loading .voucher-btn__label::before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:cs-spin .7s linear infinite}
-.is-loading:has(.voucher-btn__label)::before{display:none}
-@media (prefers-reduced-motion:reduce){.is-loading::before,.is-loading .voucher-btn__label::before{animation-duration:2.4s}}
-/* Barra "Mi viaje": en celular deja aire abajo y la pagina deja espacio para que no tape lo ultimo. */
-@media (max-width:900px){.wrap{padding-bottom:calc(var(--reserva-alto, 96px) + env(safe-area-inset-bottom,0px))}}
-
-/* Escritorio: el panel "Mi viaje" es fijo a la derecha (360px + 20px de margen).
-   Con el contenido centrado en 760px, en pantallas de ~1100 a 1560px quedaba
-   justo debajo y tapaba el borde derecho de las tarjetas (el boton "Ver
-   disponibilidad"). Mientras el panel este visible, el contenido se corre a la
-   izquierda lo justo para no pisarlo; con mas ancho sigue centrado. */
-@media (min-width:901px){
-  body:has(#trip-summary:not([hidden])) .wrap{margin-left:max(20px,min(calc((100vw - 760px) / 2),calc(100vw - 1160px)));margin-right:auto}
-}
-
-/* Lupa en el campo Destino: avisa que se puede escribir para buscar. El campo ya
-   filtra la lista al tipear; sin la lupa parecia un valor fijo. */
-#dest .custom-select__control::before{content:"";flex:none;width:18px;height:18px;margin-left:16px;background-color:var(--control-muted);pointer-events:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") center/contain no-repeat}
-#dest .custom-select__trigger{padding-left:10px}
-
-
-/* ---- Propuesta en tres pasos -----------------------------------------------
-   Cada paso muestra solo lo suyo. El paso actual va en .detail-main[data-paso]:
-   1 Vuelo/Auto + Traslados, 2 Alojamiento (hotel), 3 Extras (tours, comida,
-   transporte local). El desglose "A donde va tu plata" no se oculta nunca y va
-   al final. Las pestañas .steps usan el visual de siempre (ver .steps__list). */
-.detail-main[data-paso="1"] :is(.proposal-breakdown,[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
-.detail-main[data-paso="2"] :is(.proposal-breakdown,[data-transport-flow],[data-tours-block],.local-tours,.daily-budget,.food-guide,.guia-lock){display:none !important}
-.detail-main[data-paso="3"] :is(.proposal-breakdown,.guia-lock,.food-guide,[data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel){display:none !important}
-
-.hotel-playas{gap:16px}
-.hotel-playa-filter{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
-.hotel-option[hidden]{display:none !important}
-
-.detail-main[data-paso="4"] :is([data-transport-flow],[data-hotels-block],.hotel-options,.multistay-panel,[data-tours-block],.local-tours,.daily-budget){display:none !important}
-.detail-main:not([data-paso="4"]) .confirm-step{display:none}
-.confirm-step{margin:0 0 22px}
-
-.tour-detail-modal__gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:12px 0 16px}
-.tour-detail-modal__gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:var(--cel-soft)}
-.tour-detail-modal__gallery.is-single{grid-template-columns:1fr}
-.tour-detail-modal__gallery.is-single img{aspect-ratio:16/9}
-
-/* Logos de medios de pago sobre una pastilla blanca pareja: los logos oficiales
-   son oscuros o de color y no se leen sobre el fondo oscuro de la tarjeta. */
-
-/* ---- Ficha de hotel vertical, estilo Booking -------------------------------
-   Foto arriba, nombre con el puntaje a la derecha, estrellas, zona, tipo de
-   habitacion, comidas y precio abajo con dos botones: Ver opciones (Booking) y
-   Seleccionar. Va al final para pisar el layout horizontal de arriba. */
-.hotel-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));align-items:stretch}
-.hotel-option{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto}
-.hotel-image-wrap{grid-column:1;grid-row:1;min-height:0;height:170px}
-.hotel-option__pick{grid-column:1;grid-row:2}
-.hotel-foot{grid-column:1;grid-row:3;flex-direction:column;align-items:stretch;padding:10px 14px 14px}
-.hotel-body{padding:12px 14px 0}
-.hotel-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.hotel-top .hotel-name{font-size:17px;flex:1 1 auto;min-width:0}
-.hotel-review{display:flex;align-items:flex-start;gap:6px;flex:none}
-.hotel-review__txt{display:grid;justify-items:end;line-height:1.2;text-align:right}
-.hotel-review__txt b{font-size:11px;font-weight:800;color:var(--ink)}
-.hotel-review__txt small{font-size:10.5px;color:var(--ink2);white-space:nowrap}
-.hotel-review__score{display:grid;place-items:center;min-width:34px;height:30px;padding:0 6px;border-radius:8px 8px 8px 2px;font-size:14px;font-weight:800;color:#fff;background:#3f9d44}
-.hotel-review__score.is-ok{background:#7a9a2e}
-.hotel-review__score.is-low{background:#b0883a}
-.hotel-stars{margin:4px 0 0;color:#f5b301;font-size:13px;letter-spacing:1px;line-height:1}
-.hotel-lines{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
-.hotel-line{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;line-height:1.35;color:var(--ink);font-weight:600}
-.hotel-line svg{flex:none;width:15px;height:15px;margin-top:1px}
-.hotel-line.is-good{color:#2f8a3a}
-.hotel-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 0}
-.hotel-actions .hotel-booking{background:transparent;color:var(--ink);border:1.5px solid var(--control-line);font-weight:700;font-size:13px;min-height:42px}
-.hotel-actions .hotel-booking:hover{border-color:var(--cel);color:var(--cel);filter:none}
-.hotel-select{display:grid;place-items:center;min-height:42px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-size:13px;font-weight:800;cursor:pointer;text-align:center}
-.hotel-select>span{grid-area:1/1}
-.hotel-select__on{visibility:hidden}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-select{background:transparent;color:#2f8a3a;border:1.5px solid #3f9d44}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-select__off{visibility:hidden}
-.hotel-option:has(.hotel-option__pick input:checked) .hotel-select__on{visibility:visible}
-.hotel-price__main b{font-size:22px}
-
-/* Etiquetas y diferencia de precio sobre la foto; modal de habitaciones. */
-.hotel-image-wrap{overflow:hidden}
-.hotel-tags{position:absolute;left:8px;top:8px;right:8px;z-index:2;display:flex;flex-wrap:wrap;gap:5px;pointer-events:none}
-.hotel-tag{padding:4px 9px;border-radius:99px;background:rgba(10,16,26,.78);color:#F4F6FA;border:1px solid rgba(255,255,255,.14);font-size:10.5px;font-weight:800;letter-spacing:.03em;line-height:1.2;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.hotel-tag.is-sel{background:#2f8a3a;border-color:#2f8a3a}
-.hotel-diff{position:absolute;right:8px;bottom:8px;z-index:2;display:grid;justify-items:center;padding:5px 10px;border-radius:10px;background:rgba(10,16,26,.78);color:#fff;line-height:1.15;pointer-events:none}
-.hotel-diff[hidden]{display:none}
-.hotel-diff b{font-size:15px;font-weight:800}
-.hotel-diff small{font-size:10px;opacity:.85}
-.hotel-diff.is-less b{color:#7be08a}
-.hotel-diff.is-more b{color:#ffb4a8}
-.rooms-modal{max-width:640px;width:calc(100% - 24px);max-height:88vh;overflow:auto}
-.rooms-modal__msg{margin:8px 0 12px;color:var(--ink2);font-size:13.5px}
-.rooms-modal__list{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:10px}
-.rooms-modal__room{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px;border:1.5px solid var(--line);border-radius:14px}
-.rooms-modal__room img,.rooms-modal__nophoto{width:96px;height:72px;border-radius:10px;object-fit:cover;background:var(--cel-soft);display:block}
-.rooms-modal__info{display:grid;gap:3px;min-width:0}
-.rooms-modal__info b{font-size:14px;color:var(--ink)}
-.rooms-modal__info small{font-size:12px;color:var(--ink2)}
-.rooms-modal__price{display:grid;justify-items:end;text-align:right}
-.rooms-modal__price b{font-size:17px;color:var(--ink)}
-.rooms-modal__price small{font-size:11px;color:var(--ink2)}
-.rooms-modal__book{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-weight:800;text-decoration:none}
-@media (max-width:520px){.rooms-modal__room{grid-template-columns:72px minmax(0,1fr)}.rooms-modal__room img,.rooms-modal__nophoto{width:72px;height:56px}.rooms-modal__price{grid-column:1/-1;justify-items:start;text-align:left}}
-
-/* El filtro por playa en una sola fila con scroll horizontal, no apilado. */
-.hotel-playa-filter{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-bottom:4px}
-.hotel-playa-filter .hotel-type-pill{width:auto;flex:none;padding:0 14px;white-space:nowrap}
-
-/* Selector Total / Por persona del presupuesto: chico y discreto, al lado de la etiqueta. */
-.bud-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 8px;margin-bottom:6px}
-.bud-head label{margin:0}
-.bud-mode{display:inline-flex;padding:2px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
-.bud-mode button{min-height:26px;padding:0 9px;border:0;border-radius:999px;background:transparent;color:var(--ink2);font:inherit;font-size:11px;font-weight:700;line-height:1;white-space:nowrap;cursor:pointer}
-.bud-mode button[aria-pressed="true"]{background:var(--selected-bg);color:var(--selected-ink)}
-.bud-mode button:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
-.bud-calc{display:block;margin-top:6px;color:var(--ink2);font-size:12px;line-height:1.35;grid-column:1/-1}
-
-/* Boton de cuenta: avatar circular (foto o inicial) + "Mi perfil". */
-.account-avatar--inicial{display:inline-grid;place-items:center;vertical-align:middle;background:rgba(10,16,26,.88);color:#fff;font-size:12px;font-weight:800;line-height:1;flex:none}
-
-/* ---- Busquedas recientes (Home) ---- */
-.recent-searches{margin:0 0 28px}
-.recent-searches[hidden]{display:none}
-.recent-searches__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
-.recent-searches__head h2{margin:0;font-size:20px}
-/* 36px era un area tactil por debajo del minimo, y este boton esta al lado de la
-   busqueda guardada: es el que se toca con el mismo dedo y al mismo tiempo que
-   la tarjeta. 44px visibles y 48 de area efectiva por el pseudo-elemento, como
-   el resto de los controles chicos. */
-.recent-searches__clear{border:0;background:transparent;color:var(--ink2);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;min-height:44px;padding:0 4px;position:relative}
-.recent-searches__clear::after{content:"";position:absolute;inset:-2px -6px}
-.recent-searches__list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.recent-search{width:100%;height:100%;display:grid;gap:4px;text-align:left;padding:14px 16px;border:1.5px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .18s ease,transform .18s ease}
-.recent-search:hover,.recent-search:focus-visible{border-color:var(--cel);transform:translateY(-1px);outline:none}
-.recent-search__dest{font-family:var(--fh);font-size:17px;font-weight:800;line-height:1.2}
-.recent-search__dates{font-size:13.5px;font-weight:600}
-.recent-search__meta{font-size:12px;color:var(--ink2)}
-.recent-search__go{margin-top:6px;font-size:13px;font-weight:800;color:var(--cel)}
-@media (max-width:600px){.recent-searches__list{display:flex;overflow-x:auto;gap:10px;scroll-snap-type:x proximity;padding-bottom:6px}.recent-searches__list>li{flex:0 0 72%;scroll-snap-align:start}}
-
-/* Pildora "tu viaje" de la cabecera: destino + fechas, o "Arma tu viaje". Misma
-   altura y radio que los botones de la cuenta, fondo oscuro y acento ambar. */
-.trip-pill{display:inline-flex;align-items:center;gap:7px;flex:0 1 auto;min-width:0;max-width:260px;min-height:38px;margin-left:auto;padding:0 14px;border:1px solid color-mix(in srgb,var(--cel) 40%,var(--line));border-radius:999px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;line-height:1;cursor:pointer;transition:background .16s ease,border-color .16s ease}
-.trip-pill svg{flex:0 0 auto;color:var(--cel)}
-.trip-pill span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.trip-pill:hover{background:var(--cel-soft);border-color:var(--cel)}
-.trip-pill:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.trip-pill[data-estado="vacio"]{color:var(--ink2);font-weight:600}
-.trip-pill + .account-actions{margin-left:0}
-@media(max-width:560px){
-  .top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;row-gap:10px}
-  .trip-pill{grid-column:1/-1;grid-row:2;max-width:none;justify-content:center;min-height:40px;margin:0}
-  .trip-pill + .account-actions{grid-row:1;grid-column:2}
-}
-@media(max-width:300px){
-  .top{grid-template-columns:minmax(0,1fr)}
-  .trip-pill + .account-actions{grid-row:2;grid-column:1;justify-content:flex-start}
-  .trip-pill{grid-row:3}
-}
-@media(max-width:340px){.bud-mode{max-width:100%}.bud-mode button{padding:0 6px;font-size:10.5px}}
-
-/* ---- Los dos filtros de hoteles, bien separados ----
-   Arriba la CATEGORIA (Economico, Equilibrado...): pastillas grandes.
-   Abajo la ZONA o PLAYA: chips chicos, de contorno, con su propia etiqueta. */
-.hotel-options-head{margin-bottom:12px}
-.hotel-zona{display:grid;gap:8px;margin:16px 0 14px;padding-top:14px;border-top:1px dashed var(--line)}
-.hotel-zona .hotel-type-picks__label{font-size:12px;letter-spacing:.04em;text-transform:uppercase}
-.hotel-playa-chip{flex:none;display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font:600 13px var(--fb,inherit);white-space:nowrap;cursor:pointer}
-.hotel-playa-chip:hover{border-color:var(--control-muted)}
-.hotel-playa-chip:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.hotel-playa-chip.is-on{border-color:var(--cel);background:var(--cel-soft);color:var(--ink);font-weight:800}
-.hotel-actions{grid-template-columns:1fr}
-
-/* Extras: pilar comercial. El boton para llegar al paso destaca sobre el resto
-   (mas alto, con brillo ambar) y la pestana pendiente lleva acento propio, para
-   que pese lo mismo que Vuelo y Alojamiento. */
-.steps__item--extras.is-pending .steps__btn{border-color:color-mix(in srgb,var(--cel) 55%,var(--line));background:var(--cel-soft)}
-.steps__item--extras.is-pending .steps__n{border-color:var(--cel);color:var(--cel)}
-
-/* Modal de habitaciones: cada una es una tarjeta que se toca para elegirla,
-   con el marco amarillo de "elegido" como el resto de la app. */
-.rooms-modal__room{grid-template-columns:96px minmax(0,1fr) auto;cursor:pointer;transition:border-color .18s ease,background .18s ease}
-.rooms-modal__room:hover{border-color:var(--card-sel-border)}
-.rooms-modal__room:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.rooms-modal__room.is-picked{border-color:var(--card-sel-border);background:var(--card-sel-bg);box-shadow:var(--card-sel-glow)}
-
-/* Extras: el boton de avance va al pie del contenido, en el flujo normal de la
-   pagina (sin barra pegada ni sombra flotante). La Guia Secreta y el desglose
-   viven en el paso 4, asi que aca no hay nada mas debajo. */
-.detail-main[data-paso="3"] .steps__foot{position:static;margin:24px 0 8px;padding:0;background:none}
-.detail-main[data-paso="3"] .steps__foot .steps__next{box-shadow:none}
-
-/* Estados de un rubro: ambar (en curso / pendiente de gestionar) y verde solo
-   para lo confirmado. Sin check ni tono de exito mientras no este cerrado. */
-.reserva-chip.is-wip{background:var(--cel-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cel) 40%,transparent);color:var(--cel)}
-.trip-summary__state.is-wip{background:var(--cel-soft);color:var(--cel);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cel) 40%,transparent)}
-.voucher-item__cta.is-reserved.is-solicitado{border-color:color-mix(in srgb,var(--cel) 55%,transparent);background:transparent;color:var(--cel)}
-.voucher-item__cta.is-reserved.is-solicitado:hover{border-color:var(--cel);background:var(--cel-soft);color:var(--cel)}
-
-/* Pie del resumen: barra de herramientas (Guardar, Compartir, Asesor), menu de
-   Compartir en linea y grupo colapsado. Misma linea sobria del modo oscuro. */
-.voucher-actions{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
-.voucher-actions>*{grid-column:1/-1}
-.voucher-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;position:static}
-.voucher-tools .voucher-chip{min-height:48px;width:100%;padding:0 8px;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--surface)}
-.voucher-tools .voucher-chip:hover{border-color:var(--cel)}
-.voucher-tools .voucher-chip--asesor .voucher-btn__label{white-space:normal;line-height:1.15;text-align:left;overflow:visible}
-.voucher-tools .voucher-share__menu{position:static;grid-column:1/-1;box-shadow:none;border:1px solid var(--line);background:var(--surface);margin:0}
-.voucher-grupo{border:1px solid var(--line);border-radius:14px;background:transparent}
-.voucher-grupo>summary{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;color:var(--ink2);font-size:13.5px;font-weight:600;cursor:pointer;list-style:none}
-.voucher-grupo>summary::-webkit-details-marker{display:none}
-.voucher-grupo>summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s ease}
-.voucher-grupo[open]>summary::after{transform:rotate(-135deg)}
-.voucher-grupo>summary .voucher-btn__ico{width:18px;height:18px;color:var(--cel)}
-.voucher-grupo>.voucher-split{margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 14px 14px;background:transparent}
-.voucher-tools .voucher-share__chev{width:14px;height:14px}
-@media (max-width:480px){.voucher-tools .voucher-share__chev{display:none}.voucher-tools .voucher-chip{padding:0 4px;gap:5px;font-size:12.5px}}
-@media (max-width:420px){.voucher-tools .voucher-chip{flex-direction:column;gap:3px;padding:6px 4px;font-size:12px}.voucher-tools .voucher-chip--asesor .voucher-btn__label{text-align:center}}
-
-/* ---- Pie del resumen y checkout: sin cortes ni scroll lateral ---------------
-   El dialogo scrollea solo en vertical, con alto medido en dvh (el vh de los
-   celulares incluye la barra del navegador y cortaba el pie), y deja 80px de
-   aire abajo para que los botones principales no queden pegados al borde.
-   Los menus de compartir salen en el flujo, dentro del dialogo, en vez de
-   flotar y quedar recortados. Todo lo de abajo se apila en una columna y puede
-   partir el texto, sin sobrepasar el ancho de la pantalla. */
-.booking-dialog{max-height:calc(100dvh - 24px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-.voucher-dialog{box-sizing:border-box;max-width:100%;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
-.voucher-dialog>*,.voucher-dialog :is(.voucher-split,.voucher-split__actions,.voucher-reserve,.voucher-actions,.voucher-tools,.voucher-share,.voucher-canales,.voucher-steps){min-width:0;max-width:100%;box-sizing:border-box}
-.voucher-dialog :is(button,a,input,.voucher-chip,.voucher-tile){max-width:100%;box-sizing:border-box}
-.voucher-dialog :is(.voucher-split__btn,.voucher-chip,.voucher-tile,.voucher-reserve__btn,.voucher-step__btn){white-space:normal;overflow-wrap:anywhere}
-.voucher-share__menu{position:static;margin-top:8px;box-shadow:none}
-@media (max-width:560px){
-  .booking-dialog{max-height:calc(100dvh - 8px)}
-  .voucher-dialog{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
-  .voucher-split__actions,.voucher-actions,.voucher-tools{grid-template-columns:minmax(0,1fr)}
-  .voucher-split__actions>*,.voucher-actions>*,.voucher-tools>*{grid-column:1/-1;width:100%}
-  .checkout-panel{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
-}
-@media (max-width:900px){
-  .checkout-dialog{max-height:calc(100dvh - 8px);overflow-x:hidden;overflow-y:auto}
-  .checkout-dialog :is(.checkout-layout,.checkout-main,.checkout-panel,.checkout-grid,.checkout-actions){min-width:0;max-width:100%}
-}
-
-/* ---- Micro-animacion del total y etiquetas de gestion ----------------------- */
-@keyframes total-bump{0%{transform:scale(1);text-shadow:0 0 0 transparent}35%{transform:scale(1.08);color:var(--cel);text-shadow:0 0 14px color-mix(in srgb,var(--cel) 55%,transparent)}100%{transform:scale(1);text-shadow:0 0 0 transparent}}
-.is-bump{display:inline-block;transform-origin:left center;animation:total-bump .7s ease-out}
-@media (prefers-reduced-motion:reduce){.is-bump{animation:none}}
-/* Dos etiquetas y nada mas: externo (tercero) en tono neutro, plataforma en ambar. */
-.voucher-item__canal.is-externo{color:var(--ink2)}
-.voucher-item__canal.is-plataforma{color:var(--cel);font-weight:600}
-
-/* ---- Gastos en destino: mas aire y columnas alineadas ----------------------- */
-.voucher-destino{margin-top:24px;padding-top:20px}
-.voucher-destino__title{margin-bottom:10px;row-gap:4px}
-.voucher-destino__title span{display:block}
-.voucher-destino__list li{grid-template-columns:minmax(0,1fr) 92px 100px;column-gap:16px;padding:16px 0;align-items:center}
-.voucher-destino__dia,.voucher-destino__monto,.voucher-destino__list b{text-align:right;font-variant-numeric:tabular-nums;min-width:0}
-.voucher-destino__monto,.voucher-destino__list b{font-size:16px}
-.voucher-destino__total{margin-top:8px;padding-top:16px}
-.voucher-destino__total b{min-width:100px;font-size:20px}
-@media (max-width:560px){.voucher-destino__list li{grid-template-columns:minmax(0,1fr) 78px 84px;column-gap:10px;padding:14px 0}}
-
-/* Costos previos vs gastos en destino: cada bloque con su encabezado y su monto. */
-.voucher-bloque{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:22px 0 6px;padding-bottom:10px;border-bottom:2px solid var(--ink2)}
-.voucher-bloque__title{display:grid;gap:2px;margin:0;font-size:15px;line-height:1.2}
-.voucher-bloque__title span{color:var(--ink2);font-size:12.5px;font-weight:500}
-.voucher-bloque__monto{font-family:var(--fh);font-size:20px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.voucher-destino{border-top:2px solid var(--ink2)}
-.voucher-destino__aviso{display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;color:var(--ink2);font-size:12.5px;line-height:1.45}
-.voucher-destino__aviso span{flex:0 0 auto;display:inline-grid;place-items:center;width:18px;height:18px;margin-top:1px;border:1.5px solid var(--ink2);border-radius:50%;font-size:11px;font-weight:800;font-style:italic;font-family:Georgia,serif}
-
-/* ---- Acabado: contraste, radios y alineacion de iconos -----------------------
-   Contraste: el gris secundario (--ink2) ya da ~12:1 sobre el fondo oscuro, pero
-   varios textos chicos lo bajaban con opacity y quedaban apagados. Sin opacity,
-   y --ink2 un punto mas claro, para que los subtitulos se lean con el sol.
-   Radios: una escala de tres: 12px controles y botones, 16px tarjetas y
-   contenedores, 24px dialogos. Las pastillas (99/999px) no se tocan.
-   Alineacion: todo boton con icono es inline-flex centrado y el icono no se
-   encoge ni baja de la linea. */
-:root,:root[data-theme="light"]{--r-control:12px;--r-card:16px;--r-dialog:24px}
-.voucher-canales,.voucher-step__hint,.bus-co__note,.flight-summary-line.is-muted .flight-summary-tag{opacity:1}
-.daily-budget__option--custom .daily-budget__input-wrap input::placeholder{opacity:1}
-:is(.voucher-chip,.voucher-tile,.voucher-step__btn,.voucher-item__cta,.voucher-split__btn,.steps__next,.hotel-booking,.checkout-btn,.split-btn,.voucher-reserve__btn,.trip-summary__save,.trip-summary__head,.voucher-share__menu button){border-radius:var(--r-control)}
-:is(.hotel-option,.local-tour,.voucher-split,.steps,.steps__btn,.proposal-breakdown,.transfer-choice,.detail-summary,.saved-trip,.split-adjust,.voucher-item:has(.is-elegir)){border-radius:var(--r-card)}
-.booking-dialog{border-radius:var(--r-dialog)}
-@media (max-width:560px){.booking-dialog{border-radius:var(--r-dialog) var(--r-dialog) 0 0}}
-:is(.voucher-chip,.voucher-tile,.voucher-step__btn,.voucher-item__cta,.voucher-split__btn,.steps__next,.hotel-booking,.checkout-btn,.split-btn,.voucher-reserve__btn,.trip-summary__save,.voucher-share__menu button){display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.2}
-.voucher-share__menu button{justify-content:flex-start}
-:is(.voucher-chip,.voucher-tile,.voucher-share__menu button,.voucher-reserve__btn,.steps__next) :is(svg,.voucher-btn__ico){flex:0 0 auto;display:block}
-:is(.voucher-chip,.voucher-tile,.voucher-share__menu button) .voucher-btn__label{display:inline-block;line-height:1.2}
-
-/* Selectores nativos (calendario, listas) siguen el tema: oscuros en modo oscuro. */
-:root:not([data-theme="light"]) :is(input,select,textarea){color-scheme:dark}
-:root[data-theme="light"] :is(input,select,textarea){color-scheme:light}
-:root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.8);cursor:pointer}
-
-/* ---- Banner de la Guia Secreta (paso 4) -------------------------------------- */
-.guia-banner{width:100%;margin:18px 0 0;box-sizing:border-box;color:var(--ink);overflow:hidden;border:1.5px solid color-mix(in srgb,var(--cel) 60%,transparent);border-radius:var(--r-card,16px);background:linear-gradient(135deg,color-mix(in srgb,var(--cel) 16%,var(--surface)),var(--surface) 70%);box-shadow:0 10px 28px rgba(0,0,0,.25)}
-.guia-banner:hover{border-color:var(--cel)}
-.guia-banner__head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;padding:16px 18px;box-sizing:border-box;border:0;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer}
-.guia-banner__more{padding:0 18px 18px 78px}
-.guia-banner__more p{margin:0;padding-top:12px;border-top:1px solid var(--line);color:var(--ink2);font-size:13px;line-height:1.55}
-.guia-banner__arrow{display:inline-block;transition:transform .2s ease}
-.guia-banner.is-desplegada .guia-banner__arrow{transform:rotate(180deg)}
-.guia-banner__head:focus-visible{outline:3px solid var(--focus);outline-offset:-3px;border-radius:var(--r-card,16px)}
-.guia-banner__icon{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--cel);color:var(--cel-ink,#0A101A)}
-.guia-banner__icon svg{width:24px;height:24px;display:block}
-.guia-banner.is-abierta .guia-banner__icon .guia-lock__shackle{transform:translateY(-5px) rotate(-25deg)}
-.guia-banner__text{display:grid;gap:3px;min-width:0}
-.guia-banner__text em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cel)}
-.guia-banner__text b{font-family:var(--fh);font-size:17px;line-height:1.2}
-.guia-banner__text small{color:var(--ink2);font-size:13px;line-height:1.4}
-.guia-banner__cta{white-space:nowrap;font-size:13px;font-weight:800;color:var(--cel)}
-@media (max-width:560px){.guia-banner__head{grid-template-columns:auto minmax(0,1fr);padding:14px}.guia-banner__cta{grid-column:1/-1}.guia-banner__more{padding:0 14px 16px}}
-
-/* ---- Barra de pasos pegajosa ----
-   La propuesta (titulo y total grande) se va con el scroll de forma natural;
-   solo la barra de pasos queda fija arriba y, al pegarse, se reduce a una tira
-   de unos 52px con el total resumido y los cuatro pasos en miniatura. Son dos
-   bloques independientes: no hay un contenedor gigante pegado. */
-.detail-head__sentinel{height:1px;margin-bottom:-1px;pointer-events:none}
-.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:40}
-.steps__mini-total{display:none}
-.steps.is-compact{display:flex;align-items:center;gap:10px;max-height:60px;padding:6px 10px;border-radius:0 0 14px 14px;box-shadow:0 6px 18px rgba(0,0,0,.28)}
-.steps.is-compact .steps__mini-total:not(:empty){display:block;flex:none;font-family:var(--fh);font-size:18px;font-weight:800;line-height:1;color:var(--action-bg);white-space:nowrap}
-:root[data-theme="light"] .steps.is-compact .steps__mini-total{color:var(--ink)}
-.steps.is-compact .steps__progress,.steps.is-compact .steps__pct,.steps.is-compact .steps__t{display:none}
-.steps.is-compact .steps__list{display:flex;gap:6px;margin-left:auto}
-.steps.is-compact .steps__btn{width:40px;min-width:40px;height:40px;min-height:40px;padding:0;gap:0;justify-content:center;border-width:1px;border-radius:50%}
-.steps.is-compact .steps__n{margin:0}
-
-/* ---- Toast de guardado / enlace copiado -------------------------------------- */
-.cs-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:400;display:flex;align-items:center;gap:12px;max-width:min(92vw,420px);padding:12px 16px;border:1px solid color-mix(in srgb,var(--cel) 55%,transparent);border-radius:var(--r-card,16px);background:var(--surface);color:var(--ink);box-shadow:0 14px 40px rgba(0,0,0,.45);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
-.cs-toast.is-visible{opacity:1;transform:translate(-50%,0)}
-.cs-toast__ico{flex:0 0 auto;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--cel);color:var(--cel-ink,#0A101A);font-size:15px;font-weight:800}
-.cs-toast.is-error{border-color:var(--coral)}
-.cs-toast.is-error .cs-toast__ico{background:var(--coral);color:#0A101A}
-.cs-toast__txt{display:grid;gap:2px;min-width:0}
-.cs-toast__txt b{font-size:14px;line-height:1.25}
-.cs-toast__txt small{color:var(--ink2);font-size:12.5px;line-height:1.35}
-@media (prefers-reduced-motion:reduce){.cs-toast{transition:none}}
-
-/* ======================================================================
-   Capa de uniformidad (geometria, areas tactiles y seleccion)
-   Va al final a proposito: normaliza lo que se definio suelto arriba.
-   - Escala de espacios: multiplos de 4 (4, 8, 12, 16, 24).
-   - Todo lo que se toca mide al menos 48px de alto (--tap).
-   - Botones de accion y pestanas de pasos: mismo radio (--btn-r) y mismo
-     padding horizontal (--btn-px). Las pastillas/filtros siguen redondas
-     porque son otro tipo de control.
-   - Seleccion: borde de 2px en el color de seleccion, en toda la plataforma;
-     lo no seleccionado, 1.5px.
-   ====================================================================== */
-:root{--tap:48px;--btn-r:12px;--btn-px:16px;--bw:1.5px;--bw-on:2px}
-
-/* Acciones (principales y secundarias) */
-.btn-buscar-todos,.btn-ver-propuesta,.steps__next,.local-tour__info,.hotel-booking,.hotel-playa__toggle,.local-tours__more,.voucher-item__cta,.voucher-split__btn,.btn,.account-button,#btn-volver,.checkout-btn,.trip-summary__cta,.trip-summary__save,.hotel-select,.rooms-modal__btn{
-  min-height:var(--tap) !important;height:auto;border-radius:var(--btn-r) !important;padding-left:var(--btn-px);padding-right:var(--btn-px);box-sizing:border-box}
-.opt__disclosure{min-height:var(--tap)}
-
-/* Cabecera: los cuatro controles a la misma altura */
-.logo,.currency-badge,.trip-pill,.account-button{min-height:var(--tap)}
-.theme-toggle{width:var(--tap);height:var(--tap);border-radius:var(--btn-r)}
-.booking-close{width:var(--tap);height:var(--tap)}
-
-/* Pestanas de pasos: mismo alto entre si, mismo radio que los botones */
-.steps__btn{min-height:56px;border-radius:var(--btn-r);border-width:var(--bw)}
-.steps__list{gap:8px}
-@media(max-width:560px){.steps__list{gap:8px}.steps__btn{min-height:56px}}
-
-/* Pastillas y filtros: 48px de area tactil */
-.hotel-type-pill,.hotel-playa-chip,.seg button,.filters button,[data-filter] {min-height:var(--tap)}
-.hotel-playa-chip{border-radius:999px}
-/* El selector Total / Por persona es chico a la vista, pero su toque llega a 48px */
-.bud-mode button{position:relative}
-.bud-mode button::after{content:"";position:absolute;inset:-12px -4px}
-/* La barra de pasos compacta achica el rectangulo visible (40px, y 34px por
-   debajo de 360px) para que los 4 pasos entren en una pantalla chica. El area
-   TACTIL se mantiene en 48px con el mismo truco que .bud-mode: un
-   pseudo-elemento centrado de 48x48 que se sale del boton pero no se ve. Sin
-   esto el boton era de 40/34 de verdad, por debajo del minimo, y el comentario
-   de arriba decia 48px: el numero y la promesa no coincidian y no se notaba
-   porque "se ve bien". */
-.steps.is-compact .steps__btn{position:relative}
-.steps.is-compact .steps__btn::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px}
-/* Filas tocables del desglose y resumenes desplegables */
-.proposal-breakdown__row.is-jumpable{min-height:var(--tap)}
-summary{min-height:var(--tap);display:flex;align-items:center}
-summary::-webkit-details-marker{display:none}
-/* Barra de pasos compacta (al hacer scroll): 4 toques de 48px */
-.steps.is-compact .steps__btn{min-height:40px;min-width:40px}
-
-/* Seleccion: mismo grosor y color en toda la plataforma */
-.steps__item.is-current .steps__btn,.seg button[aria-pressed="true"],.hotel-type-pill.is-on,.hotel-playa-chip.is-on{border-width:var(--bw-on);border-color:var(--card-sel-border,var(--cel))}
-.seg button,.hotel-type-pill,.hotel-playa-chip{border-width:var(--bw)}
-
-/* Espacios: contenedor de pasos y barra inferior en la escala de 4 */
-.steps{padding:12px;margin-bottom:24px}
-@media(max-width:560px){.steps{padding:8px}}
-.steps__next{margin-top:12px}
-.steps__foot{padding:12px 4px calc(12px + env(safe-area-inset-bottom,0px))}
-@media(max-width:900px){.trip-summary{padding:12px}.trip-summary__details{margin-top:8px}}
-
-/* Zona segura inferior: el contenido de los modales y de los pasos no queda
-   debajo de la barra del navegador ni del indicador del sistema. */
-.booking-dialog{padding-bottom:max(24px,calc(16px + env(safe-area-inset-bottom,0px)))}
-.checkout-actions{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
-.wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
-
-.flight-filters button{min-height:var(--tap);border-width:var(--bw)}
-.flight-filters button[aria-pressed="true"]{border-width:var(--bw-on);border-color:var(--card-sel-border,var(--cel))}
-.logo{min-height:var(--tap) !important}
-
-/* Estados de carga de los botones de accion. */
-.btn-spinner{display:inline-block;flex:none;width:14px;height:14px;margin-right:8px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:btn-spin .7s linear infinite;vertical-align:-2px}
-@keyframes btn-spin{to{transform:rotate(360deg)}}
-.is-loading{opacity:.9;cursor:progress;pointer-events:none}
-.is-loading:disabled{opacity:.9}
-@media (prefers-reduced-motion:reduce){.btn-spinner{animation-duration:2.4s}}
-
-/* Fila Viajeros / Presupuesto: el encabezado del presupuesto lleva la pastilla
-   Total / Por persona y es mas alto que la etiqueta de Viajeros, asi que el
-   campo de plata quedaba mas abajo que el contador. Los dos encabezados miden
-   lo mismo y van centrados, y los campos arrancan a la misma altura. */
-.row2>div>.lbl,.row2>div>.bud-head{display:flex;align-items:center;min-height:32px;margin-bottom:6px}
-.row2>div>.bud-head{justify-content:space-between}
-
-/* ---- Errores amables con reintento ---- */
-.error-block{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start;margin:12px 0;padding:16px;border:1px solid color-mix(in srgb,var(--coral) 45%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--coral) 9%,var(--surface))}
-.error-block__ico{width:26px;height:26px;margin-top:2px;color:var(--coral)}
-.error-block__body h3{margin:0 0 4px;font-size:16px;color:var(--ink)}
-.error-block__body p{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink2)}
-.error-block__retry{grid-column:1/-1;justify-self:start;min-height:44px;margin-top:10px;padding:0 20px;border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
-.error-block__retry:hover{filter:brightness(1.08)}
-.error-block__retry:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-
-/* Esqueletos y transiciones. */
-.rooms-skel{display:grid;gap:10px}
-.rooms-skel__row{height:92px;border-radius:14px;background:linear-gradient(90deg,var(--bg) 25%,rgba(122,148,176,.16) 50%,var(--bg) 75%);background-size:200% 100%;animation:loadingShimmer 1.2s ease-in-out infinite}
-.hotel-skeleton-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr))}
-.hotel-skeleton-card{height:360px}
-@keyframes paso-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.detail-main.paso-anim>*:not(.detail-head):not(.detail-head__sentinel){animation:paso-fade .22s ease both}
-@media (prefers-reduced-motion:reduce){.detail-main.paso-anim>*{animation:none}.rooms-skel__row{animation:none}}
-
-/* Presupuesto en celular: Viajeros arriba a todo el ancho y debajo el bloque
-   de presupuesto en columna: titulo, cifra grande centrada y el selector
-   Total / Por persona a todo el ancho (botones de 48px). En escritorio el
-   selector sigue al lado de la etiqueta. */
-@media(max-width:560px){
-  .wrap{padding-left:16px;padding-right:16px}
-  .panel{padding:20px 16px}
-  .row2{grid-template-columns:minmax(0,1fr);gap:20px}
-  .row2>div>.lbl{min-height:0;margin-bottom:8px}
-  .row2 > .bud-field{display:flex;flex-direction:column;align-items:stretch;min-width:0}
-  .row2 > .bud-field > .bud-head{display:contents}
-  .bud-field .bud-head label{order:1;display:block;min-height:0;margin:0 0 8px;text-align:center}
-  .bud-field .money{order:2}
-  .bud-field .money span{left:16px;font-size:18px}
-  .bud-field .money .inp{height:64px;padding:0 16px 0 64px;font-size:28px;font-weight:700;text-align:center}
-  .bud-field .bud-mode{order:3;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;max-width:none;margin-top:12px;padding:4px;border-radius:var(--btn-r);box-sizing:border-box}
-  .bud-field .bud-mode button{min-height:48px;padding:0 8px;border-radius:calc(var(--btn-r) - 4px);font-size:14px}
-  .bud-field .bud-mode button::after{content:none}
-  .bud-field .bud-calc{order:4;margin-top:10px;text-align:center}
-}
-
-/* Tarjeta de tour en celular: la foto toma ~42% del ancho (antes 104px, una
-   tira angosta), la bajada de la seccion ("3 experiencias · desde ...") deja
-   aire arriba y el pie apila precio y boton alineados a la izquierda del cuerpo,
-   con el boton del ancho del texto y no estirado de borde a borde de la fila. */
-@media(max-width:639px){
-  .plate-block[data-tours-block]{margin-top:36px;padding-top:28px}
-  .plate-block[data-tours-block] > .block-sub{margin:4px 0 16px;padding:0 2px;line-height:1.5}
-  .local-tours{padding:14px}
-  .local-tour{grid-template-columns:42% minmax(0,1fr)}
-  .local-tour__media,.local-tour__media-plain{min-height:150px}
-  .local-tour__body{padding:14px 14px 14px 16px}
-  .local-tour__title{margin:6px 0 0;font-size:17px}
-  .local-tour__foot{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:10px;padding-top:10px}
-  .local-tour__price{flex:0 0 auto;min-width:0}
-  .local-tour__info{flex:0 0 auto;width:100%;max-width:200px;min-height:40px;justify-content:center;text-align:center}
-}
-
-/* Area segura superior: el padding vive en body (antes solo estaba en el
-   tema oscuro) para que el header no quede bajo la barra de estado / notch en
-   ningun tema. Ademas, un piso de 16px sobre el logo en celular. */
-
-/* Android (Huawei, Motorola): env(safe-area-inset-top) suele valer 0 aunque la
-   barra de estado tape la pagina (app instalada / pantalla completa). En ese
-   modo se reserva un piso de 28px arriba, sin tocar la vista en navegador. */
-@media(display-mode:standalone),(display-mode:fullscreen),(display-mode:minimal-ui){
-  body{padding-top:max(env(safe-area-inset-top,0px),28px)}
-}
-
-/* Filtros de vuelos: la etiqueta (Escalas / Horario de salida) va sola arriba y
-   las cuatro opciones debajo en una grilla pareja (2x2 en celular, 4 en una
-   fila desde 560px), todas del mismo ancho y alto. Antes compartian linea con
-   la etiqueta y se escalonaban al cortar. */
-.flight-filters{gap:18px}
-.flight-filters > div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:stretch}
-.flight-filters b{grid-column:1 / -1;margin:0 0 2px;font-size:13px;letter-spacing:.02em}
-.flight-filters button{width:100%;min-width:0;padding:0 8px;justify-content:center;text-align:center;white-space:nowrap;font-size:13.5px}
-@media(min-width:560px){.flight-filters > div{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:340px){.flight-filters button{font-size:12.5px;padding:0 4px}}
-
-/* ---- Estados vacios y de carga ----
-   Antes eran una linea de texto gris pegada al borde de la tarjeta. Ahora cada
-   uno es un bloque con aire, borde punteado y texto centrado que parte
-   palabras largas en vez de tocar los bordes; y los de carga llevan un
-   spinner para que se note que la app sigue trabajando. */
-.flight-empty,.hotel-group__empty,.trip-summary__empty,.rooms-modal__msg,.flight-loading{
-  display:block;box-sizing:border-box;max-width:100%;margin:12px 0;padding:18px 16px;border:1.5px dashed var(--line);border-radius:14px;
-  background:color-mix(in srgb,var(--surface) 70%,transparent);color:var(--ink2);font-size:14px;line-height:1.55;text-align:center;overflow-wrap:anywhere}
-.flight-empty > p{margin:0 0 12px}
-.flight-empty > p:last-child{margin-bottom:0}
-.flight-empty .btn{margin-top:4px}
-.loading-status,.flight-loading,.rooms-modal__msg:has(+ .rooms-skel){display:flex;align-items:center;justify-content:center;gap:10px;text-align:center}
-.loading-status::before,.flight-loading::before,.rooms-modal__msg:has(+ .rooms-skel)::before{content:"";flex:none;width:16px;height:16px;border:2.5px solid var(--line);border-top-color:var(--cel);border-radius:50%;animation:btn-spin .8s linear infinite}
-.loading-status{padding:4px 0 2px;font-size:14px}
-@media (prefers-reduced-motion:reduce){.loading-status::before,.flight-loading::before,.rooms-modal__msg:has(+ .rooms-skel)::before{animation-duration:2.4s}}
-
-/* ---- Areas tactiles: 48px minimo ----
-   Los filtros y selectores chicos mantienen su aspecto pero miden 48px de alto
-   (o ganan un area invisible que llega a 48px) para acertar con el dedo. */
-.hotel-type-pill,.hotel-playa-chip,.featured-month,.seg button,.flight-filters button,.hotel-booking,.hotel-select,.voucher-step__btn,.voucher-split__link,.voucher-split__btn--link,.roadtrip-vtab,.trip-summary__head,.voucher-share__menu button{min-height:48px}
-.local-tour__info{min-height:48px}
-.bud-mode button,.steps.is-compact .steps__btn{position:relative}
-.bud-mode button::after,.steps.is-compact .steps__btn::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:48px;transform:translateY(-50%)}
-.steps.is-compact .steps__btn{min-width:44px;min-height:44px}
-
-/* Header en celular: UNA sola linea de 56px (mas la zona segura, que la pone el
-   padding-top del body con env(safe-area-inset-top)). Logo a la izquierda; a la
-   derecha, iconos compactos: moneda, tema, Mis viajes y cuenta. Los textos de
-   "Mis viajes" y de la cuenta pasan a icono (font-size:0 + mascara); siguen
-   siendo botones con aria-label. La pildora "tu viaje" solo aparece, en una
-   fila fina debajo, cuando hay una propuesta abierta. */
-@media(max-width:560px){
-  .top{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:0 8px;height:56px;min-height:56px;max-height:56px}
-  .account-actions{display:flex;align-items:center;gap:4px;margin-left:auto;flex:0 0 auto;min-width:0}
-  .top .logo{order:1;flex:0 1 auto;min-width:0;overflow:visible;font-size:19px;gap:7px}
-  .top .logo svg{width:20px;height:25px}
-  .top .account-actions{order:2}
-  .top::after{content:none}
-  #currency-picker-slot{order:0;flex:0 0 auto}
-  .top .currency-badge{min-width:52px;padding:0 4px}
-  .top .theme-toggle{order:0;width:44px;height:var(--tap)}
-  #trips-button,#auth-button{flex:0 0 auto;width:44px;min-width:44px;max-width:none;height:var(--tap);padding:0;font-size:0;gap:0;overflow:hidden}
-  #trips-button::before,#auth-button:not(:has(.account-avatar))::before{content:"";display:block;width:22px;height:22px;background:currentColor;-webkit-mask:var(--ico) center/contain no-repeat;mask:var(--ico) center/contain no-repeat}
-  #trips-button{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='7' width='20' height='14' rx='2'/%3E%3Cpath d='M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16'/%3E%3C/svg%3E")}
-  #auth-button{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E")}
-  #auth-button .account-avatar{width:32px;height:32px;margin:0;font-size:14px}
-  /* Pildora: oculta sin viaje (el formulario esta justo debajo); con viaje, fila fina */
-  .top .trip-pill{order:3;flex:1 1 100%;max-width:none;margin:0 0 8px;justify-content:center;min-height:40px}
-  .top .trip-pill,.top .trip-pill[data-estado="vacio"]{display:none}
-}
-/* Con cuenta iniciada hay cuatro iconos: en <=400px se compactan para que entren
-   en una sola linea junto al logo. */
-@media(max-width:400px){
-  .top{gap:0 4px}
-  .top .logo{font-size:17px;gap:5px}
-  .top .logo svg{width:18px;height:22px}
-  .top .currency-badge{min-width:44px;padding:0 2px}
-  .top .theme-toggle,#trips-button,#auth-button{width:40px;min-width:40px}
-  #auth-button .account-avatar{width:28px;height:28px}
-  .account-actions{gap:2px}
-}
-#trips-button{order:1}
-#auth-button{order:2}
-
-/* Barra de pasos: sticky puro de CSS, pegada arriba y por debajo del notch
-   (env(safe-area-inset-top)). Ningun ancestro tiene overflow/transform/contain,
-   asi que el scroll es solo el del documento. */
-.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:40}
-
-/* Los carruseles y el grafico de barras solo scrollean en horizontal. Con
-   overflow-x:auto el eje Y pasa a "auto" por defecto y cada uno queda como un
-   contenedor de scroll vertical (vacio) que compite con el de la pagina cuando
-   el dedo empieza el gesto encima. */
-.chart,.featured-months,.destination-highlights__carousel,.recent-searches__list{overflow-y:hidden}
-
-/* Aviso "estas cerquisima": el texto va en UN bloque (antes cada trozo de texto
-   era un item flex propio y, con overflow-wrap:anywhere + hyphens:auto, se
-   apretaba a unos pocos px y se partia por silabas). */
-.transfer-advice{overflow-wrap:normal;hyphens:manual;word-break:normal}
-.transfer-advice__txt{flex:1 1 0;min-width:0;overflow-wrap:break-word;hyphens:manual}
-
-/* Header de UNA sola linea en celular: la pildora "tu viaje" ya no baja a una
-   segunda fila (el resumen "Mi viaje" sigue accesible desde su panel flotante)
-   y la barra de pasos no se compacta por JS: es sticky puro y mantiene su alto,
-   asi nada cambia de tamano mientras se scrollea. */
-/* En pantallas muy chicas con cuenta iniciada (cuatro iconos) el logo queda solo
-   con el isotipo para no cortarse. */
-@media(max-width:320px){.top:has(#trips-button:not([hidden])) .logo{font-size:0;gap:0}.top:has(#trips-button:not([hidden])) .logo svg{width:22px;height:28px}}
-
-/* Traslados ida / vuelta: cada tramo es su propia tarjeta, con separacion
-   marcada, un encabezado grande con flecha y color propio (ida = azul, vuelta =
-   ambar) y el precio de cada opcion separado del texto por una linea, para que
-   "por persona" / "por vehiculo" no se mezcle con el tramo de abajo. */
-.transfer-leg{--leg:var(--cel);--leg-soft:var(--cel-soft);margin:0 0 24px;padding:0 0 16px;border:1.5px solid var(--line);border-top:4px solid var(--leg);border-radius:18px;background:var(--surface);overflow:hidden}
-.transfer-leg:last-of-type{margin-bottom:0;padding-bottom:16px;border-bottom:1.5px solid var(--line)}
-.transfer-leg--vuelta{--leg:#F0A92A;--leg-soft:color-mix(in srgb,#F0A92A 16%,transparent)}
-.transfer-leg > :not(.transfer-leg__head){margin-left:14px;margin-right:14px}
-.transfer-leg__head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0 0 14px;padding:14px;background:var(--leg-soft)}
-.transfer-leg__head strong{flex:1 1 180px;min-width:0;font-size:17px;font-weight:800;line-height:1.25}
-.transfer-leg__badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;background:var(--leg);color:#fff;font-size:12px;letter-spacing:.05em}
-.transfer-leg--vuelta .transfer-leg__badge{color:#1a1204}
-.transfer-leg--ida .transfer-leg__badge::before{content:"\2794";font-size:14px;line-height:1}
-.transfer-leg--vuelta .transfer-leg__badge::before{content:"\2B05";font-size:14px;line-height:1}
-.transfer-leg .transfer-choice-grid{gap:12px}
-.transfer-leg .transfer-choice__price{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line)}
-@media(max-width:560px){
-  .transfer-leg .transfer-choice-grid{grid-template-columns:minmax(0,1fr)}
-  .transfer-leg__head strong{flex-basis:100%}
-}
-
-/* Fluidez al scrollear: las tarjetas de tours fuera de pantalla no se pintan ni
-   se miden hasta que se acercan (content-visibility), con un alto estimado para
-   que la barra de scroll no salte. Sin JS. */
-.local-tour{content-visibility:auto;contain-intrinsic-size:auto 160px}
-@media(prefers-reduced-motion:reduce){.skeleton,.rooms-skel__row,.hotel-skeleton-card{animation:none}}
-
-/* Mis viajes: tarjetas limpias. Arriba destino y fechas, el total bien visible,
-   "Cargar viaje" como accion principal a todo el ancho y, abajo, una barra
-   discreta con las acciones secundarias (actualizar precio / eliminar). */
-.saved-trips{display:grid;gap:16px;margin:16px 0}
-.saved-trip{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:14px;align-items:start;padding:16px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:var(--surface);box-shadow:0 2px 10px rgba(0,0,0,.12)}
-.saved-trip>div{display:block;flex:none;min-width:0}
-.saved-trip__dest{margin:0;font-family:var(--fh);font-size:20px;line-height:1.2;color:var(--ink);overflow-wrap:anywhere}
-.saved-trip__fechas{margin:4px 0 0;color:var(--ink2);font-size:13px;line-height:1.4}
-.saved-trip__menu-wrap{position:relative;margin:-6px -8px 0 0}
-.saved-trip__menu{display:grid;place-items:center;width:var(--tap,44px);height:var(--tap,44px);padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink2);cursor:pointer}
-.saved-trip__menu:hover,.saved-trip__menu[aria-expanded="true"]{background:var(--cel-soft);color:var(--ink)}
-.saved-trip__popover{position:absolute;top:calc(100% - 2px);right:0;z-index:5;display:grid;min-width:190px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 12px 28px rgba(0,0,0,.28)}
-.saved-trip__popover[hidden]{display:none}
-.saved-trip__popover button{min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer}
-.saved-trip__popover button:hover{background:var(--cel-soft)}
-.saved-trip__popover button.is-danger{color:var(--coral)}
-.saved-trip__popover button:disabled{opacity:.6;cursor:progress}
-.saved-trip>.saved-trip__precio{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.saved-trip__precio small{display:block;color:var(--ink2);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.saved-trip__precio b{display:block;font-family:var(--fh);font-size:24px;line-height:1.1;color:var(--cel);white-space:nowrap}
-.saved-trip__cargar{grid-column:1/-1;min-height:var(--tap,48px);border:0;border-radius:var(--btn-r,12px);background:var(--action-bg);color:var(--action-ink);font:inherit;font-size:15px;font-weight:800;cursor:pointer}
-.saved-trip__cargar:hover{filter:brightness(1.08)}
-.saved-trip__cargar:disabled{opacity:.7;cursor:progress}
-.trip-confirm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px;background:rgba(10,24,48,.72)}
-.trip-confirm__box{width:min(380px,100%);padding:22px 20px 18px;border-radius:18px;background:var(--surface);color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.4)}
-.trip-confirm__box h3{margin:0 0 8px;font-family:var(--fh);font-size:19px;line-height:1.25}
-.trip-confirm__box p{margin:0 0 18px;color:var(--ink2);font-size:14px;line-height:1.5}
-.trip-confirm__actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.trip-confirm__actions button{min-height:var(--tap,48px);border-radius:var(--btn-r,12px);font:inherit;font-size:15px;font-weight:800;cursor:pointer}
-.trip-confirm__cancel{border:1.5px solid var(--line);background:transparent;color:var(--ink)}
-.trip-confirm__ok{border:0;background:var(--coral);color:#fff}
-.saved-trip button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
-
-
-/* ---- Toast / snackbar ----
-   Una sola pieza: icono circular verde (rojo en error) y dos lineas de texto
-   alineadas al centro vertical, esquinas suaves, sombra difusa y aire. Sube por
-   encima del boton fijo "Reservar viaje completo" cuando el resumen esta abierto. */
-.cs-toast{box-sizing:border-box;width:max-content;min-width:min(280px,92vw);max-width:min(92vw,440px);gap:14px;padding:14px 20px 14px 14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.16)}
-.cs-toast__ico{width:34px;height:34px;font-size:17px;line-height:1;background:var(--good,#2fb67c);color:#fff}
-.cs-toast.is-error{border-color:var(--line)}
-.cs-toast.is-error .cs-toast__ico{background:var(--coral);color:#fff}
-.cs-toast__txt{gap:3px}
-.cs-toast__txt b{font-size:15px;font-weight:700;line-height:1.25}
-.cs-toast__txt small{font-size:13px;line-height:1.35}
-body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
-
-/* ---- Resumen: Guardar / Compartir / Asesor en UNA fila ----
-   En celular se apilaban como tres botones a todo el ancho (la "torre"). Ahora
-   son tres columnas iguales, con el icono arriba y el texto debajo; el menu de
-   Compartir se abre en linea ocupando todo el ancho. */
-@media(max-width:560px){
-  .voucher-tools{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-  .voucher-tools>*{grid-column:auto;width:100%}
-  .voucher-tools>.voucher-share__menu{grid-column:1 / -1}
-  .voucher-tools .voucher-chip{flex-direction:column;justify-content:center;gap:4px;min-height:64px;padding:8px 4px;font-size:12px;line-height:1.15;text-align:center}
-  .voucher-tools .voucher-chip .voucher-btn__label{white-space:normal;text-align:center;overflow:visible}
-  .voucher-tools .voucher-share__chev{display:none}
-}
-
-/* "Recomendado" de los hoteles: badge arriba a la derecha de la ficha. Estaba
-   anclado abajo a la izquierda y se montaba sobre "Ver habitaciones". */
-.hotel-option .hotel-choice{position:absolute;top:8px;left:8px;right:auto;bottom:auto;margin:0}
-/* Con "Recomendado" arriba a la izquierda, las etiquetas de la foto pasan a la fila de abajo. */
-.hotel-option.recommended .hotel-tags{top:42px}
-
-/* Resumen: el boton "Reservar viaje completo" es sticky con margenes negativos
-   para llegar a los bordes; el max-width:100% generico lo dejaba corrido. */
-.voucher-dialog .voucher-reserve--fijo{max-width:none;width:auto}
-
-/* Rubros cargados: "Seleccionado" en gris neutro (ni verde ni de exito). */
-.reserva-chip.is-sel{background:var(--bg);color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
-
-/* Codigo de presupuesto (#CS-XXXX-XXXXX): una pastilla tocable bajo el titulo del
-   resumen; un toque lo copia. */
-
-/* Asistencia: tarjeta con icono, mensaje y un solo boton, en lugar de un chip
-   mas en la fila de herramientas. */
-.voucher-asesor{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:center;margin-top:14px;padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--cel) 10%,var(--surface)),var(--surface))}
-.voucher-asesor__ico{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:color-mix(in srgb,#25d366 18%,transparent);color:#25d366}
-.voucher-asesor__ico svg{width:24px;height:24px}
-.voucher-asesor__txt{display:grid;gap:2px;min-width:0}
-.voucher-asesor__txt b{font-size:15px;line-height:1.25}
-.voucher-asesor__txt small{color:var(--ink2);font-size:12.5px;line-height:1.4;overflow-wrap:anywhere}
-.voucher-asesor__btn{grid-column:1 / -1;min-height:48px;margin-top:10px;padding:0 16px;border:1.5px solid var(--action-bg);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
-.voucher-asesor__btn:hover{background:var(--action-bg);color:var(--action-ink)}
-.voucher-asesor__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-@media(max-width:560px){
-  .voucher-tools{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-
-/* "A donde va tu plata": barra segmentada (un tramo por rubro, con espacio entre
-   tramos) y, debajo, una lista limpia: punto de color, nombre y monto a la
-   derecha, sin lineas divisorias. */
-.proposal-breakdown{padding:30px 28px}
-.proposal-breakdown h2{margin:0 0 26px;font-size:28px;letter-spacing:-.01em}
-.proposal-breakdown__stack{gap:3px;height:14px;border:0;background:transparent;overflow:visible}
-.proposal-breakdown__segment{min-width:6px;border-radius:999px;flex-shrink:1}
-.proposal-breakdown__list{gap:6px;margin-top:26px}
-.proposal-breakdown__row{min-height:var(--tap,48px);padding:8px 0;border:0;background:transparent;color:inherit;font:inherit;text-align:left}
-.proposal-breakdown__row+.proposal-breakdown__row{border-top:0}
-.proposal-breakdown__label{gap:12px}
-.proposal-breakdown__dot{flex:0 0 12px;width:12px;height:12px;border-radius:50%}
-.proposal-breakdown__label>span:not(.proposal-breakdown__dot){font-size:15px;font-weight:600;color:var(--ink)}
-.proposal-breakdown__pct{flex:0 0 auto;color:var(--ink2);font-size:12px;font-weight:600}
-.proposal-breakdown__row b{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-
-/* Tarjeta de vuelo: toda la tarjeta es el elemento elegible (sin botones), igual
-   que traslados y tours: borde y sombra amarillos al elegirla. El boton real es
-   una capa transparente sobre la tarjeta, asi que sigue siendo accesible. */
-.flight-card{position:relative;padding:16px;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));box-shadow:0 3px 10px rgba(16,35,62,.08);transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
-.flight-card:hover{box-shadow:0 10px 22px rgba(16,35,62,.12);transform:translateY(-2px)}
-.flight-card.is-selected{border:2px solid var(--card-sel-border);background:var(--card-bg,var(--surface));box-shadow:var(--card-sel-glow);padding:15.5px}
-.flight-card__pick{position:absolute;z-index:1;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:inherit;background:transparent;color:transparent;font-size:0;cursor:pointer;-webkit-appearance:none;appearance:none}
-.flight-card__pick:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-.flight-card__pick:disabled{cursor:not-allowed}
-.flight-card__noprice{position:absolute;right:14px;bottom:12px;color:var(--ink2);font-size:12px;font-weight:700}
-.flight-card__tick{position:absolute;z-index:2;top:12px;right:12px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;opacity:0;transform:scale(.6);transition:opacity .16s ease,transform .16s ease;pointer-events:none}
-.flight-card.is-selected .flight-card__tick{opacity:1;transform:none}
-.flight-airline{padding-right:34px}
-@media(max-width:560px){
-  .flight-route{flex-direction:column;align-items:stretch;gap:0;margin:12px 0}
-  .flight-route>div{flex:none;padding:10px 0}
-  .flight-route>div + span{display:none}
-  .flight-route>div:nth-of-type(2){border-top:1px dashed var(--line)}
-  .flight-route small{font-size:12px;line-height:1.35;overflow-wrap:anywhere}
-  .flight-route b{margin-top:2px;font-size:15px}
-  .flight-footer{align-items:center}
-  .flight-price{margin-left:auto}
-}
-
-/* Tarjeta de vuelo elegido: sin enlace a Google Flights, "Elegir otro vuelo" es
-   la accion de la tarjeta y va en amarillo, como el resto de las acciones
-   principales. */
-.flight-summary-change{margin-top:12px;min-height:var(--tap,48px);border:0;border-radius:var(--btn-r,12px);background:var(--action-bg);color:var(--action-ink);font:800 14px Poppins,sans-serif}
-.flight-summary-change:hover{border:0;background:var(--action-bg);color:var(--action-ink);filter:brightness(1.08)}
-.flight-summary-change:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-
-/* Fila del resumen: "Reservar" como accion y, debajo, un enlace chico para
-   cambiar la seleccion. */
-.voucher-item__side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.voucher-item__edit{display:inline-flex;align-items:center;justify-content:flex-end;min-height:36px;padding:0 2px;border:0;background:transparent;color:var(--ink2);font:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.voucher-item__edit:hover{color:var(--ink)}
-.voucher-item__edit:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
-.voucher-item__side .voucher-item__cta:not(.is-reserved):not(.is-elegir){background:var(--action-bg);color:var(--action-ink);border-color:var(--action-bg);font-weight:800}
-
-/* Traslado entre paradas: una sola opcion elegible, a todo el ancho. */
-.transfer-leg .transfer-choice-grid--uno{grid-template-columns:minmax(0,1fr)}
-
-/* Compartir: menu flotante (popover) anclado al boton, con solo dos opciones. Va al
-   final del archivo y con selectores de 3 clases para ganarle a las reglas viejas que
-   lo dejaban en linea (position:static) ocupando toda la fila de la barra. */
-.voucher-tools .voucher-share-wrap{position:relative;display:grid;min-width:0}
-.voucher-tools .voucher-share-wrap>.voucher-chip{width:100%;height:100%}
-.voucher-tools .voucher-share-wrap>.voucher-share__menu{position:absolute;grid-column:auto;top:auto;bottom:calc(100% + 8px);left:auto;right:0;transform:none;width:max-content;min-width:230px;max-width:calc(100vw - 40px);margin:0;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 12px 28px rgba(0,0,0,.28);z-index:20}
-.voucher-tools .voucher-share-wrap>.voucher-share__menu[hidden]{display:none}
-.voucher-tools .voucher-share-wrap>.voucher-share__menu button{min-height:44px;white-space:nowrap}
-
-/* Guia Secreta abierta desde el banner del paso 4 */
-.booking-dialog.guia-modal { max-width: 860px; width: calc(100% - 24px); max-height: 90vh; overflow-y: auto; }
-
-/* "A donde va tu plata" con el mismo formato que el panel "Mi Viaje" */
-.proposal-breakdown__total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 14px}
-.proposal-breakdown__total strong{font-family:var(--fh);font-size:34px;line-height:1}
-.proposal-breakdown .trip-summary__items{margin-top:14px}
-
-/* ---------- Resumen final: "Tu plan de viaje" ----------
-   Tarjetas por paso (sitio oficial / con nosotros / en destino), el desglose
-   que suma el total y un pie mas ordenado. Todo con las variables del tema. */
-.vplan{gap:12px}
-.vplan .vplan-head{display:grid;gap:4px;padding:0}
-.vplan .vplan-head h2{margin:2px 40px 0 0;font-family:var(--fh);font-size:30px;line-height:1.1}
-.vplan .vplan-head p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.4}
-.vplan .vplan-head .vplan-head__sub{font-size:14.5px}
-.vplan-steps{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px;margin:8px 0 0;padding:0;list-style:none}
-.vplan-steps:has(>li:nth-child(2):last-child){--n:2}
-.vplan-steps__item{display:flex;align-items:center;gap:8px;min-width:0;color:var(--ink);font-size:14px;font-weight:700;line-height:1.15}
-.vplan-steps__n{display:grid;place-items:center;flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--cel-soft);color:var(--ink);font-size:12.5px;font-weight:800}
-.vplan-steps__item.is-now .vplan-steps__n{background:var(--accent);color:var(--accent-ink)}
-.vplan-steps__item.is-done .vplan-steps__n{background:var(--good-soft);color:var(--good)}
-.vplan-steps__item.is-done{color:var(--ink2)}
-.vplan-progress{margin:0;color:var(--ink2);font-size:13px}
-.vplan .voucher-aviso{margin:0}
-.vplan-label{margin:10px 0 -2px;color:var(--ink2);font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1.4}
-.vplan-card{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
-.vplan-card.is-nuestro{gap:0;padding:6px 16px;border:2px solid var(--accent);box-shadow:var(--card-sel-glow)}
-.vplan-card.is-nuestro>.vplan-row{padding:12px 0}
-.vplan-card.is-nuestro>.vplan-row+.vplan-row{border-top:1px solid var(--line)}
-.vplan-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:start}
-.vplan-ico{display:grid;place-items:center;width:48px;height:48px;border-radius:13px}
-.vplan-ico .trip-summary__ico{width:24px;height:24px}
-.vplan-row__body{display:grid;gap:2px;min-width:0}
-.vplan-row__title{margin:0;color:var(--ink);font-size:16px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
-.vplan-row__estado{display:inline-block;vertical-align:middle;margin-left:4px}
-.vplan-row__sub{margin:0;color:var(--ink2);font-size:13px;line-height:1.4}
-.vplan-row__sub.is-warn{color:var(--accent);font-weight:700}
-:root[data-theme="light"] .vplan-row__sub.is-warn{color:var(--cel)}
-.vplan-row__sub.is-muted{font-size:12px;opacity:.8}
-.vplan-row__body .voucher-item__line,.vplan-row__body .voucher-item__ruta,.vplan-row__body .voucher-item__horarios,.vplan-row__body .voucher-item__detail{margin:0;color:var(--ink2);font-size:13px}
-.vplan-row__side{display:grid;justify-items:end;gap:2px;text-align:right}
-.vplan-row__side b{color:var(--ink);font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.vplan-row__side b.is-zero{color:var(--ink2);font-size:13px;font-weight:700}
-.vplan-row__side small{color:var(--ink2);font-size:11.5px;white-space:nowrap}
-.vplan-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;padding:0 16px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:14.5px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease}
-.vplan-btn:hover{background:var(--ink);color:var(--surface)}
-.vplan-btn:focus-visible,.vplan-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.vplan-card__links{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;margin-top:-4px}
-.vplan-link{justify-self:start;padding:4px 0;border:0;background:none;color:var(--ink2);font:inherit;font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.vplan-link:hover{color:var(--ink)}
-.vplan-row__body .vplan-link{margin-top:2px;padding:2px 0;font-size:12.5px}
-.vplan-card__estado{display:flex;justify-content:center}
-.vplan-card__hint{margin:0;color:var(--ink2);font-size:12.5px;text-align:center}
-.vplan-destino{display:grid;gap:6px;margin:0;padding:12px 0 0;border-top:1px solid var(--line);list-style:none}
-.vplan-destino li{display:flex;justify-content:space-between;gap:12px;color:var(--ink2);font-size:13px}
-.vplan-destino em{display:block;font-style:normal;font-size:11.5px;opacity:.85}
-.vplan-destino b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-.vplan-total{display:grid;gap:8px;margin-top:8px;padding:16px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
-.vplan-total p{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0;color:var(--ink2);font-size:14px}
-.vplan-total p b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
-.vplan-total .vplan-total__final{margin-top:4px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:800}
-.vplan-total__final strong{font-family:var(--fh);font-size:28px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
-.vplan-total .vplan-total__pp{justify-content:flex-end;font-size:12.5px}
-.vplan .voucher-canales{margin:4px 0 0}
-/* El pie: misma tinta y mismo radio que las tarjetas del plan. */
-.vplan .vplan-pie{gap:10px;margin-top:6px}
-.vplan .vplan-pie .voucher-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.vplan .vplan-pie .voucher-tools>*{grid-column:auto;width:100%}
-.vplan .vplan-pie .voucher-tools .voucher-chip{flex-direction:row;gap:8px;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--ink) 3%,var(--surface));font-size:13.5px;font-weight:700}
-.vplan .vplan-pie .voucher-tools .voucher-chip:hover{border-color:var(--accent)}
-.vplan .vplan-pie .voucher-tools .voucher-chip .voucher-btn__ico{width:18px;height:18px;color:var(--accent)}
-:root[data-theme="light"] .vplan .vplan-pie .voucher-tools .voucher-chip .voucher-btn__ico{color:var(--cel)}
-.vplan .vplan-pie .voucher-asesor{margin-top:0;padding:16px;border-radius:var(--r-card,16px);background:linear-gradient(135deg,color-mix(in srgb,#25d366 9%,var(--surface)),color-mix(in srgb,var(--ink) 3%,var(--surface)))}
-.vplan .vplan-pie .voucher-asesor__btn{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;border-radius:999px}
-.vplan .vplan-pie .voucher-asesor__btn .voucher-btn__ico{width:18px;height:18px;color:#25d366}
-.vplan .vplan-pie .voucher-asesor__btn:hover .voucher-btn__ico{color:currentColor}
-.vplan .vplan-pie .voucher-grupo{border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
-.vplan .vplan-pie .voucher-grupo>summary{min-height:50px;color:var(--ink);font-weight:700}
-.vplan-cta{display:grid;gap:8px;border-top:1px solid var(--line);background:var(--surface)}
-.vplan-cta .voucher-reserve__btn{justify-content:center;gap:10px;min-height:56px;border-radius:999px;font-size:16px}
-.vplan-cta .voucher-reserve__btn i{font-style:normal;opacity:.7}
-.vplan-cta__nota{margin:0;color:var(--ink2);font-size:12.5px;text-align:center}
-@media (max-width:560px){
-  .vplan .vplan-head h2{font-size:26px}
-  .vplan-card{padding:14px}
-  .vplan-card.is-nuestro{padding:4px 14px}
-  .vplan-row{grid-template-columns:44px minmax(0,1fr) auto;gap:10px}
-  .vplan-ico{width:44px;height:44px;border-radius:12px}
-  .vplan-ico .trip-summary__ico{width:22px;height:22px}
-  .vplan-row__title{font-size:15px}
-  .vplan-row__side b{font-size:16px}
-  .vplan-steps__item{gap:6px;font-size:13px}
-  .vplan-total__final strong{font-size:24px}
-}
-@media (max-width:360px){.vplan-row{grid-template-columns:40px minmax(0,1fr)}.vplan-row__side{grid-column:2;justify-items:start;text-align:left}.vplan-ico{width:40px;height:40px}}
-/* El link al proveedor con la reserva pendiente: sigue ahi para reabrir Booking
-   o Google Flights, pero como secundario, en el mismo celeste de la pastilla
-   "Pendiente de reserva", para que no se lea como el primer paso de nuevo. */
-.vplan-btn.is-reabrir{border-color:color-mix(in srgb,var(--cel) 55%,transparent);color:var(--cel)}
-.vplan-btn.is-reabrir:hover{background:var(--cel-soft);color:var(--cel);border-color:var(--cel)}
-
-/* Resumen de presupuesto: jerarquia, origen de cada reserva y espaciado */
-.vplan-cta .voucher-reserve__btn{border-radius:12px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.vplan .vplan-btn,.vplan .vplan-pie .voucher-asesor__btn{border-radius:12px}
-/* Origen: "externo" se gestiona fuera (flecha, tono frio); "nuestro" lo hacemos aca (tilde, verde) */
-.vplan-row__sub.is-externo,.vplan-card__hint.is-externo{display:flex;align-items:center;gap:5px;color:var(--cel);font-weight:600}
-.vplan-card__hint.is-externo{justify-content:center}
-.vplan-row__sub.is-externo::before,.vplan-card__hint.is-externo::before{content:"\2197";font-weight:800}
-.vplan-row__sub.is-nuestro{display:flex;align-items:center;gap:5px;color:var(--good);font-weight:600}
-.vplan-row__sub.is-nuestro::before{content:"\2713";font-weight:800}
-.vplan-row__side b.is-zero{font-style:italic}
-/* Espaciado entre desglose en destino y totales */
-.vplan-destino{gap:10px;padding:16px 0 4px;margin-top:4px}
-.vplan-destino li{line-height:1.35}
-.vplan-total{margin-top:20px;padding:18px 16px;gap:10px}
-.vplan-total .vplan-total__final{margin-top:6px;padding-top:14px}
-.vplan .voucher-canales{margin:10px 0 0}
-/* El asesor por WhatsApp conserva su lugar y deja aire antes del CTA fijo */
-.vplan .vplan-pie{margin:14px 0 22px;gap:14px}
-.vplan .vplan-pie .voucher-asesor{border:1px solid color-mix(in srgb,#25d366 45%,var(--line))}
-@media (max-width:560px){.vplan-card{gap:14px}.vplan-total{margin-top:22px}.vplan-cta .voucher-reserve__btn{min-height:54px}}
-
-/* Stepper de 4 pasos: los cuatro botones miden lo mismo y el texto no se corta.
-   Antes, de ancho >560 px cada boton ponia el icono al lado del texto en ~100 px
-   y salia "Sin vuelo + Trasla..." con puntos suspensivos; y en el celular
-   "Vuelo + Traslados" ocupaba dos lineas y su boton salia mas alto que los otros
-   (el boton no se estiraba a la altura de la fila). Ahora siempre es columna
-   (numero arriba, nombre abajo, en dos lineas si hace falta), el <li> estira al
-   boton y la altura minima cubre un titulo de dos lineas. El modo compacto
-   (.steps.is-compact) tiene mas especificidad y conserva sus circulos de 40 px. */
-.steps__list{align-items:stretch}
-.steps__item{display:flex}
-.steps__btn{flex-direction:column;justify-content:center;align-items:center;gap:4px;height:100%;min-height:64px;padding:8px 4px;text-align:center;box-sizing:border-box}
-.steps__t{justify-items:center;width:100%}
-.steps__t b{white-space:normal;overflow:visible;text-overflow:clip;font-size:11.5px;line-height:1.15;overflow-wrap:break-word}
-.steps__t small,.steps__item:not(.is-current) .steps__t small{display:none}
-@media (max-width:360px){.steps__btn{padding:8px 2px}.steps__t b{font-size:10px;letter-spacing:-.01em}}
-@media (max-width:340px){.steps__list{gap:4px}.steps__t b{font-size:9.5px}}
-
-/* Tu plan de viaje: version limpia (menos lineas, mas aire, badges, precios fuertes) */
-.vplan{gap:22px}
-.vplan-label{margin:6px 0 -10px;font-size:11.5px;letter-spacing:.08em}
-.vplan-card{gap:16px;padding:22px 20px;border:1px solid color-mix(in srgb,var(--line) 55%,transparent);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
-.vplan-card.is-nuestro{padding:8px 20px;gap:0}
-.vplan-card.is-nuestro>.vplan-row{padding:16px 0}
-.vplan-card.is-nuestro>.vplan-row+.vplan-row{border-top:1px solid color-mix(in srgb,var(--line) 40%,transparent)}
-.vplan-row{gap:14px;align-items:center}
-.vplan-row__body{gap:4px}
-.vplan-row__sub{font-size:13px;color:var(--ink2)}
-.vplan-row__sub.is-warn{font-weight:600}
-.vplan-row__side b{font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
-.vplan-row__side b.is-zero{font-size:13px;font-weight:600;font-style:normal;color:var(--ink2)}
-.vplan-badge{justify-self:start;display:inline-block;margin:0 0 2px;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;line-height:1.5}
-.vplan-badge.is-externo{background:color-mix(in srgb,var(--cel) 14%,transparent);color:var(--cel)}
-.vplan-badge.is-nuestro{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
-.vplan-card__links{margin-top:0}
-.vplan-card.is-destino{gap:14px}
-.vplan-destino{gap:12px;padding:16px 0 0;margin-top:0;border-top:1px solid color-mix(in srgb,var(--line) 40%,transparent)}
-.vplan-destino li{font-size:13.5px}
-.vplan-destino b{font-size:14.5px}
-/* Totales: caja minimalista con lineas tenues */
-.vplan-total{margin-top:0;padding:20px;gap:12px;border:1px solid color-mix(in srgb,var(--line) 55%,transparent);border-radius:var(--r-card,16px);background:transparent}
-.vplan-total p{font-size:14px}
-.vplan-total p+p{padding-top:12px;border-top:1px solid color-mix(in srgb,var(--line) 35%,transparent)}
-.vplan-total .vplan-total__final{margin-top:2px;padding-top:16px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
-.vplan-total .vplan-total__pp{border-top:0;padding-top:0}
-/* CTA: contraste limpio, sin texto debajo */
-.vplan-cta{border-top:0;padding-top:14px}
-.vplan-cta .voucher-reserve__btn{min-height:56px;font-size:16.5px;font-weight:800}
-@media (max-width:560px){.vplan{gap:20px}.vplan-card{padding:20px 16px}.vplan-card.is-nuestro{padding:6px 16px}.vplan-row__side b{font-size:17px}}
+</style><link rel="stylesheet" href="file:///C:/Users/mpbl2/Desktop/CuantoSale/public/vendor/leaflet/leaflet.css"></head><body>
+<div class="transport-card roadtrip-map-card"><div class="roadtrip-map-card__head"><b>🗺️ Tu ruta en auto</b><span>Montevideo → X</span></div><div class="roadtrip-map" data-roadtrip-map="torres" data-map-dest="torres"><span class="roadtrip-map__loading">Cargando…</span></div></div>
+<details open class="roadtrip-stops" data-roadtrip-stops data-dest="torres" data-oneway="982"><summary>☕ Paradas de descanso en la ruta (4)</summary><div class="roadtrip-stops__body"><div class="roadtrip-stops__list" data-stops-list data-every="393"></div></div></details>
+<script>function esc(s){return s}
+  var roadtripMapAssets = null;
+  function loadRoadtripMapAssets() {
+    if (roadtripMapAssets) return roadtripMapAssets;
+    function script(src) {
+      return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = src; s.onload = resolve; s.onerror = function () { reject(new Error(src)); };
+        document.head.appendChild(s);
+      });
+    }
+    var css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = '${P}/vendor/leaflet/leaflet.css';
+    document.head.appendChild(css);
+    roadtripMapAssets = Promise.all([script('file:///C:/Users/mpbl2/Desktop/CuantoSale/public/vendor/leaflet/leaflet.js'), script('file:///C:/Users/mpbl2/Desktop/CuantoSale/public/rutas-auto.js'), script('file:///C:/Users/mpbl2/Desktop/CuantoSale/public/mapa-base.js'), script('file:///C:/Users/mpbl2/Desktop/CuantoSale/public/paradas-auto.js')]);
+    roadtripMapAssets.catch(function () { roadtripMapAssets = null; });
+    return roadtripMapAssets;
+  }
+  // Referencias del mapa: países y ciudades que ubican la ruta, en orden de
+  // prioridad (si dos textos se pisan, queda el primero). Van fijas y no salen de
+  // DEST_COORDS porque esto es cartografía, no un dato del cálculo.
+  var ROADTRIP_MAP_COUNTRIES = [['Uruguay', -32.7, -56.3], ['Argentina', -33.2, -61.6], ['Brasil', -26.6, -52.6], ['Paraguay', -23.2, -58.6]];
+  var ROADTRIP_MAP_CITIES = [['Porto Alegre', -30.03, -51.22], ['Florianópolis', -27.6, -48.55], ['Curitiba', -25.43, -49.27], ['Buenos Aires', -34.61, -58.38], ['Punta del Este', -34.96, -54.95], ['Foz do Iguaçu', -25.55, -54.59], ['São Paulo', -23.55, -46.63], ['Santa Maria', -29.68, -53.81], ['Passo Fundo', -28.26, -52.41], ['Pelotas', -31.77, -52.34], ['Criciúma', -28.68, -49.37], ['Uruguaiana', -29.76, -57.09], ['Caxias do Sul', -29.17, -51.18], ['Joinville', -26.3, -48.85], ['Paysandú', -32.32, -58.08], ['Rivera', -30.9, -55.55], ['Tacuarembó', -31.72, -55.98], ['Melo', -32.37, -54.17], ['Colonia', -34.47, -57.84], ['Asunción', -25.26, -57.58], ['Posadas', -27.37, -55.9], ['Corrientes', -27.47, -58.83], ['Rosario', -32.95, -60.65], ['Concordia', -31.39, -58.02], ['Lages', -27.82, -50.33], ['Blumenau', -26.92, -49.07], ['Ponta Grossa', -25.09, -50.16]];
+  function mountRoadtripMap(el) {
+    el.setAttribute('data-map-state', 'loading');
+    loadRoadtripMapAssets().then(function () {
+      if (!el.isConnected) return;
+      var key = el.getAttribute('data-roadtrip-map');
+      var pts = window.CS_ROUTES && window.CS_ROUTES[key];
+      var base = window.CS_BASEMAP;
+      var L = window.L;
+      if (!pts || !base || !L) { el.closest('.roadtrip-map-card').remove(); return; }
+      el.innerHTML = '';
+      var origin = window.CS_ROUTE_ORIGIN, dest = pts[pts.length - 1];
+      var destName = el.getAttribute('data-map-dest');
+      // Mapa político propio (sin tiles de terceros): tierra, agua, fronteras y la ruta.
+      var map = L.map(el, { zoomSnap: 0.25, scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false, attributionControl: true,
+        maxBounds: base.bbox, maxBoundsViscosity: 1 });
+      map.attributionControl.setPrefix(false);
+      map.attributionControl.addAttribution('Ruta © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> · Límites: Natural Earth');
+      var noHit = { interactive: false, smoothFactor: 1 };
+      L.polygon(base.tierra, L.extend({ className: 'rt-land', stroke: false }, noHit)).addTo(map);
+      L.polygon(base.limites, L.extend({ className: 'rt-state', fill: false }, noHit)).addTo(map);
+      L.polygon(base.agua, L.extend({ className: 'rt-water', stroke: false }, noHit)).addTo(map);
+      L.polyline(base.rios, L.extend({ className: 'rt-river' }, noHit)).addTo(map);
+      L.polygon(base.tierra, L.extend({ className: 'rt-country', fill: false }, noHit)).addTo(map);
+      L.polyline(pts, { color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
+      var line = L.polyline(pts, { color: '#e8590c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
+      map.fitBounds(line.getBounds(), { paddingTopLeft: [34, 60], paddingBottomRight: [34, 58] });
+      map.setMinZoom(Math.max(map.getBoundsZoom(base.bbox, true), map.getZoom() - 1.5));
+      function label(latlng, cls, html) {
+        return L.marker(latlng, { interactive: false, keyboard: false, icon: L.divIcon({ className: cls, html: html, iconSize: null }) }).addTo(map);
+      }
+      // Los textos se acomodan en orden de prioridad y se descarta el que pisa a
+      // uno ya puesto: primero los pines, después países, ciudades y estados.
+      var size = map.getSize(), taken = [];
+      function claim(latlng, w, h, dx, dy) {
+        var p = map.latLngToContainerPoint(latlng);
+        var r = { x0: p.x + dx, y0: p.y + dy, x1: p.x + dx + w, y1: p.y + dy + h };
+        if (r.x0 < 4 || r.y0 < 4 || r.x1 > size.x - 4 || r.y1 > size.y - 22) return false;
+        for (var i = 0; i < taken.length; i++) {
+          var t = taken[i];
+          if (r.x0 < t.x1 && r.x1 > t.x0 && r.y0 < t.y1 && r.y1 > t.y0) return false;
+        }
+        taken.push(r);
+        return true;
+      }
+      claim(origin, 90, 46, -45, -6); claim(dest, destName.length * 7 + 26, 46, -(destName.length * 3.5 + 13), -42);
+      label(origin, 'roadtrip-pin roadtrip-pin--from', '<i></i><span>Montevideo</span>');
+      label(dest, 'roadtrip-pin roadtrip-pin--to', '<i></i><span>' + esc(destName) + '</span>');
+      ROADTRIP_MAP_COUNTRIES.forEach(function (c) {
+        if (claim([c[1], c[2]], c[0].length * 9 + 8, 18, -(c[0].length * 4.5 + 4), -9)) label([c[1], c[2]], 'rt-country-name', c[0]);
+      });
+      var cityMarks = {};
+      ROADTRIP_MAP_CITIES.forEach(function (c) {
+        if (claim([c[1], c[2]], c[0].length * 6.4 + 16, 16, -4, -9)) cityMarks[c[0]] = label([c[1], c[2]], 'rt-city', '<i></i><span>' + c[0] + '</span>');
+      });
+      (base.nombres || []).forEach(function (n) {
+        if (claim([n[1], n[2]], n[0].length * 7 + 8, 14, -(n[0].length * 3.5 + 4), -7)) label([n[1], n[2]], 'rt-state-name', esc(n[0]));
+      });
+      // Lo que necesita fillRoadtripStops para dibujar las paradas recomendadas.
+      el._rt = { L: L, map: map, label: label, claim: claim, taken: taken, baseTaken: taken.length, cityMarks: cityMarks, stops: L.layerGroup().addTo(map) };
+      fillRoadtripStops();
+      el.setAttribute('data-map-state', 'ready');
+      var gmaps = document.createElement('a');
+      gmaps.className = 'roadtrip-map__open';
+      gmaps.target = '_blank'; gmaps.rel = 'noopener noreferrer';
+      gmaps.href = 'https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=' + origin[0] + ',' + origin[1] + '&destination=' + dest[0] + ',' + dest[1];
+      gmaps.textContent = 'Abrir en Google Maps ↗';
+      el.parentNode.appendChild(gmaps);
+    }).catch(function () {
+      // Sin red o bloqueado: mejor sin mapa que una caja vacía.
+      var card = el.closest('.roadtrip-map-card');
+      if (card) card.remove();
+    });
+  }
+  /* Paradas de descanso recomendadas: ciudades reales sobre la ruta (paradas-auto.js,
+     generado con Natural Earth + el trazado de OSRM) cerca de cada punto sugerido
+     "cada X km". Se elige una ciudad a menos de 80 km del punto, prefiriendo las
+     más grandes (hay dónde cargar nafta y comer), y siempre a más de 40 km del
+     origen, del destino y de la parada anterior. Solo se listan las de la IDA: a
+     la vuelta se repiten en orden inverso. No se afirma qué servicios tiene cada
+     ciudad ni si hay cargadores: eso lo dice la población, no una consulta. */
+  function roadtripPickStops(key, everyKm, oneWayKm) {
+    var cities = window.CS_STOPS && window.CS_STOPS[key];
+    if (!cities || !(everyKm > 0) || !(oneWayKm > 0)) return [];
+    var out = [], last = 0;
+    for (var t = everyKm; t < oneWayKm - 40; t += everyKm) {
+      var best = null, bestScore = Infinity;
+      for (var i = 0; i < cities.length; i++) {
+        var c = cities[i], d = Math.abs(c[1] - t);
+        if (d > 80 || c[1] < last + 40 || c[1] < 40 || c[1] > oneWayKm - 40) continue;
+        var score = d - 30 * Math.log10(c[4] / 15000);
+        if (score < bestScore) { best = c; bestScore = score; }
+      }
+      if (best) { out.push({ name: best[0], km: best[1], lat: best[2], lng: best[3], country: best[5] }); last = best[1]; }
+    }
+    return out;
+  }
+  function fillRoadtripStops() {
+    var list = document.querySelector('[data-stops-list]');
+    if (!list || !window.CS_STOPS) return;
+    var box = list.closest('[data-roadtrip-stops]');
+    if (!box) return;
+    var stops = roadtripPickStops(box.getAttribute('data-dest'), Number(list.getAttribute('data-every')), Number(box.getAttribute('data-oneway')));
+    // El título contaba las paradas de ida y vuelta (por eso decía 4 con 2 en el
+    // mapa). Con la lista armada se corrige: N a la ida y las mismas N a la vuelta.
+    var head = box.querySelector('summary');
+    if (head && stops.length && head.textContent.indexOf('☕') === 0) head.textContent = '☕ Paradas de descanso en la ruta (' + stops.length + ' a la ida, ' + stops.length + ' a la vuelta)';
+    list.innerHTML = stops.length
+      ? '<p class="roadtrip-stops__lead">Paradas sugeridas a la ida (a la vuelta son las mismas, al revés):</p><ol>' +
+        stops.map(function (s, i) {
+          return '<li><span class="rt-stop__n">' + (i + 1) + '</span><div><b>' + esc(s.name) + '</b><small>km ' + s.km + ' desde Montevideo · ' + esc(s.country) + '</small></div></li>';
+        }).join('') + '</ol>'
+      : '<p class="roadtrip-stops__lead">No hay una ciudad grande cerca de esos puntos: parar donde veas estaciones de servicio.</p>';
+    var mapEl = document.querySelector('[data-roadtrip-map]');
+    var rt = mapEl && mapEl._rt;
+    if (!rt) return;
+    rt.stops.clearLayers();
+    rt.taken.length = rt.baseTaken;
+    Object.keys(rt.cityMarks).forEach(function (n) { rt.cityMarks[n].setOpacity(1); });
+    stops.forEach(function (s, i) {
+      var at = [s.lat, s.lng];
+      rt.L.marker(at, { interactive: false, keyboard: false, zIndexOffset: 500, icon: rt.L.divIcon({ className: 'rt-stop', html: '<b>' + (i + 1) + '</b>', iconSize: null }) }).addTo(rt.stops);
+      if (rt.cityMarks[s.name]) rt.cityMarks[s.name].setOpacity(0);
+      if (rt.claim(at, s.name.length * 6.4 + 26, 16, 12, -8)) {
+        rt.L.marker(at, { interactive: false, keyboard: false, zIndexOffset: 400, icon: rt.L.divIcon({ className: 'rt-city rt-city--stop', html: '<span>' + esc(s.name) + '</span>', iconSize: null }) }).addTo(rt.stops);
+      }
+    });
+  }
+
+mountRoadtripMap(document.querySelector('[data-roadtrip-map]'));</script></body></html>
