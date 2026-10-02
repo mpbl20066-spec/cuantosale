@@ -2662,7 +2662,10 @@ h3.block-title, .block-title:is(h3) {
 .steps__foot:empty{display:none}
 .steps__foot .steps__next{margin-top:0;min-height:54px;font-size:16px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
 .steps__skip{display:block;margin:10px auto 0;padding:8px 12px;border:0;background:none;color:var(--ink2);font:inherit;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.steps__next.is-locked{background:var(--surface);color:var(--ink2);border:1.5px dashed var(--line);box-shadow:none;font-weight:700}
+/* "Elegí tu vuelo para continuar" va en amarillo, como el boton activo: es la
+   accion que toca hacer, no un boton apagado. Antes era gris punteado y se leia
+   como deshabilitado. */
+.steps__next.is-locked{background:var(--action-bg);color:var(--action-ink);border:0;font-weight:800}
 @media (max-width:560px){
   .steps{padding:10px;border-radius:16px}
   .steps__list{grid-template-columns:1fr;gap:6px}
@@ -3105,8 +3108,6 @@ button.logo{min-height:44px}
 /* Extras: pilar comercial. El boton para llegar al paso destaca sobre el resto
    (mas alto, con brillo ambar) y la pestana pendiente lleva acento propio, para
    que pese lo mismo que Vuelo y Alojamiento. */
-.steps__next--extras{min-height:58px;padding:10px 16px;font-size:15px;line-height:1.25;background:linear-gradient(135deg,var(--action-bg),color-mix(in srgb,var(--action-bg) 70%,#fff));box-shadow:0 8px 26px color-mix(in srgb,var(--action-bg) 45%,transparent)}
-.steps__next--extras:hover{filter:brightness(1.06)}
 .steps__item--extras.is-pending .steps__btn{border-color:color-mix(in srgb,var(--cel) 55%,var(--line));background:var(--cel-soft)}
 .steps__item--extras.is-pending .steps__n{border-color:var(--cel);color:var(--cel)}
 

@@ -4618,7 +4618,7 @@
     /* Extras es un pilar de la venta, no un anexo: el boton para llegar ahi no
        dice "opcional" y pide la accion en lugar de ofrecer un paso mas. */
     if (next.n === 3) {
-      return '<button type="button" class="steps__next steps__next--extras" data-paso-ir="3">Sumá experiencias y potenciá tu viaje <span aria-hidden="true">✨</span></button>';
+      return '<button type="button" class="steps__next" data-paso-ir="3">Sumá experiencias y potenciá tu viaje <span aria-hidden="true">→</span></button>';
     }
     return '<button type="button" class="steps__next" data-paso-ir="' + (n + 1) + '">' + (next.n === 4 ? esc(next.cta) : 'Continuar a ' + esc(next.titulo)) + ' <span aria-hidden="true">→</span></button>';
   }
@@ -10512,6 +10512,51 @@
   var authReadyPromise = Promise.resolve();
   var authInitPromise = null;
   var supabaseSdkPromise = null;
+  var googleClientId = '';
+  var googleSdkPromise = null;
+  function loadGoogleSdk() {
+    if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve();
+    if (googleSdkPromise) return googleSdkPromise;
+    googleSdkPromise = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.onload = resolve;
+      script.onerror = function () { googleSdkPromise = null; reject(new Error('No pudimos cargar Google.')); };
+      document.head.appendChild(script);
+    });
+    return googleSdkPromise;
+  }
+  /* Login con Google sin salir del sitio. Google Identity Services devuelve un
+     id_token que Supabase valida (signInWithIdToken): la pantalla de Google muestra
+     cuantosale.uy y no el dominio de Supabase, que es lo que mostraba el flujo
+     OAuth con redireccion. Si GIS no puede mostrarse (bloqueado, sin Client ID),
+     devuelve false y el llamador cae al flujo OAuth de siempre. */
+  function googleIdTokenLogin() {
+    if (!googleClientId) return Promise.resolve(false);
+    return loadGoogleSdk().then(function () {
+      return new Promise(function (resolve) {
+        var listo = false;
+        var fin = function (v) { if (!listo) { listo = true; resolve(v); } };
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          use_fedcm_for_prompt: true,
+          callback: function (resp) {
+            if (!resp || !resp.credential) { fin(false); return; }
+            supabaseClient.auth.signInWithIdToken({ provider: 'google', token: resp.credential }).then(function (r) {
+              if (r && r.error) { openAuthModal(r.error.message); fin(true); return; }
+              closeAccountModal('auth-modal'); fin(true);
+            }, function () { fin(false); });
+          }
+        });
+        window.google.accounts.id.prompt(function (n) {
+          if (!n) return;
+          if (n.isNotDisplayed() || n.isSkippedMoment()) fin(false);
+          else if (n.isDismissedMoment() && n.getDismissedReason() !== 'credential_returned') fin(true);
+        });
+      });
+    }).catch(function () { return false; });
+  }
   function loadSupabaseSdk() {
     if (window.supabase && window.supabase.createClient) return Promise.resolve();
     if (supabaseSdkPromise) return supabaseSdkPromise;
@@ -11180,6 +11225,7 @@
         var configResponse = await fetch('/api/config');
         var config = await configResponse.json();
         if (!config.supabaseUrl || !config.supabaseAnonKey) { console.warn('Falta SUPABASE_ANON_KEY/SUPABASE_PUBLISHABLE_KEY en las variables de entorno del despliegue.'); return; }
+        googleClientId = config.googleClientId || '';
         supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage } });
         try { pendingTripSave = sessionStorage.getItem('cuantosale_pending_trip') === '1'; } catch (error) {}
         var sessionResult = await supabaseClient.auth.getSession();
@@ -11557,6 +11603,7 @@
            estaba puesto, el boton se quedaba muerto hasta que se cerrara y
            reabriera el modal. Con el catch se rehabilita siempre. */
         try {
+          if (await googleIdTokenLogin()) return;
           var oauth = await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname } });
           if (oauth && oauth.error) openAuthModal(oauth.error.message);
         } catch (e) {

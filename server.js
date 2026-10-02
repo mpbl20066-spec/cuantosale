@@ -146,13 +146,13 @@ const CSP = "default-src 'self'; " +
   // *.analytics.google.com son adonde van los beacons. Sin estas dos lineas la
   // etiqueta de Analytics queda bloqueada por CSP y no reporta nada, sin error
   // visible en la consola: es un fallo silencioso.
-  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com; " +
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com https://accounts.google.com; " +
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; " +
   "style-src-attr 'unsafe-inline'; " +
   "font-src 'self' https://fonts.gstatic.com; " +
   "img-src 'self' data: https:; " +
-  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; " +
-  "frame-src https://*.supabase.co; " +
+  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://accounts.google.com; " +
+  "frame-src https://*.supabase.co https://accounts.google.com; " +
   "base-uri 'none'; form-action 'self'";
 // Google Analytics (GA4). La etiqueta se inyecta una sola vez desde serveStatic
 // para todas las paginas HTML, en vez de pegada en cada archivo: asi no puede
@@ -2529,6 +2529,8 @@ function handleRequest(req, res) {
       return sendJson(res, 200, {
         supabaseUrl: process.env.SUPABASE_URL || 'https://hqyzmeordvjccytgltse.supabase.co',
         supabaseAnonKey: process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+        // Client ID web de Google para el login sin pasar por supabase.co.
+        googleClientId: process.env.GOOGLE_CLIENT_ID || '',
         travelpayoutsMarker: process.env.TRAVELPAYOUTS_MARKER || '780345',
         // Si hay token, el server puede convertir los links de hotel en links de
         // afiliado. El front lo usa para saber si los clics generan comision.
