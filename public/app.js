@@ -5566,9 +5566,38 @@ var HOTEL_NOTA_MINIMA = 8;
      el resto de la pagina. Se comparte por WhatsApp o se copia el resumen.
      Llevar la cuenta de quien pago que sigue en /grupo (irAlGrupo). */
   var splitState = { n: 0, nombres: [] };
+  /* Los datos del reparto.
+
+     Dividir el total del viaje entre n personas es correcto solo si el viaje
+     estaba calculado para n. El control arranca con la cantidad de viajeros del
+     viaje, pero es un ajuste puntual: si van cuatro y el viaje se cotizó para
+     dos, dividir 833 entre 4 da 208 a cada uno cuando la comida, los traslados
+     por persona, el pasaje y los tours se pagan dos veces mas.
+
+     Asi que lo que se cobra POR PERSONA se escala con la gente, y lo que se
+     cobra POR HABITACION escala por habitaciones —de dos a cuatro se pasa de una
+     a dos, asi que tambien se duplica—. Lo que se cobra POR VEHICULO no se toca:
+     el auto propio no se alquila una vez mas porque vaya mas gente.
+
+     Cuando el reparto coincide con los viajeros del viaje no se toca nada: los
+     numeros son los del presupuesto, sin redondeos ni sorpresas. */
   function splitDatos() {
     var b = getBudgetBreakdown(detailState);
-    return { total: Number(b.total) || 0, filas: b.entries.filter(function (e) { return e.value > 0; }) };
+    var filas = b.entries.filter(function (e) { return e.value > 0; });
+    var pax = Math.max(1, Number(detailState && detailState.meta && detailState.meta.pax) || 1);
+    var n = Math.max(1, Number(splitState.n) || 1);
+    if (n === pax) return { total: Number(b.total) || 0, filas: filas, escalado: false, pax: pax, n: n };
+    var rooms0 = Math.max(1, Math.ceil(pax / 2)), roomsN = Math.max(1, Math.ceil(n / 2));
+    var factor = { comidas: n / pax, local: n / pax, pasajes: n / pax, bus: n / pax, traslados: n / pax, tours: n / pax, alojamiento: roomsN / rooms0 };
+    var total = 0;
+    filas = filas.map(function (e) {
+      var f = factor[e.category];
+      var value = (typeof f === 'number' && isFinite(f) && f > 0) ? e.value * f : e.value;
+      value = Math.round(value);
+      total += value;
+      return Object.assign({}, e, { value: value, escalado: typeof f === 'number' && Math.abs(f - 1) > 0.001 });
+    });
+    return { total: total, filas: filas, escalado: true, pax: pax, n: n };
   }
   function splitNombre(i) {
     var t = String(splitState.nombres[i] || '').trim();
@@ -5681,6 +5710,7 @@ var HOTEL_NOTA_MINIMA = 8;
     var gente = '';
     for (var i = 0; i < n; i++) gente += '<li><span>' + esc(splitNombre(i)) + '</span><b>' + money(por) + '</b></li>';
     return '<p class="split-eq">' + money(d.total) + ' <span>/ ' + n + (n === 1 ? ' persona' : ' personas') + '</span> = <b>' + money(por) + ' por persona</b></p>' +
+      (d.escalado ? '<p class="split-aviso">El viaje estaba calculado para ' + d.pax + (d.pax === 1 ? ' persona' : ' personas') + ' y el reparto es de ' + d.n + '. Recalculamos lo que se paga por persona —comida, traslados, tours y, si volás, el pasaje— y dejamos igual lo que es por vehículo o por habitación. El total de arriba ya es el de ' + d.n + ' personas.</p>' : '') +
       '<h3 class="split-sub">Qué cubre cada parte</h3><ul class="split-rows">' + filas + '</ul>' +
       '<h3 class="split-sub">Cuánto pone cada uno</h3><ul class="split-people">' + gente + '</ul>' +
       '<p class="split-note">Partes iguales sobre el total estimado del presupuesto. Los montos pueden variar si cambiás tus elecciones.</p>';
@@ -7513,6 +7543,29 @@ var HOTEL_NOTA_MINIMA = 8;
      Si la persona puso "Sin sumar" en comidas o en transporte, se respeta y se
      deja en cero: recalcular un cero porque cambio el numero de viajeros seria
      desconocer su decision. */
+  /* El total de los tours del viaje.
+
+     El precio de cada tour es POR PERSONA —la ficha lo dice textualmente— asi
+     que el total tiene que ser la suma por la cantidad de viajeros. No lo era:
+     se sumaba una sola vez, con lo que un tour de US$ 37,68 en un viaje de dos
+     personas sumaba US$ 38 al presupuesto en vez de US$ 75. El total del viaje
+     salia mas barato que lo que la persona iba a pagar, y como el reparto
+     divide ese total, el error se dividia entre todos.
+
+     Vive en una funcion y no en las tres asignaciones sueltas porque los tres
+     caminos tienen que coincidir: marcar un tour, cargar un viaje guardado y
+     cambiar la cantidad de gente. Con un numero guardado y recalculado solo al
+     tocar una card, cambiar de 2 a 3 viajeros dejaba los tours del precio
+     viejo. */
+  function recalcularTours() {
+    if (!detailState) return 0;
+    var tours = Array.isArray(detailState.selectedTours) ? detailState.selectedTours : [];
+    var porPersona = tours.reduce(function (suma, tour) { return suma + (Number(tour.price) || 0); }, 0);
+    var pax = Math.max(1, Number((detailState.meta && detailState.meta.pax) || (typeof S !== 'undefined' && S.pax)) || 1);
+    detailState.toursTotal = Math.round(porPersona * pax);
+    return detailState.toursTotal;
+  }
+
   function alCambiarViajeros() {
     recalcularPresupuestoPorViajeros();
     if (detailState && detailState.meta) {
@@ -7525,6 +7578,7 @@ var HOTEL_NOTA_MINIMA = 8;
       if (detailState.localBudgetMode !== 'none') {
         detailState.parts.local = Math.round((Number(detailState.localPerDay) || 0) * noches * pax);
       }
+      recalcularTours();
       try { repintarPresupuestoDiario(); } catch (e) { console.error('No se pudo repintar al cambiar los viajeros', e); }
       // El total del transfer depende de cuantos viajan: el compartido se cobra
       // por persona. El badge de la cabecera de la seccion muestra ese total, asi
@@ -9481,11 +9535,116 @@ var HOTEL_NOTA_MINIMA = 8;
         : '') +
       (fits.length ? '<div class="destination-cards">' + cards + '</div>' : '<div class="notice">No encontramos destinos para esas fechas. Probá ajustando las fechas o la cantidad de viajeros.</div>') + '</section>';
   }
+  /* Envío de eventos a GA4. La función `track` es global (la define el server
+     junto a la etiqueta, en analyticsSnippet de server.js), así que ya está
+     disponible en cualquier página. Acá se envuelve igual, por dos razones:
+     una) Analytics no puede romper la app: si gtag no llegó a definirse (adblock,
+     CSP, error de red), el clic tiene que cotizar igual, y una excepción en el
+     medio del handler abortaría el resto; dos) los parámetros se sanearan antes
+     de salir, para mandar solo strings y numeros cortos y no filtrar el estado
+     interno ni datos personales. */
+  function analyticsTrack(nombre, params) {
+    try {
+      if (typeof window.track !== 'function') return;
+      var limpio = {};
+      Object.keys(params || {}).forEach(function (k) {
+        var v = params[k];
+        if (v === null || v === undefined || v === '') return;
+        limpio[k] = typeof v === 'number' ? v : String(v).slice(0, 100);
+      });
+      window.track(nombre, limpio);
+    } catch (e) { /* Analytics nunca debe romper la app */ }
+  }
+  /* El estado guarda la clave del destino ('arraial', 'buz'), pero en GA4 un
+     evento con "arraial" no se puede agrupar ni comparar con nada. Se manda la
+     etiqueta que la persona ya ve en el desplegable ("Arraial do Cabo"). Si
+     todavia no se cargaron los destinos, cae a la clave: es peor, pero no
+     rompe la búsqueda. */
+  function destinoParaAnalytics() {
+    var clave = S.dest || '';
+    if (clave === 'todos') return 'Todos los destinos';
+    /* El nombre sale del desplegable ya renderizado (button[data-dest-value]) y
+       no de la lista interna de destinos: esa lista vive en otro scope y desde
+       acá no existe. Leyéndola del ReferenceError al primer click, porque un
+       `destItems || []` no protege: un identificador no declarado revienta en
+       el `||` y, como el click es lo que dispara la búsqueda, el error se
+       llevaba la búsqueda entera. */
+    try {
+      var b = document.querySelector('[data-dest-value="' + clave + '"]');
+      var txt = b ? String(b.textContent || '').trim().replace(/\s+/g, ' ') : '';
+      return txt || clave;
+    } catch (e) { return clave; }
+  }
+  /* Los clics que se van de la app: WhatsApp y Booking. Hay varios botones
+     para lo mismo (el checkout, el botón de reservar del vuelo, cada fila del
+     voucher, los hoteles cercanos), y cada uno tiene su propio handler. En vez
+     de meterse en cada uno, se escucha el click UNA vez y se clasifica el
+     destino: si mañana aparece un botón nuevo de Booking, queda tracked sin
+     tocar nada.
+     Va en fase de captura porque varios handlers de la app hacen
+     stopPropagation, y en fase normal el click no llegaría nunca al document.
+     Los links se generan todos acá (no hay ninguno fijo en los HTML), así que
+     no se cuela ningún link de contacto que no sea una salida real. */
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    try {
+      var meta = (detailState && detailState.meta) || null;
+      var destino = (meta && meta.dest && meta.dest.name) || destinoParaAnalytics();
+      var viajeros = Number(meta ? meta.pax : S.pax) || 1;
+      /* El checkout es la conversión de verdad: confirma el pedido y se lo
+         manda al operador. El enlace suelto a wa.me también es una salida, pero
+         desde un botón de agregar o compartir. Se distinguen con `tipo` porque
+         mezclados en un solo evento el número de conversiones queda inflado. */
+      if (t.closest('[data-checkout-confirm]')) {
+        analyticsTrack('clic_whatsapp', { destino: destino, viajeros: viajeros, tipo: 'checkout' });
+        return;
+      }
+      var wa = t.closest('a[href*="wa.me"]');
+      if (wa) {
+        analyticsTrack('clic_whatsapp', { destino: destino, viajeros: viajeros, tipo: 'enlace' });
+        return;
+      }
+      var bk = t.closest('a[href*="booking.com"]');
+      if (bk) {
+        analyticsTrack('ir_booking', {
+          destino: destino,
+          viajeros: viajeros,
+          rubro: bk.getAttribute('data-reservar-rubro') || 'hotel'
+        });
+        return;
+      }
+      /* Compartir por WhatsApp también abre wa.me, pero la persona no está
+         reservando: está mandando la tarjeta del viaje. Va con su propio evento
+         para no ensuciar la conversión. */
+      if (t.closest('[data-split-whatsapp]')) {
+        analyticsTrack('compartir_whatsapp', { destino: destino, viajeros: viajeros });
+      }
+    } catch (err) { /* Measuring a click must never break the click */ }
+  }, true);
   function findDestinations() {
     var budget = S.budget;
     var el = $('#destination-results');
     if (!budget || budget < 1) { el.innerHTML = '<div class="notice">Ingresá un presupuesto máximo para buscar destinos.</div>'; return; }
     if (!S.dep || !S.ret) { el.innerHTML = '<div class="notice">Elegí las fechas de ida y vuelta antes de buscar destinos.</div>'; return; }
+    /* Va después de las dos validaciones de arriba y no antes: si el click no
+      ayne a produce una búsqueda (falta presupuesto o faltan fechas), no se
+       cuenta. Contarlo igual inflaría el evento con los formularios a medio
+       llenar, que es exactamente el caso que uno quiere medir para mejorarlo.
+      El try alrededor es deliberado: esto arma los parámetros, y cualquier
+      excepción ahí cancelaría el resto de findDestinations, o sea la búsqueda
+      que la persona pidió. Perder una métrica es tolerable; perder la búsqueda
+      no. */
+    try {
+      analyticsTrack('buscar_viaje', {
+        destino: destinoParaAnalytics(),
+        tipo_viaje: nombreEstiloViaje(S.style),
+        viajeros: Number(S.pax) || 1,
+        presupuesto: Number(budget) || 0,
+        transporte: S.transport === 'roadtrip' ? 'auto' : (S.transport || 'flight'),
+        origen: S.origin || ''
+      });
+    } catch (err) { /* Si no se puede medir, la búsqueda sigue igual */ }
     massSearch = true;
     setHighlightsVisible(false);
     $('#results').innerHTML = '';
@@ -11559,7 +11718,8 @@ var HOTEL_NOTA_MINIMA = 8;
       if (Number(details.busTotal) > 0 && detailState.parts) detailState.parts.bus = Math.round(Number(details.busTotal));
     }
     detailState.selectedTours = Array.isArray(details.tours) ? details.tours : [];
-    detailState.toursTotal = detailState.selectedTours.reduce(function (sum, tour) { return sum + (Number(tour.price) || 0); }, 0);
+    detailState.toursTotal = 0;
+    recalcularTours();
     detailState.selectedTours.forEach(function (tour) {
       var input = Array.prototype.slice.call(document.querySelectorAll('[data-tour-choice]')).find(function (item) { return item.getAttribute('data-tour-title') === tour.title; });
       if (input) input.checked = true;
@@ -13433,7 +13593,7 @@ function comboNombreDestino() {
         var tour = { title: tourChoice.getAttribute('data-tour-title'), destination: tourChoice.getAttribute('data-tour-destination'), price: Number(tourChoice.getAttribute('data-tour-price')) || 0 };
         detailState.selectedTours = (detailState.selectedTours || []).filter(function (item) { return item.title !== tour.title; });
         if (tourChoice.checked) detailState.selectedTours.push(tour);
-        detailState.toursTotal = detailState.selectedTours.reduce(function (sum, item) { return sum + item.price; }, 0);
+        recalcularTours();
         var tourCard = tourChoice.closest('[data-tour-card]');
                 // El estado visual (borde ambar, tilde y "En tu viaje") lo lleva
         // :has() en CSS sobre el checkbox, asi que aca no hay que tocar texto

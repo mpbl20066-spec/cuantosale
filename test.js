@@ -1722,6 +1722,94 @@ function haversineKm(a, b) {
       assert.strictEqual(j.meta.transport, transport, 'el meta tiene que devolver el transporte pedido');
     }
   });
+  await t('los tours son por persona y el total los cuenta por cada viajero', function () {
+    // Regresion: el precio de cada tour dice "Precio por persona" en la ficha, pero
+    // el total sumaba los precios UNA vez, sin multiplicar por los viajeros. Un tour
+    // de US$ 37,68 en un viaje de dos personas sumaba US$ 38 al presupuesto en vez
+    // de US$ 75. El total salia mas barato que lo que se iba a pagar, y como el
+    // reparto divide ese total, el error se dividia entre todos.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desde = app.indexOf('function recalcularTours()');
+    assert.ok(desde > 0, 'no se encontro recalcularTours() en el cliente');
+    const hasta = app.indexOf('function alCambiarViajeros()');
+    assert.ok(hasta > desde, 'no se pudo extraer recalcularTours del cliente');
+    // detailState y S se declaran como parametros del sandbox porque el codigo
+    // extraido los lee del scope de la app, no de un closure propio.
+    const fn = new Function('detailState', 'S', app.slice(desde, hasta) +
+      '; return recalcularTours;');
+    const calcular = function (tours, pax) {
+      return fn({ selectedTours: tours, meta: { pax: pax } }, {})();
+    };
+
+    assert.strictEqual(calcular([{ price: 37.68 }], 1), 38, 'una persona: el precio tal cual');
+    assert.strictEqual(calcular([{ price: 37.68 }], 2), 75, 'dos personas: el doble, no el mismo numero');
+    assert.strictEqual(calcular([{ price: 10 }, { price: 20 }], 3), 90, 'varios tours por la cantidad de gente');
+    assert.strictEqual(calcular([], 4), 0, 'sin tours selected no hay total');
+    assert.strictEqual(calcular([{ price: '25' }], 2), 50, 'un precio en texto tambien cuenta');
+
+    // Y los tres caminos que lo escriben tienen que pasar por ahi: marcar una card,
+    // cargar un viaje guardado y cambiar la cantidad de gente.
+    const escrituras = app.match(/toursTotal\s*=\s*detailState\.selectedTours\.reduce/g) || [];
+    assert.strictEqual(escrituras.length, 0,
+      'quedo una asignacion que suma los tours sin multiplicar por los viajeros: ' + escrituras.length);
+    assert.ok(/recalcularTours\(\);[\s\S]{0,200}recalcularTotalViaje\(\)/.test(app) ||
+      /alCambiarViajeros/.test(app), 'cambiar la cantidad de gente tiene que recalcular los tours');
+  });
+  await t('el reparto avisa cuando no coincide con los viajeros del viaje', function () {
+    // El reparto arranca con la gente del viaje pero es un ajuste puntual: si van
+    // cuatro y el viaje se cotizó para dos, dividir el total entre 4 daba 208 a
+    // cada uno cuando la comida, los traslados por persona y los tours se pagan
+    // dos veces mas. Ahora lo que es por persona se escala y lo que es por
+    // vehiculo o por habitacion no, y se dice.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desde = app.indexOf('function splitDatos()');
+    const hasta = app.indexOf('function splitNombre(i)');
+    assert.ok(desde > 0 && hasta > desde, 'no se pudo extraer splitDatos del cliente');
+    // detailState, splitState y getBudgetBreakdown son del scope de la app.
+    const fn = new Function('detailState', 'splitState', 'getBudgetBreakdown', app.slice(desde, hasta) +
+      '; return splitDatos;');
+    const datos = function (b, pax, n) { return fn({ meta: { pax: pax } }, { n: n }, function () { return b; })(); };
+
+    const b = {
+      total: 1000,
+      entries: [
+        { category: 'alojamiento', label: 'Alojamiento', value: 220 },
+        { category: 'comidas', label: 'Comidas', value: 280 },
+        { category: 'auto', label: 'Auto / Roadtrip', value: 291 },
+        { category: 'tours', label: 'Tours y actividades', value: 42 }
+      ]
+    };
+    function totalDe(n) {
+      return datos(b, 2, n).filas.reduce(function (s, f) { return s + f.value; }, 0);
+    }
+    // El caso del video: 4 personas en un viaje cotizado para 2.
+    const cuatro = datos(b, 2, 4);
+    assert.strictEqual(cuatro.escalado, true, 'tiene que avisar que recalculo');
+    var porRubro = {};
+    cuatro.filas.forEach(function (f) { porRubro[f.category] = f.value; });
+    // El auto es el mismo vehiculo: no se alquila otra vez porque vaya mas gente.
+    assert.strictEqual(porRubro.auto, 291, 'el auto no se duplica: es el mismo vehiculo');
+    // Lo que se paga por persona, se duplica.
+    assert.strictEqual(porRubro.comidas, 560, 'la comida es por persona: se duplica');
+    assert.strictEqual(porRubro.tours, 84, 'los tours son por persona: se duplican');
+    // El hotel escala por HABITACIONES, no por personas: de 2 a 4 se pasa de una
+    // habitacion a dos, asi que tambien se duplica. Con una persona y dos, en
+    // cambio, sigue siendo una habitacion y no se toca.
+    assert.strictEqual(porRubro.alojamiento, 440, 'de 1 habitacion a 2: el hotel se duplica');
+    assert.strictEqual(totalDe(4), 1375, 'el total del reparto es el de 4 personas');
+
+    const unoADos = datos(b, 1, 2);
+    var porRubro2 = {};
+    unoADos.filas.forEach(function (f) { porRubro2[f.category] = f.value; });
+    assert.strictEqual(porRubro2.alojamiento, 220, 'de 1 a 2 personas sigue siendo 1 habitacion: el hotel no se toca');
+    assert.strictEqual(porRubro2.auto, 291, 'el auto tampoco');
+
+    // Cuando la gente coincide, no se toca nada: los numeros son los del presupuesto.
+    const dos = datos(b, 2, 2);
+    assert.strictEqual(dos.escalado, false, 'con la misma gente no hay nada que recalcular');
+    assert.strictEqual(dos.total, 1000, 'el total no se toca');
+    assert.strictEqual(dos.filas.length, 4, 'los rubros no se pierden');
+  });
   await t('el server manda el precio de transfer del destino en el meta', async function () {
     // Ojo con la query: `subcategory` es el nombre que se muestra, no el destino
     // que se cotiza. Hay que pedir dest=buz, porque si se deja el dest de la

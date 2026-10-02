@@ -1,4 +1,4 @@
-/* version: 280
+/* version: 281
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2629,6 +2629,10 @@ h3.block-title, .block-title:is(h3) {
 .split-rows li b,.split-people li b{font-variant-numeric:tabular-nums;color:var(--ink)}
 .split-people li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
 .split-note{margin:4px 0 0;font-size:12px;color:var(--ink2)}
+/* El aviso de que el reparto no coincide con los viajeros del viaje. Sin el, el
+   total de arriba cambia sin que se diga por que, y parece un error de la app
+   cuando en realidad es el ajuste de gente que la persona acabo de hacer. */
+.split-aviso{margin:12px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--cel) 45%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--cel) 9%,transparent);color:var(--ink2);font-size:12.5px;line-height:1.45}
 .split-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .split-btn{min-height:48px;border-radius:14px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
 .split-btn--main{grid-column:1/-1;border:0;background:var(--action-bg);color:var(--action-ink);font-weight:800}
