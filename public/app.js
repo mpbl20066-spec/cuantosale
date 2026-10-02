@@ -8504,7 +8504,10 @@
       var L = window.L;
       el.innerHTML = '';
       var map = L.map(el, { scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false });
-      L.tileLayer('https://tile.openstreetmap.org/' + '{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(map);
+      /* referrerPolicy: la pagina sale con Referrer-Policy: no-referrer y OSM
+         bloquea los mosaicos sin Referer ("Access blocked"). Al mapa se le manda
+         solo el origen del sitio, que es lo que pide su politica de uso. */
+      L.tileLayer('https://tile.openstreetmap.org/' + '{z}/{x}/{y}.png', { maxZoom: 18, referrerPolicy: 'strict-origin-when-cross-origin', attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(map);
       var puntos = pines.map(function (p) {
         var m = L.marker([p.lat, p.lng], { title: p.name, icon: L.divIcon({ className: 'guia-pin', html: '<span>' + p.n + '</span>', iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(map);
         m.bindPopup('<b>' + esc(p.n + '. ' + p.name) + '</b><br><a href="https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng + '" target="_blank" rel="noopener noreferrer">Abrir en Google Maps ↗</a>');
@@ -8589,13 +8592,22 @@
       cuerpo += bloque('beaches', '🏖️ Qué playa ir', mapa + '<div class="guia-lista">' + beaches + '</div>');
     }
 
+    /* "Qué ver" con foto y mapa cuando el lugar los trae: es el formato de las
+       playas, para los destinos sin playa (Gramado, Canela, Porto Alegre, São
+       Paulo). Sin foto ni coordenadas la tarjeta queda como antes. */
     if ((guia.atracciones || []).length) {
-      var atracciones = guia.atracciones.map(function (a) {
-        return '<article class="guia-item">' +
-          '<div class="guia-item__head"><b>' + esc(a.name) + '</b>' + chips([a.zona, a.dur]) + etiquetaPrecio(a.usd) + '</div>' +
-          '<p class="guia-nota">' + esc(a.nota) + '</p></article>';
+      var conMapaVer = !(guia.beaches || []).length;
+      var atracciones = guia.atracciones.map(function (a, i) {
+        var num = conMapaVer && typeof a.lat === 'number' ? '<span class="guia-num" aria-hidden="true">' + (i + 1) + '</span>' : '';
+        var cabeza = '<div class="guia-item__head">' + num + '<b>' + esc(a.name) + '</b>' + chips([a.zona, a.dur]) + etiquetaPrecio(a.usd) + '</div>' +
+          '<p class="guia-nota">' + esc(a.nota) + '</p>';
+        return a.foto
+          ? '<article class="guia-item guia-item--foto">' + fotoDe(a) + '<div class="guia-item__cuerpo">' + cabeza + '</div></article>'
+          : '<article class="guia-item">' + cabeza + '</article>';
       }).join('');
-      cuerpo += bloque('atracciones', '📍 Qué ver', '<div class="guia-lista">' + atracciones + '</div>');
+      var pinesVer = conMapaVer ? guia.atracciones.map(function (a, i) { return typeof a.lat === 'number' && typeof a.lng === 'number' ? { n: i + 1, name: a.name, lat: a.lat, lng: a.lng } : null; }).filter(Boolean) : [];
+      var mapaVer = pinesVer.length ? '<div class="guia-mapa" data-guia-mapa="' + esc(JSON.stringify(pinesVer)) + '" role="img" aria-label="Mapa de qué ver en ' + esc(meta.dest.name) + '"><span class="guia-mapa__cargando">Cargando mapa…</span></div>' : '';
+      cuerpo += bloque('atracciones', '📍 Qué ver', mapaVer + '<div class="guia-lista">' + atracciones + '</div>');
     }
 
     if ((guia.comer || []).length) {
@@ -10623,6 +10635,35 @@
     modal.innerHTML = '<div class="booking-dialog account-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><button type="button" class="booking-close" data-close-auth aria-label="Cerrar">×</button><span class="account-kicker">CuántoSale</span><h2 id="auth-title">Guardá tus viajes</h2><p class="booking-note">Creá una cuenta para conservar presupuestos e itinerarios en la nube.</p>' + (message ? '<p class="booking-error">' + esc(message) + '</p>' : '') + '<button type="button" class="oauth-button" data-google-auth>Continuar con Google</button><div class="account-divider"><span>o con tu email</span></div><form id="auth-form"><label>Correo electrónico<input required type="email" name="email" autocomplete="email"></label><label>Contraseña<input required minlength="6" type="password" name="password" autocomplete="current-password"></label><div class="account-form-actions"><button type="submit" class="confirm-booking" data-auth-action="signin">Iniciar sesión</button><button type="button" class="account-button account-button--secondary" data-auth-action="signup">Crear cuenta</button></div><p class="account-status" data-auth-status aria-live="polite"></p></form></div>';
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     var first = modal.querySelector('input'); if (first) first.focus();
+    montarBotonGoogle(modal);
+  }
+  /* El boton oficial de Google (GIS) reemplaza al nuestro: es el que abre el popup
+     con el nombre de la app sin pasar por supabase.co. One Tap (prompt) se
+     suprime seguido (cooldown, bloqueadores), el boton no. Si no se puede
+     montar, queda el boton propio con el flujo OAuth de siempre. */
+  function montarBotonGoogle(modal) {
+    initAuth().then(function () {
+      if (!googleClientId || !supabaseClient) return;
+      return loadGoogleSdk().then(function () {
+        var propio = modal.querySelector('[data-google-auth]');
+        if (!propio || modal.querySelector('[data-google-gis]')) return;
+        var caja = document.createElement('div');
+        caja.setAttribute('data-google-gis', '');
+        caja.style.cssText = 'display:flex;justify-content:center;min-height:44px';
+        propio.parentNode.insertBefore(caja, propio);
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: function (resp) {
+            if (!resp || !resp.credential) return;
+            supabaseClient.auth.signInWithIdToken({ provider: 'google', token: resp.credential }).then(function (r) {
+              if (r && r.error) openAuthModal(r.error.message); else closeAccountModal('auth-modal');
+            });
+          }
+        });
+        window.google.accounts.id.renderButton(caja, { type: 'standard', theme: 'outline', size: 'large', text: 'continue_with', shape: 'pill', width: Math.min(320, Math.max(200, (caja.parentNode.clientWidth || 300) - 4)) });
+        propio.hidden = true;
+      });
+    }).catch(function () { /* queda el boton propio */ });
   }
   async function openTripsModal() {
     var modal = $('#trips-modal');
