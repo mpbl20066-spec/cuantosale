@@ -1573,6 +1573,16 @@ async function cotizar(req, res, url) {
       mode: liveQuoteApplied ? 'live' : 'estimated',
        dest: { key: v.S.dest, name: model.DEST[v.S.dest].name, region: model.DEST[v.S.dest].region || '', country: model.DEST[v.S.dest].country || 'Brasil' }, origin: origin, subcategory: subcategory, hotelType: hotelType, hotelTypeLabel: HOTEL_TYPE_LABELS[hotelType] || 'Intermedio', multiStay: multiStay,
       dep: v.S.dep, ret: v.S.ret, nights: v.nights, pax: v.S.pax, budget: v.S.budget, style: v.S.style,
+      /* El modo de transporte del viaje. El front lo necesita para una pregunta
+         que antes no hacía y por eso se contestaba mal: "¿sale más barato el
+         vuelo de otra fecha?". Solo un viaje que vuela tiene un vuelo que
+         comparar, y sin este dato el calendario de fechas le sumaba un pasaje a
+         los viajes en bus y en auto.
+
+         Cuando no viene informado se devuelve 'flight' porque es el modo por
+         defecto del modelo, pero el front NO lo asume: viajaEnAvion() trata un
+         meta sin `transport` como "no se sabe" y no le inventa un vuelo. */
+      transport: String(v.S.transport || 'flight'),
       costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
       hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString(),
       /* Los tours del destino, ya con el precio convertido a USD.

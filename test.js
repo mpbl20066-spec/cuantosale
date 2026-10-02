@@ -1674,6 +1674,54 @@ function haversineKm(a, b) {
     assert.ok(conEscalon.some(function (x) { return x === 'buz@1'; }) && conEscalon.some(function (x) { return x === 'buz@4'; }),
       'Buzios deberia poder preseleccionar el privado de 1 a 4 personas');
   });
+  await t('el calendario de fechas no le inventa un vuelo a un viaje que no vuela', function () {
+    // Regresion: loadPriceCalendar() consultaba /api/vuelos/calendario siempre y
+    // reescribia cada barra como `total - estFlightBase + pp * pax`. Para un viaje
+    // en bus o en auto el server arma la serie con estFlightBase = 0, asi que esa
+    // cuenta le SUMABA un pasaje a un viaje sin ninguno: en un roadtrip con 2
+    // personas a US$ 33,5 por persona de aire, las barras quedaban ~US$ 67 mas
+    // caras que el viaje. De ahi salia el "sali un dia antes y ahorra US$ 16" que
+    // no era ahorro, el "ninguna opcion entra en US$ 900" de un viaje que si
+    // entraba, y el "2 de 15 fechas con precio de vuelo real" de un viaje que no
+    // vuela. Los tres symptoms del video.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desde = app.indexOf('function viajaEnAvion(meta)');
+    assert.ok(desde > 0, 'no se encontro viajaEnAvion() en el cliente');
+    const hasta = app.indexOf('function loadPriceCalendar(data)');
+    assert.ok(hasta > desde, 'no se pudo extraer viajaEnAvion del cliente');
+    const fn = new Function(app.slice(desde, hasta) + '; return viajaEnAvion;')();
+
+    // Sin dato NO se asume vuelo. El costo de cada error es distinto: agregarle un
+    // pasaje a un bus inventa un ahorro; suponerse que un meta viejo es un vuelo
+    // solo le saca el precio real a una barra, que sigue ahi estimada.
+    assert.strictEqual(fn({}), false, 'sin transport no se inventa un vuelo');
+    assert.strictEqual(fn({ transport: '' }), false, 'transport vacio tampoco');
+    assert.strictEqual(fn({ transport: 'flight' }), true, 'vuelo por aire');
+    assert.strictEqual(fn({ transport: 'avion_mvd' }), true, 'el modo crudo del modelo tambien cuenta');
+    // Y estos son los que NO vuelan: para ellos el calendario no se consulta.
+    for (const t of ['auto', 'bus', 'roadtrip']) {
+      assert.strictEqual(fn({ transport: t }), false, t + ' no vuela: el calendario de vuelos no le aplica');
+    }
+
+    // Y la guarda tiene que estar en el camino de la consulta, no en la cuenta:
+    // si se reemplaza el `estFlightBase` por 0 en un bus, el vuelo se sigue
+    // sumando y el numero sale igual de inflado.
+    const cuerpo = app.slice(desde, app.indexOf('.then(function (result)'));
+    assert.ok(/if\s*\(!viajaEnAvion\(meta\)\)\s*return;/.test(cuerpo),
+      'viajaEnAvion tiene que cortar ANTES de la cuenta, no corregirla despues');
+  });
+  await t('el meta de cotizar dice en que transporte viaja', async function () {
+    // Sin esto el cliente no puede saber si el calendario de fechas corresponde:
+    // el unico dato que hay para decidirlo es este.
+    for (const transport of ['flight', 'auto', 'bus']) {
+      const r = await get(port, '/api/cotizar?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&budget=900&style=ahorro&origin=MVD&transport=' + transport);
+      const j = JSON.parse(r.body);
+      assert.strictEqual(r.status, 200);
+      assert.ok(j.meta && j.meta.transport,
+        'el meta de /api/cotizar no trae transport: el calendario no puede decidir si el viaje vuela');
+      assert.strictEqual(j.meta.transport, transport, 'el meta tiene que devolver el transporte pedido');
+    }
+  });
   await t('el server manda el precio de transfer del destino en el meta', async function () {
     // Ojo con la query: `subcategory` es el nombre que se muestra, no el destino
     // que se cotiza. Hay que pedir dest=buz, porque si se deja el dest de la

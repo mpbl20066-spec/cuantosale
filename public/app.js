@@ -9996,11 +9996,48 @@ var HOTEL_NOTA_MINIMA = 8;
    * la estimación y el aviso lo dice. El server ya cachea por punto, así que
    * volver a esta pantalla no vuelve a cobrar.
    */
+  /* ¿Este viaje tiene un pasaje que se pueda reemplazar por una tarifa real?
+     O sea: ¿vuela?
+
+     Lo único que el calendario de fechas reemplaza son las tarifas aéreas, así
+     que la pregunta es si el viaje tiene una. Se mira el modo de transporte del
+     meta y no el de la propuesta: meta es el del viaje que está abierto, y la
+     serie del gráfico se construye para ese. Un string suelto como 'avion' o
+     'avion_mvd' también cuenta, así que un meta armado por otro camino no deja
+     de volar.
+
+     SIN dato NO se asume vuelo. El costo de equivocarse en las dos direcciones
+     es distinto: si un bus o un auto se cuelan, la app le suma un pasaje que no
+     tiene y le inventa un ahorro que no existe; si a un vuelo se le cuela la
+     duda, lo unico que se pierde es el precio real de una barra, y la barra
+     sigue ahí con su estimacion. Ante la duda no se agrega nada. */
+  function viajaEnAvion(meta) {
+    var t = String((meta && (meta.transport || meta.modo || meta.mode)) || '').toLowerCase();
+    if (!t) return false;
+    return t.indexOf('avion') >= 0 || t.indexOf('vuelo') >= 0 || t === 'flight' || t === 'air';
+  }
+
   function loadPriceCalendar(data) {
     if (!data || !data.meta || data.__calendarAsked) return;
     var meta = data.meta;
     if (!meta.dest || !meta.dep || !meta.ret || !meta.pax) return;
+    /* Solo si el viaje VOLA. Este calendario no consulta "¿salen más barato
+       estas fechas?": consulta "¿el vuelo de estas fechas sale más barato?",
+       así que su único insumo son tarifas aéreas.
+
+       Para un viaje en bus o en auto no hay nada que reemplazar, y hacerlo igual
+       estaba mal, no solo inútil. El server arma la serie con estFlightBase = 0
+       cuando el viaje no vuela (el pasaje estimado no forma parte del total),
+       así que la cuenta `total - estFlightBase + pp * pax` le SUMABA un pasaje a
+       un viaje que no tiene ninguno: en un roadtrip a Florianópolis con 2
+       personas, a US$ 33,5 por persona de aire, las barras quedaban ~US$ 67 más
+       caras que el viaje. Tres cosas se rompían de una vez: el "salí un día antes
+       y ahorrá US$ 16" que no era ahorro sino un vuelo fantasma, el "ninguna
+       opción entra en US$ 900" de un viaje que sí entraba, y el "2 de 15 fechas
+       con precio de vuelo real" de un viaje que no vuela. */
+    if (!viajaEnAvion(meta)) return;
     data.__calendarAsked = true;
+
 
     var query = new URLSearchParams({
       dest: meta.dest.key, dep: meta.dep, ret: meta.ret,
