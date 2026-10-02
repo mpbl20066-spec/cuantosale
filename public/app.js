@@ -352,7 +352,25 @@
     return '';
   }
   function hotelTypeForStyle(style) { return style === 'ahorro' ? 'economico' : style === 'comodo' ? 'confort' : 'intermedio'; }
-  function hotelTypeFactor(type) { return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22, economico: 0.82, intermedio: 1, confort: 1.3 })[type] || 1; }
+  /* Sobreprecio de las categorias cerradas. Economico, intermedio y confort NO
+     llevan: son niveles de precio propios y su estimacion sale de
+     detailState.hotelEstimates (ver hotelFactorFor). Misma tabla que
+     hotelTypeMultiplier en server.js. */
+  function hotelTypeFactor(type) { return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22 })[type] || 1; }
+  /* Por cuanto hay que multiplicar la estimacion del hotel de la propuesta
+     abierta (originalHotelEstimate, que es la del tipo de viaje) para llegar al
+     precio de la categoria elegida. Para economico / equilibrado / comodo es la
+     estimacion de ESA categoria sobre la del tipo de viaje; antes era 0,82 o 1,3
+     fijo sobre el tipo de viaje, y la pastilla "Equilibrado" de un viaje Economica
+     salia mas barata que la pastilla "Economico" de un viaje Equilibrada. Las
+     categorias cerradas (resort, boutique, all-inclusive) siguen con su
+     sobreprecio. */
+  function hotelFactorFor(type) {
+    var est = detailState && detailState.hotelEstimates;
+    var base = Number(detailState && detailState.originalHotelEstimate) || 0;
+    if (est && base > 0 && Number(est[type]) > 0) return Number(est[type]) / base;
+    return hotelTypeFactor(type);
+  }
   // Los grupos son la primera pantalla de la app: definen que se ofrece. Un
   // destino que esta en model.js pero no aca esta cotizable y no se muestra, que
   // es como Angra, Ilha Grande, Bombinhas, Camboriu, Praia do Rosa, Morro,
@@ -2221,7 +2239,7 @@ var HOTEL_NOTA_MINIMA = 8;
     // que hotelSumado() ya usaba antes de que la persona tocara una card.
     if (detailState.originalHotelEstimate) {
       var tipo = resolveHotelTypeForMeta(detailState.meta);
-      detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelTypeFactor(tipo));
+      detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelFactorFor(tipo));
     }
     /* Y hay que REPINTAR. Esta funcion cambia detailState.hotel, que es uno de
        los sumandos del total, asi que sin esto el numero que se ve queda viejo
@@ -10588,7 +10606,7 @@ var HOTEL_NOTA_MINIMA = 8;
     var secondNights = totalNights - firstNights;
     var pax = Math.max(1, Number(detailState.meta.pax) || 1);
     var rooms = Math.ceil(pax / 2);
-    var typeFactor = hotelTypeFactor(detailState.meta.hotelType);
+    var typeFactor = hotelFactorFor(detailState.meta.hotelType);
     var firstStayCost;
     // Costo de cada parada. Si hay hotel elegido para ESA parada, se prorratea el
     // total de Booking por la proporcion de noches que cae ahi. Si no, se usa el
@@ -10652,7 +10670,7 @@ var HOTEL_NOTA_MINIMA = 8;
       detailState.multiStay.selectedStayTotals = {};
       updateMultiStayPricing();
     } else {
-      detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelTypeFactor(type));
+      detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelFactorFor(type));
     }
     detailState.parts.comidas = type === 'all-inclusive' ? 0 : detailState.originalMealEstimate;
     detailState.foodPerDayTouched = type === 'all-inclusive';
@@ -10699,7 +10717,7 @@ var HOTEL_NOTA_MINIMA = 8;
        quien viaja, no del pedido, y hacerlos escribir otra vez para cada
        destino es lo que hace que la gente abandone. */
     checkoutState = checkoutStateInicial();
-    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null, flightAutoPriced: false };
+    detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, hotelEstimates: proposal.hotelEstimates || null, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null, flightAutoPriced: false };
     /* El transfer privado arranca elegido en los dos tramos.
 
        El total del traslado ya lo tiene el modelo como estimacion, y desde que
@@ -11762,7 +11780,7 @@ var HOTEL_NOTA_MINIMA = 8;
         detailState.hotelDecided = false;
         detailState.hotelElegidoPorUsuario = false;
         detailState.roomChoice = {};
-        detailState.hotel = Math.round((Number(detailState.originalHotelEstimate) || 0) * hotelTypeFactor(resolveHotelTypeForMeta(detailState.meta)));
+        detailState.hotel = Math.round((Number(detailState.originalHotelEstimate) || 0) * hotelFactorFor(resolveHotelTypeForMeta(detailState.meta)));
       }
       var hotelOptions = document.querySelectorAll('[data-hotel-option]');
       Array.prototype.forEach.call(hotelOptions, function (option) {

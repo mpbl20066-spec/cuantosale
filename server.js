@@ -576,20 +576,49 @@ function resolveHotelType(value, subcategory, style) {
   if (context.indexOf('confort') >= 0 || context.indexOf('premium') >= 0) return 'confort';
   return style === 'ahorro' ? 'economico' : style === 'comodo' ? 'confort' : 'intermedio';
 }
+/* Sobreprecio de las categorias CERRADAS (all-inclusive, resort, boutique) sobre
+   el nivel de precio del viaje. Economico, intermedio y confort ya no llevan
+   multiplicador: son niveles de precio propios (ver HOTEL_TIER_OF_TYPE).
+
+   Antes economico valia x0,82 y confort x1,3 SOBRE el nivel del tipo de viaje
+   (Economica / Equilibrada / Premium). La categoria no era un precio sino un
+   ajuste del tipo de viaje, asi que se cruzaban: en un viaje Economica la pastilla
+   "Equilibrado" mostraba hoteles de US$ 57 la noche en Buzios, y en un viaje
+   Equilibrada la pastilla "Economico" mostraba de US$ 68 a 72. Elegir una
+   categoria mas barata podia dar un hotel mas caro. */
 function hotelTypeMultiplier(type) {
-  return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22, economico: 0.82, intermedio: 1, confort: 1.3 })[type] || 1;
+  return ({ 'all-inclusive': 1.7, resort: 1.35, boutique: 1.22 })[type] || 1;
+}
+/* Nivel de precio (indice de DEST[].lodge) de cada categoria por precio. No
+   depende del tipo de viaje: "Economico" es siempre lodge[0], "Equilibrado"
+   lodge[1] y "Comodo" lodge[2], en cualquier combinacion. */
+const HOTEL_TIER_OF_TYPE = { economico: 0, intermedio: 1, confort: 2 };
+/* Rango de precio por noche de cada categoria por precio, entre los puntos
+   medios de los niveles vecinos: con lodge [60, 105, 185] y una habitacion,
+   economico llega hasta 82,5, equilibrado va de 82,5 a 145 y comodo desde 145.
+   Los rangos no se pisan, asi que cualquier hotel de Economico cuesta menos que
+   cualquier hotel de Equilibrado, que cuesta menos que cualquiera de Comodo.
+   Devuelve null si el destino no tiene tabla de precios. */
+function hotelPriceBand(destKey, type, extra) {
+  if (!HOTEL_SPECTRUM_TYPES.has(type)) return null;
+  const lodge = model.DEST[destKey] && model.DEST[destKey].lodge;
+  if (!Array.isArray(lodge) || lodge.length < 3) return null;
+  const rooms = Math.ceil(Math.max(1, Number(extra && extra.pax) || 1) / 2);
+  const t = lodge.map(function (n) { return Number(n) * rooms; });
+  const lowMid = (t[0] + t[1]) / 2, highMid = (t[1] + t[2]) / 2;
+  if (type === 'economico') return { lo: 0, hi: lowMid };
+  if (type === 'intermedio') return { lo: lowMid, hi: highMid };
+  return { lo: highMid, hi: Infinity };
 }
 // El precio y el tipo son dos filtros distintos y hacen falta por separado: la
 // segunda pasada de requetas relaja el precio (un hotel real fuera de banda es
 // un mal dato) pero el tipo no se relaja nunca, porque un loft no es un resort
 // por mas barato que sea.
-function hotelPasaElPrecio(hotel, type, budgetTarget) {
+function hotelPasaElPrecio(hotel, type, budgetTarget, band) {
   if (!type || HOTEL_SPECTRUM_TYPES.has(type)) {
     const rate = Number(hotel.perNight) || 0;
-    if (!rate || !budgetTarget) return type !== 'economico';
-    if (type === 'economico') return rate <= budgetTarget * 0.85;
-    if (type === 'intermedio') return rate > budgetTarget * 0.75 && rate <= budgetTarget * 1.25;
-    return rate > budgetTarget * 1.1;
+    if (!rate || !band) return type !== 'economico';
+    return rate > band.lo && rate <= band.hi;
   }
   // Resort, boutique y all-inclusive no se filtran por precio: su banda la
   // decide el multiplicador del tipo, no el objetivo de la categoria.
@@ -636,8 +665,8 @@ function hotelEsDelTipo(hotel, type) {
   if (type === 'boutique') return /boutique/.test(text);
   return false;
 }
-function hotelMatchesType(hotel, type, budgetTarget) {
-  return hotelPasaElPrecio(hotel, type, budgetTarget) && hotelEsDelTipo(hotel, type);
+function hotelMatchesType(hotel, type, budgetTarget, band) {
+  return hotelPasaElPrecio(hotel, type, budgetTarget, band) && hotelEsDelTipo(hotel, type);
 }
 function applyHotelTypeToProposal(proposal, type, pax) {
   const factor = hotelTypeMultiplier(type);
@@ -657,11 +686,16 @@ function hotelBudgetTarget(destKey, style, extra) {
   const explicit = Number(extra && extra.hotelBudgetPerNight);
   if (extra && extra.hotelBudgetPerNight != null && Number.isFinite(explicit) && explicit >= 0) return Math.min(explicit, 1000000);
   const destination = model.DEST[destKey];
-  const tierIndex = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
+  /* Economico / equilibrado / confort fijan su propio nivel de precio; las
+     categorias cerradas (boutique, resort, all-inclusive) siguen partiendo del
+     nivel del tipo de viaje y le suman su sobreprecio. */
+  const hotelType = extra && extra.hotelType;
+  const styleTier = ({ ahorro: 0, eq: 1, comodo: 2 })[style] == null ? 1 : ({ ahorro: 0, eq: 1, comodo: 2 })[style];
+  const tierIndex = HOTEL_TIER_OF_TYPE[hotelType] == null ? styleTier : HOTEL_TIER_OF_TYPE[hotelType];
   const perPerson = destination && Array.isArray(destination.lodge) ? Number(destination.lodge[tierIndex]) : 0;
   const pax = Math.max(1, Number(extra && extra.pax) || 1);
   const rooms = Math.ceil(pax / 2);
-  return Math.max(0, perPerson * rooms * hotelTypeMultiplier(extra && extra.hotelType));
+  return Math.max(0, perPerson * rooms * hotelTypeMultiplier(hotelType));
 }
 async function bookingApiJson(url, settings) {
   let response;
@@ -822,6 +856,18 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   const hotelType = resolveHotelType(extra && extra.hotelType, extra && extra.subcategory, style);
   const hotelExtra = Object.assign({}, extra || {}, { hotelType: hotelType });
   const budgetTarget = hotelBudgetTarget(destKey, style, hotelExtra);
+  const priceBand = hotelPriceBand(destKey, hotelType, hotelExtra);
+  /* Hasta donde se puede completar una lista que quedo corta con hoteles que no
+     entran en el rango de su categoria: 15 % mas alla de cada borde, no cualquiera.
+     Completar con "el mas cercano al objetivo" sin limite dejaba que Economico
+     mostrara hoteles mas caros que los de Equilibrado cuando su rango quedaba
+     vacio. Con el margen el orden entre categorias se mantiene y lo que falte
+     lo cubre el respaldo estimado de cada categoria. */
+  const dentroDelMargen = function (hotel) {
+    if (!priceBand) return true;
+    const rate = Number(hotel.perNight) || 0;
+    return rate > priceBand.lo * 0.85 && rate <= priceBand.hi * 1.15;
+  };
   let realHotels = [];
   try {
     realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, hotelExtra)).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName, geoKey: destKey }); });
@@ -940,7 +986,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
     return list.map(function (hotel) { return Object.assign({}, hotel, { tier: selectedTier, similar: [], areaLabel: hotel.areaLabel || destName }); });
   };
   const matchingCategory = conTier(priced
-    .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget); })
+    .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget, priceBand); })
     .sort(porDistancia)
     .slice(0, 3));
   // Cuando NADA real entra en la banda de la categoría, se mostraba el
@@ -969,6 +1015,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
       // exactamente lo mismo que dejar el selector sin efecto.
       return !yaElegidos.has(normalizeHotelKey(hotel.name))
         && hotel.perNight <= high
+        && dentroDelMargen(hotel)
         && hotelEsDelTipo(hotel, hotelType);
     });
     realesExtra = conTier(restantes.sort(porDistancia).slice(0, 3 - matchingCategory.length));
@@ -991,7 +1038,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
      que la persona siga buscando en el sitio. */
   var fallback = [];
   if (missing > 0 && canUseGenericFallback) {
-    fallback = fallbackHotelsFor(destKey, destName, hotelType === 'economico' ? 0 : hotelType === 'confort' ? 2 : tierIndex, hotelExtra);
+    fallback = fallbackHotelsFor(destKey, destName, HOTEL_TIER_OF_TYPE[hotelType] == null ? tierIndex : HOTEL_TIER_OF_TYPE[hotelType], hotelExtra);
   }
   const combined = uniqueHotelList(combinedReales.concat(fallback)).slice(0, 3);
   // Ultimo paso: convertir los links de Booking en links de Travelpayouts para
@@ -1019,7 +1066,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
     const porPlaya = new Map();
     const coinciden = new Set();
     priced
-      .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget); })
+      .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget, priceBand); })
       .sort(porDistancia)
       .forEach(function (hotel) {
         const clave = hotel.playa || 'Otras zonas';
@@ -1027,12 +1074,15 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
         coinciden.add(hotel);
         if (porPlaya.get(clave).length < POR_PLAYA_MAX) porPlaya.get(clave).push(hotel);
       });
-    /* Cada playa muestra al menos 3 hoteles: si el tipo y el precio elegidos dejan
+    /* Cada playa intenta mostrar 3 hoteles: si el tipo y el precio elegidos dejan
        menos, se completa con los demas hoteles de esa misma playa, los mas cercanos
-       al presupuesto primero. Solo en tipos de espectro (economico, equilibrado,
-       comodo); All Inclusive, Resort y Boutique no admiten sustitucion. */
+       al objetivo primero, pero solo dentro del margen de la categoria
+       (dentroDelMargen): sin ese limite Economico terminaba con hoteles mas caros
+       que los de Equilibrado. Una playa puede quedar con menos de 3. Solo en tipos
+       de espectro (economico, equilibrado, comodo); All Inclusive, Resort y
+       Boutique no admiten sustitucion. */
     if (['all-inclusive', 'resort', 'boutique'].indexOf(hotelType) < 0) {
-      const resto = priced.filter(function (hotel) { return !coinciden.has(hotel); }).sort(porDistancia);
+      const resto = priced.filter(function (hotel) { return !coinciden.has(hotel) && dentroDelMargen(hotel); }).sort(porDistancia);
       const claves = new Set(priced.map(function (hotel) { return hotel.playa || 'Otras zonas'; }));
       claves.forEach(function (clave) {
         const lista = porPlaya.get(clave) || [];

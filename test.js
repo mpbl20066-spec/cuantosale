@@ -1137,11 +1137,14 @@ function haversineKm(a, b) {
       assert.strictEqual(list[0].image, 'https://images.example/f.jpg');
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
-  await t('sin hoteles en la banda de la categoría igual muestra los reales', async function () {
+  await t('sin hoteles en el rango de la categoría no se muestran reales de otra categoría', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
-    // Todos los reales quedan muy por debajo de la banda de "confort": antes
-    // se descartaban y la pantalla ofrecia 3 hoteles inventados sin foto.
+    // Los dos reales cuestan US$ 50 y 60 la noche, muy por debajo del rango de
+    // "confort" en Rio (desde ~US$ 132). Antes se mostraban igual, antes que los
+    // estimados: Comodo aparecia con hoteles de US$ 50 al lado de un Equilibrado
+    // de US$ 95, o sea una categoria mas cara con hoteles mas baratos. Ahora la
+    // categoria completa con su propio respaldo estimado, marcado como tal.
     global.fetch = async function (url) {
       const parsed = new URL(url);
       if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
@@ -1154,13 +1157,46 @@ function haversineKm(a, b) {
     try {
       const list = await app.hotelRecommendations('rio', 'Río de Janeiro', 'comodo', { dep: dep, ret: ret, pax: 2, nights: 7 });
       assert.strictEqual(list.length, 3);
-      // Los dos reales, con su foto, en vez de los tres de fábrica.
-      assert.deepStrictEqual(list.slice(0, 2).map(function (hotel) { return hotel.source; }), ['booking', 'booking']);
-      // El más caro (420/7=60) está más cerca del objetivo de "confort" que el
-      // de 350/7=50, así que va primero.
-      assert.deepStrictEqual(list.slice(0, 2).map(function (hotel) { return hotel.image; }), ['https://images.example/2.jpg', 'https://images.example/1.jpg']);
-      assert.deepStrictEqual(list.slice(0, 2).map(function (hotel) { return hotel.perNight; }), [60, 50]);
-      assert.strictEqual(list[2].source, 'fallback');
+      assert.deepStrictEqual(list.map(function (hotel) { return hotel.source; }), ['fallback', 'fallback', 'fallback']);
+      list.forEach(function (hotel) {
+        assert.ok(hotel.perNight >= 132, 'un hotel de confort a US$ ' + hotel.perNight + ' la noche quedo por debajo del rango');
+      });
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
+  await t('economico < equilibrado < comodo, y la categoria no depende del tipo de viaje', async function () {
+    /* El bug: la pastilla de categoria del alojamiento multiplicaba el nivel del
+       tipo de viaje (x0,82 economico, x1,3 confort), asi que en un viaje Economica
+       "Equilibrado" mostraba hoteles de US$ 57 en Buzios y en un viaje Equilibrada
+       "Economico" mostraba de US$ 68 a 72. Con el mismo pool de hoteles, cada
+       categoria tiene que dar lo mismo en los tres tipos de viaje y el orden
+       entre categorias no se puede cruzar. */
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    const nochePrecios = [40, 48, 55, 62, 70, 78, 86, 95, 104, 112, 122, 135, 150, 165, 180, 200, 225, 260];
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-9', search_type: 'city' }] }; } };
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: nochePrecios.map(function (precio, i) {
+        return { hotel_id: 'p' + i, property: { name: 'Hotel Prueba ' + i, photoUrls: ['https://images.example/p' + i + '.jpg'] }, priceBreakdown: { grossPrice: { value: precio * 7, currency: 'USD' } } };
+      }) } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      const porTipo = {};
+      for (const tipo of ['economico', 'intermedio', 'confort']) {
+        const porEstilo = [];
+        for (const estilo of ['ahorro', 'eq', 'comodo']) {
+          const list = await app.hotelRecommendations('buz', 'Búzios', estilo, { dep: dep, ret: ret, pax: 2, nights: 7, hotelType: tipo });
+          porEstilo.push(list.map(function (hotel) { return Math.round(hotel.perNight); }));
+        }
+        assert.deepStrictEqual(porEstilo[1], porEstilo[0], tipo + ': cambia entre viaje Economica y Equilibrada');
+        assert.deepStrictEqual(porEstilo[2], porEstilo[0], tipo + ': cambia entre viaje Economica y Premium');
+        porTipo[tipo] = porEstilo[0];
+      }
+      const max = function (xs) { return Math.max.apply(null, xs); };
+      const min = function (xs) { return Math.min.apply(null, xs); };
+      assert.ok(max(porTipo.economico) < min(porTipo.intermedio), 'Economico ' + porTipo.economico + ' no es mas barato que Equilibrado ' + porTipo.intermedio);
+      assert.ok(max(porTipo.intermedio) < min(porTipo.confort), 'Equilibrado ' + porTipo.intermedio + ' no es mas barato que Comodo ' + porTipo.confort);
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
   await t('ante fallos de Booking siempre entrega 3 opciones de respaldo de la categoría elegida', async function () {
