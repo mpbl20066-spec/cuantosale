@@ -162,7 +162,14 @@ function analyticsSnippet() {
   if (!GA_MEASUREMENT_ID) return '';
   return '<script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>' +
     '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
-    "gtag('js',new Date());gtag('config'," + JSON.stringify(GA_MEASUREMENT_ID) + ");</script>";
+    "gtag('js',new Date());gtag('config'," + JSON.stringify(GA_MEASUREMENT_ID) + ");" +
+    // Envio de eventos desde cualquier parte de la app: track('nombre', { ... }).
+    // Va junto a la definicion de gtag para que quede en el scope global de la
+    // pagina y no dependa del orden en que carguen app.js o los scripts de cada
+    // vista. El typeof protege el caso en que gtag todavia no se haya definido
+    // (o que no exista si GA_MEASUREMENT_ID viene vacio): antes el error de
+    // "gtag is not defined" rompia el click que disparaba el evento.
+    "function track(nombre,params){if(typeof gtag==='function'){gtag('event',nombre,params||{});}}</script>";
 }
 function injectAnalytics(payload, ext) {
   if (ext !== '.html' || !GA_MEASUREMENT_ID) return payload;
