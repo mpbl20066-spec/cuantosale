@@ -47,6 +47,9 @@ function igual(a, b, msg) {
     throw new Error((msg ? msg + ': ' : '') + 'esperado ' + JSON.stringify(b) + ', vino ' + JSON.stringify(a));
   }
 }
+function ok(condicion, msg) {
+  if (!condicion) throw new Error(msg);
+}
 
 const HOTEL_TYPE_LABELS = {
   'all-inclusive': 'All Inclusive', resort: 'Resort', boutique: 'Boutique',
@@ -62,6 +65,18 @@ function leerOpcionesDelFuente() {
   return Function('return ' + src.slice(ini, src.indexOf(']', ini) + 1))();
 }
 const HOTEL_TYPE_OPTIONS = leerOpcionesDelFuente();
+
+/* El piso de nota, leido del fuente por la misma razon que la lista de tipos:
+   hotelPasaLaNota() usa esta constante y si la prueba se la inventara estaria
+   probando un numero que la app no tiene. */
+function leerNotaMinimaDelFuente() {
+  const i = src.indexOf('var HOTEL_NOTA_MINIMA =');
+  if (i < 0) throw new Error('app.js no declara HOTEL_NOTA_MINIMA: el filtro de nota tiene que decir su piso en un solo lugar');
+  const m = /=\s*([0-9]+(?:\.[0-9]+)?)/.exec(src.slice(i, i + 80));
+  if (!m) throw new Error('HOTEL_NOTA_MINIMA no es un numero legible');
+  return Number(m[1]);
+}
+const HOTEL_NOTA_MINIMA = leerNotaMinimaDelFuente();
 function esc(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -83,10 +98,11 @@ function hotelStyle(meta) {
   return styles[meta.style] || styles.eq;
 }
 
-const cuerpo = ['resolveHotelTypeForMeta', 'hotelesQuePasanElTipo', 'hotelTypeSelectMarkup']
+const cuerpo = ['resolveHotelTypeForMeta', 'hotelesQuePasanElTipo', 'hotelPasaLaNota', 'hotelTypeSelectMarkup']
   .map(extraer).join('\n');
 const deps = 'var HOTEL_TYPE_LABELS = ' + JSON.stringify(HOTEL_TYPE_LABELS) + ';\n' +
   'var HOTEL_TYPE_OPTIONS = ' + JSON.stringify(HOTEL_TYPE_OPTIONS) + ';\n' +
+  'var HOTEL_NOTA_MINIMA = ' + JSON.stringify(HOTEL_NOTA_MINIMA) + ';\n' +
   'function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }\n' +
   'function hotelStyle(meta) {\n' +
   '  const p = { "all-inclusive": { tier: "all-inclusive", title: "All Inclusive", badge: "ALL INCLUSIVE", description: "d" },\n' +
@@ -102,8 +118,8 @@ const deps = 'var HOTEL_TYPE_LABELS = ' + JSON.stringify(HOTEL_TYPE_LABELS) + ';
   '  return s[meta.style] || s.eq;\n' +
   '}\n';
 
-const fns = new Function(deps + cuerpo + '\nreturn { resolveHotelTypeForMeta, hotelesQuePasanElTipo, hotelTypeSelectMarkup };')();
-const { resolveHotelTypeForMeta, hotelesQuePasanElTipo, hotelTypeSelectMarkup } = fns;
+const fns = new Function(deps + cuerpo + '\nreturn { resolveHotelTypeForMeta, hotelesQuePasanElTipo, hotelPasaLaNota, hotelTypeSelectMarkup };')();
+const { resolveHotelTypeForMeta, hotelesQuePasanElTipo, hotelPasaLaNota, hotelTypeSelectMarkup } = fns;
 
 // El caso exacto de la pantalla: el server no declaro disponible el tipo que
 // elegía el estilo de viaje. Este es el que devolvia la seccion vacia.
@@ -372,6 +388,54 @@ prueba('el hotel elegido sobrevive al filtro, o se elige el primero que queda', 
   }
   if (!/primero\.checked = true/.test(cuerpoHotelOptions) && !/primero/.test(cuerpoHotelOptions)) {
     throw new Error('si el hotel marcado desaparece, hay que marcar el primero de los que quedan');
+  }
+});
+
+prueba('un hotel con nota menor a 8 no se muestra, y el de 8 exacto si', function () {
+  // El filtro real esta en el server, antes del precio y del slice(0, 3). Esta
+  // copia del cliente existe para la lista de playas, que es un camino que no
+  // pasa por ahi, y para que la regla este escrita donde se lee.
+  ok(HOTEL_NOTA_MINIMA === 8, 'el piso de nota tiene que ser 8, no ' + HOTEL_NOTA_MINIMA);
+  ok(hotelPasaLaNota({ rating: 8 }), 'el 8 exacto entra: es el piso');
+  ok(hotelPasaLaNota({ rating: 8.0 }), 'el 8 con decimales entra');
+  ok(hotelPasaLaNota({ rating: 9.4 }), 'el 9,4 entra');
+  ok(!hotelPasaLaNota({ rating: 7.9 }), 'el 7,9 no puede mostrarse');
+  ok(!hotelPasaLaNota({ rating: 6.8 }), 'el 6,8 no puede mostrarse');
+  ok(!hotelPasaLaNota({ rating: 5 }), 'el 5 no puede mostrarse');
+  // Booking manda el puntaje como numero, pero el mapper usa Number() y el dato
+  // puede venir como texto en un payload guardado.
+  ok(hotelPasaLaNota({ rating: '8,4' }), 'una nota de 8,4 en texto tiene que entrar');
+  // Sin dato NO es nota baja: el 0 es la convencion de "Booking no lo trajo".
+  // Descartar estos seria borrar hoteles reales por una falta de informacion.
+  ok(hotelPasaLaNota({}), 'un hotel sin nota no se descarta');
+  ok(hotelPasaLaNota({ rating: 0 }), 'el 0 es "sin dato", no "nota cero"');
+  ok(hotelPasaLaNota({ rating: null }), 'null es "sin dato"');
+  ok(hotelPasaLaNota({ rating: undefined }), 'undefined es "sin dato"');
+  ok(hotelPasaLaNota(null), 'un hotel inexistente no rompe el filtro');
+});
+
+prueba('el filtro de nota se aplica a la lista y a las playas', function () {
+  const cuerpoHotelOptions = extraer('hotelOptions');
+  if (!/hotelesQuePasanElTipo/.test(cuerpoHotelOptions)) {
+    throw new Error('la lista principal ya no pasa por el filtro de tipo');
+  }
+  // La lista principal y la de cada playa son dos caminos distintos dentro de
+  // grupo(). Filtrar solo uno deja al otro mostrando hoteles por debajo del
+  // piso, que es peor que no filtrar: el filtro se ve puesto y no esta.
+  const usos = cuerpoHotelOptions.match(/hotelPasaLaNota/g) || [];
+  if (usos.length < 2) {
+    throw new Error('la nota se filtra en un solo camino: ' + usos.length +
+      ' uso(s). Tiene que entrar en la lista principal y en la de cada playa.');
+  }
+});
+
+prueba('el estado vacio de la nota explica el descarte', function () {
+  const cuerpoHotelOptions = extraer('hotelOptions');
+  if (!/descartadosPorNota/.test(cuerpoHotelOptions)) {
+    throw new Error('el estado vacio no sabe cuantos se fueron por la nota');
+  }
+  if (!/HOTEL_NOTA_MINIMA/.test(cuerpoHotelOptions)) {
+    throw new Error('el mensaje no dice cual es el piso de nota que se pide');
   }
 });
 

@@ -894,8 +894,62 @@ function haversineKm(a, b) {
       assert.ok(list.slice(1).every(function (hotel) { return /^https:\/\/www\.booking\.com\//.test(hotel.bookingUrl); }));
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
+  await t('un hotel de Booking con nota menor a 8 no llega a la pantalla', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    // Booking devuelve primero lo que a el le parece bueno, no lo barato ni lo
+    // bien valorado: el 7,2 suele abrir la lista. El filtro tiene que sacar
+    // ese primero, no dejar que el precio lo ubique adelante de los demas.
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'bajo-1', property: { name: 'Hotel nota 7,2', reviewScore: 7.2 }, priceBreakdown: { grossPrice: { value: 420, currency: 'USD' } } },
+        { hotel_id: 'bajo-2', property: { name: 'Hotel nota 7,9', reviewScore: 7.9 }, priceBreakdown: { grossPrice: { value: 460, currency: 'USD' } } },
+        { hotel_id: 'alto-1', property: { name: 'Hotel nota 8,0', reviewScore: 8.0 }, priceBreakdown: { grossPrice: { value: 520, currency: 'USD' } } },
+        { hotel_id: 'alto-2', property: { name: 'Hotel nota 9,4', reviewScore: 9.4 }, priceBreakdown: { grossPrice: { value: 600, currency: 'USD' } } },
+        { hotel_id: 'sin-nota', property: { name: 'Hotel sin nota' }, priceBreakdown: { grossPrice: { value: 480, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      const list = await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 });
+      const nombres = list.map(function (hotel) { return hotel.name; });
+      assert.ok(!nombres.includes('Hotel nota 7,2'), 'un 7,2 no puede llegar a la pantalla');
+      assert.ok(!nombres.includes('Hotel nota 7,9'), 'un 7,9 no puede llegar a la pantalla');
+      assert.ok(nombres.includes('Hotel nota 8,0'), 'el 8,0 es el piso: entra');
+      assert.ok(nombres.includes('Hotel nota 9,4'), 'el 9,4 entra');
+      assert.ok(nombres.includes('Hotel sin nota'),
+        'un hotel al que Booking no puntuó no se descarta: "sin dato" no es "nota baja"');
+      // Y que el descarte no se haya desperdiciado: los 3 que quedan tienen que ser
+      // los que pasaron la nota, no un relleno de respaldo.
+      const reales = list.filter(function (hotel) { return hotel.source === 'booking'; });
+      assert.strictEqual(reales.length, 3, 'los tres que pasan la nota llenan la lista sin el puesto');
+      assert.ok(reales.every(function (hotel) { return Number(hotel.rating) === 0 || hotel.rating >= 8; }),
+        'ningun hotel que llega puede tener nota menor a 8');
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
+  await t('el filtro de nota avisa cuantos dejo afuera y por que', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'bajo-1', property: { name: 'Hotel nota 6,8', reviewScore: 6.8 }, priceBreakdown: { grossPrice: { value: 420, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    try {
+      const diag = {};
+      await app.hotelRecommendations('fln', 'Florianópolis', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 }, diag);
+      assert.strictEqual(diag.descartadosPorNota, 1,
+        'el diagnostico tiene que decir cuantos se fueron por la nota y no por el precio');
+      assert.strictEqual(diag.notaMinima, 8, 'el piso de nota viaja al front para poder explicarlo');
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
+  });
   /* Los tipos que el selector ofrece tienen que coincidir con los que la función
-     devuelve. Cuando no coincidian, el cliente los usaba para corregir el tipo
+     devuelve. Cuando no coincididian, el cliente los usaba para corregir el tipo
      elegido —cambiandolo por el primero de la lista— y despues filtraba las
      cards por ese tipo nuevo, con lo cual la lista quedaba en cero: en pantalla
      "Hoteles para viajar intermedio" con el selector en "Económico" y abajo "No

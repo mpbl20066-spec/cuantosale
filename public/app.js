@@ -1986,6 +1986,25 @@
     if (fixed.indexOf('\uFFFD') >= 0) return text;
     return fixed;
   }
+  /* Nota minima de Booking para mostrar un hotel: 8,0.
+
+   El filtro de verdad esta en el server (server.js hotelPasaLaNota), antes del
+   precio y del slice(0, 3): filtrando alla se descartan los malos y todavia
+   llegan tres buenos. Esta copia existe para los dos caminos en que el cliente
+   muestra hoteles sin pasar por el server —la respuesta ya veio en un payload
+   guardado o la lista de una playa— y para que la regla este escrita una sola
+   vez en el lugar donde se lee.
+
+   Sin nota NO se descarta. El 0 de `rating` es la convencion para "Booking no
+   trajo el dato": la ficha ya omite el bloque de opinion cuando vale 0, asi que
+   un hotel sin nota se muestra sin nota, no con un "0,0" que nadie eligio. */
+var HOTEL_NOTA_MINIMA = 8;
+  function hotelPasaLaNota(hotel) {
+    var nota = Number(hotel && hotel.rating) || 0;
+    if (!(nota > 0)) return true;
+    return nota >= HOTEL_NOTA_MINIMA;
+  }
+
   function normalizeHotelCatalog(catalog, defaultHotel) {
     var unique = [];
     var seen = new Set();
@@ -2137,6 +2156,74 @@
     // Margen de 1 porque el total guardado viene de un data-hotel-total ya
     // redondeado al pintarse.
     return Math.abs(guardado - totalValue) < 1;
+  }
+  /* El hotel guardado tiene que existir en la lista que se esta mostrando.
+
+     Es la garantia de que la categoria que dice el encabezado sea la categoria
+     del hotel marcado. Sin esto pasaba por cuatro caminos distintos:
+
+     - abrir un viaje guardado: applySavedTripToDetail corre DESPUES de
+       showProposalView, que a su vez pide los hoteles de forma asincrona. Cuando
+       la lista llega, hotelElegidoPorUsuario ya era true y la busqueda no
+       elegia nada; como el total guardado no estaba en las cards nuevas, no
+       habia radio marcado, y el panel "Mi Viaje" seguia cobrando un hotel que
+       no estaba en la pantalla.
+     - cambiar el nivel del viaje en la ventana principal con el detalle
+       abierto: #seg cambia S.style y S.hotelType, pero no toca detailState, asi
+       que la seccion de alojamiento seguia mostrando la categoria anterior con
+       el hotel de esa.
+     - que resolveHotelTypeForMeta baje el tipo a uno disponible: cambia el
+       encabezado y el filtro sin tocar la seleccion.
+     - el repintado por cambio de moneda, que vuelve a dibujar los radios.
+
+     El peor de los cuatro no es que falte un hotel: es que el total del viaje
+     cobre algo que la persona no puede ver ni tocar. Un filtro que esconde la
+     ficha del hotel marcado tiene que devolver la seleccion, no dejarla
+     colgando.
+
+     Se fija por NOMBRE y no solo por total: el total depende de las fechas, de
+     la moneda y del multiplicador de la categoria, asi que el mismo hotel puede
+     tener otro total sin haber cambiado de lugar. El nombre es la clave que ya
+     usa la carga de un viaje guardado. */
+  function hotelGuardadoEstaEnLaLista() {
+    if (!detailState || !detailState.selectedHotel) return true;
+    var nombre = String(detailState.selectedHotelName || '').trim();
+    // Sin nombre no hay nada que cruzar: puede ser el placeholder del modelo
+    // ("Hotel recomendado"), que todavia no es una eleccion de la persona.
+    if (!nombre || nombre === 'Hotel recomendado') return true;
+    var cards = document.querySelectorAll('[data-hotel-total]');
+    if (!cards.length) return true;   // todavia no hay lista: no se juzga
+    for (var i = 0; i < cards.length; i++) {
+      var card = cards[i].closest('[data-hotel-option]');
+      var titulo = card && card.querySelector('h3');
+      if (titulo && normalizeDestinationText(titulo.textContent) === normalizeDestinationText(nombre)) return true;
+    }
+    return false;
+  }
+  /* Suelta la seleccion cuando el hotel marcado no esta en la lista, y deja que
+     el marcado de la lista caiga en el recomendado de la categoria que se este
+     mostrando. Devuelve true si hubo que soltar algo, para que el que llame
+     sepa si tiene que repintar. */
+  function soltarHotelSiNoEstaEnLaLista() {
+    if (hotelGuardadoEstaEnLaLista()) return false;
+    if (!detailState) return false;
+    // No se toca la seleccion si la persona la deshizo a proposito: "Sin
+    // alojamiento" es una decision, no un hotel que se perdio.
+    if (detailState.selectedHotel === false) return false;
+    if (!hotelElegido() && !detailState.hotelElegidoPorUsuario) return false;
+    detailState.selectedHotelName = 'Hotel recomendado';
+    detailState.selectedHotelTotal = null;
+    detailState.hotelDecided = false;
+    detailState.hotelElegidoPorUsuario = false;
+    detailState.roomChoice = {};
+    if (detailState.multiStay) detailState.multiStay.selectedStayTotals = {};
+    // El monto vuelve a la estimacion del modelo de esta categoria, que es lo
+    // que hotelSumado() ya usaba antes de que la persona tocara una card.
+    if (detailState.originalHotelEstimate) {
+      var tipo = resolveHotelTypeForMeta(detailState.meta);
+      detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelTypeFactor(tipo));
+    }
+    return true;
   }
   /* ---------- viajes de dos paradas: reparto de noches y una eleccion por parada ---------- */
 
@@ -2402,7 +2489,17 @@
       var stopName = stop === 1 ? reparto.firstName : (stop === 2 ? reparto.secondName : meta.dest.name);
       var stopNights = stop === 1 ? reparto.first : (stop === 2 ? reparto.second : nights);
       var defaultHotel = { tier: profile.tier, name: '', similar: [], image: '' };
-      var catalog0 = normalizeHotelCatalog(Array.isArray(catalog) ? catalog : [], defaultHotel);
+      /* La nota se saca antes de la categoria y antes de normalizeHotelCatalog(): si
+         el hotel con nota baja se quedara en la lista, apareceria una ficha con
+         "7,4" al lado de un filtro que promete 8 o mas, y el filtro de tipo
+         contaria un hotel que despues no se muestra. */
+      var catalogoBruto = Array.isArray(catalog) ? catalog : [];
+      var descartadosPorNota = catalogoBruto.filter(function (h) { return !hotelPasaLaNota(h); });
+      var notasDeLasDescartadas = descartadosPorNota.map(function (h) { return Number(h.rating) || 0; }).filter(function (n) { return n > 0; });
+      var notaMasBaja = notasDeLasDescartadas.length ? Math.min.apply(null, notasDeLasDescartadas) : 0;
+      var notaMasAlta = notasDeLasDescartadas.length ? Math.max.apply(null, notasDeLasDescartadas) : 0;
+      var conNota = catalogoBruto.filter(hotelPasaLaNota);
+      var catalog0 = normalizeHotelCatalog(conNota, defaultHotel);
       var hotelCatalog = hotelesQuePasanElTipo(catalog0, hotelType, strictType);
       if (hotelCatalog.length < catalog0.length && !strictType) {
         console.warn('[hoteles] el filtro de tipo dejo afuera ' + (catalog0.length - hotelCatalog.length) +
@@ -2482,6 +2579,19 @@
       if (hotelSoloReservables && hotelCatalog.length && !conDisponibilidad.length) {
         vacio = '<p class="hotel-group__empty">De los ' + hotelCatalog.length + ' alojamientos de categoría ' + esc(typeLabel)
           + ' que encontramos en ' + esc(stopName) + ', ninguno tiene disponibilidad confirmada para estas fechas. Los que había eran estimaciones de precio, no reservas. Probá con otras fechas o mirá la disponibilidad real en Booking.</p>';
+      }
+      /* Y el estado vacío de la NOTA, que es distinto del de la categoría.
+
+         Decir "no encontramos alojamientos de categoría Económico" cuando lo
+         que pasó es que los Económicos que había tienen 7,8 y 7,4: el mensaje
+         afirma una cosa y la persona entiende que ese destino no tiene buenos
+         hoteles, que es falso. Acá se dice que hubo hoteles, se dice cuántos y
+         hasta qué nota llegan. Es la diferencia entre un filtro que informa y
+         uno que se hace el misterioso. */
+      if (!conDisponibilidad.length && descartadosPorNota.length) {
+        vacio = '<p class="hotel-group__empty">En ' + esc(stopName) + ' para estas fechas encontramos ' + hotelCatalog.length + ' alojamientos de categoría ' + esc(typeLabel)
+          + ' y ninguno llega al ' + HOTEL_NOTA_MINIMA + ',0 de nota. Los ' + descartadosPorNota.length + ' que quedan afuera tienen entre '
+          + String(notaMasBaja).replace('.', ',') + ' y ' + String(notaMasAlta).replace('.', ',') + '. Podés ver todos en Booking.</p>';
       }
       /* El link del estado vacío lleva el filtro de Booking cuando el tipo lo
          necesita. Para All Inclusive, mealplan=5 es lo que hace que la búsqueda
@@ -2616,7 +2726,12 @@
       var gruposPlaya = stop === 2 ? meta.hotelsPorPlayaSecond : meta.hotelsPorPlaya;
       if (Array.isArray(gruposPlaya)) {
         gruposPlaya.forEach(function (g) {
-          var lista = hotelesQuePasanElTipo(normalizeHotelCatalog(g.hotels, defaultHotel), hotelType, strictType);
+          // La nota se filtra antes de la categoria, por el mismo motivo que en
+          // el server: si una playa queda en cero solo por la nota, el mensaje
+          // "no encontramos en esta playa" mezcla las dos cosas y la persona
+          // cree que no hay hoteles ahi.
+          var conNota = (g.hotels || []).filter(hotelPasaLaNota);
+          var lista = hotelesQuePasanElTipo(normalizeHotelCatalog(conNota, defaultHotel), hotelType, strictType);
           if (hotelSoloReservables) lista = lista.filter(function (item) { return item.source === 'booking'; });
           if (lista.length) secciones.push({ playa: g.playa, lista: lista });
         });
@@ -4125,6 +4240,7 @@
       // dejaba el titulo del placeholder arriba del titulo nuevo.
       var cached = document.querySelector('[data-hotels-block]');
       if (cached) cached.outerHTML = hotelOptions(meta, accommodationTotal);
+      soltarHotelSiNoEstaEnLaLista();
       return;
     }
     var params = new URLSearchParams({ dest: meta.dest.key, dep: meta.dep, ret: meta.ret, pax: meta.pax, style: meta.style || 'eq', hotel_type: meta.hotelType || 'intermedio', subcategory: meta.subcategory || '' });
@@ -4174,6 +4290,12 @@
          el token se pide en /api/guia/token, en el click. */
       var current = document.querySelector('[data-hotels-block]');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
+      /* Si el hotel marcado no esta en la lista que se acaba de pintar, se
+         suelta ANTES de buscar un marcado de reemplazo. Sin esto, un hotel
+         guardado que dejo de ofrecerse deja la lista sin radio y el panel "Mi
+         Viaje" lo sigue cobrando: un total que no aparece en ninguna parte de
+         la pantalla. Ver soltarHotelSiNoEstaEnLaLista(). */
+      soltarHotelSiNoEstaEnLaLista();
       // Cada parada toma su recomendado. Con querySelector pelado solo se
       // marcaba el primero de la pagina: en un viaje combinado la segunda parada
       // se quedaba sin hotel y volvia al estimado del modelo, que es
@@ -4222,6 +4344,7 @@
       meta.hotelsLoaded = true;
       var current = document.querySelector('[data-hotels-block]');
       if (current) current.outerHTML = hotelOptions(meta, accommodationTotal);
+      soltarHotelSiNoEstaEnLaLista();
       var nuevoBloque = document.querySelector('[data-hotels-block]');
       if (nuevoBloque) {
         var errHot = errorDeRed(error, 'No pudimos cargar los hoteles');
@@ -7409,6 +7532,7 @@
     var listaHoteles = document.querySelector('[data-hotels-block]');
     if (listaHoteles && detailState.meta.hotelsLoaded) {
       listaHoteles.outerHTML = hotelOptions(detailState.meta, detailState.hotel);
+      soltarHotelSiNoEstaEnLaLista();
     }
     var traslado = document.querySelector('[data-official-transfer]');
     if (traslado) traslado.outerHTML = transferCard(detailState.meta);
@@ -11396,6 +11520,26 @@
       detailState.selectedHotel = true;
       detailState.selectedHotelTotal = Math.round(Number(details.hotel.total) || 0) || null;
       detailState.selectedHotelName = details.hotel.name || detailState.selectedHotelName;
+      /* Aca NO se puede marcar nada todavia: esta funcion corre apenas
+         showProposalView() vuelve, y los hoteles se piden despues, por red. El
+         bucle de abajo no encuentra ni una card y no deja rastro.
+
+         Lo que si importa es el category check: si el viaje se guardo con un
+         tipo de alojamiento (boutique, por subcategoria) y la pantalla esta
+         mostrando el economico porque es lo unico que hay en el destino, el
+         hotel guardado no puede seguir siendo el marcado. Se resuelve aca y no
+         esperando a la lista, porque mientras tanto el "Mi Viaje" ya lo esta
+         cobrando. El hotel guardado tampoco puede ser de una banda de precio
+         que la categoria nueva no incluye, asi que la comparacion es por tipo,
+         no por nombre. */
+      if (details.hotelType && details.hotelType !== resolveHotelTypeForMeta(detailState.meta)) {
+        detailState.selectedHotelName = 'Hotel recomendado';
+        detailState.selectedHotelTotal = null;
+        detailState.hotelDecided = false;
+        detailState.hotelElegidoPorUsuario = false;
+        detailState.roomChoice = {};
+        detailState.hotel = Math.round((Number(detailState.originalHotelEstimate) || 0) * hotelTypeFactor(resolveHotelTypeForMeta(detailState.meta)));
+      }
       var hotelOptions = document.querySelectorAll('[data-hotel-option]');
       Array.prototype.forEach.call(hotelOptions, function (option) {
         var title = option.querySelector('h3');
@@ -12947,6 +13091,19 @@ function comboNombreDestino() {
       S.style = b.getAttribute('data-v');
       if (!S.hotelTypeExplicit) S.hotelType = hotelTypeForStyle(S.style);
       Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      /* Si hay una propuesta abierta, su tipo de alojamiento tiene que seguir al
+         nivel del viaje. Antes el selector de nivel cambiaba S.style y nada mas:
+         el detalle ya montado seguia con el tipo anterior —el encabezado decia
+         "Hoteles para viajar económico" y el hotel marcado era el comfortable—
+         hasta que se volvia a abrir la propuesta, que recien ahi reconstruye
+         detailState desde cero. El hotel elegido se suelta; la lista se vuelve a
+         pedir con el tipo nuevo. */
+      if (detailState && detailState.meta) {
+        var tipoNuevo = hotelTypeForStyle(S.style);
+        if (!S.hotelTypeExplicit && resolveHotelTypeForMeta(detailState.meta) !== tipoNuevo) {
+          changeHotelType(tipoNuevo);
+        }
+      }
       schedule();
     });
     $('#trip-summary').addEventListener('click', function (e) {

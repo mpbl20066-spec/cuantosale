@@ -582,6 +582,33 @@ function hotelPasaElPrecio(hotel, type, budgetTarget) {
   // decide el multiplicador del tipo, no el objetivo de la categoria.
   return true;
 }
+/* Nota minima de Booking para entrar a la lista: 8,0.
+
+   Booking ordena sus resultados por lo que le parece, no por lo que la gente
+   quiere para este viaje: el mismo destino y las mismas fechas devuelven un 7,4
+   por delante de un 9,1. Ademas el selector de precio ya devuelve los mas
+   baratos de la banda, que suelen ser los mas viejos y peor puntuados.
+
+   Un 8 es un piso, no una preferencia fina: por debajo la percepcion de la
+   estadia cae a "el hotel estaba bien", que es exactamente lo que hace que una
+   persona no vuelva.
+
+   El filtro va ACÁ, antes del precio, del tipo y del slice(0, 3), y no al final:
+   filtrando despues se muestra "menos de 3" sin que se note que hubo un
+   descarte, y el que se descarto era justamente el que la persona no queria ver.
+
+   Un hotel SIN nota no se descarta. El 0 de `rating` es la convencion del
+   mapper para "Booking no trajo el dato", no "puntaje cero" —los hoteles de
+   respaldo inventados por fallbackHotelsFor() tambien traen 0, pero esos no
+   llegan acá: son synthesized despues, en el segundo passed. Descartarlos seria
+   borrar hoteles reales que la API simplemente no puntuó. Un hotel de 7,9 sí se
+   descarta: ese 7,9 existe. */
+const HOTEL_NOTA_MINIMA = 8;
+function hotelPasaLaNota(hotel) {
+  const nota = Number(hotel && hotel.rating) || 0;
+  if (!(nota > 0)) return true;
+  return nota >= HOTEL_NOTA_MINIMA;
+}
 function hotelEsDelTipo(hotel, type) {
   if (!type || HOTEL_SPECTRUM_TYPES.has(type)) return true;
   const text = normalizeHotelKey([hotel.name, hotel.propertyType, hotel.description, hotel.categoryText].filter(Boolean).join(' '));
@@ -827,7 +854,12 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
     //como si fueran cotizaciones. Con `diag` el front puede decirlo.
     if (diag) diag.bookingError = motivo;
   }
-  const pricedTodos = uniqueHotelList(realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; }))
+  const conPrecio = realHotels.filter(function (hotel) { return hotel && hotel.name && Number(hotel.perNight) > 0; });
+  // La nota se saca ANTES de deduplicar: si el mismo hotel llega dos veces con
+  // distinta nota (Booking cambia la puntuacion entre llamadas y el cache es
+  // de proceso), quedarse con el primero puede dejar la version mala.
+  const sinNotaBaja = conPrecio.filter(function (hotel) { return !hotelPasaLaNota(hotel); });
+  const pricedTodos = uniqueHotelList(conPrecio.filter(hotelPasaLaNota))
     .map(function (hotel) {
       // Playa mas cercana y distancia al centro, calculadas con las coordenadas
       // que manda Booking (ver lib/playas.js).
@@ -838,6 +870,12 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   // cuantos vinieron con precio real de Booking: si es 0, lo que se muestra en
   // pantalla es estimacion del modelo, y el front tiene que poder decirlo.
   if (diag) diag.bookingCount = priced.length;
+  /* cuantos se fueron por la nota, y no por el precio ni por la categoria.
+     El front lo muestra en el estado vacio: "no encontramos" sin decir por que
+     es indistinguible de un destino que no tiene hoteles, y la conclusion que
+     saca la gente ("este destino no tiene buenos hoteles") es falsa. */
+  if (diag) diag.notaMinima = HOTEL_NOTA_MINIMA;
+  if (diag) diag.descartadosPorNota = sinNotaBaja.length;
   /* Que tipos hay de verdad entre los hoteles reales que llegaron.
 
      Esto tiene que COINCIDIR con lo que la seleccion de abajo devuelve, porque el
@@ -1908,6 +1946,13 @@ async function cotizarHoteles(req, res, url) {
     bookingError: hotelDiag.bookingError || null,
     bookingCountSecond: Number(hotelDiagSecond.bookingCount) || 0,
     bookingErrorSecond: hotelDiagSecond.bookingError || null,
+    /* cuantos se fueron por la nota y cual es el piso. Sin esto, una lista vacia por
+       el filtro de nota y una lista vacia porque el destino no tiene hoteles son
+       la misma pantalla, y la persona cree que ese destino no tiene buenos
+       hoteles cuando lo que paso es que no los trae. El estado vacio del
+       cliente usa estos dos numeros para explicar el descarte. */
+    notaMinima: hotelDiag.notaMinima || HOTEL_NOTA_MINIMA,
+    descartadosPorNota: Number(hotelDiag.descartadosPorNota) || 0,
     // Que tipos de alojamiento offering de verdad para este destino. El selector
     // los ofrece todos y con esto puede dejar de ofrecer los que no existen: en Rio
     // no hay ni un resort entre los 20 hoteles que trae Booking, y ofrecerlo
