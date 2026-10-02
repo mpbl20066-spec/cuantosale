@@ -3813,3 +3813,24 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
    "Pendiente de reserva", para que no se lea como el primer paso de nuevo. */
 .vplan-btn.is-reabrir{border-color:color-mix(in srgb,var(--cel) 55%,transparent);color:var(--cel)}
 .vplan-btn.is-reabrir:hover{background:var(--cel-soft);color:var(--cel);border-color:var(--cel)}
+
+/* Resumen de presupuesto: jerarquia, origen de cada reserva y espaciado */
+.vplan-cta .voucher-reserve__btn{border-radius:12px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.vplan .vplan-btn,.vplan .vplan-pie .voucher-asesor__btn{border-radius:12px}
+/* Origen: "externo" se gestiona fuera (flecha, tono frio); "nuestro" lo hacemos aca (tilde, verde) */
+.vplan-row__sub.is-externo,.vplan-card__hint.is-externo{display:flex;align-items:center;gap:5px;color:var(--cel);font-weight:600}
+.vplan-card__hint.is-externo{justify-content:center}
+.vplan-row__sub.is-externo::before,.vplan-card__hint.is-externo::before{content:"\2197";font-weight:800}
+.vplan-row__sub.is-nuestro{display:flex;align-items:center;gap:5px;color:var(--good);font-weight:600}
+.vplan-row__sub.is-nuestro::before{content:"\2713";font-weight:800}
+.vplan-row__side b.is-zero{font-style:italic}
+/* Espaciado entre desglose en destino y totales */
+.vplan-destino{gap:10px;padding:16px 0 4px;margin-top:4px}
+.vplan-destino li{line-height:1.35}
+.vplan-total{margin-top:20px;padding:18px 16px;gap:10px}
+.vplan-total .vplan-total__final{margin-top:6px;padding-top:14px}
+.vplan .voucher-canales{margin:10px 0 0}
+/* El asesor por WhatsApp conserva su lugar y deja aire antes del CTA fijo */
+.vplan .vplan-pie{margin:14px 0 22px;gap:14px}
+.vplan .vplan-pie .voucher-asesor{border:1px solid color-mix(in srgb,#25d366 45%,var(--line))}
+@media (max-width:560px){.vplan-card{gap:14px}.vplan-total{margin-top:22px}.vplan-cta .voucher-reserve__btn{min-height:54px}}

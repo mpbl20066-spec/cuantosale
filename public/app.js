@@ -5705,41 +5705,50 @@
   }
 
   /* Mensaje para el asesor: estructura fija, sin enlaces ni referencias al grupo
-     de gastos. El estado sale de lo que esta elegido en el viaje. */
+     de gastos. El estado sale de lo que esta elegido en el viaje.
+
+     Formato pensado para leerse en el celular: un saludo, un titulo y una
+     vineta por dato, cada una con su emoji. Va en una sola funcion porque el
+     texto es lo primero que lee el asesor y tiene que salir igual desde donde
+     se lo pida. */
   function mensajeCoordinar() {
     if (!detailState || !detailState.meta) return null;
     var meta = detailState.meta;
-    var destino = meta.dest.name + (meta.dest.country || 'Brasil' ? ' (' + (meta.dest.country || 'Brasil') + ')' : '');
+    var pais = meta.dest.country || 'Brasil';
+    var destino = meta.dest.name + ', ' + pais + (pais === 'Brasil' ? ' 🇧🇷' : '');
     var noches = Math.max(1, Number(meta.nights) || 1);
     var pax = Math.max(1, Number(meta.pax) || 1);
     var pedido = checkoutPedido();
-    var faltan = [], listos = [];
+    /* Cada rubro con su emoji, para que lo que falta se lea de un vistazo: el
+       asesor sabe por donde empezar y la persona ve que el mensaje es suyo. */
+    var rubros = [];
     var modo = detailState.transportMode;
-    if (modo !== 'auto' && modo !== 'bus') (getSelectedFlightSummary().selected ? listos : faltan).push('vuelos');
-    (hotelElegido() ? listos : faltan).push('alojamiento');
-    (pedido.hasTransfer ? listos : faltan).push('traslados');
-    (pedido.tours.length ? listos : faltan).push('actividades');
-    var unir = function (xs) { return xs.length > 1 ? xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1] : xs[0]; };
+    if (modo !== 'auto' && modo !== 'bus') rubros.push({ nombre: 'vuelos', emoji: '✈️', listo: !!getSelectedFlightSummary().selected });
+    rubros.push({ nombre: 'alojamiento', emoji: '🏨', listo: !!hotelElegido() });
+    rubros.push({ nombre: 'traslados', emoji: '🚗', listo: !!pedido.hasTransfer });
+    rubros.push({ nombre: 'actividades', emoji: '✨', listo: pedido.tours.length > 0 });
+    var listos = rubros.filter(function (r) { return r.listo; });
+    var faltan = rubros.filter(function (r) { return !r.listo; });
+    var nombres = function (xs) { var n = xs.map(function (r) { return r.nombre; }); return n.length > 1 ? n.slice(0, -1).join(', ') + ' y ' + n[n.length - 1] : n[0]; };
     var estado = [];
-    if (faltan.length) estado.push('Faltan definir ' + unir(faltan));
-    if (listos.length) estado.push(unir(listos) + (listos.length > 1 ? ' seleccionados' : ' seleccionado'));
+    if (listos.length) {
+      var seleccionados = nombres(listos) + (listos.length > 1 ? ' seleccionados' : ' seleccionado');
+      estado.push(seleccionados.charAt(0).toUpperCase() + seleccionados.slice(1) + ' ✅');
+    }
+    if (faltan.length) estado.push('Faltan definir ' + nombres(faltan) + ' ' + faltan.map(function (r) { return r.emoji; }).join(''));
     var total = Math.round(Number(getBudgetBreakdown(detailState).total) || 0);
     return [
-      'Hola, quiero coordinar mi viaje con la asistencia de un experto.',
+      '👋 ¡Hola! Quiero coordinar mi viaje con la asistencia de un experto.',
       '',
-      'Código de Presupuesto: ' + codigoPresupuesto(meta),
+      '📋 Detalles de mi solicitud:',
+      '• Código de Presupuesto: ' + codigoPresupuesto(meta),
+      '• Destino: ' + destino,
+      '• Fechas: ' + storyDateRange(meta) + ' (' + noches + (noches === 1 ? ' noche' : ' noches') + ') 🌴',
+      '• Viajeros: ' + pax + (pax === 1 ? ' adulto' : ' adultos') + ' 👥',
+      '• Presupuesto Estimado: ' + money(total) + ' 💰',
+      '• Estado actual: ' + estado.join(' | '),
       '',
-      'Destino: ' + destino,
-      '',
-      'Fechas: ' + storyDateRange(meta) + ' (' + noches + (noches === 1 ? ' noche' : ' noches') + ')',
-      '',
-      'Viajeros: ' + pax + (pax === 1 ? ' adulto' : ' adultos'),
-      '',
-      'Presupuesto Estimado: ' + money(total),
-      '',
-      'Estado actual: ' + estado.join('; ') + '.',
-      '',
-      'Por favor, contáctenme para avanzar con las reservas.'
+      'Me gustaría que me contacten para avanzar con las reservas y ultimar los detalles. ¡Muchas gracias!'
     ].join('\n');
   }
 
@@ -6843,7 +6852,7 @@
     var cardTransporte = '';
     if (busMode) {
       cardTransporte = '<article class="vplan-card">' + fila('bus', busTitle, busLines, precio(busTotal, true))
-        + '<p class="vplan-card__hint">Se compra directo con la empresa de bus</p></article>';
+        + '<p class="vplan-card__hint is-externo">Se compra directo con la empresa de bus</p></article>';
     } else if (!autoMode) {
       var vTitulo = flightSummary.selected
         ? 'Vuelo' + (flightSummary.airline ? ' ' + esc(flightSummary.airline) : '') + ' &middot; ' + esc(airportCode(flightSummary.origin)) + (flightSummary.isRoundTrip ? ' &#8596; ' : ' &rarr; ') + esc(airportCode(flightSummary.destination))
@@ -6852,7 +6861,7 @@
       var vVuelta = flightSummary.selected && flightSummary.isRoundTrip ? esc(flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText)) : '';
       if (/sin fecha/i.test(vVuelta)) vVuelta = '';  // sin hora real se pide elegirla
       var vCuerpo = flightSummary.selected
-        ? sub(vIda ? 'Ida ' + vIda : '') + (flightSummary.isRoundTrip ? (vVuelta ? sub('Vuelta ' + vVuelta) : sub('Vuelta: elegí la fecha', 'is-warn')) : '')
+        ? (flightProviderUrl ? sub('Se reserva en Google Flights', 'is-externo') : '') + sub(vIda ? 'Ida ' + vIda : '') + (flightSummary.isRoundTrip ? (vVuelta ? sub('Vuelta ' + vVuelta) : sub('Vuelta: elegí la fecha', 'is-warn')) : '')
         : sub('Elegí un vuelo para ver horarios y precio', 'is-warn');
       cardTransporte = '<article class="vplan-card" data-rubro="pasajes">' + fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true))
         + accionExterna('pasajes', flightBookUrl, flightProviderUrl ? 'Google Flights' : 'WhatsApp', !!flightSummary.selected, 'Elegir vuelo')
@@ -6862,7 +6871,7 @@
     // Paso: el alojamiento.
     var hTitulo = multiHotel ? hotelesElegidos.length + ' alojamientos' : (hotelElegido() ? esc(selectedHotelName) : 'Alojamiento &middot; sin elegir');
     var hCuerpo = hotelElegido()
-      ? (multiHotel ? hotelNote : '') + sub('Se reserva en Booking.com')
+      ? (multiHotel ? hotelNote : '') + sub('Se reserva en Booking.com', 'is-externo')
       : sub('Elegí dónde dormir para ver el precio', 'is-warn');
     var cardHotel = '<article class="vplan-card" data-rubro="alojamiento">' + fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true))
       + accionExterna('alojamiento', hotelBookUrl, 'Booking.com', hotelElegido(), 'Elegir hotel')
@@ -6873,8 +6882,8 @@
     if (!busMode && !autoMode) {
       filaTraslado = fila('traslados', hayTraslado ? transferTitle : 'Traslado',
         hayTraslado
-          ? sub(transferNote) + (estadoReserva('traslados') ? '' : cambiar('traslados', 'Cambiar traslado'))
-          : sub('Del aeropuerto a tu alojamiento') + cambiar('traslados', 'Elegir traslado'),
+          ? sub(transferNote, 'is-nuestro') + (estadoReserva('traslados') ? '' : cambiar('traslados', 'Cambiar traslado'))
+          : sub('Del aeropuerto a tu alojamiento', 'is-nuestro') + cambiar('traslados', 'Elegir traslado'),
         precio(transferTotal, false, 'A elegir'));
     }
     var tTitulo = selectedTours.length === 1 ? esc(selectedTours[0].title)
@@ -6882,8 +6891,8 @@
         : 'Tours y actividades';
     var filaTours = fila('tours', tTitulo,
       selectedTours.length
-        ? sub(selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail)) + (estadoReserva('tours') ? '' : cambiar('tours', 'Cambiar tours'))
-        : sub('Sumá excursiones del destino') + cambiar('tours', 'Agregar tours'),
+        ? sub(selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail), 'is-nuestro') + (estadoReserva('tours') ? '' : cambiar('tours', 'Cambiar tours'))
+        : sub('Sumá excursiones del destino', 'is-nuestro') + cambiar('tours', 'Agregar tours'),
       precio(toursTotal, false, 'Opcional'));
     var cardNuestro = '<article class="vplan-card is-nuestro">' + filaTraslado + filaTours + '</article>';
 
@@ -13353,7 +13362,11 @@ function comboNombreDestino() {
         e.preventDefault();
         var texto = mensajeCoordinar();
         if (!texto) return;
-        window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank', 'noopener,noreferrer');
+        /* Al numero de reservas y no a wa.me/?text= a secas: sin numero
+           WhatsApp abre la lista de contactos y la persona tiene que elegir a
+           quien mandarlo, que es justo lo que este boton existe para evitar.
+           whatsappUrl() ya codifica el texto (emojis y saltos de linea). */
+        window.open(whatsappUrl(texto, WHATSAPP_RESERVAS), '_blank', 'noopener,noreferrer');
         return;
       }
 
