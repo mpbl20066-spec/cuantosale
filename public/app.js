@@ -6229,14 +6229,50 @@
       mostrarAvisoReserva(error.message || 'No pudimos sacar la marca.');
     }
   }
+  /* "Ya reservé", para el cliente, en vuelo y hotel.
+
+     El estado local va PRIMERO y se pinta al toque: la persona ya compro, y
+     hacerle esperar un round-trip a Supabase para ver su propia confirmacion es
+     una espera por algo que ya sabe. Si la escritura falla, el estado local
+     vuelve atras, porque un "Confirmado" que no se guardo se leeria en la
+     proxima carga como confirmado sin serlo. */
+  async function confirmarReservaPropia(categoria) {
+    if (!supabaseClient) await initAuth();
+    var viajeId = viajeReservaId();
+    if (!viajeId) return;
+    var antes = estadoLocal(categoria);
+    guardarEstadoLocal(categoria, 'reservado');
+    reservasViaje.categorias[categoria] = true;
+    pintarVoucherReservas();
+    try {
+      if (!supabaseClient) return;
+      var result = await supabaseClient.rpc('reservas_marcar', { p_viaje_id: viajeId, p_categoria: categoria, p_destino: reservaDestino(), p_detalle: { por: 'cliente' } });
+      if (result.error) throw new Error(result.error.message);
+    } catch (error) {
+      if (antes) guardarEstadoLocal(categoria, antes); else guardarEstadoLocal(categoria, '');
+      pintarVoucherReservas();
+      mostrarAvisoReserva('No pudimos guardar tu confirmación. Volvé a intentarlo.');
+      console.warn('[reservas] no se pudo confirmar', categoria, error);
+    }
+  }
+  /* Al revés: el rubro vuelve a "Pendiente de reserva". La marca de la base no
+     se toca —esa la puso el link y sigue siendo cierto que se abrió—; lo que
+     se saca es el "reservado" del estado local, que es lo unico que la persona
+     esta desmintiendo. Sin escritura: el estado local ya es la fuente del
+     "Confirmado" y asi se ve al instante. */
+  function devolverAReservaPendiente(categoria) {
+    guardarEstadoLocal(categoria, '');
+    pintarVoucherReservas();
+  }
   /* El aviso va arriba de la lista de rubros, no en un alert: el alert parte la
      pantalla y se pierde el scroll, y en un voucher de cuatro filas el error
      tiene que quedar al lado de la fila que falló. */
   function mostrarAvisoReserva(mensaje, tipo) {
     var modal = $('#booking-modal');
     if (!modal || modal.hidden || !modal.dataset.summaryText) return;
-    // Va debajo del avance del plan, arriba de las tarjetas.
-    var ancla = modal.querySelector('.vplan-progress');
+    // Va debajo del total, arriba de las tarjetas: es el primer lugar donde la
+    // persona mira y el error tiene que quedar a la vista.
+    var ancla = modal.querySelector('.vplan-suma');
     if (!ancla) return;
     var previo = modal.querySelector('[data-reserva-aviso]');
     if (previo) previo.parentNode.removeChild(previo);
@@ -6735,8 +6771,11 @@
     }
 
     /* Una sola linea, sin detallar quien cobra cada rubro: la app cotiza y
-       coordina, cada servicio se gestiona con su proveedor. */
-    var canalesTexto = '<p class="voucher-canales">Cotización integral estimada. Gestionás cada servicio de forma directa y segura con nuestros proveedores asociados.</p>';
+       coordina, cada servicio se gestiona con su proveedor. Va pegada al titulo
+       de las reservas externas, que es donde importa: ahi esta la advertencia de
+       que el precio es estimado y de que la compra se hace afuera. Arriba, en
+       el total, era una linea mas entre el numero y la primera tarjeta. */
+    var cotizacionNota = 'Cotización integral estimada. Cada servicio se gestiona con su proveedor.';
     /* El grupo va arriba, pegado al total: es lo que se hace apenas se ve el
        numero. Con grupo creado el bloque es el link para invitar (copiar,
        WhatsApp, abrir la cuenta); sin grupo, un solo boton que lo crea con este
@@ -6773,11 +6812,21 @@
        actividades), nunca el parcial de lo que se reserva por la app. Con algo para
        reservar en la app abre el checkout; si no, lleva al asesor. */
     /* ---------- "Tu plan de viaje" ----------
-       El resumen se lee como un plan en pasos, en el orden en que se hacen:
-       primero lo que se reserva en el sitio oficial (vuelo, hotel), despues lo
-       que se reserva con nosotros en un solo pago (traslado y tours) y al final
-       lo que no se reserva: lo que se gasta en destino. El total del plan es la
-       suma de lo que dicen sus tarjetas, asi cada numero tiene su lugar en la cuenta. */
+       El resumen se lee como una cuenta, no como un formulario: el total
+       arriba y despues los rubros en el orden en que se pagan —primero lo que
+       se reserva en el sitio oficial (vuelo, hotel), despues lo que se
+       reserva con nosotros en un solo pago (traslado y tours) y al final, y
+       plegado, lo que simplemente se gasta en destino.
+
+       La compactacion no es estetica. Con las cuatro tarjetas separadas, los
+       titulos de paso y el desglose abiertos, el modal media 1803 px de
+       contenido en 548 px de alto visible: tres pantallas y media de scroll
+       para leer un presupuesto. Ahora entra en una y media. Lo que se
+       sacrifico es lo que estaba dicho tres veces (el stepper, el titulo "PASO
+       1 Y 2 ..." y los badges "Externo / Con nosotros" repetian, los tres, que
+       el vuelo y el hotel se reservan afuera) y lo que repetia los importes
+       que cada tarjeta ya tiene al lado (el desglose del total volvia a
+       mostrar las tres mismas sumas). */
     var conNosotros = (busMode || autoMode ? 0 : transferTotal) + toursTotal;
     var oficiales = (autoMode ? 0 : busMode ? busTotal : flightTotal) + hotelTotal;
     var alquilerTotal = Math.round(Number(detailState.alquiler) || 0);
@@ -6787,23 +6836,6 @@
     var nuestroHecho = (hayTraslado || selectedTours.length)
       && (!hayTraslado || !!estadoReserva('traslados'))
       && (!selectedTours.length || !!estadoReserva('tours'));
-    var nuestroLabel = busMode || autoMode ? 'Tours' : 'Traslado + tour';
-    /* hecho: true / false, o null cuando no hay forma de saberlo (el bus se
-       compra con la empresa y la app no se entera). Un null no frena el paso
-       actual: si no, el plan quedaba clavado en el 1 para siempre. */
-    var pasosPlan = [];
-    if (!autoMode) pasosPlan.push({ label: busMode ? 'Bus' : 'Vuelo', hecho: busMode ? null : !!estadoReserva('pasajes') });
-    pasosPlan.push({ label: 'Hotel', hecho: !!estadoReserva('alojamiento') });
-    pasosPlan.push({ label: nuestroLabel, hecho: !!nuestroHecho });
-    var pasoActual = -1;
-    pasosPlan.forEach(function (p, i) { if (pasoActual < 0 && p.hecho === false) pasoActual = i; });
-    var reservadas = pasosPlan.filter(function (p) { return p.hecho === true; }).length;
-    var nExternos = pasosPlan.length - 1;
-    var stepper = '<ol class="vplan-steps">' + pasosPlan.map(function (p, i) {
-      return '<li class="vplan-steps__item' + (p.hecho ? ' is-done' : '') + (i === pasoActual ? ' is-now' : '') + '">'
-        + '<span class="vplan-steps__n" aria-hidden="true">' + (p.hecho ? '&#10003;' : (i + 1)) + '</span>' + esc(p.label) + '</li>';
-    }).join('') + '</ol>'
-      + '<p class="vplan-progress">' + reservadas + ' de ' + pasosPlan.length + ' reservadas</p>';
 
     // Icono en baldosa de color, en blanco. El color es del rubro.
     var TILE = { pasajes: '#2F6BFF', bus: '#2F6BFF', alojamiento: '#7C4DFF', traslados: '#12A38B', tours: '#E5484D', comidas: '#2A3A55' };
@@ -6814,47 +6846,97 @@
       if (!(monto > 0)) return '<div class="vplan-row__side"><b class="is-zero">' + esc(nota || 'A elegir') + '</b></div>';
       return '<div class="vplan-row__side"><b>' + (aprox ? '~' : '') + money(monto) + '</b>' + '' + '</div>';
     }
-    function badge(tipo) {
-      return tipo === 'externo' ? '<span class="vplan-badge is-externo">Externo &#8599;</span>' : '<span class="vplan-badge is-nuestro">Con nosotros</span>';
-    }
-    function fila(cat, titulo, cuerpo, lado, tipo) {
-      return '<div class="vplan-row" data-rubro="' + esc(cat) + '">' + tile(cat)
-        + '<div class="vplan-row__body">' + (tipo ? badge(tipo) : '') + '<p class="vplan-row__title">' + titulo
-        + (estadoReserva(cat) ? ' <span class="vplan-row__estado">' + chipReserva(cat) + '</span>' : '')
-        + '</p>' + cuerpo + '</div>' + lado + '</div>';
+    /* La pastilla de estado va en su propia linea, arriba de la bajada, y no
+       pegada al final del titulo. Los titulos de vuelo y de hotel son largos
+       (aerolinea, dos airports, nombre del alojamiento) y con la pastilla al
+       lado el nombre se partia en dos lineas con un "Pendiente de reserva"
+       colgando del medio. En su linea el estado se lee de un vistazo y el
+       titulo ocupa el ancho entero.
+
+       Los badges "Externo / Con nosotros" tambien se fueron: el titulo de la
+       tarjeta de arriba ya dice de quien es cada rubro, y la flecha del boton
+       dice que se abre afuera. Tres veces lo mismo es una vez. */
+    function fila(cat, titulo, cuerpo, lado, acciones) {
+      var estado = estadoReserva(cat);
+      return '<div class="vplan-row' + (estado ? ' is-' + (estado === 'Reservado' ? 'reservado' : 'pendiente') : '') + '" data-rubro="' + esc(cat) + '">' + tile(cat)
+        + '<div class="vplan-row__body"><p class="vplan-row__title">' + titulo + '</p>'
+        + (estado ? chipReserva(cat) : '')
+        + cuerpo
+        + (acciones || '')
+        + '</div>' + lado + '</div>';
     }
     function sub(texto, clase) { return texto ? '<p class="vplan-row__sub' + (clase ? ' ' + clase : '') + '">' + texto + '</p>' : ''; }
     function cambiar(cat, texto) { return '<button type="button" class="vplan-link" data-detalle-rubro="' + cat + '">' + texto + '</button>'; }
-    /* La accion grande de la tarjeta externa: el link al sitio oficial. Reservado,
-       el link ya se uso y en su lugar queda el estado (la agencia lo puede deshacer).
+    /* La bajada y su link "Cambiar" van en la MISMA linea. Eran dos: la bajada
+       (horarios, nota del traslado, nombres de los tours) y abajo, solo y
+       centrado, un "Cambiar vuelo". Cuatro lineas de link que no eran ningun
+       dato, y empujaban el presupuesto fuera de la primera pantalla. */
+    function bajada(cat, texto, etiquetaCambiar, clase) {
+      var link = etiquetaCambiar ? cambiar(cat, etiquetaCambiar) : '';
+      if (!texto) return link ? '<p class="vplan-row__sub">' + link + '</p>' : '';
+      return '<p class="vplan-row__sub' + (clase ? ' ' + clase : '') + '">' + texto + (link ? ' ' + link : '') + '</p>';
+    }
+    /* Los links que NO son "Cambiar": reabrir el link al proveedor, volver
+       atras de una confirmacion y, para la agencia, sacar la marca. Van en una
+       linea aparte porque son acciones de estado, no de lectura. */
+    function linksDeFila(cat, extra) {
+      var html = [extra || '', controlReserva(cat)].filter(Boolean).join('');
+      return html ? '<div class="vplan-card__links">' + html + '</div>' : '';
+    }
+    /* Las acciones de una reserva externa. El link a Google Flights o a Booking
+       no se pierde nunca: es lo unico que la app puede hacer por ese rubro, y
+       quien vuelve de la otra pestana —con la compra a medio hacer o sin
+       hacer— no tiene forma de reabrirla de nuevo.
+
+       Los tres estados:
+
+       - sin abrir el link: un boton solo, "Reservar en <sitio>".
+       - con el link ya abierto, que es "Pendiente de reserva": el link VUELVE,
+         como "Volver a reservar", y al lado "Ya reserve". Antes ese estado
+         reemplazaba el link por la etiqueta y no habia salida; ahora la persona
+         misma cierra el circulo cuando compra, sin esperar a que la agencia lo
+         marque.
+       - confirmado: el link queda como link chico y manda el estado. "No,
+         todavia no" devuelve el rubro a pendiente, que es lo que necesita el
+         que confirmo por error. El boton de la agencia, que borra la marca
+         entera, sigue siendo de la agencia.
 
        "Pendiente de reserva" no es reservado: es haber abierto Booking o Google
-       Flights, sin saber si la compra termino. Antes ese estado tambien
-       reemplazaba el link por la etiqueta, asi que quien volvia a la app con la
-       pestaña cerrada no tenia como reabrir el hotel o el vuelo que estaba
-       comprando. Ahora el boton sigue, como secundario y con otro texto, y
-       apunta a la misma URL de afiliado. No lleva data-reservar-rubro: el rubro
-       ya quedo marcado con el primer clic y no hace falta marcarlo de nuevo. */
-    function accionExterna(cat, url, sitio, elegido, elegir) {
-      if (estadoReserva(cat) === 'Solicitado' && canalDe(cat).externo && url) {
-        var reabrir = sitio === 'WhatsApp' ? 'Volver a WhatsApp' : 'Ver en ' + sitio;
-        return '<a class="vplan-btn is-reabrir" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer" title="La compra se completa en ' + esc(sitio) + '. Reabrí la página si cerraste la pestaña.">' + esc(reabrir) + ' <span aria-hidden="true">&#8599;</span></a>'
-          + (soyAgencia ? '<div class="vplan-card__estado">' + reservadoCta(cat, 'Quitar la marca de reservado y volver a reservar.') + '</div>' : '');
+       Flights, sin saber si la compra termino. Ningun link lleva estado
+       adentro, asi que un "?status=..." inventado en la barra no produce nada:
+       la verdad la sigue poniendo la persona o la agencia. */
+    function accionesExternas(cat, url, sitio, elegido, etiquetaElegir) {
+      var estado = estadoReserva(cat);
+      function reabrir() {
+        if (!url) return '';
+        var texto = sitio === 'WhatsApp' ? 'Volver a WhatsApp' : 'Volver a ' + sitio;
+        return '<a class="vplan-btn is-reabrir" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer" title="La compra se completa en ' + esc(sitio) + '. Reabrí la página si cerraste la pestaña.">' + esc(texto) + ' <span aria-hidden="true">&#8599;</span></a>';
       }
-      if (estadoReserva(cat)) return '<div class="vplan-card__estado">' + reservadoCta(cat, 'Quitar la marca de reservado y volver a reservar.') + '</div>';
-      if (!elegido) return '<button type="button" class="vplan-btn" data-detalle-rubro="' + cat + '">' + elegir + '</button>';
-      if (!url) return '';
-      return '<a class="vplan-btn" data-reservar-rubro="' + esc(cat) + '" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer">Reservar en ' + esc(sitio) + ' <span aria-hidden="true">&#8599;</span></a>';
-    }
-    function pieExterno(cat, elegido, texto) {
-      var links = (elegido ? cambiar(cat, texto) : '') + controlReserva(cat);
-      return links ? '<div class="vplan-card__links">' + links + '</div>' : '';
+      if (estado === 'Solicitado') {
+        return '<div class="vplan-acciones">' + reabrir()
+          + '<button type="button" class="vplan-btn is-ya-reserve" data-confirmar-reserva="' + esc(cat) + '" title="Ya lo reservaste en ' + esc(sitio) + '. Marcálo como confirmado para que deje de figurar como pendiente.">Ya reservé <span aria-hidden="true">&#10003;</span></button>'
+          + '</div>' + linksDeFila(cat);
+      }
+      if (estado) {
+        var link = url
+          ? '<a class="vplan-link is-link-ext" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer" title="Reabrir ' + esc(sitio) + ' en otra pestaña.">Volver a ' + esc(sitio) + ' &#8599;</a>'
+          : '';
+        var deshacer = soyAgencia ? '' : '<button type="button" class="vplan-link" data-deshacer-confirmacion="' + esc(cat) + '" title="Volver a &quot;Pendiente de reserva&quot;: la marca queda, pero el rubro vuelve a pedirte la confirmación.">No, todavía no</button>';
+        return linksDeFila(cat, link + deshacer);
+      }
+      if (!elegido) return '<button type="button" class="vplan-btn" data-detalle-rubro="' + cat + '">' + etiquetaElegir + '</button>';
+      if (!url) return linksDeFila(cat);
+      return '<a class="vplan-btn" data-reservar-rubro="' + esc(cat) + '" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer">Reservar en ' + esc(sitio) + ' <span aria-hidden="true">&#8599;</span></a>'
+        + linksDeFila(cat);
     }
 
-    // Paso: el vuelo (o el bus).
-    var cardTransporte = '';
+    /* Las dos reservas externas en UNA sola tarjeta, con una linea de
+       separacion entre las dos filas. Eran dos tarjetas con su propio borde, su
+       propio titulo de paso y su propio boton de 46 px apilado: la separacion
+       la hacian el borde y el titulo, no el contenido. */
+    var filaPasajes = '';
     if (busMode) {
-      cardTransporte = '<article class="vplan-card">' + fila('bus', busTitle, busLines, precio(busTotal, true), 'externo') + '</article>';
+      filaPasajes = fila('bus', busTitle, busLines, precio(busTotal, true));
     } else if (!autoMode) {
       var vTitulo = flightSummary.selected
         ? 'Vuelo' + (flightSummary.airline ? ' ' + esc(flightSummary.airline) : '') + ' &middot; ' + esc(airportCode(flightSummary.origin)) + (flightSummary.isRoundTrip ? ' &#8596; ' : ' &rarr; ') + esc(airportCode(flightSummary.destination))
@@ -6862,73 +6944,99 @@
       var vIda = flightSummary.selected ? esc(flightTime(outLeg.departure, flightSummary.departureText)) : '';
       var vVuelta = flightSummary.selected && flightSummary.isRoundTrip ? esc(flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText)) : '';
       if (/sin fecha/i.test(vVuelta)) vVuelta = '';  // sin hora real se pide elegirla
+      /* Ida y vuelta en UNA linea con el "Cambiar vuelo" al final. Eran dos
+         lineas de horario y una tercera, sola y centrada, para el link. */
       var vCuerpo = flightSummary.selected
-        ? sub(vIda ? 'Ida ' + vIda : '') + (flightSummary.isRoundTrip ? (vVuelta ? sub('Vuelta ' + vVuelta) : sub('Vuelta: elegí la fecha', 'is-warn')) : '')
+        ? bajada('pasajes', [vIda ? 'Ida ' + vIda : '', vVuelta ? 'Vuelta ' + vVuelta : ''].filter(Boolean).join(' &middot; '),
+          flightSummary.isRoundTrip && !vVuelta ? '' : 'Cambiar vuelo')
+          + (flightSummary.isRoundTrip && !vVuelta ? sub('Vuelta: elegí la fecha', 'is-warn') : '')
         : sub('Elegí un vuelo para ver horarios y precio', 'is-warn');
-      cardTransporte = '<article class="vplan-card" data-rubro="pasajes">' + fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true), 'externo')
-        + accionExterna('pasajes', flightBookUrl, flightProviderUrl ? 'Google Flights' : 'WhatsApp', !!flightSummary.selected, 'Elegir vuelo')
-        + pieExterno('pasajes', !!flightSummary.selected, 'Cambiar vuelo') + '</article>';
+      filaPasajes = fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true),
+        accionesExternas('pasajes', flightBookUrl, flightProviderUrl ? 'Google Flights' : 'WhatsApp', !!flightSummary.selected, 'Elegir vuelo'));
     }
+    var cardExternas = '<article class="vplan-card is-externas">' + filaPasajes;
 
-    // Paso: el alojamiento.
+    // El alojamiento, en la misma tarjeta que el vuelo.
     var hTitulo = multiHotel ? hotelesElegidos.length + ' alojamientos' : (hotelElegido() ? esc(selectedHotelName) : 'Alojamiento &middot; sin elegir');
     var hCuerpo = hotelElegido()
-      ? (multiHotel ? hotelNote : '')
+      ? bajada('alojamiento', multiHotel ? hotelNote : '', hotelElegido() ? 'Cambiar hotel' : '')
       : sub('Elegí dónde dormir para ver el precio', 'is-warn');
-    var cardHotel = '<article class="vplan-card" data-rubro="alojamiento">' + fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true), 'externo')
-      + accionExterna('alojamiento', hotelBookUrl, 'Booking.com', hotelElegido(), 'Elegir hotel')
-      + pieExterno('alojamiento', hotelElegido(), 'Cambiar hotel') + '</article>';
+    cardExternas += fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true),
+      accionesExternas('alojamiento', hotelBookUrl, 'Booking.com', hotelElegido(), 'Elegir hotel')) + '</article>';
 
-    // Paso: lo que se reserva con nosotros.
+    // Lo que se reserva con nosotros: traslado y tours, en un solo pago.
     var filaTraslado = '';
     if (!busMode && !autoMode) {
       filaTraslado = fila('traslados', hayTraslado ? transferTitle : 'Traslado',
         hayTraslado
-          ? sub(transferNote) + (estadoReserva('traslados') ? '' : cambiar('traslados', 'Cambiar traslado'))
-          : sub('Del aeropuerto a tu alojamiento') + cambiar('traslados', 'Elegir traslado'),
-        precio(transferTotal, false, 'A elegir'), 'nuestro');
+          ? bajada('traslados', transferNote, estadoReserva('traslados') ? '' : 'Cambiar traslado')
+          : bajada('traslados', 'Del aeropuerto a tu alojamiento', 'Elegir traslado'),
+        precio(transferTotal, false, 'A elegir'));
     }
     var tTitulo = selectedTours.length === 1 ? esc(selectedTours[0].title)
       : selectedTours.length ? 'Tours y actividades &middot; ' + selectedTours.length
         : 'Tours y actividades';
     var filaTours = fila('tours', tTitulo,
       selectedTours.length
-        ? sub(selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail)) + (estadoReserva('tours') ? '' : cambiar('tours', 'Cambiar tours'))
-        : sub('Sumá excursiones del destino') + cambiar('tours', 'Agregar tours'),
-      precio(toursTotal, false, 'Opcional'), 'nuestro');
+        ? bajada('tours', selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail), estadoReserva('tours') ? '' : 'Cambiar tours')
+        : bajada('tours', 'Sumá excursiones del destino', 'Agregar tours'),
+      precio(toursTotal, false, 'Opcional'));
     var cardNuestro = '<article class="vplan-card is-nuestro">' + filaTraslado + filaTours + '</article>';
 
-    // Lo que no se reserva: se gasta en destino.
+    /* Lo que no se reserva: se gasta en destino. Va PLEGADO.
+
+       Son tres lineas de un estimado que no se compra: nadie abre el modal
+       para leer cuanto sale cenar, y el subtotal ya esta en el desglose del
+       total. Plegado ocupa una linea con el monto a la vista; abierto, es lo
+       mismo que antes. El <summary> lleva el numero justamente para que el
+       plegado no esconda nada. */
     var destinoLineas = '<ul class="vplan-destino">'
       + (autoMode ? '<li><span>Auto propio <em>combustible y peajes</em></span><b>' + money(autoTotal) + '</b></li>' : '')
       + (autoMode ? '' : '<li><span>Transporte local <em>' + transportLabel + ' &middot; ' + money(localPerDay) + '/día</em></span><b>' + money(localTotal) + '</b></li>')
       + '<li><span>Gastronomía <em>' + foodLabel + ' &middot; ' + money(foodPerDay) + '/día</em></span><b>' + money(foodTotal) + '</b></li>'
       + (alquilerTotal ? '<li><span>Alquiler de auto <em>en destino</em></span><b>' + money(alquilerTotal) + '</b></li>' : '')
       + '</ul>';
-    var cardDestino = '<article class="vplan-card is-destino">'
-      + '<div class="vplan-row">' + tile('comidas') + '<div class="vplan-row__body"><p class="vplan-row__title">Comida y gastos en destino</p>'
-      + sub('Estimado &middot; se paga en el lugar') + '</div>'
-      + '<div class="vplan-row__side"><b>~' + money(enDestino) + '</b></div></div>'
-      + destinoLineas + '</article>';
+    var cardDestino = '<details class="vplan-destino-box">'
+      + '<summary class="vplan-destino-box__sum">' + tile('comidas')
+      + '<span class="vplan-destino-box__t">Gastos en destino<em>Comida, transporte y auto &middot; los pagás en el lugar</em></span>'
+      + '<b>~' + money(enDestino) + '</b>'
+      + '<span class="vplan-destino-box__chev" aria-hidden="true">›</span></summary>'
+      + '<div class="vplan-destino-box__body">' + destinoLineas
+      + '<div class="vplan-card__links">' + cambiar('comidas', 'Personalizar los costos diarios') + '</div>'
+      + '</div></details>';
 
-    var porPersona = pax > 1 ? '<p class="vplan-total__pp">' + money(Math.round(totalPlan / pax)) + ' por persona &middot; ' + pax + ' viajeros</p>' : '';
-    var cardTotales = '<section class="vplan-total" aria-label="Presupuesto">'
-      + '<p><span>Con nosotros</span><b>' + money(conNosotros) + '</b></p>'
-      + '<p><span>Sitios oficiales (aprox.)</span><b>' + money(oficiales) + '</b></p>'
-      + '<p><span>En destino (estimado)</span><b>' + money(enDestino) + '</b></p>'
-      + '<p class="vplan-total__final"><span>Presupuesto total estimado</span><strong>' + money(totalPlan) + '</strong></p>'
-      + porPersona + '</section>';
+    /* El total va ARRIBA y pegado a la cabecera, sin caja alrededor.
 
-    var etiquetaExternos = nExternos === 2 ? 'Pasos 1 y 2 &middot; los reservás en el sitio oficial' : 'Paso 1 &middot; lo reservás en el sitio oficial';
-    var etiquetaNuestro = 'Paso ' + pasosPlan.length + ' &middot; lo reservás con nosotros, en un solo pago';
+       Primero estuvo en su propia tarjeta, con borde mostaza y fondo
+       amarillento, y el resultado fue un bloque de 240 px que se leia como
+       una pieza pegada encima del plan —"como extra"— y que pesaba mas que
+       cualquier rubro. Va ahora desnudo: la cabecera, una linea de separacion
+       y el numero. Es lo que abriste la pantalla a ver, y para eso esta arriba;
+       no hace falta una caja para decir que es importante. */
+    /* El <h2> "Tu plan de viaje" se fue. Decia lo mismo que el kicker de arriba
+       ("Tu viaje a <destino>"), en la tipografia mas grande de la pantalla, y
+       empujaba el total unheader entero mas abajo. El dialogo conserva su
+       nombre para lectores de pantalla con aria-label: sacar el titular visible
+       no puede significar que el modal deje de decir que es. */
+    var cardTotales = '<section class="vplan-suma" aria-label="Presupuesto">'
+      + '<header class="vplan-head"><span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span>'
+      + '<p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>'
+      + '<p class="vplan-suma__valor"><strong>' + money(totalPlan) + '</strong>'
+      + (pax > 1 ? '<span>' + money(Math.round(totalPlan / pax)) + ' por persona &middot; ' + pax + ' viajeros</span>' : '') + '</p>'
+      + '<details class="vplan-suma__detalle"><summary>Ver desglose</summary><ul>'
+      + '<li><span>Con nosotros</span><b>' + money(conNosotros) + '</b></li>'
+      + '<li><span>Sitios oficiales (aprox.)</span><b>' + money(oficiales) + '</b></li>'
+      + '<li><span>En destino (estimado)</span><b>' + money(enDestino) + '</b></li>'
+      + '</ul></details></section>';
+
+    var etiquetaExternos = busMode ? 'El bus lo comprás vos, con la empresa' : 'Lo reservás vos, en el sitio oficial';
+    var etiquetaNuestro = 'Con nosotros &middot; en un solo pago';
 
     /* El CTA fijo reserva SOLO lo que es con nosotros, y lo dice con su monto:
        vuelo y hotel se pagan en su sitio y no pasan por este boton. Ya
        reservado, lleva al asesor. */
     var ctaLabel = !hayTraslado ? 'Reservar tours' : selectedTours.length ? 'Reservar traslado + tour' : 'Reservar traslado';
     var ctaActivo = pedido.count && conNosotros > 0 && !nuestroHecho;
-    var notaCta = autoMode ? 'El hotel lo reservás en su sitio &middot; te guiamos'
-      : (busMode ? 'Bus' : 'Vuelo') + ' y hotel los reservás en sus sitios &middot; te guiamos';
     var reservarTodo = '<div class="voucher-reserve voucher-reserve--fijo vplan-cta">'
       + (ctaActivo
         ? '<button type="button" class="voucher-reserve__btn" data-reservar-pedido><span>' + ctaLabel + '</span><i aria-hidden="true">&middot;</i><em>' + money(conNosotros) + '</em></button>'
@@ -6939,19 +7047,25 @@
           : '<button type="button" class="voucher-reserve__btn" data-detalle-rubro="' + (busMode || autoMode ? 'tours' : 'traslados') + '"><span>' + (busMode || autoMode ? 'Elegir tours' : 'Elegir traslado y tours') + '</span></button>')
       + '</div>';
 
+    /* El asesor es UNA linea. Antes era un bloque de tres (titulo, bajada y un
+       boton de 48 px apilado) que ocupaba mas alto que la tarjeta de los
+       gastos en destino, para ofrecer una sola cosa: hablar con alguien. El
+       titulo y la bajada van en el mismo <span> para que el texto fluya en una
+       sola linea con el boton al costado. */
+    var lineaAsesor = '<aside class="voucher-asesor vplan-asesor">'
+      + '<span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span>'
+      + '<span class="vplan-asesor__txt"><b>¿Necesitás ayuda?</b> <small>Un asesor te contacta por WhatsApp.</small></span>'
+      + '<button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span>Coordinar</span></button></aside>';
+
     cerrarTodosLosModales();
-    modal.innerHTML = '<div class="booking-dialog voucher-dialog vplan" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<header class="vplan-head"><span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span><h2 id="itinerary-summary-title">Tu plan de viaje</h2>'
-      + '<p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p>'
-      + '<p class="vplan-head__sub">' + pasosPlan.length + ' reservas · ' + nExternos + (nExternos === 1 ? ' en sitio oficial' : ' en sitios oficiales') + ', 1 con nosotros</p></header>' +
-      stepper +
-      '<h3 class="vplan-label">' + etiquetaExternos + '</h3>' + cardTransporte + cardHotel +
-      '<h3 class="vplan-label">' + etiquetaNuestro + '</h3>' + cardNuestro +
-      '<h3 class="vplan-label">No se reserva acá &middot; lo pagás en destino</h3>' + cardDestino +
+    modal.innerHTML = '<div class="booking-dialog voucher-dialog vplan" role="dialog" aria-modal="true" aria-label="Resumen del viaje"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       cardTotales +
-      canalesTexto +
-      /* El pie: Guardar y Compartir, el asesor y el grupo, en ese orden. El menu
-         de Compartir se abre encima del boton, asi nunca tapa otro control. */
+      '<h3 class="vplan-label">' + etiquetaExternos + '</h3><p class="vplan-aviso">' + esc(cotizacionNota) + '</p>' + cardExternas +
+      '<h3 class="vplan-label is-nuestro">' + etiquetaNuestro + '</h3>' + cardNuestro +
+      cardDestino +
+      lineaAsesor +
+      /* El pie: Guardar y Compartir y, plegado, el grupo. El menu de Compartir
+         se abre encima del boton, asi nunca tapa otro control. */
       '<div class="voucher-actions vplan-pie">' +
       '<div class="voucher-tools voucher-share">' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
@@ -6961,7 +7075,6 @@
       '<button type="button" data-share-link>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar enlace del viaje</span></button>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '</div></div></div>' +
-      '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos y te contacta por WhatsApp.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span>Coordinar con asesor</span></button></aside>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
       '</div>' + reservarTodo;
     modal.dataset.summaryText = summaryText;
@@ -8725,17 +8838,51 @@
     var date = new Date(value);
     return isNaN(date.getTime()) ? -1 : date.getHours();
   }
+  /* ---------- "El vuelo mas barato" ----------
+     Una sola definicion de que es "mas barato", usada por los tres caminos que
+     la necesitan: ordenar la lista que se guarda en el estado, ordenar la que
+     se ve, y elegir cual queda preseleccionado.
+
+     El precio sin dato va al final (Infinity), no a 0: un vuelo sin precio en
+     USD es el que no se puede cotizar, no el que sale gratis. Con el 0 al
+     principio, un filtro de "directos" llegaba a mostrar arriba un vuelo sin
+     precio y el total se iba a 0. Un precio en cero o negativo es lo mismo que
+     no tenerlo. */
+  function precioDeOferta(offer) {
+    var p = offer ? Number(offer.price_usd) : NaN;
+    return (Number.isFinite(p) && p > 0) ? p : Infinity;
+  }
+  function ofertasPorPrecio(offers) {
+    return (offers || []).slice().sort(function (a, b) { return precioDeOferta(a) - precioDeOferta(b); });
+  }
+  /* La mas barata de la lista, o null si NINGUNA tiene precio.
+
+     Una oferta sin precio (o con precio 0) no es candidata: no es "la mas
+     barata", es la que no se puede cotizar. Antes, si ninguna de la lista tenia
+     precio, comparaba Infinity contra Infinity —que no es menor— y devolvia la
+     primera: el vuelo sin precio quedaba elegido y, como el default marca
+     flightAutoPriced, el precio real de los demas no llegaba nunca a aplicarse. */
+  function ofertaMasBarata(offers) {
+    var mejor = null;
+    (offers || []).forEach(function (offer) {
+      var p = precioDeOferta(offer);
+      if (!Number.isFinite(p)) return;
+      if (!mejor || p < precioDeOferta(mejor)) mejor = offer;
+    });
+    return mejor;
+  }
   function filteredFlightOffers(section, offers) {
     var stop = section.getAttribute('data-flight-stop') || 'all';
     var time = section.getAttribute('data-flight-time') || 'all';
-    return offers.filter(function (offer) {
+    var lista = offers.filter(function (offer) {
       if (!isCarrascoOffer(offer)) return false;
       var stops = Number(offer.stops) || 0;
       var stopOk = stop === 'all' || (stop === '2' ? stops >= 2 : stops === Number(stop));
       var hour = flightHour(offer.departure);
-      var timeOk = time === 'all' || (time === 'morning' && hour >= 5 && hour < 12) || (time === 'afternoon' && hour >= 12 && hour < 18) || (time === 'night' && (hour >= 18 || (hour >= 0 && hour < 5)));
+      var timeOk = time === 'all' || (time === 'morning' && hour >= 5 && hour < 12) || (time === 'afternoon' && hour >= 12 && hour < 18) || (time === 'night' || (hour >= 18 || (hour >= 0 && hour < 5)));
       return stopOk && timeOk;
-    }).sort(function (a, b) { return (a.price_usd == null ? Infinity : a.price_usd) - (b.price_usd == null ? Infinity : b.price_usd); });
+    });
+    return ofertasPorPrecio(lista);
   }
   /** De la lista ordenada por precio, se queda con la opción más barata y, si existe,
    * una segunda con una diferencia relevante de precio, cabina u horario. Evita
@@ -8851,7 +8998,15 @@
       return;
     }
     var section = el.closest('.flight-search');
-    if (detailState) detailState.flightOffers = offers;
+    /* Lo que se guarda en el estado va ORDENADO por precio. Ese array es la
+       fuente del ultimo paso de getSelectedFlightOffer(): caia en offers[0], y
+       offers[0] era el orden del proveedor. Google Flights devuelve
+       best_flights + other_flights, y best_flights esta ordenado por duracion,
+       escalas y horarios, NO por precio: el primero rara vez es el mas barato.
+       Ordenando una COPIA los ids del proveedor (que son 'dep_' + indice en
+       lib/providers/serpapi.js) quedan intactos y offers[0] pasa a ser el mas
+       barato de verdad. */
+    if (detailState) detailState.flightOffers = ofertasPorPrecio(offers);
     var state = getFlightSelectionState();
     var flightStep = section.getAttribute('data-flight-step') || (state && state.stage) || 'outbound';
     var stepLabel = 'Ida';
@@ -8879,9 +9034,28 @@
       // cada repintado, y el camino de los filtros vuelve a pintar la lista:
       // marcar "2+ escalas" (peor tarifa) hacía subir el total solo, y
       // "Directos" lo bajaba. Un control de filtro no puede cambiar el precio.
-      if (state && !state.outboundId && !detailState.flightAutoPriced && visible.length && visible[0].price_usd !== null) {
-        detailState.flightAutoPriced = true;
-        actualizarPasajes(section, Number(visible[0].price_usd), visible[0].airline);
+      /* Y solo si NO hay ya un vuelo elegido. applySavedTripToDetail() corre
+         justo despues de esta funcion, con el vuelo con el que se guardo el
+         viaje: si el default no lo respetara, abrir un viaje guardado perdia el
+         vuelo que la persona habia elegido. La eleccion explicita siempre le
+         gana al default. */
+      if (state && !state.outboundId && !detailState.flightAutoPriced && !detailState.selectedFlightId) {
+        /* El mas barato de TODOS, no el primero que deja la lista con los
+           filtros de la pantalla. Un filtro no puede cambiar cual es el vuelo
+           elegido ni el precio que ya esta en el presupuesto: si se elige
+           "2+ escalas", la mas barata de esa lista no es la mas barata del
+           viaje, y el total bajaria solo por marcar un filtro. */
+        var masBarato = ofertaMasBarata(offers);
+        if (masBarato) {
+          detailState.flightAutoPriced = true;
+          if (masBarato.price_usd != null) actualizarPasajes(section, Number(masBarato.price_usd), masBarato.airline);
+          /* Y queda MARCADO, no solo caro. Antes el presupuesto ya se
+             cobraba el mas barato (actualizarPasajes, de arriba) pero ninguna
+             card aparecia elegida y el resumen del voucher describia otra
+             oferta: el total y la descripcion tienen que ser la misma. La
+             eleccion sigue siendo reversible con un clic en otra card. */
+          elegirOferta(masBarato);
+        }
       }
     }
     if (!visible.length) { el.innerHTML = '<p class="flight-empty">No hay vuelos que coincidan con estos filtros.</p>'; return; }
@@ -8948,6 +9122,39 @@
         box.innerHTML = '<div class="flight-empty"><p>' + esc(e && e.name === 'AbortError' ? 'La búsqueda está tardando más de lo esperado. Podés volver a intentarlo.' : e && e.message || 'No pudimos buscar vuelos ahora.') + '</p><button type="button" class="btn btn-secondary" data-retry-flight-search>Intentar de nuevo</button></div>';
       });
   }
+  /* Persiste una oferta como vuelo elegido.
+
+     Es el mismo trabajo que hacian los atributos del <button> que se acaba de
+     tocar, pero entrando por el objeto de la oferta y no por el DOM: asi la
+     eleccion no depende de un clic. La usan el clic del usuario (persistSelectedOffer)
+     y la preseleccion automatica del mas barato, que no es un clic. */
+  function elegirOferta(offer) {
+    if (!offer || !detailState) return null;
+    var precio = Number(offer.price_usd);
+    var conPrecio = Number.isFinite(precio) && precio > 0;
+    detailState.selectedFlightId = offer.id;
+    detailState.selectedFlight = offer.airline || '';
+    /* Un vuelo sin precio en USD no toca el total: se elige igual para que el
+       resumen lo describa, pero no se pisa el presupuesto con un 0. El boton de
+       una oferta sin precio viene disabled, asi que por el camino del clic esto
+       no cambia; queda la guarda para que el default automatico no lo haga. */
+    if (conPrecio) {
+      detailState.flight = Math.round(precio);
+      detailState.baseFlight = detailState.flight;
+    }
+    detailState.selectedOffer = Object.assign({}, offer, {
+      id: offer.id,
+      airline: offer.airline || '',
+      price: conPrecio ? precio : 0,
+      currency: offer.original_currency || 'USD',
+      passengerIds: Array.isArray(offer.passenger_ids) ? offer.passenger_ids : []
+    });
+    return detailState.selectedOffer;
+  }
+  /* El clic en una card. Traduce los data-* del boton a una oferta y se la pasa
+     a elegirOferta(), que es el unico lugar donde se escribe la eleccion. La
+     oferta completa sale de detailState.flightOffers para no perder el resto de
+     los datos (horarios, escalas,Aerolinea) que el boton no lleva. */
   function persistSelectedOffer(button) {
     if (!button || !detailState) return null;
     var offerId = button.getAttribute('data-select-flight') || button.getAttribute('data-offer-id') || '';
@@ -8956,13 +9163,15 @@
     var currency = button.getAttribute('data-offer-currency') || 'USD';
     var passengerIds = [];
     try { passengerIds = JSON.parse(button.getAttribute('data-passenger-ids') || '[]'); } catch (e) { passengerIds = []; }
-    detailState.selectedFlightId = offerId;
-    detailState.selectedFlight = offerAirline;
-    detailState.flight = Math.round(offerPrice);
-    detailState.baseFlight = detailState.flight;
-    var completeOffer = Array.isArray(detailState.flightOffers) && detailState.flightOffers.find(function (offer) { return String(offer.id) === String(offerId); });
-    detailState.selectedOffer = Object.assign({}, completeOffer || {}, { id: offerId, airline: offerAirline, price: offerPrice, currency: currency, passengerIds: passengerIds });
-    return detailState.selectedOffer;
+    var completa = Array.isArray(detailState.flightOffers) && detailState.flightOffers.find(function (offer) { return String(offer.id) === String(offerId); });
+    var base = completa || {};
+    return elegirOferta(Object.assign({}, base, {
+      id: offerId,
+      airline: offerAirline,
+      price_usd: offerPrice > 0 ? offerPrice : base.price_usd,
+      original_currency: currency,
+      passenger_ids: passengerIds.length ? passengerIds : (base.passenger_ids || [])
+    }));
   }
   /* Un modal abierto a la vez, y cerrar uno se lleva a todos.
 
@@ -10144,46 +10353,37 @@
        destino es lo que hace que la gente abandone. */
     checkoutState = checkoutStateInicial();
     detailState = { parts: Object.assign({}, proposal.parts), flight: proposal.parts.pasajes, baseFlight: proposal.parts.pasajes, baseTraslados: proposal.parts.traslados, hotel: selectedHotelTotal, toursTotal: 0, selectedTours: [], auto: isRoadtrip ? Number(proposal.parts.auto) : 0, transfer: 0, transportMode: selectedTransportMode, hotelType: data.meta.hotelType || S.hotelType, originalHotelEstimate: Number(proposal.baseHotelCost) || Number(proposal.parts.alojamiento) || 0, originalMealEstimate: Number(proposal.baseMealCost) || Number(proposal.parts.comidas) || 0, proposal: proposal, roadtrip: proposal.roadtrip || data.meta.roadtrip, roadtripVehicleType: 'combustion', roadtripEv: {}, meta: data.meta, selectedFlightId: '', selectedFlight: '', selectedOffer: null, selectedHotel: true, selectedHotelTotal: selectedHotelTotal, selectedHotelName: 'Hotel recomendado', localBudgetMode: 'preset', foodBudgetMode: 'preset', localCustomValue: null, foodCustomValue: null, flightAutoPriced: false };
-    /* El compartido arranca elegido.
+    /* El transfer privado arranca elegido en los dos tramos.
 
        El total del traslado ya lo tiene el modelo como estimacion, y desde que
        trasladoDelViaje() REEMPLAZA esa estimacion por el precio de la tabla
-       cuando hay modalidad, elegir el compartido no pisa el total: lo cambia por
-       el dato real, que es mas barato en la mayoria de los destinos.
+       cuando hay modalidad, preseleccionar no pisa el total: lo cambia por el
+       dato real.
 
-       Se elige el compartido y no el privado porque el privado no escala con la
-       cantidad de gente: se cobra por vehiculo, asi que para cuatro personas sale
-       mucho mas caro que cuatro pasajes de van. Arrancar en el mas caro seria
-       arrancar por la opcion que casi nadie quiere.
+       Se elige el PRIVADO y no el compartido porque es el servicio que se
+       contrata para el grupo entero y no se comparte con desconocidos: es lo
+       que la gente quiere cuando viaja con familia o amigos.
 
-       A un destino sin van compartida (una isla) NO se preselecciona nada:
-       getSelectedTransferAmount() devuelve 0 para 'shared' si soloPrivado, y
-       quedaria una card marcada con un precio de 0. */
+       Solo se preselecciona si el privado tiene PRECIO de verdad. En un destino
+       sin escalones de vehiculo (31 de los 40 de la tabla) privadoConsultar
+       viene en true, la card se dibuja como un <div> sin precio y NO es
+       clickeable: marcarla "elegida" dejaria trasladoElegido() en true con el
+       traslado valiendo 0, o sea un total que baja solo. Ahi no se precarga
+       nada y se muestra el estimado del modelo, que es lo de siempre.
+
+       Ojo con el costo: el privado se cobra por vehiculo y la tabla es "solo
+       ida", asi que los dos tramos en privado cuestan el doble que el
+       estimado de un tramo que traia el modelo. Es una decision de negocio, no
+       un descuido. */
+    var pax = Math.max(1, Number(data.meta.pax) || 1);
     if (selectedTransportMode === 'flight' && detailState) {
       var preciosTransfer = transferPreciosDe(data.meta);
-      if (!preciosTransfer.soloPrivado && preciosTransfer.compartido > 0 && !tramoEsCercano(preciosTransfer, pax)) {
-        /* Los DOS tramos arrancan en compartido. Es lo que hace que el total los
-           incluya sin que la persona tenga que decidir nada, y es coherente con
-           la nota "Incluido para tu comodidad" de cada tarjeta.
-
-           EXCEPTO en un tramo corto. Si el sistema le esta diciendo "acá te
-           conviene un Uber", dejarle preseleccionado un transfer seria
-           contradecirse en la misma pantalla: la card amarilla y el consejo
-           "--Para este tramo estás cerquísima--" diciendo cosas opuestas. En ese
-           caso no se preselecciona nada y el total no suma el traslado, que es
-           lo que el consejo invite a hacer.
-
-           ESTO DUPLICA EL COSTO DEL TRANSFER cuando aplica: la tabla es "solo
-           ida" y ahora se cobran las dos. data/transfer-precios.json decia, en
-           _meta, que la app solo sumaba el de llegada; esa decision quedo
-           escrita y ahora es al reves. Es una decision de negocio, no un
-           descuido. */
-        // Sin precarga: el traslado suma cuando la persona elige una modalidad
-        // (ver trasladoElegido()). Antes arrancaba en 'shared' en los dos tramos.
+      if (preciosTransfer.privado > 0 && !preciosTransfer.privadoConsultar) {
+        detailState.transferType = 'private';
+        detailState.transferTypeVuelta = 'private';
       }
     }
     var nights = Math.max(1, Number(data.meta.nights) || 1);
-    var pax = Math.max(1, Number(data.meta.pax) || 1);
     if (data.meta.multiStay && data.meta.multiStay.stays && data.meta.multiStay.stays.length === 2) {
       detailState.multiStay = Object.assign({}, data.meta.multiStay, { totalNights: nights, firstNights: Math.max(1, Math.floor(nights / 2)) });
       detailState.baseTraslados = Number(proposal.parts.traslados) || 0;
@@ -13380,21 +13580,36 @@ function comboNombreDestino() {
           Array.prototype.forEach.call(document.querySelectorAll('[data-share-menu]'), function (b) { b.setAttribute('aria-expanded', 'false'); });
         }, 0);
       }
-      /* El toque de confirmar del paso externo.
+      /* "Ya reserve": el unico momento en que el dato "este rubro esta reservado"
+         es cierto. El link externo no avisa cuando termino de pagarse —el
+         vuelo se compra en Google Flights y el hotel en Booking, que son
+         carteras de otra empresa—, asi que lo declara la persona.
 
-         Es el unico momento en que el dato "este rubro esta reservado" es
-         cierto: el link externo no avisa cuando termino de pagarse, asi que lo
-         declara la persona. Se usa marcarReservadoManual, que ademas exige que
-         quien toca sea la agencia --es una afirmacion sobre una reserva, no una
-         accion de servicio--, y por lo tanto no le hace nada a un cliente.
-
-         Para el cliente esto se ve igual: el paso queda marcado y el boton pasa a
-         ser de la agencia. Un cliente que puede declararse una reserva propia
-         puede hacer que el cotizador diga "reservado" por algo que no existe. */
+         Para la agencia sigue siendo marcarReservadoManual, que ademas exige el
+         correo de la agencia en el JWT porque es una afirmacion sobre una
+         reserva. Para el cliente va por otro camino: guardo "reservado" en el
+         estado local del viaje (que es de donde estadoReserva() saca el
+         "Confirmado") y marco la fila con reservas_marcar, la RPC abierta que
+         ya usa el clic del link. El detalle lleva por:'cliente' para que la
+         agencia, al ver el viaje, sepa que la afirmacion vino de la persona y
+         no de ella. */
       var confirmarPaso = e.target.closest('[data-confirmar-reserva]');
       if (confirmarPaso) {
         e.preventDefault();
-        marcarReservadoManual(confirmarPaso.getAttribute('data-confirmar-reserva'), {});
+        var catConfirmar = confirmarPaso.getAttribute('data-confirmar-reserva');
+        if (soyAgencia) marcarReservadoManual(catConfirmar, {});
+        else confirmarReservaPropia(catConfirmar);
+        return;
+      }
+      /* "No, todavia no": volver de "Confirmado" a "Pendiente de reserva". No
+         borra la marca de la base —esa la pone el link, y sigue siendo cierto
+         que el rubro se abrio—: solo saca el "reservado" del estado local, que
+         es lo que la persona esta desmintiendo. Para la agencia el boton de
+         quitar la marca entera sigue siendo el suyo. */
+      var deshacerConfirmacion = e.target.closest('[data-deshacer-confirmacion]');
+      if (deshacerConfirmacion) {
+        e.preventDefault();
+        devolverAReservaPendiente(deshacerConfirmacion.getAttribute('data-deshacer-confirmacion'));
         return;
       }
       /* El cierre: WhatsApp con el resumen y lo que falta. El mensaje lo arma

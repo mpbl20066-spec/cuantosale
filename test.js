@@ -1530,6 +1530,96 @@ function haversineKm(a, b) {
       }
     }
   });
+  await t('el vuelo que queda elegido es siempre el mas barato, no el primero del proveedor', function () {
+    // Regresion: Google Flights devuelve [best_flights, other_flights] y
+    // best_flights esta ordenado por duracion, escalas y horario, NO por precio.
+    // El cliente guardaba la lista tal cual y getSelectedFlightOffer() caia en
+    // offers[0], o sea el primero del proveedor: el presupuesto si tomaba el mas
+    // barato, pero el resumen del voucher describia un vuelo mas caro y
+    // distinto. Ademas ninguna card aparecia elegida.
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desdeFn = app.indexOf('function precioDeOferta(offer)');
+    assert.ok(desdeFn > 0, 'no se encontro precioDeOferta() en el cliente');
+    const hasta = app.indexOf('/** De la lista ordenada por precio', desdeFn);
+    assert.ok(hasta > desdeFn, 'no se pudo extraer el bloque de orden de vuelos del cliente');
+
+    const fn = new Function(app.slice(desdeFn, hasta) +
+      '; return { precioDeOferta: precioDeOferta, ofertasPorPrecio: ofertasPorPrecio, ofertaMasBarata: ofertaMasBarata };')();
+
+    // El proveedor ordena por horario: el primero es el mas caro.
+    const delProveedor = [
+      { id: 'dep_0', airline: 'Directa', price_usd: 240, departure: '2027-01-10T14:00' },
+      { id: 'dep_1', airline: 'Barata', price_usd: 180, departure: '2027-01-10T06:00' },
+      { id: 'dep_2', airline: 'Sin precio', price_usd: null, departure: '2027-01-10T09:00' }
+    ];
+
+    assert.strictEqual(fn.ofertaMasBarata(delProveedor).id, 'dep_1',
+      'la oferta mas barata tiene que ser la de 180, no la primera del proveedor');
+    // Sin precio (o precio 0) no es "la mas barata": no se puede cotizar.
+    assert.strictEqual(fn.ofertaMasBarata([{ id: 'a', price_usd: null }, { id: 'b', price_usd: 0 }]), null,
+      'una lista sin ningun precio en USD no tiene mas barata');
+    assert.strictEqual(fn.ofertaMasBarata([{ id: 'a', price_usd: 0 }, { id: 'b', price_usd: null }]), null,
+      'un precio en 0 no puede ganar: seria el vuelo gratis');
+
+    const orden = fn.ofertasPorPrecio(delProveedor);
+    assert.deepStrictEqual(orden.map(function (o) { return o.id; }), ['dep_1', 'dep_0', 'dep_2'],
+      'el estado tiene que guardar la lista ordenada por precio, con la sin precio al final');
+    assert.deepStrictEqual(delProveedor.map(function (o) { return o.id; }), ['dep_0', 'dep_1', 'dep_2'],
+      'ordenar no puede tocar el array del proveedor: sus ids son el indice');
+
+    // El contrato completo: lo que se guarda ordenado es lo que lee el fallback.
+    const detalle = { flightOffers: orden };
+    assert.strictEqual(orden[0].id, 'dep_1', 'offers[0] tiene que ser el mas barato, que es de donde sale el fallback del resumen');
+    assert.ok(detalle.flightOffers.length === 3);
+
+    // Y la app no debe volver a ordenar el estado por su cuenta en otro lado.
+    assert.ok(!/detailState\.flightOffers = offers;/.test(app),
+      'el estado sigue guardando la lista sin ordenar: offers[0] vuelve a ser el primero del proveedor');
+
+    // El default no puede pisar un vuelo que ya estaba elegido. El caso real es
+    // abrir un viaje guardado: applySavedTripToDetail() corre justo despues de
+    // renderFlightOffers y deja el vuelo con el que se guardo; sin este filtro
+    // la busqueda asincrona lo cambiaba por el mas barato y se perdia la
+    // eleccion de la persona.
+    assert.ok(/!detailState\.flightAutoPriced && !detailState\.selectedFlightId/.test(app),
+      'el default del vuelo mas barato tiene que respetar un vuelo ya elegido (viaje guardado)');
+  });
+  await t('el transfer privado solo se preselecciona cuando tiene precio', function () {
+    const app = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    const desdeFn = app.indexOf('function transferPreciosDe(meta)');
+    const desdeTabla = app.indexOf('var AIRPORT_NAMES =');
+    const desde = (desdeTabla > 0 && desdeTabla < desdeFn) ? desdeTabla : desdeFn;
+    const hastaFn = app.indexOf('function getSelectedTransferAmount(state)');
+    const hasta = app.indexOf('// Iconos por categoría', hastaFn);
+    assert.ok(desde > 0 && hasta > desde, 'no se pudo extraer transferPreciosDe del cliente');
+    const fn = new Function('CS_TRANSFER_PRICES', 'Number', 'tasaDe',
+      app.slice(desde, hasta) + '; return { transferPreciosDe: transferPreciosDe };'
+    )(require(path.join(__dirname, 'public', 'transfer-precios.js')), Number, function () { return null; });
+
+    // El default que se cargo en showProposalView solo debe dispararse con precio
+    // real: sin escalones (o sin escalon para esa cantidad) privado queda en 0 y
+    // privadoConsultar en true, y marcar la card "Consultar" como elegida dejaba
+    // trasladoElegido() en true con el traslado valiendo 0.
+    assert.ok(/preciosTransfer\.privado > 0 && !preciosTransfer\.privadoConsultar/.test(app),
+      'el default de privado tiene que exigir precio y NO "Consultar"');
+
+    // Destinos que hoy pueden preseleccionarse: los que traen escalon para esa
+    // cantidad de personas.
+    const conEscalon = [];
+    const sinEscalon = [];
+    for (const pax of [1, 2, 3, 4, 5]) {
+      for (const k of Object.keys(require(path.join(__dirname, 'public', 'transfer-precios.js')))) {
+        const p = fn.transferPreciosDe({ dest: { key: k }, pax: pax });
+        if (p.privado > 0 && !p.privadoConsultar) conEscalon.push(k + '@' + pax);
+        else sinEscalon.push(k + '@' + pax);
+      }
+    }
+    assert.ok(conEscalon.length > 0, 'ningun destino podria preseleccionar el privado: el default no tendria efecto');
+    assert.ok(sinEscalon.length > 0, 'si todos los destinos tuvieran precio de privado, la guarda seria decorativa');
+    // Con Escalon = el mismo auto para 1 a 4 personas: no hay tope de personas.
+    assert.ok(conEscalon.some(function (x) { return x === 'buz@1'; }) && conEscalon.some(function (x) { return x === 'buz@4'; }),
+      'Buzios deberia poder preseleccionar el privado de 1 a 4 personas');
+  });
   await t('el server manda el precio de transfer del destino en el meta', async function () {
     // Ojo con la query: `subcategory` es el nombre que se muestra, no el destino
     // que se cotiza. Hay que pedir dest=buz, porque si se deja el dest de la

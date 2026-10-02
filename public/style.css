@@ -1,4 +1,4 @@
-/* version: 273
+/* version: 279
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3721,119 +3721,199 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .proposal-breakdown .trip-summary__items{margin-top:14px}
 
 /* ---------- Resumen final: "Tu plan de viaje" ----------
-   Tarjetas por paso (sitio oficial / con nosotros / en destino), el desglose
-   que suma el total y un pie mas ordenado. Todo con las variables del tema. */
-.vplan{gap:12px}
-.vplan .vplan-head{display:grid;gap:4px;padding:0}
-.vplan .vplan-head h2{margin:2px 40px 0 0;font-family:var(--fh);font-size:30px;line-height:1.1}
+
+   El total arriba, despues los rubros en el orden en que se pagan y, al
+   final, los gastos de destino plegados. Todo con las variables del tema.
+
+   Lo que se saco y por que (medido en el modal, 720 px de ancho):
+   - el stepper "1 Vuelo / 2 Hotel / 3 Traslado" y su "0 de 2 reservadas": el
+     estado de cada paso ya esta en la pastilla de su fila, y un numero de paso
+     que no coincide con el orden real de la pantalla Invite a contarlo mal.
+   - los titulos "PASO 1 Y 2 ...", "PASO 3 ..." y "NO SE RESERVA ACA": uno solo
+     por tarjeta, y los de gasto en destino se fueron al <summary> del plegado.
+   - los badges "Externo" y "Con nosotros" por fila: el titulo de la tarjeta ya
+     dice de quien es cada rubro y la flecha del boton dice que se abre afuera.
+   - el desglose con las tres sumas siempre abierto: cada tarjeta ya muestra su
+     propio importe al lado del nombre. Ahora esta plegado en "Ver desglose".
+   Con eso el modal baja de 1803 px de contenido a menos de 800. */
+.vplan{gap:10px}
+/* Cabecera y total: un solo bloque, SIN caja. El total iba en una tarjeta con
+   borde mostaza y fondo amarillento, y esa caja lo hacia leer como una pieza
+   pegada encima del plan —"como extra"— que pesaba mas que cualquier rubro.
+   Ahora es la cabecera del plan y nada mas: una linea de separacion y el
+   numero. */
+.vplan .vplan-head{display:grid;gap:3px;padding:0 0 11px;border-bottom:1px solid var(--line)}
+/* El <h2> "Tu plan de viaje" ya no esta: repetia el kicker ("Tu viaje a
+   <destino>") en la tipografia mas grande de la pantalla y empujaba el total
+   hacia abajo. La cabecera queda con el kicker y la linea de fechas. */
 .vplan .vplan-head p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.4}
-.vplan .vplan-head .vplan-head__sub{font-size:14.5px}
-.vplan-steps{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px;margin:8px 0 0;padding:0;list-style:none}
-.vplan-steps:has(>li:nth-child(2):last-child){--n:2}
-.vplan-steps__item{display:flex;align-items:center;gap:8px;min-width:0;color:var(--ink);font-size:14px;font-weight:700;line-height:1.15}
-.vplan-steps__n{display:grid;place-items:center;flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--cel-soft);color:var(--ink);font-size:12.5px;font-weight:800}
-.vplan-steps__item.is-now .vplan-steps__n{background:var(--accent);color:var(--accent-ink)}
-.vplan-steps__item.is-done .vplan-steps__n{background:var(--good-soft);color:var(--good)}
-.vplan-steps__item.is-done{color:var(--ink2)}
-.vplan-progress{margin:0;color:var(--ink2);font-size:13px}
 .vplan .voucher-aviso{margin:0}
-.vplan-label{margin:10px 0 -2px;color:var(--ink2);font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1.4}
-.vplan-card{display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
-.vplan-card.is-nuestro{gap:0;padding:6px 16px;border:2px solid var(--accent);box-shadow:var(--card-sel-glow)}
-.vplan-card.is-nuestro>.vplan-row{padding:12px 0}
-.vplan-card.is-nuestro>.vplan-row+.vplan-row{border-top:1px solid var(--line)}
-.vplan-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:start}
-.vplan-ico{display:grid;place-items:center;width:48px;height:48px;border-radius:13px}
-.vplan-ico .trip-summary__ico{width:24px;height:24px}
-.vplan-row__body{display:grid;gap:2px;min-width:0}
-.vplan-row__title{margin:0;color:var(--ink);font-size:16px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
-.vplan-row__estado{display:inline-block;vertical-align:middle;margin-left:4px}
+
+/* ---------- El total ----------
+   Va arriba porque es lo que la persona entro a ver. El numero va en la
+   tipografia de titular y el "por persona" al lado, en la misma linea: son dos
+   formas de decir lo mismo y separadas por un salto de linea ocupaban dos
+   lineas de las mas caras de la pantalla. */
+.vplan-suma{display:grid;gap:1px;padding:0}
+.vplan-suma__valor{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin:12px 0 0}
+.vplan-suma__valor strong{color:var(--ink);font-family:var(--fh);font-size:34px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vplan-suma__valor span{color:var(--ink2);font-size:13px;font-weight:600}
+/* "Ver desglose" es un link chico al pie del total, no un <details> con caja.
+   Saca el min-height de 48 px que el proyecto impone a todo summary: 48 px de
+   un texto de 13 no es un area tactil, es un hueco. */
+.vplan-suma__detalle{justify-self:start;margin-top:2px}
+.vplan-suma__detalle>summary{min-height:0;padding:5px 0;color:var(--ink2);font-size:12.5px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;list-style:none}
+.vplan-suma__detalle>summary::-webkit-details-marker{display:none}
+.vplan-suma__detalle>summary::after{content:"\203A";display:inline-block;transition:transform .18s ease}
+.vplan-suma__detalle[open]>summary::after{transform:rotate(90deg)}
+.vplan-suma__detalle>ul{display:grid;gap:4px;margin:5px 0 2px;padding:8px 0 0;border-top:1px solid var(--line);list-style:none}
+.vplan-suma__detalle li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--ink2);font-size:13.5px}
+.vplan-suma__detalle li b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* La nota de "es una cotizacion estimada y cada servicio se compra con su
+   proveedor" va pegada al titulo de las reservas externas, que es donde
+   importa. Arriba, en el total, era una linea mas entre el numero y la
+   primera tarjeta. */
+.vplan-aviso{margin:-1px 0 6px;color:var(--ink2);font-size:11.5px;line-height:1.4}
+
+.vplan-label{margin:8px 0 -2px;color:var(--ink2);font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1.4}
+/* El titulo de la tarjeta que reservamos nosotros lleva el punto de mostaza:
+   es la unica diferencia de marca entre las dos tarjetas y alcanza, sin el
+   borde de 2 px con glow que antes le ganaba en peso al propio total. */
+.vplan-label.is-nuestro{color:var(--cel)}
+
+/* ---------- Las tarjetas ---------- */
+.vplan-card{display:grid;gap:0;padding:4px 16px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
+/* Las dos tarjetas se ven IGUALES. Antes la de "con nosotros" llevaba borde de
+   2 px con glow de mostaza y ganaba en peso al propio total; ahora las
+   diferencia el titulo de arriba (masaza en "CON NOSOTROS") y el CTA del pie.
+   El color de la marca queda en la etiqueta y en el boton, no en un borde que
+   compite con los numeros. */
+.vplan-card.is-nuestro{border-color:var(--control-line)}
+.vplan-card>.vplan-row{padding:12px 0}
+.vplan-card>.vplan-row+.vplan-row{border-top:1px solid var(--line)}
+.vplan-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:start}
+.vplan-ico{display:grid;place-items:center;width:44px;height:44px;border-radius:12px}
+.vplan-ico .trip-summary__ico{width:22px;height:22px}
+.vplan-row__body{display:grid;gap:3px;min-width:0;justify-items:start}
+.vplan-row__title{margin:0;color:var(--ink);font-size:15.5px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
 .vplan-row__sub{margin:0;color:var(--ink2);font-size:13px;line-height:1.4}
 .vplan-row__sub.is-warn{color:var(--accent);font-weight:700}
 :root[data-theme="light"] .vplan-row__sub.is-warn{color:var(--cel)}
 .vplan-row__sub.is-muted{font-size:12px;opacity:.8}
+/* El link "Cambiar" va al final de la bajada, en la MISMA linea. Antes era una
+   linea propia, sola y centrada, debajo del boton: cuatro lineas en el modal
+   que no eran ningun dato y empujaban el presupuesto fuera de pantalla. */
+.vplan-row__sub .vplan-link{display:inline;margin:0 0 0 2px;padding:0;font-size:12.5px}
 .vplan-row__body .voucher-item__line,.vplan-row__body .voucher-item__ruta,.vplan-row__body .voucher-item__horarios,.vplan-row__body .voucher-item__detail{margin:0;color:var(--ink2);font-size:13px}
 .vplan-row__side{display:grid;justify-items:end;gap:2px;text-align:right}
-.vplan-row__side b{color:var(--ink);font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
-.vplan-row__side b.is-zero{color:var(--ink2);font-size:13px;font-weight:700}
+.vplan-row__side b{color:var(--ink);font-size:16.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vplan-row__side b.is-zero{color:var(--ink2);font-size:13px;font-weight:700;font-style:italic}
 .vplan-row__side small{color:var(--ink2);font-size:11.5px;white-space:nowrap}
-.vplan-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;padding:0 16px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:14.5px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease}
+/* La pastilla de estado, en su propia linea dentro del cuerpo de la fila. Se
+   estira para no dejar el hueco del titulo a su derecha: la fila es una grilla
+   de tres columnas y el chip, si no llena, deja la bajada desalineada con el
+   texto de arriba. */
+.vplan-row__body>.reserva-chip{align-self:start}
+
+/* ---------- Las acciones de la fila ----------
+   Los botones van en una grilla de dos columnas, no apilados a lo ancho. Eran
+   tres botones de 46 px de alto, uno por tarjeta, que empujaban el presupuesto
+   fuera de la primera pantalla. Con dos lado a lado la tarjeta no crece. */
+.vplan-acciones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;margin-top:5px}
+.vplan-acciones>.vplan-btn:only-child{grid-column:1/-1}
+.vplan-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:42px;padding:0 12px;border:1.5px solid var(--ink);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:13.5px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease}
 .vplan-btn:hover{background:var(--ink);color:var(--surface)}
-.vplan-btn:focus-visible,.vplan-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.vplan-card__links{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 16px;margin-top:-4px}
-.vplan-link{justify-self:start;padding:4px 0;border:0;background:none;color:var(--ink2);font:inherit;font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-.vplan-link:hover{color:var(--ink)}
-.vplan-row__body .vplan-link{margin-top:2px;padding:2px 0;font-size:12.5px}
-.vplan-card__estado{display:flex;justify-content:center}
-.vplan-card__hint{margin:0;color:var(--ink2);font-size:12.5px;text-align:center}
-.vplan-destino{display:grid;gap:6px;margin:0;padding:12px 0 0;border-top:1px solid var(--line);list-style:none}
-.vplan-destino li{display:flex;justify-content:space-between;gap:12px;color:var(--ink2);font-size:13px}
-.vplan-destino em{display:block;font-style:normal;font-size:11.5px;opacity:.85}
-.vplan-destino b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-.vplan-total{display:grid;gap:8px;margin-top:8px;padding:16px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
-.vplan-total p{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0;color:var(--ink2);font-size:14px}
-.vplan-total p b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
-.vplan-total .vplan-total__final{margin-top:4px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:800}
-.vplan-total__final strong{font-family:var(--fh);font-size:28px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
-.vplan-total .vplan-total__pp{justify-content:flex-end;font-size:12.5px}
-.vplan .voucher-canales{margin:4px 0 0}
-/* El pie: misma tinta y mismo radio que las tarjetas del plan. */
-.vplan .vplan-pie{gap:10px;margin-top:6px}
-.vplan .vplan-pie .voucher-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.vplan .vplan-pie .voucher-tools>*{grid-column:auto;width:100%}
-.vplan .vplan-pie .voucher-tools .voucher-chip{flex-direction:row;gap:8px;min-height:48px;padding:0 12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--ink) 3%,var(--surface));font-size:13.5px;font-weight:700}
-.vplan .vplan-pie .voucher-tools .voucher-chip:hover{border-color:var(--accent)}
-.vplan .vplan-pie .voucher-tools .voucher-chip .voucher-btn__ico{width:18px;height:18px;color:var(--accent)}
-:root[data-theme="light"] .vplan .vplan-pie .voucher-tools .voucher-chip .voucher-btn__ico{color:var(--cel)}
-.vplan .vplan-pie .voucher-asesor{margin-top:0;padding:16px;border-radius:var(--r-card,16px);background:linear-gradient(135deg,color-mix(in srgb,#25d366 9%,var(--surface)),color-mix(in srgb,var(--ink) 3%,var(--surface)))}
-.vplan .vplan-pie .voucher-asesor__btn{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;border-radius:999px}
-.vplan .vplan-pie .voucher-asesor__btn .voucher-btn__ico{width:18px;height:18px;color:#25d366}
-.vplan .vplan-pie .voucher-asesor__btn:hover .voucher-btn__ico{color:currentColor}
-.vplan .vplan-pie .voucher-grupo{border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
-.vplan .vplan-pie .voucher-grupo>summary{min-height:50px;color:var(--ink);font-weight:700}
-.vplan-cta{display:grid;gap:8px;border-top:1px solid var(--line);background:var(--surface)}
-.vplan-cta .voucher-reserve__btn{justify-content:center;gap:10px;min-height:56px;border-radius:999px;font-size:16px}
-.vplan-cta .voucher-reserve__btn i{font-style:normal;opacity:.7}
-.vplan-cta__nota{margin:0;color:var(--ink2);font-size:12.5px;text-align:center}
-@media (max-width:560px){
-  .vplan .vplan-head h2{font-size:26px}
-  .vplan-card{padding:14px}
-  .vplan-card.is-nuestro{padding:4px 14px}
-  .vplan-row{grid-template-columns:44px minmax(0,1fr) auto;gap:10px}
-  .vplan-ico{width:44px;height:44px;border-radius:12px}
-  .vplan-ico .trip-summary__ico{width:22px;height:22px}
-  .vplan-row__title{font-size:15px}
-  .vplan-row__side b{font-size:16px}
-  .vplan-steps__item{gap:6px;font-size:13px}
-  .vplan-total__final strong{font-size:24px}
-}
-@media (max-width:360px){.vplan-row{grid-template-columns:40px minmax(0,1fr)}.vplan-row__side{grid-column:2;justify-items:start;text-align:left}.vplan-ico{width:40px;height:40px}}
-/* El link al proveedor con la reserva pendiente: sigue ahi para reabrir Booking
-   o Google Flights, pero como secundario, en el mismo celeste de la pastilla
-   "Pendiente de reserva", para que no se lea como el primer paso de nuevo. */
+.vplan-btn:focus-visible,.vplan-link:focus-visible,.vplan-destino-box__sum:focus-visible,.vplan-suma__detalle>summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* Reabrir el link con la reserva pendiente: mismo celeste de la pastilla, para
+   que no se lea como el primer paso de nuevo. */
 .vplan-btn.is-reabrir{border-color:color-mix(in srgb,var(--cel) 55%,transparent);color:var(--cel)}
 .vplan-btn.is-reabrir:hover{background:var(--cel-soft);color:var(--cel);border-color:var(--cel)}
+/* "Ya reserve": es una afirmacion, no una navegacion, asi que va en verde con
+   la tilde y no en el contorno de los otros dos. Es el cierre del circulo de
+   la persona, y por eso tiene que verse distinto del link que la trajo. */
+.vplan-btn.is-ya-reserve{border-color:color-mix(in srgb,var(--good) 70%,transparent);color:var(--good)}
+.vplan-btn.is-ya-reserve:hover{background:var(--good-soft);color:var(--good);border-color:var(--good)}
 
-/* Resumen de presupuesto: jerarquia, origen de cada reserva y espaciado */
-.vplan-cta .voucher-reserve__btn{border-radius:12px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.vplan .vplan-btn,.vplan .vplan-pie .voucher-asesor__btn{border-radius:12px}
-/* Origen: "externo" se gestiona fuera (flecha, tono frio); "nuestro" lo hacemos aca (tilde, verde) */
-.vplan-row__sub.is-externo,.vplan-card__hint.is-externo{display:flex;align-items:center;gap:5px;color:var(--cel);font-weight:600}
-.vplan-card__hint.is-externo{justify-content:center}
-.vplan-row__sub.is-externo::before,.vplan-card__hint.is-externo::before{content:"\2197";font-weight:800}
-.vplan-row__sub.is-nuestro{display:flex;align-items:center;gap:5px;color:var(--good);font-weight:600}
-.vplan-row__sub.is-nuestro::before{content:"\2713";font-weight:800}
-.vplan-row__side b.is-zero{font-style:italic}
-/* Espaciado entre desglose en destino y totales */
-.vplan-destino{gap:10px;padding:16px 0 4px;margin-top:4px}
-.vplan-destino li{line-height:1.35}
-.vplan-total{margin-top:20px;padding:18px 16px;gap:10px}
-.vplan-total .vplan-total__final{margin-top:6px;padding-top:14px}
-.vplan .voucher-canales{margin:10px 0 0}
-/* El asesor por WhatsApp conserva su lugar y deja aire antes del CTA fijo */
-.vplan .vplan-pie{margin:14px 0 22px;gap:14px}
-.vplan .vplan-pie .voucher-asesor{border:1px solid color-mix(in srgb,#25d366 45%,var(--line))}
-@media (max-width:560px){.vplan-card{gap:14px}.vplan-total{margin-top:22px}.vplan-cta .voucher-reserve__btn{min-height:54px}}
+.vplan-card__links{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:3px}
+.vplan-link{justify-self:start;padding:2px 0;border:0;background:none;color:var(--ink2);font:inherit;font-size:12.5px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.vplan-link:hover{color:var(--ink)}
+.vplan-link.is-link-ext{text-decoration:none;font-weight:700}
+.vplan-link.is-link-ext:hover{text-decoration:underline}
+
+/* ---------- Gastos en destino, plegado ----------
+   Un <details> con la fila entera como <summary>: icono, nombre, monto y el
+   chevron. El monto va DENTRO del summary a proposito, para que plegado se
+   vea igual de completo que abierto. */
+.vplan-destino-box{border:1px solid var(--line);border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
+.vplan-destino-box__sum{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;list-style:none}
+.vplan-destino-box__sum::-webkit-details-marker{display:none}
+.vplan-destino-box__t{min-width:0;color:var(--ink);font-size:15.5px;font-weight:700;line-height:1.3}
+.vplan-destino-box__t em{display:block;color:var(--ink2);font-size:12.5px;font-style:normal;font-weight:500;line-height:1.35}
+.vplan-destino-box__sum>b{color:var(--ink);font-size:16.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vplan-destino-box__chev{display:inline-grid;place-items:center;width:22px;height:22px;color:var(--ink2);font-size:19px;line-height:1;transition:transform .18s ease}
+.vplan-destino-box[open]>.vplan-destino-box__sum .vplan-destino-box__chev{transform:rotate(90deg)}
+.vplan-destino-box__body{padding:0 16px 12px}
+.vplan-destino{display:grid;gap:7px;margin:0;padding:12px 0 4px;border-top:1px solid var(--line);list-style:none}
+.vplan-destino li{display:flex;justify-content:space-between;gap:12px;color:var(--ink2);font-size:13px;line-height:1.35}
+.vplan-destino em{display:block;font-style:normal;font-size:11.5px;opacity:.85}
+.vplan-destino b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- El asesor, en una linea ----------
+   Antes eran tres bloques (titulo, bajada y boton de 48 px apilado) y ocupaba
+   mas alto que la tarjeta de gastos en destino, para ofrecer una sola cosa:
+   hablar con alguien. */
+.vplan .vplan-asesor{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px 12px;margin:0;padding:8px 14px;border:1px solid color-mix(in srgb,#25d366 40%,var(--line));border-radius:var(--r-card,16px)}
+.vplan-asesor .voucher-asesor__ico{width:34px;height:34px}
+.vplan-asesor .voucher-asesor__ico svg{width:19px;height:19px}
+/* Titulo y bajada en el mismo <span>: en dos celdas de la grilla ocupaban dos
+   lineas y el bloque quedaba mas alto que la tarjeta de gastos en destino. */
+.vplan-asesor__txt{color:var(--ink2);font-size:12.5px;line-height:1.4}
+.vplan-asesor__txt b{color:var(--ink);font-size:13.5px}
+.vplan-asesor .voucher-asesor__btn{grid-column:3;min-height:38px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:800}
+.vplan-asesor .voucher-asesor__btn .voucher-btn__ico{width:16px;height:16px;color:#25d366}
+.vplan-asesor .voucher-asesor__btn:hover .voucher-btn__ico{color:currentColor}
+
+/* ---------- El pie ---------- */
+.vplan .voucher-canales{margin:0}
+.vplan .vplan-pie{gap:8px;margin:2px 0 14px}
+.vplan .vplan-pie .voucher-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.vplan .vplan-pie .voucher-tools>*{grid-column:auto;width:100%}
+.vplan .vplan-pie .voucher-tools .voucher-chip{flex-direction:row;gap:7px;min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--ink) 3%,var(--surface));font-size:13px;font-weight:700}
+.vplan .vplan-pie .voucher-tools .voucher-chip:hover{border-color:var(--accent)}
+.vplan .vplan-pie .voucher-tools .voucher-chip .voucher-btn__ico{width:17px;height:17px;color:var(--accent)}
+:root[data-theme="light"] .vplan .vplan-pie .voucher-tools .voucher-chip .voucher-btn__ico{color:var(--cel)}
+.vplan .vplan-pie .voucher-grupo{border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
+.vplan .vplan-pie .voucher-grupo>summary{min-height:42px;color:var(--ink);font-size:13px;font-weight:700}
+
+.vplan-cta{display:grid;gap:8px;border-top:1px solid var(--line);background:var(--surface)}
+.vplan-cta .voucher-reserve__btn{justify-content:center;gap:10px;min-height:54px;border-radius:14px;font-size:16px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.vplan-cta .voucher-reserve__btn i{font-style:normal;opacity:.7}
+
+@media (max-width:560px){
+  .vplan-suma__valor strong{font-size:30px}
+  .vplan-card{padding:2px 14px}
+  .vplan-row{grid-template-columns:40px minmax(0,1fr) auto;gap:10px}
+  .vplan-ico{width:40px;height:40px;border-radius:11px}
+  .vplan-ico .trip-summary__ico{width:20px;height:20px}
+  .vplan-row__title{font-size:15px}
+  .vplan-row__side b{font-size:15.5px}
+  .vplan-destino-box__sum{grid-template-columns:40px minmax(0,1fr) auto auto;gap:10px;padding:11px 14px}
+  .vplan-destino-box__t{font-size:15px}
+  .vplan-destino-box__sum>b{font-size:15.5px}
+  .vplan-acciones{grid-template-columns:minmax(0,1fr)}
+  .vplan-btn{font-size:13px}
+  .vplan-asesor{grid-template-columns:auto minmax(0,1fr);padding:10px 12px}
+  .vplan-asesor .voucher-asesor__btn{grid-column:1/-1;min-height:40px}
+  .vplan-cta .voucher-reserve__btn{min-height:52px}
+}
+@media (max-width:360px){
+  .vplan-row{grid-template-columns:minmax(0,1fr)}
+  .vplan-row__side{grid-column:1;justify-items:start;text-align:left}
+  .vplan-row__side b{font-size:15px}
+  .vplan-destino-box__sum{grid-template-columns:minmax(0,1fr) auto auto}
+  .vplan-destino-box__sum .vplan-ico{display:none}
+}
+
 
 /* Stepper de 4 pasos: los cuatro botones miden lo mismo y el texto no se corta.
    Antes, de ancho >560 px cada boton ponia el icono al lado del texto en ~100 px
