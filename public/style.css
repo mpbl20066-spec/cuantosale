@@ -1,4 +1,4 @@
-/* version: 271
+/* version: 273
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3834,3 +3834,20 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .vplan .vplan-pie{margin:14px 0 22px;gap:14px}
 .vplan .vplan-pie .voucher-asesor{border:1px solid color-mix(in srgb,#25d366 45%,var(--line))}
 @media (max-width:560px){.vplan-card{gap:14px}.vplan-total{margin-top:22px}.vplan-cta .voucher-reserve__btn{min-height:54px}}
+
+/* Stepper de 4 pasos: los cuatro botones miden lo mismo y el texto no se corta.
+   Antes, de ancho >560 px cada boton ponia el icono al lado del texto en ~100 px
+   y salia "Sin vuelo + Trasla..." con puntos suspensivos; y en el celular
+   "Vuelo + Traslados" ocupaba dos lineas y su boton salia mas alto que los otros
+   (el boton no se estiraba a la altura de la fila). Ahora siempre es columna
+   (numero arriba, nombre abajo, en dos lineas si hace falta), el <li> estira al
+   boton y la altura minima cubre un titulo de dos lineas. El modo compacto
+   (.steps.is-compact) tiene mas especificidad y conserva sus circulos de 40 px. */
+.steps__list{align-items:stretch}
+.steps__item{display:flex}
+.steps__btn{flex-direction:column;justify-content:center;align-items:center;gap:4px;height:100%;min-height:64px;padding:8px 4px;text-align:center;box-sizing:border-box}
+.steps__t{justify-items:center;width:100%}
+.steps__t b{white-space:normal;overflow:visible;text-overflow:clip;font-size:11.5px;line-height:1.15;overflow-wrap:break-word}
+.steps__t small,.steps__item:not(.is-current) .steps__t small{display:none}
+@media (max-width:360px){.steps__btn{padding:8px 2px}.steps__t b{font-size:10px;letter-spacing:-.01em}}
+@media (max-width:340px){.steps__list{gap:4px}.steps__t b{font-size:9.5px}}
