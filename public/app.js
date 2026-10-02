@@ -6762,11 +6762,13 @@
        El resumen se lee como un plan en pasos, en el orden en que se hacen:
        primero lo que se reserva en el sitio oficial (vuelo, hotel), despues lo
        que se reserva con nosotros en un solo pago (traslado y tours) y al final
-       lo que no se reserva: lo que se gasta en destino. Los tres montos de abajo
-       suman el total, asi que cada numero del plan tiene su lugar en la cuenta. */
+       lo que no se reserva: lo que se gasta en destino. El total del plan es la
+       suma de lo que dicen sus tarjetas, asi cada numero tiene su lugar en la cuenta. */
     var conNosotros = (busMode || autoMode ? 0 : transferTotal) + toursTotal;
     var oficiales = (autoMode ? 0 : busMode ? busTotal : flightTotal) + hotelTotal;
-    var enDestino = Math.max(0, totalGeneral - conNosotros - oficiales);
+    var alquilerTotal = Math.round(Number(detailState.alquiler) || 0);
+    var enDestino = (autoMode ? autoTotal : localTotal) + foodTotal + alquilerTotal;
+    var totalPlan = conNosotros + oficiales + enDestino;
     var hayTraslado = !busMode && !autoMode && !!(tl2 || tv2);
     var nuestroHecho = (hayTraslado || selectedTours.length)
       && (!hayTraslado || !!estadoReserva('traslados'))
@@ -6885,6 +6887,7 @@
       + (autoMode ? '<li><span>Auto propio <em>combustible y peajes</em></span><b>' + money(autoTotal) + '</b></li>' : '')
       + (autoMode ? '' : '<li><span>Transporte local <em>' + transportLabel + ' &middot; ' + money(localPerDay) + '/día</em></span><b>' + money(localTotal) + '</b></li>')
       + '<li><span>Gastronomía <em>' + foodLabel + ' &middot; ' + money(foodPerDay) + '/día</em></span><b>' + money(foodTotal) + '</b></li>'
+      + (alquilerTotal ? '<li><span>Alquiler de auto <em>en destino</em></span><b>' + money(alquilerTotal) + '</b></li>' : '')
       + '</ul>';
     var cardDestino = '<article class="vplan-card is-destino">'
       + '<div class="vplan-row">' + tile('comidas') + '<div class="vplan-row__body"><p class="vplan-row__title">Comida y gastos en destino</p>'
@@ -6892,12 +6895,12 @@
       + '<div class="vplan-row__side"><b>~' + money(enDestino) + '</b></div></div>'
       + destinoLineas + '</article>';
 
-    var porPersona = pax > 1 ? '<p class="vplan-total__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona &middot; ' + pax + ' viajeros</p>' : '';
+    var porPersona = pax > 1 ? '<p class="vplan-total__pp">' + money(Math.round(totalPlan / pax)) + ' por persona &middot; ' + pax + ' viajeros</p>' : '';
     var cardTotales = '<section class="vplan-total" aria-label="Presupuesto">'
       + '<p><span>Con nosotros</span><b>' + money(conNosotros) + '</b></p>'
       + '<p><span>Sitios oficiales (aprox.)</span><b>' + money(oficiales) + '</b></p>'
       + '<p><span>En destino (estimado)</span><b>' + money(enDestino) + '</b></p>'
-      + '<p class="vplan-total__final"><span>Presupuesto total estimado</span><strong>' + money(totalGeneral) + '</strong></p>'
+      + '<p class="vplan-total__final"><span>Presupuesto total estimado</span><strong>' + money(totalPlan) + '</strong></p>'
       + porPersona + '</section>';
 
     var etiquetaExternos = nExternos === 2 ? 'Pasos 1 y 2 &middot; los reservás en el sitio oficial' : 'Paso 1 &middot; lo reservás en el sitio oficial';

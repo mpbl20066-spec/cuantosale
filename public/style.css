@@ -1,4 +1,4 @@
-/* version: 263
+/* version: 271
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -367,8 +367,8 @@ label,.lbl{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin
 .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--cel-soft);border:1.5px solid var(--line)}
 .legend .l1::before{background:var(--ink);border-color:var(--ink)}
 .legend .l2::before{background:var(--accent);border-color:var(--accent)}
-
-.legend .l3::before{background:var(--accent);border-color:var(--accent)}
+/* "Otras fechas" va del color de sus barras, no mostaza: el amarillo es solo de la más barata. */
+.legend .l3::before{background:var(--cel-soft);border-color:var(--line)}
 /* Cuando tu fecha ES la más barata hay una sola referencia y la leyenda dice las
    dos cosas en una pastilla. El color es el de la barra que se está marcando
    (.bar.best), no el de "Tu fecha": la barra se pinta mostaza cuando coincide
