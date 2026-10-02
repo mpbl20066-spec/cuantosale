@@ -2202,8 +2202,8 @@ var HOTEL_NOTA_MINIMA = 8;
   }
   /* Suelta la seleccion cuando el hotel marcado no esta en la lista, y deja que
      el marcado de la lista caiga en el recomendado de la categoria que se este
-     mostrando. Devuelve true si hubo que soltar algo, para que el que llame
-     sepa si tiene que repintar. */
+     mostrando. Repinta el total y el panel cuando toca, porque cambiar el estado
+     sin repintar deja dos pantallas del mismo viaje con precios distintos. */
   function soltarHotelSiNoEstaEnLaLista() {
     if (hotelGuardadoEstaEnLaLista()) return false;
     if (!detailState) return false;
@@ -2223,6 +2223,18 @@ var HOTEL_NOTA_MINIMA = 8;
       var tipo = resolveHotelTypeForMeta(detailState.meta);
       detailState.hotel = Math.round(detailState.originalHotelEstimate * hotelTypeFactor(tipo));
     }
+    /* Y hay que REPINTAR. Esta funcion cambia detailState.hotel, que es uno de
+       los sumandos del total, asi que sin esto el numero que se ve queda viejo
+       mientras el estado ya es otro: el panel de arriba seguia mostrando el
+       total con hotel y "dividir gastos" —que calcula en vivo con
+       getBudgetBreakdown()— ya daba uno sin el. Dos pantallas del mismo viaje
+       con dos precios distintos, que es la peor forma de tener un numero.
+       Se recalcula el total y se repinta el panel; el bloque de hoteles ya esta
+       dibujado y no hay que tocarlo. */
+    try {
+      recalcularTotalViaje();
+      renderTripSummary();
+    } catch (e) { /* el repintado es lo que puede fallar, no el estado */ }
     return true;
   }
   /* ---------- viajes de dos paradas: reparto de noches y una eleccion por parada ---------- */
