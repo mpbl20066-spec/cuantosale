@@ -6993,6 +6993,9 @@ var HOTEL_NOTA_MINIMA = 8;
        que cada tarjeta ya tiene al lado (el desglose del total volvia a
        mostrar las tres mismas sumas). */
     var conNosotros = (busMode || autoMode ? 0 : transferTotal) + toursTotal;
+    // Solo interviene en totalPlan. Antes tambien salia a la vista, en el desglose de
+    // tres lineas que se saco de la pantalla: no queda huerfano, pero ya no se
+    // muestra solo.
     var oficiales = (autoMode ? 0 : busMode ? busTotal : flightTotal) + hotelTotal;
     var alquilerTotal = Math.round(Number(detailState.alquiler) || 0);
     var enDestino = (autoMode ? autoTotal : localTotal) + foodTotal + alquilerTotal;
@@ -7183,16 +7186,28 @@ var HOTEL_NOTA_MINIMA = 8;
        empujaba el total unheader entero mas abajo. El dialogo conserva su
        nombre para lectores de pantalla con aria-label: sacar el titular visible
        no puede significar que el modal deje de decir que es. */
+    /* El total y nada mas.
+       Antes venia un <details> "Ver desglose" que repartia el total en tres:
+       "Con nosotros", "Sitios oficiales" y "En destino". Se saco por pedido
+       propio, porque el reparto en tres no ayudaba a entender el numero.
+
+       Los tres montos no se pierden. Abajo ya esta el detalle por rubro —vuelo
+       y hotel, transfer y actividades, y gastos en destino plegado—, que es
+       donde se ve de que se compone el total. Este bloque solo los volvia a
+       sumar en una division distinta, con nombres que no coincidian con los de
+       las tarjetas de abajo: el mismo peso contado dos veces, con dos
+       vocabularios.
+
+       Queda pendiente una cosa que esta a la vista en pantalla: la tarjeta de
+       transfer y actividades sigue rotulada "Con nosotros · en un solo pago",
+       y el pedido se manda por WhatsApp, no es un pago unico de la plataforma.
+       Ese rotulo es de otra tarjeta y no se toco acá. */
     var cardTotales = '<section class="vplan-suma" aria-label="Presupuesto">'
       + '<header class="vplan-head"><span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span>'
       + '<p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>'
       + '<p class="vplan-suma__valor"><strong>' + money(totalPlan) + '</strong>'
       + (pax > 1 ? '<span>' + money(Math.round(totalPlan / pax)) + ' por persona &middot; ' + pax + ' viajeros</span>' : '') + '</p>'
-      + '<details class="vplan-suma__detalle"><summary>Ver desglose</summary><ul>'
-      + '<li><span>Con nosotros</span><b>' + money(conNosotros) + '</b></li>'
-      + '<li><span>Sitios oficiales (aprox.)</span><b>' + money(oficiales) + '</b></li>'
-      + '<li><span>En destino (estimado)</span><b>' + money(enDestino) + '</b></li>'
-      + '</ul></details></section>';
+      + '</section>';
 
     var etiquetaExternos = busMode ? 'El bus lo comprás vos, con la empresa' : 'Lo reservás vos, en el sitio oficial';
     var etiquetaNuestro = 'Con nosotros &middot; en un solo pago';

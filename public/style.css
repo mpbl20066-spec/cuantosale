@@ -1,4 +1,4 @@
-/* version: 281
+/* version: 282
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -3762,17 +3762,10 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .vplan-suma__valor{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin:12px 0 0}
 .vplan-suma__valor strong{color:var(--ink);font-family:var(--fh);font-size:34px;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
 .vplan-suma__valor span{color:var(--ink2);font-size:13px;font-weight:600}
-/* "Ver desglose" es un link chico al pie del total, no un <details> con caja.
-   Saca el min-height de 48 px que el proyecto impone a todo summary: 48 px de
-   un texto de 13 no es un area tactil, es un hueco. */
-.vplan-suma__detalle{justify-self:start;margin-top:2px}
-.vplan-suma__detalle>summary{min-height:0;padding:5px 0;color:var(--ink2);font-size:12.5px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;list-style:none}
-.vplan-suma__detalle>summary::-webkit-details-marker{display:none}
-.vplan-suma__detalle>summary::after{content:"\203A";display:inline-block;transition:transform .18s ease}
-.vplan-suma__detalle[open]>summary::after{transform:rotate(90deg)}
-.vplan-suma__detalle>ul{display:grid;gap:4px;margin:5px 0 2px;padding:8px 0 0;border-top:1px solid var(--line);list-style:none}
-.vplan-suma__detalle li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;color:var(--ink2);font-size:13.5px}
-.vplan-suma__detalle li b{color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Las reglas de .vplan-suma__detalle se fueron con el bloque de "Ver desglose"
+   que las usaba: el reparto en Con nosotros / Sitios oficiales / En destino
+   no se muestra mas. El detalle del total queda en las tarjetas de rubro de
+   abajo, con nombres que si coinciden con los del resto de la pantalla. */
 /* La nota de "es una cotizacion estimada y cada servicio se compra con su
    proveedor" va pegada al titulo de las reservas externas, que es donde
    importa. Arriba, en el total, era una linea mas entre el numero y la
@@ -3827,7 +3820,7 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .vplan-acciones>.vplan-btn:only-child{grid-column:1/-1}
 .vplan-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:42px;padding:0 12px;border:1.5px solid var(--ink);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:13.5px;font-weight:700;text-decoration:none;cursor:pointer;transition:background .16s ease,color .16s ease}
 .vplan-btn:hover{background:var(--ink);color:var(--surface)}
-.vplan-btn:focus-visible,.vplan-link:focus-visible,.vplan-destino-box__sum:focus-visible,.vplan-suma__detalle>summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.vplan-btn:focus-visible,.vplan-link:focus-visible,.vplan-destino-box__sum:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* Reabrir el link con la reserva pendiente: mismo celeste de la pastilla, para
    que no se lea como el primer paso de nuevo. */
 .vplan-btn.is-reabrir{border-color:color-mix(in srgb,var(--cel) 55%,transparent);color:var(--cel)}
