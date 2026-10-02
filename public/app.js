@@ -4710,25 +4710,17 @@
   }
   function proposalBreakdownContent(state) {
     if (!state) return '';
-    var budget = getBudgetBreakdown(state);
-    var total = budget.total;
-    var entries = budget.entries;
-    var segments = entries.map(function (entry) {
-      return '<span class="proposal-breakdown__segment" style="width:' + entry.width + '%;background:var(' + entry.color + ')"></span>';
-    }).join('');
-    var rows = entries.map(function (entry) {
-      // Un punto del color del segmento de la barra: une la fila con su tramo.
-      var pct = entry.width >= 1 ? Math.round(entry.width) + '%' : '';
-      // La fila es un botón: el desglose dice cuánta plata va a cada rubro, y
-      // el lugar donde esa plata se cambia o se revisa es unos centímetros más
-      // abajo. syncBudgetJumpTargets() desactiva las filas cuya sección todavía
-      // no existe (tours sin actividades cargadas, traslados fuera de vuelo) y
-      // les saca el "Ir a la sección", para no anunciarle al lector de pantalla
-      // un salto que el clic no va a hacer.
-      return '<button type="button" class="proposal-breakdown__row" data-breakdown-category="' + entry.category + '" data-jump-category="' + entry.category + '" data-jump-label="' + esc(entry.label) + '" aria-label="Ir a la sección de ' + esc(entry.label) + '"><div class="proposal-breakdown__label"><span class="proposal-breakdown__dot" style="background:var(' + entry.color + ')" aria-hidden="true"></span><span>' + esc(entry.label) + '</span>' + (pct ? '<small class="proposal-breakdown__pct">' + pct + '</small>' : '') + '</div><b data-breakdown-value>' + money(entry.value) + '</b></button>';
-    }).join('');
-    return '<div class="proposal-breakdown__stack" role="img" aria-label="Distribución del costo">' + segments + '</div>' +
-      '<div class="proposal-breakdown__list">' + rows + '</div>';
+    // Mismo componente que el panel "Mi Viaje": total, barra y filas con icono,
+    // estado y monto. Se calcula con tripSummaryModel() sobre detailState.
+    var m = tripSummaryModel();
+    var activos = m.summaryItems.filter(function (it) { return it.estadoClave !== 'vacio' && it.estadoClave !== 'fuera'; });
+    var pendientes = m.summaryItems.filter(function (it) { return it.estadoClave === 'vacio' || it.estadoClave === 'fuera'; });
+    var prev = document.querySelector('[data-proposal-breakdown] .trip-summary__more');
+    var abierto = prev ? prev.open : !activos.length;
+    return '<div class="proposal-breakdown__total"><span class="trip-summary__eyebrow">Mi Viaje</span><strong>' + money(m.total) + '</strong></div>'
+      + '<div class="trip-summary__bar" aria-label="Distribución del costo">' + m.segments + '</div>'
+      + '<div class="trip-summary__items">' + (activos.length ? activos.map(m.filaResumen).join('') : '<p class="trip-summary__empty">Todavía no sumaste nada al presupuesto.</p>') + '</div>'
+      + (pendientes.length ? '<details class="trip-summary__more"' + (abierto ? ' open' : '') + '><summary>Otros servicios no seleccionados <span>' + pendientes.length + '</span></summary><div class="trip-summary__items trip-summary__items--more">' + pendientes.map(m.filaResumen).join('') + '</div></details>' : '');
   }
   function proposalBreakdownHead() {
     // Sin selector de moneda acá: el total de la propuesta ya está arriba, en
@@ -4930,15 +4922,9 @@
       : 'Auto';
     return label.split(' · ')[0];
   }
-  function renderTripSummary() {
-    try { pintarPasos(); } catch (e) { /* todavia no hay viaje */ }
-    var summary = $('#trip-summary');
-    if (!summary) return;
-    if (!detailState || !detailState.meta) {
-      summary.hidden = true;
-      summary.innerHTML = '';
-      return;
-    }
+  /* El modelo del resumen de gastos: lo comparten el panel "Mi Viaje" y la seccion
+     "A donde va tu plata", para que sean el mismo componente. */
+  function tripSummaryModel() {
     var budget = getBudgetBreakdown(detailState);
     var total = budget.total;
     var entries = budget.entries;
@@ -5096,6 +5082,19 @@
         + '<em>' + item.value + '</em>'
         + '</button>';
     };
+    return { total: total, segments: segments, summaryItems: summaryItems, filaResumen: filaResumen };
+  }
+  function renderTripSummary() {
+    try { pintarPasos(); } catch (e) { /* todavia no hay viaje */ }
+    var summary = $('#trip-summary');
+    if (!summary) return;
+    if (!detailState || !detailState.meta) {
+      summary.hidden = true;
+      summary.innerHTML = '';
+      return;
+    }
+    var model = tripSummaryModel();
+    var total = model.total, segments = model.segments, summaryItems = model.summaryItems, filaResumen = model.filaResumen;
     /* La lista principal es solo lo que ya está en la cuenta ("Sumado" y los
        reservados). Los rubros "Sin elegir" y "No incluido" valen 0 y no le dicen
        nada a quien mira el total: ocupaban la mitad del panel. Van al final, en un
@@ -6222,15 +6221,16 @@
   function mostrarAvisoReserva(mensaje, tipo) {
     var modal = $('#booking-modal');
     if (!modal || modal.hidden || !modal.dataset.summaryText) return;
-    var lista = modal.querySelector('.voucher-list');
-    if (!lista) return;
-    var previo = lista.querySelector('[data-reserva-aviso]');
+    // Va debajo del avance del plan, arriba de las tarjetas.
+    var ancla = modal.querySelector('.vplan-progress');
+    if (!ancla) return;
+    var previo = modal.querySelector('[data-reserva-aviso]');
     if (previo) previo.parentNode.removeChild(previo);
-    var nota = document.createElement('li');
+    var nota = document.createElement('p');
     nota.className = 'voucher-aviso' + (tipo === 'ok' ? ' is-ok' : '');
     nota.setAttribute('data-reserva-aviso', '');
     nota.textContent = mensaje;
-    lista.appendChild(nota);
+    ancla.insertAdjacentElement('afterend', nota);
   }
   /* Repinta el voucher si está abierto. Se comprueba el dataset porque el modal
      se usa para el checkout también, y en ese momento no hay voucher que
@@ -6471,7 +6471,7 @@
       } catch (e) { /* sin history: se deja la barra como estaba */ }
       if (!viaje || volver !== viaje) return;
       if (['pasajes', 'alojamiento', 'traslados', 'tours'].indexOf(rubro) < 0) return;
-      var fila = modal.querySelector('.voucher-item[data-rubro="' + rubro + '"]');
+      var fila = modal.querySelector('[data-rubro="' + rubro + '"]');
       if (!fila) return;
       fila.classList.add('is-tras-vuelta');
       try { fila.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) { fila.scrollIntoView(); }
@@ -6758,79 +6758,182 @@
        completo" y siempre con el total global (vuelo + alojamiento + traslado +
        actividades), nunca el parcial de lo que se reserva por la app. Con algo para
        reservar en la app abre el checkout; si no, lleva al asesor. */
-    var reservarTodo = '<div class="voucher-reserve voucher-reserve--fijo">'
-      + '<button type="button" class="voucher-reserve__btn" ' + (pedido.count ? 'data-reservar-pedido' : 'data-coordinar-asesor') + '><span>Reservar viaje completo</span><em>' + money(totalGeneral) + '</em></button>'
-      + '</div>';
-    var porPersona = pax > 1 ? '<span class="voucher-hero__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona</span>' : '';
+    /* ---------- "Tu plan de viaje" ----------
+       El resumen se lee como un plan en pasos, en el orden en que se hacen:
+       primero lo que se reserva en el sitio oficial (vuelo, hotel), despues lo
+       que se reserva con nosotros en un solo pago (traslado y tours) y al final
+       lo que no se reserva: lo que se gasta en destino. Los tres montos de abajo
+       suman el total, asi que cada numero del plan tiene su lugar en la cuenta. */
+    var conNosotros = (busMode || autoMode ? 0 : transferTotal) + toursTotal;
+    var oficiales = (autoMode ? 0 : busMode ? busTotal : flightTotal) + hotelTotal;
+    var enDestino = Math.max(0, totalGeneral - conNosotros - oficiales);
+    var hayTraslado = !busMode && !autoMode && !!(tl2 || tv2);
+    var nuestroHecho = (hayTraslado || selectedTours.length)
+      && (!hayTraslado || !!estadoReserva('traslados'))
+      && (!selectedTours.length || !!estadoReserva('tours'));
+    var nuestroLabel = busMode || autoMode ? 'Tours' : 'Traslado + tour';
+    /* hecho: true / false, o null cuando no hay forma de saberlo (el bus se
+       compra con la empresa y la app no se entera). Un null no frena el paso
+       actual: si no, el plan quedaba clavado en el 1 para siempre. */
+    var pasosPlan = [];
+    if (!autoMode) pasosPlan.push({ label: busMode ? 'Bus' : 'Vuelo', hecho: busMode ? null : !!estadoReserva('pasajes') });
+    pasosPlan.push({ label: 'Hotel', hecho: !!estadoReserva('alojamiento') });
+    pasosPlan.push({ label: nuestroLabel, hecho: !!nuestroHecho });
+    var pasoActual = -1;
+    pasosPlan.forEach(function (p, i) { if (pasoActual < 0 && p.hecho === false) pasoActual = i; });
+    var reservadas = pasosPlan.filter(function (p) { return p.hecho === true; }).length;
+    var nExternos = pasosPlan.length - 1;
+    var stepper = '<ol class="vplan-steps">' + pasosPlan.map(function (p, i) {
+      return '<li class="vplan-steps__item' + (p.hecho ? ' is-done' : '') + (i === pasoActual ? ' is-now' : '') + '">'
+        + '<span class="vplan-steps__n" aria-hidden="true">' + (p.hecho ? '&#10003;' : (i + 1)) + '</span>' + esc(p.label) + '</li>';
+    }).join('') + '</ol>'
+      + '<p class="vplan-progress">' + reservadas + ' de ' + pasosPlan.length + ' reservadas</p>';
+
+    // Icono en baldosa de color, en blanco. El color es del rubro.
+    var TILE = { pasajes: '#2F6BFF', bus: '#2F6BFF', alojamiento: '#7C4DFF', traslados: '#12A38B', tours: '#E5484D', comidas: '#2A3A55' };
+    function tile(cat) {
+      return '<span class="vplan-ico" style="background:' + (TILE[cat] || '#2A3A55') + '">' + categoryIcon(cat, '#FFFFFF') + '</span>';
+    }
+    function precio(monto, aprox, nota) {
+      if (!(monto > 0)) return '<div class="vplan-row__side"><b class="is-zero">' + esc(nota || 'A elegir') + '</b></div>';
+      return '<div class="vplan-row__side"><b>' + (aprox ? '~' : '') + money(monto) + '</b>' + (aprox ? '<small>precio de referencia</small>' : '') + '</div>';
+    }
+    function fila(cat, titulo, cuerpo, lado) {
+      return '<div class="vplan-row" data-rubro="' + esc(cat) + '">' + tile(cat)
+        + '<div class="vplan-row__body"><p class="vplan-row__title">' + titulo
+        + (estadoReserva(cat) ? ' <span class="vplan-row__estado">' + chipReserva(cat) + '</span>' : '')
+        + '</p>' + cuerpo + '</div>' + lado + '</div>';
+    }
+    function sub(texto, clase) { return texto ? '<p class="vplan-row__sub' + (clase ? ' ' + clase : '') + '">' + texto + '</p>' : ''; }
+    function cambiar(cat, texto) { return '<button type="button" class="vplan-link" data-detalle-rubro="' + cat + '">' + texto + '</button>'; }
+    /* La accion grande de la tarjeta externa: el link al sitio oficial. Reservado,
+       el link ya se uso y en su lugar queda el estado (la agencia lo puede deshacer).
+
+       "Pendiente de reserva" no es reservado: es haber abierto Booking o Google
+       Flights, sin saber si la compra termino. Antes ese estado tambien
+       reemplazaba el link por la etiqueta, asi que quien volvia a la app con la
+       pestaña cerrada no tenia como reabrir el hotel o el vuelo que estaba
+       comprando. Ahora el boton sigue, como secundario y con otro texto, y
+       apunta a la misma URL de afiliado. No lleva data-reservar-rubro: el rubro
+       ya quedo marcado con el primer clic y no hace falta marcarlo de nuevo. */
+    function accionExterna(cat, url, sitio, elegido, elegir) {
+      if (estadoReserva(cat) === 'Solicitado' && canalDe(cat).externo && url) {
+        var reabrir = sitio === 'WhatsApp' ? 'Volver a WhatsApp' : 'Ver en ' + sitio;
+        return '<a class="vplan-btn is-reabrir" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer" title="La compra se completa en ' + esc(sitio) + '. Reabrí la página si cerraste la pestaña.">' + esc(reabrir) + ' <span aria-hidden="true">&#8599;</span></a>'
+          + (soyAgencia ? '<div class="vplan-card__estado">' + reservadoCta(cat, 'Quitar la marca de reservado y volver a reservar.') + '</div>' : '');
+      }
+      if (estadoReserva(cat)) return '<div class="vplan-card__estado">' + reservadoCta(cat, 'Quitar la marca de reservado y volver a reservar.') + '</div>';
+      if (!elegido) return '<button type="button" class="vplan-btn" data-detalle-rubro="' + cat + '">' + elegir + '</button>';
+      if (!url) return '';
+      return '<a class="vplan-btn" data-reservar-rubro="' + esc(cat) + '" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer">Reservar en ' + esc(sitio) + ' <span aria-hidden="true">&#8599;</span></a>';
+    }
+    function pieExterno(cat, elegido, texto) {
+      var links = (elegido ? cambiar(cat, texto) : '') + controlReserva(cat);
+      return links ? '<div class="vplan-card__links">' + links + '</div>' : '';
+    }
+
+    // Paso: el vuelo (o el bus).
+    var cardTransporte = '';
+    if (busMode) {
+      cardTransporte = '<article class="vplan-card">' + fila('bus', busTitle, busLines, precio(busTotal, true))
+        + '<p class="vplan-card__hint">Se compra directo con la empresa de bus</p></article>';
+    } else if (!autoMode) {
+      var vTitulo = flightSummary.selected
+        ? 'Vuelo' + (flightSummary.airline ? ' ' + esc(flightSummary.airline) : '') + ' &middot; ' + esc(airportCode(flightSummary.origin)) + (flightSummary.isRoundTrip ? ' &#8596; ' : ' &rarr; ') + esc(airportCode(flightSummary.destination))
+        : 'Vuelo &middot; sin elegir';
+      var vIda = flightSummary.selected ? esc(flightTime(outLeg.departure, flightSummary.departureText)) : '';
+      var vVuelta = flightSummary.selected && flightSummary.isRoundTrip ? esc(flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText)) : '';
+      if (/sin fecha/i.test(vVuelta)) vVuelta = '';  // sin hora real se pide elegirla
+      var vCuerpo = flightSummary.selected
+        ? sub(vIda ? 'Ida ' + vIda : '') + (flightSummary.isRoundTrip ? (vVuelta ? sub('Vuelta ' + vVuelta) : sub('Vuelta: elegí la fecha', 'is-warn')) : '')
+        : sub('Elegí un vuelo para ver horarios y precio', 'is-warn');
+      cardTransporte = '<article class="vplan-card" data-rubro="pasajes">' + fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true))
+        + accionExterna('pasajes', flightBookUrl, flightProviderUrl ? 'Google Flights' : 'WhatsApp', !!flightSummary.selected, 'Elegir vuelo')
+        + pieExterno('pasajes', !!flightSummary.selected, 'Cambiar vuelo') + '</article>';
+    }
+
+    // Paso: el alojamiento.
+    var hTitulo = multiHotel ? hotelesElegidos.length + ' alojamientos' : (hotelElegido() ? esc(selectedHotelName) : 'Alojamiento &middot; sin elegir');
+    var hCuerpo = hotelElegido()
+      ? (multiHotel ? hotelNote : '') + sub('Se reserva en Booking.com')
+      : sub('Elegí dónde dormir para ver el precio', 'is-warn');
+    var cardHotel = '<article class="vplan-card" data-rubro="alojamiento">' + fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true))
+      + accionExterna('alojamiento', hotelBookUrl, 'Booking.com', hotelElegido(), 'Elegir hotel')
+      + pieExterno('alojamiento', hotelElegido(), 'Cambiar hotel') + '</article>';
+
+    // Paso: lo que se reserva con nosotros.
+    var filaTraslado = '';
+    if (!busMode && !autoMode) {
+      filaTraslado = fila('traslados', hayTraslado ? transferTitle : 'Traslado',
+        hayTraslado
+          ? sub(transferNote) + (estadoReserva('traslados') ? '' : cambiar('traslados', 'Cambiar traslado'))
+          : sub('Del aeropuerto a tu alojamiento') + cambiar('traslados', 'Elegir traslado'),
+        precio(transferTotal, false, 'A elegir'));
+    }
+    var tTitulo = selectedTours.length === 1 ? esc(selectedTours[0].title)
+      : selectedTours.length ? 'Tours y actividades &middot; ' + selectedTours.length
+        : 'Tours y actividades';
+    var filaTours = fila('tours', tTitulo,
+      selectedTours.length
+        ? sub(selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail)) + (estadoReserva('tours') ? '' : cambiar('tours', 'Cambiar tours'))
+        : sub('Sumá excursiones del destino') + cambiar('tours', 'Agregar tours'),
+      precio(toursTotal, false, 'Opcional'));
+    var cardNuestro = '<article class="vplan-card is-nuestro">' + filaTraslado + filaTours + '</article>';
+
+    // Lo que no se reserva: se gasta en destino.
+    var destinoLineas = '<ul class="vplan-destino">'
+      + (autoMode ? '<li><span>Auto propio <em>combustible y peajes</em></span><b>' + money(autoTotal) + '</b></li>' : '')
+      + (autoMode ? '' : '<li><span>Transporte local <em>' + transportLabel + ' &middot; ' + money(localPerDay) + '/día</em></span><b>' + money(localTotal) + '</b></li>')
+      + '<li><span>Gastronomía <em>' + foodLabel + ' &middot; ' + money(foodPerDay) + '/día</em></span><b>' + money(foodTotal) + '</b></li>'
+      + '</ul>';
+    var cardDestino = '<article class="vplan-card is-destino">'
+      + '<div class="vplan-row">' + tile('comidas') + '<div class="vplan-row__body"><p class="vplan-row__title">Comida y gastos en destino</p>'
+      + sub('Estimado &middot; se paga en el lugar') + sub('No incluye reserva', 'is-muted') + '</div>'
+      + '<div class="vplan-row__side"><b>~' + money(enDestino) + '</b></div></div>'
+      + destinoLineas + '</article>';
+
+    var porPersona = pax > 1 ? '<p class="vplan-total__pp">' + money(Math.round(totalGeneral / pax)) + ' por persona &middot; ' + pax + ' viajeros</p>' : '';
+    var cardTotales = '<section class="vplan-total" aria-label="Presupuesto">'
+      + '<p><span>Con nosotros</span><b>' + money(conNosotros) + '</b></p>'
+      + '<p><span>Sitios oficiales (aprox.)</span><b>' + money(oficiales) + '</b></p>'
+      + '<p><span>En destino (estimado)</span><b>' + money(enDestino) + '</b></p>'
+      + '<p class="vplan-total__final"><span>Presupuesto total estimado</span><strong>' + money(totalGeneral) + '</strong></p>'
+      + porPersona + '</section>';
+
+    var etiquetaExternos = nExternos === 2 ? 'Pasos 1 y 2 &middot; los reservás en el sitio oficial' : 'Paso 1 &middot; lo reservás en el sitio oficial';
+    var etiquetaNuestro = 'Paso ' + pasosPlan.length + ' &middot; lo reservás con nosotros, en un solo pago';
+
+    /* El CTA fijo reserva SOLO lo que es con nosotros, y lo dice con su monto:
+       vuelo y hotel se pagan en su sitio y no pasan por este boton. Ya
+       reservado, lleva al asesor. */
+    var ctaLabel = !hayTraslado ? 'Reservar tours' : selectedTours.length ? 'Reservar traslado + tour' : 'Reservar traslado';
+    var ctaActivo = pedido.count && conNosotros > 0 && !nuestroHecho;
+    var notaCta = autoMode ? 'El hotel lo reservás en su sitio &middot; te guiamos'
+      : (busMode ? 'Bus' : 'Vuelo') + ' y hotel los reservás en sus sitios &middot; te guiamos';
+    var reservarTodo = '<div class="voucher-reserve voucher-reserve--fijo vplan-cta">'
+      + (ctaActivo
+        ? '<button type="button" class="voucher-reserve__btn" data-reservar-pedido><span>' + ctaLabel + '</span><i aria-hidden="true">&middot;</i><em>' + money(conNosotros) + '</em></button>'
+        : nuestroHecho
+          ? '<button type="button" class="voucher-reserve__btn" data-coordinar-asesor><span>Coordinar con un asesor</span></button>'
+          /* Sin nada elegido para reservar con nosotros, el CTA lleva a elegirlo:
+             el asesor ya tiene su propio boton en el pie. */
+          : '<button type="button" class="voucher-reserve__btn" data-detalle-rubro="' + (busMode || autoMode ? 'tours' : 'traslados') + '"><span>' + (busMode || autoMode ? 'Elegir tours' : 'Elegir traslado y tours') + '</span></button>')
+      + '<p class="vplan-cta__nota">' + notaCta + '</p></div>';
+
     cerrarTodosLosModales();
-    modal.innerHTML = '<div class="booking-dialog voucher-dialog" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      '<header class="voucher-head"><span class="voucher-kicker">Resumen del presupuesto</span><h2 id="itinerary-summary-title">Tu viaje a ' + esc(detailState.meta.dest.name) + '</h2><p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>' +
-      '<div class="voucher-hero"><div class="voucher-hero__row"><div class="voucher-hero__figure"><span>Total estimado</span><strong>' + money(totalGeneral) + '</strong>' + porPersona + '</div></div><p>' + (autoMode ? 'Auto, alojamiento, actividades y lo que vas a gastar cada día en destino.' : busMode ? 'Bus, alojamiento, actividades y lo que vas a gastar cada día en destino.' : 'Vuelo, alojamiento, traslado, actividades y lo que vas a gastar cada día en destino.') + '</p></div>' +      /* Los diferenciales van pegados al precio y antes del listado: es la
-         pregunta que uno se hace justo despues de ver el total. */
-
-      /* Dos bloques separados por el momento del pago: lo que se arma y se paga
-         antes de viajar, y lo que se gasta en destino (abajo). */
-      '<div class="voucher-bloque"><h3 class="voucher-bloque__title">Costos previos al viaje<span>' + (autoMode ? 'Auto, alojamiento y actividades' : busMode ? 'Bus, alojamiento y actividades' : 'Vuelo, alojamiento, traslado y actividades') + '</span></h3><b class="voucher-bloque__monto">' + money(Math.max(0, totalGeneral - destinoTotal)) + '</b></div>' +
-      '<ul class="voucher-list">' +
-      (autoMode ? itemRow('auto', 'Auto propio', '<p class="voucher-item__detail">' + esc(roadtripMeta()) + '</p><p class="voucher-item__detail">Combustible y peajes</p>', autoTotal, '') : busMode ? itemRow('bus', busTitle, busLines, busTotal, '') : itemRow('pasajes', flightTitle, flightLines, flightTotal, filaCta('pasajes', !!flightSummary.selected, 'Agregar vuelos', bookCta(flightBookUrl, 'Reservar', 'Reservar vuelo', 'pasajes')))) +
-      itemRow('alojamiento', hotelTitle, hotelNote, hotelTotal, filaCta('alojamiento', hotelElegido(), 'Elegir hotel', bookCta(hotelBookUrl, 'Reservar', 'Reservar alojamiento', 'alojamiento'))) +
-      (busMode || autoMode ? '' : itemRow('traslados', transferTitle, transferNoteHtml, transferTotal, transferCta)) +
-      itemRow('tours', toursTitle, selectedTours.length ? '<p class="voucher-item__detail">' + esc(toursDetail) + '</p>' : avisoVoucher(toursDetail), toursTotal, filaCta('tours', !!selectedTours.length, 'Agregar tours', reservarCta(true, 'Reservar actividades', 'tours'))) +
-      '</ul>' +
-      /* "Gastos en destino" era una caja con fondo y radio dentro del modal, que
-         ya es una caja: caja dentro de caja, y el unico bloque del modal con
-         bordes propios. Ahora son las MISMAS filas del resto, separadas por una
-         linea y con un encabezado chico. El modal ya dice donde empieza cada
-         zona con un separador; no hace falta una segunda caja adentro. */
-      '<section class="voucher-destino"><h3 class="voucher-destino__title">Gastos estimados en destino<span>Por día y total del viaje</span></h3>'
-      + '<p class="voucher-destino__aviso"><span aria-hidden="true">i</span>Es una estimación orientativa para que te organices: comida y transporte local los pagás vos en destino. No es un cobro de la plataforma.</p>'
-      + '<ul class="voucher-destino__list">'
-      + (autoMode ? '' : '<li><span class="voucher-destino__name">Transporte local <em>' + transportLabel + '</em></span><span class="voucher-destino__dia">' + money(localPerDay) + '/día</span><b class="voucher-destino__monto">' + money(localTotal) + '</b></li>')
-      + '<li><span class="voucher-destino__name">Gastronomía <em>' + foodLabel + '</em></span><span class="voucher-destino__dia">' + money(foodPerDay) + '/día</span><b class="voucher-destino__monto">' + money(foodTotal) + '</b></li>'
-      + '</ul>'
-      + '<p class="voucher-destino__total"><span>Total en destino <em>(ya está en el total)</em></span><b>' + money(destinoTotal) + '</b></p></section>' +
-      /* La nota de canales, y es la que da la tranquilidad que se busca.
-
-       La idea de fondo --todo junto y alguien que lo coordine-- se dice
-       entera. Lo que no se hace es sostenerla con un proveedor que no existe:
-       no hay integracion con Duffel, ni ruta, ni clave, ni webhook, y
-       .env.example dice que se eligio SerpAPI porque Duffel y Amadeus piden
-       aprobacion. Decir "Respaldo Duffel" seria una promesa que el producto no
-       puede cumplir.
-
-       Y el vuelo tampoco es una gigante que te respalda: Google Flights es un
-       METABUSCADOR. El precio y el link son reales, pero la compra termina en
-       la aerolinea o en una agencia. Booking si es intermediario real, y ahi
-       el respaldo es cierto. */
+    modal.innerHTML = '<div class="booking-dialog voucher-dialog vplan" role="dialog" aria-modal="true" aria-labelledby="itinerary-summary-title"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
+      '<header class="vplan-head"><span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span><h2 id="itinerary-summary-title">Tu plan de viaje</h2>'
+      + '<p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p>'
+      + '<p class="vplan-head__sub">' + pasosPlan.length + ' reservas · ' + nExternos + (nExternos === 1 ? ' en sitio oficial' : ' en sitios oficiales') + ', 1 con nosotros</p></header>' +
+      stepper +
+      '<h3 class="vplan-label">' + etiquetaExternos + '</h3>' + cardTransporte + cardHotel +
+      '<h3 class="vplan-label">' + etiquetaNuestro + '</h3>' + cardNuestro +
+      '<h3 class="vplan-label">No se reserva acá &middot; lo pagás en destino</h3>' + cardDestino +
+      cardTotales +
       canalesTexto +
-      /* Por que el paso externo tiene un boton de confirmar y el terrestre no.
-
-       Porque el pago del vuelo y del hotel pasa por un sitio del que la app
-       no recibe ningun aviso: no hay transaccion propia ni webhook al que
-       colgar el cambio. El unico dato cierto es el que declara la persona, asi
-       que se lo preguntamos una vez y lo anotamos, en vez de suponerlo y
-       mostrarle un "Comprado" que podria ser falso.
-
-       El paso terrestre no necesita ese boton porque ese pago lo lleva la app:
-       se marca solo al completar el checkout. */
-      /* ABAJO, UN SOLO BOTON SOLIDO.
-
-         Habia dos botones del mismo tamano compitiendo: "Elegi algo para
-         reservar" (mostaza) y "Compartir en Instagram" (52px, con degradado
-         fucsia de la marca y una sombra). Dos CTAs de igual peso en el pie, y el
-         de compartir encima del de comprar. El degradado, aparte, era el unico
-         color ajeno de toda la app en modo oscuro.
-
-         Ahora: el CTA de reserva arriba, solo, y las tres acciones de utilidad
-         en una barra de la misma altura, mismo borde fino y misma tinta. El
-         menu "Compartir" junta WhatsApp, la tarjeta de Instagram y copiar el
-         texto, que antes eran tres botones y uno de ellos gigante. */
-      '<div class="voucher-actions">' +
-      /* Pie del resumen, de arriba abajo: el CTA de reserva (arriba, solo), una
-         barra de herramientas con Guardar, Compartir y Coordinar con asesor, y
-         al final el bloque de grupo, colapsado. El menu de Compartir se abre
-         EN LINEA debajo de la barra, empujando el contenido: asi nunca tapa
-         otro boton. */
+      /* El pie: Guardar y Compartir, el asesor y el grupo, en ese orden. El menu
+         de Compartir se abre encima del boton, asi nunca tapa otro control. */
+      '<div class="voucher-actions vplan-pie">' +
       '<div class="voucher-tools voucher-share">' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
       '<div class="voucher-share-wrap">' +
@@ -6839,7 +6942,7 @@
       '<button type="button" data-share-link>' + brandIcon('copiar') + '<span class="voucher-btn__label">Copiar enlace del viaje</span></button>' +
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '</div></div></div>' +
-      '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos y te contacta por WhatsApp.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">Coordinar con asesor</button></aside>' +
+      '<aside class="voucher-asesor"><span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span><div class="voucher-asesor__txt"><b>¿Querés ayuda de un experto?</b><small>Un asesor arma las reservas con vos y te contacta por WhatsApp.</small></div><button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span>Coordinar con asesor</span></button></aside>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
       '</div>' + reservarTodo;
     modal.dataset.summaryText = summaryText;
@@ -8256,6 +8359,21 @@
     tmp.innerHTML = guiaBannerMarkup(detailState.meta);
     if (tmp.firstElementChild) el.replaceWith(tmp.firstElementChild);
   }
+  function abrirGuiaModal(sinGuia) {
+    var meta = detailState && detailState.meta;
+    var modal = $('#booking-modal');
+    if (!meta || !meta.dest || !modal) { if (sinGuia) sinGuia(); return; }
+    pedirGuiaSecreta(meta.dest.key, function (guia) {
+      var html = '';
+      if (guia) { try { html = guiaSecreta(meta, guia); } catch (error) { console.error('Error al pintar la guia', error); } }
+      if (!html) { if (sinGuia) sinGuia(); return; }
+      window.setTimeout(actualizarGuiaBanner, 0);
+      modal.innerHTML = '<div class="booking-dialog guia-modal" role="dialog" aria-modal="true" aria-label="Guía Secreta de ' + esc(meta.dest.name) + '">'
+        + '<button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' + html + '</div>';
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+    });
+  }
   function irALaGuia() {
     var destino = detailState && detailState.meta && detailState.meta.dest && detailState.meta.dest.key;
     var objetivo = (destino && document.querySelector('[data-guia-destino="' + destino + '"]')) || document.querySelector('[data-guia-lock],.food-guide');
@@ -8898,7 +9016,7 @@
     function visualDe(option) {
       if (option.fits) return option;
       var c = option.cheapest;
-      if (c && (option.fitsAny || option.fitsAny === undefined)) return Object.assign({}, option, { total: c.total, pp: c.pp, parts: c.parts, title: c.title, tierDesc: c.tierDesc, alt: c.tierLabel });
+      if (c && (option.fitsAny || option.fitsAny === undefined)) return Object.assign({}, option, { total: c.total, pp: c.pp, parts: c.parts, title: c.title, tierDesc: c.tierDesc, alt: c.tierLabel, altMode: c.mode });
       return null;
     }
     function porGrupo(elegir) {
@@ -8914,7 +9032,7 @@
     if (sinOpcionQueEntre) {
       fits = porGrupo(function (option) {
         var c = option.cheapest;
-        return c ? Object.assign({}, option, { total: c.total, pp: c.pp, parts: c.parts, title: c.title, tierDesc: c.tierDesc, alt: c.tierLabel, sobra: Number(c.total) - Number(data.meta.budget) }) : option;
+        return c ? Object.assign({}, option, { total: c.total, pp: c.pp, parts: c.parts, title: c.title, tierDesc: c.tierDesc, alt: c.tierLabel, altMode: c.mode, sobra: Number(c.total) - Number(data.meta.budget) }) : option;
       }).slice(0, 3);
     }
     var cards = fits.map(function (option, index) {
@@ -8956,7 +9074,7 @@
           : option.alt ? '<span class="mini g">¡Entra con categoría ' + esc(nombreCategoria(option.alt)) + '!</span>' : '<span class="mini g">¡Entra en tu presupuesto!</span>') + '</div>' +
         '<div class="opt__actions">' +
         '<button type="button" class="opt__disclosure" data-opt-toggle aria-expanded="false" aria-controls="' + bodyId + '"><span class="opt__disclosure-text">Ver desglose</span><span class="opt__chevron" aria-hidden="true">›</span></button>' +
-        '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-dest="' + esc(option.dest.key) + '"' + (option.alt ? ' data-alt-style="' + (({ 'económico': 'ahorro', intermedio: 'eq', confort: 'comodo' })[String(option.alt).toLowerCase()] || '') + '"' : '') + '>Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
+        '<button type="button" class="btn-ver-propuesta opt__cta" data-propuesta-dest="' + esc(option.dest.key) + '"' + (option.alt ? ' data-alt-style="' + (({ 'económico': 'ahorro', intermedio: 'eq', confort: 'comodo' })[String(option.alt).toLowerCase()] || '') + '"' : '') + (option.altMode === 'auto' || option.altMode === 'bus' ? ' data-alt-transport="' + option.altMode + '"' : '') + '>Ver propuesta<span class="opt__arrow" aria-hidden="true">›</span></button>' +
         '</div>' +
         '<div class="opt__body" id="' + bodyId + '" hidden>' + rows + notaDesglose + '</div>' +
         '</div>' +
@@ -8971,8 +9089,17 @@
     var monedaBaseTit = monedaBase(), monedaTit = monedaActiva();
     var enOtraMoneda = monedaTit.code !== monedaBaseTit.code && tasaDe(monedaTit.code) != null;
     var budgetTxt = enOtraMoneda ? money(data.meta.budget) + ' (≈ USD $' + titleBudget + ')' : 'USD $' + titleBudget;
-    el.innerHTML = '<section class="destination-results-section"><h2>Destinos disponibles para tu presupuesto de ' + budgetTxt + '</h2>' +
-      '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo' + (enOtraMoneda ? '. Precios en ' + monedaTit.etiqueta.toLowerCase() + ' (' + monedaTit.simbolo + ')' : '') + '.</p>' +
+    /* El transporte con el que se filtro va en el titulo. Sin esto, una busqueda
+       en auto y una en vuelo se leian igual: los precios son muy distintos
+       (combustible y peajes contra pasaje) y quien comparaba no tenia forma de
+       saber que estaba mirando. En auto se aclara tambien el alcance, que son
+       los 13 destinos con ruta de carretera y no los 44 de la app. */
+    var modoBusqueda = data.meta.transport === 'auto' ? ' en auto' : data.meta.transport === 'bus' ? ' en bus' : '';
+    var notaAlcance = data.meta.transport === 'auto'
+      ? ' Solo entran los destinos con ruta de carretera: desde Florianópolis y el sur del litoral hasta Gramado y Porto Alegre.'
+      : '';
+    el.innerHTML = '<section class="destination-results-section"><h2>Destinos disponibles' + (modoBusqueda ? ' para un viaje' + modoBusqueda : '') + ' con un presupuesto de ' + budgetTxt + '</h2>' +
+      '<p class="sub">Estimaciones para ' + data.meta.pax + (data.meta.pax === 1 ? ' viajero' : ' viajeros') + ', ordenadas de menor a mayor costo' + (enOtraMoneda ? '. Precios en ' + monedaTit.etiqueta.toLowerCase() + ' (' + monedaTit.simbolo + ')' : '') + '.' + notaAlcance + '</p>' +
       (sinOpcionQueEntre && fits.length
         ? '<div class="notice">Estás cerca: con ' + money(data.meta.budget) + ' todavía no alcanza para ningún destino, pero lo más económico sale ' + money(fits[0].total) + ' (' + esc(fits[0].dest.name) + ', categoría ' + esc(nombreCategoria(fits[0].alt)) + ') y se pasa por ' + money(fits[0].sobra) + '. Subí un poco el monto, bajá la cantidad de viajeros o probá otras fechas. Te dejamos las 3 más baratas.</div>'
         : '') +
@@ -8987,7 +9114,14 @@
     setHighlightsVisible(false);
     $('#results').innerHTML = '';
     el.innerHTML = renderLoadingState('Buscando destinos para tu presupuesto…');
-    var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style, origin: S.origin });
+    /* El transporte va en el pedido. Antes no se mandaba y el servidor caia en
+       su default ('flight'), asi que la grilla mostraba los precios de vuelo
+       aunque arriba uno hubiera elegido Auto / Roadtrip: los 40 destinos
+       aparecian igual, por un monto que nadie iba a pagar, y el filtro de
+       presupuesto no servia para nada. El server solo devuelve los destinos que
+       tienen ese transporte (13 de 44 en auto), y devuelve el transport en
+       `meta` para que el titulo diga con que se filtro. */
+    var qs = new URLSearchParams({ dep: S.dep, ret: S.ret, pax: S.pax, budget: budget, style: S.style, origin: S.origin, transport: S.transport === 'roadtrip' ? 'auto' : (S.transport || 'flight') });
     fetch('/api/cotizar-todos?' + qs.toString())
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
@@ -9301,18 +9435,47 @@
     if (!local) return data.list;
     return data.list.map(function (proposal) { return normalizeLocalTransportInProposal(data, proposal); });
   }
+  /* Destinos a los que el modelo puede cotizar en auto. Esta lista es una copia
+     de ROADTRIP_ALLOWED_DESTINATIONS en lib/model.js y TIENE QUE COINCIDIR con
+     ella: el servidor es el que aplica el filtro y devuelve 400 para los que no
+     tienen ruta de carretera.
+
+     Antes esta lista tenía 8 claves y metía 'rio', que el modelo no tiene: la
+     app ofrecía "Auto / Roadtrip" para Río y el servidor respondía "Auto /
+     Roadtrip solo está disponible para Río de Janeiro o destinos más al sur".
+     Y le faltaban las 5 del sur que el modelo sí soporta (Garopaba, Ferrugem,
+     Picárraras, Itapema, Torres y Canoa), que por eso nunca mostraban la
+     opción. Copiar la lista es preferible a pegarle los datos al modelo desde
+     el cliente: el filtro real vive en model.js. */
+  var ROADTRIP_DESTINATIONS = ['fln', 'bcm', 'gram', 'canela', 'poa', 'bombinhas', 'rosa', 'garopaba', 'ferrugem', 'picarras', 'itapema', 'torres', 'canoa'];
+  var BUS_DESTINATIONS = ['fln', 'poa'];
   function isRoadtripDestinationAllowed(destKey) {
     var key = String(destKey || S.dest || '').toLowerCase();
-    return ['rio', 'fln', 'bcm', 'gram', 'canela', 'poa', 'bombinhas', 'rosa'].indexOf(key) >= 0;
+    return ROADTRIP_DESTINATIONS.indexOf(key) >= 0;
   }
   function getAvailableTransportModes(destKey) {
     var key = String(destKey || S.dest || 'todos').toLowerCase();
-    // El bus solo se ofrece donde hay empresas con horario y tarifa cargados (public/buses.js).
-    var busDestinations = ['fln', 'poa'];
+    var enTodos = key === 'todos' || key === '';
     var modes = [{ value: 'flight', label: 'Vuelo' }];
-    if (busDestinations.indexOf(key) >= 0) modes.push({ value: 'bus', label: 'Bus' });
+    /* En "Todos los destinos" la pregunta no es "este destino tiene auto?" sino
+       "hay alguno que tenga?", asi que se ofrecen los transportes que ALGUN
+       destino de la grilla soporta. El server igual devuelve solo los que lo
+       tienen (13 de 44 en auto, 2 de 44 en bus). El bus no se ofrece aca a
+       proposito: son dos destinos, y una grilla de dos tarjetas despues de
+       esperar la carga no vale el clic. */
+    if (enTodos) {
+      modes.push({ value: 'auto', label: 'Auto / Roadtrip' });
+      return modes;
+    }
+    if (BUS_DESTINATIONS.indexOf(key) >= 0) modes.push({ value: 'bus', label: 'Bus' });
     if (isRoadtripDestinationAllowed(key)) modes.push({ value: 'auto', label: 'Auto / Roadtrip' });
     return modes;
+  }
+  /* ¿Este destino ofrece algo más que vuelo? Responder "más de un modo" y no
+     "el modo X está disponible" sirve para los dos casos a la vez: para un
+     destino concreto es lo mismo, y para 'todos' es la pregunta correcta. */
+  function transporteDisponiblePara(destKey) {
+    return getAvailableTransportModes(destKey).length > 1;
   }
   function renderTransportSelector() {
     var wrap = document.getElementById('transport-selector');
@@ -9321,7 +9484,13 @@
     var modes = getAvailableTransportModes(key);
     var current = String(S.transport || 'flight').toLowerCase();
     if (current === 'roadtrip') current = 'auto';
-    if (current === 'auto' && !isRoadtripDestinationAllowed(key)) current = 'flight';
+    /* Este chequeo miraba `isRoadtripDestinationAllowed(key)`, o sea si ESTE
+       destino tiene ruta. Con key = 'todos' la respuesta era siempre false, asi
+       que en la grilla el boton de auto se dibujaba sin marcar aunque S.transport
+       fuera 'auto': el selector y el estado quedaban diciendo cosas distintas, y
+       lo que se mandaba en el pedido no era lo que se veia marcado. La pregunta
+       correcta es la misma que usa el resto: si el modo esta disponible aca. */
+    if (current === 'auto' && !transporteDisponiblePara(key)) current = 'flight';
     if (!modes.some(function (mode) { return mode.value === current; })) current = modes[0].value;
     S.transport = current;
     wrap.innerHTML = modes.map(function (mode) {
@@ -10026,7 +10195,6 @@
       '<div data-transport-flow>' + transportMarkup + '</div>' +
       hotelsMarkup + toursMarkup + dailyBudgetMarkup +
       '<section class="confirm-step" data-confirm-step><h2 class="block-title">Confirmá tu viaje</h2><p class="sub block-sub">Este es el resumen de todo lo que armaste: transporte, alojamiento y extras, con el total.</p>' + renderSafe(function () { return guiaBannerMarkup(data.meta); }, '') + '</section>' +
-      '<div class="steps__foot" data-steps-foot>' + renderSafe(function () { return pasoSiguienteMarkup(); }, '') + '</div>' +
       /* "A donde va tu plata" va ANTES de la Guia Secreta, no despues.
 
          Antes estaba al final de todo y el comentario de arriba explicaba por
@@ -10042,6 +10210,7 @@
          cosas responden la misma pregunta --donde va la plata-- y el reparto
          primero: ahi estan las cuentas, y la guia dice como cuidarlas. */
       foodMarkup + breakdownMarkup +
+      '<div class="steps__foot" data-steps-foot>' + renderSafe(function () { return pasoSiguienteMarkup(); }, '') + '</div>' +
       '</div></div>';
     updateMultiStayPricing();
     /* Barra de pasos: pegada arriba solo con CSS (position:sticky en .steps). Antes
@@ -10165,7 +10334,13 @@
     // mañana se agrega otra forma de entrar.
     selectedDestKey = key || null;
     selectedDestFor = S.dep + '|' + S.ret + '|' + S.pax + '|' + S.budget;
-    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory, second: S.second, hotel_type: S.hotelType });
+    /* El transporte va en el pedido: sin el, /api/cotizar caia en vuelo y una
+       card de la grilla que entraba en el presupuesto por ir en auto abria la
+       propuesta de vuelo. Solo se manda si el destino lo soporta, porque el
+       server responde 400 para un auto sin ruta de carretera. */
+    var transporte = S.transport === 'roadtrip' ? 'auto' : (S.transport || 'flight');
+    if (getAvailableTransportModes(key).every(function (mode) { return mode.value !== transporte; })) transporte = 'flight';
+    var qs = new URLSearchParams({ dest: key, dep: S.dep, ret: S.ret, pax: S.pax, budget: S.budget, style: S.style, origin: S.origin, subcategory: S.subcategory, second: S.second, hotel_type: S.hotelType, transport: transporte });
     return fetch('/api/cotizar?' + qs.toString()).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (res) {
       if (!res.ok) throw new Error(res.j.error || 'No pudimos cargar la propuesta.');
       showProposalView(byId(res.j.list, res.j.recId), res.j);
@@ -10212,6 +10387,14 @@
       if (altStyle === 'ahorro' || altStyle === 'eq' || altStyle === 'comodo') {
         S.style = altStyle;
         Array.prototype.forEach.call(document.querySelectorAll('#seg button'), function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-v') === altStyle ? 'true' : 'false'); });
+      }
+      /* Si lo que entraba en el presupuesto era el paquete en auto (o bus), la
+         propuesta se abre con ese transporte. Si no, la card prometia US$ 800
+         y "Ver propuesta" abria el vuelo de US$ 1200 del mismo destino. */
+      var altTransport = button.getAttribute('data-alt-transport');
+      if (altTransport === 'auto' || altTransport === 'bus') {
+        S.transport = altTransport;
+        renderTransportSelector();
       }
       openDestinationProposal(destination);
       return;
@@ -10463,7 +10646,7 @@
       var t0 = Date.now();
       (function mirar() {
         var modal = $('#booking-modal');
-        if (modal && !modal.hidden && modal.dataset.summaryText && modal.querySelector('.voucher-list')) return resolve(true);
+        if (modal && !modal.hidden && modal.dataset.summaryText && modal.querySelector('.vplan')) return resolve(true);
         if (Date.now() - t0 > ms) return resolve(false);
         window.setTimeout(mirar, 120);
       })();
@@ -11728,9 +11911,16 @@
       if (all) { setHighlightsVisible(true); $('#results').innerHTML = ''; $('#destination-results').innerHTML = ''; }
     }
     function syncTransportSelection() {
-      if (S.dest === 'todos') { S.transport = 'flight'; }
       if (S.transport === 'roadtrip') S.transport = 'auto';
-      if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
+      /* En "Todos los destinos" el transporte ya no se fuerza a vuelo. Antes sí:
+         `if (S.dest === 'todos') S.transport = 'flight'` y despues el chequeo de
+         abajo caia tambien, porque isRoadtripDestinationAllowed('todos') es
+         false. O sea que el selector no solo no ofrecia auto: encima borraba el
+         que alguien hubiera elegido antes de buscar, en silencio. Ahora se
+         consulta si ALGUN destino de la grilla soporta el modo, que es la
+         pregunta que corresponde cuando todavia no se eligio ninguno. */
+      if (S.transport === 'auto' && !transporteDisponiblePara(S.dest)) S.transport = 'flight';
+      if (S.transport === 'bus' && !transporteDisponiblePara(S.dest)) S.transport = 'flight';
       if (['flight', 'bus', 'auto'].indexOf(S.transport) < 0) S.transport = 'flight';
       renderTransportSelector();
     }
@@ -11771,8 +11961,14 @@ function selectDestination(nextValue, subcategory, fromFeatured, requestedHotelT
       var inferredHotelType = requestedHotelType || inferHotelType(S.subcategory);
       S.hotelTypeExplicit = !!inferredHotelType;
       S.hotelType = inferredHotelType || hotelTypeForStyle(S.style);
-      if (S.dest === 'todos') { S.transport = 'flight'; }
-      else if (!isRoadtripDestinationAllowed(S.dest) && S.transport === 'auto') { S.transport = 'flight'; }
+      /* Volver a "Todos los destinos" ya no borra el transporte elegido. Elegir
+         auto y después volver a la grilla conservaba la eleccion antes, y acá
+         se perdia en silencio: la grilla por presupuesto se filtraba por vuelo
+         con un transporte de auto todavia seleccionado arriba, que es justo la
+         confusion que reportaba. Si el destino nuevo no soporta el modo, el
+         reset lo hace syncTransportSelection(), que mira si ALGUN destino lo
+         tiene en vez de mirar solo este. */
+      if (S.dest !== 'todos' && S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
       setDestDisplay(S.dest);
       closeDestMenu();
       // El par también puede entrar por el desplegable de Destino: sin esto,
@@ -12408,9 +12604,13 @@ function comboNombreDestino() {
         var button = e.target.closest('[data-transport-mode]');
         if (!button) return;
         S.transport = button.getAttribute('data-transport-mode');
-        if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest)) S.transport = 'flight';
+        if (S.transport === 'auto' && !isRoadtripDestinationAllowed(S.dest) && S.dest !== 'todos') S.transport = 'flight';
         if (S.transport === 'bus' && getAvailableTransportModes(S.dest).every(function (mode) { return mode.value !== 'bus'; })) S.transport = 'flight';
         renderTransportSelector();
+        /* En la grilla por presupuesto el cambio de transporte no dispara una
+           recotizacion suelta: el boton de buscar es el que la pide, y relanzar
+           sola volveria a pintar la seccion de resultados con la eleccion vieja
+           mientras se lee. En un destino concreto si recalcula. */
         if (S.dest !== 'todos') schedule();
       });
     }
@@ -12914,6 +13114,27 @@ function comboNombreDestino() {
         aplicarCodigoCheckout();
       }
     });
+    // "Finalizar viaje" y el banner de la Guia Secreta viven en la vista de
+    // detalle, no dentro de #booking-modal: su listener tiene que estar aca.
+    $('#vista-detalle').addEventListener('click', function (e) {
+      if (e.target.closest('[data-finalizar-viaje]')) { e.preventDefault(); try { openItinerarySummaryModal(); } catch (err) { console.error(err); } return; }
+      var guiaIr = e.target.closest('[data-guia-ir]');
+      if (guiaIr) {
+        e.preventDefault();
+        var guiaBanner = guiaIr.closest('[data-guia-banner]');
+        var guiaMas = guiaBanner && guiaBanner.querySelector('.guia-banner__more');
+        // El click abre la guia completa en un modal. Si el server no la entrega,
+        // "Qué incluye" despliega el detalle en el lugar como antes.
+        abrirGuiaModal(function () {
+          if (!guiaMas) { irALaGuia(); return; }
+          var abrir = guiaMas.hidden;
+          guiaMas.hidden = !abrir;
+          guiaIr.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+          guiaBanner.classList.toggle('is-desplegada', abrir);
+        });
+        return;
+      }
+    });
     // Acciones del resumen final del itinerario, que se pinta adentro del modal.
     $('#booking-modal').addEventListener('click', function (e) {
       /* El resumen se mira sin cuenta; lo que cambia un estado o abre una reserva
@@ -13021,21 +13242,6 @@ function comboNombreDestino() {
       if (grupoCrearButton) { e.preventDefault(); irAlGrupo(grupoCrearButton); return; }
       var grupoCopiarButton = e.target.closest('[data-grupo-copiar]');
       if (grupoCopiarButton) { e.preventDefault(); copiarTextoSplit(grupoCopiarButton, grupoCopiarButton.getAttribute('data-grupo-copiar')); return; }
-      if (e.target.closest('[data-finalizar-viaje]')) { e.preventDefault(); try { openItinerarySummaryModal(); } catch (err) { console.error(err); } return; }
-      var guiaIr = e.target.closest('[data-guia-ir]');
-      if (guiaIr) {
-        e.preventDefault();
-        var guiaBanner = guiaIr.closest('[data-guia-banner]');
-        var guiaMas = guiaBanner && guiaBanner.querySelector('.guia-banner__more');
-        if (guiaMas) {
-          // Con la guia bloqueada "Qué incluye" despliega el detalle en el lugar.
-          var abrir = guiaMas.hidden;
-          guiaMas.hidden = !abrir;
-          guiaIr.setAttribute('aria-expanded', abrir ? 'true' : 'false');
-          guiaBanner.classList.toggle('is-desplegada', abrir);
-        } else irALaGuia();
-        return;
-      }
       var splitTripButton = e.target.closest('[data-split-trip]');
       if (splitTripButton) { e.preventDefault(); openSplitModal(); return; }
       /* El menu "Compartir" y el copiado.
