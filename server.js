@@ -1949,11 +1949,35 @@ function cotizarTodos(req, res, url) {
   v.S.origin = origin;
   v.S.fuelPriceUsd = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
 
+  /* La búsqueda por presupuesto respeta el transporte elegido arriba. Antes el
+     cliente no mandaba `transport`, el validador caía en su default ('flight') y
+     la grilla mostraba siempre los precios de vuelo: con "Auto / Roadtrip"
+     seleccionado los 40 destinos aparecian igual, pero por un monto que nadie
+     iba a pagar y que no filtraba nada. Con el parámetro llega, y `validate` ya
+     lo normalizó de 'roadtrip' a 'auto'.
+
+     Los destinos a los que el modelo no les puede cotizar ese transporte se
+     sacan ANTES de computar. `build()` devuelve una lista vacía para ellos
+     (model.js:743 y 746), y `seriesFor` leía `rec` undefined: no fallaba una
+     tarjeta, fallaba la búsqueda entera con un 500. Por eso el filtro va acá y
+     no sobre el resultado.
+
+     Que sean 13 de 44 no es un recorte editorial: son los que tienen ruta de
+     carretera con su combustible y sus peajes. Un destino sin ruta no tiene
+     precio de auto, no un precio de auto alto. */
+  const transportPedido = String(v.S.transport || 'flight');
+  const esCotizable = function (key) {
+    if (transportPedido === 'auto') return model.isRoadtripAllowed(key);
+    if (transportPedido === 'bus') return !!(model.DEST[key].modes && model.DEST[key].modes.bus);
+    return true;
+  };
+  const clavesCotizables = HOME_DESTINATION_KEYS.filter(esCotizable);
+
   const localTransport = calculateLocalTransportCost({ style: v.S.style, dest: v.S.dest, nights: v.nights, pax: v.S.pax });
 
   // Estas diez opciones son comparables y estimadas: consultar el proveedor para
   // cada destino dispararía hasta 19 requests externos en un solo clic.
-  const options = HOME_DESTINATION_KEYS.map(function (key) {
+  const options = clavesCotizables.map(function (key) {
     const trip = Object.assign({}, v.S, { dest: key });
     const base = model.compute(trip, v.dep, v.ret, today, {});
     const result = adaptPackagesToStyle(base, trip, v.dep, v.ret, today);
@@ -1963,19 +1987,36 @@ function cotizarTodos(req, res, url) {
        aunque su categoria mas barata si entrara de sobra. `cheapest` es el minimo
        real de TODAS las propuestas del destino y `fitsAny` dice si ese minimo
        entra, que es lo que decide si el destino se ofrece o no. */
-    const cheapest = base.list.filter(function (p) { return p.mode !== 'avion_ba'; })
+    /* Con "Vuelo" (el default de la grilla) `base.list` trae solo propuestas de
+       vuelo, porque build() filtra por el transporte pedido. El minimo salia de
+       ahi y un destino con auto + hotel por US$ 800 figuraba como "no entra" en
+       un presupuesto de 1000, porque su vuelo costaba 1200: la busqueda decia
+       "no hay resultados" y el mismo paquete aparecia al elegir Auto / Roadtrip.
+       `base.alternatives` son las propuestas de los OTROS transportes (compute()
+       las arma con transport 'all'), asi que el minimo se toma sobre las dos
+       listas y todas las combinaciones compiten igual contra el presupuesto.
+       Si la persona eligio auto o bus a proposito, se respeta: ahi `list` ya es
+       ese transporte y no se mezclan los otros. */
+    const candidatas = transportPedido === 'flight'
+      ? base.list.concat(base.alternatives || [])
+      : base.list;
+    const cheapest = candidatas.filter(function (p) { return p.mode !== 'avion_ba'; })
       .reduce(function (min, p) { return !min || p.total < min.total ? p : min; }, null) || rec;
     return {
       dest: { key: key, name: model.DEST[key].name, region: model.DEST[key].region || '', country: model.DEST[key].country || 'Brasil' }, total: rec.total, pp: rec.pp,
       parts: rec.parts, title: rec.modeShort + ' + hotel ' + rec.tierLabel,
       tierDesc: rec.tierDesc, fits: result.fits,
       fitsAny: cheapest.total <= v.S.budget,
-      cheapest: { total: cheapest.total, pp: cheapest.pp, parts: cheapest.parts, title: cheapest.modeShort + ' + hotel ' + cheapest.tierLabel, tierLabel: cheapest.tierLabel, tierDesc: cheapest.tierDesc }
+      cheapest: { total: cheapest.total, pp: cheapest.pp, parts: cheapest.parts, title: cheapest.modeShort + ' + hotel ' + cheapest.tierLabel, mode: cheapest.mode, tierLabel: cheapest.tierLabel, tierDesc: cheapest.tierDesc }
     };
   }).sort(function (a, b) { return a.total - b.total; });
 
   sendJson(res, 200, {
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, origin: origin, mode: 'estimated', costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
+    /* `transport` y `destinosCotizables` vuelven en la respuesta para que el
+       cliente no tenga que asumir: el titulo de la seccion nombra el transporte
+       con el que se filtró, y con 13 de 44 destinos alcanza con aclarar que la
+       busqueda de auto cubre solo la zona con ruta de carretera. */
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, origin: origin, mode: 'estimated', transport: transportPedido, destinosCotizables: clavesCotizables.length, costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
     options: options,
     localTransport: localTransport
   });
