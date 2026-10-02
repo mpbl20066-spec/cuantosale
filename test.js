@@ -272,6 +272,32 @@ function haversineKm(a, b) {
     assert.strictEqual(cov.propio + cov.regional, Object.keys(model.DEST).length);
   });
 
+  await t('guias: las playas de cada guia de ciudad son hiperlocales y tienen foto', function () {
+    /* La regla de lib/guias.js ("REGLA HIPERLOCAL"): una playa de guia de
+       ciudad queda a 30 km o menos del centro de lib/playas.js, con
+       coordenadas para el mapa y foto de Wikimedia. Antes la guia de Rio era
+       la regional y mandaba a Paraty, a cuatro horas. */
+    const G = cargarGuias();
+    const playas = require('./lib/playas.js');
+    let revisadas = 0;
+    Object.keys(G.guias).forEach(function (key) {
+      const lista = G.guias[key].beaches || [];
+      if (!lista.length) return;
+      const centro = playas.centroDe(key);
+      assert.ok(centro, key + ': tiene playas pero no tiene centro en lib/playas.js');
+      lista.forEach(function (b) {
+        const etiqueta = key + ' / ' + b.name;
+        assert.ok(typeof b.lat === 'number' && typeof b.lng === 'number', etiqueta + ': sin lat/lng');
+        assert.match(String(b.foto || ''), /^https:\/\/(thumb|upload)\.wikimedia\.org\//, etiqueta + ': sin foto de Wikimedia');
+        const d = playas.km(centro, b);
+        assert.ok(d <= G.maxKm, etiqueta + ': queda a ' + d.toFixed(1) + ' km del centro, el maximo es ' + G.maxKm);
+        revisadas++;
+      });
+    });
+    assert.ok(G.guias.rio && G.guias.rio.beaches.length >= 5, 'Rio tiene que tener guia de ciudad con playas propias');
+    assert.ok(revisadas >= 15, 'se esperaban al menos 15 playas revisadas, hay ' + revisadas);
+  });
+
   await t('guias: la region resuelve aunque el nombre tenga tilde', function () {
     const G = cargarGuias();
     // "Ceará" y "Ceara" son dos strings distintas. Comparar contra el nombre
