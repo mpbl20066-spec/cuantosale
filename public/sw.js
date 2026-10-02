@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v147';
+var CACHE_NAME = 'cuantosale-shell-v148';
 var APP_SHELL = [
   // '/app' (la start_url de la PWA): el servidor responde lo mismo en '/' y en
   // '/app'. La landing de waitlist se sacó; se sube CACHE_NAME para que nadie
