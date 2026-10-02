@@ -133,7 +133,13 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
-  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2'
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2',
+  // Google pide el sitemap como application/xml o text/xml, y robots.txt como
+  // texto plano. Sin estas dos entradas caian al default del server y ambos se
+  // servian como application/octet-stream: el buscador puede rechazar un sitemap
+  // con ese content-type sin decirselo en ningun lado, y el sintoma es un sitemap
+  // vacio en Search Console sin ningun error visible en la consola del browser.
+  '.xml': 'application/xml; charset=utf-8', '.txt': 'text/plain; charset=utf-8'
 };
 // Los precios de vuelo llegan por el server y los links de reserva apuntan a
 // Google Flights, así que el browser no necesita hablar con ningun proveedor de
