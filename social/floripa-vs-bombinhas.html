@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Florianópolis vs Bombinhas · carrusel 1080x1350</title>
+<style>
+@font-face{font-family:Poppins;font-weight:500;src:url(fotos/poppins-500.woff2)}
+@font-face{font-family:Poppins;font-weight:600;src:url(fotos/poppins-600.woff2)}
+@font-face{font-family:Poppins;font-weight:700;src:url(fotos/poppins-700.woff2)}
+@font-face{font-family:Poppins;font-weight:800;src:url(fotos/poppins-800.woff2)}
+@font-face{font-family:Mano;src:url(fotos/overtherainbow.ttf)}
+:root{--navy:#0B1330;--amber:#F7C325;--ink:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;font-family:Poppins,system-ui,sans-serif;color:var(--ink)}
+.s{display:none;width:1080px;height:1350px;position:relative;overflow:hidden;background:var(--navy);isolation:isolate}
+.s.on{display:block}
+.ph{position:absolute;background-size:cover;filter:saturate(1.18) contrast(1.05)}
+svg.i{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+/* pincelada: el fondo se deforma con ruido, el texto no */
+.brush{position:relative;display:inline-block;z-index:0;color:var(--navy);font-weight:800;text-transform:uppercase;letter-spacing:.02em;padding:14px 46px;font-size:44px}
+.brush:before{content:"";position:absolute;inset:0;background:var(--amber);filter:url(#b);z-index:-1;border-radius:8px}
+.num{position:absolute;top:56px;right:56px;width:112px;height:112px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:40px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.nota{position:absolute;font-family:Mano,cursive;-webkit-text-stroke:2px #fff;font-size:76px;line-height:1.02;text-shadow:0 3px 18px rgba(0,0,0,.55)}
+.marca{display:flex;align-items:center;gap:16px;font-weight:800;font-size:44px;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+.marca svg{width:42px;height:52px}
+.pie{position:absolute;left:56px;bottom:48px}
+.tag{position:absolute;top:60px;left:56px}
+/* 1 portada */
+.cov .ph{inset:0;background:url(fotos/floripa-portada.jpg) 40% 100%/cover}
+.cov .head{position:absolute;top:110px;left:0;right:0;text-align:center}
+.cov h1{margin-top:44px;font-weight:800;font-size:122px;line-height:1.04;letter-spacing:-.02em;text-shadow:0 4px 28px rgba(0,0,0,.4)}
+.cov h1 em{font-style:normal;color:var(--amber)}
+.cov .q{position:relative;display:inline-block;margin-top:34px;font-family:Mano,cursive;-webkit-text-stroke:2.4px #fff;font-size:88px;text-shadow:0 2px 16px rgba(0,0,0,.45)}
+.cov .q:after{content:"";position:absolute;left:8%;right:-6%;bottom:-8px;height:9px;border-radius:9px;background:var(--amber);transform:rotate(-1deg)}
+.cov .chis{position:absolute;top:300px;right:42px;width:96px;height:96px;stroke:var(--amber);stroke-width:8;stroke-linecap:round;fill:none}
+.cov .sombra{position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(0deg,rgba(11,19,48,.7),rgba(11,19,48,0))}
+/* 2 y 3 ficha por destino */
+.ficha .ph{top:0;left:0;right:0;height:640px}
+.ficha .sombra{position:absolute;top:0;left:0;right:0;height:260px;background:linear-gradient(180deg,rgba(11,19,48,.45),rgba(11,19,48,0))}
+.ficha .panel{position:absolute;left:0;right:0;top:640px;bottom:0;background:var(--navy);padding:34px 56px 0}
+.ficha .row{display:flex;align-items:center;gap:26px;height:130px;border-bottom:2px solid rgba(255,255,255,.1)}
+.ficha .row:last-of-type{border:0}
+.ficha .ico{flex:none;width:82px;height:82px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:46px}
+.ficha .t b{display:block;font-size:42px;font-weight:700;line-height:1.1}
+.ficha .t span{display:block;font-size:29px;font-weight:500;color:#C5CFEA;line-height:1.25;margin-top:4px}
+.ficha .ok{margin-left:auto;flex:none;width:66px;height:66px;border-radius:50%;background:var(--amber);color:var(--navy);display:flex;align-items:center;justify-content:center;font-size:40px}
+.ficha .ok svg{stroke-width:3.2}
+.ficha .panel .marca{position:absolute;left:56px;bottom:44px;font-size:40px}
+/* 4 playas */
+.play .ph{inset:0;background:url(fotos/bombinhas-playa.jpg) 70% 60%/cover}
+.play .velo{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,19,48,.5) 0%,rgba(11,19,48,0) 40%,rgba(11,19,48,0) 62%,rgba(11,19,48,.5) 100%)}
+.play .blob{position:absolute;left:56px;right:56px;bottom:150px;padding:44px 60px;z-index:0;text-align:center;font-size:48px;font-weight:600;line-height:1.28}
+.play .blob:before{content:"";position:absolute;inset:0;background:var(--navy);filter:url(#b2);z-index:-1;border-radius:30px}
+.play .blob svg{font-size:60px;color:var(--amber);vertical-align:-10px;margin-right:12px}
+.play .blob .sub{display:block;width:62%;height:8px;border-radius:8px;background:var(--amber);margin:18px auto 0}
+/* 5 precios y ambiente */
+.pre{background:linear-gradient(180deg,#1E78DA 0%,#0E4A99 52%,#0B1330 100%)}
+.pre .cols{position:absolute;top:200px;left:48px;right:48px;display:grid;grid-template-columns:1fr 1fr}
+.pre .col{padding:0 24px;text-align:center}
+.pre .col+.col{border-left:3px solid rgba(255,255,255,.7)}
+.pre .nom{font-size:34px;padding:10px 30px}
+.pre .amb{font-size:27px;font-weight:500;margin-top:14px;color:#E8F0FF;min-height:70px;line-height:1.25}
+.pre .p{white-space:nowrap;font-size:104px;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin-top:6px}
+.pre .col.w .p{color:var(--amber)}
+.pre .pp{font-size:26px;font-weight:600;color:#E8F0FF}
+.pre ul{list-style:none;margin-top:30px;text-align:left;display:flex;flex-direction:column;gap:24px}
+.pre li{display:flex;gap:12px;align-items:center;font-size:31px;font-weight:600;line-height:1.2}
+.pre li svg{flex:none;width:44px;height:44px;padding:8px;border-radius:50%;background:var(--amber);color:var(--navy);stroke-width:3.4}
+.pre li span{margin-left:auto;white-space:nowrap;font-weight:800}
+.pre .gana{position:absolute;left:56px;right:56px;top:1000px;text-align:center;font-weight:800;font-size:42px;color:var(--amber)}
+.pre .fn{position:absolute;left:56px;right:56px;top:1070px;text-align:center;font-size:23px;line-height:1.4;color:#B8C7E6}
+/* 6 conclusion */
+.con .ph{inset:0;background:url(fotos/floripa-portada.jpg) 60% 100%/cover;transform:scaleX(-1)}
+.con .calido{position:absolute;inset:0;background:linear-gradient(180deg,rgba(247,160,60,.55) 0%,rgba(247,120,60,.18) 45%,rgba(11,19,48,.55) 100%)}
+.con .tarj{position:absolute;left:48px;right:48px;top:200px;z-index:0;padding:36px 36px 40px;color:var(--navy)}
+.con .tarj:before{content:"";position:absolute;inset:0;background:#fff;filter:url(#b2);z-index:-1;border-radius:34px}
+.con .tarj h2{font-family:Mano,cursive;-webkit-text-stroke:2.4px var(--navy);font-weight:400;font-size:88px;text-align:center;line-height:1}
+.con .dos{display:grid;grid-template-columns:1fr 1fr;margin-top:24px}
+.con .dos div{text-align:center;padding:0 22px}
+.con .dos div+div{border-left:3px solid rgba(11,19,48,.2)}
+.con .dos b{display:block;font-size:44px;font-weight:800}
+.con .dos span{display:block;font-size:30px;font-weight:500;line-height:1.3;margin-top:8px;color:#1b2a55}
+.con .blob{position:absolute;left:90px;right:90px;top:720px;z-index:0;padding:40px 50px;text-align:center;font-family:Mano,cursive;-webkit-text-stroke:1.8px #fff;font-size:66px;line-height:1.12}
+.con .blob:before{content:"";position:absolute;inset:0;background:var(--navy);filter:url(#b2);z-index:-1;border-radius:30px}
+.con .blob .sub{display:block;width:60%;height:8px;border-radius:8px;background:var(--amber);margin:14px auto 0}
+.con .cta{position:absolute;left:56px;right:56px;bottom:150px;text-align:center;font-weight:800;font-size:38px;text-shadow:0 2px 16px rgba(0,0,0,.6)}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<filter id="b" x="-5%" y="-30%" width="110%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".02 .16" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="16"/></filter>
+<filter id="b2" x="-4%" y="-8%" width="108%" height="116%"><feTurbulence type="fractalNoise" baseFrequency=".03 .05" numOctaves="3" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="18"/></filter>
+</defs></svg>
+
+<!-- 1 PORTADA -->
+<section class="s cov" data-n="1">
+  <div class="ph"></div><div class="sombra"></div>
+  <svg class="chis" viewBox="0 0 96 96"><path d="M30 62 20 20M52 56 62 22M70 70 92 52"/></svg>
+  <div class="head">
+    <div class="brush" style="font-size:52px;padding:18px 70px">Comparativa</div>
+    <h1>Florianópolis<br>vs <em>Bombinhas</em></h1>
+    <div class="q">¿Cuál te conviene más?</div>
+  </div>
+  <div class="pie"><div class="marca"><svg viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F7C325"/><circle cx="12" cy="11.5" r="4.6" fill="#0B1330"/></svg>cuantosale.uy</div></div>
+</section>
+
+<!-- 2 FLORIANOPOLIS -->
+<section class="s ficha" data-n="2">
+  <div class="ph" style="background-image:url(fotos/floripa-playa.jpg);background-position:30% 60%"></div><div class="sombra"></div>
+  <div class="tag"><div class="brush">Florianópolis</div></div><div class="num">1/5</div>
+  <div class="nota" style="left:520px;top:400px;transform:rotate(-4deg)">Más grande,<br>más urbano</div>
+  <div class="panel">
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M3 20c3 0 3-1.5 6-1.5s3 1.5 6 1.5 3-1.5 6-1.5"/><path d="M12 4a8 8 0 0 1 8 8H4a8 8 0 0 1 8-8z"/><path d="M12 12v6"/></svg></div><div class="t"><b>Playas</b><span>Norte calmas, este con olas y surf</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M16.5 7.5c-.8-1.2-2.3-1.8-4.5-1.8-2.6 0-4.2 1.2-4.2 3 0 4.4 8.7 2.1 8.7 6.6 0 1.8-1.7 3.2-4.5 3.2-2.2 0-3.9-.8-4.8-2.3"/></svg></div><div class="t"><b>Precios</b><span>US$ 573 por persona</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg></div><div class="t"><b>Ambiente</b><span>Ciudad y playa, movimiento hasta la noche</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><div class="t"><b>Distancia</b><span>Auto desde Montevideo: 1.245 km, unas 17 h</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="marca"><svg viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F7C325"/><circle cx="12" cy="11.5" r="4.6" fill="#0B1330"/></svg>cuantosale.uy</div>
+  </div>
+</section>
+
+<!-- 3 BOMBINHAS -->
+<section class="s ficha" data-n="3">
+  <div class="ph" style="background-image:url(fotos/bombinhas-portada.jpg);background-position:55% 50%"></div><div class="sombra"></div>
+  <div class="tag"><div class="brush">Bombinhas</div></div><div class="num">2/5</div>
+  <div class="nota" style="left:70px;top:230px;transform:rotate(-3deg)">Más tranquila<br>y natural</div>
+  <div class="panel">
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M3 20c3 0 3-1.5 6-1.5s3 1.5 6 1.5 3-1.5 6-1.5"/><path d="M12 4a8 8 0 0 1 8 8H4a8 8 0 0 1 8-8z"/><path d="M12 12v6"/></svg></div><div class="t"><b>Playas</b><span>Chicas, agua clara, snorkel y buceo</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M16.5 7.5c-.8-1.2-2.3-1.8-4.5-1.8-2.6 0-4.2 1.2-4.2 3 0 4.4 8.7 2.1 8.7 6.6 0 1.8-1.7 3.2-4.5 3.2-2.2 0-3.9-.8-4.8-2.3"/></svg></div><div class="t"><b>Precios</b><span>US$ 588 por persona</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg></div><div class="t"><b>Ambiente</b><span>Pueblo de pesca, pescado y mariscos</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="row"><div class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><div class="t"><b>Distancia</b><span>Auto desde Montevideo: 1.305 km, unas 18 h</span></div><div class="ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></div></div>
+    <div class="marca"><svg viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F7C325"/><circle cx="12" cy="11.5" r="4.6" fill="#0B1330"/></svg>cuantosale.uy</div>
+  </div>
+</section>
+
+<!-- 4 PLAYAS -->
+<section class="s play" data-n="4">
+  <div class="ph"></div><div class="velo"></div>
+  <div class="tag"><div class="brush">Playas</div></div><div class="num">3/5</div>
+  <div class="nota" style="left:90px;top:230px;width:760px;transform:rotate(-2deg)">En Florianópolis hay más variedad: norte calmo, este con olas.</div>
+  <div class="blob"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>Bombinhas destaca por sus playas chicas de agua clara y calma.<span class="sub"></span></div>
+  <div class="pie"><div class="marca"><svg viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F7C325"/><circle cx="12" cy="11.5" r="4.6" fill="#0B1330"/></svg>cuantosale.uy</div></div>
+</section>
+
+<!-- 5 PRECIOS Y AMBIENTE -->
+<section class="s pre" data-n="5">
+  <div class="tag"><div class="brush">Precios y ambiente</div></div><div class="num">4/5</div>
+  <div class="cols">
+    <div class="col w"><div class="brush nom">Florianópolis</div><div class="amb">Ciudad y playa, movimiento hasta la noche</div>
+      <div class="p">US$ 573</div><div class="pp">por persona · US$ 1.145 los dos</div>
+      <ul>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Hotel<span>US$ 377</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Comida<span>US$ 392</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Auto<span>US$ 291</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Tours<span>US$ 85</span></li>
+      </ul></div>
+    <div class="col"><div class="brush nom">Bombinhas</div><div class="amb">Pueblo de pesca, más tranquilo y natural</div>
+      <div class="p">US$ 588</div><div class="pp">por persona · US$ 1.175 los dos</div>
+      <ul>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Hotel<span>US$ 487</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Comida<span>US$ 322</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Auto<span>US$ 305</span></li>
+        <li><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Tours<span>US$ 61</span></li>
+      </ul></div>
+  </div>
+  <div class="gana">Florianópolis sale US$ 30 menos en total.</div>
+  <div class="fn">Cotización de cuantosale.uy del 3 oct 2026: viaje en auto desde Montevideo (ida y vuelta), 2 personas, 7 noches, con hotel y tours elegidos en la app. Precio por persona = la mitad del total. Comida, nafta y peajes son estimaciones por destino. El precio real cambia con las fechas.</div>
+  <div class="pie"><div class="marca"><svg viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F7C325"/><circle cx="12" cy="11.5" r="4.6" fill="#0B1330"/></svg>cuantosale.uy</div></div>
+</section>
+
+<!-- 6 CONCLUSION -->
+<section class="s con" data-n="6">
+  <div class="ph"></div><div class="calido"></div>
+  <div class="tag"><div class="brush">Conclusión</div></div><div class="num">5/5</div>
+  <div class="tarj"><h2>¿Cuál elegir?</h2>
+    <div class="dos"><div><b>Florianópolis</b><span>Si buscás variedad, movimiento y más opciones.</span></div><div><b>Bombinhas</b><span>Si preferís tranquilidad, naturaleza y agua clara.</span></div></div></div>
+  <div class="blob">Ambas son increíbles, ¡todo depende de lo que estés buscando!<span class="sub"></span></div>
+  <div class="cta">Calculá tu viaje en cuantosale.uy</div>
+  <div class="pie"><div class="marca"><svg viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F7C325"/><circle cx="12" cy="11.5" r="4.6" fill="#0B1330"/></svg>cuantosale.uy</div></div>
+</section>
+
+<script>
+var n=(location.search.match(/n=(\d)/)||[0,1])[1];
+document.querySelectorAll('.s').forEach(function(s){if(s.dataset.n===String(n))s.classList.add('on')});
+</script>
+</body></html>
