@@ -1369,6 +1369,144 @@ function readJson(req, maxBytes) {
   });
 }
 
+/* ---------- Email de bienvenida ----------
+ *
+ * Lo dispara un webhook de Supabase sobre INSERT en auth.users, NO el cliente.
+ * Es la unica forma que cubre a los dos caminos de alta: el formulario con
+ * correo y el login con Google. Un hook en el cliente despues de signUp()
+ * solo veria el primero, y el de Google es el que la gente va a usar.
+ *
+ * Va con fetch y no con el SDK de Resend a proposito: este server no tiene
+ * ninguna dependencia y meter una solo para dos POST REST agrega un modulo al
+ * bundle de la funcion de Vercel sin cambiar lo que hace.
+ *
+ * SEGURIDAD: este endpoint manda correo a quien llame. Abierto, es un relay de
+ * spam con el dominio de la marca como remitente, que es justo lo que hace que
+ * Resend suspenda el dominio. Por eso exige un secreto en la cabecera
+ * x-webhook-secret (WELCOME_WEBHOOK_SECRET) y ademas corta por IP.
+ */
+const RESEND_BASE = 'https://api.resend.com';
+function resendEnv() {
+  const key = String(process.env.RESEND_API_KEY || '').trim();
+  return {
+    key: key,
+    from: String(process.env.RESEND_FROM || 'CuántoSale <no-reply@cuantosale.uy>').trim(),
+    secret: String(process.env.WELCOME_WEBHOOK_SECRET || '').trim()
+  };
+}
+
+/* El nombre que se usa para saludar sale de la metadata de Supabase. OAuth de
+   Google manda full_name y un avatar; el alta por correo no manda ninguno. Se
+   usa solo la primera palabra, con mayuscula inicial, y si no hay nombre se
+   cae al saludo sin nombre antes que inventar uno. */
+function nombreDeSaludo(meta) {
+  if (!meta || typeof meta !== 'object') return '';
+  const crudo = meta.full_name != null ? meta.full_name : meta.name;
+  /* Tiene que ser un string. Con lo que mandaba antes, un array ["Ana","Bob"]
+     llegaba como "Anabob" y un objeto como "Object": los dos greeting
+    sehacían con la basura de un String() implícito. La metadata la escribe el
+     proveedor OAuth y el usuario, no nosotros. */
+  if (typeof crudo !== 'string') return '';
+  const token = crudo.trim().split(/\s+/)[0] || '';
+  if (!token) return '';
+  /* Si el primer token trae algo que no puede estar en un nombre, no se usa.
+     "<script>alert(1)</script>Bob" sin los signos se converts en
+     "Scriptalert1scriptbob": inofensivo porque el filtro igual los saca, pero
+     un saludo asi es peor que ninguno. */
+  if (/[<>()"'`=/\\[\]{}]/.test(token)) return '';
+  const limpio = token.replace(/[^\p{L}\p{N}'-]/gu, '');
+  if (!limpio || !/\p{L}/u.test(limpio)) return '';
+  return limpio.charAt(0).toUpperCase() + limpio.slice(1).toLowerCase();
+}
+
+function htmlBienvenida(nombre) {
+  const hola = nombre ? 'Hola, ' + escapeHtml(nombre) + ':' : 'Hola:';
+  return [
+    '<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:28px 20px;color:#101828">',
+      '<p style="font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#8792A8;margin:0 0 18px">CuántoSale</p>',
+      '<h1 style="font-size:26px;line-height:1.2;margin:0 0 14px">' + hola + ' ya podés saber lo que sale el viaje.</h1>',
+      '<p style="font-size:16px;line-height:1.55;color:#48566A;margin:0 0 22px">Cotizá vuelo, hotel, traslados, comida y lo que vas a gastar en destino. Con el total, no solo el pasaje.</p>',
+      '<a href="https://cuantosale.uy" style="display:inline-block;background:#F7C325;color:#0A101A;text-decoration:none;font-weight:700;padding:14px 22px;border-radius:10px">Armar mi viaje</a>',
+      '<p style="font-size:13px;line-height:1.5;color:#8792A8;margin:26px 0 0">Vuelo y alojamiento se consultan para tus fechas. Comidas, transporte local y traslados son estimacion por destino, y la app los marca como tales.</p>',
+      '<p style="font-size:13px;color:#8792A8;margin:8px 0 0">No vas a recibir correos con ofertas de terceros.</p>',
+    '</div>'
+  ].join('');
+}
+
+async function bienvenidaResend(email, nombre, metodo) {
+  const env = resendEnv();
+  if (!env.key) return { enviado: false, motivo: 'sin RESEND_API_KEY' };
+  const cabeceras = { Authorization: 'Bearer ' + env.key, 'Content-Type': 'application/json' };
+  /* El contacto se crea aunque el correo falle. Si Resend rechaza el envio, al
+     menos la persona queda en la lista y se la puede recontactar a mano. */
+  let contacto = null;
+  const cuerpoContacto = { email: email, unsubscribed: false };
+  if (nombre) cuerpoContacto.first_name = nombre;
+  try {
+    const r = await fetchWithTimeout(RESEND_BASE + '/contacts', { method: 'POST', headers: cabeceras, body: JSON.stringify(cuerpoContacto) }, 8000);
+    contacto = r.ok ? 'creado' : 'rechazado ' + r.status;
+    if (!r.ok) await r.text().catch(function () { return ''; });
+  } catch (e) { contacto = 'fallo de red'; }
+  const r = await fetchWithTimeout(RESEND_BASE + '/emails', {
+    method: 'POST',
+    headers: cabeceras,
+    body: JSON.stringify({
+      from: env.from, to: [email],
+      subject: nombre ? ('Bienvenido a CuántoSale, ' + nombre) : 'Bienvenido a CuántoSale',
+      html: htmlBienvenida(nombre),
+      tags: [{ name: 'tipo', value: 'bienvenida' }]
+    })
+  }, 10000);
+  if (!r.ok) {
+    const detalle = await r.text().catch(function () { return ''; });
+    const e = new Error('Resend respondio ' + r.status);
+    e.status = 502; e.detalle = detalle.slice(0, 300);
+    throw e;
+  }
+  const j = await r.json().catch(function () { return {}; });
+  return { enviado: true, id: j.id || null, contacto: contacto };
+}
+
+async function postBienvenida(req, res) {
+  if (limited('bienvenida:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados pedidos seguidos.' });
+  const env = resendEnv();
+  /* Sin secreto no se responde ni 403: seria indistinguishable de estar
+     desplegado y nadie sabria por que el webhook no entra. Con el secreto
+     puesto, un 503 le dice a Supabase que reintente cuando se configure. */
+  if (!env.secret) return sendJson(res, 503, { error: 'Falta configurar WELCOME_WEBHOOK_SECRET.' });
+  const recibido = String(req.headers['x-webhook-secret'] || '').trim();
+  if (!recibido || recibido.length !== env.secret.length || !timingSafeEqualString(recibido, env.secret)) {
+    return sendJson(res, 403, { error: 'Secreto de webhook incorrecto.' });
+  }
+  let body;
+  try { body = await readJson(req, 16384); }
+  catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
+  const record = (body && (body.record || body.user)) || body || {};
+  const email = String(record.email || '').trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(email)) return sendJson(res, 400, { error: 'El webhook no trajo un email valido.' });
+  /* El alta por correo llega con created_at cerca y la de Google tambien. Lo
+     que se filtra es el proveedor: si vino de Google, el email ya estaba
+     verificado por Google y no tiene sentido pedir confirmacion otra vez. */
+  const appMeta = record.raw_app_meta_data || record.app_metadata || {};
+  const proveedor = String(appMeta.provider || body.provider || '').toLowerCase();
+  const nombre = nombreDeSaludo(record.user_metadata || record.raw_user_meta_data);
+  try {
+    const r = await bienvenidaResend(email, nombre, proveedor || 'correo');
+    return sendJson(res, 200, Object.assign({ ok: true, email: email }, r));
+  } catch (e) {
+    return sendJson(res, e.status || 502, { error: e.message, detalle: e.detalle || null });
+  }
+}
+
+/* Comparacion en tiempo constante. No es paranoia: la longitud se compara
+   aparte justamente para no filtrarla, y un === normal cortaria en el primer
+   caracter distinto y permitiria adivinar el secreto byte a byte. */
+function timingSafeEqualString(a, b) {
+  let x = 0;
+  for (let i = 0; i < a.length; i++) x |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return x === 0;
+}
+
 function registrarTransferencia(req, res, body) {
   body = body && typeof body === 'object' ? body : {};
   const amount = Number(body.amount);
@@ -2609,6 +2747,14 @@ function handleRequest(req, res) {
         // El grafico es una mejora sobre la estimacion, nunca la unica fuente:
         // si falla, el cliente conserva lo que ya tinha y sigue funcionando.
         return sendJson(res, 200, { puntos: [], real: 0, estimados: 0, configured: true, error: e.message || 'No pudimos consultar los precios de otras fechas.' });
+      });
+    }
+    /* Va antes del cortafuegos de POST de mas abajo (`if (req.method === 'POST')`
+       responde 404 a cualquier POST no registrado de antemano), por eso esta ruta
+       tiene que declararse junto a las otras de POST y no mas abajo. */
+    if (url.pathname === '/api/bienvenida') {
+      return postBienvenida(req, res).catch(function (e) {
+        return sendJson(res, 500, { error: e.message });
       });
     }
     if (req.method === 'POST' && url.pathname === '/api/traslados/transferencia') {
