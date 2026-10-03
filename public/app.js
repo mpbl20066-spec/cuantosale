@@ -11132,7 +11132,10 @@ var HOTEL_NOTA_MINIMA = 8;
           callback: function (resp) {
             if (!resp || !resp.credential) { fin(false); return; }
             supabaseClient.auth.signInWithIdToken({ provider: 'google', token: resp.credential }).then(function (r) {
-              if (r && r.error) { openAuthModal(r.error.message); fin(true); return; }
+              /* Con un error de Supabase se devuelve false y no el texto crudo: el
+                 llamador sigue con signInWithOAuth, que es el flujo que usa el
+                 Client ID de Supabase. Devolver true dejaba el login sin salida. */
+              if (r && r.error) { if (window.console) console.warn('[login google] GIS rechazado:', r.error.message); fin(false); return; }
               closeAccountModal('auth-modal'); fin(true);
             }, function () { fin(false); });
           }
@@ -11208,6 +11211,41 @@ var HOTEL_NOTA_MINIMA = 8;
      con el nombre de la app sin pasar por supabase.co. One Tap (prompt) se
      suprime seguido (cooldown, bloqueadores), el boton no. Si no se puede
      montar, queda el boton propio con el flujo OAuth de siempre. */
+  /* Caida del login con Google Identity Services al flujo OAuth de siempre.
+
+     Cuando GIS entrega un token, Supabase lo valida contra el Client ID que
+     tenga configurado en su proveedor de Google, no contra el que pidio la
+     pagina. Si los dos no son el mismo, Supabase responde "Unacceptable
+     audience in id_token" y no hay nada que el usuario pueda hacer: es un
+     error de configuracion nuestro, no un fallo suyo.
+
+     Antes se mostraba ese texto crudo y nada mas. Y como el boton GIS queda
+     montado, el boton propio estaba oculto (propio.hidden = true), o sea que
+     tampoco quedaba el camino OAuth: la pantalla de login quedaba muerta
+     hasta recargar. Esta funcion esconde el GIS, vuelve a mostrar el boton
+     propio y arranca el OAuth, que si usa el Client ID de Supabase y por eso
+     funciona aunque el nuestro no coincida. */
+  function googleAuthFallback(modal) {
+    var propio = modal && modal.querySelector('[data-google-auth]');
+    var gis = modal && modal.querySelector('[data-google-gis]');
+    if (gis) gis.hidden = true;
+    if (propio) propio.hidden = false;
+    if (!supabaseClient) { openAuthModal('Falta configurar SUPABASE_ANON_KEY en las variables de entorno del despliegue.'); return Promise.resolve(); }
+    try {
+      return supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + window.location.pathname }
+      }).then(function (r) {
+        if (r && r.error) openAuthModal('No pudimos iniciar sesion con Google. Proba de nuevo en un momento.');
+      }, function () {
+        openAuthModal('No pudimos conectar con Google. Revisa la conexion y proba de nuevo.');
+      });
+    } catch (e) {
+      openAuthModal('No pudimos conectar con Google. Revisa la conexion y proba de nuevo.');
+      return Promise.resolve();
+    }
+  }
+
   function montarBotonGoogle(modal) {
     initAuth().then(function () {
       if (!googleClientId || !supabaseClient) return;
@@ -11223,7 +11261,11 @@ var HOTEL_NOTA_MINIMA = 8;
           callback: function (resp) {
             if (!resp || !resp.credential) return;
             supabaseClient.auth.signInWithIdToken({ provider: 'google', token: resp.credential }).then(function (r) {
-              if (r && r.error) openAuthModal(r.error.message); else closeAccountModal('auth-modal');
+              /* Con un error de Supabase se cae al OAuth en vez de mostrar el texto
+                 crudo, y se saca el boton GIS de la pantalla. Si queda visible
+                 tapa al boton propio, que es el unico que puede funcionar. */
+              if (r && r.error) { if (window.console) console.warn('[login google] GIS rechazado:', r.error.message); googleAuthFallback(modal); return; }
+              closeAccountModal('auth-modal');
             });
           }
         });
@@ -12257,7 +12299,12 @@ var HOTEL_NOTA_MINIMA = 8;
         var form = $('#auth-form'), status = form && form.querySelector('[data-auth-status]');
         if (!form || !form.reportValidity()) return;
         var result = await supabaseClient.auth.signUp({ email: form.email.value.trim(), password: form.password.value });
-        if (status) status.textContent = result.error ? result.error.message : 'Revisá tu correo para confirmar la cuenta.';
+        /* Sin sesion devuelta, Supabase espera que se confirme el correo. Se dice a donde
+           mando el mail y que mire spam, en un aviso visible y no en una linea gris. */
+        if (status) {
+          status.textContent = result.error ? result.error.message : '📩 Te enviamos un correo de verificación a ' + form.email.value.trim() + '. Abrilo y tocá el enlace para activar tu cuenta. Si no lo ves, mirá en Spam.';
+          status.style.fontWeight = result.error ? '' : '600';
+        }
       }
     });
     $('#auth-modal').addEventListener('submit', async function (e) {
