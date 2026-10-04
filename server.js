@@ -152,12 +152,12 @@ const CSP = "default-src 'self'; " +
   // *.analytics.google.com son adonde van los beacons. Sin estas dos lineas la
   // etiqueta de Analytics queda bloqueada por CSP y no reporta nada, sin error
   // visible en la consola: es un fallo silencioso.
-  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com https://accounts.google.com; " +
+  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com https://accounts.google.com https://emrldco.com https://*.emrldco.com; " +
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; " +
   "style-src-attr 'unsafe-inline'; " +
   "font-src 'self' https://fonts.gstatic.com; " +
   "img-src 'self' data: https:; " +
-  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://accounts.google.com; " +
+  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://accounts.google.com https://emrldco.com https://*.emrldco.com; " +
   "frame-src https://*.supabase.co https://accounts.google.com; " +
   "base-uri 'none'; form-action 'self'";
 // Google Analytics (GA4). La etiqueta se inyecta una sola vez desde serveStatic
@@ -177,13 +177,22 @@ function analyticsSnippet() {
     // "gtag is not defined" rompia el click que disparaba el evento.
     "function track(nombre,params){if(typeof gtag==='function'){gtag('event',nombre,params||{});}}</script>";
 }
+/* Script de afiliados (Drive, de Travelpayouts/Emerald). Se inyecta junto con
+   GA, una sola vez desde el server y en todas las paginas HTML, por la misma
+   razon: pegado a mano en cada archivo se duplica o se olvida en una pagina
+   nueva. Los atributos del <script> son los que da el proveedor tal cual. */
+const AFFILIATE_SNIPPET = '<script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1" data-cmp-ab="2">' +
+  '(function () {var script = document.createElement("script");script.async = 1;script.setAttribute("data-cmp-ab","2");' +
+  "script.src = 'https://emrldco.com/NTc2NTAy.js?t=576502';document.head.appendChild(script);})();</script>";
 function injectAnalytics(payload, ext) {
-  if (ext !== '.html' || !GA_MEASUREMENT_ID) return payload;
+  if (ext !== '.html') return payload;
   const html = payload.toString('utf8');
   // Google avisa que no puede haber dos etiquetas en la misma pagina, y las
-  // vistas previas de desarrollo no existen para el usuario final.
-  if (html.indexOf('googletagmanager.com/gtag/js') >= 0 || html.indexOf(GA_MEASUREMENT_ID) >= 0) return payload;
-  const snippet = analyticsSnippet();
+  // vistas previas de desarrollo no existen para el usuario final. Cada
+  // snippet se salta por separado si ya esta en el HTML.
+  let snippet = '';
+  if (GA_MEASUREMENT_ID && html.indexOf('googletagmanager.com/gtag/js') < 0 && html.indexOf(GA_MEASUREMENT_ID) < 0) snippet += analyticsSnippet();
+  if (html.indexOf('emrldco.com') < 0) snippet += AFFILIATE_SNIPPET;
   if (!snippet) return payload;
   // Justo despues de <head>, como pide Google; si el HTML no lo tiene, antes
   // de cerrar la etiqueta.
