@@ -6958,7 +6958,6 @@ var HOTEL_NOTA_MINIMA = 8;
        de las reservas externas, que es donde importa: ahi esta la advertencia de
        que el precio es estimado y de que la compra se hace afuera. Arriba, en
        el total, era una linea mas entre el numero y la primera tarjeta. */
-    var cotizacionNota = 'Cotización integral estimada. Cada servicio se gestiona con su proveedor.';
     /* El grupo va arriba, pegado al total: es lo que se hace apenas se ve el
        numero. Con grupo creado el bloque es el link para invitar (copiar,
        WhatsApp, abrir la cuenta); sin grupo, un solo boton que lo crea con este
@@ -7023,10 +7022,14 @@ var HOTEL_NOTA_MINIMA = 8;
       && (!hayTraslado || !!estadoReserva('traslados'))
       && (!selectedTours.length || !!estadoReserva('tours'));
 
-    // Icono en baldosa de color, en blanco. El color es del rubro.
-    var TILE = { pasajes: '#2F6BFF', bus: '#2F6BFF', alojamiento: '#7C4DFF', traslados: '#12A38B', tours: '#E5484D', comidas: '#2A3A55' };
+    // Icono del rubro en su baldosa.
     function tile(cat) {
-      return '<span class="vplan-ico" style="background:' + (TILE[cat] || '#2A3A55') + '">' + categoryIcon(cat, '#FFFFFF') + '</span>';
+      /* Baldosa amarilla con el icono oscuro. El vuelo usa el avion clasico,
+         relleno e inclinado, en vez del avion de papel del resto de la app. */
+      if (cat === 'pasajes') {
+        return '<span class="vplan-ico is-marca"><svg class="trip-summary__ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="transform:rotate(45deg)"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>';
+      }
+      return '<span class="vplan-ico is-marca">' + categoryIcon(cat, '#10233E') + '</span>';
     }
     function precio(monto, aprox, nota) {
       if (!(monto > 0)) return '<div class="vplan-row__side"><b class="is-zero">' + esc(nota || 'A elegir') + '</b></div>';
@@ -7120,6 +7123,18 @@ var HOTEL_NOTA_MINIMA = 8;
        separacion entre las dos filas. Eran dos tarjetas con su propio borde, su
        propio titulo de paso y su propio boton de 46 px apilado: la separacion
        la hacian el borde y el titulo, no el contenido. */
+    /* Estado del presupuesto. Usa los mismos criterios que el resto de la app:
+       vuelo elegido (flightSummary.selected), hotel decidido (hotelElegido()) y
+       traslado sumado (hayTraslado). Nada obliga a completar: se puede seguir
+       sin elegir, y la pantalla muestra lo que hay. Los gastos en destino no se
+       eligen: son una estimacion automatica, y se marcan como tal. */
+    var transporteElegido = autoMode || (busMode ? busTotal > 0 : !!flightSummary.selected);
+    var completo = transporteElegido && hotelElegido() && (busMode || autoMode || hayTraslado);
+    // Lo primero que falta, en el orden del viaje. Es la accion de la pantalla.
+    var faltante = !transporteElegido ? { cat: busMode ? 'bus' : 'pasajes', txt: busMode ? 'Elegir bus' : 'Elegir vuelo' }
+      : !hotelElegido() ? { cat: 'alojamiento', txt: 'Elegir hotel' }
+      : !(busMode || autoMode || hayTraslado) ? { cat: 'traslados', txt: 'Continuar con traslado' } : null;
+
     var filaPasajes = '';
     if (busMode) {
       filaPasajes = fila('bus', busTitle, busLines, precio(busTotal, true));
@@ -7140,15 +7155,12 @@ var HOTEL_NOTA_MINIMA = 8;
       filaPasajes = fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true),
         accionesExternas('pasajes', flightBookUrl, flightProviderUrl ? 'Google Flights' : 'WhatsApp', !!flightSummary.selected, 'Elegir vuelo'));
     }
-    var cardExternas = '<article class="vplan-card is-externas">' + filaPasajes;
 
     // El alojamiento, en la misma tarjeta que el vuelo.
     var hTitulo = multiHotel ? hotelesElegidos.length + ' alojamientos' : (hotelElegido() ? esc(selectedHotelName) : 'Alojamiento &middot; sin elegir');
     var hCuerpo = hotelElegido()
-      ? bajada('alojamiento', multiHotel ? hotelNote : '', hotelElegido() ? 'Cambiar hotel' : '')
+      ? bajada('alojamiento', multiHotel ? hotelNote : (detailState.meta.dep && detailState.meta.ret ? esc(fechaCortaViaje(detailState.meta.dep)) + ' &rarr; ' + esc(fechaCortaViaje(detailState.meta.ret)) + ' &middot; ' : '') + nights + (nights === 1 ? ' noche' : ' noches') + ' &middot; ' + pax + (pax === 1 ? ' viajero' : ' viajeros'), hotelElegido() ? 'Cambiar hotel' : '')
       : sub('Elegí dónde dormir para ver el precio', 'is-warn');
-    cardExternas += fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true),
-      accionesExternas('alojamiento', hotelBookUrl, 'Booking.com', hotelElegido(), 'Elegir hotel')) + '</article>';
 
     // Lo que se reserva con nosotros: traslado y tours, en un solo pago.
     var filaTraslado = '';
@@ -7167,7 +7179,6 @@ var HOTEL_NOTA_MINIMA = 8;
         ? bajada('tours', selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail), estadoReserva('tours') ? '' : 'Cambiar tours')
         : bajada('tours', 'Sumá excursiones del destino', 'Agregar tours'),
       precio(toursTotal, false, 'Opcional'));
-    var cardNuestro = '<article class="vplan-card is-nuestro">' + filaTraslado + filaTours + '</article>';
 
     /* Lo que no se reserva: se gasta en destino. Va PLEGADO.
 
@@ -7179,17 +7190,9 @@ var HOTEL_NOTA_MINIMA = 8;
     var destinoLineas = '<ul class="vplan-destino">'
       + (autoMode ? '<li><span>Auto propio <em>combustible y peajes</em></span><b>' + money(autoTotal) + '</b></li>' : '')
       + (autoMode ? '' : '<li><span>Transporte local <em>' + transportLabel + ' &middot; ' + money(localPerDay) + '/día</em></span><b>' + money(localTotal) + '</b></li>')
-      + '<li><span>Gastronomía <em>' + foodLabel + ' &middot; ' + money(foodPerDay) + '/día</em></span><b>' + money(foodTotal) + '</b></li>'
+      + '<li><span>Comida <em>' + foodLabel + ' &middot; ' + money(foodPerDay) + '/día</em></span><b>' + money(foodTotal) + '</b></li>'
       + (alquilerTotal ? '<li><span>Alquiler de auto <em>en destino</em></span><b>' + money(alquilerTotal) + '</b></li>' : '')
       + '</ul>';
-    var cardDestino = '<details class="vplan-destino-box">'
-      + '<summary class="vplan-destino-box__sum">' + tile('comidas')
-      + '<span class="vplan-destino-box__t">Gastos en destino<em>Comida, transporte y auto &middot; los pagás en el lugar</em></span>'
-      + '<b>~' + money(enDestino) + '</b>'
-      + '<span class="vplan-destino-box__chev" aria-hidden="true">›</span></summary>'
-      + '<div class="vplan-destino-box__body">' + destinoLineas
-      + '<div class="vplan-card__links">' + cambiar('comidas', 'Personalizar los costos diarios') + '</div>'
-      + '</div></details>';
 
     /* El total va ARRIBA y pegado a la cabecera, sin caja alrededor.
 
@@ -7220,30 +7223,94 @@ var HOTEL_NOTA_MINIMA = 8;
        transfer y actividades sigue rotulada "Con nosotros · en un solo pago",
        y el pedido se manda por WhatsApp, no es un pago unico de la plataforma.
        Ese rotulo es de otra tarjeta y no se toco acá. */
-    var cardTotales = '<section class="vplan-suma" aria-label="Presupuesto">'
+    var _kDest = detailState.meta.dest && detailState.meta.dest.key;
+    var fotoDestino = _kDest && DEST_PHOTOS[_kDest] ? '/fotos/' + encodeURIComponent(_kDest) + '.jpg?v=' + FOTOS_V : '';
+    var fechasCortas = detailState.meta.dep && detailState.meta.ret
+      ? esc(fechaCortaViaje(detailState.meta.dep)) + ' &rarr; ' + esc(fechaCortaViaje(detailState.meta.ret))
+      : esc(storyDateRange(detailState.meta));
+    var porPersona = money(Math.round(totalPlan / pax));
+    var cardTotales = '<section class="vplan-suma vplan-suma--hero" aria-label="Presupuesto"' + (fotoDestino ? ' style="background-image:linear-gradient(180deg,rgba(11,18,32,.84),rgba(11,18,32,.96)),url(&quot;' + esc(fotoDestino) + '&quot;)"' : '') + '>'
       + '<header class="vplan-head"><span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span>'
-      + '<p>' + esc(storyDateRange(detailState.meta)) + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>'
-      + '<p class="vplan-suma__valor"><strong>' + money(totalPlan) + '</strong>'
-      + (pax > 1 ? '<span>' + money(Math.round(totalPlan / pax)) + ' por persona &middot; ' + pax + ' viajeros</span>' : '') + '</p>'
+      + '<p>' + fechasCortas + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>'
+      + '<p class="vplan-suma__valor"><em class="vplan-suma__etq">Total del viaje</em><strong>' + money(totalPlan) + '</strong>'
+      + (pax > 1 ? '<span>' + porPersona + ' por persona</span>' : '') + '</p>'
       + '</section>';
 
-    var etiquetaExternos = busMode ? 'El bus lo comprás vos, con la empresa' : 'Lo reservás vos, en el sitio oficial';
-    var etiquetaNuestro = 'Con nosotros &middot; en un solo pago';
 
     /* El CTA fijo reserva SOLO lo que es con nosotros, y lo dice con su monto:
        vuelo y hotel se pagan en su sitio y no pasan por este boton. Ya
        reservado, lleva al asesor. */
     var ctaLabel = !hayTraslado ? 'Reservar tours' : selectedTours.length ? 'Reservar traslado + tour' : 'Reservar traslado';
     var ctaActivo = pedido.count && conNosotros > 0 && !nuestroHecho;
+    /* El boton fijo es siempre la siguiente accion real: lo primero que falta,
+       en el orden del viaje. Con todo elegido, lleva al resumen. Reservar el
+       traslado no se pierde: queda como accion en su propia fila. */
     var reservarTodo = '<div class="voucher-reserve voucher-reserve--fijo vplan-cta">'
-      + (ctaActivo
-        ? '<button type="button" class="voucher-reserve__btn" data-reservar-pedido><span>' + ctaLabel + '</span><i aria-hidden="true">&middot;</i><em>' + money(conNosotros) + '</em></button>'
-        : nuestroHecho
-          ? '<button type="button" class="voucher-reserve__btn" data-coordinar-asesor><span>Coordinar con un asesor</span></button>'
-          /* Sin nada elegido para reservar con nosotros, el CTA lleva a elegirlo:
-             el asesor ya tiene su propio boton en el pie. */
-          : '<button type="button" class="voucher-reserve__btn" data-detalle-rubro="' + (busMode || autoMode ? 'tours' : 'traslados') + '"><span>' + (busMode || autoMode ? 'Elegir tours' : 'Elegir traslado y tours') + '</span></button>')
+      + (faltante
+        ? '<button type="button" class="voucher-reserve__btn" data-detalle-rubro="' + faltante.cat + '"><span>' + faltante.txt + '</span><i aria-hidden="true">&rarr;</i></button>'
+        : '<button type="button" class="voucher-reserve__btn" data-coordinar-asesor><span>Finalizar</span><i aria-hidden="true">&rarr;</i></button>')
       + '</div>';
+    var marcaPlan = '<div class="vplan-marca"><p class="vplan-marca__t">Vos reservás. <b>Nosotros calculamos.</b></p>'
+      + '<p class="vplan-marca__s">Cada servicio se gestiona directamente con su proveedor.</p></div>';
+
+    /* Cada rubro se pinta segun su estado real. Elegido: la fila de siempre (con
+       sus acciones de reserva) mas "Seleccionado" y de donde sale el precio.
+       Sin elegir: lo primero que falta es la tarjeta protagonista; el resto, una
+       linea con su boton. */
+    function conSeleccion(html, cat) {
+      if (estadoReserva(cat)) return html;
+      return html.replace(/(<p class="vplan-row__title">[\s\S]*?<\/p>)/, '$1<p class="vplan-sel">&#10003; Seleccionado</p>');
+    }
+    /* El precio del proveedor va limpio (sin "~"); solo la estimacion se marca. */
+    function conFuente(html, texto) {
+      return html.replace(/<div class="vplan-row__side"><b>~?([^<]*)<\/b>/, function (m, valor) {
+        return '<div class="vplan-row__side"><b>' + valor + '</b>' + (texto === 'Estimación' ? '<small class="vplan-tag is-est">Estimación</small>' : '');
+      });
+    }
+    function itemElegido(html, cat, fuente) {
+      return '<div class="vplan-item is-elegido" data-rubro="' + cat + '">' + conFuente(conSeleccion(html, cat), fuente) + '</div>';
+    }
+    function itemPendiente(cat, nombre, texto, boton, actual) {
+      return '<div class="vplan-item is-pendiente' + (actual ? ' is-actual' : '') + '" data-rubro="' + cat + '">' + tile(cat)
+        + '<div class="vplan-item__body"><p class="vplan-item__tit">' + nombre + '</p><p class="vplan-item__txt">' + texto + '</p></div>'
+        + '<button type="button" class="vplan-item__btn" data-detalle-rubro="' + cat + '">' + boton + ' <span aria-hidden="true">&rarr;</span></button></div>';
+    }
+    function sinElegir(cat, nombre, titulo, linea1, linea2, boton) {
+      return itemPendiente(cat, nombre, linea1, boton, !!(faltante && faltante.cat === cat));
+    }
+    /* Checkout por secciones: cada servicio es una seccion con su titulo, su
+       estado y su accion. El precio de cada una forma parte de la revision. */
+    function seccion(titulo, html) {
+      return '<section class="vplan-s"><h4 class="vplan-kick">' + titulo + '</h4>' + html + '</section>';
+    }
+    var botonPedido = (pedido.count && conNosotros > 0 && !nuestroHecho)
+      ? '<button type="button" class="vplan-reservar-btn" data-reservar-pedido>' + ctaLabel + ' &middot; ' + money(conNosotros) + '</button>' : '';
+    var itemsViaje = '';
+    if (busMode) {
+      itemsViaje += seccion('Bus', busTotal > 0 ? itemElegido(filaPasajes, 'bus', busSel ? 'Precio del proveedor' : 'Estimación')
+        : sinElegir('bus', 'Bus', 'Elegí tu bus', 'Todavía no seleccionaste un bus.', 'Compará empresas y horarios.', 'Elegir bus'));
+    } else if (!autoMode) {
+      itemsViaje += seccion('Vuelo', flightSummary.selected ? itemElegido(filaPasajes, 'pasajes', 'Precio del proveedor')
+        : sinElegir('pasajes', 'Vuelo', 'Elegí tu vuelo', 'Todavía no seleccionaste un vuelo.', '', 'Elegir vuelo'));
+    }
+    itemsViaje += seccion('Hotel', hotelElegido()
+      ? itemElegido(fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true), accionesExternas('alojamiento', hotelBookUrl, 'Booking.com', true, 'Elegir hotel')), 'alojamiento', 'Precio del proveedor')
+      : sinElegir('alojamiento', 'Hotel', 'Elegí tu hotel', 'Todavía no seleccionaste alojamiento.', '', 'Elegir hotel'));
+    if (!busMode && !autoMode) {
+      itemsViaje += seccion('Traslado', (hayTraslado ? itemElegido(filaTraslado, 'traslados', 'Precio del proveedor')
+        : sinElegir('traslados', 'Traslado', 'Elegí tu traslado', 'Todavía no seleccionaste un traslado.', '', 'Elegir traslado')) + botonPedido);
+    }
+    // Gastos en destino: solo referencia, no es una reserva.
+    itemsViaje += seccion('Gastos en destino', '<details class="vplan-gastos" data-rubro="comidas"><summary>' + tile('comidas')
+      + '<span class="vplan-item__body"><span class="vplan-item__tit">Estimación para ' + pax + (pax === 1 ? ' persona' : ' personas') + ' &middot; ' + nights + (nights === 1 ? ' noche' : ' noches') + '</span>'
+      + '<span class="vplan-gastos__ver">Ver detalle</span></span>'
+      + '<span class="vplan-gastos__lado"><b>' + (enDestino > 0 ? '&asymp; ' + money(enDestino) : 'Pendiente') + '</b></span></summary>'
+      + '<div class="vplan-gastos__body"><p class="vplan-gastos__dia">' + (enDestino > 0 ? '&asymp; ' + money(Math.round(enDestino / nights)) + ' por día' + (pax === 2 ? ' entre los dos' : pax > 2 ? ' entre los ' + pax : '') + ' &middot; ' : '') + 'Es una referencia, no se reserva.</p>' + destinoLineas
+      + '<div class="vplan-card__links">' + cambiar('comidas', 'Personalizar los costos diarios') + '</div></div></details>');
+    // Tours: opcionales.
+    itemsViaje += seccion('Tours y actividades (opcional)', (selectedTours.length ? itemElegido(filaTours, 'tours', 'Precio del proveedor')
+      : '<div class="vplan-item is-opcional">' + filaTours + '</div>') + (busMode || autoMode ? botonPedido : ''));
+    var serviciosPlan = '<section class="vplan-servicios" aria-label="Revisá y completá tu viaje"><h3 class="vplan-sec">Revisá y completá tu viaje</h3>' + itemsViaje + '</section>';
 
     /* El asesor es UNA linea. Antes era un bloque de tres (titulo, bajada y un
        boton de 48 px apilado) que ocupaba mas alto que la tarjeta de los
@@ -7252,16 +7319,15 @@ var HOTEL_NOTA_MINIMA = 8;
        sola linea con el boton al costado. */
     var lineaAsesor = '<aside class="voucher-asesor vplan-asesor">'
       + '<span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span>'
-      + '<span class="vplan-asesor__txt"><b>¿Necesitás ayuda?</b> <small>Un asesor te contacta por WhatsApp.</small></span>'
+      + '<span class="vplan-asesor__txt"><b>¿Necesitás ayuda?</b> <small>Un asesor puede ayudarte por WhatsApp.</small></span>'
       + '<button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span>Coordinar</span></button></aside>';
+
 
     cerrarTodosLosModales();
     modal.innerHTML = '<div class="booking-dialog voucher-dialog vplan" role="dialog" aria-modal="true" aria-label="Resumen del viaje"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
       cardTotales +
-      '<h3 class="vplan-label">' + etiquetaExternos + '</h3><p class="vplan-aviso">' + esc(cotizacionNota) + '</p>' + cardExternas +
-      '<h3 class="vplan-label is-nuestro">' + etiquetaNuestro + '</h3>' + cardNuestro +
-      cardDestino +
-      lineaAsesor +
+      '<div class="vplan-cuerpo"><div class="vplan-main">' + marcaPlan + serviciosPlan + '</div></div>' +
+      '<div class="vplan-extras">' + lineaAsesor +
       /* El pie: Guardar y Compartir y, plegado, el grupo. El menu de Compartir
          se abre encima del boton, asi nunca tapa otro control. */
       '<div class="voucher-actions vplan-pie">' +
@@ -7274,9 +7340,10 @@ var HOTEL_NOTA_MINIMA = 8;
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '</div></div></div>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
-      '</div>' + reservarTodo;
+      '</div></div>' + reservarTodo;
     modal.dataset.summaryText = summaryText;
     precalentarTarjeta();
+    try { acortarEnlace(tokenDelViaje()); } catch (e) { /* sin enlace corto: sale el largo */ }
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
     if (_dlgPrev && (_scrollDlg || _scrollModal)) {
       var _dlgNuevo = modal.querySelector('.booking-dialog');
@@ -11470,9 +11537,38 @@ var HOTEL_NOTA_MINIMA = 8;
     if (Array.isArray(d.tours) && d.tours.length) corto.tr = d.tours.map(function (t) { return [t.title, Number(t.price) || 0]; });
     return b64urlEncode(JSON.stringify(corto));
   }
+  /* Enlace corto (/v/<codigo>). El token largo se guarda en el server (POST
+     /api/enlace) y vuelve un codigo de 8 caracteres. Las funciones de compartir
+     son sincronas y algunas corren dentro del toque del usuario (WhatsApp, la
+     hoja de compartir), asi que no pueden esperar una respuesta de red: el
+     codigo se pide por adelantado y se guarda aca. Si todavia no llego, o el
+     server falla, enlaceDelViaje() devuelve el enlace largo, que siempre abre. */
+  var enlacesCortos = {}, enlacesPidiendo = {};
+  function acortarEnlace(token) {
+    if (!token || enlacesCortos[token]) return Promise.resolve(enlacesCortos[token] || '');
+    if (enlacesPidiendo[token]) return enlacesPidiendo[token];
+    var pedido = fetch('/api/enlace', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token }) })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && /^[A-Za-z0-9_-]{8}$/.test(j.codigo || '')) enlacesCortos[token] = j.codigo; return enlacesCortos[token] || ''; })
+      .catch(function () { return ''; })
+      .then(function (c) { delete enlacesPidiendo[token]; return c; });
+    enlacesPidiendo[token] = pedido;
+    return pedido;
+  }
   function enlaceDelViaje() {
     var token = tokenDelViaje();
-    return token ? window.location.origin + '/?viaje=' + token : '';
+    if (!token) return '';
+    if (enlacesCortos[token]) return window.location.origin + '/v/' + enlacesCortos[token];
+    acortarEnlace(token); // para la proxima vez
+    return window.location.origin + '/?viaje=' + token;
+  }
+  /* Para los botones que copian el enlace: esperan el corto un instante (2 s)
+     y, si no llega, siguen con el largo. */
+  function enlaceDelViajeListo() {
+    var token = tokenDelViaje();
+    if (!token || enlacesCortos[token]) return Promise.resolve(enlaceDelViaje());
+    var tope = new Promise(function (resolve) { window.setTimeout(resolve, 2000); });
+    return Promise.race([acortarEnlace(token), tope]).then(function () { return enlaceDelViaje(); });
   }
   function viajeDesdeToken(token) {
     var c;
@@ -11562,7 +11658,7 @@ var HOTEL_NOTA_MINIMA = 8;
     return p.then(function (r) { fin(); return r; }, function (e) { fin(); throw e; });
   }
   async function guardarYCopiarEnlace() {
-    var enlace = enlaceDelViaje();
+    var enlace = await enlaceDelViajeListo();
     if (!enlace) { mostrarToast('Abrí una propuesta antes de guardar', '', true); return; }
     var copiado = await copiarAlPortapapeles(enlace);
     if (authUser) {
@@ -11578,7 +11674,7 @@ var HOTEL_NOTA_MINIMA = 8;
     mostrarToast('Presupuesto guardado con éxito', copiado ? 'Enlace copiado al portapapeles' : 'No pudimos copiar el enlace solo; probá con Compartir');
   }
   async function copiarEnlaceDelViaje() {
-    var enlace = enlaceDelViaje();
+    var enlace = await enlaceDelViajeListo();
     if (!enlace) return;
     var ok = await copiarAlPortapapeles(enlace);
     mostrarToast(ok ? 'Enlace copiado al portapapeles' : 'No pudimos copiar el enlace', ok ? 'Quien lo abra ve este mismo presupuesto' : '', !ok);
@@ -14075,6 +14171,31 @@ function comboNombreDestino() {
       /* El cierre: WhatsApp con el resumen y lo que falta. El mensaje lo arma
          mensajeCoordinar() y sale con el estado real, no con una plantilla que
          afirme reservas que todavia no pasaron. */
+      var abrirHoja = e.target.closest('[data-vplan-abrir]');
+      if (abrirHoja) {
+        e.preventDefault();
+        var _hoja = $('#booking-modal').querySelector('[data-vplan-sheet="' + abrirHoja.getAttribute('data-vplan-abrir') + '"]');
+        if (_hoja) _hoja.hidden = false;
+        return;
+      }
+      var cerrarHoja = e.target.closest('[data-vplan-info-cerrar]');
+      if (cerrarHoja) {
+        e.preventDefault();
+        var _hoja2 = cerrarHoja.closest('.vplan-sheet');
+        if (_hoja2) _hoja2.hidden = true;
+        return;
+      }
+      var aRubro = e.target.closest('[data-vplan-scroll]');
+      if (aRubro) {
+        e.preventDefault();
+        var _destino = $('#booking-modal').querySelector('[data-rubro="' + aRubro.getAttribute('data-vplan-scroll') + '"]');
+        if (_destino) {
+          try { _destino.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) { _destino.scrollIntoView(); }
+          _destino.classList.add('is-tras-vuelta');
+          window.setTimeout(function () { _destino.classList.remove('is-tras-vuelta'); }, 1600);
+        }
+        return;
+      }
       var coordinar = e.target.closest('[data-coordinar-asesor]');
       if (coordinar) {
         e.preventDefault();

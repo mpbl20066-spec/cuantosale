@@ -3980,3 +3980,270 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .nums small{color:var(--hero-soft)}
 .nums .big{color:var(--hero-accent)}
 .nums .pp{color:var(--hero-ink)}
+
+/* Voucher guiado: tira de pasos bajo el total y numero de paso en cada icono */
+.vplan-ico{position:relative}
+.vplan-n{position:absolute;top:-7px;left:-7px;display:grid;place-items:center;box-sizing:border-box;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--surface);font:800 11px/1 var(--fb,inherit);font-style:normal;border:2px solid var(--surface)}
+.vplan-n.is-hecho{background:var(--good);color:#fff}
+.vplan-pasos{list-style:none;display:flex;align-items:center;gap:0;margin:14px 0 0;padding:0}
+.vplan-pasos li{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;font-size:12px;font-weight:700;color:var(--ink2);text-align:center}
+.vplan-pasos li+li::before{content:"";position:absolute;top:13px;right:50%;width:100%;height:2px;background:var(--line);z-index:0}
+.vplan-pasos li span{position:relative;z-index:1;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--surface);border:2px solid var(--line);font-size:13px;font-weight:800;color:var(--ink2)}
+.vplan-pasos li.is-actual{color:var(--ink)}
+.vplan-pasos li.is-actual span{background:var(--hero-accent,#F7C325);border-color:var(--hero-accent,#F7C325);color:#10233E}
+.vplan-pasos li.is-hecho{color:var(--good)}
+.vplan-pasos li.is-hecho span{background:var(--good);border-color:var(--good);color:#fff}
+.vplan-pasos li.is-hecho+li::before,.vplan-pasos li.is-actual::before{background:var(--good)}
+/* La tira de pasos es navegable: cada paso es un boton */
+.vplan-pasos li button{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;cursor:pointer;color:inherit;font:inherit;text-align:center;-webkit-tap-highlight-color:transparent}
+.vplan-pasos li button:focus-visible{outline:3px solid var(--focus,#F7C325);outline-offset:3px;border-radius:10px}
+.vplan-pasos li.is-vista button b{color:var(--ink);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.vplan-atras,.vplan-saltar{justify-self:start;margin:2px 0 -6px;font-weight:700}
+.vplan-saltar{justify-self:center;margin:4px 0 0}
+.voucher-reserve__btn--wa{display:flex;align-items:center;justify-content:center;gap:10px}
+.voucher-reserve__btn--wa svg{width:22px;height:22px}
+/* Comunicacion del precio: "Desde", nota de estado y resumen final */
+.vplan-suma__etq{flex-basis:100%;margin:0 0 -6px;color:var(--ink2);font-size:12px;font-style:normal;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.vplan-suma__nota{margin:6px 0 0;color:var(--ink2);font-size:13px;font-weight:600}
+.vplan-promesa{margin:12px 0 0;text-align:center;color:var(--ink2);font-size:12.5px;line-height:1.4}
+.vplan-resumen{display:grid;gap:4px;padding:16px;border:1px solid var(--line);border-radius:var(--r-card,16px);background:color-mix(in srgb,var(--ink) 3%,var(--surface))}
+.vplan-resumen .vplan-label{margin:0 0 6px}
+.vplan-resumen .vplan-destino{padding:8px 0 4px;gap:9px;border-top:0}
+.vplan-resumen__tit{margin:8px 0 0;color:var(--ink);font-size:14px;font-weight:800}
+.vplan-resumen__tit em{margin-left:6px;color:var(--ink2);font-size:12px;font-style:normal;font-weight:500}
+.vplan-resumen__total{display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 0;padding-top:12px;border-top:1px solid var(--line);color:var(--ink);font-weight:800}
+.vplan-resumen__total b{font-family:var(--fh);font-size:24px;font-variant-numeric:tabular-nums}
+.vplan-resumen__cierre{margin:8px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.4}
+
+/* Cabecera del voucher: tarjeta oscura con la foto del destino (oscura en ambos temas) */
+.vplan-suma--hero{padding:18px 16px 16px;border-radius:22px;background:var(--hero-bg,#101828) center/cover no-repeat;color:#fff;overflow:hidden}
+.vplan-suma--hero .vplan-head{padding:0 44px 12px 0;border-bottom:1px solid rgba(255,255,255,.16)}
+.vplan-suma--hero .voucher-kicker{justify-self:start;padding:5px 11px;border-radius:99px;background:var(--hero-accent,#F7C325);color:#10233E;letter-spacing:.06em}
+.vplan-suma--hero .vplan-head p{color:rgba(255,255,255,.82)}
+.vplan-suma__fila{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.vplan-suma--hero .vplan-suma__valor{flex-direction:column;align-items:flex-start;gap:2px;margin:12px 0 0}
+.vplan-suma--hero .vplan-suma__valor strong{color:#fff;font-size:42px}
+.vplan-suma--hero .vplan-suma__valor span{color:rgba(255,255,255,.82)}
+.vplan-suma--hero .vplan-suma__etq{flex-basis:auto;margin:0 0 4px;padding:3px 10px;border-radius:99px;background:#3B6EF5;color:#fff;font-size:11px}
+.vplan-suma--hero .vplan-suma__nota{margin:8px 0 0;color:rgba(255,255,255,.9)}
+.vplan-suma--hero .vplan-promesa{flex:0 0 118px;margin:0 0 6px;text-align:left;color:var(--hero-accent,#F7C325);font-style:italic;font-weight:600;font-size:12.5px;line-height:1.25;transform:rotate(-3deg)}
+.vplan-suma--hero .vplan-promesa svg{display:block;width:22px;height:22px;margin:0 0 2px -2px}
+.vplan-suma--hero .vplan-pasos{margin-top:16px}
+.vplan-suma--hero .vplan-pasos li,.vplan-suma--hero .vplan-pasos li button{color:rgba(255,255,255,.85)}
+.vplan-suma--hero .vplan-pasos li span{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff}
+.vplan-suma--hero .vplan-pasos li+li::before{background:rgba(255,255,255,.25)}
+.vplan-suma--hero .vplan-pasos li.is-actual span{background:var(--hero-accent,#F7C325);border-color:var(--hero-accent,#F7C325);color:#10233E}
+.vplan-suma--hero .vplan-pasos li.is-hecho span{background:var(--good,#5AD19A);border-color:var(--good,#5AD19A);color:#10233E}
+.vplan-suma--hero .vplan-pasos li.is-vista button b{color:#fff}
+.vplan-suma--hero .vplan-pasos li.is-hecho+li::before,.vplan-suma--hero .vplan-pasos li.is-actual::before{background:var(--good,#5AD19A)}
+/* Como se calcula: que es reserva y que es estimado */
+.vplan-calculo{display:grid;gap:10px;padding:14px 16px;border:1px solid color-mix(in srgb,#3B6EF5 35%,var(--line));border-radius:var(--r-card,16px);background:color-mix(in srgb,#3B6EF5 8%,var(--surface))}
+.vplan-calculo__tit{display:flex;align-items:center;gap:8px;margin:0;color:var(--ink);font-size:14px;font-weight:800}
+.vplan-calculo__tit i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#3B6EF5;color:#fff;font:800 13px/1 serif;font-style:italic}
+.vplan-calculo ul{list-style:none;display:flex;gap:6px;margin:0;padding:0}
+.vplan-calculo li{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;font-size:12px;color:var(--ink)}
+.vplan-calculo li svg{width:20px;height:20px;margin-bottom:2px}
+.vplan-calculo li b{font-weight:700;line-height:1.2}
+.vplan-calculo li em{font-style:normal;color:var(--ink2);font-size:11px}
+.vplan-calculo__pie{margin:0;color:var(--ink2);font-size:12px;line-height:1.4}
+
+/* ---- Presupuesto: jerarquia (precio > progreso > accion > confianza > ayuda > acciones) ---- */
+.vplan{gap:16px}
+/* Cabecera: precio inicial y progreso, con la foto casi de textura */
+.vplan-suma--hero .vplan-suma__nota{margin:6px 0 0;color:rgba(255,255,255,.72);font-size:12.5px;font-weight:500}
+.vplan-suma--hero .vplan-suma__valor{margin:14px 0 0}
+.vplan-suma--hero .vplan-suma__valor strong{font-size:44px}
+.vplan-suma--hero .vplan-pasos{margin-top:18px}
+.vplan-suma--hero .vplan-pasos li:not(.is-actual):not(.is-hecho):not(.is-vista){opacity:.55}
+/* Confianza: una linea chica, sin protagonismo */
+.vplan>.vplan-label{margin:2px 0 -10px;font-size:11px;letter-spacing:.08em}
+.vplan>.vplan-aviso{margin:0;color:var(--ink2);font-size:12px;line-height:1.4}
+/* Tarjeta principal: lo que hay que hacer ahora */
+.vplan-card.is-principal{display:grid;grid-template-columns:48px minmax(0,1fr);gap:14px;align-items:start;padding:20px 18px;border:2px solid var(--hero-accent,#F7C325);background:var(--surface);box-shadow:0 8px 24px color-mix(in srgb,var(--ink) 10%,transparent)}
+.vplan-principal__body{display:grid;gap:6px;min-width:0}
+.vplan-principal__tit{margin:0;color:var(--ink);font-family:var(--fh);font-size:20px;font-weight:800;letter-spacing:.01em;text-transform:uppercase;line-height:1.15}
+.vplan-principal__txt{margin:0;color:var(--ink);font-size:14px;font-weight:600}
+.vplan-principal__sub{margin:0;color:var(--ink2);font-size:13px;line-height:1.4}
+.vplan-principal__btn{margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;border:0;border-radius:14px;background:var(--action-bg,#F7C325);color:var(--action-ink,#10233E);font-family:inherit;font-size:15px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;cursor:pointer}
+.vplan-principal__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* Ayuda por WhatsApp: una linea compacta */
+.vplan .vplan-asesor{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:transparent}
+.vplan .vplan-asesor .vplan-asesor__txt{flex:1;min-width:0;display:grid;gap:1px;font-size:12px;line-height:1.3}
+.vplan .vplan-asesor .vplan-asesor__txt b{font-size:13.5px}
+.vplan .vplan-asesor .voucher-asesor__ico{width:32px;height:32px;flex:0 0 auto}
+.vplan .vplan-asesor .voucher-asesor__btn{width:auto;flex:0 0 auto;min-height:36px;padding:0 14px;font-size:13px}
+/* Enlace al panel explicativo */
+.vplan-infolink{justify-self:center;display:inline-flex;align-items:center;gap:7px;padding:6px 4px;border:0;background:none;color:var(--ink2);font-family:inherit;font-size:13px;font-weight:600;line-height:1.2;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.vplan-infolink i{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font:700 11px/1 serif;font-style:italic;text-decoration:none}
+.vplan-infolink:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+/* Guardar / Compartir / grupo: secundarios */
+.vplan .vplan-pie{margin-top:0;gap:8px}
+.vplan .vplan-pie .voucher-tools .voucher-chip{min-height:40px;font-size:12.5px;font-weight:600;color:var(--ink2);background:transparent;border-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.vplan .vplan-pie .voucher-grupo>summary{min-height:42px;font-size:13px}
+/* Panel "Como calculamos tu presupuesto" */
+.vplan-sheet{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.vplan-sheet[hidden]{display:none}
+.vplan-sheet__fondo{position:absolute;inset:0;background:rgba(8,13,24,.62)}
+.vplan-sheet__panel{position:relative;width:min(520px,100%);max-height:88vh;overflow:auto;display:grid;gap:14px;padding:24px 20px calc(22px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;background:var(--surface);color:var(--ink);box-shadow:0 -10px 40px rgba(0,0,0,.3)}
+@media (min-width:640px){.vplan-sheet{align-items:center}.vplan-sheet__panel{border-radius:22px}}
+.vplan-sheet__panel h3{margin:0;color:var(--ink);padding-right:40px;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.2}
+.vplan-sheet__x{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+.vplan-sheet__panel ul{list-style:none;display:grid;gap:12px;margin:0;padding:0}
+.vplan-sheet__panel li{display:flex;align-items:center;gap:12px}
+.vplan-sheet__panel li svg{flex:0 0 22px;width:22px;height:22px}
+.vplan-sheet__panel li span{display:grid;gap:1px}
+.vplan-sheet__panel li b{font-size:14.5px}
+.vplan-sheet__panel li em{color:var(--ink2);font-size:13px;font-style:normal}
+.vplan-sheet__panel p{margin:0;color:var(--ink);font-size:14px;line-height:1.5}
+.vplan-sheet__panel .vplan-sheet__nota{color:var(--ink2);font-size:12.5px}
+.vplan-sheet__panel .voucher-reserve__btn{width:100%}
+.vplan-resumen__pp{margin:2px 0 0;text-align:right;color:var(--ink2);font-size:12.5px}
+
+/* ==== Presupuesto como constructor: estado actual, que falta, que hacer ==== */
+.vplan-ico.is-marca,.vplan-ico.is-marca svg{background:var(--hero-accent,#F7C325);color:#10233E}
+/* Cabecera */
+.vplan-suma--hero .vplan-suma__etq{margin:0 0 2px;padding:0;background:none;color:rgba(255,255,255,.66);font-size:11.5px;letter-spacing:.09em}
+.vplan-suma--hero .vplan-suma__valor strong{color:var(--hero-accent,#F7C325)}
+.vplan-suma__estado{margin:12px 0 0;color:#fff;font-size:13px;font-weight:700}
+.vplan-suma__estado.is-completo{color:var(--good,#5AD19A)}
+.vplan-prog{list-style:none;display:flex;align-items:center;margin:12px 0 0;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.14)}
+.vplan-prog li{flex:1;display:flex;align-items:center;min-width:0}
+.vplan-prog li:last-child{flex:0 0 auto}
+.vplan-prog li:not(:last-child)::after{content:"";flex:1;min-width:8px;height:1px;margin:0 6px;background:rgba(255,255,255,.22)}
+.vplan-prog button{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:rgba(255,255,255,.55);font-size:12.5px;font-weight:600;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.vplan-prog button:focus-visible{outline:2px solid var(--hero-accent,#F7C325);outline-offset:3px;border-radius:6px}
+.vplan-prog i{display:grid;place-items:center;flex:0 0 16px;width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);box-sizing:border-box;font-style:normal;font-size:10px;font-weight:800;line-height:1}
+.vplan-prog .is-hecho button{color:#fff}
+.vplan-prog .is-hecho i{border:0;background:var(--good,#5AD19A);color:#10233E}
+.vplan-prog .is-actual button{color:var(--hero-accent,#F7C325);font-weight:800}
+.vplan-prog .is-actual i{border:2px solid var(--hero-accent,#F7C325);box-shadow:0 0 0 3px rgba(247,195,37,.22)}
+.vplan-prog .is-estimado button{color:rgba(255,255,255,.85)}
+.vplan-prog .is-estimado i{border-color:#7CB7E8;color:#7CB7E8;font-size:12px}
+/* Cuerpo: secciones separadas por aire, no por cajas */
+.vplan-cuerpo{display:grid;gap:26px}
+.vplan-main,.vplan-lado{display:grid;gap:22px;align-content:start;min-width:0}
+.vplan-marca{display:grid;gap:3px}
+.vplan-marca__t{margin:0;color:var(--ink2);font-family:var(--fh);font-size:14px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.vplan-marca__t b{color:var(--ink);font-weight:800}
+.vplan-marca__s{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.4}
+.vplan-sec{margin:0 0 4px;color:var(--ink2);font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.vplan-servicios{display:grid}
+.vplan-item{padding:14px 0;border-top:1px solid color-mix(in srgb,var(--line) 65%,transparent)}
+.vplan-sec+.vplan-item{border-top:0;padding-top:6px}
+.vplan-item .vplan-row{padding:0}
+.vplan-item.is-pendiente{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center}
+.vplan-item__body{display:grid;gap:2px;min-width:0}
+.vplan-item__tit{margin:0;color:var(--ink);font-size:15px;font-weight:700;line-height:1.25}
+.vplan-item__txt{margin:0;color:var(--ink2);font-size:12.5px;line-height:1.35}
+.vplan-item__btn{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 12px;border:1.5px solid var(--ink);border-radius:11px;background:transparent;color:var(--ink);font-family:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
+.vplan-item__btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.vplan-item.is-opcional .vplan-row__title{color:var(--ink2)}
+.vplan-servicios .vplan-card.is-principal{margin:8px 0}
+.vplan-sel{margin:2px 0 0;color:var(--good);font-size:12px;font-weight:700}
+.vplan-tag{display:block;margin-top:2px;color:var(--ink2);font-size:10.5px;font-weight:600;text-align:right;white-space:nowrap}
+.vplan-tag.is-est{color:var(--c5)}
+.vplan-reservar{padding:0 0 12px 56px}
+/* Gastos en destino: estimacion plegada */
+.vplan-gastos{border-top:1px solid color-mix(in srgb,var(--line) 65%,transparent)}
+.vplan-gastos>summary{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 0;list-style:none;cursor:pointer}
+.vplan-gastos>summary::-webkit-details-marker{display:none}
+.vplan-gastos>summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:10px}
+.vplan-gastos__ver{margin-top:2px;color:var(--ink);font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.vplan-gastos[open] .vplan-gastos__ver{display:none}
+.vplan-gastos__lado{text-align:right}
+.vplan-gastos__lado b{color:var(--ink);font-size:16px;font-weight:800;white-space:nowrap}
+.vplan-gastos__body{padding:0 0 12px 56px}
+.vplan-gastos__body .vplan-destino{border-top:0;padding-top:0}
+/* Resumen: fondo suave, sin borde */
+.vplan-res{padding:18px 16px;border-radius:18px;background:color-mix(in srgb,var(--ink) 4%,var(--surface))}
+.vplan-res ul{list-style:none;display:grid;margin:0;padding:0}
+.vplan-res li{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;color:var(--ink);font-size:14px;font-weight:600}
+.vplan-res li svg{width:18px;height:18px}
+.vplan-res li em{display:block;color:var(--ink2);font-size:11px;font-style:normal;font-weight:500}
+.vplan-res li b{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vplan-res li.is-vacio span,.vplan-res li.is-vacio b{color:var(--ink2);font-weight:500}
+.vplan-res__total{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 0;padding-top:12px;border-top:1px solid var(--line);color:var(--ink)}
+.vplan-res__total span{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.vplan-res__total b{font-family:var(--fh);font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+.vplan-res__pp{margin:0;text-align:right;color:var(--ink2);font-size:12.5px}
+.vplan-res__nota{margin:10px 0 0;color:var(--ink2);font-size:12px;line-height:1.4}
+@media (max-width:420px){
+  .vplan-item.is-pendiente{grid-template-columns:44px minmax(0,1fr)}
+  .vplan-item.is-pendiente .vplan-item__btn{grid-column:2;justify-self:start}
+  .vplan-reservar,.vplan-gastos__body{padding-left:0}
+}
+/* Escritorio: el viaje a la izquierda, el presupuesto a la derecha */
+@media (min-width:900px){
+  .booking-dialog.vplan{width:min(1000px,100%)}
+  .vplan-cuerpo{grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);gap:32px;align-items:start}
+  .vplan-lado{position:sticky;top:0}
+}
+
+/* ==== Reorganizacion: una sola columna, una sola accion principal ==== */
+@media (min-width:900px){
+  .booking-dialog.vplan{width:min(640px,100%)}
+  .vplan-cuerpo{grid-template-columns:1fr;gap:26px}
+  .vplan-lado{position:static}
+}
+/* Lo que falta ahora: resaltado suave, sin boton amarillo propio */
+.vplan-item.is-pendiente.is-actual{margin:4px -12px;padding:14px 12px;border-top:0;border-radius:14px;background:color-mix(in srgb,var(--hero-accent,#F7C325) 13%,transparent)}
+.vplan-item.is-pendiente.is-actual+.vplan-item{border-top:0}
+.vplan-item.is-pendiente.is-actual .vplan-item__tit{font-size:16px}
+.vplan-item.is-pendiente.is-actual .vplan-item__txt{color:var(--ink)}
+/* Hoja del presupuesto (se abre al revisar) */
+.vplan-res--hoja{border-radius:22px 22px 0 0;background:var(--surface)}
+.vplan-res--hoja ul{margin:0}
+@media (min-width:640px){.vplan-res--hoja{border-radius:22px}}
+.vplan-res--hoja>h3{margin:0;padding-right:40px;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.2;color:var(--ink)}
+
+/* ==== Dos zonas: ARMA TU VIAJE (izquierda, decide) y TU PRESUPUESTO (derecha, resume) ==== */
+.vplan-cuerpo{display:grid;gap:24px}
+.vplan-main,.vplan-lado{display:grid;gap:18px;align-content:start;min-width:0}
+.vplan-extras{display:grid;gap:12px;margin-top:6px}
+@media (min-width:900px){
+  .booking-dialog.vplan{width:min(1000px,100%)}
+  .vplan-cuerpo{grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:32px;align-items:start}
+  .vplan-lado{position:sticky;top:0}
+  .vplan-extras{grid-template-columns:1fr 1fr;align-items:start}
+  .vplan-extras .vplan-asesor{grid-column:1}
+  .vplan-extras .vplan-infolink{grid-column:2;justify-self:end}
+  .vplan-extras .vplan-pie{grid-column:1/-1}
+}
+/* Izquierda: tarjetas suaves, separadas, sin caja que lo encierre todo */
+.vplan-servicios{gap:10px}
+.vplan-servicios .vplan-sec{margin-bottom:2px}
+.vplan-item{padding:14px;border:0;border-radius:16px;background:color-mix(in srgb,var(--ink) 4%,var(--surface))}
+.vplan-item.is-pendiente.is-actual{margin:0;padding:14px;background:color-mix(in srgb,var(--hero-accent,#F7C325) 14%,var(--surface));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hero-accent,#F7C325) 70%,transparent)}
+.vplan-item.is-opcional{background:transparent;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--line) 80%,transparent)}
+.vplan-gastos{border:0;border-radius:16px;background:color-mix(in srgb,var(--ink) 4%,var(--surface))}
+.vplan-gastos>summary{padding:14px}
+.vplan-gastos__body{padding:0 14px 14px 70px}
+@media (max-width:420px){.vplan-gastos__body{padding-left:14px}}
+/* Derecha: panel financiero, independiente del selector */
+.vplan-res{padding:22px 20px;border-radius:20px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line),0 10px 30px color-mix(in srgb,var(--ink) 8%,transparent)}
+.vplan-res .vplan-sec{margin:0 0 6px}
+.vplan-res ul{margin:0 0 4px}
+.vplan-res li{padding:9px 0;font-size:14.5px}
+.vplan-res__total{display:grid;gap:2px;margin:10px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+.vplan-res__total span{color:var(--ink2);font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.vplan-res__total b{color:var(--ink);font-family:var(--fh);font-size:44px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.vplan-res__total em{color:var(--ink2);font-size:14px;font-style:normal;font-weight:600}
+.vplan-res__nota{margin:12px 0 0;color:var(--ink2);font-size:12.5px;line-height:1.45}
+.vplan-res__reservar{margin-top:14px;width:100%;min-height:44px;border:1.5px solid var(--ink);border-radius:12px;background:transparent;color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.vplan-res__reservar:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* ==== Checkout por secciones: revisar -> completar -> reservar ==== */
+@media (min-width:900px){
+  .booking-dialog.vplan{width:min(680px,100%)}
+  .vplan-cuerpo{grid-template-columns:1fr}
+  .vplan-extras{grid-template-columns:1fr}
+  .vplan-extras .vplan-pie{grid-column:auto}
+}
+.vplan-servicios{gap:22px}
+.vplan-servicios>.vplan-sec{margin:0;font-family:var(--fh);font-size:20px;letter-spacing:.01em;text-transform:uppercase;color:var(--ink)}
+.vplan-s{display:grid;gap:8px}
+.vplan-kick{margin:0;color:var(--ink2);font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.vplan-reservar-btn{width:100%;min-height:44px;border:1.5px solid var(--ink);border-radius:12px;background:transparent;color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.vplan-reservar-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.vplan-gastos__dia{margin:0 0 8px;color:var(--ink2);font-size:12.5px;line-height:1.4}
+.vplan-suma--hero .vplan-suma__valor{margin:14px 0 4px}

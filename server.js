@@ -1484,6 +1484,75 @@ async function bienvenidaResend(email, nombre, metodo) {
   return { enviado: true, id: j.id || null, contacto: contacto };
 }
 
+/* ---------- Enlaces cortos del presupuesto ----------
+   El viaje entero va codificado en el token de ?viaje= (ver tokenDelViaje en
+   app.js) y el enlace sale kilometrico para pegarlo en WhatsApp. POST
+   /api/enlace guarda ese token en la tabla enlaces_viaje y devuelve un codigo
+   de 8 caracteres; GET /v/<codigo> redirige a /?viaje=<token>, que la app ya
+   sabe abrir. El codigo sale del hash del token: el mismo viaje da siempre el
+   mismo codigo y no se duplican filas. La tabla se crea con
+   supabase_enlaces_viaje.sql y solo la toca el server, con la service role. */
+const ENLACE_TOKEN_RE = /^[A-Za-z0-9_-]{20,6000}$/;
+function supaServicio() {
+  const url = String(process.env.SUPABASE_URL || '').trim();
+  const key = String(process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+  return url && key ? { url: url, key: key } : null;
+}
+function codigoDeEnlace(token) {
+  return crypto.createHash('sha256').update(token).digest('base64url').slice(0, 8);
+}
+/* Solo se guarda lo que de verdad es un viaje de la app: sin esto la tabla
+   serviria de almacen gratis para cualquier texto. */
+function tokenDeViajeValido(token) {
+  if (!ENLACE_TOKEN_RE.test(token)) return false;
+  try {
+    const c = JSON.parse(Buffer.from(token, 'base64url').toString('utf8'));
+    return !!c && c.v === 1 && typeof c.d === 'string' && typeof c.a === 'string' && typeof c.b === 'string';
+  } catch (e) { return false; }
+}
+async function postEnlace(req, res) {
+  if (limited('enlace:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados pedidos seguidos.' });
+  let body;
+  try { body = await readJson(req, 8192); }
+  catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
+  const token = String((body && body.token) || '');
+  if (!tokenDeViajeValido(token)) return sendJson(res, 400, { error: 'Enlace inválido.' });
+  const supa = supaServicio();
+  if (!supa) return sendJson(res, 503, { error: 'Enlaces cortos no configurados.' });
+  const codigo = codigoDeEnlace(token);
+  try {
+    const r = await fetch(supa.url + '/rest/v1/enlaces_viaje?on_conflict=codigo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', apikey: supa.key, Authorization: 'Bearer ' + supa.key,
+        Prefer: 'resolution=ignore-duplicates,return=minimal'
+      },
+      body: JSON.stringify({ codigo: codigo, token: token })
+    });
+    if (!r.ok) {
+      console.warn('[enlace] Supabase respondio HTTP ' + r.status + ': ' + (await r.text()).slice(0, 160));
+      return sendJson(res, 502, { error: 'No pudimos guardar el enlace.' });
+    }
+  } catch (e) {
+    console.warn('[enlace] no se pudo llamar a Supabase:', e.message);
+    return sendJson(res, 502, { error: 'No pudimos guardar el enlace.' });
+  }
+  return sendJson(res, 200, { codigo: codigo });
+}
+async function getEnlaceCorto(req, res, codigo) {
+  const irA = function (destino) { res.writeHead(302, { Location: destino, 'Cache-Control': 'no-store' }); res.end(); };
+  const supa = supaServicio();
+  if (!supa || limited('enlace-leer:' + clientIp(req))) return irA('/');
+  try {
+    const r = await fetch(supa.url + '/rest/v1/enlaces_viaje?select=token&limit=1&codigo=eq.' + encodeURIComponent(codigo), {
+      headers: { apikey: supa.key, Authorization: 'Bearer ' + supa.key }
+    });
+    const filas = r.ok ? await r.json() : [];
+    if (filas[0] && ENLACE_TOKEN_RE.test(filas[0].token)) return irA('/?viaje=' + filas[0].token);
+  } catch (e) { /* cae a la raiz */ }
+  return irA('/');
+}
+
 async function postBienvenida(req, res) {
   if (limited('bienvenida:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados pedidos seguidos.' });
   const env = resendEnv();
@@ -2769,6 +2838,11 @@ function handleRequest(req, res) {
     /* Va antes del cortafuegos de POST de mas abajo (`if (req.method === 'POST')`
        responde 404 a cualquier POST no registrado de antemano), por eso esta ruta
        tiene que declararse junto a las otras de POST y no mas abajo. */
+    if (req.method === 'POST' && url.pathname === '/api/enlace') {
+      return postEnlace(req, res).catch(function (e) {
+        return sendJson(res, 500, { error: e.message });
+      });
+    }
     if (url.pathname === '/api/bienvenida') {
       return postBienvenida(req, res).catch(function (e) {
         return sendJson(res, 500, { error: e.message });
@@ -2891,6 +2965,9 @@ function handleRequest(req, res) {
     if (/^\/(privacidad|terminos)\/?$/i.test(url.pathname)) {
       return serveStatic(req, res, '/' + url.pathname.replace(/\//g, '').toLowerCase() + '.html');
     }
+    // Enlace corto del presupuesto: /v/<codigo> redirige a /?viaje=<token>.
+    const mCorto = /^\/v\/([A-Za-z0-9_-]{8})\/?$/.exec(url.pathname);
+    if (mCorto && req.method === 'GET') return getEnlaceCorto(req, res, mCorto[1]);
     // Paginas publicas por destino para Google (lib/destinos-web.js).
     const mDestino = /^\/destino\/([a-z0-9-]+)\/?$/.exec(url.pathname);
     if (mDestino) {
