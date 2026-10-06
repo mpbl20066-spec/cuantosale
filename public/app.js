@@ -10405,6 +10405,18 @@ var HOTEL_NOTA_MINIMA = 8;
     var sourceBadge = live ? 'Precios reales' : 'Precios estimados';
     var sourcePill = '<span class="tag ghost source-pill">' + esc(sourceBadge) + '</span>';
 
+    /* Desglose compacto dentro de la tarjeta: el total solo asusta, repartido por
+       rubro se entiende en que se va la plata. Mismas partes que breakdownSection. */
+    var heroParts = CATS.filter(function (c) { return Number(rec.parts[c[0]]) > 0; })
+      .sort(function (a, b) { return Number(rec.parts[b[0]]) - Number(rec.parts[a[0]]); });
+    var heroBreakdown = heroParts.length ? '<div class="hero-breakdown">' +
+      '<div class="stack" role="img" aria-label="Distribución del costo">' + heroParts.map(function (c) {
+        return '<span style="width:' + (rec.parts[c[0]] / rec.total * 100) + '%;background:var(' + c[2] + ')"></span>';
+      }).join('') + '</div>' +
+      '<ul>' + heroParts.map(function (c) {
+        return '<li>' + categoryIcon(c[0], c[2]) + '<span>' + esc(c[1]) + '</span><b>' + money(rec.parts[c[0]]) + '</b></li>';
+      }).join('') + '</ul></div>' : '';
+
     var h = '';
     h += '<section class="sec"><div class="hero">' +
       '<div class="tags tags--main"><span class="tag">' + (fitsRec ? 'La más conveniente para vos' : (dentroDelPresupuesto.length ? 'Propuesta seleccionada' : 'La más barata que encontramos')) + '</span></div>' +
@@ -10413,9 +10425,11 @@ var HOTEL_NOTA_MINIMA = 8;
       '<h3>' + esc(titleOf(rec)) + '</h3>' +
       '<p class="meta">' + dLong(dep) + ' a ' + dLong(ret) + ', ' + pax + (pax === 1 ? ' persona' : ' personas') + '. Trayecto ' + esc(trayectoDe(rec)) + '.</p>' +
       '<div class="perf"><i></i><i></i></div>' +
-      '<div class="nums"><div><small>Costo total del viaje</small><span class="big">' + money(rec.total) + '</span></div>' +
-      '<div><small>Por persona</small><span class="pp">' + money(rec.pp) + '</span></div></div>' +
-      '<div class="budget"><div class="track"><div class="fill' + (fitsRec ? '' : ' over') + '" style="width:' + pct + '%"></div></div><p>' + status + '</p></div>' +
+      '<div class="nums">' + (pax > 1
+      ? '<div><small>Por persona</small><span class="big">' + money(rec.pp) + '</span></div>' +
+        '<div><small>Total para ' + pax + ' personas</small><span class="pp">' + money(rec.total) + '</span></div>'
+      : '<div><small>Costo total del viaje</small><span class="big">' + money(rec.total) + '</span></div>') + '</div>' +
+      '<div class="budget"><div class="track"><div class="fill' + (fitsRec ? '' : ' over') + '" style="width:' + pct + '%"></div></div><p>' + status + '</p></div>' + heroBreakdown +
       '</div></section>';
 
     var activeCats = CATS.filter(function (c) { return Number(rec.parts[c[0]]) > 0; });

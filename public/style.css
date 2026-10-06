@@ -3960,3 +3960,23 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .vplan-cta{border-top:0;padding-top:14px}
 .vplan-cta .voucher-reserve__btn{min-height:56px;font-size:16.5px;font-weight:800}
 @media (max-width:560px){.vplan{gap:20px}.vplan-card{padding:20px 16px}.vplan-card.is-nuestro{padding:6px 16px}.vplan-row__side b{font-size:17px}}
+
+/* Desglose dentro de la tarjeta hero de resultados: barra + una fila por rubro */
+.hero-breakdown{margin-top:22px;padding-top:20px;border-top:1px solid color-mix(in srgb,var(--hero-ink) 16%,transparent)}
+.hero-breakdown .stack{height:12px;margin-bottom:6px}
+.hero-breakdown ul{list-style:none;margin:0;padding:0}
+.hero-breakdown li{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid color-mix(in srgb,var(--hero-ink) 12%,transparent);font-size:15px;font-weight:600}
+.hero-breakdown li:first-child{border-top:0}
+.hero-breakdown li span{flex:1;min-width:0}
+.hero-breakdown li b{font-family:var(--fh);font-weight:700;font-variant-numeric:tabular-nums}
+/* La tarjeta hero es oscura en ambos temas: en modo claro --c1..--c6 son tonos
+   oscuros pensados para fondo blanco y se pierden (pasajes navy sobre navy).
+   Aca se fija la paleta clara para que barra e iconos se lean siempre. */
+.hero-breakdown{--c1:#5B9BD5;--c2:#7CB7E8;--c3:#F7C325;--c4:#F0714F;--c5:#8FA3BB;--c6:#9AA8BA}
+/* Titulo y textos de la tarjeta hero: la tarjeta es oscura en ambos temas, asi que
+   no heredan el color de texto del tema (en modo claro salian navy sobre navy). */
+.hero h3{color:var(--hero-ink)}
+.hero .meta{color:var(--hero-soft)}
+.nums small{color:var(--hero-soft)}
+.nums .big{color:var(--hero-accent)}
+.nums .pp{color:var(--hero-ink)}
