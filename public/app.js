@@ -292,7 +292,7 @@
     { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' },
     { code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }];
   var FX = { rates: null, base: 'USD', until: 0, cargando: true };
-  var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, budgetMode: 'total', budgetPP: 0, style: 'eq', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
+  var S = { currency: 'USD', dest: 'todos', dep: '', ret: '', pax: 2, budget: 3000, budgetMode: 'total', budgetPP: 0, style: 'ahorro', transport: 'flight', proposalId: '', origin: 'MVD', subcategory: '', second: '', hotelType: 'intermedio', hotelTypeExplicit: false };
   /* Solo se muestran los hoteles con disponibilidad confirmada. Antes esto era
      un filtro con dos opciones ("Todos" / "Solo con disponibilidad") y el
      default era mostrar todo. Ahora no hay opción: la lista es siempre la de los
