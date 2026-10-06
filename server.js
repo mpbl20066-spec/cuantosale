@@ -152,12 +152,12 @@ const CSP = "default-src 'self'; " +
   // *.analytics.google.com son adonde van los beacons. Sin estas dos lineas la
   // etiqueta de Analytics queda bloqueada por CSP y no reporta nada, sin error
   // visible en la consola: es un fallo silencioso.
-  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com https://accounts.google.com https://emrldco.com https://*.emrldco.com; " +
+  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com https://accounts.google.com https://emrldco.com https://*.emrldco.com https://www.clarity.ms https://*.clarity.ms; " +
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; " +
   "style-src-attr 'unsafe-inline'; " +
   "font-src 'self' https://fonts.gstatic.com; " +
   "img-src 'self' data: https:; " +
-  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://accounts.google.com https://emrldco.com https://*.emrldco.com; " +
+  "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://accounts.google.com https://emrldco.com https://*.emrldco.com https://*.clarity.ms https://c.bing.com; " +
   "frame-src https://*.supabase.co https://accounts.google.com; " +
   "base-uri 'none'; form-action 'self'";
 // Google Analytics (GA4). La etiqueta se inyecta una sola vez desde serveStatic
@@ -184,6 +184,12 @@ function analyticsSnippet() {
 const AFFILIATE_SNIPPET = '<script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1" data-cmp-ab="2">' +
   '(function () {var script = document.createElement("script");script.async = 1;script.setAttribute("data-cmp-ab","2");' +
   "script.src = 'https://emrldco.com/NTc2NTAy.js?t=576502';document.head.appendChild(script);})();</script>";
+/* Microsoft Clarity: grabaciones de sesion y mapas de calor para ver donde
+   abandonan los visitantes. Se inyecta desde el server por la misma razon que
+   GA. Necesita clarity.ms en script-src y connect-src del CSP. */
+const CLARITY_SNIPPET = '<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};' +
+  't=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);' +
+  '})(window, document, "clarity", "script", "ytl2r5iftg");</script>';
 function injectAnalytics(payload, ext) {
   if (ext !== '.html') return payload;
   const html = payload.toString('utf8');
@@ -193,6 +199,7 @@ function injectAnalytics(payload, ext) {
   let snippet = '';
   if (GA_MEASUREMENT_ID && html.indexOf('googletagmanager.com/gtag/js') < 0 && html.indexOf(GA_MEASUREMENT_ID) < 0) snippet += analyticsSnippet();
   if (html.indexOf('emrldco.com') < 0) snippet += AFFILIATE_SNIPPET;
+  if (html.indexOf('clarity.ms') < 0) snippet += CLARITY_SNIPPET;
   if (!snippet) return payload;
   // Justo despues de <head>, como pide Google; si el HTML no lo tiene, antes
   // de cerrar la etiqueta.
