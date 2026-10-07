@@ -5480,7 +5480,7 @@ var HOTEL_NOTA_MINIMA = 8;
       return '<div style="display:flex;align-items:center;gap:9px;height:24px;font-size:13px;line-height:1;">' +
         '<span style="flex:none;display:flex;color:' + color(entry) + ';">' + storyInclusionIcon(entry.category) + '</span>' +
         '<span style="flex:1;font-weight:500;color:rgba(255,255,255,.92);">' + esc(label) + '</span>' +
-        '<b style="font-weight:700;">' + esc(money(entry.value)) + '</b></div>';
+        '<b style="flex:none;font-weight:700;white-space:nowrap;">' + esc(money(entry.value)) + '</b></div>';
     }).join('');
     return '<div style="margin:0 0 12px;">' +
       '<div style="display:flex;height:9px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:9px;">' + bar + '</div>' + list + '</div>';
@@ -6498,17 +6498,26 @@ var HOTEL_NOTA_MINIMA = 8;
      botón de cerrar y scroll propio, y se llega con el CTA "Ver mi presupuesto"
      del panel "Mi Viaje". Se pinta cada vez que se abre, así que los números
      son los de este momento y no los de un recálculo anterior. */
+  /* Estado de la pantalla "Tu viaje" (ver el bloque "una etapa en foco"). Vive
+     fuera de la funcion porque se repinta con cada cambio de reserva y tiene que
+     acordarse de que etapa estabas mirando. etapa: null = la primera pendiente.
+     avanzar: la etapa que se acaba de marcar, para pasar a la siguiente.
+     arriba: tras cambiar de etapa se vuelve al principio del modal. */
+  var vtrip = { etapa: null, aviso: '', avanzar: null, omitidas: {}, arriba: false };
   function openItinerarySummaryModal(opts) {
     /* opts.repintado: lo llama pintarVoucherReservas() para refrescar un modal ya
        abierto. Ese camino NO vuelve a pedir reservas ni a preguntar si es agencia:
        cada una de esas respuestas repintaba el modal, que las volvia a pedir, y el
        bucle reemplazaba los botones (X incluida) en medio del clic. */
     var _repintado = !!(opts && opts.repintado);
+    if (!_repintado) { vtrip.etapa = null; vtrip.aviso = ''; vtrip.avanzar = null; vtrip.omitidas = {}; vtrip.arriba = false; }
     if (!detailState || !detailState.meta) return;
     var modal = $('#booking-modal');
     // Si ya estaba abierto, se repinta en el mismo lugar en vez de volver arriba.
     var _dlgPrev = modal && !modal.hidden && modal.dataset.summaryText ? modal.querySelector('.booking-dialog') : null;
     var _scrollDlg = _dlgPrev ? _dlgPrev.scrollTop : 0, _scrollModal = _dlgPrev ? modal.scrollTop : 0;
+    // Los plegables se repintan con el modal: se recuerda cual estaba abierto.
+    var _abiertos = _dlgPrev ? { bud: !!_dlgPrev.querySelector('details.vtrip-bud[open]') } : {};
     var flightSummary = getSelectedFlightSummary();
     // Solo la modalidad. El voucher antes decia "Recogida 1 hora después de la
     // llegada", una hora derivada del vuelo que el operador iba a cambiar. Ahora
@@ -7031,295 +7040,209 @@ var HOTEL_NOTA_MINIMA = 8;
       && (!hayTraslado || !!estadoReserva('traslados'))
       && (!selectedTours.length || !!estadoReserva('tours'));
 
-    // Icono del rubro en su baldosa.
-    function tile(cat) {
-      /* Baldosa amarilla con el icono oscuro. El vuelo usa el avion clasico,
-         relleno e inclinado, en vez del avion de papel del resto de la app. */
-      if (cat === 'pasajes') {
-        return '<span class="vplan-ico is-marca"><svg class="trip-summary__ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="transform:rotate(45deg)"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></span>';
-      }
-      return '<span class="vplan-ico is-marca">' + categoryIcon(cat, '#10233E') + '</span>';
-    }
-    function precio(monto, aprox, nota) {
-      if (!(monto > 0)) return '<div class="vplan-row__side"><b class="is-zero">' + esc(nota || 'A elegir') + '</b></div>';
-      return '<div class="vplan-row__side"><b>' + (aprox ? '~' : '') + money(monto) + '</b>' + '' + '</div>';
-    }
-    /* La pastilla de estado va en su propia linea, arriba de la bajada, y no
-       pegada al final del titulo. Los titulos de vuelo y de hotel son largos
-       (aerolinea, dos airports, nombre del alojamiento) y con la pastilla al
-       lado el nombre se partia en dos lineas con un "Pendiente de reserva"
-       colgando del medio. En su linea el estado se lee de un vistazo y el
-       titulo ocupa el ancho entero.
+    /* ---------- "Tu viaje": una etapa en foco ----------
+       Esto NO es un checkout. Cada servicio se reserva por su cuenta en su
+       proveedor (Google Flights, Booking, la agencia), asi que la pantalla es un
+       organizador: el progreso arriba, UNA etapa a la vez y el presupuesto
+       resumido abajo. Las etapas se pueden tocar en cualquier orden.
 
-       Los badges "Externo / Con nosotros" tambien se fueron: el titulo de la
-       tarjeta de arriba ya dice de quien es cada rubro, y la flecha del boton
-       dice que se abre afuera. Tres veces lo mismo es una vez. */
-    function fila(cat, titulo, cuerpo, lado, acciones) {
-      var estado = estadoReserva(cat);
-      return '<div class="vplan-row' + (estado ? ' is-' + (estado === 'Reservado' ? 'reservado' : 'pendiente') : '') + '" data-rubro="' + esc(cat) + '">' + tile(cat)
-        + '<div class="vplan-row__body"><p class="vplan-row__title">' + titulo + '</p>'
-        + (estado ? chipReserva(cat) : '')
-        + cuerpo
-        + (acciones || '')
-        + '</div>' + lado + '</div>';
-    }
-    function sub(texto, clase) { return texto ? '<p class="vplan-row__sub' + (clase ? ' ' + clase : '') + '">' + texto + '</p>' : ''; }
-    function cambiar(cat, texto) { return '<button type="button" class="vplan-link" data-detalle-rubro="' + cat + '">' + texto + '</button>'; }
-    /* La bajada y su link "Cambiar" van en la MISMA linea. Eran dos: la bajada
-       (horarios, nota del traslado, nombres de los tours) y abajo, solo y
-       centrado, un "Cambiar vuelo". Cuatro lineas de link que no eran ningun
-       dato, y empujaban el presupuesto fuera de la primera pantalla. */
-    function bajada(cat, texto, etiquetaCambiar, clase) {
-      var link = etiquetaCambiar ? cambiar(cat, etiquetaCambiar) : '';
-      if (!texto) return link ? '<p class="vplan-row__sub">' + link + '</p>' : '';
-      return '<p class="vplan-row__sub' + (clase ? ' ' + clase : '') + '">' + texto + (link ? ' ' + link : '') + '</p>';
-    }
-    /* Los links que NO son "Cambiar": reabrir el link al proveedor, volver
-       atras de una confirmacion y, para la agencia, sacar la marca. Van en una
-       linea aparte porque son acciones de estado, no de lectura. */
-    function linksDeFila(cat, extra) {
-      var html = [extra || '', controlReserva(cat)].filter(Boolean).join('');
-      return html ? '<div class="vplan-card__links">' + html + '</div>' : '';
-    }
-    /* Las acciones de una reserva externa. El link a Google Flights o a Booking
-       no se pierde nunca: es lo unico que la app puede hacer por ese rubro, y
-       quien vuelve de la otra pestana —con la compra a medio hacer o sin
-       hacer— no tiene forma de reabrirla de nuevo.
-
-       Los tres estados:
-
-       - sin abrir el link: un boton solo, "Reservar en <sitio>".
-       - con el link ya abierto, que es "Pendiente de reserva": el link VUELVE,
-         como "Volver a reservar", y al lado "Ya reserve". Antes ese estado
-         reemplazaba el link por la etiqueta y no habia salida; ahora la persona
-         misma cierra el circulo cuando compra, sin esperar a que la agencia lo
-         marque.
-       - confirmado: el link queda como link chico y manda el estado. "No,
-         todavia no" devuelve el rubro a pendiente, que es lo que necesita el
-         que confirmo por error. El boton de la agencia, que borra la marca
-         entera, sigue siendo de la agencia.
-
-       "Pendiente de reserva" no es reservado: es haber abierto Booking o Google
-       Flights, sin saber si la compra termino. Ningun link lleva estado
-       adentro, asi que un "?status=..." inventado en la barra no produce nada:
-       la verdad la sigue poniendo la persona o la agencia. */
-    function accionesExternas(cat, url, sitio, elegido, etiquetaElegir) {
-      var estado = estadoReserva(cat);
-      function reabrir() {
-        if (!url) return '';
-        var texto = sitio === 'WhatsApp' ? 'Volver a WhatsApp' : 'Volver a ' + sitio;
-        return '<a class="vplan-btn is-reabrir" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer" title="La compra se completa en ' + esc(sitio) + '. Reabrí la página si cerraste la pestaña.">' + esc(texto) + ' <span aria-hidden="true">&#8599;</span></a>';
-      }
-      if (estado === 'Solicitado') {
-        return '<div class="vplan-acciones">' + reabrir()
-          + '<button type="button" class="vplan-btn is-ya-reserve" data-confirmar-reserva="' + esc(cat) + '" title="Ya lo reservaste en ' + esc(sitio) + '. Marcálo como confirmado para que deje de figurar como pendiente.">Ya reservé <span aria-hidden="true">&#10003;</span></button>'
-          + '</div>' + linksDeFila(cat);
-      }
-      if (estado) {
-        var link = url
-          ? '<a class="vplan-link is-link-ext" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer" title="Reabrir ' + esc(sitio) + ' en otra pestaña.">Volver a ' + esc(sitio) + ' &#8599;</a>'
-          : '';
-        var deshacer = soyAgencia ? '' : '<button type="button" class="vplan-link" data-deshacer-confirmacion="' + esc(cat) + '" title="Volver a &quot;Pendiente de reserva&quot;: la marca queda, pero el rubro vuelve a pedirte la confirmación.">No, todavía no</button>';
-        return linksDeFila(cat, link + deshacer);
-      }
-      if (!elegido) return '<button type="button" class="vplan-btn" data-detalle-rubro="' + cat + '">' + etiquetaElegir + '</button>';
-      if (!url) return linksDeFila(cat);
-      return '<a class="vplan-btn" data-reservar-rubro="' + esc(cat) + '" href="' + esc(conLinkDeVuelta(url, cat)) + '" target="_blank" rel="noopener noreferrer">Reservar en ' + esc(sitio) + ' <span aria-hidden="true">&#8599;</span></a>'
-        + linksDeFila(cat);
-    }
-
-    /* Las dos reservas externas en UNA sola tarjeta, con una linea de
-       separacion entre las dos filas. Eran dos tarjetas con su propio borde, su
-       propio titulo de paso y su propio boton de 46 px apilado: la separacion
-       la hacian el borde y el titulo, no el contenido. */
-    /* Estado del presupuesto. Usa los mismos criterios que el resto de la app:
-       vuelo elegido (flightSummary.selected), hotel decidido (hotelElegido()) y
-       traslado sumado (hayTraslado). Nada obliga a completar: se puede seguir
-       sin elegir, y la pantalla muestra lo que hay. Los gastos en destino no se
-       eligen: son una estimacion automatica, y se marcan como tal. */
-    var transporteElegido = autoMode || (busMode ? busTotal > 0 : !!flightSummary.selected);
-    var completo = transporteElegido && hotelElegido() && (busMode || autoMode || hayTraslado);
-    // Lo primero que falta, en el orden del viaje. Es la accion de la pantalla.
-    var faltante = !transporteElegido ? { cat: busMode ? 'bus' : 'pasajes', txt: busMode ? 'Elegir bus' : 'Elegir vuelo' }
-      : !hotelElegido() ? { cat: 'alojamiento', txt: 'Elegir hotel' }
-      : !(busMode || autoMode || hayTraslado) ? { cat: 'traslados', txt: 'Continuar con traslado' } : null;
-
-    var filaPasajes = '';
-    if (busMode) {
-      filaPasajes = fila('bus', busTitle, busLines, precio(busTotal, true));
-    } else if (!autoMode) {
-      var vTitulo = flightSummary.selected
-        ? 'Vuelo' + (flightSummary.airline ? ' ' + esc(flightSummary.airline) : '') + ' &middot; ' + esc(airportCode(flightSummary.origin)) + (flightSummary.isRoundTrip ? ' &#8596; ' : ' &rarr; ') + esc(airportCode(flightSummary.destination))
-        : 'Vuelo &middot; sin elegir';
-      var vIda = flightSummary.selected ? esc(flightTime(outLeg.departure, flightSummary.departureText)) : '';
-      var vVuelta = flightSummary.selected && flightSummary.isRoundTrip ? esc(flightTime(inLeg && inLeg.departure, flightSummary.returnDepartureText)) : '';
-      if (/sin fecha/i.test(vVuelta)) vVuelta = '';  // sin hora real se pide elegirla
-      /* Ida y vuelta en UNA linea con el "Cambiar vuelo" al final. Eran dos
-         lineas de horario y una tercera, sola y centrada, para el link. */
-      var vCuerpo = flightSummary.selected
-        ? bajada('pasajes', [vIda ? 'Ida ' + vIda : '', vVuelta ? 'Vuelta ' + vVuelta : ''].filter(Boolean).join(' &middot; '),
-          flightSummary.isRoundTrip && !vVuelta ? '' : 'Cambiar vuelo')
-          + (flightSummary.isRoundTrip && !vVuelta ? sub('Vuelta: elegí la fecha', 'is-warn') : '')
-        : sub('Elegí un vuelo para ver horarios y precio', 'is-warn');
-      filaPasajes = fila('pasajes', vTitulo, vCuerpo, precio(flightTotal, true),
-        accionesExternas('pasajes', flightBookUrl, flightProviderUrl ? 'Google Flights' : 'WhatsApp', !!flightSummary.selected, 'Elegir vuelo'));
-    }
-
-    // El alojamiento, en la misma tarjeta que el vuelo.
-    var hTitulo = multiHotel ? hotelesElegidos.length + ' alojamientos' : (hotelElegido() ? esc(selectedHotelName) : 'Alojamiento &middot; sin elegir');
-    var hCuerpo = hotelElegido()
-      ? bajada('alojamiento', multiHotel ? hotelNote : (detailState.meta.dep && detailState.meta.ret ? esc(fechaCortaViaje(detailState.meta.dep)) + ' &rarr; ' + esc(fechaCortaViaje(detailState.meta.ret)) + ' &middot; ' : '') + nights + (nights === 1 ? ' noche' : ' noches') + ' &middot; ' + pax + (pax === 1 ? ' viajero' : ' viajeros'), hotelElegido() ? 'Cambiar hotel' : '')
-      : sub('Elegí dónde dormir para ver el precio', 'is-warn');
-
-    // Lo que se reserva con nosotros: traslado y tours, en un solo pago.
-    var filaTraslado = '';
-    if (!busMode && !autoMode) {
-      filaTraslado = fila('traslados', hayTraslado ? transferTitle : 'Traslado',
-        hayTraslado
-          ? bajada('traslados', transferNote, estadoReserva('traslados') ? '' : 'Cambiar traslado')
-          : bajada('traslados', 'Del aeropuerto a tu alojamiento', 'Elegir traslado'),
-        precio(transferTotal, false, 'A elegir'));
-    }
-    var tTitulo = selectedTours.length === 1 ? esc(selectedTours[0].title)
-      : selectedTours.length ? 'Tours y actividades &middot; ' + selectedTours.length
-        : 'Tours y actividades';
-    var filaTours = fila('tours', tTitulo,
-      selectedTours.length
-        ? bajada('tours', selectedTours.length === 1 ? 'Asistencia y gestión local' : esc(toursDetail), estadoReserva('tours') ? '' : 'Cambiar tours')
-        : bajada('tours', 'Sumá excursiones del destino', 'Agregar tours'),
-      precio(toursTotal, false, 'Opcional'));
-
-    /* Lo que no se reserva: se gasta en destino. Va PLEGADO.
-
-       Son tres lineas de un estimado que no se compra: nadie abre el modal
-       para leer cuanto sale cenar, y el subtotal ya esta en el desglose del
-       total. Plegado ocupa una linea con el monto a la vista; abierto, es lo
-       mismo que antes. El <summary> lleva el numero justamente para que el
-       plegado no esconda nada. */
-    var destinoLineas = '<ul class="vplan-destino">'
-      + (autoMode ? '<li><span>Auto propio <em>combustible y peajes</em></span><b>' + money(autoTotal) + '</b></li>' : '')
-      + (autoMode ? '' : '<li><span>Transporte local <em>' + transportLabel + ' &middot; ' + money(localPerDay) + '/día</em></span><b>' + money(localTotal) + '</b></li>')
-      + '<li><span>Comida <em>' + foodLabel + ' &middot; ' + money(foodPerDay) + '/día</em></span><b>' + money(foodTotal) + '</b></li>'
-      + (alquilerTotal ? '<li><span>Alquiler de auto <em>en destino</em></span><b>' + money(alquilerTotal) + '</b></li>' : '')
-      + '</ul>';
-
-    /* El total va ARRIBA y pegado a la cabecera, sin caja alrededor.
-
-       Primero estuvo en su propia tarjeta, con borde mostaza y fondo
-       amarillento, y el resultado fue un bloque de 240 px que se leia como
-       una pieza pegada encima del plan —"como extra"— y que pesaba mas que
-       cualquier rubro. Va ahora desnudo: la cabecera, una linea de separacion
-       y el numero. Es lo que abriste la pantalla a ver, y para eso esta arriba;
-       no hace falta una caja para decir que es importante. */
-    /* El <h2> "Tu plan de viaje" se fue. Decia lo mismo que el kicker de arriba
-       ("Tu viaje a <destino>"), en la tipografia mas grande de la pantalla, y
-       empujaba el total unheader entero mas abajo. El dialogo conserva su
-       nombre para lectores de pantalla con aria-label: sacar el titular visible
-       no puede significar que el modal deje de decir que es. */
-    /* El total y nada mas.
-       Antes venia un <details> "Ver desglose" que repartia el total en tres:
-       "Con nosotros", "Sitios oficiales" y "En destino". Se saco por pedido
-       propio, porque el reparto en tres no ayudaba a entender el numero.
-
-       Los tres montos no se pierden. Abajo ya esta el detalle por rubro —vuelo
-       y hotel, transfer y actividades, y gastos en destino plegado—, que es
-       donde se ve de que se compone el total. Este bloque solo los volvia a
-       sumar en una division distinta, con nombres que no coincidian con los de
-       las tarjetas de abajo: el mismo peso contado dos veces, con dos
-       vocabularios.
-
-       Queda pendiente una cosa que esta a la vista en pantalla: la tarjeta de
-       transfer y actividades sigue rotulada "Con nosotros · en un solo pago",
-       y el pedido se manda por WhatsApp, no es un pago unico de la plataforma.
-       Ese rotulo es de otra tarjeta y no se toco acá. */
-    var _kDest = detailState.meta.dest && detailState.meta.dest.key;
-    var fotoDestino = _kDest && DEST_PHOTOS[_kDest] ? '/fotos/' + encodeURIComponent(_kDest) + '.jpg?v=' + FOTOS_V : '';
+       Una etapa cuenta como hecha cuando la reserva esta confirmada. Si abriste
+       el link de vuelo u hotel pero no confirmaste, queda "pendiente": la app no
+       se entera de si la compra termino, y no lo da por cierto. Traslado y
+       actividades las coordina la agencia: con la solicitud enviada ya cuentan.
+       Las actividades son opcionales y se pueden omitir. */
+    var tieneTours = selectedTours.length > 0;
+    var ciudadOrigen = originCityName((detailState.meta && detailState.meta.origin) || S.origin);
+    var paxTxt = pax + (pax === 1 ? ' pasajero' : ' pasajeros');
     var fechasCortas = detailState.meta.dep && detailState.meta.ret
       ? esc(fechaCortaViaje(detailState.meta.dep)) + ' &rarr; ' + esc(fechaCortaViaje(detailState.meta.ret))
       : esc(storyDateRange(detailState.meta));
-    var porPersona = money(Math.round(totalPlan / pax));
-    var cardTotales = '<section class="vplan-suma vplan-suma--hero" aria-label="Presupuesto"' + (fotoDestino ? ' style="background-image:linear-gradient(180deg,rgba(11,18,32,.84),rgba(11,18,32,.96)),url(&quot;' + esc(fotoDestino) + '&quot;)"' : '') + '>'
-      + '<header class="vplan-head"><span class="voucher-kicker">Tu viaje a ' + esc(detailState.meta.dest.name) + '</span>'
-      + '<p>' + fechasCortas + ' · ' + nights + (nights === 1 ? ' noche' : ' noches') + ' · ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p></header>'
-      + '<p class="vplan-suma__valor"><em class="vplan-suma__etq">Total del viaje</em><strong>' + money(totalPlan) + '</strong>'
-      + (pax > 1 ? '<span>' + porPersona + ' por persona</span>' : '') + '</p>'
-      + '</section>';
-
-
-    /* El CTA fijo reserva SOLO lo que es con nosotros, y lo dice con su monto:
-       vuelo y hotel se pagan en su sitio y no pasan por este boton. Ya
-       reservado, lleva al asesor. */
-    var ctaLabel = !hayTraslado ? 'Reservar tours' : selectedTours.length ? 'Reservar traslado + tour' : 'Reservar traslado';
-    var ctaActivo = pedido.count && conNosotros > 0 && !nuestroHecho;
-    /* El boton fijo es siempre la siguiente accion real: lo primero que falta,
-       en el orden del viaje. Con todo elegido, lleva al resumen. Reservar el
-       traslado no se pierde: queda como accion en su propia fila. */
-    var reservarTodo = '<div class="voucher-reserve voucher-reserve--fijo vplan-cta">'
-      + (faltante
-        ? '<button type="button" class="voucher-reserve__btn" data-detalle-rubro="' + faltante.cat + '"><span>' + faltante.txt + '</span><i aria-hidden="true">&rarr;</i></button>'
-        : '<button type="button" class="voucher-reserve__btn" data-coordinar-asesor><span>Finalizar</span><i aria-hidden="true">&rarr;</i></button>')
-      + '</div>';
-    var marcaPlan = '<div class="vplan-marca"><p class="vplan-marca__t">Vos reservás. <b>Nosotros calculamos.</b></p>'
-      + '<p class="vplan-marca__s">Cada servicio se gestiona directamente con su proveedor.</p></div>';
-
-    /* Cada rubro se pinta segun su estado real. Elegido: la fila de siempre (con
-       sus acciones de reserva) mas "Seleccionado" y de donde sale el precio.
-       Sin elegir: lo primero que falta es la tarjeta protagonista; el resto, una
-       linea con su boton. */
-    function conSeleccion(html, cat) {
-      if (estadoReserva(cat)) return html;
-      return html.replace(/(<p class="vplan-row__title">[\s\S]*?<\/p>)/, '$1<p class="vplan-sel">&#10003; Seleccionado</p>');
+    var etapas = [];
+    if (!autoMode) {
+      etapas.push(busMode
+        ? { key: 'pasajes', rubro: 'bus', ico: 'bus', corto: 'Bus', largo: 'bus', hecho: 'Bus reservado', cta: 'Reservar bus', elegir: 'Elegir bus' }
+        : { key: 'pasajes', rubro: 'pasajes', ico: 'pasajes', corto: 'Vuelo', largo: 'vuelo', hecho: 'Vuelo reservado', cta: 'Reservar vuelo', elegir: 'Elegir vuelo' });
     }
-    /* El precio del proveedor va limpio (sin "~"); solo la estimacion se marca. */
-    function conFuente(html, texto) {
-      return html.replace(/<div class="vplan-row__side"><b>~?([^<]*)<\/b>/, function (m, valor) {
-        return '<div class="vplan-row__side"><b>' + valor + '</b>' + (texto === 'Estimación' ? '<small class="vplan-tag is-est">Estimación</small>' : '');
-      });
-    }
-    function itemElegido(html, cat, fuente) {
-      return '<div class="vplan-item is-elegido" data-rubro="' + cat + '">' + conFuente(conSeleccion(html, cat), fuente) + '</div>';
-    }
-    function itemPendiente(cat, nombre, texto, boton, actual) {
-      return '<div class="vplan-item is-pendiente' + (actual ? ' is-actual' : '') + '" data-rubro="' + cat + '">' + tile(cat)
-        + '<div class="vplan-item__body"><p class="vplan-item__tit">' + nombre + '</p><p class="vplan-item__txt">' + texto + '</p></div>'
-        + '<button type="button" class="vplan-item__btn" data-detalle-rubro="' + cat + '">' + boton + ' <span aria-hidden="true">&rarr;</span></button></div>';
-    }
-    function sinElegir(cat, nombre, titulo, linea1, linea2, boton) {
-      return itemPendiente(cat, nombre, linea1, boton, !!(faltante && faltante.cat === cat));
-    }
-    /* Checkout por secciones: cada servicio es una seccion con su titulo, su
-       estado y su accion. El precio de cada una forma parte de la revision. */
-    function seccion(titulo, html) {
-      return '<section class="vplan-s"><h4 class="vplan-kick">' + titulo + '</h4>' + html + '</section>';
-    }
-    var botonPedido = (pedido.count && conNosotros > 0 && !nuestroHecho)
-      ? '<button type="button" class="vplan-reservar-btn" data-reservar-pedido>' + ctaLabel + ' &middot; ' + money(conNosotros) + '</button>' : '';
-    var itemsViaje = '';
-    if (busMode) {
-      itemsViaje += seccion('Bus', busTotal > 0 ? itemElegido(filaPasajes, 'bus', busSel ? 'Precio del proveedor' : 'Estimación')
-        : sinElegir('bus', 'Bus', 'Elegí tu bus', 'Todavía no seleccionaste un bus.', 'Compará empresas y horarios.', 'Elegir bus'));
-    } else if (!autoMode) {
-      itemsViaje += seccion('Vuelo', flightSummary.selected ? itemElegido(filaPasajes, 'pasajes', 'Precio del proveedor')
-        : sinElegir('pasajes', 'Vuelo', 'Elegí tu vuelo', 'Todavía no seleccionaste un vuelo.', '', 'Elegir vuelo'));
-    }
-    itemsViaje += seccion('Hotel', hotelElegido()
-      ? itemElegido(fila('alojamiento', hTitulo, hCuerpo, precio(hotelTotal, true), accionesExternas('alojamiento', hotelBookUrl, 'Booking.com', true, 'Elegir hotel')), 'alojamiento', 'Precio del proveedor')
-      : sinElegir('alojamiento', 'Hotel', 'Elegí tu hotel', 'Todavía no seleccionaste alojamiento.', '', 'Elegir hotel'));
+    etapas.push({ key: 'alojamiento', rubro: 'alojamiento', ico: 'alojamiento', corto: 'Hotel', largo: 'Alojamiento', hecho: 'Alojamiento reservado', cta: 'Reservar alojamiento', elegir: 'Elegir hotel' });
     if (!busMode && !autoMode) {
-      itemsViaje += seccion('Traslado', (hayTraslado ? itemElegido(filaTraslado, 'traslados', 'Precio del proveedor')
-        : sinElegir('traslados', 'Traslado', 'Elegí tu traslado', 'Todavía no seleccionaste un traslado.', '', 'Elegir traslado')) + botonPedido);
+      etapas.push({ key: 'traslados', rubro: 'traslados', ico: 'traslados', corto: 'Traslado', largo: 'Traslados', hecho: 'Traslado reservado', enviado: 'Solicitud de traslado enviada', cta: 'Reservar traslado', elegir: 'Elegir traslado' });
     }
-    // Gastos en destino: solo referencia, no es una reserva.
-    itemsViaje += seccion('Gastos en destino', '<details class="vplan-gastos" data-rubro="comidas"><summary>' + tile('comidas')
-      + '<span class="vplan-item__body"><span class="vplan-item__tit">Estimación para ' + pax + (pax === 1 ? ' persona' : ' personas') + ' &middot; ' + nights + (nights === 1 ? ' noche' : ' noches') + '</span>'
-      + '<span class="vplan-gastos__ver">Ver detalle</span></span>'
-      + '<span class="vplan-gastos__lado"><b>' + (enDestino > 0 ? '&asymp; ' + money(enDestino) : 'Pendiente') + '</b></span></summary>'
-      + '<div class="vplan-gastos__body"><p class="vplan-gastos__dia">' + (enDestino > 0 ? '&asymp; ' + money(Math.round(enDestino / nights)) + ' por día' + (pax === 2 ? ' entre los dos' : pax > 2 ? ' entre los ' + pax : '') + ' &middot; ' : '') + 'Es una referencia, no se reserva.</p>' + destinoLineas
-      + '<div class="vplan-card__links">' + cambiar('comidas', 'Personalizar los costos diarios') + '</div></div></details>');
-    // Tours: opcionales.
-    itemsViaje += seccion('Tours y actividades (opcional)', (selectedTours.length ? itemElegido(filaTours, 'tours', 'Precio del proveedor')
-      : '<div class="vplan-item is-opcional">' + filaTours + '</div>') + (busMode || autoMode ? botonPedido : ''));
-    var serviciosPlan = '<section class="vplan-servicios" aria-label="Revisá y completá tu viaje"><h3 class="vplan-sec">Revisá y completá tu viaje</h3>' + itemsViaje + '</section>';
+    etapas.push({ key: 'tours', rubro: 'tours', ico: 'tours', corto: 'Actividades', largo: 'Actividades', hecho: 'Actividades reservadas', enviado: 'Solicitud de actividades enviada', cta: tieneTours ? 'Reservar actividades' : 'Ver actividades', elegir: 'Ver actividades' });
+
+    /* Las sugerencias salen de los tours del destino que tienen precio: sin
+       precio no se muestra nada, no se inventa un "desde". */
+    var toursConPrecio = toursFor(detailState.meta.dest.key, detailState.meta.dest.name, detailState.meta)
+      .filter(function (t) { return Number(t.price) > 0; });
+    function datosEtapa(e) {
+      var d = { titulo: '', lineas: [], monto: 0, elegido: false, sitio: '', url: '' };
+      if (e.key === 'pasajes' && busMode) {
+        d.titulo = 'Tu bus'; d.monto = busTotal; d.elegido = busTotal > 0; d.sitio = 'la empresa';
+        d.lineas = busSel
+          ? ['<b>' + esc(busSel.ruta.origen) + ' &harr; ' + esc(busSel.ruta.destino) + '</b>', esc(busResumenCorto(detailState.meta))]
+          : ['<b>Bus &middot; tarifa estimada</b>', 'Ida y vuelta en bus semicama / cama'];
+      } else if (e.key === 'pasajes') {
+        d.titulo = 'Tu vuelo'; d.monto = flightTotal; d.elegido = !!flightSummary.selected;
+        d.url = flightBookUrl; d.sitio = flightProviderUrl ? 'Google Flights' : 'WhatsApp';
+        d.lineas = d.elegido
+          ? ['<b>' + esc(ciudadOrigen) + ' &rarr; ' + esc(detailState.meta.dest.name) + '</b>', fechasCortas + ' &middot; ' + paxTxt].concat(flightSummary.airline ? [esc(flightSummary.airline)] : [])
+          : ['<b>Todavía no elegiste vuelo</b>', 'Compará opciones y sumá uno a tu viaje'];
+      } else if (e.key === 'alojamiento') {
+        d.titulo = 'Tu alojamiento'; d.monto = hotelTotal; d.elegido = hotelElegido();
+        d.url = hotelBookUrl; d.sitio = 'Booking.com';
+        d.lineas = d.elegido
+          ? ['<b>' + (multiHotel ? hotelesElegidos.length + ' alojamientos' : esc(selectedHotelName)) + '</b>', nights + (nights === 1 ? ' noche' : ' noches') + ' &middot; ' + pax + (pax === 1 ? ' persona' : ' personas')]
+          : ['<b>Todavía no elegiste dónde dormir</b>', 'Elegí un hotel para ver el precio'];
+      } else if (e.key === 'traslados') {
+        d.titulo = 'Llegá sin complicaciones'; d.monto = transferTotal; d.elegido = hayTraslado;
+        var _modo = tl2 && tv2 && tl2 !== tv2
+          ? 'Ida ' + (tl2 === 'private' ? 'privada' : 'compartida') + ' + vuelta ' + (tv2 === 'private' ? 'privada' : 'compartida')
+          : ((tl2 || tv2) === 'private' ? 'Viaje privado' : 'Viaje compartido');
+        d.lineas = ['<b>Traslado aeropuerto &rarr; alojamiento</b>', d.elegido ? _modo + ' &middot; ' + paxTxt : 'Todavía no elegiste la modalidad'];
+      } else {
+        d.titulo = 'Viví ' + esc(detailState.meta.dest.name); d.monto = toursTotal; d.elegido = tieneTours;
+        d.lineas = d.elegido
+          ? ['<b>' + esc(toursLabel) + '</b>', esc(toursDetail)]
+          : ['<b>Agregá excursiones y experiencias a tu viaje.</b>']
+            .concat(toursConPrecio.slice(0, 3).map(function (t) { return esc(t.title) + ' &mdash; ' + money(Number(t.price)); }))
+            .concat(toursConPrecio.length ? ['Precios por persona'] : []);
+      }
+      return d;
+    }
+    function etapaHecha(e) {
+      if (vtrip.omitidas[e.key]) return true;
+      var est = estadoReserva(e.key);
+      if (!est) return false;
+      return canalDe(e.key).externo ? est === 'Reservado' : true;
+    }
+    function etapaPorClave(k) { return etapas.filter(function (e) { return e.key === k; })[0] || null; }
+    var hechas = {};
+    etapas.forEach(function (e) { hechas[e.key] = etapaHecha(e); });
+    var todasHechas = etapas.every(function (e) { return hechas[e.key]; });
+    /* La siguiente sin hacer, a partir de la etapa dada y dando la vuelta. */
+    function proximaPendiente(desde) {
+      var i = etapas.map(function (e) { return e.key; }).indexOf(desde);
+      for (var k = 1; k <= etapas.length; k++) {
+        var cand = etapas[(i + k) % etapas.length];
+        if (!hechas[cand.key]) return cand;
+      }
+      return null;
+    }
+    // Recien se marco una etapa como hecha: se pasa a la siguiente con su aviso.
+    if (vtrip.avanzar) {
+      var _vieja = etapaPorClave(vtrip.avanzar);
+      if (_vieja && hechas[_vieja.key]) {
+        var _prox = proximaPendiente(_vieja.key);
+        vtrip.etapa = _prox ? _prox.key : 'listo';
+        vtrip.aviso = vtrip.omitidas[_vieja.key] ? '' : (estadoReserva(_vieja.key) === 'Solicitado' && _vieja.enviado ? _vieja.enviado : _vieja.hecho);
+        vtrip.arriba = true;
+      }
+      vtrip.avanzar = null;
+    }
+    var actual = vtrip.etapa === 'listo' && todasHechas ? 'listo' : (etapaPorClave(vtrip.etapa) ? vtrip.etapa : null);
+    if (!actual) {
+      var _primera = etapas.filter(function (e) { return !hechas[e.key]; })[0];
+      actual = _primera ? _primera.key : 'listo';
+    }
+
+    // El progreso: se toca cualquiera. Tilde = hecha, amarilla = la actual, aro vacio = pendiente.
+    var progreso = '<ol class="vtrip-prog" aria-label="Etapas del viaje">' + etapas.map(function (e) {
+      var h = hechas[e.key], cur = e.key === actual;
+      return '<li class="' + (h ? 'is-hecho' : '') + (cur ? ' is-actual' : '') + '"><button type="button" data-vplan-etapa="' + e.key + '"' + (cur ? ' aria-current="step"' : '') + '>'
+        + '<span class="vtrip-prog__dot">' + (h ? '<span aria-hidden="true">&#10003;</span>' : categoryIcon(e.ico)) + '</span>'
+        + '<b>' + esc(e.corto) + '</b><span class="vtrip-sr">' + (h ? ': hecho' : cur ? ': etapa actual' : ': pendiente') + '</span></button></li>';
+    }).join('') + '</ol>';
+
+    // Cuanto cuesta: siempre a la vista pero chico. Lo que se reserva va separado de lo que se estima.
+    function filaDesglose(ico, nombre, valor, etapa, hecha, entrar) {
+      var contenido = '<span class="vtrip-bud__ico">' + categoryIcon(ico) + '</span><span class="vtrip-bud__n">' + esc(nombre) + (hecha ? ' <i aria-hidden="true">&#10003;</i>' : '') + '</span><b>' + valor + '</b>'
+        + (entrar ? '<span class="vtrip-bud__go" aria-hidden="true">&rsaquo;</span>' : '');
+      return '<li>' + (etapa ? '<button type="button" data-vplan-etapa="' + etapa + '">' + contenido + '</button>' : '<div>' + contenido + '</div>') + '</li>';
+    }
+    var filasReserva = etapas.map(function (e) {
+      var d = datosEtapa(e);
+      var vacio = e.key !== 'tours' ? 'A elegir'
+        : toursConPrecio.length ? 'Desde ' + money(Math.round(Math.min.apply(null, toursConPrecio.map(function (t) { return Number(t.price); })) * pax)) + ' &middot; Opcional' : 'Opcional';
+      var valor = d.elegido && d.monto > 0 ? money(d.monto) : '<span class="is-vacio">' + vacio + '</span>';
+      return filaDesglose(e.ico, e.key === 'pasajes' ? e.corto : e.largo, valor, e.key, hechas[e.key] && !vtrip.omitidas[e.key], e.key === 'traslados' || e.key === 'tours');
+    }).join('');
+    var filasEstima = (foodTotal > 0 ? filaDesglose('comidas', 'Comidas', '&asymp; ' + money(foodTotal)) : '')
+      + (autoMode ? (autoTotal > 0 ? filaDesglose('auto', 'Auto propio', '&asymp; ' + money(autoTotal)) : '') : (localTotal > 0 ? filaDesglose('local', 'Transporte local', '&asymp; ' + money(localTotal)) : ''))
+      + (alquilerTotal > 0 ? filaDesglose('auto', 'Alquiler de auto', '&asymp; ' + money(alquilerTotal)) : '');
+    var presupuesto = '<details class="vtrip-bud"' + (_abiertos.bud ? ' open' : '') + '>'
+      + '<summary><span class="vtrip-bud__ico is-marca" aria-hidden="true">&#128176;</span>'
+      + '<span class="vtrip-bud__txt"><em>' + (todasHechas ? 'Presupuesto estimado total' : 'Presupuesto estimado del viaje') + '</em><strong>' + money(totalPlan) + '</strong>' + (pax > 1 ? '<small>' + money(Math.round(totalPlan / pax)) + ' por persona</small>' : '') + '</span>'
+      + '<span class="vtrip-bud__ver"><span class="vtrip-bud__abrir">Ver desglose</span><span class="vtrip-bud__cerrar">Ocultar</span><i aria-hidden="true"></i></span></summary>'
+      + '<div class="vtrip-bud__cuerpo"><p class="vtrip-bud__grp">Se reserva</p><ul>' + filasReserva + '</ul>'
+      + (filasEstima ? '<p class="vtrip-bud__grp">Se estima en destino</p><ul>' + filasEstima + '</ul>' : '')
+      + '</div>'
+      + '<p class="vtrip-bud__nota">Incluye reservas + gastos estimados en destino. Los precios pueden variar al momento de realizar la reserva.</p></details>';
+
+    // La etapa en foco.
+    function linkExterno(e, d) {
+      return d.url ? '<a class="vtrip-link" href="' + esc(conLinkDeVuelta(d.url, e.key)) + '" target="_blank" rel="noopener noreferrer">Volver a ' + esc(d.sitio) + ' &#8599;</a>' : '';
+    }
+    function etapaFoco(e) {
+      var d = datosEtapa(e);
+      var externo = canalDe(e.key).externo;
+      var estado = estadoReserva(e.key);
+      var hecha = hechas[e.key], omitida = !!vtrip.omitidas[e.key];
+      var pendiente = !hecha && externo && estado === 'Solicitado';
+      var prox = proximaPendiente(e.key);
+      var banner = hecha && !omitida
+        ? '<p class="vtrip-estado is-ok"><span aria-hidden="true">&#10003;</span> ' + esc(estado === 'Solicitado' && e.enviado ? e.enviado : e.hecho) + '</p>'
+        : omitida ? '<p class="vtrip-estado">Sin actividades por ahora</p>'
+          : pendiente ? '<p class="vtrip-estado is-wip">Falta confirmar: cuando termines en ' + esc(d.sitio) + ', avisanos acá</p>' : '';
+      var precio = d.elegido && d.monto > 0
+        ? '<div class="vtrip-foco__precio"><small>Precio estimado</small><strong>' + money(d.monto) + '</strong></div>' : '';
+      var fuente = d.elegido
+        ? (externo ? '' : '<p class="vtrip-foco__fuente">Lo coordina Cuánto Sale con la agencia local</p>') : '';
+      var principal, secundarios = '', nota = '';
+      if (hecha) {
+        principal = prox
+          ? '<button type="button" class="vtrip-cta" data-vplan-etapa="' + prox.key + '">Siguiente: ' + esc(prox.corto) + ' <i aria-hidden="true">&rarr;</i></button>'
+          : '<button type="button" class="vtrip-cta" data-vplan-etapa="listo">Ver mi viaje <i aria-hidden="true">&rarr;</i></button>';
+        if (!omitida && externo) {
+          secundarios = linkExterno(e, d) + (soyAgencia ? '' : '<button type="button" class="vtrip-link" data-deshacer-confirmacion="' + e.key + '">No, todavía no</button>');
+        }
+      } else if (!d.elegido) {
+        principal = '<button type="button" class="vtrip-cta" data-detalle-rubro="' + e.rubro + '">' + esc(e.elegir) + ' <i aria-hidden="true">&rarr;</i></button>';
+        if (e.key === 'tours') secundarios = '<button type="button" class="vtrip-link" data-vplan-omitir="tours">Omitir actividades</button>';
+      } else if (pendiente) {
+        principal = '<button type="button" class="vtrip-cta is-ok" data-confirmar-reserva="' + e.key + '">Ya reservé <i aria-hidden="true">&#10003;</i></button>';
+        secundarios = linkExterno(e, d);
+      } else if (externo) {
+        principal = d.url
+          ? '<a class="vtrip-cta" data-reservar-rubro="' + e.key + '" href="' + esc(conLinkDeVuelta(d.url, e.key)) + '" target="_blank" rel="noopener noreferrer">' + esc(e.cta) + ' <i aria-hidden="true">&#8599;</i></a>'
+          : '<button type="button" class="vtrip-cta" data-confirmar-reserva="' + e.key + '">Ya lo reservé <i aria-hidden="true">&#10003;</i></button>';
+        if (d.url) nota = '<p class="vtrip-nota">Te llevamos a ' + esc(d.sitio) + (d.sitio === 'WhatsApp' ? ' para coordinar la reserva.' : ' para completar la reserva.') + '</p>';
+        secundarios = '<button type="button" class="vtrip-link" data-detalle-rubro="' + e.rubro + '">Cambiar ' + esc(e.largo.toLowerCase()) + '</button>';
+      } else {
+        principal = '<button type="button" class="vtrip-cta" data-reservar-pedido>' + esc(e.cta) + ' <i aria-hidden="true">&rarr;</i></button>';
+        secundarios = '<button type="button" class="vtrip-link" data-detalle-rubro="' + e.rubro + '">Cambiar selección</button>';
+      }
+      if (soyAgencia) secundarios += controlReserva(e.key);
+      return '<section class="vtrip-foco" data-rubro="' + e.key + '" aria-live="polite">'
+        + banner
+        + '<header class="vtrip-foco__tit"><span class="vtrip-foco__ico">' + categoryIcon(e.ico, '#10233E') + '</span><h2>' + esc(d.titulo) + '</h2></header>'
+        + '<div class="vtrip-foco__fila"><div class="vtrip-foco__datos">' + d.lineas.map(function (l, i) { return '<p class="' + (i ? 'is-sub' : 'is-main') + '">' + l + '</p>'; }).join('') + fuente + '</div>' + precio + '</div>'
+        + principal + nota + (secundarios ? '<div class="vtrip-foco__mas">' + secundarios + '</div>' : '')
+        + '</section>';
+    }
+    function etapaListo() {
+      return '<section class="vtrip-foco vtrip-listo"><div class="vtrip-listo__ico" aria-hidden="true">&#127881;</div>'
+        + '<h2>¡Tu viaje está listo!</h2><p class="vtrip-listo__sub">Todas las reservas completadas.</p>'
+        + '<ul>' + etapas.map(function (e) {
+          var om = !!vtrip.omitidas[e.key];
+          return '<li class="' + (om ? 'is-omitida' : '') + '"><span aria-hidden="true">' + (om ? '&ndash;' : '&#10003;') + '</span> ' + esc(e.key === 'alojamiento' ? 'Alojamiento' : e.corto) + (om ? ' <em>sin agregar</em>' : '') + '</li>';
+        }).join('') + '</ul>'
+        + '<button type="button" class="vtrip-cta" data-close-booking>Disfrutá tu viaje <i aria-hidden="true">&rarr;</i></button></section>';
+    }
+    var avisoPrevio = vtrip.aviso && actual !== 'listo'
+      ? '<p class="vtrip-aviso"><span aria-hidden="true">&#10003;</span> ' + esc(vtrip.aviso) + '</p>' : '';
+    var nHechas = etapas.filter(function (e) { return hechas[e.key]; }).length;
+    var cabecera = '<header class="vtrip-head"><h1>Tu viaje a ' + esc(detailState.meta.dest.name) + '</h1>'
+      + '<div class="vtrip-head__fila"><p>' + fechasCortas + ' &middot; ' + pax + (pax === 1 ? ' viajero' : ' viajeros') + '</p>'
+      + '<span class="vtrip-head__n">' + nHechas + ' de ' + etapas.length + ' completados</span></div></header>';
 
     /* El asesor es UNA linea. Antes era un bloque de tres (titulo, bajada y un
        boton de 48 px apilado) que ocupaba mas alto que la tarjeta de los
@@ -7328,17 +7251,18 @@ var HOTEL_NOTA_MINIMA = 8;
        sola linea con el boton al costado. */
     var lineaAsesor = '<aside class="voucher-asesor vplan-asesor">'
       + '<span class="voucher-asesor__ico" aria-hidden="true">' + brandIcon('whatsapp') + '</span>'
-      + '<span class="vplan-asesor__txt"><b>¿Necesitás ayuda?</b> <small>Un asesor puede ayudarte por WhatsApp.</small></span>'
-      + '<button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar con asesor">' + brandIcon('whatsapp') + '<span>Coordinar</span></button></aside>';
+      + '<span class="vplan-asesor__txt"><b>¿Necesitás ayuda?</b> <small>Te ayudamos a organizar tu viaje por WhatsApp.</small></span>'
+      + '<button type="button" class="voucher-asesor__btn" data-coordinar-asesor aria-label="Coordinar por WhatsApp">' + brandIcon('whatsapp') + '<span>Coordinar &rarr;</span></button></aside>';
 
 
     cerrarTodosLosModales();
-    modal.innerHTML = '<div class="booking-dialog voucher-dialog vplan" role="dialog" aria-modal="true" aria-label="Resumen del viaje"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
-      cardTotales +
-      '<div class="vplan-cuerpo"><div class="vplan-main">' + marcaPlan + serviciosPlan + '</div></div>' +
+    modal.innerHTML = '<div class="booking-dialog voucher-dialog vplan vtrip" role="dialog" aria-modal="true" aria-label="Tu viaje"><button type="button" class="booking-close" data-close-booking aria-label="Cerrar">×</button>' +
+      cabecera + progreso + avisoPrevio +
+      (actual === 'listo' ? etapaListo() : etapaFoco(etapaPorClave(actual))) +
+      presupuesto +
+      /* Ayuda, guardar/compartir y el grupo, sin un plegable que los repita. El
+         menu de Compartir se abre encima del boton, asi nunca tapa otro control. */
       '<div class="vplan-extras">' + lineaAsesor +
-      /* El pie: Guardar y Compartir y, plegado, el grupo. El menu de Compartir
-         se abre encima del boton, asi nunca tapa otro control. */
       '<div class="voucher-actions vplan-pie">' +
       '<div class="voucher-tools voucher-share">' +
       '<button type="button" class="voucher-chip" data-save-trip aria-label="Guardar este viaje">' + brandIcon('guardar') + '<span class="voucher-btn__label">Guardar</span></button>' +
@@ -7349,16 +7273,17 @@ var HOTEL_NOTA_MINIMA = 8;
       '<button type="button" data-share-whatsapp>' + brandIcon('whatsapp') + '<span>Enviar por WhatsApp</span></button>' +
       '</div></div></div>' +
       '<details class="voucher-grupo"' + (linkGrupo ? ' open' : '') + '><summary>' + brandIcon('dividir') + '<span>' + (linkGrupo ? 'Tu grupo de gastos' : '¿Viajás en grupo? Dividí los gastos') + '</span></summary>' + dividirBloque + '</details>' +
-      '</div></div>' + reservarTodo;
+      '</div></div></div>';
     modal.dataset.summaryText = summaryText;
     precalentarTarjeta();
     try { acortarEnlace(tokenDelViaje()); } catch (e) { /* sin enlace corto: sale el largo */ }
     modal.hidden = false; modal.setAttribute('aria-hidden', 'false');
-    if (_dlgPrev && (_scrollDlg || _scrollModal)) {
+    if (_dlgPrev && (_scrollDlg || _scrollModal) && !vtrip.arriba) {
       var _dlgNuevo = modal.querySelector('.booking-dialog');
       if (_dlgNuevo) _dlgNuevo.scrollTop = _scrollDlg;
       modal.scrollTop = _scrollModal;
     }
+    vtrip.arriba = false;
     honrarLinkDeVuelta(modal);
     /* Se pide la lista de reservados al abrir, no antes: es una lectura de
        red y el voucher se abre desde un botón, así que pedirla con la
@@ -14162,6 +14087,7 @@ function comboNombreDestino() {
       if (confirmarPaso) {
         e.preventDefault();
         var catConfirmar = confirmarPaso.getAttribute('data-confirmar-reserva');
+        vtrip.avanzar = catConfirmar;
         if (soyAgencia) marcarReservadoManual(catConfirmar, {});
         else confirmarReservaPropia(catConfirmar);
         return;
@@ -14203,6 +14129,23 @@ function comboNombreDestino() {
           _destino.classList.add('is-tras-vuelta');
           window.setTimeout(function () { _destino.classList.remove('is-tras-vuelta'); }, 1600);
         }
+        return;
+      }
+      /* Navegar entre etapas de "Tu viaje" y omitir las opcionales. Todo se resuelve
+         repintando: el estado (etapa, avisos) vive en vtrip. */
+      var aEtapa = e.target.closest('[data-vplan-etapa]');
+      if (aEtapa) {
+        e.preventDefault();
+        vtrip.etapa = aEtapa.getAttribute('data-vplan-etapa'); vtrip.aviso = ''; vtrip.arriba = true;
+        pintarVoucherReservas();
+        return;
+      }
+      var omitirEtapa = e.target.closest('[data-vplan-omitir]');
+      if (omitirEtapa) {
+        e.preventDefault();
+        var _k = omitirEtapa.getAttribute('data-vplan-omitir');
+        vtrip.omitidas[_k] = true; vtrip.avanzar = _k;
+        pintarVoucherReservas();
         return;
       }
       var coordinar = e.target.closest('[data-coordinar-asesor]');
