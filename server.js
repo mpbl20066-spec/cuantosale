@@ -2971,7 +2971,7 @@ function handleRequest(req, res) {
     // Paginas publicas por destino para Google (lib/destinos-web.js).
     const mDestino = /^\/destino\/([a-z0-9-]+)\/?$/.exec(url.pathname);
     if (mDestino) {
-      const html = destinosWeb.pagina(mDestino[1]);
+      return destinosWeb.pagina(mDestino[1]).then(function (html) {
       if (!html) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
       res.writeHead(200, {
         'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP,
@@ -2979,6 +2979,7 @@ function handleRequest(req, res) {
         'Cache-Control': 'public, max-age=0, must-revalidate, s-maxage=3600'
       });
       return res.end(injectAnalytics(Buffer.from(html, 'utf8'), '.html'));
+      }).catch(function () { res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Error'); });
     }
     if (/^\/tours\/?$/i.test(url.pathname)) {
       return serveStatic(req, res, '/tours.html');

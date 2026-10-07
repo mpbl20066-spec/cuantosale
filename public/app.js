@@ -14344,6 +14344,19 @@ function comboNombreDestino() {
         }
       });
 
+      /* /?destino=rio llega desde las paginas publicas /destino/<slug> (Google):
+         abre la app con ese destino ya elegido. Solo vale si el destino esta en
+         la lista; se limpia de la URL para que no quede pegado al recargar. */
+      try {
+        var pedidoUrl = new URLSearchParams(window.location.search);
+        var pedidoDestino = pedidoUrl.get('destino');
+        if (pedidoDestino) {
+          if (destItems.some(function (it) { return it.value === pedidoDestino; })) S.dest = pedidoDestino;
+          pedidoUrl.delete('destino');
+          var restoQs = pedidoUrl.toString();
+          history.replaceState(null, '', window.location.pathname + (restoQs ? '?' + restoQs : '') + window.location.hash);
+        }
+      } catch (e) { /* sin destino pedido */ }
       sel.value = S.dest;
       filterDestOptions('');
       updateDestinationMode();
