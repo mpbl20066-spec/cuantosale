@@ -5462,19 +5462,28 @@ var HOTEL_NOTA_MINIMA = 8;
     var paths = CATEGORY_ICONS[category] || CATEGORY_ICONS[category === 'alquiler' ? 'auto' : 'alojamiento'];
     return '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
   }
-  function storyInclusionsMarkup(meta, entries) {
-    var order = ['pasajes', 'bus', 'auto', 'alquiler', 'alojamiento', 'comidas', 'local', 'traslados', 'tours'];
-    var present = Object.create(null);
-    (entries || []).forEach(function (entry) {
-      if (Number(entry.value) > 0 && order.indexOf(entry.category) >= 0) present[entry.category] = true;
-    });
-    if (meta.hotelType === 'all-inclusive') present.comidas = true;
-    var items = order.filter(function (category) { return present[category]; }).map(function (category) {
-      var label = category === 'comidas' && meta.hotelType === 'all-inclusive' ? 'All Inclusive' : storyCostLabel({ category: category });
-      return '<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">' + storyInclusionIcon(category) + '<b style="font-weight:500;">' + esc(label) + '</b></span>';
-    });
-    if (!items.length) return '';
-    return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 12px;color:rgba(255,255,255,.9);font-size:12px;line-height:1.3;"><span style="flex:none;color:rgba(255,255,255,.72);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Incluye</span>' + items.join('') + '</div>';
+  /* La barra apilada y la lista de "a dónde se va la plata" de la tarjeta de
+     la propuesta, para que la imagen para compartir muestre el mismo desglose.
+     Los colores van como hex y no como var(--cN): la tarjeta se clona a
+     SVG/canvas para exportarla y las variables del tema no siempre llegan. */
+  var STORY_COLORS = { '--c1': '#5B9BD5', '--c2': '#7CB7E8', '--c3': '#F7C325', '--c4': '#F0714F', '--c5': '#8FA3BB', '--c6': '#9AA8BA', '--c7': '#9B7EDB' };
+  function storyBreakdownMarkup(meta, entries) {
+    var rows = (entries || []).filter(function (entry) { return Number(entry.value) > 0; });
+    if (!rows.length) return '';
+    var sum = rows.reduce(function (acc, entry) { return acc + Number(entry.value); }, 0);
+    var color = function (entry) { return STORY_COLORS[entry.color] || '#8FA3BB'; };
+    var bar = rows.map(function (entry) {
+      return '<span style="display:block;height:100%;width:' + (Number(entry.value) / sum * 100) + '%;background:' + color(entry) + ';"></span>';
+    }).join('');
+    var list = rows.map(function (entry) {
+      var label = entry.category === 'comidas' && meta.hotelType === 'all-inclusive' ? 'All Inclusive' : entry.label;
+      return '<div style="display:flex;align-items:center;gap:9px;height:24px;font-size:13px;line-height:1;">' +
+        '<span style="flex:none;display:flex;color:' + color(entry) + ';">' + storyInclusionIcon(entry.category) + '</span>' +
+        '<span style="flex:1;font-weight:500;color:rgba(255,255,255,.92);">' + esc(label) + '</span>' +
+        '<b style="font-weight:700;">' + esc(money(entry.value)) + '</b></div>';
+    }).join('');
+    return '<div style="margin:0 0 12px;">' +
+      '<div style="display:flex;height:9px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:9px;">' + bar + '</div>' + list + '</div>';
   }
   function loadStoryPhoto(photoUrl) {
     if (!photoUrl) return Promise.reject(new Error('No hay una foto disponible para este destino.'));
@@ -5500,7 +5509,7 @@ var HOTEL_NOTA_MINIMA = 8;
   }
   function buildStoryCardNode(meta, totals, photo) {
     var location = [meta.dest.region, meta.dest.country || 'Brasil'].filter(Boolean).join(' - ');
-    var inclusionsMarkup = storyInclusionsMarkup(meta, totals.entries);
+    var inclusionsMarkup = storyBreakdownMarkup(meta, totals.entries);
     // El nodo se clona a SVG/canvas para exportarlo: si se posiciona fuera del
     // viewport (ej. left:-9999px) el navegador puede no llegar a pintarlo y la
     // captura sale en blanco. Por eso se ancla en (0,0) dentro de un wrapper
@@ -5521,9 +5530,9 @@ var HOTEL_NOTA_MINIMA = 8;
       (location ? '<div style="font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#F6B21B;margin-bottom:7px;">' + esc(location) + '</div>' : '') +
       '<div style="font-size:40px;font-weight:800;line-height:1.02;margin-bottom:11px;">' + esc(meta.dest.name) + '</div>' +
       '<div style="display:flex;align-items:center;gap:18px;margin-bottom:12px;color:rgba(255,255,255,.94);font-size:13px;font-weight:600;"><span>📅 ' + esc(storyDateRange(meta)) + '</span><span>👥 ' + esc(String(meta.pax)) + (Number(meta.pax) === 1 ? ' pasajero' : ' pasajeros') + '</span></div>' +
-      '<div style="background:rgba(11,27,43,.52);border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:16px 19px;margin-bottom:12px;">' +
+      '<div style="background:rgba(11,27,43,.52);border:1px solid rgba(255,255,255,.3);border-radius:18px;padding:13px 19px;margin-bottom:10px;">' +
       '<div style="font-size:11px;color:rgba(255,255,255,.78);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Precio por pasajero</div>' +
-      '<div style="font-size:58px;font-weight:800;line-height:1;letter-spacing:-.03em;">' + esc(money(totals.pp)) + '</div>' +
+      '<div style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-.03em;">' + esc(money(totals.pp)) + '</div>' +
       '<div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:7px;">Total del viaje: ' + esc(money(totals.total)) + '</div>' +
       '</div>' +
       inclusionsMarkup +
