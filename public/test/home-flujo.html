@@ -1236,6 +1236,7 @@
   var CTAS = { 1: 'Continuar a Alojamiento →', 2: 'Continuar a Extras →', 3: 'Continuar a Tu presupuesto →', 4: 'Ver opciones para reservar →' };
   function render(scrollTop) {
     pintarPasos(); pintarTotal();
+    $('main').dataset.paso = S.paso;
     $('main').innerHTML = [null, pantalla1, pantalla2, pantalla3, pantalla4, pantalla5, pantalla6, pantalla7, pantalla8, pantalla9, pantalla10, pantalla11, pantalla12, pantalla13][S.paso]();
     $('steps').hidden = S.paso >= 5;
     $('foot').hidden = S.paso >= 5;

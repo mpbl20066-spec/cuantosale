@@ -1,7 +1,129 @@
-/* /test como web app, no como maqueta de celular: sin marco, sin barra de estado falsa, a pantalla
-   completa. La columna usa el mismo ancho que la app de la raiz (.wrap en style.css: 760px) y el mismo
-   fondo, sin bordes a los costados. */
+/* /test como web app, no como maqueta de celular.
+   Causa raiz del problema: cada pantalla esta armada como un celular (.phone: una caja de alto fijo con
+   scroll interno y el boton fijo abajo) y el marco solo se sacaba por debajo de 520px. Aca se reemplaza
+   el marco por un contenedor que se adapta, y desde tablet cada pantalla reorganiza su contenido.
+
+   Celular  (< 768px):   igual que antes: una columna a pantalla completa (no se toca nada de lo de abajo).
+   Tablet   (>= 768px):  contenedor de 880px, formularios y listas en dos columnas cuando hay lugar.
+   Desktop  (>= 1100px): contenedor de 1160px, composicion en grilla y tarjetas mas amplias.
+   Toda la logica responsive vive en este archivo; las paginas solo traen su estilo de celular.
+   Cada bloque va limitado a su pagina con [data-pagina="..."] para que no se pisen entre si. */
+:root{--w-tab:880px;--w-desk:1160px;--gut:18px}
+@media (min-width:768px){:root{--gut:32px}}
 html{background:var(--bg)}
 body{display:flex!important;align-items:stretch!important;justify-content:center!important;min-height:100vh;min-height:100dvh;margin:0!important;padding:0!important;background:var(--bg)!important}
 .phone{width:100%!important;max-width:760px!important;height:100vh!important;height:100dvh!important;max-height:none!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .status,.home-bar{display:none!important}
+@media (min-width:768px){.phone{max-width:var(--w-tab)!important}}
+@media (min-width:1100px){.phone{max-width:var(--w-desk)!important}}
+
+/* ============ Home: dos caminos ============ */
+@media (min-width:768px){
+  [data-pagina="home"] .scroll{padding:0 var(--gut) 40px;display:grid;grid-template-columns:1fr 1fr;column-gap:20px;align-content:start}
+  [data-pagina="home"] .scroll>.m-top,[data-pagina="home"] .scroll>.m-sec,[data-pagina="home"] .scroll>.m-car{grid-column:1/-1}
+  [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 30px;min-height:240px}
+  [data-pagina="home"] .m-hero h1{font-size:40px}
+  [data-pagina="home"] .m-hero p{font-size:17px;max-width:520px}
+  [data-pagina="home"] .m-card{margin-bottom:20px;padding:24px;display:flex;flex-direction:column}
+  [data-pagina="home"] .m-card__row{flex:1}
+  [data-pagina="home"] .m-card h2{font-size:22px}
+  [data-pagina="home"] .m-card p{font-size:15px}
+  [data-pagina="home"] .m-btn{width:auto;align-self:flex-start;min-width:240px;margin-top:20px}
+  [data-pagina="home"] .m-car{gap:18px}
+  [data-pagina="home"] .m-dest{flex-basis:200px;height:230px}
+}
+@media (min-width:1100px){
+  [data-pagina="home"] .m-hero{margin-top:36px}
+  [data-pagina="home"] .m-hero h1{font-size:50px}
+  [data-pagina="home"] .m-dest{flex-basis:calc((100% - 72px) / 5)}
+}
+
+/* ============ Busqueda ("¿A donde queres ir?") ============ */
+@media (min-width:768px){
+  [data-pagina="calcular"] .c-bar{padding:8px var(--gut) 0;position:absolute;top:0;left:0;right:0;z-index:2}
+  [data-pagina="calcular"] .phone{justify-content:center;padding-top:56px;box-sizing:border-box}
+  [data-pagina="calcular"] .c-main{flex:0 1 auto;min-height:0;padding:10px var(--gut) 8px;width:100%;box-sizing:border-box;margin:0 auto;max-width:640px}
+  [data-pagina="calcular"] .c-foot{width:100%;box-sizing:border-box;margin:0 auto;max-width:640px;padding:6px var(--gut) 28px}
+  [data-pagina="calcular"] h1{font-size:34px}
+  [data-pagina="calcular"] .c-sub{font-size:16px}
+  /* paso 1: formulario a la izquierda, foto del destino a la derecha, boton debajo del formulario */
+  [data-pagina="calcular"] .c-main[data-pant="1"]{max-width:1040px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);column-gap:36px;align-content:center}
+  [data-pagina="calcular"] .c-main[data-pant="1"]>*{grid-column:1}
+  [data-pagina="calcular"] .c-main[data-pant="1"]>.c-costa{grid-column:2;grid-row:1/span 8;height:auto;min-height:340px;margin:0;border-radius:24px;-webkit-mask-image:none;mask-image:none}
+  [data-pagina="calcular"] .c-main[data-pant="1"]~.c-foot{max-width:1040px}
+  [data-pagina="calcular"] .c-main[data-pant="1"]~.c-foot .c-btn{max-width:calc((100% - 36px) * .5263);margin:0}
+  [data-pagina="calcular"] .c-main:not([data-pant="1"])~.c-foot .c-btn{max-width:none}
+}
+@media (max-width:1099px) and (min-width:768px){
+  [data-pagina="calcular"] .c-main[data-pant="1"]{max-width:760px}
+  [data-pagina="calcular"] .c-main[data-pant="1"]~.c-foot{max-width:760px}
+  [data-pagina="calcular"] .c-main[data-pant="1"]~.c-foot .c-btn{max-width:calc((100% - 36px) * .5263)}
+}
+
+/* ============ Presupuesto (asistente + resultados) ============ */
+@media (min-width:768px){
+  [data-pagina="presupuesto"] #main{display:flex;flex-direction:column;padding:60px var(--gut) 28px}
+  [data-pagina="presupuesto"] .p-bar{position:absolute;top:8px;left:var(--gut);right:var(--gut);margin:0}
+  /* pasos 1 y 2: el formulario centrado en la pantalla, con el boton pegado debajo */
+  [data-pagina="presupuesto"] .p-step{width:100%;max-width:560px;margin:auto auto 0;min-height:0}
+  [data-pagina="presupuesto"] .p-cta{position:static;width:100%;max-width:560px;margin:0 auto auto;padding:18px 0 0;background:none}
+  [data-pagina="presupuesto"] .p-step .p-bar{position:absolute}
+  [data-pagina="presupuesto"] .p-h{font-size:30px}
+  [data-pagina="presupuesto"] .p-sub{font-size:15.5px}
+  /* resultados: tarjetas en grilla, con la foto arriba */
+  [data-pagina="presupuesto"] .p-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  [data-pagina="presupuesto"] .p-list>.p-vacio,[data-pagina="presupuesto"] .p-list>.p-chip{grid-column:1/-1}
+  [data-pagina="presupuesto"] .p-row{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden}
+  [data-pagina="presupuesto"] .p-row__img{flex:none;width:100%;height:170px;border-radius:0}
+  [data-pagina="presupuesto"] .p-row__t{padding:12px 16px 14px}
+  [data-pagina="presupuesto"] .p-row>svg:last-child{display:none}
+  [data-pagina="presupuesto"] .p-res h1{font-size:24px}
+  [data-pagina="presupuesto"] .p-chips{margin-top:14px}
+  /* detalle del destino: foto a la izquierda, precio e "Incluye" a la derecha */
+  [data-pagina="presupuesto"] .p-over{justify-content:center}
+  [data-pagina="presupuesto"] .p-over .scroll{flex:0 1 auto;width:100%;max-width:900px;margin:0 auto;box-sizing:border-box;padding:4px var(--gut) 20px}
+  [data-pagina="presupuesto"] .p-over .p-foot{width:100%;max-width:900px;margin:0 auto;box-sizing:border-box;padding:12px var(--gut) 26px;border-top:0;background:none}
+  [data-pagina="presupuesto"] .p-over .p-go{max-width:360px;margin:0 auto}
+  [data-pagina="presupuesto"] .d-card{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  [data-pagina="presupuesto"] .d-photo{height:100%;min-height:340px}
+  [data-pagina="presupuesto"] .d-dest{font-size:34px}
+  [data-pagina="presupuesto"] .d-body{padding:22px}
+}
+@media (min-width:1100px){
+  [data-pagina="presupuesto"] .p-list{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* ============ Resultado (mejor presupuesto) ============ */
+@media (min-width:768px){
+  [data-pagina="resultado"] .scroll{padding:8px var(--gut) 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-content:start}
+  [data-pagina="resultado"] .scroll>*{grid-column:2}
+  [data-pagina="resultado"] .scroll>.r-bar{grid-column:1/-1}
+  [data-pagina="resultado"] .r-photo{grid-column:1;grid-row:2/span 14;align-self:start;position:sticky;top:0;height:min(480px,62vh);margin:0 0 30px;border-radius:24px}
+  [data-pagina="resultado"] h1.r-dest{font-size:38px}
+  [data-pagina="resultado"] .r-foot{padding:12px var(--gut) 24px;background:var(--bg)}
+  [data-pagina="resultado"] .r-go{max-width:420px;margin:0 auto}
+  [data-pagina="resultado"] .r-over .ah-body{max-width:640px;margin:0 auto}
+  [data-pagina="resultado"] .r-over .ah-top{max-width:640px;margin:0 auto}
+}
+
+/* ============ Flujo del viaje (12 pantallas) ============ */
+@media (min-width:768px){
+  [data-pagina="flujo"] .f-bar{padding:0 var(--gut)}
+  [data-pagina="flujo"] .f-steps,[data-pagina="flujo"] .f-total{width:100%;max-width:760px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+  [data-pagina="flujo"] .f-total{margin-top:8px;width:calc(100% - var(--gut) * 2);max-width:720px}
+  [data-pagina="flujo"] .f-scroll{padding:16px var(--gut) 24px}
+  [data-pagina="flujo"] .f-scroll>*{max-width:720px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+  [data-pagina="flujo"] .f-foot{padding:12px var(--gut) 24px}
+  [data-pagina="flujo"] .f-cta{max-width:420px;margin:0 auto;display:block}
+  /* etapas con listas de tarjetas (vuelos, alojamiento, extras): dos columnas */
+  [data-pagina="flujo"] .f-scroll[data-paso="1"],[data-pagina="flujo"] .f-scroll[data-paso="2"],[data-pagina="flujo"] .f-scroll[data-paso="3"]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;align-content:start}
+  [data-pagina="flujo"] .f-scroll[data-paso="1"]>*,[data-pagina="flujo"] .f-scroll[data-paso="2"]>*,[data-pagina="flujo"] .f-scroll[data-paso="3"]>*{grid-column:1/-1;max-width:none;margin-left:0;margin-right:0;justify-self:stretch}
+  [data-pagina="flujo"] .f-scroll[data-paso="1"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="2"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.xr{align-self:start;margin-top:0}
+  [data-pagina="flujo"] .f-scroll[data-paso="1"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="2"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.xr{grid-column:auto}
+  /* ventanas emergentes: dialogo centrado en vez de hoja pegada al borde inferior */
+  [data-pagina="flujo"] .f-modal{justify-content:center;align-items:center}
+  [data-pagina="flujo"] .f-modal__sheet{width:min(640px,calc(100% - 32px));max-height:88%;border-radius:22px}
+}
+@media (min-width:1100px){
+  [data-pagina="flujo"] .f-scroll[data-paso="1"],[data-pagina="flujo"] .f-scroll[data-paso="2"],[data-pagina="flujo"] .f-scroll[data-paso="3"]{max-width:1100px;margin:0 auto;width:100%}
+}
