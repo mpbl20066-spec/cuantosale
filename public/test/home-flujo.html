@@ -523,6 +523,7 @@
   .cn__nota{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;padding:12px;border-radius:14px;background:#EAF2FB;text-align:left;font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4}
   .cn__nota svg{flex:0 0 22px;color:#1F6FB5}
 </style>
+<link rel="stylesheet" href="web.css">
 </head>
 <body>
 <div class="phone">
@@ -544,7 +545,7 @@
 <script>
 (function () {
   var qs = new URLSearchParams(location.search);
-  var DESTS = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas' };
+  var DESTS = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas', bcm: 'Balneário Camboriú', itapema: 'Itapema', rosa: 'Praia do Rosa', garopaba: 'Garopaba', poa: 'Porto Alegre', gram: 'Gramado', canela: 'Canela', torres: 'Torres' };
   var destKey = qs.get('destino') || 'fln', DEST = DESTS[destKey] || String(qs.get('nombre') || '').slice(0, 40) || 'Florianópolis';
   var pax = Math.max(1, Math.min(9, +qs.get('pax') || 2)), k = pax / 2;
   var IDA = qs.get('ida') || '2026-12-26', VUELTA = qs.get('vuelta') || '2027-01-02';
@@ -922,7 +923,7 @@
       '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>';
   }
   /* ===== Reserva de vuelo y alojamiento: se sale a un tercero y se vuelve a confirmar ===== */
-  var AEROPUERTO = { fln: 'FLN', bombinhas: 'FLN', rio: 'GIG', buz: 'GIG', ilha: 'GIG' };
+  var AEROPUERTO = { fln: 'FLN', bombinhas: 'FLN', bcm: 'FLN', itapema: 'FLN', rosa: 'FLN', garopaba: 'FLN', poa: 'POA', gram: 'POA', canela: 'POA', torres: 'POA', rio: 'GIG', buz: 'GIG', ilha: 'GIG' };
   var iCalR = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
   var iPersR = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/>';
   var iPinR = '<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.400"/>';

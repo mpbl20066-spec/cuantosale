@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Maqueta — Mejor presupuesto</title>
+<title>Tu presupuesto · CuántoSale</title>
 <link rel="stylesheet" href="../style.css">
 <style>
   /* Tercera pantalla: la mejor propuesta por defecto. Cifras de ejemplo. */
@@ -110,6 +110,7 @@
   .r-over .legend{margin-top:12px}
   .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
 </style>
+<link rel="stylesheet" href="web.css">
 </head>
 <body>
 <div class="phone">
@@ -154,7 +155,7 @@
 </div>
 <script src="home-track.js"></script>
 <script>
-  var qs = new URLSearchParams(location.search), DEST = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas' };
+  var qs = new URLSearchParams(location.search), DEST = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas', bcm: 'Balneário Camboriú', itapema: 'Itapema', rosa: 'Praia do Rosa', garopaba: 'Garopaba', poa: 'Porto Alegre', gram: 'Gramado', canela: 'Canela', torres: 'Torres' };
   var pax = Math.max(1, Math.min(9, +qs.get('pax') || 2)), BUDGET = 1000 * pax;
   /* Cifras de ejemplo para 2 personas; se escalan por cantidad de personas. */
   var PARTES = [['Pasajes', 943, '--c1'], ['Alojamiento', 500, '--c3'], ['Comidas', 308, '--c4'], ['Traslados', 177, '--c5'], ['Transporte local', 64, '--c6']];

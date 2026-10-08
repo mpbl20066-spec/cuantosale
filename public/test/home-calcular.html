@@ -82,6 +82,7 @@
   .c-tot--s b{font-family:var(--fh);font-size:24px}.c-tot--s small{display:block;font-size:12px;font-weight:600;color:var(--ink2)}.c-tot--s div b{font-size:16px}
   .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
 </style>
+<link rel="stylesheet" href="web.css">
 </head>
 <body>
 <div class="phone">
@@ -104,7 +105,11 @@
   var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
   var MES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fd = function (iso) { var q = iso.split('-'); return +q[2] + ' ' + MES[+q[1] - 1]; };
-  var DESTS = [['fln', 'Florianópolis, Brasil', 1900], ['rio', 'Río de Janeiro, Brasil', 2900], ['buz', 'Búzios, Brasil', 3000], ['ilha', 'Ilha Grande, Brasil', 3000], ['bombinhas', 'Bombinhas, Brasil', 1800]];
+  /* [clave, nombre, km desde Montevideo (aprox.), region]. Auto y bus solo se ofrecen en Santa Catarina (sc) y Rio Grande do Sul (rs). */
+  var DESTS = [['fln', 'Florianópolis, Brasil', 1900, 'sc'], ['bombinhas', 'Bombinhas, Brasil', 1800, 'sc'], ['bcm', 'Balneário Camboriú, Brasil', 1800, 'sc'], ['itapema', 'Itapema, Brasil', 1800, 'sc'], ['rosa', 'Praia do Rosa, Brasil', 1900, 'sc'], ['garopaba', 'Garopaba, Brasil', 1900, 'sc'],
+    ['poa', 'Porto Alegre, Brasil', 900, 'rs'], ['gram', 'Gramado, Brasil', 1000, 'rs'], ['canela', 'Canela, Brasil', 1000, 'rs'], ['torres', 'Torres, Brasil', 1100, 'rs'],
+    ['rio', 'Río de Janeiro, Brasil', 2900, 'rj'], ['buz', 'Búzios, Brasil', 3000, 'rj'], ['ilha', 'Ilha Grande, Brasil', 3000, 'rj']];
+  var porTierra = function (d) { return d && (d[3] === 'sc' || d[3] === 'rs'); };
   var I = {
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
     cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
@@ -133,8 +138,10 @@
   }
   function pant2() {
     var o = function (id, ico, tono, t, s) { return '<button type="button" class="c-opt" data-modo="' + id + '"><span class="opt__i opt__i--' + tono + '">' + ic(I[ico], 28) + '</span><span><b>' + t + '</b><small>' + s + '</small></span>' + ic(I.chev, 16) + '</button>'; };
+    var tierra = porTierra(destInfo());
     $('main').innerHTML = '<h1>¿Cómo querés viajar?</h1><p class="c-sub">Elegí la forma de llegar a tu destino o compará todas las opciones.</p>' +
-      o('auto', 'car', 'g', 'En auto', 'Calculamos combustible, peajes y ruta.') + o('avion', 'plane', 'b', 'En avión', 'Más rápido y cómodo.') + o('bus', 'bus', 'g', 'En bus', 'Pasajes y traslados.') + o('comparar', 'cmp', 'b', 'Comparar opciones', 'Vemos qué opción te conviene más.');
+      (tierra ? o('auto', 'car', 'g', 'En auto', 'Calculamos combustible, peajes y ruta.') : '') + o('avion', 'plane', 'b', 'En avión', 'Más rápido y cómodo.') + (tierra ? o('bus', 'bus', 'g', 'En bus', 'Pasajes y traslados.') : '') + o('comparar', 'cmp', 'b', 'Comparar opciones', 'Vemos qué opción te conviene más.') +
+      (tierra ? '' : '<p class="c-ej">Para ' + esc(destInfo()[1].split(',')[0]) + ' el viaje es en avión: el auto y el bus están disponibles solo para destinos de Santa Catarina y Rio Grande do Sul.</p>');
     $('foot').innerHTML = '<button type="button" class="c-link" data-ir="1">Volver</button>';
   }
   function pant3() {
@@ -202,7 +209,8 @@
       ir(2, 'siguiente'); return;
     }
     if (t.dataset.modo) {
-      S.modo = t.dataset.modo; track('inicio_modo_transporte', { modo: S.modo });
+      S.modo = t.dataset.modo; if ((S.modo === 'auto' || S.modo === 'bus') && !porTierra(destInfo())) return;
+      track('inicio_modo_transporte', { modo: S.modo, region: destInfo()[3] });
       if (S.modo === 'auto') ir(3, 'modo_auto'); else irResultado(S.modo); return;
     }
     if (t.dataset.editar) { ir(3, 'editar'); return; }
