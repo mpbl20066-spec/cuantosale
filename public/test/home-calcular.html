@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="calcular">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta — ¿A dónde querés ir?</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* Inicio del flujo en 3 pantallas (+ resultado de la ruta en auto):
+     1 ¿A dónde querés ir? · 2 ¿Cómo querés viajar? · 3 Contanos sobre tu auto · 4 Tu ruta en auto.
+     Colores y fuente salen de los tokens de la app. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button,select,input{font-family:var(--fb)}
+  .c-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+  .c-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .c-logo{text-align:center;font-family:var(--fh);font-weight:800;font-size:22px;line-height:1.05;color:var(--ink)}
+  
+  .c-logo small{display:block;font-family:var(--fb);font-weight:500;font-size:10.5px;color:var(--ink2)}
+  .c-main{flex:1;overflow-y:auto;padding:10px 18px 14px;scrollbar-width:none}
+  .c-main::-webkit-scrollbar{display:none}
+  .c-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
+  h1{margin:6px 0 4px;font-family:var(--fh);font-size:27px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .c-sub{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink2);line-height:1.45}
+  .c-sub b{color:#1F6FB5}
+  .c-row{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;margin-bottom:10px;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left}
+  .c-row>svg{flex:0 0 24px;color:#1F6FB5}
+  .c-row .t{flex:1;min-width:0}
+  .c-row label,.c-row .lbl{display:block;font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:2px}
+  .c-row select,.c-row input{width:100%;box-sizing:border-box;padding:4px 0;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:700}
+  .c-row select:focus-visible,.c-row input:focus-visible,.c-btn:focus-visible,.c-opt:focus-visible,.c-back:focus-visible,.c-link:focus-visible,.c-step button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .c-dates{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .c-dates input{font-size:14px}
+  .c-step{display:flex;align-items:center;gap:6px}
+  .c-step button{width:34px;height:34px;border:1.5px solid var(--control-border);border-radius:50%;background:var(--surface);color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+  .c-step output{min-width:22px;text-align:center;font-weight:800;font-size:16px}
+  .c-err{margin:-2px 0 10px;color:var(--coral);font-size:12.5px;font-weight:700}
+  .c-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
+  .c-link{display:block;margin:8px auto 0;padding:8px 14px;border:0;background:transparent;color:#1F6FB5;font-size:13.5px;font-weight:800;cursor:pointer}
+  .c-costa{height:150px;margin:6px -18px 0;background:url(home-ilha-bahia.jpg) 50% 60%/cover;-webkit-mask-image:linear-gradient(180deg,transparent,#000 40%);mask-image:linear-gradient(180deg,transparent,#000 40%)}
+  .c-opt{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;margin-bottom:10px;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer}
+  .c-opt:hover{border-color:var(--ink2)}
+  .opt__i{flex:0 0 52px;height:52px;border-radius:50%;display:grid;place-items:center}
+  .opt__i--g{background:#D8F1E6;color:#12784F}.opt__i--b{background:#DCEBFA;color:#1F6FB5}
+  .c-opt b{display:block;font-size:15.5px}
+  .c-opt small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .c-opt>svg:last-child{flex:0 0 16px;margin-left:auto;color:var(--ink2)}
+  .c-auto{display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .auto__img{flex:0 0 96px;height:64px;background:url(traslado-auto.png) center/contain no-repeat}
+  .c-auto b{font-size:15px}.c-auto small{display:block;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .c-auto .c-link{margin:2px 0 0;padding:0;text-align:left}
+  .c-fld{display:block;margin:12px 0 6px;font-size:13px;font-weight:700;color:var(--ink)}
+  .c-sel{width:100%;box-sizing:border-box;padding:13px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink);font-size:15px;font-weight:700}
+  .c-cost{margin-top:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+  .c-cost li{list-style:none;display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line);font-size:14.5px;font-weight:600;color:var(--ink)}
+  .c-cost li span:first-child{flex:1}
+  .c-cost ul{margin:0;padding:0}
+  .c-cost .c-tot{display:flex;justify-content:space-between;align-items:flex-end;padding:14px;background:var(--good-soft)}
+  .c-cost .c-tot b{font-family:var(--fh);font-size:24px}
+  .c-cost .c-tot small{display:block;font-size:12px;font-weight:600;color:var(--ink2)}
+  .c-chip{display:flex;gap:16px;margin:2px 0 10px;font-size:13px;font-weight:700;color:var(--ink)}
+  .c-chip span{display:flex;align-items:center;gap:6px}
+  .c-chip svg{color:#1F6FB5}
+  .c-ej{margin:10px 0 0;text-align:center;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+  .c-h2{margin:14px 0 8px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--ink)}
+  .c-foto{height:130px;border-radius:16px;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
+  .c-llegar{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .c-llegar__i{flex:0 0 46px;height:46px;border-radius:50%;background:#D8F1E6;color:#12784F;display:grid;place-items:center}
+  .c-llegar__t{flex:1;min-width:0}.c-llegar__t b{display:block;font-size:14.5px}.c-llegar__t small{font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .c-pres{margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+  .c-pres li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14.5px;font-weight:600;color:var(--ink)}
+  .c-pres li:last-child{border-bottom:0}.c-pres li svg{color:#12784F}.c-pres li span{flex:1}
+  .c-tot--s{display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;padding:14px;border-radius:16px;background:var(--good-soft);color:var(--ink)}
+  .c-tot--s b{font-family:var(--fh);font-size:24px}.c-tot--s small{display:block;font-size:12px;font-weight:600;color:var(--ink2)}.c-tot--s div b{font-size:16px}
+  .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="c-bar">
+    <button type="button" class="c-back" id="back" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <div class="c-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div>
+    <span style="width:32px"></span>
+  </div>
+  <div class="c-main" id="main"></div>
+  <div class="c-foot" id="foot"></div>
+</div>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search), fuente = qs.get('fuente') || 'directo', debug = /[?&]debug=1/.test(location.search);
+  var $ = function (id) { return document.getElementById(id); };
+  var ic = function (d, s) { return '<svg width="' + (s || 24) + '" height="' + (s || 24) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var MES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+  var fd = function (iso) { var q = iso.split('-'); return +q[2] + ' ' + MES[+q[1] - 1]; };
+  var DESTS = [['fln', 'Florianópolis, Brasil', 1900], ['rio', 'Río de Janeiro, Brasil', 2900], ['buz', 'Búzios, Brasil', 3000], ['ilha', 'Ilha Grande, Brasil', 3000], ['bombinhas', 'Bombinhas, Brasil', 1800]];
+  var I = {
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    ppl: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+    car: '<path d="M5 16l1.5-6h11L19 16M3 16h18v3H3zM7 19v2M17 19v2"/>',
+    plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    bus: '<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M7 21v-4M17 21v-4"/>',
+    cmp: '<rect x="3" y="4" width="8" height="8" rx="1.5"/><rect x="13" y="12" width="8" height="8" rx="1.5"/><path d="M11 8h2a2 2 0 0 1 2 2v2"/>',
+    chev: '<path d="m9 5 7 7-7 7"/>'
+  };
+  /* Estado de la maqueta. Fechas por defecto: las del ejemplo de toda la maqueta. */
+  var S = { pant: 1, dest: qs.get('destino') || '', ida: '2026-12-26', vuelta: '2027-01-02', pax: 2, modo: '', tipo: 'combustion', pxs: 2, err: {} };
+  var track = function (n, p) { var plano = Object.assign({ pantalla: S.pant, fuente: fuente, destino: S.dest || undefined, pasajeros: S.pax }, p || {}); window.mockTrack(n, plano); };
+  var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
+  var debugQ = debug ? '&debug=1' : '';
+
+  function pant1() {
+    var e = S.err;
+    $('main').innerHTML = '<h1>¿A dónde querés ir?</h1><p class="c-sub">Decinos tu destino, fechas<br><b>y cuántas personas son.</b></p>' +
+      '<div class="c-row">' + ic(I.pin) + '<div class="t"><label for="dest">Destino</label><select id="dest"><option value="">Ej. Florianópolis, Brasil</option>' + DESTS.map(function (d) { return '<option value="' + d[0] + '"' + (S.dest === d[0] ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('') + '</select></div></div>' + (e.dest ? '<p class="c-err" role="alert">' + e.dest + '</p>' : '') +
+      '<div class="c-row">' + ic(I.cal) + '<div class="t"><span class="lbl">Fechas</span><div class="c-dates"><input id="ida" type="date" aria-label="Ida" value="' + S.ida + '"><input id="vuelta" type="date" aria-label="Vuelta" value="' + S.vuelta + '"></div></div></div>' + (e.fechas ? '<p class="c-err" role="alert">' + e.fechas + '</p>' : '') +
+      '<div class="c-row">' + ic(I.ppl) + '<div class="t"><span class="lbl">Personas</span><b style="font-size:15px">' + S.pax + (S.pax === 1 ? ' persona' : ' personas') + '</b></div><div class="c-step"><button type="button" data-p="-1" aria-label="Menos personas">−</button><button type="button" data-p="1" aria-label="Más personas">+</button></div></div>' +
+      '<div class="c-costa" aria-hidden="true"></div>';
+    $('foot').innerHTML = '<button type="button" class="c-btn" data-sig="1">Siguiente →</button>';
+    $('back').dataset.dest = 'home';
+  }
+  function pant2() {
+    var o = function (id, ico, tono, t, s) { return '<button type="button" class="c-opt" data-modo="' + id + '"><span class="opt__i opt__i--' + tono + '">' + ic(I[ico], 28) + '</span><span><b>' + t + '</b><small>' + s + '</small></span>' + ic(I.chev, 16) + '</button>'; };
+    $('main').innerHTML = '<h1>¿Cómo querés viajar?</h1><p class="c-sub">Elegí la forma de llegar a tu destino o compará todas las opciones.</p>' +
+      o('auto', 'car', 'g', 'En auto', 'Calculamos combustible, peajes y ruta.') + o('avion', 'plane', 'b', 'En avión', 'Más rápido y cómodo.') + o('bus', 'bus', 'g', 'En bus', 'Pasajes y traslados.') + o('comparar', 'cmp', 'b', 'Comparar opciones', 'Vemos qué opción te conviene más.');
+    $('foot').innerHTML = '<button type="button" class="c-link" data-ir="1">Volver</button>';
+  }
+  function pant3() {
+    $('main').innerHTML = '<h1>Contanos sobre tu auto</h1><p class="c-sub">Para calcular el costo de la ruta, necesitamos algunos datos de tu vehículo.</p>' +
+      '<div class="c-auto"><span class="auto__img" aria-hidden="true"></span><div><b>' + (S.tipo === 'electrico' ? 'BYD Dolphin' : 'Toyota Corolla') + '</b><small>' + (S.tipo === 'electrico' ? 'Consumo: 15 kWh / 100 km' : 'Consumo: 7,5 L / 100 km') + '</small><button type="button" class="c-link" data-cambiar="1">Cambiar auto</button></div></div>' +
+      '<label class="c-fld" for="tipo">Tipo de auto</label><select id="tipo" class="c-sel"><option value="combustion"' + (S.tipo === 'combustion' ? ' selected' : '') + '>A combustible (nafta o gasoil)</option><option value="electrico"' + (S.tipo === 'electrico' ? ' selected' : '') + '>Eléctrico</option></select>' +
+      '<label class="c-fld" for="pxs">Personas que viajan</label><select id="pxs" class="c-sel">' + [1, 2, 3, 4, 5].map(function (n) { return '<option value="' + n + '"' + (S.pxs === n ? ' selected' : '') + '>' + n + (n === 1 ? ' persona' : ' personas') + '</option>'; }).join('') + '</select>' +
+      (S.avisoAuto ? '<p class="c-ej">' + S.avisoAuto + '</p>' : '');
+    $('foot').innerHTML = '<button type="button" class="c-btn" data-calc="1">Calcular ruta</button>';
+  }
+  /* Costo de la ruta (ejemplo): km de la tabla x 2 (ida y vuelta) x consumo x precio del litro. */
+  function ruta() {
+    var d = destInfo(), km = d[2], iv = km * 2, elec = S.tipo === 'electrico';
+    var energia = elec ? iv * 15 / 100 * 0.2 : iv * 7.5 / 100 * 1.6;   // kWh x US$/kWh  |  litros x US$/litro
+    var peajes = iv * 0.011, otros = 15;
+    return { km: km, comb: energia, peajes: peajes, otros: otros, total: energia + peajes + otros, elec: elec };
+  }
+  function pant4() {
+    var d = destInfo(), r = ruta();
+    $('main').innerHTML = '<h1>Tu ruta en auto</h1><p class="c-sub" style="margin-bottom:6px"><b>Montevideo → ' + esc(d[1].split(',')[0]) + '</b></p>' +
+      '<div class="c-chip"><span>' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 18) + '~' + r.km.toLocaleString('es-UY') + ' km aprox.</span><span>' + ic('<path d="M7 7h11l-3-3M17 17H6l3 3"/>', 18) + 'Ida y vuelta</span></div>' +
+      '<div class="c-cost"><ul><li><span>' + (r.elec ? 'Carga eléctrica' : 'Combustible') + '</span><b>' + f(r.comb) + '</b></li><li><span>Peajes</span><b>' + f(r.peajes) + '</b></li><li><span>Otros costos</span><b>' + f(r.otros) + '</b></li></ul>' +
+      '<div class="c-tot"><div><b>Total ruta</b><small>(' + f(r.total / S.pxs) + ' por persona)</small></div><b>' + f(r.total) + '</b></div></div><p class="c-ej">Cálculo de ejemplo para esta maqueta.</p>';
+    $('foot').innerHTML = '<button type="button" class="c-btn" data-agregar="1">Agregar al viaje</button>';
+  }
+  function pant5() {
+    var d = destInfo(), r = ruta(), k = S.pax / 2, noches = Math.round((new Date(S.vuelta) - new Date(S.ida)) / 864e5);
+    var items = [
+      ['Alojamiento', 500 * k, '<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.8"/>'],
+      ['Comida', 350 * k, '<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.5 1.5-3 4.5-3 8h3"/>'],
+      ['Tours y actividades', 90 * k, '<path d="M12 21V11M12 11c-1-3-4-4-7-3 2 0 4 1 5 3M12 11c1-3 4-4 7-3-2 0-4 1-5 3"/>'],
+      ['Otros', 40 * k, '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>']];
+    var total = r.total + items.reduce(function (a, x) { return a + x[1]; }, 0);
+    var tit = function (t) { return '<h2 class="c-h2">' + t + '</h2>'; };
+    $('main').innerHTML = '<h1>Tu viaje a ' + esc(d[1].split(',')[0]) + '</h1><p class="c-sub" style="margin-bottom:10px">' + fd(S.ida) + ' → ' + fd(S.vuelta) + ' · ' + S.pax + (S.pax === 1 ? ' persona' : ' personas') + '</p>' +
+      '<div class="c-foto" aria-hidden="true"></div>' + tit('Cómo vas a llegar') +
+      '<div class="c-llegar"><span class="c-llegar__i">' + ic(I.car, 26) + '</span><span class="c-llegar__t"><b>En auto (' + (r.elec ? 'tu auto eléctrico' : 'tu vehículo') + ')</b><small>' + f(r.total) + ' (ida y vuelta)</small></span><button type="button" class="c-link" style="margin:0" data-editar="1">Editar</button></div>' +
+      tit('Tu presupuesto') + '<ul class="c-pres">' + items.map(function (x) { return '<li>' + ic(x[2], 22) + '<span>' + x[0] + '</span><b>' + f(x[1]) + '</b></li>'; }).join('') + '</ul>' +
+      '<div class="c-tot c-tot--s"><div><b>Total estimado</b><small>' + noches + ' noches · ' + f(total / S.pax) + ' por persona</small></div><b>' + f(total) + '</b></div><p class="c-ej">Cifras de ejemplo para esta maqueta.</p>';
+    $('foot').innerHTML = '<button type="button" class="c-btn" data-seguir="1">Continuar →</button>';
+  }
+  var PANT = { 1: pant1, 2: pant2, 3: pant3, 4: pant4, 5: pant5 };
+  var PAGS = { 1: ['destino-fechas', '¿A dónde querés ir?'], 2: ['como-viajar', '¿Cómo querés viajar?'], 3: ['auto', 'Contanos sobre tu auto'], 4: ['ruta-auto', 'Tu ruta en auto'], 5: ['resumen-auto', 'Tu viaje'] };
+  function ir(n, motivo) {
+    S.pant = n; PANT[n](); $('main').scrollTop = 0;
+    document.title = PAGS[n][1] + ' · CuántoSale';
+    window.mockTrack('page_view', { page_path: '/viaje/inicio/' + PAGS[n][0], page_title: PAGS[n][1] + ' · CuántoSale', motivo: motivo });
+  }
+  function irResultado(modo) {
+    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, modo: modo, fuente: 'calcular_presupuesto', origen_home: fuente });
+    location.href = 'home-resultado.html?' + q.toString() + debugQ;
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.id === 'back') { if (S.pant === 1) location.href = 'home-dos-caminos.html' + (debug ? '?debug=1' : ''); else ir(S.pant === 5 ? 4 : (S.pant === 4 ? 3 : (S.pant === 3 ? 2 : 1)), 'volver'); return; }
+    if (t.dataset.p) { S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); pant1(); return; }
+    if (t.dataset.ir) { ir(+t.dataset.ir, 'volver'); return; }
+    if (t.dataset.sig) {
+      S.dest = $('dest').value; S.ida = $('ida').value; S.vuelta = $('vuelta').value; S.err = {};
+      if (!S.dest) S.err.dest = 'Elegí un destino.';
+      if (!S.ida || !S.vuelta || S.vuelta <= S.ida) S.err.fechas = 'Elegí una fecha de ida y una de vuelta posterior.';
+      if (Object.keys(S.err).length) { pant1(); return; }
+      track('inicio_destino_fechas', { noches: Math.round((new Date(S.vuelta) - new Date(S.ida)) / 864e5), mes_viaje: S.ida.slice(0, 7), con_fechas: true });
+      ir(2, 'siguiente'); return;
+    }
+    if (t.dataset.modo) {
+      S.modo = t.dataset.modo; track('inicio_modo_transporte', { modo: S.modo });
+      if (S.modo === 'auto') ir(3, 'modo_auto'); else irResultado(S.modo); return;
+    }
+    if (t.dataset.editar) { ir(3, 'editar'); return; }
+    if (t.dataset.seguir) { track('inicio_continuar_resumen', { modo: 'auto', tipo_auto: S.tipo }); location.href = 'home-flujo.html?' + new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, paso: 2, modo: 'auto', fuente: 'inicio_auto' }).toString() + debugQ; return; }
+    if (t.dataset.cambiar) { S.avisoAuto = 'En la app real podés elegir marca y modelo; acá queda un auto de ejemplo según el tipo.'; track('inicio_cambiar_auto', {}); pant3(); return; }
+    if (t.dataset.calc) { S.tipo = $('tipo').value; S.pxs = +$('pxs').value; track('inicio_calcular_ruta', { tipo_auto: S.tipo, personas_auto: S.pxs }); ir(4, 'calcular_ruta'); return; }
+    if (t.dataset.agregar) { var r = ruta(); track('inicio_agregar_ruta', { importe: Math.round(r.total), km: r.km }); S.pax = S.pxs; ir(5, 'agregar_ruta'); return; }
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.id === 'dest') { S.dest = e.target.value; S.err.dest = ''; }
+  });
+  window.mockTrack('page_view', { page_path: '/viaje/inicio/' + PAGS[1][0], page_title: PAGS[1][1] + ' · CuántoSale', motivo: 'entrada' });
+  document.title = PAGS[1][1] + ' · CuántoSale';
+  pant1();
+})();
+</script>
+</body>
+</html>

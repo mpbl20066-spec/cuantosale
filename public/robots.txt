@@ -13,6 +13,9 @@ User-agent: *
 # se ofrece a un buscador.
 Disallow: /api/
 
+# /test es la version nueva en construccion: no se indexa.
+Disallow: /test/
+
 # La raiz es la app de cotizacion.
 Allow: /
 

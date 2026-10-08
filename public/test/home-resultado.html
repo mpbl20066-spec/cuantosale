@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="resultado">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta — Mejor presupuesto</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* Tercera pantalla: la mejor propuesta por defecto. Cifras de ejemplo. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  .scroll{flex:1;overflow-y:auto;padding:4px 16px 14px;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  .r-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .r-back{width:40px;height:40px;margin-left:-8px;display:grid;place-items:center;color:var(--ink)}
+  .r-logo{text-align:center;font-family:var(--fh);font-weight:800;font-size:24px;line-height:1.05;color:var(--ink)}
+  
+  .r-logo small{display:block;font-family:var(--fb);font-weight:500;font-size:11px;color:var(--ink2)}
+  .r-photo{position:relative;height:170px;margin:0 -16px 30px;border-radius:0;background:url(home-ilha-bahia.jpg) 50% 62%/cover}
+  .r-badge{position:absolute;left:12px;right:12px;bottom:-16px;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:99px;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;box-shadow:0 6px 14px rgba(16,24,40,.18)}
+  h1.r-dest{font-family:var(--fh);font-size:30px;font-weight:800;margin:0;color:var(--ink);line-height:1.1}
+  .r-noches{margin:2px 0 12px;color:var(--ink2);font-size:16px;font-weight:600}
+  .r-chips{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:14px;color:var(--ink);font-size:14px;font-weight:600}
+  .r-chips span,.r-trayecto{display:flex;align-items:center;gap:8px}
+  .r-chips svg,.r-trayecto svg{flex:0 0 22px;width:22px;height:22px;color:var(--good)}
+  .r-trayecto svg{color:#1F6FB5}
+  .r-trayecto{align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:700;line-height:1.35}
+  .r-trayecto svg{margin-top:2px}
+  .r-trayecto small{display:block;color:var(--ink2);font-size:12.5px;font-weight:600}
+  .r-nums{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:12px}
+  .r-nums>div{padding:12px 0}
+  .r-nums>div+div{padding-left:16px;border-left:1px solid var(--line);text-align:right}
+  .r-nums small{display:block;color:var(--ink2);font-size:13px;font-weight:600}
+  .r-nums b{font-family:var(--fh);font-size:28px;color:var(--ink);line-height:1.2}
+  .r-ok{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--good-soft);color:var(--good);font-size:13.5px;font-weight:700;line-height:1.35}
+  .r-ok svg{flex:0 0 28px}
+  /* "A donde va tu plata": barra segmentada, un tramo por rubro, arriba del desglose. */
+  /* Misma barra que .trip-summary__bar de la app: una sola pastilla con borde y los tramos adentro. */
+  .r-stack{display:flex;gap:2px;height:14px;margin:18px 0 0;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+  .r-stack span{display:block;height:100%;min-width:3px}
+  .r-h2{display:flex;align-items:center;gap:6px;font-family:var(--fh);font-size:16px;font-weight:700;margin:14px 0 4px;color:var(--ink)}
+  .r-h2 svg{color:var(--ink2)}
+  .r-list{list-style:none;margin:0;padding:0}
+  .r-list li{display:flex;align-items:center;gap:12px;padding:7px 0;font-size:14.5px;font-weight:600;color:var(--ink)}
+  .r-list svg{flex:0 0 22px}
+  .r-list em{flex:1;font-style:normal}
+  .r-list b{font-variant-numeric:tabular-nums}
+  .r-ahorro{display:flex;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;border-radius:14px;background:var(--good-soft);color:var(--ink);font-size:13.5px;line-height:1.35;text-decoration:none}
+  .r-ahorro b{display:block;color:var(--good)}
+  .r-ahorro .r-chev{margin-left:auto;flex:0 0 18px;color:var(--ink2)}
+  .r-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:8px;margin-top:12px}
+  .r-ghost{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 6px;white-space:nowrap;border:1.5px solid var(--control-border);border-radius:12px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:700;text-decoration:none}
+  .r-foot{flex:0 0 auto;padding:10px 14px 22px;background:var(--bg);border-top:1px solid var(--line)}
+  .r-go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;cursor:pointer}
+  .r-go:focus-visible,.r-ghost:focus-visible,.r-back:focus-visible,.r-ahorro:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+  .r-over{position:absolute;inset:0;z-index:20;background:var(--bg);overflow-y:auto;padding-top:34px}
+  .r-over[hidden]{display:none}
+  .ah-top{display:flex;align-items:center;gap:6px;padding:0 16px}
+  .ah-top .r-back{border:0;background:transparent;cursor:pointer}
+  .ah-top__t{font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
+  .ah-body{padding:6px 18px 24px}
+  .ah-h{display:flex;align-items:center;gap:10px;margin:6px 0 4px;font-family:var(--fh);font-size:26px;font-weight:800;color:var(--ink)}
+  .ah-h svg{color:var(--good)}
+  .ah-sub{margin:2px 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.4}
+  .ah-hero{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--good-soft);color:var(--ink)}
+  .ah-hero>svg{flex:0 0 26px;color:var(--good)}
+  .ah-hero b{display:block;font-family:var(--fh);font-size:19px}
+  .ah-hero span{font-size:13px;font-weight:600;color:var(--ink2)}
+  .ah-hero--f b{font-size:15px}.ah-hero--f span{font-family:var(--fh);font-size:20px;font-weight:800;color:var(--ink)}
+  .ah-h2{margin:18px 0 8px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--ink)}
+  .ah-opt{display:flex;gap:12px;margin-bottom:10px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .ah-opt__ico{flex:0 0 46px;height:46px;border-radius:12px;background:var(--cel-soft);display:grid;place-items:center;color:#1F6FB5}
+  .ah-opt b{font-size:15px;color:var(--ink)}
+  .ah-opt p{margin:2px 0 10px;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.4}
+  .ah-btn{display:inline-block;padding:10px 18px;border:0;border-radius:99px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:13px;font-weight:800;cursor:pointer}
+  .ah-btn--o{display:block;width:100%;box-sizing:border-box;padding:14px;border:1.5px solid var(--control-border);background:var(--surface);color:var(--ink);font-size:14px}
+  .ah-btn--l{display:block;width:100%;box-sizing:border-box;margin-top:8px;padding:14px;background:var(--cel-soft);color:var(--ink);font-size:14px}
+  .ah-btn:focus-visible,.r-over .bar:focus-visible,.r-over .r-back:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .ah-nota{display:flex;align-items:center;gap:10px;margin-top:6px;padding:12px;border-radius:14px;background:var(--good-soft);font-size:13px;font-weight:600;color:var(--ink)}
+  .ah-nota svg{flex:0 0 22px;color:var(--good)}
+  .ah-ej{margin:6px 0 12px;font-size:11.5px;font-weight:600;color:var(--ink2);text-align:center}
+  .r-over .chart{margin:14px 0 6px}
+  .r-over .bar.is-pick .b{outline:3px solid var(--focus);outline-offset:2px}
+  .r-over .r-go{width:100%;border:0;cursor:pointer}
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 8px;font-family:var(--fh);font-size:17px;color:var(--ink)}
+  .cal-nb{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+  .cal-nb:disabled{opacity:.35;cursor:default}
+  .cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-w{text-align:center;font-size:11.5px;font-weight:800;color:var(--ink2);padding:4px 0}
+  .cal-d{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:50px;padding:4px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-family:var(--fb);cursor:pointer}
+  .cal-d b{font-size:13.5px}
+  .cal-d small{font-size:9.5px;font-weight:700;color:var(--ink2)}
+  .cal-d:disabled{opacity:.3;cursor:default}
+  .cal-d.is-low{background:var(--good-soft)}
+  .cal-d.is-min{background:var(--accent);border-color:var(--accent)}
+  .cal-d.is-min small{color:var(--accent-ink)}
+  .cal-d.is-cur{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+  .cal-d.is-cur small{color:var(--bg)}
+  .cal-d.is-pick{outline:3px solid var(--focus);outline-offset:1px}
+  .cal-d:focus-visible,.cal-nb:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .r-over .legend{margin-top:12px}
+  .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="scroll">
+    <div class="r-bar">
+      <a class="r-back" href="home-calcular.html" aria-label="Volver" data-evento="resultado_volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></a>
+      <div class="r-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div>
+      <span style="width:32px"></span>
+    </div>
+    <div class="r-photo"><div class="r-badge">La más conveniente para vos</div></div>
+
+    <h1 class="r-dest" id="dest">Florianópolis</h1>
+    <p class="r-noches">7 noches</p>
+    <div class="r-chips">
+      <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><i id="fechas" style="font-style:normal">26 dic. → 2 ene.</i></span>
+      <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.3c1.7.8 3 2.5 3 5.2"/></svg><i id="personas" style="font-style:normal">2 personas</i></span>
+    </div>
+    <div class="r-trayecto">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+      <div>Vuelo desde Montevideo (MVD) + Alojamiento económico<small>Trayecto ~ 6 h directo</small></div>
+    </div>
+    <div class="r-nums"><div><small>Por persona</small><b id="pp"></b></div><div><small id="totlbl"></small><b id="tot"></b></div></div>
+    <div class="r-ok"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11.5C5 8.5 7.7 6 11 6h3.5l3-1.5V8c1.2.7 2 1.900 2 3.500v3h-2.500l-1 3h-3l-.5-1.500h-3L8.500 17.500H6.500v-3C5.600 13.800 5 12.700 5 11.500z"/><circle cx="15.500" cy="10.500" r=".7" fill="currentColor"/></svg><span id="ok"></span></div>
+
+    <div class="r-stack" id="stack" role="img" aria-label="A dónde va tu plata"></div>
+    <h2 class="r-h2">Desglose de costos <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></h2>
+    <ul class="r-list" id="lista"></ul>
+
+    <a class="r-ahorro" href="#" data-evento="resultado_ahorrar">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.100h5c0-.9.4-1.600 1-2.100A6 6 0 0 0 12 3z"/></svg>
+      <span id="ahorro-txt"><b>Dónde podés ahorrar</b>Si salís el 23 dic. ahorrás US$ 221.</span>
+      <svg class="r-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+    </a>
+    <div class="r-two">
+      <a class="r-ghost" href="#" data-evento="resultado_otras_fechas"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Ver otras fechas</a>
+      <a class="r-ghost" href="#" data-evento="resultado_ver_otras">Ver todas las propuestas</a>
+    </div>
+  </div>
+  <div class="r-over" id="over" hidden></div>
+  <div class="r-foot"><a class="r-go" id="go" href="#" data-evento="resultado_ver_presupuesto">Ver mi presupuesto →</a></div>
+</div>
+<script src="home-track.js"></script>
+<script>
+  var qs = new URLSearchParams(location.search), DEST = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas' };
+  var pax = Math.max(1, Math.min(9, +qs.get('pax') || 2)), BUDGET = 1000 * pax;
+  /* Cifras de ejemplo para 2 personas; se escalan por cantidad de personas. */
+  var PARTES = [['Pasajes', 943, '--c1'], ['Alojamiento', 500, '--c3'], ['Comidas', 308, '--c4'], ['Traslados', 177, '--c5'], ['Transporte local', 64, '--c6']];
+  var ICON = {
+    '--c1': '<path d="M2.5 19h19M3 11l4 1 4-7h2.5l-2.2 7 5-.5 2-2.5H20l-1 4.5-9 2z"/>',
+    '--c3': '<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.8"/>',
+    '--c4': '<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.5 1.5-3 4.5-3 8h3"/>',
+    '--c5': '<path d="M5 16l1.5-6h11L19 16M3 16h18v3H3zM7 19v2M17 19v2"/>',
+    '--c6': '<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M7 21v-4M17 21v-4"/>'
+  };
+  var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var partes = PARTES.map(function (x) { return [x[0], x[1] * pax / 2, x[2]]; });
+  var total = partes.reduce(function (a, x) { return a + x[1]; }, 0);
+  var $ = function (id) { return document.getElementById(id); };
+  $('dest').textContent = DEST[qs.get('destino')] || 'Florianópolis';
+  $('personas').textContent = pax + (pax === 1 ? ' persona' : ' personas');
+  $('pp').textContent = f(total / pax);
+  $('totlbl').textContent = pax > 1 ? 'Total para ' + pax + ' personas' : 'Costo total del viaje';
+  $('tot').textContent = f(total);
+  $('ok').textContent = 'Entra en tu presupuesto. Te sobran ' + f(BUDGET * 1.008 - total) + '.';
+  $('stack').innerHTML = partes.map(function (x) { return '<span style="width:' + x[1] / total * 100 + '%;background:var(' + x[2] + ')"></span>'; }).join('');
+  $('lista').innerHTML = partes.map(function (x) {
+    return '<li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(' + x[2] + ')" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[x[2]] + '</svg><em>' + x[0] + '</em><b>' + f(x[1]) + '</b></li>';
+  }).join('');
+  /* ---------- Ahorro: pantallas "Dónde podés ahorrar" y "¿Querés pagar menos?" ---------- */
+  var IDA0 = new Date(2026, 11, 26), NOCHES = 7, shift = 0;           // shift: dias respecto de la fecha elegida
+  /* Diferencia de precio por fecha de salida (ejemplo), respecto de la fecha original; se escala por personas. */
+  var DELTAS = { '-3': -221, '-2': -128, '-1': 54, '0': 0, '1': 71, '2': 38, '3': 96 };
+  var MES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+  var fdia = function (d) { return d.getDate() + ' ' + MES[d.getMonth()]; };
+  var sumaDias = function (d, n) { var r = new Date(d); r.setDate(r.getDate() + n); return r; };
+  var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  var pseudo = function (k) { var n = Math.abs(+k) * 2654435761 % 4294967296; return (n % 240) - 90 + (+k > 0 ? 20 : 0); };
+  var delta = function (k) { return (typeof DELTAS[k] !== 'undefined' ? DELTAS[k] : pseudo(k)) * pax / 2; };
+  var money = function (n) { return Math.round(n).toLocaleString('es-UY'); };
+  var ic = function (d, sz) { return '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+  var mejorShift = function () { return Object.keys(DELTAS).reduce(function (m, k) { return DELTAS[k] < DELTAS[m] ? k : m; }, '0'); };
+  var over = $('over');
+
+  function pintar() {
+    var d0 = sumaDias(IDA0, shift), d1 = sumaDias(d0, NOCHES);
+    var dl = delta(String(shift)), t = total + dl;
+    var pt = partes.map(function (x, i) { return [x[0], x[1] + (i === 0 ? dl : 0), x[2]]; });
+    $('fechas').textContent = fdia(d0) + ' → ' + fdia(d1);
+    $('pp').textContent = f(t / pax); $('tot').textContent = f(t);
+    $('ok').textContent = 'Entra en tu presupuesto. Te sobran ' + f(BUDGET * 1.008 - t) + '.';
+    $('stack').innerHTML = pt.map(function (x) { return '<span style="width:' + x[1] / t * 100 + '%;background:var(' + x[2] + ')"></span>'; }).join('');
+    $('lista').innerHTML = pt.map(function (x) {
+      return '<li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(' + x[2] + ')" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[x[2]] + '</svg><em>' + x[0] + '</em><b>' + f(x[1]) + '</b></li>';
+    }).join('');
+    var m = mejorShift(), ahorro = -delta(m);
+    $('ahorro-txt').innerHTML = shift === +m ? '<b>Ya tenés la fecha más barata</b>Salís el ' + fdia(d0) + '.' : '<b>Dónde podés ahorrar</b>Si salís el ' + fdia(sumaDias(IDA0, +m)) + ' ahorrás ' + f(ahorro) + '.';
+    $('go').href = 'home-flujo.html?' + new URLSearchParams({ destino: qs.get('destino') || 'fln', pax: pax, ida: iso(d0), vuelta: iso(d1), fuente: 'resultado_ver_presupuesto' }).toString() + (/[?&]debug=1/.test(location.search) ? '&debug=1' : '');
+  }
+
+  function pantallaAhorro() {
+    var m = +mejorShift(), ahorro = -delta(String(m)), dm = sumaDias(IDA0, m);
+    var tarjeta = function (ico, titulo, texto, btn, accion) {
+      return '<div class="ah-opt"><span class="ah-opt__ico">' + ic(ico, 26) + '</span><div><b>' + titulo + '</b><p>' + texto + '</p><button type="button" class="ah-btn" data-ah="' + accion + '">' + btn + '</button></div></div>';
+    };
+    return '<div class="ah-top"><button type="button" class="r-back" data-ah="cerrar" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button></div>' +
+      '<div class="ah-body"><h1 class="ah-h">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 30) + 'Dónde podés ahorrar</h1><p class="ah-sub">Te mostramos alternativas para pagar menos.</p>' +
+      (ahorro > 0 && shift !== m ? '<div class="ah-hero">' + ic('<path d="M7 7h10M7 12h10M7 17h6"/>', 26) + '<div><b>Podés ahorrar ' + f(ahorro) + '</b><span>Si salís el ' + fdia(dm) + ' en lugar del ' + fdia(sumaDias(IDA0, shift)) + '</span></div></div>' : '<div class="ah-hero">' + ic('<circle cx="12" cy="12" r="9"/><path d="m8 12.500 2.700 2.700L16 9.500"/>', 26) + '<div><b>Ya tenés la fecha más barata</b><span>Salís el ' + fdia(sumaDias(IDA0, shift)) + '</span></div></div>') +
+      '<h2 class="ah-h2">Otras opciones que podés considerar</h2>' +
+      tarjeta('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', 'Cambiar la fecha', ahorro > 0 ? 'Salí el ' + fdia(dm) + ' (' + Math.abs(m) + ' días antes) y ahorrás ' + f(ahorro) + '.' : 'Mirá cómo varía el precio según la fecha de tu viaje.', 'Ver esta opción', 'fechas') +
+      tarjeta('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>', 'Otra combinación de vuelo', 'Hay opciones con diferentes horarios y aerolíneas.', 'Ver opciones', 'vuelos') +
+      tarjeta('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7.500h2M13 7.500h2M9 11.500h2M13 11.500h2M10 21v-4h4v4"/>', 'Otra opción de alojamiento', 'Hoteles en otras zonas o categorías.', 'Ver opciones', 'aloj') +
+      '<div class="ah-nota">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 22) + 'Cada alternativa actualiza el presupuesto de tu viaje.</div></div>';
+  }
+
+  /* "¿Querés pagar menos?": barras con las mismas clases que el calendario de fechas del sitio (.chart, .bar, .legend). */
+  var shiftSel = null;
+  function pantallaFechas() {
+    var ks = ['-3', '-2', '-1', '0', '1'], tot = ks.map(function (k) { return total + delta(k); });
+    var mn = Math.min.apply(null, tot), mx = Math.max.apply(null, tot), m = mejorShift();
+    if (shiftSel === null) shiftSel = +m;
+    var barras = ks.map(function (k, i) {
+      var d = sumaDias(IDA0, +k), ht = mx === mn ? 82 : 34 + 96 * ((tot[i] - mn) / (mx - mn));
+      var cls = 'bar' + (+k === shift ? ' cur' : '') + (k === m ? ' best' : '') + (+k === shiftSel ? ' is-pick' : '');
+      return '<button type="button" class="' + cls + '" data-pick="' + k + '" aria-label="Salir el ' + fdia(d) + ': ' + f(tot[i]) + ' (ejemplo)" aria-pressed="' + (+k === shiftSel) + '"><span class="v">' + money(tot[i]) + '</span><span class="b" style="height:' + ht.toFixed(1) + 'px"></span><span class="d"><b>' + d.getDate() + '</b>' + MES[d.getMonth()].replace('.', '') + '</span></button>';
+    }).join('');
+    var dm = sumaDias(IDA0, +m), idx = ks.indexOf(m);
+    var esActual = shiftSel === shift;
+    return '<div class="ah-top"><button type="button" class="r-back" data-ah="atras" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><span class="ah-top__t">¿Querés pagar menos?</span></div>' +
+      '<div class="ah-body"><p class="ah-sub" style="margin-top:0">Mirá cómo varía el precio según la fecha de tu viaje.</p>' +
+      '<div class="ah-hero ah-hero--f">' + ic('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', 26) + '<div><b>La más barata: ' + fdia(dm) + '</b><span>' + f(tot[idx]) + '</span></div></div>' +
+      '<div class="chart" role="group" aria-label="Precio por fecha de salida">' + barras + '</div>' +
+      '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata</span><span>Otras fechas</span></div>' +
+      '<p class="ah-ej">Precios de ejemplo para esta maqueta.</p>' +
+      '<button type="button" class="r-go" data-ah="usar"' + (esActual ? ' disabled style="opacity:.5"' : '') + '>' + (esActual ? 'Esta ya es tu fecha' : 'Usar esta fecha') + '</button>' +
+      '<p class="ah-sub" style="text-align:center;margin:14px 0 8px">También podés ver el rango completo de fechas para comparar.</p>' +
+      '<button type="button" class="ah-btn ah-btn--o" data-ah="calendario">Ver calendario completo</button>' +
+      '<button type="button" class="ah-btn ah-btn--l" data-ah="atras">Volver</button></div>';
+  }
+
+  var DOW = ['L', 'M', 'M', 'J', 'V', 'S', 'D'], MESES_L = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  var calMes = null;   // {y, m}
+  var difDias = function (d) { return Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(IDA0.getFullYear(), IDA0.getMonth(), IDA0.getDate())) / 864e5); };
+  function pantallaCal() {
+    if (!calMes) calMes = { y: IDA0.getFullYear(), m: IDA0.getMonth() };
+    var primero = new Date(calMes.y, calMes.m, 1), dias = new Date(calMes.y, calMes.m + 1, 0).getDate(), hoy = new Date(2026, 9, 8), lead = (primero.getDay() + 6) % 7;
+    var celdas = [], precios = [];
+    for (var d = 1; d <= dias; d++) {
+      var f1 = new Date(calMes.y, calMes.m, d), off = difDias(f1), pasado = f1 < hoy;
+      var pr = total + delta(String(off)); celdas.push({ d: d, off: off, pr: pr, pasado: pasado }); if (!pasado) precios.push(pr);
+    }
+    var mn = Math.min.apply(null, precios), seleccion = shiftSel === null ? shift : shiftSel;
+    var html = '<div class="cal-g">' + DOW.map(function (x) { return '<span class="cal-w">' + x + '</span>'; }).join('') + new Array(lead + 1).join('<span></span>') +
+      celdas.map(function (c) {
+        var cls = 'cal-d' + (c.off === shift ? ' is-cur' : '') + (c.pr === mn && !c.pasado ? ' is-min' : (c.pr < total + delta(String(shift)) && !c.pasado ? ' is-low' : '')) + (c.off === seleccion ? ' is-pick' : '');
+        return '<button type="button" class="' + cls + '" data-calpick="' + c.off + '"' + (c.pasado ? ' disabled' : '') + ' aria-label="Salir el ' + c.d + ' de ' + MESES_L[calMes.m] + ': ' + f(c.pr) + ' (ejemplo)" aria-pressed="' + (c.off === seleccion) + '"><b>' + c.d + '</b><small>' + money(c.pr) + '</small></button>';
+      }).join('') + '</div>';
+    var dSel = sumaDias(IDA0, seleccion), pSel = total + delta(String(seleccion)), igual = seleccion === shift;
+    return '<div class="ah-top"><button type="button" class="r-back" data-ah="fechas" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button><span class="ah-top__t">Calendario de precios</span></div>' +
+      '<div class="ah-body"><p class="ah-sub" style="margin-top:0">Elegí el día de salida: el precio es el total del viaje para ' + pax + (pax === 1 ? ' persona' : ' personas') + '.</p>' +
+      '<div class="cal-nav"><button type="button" class="cal-nb" data-calmes="-1" aria-label="Mes anterior"' + (new Date(calMes.y, calMes.m, 0) < hoy ? ' disabled' : '') + '>‹</button><b>' + MESES_L[calMes.m] + ' ' + calMes.y + '</b><button type="button" class="cal-nb" data-calmes="1" aria-label="Mes siguiente">›</button></div>' +
+      html +
+      '<div class="legend"><span class="l1">Tu fecha</span><span class="l2">La más barata del mes</span><span>Más barata que la tuya</span></div>' +
+      '<p class="ah-ej">Precios de ejemplo para esta maqueta.</p>' +
+      '<div class="ah-hero ah-hero--f">' + ic('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', 26) + '<div><b>Salís el ' + fdia(dSel) + ' → volvés el ' + fdia(sumaDias(dSel, NOCHES)) + '</b><span>' + f(pSel) + '</span></div></div>' +
+      '<button type="button" class="r-go" style="margin-top:12px' + (igual ? ';opacity:.5' : '') + '" data-ah="usar"' + (igual ? ' disabled' : '') + '>' + (igual ? 'Esta ya es tu fecha' : 'Usar esta fecha') + '</button></div>';
+  }
+
+  function mostrar(vista) {
+    over.hidden = false; over.innerHTML = vista === 'cal' ? pantallaCal() : (vista === 'fechas' ? pantallaFechas() : pantallaAhorro()); over.scrollTop = 0;
+  }
+  function cerrar() { over.hidden = true; over.innerHTML = ''; }
+  function abrir(vista, origen) { window.mockTrack('resultado_ahorro_' + vista, { origen: origen, fecha_actual: iso(sumaDias(IDA0, shift)), ahorro_max: Math.round(-delta(mejorShift())) }); mostrar(vista); }
+
+  document.querySelector('.r-ahorro').addEventListener('click', function (e) { e.preventDefault(); abrir('ahorro', 'tarjeta'); });
+  document.querySelector('[data-evento="resultado_otras_fechas"]').addEventListener('click', function (e) { e.preventDefault(); shiftSel = null; abrir('fechas', 'boton_otras_fechas'); });
+  document.querySelector('[data-evento="resultado_ver_otras"]').addEventListener('click', function (e) { e.preventDefault(); });
+  over.addEventListener('click', function (e) {
+    var cp = e.target.closest('[data-calpick]');
+    if (cp) { shiftSel = +cp.dataset.calpick; window.mockTrack('resultado_calendario_fecha_vista', { dias_de_diferencia: shiftSel }); mostrar('cal'); return; }
+    var cm = e.target.closest('[data-calmes]');
+    if (cm) { calMes = { y: calMes.y, m: calMes.m + (+cm.dataset.calmes) }; if (calMes.m > 11) { calMes.m = 0; calMes.y++; } if (calMes.m < 0) { calMes.m = 11; calMes.y--; } mostrar('cal'); return; }
+    var pick = e.target.closest('[data-pick]');
+    if (pick) { shiftSel = +pick.dataset.pick; window.mockTrack('resultado_ahorro_fecha_vista', { dias_de_diferencia: shiftSel }); mostrar('fechas'); return; }
+    var b = e.target.closest('[data-ah]'); if (!b) return;
+    var a = b.dataset.ah;
+    if (a === 'cerrar') cerrar();
+    else if (a === 'atras') mostrar('ahorro');
+    else if (a === 'fechas') { shiftSel = null; window.mockTrack('resultado_ahorro_opcion', { opcion: 'fechas' }); mostrar('fechas'); }
+    else if (a === 'calendario') { calMes = null; window.mockTrack('resultado_ahorro_calendario_completo', {}); mostrar('cal'); }
+    else if (a === 'usar') {
+      var antes = total + delta(String(shift)), despues = total + delta(String(shiftSel));
+      window.mockTrack('resultado_ahorro_usar_fecha', { dias_de_diferencia: shiftSel, ahorro: Math.round(antes - despues), fecha_nueva: iso(sumaDias(IDA0, shiftSel)) });
+      shift = shiftSel; pintar(); cerrar();
+    } else if (a === 'vuelos' || a === 'aloj') {
+      window.mockTrack('resultado_ahorro_opcion', { opcion: a });
+      location.href = 'home-flujo.html?' + new URLSearchParams({ destino: qs.get('destino') || 'fln', pax: pax, ida: iso(sumaDias(IDA0, shift)), vuelta: iso(sumaDias(IDA0, shift + NOCHES)), paso: a === 'vuelos' ? 1 : 2, fuente: 'resultado_ahorro_' + a }).toString() + (/[?&]debug=1/.test(location.search) ? '&debug=1' : '');
+    }
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !over.hidden) cerrar(); });
+  pintar();
+</script>
+</body>
+</html>

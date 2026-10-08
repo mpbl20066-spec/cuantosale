@@ -1584,6 +1584,64 @@ async function postBienvenida(req, res) {
   }
 }
 
+/* ---------- Confirmacion de reserva por WhatsApp (Cloud API de Meta) ----------
+   Al pedir reservar traslados o tours, la persona recibe un WhatsApp de
+   CuantoSale con lo que pidio. Usa una plantilla aprobada por Meta (ver
+   WHATSAPP-PLANTILLA.md): fuera de la ventana de 24 h WhatsApp solo deja
+   escribir con plantillas. Variables: WHATSAPP_TOKEN, WHATSAPP_PHONE_ID y,
+   opcional, WHATSAPP_TEMPLATE (reserva_recibida) y WHATSAPP_TEMPLATE_LANG (es).
+   SEGURIDAD: el endpoint es publico y escribe a un numero que manda el cliente,
+   asi que corta por IP y por numero (un numero recibe como mucho 3 al dia). */
+const WA_GRAPH = 'https://graph.facebook.com/v21.0';
+const waPorNumero = new Map();
+function waNumero(crudo) {
+  let d = String(crudo || '').replace(/[^\d+]/g, '');
+  const mas = d.charAt(0) === '+'; d = d.replace(/\D/g, '');
+  if (!mas) { d = d.replace(/^00/, ''); if (/^09\d{7}$/.test(d)) d = '598' + d.slice(1); }
+  return /^\d{9,15}$/.test(d) ? d : '';
+}
+function waTexto(v, max) { return String(v == null ? '' : v).replace(/[\r\n\t]+/g, ' ').replace(/ {2,}/g, ' ').trim().slice(0, max); }
+async function postReservaWhatsapp(req, res) {
+  if (limited('wa-reserva:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados pedidos seguidos.' });
+  const token = String(process.env.WHATSAPP_TOKEN || '').trim(), phoneId = String(process.env.WHATSAPP_PHONE_ID || '').trim();
+  if (!token || !phoneId) return sendJson(res, 503, { error: 'Falta configurar WHATSAPP_TOKEN y WHATSAPP_PHONE_ID.' });
+  let b;
+  try { b = await readJson(req, 8192); } catch (e) { return sendJson(res, e.status || 400, { error: e.message }); }
+  b = b && typeof b === 'object' ? b : {};
+  const numero = waNumero(b.telefono);
+  if (!numero) return sendJson(res, 400, { error: 'El número de WhatsApp no es válido.' });
+  const servicios = (Array.isArray(b.servicios) ? b.servicios : []).slice(0, 8).map(function (s) {
+    const nom = waTexto(s && s.nombre, 60), det = waTexto(s && s.detalle, 60);
+    return nom ? (det ? nom + ' (' + det + ')' : nom) : '';
+  }).filter(Boolean);
+  const destino = waTexto(b.destino, 40), fechas = waTexto(b.fechas, 40), total = waTexto(b.total, 20);
+  if (!servicios.length || !destino || !fechas || !total) return sendJson(res, 400, { error: 'Faltan datos de la reserva.' });
+  const hoy = new Date().toISOString().slice(0, 10), previo = waPorNumero.get(numero);
+  const n = previo && previo.dia === hoy ? previo.n : 0;
+  if (n >= 3) return sendJson(res, 429, { error: 'Ya te enviamos la confirmación de esta reserva.' });
+  waPorNumero.set(numero, { dia: hoy, n: n + 1 });
+  if (waPorNumero.size > 5000) waPorNumero.clear();
+  const nombre = nombreDeSaludo({ name: waTexto(b.nombre, 40) }) || 'viajero';
+  const params = [nombre, destino, fechas + ' · ' + waTexto(b.personas, 20), servicios.join(' + '), total];
+  const r = await fetchWithTimeout(WA_GRAPH + '/' + encodeURIComponent(phoneId) + '/messages', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp', to: numero, type: 'template',
+      template: {
+        name: String(process.env.WHATSAPP_TEMPLATE || 'reserva_recibida').trim(), language: { code: String(process.env.WHATSAPP_TEMPLATE_LANG || 'es').trim() },
+        components: [{ type: 'body', parameters: params.map(function (t) { return { type: 'text', text: t }; }) }]
+      }
+    })
+  }, 10000);
+  if (!r.ok) {
+    waPorNumero.set(numero, { dia: hoy, n: n });
+    const detalle = await r.text().catch(function () { return ''; });
+    return sendJson(res, 502, { error: 'WhatsApp respondió ' + r.status, detalle: detalle.slice(0, 300) });
+  }
+  return sendJson(res, 200, { ok: true });
+}
+
 /* Comparacion en tiempo constante. No es paranoia: la longitud se compara
    aparte justamente para no filtrarla, y un === normal cortaria en el primer
    caracter distinto y permitiria adivinar el secreto byte a byte. */
@@ -2843,6 +2901,11 @@ function handleRequest(req, res) {
         return sendJson(res, 500, { error: e.message });
       });
     }
+    if (req.method === 'POST' && url.pathname === '/api/reserva-whatsapp') {
+      return postReservaWhatsapp(req, res).catch(function (e) {
+        return sendJson(res, 500, { error: e.message });
+      });
+    }
     if (url.pathname === '/api/bienvenida') {
       return postBienvenida(req, res).catch(function (e) {
         return sendJson(res, 500, { error: e.message });
@@ -2991,6 +3054,18 @@ function handleRequest(req, res) {
        estimated, sin nada que un buscador deba indexar. */
     if (/^\/transfers\/?$/i.test(url.pathname)) {
       try { serveStatic(req, res, '/transfers.html'); } catch (e) { res.writeHead(400); res.end(); }
+      return;
+    }
+    /* /test: la version nueva de la app (home con dos caminos, presupuesto, flujo del
+       viaje). Convive con la app de la raiz hasta que este lista para reemplazarla.
+       Sin la barra final los enlaces relativos de las paginas apuntarian a la raiz,
+       por eso /test redirige a /test/. Lleva noindex y Disallow en robots.txt. */
+    if (/^\/test$/i.test(url.pathname)) {
+      res.writeHead(302, { Location: '/test/' + (url.search || ''), 'Cache-Control': 'no-store' });
+      return res.end();
+    }
+    if (/^\/test\/$/i.test(url.pathname)) {
+      try { serveStatic(req, res, '/test/home-dos-caminos.html'); } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
     // La raíz del dominio es la app. /app sigue sirviendo lo mismo porque es la

@@ -1,0 +1,1500 @@
+﻿<!doctype html>
+<html lang="es" data-theme="light" data-pagina="flujo">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta — Armá tu viaje por etapas</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* Flujo por etapas: Vuelos + Traslados, Alojamiento, Extras, Tu presupuesto.
+     Colores, tipografia y tarjetas salen de los tokens de la app. Cifras de ejemplo. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button{font-family:var(--fb)}
+
+  .f-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+  .f-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .f-logo{text-align:center;font-family:var(--fh);font-weight:800;font-size:22px;line-height:1.05;color:var(--ink)}
+  
+  .f-logo small{display:block;font-family:var(--fb);font-weight:500;font-size:10.5px;color:var(--ink2)}
+
+  /* Indicador de progreso */
+  .f-steps{flex:0 0 auto;display:flex;padding:8px 14px 6px;margin:0;list-style:none}
+  .f-step{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:transparent;padding:0;color:var(--ink2);font-size:10.5px;font-weight:600;text-align:center;line-height:1.15;cursor:default}
+  .f-step::before{content:"";position:absolute;top:13px;right:50%;width:100%;height:2px;background:var(--line)}
+  .f-step:first-child::before{display:none}
+  .f-step.is-done::before,.f-step.is-on::before{background:var(--ink)}
+  .f-dot{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line);background:var(--bg);font-size:13px;font-weight:800;color:var(--ink2)}
+  .f-step.is-on .f-dot{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+  .f-step.is-on{color:var(--ink);font-weight:800}
+  .f-step.is-link{cursor:pointer}
+  .f-step.is-link:hover .f-dot{border-color:var(--ink)}
+  .f-step.is-done{color:var(--ink)}
+  .f-step.is-done .f-dot{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+  /* Total acumulado */
+  .f-total{flex:0 0 auto;display:flex;align-items:center;gap:10px;margin:6px 16px 0;padding:9px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+  .f-total svg{flex:0 0 auto;color:#1F6FB5}
+  .f-total svg:last-child{color:var(--ink2)}
+  .f-total div{flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink)}
+  .f-total small{display:block;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .f-total div b{font-family:var(--fh);font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .f-total.is-bump b{animation:bump .35s ease}
+  @keyframes bump{40%{transform:scale(1.12)}}
+
+  .f-scroll{flex:1;overflow-y:auto;padding:12px 16px 16px;scrollbar-width:none}
+  .f-scroll::-webkit-scrollbar{display:none}
+  .f-h{font-family:var(--fh);font-size:22px;font-weight:800;margin:4px 0 0;color:var(--ink)}
+  .f-sub{margin:2px 0 10px;color:var(--ink2);font-size:13px;font-weight:600}
+  .f-sort{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+  .f-sort::-webkit-scrollbar{display:none}
+  .f-chip{flex:0 0 auto;padding:8px 11px;white-space:nowrap;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:700;cursor:pointer}
+  .f-chip.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+
+  /* Tarjetas elegibles: borde y sombra amarillos al elegir, como en la app. */
+  .opt{position:relative;display:block;width:100%;box-sizing:border-box;margin:0 0 10px;padding:14px;text-align:left;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));color:var(--ink);cursor:pointer;box-shadow:0 3px 10px rgba(16,35,62,.08)}
+  .opt.is-sel{background:var(--card-sel-bg,var(--surface));border:2px solid var(--card-sel-border);padding:13.5px;box-shadow:var(--card-sel-glow)}
+  .opt__tick{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--action-bg);color:var(--action-ink);display:grid;place-items:center;font-size:13px;font-weight:800;opacity:0;transform:scale(.6);transition:.15s}
+  .opt.is-sel .opt__tick{opacity:1;transform:none}
+  .opt:focus-visible,.f-chip:focus-visible,.f-cta:focus-visible,.f-back:focus-visible,.f-step:focus-visible,.f-more:focus-visible,.f-add:focus-visible,.f-book:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .tagok{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:11.5px;font-weight:800}
+
+  .fl__air{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;margin-bottom:8px;padding-right:30px}
+  .fl__logo{width:22px;height:22px;border-radius:6px;background:var(--selected-bg);display:grid;place-items:center;font-size:10px;font-weight:800}
+  .fl__row{display:flex;align-items:center;gap:10px}
+  .fl__t{font-family:var(--fh);font-size:19px;font-weight:800;line-height:1}
+  .fl__t small{display:block;margin-top:3px;font-family:var(--fb);font-size:11px;font-weight:700;color:var(--ink2)}
+  .fl__mid{flex:1;text-align:center;font-size:11px;font-weight:600;color:var(--ink2)}
+  .fl__mid i{display:block;height:2px;margin:4px 0;border-radius:2px;background:var(--line)}
+  .fl__price{margin-left:6px;text-align:right}
+  .fl__price b{display:block;font-family:var(--fh);font-size:19px}
+  .fl__price small{font-size:11px;font-weight:600;color:var(--ink2)}
+  .fl__foot{margin-top:8px}
+
+  .tr{display:flex;gap:12px;align-items:center}
+  .tr__ico{flex:0 0 52px;height:52px;border-radius:12px;background:var(--cel-soft);display:grid;place-items:center;color:var(--ink)}
+  .tr b,.tr strong{display:block;font-size:14px}
+  .tr small{display:block;color:var(--ink2);font-size:12px;font-weight:600;line-height:1.35}
+  .tr__p{margin-left:auto;font-family:var(--fh);font-weight:800;font-size:16px;white-space:nowrap;padding-right:22px}
+  .f-h3{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-size:17px;font-weight:800;margin:18px 0 2px;color:var(--ink)}
+  .f-h3 svg{color:#1F6FB5}
+  .f-h3+.f-sub{margin-bottom:8px}
+  .f-more{display:block;margin:2px auto 0;padding:8px 14px;border:0;background:transparent;color:var(--ink);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+  .trc:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .trc{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px 12px;padding:12px;cursor:pointer;overflow:hidden}
+  .trc__rec{position:absolute;top:12px;left:12px;z-index:1;padding:3px 9px;border-radius:99px;background:var(--action-bg);color:var(--action-ink);font-size:11px;font-weight:800}
+  .trc__img{position:relative;grid-row:1/3;align-self:stretch;min-height:140px;border-radius:12px;background:#EEF0F3 center/contain no-repeat}
+  .trc__b b{display:block;font-size:15px;line-height:1.2}
+  .trc__b>small{display:block;color:var(--ink2);font-size:12px;font-weight:600;margin:1px 0 4px}
+  .trc__b ul{list-style:none;margin:0;padding:0}
+  .trc__b li{display:flex;align-items:flex-start;gap:6px;font-size:12px;font-weight:600;color:var(--ink);line-height:1.3;padding:1px 0}
+  .trc__b li svg{flex:0 0 16px;margin-top:1px;color:#1F6FB5}
+  .trc__p{grid-column:2;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--line)}
+  .trc__p b{font-family:var(--fh);font-size:22px;line-height:1;color:var(--ink)}
+  .trc__p small{color:var(--ink2);font-size:11.5px;font-weight:600}
+
+  .ho__head{display:flex;align-items:center;gap:12px}
+  .ho__headico{flex:0 0 52px;height:52px;border-radius:50%;background:var(--cel-soft);display:grid;place-items:center;color:#1F6FB5}
+  .f-n{margin-left:3px;padding:0 6px;border-radius:99px;background:rgba(0,0,0,.08);font-size:11px}
+  .f-chip.is-on .f-n{background:rgba(0,0,0,.16)}
+  .f-zchips,.f-orden{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;align-items:center}
+  .f-orden{gap:8px}
+  .f-orden>span{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .f-orden .f-sort{margin:0}
+  .ho{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px 12px;padding:10px;cursor:pointer}
+  .ho.is-sel{padding:9.5px}
+  .ho:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .ho__img{position:relative;align-self:stretch;min-height:128px;border-radius:14px;background:var(--selected-bg) center/cover}
+  .ho__on,.ho__ins{position:absolute;left:6px;display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:99px;font-size:10.5px;font-weight:800;line-height:1.2;max-width:calc(100% - 12px)}
+  .ho__on{top:6px;background:var(--good);color:#fff}
+  .ho__ins{bottom:6px;background:rgba(10,16,26,.72);color:#fff}
+  .ho__b{min-width:0;padding-right:26px}
+  .ho__n{font-weight:800;font-size:14.5px;line-height:1.25;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+  .ho__c{margin:5px 0 3px;font-size:12px;font-weight:600;color:var(--ink2)}
+  .ho__r{display:inline-block;padding:1px 7px;border-radius:7px;background:var(--good-soft);color:var(--good);font-weight:800}
+  .ho__u{display:flex;align-items:flex-start;gap:4px;font-size:12px;font-weight:600;color:var(--ink2);line-height:1.3}
+  .ho__u svg{flex:0 0 14px;margin-top:1px;color:#1F6FB5}
+  .ho__f{list-style:none;margin:5px 0 0;padding:0;font-size:11.5px;font-weight:600;color:var(--ink);line-height:1.4}
+  .ho__f li{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ho__p{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding-top:8px;border-top:1px solid var(--line)}
+  .ho__p b{display:block;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}
+  .ho__p small{display:block;margin-top:3px;font-size:11px;font-weight:600;color:var(--ink2)}
+  .ho__ver{flex:0 0 auto;padding:9px 12px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:800;text-decoration:none;white-space:nowrap}
+  .ho__ver:focus-visible,.ho__masbtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .ho__mas{display:flex;align-items:center;gap:10px;margin-top:4px;padding:12px;border-radius:14px;background:var(--good-soft);font-size:12px;line-height:1.35;color:var(--ink)}
+  .ho__mas>svg{flex:0 0 26px;color:var(--good)}
+  .ho__mas span{flex:1;font-weight:600}
+  .ho__mas b{display:block;font-size:13px;color:var(--ink)}
+  .ho__masbtn{flex:0 0 auto;padding:9px 11px;border:1.5px solid var(--ink);border-radius:99px;background:transparent;color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;max-width:92px;line-height:1.15}
+  .x-h3{align-items:center;gap:10px;margin:18px 0 8px}
+  .x-h3 span:last-child{display:block;line-height:1.2}
+  .x-h3 small,.x-otros__h small{display:block;font-family:var(--fb);font-size:12px;font-weight:600;color:var(--ink2)}
+  .x-ico{flex:0 0 38px;height:38px;border-radius:50%;background:var(--cel-soft);display:grid;place-items:center;color:#1F6FB5}
+  .x-car{display:flex;gap:10px;overflow-x:auto;margin:0 -16px;padding:2px 16px 8px;scroll-snap-type:x proximity;scrollbar-width:none}
+  .x-car::-webkit-scrollbar{display:none}
+  .x-car>div{flex:0 0 172px;scroll-snap-align:start}
+  .xt{display:flex;flex-direction:column;height:100%;margin:0;padding:8px;cursor:default}
+  .xt.is-sel{padding:7.5px}
+  .xt__img{height:98px;border-radius:12px;background:var(--cel-soft) center/cover;display:grid;place-items:center;color:var(--ink2)}
+  .xt__n{margin:8px 2px 4px;font-weight:800;font-size:13.5px;line-height:1.25;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .xt__f{list-style:none;margin:0 2px 8px;padding:0;font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .xt__f li{display:flex;align-items:flex-start;gap:5px;padding:1px 0}
+  .xt__f svg{flex:0 0 14px;margin-top:1px;color:#1F6FB5}
+  .xt__b{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:4px;padding:0 2px 2px}
+  .x-p b{display:block;font-family:var(--fh);font-size:19px;line-height:1;color:var(--ink)}
+  .x-p small{display:block;margin-top:2px;font-size:10.5px;font-weight:600;color:var(--ink2)}
+  .x-add{flex:0 0 auto;padding:8px 10px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+  .x-add.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+  .x-add:focus-visible,.x-otros__h:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .x-note{margin:0 0 4px;font-size:11px;font-weight:600;color:var(--ink2)}
+  .x-ej{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:99px;background:var(--cel-soft);color:var(--ink2);font-size:10.5px;font-weight:700}
+  .xf{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px}
+  .xf.is-sel{padding:11.5px}
+  .xf__b{min-width:0;padding-right:20px}
+  .xf__b b{display:block;font-size:14px;line-height:1.25;color:var(--ink)}
+  .xf__b small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:var(--ink2)}
+  .xf__r{flex:0 0 auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .x-otros{margin-top:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:4px 10px 6px}
+  .x-otros__h{display:flex;align-items:center;gap:10px;width:100%;padding:8px 0;border:0;background:transparent;color:var(--ink);text-align:left;font-family:var(--fh);font-size:16px;font-weight:800;cursor:pointer}
+  .x-otros__h>span:nth-child(2){flex:1}
+  .x-otros .opt{margin-top:6px}
+  .ho__hab{margin-top:4px;font-size:11.5px;font-weight:700;color:var(--good);line-height:1.3}
+  button.ho__ver{font-family:var(--fb);cursor:pointer}
+  .f-modal{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end}
+  .f-modal[hidden]{display:none}
+  .f-modal__bg{position:absolute;inset:0;background:rgba(10,16,26,.5)}
+  .f-modal__sheet{position:relative;max-height:88%;overflow-y:auto;padding:16px 16px 22px;border-radius:22px 22px 0 0;background:var(--bg);box-shadow:0 -10px 30px rgba(0,0,0,.25)}
+  .f-modal__top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .f-modal__top small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--ink2)}
+  .f-modal__top h2{margin:2px 0 0;font-family:var(--fh);font-size:21px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .f-modal__x{flex:0 0 36px;height:36px;border:1px solid var(--line);border-radius:50%;background:var(--surface);color:var(--ink);font-size:15px;cursor:pointer}
+  .f-modal__x:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .f-modal__note{margin:12px 0;padding:10px 12px;border:1.5px dashed var(--line);border-radius:12px;color:var(--ink2);font-size:12.5px;font-weight:600;line-height:1.4;text-align:center}
+  .hb{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:10px;align-items:start;padding:10px;margin-bottom:8px;cursor:pointer}
+  .hb.is-sel{padding:9.5px}
+  .hb__img{width:76px;height:64px;border-radius:10px;background:var(--selected-bg) center/cover}
+  .hb__b{min-width:0;padding-right:4px}
+  .hb__b b{display:block;font-size:13px;line-height:1.25;color:var(--ink)}
+  .hb__b small{display:block;margin:2px 0;font-size:11px;font-weight:600;color:var(--ink2)}
+  .hb__ok,.hb__no{display:block;font-size:11px;font-weight:700;line-height:1.3}
+  .hb__ok{color:var(--good)}
+  .hb__no{color:var(--ink2)}
+  .hb__p{text-align:right;padding-right:22px}
+  .hb__p b{display:block;font-family:var(--fh);font-size:17px;line-height:1.1;color:var(--ink)}
+  .hb__p small{display:block;font-size:10.5px;font-weight:600;color:var(--ink2)}
+  .xr{display:flex;flex-direction:row;align-items:center;gap:10px;padding:10px}
+  .xr.is-sel{padding:9.5px}
+  .xr__img{flex:0 0 68px;height:68px;border-radius:12px;background:var(--cel-soft) center/cover;display:grid;place-items:center;color:var(--ink2)}
+  .xr__img.is-veh{background-color:#EEF0F3;background-size:88% auto;background-repeat:no-repeat}
+  .xr__b{flex:1;min-width:0;padding-right:18px}
+  .xr__b b{display:block;font-size:13.5px;line-height:1.25;color:var(--ink)}
+  .xr__b small{display:flex;align-items:flex-start;gap:4px;margin-top:3px;font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.3}
+  .xr__b small svg{flex:0 0 13px;margin-top:1px;color:#1F6FB5}
+  .xr__tag{display:inline-block;margin-bottom:3px;padding:1px 8px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:10.5px;font-weight:800}
+  .xr__r{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .f-delta{display:inline-block;margin-left:4px;padding:1px 8px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:12px;font-weight:800;animation:bump .4s ease}
+  .f-delta.is-neg{background:var(--coral-soft);color:var(--coral)}
+  .fin-head{display:flex;align-items:center;gap:14px;margin-top:2px}
+  .fin-sol{flex:0 0 74px;height:74px;border-radius:50%;background:var(--cel-soft);display:grid;place-items:center;color:#1F6FB5}
+  .fin-head h1{margin:0;font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.05;color:var(--ink)}
+  .fin-head b{display:block;font-size:17px;font-weight:700;color:#1F6FB5}
+  .fin-fechas{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12.5px;font-weight:600;color:var(--ink)}
+  .fin-fechas svg{color:#1F6FB5}
+  .fin-lead{margin:12px 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.45}
+  .fin-total{text-align:center;padding:16px 12px;border:1px solid var(--line);border-radius:18px;background:var(--good-soft)}
+  .fin-total small{display:block;font-size:13px;font-weight:600;color:var(--ink)}
+  .fin-total b{display:block;margin:2px 0;font-family:var(--fh);font-size:40px;font-weight:800;line-height:1.1;color:var(--ink)}
+  .fin-total span{font-size:12px;font-weight:600;color:var(--ink2)}
+  .fin-h2{margin:18px 0 8px;font-family:var(--fh);font-size:17px;font-weight:800;color:var(--ink)}
+  .fin-sub2{margin:-4px 0 10px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .fin-list{display:flex;flex-direction:column;gap:8px}
+  .fin-row{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;font-family:var(--fb);cursor:pointer}
+  .fin-row:focus-visible,.fin-btn2:focus-visible,.fin-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .fin-row>svg:last-child{flex:0 0 16px;color:var(--ink2)}
+  .fin-ico{flex:0 0 46px;height:46px;border-radius:50%;display:grid;place-items:center}
+  .fin-ico--blue{background:#DCEBFA;color:#1F6FB5}
+  .fin-ico--green{background:#D8F1E6;color:#12784F}
+  .fin-ico--yellow{background:#FDF1C9;color:#8A5A0E}
+  .fin-ico--violet{background:#E9E4FA;color:#5A44B0}
+  .fin-t{flex:1;min-width:0}
+  .fin-t b{display:block;font-size:14.5px;line-height:1.25}
+  .fin-t small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .fin-p{flex:0 0 auto;font-family:var(--fh);font-weight:800;font-size:16px;white-space:nowrap}
+  .fin-sub{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:6px 14px 4px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .fin-sub b{color:var(--ink)}
+  .fin-gastar{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px;border-radius:16px;background:var(--good-soft);font-size:12px;line-height:1.35;color:var(--ink)}
+  .fin-gastar>svg{flex:0 0 28px;color:var(--good)}
+  .fin-gastar span{flex:1;font-weight:600}
+  .fin-gastar b{display:block;font-size:13.5px}
+  .fin-btn2{flex:0 0 auto;padding:9px 11px;border:1.5px solid var(--ink);border-radius:99px;background:transparent;color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;line-height:1.15;max-width:96px}
+  .fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .fin-card{display:flex;flex-direction:column;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .fin-card__t{display:flex;align-items:center;gap:8px}
+  .fin-card__t .fin-ico{flex:0 0 38px;height:38px}
+  .fin-card__t b{font-size:13.5px;line-height:1.2}
+  .fin-card small{display:block;margin:6px 0 8px;font-size:11px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .fin-card__f{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 6px}
+  .fin-card__f em{font-style:normal;font-size:11px;font-weight:800;color:var(--ink)}
+  .fin-link{white-space:nowrap;padding:4px 0;border:0;background:transparent;color:#1F6FB5;font-size:11.5px;font-weight:800;cursor:pointer;text-align:left}
+  .fv-trip{display:flex;align-items:center;gap:12px;overflow:hidden;border-radius:18px;background:var(--good-soft);padding-left:12px}
+  .fv-trip__ico{flex:0 0 auto;color:#1F9E92;color:var(--good)}
+  .fv-trip__t{flex:1;min-width:0;padding:12px 0}
+  .fv-trip__t h1{margin:0;font-family:var(--fh);font-size:24px;font-weight:800;line-height:1.1;color:var(--ink)}
+  .fv-trip__t b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+  .fv-trip__t span{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .fv-trip__img{flex:0 0 36%;align-self:stretch;min-height:96px;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
+  .fv-total{display:flex;align-items:center;gap:12px;margin-top:10px;padding:14px 12px;border-radius:18px;background:var(--good-soft)}
+  .fv-total__ico{flex:0 0 46px;height:46px;border-radius:50%;background:var(--surface);display:grid;place-items:center;color:var(--good)}
+  .fv-total>div{flex:0 0 auto}
+  .fv-total small{display:block;font-size:13px;font-weight:700;color:var(--ink)}
+  .fv-total b{display:block;font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.05;color:var(--ink)}
+  .fv-total p{flex:1;margin:0;padding-left:12px;border-left:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.4}
+  .fv-list{gap:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+  .fv-list .fin-row{border:0;border-radius:0;border-top:1px solid var(--line);background:transparent}
+  .fv-list .fin-row:first-child{border-top:0}
+  .fv-two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .fv-act{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:13px;font-weight:800;cursor:pointer;text-align:left}
+  .fv-act span{flex:1}
+  .fv-act svg:first-child{color:#1F6FB5}
+  .fv-act svg:last-child{color:var(--ink2)}
+  .fv-act:focus-visible,.fv-wa__btn:focus-visible,.fv-step button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .fv-div{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border-radius:14px;background:var(--cel-soft);font-size:12.5px;font-weight:700;color:var(--ink)}
+  .fv-div>span{flex:1}
+  .fv-div b{font-family:var(--fh);font-size:18px;text-align:right}
+  .fv-div b small{display:block;font-family:var(--fb);font-size:10.5px;font-weight:600;color:var(--ink2)}
+  .fv-step{display:flex;align-items:center;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);overflow:hidden}
+  .fv-step button{width:30px;height:30px;border:0;background:transparent;color:var(--ink);font-size:17px;font-weight:700;cursor:pointer}
+  .fv-step output{min-width:24px;text-align:center;font-weight:800}
+  .fv-wa{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px;border-radius:16px;background:var(--good-soft);font-size:12px;line-height:1.35;color:var(--ink)}
+  .fv-wa__ico{flex:0 0 32px;color:#25A244}
+  .fv-wa span:nth-child(2){flex:1;font-weight:600}
+  .fv-wa b{display:block;font-size:13.5px}
+  .fv-wa__btn{flex:0 0 auto;padding:8px 10px;border:1.5px solid #1F6FB5;border-radius:99px;background:transparent;color:#1F6FB5;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap}
+  .g-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;margin-top:8px;padding:14px 16px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:14.5px;font-weight:800;cursor:pointer}
+  .g-btn--main{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+  .g-skip{display:block;width:100%;margin-top:4px;padding:12px;border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:13.5px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .g-btn:focus-visible,.g-skip:focus-visible,.g-in:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .g-lbl{display:block;margin:0 0 6px;font-size:13px;font-weight:700;color:var(--ink)}
+  .g-in{width:100%;box-sizing:border-box;padding:13px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:15px;font-weight:600}
+  .g-err{margin:8px 0 0;color:var(--coral);font-size:12.5px;font-weight:700}
+  .f-modal.is-full{display:block}
+  .g-full{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;background:var(--bg);padding-top:34px}
+  .g-top{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+  .g-body{flex:1;overflow-y:auto;padding:8px 18px 12px;scrollbar-width:none}
+  .g-body::-webkit-scrollbar{display:none}
+  .g-foot{flex:0 0 auto;padding:6px 18px 20px;border-top:1px solid var(--line);background:var(--bg)}
+  .g-ico{width:62px;height:62px;border-radius:18px;background:var(--good-soft);display:grid;place-items:center;color:var(--good)}
+  .g-h{margin:12px 0 4px;font-family:var(--fh);font-size:27px;font-weight:800;color:var(--ink)}
+  .g-p{margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .g-p--s{margin:12px 0 2px;text-align:center;font-size:12.5px}
+  .g-trip{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .g-trip__img{flex:0 0 84px;height:84px;border-radius:12px;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
+  .g-trip b{display:block;font-size:15px;color:var(--ink)}
+  .g-trip small{display:block;font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .g-trip strong{display:block;margin-top:4px;font-family:var(--fh);font-size:22px;line-height:1.1;color:var(--ink)}
+  .g-ben{list-style:none;margin:12px 0;padding:12px;border-radius:16px;background:var(--good-soft);display:grid;gap:9px}
+  .g-ben li{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--ink)}
+  .g-ben li span{flex:0 0 28px;height:28px;border-radius:8px;background:var(--surface);display:grid;place-items:center;color:var(--good)}
+  .ls-hero{position:relative;height:150px;margin:2px 0 0;border-radius:18px;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
+  .ls-badge{position:absolute;left:16px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--good);color:#fff;font-size:12.5px;font-weight:800}
+  .ls-h{margin:14px 0 4px;font-family:var(--fh);font-size:30px;font-weight:800;color:var(--ink)}
+  .ls-p{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .ls-card{display:flex;align-items:center;gap:12px;margin-bottom:6px;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .ls-card__img{flex:0 0 78px;height:78px;border-radius:50%;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
+  .ls-card b{display:block;font-size:15px;color:var(--ink)}
+  .ls-card small{display:block;font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .ls-card strong{display:block;margin-top:3px;font-family:var(--fh);font-size:24px;line-height:1.1;color:var(--ink)}
+  .ls-ref{margin:14px 0 0;text-align:center;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .ls-ref b{font-family:ui-monospace,Consolas,monospace;color:var(--ink);letter-spacing:.03em}
+  .ls-ilu{display:block;width:100%;height:64px;margin-top:22px;color:#1F6FB5}
+  .ls-foot{margin:4px 0 6px;text-align:center;font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:17px;line-height:1.3;color:#1F6FB5}
+  .ah-list{gap:10px}
+  .ah-row{align-items:flex-start;padding:14px}
+  .ah-row .fin-ico{flex:0 0 52px;height:52px}
+  .ah-row>svg:last-child{align-self:center}
+  .ah-f{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+  .ah-f i{font-style:normal;font-size:12.5px;font-weight:800;color:#1F6FB5}
+  .ah-q{font-style:normal;font-size:12.5px;font-weight:800;color:var(--ink)}
+  .ah-q--c{font-style:italic;color:#1F6FB5}
+  .ah-volver{margin-top:10px;text-decoration:none;color:#1F6FB5}
+  .g-body--c{text-align:center}
+  .g-ilu{position:relative;width:150px;height:110px;margin:0 auto}
+  .g-ilu__c{position:absolute;left:50%;top:50%;width:92px;height:92px;margin:-46px 0 0 -46px;border-radius:50%;background:var(--good-soft);display:grid;place-items:center;color:var(--good)}
+  .g-ilu__avion{position:absolute;right:6px;top:0;color:var(--good)}
+  .g-h--c{margin:6px 0 6px;font-size:30px;line-height:1.15}
+  .g-p--c{margin:0 0 16px;font-size:15px}
+  .g-body--c .g-trip{text-align:left}
+  .g-trip__img{border-radius:12px}
+  .g-ben--l{margin:12px 0 14px;padding:4px 6px;background:transparent;gap:6px;text-align:left}
+  .g-ben--l li{gap:14px;font-size:14.5px}
+  .g-ben--l li span{flex:0 0 40px;height:40px;border-radius:50%;background:var(--good-soft)}
+  .g-skip--l{margin-top:2px;color:#1F6FB5;text-decoration:none}
+  .rv-head{display:flex;align-items:center;gap:14px;margin-top:4px}
+  .rv-head__ico{flex:0 0 auto;color:var(--good)}
+  .rv-head h1{margin:0;font-family:var(--fh);font-size:27px;font-weight:800;line-height:1.1;color:var(--ink)}
+  .rv-head p{margin:4px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.4}
+  .rv-dest{margin-top:14px;padding:10px;border-radius:16px}
+  .rv-dest__img{flex:0 0 56px;height:56px;border-radius:12px;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
+  .rv-list{margin-top:10px;gap:10px}
+  .rv-row{align-items:flex-start;padding:14px;border-radius:18px}
+  .rv-row .fin-ico{flex:0 0 56px;height:56px}
+  .rv-row>svg:last-child{align-self:center}
+  .rv-p{display:block;margin-top:6px;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
+  .rv-tag{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 10px;border-radius:99px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+  .rv-tag.is-fuera{background:#DCEBFA;color:#1B5FA8}
+  .rv-tag.is-cs{background:var(--good-soft);color:var(--good)}
+  .rv-ahorro{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px;border-radius:14px;background:var(--good-soft);font-size:12px;font-weight:600;line-height:1.35;color:var(--ink)}
+  .rv-ahorro>svg{flex:0 0 26px;color:var(--good)}
+  .rv-ahorro b{display:block;font-size:13.5px}
+  .vi{text-align:center;padding-top:22px}
+  .vi__x{position:absolute;right:14px;top:14px}
+  .vi__ico{width:84px;height:84px;margin:6px auto 12px;border-radius:50%;background:#1F7FE0;color:#fff;display:grid;place-items:center}
+  .vi__h{margin:0 0 6px;font-family:var(--fh);font-size:24px;font-weight:800;color:var(--ink)}
+  .vi__p{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink2);line-height:1.45}
+  .vi__card{display:grid;gap:12px;padding:14px;margin-bottom:14px;border-radius:16px;background:var(--cel-soft);text-align:left;font-size:14px;font-weight:700;color:var(--ink)}
+  .vi__card span{display:flex;align-items:center;gap:12px}
+  .vi__card svg{flex:0 0 22px;color:#1F6FB5}
+  .vi__legal{margin:8px 0 0;font-size:12px;font-weight:600;color:var(--ink2)}
+  .rq{text-align:center;padding-top:18px}
+  .rq__ico{position:relative;width:132px;height:132px;margin:0 auto 14px;border-radius:50%;background:var(--good-soft);display:grid;place-items:center;color:#1F7FE0}
+  .rq__d{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--good);opacity:.7}
+  .rq__d1{left:6px;top:20px}.rq__d2{right:2px;top:34px}.rq__d3{right:22px;bottom:4px}
+  .rq__h{margin:0 0 8px;font-family:var(--fh);font-size:27px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .rq__p{margin:0;font-size:15px;font-weight:600;color:var(--ink)}
+  .rq__pr{margin:4px 0 22px;font-size:14px;font-weight:600;color:var(--ink2)}
+  .rq__pr b{font-family:var(--fh);font-size:19px;color:var(--ink)}
+  .rq__si,.rq__no{display:block;width:100%;box-sizing:border-box;margin-top:10px;padding:16px;border-radius:14px;font-family:var(--fb);font-size:15px;font-weight:800;cursor:pointer}
+  .rq__si{border:0;background:#1F7FE0;color:#fff}
+  .rq__no{border:1.5px solid #1F7FE0;background:var(--surface);color:#1B5FA8}
+  .rq__si:focus-visible,.rq__no:focus-visible,.al-btn:focus-visible,.ed-row:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .ed-hero{display:flex;align-items:flex-end;height:150px;margin-top:2px;padding:14px;border-radius:18px;background:linear-gradient(180deg,rgba(10,16,26,0) 35%,rgba(10,16,26,.62)),url(home-ilha-bahia.jpg) 50% 60%/cover;color:#fff}
+  .ed-hero__t b{display:block;font-family:var(--fh);font-size:26px;line-height:1.1}
+  .ed-hero__t span{font-size:13px;font-weight:700}
+  .ed-row .fin-ico{flex:0 0 46px;height:46px}
+  .ed-st{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12px;font-weight:700;color:var(--ink2)}
+  .ed-st.is-ok{color:var(--good)}
+  .ed-n{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--ink)}
+  .ed-bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+  .ed-bar span{display:block;height:100%;border-radius:99px;background:var(--good);transition:width .3s}
+  .al-hero{height:190px;margin-top:2px;border-radius:18px 18px 0 0;background:var(--selected-bg) center/cover}
+  .al-card{padding:14px;border:1px solid var(--line);border-top:0;border-radius:0 0 18px 18px;background:var(--surface)}
+  .al-card h1{margin:0;font-family:var(--fh);font-size:22px;font-weight:800;color:var(--ink)}
+  .al-z{display:flex;align-items:center;gap:4px;margin:4px 0;font-size:13px;font-weight:600;color:var(--ink2)}
+  .al-r{margin:6px 0;font-size:13.5px;font-weight:600;color:var(--ink2)}
+  .al-r span{color:#F6B21B}.al-r b{color:var(--ink)}
+  .al-hab{margin:4px 0;font-size:12px;font-weight:700;color:var(--good)}
+  .al-chips{display:flex;gap:22px;margin:12px 0;padding:12px 0;border-top:1px solid var(--line);font-size:14px;font-weight:700;color:var(--ink)}
+  .al-chips span{display:flex;align-items:center;gap:8px}
+  .al-chips svg{color:#1F6FB5}
+  .al-p{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .al-p b{font-family:var(--fh);font-size:28px;color:var(--ink)}
+  .al-btn{padding:12px 16px;border:0;border-radius:99px;background:#DCEBFA;color:#1B5FA8;font-family:var(--fb);font-size:14px;font-weight:800;cursor:pointer}
+  .al-ext{display:flex;gap:12px;align-items:center;margin-top:12px;padding:12px;border-radius:14px;background:#EAF2FB;font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4}
+  .al-ext>b{flex:0 0 auto;font-family:var(--fh);font-size:15px;color:#1B5FA8}
+  .al-ext i{display:block;font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1B5FA8}
+  .f-modal.is-center{justify-content:center;align-items:center;padding:16px}
+  .f-modal.is-center .f-modal__sheet{width:100%;max-height:92%;border-radius:22px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+  .vi__vuelo{margin:0 0 10px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:left}
+  .vi__vuelo .fl__air{padding-right:0;margin-bottom:8px}
+  .vi__antes{margin:0 0 6px;font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--ink2)}
+  .vi__ico--g{background:var(--good)}
+  .vi__p--s{margin:0 0 14px;font-size:12.5px}
+  .vi__card b{font-size:15px}
+  .vi__est{padding-top:10px;border-top:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2)}
+  .vi__est b{font-family:var(--fh);font-size:22px;color:var(--ink)}
+  .rq__op{display:block;width:100%;box-sizing:border-box;margin-top:10px;padding:14px 16px;border:1.5px solid #1F7FE0;border-radius:14px;background:var(--surface);color:var(--ink);text-align:left;font-family:var(--fb);cursor:pointer}
+  .rq__op b{display:block;font-size:15px;color:#1B5FA8}
+  .rq__op small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .rq__op--no{border-color:var(--control-border)}
+  .rq__op--no b{color:var(--ink)}
+  .rq__op:first-of-type{margin-top:18px}
+  .rq__op:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .af{margin-top:16px}
+  .af .g-lbl{margin-top:12px}
+  .af__row{display:grid;grid-template-columns:1.5fr 1fr;gap:10px}
+  .af__pre{position:relative}
+  .af__pre span{position:absolute;left:12px;top:50%;margin-top:-9px;font-size:14px;font-weight:700;color:var(--ink2)}
+  .af__pre input{padding-left:46px}
+  .ed-act{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:var(--cel-soft);font-size:12.5px;font-weight:600;color:var(--ink)}
+  .cf-trip{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:10px}
+  .cf-trip__top{display:flex;align-items:center;gap:12px}
+  .cf-trip__img{flex:0 0 66px;height:66px;border-radius:12px;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
+  .cf-trip b{display:block;font-size:15px;color:var(--ink)}
+  .cf-trip small{display:block;font-size:12px;font-weight:600;color:var(--ink2)}
+  .cf-trip__ver{margin-top:4px;padding:2px 0;border:0;background:transparent;color:#1F6FB5;font-family:var(--fb);font-size:12.5px;font-weight:800;cursor:pointer}
+  .cf-res{list-style:none;margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--line);display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--ink2)}
+  .cf-res li{display:flex;justify-content:space-between}
+  .cf-res b{color:var(--ink)}
+  .cf-lista{border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+  .cf-svc{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line)}
+  .cf-svc .fin-ico{flex:0 0 46px;height:46px}
+  .cf-total{display:flex;justify-content:space-between;align-items:center;padding:12px;font-size:15px;font-weight:700;color:var(--ink)}
+  .cf-total b{font-family:var(--fh);font-size:22px}
+  .cf-tel{display:grid;grid-template-columns:104px 1fr;gap:8px}
+  .cf-vacio{display:grid;gap:8px;margin-top:14px;padding:14px;border-radius:16px;background:var(--cel-soft);font-size:13px;font-weight:600;color:var(--ink2)}
+  .cf-vacio b{font-size:15px;color:var(--ink)}
+  .ed-st.is-sol{color:#8A5A0E}
+  .wa-incl{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--good-soft)}
+  .wa-incl__ico{flex:0 0 52px;height:52px;border-radius:14px;background:#25A244;color:#fff;display:grid;place-items:center}
+  .wa-incl b{display:block;margin-bottom:6px;font-size:15px;color:var(--ink)}
+  .wa-incl ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .wa-incl li{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink)}
+  .wa-incl li svg{flex:0 0 18px;color:var(--good)}
+  .wa-chat{margin-top:12px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#ECE5DD}
+  .wa-chat__top{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#0B5A4A;color:#fff}
+  .wa-chat__av{width:30px;height:30px;border-radius:50%;background:#fff;color:#1F6FB5;display:grid;place-items:center}
+  .wa-chat__top b{display:block;font-size:14px}
+  .wa-chat__top i{font-style:normal;color:#7CC6FF;font-size:12px}
+  .wa-chat__top small{display:block;font-size:11px;opacity:.85}
+  .wa-chat__body{padding:12px}
+  .wa-msg{max-width:92%;padding:10px 12px 18px;border-radius:0 12px 12px 12px;background:#fff;font-size:13px;line-height:1.5;color:#111B21;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.12);overflow-wrap:anywhere}
+  .wa-msg__h{position:absolute;right:10px;bottom:3px;font-size:10px;color:#667781}
+  .wa-nota{display:flex;align-items:center;gap:8px;margin:12px 0;padding:10px 12px;border-radius:12px;background:var(--cel-soft);font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .wa-nota svg{flex:0 0 20px;color:#1F6FB5}
+  .ex{display:flex;gap:12px;align-items:center;padding:12px}
+  .ex__b{flex:1;min-width:0}
+  .ex__b b{display:block;font-size:14px;line-height:1.25}
+  .ex__b small{display:block;margin-top:2px;color:var(--ink2);font-size:12px;font-weight:600}
+  .ex__p{font-family:var(--fh);font-weight:800;font-size:15px;margin-top:4px;display:block}
+  .f-add{flex:0 0 auto;padding:9px 14px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:800;cursor:pointer}
+  .ex.is-sel .f-add{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+
+  /* Tu presupuesto */
+  .ok{text-align:center;margin:2px 0 14px}
+  .ok h1{font-family:var(--fh);font-size:24px;font-weight:800;margin:0 0 4px;color:var(--ink)}
+  .ok p{margin:0;color:var(--ink2);font-size:13px;font-weight:600}
+  .ok__t{margin-top:12px;font-family:var(--fh);font-size:40px;font-weight:800;line-height:1;color:var(--ink)}
+  .ok__t small{display:block;margin-top:4px;font-family:var(--fb);font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .bar{display:flex;gap:2px;height:14px;margin:14px 0 4px;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+  .bar span{display:block;height:100%;min-width:3px}
+  .rows{list-style:none;margin:0;padding:0}
+  .rows li{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:14.5px;font-weight:600;color:var(--ink)}
+  .rows svg{flex:0 0 22px}
+  .rows em{flex:1;font-style:normal}
+  .rows b{font-variant-numeric:tabular-nums}
+  .rows .est{color:var(--ink2);font-size:11.5px;font-weight:600}
+  .book{margin-top:6px;padding:4px 14px 6px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+  .book__r{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+  .book__r:first-of-type{border-top:0}
+  .book__r div{flex:1;min-width:0;font-size:14px;font-weight:800}
+  .book__r small{display:block;margin-top:1px;font-size:12px;font-weight:600;color:var(--ink2)}
+  .f-book{flex:0 0 auto;padding:10px 12px;border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;border:1.5px solid var(--control-border);background:var(--surface);color:var(--ink);text-align:center;line-height:1.2;max-width:128px}
+  .f-book--cs{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+  .legal{margin:10px 2px 0;color:var(--ink2);font-size:11.5px;line-height:1.4;text-align:center}
+
+  .f-foot{flex:0 0 auto;padding:10px 14px 22px;background:var(--bg);border-top:1px solid var(--line)}
+  .f-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;letter-spacing:.03em;cursor:pointer}
+  .f-foot[hidden],.f-total[hidden],.f-steps[hidden]{display:none}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+  @media (max-height:700px){ .f-sub{margin-bottom:6px} .f-step{font-size:10px} .f-total{padding:6px 10px} }
+  .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
+  .xr.is-sel{background:var(--card-sel-bg,var(--surface))}
+  .xr{cursor:pointer}
+  .xr .opt__tick{top:-9px;right:14px;border:2px solid var(--bg)}
+  .td-img{height:150px;margin:12px 0 10px;border-radius:14px;background:var(--cel-soft) center/cover}
+  .td-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0;font-size:12.5px;font-weight:700;color:var(--ink2)}
+  .td-meta span{display:flex;align-items:center;gap:5px}.td-meta svg{color:#1F6FB5}
+  .td-p{margin:8px 0;font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.5}
+  .td-h{margin:14px 0 4px;font-family:var(--fh);font-size:15px;color:var(--ink)}
+  .td-l{margin:0;padding:0;list-style:none;font-size:13px;font-weight:600;color:var(--ink);line-height:1.6}
+  .td-c{margin:12px 0 0;padding:8px 12px;border-radius:10px;background:var(--good-soft);color:var(--good);font-size:12.5px;font-weight:800}
+  .td-pr{margin:12px 0;font-size:13px;font-weight:600;color:var(--ink2)}.td-pr b{font-family:var(--fh);font-size:20px;color:var(--ink)}
+  .cn{text-align:center;padding-top:6px}
+  .cn__ok{position:relative;width:150px;height:130px;margin:0 auto 6px}
+  .cn__ok>span{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;background:#1F7FE0;color:#fff;display:grid;place-items:center}
+  .cn__conf i{position:absolute;width:7px;height:14px;border-radius:2px}
+  .cn__h{margin:4px 0 6px;font-family:var(--fh);font-size:26px;font-weight:800;color:var(--ink)}
+  .cn__p{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .cn__card{margin-bottom:12px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:left}
+  .cn__top{display:flex;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .cn__img{flex:0 0 78px;height:66px;border-radius:12px;background:#EEF0F3 center/cover}
+  .cn__top b{display:block;font-size:15px;color:var(--ink)}.cn__top small{font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .cn__row{display:flex;justify-content:space-between;align-items:flex-end;padding-top:12px}
+  .cn__row small{display:block;font-size:12px;font-weight:600;color:var(--ink2)}
+  .cn__row b{font-size:14.5px;color:var(--ink)}.cn__tot{font-family:var(--fh);font-size:24px}
+  .cn__nota{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;padding:12px;border-radius:14px;background:#EAF2FB;text-align:left;font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4}
+  .cn__nota svg{flex:0 0 22px;color:#1F6FB5}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="f-bar">
+    <button type="button" class="f-back" id="back" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <div class="f-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div>
+    <span style="width:32px"></span>
+  </div>
+  <ol class="f-steps" id="steps" aria-label="Progreso"></ol>
+  <div class="f-total" id="total" aria-live="polite"></div>
+  <div class="f-scroll" id="main"></div>
+  <div class="f-modal" id="modal" hidden></div>
+  <div class="f-foot" id="foot"><button type="button" class="f-cta" id="cta"></button></div>
+</div>
+<script src="../transfer-precios.js"></script>
+<script src="extras-data.js"></script>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search);
+  var DESTS = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas' };
+  var destKey = qs.get('destino') || 'fln', DEST = DESTS[destKey] || String(qs.get('nombre') || '').slice(0, 40) || 'Florianópolis';
+  var pax = Math.max(1, Math.min(9, +qs.get('pax') || 2)), k = pax / 2;
+  var IDA = qs.get('ida') || '2026-12-26', VUELTA = qs.get('vuelta') || '2027-01-02';
+  var NOCHES = Math.max(1, Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5));
+  var debug = /[?&]debug=1/.test(location.search);
+  var NOMBRES = ['Vuelos + Traslados', 'Alojamiento', 'Extras', 'Tu presupuesto'];
+  var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var $ = function (id) { return document.getElementById(id); };
+  var ic = function (d, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+  var I = {
+    plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    bed: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7.500h2M13 7.500h2M9 11.500h2M13 11.500h2M10 21v-4h4v4"/>',
+    fork: '<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.5 1.5-3 4.5-3 8h3"/>',
+    car: '<path d="M5 16l1.5-6h11L19 16M3 16h18v3H3zM7 19v2M17 19v2"/>',
+    bus: '<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M7 21v-4M17 21v-4"/>',
+    palm: '<path d="M12 21V11M12 11c-1-3-4-4-7-3 2 0 4 1 5 3M12 11c1-3 4-4 7-3-2 0-4 1-5 3M12 11c0-3-1-5-4-6 3 0 5 1 4 6M12 11c0-3 1-5 4-6-3 0-5 1-4 6"/>',
+    van: '<path d="M3 17V8a2 2 0 0 1 2-2h9l5 5v6M3 17h18M7 17v2M17 17v2M3 11h13"/>',
+    budget: '<rect x="4.500" y="4.500" width="15" height="16.500" rx="2.500"/><path d="M9 4.500V3h6v1.500"/><circle cx="12" cy="13" r="4"/><path d="M12 10.800v4.400M13.500 11.800c-.3-.4-.8-.6-1.500-.6-.9 0-1.500.4-1.500 1.100 0 1.500 3 .7 3 2.200 0 .7-.7 1.100-1.500 1.100-.7 0-1.200-.2-1.500-.6"/>',
+    wallet: '<path d="M3 7a2 2 0 0 1 2-2h13v4M3 7v11a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14.500h.01"/>'
+  };
+
+  /* ---- Datos de ejemplo ---- */
+  var VUELOS = [
+    { id: 'latam', air: 'LATAM', ab: 'LA', sal: '08:15', lle: '16:45', dur: 450, durT: '7 h 30 min', esc: 1, escT: '1 escala (GRU)', precio: 943, rec: true, mejor: true },
+    { id: 'ar', air: 'Aerolíneas Argentinas', ab: 'AR', sal: '10:20', lle: '18:50', dur: 510, durT: '8 h 30 min', esc: 1, escT: '1 escala (EZE)', precio: 1021 },
+    { id: 'gol', air: 'GOL', ab: 'G3', sal: '14:30', lle: '22:55', dur: 205, durT: '3 h 25 min', esc: 0, escT: 'Directo', precio: 1087 }
+  ];
+  /* Traslados: tabla real de la app (transfer-precios.js). compartido = USD por persona;
+     privado = USD por vehiculo de hasta 4 personas; los dos son solo ida, aca x2.
+     Si la tabla dice que el privado no tiene tarifa publicada, se marca como estimado. */
+  var TP = (window.CS_TRANSFER_PRICES || {})[destKey] || null;
+  var TPROV = (window.CS_TRANSFER_PRICES_PROVENANCE || {})[destKey] || {};
+  var privadoReal = !!(TPROV.real && TPROV.real.indexOf('privado') > -1);
+  var compReal = !TPROV.real || TPROV.real.indexOf('compartido') > -1;
+  var minTr = TP && TP.horas ? Math.round(TP.horas * 60) + ' min aprox.' : (TP && TP.modo === 'ferry' ? 'Incluye cruce en barco' : 'Duración a confirmar');
+  var TRASLADOS = TP ? [
+    { id: 'priv', tipo: 'priv', nom: 'Traslado privado', cap: 'Hasta 4 pasajeros por vehículo', dur: minTr, nota: privadoReal ? 'Tarifa publicada' : 'Precio estimado', precio: TP.privado },
+    { id: 'comp', tipo: 'comp', nom: 'Traslado compartido', sub: 'Compartido · precio por persona', cap: 'Compartís el vehículo', dur: minTr, nota: compReal ? 'Tarifa publicada' : 'Precio estimado', precio: TP.compartido, pp: true }
+  ] : [
+    { id: 'priv', tipo: 'priv', nom: 'Traslado privado', cap: 'Hasta 4 pasajeros', dur: 'A confirmar', nota: 'Precio de ejemplo', precio: 35 },
+    { id: 'comp', tipo: 'comp', nom: 'Traslado compartido', sub: 'Compartido · precio por persona', cap: 'Compartís el vehículo', dur: 'A confirmar', nota: 'Precio de ejemplo', precio: 25, pp: true }
+  ];
+  var HOTELES = [
+    { id: 'mar', nom: 'Pousada Mar Azul', cat: 'Pousada 4★', rat: 4.7, n: 1240, zona: 'Jurerê', playa: 200, serv: ['Wi-Fi', 'Desayuno', 'Piscina'], precio: 500, rec: true, img: 'home-ilha-bahia.jpg' },
+    { id: 'ilha', nom: 'Hotel Ilha Bela', cat: 'Hotel 3★', rat: 4.3, n: 860, zona: 'Canasvieiras', playa: 600, serv: ['Wi-Fi', 'Desayuno'], precio: 420, img: 'home-playa.jpg' },
+    { id: 'lagoa', nom: 'Casa da Lagoa Suítes', cat: 'Suítes 4★', rat: 4.8, n: 530, zona: 'Lagoa da Conceição', playa: 1200, serv: ['Wi-Fi', 'Cocina', 'Estacionamiento'], precio: 640, img: 'home-ilha.jpg' },
+    { id: 'costao', nom: 'Resort Costão', cat: 'Resort 5★', rat: 4.6, n: 2100, zona: 'Ingleses', playa: 0, serv: ['Wi-Fi', 'Piscina', 'Spa'], precio: 910, img: '../fotos/fln.jpg' }
+  ];
+  /* Extras. Tours: catalogo real de la app (extras-data.js = snapshot de data/tours.json, USD por
+     persona, precio referencial). Traslados adicionales, auto y otros servicios todavia no tienen
+     catalogo en la app: van marcados como ejemplo. */
+  var TOURS = (window.MOCK_TOURS || {})[destKey] || [];
+  var EXTRAS = [
+    { cat: 'tours', sec: 'Tours y actividades', sub: 'Viví experiencias únicas en tu destino.', ico: 'palm', items: TOURS.map(function (t, i) {
+      return { id: 't' + i, cat: 'tours', nom: t.titulo, dur: t.duracion, grupo: t.grupo, precio: t.precio, pp: true, foto: t.foto, autor: t.autor, real: true, info: t };
+    }) },
+    { cat: 'tras', sec: 'Traslados adicionales', sub: 'Más comodidad para moverte.', ico: 'van', items: [
+      { id: 'beto', cat: 'tras', nom: 'Traslado a Beto Carrero', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 120 },
+      { id: 'camb', cat: 'tras', nom: 'Traslado a Balneário Camboriú', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 85 },
+      { id: 'tras3', cat: 'tras', nom: 'Traslado a Praia do Rosa', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 140 } ] },
+    { cat: 'auto', sec: 'Alquiler de auto', sub: 'Libertad para explorar a tu ritmo.', ico: 'car', items: [
+      { id: 'auto', cat: 'auto', nom: 'Auto económico', dur: '7 días', grupo: 'Hasta 5 personas · Manual · A/C', precio: 245, unidadTxt: '7 días' },
+      { id: 'auto2', cat: 'auto', nom: 'Auto compacto automático', dur: '7 días', grupo: 'Hasta 5 personas · Automático · A/C', precio: 310, unidadTxt: '7 días' },
+      { id: 'auto3', cat: 'auto', nom: 'SUV mediano', dur: '7 días', grupo: 'Hasta 5 personas · Automático · A/C', precio: 420, unidadTxt: '7 días' } ] }
+  ].filter(function (g) { return g.items.length; });
+  HOTELES.forEach(function (h) { h.ejemplo = true; });
+  var COMIDAS = 308 * k, LOCAL = 64 * k;
+  var precioVuelo = function (v) { return v.precio * k; };
+  var precioExtra = function (e) { return e.pp ? e.precio * pax : e.precio; };
+  var todosExtras = [].concat.apply([], EXTRAS.map(function (s) { return s.items; }));
+
+  /* ---- Estado ---- */
+  VUELOS.forEach(function (v) { v.ejemplo = true; });
+  var S = { cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 5, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: 'latam', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'rec', verMasVuelos: false };
+  var precioHotelEstimado = function (h) { return S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.total : h.precio; };
+  var precioHotel = function (h) { return S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : precioHotelEstimado(h); };
+  var vuelo = function () { return VUELOS.filter(function (v) { return v.id === S.vuelo; })[0]; };
+  var trPrecio = function (t) { return t.precio * (t.pp ? pax : Math.ceil(pax / 4)) * (S.tIV ? 2 : 1); };
+  var trasl = function () { return TRASLADOS.filter(function (t) { return t.id === S.traslado; })[0]; };
+  var hotel = function () { return HOTELES.filter(function (h) { return h.id === S.hotel; })[0]; };
+  var extrasSel = function () { return todosExtras.filter(function (e) { return S.extras[e.id]; }); };
+  var sum = function (a, fn) { return a.reduce(function (t, x) { return t + fn(x); }, 0); };
+  function totalHastaAhora() {
+    var t = precioVuelo(vuelo()) + (trasl() ? trPrecio(trasl()) : 0);
+    if (S.paso >= 2) t += precioHotel(hotel());
+    if (S.paso >= 3) t += sum(extrasSel(), precioExtra);
+    if (S.paso >= 4) t += COMIDAS + LOCAL;
+    return t;
+  }
+  function subTotal() {
+    if (S.paso >= 4) return 'Vuelo + Alojamiento + Extras + Comidas + Transporte';
+    var p = ['Vuelo seleccionado' + (trasl() ? ' + traslado' : '')];
+    if (S.paso >= 2) p = ['Vuelo, traslado y alojamiento'.replace(', traslado', trasl() ? ', traslado' : '')];
+    if (S.paso >= 3) p = [extrasSel().length ? 'Con ' + extrasSel().length + (extrasSel().length === 1 ? ' extra' : ' extras') : 'Sin extras por ahora'];
+    return p[0];
+  }
+  /* Todo evento del flujo lleva el contexto del viaje, para poder segmentar en Analytics
+     por destino, cantidad de personas, mes de viaje, paso y origen del clic en la home. */
+  function track(n, p) {
+    var ctx = { destino: destKey, pasajeros: pax, noches: NOCHES, fecha_ida: IDA, mes_viaje: IDA.slice(0, 7), anticipacion_dias: Math.round((new Date(IDA) - new Date()) / 864e5),
+      paso: S.paso, fuente: qs.get('fuente') || 'directo', datos_reales_hoteles: S.hotelesListos && !!HOTELES[0] && !HOTELES[0].ejemplo };
+    try { ctx.total_parcial = Math.round(totalHastaAhora()); } catch (e) { /* aun sin seleccion */ }
+    var plano = Object.assign(ctx, p || {});
+    Object.keys(plano).forEach(function (k) {   // GA4 solo acepta valores simples: lo anidado se aplana
+      if (plano[k] && typeof plano[k] === 'object') { Object.keys(plano[k]).forEach(function (j) { plano[k + '_' + j] = plano[k][j]; }); delete plano[k]; }
+    });
+    window.mockTrack(n, plano);
+  }
+
+  /* ---- Encabezado: progreso y total ---- */
+  function pintarPasos() {
+    $('steps').innerHTML = NOMBRES.map(function (n, i) {
+      var c = i + 1 < S.paso ? 'is-done' : (i + 1 === S.paso ? 'is-on' : '');
+      var d = c === 'is-done' ? '✓' : (i + 1);
+      var tag = c === 'is-done' ? 'button' : 'li';
+      return '<li style="display:contents"><' + (c !== 'is-on' ? 'button type="button" data-ir="' + (i + 1) + '" aria-label="Ir al paso ' + (i + 1) + ': ' + n + '"' : 'div') + ' class="f-step ' + c + (c !== 'is-on' ? ' is-link' : '') + '"' + (c === 'is-on' ? ' aria-current="step"' : '') + '><span class="f-dot">' + d + '</span>' + n.replace(' + ', ' +<br>').replace('Tu presupuesto', 'Tu<br>presupuesto') + '</' + (c !== 'is-on' ? 'button' : 'div') + '></li>';
+    }).join('');
+  }
+  var ultimoTotal = null, ultimoPaso = null, timerDelta = null;
+  function pintarTotal() {
+    var el = $('total'), t = totalHastaAhora();
+    if (S.paso >= 4) { el.hidden = true; ultimoTotal = t; ultimoPaso = S.paso; return; }
+    if (S.paso === 2 && S.cargandoH) { el.hidden = false; el.innerHTML = ic(I.budget, 30) + '<div>Tu viaje hasta ahora<small>Buscando alojamientos…</small></div>'; return; }
+    el.hidden = false;
+    var cambio = ultimoTotal !== null && ultimoPaso === S.paso && Math.round(ultimoTotal) !== Math.round(t);
+    if (cambio) {   // el total reacciona: muestra cuanto sumo o resto lo ultimo que se toco
+      S.delta = Math.round(t - ultimoTotal); clearTimeout(timerDelta);
+      timerDelta = setTimeout(function () { S.delta = 0; pintarTotal(); }, 4500);
+    } else if (ultimoPaso !== S.paso) { S.delta = 0; }
+    ultimoPaso = S.paso;
+    el.innerHTML = ic(I.budget, 30) + '<div>Tu viaje hasta ahora: <b>' + f(t) + '</b>' + (S.delta ? ' <span class="f-delta' + (S.delta < 0 ? ' is-neg' : '') + '">' + (S.delta > 0 ? '+ ' : '− ') + f(Math.abs(S.delta)) + '</span>' : '') + '<small>' + esc(subTotal()) + '</small></div>' + ic('<path d="m9 5 7 7-7 7"/>', 18);
+    if (ultimoTotal !== null && ultimoTotal !== t) { el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump'); }
+    ultimoTotal = t;
+  }
+
+  /* ---- Pantallas ---- */
+  var sel = function (b) { return b ? ' is-sel' : ''; };
+  var tick = '<span class="opt__tick" aria-hidden="true">✓</span>';
+  function ordenarVuelos() {
+    var a = VUELOS.slice();
+    if (S.fVuelo === 'precio') a.sort(function (x, y) { return x.precio - y.precio; });
+    else if (S.fVuelo === 'directo') a.sort(function (x, y) { return x.esc - y.esc || x.dur - y.dur; });
+    return a;
+  }
+  function chips(lista, act, grupo) {
+    return '<div class="f-sort" role="group">' + lista.map(function (c) {
+      return '<button type="button" class="f-chip' + (act === c[0] ? ' is-on' : '') + '" data-filtro="' + grupo + ':' + c[0] + '" aria-pressed="' + (act === c[0]) + '">' + c[1] + '</button>';
+    }).join('') + '</div>';
+  }
+  function pantalla1() {
+    var vs = ordenarVuelos(), visibles = S.verMasVuelos ? vs : vs.slice(0, 3);
+    return '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas') + '</p>' +
+      (S.cargandoV ? '<p class="f-sub" role="status">Buscando vuelos reales…</p>' : (S.avisoV ? '<p class="f-sub">' + esc(S.avisoV) + '</p>' : '')) +
+      chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') +
+      visibles.map(function (v) {
+        return '<button type="button" class="opt' + sel(S.vuelo === v.id) + '" data-sel="vuelo:' + v.id + '" aria-pressed="' + (S.vuelo === v.id) + '">' + tick +
+          '<div class="fl__air"><span class="fl__logo">' + v.ab + '</span>' + esc(v.air) + '</div>' +
+          '<div class="fl__row"><div class="fl__t">' + v.sal + '<small>MVD</small></div><div class="fl__mid">' + v.durT + '<i></i>' + v.escT + '</div><div class="fl__t">' + v.lle + '<small>' + (AEROPUERTO[destKey] || '') + '</small></div>' +
+          '<div class="fl__price"><b>' + f(precioVuelo(v)) + '</b><small>total ' + pax + (pax === 1 ? ' persona' : ' pers.') + '</small></div></div>' +
+          (v.mejor ? '<div class="fl__foot"><span class="tagok">✓ Mejor opción</span></div>' : '') + '</button>';
+      }).join('') +
+      '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' +
+      '<h2 class="f-h3">' + ic(I.van, 22) + 'Traslados</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
+      chips([['todos', 'Todos'], ['priv', 'Privado'], ['comp', 'Compartido']], S.fTras, 'tras') +
+      TRASLADOS.filter(function (t) { return S.fTras === 'todos' || S.fTras === t.tipo; }).map(function (t) {
+        var on = S.traslado === t.id, sub = t.tipo === 'priv' ? 'Directo · ' + pax + (pax === 1 ? ' persona' : ' personas') : t.sub;
+        return '<div class="opt trc' + sel(on) + '" role="button" tabindex="0" data-sel="traslado:' + t.id + '" aria-pressed="' + on + '">' + tick + 
+          '<div class="trc__img" role="img" aria-label="' + (t.tipo === 'priv' ? 'Auto privado' : 'Van compartida') + '" style="background-image:url(' + (t.tipo === 'priv' ? 'traslado-auto.png' : 'traslado-van.png') + ')"></div>' +
+          '<div class="trc__b"><b>' + esc(t.nom) + '</b><small>' + esc(sub) + '</small>' +
+          '<ul><li>' + ic('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>', 16) + esc(t.cap) + '</li><li>' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 16) + esc(t.dur) + '</li><li>' + ic('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/>', 16) + esc(t.nota) + '</li></ul></div>' +
+          '<div class="trc__p"><b>' + f(trPrecio(t)) + '</b><small>ida y vuelta' + (t.pp ? ' · ' + pax + (pax === 1 ? ' persona' : ' personas') : ' · ' + Math.ceil(pax / 4) + (pax > 4 ? ' vehículos' : ' vehículo')) + '</small></div></div>';
+      }).join('');
+  }
+  function ordenarHoteles() {
+    var a = HOTELES.slice();
+    if (S.fHotel === 'precio') a.sort(function (x, y) { return x.precio - y.precio; });
+    else if (S.fHotel === 'rating') a.sort(function (x, y) { return (y.rat || 0) - (x.rat || 0) || y.n - x.n; });
+    else if (S.fHotel === 'playa') a.sort(function (x, y) { return (x.playa == null ? 1e9 : x.playa) - (y.playa == null ? 1e9 : y.playa); });
+    else a.sort(function (x, y) { return puntajeH(y) - puntajeH(x); });
+    return a;
+  }
+  var MAX_HOTELES = 5; /* de a 5; "Ver más alojamiento" suma otros 5 */
+  var playasDe = function () {
+    var c = {};
+    HOTELES.forEach(function (h) { c[h.zona] = (c[h.zona] || 0) + 1; });
+    return Object.keys(c).sort(function (x, y) { return (x === 'Otras zonas') - (y === 'Otras zonas') || c[y] - c[x]; }).map(function (n) { return [n, c[n]]; });
+  };
+  /* Recomendado: buena nota con resenas de verdad, cerca de la playa y sin pasarse de precio. */
+  function puntajeH(h) {
+    var nota = h.n >= 3 ? (h.rat || 0) : 0;
+    return (h.rec ? 3 : 0) + nota - h.precio / 400 - Math.min(h.playa == null ? 3000 : h.playa, 3000) / 1500;
+  }
+  var dist = function (m) { return m === 0 ? 'Frente al mar' : (m < 1000 ? m + ' m de la playa' : (m / 1000).toFixed(1).replace('.', ',') + ' km de la playa'); };
+  /* Por que se recomienda: se dice con datos que tiene el hotel, nunca inventados. */
+  function razonesDe(h, tope) {
+    var r = [];
+    if (h.rat >= 9 && h.n >= 10) r.push('excelente puntaje');
+    else if (h.rat >= 8.5 && h.n >= 10) r.push('muy bien valorado');
+    if (h.playa != null && h.playa <= 300) r.push('a pasos de la playa');
+    var precios = HOTELES.map(function (x) { return x.precio; }).sort(function (x, y) { return x - y; });
+    if (h.precio <= precios[Math.floor(precios.length / 3)]) r.push('buen precio');
+    return r.slice(0, tope || 2);
+  }
+  var urlBooking = function (h) { return 'https://www.booking.com/searchresults.html?' + new URLSearchParams({ ss: h.nom + ' ' + DEST, checkin: IDA, checkout: VUELTA, group_adults: pax, no_rooms: 1 }).toString(); };
+  /* Insignia sobre la foto: sale de datos del hotel, nunca inventada. */
+  function insignia(h, i) {
+    if (h.ejemplo) return '';
+    var mas = HOTELES.map(function (x) { return x.precio; }).sort(function (x, y) { return x - y; })[0];
+    if (i === 0 && S.fHotel === 'rec' && h.rat > 0) return 'Recomendado';
+    if (h.rat >= 9 && h.n >= 10) return 'Muy valorado';
+    if (h.playa === 0) return 'Frente al mar';
+    if (h.precio === mas) return 'Económico';
+    return '';
+  }
+  var iBed = '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7.500h2M13 7.500h2M9 11.500h2M13 11.500h2M10 21v-4h4v4"/>';
+  function pantalla2() {
+    var personas = pax + (pax === 1 ? ' persona' : ' personas');
+    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:#1F6FB5">' + esc(DEST) + ' · ' + NOCHES + ' noches · ' + personas + '</p></div></div><p class="f-sub" style="margin:6px 0 12px">Elegí la zona donde querés alojarte.</p>';
+    if (S.cargandoH) return cab + '<p class="f-sub" style="text-align:center;padding:30px 0">Buscando alojamientos en Booking…</p>';
+    var aviso = S.avisoH ? '<p class="f-sub" style="padding:8px 10px;border-radius:10px;background:var(--cel-soft)">' + esc(S.avisoH) + '</p>' : '';
+    var playas = playasDe(), todos = ordenarHoteles();
+    if (S.playaSel !== 'todas' && !playas.some(function (x) { return x[0] === S.playaSel; })) S.playaSel = 'todas';
+    var lista = todos.filter(function (h) { return S.playaSel === 'todas' || h.zona === S.playaSel; }), mostrados = lista.slice(0, S.nH);
+    var rapidas = (S.zonasTodas ? playas : playas.filter(function (x) { return x[0] !== 'Otras zonas'; }).slice(0, 4));
+    var zchip = function (val, txt, n) { return '<button type="button" class="f-chip' + (S.playaSel === val ? ' is-on' : '') + '" data-zona="' + esc(val) + '" aria-pressed="' + (S.playaSel === val) + '">' + esc(txt) + (n ? ' <span class="f-n">' + n + '</span>' : '') + '</button>'; };
+    var selector = playas.length > 1 ? '<div class="f-zchips" role="group" aria-label="Zona donde querés alojarte">' +
+      zchip('todas', 'Todas', HOTELES.length) + rapidas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') +
+      (playas.length > 4 ? '<button type="button" class="f-chip" data-zonas-mas="1" aria-expanded="' + !!S.zonasTodas + '">' + (S.zonasTodas ? 'Menos zonas ▴' : 'Más zonas ▾') + '</button>' : '') + '</div>' : '';
+    var orden = '<div class="f-orden"><span>Ordenar por:</span>' + chips([['rec', '★ Recomendados'], ['precio', 'Precio'], ['rating', 'Valoración']], S.fHotel, 'hotel') + '</div>';
+    var iPin = '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>';
+    return cab + aviso + selector + orden +
+      mostrados.map(function (h, i) {
+        var on = S.hotel === h.id, ins = insignia(h, i), feats = h.serv.filter(Boolean).map(function (x) { return String(x).split(/[·•]/)[0].trim(); }).filter(Boolean).slice(0, 2);
+        return '<div class="opt ho' + sel(on) + '" role="button" tabindex="0" data-sel="hotel:' + h.id + '" aria-pressed="' + on + '">' + tick +
+          '<div class="ho__img" style="background-image:url(\'' + h.img + '\')" role="img" aria-label="Foto de ' + esc(h.nom) + '">' +
+          (on ? '<span class="ho__on">Seleccionado</span>' : '') + (ins ? '<span class="ho__ins">★ ' + esc(ins) + '</span>' : (h.ejemplo ? '<span class="ho__ins">Ejemplo</span>' : '')) + '</div>' +
+          '<div class="ho__b">' +
+          '<div class="ho__n">' + esc(h.nom) + '</div>' +
+          '<div class="ho__c">' + (h.rat ? '<span class="ho__r">★ ' + String(h.rat).replace('.', ',') + '</span>' + (h.n ? ' (' + h.n.toLocaleString('es-UY') + (h.n === 1 ? ' opinión' : ' opiniones') + ')' : '') : 'Sin puntaje todavía') + '</div>' +
+          '<div class="ho__u">' + ic(iPin, 14) + '<span>' + esc(h.zona) + (h.playa != null ? ' · ' + dist(h.playa) : '') + '</span></div>' +
+          (S.habitacion && S.habitacion.hotelId === h.id ? '<div class="ho__hab">Habitación: ' + esc(S.habitacion.nombre) + '</div>' : '') + '<ul class="ho__f">' + feats.map(function (x) { return '<li>✓ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
+          '</div>' +
+          '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + NOCHES + ' noches · ' + personas + '</small></div>' +
+          (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Ver habitaciones →') + '</button>') + '</div></div>';
+      }).join('') +
+      '<div class="ho__mas">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 26) +
+      '<span><b>¿Querés ver más opciones?</b>Podés cambiar la zona o ajustar tus fechas para encontrar mejores precios.</span>' +
+      (lista.length > mostrados.length ? '<button type="button" class="ho__masbtn" data-mashoteles="1">Ver más alojamiento →</button>' : '') + '</div>' +
+      '<p class="f-sub" style="text-align:center;margin-top:8px">Mostrando ' + mostrados.length + ' de ' + lista.length + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '</p>';
+  }
+  var iClock = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', iUsers = '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.3c1.7.8 3 2.5 3 5.2"/>';
+  var iImg = '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4.500 3.500 3 3-2.500L20 17"/>';
+  var horas = function (t) { var m = /(\d+)/.exec(t || ''); return m ? +m[1] : 0; };
+  /* Etiquetas: solo las que se pueden sostener con datos del catalogo. */
+  function etiquetaDe(e, grupo) {
+    var items = grupo.items;
+    var baratos = items.map(function (x) { return x.precio; }).sort(function (a, b) { return a - b; });
+    if (items.length > 1 && e.precio === baratos[0]) return '💰 Mejor precio';
+    if (e.cat === 'tours' && items.length > 1 && horas(e.dur) === Math.max.apply(null, items.map(function (x) { return horas(x.dur); }))) return '🟢 Experiencia completa';
+    return '';
+  }
+  function filaExtra(e, grupo) {
+    var on = !!S.extras[e.id], tag = etiquetaDe(e, grupo), unidad = e.pp ? ' / persona' : (e.unidadTxt ? ' / ' + e.unidadTxt : '');
+    return '<div class="opt xr' + sel(on) + '" role="button" tabindex="0" data-extra="' + e.id + '" aria-pressed="' + on + '">' + tick +
+      (e.cat === 'tours' ? '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')" title="Foto: ' + esc(e.autor || 'Wikimedia Commons') + '"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 26)) + '</div>'
+        : '<div class="xr__img is-veh" style="background-image:url(\'' + (e.cat === 'tras' && /compart|bus|van/i.test(e.nom) ? 'traslado-van.png' : 'traslado-auto.png') + '\')" role="img" aria-label="' + esc(e.nom) + '"></div>') +
+      '<div class="xr__b">' + (tag ? '<span class="xr__tag">' + tag + '</span>' : '') + '<b>' + esc(e.nom) + '</b>' +
+      '<small>' + ic(iClock, 13) + esc(e.dur || 'Duración a confirmar') + (e.grupo ? ' · ' + esc(e.grupo) : '') + '</small>' +
+      (e.real ? '' : '<span class="x-ej">Precio de ejemplo</span>') + '</div>' +
+      '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small></div>' +
+      (e.cat === 'tours' ? '<button type="button" class="x-add" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div></div>';
+  }
+  var MAS_TXT = { tours: 'Ver más tours →', tras: 'Ver más traslados →', auto: 'Ver más autos →' };
+  var TITULO_X = { tours: ['🌴', 'Tours y actividades', 'Experiencias populares en '], tras: ['🚐', '¿Necesitás traslado?', 'Para moverte con comodidad'], auto: ['🚗', 'Alquiler de auto', 'Libertad para explorar a tu ritmo'] };
+  var CUANTOS_X = { tours: 3, tras: 2, auto: 1 };
+  function pantalla3() {
+    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(I.palm, 30) + '</span><div><h1 class="f-h" style="margin:0">Extras</h1><p class="f-sub" style="margin:2px 0 0;color:#1F6FB5">¿Qué querés sumar a tu viaje?</p></div></div>' +
+      '<p class="f-sub" style="margin:6px 0 0">Sumá solo lo que quieras. Podés continuar sin agregar extras.</p>';
+    var filtros = [['todos', 'Todos'], ['tours', 'Tours'], ['tras', 'Traslados'], ['auto', 'Autos']];
+    var chipsX = '<div class="f-zchips" role="group" aria-label="Categorías" style="margin:12px 0 4px">' + filtros.map(function (c) {
+      return '<button type="button" class="f-chip' + (S.fExtra === c[0] ? ' is-on' : '') + '" data-xcat="' + c[0] + '" aria-pressed="' + (S.fExtra === c[0]) + '">' + c[1] + '</button>';
+    }).join('') + '</div>';
+    var grupos = EXTRAS.filter(function (g) { return S.fExtra === 'todos' || S.fExtra === g.cat; });
+    return cab + chipsX + grupos.map(function (g) {
+      var t = TITULO_X[g.cat], todos = S.fExtra !== 'todos' || S.xmas[g.cat], lim = todos ? g.items.length : CUANTOS_X[g.cat], vis = g.items.slice(0, lim);
+      return '<h2 class="f-h3 x-h3"><span class="x-ico">' + t[0] + '</span><span>' + t[1] + '<small>' + esc(t[2]) + (g.cat === 'tours' ? esc(DEST) : '') + '</small></span></h2>' +
+        vis.map(function (e) { return filaExtra(e, g); }).join('') +
+        (g.items.length > vis.length ? '<button type="button" class="f-more" data-xmas="' + g.cat + '">' + MAS_TXT[g.cat] + '</button>' : '') +
+        (g.cat === 'tours' && vis.some(function (e) { return e.foto; }) ? '<p class="x-note">Precios por persona, referenciales. Fotos: Wikimedia Commons (licencias CC).</p>' : '');
+    }).join('');
+  }
+  function datosFinal() {
+    var v = vuelo(), h = hotel(), t = trasl(), ex = extrasSel();
+    var tVuelo = precioVuelo(v), tTras = t ? trPrecio(t) : 0, tAloj = precioHotel(h), tExtras = sum(ex, precioExtra);
+    return { v: v, h: h, t: t, ex: ex, tVuelo: tVuelo, tTras: tTras, tAloj: tAloj, tExtras: tExtras, tComidas: COMIDAS, tLocal: LOCAL,
+      total: tVuelo + tTras + tAloj + tExtras + COMIDAS + LOCAL };
+  }
+  var MESES_C = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+  var fdc = function (d) { var q = d.split('-'); return +q[2] + ' ' + MESES_C[+q[1] - 1]; };
+  var iChev = '<path d="m9 5 7 7-7 7"/>';
+  var iSolMar = '<circle cx="12" cy="8" r="3.2"/><path d="M12 2.5v.8M5.8 5l.6.6M18.2 5l-.6.6M2.5 12.500c1.500-1 3-1 4.500 0s3 1 4.500 0 3-1 4.500 0 3 1 4.500 0M2.500 17c1.500-1 3-1 4.500 0s3 1 4.500 0 3-1 4.500 0 3 1 4.500 0"/>';
+  var WHATSAPP = '5511920836306';   // el mismo numero de reservas que usa la app
+  function fila4(paso, ico, tono, titulo, detalle, precio) {
+    var tag = paso ? 'button type="button" data-ir="' + paso + '"' : 'button type="button" data-comidas="1" aria-expanded="' + !!S.comidasAbierto + '"';
+    return '<' + tag + ' class="fin-row"><span class="fin-ico fin-ico--' + tono + '">' + ic(ico, 26) + '</span><span class="fin-t"><b>' + esc(titulo) + '</b><small>' + detalle + '</small></span><span class="fin-p">' + precio + '</span>' + ic(iChev, 16) + '</button>';
+  }
+  function resumenTexto(d) {
+    return 'Mi viaje a ' + DEST + ': ' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas') + '. Total estimado: ' + f(d.total) + ' (armado en CuántoSale).';
+  }
+  function pantalla4() {
+    var d = datosFinal(), t = d.t, ex = d.ex, personas = pax + (pax === 1 ? ' persona' : ' personas'), fechas = fdc(IDA) + ' → ' + fdc(VUELTA);
+    var detVuelo = 'Montevideo → ' + esc(DEST) + '<br>(ida y vuelta)' + (t ? ' + ' + esc(t.nom.toLowerCase()) : '');
+    var detAloj = esc(d.h.nom) + ' · ' + NOCHES + ' noches<br>(' + personas + ')' + (S.habitacion && S.habitacion.hotelId === d.h.id ? '<br>' + esc(S.habitacion.nombre) : '');
+    var detEx = ex.length ? ex.map(function (e) { return esc(e.nom); }).join(', ') : 'Sin extras';
+    var comidasDet = S.comidasAbierto ? '<div class="fin-sub"><span>Comidas</span><b>' + f(d.tComidas) + '</b><span>Transporte local</span><b>' + f(d.tLocal) + '</b></div>' : '';
+    var n = S.divN || pax;
+    var dividir = S.dividirAbierto ? '<div class="fv-div"><span>Dividido entre</span><div class="fv-step"><button type="button" data-divn="-1" aria-label="Menos personas">−</button><output>' + n + '</output><button type="button" data-divn="1" aria-label="Más personas">+</button></div><b>' + f(d.total / n) + '<small>por persona</small></b></div>' : '';
+    var iBilletera = '<path d="M3 7a2 2 0 0 1 2-2h13v4M3 7v11a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14.5h.01"/>';
+    return '<div class="fv-trip"><span class="fv-trip__ico">' + ic(iBilletera, 38) + '</span><div class="fv-trip__t"><h1>Tu viaje</h1><b>' + esc(DEST) + '</b><span>' + fechas + ' · ' + personas + '</span></div><div class="fv-trip__img" aria-hidden="true"></div></div>' +
+      '<div class="fv-total"><span class="fv-total__ico">' + ic(iBilletera, 28) + '</span><div><small>Total estimado del viaje</small><b>' + f(d.total) + '</b></div><p>Podés ajustar cada parte y ver cómo cambia tu presupuesto.</p></div>' +
+      '<h2 class="fin-h2">Desglose del viaje</h2>' +
+      '<div class="fin-list fv-list">' +
+      fila4(1, I.plane, 'blue', 'Vuelo + traslado', detVuelo, f(d.tVuelo + d.tTras)) +
+      fila4(2, I.bed, 'green', 'Alojamiento', detAloj, f(d.tAloj)) +
+      fila4(3, I.palm, 'yellow', 'Extras', detEx, f(d.tExtras)) +
+      fila4(0, I.fork, 'violet', 'Comidas + transporte local', 'Estimado para ' + NOCHES + ' noches', f(d.tComidas + d.tLocal)) + comidasDet + '</div>' +
+      '<div class="fin-gastar">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 28) +
+      '<span><b>¿Querés ajustar algo?</b>Podés cambiar el vuelo, alojamiento o extras y ver cómo cambia tu presupuesto.</span><button type="button" class="fin-btn2" data-ir="1" data-evento="flujo_ajustar_viaje">Ajustar mi viaje ›</button></div>' +
+      '<h2 class="fin-h2" style="margin-bottom:2px">Compartí tu viaje</h2><p class="fin-sub2" style="margin-top:0">Dividí gastos y compartí la experiencia.</p>' +
+      '<div class="fv-two"><button type="button" class="fv-act" data-dividir="1" aria-expanded="' + !!S.dividirAbierto + '">' + ic(iUsers, 22) + '<span>Dividir gastos</span>' + ic(iChev, 16) + '</button>' +
+      '<button type="button" class="fv-act" data-compartir="1">' + ic('<circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.3 10.8 6.900-3.600M8.300 13.200l6.900 3.600"/>', 22) + '<span>' + (S.copiado ? '¡Copiado!' : 'Compartir') + '</span>' + ic(iChev, 16) + '</button></div>' + dividir +
+      '<div class="fv-wa"><span class="fv-wa__ico">' + ic('<path d="M3 21l1.6-4.700A8.500 8.500 0 1 1 8 19.500z"/><path d="M9 9.500c0 3 2.500 5.500 5.500 5.500l1.200-1.500-2-1-.8.700c-.9-.4-1.600-1.100-2-2l.7-.8-1-2z"/>', 32) + '</span><span><b>¿Necesitás ayuda?</b>Hablá con un asesor por WhatsApp.</span><button type="button" class="fv-wa__btn" data-asesor="1">Contactar asesor ›</button></div>';
+  }
+  /* Paso 5: confirmacion. Con cuenta el viaje queda guardado; sin cuenta se dice la verdad: no se guardo. */
+  function pantalla5() {
+    var d = datosFinal(), personas = pax + (pax === 1 ? ' persona' : ' personas'), guardado = !!S.sesion;
+    return '<div class="ls-hero"><span class="ls-badge">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 18) + (guardado ? 'Tu viaje guardado' : 'Tu viaje está listo') + '</span></div>' +
+      '<h1 class="ls-h">¡Listo!</h1>' +
+      '<p class="ls-p">' + (guardado ? 'Tu viaje a ' + esc(DEST) + ' está guardado. Podés volver cuando quieras desde tu perfil.' : 'Tu presupuesto a ' + esc(DEST) + ' está armado. Si querés guardarlo para volver más tarde, creá una cuenta.') + '</p>' +
+      '<div class="ls-card"><div class="ls-card__img" aria-hidden="true"></div><div><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small><strong>' + f(d.total) + '</strong><small>Total estimado</small></div></div>' +
+      '<button type="button" class="g-btn g-btn--main" data-ir="6" data-evento="flujo_listo_ver_opciones">Ver opciones para reservar →</button>' +
+      (guardado
+        ? '<button type="button" class="g-btn" data-guardado="1">' + ic('<rect x="4" y="7" width="16" height="13" rx="2.500"/><path d="M9 7V5.500A1.500 1.500 0 0 1 10.500 4h3A1.500 1.500 0 0 1 15 5.500V7"/>', 20) + 'Ver mi viaje guardado</button>'
+        : '<button type="button" class="g-btn" data-guardar-ahora="1">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 20) + 'Guardar mi viaje</button>') +
+      (S.avisoGuardado ? '<p class="g-p g-p--s">' + esc(S.avisoGuardado) + '</p>' : '') +
+      '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>' +
+      '<svg class="ls-ilu" viewBox="0 0 320 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="76" cy="20" r="8"/><path d="M76 5v3M76 32v3M61 20h3M88 20h3M65 9l2 2M85 29l2 2M65 31l2-2M85 11l2-2"/><path d="M8 52c20-8 40-8 60 0s40 8 60 0 40-8 60 0 40 8 60 0 24-5 32-3"/><path d="M262 50c0-12 0-20-2-30M260 20c-6-6-14-6-20-2M260 20c6-6 14-5 20 0M260 22c-3-8-9-10-15-9M260 22c4-7 10-9 15-7"/></svg>' +
+      '<p class="ls-foot">El próximo destino también se planifica.</p>';
+  }
+  /* Paso 6: Reservá tu viaje. Cada fila lleva a reservar esa parte y dice si se hace fuera o dentro de CuántoSale. */
+  function pantalla6() {
+    var d = datosFinal(), personas = pax + (pax === 1 ? ' persona' : ' personas');
+    var toursSel = d.ex.filter(function (e) { return e.cat === 'tours'; });
+    var toursPrecios = EXTRAS.filter(function (g) { return g.cat === 'tours'; }).reduce(function (a, g) { return a.concat(g.items.map(function (e) { return e.precio; })); }, []);
+    var desdeTours = toursPrecios.length ? Math.min.apply(null, toursPrecios) : 0;
+    /* "Desde" solo cuando hay varias opciones y todavia no se eligio una; con una eleccion el precio es el real. */
+    var precioTras = d.t ? f(d.tTras) : 'Desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio)));
+    var detTras = d.t ? esc(d.t.nom) + ' · aeropuerto ⇄ alojamiento' : 'Aeropuerto ⇄ alojamiento';
+    var precioTours = toursSel.length ? f(sum(toursSel, precioExtra)) : (desdeTours ? 'Desde ' + f(desdeTours) : 'Ver opciones');
+    var detTours = toursSel.length ? esc(toursSel.map(function (e) { return e.nom; }).join(', ')) : 'Experiencias en ' + esc(DEST);
+    function item(ico, tono, titulo, detalle, precio, accion, etiqueta, externo) {
+      return '<button type="button" class="fin-row rv-row" data-reservar="' + accion + '"><span class="fin-ico fin-ico--' + tono + '">' + ic(I[ico], 28) + '</span>' +
+        '<span class="fin-t"><b>' + titulo + '</b><small>' + detalle + '</small><strong class="rv-p">' + precio + '</strong>' +
+        '<span class="rv-tag ' + (externo ? 'is-fuera' : 'is-cs') + '">' + etiqueta + '</span></span>' + ic(iChev, 16) + '</button>';
+    }
+    return '<div class="rv-head"><span class="rv-head__ico">' + ic('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9 15h5.500a1.500 1.500 0 0 0 0-3H9"/>', 40) + '</span><div><h1>Reservá tu viaje</h1><p>Ya sabés cuánto necesitás.<br>Ahora elegí qué querés reservar.</p></div></div>' +
+      '<div class="rv-ahorro">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 26) + '<span><b>Tu presupuesto estimado: ' + f(d.total) + '</b>Podés reservar cada parte por separado.</span></div>' +
+      '<button type="button" class="fin-row rv-dest" data-ir="4" data-evento="flujo_volver_resumen"><span class="rv-dest__img" aria-hidden="true"></span><span class="fin-t"><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small></span>' + ic(iChev, 16) + '</button>' +
+      '<div class="fin-list rv-list">' +
+      item('plane', 'blue', 'Vuelo', 'Montevideo → ' + esc(DEST), f(d.tVuelo), 'externo:google_flights', 'Externo · Google Flights', true) +
+      item('bed', 'green', 'Alojamiento', esc(d.h.nom) + ' · ' + NOCHES + ' noches', f(d.tAloj), 'externo:booking', 'Externo · Booking', true) +
+      item('van', 'green', 'Traslados', detTras, precioTras, 'cs:traslado', 'Reserva en CuántoSale', false) +
+      item('palm', 'yellow', 'Tours y actividades', detTours, precioTours, 'cs:tours', 'Reserva en CuántoSale', false) + '</div>' +
+      '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>';
+  }
+  /* ===== Reserva de vuelo y alojamiento: se sale a un tercero y se vuelve a confirmar ===== */
+  var AEROPUERTO = { fln: 'FLN', bombinhas: 'FLN', rio: 'GIG', buz: 'GIG', ilha: 'GIG' };
+  var iCalR = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
+  var iPersR = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/>';
+  var iPinR = '<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.400"/>';
+  var partesReservadas = function () { return ['vuelo', 'aloj', 'tras', 'tours'].filter(function (k) { return S.res[k]; }).length; };
+  function abrirVueloIr() { S.modal = { tipo: 'vuelo_ir' }; pintarModal(); track('flujo_vuelo_ir_vista', {}); }
+  function vueloIrHoja() {
+    var v = vuelo(), personas = pax + (pax === 1 ? ' persona' : ' personas');
+    return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet vi" role="dialog" aria-modal="true" aria-label="Vas a buscar tu vuelo">' +
+      '<button type="button" class="f-modal__x vi__x" data-cerrar="1" aria-label="Cerrar">✕</button>' +
+      '<div class="vi__ico">' + ic(I.plane, 40) + '</div><h2 class="vi__h">Vas a buscar tu vuelo</h2>' +
+      '<p class="vi__p">Te llevaremos a Google Flights para comparar y reservar.</p>' +
+      '<div class="vi__vuelo"><div class="fl__air"><span class="fl__logo">' + esc(v.ab) + '</span>' + esc(v.air) + (v.ejemplo ? ' <span class="tagok" style="background:var(--cel-soft);color:var(--ink2)">Ejemplo</span>' : '') + '</div>' +
+      '<div class="fl__row"><div class="fl__t">' + v.sal + '<small>MVD</small></div><div class="fl__mid">' + v.durT + '<i></i>' + v.escT + '</div><div class="fl__t">' + v.lle + '<small>' + (AEROPUERTO[destKey] || '') + '</small></div>' +
+      '<div class="fl__price"><b>' + f(precioVuelo(v)) + '</b><small>ida y vuelta · ' + personas + '</small></div></div></div>' +
+      '<div class="vi__card"><span>' + ic('<circle cx="11" cy="11" r="6.500"/><path d="m16 16 4 4"/>', 22) + 'Montevideo → ' + esc(DEST) + '</span><span>' + ic(iCalR, 22) + fdc(IDA) + ' → ' + fdc(VUELTA) + '</span><span>' + ic(iPersR, 22) + personas + '</span></div>' +
+      '<button type="button" class="g-btn g-btn--main" data-gf="ir">Ir a Google Flights →</button>' +
+      '<button type="button" class="g-skip g-skip--l" data-cerrar="1">Volver</button>' +
+      '<p class="vi__legal">CuántoSale no realiza la reserva del vuelo.</p></div>';
+  }
+  function abrirAlojIr() { S.modal = { tipo: 'alojamiento_ir' }; pintarModal(); track('flujo_alojamiento_ir_vista', {}); }
+  function alojIrHoja() {
+    var d = datosFinal(), h = d.h, personas = pax + (pax === 1 ? ' persona' : ' personas');
+    return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet vi" role="dialog" aria-modal="true" aria-label="Vas a buscar tu alojamiento">' +
+      '<button type="button" class="f-modal__x vi__x" data-cerrar="1" aria-label="Cerrar">✕</button>' +
+      '<p class="vi__antes">ANTES DE SALIR A BOOKING</p>' +
+      '<div class="vi__ico vi__ico--g">' + ic(I.bed, 40) + '</div><h2 class="vi__h">Vas a buscar tu alojamiento</h2>' +
+      '<p class="vi__p">Elegiste esta opción como referencia para tu presupuesto.</p>' +
+      '<div class="vi__card"><span>' + ic(I.bed, 22) + '<b>' + esc(h.nom) + '</b></span><span>' + ic(iPinR, 22) + esc(DEST) + '</span><span>' + ic(iCalR, 22) + fdc(IDA) + ' → ' + fdc(VUELTA) + '</span><span>' + ic(iPersR, 22) + personas + '</span>' +
+      '<span class="vi__est"><b>' + f(d.tAloj) + '</b> estimados</span></div>' +
+      '<p class="vi__p vi__p--s">En Booking podés elegir este alojamiento u otra opción disponible. El precio y la disponibilidad pueden cambiar.</p>' +
+      '<button type="button" class="g-btn g-btn--main" data-bk="ir">Ir a Booking →</button>' +
+      '<button type="button" class="g-skip g-skip--l" data-cerrar="1">Volver</button></div>';
+  }
+  function irATercero(servicio) {
+    var id = window.CS_VIAJE_ID, d = datosFinal(), url;
+    if (servicio === 'vuelo') url = 'https://www.google.com/travel/flights?' + new URLSearchParams({ q: 'Flights from MVD to ' + (AEROPUERTO[destKey] || destKey.toUpperCase()) + ' on ' + IDA + ' through ' + VUELTA }).toString();
+    else {
+      /* Con el id de Booking del hotel se abre ESE alojamiento (dest_type=hotel); buscar por nombre devolvia
+         el destino mas parecido y no la pousada. Los hoteles de ejemplo no tienen id: ahi solo queda el nombre. */
+      var q = { checkin: IDA, checkout: VUELTA, group_adults: pax, no_rooms: 1, label: 'cs-' + id };
+      if (/^[0-9]{3,12}$/.test(String(d.h.id)) && !d.h.ejemplo) { q.dest_id = d.h.id; q.dest_type = 'hotel'; q.ss = d.h.nom; }
+      else q.ss = d.h.nom + ' ' + DEST;
+      url = 'https://www.booking.com/searchresults.html?' + new URLSearchParams(q).toString();
+    }
+    track('reserva_click', { servicio: servicio, proveedor: servicio === 'vuelo' ? 'google_flights' : 'booking', salida_a_tercero: true, importe: Math.round(servicio === 'vuelo' ? d.tVuelo : d.tAloj), sesion: S.sesion || 'sin_sesion' });
+    S.esperando = servicio;
+    S.modal = null; pintarModal();
+    /* Sin 'noopener' en las opciones: con esa opcion window.open devuelve siempre null y era imposible
+       distinguir una pestana abierta de una bloqueada. El opener se corta a mano. */
+    var w = window.open(url, '_blank');
+    if (w) { try { w.opener = null; } catch (e) { /* otro origen: no hace falta */ } }
+    else volvioDelTercero();   // si el navegador bloquea la pestana, se pregunta igual
+  }
+  function volvioDelTercero() {
+    if (!S.esperando) return;
+    S.qServicio = S.esperando; S.esperando = null; ir(9, 'vuelta_de_tercero');
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') volvioDelTercero(); });
+
+  /* Paso 9: ¿Reservaste? */
+  function pantalla9() {
+    var d = datosFinal(), vuelo = S.qServicio === 'vuelo';
+    if (!vuelo) {
+      return '<div class="rq"><div class="rq__ico"><span class="rq__d rq__d1"></span><span class="rq__d rq__d2"></span><span class="rq__d rq__d3"></span>' + ic(I.bed, 54) + '</div>' +
+        '<h1 class="rq__h">¿Ya resolviste tu alojamiento?</h1>' +
+        '<button type="button" class="rq__op" data-reservado="si"><b>Sí, reservé el que había elegido</b><small>' + esc(d.h.nom) + ' · ' + f(precioHotelEstimado(d.h)) + '</small></button>' +
+        '<button type="button" class="rq__op" data-reservado="otro"><b>Sí, pero elegí otro</b><small>Informar alojamiento reservado</small></button>' +
+        '<button type="button" class="rq__op rq__op--no" data-reservado="no"><b>Todavía no</b><small>Mantener pendiente</small></button>' +
+        '<button type="button" class="g-skip g-skip--l" data-ir="6" data-evento="flujo_volver_reserva">Volver a la reserva</button></div>';
+    }
+    return '<div class="rq"><div class="rq__ico"><span class="rq__d rq__d1"></span><span class="rq__d rq__d2"></span><span class="rq__d rq__d3"></span>' + ic(I.plane, 54) + '</div>' +
+      '<h1 class="rq__h">¿Reservaste tu vuelo?</h1>' +
+      '<p class="rq__p">Montevideo → ' + esc(DEST) + '</p>' +
+      '<p class="rq__pr"><b>' + f(d.tVuelo) + '</b> (estimado)</p>' +
+      '<button type="button" class="rq__si" data-reservado="si">Sí, ya lo reservé ✓</button>' +
+      '<button type="button" class="rq__no" data-reservado="no">Todavía no</button>' +
+      '<button type="button" class="g-skip g-skip--l" data-ir="6" data-evento="flujo_volver_reserva">Volver a la reserva</button></div>';
+  }
+  /* Paso 11: Confirmá tu reserva (traslados y tours, que se reservan con CuántoSale) */
+  function serviciosCs() {
+    var d = datosFinal(), pers = pax + (pax === 1 ? ' persona' : ' personas'), lista = [];
+    if (d.t) lista.push({ ico: 'van', nom: d.t.nom + ' aeropuerto', det: 'Aeropuerto ⇄ alojamiento', pers: pers, precio: d.tTras });
+    d.ex.forEach(function (e) {
+      if (e.cat === 'tours' || e.cat === 'tras') lista.push({ ico: e.cat === 'tras' ? 'van' : 'palm', nom: e.nom, det: e.dur || '', pers: e.pp ? pers : (e.grupo || ''), precio: precioExtra(e) });
+    });
+    return lista;
+  }
+  /* Paso 13: Reserva confirmada (la confirma el asesor; en la maqueta se simula al tocar una fila "Solicitado"). */
+  function pantalla13() {
+    var k = S.confK === 'tras' ? 'tras' : 'tours', lista = serviciosCs().filter(function (x) { return (x.ico === 'palm') === (k === 'tours'); });
+    var total = sum(lista, function (x) { return x.precio; }), d = datosFinal(), personas = pax + (pax === 1 ? ' persona' : ' personas');
+    var tour = k === 'tours' ? d.ex.filter(function (e) { return e.cat === 'tours'; })[0] : null;
+    var nombre = lista.length ? lista.map(function (x) { return x.nom; }).join(' + ') : (k === 'tras' ? 'Traslado' : 'Tour');
+    var det = lista.length === 1 ? (lista[0].det ? lista[0].det + ' · ' : '') + personas : personas;
+    var conf = ['#F6B21B', '#1F7FE0', '#2BB58A', '#E4572E', '#8B6CE0'], pie = '';
+    for (var i = 0; i < 14; i++) { var a = i / 14 * 6.283; pie += '<i style="left:' + (50 + 42 * Math.cos(a)).toFixed(1) + '%;top:' + (48 + 40 * Math.sin(a)).toFixed(1) + '%;background:' + conf[i % 5] + ';transform:rotate(' + (i * 47) + 'deg)"></i>'; }
+    return '<div class="cn"><div class="cn__ok"><div class="cn__conf" aria-hidden="true">' + pie + '</div><span>' + ic('<path d="m6 12.500 4 4 8-9"/>', 46) + '</span></div>' +
+      '<h1 class="cn__h">¡Reserva confirmada!</h1><p class="cn__p">Tu experiencia en ' + esc(DEST) + '<br>ya está en camino.</p>' +
+      '<div class="cn__card"><div class="cn__top"><span class="cn__img" style="background-image:url(\'' + (tour && tour.foto ? esc(tour.foto) : (k === 'tras' ? 'traslado-auto.png' : 'home-ilha-bahia.jpg')) + '\')" aria-hidden="true"></span><span><b>' + esc(nombre) + '</b><small>' + esc(det) + '</small></span></div>' +
+      '<div class="cn__row"><span><small>Fecha</small><b>' + fdc(IDA) + ' → ' + fdc(VUELTA) + '</b></span><span style="text-align:right"><small>Total reservado</small><b class="cn__tot">' + f(total) + '</b></span></div></div>' +
+      '<div class="cn__nota">' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>', 22) + '<span>Recibirás un comprobante por WhatsApp y email con todos los detalles de tu reserva.</span></div>' +
+      '<button type="button" class="g-btn g-btn--main" data-ir="7" data-evento="flujo_conf_ver_viaje">Ver mi viaje →</button>' +
+      '<a class="g-skip g-skip--l" style="display:block;text-align:center" href="home-dos-caminos.html" data-evento="flujo_conf_inicio">Volver al inicio</a></div>';
+  }
+  /* Enlace de confirmacion: ?viaje=<ref>&conf=tras|tours&codigo=<codigo>. Solo lo genera el asesor.
+     OJO: en la maqueta el codigo se valida en el navegador, asi que NO es seguro; en produccion
+     lo firma y lo verifica el servidor (HMAC con una clave que el cliente no tiene). */
+  function codigoConf(id, srv) { var h = 2166136261, t = id + '|' + srv + '|cs-demo-2026'; for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).toUpperCase().padStart(7, '0'); }
+  var PAISES = [['+598', 'UY +598'], ['+54', 'AR +54'], ['+55', 'BR +55'], ['+56', 'CL +56'], ['+595', 'PY +595'], ['+34', 'ES +34'], ['+1', 'US +1']];
+  function pantalla11() {
+    var d = datosFinal(), lista = serviciosCs(), personas = pax + (pax === 1 ? ' persona' : ' personas'), dt = S.datos || {}, er = S.datosErr || {};
+    var total = sum(lista, function (x) { return x.precio; });
+    var cab = '<h1 class="f-h" style="margin-top:4px">Confirmá tu reserva</h1><p class="f-sub" style="margin:4px 0 12px">Completá tus datos para finalizar la reserva de los servicios seleccionados.</p>' +
+      '<div class="cf-trip"><div class="cf-trip__top"><span class="cf-trip__img" aria-hidden="true"></span><span><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small>' +
+      '<button type="button" class="cf-trip__ver" data-resumen="1" aria-expanded="' + !!S.resumenAbierto + '">Ver resumen del viaje ' + (S.resumenAbierto ? '⌃' : '⌄') + '</button></span></div>' +
+      (S.resumenAbierto ? '<ul class="cf-res"><li><span>Vuelo</span><b>' + f(d.tVuelo) + '</b></li><li><span>Alojamiento</span><b>' + f(d.tAloj) + '</b></li><li><span>Servicios con CuántoSale</span><b>' + f(total) + '</b></li><li><span>Total estimado del viaje</span><b>' + f(d.total) + '</b></li></ul>' : '') + '</div>';
+    if (!lista.length) return cab + '<div class="cf-vacio"><b>Todavía no elegiste traslados ni tours.</b><span>Elegí lo que quieras reservar con CuántoSale y volvé acá.</span>' +
+      '<button type="button" class="g-btn g-btn--main" data-ir="1" data-evento="flujo_cs_elegir_traslado">Elegir traslado</button><button type="button" class="g-btn" data-ir="3" data-evento="flujo_cs_elegir_tours">Elegir tours y actividades</button></div>';
+    var err = function (k) { return er[k] ? '<p class="g-err" role="alert">' + esc(er[k]) + '</p>' : ''; };
+    return cab + '<h2 class="fin-h2">Servicios a reservar</h2><div class="cf-lista">' +
+      lista.map(function (x) { return '<div class="cf-svc"><span class="fin-ico fin-ico--green">' + ic(I[x.ico], 24) + '</span><span class="fin-t"><b>' + esc(x.nom) + '</b><small>' + esc(x.det) + '<br>' + esc(x.pers) + '</small></span><span class="fin-p">' + f(x.precio) + '</span></div>'; }).join('') +
+      '<div class="cf-total"><span>Total</span><b>' + f(total) + '</b></div></div>' +
+      '<h2 class="fin-h2">Tus datos</h2>' +
+      '<form id="cs-form" class="af" novalidate>' +
+      '<label class="g-lbl" for="cf-nom">Nombre y apellido</label><input id="cf-nom" class="g-in" type="text" autocomplete="name" placeholder="Ej. Juan Pérez" value="' + esc(dt.nombre || '') + '">' + err('nombre') +
+      '<label class="g-lbl" for="cf-tel">WhatsApp</label><div class="cf-tel"><select id="cf-pais" class="g-in" aria-label="Código de país">' + PAISES.map(function (c) { return '<option value="' + c[0] + '"' + ((dt.pais || '+598') === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select>' +
+      '<input id="cf-tel" class="g-in" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="Número de teléfono" value="' + esc(dt.tel || '') + '"></div>' + err('tel') +
+      '<label class="g-lbl" for="cf-mail">Email</label><input id="cf-mail" class="g-in" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" value="' + esc(dt.mail || '') + '">' + err('mail') +
+      '<button type="submit" class="g-btn g-btn--main" style="margin-top:16px">Continuar →</button></form>' +
+      '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>';
+  }
+
+  /* El mensaje que se manda es exactamente el que se muestra en la vista previa. */
+  /* Sin emojis: WhatsApp Desktop/Web los muestra como "?" cuando vienen en un enlace wa.me.
+     Se usa el formato propio de WhatsApp: *negrita* y listas con viñetas. */
+  function mensajeWA() {
+    var lista = serviciosCs(), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
+    return 'Hola CuántoSale! Quiero reservar parte de mi viaje a *' + DEST + '*.\n\n' +
+      '*Fechas:* ' + fdc(IDA) + ' → ' + fdc(VUELTA) + '\n*Personas:* ' + pax + '\n\n' +
+      '*Servicios a reservar:*\n' + lista.map(function (x) { return '• ' + x.nom + ' — ' + f(x.precio); }).join('\n') +
+      '\n\n*Total estimado:* ' + f(total) + '\n\n' +
+      '*Mis datos*\nNombre: ' + (dt.nombre || '') + '\nWhatsApp: ' + (dt.pais || '') + ' ' + (dt.tel || '') + '\nEmail: ' + (dt.mail || '') + '\n\n' +
+      'Ref: ' + window.CS_VIAJE_ID;
+  }
+  var iWa = '<path d="M3 21l1.600-4.700A8.500 8.500 0 1 1 8 19.500z"/><path d="M9 9.500c0 3 2.500 5.500 5.500 5.500l1.200-1.500-2-1-.8.700c-.9-.4-1.600-1.100-2-2l.7-.8-1-2z"/>';
+  function pantalla12() {
+    var chk = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.500 2.700 2.700L16 9.500"/></svg>';
+    return '<h1 class="f-h" style="margin-top:4px">Vas a continuar por WhatsApp</h1><p class="f-sub" style="margin:4px 0 12px">Un asesor de CuántoSale va a confirmar disponibilidad y coordinar tu reserva.</p>' +
+      '<div class="wa-incl"><span class="wa-incl__ico">' + ic(iWa, 30) + '</span><div><b>El mensaje incluirá:</b><ul>' +
+      ['Tu destino y fechas', 'Cantidad de personas', 'Servicios seleccionados', 'Total estimado'].map(function (t) { return '<li>' + chk + t + '</li>'; }).join('') + '</ul></div></div>' +
+      '<div class="wa-chat" aria-label="Vista previa del mensaje"><div class="wa-chat__top"><span class="wa-chat__av">' + ic(I.plane, 16) + '</span><div><b>CuántoSale <i>✔</i></b><small>en línea</small></div></div>' +
+      '<div class="wa-chat__body"><div class="wa-msg">' + esc(mensajeWA()).replace(/\*([^*\n]+)\*/g, '<b>$1</b>').replace(/\n/g, '<br>') + '<span class="wa-msg__h">' + new Date().toTimeString().slice(0, 5) + ' ✓✓</span></div></div></div>' +
+      '<p class="wa-nota">' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>', 20) + 'Podés revisar y editar el mensaje antes de abrir WhatsApp.</p>' +
+      '<button type="button" class="g-btn g-btn--main" data-wa="1">' + ic(iWa, 22) + 'Abrir WhatsApp →</button>' +
+      '<button type="button" class="g-skip g-skip--l" data-ir="11" data-evento="flujo_wa_volver">← Cambiar mis datos</button>';
+  }
+
+  /* Paso 10: la persona reservo otro alojamiento y lo informa */
+  function pantalla10() {
+    var a = S.alojForm || {};
+    return '<div class="ho__head"><span class="ho__headico">' + ic(I.bed, 30) + '</span><div><h1 class="f-h" style="margin:0">¿Qué alojamiento reservaste?</h1><p class="f-sub" style="margin:2px 0 0">Así actualizamos tu presupuesto con lo que realmente vas a pagar.</p></div></div>' +
+      '<form id="aloj-form" class="af" novalidate>' +
+      '<label class="g-lbl" for="af-nom">Nombre del alojamiento</label><input id="af-nom" class="g-in" type="text" autocomplete="off" placeholder="Pousada XXXXXXXX" value="' + esc(a.nombre || '') + '">' +
+      '<div class="af__row"><div><label class="g-lbl" for="af-pre">Precio reservado (opcional)</label><div class="af__pre"><span>US$</span><input id="af-pre" class="g-in" type="number" inputmode="decimal" min="0" step="1" placeholder="460" value="' + esc(a.precio || '') + '"></div></div>' +
+      '<div><label class="g-lbl" for="af-noc">Noches</label><input id="af-noc" class="g-in" type="number" inputmode="numeric" min="1" max="60" value="' + esc(a.noches || NOCHES) + '"></div></div>' +
+      (a.error ? '<p class="g-err" role="alert">' + esc(a.error) + '</p>' : '') +
+      '<button type="submit" class="g-btn g-btn--main">Guardar alojamiento</button></form>' +
+      '<button type="button" class="g-skip g-skip--l" data-ir="9" data-evento="flujo_volver">← Volver</button>';
+  }
+
+  /* Paso 7: Estado de tu viaje */
+  function pantalla7() {
+    var d = datosFinal(), personas = pax + (pax === 1 ? ' persona' : ' personas'), n = partesReservadas();
+    var toursSel = d.ex.filter(function (e) { return e.cat === 'tours'; });
+    var toursPrecios = EXTRAS.filter(function (g) { return g.cat === 'tours'; }).reduce(function (a, g) { return a.concat(g.items.map(function (e) { return e.precio; })); }, []);
+    var precioTras = d.t ? f(d.tTras) : 'Desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio)));
+    var precioTours = toursSel.length ? f(sum(toursSel, precioExtra)) : (toursPrecios.length ? 'Desde ' + f(Math.min.apply(null, toursPrecios)) : '');
+    function fila(ico, tono, titulo, clave, precio, accion) {
+      var ok = !!S.res[clave], sol = !ok && S.sol && S.sol[clave];
+      return '<button type="button" class="fin-row ed-row" data-estado="' + accion + '"><span class="fin-ico fin-ico--' + tono + '">' + ic(I[ico], 26) + '</span><span class="fin-t"><b>' + titulo + '</b>' +
+        '<span class="ed-st ' + (ok ? 'is-ok' : (sol ? 'is-sol' : '')) + '">' + (sol ? ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 15) + 'Solicitado · te contactamos por WhatsApp' : ok ? ic('<circle cx="12" cy="12" r="9"/><path d="m8 12.500 2.700 2.700L16 9.500"/>', 15) + 'Reservado' + (clave === 'aloj' && S.alojReservado ? ' · ' + esc(S.alojReservado.nombre) : '') : ic('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', 15) + 'Pendiente') + '</span></span>' +
+        '<span class="fin-p">' + precio + '</span>' + ic(iChev, 16) + '</button>';
+    }
+    var msg = n === 4 ? '¡Tu viaje está completo!' : (n === 0 ? 'Elegí por dónde querés empezar' : 'Tu viaje está tomando forma');
+    return '<div class="ed-hero"><div class="ed-hero__t"><b>' + esc(DEST) + '</b><span>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</span></div></div>' +
+      '<h2 class="fin-h2">Estado de tu viaje</h2>' +
+      '<div class="fin-list fv-list">' +
+      fila('plane', 'blue', 'Vuelo', 'vuelo', f(d.tVuelo), 'vuelo') +
+      fila('bed', 'green', 'Alojamiento', 'aloj', f(d.tAloj), 'aloj') +
+      fila('van', 'green', 'Traslados', 'tras', precioTras, 'tras') +
+      fila('palm', 'yellow', 'Tours y actividades', 'tours', precioTours, 'tours') + '</div>' +
+      (S.alojReservado && S.alojReservado.precio ? '<p class="ed-act">Presupuesto actualizado: <b>' + f(d.total) + '</b> (' + (d.tAloj - precioHotelEstimado(d.h) >= 0 ? '+' : '−') + f(Math.abs(d.tAloj - precioHotelEstimado(d.h))) + ' en alojamiento vs. lo estimado)</p>' : '') +
+      '<p class="ed-n">' + n + ' de 4 partes reservadas</p><div class="ed-bar" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="' + n + '"><span style="width:' + (n * 25) + '%"></span></div>' +
+      '<div class="rv-ahorro">' + ic('<path d="M3 5h8v6H3zM13 13h8v6h-8zM11 8h2a2 2 0 0 1 2 2v3M13 16h-2a2 2 0 0 1-2-2v-3"/>', 24) + '<span><b>' + msg + '</b>' + (S.avisoCs ? esc(S.avisoCs) : 'Reservá cada parte cuando quieras.') + '</span></div>' +
+      '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>';
+  }
+
+  /* Paso 8: Alojamiento, antes de ir a Booking */
+  function pantalla8() {
+    var d = datosFinal(), h = d.h, personas = pax + (pax === 1 ? ' persona' : ' personas');
+    return '<div class="al-hero" style="background-image:url(\'' + esc(h.img) + '\')" role="img" aria-label="Foto de ' + esc(h.nom) + '"></div>' +
+      '<div class="al-card"><h1>' + esc(h.nom) + '</h1><p class="al-z">' + ic(iPinR, 14) + esc(h.zona) + '</p>' +
+      (h.rat ? '<p class="al-r"><span>★</span> <b>' + String(h.rat).replace('.', ',') + '</b> (' + h.n.toLocaleString('es-UY') + ' reseñas)</p>' : '') +
+      (S.habitacion && S.habitacion.hotelId === h.id ? '<p class="al-hab">Habitación: ' + esc(S.habitacion.nombre) + '</p>' : '') +
+      '<div class="al-chips"><span>' + ic(iCalR, 20) + NOCHES + ' noches</span><span>' + ic(iPersR, 20) + personas + '</span></div>' +
+      '<div class="al-p"><b>' + f(d.tAloj) + '</b><button type="button" class="al-btn" data-booking="ir">Ver opciones →</button></div></div>' +
+      '<div class="al-ext"><b>Booking.com</b><span><i>EXTERNO · BOOKING.COM</i>Vas a ser redirigido a Booking.com para completar la reserva.</span></div>' +
+      '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>';
+  }
+  /* Traslado y tours se reservan con CuantoSale: el servidor manda la confirmacion por WhatsApp. */
+  function enviarConfirmacion() {
+    var lista = serviciosCs(), dt = S.datos || {};
+    if (!lista.length || !dt.tel || S.confirmacionEnviada === dt.pais + dt.tel) return;
+    S.confirmacionEnviada = dt.pais + dt.tel;   // un solo envio por numero, aunque toquen el boton dos veces
+    fetch('/api/reserva-whatsapp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      nombre: dt.nombre, telefono: dt.pais + dt.tel.replace(/^0+/, ''), destino: DEST, fechas: fdc(IDA) + ' → ' + fdc(VUELTA), personas: pax + (pax === 1 ? ' persona' : ' personas'),
+      servicios: lista.map(function (x) { return { nombre: x.nom, detalle: x.det }; }), total: f(sum(lista, function (x) { return x.precio; })) }) })
+      .then(function (r) { track('reserva_cs_confirmacion_wa', { enviada: r.ok, estado: r.status }); })
+      .catch(function () { track('reserva_cs_confirmacion_wa', { enviada: false, estado: 0 }); });
+  }
+  /* (hoja anterior, ya sin uso) */
+  function reservasHoja() {
+    var reservas = [
+      ['plane', 'blue', 'Vuelo', 'Compará y reservá en Google Flights.', 'Ver vuelos →', 'externo:google_flights', 'Google Flights'],
+      ['bed', 'green', 'Alojamiento', 'Compará y reservá en Booking.', 'Ver alojamientos →', 'externo:booking', 'Booking.com'],
+      ['van', 'green', 'Traslados', 'Reservá con CuántoSale.', 'Ver opciones →', 'cs:traslado', 'CuántoSale'],
+      ['palm', 'yellow', 'Tours y actividades', 'Reservá con CuántoSale.', 'Ver opciones →', 'cs:tours', 'CuántoSale']
+    ];
+    return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="¿Cómo querés reservar?">' +
+      '<div class="f-modal__top"><div><small>RESERVAR</small><h2>¿Cómo querés reservar?</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>' +
+      '<p class="f-modal__note">Elegí dónde querés gestionar cada parte de tu viaje.</p>' +
+      '<div class="fin-grid">' + reservas.map(function (r) {
+        return '<div class="fin-card"><div class="fin-card__t"><span class="fin-ico fin-ico--' + r[1] + '">' + ic(I[r[0]], 22) + '</span><b>' + r[2] + '</b></div><small>' + r[3] + '</small>' +
+          '<div class="fin-card__f"><button type="button" class="fin-link" data-reservar="' + r[5] + '">' + r[4] + '</button><em>' + r[6] + '</em></div></div>';
+      }).join('') + '</div>' +
+      '<p class="legal">CuántoSale no confirma estas reservas por vos. El vuelo y el alojamiento se completan en el sitio del proveedor; traslados y tours, con CuántoSale. Comidas y transporte local son una estimación.</p></div>';
+  }
+  /* Se pide la cuenta recien cuando hay una razon clara: guardar el viaje armado antes de reservar. */
+  function guardarHoja(m) {
+    var d = datosFinal(), personas = pax + (pax === 1 ? ' persona' : ' personas');
+    var marca = '<div class="g-top"><button type="button" class="f-back" data-cerrar="1" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>' +
+      '<div class="f-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>';
+    var iMarca = '<path d="M6 3h12v18l-6-4.500L6 21z"/><circle cx="12" cy="10" r="2.400"/><path d="M12 12.400V14"/>';
+    var cab = '<div class="g-full" role="dialog" aria-modal="true" aria-label="Guardá tu viaje">' + marca + '<div class="g-body"><div class="g-ico">' + ic(iMarca, 34) + '</div><h2 class="g-h">Guardá tu viaje</h2>';
+    if (m.email) return cab + '<p class="g-p">Te enviamos un enlace para entrar y guardar este presupuesto. No hace falta contraseña.</p>' +
+      '<form id="g-form" novalidate><label class="g-lbl" for="g-mail">Tu email</label><input id="g-mail" class="g-in" type="email" inputmode="email" autocomplete="email" placeholder="nombre@correo.com" value="' + esc(m.mail || '') + '">' +
+      (m.error ? '<p class="g-err" role="alert">' + esc(m.error) + '</p>' : '') +
+      '<button type="submit" class="g-btn g-btn--main">Guardar y continuar</button></form>' +
+      '<button type="button" class="g-skip" data-g="volver">← Volver</button></div></div>';
+    var beneficios = [
+      ['Guardá tu presupuesto', '<path d="M6 3h12v18l-6-4.500L6 21z"/>'],
+      ['Compartilo con amigos', '<circle cx="6" cy="12" r="2.600"/><circle cx="17.500" cy="6" r="2.600"/><circle cx="17.500" cy="18" r="2.600"/><path d="m8.300 10.800 6.900-3.600M8.300 13.200l6.900 3.600"/>'],
+      ['Dividí los gastos', '<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c0-3.600 2.900-6 6.500-6s6.500 2.400 6.500 6M16 4.800a3.300 3.300 0 0 1 0 6.400M18.500 14.300c1.700.8 3 2.500 3 5.200"/>']
+    ];
+    var ilustracion = '<div class="g-ilu" aria-hidden="true"><span class="g-ilu__c">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 44) + '</span>' +
+      '<svg class="g-ilu__avion" width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path transform="rotate(45 12 12)" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div>';
+    return '<div class="g-full" role="dialog" aria-modal="true" aria-label="Guardá tu viaje">' + marca + '<div class="g-body g-body--c">' + ilustracion +
+      '<h2 class="g-h g-h--c">¿Querés guardar<br>tu viaje?</h2><p class="g-p g-p--c">Guardá tu presupuesto y volvé cuando quieras.</p>' +
+      '<div class="g-trip"><div class="g-trip__img" aria-hidden="true"></div><div><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small><strong>' + f(d.total) + '</strong><small>Total estimado</small></div></div>' +
+      '<ul class="g-ben g-ben--l">' + beneficios.map(function (x) { return '<li><span>' + ic(x[1], 22) + '</span>' + x[0] + '</li>'; }).join('') + '</ul>' +
+      '<button type="button" class="g-btn g-btn--main" data-g="google"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22 12.200c0-.7-.1-1.400-.2-2H12v3.900h5.600a4.800 4.800 0 0 1-2.100 3.100v2.600h3.400c2-1.800 3.100-4.500 3.100-7.600z"/><path fill="#34A853" d="M12 22c2.800 0 5.200-.9 6.900-2.500l-3.400-2.600c-.9.600-2.100 1-3.500 1-2.700 0-5-1.800-5.800-4.300H2.700v2.700A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.200 13.600a6 6 0 0 1 0-3.800V7.100H2.700a10 10 0 0 0 0 9.200z"/><path fill="#EA4335" d="M12 6c1.500 0 2.900.5 4 1.600l3-3A10 10 0 0 0 2.700 7.100l3.500 2.700C7 7.800 9.300 6 12 6z"/></svg>Continuar con Google</button>' +
+      '<button type="button" class="g-btn" data-g="email">' + ic('<rect x="3" y="5" width="18" height="14" rx="2.500"/><path d="m3.500 7 8.500 6 8.500-6"/>', 20) + 'Continuar con email</button>' +
+      '<p class="g-p g-p--s">También podés seguir sin registrarte.</p>' +
+      '<button type="button" class="g-skip g-skip--l" data-g="skip">Ahora no, continuar →</button></div></div>';
+  }
+  function abrirGuardar() {
+    if (S.sesion || S.sinGuardar) { ir(6, S.sesion ? 'con_sesion' : 'sin_guardar'); return; }
+    S.modal = { tipo: 'guardar' }; pintarModal(); track('flujo_guardar_vista', { total: Math.round(totalHastaAhora()) });
+  }
+  function seguirAReservas() { ir(5, S.sesion ? 'guardado' : 'sin_guardar'); }
+  function reservar(valor) {
+    var r = valor.split(':');
+    if (r[1] === 'google_flights') { S.desde8 = 0; abrirVueloIr(); return; }
+    if (r[1] === 'booking') { S.desde8 = S.paso === 7 ? 7 : 6; ir(8, 'reservar_alojamiento'); return; }
+    S.desde11 = S.paso; ir(11, 'reservar_con_cuantosale');
+    track('reserva_click', { servicio: r[1], proveedor: 'cuantosale', salida_a_tercero: false, importe: Math.round(r[1] === 'traslado' ? datosFinal().tTras : datosFinal().tExtras), sesion: S.sesion || 'sin_sesion' });
+  }
+  function compartir() {
+    var d = datosFinal(), txt = resumenTexto(d);
+    track('flujo_compartir', { total: Math.round(d.total) });
+    if (navigator.share) { navigator.share({ title: 'Mi viaje a ' + DEST, text: txt }).catch(function () {}); return; }
+    var listo = function () { S.copiado = true; render(false); setTimeout(function () { S.copiado = false; if (S.paso === 4) render(false); }, 2000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(listo).catch(function () {});
+  }
+  /* ---- Render ---- */
+  /* ---- Vuelos reales (/api/vuelos/buscar de la app). Hasta que llegan, se ven los de ejemplo, marcados. ---- */
+  var hora = function (iso) { return String(iso || '').slice(11, 16); };
+  var minutos = function (t) { var m = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?/.exec(t || ''); return (+m[1] || 0) * 60 + (+m[2] || 0); };
+  function mapVuelo(o, i, minP) {
+    var o1 = o.outbound || {}, esc = o.stops != null ? o.stops : (o1.stops || 0), air = o.airline || 'Aerolínea';
+    return { id: String(o.id || 'v' + i), air: air, ab: air.replace(/[^A-Za-zÁÉÍÓÚ ]/g, '').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase() || '✈',
+      sal: hora(o.departure), lle: hora(o.arrival), dur: minutos(o.duration), durT: o.duration || '', esc: esc, escT: esc === 0 ? 'Directo' : esc + (esc === 1 ? ' escala' : ' escalas'),
+      precio: o.price_usd / k, mejor: o.price_usd === minP, rec: i === 0 };
+  }
+  function cargarVuelos() {
+    if (!/^https?:$/.test(location.protocol)) { S.avisoV = 'Vuelos de ejemplo: abrí la maqueta desde el servidor de la app para ver precios reales.'; return; }
+    S.cargandoV = true;
+    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax, style: 'eq' }) })
+      .then(function (r) { return r.json().then(function (d) { if (!r.ok || !(d.offers || []).length) throw new Error(d.error || 'sin vuelos'); return d; }); })
+      .then(function (d) {
+        var offers = d.offers.filter(function (o) { return o.price_usd > 0; }).slice(0, 12), minP = Math.min.apply(null, offers.map(function (o) { return o.price_usd; }));
+        VUELOS = offers.map(function (o, i) { return mapVuelo(o, i, minP); });
+        if (d.destination) AEROPUERTO[destKey] = d.destination;
+        S.vuelo = (VUELOS.filter(function (v) { return v.mejor; })[0] || VUELOS[0]).id; S.avisoV = '';
+        track('flujo_vuelos', { reales: true, cantidad: VUELOS.length });
+      })
+      .catch(function (e) { S.avisoV = 'No pudimos consultar vuelos reales ahora (' + (e.message || 'error') + '). Mostramos ejemplos.'; track('flujo_vuelos', { reales: false }); })
+      .then(function () { S.cargandoV = false; render(false); });
+  }
+  var CTAS = { 1: 'Continuar a Alojamiento →', 2: 'Continuar a Extras →', 3: 'Continuar a Tu presupuesto →', 4: 'Ver opciones para reservar →' };
+  function render(scrollTop) {
+    pintarPasos(); pintarTotal();
+    $('main').innerHTML = [null, pantalla1, pantalla2, pantalla3, pantalla4, pantalla5, pantalla6, pantalla7, pantalla8, pantalla9, pantalla10, pantalla11, pantalla12, pantalla13][S.paso]();
+    $('steps').hidden = S.paso >= 5;
+    $('foot').hidden = S.paso >= 5;
+    if (S.paso < 5) { $('cta').textContent = CTAS[S.paso]; $('cta').disabled = S.paso === 2 && S.cargandoH; $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
+    if (scrollTop) $('main').scrollTop = 0;
+  }
+  /* ---- Hoteles reales (Booking, via /api/hoteles de la app) ---- */
+  var TIPOS = ['economico', 'intermedio', 'confort'];
+  var TIPO_TXT = { economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
+  function mapHotel(h) {
+    var m = String(h.roomLabel || '').replace(/\s*·.*$/, '').replace(/\s*:.*$/, '');
+    var det = String(h.roomLabel || '').split(':')[1] ? String(h.roomLabel).split(':')[1].split('·')[0].trim() : '';
+    return { id: String(h.hotelId || h.name), nom: h.name, cat: (h.hotelTypeLabel || TIPO_TXT[h.hotelType] || 'Alojamiento') + (h.stars ? ' ' + h.stars + '★' : ''),
+      rat: Number(h.rating) || 0, n: Number(h.reviewCount) || 0, zona: h.playa || h.areaLabel || DEST,
+      playa: h.playaKm != null ? Math.round(h.playaKm * 1000) : null, serv: [m, det].filter(Boolean).slice(0, 2).concat(h.mealPlan ? [h.mealPlan] : []),
+      precio: Number(h.total), rec: !!h.recommended, img: h.image || 'home-ilha-bahia.jpg' };
+  }
+  function cargarHoteles() {
+    S.hotelesListos = true;
+    if (!/^https?:$/.test(location.protocol)) { S.avisoH = 'Hoteles de ejemplo: abrí la maqueta desde el servidor de la app (localhost) para ver precios reales de Booking.'; return Promise.resolve(); }
+    S.cargandoH = true;
+    var pedir = function (tipo) {
+      var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, style: 'eq', hotel_type: tipo, subcategory: '' });
+      return fetch('/api/hoteles?' + q.toString()).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'error'); return d; }); });
+    };
+    return Promise.all(TIPOS.map(function (t) { return pedir(t).catch(function () { return { hotels: [] }; }); })).then(function (rs) {
+      var vistos = {}, lista = [];
+      rs.forEach(function (d) { [].concat(d.hotels || [], [].concat.apply([], (d.hotelsPorPlaya || []).map(function (g) { return g.hotels || []; }))).forEach(function (h) {
+        if (h.source !== 'booking' || !(Number(h.total) > 0) || vistos[h.hotelId || h.name]) return;
+        vistos[h.hotelId || h.name] = 1; lista.push(mapHotel(h));
+      }); });
+      if (!lista.length) throw new Error('Booking no devolvió alojamientos');
+      HOTELES = lista;
+      S.hotel = ordenarHoteles()[0].id;
+    }).catch(function (e) {
+      S.avisoH = 'No pudimos consultar Booking ahora (' + (e.message || 'error') + '). Mostramos ejemplos.';
+    }).then(function () { S.cargandoH = false; track('flujo_hoteles', { reales: !HOTELES[0].ejemplo, cantidad: HOTELES.length }); render(false); });
+  }
+  /* ---- Habitaciones de un hotel (Booking, /api/hotel-habitaciones de la app) ---- */
+  function abrirHabitaciones(hotelId) {
+    var h = HOTELES.filter(function (x) { return x.id === hotelId; })[0]; if (!h) return;
+    S.modal = { hotelId: hotelId, cargando: true, rooms: [], error: '' };
+    track('flujo_ver_habitaciones', { hotel: hotelId, nombre: h.nom, zona: h.zona });
+    pintarModal();
+    var q = new URLSearchParams({ hotel_id: hotelId, dep: IDA, ret: VUELTA, pax: pax });
+    fetch('/api/hotel-habitaciones?' + q.toString()).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'error'); return d; }); })
+      .then(function (d) { S.modal.rooms = d.rooms || []; if (!S.modal.rooms.length) S.modal.error = 'Booking no devolvió habitaciones para estas fechas.'; })
+      .catch(function (e) { S.modal.error = 'No pudimos cargar las habitaciones ahora (' + (e.message || 'error') + ').'; })
+      .then(function () { if (S.modal) { S.modal.cargando = false; pintarModal(); } });
+  }
+  function cerrarModal() { S.modal = null; pintarModal(); }
+  function pintarModal() {
+    var el = $('modal'), m = S.modal;
+    if (!m) { el.hidden = true; el.innerHTML = ''; el.classList.remove('is-full'); el.classList.remove('is-center'); return; }
+    el.classList.toggle('is-full', m.tipo === 'guardar');
+    el.classList.toggle('is-center', m.tipo === 'vuelo_ir' || m.tipo === 'alojamiento_ir');
+    if (m.tipo === 'tour_det') { el.hidden = false; el.innerHTML = tourDetHoja(m); return; }
+    if (m.tipo === 'guardar') { el.hidden = false; el.innerHTML = guardarHoja(m); var inp = el.querySelector('#g-mail'); if (inp) inp.focus(); return; }
+    if (m.tipo === 'alojamiento_ir') { el.hidden = false; el.innerHTML = alojIrHoja(); return; }
+    if (m.tipo === 'vuelo_ir') { el.hidden = false; el.innerHTML = vueloIrHoja(); return; }
+    if (m.tipo === 'reservas') { el.hidden = false; el.innerHTML = reservasHoja(); return; }
+    var h = HOTELES.filter(function (x) { return x.id === m.hotelId; })[0];
+    var cuerpo = m.cargando ? '<p class="f-sub" style="text-align:center;padding:26px 0">Buscando habitaciones en Booking…</p>'
+      : (m.error ? '<p class="f-sub" style="padding:14px 4px">' + esc(m.error) + '</p>' : m.rooms.map(function (r) {
+        var libre = /free|gratu/i.test(r.cancelType + ' ' + r.cancelText), on = S.habitacion && S.habitacion.hotelId === m.hotelId && S.habitacion.id === r.id;
+        return '<button type="button" class="opt hb' + sel(on) + '" data-hab="' + esc(r.id) + '" aria-pressed="' + on + '">' + tick +
+          '<div class="hb__img"' + (r.photo ? ' style="background-image:url(\'' + esc(r.photo) + '\')"' : '') + ' aria-hidden="true"></div>' +
+          '<div class="hb__b"><b>' + esc(r.name) + '</b><small>' + [r.beds, r.surface ? r.surface + ' m²' : '', r.maxOccupancy ? 'hasta ' + r.maxOccupancy + (r.maxOccupancy === 1 ? ' persona' : ' personas') : ''].filter(Boolean).join(' · ') + '</small>' +
+          (r.meal ? '<span class="hb__ok">' + esc(r.meal) + '</span>' : '<span class="hb__no">No incluye comidas</span>') +
+          (r.cancelText ? '<span class="' + (libre ? 'hb__ok' : 'hb__no') + '">' + esc(r.cancelText) + '</span>' : '') + '</div>' +
+          '<div class="hb__p"><b>' + f(r.total) + '</b><small>total ' + NOCHES + ' noches</small></div></button>';
+      }).join(''));
+    el.hidden = false;
+    el.innerHTML = '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Habitaciones disponibles">' +
+      '<div class="f-modal__top"><div><small>HABITACIONES DISPONIBLES</small><h2>' + esc(h ? h.nom : '') + '</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>' +
+      '<p class="f-modal__note">Precios totales con impuestos para tus fechas. Tocá una habitación para sumarla a tu presupuesto.</p>' + cuerpo + '</div>';
+    var x = el.querySelector('.f-modal__x'); if (x && m.cargando) x.focus();
+  }
+  var PAGINAS = { 1: ['vuelos-traslados', 'Vuelos + Traslados'], 2: ['alojamiento', 'Alojamiento'], 3: ['extras', 'Extras'], 4: ['presupuesto', 'Tu presupuesto'], 5: ['guardado', 'Viaje guardado'], 6: ['reservar', 'Reservá tu viaje'], 7: ['estado', 'Estado de tu viaje'], 8: ['reservar-alojamiento', 'Reservar alojamiento'], 9: ['confirmar-reserva', '¿Reservaste?'], 10: ['alojamiento-reservado', 'Informar alojamiento'], 11: ['confirmar-reserva-cuantosale', 'Confirmá tu reserva'], 12: ['continuar-whatsapp', 'Continuar por WhatsApp'], 13: ['reserva-confirmada', 'Reserva confirmada'] };
+  /* Cada paso es una pagina virtual (page_view con ruta y titulo propios): en Analytics se ve un embudo
+     /viaje/vuelos-traslados -> /viaje/alojamiento -> ... -> /viaje/reservar, sin depender del nombre del archivo. */
+  function paginaVirtual(p) {
+    var pg = PAGINAS[p]; if (!pg) return;
+    document.title = pg[1] + ' · CuántoSale';
+    track('page_view', { page_path: '/viaje/' + pg[0], page_title: pg[1] + ' · CuántoSale', page_location: location.origin + '/viaje/' + pg[0] });
+  }
+  /* ---- Detalle de un tour (datos del catalogo de la app) ---- */
+  function tourDetHoja(m) {
+    var e = todosExtras.filter(function (x) { return x.id === m.id; })[0]; if (!e) return '';
+    var t = e.info || {}, on = !!S.extras[e.id];
+    var lista = function (tit, arr, mk) { return arr && arr.length ? '<h3 class="td-h">' + tit + '</h3><ul class="td-l">' + arr.map(function (x) { return '<li>' + mk + esc(x) + '</li>'; }).join('') + '</ul>' : ''; };
+    return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Detalles de ' + esc(e.nom) + '">' +
+      '<div class="f-modal__top"><div><small>DETALLES DEL TOUR</small><h2>' + esc(e.nom) + '</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>' +
+      (e.foto ? '<div class="td-img" style="background-image:url(\'' + esc(e.foto) + '\')" role="img" aria-label="' + esc(e.nom) + '"></div>' : '') +
+      '<div class="td-meta"><span>' + ic(iClock, 16) + esc(e.dur || '') + '</span>' + (e.grupo ? '<span>' + ic(iUsers, 16) + esc(e.grupo) + '</span>' : '') + (t.edad ? '<span>' + esc(t.edad) + '</span>' : '') + '</div>' +
+      (t.descripcion ? '<p class="td-p">' + esc(t.descripcion) + '</p>' : '') + (t.detalle && t.detalle !== t.descripcion ? '<p class="td-p">' + esc(t.detalle) + '</p>' : '') +
+      lista('Qué incluye', t.incluye, '✓ ') + lista('No incluye', t.noIncluye, '✕ ') + lista('Qué llevar', t.llevar, '• ') +
+      (t.cancelacion ? '<p class="td-c">' + esc(t.cancelacion) + '</p>' : '') +
+      '<p class="td-pr"><b>' + f(e.precio) + '</b> por persona · precio referencial</p>' +
+      '<button type="button" class="g-btn ' + (on ? '' : 'g-btn--main') + '" data-extra="' + e.id + '" data-cerrar-det="1">' + (on ? 'Sacar de mi viaje' : 'Sumar a mi viaje') + '</button></div>';
+  }
+  function ir(p, motivo) {
+    S.paso = p; S.reservar = false; S.modal = null; pintarModal(); paginaVirtual(p);
+    if (p === 2 && !S.hotelesListos) cargarHoteles();
+    render(true);
+    track('flujo_paso', { paso: p, nombre: NOMBRES[p - 1] || 'Reservar', motivo: motivo, total: Math.round(totalHastaAhora()) });
+  }
+
+  /* ---- Eventos ---- */
+  $('back').addEventListener('click', function () {
+    track('flujo_volver', { desde: S.paso });
+    if (S.paso === 12) ir(11, 'volver'); else if (S.paso === 11) ir(S.desde11 || 6, 'volver'); else if (S.paso === 10) ir(9, 'volver'); else if (S.paso === 9) ir(6, 'volver'); else if (S.paso === 8) ir(S.desde8 || 6, 'volver'); else if (S.paso === 7) ir(6, 'volver'); else if (S.paso === 6 && !S.sesion) ir(4, 'volver'); else if (S.paso > 1) ir(S.paso - 1, 'volver'); else location.href = 'home-resultado.html' + location.search;
+  });
+  $('cta').addEventListener('click', function () {
+    track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });
+    if (S.paso === 4) { track('flujo_ver_opciones_reservar', { total: Math.round(totalHastaAhora()), con_sesion: !!S.sesion }); abrirGuardar(); } else ir(S.paso + 1, 'continuar');
+  });
+  $('main').addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-sel],[role=button][data-extra]')) { e.preventDefault(); e.target.click(); }
+  });
+  $('main').addEventListener('change', function (e) {
+    if (e.target.id !== 'playa') return;
+    S.playaSel = e.target.value; S.nH = MAX_HOTELES; track('flujo_playa', { playa: S.playaSel, via: 'lista' });
+    var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
+  });
+  $('modal').addEventListener('click', function (e) {
+    if (e.target.closest('[data-cerrar]')) { cerrarModal(); return; }
+    if (e.target.closest('[data-gf]')) { irATercero('vuelo'); return; }
+    if (e.target.closest('[data-bk]')) { irATercero('alojamiento'); return; }
+    var ex = e.target.closest('[data-extra]');
+    if (ex) { var xid = ex.dataset.extra; S.extras[xid] = !S.extras[xid]; var xe = todosExtras.filter(function (z) { return z.id === xid; })[0]; track('flujo_extra', { opcion: xid, nombre: xe && xe.nom, categoria: xe && xe.cat, precio: xe && Math.round(precioExtra(xe)), real: !!(xe && xe.real), agregado: S.extras[xid], desde: 'detalle' }); cerrarModal(); var yy = $('main').scrollTop; render(false); $('main').scrollTop = yy; return; }
+    var rv = e.target.closest('[data-reservar]'); if (rv) { reservar(rv.dataset.reservar); return; }
+    var g = e.target.closest('[data-g]');
+    if (g) {
+      var acc = g.dataset.g;
+      if (acc === 'google') { S.sesion = 'google'; track('flujo_guardar_google', { total: Math.round(totalHastaAhora()) }); seguirAReservas(); }   // maqueta: en la app real abre el login de Google
+      else if (acc === 'email') { S.modal = { tipo: 'guardar', email: true }; pintarModal(); track('flujo_guardar_email_abrir', {}); }
+      else if (acc === 'volver') { S.modal = { tipo: 'guardar' }; pintarModal(); }
+      else if (acc === 'skip') { S.sinGuardar = true; track('flujo_guardar_saltear', { total: Math.round(totalHastaAhora()) }); ir(6, 'sin_guardar'); }
+      return;
+    }
+    var b = e.target.closest('[data-hab]'); if (!b || !S.modal) return;
+    var r = S.modal.rooms.filter(function (x) { return x.id === b.dataset.hab; })[0]; if (!r) return;
+    var hid = S.modal.hotelId;
+    S.hotel = hid; S.habitacion = { hotelId: hid, id: r.id, nombre: r.name, total: r.total };
+    track('flujo_habitacion', { hotel: hid, habitacion: r.name, precio: Math.round(r.total), comida: r.meal || 'sin comidas', cancelacion_gratis: /free|gratu/i.test(r.cancelType + ' ' + r.cancelText), camas: r.beds });
+    cerrarModal(); var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
+  });
+  $('modal').addEventListener('submit', function (e) {
+    if (e.target.id !== 'g-form') return;
+    e.preventDefault();
+    var mail = ($('g-mail').value || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'Escribí un email válido, por ejemplo nombre@correo.com.' }; pintarModal(); return; }
+    S.sesion = 'email'; track('flujo_guardar_email', { dominio: mail.split('@')[1] }); seguirAReservas();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.modal) cerrarModal(); });
+  $('main').addEventListener('submit', function (e) {
+    if (e.target.id !== 'aloj-form') return;
+    e.preventDefault();
+    var nombre = ($('af-nom').value || '').trim(), precio = parseFloat($('af-pre').value) || 0, noches = Math.max(1, Math.min(60, parseInt($('af-noc').value, 10) || NOCHES));
+    if (nombre.length < 2) { S.alojForm = { nombre: nombre, precio: $('af-pre').value, noches: noches, error: 'Escribí el nombre del alojamiento.' }; render(false); return; }
+    var dd = datosFinal(), estimado = precioHotelEstimado(dd.h);
+    S.alojReservado = { nombre: nombre, precio: precio, noches: noches }; S.res.aloj = true;
+    track('reserva_confirmada', { servicio: 'alojamiento', proveedor: 'booking', autodeclarada: true, alojamiento_elegido: false, alojamiento_distinto: true, precio_estimado: Math.round(estimado), precio_reservado: Math.round(precio), diferencia_precio: precio ? Math.round(precio - estimado) : undefined, noches: noches, partes_reservadas: partesReservadas(), partes_totales: 4 });
+    if (partesReservadas() === 4) track('viaje_completo', { total: Math.round(datosFinal().total) });
+    ir(7, 'otro_alojamiento_guardado');
+  });
+  /* Confirmar la reserva con CuantoSale: se validan los datos y el pedido sale por WhatsApp, como en la app. */
+  $('main').addEventListener('submit', function (e) {
+    if (e.target.id !== 'cs-form') return;
+    e.preventDefault();
+    var dt = { nombre: ($('cf-nom').value || '').trim(), pais: $('cf-pais').value, tel: ($('cf-tel').value || '').replace(/[^0-9]/g, ''), mail: ($('cf-mail').value || '').trim() }, er = {};
+    if (dt.nombre.length < 3 || dt.nombre.indexOf(' ') < 1) er.nombre = 'Escribí tu nombre y apellido.';
+    if (dt.tel.length < 6 || dt.tel.length > 12) er.tel = 'Escribí un número de WhatsApp válido, sin el código de país.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(dt.mail)) er.mail = 'Escribí un email válido, por ejemplo nombre@correo.com.';
+    S.datos = dt; S.datosErr = er;
+    if (Object.keys(er).length) { track('reserva_cs_datos_error', { campos: Object.keys(er).join(',') }); render(false); return; }
+    track('reserva_cs_datos_ok', { servicios: serviciosCs().length, pais_tel: dt.pais });
+    ir(12, 'revisar_mensaje');
+  });
+  $('steps').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ir]'); if (b) ir(+b.dataset.ir, 'indicador');
+  });
+  $('main').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tdet],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    if (!t) return;
+    var y = $('main').scrollTop;
+    if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
+    if (t.dataset.wa) {
+      var lista = serviciosCs(), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
+      S.sol = S.sol || {};
+      lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
+      /* Para Analytics solo viajan datos agregados: nunca el nombre, el telefono ni el email. */
+      try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
+      track('reserva_cs_solicitud', { servicios: lista.length, importe: Math.round(total), con_traslado: !!S.sol.tras, con_tours: !!S.sol.tours, pais_tel: dt.pais, canal: 'whatsapp' });
+      window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensajeWA()), '_blank');
+      enviarConfirmacion();
+      ir(7, 'solicitud_cuantosale'); return;
+    }
+    else if (t.dataset.resumen) { S.resumenAbierto = !S.resumenAbierto; track('flujo_cs_ver_resumen', { abierto: S.resumenAbierto }); }
+    else if (t.dataset.estado) { var ac = t.dataset.estado; if (ac === 'vuelo') { abrirVueloIr(); } else if (ac === 'aloj') { S.desde8 = 7; ir(8, 'estado'); } else if (S.res[ac]) { S.confK = ac; ir(13, 'ver_confirmacion'); }
+    else if (S.sol && S.sol[ac]) { S.avisoCs = 'Tu asesor te va a confirmar por WhatsApp con un enlace. Cuando lo abras, vas a ver acá la reserva confirmada.'; render(false); }
+    else { reservar('cs:' + (ac === 'tras' ? 'traslado' : 'tours')); } return; }
+    else if (t.dataset.booking) { abrirAlojIr(); return; }
+    else if (t.dataset.reservado) {
+      if (t.dataset.reservado === 'otro') { S.alojForm = {}; track('reserva_otro_alojamiento_abrir', {}); ir(10, 'otro_alojamiento'); return; }
+      var si = t.dataset.reservado === 'si', clave = S.qServicio === 'vuelo' ? 'vuelo' : 'aloj', dd = datosFinal();
+      if (si) S.res[clave] = true;
+      track(si ? 'reserva_confirmada' : 'reserva_pendiente', { servicio: clave === 'aloj' ? 'alojamiento' : 'vuelo', proveedor: clave === 'aloj' ? 'booking' : 'google_flights', importe: Math.round(clave === 'aloj' ? dd.tAloj : dd.tVuelo), partes_reservadas: partesReservadas(), partes_totales: 4, autodeclarada: true, alojamiento_elegido: clave === 'aloj' ? si : undefined });
+      if (partesReservadas() === 4) track('viaje_completo', { total: Math.round(dd.total) });
+      ir(7, si ? 'reservado' : 'todavia_no'); return;
+    }
+    else if (t.dataset.guardado) { S.avisoGuardado = 'En la app real esto abre tu perfil con tus viajes guardados.'; track('flujo_ver_viaje_guardado', {}); }
+    else if (t.dataset.guardarAhora) { track('flujo_guardar_ahora', {}); S.modal = { tipo: 'guardar' }; pintarModal(); return; }
+    else if (t.dataset.divn) { S.divN = Math.max(1, Math.min(12, (S.divN || pax) + (+t.dataset.divn))); track('flujo_dividir_gastos', { personas: S.divN }); }
+    else if (t.dataset.dividir) { S.dividirAbierto = !S.dividirAbierto; track('flujo_dividir_gastos', { abierto: S.dividirAbierto }); }
+    else if (t.dataset.compartir) { compartir(); return; }
+    else if (t.dataset.asesor) { track('flujo_contactar_asesor', { total: Math.round(totalHastaAhora()) }); window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola! Armé mi viaje en CuántoSale. ' + resumenTexto(datosFinal()) + ' Ref: ' + window.CS_VIAJE_ID), '_blank', 'noopener'); return; }
+    else if (t.dataset.comidas) { S.comidasAbierto = !S.comidasAbierto; track('flujo_ver_comidas', { abierto: S.comidasAbierto }); }
+    else if (t.dataset.ir) { track('flujo_resumen_editar', { paso_destino: +t.dataset.ir }); ir(+t.dataset.ir, 'resumen'); return; }
+    else if (t.dataset.habs) { abrirHabitaciones(t.dataset.habs); return; }
+    else if (t.dataset.xcat) { S.fExtra = t.dataset.xcat; track('flujo_filtro', { lista: 'extras', filtro: S.fExtra }); }
+    else if (t.dataset.xmas) { S.xmas[t.dataset.xmas] = true; track('flujo_ver_mas', { lista: 'extras_' + t.dataset.xmas }); }
+    else if (t.dataset.zona) { S.playaSel = t.dataset.zona; S.nH = MAX_HOTELES; track('flujo_playa', { playa: S.playaSel, via: 'chip' }); }
+    else if (t.dataset.zonasMas) { S.zonasTodas = !S.zonasTodas; track('flujo_zonas_mas', { abierto: S.zonasTodas }); }
+    else if (t.dataset.mashoteles) { S.nH += MAX_HOTELES; track('flujo_ver_mas', { lista: 'hoteles', mostrados: S.nH }); }
+    else if (t.dataset.iv) { S.tIV = !S.tIV; track('flujo_traslado_ida_vuelta', { activo: S.tIV }); }
+    else if (t.dataset.sel) {
+      var p = t.dataset.sel.split(':'), tipo = p[0], id = p[1];
+      if (tipo === 'traslado' && S.traslado === id) S.traslado = null; else S[tipo] = id;
+      var o = { vuelo: VUELOS, traslado: TRASLADOS, hotel: HOTELES }[tipo].filter(function (x) { return x.id === id; })[0];
+      track('flujo_seleccion', { tipo: tipo, opcion: id, precio: Math.round(tipo === 'vuelo' ? precioVuelo(o) : (tipo === 'traslado' ? trPrecio(o) : precioHotel(o))), activo: S[tipo] === id,
+        detalle: tipo === 'vuelo' ? { aerolinea: o.air, escalas: o.esc, minutos: o.dur } : (tipo === 'traslado' ? { modalidad: o.tipo, tarifa: o.nota } : { categoria: o.cat, nota: o.rat, resenas: o.n, playa_m: o.playa, zona: o.zona, real: !o.ejemplo }) });
+    } else if (t.dataset.filtro) {
+      var q = t.dataset.filtro.split(':'); S[{ vuelo: 'fVuelo', hotel: 'fHotel', tras: 'fTras' }[q[0]]] = q[1]; if (q[0] === 'hotel') S.nH = MAX_HOTELES;
+      track('flujo_filtro', { lista: q[0], filtro: q[1] });
+    } else if (t.dataset.extra) {
+      var id2 = t.dataset.extra; S.extras[id2] = !S.extras[id2];
+      var ex2 = todosExtras.filter(function (x) { return x.id === id2; })[0]; track('flujo_extra', { opcion: id2, nombre: ex2 && ex2.nom, categoria: ex2 && ex2.cat, precio: ex2 && Math.round(precioExtra(ex2)), real: !!(ex2 && ex2.real), agregado: S.extras[id2] });
+    } else if (t.dataset.mas) {
+      S.verMasVuelos = !S.verMasVuelos; track('flujo_ver_mas', { lista: 'vuelos' });
+    } else if (t.dataset.reservar) { reservar(t.dataset.reservar); return;
+    }
+    render(false); $('main').scrollTop = y;
+  });
+  paginaVirtual(1);
+  track('flujo_paso', { paso: 1, nombre: NOMBRES[0], motivo: 'entrada', total: Math.round(totalHastaAhora()) });
+  render(true);
+  var cf = qs.get('conf'), cc = qs.get('codigo');
+  if (cf && (cf === 'tras' || cf === 'tours')) {
+    if (cc && cc === codigoConf(window.CS_VIAJE_ID, cf)) {
+      try { var g = JSON.parse(localStorage.getItem('cs_sol_' + window.CS_VIAJE_ID) || 'null'); if (g) { S.traslado = g.traslado; S.tIV = g.tIV; S.extras = g.extras || {}; S.sol = g.sol || {}; S.hotel = g.hotel || S.hotel; S.habitacion = g.habitacion; } } catch (er) { /* sin datos guardados */ }
+      S.res[cf] = true; S.confK = cf;
+      track('reserva_cs_confirmada', { servicio: cf === 'tras' ? 'traslado' : 'tours', proveedor: 'cuantosale', via: 'enlace_asesor', partes_reservadas: partesReservadas(), partes_totales: 4 });
+      ir(13, 'reserva_confirmada');
+    } else { S.avisoCs = 'Ese enlace de confirmación no es válido. Pedile uno nuevo a tu asesor.'; ir(7, 'enlace_invalido'); }
+  }
+  var p0 = +qs.get('paso'); if (!cf && p0 >= 2 && p0 <= 4) ir(p0, 'desde_ahorro');
+  cargarVuelos();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="home">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta — Inicio con dos caminos</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* Maqueta de la home con dos caminos: "ya sé dónde" y "no sé dónde".
+     Todo el color sale de los tokens de la app (claro/oscuro), no de un navy
+     y teal propios: botones en --action-bg, textos en --ink / --ink2. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+
+  .phone{width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column;position:relative}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  .status__icons{display:flex;gap:6px;align-items:center}
+  .scroll{flex:1;overflow-y:auto;padding:0 18px 28px;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  /* Portada con la foto de Rio: el texto va sobre un degradado del color de
+     fondo que se desvanece hacia la derecha y hacia abajo. */
+  .m-top{position:relative;margin:0 -18px;padding:0 18px 26px;background:url(home-ilha.jpg) 30% 70%/cover}
+  .m-top::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 0%,color-mix(in srgb,var(--bg) 80%,transparent) 45%,transparent 100%),linear-gradient(180deg,transparent 60%,var(--bg) 100%)}
+  .m-top>*{position:relative}
+  .m-head{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
+  .m-logo{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:800;font-size:22px;color:var(--ink);letter-spacing:-.01em}
+  .m-tag{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+  .m-menu{width:40px;height:40px;border:0;background:transparent;display:grid;place-content:center;gap:5px;cursor:pointer}
+  .m-menu span{display:block;width:22px;height:2.5px;border-radius:2px;background:var(--ink)}
+
+  .m-hero{margin:22px 0 0}
+  .m-hero h1{font-family:var(--fh);font-size:30px;line-height:1.1;font-weight:800;margin:0 0 8px;color:var(--ink)}
+  .m-hero p{margin:0;color:var(--ink2);font-size:14.5px;line-height:1.45}
+
+  .m-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 6px 18px rgba(16,24,40,.08)}
+  .m-card__row{display:flex;gap:14px;align-items:flex-start}
+  .m-card__icon{flex:0 0 52px;height:52px;border-radius:16px;background:var(--cel-soft);color:var(--ink);display:grid;place-items:center}
+  .m-card h2{font-family:var(--fh);font-size:19px;font-weight:700;margin:0 0 4px;color:var(--ink)}
+  .m-card p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.45}
+  .m-btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box;width:100%;margin-top:16px;padding:14px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+  .m-btn:focus-visible,.m-menu:focus-visible,.m-more:focus-visible,.m-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+  .m-sec{display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px}
+  .m-sec h2{font-family:var(--fh);font-size:19px;font-weight:700;margin:0;color:var(--ink)}
+  .m-more{border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
+
+  /* Carrusel: scroll-snap nativo; el quinto circulo asoma por el borde
+     derecho para que se entienda que se desliza. */
+  .m-car{display:flex;gap:14px;margin:0 -18px;padding:0 18px 4px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .m-car::-webkit-scrollbar{display:none}
+  .m-dest{flex:0 0 132px;height:168px;border:0;padding:0;border-radius:16px;position:relative;overflow:hidden;scroll-snap-align:start;cursor:pointer;background:var(--surface)}
+  .m-dest img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .m-dest::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,0) 50%,rgba(10,16,26,.7))}
+  .m-dest span{position:absolute;left:10px;right:10px;bottom:10px;z-index:1;color:#fff;font-size:13px;font-weight:700;text-align:left;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+
+  .tabs{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;padding:8px 8px 22px;background:var(--surface);border-top:1px solid var(--line)}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 7px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:11.5px;font-weight:600;cursor:pointer;position:relative}
+  .tab svg{width:24px;height:24px}
+  .tab.is-on{color:var(--ink)}
+  .tab.is-on::after{content:"";position:absolute;bottom:0;width:28px;height:3px;border-radius:2px;background:var(--accent)}
+  .tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px;border-radius:10px}
+  .home-bar{position:absolute;bottom:7px;left:50%;width:120px;height:4px;margin-left:-60px;border-radius:2px;background:var(--ink)}
+
+  /* En un celular real no hay marco: la pantalla ocupa todo el alto. */
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span>
+    <span class="status__icons" aria-hidden="true">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="22" height="11" rx="3.5"/><rect x="2.5" y="2.5" width="18" height="7" rx="2" fill="currentColor" stroke="none"/><path d="M24.5 4v4" stroke-linecap="round"/></svg>
+    </span>
+  </div>
+
+  <div class="scroll">
+    <div class="m-top">
+    <header class="m-head">
+      <div>
+        <div class="m-logo">
+          <svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>
+          cuántosale
+        </div>
+        <p class="m-tag">Tu viaje, sin sorpresas</p>
+      </div>
+      <button type="button" class="m-menu" aria-label="Menú"><span></span><span></span><span></span></button>
+    </header>
+
+    <section class="m-hero">
+      <h1>¿Qué querés hacer?</h1>
+      <p>Calculá tu presupuesto de viaje y descubrí todas tus opciones.</p>
+    </section>
+    </div>
+
+    <article class="m-card">
+      <div class="m-card__row">
+        <div class="m-card__icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+        </div>
+        <div>
+          <h2>Ya sé dónde quiero ir</h2>
+          <p>Elegí tu destino y descubrí cuánto necesitás para viajar.</p>
+        </div>
+      </div>
+      <a class="m-btn" href="home-calcular.html?fuente=home_card_destino" data-evento="home_camino" data-camino="ya_se_donde" data-fuente="home_card_destino">Calcular mi viaje</a>
+    </article>
+
+    <article class="m-card">
+      <div class="m-card__row">
+        <div class="m-card__icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.4-.9-1.4-1.4-2.8-1.4-1.6 0-2.7.8-2.7 2 0 3 5.6 1.4 5.6 4.2 0 1.2-1.2 2.1-2.9 2.1-1.5 0-2.6-.6-3-1.6M12 6.5v1.3M12 16.2v1.3"/></svg>
+        </div>
+        <div>
+          <h2>No sé dónde ir</h2>
+          <p>Decinos cuánto querés gastar y te mostramos destinos que se ajustan a tu presupuesto.</p>
+        </div>
+      </div>
+      <a class="m-btn" href="home-presupuesto.html?fuente=home_card_presupuesto" data-evento="home_camino" data-camino="no_se_donde" data-fuente="home_card_presupuesto">Buscar por presupuesto</a>
+    </article>
+
+    <div class="m-sec">
+      <h2>Destinos populares</h2>
+      <button type="button" class="m-more" data-evento="home_ver_todos">Ver todos ›</button>
+    </div>
+    <div class="m-car" role="list" aria-label="Destinos populares">
+      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="rio"><img src="../fotos/rio.jpg" alt=""><span>Río de Janeiro</span></button>
+      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="fln"><img src="../fotos/fln.jpg" alt=""><span>Florianópolis</span></button>
+      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="buz"><img src="../fotos/buz.jpg" alt=""><span>Búzios</span></button>
+      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="ilha"><img src="../fotos/ilha.jpg" alt=""><span>Ilha Grande</span></button>
+      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="bombinhas"><img src="../fotos/bombinhas.jpg" alt=""><span>Bombinhas</span></button>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Navegación principal">
+    <button type="button" class="tab is-on" data-evento="home_tab" data-tab="inicio" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5z"/></svg>Inicio</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="destinos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Destinos</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>Guardados</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Perfil</button>
+    <span class="home-bar" aria-hidden="true"></span>
+  </nav>
+</div>
+<script src="home-track.js"></script>
+</body>
+</html>

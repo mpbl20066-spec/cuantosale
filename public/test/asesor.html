@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Asesor · generar enlace de confirmación</title>
+<style>
+  body{margin:0;padding:24px 16px;background:#F7F8FA;color:#101828;font:16px/1.5 Poppins,system-ui,sans-serif}
+  main{max-width:520px;margin:0 auto;background:#fff;border:1px solid #E2E6EC;border-radius:18px;padding:22px}
+  h1{margin:0 0 4px;font-size:22px} p{margin:0 0 14px;color:#48566A;font-size:14px}
+  label{display:block;margin:14px 0 6px;font-weight:700;font-size:13px}
+  input,select{width:100%;box-sizing:border-box;padding:12px;border:1.5px solid #7E8DA0;border-radius:12px;font:inherit}
+  button{margin-top:16px;width:100%;padding:14px;border:0;border-radius:12px;background:#F7C325;color:#0A101A;font:inherit;font-weight:800;cursor:pointer}
+  textarea{width:100%;box-sizing:border-box;margin-top:8px;padding:12px;border:1.5px solid #E2E6EC;border-radius:12px;font:inherit;min-height:120px}
+  .warn{margin-top:18px;padding:12px;border-radius:12px;background:#FDF4DC;font-size:12.5px}
+  :focus-visible{outline:3px solid #8A5A0E;outline-offset:2px}
+</style>
+</head>
+<body><main>
+  <h1>Confirmar una reserva</h1>
+  <p>Pegá la <b>Ref</b> que viene al final del mensaje de WhatsApp del cliente, elegí qué confirmás y mandale el texto de abajo.</p>
+  <label for="ref">Ref del cliente</label><input id="ref" placeholder="CS-XXXXXXXX-XXXX" autocomplete="off">
+  <label for="srv">Qué confirmás</label><select id="srv"><option value="tours">Tours y actividades</option><option value="tras">Traslados</option></select>
+  <button type="button" id="gen">Generar mensaje para el cliente</button>
+  <label for="out" style="margin-top:18px">Mensaje para WhatsApp</label><textarea id="out" readonly></textarea>
+  <button type="button" id="copy" style="background:#101828;color:#fff">Copiar mensaje</button>
+  <p class="warn"><b>Solo prueba.</b> Este panel no tiene contraseña y el código se calcula en el navegador, así que cualquiera que lea el código puede fabricar enlaces. En producción el enlace lo firma el servidor y este panel pide login de asesor.</p>
+</main>
+<script>
+  function codigoConf(id, srv) { var h = 2166136261, t = id + '|' + srv + '|cs-demo-2026'; for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).toUpperCase().padStart(7, '0'); }
+  var $ = function (i) { return document.getElementById(i); };
+  $('gen').onclick = function () {
+    var ref = $('ref').value.trim();
+    if (!/^CS-[A-Z0-9-]{6,}$/.test(ref)) { $('out').value = 'La Ref no tiene el formato CS-XXXXXXXX-XXXX.'; return; }
+    var srv = $('srv').value, url = location.origin + '/test/home-flujo.html?' + new URLSearchParams({ viaje: ref, conf: srv, codigo: codigoConf(ref, srv) }).toString();
+    $('out').value = 'Hola! Tu reserva con CuántoSale está confirmada. Mirá los detalles acá:\n' + url;
+  };
+  $('copy').onclick = function () { $('out').select(); try { navigator.clipboard.writeText($('out').value); $('copy').textContent = 'Copiado'; } catch (e) { document.execCommand('copy'); } };
+</script>
+</body></html>
