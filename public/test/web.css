@@ -1,9 +1,7 @@
 /* /test como web app, no como maqueta de celular: sin marco, sin barra de estado falsa, a pantalla
-   completa. En pantallas anchas el contenido queda en una columna centrada con sus bordes sutiles. */
+   completa. La columna usa el mismo ancho que la app de la raiz (.wrap en style.css: 760px) y el mismo
+   fondo, sin bordes a los costados. */
 html{background:var(--bg)}
 body{display:flex!important;align-items:stretch!important;justify-content:center!important;min-height:100vh;min-height:100dvh;margin:0!important;padding:0!important;background:var(--bg)!important}
-.phone{width:100%!important;max-width:640px!important;height:100vh!important;height:100dvh!important;max-height:none!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-@media (min-width:700px){
-  .phone{border-left:1px solid var(--line)!important;border-right:1px solid var(--line)!important;box-shadow:0 0 60px rgba(10,16,26,.06)!important}
-}
+.phone{width:100%!important;max-width:760px!important;height:100vh!important;height:100dvh!important;max-height:none!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .status,.home-bar{display:none!important}
