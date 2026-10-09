@@ -46,6 +46,11 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 /* nombre del destino siempre legible sobre la foto */
 [data-pagina="home"] .m-dest::after{background:linear-gradient(180deg,rgba(10,16,26,0) 38%,rgba(10,16,26,.82))}
 [data-pagina="home"] .m-dest span{font-size:14.5px}
+/* En celular con notch/gesto la barra inferior quedaba pegada al borde: se suma el
+   inset seguro al padding que ya trae la barra. */
+[data-pagina="home"] .tabs{padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+/* Objetivo tactil minimo (44px): el menu era de 40px y en un telefono se falla facil. */
+[data-pagina="home"] .m-top .m-menu{width:44px;height:44px}
 [data-pagina="home"] .m-auto{grid-column:1/-1;padding:18px 20px}
 /* sobre la foto oscura el menu y el pin del logo van en blanco (antes eran oscuros y casi no se veian) */
 [data-pagina="home"] .m-top .m-menu span{background:#fff}
@@ -53,7 +58,7 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 
 @media (min-width:768px){
   [data-pagina="home"] .scroll{padding-left:var(--gut);padding-right:var(--gut);padding-bottom:48px}
-  [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 32px;min-height:270px}
+  [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 32px;min-height:270px;background-image:url(home-portada.jpg)}
   [data-pagina="home"] .m-top .m-head,[data-pagina="home"] .m-menu{display:none}   /* el logo ya esta en la barra de arriba y el menu duplica los accesos */
   [data-pagina="home"] .m-hero{margin-top:48px}
   [data-pagina="home"] .m-hero h1{font-size:clamp(36px,4.4vw,44px)}

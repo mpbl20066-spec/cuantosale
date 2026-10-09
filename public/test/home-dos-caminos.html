@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F8FA">
 <title>CuántoSale · Tu viaje, sin sorpresas</title>
 <script src="tema.js"></script>
+<link rel="preload" as="image" href="home-portada-mob.jpg" fetchpriority="high" media="(max-width: 767px)">
+<link rel="preload" as="image" href="home-portada.jpg" fetchpriority="high" media="(min-width: 768px)">
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
 <style>
@@ -23,8 +26,10 @@
 
   /* Portada con la foto del atardecer (public/test/home-portada.jpg, de portada2.png).
      Baja y ancha, no alta: las dos acciones principales van DEBAJO de la foto, asi que
-     la imagen no compite con ellas por la atencion. */
-  .m-top{position:relative;margin:0 -18px;padding:0 18px 30px;min-height:300px;background:url(home-portada.jpg) 50% 40%/cover}
+     la imagen no compite con ellas por la atencion.
+     En celular se sirve home-portada-mob.jpg (832px, ~45KB): el contenedor no pasa
+     de 760px y la full (1671px, 203KB) solo se usa desde 768px (ver web.css). */
+  .m-top{position:relative;margin:0 -18px;padding:0 18px 30px;min-height:300px;background:url(home-portada-mob.jpg) 50% 40%/cover}
   /* El velo es suave arriba (el cielo del atardecer ya es oscuro y ahi va el texto) y
      sube al final para que las tarjetas que siguen entren sobre el fondo y no sobre
      un corte de foto. */
@@ -175,11 +180,11 @@
       <button type="button" class="m-more" data-evento="home_ver_todos">Ver todos <svg class="m-more__a" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </div>
     <div class="m-car" role="list" aria-label="Destinos populares">
-      <button type="button" class="m-dest" role="listitem" data-destino="rio" data-evento="home_destino_popular"><img src="../fotos/rio.jpg" alt=""><span>Río de Janeiro</span></button>
-      <button type="button" class="m-dest" role="listitem" data-destino="fln" data-evento="home_destino_popular"><img src="../fotos/fln.jpg" alt=""><span>Florianópolis</span></button>
-      <button type="button" class="m-dest" role="listitem" data-destino="buz" data-evento="home_destino_popular"><img src="dest/buz.jpg" alt=""><span>Búzios</span></button>
-      <button type="button" class="m-dest" role="listitem" data-destino="bcm" data-evento="home_destino_popular"><img src="../fotos/bcm.jpg" alt=""><span>Camboriú</span></button>
-      <button type="button" class="m-dest" role="listitem" data-destino="bombinhas" data-evento="home_destino_popular"><img src="dest/bombinhas.jpg" alt=""><span>Bombinhas</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="rio" data-evento="home_destino_popular"><img src="dest/rio-400.jpg" srcset="dest/rio-400.jpg 400w, ../fotos/rio.jpg 960w" sizes="150px" loading="lazy" decoding="async" alt=""><span>Río de Janeiro</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="fln" data-evento="home_destino_popular"><img src="dest/fln-400.jpg" srcset="dest/fln-400.jpg 400w, ../fotos/fln.jpg 960w" sizes="150px" loading="lazy" decoding="async" alt=""><span>Florianópolis</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="buz" data-evento="home_destino_popular"><img src="dest/buz-400.jpg" srcset="dest/buz-400.jpg 400w, dest/buz.jpg 800w" sizes="150px" loading="lazy" decoding="async" alt=""><span>Búzios</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="bcm" data-evento="home_destino_popular"><img src="dest/bcm-400.jpg" srcset="dest/bcm-400.jpg 400w, ../fotos/bcm.jpg 960w" sizes="150px" loading="lazy" decoding="async" alt=""><span>Camboriú</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="bombinhas" data-evento="home_destino_popular"><img src="dest/bombinhas-400.jpg" srcset="dest/bombinhas-400.jpg 400w, dest/bombinhas.jpg 800w" sizes="150px" loading="lazy" decoding="async" alt=""><span>Bombinhas</span></button>
     </div>
   </div>
 
