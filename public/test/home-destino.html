@@ -48,6 +48,19 @@
   .d-card__t small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2)}
   .d-vacio{padding:22px 4px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
   /* Pantalla 2: fechas y personas */
+  /* Paso 3: medio de transporte. Cada opcion muestra su icono, el nombre y el costo
+   mas bajo desde Montevideo, para que se pueda elegir sin entrar a otra pantalla. */
+  .d-medios{display:flex;flex-direction:column;gap:10px}
+  .d-medio{display:flex;align-items:center;gap:13px;width:100%;box-sizing:border-box;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
+  .d-medio:hover{border-color:var(--ink2)}
+  .d-medio__i{flex:0 0 48px;height:48px;border-radius:50%;background:var(--cel-soft);color:var(--ink);display:grid;place-items:center}
+  .d-medio__i--c{background:#D8F1E6;color:#12784F}
+  .d-medio__t{flex:1;min-width:0}
+  .d-medio__t b{display:block;font-size:16px;font-weight:700;line-height:1.2}
+  .d-medio__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .d-medio>svg:last-child{flex:0 0 16px;color:var(--ink2)}
+  .d-nota{margin:14px 0 0;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.45}
+
   .d-lbl{display:block;margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--ink)}
   .d-fecha{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:#1F6FB5}
   .d-fecha input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:16px;font-weight:700}
@@ -91,12 +104,17 @@
     lupa: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
     cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
-    ppl: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'
+    ppl: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+    chev: '<path d="m9 5 7 7-7 7"/>',
+    avion: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    auto: '<path d="M5 16l1.5-6h11L19 16M3 16h18v3H3zM7 19v2M17 19v2"/>',
+    bus: '<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M7 21v-4M17 21v-4"/>',
+    cmp: '<rect x="3" y="4" width="8" height="8" rx="1.5"/><rect x="13" y="12" width="8" height="8" rx="1.5"/><path d="M11 8h2a2 2 0 0 1 2 2v2"/>'
   };
   /* Los mismos 13 destinos que el resto de /test: clave, nombre, km desde Montevideo. */
-  var DESTS = [['fln', 'Florianópolis', 'Brasil', 1900], ['bombinhas', 'Bombinhas', 'Brasil', 1800], ['bcm', 'Camboriú', 'Brasil', 1800], ['itapema', 'Itapema', 'Brasil', 1800], ['rosa', 'Praia do Rosa', 'Brasil', 1900], ['garopaba', 'Garopaba', 'Brasil', 1900],
-    ['poa', 'Porto Alegre', 'Brasil', 900], ['gram', 'Gramado', 'Brasil', 1000], ['canela', 'Canela', 'Brasil', 1000], ['torres', 'Torres', 'Brasil', 1100],
-    ['rio', 'Río de Janeiro', 'Brasil', 2900], ['buz', 'Búzios', 'Brasil', 3000], ['ilha', 'Ilha Grande', 'Brasil', 3000]];
+  var DESTS = [['fln', 'Florianópolis', 'Brasil', 1900, 'sc'], ['bombinhas', 'Bombinhas', 'Brasil', 1800, 'sc'], ['bcm', 'Camboriú', 'Brasil', 1800, 'sc'], ['itapema', 'Itapema', 'Brasil', 1800, 'sc'], ['rosa', 'Praia do Rosa', 'Brasil', 1900, 'sc'], ['garopaba', 'Garopaba', 'Brasil', 1900, 'sc'],
+    ['poa', 'Porto Alegre', 'Brasil', 900, 'rs'], ['gram', 'Gramado', 'Brasil', 1000, 'rs'], ['canela', 'Canela', 'Brasil', 1000, 'rs'], ['torres', 'Torres', 'Brasil', 1100, 'rs'],
+    ['rio', 'Río de Janeiro', 'Brasil', 2900, 'rj'], ['buz', 'Búzios', 'Brasil', 3000, 'rj'], ['ilha', 'Ilha Grande', 'Brasil', 3000, 'rj']];
   var POPULARES = ['rio', 'fln', 'buz', 'bcm'];
   var HOY = new Date();
   var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
@@ -104,7 +122,7 @@
   var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
   /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
-  var S = { pant: 1, dest: qs.get('destino') || '', q: '', todos: false, err: '',
+  var S = { pant: 1, dest: qs.get('destino') || '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
     ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2 };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
@@ -153,14 +171,51 @@
     document.title = '¿Cuándo querés viajar? · CuántoSale';
   }
 
-  function pintar() { if (S.pant === 1) pant1(); else pant2(); }
+  /* Paso 3: el medio de transporte. El auto y el bus solo se ofrecen en los
+     destinos de Santa Catarina y Rio Grande do Sul, igual que en el calculador de
+     ruta en auto; en los demas el mensaje lo explica. Los precios son de ejemplo y
+     salen de los mismos numeros que usa el resto de /test. */
+  var MEDIOS = [
+    { id: 'avion', ico: 'avion', nom: 'Avión', sub: 'Costo desde US$ 472 por persona', para: ['sc', 'rs', 'rj'] },
+    { id: 'auto', ico: 'auto', nom: 'Auto', sub: 'Combustible y peajes · Costo desde US$ 268 por persona', para: ['sc', 'rs'] },
+    { id: 'bus', ico: 'bus', nom: 'Bus', sub: 'Pasaje y traslados · Costo desde US$ 210 por persona', para: ['sc', 'rs'] }
+  ];
+  var REGION = { sc: 'Santa Catarina', rs: 'Rio Grande do Sul', rj: 'Río de Janeiro' };
+  function pant3() {
+    /* d[3] es la distancia en km y d[4] la region: el medio de transporte se
+       decide por region (el auto y el bus no llegan a Rio de Janeiro). */
+    var d = destInfo(), reg = d ? d[4] : '';
+    var hay = MEDIOS.filter(function (m) { return m.para.indexOf(reg) >= 0; });
+    $('main').dataset.pant = '3';
+    $('main').innerHTML = '<h1>¿Cómo querés viajar?</h1><p class="d-sub">Elegí el medio de transporte.</p>' +
+      '<div class="d-medios">' + hay.map(function (m) {
+        return '<button type="button" class="d-medio" data-medio="' + m.id + '" data-evento="destino_medio" data-medio_id="' + m.id + '">' +
+          '<span class="d-medio__i">' + ic(I[m.ico], 26) + '</span>' +
+          '<span class="d-medio__t"><b>' + m.nom + '</b><small>' + m.sub + '</small></span>' +
+          ic(I.chev, 16) + '</button>';
+      }).join('') +
+      '<button type="button" class="d-medio d-medio--c" data-medio="comparar" data-evento="destino_medio" data-medio_id="comparar">' +
+      '<span class="d-medio__i d-medio__i--c">' + ic(I.cmp, 26) + '</span>' +
+      '<span class="d-medio__t"><b>Comparar opciones</b><small>Vemos cuál te conviene más.</small></span>' + ic(I.chev, 16) + '</button></div>' +
+      (hay.length < 3 ? '<p class="d-nota">Para ' + esc(d ? d[1] : '') + ' el viaje es en avión: el auto y el bus están disponibles solo para destinos de Santa Catarina y Rio Grande do Sul.</p>' : '');
+    $('foot').hidden = false;
+    $('foot').innerHTML = '<button type="button" class="d-btn" data-ver="1" data-evento="destino_ver_resultados" data-destino="' + S.dest + '">Ver resultados →</button>';
+    document.title = '¿Cómo querés viajar? · CuántoSale';
+  }
+
+  function pintar() { if (S.pant === 1) pant1(); else if (S.pant === 2) pant2(); else pant3(); }
   function ir(n) { S.pant = n; pintar(); $('main').scrollTop = 0; }
+  /* Ir a los resultados pasando destino, fechas, personas y medio de transporte. */
+  function aResultados() {
+    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, modo: S.medio, fuente: 'destino_' + S.medio, origen_home: fuente });
+    location.href = 'home-resultado.html?' + q.toString() + debugQ;
+  }
 
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button,a'); if (!t) return;
     if (t.id === 'atras') {
       if (S.pant === 1) location.href = 'home-dos-caminos.html' + debugQ;
-      else ir(1);
+      else ir(S.pant - 1);
       return;
     }
     if (t.dataset.todos) { S.todos = !S.todos; track('destino_ver_todos_toggle', { todos: S.todos }); pintar(); return; }
@@ -168,22 +223,39 @@
        (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
     if (t.dataset.dest) { S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
     if (t.dataset.pax) { S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.pax))); S.err = ''; track('destino_personas', { personas: S.pax }); pant2(); return; }
+    if (t.dataset.medio) {
+      S.medio = t.dataset.medio;
+      /* Elegir auto es calcular la ruta en auto de verdad: se va al calculador, que
+         ya tiene el combustible, los peajes y la carga electrica. El resto de medios
+         sigue al boton de "Ver resultados" de esta misma pantalla. */
+      if (S.medio === 'auto') {
+        var qa = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_auto' });
+        location.href = 'home-calcular.html?' + qa.toString() + debugQ;
+        return;
+      }
+      track('destino_medio_elegido', { medio: S.medio });
+      if (S.medio === 'comparar') { aResultados(); return; }
+      pintar();
+      return;
+    }
+    if (t.dataset.ver) { track('destino_ver_resultados', { destino: S.dest, medio: S.medio }); aResultados(); return; }
     if (t.dataset.seguir) {
       var ida = ($('ida') || {}).value || S.ida, vuelta = ($('vuelta') || {}).value || S.vuelta;
       S.ida = ida; S.vuelta = vuelta; S.err = '';
       if (!(S.ida >= sumarDias(iso(HOY), 1))) { S.err = 'Elegí una fecha a partir de mañana.'; pant2(); return; }
       if (!(S.vuelta > S.ida)) { S.err = 'La fecha de vuelta tiene que ser posterior a la de ida.'; pant2(); return; }
       track('destino_continuar', { destino: S.dest, personas: S.pax });
-      var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_fechas', origen_home: fuente });
-      location.href = 'home-resultado.html?' + q.toString() + debugQ;
+      ir(3);
       return;
     }
   });
   $('main').addEventListener('input', function (e) {
     if (e.target.id === 'bus') { S.q = e.target.value.trim(); var sel = document.getElementById('bus').selectionStart; pintar(); var b = document.getElementById('bus'); if (b) { b.focus(); try { b.setSelectionRange(sel, sel); } catch (x) { /* no todos los navegadores dejan */ } } }
   });
-  /* Al entrar por la maqueta con ?destino=, se salta directo a las fechas. */
-  if (S.dest && destInfo()) { S.pant = 2; }
+  /* Si entran con ?destino= y ?pax=, son datos que la pantalla anterior ya recogio y
+     se saltea directo al medio de transporte. Con solo ?destino=, a las fechas. */
+  if (S.dest && destInfo() && qs.get('pax')) { S.pant = 3; }
+  else if (S.dest && destInfo()) { S.pant = 2; }
   pintar();
 })();
 </script>
