@@ -357,27 +357,48 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="guia"] .u-handoff p{font-size:14.5px}
 }
 
-/* ============ Resultado (mejor presupuesto) ============ */
+/* ============ Resultado: lista de tarjetas horizontales ============
+   Antes: foto gigante sticky a la izquierda y el detalle del viaje a la derecha. Ahora la pantalla es una lista de
+   resultados (cabecera, barra de filtros y tarjetas) en una columna de 1000px; el resumen del viaje y el desglose
+   dejan de mostrarse en desktop (viven en las pantallas siguientes). En celular no cambia nada. */
 @media (min-width:768px){
-  [data-pagina="resultado"] .scroll{padding:8px var(--gut) 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-content:start}
-  [data-pagina="resultado"] .scroll>*{grid-column:2}
-  [data-pagina="resultado"] .scroll>.r-bar{grid-column:1/-1}
-  [data-pagina="resultado"] .r-photo{grid-column:1;grid-row:2/span 14;align-self:start;position:sticky;top:0;height:min(480px,62vh);margin:0 0 30px;border-radius:24px}
-  [data-pagina="resultado"] h1.r-dest{font-size:38px}
-  /* Los resultados van en grilla de dos columnas en la columna de texto, y con foto y
-     precio mas grandes. En una sola tira quedaban angostos al lado de la foto grande. */
-  [data-pagina="resultado"] .r-filtros{margin:14px 0 12px}
-  [data-pagina="resultado"] .r-chip{font-size:14.5px;padding:10px 16px}
-  [data-pagina="resultado"] .r-listaRes{gap:12px}
-  [data-pagina="resultado"] .r-res{padding:12px}
-  [data-pagina="resultado"] .r-res__f{flex-basis:92px;height:72px}
-  [data-pagina="resultado"] .r-res__t b{font-size:17px}
-  [data-pagina="resultado"] .r-res__t small{font-size:13px}
-  [data-pagina="resultado"] .r-res__p b{font-size:20px}
-  [data-pagina="resultado"] .r-res__p small{font-size:11.5px}
-  [data-pagina="resultado"] .r-h2{font-size:18px}
-  [data-pagina="resultado"] .r-foot{padding:12px var(--gut) 24px;background:var(--bg)}
-  [data-pagina="resultado"] .r-go{max-width:420px;margin:0 auto}
+  [data-pagina="resultado"] .scroll{display:block;box-sizing:border-box;width:100%;max-width:1000px;margin:0 auto;padding:8px 24px 24px;overflow:visible}
+  [data-pagina="resultado"] .r-photo,[data-pagina="resultado"] .r-noches,[data-pagina="resultado"] .r-chips,[data-pagina="resultado"] .r-trayecto,
+  [data-pagina="resultado"] .r-nums,[data-pagina="resultado"] .r-ok,[data-pagina="resultado"] #stack,[data-pagina="resultado"] .scroll>.r-h2,
+  [data-pagina="resultado"] #lista{display:none}
+  [data-pagina="resultado"] .r-bar{margin-bottom:0}
+  html.cs-hdr[data-pagina="resultado"] .r-back{transform:none}
+  [data-pagina="resultado"] .r-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:4px 0 14px}
+  [data-pagina="resultado"] h1.r-dest{font-size:34px;color:#1A2B4A}
+  [data-pagina="resultado"] .r-sub{display:block;margin:4px 0 0;font-size:16px;font-weight:600;color:var(--ink2)}
+  [data-pagina="resultado"] .r-mod{display:inline-flex;align-items:center;flex:0 0 auto;padding:11px 18px;border:1.5px solid #D9DEE7;border-radius:10px;background:#fff;color:#1A2B4A;font-size:14px;font-weight:700;text-decoration:none}
+  [data-pagina="resultado"] .r-mod:hover{border-color:#1A2B4A}
+  /* barra de filtros: blancos con borde gris; encendidos, azul oscuro */
+  [data-pagina="resultado"] .r-filtros{flex-wrap:wrap;margin:0 0 16px;gap:10px;overflow:visible}
+  [data-pagina="resultado"] .r-chip{padding:10px 18px;border:1.5px solid #D9DEE7;border-radius:10px;background:#fff;color:#1A2B4A;font-size:14px}
+  [data-pagina="resultado"] .r-chip:hover:not(:disabled){border-color:#1A2B4A}
+  [data-pagina="resultado"] .r-chip.is-on{background:#1A2B4A;border-color:#1A2B4A;color:#fff}
+  /* tarjetas */
+  [data-pagina="resultado"] .r-listaRes{gap:16px}
+  [data-pagina="resultado"] .r-res{align-items:center;gap:20px;padding:16px;border:0;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:box-shadow .2s ease,transform .2s ease}
+  [data-pagina="resultado"] .r-res:hover{box-shadow:0 6px 18px rgba(0,0,0,.14);transform:translateY(-2px)}
+  [data-pagina="resultado"] .r-res__f{flex:0 0 200px;height:140px;border-radius:8px}
+  [data-pagina="resultado"] .r-res__t{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+  [data-pagina="resultado"] .r-res__b{display:inline-block;margin:0 0 8px;padding:4px 12px;border-radius:20px;background:#F5C518;color:#1A2B4A;font-size:12px;font-weight:800}
+  [data-pagina="resultado"] .r-res__t b{font-size:21px;color:#1A2B4A}
+  [data-pagina="resultado"] .r-res__t>small{display:none}
+  [data-pagina="resultado"] .r-res__t .r-res__d{display:block;margin-top:2px;color:var(--ink2);font-size:13.5px}
+  [data-pagina="resultado"] .r-res__det{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;color:#1A2B4A;font-size:14px;font-weight:600}
+  [data-pagina="resultado"] .r-res__det>span{display:inline-flex;align-items:center;gap:6px}
+  [data-pagina="resultado"] .r-res__det svg{color:var(--ink2)}
+  [data-pagina="resultado"] .r-res__p{flex:0 0 190px;display:flex;flex-direction:column;align-items:flex-end}
+  [data-pagina="resultado"] .r-res__p b{font-size:30px;color:#1A2B4A}
+  [data-pagina="resultado"] .r-res__p small{font-size:12.5px;font-weight:600}
+  [data-pagina="resultado"] .r-res__go{display:block;margin-top:10px;color:#1F6FB5;font-size:14px;font-weight:800}
+  [data-pagina="resultado"] .r-h2{margin:20px 0 4px;font-size:18px}
+  [data-pagina="resultado"] .r-ahorro{margin-top:16px}
+  [data-pagina="resultado"] .r-foot{padding:12px 24px 24px;background:var(--bg)}
+  [data-pagina="resultado"] .r-go{max-width:420px;margin:0 auto;background:#F5C518;color:#1A2B4A}
   [data-pagina="resultado"] .r-over .ah-body{max-width:640px;margin:0 auto}
   [data-pagina="resultado"] .r-over .ah-top{max-width:640px;margin:0 auto}
 }

@@ -65,6 +65,10 @@
   .r-res__p{flex:0 0 auto;text-align:right}
   .r-res__p b{display:block;font-family:var(--fh);font-size:18px;font-weight:800;line-height:1.1}
   .r-res__p small{display:block;margin-top:1px;font-size:10.5px;font-weight:700;color:var(--ink2)}
+
+  /* Lista de resultados en tarjetas horizontales (desktop): en celular estos elementos no se muestran. */
+  .r-sub,.r-mod,.r-res__b,.r-res__det,.r-res__go{display:none}
+  .r-chip:disabled{opacity:.55;cursor:default}
   .r-vacio{padding:20px 4px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
   .r-h2 svg{color:var(--ink2)}
   .r-list{list-style:none;margin:0;padding:0}
@@ -146,7 +150,7 @@
     </div>
     <div class="r-photo"><div class="r-badge">La más conveniente para vos</div></div>
 
-    <h1 class="r-dest" id="dest">Florianópolis</h1>
+    <div class="r-head"><div class="r-head__t"><h1 class="r-dest" id="dest">Florianópolis</h1><p class="r-sub" id="rsub"></p></div><a class="r-mod" id="mod" href="#" data-evento="resultado_modificar">Modificar búsqueda</a></div>
     <p class="r-noches">7 noches</p>
     <div class="r-chips">
       <span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><i id="fechas" style="font-style:normal">26 dic. → 2 ene.</i></span>
@@ -181,9 +185,15 @@
   <div class="r-over" id="over" hidden></div>
   <div class="r-foot"><a class="r-go" id="go" href="#" data-evento="resultado_ver_presupuesto">Ver mi presupuesto →</a></div>
 </div>
+<script src="destinos-datos.js"></script>
 <script src="home-track.js"></script>
 <script>
-  var qs = new URLSearchParams(location.search), DEST = { buz: 'Búzios', arraial: 'Arraial do Cabo', cabo: 'Cabo Frio', ilha: 'Ilha Grande', paraty: 'Paraty', ilhabela: 'Ilhabela', ubatuba: 'Ubatuba', rio: 'Río de Janeiro', angra: 'Angra dos Reis', sao: 'São Paulo', porto: 'Porto de Galinhas', mcz: 'Maceió', maragogi: 'Maragogi', nat: 'Natal', pip: 'Pipa', trancoso: 'Trancoso', ssa: 'Salvador de Bahía', for: 'Fortaleza', jericoacoara: 'Jericoacoara', morro: 'Morro de São Paulo', portoseguro: 'Porto Seguro', itacare: 'Itacaré', forte: 'Praia do Forte', ajuda: 'Arraial dâ€™Ajuda', fernando: 'Fernando de Noronha', fln: 'Florianópolis', bombinhas: 'Bombinhas', rosa: 'Praia do Rosa', bcm: 'Balneário Camboriú', itapema: 'Itapema', garopaba: 'Garopaba', ferrugem: 'Ferrugem', picarras: 'Piçarras', gram: 'Gramado', canela: 'Canela', torres: 'Torres', canoa: 'Capão da Canoa', rec: 'Recife', joaopessoa: 'João Pessoa', poa: 'Porto Alegre' };
+  /* Los nombres salen de window.CS_DESTS (destinos-datos.js), que se genera desde
+     lib/model.js. Antes era una lista escrita a mano aca, y por el camino quedo el
+     nombre de Arraial d'Ajuda con la apostrola comida (dâ€™Ajuda). */
+  var DEST = {};
+  (window.CS_DESTS || []).forEach(function (d) { DEST[d.k] = d.name; });
+  var qs = new URLSearchParams(location.search);
   /* De que boton de la portada vino la persona. Viaja al detalle para que el paso siga
      diciendo de donde se empezo. */
   var fuente = qs.get('fuente') || 'directo';
@@ -281,39 +291,78 @@
   };
   /* Filtro por medio y orden por precio. El estado vive aca y no en la URL: es una
      mirada sobre la misma lista, no una pantalla nueva. */
-  var R = { filtro: 'todos' };
+  var R = { filtro: 'todos', orden: 'rec', tipo: 'todos', tope: false };
+  /* Distintivos: el primero es la propuesta completa de siempre; el segundo, la mas barata de las tres. */
+  var BADGES = { vuelo_hotel: 'La más conveniente para vos', solo_hotel: 'Opción más económica' };
   function resultados() {
-    var lista = COMBOS.filter(function (c) { return R.filtro === 'todos' || c.medio === R.filtro; })
-      .map(function (c) { return { nombre: DESTN[DESTK] || 'Tu destino', pie: c.desc, precio: sumaDe(c.partes), href: irDetalle(DESTK, { combo: c.id, medio: c.medio }) }; });
-    var otros = Object.keys(OTROS).filter(function (k) { return k !== DESTK && (R.filtro === 'todos' || OTROS[k][2] === R.filtro); })
-      .map(function (k) { return { nombre: OTROS[k][0], pie: (OTROS[k][2] === 'bus' ? 'En bus' : 'En avión') + ' · incluye alojamiento', precio: sumaDe(['Pasajes', 'Alojamiento'], OTROS[k][1]), href: irDetalle(k, { medio: OTROS[k][2] }) }; });
-    lista.sort(function (a, b) { return a.precio - b.precio; });
-    otros.sort(function (a, b) { return a.precio - b.precio; });
+    var tope = sumaDe(['Pasajes', 'Alojamiento']);
+    var lista = COMBOS.filter(function (c) { return (R.filtro === 'todos' || c.medio === R.filtro) && (R.tipo === 'todos' || c.id === R.tipo); })
+      .map(function (c) { return { nombre: DESTN[DESTK] || 'Tu destino', pie: c.desc, titulo: c.titulo, ico: c.ico === '--c3' ? IC_CAMA : IC_VUELO, badge: BADGES[c.id] || '', precio: sumaDe(c.partes), href: irDetalle(DESTK, { combo: c.id, medio: c.medio }) }; })
+      .filter(function (x) { return !R.tope || x.precio <= tope + 0.5; });
+    /* "Otros destinos" son siempre vuelo/bus + alojamiento: solo aplican con el tipo "todos" o "vuelo + alojamiento". */
+    var otros = (R.tipo === 'todos' || R.tipo === 'vuelo_hotel') ? Object.keys(OTROS).filter(function (k) { return k !== DESTK && (R.filtro === 'todos' || OTROS[k][2] === R.filtro); })
+      .map(function (k) { return { nombre: OTROS[k][0], pie: (OTROS[k][2] === 'bus' ? 'En bus' : 'En avión') + ' · incluye alojamiento', titulo: 'Vuelo + alojamiento', ico: IC_VUELO, badge: '', precio: sumaDe(['Pasajes', 'Alojamiento'], OTROS[k][1]), href: irDetalle(k, { medio: OTROS[k][2] }), otro: k }; })
+      .filter(function (x) { return !R.tope || x.precio <= tope + 0.5; }) : [];
+    var porPrecio = function (a, b) { return a.precio - b.precio; };
+    if (R.orden === 'desc') { lista.sort(function (a, b) { return -porPrecio(a, b); }); otros.sort(function (a, b) { return -porPrecio(a, b); }); }
+    else if (R.orden === 'asc') { lista.sort(porPrecio); otros.sort(porPrecio); }
+    else {   /* recomendadas: la propuesta completa primero, el resto de menor a mayor precio */
+      lista.sort(function (a, b) { return (b.badge === BADGES.vuelo_hotel) - (a.badge === BADGES.vuelo_hotel) || porPrecio(a, b); });
+      otros.sort(porPrecio);
+    }
     return { lista: lista, otros: otros };
   }
-  function filaRes(nom, pie, precio, href, otro) {
-    return '<a class="r-res' + (otro ? ' r-res--otro' : '') + '" href="' + href + '" data-evento="resultado_opcion" data_precio="' + Math.round(precio / pax) + '">' +
-      '<span class="r-res__f" style="background-image:url(../fotos/' + (otro || DESTK) + '.jpg)" aria-hidden="true"></span>' +
-      '<span class="r-res__t"><b>' + esc(nom) + '</b><small>' + fdia(IDA0) + ' → ' + fdia(sumaDias(IDA0, NOCHES)) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas') + '</small>' +
-      '<small class="r-res__d">' + esc(pie) + '</small></span>' +
-      '<span class="r-res__p"><b>' + f(precio / pax) + '</b><small>por persona</small></span></a>';
+  var IC_NOCHE = '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>';
+  var IC_VUELO = '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>';
+  var IC_CAMA = '<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.8"/>';
+  var icSm = function (d) { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+  /* x: { nombre, pie, titulo, ico, badge, precio, href, otro } */
+  function filaRes(x) {
+    var noches = NOCHES + (NOCHES === 1 ? ' noche' : ' noches');
+    return '<a class="r-res' + (x.otro ? ' r-res--otro' : '') + '" href="' + x.href + '" data-evento="resultado_opcion" data_precio="' + Math.round(x.precio / pax) + '">' +
+      '<span class="r-res__f" style="background-image:url(../fotos/' + (x.otro || DESTK) + '.jpg)" aria-hidden="true"></span>' +
+      '<span class="r-res__t">' + (x.badge ? '<span class="r-res__b">' + esc(x.badge) + '</span>' : '') +
+      '<b>' + esc(x.nombre) + '</b><small>' + fdia(IDA0) + ' → ' + fdia(sumaDias(IDA0, NOCHES)) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas') + '</small>' +
+      '<small class="r-res__d">' + esc(x.pie) + '</small>' +
+      '<span class="r-res__det"><span>' + icSm(IC_NOCHE) + noches + '</span><span>' + icSm(x.ico) + esc(x.titulo) + '</span></span></span>' +
+      '<span class="r-res__p"><b>' + f(x.precio / pax) + '</b><small>por persona</small><span class="r-res__go">Ver presupuesto →</span></span></a>';
   }
+  /* Barra de filtros: cada boton cicla entre sus estados; "encendido" = distinto del valor por defecto. */
+  var TIPOS = [['todos', 'Tipo de experiencia'], ['vuelo_hotel', 'Vuelo + alojamiento'], ['solo_vuelo', 'Solo vuelo'], ['solo_hotel', 'Solo alojamiento']];
+  var MEDIOS = [['todos', 'Filtros'], ['avion', 'Filtros: Avión'], ['bus', 'Filtros: Bus']];
+  var ORDENES = [['rec', 'Ordenar'], ['asc', 'Precio ↑'], ['desc', 'Precio ↓']];
+  var cicla = function (lista, actual) { for (var i = 0; i < lista.length; i++) if (lista[i][0] === actual) return lista[(i + 1) % lista.length][0]; return lista[0][0]; };
+  var rotulo = function (lista, actual) { for (var i = 0; i < lista.length; i++) if (lista[i][0] === actual) return lista[i][1]; return lista[0][1]; };
   function pintarRes() {
     var r = resultados();
-    $('filtros').innerHTML = ['todos', 'avion', 'bus'].map(function (k) {
-      return '<button type="button" class="r-chip' + (R.filtro === k ? ' is-on' : '') + '" data-filtro="' + k + '" aria-pressed="' + (R.filtro === k) + '">' + { todos: 'Todos', avion: 'Avión', bus: 'Bus' }[k] + '</button>';
-    }).join('') + '<button type="button" class="r-chip r-chip--orden">Ordenar: Precio ↑</button>';
-    var html = r.lista.map(function (x) { return filaRes(x.nombre, x.pie, x.precio, x.href, false); }).join('');
-    if (r.otros.length) html += '<h2 class="r-h2">Otros destinos que te pueden gustar</h2>' + r.otros.map(function (x) { return filaRes(x.nombre, x.pie, x.precio, x.href, x.href.match(/destino=([a-z]+)/)[1]); }).join('');
+    var chip = function (clave, texto, on) {
+      return '<button type="button" class="r-chip' + (on ? ' is-on' : '') + '" data-chip="' + clave + '" aria-pressed="' + !!on + '">' + texto + '</button>';
+    };
+    var topePP = sumaDe(['Pasajes', 'Alojamiento']) / pax;
+    $('filtros').innerHTML =
+      chip('orden', rotulo(ORDENES, R.orden), R.orden !== 'rec') +
+      chip('precio', R.tope ? 'Hasta ' + f(topePP) : 'Precio', R.tope) +
+      '<button type="button" class="r-chip" disabled title="Todas las opciones son de ' + NOCHES + ' noches">Duración · ' + NOCHES + ' noches</button>' +
+      chip('tipo', rotulo(TIPOS, R.tipo), R.tipo !== 'todos') +
+      chip('medio', rotulo(MEDIOS, R.filtro), R.filtro !== 'todos');
+    var html = r.lista.map(filaRes).join('');
+    if (r.otros.length) html += '<h2 class="r-h2">Otros destinos que te pueden gustar</h2>' + r.otros.map(filaRes).join('');
     $('listaRes').innerHTML = html || '<p class="r-vacio">No hay resultados para ese filtro.</p>';
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-filtro]'); if (!t) return;
-    R.filtro = t.dataset.filtro;
-    window.mockTrack('resultado_filtro', { filtro: R.filtro });
+    var t = e.target.closest('[data-chip]'); if (!t) return;
+    var k = t.dataset.chip;
+    if (k === 'orden') R.orden = cicla(ORDENES, R.orden);
+    else if (k === 'precio') R.tope = !R.tope;
+    else if (k === 'tipo') R.tipo = cicla(TIPOS, R.tipo);
+    else if (k === 'medio') R.filtro = cicla(MEDIOS, R.filtro);
+    window.mockTrack('resultado_filtro', { filtro: k, orden: R.orden, tipo: R.tipo, medio: R.filtro, tope: R.tope });
     pintarRes();
   });
   pintarRes();
+  var subtitulo = function (d0) { return fdia(d0) + ' - ' + fdia(sumaDias(d0, NOCHES)) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas'); };
+  $('rsub').textContent = subtitulo(IDA0);
+  $('mod').href = volverA();
   var pseudo = function (k) { var n = Math.abs(+k) * 2654435761 % 4294967296; return (n % 240) - 90 + (+k > 0 ? 20 : 0); };
   var delta = function (k) { return (typeof DELTAS[k] !== 'undefined' ? DELTAS[k] : pseudo(k)) * pax / 2; };
   var money = function (n) { return Math.round(n).toLocaleString('es-UY'); };
@@ -326,6 +375,7 @@
     var dl = delta(String(shift)), t = total + dl;
     var pt = partes.map(function (x, i) { return [x[0], x[1] + (i === 0 ? dl : 0), x[2]]; });
     $('fechas').textContent = fdia(d0) + ' → ' + fdia(d1);
+    $('rsub').textContent = subtitulo(d0);
     $('pp').textContent = f(t / pax); $('tot').textContent = f(t);
     $('ok').textContent = 'Entra en tu presupuesto. Te sobran ' + f(BUDGET * 1.008 - t) + '.';
     $('stack').innerHTML = pt.map(function (x) { return '<span style="width:' + x[1] / t * 100 + '%;background:var(' + x[2] + ')"></span>'; }).join('');
