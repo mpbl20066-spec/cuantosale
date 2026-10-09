@@ -82,7 +82,7 @@
 
   /* Desktop (>= 1024px): misma estructura que el celular, repartida en dos columnas.
      En celular y tablet estos bloques no existen (display:none) y la pantalla queda igual. */
-  .d-crumb,.d-prev,.d-sug,.d-cont,.d-x{display:none}
+  .d-crumb,.d-prev,.d-sug,.d-cont,.d-x,.d-foto{display:none}
   .d-split{display:block}
   .d-left{display:block}
   .d-bus{position:relative}
@@ -118,6 +118,31 @@
     .d-prev span{position:absolute;left:22px;right:22px;bottom:20px;z-index:1;color:#fff}
     .d-prev b{display:block;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.4)}
     .d-prev small{display:block;margin-top:2px;font-size:14px;font-weight:600;color:rgba(255,255,255,.85)}
+
+    /* ---- Pantalla 2 (fechas y personas) en dos columnas: formulario 60 % / foto vertical 40 % ---- */
+    .d-split--f{margin-top:24px}
+    .d-split--f .d-sub{margin-bottom:16px}
+    html.cs-hdr[data-pagina="destino"] .d-back{transform:none;margin-left:0}   /* el contenedor ya esta centrado: la flecha queda alineada con el contenido */
+    html[data-pagina="destino"] .d-foot{display:none}                 /* el boton Continuar va dentro de la columna */
+    .d-split--f button.d-elegido{width:fit-content;max-width:100%;margin:0;padding:8px 12px}
+    .d-split--f .d-elegido__f{flex:0 0 64px;height:48px}
+    .d-split--f .d-elegido .d-elegido__c{margin-left:18px}
+    .d-fechas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .d-split--f .d-lbl{margin:16px 0 6px}
+    .d-split--f .d-fecha{padding:12px 14px}
+    .d-split--f .d-noches{width:fit-content;margin:12px 0 0;padding:8px 14px}
+    .d-split--f h2.d-h2{margin:20px 0 10px}
+    .d-quien{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .d-quien .d-pers{padding:10px 14px}
+    .d-quien .d-pers+.d-pers{margin-top:0}
+    .d-split--f .d-limite{margin:10px 2px 0}
+    .d-split--f .d-cont{margin-top:20px;background:#F5C518;color:#1A2B4A}
+    .d-foto{display:block;position:relative;min-height:440px;border-radius:20px;overflow:hidden;background:var(--cel-soft);box-shadow:0 8px 28px rgba(10,30,70,.12)}
+    .d-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+    .d-foto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(10,16,26,.8))}
+    .d-foto span{position:absolute;left:24px;right:24px;bottom:22px;z-index:1;color:#fff}
+    .d-foto b{display:block;font-family:var(--fh);font-size:28px;font-weight:800;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+    .d-foto small{display:block;margin-top:2px;font-size:15px;font-weight:600;color:rgba(255,255,255,.88)}
     /* destinos populares: 4 tarjetas 4:3, nombre y pais encima de un degradado */
     html[data-pagina="destino"] .d-h2{margin:36px 0 14px}
     html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
@@ -264,18 +289,21 @@
   function pant2() {
     var d = destInfo(), nn = textoNoches();
     $("main").dataset.pant = "2";
-    $("main").innerHTML = migas(1) + "<h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
+    var fv = d ? (d[0] === 'rio' ? 'dest/rio-vertical.jpg' : fotoDe(d[0])) : '';   /* foto vertical del destino (solo Rio tiene una propia) */
+    $("main").innerHTML = migas(1) + "<div class=\"d-split d-split--f\"><div class=\"d-left\"><h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
       "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + (d ? "<span class=\"d-elegido__f\" style=\"background-image:url(" + fotoDe(d[0]) + ")\" aria-hidden=\"true\"></span>" : ic(I.pin, 20)) +
       "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay</small></span>" +
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
-      "<label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div>" +
-      "<label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div>" +
+      "<div class=\"d-fechas\"><div><label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div></div>" +
+      "<div><label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div></div></div>" +
       "<p class=\"d-noches" + (nn.ok ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
-      fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
-      fila("Niños", "De 2 a 11 años", "ni", S.ninos, S.ninos <= 0, S.pax >= 9) +
+      "<div class=\"d-quien\">" + fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
+      fila("Niños", "De 2 a 11 años", "ni", S.ninos, S.ninos <= 0, S.pax >= 9) + "</div>" +
       "<p class=\"d-limite\">" + (S.pax >= 9 ? "Máximo 9 personas por reserva. Para grupos más grandes, escribinos por WhatsApp. " : "") + "Los bebés menores de 2 años viajan en brazos y no se cuentan. Con niños, el alojamiento se cotiza para habitación familiar; vuelos y actividades se cotizan como pasajero y la tarifa de niño se confirma al reservar.</p>" +
-      (S.err ? "<p class=\"d-vacio\" role=\"alert\" style=\"text-align:left;color:var(--coral)\">" + esc(S.err) + "</p>" : "");
+      (S.err ? "<p class=\"d-vacio\" role=\"alert\" style=\"text-align:left;color:var(--coral)\">" + esc(S.err) + "</p>" : "") +
+      "<button type=\"button\" class=\"d-cont\" data-seguir=\"1\" data-evento=\"destino_continuar\" data-destino=\"" + S.dest + "\">Continuar " + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + "</button></div>" +
+      (d ? "<div class=\"d-foto\" aria-hidden=\"true\"><img src=\"" + fv + "\" alt=\"\"><span><b>" + esc(d[1]) + "</b><small>" + esc(d[2]) + "</small></span></div>" : "") + "</div>";
     $('foot').hidden = false;
     $('foot').innerHTML = '<button type="button" class="d-btn" data-seguir="1" data-evento="destino_continuar" data-destino="' + S.dest + '">Continuar →</button>';
     document.title = '¿Cuándo querés viajar? · CuántoSale';
