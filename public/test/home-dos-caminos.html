@@ -36,12 +36,29 @@
   .m-hero h1{font-family:var(--fh);font-size:30px;line-height:1.1;font-weight:800;margin:0 0 8px;color:var(--ink)}
   .m-hero p{margin:0;color:var(--ink2);font-size:14.5px;line-height:1.45}
 
-  .m-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 6px 18px rgba(16,24,40,.08)}
-  .m-card__row{display:flex;gap:14px;align-items:flex-start}
-  .m-card__icon{flex:0 0 52px;height:52px;border-radius:16px;background:var(--cel-soft);color:var(--ink);display:grid;place-items:center}
-  .m-card h2{font-family:var(--fh);font-size:19px;font-weight:700;margin:0 0 4px;color:var(--ink)}
-  .m-card p{margin:0;color:var(--ink2);font-size:13.5px;line-height:1.45}
-  .m-btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box;width:100%;margin-top:16px;padding:14px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+  /* Las dos tarjetas son links enteros. En celular van una al lado de la otra y
+     compactas, que es como las muestra la maqueta: asi el carrusel de destinos
+     entra en pantalla sin bajar. */
+  /* Distintivo del icono: navy con el icono en blanco. El navy es el mismo #1E2A3A
+     que usa --cel-soft en el tema oscuro, asi que en modo noche no se ve raro. */
+  :root{--m-badge:#1E2A3A;--m-badge-ink:#FFFFFF}
+  .m-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+  /* align-items:flex-start porque en una columna el eje cruzado se estira solo: sin
+     esto el distintivo del icono se come el ancho entero de la tarjeta. */
+  .m-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;box-sizing:border-box;padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);text-decoration:none;box-shadow:0 4px 14px rgba(16,24,40,.06)}
+  .m-card__txt{align-self:stretch}
+  .m-card:hover{border-color:var(--ink2)}
+  .m-card:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .m-card__icon{flex:none;width:52px;height:52px;border-radius:14px;background:var(--m-badge);color:var(--m-badge-ink);display:grid;place-items:center}
+  .m-card__txt{display:block}
+  .m-card__txt b{display:block;font-family:var(--fh);font-size:16px;font-weight:700;line-height:1.2;color:var(--ink)}
+  .m-card__txt small{display:block;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  /* La de presupuesto es la que diferencia a CuantoSale: va pintada, no con borde. */
+  .m-card--main{border-color:transparent;background:#FBE7B0;color:#3A2C05;box-shadow:0 6px 20px rgba(180,140,30,.22)}
+  .m-card--main .m-card__icon{background:rgba(58,44,5,.12);color:#3A2C05}
+  .m-card--main .m-card__txt b{color:#3A2C05}
+  .m-card--main .m-card__txt small{color:#6B551A}
+
   .m-btn:focus-visible,.m-menu:focus-visible,.m-more:focus-visible,.m-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
   /* Opcion aparte: el camino en auto. Es un link, no un camino de los dos, asi que
@@ -113,32 +130,25 @@
     </section>
     </div>
 
-    <article class="m-card">
-      <div class="m-card__row">
-        <div class="m-card__icon" aria-hidden="true">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
-        </div>
-        <div>
-          <h2>Ya sé dónde quiero ir</h2>
-          <p>Decí dónde y compará.</p>
-        </div>
-      </div>
-      <a class="m-btn" href="home-destino.html?fuente=home_card_destino" data-evento="home_camino" data-camino="ya_se_donde" data-fuente="home_card_destino">Calcular mi viaje</a>
-    </article>
+    <!-- Las dos tarjetas son el link entero, no una tarjeta con un boton abajo: asi
+         van lado a lado y compactas, como en la maqueta, y el carrusel de destinos
+         entra en pantalla sin tener que bajar. El contenedor .m-cards es el que las
+         pone en dos columnas, tambien en celular. -->
+    <div class="m-cards">
+    <a class="m-card" href="home-destino.html?fuente=home_card_destino" data-evento="home_camino" data-camino="ya_se_donde" data-fuente="home_card_destino">
+      <span class="m-card__icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+      </span>
+      <span class="m-card__txt"><b>Ya sé dónde quiero ir</b><small>Decí dónde y compará</small></span>
+    </a>
 
-    <article class="m-card m-card--main">
-      <div class="m-card__row">
-        <div class="m-card__icon" aria-hidden="true">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.4-.9-1.4-1.4-2.8-1.4-1.6 0-2.7.8-2.7 2 0 3 5.6 1.4 5.6 4.2 0 1.2-1.2 2.1-2.9 2.1-1.5 0-2.6-.6-3-1.6M12 6.5v1.3M12 16.2v1.3"/></svg>
-        </div>
-        <div>
-          <span class="m-card__tag">Lo que nos distingue</span>
-          <h2>No sé dónde ir</h2>
-          <p>Buscá por presupuesto.</p>
-        </div>
-      </div>
-      <a class="m-btn" href="home-presupuesto.html?fuente=home_card_presupuesto" data-evento="home_camino" data-camino="no_se_donde" data-fuente="home_card_presupuesto">Buscar por presupuesto</a>
-    </article>
+    <a class="m-card m-card--main" href="home-presupuesto.html?fuente=home_card_presupuesto" data-evento="home_camino" data-camino="no_se_donde" data-fuente="home_card_presupuesto">
+      <span class="m-card__icon" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+      </span>
+      <span class="m-card__txt"><b>No sé dónde ir</b><small>Buscá por presupuesto</small></span>
+    </a>
+    </div>
 
     <div class="m-sec">
       <h2>Destinos populares</h2>

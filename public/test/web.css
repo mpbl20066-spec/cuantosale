@@ -28,11 +28,14 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 30px;min-height:240px}
   [data-pagina="home"] .m-hero h1{font-size:40px}
   [data-pagina="home"] .m-hero p{font-size:17px;max-width:520px}
-  [data-pagina="home"] .m-card{margin-bottom:20px;padding:24px;display:flex;flex-direction:column}
-  [data-pagina="home"] .m-card__row{flex:1}
-  [data-pagina="home"] .m-card h2{font-size:22px}
-  [data-pagina="home"] .m-card p{font-size:15px}
-  [data-pagina="home"] .m-btn{width:auto;align-self:flex-start;min-width:240px;margin-top:20px}
+  /* En escritorio las tarjetas crecen, pero siguen siendo dos columnas: el icono
+     arriba y el texto abajo, como en la maqueta. */
+  [data-pagina="home"] .m-card{padding:22px;gap:14px}
+  [data-pagina="home"] .m-cards{gap:20px;grid-column:1/-1}
+  [data-pagina="home"] .m-card__icon{width:60px;height:60px;border-radius:16px}
+  [data-pagina="home"] .m-card__icon svg{width:30px;height:30px}
+  [data-pagina="home"] .m-card__txt b{font-size:22px}
+  [data-pagina="home"] .m-card__txt small{font-size:14.5px}
   [data-pagina="home"] .m-car{gap:18px}
   [data-pagina="home"] .m-dest{flex-basis:200px;height:230px}
 }
@@ -324,10 +327,10 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 }
 
 /* ============ Home: portada, tarjetas y navegacion (ajustes de revision) ============ */
-/* La tarjeta de presupuesto es lo que diferencia a CuantoSale de un buscador de vuelos: va destacada. */
-[data-pagina="home"] .m-card--main{border:2px solid #1F6FB5;box-shadow:0 10px 28px rgba(31,111,181,.16)}
-[data-pagina="home"] .m-card__tag{display:inline-block;margin-bottom:6px;padding:3px 10px;border-radius:99px;background:#DCEBFA;color:#1F6FB5;font-size:11.5px;font-weight:800;letter-spacing:.02em}
-[data-pagina="home"] .m-card:not(.m-card--main) .m-btn{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+/* La tarjeta de presupuesto es la que diferencia a CuantoSale de un buscador de
+     vuelos: va pintada de ambar, sin borde. La regla vive en el CSS de la pagina
+     porque el color viene de ahi, no de un token del tema. */
+[data-pagina="home"] .m-card--main{background:#FBE7B0}
 /* La opcion de auto ocupa el ancho de las dos tarjetas, que en escritorio van
    una al lado de la otra. */
 [data-pagina="home"] .m-auto{grid-column:1/-1;padding:18px 20px}
