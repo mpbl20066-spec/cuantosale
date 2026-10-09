@@ -94,6 +94,7 @@
   <div class="d-foot" id="foot"></div>
 </div>
 <script src="home-track.js"></script>
+<script src="destinos-datos.js"></script>
 <script>
 (function () {
   var qs = new URLSearchParams(location.search), fuente = qs.get('fuente') || 'directo', debug = /[?&]debug=1/.test(location.search);
@@ -112,9 +113,11 @@
     cmp: '<rect x="3" y="4" width="8" height="8" rx="1.5"/><rect x="13" y="12" width="8" height="8" rx="1.5"/><path d="M11 8h2a2 2 0 0 1 2 2v2"/>'
   };
   /* Los mismos 13 destinos que el resto de /test: clave, nombre, km desde Montevideo. */
-  var DESTS = [['fln', 'Florianópolis', 'Brasil', 1900, 'sc'], ['bombinhas', 'Bombinhas', 'Brasil', 1800, 'sc'], ['bcm', 'Camboriú', 'Brasil', 1800, 'sc'], ['itapema', 'Itapema', 'Brasil', 1800, 'sc'], ['rosa', 'Praia do Rosa', 'Brasil', 1900, 'sc'], ['garopaba', 'Garopaba', 'Brasil', 1900, 'sc'],
-    ['poa', 'Porto Alegre', 'Brasil', 900, 'rs'], ['gram', 'Gramado', 'Brasil', 1000, 'rs'], ['canela', 'Canela', 'Brasil', 1000, 'rs'], ['torres', 'Torres', 'Brasil', 1100, 'rs'],
-    ['rio', 'Río de Janeiro', 'Brasil', 2900, 'rj'], ['buz', 'Búzios', 'Brasil', 3000, 'rj'], ['ilha', 'Ilha Grande', 'Brasil', 3000, 'rj']];
+  /* Los 40 destinos de la app (destinos-datos.js, copia de lib/model.js). La distancia por tierra solo existe donde hay ruta
+     en auto; en el resto el viaje es en avion y no se muestra km. d = [clave, nombre, pais, km, grupo de transporte, region] */
+  var KM = { fln: 1900, bombinhas: 1800, bcm: 1800, itapema: 1800, rosa: 1900, garopaba: 1900, poa: 900, gram: 1000, canela: 1000, torres: 1100, rio: 2900, buz: 3000, ilha: 3000 };
+  var GRUPO = { 'Santa Catarina': 'sc', 'Río Grande do Sul': 'rs', 'Río de Janeiro': 'rj' };
+  var DESTS = (window.CS_DESTS || []).map(function (d) { return [d.k, d.name, 'Brasil', KM[d.k] || 0, GRUPO[d.region] || 'otro', d.region]; });
   var POPULARES = ['rio', 'fln', 'buz', 'bcm'];
   var HOY = new Date();
   var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
@@ -131,14 +134,15 @@
   function grilla() {
     var lista = DESTS.filter(function (d) {
       if (!S.todos && POPULARES.indexOf(d[0]) < 0) return false;
-      var t = (d[1] + ' ' + d[2]).toLowerCase();
+      var t = (d[1] + ' ' + d[5]).toLowerCase();
       return !S.q || t.indexOf(S.q.toLowerCase()) >= 0;
     });
+    lista.sort(function (a, b) { return S.todos ? a[1].localeCompare(b[1], 'es') : POPULARES.indexOf(a[0]) - POPULARES.indexOf(b[0]); });
     if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
     return '<div class="d-grid">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
         '<span class="d-card__f" style="background-image:url(' + (['buz', 'bombinhas', 'bcm'].indexOf(d[0]) >= 0 ? 'dest/' : '../fotos/') + d[0] + '.jpg)" aria-hidden="true"></span>' +
-        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + ' · ' + d[3] + ' km</small></span></button>';
+        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[5]) + (d[3] ? ' · ' + d[3] + ' km' : '') + '</small></span></button>';
     }).join('') + '</div>';
   }
 
@@ -146,7 +150,7 @@
     $('main').dataset.pant = '1';
     $('main').innerHTML = '<h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá tu destino, elegí las fechas y las personas.</p>' +
       '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="¿A dónde querés ir?" value="' + esc(S.q) + '" autocomplete="off"></label>' +
-      '<div class="d-h2"><h2>' + (S.q ? 'Resultados' : 'Destinos populares') + '</h2>' +
+      '<div class="d-h2"><h2>' + (S.q ? 'Resultados' : (S.todos ? 'Todos los destinos' : 'Destinos populares')) + '</h2>' +
       (S.q ? '' : '<button type="button" class="d-mas" data-todos="1" data-evento="destino_ver_todos">' + (S.todos ? 'Ver solo los populares' : 'Ver todos los destinos') + ' ›</button>') + '</div>' +
       grilla();
     $('foot').innerHTML = '';
@@ -159,7 +163,7 @@
     var d = destInfo();
     $('main').dataset.pant = '2';
     $('main').innerHTML = '<h1>¿Cuándo querés viajar?</h1><p class="d-sub">Elegí las fechas de tu viaje.</p>' +
-      '<div class="d-elegido">' + ic(I.pin, 20) + '<b>' + esc(d ? d[1] + ', ' + d[2] : '') + '</b><span>' + (d ? d[3] + ' km' : '') + '</span></div>' +
+      '<div class="d-elegido">' + ic(I.pin, 20) + '<b>' + esc(d ? d[1] + ', ' + d[2] : '') + '</b><span>' + (d && d[3] ? d[3] + ' km' : '') + '</span></div>' +
       '<label class="d-lbl" for="ida">Desde</label><div class="d-fecha">' + ic(I.cal, 22) + '<input id="ida" type="date" min="' + sumarDias(iso(HOY), 1) + '" value="' + S.ida + '" aria-label="Fecha de ida"></div>' +
       '<label class="d-lbl" for="vuelta">Hasta</label><div class="d-fecha">' + ic(I.cal, 22) + '<input id="vuelta" type="date" min="' + sumarDias(S.ida, 1) + '" value="' + S.vuelta + '" aria-label="Fecha de vuelta"></div>' +
       '<h2 class="d-h2" style="margin-top:22px">¿Cuántas personas?</h2>' +
@@ -176,7 +180,7 @@
      ruta en auto; en los demas el mensaje lo explica. Los precios son de ejemplo y
      salen de los mismos numeros que usa el resto de /test. */
   var MEDIOS = [
-    { id: 'avion', ico: 'avion', nom: 'Avión', sub: 'Costo desde US$ 472 por persona', para: ['sc', 'rs', 'rj'] },
+    { id: 'avion', ico: 'avion', nom: 'Avión', sub: 'Costo desde US$ 472 por persona', para: ['sc', 'rs', 'rj', 'otro'] },
     { id: 'auto', ico: 'auto', nom: 'Auto', sub: 'Combustible y peajes · Costo desde US$ 268 por persona', para: ['sc', 'rs'] },
     { id: 'bus', ico: 'bus', nom: 'Bus', sub: 'Pasaje y traslados · Costo desde US$ 210 por persona', para: ['sc', 'rs'] }
   ];
