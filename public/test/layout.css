@@ -1,0 +1,33 @@
+/* ============ Ancho maximo legible (todas las paginas de /test) ============
+   Se carga DESPUES de web.css. Solo corrige anchos, centrado y espaciado; no toca colores, tipografia ni estructura.
+   - Barras y pies mantienen su fondo a todo el ancho, pero el contenido queda en 1200px centrado, con 24px a cada lado.
+   - Modales: hoja centrada de 700px como maximo sobre un velo oscuro; en celular siguen ocupando todo el ancho.
+   - Textos: parrafos hasta 700px y titulos hasta 800px.
+   Variables: --lay-max (ancho del contenido), --lay-pad (margen lateral minimo), --lay-gut (margen lateral que centra). */
+:root{--lay-max:1200px;--lay-pad:24px;--lay-gut:max(var(--lay-pad),calc((100% - var(--lay-max)) / 2 + var(--lay-pad)));--lay-text:700px;--lay-title:800px;--lay-modal:700px}
+
+@media (min-width:768px){
+  /* barras superiores, pies y zonas de contenido que salian de borde a borde */
+  html[data-pagina] .p-top,html[data-pagina] .p-bar,html[data-pagina] .t-bar,html[data-pagina] .t-main,html[data-pagina] .t-foot,
+  html[data-pagina] .f-bar,html[data-pagina] .f-foot,html[data-pagina] .g-bar,html[data-pagina] .u-bar,html[data-pagina] .u-foot,
+  html[data-pagina] .c-bar,html[data-pagina] .r-bar,html[data-pagina] .r-foot,
+  html[data-pagina="presupuesto"] #main{padding-left:var(--lay-gut);padding-right:var(--lay-gut);box-sizing:border-box}
+  /* contenido sin padding propio: se centra con ancho maximo */
+  html[data-pagina] .u-main{max-width:var(--lay-max);margin-left:auto;margin-right:auto;box-sizing:border-box}
+  /* paso "Tu presupuesto" del flujo y portada: 1200px como maximo */
+  html[data-pagina="flujo"] .f-scroll[data-paso="4"]{max-width:var(--lay-max)}
+  /* subtitulos y titulos de pagina */
+  html[data-pagina] .d-sub,html[data-pagina] .f-sub,html[data-pagina] .p-sub,html[data-pagina] .c-sub,html[data-pagina] .g-sub{max-width:var(--lay-text)}
+  html[data-pagina] .d-main h1,html[data-pagina] .f-scroll>h1,html[data-pagina] .c-main h1,html[data-pagina] .t-main h1{max-width:var(--lay-title)}
+
+  /* modales y hojas de la pantalla de flujo: centrados, 700px como maximo */
+  html[data-pagina="flujo"] .f-modal:not(.is-full){justify-content:center;align-items:center;padding:24px;box-sizing:border-box}
+  html[data-pagina="flujo"] .f-modal:not(.is-full) .f-modal__bg{background:rgba(0,0,0,.5)}
+  html[data-pagina="flujo"] .f-modal:not(.is-full) .f-modal__sheet{width:100%;max-width:var(--lay-modal);max-height:88%;margin:0 auto;padding:40px 32px;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+  html[data-pagina="flujo"] .f-modal__sheet>*{max-width:100%;box-sizing:border-box}
+  html[data-pagina="flujo"] .f-modal__sheet .g-btn,html[data-pagina="flujo"] .f-modal__sheet button.g-btn{width:100%}
+}
+
+/* miniaturas e imagenes: recorte centrado, sin estirarse */
+img{object-position:center}
+.d-card__f,.p-dst__f,.g-trip__img,.ls-card__img,.d-elegido__f,.pv-c__img,.pv-t__img{background-position:center;background-size:cover}

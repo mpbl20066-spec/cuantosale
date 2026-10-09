@@ -436,6 +436,22 @@
   .g-ben--l li{gap:14px;font-size:14.5px}
   .g-ben--l li span{flex:0 0 40px;height:40px;border-radius:50%;background:var(--good-soft)}
   .g-skip--l{margin-top:2px;color:#1F6FB5;text-decoration:none}
+  /* "¿Querés guardar tu viaje?": el error se ve como error y, en pantallas anchas, todo va en un contenedor centrado. */
+  .g-body--c .g-err{margin:10px 0;padding:12px 14px;border:1.5px solid #E5484D;border-radius:12px;background:#FDECEC;color:#8B1A1A;font-size:13.5px;text-align:left}
+  @media (min-width:768px){
+    .g-body--c{display:flex;flex-direction:column;align-items:center;width:100%;max-width:900px;margin:0 auto;padding:24px 24px 32px;box-sizing:border-box}
+    .g-body--c>*{width:100%;max-width:800px;box-sizing:border-box}
+    .g-body--c .g-ilu{width:120px;height:96px}
+    .g-body--c .g-ilu__c{width:80px;height:80px;margin:-40px 0 0 -40px}
+    .g-body--c .g-h--c{max-width:500px;font-size:32px}
+    .g-body--c .g-p--c{max-width:500px}
+    .g-body--c .g-btn{max-width:600px}
+    .g-body--c .g-skip{max-width:600px}
+    .g-body--c .g-p--s{max-width:500px}
+    .g-body--c .g-trip{padding:14px 16px;border-radius:14px;box-shadow:0 2px 8px rgba(10,30,70,.08)}
+    .g-body--c .g-trip__img{flex:0 0 96px;height:96px}
+    .g-body--c .g-ben--l{max-width:600px}
+  }
   .rv-head{display:flex;align-items:center;gap:14px;margin-top:4px}
   .rv-head__ico{flex:0 0 auto;color:var(--good)}
   .rv-head h1{margin:0;font-family:var(--fh);font-size:27px;font-weight:800;line-height:1.1;color:var(--ink)}
@@ -665,6 +681,7 @@
   .phone.es-oscuro .g-p{color:var(--ink2)}
 </style>
 <link rel="stylesheet" href="web.css">
+<link rel="stylesheet" href="layout.css">
 </head>
 <body>
 <div class="phone" id="phone">
