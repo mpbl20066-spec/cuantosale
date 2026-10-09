@@ -74,6 +74,7 @@
   /* la tarjeta del destino es un boton: toda ella lleva a elegir otro destino */
   button.d-elegido{width:100%;box-sizing:border-box;text-align:left;font-family:var(--fb);cursor:pointer}
   button.d-elegido:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .d-elegido__f{display:block;flex:0 0 clamp(90px,26vw,120px);height:72px;border-radius:10px;background:var(--cel-soft) center/cover}
   .d-elegido__t{flex:1;min-width:0}
   .d-elegido__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2)}
   .d-elegido .d-elegido__c{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:800;color:#1F6FB5;white-space:nowrap}
@@ -169,6 +170,8 @@
     window.mockTrack('page_view', { page_path: '/viaje/destino', page_title: 'Elegí tu destino · CuántoSale', motivo: 'elegir_destino' });
   }
 
+  /* Foto del destino: las de Búzios, Bombinhas y Camboriú son las reducidas de dest/; el resto, las de fotos/. */
+  var fotoDe = function (k) { return (['buz', 'bombinhas', 'bcm'].indexOf(k) >= 0 ? 'dest/' : '../fotos/') + k + '.jpg'; };
   var plural = function (n, a, b) { return n + " " + (n === 1 ? a : b); };
   /* Noches entre ida y vuelta: se recalcula al tocar las fechas, sin volver a pintar (si no, se cerraria el selector). */
   function textoNoches() {
@@ -180,7 +183,7 @@
     var d = destInfo(), nn = textoNoches();
     $("main").dataset.pant = "2";
     $("main").innerHTML = "<h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
-      "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + ic(I.pin, 20) +
+      "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + (d ? "<span class=\"d-elegido__f\" style=\"background-image:url(" + fotoDe(d[0]) + ")\" aria-hidden=\"true\"></span>" : ic(I.pin, 20)) +
       "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay" + (d && d[3] ? " · " + d[3] + " km por tierra" : "") + "</small></span>" +
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
       "<label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div>" +
