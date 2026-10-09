@@ -302,11 +302,16 @@ const HOTEL_TIER_FALLBACK = [
   { id: 'confort', label: 'Confort', brands: ['Mercure', 'Golden Tulip', 'Blue Tree'],
     desc: 'Hotel 4 estrellas con más comodidades y mejor ubicación.' }
 ];
-function fallbackBookingUrl(destName, dep, ret, pax, hotelName) {
+/* `ninos` son los menores (2 a 11 anos) incluidos en `pax`; el resto viaja como adulto. Booking pide la edad de cada nino: se usa 8. */
+const EDAD_NINO = 8;
+function fallbackBookingUrl(destName, dep, ret, pax, hotelName, ninos) {
+  const total = Math.max(1, Number(pax) || 1);
+  const kids = Math.max(0, Math.min(Number(ninos) || 0, total - 1));
   const query = new URLSearchParams({
     ss: (hotelName ? hotelName + ', ' : '') + destName + ', Brasil',
-    group_adults: String(Math.max(1, Number(pax) || 1)), no_rooms: '1', group_children: '0'
+    group_adults: String(total - kids), no_rooms: '1', group_children: String(kids)
   });
+  for (let i = 0; i < kids; i++) query.append('age', String(EDAD_NINO));
   if (dep) query.set('checkin', dep);
   if (ret) query.set('checkout', ret);
   return 'https://www.booking.com/searchresults.es.html?' + query.toString();
@@ -322,7 +327,7 @@ function fallbackHotelsFor(destKey, destName, tierIndex, extra) {
     const perNight = Math.round(basePerNight * spread[index]);
     return {
       name: name, hotelId: '', image: '', total: perNight * nights, perNight: perNight, currency: 'USD', rating: 0,
-      bookingUrl: fallbackBookingUrl(destName, extra && extra.dep, extra && extra.ret, extra && extra.pax, name),
+      bookingUrl: fallbackBookingUrl(destName, extra && extra.dep, extra && extra.ret, extra && extra.pax, name, extra && extra.ninos),
       similar: [], source: 'fallback', tier: tierInfo.id,
       description: tierInfo.desc
     };
@@ -778,7 +783,9 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
   const hotelName = String(destName || settings.destination || 'Florianópolis').trim();
   const dep = String((extra && extra.dep) || '').trim() || new Date(Date.now() + 86400000).toISOString().slice(0, 10);
   const ret = String((extra && extra.ret) || '').trim() || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
-  const adults = Math.max(1, Number((extra && extra.pax) || 1));
+  const totalViajeros = Math.max(1, Number((extra && extra.pax) || 1));
+  const ninos = Math.max(0, Math.min(Number(extra && extra.ninos) || 0, totalViajeros - 1));
+  const adults = totalViajeros - ninos;
   // El nombre del destino en lib/model.js está escrito para que se lea bien en
   // la interfaz, y a veces son dos ciudades: "Fortaleza / Jericoacoara",
   // "Trancoso / Arraial d'Ajuda". Booking no entiende esa barra: searchDestination
@@ -818,6 +825,8 @@ async function fetchBookingHotels(destKey, destName, style, extra) {
     arrival_date: dep, departure_date: ret, adults: String(adults), room_qty: '1',
     page_number: '1', units: 'metric', languagecode: 'es', currency_code: 'USD'
   });
+  // Con ninos, Booking cotiza la habitacion familiar: pide la edad de cada uno.
+  if (ninos > 0) params.set('children_age', new Array(ninos).fill(EDAD_NINO).join(','));
   // Filtrar por regimen todo-incluido directamente en la API de Booking
   if (isAllInclusive) { params.set('meal_plan', 'all_inclusive'); params.set('filter_by_meal_plan', '5'); }
   // NO se manda filter_by_property_type. Se probo y esta RapidAPI lo rechaza:
@@ -2033,16 +2042,19 @@ async function habitacionesHotel(req, res, url) {
   const dep = String(url.searchParams.get('dep') || '').trim();
   const ret = String(url.searchParams.get('ret') || '').trim();
   const pax = Math.max(1, Math.min(10, Math.round(Number(url.searchParams.get('pax')) || 2)));
+  const ninosRaw = Math.max(0, Math.min(8, Math.round(Number(url.searchParams.get('ninos')) || 0)));
+  const ninos = ninosRaw < pax ? ninosRaw : 0;   // al menos un adulto
   const iso = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
   if (!/^[0-9]{1,12}$/.test(hotelId) || !iso.test(dep) || !iso.test(ret) || ret <= dep) return sendJson(res, 400, { error: 'Faltan datos del hotel o de las fechas.' });
   const settings = bookingSettings();
   if (!settings.key) return sendJson(res, 503, { error: 'Las habitaciones no están disponibles ahora.' });
-  const clave = [hotelId, dep, ret, pax].join('|');
+  const clave = [hotelId, dep, ret, pax, ninos].join('|');
   const guardado = habitacionesCache.get(clave);
   if (guardado && Date.now() - guardado.t < 15 * 60000) return sendJson(res, 200, { rooms: guardado.rooms });
   const u = new URL('/api/v1/hotels/getRoomList', 'https://' + settings.host);
   u.searchParams.set('hotel_id', hotelId); u.searchParams.set('arrival_date', dep); u.searchParams.set('departure_date', ret);
-  u.searchParams.set('adults', String(pax)); u.searchParams.set('room_qty', '1'); u.searchParams.set('units', 'metric');
+  u.searchParams.set('adults', String(pax - ninos)); u.searchParams.set('room_qty', '1'); u.searchParams.set('units', 'metric');
+  if (ninos > 0) u.searchParams.set('children_age', new Array(ninos).fill(EDAD_NINO).join(','));
   u.searchParams.set('languagecode', 'es'); u.searchParams.set('currency_code', 'USD');
   const payload = await bookingApiJson(u.toString(), settings);
   const d = (payload && payload.data) || {};
@@ -2238,6 +2250,8 @@ async function cotizarHoteles(req, res, url) {
   const hotelType = resolveHotelType(url.searchParams.get('hotel_type'), url.searchParams.get('subcategory'), v.S.style);
   const rawBudget = url.searchParams.get('hotel_budget_per_night');
   const extra = { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, nights: v.nights, hotelType: hotelType, subcategory: url.searchParams.get('subcategory') || '' };
+  const ninosPedidos = Math.max(0, Math.min(8, Math.round(Number(url.searchParams.get('ninos')) || 0)));
+  if (ninosPedidos > 0 && ninosPedidos < v.S.pax) extra.ninos = ninosPedidos;   // al menos un adulto
   if (rawBudget !== null && Number.isFinite(Number(rawBudget)) && Number(rawBudget) >= 0) extra.hotelBudgetPerNight = Number(rawBudget);
   const hotelDiag = {};
   // Segunda parada del viaje combinado. Antes el endpoint solo miraba `dest`, y

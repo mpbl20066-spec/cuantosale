@@ -69,6 +69,9 @@
   .d-noches{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:var(--good-soft);color:var(--ink);font-size:14.5px;font-weight:700}
   .d-noches.is-err{background:var(--coral-soft);color:var(--coral)}
   h2.d-h2{font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}   /* el titulo "cuantas personas" salia con el tamano por defecto del navegador */
+  .d-pers + .d-pers{margin-top:8px}
+  .d-pers__s{display:block;font-size:12px;font-weight:600;color:var(--ink2)}
+  .d-pers output{min-width:22px;text-align:center;font-weight:800;font-size:16px;color:var(--ink)}
   .d-limite{margin:8px 2px 0;font-size:12.5px;font-weight:600;color:var(--ink2)}
   .d-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
   .d-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
@@ -129,7 +132,8 @@
   var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
   /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
   var S = { pant: 1, dest: qs.get('destino') || '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
-    ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2 };
+    ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: Math.max(0, +qs.get('ninos') || 0) };
+  if (S.ninos >= S.pax) S.ninos = 0;   // siempre viaja al menos un adulto
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
   var debugQ = debug ? '&debug=1' : '';
@@ -171,6 +175,13 @@
     if (!(n >= 1)) return { ok: false, t: "La vuelta tiene que ser posterior a la ida." };
     return { ok: true, t: plural(n, "noche", "noches") };   /* las personas ya se ven mas abajo: no se repiten aca */
   }
+  /* Una fila de personas: nombre, aclaracion de edad y el selector - n +. Los limites los pone el que la llama. */
+  function fila(nombre, sub, clave, n, sinMenos, sinMas) {
+    return "<div class=\"d-pers\">" + ic(I.ppl, 22) + "<b>" + nombre + "<small class=\"d-pers__s\">" + sub + "</small></b>" +
+      "<span style=\"display:flex;align-items:center;gap:8px\"><button type=\"button\" data-" + clave + "=\"-1\" aria-label=\"Menos " + nombre.toLowerCase() + "\"" + (sinMenos ? " disabled" : "") + ">−</button>" +
+      "<output aria-label=\"" + nombre + ": " + n + "\">" + n + "</output>" +
+      "<button type=\"button\" data-" + clave + "=\"1\" aria-label=\"Más " + nombre.toLowerCase() + "\"" + (sinMas ? " disabled" : "") + ">+</button></span></div>";
+  }
   function pant2() {
     var d = destInfo(), nn = textoNoches();
     $("main").dataset.pant = "2";
@@ -181,10 +192,10 @@
       "<label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div>" +
       "<label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div>" +
       "<p class=\"d-noches" + (nn.ok ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
-      "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Cuántas personas viajan?</h2>" +
-      "<div class=\"d-pers\">" + ic(I.ppl, 22) + "<b>" + plural(S.pax, "persona", "personas") + "</b>" +
-      "<span style=\"display:flex;gap:8px\"><button type=\"button\" data-pax=\"-1\" aria-label=\"Menos personas\"" + (S.pax <= 1 ? " disabled" : "") + ">−</button><button type=\"button\" data-pax=\"1\" aria-label=\"Más personas\"" + (S.pax >= 9 ? " disabled" : "") + ">+</button></span></div>" +
-      (S.pax >= 9 ? "<p class=\"d-limite\">Máximo 9 personas por reserva. Para grupos más grandes, escribinos por WhatsApp.</p>" : "") +
+      "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
+      fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
+      fila("Niños", "De 2 a 11 años", "ni", S.ninos, S.ninos <= 0, S.pax >= 9) +
+      "<p class=\"d-limite\">" + (S.pax >= 9 ? "Máximo 9 personas por reserva. Para grupos más grandes, escribinos por WhatsApp. " : "") + "Los bebés menores de 2 años viajan en brazos y no se cuentan. Con niños, el alojamiento se cotiza para habitación familiar; vuelos y actividades se cotizan como pasajero y la tarifa de niño se confirma al reservar.</p>" +
       (S.err ? "<p class=\"d-vacio\" role=\"alert\" style=\"text-align:left;color:var(--coral)\">" + esc(S.err) + "</p>" : "");
     $('foot').hidden = false;
     $('foot').innerHTML = '<button type="button" class="d-btn" data-seguir="1" data-evento="destino_continuar" data-destino="' + S.dest + '">Continuar →</button>';
@@ -203,7 +214,7 @@
   function irA() { aResultados(); }
   /* Ir a los resultados pasando destino, fechas, personas y medio de transporte. */
   function aResultados() {
-    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, modo: S.medio, fuente: 'destino_' + S.medio, origen_home: fuente });
+    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, modo: S.medio, fuente: 'destino_' + S.medio, origen_home: fuente });
     location.href = 'home-resultado.html?' + q.toString() + debugQ;
   }
 
@@ -219,7 +230,14 @@
        (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
     if (t.dataset.dest) { S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
     if (t.dataset.cambiar) { track('destino_cambiar_destino', { destino: S.dest }); ir(1); return; }
-    if (t.dataset.pax) { S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.pax))); S.err = ''; track('destino_personas', { personas: S.pax }); pant2(); return; }
+    if (t.dataset.ad || t.dataset.ni) {
+      var ad = S.pax - S.ninos, ni = S.ninos;
+      if (t.dataset.ad) ad = Math.max(1, Math.min(9 - ni, ad + (+t.dataset.ad)));
+      else ni = Math.max(0, Math.min(9 - ad, ni + (+t.dataset.ni)));
+      S.pax = ad + ni; S.ninos = ni; S.err = '';
+      track('destino_personas', { personas: S.pax, adultos: ad, ninos: ni });
+      pant2(); return;
+    }
     if (t.dataset.seguir) {
       var ida = ($('ida') || {}).value || S.ida, vuelta = ($('vuelta') || {}).value || S.vuelta;
       S.ida = ida; S.vuelta = vuelta; S.err = '';
