@@ -287,7 +287,7 @@
     if (qn()) return null;   /* escribio algo que no existe: no se ofrece otro destino en su lugar */
     return DESTS.filter(function (d) { return d[0] === S.sel; })[0] || DESTS.filter(function (d) { return d[0] === POPULARES[0]; })[0] || null;
   }
-  var PASOS = ['Destino', 'Fechas y personas', 'Resultados', 'Detalle', 'Presupuesto'];
+  var PASOS = ['Destino', 'Fechas y personas', 'Vuelos', 'Alojamiento', 'Extras', 'Presupuesto'];
   function migas(activo) {
     return '<nav class="d-crumb" aria-label="Pasos del viaje"><ol>' + PASOS.map(function (n, i) {
       return '<li' + (i === activo ? ' class="is-on" aria-current="step"' : '') + '><span>' + (i + 1) + '</span>' + n + '</li>';
@@ -427,8 +427,9 @@
   function irA() { aResultados(); }
   /* Ir a los resultados pasando destino, fechas, personas y medio de transporte. */
   function aResultados() {
-    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, modo: S.medio, fuente: 'destino_' + S.medio, origen_home: fuente });
-    location.href = 'home-resultado.html?' + q.toString() + debugQ;
+    /* Con las fechas elegidas se va derecho a elegir el vuelo (paso 1 del flujo de reserva). */
+    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente });
+    location.href = 'home-flujo.html?' + q.toString() + debugQ;
   }
 
   document.addEventListener('click', function (e) {
