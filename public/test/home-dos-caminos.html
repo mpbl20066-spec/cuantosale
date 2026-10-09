@@ -21,10 +21,15 @@
   .scroll{flex:1;overflow-y:auto;padding:0 18px 28px;scrollbar-width:none}
   .scroll::-webkit-scrollbar{display:none}
 
-  /* Portada con la foto de Rio: el texto va sobre un degradado del color de
-     fondo que se desvanece hacia la derecha y hacia abajo. */
-  .m-top{position:relative;margin:0 -18px;padding:0 18px 26px;background:url(home-ilha.jpg) 30% 70%/cover}
-  .m-top::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 0%,color-mix(in srgb,var(--bg) 80%,transparent) 45%,transparent 100%),linear-gradient(180deg,transparent 60%,var(--bg) 100%)}
+  /* Portada con la foto de Niteroi (public/test/home-portada.jpg, convertida de
+     portada.png). Es 16:9 y muy colorida, asi que el degradado va solo del lado
+     izquierdo, donde se apila el texto, y la foto se ve entera del lado derecho.
+     El alto sube para que la imagen tenga presencia en vez de quedar de franja. */
+  .m-top{position:relative;margin:0 -18px;padding:0 18px 26px;min-height:290px;background:url(home-portada.jpg) 62% 54%/cover}
+  /* El velo es solo arriba y abajo, y suave: la foto de la portada tiene cielo claro
+     arriba y agua turquesa en el medio, y el texto navy se lee solo. Con un
+     degradado de lado la tapaba entera y no se veía nada. */
+  .m-top::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 62%,transparent) 0%,color-mix(in srgb,var(--bg) 18%,transparent) 26%,transparent 46%,color-mix(in srgb,var(--bg) 45%,transparent) 78%,var(--bg) 100%)}
   .m-top>*{position:relative}
   .m-head{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
   .m-logo{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:800;font-size:22px;color:var(--ink);letter-spacing:-.01em}
@@ -39,25 +44,27 @@
   /* Las dos tarjetas son links enteros. En celular van una al lado de la otra y
      compactas, que es como las muestra la maqueta: asi el carrusel de destinos
      entra en pantalla sin bajar. */
-  /* Distintivo del icono: navy con el icono en blanco. El navy es el mismo #1E2A3A
-     que usa --cel-soft en el tema oscuro, asi que en modo noche no se ve raro. */
-  :root{--m-badge:#1E2A3A;--m-badge-ink:#FFFFFF}
+  /* Distintivo del icono: rectángulo ámbar claro con el ícono oscuro, como en la
+     maqueta. El de la tarjeta pintada es un ámbar más fuerte para que se recorte. */
+  :root{--m-badge:#FBE7B0;--m-badge-ink:#3A2C05;--m-badge-2:#F0C33C;--m-main:#F7C325;--m-main-ink:#3A2C05;--m-main-ink2:#6B551A}
   .m-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
-  /* align-items:flex-start porque en una columna el eje cruzado se estira solo: sin
-     esto el distintivo del icono se come el ancho entero de la tarjeta. */
-  .m-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px;box-sizing:border-box;padding:14px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);text-decoration:none;box-shadow:0 4px 14px rgba(16,24,40,.06)}
-  .m-card__txt{align-self:stretch}
+  /* Icono a la izquierda y texto al lado, como en la maqueta. La tarjeta es angosta
+     (van dos por fila), asi que el distintivo y los textos van chicos: con el
+     tamaño de escritorio el titulo se parte en tres lineas. */
+  .m-card{display:flex;flex-direction:row;align-items:center;gap:9px;box-sizing:border-box;padding:11px 10px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);text-decoration:none;box-shadow:0 4px 14px rgba(16,24,40,.06)}
   .m-card:hover{border-color:var(--ink2)}
   .m-card:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .m-card__icon{flex:none;width:52px;height:52px;border-radius:14px;background:var(--m-badge);color:var(--m-badge-ink);display:grid;place-items:center}
-  .m-card__txt{display:block}
-  .m-card__txt b{display:block;font-family:var(--fh);font-size:16px;font-weight:700;line-height:1.2;color:var(--ink)}
-  .m-card__txt small{display:block;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
-  /* La de presupuesto es la que diferencia a CuantoSale: va pintada, no con borde. */
-  .m-card--main{border-color:transparent;background:#FBE7B0;color:#3A2C05;box-shadow:0 6px 20px rgba(180,140,30,.22)}
-  .m-card--main .m-card__icon{background:rgba(58,44,5,.12);color:#3A2C05}
-  .m-card--main .m-card__txt b{color:#3A2C05}
-  .m-card--main .m-card__txt small{color:#6B551A}
+  .m-card__icon{flex:none;width:38px;height:38px;border-radius:11px;background:var(--m-badge);color:var(--m-badge-ink);display:grid;place-items:center}
+  .m-card__icon svg{width:20px;height:20px}
+  .m-card__txt{display:block;flex:1;min-width:0}
+  .m-card__txt b{display:block;font-family:var(--fh);font-size:13.5px;font-weight:700;line-height:1.2;color:var(--ink)}
+  .m-card__txt small{display:block;margin-top:3px;font-size:11px;font-weight:600;color:var(--ink2);line-height:1.3}
+  /* La de presupuesto es la que diferencia a CuantoSale: va pintada de amarillo
+     fuerte, sin borde, con el mismo contenido que la otra. */
+  .m-card--main{border-color:transparent;background:var(--m-main);box-shadow:0 6px 18px rgba(180,140,20,.28)}
+  .m-card--main .m-card__icon{background:var(--m-badge-2);color:var(--m-main-ink)}
+  .m-card--main .m-card__txt b{color:var(--m-main-ink)}
+  .m-card--main .m-card__txt small{color:var(--m-main-ink2)}
 
   .m-btn:focus-visible,.m-menu:focus-visible,.m-more:focus-visible,.m-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
