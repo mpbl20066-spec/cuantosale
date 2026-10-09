@@ -255,6 +255,28 @@
   .fv-total small{display:block;font-size:13px;font-weight:700;color:var(--ink)}
   .fv-total b{display:block;font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.05;color:var(--ink)}
   .fv-total p{flex:1;margin:0;padding-left:12px;border-left:1px solid var(--line);font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.4}
+  .fv-total{flex-wrap:wrap}
+  .fv-total>.fv-dist{flex:0 0 100%;min-width:0;margin-top:2px;padding-top:12px;border-top:1px solid var(--line)}
+  .fv-dist h2{margin:0 0 8px;font-family:var(--fh);font-size:14px;font-weight:800;color:var(--ink)}
+  .fv-bar{display:flex;gap:2px;height:16px;border-radius:99px;overflow:hidden}
+  .fv-seg{flex:1 1 0;min-width:6px;padding:0;border:0;cursor:pointer;background:var(--c);opacity:.9;transition:opacity .15s}
+  .fv-bar.has-sel .fv-seg:not(.is-on){opacity:.35}
+  .fv-seg.is-on,.fv-seg:hover{opacity:1}
+  .fv-seg:focus-visible,.fv-leg button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .fv-leg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+  .fv-leg button{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid transparent;border-radius:12px;background:var(--surface);color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
+  .fv-leg button.is-on{border-color:var(--c)}
+  .fv-leg i{flex:0 0 10px;height:10px;border-radius:50%;background:var(--c)}
+  .fv-leg span{flex:1;min-width:0;font-size:12px;font-weight:700;line-height:1.25}
+  .fv-total .fv-leg b{display:block;margin-top:1px;font-family:var(--fh);font-size:14px;line-height:1.2;font-variant-numeric:tabular-nums}
+  .fv-leg em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink2)}
+  .fv-seg-det{margin-top:8px;padding:10px 12px;border-left:4px solid var(--c);border-radius:10px;background:var(--surface);font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.45}
+  .fv-total .fv-seg-det b{display:inline;font-family:var(--fh);font-size:15px;line-height:1.3}
+  .fv-total .fv-seg-det small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:var(--ink2)}
+  .fv-total .fv-seg-hint{flex:none;margin:8px 0 0;padding:0;border:0;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .fin-ico--blue,.fin-ico--green,.fin-ico--yellow,.fin-ico--violet{box-shadow:inset 0 0 0 2px var(--c)}
+  .fv-c-blue{--c:#1F6FB5}.fv-c-green{--c:#12784F}.fv-c-yellow{--c:#D99A0B}.fv-c-violet{--c:#5A44B0}
+  @media (max-width:420px){.fv-leg{grid-template-columns:1fr}}
   .fv-list{gap:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
   .fv-list .fin-row{border:0;border-radius:0;border-top:1px solid var(--line);background:transparent}
   .fv-list .fin-row:first-child{border-top:0}
@@ -909,7 +931,7 @@
   }
   function fila4(paso, ico, tono, titulo, detalle, precio) {
     var tag = paso ? 'button type="button" data-ir="' + paso + '"' : 'button type="button" data-comidas="1" aria-expanded="' + !!S.comidasAbierto + '"';
-    return '<' + tag + ' class="fin-row"><span class="fin-ico fin-ico--' + tono + '">' + ic(ico, 26) + '</span><span class="fin-t"><b>' + esc(titulo) + '</b><small>' + detalle + '</small></span><span class="fin-p">' + precio + '</span>' + ic(iChev, 16) + '</button>';
+    return '<' + tag + ' class="fin-row fv-c-' + tono + '"><span class="fin-ico fin-ico--' + tono + '">' + ic(ico, 26) + '</span><span class="fin-t"><b>' + esc(titulo) + '</b><small>' + detalle + '</small></span><span class="fin-p">' + precio + '</span>' + ic(iChev, 16) + '</button>';
   }
   function resumenTexto(d) {
     return 'Mi viaje a ' + DEST + ': ' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '. Total estimado: ' + f(d.total) + ' (armado en CuántoSale).';
@@ -922,6 +944,27 @@
     var hr = HOTELES.filter(function (x) { return !x.ejemplo; });
     if (!d.h.ejemplo && hr.length) { var mh = Math.min.apply(null, hr.map(function (x) { return x.precio; })), dh = d.tAloj - mh; if (dh > 0) partes.push('un alojamiento ' + f(dh) + ' más barato'); }
     return partes.length ? '<br><strong class="fin-ahorro">Hay ' + partes.join(' y ') + ' con los mismos datos de tu viaje.</strong>' : '';
+  }
+  /* Barra de distribucion del gasto: las mismas cuatro categorias (y colores) que las filas del desglose.
+     Segmentos y leyenda son botones; al tocar uno se explica cuanto es y que incluye. */
+  function distribucion(d, detVuelo, detAloj, detEx) {
+    var cats = [
+      { k: 'vuelo', n: 'Vuelo + traslado', v: d.tVuelo + d.tTras, c: 'blue', det: 'Vuelo ' + f(d.tVuelo) + (d.t ? ' · Traslado ' + f(d.tTras) : '') + '<br>' + detVuelo },
+      { k: 'aloj', n: 'Alojamiento', v: d.tAloj, c: 'green', det: detAloj },
+      { k: 'extras', n: 'Extras', v: d.tExtras, c: 'yellow', det: detEx },
+      { k: 'comidas', n: 'Comidas + transporte local', v: d.tComidas + d.tLocal, c: 'violet', det: 'Comidas ' + f(d.tComidas) + ' · Transporte local ' + f(d.tLocal) + '<br>' + est('', 'comidas') }
+    ];
+    var pct = function (v) { return d.total > 0 ? Math.round(v / d.total * 100) : 0; };
+    var sel = cats.filter(function (x) { return x.k === S.segAbierto; })[0];
+    var barra = cats.filter(function (x) { return x.v > 0; }).map(function (x) {
+      return '<button type="button" class="fv-seg fv-c-' + x.c + (sel === x ? ' is-on' : '') + '" style="flex-grow:' + x.v + '" data-seg="' + x.k + '" aria-pressed="' + (sel === x) + '" aria-label="' + x.n + ': ' + f(x.v) + ' (' + pct(x.v) + '%)"></button>';
+    }).join('');
+    var leyenda = cats.map(function (x) {
+      return '<li><button type="button" class="fv-c-' + x.c + (sel === x ? ' is-on' : '') + '" data-seg="' + x.k + '" aria-pressed="' + (sel === x) + '"><i aria-hidden="true"></i><span>' + x.n + '<b>' + f(x.v) + '</b></span><em>' + pct(x.v) + '%</em></button></li>';
+    }).join('');
+    return '<div class="fv-dist"><h2>¿A dónde va tu plata?</h2><div class="fv-bar' + (sel ? ' has-sel' : '') + '" role="group" aria-label="Distribución del gasto">' + barra + '</div>' +
+      '<ul class="fv-leg">' + leyenda + '</ul>' +
+      (sel ? '<div class="fv-seg-det fv-c-' + sel.c + '" role="status"><b>' + sel.n + ' · ' + f(sel.v) + '</b> (' + pct(sel.v) + '% del total)<small>' + sel.det + '</small></div>' : '<p class="fv-seg-hint">Tocá una categoría para ver qué incluye.</p>') + '</div>';
   }
   function pantalla4() {
     var d = datosFinal(), t = d.t, ex = d.ex, personas = personasTxt(), fechas = fdc(IDA) + ' → ' + fdc(VUELTA);
@@ -937,7 +980,7 @@
     var dividir = S.dividirAbierto ? '<div class="fv-div"><span>Dividido entre</span><div class="fv-step"><button type="button" data-divn="-1" aria-label="Menos personas">−</button><output>' + n + '</output><button type="button" data-divn="1" aria-label="Más personas">+</button></div><b>' + f(d.total / n) + '<small>por persona</small></b></div>' : '';
     var iBilletera = '<path d="M3 7a2 2 0 0 1 2-2h13v4M3 7v11a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14.5h.01"/>';
     return '<div class="fv-trip"><span class="fv-trip__ico">' + ic(iBilletera, 38) + '</span><div class="fv-trip__t"><h1>Tu viaje</h1><b>' + esc(DEST) + '</b><span>' + fechas + ' · ' + personas + '</span></div><div class="fv-trip__img" aria-hidden="true"></div></div>' +
-      '<div class="fv-total"><span class="fv-total__ico">' + ic(iBilletera, 28) + '</span><div><small>Costo estimado total</small><b>' + f(d.total) + '</b><em>Por persona: ' + f(d.total / pax) + '</em></div><p>Es una estimación para ' + personas + ': todavía no se cobra nada.</p></div>' +
+      '<div class="fv-total"><span class="fv-total__ico">' + ic(iBilletera, 28) + '</span><div><small>Costo estimado total</small><b>' + f(d.total) + '</b><em>Por persona: ' + f(d.total / pax) + '</em></div><p>Es una estimación para ' + personas + ': todavía no se cobra nada.</p>' + distribucion(d, detVuelo, detAloj, detEx) + '</div>' +
       '<p class="fv-aprox">' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>', 16) + '<span>Incluye valores aproximados: ' + aprox.join(', ') + '.</span></p>' +
       '<h2 class="fin-h2">Desglose del viaje</h2>' +
       '<div class="fin-list fv-list">' +
@@ -1558,7 +1601,7 @@
     var b = e.target.closest('[data-ir]'); if (b) ir(+b.dataset.ir, 'indicador');
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tdet],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-tdet],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
@@ -1592,6 +1635,7 @@
     else if (t.dataset.dividir) { S.dividirAbierto = !S.dividirAbierto; track('flujo_dividir_gastos', { abierto: S.dividirAbierto }); }
     else if (t.dataset.compartir) { compartir(); return; }
     else if (t.dataset.asesor) { track('flujo_contactar_asesor', { total: Math.round(totalHastaAhora()) }); window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola! Armé mi viaje en CuántoSale. ' + resumenTexto(datosFinal()) + ' Ref: ' + window.CS_VIAJE_ID), '_blank', 'noopener'); return; }
+    else if (t.dataset.seg) { S.segAbierto = S.segAbierto === t.dataset.seg ? '' : t.dataset.seg; track('flujo_distribucion_categoria', { categoria: t.dataset.seg, abierta: !!S.segAbierto }); }
     else if (t.dataset.comidas) { S.comidasAbierto = !S.comidasAbierto; track('flujo_ver_comidas', { abierto: S.comidasAbierto }); }
     else if (t.dataset.ir) { track('flujo_resumen_editar', { paso_destino: +t.dataset.ir }); ir(+t.dataset.ir, 'resumen'); return; }
     else if (t.dataset.habs) { abrirHabitaciones(t.dataset.habs); return; }
