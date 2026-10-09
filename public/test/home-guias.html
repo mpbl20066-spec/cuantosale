@@ -23,20 +23,88 @@
   .g-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
   .g-main{flex:1;overflow-y:auto;padding:4px 18px 18px;scrollbar-width:none}
   .g-main::-webkit-scrollbar{display:none}
-  /* Pantalla 1: el menu de destinos, en azul noche como en la maqueta. */
-  .g-menu{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;background:#0A101A;color:#F2F6FB;padding:0 18px 22px}
+  /* Pantalla 1 (Destinos): pagina completa con populares, tarjetas de accion y cierre. Siempre en azul noche. */
+  .g-menu{position:absolute;inset:0;z-index:5;--gm-bg:#0F1B2D;--gm-card:#1A2B4A;--gm-y:#F5C518;--gm-gris:#B0B8C4;--gm-gris2:#6A7A8A;background:var(--gm-bg);overflow-y:auto;padding:0;scrollbar-width:none}
   .g-menu[hidden]{display:none}
-  .g-menu__t{display:flex;align-items:center;gap:10px;padding:16px 0 4px}
-  .g-menu__t h1{margin:0;font-family:var(--fh);font-size:22px;font-weight:800}
-  .g-menu .g-bus{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#F2F6FB}
-  .g-menu .g-bus input{color:#F2F6FB}
-  .g-menu .g-bus input::placeholder{color:#9FACC0}
-  .g-fila{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;margin-top:9px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.06);color:#F2F6FB;text-align:left;cursor:pointer}
-  .g-fila__i{flex:0 0 40px;height:40px;border-radius:12px;background:rgba(255,255,255,.1);display:grid;place-items:center}
-  .g-fila__t{flex:1;min-width:0}
-  .g-fila__t b{display:block;font-size:15px}
-  .g-fila__t small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:#9FACC0}
-  .g-badge{flex:0 0 auto;min-width:24px;height:24px;padding:0 7px;border-radius:99px;background:#F7C325;color:#0A101A;font-size:12.5px;font-weight:800;display:grid;place-items:center}
+  .g-menu::-webkit-scrollbar{display:none}
+  .gm{box-sizing:border-box;max-width:1200px;margin:0 auto;padding:20px 18px 28px}
+  .gm button{font-family:var(--fb);cursor:pointer}
+  .gm-titulo{display:flex;align-items:flex-start;gap:12px}
+  .gm-pin{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--gm-y)}
+  .gm-pin svg{width:20px;height:24px}
+  .gm-titulo h1{margin:0;font-family:var(--fh);font-size:30px;line-height:1.1;font-weight:800;color:#fff}
+  .gm-titulo p{margin:6px 0 0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.7)}
+  .gm-bus{display:flex;align-items:center;gap:12px;margin-top:18px;padding:14px 16px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:var(--gm-card);color:#fff}
+  .gm-bus svg{flex:0 0 auto}
+  .gm-bus input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#fff;font:600 15px var(--fb)}
+  .gm-bus input::placeholder{color:var(--gm-gris)}
+  .gm-bus:focus-within{border-color:var(--gm-y)}
+  .gm-pop{margin-top:26px}
+  .gm-pop__h{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .gm-pop__h h2{display:flex;align-items:center;gap:10px;margin:0;font-family:var(--fh);font-size:20px;font-weight:800;color:#fff}
+  .gm-link{display:inline-flex;align-items:center;gap:6px;padding:6px 0;border:0;background:transparent;color:var(--gm-y);font-size:14px;font-weight:700}
+  .gm-pop__g{display:flex;gap:12px;margin:14px -18px 0;padding:0 18px 4px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .gm-pop__g::-webkit-scrollbar{display:none}
+  .gm-dest{position:relative;flex:0 0 150px;height:170px;scroll-snap-align:start;display:flex;align-items:flex-end;justify-content:space-between;gap:6px;box-sizing:border-box;padding:12px;border:1px solid rgba(255,255,255,.18);border-radius:12px;background:#1A2B4A center/cover no-repeat;color:#fff;font-size:14px;font-weight:700;text-align:left;overflow:hidden}
+  .gm-dest::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,0) 45%,rgba(10,16,26,.85))}
+  .gm-dest>*{position:relative}
+  .gm-dest span{display:flex;align-items:center;gap:6px;min-width:0}
+  .gm-dest:focus-visible,.gm-card:focus-visible,.gm-link:focus-visible{outline:3px solid var(--gm-y);outline-offset:2px}
+  .gm-card{position:relative;display:flex;align-items:center;gap:16px;width:100%;box-sizing:border-box;margin-top:16px;padding:20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:var(--gm-card);color:#fff;text-align:left;overflow:hidden}
+  .gm-card:hover{border-color:rgba(255,255,255,.24)}
+  .gm-card__i{flex:0 0 auto;display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.1)}
+  .gm-card__t{flex:1;min-width:0;display:block}
+  .gm-card__t b{display:block;font-family:var(--fh);font-size:20px;font-weight:800}
+  .gm-card__t>span{display:block;margin-top:6px;max-width:44ch;font-size:14px;line-height:1.55;color:var(--gm-gris)}
+  .gm-card__t em{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-style:normal;font-size:14px;font-weight:700;color:var(--gm-y)}
+  .gm-card__ilu{display:none}
+  .gm-card[data-accion="guias"] .gm-card__t b{padding-right:96px}
+  .gm-badge{position:absolute;top:16px;right:16px;padding:5px 12px;border-radius:99px;background:var(--gm-y);color:#0F1B2D;font-size:12px;font-weight:800}
+  .gm-nota{font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:15px;line-height:1.25;color:#fff;transform:rotate(-6deg)}
+  .gm-cierre{position:relative;display:flex;align-items:center;gap:18px;margin-top:16px;padding:22px 20px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:var(--gm-card);overflow:hidden}
+  .gm-cierre p{margin:0;position:relative;font-size:16px;line-height:1.45;color:#fff}
+  .gm-ola{position:absolute;right:0;bottom:0;width:42%;height:60%;opacity:.8}
+  @media (min-width:768px){
+    .gm{padding:36px 24px 44px}
+    .gm-pin{width:56px;height:56px}.gm-pin svg{width:24px;height:30px}
+    .gm-titulo{align-items:center;gap:18px}
+    .gm-titulo h1{font-size:40px}
+    .gm-titulo p{font-size:16px}
+    .gm-bus{padding:18px 22px}
+    .gm-bus input{font-size:17px}
+    .gm-pop{margin-top:34px}
+    .gm-pop__h h2{font-size:24px}
+    .gm-pop__g{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:16px 0 0;padding:0;overflow:visible}
+    .gm-dest{flex:none;height:190px;font-size:15px}
+    .gm-card{gap:26px;margin-top:20px;padding:28px}
+    .gm-card__i{width:88px;height:88px}
+    .gm-card__t b{font-size:24px}
+    .gm-card[data-accion="guias"] .gm-card__t b{padding-right:0}
+    .gm-card__t>span{font-size:16px}
+    .gm-card__ilu{position:relative;flex:0 0 38%;display:block;align-self:stretch;min-height:110px}
+    .gm-cierre{margin-top:20px;padding:26px 28px}
+    .gm-cierre svg:first-child{width:64px;height:54px}
+    .gm-cierre p{font-size:17px}
+  }
+  /* ilustraciones: una guia abierta con la foto del Cristo, un corazon con flecha, un globo con avion */
+  .gm-ilu-guia .gm-pag{position:absolute;bottom:-34px;width:118px;height:150px;border-radius:10px;background:#fff center/cover;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+  .gm-ilu-guia .gm-pag--a{left:6%;transform:rotate(7deg)}
+  .gm-ilu-guia .gm-pag--b{left:22%;transform:rotate(14deg);background:#e8edf3}
+  .gm-ilu-guia .gm-nota{position:absolute;right:4%;top:44px;text-align:center}
+  .gm-ilu-guia .gm-flecha{position:absolute;right:16%;top:92px}
+  .gm-ilu-fav{align-items:center;gap:8px;justify-content:center}
+  @media (min-width:768px){.gm-ilu-fav{display:flex}}
+  .gm-corazon{display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff}
+  .gm-ilu-mundo .gm-globo{position:absolute;left:0;bottom:0}
+  .gm-ilu-mundo .gm-nota--m{position:absolute;right:28px;top:16px}
+  .gm-ilu-mundo .gm-rayas{position:absolute;right:0;top:44px}
+  /* en escritorio es una pagina, no un panel ni una tarjeta flotante */
+  @media (min-width:1024px){
+    html[data-pagina="guias"].cs-hdr .g-menu{position:fixed;inset:65px 0 0 0;left:0;top:65px;transform:none;width:auto;max-height:none;height:auto;border-radius:0;box-shadow:none;padding:0;justify-content:flex-start}
+  }
+  @media (min-width:768px) and (max-width:1023px){
+    [data-pagina="guias"] .g-menu{left:0;width:auto;box-shadow:none;padding:0;justify-content:flex-start}
+  }
   /* Pantalla 2: lista de destinos con guía */
   .g-tit{margin:6px 0 4px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;color:var(--ink)}
   .g-sub{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.45}
@@ -72,9 +140,59 @@
   </div>
   <div class="g-main" id="main"></div>
   <div class="g-menu" id="menu">
-    <div class="g-menu__t"><svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F2F6FB"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><h1>Destinos</h1></div>
-    <label class="g-bus" for="busmenu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg><input id="busmenu" type="search" placeholder="Explorar destinos" autocomplete="off"></label>
-    <div id="menuFilas"></div>
+    <div class="gm">
+      <header class="gm-titulo">
+        <span class="gm-pin" aria-hidden="true"><svg width="26" height="32" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#0F1B2D"/><circle cx="12" cy="11.5" r="4.6" fill="#F5C518"/></svg></span>
+        <div><h1>Destinos</h1><p>Encontrá tu próximo destino. Inspirate, explorá y empezá a planear tu viaje.</p></div>
+      </header>
+      <label class="gm-bus" for="busmenu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+        <input id="busmenu" type="search" placeholder="Buscá por destino, país o ciudad..." autocomplete="off">
+        <svg class="gm-bus__f" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3 6h5M14 6h7M3 12h9M18 12h3M3 18h3M12 18h9"/><circle cx="11" cy="6" r="2.2"/><circle cx="15" cy="12" r="2.2"/><circle cx="9" cy="18" r="2.2"/></svg>
+      </label>
+
+      <section class="gm-pop" aria-labelledby="gmPop">
+        <div class="gm-pop__h">
+          <h2 id="gmPop"><svg width="24" height="28" viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1c1 4 6 7 6 13a6 6 0 0 1-12 0c0-2 1-3.5 2-4.5.2 1.5 1 2.5 2 3C10 8 10.5 4 12 1z" fill="#F5C518"/></svg>Destinos populares</h2>
+          <button type="button" class="gm-link" data-accion="guias" data-evento="guias_menu">Ver todos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+        </div>
+        <div class="gm-pop__g">
+          <button type="button" class="gm-dest" data-dest="rio" data-evento="guias_abrir" data-destino="rio" style="background-image:url(../fotos/rio.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Río de Janeiro</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+          <button type="button" class="gm-dest" data-dest="fln" data-evento="guias_abrir" data-destino="fln" style="background-image:url(../fotos/fln.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Florianópolis</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+          <button type="button" class="gm-dest" data-dest="buz" data-evento="guias_abrir" data-destino="buz" style="background-image:url(../fotos/buz.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Búzios</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+          <button type="button" class="gm-dest" data-dest="ilha" data-evento="guias_abrir" data-destino="ilha" style="background-image:url(../fotos/ilha.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Ilha Grande</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+          <button type="button" class="gm-dest" data-dest="maragogi" data-evento="guias_abrir" data-destino="maragogi" style="background-image:url(../fotos/maragogi.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Maragogi</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+        </div>
+      </section>
+
+      <button type="button" class="gm-card" data-accion="guias" data-evento="guias_menu" data_accion="guias">
+        <span class="gm-card__i"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-2.5 6 2.5 6-2.5v14.5L15 20.5 9 18l-6 2.5z"/><path d="M9 3.5V18M15 6v14.5"/></svg></span>
+        <span class="gm-card__t"><b>Guías de viaje</b><span>Todo lo que necesitás saber de cada destino: playas, comida, actividades, transporte y consejos prácticos.</span><em>Ver guías <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
+        <span class="gm-card__ilu gm-ilu-guia" aria-hidden="true"><i class="gm-pag gm-pag--b"></i><i class="gm-pag gm-pag--a" style="background-image:url(../fotos/rio.jpg)"></i><span class="gm-nota">Guías completas<br>de cada destino</span><svg class="gm-flecha" width="46" height="30" viewBox="0 0 46 30" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M40 4c-2 12-14 20-32 21M8 25l8-6M8 25l9 3"/></svg></span>
+        <span class="gm-badge">40 destinos</span>
+      </button>
+
+      <button type="button" class="gm-card" data-accion="favoritos" data-evento="guias_menu" data_accion="favoritos">
+        <span class="gm-card__i"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg></span>
+        <span class="gm-card__t"><b>Mis favoritos</b><span>Guardá tus destinos preferidos para encontrarlos más rápido.</span><em>Ver favoritos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
+        <span class="gm-card__ilu gm-ilu-fav" aria-hidden="true"><span class="gm-corazon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg></span><svg width="34" height="26" viewBox="0 0 34 26" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M32 6c-8-4-16-1-24 6M8 12l1-8M8 12l8 2"/></svg><span class="gm-nota">Tus destinos<br>favoritos en un solo lugar</span></span>
+      </button>
+
+      <button type="button" class="gm-card" data-accion="explorar" data-evento="guias_menu" data_accion="explorar">
+        <span class="gm-card__i"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span>
+        <span class="gm-card__t"><b>Explorar destinos</b><span>Buscá por país, ciudad o tipo de viaje y encontrá el lugar perfecto para vos.</span><em>Explorar destinos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
+        <span class="gm-card__ilu gm-ilu-mundo" aria-hidden="true">
+          <svg class="gm-globo" width="230" height="150" viewBox="0 0 230 150"><defs><radialGradient id="gmG" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#4FA3E8"/><stop offset="1" stop-color="#123A6B"/></radialGradient><clipPath id="gmC"><circle cx="130" cy="112" r="70"/></clipPath></defs><circle cx="130" cy="112" r="70" fill="url(#gmG)"/><g clip-path="url(#gmC)" fill="#4E9B52"><path d="M84 78c16-9 34-7 46 5 9 9 5 23-7 30-14 7-25 21-39 12-9-7-12-30 0-47z"/><path d="M142 106c11-5 25 2 30 13s-7 25-16 18-18-27-14-31z"/></g><path d="M6 82C20 44 62 24 106 30" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="4 5" stroke-linecap="round"/><path d="m118 22 34-5-9 9 20 3-7 4-23 0-7 11-5-2 3-11-11-5z" fill="#F5C518" transform="rotate(-12 135 26)"/></svg>
+          <span class="gm-nota gm-nota--m">El mundo<br>te espera</span><svg class="gm-rayas" width="26" height="30" viewBox="0 0 26 30" stroke="#F5C518" stroke-width="2.4" stroke-linecap="round"><path d="M4 4l10 2M10 20l4-8M16 26l8-6"/></svg>
+        </span>
+      </button>
+
+      <section class="gm-cierre">
+        <svg width="56" height="48" viewBox="0 0 56 48" fill="none" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M14 30a14 14 0 0 1 28 0M28 6v6M10 12l4 4M46 12l-4 4M2 24h6M48 24h6M6 36c6-4 8 4 14 0s8 4 14 0 8 4 14 0"/></svg>
+        <p><b>Los mejores viajes<br>comienzan con una buena idea.</b></p>
+        <svg class="gm-ola" viewBox="0 0 300 40" preserveAspectRatio="none" fill="none" stroke="#2C4468" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M0 30c30-16 54-18 84-6s54 6 84-6 54-14 84-4 38 6 48 0"/></svg>
+      </section>
+    </div>
   </div>
 </div>
 <script src="destinos-datos.js"></script>
@@ -95,18 +213,7 @@
   var CLAVES = Object.keys(C.Nombres).sort(function (a, b) { return C.Nombres[a].localeCompare(C.Nombres[b], 'es'); });
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant }, p || {})); };
 
-  function menu() {
-    $('menu').hidden = false;
-    $('menuFilas').innerHTML =
-      fila('libro', 'Guía de viaje', 'Qué hacer, playas, comida y tips', CLAVES.length, 'guias') +
-      fila('corazon', 'Mis favoritos', 'Los destinos que guardaste', null, 'favoritos') +
-      fila('lupa', 'Explorar destinos', 'Buscar por nombre', null, 'explorar');
-  }
-  function fila(ico, titulo, sub, badge, accion) {
-    return '<button type="button" class="g-fila" data-accion="' + accion + '" data-evento="guias_menu" data_accion="' + accion + '">' +
-      '<span class="g-fila__i">' + ic(I[ico], 20) + '</span><span class="g-fila__t"><b>' + esc(titulo) + '</b><small>' + esc(sub) + '</small></span>' +
-      (badge ? '<span class="g-badge">' + badge + '</span>' : '') + ic(I.chev, 16) + '</button>';
-  }
+  function menu() { $('menu').hidden = false; }
   function lista() {
     $('menu').hidden = true;
     var q = S.q.toLowerCase();
@@ -139,6 +246,7 @@
   document.addEventListener('input', function (e) {
     if (e.target.id === 'bus') { S.q = e.target.value.trim(); lista(); var b = $('bus'); if (b) { var c = e.target.selectionStart; b.focus(); try { b.setSelectionRange(c, c); } catch (x) { /* no todos dejan */ } } }
   });
+  $('busmenu').addEventListener('keydown', function (e) { if (e.key === 'Enter') { S.q = e.target.value.trim(); S.pant = 2; track('guias_buscar'); pintar(); $('bus').focus(); } });
   pintar();
 })();
 </script>
