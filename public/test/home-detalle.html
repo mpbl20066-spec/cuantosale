@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="detalle">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Detalle del destino · CuántoSale</title>
+<script src="tema.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Paso 6 del flujo: el detalle del destino. Arriba la foto y el nombre, despues las
+     pestañas Resumen / Alojamiento / Extras / Viaje incluye, y abajo "¿Que incluye?" y
+     "¿Queres agregar?". Cada pestaña es una mirada de los mismos datos del modelo de
+     costos: cambiar de pestaña no cambia ningun precio. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button{font-family:var(--fb)}
+  .t-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+  .t-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .t-compartir{border:0;background:transparent;color:var(--ink);display:grid;place-items:center;width:40px;height:40px;cursor:pointer}
+  .t-bar__m{flex:1;text-align:center;min-width:0}
+  .t-bar__m b{display:block;font-size:13px;font-weight:700;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .t-main{flex:1;overflow-y:auto;padding:0 0 14px;scrollbar-width:none}
+  .t-main::-webkit-scrollbar{display:none}
+  .t-hero{position:relative;height:180px;background:var(--cel-soft) center/cover}
+  .t-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,16,26,.72))}
+  .t-hero__t{position:absolute;left:18px;right:18px;bottom:12px;z-index:1;color:#fff}
+  .t-hero__t b{display:block;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.1}
+  .t-hero__t small{display:block;margin-top:3px;font-size:13px;font-weight:600;opacity:.92}
+  /* Las pestañas van pegadas al tope, como en la maqueta. */
+  .t-tabs{display:flex;gap:4px;padding:10px 12px 0;overflow-x:auto;scrollbar-width:none;background:var(--bg);position:sticky;top:0;z-index:2}
+  .t-tabs::-webkit-scrollbar{display:none}
+  .t-tab{flex:0 0 auto;padding:10px 14px;border:0;border-bottom:2.5px solid transparent;background:transparent;color:var(--ink2);font-size:13.5px;font-weight:700;cursor:pointer}
+  .t-tab.is-on{color:var(--ink);border-bottom-color:var(--accent)}
+  .t-tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+  .t-cuerpo{padding:14px 18px 0}
+  .t-h2{margin:16px 0 8px;font-family:var(--fh);font-size:17px;font-weight:800;color:var(--ink)}
+  .t-h2:first-child{margin-top:4px}
+  .t-sub{margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.45}
+  /* Lo que incluye: la misma lista de partidas que usa el desglose del presupuesto. */
+  .t-inc{list-style:none;margin:0;padding:0}
+  .t-inc li{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;font-weight:600;color:var(--ink)}
+  .t-inc li:last-child{border-bottom:0}
+  .t-inc svg{flex:0 0 18px;margin-top:1px;color:var(--good)}
+  .t-inc em{font-style:normal;font-size:12px;font-weight:600;color:var(--ink2);display:block}
+  .t-cards{display:flex;flex-direction:column;gap:9px}
+  .t-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);text-align:left}
+  .t-card__i{flex:0 0 40px;height:40px;border-radius:50%;background:var(--cel-soft);display:grid;place-items:center}
+  .t-card__t{flex:1;min-width:0}
+  .t-card__t b{display:block;font-size:15px}
+  .t-card__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .t-card__p{flex:0 0 auto;font-family:var(--fh);font-size:16px;font-weight:800}
+  .t-card:hover{border-color:var(--ink2)}
+  .t-card:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .t-agregar{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px dashed #1F6FB5;border-radius:14px;background:var(--cel-soft);color:var(--ink);cursor:pointer}
+  .t-agregar__t{flex:1;min-width:0}
+  .t-agregar__t b{display:block;font-size:15px}
+  .t-agregar__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .t-agregar__x{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:#1F6FB5;color:#fff;font-size:19px;font-weight:700;line-height:1;display:grid;place-items:center}
+  .t-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg);display:flex;gap:9px}
+  .t-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;box-sizing:border-box;padding:15px 14px;border:0;border-radius:14px;font-size:14.5px;font-weight:800;text-decoration:none;cursor:pointer}
+  .t-btn--main{background:var(--action-bg);color:var(--action-ink)}
+  .t-btn--ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);flex:0 0 auto}
+  .t-foot2{display:flex;gap:9px;margin-top:9px}
+  .t-pie{font-size:11.5px;font-weight:600;color:var(--ink2);text-align:center;margin:10px 0 0}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="t-bar">
+    <button type="button" class="t-back" id="atras" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <div class="t-bar__m"><b id="mini">Detalle del destino</b></div>
+    <button type="button" class="t-compartir" aria-label="Compartir"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.4 10.8 7.2-4.2M8.4 13.2l7.2 4.2"/></svg></button>
+  </div>
+  <div class="t-main" id="main"></div>
+  <div class="t-foot" id="foot"></div>
+</div>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search), fuente = qs.get('fuente') || 'directo', debug = /[?&]debug=1/.test(location.search);
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var ic = function (p, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+  var I = {
+    ok: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16 9.5"/>',
+    cama: '<path d="M3 18V6M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="1.8"/>',
+    playa: '<path d="M12 21V11M12 11c-1-3-4-4-7-3 2 0 4 1 5 3M12 11c1-3 4-4 7-3-2 0-4 1-5 3"/>',
+    comida: '<path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10M17 21V3c-2.5 1.5-3 4.5-3 8h3"/>',
+    carro: '<path d="M5 16l1.5-6h11L19 16M3 16h18v3H3zM7 19v2M17 19v2"/>',
+    avion: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    est: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9.5 20v-6h5v6"/>'
+  };
+  var Nombres = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas', bcm: 'Balneário Camboriú', itapema: 'Itapema', rosa: 'Praia do Rosa', garopaba: 'Garopaba', poa: 'Porto Alegre', gram: 'Gramado', canela: 'Canela', torres: 'Torres' };
+  var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+  var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
+  var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
+  var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
+  var K = qs.get('destino') || 'fln', NOM = Nombres[K] || 'Tu destino';
+  var PAX = Math.max(1, Math.min(9, +qs.get('pax') || 2));
+  var HOY = iso(new Date());
+  var IDA = qs.get('ida') || sumarDias(HOY, 10), VUELTA = qs.get('vuelta') || sumarDias(HOY, 17);
+  var NOCHES = Math.max(1, Math.round((new Date(VUELTA + 'T12:00:00') - new Date(IDA + 'T12:00:00')) / 864e5));
+  var MEDIO = qs.get('medio') || 'avion';
+  /* Partidas de ejemplo por persona, escaladas por cantidad de personas y noches.
+     Son las mismas que usa el desglose del resultado, para que las dos pantallas
+     cuenten lo mismo. */
+  var porPersona = function (pp, porNoche) { return pp * PAX + (porNoche || 0) * PAX * NOCHES; };
+  var PARTES = [
+    { nom: 'Vuelo + traslados', ico: 'avion', pp: 604, pn: 26, detalle: 'Ida y vuelta desde Montevideo, con el traslado al hotel.' },
+    { nom: 'Alojamiento', ico: 'cama', pp: 300, pn: 62, detalle: NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + ' en el hotel que elegiste.' },
+    { nom: 'Comidas', ico: 'comida', pp: 154, pn: 0, detalle: 'Desayuno y cenas para el viaje entero.' },
+    { nom: 'Transporte local', ico: 'carro', pp: 64, pn: 0, detalle: 'Moverse por el destino sin depender del auto.' },
+    { nom: 'Traslados', ico: 'carro', pp: 88, pn: 0, detalle: 'Aeropuerto a hotel y a la vuelta.' },
+    { nom: 'Extras y actividades', ico: 'playa', pp: 86, pn: 0, detalle: 'Tours y actividades que podes sumar.' }
+  ];
+  var total = PARTES.reduce(function (a, p) { return a + porPersona(p.pp, p.pn); }, 0);
+  var TAB = { resumen: 'Resumen', alojamiento: 'Alojamiento', extras: 'Extras', incluye: 'Viaje incluye' };
+  var S = { tab: 'resumen', extra: false };
+  var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K, personas: PAX, medio: MEDIO, origen_home: fuente }, p || {})); };
+  var linea = function (p) {
+    return '<li>' + ic(I[p.ico], 18) + '<span><b>' + esc(p.nom) + '</b><em>' + esc(p.detalle) + '</em></span></li>';
+  };
+  var totalCon = function () { return total + (S.extra ? porPersona(86) : 0); };
+
+  function pintar() {
+    var t = totalCon();
+    $('main').innerHTML = '<div class="t-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="t-hero__t"><b>' + esc(NOM) + '</b><small>' + fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + PAX + (PAX === 1 ? ' persona' : ' personas') + '</small></div></div>' +
+      '<div class="t-tabs" role="tablist">' + Object.keys(TAB).map(function (k) {
+        return '<button type="button" role="tab" class="t-tab' + (S.tab === k ? ' is-on' : '') + '" data-tab="' + k + '" aria-selected="' + (S.tab === k) + '">' + TAB[k] + '</button>';
+      }).join('') + '</div>' +
+      '<div class="t-cuerpo" role="tabpanel">' + cuerpo() + '</div>';
+    $('foot').innerHTML = '<div style="flex:1"><a class="t-btn t-btn--main" href="' + siguiente() + '" data-evento="detalle_calcular" data_destino="' + K + '">Calcular viaje →</a>' +
+      '<div class="t-foot2"><a class="t-btn t-btn--ghost" style="flex:1" href="home-resultado.html?vuelta=' + VUELTA + '&ida=' + IDA + '&pax=' + PAX + '&destino=' + K + '" data-evento="detalle_ver_aloja">Ver tipos de alojamiento</a></div></div>';
+    document.title = NOM + ' · CuántoSale';
+  }
+  function cuerpo() {
+    var pp = function (n) { return f(n / PAX); };
+    if (S.tab === 'resumen') {
+      return '<h2 class="t-h2">Resumen del viaje</h2><p class="t-sub">Todo lo que incluye tu viaje a ' + esc(NOM) + ', con los importes que calcula CuántoSale.</p>' +
+        '<ul class="t-inc">' + PARTES.slice(0, 4).map(linea).join('') + '</ul>' +
+        '<h2 class="t-h2">Costo estimado</h2><div class="t-cards">' +
+        '<div class="t-card"><span class="t-card__i">' + ic(I.avion, 20) + '</span><span class="t-card__t"><b>Total por persona</b><small>' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + ' · ' + fdc(IDA) + ' → ' + fdc(VUELTA) + '</small></span><span class="t-card__p">' + pp(totalCon()) + '</span></div>' +
+        '<div class="t-card"><span class="t-card__i">' + ic(I.est, 20) + '</span><span class="t-card__t"><b>Total del viaje</b><small>' + PAX + (PAX === 1 ? ' persona' : ' personas') + ' · lo que pagan todos juntos</small></span><span class="t-card__p">' + f(totalCon()) + '</span></div>' +
+        '</div>';
+    }
+    if (S.tab === 'alojamiento') {
+      var a = PARTES[1];
+      return '<h2 class="t-h2">Alojamiento</h2><p class="t-sub">' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + ' en ' + esc(NOM) + '. El precio por noche es el mismo para todos los destinos del modelo.</p>' +
+        '<div class="t-cards">' +
+        ['Económico', 'Intermedio', 'Confort'].map(function (tipo, i) {
+          return '<div class="t-card"><span class="t-card__i">' + ic(I.cama, 20) + '</span><span class="t-card__t"><b>Hotel ' + tipo.toLowerCase() + '</b><small>' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + ' · ' + PAX + (PAX === 1 ? ' persona' : ' personas') + '</small></span><span class="t-card__p">' + pp(porPersona(a.pp + i * 58, a.pn + i * 34)) + '</span></div>';
+        }).join('') + '</div>' +
+        '<p class="t-pie">Cifras de ejemplo para esta maqueta.</p>';
+    }
+    if (S.tab === 'extras') {
+      return '<h2 class="t-h2">Extras</h2><p class="t-sub">Lo que podés sumar al viaje. Nada de esto está incluido arriba hasta que lo elijas.</p>' +
+        '<div class="t-cards">' +
+        [['Paseo en barco', I.playa, 96], ['Visita a la playa', I.playa, 58], ['Comida local', I.comida, 44]].map(function (x, i) {
+          return '<button type="button" class="t-card" data-extra="' + i + '"><span class="t-card__i">' + ic(x[1], 20) + '</span><span class="t-card__t"><b>' + esc(x[0]) + '</b><small>Por persona · se suma al total</small></span><span class="t-card__p">+' + f(x[2]) + '</span></button>';
+        }).join('') + '</div>';
+    }
+    return '<h2 class="t-h2">¿Qué incluye?</h2><p class="t-sub">Todas las partidas del viaje, con lo que trae cada una.</p>' +
+      '<ul class="t-inc">' + PARTES.map(function (p) { return linea(p); }).join('') + '</ul>' +
+      '<h2 class="t-h2">¿Querés agregar?</h2>' +
+      '<button type="button" class="t-agregar" data-sumar="1" aria-pressed="' + S.extra + '"><span class="t-agregar__t"><b>Extras y actividades</b><small>' + (S.extra ? 'Agregados al presupuesto' : 'Tours y actividades para sumar') + '</small></span><span class="t-agregar__x">' + (S.extra ? '−' : '+') + '</span></button>';
+  }
+  /* El boton principal lleva al flujo del viaje, que es donde ya vive el resumen con
+     desglose, la eleccion de alojamiento y las opciones de reserva. */
+  function siguiente() {
+    return 'home-flujo.html?' + new URLSearchParams({ destino: K, pax: PAX, ida: IDA, vuelta: VUELTA, modo: MEDIO, extras: S.extra ? '1' : '', fuente: 'detalle_calcular' }).toString() + (debug ? '&debug=1' : '');
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.id === 'atras') { location.href = 'home-resultado.html?destino=' + K + '&pax=' + PAX + '&ida=' + IDA + '&vuelta=' + VUELTA + (debug ? '&debug=1' : ''); return; }
+    if (t.dataset.tab) { S.tab = t.dataset.tab; track('detalle_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
+    if (t.dataset.sumar) { S.extra = !S.extra; track('detalle_sumar_extra', { activo: S.extra }); pintar(); return; }
+    if (t.dataset.extra !== undefined) { S.extra = true; track('detalle_extra', { extra: t.dataset.extra }); pintar(); return; }
+  });
+  pintar();
+})();
+</script>
+<script src="cuenta.js"></script>
+</body>
+</html>

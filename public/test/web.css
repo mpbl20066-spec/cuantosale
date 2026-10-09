@@ -176,6 +176,29 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="destino"] .d-card__f{height:152px}
 }
 
+/* ============ Detalle del destino ============ */
+@media (min-width:768px){
+  [data-pagina="detalle"] .t-bar{padding:8px var(--gut) 0;position:absolute;top:0;left:0;right:0;z-index:3}
+  [data-pagina="detalle"] .phone{justify-content:flex-start;padding-top:56px;box-sizing:border-box}
+  [data-pagina="detalle"] .t-main{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);column-gap:34px;align-content:start;padding:0 var(--gut) 20px}
+  [data-pagina="detalle"] .t-hero{grid-column:1;grid-row:1/span 3;position:sticky;top:56px;height:min(460px,60vh);border-radius:24px}
+  [data-pagina="detalle"] .t-hero__t{left:20px;right:20px;bottom:16px}
+  [data-pagina="detalle"] .t-hero__t b{font-size:34px}
+  [data-pagina="detalle"] .t-hero__t small{font-size:15px}
+  [data-pagina="detalle"] .t-tabs{grid-column:2;position:static;background:none;padding:0 0 4px}
+  [data-pagina="detalle"] .t-tab{font-size:15px;padding:12px 16px}
+  [data-pagina="detalle"] .t-cuerpo{grid-column:2;padding:0}
+  [data-pagina="detalle"] .t-h2{font-size:19px}
+  [data-pagina="detalle"] .t-sub{font-size:14.5px}
+  [data-pagina="detalle"] .t-inc li{font-size:15px;padding:11px 0}
+  [data-pagina="detalle"] .t-card{padding:14px}
+  [data-pagina="detalle"] .t-card__t b{font-size:16px}
+  [data-pagina="detalle"] .t-card__p{font-size:17px}
+  [data-pagina="detalle"] .t-foot{padding:12px var(--gut) 26px}
+  [data-pagina="detalle"] .t-btn{font-size:15.5px;padding:17px 18px}
+  [data-pagina="detalle"] .t-pie{font-size:12.5px}
+}
+
 /* ============ Resultado (mejor presupuesto) ============ */
 @media (min-width:768px){
   [data-pagina="resultado"] .scroll{padding:8px var(--gut) 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-content:start}
@@ -183,16 +206,17 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="resultado"] .scroll>.r-bar{grid-column:1/-1}
   [data-pagina="resultado"] .r-photo{grid-column:1;grid-row:2/span 14;align-self:start;position:sticky;top:0;height:min(480px,62vh);margin:0 0 30px;border-radius:24px}
   [data-pagina="resultado"] h1.r-dest{font-size:38px}
-  /* Las combinaciones van apiladas, no en grilla: en escritorio el contenido de esta
-     pantalla vive en una columna de texto (la foto grande ocupa la otra), asi que
-     tres tarjetas en fila quedarian de menos de 200px de ancho. Solo se agrandan. */
-  [data-pagina="resultado"] .r-combos{gap:12px;margin-top:10px}
-  [data-pagina="resultado"] .r-combo{padding:16px 16px 16px 12px}
-  [data-pagina="resultado"] .r-combo__i{flex-basis:46px;height:46px}
-  [data-pagina="resultado"] .r-combo__t b{font-size:16.5px}
-  [data-pagina="resultado"] .r-combo__t small{font-size:13px}
-  [data-pagina="resultado"] .r-combo__p b{font-size:20px}
-  [data-pagina="resultado"] .r-combo__p small{font-size:11.5px}
+  /* Los resultados van en grilla de dos columnas en la columna de texto, y con foto y
+     precio mas grandes. En una sola tira quedaban angostos al lado de la foto grande. */
+  [data-pagina="resultado"] .r-filtros{margin:14px 0 12px}
+  [data-pagina="resultado"] .r-chip{font-size:14.5px;padding:10px 16px}
+  [data-pagina="resultado"] .r-listaRes{gap:12px}
+  [data-pagina="resultado"] .r-res{padding:12px}
+  [data-pagina="resultado"] .r-res__f{flex-basis:92px;height:72px}
+  [data-pagina="resultado"] .r-res__t b{font-size:17px}
+  [data-pagina="resultado"] .r-res__t small{font-size:13px}
+  [data-pagina="resultado"] .r-res__p b{font-size:20px}
+  [data-pagina="resultado"] .r-res__p small{font-size:11.5px}
   [data-pagina="resultado"] .r-h2{font-size:18px}
   [data-pagina="resultado"] .r-foot{padding:12px var(--gut) 24px;background:var(--bg)}
   [data-pagina="resultado"] .r-go{max-width:420px;margin:0 auto}
