@@ -21,6 +21,7 @@
   .scroll{flex:1;overflow-y:auto;padding:4px 16px 20px;scrollbar-width:none}
   .scroll::-webkit-scrollbar{display:none}
   .p-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .p-back__t{display:none}
   .p-back{width:40px;height:40px;margin-left:-8px;display:grid;place-items:center;border:0;background:transparent;color:var(--ink);cursor:pointer}
   .p-logo{text-align:center;font-family:var(--fh);font-weight:800;font-size:24px;line-height:1.05;color:var(--ink)}
   .p-logo svg{vertical-align:-4px;margin-left:5px;color:var(--azul)}
@@ -154,8 +155,18 @@
      transporte. Se arranca en 768px, que es donde empieza la composicion de
      escritorio, y no queda el hueco. */
   @media (min-width:768px){
-    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){display:block;max-width:600px;margin:0 auto;flex:0 0 auto}
-    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig],.p-go[data-paso2]){max-width:600px;margin:0 auto;padding-top:16px}
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){display:block;max-width:700px;margin:0 auto;flex:0 0 auto}
+    /* la flecha de volver va dentro de la misma columna de 700px que la tarjeta, con la palabra "Volver" al lado */
+    html[data-pagina="presupuesto"] .phone>.p-top{width:100%;max-width:700px;margin:0 auto;padding:12px 24px 0;box-sizing:border-box}
+    html[data-pagina="presupuesto"] .phone>.p-top .p-bar{margin-bottom:12px;padding:0;justify-content:flex-start}
+    html[data-pagina="presupuesto"] .p-top .p-bar>span{display:none}
+    .p-top .p-back{width:auto;height:44px;margin-left:-8px;padding:0 12px 0 8px;gap:6px;display:inline-flex;align-items:center;font-family:var(--fb);font-size:14px;font-weight:600;color:var(--ink2)}
+    .p-top .p-back:hover{color:var(--ink)}
+    .p-top .p-back__t{display:inline}
+    html.cs-hdr[data-pagina="presupuesto"] .p-top .p-back{transform:none}
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){padding-left:24px;padding-right:24px;box-sizing:border-box}
+    [data-pagina="presupuesto"] .p-card{padding:32px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig],.p-go[data-paso2]){max-width:700px;margin:0 auto;padding:16px 24px 0;box-sizing:border-box}
   }
   .p-card__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .p-card__h .p-eyebrow{margin:0}
@@ -313,7 +324,7 @@
   }
   /* La barra se dibuja en #top, no en #main: #main scrollea y la barra tiene que
      quedar fija arriba en los pasos largos. ver pintar(). */
-  var barra = function () { return '<div class="p-bar"><button type="button" class="p-back" id="atras" aria-label="Volver">' + ic(I.back, 22) + '</button><div class="p-logo">CuántoSale' + ic(I.plane, 24) + '<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>'; };
+  var barra = function () { return '<div class="p-bar"><button type="button" class="p-back" id="atras" aria-label="Volver">' + ic(I.back, 22) + '<span class="p-back__t">Volver</span></button><div class="p-logo">CuántoSale' + ic(I.plane, 24) + '<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>'; };
   var pintarBarra = function () { $('top').innerHTML = barra(); };
   var iCal = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
   var iPers = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>';
