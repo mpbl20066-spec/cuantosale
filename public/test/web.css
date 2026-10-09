@@ -677,3 +677,13 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 [data-theme="night"][data-pagina="home"] .hx-step__n{color:#0A101A}
 [data-theme="night"][data-pagina="home"] .hx-more{color:var(--azul)}
 [data-theme="night"][data-pagina="home"] .hx-foot{background:#0F1A2B;border-top:1px solid var(--line)}
+
+/* Modo oscuro: "Tu presupuesto" (paso 4) y seleccionados sobre --azul (que en night es claro). */
+[data-theme="night"] .pv-total{background:var(--surface);border-color:var(--control-line)}
+[data-theme="night"] .pv-total__ico{background:var(--cel-soft);color:var(--azul)}
+[data-theme="night"] .p-chip.is-on,
+[data-theme="night"] .p-opt--c.is-on,
+[data-theme="night"] .d-seg button.is-on,
+[data-theme="night"] .p-monto.is-on{color:#0A101A}
+[data-theme="night"] .al-ext,
+[data-theme="night"] .cn__nota{background:var(--cel-soft)}
