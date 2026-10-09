@@ -97,6 +97,22 @@
   .c-mapa__h{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--ink2)}
   .c-mapa__h b{color:var(--ink);font-size:13px}
   .c-mapa .roadtrip-map{height:260px;border-radius:0}
+  .c-busq{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink2)}
+  .c-busq input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:600}
+  .c-busq input:focus-visible{outline:none}
+  .c-busq:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+  .c-chipd{display:flex;align-items:center;gap:8px;margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--cel-soft);font-size:13.5px;font-weight:600;color:var(--ink)}
+  .c-chipd svg{color:#1F6FB5}
+  .c-h3{margin:12px 0 6px;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .c-dg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+  .c-dc{position:relative;aspect-ratio:1/1.12;padding:0;border:2px solid transparent;border-radius:14px;background:var(--cel-soft) center/cover;cursor:pointer;overflow:hidden;color:#fff;text-align:left}
+  .c-dc::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,0) 45%,rgba(10,16,26,.75))}
+  .c-dc__n{position:absolute;left:8px;right:8px;bottom:7px;z-index:1;font-size:12px;font-weight:800;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  .c-dc__ok{position:absolute;top:6px;right:6px;z-index:1;width:22px;height:22px;border-radius:50%;background:var(--action-bg);color:var(--action-ink);display:grid;place-items:center;font-size:12px;font-weight:800}
+  .c-dc.is-sel{border-color:var(--card-sel-border);box-shadow:var(--card-sel-glow)}
+  .c-dc:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .c-ref{margin:18px 0 4px;text-align:center;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .c-ref b{font-family:ui-monospace,Consolas,monospace;color:var(--ink)}
 </style>
 <link rel="stylesheet" href="web.css">
 </head>
@@ -111,6 +127,7 @@
   <div class="c-main" id="main"></div>
   <div class="c-foot" id="foot"></div>
 </div>
+<script src="destinos-datos.js"></script>
 <script src="ruta-datos.js"></script>
 <script src="home-track.js"></script>
 <script>
@@ -122,10 +139,10 @@
   var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
   var MES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fd = function (iso) { var q = iso.split('-'); return +q[2] + ' ' + MES[+q[1] - 1]; };
-  /* [clave, nombre, km desde Montevideo (aprox.), region]. Auto y bus solo se ofrecen en Santa Catarina (sc) y Rio Grande do Sul (rs). */
-  var DESTS = [['fln', 'Florianópolis, Brasil', 1900, 'sc'], ['bombinhas', 'Bombinhas, Brasil', 1800, 'sc'], ['bcm', 'Balneário Camboriú, Brasil', 1800, 'sc'], ['itapema', 'Itapema, Brasil', 1800, 'sc'], ['rosa', 'Praia do Rosa, Brasil', 1900, 'sc'], ['garopaba', 'Garopaba, Brasil', 1900, 'sc'],
-    ['poa', 'Porto Alegre, Brasil', 900, 'rs'], ['gram', 'Gramado, Brasil', 1000, 'rs'], ['canela', 'Canela, Brasil', 1000, 'rs'], ['torres', 'Torres, Brasil', 1100, 'rs'],
-    ['rio', 'Río de Janeiro, Brasil', 2900, 'rj'], ['buz', 'Búzios, Brasil', 3000, 'rj'], ['ilha', 'Ilha Grande, Brasil', 3000, 'rj']];
+  /* Los mismos 40 destinos que cuantosale.uy (lib/model.js). [clave, nombre, km (solo respaldo), region: sc | rs | otro, region completa].
+     Auto y bus solo se ofrecen en Santa Catarina (sc) y Rio Grande do Sul (rs). */
+  var DESTS = (window.CS_DESTS || []).map(function (d) { return [d.k, d.name + ', Brasil', 1500, d.region === 'Santa Catarina' ? 'sc' : (d.region === 'Río Grande do Sul' ? 'rs' : 'otro'), d.region]; });
+  var POPULARES = ['rio', 'fln', 'buz', 'ilha', 'bombinhas', 'for'];
   var porTierra = function (d) { return d && (d[3] === 'sc' || d[3] === 'rs'); };
   var I = {
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
@@ -143,16 +160,43 @@
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
   var debugQ = debug ? '&debug=1' : '';
 
+  var norm = function (t) { return String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); };
+  var nombreCorto = function (d) { return d[1].split(',')[0]; };
+  function tarjetaDest(d, origen) {
+    var on = S.dest === d[0];
+    return '<button type="button" class="c-dc' + (on ? ' is-sel' : '') + '" data-dest="' + d[0] + '" data-origen="' + origen + '" aria-pressed="' + on + '" style="background-image:url(/fotos/' + d[0] + '.jpg?v=1)"><span class="c-dc__n">' + esc(nombreCorto(d)) + '</span>' + (on ? '<span class="c-dc__ok" aria-hidden="true">✓</span>' : '') + '</button>';
+  }
+  /* Resultados de la busqueda, o populares + todos por region (mismo orden que el sitio). */
+  function gridDest() {
+    var q = norm(S.q || '').trim(), lista;
+    if (q) {
+      lista = DESTS.filter(function (d) { return norm(d[1]).indexOf(q) > -1 || norm(d[4]).indexOf(q) > -1; });
+      return lista.length ? '<div class="c-dg">' + lista.map(function (d) { return tarjetaDest(d, 'busqueda'); }).join('') + '</div>' : '<p class="c-ej">No encontramos «' + esc(S.q) + '». Probá con otro nombre o región.</p>';
+    }
+    var pop = POPULARES.map(function (k) { return DESTS.filter(function (d) { return d[0] === k; })[0]; }).filter(Boolean);
+    return '<h2 class="c-h2">Destinos populares</h2><div class="c-dg">' + pop.map(function (d) { return tarjetaDest(d, 'popular'); }).join('') + '</div>';
+  }
+  function todosDest() {
+    if (norm(S.q || '').trim()) return '';
+    var regs = [], por = {};
+    DESTS.forEach(function (d) { if (!por[d[4]]) { por[d[4]] = []; regs.push(d[4]); } por[d[4]].push(d); });
+    return '<h2 class="c-h2">Todos los destinos</h2>' + regs.map(function (r) { return '<h3 class="c-h3">' + esc(r) + '</h3><div class="c-dg">' + por[r].map(function (d) { return tarjetaDest(d, 'lista'); }).join('') + '</div>'; }).join('');
+  }
+  function chipDest() {
+    var d = destInfo();
+    return d ? '<div class="c-chipd">' + ic(I.pin, 18) + '<span>Elegiste <b>' + esc(d[1]) + '</b></span></div>' : '';
+  }
   function pant1() {
-    $('main').dataset.pant = '1';
     var e = S.err;
     $('main').innerHTML = '<h1>¿A dónde querés ir?</h1><p class="c-sub">Decinos tu destino, fechas<br><b>y cuántas personas son.</b></p>' +
-      '<div class="c-row">' + ic(I.pin) + '<div class="t"><label for="dest">Destino</label><select id="dest"><option value="">Ej. Florianópolis, Brasil</option>' + DESTS.map(function (d) { return '<option value="' + d[0] + '"' + (S.dest === d[0] ? ' selected' : '') + '>' + d[1] + '</option>'; }).join('') + '</select></div></div>' + (e.dest ? '<p class="c-err" role="alert">' + e.dest + '</p>' : '') +
+      '<label class="c-busq">' + ic('<circle cx="11" cy="11" r="6.500"/><path d="m16 16 4 4"/>', 20) + '<input id="q" type="search" autocomplete="off" placeholder="Buscar destino o región" aria-label="Buscar destino" value="' + esc(S.q || '') + '"></label>' +
+      '<div id="chipd">' + chipDest() + '</div>' + (e.dest ? '<p class="c-err" role="alert">' + e.dest + '</p>' : '') +
+      '<div id="grid">' + gridDest() + '</div>' +
+      '<h2 class="c-h2">Fechas y personas</h2>' +
       '<div class="c-row">' + ic(I.cal) + '<div class="t"><span class="lbl">Fechas</span><div class="c-dates"><input id="ida" type="date" aria-label="Ida" value="' + S.ida + '"><input id="vuelta" type="date" aria-label="Vuelta" value="' + S.vuelta + '"></div></div></div>' + (e.fechas ? '<p class="c-err" role="alert">' + e.fechas + '</p>' : '') +
       '<div class="c-row">' + ic(I.ppl) + '<div class="t"><span class="lbl">Personas</span><b style="font-size:15px">' + S.pax + (S.pax === 1 ? ' persona' : ' personas') + '</b></div><div class="c-step"><button type="button" data-p="-1" aria-label="Menos personas">−</button><button type="button" data-p="1" aria-label="Más personas">+</button></div></div>' +
-      '<div class="c-costa" aria-hidden="true"></div>';
+      '<div id="todos">' + todosDest() + '</div>';
     $('foot').innerHTML = '<button type="button" class="c-btn" data-sig="1">Siguiente →</button>';
-    $('back').dataset.dest = 'home';
   }
   function pant2() {
     $('main').dataset.pant = '2';
@@ -260,7 +304,7 @@
   var PANT = { 1: pant1, 2: pant2, 3: pant3, 4: pant4, 5: pant5 };
   var PAGS = { 1: ['destino-fechas', '¿A dónde querés ir?'], 2: ['como-viajar', '¿Cómo querés viajar?'], 3: ['auto', 'Contanos sobre tu auto'], 4: ['ruta-auto', 'Tu ruta en auto'], 5: ['resumen-auto', 'Tu viaje'] };
   function ir(n, motivo) {
-    S.pant = n; PANT[n](); $('main').scrollTop = 0;
+    S.pant = n; PANT[n](); $('main').insertAdjacentHTML('beforeend', '<p class="c-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>'); $('main').scrollTop = 0;
     document.title = PAGS[n][1] + ' · CuántoSale';
     window.mockTrack('page_view', { page_path: '/viaje/inicio/' + PAGS[n][0], page_title: PAGS[n][1] + ' · CuántoSale', motivo: motivo });
   }
@@ -272,11 +316,16 @@
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t) return;
     if (t.id === 'back') { if (S.pant === 1) location.href = 'home-dos-caminos.html' + (debug ? '?debug=1' : ''); else ir(S.pant === 5 ? 4 : (S.pant === 4 ? 3 : (S.pant === 3 ? 2 : 1)), 'volver'); return; }
-    if (t.dataset.p) { S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); pant1(); return; }
+    if (t.dataset.dest) {
+      S.dest = t.dataset.dest; S.err.dest = ''; var di = destInfo();
+      track('inicio_elegir_destino', { destino: S.dest, region: di[4], origen_seleccion: t.dataset.origen, busqueda: S.q ? S.q.length : 0 });
+      $('chipd').innerHTML = chipDest(); $('grid').innerHTML = gridDest(); $('todos').innerHTML = todosDest(); return;
+    }
+    if (t.dataset.p) { S.ida = ($('ida') || {}).value || S.ida; S.vuelta = ($('vuelta') || {}).value || S.vuelta; S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); var y = $('main').scrollTop; pant1(); $('main').scrollTop = y; return; }
     if (t.dataset.ir) { ir(+t.dataset.ir, 'volver'); return; }
     if (t.dataset.sig) {
-      S.dest = $('dest').value; S.ida = $('ida').value; S.vuelta = $('vuelta').value; S.err = {};
-      if (!S.dest) S.err.dest = 'Elegí un destino.';
+      S.ida = $('ida').value; S.vuelta = $('vuelta').value; S.err = {};
+      if (!S.dest) S.err.dest = 'Elegí un destino de la lista.';
       if (!S.ida || !S.vuelta || S.vuelta <= S.ida) S.err.fechas = 'Elegí una fecha de ida y una de vuelta posterior.';
       if (Object.keys(S.err).length) { pant1(); return; }
       track('inicio_destino_fechas', { noches: Math.round((new Date(S.vuelta) - new Date(S.ida)) / 864e5), mes_viaje: S.ida.slice(0, 7), con_fechas: true });
@@ -297,14 +346,18 @@
     if (t.dataset.agregar) { var r = ruta(); track('inicio_agregar_ruta', { importe: Math.round(r.total), km: r.km }); S.pax = S.pxs; ir(5, 'agregar_ruta'); return; }
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'kwhp') { S.kwhp = parseFloat(e.target.value) || 0; $('calc').innerHTML = calcTxt(); } });
+  document.addEventListener('input', function (e) {
+    if (e.target.id !== 'q') return;
+    S.q = e.target.value; $('grid').innerHTML = gridDest(); $('todos').innerHTML = todosDest();
+  });
   document.addEventListener('change', function (e) {
+    if (e.target.id === 'q') track('inicio_buscar_destino', { caracteres: (S.q || '').length, resultados: DESTS.filter(function (d) { return norm(d[1]).indexOf(norm(S.q || '').trim()) > -1 || norm(d[4]).indexOf(norm(S.q || '').trim()) > -1; }).length });
     if (e.target.id === 'em') { S.em = e.target.value; $('calc').innerHTML = calcTxt(); }
     if (e.target.id === 'cm') { S.cm = e.target.value; $('calc').innerHTML = calcTxt(); }
-    if (e.target.id === 'dest') { S.dest = e.target.value; S.err.dest = ''; }
   });
   window.mockTrack('page_view', { page_path: '/viaje/inicio/' + PAGS[1][0], page_title: PAGS[1][1] + ' · CuántoSale', motivo: 'entrada' });
   document.title = PAGS[1][1] + ' · CuántoSale';
-  pant1();
+  pant1(); $('main').insertAdjacentHTML('beforeend', '<p class="c-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>');
 })();
 </script>
 <script src="cuenta.js"></script>

@@ -55,4 +55,4 @@ html.cs-perfil-abierto{overflow:hidden}
   .cp-fondo{background:transparent}
   .cp-hoja{left:auto;bottom:auto;top:64px;right:max(16px,calc((100vw - 880px) / 2 + 16px));width:360px;max-height:calc(100dvh - 88px);border-radius:20px;border:1px solid var(--line);box-shadow:0 18px 50px rgba(10,16,26,.22)}
 }
-@media (min-width:1100px){.cp-hoja{right:max(16px,calc((100vw - 1160px) / 2 + 16px))}}
+@media (min-width:1100px){.cp-hoja{right:max(16px,calc((100vw - min(1400px,100vw)) / 2 + 16px))}}

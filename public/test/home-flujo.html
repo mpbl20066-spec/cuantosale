@@ -587,7 +587,7 @@
 <script>
 (function () {
   var qs = new URLSearchParams(location.search);
-  var DESTS = { fln: 'Florianópolis', rio: 'Río de Janeiro', buz: 'Búzios', ilha: 'Ilha Grande', bombinhas: 'Bombinhas', bcm: 'Balneário Camboriú', itapema: 'Itapema', rosa: 'Praia do Rosa', garopaba: 'Garopaba', poa: 'Porto Alegre', gram: 'Gramado', canela: 'Canela', torres: 'Torres' };
+  var DESTS = { buz: 'BÃºzios', arraial: 'Arraial do Cabo', cabo: 'Cabo Frio', ilha: 'Ilha Grande', paraty: 'Paraty', ilhabela: 'Ilhabela', ubatuba: 'Ubatuba', rio: 'RÃ­o de Janeiro', angra: 'Angra dos Reis', sao: 'SÃ£o Paulo', porto: 'Porto de Galinhas', mcz: 'MaceiÃ³', maragogi: 'Maragogi', nat: 'Natal', pip: 'Pipa', trancoso: 'Trancoso', ssa: 'Salvador de BahÃ­a', for: 'Fortaleza', jericoacoara: 'Jericoacoara', morro: 'Morro de SÃ£o Paulo', portoseguro: 'Porto Seguro', itacare: 'ItacarÃ©', forte: 'Praia do Forte', ajuda: 'Arraial dâ€™Ajuda', fernando: 'Fernando de Noronha', fln: 'FlorianÃ³polis', bombinhas: 'Bombinhas', rosa: 'Praia do Rosa', bcm: 'BalneÃ¡rio CamboriÃº', itapema: 'Itapema', garopaba: 'Garopaba', ferrugem: 'Ferrugem', picarras: 'PiÃ§arras', gram: 'Gramado', canela: 'Canela', torres: 'Torres', canoa: 'CapÃ£o da Canoa', rec: 'Recife', joaopessoa: 'JoÃ£o Pessoa', poa: 'Porto Alegre' };
   var destKey = qs.get('destino') || 'fln', DEST = DESTS[destKey] || String(qs.get('nombre') || '').slice(0, 40) || 'Florianópolis';
   var pax = Math.max(1, Math.min(9, +qs.get('pax') || 2)), k = pax / 2;
   var IDA = qs.get('ida') || '2026-12-26', VUELTA = qs.get('vuelta') || '2027-01-02';
@@ -704,7 +704,7 @@
       var c = i + 1 < S.paso ? 'is-done' : (i + 1 === S.paso ? 'is-on' : '');
       var d = c === 'is-done' ? '✓' : (i + 1);
       var tag = c === 'is-done' ? 'button' : 'li';
-      return '<li style="display:contents"><' + (c !== 'is-on' ? 'button type="button" data-ir="' + (i + 1) + '" aria-label="Ir al paso ' + (i + 1) + ': ' + n + '"' : 'div') + ' class="f-step ' + c + (c !== 'is-on' ? ' is-link' : '') + '"' + (c === 'is-on' ? ' aria-current="step"' : '') + '><span class="f-dot">' + d + '</span>' + n.replace(' + ', ' +<br>').replace('Tu presupuesto', 'Tu<br>presupuesto') + '</' + (c !== 'is-on' ? 'button' : 'div') + '></li>';
+      return '<li style="display:contents"><' + (c !== 'is-on' ? 'button type="button" data-ir="' + (i + 1) + '" aria-label="Ir al paso ' + (i + 1) + ': ' + n + '"' : 'div') + ' class="f-step ' + c + (c !== 'is-on' ? ' is-link' : '') + '"' + (c === 'is-on' ? ' aria-current="step"' : '') + '><span class="f-dot">' + d + '</span>' + n.replace(' + ', ' +<br> ').replace('Tu presupuesto', 'Tu<br> presupuesto') + '</' + (c !== 'is-on' ? 'button' : 'div') + '></li>';
     }).join('');
   }
   var ultimoTotal = null, ultimoPaso = null, timerDelta = null;
@@ -986,7 +986,7 @@
       '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>';
   }
   /* ===== Reserva de vuelo y alojamiento: se sale a un tercero y se vuelve a confirmar ===== */
-  var AEROPUERTO = { fln: 'FLN', bombinhas: 'FLN', bcm: 'FLN', itapema: 'FLN', rosa: 'FLN', garopaba: 'FLN', poa: 'POA', gram: 'POA', canela: 'POA', torres: 'POA', rio: 'GIG', buz: 'GIG', ilha: 'GIG' };
+  var AEROPUERTO = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'RIO', angra: 'GIG', sao: 'SAO', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', ajuda: 'SSA', fernando: 'FEN', fln: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', gram: 'POA', canela: 'POA', torres: 'POA', canoa: 'POA', rec: 'REC', joaopessoa: 'JPA', poa: 'POA' };
   var iCalR = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
   var iPersR = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/>';
   var iPinR = '<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.400"/>';
