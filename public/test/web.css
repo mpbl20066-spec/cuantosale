@@ -687,3 +687,8 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 [data-theme="night"] .p-monto.is-on{color:#0A101A}
 [data-theme="night"] .al-ext,
 [data-theme="night"] .cn__nota{background:var(--cel-soft)}
+
+/* ---- Sin verde: lo que antes era "bien/confirmado" usa el azul de la marca (claro y oscuro) ---- */
+:root[data-theme="light"]{--good:#1F6FB5;--good-soft:#E3F2FD}
+:root[data-theme="night"]{--good:#74B7F5;--good-soft:#14304F}
+[data-theme="night"] .fin-ico--green{background:rgba(116,183,245,.16);color:#74B7F5}
