@@ -5,7 +5,9 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maqueta — Armá tu viaje por etapas</title>
+<script src="tema.js"></script>
 <link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
 <style>
   /* Flujo por etapas: Vuelos + Traslados, Alojamiento, Extras, Tu presupuesto.
      Colores, tipografia y tarjetas salen de los tokens de la app. Cifras de ejemplo. */
@@ -522,6 +524,19 @@
   .cn__row b{font-size:14.5px;color:var(--ink)}.cn__tot{font-family:var(--fh);font-size:24px}
   .cn__nota{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;padding:12px;border-radius:14px;background:#EAF2FB;text-align:left;font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4}
   .cn__nota svg{flex:0 0 22px;color:#1F6FB5}
+  .fv-total em{display:block;margin-top:2px;font-style:normal;font-size:13px;font-weight:700;color:var(--ink)}
+  .fv-aprox{display:flex;gap:8px;align-items:flex-start;margin:8px 2px 0;font-size:12px;font-weight:600;color:var(--ink2);line-height:1.4}
+  .fv-aprox svg{flex:0 0 16px;margin-top:1px;color:#1F6FB5}
+  .fin-st{display:inline-block;margin:3px 4px 0 0;padding:1px 8px;border-radius:99px;font-size:10.5px;font-weight:800;line-height:1.5}
+  .fin-st--e{background:var(--cel-soft);color:var(--ink2)}
+  .fin-st--s{background:#FDF1C9;color:#8A5A0E}
+  .fin-st--r{background:var(--good-soft);color:var(--good)}
+  .fin-ahorro{display:block;margin-top:6px;color:var(--good);font-size:12.5px}
+  .fin-btn2{max-width:132px}
+  .fin-h2--s{margin:20px 0 0;font-size:14px;color:var(--ink2)}
+  .fin-sub2--s{margin:0 0 6px;font-size:12px}
+  .fv-act{padding:10px 12px;font-size:12.5px;font-weight:700}
+  .fv-wa{margin-top:10px;padding:10px 12px;background:transparent;border:1px dashed var(--line)}
 </style>
 <link rel="stylesheet" href="web.css">
 </head>
@@ -542,6 +557,8 @@
 <script src="../transfer-precios.js"></script>
 <script src="extras-data.js"></script>
 <script src="home-track.js"></script>
+<script src="tarjeta.js"></script>
+<script src="cuenta.js"></script>
 <script>
 (function () {
   var qs = new URLSearchParams(location.search);
@@ -849,6 +866,13 @@
   var iChev = '<path d="m9 5 7 7-7 7"/>';
   var iSolMar = '<circle cx="12" cy="8" r="3.2"/><path d="M12 2.5v.8M5.8 5l.6.6M18.2 5l-.6.6M2.5 12.500c1.500-1 3-1 4.500 0s3 1 4.500 0 3-1 4.500 0 3 1 4.500 0M2.500 17c1.500-1 3-1 4.500 0s3 1 4.500 0 3-1 4.500 0 3 1 4.500 0"/>';
   var WHATSAPP = '5511920836306';   // el mismo numero de reservas que usa la app
+  /* Estimado = precio de referencia; Solicitado = pedido enviado a CuántoSale; Reservado = confirmado.
+     Vuelo y alojamiento solo pasan a Reservado cuando la persona lo confirma al volver del sitio externo. */
+  function est(k, clave) {
+    var r = !!S.res[clave], so = !r && S.sol && S.sol[clave];
+    var txt = r ? 'Reservado' : (so ? 'Solicitado' : 'Estimado');
+    return '<span class="fin-st fin-st--' + (r ? 'r' : (so ? 's' : 'e')) + '">' + (k ? k + ': ' : '') + txt + '</span>';
+  }
   function fila4(paso, ico, tono, titulo, detalle, precio) {
     var tag = paso ? 'button type="button" data-ir="' + paso + '"' : 'button type="button" data-comidas="1" aria-expanded="' + !!S.comidasAbierto + '"';
     return '<' + tag + ' class="fin-row"><span class="fin-ico fin-ico--' + tono + '">' + ic(ico, 26) + '</span><span class="fin-t"><b>' + esc(titulo) + '</b><small>' + detalle + '</small></span><span class="fin-p">' + precio + '</span>' + ic(iChev, 16) + '</button>';
@@ -856,28 +880,42 @@
   function resumenTexto(d) {
     return 'Mi viaje a ' + DEST + ': ' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas') + '. Total estimado: ' + f(d.total) + ' (armado en CuántoSale).';
   }
+  /* Solo se menciona un ahorro cuando hay una alternativa REAL (precio de Booking / vuelo consultado) más barata. */
+  function ahorroTxt(d) {
+    var partes = [];
+    var vr = VUELOS.filter(function (x) { return !x.ejemplo; });
+    if (!d.v.ejemplo && vr.length) { var mv = Math.min.apply(null, vr.map(precioVuelo)), dv = precioVuelo(d.v) - mv; if (dv > 0) partes.push('un vuelo ' + f(dv) + ' más barato'); }
+    var hr = HOTELES.filter(function (x) { return !x.ejemplo; });
+    if (!d.h.ejemplo && hr.length) { var mh = Math.min.apply(null, hr.map(function (x) { return x.precio; })), dh = d.tAloj - mh; if (dh > 0) partes.push('un alojamiento ' + f(dh) + ' más barato'); }
+    return partes.length ? '<br><strong class="fin-ahorro">Hay ' + partes.join(' y ') + ' con los mismos datos de tu viaje.</strong>' : '';
+  }
   function pantalla4() {
     var d = datosFinal(), t = d.t, ex = d.ex, personas = pax + (pax === 1 ? ' persona' : ' personas'), fechas = fdc(IDA) + ' → ' + fdc(VUELTA);
-    var detVuelo = 'Montevideo → ' + esc(DEST) + '<br>(ida y vuelta)' + (t ? ' + ' + esc(t.nom.toLowerCase()) : '');
-    var detAloj = esc(d.h.nom) + ' · ' + NOCHES + ' noches<br>(' + personas + ')' + (S.habitacion && S.habitacion.hotelId === d.h.id ? '<br>' + esc(S.habitacion.nombre) : '');
-    var detEx = ex.length ? ex.map(function (e) { return esc(e.nom); }).join(', ') : 'Sin extras';
+    var detVuelo = 'Montevideo → ' + esc(DEST) + ' (ida y vuelta)' + '<br>' + est('Vuelo', 'vuelo') + (t ? ' ' + est('Traslado', 'tras') : '');
+    var detAloj = esc(d.h.nom) + ' · ' + NOCHES + ' noches<br>(' + personas + ')' + (S.habitacion && S.habitacion.hotelId === d.h.id ? '<br>' + esc(S.habitacion.nombre) : '') + '<br>' + est('', 'aloj');
+    var detEx = ex.length ? ex.map(function (e) { return esc(e.nom); }).join(', ') + '<br>' + est('', 'tours') : 'Sin extras';
     var comidasDet = S.comidasAbierto ? '<div class="fin-sub"><span>Comidas</span><b>' + f(d.tComidas) + '</b><span>Transporte local</span><b>' + f(d.tLocal) + '</b></div>' : '';
+    var aprox = ['comidas y transporte local'];
+    if (d.v.ejemplo) aprox.push('el vuelo (precio de ejemplo)');
+    if (d.h.ejemplo) aprox.push('el alojamiento (precio de ejemplo)');
+    if (d.t && !(d.t.nota === 'Tarifa publicada')) aprox.push('el traslado');
     var n = S.divN || pax;
     var dividir = S.dividirAbierto ? '<div class="fv-div"><span>Dividido entre</span><div class="fv-step"><button type="button" data-divn="-1" aria-label="Menos personas">−</button><output>' + n + '</output><button type="button" data-divn="1" aria-label="Más personas">+</button></div><b>' + f(d.total / n) + '<small>por persona</small></b></div>' : '';
     var iBilletera = '<path d="M3 7a2 2 0 0 1 2-2h13v4M3 7v11a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14.5h.01"/>';
     return '<div class="fv-trip"><span class="fv-trip__ico">' + ic(iBilletera, 38) + '</span><div class="fv-trip__t"><h1>Tu viaje</h1><b>' + esc(DEST) + '</b><span>' + fechas + ' · ' + personas + '</span></div><div class="fv-trip__img" aria-hidden="true"></div></div>' +
-      '<div class="fv-total"><span class="fv-total__ico">' + ic(iBilletera, 28) + '</span><div><small>Total estimado del viaje</small><b>' + f(d.total) + '</b></div><p>Podés ajustar cada parte y ver cómo cambia tu presupuesto.</p></div>' +
+      '<div class="fv-total"><span class="fv-total__ico">' + ic(iBilletera, 28) + '</span><div><small>Costo estimado total</small><b>' + f(d.total) + '</b><em>Por persona: ' + f(d.total / pax) + '</em></div><p>Es una estimación para ' + personas + ': todavía no se cobra nada.</p></div>' +
+      '<p class="fv-aprox">' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>', 16) + '<span>Incluye valores aproximados: ' + aprox.join(', ') + '.</span></p>' +
       '<h2 class="fin-h2">Desglose del viaje</h2>' +
       '<div class="fin-list fv-list">' +
       fila4(1, I.plane, 'blue', 'Vuelo + traslado', detVuelo, f(d.tVuelo + d.tTras)) +
       fila4(2, I.bed, 'green', 'Alojamiento', detAloj, f(d.tAloj)) +
       fila4(3, I.palm, 'yellow', 'Extras', detEx, f(d.tExtras)) +
-      fila4(0, I.fork, 'violet', 'Comidas + transporte local', 'Estimado para ' + NOCHES + ' noches', f(d.tComidas + d.tLocal)) + comidasDet + '</div>' +
+      fila4(0, I.fork, 'violet', 'Comidas + transporte local', 'Para ' + NOCHES + ' noches<br>' + est('', 'comidas'), f(d.tComidas + d.tLocal)) + comidasDet + '</div>' +
       '<div class="fin-gastar">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 28) +
-      '<span><b>¿Querés ajustar algo?</b>Podés cambiar el vuelo, alojamiento o extras y ver cómo cambia tu presupuesto.</span><button type="button" class="fin-btn2" data-ir="1" data-evento="flujo_ajustar_viaje">Ajustar mi viaje ›</button></div>' +
-      '<h2 class="fin-h2" style="margin-bottom:2px">Compartí tu viaje</h2><p class="fin-sub2" style="margin-top:0">Dividí gastos y compartí la experiencia.</p>' +
+      '<span><b>¿Querés gastar menos?</b>Compará otras fechas, alojamientos o formas de llegar y descubrí cuánto podés ahorrar.' + ahorroTxt(d) + '</span><button type="button" class="fin-btn2" data-ir="1" data-evento="flujo_buscar_mas_economico">Buscar opciones más económicas</button></div>' +
+      '<h2 class="fin-h2 fin-h2--s">Compartí tu viaje</h2><p class="fin-sub2 fin-sub2--s">Dividí gastos y compartí la experiencia.</p>' +
       '<div class="fv-two"><button type="button" class="fv-act" data-dividir="1" aria-expanded="' + !!S.dividirAbierto + '">' + ic(iUsers, 22) + '<span>Dividir gastos</span>' + ic(iChev, 16) + '</button>' +
-      '<button type="button" class="fv-act" data-compartir="1">' + ic('<circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.3 10.8 6.900-3.600M8.300 13.200l6.900 3.600"/>', 22) + '<span>' + (S.copiado ? '¡Copiado!' : 'Compartir') + '</span>' + ic(iChev, 16) + '</button></div>' + dividir +
+      '<button type="button" class="fv-act" data-compartir="1">' + ic('<circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.3 10.8 6.900-3.600M8.300 13.200l6.900 3.600"/>', 22) + '<span>' + (S.compMsg || 'Compartir') + '</span>' + ic(iChev, 16) + '</button></div>' + dividir +
       '<div class="fv-wa"><span class="fv-wa__ico">' + ic('<path d="M3 21l1.6-4.700A8.500 8.500 0 1 1 8 19.500z"/><path d="M9 9.500c0 3 2.500 5.500 5.500 5.500l1.200-1.500-2-1-.8.700c-.9-.4-1.600-1.100-2-2l.7-.8-1-2z"/>', 32) + '</span><span><b>¿Necesitás ayuda?</b>Hablá con un asesor por WhatsApp.</span><button type="button" class="fv-wa__btn" data-asesor="1">Contactar asesor ›</button></div>';
   }
   /* Paso 5: confirmacion. Con cuenta el viaje queda guardado; sin cuenta se dice la verdad: no se guardo. */
@@ -1168,6 +1206,8 @@
       '<div class="f-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>';
     var iMarca = '<path d="M6 3h12v18l-6-4.500L6 21z"/><circle cx="12" cy="10" r="2.400"/><path d="M12 12.400V14"/>';
     var cab = '<div class="g-full" role="dialog" aria-modal="true" aria-label="Guardá tu viaje">' + marca + '<div class="g-body"><div class="g-ico">' + ic(iMarca, 34) + '</div><h2 class="g-h">Guardá tu viaje</h2>';
+    if (m.enviado) return cab + '<p class="g-p">Te enviamos un link a <b>' + esc(m.enviado) + '</b>. Abrilo desde este mismo dispositivo y tu viaje se guarda solo.</p>' +
+      '<button type="button" class="g-btn g-btn--main" data-g="skip">Mientras tanto, continuar →</button><button type="button" class="g-skip" data-g="volver">← Volver</button></div></div>';
     if (m.email) return cab + '<p class="g-p">Te enviamos un enlace para entrar y guardar este presupuesto. No hace falta contraseña.</p>' +
       '<form id="g-form" novalidate><label class="g-lbl" for="g-mail">Tu email</label><input id="g-mail" class="g-in" type="email" inputmode="email" autocomplete="email" placeholder="nombre@correo.com" value="' + esc(m.mail || '') + '">' +
       (m.error ? '<p class="g-err" role="alert">' + esc(m.error) + '</p>' : '') +
@@ -1181,7 +1221,7 @@
     var ilustracion = '<div class="g-ilu" aria-hidden="true"><span class="g-ilu__c">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 44) + '</span>' +
       '<svg class="g-ilu__avion" width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path transform="rotate(45 12 12)" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div>';
     return '<div class="g-full" role="dialog" aria-modal="true" aria-label="Guardá tu viaje">' + marca + '<div class="g-body g-body--c">' + ilustracion +
-      '<h2 class="g-h g-h--c">¿Querés guardar<br>tu viaje?</h2><p class="g-p g-p--c">Guardá tu presupuesto y volvé cuando quieras.</p>' +
+      '<h2 class="g-h g-h--c">¿Querés guardar<br>tu viaje?</h2><p class="g-p g-p--c">Guardá tu presupuesto y volvé cuando quieras.</p>' + (m.error ? '<p class="g-err" role="alert">' + esc(m.error) + '</p>' : '') +
       '<div class="g-trip"><div class="g-trip__img" aria-hidden="true"></div><div><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small><strong>' + f(d.total) + '</strong><small>Total estimado</small></div></div>' +
       '<ul class="g-ben g-ben--l">' + beneficios.map(function (x) { return '<li><span>' + ic(x[1], 22) + '</span>' + x[0] + '</li>'; }).join('') + '</ul>' +
       '<button type="button" class="g-btn g-btn--main" data-g="google"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22 12.200c0-.7-.1-1.400-.2-2H12v3.900h5.600a4.800 4.800 0 0 1-2.100 3.100v2.600h3.400c2-1.800 3.100-4.500 3.100-7.600z"/><path fill="#34A853" d="M12 22c2.800 0 5.200-.9 6.900-2.500l-3.400-2.600c-.9.600-2.100 1-3.500 1-2.700 0-5-1.800-5.800-4.300H2.700v2.700A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.200 13.600a6 6 0 0 1 0-3.800V7.100H2.700a10 10 0 0 0 0 9.200z"/><path fill="#EA4335" d="M12 6c1.500 0 2.900.5 4 1.600l3-3A10 10 0 0 0 2.700 7.100l3.500 2.700C7 7.800 9.300 6 12 6z"/></svg>Continuar con Google</button>' +
@@ -1189,8 +1229,39 @@
       '<p class="g-p g-p--s">También podés seguir sin registrarte.</p>' +
       '<button type="button" class="g-skip g-skip--l" data-g="skip">Ahora no, continuar →</button></div></div>';
   }
+  /* Guardar el viaje es real: va a la tabla trips de la misma cuenta que usa la app (cuenta.js). Sin sesion se guarda la
+     seleccion, se sale al login y al volver (Google o link del correo) se restaura y se guarda sola. */
+  function viajeParaGuardar() {
+    var d = datosFinal(), url = location.origin + location.pathname + '?' + new URLSearchParams({ destino: destKey, nombre: DEST, pax: pax, ida: IDA, vuelta: VUELTA, fuente: 'guardado' }).toString();
+    return { destination: DEST, destination_key: destKey, pax: pax, departure_date: IDA, return_date: VUELTA, total_amount: Math.round(d.total), url: url };
+  }
+  function guardarEnCuenta() {
+    return CSCuenta.guardarViaje(viajeParaGuardar()).then(function () { S.sesion = 'cuenta'; S.avisoGuardado = ''; track('flujo_guardar_ok', { total: Math.round(totalHastaAhora()) }); });
+  }
+  function guardarPendiente() {
+    try { sessionStorage.setItem('cs_test_pendiente', JSON.stringify({ clave: [destKey, IDA, VUELTA, pax].join('|'), s: { vuelo: S.vuelo, traslado: S.traslado, tIV: S.tIV, hotel: S.hotel, habitacion: S.habitacion, extras: S.extras } })); } catch (e) { /* modo privado: se guarda sin la seleccion */ }
+  }
+  function restaurarPendiente(u) {
+    var p; try { p = JSON.parse(sessionStorage.getItem('cs_test_pendiente') || 'null'); } catch (e) { p = null; }
+    if (!p || !u || p.clave !== [destKey, IDA, VUELTA, pax].join('|')) return;
+    try { sessionStorage.removeItem('cs_test_pendiente'); } catch (e) { /* nada */ }
+    Promise.all([vuelosListos, cargarHoteles()]).then(function () {
+      var s = p.s || {};
+      if (VUELOS.some(function (v) { return v.id === s.vuelo; })) S.vuelo = s.vuelo;
+      if (s.traslado === null || TRASLADOS.some(function (t) { return t.id === s.traslado; })) S.traslado = s.traslado;
+      if (typeof s.tIV === 'boolean') S.tIV = s.tIV;
+      if (HOTELES.some(function (x) { return x.id === s.hotel; })) { S.hotel = s.hotel; if (s.habitacion && s.habitacion.hotelId === s.hotel) S.habitacion = s.habitacion; }
+      if (s.extras && typeof s.extras === 'object') S.extras = s.extras;
+      return guardarEnCuenta().then(function () { ir(5, 'guardado'); }, function (e) { S.avisoGuardado = e.message; ir(4, 'guardar_error'); });
+    });
+  }
   function abrirGuardar() {
-    if (S.sesion || S.sinGuardar) { ir(6, S.sesion ? 'con_sesion' : 'sin_guardar'); return; }
+    if (S.sinGuardar) { ir(6, 'sin_guardar'); return; }
+    var u = CSCuenta.usuario();
+    if (S.sesion || u) {
+      guardarEnCuenta().then(function () { ir(5, 'guardado'); }, function (e) { S.avisoGuardado = e.message; S.modal = { tipo: 'guardar', error: e.message }; pintarModal(); });
+      return;
+    }
     S.modal = { tipo: 'guardar' }; pintarModal(); track('flujo_guardar_vista', { total: Math.round(totalHastaAhora()) });
   }
   function seguirAReservas() { ir(5, S.sesion ? 'guardado' : 'sin_guardar'); }
@@ -1201,12 +1272,36 @@
     S.desde11 = S.paso; ir(11, 'reservar_con_cuantosale');
     track('reserva_click', { servicio: r[1], proveedor: 'cuantosale', salida_a_tercero: false, importe: Math.round(r[1] === 'traslado' ? datosFinal().tTras : datosFinal().tExtras), sesion: S.sesion || 'sin_sesion' });
   }
+  /* Compartir: genera la tarjeta del viaje (tarjeta.js, la misma de la app) y la manda por la hoja de compartir del
+     celular o por WhatsApp con la imagen copiada en escritorio. Si no se puede armar la imagen, se comparte solo el texto. */
+  function datosTarjeta() {
+    var d = datosFinal(), url = location.origin + location.pathname + "?" + new URLSearchParams({ destino: destKey, nombre: DEST, pax: pax, ida: IDA, vuelta: VUELTA, fuente: "compartido" }).toString();
+    return { dest: { key: destKey, name: DEST, country: "Brasil" }, ida: IDA, vuelta: VUELTA, pax: pax, pp: d.total / pax, total: d.total,
+      entries: [
+        { category: "pasajes", label: "Vuelo", value: d.tVuelo, color: "c1" },
+        { category: "alojamiento", label: "Hotel", value: d.tAloj, color: "c3" },
+        { category: "comidas", label: "Comida", value: d.tComidas, color: "c4" },
+        { category: "local", label: "Transporte local", value: d.tLocal, color: "c6" },
+        { category: "traslados", label: "Transfer", value: d.tTras, color: "c2" },
+        { category: "tours", label: "Tours y extras", value: d.tExtras, color: "c7" }
+      ],
+      texto: "Mi viaje a " + DEST + " · " + CSTarjeta.rangoFechas(IDA, VUELTA) + " · " + f(d.total) + "\nAbrí el presupuesto: " + url };
+  }
   function compartir() {
     var d = datosFinal(), txt = resumenTexto(d);
-    track('flujo_compartir', { total: Math.round(d.total) });
-    if (navigator.share) { navigator.share({ title: 'Mi viaje a ' + DEST, text: txt }).catch(function () {}); return; }
-    var listo = function () { S.copiado = true; render(false); setTimeout(function () { S.copiado = false; if (S.paso === 4) render(false); }, 2000); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(listo).catch(function () {});
+    track("flujo_compartir", { total: Math.round(d.total) });
+    var avisar = function (m) { S.compMsg = m; render(false); if (m && m.indexOf("Preparando") < 0) setTimeout(function () { S.compMsg = ""; if (S.paso === 4) render(false); }, 2500); };
+    var soloTexto = function () {
+      if (navigator.share) { navigator.share({ title: "Mi viaje a " + DEST, text: txt }).catch(function () {}); return; }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { avisar("¡Copiado!"); }).catch(function () {});
+    };
+    if (!window.CSTarjeta) { soloTexto(); return; }
+    var p = CSTarjeta.compartir(datosTarjeta());   /* se llama dentro del toque: navigator.share lo exige */
+    avisar("Preparando imagen…");
+    p.then(function (r) {
+      track("flujo_compartir_resultado", { resultado: r });
+      avisar(r === "copiada" ? "Imagen copiada ✓" : (r === "descargada" ? "Imagen descargada ✓" : ""));
+    }).catch(function () { avisar(""); soloTexto(); });
   }
   /* ---- Render ---- */
   /* ---- Vuelos reales (/api/vuelos/buscar de la app). Hasta que llegan, se ven los de ejemplo, marcados. ---- */
@@ -1221,7 +1316,7 @@
   function cargarVuelos() {
     if (!/^https?:$/.test(location.protocol)) { S.avisoV = 'Vuelos de ejemplo: abrí la maqueta desde el servidor de la app para ver precios reales.'; return; }
     S.cargandoV = true;
-    fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax, style: 'eq' }) })
+    return fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax, style: 'eq' }) })
       .then(function (r) { return r.json().then(function (d) { if (!r.ok || !(d.offers || []).length) throw new Error(d.error || 'sin vuelos'); return d; }); })
       .then(function (d) {
         var offers = d.offers.filter(function (o) { return o.price_usd > 0; }).slice(0, 12), minP = Math.min.apply(null, offers.map(function (o) { return o.price_usd; }));
@@ -1236,6 +1331,7 @@
   var CTAS = { 1: 'Continuar a Alojamiento →', 2: 'Continuar a Extras →', 3: 'Continuar a Tu presupuesto →', 4: 'Ver opciones para reservar →' };
   function render(scrollTop) {
     pintarPasos(); pintarTotal();
+    if (S.paso === 4 && window.CSTarjeta) CSTarjeta.precalentar(datosTarjeta());
     $('main').dataset.paso = S.paso;
     $('main').innerHTML = [null, pantalla1, pantalla2, pantalla3, pantalla4, pantalla5, pantalla6, pantalla7, pantalla8, pantalla9, pantalla10, pantalla11, pantalla12, pantalla13][S.paso]();
     $('steps').hidden = S.paso >= 5;
@@ -1372,7 +1468,7 @@
     var g = e.target.closest('[data-g]');
     if (g) {
       var acc = g.dataset.g;
-      if (acc === 'google') { S.sesion = 'google'; track('flujo_guardar_google', { total: Math.round(totalHastaAhora()) }); seguirAReservas(); }   // maqueta: en la app real abre el login de Google
+      if (acc === 'google') { track('flujo_guardar_google', { total: Math.round(totalHastaAhora()) }); guardarPendiente(); CSCuenta.loginGoogle().catch(function () { S.modal = { tipo: 'guardar', error: 'No pudimos conectar con Google. Probá de nuevo en un momento.' }; pintarModal(); }); }
       else if (acc === 'email') { S.modal = { tipo: 'guardar', email: true }; pintarModal(); track('flujo_guardar_email_abrir', {}); }
       else if (acc === 'volver') { S.modal = { tipo: 'guardar' }; pintarModal(); }
       else if (acc === 'skip') { S.sinGuardar = true; track('flujo_guardar_saltear', { total: Math.round(totalHastaAhora()) }); ir(6, 'sin_guardar'); }
@@ -1390,7 +1486,9 @@
     e.preventDefault();
     var mail = ($('g-mail').value || '').trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'Escribí un email válido, por ejemplo nombre@correo.com.' }; pintarModal(); return; }
-    S.sesion = 'email'; track('flujo_guardar_email', { dominio: mail.split('@')[1] }); seguirAReservas();
+    track('flujo_guardar_email', { dominio: mail.split('@')[1] }); guardarPendiente();
+    CSCuenta.loginCorreo(mail).then(function () { S.modal = { tipo: 'guardar', enviado: mail }; pintarModal(); },
+      function () { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'No pudimos enviar el link. Revisá el email y probá de nuevo.' }; pintarModal(); });
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.modal) cerrarModal(); });
   $('main').addEventListener('submit', function (e) {
@@ -1495,7 +1593,8 @@
     } else { S.avisoCs = 'Ese enlace de confirmación no es válido. Pedile uno nuevo a tu asesor.'; ir(7, 'enlace_invalido'); }
   }
   var p0 = +qs.get('paso'); if (!cf && p0 >= 2 && p0 <= 4) ir(p0, 'desde_ahorro');
-  cargarVuelos();
+  var vuelosListos = Promise.resolve(cargarVuelos());
+  CSCuenta.alCambiar(function (u) { if (u) restaurarPendiente(u); });
 })();
 </script>
 </body>
