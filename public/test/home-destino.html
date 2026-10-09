@@ -122,9 +122,9 @@
     .d-crumb ol{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0;padding:0;list-style:none}
     .d-crumb li{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink2)}
     .d-crumb li+li::before{content:"›";margin-right:4px;color:var(--ink2);font-size:18px}
-    .d-crumb li span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);font-size:13px;font-weight:800;color:var(--ink2)}
+    .d-crumb li span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--ink2);font-size:13px;font-weight:800;color:var(--ink)}
     .d-crumb li.is-on{color:var(--ink);font-weight:800}
-    .d-crumb li.is-on span{border-color:var(--ink);background:var(--ink);color:#fff}
+    .d-crumb li.is-on span{border-color:var(--ink);background:var(--ink);color:var(--bg)}
     .d-split{display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:stretch;margin-top:32px}
     .d-left{display:flex;flex-direction:column;min-width:0}
     html[data-pagina="destino"] h1{margin:0 0 6px}
@@ -133,9 +133,9 @@
     .d-sug{display:block;margin-top:22px}
     .d-sug h2{margin:0 0 10px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--ink)}
     .d-chips{display:flex;flex-wrap:wrap;gap:10px}
-    .d-chip{padding:9px 16px;border:1.5px solid var(--line);border-radius:99px;background:#fff;color:var(--ink);font-size:14.5px;font-weight:700;cursor:pointer;transition:background-color .15s,border-color .15s}
-    .d-chip:hover{background:#EAF2FB;border-color:#B9D3F0}
-    .d-chip.is-on{background:#EAF2FB;border-color:var(--azul)}
+    .d-chip{padding:9px 16px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:14.5px;font-weight:700;cursor:pointer;transition:background-color .15s,border-color .15s}
+    .d-chip:hover{background:var(--cel-soft);border-color:var(--ink2)}
+    .d-chip.is-on{background:var(--cel-soft);border-color:var(--azul)}
     .d-chip:focus-visible,.d-x:focus-visible,.d-cont:focus-visible,.d-prev:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
     .d-cont{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;margin-top:auto;padding:18px 20px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:17px;font-weight:800;cursor:pointer}
     .d-cont:disabled{opacity:.5;cursor:default}

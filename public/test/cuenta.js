@@ -90,7 +90,7 @@
       if (!u) { var e = new Error('Iniciá sesión para guardar tu viaje.'); e.codigo = 'sin_sesion'; throw e; }
       return cliente.from('trips').insert({
         user_id: u.id, origin: 'MVD', destination: d.destination, departure_date: d.departure_date, return_date: d.return_date,
-        total_amount: Number(d.total_amount) || 0, currency: 'USD',
+        total_price: Number(d.total_amount) || 0,
         flight_details: { fuente: 'test', destination_key: d.destination_key, pax: d.pax, url: d.url }
       }).select().single();
     }).then(function (r) { if (r.error) throw new Error('No pudimos guardar el viaje: ' + r.error.message); return r.data; });
