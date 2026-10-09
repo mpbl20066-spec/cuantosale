@@ -109,6 +109,47 @@
     .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
     .status{display:none}
   }
+  .p-card{padding:18px 16px 4px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+  .p-eyebrow{margin:0 0 6px;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:#1F6FB5}
+  .p-card h1.p-h{margin:0 0 6px;font-size:22px;color:var(--ink)}
+  .p-card .p-h2{margin:14px 0 8px;font-size:14px;color:var(--ink)}
+  .p-card .p-h2--c{margin-top:20px}
+  .p-montos{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .p-monto{padding:6px 12px;border:0;border-radius:99px;background:var(--cel-soft);color:var(--ink);font-family:var(--fb);font-size:12.5px;font-weight:700;cursor:pointer}
+  .p-monto.is-on{background:#1F6FB5;color:#fff}
+  .p-monto:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .p-opt--d{align-items:flex-start;padding:12px 14px;margin-bottom:10px;text-align:left}
+  .p-opt--d .p-opt__i{flex:0 0 32px;width:32px;height:32px;background:transparent}
+  .p-opt--d b{font-size:14.5px}
+  @media (min-width:880px){
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){display:block;max-width:600px;margin:0 auto}
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig]){max-width:600px;margin:0 auto;padding-top:16px}
+  }
+  .p-card__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .p-card__h .p-eyebrow{margin:0}
+  .p-badge{padding:3px 10px;border-radius:99px;background:var(--cel-soft);font-size:11px;font-weight:800;color:var(--ink2)}
+  h1.p-h--paso{margin:4px 2px 10px;font-size:20px;color:var(--ink)}
+  .p-resumen{padding:12px 14px;border-radius:12px;background:var(--bg);line-height:1.4}
+  .p-resumen small{display:block;font-size:12px;font-weight:600;color:#1F6FB5}
+  .p-resumen b{display:block;font-family:var(--fh);font-size:17px;color:var(--ink)}
+  .p-resumen span{font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .p-sel{position:relative;display:flex;align-items:center;gap:8px;padding:0 12px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:#1F6FB5}
+  .p-sel select{flex:1;min-width:0;padding:14px 0;border:0;background:transparent;color:var(--ink);font:700 14.5px var(--fb)}
+  .p-card .p-pers{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface)}
+  .p-card .p-pers b{display:block;font-size:14.5px;color:var(--ink)}
+  .p-card .p-pers small{display:block;font-size:12px;font-weight:600;color:var(--ink2)}
+  .p-pers__s{display:flex;align-items:center;gap:10px}
+  .p-pers__s output{min-width:18px;text-align:center;font-weight:800}
+  .p-pers__s button{width:30px;height:30px;border:1.5px solid var(--control-border);border-radius:50%;background:var(--surface);color:var(--ink);font-size:17px;cursor:pointer}
+  .p-pers__s button:disabled{opacity:.35}
+  .p-sub--s{margin:-4px 0 8px;font-size:12.5px;color:#1F6FB5}
+  .p-medios{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .p-medio{display:block;padding:12px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);text-align:left;font-family:var(--fb);cursor:pointer}
+  .p-medio__i{display:block;margin-bottom:6px;color:#1F6FB5}
+  .p-medio b{display:block;font-size:14.5px}
+  .p-medio small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .p-medio.is-on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
+  .p-medio:focus-visible,.p-sel select:focus-visible,.p-pers__s button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 </style>
 <link rel="stylesheet" href="web.css">
 </head>
@@ -158,7 +199,8 @@
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
   var HOY = iso(new Date());
   /* Paso 1: presupuesto y como viaja (cuando). Paso 2: fechas, mes o noches. Paso 3: resultados. */
-  var S = { paso: 1, cuando: 'fechas', presupuesto: +qs.get('presupuesto') || 1000, pax: +qs.get('pax') || 2, ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02',
+  var ORIGENES0 = 'Montevideo, Uruguay';
+  var S = { origen: ORIGENES0, paso: 1, cuando: 'fechas', presupuesto: +qs.get('presupuesto') || 1000, pax: +qs.get('pax') || 2, ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02',
     mes: -1, noches: '5-7', err: '', modo: 'todos', medio: 'comparar', tipo: 'todos', abierto: null, modoDet: 'auto', cargando: false, error: '', n: 6 };
   var IDA = S.ida, VUELTA = S.vuelta, PAX = S.pax;   /* lo que se consulto de verdad (se fija al continuar) */
   var NOCHES_N = { '5-7': 6, '7-10': 8, '10+': 11 };
@@ -227,17 +269,23 @@
       '<span><button type="button" data-pax="-1" aria-label="Menos personas"' + (S.pax <= 1 ? ' disabled' : '') + '>−</button><button type="button" data-pax="1" aria-label="Más personas"' + (S.pax >= 9 ? ' disabled' : '') + '>+</button></span></div>';
   };
   /* Paso 1: cuanto quiere gastar y si tiene fechas. */
+  var CUANDO1 = [['fechas', 'Tengo fechas definidas', 'Elegí cuándo salís y cuándo volvés.', iCal], ['flexible', 'Tengo fechas flexibles', 'Buscamos opciones en distintos días.', iCal], ['igual', 'Puedo viajar en cualquier momento', 'Priorizamos los destinos que mejor se ajustan a tu presupuesto.', iMezcla]];
+  var MONTOS = [500, 1000, 1500, 2000];
   function pintarPaso1() {
     $('main').innerHTML = '<div class="p-step">' + barra() +
-      '<h1 class="p-h">¿Cuánto querés gastar<br>en tu próximo viaje?</h1><p class="p-sub">Ingresá un monto estimado por persona para que te mostremos las mejores opciones.</p>' +
-      '<div class="p-budget"><label for="pres">US$ <input id="pres" type="number" inputmode="numeric" min="100" max="9999" step="50" value="' + S.presupuesto + '"></label><span>por persona</span></div>' + ayuda() +
-      '</div><div class="p-form"><h2 class="p-h2">¿Cuándo querés viajar?</h2>' +
-      CUANDO.map(function (c) {
-        return '<button type="button" class="p-opt' + (S.cuando === c[0] ? ' is-on' : '') + '" data-cuando="' + c[0] + '" aria-pressed="' + (S.cuando === c[0]) + '"><span class="p-opt__i">' + ic(c[2], 22) + '</span>' + c[1] + '</button>';
-      }).join('') + '</div></div><div class="p-cta"><button type="button" class="p-go" data-sig="1" data-evento="presupuesto_paso1_continuar">Continuar →</button></div>';
+      '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCÁ UN VIAJE A TU MEDIDA</p><span class="p-badge">1 de 4</span></div>' +
+      '<h1 class="p-h">¿Cuánto querés gastar en tu próximo viaje?</h1><p class="p-sub">Encontrá destinos que se ajusten a tu presupuesto, viajando en avión, auto o bus.</p>' +
+      '<h2 class="p-h2">Tu presupuesto por persona</h2>' +
+      '<div class="p-budget"><label for="pres">US$ <input id="pres" type="number" inputmode="numeric" min="100" max="9999" step="50" value="' + S.presupuesto + '"></label><span>por persona</span></div>' +
+      '<div class="p-montos" role="group" aria-label="Montos sugeridos">' + MONTOS.map(function (m) { return '<button type="button" class="p-monto' + (S.presupuesto === m ? ' is-on' : '') + '" data-monto="' + m + '" aria-pressed="' + (S.presupuesto === m) + '">US$ ' + m.toLocaleString('es-UY') + '</button>'; }).join('') + '</div>' + ayuda() +
+      '<h2 class="p-h2 p-h2--c">¿Cuándo querés viajar?</h2>' +
+      CUANDO1.map(function (c) {
+        return '<button type="button" class="p-opt p-opt--d' + (S.cuando === c[0] ? ' is-on' : '') + '" data-cuando="' + c[0] + '" aria-pressed="' + (S.cuando === c[0]) + '"><span class="p-opt__i">' + ic(c[3], 20) + '</span><span><b>' + c[1] + '</b><small>' + c[2] + '</small></span></button>';
+      }).join('') +
+      '</div></div><div class="p-cta"><button type="button" class="p-go" data-sig="1" data-evento="presupuesto_paso1_continuar">Continuar →</button></div>';
   }
   /* Paso 2: segun lo elegido, fechas exactas, mes y noches, o solo noches. */
-  function pintarPaso2() {
+  function pintarPaso3() {
     var tabs = '<div class="p-tabs" role="group" aria-label="Cuándo viajar">' + CUANDO.map(function (c) {
       return '<button type="button" class="p-chip' + (S.cuando === c[0] ? ' is-on' : '') + '" data-cuando2="' + c[0] + '" aria-pressed="' + (S.cuando === c[0]) + '">' + c[1] + '</button>';
     }).join('') + '</div>';
@@ -256,26 +304,36 @@
     } else {
       cuerpo = '<p class="p-sub">Si no tenés una fecha específica, podemos buscarte las mejores opciones según tu presupuesto.</p>' + noches;
     }
-    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cuándo querés viajar?</h1>' + tabs + '<div class="p-form">' + cuerpo + '</div><div class="p-form">' + personas() + ayuda() + '</div></div>' +
-      '<div class="p-cta"><button type="button" class="p-go" data-buscar="1" data-evento="presupuesto_paso2_continuar" data-tipo_fechas="' + S.cuando + '">Continuar →</button></div>';
+    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cuándo querés viajar?</h1>' + tabs + '<div class="p-form">' + cuerpo + '</div><div class="p-form">' + ayuda() + '</div></div>' +
+      '<div class="p-cta"><button type="button" class="p-go" data-buscar="1" data-evento="presupuesto_paso3_buscar" data-tipo_fechas="' + S.cuando + '">Buscar destinos →</button></div>';
   }
-  /* Paso 3 del flujo por presupuesto: el medio de transporte. Va entre las fechas y
-     los resultados, igual que en el flujo por destino: primero se decide cuando y
-     como se viaja, recien despues se busca que destinos entran en el presupuesto. */
-  var MEDIOS = [
-    { id: 'avion', ico: I.avion, nom: 'Avión', sub: 'Más rápido · Desde US$ 472 por persona' },
-    { id: 'auto', ico: I.car, nom: 'Auto', sub: 'Combustible y peajes · Desde US$ 268 por persona' },
-    { id: 'bus', ico: I.bus, nom: 'Bus', sub: 'Pasajes y traslados · Desde US$ 210 por persona' }
+  /* Paso 2: Armá tu búsqueda (origen, personas y medio de transporte). */
+  var MEDIOS2 = [
+    { id: 'avion', ico: I.avion, nom: 'Avión', sub: 'Vuelos y equipaje' },
+    { id: 'auto', ico: I.car, nom: 'Auto', sub: 'Combustible y peajes' },
+    { id: 'bus', ico: I.bus, nom: 'Bus', sub: 'Pasajes ida y vuelta' },
+    { id: 'comparar', ico: I.cmp, nom: 'Comparar todos', sub: 'Buscamos la mejor alternativa' }
   ];
-  function pintarPaso3() {
-    var opciones = MEDIOS.concat([{ id: 'comparar', ico: I.cmp, nom: 'Comparar todas las opciones', sub: 'Vemos cuál te conviene más.' }]);
-    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cómo querés viajar?</h1>' +
-      '<div class="p-form"><p class="p-sub">Seleccioná el medio de transporte<br>o compará todas las opciones.</p>' +
-      opciones.map(function (m) {
-        return '<button type="button" class="p-opt' + (S.medio === m.id ? ' is-on' : '') + '" data-medio-paso="1" data-medio="' + m.id + '" aria-pressed="' + (S.medio === m.id) + '"><span class="p-opt__i">' + ic(m.ico, 22) + '</span><span><b>' + m.nom + '</b><small>' + m.sub + '</small></span></button>';
-      }).join('') + '</div>' +
-      '<div class="p-form">' + ayuda() + '</div></div>' +
-      '<div class="p-cta"><button type="button" class="p-go" data-ver="1" data-evento="presupuesto_ver_destinos">Ver destinos →</button></div>';
+  var ORIGENES = ['Montevideo, Uruguay', 'Punta del Este, Uruguay'];
+  var CUANDO_TXT = { fechas: 'Fechas definidas', flexible: 'Fechas flexibles', igual: 'Cualquier momento' };
+  function pintarPaso2() {
+    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h p-h--paso">Armá tu búsqueda</h1>' +
+      '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCAR POR PRESUPUESTO</p><span class="p-badge">2 de 4</span></div>' +
+      '<div class="p-resumen"><small>Tu presupuesto</small><b>US$ ' + S.presupuesto.toLocaleString('es-UY') + ' por persona</b><span>' + CUANDO_TXT[S.cuando] + '</span></div>' +
+      '<h2 class="p-h2">¿Desde dónde salís?</h2><div class="p-sel">' + ic('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>', 18) + '<select id="origen" aria-label="Desde dónde salís">' +
+      ORIGENES.map(function (o) { return '<option' + (S.origen === o ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select></div>' +
+      '<h2 class="p-h2">¿Cuántas personas viajan?</h2><div class="p-pers"><span><b>Adultos</b><small>Mayores de 12 años</small></span><span class="p-pers__s"><button type="button" data-pax="-1" aria-label="Menos adultos"' + (S.pax <= 1 ? ' disabled' : '') + '>−</button><output>' + S.pax + '</output><button type="button" data-pax="1" aria-label="Más adultos"' + (S.pax >= 9 ? ' disabled' : '') + '>+</button></span></div>' +
+      '<h2 class="p-h2">¿Cómo preferís viajar?</h2><p class="p-sub p-sub--s">Podés comparar todas las opciones.</p><div class="p-medios">' +
+      MEDIOS2.map(function (m) {
+        return '<button type="button" class="p-medio' + (S.medio === m.id ? ' is-on' : '') + '" data-medio2="' + m.id + '" aria-pressed="' + (S.medio === m.id) + '"><span class="p-medio__i">' + ic(m.ico, 18) + '</span><b>' + m.nom + '</b><small>' + m.sub + '</small></button>';
+      }).join('') + '</div>' + ayuda() + '</div></div>' +
+      '<div class="p-cta"><button type="button" class="p-go" data-paso2="1" data-evento="presupuesto_paso2_continuar">' + (S.cuando === 'igual' ? 'Buscar destinos →' : 'Continuar →') + '</button></div>';
+  }
+  function irAResultados() {
+    var fe = fechasDe(); IDA = fe.ida; VUELTA = fe.vuelta; PAX = S.pax;
+    S.modo = S.medio === 'comparar' ? 'todos' : S.medio;
+    track('presupuesto_buscar', { cuando: S.cuando, noches: Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5), personas: PAX, medio: S.medio, origen: S.origen });
+    S.paso = 4; S.cargando = true; S.error = ''; pintar(); cargar();
   }
   function pintar() {
     if (S.paso === 1) return pintarPaso1();
@@ -339,6 +397,7 @@
       else { S.paso--; S.err = ''; pintar(); }
       return;
     }
+    if (t.dataset.monto) { S.presupuesto = +t.dataset.monto; S.err = ''; track('presupuesto_monto_sugerido', { monto: S.presupuesto }); pintar(); return; }
     if (t.dataset.cuando) {
       var m0 = Math.round(+($('pres') || {}).value); if (m0 >= 100 && m0 <= 9999) S.presupuesto = m0;
       S.cuando = t.dataset.cuando; S.err = ''; pintar(); return;
@@ -353,23 +412,20 @@
       if (!(v >= 100 && v <= 9999)) { S.err = 'Escribí un monto entre US$ 100 y US$ 9.999 por persona.'; pintar(); return; }
       S.presupuesto = v; S.err = ''; S.paso = 2; track('presupuesto_monto', { monto: v, cuando: S.cuando }); pintar(); return;
     }
+    if (t.dataset.medio2) { S.medio = t.dataset.medio2; S.err = ''; track('presupuesto_medio', { medio: S.medio }); pintar(); return; }
+    if (t.dataset.paso2) {
+      if (!S.medio) { S.err = 'Elegí cómo preferís viajar o comparar todas las opciones.'; pintar(); return; }
+      PAX = S.pax; track('presupuesto_paso2', { origen: S.origen, personas: S.pax, medio: S.medio, cuando: S.cuando });
+      if (S.cuando === 'igual') { irAResultados(); return; }
+      S.paso = 3; S.err = ''; pintar(); return;
+    }
     if (t.dataset.buscar) {
       if (S.cuando === 'fechas') {
         if (!S.ida || !S.vuelta || S.ida < sumarDias(HOY, 1)) S.err = 'Elegí una fecha de ida a partir de mañana.';
         else if (S.vuelta <= S.ida) S.err = 'La vuelta tiene que ser posterior a la ida.';
       } else if (S.cuando === 'flexible' && S.mes < 0) S.err = 'Elegí el mes en que te gustaría viajar.';
       if (S.err) { pintar(); return; }
-      var fe = fechasDe(); IDA = fe.ida; VUELTA = fe.vuelta; PAX = S.pax; S.paso = 3;
-      track('presupuesto_buscar', { cuando: S.cuando, noches: S.cuando === 'fechas' ? Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5) : NOCHES_N[S.noches], personas: PAX });
-      pintar(); return;
-    }
-    /* Paso del medio de transporte: elige uno y sigue a los resultados. "Comparar"
-       deja el filtro en todos, que es lo que quiere ver la persona que no se decide. */
-    if (t.dataset.medioPaso) {
-      S.medio = t.dataset.medio;
-      track('presupuesto_medio', { medio: S.medio });
-      if (S.medio === 'comparar') { S.modo = 'todos'; S.paso = 4; S.cargando = true; S.error = ''; pintar(); cargar(); return; }
-      pintar(); return;
+      irAResultados(); return;
     }
     if (t.dataset.ver) {
       S.modo = S.medio === 'comparar' ? 'todos' : (S.medio === 'avion' ? 'avion' : S.medio === 'auto' ? 'auto' : 'bus');
@@ -387,6 +443,7 @@
   });
   /* Las fechas se guardan al cambiar, sin volver a pintar: pintar cerraria el selector de fechas. */
   document.addEventListener('change', function (e) {
+    if (e.target.id === 'origen') { S.origen = e.target.value; track('presupuesto_origen', { origen: S.origen }); return; }
     if (e.target.id === 'ida') { S.ida = e.target.value; if (S.vuelta <= S.ida) S.vuelta = sumarDias(S.ida, 7); S.err = ''; pintar(); }
     else if (e.target.id === 'vuelta') { S.vuelta = e.target.value; S.err = ''; }
   });
