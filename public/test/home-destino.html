@@ -71,6 +71,16 @@
   .d-elegido{display:flex;align-items:center;gap:10px;margin:0 0 6px;padding:11px 13px;border:1.5px solid #1F6FB5;border-radius:14px;background:var(--cel-soft);color:var(--ink)}
   .d-elegido b{font-family:var(--fh);font-size:16px;font-weight:700}
   .d-elegido span{margin-left:auto;font-size:12.5px;font-weight:700;color:#1F6FB5}
+  /* la tarjeta del destino es un boton: toda ella lleva a elegir otro destino */
+  button.d-elegido{width:100%;box-sizing:border-box;text-align:left;font-family:var(--fb);cursor:pointer}
+  button.d-elegido:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .d-elegido__t{flex:1;min-width:0}
+  .d-elegido__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .d-elegido .d-elegido__c{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:800;color:#1F6FB5;white-space:nowrap}
+  .d-noches{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:var(--good-soft);color:var(--ink);font-size:14.5px;font-weight:700}
+  .d-noches.is-err{background:var(--coral-soft);color:var(--coral)}
+  h2.d-h2{font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}   /* el titulo "cuantas personas" salia con el tamano por defecto del navegador */
+  .d-limite{margin:8px 2px 0;font-size:12.5px;font-weight:600;color:var(--ink2)}
   .d-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
   .d-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
   .lg-pin{vertical-align:-3px;margin:0 5px 0 0}
@@ -159,17 +169,28 @@
     window.mockTrack('page_view', { page_path: '/viaje/destino', page_title: 'Elegí tu destino · CuántoSale', motivo: 'elegir_destino' });
   }
 
+  var plural = function (n, a, b) { return n + " " + (n === 1 ? a : b); };
+  /* Noches entre ida y vuelta: se recalcula al tocar las fechas, sin volver a pintar (si no, se cerraria el selector). */
+  function textoNoches() {
+    var n = Math.round((new Date(S.vuelta + "T12:00:00") - new Date(S.ida + "T12:00:00")) / 864e5);
+    if (!(n >= 1)) return { ok: false, t: "La vuelta tiene que ser posterior a la ida." };
+    return { ok: true, t: plural(n, "noche", "noches") + " · " + plural(S.pax, "persona", "personas") };
+  }
   function pant2() {
-    var d = destInfo();
-    $('main').dataset.pant = '2';
-    $('main').innerHTML = '<h1>¿Cuándo querés viajar?</h1><p class="d-sub">Elegí las fechas de tu viaje.</p>' +
-      '<div class="d-elegido">' + ic(I.pin, 20) + '<b>' + esc(d ? d[1] + ', ' + d[2] : '') + '</b><span>' + (d && d[3] ? d[3] + ' km' : '') + '</span></div>' +
-      '<label class="d-lbl" for="ida">Desde</label><div class="d-fecha">' + ic(I.cal, 22) + '<input id="ida" type="date" min="' + sumarDias(iso(HOY), 1) + '" value="' + S.ida + '" aria-label="Fecha de ida"></div>' +
-      '<label class="d-lbl" for="vuelta">Hasta</label><div class="d-fecha">' + ic(I.cal, 22) + '<input id="vuelta" type="date" min="' + sumarDias(S.ida, 1) + '" value="' + S.vuelta + '" aria-label="Fecha de vuelta"></div>' +
-      '<h2 class="d-h2" style="margin-top:22px">¿Cuántas personas?</h2>' +
-      '<div class="d-pers">' + ic(I.ppl, 22) + '<b>' + S.pax + (S.pax === 1 ? ' persona' : ' personas') + '</b>' +
-      '<span style="display:flex;gap:8px"><button type="button" data-pax="-1" aria-label="Menos personas"' + (S.pax <= 1 ? ' disabled' : '') + '>−</button><button type="button" data-pax="1" aria-label="Más personas"' + (S.pax >= 9 ? ' disabled' : '') + '>+</button></span></div>' +
-      (S.err ? '<p class="d-vacio" role="alert" style="text-align:left;color:var(--coral)">' + esc(S.err) + '</p>' : '');
+    var d = destInfo(), nn = textoNoches();
+    $("main").dataset.pant = "2";
+    $("main").innerHTML = "<h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
+      "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + ic(I.pin, 20) +
+      "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay" + (d && d[3] ? " · " + d[3] + " km por tierra" : "") + "</small></span>" +
+      "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
+      "<label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div>" +
+      "<label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div>" +
+      "<p class=\"d-noches" + (nn.ok ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
+      "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Cuántas personas viajan?</h2>" +
+      "<div class=\"d-pers\">" + ic(I.ppl, 22) + "<b>" + plural(S.pax, "persona", "personas") + "</b>" +
+      "<span style=\"display:flex;gap:8px\"><button type=\"button\" data-pax=\"-1\" aria-label=\"Menos personas\"" + (S.pax <= 1 ? " disabled" : "") + ">−</button><button type=\"button\" data-pax=\"1\" aria-label=\"Más personas\"" + (S.pax >= 9 ? " disabled" : "") + ">+</button></span></div>" +
+      (S.pax >= 9 ? "<p class=\"d-limite\">Máximo 9 personas por reserva. Para grupos más grandes, escribinos por WhatsApp.</p>" : "") +
+      (S.err ? "<p class=\"d-vacio\" role=\"alert\" style=\"text-align:left;color:var(--coral)\">" + esc(S.err) + "</p>" : "");
     $('foot').hidden = false;
     $('foot').innerHTML = '<button type="button" class="d-btn" data-seguir="1" data-evento="destino_continuar" data-destino="' + S.dest + '">Continuar →</button>';
     document.title = '¿Cuándo querés viajar? · CuántoSale';
@@ -226,6 +247,7 @@
     /* El click en la tarjeta ya dispara el evento data-evento="destino_elegido"
        (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
     if (t.dataset.dest) { S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
+    if (t.dataset.cambiar) { track('destino_cambiar_destino', { destino: S.dest }); ir(1); return; }
     if (t.dataset.pax) { S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.pax))); S.err = ''; track('destino_personas', { personas: S.pax }); pant2(); return; }
     if (t.dataset.medio) {
       S.medio = t.dataset.medio;
@@ -253,6 +275,17 @@
       return;
     }
   });
+  /* Fechas: se guardan al cambiar y las noches se actualizan en el momento. */
+  function alCambiarFecha(e) {
+    if (e.target.id !== 'ida' && e.target.id !== 'vuelta') return;
+    if (e.target.id === 'ida') { S.ida = e.target.value; var v = $('vuelta'); if (v) { v.min = sumarDias(S.ida, 1); if (S.vuelta <= S.ida) { S.vuelta = sumarDias(S.ida, 7); v.value = S.vuelta; } } }
+    else S.vuelta = e.target.value;
+    S.err = '';
+    var n = $('noches'), nn = textoNoches();
+    if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok); }
+  }
+  $('main').addEventListener('change', alCambiarFecha);
+  $('main').addEventListener('input', alCambiarFecha);
   $('main').addEventListener('input', function (e) {
     if (e.target.id === 'bus') { S.q = e.target.value.trim(); var sel = document.getElementById('bus').selectionStart; pintar(); var b = document.getElementById('bus'); if (b) { b.focus(); try { b.setSelectionRange(sel, sel); } catch (x) { /* no todos los navegadores dejan */ } } }
   });
