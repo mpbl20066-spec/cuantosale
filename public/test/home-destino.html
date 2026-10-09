@@ -153,7 +153,7 @@
     return '<div class="d-grid">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
         '<span class="d-card__f" style="background-image:url(' + (['buz', 'bombinhas', 'bcm'].indexOf(d[0]) >= 0 ? 'dest/' : '../fotos/') + d[0] + '.jpg)" aria-hidden="true"></span>' +
-        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[5]) + (d[3] ? ' · ' + d[3] + ' km' : '') + '</small></span></button>';
+        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[5]) + '</small></span></button>';
     }).join('') + '</div>';
   }
 
@@ -177,14 +177,14 @@
   function textoNoches() {
     var n = Math.round((new Date(S.vuelta + "T12:00:00") - new Date(S.ida + "T12:00:00")) / 864e5);
     if (!(n >= 1)) return { ok: false, t: "La vuelta tiene que ser posterior a la ida." };
-    return { ok: true, t: plural(n, "noche", "noches") + " · " + plural(S.pax, "persona", "personas") };
+    return { ok: true, t: plural(n, "noche", "noches") };   /* las personas ya se ven mas abajo: no se repiten aca */
   }
   function pant2() {
     var d = destInfo(), nn = textoNoches();
     $("main").dataset.pant = "2";
     $("main").innerHTML = "<h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
       "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + (d ? "<span class=\"d-elegido__f\" style=\"background-image:url(" + fotoDe(d[0]) + ")\" aria-hidden=\"true\"></span>" : ic(I.pin, 20)) +
-      "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay" + (d && d[3] ? " · " + d[3] + " km por tierra" : "") + "</small></span>" +
+      "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay</small></span>" +
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
       "<label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div>" +
       "<label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div>" +
@@ -219,7 +219,7 @@
       '<div class="d-medios">' + hay.map(function (m) {
         return '<button type="button" class="d-medio" data-medio="' + m.id + '" data-evento="destino_medio" data-medio_id="' + m.id + '">' +
           '<span class="d-medio__i">' + ic(I[m.ico], 26) + '</span>' +
-          '<span class="d-medio__t"><b>' + m.nom + '</b><small>' + m.sub + '</small></span>' +
+          '<span class="d-medio__t"><b>' + m.nom + '</b><small>' + m.sub + (d && d[3] && (m.id === 'auto' || m.id === 'bus') ? ' · ruta de unos ' + d[3] + ' km desde Montevideo' : '') + '</small></span>' +
           ic(I.chev, 16) + '</button>';
       }).join('') +
       '<button type="button" class="d-medio d-medio--c" data-medio="comparar" data-evento="destino_medio" data-medio_id="comparar">' +
