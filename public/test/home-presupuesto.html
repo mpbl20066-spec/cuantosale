@@ -15,6 +15,9 @@
   [data-theme="night"] body{background:#05080D}
   .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
   .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  /* La barra con la flecha y el logo: hermano del contenedor que scrollea, asi que
+     no se mueve nunca. Por eso no lleva position: sticky ni absolute. */
+  .p-top{flex:0 0 auto;padding:4px 16px 10px;background:var(--bg)}
   .scroll{flex:1;overflow-y:auto;padding:4px 16px 20px;scrollbar-width:none}
   .scroll::-webkit-scrollbar{display:none}
   .p-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -29,25 +32,16 @@
   .p-budget input{flex:1;min-width:0;width:100%;border:0;background:transparent;font:800 16px var(--fb);color:var(--ink)}
   .p-budget input:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
   .p-budget span{font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap}
+  /* Los filtros por medio y por tipo de destino vivieron en la pantalla de
+     resultados. El paso 3 ahora muestra solo los destinos que entran en el
+     presupuesto, con el medio ya elegido en el paso 2, asi que las pastillas
+     quedaron sin uso y se fueron con ellas. */
   .p-chips{display:flex;gap:8px;margin:12px 0 14px}
   .p-chip{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:13.5px;font-weight:700;cursor:pointer}
   .p-chip.is-on{background:#1F6FB5;border-color:#1F6FB5;color:#fff}
-  .p-chip:focus-visible,.p-row:focus-visible,.p-go:focus-visible,.p-back:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .p-list{display:flex;flex-direction:column;gap:10px}
-  .p-row{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:8px 14px 8px 8px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;font-family:var(--fb);cursor:pointer}
-  .p-row__img{flex:0 0 84px;height:64px;border-radius:12px;background:var(--cel-soft) center/cover}
-  .p-row__t{flex:1;min-width:0}
-  .p-row__t b{display:block;font-size:16px;line-height:1.2}
-  .p-row__t small{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px;font-weight:600;color:var(--ink2)}
-  .p-row__t small svg{color:#1F6FB5}
-  .p-row__p{flex:0 0 auto;text-align:right;font-family:var(--fh);font-size:17px;font-weight:800}
-  .p-row__p em{display:block;margin-top:1px;font-family:var(--fb);font-style:normal;font-size:10.5px;font-weight:700;color:var(--ink2)}
-  .p-row.is-over .p-row__p{color:var(--ink2)}
+  .p-chip:focus-visible,.p-go:focus-visible,.p-back:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .p-vacio{padding:24px 8px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
   .p-ej{margin:14px 0 0;font-size:11.5px;font-weight:600;color:var(--ink2);text-align:center}
-  .p-row__pr{display:block;margin-top:2px;font-family:var(--fh);font-size:19px;font-weight:800;color:var(--ink)}
-  .p-row>svg:last-child{flex:0 0 16px;color:var(--ink2)}
-  .p-row.is-over .p-row__pr{color:var(--ink2)}
   /* Asistente: pasos 1 y 2 */
   .p-step{min-height:calc(100% - 72px)}
   .p-h2{margin:18px 0 8px;font-family:var(--fh);font-size:16px;font-weight:800;color:#1F6FB5}
@@ -73,13 +67,23 @@
   .p-pers button{width:34px;height:34px;border:1.5px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
   .p-pers button:disabled{opacity:.35;cursor:default}
   .p-err{margin:10px 0 0}
-  .p-cta{position:sticky;bottom:-20px;margin:14px -16px -20px;padding:12px 16px 22px;background:linear-gradient(180deg,transparent,var(--bg) 28%)}
-  /* Resultados */
-  .p-res{display:flex;align-items:center;gap:12px;margin:6px 0 10px}
-  .p-res__i{flex:0 0 48px;height:48px;border-radius:14px;background:var(--good-soft);color:var(--good);display:grid;place-items:center}
-  .p-res h1{margin:0;font-family:var(--fh);font-size:19px;font-weight:800;line-height:1.2;color:#1F6FB5}
-  .p-res p{display:flex;align-items:center;gap:5px;margin:3px 0 0;font-size:12.5px;font-weight:600;color:var(--ink2)}
-  .p-fechas{display:flex;align-items:center;gap:6px;margin:0 0 4px;font-size:12.5px;font-weight:700;color:var(--ink2)}
+  /* El boton de "Continuar" queda fijo abajo mientras el paso es mas largo que la
+   pantalla. Antes el fondo era un degradado que arrancaba transparente: las
+   tarjetas de "Como preferis viajar?" se veian a traves del boton y parecian
+   rotas. Ahora es opaco, con una sombra arriba que separa el boton del contenido
+   sin taparlo. El degradado sigue, pero solo en los 14px de arriba. */
+  .p-cta{position:sticky;bottom:0;z-index:3;margin:14px -16px -20px;padding:14px 16px 22px;background:var(--bg);box-shadow:0 -18px 14px -6px var(--bg)}
+  /* Un boton pegado abajo pisa el contenido que le llega justo debajo. Por eso, SOLO
+     en los pasos que tienen boton, el contenedor de scroll deja abajo el alto del
+     boton: asi la ultima tarjeta se puede leer completa con el scroll al fondo. Sin
+     esto, elegir medio de transporte tapaba la ultima opcion. El paso 3 no lleva
+     boton, asi que no necesita (ni debe tener) ese espacio. */
+  [data-pagina="presupuesto"] #main:has(.p-cta){padding-bottom:104px}
+  /* El paso deja aire abajo para que la ultima fila se pueda leer por encima del
+     boton: sin esto, con scroll al fondo, la ultima tarjeta queda debajo. */
+  .p-step{padding-bottom:10px}
+  /* Paso 3: fechas de la búsqueda y pie de ejemplo */
+  .p-fechas{display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:12.5px;font-weight:700;color:var(--ink2)}
   .p-link{border:0;background:transparent;color:#1F6FB5;font:800 12.5px var(--fb);text-decoration:underline;cursor:pointer}
   /* Detalle del destino: hoja que cubre la pantalla. */
   .p-over{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;background:var(--bg);padding-top:34px}
@@ -110,6 +114,24 @@
     .status{display:none}
   }
   .p-card{padding:18px 16px 4px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+  /* Tarjeta de destino del paso 3. La foto va arriba y el texto debajo, como las
+     tarjetas de la portada: en una columna angosta la foto al lado recortaba el
+     nombre y el precio quedaban pegados. */
+  .p-dsts{display:flex;flex-direction:column;gap:14px;margin:14px 0 6px}
+  .p-dst{border:1px solid var(--line);border-radius:16px;background:var(--bg);overflow:hidden}
+  .p-dst__f{display:block;height:120px;background:var(--cel-soft) center/cover}
+  .p-dst__b{padding:12px 14px 14px}
+  .p-dst__b h3{margin:0;font-family:var(--fh);font-size:18px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .p-dst__m{display:flex;align-items:center;gap:6px;margin:4px 0 0;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .p-dst__m svg{flex:0 0 14px;color:#1F6FB5}
+  .p-dst__f2{display:flex;align-items:baseline;gap:10px;margin-top:10px}
+  .p-dst__f2 b{font-family:var(--fh);font-size:22px;font-weight:800;line-height:1;color:var(--ink)}
+  .p-dst__q{font-size:12.5px;font-weight:800;color:var(--good)}
+  .p-dst__q.is-over{color:var(--coral)}
+  .p-dst__go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;margin-top:12px;padding:12px 14px;border:0;border-radius:12px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:14.5px;font-weight:800;cursor:pointer}
+  .p-dst__go svg{margin-left:auto}
+  .p-dst__go:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .p-dst.is-over .p-dst__f2 b{color:var(--ink2)}
   .p-eyebrow{margin:0 0 6px;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:#1F6FB5}
   .p-card h1.p-h{margin:0 0 6px;font-size:22px;color:var(--ink)}
   .p-card .p-h2{margin:14px 0 8px;font-size:14px;color:var(--ink)}
@@ -121,8 +143,15 @@
   .p-opt--d{align-items:flex-start;padding:12px 14px;margin-bottom:10px;text-align:left}
   .p-opt--d .p-opt__i{flex:0 0 32px;width:32px;height:32px;background:transparent}
   .p-opt--d b{font-size:14.5px}
-  @media (min-width:880px){
-    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){display:block;max-width:600px;margin:0 auto}
+  /* El paso va en una tarjeta de 600px centrada, y el boton al mismo ancho.
+     Antes esta regla arrancaba en 880px mientras que web.css pone el paso en grilla
+     de dos columnas desde 768px. Entre 768 y 880 no aplicaba ninguna de las dos
+     Composiciones bien: la tarjeta (mas alta que la fila de la grilla) desbordaba y
+     el boton de "Continuar" se le montaba encima, tapando la ultima opcion de
+     transporte. Se arranca en 768px, que es donde empieza la composicion de
+     escritorio, y no queda el hueco. */
+  @media (min-width:768px){
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){display:block;max-width:600px;margin:0 auto;flex:0 0 auto}
     [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig],.p-go[data-paso2]){max-width:600px;margin:0 auto;padding-top:16px}
   }
   .p-card__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -160,6 +189,11 @@
 <body>
 <div class="phone">
   <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <!-- La barra con la flecha y el logo va FUERA del contenedor que scrollea. Antes
+       se dibujaba dentro de #main, asi que se iba al hacer scroll y en un paso largo
+       (el 2, con origen, personas, medio y fechas) el logo desaparecia a media
+       pantalla. Siendo hermano de #main queda siempre arriba. -->
+  <div class="p-top" id="top"></div>
   <div class="scroll" id="main"></div>
   <div class="p-over" id="detalle" hidden></div>
 </div>
@@ -237,7 +271,7 @@
       DESTS = {};
       rs.forEach(function (r) {
         r.options.forEach(function (o) {
-          var d = DESTS[o.dest.key] = DESTS[o.dest.key] || { nom: o.dest.name, precios: {} };
+          var d = DESTS[o.dest.key] = DESTS[o.dest.key] || { nom: o.dest.name, reg: o.dest.region || '', precios: {} };
           d.precios[r.m] = { pp: o.pp, total: o.total, parts: o.parts };
         });
       });
@@ -262,7 +296,10 @@
     var fuera = l.filter(function (x) { return x.p > S.presupuesto; }).sort(function (a, b) { return a.p - b.p; });
     return dentro.concat(fuera);
   }
+  /* La barra se dibuja en #top, no en #main: #main scrollea y la barra tiene que
+     quedar fija arriba en los pasos largos. ver pintar(). */
   var barra = function () { return '<div class="p-bar"><button type="button" class="p-back" id="atras" aria-label="Volver">' + ic(I.back, 22) + '</button><div class="p-logo">CuántoSale' + ic(I.plane, 24) + '<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>'; };
+  var pintarBarra = function () { $('top').innerHTML = barra(); };
   var iCal = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
   var iPers = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>';
   var iMezcla = '<path d="M3 7h3c4 0 5 10 9 10h6M3 17h3c1.5 0 2.600-1 3.500-2.500M15 7h6M18 4l3 3-3 3M18 14l3 3-3 3"/>';
@@ -276,7 +313,7 @@
   var CUANDO1 = [['fechas', 'Tengo fechas definidas', 'Elegí cuándo salís y cuándo volvés.', iCal], ['flexible', 'Tengo fechas flexibles', 'Buscamos opciones en distintos días.', iCal], ['igual', 'Puedo viajar en cualquier momento', 'Priorizamos los destinos que mejor se ajustan a tu presupuesto.', iMezcla]];
   var MONTOS = [500, 1000, 1500, 2000];
   function pintarPaso1() {
-    $('main').innerHTML = '<div class="p-step">' + barra() +
+    $('main').innerHTML = '<div class="p-step">' +
       '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCÁ UN VIAJE A TU MEDIDA</p><span class="p-badge">1 de 4</span></div>' +
       '<h1 class="p-h">¿Cuánto querés gastar en tu próximo viaje?</h1><p class="p-sub">Encontrá destinos que se ajusten a tu presupuesto, viajando en avión, auto o bus.</p>' +
       '<h2 class="p-h2">Tu presupuesto por persona</h2>' +
@@ -288,28 +325,29 @@
       }).join('') +
       '</div></div><div class="p-cta"><button type="button" class="p-go" data-sig="1" data-evento="presupuesto_paso1_continuar">Continuar →</button></div>';
   }
-  /* Paso 2: segun lo elegido, fechas exactas, mes y noches, o solo noches. */
-  function pintarPaso3() {
-    var tabs = '<div class="p-tabs" role="group" aria-label="Cuándo viajar">' + CUANDO.map(function (c) {
-      return '<button type="button" class="p-chip' + (S.cuando === c[0] ? ' is-on' : '') + '" data-cuando2="' + c[0] + '" aria-pressed="' + (S.cuando === c[0]) + '">' + c[1] + '</button>';
-    }).join('') + '</div>';
+  /* Las fechas van dentro del paso 2, en su propia tarjeta, y no en un paso aparte.
+     El paso 1 ya pregunta CUANDO se viaja (fechas definidas, flexible o me da igual);
+     este bloque solo lo precisa: los dias exactos, o el mes y la duracion. Con esto
+     los pasos quedan 1) monto y cuando, 2) busqueda completa, 3) destinos, 4)
+     presupuesto, que es la cuenta que muestra el "3 de 4" de la pantalla de
+     resultados. Preguntar las fechas en una pantalla sola era una pantalla de mas. */
+  function bloqueFechas() {
     var noches = '<h2 class="p-h2">¿Cuántas noches?</h2><div class="p-grid3">' + ['5-7', '7-10', '10+'].map(function (n) {
       return '<button type="button" class="p-opt p-opt--c' + (S.noches === n ? ' is-on' : '') + '" data-noches="' + n + '" aria-pressed="' + (S.noches === n) + '">' + n.replace('-', ' – ') .replace('10+', '10+') + '</button>';
     }).join('') + '</div>';
     var cuerpo;
     if (S.cuando === 'fechas') {
-      cuerpo = '<p class="p-sub">Seleccioná las fechas de tu viaje.</p>' +
+      cuerpo = '<h2 class="p-h2">¿Qué días viajás?</h2>' +
         '<label class="p-fl" for="ida">Desde</label><div class="p-date">' + ic(iCal, 22) + '<input id="ida" type="date" min="' + sumarDias(HOY, 1) + '" value="' + S.ida + '"></div>' +
         '<label class="p-fl" for="vuelta">Hasta</label><div class="p-date">' + ic(iCal, 22) + '<input id="vuelta" type="date" min="' + sumarDias(S.ida, 1) + '" value="' + S.vuelta + '"></div>';
     } else if (S.cuando === 'flexible') {
-      cuerpo = '<p class="p-sub">Elegí el mes y la duración aproximada de tu viaje.</p><h2 class="p-h2">¿Qué mes te gustaría?</h2><div class="p-grid3">' + mesesOfrecidos().map(function (m) {
+      cuerpo = '<h2 class="p-h2">¿Qué mes te gustaría?</h2><div class="p-grid3">' + mesesOfrecidos().map(function (m) {
         return '<button type="button" class="p-opt p-opt--c' + (S.mes === m.i ? ' is-on' : '') + '" data-mes="' + m.i + '" aria-pressed="' + (S.mes === m.i) + '">' + MESES_L[m.i] + '</button>';
       }).join('') + '</div>' + noches;
     } else {
-      cuerpo = '<p class="p-sub">Si no tenés una fecha específica, podemos buscarte las mejores opciones según tu presupuesto.</p>' + noches;
+      cuerpo = noches;
     }
-    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cuándo querés viajar?</h1>' + tabs + '<div class="p-form">' + cuerpo + '</div><div class="p-form">' + ayuda() + '</div></div>' +
-      '<div class="p-cta"><button type="button" class="p-go" data-buscar="1" data-evento="presupuesto_paso3_buscar" data-tipo_fechas="' + S.cuando + '">Buscar destinos →</button></div>';
+    return '<div class="p-card p-card--h2"><div class="p-card__h"><p class="p-eyebrow">CUÁNDO VIAJÁS</p></div>' + cuerpo + '</div>';
   }
   /* Paso 2: Armá tu búsqueda (origen, personas y medio de transporte).
      Aca el medio es una PREFERENCIA sobre el conjunto de destinos, no una eleccion
@@ -328,8 +366,10 @@
   ];
   var ORIGENES = ['Montevideo, Uruguay', 'Punta del Este, Uruguay'];
   var CUANDO_TXT = { fechas: 'Fechas definidas', flexible: 'Fechas flexibles', igual: 'Cualquier momento' };
+  /* El h1 "Paso 2 — Armá tu búsqueda" no va mas: el badge "2 de 4" de la tarjeta ya
+     dice en que paso estamos y el titulo repetia el nombre del flujo. */
   function pintarPaso2() {
-    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h p-h--paso">Paso 2 — Armá tu búsqueda</h1>' +
+    $('main').innerHTML = '<div class="p-step">' +
       '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCAR POR PRESUPUESTO</p><span class="p-badge">2 de 4</span></div>' +
       '<div class="p-resumen"><small>Tu presupuesto</small><b>US$ ' + S.presupuesto.toLocaleString('es-UY') + ' por persona</b><span>' + CUANDO_TXT[S.cuando] + '</span></div>' +
       '<h2 class="p-h2">¿Desde dónde salís?</h2><div class="p-sel">' + ic('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>', 18) + '<select id="origen" aria-label="Desde dónde salís">' +
@@ -338,47 +378,63 @@
       '<h2 class="p-h2">¿Cómo preferís viajar?</h2><p class="p-sub p-sub--s">Filtramos por esta forma de llegar. Si no te importa, compará todas.</p><div class="p-medios">' +
       MEDIOS2.map(function (m) {
         return '<button type="button" class="p-medio' + (S.medio === m.id ? ' is-on' : '') + '" data-medio2="' + m.id + '" aria-pressed="' + (S.medio === m.id) + '"><span class="p-medio__i">' + ic(m.ico, 18) + '</span><b>' + m.nom + '</b><small>' + m.sub + '</small></button>';
-      }).join('') + '</div>' + ayuda() + '</div></div>' +
-      '<div class="p-cta"><button type="button" class="p-go" data-paso2="1" data-evento="presupuesto_paso2_continuar">' + (S.cuando === 'igual' ? 'Buscar destinos →' : 'Continuar →') + '</button></div>';
+      }).join('') + '</div>' + ayuda() + '</div>' + bloqueFechas() + ayuda() + '</div>' +
+      '<div class="p-cta"><button type="button" class="p-go" data-paso2="1" data-evento="presupuesto_paso2_continuar">Buscar destinos →</button></div>';
   }
   function irAResultados() {
     var fe = fechasDe(); IDA = fe.ida; VUELTA = fe.vuelta; PAX = S.pax;
     S.modo = S.medio === 'comparar' ? 'todos' : S.medio;
     track('presupuesto_buscar', { cuando: S.cuando, noches: Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5), personas: PAX, medio: S.medio, origen: S.origen });
-    S.paso = 4; S.cargando = true; S.error = ''; pintar(); cargar();
+    S.paso = 3; S.cargando = true; S.error = ''; pintar(); cargar();
   }
   function pintar() {
+    pintarBarra();
     if (S.paso === 1) return pintarPaso1();
     if (S.paso === 2) return pintarPaso2();
-    if (S.paso === 3) return pintarPaso3();
-    return pintarResultados();
+    return pintarPaso3();
   }
-  function pintarResultados() {
-    var chips = [['todos', 'Todos'], ['auto', 'Auto'], ['avion', 'Avión'], ['bus', 'Bus']].map(function (c) {
-      return '<button type="button" class="p-chip' + (S.modo === c[0] ? ' is-on' : '') + '" data-modo="' + c[0] + '" aria-pressed="' + (S.modo === c[0]) + '">' + (MODOS[c[0]] ? ic(MODOS[c[0]][1], 16) : '') + c[1] + '</button>';
-    }).join('');
-    /* Segunda fila: que tipo de lugar se busca. Es el filtro que usa la maqueta para
-       este flujo, porque aca no se eligio un destino: se elige entre varios. */
-    var tipos = Object.keys(window.CS_Viaje.TIPOS_TXT).map(function (k) {
-      return '<button type="button" class="p-chip' + (S.tipo === k ? ' is-on' : '') + '" data-tipo="' + k + '" aria-pressed="' + (S.tipo === k) + '">' + window.CS_Viaje.TIPOS_TXT[k] + '</button>';
-    }).join('');
-    var todas = filas(), l = todas.slice(0, S.n);
-    var lista = S.cargando ? '<p class="p-vacio" role="status">Buscando destinos para tu presupuesto…</p>'
-      : (S.error ? '<p class="p-vacio" role="alert">' + esc(S.error) + '<br><button type="button" class="p-chip" data-reintentar="1" style="margin:10px auto 0">Reintentar</button></p>' : null);
-    var dentro = todas.filter(function (x) { return x.p <= S.presupuesto; }).length;
-    var titulo = S.cargando ? 'Buscando opciones…' : (dentro ? 'Encontramos ' + dentro + (dentro === 1 ? ' opción dentro de tu presupuesto' : ' opciones dentro de tu presupuesto') : 'No encontramos opciones dentro de tu presupuesto');
-    $('main').innerHTML = barra() +
-      '<div class="p-res"><span class="p-res__i">' + ic(I.plane, 28) + '</span><div><h1>' + titulo + '</h1><p>' + ic('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>', 14) + 'Montevideo → Brasil · ' + f(S.presupuesto) + ' por persona</p></div></div>' +
+  /* Paso 3: los destinos que entran en el presupuesto.
+     El precio sale de /api/cotizar-todos con el modelo de costos real, y el "dentro
+     de tu presupuesto" se compara contra el monto que puso la persona: no es una
+     etiqueta de marketing. La segunda linea de cada tarjeta (noches, tipo de lugar y
+     region) sale de los mismos datos, no de un texto escrito a mano por destino. */
+  var TIPO_TXT = { playa: 'Playa', ciudad: 'Ciudad', naturaleza: 'Naturaleza' };
+  function descriptor(x, noches) {
+    var tipo = TIPO_TXT[window.CS_Viaje.Tipo[x.k] || 'ciudad'];
+    return noches + (noches === 1 ? ' noche' : ' noches') + ' · ' + tipo + (DESTS[x.k].reg ? ' · ' + DESTS[x.k].reg : '');
+  }
+  function tarjetaDest(x, noches) {
+    var over = x.p > S.presupuesto;
+    return '<article class="p-dst' + (over ? ' is-over' : '') + '">' +
+      '<span class="p-dst__f" style="background-image:url(\'../fotos/' + x.k + '.jpg\')" role="img" aria-label="' + esc(DESTS[x.k].nom) + '"></span>' +
+      '<div class="p-dst__b"><h3>' + esc(DESTS[x.k].nom) + ', Brasil</h3>' +
+      '<p class="p-dst__m">' + ic(MODOS[x.m][1], 14) + esc(descriptor(x, noches)) + '</p>' +
+      '<div class="p-dst__f2"><b>' + f(x.p) + '</b>' + (over
+        ? '<span class="p-dst__q is-over">Supera tu presupuesto</span>'
+        : '<span class="p-dst__q">Dentro de tu presupuesto</span>') + '</div>' +
+      '<button type="button" class="p-dst__go" data-dest="' + x.k + '" data-m="' + x.m + '" data-evento="presupuesto_destino" data-destino="' + x.k + '" data-medio="' + x.m + '" data-precio="' + x.p + '">Ver destino ' + ic(I.arrow, 16) + '</button>' +
+      '</div></article>';
+  }
+  function pintarPaso3() {
+    var noches = Math.round((new Date(VUELTA + 'T12:00:00') - new Date(IDA + 'T12:00:00')) / 864e5);
+    var dentro = filas().filter(function (x) { return x.p <= S.presupuesto; });
+    var l = dentro.slice(0, S.n);
+    var cuerpo;
+    if (S.cargando) cuerpo = '<p class="p-vacio" role="status">Buscando destinos para tu presupuesto…</p>';
+    else if (S.error) cuerpo = '<p class="p-vacio" role="alert">' + esc(S.error) + '<br><button type="button" class="p-chip" data-reintentar="1" style="margin:10px auto 0">Reintentar</button></p>';
+    else if (!dentro.length) cuerpo = '<p class="p-vacio">Con ' + f(S.presupuesto) + ' por persona no encontramos destinos que entren. Probá subiendo el monto o comparando todos los medios.</p>';
+    else cuerpo = '<div class="p-dsts">' + l.map(function (x) { return tarjetaDest(x, noches); }).join('') +
+      (dentro.length > l.length ? '<button type="button" class="p-chip" data-mas="1" style="align-self:center;margin-top:4px">Ver más destinos</button>' : '') + '</div>';
+    var sub = S.cargando ? 'Buscando opciones para tu presupuesto…'
+      : (dentro.length ? 'Encontramos ' + dentro.length + (dentro.length === 1 ? ' opción que se ajusta' : ' opciones que se ajustan') + ' a tu presupuesto de ' + f(S.presupuesto) + ' por persona.'
+        : 'No encontramos destinos para ' + f(S.presupuesto) + ' por persona.');
+    $('main').innerHTML = '<div class="p-step">' +
+      '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCAR POR PRESUPUESTO</p><span class="p-badge">3 de 4</span></div>' +
+      '<h1 class="p-h">Estos destinos pueden ser para vos</h1><p class="p-sub">' + esc(sub) + '</p>' +
       '<p class="p-fechas">' + ic(iCal, 14) + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + PAX + (PAX === 1 ? ' persona' : ' personas') + ' <button type="button" class="p-link" data-editar="1">Cambiar</button></p>' +
-      '<div class="p-chips" role="group" aria-label="Forma de llegar">' + chips + '</div>' +
-      '<div class="p-chips" role="group" aria-label="Tipo de destino">' + tipos + '</div>' +
-      '<div class="p-list">' + (lista !== null ? lista : (l.length ? l.map(function (x) {
-        var over = x.p > S.presupuesto;
-        return '<button type="button" class="p-row' + (over ? ' is-over' : '') + '" data-dest="' + x.k + '" data-m="' + x.m + '" data-evento="presupuesto_destino" data-destino="' + x.k + '" data-medio="' + x.m + '" data-precio="' + x.p + '">' +
-          '<span class="p-row__img" style="background-image:url(\'../fotos/' + x.k + '.jpg\')" aria-hidden="true"></span>' +
-          '<span class="p-row__t"><b>' + esc(DESTS[x.k].nom) + '</b><strong class="p-row__pr">' + f(x.p) + '</strong><small>' + ic(MODOS[x.m][1], 16) + MODOS[x.m][0] + (over ? ' · Supera tu presupuesto' : '') + '</small></span>' + ic('<path d="m9 5 7 7-7 7"/>', 16) + '</button>';
-      }).join('') + (todas.length > l.length ? '<button type="button" class="p-chip" data-mas="1" style="align-self:center;margin-top:4px">Ver más destinos</button>' : '') : '<p class="p-vacio">No hay destinos para esa combinación.</p>')) + '</div>' +
-      '<p class="p-ej">Estimación por persona para ' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' (' + PAX + (PAX === 1 ? ' persona' : ' personas') + '), con el modelo de costos de CuántoSale.</p>';
+      cuerpo +
+      '<p class="p-ej">Ejemplo ilustrativo. Los precios reales deben calcularse según origen, fechas, transporte y cantidad de personas.</p>' +
+      '</div></div>';
   }
   function pintarDetalle() {
     var k = S.abierto, d = DESTS[k], m = S.modoDet, pr = d.precios[m], p = pr.pp;
@@ -400,7 +456,7 @@
     return 'home-flujo.html?' + q.toString() + (debug ? '&debug=1' : '');
   }
   function abrir(k, m) { S.abierto = k; S.modoDet = m; pintarDetalle(); $('detalle').hidden = false; $('cerrar').focus(); track('presupuesto_detalle_vista', { destino: k, medio: m, precio: DESTS[k].precios[m].pp }); }
-  function cerrar() { $('detalle').hidden = true; S.abierto = null; var r = $('main').querySelector('.p-row'); if (r) r.focus(); }
+  function cerrar() { $('detalle').hidden = true; S.abierto = null; var r = $('main').querySelector('.p-dst__go'); if (r) r.focus(); }
 
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t) return;
@@ -427,9 +483,15 @@
     if (t.dataset.medio2) { S.medio = t.dataset.medio2; S.err = ''; track('presupuesto_medio', { medio: S.medio }); pintar(); return; }
     if (t.dataset.paso2) {
       if (!S.medio) { S.err = 'Elegí cómo preferís viajar o comparar todas las opciones.'; pintar(); return; }
+      /* Las fechas se validan aca porque esta pantalla las pide: el paso 2 es el
+         ultimo antes de buscar. Mismas reglas que tenia el paso de fechas. */
+      if (S.cuando === 'fechas') {
+        if (!S.ida || !S.vuelta || S.ida < sumarDias(HOY, 1)) S.err = 'Elegí una fecha de ida a partir de mañana.';
+        else if (S.vuelta <= S.ida) S.err = 'La vuelta tiene que ser posterior a la ida.';
+      } else if (S.cuando === 'flexible' && S.mes < 0) S.err = 'Elegí el mes en que te gustaría viajar.';
+      if (S.err) { pintar(); return; }
       PAX = S.pax; track('presupuesto_paso2', { origen: S.origen, personas: S.pax, medio: S.medio, cuando: S.cuando });
-      if (S.cuando === 'igual') { irAResultados(); return; }
-      S.paso = 3; S.err = ''; pintar(); return;
+      irAResultados(); return;
     }
     if (t.dataset.buscar) {
       if (S.cuando === 'fechas') {
@@ -439,15 +501,7 @@
       if (S.err) { pintar(); return; }
       irAResultados(); return;
     }
-    if (t.dataset.ver) {
-      S.modo = S.medio === 'comparar' ? 'todos' : (S.medio === 'avion' ? 'avion' : S.medio === 'auto' ? 'auto' : 'bus');
-      S.paso = 4; S.cargando = true; S.error = '';
-      track('presupuesto_ver_destinos', { medio: S.medio, filtro: S.modo });
-      pintar(); cargar(); return;
-    }
     if (t.id === 'cerrar') { cerrar(); return; }
-    if (t.dataset.modo) { S.modo = t.dataset.modo; track('presupuesto_filtro_medio', { medio: S.modo }); pintar(); return; }
-    if (t.dataset.tipo) { S.tipo = t.dataset.tipo; track('presupuesto_filtro_tipo', { tipo: S.tipo }); pintar(); return; }
     if (t.dataset.mas) { S.n += 6; pintar(); return; }
     if (t.dataset.reintentar) { cargar(); return; }
     if (t.dataset.dest) { abrir(t.dataset.dest, t.dataset.m); return; }

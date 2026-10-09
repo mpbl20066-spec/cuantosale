@@ -170,8 +170,12 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 
 /* ============ Presupuesto (asistente + resultados) ============ */
 @media (min-width:768px){
-  [data-pagina="presupuesto"] #main{display:flex;flex-direction:column;padding:60px var(--gut) 28px}
-  [data-pagina="presupuesto"] .p-bar{position:absolute;top:8px;left:var(--gut);right:var(--gut);margin:0}
+  [data-pagina="presupuesto"] #main{display:flex;flex-direction:column;padding:16px var(--gut) 28px}
+  /* La barra con el logo ya no va dentro de #main: es hermana, en .p-top, y por eso
+     no necesita ni posicionarse ni flotar para quedar arriba. Antes era
+     position:absolute dentro del contenedor que scrollea, con lo cual se iba al
+     hacer scroll. */
+  [data-pagina="presupuesto"] .p-top{padding:8px var(--gut)}
   /* Los dos bloques del formulario van envueltos en .p-form para que en escritorio
      se puedan poner en dos columnas (ver la regla .p-step mas abajo). En celular el
      .p-form es un bloque normal y se ven igual que antes, uno debajo del otro. */
