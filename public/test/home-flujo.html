@@ -1039,7 +1039,7 @@
   function etiquetaDe(e, grupo) {
     var items = grupo.items;
     var baratos = items.map(function (x) { return x.precio; }).sort(function (a, b) { return a - b; });
-    if (items.length > 1 && e.precio === baratos[0]) return '💰 Mejor precio';
+    if (e.cat !== 'auto' && items.length > 1 && e.precio === baratos[0]) return '💰 Mejor precio';
     if (e.cat === 'tours' && items.length > 1 && horas(e.dur) === Math.max.apply(null, items.map(function (x) { return horas(x.dur); }))) return '🟢 Experiencia completa';
     return '';
   }
