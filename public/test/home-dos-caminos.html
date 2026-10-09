@@ -25,11 +25,11 @@
      portada.png). Es 16:9 y muy colorida, asi que el degradado va solo del lado
      izquierdo, donde se apila el texto, y la foto se ve entera del lado derecho.
      El alto sube para que la imagen tenga presencia en vez de quedar de franja. */
-  .m-top{position:relative;margin:0 -18px;padding:0 18px 26px;min-height:440px;background:url(home-portada.jpg) 74% 46%/cover}
-  /* Velo suave para que el texto blanco se lea: la foto tiene lomas oscuras arriba y
-     agua clara abajo, y sin esto el titulo se pierde. No es un degradado de lado:
-     ese tapaba la foto entera. */
-  .m-top::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.55) 0%,rgba(10,16,26,.30) 26%,rgba(10,16,26,.10) 52%,rgba(10,16,26,.34) 100%),linear-gradient(90deg,rgba(10,16,26,.72) 0%,rgba(10,16,26,.52) 28%,rgba(10,16,26,.16) 52%,transparent 72%)}
+  .m-top{position:relative;margin:0 -18px;padding:0 18px 26px;min-height:440px;background:url(home-portada.jpg) 52% 44%/cover}
+  /* Esta foto es del atardecer: el cielo de la izquierda ya es azul oscuro, asi que
+     el velo puede ser suave y el texto blanco se apoya en la foto sin taparla. Con la
+     foto de dia habia que poner 72% de velo del lado izquierdo y la imagen se apagaba. */
+  .m-top::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.34) 0%,rgba(10,16,26,.14) 26%,rgba(10,16,26,.04) 52%,rgba(10,16,26,.26) 100%),linear-gradient(90deg,rgba(10,16,26,.26) 0%,rgba(10,16,26,.08) 32%,transparent 58%)}
   /* Sobre la foto el texto va en blanco, no en el color de ink. */
   .m-top .m-logo{color:#fff}
   .m-top .m-tag{color:rgba(255,255,255,.9)}

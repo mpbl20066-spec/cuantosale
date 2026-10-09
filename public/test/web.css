@@ -25,7 +25,7 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 @media (min-width:768px){
   [data-pagina="home"] .scroll{padding:0 var(--gut) 40px;display:grid;grid-template-columns:1fr 1fr;column-gap:20px;align-content:start}
   [data-pagina="home"] .scroll>.m-top,[data-pagina="home"] .scroll>.m-sec,[data-pagina="home"] .scroll>.m-car{grid-column:1/-1}
-  [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 30px;min-height:470px;background-position:74% 52%}
+  [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 30px;min-height:470px;background-position:52% 50%}
   [data-pagina="home"] .m-hero h1{font-size:40px}
   [data-pagina="home"] .m-hero p{font-size:17px;max-width:520px}
   /* En escritorio las tarjetas crecen, pero siguen siendo dos columnas: el icono
