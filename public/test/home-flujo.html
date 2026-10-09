@@ -402,19 +402,44 @@
   .g-ben{list-style:none;margin:12px 0;padding:12px;border-radius:16px;background:var(--good-soft);display:grid;gap:9px}
   .g-ben li{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--ink)}
   .g-ben li span{flex:0 0 28px;height:28px;border-radius:8px;background:var(--surface);display:grid;place-items:center;color:var(--good)}
-  .ls-hero{position:relative;height:150px;margin:2px 0 0;border-radius:18px;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
-  .ls-badge{position:absolute;left:16px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--good);color:#fff;font-size:12.5px;font-weight:800}
-  .ls-h{margin:14px 0 4px;font-family:var(--fh);font-size:30px;font-weight:800;color:var(--ink)}
-  .ls-p{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink2);line-height:1.5}
-  .ls-card{display:flex;align-items:center;gap:12px;margin-bottom:6px;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
-  .ls-card__img{flex:0 0 78px;height:78px;border-radius:50%;background:url(home-ilha-bahia.jpg) 50% 60%/cover}
-  .ls-card b{display:block;font-size:15px;color:var(--ink)}
-  .ls-card small{display:block;font-size:11.5px;font-weight:600;color:var(--ink2);line-height:1.35}
-  .ls-card strong{display:block;margin-top:3px;font-family:var(--fh);font-size:24px;line-height:1.1;color:var(--ink)}
-  .ls-ref{margin:14px 0 0;text-align:center;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  /* Paso 5 "Tu viaje quedo guardado": siempre en azul noche, con colores propios (no dependen del tema). */
+  .ls{--ls-card:#1A2B4A;--ls-y:#F5C518;--ls-gris:#B0B8C4;--ls-gris2:#6A7A8A;color:#fff}
+  .ls-hero{position:relative;height:150px;margin:2px 0 0;border-radius:16px;background:#1A2B4A center/cover}
+  .ls-badge{position:absolute;left:14px;top:14px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;background:rgba(15,27,45,.8);color:#fff;font-size:13px;font-weight:600;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .ls-badge svg{color:#8EC5FF}
+  .ls-ok{display:flex;align-items:flex-start;gap:14px;margin:20px 0 18px}
+  .ls-ok__i{flex:0 0 auto;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#4CAF50;color:#fff}
+  .ls-h{margin:0 0 4px;font-family:var(--fh);font-size:26px;line-height:1.15;font-weight:800;color:#fff}
+  .ls-p{margin:0;font-size:14px;font-weight:500;color:rgba(255,255,255,.7);line-height:1.5}
+  .ls-card{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;margin:0 0 16px;padding:14px;border:0;border-radius:16px;background:var(--ls-card);color:#fff;text-align:left;font-family:var(--fb);cursor:pointer}
+  .ls-card:hover{background:#22375C}
+  .ls-card__img{flex:0 0 84px;height:84px;border-radius:12px;background:#0F1B2D center/cover}
+  .ls-card__t{flex:1;min-width:0}
+  .ls-card b{display:block;font-family:var(--fh);font-size:20px;color:#fff}
+  .ls-card small{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px;font-weight:500;color:var(--ls-gris);line-height:1.4}
+  .ls-card strong{display:block;margin-top:6px;font-family:var(--fh);font-size:26px;line-height:1.1;color:#fff}
+  .ls-card em{display:block;margin-top:6px;font-style:normal;font-size:12px;color:var(--ls-gris2);line-height:1.4}
+  .ls-card>svg{flex:0 0 auto;color:#fff}
+  .ls-cta{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;box-sizing:border-box;min-height:60px;padding:10px 18px;border:0;border-radius:12px;background:var(--ls-y);color:#0F1B2D;font-family:var(--fb);text-align:left;cursor:pointer}
+  .ls-cta span{display:block}
+  .ls-cta b{display:block;font-size:17px;font-weight:800}
+  .ls-cta small{display:block;margin-top:1px;font-size:13px;font-weight:500;opacity:.8}
+  .ls-sec{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;min-height:56px;margin-top:12px;border:1px solid rgba(255,255,255,.4);border-radius:12px;background:transparent;color:#fff;font-family:var(--fb);font-size:16px;font-weight:700;cursor:pointer}
+  .ls-cta:focus-visible,.ls-sec:focus-visible,.ls-card:focus-visible,.ls-acc:focus-visible{outline:3px solid var(--ls-y);outline-offset:2px}
+  .ls-accs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:24px}
+  .ls-acc{display:flex;flex-direction:column;align-items:flex-start;gap:12px;box-sizing:border-box;padding:16px;border:0;border-radius:12px;background:var(--ls-card);color:#fff;text-align:left;text-decoration:none;font-family:var(--fb);cursor:pointer}
+  .ls-acc:hover{background:#22375C}
+  .ls-acc__i{flex:0 0 auto;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff}
+  .ls-acc b{display:block;font-size:16px;font-weight:700}
+  .ls-acc small{display:block;margin-top:3px;font-size:13px;font-weight:500;color:var(--ls-gris);line-height:1.4}
+  .ls-ref{margin:20px 0 0;text-align:center;font-size:12px;font-weight:500;color:var(--ls-gris,var(--ink2))}
   .ls-ref b{font-family:ui-monospace,Consolas,monospace;color:var(--ink);letter-spacing:.03em}
-  .ls-ilu{display:block;width:100%;height:64px;margin-top:22px;color:var(--azul)}
-  .ls-foot{margin:4px 0 6px;text-align:center;font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:17px;line-height:1.3;color:var(--azul)}
+  .ls-cierre{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 6px}
+  .ls-ilu{flex:0 0 auto;width:150px;height:56px;color:var(--ls-y)}
+  .ls-foot{display:flex;align-items:center;gap:10px;margin:0;font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:19px;line-height:1.3;color:#fff;transform:rotate(-3deg)}
+  .ls-foot span{padding-bottom:4px;border-bottom:2px solid var(--ls-y)}
+  .ls-foot svg{flex:0 0 auto;color:var(--ls-y)}
+  @media (min-width:900px){.ls-accs{grid-template-columns:repeat(4,minmax(0,1fr))}.ls-hero{height:220px}.ls-h{font-size:32px}.ls-p{font-size:16px}.ls-card__img{flex-basis:120px;height:120px}.ls-card b{font-size:24px}.ls-card strong{font-size:28px}.ls-acc{flex-direction:row;align-items:center;padding:20px}.ls-ilu{width:240px}}
   .ah-list{gap:10px}
   .ah-row{align-items:flex-start;padding:14px}
   .ah-row .fin-ico{flex:0 0 52px;height:52px}
@@ -720,23 +745,13 @@
      en azul noche, con la foto del destino arriba. Los colores salen de los mismos
      tokens del tema, invertidos, asi que no es un tema nuevo ni una foto de fondo
      maquetada: es el mismo tema con la superficie al reves. */
-  .phone.es-oscuro{--bg:#0A101A;--surface:#141C28;--line:#26313F;--ink:#F2F6FB;--ink2:#9FACC0;background:var(--bg)}
+  .phone.es-oscuro{--bg:#0F1B2D;--surface:#1A2B4A;--line:#2C4468;--ink:#FFFFFF;--ink2:#B0B8C4;background:var(--bg)}
   .phone.es-oscuro .status{color:var(--ink)}
   .phone.es-oscuro .f-bar{background:var(--bg)}
   .phone.es-oscuro .f-logo{color:var(--ink)}
   .phone.es-oscuro .f-logo small{color:var(--ink2)}
   .phone.es-oscuro .f-scroll{background:var(--bg)}
   .phone.es-oscuro .f-back{color:var(--ink)}
-  .phone.es-oscuro .ls-badge{background:rgba(159,232,195,.14);color:#9FE8C3}
-  .phone.es-oscuro .ls-h{color:var(--ink)}
-  .phone.es-oscuro .ls-p{color:var(--ink2)}
-  .phone.es-oscuro .ls-card{background:var(--surface);border-color:var(--line)}
-  .phone.es-oscuro .ls-card small{color:var(--ink2)}
-  .phone.es-oscuro .ls-card strong{color:var(--ink)}
-  .phone.es-oscuro .ls-card b{color:var(--ink)}
-  .phone.es-oscuro .ls-ref{color:var(--ink2)}
-  .phone.es-oscuro .ls-foot{color:var(--ink2)}
-  .phone.es-oscuro .ls-ilu{color:var(--azul)}
   .phone.es-oscuro .g-btn{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
   .phone.es-oscuro .g-btn--main{background:var(--accent);color:var(--accent-ink);box-shadow:none}
   .phone.es-oscuro .g-p{color:var(--ink2)}
@@ -1179,19 +1194,27 @@
   }
   /* Paso 5: confirmacion. Con cuenta el viaje queda guardado; sin cuenta se dice la verdad: no se guardo. */
   function pantalla5() {
-    var d = datosFinal(), personas = personasTxt(), guardado = !!S.sesion;
-    return '<div class="ls-hero"><span class="ls-badge">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 18) + (guardado ? 'Tu viaje guardado' : 'Tu viaje está listo') + '</span></div>' +
-      '<h1 class="ls-h">¡Listo!</h1>' +
-      '<p class="ls-p">' + (guardado ? 'Tu viaje a ' + esc(DEST) + ' está guardado. Podés volver cuando quieras desde tu perfil.' : 'Tu presupuesto a ' + esc(DEST) + ' está armado. Si querés guardarlo para volver más tarde, creá una cuenta.') + '</p>' +
-      '<div class="ls-card"><div class="ls-card__img" aria-hidden="true"></div><div><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small><strong>' + f(d.total) + '</strong><small>Total estimado</small></div></div>' +
-      '<button type="button" class="g-btn g-btn--main" data-ir="6" data-evento="flujo_listo_ver_opciones">Ver opciones para reservar →</button>' +
+    var d = datosFinal(), personas = personasTxt(), guardado = !!S.sesion, foto = '../fotos/' + destKey + '.jpg';
+    var chev = ic('<path d="m9 5 7 7-7 7"/>', 22);
+    var acc = function (abre, ico, t, p) { return '<' + abre + ' class="ls-acc"><span class="ls-acc__i">' + ic(ico, 24) + '</span><span><b>' + t + '</b><small>' + p + '</small></span></' + (abre.indexOf('a ') === 0 ? 'a' : 'button') + '>'; };
+    return '<div class="ls"><div class="ls-hero" style="background-image:url(' + foto + ')"><span class="ls-badge">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 18) + (guardado ? 'Tu viaje guardado' : 'Tu viaje está listo') + '</span></div>' +
+      '<div class="ls-ok"><span class="ls-ok__i">' + ic('<path d="m5 12.500 4.500 4.500L19 7.500"/>', 24) + '</span><div><h1 class="ls-h">' + (guardado ? '¡Tu viaje quedó guardado!' : '¡Tu viaje está listo!') + '</h1>' +
+      '<p class="ls-p">' + (guardado ? 'Podés volver a verlo cuando quieras y seguir organizándolo.' : 'Tu presupuesto a ' + esc(DEST) + ' está armado. Si querés guardarlo para volver más tarde, creá una cuenta.') + '</p></div></div>' +
+      '<button type="button" class="ls-card" data-ir="4"><span class="ls-card__img" style="background-image:url(' + foto + ')" aria-hidden="true"></span><span class="ls-card__t"><b>' + esc(DEST) + '</b><small>' + ic('<rect x="3.500" y="5" width="17" height="15" rx="2"/><path d="M3.500 10h17M8 3v4M16 3v4"/>', 14) + fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + personas + '</small><small>Total estimado</small><strong>' + f(d.total) + '</strong><em>Los precios pueden cambiar y las reservas se realizan con cada proveedor.</em></span>' + chev + '</button>' +
+      '<button type="button" class="ls-cta" data-ir="6" data-evento="flujo_listo_ver_opciones">' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 24) + '<span><b>Continuar organizando mi viaje</b><small>Ver vuelos, alojamiento y experiencias</small></span></button>' +
       (guardado
-        ? '<button type="button" class="g-btn" data-guardado="1">' + ic('<rect x="4" y="7" width="16" height="13" rx="2.500"/><path d="M9 7V5.500A1.500 1.500 0 0 1 10.500 4h3A1.500 1.500 0 0 1 15 5.500V7"/>', 20) + 'Ver mi viaje guardado</button>'
-        : '<button type="button" class="g-btn" data-guardar-ahora="1">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 20) + 'Guardar mi viaje</button>') +
+        ? '<button type="button" class="ls-sec" data-guardado="1">' + ic('<rect x="4" y="7" width="16" height="13" rx="2.500"/><path d="M9 7V5.500A1.500 1.500 0 0 1 10.500 4h3A1.500 1.500 0 0 1 15 5.500V7"/>', 22) + 'Ver mi viaje guardado</button>'
+        : '<button type="button" class="ls-sec" data-guardar-ahora="1">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 22) + 'Guardar mi viaje</button>') +
       (S.avisoGuardado ? '<p class="g-p g-p--s">' + esc(S.avisoGuardado) + '</p>' : '') +
+      '<div class="ls-accs">' +
+      acc('button type="button" data-ir="1"', '<path d="M2.500 19h19M3 13l3-5 4 1 5-5 2 1-3 5 4 1 2 2-6 1-4 3-2-1 1-3-4-1z"/>', 'Vuelos', 'Encontrá las mejores opciones y horarios.') +
+      acc('button type="button" data-ir="2"', '<path d="M3 20V6M3 12h18v8M21 12V9a2 2 0 0 0-2-2h-7v5"/><circle cx="7.500" cy="9.500" r="1.800"/>', 'Alojamiento', 'Compará precios y ubicación.') +
+      acc('button type="button" data-ir="3"', '<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><path d="M12 12.500s-2.500-1.600-2.500-3.200a1.400 1.400 0 0 1 2.500-.8 1.400 1.400 0 0 1 2.500.8c0 1.600-2.500 3.200-2.500 3.200z"/>', 'Tours y traslados', 'Viví experiencias únicas y movete sin complicaciones.') +
+      acc('a href="home-guia.html?destino=' + destKey + '" data-evento="flujo_listo_guia"', '<path d="M4 4.500A2.500 2.500 0 0 1 6.500 2H20v16H6.500A2.500 2.500 0 0 0 4 20.500z"/><path d="M4 20.500A2.500 2.500 0 0 1 6.500 18H20v4H6.500A2.500 2.500 0 0 1 4 20.500z"/>', 'Guías de viaje', 'Todo lo que necesitás saber para tu destino.') +
+      '</div>' +
       '<p class="ls-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>' +
-      '<svg class="ls-ilu" viewBox="0 0 320 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="76" cy="20" r="8"/><path d="M76 5v3M76 32v3M61 20h3M88 20h3M65 9l2 2M85 29l2 2M65 31l2-2M85 11l2-2"/><path d="M8 52c20-8 40-8 60 0s40 8 60 0 40-8 60 0 40 8 60 0 24-5 32-3"/><path d="M262 50c0-12 0-20-2-30M260 20c-6-6-14-6-20-2M260 20c6-6 14-5 20 0M260 22c-3-8-9-10-15-9M260 22c4-7 10-9 15-7"/></svg>' +
-      '<p class="ls-foot">El próximo destino también se planifica.</p>';
+      '<div class="ls-cierre"><svg class="ls-ilu" viewBox="0 0 240 56" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 48c30 0 40-30 80-30s40 20 80 0" stroke-dasharray="3 6"/><path d="m186 14 30-6-8 10 18 4-6 6-22-2-6 10-4-2 3-12-9-3z" fill="currentColor"/></svg>' +
+      '<p class="ls-foot"><span>¡El mundo te espera!</span>' + ic('<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/>', 28) + '</p></div></div>';
   }
   /* Paso 6: Reservá tu viaje. Cada fila lleva a reservar esa parte y dice si se hace fuera o dentro de CuántoSale. */
   function pantalla6() {

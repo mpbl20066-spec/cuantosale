@@ -692,3 +692,9 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 :root[data-theme="light"]{--good:#1F6FB5;--good-soft:#E3F2FD}
 :root[data-theme="night"]{--good:#74B7F5;--good-soft:#14304F}
 [data-theme="night"] .fin-ico--green{background:rgba(116,183,245,.16);color:#74B7F5}
+
+/* Paso 5 ("Tu viaje quedo guardado"): en escritorio, 1200px centrados como el resto de la web */
+@media (min-width:1024px){
+  [data-pagina="flujo"] .f-scroll[data-paso="5"]{max-width:1200px;margin:0 auto;width:100%}
+  [data-pagina="flujo"] .f-scroll[data-paso="5"]>*{max-width:none;margin-left:0;margin-right:0}
+}
