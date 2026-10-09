@@ -200,6 +200,7 @@
     raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? vistaViajes() : v === 'editar' ? vistaEditar() : menu()) + '</div>';
   }
   function alClic(e) {
+    if (e.target.closest('.cp-fondo')) { cerrar(); return; }   /* tocar fuera del panel lo cierra (el fondo no es un boton) */
     var t = e.target.closest('button,a'); if (!t) return;
     if (t.hasAttribute('data-cerrar')) { cerrar(); return; }
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }

@@ -21,35 +21,75 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 @media (min-width:768px){.phone{max-width:var(--w-tab)!important}}
 @media (min-width:1100px){.phone{max-width:var(--w-desk)!important}}
 
-/* ============ Home: dos caminos ============ */
+/* ============ Home: dos caminos ============
+   Un solo bloque para toda la home (antes eran dos, con reglas repetidas que se pisaban).
+   Causa raiz del contenido cortado en desktop: .scroll es una grilla y el carrusel (overflow) dejaba que su fila se
+   comprimiera a 0 de alto, asi que la pagina no scrolleaba y las fotos quedaban cortadas. grid-auto-rows:max-content lo evita.
+   Celular  (< 768):  una columna; las dos tarjetas apiladas; navegacion inferior.
+   Tablet   (768+):   tarjetas lado a lado; navegacion superior; carrusel con scroll.
+   Desktop  (1024+):  portada baja, tarjetas amplias y las cinco fotos de destinos en una fila. */
+[data-pagina="home"] .scroll{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+/* portada: velo oscuro parejo detras del texto (blanco), que sube al fondo de la pagina */
+[data-pagina="home"] .m-top{min-height:230px;background-position:50% 55%}
+[data-pagina="home"] .m-top::before{background:linear-gradient(180deg,rgba(10,16,26,.62) 0%,rgba(10,16,26,.34) 52%,rgba(10,16,26,.12) 78%,var(--bg) 100%)}
+[data-pagina="home"] .m-hero h1,[data-pagina="home"] .m-hero p{text-shadow:0 2px 14px rgba(10,16,26,.5)}
+/* tarjetas: icono a la izquierda; texto y accion a la derecha. En celular van apiladas. */
+[data-pagina="home"] .m-cards{grid-template-columns:minmax(0,1fr);gap:12px}
+[data-pagina="home"] .m-card{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i t" "i c";column-gap:14px;row-gap:10px;align-items:center;padding:16px}
+[data-pagina="home"] .m-card__icon{grid-area:i;align-self:start}
+[data-pagina="home"] .m-card__txt{grid-area:t}
+[data-pagina="home"] .m-card__txt b{font-size:17px}
+[data-pagina="home"] .m-card__txt small{font-size:13.5px}
+[data-pagina="home"] .m-card__cta{grid-area:c;justify-self:start;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:12px;border:2px solid var(--ink);background:transparent;color:var(--ink);font-size:14px;font-weight:800}
+[data-pagina="home"] .m-card--main .m-card__cta{background:var(--m-main);border-color:var(--m-main);color:var(--m-main-ink)}
+[data-pagina="home"] .m-card:hover .m-card__cta{filter:brightness(.96)}
+/* nombre del destino siempre legible sobre la foto */
+[data-pagina="home"] .m-dest::after{background:linear-gradient(180deg,rgba(10,16,26,0) 38%,rgba(10,16,26,.82))}
+[data-pagina="home"] .m-dest span{font-size:14.5px}
+[data-pagina="home"] .m-auto{grid-column:1/-1;padding:18px 20px}
+/* sobre la foto oscura el menu y el pin del logo van en blanco (antes eran oscuros y casi no se veian) */
+[data-pagina="home"] .m-top .m-menu span{background:#fff}
+[data-pagina="home"] .m-top .m-logo svg path:first-child{fill:#fff}
+
 @media (min-width:768px){
-  [data-pagina="home"] .scroll{padding:0 var(--gut) 48px;display:grid;grid-template-columns:1fr 1fr;column-gap:24px;align-content:start}
-  [data-pagina="home"] .scroll>.m-top,[data-pagina="home"] .scroll>.m-cards,[data-pagina="home"] .scroll>.m-sec,[data-pagina="home"] .scroll>.m-car{grid-column:1/-1}
-  /* La portada es baja y ancha: las dos acciones van debajo, no encima. */
-  [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 32px;min-height:330px;background-position:50% 42%}
-  [data-pagina="home"] .m-hero{margin-top:34px}
-  [data-pagina="home"] .m-hero h1{font-size:44px}
+  [data-pagina="home"] .scroll{padding-left:var(--gut);padding-right:var(--gut);padding-bottom:48px}
+  [data-pagina="home"] .m-top{margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 32px;min-height:270px}
+  [data-pagina="home"] .m-top .m-head,[data-pagina="home"] .m-menu{display:none}   /* el logo ya esta en la barra de arriba y el menu duplica los accesos */
+  [data-pagina="home"] .m-hero{margin-top:48px}
+  [data-pagina="home"] .m-hero h1{font-size:clamp(36px,4.4vw,44px)}
   [data-pagina="home"] .m-hero p{font-size:18px;max-width:560px}
-  /* En escritorio el logo ya esta en la barra de arriba, asi que sobre la foto
-     sobra y estorba. */
-  [data-pagina="home"] .m-top .m-head{display:none}
-  /* Las tarjetas blancas, con aire, y centradas: en un contenedor de 1400px pegadas a
-     los bordes se ven perdidas. */
-  [data-pagina="home"] .m-cards{gap:22px;max-width:940px;margin:0 auto 34px}
-  [data-pagina="home"] .m-card{padding:20px 18px;gap:14px}
+  [data-pagina="home"] .m-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:28px 0 30px}
+  [data-pagina="home"] .m-card{padding:22px;column-gap:16px}
   [data-pagina="home"] .m-card__icon{width:52px;height:52px;border-radius:14px}
-  [data-pagina="home"] .m-card__icon svg{width:26px;height:26px}
   [data-pagina="home"] .m-card__txt b{font-size:19px}
-  [data-pagina="home"] .m-card__txt small{font-size:14px}
-  [data-pagina="home"] .m-sec{margin:34px 0 16px}
+  [data-pagina="home"] .m-card__txt small{font-size:14.5px}
+  [data-pagina="home"] .m-sec{margin:6px 0 16px}
   [data-pagina="home"] .m-sec h2{font-size:22px}
-  [data-pagina="home"] .m-car{gap:20px}
-  [data-pagina="home"] .m-dest{flex-basis:216px;height:250px}
+  [data-pagina="home"] .m-car{gap:18px;margin:0 calc(var(--gut) * -1);padding:0 var(--gut) 6px}
+  [data-pagina="home"] .m-dest{flex-basis:200px;height:240px}
+  [data-pagina="home"] .m-dest span{font-size:16px;left:14px;right:14px;bottom:14px}
+  /* navegacion superior: logo a la izquierda, accesos a la derecha */
+  [data-pagina="home"] .tabs{order:-1;justify-content:flex-end;gap:4px;padding:8px var(--gut);border-top:0;border-bottom:1px solid var(--line)}
+  [data-pagina="home"] .tabs__logo{display:flex;margin-right:auto}
+  [data-pagina="home"] .tab{flex:0 0 auto;flex-direction:row;gap:8px;padding:10px 16px;font-size:14px}
+  [data-pagina="home"] .tab svg{width:20px;height:20px}
+  [data-pagina="home"] .tab.is-on::after{left:16px;right:16px;bottom:2px;width:auto}
 }
-@media (min-width:1100px){
-  [data-pagina="home"] .m-hero{margin-top:36px}
-  [data-pagina="home"] .m-hero h1{font-size:50px}
-  [data-pagina="home"] .m-dest{flex-basis:calc((100% - 72px) / 5)}
+@media (min-width:1024px){
+  [data-pagina="home"] .scroll{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+  [data-pagina="home"] .scroll>.m-top,[data-pagina="home"] .scroll>.m-cards,[data-pagina="home"] .scroll>.m-sec,[data-pagina="home"] .scroll>.m-car{grid-column:1/-1}
+  [data-pagina="home"] .m-top{display:flex;flex-direction:column;justify-content:flex-end;min-height:clamp(210px,30vh,300px);padding-bottom:clamp(22px,4vh,40px);background-position:50% 58%}
+  [data-pagina="home"] .m-hero{margin-top:0}
+  [data-pagina="home"] .m-hero h1{font-size:clamp(38px,3.4vw,50px)}
+  [data-pagina="home"] .m-cards{gap:24px;margin:clamp(20px,3.5vh,32px) 0}
+  [data-pagina="home"] .m-card{padding:clamp(20px,2vw,28px);column-gap:18px}
+  [data-pagina="home"] .m-card__icon{width:58px;height:58px}
+  [data-pagina="home"] .m-card__txt b{font-size:clamp(19px,1.6vw,22px)}
+  [data-pagina="home"] .m-card__txt small{font-size:15px}
+  /* las cinco fotos en una fila, todas del mismo tamano y sin scroll horizontal */
+  [data-pagina="home"] .m-car{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;margin:0;padding:0;overflow:visible}
+  [data-pagina="home"] .m-dest{flex:none;height:auto;aspect-ratio:5/6}
+  [data-pagina="home"] .m-dest span{font-size:clamp(15px,1.2vw,18px)}
 }
 
 /* ============ Busqueda ("¿A donde queres ir?") ============ */
@@ -337,37 +377,6 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 /* Las dos tarjetas de la portada son blancas y del mismo peso. La de presupuesto ya
      no se pinta: se distingue por el distintivo ambar del icono y por la etiqueta, que
      es lo que hace que se lea como una accion mas y no como un cartel. */
-/* La opcion de auto ocupa el ancho de las dos tarjetas, que en escritorio van
-   una al lado de la otra. */
-/* La opcion de auto ocupa el ancho de las dos tarjetas, que en escritorio van
-   una al lado de la otra. */
-[data-pagina="home"] .m-auto{grid-column:1/-1;padding:18px 20px}
-@media (min-width:768px){
-  [data-pagina="home"] .m-auto__i{flex-basis:52px;height:52px}
-  [data-pagina="home"] .m-auto__t b{font-size:17px}
-  [data-pagina="home"] .m-auto__t small{font-size:14px}
-  [data-pagina="home"] .m-auto__c{flex-basis:20px}
-}
-/* Nombre del destino siempre legible sobre la foto, con degradado oscuro abajo. */
-[data-pagina="home"] .m-dest::after{background:linear-gradient(180deg,rgba(10,16,26,0) 38%,rgba(10,16,26,.82))}
-[data-pagina="home"] .m-dest span{font-size:14.5px}
-@media (min-width:768px){
-  /* portada: degradado parejo detras del titulo y la imagen a todo el ancho del contenedor */
-  /* La foto de portada es 16:9: en pantallas anchas el recorte es horizontal y hay que
-     elegir la franja de la bahia, no el cielo. */
-  [data-pagina="home"] .m-top::before{background:linear-gradient(90deg,var(--bg) 0%,color-mix(in srgb,var(--bg) 82%,transparent) 26%,color-mix(in srgb,var(--bg) 34%,transparent) 62%,transparent 100%),linear-gradient(180deg,color-mix(in srgb,var(--bg) 40%,transparent) 0%,transparent 30%,transparent 66%,var(--bg) 100%)}
-  [data-pagina="home"] .m-top{background-position:60% 58%}
-  [data-pagina="home"] .m-menu{display:none}
-  [data-pagina="home"] .m-dest span{font-size:16px;left:14px;right:14px;bottom:14px}
-  /* en tablet y desktop la navegacion va arriba, no como barra inferior de celular:
-     logo a la izquierda, enlaces a la derecha, como en cualquier web. */
-  [data-pagina="home"] .tabs{order:-1;justify-content:space-between;gap:4px;padding:10px var(--gut);border-top:0;border-bottom:1px solid var(--line)}
-  [data-pagina="home"] .tabs__logo{display:flex}
-  [data-pagina="home"] .tab{flex:0 0 auto;flex-direction:row;gap:8px;padding:10px 16px;font-size:14px}
-  [data-pagina="home"] .tab svg{width:20px;height:20px}
-  [data-pagina="home"] .tab.is-on::after{left:16px;right:16px;bottom:2px;width:auto}
-}
-
 /* ============ Escala desktop (revision a 100 % de zoom) ============
    Diagnostico: no hay zoom ni transform:scale. El problema era que (1) el contenedor de desktop era una columna de 1160px y
    varias pantallas la achicaban mas (560, 640, 720px), y (2) las medidas verticales eran de celular: la cabecera del
