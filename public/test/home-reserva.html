@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="reserva">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reservá tu viaje · CuántoSale</title>
+<script src="tema.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Paso 8: opciones de reserva. Cada fila es una parte del viaje y dice por que canal
+     se reserva: el vuelo y el alojamiento afuera (Google Flights y Booking) y los
+     traslados y los tours adentro de CuantoSale. El desglose sale de viaje-datos.js,
+     el mismo modelo del presupuesto, asi que los precios coinciden. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button{font-family:var(--fb)}
+  .r-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+  .r-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .r-bar__m{flex:1;text-align:center;min-width:0}
+  .r-bar__m b{display:block;font-size:13px;font-weight:700;color:var(--ink2)}
+  .r-close{width:40px;height:40px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .r-main{flex:1;overflow-y:auto;padding:4px 18px 16px;scrollbar-width:none}
+  .r-main::-webkit-scrollbar{display:none}
+  .r-tit{margin:6px 0 2px;font-family:var(--fh);font-size:24px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .r-sub{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.45}
+  .r-lista{display:flex;flex-direction:column;gap:10px}
+  .r-fila{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;text-decoration:none;cursor:pointer}
+  .r-fila:hover{border-color:var(--ink2)}
+  .r-fila:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .r-fila.is-off{opacity:.55}
+  .r-fila__i{flex:0 0 44px;height:44px;border-radius:50%;background:var(--cel-soft);color:var(--ink);display:grid;place-items:center}
+  .r-fila__t{flex:1;min-width:0}
+  .r-fila__t b{display:block;font-size:15.5px;line-height:1.2}
+  .r-fila__t small{display:block;margin-top:3px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .r-fila__p{flex:0 0 auto;text-align:right}
+  .r-fila__p b{display:block;font-family:var(--fh);font-size:16.5px;font-weight:800;line-height:1.1}
+  .r-fila__p small{display:block;margin-top:2px;font-size:10px;font-weight:700;color:var(--ink2)}
+  /* Etiqueta del canal: afuera o adentro de CuantoSale. */
+  .r-can{flex:0 0 auto;margin-top:5px;display:inline-block;padding:3px 8px;border-radius:99px;font-size:10.5px;font-weight:800}
+  .r-can--fuera{background:#FDF0D5;color:#8A6100}
+  .r-can--cs{background:var(--good-soft);color:var(--good)}
+  .r-chev{flex:0 0 16px;color:var(--ink2)}
+  .r-wa{display:flex;align-items:center;gap:11px;margin-top:14px;padding:13px;border:1px dashed var(--line);border-radius:16px;background:var(--surface);color:var(--ink)}
+  .r-wa__t{flex:1;min-width:0}
+  .r-wa__t b{display:block;font-size:14px}
+  .r-wa__t small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:var(--ink2)}
+  .r-wa__b{flex:0 0 auto;padding:9px 13px;border:1.5px solid var(--line);border-radius:99px;background:transparent;color:var(--ink);font-size:12.5px;font-weight:800;cursor:pointer}
+  .r-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
+  .r-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
+  .r-btn:disabled{opacity:.5;cursor:default}
+  .r-nota{margin:9px 0 0;font-size:11.5px;font-weight:600;color:var(--ink2);text-align:center;line-height:1.45}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="r-bar">
+    <button type="button" class="r-back" id="atras" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <div class="r-bar__m"><b id="mini">Reserva</b></div>
+    <button type="button" class="r-close" id="cerrar" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="r-main" id="main"></div>
+  <div class="r-foot" id="foot"></div>
+</div>
+<script src="viaje-datos.js"></script>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search), debug = /[?&]debug=1/.test(location.search);
+  var C = window.CS_Viaje, $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var ic = function (p, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+  var D = C.defaults(qs), NOM = C.Nombres[D.destino] || 'Tu destino';
+  var V = C.armalo(D.ida, D.vuelta, D.pax, D.extras);
+  var WHATSAPP = '5511920836306';
+  /* Cada parte del viaje, de que canal sale y cuanto cuesta. Los importes salen de
+     las mismas partidas del presupuesto, partidas por partida. */
+  var sumas = {};
+  C.desglose(V).forEach(function (d) { sumas[d.nom] = d.suma; });
+  var PARTS = [
+    { id: 'vuelo', nom: 'Vuelo', canal: 'Continuar en Google Flights', fuera: true, ico: 'avion', suma: sumas['Vuelo + traslados'], url: function () { return 'https://www.google.com/travel/flights?' + new URLSearchParams({ q: 'Flights from MVD to ' + NOM + ' on ' + V.ida + ' through ' + V.vuelta }).toString(); } },
+    { id: 'hotel', nom: 'Alojamiento', canal: 'Continuar en Booking', fuera: true, ico: 'cama', suma: sumas['Alojamiento'], url: function () { return 'https://www.booking.com/searchresults.html?' + new URLSearchParams({ ss: NOM + ' ' + NOM, checkin: V.ida, checkout: V.vuelta, group_adults: V.pax, no_rooms: 1 }).toString(); } },
+    { id: 'traslados', nom: 'Traslados', canal: 'Reservar en CuántoSale', fuera: false, ico: 'carro', suma: Math.round(sumas['Vuelo + traslados'] * 0.16), url: function () { return '#'; } },
+    { id: 'tours', nom: 'Tours y actividades', canal: V.extras ? 'Reservar en CuántoSale' : 'Agregar en CuántoSale', fuera: false, ico: 'playa', suma: sumas['Extras'], url: function () { return 'home-flujo.html?' + new URLSearchParams({ destino: D.destino, pax: V.pax, ida: V.ida, vuelta: V.vuelta, modo: D.medio, paso: 3, fuente: 'reserva_tours' }).toString(); } }
+  ];
+  var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: D.destino, personas: V.pax }, p || {})); };
+
+  function pintar() {
+    $('main').innerHTML = '<h1 class="r-tit">Reservá tu viaje</h1>' +
+      '<p class="r-sub">Elegí qué querés reservar y en qué canal.<br>Tu viaje a ' + esc(NOM) + ': ' + C.fdc(V.ida) + ' – ' + C.fdc(V.vuelta) + '.</p>' +
+      '<div class="r-lista">' + PARTS.map(function (p) {
+        return '<a class="r-fila" href="' + p.url() + '" data-part="' + p.id + '" data-canal="' + (p.fuera ? 'fuera' : 'cs') + '" data-evento="reserva_parte" data-parte="' + p.id + '" data-evento_canal="' + (p.fuera ? 'externo' : 'propio') + '">' +
+          '<span class="r-fila__i">' + ic(C.ICONOS[p.ico], 22) + '</span>' +
+          '<span class="r-fila__t"><b>' + esc(p.nom) + '</b><small>' + esc(p.canal) + '</small>' +
+          '<span class="r-can r-can--' + (p.fuera ? 'fuera' : 'cs') + '">' + (p.fuera ? 'Fuera de CuántoSale' : 'Dentro de CuántoSale') + '</span></span>' +
+          '<span class="r-fila__p"><b>' + C.money(p.suma) + '</b><small>total</small></span>' +
+          '<svg class="r-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></a>';
+      }).join('') + '</div>' +
+      '<div class="r-wa"><span class="r-wa__t"><b>¿Necesitás ayuda?</b><small>Hablá con un asesor por WhatsApp.</small></span>' +
+      '<button type="button" class="r-wa__b" data-asesor="1">Contactar asesor ›</button></div>';
+    $('foot').innerHTML = '<button type="button" class="r-btn" data-confirmar="1" data-evento="reserva_confirmar_pagar">Confirmar y pagar →</button>' +
+      '<p class="r-nota">El vuelo y el alojamiento se reservan en sus sitios; CuántoSale te lleva con el contexto del viaje.</p>';
+  }
+  pintar();
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-asesor],[data-confirmar],[id="atras"],[id="cerrar"]'); if (!t) return;
+    if (t.id === 'atras') { location.href = 'home-costo.html?' + location.search.replace('home-reserva.html?', '') ; return; }
+    if (t.id === 'cerrar') { location.href = 'home-dos-caminos.html' + (debug ? '?debug=1' : ''); return; }
+    if (t.dataset.asesor) { window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola! Necesito ayuda para reservar mi viaje a ' + NOM + '.'), '_blank', 'noopener'); return; }
+    if (t.dataset.confirmar) {
+      /* El boton va al flujo, que es donde ya se coordinan disponibilidad y pago. */
+      track('reserva_confirmar');
+      location.href = 'home-flujo.html?' + new URLSearchParams({ destino: D.destino, pax: V.pax, ida: V.ida, vuelta: V.vuelta, modo: D.medio, paso: 6, fuente: 'reserva_confirmar' }).toString() + (debug ? '&debug=1' : '');
+    }
+  });
+})();
+</script>
+<script src="cuenta.js"></script>
+</body>
+</html>

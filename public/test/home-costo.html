@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="costo">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu presupuesto · CuántoSale</title>
+<script src="tema.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Paso 7: el presupuesto. Arriba el total destacado y por persona, despues el
+     desglose en cuatro lineas y el aviso de que se puede gastar menos. Los importes
+     salen de viaje-datos.js, el mismo modelo que usa el detalle del destino, para
+     que las dos pantallas no muestren precios distintos. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button{font-family:var(--fb)}
+  .p-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+  .p-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .p-bar__m{flex:1;text-align:center;min-width:0}
+  .p-bar__m b{display:block;font-size:13px;font-weight:700;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .p-share{border:0;background:transparent;color:var(--ink);width:40px;height:40px;display:grid;place-items:center;cursor:pointer}
+  .p-main{flex:1;overflow-y:auto;padding:4px 18px 16px;scrollbar-width:none}
+  .p-main::-webkit-scrollbar{display:none}
+  .p-tit{margin:6px 0 2px;font-family:var(--fh);font-size:24px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .p-meta{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2)}
+  /* El total: la cifra grande es lo primero que se ve. */
+  .p-total{padding:18px;border-radius:20px;background:var(--good-soft);color:var(--ink)}
+  .p-total small{display:block;font-size:12.5px;font-weight:700;color:var(--ink2)}
+  .p-total b{display:block;margin-top:3px;font-family:var(--fh);font-size:38px;font-weight:800;line-height:1.05}
+  .p-total span{display:block;margin-top:5px;font-size:13.5px;font-weight:700;color:var(--ink2)}
+  .p-h2{margin:20px 0 8px;font-family:var(--fh);font-size:17px;font-weight:800;color:var(--ink)}
+  .p-desg{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+  .p-desg li{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line)}
+  .p-desg li:last-child{border-bottom:0}
+  .p-desg svg{flex:0 0 22px;color:#1F6FB5}
+  .p-desg span{flex:1;min-width:0;font-size:14.5px;font-weight:600;color:var(--ink)}
+  .p-desg b{font-family:var(--fh);font-size:16px;font-weight:800}
+  .p-desg tfoot{background:var(--bg)}
+  .p-fila-total{display:flex;align-items:center;gap:12px;padding:14px;border-top:1px solid var(--line);background:var(--cel-soft)}
+  .p-fila-total span{flex:1;font-size:15px;font-weight:800;color:var(--ink)}
+  .p-fila-total b{font-family:var(--fh);font-size:19px;font-weight:800}
+  /* Aviso de que se puede gastar menos, como en la maqueta. */
+  .p-menos{display:flex;gap:12px;padding:14px;border:1.5px solid var(--good);border-radius:16px;background:var(--good-soft);color:var(--ink)}
+  .p-menos__i{flex:0 0 34px;color:var(--good)}
+  .p-menos__t{flex:1;min-width:0}
+  .p-menos__t b{display:block;font-size:15px}
+  .p-menos__t small{display:block;margin-top:3px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.4}
+  .p-menos__b{display:block;width:100%;margin-top:10px;padding:11px;border:1.5px solid var(--good);border-radius:12px;background:transparent;color:var(--good);font-size:13.5px;font-weight:800;cursor:pointer}
+  .p-pie{margin:12px 0 0;font-size:11.5px;font-weight:600;color:var(--ink2);text-align:center;line-height:1.45}
+  .p-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
+  .p-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;text-decoration:none;cursor:pointer}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="p-bar">
+    <button type="button" class="p-back" id="atras" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <div class="p-bar__m"><b>Presupuesto</b></div>
+    <button type="button" class="p-share" aria-label="Compartir"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.4 10.8 7.2-4.2M8.4 13.2l7.2 4.2"/></svg></button>
+  </div>
+  <div class="p-main" id="main"></div>
+  <div class="p-foot" id="foot"></div>
+</div>
+<script src="viaje-datos.js"></script>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search), debug = /[?&]debug=1/.test(location.search);
+  var C = window.CS_Viaje, $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var ic = function (p, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+  var V = C.armalo(C.defaults(qs).ida, C.defaults(qs).vuelta, C.defaults(qs).pax, C.defaults(qs).extras);
+  var D = C.defaults(qs), NOM = C.Nombres[D.destino] || 'Tu destino';
+  var aReserva = 'home-reserva.html?' + new URLSearchParams({ destino: D.destino, pax: V.pax, ida: V.ida, vuelta: V.vuelta, medio: D.medio, extras: V.extras ? '1' : '' }).toString();
+  var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: D.destino, personas: V.pax, total: Math.round(V.total) }, p || {})); };
+
+  $('main').innerHTML = '<h1 class="p-tit">Tu viaje a ' + esc(NOM) + '</h1>' +
+    '<p class="p-meta">' + C.fdc(V.ida) + ' – ' + C.fdc(V.vuelta) + ' · ' + V.pax + (V.pax === 1 ? ' persona' : ' personas') + '</p>' +
+    '<div class="p-total"><small>Costo estimado total</small><b>' + C.money(V.total) + '</b><span>' + C.money(V.porPersona) + ' por persona</span></div>' +
+    '<h2 class="p-h2">Desglose del viaje</h2>' +
+    '<ul class="p-desg">' + C.desglose(V).map(function (d) {
+      return '<li>' + ic(C.ICONOS[d.ico]) + '<span>' + esc(d.nom) + '</span><b>' + C.money(d.suma) + '</b></li>';
+    }).join('') +
+    '<li class="p-fila-total"><span>Total estimado</span><b>' + C.money(V.total) + '</b></li></ul>' +
+    '<div class="p-menos"><span class="p-menos__i">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 34) + '</span>' +
+    '<span class="p-menos__t"><b>¿Querés gastar menos?</b><small>Compará otras fechas, alojamientos o formas de llegar y descubrí cuánto podés ahorrar.</small>' +
+    '<button type="button" class="p-menos__b" data-menos="1" data-evento="presupuesto_gastar_menos">Buscar opciones más económicas →</button></span></div>' +
+    '<p class="p-pie">Estimación del modelo de costos de CuántoSale. Los precios reales se confirman al reservar.</p>';
+  $('foot').innerHTML = '<a class="p-btn" href="' + aReserva + '" data-evento="presupuesto_ver_opciones">Reservá tu viaje →</a>';
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-menos]'); if (!t) return;
+    /* "Gastar menos" va al resultado con las opciones ya ordenadas por precio: es
+       donde la persona puede comparar de verdad. */
+    track('presupuesto_gastar_menos');
+    location.href = 'home-resultado.html?' + new URLSearchParams({ destino: D.destino, pax: V.pax, ida: V.ida, vuelta: V.vuelta, medio: D.medio, ordenar: 'precio', fuente: 'presupuesto_menos' }).toString();
+  });
+  track('presupuesto_vista');
+})();
+</script>
+<script src="cuenta.js"></script>
+</body>
+</html>

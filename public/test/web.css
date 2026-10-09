@@ -183,7 +183,7 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="detalle"] .t-main{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);column-gap:34px;align-content:start;padding:0 var(--gut) 20px}
   [data-pagina="detalle"] .t-hero{grid-column:1;grid-row:1/span 3;position:sticky;top:56px;height:min(460px,60vh);border-radius:24px}
   [data-pagina="detalle"] .t-hero__t{left:20px;right:20px;bottom:16px}
-  [data-pagina="detalle"] .t-hero__t b{font-size:34px}
+  [data-pagina="detalle"] .t-hero__t h1{font-size:34px}
   [data-pagina="detalle"] .t-hero__t small{font-size:15px}
   [data-pagina="detalle"] .t-tabs{grid-column:2;position:static;background:none;padding:0 0 4px}
   [data-pagina="detalle"] .t-tab{font-size:15px;padding:12px 16px}
@@ -197,6 +197,39 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="detalle"] .t-foot{padding:12px var(--gut) 26px}
   [data-pagina="detalle"] .t-btn{font-size:15.5px;padding:17px 18px}
   [data-pagina="detalle"] .t-pie{font-size:12.5px}
+}
+
+/* ============ Presupuesto y opciones de reserva (pasos 7 y 8) ============ */
+@media (min-width:768px){
+  [data-pagina="costo"] .p-bar,[data-pagina="reserva"] .r-bar{padding:8px var(--gut) 0;position:absolute;top:0;left:0;right:0;z-index:3}
+  [data-pagina="costo"] .phone,[data-pagina="reserva"] .phone{justify-content:center;padding-top:56px;box-sizing:border-box}
+  [data-pagina="costo"] .p-main,[data-pagina="reserva"] .r-main{flex:0 1 auto;min-height:0;padding:10px var(--gut) 8px;width:100%;box-sizing:border-box;margin:0 auto;max-width:900px}
+  [data-pagina="costo"] .p-foot,[data-pagina="reserva"] .r-foot{width:100%;box-sizing:border-box;margin:0 auto;max-width:900px;padding:6px var(--gut) 28px}
+  [data-pagina="costo"] .p-tit,[data-pagina="reserva"] .r-tit{font-size:clamp(30px,1.3vw + 23px,38px)}
+  [data-pagina="costo"] .p-meta,[data-pagina="reserva"] .r-sub{font-size:16px}
+  /* El total y el desglose van en dos columnas: la cifra grande a la izquierda, las
+     partidas a la derecha. En una sola columna el total queda aislado arriba. */
+  [data-pagina="costo"] .p-main{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);column-gap:28px;align-content:center;grid-template-rows:auto}
+  [data-pagina="costo"] .p-tit,[data-pagina="costo"] .p-meta{grid-column:1/-1}
+  [data-pagina="costo"] .p-total{grid-column:1;grid-row:3/span 3;align-self:start;padding:22px}
+  [data-pagina="costo"] .p-total b{font-size:clamp(40px,2vw + 28px,54px)}
+  [data-pagina="costo"] .p-h2{grid-column:2;grid-row:3;margin-top:0}
+  [data-pagina="costo"] .p-desg{grid-column:2;grid-row:4}
+  [data-pagina="costo"] .p-menos,[data-pagina="costo"] .p-pie{grid-column:1/-1}
+  [data-pagina="costo"] .p-h2{font-size:19px}
+  [data-pagina="costo"] .p-desg li{padding:15px 16px}
+  [data-pagina="costo"] .p-desg span{font-size:15.5px}
+  [data-pagina="costo"] .p-desg b{font-size:17px}
+  [data-pagina="costo"] .p-menos__t b{font-size:16px}
+  [data-pagina="costo"] .p-menos__t small{font-size:13.5px}
+  [data-pagina="costo"] .p-btn,[data-pagina="reserva"] .r-btn{font-size:16px;padding:17px 18px}
+  [data-pagina="reserva"] .r-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+  [data-pagina="reserva"] .r-fila{padding:16px}
+  [data-pagina="reserva"] .r-fila__t b{font-size:16.5px}
+  [data-pagina="reserva"] .r-fila__t small{font-size:13px}
+  [data-pagina="reserva"] .r-fila__p b{font-size:18px}
+  [data-pagina="reserva"] .r-wa{font-size:14px}
+  [data-pagina="reserva"] .r-nota{font-size:12.5px}
 }
 
 /* ============ Resultado (mejor presupuesto) ============ */

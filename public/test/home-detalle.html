@@ -28,7 +28,7 @@
   .t-hero{position:relative;height:180px;background:var(--cel-soft) center/cover}
   .t-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,16,26,.72))}
   .t-hero__t{position:absolute;left:18px;right:18px;bottom:12px;z-index:1;color:#fff}
-  .t-hero__t b{display:block;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.1}
+  .t-hero__t h1{margin:0;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.1}
   .t-hero__t small{display:block;margin-top:3px;font-size:13px;font-weight:600;opacity:.92}
   /* Las pestañas van pegadas al tope, como en la maqueta. */
   .t-tabs{display:flex;gap:4px;padding:10px 12px 0;overflow-x:auto;scrollbar-width:none;background:var(--bg);position:sticky;top:0;z-index:2}
@@ -85,6 +85,7 @@
   <div class="t-main" id="main"></div>
   <div class="t-foot" id="foot"></div>
 </div>
+<script src="viaje-datos.js"></script>
 <script src="home-track.js"></script>
 <script>
 (function () {
@@ -113,19 +114,13 @@
   var IDA = qs.get('ida') || sumarDias(HOY, 10), VUELTA = qs.get('vuelta') || sumarDias(HOY, 17);
   var NOCHES = Math.max(1, Math.round((new Date(VUELTA + 'T12:00:00') - new Date(IDA + 'T12:00:00')) / 864e5));
   var MEDIO = qs.get('medio') || 'avion';
-  /* Partidas de ejemplo por persona, escaladas por cantidad de personas y noches.
-     Son las mismas que usa el desglose del resultado, para que las dos pantallas
-     cuenten lo mismo. */
-  var porPersona = function (pp, porNoche) { return pp * PAX + (porNoche || 0) * PAX * NOCHES; };
-  var PARTES = [
-    { nom: 'Vuelo + traslados', ico: 'avion', pp: 604, pn: 26, detalle: 'Ida y vuelta desde Montevideo, con el traslado al hotel.' },
-    { nom: 'Alojamiento', ico: 'cama', pp: 300, pn: 62, detalle: NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + ' en el hotel que elegiste.' },
-    { nom: 'Comidas', ico: 'comida', pp: 154, pn: 0, detalle: 'Desayuno y cenas para el viaje entero.' },
-    { nom: 'Transporte local', ico: 'carro', pp: 64, pn: 0, detalle: 'Moverse por el destino sin depender del auto.' },
-    { nom: 'Traslados', ico: 'carro', pp: 88, pn: 0, detalle: 'Aeropuerto a hotel y a la vuelta.' },
-    { nom: 'Extras y actividades', ico: 'playa', pp: 86, pn: 0, detalle: 'Tours y actividades que podes sumar.' }
-  ];
-  var total = PARTES.reduce(function (a, p) { return a + porPersona(p.pp, p.pn); }, 0);
+  /* Partidas y totales salen de viaje-datos.js: el mismo modelo que usan el
+     presupuesto y las opciones de reserva, para que las tres pantallas muestren
+     el mismo numero. */
+  var C = window.CS_Viaje;
+  var porPersona = function (pp, pn) { return pp * PAX + (pn || 0) * PAX * NOCHES; };
+  var PARTES = C.PARTES;
+  var total = C.armalo(IDA, VUELTA, PAX, false).total;
   var TAB = { resumen: 'Resumen', alojamiento: 'Alojamiento', extras: 'Extras', incluye: 'Viaje incluye' };
   var S = { tab: 'resumen', extra: false };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K, personas: PAX, medio: MEDIO, origen_home: fuente }, p || {})); };
@@ -136,7 +131,7 @@
 
   function pintar() {
     var t = totalCon();
-    $('main').innerHTML = '<div class="t-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="t-hero__t"><b>' + esc(NOM) + '</b><small>' + fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + PAX + (PAX === 1 ? ' persona' : ' personas') + '</small></div></div>' +
+    $('main').innerHTML = '<div class="t-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="t-hero__t"><h1>' + esc(NOM) + '</h1><small>' + fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + PAX + (PAX === 1 ? ' persona' : ' personas') + '</small></div></div>' +
       '<div class="t-tabs" role="tablist">' + Object.keys(TAB).map(function (k) {
         return '<button type="button" role="tab" class="t-tab' + (S.tab === k ? ' is-on' : '') + '" data-tab="' + k + '" aria-selected="' + (S.tab === k) + '">' + TAB[k] + '</button>';
       }).join('') + '</div>' +
@@ -176,10 +171,10 @@
       '<h2 class="t-h2">¿Querés agregar?</h2>' +
       '<button type="button" class="t-agregar" data-sumar="1" aria-pressed="' + S.extra + '"><span class="t-agregar__t"><b>Extras y actividades</b><small>' + (S.extra ? 'Agregados al presupuesto' : 'Tours y actividades para sumar') + '</small></span><span class="t-agregar__x">' + (S.extra ? '−' : '+') + '</span></button>';
   }
-  /* El boton principal lleva al flujo del viaje, que es donde ya vive el resumen con
-     desglose, la eleccion de alojamiento y las opciones de reserva. */
+  /* El boton principal lleva al presupuesto, que es el paso siguiente del flujo. El
+     desglose y las opciones de reserva viven ahi y en la pantalla de reserva. */
   function siguiente() {
-    return 'home-flujo.html?' + new URLSearchParams({ destino: K, pax: PAX, ida: IDA, vuelta: VUELTA, modo: MEDIO, extras: S.extra ? '1' : '', fuente: 'detalle_calcular' }).toString() + (debug ? '&debug=1' : '');
+    return 'home-costo.html?' + new URLSearchParams({ destino: K, pax: PAX, ida: IDA, vuelta: VUELTA, medio: MEDIO, extras: S.extra ? '1' : '', fuente: 'detalle_calcular' }).toString() + (debug ? '&debug=1' : '');
   }
 
   document.addEventListener('click', function (e) {

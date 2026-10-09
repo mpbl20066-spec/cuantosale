@@ -52,6 +52,10 @@
   .p-step{min-height:calc(100% - 72px)}
   .p-h2{margin:18px 0 8px;font-family:var(--fh);font-size:16px;font-weight:800;color:#1F6FB5}
   .p-opt{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;margin-bottom:8px;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:14.5px;font-weight:700;text-align:left;cursor:pointer}
+  /* El paso del medio de transporte muestra nombre y bajada en dos lineas. */
+  .p-opt>span:not(.p-opt__i){flex:1;min-width:0}
+  .p-opt b{display:block;font-size:15px;line-height:1.2}
+  .p-opt small{display:block;margin-top:3px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
   .p-opt__i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--cel-soft);color:#1F6FB5}
   .p-opt.is-on{border-color:#1F6FB5;background:var(--cel-soft);box-shadow:0 0 0 3px rgba(31,111,181,.15)}
   .p-opt--c{justify-content:center;margin:0;padding:11px 6px;border-radius:99px;font-size:13.5px;text-align:center}
@@ -114,6 +118,7 @@
   <div class="scroll" id="main"></div>
   <div class="p-over" id="detalle" hidden></div>
 </div>
+<script src="viaje-datos.js"></script>
 <script src="home-track.js"></script>
 <script>
 (function () {
@@ -127,6 +132,7 @@
     avion: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
     bus: '<rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M7 21v-4M17 21v-4"/>',
     back: '<path d="m15 5-7 7 7 7"/>', ok: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16 9.5"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    cmp: '<rect x="3" y="4" width="8" height="8" rx="1.5"/><rect x="13" y="12" width="8" height="8" rx="1.5"/><path d="M11 8h2a2 2 0 0 1 2 2v2"/>',
     plane: '<path transform="rotate(45 12 12)" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>'
   };
   var MODOS = { auto: ['En auto', I.car], avion: ['En avión', I.avion], bus: ['En bus', I.bus] };
@@ -153,7 +159,7 @@
   var HOY = iso(new Date());
   /* Paso 1: presupuesto y como viaja (cuando). Paso 2: fechas, mes o noches. Paso 3: resultados. */
   var S = { paso: 1, cuando: 'fechas', presupuesto: +qs.get('presupuesto') || 1000, pax: +qs.get('pax') || 2, ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02',
-    mes: -1, noches: '5-7', err: '', modo: 'todos', abierto: null, modoDet: 'auto', cargando: false, error: '', n: 6 };
+    mes: -1, noches: '5-7', err: '', modo: 'todos', medio: 'comparar', tipo: 'todos', abierto: null, modoDet: 'auto', cargando: false, error: '', n: 6 };
   var IDA = S.ida, VUELTA = S.vuelta, PAX = S.pax;   /* lo que se consulto de verdad (se fija al continuar) */
   var NOCHES_N = { '5-7': 6, '7-10': 8, '10+': 11 };
   /* Proximos seis meses, a partir del mes que viene (hay que poder reservar con anticipacion). */
@@ -199,7 +205,11 @@
      al tope hacia abajo; los que lo superan, despues, del mas barato al mas caro. */
   function filas() {
     var l = [];
+    /* Filtro por tipo de lugar (Todos / Playas / Ciudades / Naturaleza) y por medio de
+       transporte. Los dos sonlookar la misma lista, asi que viven en el estado y no
+       cambian nada de lo que ya se consulto al servidor. */
     Object.keys(DESTS).forEach(function (k) {
+      if (S.tipo !== 'todos' && (window.CS_Viaje.Tipo[k] || 'ciudad') !== S.tipo) return;
       Object.keys(DESTS[k].precios).forEach(function (m) { if (S.modo === 'todos' || S.modo === m) l.push({ k: k, m: m, p: DESTS[k].precios[m].pp }); });
     });
     var dentro = l.filter(function (x) { return x.p <= S.presupuesto; }).sort(function (a, b) { return b.p - a.p; });
@@ -249,14 +259,38 @@
     $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cuándo querés viajar?</h1>' + tabs + '<div class="p-form">' + cuerpo + '</div><div class="p-form">' + personas() + ayuda() + '</div></div>' +
       '<div class="p-cta"><button type="button" class="p-go" data-buscar="1" data-evento="presupuesto_paso2_continuar" data-tipo_fechas="' + S.cuando + '">Continuar →</button></div>';
   }
+  /* Paso 3 del flujo por presupuesto: el medio de transporte. Va entre las fechas y
+     los resultados, igual que en el flujo por destino: primero se decide cuando y
+     como se viaja, recien despues se busca que destinos entran en el presupuesto. */
+  var MEDIOS = [
+    { id: 'avion', ico: I.avion, nom: 'Avión', sub: 'Más rápido · Desde US$ 472 por persona' },
+    { id: 'auto', ico: I.car, nom: 'Auto', sub: 'Combustible y peajes · Desde US$ 268 por persona' },
+    { id: 'bus', ico: I.bus, nom: 'Bus', sub: 'Pasajes y traslados · Desde US$ 210 por persona' }
+  ];
+  function pintarPaso3() {
+    var opciones = MEDIOS.concat([{ id: 'comparar', ico: I.cmp, nom: 'Comparar todas las opciones', sub: 'Vemos cuál te conviene más.' }]);
+    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cómo querés viajar?</h1>' +
+      '<div class="p-form"><p class="p-sub">Seleccioná el medio de transporte<br>o compará todas las opciones.</p>' +
+      opciones.map(function (m) {
+        return '<button type="button" class="p-opt' + (S.medio === m.id ? ' is-on' : '') + '" data-medio-paso="1" data-medio="' + m.id + '" aria-pressed="' + (S.medio === m.id) + '"><span class="p-opt__i">' + ic(m.ico, 22) + '</span><span><b>' + m.nom + '</b><small>' + m.sub + '</small></span></button>';
+      }).join('') + '</div>' +
+      '<div class="p-form">' + ayuda() + '</div></div>' +
+      '<div class="p-cta"><button type="button" class="p-go" data-ver="1" data-evento="presupuesto_ver_destinos">Ver destinos →</button></div>';
+  }
   function pintar() {
     if (S.paso === 1) return pintarPaso1();
     if (S.paso === 2) return pintarPaso2();
+    if (S.paso === 3) return pintarPaso3();
     return pintarResultados();
   }
   function pintarResultados() {
     var chips = [['todos', 'Todos'], ['auto', 'Auto'], ['avion', 'Avión'], ['bus', 'Bus']].map(function (c) {
       return '<button type="button" class="p-chip' + (S.modo === c[0] ? ' is-on' : '') + '" data-modo="' + c[0] + '" aria-pressed="' + (S.modo === c[0]) + '">' + (MODOS[c[0]] ? ic(MODOS[c[0]][1], 16) : '') + c[1] + '</button>';
+    }).join('');
+    /* Segunda fila: que tipo de lugar se busca. Es el filtro que usa la maqueta para
+       este flujo, porque aca no se eligio un destino: se elige entre varios. */
+    var tipos = Object.keys(window.CS_Viaje.TIPOS_TXT).map(function (k) {
+      return '<button type="button" class="p-chip' + (S.tipo === k ? ' is-on' : '') + '" data-tipo="' + k + '" aria-pressed="' + (S.tipo === k) + '">' + window.CS_Viaje.TIPOS_TXT[k] + '</button>';
     }).join('');
     var todas = filas(), l = todas.slice(0, S.n);
     var lista = S.cargando ? '<p class="p-vacio" role="status">Buscando destinos para tu presupuesto…</p>'
@@ -267,6 +301,7 @@
       '<div class="p-res"><span class="p-res__i">' + ic(I.plane, 28) + '</span><div><h1>' + titulo + '</h1><p>' + ic('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>', 14) + 'Montevideo → Brasil · ' + f(S.presupuesto) + ' por persona</p></div></div>' +
       '<p class="p-fechas">' + ic(iCal, 14) + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + PAX + (PAX === 1 ? ' persona' : ' personas') + ' <button type="button" class="p-link" data-editar="1">Cambiar</button></p>' +
       '<div class="p-chips" role="group" aria-label="Forma de llegar">' + chips + '</div>' +
+      '<div class="p-chips" role="group" aria-label="Tipo de destino">' + tipos + '</div>' +
       '<div class="p-list">' + (lista !== null ? lista : (l.length ? l.map(function (x) {
         var over = x.p > S.presupuesto;
         return '<button type="button" class="p-row' + (over ? ' is-over' : '') + '" data-dest="' + x.k + '" data-m="' + x.m + '" data-evento="presupuesto_destino" data-destino="' + x.k + '" data-medio="' + x.m + '" data-precio="' + x.p + '">' +
@@ -324,12 +359,27 @@
         else if (S.vuelta <= S.ida) S.err = 'La vuelta tiene que ser posterior a la ida.';
       } else if (S.cuando === 'flexible' && S.mes < 0) S.err = 'Elegí el mes en que te gustaría viajar.';
       if (S.err) { pintar(); return; }
-      var fe = fechasDe(); IDA = fe.ida; VUELTA = fe.vuelta; PAX = S.pax; S.paso = 3; S.modo = 'todos';
+      var fe = fechasDe(); IDA = fe.ida; VUELTA = fe.vuelta; PAX = S.pax; S.paso = 3;
       track('presupuesto_buscar', { cuando: S.cuando, noches: S.cuando === 'fechas' ? Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5) : NOCHES_N[S.noches], personas: PAX });
-      cargar(); return;
+      pintar(); return;
+    }
+    /* Paso del medio de transporte: elige uno y sigue a los resultados. "Comparar"
+       deja el filtro en todos, que es lo que quiere ver la persona que no se decide. */
+    if (t.dataset.medioPaso) {
+      S.medio = t.dataset.medio;
+      track('presupuesto_medio', { medio: S.medio });
+      if (S.medio === 'comparar') { S.modo = 'todos'; S.paso = 4; S.cargando = true; S.error = ''; pintar(); cargar(); return; }
+      pintar(); return;
+    }
+    if (t.dataset.ver) {
+      S.modo = S.medio === 'comparar' ? 'todos' : (S.medio === 'avion' ? 'avion' : S.medio === 'auto' ? 'auto' : 'bus');
+      S.paso = 4; S.cargando = true; S.error = '';
+      track('presupuesto_ver_destinos', { medio: S.medio, filtro: S.modo });
+      pintar(); cargar(); return;
     }
     if (t.id === 'cerrar') { cerrar(); return; }
     if (t.dataset.modo) { S.modo = t.dataset.modo; track('presupuesto_filtro_medio', { medio: S.modo }); pintar(); return; }
+    if (t.dataset.tipo) { S.tipo = t.dataset.tipo; track('presupuesto_filtro_tipo', { tipo: S.tipo }); pintar(); return; }
     if (t.dataset.mas) { S.n += 6; pintar(); return; }
     if (t.dataset.reintentar) { cargar(); return; }
     if (t.dataset.dest) { abrir(t.dataset.dest, t.dataset.m); return; }
