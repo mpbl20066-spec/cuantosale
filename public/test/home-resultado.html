@@ -45,6 +45,21 @@
   .r-stack{display:flex;gap:2px;height:14px;margin:18px 0 0;border-radius:999px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
   .r-stack span{display:block;height:100%;min-width:3px}
   .r-h2{display:flex;align-items:center;gap:6px;font-family:var(--fh);font-size:16px;font-weight:700;margin:14px 0 4px;color:var(--ink)}
+  /* Las tres combinaciones de la maqueta. Cada fila lleva su icono, el nombre, la
+     explicacion corta y el precio por persona, y lleva al detalle del viaje. */
+  .r-combos{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .r-combo{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 10px;border:1.5px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-decoration:none}
+  .r-combo.is-on{border-color:#1F6FB5;background:var(--cel-soft)}
+  .r-combo:hover{border-color:var(--ink2)}
+  .r-combo:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .r-combo__i{flex:0 0 42px;height:42px;border-radius:50%;background:var(--bg);display:grid;place-items:center}
+  .r-combo__t{flex:1;min-width:0}
+  .r-combo__t b{display:block;font-size:15.5px;line-height:1.2}
+  .r-combo__t small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:var(--ink2);line-height:1.3}
+  .r-combo__p{flex:0 0 auto;text-align:right}
+  .r-combo__p b{display:block;font-family:var(--fh);font-size:17px;font-weight:800;line-height:1.1}
+  .r-combo__p small{display:block;margin-top:1px;font-size:10.5px;font-weight:700;color:var(--ink2)}
+  .r-combo__c{flex:0 0 18px;color:var(--ink2)}
   .r-h2 svg{color:var(--ink2)}
   .r-list{list-style:none;margin:0;padding:0}
   .r-list li{display:flex;align-items:center;gap:12px;padding:7px 0;font-size:14.5px;font-weight:600;color:var(--ink)}
@@ -138,6 +153,11 @@
     <div class="r-nums"><div><small>Por persona</small><b id="pp"></b></div><div><small id="totlbl"></small><b id="tot"></b></div></div>
     <div class="r-ok"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11.5C5 8.5 7.7 6 11 6h3.5l3-1.5V8c1.2.7 2 1.900 2 3.500v3h-2.500l-1 3h-3l-.5-1.500h-3L8.500 17.500H6.500v-3C5.600 13.800 5 12.700 5 11.500z"/><circle cx="15.500" cy="10.500" r=".7" fill="currentColor"/></svg><span id="ok"></span></div>
 
+    <!-- Las tres combinaciones de la maqueta (pantalla 4). Los importes salen de
+         las mismas partes del desglose de abajo: no son numeros inventados aparte. -->
+    <h2 class="r-h2">Elegí qué querés incluir</h2>
+    <div class="r-combos" id="combos"></div>
+
     <div class="r-stack" id="stack" role="img" aria-label="A dónde va tu plata"></div>
     <h2 class="r-h2">Desglose de costos <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></h2>
     <ul class="r-list" id="lista"></ul>
@@ -183,13 +203,48 @@
     return '<li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(' + x[2] + ')" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[x[2]] + '</svg><em>' + x[0] + '</em><b>' + f(x[1]) + '</b></li>';
   }).join('');
   /* ---------- Ahorro: pantallas "Dónde podés ahorrar" y "¿Querés pagar menos?" ---------- */
-  var IDA0 = new Date(2026, 11, 26), NOCHES = 7, shift = 0;           // shift: dias respecto de la fecha elegida
+  /* Las fechas las elige la persona en la pantalla anterior (home-destino.html).
+     Antes estaban fijas en el codigo y se ignoraba lo que vinha por la URL, asi que
+     las fechas que elegia la persona se perdian al entrar aqui. Si no vienen
+     (entrada directa por el enlace viejo) se usan las de ejemplo de siempre y esta
+     pantalla se comporta igual que antes. */
+  var fISO = function (s) { var q = String(s || '').split('-'); return q.length === 3 ? new Date(+q[0], +q[1] - 1, +q[2]) : null; };
+  var IDA0 = fISO(qs.get('ida')) || new Date(2026, 11, 26);            // shift: dias respecto de la fecha elegida
+  var VUELTA0 = fISO(qs.get('vuelta'));
+  var NOCHES = VUELTA0 ? Math.max(1, Math.round((VUELTA0 - IDA0) / 864e5)) : 7, shift = 0;
   /* Diferencia de precio por fecha de salida (ejemplo), respecto de la fecha original; se escala por personas. */
   var DELTAS = { '-3': -221, '-2': -128, '-1': 54, '0': 0, '1': 71, '2': 38, '3': 96 };
   var MES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fdia = function (d) { return d.getDate() + ' ' + MES[d.getMonth()]; };
   var sumaDias = function (d, n) { var r = new Date(d); r.setDate(r.getDate() + n); return r; };
   var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
+  /* ---------- Las tres combinaciones: con alojamiento, solo vuelo, solo alojamiento ----------
+     Cada una se arma sumando las partes del desglose, asi que el precio que se muestra
+     es el mismo que esta desglosado mas abajo, no un numero inventado aparte. El
+     "modo" viaja al flujo para que la pantalla siguiente sepa con que arranco. */
+  var COMBOS = [
+    { id: 'vuelo_hotel', ico: '--c1', titulo: 'Vuelo + alojamiento', desc: 'El viaje completo, con dónde dormir', modo: 'avion', partes: ['Pasajes', 'Alojamiento'] },
+    { id: 'solo_vuelo', ico: '--c1', titulo: 'Solo vuelo', desc: 'Ida y vuelta desde Montevideo', modo: 'avion', partes: ['Pasajes'] },
+    { id: 'solo_hotel', ico: '--c3', titulo: 'Solo alojamiento', desc: 'Tu hotel, sin el pasaje', modo: 'auto', partes: ['Alojamiento'] }
+  ];
+  var sumaDe = function (nombres) {
+    return partes.filter(function (x) { return nombres.indexOf(x[0]) >= 0; }).reduce(function (a, x) { return a + x[1]; }, 0);
+  };
+  var irFlujo = function (modo, combo) {
+    return 'home-flujo.html?' + new URLSearchParams({
+      destino: qs.get('destino') || 'fln', pax: pax, ida: iso(IDA0), vuelta: iso(sumaDias(IDA0, NOCHES)),
+      modo: modo, combo: combo, fuente: 'resultado_combo_' + combo
+    }).toString() + (/[?&]debug=1/.test(location.search) ? '&debug=1' : '');
+  };
+  $('combos').innerHTML = COMBOS.map(function (c, i) {
+    return '<a class="r-combo' + (i === 0 ? ' is-on' : '') + '" href="' + irFlujo(c.modo, c.id) + '" data-evento="resultado_combo" data-combo="' + c.id + '" data-destino="' + (qs.get('destino') || 'fln') + '">' +
+      '<span class="r-combo__i" style="color:var(' + c.ico + ')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[c.ico] + '</svg></span>' +
+      '<span class="r-combo__t"><b>' + c.titulo + '</b><small>' + c.desc + '</small></span>' +
+      '<span class="r-combo__p"><b>' + f(sumaDe(c.partes) / pax) + '</b><small>por persona</small></span>' +
+      '<svg class="r-combo__c" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>' +
+      '</a>';
+  }).join('');
   var pseudo = function (k) { var n = Math.abs(+k) * 2654435761 % 4294967296; return (n % 240) - 90 + (+k > 0 ? 20 : 0); };
   var delta = function (k) { return (typeof DELTAS[k] !== 'undefined' ? DELTAS[k] : pseudo(k)) * pax / 2; };
   var money = function (n) { return Math.round(n).toLocaleString('es-UY'); };

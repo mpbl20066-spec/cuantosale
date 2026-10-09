@@ -537,11 +537,36 @@
   .fin-sub2--s{margin:0 0 6px;font-size:12px}
   .fv-act{padding:10px 12px;font-size:12.5px;font-weight:700}
   .fv-wa{margin-top:10px;padding:10px 12px;background:transparent;border:1px dashed var(--line)}
+
+  /* Cierre en oscuro ("¡Todo listo!"): la ultima pantalla del flujo se pinta entera
+     en azul noche, con la foto del destino arriba. Los colores salen de los mismos
+     tokens del tema, invertidos, asi que no es un tema nuevo ni una foto de fondo
+     maquetada: es el mismo tema con la superficie al reves. */
+  .phone.es-oscuro{--bg:#0A101A;--surface:#141C28;--line:#26313F;--ink:#F2F6FB;--ink2:#9FACC0;background:var(--bg)}
+  .phone.es-oscuro .status{color:var(--ink)}
+  .phone.es-oscuro .f-bar{background:var(--bg)}
+  .phone.es-oscuro .f-logo{color:var(--ink)}
+  .phone.es-oscuro .f-logo small{color:var(--ink2)}
+  .phone.es-oscuro .f-scroll{background:var(--bg)}
+  .phone.es-oscuro .f-back{color:var(--ink)}
+  .phone.es-oscuro .ls-badge{background:rgba(159,232,195,.14);color:#9FE8C3}
+  .phone.es-oscuro .ls-h{color:var(--ink)}
+  .phone.es-oscuro .ls-p{color:var(--ink2)}
+  .phone.es-oscuro .ls-card{background:var(--surface);border-color:var(--line)}
+  .phone.es-oscuro .ls-card small{color:var(--ink2)}
+  .phone.es-oscuro .ls-card strong{color:var(--ink)}
+  .phone.es-oscuro .ls-card b{color:var(--ink)}
+  .phone.es-oscuro .ls-ref{color:var(--ink2)}
+  .phone.es-oscuro .ls-foot{color:var(--ink2)}
+  .phone.es-oscuro .ls-ilu{color:#1F6FB5}
+  .phone.es-oscuro .g-btn{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+  .phone.es-oscuro .g-btn--main{background:var(--accent);color:var(--accent-ink);box-shadow:none}
+  .phone.es-oscuro .g-p{color:var(--ink2)}
 </style>
 <link rel="stylesheet" href="web.css">
 </head>
 <body>
-<div class="phone">
+<div class="phone" id="phone">
   <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
   <div class="f-bar">
     <button type="button" class="f-back" id="back" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
@@ -1334,6 +1359,11 @@
     if (S.paso === 4 && window.CSTarjeta) CSTarjeta.precalentar(datosTarjeta());
     $('main').dataset.paso = S.paso;
     $('main').innerHTML = [null, pantalla1, pantalla2, pantalla3, pantalla4, pantalla5, pantalla6, pantalla7, pantalla8, pantalla9, pantalla10, pantalla11, pantalla12, pantalla13][S.paso]();
+    /* data-paso y la clase es-oscuro: el cierre ("¡Listo!") se pinta entero en oscuro,
+       como en la maqueta. Se marca aca y no con un if para que el CSS tenga un solo
+       lugar donde decidir como se ve cada pantalla. */
+    $('main').dataset.paso = S.paso;
+    $('phone').classList.toggle('es-oscuro', S.paso === 5);
     $('steps').hidden = S.paso >= 5;
     $('foot').hidden = S.paso >= 5;
     if (S.paso < 5) { $('cta').textContent = CTAS[S.paso]; $('cta').disabled = S.paso === 2 && S.cargandoH; $('cta').style.opacity = $('cta').disabled ? .5 : 1; }

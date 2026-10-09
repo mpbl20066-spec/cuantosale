@@ -44,6 +44,17 @@
   .m-btn{display:block;text-align:center;text-decoration:none;box-sizing:border-box;width:100%;margin-top:16px;padding:14px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:14px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
   .m-btn:focus-visible,.m-menu:focus-visible,.m-more:focus-visible,.m-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
+  /* Opcion aparte: el camino en auto. Es un link, no un camino de los dos, asi que
+     va mas chico y sin el boton enorme de las tarjetas. */
+  .m-auto{display:flex;align-items:center;gap:12px;box-sizing:border-box;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);text-decoration:none}
+  .m-auto__i{flex:0 0 44px;height:44px;border-radius:50%;background:var(--cel-soft);color:var(--ink);display:grid;place-items:center}
+  .m-auto__t{flex:1;min-width:0}
+  .m-auto__t b{display:block;font-family:var(--fh);font-size:15.5px;font-weight:700}
+  .m-auto__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  .m-auto__c{flex:0 0 18px;color:var(--ink2)}
+  .m-auto:hover{border-color:var(--ink2)}
+  .m-auto:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
   .m-sec{display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px}
   .m-sec h2{font-family:var(--fh);font-size:19px;font-weight:700;margin:0;color:var(--ink)}
   .m-more{border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
@@ -97,8 +108,8 @@
     </header>
 
     <section class="m-hero">
-      <h1>¿Qué querés hacer?</h1>
-      <p>Encontrá tu próximo viaje según lo que querés gastar.</p>
+      <h1>¿A dónde querés ir?</h1>
+      <p>Describí cuánto sale tu viaje y armá tu próximo destino.</p>
     </section>
     </div>
 
@@ -108,37 +119,48 @@
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
         </div>
         <div>
-          <h2>Ya sé dónde quiero ir</h2>
-          <p>Calculá vuelos o ruta en auto, alojamiento, comida y actividades.</p>
+          <h2>Buscar por destino</h2>
+          <p>Elegí un lugar y compará.</p>
         </div>
       </div>
-      <a class="m-btn" href="home-calcular.html?fuente=home_card_destino" data-evento="home_camino" data-camino="ya_se_donde" data-fuente="home_card_destino">Calcular mi viaje</a>
+      <a class="m-btn" href="home-destino.html?fuente=home_card_destino" data-evento="home_camino" data-camino="por_destino" data-fuente="home_card_destino">Elegir un destino</a>
     </article>
 
     <article class="m-card m-card--main">
       <div class="m-card__row">
         <div class="m-card__icon" aria-hidden="true">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.4-.9-1.4-1.4-2.8-1.4-1.6 0-2.7.8-2.7 2 0 3 5.6 1.4 5.6 4.2 0 1.2-1.2 2.1-2.9 2.1-1.5 0-2.6-.6-3-1.6M12 6.5v1.3M12 16.2v1.3"/></svg>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
         </div>
         <div>
           <span class="m-card__tag">Lo que nos distingue</span>
-          <h2>No sé dónde ir</h2>
-          <p>Decinos tu presupuesto y encontrá destinos que te convengan.</p>
+          <h2>Buscar por presupuesto</h2>
+          <p>Decinos cuánto querés gastar.</p>
         </div>
       </div>
-      <a class="m-btn" href="home-presupuesto.html?fuente=home_card_presupuesto" data-evento="home_camino" data-camino="no_se_donde" data-fuente="home_card_presupuesto">Buscar por presupuesto</a>
+      <a class="m-btn" href="home-presupuesto.html?fuente=home_card_presupuesto" data-evento="home_camino" data-camino="por_presupuesto" data-fuente="home_card_presupuesto">Buscar por presupuesto</a>
     </article>
+
+    <!-- El camino en auto y eléctrico quedó como una opción aparte, no como uno de
+         los dos caminos de la portada: es un cálculo distinto (combustible, peajes,
+         carga eléctrica) y no compite con buscar por destino. -->
+    <a class="m-auto" href="home-calcular.html?fuente=home_auto" data-evento="home_camino" data-camino="en_auto" data-fuente="home_auto">
+      <span class="m-auto__i" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16l1.5-6h11L19 16M3 16h18v3H3zM7 19v2M17 19v2"/></svg>
+      </span>
+      <span class="m-auto__t"><b>¿Venís en auto?</b><small>Calculá la ruta con combustible, peajes y carga eléctrica.</small></span>
+      <svg class="m-auto__c" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+    </a>
 
     <div class="m-sec">
       <h2>Destinos populares</h2>
       <button type="button" class="m-more" data-evento="home_ver_todos">Ver todos ›</button>
     </div>
     <div class="m-car" role="list" aria-label="Destinos populares">
-      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="rio"><img src="../fotos/rio.jpg" alt=""><span>Río de Janeiro</span></button>
-      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="fln"><img src="../fotos/fln.jpg" alt=""><span>Florianópolis</span></button>
-      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="buz"><img src="dest/buz.jpg" alt=""><span>Búzios</span></button>
-      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="bcm"><img src="dest/bcm.jpg" alt=""><span>Camboriú</span></button>
-      <button type="button" class="m-dest" role="listitem" data-evento="home_destino_popular" data-destino="bombinhas"><img src="dest/bombinhas.jpg" alt=""><span>Bombinhas</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="rio" data-evento="home_destino_popular"><img src="../fotos/rio.jpg" alt=""><span>Río de Janeiro</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="fln" data-evento="home_destino_popular"><img src="../fotos/fln.jpg" alt=""><span>Florianópolis</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="buz" data-evento="home_destino_popular"><img src="../fotos/buz.jpg" alt=""><span>Búzios</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="bcm" data-evento="home_destino_popular"><img src="../fotos/bcm.jpg" alt=""><span>Camboriú</span></button>
+      <button type="button" class="m-dest" role="listitem" data-destino="bombinhas" data-evento="home_destino_popular"><img src="../fotos/bombinhas.jpg" alt=""><span>Bombinhas</span></button>
     </div>
   </div>
 
@@ -151,6 +173,24 @@
   </nav>
 </div>
 <script src="home-track.js"></script>
+<script>
+/* Los botones que antes solo mandaban el evento de Analytics y no hacian nada:
+   el menu abre el panel de cuenta (lo maneja cuenta.js), las tarjetas del carrusel
+   y "Ver todos" llevan a la pantalla de destinos. */
+(function () {
+  document.addEventListener('click', function (e) {
+    var d = e.target.closest('.m-dest'); if (d) { location.href = 'home-destino.html?destino=' + encodeURIComponent(d.dataset.destino) + '&fuente=home_destino_popular'; return; }
+    var m = e.target.closest('.m-more'); if (m) { location.href = 'home-destino.html?fuente=home_ver_todos'; return; }
+    var u = e.target.closest('.m-menu'); if (u && window.CSCuenta) { window.CSCuenta.abrir('menu'); return; }
+    /* Tabs "Inicio" y "Destinos". "Guardados" y "Perfil" los maneja cuenta.js por
+       data-tab, asi que acá no se tocan para no abrir dos veces el panel. */
+    var t = e.target.closest('.tab'); if (t && (t.dataset.tab === 'inicio' || t.dataset.tab === 'destinos')) {
+      location.href = t.dataset.tab === 'inicio' ? 'home-dos-caminos.html' : 'home-destino.html?fuente=home_tab_destinos';
+      return;
+    }
+  });
+})();
+</script>
 <script src="cuenta.js"></script>
 </body>
 </html>

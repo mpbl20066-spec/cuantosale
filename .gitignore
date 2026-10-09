@@ -16,6 +16,12 @@ node_modules
 outputs/
 REELS.md
 
+# Mismo caso que outputs/, pero para las piezas de redes: HTML renderizados,
+# fotos retocadas, reels y sus capturas. Son 257 archivos y 171 MB que se
+# regeneran corriendo los scripts de render. Versionarlos no aporta nada salvo
+# inflar el repo y hacer lentos los clones.
+social/
+
 # Logs de corridas locales. Salen de Start-Process con redirect, no son de
 # ningun script del repo.
 _s.log

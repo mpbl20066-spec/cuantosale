@@ -8,7 +8,11 @@
    Desktop  (>= 1100px): contenedor de 1160px, composicion en grilla y tarjetas mas amplias.
    Toda la logica responsive vive en este archivo; las paginas solo traen su estilo de celular.
    Cada bloque va limitado a su pagina con [data-pagina="..."] para que no se pisen entre si. */
-:root{--w-tab:880px;--w-desk:1160px;--gut:18px}
+/* Ancho del contenido. El tope existe para que en un monitor enorme no queden
+   lineas de texto de 250 caracteres; antes era 1160px y con los margenes laterales
+   sobraba casi la mitad de una pantalla de 1920 sin usar. 1280px mantiene lineas
+   legibles y deja menos borde muerto. */
+:root{--w-tab:880px;--w-desk:1280px;--gut:18px}
 @media (min-width:768px){:root{--gut:32px}}
 html{background:var(--bg)}
 body{display:flex!important;align-items:stretch!important;justify-content:center!important;min-height:100vh;min-height:100dvh;margin:0!important;padding:0!important;background:var(--bg)!important}
@@ -42,17 +46,37 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 @media (min-width:768px){
   [data-pagina="calcular"] .c-bar{padding:8px var(--gut) 0;position:absolute;top:0;left:0;right:0;z-index:2}
   [data-pagina="calcular"] .phone{justify-content:center;padding-top:56px;box-sizing:border-box}
-  [data-pagina="calcular"] .c-main{flex:0 1 auto;min-height:0;padding:10px var(--gut) 8px;width:100%;box-sizing:border-box;margin:0 auto;max-width:640px}
-  [data-pagina="calcular"] .c-foot{width:100%;box-sizing:border-box;margin:0 auto;max-width:640px;padding:6px var(--gut) 28px}
-  [data-pagina="calcular"] h1{font-size:34px}
-  [data-pagina="calcular"] .c-sub{font-size:16px}
+  /* Los pasos 2 a 5 (medio de transporte, datos del auto, ruta, resumen) quedaban
+     en una columna de 640px dentro de un contenedor de 1160px: menos de la mitad del
+     ancho. Ahora el tope sale del contenedor, asi que en una computadora el formulario
+     ocupa lo que corresponde. */
+  [data-pagina="calcular"] .c-main{flex:0 1 auto;min-height:0;padding:10px var(--gut) 8px;width:100%;box-sizing:border-box;margin:0 auto;max-width:900px}
+  [data-pagina="calcular"] .c-foot{width:100%;box-sizing:border-box;margin:0 auto;max-width:900px;padding:6px var(--gut) 28px}
+  [data-pagina="calcular"] h1{font-size:clamp(34px,1.4vw + 26px,42px)}
+  [data-pagina="calcular"] .c-sub{font-size:17px}
+  [data-pagina="calcular"] .c-btn{font-size:16px;padding:17px 18px}
+  [data-pagina="calcular"] .c-opt{padding:18px}
+  [data-pagina="calcular"] .c-opt b{font-size:17px}
+  [data-pagina="calcular"] .c-opt small{font-size:13.5px}
+  [data-pagina="calcular"] .c-row{padding:14px 16px}
+  [data-pagina="calcular"] .c-row select,[data-pagina="calcular"] .c-row input{font-size:16px}
+  [data-pagina="calcular"] .c-sel{font-size:16px;padding:15px 16px}
   /* paso 1: formulario a la izquierda, foto del destino a la derecha, boton debajo del formulario */
-  [data-pagina="calcular"] .c-main[data-pant="1"]{max-width:1040px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);column-gap:36px;align-content:center}
+  [data-pagina="calcular"] .c-main[data-pant="1"]{max-width:1120px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);column-gap:36px;align-content:center}
   [data-pagina="calcular"] .c-main[data-pant="1"]>*{grid-column:1}
   [data-pagina="calcular"] .c-main[data-pant="1"]>.c-costa{grid-column:2;grid-row:1/span 8;height:auto;min-height:340px;margin:0;border-radius:24px;-webkit-mask-image:none;mask-image:none}
-  [data-pagina="calcular"] .c-main[data-pant="1"]~.c-foot{max-width:1040px}
+  [data-pagina="calcular"] .c-main[data-pant="1"]~.c-foot{max-width:1120px}
   [data-pagina="calcular"] .c-main[data-pant="1"]~.c-foot .c-btn{max-width:calc((100% - 36px) * .5263);margin:0}
   [data-pagina="calcular"] .c-main:not([data-pant="1"])~.c-foot .c-btn{max-width:none}
+  /* pasos 2 a 5: las opciones son pocas y muy anchas. Antes ocupaban una tira de
+     836px en una columna de 900px; ahora van en dos columnas y aprovechan el ancho
+     sin estirar el boton de abajo mas de lo que corresponde. */
+  [data-pagina="calcular"] .c-main:not([data-pant="1"]):has(.c-opt){max-width:1120px}
+  [data-pagina="calcular"] .c-main:not([data-pant="1"]):has(.c-opt)~.c-foot{max-width:1120px}
+  [data-pagina="calcular"] .c-main[data-pant="2"]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;align-content:center}
+  [data-pagina="calcular"] .c-main[data-pant="2"]>h1,[data-pagina="calcular"] .c-main[data-pant="2"]>.c-sub{grid-column:1/-1}
+  [data-pagina="calcular"] .c-main[data-pant="2"]>.c-opt{margin-bottom:0}
+  [data-pagina="calcular"] .c-main[data-pant="2"]>.c-opt:nth-last-child(2):nth-child(odd),[data-pagina="calcular"] .c-main[data-pant="2"]>.c-ej{grid-column:1/-1}
 }
 @media (max-width:1099px) and (min-width:768px){
   [data-pagina="calcular"] .c-main[data-pant="1"]{max-width:760px}
@@ -64,12 +88,30 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 @media (min-width:768px){
   [data-pagina="presupuesto"] #main{display:flex;flex-direction:column;padding:60px var(--gut) 28px}
   [data-pagina="presupuesto"] .p-bar{position:absolute;top:8px;left:var(--gut);right:var(--gut);margin:0}
-  /* pasos 1 y 2: el formulario centrado en la pantalla, con el boton pegado debajo */
-  [data-pagina="presupuesto"] .p-step{width:100%;max-width:560px;margin:auto auto 0;min-height:0}
-  [data-pagina="presupuesto"] .p-cta{position:static;width:100%;max-width:560px;margin:0 auto auto;padding:18px 0 0;background:none}
-  [data-pagina="presupuesto"] .p-step .p-bar{position:absolute}
-  [data-pagina="presupuesto"] .p-h{font-size:30px}
-  [data-pagina="presupuesto"] .p-sub{font-size:15.5px}
+  /* Los dos bloques del formulario van envueltos en .p-form para que en escritorio
+     se puedan poner en dos columnas (ver la regla .p-step mas abajo). En celular el
+     .p-form es un bloque normal y se ven igual que antes, uno debajo del otro. */
+  [data-pagina="presupuesto"] .p-form{min-width:0}
+  /* pasos 1 y 2: antes el formulario era una columna fija de 560px en el centro de un
+     contenedor de 1160px, o sea menos de la mitad del ancho: en una computadora se
+     veía como una pantalla de celular flotando. Ahora el paso se reparte en dos
+     columnas (la pregunta a la izquierda, las opciones a la derecha) y el ancho sale
+     del contenedor, asi que crece con la pantalla. */
+  [data-pagina="presupuesto"] .p-step{width:100%;max-width:none;margin:0 0 auto;min-height:0;display:grid;gap:0 40px;align-content:center;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  [data-pagina="presupuesto"] .p-step>.p-h,[data-pagina="presupuesto"] .p-step>.p-tabs{grid-column:1/-1}
+  [data-pagina="presupuesto"] .p-cta{position:static;width:100%;max-width:none;margin:auto auto 0;padding:24px 0 0;background:none}
+  [data-pagina="presupuesto"] .p-h{font-size:clamp(30px,1.6vw + 21px,38px)}
+  [data-pagina="presupuesto"] .p-sub{font-size:16px}
+  [data-pagina="presupuesto"] .p-h2{font-size:19px}
+  [data-pagina="presupuesto"] .p-budget{padding:14px 18px}
+  [data-pagina="presupuesto"] .p-budget input,[data-pagina="presupuesto"] .p-budget label{font-size:19px}
+  [data-pagina="presupuesto"] .p-opt{padding:16px;font-size:16px}
+  [data-pagina="presupuesto"] .p-opt--c{font-size:15px}
+  [data-pagina="presupuesto"] .p-chip{font-size:14.5px;padding:11px 16px}
+  [data-pagina="presupuesto"] .p-date,[data-pagina="presupuesto"] .p-pers{padding:14px 18px}
+  [data-pagina="presupuesto"] .p-date input{font-size:16px}
+  [data-pagina="presupuesto"] .p-pers b{font-size:16px}
+  [data-pagina="presupuesto"] .p-pers button{width:38px;height:38px}
   /* resultados: tarjetas en grilla, con la foto arriba */
   [data-pagina="presupuesto"] .p-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
   [data-pagina="presupuesto"] .p-list>.p-vacio,[data-pagina="presupuesto"] .p-list>.p-chip{grid-column:1/-1}
@@ -77,8 +119,10 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="presupuesto"] .p-row__img{flex:none;width:100%;height:170px;border-radius:0}
   [data-pagina="presupuesto"] .p-row__t{padding:12px 16px 14px}
   [data-pagina="presupuesto"] .p-row>svg:last-child{display:none}
-  [data-pagina="presupuesto"] .p-res h1{font-size:24px}
+  [data-pagina="presupuesto"] .p-res h1{font-size:26px}
   [data-pagina="presupuesto"] .p-chips{margin-top:14px}
+  [data-pagina="presupuesto"] .p-row__t b{font-size:17px}
+  [data-pagina="presupuesto"] .p-row__pr{font-size:21px}
   /* detalle del destino: foto a la izquierda, precio e "Incluye" a la derecha */
   [data-pagina="presupuesto"] .p-over{justify-content:center}
   [data-pagina="presupuesto"] .p-over .scroll{flex:0 1 auto;width:100%;max-width:900px;margin:0 auto;box-sizing:border-box;padding:4px var(--gut) 20px}
@@ -93,6 +137,35 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="presupuesto"] .p-list{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 
+/* ============ Elegir destino + fechas ============ */
+@media (min-width:768px){
+  [data-pagina="destino"] .d-bar{padding:8px var(--gut) 0;position:absolute;top:0;left:0;right:0;z-index:2}
+  [data-pagina="destino"] .phone{justify-content:center;padding-top:56px;box-sizing:border-box}
+  [data-pagina="destino"] .d-main{flex:0 1 auto;min-height:0;padding:10px var(--gut) 8px;width:100%;box-sizing:border-box;margin:0 auto;max-width:900px}
+  [data-pagina="destino"] .d-foot{width:100%;box-sizing:border-box;margin:0 auto;max-width:900px;padding:6px var(--gut) 28px}
+  [data-pagina="destino"] h1{font-size:clamp(34px,1.4vw + 26px,42px)}
+  [data-pagina="destino"] .d-sub{font-size:17px}
+  [data-pagina="destino"] .d-h2 h2{font-size:20px}
+  [data-pagina="destino"] .d-bus{padding:16px 18px}
+  [data-pagina="destino"] .d-bus input{font-size:17px}
+  /* La grilla de destinos aprovecha el ancho: mas columnas y fotos mas altas, en vez
+     de dos tarjetas angostas flotando en el medio de una pantalla grande. */
+  [data-pagina="destino"] .d-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  [data-pagina="destino"] .d-card__f{height:132px}
+  [data-pagina="destino"] .d-card__t{padding:11px 14px 13px}
+  [data-pagina="destino"] .d-card__t b{font-size:17px}
+  [data-pagina="destino"] .d-card__t small{font-size:12.5px}
+  [data-pagina="destino"] .d-fecha,[data-pagina="destino"] .d-pers{padding:15px 18px}
+  [data-pagina="destino"] .d-fecha input{font-size:17px}
+  [data-pagina="destino"] .d-pers b{font-size:17px}
+  [data-pagina="destino"] .d-pers button{width:40px;height:40px}
+  [data-pagina="destino"] .d-btn{font-size:16px;padding:17px 18px}
+}
+@media (min-width:1100px){
+  [data-pagina="destino"] .d-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  [data-pagina="destino"] .d-card__f{height:152px}
+}
+
 /* ============ Resultado (mejor presupuesto) ============ */
 @media (min-width:768px){
   [data-pagina="resultado"] .scroll{padding:8px var(--gut) 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-content:start}
@@ -100,6 +173,17 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="resultado"] .scroll>.r-bar{grid-column:1/-1}
   [data-pagina="resultado"] .r-photo{grid-column:1;grid-row:2/span 14;align-self:start;position:sticky;top:0;height:min(480px,62vh);margin:0 0 30px;border-radius:24px}
   [data-pagina="resultado"] h1.r-dest{font-size:38px}
+  /* Las combinaciones van apiladas, no en grilla: en escritorio el contenido de esta
+     pantalla vive en una columna de texto (la foto grande ocupa la otra), asi que
+     tres tarjetas en fila quedarian de menos de 200px de ancho. Solo se agrandan. */
+  [data-pagina="resultado"] .r-combos{gap:12px;margin-top:10px}
+  [data-pagina="resultado"] .r-combo{padding:16px 16px 16px 12px}
+  [data-pagina="resultado"] .r-combo__i{flex-basis:46px;height:46px}
+  [data-pagina="resultado"] .r-combo__t b{font-size:16.5px}
+  [data-pagina="resultado"] .r-combo__t small{font-size:13px}
+  [data-pagina="resultado"] .r-combo__p b{font-size:20px}
+  [data-pagina="resultado"] .r-combo__p small{font-size:11.5px}
+  [data-pagina="resultado"] .r-h2{font-size:18px}
   [data-pagina="resultado"] .r-foot{padding:12px var(--gut) 24px;background:var(--bg)}
   [data-pagina="resultado"] .r-go{max-width:420px;margin:0 auto}
   [data-pagina="resultado"] .r-over .ah-body{max-width:640px;margin:0 auto}
@@ -109,10 +193,12 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 /* ============ Flujo del viaje (12 pantallas) ============ */
 @media (min-width:768px){
   [data-pagina="flujo"] .f-bar{padding:0 var(--gut)}
-  [data-pagina="flujo"] .f-steps,[data-pagina="flujo"] .f-total{width:100%;max-width:760px;margin-left:auto;margin-right:auto;box-sizing:border-box}
-  [data-pagina="flujo"] .f-total{margin-top:8px;width:calc(100% - var(--gut) * 2);max-width:720px}
+  [data-pagina="flujo"] .f-steps,[data-pagina="flujo"] .f-total{width:100%;max-width:880px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+  [data-pagina="flujo"] .f-total{margin-top:8px;width:calc(100% - var(--gut) * 2);max-width:860px}
   [data-pagina="flujo"] .f-scroll{padding:16px var(--gut) 24px}
-  [data-pagina="flujo"] .f-scroll>*{max-width:720px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+  /* 860px y no mas: es el tope de la columna de lectura del flujo. Con 720 quedaba en
+     el 56% del contenedor de escritorio, con media pantalla sin usar. */
+  [data-pagina="flujo"] .f-scroll>*{max-width:860px;margin-left:auto;margin-right:auto;box-sizing:border-box}
   [data-pagina="flujo"] .f-foot{padding:12px var(--gut) 24px}
   [data-pagina="flujo"] .f-cta{max-width:420px;margin:0 auto;display:block}
   /* etapas con listas de tarjetas (vuelos, alojamiento, extras): dos columnas */
@@ -133,6 +219,15 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 [data-pagina="home"] .m-card--main{border:2px solid #1F6FB5;box-shadow:0 10px 28px rgba(31,111,181,.16)}
 [data-pagina="home"] .m-card__tag{display:inline-block;margin-bottom:6px;padding:3px 10px;border-radius:99px;background:#DCEBFA;color:#1F6FB5;font-size:11.5px;font-weight:800;letter-spacing:.02em}
 [data-pagina="home"] .m-card:not(.m-card--main) .m-btn{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+/* La opcion de auto ocupa el ancho de las dos tarjetas, que en escritorio van
+   una al lado de la otra. */
+[data-pagina="home"] .m-auto{grid-column:1/-1;padding:18px 20px}
+@media (min-width:768px){
+  [data-pagina="home"] .m-auto__i{flex-basis:52px;height:52px}
+  [data-pagina="home"] .m-auto__t b{font-size:17px}
+  [data-pagina="home"] .m-auto__t small{font-size:14px}
+  [data-pagina="home"] .m-auto__c{flex-basis:20px}
+}
 /* Nombre del destino siempre legible sobre la foto, con degradado oscuro abajo. */
 [data-pagina="home"] .m-dest::after{background:linear-gradient(180deg,rgba(10,16,26,0) 38%,rgba(10,16,26,.82))}
 [data-pagina="home"] .m-dest span{font-size:14.5px}

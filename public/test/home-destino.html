@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="destino">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elegí tu destino · CuántoSale</title>
+<script src="tema.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Camino "buscar por destino", dos pantallas:
+     1 ¿A dónde querés ir?  (buscador + destinos populares)
+     2 ¿Cuándo querés viajar? (desde, hasta y cuántas personas)
+     Los destinos son los mismos 13 que ofrece el resto de /test, con las mismas
+     fotos de ../fotos, para que no haya dos listas distintas de lugares. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button,input{font-family:var(--fb)}
+  .d-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+  .d-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .d-back:focus-visible,.d-bus:focus-visible,.d-card:focus-visible,.d-mas:focus-visible,.d-opt:focus-visible,.d-pers button:focus-visible,.d-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .d-logo{text-align:center;font-family:var(--fh);font-weight:800;font-size:21px;line-height:1.05;color:var(--ink)}
+  .d-logo small{display:block;font-family:var(--fb);font-weight:500;font-size:10.5px;color:var(--ink2)}
+  .d-main{flex:1;overflow-y:auto;padding:10px 18px 14px;scrollbar-width:none}
+  .d-main::-webkit-scrollbar{display:none}
+  h1{margin:6px 0 4px;font-family:var(--fh);font-size:27px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .d-sub{margin:0 0 14px;font-size:14.5px;font-weight:600;color:var(--ink2);line-height:1.45}
+  .d-bus{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink)}
+  .d-bus svg{flex:0 0 22px;color:#1F6FB5}
+  .d-bus input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:16px;font-weight:600}
+  .d-bus input::placeholder{color:var(--ink2)}
+  .d-h2{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px}
+  .d-h2 h2{margin:0;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
+  .d-mas{border:0;background:transparent;color:#1F6FB5;font:800 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
+  /* Grilla de destinos: dos columnas en celular, con la foto de arriba y el nombre
+     debajo, igual que en la maqueta. */
+  .d-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .d-card{display:block;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;overflow:hidden;cursor:pointer}
+  .d-card:hover{border-color:var(--ink2)}
+  .d-card.is-on{border-color:#1F6FB5;box-shadow:0 0 0 2px rgba(31,111,181,.35)}
+  .d-card__f{position:relative;height:96px;background:var(--cel-soft) center/cover}
+  .d-card__f::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(10,16,26,.5))}
+  .d-card__t{padding:9px 11px 11px}
+  .d-card__t b{display:block;font-family:var(--fh);font-size:15px;font-weight:700;line-height:1.2}
+  .d-card__t small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .d-vacio{padding:22px 4px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
+  /* Pantalla 2: fechas y personas */
+  .d-lbl{display:block;margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--ink)}
+  .d-fecha{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:#1F6FB5}
+  .d-fecha input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:16px;font-weight:700}
+  .d-pers{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:#1F6FB5}
+  .d-pers b{flex:1;color:var(--ink);font-size:16px}
+  .d-pers button{width:36px;height:36px;border:1.5px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);font-size:19px;font-weight:700;cursor:pointer}
+  .d-pers button:disabled{opacity:.35;cursor:default}
+  .d-elegido{display:flex;align-items:center;gap:10px;margin:0 0 6px;padding:11px 13px;border:1.5px solid #1F6FB5;border-radius:14px;background:var(--cel-soft);color:var(--ink)}
+  .d-elegido b{font-family:var(--fh);font-size:16px;font-weight:700}
+  .d-elegido span{margin-left:auto;font-size:12.5px;font-weight:700;color:#1F6FB5}
+  .d-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
+  .d-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
+  .lg-pin{vertical-align:-3px;margin:0 5px 0 0}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="d-bar">
+    <button type="button" class="d-back" id="atras" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <div class="d-logo"><svg class="lg-pin" width="18" height="22" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div>
+    <span style="width:40px"></span>
+  </div>
+  <div class="d-main" id="main"></div>
+  <div class="d-foot" id="foot"></div>
+</div>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search), fuente = qs.get('fuente') || 'directo', debug = /[?&]debug=1/.test(location.search);
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var ic = function (p, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+  var I = {
+    lupa: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
+    cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+    ppl: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>'
+  };
+  /* Los mismos 13 destinos que el resto de /test: clave, nombre, km desde Montevideo. */
+  var DESTS = [['fln', 'Florianópolis', 'Brasil', 1900], ['bombinhas', 'Bombinhas', 'Brasil', 1800], ['bcm', 'Camboriú', 'Brasil', 1800], ['itapema', 'Itapema', 'Brasil', 1800], ['rosa', 'Praia do Rosa', 'Brasil', 1900], ['garopaba', 'Garopaba', 'Brasil', 1900],
+    ['poa', 'Porto Alegre', 'Brasil', 900], ['gram', 'Gramado', 'Brasil', 1000], ['canela', 'Canela', 'Brasil', 1000], ['torres', 'Torres', 'Brasil', 1100],
+    ['rio', 'Río de Janeiro', 'Brasil', 2900], ['buz', 'Búzios', 'Brasil', 3000], ['ilha', 'Ilha Grande', 'Brasil', 3000]];
+  var POPULARES = ['rio', 'fln', 'buz', 'bcm'];
+  var HOY = new Date();
+  var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
+  var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
+  var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+  var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
+  /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
+  var S = { pant: 1, dest: qs.get('destino') || '', q: '', todos: false, err: '',
+    ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2 };
+  var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
+  var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
+  var debugQ = debug ? '&debug=1' : '';
+
+  function grilla() {
+    var lista = DESTS.filter(function (d) {
+      if (!S.todos && POPULARES.indexOf(d[0]) < 0) return false;
+      var t = (d[1] + ' ' + d[2]).toLowerCase();
+      return !S.q || t.indexOf(S.q.toLowerCase()) >= 0;
+    });
+    if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
+    return '<div class="d-grid">' + lista.map(function (d) {
+      return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
+        '<span class="d-card__f" style="background-image:url(../fotos/' + d[0] + '.jpg)" aria-hidden="true"></span>' +
+        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + ' · ' + d[3] + ' km</small></span></button>';
+    }).join('') + '</div>';
+  }
+
+  function pant1() {
+    $('main').dataset.pant = '1';
+    $('main').innerHTML = '<h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá tu destino, elegí las fechas y las personas.</p>' +
+      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="¿A dónde querés ir?" value="' + esc(S.q) + '" autocomplete="off"></label>' +
+      '<div class="d-h2"><h2>' + (S.q ? 'Resultados' : 'Destinos populares') + '</h2>' +
+      (S.q ? '' : '<button type="button" class="d-mas" data-todos="1" data-evento="destino_ver_todos">' + (S.todos ? 'Ver solo los populares' : 'Ver todos los destinos') + ' ›</button>') + '</div>' +
+      grilla();
+    $('foot').innerHTML = '';
+    $('foot').hidden = true;
+    document.title = 'Elegí tu destino · CuántoSale';
+    window.mockTrack('page_view', { page_path: '/viaje/destino', page_title: 'Elegí tu destino · CuántoSale', motivo: 'elegir_destino' });
+  }
+
+  function pant2() {
+    var d = destInfo();
+    $('main').dataset.pant = '2';
+    $('main').innerHTML = '<h1>¿Cuándo querés viajar?</h1><p class="d-sub">Elegí las fechas de tu viaje.</p>' +
+      '<div class="d-elegido">' + ic(I.pin, 20) + '<b>' + esc(d ? d[1] + ', ' + d[2] : '') + '</b><span>' + (d ? d[3] + ' km' : '') + '</span></div>' +
+      '<label class="d-lbl" for="ida">Desde</label><div class="d-fecha">' + ic(I.cal, 22) + '<input id="ida" type="date" min="' + sumarDias(iso(HOY), 1) + '" value="' + S.ida + '" aria-label="Fecha de ida"></div>' +
+      '<label class="d-lbl" for="vuelta">Hasta</label><div class="d-fecha">' + ic(I.cal, 22) + '<input id="vuelta" type="date" min="' + sumarDias(S.ida, 1) + '" value="' + S.vuelta + '" aria-label="Fecha de vuelta"></div>' +
+      '<h2 class="d-h2" style="margin-top:22px">¿Cuántas personas?</h2>' +
+      '<div class="d-pers">' + ic(I.ppl, 22) + '<b>' + S.pax + (S.pax === 1 ? ' persona' : ' personas') + '</b>' +
+      '<span style="display:flex;gap:8px"><button type="button" data-pax="-1" aria-label="Menos personas"' + (S.pax <= 1 ? ' disabled' : '') + '>−</button><button type="button" data-pax="1" aria-label="Más personas"' + (S.pax >= 9 ? ' disabled' : '') + '>+</button></span></div>' +
+      (S.err ? '<p class="d-vacio" role="alert" style="text-align:left;color:var(--coral)">' + esc(S.err) + '</p>' : '');
+    $('foot').hidden = false;
+    $('foot').innerHTML = '<button type="button" class="d-btn" data-seguir="1" data-evento="destino_continuar" data-destino="' + S.dest + '">Continuar →</button>';
+    document.title = '¿Cuándo querés viajar? · CuántoSale';
+  }
+
+  function pintar() { if (S.pant === 1) pant1(); else pant2(); }
+  function ir(n) { S.pant = n; pintar(); $('main').scrollTop = 0; }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button,a'); if (!t) return;
+    if (t.id === 'atras') {
+      if (S.pant === 1) location.href = 'home-dos-caminos.html' + debugQ;
+      else ir(1);
+      return;
+    }
+    if (t.dataset.todos) { S.todos = !S.todos; track('destino_ver_todos_toggle', { todos: S.todos }); pintar(); return; }
+    /* El click en la tarjeta ya dispara el evento data-evento="destino_elegido"
+       (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
+    if (t.dataset.dest) { S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
+    if (t.dataset.pax) { S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.pax))); S.err = ''; track('destino_personas', { personas: S.pax }); pant2(); return; }
+    if (t.dataset.seguir) {
+      var ida = ($('ida') || {}).value || S.ida, vuelta = ($('vuelta') || {}).value || S.vuelta;
+      S.ida = ida; S.vuelta = vuelta; S.err = '';
+      if (!(S.ida >= sumarDias(iso(HOY), 1))) { S.err = 'Elegí una fecha a partir de mañana.'; pant2(); return; }
+      if (!(S.vuelta > S.ida)) { S.err = 'La fecha de vuelta tiene que ser posterior a la de ida.'; pant2(); return; }
+      track('destino_continuar', { destino: S.dest, personas: S.pax });
+      var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_fechas', origen_home: fuente });
+      location.href = 'home-resultado.html?' + q.toString() + debugQ;
+      return;
+    }
+  });
+  $('main').addEventListener('input', function (e) {
+    if (e.target.id === 'bus') { S.q = e.target.value.trim(); var sel = document.getElementById('bus').selectionStart; pintar(); var b = document.getElementById('bus'); if (b) { b.focus(); try { b.setSelectionRange(sel, sel); } catch (x) { /* no todos los navegadores dejan */ } } }
+  });
+  /* Al entrar por la maqueta con ?destino=, se salta directo a las fechas. */
+  if (S.dest && destInfo()) { S.pant = 2; }
+  pintar();
+})();
+</script>
+<script src="cuenta.js"></script>
+</body>
+</html>

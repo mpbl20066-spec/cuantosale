@@ -221,10 +221,10 @@
     $('main').innerHTML = '<div class="p-step">' + barra() +
       '<h1 class="p-h">¿Cuánto querés gastar<br>en tu próximo viaje?</h1><p class="p-sub">Ingresá un monto estimado por persona para que te mostremos las mejores opciones.</p>' +
       '<div class="p-budget"><label for="pres">US$ <input id="pres" type="number" inputmode="numeric" min="100" max="9999" step="50" value="' + S.presupuesto + '"></label><span>por persona</span></div>' + ayuda() +
-      '<h2 class="p-h2">¿Cuándo querés viajar?</h2>' +
+      '</div><div class="p-form"><h2 class="p-h2">¿Cuándo querés viajar?</h2>' +
       CUANDO.map(function (c) {
         return '<button type="button" class="p-opt' + (S.cuando === c[0] ? ' is-on' : '') + '" data-cuando="' + c[0] + '" aria-pressed="' + (S.cuando === c[0]) + '"><span class="p-opt__i">' + ic(c[2], 22) + '</span>' + c[1] + '</button>';
-      }).join('') + '</div><div class="p-cta"><button type="button" class="p-go" data-sig="1" data-evento="presupuesto_paso1_continuar">Continuar →</button></div>';
+      }).join('') + '</div></div><div class="p-cta"><button type="button" class="p-go" data-sig="1" data-evento="presupuesto_paso1_continuar">Continuar →</button></div>';
   }
   /* Paso 2: segun lo elegido, fechas exactas, mes y noches, o solo noches. */
   function pintarPaso2() {
@@ -246,7 +246,7 @@
     } else {
       cuerpo = '<p class="p-sub">Si no tenés una fecha específica, podemos buscarte las mejores opciones según tu presupuesto.</p>' + noches;
     }
-    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cuándo querés viajar?</h1>' + tabs + cuerpo + personas() + ayuda() + '</div>' +
+    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cuándo querés viajar?</h1>' + tabs + '<div class="p-form">' + cuerpo + '</div><div class="p-form">' + personas() + ayuda() + '</div></div>' +
       '<div class="p-cta"><button type="button" class="p-go" data-buscar="1" data-evento="presupuesto_paso2_continuar" data-tipo_fechas="' + S.cuando + '">Continuar →</button></div>';
   }
   function pintar() {
