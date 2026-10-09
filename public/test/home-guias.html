@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="guias">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guías de destino · CuántoSale</title>
+<script src="tema.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Guías de destinos, en dos pantallas:
+     1 el menu de Destinos, en oscuro, como en la maqueta
+     2 la lista de destinos con su guía
+     El contenido de la guía no vive acá: se pide a /api/guia con el token que firma
+     el server, igual que en el sitio. Esta pantalla no abre la puerta: la pide. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button,input{font-family:var(--fb)}
+  .g-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+  .g-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .g-main{flex:1;overflow-y:auto;padding:4px 18px 18px;scrollbar-width:none}
+  .g-main::-webkit-scrollbar{display:none}
+  /* Pantalla 1: el menu de destinos, en azul noche como en la maqueta. */
+  .g-menu{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;background:#0A101A;color:#F2F6FB;padding:0 18px 22px}
+  .g-menu[hidden]{display:none}
+  .g-menu__t{display:flex;align-items:center;gap:10px;padding:16px 0 4px}
+  .g-menu__t h1{margin:0;font-family:var(--fh);font-size:22px;font-weight:800}
+  .g-menu .g-bus{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#F2F6FB}
+  .g-menu .g-bus input{color:#F2F6FB}
+  .g-menu .g-bus input::placeholder{color:#9FACC0}
+  .g-fila{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;margin-top:9px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.06);color:#F2F6FB;text-align:left;cursor:pointer}
+  .g-fila__i{flex:0 0 40px;height:40px;border-radius:12px;background:rgba(255,255,255,.1);display:grid;place-items:center}
+  .g-fila__t{flex:1;min-width:0}
+  .g-fila__t b{display:block;font-size:15px}
+  .g-fila__t small{display:block;margin-top:2px;font-size:12px;font-weight:600;color:#9FACC0}
+  .g-badge{flex:0 0 auto;min-width:24px;height:24px;padding:0 7px;border-radius:99px;background:#F7C325;color:#0A101A;font-size:12.5px;font-weight:800;display:grid;place-items:center}
+  /* Pantalla 2: lista de destinos con guía */
+  .g-tit{margin:6px 0 4px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .g-sub{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.45}
+  .g-bus{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink)}
+  .g-bus svg{flex:0 0 22px;color:#1F6FB5}
+  .g-bus input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:16px;font-weight:600}
+  .g-bus input::placeholder{color:var(--ink2)}
+  .g-lista{display:flex;flex-direction:column;gap:11px;margin-top:14px}
+  .g-dest{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;cursor:pointer}
+  .g-dest:hover{border-color:var(--ink2)}
+  .g-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .g-dest__f{flex:0 0 78px;height:62px;border-radius:12px;background:var(--cel-soft) center/cover}
+  .g-dest__t{flex:1;min-width:0}
+  .g-dest__t b{display:block;font-family:var(--fh);font-size:16px;line-height:1.2}
+  .g-dest__t small{display:block;margin-top:3px;font-size:12.5px;font-weight:700;color:#1F6FB5}
+  .g-dest__c{flex:0 0 16px;color:var(--ink2)}
+  .g-vacio{padding:22px 4px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="g-bar">
+    <button type="button" class="g-back" id="atras" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <div style="flex:1"></div>
+  </div>
+  <div class="g-main" id="main"></div>
+  <div class="g-menu" id="menu">
+    <div class="g-menu__t"><svg width="24" height="30" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#F2F6FB"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><h1>Destinos</h1></div>
+    <label class="g-bus" for="busmenu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg><input id="busmenu" type="search" placeholder="Explorar destinos" autocomplete="off"></label>
+    <div id="menuFilas"></div>
+  </div>
+</div>
+<script src="viaje-datos.js"></script>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search), debug = /[?&]debug=1/.test(location.search);
+  var C = window.CS_Viaje, $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var ic = function (p, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
+  var I = { lupa: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>', chev: '<path d="m9 5 7 7-7 7"/>',
+    libro: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v16H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v4H6.5A2.5 2.5 0 0 1 4 20.5z"/>',
+    corazon: '<path d="M6 3h12v18l-6-4.5L6 21z"/>' };
+  var S = { pant: 1, q: '' };
+  /* Las claves son las del modelo (viaje-datos.js), ordenadas por nombre para que la
+     lista se lea como un indice y no como la tabla del modelo. */
+  var CLAVES = Object.keys(C.Nombres).sort(function (a, b) { return C.Nombres[a].localeCompare(C.Nombres[b], 'es'); });
+  var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant }, p || {})); };
+
+  function menu() {
+    $('menu').hidden = false;
+    $('menuFilas').innerHTML =
+      fila('libro', 'Guía de viaje', 'Qué hacer, playas, comida y tips', CLAVES.length, 'guias') +
+      fila('corazon', 'Mis favoritos', 'Los destinos que guardaste', null, 'favoritos') +
+      fila('lupa', 'Explorar destinos', 'Buscar por nombre', null, 'explorar');
+  }
+  function fila(ico, titulo, sub, badge, accion) {
+    return '<button type="button" class="g-fila" data-accion="' + accion + '" data-evento="guias_menu" data_accion="' + accion + '">' +
+      '<span class="g-fila__i">' + ic(I[ico], 20) + '</span><span class="g-fila__t"><b>' + esc(titulo) + '</b><small>' + esc(sub) + '</small></span>' +
+      (badge ? '<span class="g-badge">' + badge + '</span>' : '') + ic(I.chev, 16) + '</button>';
+  }
+  function lista() {
+    $('menu').hidden = true;
+    var q = S.q.toLowerCase();
+    var l = CLAVES.filter(function (k) { return !q || C.Nombres[k].toLowerCase().indexOf(q) >= 0; });
+    $('main').innerHTML = '<h1 class="g-tit">Guías de viaje</h1>' +
+      '<p class="g-sub">Qué hacer, dónde comer y los tips que ahorran plata.<br>Elegí un destino y leé la guía antes de armarte el viaje.</p>' +
+      '<label class="g-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="Buscar destino…" value="' + esc(S.q) + '" autocomplete="off"></label>' +
+      (l.length ? '<div class="g-lista">' + l.map(function (k) {
+        return '<button type="button" class="g-dest" data-dest="' + k + '" data-evento="guias_abrir" data-destino="' + k + '">' +
+          '<span class="g-dest__f" style="background-image:url(../fotos/' + k + '.jpg)" aria-hidden="true"></span>' +
+          '<span class="g-dest__t"><b>' + esc(C.Nombres[k]) + '</b><small>Guía de viaje</small></span>' +
+          ic(I.chev, 16) + '</button>';
+      }).join('') + '</div>' : '<p class="g-vacio">No encontramos ese destino.<br>Probá con otro nombre.</p>');
+  }
+  function pintar() { if (S.pant === 1) menu(); else lista(); }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.id === 'atras') { location.href = 'home-dos-caminos.html' + (debug ? '?debug=1' : ''); return; }
+    if (t.dataset.accion) {
+      if (t.dataset.accion === 'guias') { S.pant = 2; track('guias_ver_lista'); pintar(); $('bus').focus(); return; }
+      /* "Mis favoritos" y "Explorar destinos" todavia no tienen destino propio: el
+         menu no trae a la nada, avisamos y dejamos al usuario en la lista. */
+      window.mockTrack('guias_menu_sin_pantalla', { accion: t.dataset.accion });
+      S.pant = 2; pintar();
+      return;
+    }
+    if (t.dataset.dest) { track('guias_abrir', { destino: t.dataset.dest }); location.href = 'home-guia.html?destino=' + t.dataset.dest + (debug ? '&debug=1' : ''); }
+  });
+  document.addEventListener('input', function (e) {
+    if (e.target.id === 'bus') { S.q = e.target.value.trim(); lista(); var b = $('bus'); if (b) { var c = e.target.selectionStart; b.focus(); try { b.setSelectionRange(c, c); } catch (x) { /* no todos dejan */ } } }
+  });
+  pintar();
+})();
+</script>
+<script src="cuenta.js"></script>
+</body>
+</html>

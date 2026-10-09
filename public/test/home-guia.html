@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es" data-theme="light" data-pagina="guia">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía del destino · CuántoSale</title>
+<script src="tema.js"></script>
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Guia de un destino. Las pestanas son Que hacer / Playas / Comida / Tips.
+     El contenido no esta en esta pagina: se pide a /api/guia con el token que firma
+     el server, igual que en el sitio principal. Si el server no tiene con que
+     firmar, la guia queda cerrada y se dice, sin error raro. */
+  body{background:#E9EDF3;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  button{font-family:var(--fb)}
+  .u-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 14px;position:absolute;top:0;left:0;right:0;z-index:4}
+  .u-back{width:40px;height:40px;margin-left:-8px;border:0;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+  .u-back svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+  .u-main{flex:1;overflow-y:auto;scrollbar-width:none}
+  .u-main::-webkit-scrollbar{display:none}
+  .u-hero{position:relative;height:220px;background:var(--cel-soft) center/cover}
+  .u-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.45) 0,transparent 38%,rgba(10,16,26,.62) 100%)}
+  .u-hero__t{position:absolute;left:18px;right:18px;bottom:14px;z-index:1;color:#fff}
+  .u-hero__t h1{margin:0;font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.45)}
+  .u-hero__t small{display:block;margin-top:4px;font-size:13px;font-weight:600;opacity:.95}
+  .u-hero__vol{display:block;margin-top:6px;font-size:12.5px;font-weight:700;color:#fff;opacity:.9}
+  .u-cuerpo{padding:14px 18px 0}
+  .u-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:3;padding:10px 0 0;background:var(--bg);overflow-x:auto;scrollbar-width:none}
+  .u-tabs::-webkit-scrollbar{display:none}
+  .u-tab{flex:0 0 auto;padding:10px 13px;border:0;border-bottom:2.5px solid transparent;background:transparent;color:var(--ink2);font-size:13.5px;font-weight:700;cursor:pointer}
+  .u-tab.is-on{color:var(--ink);border-bottom-color:var(--accent)}
+  .u-tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+  .u-lead{margin:0 0 14px;font-size:14.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .u-h2{margin:18px 0 8px;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
+  .u-item{padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:9px}
+  .u-item b{display:block;font-size:15px;line-height:1.25}
+  .u-item .meta{display:block;margin-top:3px;font-size:12px;font-weight:700;color:#1F6FB5}
+  .u-item p{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .u-foto{height:110px;margin:-13px -13px 10px;border-radius:16px 16px 0 0;background:var(--cel-soft) center/cover}
+  .u-precio{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:12px;font-weight:800}
+  .u-temp{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.5}
+  /* El cierre: desde la guia al buscador, como en la maqueta. */
+  .u-handoff{margin:22px 18px 0;padding:18px;border:1.5px solid #1F6FB5;border-radius:20px;background:var(--cel-soft);color:var(--ink)}
+  .u-handoff h2{margin:0 0 5px;font-family:var(--fh);font-size:19px;font-weight:800;line-height:1.2}
+  .u-handoff p{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .u-handoff__b{display:flex;gap:9px}
+  .u-handoff__b a,.u-handoff__b button{flex:1;box-sizing:border-box;padding:14px;border-radius:14px;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}
+  .u-go{background:var(--action-bg);color:var(--action-ink);border:0}
+  .u-volver{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);border:0}
+  .u-cargando{padding:30px 18px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
+  .u-cerrada{margin:14px 18px 0;padding:18px;border:1px dashed var(--line);border-radius:18px;background:var(--surface);text-align:center}
+  .u-cerrada b{display:block;font-family:var(--fh);font-size:16px;margin-bottom:5px}
+  .u-cerrada small{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .u-foot{flex:0 0 auto;padding:8px 18px 20px;background:var(--bg)}
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
+  <div class="u-bar">
+    <button type="button" class="u-back" id="atras" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+  </div>
+  <div class="u-main" id="main"></div>
+  <div class="u-foot" id="foot"></div>
+</div>
+<script src="viaje-datos.js"></script>
+<script src="home-track.js"></script>
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search), debug = /[?&]debug=1/.test(location.search);
+  var C = window.CS_Viaje, $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var K = qs.get('destino') || 'fln', NOM = C.Nombres[K] || 'Tu destino';
+  var TAB = [{ id: 'hacer', nom: 'Qué hacer' }, { id: 'playas', nom: 'Playas' }, { id: 'comer', nom: 'Comida' }, { id: 'tips', nom: 'Tips' }];
+  var S = { tab: 'hacer', guia: null, estado: 'cargando' };
+  var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
+  var usd = function (n) { return 'US$ ' + Math.round(Number(n) || 0); };
+
+  function cabecera() {
+    return '<div class="u-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="u-hero__t"><h1>' + esc(NOM) + '</h1>' +
+      '<small>' + (S.guia && S.guia.región ? esc(S.guia.región) : 'Brasil') + '</small>' +
+      (S.guia && S.guia.temporada ? '<span class="u-hero__vol">Temporada alta: ' + S.guia.temporada.alta.map(function (m) { return C.MESES[m]; }).join(', ') + '</span>' : '') +
+      '</div></div>';
+  }
+  function listaGuia() {
+    var g = S.guia || {};
+    if (S.tab === 'hacer') {
+      var h = g.hacer || [];
+      return '<h2 class="u-h2">Las claves antes de que te pagues el viaje</h2>' +
+        (h.length ? h.map(function (x) {
+          return '<div class="u-item"><b>' + esc(x.name) + '</b><span class="meta">' + esc(x.zona || '') + (x.dur ? ' · ' + esc(x.dur) : '') + '</span>' +
+            (x.nota ? '<p>' + esc(x.nota) + '</p>' : '') + (typeof x.usd === 'number' ? '<span class="u-precio">' + usd(x.usd) + '</span>' : '') + '</div>';
+        }).join('') : vacio(' todavia no hay nada para hacer acá.'));
+    }
+    if (S.tab === 'playas') {
+      var b = g.beaches || [];
+      return '<h2 class="u-h2">Playas</h2>' +
+        (b.length ? b.map(function (x) {
+          return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')"></div>' : '') +
+            '<b>' + esc(x.name) + '</b><span class="meta">' + esc(x.zona || '') + (x.cuando ? ' · ' + esc(x.cuando) : '') + '</span>' +
+            (x.vibe ? '<p>' + esc(x.vibe) + '</p>' : '') + '</div>';
+        }).join('') : vacio(' este destino no tiene playas registradas.'));
+    }
+    if (S.tab === 'comer') {
+      var c = g.comer || [];
+      return '<h2 class="u-h2">Dónde comer</h2>' +
+        (c.length ? c.map(function (x) {
+          return '<div class="u-item"><b>' + esc(x.name) + '</b><span class="meta">' + esc(x.tipo || '') + (x.zona ? ' · ' + esc(x.zona) : '') + '</span>' +
+            (x.momento ? '<p>' + esc(x.momento) + '</p>' : '') + (x.nota ? '<p>' + esc(x.nota) + '</p>' : '') +
+            (typeof x.usd === 'number' ? '<span class="u-precio">' + usd(x.usd) + '</span>' : '') + '</div>';
+        }).join('') : vacio(' todavia no hay lugares de comida cargados.'));
+    }
+    var t = g.tips || [];
+    return '<h2 class="u-h2">Tips</h2>' +
+      (t.length ? t.map(function (x) {
+        return '<div class="u-item"><b>' + esc(x.titulo) + '</b><p>' + esc(x.texto) + '</p></div>';
+      }).join('') : vacio(' todavia no hay tips cargados.'));
+  }
+  function vacio(d) { return '<p class="u-cargando">' + esc(d) + '</p>'; }
+
+  function pintar() {
+    var cuerpo;
+    if (S.estado === 'cargando') cuerpo = '<div class="u-cargando" role="status">Cargando la guía…</div>';
+    else if (S.estado === 'cerrada') cuerpo = '<div class="u-cerrada"><b>La guía no está disponible</b><small>No pudimos abrirla ahora. Podés ver los destinos y calcular tu viaje igual.</small></div>';
+    else cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' +
+      '<div class="u-tabs" role="tablist">' + TAB.map(function (t) {
+        return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + '</button>';
+      }).join('') + '</div>' +
+      '<div role="tabpanel">' + listaGuia() + '</div>' +
+      '<h2 class="u-h2">Todo lo que necesitas saber<br>para tu viaje a ' + esc(NOM) + '</h2>' +
+      (S.guia.temporada && S.guia.temporada.nota ? '<p class="u-temp">' + esc(S.guia.temporada.nota) + '</p>' : '') +
+      '<div class="u-handoff"><h2>¿Te gusta este destino?</h2>' +
+      '<p>Calculá cuánto sale tu viaje y reservá en pocos pasos.</p>' +
+      '<div class="u-handoff__b"><a class="u-go" href="home-destino.html?destino=' + K + '&fuente=guia" data-evento="guia_calcular_viaje" data-destino="' + K + '">Calcular un viaje →</a>' +
+      '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver a la guía</button></div></div>';
+    $('main').innerHTML = cabecera() + '<div class="u-cuerpo">' + cuerpo + '</div>';
+    $('foot').innerHTML = S.estado === 'cerrada' ? '<a class="u-go" style="display:block;padding:15px;border-radius:14px;text-align:center;font-weight:800;text-decoration:none;background:var(--action-bg);color:var(--action-ink)" href="home-destino.html?destino=' + K + '&fuente=guia_cerrada">Buscar otro destino</a>' : '';
+    document.title = NOM + ' · Guía de viaje · CuántoSale';
+  }
+
+  /* La guia se pide en dos pasos, como en el sitio: primero el token que firma el
+     server y despues el contenido. 503 y 403 no son errores: significan que la guia
+     esta cerrada, y se muestra el estado cerrado sin romperse. */
+  function pedirGuia() {
+    var d = encodeURIComponent(K);
+    fetch('/api/guia/token?dest=' + d)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (tk) {
+        if (!tk || !tk.token) { S.estado = 'cerrada'; pintar(); return; }
+        return fetch('/api/guia?dest=' + d + '&token=' + encodeURIComponent(tk.token))
+          .then(function (r) { if (r.status === 403 || r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function (data) {
+            if (data && data.guia) { S.guia = data.guia; S.estado = 'abierta'; track('guia_abierta', { secciones: TAB.map(function (t) { return (data.guia[t.id === 'hacer' ? 'hacer' : t.id === 'playas' ? 'beaches' : t.id === 'comer' ? 'comer' : 'tips'] || []).length; }) });
+              pintar(); return; }
+            S.estado = 'cerrada'; pintar();
+          });
+      })
+      .catch(function () { S.estado = 'cerrada'; pintar(); });
+  }
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+    if (t.id === 'atras') { location.href = 'home-guias.html' + (debug ? '?debug=1' : ''); return; }
+    if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
+    if (t.dataset.volver) { $('main').scrollTop = 0; track('guia_volver'); }
+  });
+  pintar();
+  pedirGuia();
+})();
+</script>
+<script src="cuenta.js"></script>
+</body>
+</html>

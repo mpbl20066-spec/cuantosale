@@ -174,7 +174,9 @@
     /* Tabs "Inicio" y "Destinos". "Guardados" y "Perfil" los maneja cuenta.js por
        data-tab, asi que acá no se tocan para no abrir dos veces el panel. */
     var t = e.target.closest('.tab'); if (t && (t.dataset.tab === 'inicio' || t.dataset.tab === 'destinos')) {
-      location.href = t.dataset.tab === 'inicio' ? 'home-dos-caminos.html' : 'home-destino.html?fuente=home_tab_destinos';
+      /* "Destinos" abre el menu de destinos, que es donde estan las guias; el
+         buscador por nombre sigue en "Ver todos los destinos". */
+      location.href = t.dataset.tab === 'inicio' ? 'home-dos-caminos.html' : 'home-guias.html?fuente=home_tab_destinos';
       return;
     }
   });

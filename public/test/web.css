@@ -232,6 +232,48 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="reserva"] .r-nota{font-size:12.5px}
 }
 
+/* ============ Guias de destinos ============ */
+@media (min-width:768px){
+  [data-pagina="guias"] .g-bar{padding:8px var(--gut) 0}
+  [data-pagina="guias"] .phone{justify-content:flex-start;box-sizing:border-box}
+  [data-pagina="guias"] .g-main{padding:10px var(--gut) 28px;width:100%;box-sizing:border-box;max-width:900px;margin:0 auto}
+  [data-pagina="guias"] .g-tit{font-size:clamp(32px,1.5vw + 24px,42px)}
+  [data-pagina="guias"] .g-sub{font-size:16px}
+  [data-pagina="guias"] .g-bus{padding:16px 18px}
+  [data-pagina="guias"] .g-bus input{font-size:17px}
+  /* La lista de destinos va en grilla: son muchas tarjetas angostas en una tira. */
+  [data-pagina="guias"] .g-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  [data-pagina="guias"] .g-dest{padding:12px}
+  [data-pagina="guias"] .g-dest__f{flex-basis:96px;height:76px}
+  [data-pagina="guias"] .g-dest__t b{font-size:17px}
+  [data-pagina="guias"] .g-dest__t small{font-size:13px}
+  /* El menu oscuro se vuelve una columna angota pegada al costado, como un panel. */
+  [data-pagina="guias"] .g-menu{left:auto;width:min(420px,92%);box-shadow:-20px 0 50px rgba(10,16,26,.4);padding:14px var(--gut) 28px;justify-content:center}
+}
+@media (min-width:1100px){
+  [data-pagina="guias"] .g-lista{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (min-width:768px){
+  [data-pagina="guia"] .u-main{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);column-gap:34px;align-content:start;padding:0}
+  [data-pagina="guia"] .u-hero{grid-column:1;grid-row:1/span 6;position:sticky;top:0;height:min(520px,72vh)}
+  [data-pagina="guia"] .u-hero__t{left:20px;right:20px;bottom:18px}
+  [data-pagina="guia"] .u-hero__t h1{font-size:38px}
+  [data-pagina="guia"] .u-hero__t small{font-size:15px}
+  [data-pagina="guia"] .u-cuerpo{grid-column:2;padding:16px 22px 0 0}
+  [data-pagina="guia"] .u-handoff{margin:22px 22px 0 0}
+  [data-pagina="guia"] .u-cerrada{margin:14px 22px 0 0}
+  [data-pagina="guia"] .u-foot{padding:10px 22px 24px 0}
+  [data-pagina="guia"] .u-h2{font-size:20px}
+  [data-pagina="guia"] .u-lead{font-size:15.5px}
+  [data-pagina="guia"] .u-tab{font-size:15px;padding:12px 16px}
+  [data-pagina="guia"] .u-item{padding:15px}
+  [data-pagina="guia"] .u-item b{font-size:16px}
+  [data-pagina="guia"] .u-item p{font-size:14px}
+  [data-pagina="guia"] .u-foto{height:150px;margin:-15px -15px 12px}
+  [data-pagina="guia"] .u-handoff h2{font-size:21px}
+  [data-pagina="guia"] .u-handoff p{font-size:14.5px}
+}
+
 /* ============ Resultado (mejor presupuesto) ============ */
 @media (min-width:768px){
   [data-pagina="resultado"] .scroll{padding:8px var(--gut) 24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:36px;align-content:start}
