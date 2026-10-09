@@ -498,3 +498,42 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 @media (min-width:1024px){
   [data-pagina="guias"] .g-menu{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 48px));height:auto;max-height:calc(100% - 48px);overflow-y:auto;border-radius:24px;padding:8px 24px 24px;box-shadow:0 30px 80px rgba(10,16,26,.38)}
 }
+
+/* ============ Desktop: scrollea la pagina, no una caja interna ============
+   Causa raiz del contenido cortado: cada pantalla es una caja .phone de la altura de la ventana con UNA zona interna que scrollea,
+   entre una cabecera y un pie fijos. En una ventana baja (1366x768) la barra comun, la cabecera y el pie se comen ~35 % del alto
+   y el contenido queda en una ventanita (detalle: 483px, con el pie de 162px tapando tarjetas). Desde 1024px la pagina vuelve a
+   scrollear normal: .phone crece con el contenido, el pie queda pegado abajo (sticky) y los paneles flotantes pasan a fixed.
+   < 1024px no cambia nada (celular y tablet siguen con el modelo de pantalla completa). */
+@media (min-width:1024px){
+  html.cs-hdr .cs-top{position:sticky;top:0}
+  html.cs-hdr .phone{height:auto!important;min-height:calc(100vh - 68px)!important;min-height:calc(100dvh - 68px)!important;overflow:visible!important}
+  html.cs-hdr .phone>.c-main,html.cs-hdr .phone>.d-main,html.cs-hdr .phone>.p-main,html.cs-hdr .phone>.r-main,
+  html.cs-hdr .phone>.t-main,html.cs-hdr .phone>.u-main,html.cs-hdr .phone>.g-main,html.cs-hdr .phone>.f-scroll,
+  html.cs-hdr .phone>.scroll{overflow:visible!important;min-height:0}
+  /* pie de accion: pegado al borde inferior de la ventana mientras haya contenido por debajo */
+  html.cs-hdr .phone>.c-foot,html.cs-hdr .phone>.d-foot,html.cs-hdr .phone>.p-foot,html.cs-hdr .phone>.r-foot,
+  html.cs-hdr .phone>.t-foot,html.cs-hdr .phone>.u-foot,html.cs-hdr .phone>.f-foot{position:sticky;bottom:0;z-index:6}
+  /* fotos pegajosas: debajo de la barra comun (68px) con un margen */
+  [data-pagina="detalle"] .t-hero,[data-pagina="guia"] .u-hero,[data-pagina="resultado"] .r-photo{top:84px}
+  /* paneles y ventanas flotantes: cubren la ventana (debajo de la barra comun), no el .phone que ahora es mas alto */
+  html.cs-hdr .f-modal,html.cs-hdr .g-full,html.cs-hdr .p-over,html.cs-hdr .r-over,html.cs-hdr .g-menu{position:fixed}
+  html.cs-hdr .f-modal,html.cs-hdr .g-full,html.cs-hdr .p-over,html.cs-hdr .r-over{inset:68px 0 0 0;overscroll-behavior:contain}
+
+  /* home: misma idea. La barra superior queda pegada y .scroll deja de ser una caja interna */
+  html[data-pagina="home"] .phone{height:auto!important;min-height:100vh!important;min-height:100dvh!important;overflow:visible!important}
+  [data-pagina="home"] .phone>.scroll{overflow:visible!important;min-height:0}
+  [data-pagina="home"] .tabs{position:sticky;top:0;z-index:30}
+
+  /* detalle: pie en una fila (antes eran dos botones a todo el ancho y 162px de alto) */
+  [data-pagina="detalle"] .t-foot{justify-content:center}
+  [data-pagina="detalle"] .t-foot>div{flex:0 1 760px!important;display:flex;gap:12px}
+  [data-pagina="detalle"] .t-foot>div>.t-btn--main{flex:1}
+  [data-pagina="detalle"] .t-foot2{flex:1;margin-top:0}
+  [data-pagina="detalle"] .t-foot{padding-top:10px;padding-bottom:16px}
+}
+/* detalle: las pestanas eran un contenedor con overflow-x:auto dentro de una grilla; con poca altura su fila se
+   comprimia a 4px y desaparecian. En >= 768px caben enteras, asi que no necesitan scroll propio. */
+@media (min-width:768px){
+  [data-pagina="detalle"] .t-tabs{overflow:visible;flex:none;min-height:46px}
+}

@@ -19,4 +19,17 @@
     '</nav>';
   document.body.insertBefore(h, document.body.firstChild);
   document.documentElement.classList.add('cs-hdr');
+
+  /* En escritorio (>= 1024px) scrollea la pagina y no la caja #main (ver web.css). Las pantallas guardan y restauran
+     $('main').scrollTop al repintar: se redirige a la ventana para no tocar cada una. */
+  var mq = window.matchMedia('(min-width:1024px)');
+  var m = document.getElementById('main');
+  if (m) {
+    var d = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop');
+    Object.defineProperty(m, 'scrollTop', {
+      configurable: true,
+      get: function () { return mq.matches ? window.pageYOffset : d.get.call(m); },
+      set: function (v) { if (mq.matches) window.scrollTo(0, v); else d.set.call(m, v); }
+    });
+  }
 })();
