@@ -106,7 +106,7 @@
   .d-list{list-style:none;margin:0;padding:0}
   .d-list li{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14.5px;font-weight:600;color:var(--ink)}
   .d-list svg{flex:0 0 20px;color:var(--good)}
-  .p-foot{flex:0 0 auto;padding:10px 14px 22px;background:var(--bg);border-top:1px solid var(--line)}
+  .p-foot{flex:0 0 auto;padding:10px 14px calc(28px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line)}
   .p-go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-family:var(--fb);font-size:14px;font-weight:800;letter-spacing:.02em;text-decoration:none;cursor:pointer}
   @media (max-width:520px){
     body{display:block;padding:0;background:var(--bg)}
@@ -133,6 +133,9 @@
   .p-dst__go:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .p-dst.is-over .p-dst__f2 b{color:var(--ink2)}
   .p-eyebrow{margin:0 0 6px;font-size:11.5px;font-weight:800;letter-spacing:.06em;color:var(--azul)}
+  .p-opt__i{width:44px;height:44px}.p-opt__i svg{width:26px;height:26px}
+  [data-theme="night"] .p-card{background:#1A2B4A;border-color:#2C4468}
+  [data-theme="night"] .p-eyebrow{color:var(--accent)}
   .p-card h1.p-h{margin:0 0 6px;font-size:22px;color:var(--ink)}
   .p-card .p-h2{margin:14px 0 8px;font-size:14px;color:var(--ink)}
   .p-card .p-h2--c{margin-top:20px}
@@ -322,7 +325,7 @@
       '<span><button type="button" data-pax="-1" aria-label="Menos personas"' + (S.pax <= 1 ? ' disabled' : '') + '>−</button><button type="button" data-pax="1" aria-label="Más personas"' + (S.pax >= 9 ? ' disabled' : '') + '>+</button></span></div>';
   };
   /* Paso 1: cuanto quiere gastar y si tiene fechas. */
-  var CUANDO1 = [['fechas', 'Tengo fechas definidas', 'Elegí cuándo salís y cuándo volvés.', iCal], ['flexible', 'Tengo fechas flexibles', 'Buscamos opciones en distintos días.', iCal], ['igual', 'Puedo viajar en cualquier momento', 'Priorizamos los destinos que mejor se ajustan a tu presupuesto.', iMezcla]];
+  var CUANDO1 = [['fechas', 'Tengo fechas definidas', 'Elegí cuándo salís y cuándo volvés.', iCal], ['flexible', 'Tengo fechas flexibles', 'Buscamos opciones en distintos días.', iCal], ['igual', 'Puedo viajar en cualquier momento', 'Priorizamos los destinos que se ajustan a tu presupuesto.', iMezcla]];
   var MONTOS = [500, 1000, 1500, 2000];
   function pintarPaso1() {
     $('main').innerHTML = '<div class="p-step">' +
