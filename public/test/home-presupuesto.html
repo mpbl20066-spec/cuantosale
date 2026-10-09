@@ -259,13 +259,20 @@
   var track = function (n, p) { window.mockTrack(n, Object.assign({ fuente: fuente, presupuesto: S.presupuesto, modo: S.modo }, p || {})); };
 
   /* Un pedido por medio de transporte; el presupuesto que recibe el servidor es el del grupo entero. */
+  var enVuelo = false;   /* hay una consulta en curso: evita pedidos duplicados (doble toque en Reintentar) */
+  var msgError = function (e) {
+    return (e && /Failed to fetch|NetworkError|Load failed/i.test(e.message || e)) || !e
+      ? 'No pudimos conectar con CuántoSale. Revisá tu conexión e intentá de nuevo.'
+      : String(e.message || e);
+  };
   function cargar() {
-    S.cargando = true; S.error = ''; pintar();
+    if (enVuelo) return Promise.resolve();
+    enVuelo = true; S.cargando = true; S.error = ''; pintar();
     var ped = Object.keys(TRANSPORTE).map(function (m) {
       var q = new URLSearchParams({ dep: IDA, ret: VUELTA, pax: PAX, budget: Math.round(S.presupuesto * PAX), style: 'eq', transport: TRANSPORTE[m] });
-      return fetch('/api/cotizar-todos?' + q.toString()).then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'error'); return j; }); })
+      return fetch('/api/cotizar-todos?' + q.toString()).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'El servidor no pudo responder (' + r.status + ').'); return j; }); })
         .then(function (j) { return { m: m, options: j.options || [] }; })
-        .catch(function (e) { return { m: m, options: [], error: e.message }; });
+        .catch(function (e) { return { m: m, options: [], error: msgError(e) }; });
     });
     return Promise.all(ped).then(function (rs) {
       DESTS = {};
@@ -275,9 +282,12 @@
           d.precios[r.m] = { pp: o.pp, total: o.total, parts: o.parts };
         });
       });
-      if (!Object.keys(DESTS).length) S.error = (rs[0] && rs[0].error) || 'No pudimos consultar los destinos ahora.';
-      S.cargando = false; S.n = 6; pintar();
-      track('presupuesto_cargado', { destinos: Object.keys(DESTS).length, error: S.error ? 1 : 0 });
+      /* Error solo si fallaron todas las consultas. Si respondio alguna, hay resultados reales
+         (o una busqueda terminada sin destinos) y no se oculta nada detras de un error. */
+      var fallaron = rs.filter(function (r) { return r.error; });
+      if (fallaron.length === rs.length) S.error = fallaron[0].error;
+      enVuelo = false; S.cargando = false; S.n = 6; pintar();
+      track('presupuesto_cargado', { destinos: Object.keys(DESTS).length, error: S.error ? 1 : 0, medios_fallidos: fallaron.length });
     });
   }
 
@@ -314,7 +324,7 @@
   var MONTOS = [500, 1000, 1500, 2000];
   function pintarPaso1() {
     $('main').innerHTML = '<div class="p-step">' +
-      '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCÁ UN VIAJE A TU MEDIDA</p><span class="p-badge">1 de 4</span></div>' +
+      '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCÁ UN VIAJE A TU MEDIDA</p></div>' +
       '<h1 class="p-h">¿Cuánto querés gastar en tu próximo viaje?</h1><p class="p-sub">Encontrá destinos que se ajusten a tu presupuesto, viajando en avión, auto o bus.</p>' +
       '<h2 class="p-h2">Tu presupuesto por persona</h2>' +
       '<div class="p-budget"><label for="pres">US$ <input id="pres" type="number" inputmode="numeric" min="100" max="9999" step="50" value="' + S.presupuesto + '"></label><span>por persona</span></div>' +
@@ -426,6 +436,7 @@
     else cuerpo = '<div class="p-dsts">' + l.map(function (x) { return tarjetaDest(x, noches); }).join('') +
       (dentro.length > l.length ? '<button type="button" class="p-chip" data-mas="1" style="align-self:center;margin-top:4px">Ver más destinos</button>' : '') + '</div>';
     var sub = S.cargando ? 'Buscando opciones para tu presupuesto…'
+      : S.error ? 'No pudimos completar la búsqueda para ' + f(S.presupuesto) + ' por persona.'
       : (dentro.length ? 'Encontramos ' + dentro.length + (dentro.length === 1 ? ' opción que se ajusta' : ' opciones que se ajustan') + ' a tu presupuesto de ' + f(S.presupuesto) + ' por persona.'
         : 'No encontramos destinos para ' + f(S.presupuesto) + ' por persona.');
     $('main').innerHTML = '<div class="p-step">' +
