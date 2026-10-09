@@ -100,6 +100,9 @@
   .tabs{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;padding:8px 8px 22px;background:var(--surface);border-top:1px solid var(--line)}
   /* El logo de la barra va solo en escritorio, donde la barra pasa a ser la
      navegacion superior; en celular el logo ya esta arriba, sobre la foto. */
+  .tabs__menu{display:none}
+  .tabs__lt small{display:none}
+  .tabs__lt b{font-weight:800}
   .tabs__logo{display:none;align-items:center;gap:7px;padding-left:16px;font-family:var(--fh);font-weight:800;font-size:19px;color:var(--ink)}
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 7px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:11.5px;font-weight:600;cursor:pointer;position:relative}
   .tab svg{width:24px;height:24px}
@@ -155,7 +158,7 @@
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
       </span>
       <span class="m-card__txt"><b>Ya sé dónde quiero ir</b><small>Elegí tu destino y calculá cuánto necesitás para viajar.</small></span>
-      <span class="m-card__cta">Calcular mi viaje</span>
+      <span class="m-card__cta">Calcular mi viaje <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     </a>
 
     <a class="m-card m-card--main" href="home-presupuesto.html?fuente=home_card_presupuesto" data-evento="home_camino" data-camino="no_se_donde" data-fuente="home_card_presupuesto">
@@ -163,13 +166,13 @@
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
       </span>
       <span class="m-card__txt"><b>No sé dónde ir</b><small>Decinos cuánto querés gastar y encontrá destinos que te convengan.</small><span class="m-card__tag">Lo que nos distingue</span></span>
-      <span class="m-card__cta">Buscar por presupuesto</span>
+      <span class="m-card__cta">Buscar por presupuesto <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     </a>
     </div>
 
     <div class="m-sec">
       <h2>Destinos populares</h2>
-      <button type="button" class="m-more" data-evento="home_ver_todos">Ver todos ›</button>
+      <button type="button" class="m-more" data-evento="home_ver_todos">Ver todos <svg class="m-more__a" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </div>
     <div class="m-car" role="list" aria-label="Destinos populares">
       <button type="button" class="m-dest" role="listitem" data-destino="rio" data-evento="home_destino_popular"><img src="../fotos/rio.jpg" alt=""><span>Río de Janeiro</span></button>
@@ -181,11 +184,12 @@
   </div>
 
   <nav class="tabs" aria-label="Navegación principal">
-    <span class="tabs__logo" aria-hidden="true"><svg width="20" height="24" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale</span>
+    <span class="tabs__logo" aria-hidden="true"><svg width="20" height="24" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span class="tabs__lt"><b>cuántosale</b><small>Tu viaje, sin sorpresas</small></span></span>
     <button type="button" class="tab is-on" data-evento="home_tab" data-tab="inicio" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5z"/></svg>Inicio</button>
     <button type="button" class="tab" data-evento="home_tab" data-tab="destinos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Destinos</button>
     <button type="button" class="tab" data-evento="home_tab" data-tab="guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>Guardados</button>
     <button type="button" class="tab" data-evento="home_tab" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Perfil</button>
+    <button type="button" class="tabs__menu" data-perfil data-evento="home_menu" aria-label="Abrir el menú de la cuenta"><span></span><span></span><span></span></button>
     <span class="home-bar" aria-hidden="true"></span>
   </nav>
 </div>
