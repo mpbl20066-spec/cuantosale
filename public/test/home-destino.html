@@ -137,7 +137,7 @@
     if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
     return '<div class="d-grid">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
-        '<span class="d-card__f" style="background-image:url(../fotos/' + d[0] + '.jpg)" aria-hidden="true"></span>' +
+        '<span class="d-card__f" style="background-image:url(' + (['buz', 'bombinhas', 'bcm'].indexOf(d[0]) >= 0 ? 'dest/' : '../fotos/') + d[0] + '.jpg)" aria-hidden="true"></span>' +
         '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + ' · ' + d[3] + ' km</small></span></button>';
     }).join('') + '</div>';
   }
@@ -260,5 +260,6 @@
 })();
 </script>
 <script src="cuenta.js"></script>
+<script src="cabecera.js"></script>
 </body>
 </html>

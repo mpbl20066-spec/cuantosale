@@ -444,3 +444,59 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 @media (min-width:768px) and (max-width:1099px){
   [data-pagina="flujo"] .f-step{font-size:11.5px}
 }
+
+/* ============ Barra superior comun (pantallas internas) ============
+   Solo desktop (>= 1024px). Misma barra que la home; en celular y tablet no existe (cabecera.js la inserta, el CSS la oculta). */
+.cs-top{display:none}
+@media (min-width:1024px){
+  html.cs-hdr body{flex-direction:column!important;align-items:center!important;justify-content:flex-start!important}
+  html.cs-hdr .cs-top{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;width:100%;box-sizing:border-box;height:68px;padding:0 max(40px,calc((100vw - 1200px) / 2));background:var(--bg);border-bottom:1px solid var(--line);position:relative;z-index:30}
+  html.cs-hdr .phone{height:calc(100vh - 68px)!important;height:calc(100dvh - 68px)!important;flex:0 0 auto}
+  /* el encabezado propio de cada pantalla pierde el logo (ya esta en la barra) y conserva la flecha de volver */
+  html.cs-hdr .c-logo,html.cs-hdr .f-logo,html.cs-hdr .p-logo,html.cs-hdr .r-logo,html.cs-hdr .d-logo,html.cs-hdr .g-logo{display:none}
+  .cs-top__logo{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+  .cs-top__logo span{display:flex;flex-direction:column;line-height:1.1}
+  .cs-top__logo b{font-family:var(--fh);font-size:26px;font-weight:800;letter-spacing:-.01em;color:#0B2A55}
+  .cs-top__logo small{margin-top:2px;font-family:var(--fb);font-size:13px;font-weight:600;color:#1F6FB5}
+  .cs-top__nav{display:flex;align-items:center;gap:6px}
+  .cs-top__a{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;position:relative}
+  .cs-top__a svg{width:20px;height:20px}
+  .cs-top__a:hover,.cs-top__a.is-on{color:var(--ink)}
+  .cs-top__a.is-on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:3px;border-radius:2px;background:var(--accent)}
+  .cs-top__menu{display:grid;place-content:center;gap:5px;width:44px;height:44px;margin-left:8px;border:0;background:transparent;cursor:pointer}
+  .cs-top__menu span{display:block;width:24px;height:2.5px;border-radius:2px;background:var(--ink)}
+  .cs-top a:focus-visible,.cs-top button:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:10px}
+}
+
+/* ============ Destino ("Ya se donde quiero ir"): las fotos de los destinos ============
+   La foto es un <span>: en linea, el navegador ignora su alto y medía 21px, asi que no se veia (tambien en celular). */
+[data-pagina="destino"] .d-card__f{display:block}
+[data-pagina="destino"] .d-card__t{display:block}   /* tambien era un span en linea: su padding no se aplicaba y el texto quedaba pegado al borde */
+
+/* ============ Ajustes de desktop en las pantallas internas (mismo estilo que la home) ============ */
+@media (min-width:1024px){
+  /* la flecha de volver queda alineada con el borde del contenido (1200px), no pegada al borde de la ventana */
+  html.cs-hdr .c-back,html.cs-hdr .f-back,html.cs-hdr .d-back,html.cs-hdr .g-back,html.cs-hdr .p-back,html.cs-hdr .r-back{transform:translateX(max(0px,calc((min(100vw,1400px) - 1200px) / 2 - var(--gut) - 4px)))}
+
+  /* Ya se donde quiero ir: contenido al ancho del resto de la web y fotos de destinos como en la home */
+  [data-pagina="destino"] .d-main,[data-pagina="destino"] .d-foot{max-width:1200px}
+  [data-pagina="destino"] .d-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+  [data-pagina="destino"] .d-card{border-radius:16px;box-shadow:0 6px 22px rgba(10,30,70,.07)}
+  [data-pagina="destino"] .d-card__f{height:auto;aspect-ratio:13/10}
+  [data-pagina="destino"] .d-card__t{padding:14px 16px 16px}
+  [data-pagina="destino"] .d-card__t b{font-size:18px}
+  [data-pagina="destino"] .d-card__t small{font-size:13.5px}
+  [data-pagina="destino"] .d-h2 h2{font-size:clamp(24px,2vw,30px);color:#0B2A55}
+
+  /* Presupuesto, paso 1: titulo y monto a la izquierda; "cuando queres viajar" a la derecha; el boton, abajo */
+  [data-pagina="presupuesto"] #main:has(>.p-form){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:64px;align-content:center;align-items:start;width:100%;max-width:1100px;margin:0 auto;padding-top:24px}
+  [data-pagina="presupuesto"] #main:has(>.p-form)>.p-step{display:block;grid-column:1;margin:0;width:auto}
+  [data-pagina="presupuesto"] #main:has(>.p-form)>.p-form{grid-column:2;align-self:start}
+  [data-pagina="presupuesto"] #main:has(>.p-form)>.p-form .p-h2{margin-top:6px}
+  [data-pagina="presupuesto"] #main:has(>.p-form)>.p-cta{grid-column:1/-1;justify-self:center;width:min(420px,100%);margin:28px 0 0;padding:0}
+}
+
+/* Destinos (menu de guias): en desktop es una tarjeta centrada, no un cajon que cubre la pantalla */
+@media (min-width:1024px){
+  [data-pagina="guias"] .g-menu{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 48px));height:auto;max-height:calc(100% - 48px);overflow-y:auto;border-radius:24px;padding:8px 24px 24px;box-shadow:0 30px 80px rgba(10,16,26,.38)}
+}
