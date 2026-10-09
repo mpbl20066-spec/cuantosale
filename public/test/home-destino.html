@@ -76,6 +76,55 @@
   .d-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
   .d-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
   .lg-pin{vertical-align:-3px;margin:0 5px 0 0}
+
+  /* Desktop (>= 1024px): misma estructura que el celular, repartida en dos columnas.
+     En celular y tablet estos bloques no existen (display:none) y la pantalla queda igual. */
+  .d-crumb,.d-prev,.d-sug,.d-cont,.d-x{display:none}
+  .d-split{display:block}
+  .d-left{display:block}
+  .d-bus{position:relative}
+  @media (min-width:1024px){
+    html[data-pagina="destino"] .phone{justify-content:flex-start;padding-top:0}
+    html[data-pagina="destino"] .d-bar{position:static;padding:6px 24px 0;max-width:1200px;width:100%;margin:0 auto;box-sizing:border-box}
+    html[data-pagina="destino"] .d-logo{display:none}
+    html[data-pagina="destino"] .d-main{flex:0 0 auto;max-width:1200px;padding:0 24px 40px;overflow:visible}
+    .d-crumb{display:block;margin:4px 0 0}
+    .d-crumb ol{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0;padding:0;list-style:none}
+    .d-crumb li{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink2)}
+    .d-crumb li+li::before{content:"›";margin-right:4px;color:var(--ink2);font-size:18px}
+    .d-crumb li span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);font-size:13px;font-weight:800;color:var(--ink2)}
+    .d-crumb li.is-on{color:var(--ink);font-weight:800}
+    .d-crumb li.is-on span{border-color:var(--ink);background:var(--ink);color:#fff}
+    .d-split{display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:stretch;margin-top:32px}
+    .d-left{display:flex;flex-direction:column;min-width:0}
+    html[data-pagina="destino"] h1{margin:0 0 6px}
+    .d-x{display:grid;place-items:center;width:30px;height:30px;border:0;border-radius:50%;background:var(--cel-soft);color:var(--ink2);cursor:pointer}
+    .d-x:hover{background:var(--line)}
+    .d-sug{display:block;margin-top:22px}
+    .d-sug h2{margin:0 0 10px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--ink)}
+    .d-chips{display:flex;flex-wrap:wrap;gap:10px}
+    .d-chip{padding:9px 16px;border:1.5px solid var(--line);border-radius:99px;background:#fff;color:var(--ink);font-size:14.5px;font-weight:700;cursor:pointer;transition:background-color .15s,border-color .15s}
+    .d-chip:hover{background:#EAF2FB;border-color:#B9D3F0}
+    .d-chip.is-on{background:#EAF2FB;border-color:#1F6FB5}
+    .d-chip:focus-visible,.d-x:focus-visible,.d-cont:focus-visible,.d-prev:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+    .d-cont{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;margin-top:auto;padding:18px 20px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:17px;font-weight:800;cursor:pointer}
+    .d-cont:disabled{opacity:.5;cursor:default}
+    .d-sug+.d-cont{margin-top:26px}
+    .d-prev{display:block;position:relative;min-height:340px;padding:0;border:0;border-radius:20px;overflow:hidden;background:var(--cel-soft) center/cover;text-align:left;cursor:pointer;box-shadow:0 8px 28px rgba(10,30,70,.12)}
+    .d-prev::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,16,26,.78))}
+    .d-prev span{position:absolute;left:22px;right:22px;bottom:20px;z-index:1;color:#fff}
+    .d-prev b{display:block;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+    .d-prev small{display:block;margin-top:2px;font-size:14px;font-weight:600;color:rgba(255,255,255,.85)}
+    /* destinos populares: 4 tarjetas 4:3, nombre y pais encima de un degradado */
+    html[data-pagina="destino"] .d-h2{margin:36px 0 14px}
+    html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+    html[data-pagina="destino"] .d-card{position:relative;border:0;border-radius:16px;background:var(--cel-soft)}
+    html[data-pagina="destino"] .d-card__f{height:auto;aspect-ratio:4/3;background-size:cover;background-position:center}
+    html[data-pagina="destino"] .d-card__f::after{background:linear-gradient(180deg,transparent 40%,rgba(10,16,26,.82))}
+    html[data-pagina="destino"] .d-card__t{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;color:#fff}
+    html[data-pagina="destino"] .d-card__t b{color:#fff;font-size:18px;text-shadow:0 1px 5px rgba(0,0,0,.45)}
+    html[data-pagina="destino"] .d-card__t small{color:rgba(255,255,255,.85);font-size:13px}
+  }
   @media (max-width:520px){
     body{display:block;padding:0;background:var(--bg)}
     .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
@@ -131,7 +180,7 @@
   var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
   /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
-  var S = { pant: 1, dest: qs.get('destino') || '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
+  var S = { pant: 1, dest: qs.get('destino') || '', sel: '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
     ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: Math.max(0, +qs.get('ninos') || 0) };
   if (S.ninos >= S.pax) S.ninos = 0;   // siempre viaja al menos un adulto
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
@@ -141,22 +190,46 @@
   function grilla() {
     var lista = DESTS.filter(function (d) {
       if (!S.todos && POPULARES.indexOf(d[0]) < 0) return false;
-      var t = (d[1] + ' ' + d[5]).toLowerCase();
+      var t = (d[1] + ' ' + d[4]).toLowerCase();
       return !S.q || t.indexOf(S.q.toLowerCase()) >= 0;
     });
     lista.sort(function (a, b) { return S.todos ? a[1].localeCompare(b[1], 'es') : POPULARES.indexOf(a[0]) - POPULARES.indexOf(b[0]); });
     if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
     return '<div class="d-grid">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
-        '<span class="d-card__f" style="background-image:url(' + (['buz', 'bombinhas', 'bcm'].indexOf(d[0]) >= 0 ? 'dest/' : '../fotos/') + d[0] + '.jpg)" aria-hidden="true"></span>' +
-        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[5]) + '</small></span></button>';
+        '<span class="d-card__f" style="background-image:url(' + fotoDe(d[0]) + ')" aria-hidden="true"></span>' +
+        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + '</small></span></button>';
     }).join('') + '</div>';
   }
 
+  /* Destino que se muestra en la tarjeta grande (solo desktop): el que se toco en las sugerencias, o el primero
+     que coincide con lo que se escribe. Por defecto, el primero de los populares. */
+  function destPrevia() {
+    var q = S.q.toLowerCase(), hit = q ? DESTS.filter(function (d) { return (d[1] + ' ' + d[4]).toLowerCase().indexOf(q) >= 0; })[0] : null;
+    if (hit) return hit;
+    return DESTS.filter(function (d) { return d[0] === S.sel; })[0] || DESTS.filter(function (d) { return d[0] === POPULARES[0]; })[0] || null;
+  }
+  var PASOS = ['Destino', 'Fechas y personas', 'Resultados', 'Detalle', 'Presupuesto'];
+  function migas(activo) {
+    return '<nav class="d-crumb" aria-label="Pasos del viaje"><ol>' + PASOS.map(function (n, i) {
+      return '<li' + (i === activo ? ' class="is-on" aria-current="step"' : '') + '><span>' + (i + 1) + '</span>' + n + '</li>';
+    }).join('') + '</ol></nav>';
+  }
   function pant1() {
     $('main').dataset.pant = '1';
-    $('main').innerHTML = '<h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá tu destino, elegí las fechas y las personas.</p>' +
-      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="¿A dónde querés ir?" value="' + esc(S.q) + '" autocomplete="off"></label>' +
+    var prev = destPrevia();
+    var chips = POPULARES.map(function (k) {
+      var d = DESTS.filter(function (x) { return x[0] === k; })[0]; if (!d) return '';
+      return '<button type="button" class="d-chip' + (prev && prev[0] === k ? ' is-on' : '') + '" data-sel="' + k + '" aria-pressed="' + !!(prev && prev[0] === k) + '">' + esc(d[1]) + '</button>';
+    }).join('');
+    $('main').innerHTML = migas(0) +
+      '<div class="d-split"><div class="d-left"><h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá tu destino, elegí las fechas y las personas.</p>' +
+      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="¿A dónde querés ir?" value="' + esc(S.q) + '" autocomplete="off">' +
+      (S.q ? '<button type="button" class="d-x" data-limpiar="1" aria-label="Borrar búsqueda">' + ic('<path d="M6 6l12 12M18 6 6 18"/>', 16) + '</button>' : '') + '</label>' +
+      '<div class="d-sug"><h2>Sugerencias populares</h2><div class="d-chips">' + chips + '</div></div>' +
+      '<button type="button" class="d-cont" data-continuar="1" data-evento="destino_continuar_desde_busqueda"' + (prev ? '' : ' disabled') + '>Continuar ' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + '</button></div>' +
+      (prev ? '<button type="button" class="d-prev" data-continuar="1" style="background-image:url(' + fotoDe(prev[0]) + ')" aria-label="Elegir ' + esc(prev[1]) + '"><span><b>' + esc(prev[1]) + '</b><small>' + esc(prev[2]) + '</small></span></button>' : '') +
+      '</div>' +
       '<div class="d-h2"><h2>' + (S.q ? 'Resultados' : (S.todos ? 'Todos los destinos' : 'Destinos populares')) + '</h2>' +
       (S.q ? '' : '<button type="button" class="d-mas" data-todos="1" data-evento="destino_ver_todos">' + (S.todos ? 'Ver solo los populares' : 'Ver todos los destinos') + ' ›</button>') + '</div>' +
       grilla();
@@ -167,7 +240,7 @@
   }
 
   /* Foto del destino: las de Búzios, Bombinhas y Camboriú son las reducidas de dest/; el resto, las de fotos/. */
-  var fotoDe = function (k) { return (['buz', 'bombinhas', 'bcm'].indexOf(k) >= 0 ? 'dest/' : '../fotos/') + k + '.jpg'; };
+  function fotoDe(k) { return (['buz', 'bombinhas', 'bcm'].indexOf(k) >= 0 ? 'dest/' : '../fotos/') + k + '.jpg'; }
   var plural = function (n, a, b) { return n + " " + (n === 1 ? a : b); };
   /* Noches entre ida y vuelta: se recalcula al tocar las fechas, sin volver a pintar (si no, se cerraria el selector). */
   function textoNoches() {
@@ -185,7 +258,7 @@
   function pant2() {
     var d = destInfo(), nn = textoNoches();
     $("main").dataset.pant = "2";
-    $("main").innerHTML = "<h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
+    $("main").innerHTML = migas(1) + "<h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
       "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + (d ? "<span class=\"d-elegido__f\" style=\"background-image:url(" + fotoDe(d[0]) + ")\" aria-hidden=\"true\"></span>" : ic(I.pin, 20)) +
       "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay</small></span>" +
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
@@ -225,6 +298,9 @@
       else ir(S.pant - 1);
       return;
     }
+    if (t.dataset.sel) { S.sel = t.dataset.sel; S.q = ''; track('destino_sugerencia', { destino: S.sel }); pant1(); return; }
+    if (t.dataset.limpiar) { S.q = ''; pant1(); var b0 = document.getElementById('bus'); if (b0) b0.focus(); return; }
+    if (t.dataset.continuar) { var pv = destPrevia(); if (!pv) return; S.dest = pv[0]; track('destino_pasa_a_fechas', { destino: S.dest, via: 'continuar' }); ir(2); return; }
     if (t.dataset.todos) { S.todos = !S.todos; track('destino_ver_todos_toggle', { todos: S.todos }); pintar(); return; }
     /* El click en la tarjeta ya dispara el evento data-evento="destino_elegido"
        (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
