@@ -80,6 +80,7 @@
   .d-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
   .lg-pin{vertical-align:-3px;margin:0 5px 0 0}
   /* Calendario de rango */
+  .cal[hidden]{display:none}
   .cal{position:relative;margin:12px 0 0;padding:14px 14px 10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
   .cal__ms{display:grid;grid-template-columns:1fr;gap:24px}
   .cal__m+.cal__m{display:none}
@@ -339,7 +340,7 @@
   var plural = function (n, a, b) { return n + " " + (n === 1 ? a : b); };
   /* Noches entre ida y vuelta: se recalcula al tocar las fechas, sin volver a pintar (si no, se cerraria el selector). */
   function textoNoches() {
-    if (!S.vuelta) return { ok: false, t: "Elegí la fecha de vuelta en el calendario." };
+    if (!S.vuelta) return { ok: false, pend: true, t: "Elegí la fecha de vuelta en el calendario." };
     var n = Math.round((new Date(S.vuelta + "T12:00:00") - new Date(S.ida + "T12:00:00")) / 864e5);
     if (!(n >= 1)) return { ok: false, t: "La vuelta tiene que ser posterior a la ida." };
     return { ok: true, t: plural(n, "noche", "noches") };   /* las personas ya se ven mas abajo: no se repiten aca */
@@ -377,18 +378,18 @@
     return '<button type="button" class="cal__nav cal__nav--p" data-calnav="-1" aria-label="Mes anterior"' + (esPrimero ? ' disabled' : '') + '>' + ic('<path d="m15 5-7 7 7 7"/>', 18) + '</button>' +
       '<button type="button" class="cal__nav cal__nav--n" data-calnav="1" aria-label="Mes siguiente">' + ic('<path d="m9 5 7 7-7 7"/>', 18) + '</button>' +
       '<div class="cal__ms">' + calMes(y, m) + calMes(y2, m2) + '</div>' +
-      '<p class="cal__ay" aria-live="polite">' + (S.paso === 'vuelta' ? 'Ahora elegí la fecha de vuelta.' : 'Elegí la fecha de ida y después la de vuelta.') + '</p>';
+      '<p class="cal__ay" aria-live="polite">' + (S.paso === 'vuelta' ? 'Ahora elegí la fecha de vuelta.' : (S.ida && S.vuelta ? 'Tocá otra fecha para cambiar el viaje.' : 'Elegí la fecha de ida y después la de vuelta.')) + '</p>';
   }
   /* Despues de un toque en el calendario: campos, noches, marca del campo activo y calendario. */
   function calSync() {
     var a = $('ida'), v = $('vuelta'), n = $('noches'), nn = textoNoches(), c = $('cal');
+    S.sync = true;   // escribir el valor en un campo de fecha con foco dispara 'focusin': no es el usuario
     if (a) a.value = S.ida;
     if (v) { v.value = S.vuelta; v.min = sumarDias(S.ida, 1); }
-    if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok); }
-    [['ida', 'ida'], ['vuelta', 'vuelta']].forEach(function (k) {
-      var e = $(k[0]); if (e && e.parentNode) e.parentNode.classList.toggle('is-act', S.paso === k[1]);
-    });
-    if (c) c.innerHTML = calHTML();
+    setTimeout(function () { S.sync = false; }, 0);
+    if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok && !nn.pend); }
+    var ev = $('vuelta'); if (ev && ev.parentNode) ev.parentNode.classList.toggle('is-act', S.paso === 'vuelta');   // el campo que espera la proxima fecha
+    if (c) { c.innerHTML = calHTML(); c.hidden = !S.calOn; }
   }
   function pant2() {
     var d = destInfo(), nn = textoNoches();
@@ -400,8 +401,8 @@
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
       "<div class=\"d-fechas\"><div><label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div></div>" +
       "<div><label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div></div></div>" +
-      "<div class=\"cal\" id=\"cal\">" + calHTML() + "</div>" +
-      "<p class=\"d-noches" + (nn.ok ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
+      "<div class=\"cal\" id=\"cal\"" + (S.calOn ? "" : " hidden") + ">" + calHTML() + "</div>" +
+      "<p class=\"d-noches" + (nn.ok || nn.pend ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
       "<div class=\"d-quien\">" + fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
       fila("Niños", "De 2 a 11 años", "ni", S.ninos, S.ninos <= 0, S.pax >= 9) + "</div>" +
@@ -421,7 +422,7 @@
      era una pantalla mas entre el destino y el resultado.
      Si el medio llegara pedido (?modo=) se respeta; si no, el sistema elige. */
   function pintar() { if (S.pant === 1) pant1(); else pant2(); }
-  function ir(n) { S.pant = n; pintar(); $('main').scrollTop = 0; }
+  function ir(n) { if (n === 2 && S.pant !== 2) S.calOn = false; S.pant = n; pintar(); $('main').scrollTop = 0; }
   /* De las fechas se va derecho a resultados. */
   function irA() { aResultados(); }
   /* Ir a los resultados pasando destino, fechas, personas y medio de transporte. */
@@ -431,6 +432,7 @@
   }
 
   document.addEventListener('click', function (e) {
+    if (S.calOn && !(e.target.closest && e.target.closest('#cal,.d-fecha'))) { S.calOn = false; var cc = $('cal'); if (cc) cc.hidden = true; }
     var t = e.target.closest('button,a'); if (!t) return;
     if (t.id === 'atras') {
       if (S.pant === 1) location.href = 'home-dos-caminos.html' + debugQ;
@@ -439,7 +441,7 @@
     }
     if (t.dataset.dia) {
       var f = t.dataset.dia;
-      if (S.paso === 'vuelta' && S.ida && f > S.ida) { S.vuelta = f; S.paso = 'ida'; }
+      if (S.paso === 'vuelta' && S.ida && f > S.ida) { S.vuelta = f; S.paso = 'ida'; S.calOn = false; }
       else { S.ida = f; S.vuelta = ''; S.paso = 'vuelta'; }
       S.err = ''; track('destino_calendario', { paso: S.paso }); calSync(); return;
     }
@@ -481,7 +483,7 @@
     else S.vuelta = e.target.value;
     S.err = '';
     var n = $('noches'), nn = textoNoches();
-    if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok); }
+    if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok && !nn.pend); }
     if (S.ida) S.cal = String(S.ida).slice(0, 7) + '-01';
     var c = $('cal'); if (c) c.innerHTML = calHTML();
   }
@@ -496,7 +498,19 @@
     }
   });
   $('main').addEventListener('focusin', function (e) {
-    if (e.target.id === 'ida' || e.target.id === 'vuelta') { S.paso = e.target.id === 'vuelta' && S.ida ? 'vuelta' : 'ida'; calSync(); }
+    if (S.sync) return;
+    if (e.target.id === 'ida' || e.target.id === 'vuelta') { S.paso = e.target.id === 'vuelta' && S.ida ? 'vuelta' : 'ida'; S.calOn = true; calSync(); }
+  });
+  /* El calendario propio se abre solo al tocar el campo o su icono (o al escribir en el campo). El selector nativo
+     del navegador no: se frena su apertura para que no aparezcan dos calendarios. */
+  $('main').addEventListener('click', function (e) {
+    var inp = e.target.closest && e.target.closest('input[type="date"]');
+    if (inp) e.preventDefault();
+    var fe = e.target.closest && e.target.closest('.d-fecha'); if (!fe) return;
+    var campo = fe.querySelector('input'); if (!campo) return;
+    if (e.target.closest('svg') && S.calOn && S.paso === (campo.id === 'vuelta' ? 'vuelta' : 'ida')) { S.calOn = false; var c0 = $('cal'); if (c0) c0.hidden = true; return; }
+    S.paso = campo.id === 'vuelta' && S.ida ? 'vuelta' : 'ida'; S.calOn = true; calSync();
+    if (document.activeElement !== campo) campo.focus();
   });
   $('main').addEventListener('change', alCambiarFecha);
   $('main').addEventListener('input', alCambiarFecha);
