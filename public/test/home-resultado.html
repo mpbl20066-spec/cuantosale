@@ -217,7 +217,7 @@
       var ida = qs.get('ida'), vuelta = qs.get('vuelta');
       if (ida) q.set('ida', ida);
       if (vuelta) q.set('vuelta', vuelta);
-      q.set('origen_home', fuente);
+      q.set('origen_home', fuente); q.set('editar', '1');
       return 'home-destino.html?' + q.toString() + dbg;
     }
     return 'home-calcular.html' + dbg;

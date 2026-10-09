@@ -521,7 +521,7 @@
   });
   /* Si entran con ?destino= y ?pax=, son datos que la pantalla anterior ya recogio:
      se va derecho a resultados. Con solo ?destino=, todavia hay que elegir fechas. */
-  if (S.dest && destInfo() && qs.get('pax')) { aResultados(); }
+  if (S.dest && destInfo() && qs.get('pax') && !qs.get('editar')) { aResultados(); }
   else if (S.dest && destInfo()) { S.pant = 2; }
   pintar();
 })();

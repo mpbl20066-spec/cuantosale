@@ -427,6 +427,24 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="flujo"] .f-scroll[data-paso="1"],[data-pagina="flujo"] .f-scroll[data-paso="2"],[data-pagina="flujo"] .f-scroll[data-paso="3"]{max-width:1100px;margin:0 auto;width:100%}
 }
 
+
+/* ============ Flujo, paso 7: Estado de tu viaje ============
+   Contenedor de 1200px centrado; el banner baja a ~280px y el contenido pasa a dos columnas (1.8fr / 1fr). */
+@media (min-width:768px){
+  [data-pagina="flujo"] .f-scroll[data-paso="7"]{max-width:1200px;margin:0 auto;width:100%;padding-left:0;padding-right:0}
+  [data-pagina="flujo"] .f-scroll[data-paso="7"]>*{max-width:none;margin-left:0;margin-right:0}
+  [data-pagina="flujo"] .st{padding:0 24px;box-sizing:border-box}
+  [data-pagina="flujo"] .st-hero{min-height:280px;padding:28px 32px}
+  [data-pagina="flujo"] .st-chip{top:20px;left:24px}
+  [data-pagina="flujo"] .st-hero h1{font-size:48px}
+  [data-pagina="flujo"] .st-meta{font-size:15px;gap:8px 28px;margin-top:12px}
+  [data-pagina="flujo"] .st-lema{display:block;position:absolute;right:36px;bottom:34px;margin:0;font-family:"Segoe Script","Brush Script MT","Lucida Handwriting",cursive;font-size:26px;font-style:italic;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.45);text-decoration:underline;text-decoration-color:#F5C518;text-decoration-thickness:3px;text-underline-offset:8px}
+}
+@media (min-width:1024px){
+  [data-pagina="flujo"] .st-grid{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);gap:24px;margin-top:24px}
+  [data-pagina="flujo"] .st-h{font-size:24px}
+  [data-pagina="flujo"] .st-dato{margin-top:24px}
+}
 /* ============ Home: portada, tarjetas y navegacion (ajustes de revision) ============ */
 /* Las dos tarjetas de la portada son blancas y del mismo peso. La de presupuesto ya
      no se pinta: se distingue por el distintivo ambar del icono y por la etiqueta, que
