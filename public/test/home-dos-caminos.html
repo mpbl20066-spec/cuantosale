@@ -51,16 +51,13 @@
   .hx .m-cards{margin:0;gap:12px}
   .hx .m-card{background:#fff}
 
-  .hx-how,.hx-why{max-width:1280px;margin:0 auto;padding:28px 0 4px}
-  .hx-how h2,.hx-why h2{margin:0 0 14px;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
+  .hx-how{max-width:1280px;margin:0 auto;padding:28px 0 4px}
+  .hx-how h2{margin:0 0 14px;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
   .hx-steps{display:grid;grid-template-columns:1fr;gap:12px;margin:0;padding:0;list-style:none}
   .hx-step{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--hx-border);border-radius:16px;background:#fff}
   .hx-step__n{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--hx-yellow);color:var(--hx-navy);font-family:var(--fh);font-size:16px;font-weight:800}
   .hx-step b{display:block;margin:0 0 3px;font-family:var(--fh);font-size:15px;font-weight:700;color:var(--hx-navy)}
   .hx-step p{margin:0;font-size:13px;line-height:1.5;color:var(--hx-gray)}
-  .hx-whyg{display:grid;grid-template-columns:1fr;gap:12px;padding:18px;border-radius:18px;background:#EAF2FB}
-  .hx-whyg b{display:block;margin:0 0 3px;font-family:var(--fh);font-size:15px;font-weight:700;color:var(--hx-navy)}
-  .hx-whyg p{margin:0;font-size:13px;line-height:1.5;color:var(--hx-gray)}
   .hx-foot{margin:24px calc(var(--hx-pad) * -1) calc(var(--hx-pb) * -1);padding:20px var(--hx-pad);background:var(--hx-navy);color:#CBD5E1}
   .hx-foot__in{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:center;justify-content:space-between;max-width:1280px;min-height:40px;margin:0 auto}
   .hx-foot b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;color:#fff}
@@ -72,9 +69,8 @@
   @media (min-width:768px){
     .hx{--hx-pb:48px}
     .hx-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-    .hx-whyg{grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;padding:24px 28px}
-    .hx-how h2,.hx-why h2{font-size:18px}
-    .hx-how,.hx-why{padding-top:36px}
+    .hx-how h2{font-size:18px}
+    .hx-how{padding-top:36px}
   }
   @media (min-width:1024px){
     .hx{--hx-pb:56px}
@@ -287,15 +283,6 @@
         <li class="hx-step"><span class="hx-step__n" aria-hidden="true">2</span><div><b>Compará y armá tu viaje</b><p>Vemos el transporte, el alojamiento y los extras que se pueden calcular para tu viaje, y vos elegís.</p></div></li>
         <li class="hx-step"><span class="hx-step__n" aria-hidden="true">3</span><div><b>Mirá el total y reservá</b><p>Ves cuánto cuesta el viaje completo antes de reservar, con cada precio marcado como estimado o reservado.</p></div></li>
       </ol>
-    </section>
-
-    <section class="hx-why" aria-labelledby="hx-why-h">
-      <h2 id="hx-why-h">Por qué CuántoSale</h2>
-      <div class="hx-whyg">
-        <div><b>El viaje completo, no solo el pasaje</b><p>Sumamos transporte, alojamiento, comidas, traslados y actividades en un solo presupuesto.</p></div>
-        <div><b>Estimado y reservado, siempre claros</b><p>Te mostramos qué precio es una estimación y qué está confirmado. Nada se da por reservado hasta que vos lo confirmás.</p></div>
-        <div><b>Sin crear cuenta para consultar</b><p>Calculá tu presupuesto sin registrarte. La cuenta solo hace falta si querés guardar el viaje.</p></div>
-      </div>
     </section>
 
     <footer class="hx-foot">
