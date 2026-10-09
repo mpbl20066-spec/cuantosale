@@ -79,6 +79,32 @@
   .d-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
   .d-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
   .lg-pin{vertical-align:-3px;margin:0 5px 0 0}
+  /* Calendario de rango */
+  .cal{position:relative;margin:12px 0 0;padding:14px 14px 10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .cal__ms{display:grid;grid-template-columns:1fr;gap:24px}
+  .cal__m+.cal__m{display:none}
+  .cal__t{margin:0 0 8px;text-align:center;font-family:var(--fh);font-size:15px;font-weight:800;color:var(--ink);text-transform:capitalize}
+  .cal__g{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px}
+  .cal__d{padding:4px 0 6px;text-align:center;font-size:12px;font-weight:700;color:var(--ink2)}
+  .cal__c{height:38px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--ink);font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer}
+  .cal__c:hover:not(:disabled){background:var(--cel-soft)}
+  .cal__c:disabled{opacity:.3;cursor:default}
+  .cal__c.is-rango,.cal__c.is-prev{background:#DCE9F8;border-radius:0}
+  .cal__c.is-ida,.cal__c.is-vuelta{background:#1A2B4A;color:#fff}
+  .cal__c:focus-visible,.cal__nav:focus-visible{outline:3px solid var(--focus);outline-offset:1px}
+  .cal__nav{position:absolute;top:10px;width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}
+  .cal__nav:hover:not(:disabled){background:var(--cel-soft)}
+  .cal__nav:disabled{opacity:.25;cursor:default}
+  .cal__nav--p{left:10px}
+  .cal__nav--n{right:10px}
+  .cal__ay{margin:8px 0 2px;text-align:center;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .d-fecha.is-act{border-color:#1A2B4A;box-shadow:0 0 0 2px rgba(26,43,74,.18)}
+  .d-fecha input::-webkit-calendar-picker-indicator{display:none}
+  @media (min-width:768px){
+    .cal__ms{grid-template-columns:1fr 1fr;gap:32px}
+    .cal__m+.cal__m{display:block}
+  }
+
 
   /* Desktop (>= 1024px): misma estructura que el celular, repartida en dos columnas.
      En celular y tablet estos bloques no existen (display:none) y la pantalla queda igual. */
@@ -211,20 +237,39 @@
   var S = { pant: 1, dest: qs.get('destino') || '', sel: '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
     ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: Math.max(0, +qs.get('ninos') || 0) };
   if (S.ninos >= S.pax) S.ninos = 0;   // siempre viaja al menos un adulto
+  S.cal = String(S.ida).slice(0, 7) + '-01'; S.paso = 'ida';   // mes que muestra el calendario y que fecha se elige con el proximo toque
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
   var debugQ = debug ? '&debug=1' : '';
 
   /* Sin tildes ni mayusculas: "bu" tiene que encontrar "Búzios". */
   var norm = function (t) { return String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
-  var coincide = function (d, q) { return norm(d[1] + ' ' + d[4]).indexOf(norm(q)) >= 0; };
+  /* Cada palabra escrita tiene que estar en el nombre o la region ("sao paulo", "rio de janeiro", "janeiro rio"). */
+  var qn = function () { return norm(S.q).replace(/\s+/g, ' ').trim(); };
+  var coincide = function (d, q) {
+    var t = norm(d[1] + ' ' + d[4]), pal = norm(q).split(/\s+/).filter(Boolean);
+    return pal.every(function (w) { return t.indexOf(w) >= 0; });
+  };
+  /* Orden de los resultados: primero los que empiezan con lo escrito, despues los que lo tienen en el nombre y,
+     al final, los que solo coinciden por la region (escribir "rio de janeiro" tiene que dar primero la ciudad). */
+  var puntaje = function (d, q) {
+    var n = norm(d[1]), t = norm(q).replace(/\s+/g, ' ').trim();
+    if (n === t) return 0;
+    if (n.indexOf(t) === 0) return 1;
+    var pal = t.split(' ');
+    if (pal.every(function (w) { return n.indexOf(w) >= 0; })) return 2;
+    return 3;
+  };
   function grilla() {
     /* Con texto escrito se busca en los 40 destinos; sin texto, solo los populares (o todos si se pidio). */
     var lista = DESTS.filter(function (d) {
-      if (S.q) return coincide(d, S.q);
+      if (qn()) return coincide(d, S.q);
       return S.todos || POPULARES.indexOf(d[0]) >= 0;
     });
-    lista.sort(function (a, b) { return S.todos ? a[1].localeCompare(b[1], 'es') : POPULARES.indexOf(a[0]) - POPULARES.indexOf(b[0]); });
+    lista.sort(function (a, b) {
+      if (qn()) { var pa = puntaje(a, S.q), pb = puntaje(b, S.q); if (pa !== pb) return pa - pb; return a[1].localeCompare(b[1], 'es'); }
+      return S.todos ? a[1].localeCompare(b[1], 'es') : POPULARES.indexOf(a[0]) - POPULARES.indexOf(b[0]);
+    });
     if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
     return '<div class="d-grid">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
@@ -236,8 +281,9 @@
   /* Destino que se muestra en la tarjeta grande (solo desktop): el que se toco en las sugerencias, o el primero
      que coincide con lo que se escribe. Por defecto, el primero de los populares. */
   function destPrevia() {
-    var hit = S.q ? DESTS.filter(function (d) { return coincide(d, S.q); })[0] : null;
+    var hit = qn() ? DESTS.filter(function (d) { return coincide(d, S.q); }).sort(function (a, b) { return puntaje(a, S.q) - puntaje(b, S.q); })[0] : null;
     if (hit) return hit;
+    if (qn()) return null;   /* escribio algo que no existe: no se ofrece otro destino en su lugar */
     return DESTS.filter(function (d) { return d[0] === S.sel; })[0] || DESTS.filter(function (d) { return d[0] === POPULARES[0]; })[0] || null;
   }
   var PASOS = ['Destino', 'Fechas y personas', 'Resultados', 'Detalle', 'Presupuesto'];
@@ -246,24 +292,42 @@
       return '<li' + (i === activo ? ' class="is-on" aria-current="step"' : '') + '><span>' + (i + 1) + '</span>' + n + '</li>';
     }).join('') + '</ol></nav>';
   }
-  function pant1() {
-    $('main').dataset.pant = '1';
-    var prev = destPrevia();
-    var chips = POPULARES.map(function (k) {
+  /* Partes de la pantalla que cambian al escribir. El <input> no se vuelve a crear: asi no pierde el foco,
+     el cursor ni los espacios que se escriben. */
+  function chipsHtml(prev) {
+    return POPULARES.map(function (k) {
       var d = DESTS.filter(function (x) { return x[0] === k; })[0]; if (!d) return '';
       return '<button type="button" class="d-chip' + (prev && prev[0] === k ? ' is-on' : '') + '" data-sel="' + k + '" aria-pressed="' + !!(prev && prev[0] === k) + '">' + esc(d[1]) + '</button>';
     }).join('');
+  }
+  function prevHtml(prev) {
+    return prev ? '<button type="button" class="d-prev" data-continuar="1" style="background-image:url(' + fotoDe(prev[0]) + ')" aria-label="Elegir ' + esc(prev[1]) + '"><span><b>' + esc(prev[1]) + '</b><small>' + esc(prev[2]) + '</small></span></button>' : '';
+  }
+  function listadoHtml() {
+    var q = qn();
+    return '<div class="d-h2"><h2>' + (q ? 'Resultados' : (S.todos ? 'Todos los destinos' : 'Destinos populares')) + '</h2>' +
+      (q ? '' : '<button type="button" class="d-mas" data-todos="1" data-evento="destino_ver_todos">' + (S.todos ? 'Ver solo los populares' : 'Ver todos los destinos') + ' ›</button>') + '</div>' + grilla();
+  }
+  function xHtml() { return S.q ? '<button type="button" class="d-x" data-limpiar="1" aria-label="Borrar búsqueda">' + ic('<path d="M6 6l12 12M18 6 6 18"/>', 16) + '</button>' : ''; }
+  function actualizar() {
+    var prev = destPrevia();
+    $('d-xs').innerHTML = xHtml();
+    $('d-chips').innerHTML = chipsHtml(prev);
+    $('d-pv').innerHTML = prevHtml(prev);
+    var c = document.querySelector('.d-cont'); if (c) c.disabled = !prev;
+    $('d-lst').innerHTML = listadoHtml();
+  }
+  function pant1() {
+    $('main').dataset.pant = '1';
+    var prev = destPrevia();
     $('main').innerHTML = migas(0) +
       '<div class="d-split"><div class="d-left"><h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá tu destino, elegí las fechas y las personas.</p>' +
-      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="¿A dónde querés ir?" value="' + esc(S.q) + '" autocomplete="off">' +
-      (S.q ? '<button type="button" class="d-x" data-limpiar="1" aria-label="Borrar búsqueda">' + ic('<path d="M6 6l12 12M18 6 6 18"/>', 16) + '</button>' : '') + '</label>' +
-      '<div class="d-sug"><h2>Sugerencias populares</h2><div class="d-chips">' + chips + '</div></div>' +
+      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="¿A dónde querés ir?" value="' + esc(S.q) + '" autocomplete="off" spellcheck="false">' +
+      '<span id="d-xs" style="display:contents">' + xHtml() + '</span></label>' +
+      '<div class="d-sug"><h2>Sugerencias populares</h2><div class="d-chips" id="d-chips">' + chipsHtml(prev) + '</div></div>' +
       '<button type="button" class="d-cont" data-continuar="1" data-evento="destino_continuar_desde_busqueda"' + (prev ? '' : ' disabled') + '>Continuar ' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + '</button></div>' +
-      (prev ? '<button type="button" class="d-prev" data-continuar="1" style="background-image:url(' + fotoDe(prev[0]) + ')" aria-label="Elegir ' + esc(prev[1]) + '"><span><b>' + esc(prev[1]) + '</b><small>' + esc(prev[2]) + '</small></span></button>' : '') +
-      '</div>' +
-      '<div class="d-h2"><h2>' + (S.q ? 'Resultados' : (S.todos ? 'Todos los destinos' : 'Destinos populares')) + '</h2>' +
-      (S.q ? '' : '<button type="button" class="d-mas" data-todos="1" data-evento="destino_ver_todos">' + (S.todos ? 'Ver solo los populares' : 'Ver todos los destinos') + ' ›</button>') + '</div>' +
-      grilla();
+      '<div id="d-pv" style="display:contents">' + prevHtml(prev) + '</div></div>' +
+      '<div id="d-lst">' + listadoHtml() + '</div>';
     $('foot').innerHTML = '';
     $('foot').hidden = true;
     document.title = 'Elegí tu destino · CuántoSale';
@@ -275,6 +339,7 @@
   var plural = function (n, a, b) { return n + " " + (n === 1 ? a : b); };
   /* Noches entre ida y vuelta: se recalcula al tocar las fechas, sin volver a pintar (si no, se cerraria el selector). */
   function textoNoches() {
+    if (!S.vuelta) return { ok: false, t: "Elegí la fecha de vuelta en el calendario." };
     var n = Math.round((new Date(S.vuelta + "T12:00:00") - new Date(S.ida + "T12:00:00")) / 864e5);
     if (!(n >= 1)) return { ok: false, t: "La vuelta tiene que ser posterior a la ida." };
     return { ok: true, t: plural(n, "noche", "noches") };   /* las personas ya se ven mas abajo: no se repiten aca */
@@ -286,6 +351,45 @@
       "<output aria-label=\"" + nombre + ": " + n + "\">" + n + "</output>" +
       "<button type=\"button\" data-" + clave + "=\"1\" aria-label=\"Más " + nombre.toLowerCase() + "\"" + (sinMas ? " disabled" : "") + ">+</button></span></div>";
   }
+
+  /* Calendario de rango: se toca la ida y despues la vuelta; el tramo queda marcado. Las dos fechas siguen siendo los
+     campos #ida y #vuelta (que tambien se pueden escribir), asi que el resto de la pantalla no cambia. */
+  var DIAS_C = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  var MESES_C = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var p2 = function (n) { return ('0' + n).slice(-2); };
+  function calMes(y, m) {
+    var lead = (new Date(y, m, 1).getDay() + 6) % 7, total = new Date(y, m + 1, 0).getDate(), min = sumarDias(iso(HOY), 1);
+    var h = '<div class="cal__m"><div class="cal__t">' + MESES_C[m] + ' ' + y + '</div><div class="cal__g">' +
+      DIAS_C.map(function (d) { return '<span class="cal__d" aria-hidden="true">' + d + '</span>'; }).join('');
+    for (var i = 0; i < lead; i++) h += '<span></span>';
+    for (var d = 1; d <= total; d++) {
+      var f = y + '-' + p2(m + 1) + '-' + p2(d), dis = f < min;
+      var c = 'cal__c' + (f === S.ida ? ' is-ida' : '') + (f === S.vuelta ? ' is-vuelta' : '') +
+        (S.ida && S.vuelta && f > S.ida && f < S.vuelta ? ' is-rango' : '');
+      h += '<button type="button" class="' + c + '" data-dia="' + f + '"' + (dis ? ' disabled' : '') + ' aria-pressed="' + (f === S.ida || f === S.vuelta) +
+        '" aria-label="' + d + ' de ' + MESES_C[m] + ' de ' + y + (f === S.ida ? ', ida' : (f === S.vuelta ? ', vuelta' : '')) + '">' + d + '</button>';
+    }
+    return h + '</div></div>';
+  }
+  function calHTML() {
+    var y = +S.cal.slice(0, 4), m = +S.cal.slice(5, 7) - 1, y2 = m === 11 ? y + 1 : y, m2 = (m + 1) % 12;
+    var h0 = new Date(HOY.getFullYear(), HOY.getMonth(), 1), esPrimero = y === h0.getFullYear() && m === h0.getMonth();
+    return '<button type="button" class="cal__nav cal__nav--p" data-calnav="-1" aria-label="Mes anterior"' + (esPrimero ? ' disabled' : '') + '>' + ic('<path d="m15 5-7 7 7 7"/>', 18) + '</button>' +
+      '<button type="button" class="cal__nav cal__nav--n" data-calnav="1" aria-label="Mes siguiente">' + ic('<path d="m9 5 7 7-7 7"/>', 18) + '</button>' +
+      '<div class="cal__ms">' + calMes(y, m) + calMes(y2, m2) + '</div>' +
+      '<p class="cal__ay" aria-live="polite">' + (S.paso === 'vuelta' ? 'Ahora elegí la fecha de vuelta.' : 'Elegí la fecha de ida y después la de vuelta.') + '</p>';
+  }
+  /* Despues de un toque en el calendario: campos, noches, marca del campo activo y calendario. */
+  function calSync() {
+    var a = $('ida'), v = $('vuelta'), n = $('noches'), nn = textoNoches(), c = $('cal');
+    if (a) a.value = S.ida;
+    if (v) { v.value = S.vuelta; v.min = sumarDias(S.ida, 1); }
+    if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok); }
+    [['ida', 'ida'], ['vuelta', 'vuelta']].forEach(function (k) {
+      var e = $(k[0]); if (e && e.parentNode) e.parentNode.classList.toggle('is-act', S.paso === k[1]);
+    });
+    if (c) c.innerHTML = calHTML();
+  }
   function pant2() {
     var d = destInfo(), nn = textoNoches();
     $("main").dataset.pant = "2";
@@ -296,6 +400,7 @@
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
       "<div class=\"d-fechas\"><div><label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div></div>" +
       "<div><label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div></div></div>" +
+      "<div class=\"cal\" id=\"cal\">" + calHTML() + "</div>" +
       "<p class=\"d-noches" + (nn.ok ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
       "<div class=\"d-quien\">" + fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
@@ -332,8 +437,18 @@
       else ir(S.pant - 1);
       return;
     }
-    if (t.dataset.sel) { S.sel = t.dataset.sel; S.q = ''; track('destino_sugerencia', { destino: S.sel }); pant1(); return; }
-    if (t.dataset.limpiar) { S.q = ''; pant1(); var b0 = document.getElementById('bus'); if (b0) b0.focus(); return; }
+    if (t.dataset.dia) {
+      var f = t.dataset.dia;
+      if (S.paso === 'vuelta' && S.ida && f > S.ida) { S.vuelta = f; S.paso = 'ida'; }
+      else { S.ida = f; S.vuelta = ''; S.paso = 'vuelta'; }
+      S.err = ''; track('destino_calendario', { paso: S.paso }); calSync(); return;
+    }
+    if (t.dataset.calnav) {
+      var cy = +S.cal.slice(0, 4), cm = +S.cal.slice(5, 7) - 1 + (+t.dataset.calnav), dd = new Date(cy, cm, 1);
+      S.cal = dd.getFullYear() + '-' + p2(dd.getMonth() + 1) + '-01'; calSync(); return;
+    }
+    if (t.dataset.sel) { S.sel = t.dataset.sel; S.q = ''; var b1 = document.getElementById('bus'); if (b1) b1.value = ''; track('destino_sugerencia', { destino: S.sel }); actualizar(); return; }
+    if (t.dataset.limpiar) { S.q = ''; var b0 = document.getElementById('bus'); if (b0) { b0.value = ''; b0.focus(); } actualizar(); return; }
     if (t.dataset.continuar) { var pv = destPrevia(); if (!pv) return; S.dest = pv[0]; track('destino_pasa_a_fechas', { destino: S.dest, via: 'continuar' }); ir(2); return; }
     if (t.dataset.todos) { S.todos = !S.todos; track('destino_ver_todos_toggle', { todos: S.todos }); pintar(); return; }
     /* El click en la tarjeta ya dispara el evento data-evento="destino_elegido"
@@ -352,6 +467,7 @@
       var ida = ($('ida') || {}).value || S.ida, vuelta = ($('vuelta') || {}).value || S.vuelta;
       S.ida = ida; S.vuelta = vuelta; S.err = '';
       if (!(S.ida >= sumarDias(iso(HOY), 1))) { S.err = 'Elegí una fecha a partir de mañana.'; pant2(); return; }
+      if (!S.vuelta) { S.err = 'Elegí la fecha de vuelta en el calendario.'; pant2(); return; }
       if (!(S.vuelta > S.ida)) { S.err = 'La fecha de vuelta tiene que ser posterior a la de ida.'; pant2(); return; }
       track('destino_continuar', { destino: S.dest, personas: S.pax });
       irA();
@@ -366,11 +482,26 @@
     S.err = '';
     var n = $('noches'), nn = textoNoches();
     if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok); }
+    if (S.ida) S.cal = String(S.ida).slice(0, 7) + '-01';
+    var c = $('cal'); if (c) c.innerHTML = calHTML();
   }
+  $('main').addEventListener('mouseover', function (e) {
+    var b = e.target.closest && e.target.closest('.cal__c'); if (!b || S.paso !== 'vuelta' || !S.ida) return;
+    var f = b.dataset.dia, all = document.querySelectorAll('#cal .cal__c');
+    for (var i = 0; i < all.length; i++) all[i].classList.toggle('is-prev', all[i].dataset.dia > S.ida && all[i].dataset.dia < f);
+  });
+  $('main').addEventListener('mouseout', function (e) {
+    if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('#cal')) {
+      var all = document.querySelectorAll('#cal .is-prev'); for (var i = 0; i < all.length; i++) all[i].classList.remove('is-prev');
+    }
+  });
+  $('main').addEventListener('focusin', function (e) {
+    if (e.target.id === 'ida' || e.target.id === 'vuelta') { S.paso = e.target.id === 'vuelta' && S.ida ? 'vuelta' : 'ida'; calSync(); }
+  });
   $('main').addEventListener('change', alCambiarFecha);
   $('main').addEventListener('input', alCambiarFecha);
   $('main').addEventListener('input', function (e) {
-    if (e.target.id === 'bus') { S.q = e.target.value.trim(); var sel = document.getElementById('bus').selectionStart; pintar(); var b = document.getElementById('bus'); if (b) { b.focus(); try { b.setSelectionRange(sel, sel); } catch (x) { /* no todos los navegadores dejan */ } } }
+    if (e.target.id === 'bus') { S.q = e.target.value; actualizar(); }
   });
   /* Si entran con ?destino= y ?pax=, son datos que la pantalla anterior ya recogio:
      se va derecho a resultados. Con solo ?destino=, todavia hay que elegir fechas. */
