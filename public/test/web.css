@@ -698,3 +698,15 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="flujo"] .f-scroll[data-paso="5"]{max-width:1200px;margin:0 auto;width:100%}
   [data-pagina="flujo"] .f-scroll[data-paso="5"]>*{max-width:none;margin-left:0;margin-right:0}
 }
+
+/* ============ Celular y tablet: objetivos tactiles de 44px (WCAG 2.5.5 / guia de Apple y Google) ============
+   Auditado a 390px: chips, selectores de monto, pasos de personas y enlaces del pie median 21-37px de alto.
+   Solo se agranda la zona tocable (alto minimo y relleno): el diseno no cambia. En escritorio no aplica. */
+@media (max-width:1023px){
+  .hx-more,.gm-link,.f-more,.r-wa__b,.p-monto,.r-chip,.f-chip,.c-link,.p-link,.d-mas,.fin-link,.pv-link,.pv-sec__b{min-height:44px;box-sizing:border-box}
+  .p-monto,.r-chip,.f-chip{display:inline-flex;align-items:center;justify-content:center}
+  .c-step button,.d-stepper button,.d-pers button,.p-pers button{min-width:44px;min-height:44px}
+  .c-step button{width:44px;height:44px}
+  .hx-foot nav a,.hx-foot a{display:inline-flex;align-items:center;min-height:44px}
+  .d-pers button[data-adultos],.d-pers button[data-ninos],[data-pagina="destino"] button[data-adultos],[data-pagina="destino"] button[data-ninos]{width:44px;height:44px}
+}
