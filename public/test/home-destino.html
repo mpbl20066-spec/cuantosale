@@ -29,21 +29,21 @@
   h1{margin:6px 0 4px;font-family:var(--fh);font-size:27px;font-weight:800;line-height:1.15;color:var(--ink)}
   .d-sub{margin:0 0 14px;font-size:14.5px;font-weight:600;color:var(--ink2);line-height:1.45}
   .d-bus{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink)}
-  .d-bus svg{flex:0 0 22px;color:#1F6FB5}
+  .d-bus svg{flex:0 0 22px;color:var(--azul)}
   .d-bus input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:16px;font-weight:600}
   .d-bus input::placeholder{color:var(--ink2)}
   .d-bus input,.d-bus input:focus,.d-bus input:focus-visible{outline:0;box-shadow:none;-webkit-appearance:none;appearance:none;border-radius:0}
   .d-bus input::-webkit-search-cancel-button,.d-bus input::-webkit-search-decoration{-webkit-appearance:none;display:none}
-  .d-bus:focus-within{border-color:#1F6FB5;box-shadow:0 0 0 3px rgba(31,111,181,.28)}
+  .d-bus:focus-within{border-color:var(--azul);box-shadow:0 0 0 3px rgba(31,111,181,.28)}
   .d-h2{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px}
   .d-h2 h2{margin:0;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
-  .d-mas{border:0;background:transparent;color:#1F6FB5;font:800 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
+  .d-mas{border:0;background:transparent;color:var(--azul);font:800 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
   /* Grilla de destinos: dos columnas en celular, con la foto de arriba y el nombre
      debajo, igual que en la maqueta. */
   .d-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .d-card{display:block;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;overflow:hidden;cursor:pointer}
   .d-card:hover{border-color:var(--ink2)}
-  .d-card.is-on{border-color:#1F6FB5;box-shadow:0 0 0 2px rgba(31,111,181,.35)}
+  .d-card.is-on{border-color:var(--azul);box-shadow:0 0 0 2px rgba(31,111,181,.35)}
   .d-card__f{position:relative;height:96px;background:var(--cel-soft) center/cover}
   .d-card__f::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(10,16,26,.5))}
   .d-card__t{padding:9px 11px 11px}
@@ -53,22 +53,22 @@
   /* Pantalla 2: fechas y personas */
 
   .d-lbl{display:block;margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--ink)}
-  .d-fecha{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:#1F6FB5}
+  .d-fecha{display:flex;align-items:center;gap:10px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--azul)}
   .d-fecha input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:16px;font-weight:700}
-  .d-pers{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:#1F6FB5}
+  .d-pers{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--azul)}
   .d-pers b{flex:1;color:var(--ink);font-size:16px}
   .d-pers button{width:36px;height:36px;border:1.5px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);font-size:19px;font-weight:700;cursor:pointer}
   .d-pers button:disabled{opacity:.35;cursor:default}
-  .d-elegido{display:flex;align-items:center;gap:10px;margin:0 0 6px;padding:11px 13px;border:1.5px solid #1F6FB5;border-radius:14px;background:var(--cel-soft);color:var(--ink)}
+  .d-elegido{display:flex;align-items:center;gap:10px;margin:0 0 6px;padding:11px 13px;border:1.5px solid var(--azul);border-radius:14px;background:var(--cel-soft);color:var(--ink)}
   .d-elegido b{font-family:var(--fh);font-size:16px;font-weight:700}
-  .d-elegido span{margin-left:auto;font-size:12.5px;font-weight:700;color:#1F6FB5}
+  .d-elegido span{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--azul)}
   /* la tarjeta del destino es un boton: toda ella lleva a elegir otro destino */
   button.d-elegido{width:100%;box-sizing:border-box;text-align:left;font-family:var(--fb);cursor:pointer}
   button.d-elegido:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .d-elegido__f{display:block;flex:0 0 clamp(90px,26vw,120px);height:72px;border-radius:10px;background:var(--cel-soft) center/cover}
   .d-elegido__t{flex:1;min-width:0}
   .d-elegido__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2)}
-  .d-elegido .d-elegido__c{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:800;color:#1F6FB5;white-space:nowrap}
+  .d-elegido .d-elegido__c{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:13.5px;font-weight:800;color:var(--azul);white-space:nowrap}
   .d-noches{margin:12px 0 0;padding:10px 14px;border-radius:12px;background:var(--good-soft);color:var(--ink);font-size:14.5px;font-weight:700}
   .d-noches.is-err{background:var(--coral-soft);color:var(--coral)}
   h2.d-h2{font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}   /* el titulo "cuantas personas" salia con el tamano por defecto del navegador */
@@ -135,7 +135,7 @@
     .d-chips{display:flex;flex-wrap:wrap;gap:10px}
     .d-chip{padding:9px 16px;border:1.5px solid var(--line);border-radius:99px;background:#fff;color:var(--ink);font-size:14.5px;font-weight:700;cursor:pointer;transition:background-color .15s,border-color .15s}
     .d-chip:hover{background:#EAF2FB;border-color:#B9D3F0}
-    .d-chip.is-on{background:#EAF2FB;border-color:#1F6FB5}
+    .d-chip.is-on{background:#EAF2FB;border-color:var(--azul)}
     .d-chip:focus-visible,.d-x:focus-visible,.d-cont:focus-visible,.d-prev:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
     .d-cont{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;margin-top:auto;padding:18px 20px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:17px;font-weight:800;cursor:pointer}
     .d-cont:disabled{opacity:.5;cursor:default}
