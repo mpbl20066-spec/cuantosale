@@ -21,15 +21,14 @@
   .scroll{flex:1;overflow-y:auto;padding:0 18px 28px;scrollbar-width:none}
   .scroll::-webkit-scrollbar{display:none}
 
-  /* Portada con la foto de Niteroi (public/test/home-portada.jpg, convertida de
-     portada.png). Es 16:9 y muy colorida, asi que el degradado va solo del lado
-     izquierdo, donde se apila el texto, y la foto se ve entera del lado derecho.
-     El alto sube para que la imagen tenga presencia en vez de quedar de franja. */
-  .m-top{position:relative;margin:0 -18px;padding:0 18px 26px;min-height:440px;background:url(home-portada.jpg) 52% 44%/cover}
-  /* Esta foto es del atardecer: el cielo de la izquierda ya es azul oscuro, asi que
-     el velo puede ser suave y el texto blanco se apoya en la foto sin taparla. Con la
-     foto de dia habia que poner 72% de velo del lado izquierdo y la imagen se apagaba. */
-  .m-top::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.34) 0%,rgba(10,16,26,.14) 26%,rgba(10,16,26,.04) 52%,rgba(10,16,26,.26) 100%),linear-gradient(90deg,rgba(10,16,26,.26) 0%,rgba(10,16,26,.08) 32%,transparent 58%)}
+  /* Portada con la foto del atardecer (public/test/home-portada.jpg, de portada2.png).
+     Baja y ancha, no alta: las dos acciones principales van DEBAJO de la foto, asi que
+     la imagen no compite con ellas por la atencion. */
+  .m-top{position:relative;margin:0 -18px;padding:0 18px 30px;min-height:300px;background:url(home-portada.jpg) 50% 40%/cover}
+  /* El velo es suave arriba (el cielo del atardecer ya es oscuro y ahi va el texto) y
+     sube al final para que las tarjetas que siguen entren sobre el fondo y no sobre
+     un corte de foto. */
+  .m-top::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.46) 0%,rgba(10,16,26,.20) 30%,rgba(10,16,26,.06) 58%,rgba(10,16,26,.42) 88%,var(--bg) 100%)}
   /* Sobre la foto el texto va en blanco, no en el color de ink. */
   .m-top .m-logo{color:#fff}
   .m-top .m-tag{color:rgba(255,255,255,.9)}
@@ -43,7 +42,7 @@
   .m-menu{width:40px;height:40px;border:0;background:transparent;display:grid;place-content:center;gap:5px;cursor:pointer}
   .m-menu span{display:block;width:22px;height:2.5px;border-radius:2px;background:var(--ink)}
 
-  .m-hero{margin:22px 0 0}
+  .m-hero{margin:26px 0 0}
   .m-hero h1{font-family:var(--fh);font-size:30px;line-height:1.1;font-weight:800;margin:0 0 8px;color:var(--ink)}
   .m-hero p{margin:0;color:var(--ink2);font-size:14.5px;line-height:1.45}
 
@@ -53,26 +52,23 @@
   /* Distintivo del icono: rectángulo ámbar claro con el ícono oscuro, como en la
      maqueta. El de la tarjeta pintada es un ámbar más fuerte para que se recorte. */
   :root{--m-badge:#FBE7B0;--m-badge-ink:#3A2C05;--m-badge-2:#F0C33C;--m-main:#F7C325;--m-main-ink:#3A2C05;--m-main-ink2:#6B551A}
-  /* Las dos tarjetas van ENCIMA de la foto, centradas, como en la maqueta: por eso el
-     margen negativo. Sin esto quedaban abajo de la foto y el encuadre se pierde. */
-  .m-cards{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:-120px 0 22px}
-  /* Icono a la izquierda y texto al lado, como en la maqueta. La tarjeta es angosta
-     (van dos por fila), asi que el distintivo y los textos van chicos: con el
-     tamaño de escritorio el titulo se parte en tres lineas. */
-  .m-card{display:flex;flex-direction:row;align-items:center;gap:9px;box-sizing:border-box;padding:11px 10px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);text-decoration:none;box-shadow:0 4px 14px rgba(16,24,40,.06)}
+  /* Las dos tarjetas van DEBAJO de la foto, no encima: montadas sobre la imagen el
+     paisaje y las acciones competian por la misma atencion. Ahora son dos tarjetas
+     blancas, lado a lado, con aire. */
+  .m-cards{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 26px}
+  .m-card{display:flex;flex-direction:row;align-items:center;gap:12px;box-sizing:border-box;padding:16px 14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);text-decoration:none;box-shadow:0 2px 10px rgba(16,24,40,.05)}
   .m-card:hover{border-color:var(--ink2)}
   .m-card:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .m-card__icon{flex:none;width:38px;height:38px;border-radius:11px;background:var(--m-badge);color:var(--m-badge-ink);display:grid;place-items:center}
-  .m-card__icon svg{width:20px;height:20px}
+  .m-card__icon{flex:none;width:44px;height:44px;border-radius:12px;background:var(--m-badge);color:var(--m-badge-ink);display:grid;place-items:center}
+  .m-card__icon svg{width:23px;height:23px}
   .m-card__txt{display:block;flex:1;min-width:0}
-  .m-card__txt b{display:block;font-family:var(--fh);font-size:13.5px;font-weight:700;line-height:1.2;color:var(--ink)}
-  .m-card__txt small{display:block;margin-top:3px;font-size:11px;font-weight:600;color:var(--ink2);line-height:1.3}
-  /* La de presupuesto es la que diferencia a CuantoSale: va pintada de amarillo
-     fuerte, sin borde, con el mismo contenido que la otra. */
-  .m-card--main{border-color:transparent;background:var(--m-main);box-shadow:0 6px 18px rgba(180,140,20,.28)}
-  .m-card--main .m-card__icon{background:var(--m-badge-2);color:var(--m-main-ink)}
-  .m-card--main .m-card__txt b{color:var(--m-main-ink)}
-  .m-card--main .m-card__txt small{color:var(--m-main-ink2)}
+  .m-card__txt b{display:block;font-family:var(--fh);font-size:15.5px;font-weight:700;line-height:1.2;color:var(--ink)}
+  .m-card__txt small{display:block;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
+  /* Las dos son blancas y parecidas. La de presupuesto se distingue por el distintivo
+     ambar del icono y por la etiqueta, no por pintar la tarjeta entera: al pintarla
+     dejaba de leerse como una accion mas de la portada. */
+  .m-card__tag{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:99px;background:var(--m-badge);color:var(--m-main-ink);font-size:10.5px;font-weight:800;letter-spacing:.02em}
+  .m-card--main .m-card__icon{background:var(--m-main);color:var(--m-main-ink)}
 
   .m-btn:focus-visible,.m-menu:focus-visible,.m-more:focus-visible,.m-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
@@ -87,20 +83,24 @@
   .m-auto:hover{border-color:var(--ink2)}
   .m-auto:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
-  .m-sec{display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px}
+  .m-sec{display:flex;align-items:baseline;justify-content:space-between;margin:26px 0 14px}
   .m-sec h2{font-family:var(--fh);font-size:19px;font-weight:700;margin:0;color:var(--ink)}
   .m-more{border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
 
-  /* Carrusel: scroll-snap nativo; el quinto circulo asoma por el borde
-     derecho para que se entienda que se desliza. */
-  .m-car{display:flex;gap:14px;margin:0 -18px;padding:0 18px 4px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  /* Carrusel: scroll-snap nativo. Las imagenes se ven completas y el nombre va
+     sobre ellas, no al lado; el padding de la derecha deja asomar la siguiente para
+     que se entienda que se desliza. */
+  .m-car{display:flex;gap:14px;margin:0 -18px;padding:0 18px 6px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none}
   .m-car::-webkit-scrollbar{display:none}
-  .m-dest{flex:0 0 132px;height:168px;border:0;padding:0;border-radius:16px;position:relative;overflow:hidden;scroll-snap-align:start;cursor:pointer;background:var(--surface)}
+  .m-dest{flex:0 0 150px;height:190px;border:0;padding:0;border-radius:16px;position:relative;overflow:hidden;scroll-snap-align:start;cursor:pointer;background:var(--surface)}
   .m-dest img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .m-dest::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,0) 50%,rgba(10,16,26,.7))}
-  .m-dest span{position:absolute;left:10px;right:10px;bottom:10px;z-index:1;color:#fff;font-size:13px;font-weight:700;text-align:left;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+  .m-dest::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(10,16,26,.55) 72%,rgba(10,16,26,.86))}
+  .m-dest span{position:absolute;left:11px;right:11px;bottom:11px;z-index:1;color:#fff;font-size:13.5px;font-weight:700;text-align:left;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.55)}
 
   .tabs{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;padding:8px 8px 22px;background:var(--surface);border-top:1px solid var(--line)}
+  /* El logo de la barra va solo en escritorio, donde la barra pasa a ser la
+     navegacion superior; en celular el logo ya esta arriba, sobre la foto. */
+  .tabs__logo{display:none;align-items:center;gap:7px;padding-left:16px;font-family:var(--fh);font-weight:800;font-size:19px;color:var(--ink)}
   .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 7px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:11.5px;font-weight:600;cursor:pointer;position:relative}
   .tab svg{width:24px;height:24px}
   .tab.is-on{color:var(--ink)}
@@ -161,7 +161,7 @@
       <span class="m-card__icon" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
       </span>
-      <span class="m-card__txt"><b>No sé dónde ir</b><small>Buscá por presupuesto</small></span>
+      <span class="m-card__txt"><b>No sé dónde ir</b><small>Buscá por presupuesto</small><span class="m-card__tag">Lo que nos distingue</span></span>
     </a>
     </div>
 
@@ -179,6 +179,7 @@
   </div>
 
   <nav class="tabs" aria-label="Navegación principal">
+    <span class="tabs__logo" aria-hidden="true"><svg width="20" height="24" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale</span>
     <button type="button" class="tab is-on" data-evento="home_tab" data-tab="inicio" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5z"/></svg>Inicio</button>
     <button type="button" class="tab" data-evento="home_tab" data-tab="destinos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Destinos</button>
     <button type="button" class="tab" data-evento="home_tab" data-tab="guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>Guardados</button>
