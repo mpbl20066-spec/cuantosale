@@ -188,6 +188,32 @@
      diciendo de donde se empezo. */
   var fuente = qs.get('fuente') || 'directo';
   var pax = Math.max(1, Math.min(9, +qs.get('pax') || 2)), BUDGET = 1000 * pax;
+  /* A donde vuelve la flecha de "atras".
+     Esta pantalla se abre desde dos lugares y cada uno vuelve a lo suyo:
+     - el flujo por destino (home-destino.html manda fuente=destino_<medio>), que
+       termina en las fechas: la flecha tiene que devolver ahi con el destino y las
+       fechas ya~(\`?destino=\` y fechas).
+     - el calculador de ruta (home-calcular.html manda fuente=calcular_presupuesto),
+       que quedo como esta.
+     Antes el "atras" apuntaba siempre al calculador. Con la pantalla de medios del
+     flujo por destino eliminada, home-destino llega aca directo, asi que sin esto
+     la flecha mandaba a un flujo que no era el suyo. `origen_home` distingue el
+     caso de entrar por la portada y no saber de donde se vino. */
+  var dbg = /[?&]debug=1/.test(location.search) ? '&debug=1' : '';
+  function volverA() {
+    if (fuente.indexOf('destino_') === 0) {
+      var q = new URLSearchParams({ destino: qs.get('destino') || '', pax: pax });
+      var ida = qs.get('ida'), vuelta = qs.get('vuelta');
+      if (ida) q.set('ida', ida);
+      if (vuelta) q.set('vuelta', vuelta);
+      q.set('origen_home', fuente);
+      return 'home-destino.html?' + q.toString() + dbg;
+    }
+    return 'home-calcular.html' + dbg;
+  }
+  /* La flecha del encabezado se arma aca: el HTML trae la de destino por defecto y
+     esta la reemplaza segun de donde se entro. */
+  (function () { var b = document.querySelector('.r-bar .r-back'); if (b) b.href = volverA(); })();
   /* Cifras de ejemplo para 2 personas; se escalan por cantidad de personas. */
   var PARTES = [['Pasajes', 943, '--c1'], ['Alojamiento', 500, '--c3'], ['Comidas', 308, '--c4'], ['Traslados', 177, '--c5'], ['Transporte local', 64, '--c6']];
   var ICON = {
