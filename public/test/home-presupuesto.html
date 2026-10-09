@@ -123,7 +123,7 @@
   .p-opt--d b{font-size:14.5px}
   @media (min-width:880px){
     [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){display:block;max-width:600px;margin:0 auto}
-    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig]){max-width:600px;margin:0 auto;padding-top:16px}
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig],.p-go[data-paso2]){max-width:600px;margin:0 auto;padding-top:16px}
   }
   .p-card__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .p-card__h .p-eyebrow{margin:0}
@@ -150,6 +150,10 @@
   .p-medio small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2)}
   .p-medio.is-on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
   .p-medio:focus-visible,.p-sel select:focus-visible,.p-pers__s button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  [data-pagina="presupuesto"] h1.p-h.p-h--paso{margin:2px 2px 10px;font-family:var(--fb);font-size:15px;font-weight:700;line-height:1.3;color:var(--ink2)}
+  .p-card .p-pers>span:first-child{display:block}
+  .p-card .p-pers>span:first-child b,.p-card .p-pers>span:first-child small{display:block}
+  .p-card{margin-bottom:6px}
 </style>
 <link rel="stylesheet" href="web.css">
 </head>
@@ -307,7 +311,15 @@
     $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h">¿Cuándo querés viajar?</h1>' + tabs + '<div class="p-form">' + cuerpo + '</div><div class="p-form">' + ayuda() + '</div></div>' +
       '<div class="p-cta"><button type="button" class="p-go" data-buscar="1" data-evento="presupuesto_paso3_buscar" data-tipo_fechas="' + S.cuando + '">Buscar destinos →</button></div>';
   }
-  /* Paso 2: Armá tu búsqueda (origen, personas y medio de transporte). */
+  /* Paso 2: Armá tu búsqueda (origen, personas y medio de transporte).
+     Aca el medio es una PREFERENCIA sobre el conjunto de destinos, no una eleccion
+     para un destino puntual: todavia no se sabe a donde se va. Por eso la pantalla
+     se muestra siempre y por eso "Comparar todos" tiene sentido (los 40 destinos
+     ofrecen mas de un medio).
+     Que el filtro respete lo que el modelo puede cotizar no lo decide esta pantalla:
+     lo decide /api/cotizar-todos, que saca los destinos sin ese transporte
+     (server.js:2369, esCotizable). Si se eligiera auto y el destino no tiene ruta,
+     no aparece: no se ofrece un auto que despues no tiene precio. */
   var MEDIOS2 = [
     { id: 'avion', ico: I.avion, nom: 'Avión', sub: 'Vuelos y equipaje' },
     { id: 'auto', ico: I.car, nom: 'Auto', sub: 'Combustible y peajes' },
@@ -317,13 +329,13 @@
   var ORIGENES = ['Montevideo, Uruguay', 'Punta del Este, Uruguay'];
   var CUANDO_TXT = { fechas: 'Fechas definidas', flexible: 'Fechas flexibles', igual: 'Cualquier momento' };
   function pintarPaso2() {
-    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h p-h--paso">Armá tu búsqueda</h1>' +
+    $('main').innerHTML = '<div class="p-step">' + barra() + '<h1 class="p-h p-h--paso">Paso 2 — Armá tu búsqueda</h1>' +
       '<div class="p-card"><div class="p-card__h"><p class="p-eyebrow">BUSCAR POR PRESUPUESTO</p><span class="p-badge">2 de 4</span></div>' +
       '<div class="p-resumen"><small>Tu presupuesto</small><b>US$ ' + S.presupuesto.toLocaleString('es-UY') + ' por persona</b><span>' + CUANDO_TXT[S.cuando] + '</span></div>' +
       '<h2 class="p-h2">¿Desde dónde salís?</h2><div class="p-sel">' + ic('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>', 18) + '<select id="origen" aria-label="Desde dónde salís">' +
       ORIGENES.map(function (o) { return '<option' + (S.origen === o ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select></div>' +
       '<h2 class="p-h2">¿Cuántas personas viajan?</h2><div class="p-pers"><span><b>Adultos</b><small>Mayores de 12 años</small></span><span class="p-pers__s"><button type="button" data-pax="-1" aria-label="Menos adultos"' + (S.pax <= 1 ? ' disabled' : '') + '>−</button><output>' + S.pax + '</output><button type="button" data-pax="1" aria-label="Más adultos"' + (S.pax >= 9 ? ' disabled' : '') + '>+</button></span></div>' +
-      '<h2 class="p-h2">¿Cómo preferís viajar?</h2><p class="p-sub p-sub--s">Podés comparar todas las opciones.</p><div class="p-medios">' +
+      '<h2 class="p-h2">¿Cómo preferís viajar?</h2><p class="p-sub p-sub--s">Filtramos por esta forma de llegar. Si no te importa, compará todas.</p><div class="p-medios">' +
       MEDIOS2.map(function (m) {
         return '<button type="button" class="p-medio' + (S.medio === m.id ? ' is-on' : '') + '" data-medio2="' + m.id + '" aria-pressed="' + (S.medio === m.id) + '"><span class="p-medio__i">' + ic(m.ico, 18) + '</span><b>' + m.nom + '</b><small>' + m.sub + '</small></button>';
       }).join('') + '</div>' + ayuda() + '</div></div>' +

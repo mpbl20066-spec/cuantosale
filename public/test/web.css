@@ -244,17 +244,7 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="destino"] .d-pers b{font-size:17px}
   [data-pagina="destino"] .d-pers button{width:40px;height:40px}
   [data-pagina="destino"] .d-btn{font-size:16px;padding:17px 18px}
-  /* El medio de transporte son pocas opciones y muy anchas: en escritorio van en dos
-     columnas, como las tarjetas de la portada. */
-  [data-pagina="destino"] .d-medios{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
-  [data-pagina="destino"] .d-medio{padding:18px}
-  [data-pagina="destino"] .d-medio__i{flex-basis:54px;height:54px}
-  [data-pagina="destino"] .d-medio__t b{font-size:17.5px}
-  [data-pagina="destino"] .d-medio__t small{font-size:13.5px}
-  [data-pagina="destino"] .d-nota{font-size:13.5px}
-  /* El paso 3 es el mas corto de los tres: que no quede estirado a lo alto. */
-  [data-pagina="destino"] .d-main[data-pant="3"]{align-content:center}
-}
+  }
 @media (min-width:1100px){
   [data-pagina="destino"] .d-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
   [data-pagina="destino"] .d-card__f{height:152px}

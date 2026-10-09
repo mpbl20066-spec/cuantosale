@@ -139,11 +139,18 @@
   var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
   var MES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fd = function (iso) { var q = iso.split('-'); return +q[2] + ' ' + MES[+q[1] - 1]; };
-  /* Los mismos 40 destinos que cuantosale.uy (lib/model.js). [clave, nombre, km (solo respaldo), region: sc | rs | otro, region completa].
-     Auto y bus solo se ofrecen en Santa Catarina (sc) y Rio Grande do Sul (rs). */
-  var DESTS = (window.CS_DESTS || []).map(function (d) { return [d.k, d.name + ', Brasil', 1500, d.region === 'Santa Catarina' ? 'sc' : (d.region === 'Río Grande do Sul' ? 'rs' : 'otro'), d.region]; });
+  /* Los mismos 40 destinos que cuantosale.uy (lib/model.js). [clave, nombre, region completa, medios].
+     El km no se trae aca: la ruta sale de ruta-datos.js (RT_DATA), el mismo snapshot del
+     roadtrip del modelo, y si un destino no esta ahi es que no tiene ruta por carretera.
+     `medios` es lo que el sistema puede cotizar de verdad para ese destino; lo genera
+     scripts/build-destinos-datos.js desde DEST.modes y la whitelist de roadtrip. */
+  var DESTS = (window.CS_DESTS || []).map(function (d) { return [d.k, d.name + ', Brasil', d.region, d.medios || []]; });
   var POPULARES = ['rio', 'fln', 'buz', 'ilha', 'bombinhas', 'for'];
-  var porTierra = function (d) { return d && (d[3] === 'sc' || d[3] === 'rs'); };
+  /* Alternativas de transporte de un destino, en el orden en que se las muestra.
+     Un destino sin datos cae a avion, el unico medio que el modelo tiene para los 40. */
+  var mediosDe = function (d) { return d && d[3] && d[3].length ? d[3] : ['avion']; };
+  /* Con una sola alternativa la pantalla "¿Cómo querés viajar?" no aporta decision. */
+  var hayDecision = function (d) { return mediosDe(d).length >= 2; };
   var I = {
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
     cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
@@ -198,13 +205,32 @@
       '<div id="todos">' + todosDest() + '</div>';
     $('foot').innerHTML = '<button type="button" class="c-btn" data-sig="1">Siguiente →</button>';
   }
+  /* Esta pantalla solo se pinta cuando hay dos o mas alternativas: con una sola,
+     ir(2) nunca llega aca y el paso 1 va derecho a resultados (ver data-sig). Por eso
+     no hay un caso de "un solo medio" ni hace falta una nota al pie: si se llegara con
+     una sola, no se muestra. Cada medio se ofrece solo si esta en `mediosDe`. */
+  /* 'comparar' no es un medio del destino: no viene en `mediosDe`, que solo trae
+     los que el modelo puede cotizar. Se ofrece aparte, al final, y solo tiene
+     sentido con dos o mas alternativas. */
+  var MEDIO_TXT = {
+    auto: ['car', 'g', 'En auto', 'Calculamos combustible, peajes y ruta.'],
+    avion: ['plane', 'b', 'En avión', 'Más rápido y cómodo.'],
+    bus: ['bus', 'g', 'En bus', 'Pasajes y traslados.'],
+    comparar: ['cmp', 'b', 'Comparar opciones', 'Vemos qué opción te conviene más.']
+  };
   function pant2() {
     $('main').dataset.pant = '2';
-    var o = function (id, ico, tono, t, s) { return '<button type="button" class="c-opt" data-modo="' + id + '"><span class="opt__i opt__i--' + tono + '">' + ic(I[ico], 28) + '</span><span><b>' + t + '</b><small>' + s + '</small></span>' + ic(I.chev, 16) + '</button>'; };
-    var tierra = porTierra(destInfo());
+    var o = function (id) {
+      var t = MEDIO_TXT[id];
+      return '<button type="button" class="c-opt" data-modo="' + id + '"><span class="opt__i opt__i--' + t[1] + '">' + ic(I[t[0]], 28) + '</span><span><b>' + t[2] + '</b><small>' + t[3] + '</small></span>' + ic(I.chev, 16) + '</button>';
+    };
+    var hay = mediosDe(destInfo());
     $('main').innerHTML = '<h1>¿Cómo querés viajar?</h1><p class="c-sub">Elegí la forma de llegar a tu destino o compará todas las opciones.</p>' +
-      (tierra ? o('auto', 'car', 'g', 'En auto', 'Calculamos combustible, peajes y ruta.') : '') + o('avion', 'plane', 'b', 'En avión', 'Más rápido y cómodo.') + (tierra ? o('bus', 'bus', 'g', 'En bus', 'Pasajes y traslados.') : '') + o('comparar', 'cmp', 'b', 'Comparar opciones', 'Vemos qué opción te conviene más.') +
-      (tierra ? '' : '<p class="c-ej">Para ' + esc(destInfo()[1].split(',')[0]) + ' el viaje es en avión: el auto y el bus están disponibles solo para destinos de Santa Catarina y Rio Grande do Sul.</p>');
+      hay.map(o).join('') +
+      /* "Comparar opciones" solo si hay dos o mas alternativas comparables. Esta pantalla
+         solo se pinta con dos o mas (ir(2) no se alcanza con una sola), asi que aca
+         siempre hay algo que comparar. */
+      o('comparar');
     $('foot').innerHTML = '<button type="button" class="c-link" data-ir="1">Volver</button>';
   }
   function calcTxt() {
@@ -224,14 +250,20 @@
       '<label class="c-fld" for="pxs">Personas que viajan</label><select id="pxs" class="c-sel">' + [1, 2, 3, 4, 5].map(function (n) { return '<option value="' + n + '"' + (S.pxs === n ? ' selected' : '') + '>' + n + (n === 1 ? ' persona' : ' personas') + '</option>'; }).join('') + '</select>';
     $('foot').innerHTML = '<button type="button" class="c-btn" data-calc="1">Calcular ruta</button>';
   }
-  /* Costo de la ruta (ejemplo): km de la tabla x 2 (ida y vuelta) x consumo x precio del litro. */
+  /* La distancia sale de RT_DATA (ruta-datos.js), el snapshot de roadtripCost del
+     modelo. Los 13 destinos con ruta estan ahi; el respaldo es solo para que la
+     pantalla no se rompa si faltara alguna entrada. */
   var CAR_KMPL = { onix: ['Chevrolet Onix · 13 km/l', 13], gol: ['VW Gol · 12 km/l', 12], argo: ['Fiat Argo · 12,5 km/l', 12.5], hilux: ['Toyota Hilux · 9 km/l', 9], kwid: ['Renault Kwid · 15 km/l', 15] };
   var EV_CARS = { kwid_etech: ['Renault Kwid E-Tech · 12 kWh/100km', 12, 26.8], byd_dolphin: ['BYD Dolphin · 15 kWh/100km', 15, 44.9], byd_yuanplus: ['BYD Yuan Plus (Atto 3) · 16 kWh/100km', 16, 60.5], bolt: ['Chevrolet Bolt EV · 17 kWh/100km', 17, 65], model3: ['Tesla Model 3 · 14 kWh/100km', 14, 57.5] };
   var FUEL_USD = 1.2;
   var nf1 = function (n) { return String(n).replace('.', ','); };
   /* Mismas cuentas que el planificador de ruta en auto de cuantosale.uy. */
   function ruta() {
-    var r = (window.RT_DATA || {})[S.dest] || { distanceKm: destInfo()[2], roundTripKm: destInfo()[2] * 2, hours: Math.round(destInfo()[2] / 70), tollsUsd: 45 }, ev = S.vt === 'ev';
+    /* RT_DATA tiene los 13 destinos con ruta. Esta pantalla (pant3 en adelante) solo se
+     alcanza eligiendo auto, y auto solo existe para esos 13, asi que la entrada
+     siempre esta. El respaldo es por si faltara alguna: antes se usaba un numero que
+     ya no esta en la fila del destino (hoy es el nombre de la region). */
+    var r = (window.RT_DATA || {})[S.dest] || { distanceKm: 0, roundTripKm: 0, hours: 0, tollsUsd: 0 }, ev = S.vt === 'ev';
     var o = { km: r.roundTripKm, unaVia: r.distanceKm, horas: r.hours, peajes: r.tollsUsd, otros: 15, ev: ev };
     if (ev) { var c = EV_CARS[S.em]; o.kwh = Math.round(r.roundTripKm / 100 * c[1] * 10) / 10; o.precioKwh = S.kwhp > 0 ? S.kwhp : 0.35; o.comb = Math.round(o.kwh * o.precioKwh); o.autonomia = Math.max(50, Math.round(c[2] * 0.8 / c[1] * 100)); }
     else { var kmpl = CAR_KMPL[S.cm][1]; o.litros = Math.round(r.roundTripKm / kmpl * 10) / 10; o.comb = Math.round(o.litros * FUEL_USD); }
@@ -318,7 +350,7 @@
     if (t.id === 'back') { if (S.pant === 1) location.href = 'home-dos-caminos.html' + (debug ? '?debug=1' : ''); else ir(S.pant === 5 ? 4 : (S.pant === 4 ? 3 : (S.pant === 3 ? 2 : 1)), 'volver'); return; }
     if (t.dataset.dest) {
       S.dest = t.dataset.dest; S.err.dest = ''; var di = destInfo();
-      track('inicio_elegir_destino', { destino: S.dest, region: di[4], origen_seleccion: t.dataset.origen, busqueda: S.q ? S.q.length : 0 });
+      track('inicio_elegir_destino', { destino: S.dest, region: di[2], origen_seleccion: t.dataset.origen, busqueda: S.q ? S.q.length : 0 });
       $('chipd').innerHTML = chipDest(); $('grid').innerHTML = gridDest(); $('todos').innerHTML = todosDest(); return;
     }
     if (t.dataset.p) { S.ida = ($('ida') || {}).value || S.ida; S.vuelta = ($('vuelta') || {}).value || S.vuelta; S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); var y = $('main').scrollTop; pant1(); $('main').scrollTop = y; return; }
@@ -329,13 +361,22 @@
       if (!S.ida || !S.vuelta || S.vuelta <= S.ida) S.err.fechas = 'Elegí una fecha de ida y una de vuelta posterior.';
       if (Object.keys(S.err).length) { pant1(); return; }
       track('inicio_destino_fechas', { noches: Math.round((new Date(S.vuelta) - new Date(S.ida)) / 864e5), mes_viaje: S.ida.slice(0, 7), con_fechas: true });
-      /* Sin auto ni bus no hay nada que elegir: se salta "¿Cómo querés viajar?" y se va en avión. */
-      if (!porTierra(destInfo())) { track('inicio_modo_transporte', { modo: 'avion', region: destInfo()[3], automatico: true }); irResultado('avion'); return; }
+      /* Con una sola alternativa que el sistema puede cotizar, "¿Cómo querés viajar?" no
+         aporta ninguna decision: se va directo a resultados con ese medio. Con dos o
+         mas, se muestra para que la persona elija. */
+      if (!hayDecision(destInfo())) {
+        var solo = mediosDe(destInfo())[0];
+        track('inicio_modo_transporte', { modo: solo, region: destInfo()[2], automatico: true, alternativas: 1 });
+        irResultado(solo); return;
+      }
       ir(2, 'siguiente'); return;
     }
     if (t.dataset.modo) {
-      S.modo = t.dataset.modo; if ((S.modo === 'auto' || S.modo === 'bus') && !porTierra(destInfo())) return;
-      track('inicio_modo_transporte', { modo: S.modo, region: destInfo()[3] });
+      /* La pantalla no ofrece lo que el destino no tiene, pero el click se valida
+         igual: si el medio no esta entre los disponibles del destino, se ignora y
+         no se ofrece una alternativa que el modelo no puede cotizar. */
+      S.modo = t.dataset.modo; if (S.modo !== 'comparar' && mediosDe(destInfo()).indexOf(S.modo) < 0) return;
+      track('inicio_modo_transporte', { modo: S.modo, region: destInfo()[2] });
       if (S.modo === 'auto') ir(3, 'modo_auto'); else irResultado(S.modo); return;
     }
     if (t.dataset.editar) { ir(3, 'editar'); return; }
