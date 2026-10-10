@@ -95,7 +95,7 @@ const stubs = {
   CHECKOUT_STEPS: [{ label: 'Datos' }, { label: 'Pago' }, { label: 'Listo' }],
   // El numero al que llega la reserva. Va en los stubs y no hardcodeado en el
   // test para que cambiarlo en app.js no rompa la comprobacion.
-  WHATSAPP_RESERVAS: '5511920836306',
+  WHATSAPP_RESERVAS: '59898529851',
   // Las etiquetas que la app usa cuando todavia no hay un hotel real. Se copian
   // del fuente con una expresion laxa a proposito: si en app.js cambia la
   // lista, el test avisa en vez de dar verde con una copia vieja.
@@ -184,7 +184,7 @@ prueba('el whatsapp abre pidiendo las dos cosas', () => assert.ok(/ACTIVIDADES S
    proposito —un cambio para que el mensaje lo mande la persona a quien quiera—
    pasaria todos los tests de arriba, porque el texto armarlo igual. */
 prueba('el link va al numero del operador y no al selector de contactos', () => {
-  assert.ok(r.waCrudo.startsWith('https://wa.me/5511920836306?text='), 'queda: ' + r.waCrudo.slice(0, 40));
+  assert.ok(r.waCrudo.startsWith('https://wa.me/59898529851?text='), 'queda: ' + r.waCrudo.slice(0, 40));
 });
 prueba('el whatsapp lista actividades y transfer', () => {
   assert.ok(/ACTIVIDADES SELECCIONADAS\n• ⛵ Paseo en escuna \(R\$ 42,00\)/.test(r.wa), 'actividades');

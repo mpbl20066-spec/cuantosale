@@ -4230,7 +4230,7 @@ var HOTEL_NOTA_MINIMA = 8;
      mandarle el itinerario a un amigo, y con numero destino le llega a la
      empresa en lugar del amigo. Compartir y hacer un pedido son dos cosas
      distintas. */
-  var WHATSAPP_RESERVAS = '5511920836306';
+  var WHATSAPP_RESERVAS = '59898529851';
   function whatsappUrl(message, numero) {
     return 'https://wa.me/' + (numero || '') + '?text=' + encodeURIComponent(message);
   }

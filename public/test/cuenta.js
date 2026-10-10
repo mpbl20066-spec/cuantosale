@@ -12,7 +12,7 @@
      CSCuenta.guardarViaje(datos)       -> Promise; rechaza con { codigo: 'sin_sesion' } si no hay sesion */
 (function () {
   'use strict';
-  var WHATSAPP = '5511920836306';   // el mismo numero de ayuda que usa la app
+  var WHATSAPP = '59898529851';   // el mismo numero de ayuda que usa la app
   var ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ESC[c]; }); };
   var money = function (n) { return 'US$ ' + Math.round(Number(n) || 0).toLocaleString('es-UY'); };
