@@ -377,7 +377,7 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="resultado"] .r-filtros{flex-wrap:wrap;margin:0 0 16px;gap:10px;overflow:visible}
   [data-pagina="resultado"] .r-chip{padding:10px 18px;border:1.5px solid #D9DEE7;border-radius:10px;background:#fff;color:#1A2B4A;font-size:14px}
   [data-pagina="resultado"] .r-chip:hover:not(:disabled){border-color:#1A2B4A}
-  [data-pagina="resultado"] .r-chip.is-on{background:#1A2B4A;border-color:#1A2B4A;color:#fff}
+  [data-pagina="resultado"] .r-chip.is-on{background:#F7C325;border-color:#F7C325;color:#0A101A}
   /* tarjetas */
   [data-pagina="resultado"] .r-listaRes{gap:16px}
   [data-pagina="resultado"] .r-res{align-items:center;gap:20px;padding:16px;border:0;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:box-shadow .2s ease,transform .2s ease}
@@ -731,3 +731,25 @@ body{max-width:100%;overflow-x:clip}
 .phone svg:not([fill="#F6B21B"]):not(.cs-keep),.cs-top svg,.hx svg,.tabs svg{color:var(--ico)}
 .cs-top__logo svg path{fill:var(--ink)}
 .d-btn svg,.p-go svg,.r-go svg,.c-btn svg,.p-btn svg,.f-cta svg,.m-card__cta svg,.f-chip.is-on svg,.p-chip.is-on svg,.r-chip.is-on svg{color:currentColor}
+
+/* ---- Iconos: solo amarillo (o blanco sobre fondo oscuro/foto); nada azul ---- */
+svg{color:var(--ico)}
+svg [stroke="#1F6FB5"],svg [stroke="#1F7FE0"],svg [stroke="#1B5FA8"],svg [stroke="#0B2A55"],svg [stroke="#1A2B4A"],svg [stroke="#2C4468"]{stroke:var(--ico)}
+svg [fill="#1F6FB5"],svg [fill="#1F7FE0"],svg [fill="#1B5FA8"],svg [fill="#0B2A55"],svg [fill="#1A2B4A"]{fill:var(--ico)}
+.cs-top__logo svg path,.f-logo svg path,.r-logo svg path{fill:var(--ink)}
+/* Seleccion: siempre fondo/borde amarillo con texto oscuro */
+.f-step.is-on::before,.f-step.is-done::before{background:var(--sel)!important}
+.d-crumb li.is-on span{background:var(--sel)!important;border-color:var(--sel)!important;color:#0A101A!important}
+.pv-d.is-on,.fv-leg button.is-on,.xr.is-sel,.c-vt button.is-on,.c-dc.is-sel,.st-svc.is-on,.d-fecha.is-act,.p-medio.is-on,.d-card.is-on,.p-opt.is-on,.opt.is-sel,.pv-t.is-on{border-color:var(--sel)!important}
+.cal__c.is-ida,.cal__c.is-vuelta{background:var(--sel)!important;color:#0A101A!important}
+:root[data-theme="night"] .cal__c.is-rango,:root[data-theme="night"] .cal__c.is-prev{background:rgba(247,195,37,.18)}
+:root[data-theme="night"] .p-card svg{color:var(--ico)}
+
+/* "Mejor opcion": verde (unico verde permitido, para que no se confunda con la seleccion amarilla) */
+.tagok,.d-best{background:#E1F4E8!important;color:#12784F!important}
+:root[data-theme="night"] .tagok,:root[data-theme="night"] .d-best{background:#123D2E!important;color:#5AD19A!important}
+.tagok svg,.d-best svg{color:currentColor!important}
+/* Tarjeta seleccionada: borde amarillo de 2px, fondo tenido y brillo, igual en todas las pantallas */
+.opt.is-sel,.xr.is-sel,.d-card.is-on,.p-opt.is-on,.p-medio.is-on,.c-dc.is-sel,.pv-d.is-on,.pv-t.is-on,.st-svc.is-on,.fl.is-sel,.hb.is-sel,.trc.is-sel,.ho.is-sel,.xt.is-sel,.xf.is-sel,.ex.is-sel{
+  border:2px solid var(--sel)!important;background:var(--card-sel-bg,#FEF7E7)!important;box-shadow:var(--card-sel-glow,0 0 0 3px rgba(247,195,37,.2))!important}
+:root[data-theme="light"]{--card-sel-bg:#FEF7E7}
