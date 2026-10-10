@@ -39,7 +39,7 @@ global.fetch = function (url, options) {
   const u = String(url);
   pedidos.push(u);
   if (fetchLanza) return Promise.reject(new Error('red caida'));
-  if (u.indexOf('/rest/v1/serpapi_cache?') >= 0) {
+  if (u.indexOf('/rest/v1/vuelos_cache?') >= 0) {
     // Solo devolvemos las claves que se pidieron, como hace PostgREST con el
     // filtro key=in.(...). Asi el test puede distinguir "no hay" de "no pregunto".
     const m = u.match(/key=in\.\(([^)]*)\)/);
