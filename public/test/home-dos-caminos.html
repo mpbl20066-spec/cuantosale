@@ -214,6 +214,20 @@
     html[data-pagina="home"] .hx .hx-grid .hx-dest span{padding:10px 12px;font-size:14px}
     html[data-pagina="home"] .hx .hx-grid .hx-dest:nth-child(5){display:none}
   }
+
+  /* ---- Ajustes de proporcion y legibilidad de la home ---- */
+  /* fila "Destinos populares / Ver todos": mismo eje y misma altura de linea, para que queden nivelados */
+  .hx-sec__h h2,.hx-more{line-height:1.2}
+  .hx-more{display:inline-flex;align-items:center}
+  /* celular: tarjetas bien separadas, mas aire a los lados y menos hueco antes de "Destinos populares" */
+  @media (max-width:767px){[data-pagina="home"] .m-cards{gap:16px}.hx-sec{padding-top:8px}}
+  .m-card{padding:16px 18px}
+  /* destinos: degradado un poco mas largo para que el nombre se lea tambien sobre fotos claras (espuma, cielo) */
+  .hx-grid .hx-dest::after{background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.4) 40%,transparent 65%)}
+  @media (min-width:1024px){
+    html[data-pagina="home"] .hx .hx-hero .m-card{padding:18px 22px}
+    html[data-pagina="home"] .hx .hx-sec{padding-top:56px}
+  }
   /* Barra inferior */
   .tabs{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;padding:8px 8px 22px;background:var(--surface);border-top:1px solid var(--line)}
   .tabs__menu{display:none}
