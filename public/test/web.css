@@ -800,3 +800,12 @@ svg [fill="#1F6FB5"],svg [fill="#1F7FE0"],svg [fill="#1B5FA8"],svg [fill="#0B2A5
   [data-pagina="flujo"] .f-scroll[data-paso="5"]{max-width:880px}
   [data-pagina="flujo"] .f-scroll[data-paso="5"] .ls-hero{height:130px}
 }
+
+/* Calcular: la barra con la flecha de volver ocupa el mismo ancho y centrado que la columna del contenido */
+@media (min-width:1024px){
+  [data-pagina="calcular"] .c-bar{left:50%;right:auto;width:min(900px,100%);transform:translateX(-50%);box-sizing:border-box}
+  :root[data-pagina="calcular"] .c-bar{padding-left:var(--gut);padding-right:var(--gut)}
+  html.cs-hdr[data-pagina="calcular"] .c-back{transform:none}
+  [data-pagina="calcular"] .c-bar:has(~ .c-main[data-pant="1"]),
+  [data-pagina="calcular"] .c-bar:has(~ .c-main[data-pant="2"]){width:min(1120px,100%)}
+}

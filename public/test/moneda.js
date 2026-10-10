@@ -76,7 +76,7 @@
     var w = document.createElement('div');
     w.className = 'cs-mon'; w.setAttribute('data-cs-mon', '');
     w.innerHTML =
-      '<button type="button" class="cs-mon__b" aria-haspopup="listbox" aria-expanded="false" aria-label="Elegir la moneda. Moneda actual: ' + a.m.etiqueta + '">' +
+      '<button type="button" class="cs-mon__b" aria-haspopup="listbox" aria-expanded="false" aria-label="' + a.m.code + ', elegir la moneda. Moneda actual: ' + a.m.etiqueta + '">' +
       '<span class="cs-mon__s" aria-hidden="true">$</span><span class="cs-mon__c">' + a.m.code + '</span>' +
       '<svg class="cs-mon__v" viewBox="0 0 10 10" aria-hidden="true"><path d="m1.5 3.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
       '<ul class="cs-mon__m" role="listbox" aria-label="Elegí la moneda" hidden>' + ST.monedas.map(function (m) {

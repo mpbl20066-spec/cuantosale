@@ -105,7 +105,7 @@
   .hx-hero__in{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:6px 0 20px}
   .hx-hero__txt{margin-top:14px}
   .hx-hero h1{margin:0 0 6px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;color:var(--hx-navy)}
-  .hx-hero__sub{margin:0 0 16px;max-width:36rem;font-size:14px;line-height:1.5;color:var(--hx-gray)}
+  .hx-hero__sub{margin:0 0 16px;max-width:36rem;font-size:14px;line-height:1.5;color:var(--ink2)}
   .hx-cards{display:grid;grid-template-columns:1fr;gap:12px}
   .hx-card{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--hx-border);border-radius:16px;background:#fff;color:var(--hx-navy);text-align:left;text-decoration:none;transition:background-color .15s ease}
   .hx-card:hover{background:#F8FAFC}
@@ -120,7 +120,7 @@
   .hx-sec{max-width:1200px;margin:0 auto;padding:20px 0 4px}
   .hx-sec__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .hx-sec__h h2{margin:0;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
-  .hx-more{border:0;background:transparent;color:var(--hx-gray);font-family:var(--fb);font-size:14px;cursor:pointer;padding:4px}
+  .hx-more{border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;padding:4px}
   .hx-more:hover{color:var(--hx-navy)}
   .hx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .hx-dest{position:relative;display:block;height:128px;padding:0;border:0;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#60A5FA,#06B6D4);cursor:pointer;text-align:left}
@@ -222,6 +222,7 @@
   /* fila "Destinos populares / Ver todos": mismo eje y misma altura de linea, para que queden nivelados */
   .hx-sec__h h2,.hx-more{line-height:1.2}
   .hx-more{display:inline-flex;align-items:center}
+  .hx-foot .hx-cookies{border:0;background:transparent;padding:0;font-family:var(--fb);font-size:14px;font-weight:600;color:#fff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
   /* celular: tarjetas bien separadas, mas aire a los lados y menos hueco antes de "Destinos populares" */
   @media (max-width:767px){[data-pagina="home"] .m-cards{gap:16px}.hx-sec{padding-top:8px}}
   .m-card{padding:16px 18px}
@@ -335,6 +336,7 @@
         <nav aria-label="Información">
           <a href="/privacidad">Privacidad</a>
           <a href="/terminos">Términos</a>
+          <button type="button" class="hx-cookies" onclick="window.csConsentimiento&&csConsentimiento.abrir()">Preferencias de cookies</button>
           <a href="https://wa.me/5511920836306" target="_blank" rel="noopener">Hablar con un asesor</a>
         </nav>
         <small>Los precios mostrados son estimaciones y pueden variar al reservar. © 2026 CuántoSale.</small>
