@@ -34,7 +34,10 @@
   .d-bus input::placeholder{color:var(--ink2)}
   .d-bus input,.d-bus input:focus,.d-bus input:focus-visible{outline:0;box-shadow:none;-webkit-appearance:none;appearance:none;border-radius:0}
   .d-bus input::-webkit-search-cancel-button,.d-bus input::-webkit-search-decoration{-webkit-appearance:none;display:none}
-  .d-bus:focus-within{border-color:var(--azul);box-shadow:0 0 0 3px rgba(31,111,181,.28)}
+  .d-bus:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(247,195,37,.3)}
+  .d-bus svg{color:var(--ink2)}.d-bus:focus-within svg{color:var(--ink)}
+  /* aire entre la accion principal (Continuar) y el contenido secundario de abajo */
+  #d-lst .d-h2{margin-top:44px}
   .d-h2{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px}
   .d-h2 h2{margin:0;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
   .d-mas{border:0;background:transparent;color:var(--azul);font:800 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
@@ -172,6 +175,41 @@
     .d-foto small{display:block;margin-top:2px;font-size:15px;font-weight:600;color:rgba(255,255,255,.88)}
     /* destinos populares: 4 tarjetas 4:3, nombre y pais encima de un degradado */
     html[data-pagina="destino"] .d-h2{margin:36px 0 14px}
+    html[data-pagina="destino"] #d-lst .d-h2{margin-top:40px}
+    /* Primera pantalla compacta (1366x768): la flecha de volver y los pasos comparten renglon, y se recorta el aire vertical
+       sobrante entre formulario, imagen y "Destinos populares" para que los destinos asomen sin scroll. */
+    html[data-pagina="destino"] .d-bar{position:relative;z-index:2}
+    html.cs-hdr[data-pagina="destino"] .d-back{transform:none;margin-left:0}
+    html[data-pagina="destino"] .phone>.d-main{width:100%;max-width:1200px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+    html[data-pagina="destino"] .d-main{margin-top:-40px;padding-bottom:28px}
+    html[data-pagina="destino"] .d-crumb{margin:4px 0 0 48px}
+    html[data-pagina="destino"] .d-split{margin-top:16px;gap:36px}
+    html[data-pagina="destino"] .d-sug{margin-top:16px}
+    html[data-pagina="destino"] .d-sug+.d-cont{margin-top:16px;padding:15px 20px}
+    html[data-pagina="destino"] .d-prev{min-height:260px}
+    /* compactacion ~12 %: titulo, buscador, etiquetas y boton un poco mas bajos, sin tocar tipografia ni colores */
+    html[data-pagina="destino"] h1{font-size:34px}
+    html[data-pagina="destino"] .d-sub{font-size:16px}
+    html[data-pagina="destino"] .d-bus{padding:13px 16px}
+    html[data-pagina="destino"] .d-chips{gap:8px}
+    html[data-pagina="destino"] .d-chip{padding:7px 14px;font-size:14px}
+    html[data-pagina="destino"] .d-sug h2{margin-bottom:8px}
+    html[data-pagina="destino"] .d-sug+.d-cont{margin-top:14px;padding:13px 20px}
+    html[data-pagina="destino"] .d-split{margin-top:12px}
+    html[data-pagina="destino"] #d-lst .d-h2{margin-top:32px}
+    html[data-pagina="destino"] .d-card__f{height:112px}
+    /* Pantalla 2 (fechas y personas): mismo criterio. El formulario manda la altura (la foto lateral se ajusta a el, no al reves)
+       y "Continuar" queda siempre a la vista: en una ventana baja se pega al borde inferior mientras queda contenido por debajo. */
+    html[data-pagina="destino"] .d-split--f{margin-top:12px}
+    html[data-pagina="destino"] .d-split--f .d-sub{margin-bottom:10px}
+    html[data-pagina="destino"] .d-split--f .d-lbl{margin:10px 0 4px}
+    html[data-pagina="destino"] .d-split--f .d-fecha{padding:10px 14px}
+    html[data-pagina="destino"] .d-split--f .d-noches{margin:8px 0 0;padding:6px 12px}
+    html[data-pagina="destino"] .d-split--f h2.d-h2{margin:12px 0 8px}
+    html[data-pagina="destino"] .d-quien .d-pers{padding:8px 14px}
+    html[data-pagina="destino"] .d-split--f .d-limite{margin:6px 2px 0}
+    html[data-pagina="destino"] .d-split--f .d-cont{margin-top:14px;padding:13px 20px;position:sticky;bottom:12px;z-index:3;box-shadow:0 0 0 10px var(--bg)}
+    html[data-pagina="destino"] .d-split--f .d-foto{min-height:0}
     html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
     html[data-pagina="destino"] .d-card{position:relative;border:0;border-radius:16px;background:var(--cel-soft)}
     html[data-pagina="destino"] .d-card__f{height:auto;aspect-ratio:4/3;background-size:cover;background-position:center}
@@ -323,8 +361,8 @@
     $('main').dataset.pant = '1';
     var prev = destPrevia();
     $('main').innerHTML = migas(0) +
-      '<div class="d-split"><div class="d-left"><h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá tu destino, elegí las fechas y las personas.</p>' +
-      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="¿A dónde querés ir?" value="' + esc(S.q) + '" autocomplete="off" spellcheck="false">' +
+      '<div class="d-split"><div class="d-left"><h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá o seleccioná el destino de tu próximo viaje.</p>' +
+      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="Ej: Río de Janeiro, Florianópolis..." value="' + esc(S.q) + '" autocomplete="off" spellcheck="false">' +
       '<span id="d-xs" style="display:contents">' + xHtml() + '</span></label>' +
       '<div class="d-sug"><h2>Sugerencias populares</h2><div class="d-chips" id="d-chips">' + chipsHtml(prev) + '</div></div>' +
       '<button type="button" class="d-cont" data-continuar="1" data-evento="destino_continuar_desde_busqueda"' + (prev ? '' : ' disabled') + '>Continuar ' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + '</button></div>' +

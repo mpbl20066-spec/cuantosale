@@ -4343,3 +4343,17 @@ body:has(.voucher-dialog) .cs-toast{bottom:calc(96px + env(safe-area-inset-botto
 .vtrip-bud__txt small{color:var(--ink2);font-size:12.5px;font-weight:600}
 .vtrip-bud__go{flex:none;color:var(--ink2);font-size:20px;line-height:1;margin-left:-4px}
 .vtrip .vplan-extras{display:grid;gap:12px}
+
+/* ==== Escala de escritorio (>=900px) ====
+   En una pantalla de escritorio el titulo llegaba a 92px (clamp(52px,14vw,92px) esta pensado para celular: 14vw de 390px = 54px)
+   y se comia 300px de alto antes del formulario. Aca se acota a 52px y se recortan los rellenos de la columna, para que el
+   formulario entre en el primer viewport. El celular no cambia: esta regla no aplica por debajo de 900px. */
+@media (min-width:900px){
+  h1{font-size:clamp(40px,3.6vw,52px);line-height:1;margin:14px 0 12px}
+  .wrap{padding-top:12px;padding-bottom:56px}
+  /* controles de formulario: 52px es la medida tactil del celular; con mouse alcanzan 46px */
+  .inp,.custom-select__control,.origin__control,.step{height:46px;min-height:46px}
+  .custom-select__trigger{min-height:44px}
+  .seg button{min-height:46px;padding-top:9px;padding-bottom:9px}
+  .find-destinations{min-height:48px}
+}
