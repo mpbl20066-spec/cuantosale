@@ -1746,7 +1746,7 @@ async function buscarVuelos(req, res, body) {
  */
 function browseVacioMsg() {
   if (!flightProviders.isLive()) {
-    return 'Busqueda de vuelos sin credenciales: se muestra el precio estimado del modelo. Poné SERPAPI_API_KEY para precios reales, o MOCK_FLIGHTS=1 para probar con datos falsos.';
+    return 'Busqueda de vuelos sin credenciales: se muestra el precio estimado del modelo. Poné IGNAV_API_KEY para precios reales de Ignav, o MOCK_FLIGHTS=1 para probar con datos falsos.';
   }
   return 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.';
 }
@@ -3165,8 +3165,8 @@ if (require.main === module) {
     const modoVuelos = flightProviders.providerName() === 'mock'
       ? 'MOCK_FLIGHTS=1; los precios de vuelo son INVENTADOS, no los gastes en produccion'
       : (flightProviders.isLive()
-        ? 'precios de vuelo reales via SerpAPI'
-        : 'sin SERPAPI_API_KEY; los vuelos mostraran precios estimados');
+        ? 'precios de vuelo reales via Ignav'
+        : 'sin IGNAV_API_KEY; los vuelos mostraran precios estimados');
     console.log('CuántoSale en http://localhost:' + port + ' (' + modoVuelos + ')');
   });
 }
