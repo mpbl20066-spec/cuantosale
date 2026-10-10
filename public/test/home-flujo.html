@@ -947,6 +947,48 @@
   .pv-com__f button{min-height:40px;padding:0 14px;border:0;border-radius:10px;background:var(--action-bg);color:var(--action-ink);font:800 13px var(--fb);cursor:pointer}
   .pv-com em{font-style:normal;font-size:12px;color:var(--ink2)}
   .pv-com__sug{justify-self:start;padding:0;border:0;background:transparent;color:var(--ink);font:700 12.5px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  /* Comparativa de precios por fecha (mini grafico). Siempre oscura, como la tarjeta de busqueda. */
+  .af2{margin:16px 0 6px;padding:18px 16px 16px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:linear-gradient(160deg,#0F1B2D,#14243C);color:#fff}
+  .af2-h{margin:0;font-family:var(--fh);font-size:16px;font-weight:800;color:#fff}
+  .af2-sub{margin:3px 0 0;font-size:12.5px;font-weight:600;color:#9FB0C8}
+  .af2-g{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;margin:16px 0 12px;padding-top:22px}
+  .af2-b{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;padding:6px 2px;border:1px solid transparent;border-radius:12px;background:transparent;color:#fff;font-family:var(--fb);cursor:pointer;transition:background .15s,border-color .15s}
+  .af2-b:hover{background:rgba(255,255,255,.05)}
+  .af2-b.is-sel{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.06)}
+  .af2-b:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .af2-p{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;font-weight:700;color:#C5CDD8;font-variant-numeric:tabular-nums}
+  .af2-b.is-tuya .af2-p,.af2-b.is-barata .af2-p,.af2-b.is-sel .af2-p{color:#fff}
+  .af2-t{display:flex;align-items:flex-end;width:100%;max-width:30px;height:92px;border-radius:8px;background:rgba(255,255,255,.05)}
+  .af2-t i{display:block;width:100%;border-radius:8px;background:#3A4A63;transition:height .3s ease,background .15s}
+  .af2-b:hover .af2-t i{background:#4A5D7A}
+  .af2-b.is-tuya .af2-t i{background:#F5C518}
+  .af2-b.is-barata .af2-t i{background:#6FD3A6}
+  .af2-d{font-size:11.5px;font-weight:600;color:#9FB0C8;white-space:nowrap}
+  .af2-d b{font-weight:800;color:#fff}
+  .af2-badge{position:absolute;top:-20px;left:50%;transform:translateX(-50%);padding:2px 7px;border-radius:99px;background:rgba(111,211,166,.16);border:1px solid rgba(111,211,166,.45);color:#8BE3BC;font-size:10px;font-weight:800;white-space:nowrap}
+  .af2-b.is-vacia{cursor:default;opacity:.5}
+  .af2-g--ghost .af2-b{cursor:default}
+  .af2-g--ghost .af2-t i{background:rgba(255,255,255,.1);animation:af2-lat 1.4s ease-in-out infinite alternate}
+  .af2-g--ghost .af2-b.is-tuya .af2-t i{background:rgba(245,197,24,.45)}
+  @keyframes af2-lat{from{opacity:.55}to{opacity:1}}
+  .af2-b[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;z-index:5;width:max-content;max-width:220px;padding:7px 10px;border-radius:8px;background:#fff;color:#0B1F3A;font-size:12px;font-weight:700;line-height:1.35;text-align:left;white-space:normal;transform:translateX(-50%);box-shadow:0 8px 20px rgba(0,0,0,.35);pointer-events:none}
+  .af2-b.is-ini[data-tip]:hover::after{left:0;transform:none}
+  .af2-b.is-fin[data-tip]:hover::after{left:auto;right:0;transform:none}
+  @media (hover:none){.af2-b[data-tip]:hover::after{display:none}}
+  .af2-go,.af2-usar{display:block;width:100%;min-height:44px;border:0;border-radius:12px;background:#F5C518;color:#0B1F3A;font:800 14px var(--fb);cursor:pointer}
+  .af2-go:hover,.af2-usar:hover{filter:brightness(1.05)}
+  .af2-go:focus-visible,.af2-usar:focus-visible,.af2-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .af2-estado{display:flex;align-items:center;gap:10px;margin:0 0 6px;font-size:13.5px;font-weight:600;color:#C5CDD8}
+  .af2-rec,.af2-det p{margin:0 0 8px;font-size:13.5px;font-weight:600;line-height:1.45;color:#C5CDD8}
+  .af2-rec b,.af2-det b{color:#fff}
+  .af2-det{padding:12px;border-radius:12px;background:rgba(255,255,255,.05)}
+  .af2-menos{color:#8BE3BC;font-weight:800}.af2-mas{color:#FCA5A5;font-weight:800}
+  .af2-acc{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+  .af2-acc .af2-usar{width:auto;flex:1 1 180px}
+  .af2-link{color:#fff;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+  .af2-nota{margin:10px 0 0;font-size:11.5px;font-weight:600;line-height:1.4;color:#8597B0}
+  .fl-spin{flex:0 0 auto}
+  @media (prefers-reduced-motion:reduce){.af2-g--ghost .af2-t i{animation:none}}
   /* ¿Podés ahorrar viajando otro día? */
   .af{margin:16px 0 6px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
   .af-h{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--ink)}
@@ -1387,26 +1429,59 @@
       .sort(function (a, b) { return tot(a) - tot(b); }).slice(0, 3);
     return { base: base, alts: alts };
   }
+  /* "Comparativa de precios por fecha": mini grafico de barras con los precios REALES del calendario (compararFechas).
+     7 dias alrededor de la fecha elegida (5 en celular). Tu fecha va en amarillo; la mas barata en verde suave con
+     "Ahorra $ X". Cada barra es un boton: muestra el detalle y "Usar estas fechas" (las fechas nunca cambian solas).
+     Antes de consultar se ven barras fantasma con el boton, porque cada consulta gasta creditos del proveedor. */
+  var DIA_A = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   function ahorroFechas() {
     if (MODO !== 'avion' || !VUELOS.length) return '';
-    var c = S.cmp || {}, gf = function (d, r, txt) { return '<a class="af-gf" href="' + esc(urlVuelos(d, r)) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">' + txt + '</a>'; };
-    var cab = '<section class="af" aria-labelledby="af-h"><h2 class="af-h" id="af-h">' + ic('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', 20) + '¿Podés ahorrar viajando otro día?</h2>';
-    var tuyo = '<p class="af-tu">Tu fecha: <b>' + diaLargo(IDA) + '</b> → ' + fdc(VUELTA) + ' · vuelo elegido <b>' + f(precioVuelo(vuelo())) + '</b></p>';
-    var nota = '<p class="af-nota">Las fechas que elegiste no cambian. Precios reales para ' + personasTxt() + ', ida y vuelta, consultados hoy: pueden variar.</p>';
-    if (!c.estado) return cab + tuyo + '<p class="af-p">Comparamos el mismo viaje de ' + NOCHES + ' noches saliendo hasta 5 días antes o después.</p><button type="button" class="af-btn" data-cmp="1">Comparar fechas</button></section>';
-    if (c.estado === 'cargando') return cab + tuyo + '<p class="af-p af-p--c" role="status"><span class="fl-spin" aria-hidden="true"></span>Buscando precios de otras fechas…</p></section>';
-    if (c.estado === 'vacio') return cab + tuyo + '<p class="af-p">Compará fechas para encontrar posibles ahorros.</p>' + gf(IDA, VUELTA, 'Comparar fechas en Google Flights →') + '</section>';
+    var c = S.cmp || {}, n = window.matchMedia && window.matchMedia('(max-width:419px)').matches ? 2 : 3;
+    var head = '<section class="af2" aria-labelledby="af2-h"><div class="af2-top"><h2 id="af2-h" class="af2-h">Comparativa de precios por fecha</h2>' +
+      '<p class="af2-sub">Mismo viaje de ' + NOCHES + ' noches · ' + personasTxt() + ' · ida y vuelta</p></div>';
+    var dias = []; for (var sh = -n; sh <= n; sh++) dias.push(sumarDias(IDA, sh));
+    var etiqueta = function (iso) { var d = new Date(iso + 'T12:00:00'); return '<span class="af2-d"><b>' + DIA_A[d.getDay()] + '</b> ' + d.getDate() + '</span>'; };
+    if (!c.estado || c.estado === 'cargando') {
+      var alto = [55, 70, 45, 80, 60, 50, 65];
+      return head + '<div class="af2-g af2-g--ghost" aria-hidden="true">' + dias.map(function (iso, k) {
+        return '<span class="af2-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af2-p">—</span><span class="af2-t"><i style="height:' + alto[k % alto.length] + '%"></i></span>' + etiqueta(iso) + '</span>';
+      }).join('') + '</div>' +
+        (c.estado ? '<p class="af2-estado" role="status"><span class="fl-spin" aria-hidden="true"></span>Buscando precios de otras fechas…</p>'
+          : '<button type="button" class="af2-go" data-cmp="1">Ver precios por fecha</button>') + '</section>';
+    }
+    if (c.estado !== 'ok') return head + '<p class="af2-estado">Compará fechas para encontrar posibles ahorros.</p>' +
+      '<a class="af2-link" href="' + esc(urlVuelos(IDA, VUELTA)) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Comparar fechas en Google Flights →</a></section>';
     var tot = function (x) { return x.pp * pax; };
-    var df = datosFechas(), base = df.base, alts = df.alts;
-    var cabBase = '<p class="af-p">Para tu fecha, el vuelo más barato está en <b>' + f(base) + '</b>.</p>';
-    if (!alts.length) return cab + tuyo + cabBase + '<p class="af-p"><b>No encontramos días cercanos más baratos.</b> Comparamos ' + c.puntos.length + (c.puntos.length === 1 ? ' fecha' : ' fechas') + ' con precio real.</p>' + nota + '</section>';
-    var mejor = alts[0], ah = base - tot(mejor);
-    return cab + tuyo + cabBase +
-      '<p class="af-rec">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 20) + '<span>Si salís el <b>' + diaLargo(mejor.dep) + '</b> en lugar del ' + diaLargo(IDA) + ', podrías ahorrar <b>' + f(ah) + '</b> (' + Math.round(ah / base * 100) + '%).</span></p>' +
-      '<ul class="af-l">' + alts.map(function (x) {
-        var a = base - tot(x), r = sumarDias(x.dep, NOCHES);
-        return '<li><span class="af-l__f"><b>' + diaLargo(x.dep) + '</b><small>vuelta ' + fdc(r) + '</small></span><span class="af-l__p"><b>' + f(tot(x)) + '</b><em>− ' + f(a) + ' (' + Math.round(a / base * 100) + '%)</em></span>' + gf(x.dep, r, 'Ver ese día') + '</li>';
-      }).join('') + '</ul>' + nota + '</section>';
+    var por = {}; c.puntos.forEach(function (x) { por[x.dep] = x; });
+    var vis = dias.map(function (iso) { return por[iso] || null; }), con = vis.filter(Boolean);
+    var tuyo = por[IDA], base = tuyo ? tot(tuyo) : Math.min.apply(null, VUELOS.map(precioVuelo));
+    var vals = con.map(tot), min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    var barata = con.filter(function (x) { return tot(x) === min; })[0], ahorro = barata ? base - tot(barata) : 0;
+    var hayAhorro = barata && barata.dep !== IDA && ahorro >= 1;
+    var barras = dias.map(function (iso, k) {
+      var x = vis[k];
+      if (!x) return '<span class="af2-b is-vacia" data-tip="Sin precio para ese día"><span class="af2-p">—</span><span class="af2-t"></span>' + etiqueta(iso) + '</span>';
+      var v = tot(x), h = max > min ? 30 + 70 * (v - min) / (max - min) : 65, dif = base - v;
+      var d = new Date(iso + 'T12:00:00');
+      var tip = DIA_A[d.getDay()] + ' ' + fdc(iso) + ' → ' + fdc(sumarDias(iso, NOCHES)) + ': ' + f(v) + (iso === IDA ? ' (tu fecha)' : (Math.round(dif) ? (dif > 0 ? ' · ahorrás ' + f(dif) : ' · ' + f(-dif) + ' más') : ''));
+      var cls = (iso === IDA ? ' is-tuya' : '') + (x === barata && hayAhorro ? ' is-barata' : '') + (S.cmpSel === iso ? ' is-sel' : '') + (k === 0 ? ' is-ini' : (k === dias.length - 1 ? ' is-fin' : ''));
+      return '<button type="button" class="af2-b' + cls + '" data-af-sel="' + iso + '" aria-pressed="' + (S.cmpSel === iso) + '" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">' +
+        (x === barata && hayAhorro ? '<span class="af2-badge">Ahorrá ' + f(ahorro) + '</span>' : '') +
+        '<span class="af2-p">' + f(v) + '</span><span class="af2-t"><i style="height:' + h.toFixed(0) + '%"></i></span>' + etiqueta(iso) + '</button>';
+    }).join('');
+    var sel = S.cmpSel && por[S.cmpSel] ? por[S.cmpSel] : null, det;
+    if (sel && sel.dep !== IDA) {
+      var ds = new Date(sel.dep + 'T12:00:00'), dsel = base - tot(sel);
+      det = '<div class="af2-det"><p>Saliendo el <b>' + DIA_A[ds.getDay()].toLowerCase() + ' ' + fdc(sel.dep) + '</b> (vuelta ' + fdc(sumarDias(sel.dep, NOCHES)) + '): <b>' + f(tot(sel)) + '</b>' +
+        (Math.round(dsel) ? ' · <span class="' + (dsel > 0 ? 'af2-menos' : 'af2-mas') + '">' + (dsel > 0 ? 'ahorrás ' + f(dsel) : f(-dsel) + ' más') + '</span>' : '') + '</p>' +
+        '<div class="af2-acc"><button type="button" class="af2-usar" data-usar-fecha="' + sel.dep + '">Usar estas fechas</button>' +
+        '<a class="af2-link" href="' + esc(urlVuelos(sel.dep, sumarDias(sel.dep, NOCHES))) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver en Google Flights</a></div></div>';
+    } else if (hayAhorro) {
+      var db = new Date(barata.dep + 'T12:00:00');
+      det = '<p class="af2-rec">Si salís el <b>' + DIA_A[db.getDay()].toLowerCase() + ' ' + fdc(barata.dep) + '</b> en lugar del ' + DIA_A[new Date(IDA + 'T12:00:00').getDay()].toLowerCase() + ' ' + fdc(IDA) + ', podrías ahorrar <b>' + f(ahorro) + '</b>. Tocá una barra para ver el detalle.</p>';
+    } else det = '<p class="af2-rec">Tu fecha ya es la más barata de estos días.</p>';
+    return head + '<div class="af2-g" role="group" aria-label="Precio del vuelo por fecha de salida">' + barras + '</div>' + det +
+      '<p class="af2-nota">Precios reales consultados hoy; pueden variar. Tus fechas solo cambian si tocás “Usar estas fechas”.</p></section>';
   }
   function ordenarHoteles() {
     var a = HOTELES.slice();
@@ -2280,6 +2355,12 @@
       '<ul class="cal-ley"><li><i class="is-tuya"></i>Tu fecha</li><li><i class="is-barata"></i>La más barata</li><li><i></i>Otras fechas</li></ul>' +
       '<p class="cal-nota">Precios reales consultados hoy, en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ': pueden variar. Tus fechas solo cambian si tocás “Usar estas fechas”.</p></div>';
   }
+  /* Rearma el viaje con otra fecha de salida (mismas noches). Solo se llama por un toque explicito en "Usar estas fechas". */
+  function usarFecha(dep, desde) {
+    var nq = new URLSearchParams(location.search); nq.set('ida', dep); nq.set('vuelta', sumarDias(dep, NOCHES)); nq.delete('paso');
+    track('flujo_calendario_usar_fechas', { fecha_nueva: dep, desde: desde });
+    location.href = location.pathname + '?' + nq.toString();
+  }
   function cerrarModal() { S.modal = null; pintarModal(); }
   function pintarModal() {
     var el = $('modal'), m = S.modal;
@@ -2380,12 +2461,7 @@
   $('total').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirCalendario(); } });
   $('modal').addEventListener('click', function (e) {
     var cb = e.target.closest('[data-cal-sel]'); if (cb && S.modal) { S.modal.sel = cb.dataset.calSel; pintarModal(); track('flujo_calendario_precios_fecha', { fecha: S.modal.sel }); var b2 = $('modal').querySelector('[data-cal-sel="' + S.modal.sel + '"]'); if (b2) b2.focus(); return; }
-    var uf = e.target.closest('[data-usar-fecha]');
-    if (uf) {
-      var nq = new URLSearchParams(location.search); nq.set('ida', uf.dataset.usarFecha); nq.set('vuelta', sumarDias(uf.dataset.usarFecha, NOCHES)); nq.delete('paso');
-      track('flujo_calendario_usar_fechas', { fecha_nueva: uf.dataset.usarFecha });
-      location.href = location.pathname + '?' + nq.toString(); return;
-    }
+    var uf = e.target.closest('[data-usar-fecha]'); if (uf) { usarFecha(uf.dataset.usarFecha, 'calendario'); return; }
     if (e.target.closest('[data-cerrar]')) { cerrarModal(); return; }
     if (e.target.closest('[data-gf]')) { irATercero('vuelo'); return; }
     if (e.target.closest('[data-bk]')) { irATercero('alojamiento'); return; }
@@ -2466,7 +2542,7 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tdet],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-com-ok],[data-com-sug],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-com-ok],[data-com-sug],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
@@ -2510,6 +2586,8 @@
     else if (t.dataset.zonasMas) { S.zonasTodas = !S.zonasTodas; track('flujo_zonas_mas', { abierto: S.zonasTodas }); }
     else if (t.dataset.mashoteles) { S.nH += MAX_HOTELES; track('flujo_ver_mas', { lista: 'hoteles', mostrados: S.nH }); }
     else if (t.dataset.cmp) { compararFechas(); return; }
+    else if (t.dataset.afSel) { S.cmpSel = S.cmpSel === t.dataset.afSel ? '' : t.dataset.afSel; track('flujo_comparativa_fecha', { fecha: t.dataset.afSel }); render(false); $('main').scrollTop = y; var fb = $('main').querySelector('[data-af-sel="' + S.cmpSel + '"]'); if (fb) fb.focus(); return; }
+    else if (t.dataset.usarFecha) { usarFecha(t.dataset.usarFecha, 'comparativa'); return; }
     else if (t.dataset.resEdit) { S.editRes = t.dataset.resEdit; render(false); $('main').scrollTop = y; var ri = $('rs-in'); if (ri) { ri.focus(); ri.select(); } return; }
     else if (t.dataset.resCancel) { S.editRes = ''; }
     else if (t.dataset.resQuitar) {
