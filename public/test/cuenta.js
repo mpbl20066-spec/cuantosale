@@ -36,7 +36,7 @@
   };
 
   /* ---------- Supabase (el mismo proyecto que la app de la raiz) ---------- */
-  var cliente = null, iniciando = null, usuario = null, oyentes = [], listo = false;
+  var cliente = null, iniciando = null, usuario = null, oyentes = [], listo = false, googleClientId = '';
   function cargarSdk() {
     if (window.supabase && window.supabase.createClient) return Promise.resolve();
     return new Promise(function (ok, no) {
@@ -50,6 +50,7 @@
     if (iniciando) return iniciando;
     iniciando = cargarSdk().then(function () { return fetch('/api/config'); }).then(function (r) { return r.json(); }).then(function (c) {
       if (!c.supabaseUrl || !c.supabaseAnonKey) throw new Error('La cuenta no está configurada en este entorno.');
+      googleClientId = c.googleClientId || '';
       cliente = window.supabase.createClient(c.supabaseUrl, c.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage } });
       cliente.auth.onAuthStateChange(function (_e, sesion) { poner(sesion && sesion.user || null); });
       return cliente.auth.getSession();
@@ -80,6 +81,57 @@
   function loginGoogle() {
     return iniciar().then(function () { return cliente.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + location.search } }); })
       .then(function (r) { if (r && r.error) throw r.error; });
+  }
+  /* Boton oficial de Google (Google Identity Services) con el Client ID de CuantoSale: Google muestra "cuantosale.uy"
+     y devuelve un id_token que Supabase valida (signInWithIdToken), sin salir de la pagina. Es lo mismo que hace la app
+     de la raiz (app.js, montarBotonGoogle). El flujo con redireccion de Supabase (loginGoogle) queda solo de respaldo:
+     usa el Client ID de Supabase, que hoy Google rechaza con redirect_uri_mismatch.
+     montarGoogle(boton, { antes, ok, error }) pone el boton de Google en lugar de `boton` (el propio, que queda oculto). */
+  var gisPromesa = null;
+  function cargarGis() {
+    if (window.google && window.google.accounts && window.google.accounts.id) return Promise.resolve();
+    if (gisPromesa) return gisPromesa;
+    gisPromesa = new Promise(function (ok, no) {
+      var s = document.createElement('script');
+      s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+      s.onload = ok; s.onerror = function () { gisPromesa = null; no(new Error('No pudimos cargar Google.')); };
+      document.head.appendChild(s);
+    });
+    return gisPromesa;
+  }
+  function montarGoogle(boton, o) {
+    o = o || {};
+    if (!boton || boton.hasAttribute('data-gis')) return;
+    boton.setAttribute('data-gis', '');
+    iniciar().then(function () {
+      if (!googleClientId) return;
+      return cargarGis().then(function () {
+        if (!boton.isConnected) return;
+        var caja = document.createElement('div');
+        caja.className = 'cs-gis';
+        boton.parentNode.insertBefore(caja, boton);
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: function (resp) {
+            if (!resp || !resp.credential) return;
+            if (o.antes) o.antes();
+            cliente.auth.signInWithIdToken({ provider: 'google', token: resp.credential }).then(function (r) {
+              if (r && r.error) {
+                /* Supabase lo rechazo: se vuelve al boton propio (redireccion) y se avisa. */
+                if (window.console) console.warn('[login google] id_token rechazado:', r.error.message);
+                caja.remove(); boton.hidden = false;
+                if (o.error) o.error(r.error); return;
+              }
+              if (o.ok) o.ok();
+            }, function (e) { caja.remove(); boton.hidden = false; if (o.error) o.error(e); });
+          }
+        });
+        var noche = document.documentElement.getAttribute('data-theme') === 'night';
+        window.google.accounts.id.renderButton(caja, { type: 'standard', theme: noche ? 'filled_black' : 'outline', size: 'large', text: 'continue_with', shape: 'pill', locale: 'es',
+          width: Math.min(400, Math.max(220, (caja.parentNode.clientWidth || 300) - 4)) });
+        boton.hidden = true;
+      });
+    }).catch(function () { /* sin Google: queda el boton propio */ });
   }
   function loginCorreo(email) {
     return iniciar().then(function () { return cliente.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname + location.search } }); })
@@ -204,6 +256,10 @@
     if ((v === 'viajes' || v === 'editar') && !usuario && !listo) { raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + cabecera('Mi cuenta') + '<div class="cp-cuerpo"><p class="cp-p" role="status">Cargando…</p></div></div>'; return; }
     if ((v === 'viajes' || v === 'editar') && !usuario) v = S.vista = 'login';
     raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? vistaViajes() : v === 'editar' ? vistaEditar() : menu()) + '</div>';
+    if (v === 'login') montarGoogle(raiz.querySelector('[data-google]'), {
+      ok: function () { S.error = ''; ir('menu'); },
+      error: function () { S.error = 'Google no pudo validar tu cuenta. Probá con el botón de nuevo o entrá con tu correo.'; pintar(); }
+    });
   }
   function alClic(e) {
     if (e.target.closest('.cp-fondo')) { cerrar(); return; }   /* tocar fuera del panel lo cierra (el fondo no es un boton) */
@@ -253,5 +309,5 @@
   /* Si la persona vuelve del login (Google o link del correo), la sesion se levanta sola; basta con iniciar en segundo plano. */
   if (/[?&#](code|access_token|error_description)=/.test(location.search + location.hash) || (function () { try { return Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); }); } catch (e) { return false; } })()) iniciar().catch(function () { /* sin cuenta: la pagina funciona igual */ });
 
-  window.CSCuenta = { usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, iniciar: iniciar, loginGoogle: loginGoogle, loginCorreo: loginCorreo };
+  window.CSCuenta = { usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo };
 })();
