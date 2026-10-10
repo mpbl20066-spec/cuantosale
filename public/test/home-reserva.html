@@ -100,7 +100,7 @@
 
   function pintar() {
     $('main').innerHTML = '<h1 class="r-tit">Reservá tu viaje</h1>' +
-      '<p class="r-sub">Elegí qué querés reservar y en qué canal.<br>Tu viaje a ' + esc(NOM) + ': ' + C.fdc(V.ida) + ' – ' + C.fdc(V.vuelta) + '.</p>' +
+      '<p class="r-sub">Elegí qué querés reservar y en qué canal.<br>Tu viaje a ' + esc(NOM) + ': ' + C.fdc(V.ida) + ' – ' + C.fdc(V.vuelta) + '</p>' +
       '<div class="r-lista">' + PARTS.map(function (p) {
         return '<a class="r-fila" href="' + p.url() + '" data-part="' + p.id + '" data-canal="' + (p.fuera ? 'fuera' : 'cs') + '" data-evento="reserva_parte" data-parte="' + p.id + '" data-evento_canal="' + (p.fuera ? 'externo' : 'propio') + '">' +
           '<span class="r-fila__i">' + ic(C.ICONOS[p.ico], 22) + '</span>' +
