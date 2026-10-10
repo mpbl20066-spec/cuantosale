@@ -73,10 +73,10 @@ const futuro = (ms) => new Date(Date.now() + ms).toISOString();
   // Se sacan del modulo por construccion: se reproducen las dos funciones tal
   // cual estan en index.js. Si alguien cambia una y no la otra, esto falla.
   const quoteKey = (o, d, dep, ret, tc) => ['q', o, d, dep, ret, tc].join('|');
-  const calendarKey = (o, d, dep, ret, pax, tc) => ['c', o, d, dep, ret, pax, tc].join('|');
+  const calendarKey = (o, d, dep, ret, pax, tc) => ['c2', o, d, dep, ret, tc].join('|');   // sin pax: el precio es por persona
   const src = require('fs').readFileSync(path.join(__dirname, 'lib', 'providers', 'index.js'), 'utf8');
   assert.ok(src.includes("['q', origin, destination, dep, ret, travelClass].join('|')"), 'la clave de tarifa cambio de forma');
-  assert.ok(src.includes("['c', origin, destination, dep, ret, pax, travelClass].join('|')"), 'la clave de calendario cambio de forma');
+  assert.ok(src.includes("['c2', origin, destination, dep, ret, travelClass].join('|')"), 'la clave de calendario cambio de forma');
   // Y el prefijo tiene que ser distinto entre las dos, o una tarifa principal
   // pisa un punto del calendario.
   assert.notStrictEqual(quoteKey('MVD', 'GIG', '2026-10-01', '2026-10-08', 'economy'),
