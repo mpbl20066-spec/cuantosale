@@ -165,32 +165,37 @@ const CSP = "default-src 'self'; " +
 // para todas las paginas HTML, en vez de pegada en cada archivo: asi no puede
 // quedar duplicada en una pagina ni olvidada en una nueva.
 const GA_MEASUREMENT_ID = String(process.env.GA_MEASUREMENT_ID || 'G-JJSG6WSTYZ').trim();
+/* Medicion con consentimiento. Un unico snippet reemplaza a GA4, Clarity y el script de afiliados:
+   - Antes de que la persona elija no se carga ni se envia nada a terceros (Consent Mode v2 en "denied").
+   - "Aceptar" guarda cs_consent=granted en localStorage y carga GA4, Clarity y afiliados.
+   - "Solo lo necesario" guarda cs_consent=denied: no se carga ninguno de los tres.
+   track() existe siempre (encola en dataLayer) para que app.js y las pantallas no dependan del consentimiento.
+   No se envian nombres, correos ni tokens: los eventos llevan solo parametros de producto (destino, medio, importes). */
 function analyticsSnippet() {
-  if (!GA_MEASUREMENT_ID) return '';
-  return '<script async src="https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID + '"></script>' +
-    '<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}' +
-    "gtag('js',new Date());gtag('config'," + JSON.stringify(GA_MEASUREMENT_ID) + ");" +
-    // Envio de eventos desde cualquier parte de la app: track('nombre', { ... }).
-    // Va junto a la definicion de gtag para que quede en el scope global de la
-    // pagina y no dependa del orden en que carguen app.js o los scripts de cada
-    // vista. El typeof protege el caso en que gtag todavia no se haya definido
-    // (o que no exista si GA_MEASUREMENT_ID viene vacio): antes el error de
-    // "gtag is not defined" rompia el click que disparaba el evento.
-    "function track(nombre,params){if(typeof gtag==='function'){gtag('event',nombre,params||{});}}</script>";
+  const ID = JSON.stringify(GA_MEASUREMENT_ID || '');
+  return '<script data-cs-medicion>(function(){' +
+    'var ID=' + ID + ',K="cs_consent",v=null;' +
+    'window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;' +
+    'gtag("consent","default",{analytics_storage:"denied",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",wait_for_update:500});' +
+    'window.track=function(n,p){gtag("event",n,p||{});};' +
+    'try{v=localStorage.getItem(K);}catch(e){}' +
+    'function js(src){var s=document.createElement("script");s.async=1;s.src=src;document.head.appendChild(s);}' +
+    'function cargar(){if(window.__csMedicion)return;window.__csMedicion=1;' +
+    'gtag("consent","update",{analytics_storage:"granted"});' +
+    'if(ID){gtag("js",new Date());gtag("config",ID);js("https://www.googletagmanager.com/gtag/js?id="+ID);}' +
+    '(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","ytl2r5iftg");' +
+    'js("https://emrldco.com/NTc2NTAy.js?t=576502");}' +
+    'function elegir(x){try{localStorage.setItem(K,x);}catch(e){}var b=document.getElementById("cs-consent");if(b)b.remove();if(x==="granted")cargar();}' +
+    'function banner(){if(document.getElementById("cs-consent")||!document.body)return;var d=document.createElement("div");d.id="cs-consent";d.setAttribute("role","dialog");d.setAttribute("aria-label","Preferencias de cookies");' +
+    'd.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#0A101A;color:#fff;font:14px/1.45 system-ui,sans-serif;box-shadow:0 -6px 24px rgba(0,0,0,.25)";' +
+    'd.innerHTML=\'<span style="max-width:640px">Usamos cookies para medir el uso del sitio y mejorar CuántoSale. Podés aceptarlas o continuar solo con las necesarias. <a href="/privacidad" style="color:#F7C325">Más información</a></span>\'' +
+    '+\'<span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" data-n style="min-height:44px;padding:0 16px;border:1.5px solid #fff;border-radius:99px;background:transparent;color:#fff;font:700 14px system-ui,sans-serif;cursor:pointer">Solo lo necesario</button>\'' +
+    '+\'<button type="button" data-a style="min-height:44px;padding:0 18px;border:0;border-radius:99px;background:#F7C325;color:#0A101A;font:800 14px system-ui,sans-serif;cursor:pointer">Aceptar</button></span>\';' +
+    'd.querySelector("[data-n]").onclick=function(){elegir("denied");};d.querySelector("[data-a]").onclick=function(){elegir("granted");};document.body.appendChild(d);}' +
+    'window.csConsentimiento={abrir:function(){try{localStorage.removeItem(K);}catch(e){}banner();}};' +
+    'if(v==="granted")cargar();else if(v!=="denied"){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",banner);else banner();}' +
+    '})();</script>';
 }
-/* Script de afiliados (Drive, de Travelpayouts/Emerald). Se inyecta junto con
-   GA, una sola vez desde el server y en todas las paginas HTML, por la misma
-   razon: pegado a mano en cada archivo se duplica o se olvida en una pagina
-   nueva. Los atributos del <script> son los que da el proveedor tal cual. */
-const AFFILIATE_SNIPPET = '<script nowprocket data-noptimize="1" data-cfasync="false" data-wpfc-render="false" seraph-accel-crit="1" data-no-defer="1" data-cmp-ab="2">' +
-  '(function () {var script = document.createElement("script");script.async = 1;script.setAttribute("data-cmp-ab","2");' +
-  "script.src = 'https://emrldco.com/NTc2NTAy.js?t=576502';document.head.appendChild(script);})();</script>";
-/* Microsoft Clarity: grabaciones de sesion y mapas de calor para ver donde
-   abandonan los visitantes. Se inyecta desde el server por la misma razon que
-   GA. Necesita clarity.ms en script-src y connect-src del CSP. */
-const CLARITY_SNIPPET = '<script type="text/javascript">(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};' +
-  't=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);' +
-  '})(window, document, "clarity", "script", "ytl2r5iftg");</script>';
 function injectAnalytics(payload, ext) {
   if (ext !== '.html') return payload;
   const html = payload.toString('utf8');
@@ -198,9 +203,7 @@ function injectAnalytics(payload, ext) {
   // vistas previas de desarrollo no existen para el usuario final. Cada
   // snippet se salta por separado si ya esta en el HTML.
   let snippet = '';
-  if (GA_MEASUREMENT_ID && html.indexOf('googletagmanager.com/gtag/js') < 0 && html.indexOf(GA_MEASUREMENT_ID) < 0) snippet += analyticsSnippet();
-  if (html.indexOf('emrldco.com') < 0) snippet += AFFILIATE_SNIPPET;
-  if (html.indexOf('clarity.ms') < 0) snippet += CLARITY_SNIPPET;
+  if (html.indexOf('data-cs-medicion') < 0 && html.indexOf('googletagmanager.com/gtag/js') < 0) snippet += analyticsSnippet();
   if (!snippet) return payload;
   // Justo despues de <head>, como pide Google; si el HTML no lo tiene, antes
   // de cerrar la etiqueta.

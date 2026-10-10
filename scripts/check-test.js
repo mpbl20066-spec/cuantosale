@@ -53,6 +53,7 @@ async function main() {
     if (browser) {
       const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
       const pg = await ctx.newPage();
+      await pg.addInitScript(function () { try { localStorage.setItem('cs_consent', 'denied'); } catch (e) { /* sin storage */ } });   /* sin banner de cookies tapando el boton */
       const errores = [], malas = [];
       pg.on('pageerror', function (e) { errores.push(e.message); });
       pg.on('response', function (r) { if (r.status() >= 400 && r.url().indexOf(base) === 0) malas.push(r.status() + ' ' + r.url().replace(base, '')); });
