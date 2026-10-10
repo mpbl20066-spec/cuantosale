@@ -27,6 +27,7 @@
     cog: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.800l.1.1a2 2 0 1 1-2.800 2.800l-.1-.1a1.700 1.700 0 0 0-1.800-.3 1.700 1.700 0 0 0-1 1.500V21a2 2 0 0 1-4 0v-.1a1.700 1.700 0 0 0-1.100-1.500 1.700 1.700 0 0 0-1.800.3l-.1.1a2 2 0 1 1-2.800-2.800l.1-.1a1.700 1.700 0 0 0 .3-1.800 1.700 1.700 0 0 0-1.500-1H3a2 2 0 0 1 0-4h.1a1.700 1.700 0 0 0 1.500-1.100 1.700 1.700 0 0 0-.3-1.800l-.1-.1a2 2 0 1 1 2.800-2.800l.1.1a1.700 1.700 0 0 0 1.800.3H9a1.700 1.700 0 0 0 1-1.500V3a2 2 0 0 1 4 0v.1a1.700 1.700 0 0 0 1 1.500 1.700 1.700 0 0 0 1.800-.3l.1-.1a2 2 0 1 1 2.800 2.800l-.1.1a1.700 1.700 0 0 0-.3 1.800V9a1.700 1.700 0 0 0 1.500 1H21a2 2 0 0 1 0 4h-.1a1.700 1.700 0 0 0-1.500 1z"/>',
     doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
     out: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+    split: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M17 5a3 3 0 0 1 0 6M19 14.500c1.500.8 2.500 2.500 2.500 5.500"/>',
     chev: '<path d="m9 5 7 7-7 7"/>', back: '<path d="m15 5-7 7 7 7"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
@@ -156,6 +157,7 @@
       : '<button type="button" class="cp-head" data-login data-foco><span class="cp-av cp-av--v">' + ic(I.user, 24) + '</span><span class="cp-head__t"><b>Ingresá a CuántoSale</b><small>Guardá tus viajes y verlos en cualquier lado</small></span>' + ic(I.chev, 16) + '</button>';
     return cabecera('Mi cuenta') + encabezado + '<div class="cp-lista">' +
       fila(I.save, 'Mis viajes guardados', 'data-viajes') +
+      fila(I.split, 'Dividir gastos', 'data-dividir') +
       interruptor() +
       fila(I.help, 'Ayuda y soporte', 'data-ayuda') +
       (u ? fila(I.cog, 'Configuración', 'data-editar') : '') +
@@ -205,6 +207,7 @@
     if (t.hasAttribute('data-cerrar')) { cerrar(); return; }
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
     if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
+    if (t.hasAttribute('data-dividir')) { location.href = '/grupo'; return; }
     if (t.hasAttribute('data-login')) { ir('login'); return; }
     if (t.hasAttribute('data-editar')) { ir('editar'); return; }
     if (t.hasAttribute('data-tema')) { aplicarTema(temaActual() === 'night' ? 'light' : 'night'); pintar(); var f = raiz.querySelector('[data-tema]'); if (f) f.focus(); return; }

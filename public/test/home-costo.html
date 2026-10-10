@@ -106,7 +106,7 @@
     /* "Gastar menos" va al resultado con las opciones ya ordenadas por precio: es
        donde la persona puede comparar de verdad. */
     track('presupuesto_gastar_menos');
-    location.href = 'home-resultado.html?' + new URLSearchParams({ destino: D.destino, pax: V.pax, ida: V.ida, vuelta: V.vuelta, medio: D.medio, ordenar: 'precio', fuente: 'presupuesto_menos' }).toString();
+    location.href = 'home-destino.html?' + new URLSearchParams({ destino: D.destino, pax: V.pax, ida: V.ida, vuelta: V.vuelta, editar: 1, fuente: 'presupuesto_menos' }).toString();
   });
   track('presupuesto_vista');
 })();

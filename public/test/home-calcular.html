@@ -354,8 +354,9 @@
     window.mockTrack('page_view', { page_path: '/viaje/inicio/' + PAGS[n][0], page_title: PAGS[n][1] + ' · CuántoSale', motivo: motivo });
   }
   function irResultado(modo) {
-    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, modo: modo, fuente: 'calcular_presupuesto', origen_home: fuente });
-    location.href = 'home-resultado.html?' + q.toString() + debugQ;
+    /* Sin pantalla de resultados: se va derecho al flujo (vuelo + traslado, o bus). */
+    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, modo: modo === 'bus' ? 'bus' : 'avion', fuente: 'calcular_presupuesto', origen_home: fuente });
+    location.href = 'home-flujo.html?' + q.toString() + debugQ;
   }
 
   document.addEventListener('click', function (e) {

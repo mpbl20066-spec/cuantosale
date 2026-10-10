@@ -1842,7 +1842,7 @@
   $('back').addEventListener('click', function () {
     track('flujo_volver', { desde: S.paso });
     if (S.paso === 1 && MODO === 'avion' && S.sub === 't') { S.sub = 'v'; render(true); return; }
-    if (S.paso === 12) ir(11, 'volver'); else if (S.paso === 11) ir(S.desde11 || 6, 'volver'); else if (S.paso === 10) ir(9, 'volver'); else if (S.paso === 9) ir(6, 'volver'); else if (S.paso === 8) ir(S.desde8 || 6, 'volver'); else if (S.paso === 7) ir(6, 'volver'); else if (S.paso === 6 && !S.sesion) ir(4, 'volver'); else if (S.paso > 1) ir(S.paso - 1, 'volver'); else location.href = 'home-resultado.html' + location.search;
+    if (S.paso === 12) ir(11, 'volver'); else if (S.paso === 11) ir(S.desde11 || 6, 'volver'); else if (S.paso === 10) ir(9, 'volver'); else if (S.paso === 9) ir(6, 'volver'); else if (S.paso === 8) ir(S.desde8 || 6, 'volver'); else if (S.paso === 7) ir(6, 'volver'); else if (S.paso === 6 && !S.sesion) ir(4, 'volver'); else if (S.paso > 1) ir(S.paso - 1, 'volver'); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
   });
   $('cta').addEventListener('click', function () {
     track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });

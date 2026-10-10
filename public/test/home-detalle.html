@@ -139,7 +139,7 @@
       }).join('') + '</div>' +
       '<div class="t-cuerpo" role="tabpanel">' + cuerpo() + '</div>';
     $('foot').innerHTML = '<div style="flex:1"><a class="t-btn t-btn--main" href="' + siguiente() + '" data-evento="detalle_calcular" data_destino="' + K + '">Calcular viaje →</a>' +
-      '<div class="t-foot2"><a class="t-btn t-btn--ghost" style="flex:1" href="home-resultado.html?vuelta=' + VUELTA + '&ida=' + IDA + '&pax=' + PAX + '&destino=' + K + '" data-evento="detalle_ver_aloja">Ver tipos de alojamiento</a></div></div>';
+      '<div class="t-foot2"><a class="t-btn t-btn--ghost" style="flex:1" href="home-flujo.html?vuelta=' + VUELTA + '&ida=' + IDA + '&pax=' + PAX + '&destino=' + K + '" data-evento="detalle_ver_aloja">Ver tipos de alojamiento</a></div></div>';
     document.title = NOM + ' · CuántoSale';
   }
   function cuerpo() {
@@ -181,7 +181,7 @@
 
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t) return;
-    if (t.id === 'atras') { location.href = 'home-resultado.html?destino=' + K + '&pax=' + PAX + '&ida=' + IDA + '&vuelta=' + VUELTA + (debug ? '&debug=1' : ''); return; }
+    if (t.id === 'atras') { location.href = 'home-destino.html?editar=1&destino=' + K + '&pax=' + PAX + '&ida=' + IDA + '&vuelta=' + VUELTA + (debug ? '&debug=1' : ''); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('detalle_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
     if (t.dataset.sumar) { S.extra = !S.extra; track('detalle_sumar_extra', { activo: S.extra }); pintar(); return; }
     if (t.dataset.extra !== undefined) { S.extra = true; track('detalle_extra', { extra: t.dataset.extra }); pintar(); return; }
