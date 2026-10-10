@@ -1560,7 +1560,7 @@ async function getEnlaceCorto(req, res, codigo) {
       headers: { apikey: supa.key, Authorization: 'Bearer ' + supa.key }
     });
     const filas = r.ok ? await r.json() : [];
-    if (filas[0] && ENLACE_TOKEN_RE.test(filas[0].token)) return irA('/?viaje=' + filas[0].token);
+    if (filas[0] && ENLACE_TOKEN_RE.test(filas[0].token)) return irA('/app?viaje=' + filas[0].token);
   } catch (e) { /* cae a la raiz */ }
   return irA('/');
 }
@@ -2829,30 +2829,50 @@ async function fetchGrupoNombre(groupId) {
   const name = rows && rows[0] && rows[0].name ? String(rows[0].name).trim() : '';
   return name || null;
 }
-/* ---- App nueva con URLs limpias ----
-   Una sola tabla: pagina -> archivo de public/test. Para promover la app nueva a la raiz basta cambiar NUEVO a ''. */
-const NUEVO = '/nuevo';
+/* ---- App nueva en la raiz, con URLs limpias ----
+   Una sola tabla: ruta -> archivo de public/test. '/' es la home nueva; la app anterior sigue en /app (start_url de
+   la PWA ya instalada, que precachea el service worker). Para sacarla de la raiz basta cambiar NUEVO (ej. '/nuevo'). */
+const NUEVO = '';
 const NUEVO_PAGINAS = {
   '': 'home-dos-caminos', destinos: 'home-destino', presupuesto: 'home-presupuesto', planificar: 'home-flujo',
   ruta: 'home-calcular', detalle: 'home-detalle', resumen: 'home-costo', reserva: 'home-reserva', guias: 'home-guias', guia: 'home-guia'
 };
+/* Paginas que se indexan: la home. El resto son herramientas que dependen de parametros y siguen con noindex. */
+const NUEVO_INDEXABLES = { '': true };
 const NUEVO_POR_ARCHIVO = {};
-Object.keys(NUEVO_PAGINAS).forEach(function (k) { NUEVO_POR_ARCHIVO[NUEVO_PAGINAS[k] + '.html'] = NUEVO + (k ? '/' + k : ''); });
-function nuevoPagina(pathname) {
-  const m = /^\/nuevo(?:\/([a-z-]+))?$/.exec(pathname);
-  if (!m) return null;
-  return NUEVO_PAGINAS[m[1] || ''] || null;
+Object.keys(NUEVO_PAGINAS).forEach(function (k) { NUEVO_POR_ARCHIVO[NUEVO_PAGINAS[k] + '.html'] = (NUEVO + (k ? '/' + k : '')) || '/'; });
+const NUEVO_SLUGS = Object.keys(NUEVO_PAGINAS).filter(Boolean);
+function nuevoSlug(pathname) {
+  const base = NUEVO + '/';
+  if (pathname === (NUEVO || '/')) return '';
+  if (pathname.indexOf(base) !== 0) return null;
+  const slug = pathname.slice(base.length);
+  return NUEVO_SLUGS.indexOf(slug) >= 0 ? slug : null;
 }
-/* Devuelve la ruta canonica (minusculas, sin barra final) si la URL pedida es una variante o una URL vieja. */
+function nuevoPagina(pathname, search) {
+  const slug = nuevoSlug(pathname);
+  if (slug === null) return null;
+  /* '/?viaje=<token>' es el enlace de presupuesto compartido de la app anterior: sigue yendo a ella. */
+  if (slug === '' && /[?&]viaje=/.test(search || '')) return null;
+  return { slug: slug, archivo: NUEVO_PAGINAS[slug] };
+}
+/* Devuelve la ruta canonica si la URL pedida es una variante o una URL vieja (/test/..., /nuevo/...). */
 function nuevoRedireccion(pathname, search) {
   const q = search || '';
   const viejo = /^\/test\/(home-[a-z-]+\.html)$/i.exec(pathname);
   if (viejo && NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()]) return NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()] + q;
-  if (/^\/test\/?$/i.test(pathname)) return NUEVO + q;
-  const m = /^\/nuevo(?:\/([A-Za-z-]+))?(\/)?$/i.exec(pathname);
+  if (/^\/test\/?$/i.test(pathname)) return (NUEVO || '/') + q;
+  /* El prefijo provisorio /nuevo ya no existe: va a la misma pagina en la raiz. */
+  const n = /^\/nuevo(?:\/([A-Za-z-]+))?\/?$/i.exec(pathname);
+  if (n && NUEVO !== '/nuevo') {
+    const slug = (n[1] || '').toLowerCase();
+    if (slug === '' || NUEVO_SLUGS.indexOf(slug) >= 0) return ((NUEVO + (slug ? '/' + slug : '')) || '/') + q;
+  }
+  /* Variantes de mayusculas o barra final de una ruta limpia. */
+  const m = /^(\/[A-Za-z-]+)\/$|^(\/[A-Za-z-]+)$/.exec(pathname);
   if (m) {
-    const slug = (m[1] || '').toLowerCase(), canon = NUEVO + (slug ? '/' + slug : '');
-    if (NUEVO_PAGINAS[slug] && canon !== pathname) return canon + q;
+    const p = (m[1] || m[2]), slug = p.slice(1).toLowerCase();
+    if (!NUEVO && NUEVO_SLUGS.indexOf(slug) >= 0 && ('/' + slug) !== pathname) return '/' + slug + q;
   }
   return null;
 }
@@ -3114,17 +3134,20 @@ function handleRequest(req, res) {
       res.writeHead(301, { Location: nuevoRedir, 'Cache-Control': 'public, max-age=3600' });
       return res.end();
     }
-    const nuevoArchivo = nuevoPagina(url.pathname);
-    if (nuevoArchivo) {
+    const nuevoPag = nuevoPagina(url.pathname, url.search);
+    if (nuevoPag) {
       try {
-        serveStatic(req, res, '/test/' + nuevoArchivo + '.html', function (data) {
-          const html = nuevoReescribir(data.toString('utf8')).replace(/<head[^>]*>/i, function (h) { return h + '<base href="/test/">'; });
+        serveStatic(req, res, '/test/' + nuevoPag.archivo + '.html', function (data) {
+          let html = nuevoReescribir(data.toString('utf8'));
+          const indexable = !!NUEVO_INDEXABLES[nuevoPag.slug];
+          if (indexable) html = html.replace(/<meta name="robots"[^>]*>\s*/i, '');
+          const canonical = 'https://cuantosale.uy' + ((NUEVO + (nuevoPag.slug ? '/' + nuevoPag.slug : '')) || '/');
+          html = html.replace(/<head[^>]*>/i, function (h) { return h + '<base href="/test/"><link rel="canonical" href="' + canonical + '">'; });
           return Buffer.from(html, 'utf8');
         });
       } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
-    if (/^\/nuevo(\/|$)/i.test(url.pathname)) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
     /* Los scripts de /test traen enlaces a las paginas por su nombre de archivo: se reescriben a la ruta limpia. */
     if (/^\/test\/[^/]+\.js$/i.test(url.pathname)) {
       try { return serveStatic(req, res, url.pathname, function (data) { return Buffer.from(nuevoReescribir(data.toString('utf8')), 'utf8'); }); } catch (e) { res.writeHead(400); return res.end(); }

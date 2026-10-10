@@ -15,7 +15,7 @@ const ANCHOS = process.argv[3] ? TODOS.filter(function (a) { return process.argv
       const pg = await ctx.newPage();
       const errs = [];
       pg.on('pageerror', function (e) { errs.push(e.message); });
-      await pg.goto(BASE + '/nuevo' + (r ? '/' + r : ''), { waitUntil: 'networkidle' }).catch(function () {});
+      await pg.goto(BASE + '/' + r, { waitUntil: 'networkidle' }).catch(function () {});
       let res;
       try { await pg.waitForTimeout(400); res = await pg.evaluate(function () {
         const de = document.documentElement, W = innerWidth;

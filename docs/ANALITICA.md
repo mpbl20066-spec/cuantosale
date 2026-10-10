@@ -1,4 +1,4 @@
-# Plan de analítica — CuántoSale (app nueva, `/nuevo`)
+# Plan de analítica — CuántoSale (app nueva, la raíz `/`)
 
 Estado auditado en el código el 2026-10-10. Una sola herramienta de producto (GA4, `G-JJSG6WSTYZ`); Clarity se usa solo para
 grabaciones y mapas de calor (no duplica eventos) y el script de afiliados es de atribución de ventas, no de uso.
