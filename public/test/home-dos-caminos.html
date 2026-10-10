@@ -68,7 +68,7 @@
   .hx-step b{display:block;margin:0 0 3px;font-family:var(--fh);font-size:15px;font-weight:700;color:var(--hx-navy)}
   .hx-step p{margin:0;font-size:13px;line-height:1.5;color:var(--hx-gray)}
   .hx-foot{margin:24px calc(var(--hx-pad) * -1) calc(var(--hx-pb) * -1);padding:20px var(--hx-pad);background:var(--hx-navy);color:#CBD5E1}
-  .hx-foot__in{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:center;justify-content:space-between;max-width:1200px;min-height:40px;margin:0 auto}
+  .hx-foot__in{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-start;justify-content:space-between;max-width:1200px;min-height:40px;margin:0 auto}
   .hx-foot__logo{display:inline-flex;align-items:center;gap:9px;text-decoration:none!important}
   .hx-foot__logo b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.05;color:#fff}
   .hx-foot__logo small{display:block;max-width:none!important;margin:0;font-size:11.5px;font-weight:500;color:#CBD5E1}
@@ -76,7 +76,10 @@
   .hx-foot nav a,.hx-foot nav .hx-cookies{display:inline-flex;align-items:center;min-height:44px;margin:0;padding:0;line-height:1.2;vertical-align:middle}
   .hx-foot a{color:#fff;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
   .hx-foot a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .hx-foot small{display:block;flex:1 1 280px;max-width:46ch;font-size:12px;line-height:1.45;color:#94A3B8}
+  .hx-foot__brand{flex:1 1 300px;min-width:0}
+  .hx-foot__brand p{margin:8px 0 0;max-width:34ch;font-size:13.5px;line-height:1.45;color:#CBD5E1}
+  .hx-foot__logo small{font-size:12.5px!important;font-weight:700!important;color:#F5C518!important}
+  .hx-foot .hx-foot__legal{display:block;flex:1 1 100%;max-width:none;margin-top:4px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);font-size:12px;line-height:1.45;color:#94A3B8}
   .hx{--hx-pb:20px}
   @media (min-width:768px){
     .hx{--hx-pb:48px}
@@ -111,6 +114,9 @@
   .hx-hero__in{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:6px 0 20px}
   .hx-hero__txt{margin-top:14px}
   .hx-hero h1{margin:0 0 6px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;color:var(--hx-navy)}
+  /* Antetitulo de la portada: chico, en mayusculas, en el color de la marca */
+  .hx-hero__eye{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B8860B}
+  [data-theme="night"] .hx-hero__eye{color:#F5C518}
   .hx-hero__sub{margin:0 0 16px;max-width:36rem;font-size:14px;line-height:1.5;color:var(--ink2)}
   .hx-cards{display:grid;grid-template-columns:1fr;gap:12px}
   .hx-card{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--hx-border);border-radius:16px;background:#fff;color:var(--hx-navy);text-align:left;text-decoration:none;transition:background-color .15s ease}
@@ -126,6 +132,7 @@
   .hx-sec{max-width:1200px;margin:0 auto;padding:20px 0 4px}
   .hx-sec__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .hx-sec__h h2{margin:0;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
+  .hx-sec__nota{margin:-4px 0 12px;font-size:12.5px;font-weight:500;line-height:1.45;color:var(--ink2)}
   .hx-more{border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;padding:4px}
   .hx-more:hover{color:var(--hx-navy)}
   .hx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -146,6 +153,7 @@
     .hx-hero__txt{margin-top:0}
     .hx-hero h1{margin-bottom:6px;font-size:34px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.45)}
     .hx-hero__sub{margin-bottom:16px;font-size:14px;color:rgba(255,255,255,.9);text-shadow:0 1px 6px rgba(0,0,0,.45)}
+    .hx-hero__eye{color:#F5C518;text-shadow:0 1px 6px rgba(0,0,0,.5)}
     .hx-cards{grid-template-columns:1fr 1fr;gap:16px;max-width:56rem}
     .hx-card{padding:20px;border:0;background:rgba(255,255,255,.95);backdrop-filter:blur(4px)}
     .hx-card:hover{background:#F8FAFC}
@@ -284,8 +292,9 @@
           <span class="m-head__r"><span data-slot-moneda></span><button type="button" class="m-menu" aria-label="Menú"><span></span><span></span><span></span></button></span>
         </header>
         <div class="hx-hero__txt">
-          <h1>¿Qué querés hacer?</h1>
-          <p class="hx-hero__sub">Elegí cómo querés empezar y armá tu próximo destino.</p>
+          <p class="hx-hero__eye">Tu próximo viaje empieza acá</p>
+          <h1>Organizá tu viaje. Conocé cuánto vas a gastar.</h1>
+          <p class="hx-hero__sub">Calculá vuelos, alojamiento, traslados y gastos en destino, todo en un solo lugar.</p>
             <div class="m-cards">
             <a class="m-card" href="home-destino.html?fuente=home_card_destino" data-evento="home_camino" data-camino="ya_se_donde" data-fuente="home_card_destino">
               <span class="m-card__icon" aria-hidden="true">
@@ -303,9 +312,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
               </span>
               <span class="m-card__txt">
-                <b>No sé dónde ir</b>
-                <small>Decinos cuánto querés gastar y encontrá destinos que te convengan.</small>
-                <span class="m-card__cta">Buscar por presupuesto <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                <b>Sorprendeme</b>
+                <small>Decinos cuánto querés gastar y te mostramos destinos que entran en tu presupuesto.</small>
+                <span class="m-card__cta">Ver destinos para mi presupuesto <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
               </span>
             </a>
             </div>
@@ -318,6 +327,7 @@
         <h2 id="hx-pop">Destinos populares</h2>
         <button type="button" class="hx-more" data-evento="home_ver_todos">Ver todos →</button>
       </div>
+      <p class="hx-sec__nota" id="hx-nota" hidden>Precio por persona de un viaje de 7 noches para 2, saliendo de Montevideo: incluye vuelo, alojamiento, traslados, comidas y transporte local.</p>
       <div class="hx-grid">
       <button type="button" class="hx-dest" data-destino="rio" data-evento="home_destino_popular"><img src="dest/rio-400.jpg" srcset="dest/rio-400.jpg 400w, ../fotos/rio.jpg 960w" sizes="(min-width:1024px) 300px, (min-width:768px) 25vw, 50vw" fetchpriority="high" decoding="async" alt=""><span>Río de Janeiro<small>Brasil</small></span></button>
       <button type="button" class="hx-dest" data-destino="fln" data-evento="home_destino_popular"><img src="dest/fln-400.jpg" srcset="dest/fln-400.jpg 400w, ../fotos/fln.jpg 960w" sizes="(min-width:1024px) 300px, (min-width:768px) 25vw, 50vw" fetchpriority="high" decoding="async" alt=""><span>Florianópolis<small>Brasil</small></span></button>
@@ -329,14 +339,18 @@
 
     <footer class="hx-foot">
       <div class="hx-foot__in">
-        <a class="hx-foot__logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span><b>cuántosale</b><small>Tu viaje, sin sorpresas</small></span></a>
+        <div class="hx-foot__brand">
+          <a class="hx-foot__logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span><b>cuántosale</b><small>Viajá tranquilo.</small></span></a>
+          <p>Calculá tu viaje completo y viajá con los números claros.</p>
+        </div>
         <nav aria-label="Información">
+          <a href="home-guias.html?fuente=footer">Destinos</a>
+          <a href="https://wa.me/5511920836306" target="_blank" rel="noopener">Contacto</a>
           <a href="/privacidad">Privacidad</a>
           <a href="/terminos">Términos</a>
           <button type="button" class="hx-cookies" onclick="window.csConsentimiento&&csConsentimiento.abrir()">Preferencias de cookies</button>
-          <a href="https://wa.me/5511920836306" target="_blank" rel="noopener">Hablar con un asesor</a>
         </nav>
-        <small>Los precios mostrados son estimaciones y pueden variar al reservar. © 2026 CuántoSale.</small>
+        <small class="hx-foot__legal">© 2026 CuántoSale · Los precios son estimaciones y pueden variar.</small>
       </div>
     </footer>
     </div>
@@ -372,6 +386,7 @@
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
       .then(function (j) {
         var por = {}; (j.items || []).forEach(function (it) { por[it.key] = it.pp; });
+        if ((j.items || []).some(function (it) { return it.pp > 0; })) document.getElementById('hx-nota').hidden = false;
         Array.prototype.forEach.call(tarjetas, function (t) {
           var pp = por[t.dataset.destino], sp = t.querySelector('span');
           if (!sp || !(pp > 0)) return;

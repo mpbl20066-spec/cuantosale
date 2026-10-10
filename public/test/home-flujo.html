@@ -808,6 +808,146 @@
   .fl-vacio{display:grid;gap:12px;margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:center}
   .fl-vacio b{font-size:14.5px;line-height:1.4;color:var(--ink)}
   .fl-vacio .g-btn{display:block;text-decoration:none;text-align:center}
+  /* "Donde podes ahorrar" (va en #total, arriba de cada paso) */
+  .f-total.f-ahorro{align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid #CDEBDD;border-radius:16px;background:#EAF7F1}
+  .f-ahorro__i{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;color:#12784F}
+  .f-ahorro__i svg{color:#12784F!important}
+  .f-total.f-ahorro div{flex:1;min-width:0}
+  .f-ahorro__h{display:block;font-family:var(--fh);font-size:14.5px;font-weight:800;color:#0B1F3A}
+  .f-total.f-ahorro small{display:block;margin-top:2px;font-size:12.5px;font-weight:500;line-height:1.4;color:#3D5A4F}
+  .f-ahorro__v{flex:0 0 auto;align-self:flex-end;font-family:var(--fh);font-size:17px;font-weight:800;color:#0B1F3A;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .f-total.f-ahorro.is-bump .f-ahorro__v{animation:bump .35s ease}
+  [data-theme="night"] .f-total.f-ahorro{border-color:#1E4A3A;background:#10291F}
+  [data-theme="night"] .f-ahorro__i svg{color:#5AD19A!important}
+  [data-theme="night"] .f-ahorro__h,[data-theme="night"] .f-ahorro__v{color:#fff}
+  [data-theme="night"] .f-total.f-ahorro small{color:#A9C9BB}
+  html[data-pagina="flujo"] .f-total.f-ahorro small{display:block;margin-left:0}
+  .f-total.f-ahorro[role=button]{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .f-total.f-ahorro[role=button]:hover{border-color:#12784F}
+  .f-total.f-ahorro[role=button]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .f-ahorro__cal{display:inline-block;margin-top:4px;font-size:12.5px;font-weight:800;color:#12784F;text-decoration:underline;text-underline-offset:3px}
+  [data-theme="night"] .f-ahorro__cal{color:#5AD19A}
+  /* Calendario de precios (hoja) */
+  .cal .f-modal__top h2{margin:0}
+  .cal-cargando{display:flex;align-items:center;gap:10px;padding:30px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  .cal-sel{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:center;margin:4px 0 14px;padding:14px;border:1px solid rgba(245,197,24,.5);border-radius:14px;background:rgba(245,197,24,.12)}
+  .cal-sel>svg{color:#B8860B!important}
+  [data-theme="night"] .cal-sel>svg{color:#F5C518!important}
+  .cal-sel b{display:block;font-family:var(--fh);font-size:16px;color:var(--ink)}
+  .cal-sel small{display:block;margin-top:2px;font-size:13px;font-weight:600;line-height:1.4;color:var(--ink2)}
+  .cal-sel .cal-usar{grid-column:1/-1;margin:8px 0 0}
+  .cal-p{margin:0 0 14px;font-size:13.5px;font-weight:600;line-height:1.45;color:var(--ink2)}
+  .cal-gf{display:block;text-align:center;text-decoration:none}
+  .cal-g{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 6px}
+  @media (min-width:560px){.cal-g{grid-template-columns:repeat(11,minmax(0,1fr))}}
+  .cal-b{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:4px 0;border:0;border-radius:10px;background:transparent;color:var(--ink);font-family:var(--fb);cursor:pointer}
+  .cal-b em{font-style:normal;font-size:10.5px;font-weight:700;color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .cal-b__t{display:flex;align-items:flex-end;width:100%;max-width:34px;height:110px;border-radius:8px;background:#EEF2F6}
+  [data-theme="night"] .cal-b__t{background:rgba(255,255,255,.05)}
+  .cal-b__t i{display:block;width:100%;border-radius:8px;background:#CBD5E1;transition:background .15s}
+  [data-theme="night"] .cal-b__t i{background:#334155}
+  .cal-b.is-barata .cal-b__t i{background:#8FD9B6}
+  [data-theme="night"] .cal-b.is-barata .cal-b__t i{background:#2F8F67}
+  .cal-b.is-tuya .cal-b__t i{background:#F5C518}
+  .cal-b.is-tuya em,.cal-b.is-sel em{color:var(--ink);font-weight:800}
+  .cal-b.is-sel .cal-b__t{box-shadow:0 0 0 2px var(--ink)}
+  .cal-b b{font-family:var(--fh);font-size:14px;line-height:1}
+  .cal-b small{font-size:10.5px;font-weight:700;color:var(--ink2)}
+  .cal-b:hover .cal-b__t i{filter:brightness(.95)}
+  .cal-b:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .cal-ley{display:flex;flex-wrap:wrap;gap:8px 18px;margin:16px 0 8px;padding:0;list-style:none;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .cal-ley li{display:flex;align-items:center;gap:6px}
+  .cal-ley i{width:12px;height:12px;border-radius:50%;background:#CBD5E1}
+  [data-theme="night"] .cal-ley i{background:#334155}
+  .cal-ley i.is-tuya{background:#F5C518!important}.cal-ley i.is-barata{background:#8FD9B6!important}
+  .cal-nota{margin:4px 0 0;font-size:11.5px;font-weight:600;line-height:1.4;color:var(--ink2)}
+  /* Las hojas (calendario, habitaciones, tours) van por encima del boton de abajo, que es sticky con z-index 20 */
+  html[data-pagina="flujo"] .f-modal{z-index:60}
+  @media (min-width:768px){html[data-pagina="flujo"] .f-total.f-ahorro{max-width:800px!important}}
+  /* Lista de vuelos: una columna de 800px, tarjetas con borde sutil y radio de 12px */
+  html[data-pagina="flujo"] .f-scroll[data-paso="1"]{max-width:800px!important;margin-left:auto!important;margin-right:auto!important}
+  .fc-list{display:grid;gap:12px;margin:0 0 6px}
+  .fc{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s}
+  .fc:hover{border-color:color-mix(in srgb,var(--ink) 28%,transparent)}
+  .fc.is-sel{border-color:#F5C518;box-shadow:0 0 0 1px #F5C518,0 8px 22px rgba(10,16,26,.12)}
+  [data-theme="night"] .fc{background:#111A28;border-color:rgba(255,255,255,.09)}
+  [data-theme="night"] .fc:hover{border-color:rgba(255,255,255,.2)}
+  [data-theme="night"] .fc.is-sel{border-color:#F5C518;box-shadow:0 0 0 1px #F5C518,0 10px 26px rgba(0,0,0,.35)}
+  .fc-air{display:flex;align-items:center;gap:12px;min-width:0}
+  .fc-logo{flex:0 0 40px;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--cel-soft);color:var(--ink);font-family:var(--fh);font-size:13px;font-weight:800;letter-spacing:.02em}
+  [data-theme="night"] .fc-logo{background:rgba(255,255,255,.07)}
+  .fc-air__t{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .fc-air__t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px;font-weight:800}
+  .fc-bs{display:flex;flex-wrap:wrap;gap:5px}
+  .fc-b{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;font-size:11px;font-weight:700;line-height:1.4;color:var(--ink2);white-space:nowrap}
+  .fc-b--mejor{border-color:rgba(245,197,24,.55);background:rgba(245,197,24,.12);color:var(--ink)}
+  [data-theme="night"] .fc-b{border-color:rgba(255,255,255,.14)}
+  [data-theme="night"] .fc-b--mejor{border-color:rgba(245,197,24,.45);color:#F5C518}
+  .fc-ruta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px}
+  .fc-pt b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .fc-pt small{display:block;margin-top:4px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--ink2)}
+  .fc-pt--d{text-align:right}
+  .fc-mid{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;text-align:center}
+  .fc-mid small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .fc-mid small.is-dir{color:#15803D;font-weight:700}
+  [data-theme="night"] .fc-mid small.is-dir{color:#5AD19A}
+  .fc-mid i{position:relative;display:block;width:100%;height:2px;border-radius:2px;background:var(--line)}
+  [data-theme="night"] .fc-mid i{background:rgba(255,255,255,.16)}
+  .fc-mid i::before,.fc-mid i::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;box-sizing:border-box;border:2px solid var(--ink2);background:var(--surface)}
+  [data-theme="night"] .fc-mid i::before{background:#111A28}
+  .fc-mid i::before{left:0}.fc-mid i::after{right:0;border-color:#F5C518;background:#F5C518}
+  .fc-pr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid var(--line)}
+  [data-theme="night"] .fc-pr{border-top-color:rgba(255,255,255,.08)}
+  .fc-pr__v b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .fc-pr__v small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+  .fc-btn{flex:0 0 auto;min-width:104px;min-height:42px;padding:0 18px;border:1.5px solid var(--ink);border-radius:10px;background:transparent;color:var(--ink);font:800 13.5px var(--fb);cursor:pointer;transition:background .15s,color .15s}
+  .fc-btn:hover{background:var(--cel-soft)}
+  .fc.is-sel .fc-btn{border-color:#F5C518;background:#F5C518;color:#0B1F3A}
+  .fc-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  @media (min-width:640px){
+    .fc{grid-template-columns:170px minmax(0,1fr) auto;align-items:center;gap:22px;padding:18px 20px}
+    .fc-pr{flex-direction:column;align-items:flex-end;gap:8px;padding:0 0 0 20px;border-top:0;border-left:1px solid var(--line);text-align:right}
+    [data-theme="night"] .fc-pr{border-left-color:rgba(255,255,255,.08)}
+    .fc-pt b{font-size:21px}
+  }
+  @media (prefers-reduced-motion:no-preference){.fc:active{transform:scale(.995)}}
+  /* Tarjeta animada mientras se buscan los vuelos */
+  .fl-load{margin:14px 0 12px;padding:18px 18px 16px;border-radius:18px;background:linear-gradient(135deg,#0F1B2D,#1A2B4A);color:#fff;box-shadow:0 10px 28px rgba(10,16,26,.18);overflow:hidden}
+  .fl-load__ruta{display:flex;align-items:center;gap:12px}
+  .fl-load__c{flex:0 0 auto;display:flex;flex-direction:column;min-width:0}
+  .fl-load__c--d{align-items:flex-end;text-align:right}
+  .fl-load__c b{font-family:var(--fh);font-size:22px;font-weight:800;line-height:1;letter-spacing:.02em;color:#fff}
+  .fl-load__c small{max-width:110px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:600;color:#9FB0C8}
+  .fl-load__pista{position:relative;flex:1;height:40px;min-width:60px}
+  .fl-load__pista::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed rgba(255,255,255,.28)}
+  .fl-load__pista::after{content:"";position:absolute;right:-2px;top:calc(50% - 4px);width:8px;height:8px;border-radius:50%;background:#F5C518;box-shadow:0 0 0 4px rgba(245,197,24,.2)}
+  .fl-load__x{position:absolute;inset:0;animation:fl-x 2.6s cubic-bezier(.45,.05,.55,.95) infinite}
+  .fl-load__y{position:absolute;left:0;top:50%;margin:-13px 0 0 -13px;animation:fl-y 1.3s ease-in-out infinite alternate}
+  .fl-load__y svg{display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
+  @keyframes fl-x{0%{transform:translateX(0);opacity:0}10%{opacity:1}88%{opacity:1}100%{transform:translateX(100%);opacity:0}}
+  @keyframes fl-y{from{transform:translateY(5px)}to{transform:translateY(-9px)}}
+  .fl-load__t{margin:14px 0 10px;font-size:14px;line-height:1.35}
+  .fl-load__t b{display:block;font-size:15.5px;font-weight:800;color:#fff}
+  .fl-load__msgs{position:relative;display:block;height:20px;margin-top:3px;overflow:hidden}
+  .fl-load__msgs span{position:absolute;left:0;top:0;font-weight:600;color:#C5CDD8;opacity:0;animation:fl-msg 7.5s infinite}
+  .fl-load__msgs span:nth-child(2){animation-delay:2.5s}
+  .fl-load__msgs span:nth-child(3){animation-delay:5s}
+  @keyframes fl-msg{0%{opacity:0;transform:translateY(8px)}5%,30%{opacity:1;transform:none}36%,100%{opacity:0;transform:translateY(-8px)}}
+  .fl-load__bar{height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+  .fl-load__bar i{display:block;width:40%;height:100%;border-radius:99px;background:linear-gradient(90deg,#F5C518,#FFE27A);animation:fl-bar 1.8s ease-in-out infinite}
+  @keyframes fl-bar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+  .fl-sk{position:relative;display:grid;grid-template-columns:1fr auto;gap:10px 16px;margin:0 0 12px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+  .fl-sk i{display:block;height:12px;border-radius:6px;background:var(--line)}
+  .fl-sk__a{width:90px}.fl-sk__b{grid-column:1;width:70%;height:22px!important}.fl-sk__c{grid-column:1;width:45%}
+  .fl-sk__p{grid-column:2;grid-row:1/4;align-self:center;width:84px;height:26px!important}
+  .fl-sk::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(-100%);animation:fl-brillo 1.6s ease-in-out infinite}
+  [data-theme="night"] .fl-sk::after{background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.07) 50%,transparent 70%)}
+  @keyframes fl-brillo{to{transform:translateX(100%)}}
+  @media (prefers-reduced-motion:reduce){
+    .fl-load__x,.fl-load__y,.fl-load__bar i,.fl-sk::after{animation:none}
+    .fl-load__x{transform:translateX(50%)}
+    .fl-load__msgs span{animation:none}.fl-load__msgs span:first-child{opacity:1}
+  }
   /* Transfer: salida chica para seguir sin transfer */
   .f-sin{display:block;margin:6px auto 0;padding:10px 14px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   .f-sin:hover{color:var(--ink)}
@@ -1072,14 +1212,30 @@
     if (S.paso >= 4) t += comidasTotal();
     return t;
   }
-  /* De donde sale el total: cada parte elegida con su precio, para que se entienda la suma. */
-  function subTotal() {
-    var p = [];
-    if (MODO === 'avion') { p.push('Vuelo ' + f(precioVuelo(vuelo()))); if (trasl()) p.push('Transfer ' + f(trPrecio(trasl()))); }
-    else p.push((MODO === 'auto' ? 'Auto ' : 'Bus ') + f(transporteTotal()));
-    if (S.paso >= 2) p.push('Alojamiento ' + f(precioHotel(hotel())));
-    if (S.paso >= 3 && extrasSel().length) p.push('Extras ' + f(sum(extrasSel(), precioExtra)));
-    return p.join(' + ');
+  /* "Donde podes ahorrar": solo ahorros que salen de precios reales que la pagina ya tiene, comparados con lo elegido.
+     - vuelo: el elegido contra el mas barato de la lista (misma fecha);
+     - fecha: el mejor dia de "Comparar fechas", si la persona lo consulto (contra el mas barato de su fecha);
+     - transfer: el elegido contra el mas barato;
+     - alojamiento: el elegido contra el mas barato de Booking (solo con precios reales).
+     Las partes se suman porque cada una compara contra una base distinta. Nunca se inventa un ahorro. */
+  function ahorros() {
+    var out = [];
+    if (MODO === 'avion' && VUELOS.length && S.vuelo && S.reales.vuelo == null) {
+      var minV = Math.min.apply(null, VUELOS.map(precioVuelo)), dv = precioVuelo(vuelo()) - minV;
+      if (dv >= 1) out.push({ k: 'vuelo', txt: 'el vuelo más barato', v: dv });
+      var df = datosFechas();
+      if (df && df.alts.length) out.push({ k: 'fecha', txt: 'saliendo el ' + diaLargo(df.alts[0].dep), v: df.base - df.alts[0].pp * pax });
+    }
+    if (MODO === 'avion' && trasl()) {
+      var minT = Math.min.apply(null, TRASLADOS.map(trPrecio)), dt = trPrecio(trasl()) - minT;
+      if (dt >= 1) out.push({ k: 'transfer', txt: 'el transfer compartido', v: dt });
+    }
+    var hr = HOTELES.filter(function (x) { return !x.ejemplo; });
+    if (S.paso >= 2 && hr.length && !S.alojReservado) {
+      var dh = precioHotelEstimado(hotel()) - Math.min.apply(null, hr.map(function (x) { return x.precio; }));
+      if (dh >= 1) out.push({ k: 'aloj', txt: 'el alojamiento más barato', v: dh });
+    }
+    return out;
   }
   /* Todo evento del flujo lleva el contexto del viaje, para poder segmentar en Analytics
      por destino, cantidad de personas, mes de viaje, paso y origen del clic en la home. */
@@ -1103,16 +1259,25 @@
       return '<li style="display:contents"><' + (c !== 'is-on' ? 'button type="button" data-ir="' + (i + 1) + '" aria-label="Ir al paso ' + (i + 1) + ': ' + n + '"' : 'div') + ' class="f-step ' + c + (c !== 'is-on' ? ' is-link' : '') + '"' + (c === 'is-on' ? ' aria-current="step"' : '') + '><span class="f-dot">' + d + '</span>' + n.replace(' + ', ' +<br> ').replace('Tu presupuesto', 'Tu<br> presupuesto') + '</' + (c !== 'is-on' ? 'button' : 'div') + '></li>';
     }).join('');
   }
-  var ultimoTotal = null;
+  /* Arriba de cada paso: "Donde podes ahorrar" (reemplaza a "Tu viaje hasta ahora"). */
+  var iChancho = '<path d="M19 10c-.7-2.900-3.600-5-7.300-5C7.400 5 4 7.700 4 11.200c0 1.700.8 3.200 2.100 4.300L5.800 19h2.700l.7-1.600c.9.300 1.800.400 2.800.400s1.900-.1 2.800-.4l.7 1.600h2.700l-.3-3.400c.6-.6 1.100-1.200 1.400-2H21v-3.600z"/><path d="M9.500 5.400 8.300 3.300l3.200 1.100M15.700 10.300h.01M3 10.500c0 1 .5 1.700 1.300 2"/>';
+  var ultimoAhorro = null;
   function pintarTotal() {
-    var el = $('total'), t = totalHastaAhora();
-    /* Sin vuelo elegido todavia (buscando o sin resultados) no hay nada que sumar: no se muestra un numero. */
-    if (S.paso >= 4 || (MODO === 'avion' && !S.vuelo) || (MODO === 'bus' && !BUS)) { el.hidden = true; ultimoTotal = null; return; }
-    if (S.paso === 2 && S.cargandoH) { el.hidden = false; el.innerHTML = ic(I.budget, 30) + '<div>Tu viaje hasta ahora<small>Buscando alojamientos…</small></div>'; return; }
+    var el = $('total');
+    el.classList.add('f-ahorro');
+    /* Sin vuelo elegido todavia (buscando o sin resultados) no hay nada que comparar. */
+    if (S.paso >= 4 || (MODO === 'avion' && !S.vuelo) || (MODO === 'bus' && !BUS) || (S.paso === 2 && S.cargandoH)) { el.hidden = true; ultimoAhorro = null; return; }
+    var a = ahorros(), total = sum(a, function (x) { return x.v; });
+    var que = MODO === 'avion' ? (S.paso >= 2 ? 'fechas, vuelos, transfer y alojamiento' : 'fechas, vuelos y transfer') : 'alojamiento';
+    var lista = a.map(function (x) { return x.txt; });
+    var det = a.length ? 'Con ' + (lista.length > 1 ? lista.slice(0, -1).join(', ') + ' y ' + lista[lista.length - 1] : lista[0]) + '.' : 'Tu elección ya es la más económica que encontramos.';
     el.hidden = false;
-    el.innerHTML = ic(I.budget, 30) + '<div>Tu viaje hasta ahora: <b>' + f(t) + '</b><small>' + esc(subTotal()) + '</small></div>';
-    if (ultimoTotal !== null && Math.round(ultimoTotal) !== Math.round(t)) { el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump'); }
-    ultimoTotal = t;
+    if (MODO === 'avion') { el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', 'Dónde podés ahorrar: ver el calendario de precios'); }
+    el.innerHTML = '<span class="f-ahorro__i">' + ic(iChancho, 26) + '</span><div><b class="f-ahorro__h">Dónde podés ahorrar</b>' +
+      '<small>Comparamos ' + que + ' con tu selección. ' + esc(det) + '</small>' + (MODO === 'avion' ? '<span class="f-ahorro__cal">Ver calendario de precios →</span>' : '') + '</div>' +
+      (total >= 1 ? '<strong class="f-ahorro__v">−' + f(total) + '</strong>' : '');
+    if (ultimoAhorro !== null && Math.round(ultimoAhorro) !== Math.round(total)) { el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump'); }
+    ultimoAhorro = total;
   }
 
   /* ---- Pantallas ---- */
@@ -1157,23 +1322,44 @@
       .catch(function (e) { S.errorB = (e && e.message && !/Failed to fetch|NetworkError|Load failed/i.test(e.message)) ? e.message : 'No pudimos conectar con CuántoSale. Revisá tu conexión.'; })
       .then(function () { S.cargandoB = false; render(false); });
   }
+  /* Mientras llegan los vuelos: la ruta con un avion que vuela, mensajes que van rotando, una barra que avanza y dos
+     tarjetas "fantasma" con brillo donde van a aparecer los vuelos. Todo con CSS; con movimiento reducido queda quieto. */
+  function cargandoVuelos() {
+    var avion = '<svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path fill="#F5C518" d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg>';
+    var fantasma = '<div class="fl-sk" aria-hidden="true"><i class="fl-sk__a"></i><i class="fl-sk__b"></i><i class="fl-sk__c"></i><i class="fl-sk__p"></i></div>';
+    return '<div class="fl-load" role="status"><div class="fl-load__ruta" aria-hidden="true">' +
+      '<span class="fl-load__c"><b>MVD</b><small>Montevideo</small></span>' +
+      '<span class="fl-load__pista"><span class="fl-load__x"><span class="fl-load__y">' + avion + '</span></span></span>' +
+      '<span class="fl-load__c fl-load__c--d"><b>' + esc(AEROPUERTO[destKey] || '✈') + '</b><small>' + esc(DEST) + '</small></span></div>' +
+      '<p class="fl-load__t"><b>Buscando vuelos para ' + personasTxt() + '</b><span class="fl-load__msgs" aria-hidden="true"><span>Comparando aerolíneas…</span><span>Revisando escalas y horarios…</span><span>Buscando el mejor precio…</span></span></p>' +
+      '<div class="fl-load__bar" aria-hidden="true"><i></i></div></div>' + fantasma + fantasma;
+  }
+  /* Tarjeta de vuelo: aerolinea a la izquierda, trayecto al centro (salida, duracion, escalas, llegada) y precio total con
+     el boton a la derecha. En celular se apila en tres bloques. Etiquetas sobrias: "Mejor opcion" (una sola, ver
+     marcarMejor) y "Mas barato". Toda la tarjeta elige el vuelo; el boton es el acceso por teclado. */
+  function tarjetaVuelo(v, idBarato) {
+    var on = S.vuelo === v.id;
+    var badges = (v.mejor ? '<span class="fc-b fc-b--mejor">Mejor opción</span>' : '') + (v.id === idBarato ? '<span class="fc-b">Más barato</span>' : '');
+    return '<article class="fc' + (on ? ' is-sel' : '') + '" data-sel="vuelo:' + esc(v.id) + '">' +
+      '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + '</span></div>' +
+      '<div class="fc-ruta"><div class="fc-pt"><b>' + v.sal + '</b><small>MVD</small></div>' +
+        '<div class="fc-mid"><small>' + esc(v.durT) + '</small><i aria-hidden="true"></i><small class="' + (v.esc === 0 ? 'is-dir' : '') + '">' + esc(v.escT) + '</small></div>' +
+        '<div class="fc-pt fc-pt--d"><b>' + v.lle + '</b><small>' + esc(AEROPUERTO[destKey] || '') + '</small></div></div>' +
+      '<div class="fc-pr"><span class="fc-pr__v"><b>' + f(precioVuelo(v)) + '</b><small>ida y vuelta · ' + personasTxt() + '</small></span>' +
+        '<button type="button" class="fc-btn" data-sel="vuelo:' + esc(v.id) + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Vuelo elegido: ' : 'Elegir el vuelo de ') + esc(v.air) + ', ' + v.sal + ', ' + f(precioVuelo(v)) + '">' + (on ? 'Elegido ✓' : 'Elegir') + '</button></div></article>';
+  }
   function pantalla1() {
     if (MODO === 'bus') return pantallaBus();
     var vs = ordenarVuelos(), visibles = S.verMasVuelos ? vs : vs.slice(0, 3);
+    var idBarato = VUELOS.length > 1 ? VUELOS.slice().sort(function (x, y) { return precioVuelo(x) - precioVuelo(y) || x.dur - y.dur; })[0].id : '';
     var cambiarFechas = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
     var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
       (ninos && VUELOS.length ? '<p class="f-sub">Vuelos cotizados para ' + pax + ' pasajeros a tarifa de adulto. Los niños de 2 a 11 años suelen tener descuento: la aerolínea lo confirma al reservar.</p>' : '') +
-      (S.cargandoV ? '<div class="fl-cargando" role="status"><span class="fl-spin" aria-hidden="true"></span>Buscando vuelos…</div>' : '') +
+      (S.cargandoV ? cargandoVuelos() : '') +
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
         '<a class="g-btn g-btn--main" href="' + esc(cambiarFechas) + '">Cambiar fechas</a></div>' : '') +
       (VUELOS.length > 1 ? chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') : '') +
-      visibles.map(function (v) {
-        return '<button type="button" class="opt' + sel(S.vuelo === v.id) + '" data-sel="vuelo:' + v.id + '" aria-pressed="' + (S.vuelo === v.id) + '">' + tick +
-          '<div class="fl__air"><span class="fl__logo">' + v.ab + '</span>' + esc(v.air) + '</div>' +
-          '<div class="fl__row"><div class="fl__t">' + v.sal + '<small>MVD</small></div><div class="fl__mid">' + v.durT + '<i></i>' + v.escT + '</div><div class="fl__t">' + v.lle + '<small>' + (AEROPUERTO[destKey] || '') + '</small></div>' +
-          '<div class="fl__price"><b>' + f(precioVuelo(v)) + '</b><small>total ' + pax + (pax === 1 ? ' persona' : ' pers.') + '</small></div></div>' +
-          (v.mejor ? '<div class="fl__foot"><span class="tagok">✓ Mejor opción</span></div>' : '') + '</button>';
-      }).join('') +
+      (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato); }).join('') + '</div>' : '') +
       (vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
       '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
@@ -1213,7 +1399,21 @@
         track('flujo_comparar_fechas_resultado', { fechas_reales: reales.length });
       })
       .catch(function () { S.cmp = { estado: 'vacio' }; track('flujo_comparar_fechas_resultado', { fechas_reales: 0, error: true }); })
-      .then(function () { if (S.paso === 1) { var y = $('main').scrollTop; render(false); $('main').scrollTop = y; } });
+      .then(function () {
+        if (S.paso === 1) { var y = $('main').scrollTop; render(false); $('main').scrollTop = y; } else pintarTotal();
+        if (S.modal && S.modal.tipo === 'calendario') pintarModal();
+      });
+  }
+  /* Fechas mas baratas del calendario: base = lo mas barato de TU fecha (mismo calendario; sin ese punto, el vuelo mas
+     barato de la lista) y hasta 3 dias mas baratos, al menos 1 % menos. null si no se consulto o no hubo precios. */
+  function datosFechas() {
+    var c = S.cmp; if (!c || c.estado !== 'ok' || !VUELOS.length) return null;
+    var tot = function (x) { return x.pp * pax; };
+    var p0 = c.puntos.filter(function (x) { return x.shift === 0; })[0];
+    var base = p0 ? tot(p0) : Math.min.apply(null, VUELOS.map(precioVuelo));
+    var alts = c.puntos.filter(function (x) { return x.shift !== 0 && base - tot(x) >= Math.max(1, base * 0.01); })
+      .sort(function (a, b) { return tot(a) - tot(b); }).slice(0, 3);
+    return { base: base, alts: alts };
   }
   function ahorroFechas() {
     if (MODO !== 'avion' || !VUELOS.length) return '';
@@ -1224,12 +1424,8 @@
     if (!c.estado) return cab + tuyo + '<p class="af-p">Comparamos el mismo viaje de ' + NOCHES + ' noches saliendo hasta 5 días antes o después.</p><button type="button" class="af-btn" data-cmp="1">Comparar fechas</button></section>';
     if (c.estado === 'cargando') return cab + tuyo + '<p class="af-p af-p--c" role="status"><span class="fl-spin" aria-hidden="true"></span>Buscando precios de otras fechas…</p></section>';
     if (c.estado === 'vacio') return cab + tuyo + '<p class="af-p">Compará fechas para encontrar posibles ahorros.</p>' + gf(IDA, VUELTA, 'Comparar fechas en Google Flights →') + '</section>';
-    /* Base: el precio mas bajo de TU fecha en el mismo calendario (asi se compara igual con igual). Sin ese punto, el vuelo mas barato de la lista. */
     var tot = function (x) { return x.pp * pax; };
-    var p0 = c.puntos.filter(function (x) { return x.shift === 0; })[0];
-    var base = p0 ? tot(p0) : Math.min.apply(null, VUELOS.map(precioVuelo));
-    var alts = c.puntos.filter(function (x) { return x.shift !== 0 && base - tot(x) >= Math.max(1, base * 0.01); })
-      .sort(function (a, b) { return tot(a) - tot(b); }).slice(0, 3);
+    var df = datosFechas(), base = df.base, alts = df.alts;
     var cabBase = '<p class="af-p">Para tu fecha, el vuelo más barato está en <b>' + f(base) + '</b>.</p>';
     if (!alts.length) return cab + tuyo + cabBase + '<p class="af-p"><b>No encontramos días cercanos más baratos.</b> Comparamos ' + c.puntos.length + (c.puntos.length === 1 ? ' fecha' : ' fechas') + ' con precio real.</p>' + nota + '</section>';
     var mejor = alts[0], ah = base - tot(mejor);
@@ -2066,12 +2262,59 @@
       .catch(function (e) { S.modal.error = 'No pudimos cargar las habitaciones ahora (' + (e.message || 'error') + ').'; })
       .then(function () { if (S.modal) { S.modal.cargando = false; pintarModal(); } });
   }
+  /* ---- "Mismo viaje, otra fecha": calendario de barras con los precios reales del vuelo (ver compararFechas) ----
+     Una barra por fecha de salida (5 dias antes a 5 despues, mismas noches). Tocar una barra la muestra arriba; las
+     fechas solo cambian si la persona toca "Usar estas fechas", que vuelve a armar el viaje con esas fechas. */
+  var MES_C = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+  var DIA_C = ['dom.', 'lun.', 'mar.', 'mié.', 'jue.', 'vie.', 'sáb.'];
+  function abrirCalendario() {
+    if (MODO !== 'avion') return;
+    S.modal = { tipo: 'calendario', sel: '' }; pintarModal(); track('flujo_calendario_precios_abrir', {});
+    if (!S.cmp) compararFechas();   /* la primera vez se consultan los precios; despues se reusan */
+  }
+  function calendarioHoja(m) {
+    var c = S.cmp || {}, cab = '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet cal" role="dialog" aria-modal="true" aria-labelledby="cal-h">' +
+      '<div class="f-modal__top"><div><small>CALENDARIO DE PRECIOS</small><h2 id="cal-h">Mismo viaje, otra fecha</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>';
+    if (!c.estado || c.estado === 'cargando') return cab + '<div class="cal-cargando" role="status"><span class="fl-spin" aria-hidden="true"></span>Buscando precios de otras fechas…</div></div>';
+    if (c.estado !== 'ok') return cab + '<p class="cal-p">No encontramos precios de otras fechas para este viaje. Compará fechas para encontrar posibles ahorros.</p>' +
+      '<a class="g-btn g-btn--main cal-gf" href="' + esc(urlVuelos(IDA, VUELTA)) + '" target="_blank" rel="noopener">Comparar fechas en Google Flights →</a></div>';
+    var tot = function (x) { return x.pp * pax; };
+    var pts = c.puntos.slice().sort(function (a, b) { return a.dep < b.dep ? -1 : 1; });
+    var tuyo = pts.filter(function (x) { return x.dep === IDA; })[0];
+    var base = tuyo ? tot(tuyo) : Math.min.apply(null, VUELOS.map(precioVuelo));
+    var vals = pts.map(tot), min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    var barata = pts.filter(function (x) { return tot(x) === min; })[0];
+    var corto = function (v) { return f(v).replace(/^[^\d-]+/, ''); };
+    var sel = pts.filter(function (x) { return x.dep === m.sel; })[0];
+    var tarjeta = '';
+    if (sel) {
+      var dias = Math.round((new Date(sel.dep + 'T12:00:00') - new Date(IDA + 'T12:00:00')) / 864e5), dif = base - tot(sel);
+      var d = new Date(sel.dep + 'T12:00:00');
+      tarjeta = '<div class="cal-sel">' + ic('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', 26) +
+        '<div><b>Salí el ' + DIA_C[d.getDay()] + ' ' + d.getDate() + ' ' + MES_C[d.getMonth()] + '</b><small>' +
+        (dias === 0 ? 'Es la fecha que elegiste' : Math.abs(dias) + (Math.abs(dias) === 1 ? ' día ' : ' días ') + (dias < 0 ? 'antes' : 'después') + ', con la misma cantidad de noches') +
+        (dias !== 0 && Math.round(dif) !== 0 ? ' · ' + (dif > 0 ? 'ahorrás ' + f(dif) : 'cuesta ' + f(-dif) + ' más') : '') + '</small></div>' +
+        (dias !== 0 ? '<button type="button" class="g-btn g-btn--main cal-usar" data-usar-fecha="' + sel.dep + '">Usar estas fechas</button>' : '') + '</div>';
+    }
+    var barras = pts.map(function (x) {
+      var v = tot(x), h = max > min ? 34 + 66 * (v - min) / (max - min) : 70, d = new Date(x.dep + 'T12:00:00');
+      var cls = x.dep === IDA ? ' is-tuya' : (x === barata ? ' is-barata' : '');
+      return '<button type="button" class="cal-b' + cls + (m.sel === x.dep ? ' is-sel' : '') + '" data-cal-sel="' + x.dep + '" aria-pressed="' + (m.sel === x.dep) + '" aria-label="Salida ' + DIA_C[d.getDay()] + ' ' + d.getDate() + ' ' + MES_C[d.getMonth()] + ': ' + f(v) + '">' +
+        '<em>' + corto(v) + '</em><span class="cal-b__t"><i style="height:' + h.toFixed(0) + '%"></i></span><b>' + d.getDate() + '</b><small>' + MES_C[d.getMonth()] + '</small></button>';
+    }).join('');
+    return cab + tarjeta +
+      '<p class="cal-p">Costo del vuelo para ' + personasTxt() + ', ida y vuelta, si salís antes o después con las mismas ' + NOCHES + ' noches. Tocá una barra para verla.</p>' +
+      '<div class="cal-g">' + barras + '</div>' +
+      '<ul class="cal-ley"><li><i class="is-tuya"></i>Tu fecha</li><li><i class="is-barata"></i>La más barata</li><li><i></i>Otras fechas</li></ul>' +
+      '<p class="cal-nota">Precios reales consultados hoy, en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ': pueden variar. Tus fechas solo cambian si tocás “Usar estas fechas”.</p></div>';
+  }
   function cerrarModal() { S.modal = null; pintarModal(); }
   function pintarModal() {
     var el = $('modal'), m = S.modal;
     if (!m) { el.hidden = true; el.innerHTML = ''; el.classList.remove('is-full'); el.classList.remove('is-center'); return; }
     el.classList.toggle('is-full', m.tipo === 'guardar');
     el.classList.toggle('is-center', m.tipo === 'vuelo_ir' || m.tipo === 'alojamiento_ir');
+    if (m.tipo === 'calendario') { el.hidden = false; el.innerHTML = calendarioHoja(m); return; }
     if (m.tipo === 'tour_det') { el.hidden = false; el.innerHTML = tourDetHoja(m); return; }
     if (m.tipo === 'guardar') { el.hidden = false; el.innerHTML = guardarHoja(m); var inp = el.querySelector('#g-mail'); if (inp) inp.focus(); return; }
     if (m.tipo === 'alojamiento_ir') { el.hidden = false; el.innerHTML = alojIrHoja(); return; }
@@ -2153,7 +2396,16 @@
     S.playaSel = e.target.value; S.nH = MAX_HOTELES; track('flujo_playa', { playa: S.playaSel, via: 'lista' });
     var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
   });
+  $('total').addEventListener('click', function () { abrirCalendario(); });
+  $('total').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirCalendario(); } });
   $('modal').addEventListener('click', function (e) {
+    var cb = e.target.closest('[data-cal-sel]'); if (cb && S.modal) { S.modal.sel = cb.dataset.calSel; pintarModal(); track('flujo_calendario_precios_fecha', { fecha: S.modal.sel }); var b2 = $('modal').querySelector('[data-cal-sel="' + S.modal.sel + '"]'); if (b2) b2.focus(); return; }
+    var uf = e.target.closest('[data-usar-fecha]');
+    if (uf) {
+      var nq = new URLSearchParams(location.search); nq.set('ida', uf.dataset.usarFecha); nq.set('vuelta', sumarDias(uf.dataset.usarFecha, NOCHES)); nq.delete('paso');
+      track('flujo_calendario_usar_fechas', { fecha_nueva: uf.dataset.usarFecha });
+      location.href = location.pathname + '?' + nq.toString(); return;
+    }
     if (e.target.closest('[data-cerrar]')) { cerrarModal(); return; }
     if (e.target.closest('[data-gf]')) { irATercero('vuelo'); return; }
     if (e.target.closest('[data-bk]')) { irATercero('alojamiento'); return; }

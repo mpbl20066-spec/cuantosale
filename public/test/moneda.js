@@ -8,9 +8,12 @@
   var KEY = 'cuantosale_moneda';
   var ST = {
     monedas: [{ code: 'UYU', etiqueta: 'Pesos uruguayos', simbolo: '$' }, { code: 'USD', etiqueta: 'Dólares', simbolo: 'US$' }, { code: 'BRL', etiqueta: 'Reales', simbolo: 'R$' }],
-    rates: null, base: 'USD', code: 'USD', cargando: true
+    rates: null, base: 'USD', code: 'UYU', cargando: true
   };
+  /* Moneda inicial: pesos uruguayos (el publico es de Uruguay); la elegida antes, si la hay. Las ultimas tasas quedan
+     guardadas (cs_tasas) para mostrar en pesos desde el primer momento, sin que los precios salten de US$ a $ al cargar. */
   try { var g = localStorage.getItem(KEY); if (g) ST.code = g; } catch (e) { /* modo privado */ }
+  try { var tg = JSON.parse(localStorage.getItem('cs_tasas') || 'null'); if (tg && tg.rates) { ST.rates = tg.rates; ST.base = tg.base || 'USD'; } } catch (e) { /* sin tasas guardadas */ }
   var subs = [];
 
   function tasa(code) {
@@ -120,7 +123,7 @@
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (j && j.monedas && j.monedas.length) ST.monedas = j.monedas.map(function (m) { return { code: m.code, etiqueta: m.etiqueta, simbolo: m.simbolo }; });
-        if (j && j.rates) { ST.rates = j.rates; ST.base = j.base || 'USD'; }
+        if (j && j.rates) { ST.rates = j.rates; ST.base = j.base || 'USD'; try { localStorage.setItem('cs_tasas', JSON.stringify({ rates: j.rates, base: ST.base })); } catch (e) { /* modo privado */ } }
       })
       .catch(function () { /* sin tasas: todo en la base */ })
       .then(function () { ST.cargando = false; pintarSelectores(); avisar(); });
