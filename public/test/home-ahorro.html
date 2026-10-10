@@ -1,0 +1,794 @@
+﻿<!doctype html>
+<html lang="es" data-theme="light" data-pagina="home">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Armá tu viaje a Brasil desde Uruguay y mirá cuánto cuesta en total: vuelo, traslados, alojamiento y extras.">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<meta name="theme-color" content="#F7F8FA">
+<title>Mi alcancía de viaje</title>
+<script src="tema.js"></script>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="instalar.js" defer></script>
+<script src="moneda.js"></script>
+<link rel="preload" as="image" href="home-portada2.jpg" fetchpriority="high" media="(min-width: 768px)">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Home con dos caminos. Las tarjetas van superpuestas sobre la foto,
+     con margen negativo, para que entren junto con los destinos. */
+  body{background:#E9EDF3;margin:-110px;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  .status__icons{display:flex;gap:6px;align-items:center}
+  .scroll{flex:1;overflow-y:auto;padding:0 18px 20px;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  .m-head{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
+  .m-logo{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:800;font-size:22px;color:var(--ink);letter-spacing:-.01em}
+  .m-tag{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+  .m-head__r{display:flex;align-items:center;gap:6px}
+  .tabs__mon,.tabs__sep{display:none}
+  @media (min-width:768px){.tabs__mon{display:inline-flex;align-items:center;margin-left:4px}.tabs__sep{display:block;align-self:center;width:1px;height:34px;margin:0 8px;background:var(--line)}}
+  .m-menu{width:40px;height:40px;border:0;background:transparent;display:grid;place-content:center;gap:5px;cursor:pointer}
+  .m-menu span{display:block;width:22px;height:2.5px;border-radius:2px;background:var(--ink)}
+  /* Tarjetas de los dos caminos (formato anterior, con iconos SVG) */
+  .m-cards{position:relative;z-index:3;display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 16px}
+  @media (min-width:768px){.m-cards{grid-template-columns:1fr 1fr;gap:14px}}
+  .m-card{display:flex;align-items:flex-start;gap:12px;padding:14px;background:#ffffff;border:1px solid rgba(226,232,240,.6);border-radius:16px;color:var(--ink);text-decoration:none;box-shadow:0 8px 24px rgba(10,16,26,.14),0 2px 6px rgba(10,16,26,.06);transition:transform .18s ease,box-shadow .18s ease}
+  @media (min-width:768px){.m-card{padding:16px}}
+  .m-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(10,16,26,.18),0 3px 8px rgba(10,16,26,.08)}
+  .m-card:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .m-card__icon{flex:none;width:40px;height:40px;border-radius:50%;background:var(--m-badge);color:var(--m-badge-ink);display:grid;place-items:center}
+  .m-card__icon svg{width:22px;height:22px}
+  .m-card--main .m-card__icon{background:var(--m-main);color:var(--m-main-ink)}
+  .m-card__txt{display:flex;flex-direction:column;flex:1;min-width:0}
+  .m-card__txt b{display:block;font-family:var(--fh);font-size:15px;font-weight:700;color:#0B1F3A;margin:0 0 3px 0;line-height:1.25}
+  @media (min-width:768px){.m-card__txt b{font-size:16px}}
+  .m-card__txt small{display:block;font-size:12px;font-weight:500;color:#64748b;line-height:1.4;margin:0 0 10px 0}
+  @media (min-width:768px){.m-card__txt small{font-size:13px}}
+  .m-card__cta{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding:8px 14px;border-radius:10px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:12.5px;font-weight:700;line-height:1.2;white-space:nowrap;width:fit-content;transition:gap .18s ease}
+  @media (min-width:768px){.m-card__cta{font-size:13px}}
+  .m-card:hover .m-card__cta{gap:10px}
+  .m-card__tag{display:inline-block;margin:0 0 4px 0;padding:2px 8px;border-radius:99px;background:var(--m-badge);color:var(--m-main-ink);font-size:10px;font-weight:800;letter-spacing:.02em;width:fit-content}
+  :root{--m-badge:#FBE7B0;--m-badge-ink:var(--azul);--m-main:#F7C325;--m-main-ink:#3A2C05}
+  /* Tarjetas anteriores dentro del hero nuevo, mas compactas para bajar la altura de la portada */
+  .hx .m-cards{margin:0;gap:12px}
+  .hx .m-card{background:#fff}
+
+  .hx-how{max-width:1200px;margin:0 auto;padding:28px 0 4px}
+  .hx-how h2{margin:0 0 14px;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
+  .hx-steps{display:grid;grid-template-columns:1fr;gap:12px;margin:0;padding:0;list-style:none}
+  .hx-step{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--hx-border);border-radius:16px;background:#fff}
+  .hx-step__n{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--hx-yellow);color:var(--hx-navy);font-family:var(--fh);font-size:16px;font-weight:800}
+  .hx-step b{display:block;margin:0 0 3px;font-family:var(--fh);font-size:15px;font-weight:700;color:var(--hx-navy)}
+  .hx-step p{margin:0;font-size:13px;line-height:1.5;color:var(--hx-gray)}
+  .hx-foot{margin:24px calc(var(--hx-pad) * -1) calc(var(--hx-pb) * -1);padding:20px var(--hx-pad);background:var(--hx-navy);color:#CBD5E1}
+  .hx-foot__in{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-start;justify-content:space-between;max-width:1200px;min-height:40px;margin:0 auto}
+  .hx-foot__logo{display:inline-flex;align-items:center;gap:9px;text-decoration:none!important}
+  .hx-foot__logo b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.05;color:#fff}
+  .hx-foot__logo small{display:block;max-width:none!important;margin:0;font-size:11.5px;font-weight:500;color:#CBD5E1}
+  .hx-foot nav{display:flex;flex-wrap:wrap;align-items:center;gap:0 22px}
+  .hx-foot nav a,.hx-foot nav .hx-cookies{display:inline-flex;align-items:center;min-height:44px;margin:0;padding:0;line-height:1.2;vertical-align:middle}
+  .hx-foot a{color:#fff;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+  .hx-foot a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .hx-foot__brand{flex:1 1 300px;min-width:0}
+  .hx-foot__brand p{margin:8px 0 0;max-width:34ch;font-size:13.5px;line-height:1.45;color:#CBD5E1}
+  .hx-foot__logo small{font-size:12.5px!important;font-weight:700!important;color:#F5C518!important}
+  .hx-foot .hx-foot__legal{display:block;flex:1 1 100%;max-width:none;margin-top:4px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);font-size:12px;line-height:1.45;color:#94A3B8}
+  .hx{--hx-pb:20px}
+  @media (min-width:768px){
+    .hx{--hx-pb:48px}
+    .hx-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .hx-how h2{font-size:18px}
+    .hx-how{padding-top:36px}
+  }
+  @media (min-width:1024px){
+    .hx{--hx-pb:56px}
+    /* hero mas bajo: la altura la da el contenido, no un minimo */
+    [data-pagina="home"] .hx .m-cards{margin:0;gap:20px}
+    [data-pagina="home"] .hx .m-card{padding:18px 22px;column-gap:18px;row-gap:12px;align-items:center;background:rgba(255,255,255,.96)}
+    [data-pagina="home"] .hx .m-card__icon{width:56px;height:56px}
+    [data-pagina="home"] .hx .m-card__icon svg{width:28px;height:28px}
+    [data-pagina="home"] .hx .m-card__txt b{font-size:20px}
+    [data-pagina="home"] .hx .m-card__txt small{margin-top:4px;max-width:none;font-size:15px}
+    [data-pagina="home"] .hx .m-card__cta{min-height:42px;padding:0 20px;font-size:15px}
+  }
+  .m-menu:focus-visible,.hx-card:focus-visible,.hx-more:focus-visible,.hx-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+  /* ==========================================================
+     HOME NUEVO (diseño de la home en React): portada a color en desktop, dos
+     tarjetas blancas con boton amarillo y destinos populares en grilla.
+     La cabecera (logo/menu en celular, barra de arriba en desktop) no cambia.
+     ========================================================== */
+  :root{--hx-navy:#0B1F3A;--hx-gray:#64748B;--hx-border:#E2E8F0;--hx-yellow:#F7C325}
+  .hx{grid-column:1/-1;--hx-pad:18px}
+  @media (min-width:768px){.hx{--hx-pad:32px}}
+  @media (min-width:1024px){.hx{--hx-pad:var(--hpad,40px)}}
+  .hx-hero{position:relative;display:flex;align-items:center;margin:0 calc(var(--hx-pad) * -1);padding:0 var(--hx-pad);overflow:hidden}
+  .hx-hero__bg{display:none}
+  .hx-hero__in{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:6px 0 20px}
+  .hx-hero__txt{margin-top:14px}
+  .hx-hero h1{margin:0 0 6px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;color:var(--hx-navy)}
+  /* Antetitulo de la portada: chico, en mayusculas, en el color de la marca */
+  .hx-hero__eye{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B8860B}
+  [data-theme="night"] .hx-hero__eye{color:#F5C518}
+  .hx-hero__sub{margin:0 0 16px;max-width:36rem;font-size:14px;line-height:1.5;color:var(--ink2)}
+  .hx-cards{display:grid;grid-template-columns:1fr;gap:12px}
+  .hx-card{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--hx-border);border-radius:16px;background:#fff;color:var(--hx-navy);text-align:left;text-decoration:none;transition:background-color .15s ease}
+  .hx-card:hover{background:#F8FAFC}
+  .hx-card__ico{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--hx-yellow);box-shadow:0 1px 2px rgba(10,16,26,.12);font-size:16px;line-height:1}
+  .hx-card__txt{display:flex;flex-direction:column;flex:1;min-width:0}
+  .hx-card__txt b{display:block;margin:0 0 2px;font-family:var(--fh);font-size:15px;font-weight:700;line-height:1.3}
+  .hx-card__txt p{margin:0 0 12px;font-size:12px;line-height:1.55;color:var(--hx-gray)}
+  .hx-card__txt p strong{font-weight:700}
+  .hx-card__cta{display:inline-flex;align-items:center;gap:6px;width:fit-content;padding:7px 12px;border-radius:8px;background:var(--hx-yellow);color:var(--hx-navy);font-family:var(--fb);font-size:12px;font-weight:600;line-height:1.2;transition:gap .15s ease}
+  .hx-card:hover .hx-card__cta{gap:10px}
+
+  .hx-sec{max-width:1200px;margin:0 auto;padding:20px 0 4px}
+  .hx-sec__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .hx-sec__h h2{margin:0;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
+  .hx-sec__nota{margin:-4px 0 12px;font-size:12.5px;font-weight:500;line-height:1.45;color:var(--ink2)}
+  .hx-more{border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;padding:4px}
+  .hx-more:hover{color:var(--hx-navy)}
+  .hx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .hx-dest{position:relative;display:block;height:128px;padding:0;border:0;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#60A5FA,#06B6D4);cursor:pointer;text-align:left}
+  .hx-dest img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+  .hx-dest:hover img{transform:scale(1.05)}
+  .hx-dest::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.7),rgba(0,0,0,.2) 50%,transparent)}
+  .hx-dest span{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:12px;color:#fff;font-size:14px;font-weight:700;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+  .hx-dest small{display:block;margin-top:1px;font-size:11px;font-weight:500;color:rgba(255,255,255,.8)}
+  .hx-dest em{display:block;margin-top:4px;font-style:normal;font-size:12px;font-weight:800;color:var(--accent)}
+
+  @media (min-width:768px){
+    .hx-head{display:none}
+    .hx-hero{background:#0B1F3A}
+    .hx-hero__bg{display:block;position:absolute;inset:0;background:url(home-portada2.jpg) 50% 50%/cover}
+    .hx-hero__bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.7),rgba(0,0,0,.4) 50%,rgba(0,0,0,.2))}
+    .hx-hero__in{max-width:1200px;padding:26px 0 28px}
+    .hx-hero__txt{margin-top:0}
+    .hx-hero h1{margin-bottom:6px;font-size:34px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.45)}
+    .hx-hero__sub{margin-bottom:16px;font-size:14px;color:rgba(255,255,255,.9);text-shadow:0 1px 6px rgba(0,0,0,.45)}
+    .hx-hero__eye{color:#F5C518;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+    .hx-cards{grid-template-columns:1fr 1fr;gap:16px;max-width:56rem}
+    .hx-card{padding:20px;border:0;background:rgba(255,255,255,.95);backdrop-filter:blur(4px)}
+    .hx-card:hover{background:#F8FAFC}
+    .hx-card__txt b{font-size:16px}
+    .hx-card__txt p{font-size:13px}
+    .hx-card__cta{font-size:13px;padding:7px 12px}
+    .hx-sec{padding-top:24px}
+    .hx-sec__h h2{font-size:18px}
+    .hx-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .hx-dest{height:144px}
+  }
+
+
+  /* ---- Ajustes de proporcion (revision de la home en desktop) ----
+     Destinos: tarjetas 3:2 (antes alto fijo de 128/144px, que recortaba el paisaje), foto centrada y degradado oscuro
+     en el 40 % inferior para que el nombre se lea tambien sobre fotos claras. */
+  .hx-grid .hx-dest{height:auto;aspect-ratio:3/2}
+  .hx-grid .hx-dest img{object-fit:cover;object-position:center}
+  .hx-grid .hx-dest::after{background:linear-gradient(to top,rgba(0,0,0,.8),transparent 50%)}
+  .hx-grid .hx-dest{transition:transform .2s ease,box-shadow .2s ease}
+  .hx-grid .hx-dest:hover{transform:scale(1.03);box-shadow:0 12px 28px rgba(10,30,70,.28)}
+  .hx-grid .hx-dest:hover img{transform:none}
+  .hx-grid .hx-dest span{padding:14px;font-size:16px;font-weight:700}
+  .hx-grid .hx-dest small{margin-top:2px;font-size:12px;font-weight:400;color:rgba(255,255,255,.8)}
+  .hx-grid .hx-dest:nth-child(5){display:none}
+  @media (min-width:1024px){
+    /* Cabecera de 65px con sombra sutil */
+    html[data-pagina="home"] .tabs{height:65px;box-sizing:border-box;padding-top:0;padding-bottom:0;align-items:center;border-bottom:0;box-shadow:0 1px 8px rgba(10,30,70,.08)}
+    /* Portada: 380px de alto, velo uniforme del 30 %; las tarjetas montadas 40px sobre su borde inferior (sin hueco). */
+    html[data-pagina="home"] .hx .hx-hero{height:380px;align-items:stretch;overflow:visible}
+    html[data-pagina="home"] .hx .hx-hero__bg{background-position:50% 48%}   /* recorta cielo por arriba, conserva morro y playa */
+    html[data-pagina="home"] .hx .hx-hero__bg::after{background:rgba(0,0,0,.3)}
+    html[data-pagina="home"] .hx .hx-hero__in{display:flex;flex-direction:column;padding:34px 0 0}
+    html[data-pagina="home"] .hx .hx-hero__txt{display:flex;flex-direction:column;flex:1;min-height:0}
+    html[data-pagina="home"] .hx .hx-hero h1{margin:0 0 6px;font-size:48px;line-height:1.1}
+    html[data-pagina="home"] .hx .hx-hero__sub{margin:0;font-size:18px;color:rgba(255,255,255,.9)}
+    html[data-pagina="home"] .hx .hx-hero .m-cards{margin:auto 0 -40px;gap:20px}
+    html[data-pagina="home"] .hx .hx-hero .m-card{height:180px;box-sizing:border-box;padding:18px 26px;column-gap:18px;align-content:center;align-items:center;border-radius:16px;background:#fff;box-shadow:0 14px 36px rgba(10,30,70,.2),0 2px 6px rgba(10,30,70,.08)}
+    html[data-pagina="home"] .hx .hx-hero .m-card__icon{width:48px;height:48px;align-self:center}
+    html[data-pagina="home"] .hx .hx-hero .m-card__icon svg{width:24px;height:24px}
+    html[data-pagina="home"] .hx .hx-hero .m-card__txt b{font-size:20px;color:#0B1F3A}
+    html[data-pagina="home"] .hx .hx-hero .m-card__txt small{margin:2px 0 12px;font-size:14px;color:var(--hx-gray)}
+    html[data-pagina="home"] .hx .hx-hero .m-card__cta{justify-content:center;min-width:180px;height:45px;min-height:45px;padding:0 20px;background:#F5C518;color:#0B1F3A}
+    html[data-pagina="home"] .hx .hx-hero .m-card__tag{display:none}
+    /* lo que queda debajo de las tarjetas respeta esos 40px de superposicion */
+    html[data-pagina="home"] .hx .hx-sec{padding-top:64px}
+    /* destinos: 5 tarjetas de ~220 x 160 en un contenedor de 1200px */
+    html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:160px;aspect-ratio:auto}
+    /* footer de 80px, siempre al pie de la ventana (antes quedaba un hueco vacio debajo en pantallas altas) */
+    html[data-pagina="home"] .hx .hx-foot{box-sizing:border-box;min-height:80px;margin-top:auto}
+    html[data-pagina="home"] .hx{display:flex;flex-direction:column;min-height:calc(100vh - 65px - var(--hx-pb,0px));min-height:calc(100dvh - 65px - var(--hx-pb,0px))}
+  }
+
+
+  /* ---- Escritorio: contenedor de 1200px, tarjetas compactas y portada protagonista ----
+     Contenedor de --hx-col (1200px). Las dos tarjetas de la portada tienen un ancho maximo propio (540px), repartidas a los
+     lados, asi no se estiran ni tapan la foto: entre ellas y alrededor se ve el paisaje. Destinos populares: 5 tarjetas de ~220px. */
+  @media (min-width:768px){
+    html[data-pagina="home"] .hx{--hx-col:1200px}
+    html[data-pagina="home"] .hx .hx-hero__in,html[data-pagina="home"] .hx .hx-foot__in{max-width:var(--hx-col)}
+    html[data-pagina="home"] .hx .hx-sec,html[data-pagina="home"] .hx .hx-how{width:100%;max-width:var(--hx-col);margin-left:auto;margin-right:auto;box-sizing:border-box}
+  }
+  @media (min-width:1024px){
+    html[data-pagina="home"] .hx .hx-hero{height:clamp(300px,44vh,360px)}
+    html[data-pagina="home"] .hx .hx-hero__in{padding:clamp(20px,4vh,36px) 0 0}
+    html[data-pagina="home"] .hx .hx-hero h1{font-size:36px}
+    html[data-pagina="home"] .hx .hx-hero__sub{font-size:16px}
+    html[data-pagina="home"] .hx .hx-hero .m-cards{grid-template-columns:repeat(2,minmax(0,540px));justify-content:space-between;margin:auto 0 -40px;gap:24px}
+    html[data-pagina="home"] .hx .hx-hero .m-card{height:auto;min-height:0;padding:14px 22px;row-gap:8px;align-content:center;background:rgba(255,255,255,.94)}
+    html[data-pagina="home"] .hx .hx-hero .m-card .m-card__cta{width:260px;min-width:260px;padding:0 24px;justify-content:center;text-align:center;color:#000!important;background:#F5C518;border:0}
+    html[data-pagina="home"] .hx .hx-hero .m-card .m-card__cta svg{color:#000}
+    html[data-pagina="home"][data-theme="night"] .hx .hx-hero .m-card{background:rgba(15,23,36,.84)}
+    html[data-pagina="home"] .hx .hx-sec{padding-top:clamp(44px,6vh,56px)}
+    html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:150px;aspect-ratio:auto}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest span{padding:12px 14px;font-size:15px}
+  }
+
+  /* ---- Ajustes de proporcion y legibilidad de la home ---- */
+  /* fila "Destinos populares / Ver todos": mismo eje y misma altura de linea, para que queden nivelados */
+  .hx-sec__h h2,.hx-more{line-height:1.2}
+  .hx-more{display:inline-flex;align-items:center}
+  .hx-foot .hx-cookies{border:0;background:transparent;padding:0;font-family:var(--fb);font-size:14px;font-weight:600;color:#fff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
+  /* celular: tarjetas bien separadas, mas aire a los lados y menos hueco antes de "Destinos populares" */
+  @media (max-width:767px){[data-pagina="home"] .m-cards{gap:16px}.hx-sec{padding-top:8px}}
+  .m-card{padding:16px 18px}
+  /* destinos: degradado un poco mas largo para que el nombre se lea tambien sobre fotos claras (espuma, cielo) */
+  .hx-grid .hx-dest::after{background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.4) 40%,transparent 65%)}
+  @media (min-width:1024px){
+  }
+  /* Barra inferior */
+  .tabs{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;padding:8px 8px 22px;background:var(--surface);border-top:1px solid var(--line)}
+  .tabs__menu{display:none}
+  .tabs__lt small{display:none}
+  .tabs__lt b{font-weight:800}
+  .tabs__logo{display:none;align-items:center;gap:7px;padding-left:16px;font-family:var(--fh);font-weight:800;font-size:19px;color:var(--ink)}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 7px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:11.5px;font-weight:600;cursor:pointer;position:relative}
+  .tab svg{width:24px;height:24px}
+  .tab.is-on{color:var(--ink)}
+  .tab.is-on::after{content:"";position:absolute;bottom:0;width:28px;height:3px;border-radius:2px;background:var(--accent)}
+  .tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px;border-radius:10px}
+  .home-bar{position:absolute;bottom:7px;left:50%;width:120px;height:4px;margin-left:-60px;border-radius:2px;background:var(--ink)}
+
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+<link rel="stylesheet" href="layout.css">
+<style>
+  /* ==========================================================
+     home2: capa de "game feel" (solo maqueta local, no se publica).
+     Todo lo nuevo usa el prefijo g- o va en este bloque.
+     ========================================================== */
+  @keyframes g-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes g-pop{0%{opacity:0;transform:scale(.4) rotate(-20deg)}70%{opacity:1;transform:scale(1.12) rotate(-8deg)}100%{transform:scale(1) rotate(-8deg)}}
+  @keyframes g-chip{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.1)}100%{opacity:1;transform:scale(1)}}
+  @keyframes g-shine{from{transform:translateX(-140%) skewX(-20deg)}to{transform:translateX(320%) skewX(-20deg)}}
+  @keyframes g-shine2{from{transform:translateX(-140%) skewX(-20deg)}to{transform:translateX(320%) skewX(-20deg)}}
+  @keyframes g-wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg) scale(1.08)}60%{transform:rotate(8deg) scale(1.08)}}
+  @keyframes g-ripple{to{transform:scale(1);opacity:0}}
+  @keyframes g-burst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.4)}}
+  @keyframes g-check{0%{transform:scale(.5)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+  /* Entrada escalonada */
+  .g-anim .g-in{animation:g-up .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)}
+
+  /* Tarjetas de los dos caminos: se hunden al tocar, el icono saluda, el boton brilla */
+  .m-card{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+  .m-card:active{transform:scale(.97)!important;transition-duration:.08s}
+  .m-card:hover .m-card__icon{animation:g-wiggle .5s ease}
+  .m-card__cta{position:relative;overflow:hidden}
+  .m-card__cta::after{content:"";position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);transform:translateX(-140%) skewX(-20deg);pointer-events:none}
+  .m-card--main .m-card__cta::after{animation:g-shine 1.1s ease 1.3s 1}
+  .m-card:hover .m-card__cta::after{animation:g-shine2 .7s ease}
+
+  /* Ripple dorado donde se toca */
+  .g-rip{position:absolute;width:var(--s);height:var(--s);left:var(--l);top:var(--t);border-radius:50%;background:rgba(245,197,24,.35);transform:scale(0);opacity:1;pointer-events:none;animation:g-ripple .55s ease-out forwards;z-index:2}
+
+  /* Destinos: precio en pastilla que aparece con rebote, sello de "mas elegido" */
+  .hx-grid .hx-dest:active{transform:scale(.97)}
+  .hx-dest em{display:inline-block!important;width:fit-content;margin-top:6px!important;padding:3px 9px;border-radius:99px;background:#F5C518;color:#0B1F3A!important;font-size:12px;text-shadow:none;animation:g-chip .4s cubic-bezier(.2,.8,.2,1) both}
+  .g-sello{position:absolute;top:8px;right:8px;z-index:2;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;border:2px dashed #0B1F3A;background:#F5C518;color:#0B1F3A;font-size:9px;font-weight:800;line-height:1.05;letter-spacing:.04em;text-align:center;text-transform:uppercase;box-shadow:0 0 0 3px #F5C518,0 4px 10px rgba(0,0,0,.3);transform:rotate(-8deg);animation:g-pop .5s cubic-bezier(.2,.8,.2,1) .9s both}
+
+  @media (max-width:767px){.g-sello{top:8px;left:8px;right:auto;width:auto;height:auto;padding:4px 8px;border-width:1.5px;border-radius:8px;font-size:9px;box-shadow:0 0 0 2px #F5C518,0 3px 8px rgba(0,0,0,.3)}.g-sello br{display:none}}
+
+  /* Ruta en 3 pasos: el avion recorre la linea y cada paso se marca al pasar */
+  .g-ruta{padding-top:28px!important}
+  .g-pasos{position:relative;display:grid;grid-template-columns:repeat(3,1fr);margin:0;padding:6px 0 0;list-style:none;text-align:center}
+  .g-linea{position:absolute;top:24px;left:16.66%;right:16.66%;height:3px;border-radius:2px;background:repeating-linear-gradient(90deg,var(--line) 0 8px,transparent 8px 14px)}
+  .g-linea i{position:absolute;inset:0 auto 0 0;width:0;border-radius:2px;background:#F5C518;transition:width 1.8s cubic-bezier(.5,0,.25,1)}
+  .g-avion{position:absolute;top:10px;left:16.66%;z-index:2;width:30px;height:30px;margin-left:-15px;color:var(--ink);transition:left 1.8s cubic-bezier(.5,0,.25,1)}
+  .g-avion svg{width:30px;height:30px;transform:rotate(90deg)}
+  .g-ruta.is-on .g-linea i{width:100%}
+  .g-ruta.is-on .g-avion{left:83.33%}
+  .g-ruta.is-fin .g-avion{opacity:0;transform:translateY(-14px) scale(.6);transition:left 1.8s cubic-bezier(.5,0,.25,1),opacity .35s ease,transform .35s ease}
+  .g-paso{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:0 4px}
+  .g-paso__n{display:grid;place-items:center;width:38px;height:38px;margin-bottom:8px;border-radius:50%;background:var(--surface,#fff);border:2px solid var(--line);color:var(--ink2);font-family:var(--fh);font-size:16px;font-weight:800;transition:background-color .25s,border-color .25s,color .25s}
+  .g-paso.is-ok .g-paso__n{background:#F5C518;border-color:#F5C518;color:#0B1F3A;animation:g-check .35s ease}
+  .g-paso b{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--ink)}
+  .g-paso small{margin-top:2px;font-size:11.5px;line-height:1.35;color:var(--ink2)}
+  @media (min-width:768px){.g-paso b{font-size:16px}.g-paso small{font-size:13px}}
+  .g-chispa{position:absolute;top:19px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;pointer-events:none;animation:g-burst .7s ease-out forwards}
+
+  /* ---- Mi alcancía de viaje ---- */
+  .ah{max-width:640px;margin:0 auto;padding:4px 0 24px}
+  .ah [hidden]{display:none!important}
+  .ah-eye{margin:14px 0 8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B8860B}
+  .ah-h{margin:0 0 8px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.2;letter-spacing:-.02em;color:var(--hx-navy)}
+  .ah-h em{font-style:normal;background:linear-gradient(transparent 62%,#F5C518 62% 92%,transparent 92%)}
+  .ah-lead{margin:0 0 16px;font-size:14px;line-height:1.5;color:var(--ink2)}
+  .ah-card{margin:0 0 14px;padding:16px;border-radius:18px;background:var(--surface,#fff);border:2px solid #0B1F3A;box-shadow:5px 5px 0 #0B1F3A}
+  .ah-lab{margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .ah-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+  #ah-mes .ah-chip{text-transform:capitalize}
+  .ah-chip{padding:9px 14px;border:2px solid var(--line);border-radius:99px;background:var(--surface,#fff);color:var(--ink);font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;transition:transform .1s,background-color .15s,border-color .15s}
+  .ah-chip:hover{border-color:#F5C518}
+  .ah-chip:active{transform:scale(.94)}
+  .ah-chip.is-on{background:#F5C518;border-color:#F5C518;color:#0B1F3A}
+  .ah-chip:focus-visible,.ah-btn:focus-visible,.ah-step button:focus-visible,.ah-acc button:focus-visible,.ah-reservar:focus-visible,.ah-otro input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .ah-params{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px;padding:12px 0;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line)}
+  .ah-step{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--ink2)}
+  .ah-step div{display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .ah-step b{min-width:2ch;text-align:center;font-family:var(--fh);font-size:22px;font-weight:800;color:var(--hx-navy)}
+  .ah-step button{width:40px;height:40px;border-radius:50%;border:2px solid #0B1F3A;background:#F5C518;color:#0B1F3A;font-size:22px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 2px 0 #0B1F3A;-webkit-tap-highlight-color:transparent}
+  .ah-step button:active{transform:translateY(2px);box-shadow:none}
+  .ah-step button:disabled{opacity:.35;cursor:default;box-shadow:none}
+  .ah-meta{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
+  .ah-meta span{font-size:13px;color:var(--ink2)}
+  .ah-meta b{font-family:var(--fh);font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--hx-navy)}
+  .ah-btn{display:block;width:100%;padding:16px;border:0;border-radius:14px;background:#F5C518;color:#0B1F3A;text-align:center;font-family:var(--fh);font-size:16px;font-weight:800;cursor:pointer;box-shadow:4px 4px 0 #0B1F3A;transition:transform .1s,box-shadow .1s}
+  .ah-btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #0B1F3A}
+  .ah-btn:disabled{background:var(--line);color:var(--ink2);box-shadow:none;cursor:default}
+  .ah-btn--s{width:auto;padding:12px 18px;font-size:14px}
+
+  .ah-viaje{margin:0 0 12px;font-family:var(--fh);font-size:15px;font-weight:700;color:var(--hx-navy)}
+  .ah-hero{display:flex;align-items:center;gap:18px;margin:0 0 14px}
+  .ah-valija{flex:none;width:132px}
+  .ah-valija__asa{width:44px;height:16px;margin:0 auto -2px;border:4px solid #0B1F3A;border-bottom:0;border-radius:10px 10px 0 0}
+  .ah-valija__cuerpo{position:relative;height:112px;border:4px solid #0B1F3A;border-radius:16px;background:var(--surface,#fff);overflow:hidden;box-shadow:5px 5px 0 #0B1F3A;display:grid;place-items:center}
+  .ah-valija__cuerpo i{position:absolute;left:0;right:0;bottom:0;height:0;background:#F5C518;transition:height .7s cubic-bezier(.2,.8,.2,1)}
+  .ah-valija__cuerpo i::before{content:"";position:absolute;left:-10%;right:-10%;top:-7px;height:14px;border-radius:50%;background:#F5C518}
+  .ah-valija__cuerpo span{position:relative;font-family:var(--fh);font-size:28px;font-weight:800;color:#0B1F3A}
+  .ah-cifras p{margin:0;font-size:13px;color:var(--ink2)}
+  .ah-cifras b{display:block;font-family:var(--fh);font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--hx-navy)}
+  .ah-cifras strong{color:var(--hx-navy)}
+  .ah-falta{margin-top:6px!important;font-weight:700}
+  .ah-plan{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+  .ah-plan div{padding:12px;border-radius:14px;background:#FBE7B0;color:#3A2C05;text-align:center;font-size:12px;font-weight:600}
+  .ah-plan b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;color:#0B1F3A}
+  .ah-plan p{grid-column:1/-1;margin:0;font-size:13px;color:var(--ink2)}
+  .ah-hitos{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 12px;padding:0;list-style:none}
+  .ah-hitos li{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:10.5px;font-weight:700;color:var(--ink2)}
+  .ah-hitos i{display:block;width:100%;height:8px;border-radius:4px;background:var(--line);transition:background-color .3s}
+  .ah-hitos li.is-ok{color:var(--hx-navy)}
+  .ah-hitos li.is-ok i{background:#F5C518}
+  .ah-aviso{margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#0B1F3A;color:#fff;font-size:14px;font-weight:700;text-align:center;animation:g-up .35s ease both}
+  .ah-aporte{position:relative}
+  .ah-otro{display:flex;align-items:center;gap:8px}
+  .ah-otro__l{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .ah-otro input{flex:1;min-width:0;padding:12px;border:2px solid var(--line);border-radius:12px;background:var(--surface,#fff);color:var(--ink);font-family:var(--fb);font-size:16px}
+  .ah-reservar{display:block;margin:0 0 14px;padding:16px;border-radius:14px;background:#0B1F3A;color:#fff;text-align:center;font-family:var(--fh);font-size:16px;font-weight:800;text-decoration:none;animation:g-up .4s ease both}
+  .ah-hist ul{margin:0 0 14px;padding:0;list-style:none}
+  .ah-hist li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink)}
+  .ah-hist li span{color:var(--ink2);font-size:12.5px}
+  .ah-hist li button{border:0;background:transparent;color:var(--ink2);font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer}
+  .ah-vacio{color:var(--ink2);font-size:13px}
+  .ah-acc{display:flex;flex-direction:column;gap:6px;align-items:center;margin:0 0 14px}
+  .ah-acc button{border:0;background:transparent;color:var(--hx-navy);font-family:var(--fb);font-size:14px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px}
+  .ah-nota{margin:0;padding:12px 14px;border-radius:12px;background:var(--surface,#fff);border:1px dashed var(--line);font-size:12.5px;line-height:1.5;color:var(--ink2)}
+  .ah-chips--fin{margin-bottom:0}
+  .ah-meta small{font-size:12.5px;line-height:1.45;color:var(--ink2)}
+  .ah-fuente{margin:-6px 0 14px;font-size:12px;line-height:1.45;color:var(--ink2)}
+  .ah-periodo{margin:0 0 14px;padding:14px;border-radius:16px;border:2px solid var(--line);background:var(--surface,#fff)}
+  .ah-periodo h3{margin:0 0 4px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--hx-navy)}
+  .ah-periodo p{margin:0 0 10px;font-size:13px;line-height:1.45;color:var(--ink2)}
+  .ah-periodo p:last-child{margin-bottom:0}
+  .ah-periodo .ah-pb{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:0 0 10px}
+  .ah-periodo .ah-pb i{display:block;height:100%;border-radius:6px;background:#F5C518;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .ah-periodo.is-ok{border-color:#0B1F3A;background:#FBE7B0;box-shadow:4px 4px 0 #0B1F3A}
+  .ah-periodo.is-ok h3{color:#3A2C05}
+  .ah-periodo.is-ok p{color:#3A2C05}
+  .ah-periodo.is-ok .ah-pb{background:rgba(11,31,58,.15)}
+  .ah-periodo.is-ok .ah-pb i{background:#0B1F3A}
+  .ah-extra{display:inline-block;padding:3px 10px;border-radius:99px;background:#0B1F3A;color:#fff;font-size:12px;font-weight:800}
+  .ah-guardado{margin:0 0 6px;text-align:center;font-size:12.5px;color:var(--ink2)}
+  .ah-guardado button{border:0;background:transparent;padding:0;font:inherit;font-weight:800;color:var(--hx-navy);text-decoration:underline;cursor:pointer}
+  .g-bote{animation:g-check .35s ease}
+  @media (prefers-reduced-motion:reduce){
+    .g-bote,.ah-aviso,.ah-reservar{animation:none!important}
+    .ah-valija__cuerpo i,.ah-hitos i{transition:none!important}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .g-anim .g-in,.m-card--main .m-card__cta::after,.m-card:hover .m-card__cta::after,.m-card:hover .m-card__icon,.g-sello,.hx-dest em,.g-paso.is-ok .g-paso__n{animation:none!important}
+    .g-linea i,.g-avion{transition:none!important}
+    .g-rip,.g-chispa{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span>
+    <span class="status__icons" aria-hidden="true">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="22" height="11" rx="3.5"/><rect x="2.5" y="2.5" width="18" height="7" rx="2" fill="currentColor" stroke="none"/><path d="M24.5 4v4" stroke-linecap="round"/></svg>
+    </span>
+  </div>
+
+  <div class="scroll">
+    <div class="hx">
+    <header class="m-head hx-head">
+      <div>
+        <div class="m-logo"><svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg> cuántosale</div>
+      </div>
+      <span class="m-head__r"><span data-slot-moneda></span><button type="button" class="m-menu" aria-label="Menú"><span></span><span></span><span></span></button></span>
+    </header>
+
+    <main class="ah" id="ah">
+      <p class="ah-eye">Mi alcancía de viaje</p>
+
+      <!-- Paso 1: crear la meta -->
+      <section id="ah-nueva" hidden>
+        <h1 class="ah-h">Juntá para tu viaje, <em>de a poquito</em>.</h1>
+        <p class="ah-lead">Elegí el viaje y te decimos cuánto cuesta entero, con el vuelo a precio real, y cuánto juntar para llegar.</p>
+
+        <div class="ah-card">
+          <p class="ah-lab">¿A dónde?</p>
+          <div class="ah-chips" id="ah-dest" role="group" aria-label="Destino"></div>
+          <div class="ah-params">
+            <div class="ah-step" role="group" aria-label="Cantidad de personas"><span>Personas</span><div><button type="button" data-p="pax" data-d="-1" aria-label="Una persona menos">−</button><b id="ah-pax" aria-live="polite">2</b><button type="button" data-p="pax" data-d="1" aria-label="Una persona más">+</button></div></div>
+            <div class="ah-step" role="group" aria-label="Cantidad de noches"><span>Noches</span><div><button type="button" data-p="noches" data-d="-1" aria-label="Una noche menos">−</button><b id="ah-noches" aria-live="polite">7</b><button type="button" data-p="noches" data-d="1" aria-label="Una noche más">+</button></div></div>
+          </div>
+          <p class="ah-lab">¿Cuándo viajás?</p>
+          <div class="ah-chips" id="ah-mes" role="group" aria-label="Mes del viaje"></div>
+          <p class="ah-lab">¿Qué tipo de viaje?</p>
+          <div class="ah-chips" id="ah-estilo" role="group" aria-label="Tipo de viaje"></div>
+          <p class="ah-lab">¿Cada cuánto querés juntar?</p>
+          <div class="ah-chips ah-chips--fin" id="ah-ritmo" role="group" aria-label="Ritmo de ahorro"></div>
+        </div>
+
+        <div class="ah-meta" aria-live="polite"><span>La meta del viaje</span><b id="ah-meta-n">Elegí un destino</b><small id="ah-base"></small></div>
+        <button type="button" class="ah-btn" id="ah-crear" disabled>Crear mi alcancía</button>
+      </section>
+
+      <!-- Paso 2: la alcancia viva -->
+      <section id="ah-viva" hidden>
+        <p class="ah-viaje" id="ah-viaje"></p>
+
+        <div class="ah-hero">
+          <div class="ah-valija" aria-hidden="true"><div class="ah-valija__asa"></div><div class="ah-valija__cuerpo"><i id="ah-fill"></i><span id="ah-pct">0%</span></div></div>
+          <div class="ah-cifras">
+            <p>Juntaste</p><b id="ah-juntado">—</b>
+            <p>de <strong id="ah-metaviva">—</strong></p>
+            <p class="ah-falta" id="ah-falta"></p>
+          </div>
+        </div>
+        <p class="ah-fuente" id="ah-fuente"></p>
+
+        <div class="ah-periodo" id="ah-periodo" aria-live="polite"></div>
+
+        <ol class="ah-hitos" id="ah-hitos" aria-label="Hitos del ahorro">
+          <li data-p="25"><i></i>Primer cuarto</li><li data-p="50"><i></i>Mitad del viaje</li><li data-p="75"><i></i>Casi listo</li><li data-p="100"><i></i>A reservar</li>
+        </ol>
+        <p class="ah-aviso" id="ah-aviso" role="status" aria-live="polite" hidden></p>
+
+        <div class="ah-card ah-aporte">
+          <p class="ah-lab">Anotar lo que ahorraste</p>
+          <div class="ah-chips" id="ah-rapidos" role="group" aria-label="Montos rápidos"></div>
+          <form class="ah-otro" id="ah-form">
+            <label class="ah-otro__l" for="ah-monto">Otro monto</label>
+            <input id="ah-monto" type="number" inputmode="decimal" min="1" step="any" placeholder="Monto">
+            <button type="submit" class="ah-btn ah-btn--s">Anotar</button>
+          </form>
+        </div>
+
+        <a class="ah-reservar" id="ah-reservar" href="home-destino.html?fuente=alcancia" hidden>Ya llegaste. Reservar mi viaje →</a>
+
+        <div class="ah-hist"><p class="ah-lab">Tus aportes</p><ul id="ah-lista"></ul></div>
+
+        <p class="ah-guardado" id="ah-guardado"></p>
+        <div class="ah-acc">
+          <button type="button" id="ah-act">Actualizar el precio del viaje</button>
+          <button type="button" id="ah-cambiar">Cambiar mi meta</button>
+        </div>
+      </section>
+
+      <p class="ah-nota">Esta plata no pasa por CuántoSale: la ahorrás en tu banco o donde quieras y acá solo anotás cuánto llevás.</p>
+    </main>
+
+    <footer class="hx-foot">
+      <div class="hx-foot__in">
+        <div class="hx-foot__brand">
+          <a class="hx-foot__logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span><b>cuántosale</b><small>Viajá tranquilo.</small></span></a>
+          <p>Calculá tu viaje completo y viajá con los números claros.</p>
+        </div>
+        <nav aria-label="Información">
+          <a href="home-guias.html?fuente=footer">Destinos</a>
+          <a href="https://wa.me/59898529851" target="_blank" rel="noopener">Contacto</a>
+          <a href="/privacidad">Privacidad</a>
+          <a href="/terminos">Términos</a>
+          <button type="button" class="hx-cookies" onclick="window.csConsentimiento&&csConsentimiento.abrir()">Preferencias de cookies</button>
+        </nav>
+        <small class="hx-foot__legal">© 2026 CuántoSale · Los precios son estimaciones y pueden variar.</small>
+      </div>
+    </footer>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Navegación principal">
+    <span class="tabs__logo" aria-hidden="true"><svg width="20" height="24" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span class="tabs__lt"><b>cuántosale</b><small>Tu viaje, sin sorpresas</small></span></span>
+    <button type="button" class="tab is-on" data-evento="home_tab" data-tab="inicio" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5z"/></svg>Inicio</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="destinos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Destinos</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>Guardados</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Perfil</button>
+    <span class="tabs__sep" aria-hidden="true"></span>
+    <span class="tabs__mon" data-slot-moneda></span>
+    <button type="button" class="tabs__menu" data-perfil data-evento="home_menu" aria-label="Abrir el menú de la cuenta"><span></span><span></span><span></span></button>
+    <span class="home-bar" aria-hidden="true"></span>
+  </nav>
+</div>
+<script>window.mockTrack = function () {}; /* home2: sin medicion */</script>
+<script>
+(function () {
+  if (window.CSMoneda) document.querySelectorAll('[data-slot-moneda]').forEach(function (h) { h.appendChild(CSMoneda.selector()); });
+  document.addEventListener('click', function (e) {
+    var u = e.target.closest('.m-menu'); if (u && window.CSCuenta) { window.CSCuenta.abrir('menu'); return; }
+    var t = e.target.closest('.tab'); if (t && (t.dataset.tab === 'inicio' || t.dataset.tab === 'destinos')) {
+      location.href = t.dataset.tab === 'inicio' ? 'home-dos-caminos.html' : 'home-guias.html?fuente=home_tab_destinos';
+    }
+  });
+})();
+</script>
+<script>
+/* Mi alcancia de viaje: un contador. La plata no pasa por CuantoSale; solo se anota lo ahorrado.
+   - La meta sale de /api/cotizar: el vuelo con tarifa real (Google Flights) cuando existe; alojamiento, comidas y
+     traslados son estimaciones del modelo de la app, y asi se le dice a la persona.
+   - Todo se guarda en USD (como el resto de la app) y se muestra en la moneda elegida.
+   - Se guarda en la cuenta (user_metadata) si hay sesion, y en este dispositivo siempre (ver cuenta.js). */
+(function () {
+  var KEY = 'cs_alcancia_v1', quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var D = [['rio', 'Río de Janeiro'], ['fln', 'Florianópolis'], ['buz', 'Búzios'], ['bcm', 'Balneário Camboriú'], ['bombinhas', 'Bombinhas']];
+  var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var ESTILOS = [['ahorro', 'Ahorro'], ['eq', 'Equilibrado'], ['comodo', 'Cómodo']];
+  var RITMOS = [['mes', 'Por mes'], ['semana', 'Por semana']];
+  var LIM = { pax: [1, 8], noches: [2, 21] };
+  var DIA = 864e5;
+  var $ = function (id) { return document.getElementById(id); };
+  var fm = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  var nomMes = function (ym) { var p = ym.split('-'); return MESES[+p[1] - 1] + ' de ' + p[0]; };
+  var nomDest = function (k) { var o = D.filter(function (d) { return d[0] === k; })[0]; return o ? o[1] : k; };
+  var C = function () { return window.CSCuenta && CSCuenta.alcancia ? CSCuenta.alcancia : null; };
+
+  /* ---------- guardado ---------- */
+  function leerLocal() { try { var j = JSON.parse(localStorage.getItem(KEY)); return j && j.dest && j.meta > 0 ? j : null; } catch (e) { return null; } }
+  function leer() { var c = C(); return (c && c.leer()) || leerLocal(); }
+  var sesion = false, errGuardado = false;
+  function guardar(a) {
+    try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) { /* modo privado */ }
+    var c = C(); if (!c) return;
+    errGuardado = false;
+    c.guardar(a).then(function () { pintarGuardado(); }, function () { errGuardado = true; pintarGuardado(); });
+  }
+  function pintarGuardado() {
+    var u = window.CSCuenta && CSCuenta.usuario && CSCuenta.usuario(); sesion = !!u;
+    var el = $('ah-guardado'); if (!el) return;
+    if (errGuardado) el.textContent = 'No pudimos guardarla en tu cuenta ahora. Quedó en este dispositivo.';
+    else if (sesion) el.textContent = 'Guardada en tu cuenta: la ves desde cualquier dispositivo.';
+    else { el.innerHTML = 'Guardada solo en este dispositivo. <button type="button" id="ah-login">Iniciá sesión</button> para no perderla.'; }
+  }
+  var A = leer();                                                  /* la alcancia guardada */
+  var F = { dest: null, pax: 2, noches: 7, mes: null, estilo: 'eq', ritmo: 'mes', meta: 0, base: null };   /* el formulario */
+
+  /* ---------- meta: cotizacion de la app (vuelo real cuando hay tarifa) ---------- */
+  var gen = 0, cache = {};
+  function traerMeta(dest, pax, noches, mes, estilo) {
+    var k = [dest, pax, noches, mes, estilo].join('|'); if (cache[k]) return Promise.resolve(cache[k]);
+    var dep = new Date(mes + '-15T00:00:00'), ret = new Date(dep); ret.setDate(ret.getDate() + noches);
+    var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 40000);
+    var q = new URLSearchParams({ dest: dest, dep: iso(dep), ret: iso(ret), pax: String(pax), budget: '0', style: estilo, transport: 'flight' });
+    return fetch('/api/cotizar?' + q.toString(), ctl ? { signal: ctl.signal } : {})
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'http'); return j; }); })
+      .then(function (j) {
+        var vuelos = (j.list || []).filter(function (p) { return p.mode === 'avion_mvd'; });
+        var p = vuelos.filter(function (x) { return x.id === j.recId; })[0] || vuelos.sort(function (a, b) { return a.total - b.total; })[0];
+        if (!p || !(p.total > 0)) throw new Error('vacio');
+        var r = { meta: Math.round(p.total), base: { pasajes: (p.sources && p.sources.pasajes) === 'real' ? 'real' : 'estimado', aerolinea: p.quote && p.quote.airline || '', t: Date.now() } };
+        cache[k] = r; return r;
+      })
+      .then(function (v) { clearTimeout(tm); return v; }, function (e) { clearTimeout(tm); throw e; });
+  }
+  function textoBase(b) {
+    if (!b) return '';
+    return b.pasajes === 'real'
+      ? 'Vuelo a precio real' + (b.aerolinea ? ' (' + b.aerolinea + ')' : '') + '. Alojamiento, comidas y traslados son estimaciones de CuántoSale.'
+      : 'Todavía no hay tarifa real de vuelo para esas fechas: usamos una estimación. Alojamiento, comidas y traslados también son estimados.';
+  }
+
+  /* ---------- formulario ---------- */
+  function mesesLista() { var o = [], h = new Date(); for (var i = 1; i <= 12; i++) { var d = new Date(h.getFullYear(), h.getMonth() + i, 1); o.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')); } return o; }
+  function chip(txt, v, on) { var b = document.createElement('button'); b.type = 'button'; b.className = 'ah-chip' + (on ? ' is-on' : ''); b.dataset.v = v; b.setAttribute('aria-pressed', !!on); b.textContent = txt; return b; }
+  function llenar(id, lista, sel) { var el = $(id); el.innerHTML = ''; lista.forEach(function (o) { el.appendChild(chip(o[1], o[0], sel === o[0])); }); }
+  function pintarForm() {
+    llenar('ah-dest', D, F.dest);
+    llenar('ah-mes', mesesLista().map(function (m) { var p = m.split('-'); return [m, MESES[+p[1] - 1].slice(0, 3) + ' ' + p[0].slice(2)]; }), F.mes);
+    llenar('ah-estilo', ESTILOS, F.estilo); llenar('ah-ritmo', RITMOS, F.ritmo);
+    $('ah-pax').textContent = F.pax; $('ah-noches').textContent = F.noches;
+    document.querySelectorAll('.ah-step button').forEach(function (b) { var k = b.dataset.p, d = +b.dataset.d; b.disabled = (F[k] + d < LIM[k][0] || F[k] + d > LIM[k][1]); });
+    $('ah-crear').disabled = !(F.meta > 0);
+    $('ah-base').textContent = F.meta > 0 ? textoBase(F.base) : '';
+  }
+  var deb = null;
+  function recalcular() {
+    F.meta = 0; F.base = null; pintarForm();
+    if (!F.dest || !F.mes) { $('ah-meta-n').textContent = !F.dest ? 'Elegí un destino' : 'Elegí el mes'; return; }
+    $('ah-meta-n').textContent = 'Buscando el vuelo real…';
+    var mia = ++gen;
+    traerMeta(F.dest, F.pax, F.noches, F.mes, F.estilo).then(function (r) {
+      if (mia !== gen) return; F.meta = r.meta; F.base = r.base; $('ah-meta-n').textContent = fm(r.meta); pintarForm();
+    }, function () { if (mia !== gen) return; $('ah-meta-n').textContent = 'No pudimos calcularlo ahora. Probá de nuevo.'; });
+  }
+  function cambio() { clearTimeout(deb); F.meta = 0; F.base = null; pintarForm(); deb = setTimeout(recalcular, 900); }
+  [['ah-dest', 'dest'], ['ah-mes', 'mes'], ['ah-estilo', 'estilo']].forEach(function (p) {
+    $(p[0]).addEventListener('click', function (e) { var c = e.target.closest('.ah-chip'); if (c) { F[p[1]] = c.dataset.v; cambio(); } });
+  });
+  $('ah-ritmo').addEventListener('click', function (e) { var c = e.target.closest('.ah-chip'); if (c) { F.ritmo = c.dataset.v; pintarForm(); } });
+  document.querySelector('.ah-params').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled) return;
+    var k = b.dataset.p; F[k] = Math.min(LIM[k][1], Math.max(LIM[k][0], F[k] + (+b.dataset.d))); cambio();
+  });
+  $('ah-crear').addEventListener('click', function () {
+    if (!(F.meta > 0)) return;
+    var previos = A ? A.aportes : [];
+    A = { dest: F.dest, destName: nomDest(F.dest), pax: F.pax, noches: F.noches, mes: F.mes, estilo: F.estilo, ritmo: F.ritmo, meta: F.meta, base: F.base, aportes: previos || [], creada: Date.now() };
+    guardar(A); mostrar();
+  });
+
+  /* ---------- periodos: cuota fija dentro de la semana o del mes ---------- */
+  function inicioPeriodo(d) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    if (A.ritmo === 'semana') { x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }   /* lunes */
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  }
+  function finPeriodo(ini) { return A.ritmo === 'semana' ? new Date(ini.getFullYear(), ini.getMonth(), ini.getDate() + 7) : new Date(ini.getFullYear(), ini.getMonth() + 1, 1); }
+  function periodosRestantes(ini) {
+    var viaje = new Date(A.mes + '-15T00:00:00');
+    if (A.ritmo === 'semana') return Math.max(1, Math.ceil((viaje - ini) / (7 * DIA)));
+    return Math.max(1, (viaje.getFullYear() * 12 + viaje.getMonth()) - (ini.getFullYear() * 12 + ini.getMonth()));
+  }
+  function suma(l) { return l.reduce(function (t, x) { return t + (+x.usd || 0); }, 0); }
+  function estadoPeriodo() {
+    var ahora = new Date(), ini = inicioPeriodo(ahora), fin = finPeriodo(ini), ap = A.aportes || [];
+    var enPeriodo = suma(ap.filter(function (x) { return x.t >= ini.getTime(); })), antes = suma(ap) - enPeriodo;
+    var cuota = Math.max(0, (A.meta - antes) / periodosRestantes(ini));
+    return { ini: ini, fin: fin, enPeriodo: enPeriodo, cuota: cuota, diasQuedan: Math.max(0, Math.ceil((fin - ahora) / DIA)) };
+  }
+  var unidad = function () { return A.ritmo === 'semana' ? { esta: 'esta semana', cada: 'por semana', del: 'la semana', lo: 'semanas' } : { esta: 'este mes', cada: 'por mes', del: 'el mes', lo: 'meses' }; };
+
+  /* ---------- alcancia viva ---------- */
+  function chispas(el) {
+    var cols = ['#F5C518', '#0B1F3A', '#06B6D4', '#F59E0B'];
+    for (var i = 0; i < 14; i++) {
+      var a = (i / 14) * Math.PI * 2, d = 36 + Math.random() * 28, c = document.createElement('span');
+      c.className = 'g-chispa';
+      c.style.cssText = 'background:' + cols[i % 4] + ';--x:' + Math.cos(a) * d + 'px;--y:' + Math.sin(a) * d + 'px;top:50%;left:50%';
+      el.appendChild(c); setTimeout(function (c) { c.remove(); }, 800, c);
+    }
+  }
+  function pintar() {
+    var j = suma(A.aportes || []), pct = Math.min(100, Math.floor(j / A.meta * 100)), falta = Math.max(0, A.meta - j), sobra = Math.max(0, j - A.meta), u = unidad();
+    $('ah-viaje').textContent = nomDest(A.dest) + ' · ' + (A.pax === 1 ? '1 persona' : A.pax + ' personas') + ' · ' + A.noches + ' noches · ' + nomMes(A.mes);
+    $('ah-fill').style.height = pct + '%'; $('ah-pct').textContent = pct + '%';
+    $('ah-juntado').textContent = fm(j); $('ah-metaviva').textContent = fm(A.meta);
+    $('ah-falta').textContent = sobra > 0 ? 'Te pasaste por ' + fm(sobra) : (falta > 0 ? 'Te faltan ' + fm(falta) : '¡Meta cumplida!');
+    $('ah-fuente').textContent = (A.base ? textoBase(A.base) + ' ' : '') + 'Precio de referencia' + (A.base && A.base.t ? ' del ' + new Date(A.base.t).toLocaleDateString('es-UY', { day: 'numeric', month: 'short' }) : '') + ': puede cambiar hasta que reserves.';
+
+    var P = $('ah-periodo');
+    if (j >= A.meta) {
+      P.className = 'ah-periodo is-ok';
+      P.innerHTML = '<h3>' + (sobra > 0 ? '¡Ya tenés de sobra!' : '¡Ya llegaste a la meta!') + '</h3><p>' + (sobra > 0 ? 'Juntaste ' + fm(sobra) + ' más de lo que cuesta el viaje. Ese extra te sirve para gastos de allá.' : 'No hace falta juntar más. Ahora podés reservar.') + '</p>';
+    } else if (new Date(A.mes + '-15T00:00:00') <= new Date()) {
+      P.className = 'ah-periodo'; P.innerHTML = '<h3>La fecha del viaje ya pasó</h3><p>Cambiá la meta para elegir otro mes y recalcular la cuota.</p>';
+    } else {
+      var e = estadoPeriodo(), pp = Math.min(100, e.cuota > 0 ? Math.round(e.enPeriodo / e.cuota * 100) : 100), ok = e.cuota > 0 && e.enPeriodo >= e.cuota - 0.5, extra = Math.max(0, e.enPeriodo - e.cuota);
+      P.className = 'ah-periodo' + (ok ? ' is-ok' : '');
+      if (ok) {
+        P.innerHTML = '<h3>✓ Ya cumpliste ' + u.esta + '</h3><div class="ah-pb"><i style="width:100%"></i></div><p>Tu cuota ' + u.cada + ' era ' + fm(e.cuota) + (extra > 0.5 ? ' y pusiste <span class="ah-extra">' + fm(extra) + ' de más</span>. Vas adelantado: ' + (A.ritmo === 'semana' ? 'las próximas semanas' : 'los próximos meses') + ' te piden menos.' : '.') + '</p>';
+      } else {
+        P.innerHTML = '<h3>' + (e.enPeriodo > 0 ? 'Vas ' + pp + '% ' : 'Todavía no juntaste ') + u.esta + '</h3><div class="ah-pb"><i style="width:' + pp + '%"></i></div><p>Para cumplir ' + u.del + ' te faltan <b>' + fm(Math.max(0, e.cuota - e.enPeriodo)) + '</b> (tu cuota ' + u.cada + ' es ' + fm(e.cuota) + '). Quedan ' + e.diasQuedan + (e.diasQuedan === 1 ? ' día.' : ' días.') + '</p>';
+      }
+    }
+    document.querySelectorAll('#ah-hitos li').forEach(function (li) { li.classList.toggle('is-ok', pct >= +li.dataset.p); });
+    var RAP = { UYU: [500, 1000, 2000, 5000], BRL: [50, 100, 250, 500], USD: [10, 25, 50, 100] }, cod = window.CSMoneda ? CSMoneda.code() : 'USD', tz = window.CSMoneda ? CSMoneda.tasa() : 1;
+    $('ah-rapidos').innerHTML = ''; (RAP[cod] || RAP.USD).forEach(function (l) { var uu = l / tz; var b = chip('+ ' + fm(uu), uu, false); b.removeAttribute('aria-pressed'); $('ah-rapidos').appendChild(b); });
+    var ul = $('ah-lista'); ul.innerHTML = '';
+    var ap = (A.aportes || []).slice(-5).reverse();
+    if (!ap.length) { var v = document.createElement('li'); v.className = 'ah-vacio'; v.textContent = 'Todavía no anotaste nada. El primer aporte es el que más cuesta.'; ul.appendChild(v); }
+    ap.forEach(function (x) {
+      var li = document.createElement('li'), t = document.createElement('div'), fe = document.createElement('span'), b = document.createElement('button');
+      t.textContent = '+ ' + fm(x.usd); fe.textContent = ' ' + new Date(x.t).toLocaleDateString('es-UY', { day: 'numeric', month: 'short' }); t.appendChild(fe);
+      b.type = 'button'; b.textContent = 'Deshacer'; b.dataset.t = x.t; b.setAttribute('aria-label', 'Deshacer el aporte de ' + fm(x.usd));
+      li.appendChild(t); li.appendChild(b); ul.appendChild(li);
+    });
+    var r = $('ah-reservar'); r.hidden = j < A.meta;
+    r.href = 'home-destino.html?' + new URLSearchParams({ destino: A.dest, pax: A.pax, fuente: 'alcancia' }).toString();
+    pintarGuardado();
+  }
+  function aviso(txt) {
+    var av = $('ah-aviso'); av.hidden = !txt; if (!txt) return;
+    av.textContent = txt; av.style.animation = 'none'; void av.offsetWidth; av.style.animation = '';
+  }
+  function anotar(usd) {
+    if (!(usd > 0)) return;
+    var antesTot = suma(A.aportes || []), eAntes = estadoPeriodo(), u = unidad(), pctAntes = Math.floor(antesTot / A.meta * 100);
+    (A.aportes = A.aportes || []).push({ usd: usd, t: Date.now() }); guardar(A);
+    var despTot = antesTot + usd, pctDesp = Math.floor(despTot / A.meta * 100), eDesp = estadoPeriodo(), msg = null;
+    if (antesTot >= A.meta) {
+      msg = 'Ojo: tu meta ya estaba cumplida y anotaste ' + fm(usd) + ' de más. Ya tenés ' + fm(despTot - A.meta) + ' de sobra para gastos de allá.';
+    } else if (despTot > A.meta) {
+      msg = '¡Te pasaste de la meta! Te faltaban ' + fm(A.meta - antesTot) + ' y anotaste ' + fm(usd) + ': sobran ' + fm(despTot - A.meta) + '. Ya podés reservar.';
+    } else if (eAntes.enPeriodo < eAntes.cuota - 0.5 && eDesp.enPeriodo >= eDesp.cuota - 0.5 && eDesp.cuota > 0) {
+      var ex = eDesp.enPeriodo - eDesp.cuota;
+      msg = '¡Ya cumpliste ' + u.esta + '!' + (ex > 0.5 ? ' Y pusiste ' + fm(ex) + ' de más: te adelantás.' : '');
+    } else if (eAntes.cuota > 0 && eAntes.enPeriodo >= eAntes.cuota - 0.5) {
+      msg = 'Ya habías cumplido ' + u.esta + ': esto es de más y te adelanta ' + fm(usd) + '.';
+    } else {
+      [[100, '¡Llegaste! Ahora a reservar.'], [75, 'Casi listo: tres cuartas partes del viaje.'], [50, '¡Mitad del viaje juntada!'], [25, 'Primer cuarto. Ya arrancaste.']].some(function (h) { if (pctAntes < h[0] && pctDesp >= h[0]) { msg = h[1]; return true; } });
+    }
+    pintar(); aviso(msg);
+    if (!quieto) { var v = document.querySelector('.ah-valija__cuerpo'); v.classList.remove('g-bote'); void v.offsetWidth; v.classList.add('g-bote'); chispas(v); }
+  }
+  $('ah-rapidos').addEventListener('click', function (e) { var c = e.target.closest('.ah-chip'); if (c) anotar(+c.dataset.v); });
+  $('ah-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = parseFloat($('ah-monto').value), t = window.CSMoneda ? CSMoneda.tasa() : 1;
+    if (!(v > 0) || !(t > 0)) return;
+    anotar(v / t); $('ah-monto').value = '';
+  });
+  $('ah-lista').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    A.aportes = A.aportes.filter(function (x) { return String(x.t) !== b.dataset.t; }); guardar(A); aviso(null); pintar();
+  });
+  $('ah-cambiar').addEventListener('click', function () {
+    F = { dest: A.dest, pax: A.pax, noches: A.noches, mes: A.mes, estilo: A.estilo || 'eq', ritmo: A.ritmo || 'mes', meta: 0, base: null }; mostrar(true);
+  });
+  $('ah-act').addEventListener('click', function () {
+    var b = $('ah-act'); b.disabled = true; b.textContent = 'Buscando el vuelo real…';
+    delete cache[[A.dest, A.pax, A.noches, A.mes, A.estilo || 'eq'].join('|')];
+    traerMeta(A.dest, A.pax, A.noches, A.mes, A.estilo || 'eq').then(function (r) {
+      var igual = Math.abs(r.meta - A.meta) < 1, antes = A.meta;
+      A.meta = r.meta; A.base = r.base; guardar(A); pintar();
+      aviso(igual ? 'El precio del viaje sigue igual.' : (r.meta > antes ? 'El viaje subió: ahora la meta es ' + fm(r.meta) + '.' : 'El viaje bajó: ahora la meta es ' + fm(r.meta) + '.'));
+    }, function () { aviso('No pudimos actualizar el precio ahora.'); })
+      .then(function () { b.disabled = false; b.textContent = 'Actualizar el precio del viaje'; });
+  });
+  document.addEventListener('click', function (e) { if (e.target.id === 'ah-login' && window.CSCuenta) CSCuenta.abrir('login'); });
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { if (A && !$('ah-viva').hidden) pintar(); else if (F.meta > 0) $('ah-meta-n').textContent = fm(F.meta); });
+
+  function mostrar(editar) {
+    $('ah-nueva').hidden = !!(A && !editar); $('ah-viva').hidden = !(A && !editar);
+    if (A && !editar) pintar(); else { pintarForm(); if (F.dest && F.mes) recalcular(); else $('ah-meta-n').textContent = 'Elegí un destino'; }
+    $('ah-crear').textContent = A ? 'Guardar la nueva meta' : 'Crear mi alcancía';
+  }
+  mostrar();
+  /* cuenta.js carga despues: al iniciar o cerrar sesion se vuelve a leer la alcancia de la cuenta */
+  window.addEventListener('load', function () {
+    if (!window.CSCuenta) return;
+    CSCuenta.alCambiar(function () { var n = leer(); if (n) { A = n; } mostrar(); });
+    CSCuenta.iniciar().then(function () { var n = leer(); if (n && (!A || n.creada !== A.creada || (n.aportes || []).length !== (A.aportes || []).length)) { A = n; mostrar(); } else pintarGuardado(); }, function () { pintarGuardado(); });
+  });
+})();
+</script>
+<script src="cuenta.js"></script>
+</body>
+</html>

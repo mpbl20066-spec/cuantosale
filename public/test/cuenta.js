@@ -33,6 +33,7 @@
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     dl: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
     conv: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
+    alc: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
     mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/>'
   };
 
@@ -62,6 +63,7 @@
   function poner(u) {
     var cambio = (usuario && usuario.id) !== (u && u.id);
     usuario = u;
+    if (cambio && u) alcSync();
     if (cambio) oyentes.forEach(function (fn) { try { fn(usuario); } catch (e) { /* un oyente no rompe a los demas */ } });
     if (panelAbierto()) pintar();
   }
@@ -138,7 +140,7 @@
     return iniciar().then(function () { return cliente.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname + location.search } }); })
       .then(function (r) { if (r && r.error) throw r.error; });
   }
-  function salir() { return iniciar().then(function () { return cliente.auth.signOut(); }); }
+  function salir() { return iniciar().then(function () { return cliente.auth.signOut(); }).then(function (r) { try { localStorage.removeItem(KA); } catch (e) { /* modo privado */ } return r; }); }
   function guardarNombre(n) { return iniciar().then(function () { return cliente.auth.updateUser({ data: { full_name: n } }); }).then(function (r) { if (r.error) throw r.error; poner(r.data.user); }); }
   /* Los viajes de /test van a la misma tabla `trips` que usa la app de la raiz. flight_details.fuente = 'test' los distingue. */
   function guardarViaje(d) {
@@ -159,6 +161,36 @@
   function borrarViaje(id) {
     return iniciar().then(function () { return cliente.from('trips').delete().eq('id', id).eq('user_id', usuario.id); })
       .then(function (r) { if (r.error) throw new Error('No pudimos eliminar el viaje.'); });
+  }
+
+  /* ---------- Alcancia de viaje ----------
+     Es un contador: la plata no pasa por CuantoSale. Con sesion iniciada se guarda en user_metadata.alcancia (viaja con la
+     cuenta a cualquier dispositivo, sin tablas nuevas); sin sesion queda en este dispositivo. localStorage hace de espejo. */
+  var KA = 'cs_alcancia_v1';
+  function alcLocal() { try { var j = JSON.parse(localStorage.getItem(KA)); return j && j.dest && j.meta > 0 ? j : null; } catch (e) { return null; } }
+  function alcRemota() { var m = usuario && usuario.user_metadata; return m && m.alcancia && m.alcancia.meta > 0 ? m.alcancia : null; }
+  function alcLeer() { return alcRemota() || alcLocal(); }
+  function alcGuardar(a) {
+    try { localStorage.setItem(KA, JSON.stringify(a)); } catch (e) { /* modo privado: queda en la cuenta si hay sesion */ }
+    if (!usuario) return Promise.resolve(false);
+    return iniciar().then(function () { return cliente.auth.updateUser({ data: { alcancia: a } }); })
+      .then(function (r) { if (r.error) throw r.error; poner(r.data.user); return true; });
+  }
+  function alcBorrar() {
+    try { localStorage.removeItem(KA); } catch (e) { /* modo privado */ }
+    if (!usuario) return Promise.resolve(false);
+    return iniciar().then(function () { return cliente.auth.updateUser({ data: { alcancia: null } }); })
+      .then(function (r) { if (r.error) throw r.error; poner(r.data.user); return true; });
+  }
+  function alcSync() {
+    var r = alcRemota(), l = alcLocal();
+    if (r) { try { localStorage.setItem(KA, JSON.stringify(r)); } catch (e) { /* modo privado */ } }
+    else if (l) alcGuardar(l).catch(function () { /* queda en este dispositivo y se reintenta en el proximo guardado */ });
+  }
+  function alcResumen() {
+    var a = alcLeer(); if (!a) return 'Empezá a juntar para tu viaje';
+    var j = (a.aportes || []).reduce(function (t, x) { return t + (+x.usd || 0); }, 0), p = Math.floor(j / a.meta * 100);
+    return (p >= 100 ? '¡Meta cumplida! ' : p + '% juntado · ') + String(a.destName || a.dest);
   }
 
   /* ---------- Panel ---------- */
@@ -221,6 +253,7 @@
       ? '<button type="button" class="cp-head" data-editar data-foco><span class="cp-av">' + esc((nombre || '?').charAt(0).toUpperCase()) + '</span><span class="cp-head__t"><b>Hola, ' + esc(nombre || 'viajero') + '</b><small>Ver y editar tu perfil</small></span>' + ic(I.chev, 16) + '</button>'
       : '<button type="button" class="cp-head" data-login data-foco><span class="cp-av cp-av--v">' + ic(I.user, 24) + '</span><span class="cp-head__t"><b>Ingresá a CuántoSale</b><small>Guardá tus viajes y verlos en cualquier lado</small></span>' + ic(I.chev, 16) + '</button>';
     return cabecera('Mi cuenta') + encabezado + '<div class="cp-lista">' +
+      fila(I.alc, 'Mi alcancía de viaje<small class="cp-fila__s">' + esc(alcResumen()) + '</small>', 'data-alcancia') +
       fila(I.save, 'Mis viajes guardados', 'data-viajes') +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
       (window.CSMoneda && CSMoneda.tasaDe ? fila(I.conv, 'Conversor de monedas', 'data-conversor') : '') +
@@ -301,6 +334,7 @@
     if (t.hasAttribute('data-cerrar')) { cerrar(); return; }
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
     if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
+    if (t.hasAttribute('data-alcancia')) { location.href = '/test/home-ahorro.html'; return; }
     if (t.hasAttribute('data-dividir')) { location.href = '/grupo?volver=' + encodeURIComponent(location.pathname.indexOf('/test') === 0 ? '/test/' : (location.pathname.indexOf('/nuevo') === 0 ? '/nuevo/' : '/app')); return; }
     if (t.hasAttribute('data-login')) { ir('login'); return; }
     if (t.hasAttribute('data-editar')) { ir('editar'); return; }
@@ -344,5 +378,5 @@
   /* Si la persona vuelve del login (Google o link del correo), la sesion se levanta sola; basta con iniciar en segundo plano. */
   if (/[?&#](code|access_token|error_description)=/.test(location.search + location.hash) || (function () { try { return Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); }); } catch (e) { return false; } })()) iniciar().catch(function () { /* sin cuenta: la pagina funciona igual */ });
 
-  window.CSCuenta = { usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo };
+  window.CSCuenta = { alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo };
 })();

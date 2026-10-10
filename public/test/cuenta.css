@@ -69,3 +69,5 @@ html.cs-perfil-abierto{overflow:hidden}
 .cp-conv__n{margin-top:10px;font-size:12px}
 /* Boton oficial de Google (cuenta.js, montarGoogle): centrado y con el alto tactil minimo */
 .cs-gis{display:flex;justify-content:center;min-height:44px;margin:0 0 10px}
+
+.cp-fila__s{display:block;margin-top:2px;font-size:12px;font-weight:500;color:var(--ink2,#64748B);line-height:1.3}
