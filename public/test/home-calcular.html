@@ -97,6 +97,7 @@
   .c-mapa__h{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--ink2)}
   .c-mapa__h b{color:var(--ink);font-size:13px}
   .c-mapa .roadtrip-map{height:260px;border-radius:0}
+  @media (min-width:1024px){.c-mapa .roadtrip-map{height:340px}}
   .c-busq{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink2)}
   .c-busq input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:600}
   .c-busq input:focus-visible{outline:none}
@@ -279,7 +280,7 @@
       '<div class="c-mapa"><div class="c-mapa__h"><b>🗺️ Tu ruta en auto</b><span>Montevideo → ' + esc(nombre) + '</span></div><div class="roadtrip-map" id="rtmap" data-map-dest="' + esc(nombre) + '"></div></div>' +
       '<div class="c-cost"><ul><li><span>' + (r.ev ? 'Carga eléctrica' : 'Combustible') + '</span><b>' + f(r.comb) + '</b></li><li><span>Peajes</span><b>' + f(r.peajes) + '</b></li><li><span>Otros costos</span><b>' + f(r.otros) + '</b></li></ul>' +
       '<div class="c-tot"><div><b>Total ruta</b><small>(' + f(r.total / S.pxs) + ' por persona)</small></div><b>' + f(r.total) + '</b></div></div><p class="c-ej">Combustible, peajes y ruta calculados con los datos de CuántoSale; «Otros costos» es una estimación fija.</p>';
-    $('foot').innerHTML = '<button type="button" class="c-btn" data-agregar="1">Agregar al viaje</button>';
+    $('foot').innerHTML = '<button type="button" class="c-btn" data-agregar="1">Continuar a Alojamiento →</button>';
     montarMapa();
   }
   /* Mapa de la ruta: mismos archivos y mismo dibujo que el sitio (Leaflet + trazado propio, sin tiles de terceros). */
@@ -311,8 +312,19 @@
       L.polygon(base.tierra, L.extend({ className: 'rt-country', fill: false }, noHit)).addTo(map);
       L.polyline(pts, { color: '#fff', weight: 9, opacity: 0.95, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
       var line = L.polyline(pts, { color: '#e8590c', weight: 5, opacity: 1, lineCap: 'round', lineJoin: 'round', interactive: false }).addTo(map);
-      map.fitBounds(line.getBounds(), { paddingTopLeft: [34, 60], paddingBottomRight: [34, 58] });
-      map.setMinZoom(Math.max(map.getBoundsZoom(base.bbox, true), map.getZoom() - 1.5));
+      /* Encuadre: se calcula cuando el contenedor ya tiene su tamano real. Si Leaflet encuadra antes de que la caja termine de
+         acomodarse (la pantalla se pinta de golpe y el ancho cambia con la barra de desplazamiento), queda con el zoom de una
+         caja distinta y la ruta se ve cortada. Por eso se encuadra ahora, en el proximo cuadro y cada vez que la caja cambia. */
+      var encuadrar = function () {
+        map.invalidateSize(false);
+        map.setMinZoom(0);
+        map.fitBounds(line.getBounds(), { paddingTopLeft: [34, 62], paddingBottomRight: [34, 74], animate: false });
+        map.setMinZoom(Math.max(map.getBoundsZoom(base.bbox, true), map.getZoom() - 1.5));
+      };
+      encuadrar();
+      requestAnimationFrame(encuadrar);
+      setTimeout(encuadrar, 250);
+      if (window.ResizeObserver) { var ro = new ResizeObserver(function () { if (el.isConnected) encuadrar(); else ro.disconnect(); }); ro.observe(el); }
       var pin = function (ll, cls, html) { return L.marker(ll, { interactive: false, keyboard: false, icon: L.divIcon({ className: cls, html: html, iconSize: null }) }).addTo(map); };
       pin(origin, 'roadtrip-pin roadtrip-pin--from', '<i></i><span>Montevideo</span>'); pin(dest, 'roadtrip-pin roadtrip-pin--to', '<i></i><span>' + esc(nombre) + '</span>');
       [['Uruguay', -32.7, -56.3], ['Argentina', -33.2, -61.6], ['Brasil', -26.6, -52.6]].forEach(function (c) { pin([c[1], c[2]], 'rt-country-name', c[0]); });
@@ -385,7 +397,12 @@
     if (t.dataset.cambiar) { S.avisoAuto = 'En la app real podés elegir marca y modelo; acá queda un auto de ejemplo según el tipo.'; track('inicio_cambiar_auto', {}); pant3(); return; }
     if (t.dataset.vt) { S.vt = t.dataset.vt; pant3(); track('inicio_tipo_auto', { tipo_auto: S.vt }); return; }
     if (t.dataset.calc) { S.pxs = +$('pxs').value; track('inicio_calcular_ruta', { tipo_auto: S.vt, modelo: S.vt === 'ev' ? S.em : S.cm, km: ruta().km, personas_auto: S.pxs }); ir(4, 'calcular_ruta'); return; }
-    if (t.dataset.agregar) { var r = ruta(); track('inicio_agregar_ruta', { importe: Math.round(r.total), km: r.km }); S.pax = S.pxs; ir(5, 'agregar_ruta'); return; }
+    /* Con la ruta y el costo del auto a la vista se sigue con el flujo de siempre (alojamiento, extras, presupuesto, reserva):
+       el costo del auto viaja en el enlace y home-flujo lo usa en lugar del vuelo. */
+    if (t.dataset.agregar) {
+      var r = ruta(); track('inicio_agregar_ruta', { importe: Math.round(r.total), km: r.km }); S.pax = S.pxs;
+      location.href = 'home-flujo.html?' + new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: Math.min(+qs.get('ninos') || 0, S.pax - 1), ida: S.ida, vuelta: S.vuelta, paso: 2, modo: 'auto', auto: Math.round(r.total), km: r.km, horas: Math.round(r.horas), comb: Math.round(r.comb), peajes: Math.round(r.peajes), fuente: 'inicio_auto', origen_home: qs.get('origen_home') || '' }).toString() + debugQ; return;
+    }
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'kwhp') { S.kwhp = parseFloat(e.target.value) || 0; $('calc').innerHTML = calcTxt(); } });
   document.addEventListener('input', function (e) {

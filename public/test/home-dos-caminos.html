@@ -366,7 +366,7 @@
         Array.prototype.forEach.call(tarjetas, function (t) {
           var pp = por[t.dataset.destino], sp = t.querySelector('span');
           if (!sp || !(pp > 0)) return;
-          var e = document.createElement('em'); e.textContent = 'Desde US$ ' + Math.round(pp).toLocaleString('es-UY') + ' p/p'; sp.appendChild(e);
+          var e = document.createElement('em'); e.textContent = 'Desde US$ ' + Math.round(pp).toLocaleString('es-UY'); sp.appendChild(e);
         });
       })
       .catch(function () { /* sin precios: las tarjetas quedan sin cifra */ })

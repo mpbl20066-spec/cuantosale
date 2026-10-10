@@ -52,6 +52,21 @@
   .d-card__t{padding:9px 11px 11px}
   .d-card__t b{display:block;font-family:var(--fh);font-size:15px;font-weight:700;line-height:1.2}
   .d-card__t small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  /* Pantalla 3: tarjetas de medio de transporte */
+  .d-modos{display:grid;gap:10px;margin-top:14px}
+  .d-modo{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
+  .d-modo:hover{border-color:var(--ink2)}
+  .d-modo.is-on{border-color:var(--accent);background:var(--cel-soft);box-shadow:0 0 0 3px rgba(247,195,37,.22)}
+  .d-modo:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .d-modo__i{flex:0 0 auto;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--cel-soft);color:var(--azul)}
+  .d-modo.is-on .d-modo__i{background:var(--accent);color:var(--accent-ink)}
+  .d-modo__t{flex:1;min-width:0}
+  .d-modo__t b{display:block;font-family:var(--fh);font-size:17px;font-weight:800}
+  .d-modo__t small{display:block;margin-top:2px;font-size:13px;font-weight:500;color:var(--ink2);line-height:1.4}
+  .d-modo__c{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:800}
+  .d-modo__c:empty{background:transparent;border:1.5px solid var(--line)}
+  .d-card__t em{display:block;margin-top:3px;font-style:normal;font-size:12px;font-weight:800;color:var(--accent)}
+  .d-grid--pop .d-card:nth-child(5){display:none}   /* en celular y tablet se ven cuatro, como en la portada */
   .d-vacio{padding:22px 4px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
   /* Pantalla 2: fechas y personas */
 
@@ -210,13 +225,14 @@
     html[data-pagina="destino"] .d-split--f .d-limite{margin:6px 2px 0}
     html[data-pagina="destino"] .d-split--f .d-cont{margin-top:14px;padding:13px 20px;position:sticky;bottom:12px;z-index:3;box-shadow:0 0 0 10px var(--bg)}
     html[data-pagina="destino"] .d-split--f .d-foto{min-height:0}
-    html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+    html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+    html[data-pagina="destino"] .d-grid--pop .d-card:nth-child(5){display:block}
     html[data-pagina="destino"] .d-card{position:relative;border:0;border-radius:16px;background:var(--cel-soft)}
-    html[data-pagina="destino"] .d-card__f{height:auto;aspect-ratio:4/3;background-size:cover;background-position:center}
+    html[data-pagina="destino"] .d-card__f{height:150px;aspect-ratio:auto;background-size:cover;background-position:center}
     html[data-pagina="destino"] .d-card__f::after{background:linear-gradient(180deg,transparent 40%,rgba(10,16,26,.82))}
-    html[data-pagina="destino"] .d-card__t{position:absolute;left:0;right:0;bottom:0;padding:14px 16px;color:#fff}
-    html[data-pagina="destino"] .d-card__t b{color:#fff;font-size:18px;text-shadow:0 1px 5px rgba(0,0,0,.45)}
-    html[data-pagina="destino"] .d-card__t small{color:rgba(255,255,255,.85);font-size:13px}
+    html[data-pagina="destino"] .d-card__t{position:absolute;left:0;right:0;bottom:0;padding:12px 14px;color:#fff}
+    html[data-pagina="destino"] .d-card__t b{color:#fff;font-size:15px;text-shadow:0 1px 5px rgba(0,0,0,.45)}
+    html[data-pagina="destino"] .d-card__t small{color:rgba(255,255,255,.85);font-size:12px}
   }
   @media (max-width:520px){
     body{display:block;padding:0;background:var(--bg)}
@@ -267,7 +283,8 @@
     var rt = (window.RT_DATA || {})[d.k];
     return [d.k, d.name, 'Brasil', rt ? rt.distanceKm : 0, d.region, d.medios || []];
   });
-  var POPULARES = ['rio', 'fln', 'buz', 'bcm'];
+  var POPULARES = ['rio', 'fln', 'buz', 'bcm', 'bombinhas'];   /* los mismos cinco, y en el mismo orden, que "Destinos populares" de la portada */
+  var PRECIOS = {};   /* precio real "Desde US$ X" por persona, de /api/destinos-destacados (el mismo endpoint de la portada) */
   var HOY = new Date();
   var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
@@ -311,10 +328,10 @@
       return S.todos ? a[1].localeCompare(b[1], 'es') : POPULARES.indexOf(a[0]) - POPULARES.indexOf(b[0]);
     });
     if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
-    return '<div class="d-grid">' + lista.map(function (d) {
+    return '<div class="d-grid' + (!qn() && !S.todos ? ' d-grid--pop' : '') + '">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
         '<span class="d-card__f" style="background-image:url(' + fotoDe(d[0]) + ')" aria-hidden="true"></span>' +
-        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + '</small></span></button>';
+        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + '</small>' + (PRECIOS[d[0]] > 0 ? '<em>Desde US$ ' + Math.round(PRECIOS[d[0]]).toLocaleString('es-UY') + '</em>' : '') + '</span></button>';
     }).join('') + '</div>';
   }
 
@@ -326,9 +343,14 @@
     if (qn()) return null;   /* escribio algo que no existe: no se ofrece otro destino en su lugar */
     return DESTS.filter(function (d) { return d[0] === S.sel; })[0] || DESTS.filter(function (d) { return d[0] === POPULARES[0]; })[0] || null;
   }
-  var PASOS = ['Destino', 'Fechas y personas', 'Vuelos', 'Alojamiento', 'Extras', 'Presupuesto'];
+  /* Con mas de un medio posible (Santa Catarina y Rio Grande do Sul: avion, auto y a veces bus) se agrega "Como ir", y el paso del
+     transporte se llama Vuelos, Auto o Bus segun lo elegido. En el resto de los destinos solo hay avion y no se pregunta. */
+  function pasosDe() {
+    var d = destInfo(), m = mediosDe(d), t = { avion: 'Vuelos', auto: 'Auto', bus: 'Bus' }[S.medio] || 'Vuelos';
+    return m.length > 1 ? ['Destino', 'Fechas y personas', 'Cómo ir', t, 'Alojamiento', 'Extras', 'Presupuesto'] : ['Destino', 'Fechas y personas', 'Vuelos', 'Alojamiento', 'Extras', 'Presupuesto'];
+  }
   function migas(activo) {
-    return '<nav class="d-crumb" aria-label="Pasos del viaje"><ol>' + PASOS.map(function (n, i) {
+    return '<nav class="d-crumb" aria-label="Pasos del viaje"><ol>' + pasosDe().map(function (n, i) {
       return '<li' + (i === activo ? ' class="is-on" aria-current="step"' : '') + '><span>' + (i + 1) + '</span>' + n + '</li>';
     }).join('') + '</ol></nav>';
   }
@@ -451,7 +473,6 @@
       "<div><label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div></div></div>" +
       "<div class=\"cal\" id=\"cal\"" + (S.calOn ? "" : " hidden") + ">" + calHTML() + "</div>" +
       "<p class=\"d-noches" + (nn.ok || nn.pend ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
-      medioHTML(d) +
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
       "<div class=\"d-quien\">" + fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
       fila("Niños", "De 2 a 11 años", "ni", S.ninos, S.ninos <= 0, S.pax >= 9) + "</div>" +
@@ -470,10 +491,39 @@
      pantalla de eleccion de medio con un solo avion al lado no era una decision:
      era una pantalla mas entre el destino y el resultado.
      Si el medio llegara pedido (?modo=) se respeta; si no, el sistema elige. */
-  function pintar() { if (S.pant === 1) pant1(); else pant2(); }
+  /* Pantalla 3 (solo si el destino se puede hacer por mas de un medio): como querés ir. */
+  var ICO_MEDIO = {
+    avion: '<path d="M2.6 12.3 21.4 4.6l-7.4 17.3-2.5-8.1-8.9-1.5Z"/>',
+    auto: '<path d="M5 16.5V13l1.6-4.6A2 2 0 0 1 8.5 7h7a2 2 0 0 1 1.9 1.4L19 13v3.5"/><path d="M3.5 13h17v3.5h-17z"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/>',
+    bus: '<rect x="4" y="4" width="16" height="13" rx="2.5"/><path d="M4 11h16M8 21v-4M16 21v-4"/><circle cx="8" cy="14" r="1"/><circle cx="16" cy="14" r="1"/>'
+  };
+  var MEDIO_D = {
+    avion: ['Avión', 'Vuelo ida y vuelta más traslados. Es lo más rápido y cómodo.'],
+    auto: ['Auto', 'Te mostramos el consumo, los kilómetros, los peajes y el mapa de la ruta.'],
+    bus: ['Bus', 'Pasaje de ida y vuelta desde Montevideo, semicama o cama.']
+  };
+  function pant3() {
+    var d = destInfo(), m = ['avion', 'auto', 'bus'].filter(function (k) { return mediosDe(d).indexOf(k) >= 0; }); if (m.indexOf(S.medio) < 0) S.medio = 'avion';
+    var fv = d ? (d[0] === 'rio' ? 'dest/rio-vertical.jpg' : fotoDe(d[0])) : '';
+    $("main").dataset.pant = "3";
+    $("main").innerHTML = migas(2) + '<div class="d-split d-split--f"><div class="d-left"><h1>¿Cómo querés ir?</h1><p class="d-sub">Elegí cómo viajar de Montevideo a ' + esc(d ? d[1] : '') + '.</p>' +
+      '<div class="d-modos" role="group" aria-label="Medio de transporte">' + m.map(function (k) {
+        var on = S.medio === k;
+        return '<button type="button" class="d-modo' + (on ? ' is-on' : '') + '" data-medio="' + k + '" aria-pressed="' + on + '" data-evento="destino_medio">' +
+          '<span class="d-modo__i"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO_MEDIO[k] + '</svg></span>' +
+          '<span class="d-modo__t"><b>' + MEDIO_D[k][0] + '</b><small>' + MEDIO_D[k][1] + '</small></span>' +
+          '<span class="d-modo__c" aria-hidden="true">' + (on ? '✓' : '') + '</span></button>';
+      }).join('') + '</div>' +
+      '<button type="button" class="d-cont" data-irmedio="1" data-evento="destino_continuar_medio" data-destino="' + S.dest + '">Continuar ' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + '</button></div>' +
+      (d ? '<div class="d-foto" aria-hidden="true"><img src="' + fv + '" alt=""><span><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + '</small></span></div>' : '') + '</div>';
+    $('foot').hidden = false;
+    $('foot').innerHTML = '<button type="button" class="d-btn" data-irmedio="1" data-evento="destino_continuar_medio" data-destino="' + S.dest + '">Continuar →</button>';
+    document.title = '¿Cómo querés ir? · CuántoSale';
+  }
+  function pintar() { if (S.pant === 1) pant1(); else if (S.pant === 3) pant3(); else pant2(); }
   function ir(n) { if (n === 2 && S.pant !== 2) S.calOn = false; S.pant = n; pintar(); $('main').scrollTop = 0; }
   /* De las fechas se va derecho a resultados. */
-  function irA() { aResultados(); }
+  function irA() { if (mediosDe(destInfo()).length > 1) ir(3); else aResultados(); }
   /* Ir a los resultados pasando destino, fechas, personas y medio de transporte. */
   function aResultados() {
     /* Con las fechas elegidas se va derecho a elegir el vuelo (paso 1 del flujo de reserva). */
@@ -481,7 +531,7 @@
     /* Avion: elegir vuelo. Auto: datos del auto, combustible, peajes y mapa. Bus: resultado del bus. */
     var m = mediosDe(destInfo()).indexOf(S.medio) >= 0 ? S.medio : 'avion';
     if (m === 'auto') { q.set('modo', 'auto'); q.set('fuente', 'destino_auto'); location.href = 'home-calcular.html?' + q.toString() + debugQ; return; }
-    if (m === 'bus') { q.set('modo', 'bus'); q.set('fuente', 'destino_bus'); location.href = 'home-resultado.html?' + q.toString() + debugQ; return; }
+    if (m === 'bus') { q.set('modo', 'bus'); q.set('fuente', 'destino_bus'); location.href = 'home-flujo.html?' + q.toString() + debugQ; return; }
     location.href = 'home-flujo.html?' + q.toString() + debugQ;
   }
 
@@ -510,7 +560,8 @@
     /* El click en la tarjeta ya dispara el evento data-evento="destino_elegido"
        (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
     if (t.dataset.dest) { S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
-    if (t.dataset.medio) { S.medio = t.dataset.medio; track('destino_medio', { medio: S.medio }); pant2(); return; }
+    if (t.dataset.medio) { S.medio = t.dataset.medio; track('destino_medio', { medio: S.medio }); pintar(); return; }
+    if (t.dataset.irmedio) { track('destino_continuar_medio', { medio: S.medio }); aResultados(); return; }
     if (t.dataset.cambiar) { track('destino_cambiar_destino', { destino: S.dest }); ir(1); return; }
     if (t.dataset.ad || t.dataset.ni) {
       var ad = S.pax - S.ninos, ni = S.ninos;
@@ -574,8 +625,18 @@
   });
   /* Si entran con ?destino= y ?pax=, son datos que la pantalla anterior ya recogio:
      se va derecho a resultados. Con solo ?destino=, todavia hay que elegir fechas. */
-  if (S.dest && destInfo() && qs.get('pax') && !qs.get('editar')) { aResultados(); }
+  if (S.dest && destInfo() && qs.get('pax') && !qs.get('editar')) { if (mediosDe(destInfo()).length > 1 && !qs.get('modo')) { S.pant = 3; } else { aResultados(); } }
   else if (S.dest && destInfo()) { S.pant = 2; }
+  (function () {
+    var d0 = new Date(); d0.setDate(d0.getDate() + 45); var d1 = new Date(d0); d1.setDate(d1.getDate() + 7);
+    var items = POPULARES.map(function (k) { return k + '~' + iso(d0) + '~' + iso(d1); }).join(',');
+    var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
+    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'eq', origin: 'MVD', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function (j) { (j.items || []).forEach(function (it) { PRECIOS[it.key] = it.pp; }); if (S.pant === 1) actualizar(); })
+      .catch(function () { /* sin precios: las tarjetas quedan sin cifra */ })
+      .then(function () { clearTimeout(tm); });
+  })();
   pintar();
 })();
 </script>
