@@ -578,13 +578,13 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="detalle"] .t-tabs{overflow:visible;flex:none;min-height:46px}
 }
 
-:root{--azul:#1F6FB5}
+:root{--azul:#B8860B}
 /* ---- Modo oscuro ----
    Varias pantallas traen colores fijos pensados para fondo claro: texto navy
    (#0B2A55 / #1A2B4A / #0B1F3A), celeste #1F6FB5 y superficies blancas o
    celestes pastel donde el texto usa --ink/--ink2 (que en night son casi blancos:
    blanco sobre blanco). En night se aclara el azul y se oscurecen esas superficies. */
-[data-theme="night"]{--azul:#74B7F5;--marca-celeste:#74B7F5}
+[data-theme="night"]{--azul:#F7C325;--marca-celeste:#F7C325}
 
 /* texto navy -> tinta clara sobre el fondo oscuro */
 [data-theme="night"][data-pagina="home"] .tabs__lt b,
@@ -689,9 +689,9 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 [data-theme="night"] .cn__nota{background:var(--cel-soft)}
 
 /* ---- Sin verde: lo que antes era "bien/confirmado" usa el azul de la marca (claro y oscuro) ---- */
-:root[data-theme="light"]{--good:#1F6FB5;--good-soft:#E3F2FD}
-:root[data-theme="night"]{--good:#74B7F5;--good-soft:#14304F}
-[data-theme="night"] .fin-ico--green{background:rgba(116,183,245,.16);color:#74B7F5}
+:root[data-theme="light"]{--good:#B8860B;--good-soft:#FDF4DC}
+:root[data-theme="night"]{--good:#F7C325;--good-soft:#2A2410}
+[data-theme="night"] .fin-ico--green{background:rgba(247,195,37,.16);color:#F7C325}
 
 /* Paso 5 ("Tu viaje quedo guardado"): en escritorio, 1200px centrados como el resto de la web */
 @media (min-width:1024px){
@@ -724,3 +724,10 @@ body{max-width:100%;overflow-x:clip}
 .d-card.is-on,.p-opt.is-on,.opt.is-sel,.c-dc.is-sel,.hotel-playa-chip.is-on{border-color:var(--sel)!important}
 .f-chip.is-on,.x-add.is-on,.d-seg button.is-on,.p-monto.is-on,.p-chip.is-on,.p-opt--c.is-on,.r-chip.is-on{background:var(--sel)!important;border-color:var(--sel)!important;color:#0A101A!important}
 :root[data-theme="light"]{--sel:#F7C325}
+
+/* Iconos (svg) y textos de acento en amarillo de marca (mostaza en claro para que se lea sobre blanco) */
+:root{--ico:#B8860B}
+:root[data-theme="night"]{--ico:#F7C325}
+.phone svg:not([fill="#F6B21B"]):not(.cs-keep),.cs-top svg,.hx svg,.tabs svg{color:var(--ico)}
+.cs-top__logo svg path{fill:var(--ink)}
+.d-btn svg,.p-go svg,.r-go svg,.c-btn svg,.p-btn svg,.f-cta svg,.m-card__cta svg,.f-chip.is-on svg,.p-chip.is-on svg,.r-chip.is-on svg{color:currentColor}

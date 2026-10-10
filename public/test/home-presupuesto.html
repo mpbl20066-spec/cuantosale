@@ -39,7 +39,7 @@
      quedaron sin uso y se fueron con ellas. */
   .p-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 14px}
   .p-chip{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-family:var(--fb);font-size:13.5px;font-weight:700;cursor:pointer}
-  .p-chip.is-on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .p-chip.is-on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
   .p-chip:focus-visible,.p-go:focus-visible,.p-back:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .p-vacio{padding:24px 8px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
   .p-ej{margin:14px 0 0;font-size:11.5px;font-weight:600;color:var(--ink2);text-align:center}
@@ -57,9 +57,9 @@
   .p-opt b{display:block;font-size:15px;line-height:1.2}
   .p-opt small{display:block;margin-top:3px;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.35}
   .p-opt__i{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--cel-soft);color:var(--azul)}
-  .p-opt.is-on{border-color:var(--azul);background:var(--cel-soft);box-shadow:0 0 0 3px rgba(31,111,181,.15)}
+  .p-opt.is-on{border-color:var(--accent);background:var(--cel-soft);box-shadow:0 0 0 3px rgba(247,195,37,.22)}
   .p-opt--c{justify-content:center;margin:0;padding:11px 6px;border-radius:99px;font-size:13.5px;text-align:center}
-  .p-opt--c.is-on{background:var(--azul);border-color:var(--azul);color:#fff;box-shadow:none}
+  .p-opt--c.is-on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:none}
   .p-opt:focus-visible,.p-pers button:focus-visible,.p-link:focus-visible,.p-date input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .p-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
   .p-tabs{display:flex;gap:8px;margin:2px 0 14px;overflow-x:auto;scrollbar-width:none}
@@ -99,7 +99,7 @@
   .d-meta{margin:2px 0 12px;font-size:14px;font-weight:600;color:var(--ink2)}
   .d-seg{display:inline-flex;gap:4px;margin-bottom:12px;padding:3px;border-radius:99px;background:var(--cel-soft)}
   .d-seg button{padding:8px 18px;border:0;border-radius:99px;background:transparent;color:var(--ink);font-family:var(--fb);font-size:13.5px;font-weight:700;cursor:pointer}
-  .d-seg button.is-on{background:var(--azul);color:#fff}
+  .d-seg button.is-on{background:var(--accent);color:var(--accent-ink)}
   .d-seg button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .d-card{overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
   .d-photo{height:190px;background:var(--cel-soft) center/cover}
@@ -147,7 +147,7 @@
   .p-card .p-h2--c{margin-top:20px}
   .p-montos{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .p-monto{padding:6px 12px;border:0;border-radius:99px;background:var(--cel-soft);color:var(--ink);font-family:var(--fb);font-size:12.5px;font-weight:700;cursor:pointer}
-  .p-monto.is-on{background:var(--azul);color:#fff}
+  .p-monto.is-on{background:var(--accent);color:var(--accent-ink)}
   .p-monto:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .p-opt--d{align-items:flex-start;padding:12px 14px;margin-bottom:10px;text-align:left}
   .p-opt--d .p-opt__i{flex:0 0 32px;width:32px;height:32px;background:transparent}
@@ -172,6 +172,24 @@
     [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-step:has(.p-card){padding-left:24px;padding-right:24px;box-sizing:border-box}
     [data-pagina="presupuesto"] .p-card{padding:32px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
     [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig],.p-go[data-paso2]){max-width:700px;margin:0 auto;padding:16px 24px 0;box-sizing:border-box}
+  }
+  /* El azul de la pagina pasa al amarillo de la marca: --cel es amarillo en oscuro y dorado oscuro (legible) en claro. */
+  html[data-pagina="presupuesto"]{--azul:var(--cel)}
+  /* Escritorio: que el formulario entre en la pantalla sin scroll (laptops de 768px de alto incluidas). */
+  @media (min-width:768px){
+    [data-pagina="presupuesto"] .p-card{padding:24px 28px 20px}
+    [data-pagina="presupuesto"] .p-card h1.p-h{font-size:24px;margin-bottom:4px}
+    [data-pagina="presupuesto"] .p-card .p-sub{margin-bottom:10px}
+    [data-pagina="presupuesto"] .p-card .p-h2{margin:10px 0 6px;font-size:16px}
+    [data-pagina="presupuesto"] .p-card .p-h2--c{margin-top:14px}
+    [data-pagina="presupuesto"] .p-card .p-chips{margin:8px 0 6px}
+    [data-pagina="presupuesto"] .p-card .p-chip{padding:8px 14px}
+    [data-pagina="presupuesto"] .p-card .p-budget{padding:10px 16px}
+    [data-pagina="presupuesto"] .p-card .p-opt{margin-bottom:6px;padding:10px 14px}
+    [data-pagina="presupuesto"] #main:not(:has(>.p-form))>.p-cta:has(.p-go[data-sig],.p-go[data-paso2]){padding-top:12px}
+    html[data-pagina="presupuesto"] .phone>.p-top{padding-top:4px}
+    html[data-pagina="presupuesto"] .phone>.p-top .p-bar{margin-bottom:4px}
+    html[data-pagina="presupuesto"] #main:has(.p-cta){padding-top:4px;padding-bottom:16px}
   }
   .p-card__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .p-card__h .p-eyebrow{margin:0}
@@ -485,7 +503,8 @@
   /* El flujo ya sabe armar el viaje de un destino: se le pasa destino, personas y fechas. */
   function irFlujo(k, m) {
     var q = new URLSearchParams({ destino: k, nombre: DESTS[k].nom, pax: PAX, ida: IDA, vuelta: VUELTA, modo: m, fuente: 'presupuesto_detalle', origen_home: fuente });
-    return 'home-flujo.html?' + q.toString() + (debug ? '&debug=1' : '');
+    /* En auto no se eligen pasajes: se pasa por los datos del auto, combustible, peajes y mapa de la ruta. */
+    return (m === 'auto' ? 'home-calcular.html?' : 'home-flujo.html?') + q.toString() + (debug ? '&debug=1' : '');
   }
   function abrir(k, m) { S.abierto = k; S.modoDet = m; pintarDetalle(); $('detalle').hidden = false; $('cerrar').focus(); track('presupuesto_detalle_vista', { destino: k, medio: m, precio: DESTS[k].precios[m].pp }); }
   function cerrar() { $('detalle').hidden = true; S.abierto = null; var r = $('main').querySelector('.p-dst__go'); if (r) r.focus(); }

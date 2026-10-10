@@ -43,7 +43,7 @@
   .d-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .d-card{display:block;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;overflow:hidden;cursor:pointer}
   .d-card:hover{border-color:var(--ink2)}
-  .d-card.is-on{border-color:var(--azul);box-shadow:0 0 0 2px rgba(31,111,181,.35)}
+  .d-card.is-on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(247,195,37,.35)}
   .d-card__f{position:relative;height:96px;background:var(--cel-soft) center/cover}
   .d-card__f::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(10,16,26,.5))}
   .d-card__t{padding:9px 11px 11px}
@@ -135,7 +135,7 @@
     .d-chips{display:flex;flex-wrap:wrap;gap:10px}
     .d-chip{padding:9px 16px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:14.5px;font-weight:700;cursor:pointer;transition:background-color .15s,border-color .15s}
     .d-chip:hover{background:var(--cel-soft);border-color:var(--ink2)}
-    .d-chip.is-on{background:var(--cel-soft);border-color:var(--azul)}
+    .d-chip.is-on{background:var(--cel-soft);border-color:var(--accent)}
     .d-chip:focus-visible,.d-x:focus-visible,.d-cont:focus-visible,.d-prev:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
     .d-cont{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;margin-top:auto;padding:18px 20px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:17px;font-weight:800;cursor:pointer}
     .d-cont:disabled{opacity:.5;cursor:default}
@@ -392,6 +392,15 @@
     var ev = $('vuelta'); if (ev && ev.parentNode) ev.parentNode.classList.toggle('is-act', S.paso === 'vuelta');   // el campo que espera la proxima fecha
     if (c) { c.innerHTML = calHTML(); c.hidden = !S.calOn; }
   }
+  /* Medio de transporte: solo se pregunta si el destino tiene mas de uno cotizable (SC y RS tienen auto; Floripa y Porto Alegre, tambien bus). */
+  var MEDIO_T = { avion: 'Avión', auto: 'Auto', bus: 'Bus' };
+  function mediosDe(d) { return d && d[5] && d[5].length ? d[5] : ['avion']; }
+  function medioHTML(d) {
+    var m = mediosDe(d); if (m.length < 2) return '';
+    if (m.indexOf(S.medio) < 0) S.medio = 'avion';
+    return '<h2 class="d-h2" style="margin-top:22px">¿Cómo querés viajar?</h2><div class="d-medios" role="group" aria-label="Medio de transporte" style="display:flex;flex-wrap:wrap;gap:8px">' +
+      m.map(function (k) { return '<button type="button" class="d-chip' + (S.medio === k ? ' is-on' : '') + '" data-medio="' + k + '" aria-pressed="' + (S.medio === k) + '">' + MEDIO_T[k] + '</button>'; }).join('') + '</div>';
+  }
   function pant2() {
     var d = destInfo(), nn = textoNoches();
     $("main").dataset.pant = "2";
@@ -404,6 +413,7 @@
       "<div><label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div></div></div>" +
       "<div class=\"cal\" id=\"cal\"" + (S.calOn ? "" : " hidden") + ">" + calHTML() + "</div>" +
       "<p class=\"d-noches" + (nn.ok || nn.pend ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
+      medioHTML(d) +
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
       "<div class=\"d-quien\">" + fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
       fila("Niños", "De 2 a 11 años", "ni", S.ninos, S.ninos <= 0, S.pax >= 9) + "</div>" +
@@ -430,6 +440,10 @@
   function aResultados() {
     /* Con las fechas elegidas se va derecho a elegir el vuelo (paso 1 del flujo de reserva). */
     var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente });
+    /* Avion: elegir vuelo. Auto: datos del auto, combustible, peajes y mapa. Bus: resultado del bus. */
+    var m = mediosDe(destInfo()).indexOf(S.medio) >= 0 ? S.medio : 'avion';
+    if (m === 'auto') { q.set('modo', 'auto'); q.set('fuente', 'destino_auto'); location.href = 'home-calcular.html?' + q.toString() + debugQ; return; }
+    if (m === 'bus') { q.set('modo', 'bus'); q.set('fuente', 'destino_bus'); location.href = 'home-resultado.html?' + q.toString() + debugQ; return; }
     location.href = 'home-flujo.html?' + q.toString() + debugQ;
   }
 
@@ -458,6 +472,7 @@
     /* El click en la tarjeta ya dispara el evento data-evento="destino_elegido"
        (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
     if (t.dataset.dest) { S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
+    if (t.dataset.medio) { S.medio = t.dataset.medio; track('destino_medio', { medio: S.medio }); pant2(); return; }
     if (t.dataset.cambiar) { track('destino_cambiar_destino', { destino: S.dest }); ir(1); return; }
     if (t.dataset.ad || t.dataset.ni) {
       var ad = S.pax - S.ninos, ni = S.ninos;
