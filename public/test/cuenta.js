@@ -32,6 +32,7 @@
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     dl: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+    conv: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
     mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/>'
   };
 
@@ -171,6 +172,15 @@
     document.body.appendChild(raiz);
     raiz.addEventListener('click', alClic);
     raiz.addEventListener('submit', alEnviar);
+    /* Conversor: se actualiza el resultado mientras se escribe, sin repintar (asi no se pierde el foco). */
+    var alCambiarConv = function (e) {
+      var id = e.target && e.target.id; if (id !== 'cv-monto' && id !== 'cv-de' && id !== 'cv-a') return;
+      if (id === 'cv-monto') S.conv.monto = e.target.value; else S.conv[id === 'cv-de' ? 'de' : 'a'] = e.target.value;
+      var t = textoConv(), r = raiz.querySelector('[data-conv-res]'), q = raiz.querySelector('[data-conv-tasa]');
+      if (r) r.textContent = t.res; if (q) q.textContent = t.tasa;
+    };
+    raiz.addEventListener('input', alCambiarConv);
+    raiz.addEventListener('change', alCambiarConv);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panelAbierto()) cerrar(); });
   }
   function abrir(vista) {
@@ -213,12 +223,36 @@
     return cabecera('Mi cuenta') + encabezado + '<div class="cp-lista">' +
       fila(I.save, 'Mis viajes guardados', 'data-viajes') +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
+      (window.CSMoneda && CSMoneda.tasaDe ? fila(I.conv, 'Conversor de monedas', 'data-conversor') : '') +
       interruptor() +
-      (window.CSInstalar && CSInstalar.disponible() ? fila(I.dl, 'Instalar la app', 'data-instalar') : '') +
       fila(I.help, 'Ayuda y soporte', 'data-ayuda') +
       (u ? fila(I.cog, 'Configuración', 'data-editar') : '') +
       fila(I.doc, 'Términos y condiciones', 'data-terminos') +
       (u ? fila(I.out, 'Cerrar sesión', 'data-salir', '', true) : '') + '</div>' + pie();
+  }
+  /* Conversor de monedas: las mismas cotizaciones que usa toda la web (moneda.js, /api/tasas). Convierte mientras se escribe. */
+  S.conv = { monto: '1000', de: 'USD', a: 'UYU' };
+  function convertir() {
+    var c = S.conv, td = CSMoneda.tasaDe(c.de), ta = CSMoneda.tasaDe(c.a), v = parseFloat(String(c.monto).replace(',', '.'));
+    if (!(v >= 0) || td == null || ta == null) return null;
+    return v / td * ta;
+  }
+  var numero = function (n, code) { return n.toLocaleString('es-UY', { minimumFractionDigits: 0, maximumFractionDigits: code === 'UYU' ? 0 : 2 }); };
+  function textoConv() {
+    var c = S.conv, r = convertir(), ms = CSMoneda.monedas(), sim = function (k) { var m = ms.filter(function (x) { return x.code === k; })[0]; return m ? m.simbolo : k; };
+    var td = CSMoneda.tasaDe(c.de), ta = CSMoneda.tasaDe(c.a);
+    return { res: r == null ? '—' : sim(c.a) + ' ' + numero(r, c.a), tasa: td && ta ? '1 ' + c.de + ' = ' + sim(c.a) + ' ' + numero(ta / td, c.a === 'UYU' ? 'USD' : c.a) : 'Sin cotización para esa moneda' };
+  }
+  function vistaConversor() {
+    var c = S.conv, ms = CSMoneda.monedas().filter(function (m) { return CSMoneda.tasaDe(m.code) != null; }), t = textoConv();
+    var opts = function (sel) { return ms.map(function (m) { return '<option value="' + m.code + '"' + (m.code === sel ? ' selected' : '') + '>' + esc(m.code + ' (' + m.simbolo + ')') + '</option>'; }).join(''); };
+    return cabecera('Conversor de monedas') + '<div class="cp-cuerpo cp-conv">' +
+      '<label class="cp-l" for="cv-monto">Monto</label><input id="cv-monto" class="cp-in" type="number" inputmode="decimal" min="0" step="any" value="' + esc(c.monto) + '" data-foco>' +
+      '<div class="cp-conv__f"><div><label class="cp-l" for="cv-de">De</label><select id="cv-de" class="cp-in">' + opts(c.de) + '</select></div>' +
+      '<button type="button" class="cp-conv__sw" data-conv-swap aria-label="Invertir monedas">' + ic(I.conv, 20) + '</button>' +
+      '<div><label class="cp-l" for="cv-a">A</label><select id="cv-a" class="cp-in">' + opts(c.a) + '</select></div></div>' +
+      '<div class="cp-conv__r" aria-live="polite"><small>Resultado</small><b data-conv-res>' + t.res + '</b><span data-conv-tasa>' + esc(t.tasa) + '</span></div>' +
+      '<p class="cp-p cp-conv__n">Cotización de referencia de hoy. Bancos y casas de cambio pueden cobrar distinto.</p></div>';
   }
   function vistaLogin() {
     return cabecera('Ingresar') + '<div class="cp-cuerpo"><p class="cp-p">Creá una cuenta o entrá para guardar tus viajes y verlos cuando quieras. No hace falta contraseña.</p>' +
@@ -255,7 +289,7 @@
     var v = S.vista;
     if ((v === 'viajes' || v === 'editar') && !usuario && !listo) { raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + cabecera('Mi cuenta') + '<div class="cp-cuerpo"><p class="cp-p" role="status">Cargando…</p></div></div>'; return; }
     if ((v === 'viajes' || v === 'editar') && !usuario) v = S.vista = 'login';
-    raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? vistaViajes() : v === 'editar' ? vistaEditar() : menu()) + '</div>';
+    raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? vistaViajes() : v === 'editar' ? vistaEditar() : v === 'conversor' ? vistaConversor() : menu()) + '</div>';
     if (v === 'login') montarGoogle(raiz.querySelector('[data-google]'), {
       ok: function () { S.error = ''; ir('menu'); },
       error: function () { S.error = 'Google no pudo validar tu cuenta. Probá con el botón de nuevo o entrá con tu correo.'; pintar(); }
@@ -271,7 +305,8 @@
     if (t.hasAttribute('data-login')) { ir('login'); return; }
     if (t.hasAttribute('data-editar')) { ir('editar'); return; }
     if (t.hasAttribute('data-tema')) { aplicarTema(temaActual() === 'night' ? 'light' : 'night'); pintar(); var f = raiz.querySelector('[data-tema]'); if (f) f.focus(); return; }
-    if (t.hasAttribute('data-instalar')) { cerrar(); if (window.CSInstalar) CSInstalar.instalar(); return; }
+    if (t.hasAttribute('data-conversor')) { ir('conversor'); return; }
+    if (t.hasAttribute('data-conv-swap')) { var c0 = S.conv.de; S.conv.de = S.conv.a; S.conv.a = c0; pintar(); var sw = raiz.querySelector('[data-conv-swap]'); if (sw) sw.focus(); return; }
     if (t.hasAttribute('data-ayuda')) { window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola! Necesito ayuda con CuántoSale.'), '_blank', 'noopener'); return; }
     if (t.hasAttribute('data-terminos')) { window.open('/terminos', '_blank', 'noopener'); return; }
     if (t.hasAttribute('data-google')) { S.error = ''; loginGoogle().catch(function () { S.error = 'No pudimos conectar con Google. Probá de nuevo en un momento.'; pintar(); }); return; }

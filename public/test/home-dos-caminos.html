@@ -266,6 +266,24 @@
 </style>
 <link rel="stylesheet" href="web.css">
 <link rel="stylesheet" href="layout.css">
+<style>
+  /* Tarjetas de los dos caminos: icono y titulo en una fila, descripcion y el boton abajo, siempre adentro de la tarjeta
+     (antes el boton se salia por abajo en escritorio). Va despues de web.css para ganarle a su grilla de "i t / i c". */
+  html[data-pagina="home"] .m-cards .m-card{display:flex!important;flex-direction:column;align-items:flex-start;gap:8px;height:auto!important;min-height:0!important;padding:18px 20px 22px!important;box-sizing:border-box}
+  html[data-pagina="home"] .m-card__hd{display:flex;align-items:center;gap:12px}
+  html[data-pagina="home"] .m-cards .m-card>*{align-self:flex-start!important;margin-left:0!important;margin-right:0!important;text-align:left!important}
+  html[data-pagina="home"] .m-cards .m-card .m-card__icon{flex:0 0 40px;width:40px!important;height:40px!important;margin:0;border-radius:50%}
+  html[data-pagina="home"] .m-cards .m-card .m-card__icon svg{width:22px;height:22px}
+  html[data-pagina="home"] .m-card__hd b{font-family:var(--fh);font-size:18px;font-weight:800;line-height:1.2;color:#0B1F3A}
+  html[data-pagina="home"][data-theme="night"] .m-card__hd b{color:#fff}
+  html[data-pagina="home"] .m-card__d{display:block;margin:0 0 6px;font-size:14px;font-weight:500;line-height:1.45;color:#64748b}
+  html[data-pagina="home"][data-theme="night"] .m-card__d{color:#AEB9C8}
+  html[data-pagina="home"] .m-cards .m-card .m-card__cta{margin-top:auto!important;width:auto!important;min-width:0!important;min-height:44px;height:auto!important;padding:0 20px!important;justify-content:center}
+  @media (min-width:1024px){
+    html[data-pagina="home"] .hx .hx-hero .m-cards{align-items:stretch}
+    html[data-pagina="home"] .m-cards .m-card .m-card__cta{min-width:240px!important}
+  }
+</style>
 </head>
 <body>
 <div class="phone">
@@ -297,25 +315,15 @@
           <p class="hx-hero__sub">Calculá vuelos, alojamiento, traslados y gastos en destino, todo en un solo lugar.</p>
             <div class="m-cards">
             <a class="m-card" href="home-destino.html?fuente=home_card_destino" data-evento="home_camino" data-camino="ya_se_donde" data-fuente="home_card_destino">
-              <span class="m-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-              </span>
-              <span class="m-card__txt">
-                <b>Ya sé dónde quiero ir</b>
-                <small>Elegí tu destino y calculá cuánto necesitás para viajar.</small>
-                <span class="m-card__cta">Calcular mi viaje <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-              </span>
+              <span class="m-card__hd"><span class="m-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span><b>Ya sé dónde quiero ir</b></span>
+              <small class="m-card__d">Elegí tu destino y calculá cuánto necesitás para viajar.</small>
+              <span class="m-card__cta">Calcular mi viaje <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
             </a>
 
             <a class="m-card m-card--main" href="home-presupuesto.html?fuente=home_card_presupuesto" data-evento="home_camino" data-camino="no_se_donde" data-fuente="home_card_presupuesto">
-              <span class="m-card__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-              </span>
-              <span class="m-card__txt">
-                <b>Sorprendeme</b>
-                <small>Decinos cuánto querés gastar y te mostramos destinos que entran en tu presupuesto.</small>
-                <span class="m-card__cta">Ver destinos para mi presupuesto <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-              </span>
+              <span class="m-card__hd"><span class="m-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></span><b>Sorprendeme</b></span>
+              <small class="m-card__d">Decinos cuánto querés gastar y te mostramos destinos que entran en tu presupuesto.</small>
+              <span class="m-card__cta">Buscar por presupuesto <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
             </a>
             </div>
         </div>

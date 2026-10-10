@@ -101,6 +101,31 @@
   .c-mapa__h{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--ink2)}
   .c-mapa__h b{color:var(--ink);font-size:13px}
   .c-mapa .roadtrip-map{height:260px;border-radius:0}
+  /* Pantalla "Tu ruta en auto" (pant4) */
+  .c-rt{display:grid;gap:14px;width:100%;max-width:800px;margin:0 auto;padding-bottom:40px}
+  .c-rt__h h1{margin:4px 0 2px}
+  .c-rt__h .c-sub{margin:0}
+  .c-rt__card{overflow:hidden;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));box-shadow:0 3px 10px rgba(16,35,62,.08)}
+  .c-rt__map{height:300px!important;border-radius:0!important}
+  @media (min-width:768px){.c-rt__map{height:380px!important}}
+  .c-rt__stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line)}
+  .c-rt__stats div{padding:12px 14px;border-left:1px solid var(--line)}
+  .c-rt__stats div:first-child{border-left:0}
+  .c-rt__stats small{display:block;font-size:11.5px;font-weight:700;color:var(--ink2)}
+  .c-rt__stats b{display:block;margin-top:2px;font-family:var(--fh);font-size:17px;font-weight:800;color:var(--ink)}
+  .c-rt__f{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--line)}
+  .c-rt__f:first-child{border-top:0}
+  .c-rt__i{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:rgba(245,197,24,.14)}
+  .c-rt__i svg{color:#B8860B!important}
+  [data-theme="night"] .c-rt__i svg{color:#F5C518!important}
+  .c-rt__t b{display:block;font-size:14.5px;font-weight:800;color:var(--ink)}
+  .c-rt__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .c-rt__v{font-family:var(--fh);font-size:17px;font-weight:800;color:var(--ink);white-space:nowrap}
+  .c-rt__tot{padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:var(--card-radius,18px);background:linear-gradient(135deg,#0F1B2D,#1A2B4A);color:#fff;box-shadow:0 10px 28px rgba(10,16,26,.18)}
+  .c-rt__tot span{display:block;font-size:13px;font-weight:700;color:#9FB0C8}
+  .c-rt__tot b{display:block;margin:2px 0;font-family:var(--fh);font-size:34px;font-weight:800;line-height:1.05;color:#fff}
+  .c-rt__tot em{font-style:normal;font-size:14px;font-weight:700;color:#F5C518}
+  [data-theme="night"] .c-rt__card .c-rt__stats,[data-theme="night"] .c-rt__card .c-rt__stats div,[data-theme="night"] .c-rt__f{border-color:rgba(255,255,255,.08)}
   @media (min-width:1024px){.c-mapa .roadtrip-map{height:340px}}
   .c-busq{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink2)}
   .c-busq input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:600}
@@ -271,7 +296,8 @@
      siempre esta. El respaldo es por si faltara alguna: antes se usaba un numero que
      ya no esta en la fila del destino (hoy es el nombre de la region). */
     var r = (window.RT_DATA || {})[S.dest] || { distanceKm: 0, roundTripKm: 0, hours: 0, tollsUsd: 0 }, ev = S.vt === 'ev';
-    var o = { km: r.roundTripKm, unaVia: r.distanceKm, horas: r.hours, peajes: r.tollsUsd, otros: 15, ev: ev };
+    /* Sin "Otros costos": el total de la ruta es combustible (o carga) + peajes, lo que se puede calcular. */
+    var o = { km: r.roundTripKm, unaVia: r.distanceKm, horas: r.hours, peajes: r.tollsUsd, otros: 0, ev: ev };
     if (ev) { var c = EV_CARS[S.em]; o.kwh = Math.round(r.roundTripKm / 100 * c[1] * 10) / 10; o.precioKwh = S.kwhp > 0 ? S.kwhp : 0.35; o.comb = Math.round(o.kwh * o.precioKwh); o.autonomia = Math.max(50, Math.round(c[2] * 0.8 / c[1] * 100)); }
     else { var kmpl = CAR_KMPL[S.cm][1]; o.litros = Math.round(r.roundTripKm / kmpl * 10) / 10; o.comb = Math.round(o.litros * FUEL_USD); }
     o.sinOtros = o.comb + o.peajes; o.total = o.sinOtros + o.otros;
@@ -280,11 +306,18 @@
   function pant4() {
     var d = destInfo(), r = ruta(), nombre = d[1].split(',')[0];
     var tieneMapa = window.CS_ROUTES_OK;
-    $('main').innerHTML = '<h1>Tu ruta en auto</h1><p class="c-sub" style="margin-bottom:8px"><b>Montevideo → ' + esc(nombre) + '</b></p>' +
-      '<div class="c-rstats"><div><small>RUTA IDA Y VUELTA</small><b>' + r.km.toLocaleString('es-UY') + ' km</b></div><div><small>MANEJO ESTIMADO</small><b>' + nf1(r.horas) + ' hs</b></div><div><small>DESTINO</small><b>' + esc(nombre) + '</b></div></div>' +
-      '<div class="c-mapa"><div class="c-mapa__h"><b>🗺️ Tu ruta en auto</b><span>Montevideo → ' + esc(nombre) + '</span></div><div class="roadtrip-map" id="rtmap" data-map-dest="' + esc(nombre) + '"></div></div>' +
-      '<div class="c-cost"><ul><li><span>' + (r.ev ? 'Carga eléctrica' : 'Combustible') + '</span><b>' + f(r.comb) + '</b></li><li><span>Peajes</span><b>' + f(r.peajes) + '</b></li><li><span>Otros costos</span><b>' + f(r.otros) + '</b></li></ul>' +
-      '<div class="c-tot"><div><b>Total ruta</b><small>(' + f(r.total / S.pxs) + ' por persona)</small></div><b>' + f(r.total) + '</b></div></div><p class="c-ej">Combustible, peajes y ruta calculados con los datos de CuántoSale; «Otros costos» es una estimación fija.</p>';
+    /* Una tarjeta con el mapa y los datos de la ruta, los costos en filas y el total en la tarjeta oscura (como el resto). */
+    var iFuel = r.ev ? '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>' : '<path d="M4 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16M4 21h11M7 8h5M15 10h2a2 2 0 0 1 2 2v4a1.5 1.5 0 0 0 3 0V8l-3-3"/>';
+    var iPeaje = '<path d="M4 20V9l8-5 8 5v11M9 20v-6h6v6M2 20h20"/>';
+    var detComb = r.ev ? nf1(r.kwh) + ' kWh × US$ ' + nf1(r.precioKwh.toFixed(2)) + '/kWh' : nf1(r.litros) + ' litros × US$ ' + nf1(FUEL_USD.toFixed(2)) + '/l';
+    $('main').innerHTML = '<div class="c-rt"><div class="c-rt__h"><h1>Tu ruta en auto</h1><p class="c-sub"><b>Montevideo → ' + esc(nombre) + '</b> · ida y vuelta</p></div>' +
+      '<section class="c-rt__card"><div class="roadtrip-map c-rt__map" id="rtmap" data-map-dest="' + esc(nombre) + '"></div>' +
+        '<div class="c-rt__stats"><div><small>Ida y vuelta</small><b>' + r.km.toLocaleString('es-UY') + ' km</b></div><div><small>Manejo estimado</small><b>' + nf1(r.horas) + ' h</b></div><div><small>Viajan</small><b>' + S.pxs + (S.pxs === 1 ? ' persona' : ' personas') + '</b></div></div></section>' +
+      '<section class="c-rt__card c-rt__costos" aria-label="Costos de la ruta">' +
+        '<div class="c-rt__f"><span class="c-rt__i">' + ic(iFuel) + '</span><span class="c-rt__t"><b>' + (r.ev ? 'Carga eléctrica' : 'Combustible') + '</b><small>' + detComb + '</small></span><b class="c-rt__v">' + f(r.comb) + '</b></div>' +
+        '<div class="c-rt__f"><span class="c-rt__i">' + ic(iPeaje) + '</span><span class="c-rt__t"><b>Peajes</b><small>Estimados para el recorrido</small></span><b class="c-rt__v">' + f(r.peajes) + '</b></div></section>' +
+      '<section class="c-rt__tot" aria-label="Total de la ruta"><div><span>Total de la ruta</span><b>' + f(r.total) + '</b><em>' + f(r.total / S.pxs) + ' por persona</em></div></section>' +
+      '<p class="c-ej">Combustible, peajes y ruta calculados con los datos de CuántoSale.</p></div>';
     $('foot').innerHTML = '<button type="button" class="c-btn" data-agregar="1">Continuar a Alojamiento →</button>';
     montarMapa();
   }
@@ -323,7 +356,8 @@
       var encuadrar = function () {
         map.invalidateSize(false);
         map.setMinZoom(0);
-        map.fitBounds(line.getBounds(), { paddingTopLeft: [34, 62], paddingBottomRight: [34, 74], animate: false });
+        /* Margen de sobra arriba y abajo: las etiquetas de origen y destino van por fuera del punto y se cortaban. */
+        map.fitBounds(line.getBounds(), { paddingTopLeft: [44, 78], paddingBottomRight: [44, 84], animate: false });
         map.setMinZoom(Math.max(map.getBoundsZoom(base.bbox, true), map.getZoom() - 1.5));
       };
       encuadrar();

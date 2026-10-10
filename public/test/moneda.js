@@ -133,5 +133,7 @@
   /* tasa(): cuanto vale 1 dolar en la moneda elegida. usdDe(code, monto): ese monto pasado a dolares (null sin tasa). */
   function tasaActiva() { return activa().t; }
   function usdDe(c, monto) { var t = tasa(c); return t ? Number(monto) / t : null; }
-  window.CSMoneda = { fmt: fmt, simbolo: simbolo, code: code, tasa: tasaActiva, usdDe: usdDe, set: set, alCambiar: alCambiar, selector: selector, pintar: pintarSelectores };
+  /* Para el conversor del panel de la cuenta: tasa de cualquier moneda (cuanto vale 1 USD; null sin tasa) y la lista. */
+  function monedas() { return ST.monedas.slice(); }
+  window.CSMoneda = { fmt: fmt, simbolo: simbolo, code: code, tasa: tasaActiva, tasaDe: tasa, monedas: monedas, usdDe: usdDe, set: set, alCambiar: alCambiar, selector: selector, pintar: pintarSelectores };
 })();
