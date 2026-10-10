@@ -396,12 +396,20 @@
   .ah-periodo p:last-child{margin-bottom:0}
   .ah-periodo .ah-pb{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:0 0 10px}
   .ah-periodo .ah-pb i{display:block;height:100%;border-radius:6px;background:#F5C518;transition:width .5s cubic-bezier(.2,.8,.2,1)}
-  .ah-periodo.is-ok{border-color:#0B1F3A;background:#FBE7B0;box-shadow:4px 4px 0 #0B1F3A}
-  .ah-periodo.is-ok h3{color:#3A2C05}
-  .ah-periodo.is-ok p{color:#3A2C05}
-  .ah-periodo.is-ok .ah-pb{background:rgba(11,31,58,.15)}
-  .ah-periodo.is-ok .ah-pb i{background:#0B1F3A}
-  .ah-extra{display:inline-block;padding:3px 10px;border-radius:99px;background:#0B1F3A;color:#fff;font-size:12px;font-weight:800}
+  /* Meta del periodo cumplida: el verde de "logrado / ahorro" de toda la app ("Más barato", "Reservado ✓"),
+     con la misma tarjeta de borde fino que el resto (antes amarillo crema con sombra negra dura). */
+  .ah-periodo.is-ok{border-color:rgba(18,120,79,.35);background:#EAF7F1;box-shadow:none}
+  .ah-periodo.is-ok h3{color:#12784F}
+  .ah-periodo.is-ok p{color:#2F4A3F}
+  .ah-periodo.is-ok .ah-pb{background:rgba(18,120,79,.15)}
+  .ah-periodo.is-ok .ah-pb i{background:#16A34A}
+  .ah-extra{display:inline-block;padding:2px 9px;border-radius:6px;background:#D1F2E0;color:#12784F;font-size:12px;font-weight:800}
+  [data-theme="night"] .ah-periodo.is-ok{border-color:rgba(74,222,128,.35);background:#10291F}
+  [data-theme="night"] .ah-periodo.is-ok h3{color:#5AD19A}
+  [data-theme="night"] .ah-periodo.is-ok p{color:#C5D6CE}
+  [data-theme="night"] .ah-periodo.is-ok .ah-pb{background:rgba(74,222,128,.15)}
+  [data-theme="night"] .ah-periodo.is-ok .ah-pb i{background:#4ADE80}
+  [data-theme="night"] .ah-extra{background:rgba(74,222,128,.16);color:#86EFAC}
   .ah-guardado{margin:0 0 6px;text-align:center;font-size:12.5px;color:var(--ink2)}
   .ah-guardado button{border:0;background:transparent;padding:0;font:inherit;font-weight:800;color:var(--hx-navy);text-decoration:underline;cursor:pointer}
   .g-bote{animation:g-check .35s ease}
@@ -440,7 +448,7 @@
       <!-- Paso 1: crear la meta -->
       <section id="ah-nueva" hidden>
         <h1 class="ah-h">Juntá para tu viaje, <em>de a poquito</em>.</h1>
-        <p class="ah-lead">Elegí el viaje y te decimos cuánto cuesta entero, con el vuelo a precio real, y cuánto juntar para llegar.</p>
+        <p class="ah-lead">Elegí el viaje y te decimos cuánto cuesta entero y cuánto juntar para llegar.</p>
 
         <div class="ah-card">
           <p class="ah-lab">¿A dónde?</p>
@@ -608,12 +616,7 @@
       })
       .then(function (v) { clearTimeout(tm); return v; }, function (e) { clearTimeout(tm); throw e; });
   }
-  function textoBase(b) {
-    if (!b) return '';
-    return b.pasajes === 'real'
-      ? 'Vuelo a precio real' + (b.aerolinea ? ' (' + b.aerolinea + ')' : '') + '. Alojamiento, comidas y traslados son estimaciones de CuántoSale.'
-      : 'Todavía no hay tarifa real de vuelo para esas fechas: usamos una estimación. Alojamiento, comidas y traslados también son estimados.';
-  }
+  function textoBase() { return ''; }
 
   /* ---------- formulario ---------- */
   function mesesLista() { var o = [], h = new Date(); for (var i = 1; i <= 12; i++) { var d = new Date(h.getFullYear(), h.getMonth() + i, 1); o.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')); } return o; }
@@ -632,7 +635,7 @@
   function recalcular() {
     F.meta = 0; F.base = null; pintarForm();
     if (!F.dest || !F.mes) { $('ah-meta-n').textContent = !F.dest ? 'Elegí un destino' : 'Elegí el mes'; return; }
-    $('ah-meta-n').textContent = 'Buscando el vuelo real…';
+    $('ah-meta-n').textContent = 'Calculando…';
     var mia = ++gen;
     traerMeta(F.dest, F.pax, F.noches, F.mes, F.estilo).then(function (r) {
       if (mia !== gen) return; F.meta = r.meta; F.base = r.base; $('ah-meta-n').textContent = fm(r.meta); pintarForm();
@@ -683,7 +686,7 @@
       c.className = 'g-chispa';
       c.style.cssText = 'background:' + cols[i % 4] + ';--x:' + Math.cos(a) * d + 'px;--y:' + Math.sin(a) * d + 'px;top:50%;left:50%';
       el.appendChild(c); setTimeout(function (c) { c.remove(); }, 800, c);
-    }
+    $('ah-fuente').textContent = '';
   }
   function pintar() {
     var j = suma(A.aportes || []), pct = Math.min(100, Math.floor(j / A.meta * 100)), falta = Math.max(0, A.meta - j), sobra = Math.max(0, j - A.meta), u = unidad();
@@ -763,7 +766,7 @@
     F = { dest: A.dest, pax: A.pax, noches: A.noches, mes: A.mes, estilo: A.estilo || 'eq', ritmo: A.ritmo || 'mes', meta: 0, base: null }; mostrar(true);
   });
   $('ah-act').addEventListener('click', function () {
-    var b = $('ah-act'); b.disabled = true; b.textContent = 'Buscando el vuelo real…';
+    var b = $('ah-act'); b.disabled = true; b.textContent = 'Calculando…';
     delete cache[[A.dest, A.pax, A.noches, A.mes, A.estilo || 'eq'].join('|')];
     traerMeta(A.dest, A.pax, A.noches, A.mes, A.estilo || 'eq').then(function (r) {
       var igual = Math.abs(r.meta - A.meta) < 1, antes = A.meta;

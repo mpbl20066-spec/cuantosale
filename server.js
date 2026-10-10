@@ -2834,13 +2834,15 @@ async function fetchGrupoNombre(groupId) {
    la PWA ya instalada, que precachea el service worker). Para sacarla de la raiz basta cambiar NUEVO (ej. '/nuevo'). */
 const NUEVO = '';
 const NUEVO_PAGINAS = {
-  '': 'home-dos-caminos', destinos: 'home-destino', presupuesto: 'home-presupuesto', planificar: 'home-flujo',
+  '': 'home2', destinos: 'home-destino', presupuesto: 'home-presupuesto', planificar: 'home-flujo',
   ruta: 'home-calcular', detalle: 'home-detalle', resumen: 'home-costo', reserva: 'home-reserva', guias: 'home-guias', guia: 'home-guia'
 };
 /* Paginas que se indexan: la home. El resto son herramientas que dependen de parametros y siguen con noindex. */
 const NUEVO_INDEXABLES = { '': true };
 const NUEVO_POR_ARCHIVO = {};
 Object.keys(NUEVO_PAGINAS).forEach(function (k) { NUEVO_POR_ARCHIVO[NUEVO_PAGINAS[k] + '.html'] = (NUEVO + (k ? '/' + k : '')) || '/'; });
+/* La home anterior (dos caminos) ya no es la raiz, pero las otras paginas siguen enlazando a ella: tambien lleva a la home. */
+NUEVO_POR_ARCHIVO['home-dos-caminos.html'] = (NUEVO || '/');
 const NUEVO_SLUGS = Object.keys(NUEVO_PAGINAS).filter(Boolean);
 function nuevoSlug(pathname) {
   const base = NUEVO + '/';

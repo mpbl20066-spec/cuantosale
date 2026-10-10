@@ -1,0 +1,575 @@
+﻿<!doctype html>
+<html lang="es" data-theme="light" data-pagina="home">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Armá tu viaje a Brasil desde Uruguay y mirá cuánto cuesta en total: vuelo, traslados, alojamiento y extras.">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<meta name="theme-color" content="#F7F8FA">
+<title>CuántoSale · ¿Con cuánta plata contás?</title>
+<script src="tema.js"></script>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="instalar.js" defer></script>
+<script src="moneda.js"></script>
+<link rel="preload" as="image" href="home-portada2.jpg" fetchpriority="high" media="(min-width: 768px)">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="cuenta.css">
+<style>
+  /* Home con dos caminos. Las tarjetas van superpuestas sobre la foto,
+     con margen negativo, para que entren junto con los destinos. */
+  body{background:#E9EDF3;margin:-110px;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:var(--fb)}
+  [data-theme="night"] body{background:#05080D}
+
+  .phone{position:relative;width:390px;max-width:100%;height:800px;max-height:calc(100vh - 32px);background:var(--bg);border:10px solid #0A101A;border-radius:48px;box-shadow:0 24px 60px rgba(10,16,26,.28);overflow:hidden;display:flex;flex-direction:column}
+  .status{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:14px 26px 4px;font-size:14px;font-weight:700;color:var(--ink)}
+  .status__icons{display:flex;gap:6px;align-items:center}
+  .scroll{flex:1;overflow-y:auto;padding:0 18px 20px;scrollbar-width:none}
+  .scroll::-webkit-scrollbar{display:none}
+
+  .m-head{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
+  .m-logo{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:800;font-size:22px;color:var(--ink);letter-spacing:-.01em}
+  .m-tag{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+  .m-head__r{display:flex;align-items:center;gap:6px}
+  .tabs__mon,.tabs__sep{display:none}
+  @media (min-width:768px){.tabs__mon{display:inline-flex;align-items:center;margin-left:4px}.tabs__sep{display:block;align-self:center;width:1px;height:34px;margin:0 8px;background:var(--line)}}
+  .m-menu{width:40px;height:40px;border:0;background:transparent;display:grid;place-content:center;gap:5px;cursor:pointer}
+  .m-menu span{display:block;width:22px;height:2.5px;border-radius:2px;background:var(--ink)}
+  /* Tarjetas de los dos caminos (formato anterior, con iconos SVG) */
+  .m-cards{position:relative;z-index:3;display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 16px}
+  @media (min-width:768px){.m-cards{grid-template-columns:1fr 1fr;gap:14px}}
+  .m-card{display:flex;align-items:flex-start;gap:12px;padding:14px;background:#ffffff;border:1px solid rgba(226,232,240,.6);border-radius:16px;color:var(--ink);text-decoration:none;box-shadow:0 8px 24px rgba(10,16,26,.14),0 2px 6px rgba(10,16,26,.06);transition:transform .18s ease,box-shadow .18s ease}
+  @media (min-width:768px){.m-card{padding:16px}}
+  .m-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(10,16,26,.18),0 3px 8px rgba(10,16,26,.08)}
+  .m-card:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .m-card__icon{flex:none;width:40px;height:40px;border-radius:50%;background:var(--m-badge);color:var(--m-badge-ink);display:grid;place-items:center}
+  .m-card__icon svg{width:22px;height:22px}
+  .m-card--main .m-card__icon{background:var(--m-main);color:var(--m-main-ink)}
+  .m-card__txt{display:flex;flex-direction:column;flex:1;min-width:0}
+  .m-card__txt b{display:block;font-family:var(--fh);font-size:15px;font-weight:700;color:#0B1F3A;margin:0 0 3px 0;line-height:1.25}
+  @media (min-width:768px){.m-card__txt b{font-size:16px}}
+  .m-card__txt small{display:block;font-size:12px;font-weight:500;color:#64748b;line-height:1.4;margin:0 0 10px 0}
+  @media (min-width:768px){.m-card__txt small{font-size:13px}}
+  .m-card__cta{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding:8px 14px;border-radius:10px;background:var(--action-bg);color:var(--action-ink);font-family:var(--fb);font-size:12.5px;font-weight:700;line-height:1.2;white-space:nowrap;width:fit-content;transition:gap .18s ease}
+  @media (min-width:768px){.m-card__cta{font-size:13px}}
+  .m-card:hover .m-card__cta{gap:10px}
+  .m-card__tag{display:inline-block;margin:0 0 4px 0;padding:2px 8px;border-radius:99px;background:var(--m-badge);color:var(--m-main-ink);font-size:10px;font-weight:800;letter-spacing:.02em;width:fit-content}
+  :root{--m-badge:#FBE7B0;--m-badge-ink:var(--azul);--m-main:#F7C325;--m-main-ink:#3A2C05}
+  /* Tarjetas anteriores dentro del hero nuevo, mas compactas para bajar la altura de la portada */
+  .hx .m-cards{margin:0;gap:12px}
+  .hx .m-card{background:#fff}
+
+  .hx-how{max-width:1200px;margin:0 auto;padding:28px 0 4px}
+  .hx-how h2{margin:0 0 14px;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
+  .hx-steps{display:grid;grid-template-columns:1fr;gap:12px;margin:0;padding:0;list-style:none}
+  .hx-step{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--hx-border);border-radius:16px;background:#fff}
+  .hx-step__n{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--hx-yellow);color:var(--hx-navy);font-family:var(--fh);font-size:16px;font-weight:800}
+  .hx-step b{display:block;margin:0 0 3px;font-family:var(--fh);font-size:15px;font-weight:700;color:var(--hx-navy)}
+  .hx-step p{margin:0;font-size:13px;line-height:1.5;color:var(--hx-gray)}
+  .hx-foot{margin:24px calc(var(--hx-pad) * -1) calc(var(--hx-pb) * -1);padding:20px var(--hx-pad);background:var(--hx-navy);color:#CBD5E1}
+  .hx-foot__in{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-start;justify-content:space-between;max-width:1200px;min-height:40px;margin:0 auto}
+  .hx-foot__logo{display:inline-flex;align-items:center;gap:9px;text-decoration:none!important}
+  .hx-foot__logo b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.05;color:#fff}
+  .hx-foot__logo small{display:block;max-width:none!important;margin:0;font-size:11.5px;font-weight:500;color:#CBD5E1}
+  .hx-foot nav{display:flex;flex-wrap:wrap;align-items:center;gap:0 22px}
+  .hx-foot nav a,.hx-foot nav .hx-cookies{display:inline-flex;align-items:center;min-height:44px;margin:0;padding:0;line-height:1.2;vertical-align:middle}
+  .hx-foot a{color:#fff;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+  .hx-foot a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .hx-foot__brand{flex:1 1 300px;min-width:0}
+  .hx-foot__brand p{margin:8px 0 0;max-width:34ch;font-size:13.5px;line-height:1.45;color:#CBD5E1}
+  .hx-foot__logo small{font-size:12.5px!important;font-weight:700!important;color:#F5C518!important}
+  .hx-foot .hx-foot__legal{display:block;flex:1 1 100%;max-width:none;margin-top:4px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);font-size:12px;line-height:1.45;color:#94A3B8}
+  .hx{--hx-pb:20px}
+  @media (min-width:768px){
+    .hx{--hx-pb:48px}
+    .hx-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .hx-how h2{font-size:18px}
+    .hx-how{padding-top:36px}
+  }
+  @media (min-width:1024px){
+    .hx{--hx-pb:56px}
+    /* hero mas bajo: la altura la da el contenido, no un minimo */
+    [data-pagina="home"] .hx .m-cards{margin:0;gap:20px}
+    [data-pagina="home"] .hx .m-card{padding:18px 22px;column-gap:18px;row-gap:12px;align-items:center;background:rgba(255,255,255,.96)}
+    [data-pagina="home"] .hx .m-card__icon{width:56px;height:56px}
+    [data-pagina="home"] .hx .m-card__icon svg{width:28px;height:28px}
+    [data-pagina="home"] .hx .m-card__txt b{font-size:20px}
+    [data-pagina="home"] .hx .m-card__txt small{margin-top:4px;max-width:none;font-size:15px}
+    [data-pagina="home"] .hx .m-card__cta{min-height:42px;padding:0 20px;font-size:15px}
+  }
+  .m-menu:focus-visible,.hx-card:focus-visible,.hx-more:focus-visible,.hx-dest:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+  /* ==========================================================
+     HOME NUEVO (diseño de la home en React): portada a color en desktop, dos
+     tarjetas blancas con boton amarillo y destinos populares en grilla.
+     La cabecera (logo/menu en celular, barra de arriba en desktop) no cambia.
+     ========================================================== */
+  :root{--hx-navy:#0B1F3A;--hx-gray:#64748B;--hx-border:#E2E8F0;--hx-yellow:#F7C325}
+  .hx{grid-column:1/-1;--hx-pad:18px}
+  @media (min-width:768px){.hx{--hx-pad:32px}}
+  @media (min-width:1024px){.hx{--hx-pad:var(--hpad,40px)}}
+  .hx-hero{position:relative;display:flex;align-items:center;margin:0 calc(var(--hx-pad) * -1);padding:0 var(--hx-pad);overflow:hidden}
+  .hx-hero__bg{display:none}
+  .hx-hero__in{position:relative;width:100%;max-width:1200px;margin:0 auto;padding:6px 0 20px}
+  .hx-hero__txt{margin-top:14px}
+  .hx-hero h1{margin:0 0 6px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.15;color:var(--hx-navy)}
+  /* Antetitulo de la portada: chico, en mayusculas, en el color de la marca */
+  .hx-hero__eye{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B8860B}
+  [data-theme="night"] .hx-hero__eye{color:#F5C518}
+  .hx-hero__sub{margin:0 0 16px;max-width:36rem;font-size:14px;line-height:1.5;color:var(--ink2)}
+  .hx-cards{display:grid;grid-template-columns:1fr;gap:12px}
+  .hx-card{display:flex;align-items:flex-start;gap:12px;padding:16px;border:1px solid var(--hx-border);border-radius:16px;background:#fff;color:var(--hx-navy);text-align:left;text-decoration:none;transition:background-color .15s ease}
+  .hx-card:hover{background:#F8FAFC}
+  .hx-card__ico{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--hx-yellow);box-shadow:0 1px 2px rgba(10,16,26,.12);font-size:16px;line-height:1}
+  .hx-card__txt{display:flex;flex-direction:column;flex:1;min-width:0}
+  .hx-card__txt b{display:block;margin:0 0 2px;font-family:var(--fh);font-size:15px;font-weight:700;line-height:1.3}
+  .hx-card__txt p{margin:0 0 12px;font-size:12px;line-height:1.55;color:var(--hx-gray)}
+  .hx-card__txt p strong{font-weight:700}
+  .hx-card__cta{display:inline-flex;align-items:center;gap:6px;width:fit-content;padding:7px 12px;border-radius:8px;background:var(--hx-yellow);color:var(--hx-navy);font-family:var(--fb);font-size:12px;font-weight:600;line-height:1.2;transition:gap .15s ease}
+  .hx-card:hover .hx-card__cta{gap:10px}
+
+  .hx-sec{max-width:1200px;margin:0 auto;padding:20px 0 4px}
+  .hx-sec__h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .hx-sec__h h2{margin:0;font-family:var(--fh);font-size:16px;font-weight:700;color:var(--hx-navy)}
+  .hx-sec__nota{margin:-4px 0 12px;font-size:12.5px;font-weight:500;line-height:1.45;color:var(--ink2)}
+  .hx-more{border:0;background:transparent;color:var(--ink);font-family:var(--fb);font-size:14px;font-weight:700;cursor:pointer;padding:4px}
+  .hx-more:hover{color:var(--hx-navy)}
+  .hx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .hx-dest{position:relative;display:block;height:128px;padding:0;border:0;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#60A5FA,#06B6D4);cursor:pointer;text-align:left}
+  .hx-dest img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+  .hx-dest:hover img{transform:scale(1.05)}
+  .hx-dest::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.7),rgba(0,0,0,.2) 50%,transparent)}
+  .hx-dest span{position:absolute;left:0;right:0;bottom:0;z-index:1;padding:12px;color:#fff;font-size:14px;font-weight:700;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+  .hx-dest small{display:block;margin-top:1px;font-size:11px;font-weight:500;color:rgba(255,255,255,.8)}
+  .hx-dest em{display:block;margin-top:4px;font-style:normal;font-size:12px;font-weight:800;color:var(--accent)}
+
+  @media (min-width:768px){
+    .hx-head{display:none}
+    .hx-hero{background:#0B1F3A}
+    .hx-hero__bg{display:block;position:absolute;inset:0;background:url(home-portada2.jpg) 50% 50%/cover}
+    .hx-hero__bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.7),rgba(0,0,0,.4) 50%,rgba(0,0,0,.2))}
+    .hx-hero__in{max-width:1200px;padding:26px 0 28px}
+    .hx-hero__txt{margin-top:0}
+    .hx-hero h1{margin-bottom:6px;font-size:34px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.45)}
+    .hx-hero__sub{margin-bottom:16px;font-size:14px;color:rgba(255,255,255,.9);text-shadow:0 1px 6px rgba(0,0,0,.45)}
+    .hx-hero__eye{color:#F5C518;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+    .hx-cards{grid-template-columns:1fr 1fr;gap:16px;max-width:56rem}
+    .hx-card{padding:20px;border:0;background:rgba(255,255,255,.95);backdrop-filter:blur(4px)}
+    .hx-card:hover{background:#F8FAFC}
+    .hx-card__txt b{font-size:16px}
+    .hx-card__txt p{font-size:13px}
+    .hx-card__cta{font-size:13px;padding:7px 12px}
+    .hx-sec{padding-top:24px}
+    .hx-sec__h h2{font-size:18px}
+    .hx-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+    .hx-dest{height:144px}
+  }
+
+
+  /* ---- Ajustes de proporcion (revision de la home en desktop) ----
+     Destinos: tarjetas 3:2 (antes alto fijo de 128/144px, que recortaba el paisaje), foto centrada y degradado oscuro
+     en el 40 % inferior para que el nombre se lea tambien sobre fotos claras. */
+  .hx-grid .hx-dest{height:auto;aspect-ratio:3/2}
+  .hx-grid .hx-dest img{object-fit:cover;object-position:center}
+  .hx-grid .hx-dest::after{background:linear-gradient(to top,rgba(0,0,0,.8),transparent 50%)}
+  .hx-grid .hx-dest{transition:transform .2s ease,box-shadow .2s ease}
+  .hx-grid .hx-dest:hover{transform:scale(1.03);box-shadow:0 12px 28px rgba(10,30,70,.28)}
+  .hx-grid .hx-dest:hover img{transform:none}
+  .hx-grid .hx-dest span{padding:14px;font-size:16px;font-weight:700}
+  .hx-grid .hx-dest small{margin-top:2px;font-size:12px;font-weight:400;color:rgba(255,255,255,.8)}
+  .hx-grid .hx-dest:nth-child(5){display:none}
+  @media (min-width:1024px){
+    /* Cabecera de 65px con sombra sutil */
+    html[data-pagina="home"] .tabs{height:65px;box-sizing:border-box;padding-top:0;padding-bottom:0;align-items:center;border-bottom:0;box-shadow:0 1px 8px rgba(10,30,70,.08)}
+    /* Portada: 380px de alto, velo uniforme del 30 %; las tarjetas montadas 40px sobre su borde inferior (sin hueco). */
+    html[data-pagina="home"] .hx .hx-hero{height:380px;align-items:stretch;overflow:visible}
+    html[data-pagina="home"] .hx .hx-hero__bg{background-position:50% 48%}   /* recorta cielo por arriba, conserva morro y playa */
+    html[data-pagina="home"] .hx .hx-hero__bg::after{background:rgba(0,0,0,.3)}
+    html[data-pagina="home"] .hx .hx-hero__in{display:flex;flex-direction:column;padding:34px 0 0}
+    html[data-pagina="home"] .hx .hx-hero__txt{display:flex;flex-direction:column;flex:1;min-height:0}
+    html[data-pagina="home"] .hx .hx-hero h1{margin:0 0 6px;font-size:48px;line-height:1.1}
+    html[data-pagina="home"] .hx .hx-hero__sub{margin:0;font-size:18px;color:rgba(255,255,255,.9)}
+    html[data-pagina="home"] .hx .hx-hero .m-cards{margin:auto 0 -40px;gap:20px}
+    html[data-pagina="home"] .hx .hx-hero .m-card{height:180px;box-sizing:border-box;padding:18px 26px;column-gap:18px;align-content:center;align-items:center;border-radius:16px;background:#fff;box-shadow:0 14px 36px rgba(10,30,70,.2),0 2px 6px rgba(10,30,70,.08)}
+    html[data-pagina="home"] .hx .hx-hero .m-card__icon{width:48px;height:48px;align-self:center}
+    html[data-pagina="home"] .hx .hx-hero .m-card__icon svg{width:24px;height:24px}
+    html[data-pagina="home"] .hx .hx-hero .m-card__txt b{font-size:20px;color:#0B1F3A}
+    html[data-pagina="home"] .hx .hx-hero .m-card__txt small{margin:2px 0 12px;font-size:14px;color:var(--hx-gray)}
+    html[data-pagina="home"] .hx .hx-hero .m-card__cta{justify-content:center;min-width:180px;height:45px;min-height:45px;padding:0 20px;background:#F5C518;color:#0B1F3A}
+    html[data-pagina="home"] .hx .hx-hero .m-card__tag{display:none}
+    /* lo que queda debajo de las tarjetas respeta esos 40px de superposicion */
+    html[data-pagina="home"] .hx .hx-sec{padding-top:64px}
+    /* destinos: 5 tarjetas de ~220 x 160 en un contenedor de 1200px */
+    html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:160px;aspect-ratio:auto}
+    /* footer de 80px, siempre al pie de la ventana (antes quedaba un hueco vacio debajo en pantallas altas) */
+    html[data-pagina="home"] .hx .hx-foot{box-sizing:border-box;min-height:80px;margin-top:auto}
+    html[data-pagina="home"] .hx{display:flex;flex-direction:column;min-height:calc(100vh - 65px - var(--hx-pb,0px));min-height:calc(100dvh - 65px - var(--hx-pb,0px))}
+  }
+
+
+  /* ---- Escritorio: contenedor de 1200px, tarjetas compactas y portada protagonista ----
+     Contenedor de --hx-col (1200px). Las dos tarjetas de la portada tienen un ancho maximo propio (540px), repartidas a los
+     lados, asi no se estiran ni tapan la foto: entre ellas y alrededor se ve el paisaje. Destinos populares: 5 tarjetas de ~220px. */
+  @media (min-width:768px){
+    html[data-pagina="home"] .hx{--hx-col:1200px}
+    html[data-pagina="home"] .hx .hx-hero__in,html[data-pagina="home"] .hx .hx-foot__in{max-width:var(--hx-col)}
+    html[data-pagina="home"] .hx .hx-sec,html[data-pagina="home"] .hx .hx-how{width:100%;max-width:var(--hx-col);margin-left:auto;margin-right:auto;box-sizing:border-box}
+  }
+  @media (min-width:1024px){
+    html[data-pagina="home"] .hx .hx-hero{height:clamp(300px,44vh,360px)}
+    html[data-pagina="home"] .hx .hx-hero__in{padding:clamp(20px,4vh,36px) 0 0}
+    html[data-pagina="home"] .hx .hx-hero h1{font-size:36px}
+    html[data-pagina="home"] .hx .hx-hero__sub{font-size:16px}
+    html[data-pagina="home"] .hx .hx-hero .m-cards{grid-template-columns:repeat(2,minmax(0,540px));justify-content:space-between;margin:auto 0 -40px;gap:24px}
+    html[data-pagina="home"] .hx .hx-hero .m-card{height:auto;min-height:0;padding:14px 22px;row-gap:8px;align-content:center;background:rgba(255,255,255,.94)}
+    html[data-pagina="home"] .hx .hx-hero .m-card .m-card__cta{width:260px;min-width:260px;padding:0 24px;justify-content:center;text-align:center;color:#000!important;background:#F5C518;border:0}
+    html[data-pagina="home"] .hx .hx-hero .m-card .m-card__cta svg{color:#000}
+    html[data-pagina="home"][data-theme="night"] .hx .hx-hero .m-card{background:rgba(15,23,36,.84)}
+    html[data-pagina="home"] .hx .hx-sec{padding-top:clamp(44px,6vh,56px)}
+    html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:150px;aspect-ratio:auto}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest span{padding:12px 14px;font-size:15px}
+  }
+
+  /* ---- Ajustes de proporcion y legibilidad de la home ---- */
+  /* fila "Destinos populares / Ver todos": mismo eje y misma altura de linea, para que queden nivelados */
+  .hx-sec__h h2,.hx-more{line-height:1.2}
+  .hx-more{display:inline-flex;align-items:center}
+  .hx-foot .hx-cookies{border:0;background:transparent;padding:0;font-family:var(--fb);font-size:14px;font-weight:600;color:#fff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:44px}
+  /* celular: tarjetas bien separadas, mas aire a los lados y menos hueco antes de "Destinos populares" */
+  @media (max-width:767px){[data-pagina="home"] .m-cards{gap:16px}.hx-sec{padding-top:8px}}
+  .m-card{padding:16px 18px}
+  /* destinos: degradado un poco mas largo para que el nombre se lea tambien sobre fotos claras (espuma, cielo) */
+  .hx-grid .hx-dest::after{background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.4) 40%,transparent 65%)}
+  @media (min-width:1024px){
+  }
+  /* Barra inferior */
+  .tabs{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;padding:8px 8px 22px;background:var(--surface);border-top:1px solid var(--line)}
+  .tabs__menu{display:none}
+  .tabs__lt small{display:none}
+  .tabs__lt b{font-weight:800}
+  .tabs__logo{display:none;align-items:center;gap:7px;padding-left:16px;font-family:var(--fh);font-weight:800;font-size:19px;color:var(--ink)}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 7px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:11.5px;font-weight:600;cursor:pointer;position:relative}
+  .tab svg{width:24px;height:24px}
+  .tab.is-on{color:var(--ink)}
+  .tab.is-on::after{content:"";position:absolute;bottom:0;width:28px;height:3px;border-radius:2px;background:var(--accent)}
+  .tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px;border-radius:10px}
+  .home-bar{position:absolute;bottom:7px;left:50%;width:120px;height:4px;margin-left:-60px;border-radius:2px;background:var(--ink)}
+
+  @media (max-width:520px){
+    body{display:block;padding:0;background:var(--bg)}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}
+    .status{display:none}
+  }
+</style>
+<link rel="stylesheet" href="web.css">
+<link rel="stylesheet" href="layout.css">
+<style>
+  /* ==========================================================
+     home2: capa de "game feel" (solo maqueta local, no se publica).
+     Todo lo nuevo usa el prefijo g- o va en este bloque.
+     ========================================================== */
+  @keyframes g-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes g-pop{0%{opacity:0;transform:scale(.4) rotate(-20deg)}70%{opacity:1;transform:scale(1.12) rotate(-8deg)}100%{transform:scale(1) rotate(-8deg)}}
+  @keyframes g-chip{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.1)}100%{opacity:1;transform:scale(1)}}
+  @keyframes g-shine{from{transform:translateX(-140%) skewX(-20deg)}to{transform:translateX(320%) skewX(-20deg)}}
+  @keyframes g-shine2{from{transform:translateX(-140%) skewX(-20deg)}to{transform:translateX(320%) skewX(-20deg)}}
+  @keyframes g-wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg) scale(1.08)}60%{transform:rotate(8deg) scale(1.08)}}
+  @keyframes g-ripple{to{transform:scale(1);opacity:0}}
+  @keyframes g-burst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.4)}}
+  @keyframes g-check{0%{transform:scale(.5)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+  /* Entrada escalonada */
+  .g-anim .g-in{animation:g-up .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)}
+
+  /* Tarjetas de los dos caminos: se hunden al tocar, el icono saluda, el boton brilla */
+  .m-card{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+  .m-card:active{transform:scale(.97)!important;transition-duration:.08s}
+  .m-card:hover .m-card__icon{animation:g-wiggle .5s ease}
+  .m-card__cta{position:relative;overflow:hidden}
+  .m-card__cta::after{content:"";position:absolute;top:0;bottom:0;left:0;width:35%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);transform:translateX(-140%) skewX(-20deg);pointer-events:none}
+  .m-card--main .m-card__cta::after{animation:g-shine 1.1s ease 1.3s 1}
+  .m-card:hover .m-card__cta::after{animation:g-shine2 .7s ease}
+
+  /* Ripple dorado donde se toca */
+  .g-rip{position:absolute;width:var(--s);height:var(--s);left:var(--l);top:var(--t);border-radius:50%;background:rgba(245,197,24,.35);transform:scale(0);opacity:1;pointer-events:none;animation:g-ripple .55s ease-out forwards;z-index:2}
+
+  /* Destinos: precio en pastilla que aparece con rebote, sello de "mas elegido" */
+  .hx-grid .hx-dest:active{transform:scale(.97)}
+  .hx-dest em{display:inline-block!important;width:fit-content;margin-top:6px!important;padding:3px 9px;border-radius:99px;background:#F5C518;color:#0B1F3A!important;font-size:12px;text-shadow:none;animation:g-chip .4s cubic-bezier(.2,.8,.2,1) both}
+  .g-sello{position:absolute;top:8px;right:8px;z-index:2;display:grid;place-items:center;width:58px;height:58px;border-radius:50%;border:2px dashed #0B1F3A;background:#F5C518;color:#0B1F3A;font-size:9px;font-weight:800;line-height:1.05;letter-spacing:.04em;text-align:center;text-transform:uppercase;box-shadow:0 0 0 3px #F5C518,0 4px 10px rgba(0,0,0,.3);transform:rotate(-8deg);animation:g-pop .5s cubic-bezier(.2,.8,.2,1) .9s both}
+
+  @media (max-width:767px){.g-sello{top:8px;left:8px;right:auto;width:auto;height:auto;padding:4px 8px;border-width:1.5px;border-radius:8px;font-size:9px;box-shadow:0 0 0 2px #F5C518,0 3px 8px rgba(0,0,0,.3)}.g-sello br{display:none}}
+
+  /* Ruta en 3 pasos: el avion recorre la linea y cada paso se marca al pasar */
+  .g-ruta{padding-top:28px!important}
+  .g-pasos{position:relative;display:grid;grid-template-columns:repeat(3,1fr);margin:0;padding:6px 0 0;list-style:none;text-align:center}
+  .g-linea{position:absolute;top:24px;left:16.66%;right:16.66%;height:3px;border-radius:2px;background:repeating-linear-gradient(90deg,var(--line) 0 8px,transparent 8px 14px)}
+  .g-linea i{position:absolute;inset:0 auto 0 0;width:0;border-radius:2px;background:#F5C518;transition:width 1.8s cubic-bezier(.5,0,.25,1)}
+  .g-avion{position:absolute;top:10px;left:16.66%;z-index:2;width:30px;height:30px;margin-left:-15px;color:var(--ink);transition:left 1.8s cubic-bezier(.5,0,.25,1)}
+  .g-avion svg{width:30px;height:30px;transform:rotate(90deg)}
+  .g-ruta.is-on .g-linea i{width:100%}
+  .g-ruta.is-on .g-avion{left:83.33%}
+  .g-ruta.is-fin .g-avion{opacity:0;transform:translateY(-14px) scale(.6);transition:left 1.8s cubic-bezier(.5,0,.25,1),opacity .35s ease,transform .35s ease}
+  .g-paso{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:0 4px}
+  .g-paso__n{display:grid;place-items:center;width:38px;height:38px;margin-bottom:8px;border-radius:50%;background:var(--surface,#fff);border:2px solid var(--line);color:var(--ink2);font-family:var(--fh);font-size:16px;font-weight:800;transition:background-color .25s,border-color .25s,color .25s}
+  .g-paso.is-ok .g-paso__n{background:#F5C518;border-color:#F5C518;color:#0B1F3A;animation:g-check .35s ease}
+  .g-paso b{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--ink)}
+  .g-paso small{margin-top:2px;font-size:11.5px;line-height:1.35;color:var(--ink2)}
+  @media (min-width:768px){.g-paso b{font-size:16px}.g-paso small{font-size:13px}}
+  .g-chispa{position:absolute;top:19px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;pointer-events:none;animation:g-burst .7s ease-out forwards}
+
+  /* ---- Home "tu plata manda": un solo control, los destinos reaccionan ---- */
+  .q{max-width:640px;margin:0 auto;padding:4px 0 24px}
+  .q-eye{margin:14px 0 8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B8860B}
+  .q-h{margin:0 0 18px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.2;letter-spacing:-.02em;color:var(--hx-navy)}
+  .q-h em{font-style:normal;background:linear-gradient(transparent 62%,#F5C518 62% 92%,transparent 92%)}
+  .q-caja{margin:0 0 14px;padding:16px 16px 12px;border-radius:18px;background:var(--surface,#fff);border:2px solid #0B1F3A;box-shadow:5px 5px 0 #0B1F3A}
+  .q-monto{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+  .q-monto b{font-family:var(--fh);font-size:40px;font-weight:800;letter-spacing:-.03em;color:var(--hx-navy);line-height:1}
+  .q-monto small{font-size:13px;font-weight:600;color:var(--ink2)}
+  .q-slide{padding:10px 0}
+  .q-slide input{-webkit-appearance:none;appearance:none;display:block;width:100%;height:12px;margin:0;border-radius:8px;outline:0;cursor:pointer;background:linear-gradient(90deg,#F5C518 var(--p,30%),var(--line) var(--p,30%))}
+  .q-slide input:disabled{cursor:progress;opacity:.55}
+  .q-slide input::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;background:#F5C518 radial-gradient(circle,#0B1F3A 0 3px,transparent 4px);border:3px solid #0B1F3A;box-shadow:0 3px 0 #0B1F3A;cursor:grab}
+  .q-slide input::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#F5C518;border:3px solid #0B1F3A;box-shadow:0 3px 0 #0B1F3A;cursor:grab}
+  .q-slide input:active::-webkit-slider-thumb{transform:scale(1.12);cursor:grabbing}
+  .q-slide input:focus-visible{outline:3px solid var(--focus);outline-offset:6px}
+  .q-ejes{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--ink2)}
+  .q-params{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:2px dashed var(--line)}
+  .q-step{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--ink2)}
+  .q-step div{display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .q-step b{min-width:2ch;text-align:center;font-family:var(--fh);font-size:22px;font-weight:800;color:var(--hx-navy)}
+  .q-step button{width:40px;height:40px;border-radius:50%;border:2px solid #0B1F3A;background:#F5C518;color:#0B1F3A;font-size:22px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 2px 0 #0B1F3A;-webkit-tap-highlight-color:transparent}
+  .q-step button:active{transform:translateY(2px);box-shadow:none}
+  .q-step button:disabled{opacity:.35;cursor:default;box-shadow:none}
+  .q-step button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .q-lista.is-cargando{opacity:.6;transition:opacity .2s}
+  .q-cuenta{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
+  .q-cuenta b{font-family:var(--fh);font-size:19px;font-weight:800;color:var(--hx-navy)}
+  .q-cuenta span{font-size:13px;color:var(--ink2)}
+  .q-lista{display:flex;flex-direction:column;gap:10px;margin:0 0 12px;padding:0;list-style:none}
+  .q-fila{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--surface,#fff);border:2px solid var(--line);color:var(--ink);text-decoration:none;transition:opacity .3s,filter .3s,border-color .3s,background-color .3s,box-shadow .3s,transform .1s}
+  .q-fila:active{transform:scale(.98)}
+  .q-fila:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  .q-fila img{flex:none;width:54px;height:54px;border-radius:50%;object-fit:cover;transition:filter .3s}
+  .q-nom{flex:1;min-width:0;font-family:var(--fh);font-size:16px;font-weight:800;line-height:1.2;color:var(--hx-navy)}
+  .q-nom small{display:block;margin-top:2px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--ink2)}
+  .q-est{flex:none;padding:5px 11px;border-radius:99px;border:2px solid var(--line);font-size:12px;font-weight:800;color:var(--ink2);white-space:nowrap}
+  .q-fila[data-est="ok"]{border-color:#0B1F3A;box-shadow:3px 3px 0 #0B1F3A}
+  .q-fila[data-est="ok"] .q-est{background:#F5C518;border-color:#F5C518;color:#0B1F3A}
+  .q-fila[data-est="justo"]{border-color:#F5C518}
+  .q-fila[data-est="justo"] .q-est{border-color:#F5C518;color:#0B1F3A}
+  .q-fila[data-est="casi"],.q-fila[data-est="no"]{opacity:.55}
+  .q-fila[data-est="casi"] img,.q-fila[data-est="no"] img{filter:grayscale(1)}
+  .q-fila[data-est="x"] .q-est{border-style:dashed}
+  .q-fila{will-change:transform}
+  .q-nota{margin:0 0 12px;font-size:12px;line-height:1.5;color:var(--ink2)}
+  .q-alt{display:block;margin-top:6px;text-align:center;font-size:14px;font-weight:700;color:var(--hx-navy);text-decoration:underline;text-underline-offset:3px}
+  .q-alt:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  .g-bote{animation:g-check .35s ease}
+  @media (prefers-reduced-motion:reduce){
+    .g-bote{animation:none!important}
+    .q-fila,.q-fila img{transition:none!important}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .g-anim .g-in,.m-card--main .m-card__cta::after,.m-card:hover .m-card__cta::after,.m-card:hover .m-card__icon,.g-sello,.hx-dest em,.g-paso.is-ok .g-paso__n{animation:none!important}
+    .g-linea i,.g-avion{transition:none!important}
+    .g-rip,.g-chispa{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status"><span>9:41</span>
+    <span class="status__icons" aria-hidden="true">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="26" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="22" height="11" rx="3.5"/><rect x="2.5" y="2.5" width="18" height="7" rx="2" fill="currentColor" stroke="none"/><path d="M24.5 4v4" stroke-linecap="round"/></svg>
+    </span>
+  </div>
+
+  <div class="scroll">
+    <div class="hx">
+    <header class="m-head hx-head">
+      <div>
+        <div class="m-logo"><svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg> cuántosale</div>
+      </div>
+      <span class="m-head__r"><span data-slot-moneda></span><button type="button" class="m-menu" aria-label="Menú"><span></span><span></span><span></span></button></span>
+    </header>
+
+    <main class="q" id="q">
+      <p class="q-eye">Primero la plata, después el viaje</p>
+      <h1 class="q-h">¿Con cuánta plata contás? <em>Te decimos a dónde llegás.</em></h1>
+
+      <div class="q-caja">
+        <div class="q-monto"><b id="q-monto" aria-live="polite">—</b><small>por persona</small></div>
+        <div class="q-slide">
+          <input type="range" id="q-rango" min="300" max="3000" step="50" value="900" aria-label="Cuánta plata tenés por persona" disabled>
+        </div>
+        <div class="q-ejes" aria-hidden="true"><span>poco</span><span>mucho</span></div>
+        <div class="q-params">
+          <div class="q-step" role="group" aria-label="Cantidad de personas"><span>Personas</span><div><button type="button" data-p="pax" data-d="-1" aria-label="Una persona menos">−</button><b id="q-pax" aria-live="polite">2</b><button type="button" data-p="pax" data-d="1" aria-label="Una persona más">+</button></div></div>
+          <div class="q-step" role="group" aria-label="Cantidad de noches"><span>Noches</span><div><button type="button" data-p="noches" data-d="-1" aria-label="Una noche menos">−</button><b id="q-noches" aria-live="polite">7</b><button type="button" data-p="noches" data-d="1" aria-label="Una noche más">+</button></div></div>
+        </div>
+      </div>
+
+      <div class="q-cuenta"><b id="q-n">Calculando…</b><span id="q-sub">Armando tu mapa de posibilidades</span></div>
+
+      <ol class="q-lista" id="q-lista">
+        <li><a class="q-fila" data-destino="rio" href="home-destino.html?destino=rio&fuente=home_plata"><img src="dest/rio-400.jpg" alt=""><span class="q-nom">Río de Janeiro<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="fln" href="home-destino.html?destino=fln&fuente=home_plata"><img src="dest/fln-400.jpg" alt=""><span class="q-nom">Florianópolis<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="buz" href="home-destino.html?destino=buz&fuente=home_plata"><img src="dest/buz-400.jpg" alt=""><span class="q-nom">Búzios<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="bcm" href="home-destino.html?destino=bcm&fuente=home_plata"><img src="dest/bcm-400.jpg" alt=""><span class="q-nom">Balneário Camboriú<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="bombinhas" href="home-destino.html?destino=bombinhas&fuente=home_plata"><img src="dest/bombinhas-400.jpg" alt=""><span class="q-nom">Bombinhas<small>Brasil</small></span><span class="q-est">…</span></a></li>
+      </ol>
+      <p class="q-nota" id="q-nota"></p>
+      <a class="q-alt" href="home-destino.html?fuente=home_prefiero_elegir">Ya sé a dónde voy: elegir destino →</a>
+    </main>
+
+    <footer class="hx-foot">
+      <div class="hx-foot__in">
+        <div class="hx-foot__brand">
+          <a class="hx-foot__logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span><b>cuántosale</b><small>Viajá tranquilo.</small></span></a>
+          <p>Calculá tu viaje completo y viajá con los números claros.</p>
+        </div>
+        <nav aria-label="Información">
+          <a href="home-guias.html?fuente=footer">Destinos</a>
+          <a href="https://wa.me/59898529851" target="_blank" rel="noopener">Contacto</a>
+          <a href="/privacidad">Privacidad</a>
+          <a href="/terminos">Términos</a>
+          <button type="button" class="hx-cookies" onclick="window.csConsentimiento&&csConsentimiento.abrir()">Preferencias de cookies</button>
+        </nav>
+        <small class="hx-foot__legal">© 2026 CuántoSale · Los precios son estimaciones y pueden variar.</small>
+      </div>
+    </footer>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Navegación principal">
+    <span class="tabs__logo" aria-hidden="true"><svg width="20" height="24" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span class="tabs__lt"><b>cuántosale</b><small>Tu viaje, sin sorpresas</small></span></span>
+    <button type="button" class="tab is-on" data-evento="home_tab" data-tab="inicio" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5z"/></svg>Inicio</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="destinos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Destinos</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>Guardados</button>
+    <button type="button" class="tab" data-evento="home_tab" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Perfil</button>
+    <span class="tabs__sep" aria-hidden="true"></span>
+    <span class="tabs__mon" data-slot-moneda></span>
+    <button type="button" class="tabs__menu" data-perfil data-evento="home_menu" aria-label="Abrir el menú de la cuenta"><span></span><span></span><span></span></button>
+    <span class="home-bar" aria-hidden="true"></span>
+  </nav>
+</div>
+<script>window.mockTrack = function () {}; /* home2: sin medicion */</script>
+<script>
+(function () {
+  /* selector de moneda (el de cuantosale.uy) en la barra */
+  if (window.CSMoneda) document.querySelectorAll('[data-slot-moneda]').forEach(function (h) { h.appendChild(CSMoneda.selector()); });
+  document.addEventListener('click', function (e) {
+    var d = e.target.closest('.hx-dest'); if (d) { location.href = 'home-destino.html?destino=' + encodeURIComponent(d.dataset.destino) + '&fuente=home_destino_popular'; return; }
+    var m = e.target.closest('.hx-more'); if (m) { location.href = 'home-destino.html?fuente=home_ver_todos'; return; }
+    var u = e.target.closest('.m-menu'); if (u && window.CSCuenta) { window.CSCuenta.abrir('menu'); return; }
+    var t = e.target.closest('.tab'); if (t && (t.dataset.tab === 'inicio' || t.dataset.tab === 'destinos')) {
+      location.href = t.dataset.tab === 'inicio' ? 'home-dos-caminos.html' : 'home-guias.html?fuente=home_tab_destinos';
+      return;
+    }
+  });
+})();
+</script>
+<script>
+/* home2: capa de "game feel" */
+(function () {
+  var quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fmt = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+
+  /* Entrada escalonada; la clase se saca al terminar para no pisar el hover */
+  if (!quieto) {
+    document.documentElement.classList.add('g-anim');
+    var n = 0;
+    ['.hx-hero__eye', '.hx-hero h1', '.hx-hero__sub', '.m-card', '.hx-sec__h', '.hx-dest'].forEach(function (sel) {
+      document.querySelectorAll('.hx ' + sel).forEach(function (el) {
+        el.style.setProperty('--d', (n++ * 70) + 'ms');
+        el.classList.add('g-in');
+        el.addEventListener('animationend', function fin(e) { if (e.target !== el) return; el.classList.remove('g-in'); el.removeEventListener('animationend', fin); });
+      });
+    });
+  }
+
+  /* Tu plata manda: los precios por persona vienen del mismo endpoint que usa la app; nunca se muestran,
+     solo deciden si cada destino "llega" con la plata elegida. Sin respuesta del servidor no se inventa nada. */
+  var rango = document.getElementById('q-rango'), lista = document.getElementById('q-lista'), PP = {}, antes = {};
+  var filas = Array.prototype.slice.call(lista.querySelectorAll('.q-fila'));
+  var fm = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  function estado(pp, b) { return pp <= b * 0.85 ? 'ok' : (pp <= b ? 'justo' : (pp <= b * 1.2 ? 'casi' : 'no')); }
+  var TXT = { ok: 'Llegás', justo: 'Justo', casi: 'Casi', no: 'Todavía no' };
+  function chispasEn(el) {
+    var cols = ['#F5C518', '#0B1F3A', '#06B6D4', '#F59E0B'];
+    for (var i = 0; i < 12; i++) {
+      var a = (i / 12) * Math.PI * 2, d = 24 + Math.random() * 22, c = document.createElement('span');
+      c.className = 'g-chispa';
+      c.style.cssText = 'background:' + cols[i % 4] + ';--x:' + Math.cos(a) * d + 'px;--y:' + Math.sin(a) * d + 'px;top:50%;left:calc(100% - 44px)';
+      el.appendChild(c); (function (c) { setTimeout(function () { c.remove(); }, 800); })(c);
+    }
+  }
+  function pintar(celebrar) {
+    var b = +rango.value, n = 0, hay = Object.keys(PP).length > 0;
+    rango.style.setProperty('--p', ((b - rango.min) / (rango.max - rango.min) * 100) + '%');
+    document.getElementById('q-monto').textContent = fm(b);
+    filas.forEach(function (fi) {
+      var k = fi.dataset.destino, pp = PP[k], e = fi.querySelector('.q-est');
+      if (!(pp > 0)) { fi.dataset.est = hay ? 'no' : 'x'; e.textContent = hay ? 'Sin datos' : '…'; fi.parentNode.style.order = 9; return; }
+      var st = estado(pp, b); fi.dataset.est = st; e.textContent = TXT[st]; fi.parentNode.style.order = Math.round(pp / 10);
+      if (st === 'ok' || st === 'justo') n++;
+      if (celebrar && !quieto && (st === 'ok') && antes[k] !== 'ok') { fi.classList.remove('g-bote'); void fi.offsetWidth; fi.classList.add('g-bote'); chispasEn(fi); }
+      antes[k] = st;
+    });
+    if (!hay) return;
+    document.getElementById('q-n').textContent = n === 0 ? 'Todavía no llegás a ninguno' : 'Llegás a ' + n + ' de ' + filas.length;
+    document.getElementById('q-sub').textContent = n === 0 ? 'Subí un poco la plata y se van encendiendo.' : (n === filas.length ? 'Te alcanza para todo. Elegí con el corazón.' : 'Los demás se encienden si subís la plata.');
+  }
+  rango.addEventListener('input', function () { pintar(true); });
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { pintar(false); });
+  var P = { pax: 2, noches: 7 }, LIM = { pax: [1, 8], noches: [2, 21] }, gen = 0, deb = null;
+  function nota() {
+    document.getElementById('q-pax').textContent = P.pax; document.getElementById('q-noches').textContent = P.noches;
+    document.getElementById('q-nota').textContent = 'Cuenta ' + P.noches + ' noches para ' + (P.pax === 1 ? '1 persona' : P.pax + ' personas') + ', saliendo de Montevideo, con vuelo, alojamiento, traslados, comidas y transporte local. La plata es por persona.';
+    document.querySelectorAll('.q-step button').forEach(function (b) { var k = b.dataset.p, d = +b.dataset.d; b.disabled = (P[k] + d < LIM[k][0] || P[k] + d > LIM[k][1]); });
+  }
+  function cargar() {
+    var mia = ++gen;
+    var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+    var dep = new Date(); dep.setDate(dep.getDate() + 45); var ret = new Date(dep); ret.setDate(ret.getDate() + P.noches);
+    var items = filas.map(function (fi) { return fi.dataset.destino + '~' + iso(dep) + '~' + iso(ret); }).join(',');
+    var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
+    document.getElementById('q-lista').classList.add('is-cargando');
+    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: String(P.pax), style: 'eq', origin: 'MVD', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function (j) {
+        if (mia !== gen) return;
+        var nuevo = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) nuevo[it.key] = it.pp; });
+        if (!Object.keys(nuevo).length) throw new Error('vacio');
+        PP = nuevo; antes = {}; rango.disabled = false; pintar(false);
+      })
+      .catch(function () {
+        if (mia !== gen) return;
+        if (Object.keys(PP).length) return; /* si ya habia datos, quedan los anteriores */
+        document.getElementById('q-n').textContent = 'No pudimos calcular ahora';
+        document.getElementById('q-sub').textContent = 'Igual podés elegir un destino y ver el viaje completo.';
+        filas.forEach(function (fi) { fi.dataset.est = 'x'; fi.querySelector('.q-est').textContent = 'Ver'; });
+      })
+      .then(function () { clearTimeout(tm); if (mia === gen) document.getElementById('q-lista').classList.remove('is-cargando'); });
+  }
+  document.querySelector('.q-params').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled) return;
+    var k = b.dataset.p; P[k] = Math.min(LIM[k][1], Math.max(LIM[k][0], P[k] + (+b.dataset.d)));
+    nota(); clearTimeout(deb); deb = setTimeout(cargar, 350);
+    /* los links llevan lo elegido */
+    filas.forEach(function (fi) { fi.href = 'home-destino.html?' + new URLSearchParams({ destino: fi.dataset.destino, pax: P.pax, fuente: 'home_plata' }).toString(); });
+  });
+  pintar(false); nota(); cargar();
+})();
+</script>
+<script src="cuenta.js"></script>
+<link rel="stylesheet" href="/gamificacion.css?v=2">
+<script defer src="/gamificacion.js?v=3"></script>
+</body>
+</html>
