@@ -1006,6 +1006,28 @@
   .af2-b.is-ini[data-tip]:hover::after{left:0;transform:none}
   .af2-b.is-fin[data-tip]:hover::after{left:auto;right:0;transform:none}
   @media (hover:none){.af2-b[data-tip]:hover::after{display:none}}
+  /* Grafico de barras de la comparativa: barras gruesas, esquinas casi rectas, precio arriba y dia abajo */
+  .af3{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin:14px 0 10px;padding-top:24px}
+  .af3-b{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:4px 0;border:0;border-radius:6px;background:transparent;color:#fff;font-family:var(--fb);cursor:pointer;transition:background .15s}
+  .af3-b:hover{background:rgba(255,255,255,.05)}
+  .af3-b:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .af3-p{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:800;color:#C5CDD8;font-variant-numeric:tabular-nums}
+  .af3-b.is-tuya .af3-p,.af3-b.is-barata .af3-p,.af3-b.is-sel .af3-p{color:#fff}
+  .af3-t{display:flex;align-items:flex-end;justify-content:center;width:100%;height:120px;border-bottom:2px solid rgba(255,255,255,.18)}
+  .af3-t i{display:block;width:72%;max-width:52px;border-radius:4px 4px 0 0;background:#3A4A63;transition:height .35s ease,background .15s}
+  .af3-b:hover .af3-t i{background:#4A5D7A}
+  .af3-b.is-tuya .af3-t i{background:#F5C518}
+  .af3-b.is-barata .af3-t i{background:#4ADE80}
+  .af3-b.is-sel .af3-t i{box-shadow:0 0 0 2px #fff}
+  .af3-d{font-size:12px;font-weight:800;color:#fff;white-space:nowrap}
+  .af3-badge{position:absolute;top:-22px;left:50%;transform:translateX(-50%);padding:2px 7px;border-radius:4px;background:rgba(74,222,128,.18);border:1px solid rgba(74,222,128,.5);color:#86EFAC;font-size:10px;font-weight:800;white-space:nowrap}
+  .af3-badge--t{background:rgba(245,197,24,.16);border-color:rgba(245,197,24,.55);color:#F5C518}
+  .af3-b.is-vacia{cursor:default;opacity:.45}
+  .af3--ghost .af3-b{cursor:default}
+  .af3--ghost .af3-t i{background:rgba(255,255,255,.12);animation:af2-lat 1.2s ease-in-out infinite alternate}
+  .af3--ghost .af3-b.is-tuya .af3-t i{background:rgba(245,197,24,.5)}
+  @media (max-width:479px){.af3{gap:6px}.af3-p{font-size:10.5px}.af3-t{height:104px}}
+  @media (prefers-reduced-motion:reduce){.af3--ghost .af3-t i{animation:none}.af3-t i{transition:none}}
   /* Tira de fechas: fichas grandes, borde grueso y esquinas casi rectas */
   /* La tira se desliza adentro de la tarjeta: sin min-width:0 el contenedor crecia con las fichas y estiraba la pagina. */
   html[data-pagina="flujo"] .phone>.f-scroll{width:100%;min-width:0;box-sizing:border-box}
@@ -1454,6 +1476,8 @@
   var ultimoAhorro = null;
   function pintarTotal() {
     var el = $('total');
+    /* El aviso "Donde podes ahorrar" se saco: el ahorro por fecha ya lo dice la comparativa de precios del paso de vuelos. */
+    el.hidden = true; return;
     el.classList.add('f-ahorro');
     /* Sin vuelo elegido todavia (buscando o sin resultados) no hay nada que comparar. */
     /* No va en la pantalla de transfer (paso 1, segunda parte): ahi solo se elige el transfer. */
@@ -1618,7 +1642,7 @@
      cuando el widget entra en pantalla (vigilarComparativa), una vez por pagina. Tocar una barra muestra el detalle y
      "Usar estas fechas" (las fechas nunca cambian solas). */
   var DIA_A = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  var diasVentana = function () { return 3; };   /* 7 dias; en celular la tira se desliza */
+  var diasVentana = function () { return window.matchMedia && window.matchMedia('(max-width:479px)').matches ? 2 : 3; };   /* 7 dias en PC, 5 en celular */
   function ahorroFechas() {
     if (MODO !== 'avion' || !VUELOS.length) return '';
     var c = S.cmp || {}, n = diasVentana();
@@ -1628,8 +1652,9 @@
     var sub = '<p class="af2-sub">Mismo viaje de ' + NOCHES + ' noches · ' + personasTxt() + '</p>';
     var caja = function (titulo, cuerpo) { return '<section class="af2" aria-labelledby="af2-h"><h2 id="af2-h" class="af2-h">' + titulo + '</h2>' + sub + cuerpo + '</section>'; };
     if (!c.estado || c.estado === 'cargando') {
-      return caja('<span aria-hidden="true">💡</span> Buscando el mejor día para salir…', '<div class="af2-s af2-s--ghost" role="status" aria-label="Buscando precios de otras fechas">' + dias.map(function (iso) {
-        return '<span class="af2-c' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af2-c__d">' + dia(iso) + '</span><span class="af2-c__p"><i></i></span><span class="af2-c__x">' + (iso === IDA ? 'Tu día' : '&nbsp;') + '</span></span>';
+      var alto = [55, 72, 46, 64, 80, 50, 68];
+      return caja('<span aria-hidden="true">💡</span> Buscando el mejor día para salir…', '<div class="af3 af3--ghost" role="status" aria-label="Buscando precios de otras fechas">' + dias.map(function (iso, k) {
+        return '<span class="af3-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af3-p">&nbsp;</span><span class="af3-t"><i style="height:' + alto[k % alto.length] + '%"></i></span><span class="af3-d">' + dia(iso) + '</span></span>';
       }).join('') + '</div>');
     }
     if (c.estado !== 'ok') return caja('<span aria-hidden="true">💡</span> Compará fechas para ahorrar', '<a class="af2-link" href="' + esc(urlVuelos(IDA, VUELTA)) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver precios por fecha en Google Flights ↗</a>');
@@ -1641,15 +1666,16 @@
     var barata = con.filter(function (x) { return tot(x) === min; })[0], ahorro = barata ? base - tot(barata) : 0;
     var hayAhorro = barata && barata.dep !== IDA && ahorro >= 1;
     var titulo = hayAhorro ? '<span aria-hidden="true">💡</span> Salí el ' + dia(barata.dep).toLowerCase() + ' y ahorrá ' + f(ahorro) : '<span aria-hidden="true">💡</span> Tu fecha es la más barata de estos días';
-    var fichas = dias.map(function (iso) {
+    var barras = dias.map(function (iso, k) {
       var x = por[iso];
-      if (!x) return '<span class="af2-c is-vacia"><span class="af2-c__d">' + dia(iso) + '</span><span class="af2-c__p">—</span><span class="af2-c__x">Sin precio</span></span>';
+      if (!x) return '<span class="af3-b is-vacia" title="Sin precio para ese día"><span class="af3-p">—</span><span class="af3-t"></span><span class="af3-d">' + dia(iso) + '</span></span>';
       var v = tot(x), dif = base - v, d = new Date(iso + 'T12:00:00');
       var esTuya = iso === IDA, esBarata = x === barata && hayAhorro;
+      var h = max > min ? 28 + 72 * (v - min) / (max - min) : 64;
       var tip = DIA_A[d.getDay()] + ' ' + fdc(iso) + ' → ' + fdc(sumarDias(iso, NOCHES)) + ': ' + f(v) + (esTuya ? ' (tu fecha)' : (Math.round(dif) ? (dif > 0 ? ', ahorrás ' + f(dif) : ', ' + f(-dif) + ' más') : ''));
-      var pie = esTuya ? 'Tu día' : (dif >= 1 ? '−' + f(dif).replace(/^[^\d]+/, '') : '&nbsp;');
-      return '<button type="button" class="af2-c' + (esTuya ? ' is-tuya' : '') + (esBarata ? ' is-barata' : '') + (dif >= 1 && !esTuya ? ' is-menos' : '') + (S.cmpSel === iso ? ' is-sel' : '') + '" data-af-sel="' + iso + '" aria-pressed="' + (S.cmpSel === iso) + '" aria-label="' + esc(tip) + '" title="' + esc(tip) + '">' +
-        '<span class="af2-c__d">' + dia(iso) + '</span><span class="af2-c__p">' + f(v) + '</span><span class="af2-c__x">' + pie + '</span></button>';
+      return '<button type="button" class="af3-b' + (esTuya ? ' is-tuya' : '') + (esBarata ? ' is-barata' : '') + (S.cmpSel === iso ? ' is-sel' : '') + '" data-af-sel="' + iso + '" aria-pressed="' + (S.cmpSel === iso) + '" aria-label="' + esc(tip) + '" title="' + esc(tip) + '">' +
+        (esBarata ? '<span class="af3-badge">Más barato</span>' : (esTuya ? '<span class="af3-badge af3-badge--t">Tu día</span>' : '')) +
+        '<span class="af3-p">' + f(v) + '</span><span class="af3-t"><i style="height:' + h.toFixed(0) + '%"></i></span><span class="af3-d">' + dia(iso) + '</span></button>';
     }).join('');
     var sel = S.cmpSel && por[S.cmpSel] && S.cmpSel !== IDA ? por[S.cmpSel] : null, det = '';
     if (sel) {
@@ -1659,7 +1685,7 @@
         '<div class="af2-acc"><button type="button" class="af2-usar" data-usar-fecha="' + sel.dep + '">Usar estas fechas</button>' +
         '<a class="af2-link" href="' + esc(urlVuelos(sel.dep, sumarDias(sel.dep, NOCHES))) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver en Google Flights ↗</a></div></div>';
     }
-    return caja(titulo, '<div class="af2-s" role="group" aria-label="Precio del vuelo por fecha de salida">' + fichas + '</div>' + det +
+    return caja(titulo, '<div class="af3" role="group" aria-label="Precio del vuelo por fecha de salida">' + barras + '</div>' + det +
       '<p class="af2-nota">Precios reales de hoy · Tocá un día para verlo · Tus fechas no cambian solas.</p>');
   }
   /* Pide los precios por fecha recien cuando el widget se ve (cada consulta gasta busquedas del proveedor). */
@@ -2452,8 +2478,6 @@
     if (S.paso < 5) { $('cta').textContent = S.paso === 1 && MODO === 'avion' && S.sub !== 't' ? 'Continuar a Transfer →' : CTAS[S.paso]; $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS) || (MODO === 'avion' && S.paso === 1 && !S.vuelo); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
     if (scrollTop) $('main').scrollTop = 0;
     vigilarComparativa();
-    var tira = $('main').querySelector('.af2-s'), tuya = tira && tira.querySelector('.is-sel') || (tira && tira.querySelector('.is-tuya'));
-    if (tira && tuya && tira.scrollWidth > tira.clientWidth) tira.scrollLeft = tuya.offsetLeft - (tira.clientWidth - tuya.clientWidth) / 2;
   }
   /* ---- Hoteles reales (Booking, via /api/hoteles de la app) ---- */
   var TIPOS = ['economico', 'intermedio', 'confort'];
