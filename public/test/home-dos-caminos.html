@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#F7F8FA">
 <title>CuántoSale · Tu viaje, sin sorpresas</title>
 <script src="tema.js"></script>
+<script src="moneda.js"></script>
 <link rel="preload" as="image" href="home-portada2.jpg" fetchpriority="high" media="(min-width: 768px)">
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
@@ -25,6 +26,9 @@
   .m-head{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
   .m-logo{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:800;font-size:22px;color:var(--ink);letter-spacing:-.01em}
   .m-tag{margin:2px 0 0;color:var(--ink2);font-size:12.5px}
+  .m-head__r{display:flex;align-items:center;gap:6px}
+  .tabs__mon{display:none}
+  @media (min-width:768px){.tabs__mon{display:inline-flex;align-items:center;margin-left:4px}}
   .m-menu{width:40px;height:40px;border:0;background:transparent;display:grid;place-content:center;gap:5px;cursor:pointer}
   .m-menu span{display:block;width:22px;height:2.5px;border-radius:2px;background:var(--ink)}
   /* Tarjetas de los dos caminos (formato anterior, con iconos SVG) */
@@ -267,7 +271,7 @@
             </div>
             <p class="m-tag">Tu viaje, sin sorpresas</p>
           </div>
-          <button type="button" class="m-menu" aria-label="Menú"><span></span><span></span><span></span></button>
+          <span class="m-head__r"><span data-slot-moneda></span><button type="button" class="m-menu" aria-label="Menú"><span></span><span></span><span></span></button></span>
         </header>
         <div class="hx-hero__txt">
           <h1>¿Qué querés hacer?</h1>
@@ -341,8 +345,7 @@
     <span class="tabs__logo" aria-hidden="true"><svg width="20" height="24" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span class="tabs__lt"><b>cuántosale</b><small>Tu viaje, sin sorpresas</small></span></span>
     <button type="button" class="tab is-on" data-evento="home_tab" data-tab="inicio" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5z"/></svg>Inicio</button>
     <button type="button" class="tab" data-evento="home_tab" data-tab="destinos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Destinos</button>
-    <button type="button" class="tab" data-evento="home_tab" data-tab="guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>Guardados</button>
-    <button type="button" class="tab" data-evento="home_tab" data-tab="perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>Perfil</button>
+    <span class="tabs__mon" data-slot-moneda></span>
     <button type="button" class="tabs__menu" data-perfil data-evento="home_menu" aria-label="Abrir el menú de la cuenta"><span></span><span></span><span></span></button>
     <span class="home-bar" aria-hidden="true"></span>
   </nav>
@@ -350,6 +353,8 @@
 <script src="home-track.js"></script>
 <script>
 (function () {
+  /* selector de moneda (el de cuantosale.uy) en la barra */
+  if (window.CSMoneda) document.querySelectorAll('[data-slot-moneda]').forEach(function (h) { h.appendChild(CSMoneda.selector()); });
   /* Precios reales en los destinos populares: el mismo endpoint que usa la app principal (/api/destinos-destacados),
      con el mismo formato "US$ 1.234". Fechas de referencia: salida en 45 dias, 7 noches, 2 personas, desde Montevideo.
      Si el servidor no responde, las tarjetas quedan como estan, sin cifra (nunca se inventa un precio). */
@@ -366,12 +371,13 @@
         Array.prototype.forEach.call(tarjetas, function (t) {
           var pp = por[t.dataset.destino], sp = t.querySelector('span');
           if (!sp || !(pp > 0)) return;
-          var e = document.createElement('em'); e.textContent = 'Desde US$ ' + Math.round(pp).toLocaleString('es-UY'); sp.appendChild(e);
+          var e = document.createElement('em'); e.dataset.usd = pp; e.textContent = 'Desde ' + (window.CSMoneda ? CSMoneda.fmt(pp) : 'US$ ' + Math.round(pp).toLocaleString('es-UY')); sp.appendChild(e);
         });
       })
       .catch(function () { /* sin precios: las tarjetas quedan sin cifra */ })
       .then(function () { clearTimeout(tm); });
   })();
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { document.querySelectorAll('.hx-dest em[data-usd]').forEach(function (e) { e.textContent = 'Desde ' + CSMoneda.fmt(+e.dataset.usd); }); });
   document.addEventListener('click', function (e) {
     var d = e.target.closest('.hx-dest'); if (d) { location.href = 'home-destino.html?destino=' + encodeURIComponent(d.dataset.destino) + '&fuente=home_destino_popular'; return; }
     var m = e.target.closest('.hx-more'); if (m) { location.href = 'home-destino.html?fuente=home_ver_todos'; return; }

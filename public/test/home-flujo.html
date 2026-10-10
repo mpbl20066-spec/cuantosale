@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maqueta — Armá tu viaje por etapas</title>
 <script src="tema.js"></script>
+<script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
 <style>
@@ -808,7 +809,8 @@
   var BUS = null;   /* { precio, dur, nombre }: se carga de /api/cotizar (transport=bus) */
   var NOMBRES = [MODO === 'auto' ? 'Auto' : (MODO === 'bus' ? 'Bus' : 'Vuelos + Traslados'), 'Alojamiento', 'Extras', 'Tu presupuesto'];
   var parametrosModo = function () { return MODO === 'auto' ? { modo: 'auto', auto: AUTO.total, km: AUTO.km, horas: AUTO.horas, comb: AUTO.comb, peajes: AUTO.peajes } : (MODO === 'bus' ? { modo: 'bus' } : {}); };
-  var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var f = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };   /* moneda elegida (moneda.js) */
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { render(false); if (typeof pintarModal === 'function') pintarModal(); });
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var $ = function (id) { return document.getElementById(id); };
   var ic = function (d, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
@@ -862,11 +864,7 @@
     { cat: 'tras', sec: 'Traslados adicionales', sub: 'Más comodidad para moverte.', ico: 'van', items: [
       { id: 'beto', cat: 'tras', nom: 'Traslado a Beto Carrero', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 120 },
       { id: 'camb', cat: 'tras', nom: 'Traslado a Balneário Camboriú', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 85 },
-      { id: 'tras3', cat: 'tras', nom: 'Traslado a Praia do Rosa', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 140 } ] },
-    { cat: 'auto', sec: 'Alquiler de auto', sub: 'Libertad para explorar a tu ritmo.', ico: 'car', items: [
-      { id: 'auto', cat: 'auto', nom: 'Auto económico', dur: '7 días', grupo: 'Hasta 5 personas · Manual · A/C', precio: 245, unidadTxt: '7 días' },
-      { id: 'auto2', cat: 'auto', nom: 'Auto compacto automático', dur: '7 días', grupo: 'Hasta 5 personas · Automático · A/C', precio: 310, unidadTxt: '7 días' },
-      { id: 'auto3', cat: 'auto', nom: 'SUV mediano', dur: '7 días', grupo: 'Hasta 5 personas · Automático · A/C', precio: 420, unidadTxt: '7 días' } ] }
+      { id: 'tras3', cat: 'tras', nom: 'Traslado a Praia do Rosa', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 140 } ] }
   ].filter(function (g) { return g.items.length; });
   HOTELES.forEach(function (h) { h.ejemplo = true; });
   var COMIDAS = 308 * k, LOCAL = 64 * k;
@@ -1100,7 +1098,7 @@
   function etiquetaDe(e, grupo) {
     var items = grupo.items;
     var baratos = items.map(function (x) { return x.precio; }).sort(function (a, b) { return a - b; });
-    if (e.cat !== 'auto' && items.length > 1 && e.precio === baratos[0]) return '💰 Mejor precio';
+    if (items.length > 1 && e.precio === baratos[0]) return '💰 Mejor precio';
     if (e.cat === 'tours' && items.length > 1 && horas(e.dur) === Math.max.apply(null, items.map(function (x) { return horas(x.dur); }))) return '🟢 Experiencia completa';
     return '';
   }
@@ -1115,13 +1113,13 @@
       '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small></div>' +
       (e.cat === 'tours' ? '<button type="button" class="x-add" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div></div>';
   }
-  var MAS_TXT = { tours: 'Ver más tours →', tras: 'Ver más traslados →', auto: 'Ver más autos →' };
-  var TITULO_X = { tours: ['🌴', 'Tours y actividades', 'Experiencias populares en '], tras: ['🚐', '¿Necesitás traslado?', 'Para moverte con comodidad'], auto: ['🚗', 'Alquiler de auto', 'Libertad para explorar a tu ritmo'] };
-  var CUANTOS_X = { tours: 3, tras: 2, auto: 1 };
+  var MAS_TXT = { tours: 'Ver más tours →', tras: 'Ver más traslados →' };
+  var TITULO_X = { tours: ['🌴', 'Tours y actividades', 'Experiencias populares en '], tras: ['🚐', '¿Necesitás traslado?', 'Para moverte con comodidad'] };
+  var CUANTOS_X = { tours: 3, tras: 2 };
   function pantalla3() {
     var cab = '<div class="ho__head"><span class="ho__headico">' + ic(I.palm, 30) + '</span><div><h1 class="f-h" style="margin:0">Extras</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">¿Qué querés sumar a tu viaje?</p></div></div>' +
       '<p class="f-sub" style="margin:6px 0 0">Sumá solo lo que quieras. Podés continuar sin agregar extras.</p>';
-    var filtros = [['todos', 'Todos'], ['tours', 'Tours'], ['tras', 'Traslados'], ['auto', 'Autos']];
+    var filtros = [['todos', 'Todos'], ['tours', 'Tours'], ['tras', 'Traslados']];
     var chipsX = '<div class="f-zchips" role="group" aria-label="Categorías" style="margin:12px 0 4px">' + filtros.map(function (c) {
       return '<button type="button" class="f-chip' + (S.fExtra === c[0] ? ' is-on' : '') + '" data-xcat="' + c[0] + '" aria-pressed="' + (S.fExtra === c[0]) + '">' + c[1] + '</button>';
     }).join('') + '</div>';

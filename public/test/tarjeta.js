@@ -15,7 +15,7 @@
   'use strict';
   var ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ESC[c]; }); };
-  var money = function (n) { return 'US$ ' + Math.round(Number(n) || 0).toLocaleString('es-UY'); };
+  var money = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0).toLocaleString('es-UY'); };
   var COLORES = { c1: '#5B9BD5', c2: '#7CB7E8', c3: '#F7C325', c4: '#F0714F', c5: '#8FA3BB', c6: '#9AA8BA', c7: '#9B7EDB' };
   /* Mismos iconos del flujo, como trazos de 24x24. */
   var ICONOS = {

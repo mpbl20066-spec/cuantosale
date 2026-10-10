@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Guía del destino · CuántoSale</title>
 <script src="tema.js"></script>
+<script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
 <style>
@@ -87,7 +88,7 @@
   var TAB = [{ id: 'hacer', nom: 'Qué hacer' }, { id: 'playas', nom: 'Playas' }, { id: 'comer', nom: 'Comida' }, { id: 'tips', nom: 'Tips' }];
   var S = { tab: 'hacer', guia: null, estado: 'cargando' };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
-  var usd = function (n) { return 'US$ ' + Math.round(Number(n) || 0); };
+  var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
 
   function cabecera() {
     return '<div class="u-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="u-hero__t"><h1>' + esc(NOM) + '</h1>' +

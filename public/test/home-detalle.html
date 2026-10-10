@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Detalle del destino · CuántoSale</title>
 <script src="tema.js"></script>
+<script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
 <style>
@@ -94,7 +95,8 @@
   var qs = new URLSearchParams(location.search), fuente = qs.get('fuente') || 'directo', debug = /[?&]debug=1/.test(location.search);
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var f = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };   /* moneda elegida (moneda.js) */
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { pintar(); });
   var ic = function (p, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
   var I = {
     ok: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16 9.5"/>',

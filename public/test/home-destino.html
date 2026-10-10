@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Elegí tu destino · CuántoSale</title>
 <script src="tema.js"></script>
+<script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
 <style>
@@ -284,7 +285,8 @@
     return [d.k, d.name, 'Brasil', rt ? rt.distanceKm : 0, d.region, d.medios || []];
   });
   var POPULARES = ['rio', 'fln', 'buz', 'bcm', 'bombinhas'];   /* los mismos cinco, y en el mismo orden, que "Destinos populares" de la portada */
-  var PRECIOS = {};   /* precio real "Desde US$ X" por persona, de /api/destinos-destacados (el mismo endpoint de la portada) */
+  var PRECIOS = {};
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { if (S.pant === 1) actualizar(); });   /* precio real "Desde US$ X" por persona, de /api/destinos-destacados (el mismo endpoint de la portada) */
   var HOY = new Date();
   var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
@@ -331,7 +333,7 @@
     return '<div class="d-grid' + (!qn() && !S.todos ? ' d-grid--pop' : '') + '">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
         '<span class="d-card__f" style="background-image:url(' + fotoDe(d[0]) + ')" aria-hidden="true"></span>' +
-        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + '</small>' + (PRECIOS[d[0]] > 0 ? '<em>Desde US$ ' + Math.round(PRECIOS[d[0]]).toLocaleString('es-UY') + '</em>' : '') + '</span></button>';
+        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + '</small>' + (PRECIOS[d[0]] > 0 ? '<em>Desde ' + (window.CSMoneda ? CSMoneda.fmt(PRECIOS[d[0]]) : 'US$ ' + Math.round(PRECIOS[d[0]]).toLocaleString('es-UY')) + '</em>' : '') + '</span></button>';
     }).join('') + '</div>';
   }
 

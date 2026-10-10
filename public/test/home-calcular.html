@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Maqueta — ¿A dónde querés ir?</title>
 <script src="tema.js"></script>
+<script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
 <style>
@@ -138,7 +139,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var ic = function (d, s) { return '<svg width="' + (s || 24) + '" height="' + (s || 24) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var f = function (n) { return 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
+  var f = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };   /* moneda elegida (moneda.js) */
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { if (PANT[S.pant]) ir(S.pant, 'moneda'); });
   var MES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fd = function (iso) { var q = iso.split('-'); return +q[2] + ' ' + MES[+q[1] - 1]; };
   /* Los mismos 40 destinos que cuantosale.uy (lib/model.js). [clave, nombre, region completa, medios].
