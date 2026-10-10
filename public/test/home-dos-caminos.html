@@ -197,18 +197,18 @@
     html[data-pagina="home"] .hx .hx-sec,html[data-pagina="home"] .hx .hx-how{width:100%;max-width:var(--hx-col);margin-left:auto;margin-right:auto;box-sizing:border-box}
   }
   @media (min-width:1024px){
-    html[data-pagina="home"] .hx .hx-hero{height:420px}
-    html[data-pagina="home"] .hx .hx-hero__in{padding:64px 0 0}
-    html[data-pagina="home"] .hx .hx-hero h1{font-size:44px}
-    html[data-pagina="home"] .hx .hx-hero__sub{font-size:17px}
-    html[data-pagina="home"] .hx .hx-hero .m-cards{grid-template-columns:repeat(2,minmax(0,540px));justify-content:space-between;margin:auto 0 -48px;gap:24px}
-    html[data-pagina="home"] .hx .hx-hero .m-card{height:auto;min-height:0;padding:20px 24px;align-content:center;background:rgba(255,255,255,.94)}
+    html[data-pagina="home"] .hx .hx-hero{height:clamp(300px,44vh,360px)}
+    html[data-pagina="home"] .hx .hx-hero__in{padding:clamp(20px,4vh,36px) 0 0}
+    html[data-pagina="home"] .hx .hx-hero h1{font-size:40px}
+    html[data-pagina="home"] .hx .hx-hero__sub{font-size:16px}
+    html[data-pagina="home"] .hx .hx-hero .m-cards{grid-template-columns:repeat(2,minmax(0,540px));justify-content:space-between;margin:auto 0 -40px;gap:24px}
+    html[data-pagina="home"] .hx .hx-hero .m-card{height:auto;min-height:0;padding:14px 22px;row-gap:8px;align-content:center;background:rgba(255,255,255,.94)}
     html[data-pagina="home"] .hx .hx-hero .m-card .m-card__cta{width:260px;min-width:260px;padding:0 24px;justify-content:center;text-align:center;color:#000!important;background:#F5C518;border:0}
     html[data-pagina="home"] .hx .hx-hero .m-card .m-card__cta svg{color:#000}
     html[data-pagina="home"][data-theme="night"] .hx .hx-hero .m-card{background:rgba(15,23,36,.84)}
-    html[data-pagina="home"] .hx .hx-sec{padding-top:72px}
+    html[data-pagina="home"] .hx .hx-sec{padding-top:clamp(44px,6vh,56px)}
     html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
-    html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:170px;aspect-ratio:auto}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:150px;aspect-ratio:auto}
     html[data-pagina="home"] .hx .hx-grid .hx-dest span{padding:12px 14px;font-size:15px}
   }
 
