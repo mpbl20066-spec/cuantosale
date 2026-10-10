@@ -188,31 +188,27 @@
   }
 
 
-  /* ---- Columna compacta en escritorio ----
-     Causa: en >=768px el contenido de la home se medía contra 1200px (hero__in, secciones, pie) y a >=1024px se le sumaban
-     reglas de escritorio que agrandaban todo (portada de 380px, titulo de 48px, tarjetas de 180px, 5 destinos por fila,
-     3 pasos en fila). Resultado: la composicion del celular se estiraba hasta casi el ancho de la ventana.
-     Ahora el contenido vive en una columna de --hx-col (800px) centrada. La portada sigue a todo el ancho (es solo la foto);
-     el titulo, las tarjetas, los destinos y el pie quedan dentro de la columna con las proporciones del celular. */
+  /* ---- Escritorio: contenedor de 1200px, tarjetas compactas y portada protagonista ----
+     Contenedor de --hx-col (1200px). Las dos tarjetas de la portada tienen un ancho maximo propio (540px), repartidas a los
+     lados, asi no se estiran ni tapan la foto: entre ellas y alrededor se ve el paisaje. Destinos populares: 5 tarjetas de ~220px. */
   @media (min-width:768px){
-    html[data-pagina="home"] .hx{--hx-col:800px}
+    html[data-pagina="home"] .hx{--hx-col:1200px}
     html[data-pagina="home"] .hx .hx-hero__in,html[data-pagina="home"] .hx .hx-foot__in{max-width:var(--hx-col)}
     html[data-pagina="home"] .hx .hx-sec,html[data-pagina="home"] .hx .hx-how{width:100%;max-width:var(--hx-col);margin-left:auto;margin-right:auto;box-sizing:border-box}
   }
   @media (min-width:1024px){
-    html[data-pagina="home"] .hx .hx-hero{height:auto}
-    html[data-pagina="home"] .hx .hx-hero__in{padding:30px 0 0}
-    html[data-pagina="home"] .hx .hx-hero h1{font-size:36px}
-    html[data-pagina="home"] .hx .hx-hero__sub{font-size:15px}
-    html[data-pagina="home"] .hx .hx-hero .m-cards{margin:22px 0 -40px;gap:14px}
-    html[data-pagina="home"] .hx .hx-hero .m-card{height:auto;min-height:0;padding:16px 18px}
-    html[data-pagina="home"] .hx .hx-hero .m-card__txt b{font-size:17px}
-    html[data-pagina="home"] .hx .hx-hero .m-card__txt small{margin:2px 0 10px;font-size:13px}
-    html[data-pagina="home"] .hx .hx-hero .m-card__cta{min-width:0;height:40px;min-height:40px;padding:0 16px;font-size:14px}
-    html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-    html[data-pagina="home"] .hx .hx-grid .hx-dest{height:auto;aspect-ratio:3/2}
-    html[data-pagina="home"] .hx .hx-grid .hx-dest span{padding:10px 12px;font-size:14px}
-    html[data-pagina="home"] .hx .hx-grid .hx-dest:nth-child(5){display:none}
+    html[data-pagina="home"] .hx .hx-hero{height:420px}
+    html[data-pagina="home"] .hx .hx-hero__in{padding:64px 0 0}
+    html[data-pagina="home"] .hx .hx-hero h1{font-size:44px}
+    html[data-pagina="home"] .hx .hx-hero__sub{font-size:17px}
+    html[data-pagina="home"] .hx .hx-hero .m-cards{grid-template-columns:repeat(2,minmax(0,540px));justify-content:space-between;margin:auto 0 -48px;gap:24px}
+    html[data-pagina="home"] .hx .hx-hero .m-card{height:auto;min-height:0;padding:20px 24px;align-content:center;background:rgba(255,255,255,.94)}
+    html[data-pagina="home"] .hx .hx-hero .m-card__cta{min-width:0;padding:0 20px}
+    html[data-pagina="home"][data-theme="night"] .hx .hx-hero .m-card{background:rgba(15,23,36,.84)}
+    html[data-pagina="home"] .hx .hx-sec{padding-top:72px}
+    html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:170px;aspect-ratio:auto}
+    html[data-pagina="home"] .hx .hx-grid .hx-dest span{padding:12px 14px;font-size:15px}
   }
 
   /* ---- Ajustes de proporcion y legibilidad de la home ---- */
@@ -225,8 +221,6 @@
   /* destinos: degradado un poco mas largo para que el nombre se lea tambien sobre fotos claras (espuma, cielo) */
   .hx-grid .hx-dest::after{background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.4) 40%,transparent 65%)}
   @media (min-width:1024px){
-    html[data-pagina="home"] .hx .hx-hero .m-card{padding:18px 22px}
-    html[data-pagina="home"] .hx .hx-sec{padding-top:56px}
   }
   /* Barra inferior */
   .tabs{flex:0 0 auto;position:relative;display:flex;justify-content:space-around;padding:8px 8px 22px;background:var(--surface);border-top:1px solid var(--line)}
