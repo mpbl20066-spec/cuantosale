@@ -1626,10 +1626,11 @@
     if (!grupos.length) return cab + '<p class="f-sub" style="margin-top:14px">Todavía no tenemos tours para ' + esc(DEST) + '. Podés continuar a tu presupuesto.</p>';
     return cab + grupos.map(function (g) {
       var t = TITULO_X[g.cat], todos = S.fExtra !== 'todos' || S.xmas[g.cat], lim = todos ? g.items.length : CUANTOS_X[g.cat], vis = g.items.slice(0, lim);
+      /* "Ver más tours" solo si quedan tours sin mostrar; si lo que queda son traslados, se muestran todos de una. */
+      if (!g.items.slice(lim).some(function (e) { return e.cat === 'tours'; })) vis = g.items.slice();
       return '<h2 class="f-h3 x-h3"><span class="x-ico">' + t[0] + '</span><span>' + t[1] + '<small>' + esc(t[2]) + (g.cat === 'tours' ? esc(DEST) : '') + '</small></span></h2>' +
         vis.map(function (e) { return filaExtra(e, g); }).join('') +
-        (g.items.length > vis.length ? '<button type="button" class="f-more" data-xmas="' + g.cat + '">' + MAS_TXT[g.cat] + '</button>' : '') +
-        (g.cat === 'tours' && vis.some(function (e) { return e.foto; }) ? '<p class="x-note">Fotos: Wikimedia Commons (licencias CC).</p>' : '');
+        (g.items.length > vis.length ? '<button type="button" class="f-more" data-xmas="' + g.cat + '">' + MAS_TXT[g.cat] + '</button>' : '');
     }).join('');
   }
   function datosFinal() {
