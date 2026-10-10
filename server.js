@@ -160,7 +160,7 @@ const CSP = "default-src 'self'; " +
   "img-src 'self' data: https:; " +
   "connect-src 'self' https://*.supabase.co https://*.wikimedia.org https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://accounts.google.com https://emrldco.com https://*.emrldco.com https://*.clarity.ms https://c.bing.com; " +
   "frame-src https://*.supabase.co https://accounts.google.com; " +
-  "base-uri 'none'; form-action 'self'";
+  "base-uri 'self'; form-action 'self'";
 // Google Analytics (GA4). La etiqueta se inyecta una sola vez desde serveStatic
 // para todas las paginas HTML, en vez de pegada en cada archivo: asi no puede
 // quedar duplicada en una pagina ni olvidada en una nueva.
@@ -2826,6 +2826,36 @@ async function fetchGrupoNombre(groupId) {
   const name = rows && rows[0] && rows[0].name ? String(rows[0].name).trim() : '';
   return name || null;
 }
+/* ---- App nueva con URLs limpias ----
+   Una sola tabla: pagina -> archivo de public/test. Para promover la app nueva a la raiz basta cambiar NUEVO a ''. */
+const NUEVO = '/nuevo';
+const NUEVO_PAGINAS = {
+  '': 'home-dos-caminos', destinos: 'home-destino', presupuesto: 'home-presupuesto', planificar: 'home-flujo',
+  ruta: 'home-calcular', detalle: 'home-detalle', resumen: 'home-costo', reserva: 'home-reserva', guias: 'home-guias', guia: 'home-guia'
+};
+const NUEVO_POR_ARCHIVO = {};
+Object.keys(NUEVO_PAGINAS).forEach(function (k) { NUEVO_POR_ARCHIVO[NUEVO_PAGINAS[k] + '.html'] = NUEVO + (k ? '/' + k : ''); });
+function nuevoPagina(pathname) {
+  const m = /^\/nuevo(?:\/([a-z-]+))?$/.exec(pathname);
+  if (!m) return null;
+  return NUEVO_PAGINAS[m[1] || ''] || null;
+}
+/* Devuelve la ruta canonica (minusculas, sin barra final) si la URL pedida es una variante o una URL vieja. */
+function nuevoRedireccion(pathname, search) {
+  const q = search || '';
+  const viejo = /^\/test\/(home-[a-z-]+\.html)$/i.exec(pathname);
+  if (viejo && NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()]) return NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()] + q;
+  if (/^\/test\/?$/i.test(pathname)) return NUEVO + q;
+  const m = /^\/nuevo(?:\/([A-Za-z-]+))?(\/)?$/i.exec(pathname);
+  if (m) {
+    const slug = (m[1] || '').toLowerCase(), canon = NUEVO + (slug ? '/' + slug : '');
+    if (NUEVO_PAGINAS[slug] && canon !== pathname) return canon + q;
+  }
+  return null;
+}
+function nuevoReescribir(texto) {
+  return texto.replace(/(home-[a-z-]+\.html)/g, function (f) { return NUEVO_POR_ARCHIVO[f] || f; });
+}
 function serveGrupoPage(req, res, groupId) {
   if (!groupId) { serveStatic(req, res, '/grupo.html'); return; }
   serveStatic(req, res, '/grupo.html', async function (data) {
@@ -3074,13 +3104,27 @@ function handleRequest(req, res) {
        viaje). Convive con la app de la raiz hasta que este lista para reemplazarla.
        Sin la barra final los enlaces relativos de las paginas apuntarian a la raiz,
        por eso /test redirige a /test/. Lleva noindex y Disallow en robots.txt. */
-    if (/^\/test$/i.test(url.pathname)) {
-      res.writeHead(302, { Location: '/test/' + (url.search || ''), 'Cache-Control': 'no-store' });
+    /* URLs limpias de la app nueva: /nuevo, /nuevo/destinos, /nuevo/planificar... (tabla en NUEVO_PAGINAS).
+       Las URL viejas (/test, /test/, /test/home-xxx.html) responden 301 a la ruta limpia, con los mismos parametros. */
+    const nuevoRedir = nuevoRedireccion(url.pathname, url.search);
+    if (nuevoRedir) {
+      res.writeHead(301, { Location: nuevoRedir, 'Cache-Control': 'public, max-age=3600' });
       return res.end();
     }
-    if (/^\/test\/$/i.test(url.pathname)) {
-      try { serveStatic(req, res, '/test/home-dos-caminos.html'); } catch (e) { res.writeHead(400); res.end(); }
+    const nuevoArchivo = nuevoPagina(url.pathname);
+    if (nuevoArchivo) {
+      try {
+        serveStatic(req, res, '/test/' + nuevoArchivo + '.html', function (data) {
+          const html = nuevoReescribir(data.toString('utf8')).replace(/<head[^>]*>/i, function (h) { return h + '<base href="/test/">'; });
+          return Buffer.from(html, 'utf8');
+        });
+      } catch (e) { res.writeHead(400); res.end(); }
       return;
+    }
+    if (/^\/nuevo(\/|$)/i.test(url.pathname)) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+    /* Los scripts de /test traen enlaces a las paginas por su nombre de archivo: se reescriben a la ruta limpia. */
+    if (/^\/test\/[^/]+\.js$/i.test(url.pathname)) {
+      try { return serveStatic(req, res, url.pathname, function (data) { return Buffer.from(nuevoReescribir(data.toString('utf8')), 'utf8'); }); } catch (e) { res.writeHead(400); return res.end(); }
     }
     // La raíz del dominio es la app. /app sigue sirviendo lo mismo porque es la
     // start_url de la PWA ya instalada y lo que precachea el service worker.

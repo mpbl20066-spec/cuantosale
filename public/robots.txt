@@ -15,6 +15,7 @@ Disallow: /api/
 
 # /test es la version nueva en construccion: no se indexa.
 Disallow: /test/
+Disallow: /nuevo
 
 # La raiz es la app de cotizacion.
 Allow: /
