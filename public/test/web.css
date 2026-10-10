@@ -710,3 +710,17 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   .hx-foot nav a,.hx-foot a{display:inline-flex;align-items:center;min-height:44px}
   .d-pers button[data-adultos],.d-pers button[data-ninos],[data-pagina="destino"] button[data-adultos],[data-pagina="destino"] button[data-ninos]{width:44px;height:44px}
 }
+
+/* ---- Global: seleccion en amarillo de marca + contenedores que nunca se desbordan ---- */
+*,*::before,*::after{box-sizing:border-box}
+body{max-width:100%;overflow-x:clip}
+.phone,.scroll,.f-scroll,#main{max-width:100%}
+.p-chip-row,.p-chips,.p-medios,.d-chips,.d-seg,.r-chips,.f-chips,.c-vt{flex-wrap:wrap}
+.p-chips,.d-chips,.r-chips,.f-chips{display:flex;flex-wrap:wrap}
+/* Seleccionado = amarillo (en oscuro --ink es blanco y los bordes quedaban blancos) */
+:root{--sel:#F7C325}
+.p-medio.is-on{border-color:var(--sel)!important;box-shadow:0 0 0 2px var(--sel) inset!important}
+.d-fecha.is-act{border-color:var(--sel)!important;box-shadow:0 0 0 2px rgba(247,195,37,.3)!important}
+.d-card.is-on,.p-opt.is-on,.opt.is-sel,.c-dc.is-sel,.hotel-playa-chip.is-on{border-color:var(--sel)!important}
+.f-chip.is-on,.x-add.is-on,.d-seg button.is-on,.p-monto.is-on,.p-chip.is-on,.p-opt--c.is-on,.r-chip.is-on{background:var(--sel)!important;border-color:var(--sel)!important;color:#0A101A!important}
+:root[data-theme="light"]{--sel:#F7C325}
