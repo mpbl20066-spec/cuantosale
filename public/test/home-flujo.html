@@ -868,12 +868,13 @@
   [data-theme="night"] .fc-pr{border-top-color:rgba(255,255,255,.08)}
   .fc-pr__v b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
   .fc-pr__v small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
-  .fc-btn{flex:0 0 auto;min-width:104px;min-height:42px;padding:0 18px;border:1.5px solid var(--ink);border-radius:10px;background:transparent;color:var(--ink);font:800 13.5px var(--fb);cursor:pointer;transition:background .15s,color .15s}
-  .fc-btn:hover{background:var(--cel-soft)}
-  .fc.is-sel .fc-btn{border-color:#F5C518;background:#F5C518;color:#0B1F3A}
-  .fc-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .fc{position:relative}
+  .fc .opt__tick{top:10px;right:10px}
+  .fc.is-sel .opt__tick{opacity:1;transform:none}
+  .fc:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   @media (min-width:640px){
     .fc{grid-template-columns:190px minmax(0,1fr) auto;align-items:center;gap:22px;padding:18px 20px}
+    .fc{padding-right:46px}
     .fc-pr{flex-direction:column;align-items:flex-end;gap:8px;padding:0 0 0 20px;border-top:0;border-left:1px solid var(--line);text-align:right}
     [data-theme="night"] .fc-pr{border-left-color:rgba(255,255,255,.08)}
     .fc-pt b{font-size:21px}
@@ -1306,18 +1307,18 @@
   }
   /* Tarjeta de vuelo: aerolinea a la izquierda, trayecto al centro (salida, duracion, escalas, llegada) y precio total con
      el boton a la derecha. En celular se apila en tres bloques. Etiquetas sobrias: "Mejor opcion" (una sola, ver
-     marcarMejor) y "Mas barato". Toda la tarjeta elige el vuelo; el boton es el acceso por teclado. */
+     marcarMejor) y "Mas barato". Se elige tocando la tarjeta, como el resto de las opciones del flujo (borde amarillo y
+     tilde arriba a la derecha); con teclado, Enter o espacio. */
   function tarjetaVuelo(v, idBarato) {
     var on = S.vuelo === v.id;
     var barato = v.id === idBarato;
     var badges = v.mejor ? '<span class="fc-b fc-b--mejor">' + (barato ? 'Mejor y más barato' : 'Mejor opción') + '</span>' : (barato ? '<span class="fc-b">Más barato</span>' : '');
-    return '<article class="fc' + (on ? ' is-sel' : '') + '" data-sel="vuelo:' + esc(v.id) + '">' +
+    return '<div class="fc' + (on ? ' is-sel' : '') + '" role="button" tabindex="0" data-sel="vuelo:' + esc(v.id) + '" aria-pressed="' + on + '" aria-label="' + esc(v.air) + ', sale ' + v.sal + ', llega ' + v.lle + ', ' + esc(v.escT) + ', ' + f(precioVuelo(v)) + (on ? ', elegido' : '') + '">' + tick +
       '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + '</span></div>' +
       '<div class="fc-ruta"><div class="fc-pt"><b>' + v.sal + '</b><small>MVD</small></div>' +
         '<div class="fc-mid"><small>' + esc(v.durT) + '</small><i aria-hidden="true"></i><small class="' + (v.esc === 0 ? 'is-dir' : '') + '">' + esc(v.escT) + '</small></div>' +
         '<div class="fc-pt fc-pt--d"><b>' + v.lle + '</b><small>' + esc(AEROPUERTO[destKey] || '') + '</small></div></div>' +
-      '<div class="fc-pr"><span class="fc-pr__v"><b>' + f(precioVuelo(v)) + '</b><small>ida y vuelta · ' + personasTxt() + '</small></span>' +
-        '<button type="button" class="fc-btn" data-sel="vuelo:' + esc(v.id) + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Vuelo elegido: ' : 'Elegir el vuelo de ') + esc(v.air) + ', ' + v.sal + ', ' + f(precioVuelo(v)) + '">' + (on ? 'Elegido ✓' : 'Elegir') + '</button></div></article>';
+      '<div class="fc-pr"><span class="fc-pr__v"><b>' + f(precioVuelo(v)) + '</b><small>ida y vuelta · ' + personasTxt() + '</small></span></div></div>';
   }
   function pantalla1() {
     if (MODO === 'bus') return pantallaBus();
