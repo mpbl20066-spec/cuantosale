@@ -1931,7 +1931,7 @@
     e.preventDefault();
     var mail = ($('g-mail').value || '').trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'Escribí un email válido, por ejemplo nombre@correo.com.' }; pintarModal(); return; }
-    track('flujo_guardar_email', { dominio: mail.split('@')[1] }); guardarPendiente();
+    track('flujo_guardar_email', {}); guardarPendiente();
     CSCuenta.loginCorreo(mail).then(function () { S.modal = { tipo: 'guardar', enviado: mail }; pintarModal(); },
       function () { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'No pudimos enviar el link. Revisá el email y probá de nuevo.' }; pintarModal(); });
   });
