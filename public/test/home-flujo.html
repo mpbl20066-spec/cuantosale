@@ -880,6 +880,31 @@
     .fc-pt b{font-size:21px}
   }
   @media (prefers-reduced-motion:no-preference){.fc:active{transform:scale(.995)}}
+  /* Carga de alojamientos (paso 2) */
+  .hl-wrap{grid-column:1/-1;width:100%;max-width:800px;margin:4px auto 0}
+  .hl-load{display:flex;align-items:center;gap:16px;margin:0 0 14px;padding:18px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:linear-gradient(135deg,#0F1B2D,#1A2B4A);color:#fff;box-shadow:0 10px 28px rgba(10,16,26,.18)}
+  .hl-load__ico{position:relative;flex:0 0 56px;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:rgba(245,197,24,.12)}
+  .hl-load__ico svg{color:#F5C518!important}
+  .hl-load__aro{position:absolute;inset:-3px;border:3px solid rgba(245,197,24,.18);border-top-color:#F5C518;border-radius:50%;animation:fl-gira 1s linear infinite}
+  .hl-load__t{flex:1;min-width:0}
+  .hl-load__t b{display:block;font-size:15.5px;font-weight:800;line-height:1.3;color:#fff}
+  .hl-load__msgs{position:relative;display:block;height:20px;margin-top:3px;overflow:hidden;font-size:13.5px}
+  .hl-load__msgs span{position:absolute;left:0;top:0;white-space:nowrap;font-weight:600;color:#C5CDD8;opacity:0;animation:fl-msg 7.5s infinite}
+  .hl-load__msgs span:nth-child(2){animation-delay:2.5s}
+  .hl-load__msgs span:nth-child(3){animation-delay:5s}
+  .hl-load__bar{display:block;height:6px;margin-top:10px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+  .hl-load__bar i{display:block;width:40%;height:100%;border-radius:99px;background:linear-gradient(90deg,#F5C518,#FFE27A);animation:fl-bar 1.8s ease-in-out infinite}
+  .hl-sk{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;margin:0 0 12px;padding:12px;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));animation:hl-pulso 1.6s ease-in-out infinite}
+  .hl-sk:nth-child(3){animation-delay:.3s}
+  .hl-sk__img{min-height:112px;border-radius:12px;background:var(--line)}
+  .hl-sk__b{display:flex;flex-direction:column;gap:9px;padding:4px 0}
+  .hl-sk__b i{display:block;height:12px;border-radius:6px;background:var(--line)}
+  [data-theme="night"] .hl-sk__img,[data-theme="night"] .hl-sk__b i{background:rgba(255,255,255,.08)}
+  .hl-sk__t{width:62%;height:16px!important}.hl-sk__s{width:44%}.hl-sk__s--c{width:30%}
+  .hl-sk__p{width:34%;height:20px!important;margin-top:auto}
+  @keyframes hl-pulso{0%,100%{opacity:1}50%{opacity:.55}}
+  @media (min-width:640px){.hl-sk{grid-template-columns:200px minmax(0,1fr)}.hl-sk__img{min-height:130px}}
+  @media (prefers-reduced-motion:reduce){.hl-load__aro,.hl-load__bar i,.hl-sk{animation:none}.hl-load__msgs span{animation:none}.hl-load__msgs span:first-child{opacity:1}}
   /* Tarjeta animada mientras se buscan los vuelos */
   .fl-load{margin:14px 0 12px;padding:18px 18px 16px;border-radius:18px;background:linear-gradient(135deg,#0F1B2D,#1A2B4A);color:#fff;box-shadow:0 10px 28px rgba(10,16,26,.18);overflow:hidden}
   .fl-load__ruta{display:flex;align-items:center;gap:12px}
@@ -1526,10 +1551,19 @@
     return '';
   }
   var iBed = '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7.500h2M13 7.500h2M9 11.500h2M13 11.500h2M10 21v-4h4v4"/>';
+  /* Mientras Booking responde: tarjeta oscura con un aro amarillo que gira alrededor del icono, mensajes que rotan,
+     barra que avanza y dos tarjetas esqueleto de hotel que laten. Mismo lenguaje que la busqueda de vuelos. */
+  function cargandoHoteles() {
+    var esq = '<div class="hl-sk" aria-hidden="true"><span class="hl-sk__img"></span><span class="hl-sk__b"><i class="hl-sk__t"></i><i class="hl-sk__s"></i><i class="hl-sk__s hl-sk__s--c"></i><i class="hl-sk__p"></i></span></div>';
+    return '<div class="hl-wrap"><div class="hl-load" role="status">' +
+      '<span class="hl-load__ico" aria-hidden="true"><span class="hl-load__aro"></span>' + ic(I.bed, 26) + '</span>' +
+      '<div class="hl-load__t"><b>Buscando alojamientos en Booking…</b><span class="hl-load__msgs" aria-hidden="true"><span>Comparando precios para ' + NOCHES + ' noches…</span><span>Revisando ubicación y opiniones…</span><span>Ordenando del más barato al más caro…</span></span>' +
+      '<span class="hl-load__bar" aria-hidden="true"><i></i></span></div></div>' + esq + esq + '</div>';
+  }
   function pantalla2() {
     var personas = personasTxt();
     var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(DEST) + ' · ' + NOCHES + ' noches · ' + personas + '</p></div></div>';
-    if (S.cargandoH) return cab + '<p class="f-sub" style="text-align:center;padding:30px 0">Buscando alojamientos en Booking…</p>';
+    if (S.cargandoH) return cab + cargandoHoteles();
     var aviso = S.avisoH ? '<p class="f-sub" style="padding:8px 10px;border-radius:10px;background:var(--cel-soft)">' + esc(S.avisoH) + '</p>' : '';
     var playas = playasDe(), todos = ordenarHoteles();
     if (S.playaSel !== 'todas' && !playas.some(function (x) { return x[0] === S.playaSel; })) S.playaSel = 'todas';
