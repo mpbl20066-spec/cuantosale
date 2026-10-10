@@ -403,44 +403,85 @@
   .g-ben{list-style:none;margin:12px 0;padding:12px;border-radius:16px;background:var(--good-soft);display:grid;gap:9px}
   .g-ben li{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--ink)}
   .g-ben li span{flex:0 0 28px;height:28px;border-radius:8px;background:var(--surface);display:grid;place-items:center;color:var(--good)}
-  /* Paso 5 "Tu viaje quedo guardado": siempre en azul noche, con colores propios (no dependen del tema). */
-  .ls{--ls-card:#1A2B4A;--ls-y:#F5C518;--ls-gris:#B0B8C4;--ls-gris2:#6A7A8A;color:#fff}
-  .ls-hero{position:relative;height:150px;margin:2px 0 0;border-radius:16px;background:#1A2B4A center/cover}
-  .ls-badge{position:absolute;left:14px;top:14px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;background:rgba(15,27,45,.8);color:#fff;font-size:13px;font-weight:600;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-  .ls-badge svg{color:#F7C325}
-  .ls-ok{display:flex;align-items:flex-start;gap:14px;margin:20px 0 18px}
-  .ls-ok__i{flex:0 0 auto;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#F7C325;color:#0A101A}
-  .ls-h{margin:0 0 4px;font-family:var(--fh);font-size:26px;line-height:1.15;font-weight:800;color:#fff}
-  .ls-p{margin:0;font-size:14px;font-weight:500;color:rgba(255,255,255,.7);line-height:1.5}
-  .ls-card{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;margin:0 0 16px;padding:14px;border:0;border-radius:16px;background:var(--ls-card);color:#fff;text-align:left;font-family:var(--fb);cursor:pointer}
-  .ls-card:hover{background:#22375C}
-  .ls-card__img{flex:0 0 84px;height:84px;border-radius:12px;background:#0F1B2D center/cover}
-  .ls-card__t{flex:1;min-width:0}
-  .ls-card b{display:block;font-family:var(--fh);font-size:20px;color:#fff}
-  .ls-card small{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:13px;font-weight:500;color:var(--ls-gris);line-height:1.4}
-  .ls-card strong{display:block;margin-top:6px;font-family:var(--fh);font-size:26px;line-height:1.1;color:#fff}
-  .ls-card em{display:block;margin-top:6px;font-style:normal;font-size:12px;color:var(--ls-gris2);line-height:1.4}
-  .ls-card>svg{flex:0 0 auto;color:#fff}
-  .ls-cta{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;box-sizing:border-box;min-height:60px;padding:10px 18px;border:0;border-radius:12px;background:var(--ls-y);color:#0F1B2D;font-family:var(--fb);text-align:left;cursor:pointer}
+  /* Paso 5 "Tu viaje quedo guardado". Siempre en azul noche, con la paleta de la marca (no depende del tema):
+     fondo #0F1B2D, tarjetas #1A2B4A, acento amarillo #F5C518 y verde #4CAF50 solo para "operacion completada".
+     Jerarquia: confirmacion -> resumen del viaje -> accion principal -> accesos -> codigo. */
+  .ls{--ls-card:#1A2B4A;--ls-card2:#22375C;--ls-y:#F5C518;--ls-ok:#4CAF50;--ls-t:#fff;--ls-t2:#C5CDD8;--ls-t3:#9FADBF;--ls-line:rgba(255,255,255,.12);color:var(--ls-t);display:grid;gap:16px;padding-top:6px}
+  .ls-ok{display:flex;align-items:center;gap:14px}
+  .ls-ok__i{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--ls-ok);color:#fff;box-shadow:0 0 0 6px rgba(76,175,80,.16)}
+  .ls-h{margin:0;font-family:var(--fh);font-size:26px;line-height:1.15;font-weight:800;letter-spacing:-.01em;color:var(--ls-t)}
+  .ls-p{margin:3px 0 0;font-size:15px;font-weight:500;color:var(--ls-t2);line-height:1.45}
+  .ls-card{display:grid;grid-template-columns:116px minmax(0,1fr) auto;align-items:stretch;gap:16px;width:100%;box-sizing:border-box;margin:0;padding:12px;border:1px solid var(--ls-line);border-radius:18px;background:var(--ls-card);box-shadow:0 8px 24px rgba(0,0,0,.22);color:var(--ls-t);text-align:left;font-family:var(--fb);cursor:pointer;transition:background .15s,border-color .15s}
+  .ls-card:hover{background:var(--ls-card2);border-color:rgba(255,255,255,.22)}
+  .ls-card__img{align-self:stretch;min-height:116px;border-radius:12px;background:#0F1B2D center/cover}
+  .ls-card__t{display:flex;flex-direction:column;justify-content:center;gap:8px;min-width:0;padding:2px 0}
+  .ls-card__d{margin:0;font-family:var(--fh);font-size:21px;line-height:1.15;font-weight:800;color:var(--ls-t)}
+  .ls-card__m{display:flex;flex-wrap:wrap;gap:6px 8px}
+  .ls-card__m span{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.08);font-size:13px;font-weight:600;color:var(--ls-t2)}
+  .ls-card__m svg{color:var(--ls-y);flex:0 0 auto}
+  .ls-card__p{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}
+  .ls-card__p small{display:block;width:100%;font-size:12px;font-weight:600;color:var(--ls-t3);letter-spacing:.02em}
+  .ls-card__p strong{font-family:var(--fh);font-size:28px;line-height:1.05;font-weight:800;color:var(--ls-t)}
+  .ls-card__n{display:block;margin:0;font-size:12px;line-height:1.4;color:var(--ls-t3)}
+  .ls-card>svg{align-self:center;color:var(--ls-t2)}
+  .ls-act{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+  .ls-cta{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;box-sizing:border-box;min-height:60px;padding:10px 20px;border:0;border-radius:14px;background:var(--ls-y);color:#0F1B2D;font-family:var(--fb);text-align:left;cursor:pointer;box-shadow:0 8px 20px rgba(245,197,24,.22);transition:filter .15s,transform .15s}
+  .ls-cta:hover{filter:brightness(1.05);transform:translateY(-1px)}
+  /* el color de los iconos lo define --ico (regla global de /test): se fija por componente */
+  .ls-ok__i{--ico:#fff}
+  .ls-cta{--ico:#0F1B2D}
+  .ls-cta svg{flex:0 0 auto}
+  .ls-acc__i,.ls-card__m,.ls-sec,.ls-foot,.ls-ilu{--ico:#F5C518}
+  .ls-card>svg{--ico:#C5CDD8}
   .ls-cta span{display:block}
-  .ls-cta b{display:block;font-size:17px;font-weight:800}
-  .ls-cta small{display:block;margin-top:1px;font-size:13px;font-weight:500;opacity:.8}
-  .ls-sec{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;min-height:56px;margin-top:12px;border:1px solid rgba(255,255,255,.4);border-radius:12px;background:transparent;color:#fff;font-family:var(--fb);font-size:16px;font-weight:700;cursor:pointer}
+  .ls-cta b{display:block;font-size:17px;font-weight:800;line-height:1.2}
+  .ls-cta small{display:block;margin-top:1px;font-size:13px;font-weight:600;opacity:.78}
+  .ls-sec{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;min-height:60px;margin:0;padding:0 16px;border:1.5px solid rgba(255,255,255,.32);border-radius:14px;background:transparent;color:var(--ls-t);font-family:var(--fb);font-size:15px;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s}
+  .ls-sec:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.5)}
+  .ls-sec svg{color:var(--ls-y)}
   .ls-cta:focus-visible,.ls-sec:focus-visible,.ls-card:focus-visible,.ls-acc:focus-visible{outline:3px solid var(--ls-y);outline-offset:2px}
-  .ls-accs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:24px}
-  .ls-acc{display:flex;flex-direction:column;align-items:flex-start;gap:12px;box-sizing:border-box;padding:16px;border:0;border-radius:12px;background:var(--ls-card);color:#fff;text-align:left;text-decoration:none;font-family:var(--fb);cursor:pointer}
-  .ls-acc:hover{background:#22375C}
-  .ls-acc__i{flex:0 0 auto;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff}
-  .ls-acc b{display:block;font-size:16px;font-weight:700}
-  .ls-acc small{display:block;margin-top:3px;font-size:13px;font-weight:500;color:var(--ls-gris);line-height:1.4}
-  .ls-ref{margin:20px 0 0;text-align:center;font-size:12px;font-weight:500;color:var(--ls-gris,var(--ink2))}
-  .ls-ref b{font-family:ui-monospace,Consolas,monospace;color:var(--ink);letter-spacing:.03em}
-  .ls-cierre{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 6px}
-  .ls-ilu{flex:0 0 auto;width:150px;height:56px;color:var(--ls-y)}
-  .ls-foot{display:flex;align-items:center;gap:10px;margin:0;font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:19px;line-height:1.3;color:#fff;transform:rotate(-3deg)}
-  .ls-foot span{padding-bottom:4px;border-bottom:2px solid var(--ls-y)}
+  .ls-accs{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+  .ls-acc{display:flex;align-items:center;gap:14px;box-sizing:border-box;padding:12px 14px;border:1px solid var(--ls-line);border-radius:14px;background:var(--ls-card);color:var(--ls-t);text-align:left;text-decoration:none;font-family:var(--fb);cursor:pointer;transition:background .15s,border-color .15s}
+  .ls-acc:hover{background:var(--ls-card2);border-color:rgba(255,255,255,.22)}
+  .ls-acc__i{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(245,197,24,.16)!important;color:var(--ls-y)}
+  .ls-acc b{display:block;font-size:15px;font-weight:700;line-height:1.25}
+  .ls-acc small{display:block;margin-top:2px;font-size:13px;font-weight:500;color:var(--ls-t2);line-height:1.4}
+  .ls-ref{margin:2px 0 0;text-align:center;font-size:12px;font-weight:500;color:var(--ls-t3)}
+  .ls-ref b{font-family:ui-monospace,Consolas,monospace;color:var(--ls-t2);letter-spacing:.04em}
+  .ls-cierre{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px;opacity:.9}
+  .ls-ilu{flex:0 0 auto;width:150px;height:48px;color:var(--ls-y)}
+  .ls-foot{display:flex;align-items:center;gap:10px;margin:0;font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:18px;line-height:1.3;color:var(--ls-t);transform:rotate(-3deg)}
+  .ls-foot span{padding-bottom:3px;border-bottom:2px solid var(--ls-y)}
   .ls-foot svg{flex:0 0 auto;color:var(--ls-y)}
-  @media (min-width:900px){.ls-accs{grid-template-columns:repeat(4,minmax(0,1fr))}.ls-hero{height:220px}.ls-h{font-size:32px}.ls-p{font-size:16px}.ls-card__img{flex-basis:120px;height:120px}.ls-card b{font-size:24px}.ls-card strong{font-size:28px}.ls-acc{flex-direction:row;align-items:center;padding:20px}.ls-ilu{width:240px}}
+  @media (max-width:520px){
+    .ls-h{font-size:22px}
+    .ls-card{grid-template-columns:88px minmax(0,1fr);gap:12px}
+    .ls-card__img{min-height:88px}
+    .ls-card>svg{display:none}
+    .ls-card__d{font-size:19px}
+    .ls-card__p strong{font-size:24px}
+    .ls-ilu{width:110px}
+  }
+  @media (min-width:640px){
+    .ls{gap:18px}
+    .ls-h{font-size:30px}
+    .ls-card{grid-template-columns:200px minmax(0,1fr) auto;padding:14px;gap:20px}
+    .ls-card__img{min-height:150px}
+    .ls-card__d{font-size:24px}
+    .ls-card__p{flex-wrap:nowrap;align-items:flex-end;justify-content:space-between;gap:20px}
+    .ls-card__p>span{flex:0 0 auto}
+    .ls-card__n{max-width:34ch;text-align:right}
+    .ls-act{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+    .ls-accs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  /* la barra superior de escritorio acompana el azul noche de esta pantalla (en las demas sigue el tema) */
+  html.cs-oscuro .cs-top{--ink:#fff;--ink2:#C5CDD8;--line:rgba(255,255,255,.12);--cel-soft:rgba(255,255,255,.08);--surface:#1A2B4A;--bg:#0F1B2D;--azul:#F5C518;background:#0F1B2D;border-bottom-color:rgba(255,255,255,.12)}
+  html.cs-oscuro .cs-top__logo b{color:#fff}
+  html.cs-oscuro .cs-top__logo small{color:#F5C518}
+  html.cs-oscuro .cs-top__logo svg path:first-child{fill:#fff}
+  html.cs-oscuro .cs-top__a:hover,html.cs-oscuro .cs-top__a.is-on{color:#fff}
+  html.cs-oscuro .cs-top__menu span{background:#fff}
+  html.cs-oscuro .cs-top .cs-mon__b{color:#fff;border-color:rgba(255,255,255,.28)}
   .ah-list{gap:10px}
   .ah-row{align-items:flex-start;padding:14px}
   .ah-row .fin-ico{flex:0 0 52px;height:52px}
@@ -1247,14 +1288,20 @@
     var d = datosFinal(), personas = personasTxt(), guardado = !!S.sesion, foto = '../fotos/' + destKey + '.jpg';
     var chev = ic('<path d="m9 5 7 7-7 7"/>', 22);
     var acc = function (abre, ico, t, p) { return '<' + abre + ' class="ls-acc"><span class="ls-acc__i">' + ic(ico, 24) + '</span><span><b>' + t + '</b><small>' + p + '</small></span></' + (abre.indexOf('a ') === 0 ? 'a' : 'button') + '>'; };
-    return '<div class="ls"><div class="ls-hero" style="background-image:url(' + foto + ')"><span class="ls-badge">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 18) + (guardado ? 'Tu viaje guardado' : 'Tu viaje está listo') + '</span></div>' +
-      '<div class="ls-ok"><span class="ls-ok__i">' + ic('<path d="m5 12.500 4.500 4.500L19 7.500"/>', 24) + '</span><div><h1 class="ls-h">' + (guardado ? '¡Tu viaje quedó guardado!' : '¡Tu viaje está listo!') + '</h1>' +
+    var iCal = '<rect x="3.500" y="5" width="17" height="15" rx="2"/><path d="M3.500 10h17M8 3v4M16 3v4"/>', iPers = '<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c0-3.600 2.900-6 6.500-6s6.500 2.400 6.500 6M16 4.800a3.300 3.300 0 0 1 0 6.400M18.500 14.300c1.700.8 3 2.500 3 5.200"/>';
+    return '<div class="ls">' +
+      '<div class="ls-ok"><span class="ls-ok__i">' + ic('<path d="m5 12.500 4.500 4.500L19 7.500"/>', 26) + '</span><div><h1 class="ls-h">' + (guardado ? '¡Tu viaje quedó guardado!' : '¡Tu viaje está listo!') + '</h1>' +
       '<p class="ls-p">' + (guardado ? 'Podés volver a verlo cuando quieras y seguir organizándolo.' : 'Tu presupuesto a ' + esc(DEST) + ' está armado. Si querés guardarlo para volver más tarde, creá una cuenta.') + '</p></div></div>' +
-      '<button type="button" class="ls-card" data-ir="4"><span class="ls-card__img" style="background-image:url(' + foto + ')" aria-hidden="true"></span><span class="ls-card__t"><b>' + esc(DEST) + '</b><small>' + ic('<rect x="3.500" y="5" width="17" height="15" rx="2"/><path d="M3.500 10h17M8 3v4M16 3v4"/>', 14) + fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + personas + '</small><small>Total estimado</small><strong>' + f(d.total) + '</strong><em>Los precios pueden cambiar y las reservas se realizan con cada proveedor.</em></span>' + chev + '</button>' +
-      '<button type="button" class="ls-cta" data-ir="6" data-evento="flujo_listo_ver_opciones">' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 24) + '<span><b>Continuar organizando mi viaje</b><small>Ver vuelos, alojamiento y experiencias</small></span></button>' +
-      (guardado
-        ? '<button type="button" class="ls-sec" data-guardado="1">' + ic('<rect x="4" y="7" width="16" height="13" rx="2.500"/><path d="M9 7V5.500A1.500 1.500 0 0 1 10.500 4h3A1.500 1.500 0 0 1 15 5.500V7"/>', 22) + 'Ver mi viaje guardado</button>'
-        : '<button type="button" class="ls-sec" data-guardar-ahora="1">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 22) + 'Guardar mi viaje</button>') +
+      '<button type="button" class="ls-card" data-ir="4" aria-label="Ver el presupuesto de ' + esc(DEST) + '"><span class="ls-card__img" style="background-image:url(' + foto + ')" aria-hidden="true"></span>' +
+        '<span class="ls-card__t"><span class="ls-card__d">' + esc(DEST) + '</span>' +
+        '<span class="ls-card__m"><span>' + ic(iCal, 15) + fdc(IDA) + ' – ' + fdc(VUELTA) + '</span><span>' + ic(iPers, 15) + personas + '</span></span>' +
+        '<span class="ls-card__p"><span><small>Total estimado</small><strong>' + f(d.total) + '</strong></span><span class="ls-card__n">Los precios pueden cambiar y las reservas se realizan con cada proveedor.</span></span></span>' + chev + '</button>' +
+      '<div class="ls-act">' +
+        '<button type="button" class="ls-cta" data-ir="6" data-evento="flujo_listo_ver_opciones">' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 24) + '<span><b>Continuar organizando mi viaje</b><small>Ver vuelos, alojamiento y experiencias</small></span></button>' +
+        (guardado
+          ? '<button type="button" class="ls-sec" data-guardado="1">' + ic('<rect x="4" y="7" width="16" height="13" rx="2.500"/><path d="M9 7V5.500A1.500 1.500 0 0 1 10.500 4h3A1.500 1.500 0 0 1 15 5.500V7"/>', 22) + 'Ver mi viaje guardado</button>'
+          : '<button type="button" class="ls-sec" data-guardar-ahora="1">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 22) + 'Guardar mi viaje</button>') +
+      '</div>' +
       (S.avisoGuardado ? '<p class="g-p g-p--s">' + esc(S.avisoGuardado) + '</p>' : '') +
       '<div class="ls-accs">' +
       acc('button type="button" data-ir="1"', '<path d="M2.500 19h19M3 13l3-5 4 1 5-5 2 1-3 5 4 1 2 2-6 1-4 3-2-1 1-3-4-1z"/>', 'Vuelos', 'Encontrá las mejores opciones y horarios.') +
@@ -1727,6 +1774,7 @@
        lugar donde decidir como se ve cada pantalla. */
     $('main').dataset.paso = S.paso;
     $('phone').classList.toggle('es-oscuro', S.paso === 5);
+    document.documentElement.classList.toggle('cs-oscuro', S.paso === 5);
     $('steps').hidden = S.paso >= 5;
     $('foot').hidden = S.paso >= 5;
     if (S.paso < 5) { $('cta').textContent = S.paso === 1 && MODO === 'avion' && S.sub !== 't' ? 'Continuar a Traslados →' : CTAS[S.paso]; $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
