@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v155';
+var CACHE_NAME = 'cuantosale-shell-v156';
 var APP_SHELL = [
   // '/app' (la start_url de la PWA): el servidor responde lo mismo en '/' y en
   // '/app'. La landing de waitlist se sacó; se sube CACHE_NAME para que nadie
@@ -61,7 +61,7 @@ self.addEventListener('fetch', function (event) {
   if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.indexOf('/api/') === 0) return;
   // /test es la version nueva en desarrollo: siempre va a la red. Con cache-first, web.css y los scripts (que no llevan
   // ?v=) se quedaban para siempre en la copia vieja y los cambios de diseno no se veian aunque el servidor ya los tuviera.
-  if (url.pathname === '/test' || url.pathname.indexOf('/test/') === 0 || url.pathname === '/nuevo' || url.pathname.indexOf('/nuevo/') === 0) return;
+  if (url.pathname === '/test' || url.pathname.indexOf('/test/') === 0) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).then(function (response) {

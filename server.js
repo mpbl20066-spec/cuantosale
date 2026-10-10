@@ -2856,18 +2856,12 @@ function nuevoPagina(pathname, search) {
   if (slug === '' && /[?&]viaje=/.test(search || '')) return null;
   return { slug: slug, archivo: NUEVO_PAGINAS[slug] };
 }
-/* Devuelve la ruta canonica si la URL pedida es una variante o una URL vieja (/test/..., /nuevo/...). */
+/* Devuelve la ruta canonica si la URL pedida es una variante o una URL vieja (/test/...). */
 function nuevoRedireccion(pathname, search) {
   const q = search || '';
   const viejo = /^\/test\/(home-[a-z-]+\.html)$/i.exec(pathname);
   if (viejo && NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()]) return NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()] + q;
   if (/^\/test\/?$/i.test(pathname)) return (NUEVO || '/') + q;
-  /* El prefijo provisorio /nuevo ya no existe: va a la misma pagina en la raiz. */
-  const n = /^\/nuevo(?:\/([A-Za-z-]+))?\/?$/i.exec(pathname);
-  if (n && NUEVO !== '/nuevo') {
-    const slug = (n[1] || '').toLowerCase();
-    if (slug === '' || NUEVO_SLUGS.indexOf(slug) >= 0) return ((NUEVO + (slug ? '/' + slug : '')) || '/') + q;
-  }
   /* Variantes de mayusculas o barra final de una ruta limpia. */
   const m = /^(\/[A-Za-z-]+)\/$|^(\/[A-Za-z-]+)$/.exec(pathname);
   if (m) {

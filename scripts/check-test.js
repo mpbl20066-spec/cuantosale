@@ -9,7 +9,6 @@ const PAGINAS = ['', 'destinos', 'presupuesto', 'planificar', 'ruta', 'detalle',
 const VIEJAS = {
   '/test': '/', '/test/': '/', '/test/home-dos-caminos.html': '/', '/test/home-destino.html': '/destinos',
   '/test/home-flujo.html?destino=rio&pax=2': '/planificar?destino=rio&pax=2', '/test/HOME-calcular.html': '/ruta',
-  '/nuevo': '/', '/nuevo/': '/', '/nuevo/destinos': '/destinos', '/NUEVO/Planificar?destino=rio': '/planificar?destino=rio',
   '/Destinos': '/destinos', '/destinos/': '/destinos'
 };
 let fallas = 0;
@@ -42,6 +41,7 @@ async function main() {
     if (destino) { const s = await pedir(base, destino); ok(s.status === 200, '  ' + destino + ' responde 200 (sin cadena)'); }
   }
   ok((await pedir(base, '/xyz-no-existe')).status === 404, '/xyz-no-existe -> 404');
+  for (const n of ['/nuevo', '/nuevo/destinos']) ok((await pedir(base, n)).status === 404, n + ' ya no existe (404)');
   const app = await pedir(base, '/app');
   ok(app.status === 200 && /id="app"|app\.js/.test(app.body), '/app sigue sirviendo la app anterior');
   const viaje = await pedir(base, '/?viaje=abcdefgh');
