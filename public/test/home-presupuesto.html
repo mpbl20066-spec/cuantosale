@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Destinos por presupuesto · CuántoSale</title>
 <script src="tema.js"></script>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="instalar.js" defer></script>
 <script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
@@ -26,6 +29,7 @@
   .p-back{width:40px;height:40px;margin-left:-8px;display:grid;place-items:center;border:0;background:transparent;color:var(--ink);cursor:pointer}
   .p-logo{text-align:center;font-family:var(--fh);font-weight:800;font-size:24px;line-height:1.05;color:var(--ink)}
   .p-logo svg{vertical-align:-4px;margin-left:5px;color:var(--azul)}
+  .p-logo .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
   .p-logo small{display:block;font-family:var(--fb);font-weight:500;font-size:11px;color:var(--ink2)}
   h1.p-h{margin:6px 0 4px;font-family:var(--fh);font-size:24px;font-weight:800;line-height:1.15;color:var(--azul)}
   .p-sub{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--ink2);line-height:1.4}
@@ -224,6 +228,71 @@
 </style>
 <link rel="stylesheet" href="web.css">
 <link rel="stylesheet" href="layout.css">
+<style>
+  /* El boton del detalle dentro de la tarjeta solo existe en escritorio (en celular va en el pie fijo). */
+  .d-go{display:none}
+  /* La flecha de los botones amarillos va del color del texto: la regla general de iconos (web.css) la pintaba
+     amarilla y en modo oscuro desaparecia sobre el boton. El selector de fecha, con iconos claros en oscuro. */
+  html[data-pagina="presupuesto"] .phone .p-dst__go svg,html[data-pagina="presupuesto"] .phone .p-go svg{color:currentColor}
+  [data-theme="night"][data-pagina="presupuesto"] .p-date input{color-scheme:dark}
+  /* ============ Escritorio (>=1024px): "No sé dónde ir" ============
+     Va despues de web.css y layout.css para ganarles. El ancho cambia segun el paso (data-paso en .phone):
+     paso 1 en una tarjeta de 700px; paso 2 en dos columnas de 1100px (busqueda | fechas) con el boton
+     abajo a la derecha; paso 3 en 1200px con los destinos en grilla de tres; detalle en 1100px con el
+     boton dentro de la columna del precio. Nada de esto toca el celular. */
+  @media (min-width:1024px){
+    /* el boton no flota en escritorio: sin la sombra que lo separaba del contenido */
+    html[data-pagina="presupuesto"] #main>.p-cta{box-shadow:none;background:none}
+    html[data-pagina="presupuesto"] .p-card{box-shadow:0 6px 24px rgba(10,30,70,.08)}
+    [data-theme="night"][data-pagina="presupuesto"] .p-card{box-shadow:0 6px 24px rgba(0,0,0,.35)}
+    /* paso 2: busqueda a la izquierda, fechas a la derecha */
+    html[data-pagina="presupuesto"] .phone[data-paso="2"]>.p-top,
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] #main>.p-step:has(.p-card),
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] #main>.p-cta:has(.p-go){max-width:1100px}
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] #main>.p-step:has(.p-card){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto 1fr;gap:24px;align-items:start}
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] #main>.p-step>.p-card{margin:0}
+    /* el aviso de error va en la columna de la derecha, debajo de las fechas (la tarjeta de la izquierda ocupa las dos filas) */
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] #main>.p-step>.p-card:first-child{grid-row:1/span 2}
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] #main>.p-step>.p-err{grid-column:2;grid-row:2;align-self:start;margin:0}
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] .p-card--h2 .p-date{padding:12px 16px}
+    html[data-pagina="presupuesto"] .phone[data-paso="2"] #main>.p-cta .p-go{width:calc(50% - 12px);margin-left:auto}
+    /* paso 3: resultados en 1200px, tarjetas en grilla */
+    html[data-pagina="presupuesto"] .phone[data-paso="3"]>.p-top,
+    html[data-pagina="presupuesto"] .phone[data-paso="3"] #main>.p-step:has(.p-card){max-width:1200px}
+    html[data-pagina="presupuesto"] .phone[data-paso="3"] #main{padding-bottom:32px}
+    [data-pagina="presupuesto"] .phone[data-paso="3"] .p-card h1.p-h{font-size:28px}
+    [data-pagina="presupuesto"] .p-dsts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:22px 0 8px}
+    [data-pagina="presupuesto"] .p-dsts>.p-chip{grid-column:1/-1;justify-self:center}
+    [data-pagina="presupuesto"] .p-dst{display:flex;flex-direction:column;background:var(--surface);transition:box-shadow .15s,transform .15s}
+    [data-pagina="presupuesto"] .p-dst:hover{box-shadow:0 10px 28px rgba(10,30,70,.12);transform:translateY(-2px)}
+    [data-theme="night"][data-pagina="presupuesto"] .p-dst{background:var(--bg)}
+    [data-theme="night"][data-pagina="presupuesto"] .p-dst:hover{box-shadow:0 10px 28px rgba(0,0,0,.45)}
+    [data-pagina="presupuesto"] .p-dst__f{height:auto;aspect-ratio:16/10}
+    [data-pagina="presupuesto"] .p-dst__b{flex:1;display:flex;flex-direction:column;padding:14px 16px 16px}
+    [data-pagina="presupuesto"] .p-dst__f2{flex-wrap:wrap;gap:4px 10px;margin:12px 0 14px}
+    [data-pagina="presupuesto"] .p-dst__go{margin-top:auto}
+    [data-pagina="presupuesto"] .phone[data-paso="3"] .p-vacio{padding:48px 8px;font-size:15px}
+    [data-pagina="presupuesto"] .phone[data-paso="3"] .p-ej{margin-top:18px}
+    /* detalle: 1100px, flecha con texto alineada al contenido (sin el corrimiento de la barra comun) */
+    /* arriba (no centrado en vertical) y con los mismos bordes que la tarjeta de resultados del paso 3 */
+    html[data-pagina="presupuesto"] .p-over{justify-content:flex-start;padding-top:4px}
+    html[data-pagina="presupuesto"] .p-over .scroll{flex:1 1 auto;max-width:1152px;padding:0 24px 32px}
+    [data-pagina="presupuesto"] .p-over .p-foot{display:none}
+    html[data-pagina="presupuesto"] .p-over .p-bar{padding:0;margin-bottom:10px;justify-content:flex-start}
+    html[data-pagina="presupuesto"] .p-over .p-bar>span{display:none}
+    html[data-pagina="presupuesto"] .p-over .p-back{width:auto;height:44px;margin-left:-8px;padding:0 12px 0 8px;gap:6px;display:inline-flex;align-items:center;font-family:var(--fb);font-size:14px;font-weight:600;color:var(--ink2);transform:none}
+    html[data-pagina="presupuesto"] .p-over .p-back:hover{color:var(--ink)}
+    html[data-pagina="presupuesto"] .p-over .p-back__t{display:inline}
+    [data-pagina="presupuesto"] .d-card{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);box-shadow:0 6px 24px rgba(10,30,70,.08)}
+    [data-theme="night"][data-pagina="presupuesto"] .d-card{box-shadow:0 6px 24px rgba(0,0,0,.35)}
+    [data-pagina="presupuesto"] .d-photo{min-height:400px}
+    [data-pagina="presupuesto"] .d-body{display:flex;flex-direction:column;padding:28px 32px}
+    [data-pagina="presupuesto"] .d-price b{font-size:38px}
+    [data-pagina="presupuesto"] .d-inc{margin-top:22px}
+    [data-pagina="presupuesto"] .p-over .d-go{display:flex;max-width:none;margin:auto 0 0}
+    [data-pagina="presupuesto"] .d-list{margin-bottom:24px}
+  }
+</style>
 </head>
 <body>
 <div class="phone">
@@ -277,10 +346,21 @@
   var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
   var HOY = iso(new Date());
+  /* Los vuelos se pueden buscar con hasta 6 meses de anticipacion: ninguna fecha pasa de hoy + 6 meses.
+     Si el dia no existe en ese mes (31 de agosto + 6 = 31 de febrero) queda el ultimo dia del mes. */
+  var MAXF = (function () { var d = new Date(), m = new Date(d.getFullYear(), d.getMonth() + 6, 1), u = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(); m.setDate(Math.min(d.getDate(), u)); return iso(m); })();
+  var MAXIDA = sumarDias(MAXF, -1);   /* la ida deja al menos una noche antes del tope */
   /* Paso 1: presupuesto y como viaja (cuando). Paso 2: fechas, mes o noches. Paso 3: resultados. */
   var ORIGENES0 = 'Montevideo, Uruguay';
   var S = { origen: ORIGENES0, paso: 1, cuando: 'fechas', presupuesto: +qs.get('presupuesto') || 1000, pax: +qs.get('pax') || 2, ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02',
     mes: -1, noches: '5-7', err: '', modo: 'todos', medio: 'comparar', tipo: 'todos', abierto: null, modoDet: 'auto', cargando: false, error: '', n: 6 };
+  /* Fechas dentro del tope de 6 meses (tambien las que llegan por la URL). */
+  function acotarFechas() {
+    if (S.ida > MAXIDA) S.ida = MAXIDA;
+    if (S.vuelta > MAXF) S.vuelta = MAXF;
+    if (S.vuelta <= S.ida) S.vuelta = sumarDias(S.ida, 7) > MAXF ? MAXF : sumarDias(S.ida, 7);
+  }
+  acotarFechas();
   var IDA = S.ida, VUELTA = S.vuelta, PAX = S.pax;   /* lo que se consulto de verdad (se fija al continuar) */
   var NOCHES_N = { '5-7': 6, '7-10': 8, '10+': 11 };
   /* Proximos seis meses, a partir del mes que viene (hay que poder reservar con anticipacion). */
@@ -295,6 +375,8 @@
     var n = NOCHES_N[S.noches], ida;
     if (S.cuando === 'flexible') { var m = mesesOfrecidos().filter(function (x) { return x.i === S.mes; })[0]; ida = iso(new Date(m.y, m.i, 12)); }
     else ida = sumarDias(HOY, 45);
+    /* el ultimo mes ofrecido puede pasarse del tope de 6 meses: el viaje se corre para atras */
+    if (sumarDias(ida, n) > MAXF) return { ida: sumarDias(MAXF, -n), vuelta: MAXF };
     return { ida: ida, vuelta: sumarDias(ida, n) };
   }
   var track = function (n, p) { window.mockTrack(n, Object.assign({ fuente: fuente, presupuesto: S.presupuesto, modo: S.modo }, p || {})); };
@@ -349,12 +431,13 @@
   }
   /* La barra se dibuja en #top, no en #main: #main scrollea y la barra tiene que
      quedar fija arriba en los pasos largos. ver pintar(). */
-  var barra = function () { return '<div class="p-bar"><button type="button" class="p-back" id="atras" aria-label="Volver">' + ic(I.back, 22) + '<span class="p-back__t">Volver</span></button><div class="p-logo">CuántoSale' + ic(I.plane, 24) + '<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>'; };
+  var barra = function () { return '<div class="p-bar"><button type="button" class="p-back" id="atras" aria-label="Volver">' + ic(I.back, 22) + '<span class="p-back__t">Volver</span></button><div class="p-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>'; };
   var pintarBarra = function () { $('top').innerHTML = barra(); };
   var iCal = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
   var iPers = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>';
   var iMezcla = '<path d="M3 7h3c4 0 5 10 9 10h6M3 17h3c1.5 0 2.600-1 3.500-2.500M15 7h6M18 4l3 3-3 3M18 14l3 3-3 3"/>';
   var CUANDO = [['fechas', 'Tengo fechas', iCal], ['flexible', 'Soy flexible', iCal], ['igual', 'Me da igual', iMezcla]];
+  var TXT_TOPE = function () { return 'Podés elegir fechas hasta el ' + fdc(MAXF) + ' ' + MAXF.slice(0, 4) + ': los vuelos se buscan con hasta 6 meses de anticipación.'; };
   var ayuda = function () { return S.err ? '<p class="g-err p-err" role="alert">' + esc(S.err) + '</p>' : ''; };
   var personas = function () {
     return '<h2 class="p-h2">¿Cuántas personas?</h2><div class="p-pers">' + ic(iPers, 22) + '<b>' + S.pax + (S.pax === 1 ? ' persona' : ' personas') + '</b>' +
@@ -389,8 +472,8 @@
     var cuerpo;
     if (S.cuando === 'fechas') {
       cuerpo = '<h2 class="p-h2">¿Qué días viajás?</h2>' +
-        '<label class="p-fl" for="ida">Desde</label><div class="p-date">' + ic(iCal, 22) + '<input id="ida" type="date" min="' + sumarDias(HOY, 1) + '" value="' + S.ida + '"></div>' +
-        '<label class="p-fl" for="vuelta">Hasta</label><div class="p-date">' + ic(iCal, 22) + '<input id="vuelta" type="date" min="' + sumarDias(S.ida, 1) + '" value="' + S.vuelta + '"></div>';
+        '<label class="p-fl" for="ida">Desde</label><div class="p-date">' + ic(iCal, 22) + '<input id="ida" type="date" min="' + sumarDias(HOY, 1) + '" max="' + MAXIDA + '" value="' + S.ida + '"></div>' +
+        '<label class="p-fl" for="vuelta">Hasta</label><div class="p-date">' + ic(iCal, 22) + '<input id="vuelta" type="date" min="' + sumarDias(S.ida, 1) + '" max="' + MAXF + '" value="' + S.vuelta + '"></div>';
     } else if (S.cuando === 'flexible') {
       cuerpo = '<h2 class="p-h2">¿Qué mes te gustaría?</h2><div class="p-grid3">' + mesesOfrecidos().map(function (m) {
         return '<button type="button" class="p-opt p-opt--c' + (S.mes === m.i ? ' is-on' : '') + '" data-mes="' + m.i + '" aria-pressed="' + (S.mes === m.i) + '">' + MESES_L[m.i] + '</button>';
@@ -429,7 +512,7 @@
       '<h2 class="p-h2">¿Cómo preferís viajar?</h2><p class="p-sub p-sub--s">Filtramos por esta forma de llegar. Si no te importa, compará todas.</p><div class="p-medios">' +
       MEDIOS2.map(function (m) {
         return '<button type="button" class="p-medio' + (S.medio === m.id ? ' is-on' : '') + '" data-medio2="' + m.id + '" aria-pressed="' + (S.medio === m.id) + '"><span class="p-medio__i">' + ic(m.ico, 18) + '</span><b>' + m.nom + '</b><small>' + m.sub + '</small></button>';
-      }).join('') + '</div>' + ayuda() + '</div>' + bloqueFechas() + ayuda() + '</div>' +
+      }).join('') + '</div></div>' + bloqueFechas() + ayuda() + '</div>' +
       '<div class="p-cta"><button type="button" class="p-go" data-paso2="1" data-evento="presupuesto_paso2_continuar">Buscar destinos →</button></div>';
   }
   function irAResultados() {
@@ -439,6 +522,7 @@
     S.paso = 3; S.cargando = true; S.error = ''; pintar(); cargar();
   }
   function pintar() {
+    document.querySelector('.phone').setAttribute('data-paso', S.paso);   /* el CSS de escritorio cambia el ancho segun el paso */
     pintarBarra();
     if (S.paso === 1) return pintarPaso1();
     if (S.paso === 2) return pintarPaso2();
@@ -494,12 +578,13 @@
     var seg = Object.keys(d.precios).map(function (o) {
       return '<button type="button" class="' + (o === m ? 'is-on' : '') + '" data-det-modo="' + o + '" aria-pressed="' + (o === m) + '">' + MODOS[o][0] + '</button>';
     }).join('');
-    $('detalle').innerHTML = '<div class="scroll"><div class="p-bar"><button type="button" class="p-back" id="cerrar" aria-label="Volver a la lista">' + ic(I.back, 22) + '</button><div class="p-logo">CuántoSale' + ic(I.plane, 24) + '<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>' +
+    $('detalle').innerHTML = '<div class="scroll"><div class="p-bar"><button type="button" class="p-back" id="cerrar" aria-label="Volver a la lista">' + ic(I.back, 22) + '<span class="p-back__t">Volver a los destinos</span></button><div class="p-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>' +
       '<h2 class="d-dest">' + esc(d.nom) + '</h2><p class="d-meta">' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + PAX + (PAX === 1 ? ' persona' : ' personas') + '</p>' +
       '<div class="d-seg" role="group" aria-label="Forma de llegar">' + seg + '</div>' +
       '<div class="d-card"><div class="d-photo" style="background-image:url(\'../fotos/' + k + '.jpg\')" role="img" aria-label="' + esc(d.nom) + '"></div><div class="d-body">' +
       '<div class="d-price"><div><b>' + f(p) + '</b><small>por persona</small></div>' + (mejor ? '<span class="d-best">' + ic(I.ok, 16) + 'Mejor opción</span>' : '') + '</div>' +
-      '<h3 class="d-inc">Incluye</h3><ul class="d-list">' + incluye(d.nom, pr.parts).map(function (t) { return '<li>' + ic(I.ok, 20) + esc(t) + '</li>'; }).join('') + '</ul></div></div></div>' +
+      '<h3 class="d-inc">Incluye</h3><ul class="d-list">' + incluye(d.nom, pr.parts).map(function (t) { return '<li>' + ic(I.ok, 20) + esc(t) + '</li>'; }).join('') + '</ul>' +
+      '<a class="p-go d-go" href="' + irFlujo(k, m) + '" data-evento="presupuesto_ver_detalle" data-destino="' + k + '" data-medio="' + m + '" data-precio="' + p + '">Ver detalle del viaje ' + ic(I.arrow, 18) + '</a></div></div></div>' +
       '<div class="p-foot"><a class="p-go" id="ver" href="' + irFlujo(k, m) + '" data-evento="presupuesto_ver_detalle" data-destino="' + k + '" data-medio="' + m + '" data-precio="' + p + '">Ver detalle del viaje ' + ic(I.arrow, 18) + '</a></div>';
   }
   /* El flujo ya sabe armar el viaje de un destino: se le pasa destino, personas y fechas. */
@@ -541,6 +626,7 @@
       if (S.cuando === 'fechas') {
         if (!S.ida || !S.vuelta || S.ida < sumarDias(HOY, 1)) S.err = 'Elegí una fecha de ida a partir de mañana.';
         else if (S.vuelta <= S.ida) S.err = 'La vuelta tiene que ser posterior a la ida.';
+        else if (S.vuelta > MAXF) S.err = TXT_TOPE();
       } else if (S.cuando === 'flexible' && S.mes < 0) S.err = 'Elegí el mes en que te gustaría viajar.';
       if (S.err) { pintar(); return; }
       PAX = S.pax; track('presupuesto_paso2', { origen: S.origen, personas: S.pax, medio: S.medio, cuando: S.cuando });
@@ -550,6 +636,7 @@
       if (S.cuando === 'fechas') {
         if (!S.ida || !S.vuelta || S.ida < sumarDias(HOY, 1)) S.err = 'Elegí una fecha de ida a partir de mañana.';
         else if (S.vuelta <= S.ida) S.err = 'La vuelta tiene que ser posterior a la ida.';
+        else if (S.vuelta > MAXF) S.err = TXT_TOPE();
       } else if (S.cuando === 'flexible' && S.mes < 0) S.err = 'Elegí el mes en que te gustaría viajar.';
       if (S.err) { pintar(); return; }
       irAResultados(); return;
@@ -563,8 +650,9 @@
   /* Las fechas se guardan al cambiar, sin volver a pintar: pintar cerraria el selector de fechas. */
   document.addEventListener('change', function (e) {
     if (e.target.id === 'origen') { S.origen = e.target.value; track('presupuesto_origen', { origen: S.origen }); return; }
-    if (e.target.id === 'ida') { S.ida = e.target.value; if (S.vuelta <= S.ida) S.vuelta = sumarDias(S.ida, 7); S.err = ''; pintar(); }
-    else if (e.target.id === 'vuelta') { S.vuelta = e.target.value; S.err = ''; }
+    /* Escribiendo a mano se puede pasar del max del input: se corrige al tope y se avisa por que. */
+    if (e.target.id === 'ida') { var pasada = e.target.value > MAXIDA; S.ida = e.target.value; if (S.vuelta <= S.ida) S.vuelta = sumarDias(S.ida, 7); acotarFechas(); S.err = pasada ? TXT_TOPE() : ''; pintar(); }
+    else if (e.target.id === 'vuelta') { S.vuelta = e.target.value; S.err = ''; if (S.vuelta > MAXF) { acotarFechas(); S.err = TXT_TOPE(); pintar(); } }
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.abierto) cerrar(); });
   pintar();

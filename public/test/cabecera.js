@@ -40,9 +40,9 @@
   }
   document.documentElement.classList.add('cs-hdr');
 
-  /* En escritorio (>= 1024px) scrollea la pagina y no la caja #main (ver web.css). Las pantallas guardan y restauran
+  /* Scrollea la pagina y no la caja #main (ver web.css). Las pantallas guardan y restauran
      $('main').scrollTop al repintar: se redirige a la ventana para no tocar cada una. */
-  var mq = window.matchMedia('(min-width:1024px)');
+  var mq = window.matchMedia('all');   /* en todos los anchos scrollea la pagina (ver web.css) */
   var m = document.getElementById('main');
   if (m) {
     var d = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop');

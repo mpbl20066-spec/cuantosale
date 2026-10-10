@@ -62,7 +62,7 @@
     '.cs-mon__o:hover,.cs-mon__o:focus-visible{background:var(--cel-soft,#f1f4f8);outline:0}' +
     '.cs-mon__o[aria-selected="true"]{font-weight:800}' +
     '.cs-mon__o[disabled]{opacity:.45;cursor:default}' +
-    '.cs-mon__o i{flex:0 0 28px;font-style:normal;font-weight:800;color:var(--ink2,#48566a)}' +
+    '.cs-mon__o i{flex:0 0 30px;display:grid;place-items:center;width:30px;height:30px;box-sizing:border-box;border-radius:50%;background:#1A2B4A;color:#F5C518!important;font-style:normal;font-size:12px;font-weight:800;line-height:1;letter-spacing:-.02em}' +
     '.cs-mon__o span{flex:1}' +
     '.cs-mon__o em{font-style:normal;font-weight:800}' +
     '.cs-top__mon{display:inline-flex;align-items:center;margin-left:2px}' +
@@ -127,5 +127,8 @@
   }
   if (/^https?:$/.test(location.protocol)) cargar(); else ST.cargando = false;
 
-  window.CSMoneda = { fmt: fmt, simbolo: simbolo, code: code, set: set, alCambiar: alCambiar, selector: selector, pintar: pintarSelectores };
+  /* tasa(): cuanto vale 1 dolar en la moneda elegida. usdDe(code, monto): ese monto pasado a dolares (null sin tasa). */
+  function tasaActiva() { return activa().t; }
+  function usdDe(c, monto) { var t = tasa(c); return t ? Number(monto) / t : null; }
+  window.CSMoneda = { fmt: fmt, simbolo: simbolo, code: code, tasa: tasaActiva, usdDe: usdDe, set: set, alCambiar: alCambiar, selector: selector, pintar: pintarSelectores };
 })();

@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Guías de destino · CuántoSale</title>
 <script src="tema.js"></script>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="instalar.js" defer></script>
 <script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
@@ -131,6 +134,21 @@
 </style>
 <link rel="stylesheet" href="web.css">
 <link rel="stylesheet" href="layout.css">
+<style>
+  /* Desktop: la lista de guias usa el mismo ancho que el resto de la web (1200px, alineada con la flecha de volver) en
+     tres columnas anchas. A 900px las tarjetas eran tan angostas que los nombres se partian ("Arraial / d’Ajuda",
+     "Angra dos / Reis"). Si un nombre no entra, baja a un segundo renglon parejo; nunca se corta ni se parte con guion. */
+  @media (min-width:1024px){
+    [data-pagina="guias"] .g-main{max-width:1200px}
+    [data-pagina="guias"] .g-lista{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    [data-pagina="guias"] .g-dest{padding:12px 14px 12px 12px;transition:border-color .15s,box-shadow .15s}
+    [data-pagina="guias"] .g-dest:hover{box-shadow:0 8px 22px rgba(10,30,70,.1)}
+    [data-pagina="guias"] .g-dest__t b{overflow-wrap:normal;word-break:normal;hyphens:none;text-wrap:balance}
+  }
+  /* el buscador mostraba el anillo de foco nativo como un recuadro dentro de la caja (blanco en modo noche): el foco va en el borde */
+  [data-pagina="guias"] .g-bus input:focus,[data-pagina="guias"] .g-bus input:focus-visible{outline:0;box-shadow:none}
+  [data-pagina="guias"] .g-bus:focus-within{border-color:var(--sel,#F7C325);box-shadow:0 0 0 3px rgba(247,195,37,.25)}
+</style>
 </head>
 <body>
 <div class="phone">

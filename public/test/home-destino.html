@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Elegí tu destino · CuántoSale</title>
 <script src="tema.js"></script>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="instalar.js" defer></script>
 <script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
@@ -243,6 +246,47 @@
 </style>
 <link rel="stylesheet" href="web.css">
 <link rel="stylesheet" href="layout.css">
+<style>
+  /* Va despues de web.css/layout.css a proposito: esas hojas pisan varias reglas de arriba. */
+  /* Campos de fecha. En el celular el control nativo se pintaba como un recuadro blanco (el "boton" de fecha de iOS
+     y el anillo de foco del navegador, blanco en modo noche) y al tocarlo abria el selector del sistema encima del
+     calendario propio. Se le saca la apariencia nativa; el foco se marca en el borde de la caja (.d-fecha). */
+  html[data-pagina="destino"] .d-fecha input{-webkit-appearance:none;appearance:none;min-height:24px;margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;outline:0;color-scheme:light}
+  html[data-theme="night"][data-pagina="destino"] .d-fecha input{color-scheme:dark}
+  html[data-pagina="destino"] .d-fecha input:focus,html[data-pagina="destino"] .d-fecha input:focus-visible{outline:0;box-shadow:none}
+  html[data-pagina="destino"] .d-fecha input::-webkit-date-and-time-value{text-align:left;margin:0}
+  html[data-pagina="destino"] .d-fecha input::-webkit-datetime-edit{padding:0}
+  html[data-pagina="destino"] .d-fecha:focus-within{border-color:var(--sel,#F7C325);box-shadow:0 0 0 3px rgba(247,195,37,.25)}
+  html[data-pagina="destino"] .cal__c:disabled{text-decoration:none}
+  .cal__max{margin:2px 0 0;text-align:center;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  /* ¿Como queres ir?: el icono del medio elegido. web.css pinta todo svg de .phone con var(--ico) (amarillo en modo
+     noche, mostaza en dia), asi que sobre el circulo amarillo el dibujo desaparecia. Se fuerza el trazo oscuro. */
+  html[data-pagina="destino"] .d-modo.is-on .d-modo__i{background:var(--sel,#F7C325)}
+  html[data-pagina="destino"] .d-modo.is-on .d-modo__i svg{color:#0A101A;stroke:#0A101A}
+  html[data-pagina="destino"] .d-modo .d-modo__c{color:#0A101A}
+  @media (min-width:1024px){
+    /* Calendario en desktop: compacto (celdas de ~34px, como un selector de fechas) en vez de estirarse a todo el ancho
+       de la columna con filas de 40px; asi entra completo debajo de los campos sin que lo tape el boton pegajoso. */
+    html[data-pagina="destino"] .cal{max-width:540px;margin-top:10px;padding:10px 12px 8px}
+    html[data-pagina="destino"] .cal__ms{gap:22px}
+    html[data-pagina="destino"] .cal__t{margin:0 0 4px;font-size:14px;line-height:30px}
+    html[data-pagina="destino"] .cal__d{padding:2px 0 4px;font-size:11px}
+    html[data-pagina="destino"] .cal__c{height:34px;font-size:13px}
+    html[data-pagina="destino"] .cal__nav{top:8px;width:30px;height:30px}
+    html[data-pagina="destino"] .cal__ay{margin:6px 0 0;font-size:12px}
+    /* Destinos: los nombres largos ("Arraial d’Ajuda", "Fernando de Noronha", "Balneário Camboriú") se ven
+       enteros, en hasta dos renglones parejos; nunca se cortan ni se parten con guion. La grilla de "todos" se
+       acomoda al ancho (4 columnas a 1024px, 5 a 1200px) en vez de apretar 5 columnas en cualquier pantalla. */
+    html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+    html[data-pagina="destino"] .d-grid--pop{grid-template-columns:repeat(5,minmax(0,1fr))}
+    html[data-pagina="destino"] .d-card{min-width:0;box-shadow:0 6px 22px rgba(10,30,70,.08)}
+    html[data-pagina="destino"] .d-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(10,30,70,.14)}
+    html[data-pagina="destino"] .d-card{transition:transform .15s,box-shadow .15s}
+    html[data-pagina="destino"] .d-card__f{height:auto;aspect-ratio:4/3}
+    html[data-pagina="destino"] .d-card__t{padding:12px 14px 13px}
+    html[data-pagina="destino"] .d-card__t b{font-size:16px;line-height:1.2;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:normal;word-break:normal;hyphens:none;text-wrap:balance}
+  }
+</style>
 </head>
 <body>
 <div class="phone">
@@ -292,11 +336,17 @@
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
   var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
+  /* Los vuelos se buscan hasta 6 meses adelante: el calendario, los campos y "Continuar" no dejan pasar de esa fecha.
+     (Si el dia no existe en ese mes, p. ej. 31 de agosto + 6 meses, queda el ultimo dia del mes.) */
+  var MAXF = (function () { var d = new Date(HOY.getFullYear(), HOY.getMonth() + 6, HOY.getDate(), 12); if (d.getDate() !== HOY.getDate()) d.setDate(0); return iso(d); })();
+  var MAXM = MAXF.slice(0, 7) + '-01';   // ultimo mes al que se puede llegar en el calendario
+  var TACTIL = !!(window.matchMedia && matchMedia('(hover:none) and (pointer:coarse)').matches);   // celular: sin selector nativo
+  var fLarga = function (s) { var q = String(s).split('-'); return +q[2] + ' de ' + ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][+q[1] - 1] + ' de ' + q[0]; };
   /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
   var S = { pant: 1, dest: qs.get('destino') || '', sel: '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
     ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: Math.max(0, +qs.get('ninos') || 0) };
   if (S.ninos >= S.pax) S.ninos = 0;   // siempre viaja al menos un adulto
-  S.cal = String(S.ida).slice(0, 7) + '-01'; S.paso = 'ida';   // mes que muestra el calendario y que fecha se elige con el proximo toque
+  S.cal = String(S.ida).slice(0, 7) + '-01'; if (S.cal > MAXM) S.cal = MAXM; S.paso = 'ida';   // mes que muestra el calendario y que fecha se elige con el proximo toque
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
   var debugQ = debug ? '&debug=1' : '';
@@ -406,6 +456,7 @@
     if (!S.vuelta) return { ok: false, pend: true, t: "Elegí la fecha de vuelta en el calendario." };
     var n = Math.round((new Date(S.vuelta + "T12:00:00") - new Date(S.ida + "T12:00:00")) / 864e5);
     if (!(n >= 1)) return { ok: false, t: "La vuelta tiene que ser posterior a la ida." };
+    if (S.vuelta > MAXF) return { ok: false, t: "Buscamos vuelos hasta 6 meses adelante: elegí fechas hasta el " + fLarga(MAXF) + "." };
     return { ok: true, t: plural(n, "noche", "noches") };   /* las personas ya se ven mas abajo: no se repiten aca */
   }
   /* Una fila de personas: nombre, aclaracion de edad y el selector - n +. Los limites los pone el que la llama. */
@@ -427,7 +478,7 @@
       DIAS_C.map(function (d) { return '<span class="cal__d" aria-hidden="true">' + d + '</span>'; }).join('');
     for (var i = 0; i < lead; i++) h += '<span></span>';
     for (var d = 1; d <= total; d++) {
-      var f = y + '-' + p2(m + 1) + '-' + p2(d), dis = f < min;
+      var f = y + '-' + p2(m + 1) + '-' + p2(d), dis = f < min || f > MAXF || (S.paso !== 'vuelta' && f === MAXF);   // el ultimo dia solo sirve de vuelta
       var c = 'cal__c' + (f === S.ida ? ' is-ida' : '') + (f === S.vuelta ? ' is-vuelta' : '') +
         (S.ida && S.vuelta && f > S.ida && f < S.vuelta ? ' is-rango' : '');
       h += '<button type="button" class="' + c + '" data-dia="' + f + '"' + (dis ? ' disabled' : '') + ' aria-pressed="' + (f === S.ida || f === S.vuelta) +
@@ -436,12 +487,20 @@
     return h + '</div></div>';
   }
   function calHTML() {
-    var y = +S.cal.slice(0, 4), m = +S.cal.slice(5, 7) - 1, y2 = m === 11 ? y + 1 : y, m2 = (m + 1) % 12;
-    var h0 = new Date(HOY.getFullYear(), HOY.getMonth(), 1), esPrimero = y === h0.getFullYear() && m === h0.getMonth();
+    /* Desde 768px se ven dos meses (ver .cal__m+.cal__m): el "siguiente" se apaga cuando el ultimo mes visible es el
+       de la fecha maxima, y con dos meses el par arranca un mes antes para no mostrar un mes entero apagado. */
+    var dos = !!(window.matchMedia && matchMedia('(min-width:768px)').matches), mes0 = iso(HOY).slice(0, 7) + '-01';
+    if (S.cal > MAXM) S.cal = MAXM;
+    if (S.cal < mes0) S.cal = mes0;
+    if (dos && S.cal >= MAXM && S.cal > mes0) { var pr = new Date(+S.cal.slice(0, 4), +S.cal.slice(5, 7) - 2, 1); S.cal = pr.getFullYear() + '-' + p2(pr.getMonth() + 1) + '-01'; }
+    var cal = S.cal;
+    var y = +cal.slice(0, 4), m = +cal.slice(5, 7) - 1, y2 = m === 11 ? y + 1 : y, m2 = (m + 1) % 12;
+    var esPrimero = cal <= mes0, esUltimo = (dos ? y2 + '-' + p2(m2 + 1) + '-01' : cal) >= MAXM;
     return '<button type="button" class="cal__nav cal__nav--p" data-calnav="-1" aria-label="Mes anterior"' + (esPrimero ? ' disabled' : '') + '>' + ic('<path d="m15 5-7 7 7 7"/>', 18) + '</button>' +
-      '<button type="button" class="cal__nav cal__nav--n" data-calnav="1" aria-label="Mes siguiente">' + ic('<path d="m9 5 7 7-7 7"/>', 18) + '</button>' +
+      '<button type="button" class="cal__nav cal__nav--n" data-calnav="1" aria-label="Mes siguiente"' + (esUltimo ? ' disabled' : '') + '>' + ic('<path d="m9 5 7 7-7 7"/>', 18) + '</button>' +
       '<div class="cal__ms">' + calMes(y, m) + calMes(y2, m2) + '</div>' +
-      '<p class="cal__ay" aria-live="polite">' + (S.paso === 'vuelta' ? 'Ahora elegí la fecha de vuelta.' : (S.ida && S.vuelta ? 'Tocá otra fecha para cambiar el viaje.' : 'Elegí la fecha de ida y después la de vuelta.')) + '</p>';
+      '<p class="cal__ay" aria-live="polite">' + (S.paso === 'vuelta' ? 'Ahora elegí la fecha de vuelta.' : (S.ida && S.vuelta ? 'Tocá otra fecha para cambiar el viaje.' : 'Elegí la fecha de ida y después la de vuelta.')) + '</p>' +
+      '<p class="cal__max">Buscamos vuelos hasta 6 meses adelante (hasta el ' + fLarga(MAXF) + ').</p>';
   }
   /* Despues de un toque en el calendario: campos, noches, marca del campo activo y calendario. */
   function calSync() {
@@ -465,14 +524,17 @@
   }
   function pant2() {
     var d = destInfo(), nn = textoNoches();
+    /* En pantallas tactiles los campos quedan de solo lectura: el toque abre el calendario propio y no el selector
+       del sistema (en iOS/Android aparecia encima, como un recuadro blanco). En desktop se pueden seguir escribiendo. */
+    var RO = TACTIL ? ' readonly inputmode="none"' : '';
     $("main").dataset.pant = "2";
     var fv = d ? (d[0] === 'rio' ? 'dest/rio-vertical.jpg' : fotoDe(d[0])) : '';   /* foto vertical del destino (solo Rio tiene una propia) */
     $("main").innerHTML = migas(1) + "<div class=\"d-split d-split--f\"><div class=\"d-left\"><h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
       "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + (d ? "<span class=\"d-elegido__f\" style=\"background-image:url(" + fotoDe(d[0]) + ")\" aria-hidden=\"true\"></span>" : ic(I.pin, 20)) +
       "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay</small></span>" +
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
-      "<div class=\"d-fechas\"><div><label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"></div></div>" +
-      "<div><label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"></div></div></div>" +
+      "<div class=\"d-fechas\"><div><label class=\"d-lbl\" for=\"ida\">Ida</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"ida\" type=\"date\" min=\"" + sumarDias(iso(HOY), 1) + "\" max=\"" + sumarDias(MAXF, -1) + "\" value=\"" + S.ida + "\" aria-label=\"Fecha de ida\"" + RO + "></div></div>" +
+      "<div><label class=\"d-lbl\" for=\"vuelta\">Vuelta</label><div class=\"d-fecha\">" + ic(I.cal, 22) + "<input id=\"vuelta\" type=\"date\" min=\"" + sumarDias(S.ida, 1) + "\" max=\"" + MAXF + "\" value=\"" + S.vuelta + "\" aria-label=\"Fecha de vuelta\"" + RO + "></div></div></div>" +
       "<div class=\"cal\" id=\"cal\"" + (S.calOn ? "" : " hidden") + ">" + calHTML() + "</div>" +
       "<p class=\"d-noches" + (nn.ok || nn.pend ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
@@ -553,7 +615,7 @@
     }
     if (t.dataset.calnav) {
       var cy = +S.cal.slice(0, 4), cm = +S.cal.slice(5, 7) - 1 + (+t.dataset.calnav), dd = new Date(cy, cm, 1);
-      S.cal = dd.getFullYear() + '-' + p2(dd.getMonth() + 1) + '-01'; calSync(); return;
+      S.cal = dd.getFullYear() + '-' + p2(dd.getMonth() + 1) + '-01'; if (S.cal > MAXM) S.cal = MAXM; calSync(); return;
     }
     if (t.dataset.sel) { S.sel = t.dataset.sel; S.q = ''; var b1 = document.getElementById('bus'); if (b1) b1.value = ''; track('destino_sugerencia', { destino: S.sel }); actualizar(); return; }
     if (t.dataset.limpiar) { S.q = ''; var b0 = document.getElementById('bus'); if (b0) { b0.value = ''; b0.focus(); } actualizar(); return; }
@@ -579,6 +641,7 @@
       if (!(S.ida >= sumarDias(iso(HOY), 1))) { S.err = 'Elegí una fecha a partir de mañana.'; pant2(); return; }
       if (!S.vuelta) { S.err = 'Elegí la fecha de vuelta en el calendario.'; pant2(); return; }
       if (!(S.vuelta > S.ida)) { S.err = 'La fecha de vuelta tiene que ser posterior a la de ida.'; pant2(); return; }
+      if (S.ida > MAXF || S.vuelta > MAXF) { S.err = 'Buscamos vuelos hasta 6 meses adelante: elegí fechas hasta el ' + fLarga(MAXF) + '.'; pant2(); return; }
       track('destino_continuar', { destino: S.dest, personas: S.pax });
       irA();
       return;
@@ -587,12 +650,15 @@
   /* Fechas: se guardan al cambiar y las noches se actualizan en el momento. */
   function alCambiarFecha(e) {
     if (e.target.id !== 'ida' && e.target.id !== 'vuelta') return;
-    if (e.target.id === 'ida') { S.ida = e.target.value; var v = $('vuelta'); if (v) { v.min = sumarDias(S.ida, 1); if (S.vuelta <= S.ida) { S.vuelta = sumarDias(S.ida, 7); v.value = S.vuelta; } } }
+    if (e.target.id === 'ida') {
+      S.ida = e.target.value; var v = $('vuelta');
+      if (v) { v.min = sumarDias(S.ida, 1); if (S.ida && S.vuelta <= S.ida) { S.vuelta = sumarDias(S.ida, 7); if (S.vuelta > MAXF && MAXF > S.ida) S.vuelta = MAXF; v.value = S.vuelta; } }   // la vuelta automatica tampoco pasa del maximo
+    }
     else S.vuelta = e.target.value;
     S.err = '';
     var n = $('noches'), nn = textoNoches();
     if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok && !nn.pend); }
-    if (S.ida) S.cal = String(S.ida).slice(0, 7) + '-01';
+    if (S.ida) { S.cal = String(S.ida).slice(0, 7) + '-01'; if (S.cal > MAXM) S.cal = MAXM; }
     var c = $('cal'); if (c) c.innerHTML = calHTML();
   }
   $('main').addEventListener('mouseover', function (e) {

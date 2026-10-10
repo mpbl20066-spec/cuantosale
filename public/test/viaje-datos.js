@@ -65,32 +65,26 @@
       { nom: 'Comidas + transporte local', ico: 'comida', suma: de(['Comidas', 'Transporte local']) }
     ];
   }
-  /* Los 40 destinos del modelo (lib/model.js, DEST). Antes el mapa de nombres y el de
-     tipos cubrian solo 13: los destinos que llegan del servidor caian como "ciudad"
-     por defecto y las playas terminaban en el filtro equivocado. */
-  var Nombres = {
-    buz: 'Búzios', arraial: 'Arraial do Cabo', cabo: 'Cabo Frío', ilha: 'Ilha Grande', paraty: 'Paraty', ilhabela: 'Ilhabela', ubatuba: 'Ubatuba',
-    rio: 'Río de Janeiro', angra: 'Angra dos Reis', sao: 'São Sebastião', porto: 'Porto Seguro', mcz: 'Maceió', maragogi: 'Maragogi',
-    nat: 'Natal', pip: 'Pipa', trancoso: 'Trancoso', ssa: 'Salvador', for: 'Fortaleza', jericoacoara: 'Jericoacoara', morro: 'Morro de São Paulo',
-    portoseguro: 'Porto Seguro', itacare: 'Itacare', forte: 'Fortaleza', ajuda: 'Ajuda', fernando: 'Fernando de Noronha', fln: 'Florianópolis',
-    bombinhas: 'Bombinhas', rosa: 'Praia do Rosa', bcm: 'Balneário Camboriú', itapema: 'Itapema', garopaba: 'Garopaba', ferrugem: 'Ferrugem',
-    picarras: 'Piçarras', gram: 'Gramado', canela: 'Canela', torres: 'Torres', canoa: 'Canoa', rec: 'Recife', joaopessoa: 'João Pessoa', poa: 'Porto Alegre'
-  };
-  /* Tipo de lugar, para los filtros del flujo por presupuesto. Las ciudades son las
-     grandes; naturaleza es la Serra Gaucha (Gramado y Canela), que no van a la playa;
-     el resto son destinos de costa o de playa. */
-  var Tipo = {
-    rio: 'ciudad', ssa: 'ciudad', poa: 'ciudad', rec: 'ciudad', joaopessoa: 'ciudad', fln: 'ciudad',
-    gram: 'naturaleza', canela: 'naturaleza',
-    buz: 'playa', arraial: 'playa', cabo: 'playa', ilha: 'playa', paraty: 'playa', ilhabela: 'playa', ubatuba: 'playa',
-    angra: 'playa', sao: 'playa', porto: 'playa', mcz: 'playa', maragogi: 'playa', nat: 'playa', pip: 'playa', trancoso: 'playa',
-    for: 'playa', jericoacoara: 'playa', morro: 'playa', portoseguro: 'playa', itacare: 'playa', forte: 'playa', ajuda: 'playa',
-    fernando: 'playa', bombinhas: 'playa', rosa: 'playa', bcm: 'playa', itapema: 'playa', garopaba: 'playa', ferrugem: 'playa',
-    picarras: 'playa', torres: 'playa', canoa: 'playa'
-  };
+  /* Los nombres salen de window.CS_DESTS (destinos-datos.js), que es el snapshot
+     GENERADO desde lib/model.js con `npm run build:destinos-datos`. Antes esta lista
+     estaba escrita a mano acá y se desactualizo sin avisar: decia "São Sebastião"
+     para São Paulo, "Porto Seguro" para Porto de Galinhas y "Fortaleza" para Praia
+     do Forte, tres destinos con el nombre de otro. Un destino con el nombre de otro
+     es peor que uno sin nombre. */
+  var Nombres = {};
+  (window.CS_DESTS || []).forEach(function (d) { Nombres[d.k] = d.name; });
+
+  /* Tipo de lugar para los filtros del flujo por presupuesto. Sale del `group` del
+     modelo (beach / city / nature) y no de una lista escrita a mano: el modelo ya
+     clasifica a cada destino y una copia aparte termina clasificando distinto. */
+  var TIPO_DE_GROUP = { beach: 'playa', city: 'ciudad', nature: 'naturaleza' };
+  var Tipo = {};
+  (window.CS_DESTS || []).forEach(function (d) {
+    /* Si el destino no esta en el mapa, se trata como ciudad: es lo menos ofensivo,
+       porque "Playas" e "Naturaleza" son filtros que acotan y "Ciudades" no. */
+    Tipo[d.k] = TIPO_DE_GROUP[d.group] || 'ciudad';
+  });
   var TIPOS_TXT = { todos: 'Todos', playa: 'Playas', ciudad: 'Ciudades', naturaleza: 'Naturaleza' };
-  /* Si el destino no esta en el mapa, se trata como ciudad: es lo menos ofensivo,
-     porque "Playas" e "Naturaleza" son filtros que acotan y "Ciudades" no. */
 
   window.CS_Viaje = {
     MESES: MESES, iso: iso, sumarDias: sumarDias, fdc: fdc, money: money, ICONOS: ICONOS,

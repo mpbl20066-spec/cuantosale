@@ -49,11 +49,13 @@ function mediosDe(key) {
 }
 
 const datos = Object.keys(model.DEST).map(function (k) {
-  return { k: k, name: model.DEST[k].name, region: model.DEST[k].region, medios: mediosDe(k) };
+  return { k: k, name: model.DEST[k].name, region: model.DEST[k].region, group: model.DEST[k].group || 'beach', medios: mediosDe(k) };
 });
 
 const CABECERA = '/* Snapshot de lib/model.js DEST: los mismos 40 destinos que ofrece cuantosale.uy, con su region\n'
   + '   y los medios de transporte que el sistema puede cotizar para cada uno (`medios`).\n'
+  + '   `group` es la clasificacion del modelo (beach / city / nature): de ahi sale el\n'
+  + '   filtro por tipo de lugar de /test, para que no vuelva a ser una lista a mano.\n'
   + '   NO EDITAR A MANO: se regenera con `node scripts/build-destinos-datos.js`. */\n';
 
 fs.writeFileSync(SALIDA, CABECERA + 'window.CS_DESTS = ' + JSON.stringify(datos) + ';\n', 'utf8');

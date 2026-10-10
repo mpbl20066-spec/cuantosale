@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es" data-theme="light" data-pagina="home">
 <head>
 <meta charset="UTF-8">
@@ -9,6 +9,9 @@
 <meta name="theme-color" content="#F7F8FA">
 <title>CuántoSale · Tu viaje, sin sorpresas</title>
 <script src="tema.js"></script>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<script src="instalar.js" defer></script>
 <script src="moneda.js"></script>
 <link rel="preload" as="image" href="home-portada2.jpg" fetchpriority="high" media="(min-width: 768px)">
 <link rel="stylesheet" href="../style.css">
@@ -66,8 +69,11 @@
   .hx-step p{margin:0;font-size:13px;line-height:1.5;color:var(--hx-gray)}
   .hx-foot{margin:24px calc(var(--hx-pad) * -1) calc(var(--hx-pb) * -1);padding:20px var(--hx-pad);background:var(--hx-navy);color:#CBD5E1}
   .hx-foot__in{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:center;justify-content:space-between;max-width:1200px;min-height:40px;margin:0 auto}
-  .hx-foot b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;color:#fff}
-  .hx-foot nav{display:flex;flex-wrap:wrap;gap:6px 22px}
+  .hx-foot__logo{display:inline-flex;align-items:center;gap:9px;text-decoration:none!important}
+  .hx-foot__logo b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.05;color:#fff}
+  .hx-foot__logo small{display:block;max-width:none!important;margin:0;font-size:11.5px;font-weight:500;color:#CBD5E1}
+  .hx-foot nav{display:flex;flex-wrap:wrap;align-items:center;gap:0 22px}
+  .hx-foot nav a,.hx-foot nav .hx-cookies{display:inline-flex;align-items:center;min-height:44px;margin:0;padding:0;line-height:1.2;vertical-align:middle}
   .hx-foot a{color:#fff;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
   .hx-foot a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .hx-foot small{display:block;flex:1 1 280px;max-width:46ch;font-size:12px;line-height:1.45;color:#94A3B8}
@@ -189,8 +195,9 @@
     /* destinos: 5 tarjetas de ~220 x 160 en un contenedor de 1200px */
     html[data-pagina="home"] .hx .hx-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
     html[data-pagina="home"] .hx .hx-grid .hx-dest{display:block;height:160px;aspect-ratio:auto}
-    /* footer de 80px */
-    html[data-pagina="home"] .hx .hx-foot{box-sizing:border-box;min-height:80px}
+    /* footer de 80px, siempre al pie de la ventana (antes quedaba un hueco vacio debajo en pantallas altas) */
+    html[data-pagina="home"] .hx .hx-foot{box-sizing:border-box;min-height:80px;margin-top:auto}
+    html[data-pagina="home"] .hx{display:flex;flex-direction:column;min-height:calc(100vh - 65px - var(--hx-pb,0px));min-height:calc(100dvh - 65px - var(--hx-pb,0px))}
   }
 
 
@@ -298,7 +305,6 @@
               <span class="m-card__txt">
                 <b>No sé dónde ir</b>
                 <small>Decinos cuánto querés gastar y encontrá destinos que te convengan.</small>
-                <span class="m-card__tag">Lo que nos distingue</span>
                 <span class="m-card__cta">Buscar por presupuesto <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
               </span>
             </a>
@@ -321,18 +327,9 @@
       </div>
     </section>
 
-    <section class="hx-how" aria-labelledby="hx-how-h">
-      <h2 id="hx-how-h">Cómo funciona</h2>
-      <ol class="hx-steps">
-        <li class="hx-step"><span class="hx-step__n" aria-hidden="true">1</span><div><b>Elegí cómo empezar</b><p>Si ya sabés adónde ir, elegí tu destino y tus fechas. Si no, decinos cuánto querés gastar por persona.</p></div></li>
-        <li class="hx-step"><span class="hx-step__n" aria-hidden="true">2</span><div><b>Compará y armá tu viaje</b><p>Vemos el transporte, el alojamiento y los extras que se pueden calcular para tu viaje, y vos elegís.</p></div></li>
-        <li class="hx-step"><span class="hx-step__n" aria-hidden="true">3</span><div><b>Mirá el total y reservá</b><p>Ves cuánto cuesta el viaje completo antes de reservar, con cada precio marcado como estimado o reservado.</p></div></li>
-      </ol>
-    </section>
-
     <footer class="hx-foot">
       <div class="hx-foot__in">
-        <b>cuántosale</b>
+        <a class="hx-foot__logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg width="22" height="28" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#fff"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span><b>cuántosale</b><small>Tu viaje, sin sorpresas</small></span></a>
         <nav aria-label="Información">
           <a href="/privacidad">Privacidad</a>
           <a href="/terminos">Términos</a>

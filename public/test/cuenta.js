@@ -31,6 +31,7 @@
     chev: '<path d="m9 5 7 7-7 7"/>', back: '<path d="m15 5-7 7 7 7"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    dl: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
     mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/>'
   };
 
@@ -69,7 +70,9 @@
   var temaActual = function () { return document.documentElement.getAttribute('data-theme') === 'night' ? 'night' : 'light'; };
   function aplicarTema(t) {
     document.documentElement.setAttribute('data-theme', t);
-    try { localStorage.setItem('cuantosale_tema', t); } catch (e) { /* modo privado: funciona igual, no se recuerda */ }
+    /* Si lo elegido coincide con el sistema se borra la eleccion: vuelve a seguir al sistema (tema.js). */
+    var sis = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'light';
+    try { if (t === sis) localStorage.removeItem('cs_tema_manual'); else localStorage.setItem('cs_tema_manual', t); } catch (e) { /* modo privado: funciona igual, no se recuerda */ }
     var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#F7F8FA' : '#0A101A');
   }
 
@@ -159,6 +162,7 @@
       fila(I.save, 'Mis viajes guardados', 'data-viajes') +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
       interruptor() +
+      (window.CSInstalar && CSInstalar.disponible() ? fila(I.dl, 'Instalar la app', 'data-instalar') : '') +
       fila(I.help, 'Ayuda y soporte', 'data-ayuda') +
       (u ? fila(I.cog, 'Configuración', 'data-editar') : '') +
       fila(I.doc, 'Términos y condiciones', 'data-terminos') +
@@ -211,6 +215,7 @@
     if (t.hasAttribute('data-login')) { ir('login'); return; }
     if (t.hasAttribute('data-editar')) { ir('editar'); return; }
     if (t.hasAttribute('data-tema')) { aplicarTema(temaActual() === 'night' ? 'light' : 'night'); pintar(); var f = raiz.querySelector('[data-tema]'); if (f) f.focus(); return; }
+    if (t.hasAttribute('data-instalar')) { cerrar(); if (window.CSInstalar) CSInstalar.instalar(); return; }
     if (t.hasAttribute('data-ayuda')) { window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola! Necesito ayuda con CuántoSale.'), '_blank', 'noopener'); return; }
     if (t.hasAttribute('data-terminos')) { window.open('/terminos', '_blank', 'noopener'); return; }
     if (t.hasAttribute('data-google')) { S.error = ''; loginGoogle().catch(function () { S.error = 'No pudimos conectar con Google. Probá de nuevo en un momento.'; pintar(); }); return; }
