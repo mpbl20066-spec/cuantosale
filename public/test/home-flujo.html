@@ -91,7 +91,9 @@
   .f-more{display:block;margin:2px auto 0;padding:8px 14px;border:0;background:transparent;color:var(--ink);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 
   .trc:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .trc{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px 12px;padding:12px;cursor:pointer;overflow:hidden}
+  .trc{display:grid;grid-template-columns:104px minmax(0,1fr);grid-template-rows:1fr auto;gap:8px 12px;padding:12px;cursor:pointer;overflow:hidden}
+  /* Las dos tarjetas de transfer, lado a lado, con el mismo alto: se estiran a la fila y el precio queda abajo en las dos. */
+  html[data-pagina="flujo"] .f-scroll[data-paso="1"]>.opt.trc{align-self:stretch;margin-bottom:12px;min-height:172px}
   .trc__rec{position:absolute;top:12px;left:12px;z-index:1;padding:3px 9px;border-radius:99px;background:var(--action-bg);color:var(--action-ink);font-size:11px;font-weight:800}
   .trc__img{position:relative;grid-row:1/3;align-self:stretch;min-height:140px;border-radius:12px;background:#EEF0F3 center/contain no-repeat}
   .trc__b b{display:block;font-size:15px;line-height:1.2}
@@ -835,12 +837,10 @@
   /* Lista de vuelos: una columna de 800px, tarjetas con borde sutil y radio de 12px */
   html[data-pagina="flujo"] .f-scroll[data-paso="1"]{max-width:800px!important;margin-left:auto!important;margin-right:auto!important}
   .fc-list{display:grid;gap:12px;margin:0 0 6px}
-  .fc{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s}
-  .fc:hover{border-color:color-mix(in srgb,var(--ink) 28%,transparent)}
-  .fc.is-sel{border-color:#F5C518;box-shadow:0 0 0 1px #F5C518,0 8px 22px rgba(10,16,26,.12)}
-  [data-theme="night"] .fc{background:#111A28;border-color:rgba(255,255,255,.09)}
-  [data-theme="night"] .fc:hover{border-color:rgba(255,255,255,.2)}
-  [data-theme="night"] .fc.is-sel{border-color:#F5C518;box-shadow:0 0 0 1px #F5C518,0 10px 26px rgba(0,0,0,.35)}
+  /* Misma tarjeta que las demas opciones del flujo (.opt, p. ej. el transfer): mismos colores, borde y radio; seleccionada,
+     borde amarillo de 2px, fondo tenido, brillo y tilde (regla comun en web.css). */
+  .fc{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:16px;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));color:var(--ink);cursor:pointer;box-shadow:0 3px 10px rgba(16,35,62,.08);transition:border-color .15s,box-shadow .15s,transform .15s}
+  .fc:hover{border-color:var(--ink2)}
   .fc-air{display:flex;align-items:center;gap:12px;min-width:0}
   .fc-logo{flex:0 0 40px;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--cel-soft);color:var(--ink);font-family:var(--fh);font-size:13px;font-weight:800;letter-spacing:.02em}
   [data-theme="night"] .fc-logo{background:rgba(255,255,255,.07)}
@@ -1277,7 +1277,8 @@
     var el = $('total');
     el.classList.add('f-ahorro');
     /* Sin vuelo elegido todavia (buscando o sin resultados) no hay nada que comparar. */
-    if (S.paso >= 4 || (MODO === 'avion' && !S.vuelo) || (MODO === 'bus' && !BUS) || (S.paso === 2 && S.cargandoH)) { el.hidden = true; ultimoAhorro = null; return; }
+    /* No va en la pantalla de transfer (paso 1, segunda parte): ahi solo se elige el transfer. */
+    if (S.paso >= 4 || (MODO === 'avion' && !S.vuelo) || (MODO === 'bus' && !BUS) || (S.paso === 2 && S.cargandoH) || (MODO === 'avion' && S.paso === 1 && S.sub === 't')) { el.hidden = true; ultimoAhorro = null; return; }
     var a = ahorros(), total = sum(a, function (x) { return x.v; });
     var que = MODO === 'avion' ? (S.paso >= 2 ? 'fechas, vuelos, transfer y alojamiento' : 'fechas, vuelos y transfer') : 'alojamiento';
     var lista = a.map(function (x) { return x.txt; });

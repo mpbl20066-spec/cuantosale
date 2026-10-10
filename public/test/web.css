@@ -771,7 +771,7 @@ svg [fill="#1F6FB5"],svg [fill="#1F7FE0"],svg [fill="#1B5FA8"],svg [fill="#0B2A5
 :root[data-theme="night"] .tagok,:root[data-theme="night"] .d-best{background:#123D2E!important;color:#5AD19A!important}
 .tagok svg,.d-best svg{color:currentColor!important}
 /* Tarjeta seleccionada: borde amarillo de 2px, fondo tenido y brillo, igual en todas las pantallas */
-.opt.is-sel,.xr.is-sel,.d-card.is-on,.p-opt.is-on,.p-medio.is-on,.c-dc.is-sel,.pv-d.is-on,.pv-t.is-on,.st-svc.is-on,.fl.is-sel,.hb.is-sel,.trc.is-sel,.ho.is-sel,.xt.is-sel,.xf.is-sel,.ex.is-sel{
+.opt.is-sel,.xr.is-sel,.d-card.is-on,.p-opt.is-on,.p-medio.is-on,.c-dc.is-sel,.pv-d.is-on,.pv-t.is-on,.st-svc.is-on,.fl.is-sel,.fc.is-sel,.hb.is-sel,.trc.is-sel,.ho.is-sel,.xt.is-sel,.xf.is-sel,.ex.is-sel{
   border:2px solid var(--sel)!important;background:var(--card-sel-bg,#FEF7E7)!important;box-shadow:var(--card-sel-glow,0 0 0 3px rgba(247,195,37,.2))!important}
 :root[data-theme="light"]{--card-sel-bg:#FEF7E7}
 
