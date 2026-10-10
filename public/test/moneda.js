@@ -50,10 +50,11 @@
   var estilo = document.createElement('style');
   estilo.textContent =
     '.cs-mon{position:relative;display:inline-block;font-family:var(--fb,inherit)}' +
-    '.cs-mon__b{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 10px;border:1.5px solid var(--line,#d0d7e2);border-radius:12px;background:transparent;color:var(--ink,#101828);font:800 14px var(--fb,inherit);cursor:pointer}' +
-    '.cs-mon__b:hover{border-color:var(--ink2,#48566a)}' +
-    '.cs-mon__s{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent,#F7C325);color:var(--accent-ink,#0A101A);font-size:13px;font-weight:800;line-height:1}' +
-    '.cs-mon__v{width:10px;height:10px;transition:transform .15s}' +
+    '.cs-mon__b{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 6px;border:0;border-radius:12px;background:transparent;color:var(--ink,#101828);font:800 16px var(--fb,inherit);letter-spacing:.01em;cursor:pointer}' +
+    '.cs-mon__b:hover .cs-mon__s{box-shadow:0 0 0 3px rgba(245,166,35,.22)}' +
+    '.cs-mon__b:focus-visible{outline:3px solid var(--focus,#F7C325);outline-offset:2px}' +
+    '.cs-mon__s{display:grid;place-items:center;width:34px;height:34px;box-sizing:border-box;border-radius:50%;border:2px solid #F5A623;background:rgba(245,166,35,.14);color:#F5A623;font-size:18px;font-weight:800;line-height:1;transition:box-shadow .15s}' +
+    '.cs-mon__v{width:12px;height:12px;color:var(--ink2,#9FADBF);opacity:.9;transition:transform .15s}' +
     '.cs-mon__b[aria-expanded="true"] .cs-mon__v{transform:rotate(180deg)}' +
     '.cs-mon__m{position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:210px;margin:0;padding:6px;list-style:none;border:1px solid var(--line,#d0d7e2);border-radius:14px;background:var(--surface,#fff);box-shadow:0 14px 34px rgba(10,16,26,.22)}' +
     '.cs-mon__m[hidden]{display:none}' +
@@ -64,6 +65,8 @@
     '.cs-mon__o i{flex:0 0 28px;font-style:normal;font-weight:800;color:var(--ink2,#48566a)}' +
     '.cs-mon__o span{flex:1}' +
     '.cs-mon__o em{font-style:normal;font-weight:800}' +
+    '.cs-mon__sep{height:1px;margin:6px 4px;background:var(--line,#d0d7e2)}' +
+    '.cs-mon__perfil svg{flex:0 0 28px;width:20px;height:20px;color:var(--ink2,#48566a)}' +
     '.cs-top__mon{display:inline-flex;align-items:center;margin-left:6px}' +
     '.cs-mon--bar{display:inline-flex;align-items:center}' +
     '@media (min-width:1024px){.cs-mon--bar{display:none}}';
@@ -80,7 +83,9 @@
       '<ul class="cs-mon__m" role="listbox" aria-label="Elegí la moneda" hidden>' + ST.monedas.map(function (m) {
         var ok = tasa(m.code) != null, on = m.code === a.m.code;
         return '<li role="none"><button type="button" class="cs-mon__o" role="option" data-cs-moneda="' + m.code + '" aria-selected="' + on + '"' + (ok ? '' : ' disabled') + '><i>' + m.simbolo + '</i><span>' + m.etiqueta + '</span>' + (on ? '<em aria-hidden="true">✓</em>' : '') + '</button></li>';
-      }).join('') + '</ul>';
+      }).join('') +
+      '<li role="none" class="cs-mon__sep" aria-hidden="true"></li>' +
+      '<li role="none"><button type="button" class="cs-mon__o cs-mon__perfil" data-perfil><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.400 3.600-7 8-7s8 2.600 8 7"/></svg><span>Mi perfil</span></button></li></ul>';
     return w;
   }
   function selector() { return nodo(); }

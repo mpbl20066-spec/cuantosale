@@ -322,10 +322,22 @@
 <body>
 <div class="wrap grupo-wrap">
   <div class="grupo-header">
-    <a href="/app">← CuántoSale</a>
+    <a href="/app" id="grupo-volver">← CuántoSale</a>
     <span class="grupo-kicker">Dividir gastos</span>
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
+  <script>
+    /* Si se llego desde /test (menu de la cuenta), "volver" lleva a donde se estaba y no a la app. Solo rutas del mismo sitio. */
+    (function () {
+      try {
+        var v = new URLSearchParams(location.search).get('volver');
+        if (v && v.charAt(0) === '/' && v.charAt(1) !== '/' && v.indexOf(String.fromCharCode(92)) < 0) {
+          var a = document.getElementById('grupo-volver');
+          if (a) { a.setAttribute('href', v); a.textContent = '← Volver'; }
+        }
+      } catch (e) { /* queda el enlace a la app */ }
+    })();
+  </script>
   <!-- Legal a mano y no por JS: esta pagina es un shell que se completa con
        grupo.js, y si el script falla la persona igual tiene que poder llegar a
        la politica de privacidad. Sin .html porque el server sirve /privacidad y

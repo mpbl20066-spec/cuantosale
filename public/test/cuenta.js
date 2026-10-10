@@ -207,7 +207,7 @@
     if (t.hasAttribute('data-cerrar')) { cerrar(); return; }
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
     if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
-    if (t.hasAttribute('data-dividir')) { location.href = '/grupo'; return; }
+    if (t.hasAttribute('data-dividir')) { location.href = '/grupo?volver=' + encodeURIComponent(location.pathname.indexOf('/test') === 0 ? '/test/' : (location.pathname.indexOf('/nuevo') === 0 ? '/nuevo/' : '/app')); return; }
     if (t.hasAttribute('data-login')) { ir('login'); return; }
     if (t.hasAttribute('data-editar')) { ir('editar'); return; }
     if (t.hasAttribute('data-tema')) { aplicarTema(temaActual() === 'night' ? 'light' : 'night'); pintar(); var f = raiz.querySelector('[data-tema]'); if (f) f.focus(); return; }
