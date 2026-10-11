@@ -1536,7 +1536,7 @@
     if (MODO !== 'bus') return Promise.resolve();
     if (!/^https?:$/.test(location.protocol)) { S.errorB = 'Abrí la maqueta desde el servidor de la app para ver el precio del bus.'; return Promise.resolve(); }
     S.cargandoB = true; S.errorB = ''; render(false);
-    var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, budget: 99999, style: 'eq', transport: 'bus' });
+    var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, budget: 99999, style: 'ahorro', hotel_type: 'economico', transport: 'bus' });
     return fetch('/api/cotizar?' + q.toString())
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'No pudimos cotizar el bus ahora.'); return j; }); })
       .then(function (j) {
@@ -1616,7 +1616,7 @@
     if (!/^https?:$/.test(location.protocol)) { S.cmp = { estado: 'vacio' }; render(false); return; }
     S.cmp = { estado: 'cargando' }; render(false);
     track('flujo_comparar_fechas', {});
-    var q = new URLSearchParams({ dest: destKey, origin: 'MVD', pax: pax, dep: IDA, ret: VUELTA, style: 'eq' });
+    var q = new URLSearchParams({ dest: destKey, origin: 'MVD', pax: pax, dep: IDA, ret: VUELTA, style: 'ahorro' });
     fetch('/api/vuelos/calendario?' + q.toString())
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'error'); return j; }); })
       .then(function (j) {
@@ -2502,7 +2502,7 @@
     if (!/^https?:$/.test(location.protocol)) { S.avisoV = 'Abrí la página desde el servidor de la app para ver los vuelos.'; return; }
     if (idaMuyLejos) { S.avisoV = 'Los vuelos se pueden buscar hasta 6 meses antes de viajar. Elegí una fecha de ida más cercana.'; track('flujo_vuelos', { reales: false, motivo: 'mas_de_6_meses' }); render(false); return; }
     S.cargandoV = true; render(false);
-    return fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax, style: 'eq' }) })
+    return fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax, style: 'ahorro' }) })
       .then(function (r) { return r.json().then(function (d) { if (!r.ok || !(d.offers || []).length) throw new Error(d.error || 'sin vuelos'); return d; }); })
       .then(function (d) {
         /* El proveedor a veces repite el mismo vuelo (misma aerolinea, horarios y precio): se muestra una vez. */
@@ -2554,7 +2554,7 @@
     if (!/^https?:$/.test(location.protocol)) { S.avisoH = 'Hoteles de ejemplo: abrí la maqueta desde el servidor de la app (localhost) para ver precios reales de Booking.'; return Promise.resolve(); }
     S.cargandoH = true;
     var pedir = function (tipo) {
-      var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, ninos: ninos, style: 'eq', hotel_type: tipo, subcategory: '' });
+      var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, ninos: ninos, style: 'ahorro', hotel_type: tipo, subcategory: '' });
       return fetch('/api/hoteles?' + q.toString()).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'error'); return d; }); });
     };
     return Promise.all(TIPOS.map(function (t) { return pedir(t).catch(function () { return { hotels: [] }; }); })).then(function (rs) {

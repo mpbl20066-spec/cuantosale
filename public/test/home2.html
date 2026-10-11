@@ -496,11 +496,12 @@
 
   /* Tu plata manda: los precios por persona vienen del mismo endpoint que usa la app; nunca se muestran,
      solo deciden si cada destino "llega" con la plata elegida. Sin respuesta del servidor no se inventa nada. */
-  var rango = document.getElementById('q-rango'), lista = document.getElementById('q-lista'), PP = {}, antes = {};
+  var rango = document.getElementById('q-rango'), lista = document.getElementById('q-lista'), PP = {}, MODO = {}, antes = {};
   var filas = Array.prototype.slice.call(lista.querySelectorAll('.q-fila'));
   var fm = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
   function estado(pp, b) { return pp <= b * 0.85 ? 'ok' : (pp <= b ? 'justo' : (pp <= b * 1.2 ? 'casi' : 'no')); }
   var TXT = { ok: 'Llegás', justo: 'Justo', casi: 'Casi', no: 'Todavía no' };
+  var EN = { auto: 'en auto', bus: 'en bus', ferry: 'en ferry', avion_mvd: 'en vuelo', avion_ba: 'en vuelo' };
   function chispasEn(el) {
     var cols = ['#F5C518', '#0B1F3A', '#06B6D4', '#F59E0B'];
     for (var i = 0; i < 12; i++) {
@@ -518,6 +519,7 @@
       var k = fi.dataset.destino, pp = PP[k], e = fi.querySelector('.q-est');
       if (!(pp > 0)) { fi.dataset.est = hay ? 'no' : 'x'; e.textContent = hay ? 'Sin datos' : '…'; fi.parentNode.style.order = 9; return; }
       var st = estado(pp, b); fi.dataset.est = st; e.textContent = TXT[st]; fi.parentNode.style.order = Math.round(pp / 10);
+      var sub = fi.querySelector('.q-nom small'); if (sub && EN[MODO[k]]) sub.textContent = 'Brasil · ' + EN[MODO[k]];
       if (st === 'ok' || st === 'justo') n++;
       if (celebrar && !quieto && (st === 'ok') && antes[k] !== 'ok') { fi.classList.remove('g-bote'); void fi.offsetWidth; fi.classList.add('g-bote'); chispasEn(fi); }
       antes[k] = st;
@@ -531,23 +533,23 @@
   var P = { pax: 2, noches: 7 }, LIM = { pax: [1, 8], noches: [2, 21] }, gen = 0, deb = null;
   function nota() {
     document.getElementById('q-pax').textContent = P.pax; document.getElementById('q-noches').textContent = P.noches;
-    document.getElementById('q-nota').textContent = 'Cuenta ' + P.noches + ' noches para ' + (P.pax === 1 ? '1 persona' : P.pax + ' personas') + ', saliendo de Montevideo, con vuelo, alojamiento, traslados, comidas y transporte local. La plata es por persona.';
+    document.getElementById('q-nota').textContent = 'Cuenta ' + P.noches + ' noches para ' + (P.pax === 1 ? '1 persona' : P.pax + ' personas') + ', saliendo de Montevideo, con el transporte más barato (auto, bus o vuelo), alojamiento, traslados, comidas y transporte local. La plata es por persona.';
     document.querySelectorAll('.q-step button').forEach(function (b) { var k = b.dataset.p, d = +b.dataset.d; b.disabled = (P[k] + d < LIM[k][0] || P[k] + d > LIM[k][1]); });
   }
   function cargar() {
     var mia = ++gen;
     var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
     var dep = new Date(); dep.setDate(dep.getDate() + 45); var ret = new Date(dep); ret.setDate(ret.getDate() + P.noches);
-    var items = filas.map(function (fi) { return fi.dataset.destino + '~' + iso(dep) + '~' + iso(ret); }).join(',');
+    var items = filas.map(function (fi) { return fi.dataset.destino + '~' + iso(dep) + '~' + iso(ret) + '~economico'; }).join(',');
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
     document.getElementById('q-lista').classList.add('is-cargando');
-    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: String(P.pax), style: 'eq', origin: 'MVD', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
+    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: String(P.pax), style: 'ahorro', origin: 'MVD', transport: 'all', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
       .then(function (j) {
         if (mia !== gen) return;
-        var nuevo = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) nuevo[it.key] = it.pp; });
+        var nuevo = {}, modos = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { nuevo[it.key] = it.pp; modos[it.key] = it.mode; } });
         if (!Object.keys(nuevo).length) throw new Error('vacio');
-        PP = nuevo; antes = {}; rango.disabled = false; pintar(false);
+        PP = nuevo; MODO = modos; antes = {}; rango.disabled = false; pintar(false);
       })
       .catch(function () {
         if (mia !== gen) return;

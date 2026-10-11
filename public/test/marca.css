@@ -1,0 +1,72 @@
+/* marca.css — Identidad CuántoSale para /test (boceto vs. implementación).
+   Single source de marca: el boceto pide navy + amarillo, pero cada pantalla
+   trae su propio hex hardcodeado (#1F6FB5 celeste, #0B2A55 navy, #F7C325/#F6B21B
+   amarillo). Este archivo no redibuja nada: solo re-mapea esos hex a los
+   tokens de ../style.css y normaliza jerarquía (título / subtítulo / CTA)
+   para que las 9 pantallas del Flujo 1 y las 8 del Flujo 2 se lean igual.
+   Se carga vía @import al inicio de web.css, que ya usan todas las páginas. */
+:root{
+  --marca-navy:#0B2A55;
+  --marca-navy-ink:#0A101A;
+  --marca-amarillo:#F7C325;
+  --marca-amarillo-ink:#3A2C05;
+  --marca-celeste:#B8860B;
+  --marca-fondo:#EAF2FB;
+  --marca-radio:18px;
+}
+
+/* Jerarquía del boceto: título navy 27-30px/800, subtítulo ink2 14-14.5px/600,
+   CTA amarillo full-width 15px/800. En night el título pasa a --ink. */
+[data-pagina="destino"] h1,
+[data-pagina="presupuesto"] h1.p-h,
+[data-pagina="detalle"] .t-hero__t h1,
+[data-pagina="costo"] .p-tit,
+[data-pagina="reserva"] .r-tit,
+[data-pagina="resultado"] h1.r-dest,
+[data-pagina="calcular"] h1,
+[data-pagina="guias"] .g-tit{color:var(--marca-navy);letter-spacing:-.01em}
+[data-theme="night"] [data-pagina="destino"] h1,
+[data-theme="night"] [data-pagina="presupuesto"] h1.p-h,
+[data-theme="night"] [data-pagina="costo"] .p-tit,
+[data-theme="night"] [data-pagina="reserva"] .r-tit,
+[data-theme="night"] [data-pagina="resultado"] h1.r-dest,
+[data-theme="night"] [data-pagina="calcular"] h1,
+[data-theme="night"] [data-pagina="guias"] .g-tit{color:var(--ink)}
+
+/* CTA primario SIEMPRE amarillo marca con tinta navy (boceto: "Continuar →",
+   "Buscar destinos →", "Reservá tu viaje →", "Ver mi presupuesto →"). */
+.d-btn,.p-go,.r-go,.c-btn,.p-btn,.r-btn,
+.m-card__cta,[data-pagina="flujo"] .f-cta{
+  background:var(--action-bg)!important;
+  border-color:var(--action-bg)!important;
+  color:var(--action-ink)!important;
+}
+
+/* Seleccionados: el boceto marca con amarillo + borde navy, no con celeste.
+   Se conserva el celeste solo como icono informativo, no como selección. */
+.p-chip.is-on,.p-monto.is-on,.r-chip.is-on,
+.p-opt--c.is-on,.p-medio.is-on{
+  background:var(--action-bg)!important;
+  border-color:var(--action-bg)!important;
+  color:var(--action-ink)!important;
+}
+.d-card.is-on{border-color:var(--marca-navy)!important;box-shadow:0 0 0 2px rgba(11,42,85,.25)!important}
+.p-opt.is-on{border-color:var(--marca-navy)!important;background:var(--cel-soft)!important;box-shadow:0 0 0 3px rgba(11,42,85,.12)!important}
+.t-tab.is-on{border-bottom-color:var(--marca-amarillo)!important;color:var(--ink)!important}
+
+/* Acentos informativos (lupa, calendario, pin): celeste marca, igual en boceto. */
+.d-bus svg,.d-fecha,.d-pers,.p-budget,.p-date,.p-pers,
+.g-bus svg,.r-trayecto svg{color:var(--marca-celeste)}
+
+/* Desktop: logo navy como en el boceto (web.css lo dejaba en --ink). */
+@media (min-width:1024px){
+  [data-pagina="home"] .tabs__lt b,.cs-top__logo b{color:var(--marca-navy)!important}
+  [data-pagina="home"] .tabs__lt small,.cs-top__logo small{color:var(--marca-celeste)!important}
+}
+
+/* Espaciado del boceto: tarjetas con aire (12-14px gap, radio 16-18px),
+   desglose con filas de 13-15px. Solo fija lo que divergía. */
+.d-grid{gap:12px}
+.p-dsts{gap:14px}
+.p-desg li{padding:13px 14px}
+.r-list li{padding:7px 0}

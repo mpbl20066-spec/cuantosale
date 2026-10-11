@@ -392,7 +392,7 @@
     if (enVuelo) return Promise.resolve();
     enVuelo = true; S.cargando = true; S.error = ''; pintar();
     var ped = Object.keys(TRANSPORTE).map(function (m) {
-      var q = new URLSearchParams({ dep: IDA, ret: VUELTA, pax: PAX, budget: Math.round(S.presupuesto * PAX), style: 'eq', transport: TRANSPORTE[m] });
+      var q = new URLSearchParams({ dep: IDA, ret: VUELTA, pax: PAX, budget: Math.round(S.presupuesto * PAX), style: 'ahorro', hotel_type: 'economico', transport: TRANSPORTE[m] });
       return fetch('/api/cotizar-todos?' + q.toString()).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'El servidor no pudo responder (' + r.status + ').'); return j; }); })
         .then(function (j) { return { m: m, options: j.options || [] }; })
         .catch(function (e) { return { m: m, options: [], error: msgError(e) }; });

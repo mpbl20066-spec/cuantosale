@@ -697,9 +697,9 @@
   else if (S.dest && destInfo()) { S.pant = 2; }
   (function () {
     var d0 = new Date(); d0.setDate(d0.getDate() + 45); var d1 = new Date(d0); d1.setDate(d1.getDate() + 7);
-    var items = POPULARES.map(function (k) { return k + '~' + iso(d0) + '~' + iso(d1); }).join(',');
+    var items = POPULARES.map(function (k) { return k + '~' + iso(d0) + '~' + iso(d1) + '~economico'; }).join(',');
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
-    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'eq', origin: 'MVD', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
+    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
       .then(function (j) { (j.items || []).forEach(function (it) { PRECIOS[it.key] = it.pp; }); if (S.pant === 1) actualizar(); })
       .catch(function () { /* sin precios: las tarjetas quedan sin cifra */ })
