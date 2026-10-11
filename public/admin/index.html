@@ -8,6 +8,14 @@
 <!-- data-cs-medicion: el server no le inyecta Analytics ni el aviso de cookies a esta pagina (datos de clientes). -->
 <meta name="cs-medicion" content="ninguna" data-cs-medicion>
 <title>Panel · CuántoSale</title>
+<!-- Instalable en el celular ("Agregar a la pantalla de inicio"): abre directo el panel, con su nombre y sin la barra del navegador. -->
+<link rel="manifest" href="/admin/manifest.json">
+<meta name="theme-color" content="#0A101A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CS Panel">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <style>
 :root{--bg:#F4F5F8;--card:#fff;--ink:#0F172A;--muted:#64748B;--line:#E2E6EE;--brand:#0A101A;--accent:#F6B21B;--ok:#16825D;--okbg:#E4F5EE;--warn:#B45309;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FDE8E6;--info:#1D4ED8;--infobg:#E3ECFF;--r:12px}
 @media (prefers-color-scheme:dark){:root{--bg:#0B1020;--card:#141B2E;--ink:#E8ECF6;--muted:#97A3C0;--line:#26304A;--brand:#05080F;--ok:#3DD6A0;--okbg:#0E2E26;--warn:#F5B94A;--warnbg:#33260B;--bad:#FF8A7A;--badbg:#3A1512;--info:#8FB2FF;--infobg:#14224A}}
@@ -131,6 +139,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=5"></script>
+<script src="/admin/admin.js?v=6"></script>
 </body>
 </html>

@@ -213,7 +213,12 @@
   }
   function abajo() { var m = document.getElementById('chat-msgs'); if (m) m.scrollTop = m.scrollHeight; }
   function refrescarMensajes(irAbajo) {
-    var tab = document.getElementById('tab-noleidos'); if (tab) tab.textContent = S.chats && S.chats.no_leidos ? ' (' + S.chats.no_leidos + ')' : '';
+    var n = S.chats && S.chats.no_leidos ? S.chats.no_leidos : 0;
+    var tab = document.getElementById('tab-noleidos'); if (tab) tab.textContent = n ? ' (' + n + ')' : '';
+    /* El titulo (pestaña y app instalada) muestra los no leidos, y el icono de la app instalada lleva el numero
+       donde el sistema lo permite (Android/Chrome y PC). */
+    document.title = (n ? '(' + n + ') ' : '') + 'Panel · CuántoSale';
+    try { if (navigator.setAppBadge) { if (n) navigator.setAppBadge(n); else navigator.clearAppBadge(); } } catch (er) { /* sin soporte */ }
     if (S.vista !== 'mensajes') return;
     var l = document.getElementById('chat-lista'); if (l) l.innerHTML = listaChatsHtml();
     var m = document.getElementById('chat-msgs');
