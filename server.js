@@ -3234,6 +3234,12 @@ function handleRequest(req, res) {
     const adminApi = adminPanel.manejar(req, res, url);
     if (adminApi) return adminApi;
     if (/^\/admin\/?$/i.test(url.pathname)) return serveStatic(req, res, '/admin/index.html');
+    /* Precio del seguro de viaje (lib/seguro.js, API de aliados de Protege tu Viaje). */
+    if (req.method === 'GET' && url.pathname === '/api/seguro') {
+      return require('./lib/seguro.js')({ fetchWithTimeout: fetchWithTimeout, sendJson: sendJson, limited: limited, clientIp: clientIp }).precio(req, res, url).catch(function (e) {
+        return sendJson(res, e.status || 500, { error: e.message });
+      });
+    }
     if (req.method === 'POST' && url.pathname === '/api/reserva-whatsapp') {
       return postReservaWhatsapp(req, res).catch(function (e) {
         return sendJson(res, 500, { error: e.message });

@@ -644,6 +644,7 @@
   .st-b{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;line-height:1.4}
   .st-b--ok{background:#DCFCE7;color:#15803D}
   .st-b--sol,.st-b--pen{background:#FFF8E1;color:#B26A00}
+  .st-b--opc{background:rgba(127,127,127,.16);color:var(--ink2)}
   .st-aviso{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:#FDF4DC;font-size:13px;font-weight:600;color:#1A2B4A;line-height:1.4}
   .st-side{display:flex;flex-direction:column;gap:16px}
   .st-card{padding:20px;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06)}
@@ -1022,14 +1023,6 @@
   /* Monto editable de comidas y transporte local */
   /* Comidas y transporte local en Extras: cajas 2x2 como en la app */
   .dd{margin:22px 0 4px}
-  /* Seguro de viaje (Extras): tarjeta que lleva al cotizador de protegetuviaje con el link de aliado */
-  .sg{display:flex;align-items:center;gap:14px;margin:22px 0 4px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink)}
-  .sg__i{flex:0 0 46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--good-soft);color:var(--good)}
-  .sg__t{flex:1;min-width:0}
-  .sg__t b{display:block;font-size:15px;font-weight:800}
-  .sg__t span{display:block;margin-top:2px;font-size:13px;color:var(--ink2);line-height:1.4}
-  .sg .g-btn{flex:none;width:auto;margin:0;padding:11px 16px;font-size:14px}
-  @media (max-width:560px){.sg{flex-wrap:wrap}.sg .g-btn{width:100%}}
   .dd-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 8px}
   .dd-h h2{margin:0;font-family:var(--fh);font-size:17px;font-weight:800;color:var(--ink)}
   .dd-h small{font-size:11.5px;font-weight:700;color:var(--ink2)}
@@ -2062,7 +2055,7 @@
     var cab = '<div class="ho__head"><span class="ho__headico">' + ic(I.palm, 30) + '</span><div><h1 class="f-h" style="margin:0">Extras</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">¿Qué querés sumar a tu viaje?</p></div></div>' +
       '<p class="f-sub" style="margin:6px 0 0">Sumá solo lo que quieras. Podés continuar sin agregar extras.</p>';
     var grupos = EXTRAS;
-    if (!grupos.length) return cab + '<p class="f-sub" style="margin-top:14px">Todavía no tenemos tours para ' + esc(DEST) + '. Podés continuar a tu presupuesto.</p>' + bloqueSeguro() + bloqueDia('local') + bloqueDia('comidas');
+    if (!grupos.length) return cab + '<p class="f-sub" style="margin-top:14px">Todavía no tenemos tours para ' + esc(DEST) + '. Podés continuar a tu presupuesto.</p>' + bloqueDia('local') + bloqueDia('comidas');
     return cab + grupos.map(function (g) {
       var t = TITULO_X[g.cat], todos = S.fExtra !== 'todos' || S.xmas[g.cat], lim = todos ? g.items.length : CUANTOS_X[g.cat], vis = g.items.slice(0, lim);
       /* "Ver más tours" solo si quedan tours sin mostrar; si lo que queda son traslados, se muestran todos de una. */
@@ -2070,23 +2063,30 @@
       return '<h2 class="f-h3 x-h3"><span>' + t[1] + '</span></h2>' +
         vis.map(function (e) { return filaExtra(e, g); }).join('') +
         (g.items.length > vis.length ? '<button type="button" class="f-more" data-xmas="' + g.cat + '">' + MAS_TXT[g.cat] + '</button>' : '');
-    }).join('') + bloqueSeguro() + bloqueDia('local') + bloqueDia('comidas');
+    }).join('') + bloqueDia('local') + bloqueDia('comidas');
   }
-  /* Seguro de viaje: se cotiza y se compra en protegetuviaje con el link de aliado de CuántoSale (la venta queda
+  /* Seguro de viaje (fila opcional en Estado de tu viaje): se cotiza y se compra en protegetuviaje con el link de aliado de CuántoSale (la venta queda
      a nuestro nombre). No suma al presupuesto: el precio depende de la cobertura que elija la persona. */
   var SEGURO_URL = 'https://protegetuviaje.com/partners/cuantosaleuy';
   var iEscudo = '<path d="M12 3 5 6v5c0 4.500 3 8.300 7 10 4-1.700 7-5.500 7-10V6z"/><path d="m9 12 2 2 4-4"/>';
-  function bloqueSeguro() {
-    return '<section class="sg" aria-labelledby="sg-h"><span class="sg__i">' + ic(iEscudo, 24) + '</span>' +
-      '<div class="sg__t"><b id="sg-h">Seguro de viaje</b><span>Asistencia médica, equipaje y cancelación para todo el viaje.</span></div>' +
-      '<button type="button" class="g-btn" data-seguro="1">Cotizar seguro</button></section>';
+  /* Precio real del seguro (GET /api/seguro, lib/seguro.js): el plan mas barato para estas fechas y personas.
+     Se pide una vez por pagina; si falla o no hay credenciales, la fila sigue diciendo "Cotizar". */
+  function cargarSeguro() {
+    if (S.seguro) return;
+    S.seguro = { cargando: true };
+    fetch('/api/seguro?' + new URLSearchParams({ ida: IDA, vuelta: VUELTA, pax: pax, ninos: ninos }).toString())
+      .then(function (r) { return r.json(); })
+      .then(function (j) { S.seguro = j && j.ok ? { desde: j.desde, plan: j.plan } : { error: true }; track('flujo_seguro_precio', { ok: !!(j && j.ok), desde: j && j.desde }); })
+      .catch(function () { S.seguro = { error: true }; })
+      .then(function () { if (S.paso === 7) { var y = $('main').scrollTop; render(false); $('main').scrollTop = y; } if (S.modal && S.modal.tipo === 'seguro_ir') pintarModal(); });
   }
   function abrirSeguroIr() { S.modal = { tipo: 'seguro_ir' }; pintarModal(); track('flujo_seguro_ir_vista', {}); }
   function seguroIrHoja() {
     return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet vi vi2" role="dialog" aria-modal="true" aria-labelledby="vi-h">' +
       '<button type="button" class="f-modal__x vi__x" data-cerrar="1" aria-label="Cerrar">✕</button>' +
       '<div class="vi2-h"><span class="vi2-i">' + ic(iEscudo, 24) + '</span><div><h2 class="vi__h" id="vi-h">Vas a cotizar tu seguro</h2><p class="vi__p">Te llevamos a Protege tu Viaje para comparar coberturas y contratar.</p></div></div>' +
-      '<div class="vi2-c"><div class="vi2-v"><span class="vi2-air"><b>Uruguay → ' + esc(DEST) + '</b>Seguro de viaje</span><span class="vi2-hs">' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + '</span></div>' +
+      '<div class="vi2-c"><div class="vi2-v"><span class="vi2-air"><b>Uruguay → ' + esc(DEST) + '</b>Seguro de viaje' + (S.seguro && S.seguro.plan ? ' · plan ' + esc(S.seguro.plan) : '') + '</span><span class="vi2-hs">' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + '</span></div>' +
+        (S.seguro && S.seguro.desde ? '<div class="vi2-p"><b>' + f(S.seguro.desde) + '</b><small>desde, total</small></div>' : '') +
         '<ul class="vi2-m"><li>' + ic(iCalR, 15) + fdc(IDA) + ' → ' + fdc(VUELTA) + '</li><li>' + ic(iPersR, 15) + personasTxt() + '</li></ul></div>' +
       '<div class="vi2-b"><button type="button" class="g-btn" data-cerrar="1">Volver</button><button type="button" class="g-btn g-btn--main" data-sg="ir">Cotizar seguro' + ic(iExt, 16) + '</button></div>' +
       '<p class="vi__legal">CuántoSale no vende el seguro: lo emite Protege tu Viaje.</p></div>';
@@ -2579,6 +2579,7 @@
      Dos columnas en desktop: a la izquierda el estado de cada servicio; a la derecha el resumen del costo y
      "cambiar algo". Las filas siguen siendo los mismos botones data-estado de siempre. */
   function pantalla7() {
+    cargarSeguro();
     var d = datosFinal(), n = partesReservadas();
     var toursSel = d.ex.filter(function (e) { return e.cat === 'tours'; });
     var toursPrecios = EXTRAS.filter(function (g) { return g.cat === 'tours'; }).reduce(function (a, g) { return a.concat(g.items.map(function (e) { return e.precio; })); }, []);
@@ -2627,6 +2628,11 @@
           svc('bed', 'green', 'Alojamiento', 'aloj', f(d.tAloj)) +
           (MODO === 'avion' ? svc('van', 'green', 'Traslados', 'tras', precioTras) : '') +
           svc('palm', 'yellow', 'Tours y actividades', 'tours', precioTours) +
+          /* Seguro: opcional, no cuenta en "N de 4 servicios confirmados" ni suma al presupuesto */
+          '<button type="button" class="st-svc" data-seguro="1"><span class="fin-ico fin-ico--blue st-svc__ico">' + ic(iEscudo, 24) + '</span>' +
+            '<span class="st-svc__t"><b>Seguro de viaje</b><span class="st-b st-b--opc">Opcional</span></span>' +
+            '<span class="st-svc__d">Asistencia médica, equipaje y cancelación · Protege tu Viaje</span>' +
+            '<span class="st-svc__r"><b>' + (S.seguro && S.seguro.desde ? 'Desde ' + f(S.seguro.desde) : 'Cotizar') + '</b></span></button>' +
           (S.alojReservado && S.alojReservado.precio ? '<p class="ed-act">Presupuesto actualizado: <b>' + f(d.total) + '</b> (' + (d.tAloj - precioHotelEstimado(d.h) >= 0 ? '+' : '−') + f(Math.abs(d.tAloj - precioHotelEstimado(d.h))) + ' en alojamiento vs. lo estimado)</p>' : '') +
           (S.avisoCs ? '<p class="st-aviso" role="status">' + esc(S.avisoCs) + '</p>' : '') +
         '</section>' +
