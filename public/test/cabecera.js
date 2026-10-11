@@ -22,22 +22,32 @@
   document.body.insertBefore(h, document.body.firstChild);
   /* Selector de moneda: en escritorio va en esta barra; en celular y tablet (donde esta barra no se ve) se agrega a la
      barra propia de cada pantalla. Algunas pantallas repintan su barra, por eso se vuelve a poner si falta. */
-  if (window.CSMoneda) {
-    var slot = h.querySelector('[data-slot-moneda]'); if (slot) slot.appendChild(CSMoneda.selector());
-    var BARRAS = ['.f-bar', '.d-bar', '.c-bar', '.p-bar', '.r-bar', '.t-bar', '.u-bar', '.g-bar'];
-    var poner = function () {
-      if (document.querySelector('.cs-mon--bar')) return;
-      for (var i = 0; i < BARRAS.length; i++) {
-        var bar = document.querySelector(BARRAS[i]); if (!bar) continue;
-        var w = document.createElement('span'); w.className = 'cs-mon--bar'; w.appendChild(CSMoneda.selector());
-        var hueco = bar.querySelector('span[style*="width:32px"], span[style*="width: 32px"]');
-        if (hueco) hueco.replaceWith(w); else bar.appendChild(w);
-        return;
-      }
-    };
-    poner();
-    new MutationObserver(function () { poner(); }).observe(document.body, { childList: true, subtree: true });
-  }
+  /* En celular y tablet esta barra no se ve: el selector de moneda y el menu (☰, abre el panel de cuenta igual que en
+     la home) van en la barra propia de cada pantalla. Algunas pantallas repintan su barra, por eso se vuelven a poner si faltan. */
+  if (window.CSMoneda) { var slot = h.querySelector('[data-slot-moneda]'); if (slot) slot.appendChild(CSMoneda.selector()); }
+  var est = document.createElement('style');
+  est.textContent = '.cs-bar-extra{display:inline-flex;align-items:center;gap:2px}' +
+    '.cs-menu--bar{display:grid;place-content:center;gap:4px;width:40px;height:40px;margin-left:2px;border:0;background:transparent;color:inherit;cursor:pointer;flex:0 0 auto}' +
+    '.cs-menu--bar span{display:block;width:22px;height:2.5px;border-radius:2px;background:currentColor}' +
+    '@media (min-width:1024px){.cs-bar-extra{display:none}}';
+  document.head.appendChild(est);
+  var BARRAS = ['.f-bar', '.d-bar', '.c-bar', '.p-bar', '.r-bar', '.t-bar', '.u-bar', '.g-bar'];
+  var poner = function () {
+    if (document.querySelector('.cs-bar-extra')) return;
+    for (var i = 0; i < BARRAS.length; i++) {
+      var bar = document.querySelector(BARRAS[i]); if (!bar) continue;
+      var w = document.createElement('span'); w.className = 'cs-bar-extra';
+      if (window.CSMoneda) { var mo = document.createElement('span'); mo.className = 'cs-mon--bar'; mo.appendChild(CSMoneda.selector()); w.appendChild(mo); }
+      var mb = document.createElement('button'); mb.type = 'button'; mb.className = 'cs-menu--bar'; mb.setAttribute('data-perfil', '');
+      mb.setAttribute('aria-label', 'Abrir el menú de la cuenta'); mb.innerHTML = '<span></span><span></span><span></span>';
+      w.appendChild(mb);
+      var hueco = bar.querySelector('span[style*="width:32px"], span[style*="width: 32px"]');
+      if (hueco) hueco.replaceWith(w); else bar.appendChild(w);
+      return;
+    }
+  };
+  poner();
+  new MutationObserver(function () { poner(); }).observe(document.body, { childList: true, subtree: true });
   document.documentElement.classList.add('cs-hdr');
 
   /* Scrollea la pagina y no la caja #main (ver web.css). Las pantallas guardan y restauran
