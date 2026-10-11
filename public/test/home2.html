@@ -394,43 +394,53 @@
     .q{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:56px;align-items:start;max-width:1120px;padding:28px 0 40px}
     .q-eye,.q-h{grid-column:1/-1}
     .q-h{margin-bottom:28px;font-size:40px}
-    .q-caja{grid-column:1;grid-row:3;margin:0 0 24px;padding:22px 24px 18px}
-    .q-monto b{font-size:48px}
-    .q-busca{grid-column:2;grid-row:3/span 4;margin:0;padding:22px 24px}
-    .q-tile{height:110px}
-    .q-tile span{font-size:14px}
-    .q-cuenta{grid-column:1;grid-row:4}
-    .q-lista{grid-column:1;grid-row:5}
-    .q-nota{grid-column:1;grid-row:6}
+    .q-caja{grid-column:1;grid-row:3/span 4;margin:0;padding:24px 24px 18px}
+    .q-monto b{font-size:52px}
+    .q-cuenta{grid-column:2;grid-row:3}
+    .q-lista{grid-column:2;grid-row:4}
+    .q-nota{grid-column:2;grid-row:5}
+    .q-alt{grid-column:2;grid-row:6;text-align:left}
   }
-  /* ---- Las dos busquedas a la vista: por presupuesto y por destino y fechas ---- */
-  .q-caja__t{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--hx-navy)}
-  .q-caja__t svg{flex:none;width:22px;height:22px;padding:4px;border-radius:8px;background:#F5C518;color:#0B1F3A;box-sizing:content-box}
-  .q-busca{margin:0 0 18px;padding:16px;border-radius:18px;background:var(--surface,#fff);border:2px solid #0B1F3A;box-shadow:5px 5px 0 #0B1F3A}
-  .q-campo{display:flex;flex-direction:column;gap:5px;margin:0 0 10px;font-size:12px;font-weight:700;color:var(--ink2)}
-  .q-campo select,.q-campo input{width:100%;box-sizing:border-box;height:46px;padding:0 12px;border-radius:12px;border:2px solid var(--line);background:var(--surface,#fff);color:var(--hx-navy);font:600 15px var(--fb);-webkit-appearance:none;appearance:none}
-  .q-campo select{padding-right:34px;background:var(--surface,#fff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230B1F3A' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center}
-  .q-campo select:focus,.q-campo input:focus{outline:0;border-color:#0B1F3A}
-  .q-campo select:focus-visible,.q-campo input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .q-campo[data-err] select,.q-campo[data-err] input{border-color:#D14343}
-  .q-fechas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .q-fechas .q-campo{margin:0}
-  .q-busca .q-params{grid-template-columns:1fr;margin-top:12px;padding-top:12px}
-  .q-err{margin:6px 0 0;font-size:12.5px;font-weight:700;color:#D14343}
-  .q-err:empty{display:none}
-  .q-ir{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;margin-top:14px;border-radius:14px;border:2px solid #0B1F3A;background:#F5C518;color:#0B1F3A;font:800 16px var(--fh);cursor:pointer;box-shadow:0 3px 0 #0B1F3A;-webkit-tap-highlight-color:transparent}
-  .q-ir:active{transform:translateY(3px);box-shadow:none}
-  .q-ir:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-  .q-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 12px}
-  .q-tile{position:relative;height:84px;padding:0;border-radius:12px;overflow:hidden;border:2px solid var(--line);background:#0B1F3A;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .1s,border-color .2s,box-shadow .2s}
-  .q-tile:active{transform:scale(.96)}
-  .q-tile:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  /* ---- Dos caminos al mismo nivel: por la plata o eligiendo el destino ---- */
+  .q-camino{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:640px;margin:14px auto 4px}
+  .q-camino button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px 12px 11px;border-radius:16px;border:2px solid var(--line);background:var(--surface,#fff);color:var(--hx-navy);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .2s,border-color .2s,box-shadow .2s,transform .1s}
+  .q-camino button:active{transform:scale(.97)}
+  .q-camino button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  .q-camino b{display:flex;align-items:center;gap:6px;font-family:var(--fh);font-size:15px;font-weight:800;line-height:1.2}
+  .q-camino b svg{flex:none;width:20px;height:20px}
+  .q-camino small{font-size:12px;font-weight:500;line-height:1.3;color:var(--ink2)}
+  .q-camino button[aria-selected="true"]{background:#F5C518;border-color:#0B1F3A;box-shadow:4px 4px 0 #0B1F3A;color:#0B1F3A}
+  .q-camino button[aria-selected="true"] small{color:#0B1F3A}
+  .q-d{max-width:640px;margin:0 auto;padding:4px 0 24px}
+  .q-d[hidden],.q[hidden]{display:none}
+  .q-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px;padding:0;list-style:none}
+  .q-grid li:first-child{grid-column:1/-1}
+  .q-tile{position:relative;display:block;height:130px;border-radius:16px;overflow:hidden;border:2px solid #0B1F3A;box-shadow:3px 3px 0 #0B1F3A;color:#fff;text-decoration:none;transition:transform .1s}
+  .q-grid li:first-child .q-tile{height:170px}
+  .q-tile:active{transform:scale(.98)}
+  .q-tile:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
   .q-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .q-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(11,31,58,.88))}
-  .q-tile span{position:absolute;left:7px;right:7px;bottom:6px;z-index:1;color:#fff;font:800 12.5px/1.15 var(--fh);text-align:left;text-shadow:0 1px 3px rgba(0,0,0,.45)}
-  .q-tile[aria-pressed="true"]{border-color:#0B1F3A;box-shadow:0 0 0 3px #F5C518}
-  .q-tile[aria-pressed="true"]::before{content:"✓";position:absolute;top:5px;right:5px;z-index:2;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#F5C518;border:2px solid #0B1F3A;color:#0B1F3A;font:800 12px/1 var(--fb)}
-  .q-caja{margin-bottom:18px}
+  .q-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(11,31,58,.85))}
+  .q-tile span{position:absolute;left:12px;right:12px;bottom:10px;z-index:1;font-family:var(--fh);font-size:17px;font-weight:800;line-height:1.15;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+  .q-tile small{display:block;font-family:var(--fb);font-size:12px;font-weight:600;opacity:.9}
+  .q-todos{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:16px;border:2px solid #0B1F3A;background:var(--surface,#fff);box-shadow:3px 3px 0 #0B1F3A;font-family:var(--fh);font-size:15px;font-weight:800;color:var(--hx-navy);text-decoration:none}
+  .q-grid__mas .q-todos{height:130px;box-sizing:border-box;flex-direction:column;border-style:dashed;box-shadow:none;text-align:center}
+  .q-todos:active{transform:translateY(2px);box-shadow:none}
+  .q-todos:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  @media (min-width:1024px){
+    .q-camino{max-width:1120px;margin-top:28px;gap:16px}
+    .q-camino button{padding:16px 20px;flex-direction:row;align-items:center;gap:14px}
+    .q-camino b{font-size:18px}
+    .q-camino small{font-size:13.5px}
+    .q{padding-top:20px}
+    .q-d{max-width:1120px;padding:20px 0 40px}
+    .q-d .q-h{font-size:40px;margin-bottom:24px}
+    .q-grid{grid-template-columns:repeat(3,1fr);gap:16px}
+    .q-grid li:first-child{grid-column:span 1}
+    .q-grid li:first-child .q-tile,.q-tile{height:200px}
+    .q-grid__mas{grid-column:auto}
+    .q-grid__mas .q-todos{height:200px;flex-direction:column;border-style:dashed;box-shadow:none;font-size:17px}
+  }
   @media (prefers-reduced-motion:reduce){
     .g-bote{animation:none!important}
     .q-fila,.q-fila img{transition:none!important}
@@ -460,12 +470,17 @@
       <span class="m-head__r"><span data-slot-moneda></span><button type="button" class="m-menu" aria-label="Menú"><span></span><span></span><span></span></button></span>
     </header>
 
-    <main class="q" id="q">
-      <p class="q-eye">Tu viaje a Brasil, sin sorpresas</p>
-      <h1 class="q-h">¿Cuánto sale tu viaje? <em>Buscá por tu plata o por destino.</em></h1>
+    <main>
+    <div class="q-camino" role="tablist" aria-label="Cómo querés empezar">
+      <button type="button" role="tab" id="q-tab-plata" aria-controls="q" aria-selected="true" data-camino="plata"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/></svg>Tengo un presupuesto</b><small>Te decimos a dónde llegás</small></button>
+      <button type="button" role="tab" id="q-tab-destino" aria-controls="q-d" aria-selected="false" data-camino="destino"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Ya sé a dónde voy</b><small>Elegí el destino y te decimos cuánto sale</small></button>
+    </div>
+
+    <section class="q" id="q" role="tabpanel" aria-labelledby="q-tab-plata">
+      <p class="q-eye">Primero la plata, después el viaje</p>
+      <h1 class="q-h">¿Con cuánta plata contás? <em>Te decimos a dónde llegás.</em></h1>
 
       <div class="q-caja">
-        <h2 class="q-caja__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/></svg>Por presupuesto: ¿a dónde llego?</h2>
         <div class="q-monto"><b id="q-monto" aria-live="polite">—</b><small>por persona</small></div>
         <div class="q-slide">
           <input type="range" id="q-rango" min="300" max="3000" step="50" value="900" aria-label="Cuánta plata tenés por persona" disabled>
@@ -477,33 +492,6 @@
         </div>
       </div>
 
-      <form class="q-busca" id="q-busca" novalidate>
-        <h2 class="q-caja__t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Por destino y fechas: ¿cuánto sale?</h2>
-        <div class="q-tiles" role="group" aria-label="Destinos más elegidos">
-          <button type="button" class="q-tile" data-k="rio" aria-pressed="false"><img src="dest/rio-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Río de Janeiro</span></button>
-          <button type="button" class="q-tile" data-k="fln" aria-pressed="false"><img src="dest/fln-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Florianópolis</span></button>
-          <button type="button" class="q-tile" data-k="buz" aria-pressed="false"><img src="dest/buz-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Búzios</span></button>
-          <button type="button" class="q-tile" data-k="bcm" aria-pressed="false"><img src="dest/bcm-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Balneário Camboriú</span></button>
-          <button type="button" class="q-tile" data-k="bombinhas" aria-pressed="false"><img src="dest/bombinhas-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Bombinhas</span></button>
-          <button type="button" class="q-tile" data-k="porto" aria-pressed="false"><img src="/fotos/porto.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Porto de Galinhas</span></button>
-          <button type="button" class="q-tile" data-k="ssa" aria-pressed="false"><img src="/fotos/ssa.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Salvador</span></button>
-          <button type="button" class="q-tile" data-k="gram" aria-pressed="false"><img src="/fotos/gram.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Gramado</span></button>
-          <button type="button" class="q-tile" data-k="arraial" aria-pressed="false"><img src="/fotos/arraial.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Arraial do Cabo</span></button>
-        </div>
-        <label class="q-campo">Destino
-          <select id="q-dest" required><option value="">O elegí otro de la lista</option></select>
-        </label>
-        <div class="q-fechas">
-          <label class="q-campo">Ida<input type="date" id="q-ida" required></label>
-          <label class="q-campo">Vuelta<input type="date" id="q-vuelta" required></label>
-        </div>
-        <div class="q-params">
-          <div class="q-step" role="group" aria-label="Cantidad de personas del viaje"><span>Personas</span><div><button type="button" data-b="-1" aria-label="Una persona menos">−</button><b id="q-bpax" aria-live="polite">2</b><button type="button" data-b="1" aria-label="Una persona más">+</button></div></div>
-        </div>
-        <p class="q-err" id="q-err" role="alert"></p>
-        <button type="submit" class="q-ir">Ver cuánto sale <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-      </form>
-
       <div class="q-cuenta"><b id="q-n">Calculando…</b><span id="q-sub">Armando tu mapa de posibilidades</span></div>
 
       <ol class="q-lista" id="q-lista">
@@ -514,6 +502,23 @@
         <li><a class="q-fila" data-destino="bombinhas" href="home-destino.html?destino=bombinhas&fuente=home_plata"><img src="dest/bombinhas-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Bombinhas<small>Brasil</small></span><span class="q-est">…</span></a></li>
       </ol>
       <p class="q-nota" id="q-nota"></p>
+    </section>
+
+    <section class="q-d" id="q-d" role="tabpanel" aria-labelledby="q-tab-destino" hidden>
+      <p class="q-eye">Primero el destino, después la cuenta</p>
+      <h2 class="q-h">¿A dónde querés ir? <em>Te decimos cuánto sale todo.</em></h2>
+      <ul class="q-grid">
+        <li><a class="q-tile" href="home-destino.html?destino=rio&fuente=home_elegir"><img src="dest/rio-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Río de Janeiro<small>Brasil</small></span></a></li>
+        <li><a class="q-tile" href="home-destino.html?destino=fln&fuente=home_elegir"><img src="dest/fln-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Florianópolis<small>Brasil</small></span></a></li>
+        <li><a class="q-tile" href="home-destino.html?destino=buz&fuente=home_elegir"><img src="dest/buz-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Búzios<small>Brasil</small></span></a></li>
+        <li><a class="q-tile" href="home-destino.html?destino=bcm&fuente=home_elegir"><img src="dest/bcm-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Balneário Camboriú<small>Brasil</small></span></a></li>
+        <li><a class="q-tile" href="home-destino.html?destino=bombinhas&fuente=home_elegir"><img src="dest/bombinhas-400.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Bombinhas<small>Brasil</small></span></a></li>
+        <li><a class="q-tile" href="home-destino.html?destino=porto&fuente=home_elegir"><img src="/fotos/porto.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Porto de Galinhas<small>Brasil</small></span></a></li>
+        <li><a class="q-tile" href="home-destino.html?destino=ssa&fuente=home_elegir"><img src="/fotos/ssa.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Salvador<small>Brasil</small></span></a></li>
+        <li><a class="q-tile" href="home-destino.html?destino=gram&fuente=home_elegir"><img src="/fotos/gram.jpg" width="400" height="260" loading="lazy" decoding="async" alt=""><span>Gramado<small>Brasil</small></span></a></li>
+        <li class="q-grid__mas"><a class="q-todos" href="home-destino.html?fuente=home_buscar_destino"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Buscar otro destino</a></li>
+      </ul>
+    </section>
     </main>
 
     <footer class="hx-foot">
@@ -548,7 +553,6 @@
   </nav>
 </div>
 <script>window.mockTrack = function () {}; /* home2: sin medicion */</script>
-<script src="destinos-datos.js"></script>
 <script>
 (function () {
   /* selector de moneda (el de cuantosale.uy) en la barra */
@@ -659,45 +663,27 @@
   });
   pintar(false); nota(); cargar();
 
-  /* Busqueda por destino y fechas: lleva a la cotizacion de home-destino con todo cargado (los mismos limites:
-     vuelos hasta 6 meses adelante, al menos una noche). */
-  var bf = document.getElementById('q-busca'), selD = document.getElementById('q-dest'), fIda = document.getElementById('q-ida'), fVta = document.getElementById('q-vuelta'), BP = 2;
-  var isoD = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-  var masDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return isoD(d); };
-  var HOYD = isoD(new Date()), MAXD = (function () { var h = new Date(), d = new Date(h.getFullYear(), h.getMonth() + 6, h.getDate(), 12); if (d.getDate() !== h.getDate()) d.setDate(0); return isoD(d); })();
-  var POP = ['rio', 'fln', 'buz', 'bcm', 'bombinhas'], DS = window.CS_DESTS || [];
-  var opt = function (d) { return '<option value="' + d.k + '">' + d.name + (d.region ? ' · ' + d.region : '') + '</option>'; };
-  selD.insertAdjacentHTML('beforeend',
-    '<optgroup label="Los más elegidos">' + POP.map(function (k) { return DS.filter(function (d) { return d.k === k; })[0]; }).filter(Boolean).map(opt).join('') + '</optgroup>' +
-    '<optgroup label="Todos los destinos">' + DS.slice().sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); }).map(opt).join('') + '</optgroup>');
-  fIda.min = fVta.min = HOYD; fIda.max = fVta.max = MAXD;
-  fIda.value = masDias(HOYD, 10); fVta.value = masDias(HOYD, 17);
-  fIda.addEventListener('change', function () {
-    fVta.min = fIda.value ? masDias(fIda.value, 1) : HOYD;
-    if (fIda.value && (!fVta.value || fVta.value <= fIda.value)) fVta.value = masDias(fIda.value, 7) > MAXD ? MAXD : masDias(fIda.value, 7);
+  /* Los dos caminos: el elegido queda en el hash (#destino) para que volver atras no lo pierda */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.q-camino [role="tab"]'));
+  function camino(c, foco) {
+    tabs.forEach(function (t) {
+      var on = t.dataset.camino === c;
+      t.setAttribute('aria-selected', on ? 'true' : 'false'); t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      if (on && foco) t.focus();
+    });
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      camino(t.dataset.camino);
+      try { history.replaceState(null, '', t.dataset.camino === 'destino' ? '#destino' : location.pathname + location.search); } catch (e) {}
+    });
+    t.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault(); var o = tabs[(tabs.indexOf(t) + 1) % tabs.length]; o.click(); o.focus();
+    });
   });
-  function pintarBP() { document.getElementById('q-bpax').textContent = BP; bf.querySelectorAll('[data-b]').forEach(function (b) { b.disabled = BP + (+b.dataset.b) < 1 || BP + (+b.dataset.b) > 8; }); }
-  bf.querySelector('.q-params').addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b || b.disabled) return;
-    BP = Math.min(8, Math.max(1, BP + (+b.dataset.b))); pintarBP();
-  });
-  pintarBP();
-  /* Las tarjetas y la lista eligen lo mismo: tocar una tarjeta la marca y pone ese destino en la lista */
-  var tl = Array.prototype.slice.call(bf.querySelectorAll('.q-tile'));
-  function marcar() { tl.forEach(function (t) { t.setAttribute('aria-pressed', t.dataset.k === selD.value ? 'true' : 'false'); }); }
-  tl.forEach(function (t) { t.addEventListener('click', function () { selD.value = t.dataset.k; marcar(); selD.parentNode.removeAttribute('data-err'); document.getElementById('q-err').textContent = ''; }); });
-  selD.addEventListener('change', marcar);
-  bf.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var err = '', campo = null;
-    bf.querySelectorAll('.q-campo').forEach(function (c) { c.removeAttribute('data-err'); });
-    if (!selD.value) { err = 'Elegí el destino.'; campo = selD; }
-    else if (!fIda.value || fIda.value < HOYD || fIda.value > MAXD) { err = 'Elegí una fecha de ida entre hoy y los próximos 6 meses.'; campo = fIda; }
-    else if (!fVta.value || fVta.value <= fIda.value || fVta.value > MAXD) { err = 'La vuelta tiene que ser después de la ida (hasta 6 meses adelante).'; campo = fVta; }
-    document.getElementById('q-err').textContent = err;
-    if (campo) { campo.parentNode.setAttribute('data-err', ''); campo.focus(); return; }
-    location.href = 'home-destino.html?' + new URLSearchParams({ destino: selD.value, ida: fIda.value, vuelta: fVta.value, pax: BP, fuente: 'home_destino_fechas' }).toString();
-  });
+  camino(location.hash === '#destino' ? 'destino' : 'plata');
 })();
 </script>
 <script src="cuenta.js"></script>
