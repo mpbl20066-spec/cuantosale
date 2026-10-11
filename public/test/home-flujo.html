@@ -489,6 +489,7 @@
   .ls-ilu{flex:0 0 auto;width:150px;height:48px;color:var(--ls-y)}
   .ls-foot{display:flex;align-items:center;gap:10px;margin:0;font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:18px;line-height:1.3;color:var(--ls-t);transform:rotate(-3deg)}
   .ls-foot span{position:relative;padding-bottom:3px}
+  .rv2-fin{--ls-y:#F5C518;--ls-t:var(--ink);margin-top:6px}
   .ls-foot svg{flex:0 0 auto;color:var(--ls-y)}
   /* Cierre animado: la ruta punteada avanza, el avion entra volando y queda flotando, el subrayado se dibuja y el pin salta */
   .ls-foot span::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--ls-y);transform-origin:left;animation:ls-raya .9s .5s cubic-bezier(.3,.7,.3,1) both}
@@ -2252,8 +2253,12 @@
       acc('button type="button" data-ir="2"', '<path d="M3 20V6M3 12h18v8M21 12V9a2 2 0 0 0-2-2h-7v5"/><circle cx="7.500" cy="9.500" r="1.800"/>', 'Alojamiento', 'Compará precios y ubicación.') +
       acc('button type="button" data-ir="3"', '<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><path d="M12 12.500s-2.500-1.600-2.500-3.200a1.400 1.400 0 0 1 2.500-.8 1.400 1.400 0 0 1 2.500.8c0 1.600-2.500 3.200-2.500 3.200z"/>', 'Tours y traslados', 'Viví experiencias únicas y movete sin complicaciones.') +
       '</div>') +
-      '<div class="ls-cierre"><svg class="ls-ilu" viewBox="0 0 240 56" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ls-ruta" d="M4 48c30 0 40-30 80-30s40 20 80 0" stroke-dasharray="3 6"/><path class="ls-avion" d="m186 14 30-6-8 10 18 4-6 6-22-2-6 10-4-2 3-12-9-3z" fill="currentColor"/></svg>' +
-      '<p class="ls-foot"><span>¡El mundo te espera!</span>' + ic('<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/>', 28) + '</p></div></div>';
+      cierreMundo() + '</div>';
+  }
+  /* "¡El mundo te espera!" animado (avion, ruta punteada, subrayado y pin). Va al pie de Reservá tu viaje. */
+  function cierreMundo() {
+    return '<div class="ls-cierre"><svg class="ls-ilu" viewBox="0 0 240 56" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="ls-ruta" d="M4 48c30 0 40-30 80-30s40 20 80 0" stroke-dasharray="3 6"/><path class="ls-avion" d="m186 14 30-6-8 10 18 4-6 6-22-2-6 10-4-2 3-12-9-3z" fill="currentColor"/></svg>' +
+      '<p class="ls-foot"><span>¡El mundo te espera!</span>' + ic('<path d="M12 21s-7-6.200-7-11.500A7 7 0 0 1 19 9.500C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/>', 28) + '</p></div>';
   }
   /* Paso 6: Reservá tu viaje.
      Arriba, una sola tarjeta con la foto del destino, fechas, personas y el total. Debajo, una fila por servicio:
@@ -2289,7 +2294,8 @@
         '<div class="rv2-dest__b"><span class="rv2-dest__k">Tu viaje</span><h2>' + esc(DEST) + '</h2>' +
           '<ul class="rv2-dest__m"><li>' + ic(iCal6, 15) + fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + '</li><li>' + ic(iPers6, 15) + personas + '</li></ul>' +
           '<div class="rv2-dest__tot"><span><small>Presupuesto total</small><b>' + f(d.total) + '</b></span><button type="button" class="rv2-dest__ver" data-ir="4" data-evento="flujo_volver_resumen">Ver presupuesto</button></div></div></section>' +
-      '<ul class="rv2-l">' + filas.map(fila).join('') + '</ul></div>';
+      '<ul class="rv2-l">' + filas.map(fila).join('') + '</ul>' +
+      '<div class="rv2-fin">' + cierreMundo() + '</div></div>';
   }
   /* ===== Reserva de vuelo y alojamiento: se sale a un tercero y se vuelve a confirmar ===== */
   var AEROPUERTO = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'RIO', angra: 'GIG', sao: 'SAO', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', ajuda: 'SSA', fernando: 'FEN', fln: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', gram: 'POA', canela: 'POA', torres: 'POA', canoa: 'POA', rec: 'REC', joaopessoa: 'JPA', poa: 'POA' };
