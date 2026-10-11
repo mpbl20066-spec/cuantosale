@@ -3131,7 +3131,8 @@ async function guardarPedido(cuerpo) {
   try {
     const r = await pedidosStore.crearPedido(pedidosStore.desdeSolicitud(cuerpo));
     if (r.nuevo) adminPanel.avisarPedidoNuevo(r.pedido);
-    return !!r.pedido;
+    /* El id (uuid) vuelve al navegador del cliente: con el consulta /api/reserva-estado si el asesor ya lo confirmo. */
+    return r.pedido ? (r.pedido.id || true) : false;
   } catch (e) { console.error('[pedidos] no se pudo guardar el pedido para el panel:', e.message); return false; }
 }
 
@@ -3213,6 +3214,17 @@ function handleRequest(req, res) {
       if (url.pathname === '/api/pasaporte' && req.method === 'GET') return pas.getEstado(req, res).catch(alFallarPas);
       if (url.pathname === '/api/pasaporte/evento' && req.method === 'POST') return pas.postEvento(req, res).catch(alFallarPas);
       res.writeHead(405, { Allow: 'GET, POST' }); return res.end();
+    }
+    /* Estado de un pedido para la pagina del cliente: solo el estado (sin nombre, telefono ni montos). El id es un uuid
+       que solo tiene el navegador que hizo el pedido. Cuando el asesor confirma en /admin, aca aparece "confirmado". */
+    if (url.pathname === '/api/reserva-estado' && req.method === 'GET') {
+      const pid = String(url.searchParams.get('id') || '');
+      if (!/^[0-9a-f-]{36}$/i.test(pid)) return sendJson(res, 400, { error: 'Pedido no válido.' });
+      pedidosStore.obtenerPedido(pid).then(function (p) {
+        if (!p) return sendJson(res, 404, { error: 'Pedido no encontrado.' });
+        return sendJson(res, 200, { estado: p.estado, items: (p.items || []).map(function (i) { return { tipo: i.tipo, estado: i.estado }; }) });
+      }).catch(function (e) { return sendJson(res, e.status || 500, { error: e.message }); });
+      return;
     }
     /* Pedido de reserva: le llega al asesor por email y el asesor manda el WhatsApp al cliente (lib/reservas.js). */
     if (url.pathname === '/api/reserva-solicitud' || url.pathname === '/api/reserva-enviar') {

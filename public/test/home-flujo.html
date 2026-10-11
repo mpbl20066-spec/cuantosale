@@ -2627,6 +2627,36 @@
       '<div class="al-ext"><b>Booking.com</b><span><i>EXTERNO · BOOKING.COM</i>Vas a ser redirigido a Booking.com para completar la reserva.</span></div>';
   }
   /* Reservar: el pedido le llega al asesor (por email, desde el servidor) y el asesor le manda el WhatsApp al cliente. */
+  /* Pedidos hechos desde este navegador: el id del pedido en el panel /admin, por servicio y por viaje. Con eso la pagina
+     pregunta a /api/reserva-estado y, cuando el asesor confirma en /admin, el servicio pasa a "Reservado". */
+  var CLAVE_VIAJE = [destKey, IDA, VUELTA, pax].join('|');
+  function pedidosGuardados() { try { var l = JSON.parse(localStorage.getItem('cs_pedidos') || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
+  function anotarPedido(id, k) {
+    if (!id || typeof id !== 'string') return;
+    var l = pedidosGuardados().filter(function (x) { return x.id !== id; });
+    l.unshift({ id: id, k: k, viaje: CLAVE_VIAJE, t: Date.now() });
+    try { localStorage.setItem('cs_pedidos', JSON.stringify(l.slice(0, 30))); } catch (e) { /* modo privado */ }
+  }
+  function sincronizarPedidos() {
+    var mios = pedidosGuardados().filter(function (x) { return x.viaje === CLAVE_VIAJE; });
+    if (!mios.length || !/^https?:$/.test(location.protocol)) return;
+    S.sol = S.sol || {};
+    mios.forEach(function (x) { if (!S.res[x.k]) S.sol[x.k] = true; });
+    Promise.all(mios.map(function (x) {
+      return fetch('/api/reserva-estado?id=' + encodeURIComponent(x.id)).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+        .then(function (j) { return { x: x, j: j }; });
+    })).then(function (rs) {
+      var cambio = false;
+      rs.forEach(function (o) {
+        if (!o.j) return;
+        var tipo = o.x.k === 'tours' ? 'tour' : 'traslado', its = (o.j.items || []).filter(function (i) { return i.tipo === tipo; });
+        var conf = o.j.estado === 'confirmado' || o.j.estado === 'completado' || (its.length > 0 && its.every(function (i) { return i.estado === 'confirmado'; }));
+        if (conf && !S.res[o.x.k]) { S.res[o.x.k] = true; cambio = true; track('reserva_cs_confirmada', { servicio: tipo, proveedor: 'cuantosale', via: 'panel_admin' }); }
+        else if (o.j.estado === 'cancelado' && !S.res[o.x.k] && S.sol[o.x.k]) { S.sol[o.x.k] = false; cambio = true; }
+      });
+      if (cambio) { var y = $('main').scrollTop; render(false); $('main').scrollTop = y; }
+    });
+  }
   function enviarSolicitud(dt) {
     var lista = serviciosCs(S.csK), btn = $('cf-reservar');
     if (!lista.length) return;
@@ -2650,6 +2680,7 @@
         clearTimeout(tm);
         S.sol = S.sol || {};
         lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
+        anotarPedido(j && j.pedido, S.csK || (lista[0].ico === 'palm' ? 'tours' : 'tras'));
         if (S.datos) S.datos.cupon = '';   // el cupon se usa una vez; nombre, celular y mail quedan para el otro pedido
         try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
         try { if (window.CS_GAME && CS_GAME.refrescar) CS_GAME.refrescar(); } catch (er) { /* el pasaporte no puede trabar la reserva */ }
@@ -3123,6 +3154,7 @@
     if (p === 1) S.sub = sub || (S.paso === 2 ? 't' : 'v');
     S.paso = p; S.reservar = false; S.modal = null; pintarModal(); paginaVirtual(p);
     if (p === 2 && !S.hotelesListos) cargarHoteles();
+    if (p === 6 || p === 7) sincronizarPedidos();
     render(true);
     track('flujo_paso', { paso: p, nombre: NOMBRES[p - 1] || 'Reservar', motivo: motivo, total: Math.round(totalHastaAhora()) });
   }
@@ -3352,6 +3384,7 @@
   histIni = false;
   var vuelosListos = Promise.resolve(MODO === 'avion' ? cargarVuelos() : (MODO === 'bus' ? cargarBus() : null));
   CSCuenta.alCambiar(function (u) { if (u) restaurarPendiente(u); });
+  sincronizarPedidos();
   if (!S.datos) { try { var dg = JSON.parse(localStorage.getItem('cs_datos_reserva') || 'null'); if (dg && dg.nombre) S.datos = { nombre: dg.nombre, pais: dg.pais || '+598', tel: dg.tel || '', mail: dg.mail || '', cupon: '' }; } catch (e) { /* modo privado */ } }
   /* Viaje guardado: el link trae la seleccion (sel=...) y se abre en Tu presupuesto con todo lo elegido. */
   (function () {
