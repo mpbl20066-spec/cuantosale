@@ -781,7 +781,8 @@
   .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
   .xr.is-sel{background:var(--card-sel-bg,var(--surface))}
   .xr{cursor:pointer}
-  .xr .opt__tick{top:-8px;right:-8px;left:auto;width:22px;height:22px;font-size:12px;border:2px solid var(--bg);box-sizing:border-box;z-index:2}
+  /* Mismo tilde que el alojamiento (adentro, arriba a la derecha); el precio se corre para no quedar debajo */
+  .xr .x-p{margin-right:30px}
   .td-img{height:150px;margin:12px 0 10px;border-radius:14px;background:var(--cel-soft) center/cover}
   .td-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0;font-size:12.5px;font-weight:700;color:var(--ink2)}
   .td-meta span{display:flex;align-items:center;gap:5px}.td-meta svg{color:var(--azul)}
@@ -1006,6 +1007,10 @@
   .dd-g{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:10px;padding:10px;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface))}
   .dd-o{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:118px;padding:12px;box-sizing:border-box;border:1.5px solid var(--line);border-radius:14px;background:transparent;color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
   .dd-o:hover{border-color:var(--ink2)}
+  .dd-o{position:relative}
+  .dd-o>b{padding-right:28px}
+  .dd-o.is-sel .opt__tick{opacity:1;transform:none}
+  .dd-o>.opt__tick{color:var(--action-ink);font-size:13px;line-height:1}
   .dd-o:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .dd-o.is-sel{border:2px solid #F5C518;background:rgba(245,197,24,.1);padding:11.5px;cursor:default}
   .dd-o>b{font-size:13.5px;font-weight:800}
@@ -2032,10 +2037,10 @@
     var unidad = '<small>por persona / día</small>';
     var cajas = c.o.map(function (o) {
       var on = e.k === o[0];
-      return '<button type="button" class="dd-o' + (on ? ' is-sel' : '') + '" data-dia="' + q + ':' + o[0] + '" aria-pressed="' + on + '"><b>' + o[1] + '</b><span>' + o[2] + '</span><strong>' + f(COSTO_DIA[c.base][o[0]] || 0) + unidad + '</strong></button>';
+      return '<button type="button" class="dd-o' + (on ? ' is-sel' : '') + '" data-dia="' + q + ':' + o[0] + '" aria-pressed="' + on + '">' + tick + '<b>' + o[1] + '</b><span>' + o[2] + '</span><strong>' + f(COSTO_DIA[c.base][o[0]] || 0) + unidad + '</strong></button>';
     }).join('');
     var custom = e.k === 'custom'
-      ? '<div class="dd-o is-sel"><b>Personalizado</b><label for="dd-in-' + q + '">Monto planeado</label><span class="dd-in"><span>' + esc(sim) + '</span><input id="dd-in-' + q + '" data-dia-in="' + q + '" type="number" min="0" step="1" inputmode="decimal" value="' + (e.monto ? Math.round(e.monto * tasa) : '') + '"></span>' + unidad + '</div>'
+      ? '<div class="dd-o is-sel">' + tick + '<b>Personalizado</b><label for="dd-in-' + q + '">Monto planeado</label><span class="dd-in"><span>' + esc(sim) + '</span><input id="dd-in-' + q + '" data-dia-in="' + q + '" type="number" min="0" step="1" inputmode="decimal" value="' + (e.monto ? Math.round(e.monto * tasa) : '') + '"></span>' + unidad + '</div>'
       : '<button type="button" class="dd-o" data-dia="' + q + ':custom" aria-pressed="false"><b>Personalizado</b><span>Definí tu propio presupuesto</span><strong class="dd-o__ing">' + ic('<path d="M4 20h4L19 9l-4-4L4 16z"/>', 16) + 'Ingresar monto</strong></button>';
     return '<section class="dd" aria-labelledby="dd-h-' + q + '"><div class="dd-h"><h2 id="dd-h-' + q + '">' + c.t + '</h2><small>Valores estimados</small></div>' +
       '<div class="dd-g">' + cajas + custom + '</div>' +
