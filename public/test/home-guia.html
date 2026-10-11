@@ -47,9 +47,10 @@
   .u-item p{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.5}
   .u-foto{height:110px;margin:-13px -13px 10px;border-radius:16px 16px 0 0;background:var(--cel-soft) center/cover}
   .u-precio{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:12px;font-weight:800}
+  .u-item--temp .u-temp{margin:0}
   .u-temp{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.5}
   /* El cierre: desde la guia al buscador, como en la maqueta. */
-  .u-handoff{margin:22px 18px 0;padding:18px;border:1.5px solid var(--azul);border-radius:20px;background:var(--cel-soft);color:var(--ink)}
+  .u-handoff{margin:22px 0 0;padding:18px;border:1.5px solid var(--azul);border-radius:20px;background:var(--cel-soft);color:var(--ink)}
   .u-handoff h2{margin:0 0 5px;font-family:var(--fh);font-size:19px;font-weight:800;line-height:1.2}
   .u-handoff p{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
   .u-handoff__b{display:flex;gap:9px}
@@ -96,7 +97,7 @@
   function cabecera() {
     return '<div class="u-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="u-hero__t"><h1>' + esc(NOM) + '</h1>' +
       '<small>' + (S.guia && S.guia.región ? esc(S.guia.región) : 'Brasil') + '</small>' +
-      (S.guia && S.guia.temporada ? '<span class="u-hero__vol">Temporada alta: ' + S.guia.temporada.alta.map(function (m) { return C.MESES[m]; }).join(', ') + '</span>' : '') +
+      (S.guia && S.guia.temporada ? '<span class="u-hero__vol">Temporada alta: ' + S.guia.temporada.alta.map(function (m) { return C.MESES[m - 1]; }).filter(Boolean).join(', ') + '</span>' : '') +
       '</div></div>';
   }
   function listaGuia() {
@@ -144,8 +145,7 @@
         return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + '</button>';
       }).join('') + '</div>' +
       '<div role="tabpanel">' + listaGuia() + '</div>' +
-      '<h2 class="u-h2">Todo lo que necesitas saber<br>para tu viaje a ' + esc(NOM) + '</h2>' +
-      (S.guia.temporada && S.guia.temporada.nota ? '<p class="u-temp">' + esc(S.guia.temporada.nota) + '</p>' : '') +
+      (S.guia.temporada && S.guia.temporada.nota ? '<h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div>' : '') +
       '<div class="u-handoff"><h2>¿Te gusta este destino?</h2>' +
       '<p>Calculá cuánto sale tu viaje y reservá en pocos pasos.</p>' +
       '<div class="u-handoff__b"><a class="u-go" href="home-destino.html?destino=' + K + '&fuente=guia" data-evento="guia_calcular_viaje" data-destino="' + K + '">Calcular un viaje →</a>' +

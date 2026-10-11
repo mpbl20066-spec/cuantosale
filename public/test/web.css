@@ -338,14 +338,21 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
 }
 @media (min-width:768px){
   [data-pagina="guia"] .u-main{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);column-gap:34px;align-content:start;padding:0}
-  [data-pagina="guia"] .u-hero{grid-column:1;grid-row:1/span 6;position:sticky;top:0;height:min(520px,72vh)}
+  [data-pagina="guia"] .u-hero{grid-column:1;grid-row:1/span 6;position:sticky;top:0;height:min(560px,calc(100vh - 120px));border-radius:22px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.28)}
   [data-pagina="guia"] .u-hero__t{left:20px;right:20px;bottom:18px}
   [data-pagina="guia"] .u-hero__t h1{font-size:32.5px}
   [data-pagina="guia"] .u-hero__t small{font-size:15px}
-  [data-pagina="guia"] .u-cuerpo{grid-column:2;padding:16px 22px 0 0}
-  [data-pagina="guia"] .u-handoff{margin:22px 22px 0 0}
-  [data-pagina="guia"] .u-cerrada{margin:14px 22px 0 0}
-  [data-pagina="guia"] .u-foot{padding:10px 22px 24px 0}
+  [data-pagina="guia"] .u-cuerpo{grid-column:2;padding:0 0 40px}
+  [data-pagina="guia"] .u-lead{margin-top:0}
+  [data-pagina="guia"] .u-handoff{margin:26px 0 0}
+  [data-pagina="guia"] .u-cerrada{margin:0}
+  /* volver: boton visible sobre el fondo (la flecha blanca suelta no se veia en modo claro) */
+  [data-pagina="guia"] .u-bar{padding:12px 0 14px}
+  [data-pagina="guia"] .u-back{width:auto;height:38px;margin:0;padding:0 14px 0 8px;gap:4px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:700}
+  [data-pagina="guia"] .u-back::after{content:"Todas las guías"}
+  [data-pagina="guia"] .u-back svg{stroke:currentColor;filter:none}
+  [data-pagina="guia"] .u-foot{padding:10px 0 24px}
+  [data-pagina="guia"] .u-foot:empty{display:none}
   [data-pagina="guia"] .u-h2{font-size:18px}
   [data-pagina="guia"] .u-lead{font-size:15px}
   [data-pagina="guia"] .u-tab{font-size:15px;padding:12px 16px}
