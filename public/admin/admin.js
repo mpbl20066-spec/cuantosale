@@ -164,7 +164,7 @@
   }
 
   /* ---------- WhatsApp: estado del numero, registro y prueba ---------- */
-  var WA_ESTADOS = { CONNECTED: 'Conectado', PENDING: 'Pendiente', NOT_VERIFIED: 'Sin verificar', VERIFIED: 'Verificado', APPROVED: 'Aprobado', PENDING_REVIEW: 'En revisión', DECLINED: 'Rechazado', FLAGGED: 'Marcado', RESTRICTED: 'Restringido', DISCONNECTED: 'Desconectado', CLOUD_API: 'API en la nube', NOT_APPLICABLE: 'Sin registrar' };
+  var WA_ESTADOS = { CONNECTED: 'Conectado', PENDING: 'Pendiente', NOT_VERIFIED: 'Sin verificar', VERIFIED: 'Verificado', APPROVED: 'Aprobado', PENDING_REVIEW: 'En revisión', DECLINED: 'Rechazado', FLAGGED: 'Marcado', RESTRICTED: 'Restringido', DISCONNECTED: 'Desconectado', CLOUD_API: 'API en la nube', NOT_APPLICABLE: 'Sin registrar', AVAILABLE_WITHOUT_REVIEW: 'Aprobado', NONE: 'Sin revisar', EXPIRED: 'Vencido' };
   function waTxt(v) { return v ? (WA_ESTADOS[v] || v) : '—'; }
   function cargarWa() {
     S.wa = { cargando: true };
@@ -372,7 +372,7 @@
       var reg = e.target.id === 'wa-reg';
       b.disabled = true; msg.style.color = ''; msg.textContent = reg ? 'Registrando…' : 'Enviando…';
       (reg ? api('whatsapp/registrar', { pin: String(f.get('pin') || '') }) : api('whatsapp/prueba', { telefono: String(f.get('tel') || '') }))
-        .then(function () { S.wa = null; cargarWa(); S.wa.msg = ''; toast(reg ? 'Número registrado' : 'Prueba enviada: revisá tu WhatsApp'); })
+        .then(function () { cargarWa(); pintar(); toast(reg ? 'Número registrado' : 'Prueba enviada: revisá tu WhatsApp'); })
         .catch(function (er) { b.disabled = false; msg.style.color = 'var(--bad)'; msg.textContent = er.message; });
       return;
     }
