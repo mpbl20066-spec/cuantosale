@@ -2764,7 +2764,7 @@
     if (!p || !u || p.clave !== [destKey, IDA, VUELTA, pax].join('|')) return;
     try { sessionStorage.removeItem('cs_test_pendiente'); } catch (e) { /* nada */ }
     aplicarSeleccion(p.s || {}).then(function () {
-      return guardarEnCuenta().then(function () { ir(6, 'guardado'); }, function (e) { S.avisoGuardado = e.message; ir(4, 'guardar_error'); });
+      return guardarEnCuenta().then(function () { ir(7, 'guardado'); }, function (e) { S.avisoGuardado = e.message; ir(4, 'guardar_error'); });
     });
   }
   /* Vuelve a poner lo elegido (vuelo, transfer, alojamiento y habitacion, tours, comidas y transporte local).
@@ -2787,16 +2787,16 @@
     });
   }
   function abrirGuardar() {
-    if (S.sinGuardar) { ir(6, 'sin_guardar'); return; }
+    if (S.sinGuardar) { ir(7, 'sin_guardar'); return; }
     var u = CSCuenta.usuario();
     if (S.sesion || u) {
-      guardarEnCuenta().then(function () { ir(6, 'guardado'); }, function (e) { S.avisoGuardado = e.message; S.modal = { tipo: 'guardar', error: e.message }; pintarModal(); });
+      guardarEnCuenta().then(function () { ir(7, 'guardado'); }, function (e) { S.avisoGuardado = e.message; S.modal = { tipo: 'guardar', error: e.message }; pintarModal(); });
       return;
     }
     S.modal = { tipo: 'guardar' }; pintarModal(); track('flujo_guardar_vista', { total: Math.round(totalHastaAhora()) });
   }
-  /* Sin la pantalla intermedia de "viaje guardado": se va directo a Reservá tu viaje. */
-  function seguirAReservas() { ir(6, S.sesion ? 'guardado' : 'sin_guardar'); }
+  /* Sin la pantalla intermedia de "viaje guardado": 'Reservar mi viaje' lleva directo a Estado de tu viaje. */
+  function seguirAReservas() { ir(7, S.sesion ? 'guardado' : 'sin_guardar'); }
   function reservar(valor) {
     var r = valor.split(':');
     if (r[1] === 'google_flights') { S.desde8 = 0; abrirVueloIr(); return; }
@@ -3131,7 +3131,7 @@
   $('back').addEventListener('click', function () {
     track('flujo_volver', { desde: S.paso });
     if (S.paso === 1 && MODO === 'avion' && S.sub === 't') { volverA(1, 'v'); return; }
-    if (S.paso === 12) volverA(11); else if (S.paso === 11) volverA(S.desde11 || 6); else if (S.paso === 10) volverA(9); else if (S.paso === 9) volverA(6); else if (S.paso === 8) volverA(S.desde8 || 6); else if (S.paso === 7) volverA(6); else if (S.paso === 6) volverA(4); else if (S.paso > 1) volverA(S.paso - 1); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
+    if (S.paso === 12) volverA(11); else if (S.paso === 11) volverA(S.desde11 || 6); else if (S.paso === 10) volverA(9); else if (S.paso === 9) volverA(7); else if (S.paso === 8) volverA(S.desde8 || 6); else if (S.paso === 7) volverA(4); else if (S.paso === 6) volverA(4); else if (S.paso > 1) volverA(S.paso - 1); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
   });
   $('cta').addEventListener('click', function () {
     track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });
@@ -3169,7 +3169,7 @@
       if (acc === 'google') { track('flujo_guardar_google', { total: Math.round(totalHastaAhora()) }); guardarPendiente(); CSCuenta.loginGoogle().catch(function () { S.modal = { tipo: 'guardar', error: 'No pudimos conectar con Google. Probá de nuevo en un momento.' }; pintarModal(); }); }
       else if (acc === 'email') { S.modal = { tipo: 'guardar', email: true }; pintarModal(); track('flujo_guardar_email_abrir', {}); }
       else if (acc === 'volver') { S.modal = { tipo: 'guardar' }; pintarModal(); }
-      else if (acc === 'skip') { S.sinGuardar = true; track('flujo_guardar_saltear', { total: Math.round(totalHastaAhora()) }); ir(6, 'sin_guardar'); }
+      else if (acc === 'skip') { S.sinGuardar = true; track('flujo_guardar_saltear', { total: Math.round(totalHastaAhora()) }); ir(7, 'sin_guardar'); }
       return;
     }
     var b = e.target.closest('[data-hab]'); if (!b || !S.modal) return;
