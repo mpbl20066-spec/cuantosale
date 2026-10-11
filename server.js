@@ -1257,9 +1257,9 @@ function adaptPackagesToStyle(result, trip, dep, ret, today) {
     roadtripList: roadtripList, series: series, tips: model.tipsFor(trip, rec, list, series)
   });
 }
-function roadtripCost(key, kmPerLiter) {
+function roadtripCost(key, kmPerLiter, pax) {
   const fuelPrice = Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2;
-  return model.roadtripCost(key, kmPerLiter, fuelPrice);
+  return model.roadtripCost(key, kmPerLiter, fuelPrice, pax);
 }
 function calculateLocalTransportCost({ style = 'eq', dest = 'rio', nights = 3, pax = 2 } = {}) {
   const normalizedStyle = ['eco', 'eq', 'comodo'].includes(String(style).toLowerCase()) ? String(style).toLowerCase() : 'eq';
@@ -2020,7 +2020,7 @@ async function cotizar(req, res, url) {
          defecto del modelo, pero el front NO lo asume: viajaEnAvion() trata un
          meta sin `transport` como "no se sabe" y no le inventa un vuelo. */
       transport: String(v.S.transport || 'flight'),
-      costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
+      costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter, v.S.pax), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport,
       hotels: [], hotelsPending: true, hotelBudgetPerNight: Number.isFinite(hotelBudgetPerNight) ? hotelBudgetPerNight : hotelBudgetTarget(v.S.dest, v.S.style, hotelExtra), hotelsNearby: '', generatedAt: new Date().toISOString(),
       /* Los tours del destino, ya con el precio convertido a USD.
          *
@@ -2533,7 +2533,7 @@ function cotizarTodos(req, res, url) {
        cliente no tenga que asumir: el titulo de la seccion nombra el transporte
        con el que se filtró, y con 13 de 44 destinos alcanza con aclarar que la
        busqueda de auto cubre solo la zona con ruta de carretera. */
-    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, origin: origin, mode: 'estimated', transport: transportPedido, destinosCotizables: clavesCotizables.length, costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
+    meta: { dep: v.S.dep, ret: v.S.ret, pax: v.S.pax, budget: v.S.budget, style: v.S.style, origin: origin, mode: 'estimated', transport: transportPedido, destinosCotizables: clavesCotizables.length, costBasis: Object.assign({}, model.REAL_COSTS, { destinationCosts: model.DESTINATION_COSTS }), roadtrip: roadtripCost(v.S.dest, v.S.kmPerLiter, v.S.pax), officialTransfer: transferConfig(v.S.dest, v.S.pax), localTransport: localTransport },
     options: options,
     localTransport: localTransport
   });
