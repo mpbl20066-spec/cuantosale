@@ -151,7 +151,7 @@
       return cliente.from('trips').insert({
         user_id: u.id, origin: 'MVD', destination: d.destination, departure_date: d.departure_date, return_date: d.return_date,
         total_price: Number(d.total_amount) || 0,
-        flight_details: { fuente: 'test', destination_key: d.destination_key, pax: d.pax, url: d.url }
+        flight_details: { fuente: 'test', destination_key: d.destination_key, pax: d.pax, url: d.url, seleccion: d.seleccion || null, detalle: d.detalle || null }
       }).select().single();
     }).then(function (r) { if (r.error) throw new Error('No pudimos guardar el viaje: ' + r.error.message); return r.data; });
   }
@@ -338,8 +338,19 @@
     else cuerpo = S.viajes.map(function (t) {
       var fd = t.flight_details || {}, fechas = fdc(t.departure_date) + (t.return_date ? ' → ' + fdc(t.return_date) : '');
       var url = fd.fuente === 'test' && fd.url ? fd.url : '';
+      /* Lo que se eligio al guardar (vuelo, transfer, alojamiento, tours), con el precio de ese momento. */
+      var dt = fd.detalle, items = [];
+      if (dt) {
+        if (dt.vuelo) items.push(['Vuelo', dt.vuelo.aerolinea + (dt.vuelo.salida ? ' · ' + dt.vuelo.salida + ' → ' + dt.vuelo.llegada : ''), dt.vuelo.precio]);
+        if (dt.bus) items.push(['Bus', 'Ida y vuelta', dt.bus.precio]);
+        if (dt.auto) items.push(['Auto', 'Nafta y peajes', dt.auto.precio]);
+        items.push(['Transfer', dt.transfer ? dt.transfer.nombre + (dt.transfer.ida_y_vuelta ? ' · ida y vuelta' : '') : 'Sin transfer', dt.transfer ? dt.transfer.precio : null]);
+        items.push(['Alojamiento', dt.alojamiento ? dt.alojamiento.nombre + (dt.alojamiento.habitacion ? ' · ' + dt.alojamiento.habitacion : '') : 'Sin alojamiento', dt.alojamiento ? dt.alojamiento.precio : null]);
+        (dt.tours || []).forEach(function (x) { items.push(['Tour', x.nombre, x.precio]); });
+      }
+      var det = items.length ? '<ul class="cp-viaje__d">' + items.map(function (x) { return '<li><span><b>' + esc(x[0]) + '</b> ' + esc(x[1]) + '</span>' + (x[2] != null ? '<em>' + esc(money(x[2])) + '</em>' : '') + '</li>'; }).join('') + '</ul>' : '';
       return '<article class="cp-viaje"><div class="cp-viaje__t"><b>' + esc(t.destination || 'Viaje guardado') + '</b><small>' + esc(fechas) + (fd.pax ? ' · ' + esc(fd.pax) + (Number(fd.pax) === 1 ? ' persona' : ' personas') : '') + '</small></div>' +
-        '<div class="cp-viaje__p"><small>Total estimado</small><b>' + esc(money(t.total_amount || t.total_price)) + '</b></div>' +
+        '<div class="cp-viaje__p"><small>Total estimado</small><b>' + esc(money(t.total_amount || t.total_price)) + '</b></div>' + det +
         '<div class="cp-viaje__a">' + (url ? '<a class="cp-btn cp-btn--s" href="' + esc(url) + '">Abrir</a>' : '<span class="cp-nota">Guardado en la app anterior</span>') +
         '<button type="button" class="cp-btn cp-btn--s cp-btn--o" data-borrar="' + esc(t.id) + '" aria-label="Eliminar el viaje a ' + esc(t.destination || '') + '">' + ic(I.trash, 16) + '</button></div></article>';
     }).join('');

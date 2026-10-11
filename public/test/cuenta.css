@@ -48,6 +48,10 @@ html.cs-perfil-abierto{overflow:hidden}
 .cp-viaje__t small,.cp-viaje__p small{display:block;font-size:12px;font-weight:600;color:var(--ink2)}
 .cp-viaje__p{text-align:right}
 .cp-viaje__p b{font-family:var(--fh);font-size:17px}
+.cp-viaje__d{grid-column:1/-1;margin:2px 0 4px;padding:8px 0 0;border-top:1px solid var(--line);list-style:none;display:grid;gap:4px}
+.cp-viaje__d li{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--ink2)}
+.cp-viaje__d b{color:var(--ink);font-weight:700}
+.cp-viaje__d em{font-style:normal;font-weight:700;color:var(--ink);white-space:nowrap}
 .cp-viaje__a{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .cp-nota{font-size:12px;font-weight:600;color:var(--ink2)}
 .cp-hoja button:focus-visible,.cp-hoja a:focus-visible,.cp-hoja input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
