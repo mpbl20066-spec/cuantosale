@@ -761,7 +761,7 @@
   .lg-pin{vertical-align:-3px;margin:0 6px 0 0}
   .xr.is-sel{background:var(--card-sel-bg,var(--surface))}
   .xr{cursor:pointer}
-  .xr .opt__tick{top:6px;left:6px;right:auto;width:22px;height:22px;font-size:12px;border:2px solid var(--bg);box-sizing:border-box;z-index:2}
+  .xr .opt__tick{top:-8px;right:-8px;left:auto;width:22px;height:22px;font-size:12px;border:2px solid var(--bg);box-sizing:border-box;z-index:2}
   .td-img{height:150px;margin:12px 0 10px;border-radius:14px;background:var(--cel-soft) center/cover}
   .td-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0;font-size:12.5px;font-weight:700;color:var(--ink2)}
   .td-meta span{display:flex;align-items:center;gap:5px}.td-meta svg{color:var(--azul)}
@@ -1208,23 +1208,21 @@
   .pz-r{border-top:1px solid var(--line)}
   [data-theme="night"] .pz-r{border-top-color:rgba(255,255,255,.08)}
   .pz-r:first-child{border-top:0}
-  .pz-r__h{display:grid;grid-template-columns:40px minmax(0,1fr) auto 18px;grid-template-rows:auto auto;align-items:center;gap:6px 12px;width:100%;box-sizing:border-box;padding:12px 16px;border:0;background:transparent;color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
+  .pz-r__h{display:grid;grid-template-columns:40px minmax(0,1fr) auto 18px;align-items:center;gap:6px 12px;width:100%;box-sizing:border-box;padding:12px 16px;border:0;background:transparent;color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
   .pz-r__h:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
   .pz-r__h:focus-visible{outline:3px solid var(--focus);outline-offset:-3px;border-radius:12px}
   .pz-r__h>svg{color:var(--ink2)!important}
-  .pz-r__i{grid-row:1/3;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:rgba(245,197,24,.14)}
-  .pz-r__i svg{color:#B8860B!important}
-  [data-theme="night"] .pz-r__i svg{color:#F5C518!important}
+  .pz-r__i{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:color-mix(in srgb,var(--pz-c,#F7C325) 16%,transparent)}
+  .pz-r__i svg{color:var(--pz-c,#B8860B)!important}
+  /* Una sola barra con lo que pesa cada parte del viaje, cada una de su color (como en la app anterior) */
+  .pz-stack{display:flex;gap:3px;height:12px;margin:6px 16px 8px;border-radius:99px;overflow:hidden}
+  .pz-stack span{display:block;height:100%;min-width:4px}
   .pz-r__t{min-width:0}
   .pz-r__t b{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14.5px;font-weight:800}
   .pz-r__t small{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600;color:var(--ink2)}
   .pz-r__v{text-align:right}
   .pz-r__v b{display:block;font-family:var(--fh);font-size:16px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
   .pz-r__v small{font-size:11.5px;font-weight:700;color:var(--ink2)}
-  .pz-r__bar{grid-column:2/-1;display:block;height:5px;border-radius:99px;background:var(--line);overflow:hidden}
-  [data-theme="night"] .pz-r__bar{background:rgba(255,255,255,.08)}
-  .pz-r__bar i{display:block;height:100%;border-radius:99px;background:#1F6FB5}
-  [data-theme="night"] .pz-r__bar i{background:#4C9BE8}
   .pz-tag{padding:1px 8px;border-radius:99px;background:#E1F4E8;color:#12784F;font-size:11px;font-weight:800}
   [data-theme="night"] .pz-tag{background:#123D2E;color:#5AD19A}
   .pz-r__d{margin:0 16px 14px 68px;padding:12px 14px;border-radius:12px;background:var(--cel-soft)}
@@ -1292,7 +1290,7 @@
   <div class="status"><span>9:41</span><span aria-hidden="true">●●●● ▭</span></div>
   <div class="f-bar">
     <button type="button" class="f-back" id="back" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
-    <div class="f-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div>
+    <a class="f-logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></a>
     <span style="width:32px"></span>
   </div>
   <ol class="f-steps" id="steps" aria-label="Progreso"></ol>
@@ -1642,7 +1640,7 @@
     var p0 = c.puntos.filter(function (x) { return x.shift === 0; })[0];
     var base = p0 ? tot(p0) : Math.min.apply(null, VUELOS.map(precioVuelo));
     /* Mismos dias que muestra el widget (7, o 5 en celular): el aviso de arriba y las barras dicen lo mismo. */
-    var alts = c.puntos.filter(function (x) { return x.shift !== 0 && Math.abs(x.shift) <= diasVentana() && base - tot(x) >= Math.max(1, base * 0.01); })
+    var alts = c.puntos.filter(function (x) { return x.shift !== 0 && enVentana(x.shift) && base - tot(x) >= Math.max(1, base * 0.01); })
       .sort(function (a, b) { return tot(a) - tot(b); }).slice(0, 3);
     return { base: base, alts: alts };
   }
@@ -1652,20 +1650,24 @@
      cuando el widget entra en pantalla (vigilarComparativa), una vez por pagina. Tocar una barra muestra el detalle y
      "Usar estas fechas" (las fechas nunca cambian solas). */
   var DIA_A = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  var diasVentana = function () { return window.matchMedia && window.matchMedia('(max-width:479px)').matches ? 2 : 3; };   /* 7 dias en PC, 5 en celular */
+  /* 10 dias como maximo: 5 antes y 4 despues de tu fecha. En pantallas angostas la tira se desliza de costado. */
+  var VENT_A = 5, VENT_D = 4;
+  var enVentana = function (sh) { return sh >= -VENT_A && sh <= VENT_D; };
   function ahorroFechas() {
     if (MODO !== 'avion' || !VUELOS.length) return '';
-    var c = S.cmp || {}, n = diasVentana();
-    var dias = []; for (var sh = -n; sh <= n; sh++) dias.push(sumarDias(IDA, sh));
+    var c = S.cmp || {};
+    var dias = []; for (var sh = -VENT_A; sh <= VENT_D; sh++) dias.push(sumarDias(IDA, sh));
+    var lbl = function (iso) { var d = new Date(iso + 'T12:00:00'); return '<span class="af3-d"><b>' + d.getDate() + '</b><small>' + MES_C[d.getMonth()].replace(/^./, function (l) { return l.toUpperCase(); }) + '</small></span>'; };
+    var corto = function (v) { return f(v).replace(/^[^\d-]+/, ''); };
+    var ley = '<ul class="af3-ley"><li><i class="is-tuya"></i>Tu fecha</li><li><i class="is-barata"></i>La más barata</li><li><i></i>Otras fechas</li></ul>';
     var dia = function (iso) { var d = new Date(iso + 'T12:00:00'); return DIA_A[d.getDay()] + ' ' + d.getDate(); };
-    var etiqueta = function (iso) { var d = new Date(iso + 'T12:00:00'); return '<span class="af2-d"><b>' + DIA_A[d.getDay()] + '</b> ' + d.getDate() + '</span>'; };
-    var sub = '<p class="af2-sub">Mismo viaje de ' + NOCHES + ' noches · ' + personasTxt() + '</p>';
+    var sub = '<p class="af2-sub">Costo total en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ' si salís antes o después, con las mismas ' + NOCHES + ' noches · ' + personasTxt() + '. Tocá una barra para verla.</p>';
     var caja = function (titulo, cuerpo) { return '<section class="af2" aria-labelledby="af2-h"><h2 id="af2-h" class="af2-h">' + titulo + '</h2>' + sub + cuerpo + '</section>'; };
     if (!c.estado || c.estado === 'cargando') {
-      var alto = [55, 72, 46, 64, 80, 50, 68];
-      return caja('<span aria-hidden="true">💡</span> Buscando el mejor día para salir…', '<div class="af3 af3--ghost" role="status" aria-label="Buscando precios de otras fechas">' + dias.map(function (iso, k) {
-        return '<span class="af3-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af3-t"><i style="height:' + alto[k % alto.length] + '%"></i></span><span class="af3-d">' + dia(iso) + '</span><span class="af3-tag"></span></span>';
-      }).join('') + '</div>');
+      var alto = [55, 72, 46, 64, 80, 50, 68, 58, 76, 62];
+      return caja('Comparando precios de otros días…', '<div class="af3 af3--ghost" role="status" aria-label="Buscando precios de otras fechas">' + dias.map(function (iso, k) {
+        return '<span class="af3-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af3-t"><i style="height:' + alto[k % alto.length] + '%"></i></span>' + lbl(iso) + '</span>';
+      }).join('') + '</div>' + ley);
     }
     if (c.estado !== 'ok') return caja('<span aria-hidden="true">💡</span> Compará fechas para ahorrar', '<a class="af2-link" href="' + esc(urlVuelos(IDA, VUELTA)) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver precios por fecha en Google Flights ↗</a>');
     var tot = function (x) { return x.pp * pax; };
@@ -1678,15 +1680,15 @@
     var titulo = hayAhorro ? '<span aria-hidden="true">💡</span> Salí el ' + dia(barata.dep).toLowerCase() + ' y ahorrá ' + f(ahorro) : '<span aria-hidden="true">💡</span> Tu fecha es la más barata de estos días';
     var barras = dias.map(function (iso, k) {
       var x = por[iso];
-      if (!x) return '<span class="af3-b is-vacia" title="Sin precio para ese día"><span class="af3-t">—</span><span class="af3-d">' + dia(iso) + '</span><span class="af3-tag"></span></span>';
+      if (!x) return '<span class="af3-b is-vacia" title="Sin precio para ese día"><span class="af3-t">—</span>' + lbl(iso) + '</span>';
       var v = tot(x), dif = base - v, d = new Date(iso + 'T12:00:00');
-      var esTuya = iso === IDA, esBarata = x === barata && hayAhorro;
+      var esTuya = iso === IDA, esBarata = x === barata && !esTuya;
       /* Escala desde el 75% del minimo: se notan las diferencias sin exagerarlas (antes US$ 130 parecia la mitad) */
       var piso = min * 0.75, h = max > min ? 100 * (v - piso) / (max - piso) : 64;
+      h = Math.max(h, 18);
       var tip = DIA_A[d.getDay()] + ' ' + fdc(iso) + ' → ' + fdc(sumarDias(iso, NOCHES)) + ': ' + f(v) + (esTuya ? ' (tu fecha)' : (Math.round(dif) ? (dif > 0 ? ', ahorrás ' + f(dif) : ', ' + f(-dif) + ' más') : ''));
       return '<button type="button" class="af3-b' + (esTuya ? ' is-tuya' : '') + (esBarata ? ' is-barata' : '') + (S.cmpSel === iso ? ' is-sel' : '') + '" data-af-sel="' + iso + '" aria-pressed="' + (S.cmpSel === iso) + '" aria-label="' + esc(tip) + '" title="' + esc(tip) + '">' +
-        '<span class="af3-t"><i style="height:' + h.toFixed(0) + '%"><span class="af3-p">' + f(v) + '</span></i></span><span class="af3-d">' + dia(iso) + '</span>' +
-        '<span class="af3-tag' + (esTuya && !esBarata ? ' af3-tag--t' : '') + '">' + (esBarata ? 'Más barato' : (esTuya ? 'Tu día' : '')) + '</span></button>';
+        '<span class="af3-t"><i style="height:' + h.toFixed(0) + '%"><span class="af3-p">' + corto(v) + '</span></i></span>' + lbl(iso) + '</button>';
     }).join('');
     var sel = S.cmpSel && por[S.cmpSel] && S.cmpSel !== IDA ? por[S.cmpSel] : null, det = '';
     if (sel) {
@@ -1696,7 +1698,7 @@
         '<div class="af2-acc"><button type="button" class="af2-usar" data-usar-fecha="' + sel.dep + '">Usar estas fechas</button>' +
         '<a class="af2-link" href="' + esc(urlVuelos(sel.dep, sumarDias(sel.dep, NOCHES))) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver en Google Flights ↗</a></div></div>';
     }
-    return caja(titulo, '<div class="af3" role="group" aria-label="Precio del vuelo por fecha de salida">' + barras + '</div>' + det +
+    return caja(titulo, '<div class="af3" role="group" aria-label="Precio del vuelo por fecha de salida">' + barras + '</div>' + ley + det +
       '<p class="af2-nota">Precios reales de hoy · Tocá un día para verlo · Tus fechas no cambian solas.</p>');
   }
   /* Pide los precios por fecha recien cuando el widget se ve (cada consulta gasta busquedas del proveedor). */
@@ -1708,7 +1710,7 @@
     if (!('IntersectionObserver' in window)) { compararFechas(); return; }
     obsCmp = new IntersectionObserver(function (es) {
       if (!S.cmp && es.some(function (x) { return x.isIntersecting; })) { obsCmp.disconnect(); obsCmp = null; compararFechas(); }
-    }, { rootMargin: '160px' });
+    }, { rootMargin: '600px' });
     obsCmp.observe(el);
   }
   function ordenarHoteles() {
@@ -1914,14 +1916,14 @@
       info: d.ex.map(function (e) { return e.nom + ' · ' + f(precioExtra(e)); }), est: d.tExtras, real: S.res.tours && d.tExtras ? d.tExtras : null, ir: 3, irTxt: d.ex.length ? 'Cambiar actividades' : 'Agregar actividades' });
     return l;
   }
+  var PZ_COLOR = { vuelo: "#5B9BD5", bus: "#5B9BD5", auto: "#F0714F", tras: "#F0714F", aloj: "#7CB7E8", comidas: "#F7C325", extras: "#8FA3BB" };
   function filaParte(x, total) {
     var v = x.real != null ? x.real : x.est, pct = total > 0 ? Math.round(v / total * 100) : 0, abierta = S.segAbierto === x.k;
     var tasa = window.CSMoneda && CSMoneda.tasa ? CSMoneda.tasa() : 1, sim = window.CSMoneda ? CSMoneda.simbolo() : 'US$';
     var cab = '<button type="button" class="pz-r__h" data-seg="' + x.k + '" aria-expanded="' + abierta + '">' +
-      '<span class="pz-r__i" aria-hidden="true">' + ic(x.ico, 22) + '</span>' +
+      '<span class="pz-r__i" style="--pz-c:' + (PZ_COLOR[x.k] || "#F7C325") + '" aria-hidden="true">' + ic(x.ico, 22) + '</span>' +
       '<span class="pz-r__t"><b>' + esc(x.n) + (x.real != null ? ' <span class="pz-tag">Reservado ✓</span>' : '') + '</b><small>' + esc(x.det) + '</small></span>' +
-      '<span class="pz-r__v"><b>' + f(v) + '</b><small>' + pct + '%</small></span>' + ic(abierta ? '<path d="m6 15 6-6 6 6"/>' : '<path d="m6 9 6 6 6-6"/>', 18) +
-      '<span class="pz-r__bar" aria-hidden="true"><i style="width:' + pct + '%"></i></span></button>';
+      '<span class="pz-r__v"><b>' + f(v) + '</b><small>' + pct + '%</small></span>' + ic(abierta ? '<path d="m6 15 6-6 6 6"/>' : '<path d="m6 9 6 6 6-6"/>', 18) + '</button>';
     if (!abierta) return '<li class="pz-r">' + cab + '</li>';
     var cuerpo = '<ul class="pz-r__info">' + x.info.filter(Boolean).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
     if (x.real != null && Math.round(x.real) !== Math.round(x.est)) cuerpo += '<p class="pz-r__est">Estimado original: ' + f(x.est) + '</p>';
@@ -1955,6 +1957,7 @@
         (reservado > 0 ? '<div class="pz-total__s"><p><span>Ya reservado</span><b>' + f(reservado) + '</b></p><p><span>Falta reservar</span><b>' + f(porReservar) + '</b></p></div>' : '') +
         '<p class="pz-total__n">Valores para ' + personasTxt() + ' en ' + monedaTxt + '. Comidas y transporte local con costos aproximados.</p></section>' +
       '<section class="pz-card" aria-labelledby="pz-h"><div class="pz-card__h"><h2 id="pz-h">Resumen de tu viaje</h2><p>Tocá una parte para ver el detalle o cambiarla.</p></div>' +
+        (total > 0 ? '<div class="pz-stack" role="img" aria-label="Distribución del costo">' + partes.map(function (x) { var v = x.real != null ? x.real : x.est; return v > 0 ? '<span style="width:' + (v / total * 100).toFixed(2) + '%;background:' + (PZ_COLOR[x.k] || "#F7C325") + '"></span>' : ""; }).join("") + '</div>' : "") +
         '<ul class="pz-l">' + partes.map(function (x) { return filaParte(x, total); }).join('') + '</ul></section>' +
       '<div class="pz-acts">' +
         '<button type="button" class="pz-act" data-compartir="1">' + ic('<circle cx="17.5" cy="6" r="2.6"/><circle cx="6.5" cy="12" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.8 10.8 6.4-3.5M8.8 13.2l6.4 3.5"/>', 18) + (S.compMsg || 'Compartir') + '</button>' +
@@ -2378,7 +2381,7 @@
   function guardarHoja(m) {
     var d = datosFinal(), personas = personasTxt();
     var marca = '<div class="g-top"><button type="button" class="f-back" data-cerrar="1" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>' +
-      '<div class="f-logo"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></div><span style="width:32px"></span></div>';
+      '<a class="f-logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></a><span style="width:32px"></span></div>';
     var iMarca = '<path d="M6 3h12v18l-6-4.500L6 21z"/><circle cx="12" cy="10" r="2.400"/><path d="M12 12.400V14"/>';
     var cab = '<div class="g-full" role="dialog" aria-modal="true" aria-label="Guardá tu viaje">' + marca + '<div class="g-body"><div class="g-ico">' + ic(iMarca, 34) + '</div><h2 class="g-h">Guardá tu viaje</h2>';
     if (m.enviado) return cab + '<p class="g-p">Te enviamos un link a <b>' + esc(m.enviado) + '</b>. Abrilo desde este mismo dispositivo y tu viaje se guarda solo.</p>' +

@@ -806,6 +806,9 @@ svg [fill="#1F6FB5"],svg [fill="#1F7FE0"],svg [fill="#1B5FA8"],svg [fill="#0B2A5
    (sticky), asi "Continuar" esta siempre a la vista aunque el paso sea largo. No cambia el celular ni la tablet. */
 @media (min-width:1024px){
   html.cs-hdr[data-pagina="flujo"] .f-bar{position:relative;z-index:2;padding-top:0;padding-bottom:0}
+  /* La barra queda encima del indicador (comparten renglon): que deje pasar los clics a los pasos, salvo la flecha */
+  html.cs-hdr[data-pagina="flujo"] .f-bar{pointer-events:none}
+  html.cs-hdr[data-pagina="flujo"] .f-bar>*{pointer-events:auto}
   html.cs-hdr[data-pagina="flujo"] .f-logo,html.cs-hdr[data-pagina="flujo"] .f-bar>span{display:none}
   html.cs-hdr[data-pagina="flujo"] .f-steps{margin-top:-30px;padding-top:6px;padding-bottom:2px}
   html.cs-hdr[data-pagina="flujo"] .f-total{margin-top:4px}
@@ -860,3 +863,7 @@ svg [fill="#1F6FB5"],svg [fill="#1F7FE0"],svg [fill="#1B5FA8"],svg [fill="#0B2A5
   :root[data-pagina="costo"] .p-bar,:root[data-pagina="reserva"] .r-bar{padding-left:var(--gut);padding-right:var(--gut)}
   html.cs-hdr[data-pagina="costo"] .p-back,html.cs-hdr[data-pagina="reserva"] .r-back{transform:none}
 }
+/* Los logos de las barras llevan a la home */
+a.tabs__logo,a.m-logo,a.c-logo,a.d-logo,a.f-logo,a.p-logo{text-decoration:none}
+a.c-logo,a.d-logo,a.f-logo,a.p-logo{display:block}
+a.c-logo:focus-visible,a.d-logo:focus-visible,a.f-logo:focus-visible,a.p-logo:focus-visible,a.m-logo:focus-visible,a.tabs__logo:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:8px}
