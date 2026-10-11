@@ -1427,7 +1427,7 @@
     return a + (a === 1 ? ' adulto' : ' adultos') + ' · ' + ninos + (ninos === 1 ? ' niño' : ' niños');
   };
   var IDA = qs.get('ida') || '2026-12-26', VUELTA = qs.get('vuelta') || '2027-01-02';
-  var NOCHES = Math.max(1, Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5));
+  var NOCHES = Math.max(1, Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5) || 1), NOCHES_TXT = NOCHES + (NOCHES === 1 ? ' noche' : ' noches');
   var debug = /[?&]debug=1/.test(location.search);
   /* Medio de transporte elegido en "¿Cómo querés ir?": avion (vuelos + traslados, el flujo de siempre), auto (consumo, km y mapa se ven
      en home-calcular.html, que vuelve aca con el costo ya calculado) o bus (se elige aca mismo). Alojamiento, extras, presupuesto y
@@ -1950,12 +1950,12 @@
     var esq = '<div class="hl-sk" aria-hidden="true"><span class="hl-sk__img"></span><span class="hl-sk__b"><i class="hl-sk__t"></i><i class="hl-sk__s"></i><i class="hl-sk__s hl-sk__s--c"></i><i class="hl-sk__p"></i></span></div>';
     return '<div class="hl-wrap"><div class="hl-load" role="status">' +
       '<span class="hl-load__ico" aria-hidden="true"><span class="hl-load__aro"></span>' + ic(I.bed, 26) + '</span>' +
-      '<div class="hl-load__t"><b>Buscando alojamientos en Booking…</b><span class="hl-load__msgs" aria-hidden="true"><span>Comparando precios para ' + NOCHES + ' noches…</span><span>Revisando ubicación y opiniones…</span><span>Ordenando del más barato al más caro…</span></span>' +
+      '<div class="hl-load__t"><b>Buscando alojamientos en Booking…</b><span class="hl-load__msgs" aria-hidden="true"><span>Comparando precios para ' + NOCHES_TXT + '…</span><span>Revisando ubicación y opiniones…</span><span>Ordenando del más barato al más caro…</span></span>' +
       '<span class="hl-load__bar" aria-hidden="true"><i></i></span></div></div>' + esq + esq + '</div>';
   }
   function pantalla2() {
     var personas = personasTxt();
-    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(DEST) + ' · ' + NOCHES + ' noches · ' + personas + '</p></div></div>';
+    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(DEST) + ' · ' + NOCHES_TXT + ' · ' + personas + '</p></div></div>';
     var sinAlojBtn = '<button type="button" class="f-sin" data-sin-aloj="1">Continuar sin alojamiento</button>';
     if (S.cargandoH) return cab + cargandoHoteles() + sinAlojBtn;
     var aviso = S.avisoH ? '<p class="f-sub" style="padding:8px 10px;border-radius:10px;background:var(--cel-soft)">' + esc(S.avisoH) + '</p>' : '';
@@ -1987,7 +1987,7 @@
           '<div class="ho__u">' + ic(iPin, 14) + '<span>' + esc(h.zona) + (h.playa != null ? ' · ' + dist(h.playa) : '') + '</span></div>' +
           (S.habitacion && S.habitacion.hotelId === h.id ? '<div class="ho__hab">Habitación: ' + esc(S.habitacion.nombre) + '</div>' : '') + '<ul class="ho__f">' + feats.map(function (x) { return '<li>✓ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
           '</div>' +
-          '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + NOCHES + ' noches · ' + personas + '</small></div>' +
+          '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + NOCHES_TXT + ' · ' + personas + '</small></div>' +
           (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Elegir habitación') + '</button>') + '</div></div>';
       }).join('') +
       (lista.length > mostrados.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Elegimos ' + mostrados.length + ' opciones distintas entre ' + lista.length + ' alojamientos' + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '.</p>' : '') + sinAlojBtn;
@@ -2121,7 +2121,7 @@
       total: tVuelo + tTras + tAloj + tExtras + tComidas + tLocal };
   }
   var MESES_C = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
-  var fdc = function (d) { var q = d.split('-'); return +q[2] + ' ' + MESES_C[+q[1] - 1]; };
+  var fdc = function (d) { var q = String(d || '').split('-'); return MESES_C[+q[1] - 1] && +q[2] ? +q[2] + ' ' + MESES_C[+q[1] - 1] : '?'; };
   var iChev = '<path d="m9 5 7 7-7 7"/>';
   var iSolMar = '<circle cx="12" cy="8" r="3.2"/><path d="M12 2.5v.8M5.8 5l.6.6M18.2 5l-.6.6M2.5 12.500c1.500-1 3-1 4.500 0s3 1 4.500 0 3-1 4.500 0 3 1 4.500 0M2.500 17c1.500-1 3-1 4.500 0s3 1 4.500 0 3-1 4.500 0 3 1 4.500 0"/>';
   var WHATSAPP = '59898529851';   // el mismo numero de reservas que usa la app
@@ -2177,7 +2177,7 @@
     else l.push({ k: 'aloj', ico: ICO_PLATA.aloj, n: 'Alojamiento', det: d.h.nom,
       info: [NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + ' · ' + personasTxt(), S.habitacion && S.habitacion.hotelId === d.h.id ? 'Habitación: ' + S.habitacion.nombre : ''],
       est: precioHotelEstimado(d.h), real: S.res.aloj && S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : (S.res.aloj ? d.tAloj : null), edit: true, ir: 2, irTxt: 'Cambiar alojamiento' });
-    l.push({ k: 'comidas', ico: ICO_PLATA.comidas, n: 'Comidas y transporte local', det: 'Costos aproximados · ' + NOCHES + ' noches',
+    l.push({ k: 'comidas', ico: ICO_PLATA.comidas, n: 'Comidas y transporte local', det: 'Costos aproximados · ' + NOCHES_TXT + '',
       info: ['Comidas ' + f(d.tComidas) + ' · Transporte local ' + f(d.tLocal)], est: d.tComidas + d.tLocal, real: null, ir: 3, irTxt: 'Cambiar comidas y transporte' });
     l.push({ k: 'extras', ico: ICO_PLATA.extras, n: 'Actividades y extras', det: d.ex.length ? d.ex.length + (d.ex.length === 1 ? ' actividad' : ' actividades') : 'Sin actividades por ahora',
       info: d.ex.map(function (e) { return e.nom + ' · ' + f(precioExtra(e)); }), est: d.tExtras, real: S.res.tours && d.tExtras ? d.tExtras : null, ir: 3, irTxt: d.ex.length ? 'Cambiar actividades' : 'Agregar actividades' });
@@ -2223,7 +2223,7 @@
     var df = MODO === 'avion' && !S.res.vuelo ? datosFechas() : null, alt = df && df.alts[0];
     if (alt && df.base - alt.pp * pax >= AHORRO_MIN) {
       var n = Math.abs(alt.shift), dd = new Date(alt.dep + 'T12:00:00');
-      l.push({ save: df.base - alt.pp * pax, t: 'Salí el ' + DIA_A[dd.getDay()].toLowerCase() + ' ' + fdc(alt.dep), p: n + (n === 1 ? ' día ' : ' días ') + (alt.shift < 0 ? 'antes' : 'después') + ', con las mismas ' + NOCHES + ' noches.', b: '<button type="button" class="ah2-b" data-usar-fecha="' + alt.dep + '">Usar estas fechas</button>' });
+      l.push({ save: df.base - alt.pp * pax, t: 'Salí el ' + DIA_A[dd.getDay()].toLowerCase() + ' ' + fdc(alt.dep), p: n + (n === 1 ? ' día ' : ' días ') + (alt.shift < 0 ? 'antes' : 'después') + ', con las mismas ' + NOCHES_TXT + '.', b: '<button type="button" class="ah2-b" data-usar-fecha="' + alt.dep + '">Usar estas fechas</button>' });
     }
     if (!S.res.aloj && d.h && !d.h.sin) {
       var nota = d.h.rat || 0, tope = nota * 0.93;
@@ -2665,7 +2665,7 @@
       '<div class="al-card"><h1>' + esc(h.nom) + '</h1><p class="al-z">' + ic(iPinR, 14) + esc(h.zona) + '</p>' +
       (h.rat ? '<p class="al-r"><span>★</span> <b>' + String(h.rat).replace('.', ',') + '</b> (' + h.n.toLocaleString('es-UY') + ' reseñas)</p>' : '') +
       (S.habitacion && S.habitacion.hotelId === h.id ? '<p class="al-hab">Habitación: ' + esc(S.habitacion.nombre) + '</p>' : '') +
-      '<div class="al-chips"><span>' + ic(iCalR, 20) + NOCHES + ' noches</span><span>' + ic(iPersR, 20) + personas + '</span></div>' +
+      '<div class="al-chips"><span>' + ic(iCalR, 20) + NOCHES_TXT + '</span><span>' + ic(iPersR, 20) + personas + '</span></div>' +
       '<div class="al-p"><b>' + f(d.tAloj) + '</b><button type="button" class="al-btn" data-booking="ir">Ver opciones →</button></div></div>' +
       '<div class="al-ext"><b>Booking.com</b><span><i>EXTERNO · BOOKING.COM</i>Vas a ser redirigido a Booking.com para completar la reserva.</span></div>';
   }
@@ -2938,6 +2938,11 @@
   function cargarVuelos() {
     if (!/^https?:$/.test(location.protocol)) { S.avisoV = 'Abrí la página desde el servidor de la app para ver los vuelos.'; return; }
     if (idaMuyLejos) { S.avisoV = 'Los vuelos se pueden buscar hasta 6 meses antes de viajar. Elegí una fecha de ida más cercana.'; track('flujo_vuelos', { reales: false, motivo: 'mas_de_6_meses' }); render(false); return; }
+    /* Fechas que no sirven (pasadas, vuelta antes de la ida o mal escritas) o un destino que no existe: se avisa
+       aca, sin gastar una busqueda paga que igual iba a fallar con un "probá en unos minutos" engañoso. */
+    var hoyF = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10), fOk = /^\d{4}-\d{2}-\d{2}$/;
+    if (!fOk.test(IDA) || !fOk.test(VUELTA) || IDA < hoyF || VUELTA <= IDA) { S.avisoV = 'Revisá las fechas: la ida tiene que ser desde hoy y la vuelta, después de la ida.'; track('flujo_vuelos', { reales: false, motivo: 'fechas_invalidas' }); render(false); return; }
+    if (!DESTS[destKey]) { S.avisoV = 'No encontramos ese destino. Elegilo de nuevo desde el inicio.'; track('flujo_vuelos', { reales: false, motivo: 'destino_invalido' }); render(false); return; }
     S.cargandoV = true; render(false);
     return fetch('/api/vuelos/buscar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origen: 'MVD', destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax, style: 'ahorro' }) })
       .then(function (r) { return r.json().then(function (d) { if (!r.ok || !(d.offers || []).length) throw new Error(d.error || 'sin vuelos'); return d; }); })
@@ -3025,8 +3030,11 @@
       /* Por defecto, el alojamiento mas barato de la categoria elegida. */
       elegirMasBarato();
     }).catch(function (e) {
-      S.avisoH = 'No pudimos consultar Booking ahora (' + (e.message || 'error') + '). Mostramos ejemplos.';
-    }).then(function () { S.cargandoH = false; track('flujo_hoteles', { reales: !HOTELES[0].ejemplo, cantidad: HOTELES.length }); render(false); });
+      /* Sin Booking no se muestran los de ejemplo: son de Florianopolis y uno quedaba sumado al presupuesto
+         como si fuera real. El viaje sigue sin alojamiento y la persona lo puede reintentar. */
+      HOTELES = []; S.sinAloj = true; S.habitacion = null;
+      S.avisoH = 'No pudimos consultar Booking ahora (' + (e.message || 'error') + '). Podés seguir sin alojamiento y sumarlo después.';
+    }).then(function () { S.cargandoH = false; track('flujo_hoteles', { reales: !!HOTELES.length && !HOTELES[0].ejemplo, cantidad: HOTELES.length }); render(false); });
   }
   /* Suma a la lista los alojamientos de Booking de una categoria (sin repetir dentro de la misma categoria). */
   function sumarHoteles(lista, vistos, d, tipo) {
@@ -3066,10 +3074,10 @@
     var q = new URLSearchParams({ hotel_id: hotelId, dep: IDA, ret: VUELTA, pax: pax, ninos: ninos });
     fetch('/api/hotel-habitaciones?' + q.toString()).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'error'); return d; }); })
       .then(function (d) {
-        var rs = (d.rooms || []).filter(function (r) { return Number(r.total) > 0; }).sort(function (a, b) { return a.total - b.total; });
+        var entra = function (r) { return !r.maxOccupancy || r.maxOccupancy >= pax; };
+        var rs = (d.rooms || []).filter(function (r) { return Number(r.total) > 0; }).sort(function (a, b) { return (entra(b) - entra(a)) || a.total - b.total; });
         S.modal.rooms = rs;
         if (!rs.length) { S.modal.error = 'Booking no devolvió habitaciones para estas fechas.'; return; }
-        if (!(S.habitacion && S.habitacion.hotelId === hotelId)) { S.hotel = hotelId; S.sinAloj = false; S.habitacion = { hotelId: hotelId, id: rs[0].id, nombre: rs[0].name, total: rs[0].total }; render(false); }
       })
       .catch(function (e) { S.modal.error = 'No pudimos cargar las habitaciones ahora (' + (e.message || 'error') + ').'; })
       .then(function () { if (S.modal) { S.modal.cargando = false; pintarModal(); } });
@@ -3114,7 +3122,7 @@
         '<em>' + corto(v) + '</em><span class="cal-b__t"><i style="height:' + h.toFixed(0) + '%"></i></span><b>' + d.getDate() + '</b><small>' + MES_C[d.getMonth()] + '</small></button>';
     }).join('');
     return cab + tarjeta +
-      '<p class="cal-p">Costo del vuelo para ' + personasTxt() + ', ida y vuelta, si salís antes o después con las mismas ' + NOCHES + ' noches. Tocá una barra para verla.</p>' +
+      '<p class="cal-p">Costo del vuelo para ' + personasTxt() + ', ida y vuelta, si salís antes o después con las mismas ' + NOCHES_TXT + '. Tocá una barra para verla.</p>' +
       '<div class="cal-g">' + barras + '</div>' +
       '<ul class="cal-ley"><li><i class="is-tuya"></i>Tu fecha</li><li><i class="is-barata"></i>La más barata</li><li><i></i>Otras fechas</li></ul>' +
       '<p class="cal-nota">Precios reales consultados hoy, en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ': pueden variar. Tus fechas solo cambian si tocás “Usar estas fechas”.</p></div>';
@@ -3153,9 +3161,10 @@
         return '<button type="button" class="opt hb' + sel(on) + '" data-hab="' + esc(r.id) + '" aria-pressed="' + on + '">' + tick +
           '<div class="hb__img"' + (r.photo ? ' style="background-image:url(\'' + esc(r.photo) + '\')"' : '') + ' aria-hidden="true"></div>' +
           '<div class="hb__b"><b>' + esc(r.name) + '</b><small>' + [r.beds, r.surface ? r.surface + ' m²' : '', r.maxOccupancy ? 'hasta ' + r.maxOccupancy + (r.maxOccupancy === 1 ? ' persona' : ' personas') : ''].filter(Boolean).join(' · ') + '</small>' +
+          (r.maxOccupancy && r.maxOccupancy < pax ? '<span class="hb__no">No entran las ' + pax + ' personas</span>' : '') +
           (r.meal ? '<span class="hb__ok">' + esc(r.meal) + '</span>' : '<span class="hb__no">No incluye comidas</span>') +
           (r.cancelText ? '<span class="' + (libre ? 'hb__ok' : 'hb__no') + '">' + esc(r.cancelText) + '</span>' : '') + '</div>' +
-          '<div class="hb__p"><b>' + f(r.total) + '</b><small>total ' + NOCHES + ' noches</small></div></button>';
+          '<div class="hb__p"><b>' + f(r.total) + '</b><small>total ' + NOCHES_TXT + '</small></div></button>';
       }).join(''));
     el.hidden = false;
     el.innerHTML = '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Habitaciones disponibles">' +

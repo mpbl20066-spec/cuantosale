@@ -1742,6 +1742,11 @@ async function buscarVuelos(req, res, body) {
   if (['MVD', 'PDP'].indexOf(origin) < 0 || !destination || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) || (returnDate && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
+  /* Fechas pasadas o vuelta antes de la ida: Ignav las cobra igual y termina en error. Se cortan antes. */
+  const hoyUy = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10);
+  if (date < hoyUy || (returnDate && returnDate <= date)) {
+    return sendJson(res, 400, { error: 'Elegí una fecha de ida desde hoy y una vuelta posterior a la ida.' });
+  }
 
   try {
     const result = await flightProviders.searchOffers({
@@ -2961,7 +2966,8 @@ async function fetchGrupoNombre(groupId) {
 const NUEVO = '';
 const NUEVO_PAGINAS = {
   '': 'home2', destinos: 'home-destino', presupuesto: 'home-presupuesto', planificar: 'home-flujo',
-  ruta: 'home-calcular', detalle: 'home-detalle', resumen: 'home-costo', reserva: 'home-reserva', guias: 'home-guias', guia: 'home-guia'
+  ruta: 'home-calcular', detalle: 'home-detalle', resumen: 'home-costo', reserva: 'home-reserva', guias: 'home-guias', guia: 'home-guia',
+  ahorro: 'home-ahorro'
 };
 /* Paginas que se indexan: la home. El resto son herramientas que dependen de parametros y siguen con noindex. */
 const NUEVO_INDEXABLES = { '': true };
