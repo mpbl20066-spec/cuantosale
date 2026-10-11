@@ -172,8 +172,9 @@
   .xt__f li{display:flex;align-items:flex-start;gap:5px;padding:1px 0}
   .xt__f svg{flex:0 0 14px;margin-top:1px;color:var(--azul)}
   .xt__b{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:4px;padding:0 2px 2px}
+  .x-p{display:flex;align-items:baseline;gap:4px;white-space:nowrap}
   .x-p b{display:block;font-family:var(--fh);font-size:19px;line-height:1;color:var(--ink)}
-  .x-p small{display:block;margin-top:2px;font-size:10.5px;font-weight:600;color:var(--ink2)}
+  .x-p small{display:block;font-size:10.5px;font-weight:600;color:var(--ink2)}
   .x-add{flex:0 0 auto;padding:8px 10px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
   .x-add.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
   .x-add:focus-visible,.x-otros__h:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -2007,9 +2008,10 @@
       '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small></div>' +
       (e.cat === 'tours' ? '<button type="button" class="x-add" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div></div>';
   }
-  var MAS_TXT = { tours: 'Ver más tours →', tras: 'Ver más traslados →' };
+  var MAS_TXT = { tours: 'Ver más tours', tras: 'Ver más traslados' };
   var TITULO_X = { tours: ['🌴', 'Tours y actividades', 'Experiencias y traslados en '] };
-  var CUANTOS_X = { tours: 3, tras: 2 };
+  /* Hasta 5 tours se muestran todos; con mas de 5 se ven 5 y "Ver más tours". */
+  var CUANTOS_X = { tours: 5, tras: 2 };
   function pantalla3() {
     var cab = '<div class="ho__head"><span class="ho__headico">' + ic(I.palm, 30) + '</span><div><h1 class="f-h" style="margin:0">Extras</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">¿Qué querés sumar a tu viaje?</p></div></div>' +
       '<p class="f-sub" style="margin:6px 0 0">Sumá solo lo que quieras. Podés continuar sin agregar extras.</p>';
