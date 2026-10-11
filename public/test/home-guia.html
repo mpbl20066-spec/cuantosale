@@ -73,6 +73,22 @@
   .u-lock li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2)}
   .u-lock li b{flex:0 0 42px;color:var(--good);font-weight:800}
   .u-lock__cta{display:block;width:100%;box-sizing:border-box;padding:14px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}
+  .u-tab small{margin-left:3px;font-size:11px;font-weight:800;color:var(--ink2);opacity:.75}
+  .u-foto{position:relative}
+  .u-cred{display:block;margin:-6px 0 8px;font-size:10.5px;font-weight:600;color:var(--ink2);opacity:.8}
+  .u-num{position:absolute;left:10px;top:10px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#0B1F3A;color:#fff;font-size:12.5px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+  .u-num--in{position:static;display:inline-grid;width:22px;height:22px;margin-right:7px;font-size:11.5px;box-shadow:none;vertical-align:1px}
+  .u-acc{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .u-acc:empty{display:none}
+  .u-acc .u-precio{margin-top:9px}
+  .u-llegar{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:5px 11px;border-radius:99px;background:var(--cel-soft);color:var(--azul);font-size:12.5px;font-weight:800;text-decoration:none}
+  .u-llegar:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .u-mapa{height:220px;margin:0 0 12px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--cel-soft);position:relative;z-index:0}
+  .u-pin span{display:grid;place-items:center;width:28px;height:28px;box-sizing:border-box;border:2px solid #fff;border-radius:50%;background:#0B1F3A;color:#fff;font:800 12.5px/1 var(--fb);box-shadow:0 2px 6px rgba(0,0,0,.35)}
+  .u-lock__trae{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:2px 0 12px}
+  .u-lock__chip{padding:5px 10px;border-radius:99px;background:var(--cel-soft);color:var(--ink);font-size:12px;font-weight:700}
+  .u-lock__chip b{font-weight:800;color:var(--azul)}
+  .u-lock__sec{display:block;width:100%;margin-top:8px;padding:12px;border:0;border-radius:14px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);font-size:13.5px;font-weight:800;cursor:pointer}
   .u-foot{flex:0 0 auto;padding:8px 18px 20px;background:var(--bg)}
   @media (max-width:520px){
     body{display:block;padding:0;background:var(--bg)}
@@ -101,93 +117,149 @@
   var C = window.CS_Viaje, $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var K = qs.get('destino') || 'fln', NOM = C.Nombres[K] || 'Tu destino';
-  var TAB = [{ id: 'hacer', nom: 'Qué hacer' }, { id: 'playas', nom: 'Playas' }, { id: 'comer', nom: 'Comida' }, { id: 'tips', nom: 'Tips' }];
-  var S = { tab: 'hacer', guia: null, estado: 'cargando' };
+  /* Pestanas: solo salen las que tienen algo. "Qué ver" son las atracciones (en Sao Paulo, Gramado, Canela y Porto
+     Alegre es la seccion principal, con foto y mapa). La primera pestana es Playas si hay, si no Qué ver. */
+  var TAB = [{ id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Qué ver', k: 'atracciones' }, { id: 'hacer', nom: 'Qué hacer', k: 'hacer' },
+    { id: 'comer', nom: 'Comida', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
+  var S = { tab: '', guia: null, region: '', estado: 'cargando' };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
   var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
+  var lista = function (k) { return (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : []; };
+  var tabs = function () { return TAB.filter(function (t) { return lista(t.k).length; }); };
+  var tieneLugar = function (x) { return typeof x.lat === 'number' && typeof x.lng === 'number'; };
 
   function cabecera() {
     return '<div class="u-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="u-hero__t"><h1>' + esc(NOM) + '</h1>' +
-      '<small>' + (S.guia && S.guia.región ? esc(S.guia.región) : 'Brasil') + '</small>' +
+      '<small>' + (S.region ? esc(S.region) + ', Brasil' : 'Brasil') + '</small>' +
       (S.guia && S.guia.temporada ? '<span class="u-hero__vol">Temporada alta: ' + S.guia.temporada.alta.map(function (m) { return C.MESES[m - 1]; }).filter(Boolean).join(', ') + '</span>' : '') +
       '</div></div>';
   }
+  /* Credito de la foto (CC BY / BY-SA piden autor y licencia): sale de creditos-fotos.generated.js. */
+  function credito(url) {
+    var c = window.FOTO_CREDITOS && window.FOTO_CREDITOS[url];
+    return c ? '<span class="u-cred">Foto: ' + esc(c.autor) + ' · ' + esc(c.licencia) + ' · Wikimedia Commons</span>' : '';
+  }
+  function comoLlegar(x) {
+    if (!tieneLugar(x)) return '';
+    return '<a class="u-llegar" href="https://www.google.com/maps/search/?api=1&query=' + x.lat + ',' + x.lng + '" target="_blank" rel="noopener" data-evento="guia_como_llegar" data-lugar="' + esc(x.name) + '">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Cómo llegar</a>';
+  }
+  function precio(x) { return typeof x.usd === 'number' ? '<span class="u-precio">' + (x.usd ? usd(x.usd) : 'Gratis') + '</span>' : ''; }
+  /* Tarjeta con foto, numero del pin del mapa, credito y "Cómo llegar" (playas, atracciones y qué hacer). */
+  function tarjeta(x, n, meta, texto) {
+    return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')">' + (n ? '<span class="u-num">' + n + '</span>' : '') + '</div>' + credito(x.foto) : '') +
+      '<b>' + (!x.foto && n ? '<span class="u-num u-num--in">' + n + '</span>' : '') + esc(x.name) + '</b><span class="meta">' + meta + '</span>' +
+      (texto ? '<p>' + esc(texto) + '</p>' : '') + '<div class="u-acc">' + precio(x) + comoLlegar(x) + '</div></div>';
+  }
+  function conMapa(arr) { return arr.some(tieneLugar) ? '<div class="u-mapa" id="u-mapa" role="img" aria-label="Mapa con los lugares de esta lista"></div>' : ''; }
   function listaGuia() {
-    var g = S.guia || {};
-    if (S.tab === 'hacer') {
-      var h = g.hacer || [];
-      return '<h2 class="u-h2">Las claves antes de que te pagues el viaje</h2>' +
-        (h.length ? h.map(function (x) {
-          return '<div class="u-item"><b>' + esc(x.name) + '</b><span class="meta">' + esc(x.zona || '') + (x.dur ? ' · ' + esc(x.dur) : '') + '</span>' +
-            (x.nota ? '<p>' + esc(x.nota) + '</p>' : '') + (typeof x.usd === 'number' ? '<span class="u-precio">' + usd(x.usd) + '</span>' : '') + '</div>';
-        }).join('') : vacio(' todavia no hay nada para hacer acá.'));
-    }
+    var n = 0;
     if (S.tab === 'playas') {
-      var b = g.beaches || [];
-      return '<h2 class="u-h2">Playas</h2>' +
-        (b.length ? b.map(function (x) {
-          return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')"></div>' : '') +
-            '<b>' + esc(x.name) + '</b><span class="meta">' + esc(x.zona || '') + (x.cuando ? ' · ' + esc(x.cuando) : '') + '</span>' +
-            (x.vibe ? '<p>' + esc(x.vibe) + '</p>' : '') + '</div>';
-        }).join('') : vacio(' este destino no tiene playas registradas.'));
+      var b = lista('beaches');
+      return '<h2 class="u-h2">Playas</h2>' + conMapa(b) + b.map(function (x) {
+        return tarjeta(x, tieneLugar(x) ? ++n : 0, esc(x.zona || '') + (x.cuando ? ' · ' + esc(x.cuando) : ''), x.vibe);
+      }).join('');
+    }
+    if (S.tab === 'ver') {
+      var a = lista('atracciones');
+      return '<h2 class="u-h2">Qué ver</h2>' + conMapa(a) + a.map(function (x) {
+        return tarjeta(x, tieneLugar(x) ? ++n : 0, esc(x.zona || '') + (x.dur ? ' · ' + esc(x.dur) : ''), x.nota);
+      }).join('');
+    }
+    if (S.tab === 'hacer') {
+      return '<h2 class="u-h2">Qué hacer</h2>' + lista('hacer').map(function (x) {
+        return tarjeta(x, 0, esc(x.zona || '') + (x.dur ? ' · ' + esc(x.dur) : ''), x.nota);
+      }).join('');
     }
     if (S.tab === 'comer') {
-      var c = g.comer || [];
-      return '<h2 class="u-h2">Dónde comer</h2>' +
-        (c.length ? c.map(function (x) {
-          return '<div class="u-item"><b>' + esc(x.name) + '</b><span class="meta">' + esc(x.tipo || '') + (x.zona ? ' · ' + esc(x.zona) : '') + '</span>' +
-            (x.momento ? '<p>' + esc(x.momento) + '</p>' : '') + (x.nota ? '<p>' + esc(x.nota) + '</p>' : '') +
-            (typeof x.usd === 'number' ? '<span class="u-precio">' + usd(x.usd) + '</span>' : '') + '</div>';
-        }).join('') : vacio(' todavia no hay lugares de comida cargados.'));
+      return '<h2 class="u-h2">Dónde comer</h2>' + lista('comer').map(function (x) {
+        return tarjeta(x, 0, esc(x.tipo || '') + (x.zona ? ' · ' + esc(x.zona) : '') + (x.momento ? ' · ' + esc(x.momento) : ''), x.nota);
+      }).join('');
     }
-    var t = g.tips || [];
-    return '<h2 class="u-h2">Tips</h2>' +
-      (t.length ? t.map(function (x) {
-        return '<div class="u-item"><b>' + esc(x.titulo) + '</b><p>' + esc(x.texto) + '</p></div>';
-      }).join('') : vacio(' todavia no hay tips cargados.'));
+    return '<h2 class="u-h2">Tips</h2>' + lista('tips').map(function (x) {
+      return '<div class="u-item"><b>' + esc(x.titulo) + '</b><p>' + esc(x.texto) + '</p></div>';
+    }).join('');
   }
-  /* Sin sesion o con menos de 50 XP: se dice cuanto falta y como se suma, sin nada de la guia. */
+
+  /* Mapa: Leaflet propio (el mismo de la app, /vendor/leaflet) con tiles de OpenStreetMap, cargado recien cuando hay
+     un mapa en pantalla. Los pines llevan el mismo numero que la tarjeta. */
+  var mapa = null, leaflet = null;
+  function cargarLeaflet() {
+    if (window.L && window.L.map) return Promise.resolve();
+    if (leaflet) return leaflet;
+    leaflet = new Promise(function (ok, mal) {
+      var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/vendor/leaflet/leaflet.css?v=1'; document.head.appendChild(css);
+      var s = document.createElement('script'); s.src = '/vendor/leaflet/leaflet.js?v=1'; s.onload = ok; s.onerror = function () { leaflet = null; mal(new Error('leaflet')); };
+      document.head.appendChild(s);
+    });
+    return leaflet;
+  }
+  function montarMapa() {
+    if (mapa) { mapa.remove(); mapa = null; }
+    var el = $('u-mapa'); if (!el) return;
+    var arr = lista(S.tab === 'ver' ? 'atracciones' : 'beaches').filter(tieneLugar), tab = S.tab;
+    cargarLeaflet().then(function () {
+      if (S.tab !== tab || !document.body.contains(el)) return;
+      var L = window.L, pts = [];
+      mapa = L.map(el, { scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false });
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, referrerPolicy: 'strict-origin-when-cross-origin', attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>' }).addTo(mapa);
+      arr.forEach(function (x, i) {
+        pts.push([x.lat, x.lng]);
+        L.marker([x.lat, x.lng], { title: x.name, icon: L.divIcon({ className: 'u-pin', html: '<span>' + (i + 1) + '</span>', iconSize: [28, 28], iconAnchor: [14, 14] }) })
+          .bindPopup('<b>' + esc(x.name) + '</b>').addTo(mapa);
+      });
+      if (pts.length === 1) mapa.setView(pts[0], 13); else mapa.fitBounds(L.latLngBounds(pts), { padding: [26, 26], maxZoom: 13 });
+    }).catch(function () { el.remove(); });
+  }
+
+  /* Sin sesion o con menos de 50 XP: cuanto falta, como se suma y que trae la guia (en numeros, sin contenido). */
   function candado() {
-    var L = S.lock || {}, nec = L.xpNecesario || 50, xp = Math.min(L.xp || 0, nec), sinSesion = L.motivo === 'sesion';
+    var L = S.lock || {}, nec = L.xpNecesario || 50, xp = Math.min(L.xp || 0, nec), sinSesion = L.motivo === 'sesion', inc = L.incluye || {};
     var ico = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M12 14.5v2.5"/></svg>';
+    var trae = [[inc.playas, 'playa', 'playas'], [inc.atracciones, 'lugar para ver', 'lugares para ver'], [inc.hacer, 'cosa para hacer', 'cosas para hacer'], [inc.comer, 'dato para comer', 'datos para comer'], [inc.tips, 'tip local', 'tips locales']]
+      .filter(function (x) { return x[0] > 0; }).map(function (x) { return '<span class="u-lock__chip"><b>' + x[0] + '</b> ' + (x[0] === 1 ? x[1] : x[2]) + '</span>'; }).join('');
     return '<div class="u-lock"><span class="u-lock__ico">' + ico + '</span>' +
       '<h2>La guía de ' + esc(NOM) + ' se abre con ' + nec + ' XP</h2>' +
-      '<p>' + (sinSesion ? 'Iniciá sesión y llegá al nivel Mochilero 🎒 para abrir todas las guías: playas con foto y mapa, dónde comer barato y tips locales.'
-        : 'Llegá al nivel Mochilero 🎒 y se abren todas las guías: playas con foto y mapa, dónde comer barato y tips locales.') + '</p>' +
+      (trae ? '<div class="u-lock__trae" aria-label="Qué incluye la guía">' + trae + '</div>' : '') +
+      '<p>' + (sinSesion ? 'Iniciá sesión y llegá al nivel Mochilero 🎒 para abrir todas las guías, con fotos, mapa y cómo llegar a cada lugar.'
+        : 'Llegá al nivel Mochilero 🎒 y se abren todas las guías, con fotos, mapa y cómo llegar a cada lugar.') + '</p>' +
       (sinSesion ? '' : '<div class="u-lock__bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + nec + '" aria-valuenow="' + xp + '"><i style="width:' + Math.round(xp / nec * 100) + '%"></i></div>' +
         '<span class="u-lock__n">' + xp + ' / ' + nec + ' XP · te faltan ' + (nec - xp) + '</span>') +
       '<ul><li><b>+25</b>Guardar un viaje</li><li><b>+15</b>Compartir un viaje o dividir los gastos</li><li><b>+15</b>Abrir un destino nuevo</li><li><b>+5</b>Entrar cada día</li></ul>' +
       (sinSesion ? '<button type="button" class="u-lock__cta" data-login="1" data-evento="guia_bloqueada_login">Iniciar sesión</button>'
-        : '<a class="u-lock__cta" href="home-destino.html?destino=' + K + '&fuente=guia_xp" data-evento="guia_bloqueada_sumar_xp">Armar un viaje y sumar XP</a>') + '</div>';
+        : '<a class="u-lock__cta" href="home-destino.html?destino=' + K + '&fuente=guia_xp" data-evento="guia_bloqueada_sumar_xp">Armar un viaje y sumar XP</a>' +
+          '<button type="button" class="u-lock__sec" data-pasaporte="1" data-evento="guia_bloqueada_pasaporte">Ver mi pasaporte</button>') + '</div>';
   }
-  function vacio(d) { return '<p class="u-cargando">' + esc(d) + '</p>'; }
 
   function pintar() {
     var cuerpo;
     if (S.estado === 'cargando') cuerpo = '<div class="u-cargando" role="status">Cargando la guía…</div>';
     else if (S.estado === 'bloqueada') cuerpo = candado();
     else if (S.estado === 'cerrada') cuerpo = '<div class="u-cerrada"><b>La guía no está disponible</b><small>No pudimos abrirla ahora. Podés ver los destinos y calcular tu viaje igual.</small></div>';
-    else cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' +
-      '<div class="u-tabs" role="tablist">' + TAB.map(function (t) {
-        return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + '</button>';
-      }).join('') + '</div>' +
-      '<div role="tabpanel">' + listaGuia() + '</div>' +
-      '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
-      '<div class="u-handoff"><h2>¿Te gusta este destino?</h2>' +
-      '<p>Calculá cuánto sale tu viaje y reservá en pocos pasos.</p>' +
-      '<div class="u-handoff__b"><a class="u-go" href="home-destino.html?destino=' + K + '&fuente=guia" data-evento="guia_calcular_viaje" data-destino="' + K + '">Calcular un viaje →</a>' +
-      '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver a la guía</button></div></div></div>';
+    else {
+      var ts = tabs();
+      if (!ts.some(function (t) { return t.id === S.tab; })) S.tab = ts.length ? ts[0].id : '';
+      cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' +
+        (ts.length ? '<div class="u-tabs" role="tablist">' + ts.map(function (t) {
+          return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + lista(t.k).length + '</small></button>';
+        }).join('') + '</div>' +
+        '<div role="tabpanel">' + listaGuia() + '</div>' : '') +
+        '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
+        '<div class="u-handoff"><h2>¿Te gusta este destino?</h2>' +
+        '<p>Calculá cuánto sale tu viaje y reservá en pocos pasos.</p>' +
+        '<div class="u-handoff__b"><a class="u-go" href="home-destino.html?destino=' + K + '&fuente=guia" data-evento="guia_calcular_viaje" data-destino="' + K + '">Calcular un viaje →</a>' +
+        '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver a la guía</button></div></div></div>';
+    }
     $('main').innerHTML = cabecera() + '<div class="u-cuerpo">' + cuerpo + '</div>';
     $('foot').innerHTML = S.estado === 'cerrada' ? '<a class="u-go" style="display:block;padding:15px;border-radius:14px;text-align:center;font-weight:800;text-decoration:none;background:var(--action-bg);color:var(--action-ink)" href="home-destino.html?destino=' + K + '&fuente=guia_cerrada">Buscar otro destino</a>' : '';
     document.title = NOM + ' · Guía de viaje · CuántoSale';
+    montarMapa();
   }
 
-  /* La guia se pide en dos pasos, como en el sitio: primero el token que firma el
-     server y despues el contenido. 503 y 403 no son errores: significan que la guia
-     esta cerrada, y se muestra el estado cerrado sin romperse. */
+  /* La guia se pide en dos pasos: primero el token, que el server firma solo con sesion y 50 XP (emitirTokenGuia en
+     server.js), y despues el contenido. 401/403 del token son el candado, con lo que falta; 503 es la guia cerrada. */
   function pedirGuia() {
     var d = encodeURIComponent(K);
-    /* El token de la guia lo firma el server solo con sesion y 50 XP (ver emitirTokenGuia en server.js). */
     var sesion = window.CSCuenta ? CSCuenta.token() : Promise.resolve('');
     sesion.then(function (t) { return fetch('/api/guia/token?dest=' + d, { headers: t ? { Authorization: 'Bearer ' + t } : {} }); })
       .then(function (r) {
@@ -195,13 +267,16 @@
         return r.ok ? r.json() : null;
       })
       .then(function (tk) {
-        if (tk && tk.lock) { S.lock = tk.lock; S.estado = 'bloqueada'; track('guia_bloqueada', { motivo: tk.lock.motivo || '', xp: tk.lock.xp || 0 }); pintar(); return; }
+        if (tk && tk.lock) { S.lock = tk.lock; S.region = tk.lock.region || ''; S.estado = 'bloqueada'; track('guia_bloqueada', { motivo: tk.lock.motivo || '', xp: tk.lock.xp || 0 }); pintar(); return; }
         if (!tk || !tk.token) { S.estado = 'cerrada'; pintar(); return; }
         return fetch('/api/guia?dest=' + d + '&token=' + encodeURIComponent(tk.token))
           .then(function (r) { if (r.status === 403 || r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
           .then(function (data) {
-            if (data && data.guia) { S.guia = data.guia; S.estado = 'abierta'; track('guia_abierta', { secciones: TAB.map(function (t) { return (data.guia[t.id === 'hacer' ? 'hacer' : t.id === 'playas' ? 'beaches' : t.id === 'comer' ? 'comer' : 'tips'] || []).length; }) });
-              pintar(); return; }
+            if (data && data.guia) {
+              S.guia = data.guia; S.region = data.region || ''; S.estado = 'abierta';
+              track('guia_abierta', { secciones: TAB.map(function (t) { return lista(t.k).length; }) });
+              pintar(); return;
+            }
             S.estado = 'cerrada'; pintar();
           });
       })
@@ -213,12 +288,13 @@
     if (t.id === 'atras') { location.href = 'home-guias.html' + (debug ? '?debug=1' : ''); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
     if (t.dataset.login) { if (window.CSCuenta) CSCuenta.abrir(); return; }
+    if (t.dataset.pasaporte) { if (window.CS_GAME) CS_GAME.abrir(); return; }
     if (t.dataset.volver) { $('main').scrollTop = 0; track('guia_volver'); }
   });
   pintar();
-  /* cuenta.js carga despues de este script: se espera al DOM para tener CSCuenta. Al iniciar sesion con la guia
-     bloqueada se vuelve a pedir. */
-  document.addEventListener('DOMContentLoaded', function () {
+  /* cuenta.js, gamificacion.js y los creditos de las fotos cargan despues de este script: se espera a que carguen
+     (load, por el defer de los creditos). Al iniciar sesion con la guia bloqueada se vuelve a pedir. */
+  window.addEventListener('load', function () {
     pedirGuia();
     if (window.CSCuenta) CSCuenta.alCambiar(function (u) { if (u && S.estado === 'bloqueada') { S.estado = 'cargando'; pintar(); pedirGuia(); } });
   });
@@ -226,5 +302,8 @@
 </script>
 <script src="cuenta.js"></script>
 <script src="cabecera.js"></script>
+<script defer src="/creditos-fotos.generated.js"></script>
+<link rel="stylesheet" href="/gamificacion.css?v=3">
+<script src="/gamificacion.js?v=5"></script>
 </body>
 </html>

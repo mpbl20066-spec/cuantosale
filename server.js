@@ -2108,7 +2108,8 @@ function servirGuiaSecreta(req, res, url) {
   }
   const guia = guiSecreta.guiaPara(dest, model.DEST[dest].region);
   if (!guia) return sendJson(res, 404, { error: ' todavia no hay una guia escrita para este destino.' });
-  return sendJson(res, 200, { guia: guia });
+  // La region va aparte (la guia no la trae): sin esto la pagina decia "Brasil" tambien en Buenos Aires.
+  return sendJson(res, 200, { guia: guia, region: model.DEST[dest].region || '' });
 }
 
 /* Habitaciones de UN hotel, para el modal "Ver habitaciones". Una consulta a
@@ -2207,11 +2208,15 @@ async function emitirTokenGuia(req, res, url) {
   if (limited('guia-token:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados pedidos. Esperá un minuto.' });
   const pas = pasaporteApi();
   const necesario = pas.XP_GUIA;
+  /* Lo que trae la guia, en numeros y sin contenido: el candado lo muestra para que se vea que vale la pena. */
+  const g = guiSecreta.guiaPara(dest, model.DEST[dest].region) || {};
+  const largo = function (k) { return Array.isArray(g[k]) ? g[k].length : 0; };
+  const incluye = { playas: largo('beaches'), atracciones: largo('atracciones'), comer: largo('comer'), hacer: largo('hacer'), tips: largo('tips') };
   const u = await pas.usuarioDe(req);
-  if (!u) return sendJson(res, 401, { motivo: 'sesion', xpNecesario: necesario, error: 'Iniciá sesión para abrir la guía.' });
+  if (!u) return sendJson(res, 401, { motivo: 'sesion', xpNecesario: necesario, incluye: incluye, region: model.DEST[dest].region || '', error: 'Iniciá sesión para abrir la guía.' });
   const xp = await pas.xpDe(u.id);
   if (xp == null) return sendJson(res, 503, { error: 'La Guia Secreta no esta disponible ahora.' });
-  if (xp < necesario) return sendJson(res, 403, { motivo: 'xp', xp: xp, xpNecesario: necesario, error: 'Te faltan ' + (necesario - xp) + ' XP para abrir la guía.' });
+  if (xp < necesario) return sendJson(res, 403, { motivo: 'xp', xp: xp, xpNecesario: necesario, incluye: incluye, region: model.DEST[dest].region || '', error: 'Te faltan ' + (necesario - xp) + ' XP para abrir la guía.' });
   const token = guiaToken(dest);
   if (!token) return sendJson(res, 503, { error: 'La Guia Secreta no esta disponible ahora.' });
   return sendJson(res, 200, { dest: dest, token: token });
