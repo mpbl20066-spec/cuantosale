@@ -61,6 +61,18 @@
   .u-cerrada{margin:14px 18px 0;padding:18px;border:1px dashed var(--line);border-radius:18px;background:var(--surface);text-align:center}
   .u-cerrada b{display:block;font-family:var(--fh);font-size:16px;margin-bottom:5px}
   .u-cerrada small{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  /* Candado por XP: la guia entera se abre en Mochilero (50 XP), con sesion. */
+  .u-lock{margin:16px 0 0;padding:20px 18px;border:1.5px solid var(--line);border-radius:20px;background:var(--surface);text-align:center}
+  .u-lock__ico{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 10px;border-radius:50%;background:var(--cel-soft);color:var(--azul)}
+  .u-lock h2{margin:0 0 6px;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
+  .u-lock p{margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .u-lock__bar{height:10px;margin:4px 0 6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .u-lock__bar i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+  .u-lock__n{display:block;margin-bottom:14px;font-size:12.5px;font-weight:800;color:var(--ink)}
+  .u-lock ul{margin:0 0 16px;padding:0;list-style:none;text-align:left}
+  .u-lock li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2)}
+  .u-lock li b{flex:0 0 42px;color:var(--good);font-weight:800}
+  .u-lock__cta{display:block;width:100%;box-sizing:border-box;padding:14px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}
   .u-foot{flex:0 0 auto;padding:8px 18px 20px;background:var(--bg)}
   @media (max-width:520px){
     body{display:block;padding:0;background:var(--bg)}
@@ -134,11 +146,26 @@
         return '<div class="u-item"><b>' + esc(x.titulo) + '</b><p>' + esc(x.texto) + '</p></div>';
       }).join('') : vacio(' todavia no hay tips cargados.'));
   }
+  /* Sin sesion o con menos de 50 XP: se dice cuanto falta y como se suma, sin nada de la guia. */
+  function candado() {
+    var L = S.lock || {}, nec = L.xpNecesario || 50, xp = Math.min(L.xp || 0, nec), sinSesion = L.motivo === 'sesion';
+    var ico = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M12 14.5v2.5"/></svg>';
+    return '<div class="u-lock"><span class="u-lock__ico">' + ico + '</span>' +
+      '<h2>La guía de ' + esc(NOM) + ' se abre con ' + nec + ' XP</h2>' +
+      '<p>' + (sinSesion ? 'Iniciá sesión y llegá al nivel Mochilero 🎒 para abrir todas las guías: playas con foto y mapa, dónde comer barato y tips locales.'
+        : 'Llegá al nivel Mochilero 🎒 y se abren todas las guías: playas con foto y mapa, dónde comer barato y tips locales.') + '</p>' +
+      (sinSesion ? '' : '<div class="u-lock__bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + nec + '" aria-valuenow="' + xp + '"><i style="width:' + Math.round(xp / nec * 100) + '%"></i></div>' +
+        '<span class="u-lock__n">' + xp + ' / ' + nec + ' XP · te faltan ' + (nec - xp) + '</span>') +
+      '<ul><li><b>+25</b>Guardar un viaje</li><li><b>+15</b>Compartir un viaje o dividir los gastos</li><li><b>+15</b>Abrir un destino nuevo</li><li><b>+5</b>Entrar cada día</li></ul>' +
+      (sinSesion ? '<button type="button" class="u-lock__cta" data-login="1" data-evento="guia_bloqueada_login">Iniciar sesión</button>'
+        : '<a class="u-lock__cta" href="home-destino.html?destino=' + K + '&fuente=guia_xp" data-evento="guia_bloqueada_sumar_xp">Armar un viaje y sumar XP</a>') + '</div>';
+  }
   function vacio(d) { return '<p class="u-cargando">' + esc(d) + '</p>'; }
 
   function pintar() {
     var cuerpo;
     if (S.estado === 'cargando') cuerpo = '<div class="u-cargando" role="status">Cargando la guía…</div>';
+    else if (S.estado === 'bloqueada') cuerpo = candado();
     else if (S.estado === 'cerrada') cuerpo = '<div class="u-cerrada"><b>La guía no está disponible</b><small>No pudimos abrirla ahora. Podés ver los destinos y calcular tu viaje igual.</small></div>';
     else cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' +
       '<div class="u-tabs" role="tablist">' + TAB.map(function (t) {
@@ -160,9 +187,15 @@
      esta cerrada, y se muestra el estado cerrado sin romperse. */
   function pedirGuia() {
     var d = encodeURIComponent(K);
-    fetch('/api/guia/token?dest=' + d)
-      .then(function (r) { return r.ok ? r.json() : null; })
+    /* El token de la guia lo firma el server solo con sesion y 50 XP (ver emitirTokenGuia en server.js). */
+    var sesion = window.CSCuenta ? CSCuenta.token() : Promise.resolve('');
+    sesion.then(function (t) { return fetch('/api/guia/token?dest=' + d, { headers: t ? { Authorization: 'Bearer ' + t } : {} }); })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) return r.json().then(function (j) { return { lock: j }; });
+        return r.ok ? r.json() : null;
+      })
       .then(function (tk) {
+        if (tk && tk.lock) { S.lock = tk.lock; S.estado = 'bloqueada'; track('guia_bloqueada', { motivo: tk.lock.motivo || '', xp: tk.lock.xp || 0 }); pintar(); return; }
         if (!tk || !tk.token) { S.estado = 'cerrada'; pintar(); return; }
         return fetch('/api/guia?dest=' + d + '&token=' + encodeURIComponent(tk.token))
           .then(function (r) { if (r.status === 403 || r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -179,10 +212,16 @@
     var t = e.target.closest('button'); if (!t) return;
     if (t.id === 'atras') { location.href = 'home-guias.html' + (debug ? '?debug=1' : ''); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
+    if (t.dataset.login) { if (window.CSCuenta) CSCuenta.abrir(); return; }
     if (t.dataset.volver) { $('main').scrollTop = 0; track('guia_volver'); }
   });
   pintar();
-  pedirGuia();
+  /* cuenta.js carga despues de este script: se espera al DOM para tener CSCuenta. Al iniciar sesion con la guia
+     bloqueada se vuelve a pedir. */
+  document.addEventListener('DOMContentLoaded', function () {
+    pedirGuia();
+    if (window.CSCuenta) CSCuenta.alCambiar(function (u) { if (u && S.estado === 'bloqueada') { S.estado = 'cargando'; pintar(); pedirGuia(); } });
+  });
 })();
 </script>
 <script src="cuenta.js"></script>

@@ -2104,7 +2104,7 @@ function servirGuiaSecreta(req, res, url) {
   const dest = String(url.searchParams.get('dest') || '').toLowerCase();
   if (!dest || !VALID_DESTINATION_KEYS.has(dest)) return sendJson(res, 400, { error: 'Destino desconocido.' });
   if (!guiaTokenValido(url.searchParams.get('token'), dest)) {
-    return sendJson(res, 403, { error: 'La Guia Secreta se abre eligiendo un hotel con precio real de Booking.' });
+    return sendJson(res, 403, { error: 'La Guia Secreta se abre con 50 XP (nivel Mochilero).' });
   }
   const guia = guiSecreta.guiaPara(dest, model.DEST[dest].region);
   if (!guia) return sendJson(res, 404, { error: ' todavia no hay una guia escrita para este destino.' });
@@ -2194,9 +2194,24 @@ async function habitacionesHotel(req, res, url) {
  * Falla cerrado: sin GUIA_TOKEN_SECRET ni BOOKING_API_KEY no hay firma y no se
  * devuelve token.
  */
-function emitirTokenGuia(req, res, url) {
+/* DESDE OCTUBRE 2026 LA GUIA SE ABRE CON XP, NO CON EL HOTEL
+ * Hace falta sesion iniciada y llegar a Mochilero (50 XP, pasaporte.XP_GUIA). El XP
+ * se lee de Supabase con el token de la sesion, no del navegador: el progreso de
+ * invitado vive en localStorage y se fabrica desde la consola. Respuestas:
+ *   401 { motivo:'sesion' }           sin sesion
+ *   403 { motivo:'xp', xp, xpNecesario } con sesion pero con menos XP
+ * El cliente dibuja el candado con cuanto falta. */
+async function emitirTokenGuia(req, res, url) {
   const dest = String(url.searchParams.get('dest') || '').toLowerCase();
   if (!dest || !VALID_DESTINATION_KEYS.has(dest)) return sendJson(res, 400, { error: 'Destino desconocido.' });
+  if (limited('guia-token:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiados pedidos. Esperá un minuto.' });
+  const pas = pasaporteApi();
+  const necesario = pas.XP_GUIA;
+  const u = await pas.usuarioDe(req);
+  if (!u) return sendJson(res, 401, { motivo: 'sesion', xpNecesario: necesario, error: 'Iniciá sesión para abrir la guía.' });
+  const xp = await pas.xpDe(u.id);
+  if (xp == null) return sendJson(res, 503, { error: 'La Guia Secreta no esta disponible ahora.' });
+  if (xp < necesario) return sendJson(res, 403, { motivo: 'xp', xp: xp, xpNecesario: necesario, error: 'Te faltan ' + (necesario - xp) + ' XP para abrir la guía.' });
   const token = guiaToken(dest);
   if (!token) return sendJson(res, 503, { error: 'La Guia Secreta no esta disponible ahora.' });
   return sendJson(res, 200, { dest: dest, token: token });
@@ -3161,7 +3176,7 @@ function handleRequest(req, res) {
       return sendJson(res, 200, flightProviders.stats());
     }
     if (url.pathname === '/api/guia/token') {
-      return emitirTokenGuia(req, res, url);
+      return emitirTokenGuia(req, res, url).catch(function (e) { return sendJson(res, e.status || 500, { error: e.message }); });
     }
     // Acepta GET y POST: el panel de Travelpayouts manda POST form-encoded y
     // algunos gateways lo prueban con GET.
