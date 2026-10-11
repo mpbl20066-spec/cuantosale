@@ -75,7 +75,7 @@
   .u-lock__cta{display:block;width:100%;box-sizing:border-box;padding:14px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}
   .u-tab small{margin-left:3px;font-size:11px;font-weight:800;color:var(--ink2);opacity:.75}
   .u-foto{position:relative}
-  .u-cred{display:block;margin:-6px 0 8px;font-size:10.5px;font-weight:600;color:var(--ink2);opacity:.8}
+  .u-cred{position:absolute;right:6px;bottom:5px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.35);color:rgba(255,255,255,.85);font-size:8.5px;font-weight:600;line-height:1.4}
   .u-num{position:absolute;left:10px;top:10px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#0B1F3A;color:#fff;font-size:12.5px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.3)}
   .u-num--in{position:static;display:inline-grid;width:22px;height:22px;margin-right:7px;font-size:11.5px;box-shadow:none;vertical-align:1px}
   .u-acc{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
@@ -134,10 +134,12 @@
       (S.guia && S.guia.temporada ? '<span class="u-hero__vol">Temporada alta: ' + S.guia.temporada.alta.map(function (m) { return C.MESES[m - 1]; }).filter(Boolean).join(', ') + '</span>' : '') +
       '</div></div>';
   }
-  /* Credito de la foto (CC BY / BY-SA piden autor y licencia): sale de creditos-fotos.generated.js. */
+  /* Credito de la foto: solo las de Wikimedia con CC BY / BY-SA lo piden (autor y licencia), y va chiquito sobre la
+     foto. Las propias (/fotos/guias, de Unsplash y Pexels) y las de dominio publico no llevan. */
   function credito(url) {
     var c = window.FOTO_CREDITOS && window.FOTO_CREDITOS[url];
-    return c ? '<span class="u-cred">Foto: ' + esc(c.autor) + ' · ' + esc(c.licencia) + ' · Wikimedia Commons</span>' : '';
+    if (!c || /public domain|dominio p|cc0/i.test(c.licencia || '')) return '';
+    return '<span class="u-cred">© ' + esc(c.autor) + ' · ' + esc(c.licencia) + '</span>';
   }
   function comoLlegar(x) {
     if (!tieneLugar(x)) return '';
@@ -147,7 +149,7 @@
   function precio(x) { return typeof x.usd === 'number' ? '<span class="u-precio">' + (x.usd ? usd(x.usd) : 'Gratis') + '</span>' : ''; }
   /* Tarjeta con foto, numero del pin del mapa, credito y "Cómo llegar" (playas, atracciones y qué hacer). */
   function tarjeta(x, n, meta, texto) {
-    return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')">' + (n ? '<span class="u-num">' + n + '</span>' : '') + '</div>' + credito(x.foto) : '') +
+    return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')">' + (n ? '<span class="u-num">' + n + '</span>' : '') + credito(x.foto) + '</div>' : '') +
       '<b>' + (!x.foto && n ? '<span class="u-num u-num--in">' + n + '</span>' : '') + esc(x.name) + '</b><span class="meta">' + meta + '</span>' +
       (texto ? '<p>' + esc(texto) + '</p>' : '') + '<div class="u-acc">' + precio(x) + comoLlegar(x) + '</div></div>';
   }
@@ -303,7 +305,7 @@
 <script src="cuenta.js"></script>
 <script src="cabecera.js"></script>
 <script defer src="/creditos-fotos.generated.js"></script>
-<link rel="stylesheet" href="/gamificacion.css?v=3">
-<script src="/gamificacion.js?v=5"></script>
+<link rel="stylesheet" href="/gamificacion.css?v=5">
+<script src="/gamificacion.js?v=6"></script>
 </body>
 </html>
