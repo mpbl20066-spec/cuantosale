@@ -124,6 +124,22 @@
     setTimeout(function () { if (cont.parentNode) cont.parentNode.removeChild(cont); }, 3200);
   }
 
+  /* Solo visual: el chip que se ve da un salto y suelta un "+XP" que sube y se desvanece. */
+  function festejarChip(xp) {
+    if (reducido()) return;
+    chips.forEach(function (c) {
+      var r = c.getBoundingClientRect();
+      if (!r.width) return;   // el chip de otro tamano de pantalla (display:none)
+      c.classList.remove('is-sube'); void c.offsetWidth; c.classList.add('is-sube');
+      setTimeout(function () { c.classList.remove('is-sube'); }, 700);
+      var f = document.createElement('span');
+      f.className = 'gm-flota'; f.setAttribute('aria-hidden', 'true'); f.textContent = '+' + xp + ' XP';
+      f.style.left = (r.left + r.width / 2) + 'px'; f.style.top = (r.top - 4) + 'px';
+      document.body.appendChild(f);
+      setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 1200);
+    });
+  }
+
   function sumar(xp, motivo) {
     if (!xp) return;
     E.xp += xp;
@@ -135,6 +151,7 @@
     if (subio) aviso('¡Subiste a ' + NIVELES[nuevo].n + '!', 'Nivel ' + (nuevo + 1) + ' · ' + E.xp + ' XP', NIVELES[nuevo].ico, true);
     else aviso('+' + xp + ' XP', motivo, '✨');
     pintar();
+    festejarChip(xp);
   }
 
   function revisarInsignias(conAviso) {
@@ -188,6 +205,7 @@
     if (avisar && E.cupones.length > antesCup) aviso('¡Ganaste un cupón!', 'Mirá tus cupones en el pasaporte', '🎟️', true);
     revisarInsignias(!!avisar);
     guardar(); pintar();
+    if (avisar && E.xp > antesXp) festejarChip(E.xp - antesXp);
   }
   function sincronizar() {
     if (!sesion()) return Promise.resolve();
@@ -378,18 +396,18 @@
       '<div class="gm-xp"><div class="gm-xp__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + p.pct + '"><i style="width:' + p.pct + '%"></i></div>' +
       '<p>' + E.xp + ' XP' + (p.sig ? ' · te faltan <b>' + p.falta + '</b> para ' + p.sig.n + ' ' + p.sig.ico : ' · ¡nivel máximo!') + '</p></div>' +
       '<div class="gm-stats">' +
-      '<div><b>' + (E.racha || 0) + '</b><span>🔥 racha (días)</span></div>' +
-      '<div><b>' + sellos.length + '</b><span>🛂 sellos</span></div>' +
-      '<div><b>' + ganadas + '/' + INSIGNIAS.length + '</b><span>🏅 insignias</span></div></div>' +
+      '<div style="--i:0"><b>' + (E.racha || 0) + '</b><span>🔥 racha (días)</span></div>' +
+      '<div style="--i:1"><b>' + sellos.length + '</b><span>🛂 sellos</span></div>' +
+      '<div style="--i:2"><b>' + ganadas + '/' + INSIGNIAS.length + '</b><span>🏅 insignias</span></div></div>' +
       '<h3>Sellos del pasaporte</h3>';
     if (sellos.length) {
-      h += '<ul class="gm-sellos">' + sellos.map(function (s) { return '<li><span aria-hidden="true">🛂</span>' + esc(s.n) + '</li>'; }).join('') + '</ul>';
+      h += '<ul class="gm-sellos">' + sellos.map(function (s, i) { return '<li style="--i:' + Math.min(i, 15) + '"><span aria-hidden="true">🛂</span>' + esc(s.n) + '</li>'; }).join('') + '</ul>';
     } else {
       h += '<p class="gm-vacio">Todavía no tenés sellos. Abrí la propuesta de un destino para ganar el primero.</p>';
     }
-    h += '<h3>Insignias</h3><ul class="gm-insignias">' + INSIGNIAS.map(function (b) {
+    h += '<h3>Insignias</h3><ul class="gm-insignias">' + INSIGNIAS.map(function (b, i) {
       var ok = !!E.insignias[b.id];
-      return '<li class="' + (ok ? 'is-ok' : 'is-bloq') + '"><span class="gm-insignia__ico" aria-hidden="true">' + (ok ? b.ico : '🔒') + '</span>' +
+      return '<li class="' + (ok ? 'is-ok' : 'is-bloq') + '" style="--i:' + i + '"><span class="gm-insignia__ico" aria-hidden="true">' + (ok ? b.ico : '🔒') + '</span>' +
         '<span><b>' + esc(b.n) + '</b><small>' + esc(b.d) + '</small></span></li>';
     }).join('') + '</ul>' +
       '<h3>Cómo sumar XP</h3><ul class="gm-reglas">' +
@@ -423,6 +441,8 @@
     }
     foco = document.activeElement;
     cuerpoModal();
+    m.classList.add('is-entra');
+    clearTimeout(abrir.t); abrir.t = setTimeout(function () { m.classList.remove('is-entra'); }, 1600);
     m.hidden = false;
     document.documentElement.classList.add('gm-abierto');
     var c = m.querySelector('[data-gm-cerrar]'); if (c) c.focus();
