@@ -3,12 +3,11 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v160';
+var CACHE_NAME = 'cuantosale-shell-v161';
 var APP_SHELL = [
-  // '/app' (la start_url de la PWA): el servidor responde lo mismo en '/' y en
-  // '/app'. La landing de waitlist se sacó; se sube CACHE_NAME para que nadie
-  // conserve la copia vieja de '/' que guardaba esa landing.
-  '/app',
+  // '/' (la start_url de la PWA). '/app' ya no: ahora redirige a '/', y una
+  // respuesta redirigida en el precache rompe la navegacion sin senal.
+  '/',
   '/manifest.json',
   '/pwa.js',
   //Va sin '?v=' y por eso sí va en el precache: son 4 KB de costos por destino
@@ -79,7 +78,7 @@ self.addEventListener('fetch', function (event) {
       return caches.match(request).then(function (cached) {
         // Sin red: primero la URL exacta, después el shell de la app. La
         // '/' queda como último recurso, no como respuesta principal.
-        return cached || caches.match('/app') || caches.match('/');
+        return cached || caches.match('/');
       });
     }));
     return;

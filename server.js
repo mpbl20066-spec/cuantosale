@@ -1642,7 +1642,6 @@ async function postBienvenida(req, res) {
    opcional, WHATSAPP_TEMPLATE (reserva_recibida) y WHATSAPP_TEMPLATE_LANG (es).
    SEGURIDAD: el endpoint es publico y escribe a un numero que manda el cliente,
    asi que corta por IP y por numero (un numero recibe como mucho 3 al dia). */
-const WA_GRAPH = 'https://graph.facebook.com/v21.0';
 let pasaporteCache = null;
 function pasaporteApi() {
   if (!pasaporteCache) pasaporteCache = require('./lib/pasaporte')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, tasas: getTasas });
@@ -1683,21 +1682,11 @@ async function postReservaWhatsapp(req, res) {
   if (waPorNumero.size > 5000) waPorNumero.clear();
   const nombre = nombreDeSaludo({ name: waTexto(b.nombre, 40) }) || 'viajero';
   const params = [nombre, destino, fechas + ' · ' + waTexto(b.personas, 20), servicios.join(' + '), total];
-  const r = await fetchWithTimeout(WA_GRAPH + '/' + encodeURIComponent(phoneId) + '/messages', {
-    method: 'POST',
-    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp', to: numero, type: 'template',
-      template: {
-        name: String(process.env.WHATSAPP_TEMPLATE || 'reserva_recibida').trim(), language: { code: String(process.env.WHATSAPP_TEMPLATE_LANG || 'es').trim() },
-        components: [{ type: 'body', parameters: params.map(function (t) { return { type: 'text', text: t }; }) }]
-      }
-    })
-  }, 10000);
+  /* lib/wa-plantilla.js: si el idioma no coincide con el de la plantilla (error 132001), prueba los otros españoles. */
+  const r = await require('./lib/wa-plantilla.js').enviarPlantilla(function (u, op) { return fetchWithTimeout(u, op, 10000); }, { token: token, phoneId: phoneId, to: numero, params: params });
   if (!r.ok) {
     waPorNumero.set(numero, { dia: hoy, n: n });
-    const detalle = await r.text().catch(function () { return ''; });
-    return sendJson(res, 502, { error: 'WhatsApp respondió ' + r.status, detalle: detalle.slice(0, 300) });
+    return sendJson(res, 502, { error: 'WhatsApp respondió ' + r.status, detalle: String(r.texto || '').slice(0, 300) });
   }
   return sendJson(res, 200, { ok: true });
 }
@@ -3436,11 +3425,17 @@ function handleRequest(req, res) {
     if (/^\/test\/[^/]+\.js$/i.test(url.pathname)) {
       try { return serveStatic(req, res, url.pathname, function (data) { return Buffer.from(nuevoReescribir(data.toString('utf8')), 'utf8'); }); } catch (e) { res.writeHead(400); return res.end(); }
     }
-    // La raíz del dominio es la app. /app sigue sirviendo lo mismo porque es la
-    // start_url de la PWA ya instalada y lo que precachea el service worker.
+    // /app era la start_url de la PWA instalada antes del cambio a '/'. El celular
+    // (sobre todo iPhone) conserva esa start_url para siempre, y servir aca la app
+    // anterior dejaba la app instalada en la version vieja. Ahora va a la home nueva.
+    // '/app?viaje=<token>' sigue en la app anterior: es el enlace corto de presupuesto.
     if (/^\/app\/?$/i.test(url.pathname)) {
-      try { serveStatic(req, res, '/index.html'); } catch (e) { res.writeHead(400); res.end(); }
-      return;
+      if (/[?&]viaje=/.test(url.search)) {
+        try { serveStatic(req, res, '/index.html'); } catch (e) { res.writeHead(400); res.end(); }
+        return;
+      }
+      res.writeHead(302, { Location: '/' + url.search, 'Cache-Control': 'no-store' });
+      return res.end();
     }
     try { serveStatic(req, res, url.pathname); } catch (e) { res.writeHead(400); res.end(); }
 }

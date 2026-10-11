@@ -559,7 +559,11 @@
       var reg = e.target.id === 'wa-reg';
       b.disabled = true; msg.style.color = ''; msg.textContent = reg ? 'Registrando…' : 'Enviando…';
       (reg ? api('whatsapp/registrar', { pin: String(f.get('pin') || '') }) : api('whatsapp/prueba', { telefono: String(f.get('tel') || '') }))
-        .then(function () { cargarWa(); pintar(); toast(reg ? 'Número registrado' : 'Prueba enviada: revisá tu WhatsApp'); })
+        .then(function (r) {
+          cargarWa(); pintar();
+          /* Si anduvo con otro idioma que el configurado, se avisa cual poner en WHATSAPP_TEMPLATE_LANG */
+          toast(reg ? 'Número registrado' : 'Prueba enviada: revisá tu WhatsApp' + (r && r.idioma && r.idioma !== r.idiomaConfigurado ? '. La plantilla está en ' + r.idioma + ': poné WHATSAPP_TEMPLATE_LANG=' + r.idioma : ''));
+        })
         .catch(function (er) { b.disabled = false; msg.style.color = 'var(--bad)'; msg.textContent = er.message; });
       return;
     }
