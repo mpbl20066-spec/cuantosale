@@ -672,7 +672,11 @@
   .st-copy{display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--ink2);cursor:pointer}
   .st-copy.is-ok{color:var(--azul)}
   @media (max-width:620px){
-    .st-dato{flex-wrap:wrap}
+    /* En el celular: el icono a la izquierda y el texto y 'Ver mas informacion' en una columna, alineados */
+    .st-dato{display:grid;grid-template-columns:26px minmax(0,1fr);align-items:start;column-gap:12px;row-gap:10px;padding:14px}
+    .st-dato>svg{margin-top:2px}
+    .st-dato p{font-size:13.5px}
+    .st-dato a{grid-column:2;justify-self:start}
     .st-svc{grid-template-columns:44px minmax(0,1fr)}
     .st-svc__r{grid-column:2;grid-row:auto;flex-direction:row;align-items:center;justify-content:space-between;width:100%;margin-top:6px}
     .st-svc__ico{width:44px;height:44px}
