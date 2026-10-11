@@ -1550,12 +1550,22 @@
   }
 
   /* ---- Encabezado: progreso y total ---- */
+  /* En avion, vuelos y transfer se muestran como dos pasos (1 y 2) aunque por dentro sean el paso 1
+     con S.sub 'v' / 't': asi el indicador queda Vuelos, Transfer, Alojamiento, Extras, Tu presupuesto. */
+  function pasosVisibles() {
+    if (MODO !== 'avion') return NOMBRES.map(function (n, i) { return { n: n, paso: i + 1 }; });
+    return [{ n: 'Vuelos', paso: 1, sub: 'v' }, { n: 'Transfer', paso: 1, sub: 't' }, { n: 'Alojamiento', paso: 2 }, { n: 'Extras', paso: 3 }, { n: 'Tu presupuesto', paso: 4 }];
+  }
+  function pasoVisibleActual() {
+    if (MODO !== 'avion') return S.paso;
+    return S.paso === 1 ? (S.sub === 't' ? 2 : 1) : S.paso + 1;
+  }
   function pintarPasos() {
-    $('steps').innerHTML = NOMBRES.map(function (n, i) {
-      var c = i + 1 < S.paso ? 'is-done' : (i + 1 === S.paso ? 'is-on' : '');
+    var actual = pasoVisibleActual();
+    $('steps').innerHTML = pasosVisibles().map(function (x, i) {
+      var n = x.n, c = i + 1 < actual ? 'is-done' : (i + 1 === actual ? 'is-on' : '');
       var d = c === 'is-done' ? '✓' : (i + 1);
-      var tag = c === 'is-done' ? 'button' : 'li';
-      return '<li style="display:contents"><' + (c !== 'is-on' ? 'button type="button" data-ir="' + (i + 1) + '" aria-label="Ir al paso ' + (i + 1) + ': ' + n + '"' : 'div') + ' class="f-step ' + c + (c !== 'is-on' ? ' is-link' : '') + '"' + (c === 'is-on' ? ' aria-current="step"' : '') + '><span class="f-dot">' + d + '</span>' + n.replace(' + ', ' +<br> ').replace('Tu presupuesto', 'Tu<br> presupuesto') + '</' + (c !== 'is-on' ? 'button' : 'div') + '></li>';
+      return '<li style="display:contents"><' + (c !== 'is-on' ? 'button type="button" data-ir="' + x.paso + '"' + (x.sub ? ' data-sub="' + x.sub + '"' : '') + ' aria-label="Ir al paso ' + (i + 1) + ': ' + n + '"' : 'div') + ' class="f-step ' + c + (c !== 'is-on' ? ' is-link' : '') + '"' + (c === 'is-on' ? ' aria-current="step"' : '') + '><span class="f-dot">' + d + '</span>' + n.replace(' + ', ' +<br> ').replace('Tu presupuesto', 'Tu<br> presupuesto') + '</' + (c !== 'is-on' ? 'button' : 'div') + '></li>';
     }).join('');
   }
   /* Arriba de cada paso: "Donde podes ahorrar" (reemplaza a "Tu viaje hasta ahora"). */
@@ -2915,9 +2925,9 @@
       '<p class="td-pr"><b>' + f(e.precio) + '</b> ' + (e.pp ? 'por persona' : 'por vehículo') + '</p>' +
       '<button type="button" class="g-btn ' + (on ? '' : 'g-btn--main') + '" data-extra="' + e.id + '" data-cerrar-det="1">' + (on ? 'Sacar de mi viaje' : 'Sumar a mi viaje') + '</button></div>';
   }
-  function ir(p, motivo) {
+  function ir(p, motivo, sub) {
     if (p === 1 && MODO === 'auto') { location.href = 'home-calcular.html?' + new URLSearchParams({ destino: destKey, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, modo: 'auto', fuente: 'destino_auto', origen_home: qs.get('origen_home') || '' }).toString() + (debug ? '&debug=1' : ''); return; }
-    if (p === 1) S.sub = S.paso === 2 ? 't' : 'v';
+    if (p === 1) S.sub = sub || (S.paso === 2 ? 't' : 'v');
     S.paso = p; S.reservar = false; S.modal = null; pintarModal(); paginaVirtual(p);
     if (p === 2 && !S.hotelesListos) cargarHoteles();
     render(true);
@@ -3043,7 +3053,7 @@
   });
   $('steps').addEventListener('click', function (e) {
     var rb = e.target.closest('[data-reintentar-bus]'); if (rb) { cargarBus(); return; }
-    var b = e.target.closest('[data-ir]'); if (b) ir(+b.dataset.ir, 'indicador');
+    var b = e.target.closest('[data-ir]'); if (b) ir(+b.dataset.ir, 'indicador', b.dataset.sub);
   });
   /* Copiar el codigo del viaje (paso 7). */
   $('main').addEventListener('click', function (e) {
