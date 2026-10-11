@@ -1757,6 +1757,9 @@
     if (MODO === 'bus') return pantallaBus();
     /* Recomendados: solo los que de verdad convienen (hasta 3), sin "Ver mas". Los otros filtros: 3 y "Ver mas opciones". */
     var esRec = S.fVuelo === 'rec', vs = ordenarVuelos(), visibles = esRec ? vs.slice(0, VUELOS.length ? recomendados().length : 3) : (S.verMasVuelos ? vs : vs.slice(0, 3));
+    /* El vuelo elegido se ve siempre, aunque el filtro o el corte de la lista lo dejaran afuera. */
+    var vSel = VUELOS.filter(function (v) { return v.id === S.vuelo; })[0];
+    if (vSel && visibles.indexOf(vSel) < 0) visibles = visibles.concat(vSel);
     var idBarato = VUELOS.length > 1 ? masBarato().id : '';
     var cambiarFechas = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
     var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
