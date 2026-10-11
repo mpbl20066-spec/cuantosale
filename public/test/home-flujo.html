@@ -2279,7 +2279,7 @@
     var precioTours = toursSel.length ? f(sum(toursSel, precioExtra)) : (desdeTours ? 'Desde ' + f(desdeTours) : '');
     var fila = function (o) {
       var hecho = o.k && S.res[o.k];
-      var btn = o.accion ? '<button type="button" class="rv2-btn' + (o.externo ? '' : ' rv2-btn--cs') + '" data-reservar="' + o.accion + '">' + o.btn + (o.externo ? ic(iExt, 16) : ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 16)) + '</button>' : '';
+      var btn = o.accion ? '<button type="button" class="rv2-btn' + (o.externo ? '' : ' rv2-btn--cs') + '" data-reservar="' + o.accion + '">' + o.btn + (o.externo ? '' : ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 16)) + '</button>' : '';
       return '<li class="rv2-r' + (hecho ? ' is-ok' : '') + '"><span class="rv2-i" aria-hidden="true">' + ic(o.ico, 22) + '</span>' +
         '<div class="rv2-t"><b>' + o.n + (hecho ? ' <span class="pz-tag">Reservado ✓</span>' : '') + '</b><span class="rv2-prov">' + o.prov + '</span><small>' + o.det + '</small>' +
         (o.precio ? '<strong>' + o.precio + '</strong>' : '') + '</div>' + btn + '</li>';
