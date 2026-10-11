@@ -61,7 +61,7 @@
   .u-cerrada{margin:14px 18px 0;padding:18px;border:1px dashed var(--line);border-radius:18px;background:var(--surface);text-align:center}
   .u-cerrada b{display:block;font-family:var(--fh);font-size:16px;margin-bottom:5px}
   .u-cerrada small{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.5}
-  /* Candado por XP: la guia entera se abre en Mochilero (50 XP), con sesion. */
+  /* Candado: la guia se abre con sesion iniciada (sin XP). */
   .u-lock{margin:16px 0 0;padding:20px 18px;border:1.5px solid var(--line);border-radius:20px;background:var(--surface);text-align:center}
   .u-lock__ico{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 10px;border-radius:50%;background:var(--cel-soft);color:var(--azul)}
   .u-lock h2{margin:0 0 6px;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
@@ -214,23 +214,17 @@
     }).catch(function () { el.remove(); });
   }
 
-  /* Sin sesion o con menos de 50 XP: cuanto falta, como se suma y que trae la guia (en numeros, sin contenido). */
+  /* Sin sesion: que trae la guia (en numeros, sin contenido) y el boton para iniciar sesion. */
   function candado() {
-    var L = S.lock || {}, nec = L.xpNecesario || 50, xp = Math.min(L.xp || 0, nec), sinSesion = L.motivo === 'sesion', inc = L.incluye || {};
+    var inc = (S.lock || {}).incluye || {};
     var ico = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M12 14.5v2.5"/></svg>';
     var trae = [[inc.playas, 'playa', 'playas'], [inc.atracciones, 'lugar para ver', 'lugares para ver'], [inc.hacer, 'cosa para hacer', 'cosas para hacer'], [inc.comer, 'dato para comer', 'datos para comer'], [inc.tips, 'tip local', 'tips locales']]
       .filter(function (x) { return x[0] > 0; }).map(function (x) { return '<span class="u-lock__chip"><b>' + x[0] + '</b> ' + (x[0] === 1 ? x[1] : x[2]) + '</span>'; }).join('');
     return '<div class="u-lock"><span class="u-lock__ico">' + ico + '</span>' +
-      '<h2>La guía de ' + esc(NOM) + ' se abre con ' + nec + ' XP</h2>' +
+      '<h2>Iniciá sesión para ver la guía de ' + esc(NOM) + '</h2>' +
       (trae ? '<div class="u-lock__trae" aria-label="Qué incluye la guía">' + trae + '</div>' : '') +
-      '<p>' + (sinSesion ? 'Iniciá sesión y llegá al nivel Mochilero 🎒 para abrir todas las guías, con fotos, mapa y cómo llegar a cada lugar.'
-        : 'Llegá al nivel Mochilero 🎒 y se abren todas las guías, con fotos, mapa y cómo llegar a cada lugar.') + '</p>' +
-      (sinSesion ? '' : '<div class="u-lock__bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + nec + '" aria-valuenow="' + xp + '"><i style="width:' + Math.round(xp / nec * 100) + '%"></i></div>' +
-        '<span class="u-lock__n">' + xp + ' / ' + nec + ' XP · te faltan ' + (nec - xp) + '</span>') +
-      '<ul><li><b>+25</b>Guardar un viaje</li><li><b>+15</b>Compartir un viaje o dividir los gastos</li><li><b>+15</b>Abrir un destino nuevo</li><li><b>+5</b>Entrar cada día</li></ul>' +
-      (sinSesion ? '<button type="button" class="u-lock__cta" data-login="1" data-evento="guia_bloqueada_login">Iniciar sesión</button>'
-        : '<a class="u-lock__cta" href="home-destino.html?destino=' + K + '&fuente=guia_xp" data-evento="guia_bloqueada_sumar_xp">Armar un viaje y sumar XP</a>' +
-          '<button type="button" class="u-lock__sec" data-pasaporte="1" data-evento="guia_bloqueada_pasaporte">Ver mi pasaporte</button>') + '</div>';
+      '<p>Con tu cuenta se abren todas las guías, con fotos, mapa y cómo llegar a cada lugar. Es gratis.</p>' +
+      '<button type="button" class="u-lock__cta" data-login="1" data-evento="guia_bloqueada_login">Iniciar sesión</button></div>';
   }
 
   function pintar() {
@@ -258,8 +252,8 @@
     montarMapa();
   }
 
-  /* La guia se pide en dos pasos: primero el token, que el server firma solo con sesion y 50 XP (emitirTokenGuia en
-     server.js), y despues el contenido. 401/403 del token son el candado, con lo que falta; 503 es la guia cerrada. */
+  /* La guia se pide en dos pasos: primero el token, que el server firma solo con sesion (emitirTokenGuia en
+     server.js), y despues el contenido. 401/403 del token son el candado; 503 es la guia cerrada. */
   function pedirGuia() {
     var d = encodeURIComponent(K);
     var sesion = window.CSCuenta ? CSCuenta.token() : Promise.resolve('');
@@ -269,7 +263,7 @@
         return r.ok ? r.json() : null;
       })
       .then(function (tk) {
-        if (tk && tk.lock) { S.lock = tk.lock; S.region = tk.lock.region || ''; S.estado = 'bloqueada'; track('guia_bloqueada', { motivo: tk.lock.motivo || '', xp: tk.lock.xp || 0 }); pintar(); return; }
+        if (tk && tk.lock) { S.lock = tk.lock; S.region = tk.lock.region || ''; S.estado = 'bloqueada'; track('guia_bloqueada', { motivo: tk.lock.motivo || '' }); pintar(); return; }
         if (!tk || !tk.token) { S.estado = 'cerrada'; pintar(); return; }
         return fetch('/api/guia?dest=' + d + '&token=' + encodeURIComponent(tk.token))
           .then(function (r) { if (r.status === 403 || r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -290,11 +284,10 @@
     if (t.id === 'atras') { location.href = 'home-guias.html' + (debug ? '?debug=1' : ''); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
     if (t.dataset.login) { if (window.CSCuenta) CSCuenta.abrir(); return; }
-    if (t.dataset.pasaporte) { if (window.CS_GAME) CS_GAME.abrir(); return; }
     if (t.dataset.volver) { $('main').scrollTop = 0; track('guia_volver'); }
   });
   pintar();
-  /* cuenta.js, gamificacion.js y los creditos de las fotos cargan despues de este script: se espera a que carguen
+  /* cuenta.js y los creditos de las fotos cargan despues de este script: se espera a que carguen
      (load, por el defer de los creditos). Al iniciar sesion con la guia bloqueada se vuelve a pedir. */
   window.addEventListener('load', function () {
     pedirGuia();
@@ -305,7 +298,5 @@
 <script src="cuenta.js"></script>
 <script src="cabecera.js"></script>
 <script defer src="/creditos-fotos.generated.js"></script>
-<link rel="stylesheet" href="/gamificacion.css?v=6">
-<script src="/gamificacion.js?v=7"></script>
 </body>
 </html>
