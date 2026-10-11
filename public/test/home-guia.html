@@ -145,11 +145,11 @@
         return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + '</button>';
       }).join('') + '</div>' +
       '<div role="tabpanel">' + listaGuia() + '</div>' +
-      (S.guia.temporada && S.guia.temporada.nota ? '<h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div>' : '') +
+      '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
       '<div class="u-handoff"><h2>¿Te gusta este destino?</h2>' +
       '<p>Calculá cuánto sale tu viaje y reservá en pocos pasos.</p>' +
       '<div class="u-handoff__b"><a class="u-go" href="home-destino.html?destino=' + K + '&fuente=guia" data-evento="guia_calcular_viaje" data-destino="' + K + '">Calcular un viaje →</a>' +
-      '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver a la guía</button></div></div>';
+      '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver a la guía</button></div></div></div>';
     $('main').innerHTML = cabecera() + '<div class="u-cuerpo">' + cuerpo + '</div>';
     $('foot').innerHTML = S.estado === 'cerrada' ? '<a class="u-go" style="display:block;padding:15px;border-radius:14px;text-align:center;font-weight:800;text-decoration:none;background:var(--action-bg);color:var(--action-ink)" href="home-destino.html?destino=' + K + '&fuente=guia_cerrada">Buscar otro destino</a>' : '';
     document.title = NOM + ' · Guía de viaje · CuántoSale';

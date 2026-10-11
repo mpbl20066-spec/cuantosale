@@ -337,17 +337,28 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="guias"] .g-lista{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (min-width:768px){
-  [data-pagina="guia"] .u-main{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);column-gap:34px;align-content:start;padding:0}
-  [data-pagina="guia"] .u-hero{grid-column:1;grid-row:1/span 6;position:sticky;top:0;height:min(560px,calc(100vh - 120px));border-radius:22px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.28)}
-  [data-pagina="guia"] .u-hero__t{left:20px;right:20px;bottom:18px}
-  [data-pagina="guia"] .u-hero__t h1{font-size:32.5px}
+  /* Guia en PC: una sola columna centrada. Arriba la foto ancha con el nombre; abajo el resumen, las pestanas
+     y las tarjetas en dos columnas; al final "Cuando conviene ir" y "Te gusta este destino" lado a lado. */
+  [data-pagina="guia"] .u-main{display:block;padding:0 var(--gut,24px)}
+  [data-pagina="guia"] .u-hero{position:relative!important;top:auto!important;max-width:1080px;height:clamp(260px,30vw,360px);margin:0 auto;border-radius:24px;overflow:hidden;background-position:center 60%;box-shadow:0 14px 34px rgba(0,0,0,.22)}
+  [data-pagina="guia"] .u-hero::after{background:linear-gradient(180deg,transparent 35%,rgba(10,16,26,.72) 100%)}
+  [data-pagina="guia"] .u-hero__t{left:32px;right:32px;bottom:26px}
+  [data-pagina="guia"] .u-hero__t h1{font-size:clamp(34px,2.4vw + 14px,46px)}
   [data-pagina="guia"] .u-hero__t small{font-size:15px}
-  [data-pagina="guia"] .u-cuerpo{grid-column:2;padding:0 0 40px}
-  [data-pagina="guia"] .u-lead{margin-top:0}
-  [data-pagina="guia"] .u-handoff{margin:26px 0 0}
+  [data-pagina="guia"] .u-hero__vol{display:inline-block;margin-top:10px;padding:5px 12px;border-radius:99px;background:rgba(10,16,26,.55);font-size:13px}
+  [data-pagina="guia"] .u-cuerpo{max-width:1080px;margin:0 auto;padding:22px 0 48px;box-sizing:border-box}
+  [data-pagina="guia"] .u-lead{max-width:760px;margin:0 0 6px}
+  [data-pagina="guia"] .u-tabs{top:65px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+  [data-pagina="guia"] [role="tabpanel"]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
+  [data-pagina="guia"] [role="tabpanel"]>.u-h2,[data-pagina="guia"] [role="tabpanel"]>.u-cargando{grid-column:1/-1;margin-bottom:0}
+  [data-pagina="guia"] [role="tabpanel"]>.u-item{margin:0}
+  [data-pagina="guia"] .u-cierre{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end;margin-top:14px}
+  [data-pagina="guia"] .u-cierre>:only-child{grid-column:1/-1}
+  [data-pagina="guia"] .u-cuando .u-item{margin:0}
+  [data-pagina="guia"] .u-handoff{margin:0}
   [data-pagina="guia"] .u-cerrada{margin:0}
   /* volver: boton visible sobre el fondo (la flecha blanca suelta no se veia en modo claro) */
-  [data-pagina="guia"] .u-bar{padding:12px 0 14px}
+  [data-pagina="guia"] .u-bar{position:relative!important;left:auto;right:auto;width:min(1080px,calc(100% - 2 * var(--gut,24px)));margin:0 auto;padding:14px 0 12px!important;background:transparent!important;box-sizing:border-box}
   [data-pagina="guia"] .u-back{width:auto;height:38px;margin:0;padding:0 14px 0 8px;gap:4px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:13.5px;font-weight:700}
   [data-pagina="guia"] .u-back::after{content:"Todas las guías"}
   [data-pagina="guia"] .u-back svg{stroke:currentColor;filter:none}
