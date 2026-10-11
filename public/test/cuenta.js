@@ -64,7 +64,7 @@
   function poner(u) {
     var cambio = (usuario && usuario.id) !== (u && u.id);
     usuario = u;
-    if (cambio && u) alcSync();
+    if (cambio && u) { alcSync(); recSync(); }
     if (cambio) oyentes.forEach(function (fn) { try { fn(usuario); } catch (e) { /* un oyente no rompe a los demas */ } });
     if (panelAbierto()) pintar();
   }
@@ -193,6 +193,35 @@
     var j = (a.aportes || []).reduce(function (t, x) { return t + (+x.usd || 0); }, 0), p = Math.floor(j / a.meta * 100);
     return (p >= 100 ? '¡Meta cumplida! ' : p + '% juntado · ') + String(a.destName || a.dest);
   }
+
+  /* ---------- Busquedas recientes ----------
+     Las mismas de la app de la raiz (recientes.js): clave cs_recientes_v1 en el navegador y, con sesion, user_metadata.busquedas_recientes
+     para que sigan en otro dispositivo. Cada entrada: { dest, destLabel, dep, ret, pax, transport, t }. Maximo 4, las mas nuevas primero. */
+  var KR = 'cs_recientes_v1', MAXR = 4;
+  function recLocal() { try { var l = JSON.parse(localStorage.getItem(KR) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
+  function recRemota() { var l = usuario && usuario.user_metadata && usuario.user_metadata.busquedas_recientes; return Array.isArray(l) ? l : []; }
+  function recLimpiar(l) {
+    var vistos = {};
+    return l.filter(function (b) { return b && b.dest && b.t; }).sort(function (a, b) { return b.t - a.t; })
+      .filter(function (b) { var k = [b.dest, b.dep, b.ret, b.pax, b.transport].join('|'); if (vistos[k]) return false; vistos[k] = 1; return true; })
+      .slice(0, MAXR);
+  }
+  function recLeer() { return recLimpiar(recRemota().concat(recLocal())); }
+  function recGuardarTodo(l) {
+    try { localStorage.setItem(KR, JSON.stringify(l)); } catch (e) { /* modo privado */ }
+    if (!usuario || JSON.stringify(recLimpiar(recRemota())) === JSON.stringify(l)) return Promise.resolve(false);
+    return iniciar().then(function () { return cliente.auth.updateUser({ data: { busquedas_recientes: l } }); })
+      .then(function (r) { if (r.error) throw r.error; poner(r.data.user); return true; });
+  }
+  /* Una busqueda nueva del mismo destino reemplaza a la anterior de ese destino. */
+  function recAnotar(b) {
+    b.t = Date.now();
+    return recGuardarTodo(recLimpiar([b].concat(recLeer().filter(function (x) { return x.dest !== b.dest; })))).catch(function () { /* queda en el navegador */ });
+  }
+  /* Al entrar (o al volver con sesion): se unen las del navegador con las de la cuenta. Tambien sube las que se anotaron
+     justo antes de cambiar de pagina, cuando el pedido a la cuenta no llego a salir. */
+  function recSync() { recGuardarTodo(recLeer()).catch(function () { /* se reintenta en la proxima */ }); }
+  function recBorrar() { return recGuardarTodo([]).catch(function () { /* queda borrada en el navegador */ }); }
 
   /* ---------- Panel ---------- */
   var S = { vista: 'menu', cargando: false, viajes: null, error: '', aviso: '', enviando: false, correo: '' };
@@ -385,5 +414,5 @@
   /* Si la persona vuelve del login (Google o link del correo), la sesion se levanta sola; basta con iniciar en segundo plano. */
   if (/[?&#](code|access_token|error_description)=/.test(location.search + location.hash) || (function () { try { return Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); }); } catch (e) { return false; } })()) iniciar().catch(function () { /* sin cuenta: la pagina funciona igual */ });
 
-  window.CSCuenta = { alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
+  window.CSCuenta = { alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
 })();

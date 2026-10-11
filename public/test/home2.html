@@ -383,6 +383,24 @@
   .q-fila[data-est="casi"] img,.q-fila[data-est="no"] img{filter:grayscale(1)}
   .q-fila[data-est="x"] .q-est{border-style:dashed}
   .q-fila{will-change:transform}
+  .q-mas{display:block;width:100%;margin:0 0 12px;padding:12px;border-radius:14px;border:2px dashed var(--line);background:transparent;color:var(--hx-navy);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+  .q-mas:hover{border-color:#F5C518}
+  .q-mas:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  /* ---- Tus busquedas recientes: en el celular una fila que se desliza; en la PC debajo de la calculadora ---- */
+  .q-rec{margin:0 0 18px}
+  .q-rec__h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .q-rec__h h2{margin:0;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--hx-navy)}
+  .q-rec__h button{padding:4px 2px;border:0;background:none;color:var(--ink2);font:inherit;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .q-rec ul{display:flex;gap:10px;margin:0 -16px;padding:2px 16px 6px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .q-rec ul::-webkit-scrollbar{display:none}
+  .q-rec li{flex:none;width:min(78%,260px);scroll-snap-align:start}
+  .q-rec a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;border:2px solid var(--line);background:var(--surface,#fff);color:var(--ink);text-decoration:none;transition:border-color .2s}
+  .q-rec a:hover{border-color:#F5C518}
+  .q-rec a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  .q-rec img{flex:none;width:40px;height:40px;border-radius:10px;object-fit:cover}
+  .q-rec span{flex:1;min-width:0;font-family:var(--fh);font-size:14px;font-weight:800;line-height:1.2;color:var(--hx-navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .q-rec small{display:block;margin-top:2px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--ink2);overflow:hidden;text-overflow:ellipsis}
+  .q-rec i{flex:none;font-style:normal;font-weight:800;color:var(--hx-navy)}
   .q-nota{margin:0 0 12px;font-size:12px;line-height:1.5;color:var(--ink2)}
   .q-alt{display:block;margin-top:0;padding:12px 0;text-align:center;font-size:14px;font-weight:700;color:var(--hx-navy);text-decoration:underline;text-underline-offset:3px}
   .q-alt:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
@@ -394,12 +412,16 @@
     .q{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:56px;align-items:start;max-width:1120px;padding:28px 0 40px}
     .q-eye,.q-h{grid-column:1/-1}
     .q-h{margin-bottom:28px;font-size:40px}
-    .q-caja{grid-column:1;grid-row:3/span 4;margin:0;padding:24px 24px 18px}
+    .q-izq{grid-column:1;grid-row:3/span 5;position:sticky;top:16px}
+    .q-caja{margin:0;padding:24px 24px 18px}
+    .q-rec{margin:24px 0 0}
+    .q-rec ul{flex-direction:column;margin:0;padding:0;overflow:visible}
+    .q-rec li{width:auto}
     .q-monto b{font-size:52px}
     .q-cuenta{grid-column:2;grid-row:3}
     .q-lista{grid-column:2;grid-row:4}
-    .q-nota{grid-column:2;grid-row:5}
-    .q-alt{grid-column:2;grid-row:6;text-align:left}
+    .q-mas{grid-column:2;grid-row:5}
+    .q-nota{grid-column:2;grid-row:6}
   }
   /* ---- Dos caminos al mismo nivel: por la plata o eligiendo el destino ---- */
   .q-camino{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:640px;margin:14px auto 4px}
@@ -458,27 +480,25 @@
       <p class="q-eye">Primero la plata, después el viaje</p>
       <h1 class="q-h">¿Con cuánta plata contás? <em>Te decimos a dónde llegás.</em></h1>
 
-      <div class="q-caja">
-        <div class="q-monto"><b id="q-monto" aria-live="polite">—</b><small>por persona</small></div>
-        <div class="q-slide">
-          <input type="range" id="q-rango" min="300" max="3000" step="50" value="900" aria-label="Cuánta plata tenés por persona" disabled>
+      <div class="q-izq">
+        <div class="q-caja">
+          <div class="q-monto"><b id="q-monto" aria-live="polite">—</b><small>por persona</small></div>
+          <div class="q-slide">
+            <input type="range" id="q-rango" min="300" max="3000" step="50" value="900" aria-label="Cuánta plata tenés por persona" disabled>
+          </div>
+          <div class="q-ejes" aria-hidden="true"><span>poco</span><span>mucho</span></div>
+          <div class="q-params">
+            <div class="q-step" role="group" aria-label="Cantidad de personas"><span>Personas</span><div><button type="button" data-p="pax" data-d="-1" aria-label="Una persona menos">−</button><b id="q-pax" aria-live="polite">2</b><button type="button" data-p="pax" data-d="1" aria-label="Una persona más">+</button></div></div>
+            <div class="q-step" role="group" aria-label="Cantidad de noches"><span>Noches</span><div><button type="button" data-p="noches" data-d="-1" aria-label="Una noche menos">−</button><b id="q-noches" aria-live="polite">7</b><button type="button" data-p="noches" data-d="1" aria-label="Una noche más">+</button></div></div>
+          </div>
         </div>
-        <div class="q-ejes" aria-hidden="true"><span>poco</span><span>mucho</span></div>
-        <div class="q-params">
-          <div class="q-step" role="group" aria-label="Cantidad de personas"><span>Personas</span><div><button type="button" data-p="pax" data-d="-1" aria-label="Una persona menos">−</button><b id="q-pax" aria-live="polite">2</b><button type="button" data-p="pax" data-d="1" aria-label="Una persona más">+</button></div></div>
-          <div class="q-step" role="group" aria-label="Cantidad de noches"><span>Noches</span><div><button type="button" data-p="noches" data-d="-1" aria-label="Una noche menos">−</button><b id="q-noches" aria-live="polite">7</b><button type="button" data-p="noches" data-d="1" aria-label="Una noche más">+</button></div></div>
-        </div>
+        <section class="q-rec" id="q-rec" aria-labelledby="q-rec-t" hidden></section>
       </div>
 
       <div class="q-cuenta"><b id="q-n">Calculando…</b><span id="q-sub">Armando tu mapa de posibilidades</span></div>
 
-      <ol class="q-lista" id="q-lista">
-        <li><a class="q-fila" data-destino="rio" href="home-destino.html?destino=rio&fuente=home_plata"><img src="dest/rio-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Río de Janeiro<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="fln" href="home-destino.html?destino=fln&fuente=home_plata"><img src="dest/fln-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Florianópolis<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="buz" href="home-destino.html?destino=buz&fuente=home_plata"><img src="dest/buz-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Búzios<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="bcm" href="home-destino.html?destino=bcm&fuente=home_plata"><img src="dest/bcm-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Balneário Camboriú<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="bombinhas" href="home-destino.html?destino=bombinhas&fuente=home_plata"><img src="dest/bombinhas-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Bombinhas<small>Brasil</small></span><span class="q-est">…</span></a></li>
-      </ol>
+      <ol class="q-lista" id="q-lista"></ol>
+      <button type="button" class="q-mas" id="q-mas" hidden></button>
       <p class="q-nota" id="q-nota"></p>
     </section>
 
@@ -516,6 +536,7 @@
   </nav>
 </div>
 <script>window.mockTrack = function () {}; /* home2: sin medicion */</script>
+<script src="destinos-datos.js"></script>
 <script>
 (function () {
   /* selector de moneda (el de cuantosale.uy) en la barra */
@@ -553,7 +574,28 @@
   /* Tu plata manda: los precios por persona vienen del mismo endpoint que usa la app; nunca se muestran,
      solo deciden si cada destino "llega" con la plata elegida. Sin respuesta del servidor no se inventa nada. */
   var rango = document.getElementById('q-rango'), lista = document.getElementById('q-lista'), PP = {}, MODO = {}, antes = {};
+  /* Los 40 destinos de la app (destinos-datos.js). Se ven primero los que llegan (ordenados por precio) y el resto
+     queda detras de "Ver los 40 destinos", asi la lista no se hace eterna. */
+  var DESTS = window.CS_DESTS || [], VISIBLES = 6, todos = false;
+  var CHICAS = { rio: 1, fln: 1, buz: 1, bcm: 1, bombinhas: 1 };   /* las que tienen miniatura de 120 px */
+  function fotoDe(k) { return CHICAS[k] ? 'dest/' + k + '-120.jpg' : '../fotos/' + k + '.jpg'; }
+  function escH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var REGION = {};
+  lista.innerHTML = DESTS.map(function (d) {
+    REGION[d.k] = d.region || 'Brasil';
+    return '<li><a class="q-fila" data-destino="' + escH(d.k) + '" href="home-destino.html?destino=' + encodeURIComponent(d.k) + '&fuente=home_plata"><img src="' + fotoDe(d.k) + '" width="54" height="54" loading="lazy" decoding="async" alt=""><span class="q-nom">' + escH(d.name) + '<small>' + escH(REGION[d.k]) + '</small></span><span class="q-est">…</span></a></li>';
+  }).join('');
   var filas = Array.prototype.slice.call(lista.querySelectorAll('.q-fila'));
+  var mas = document.getElementById('q-mas');
+  mas.addEventListener('click', function () { todos = !todos; ordenar(); if (!todos) document.getElementById('q').scrollIntoView({ block: 'start', behavior: quieto ? 'auto' : 'smooth' }); });
+  /* Ordena por precio (los sin precio al final) y muestra los primeros, o todos si se pidio. */
+  function ordenar() {
+    var orden = filas.slice().sort(function (a, b) { return (PP[a.dataset.destino] || 1e9) - (PP[b.dataset.destino] || 1e9); });
+    orden.forEach(function (fi, i) { var li = fi.parentNode; li.hidden = !todos && i >= VISIBLES; lista.appendChild(li); });
+    mas.hidden = filas.length <= VISIBLES;
+    mas.textContent = todos ? 'Ver menos' : 'Ver los ' + filas.length + ' destinos';
+    mas.setAttribute('aria-expanded', String(todos));
+  }
   var fm = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
   function estado(pp, b) { return pp <= b * 0.85 ? 'ok' : (pp <= b ? 'justo' : (pp <= b * 1.2 ? 'casi' : 'no')); }
   var TXT = { ok: 'Llegás', justo: 'Justo', casi: 'Casi', no: 'Todavía no' };
@@ -574,14 +616,14 @@
     document.getElementById('q-monto').textContent = fm(b);
     filas.forEach(function (fi) {
       var k = fi.dataset.destino, pp = PP[k], e = fi.querySelector('.q-est');
-      if (!(pp > 0)) { fi.dataset.est = hay ? 'no' : 'x'; e.textContent = hay ? 'Sin datos' : '…'; fi.parentNode.style.order = 9; return; }
-      var st = estado(pp, b); fi.dataset.est = st; e.textContent = TXT[st]; fi.parentNode.style.order = Math.round(pp / 10);
-      var sub = fi.querySelector('.q-nom small'); if (sub && EN[MODO[k]]) sub.textContent = 'Brasil · ' + EN[MODO[k]];
+      if (!(pp > 0)) { fi.dataset.est = hay ? 'no' : 'x'; e.textContent = hay ? 'Sin datos' : '…'; return; }
+      var st = estado(pp, b); fi.dataset.est = st; e.textContent = TXT[st];
+      var sub = fi.querySelector('.q-nom small'); if (sub && EN[MODO[k]]) sub.textContent = REGION[k] + ' · ' + EN[MODO[k]];
       if (st === 'ok' || st === 'justo') n++;
       if (celebrar && !quieto && (st === 'ok') && antes[k] !== 'ok') { fi.classList.remove('g-bote'); void fi.offsetWidth; fi.classList.add('g-bote'); chispasEn(fi); }
       antes[k] = st;
     });
-    if (!hay) return;
+    if (!hay) { ordenar(); return; }
     document.getElementById('q-n').textContent = n === 0 ? 'Todavía no llegás a ninguno' : 'Llegás a ' + n + ' de ' + filas.length;
     document.getElementById('q-sub').textContent = n === 0 ? 'Subí un poco la plata y se van encendiendo.' : (n === filas.length ? 'Te alcanza para todo. Elegí con el corazón.' : 'Los demás se encienden si subís la plata.');
   }
@@ -606,7 +648,7 @@
         if (mia !== gen) return;
         var nuevo = {}, modos = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { nuevo[it.key] = it.pp; modos[it.key] = it.mode; } });
         if (!Object.keys(nuevo).length) throw new Error('vacio');
-        PP = nuevo; MODO = modos; antes = {}; rango.disabled = false; pintar(false);
+        PP = nuevo; MODO = modos; antes = {}; rango.disabled = false; pintar(false); ordenar();
       })
       .catch(function () {
         if (mia !== gen) return;
@@ -625,6 +667,37 @@
     filas.forEach(function (fi) { fi.href = 'home-destino.html?' + new URLSearchParams({ destino: fi.dataset.destino, pax: P.pax, fuente: 'home_plata' }).toString(); });
   });
   pintar(false); nota(); cargar();
+
+  /* Tus busquedas recientes: las que se hicieron eligiendo destino y fechas (cuenta.js las guarda en el navegador y,
+     con sesion, en la cuenta). Tocar una vuelve a esa busqueda; si las fechas ya pasaron, abre el destino para elegir otras. */
+  var MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  var fc = function (s) { var q = String(s || '').split('-'); return q.length < 3 ? '' : +q[2] + ' ' + MES[+q[1] - 1]; };
+  var MODOQ = { flight: 'avion', auto: 'auto', roadtrip: 'auto', bus: 'bus' };
+  var NOMBRE = {}; DESTS.forEach(function (d) { NOMBRE[d.k] = d.name; });
+  function recientes() {
+    var sec = document.getElementById('q-rec'), R = window.CSCuenta && CSCuenta.recientes;
+    var l = R ? R.leer().filter(function (b) { return NOMBRE[b.dest]; }) : [];
+    if (!l.length) { sec.hidden = true; sec.innerHTML = ''; return; }
+    var m = new Date(); m.setDate(m.getDate() + 1);
+    var manana = m.getFullYear() + '-' + String(m.getMonth() + 1).padStart(2, '0') + '-' + String(m.getDate()).padStart(2, '0');
+    sec.innerHTML = '<div class="q-rec__h"><h2 id="q-rec-t">Tus búsquedas recientes</h2><button type="button" data-rec-borrar>Borrar</button></div><ul>' + l.map(function (b) {
+      var vale = b.dep >= manana && b.ret > b.dep, pax = +b.pax || 2;
+      var q = vale ? { destino: b.dest, ida: b.dep, vuelta: b.ret, pax: pax, fuente: 'home_reciente' } : { destino: b.dest, fuente: 'home_reciente' };
+      if (vale && MODOQ[b.transport]) q.modo = MODOQ[b.transport];
+      var det = (vale ? fc(b.dep) + ' – ' + fc(b.ret) : 'Elegí nuevas fechas') + ' · ' + pax + (pax === 1 ? ' persona' : ' personas');
+      return '<li><a href="home-destino.html?' + new URLSearchParams(q).toString() + '"><img src="' + fotoDe(b.dest) + '" width="40" height="40" loading="lazy" decoding="async" alt=""><span>' + escH(NOMBRE[b.dest]) + '<small>' + escH(det) + '</small></span><i aria-hidden="true">→</i></a></li>';
+    }).join('') + '</ul>';
+    sec.hidden = false;
+  }
+  document.getElementById('q-rec').addEventListener('click', function (e) {
+    if (!e.target.closest('[data-rec-borrar]')) return;
+    CSCuenta.recientes.borrar(); recientes();
+  });
+  /* cuenta.js se carga al final de la pagina: se pinta cuando esta, y otra vez si cambia la sesion. */
+  window.addEventListener('DOMContentLoaded', function () {
+    if (!window.CSCuenta || !CSCuenta.recientes) return;
+    CSCuenta.recientes.alCambiar(recientes); recientes();
+  });
 
 })();
 </script>

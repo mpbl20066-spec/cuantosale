@@ -592,6 +592,14 @@
     var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente });
     /* Avion: elegir vuelo. Auto: datos del auto, combustible, peajes y mapa. Bus: resultado del bus. */
     var m = mediosDe(destInfo()).indexOf(S.medio) >= 0 ? S.medio : 'avion';
+    /* Se anota en "Tus búsquedas recientes" de la portada. */
+    /* Si se entra con todo en el link, esto corre antes de que cargue cuenta.js: se anota directo en el navegador
+       (la misma clave) y cuenta.js la sube a la cuenta la proxima vez que haya sesion. */
+    try {
+      var rb = { dest: S.dest, destLabel: destInfo()[1], dep: S.ida, ret: S.vuelta, pax: S.pax, transport: { avion: 'flight', auto: 'auto', bus: 'bus' }[m], t: Date.now() };
+      if (window.CSCuenta) CSCuenta.recientes.anotar(rb);
+      else { var rl = JSON.parse(localStorage.getItem('cs_recientes_v1') || '[]'); localStorage.setItem('cs_recientes_v1', JSON.stringify([rb].concat((Array.isArray(rl) ? rl : []).filter(function (x) { return x && x.dest !== rb.dest; })).slice(0, 4))); }
+    } catch (e) { /* las recientes son accesorias */ }
     if (m === 'auto') { q.set('modo', 'auto'); q.set('fuente', 'destino_auto'); location.href = 'home-calcular.html?' + q.toString() + debugQ; return; }
     if (m === 'bus') { q.set('modo', 'bus'); q.set('fuente', 'destino_bus'); location.href = 'home-flujo.html?' + q.toString() + debugQ; return; }
     location.href = 'home-flujo.html?' + q.toString() + debugQ;

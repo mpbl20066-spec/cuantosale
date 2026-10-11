@@ -2553,7 +2553,8 @@ function cotizarTodos(req, res, url) {
  * salidas por Buenos Aires) para no prometer un precio con una conexión que
  * la app no va a mostrar.
  */
-const FEATURED_MAX_ITEMS = 12;
+// 40: la portada nueva ("¿Con cuánta plata contás?") pide los 40 destinos de una vez; son ~50 ms de cálculo.
+const FEATURED_MAX_ITEMS = 40;
 const FEATURED_HOTEL_TYPES = ['all-inclusive', 'resort', 'boutique', 'economico', 'intermedio', 'confort'];
 
 function featuredPriceItems(req, res, url) {
