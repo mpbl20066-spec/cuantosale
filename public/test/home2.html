@@ -8,6 +8,13 @@
 <link rel="icon" href="/icons/icon-192.png" type="image/png">
 <meta name="theme-color" content="#F7F8FA">
 <title>CuántoSale · ¿Con cuánta plata contás?</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CuántoSale">
+<meta property="og:title" content="CuántoSale · ¿Con cuánta plata contás?">
+<meta property="og:description" content="Armá tu viaje a Brasil desde Uruguay y mirá cuánto cuesta en total: vuelo, traslados, alojamiento y extras.">
+<meta property="og:url" content="https://cuantosale.uy/">
+<meta property="og:image" content="https://cuantosale.uy/og-cuantosale.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <script src="tema.js"></script>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -648,7 +655,7 @@
         if (mia !== gen) return;
         var nuevo = {}, modos = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { nuevo[it.key] = it.pp; modos[it.key] = it.mode; } });
         if (!Object.keys(nuevo).length) throw new Error('vacio');
-        PP = nuevo; MODO = modos; antes = {}; rango.disabled = false; pintar(false); ordenar();
+        PP = nuevo; MODO = modos; antes = {}; rango.disabled = false; pintar(false); ordenar(); enlaces(iso(dep), iso(ret));
       })
       .catch(function () {
         if (mia !== gen) return;
@@ -664,8 +671,16 @@
     var k = b.dataset.p; P[k] = Math.min(LIM[k][1], Math.max(LIM[k][0], P[k] + (+b.dataset.d)));
     nota(); clearTimeout(deb); deb = setTimeout(cargar, 350);
     /* los links llevan lo elegido */
-    filas.forEach(function (fi) { fi.href = 'home-destino.html?' + new URLSearchParams({ destino: fi.dataset.destino, pax: P.pax, fuente: 'home_plata' }).toString(); });
   });
+  /* Cada destino abre con lo mismo que se cotizo aca: personas, las mismas fechas (y por lo tanto noches) y el medio
+     con el que salio el precio. Antes solo llevaba destino y personas, y la pagina siguiente cotizaba otra cosa. */
+  function enlaces(ida, vuelta) {
+    filas.forEach(function (fi) {
+      var k = fi.dataset.destino, q = { destino: k, pax: P.pax, ida: ida, vuelta: vuelta, fuente: 'home_plata' };
+      if (MODO[k] === 'auto' || MODO[k] === 'bus') q.modo = MODO[k];
+      fi.href = 'home-destino.html?' + new URLSearchParams(q).toString();
+    });
+  }
   pintar(false); nota(); cargar();
 
   /* Tus busquedas recientes: las que se hicieron eligiendo destino y fechas (cuenta.js las guarda en el navegador y,

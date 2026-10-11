@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Maqueta — Armá tu viaje por etapas</title>
+<title>Armá tu viaje · CuántoSale</title>
 <script src="tema.js"></script>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -2214,6 +2214,9 @@
   var AHORRO_MIN = 15;
   function cargarBusAlt() {
     if (MODO !== 'avion' || S.busAlt !== undefined || !/^https?:$/.test(location.protocol)) return;
+    /* Solo si el destino tiene bus: si no, el pedido siempre volvia con 400 y llenaba la consola de errores. */
+    var dInfo = (window.CS_DESTS || []).filter(function (d) { return d.k === destKey; })[0];
+    if (!dInfo || (dInfo.medios || []).indexOf('bus') < 0) { S.busAlt = null; return; }
     S.busAlt = 'cargando';
     var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, budget: 99999, style: 'ahorro', hotel_type: 'economico', transport: 'bus' });
     fetch('/api/cotizar?' + q.toString()).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (j) {
