@@ -289,7 +289,7 @@
   function pintar() {
     if (!chips.length) return;
     var p = progreso();
-    var html = '<span class="gm-chip__ico" aria-hidden="true">' + NIVELES[p.i].ico + '</span><span class="gm-chip__nv">Nv ' + (p.i + 1) + '</span>' +
+    var html = '<span class="gm-chip__ico" aria-hidden="true">' + NIVELES[p.i].ico + '</span><span class="gm-chip__nv">Nv ' + (p.i + 1) + '</span><span class="gm-chip__xp">' + E.xp + ' XP</span>' +
       (E.racha > 1 ? '<span class="gm-chip__racha" aria-hidden="true">🔥' + E.racha + '</span>' : '') +
       '<span class="gm-chip__bar" aria-hidden="true"><i style="width:' + p.pct + '%"></i></span>';
     chips.forEach(function (chip) {

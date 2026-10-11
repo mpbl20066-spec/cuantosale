@@ -33,6 +33,7 @@
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     dl: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
     conv: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
+    pas: '<rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 17h6"/>',
     alc: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
     mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/>'
   };
@@ -245,7 +246,12 @@
     return '<div class="cp-top"><button type="button" class="cp-ico" data-' + (S.vista === 'menu' ? 'cerrar' : 'menu') + ' aria-label="' + (S.vista === 'menu' ? 'Cerrar' : 'Volver') + '">' + ic(S.vista === 'menu' ? I.x : I.back, 20) + '</button><h2 class="cp-h">' + esc(titulo) + '</h2><span style="width:36px"></span></div>';
   };
   function pie() {
-    return '<div class="cp-pie"><b>CuántoSale<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path transform="rotate(45 12 12)" d="M21 16v-2l-8-5V3.500c0-.8-.7-1.500-1.500-1.500S10 2.700 10 3.500V9l-8 5v2l8-2.500V19l-2 1.500V22l3.500-1 3.500 1v-1.500L13 19v-5.500z"/></svg></b><small>Tu viaje, sin sorpresas</small></div>';
+    return '<div class="cp-pie"><b><svg width="16" height="20" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale</b><small>Tu viaje, sin sorpresas</small></div>';
+  }
+  function xpResumen() {
+    var e = window.CS_GAME.estado(), niv = [0, 50, 150, 350, 700], n = 1;
+    niv.forEach(function (x, k) { if ((e.xp || 0) >= x) n = k + 1; });
+    return 'Nivel ' + n + ' · ' + (e.xp || 0) + ' XP' + (e.racha > 1 ? ' · racha ' + e.racha + ' días' : '');
   }
   function menu() {
     var u = usuario, nombre = primerNombre(u);
@@ -253,6 +259,7 @@
       ? '<button type="button" class="cp-head" data-editar data-foco><span class="cp-av">' + esc((nombre || '?').charAt(0).toUpperCase()) + '</span><span class="cp-head__t"><b>Hola, ' + esc(nombre || 'viajero') + '</b><small>Ver y editar tu perfil</small></span>' + ic(I.chev, 16) + '</button>'
       : '<button type="button" class="cp-head" data-login data-foco><span class="cp-av cp-av--v">' + ic(I.user, 24) + '</span><span class="cp-head__t"><b>Ingresá a CuántoSale</b><small>Guardá tus viajes y verlos en cualquier lado</small></span>' + ic(I.chev, 16) + '</button>';
     return cabecera('Mi cuenta') + encabezado + '<div class="cp-lista">' +
+      (window.CS_GAME ? fila(I.pas, 'Mi pasaporte<small class="cp-fila__s">' + esc(xpResumen()) + '</small>', 'data-pasaporte') : '') +
       fila(I.alc, 'Mi ahorro de viaje<small class="cp-fila__s">' + esc(alcResumen()) + '</small>', 'data-alcancia') +
       fila(I.save, 'Mis viajes guardados', 'data-viajes') +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
@@ -333,6 +340,7 @@
     if (t.hasAttribute('data-cerrar')) { cerrar(); return; }
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
     if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
+    if (t.hasAttribute('data-pasaporte')) { cerrar(); window.CS_GAME.abrir(); return; }
     if (t.hasAttribute('data-alcancia')) { location.href = '/test/home-ahorro.html'; return; }
     if (t.hasAttribute('data-dividir')) { location.href = '/grupo?volver=' + encodeURIComponent(location.pathname.indexOf('/test') === 0 ? '/test/' : (location.pathname.indexOf('/nuevo') === 0 ? '/nuevo/' : '/app')); return; }
     if (t.hasAttribute('data-login')) { ir('login'); return; }

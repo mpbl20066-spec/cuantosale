@@ -48,6 +48,7 @@ const travelpayouts = require('./lib/providers/travelpayouts');
 // commiteada: sin ella, un problema de Supabase sacaria la seccion de tours de
 // todas las propuestas.
 const tours = require('./lib/tours');
+const pedidosStore = require('./lib/pedidos');
 
 /*
  * Tasas de cambio para el selector de moneda.
@@ -2957,6 +2958,19 @@ function serveGrupoPage(req, res, groupId) {
   });
 }
 
+/* ---------- Panel /admin y pedidos ----------
+   adminPanel = login + API del panel (lib/admin.js). guardarPedido() es el gancho que
+   lib/reservas.js llama con cada pedido ya validado de POST /api/reserva-solicitud: lo
+   guarda en lib/pedidos.js para verlo en /admin. No tira nunca: si el almacenamiento
+   falla, el pedido igual sigue su camino (WhatsApp y email al asesor). */
+const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual });
+async function guardarPedido(cuerpo) {
+  try {
+    const r = await pedidosStore.crearPedido(pedidosStore.desdeSolicitud(cuerpo));
+    if (r.nuevo) adminPanel.avisarPedidoNuevo(r.pedido);
+  } catch (e) { console.error('[pedidos] no se pudo guardar el pedido para el panel:', e.message); }
+}
+
 function createServer() {
   return http.createServer(function (req, res) {
     // Red de seguridad para TODO el handler. Antes cada ruta tenía su propio
@@ -2997,7 +3011,8 @@ function handleRequest(req, res) {
     // seguían respondiendo 200 sin contraseña y devolvían cotizaciones reales,
     // consumiendo la cuota de SerpAPI y de Booking a nombre de cualquiera que
     // supiera la URL.
-    if (url.pathname.indexOf('/api/') === 0 && !PRELAUNCH_PUBLIC_API.has(url.pathname) && !PRELAUNCH_EXEMPT.has(url.pathname)) {
+    // /api/admin/* trae su propio login (usuario + contrasena + cookie firmada, lib/admin.js).
+    if (url.pathname.indexOf('/api/') === 0 && url.pathname.indexOf('/api/admin') !== 0 && !PRELAUNCH_PUBLIC_API.has(url.pathname) && !PRELAUNCH_EXEMPT.has(url.pathname)) {
       if (!prelaunchAuthorized(req)) return denyPrelaunchJson(res);
     }
     if (req.method === 'POST' && url.pathname === '/api/vuelos/buscar') {
@@ -3027,6 +3042,10 @@ function handleRequest(req, res) {
         return sendJson(res, 500, { error: e.message });
       });
     }
+    /* Panel de la agencia: API (lib/admin.js) y la pagina. Van antes del cortafuegos de POST. */
+    const adminApi = adminPanel.manejar(req, res, url);
+    if (adminApi) return adminApi;
+    if (/^\/admin\/?$/i.test(url.pathname)) return serveStatic(req, res, '/admin/index.html');
     if (req.method === 'POST' && url.pathname === '/api/reserva-whatsapp') {
       return postReservaWhatsapp(req, res).catch(function (e) {
         return sendJson(res, 500, { error: e.message });

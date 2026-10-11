@@ -4,6 +4,8 @@
 .gm-chip:focus-visible{outline:3px solid var(--focus,var(--accent));outline-offset:2px}
 .gm-chip__ico{font-size:15px;line-height:1}
 .gm-chip__racha{color:var(--coral);font-size:11px}
+.gm-chip__xp{display:none;font-size:12px;font-weight:700;color:var(--ink2)}
+@media (min-width:768px){.gm-chip__xp{display:inline}}
 .gm-chip__bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--line)}
 .gm-chip__bar i{display:block;height:100%;background:var(--accent);transition:width .5s ease}
 

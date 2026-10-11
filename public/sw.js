@@ -62,6 +62,8 @@ self.addEventListener('fetch', function (event) {
   // /test es la version nueva en desarrollo: siempre va a la red. Con cache-first, web.css y los scripts (que no llevan
   // ?v=) se quedaban para siempre en la copia vieja y los cambios de diseno no se veian aunque el servidor ya los tuviera.
   if (url.pathname === '/test' || url.pathname.indexOf('/test/') === 0) return;
+  // El panel de la agencia nunca se cachea ni se sirve sin red: tiene datos de clientes.
+  if (url.pathname === '/admin' || url.pathname.indexOf('/admin/') === 0) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).then(function (response) {
