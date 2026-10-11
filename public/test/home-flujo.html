@@ -1527,7 +1527,8 @@
   var vuelo = function () { return VUELOS.filter(function (v) { return v.id === S.vuelo; })[0] || SIN_VUELO; };
   var trPrecio = function (t) { return t.precio * (t.pp ? pax : Math.ceil(pax / 4)) * (S.tIV ? 2 : 1); };
   var trasl = function () { return TRASLADOS.filter(function (t) { return t.id === S.traslado; })[0]; };
-  var hotel = function () { return S.sinAloj ? SIN_HOTEL : (HOTELES.filter(function (h) { return h.id === S.hotel; })[0] || SIN_HOTEL); };
+  /* Mientras Booking no respondio, ningun hotel: los de la lista inicial son de ejemplo (de Florianopolis) y solo sirven sin servidor. */
+  var hotel = function () { return S.sinAloj || (/^https?:$/.test(location.protocol) && (!S.hotelesListos || S.cargandoH)) ? SIN_HOTEL : (HOTELES.filter(function (h) { return h.id === S.hotel; })[0] || SIN_HOTEL); };
   var extrasSel = function () { return todosExtras.filter(function (e) { return S.extras[e.id]; }); };
   var sum = function (a, fn) { return a.reduce(function (t, x) { return t + fn(x); }, 0); };
   /* Costo del transporte principal: vuelo + traslado, o el auto (combustible, peajes y otros), o el bus. */
@@ -3133,6 +3134,12 @@
   /* Rearma el viaje con otra fecha de salida (mismas noches). Solo se llama por un toque explicito en "Usar estas fechas". */
   function usarFecha(dep, desde) {
     var nq = new URLSearchParams(location.search); nq.set('ida', dep); nq.set('vuelta', sumarDias(dep, NOCHES)); nq.delete('paso');
+    /* Se mantiene lo elegido (transfer, categoria de alojamiento, tours, comidas) y se vuelve al mismo paso, con el
+       vuelo mas barato de la nueva fecha: es el que da el ahorro que se prometio. Antes se perdia todo y quedaba el
+       vuelo recomendado, que podia costar lo mismo que antes. */
+    var sa = seleccionActual();
+    nq.set('mant', JSON.stringify({ traslado: sa.traslado, tIV: sa.tIV, catH: sa.catH, sinAloj: sa.sinAloj, toursN: sa.toursN, dia: sa.dia, barato: 1 }));
+    if (S.paso >= 2 && S.paso <= 4) nq.set('paso', S.paso);
     track('flujo_calendario_usar_fechas', { fecha_nueva: dep, desde: desde });
     location.href = location.pathname + '?' + nq.toString();
   }
@@ -3228,7 +3235,8 @@
     if (p === 1 && MODO === 'auto') { location.href = 'home-calcular.html?' + new URLSearchParams({ destino: destKey, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, modo: 'auto', fuente: 'destino_auto', origen_home: qs.get('origen_home') || '' }).toString() + (debug ? '&debug=1' : ''); return; }
     if (p === 1) S.sub = sub || (S.paso === 2 ? 't' : 'v');
     S.paso = p; S.reservar = false; S.modal = null; pintarModal(); paginaVirtual(p);
-    if (p === 2 && !S.hotelesListos) cargarHoteles();
+    /* Tambien al saltar directo a Extras o al presupuesto (paso= en el link, cambio de fechas): sin esto quedaba el hotel de ejemplo. */
+    if (p >= 2 && !S.hotelesListos) cargarHoteles();
     if (p === 6 || p === 7) sincronizarPedidos();
     render(true);
     track('flujo_paso', { paso: p, nombre: NOMBRES[p - 1] || 'Reservar', motivo: motivo, total: Math.round(totalHastaAhora()) });
@@ -3464,6 +3472,17 @@
   CSCuenta.alCambiar(function (u) { if (u) restaurarPendiente(u); });
   sincronizarPedidos();
   if (!S.datos) { try { var dg = JSON.parse(localStorage.getItem('cs_datos_reserva') || 'null'); if (dg && dg.nombre) S.datos = { nombre: dg.nombre, pais: dg.pais || '+598', tel: dg.tel || '', mail: dg.mail || '', cupon: '' }; } catch (e) { /* modo privado */ } }
+  /* Cambio de fechas desde el calendario (usarFecha): mantiene lo elegido y toma el vuelo mas barato. */
+  (function () {
+    var raw = qs.get('mant'), m = null;
+    if (!raw || cf || qs.get('sel')) return;
+    try { m = JSON.parse(raw); } catch (e) { return; }
+    if (!m || typeof m !== 'object') return;
+    aplicarSeleccion(m).then(function () {
+      if (m.barato && VUELOS.length) S.vuelo = VUELOS.slice().sort(function (a, b) { return a.precio - b.precio; })[0].id;
+      render(false);
+    });
+  })();
   /* Viaje guardado: el link trae la seleccion (sel=...) y se abre en Estado de tu viaje con todo lo elegido
      (reemplaza la entrada del historial: atras desde ahi va a Tu presupuesto, no a la carga). */
   (function () {
