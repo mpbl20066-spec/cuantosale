@@ -2937,15 +2937,16 @@
     pintarPasos(); pintarTotal();
     if (S.paso === 4 && window.CSTarjeta) CSTarjeta.precalentar(datosTarjeta());
     $('main').dataset.paso = S.paso;
-    $('main').innerHTML = [null, pantalla1, pantalla2, pantalla3, pantalla4, pantalla5, pantalla6, pantalla7, pantalla8, pantalla9, pantalla10, pantalla11, pantalla12, pantalla13][S.paso]();
+    /* Abriendo un viaje guardado: hasta tener vuelos y hoteles se muestra solo un aviso (no el paso de vuelos) */
+    $('main').innerHTML = S.abriendo ? '<div class="cal-cargando" role="status" style="justify-content:center;padding:48px 16px"><span class="fl-spin" aria-hidden="true"></span>Abriendo tu viaje…</div>' : [null, pantalla1, pantalla2, pantalla3, pantalla4, pantalla5, pantalla6, pantalla7, pantalla8, pantalla9, pantalla10, pantalla11, pantalla12, pantalla13][S.paso]();
     /* data-paso y la clase es-oscuro: el cierre ("¡Listo!") se pinta entero en oscuro,
        como en la maqueta. Se marca aca y no con un if para que el CSS tenga un solo
        lugar donde decidir como se ve cada pantalla. */
     $('main').dataset.paso = S.paso;
     $('phone').classList.toggle('es-oscuro', S.paso === 5);
     document.documentElement.classList.toggle('cs-oscuro', S.paso === 5);
-    $('steps').hidden = S.paso >= 5;
-    $('foot').hidden = S.paso >= 5;
+    $('steps').hidden = S.paso >= 5 || !!S.abriendo;
+    $('foot').hidden = S.paso >= 5 || !!S.abriendo;
     if (S.paso < 5) { $('cta').textContent = S.paso === 1 && MODO === 'avion' && S.sub !== 't' ? 'Continuar a Transfer →' : CTAS[S.paso]; $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS) || (MODO === 'avion' && S.paso === 1 && !S.vuelo); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
     if (scrollTop) $('main').scrollTop = 0;
     marcarHistoria();
@@ -3405,13 +3406,16 @@
   CSCuenta.alCambiar(function (u) { if (u) restaurarPendiente(u); });
   sincronizarPedidos();
   if (!S.datos) { try { var dg = JSON.parse(localStorage.getItem('cs_datos_reserva') || 'null'); if (dg && dg.nombre) S.datos = { nombre: dg.nombre, pais: dg.pais || '+598', tel: dg.tel || '', mail: dg.mail || '', cupon: '' }; } catch (e) { /* modo privado */ } }
-  /* Viaje guardado: el link trae la seleccion (sel=...) y se abre en Tu presupuesto con todo lo elegido. */
+  /* Viaje guardado: el link trae la seleccion (sel=...) y se abre en Estado de tu viaje con todo lo elegido
+     (reemplaza la entrada del historial: atras desde ahi va a Tu presupuesto, no a la carga). */
   (function () {
     var raw = qs.get('sel'), s0 = null;
     if (!raw || cf) return;
     try { s0 = JSON.parse(raw); } catch (e) { return; }
     if (!s0 || typeof s0 !== 'object') return;
-    aplicarSeleccion(s0).then(function () { ir(4, 'viaje_guardado'); });
+    S.abriendo = true; render(true);
+    var abrir = function () { S.abriendo = false; histIni = true; ir(7, 'viaje_guardado'); histIni = false; };
+    aplicarSeleccion(s0).then(abrir, abrir);
   })();
 })();
 </script>

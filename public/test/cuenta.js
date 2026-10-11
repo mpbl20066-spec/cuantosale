@@ -338,6 +338,8 @@
     else cuerpo = S.viajes.map(function (t) {
       var fd = t.flight_details || {}, fechas = fdc(t.departure_date) + (t.return_date ? ' → ' + fdc(t.return_date) : '');
       var url = fd.fuente === 'test' && fd.url ? fd.url : '';
+      /* Si el link no trae lo elegido pero el viaje si lo guardo, se agrega: asi abre en Estado de tu viaje y no en el primer paso. */
+      if (url && fd.seleccion && !/[?&]sel=/.test(url)) url += (url.indexOf('?') < 0 ? '?' : '&') + 'sel=' + encodeURIComponent(JSON.stringify(fd.seleccion));
       /* Lo que se eligio al guardar (vuelo, transfer, alojamiento, tours), con el precio de ese momento. */
       var dt = fd.detalle, items = [];
       if (dt) {
