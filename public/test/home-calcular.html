@@ -194,11 +194,20 @@
     chev: '<path d="m9 5 7 7-7 7"/>'
   };
   /* Estado de la maqueta. Fechas por defecto: las del ejemplo de toda la maqueta. */
-  var S = { pant: 1, dest: qs.get('destino') || '', ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02', pax: Math.max(1, Math.min(9, +qs.get('pax') || 2)), modo: '', vt: 'combustion', cm: 'gol', em: 'byd_dolphin', kwhp: 0.35, pxs: 2, err: {} };
-  /* Los que viajan en el auto arrancan como las personas del viaje (el selector llega a 5). Con 2 fijo, quien venia
-     con 4 terminaba con el presupuesto de 2, porque al continuar pax toma este valor. */
-  S.pxs = Math.min(5, S.pax);
+  var S = { pant: 1, dest: /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : '', ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02', pax: Math.max(1, Math.min(9, +qs.get('pax') || 2)), modo: '', vt: 'combustion', cm: 'gol', em: 'byd_dolphin', kwhp: 0.35, pxs: 2, err: {} };
+  /* Los que viajan arrancan como las personas del viaje: al continuar, pax toma este valor. De 6 en adelante van
+     en 2 autos (PERSONAS_POR_AUTO del modelo): antes el selector cortaba en 5 y el viaje entero quedaba para 5. */
+  S.pxs = S.pax;
+  var autosPara = function (n) { return Math.ceil(n / 5); };
   var track = function (n, p) { var plano = Object.assign({ pantalla: S.pant, fuente: fuente, destino: S.dest || undefined, pasajeros: S.pax }, p || {}); window.mockTrack(n, plano); };
+  /* Ida desde mañana y vuelta despues de la ida. Sin esto un link con fechas pasadas o al reves seguia de largo
+     y el planificador mostraba "NaN noches" o ejemplos de hoteles porque Booking no cotiza el pasado. */
+  function errFechas() {
+    var re = /^\d{4}-\d{2}-\d{2}$/, man = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+    if (!re.test(S.ida || '') || !re.test(S.vuelta || '') || S.vuelta <= S.ida) return 'Elegí una fecha de ida y una de vuelta posterior.';
+    if (S.ida < man) return 'La fecha de ida tiene que ser a partir de mañana.';
+    return '';
+  }
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
   var debugQ = debug ? '&debug=1' : '';
 
@@ -212,7 +221,7 @@
   function gridDest() {
     var q = norm(S.q || '').trim(), lista;
     if (q) {
-      lista = DESTS.filter(function (d) { return norm(d[1]).indexOf(q) > -1 || norm(d[4]).indexOf(q) > -1; });
+      lista = DESTS.filter(function (d) { return norm(d[1]).indexOf(q) > -1 || norm(d[2]).indexOf(q) > -1; });
       return lista.length ? '<div class="c-dg">' + lista.map(function (d) { return tarjetaDest(d, 'busqueda'); }).join('') + '</div>' : '<p class="c-ej">No encontramos «' + esc(S.q) + '». Probá con otro nombre o región.</p>';
     }
     var pop = POPULARES.map(function (k) { return DESTS.filter(function (d) { return d[0] === k; })[0]; }).filter(Boolean);
@@ -221,7 +230,7 @@
   function todosDest() {
     if (norm(S.q || '').trim()) return '';
     var regs = [], por = {};
-    DESTS.forEach(function (d) { if (!por[d[4]]) { por[d[4]] = []; regs.push(d[4]); } por[d[4]].push(d); });
+    DESTS.forEach(function (d) { if (!por[d[2]]) { por[d[2]] = []; regs.push(d[2]); } por[d[2]].push(d); });
     return '<h2 class="c-h2">Todos los destinos</h2>' + regs.map(function (r) { return '<h3 class="c-h3">' + esc(r) + '</h3><div class="c-dg">' + por[r].map(function (d) { return tarjetaDest(d, 'lista'); }).join('') + '</div>'; }).join('');
   }
   function chipDest() {
@@ -282,7 +291,7 @@
             '<label class="c-fld" for="kwhp">Tarifa de carga (US$ por kWh)</label><input id="kwhp" class="c-sel" type="number" inputmode="decimal" min="0.05" max="2" step="0.01" value="' + S.kwhp + '">'
           : '<label class="c-fld" for="cm" style="margin-top:0">Modelo o consumo del auto</label><select id="cm" class="c-sel">' + sel(CAR_KMPL, S.cm) + '</select>') +
       '<div class="c-calc__t" id="calc">' + calcTxt() + '</div></div>' +
-      '<label class="c-fld" for="pxs">Personas que viajan</label><select id="pxs" class="c-sel">' + [1, 2, 3, 4, 5].map(function (n) { return '<option value="' + n + '"' + (S.pxs === n ? ' selected' : '') + '>' + n + (n === 1 ? ' persona' : ' personas') + '</option>'; }).join('') + '</select>';
+      '<label class="c-fld" for="pxs">Personas que viajan</label><select id="pxs" class="c-sel">' + [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<option value="' + n + '"' + (S.pxs === n ? ' selected' : '') + '>' + n + (n === 1 ? ' persona' : ' personas') + (n > 5 ? ' (2 autos)' : '') + '</option>'; }).join('') + '</select>';
     $('foot').innerHTML = '<button type="button" class="c-btn" data-calc="1">Calcular ruta</button>';
   }
   /* La distancia sale de RT_DATA (ruta-datos.js), el snapshot de roadtripCost del
@@ -301,8 +310,10 @@
     var r = (window.RT_DATA || {})[S.dest] || { distanceKm: 0, roundTripKm: 0, hours: 0, tollsUsd: 0 }, ev = S.vt === 'ev';
     /* Sin "Otros costos": el total de la ruta es combustible (o carga) + peajes, lo que se puede calcular. */
     var o = { km: r.roundTripKm, unaVia: r.distanceKm, horas: r.hours, peajes: r.tollsUsd, otros: 0, ev: ev };
-    if (ev) { var c = EV_CARS[S.em]; o.kwh = Math.round(r.roundTripKm / 100 * c[1] * 10) / 10; o.precioKwh = S.kwhp > 0 ? S.kwhp : 0.35; o.comb = Math.round(o.kwh * o.precioKwh); o.autonomia = Math.max(50, Math.round(c[2] * 0.8 / c[1] * 100)); }
-    else { var kmpl = CAR_KMPL[S.cm][1]; o.litros = Math.round(r.roundTripKm / kmpl * 10) / 10; o.comb = Math.round(o.litros * FUEL_USD); }
+    /* Combustible y peajes van por auto: con 6 o mas personas son 2 autos. */
+    o.autos = autosPara(S.pxs); o.peajes = r.tollsUsd * o.autos;
+    if (ev) { var c = EV_CARS[S.em]; o.kwh = Math.round(r.roundTripKm / 100 * c[1] * o.autos * 10) / 10; o.precioKwh = S.kwhp >= 0.05 && S.kwhp <= 2 ? S.kwhp : 0.35; o.comb = Math.round(o.kwh * o.precioKwh); o.autonomia = Math.max(50, Math.round(c[2] * 0.8 / c[1] * 100)); }
+    else { var kmpl = CAR_KMPL[S.cm][1]; o.litros = Math.round(r.roundTripKm / kmpl * o.autos * 10) / 10; o.comb = Math.round(o.litros * FUEL_USD); }
     o.sinOtros = o.comb + o.peajes; o.total = o.sinOtros + o.otros;
     return o;
   }
@@ -315,7 +326,7 @@
     var detComb = r.ev ? nf1(r.kwh) + ' kWh × US$ ' + nf1(r.precioKwh.toFixed(2)) + '/kWh' : nf1(r.litros) + ' litros × US$ ' + nf1(FUEL_USD.toFixed(2)) + '/l';
     $('main').innerHTML = '<div class="c-rt"><div class="c-rt__h"><h1>Tu ruta en auto</h1><p class="c-sub"><b>Montevideo → ' + esc(nombre) + '</b> · ida y vuelta</p></div>' +
       '<section class="c-rt__card"><div class="roadtrip-map c-rt__map" id="rtmap" data-map-dest="' + esc(nombre) + '"></div>' +
-        '<div class="c-rt__stats"><div><small>Ida y vuelta</small><b>' + r.km.toLocaleString('es-UY') + ' km</b></div><div><small>Manejo estimado</small><b>' + nf1(r.horas) + ' h</b></div><div><small>Viajan</small><b>' + S.pxs + (S.pxs === 1 ? ' persona' : ' personas') + '</b></div></div></section>' +
+        '<div class="c-rt__stats"><div><small>Ida y vuelta</small><b>' + r.km.toLocaleString('es-UY') + ' km</b></div><div><small>Manejo por tramo</small><b>' + nf1(r.horas) + ' h</b></div><div><small>Viajan</small><b>' + S.pxs + (S.pxs === 1 ? ' persona' : ' personas') + (r.autos > 1 ? ' · ' + r.autos + ' autos' : '') + '</b></div></div></section>' +
       '<section class="c-rt__card c-rt__costos" aria-label="Costos de la ruta">' +
         '<div class="c-rt__f"><span class="c-rt__i">' + ic(iFuel) + '</span><span class="c-rt__t"><b>' + (r.ev ? 'Carga eléctrica' : 'Combustible') + '</b><small>' + detComb + '</small></span><b class="c-rt__v">' + f(r.comb) + '</b></div>' +
         '<div class="c-rt__f"><span class="c-rt__i">' + ic(iPeaje) + '</span><span class="c-rt__t"><b>Peajes</b><small>Estimados para el recorrido</small></span><b class="c-rt__v">' + f(r.peajes) + '</b></div></section>' +
@@ -409,12 +420,12 @@
       track('inicio_elegir_destino', { destino: S.dest, region: di[2], origen_seleccion: t.dataset.origen, busqueda: S.q ? S.q.length : 0 });
       $('chipd').innerHTML = chipDest(); $('grid').innerHTML = gridDest(); $('todos').innerHTML = todosDest(); return;
     }
-    if (t.dataset.p) { S.ida = ($('ida') || {}).value || S.ida; S.vuelta = ($('vuelta') || {}).value || S.vuelta; S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); S.pxs = Math.min(5, S.pax); var y = $('main').scrollTop; pant1(); $('main').scrollTop = y; return; }
+    if (t.dataset.p) { S.ida = ($('ida') || {}).value || S.ida; S.vuelta = ($('vuelta') || {}).value || S.vuelta; S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); S.pxs = S.pax; var y = $('main').scrollTop; pant1(); $('main').scrollTop = y; return; }
     if (t.dataset.ir) { ir(+t.dataset.ir, 'volver'); return; }
     if (t.dataset.sig) {
       S.ida = $('ida').value; S.vuelta = $('vuelta').value; S.err = {};
-      if (!S.dest) S.err.dest = 'Elegí un destino de la lista.';
-      if (!S.ida || !S.vuelta || S.vuelta <= S.ida) S.err.fechas = 'Elegí una fecha de ida y una de vuelta posterior.';
+      if (!destInfo()) S.err.dest = 'Elegí un destino de la lista.';
+      var ef = errFechas(); if (ef) S.err.fechas = ef;
       if (Object.keys(S.err).length) { pant1(); return; }
       track('inicio_destino_fechas', { noches: Math.round((new Date(S.vuelta) - new Date(S.ida)) / 864e5), mes_viaje: S.ida.slice(0, 7), con_fechas: true });
       /* Con una sola alternativa que el sistema puede cotizar, "¿Cómo querés viajar?" no
@@ -453,7 +464,7 @@
     S.q = e.target.value; $('grid').innerHTML = gridDest(); $('todos').innerHTML = todosDest();
   });
   document.addEventListener('change', function (e) {
-    if (e.target.id === 'q') track('inicio_buscar_destino', { caracteres: (S.q || '').length, resultados: DESTS.filter(function (d) { return norm(d[1]).indexOf(norm(S.q || '').trim()) > -1 || norm(d[4]).indexOf(norm(S.q || '').trim()) > -1; }).length });
+    if (e.target.id === 'q') track('inicio_buscar_destino', { caracteres: (S.q || '').length, resultados: DESTS.filter(function (d) { return norm(d[1]).indexOf(norm(S.q || '').trim()) > -1 || norm(d[2]).indexOf(norm(S.q || '').trim()) > -1; }).length });
     if (e.target.id === 'em') { S.em = e.target.value; $('calc').innerHTML = calcTxt(); }
     if (e.target.id === 'cm') { S.cm = e.target.value; $('calc').innerHTML = calcTxt(); }
   });
@@ -461,7 +472,9 @@
   document.title = PAGS[1][1] + ' · CuántoSale';
   pant1();
   /* Viene pedido en auto (desde presupuesto o destino): directo a los datos del auto, luego combustible, peajes y mapa. */
-  if (qs.get('modo') === 'auto' && destInfo() && mediosDe(destInfo()).indexOf('auto') >= 0) { S.modo = 'auto'; ir(3, 'modo_auto'); }
+  if (qs.get('modo') === 'auto' && destInfo() && mediosDe(destInfo()).indexOf('auto') >= 0) {
+    if (errFechas()) { S.err.fechas = errFechas(); pant1(); } else { S.modo = 'auto'; ir(3, 'modo_auto'); }
+  }
 })();
 </script>
 <script src="cuenta.js"></script>

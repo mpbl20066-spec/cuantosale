@@ -115,7 +115,7 @@
   var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
   var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
-  var K = qs.get('destino') || 'fln', NOM = Nombres[K] || 'Tu destino';
+  var K = /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : 'fln', NOM = Nombres[K] || 'Tu destino';
   var PAX = Math.max(1, Math.min(9, +qs.get('pax') || 2));
   var HOY = iso(new Date());
   var IDA = qs.get('ida') || sumarDias(HOY, 10), VUELTA = qs.get('vuelta') || sumarDias(HOY, 17);

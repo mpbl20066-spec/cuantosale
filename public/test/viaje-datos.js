@@ -94,7 +94,7 @@
     defaults: function (qs) {
       var hoy = iso(new Date());
       return {
-        destino: (qs && qs.get('destino')) || 'fln',
+        destino: (qs && /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '')) ? qs.get('destino') : 'fln',
         pax: Math.max(1, Math.min(9, (qs && +qs.get('pax')) || 2)),
         ida: (qs && qs.get('ida')) || sumarDias(hoy, 10),
         vuelta: (qs && qs.get('vuelta')) || sumarDias(hoy, 17),

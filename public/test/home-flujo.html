@@ -1416,7 +1416,7 @@
      nombre de Arraial d'Ajuda con la apostrola comida (dâ€™Ajuda). */
   var DESTS = {};
   (window.CS_DESTS || []).forEach(function (d) { DESTS[d.k] = d.name; });
-  var destKey = qs.get('destino') || 'fln', DEST = DESTS[destKey] || String(qs.get('nombre') || '').slice(0, 40) || 'Florianópolis';
+  var destKey = /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : 'fln', DEST = DESTS[destKey] || String(qs.get('nombre') || '').slice(0, 40) || 'Florianópolis';
   var pax = Math.max(1, Math.min(9, +qs.get('pax') || 2)), k = pax / 2;
   /* Ninos de 2 a 11 anos incluidos en pax. Al menos un adulto. Alojamiento se cotiza con ellos (habitacion familiar);
      vuelos y actividades los cuentan como pasajero porque no hay tarifa de nino en esas fuentes. */

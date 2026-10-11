@@ -343,7 +343,7 @@
   var TACTIL = !!(window.matchMedia && matchMedia('(hover:none) and (pointer:coarse)').matches);   // celular: sin selector nativo
   var fLarga = function (s) { var q = String(s).split('-'); return +q[2] + ' de ' + ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][+q[1] - 1] + ' de ' + q[0]; };
   /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
-  var S = { pant: 1, dest: qs.get('destino') || '', sel: '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
+  var S = { pant: 1, dest: /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : '', sel: '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
     ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: 0 };   // sin selector de niños: todos se cuentan como personas
   S.cal = String(S.ida).slice(0, 7) + '-01'; if (S.cal > MAXM) S.cal = MAXM; S.paso = 'ida';   // mes que muestra el calendario y que fecha se elige con el proximo toque
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
