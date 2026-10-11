@@ -882,6 +882,7 @@
   .fc-b--mejor{border-color:rgba(245,197,24,.55);background:rgba(245,197,24,.12);color:var(--ink)}
   [data-theme="night"] .fc-b{border-color:rgba(255,255,255,.14)}
   [data-theme="night"] .fc-b--mejor{border-color:rgba(245,197,24,.45);color:#F5C518}
+  .fc-por{margin:-6px 0 0;font-size:12.5px;font-weight:600;line-height:1.4;color:var(--ink2)}
   .fc-ruta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px}
   .fc-pt b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
   .fc-pt small{display:block;margin-top:4px;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--ink2)}
@@ -1024,7 +1025,13 @@
   .pv-com em{font-style:normal;font-size:12px;color:var(--ink2)}
   .pv-com__sug{justify-self:start;padding:0;border:0;background:transparent;color:var(--ink);font:700 12.5px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   /* Comparativa de precios por fecha: tarjeta oscura delgada con barras finas */
-  .af2{margin:16px 0 6px;padding:16px 16px 12px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:linear-gradient(160deg,#0F1B2D,#14243C);color:#fff}
+  .af2{margin:10px 0 6px;padding:14px 14px 10px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:#111C2E;color:#fff}
+  .af5{margin:22px 0 8px}
+  .af5>section+section{margin-top:22px}
+  .af5-h{margin:0;font-family:var(--fh);font-size:24px;font-weight:800;line-height:1.2;color:var(--ink)}
+  .af5-sub{margin:4px 0 0;font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ink2)}
+  .af5 .af4{margin:10px 0 0;padding:16px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:#111C2E}
+  .af4-c{color:#7FB2F0!important}
   .af2-h{margin:0;font-family:var(--fh);font-size:16px;font-weight:800;line-height:1.3;color:#fff}
   .af2-sub{margin:2px 0 0;font-size:12.5px;font-weight:600;color:#9FB0C8}
   .af2-g{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;margin:14px 0 8px;padding-top:20px}
@@ -1059,14 +1066,14 @@
   .af3-b{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:0 0 4px;border:0;border-radius:10px;background:transparent;color:#fff;font-family:var(--fb);cursor:pointer}
   .af3-b:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .af3-t{display:flex;align-items:flex-end;justify-content:center;width:100%;height:140px;padding-top:22px;box-sizing:border-box}
-  .af3-t i{position:relative;display:block;width:100%;border-radius:12px 12px 0 0;background:#3A4A63;transition:height .35s ease,filter .15s}
-  .af3-b:hover .af3-t i{filter:brightness(1.2)}
-  .af3-b.is-tuya .af3-t i{background:#F5C518}
-  .af3-b.is-barata .af3-t i{background:#22C55E}
-  .af3-b.is-sel .af3-t i{box-shadow:0 0 0 2px #fff}
+  .af3-t i{position:relative;display:block;width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.08);border-radius:12px 12px 0 0;background:#1E2B40;transition:height .35s ease,filter .15s}
+  .af3-b:hover .af3-t i{filter:brightness(1.25)}
+  .af3-b.is-tuya .af3-t i{border:2px dashed #fff}
+  .af3-b.is-barata .af3-t i{border:2px dashed #F5C518}
+  .af3-b.is-sel .af3-t i{filter:brightness(1.45)}
   .af3-p{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:700;font-style:normal;color:#C9D4E5;font-variant-numeric:tabular-nums}
-  .af3-b.is-tuya .af3-p{color:#F5C518;font-weight:800}
-  .af3-b.is-barata .af3-p{color:#4ADE80;font-weight:800}
+  .af3-b.is-tuya .af3-p{color:#fff;font-weight:800}
+  .af3-b.is-barata .af3-p{color:#F5C518;font-weight:800}
   .af3-d{display:flex;flex-direction:column;align-items:center;line-height:1.15;white-space:nowrap}
   .af3-d b{font-family:var(--fh);font-size:15px;font-weight:800;color:#fff}
   .af3-d small{font-size:10.5px;font-weight:600;color:#9FB0C8}
@@ -1077,8 +1084,8 @@
   .af3-ley{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 2px;padding:0;list-style:none;font-size:12px;font-weight:600;color:#C9D4E5}
   .af3-ley li{display:flex;align-items:center;gap:6px}
   .af3-ley i{width:11px;height:11px;border-radius:3px;background:#3A4A63}
-  .af3-ley i.is-tuya{background:#F5C518}
-  .af3-ley i.is-barata{background:#22C55E}
+  .af3-ley i.is-tuya{background:#fff}
+  .af3-ley i.is-barata{background:#F5C518}
   /* Tarjeta de la mejor fecha (arriba de las barras) */
   .af4{display:flex;align-items:center;gap:14px;margin:12px 0 4px;padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.04)}
   .af4-m{flex:0 0 auto;padding:8px 12px;border-radius:10px;background:#F5C518;color:#0B1F3A;font-family:var(--fh);font-size:20px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -1586,20 +1593,40 @@
     var a = VUELOS.slice();
     if (S.fVuelo === 'precio') a.sort(function (x, y) { return x.precio - y.precio; });
     else if (S.fVuelo === 'directo') a.sort(function (x, y) { return x.esc - y.esc || x.dur - y.dur; });
-    else {   /* recomendados: la mejor opcion, la mas barata y la mas rapida (hasta 3); despues el resto por precio y duracion juntos */
-      var rec = recomendados(), minP = Math.min.apply(null, a.map(precioVuelo)), minD = Math.min.apply(null, a.map(function (x) { return x.dur || 1e9; }));
-      var nota = function (x) { var i = rec.indexOf(x); return i >= 0 ? i - 10 : precioVuelo(x) / minP + (x.dur || minD * 2) / minD; };
-      a.sort(function (x, y) { return nota(x) - nota(y); });
-    }
+    else a.sort(function (x, y) { return notaVuelo(x) - notaVuelo(y); });   /* recomendados: por nota (ver notaVuelo) */
     return a;
   }
   var masBarato = function () { return VUELOS.slice().sort(function (x, y) { return precioVuelo(x) - precioVuelo(y) || x.dur - y.dur; })[0]; };
   var masRapido = function () { return VUELOS.slice().sort(function (x, y) { return (x.dur || 1e9) - (y.dur || 1e9) || precioVuelo(x) - precioVuelo(y); })[0]; };
-  /* Los recomendados: la mejor opcion (marcarMejor), la mas barata y la mas rapida, sin repetir. Maximo 3. */
+  /* Nota de un vuelo, como lo pesaria una persona (mas baja = mejor): el precio contra el mas barato, y cada hora de
+     viaje de mas que el mas rapido cuenta como un 8 % del precio, cada escala un 6 % y salir antes de las 5 o llegar
+     de madrugada (23 a 5 h) un 5 %. Asi un vuelo apenas mas barato pero 4 h mas largo no se recomienda. */
+  function notaVuelo(v) {
+    var minP = Math.min.apply(null, VUELOS.map(precioVuelo)), minD = Math.min.apply(null, VUELOS.map(function (x) { return x.dur || 1e9; }));
+    var dur = v.dur || minD + 120, hs = +String(v.sal).slice(0, 2), hl = +String(v.lle).slice(0, 2);
+    return precioVuelo(v) / minP + 0.08 * (dur - minD) / 60 + 0.06 * v.esc + (hs < 5 || hl >= 23 || hl < 5 ? 0.05 : 0);
+  }
+  /* Recomendados de verdad: los de mejor nota, solo si quedan cerca del mejor (hasta 12 % peor). Maximo 3; puede ser 1. */
   function recomendados() {
-    var r = [];
-    [VUELOS.filter(function (v) { return v.mejor; })[0], masBarato(), masRapido()].forEach(function (v) { if (v && r.indexOf(v) < 0) r.push(v); });
-    return r;
+    var a = VUELOS.slice().sort(function (x, y) { return notaVuelo(x) - notaVuelo(y); });
+    if (!a.length) return a;
+    var tope = notaVuelo(a[0]) * 1.12;
+    return a.filter(function (v) { return notaVuelo(v) <= tope; }).slice(0, 3);
+  }
+  var durTxt = function (m) { m = Math.round(m); var h = Math.floor(m / 60), r = m % 60; return (h ? h + ' h' : '') + (h && r ? ' ' : '') + (r ? r + ' min' : ''); };
+  /* Por que se recomienda: en numeros, contra el mas barato (la mejor opcion) o contra la mejor opcion (las demas). */
+  function porQue(v) {
+    var c = masBarato(), r = masRapido(), m = VUELOS.filter(function (x) { return x.mejor; })[0] || c;
+    var dir = v.esc === 0 && m.esc > 0 ? 'Directo, sin escalas. ' : '';
+    if (v === m) {
+      if (v === c && v === r) return 'El más barato y el más rápido.';
+      if (v === c) return 'El más barato' + (v.dur - r.dur >= 30 ? ', y solo ' + durTxt(v.dur - r.dur) + ' más que el más rápido.' : ' y de los más rápidos.');
+      var dp = precioVuelo(v) - precioVuelo(c), dd = c.dur - v.dur;
+      return dir + (dd >= 15 ? 'Pagás ' + f(dp) + ' más que el más barato y llegás ' + durTxt(dd) + ' antes.' : 'Casi el mismo precio que el más barato, con mejor horario.');
+    }
+    var dpm = precioVuelo(v) - precioVuelo(m), ddm = v.dur - m.dur;
+    if (dpm < 0) return dir + 'Ahorrás ' + f(-dpm) + (ddm >= 15 ? ' y tardás ' + durTxt(ddm) + ' más.' : ' con un tiempo de viaje parecido.');
+    return dir + (ddm <= -15 ? 'Llegás ' + durTxt(-ddm) + ' antes por ' + f(dpm) + ' más.' : 'Otro horario por ' + f(dpm) + ' más.');
   }
   /* Saca los vuelos que no suman nada: los que cuestan y demoran casi lo mismo que otro mas barato (misma cantidad de
      escalas o mas, hasta 45 min y 6 % de diferencia), los que otro mas barato le gana en tiempo, y los que demoran 3 h o mas que el mas rapido sin ser los mas baratos. */
@@ -1668,13 +1695,14 @@
      el boton a la derecha. En celular se apila en tres bloques. Etiquetas sobrias: "Mejor opcion" (una sola, ver
      marcarMejor) y "Mas barato". Se elige tocando la tarjeta, como el resto de las opciones del flujo (borde amarillo y
      tilde arriba a la derecha); con teclado, Enter o espacio. */
-  function tarjetaVuelo(v, idBarato) {
+  function tarjetaVuelo(v, idBarato, conPorQue) {
     var on = S.vuelo === v.id;
     var barato = v.id === idBarato;
     var rapido = VUELOS.length > 1 && !barato && v === masRapido() && v.dur < masBarato().dur;
     var badges = v.mejor ? '<span class="fc-b fc-b--mejor">' + (barato ? 'Mejor y más barato' : (rapido ? 'Mejor y más rápido' : 'Mejor opción')) + '</span>' : (barato ? '<span class="fc-b">Más barato</span>' : (rapido ? '<span class="fc-b">Más rápido</span>' : ''));
     return '<div class="fc' + (on ? ' is-sel' : '') + '" role="button" tabindex="0" data-sel="vuelo:' + esc(v.id) + '" aria-pressed="' + on + '" aria-label="' + esc(v.air) + ', sale ' + v.sal + ', llega ' + v.lle + ', ' + esc(v.escT) + ', ' + f(precioVuelo(v)) + (on ? ', elegido' : '') + '">' + tick +
       '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + (v.logo ? '<img class="fc-logo__img" src="' + esc(v.logo) + '" alt="" loading="lazy" decoding="async">' : '') + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + '</span></div>' +
+      (conPorQue && VUELOS.length > 1 ? '<p class="fc-por">' + esc(porQue(v)) + '</p>' : '') +
       '<div class="fc-ruta"><div class="fc-pt"><b>' + v.sal + '</b><small>MVD</small></div>' +
         '<div class="fc-mid"><small>' + esc(v.durT) + '</small><i aria-hidden="true"></i><small class="' + (v.esc === 0 ? 'is-dir' : '') + '">' + esc(v.escT) + '</small></div>' +
         '<div class="fc-pt fc-pt--d"><b>' + v.lle + '</b><small>' + esc(AEROPUERTO[destKey] || '') + '</small></div></div>' +
@@ -1682,7 +1710,7 @@
   }
   function pantalla1() {
     if (MODO === 'bus') return pantallaBus();
-    /* Recomendados: solo los 3 (mejor, mas barato, mas rapido), sin "Ver mas". Los otros filtros: 3 y "Ver mas opciones". */
+    /* Recomendados: solo los que de verdad convienen (hasta 3), sin "Ver mas". Los otros filtros: 3 y "Ver mas opciones". */
     var esRec = S.fVuelo === 'rec', vs = ordenarVuelos(), visibles = esRec ? vs.slice(0, VUELOS.length ? recomendados().length : 3) : (S.verMasVuelos ? vs : vs.slice(0, 3));
     var idBarato = VUELOS.length > 1 ? masBarato().id : '';
     var cambiarFechas = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
@@ -1692,7 +1720,7 @@
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
         '<a class="g-btn g-btn--main" href="' + esc(cambiarFechas) + '">Cambiar fechas</a></div>' : '') +
       (VUELOS.length > 1 ? chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') : '') +
-      (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato); }).join('') + '</div>' : '') +
+      (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' : '') +
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
       '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
@@ -1764,10 +1792,16 @@
     var dias = []; for (var sh = -VENT_A; sh <= VENT_D; sh++) dias.push(sumarDias(IDA, sh));
     var lbl = function (iso) { var d = new Date(iso + 'T12:00:00'); return '<span class="af3-d"><b>' + d.getDate() + '</b><small>' + ['Ene.', 'Feb.', 'Mar.', 'Abr.', 'May.', 'Jun.', 'Jul.', 'Ago.', 'Sep.', 'Oct.', 'Nov.', 'Dic.'][d.getMonth()] + '</small></span>'; };
     var corto = function (v) { return f(v).replace(/^[^\d-]+/, ''); };
-    var ley = '<ul class="af3-ley"><li><i class="is-tuya"></i>Tu fecha</li><li><i class="is-barata"></i>La más barata</li><li><i></i>Otras fechas</li></ul>';
+    var ley = '<ul class="af3-ley" aria-hidden="true"><li><i class="is-tuya"></i>Tu fecha</li><li><i class="is-barata"></i>La más barata</li><li><i></i>Otras fechas</li></ul>';
     var dia = function (iso) { var d = new Date(iso + 'T12:00:00'); return DIA_A[d.getDay()] + ' ' + d.getDate(); };
-    var sub = '<p class="af2-sub">Costo total en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ' si salís antes o después, con las mismas ' + NOCHES + ' noches · ' + personasTxt() + '. Tocá una barra para verla.</p>';
-    var caja = function (arriba, cuerpo) { return '<section class="af2" aria-labelledby="af2-h"><h2 id="af2-h" class="af2-h">Mismo viaje, otra fecha</h2>' + arriba + sub + cuerpo + '</section>'; };
+    var sub = '<p class="af5-sub">Costo total en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ' si salís antes o después, con las mismas noches. Tocá una barra para usarla.</p>';
+    /* Como en la app: "Donde podes ahorrar" (la mejor fecha) y abajo "Mismo viaje, otra fecha" (las barras), cada uno con
+       su titulo grande afuera y el contenido en una tarjeta oscura. .af2 queda en la tarjeta de las barras: es la que
+       vigila vigilarComparativa() para pedir los precios. */
+    var caja = function (arriba, cuerpo) {
+      return '<div class="af5">' + (arriba ? '<section aria-labelledby="af5-ah"><h2 id="af5-ah" class="af5-h">Dónde podés ahorrar</h2><p class="af5-sub">Comparamos fechas, rutas y alojamiento con la propuesta principal.</p>' + arriba + '</section>' : '') +
+        '<section aria-labelledby="af2-h"><h2 id="af2-h" class="af5-h">Mismo viaje, otra fecha</h2>' + sub + '<div class="af2">' + cuerpo + '</div></section></div>';
+    };
     if (!c.estado || c.estado === 'cargando') {
       var alto = [55, 72, 46, 64, 80, 50, 68, 58, 76, 62];
       return caja('', '<div class="af3 af3--ghost" role="status" aria-label="Buscando precios de otras fechas">' + dias.map(function (iso, k) {
@@ -1787,7 +1821,7 @@
     if (hayAhorro) {
       var db = new Date(barata.dep + 'T12:00:00'), nd = Math.round((db - new Date(IDA + 'T12:00:00')) / 864e5);
       titulo = '<div class="af4"><span class="af4-m">−' + f(ahorro) + '</span><div class="af4-t"><b>Salí el ' + DIA_A[db.getDay()].toLowerCase() + ', ' + db.getDate() + ' ' + ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'][db.getMonth()] + '</b>' +
-        '<small>' + Math.abs(nd) + (Math.abs(nd) === 1 ? ' día ' : ' días ') + (nd < 0 ? 'antes' : 'después') + ', con la misma cantidad de noches.</small>' +
+        '<small class="af4-c">' + Math.abs(nd) + (Math.abs(nd) === 1 ? ' día ' : ' días ') + (nd < 0 ? 'antes' : 'después') + ', con la misma cantidad de noches.</small>' +
         '<button type="button" class="af4-usar" data-usar-fecha="' + barata.dep + '">Usar estas fechas</button></div></div>';
     } else titulo = '<div class="af4 af4--ok"><span class="af4-ok" aria-hidden="true">✓</span><div class="af4-t"><b>Tu fecha es la más barata de estos días</b><small>No hay un día cercano que te haga ahorrar.</small></div></div>';
     var barras = dias.map(function (iso, k) {
@@ -2668,17 +2702,13 @@
       sal: hora(o.departure), lle: hora(o.arrival), dur: minutos(o.duration), durT: o.duration || '', esc: esc, escT: esc === 0 ? 'Directo' : esc + (esc === 1 ? ' escala' : ' escalas'),
       precio: o.price_usd / k, mejor: false, rec: i === 0 };
   }
-  /* Una sola "Mejor opcion": entre los vuelos que cuestan hasta $ 1.000 (pesos uruguayos) mas que el mas barato,
-     el de menor duracion; si empatan, el mas barato. Sin cotizacion del peso se toma 40 $ por dolar. */
+  /* Una sola "Mejor opcion": el vuelo de mejor nota (precio, duracion, escalas y horario; ver notaVuelo). */
   function marcarMejor() {
     VUELOS.forEach(function (v) { v.mejor = false; });
     if (!VUELOS.length) return null;
-    var margen = window.CSMoneda && CSMoneda.usdDe ? CSMoneda.usdDe('UYU', 1000) : null; if (!(margen > 0)) margen = 1000 / 40;
-    var min = Math.min.apply(null, VUELOS.map(precioVuelo));
-    var cand = VUELOS.filter(function (v) { return precioVuelo(v) <= min + margen; });
-    cand.sort(function (a, b) { return (a.dur || 1e9) - (b.dur || 1e9) || precioVuelo(a) - precioVuelo(b); });
-    cand[0].mejor = true;
-    return cand[0];
+    var mejor = recomendados()[0];
+    mejor.mejor = true;
+    return mejor;
   }
   function cargarVuelos() {
     if (!/^https?:$/.test(location.protocol)) { S.avisoV = 'Abrí la página desde el servidor de la app para ver los vuelos.'; return; }
