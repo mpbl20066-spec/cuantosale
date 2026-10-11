@@ -186,13 +186,22 @@ function analyticsSnippet() {
     'if(ID){gtag("js",new Date());gtag("config",ID);js("https://www.googletagmanager.com/gtag/js?id="+ID);}' +
     '(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","ytl2r5iftg");' +
     'js("https://emrldco.com/NTc2NTAy.js?t=576502");}' +
-    'function elegir(x){try{localStorage.setItem(K,x);}catch(e){}var b=document.getElementById("cs-consent");if(b)b.remove();if(x==="granted")cargar();}' +
+    'function elegir(x){try{localStorage.setItem(K,x);}catch(e){}var b=document.getElementById("cs-consent");if(b)b.remove();ajustar();if(x==="granted")cargar();}' +
+    /* Mientras la barra esta abierta, los botones pegados abajo (Continuar, Reservar, la barra de pestanas) se corren
+       hacia arriba lo que mide la barra: si no, la barra los tapaba y no se podia seguir. */
+    'function ajustar(){var b=document.getElementById("cs-consent"),r=document.documentElement;if(!b){r.classList.remove("cs-consent");return;}' +
+    'if(!document.getElementById("cs-consent-css")){var st=document.createElement("style");st.id="cs-consent-css";st.textContent=' + JSON.stringify(
+      'html.cs-consent .phone{padding-bottom:var(--csh)!important;box-sizing:border-box!important}' +
+      'html.cs-consent body:not(:has(.phone)){padding-bottom:var(--csh)!important}' +
+      'html.cs-consent .f-foot,html.cs-consent .t-foot,html.cs-consent .u-foot,html.cs-consent .p-foot,html.cs-consent .r-foot,html.cs-consent .c-foot,html.cs-consent .d-foot,html.cs-consent .ls-foot,html.cs-consent .p-cta,html.cs-consent .voucher-reserve--fijo{bottom:var(--csh)!important}' +
+      '@media (max-width:767px){html.cs-consent[data-pagina="home"] .tabs{bottom:var(--csh)!important}}') + ';document.head.appendChild(st);}' +
+    'r.style.setProperty("--csh",b.offsetHeight+"px");r.classList.add("cs-consent");}' +
     'function banner(){if(document.getElementById("cs-consent")||!document.body)return;var d=document.createElement("div");d.id="cs-consent";d.setAttribute("role","dialog");d.setAttribute("aria-label","Preferencias de cookies");' +
     'd.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#0A101A;color:#fff;font:14px/1.45 system-ui,sans-serif;box-shadow:0 -6px 24px rgba(0,0,0,.25)";' +
     'd.innerHTML=\'<span style="max-width:640px">Usamos cookies para medir el uso del sitio y mejorar CuántoSale. Podés aceptarlas o continuar solo con las necesarias. <a href="/privacidad" style="color:#F7C325">Política de privacidad</a></span>\'' +
     '+\'<span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" data-n style="min-height:44px;padding:0 16px;border:1.5px solid #fff;border-radius:99px;background:transparent;color:#fff;font:700 14px system-ui,sans-serif;cursor:pointer">Solo lo necesario</button>\'' +
     '+\'<button type="button" data-a style="min-height:44px;padding:0 18px;border:0;border-radius:99px;background:#F7C325;color:#0A101A;font:800 14px system-ui,sans-serif;cursor:pointer">Aceptar</button></span>\';' +
-    'd.querySelector("[data-n]").onclick=function(){elegir("denied");};d.querySelector("[data-a]").onclick=function(){elegir("granted");};document.body.appendChild(d);}' +
+    'd.querySelector("[data-n]").onclick=function(){elegir("denied");};d.querySelector("[data-a]").onclick=function(){elegir("granted");};document.body.appendChild(d);ajustar();window.addEventListener("resize",ajustar);}' +
     'window.csConsentimiento={abrir:function(){try{localStorage.removeItem(K);}catch(e){}banner();}};' +
     'if(v==="granted")cargar();else if(v!=="denied"){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",banner);else banner();}' +
     '})();</script>';
@@ -2531,6 +2540,10 @@ function featuredPriceItems(req, res, url) {
     ? String(url.searchParams.get('style')).toLowerCase() : 'eq';
   const origin = ['MVD', 'PDP'].indexOf(String(url.searchParams.get('origin') || 'MVD').toUpperCase()) >= 0
     ? String(url.searchParams.get('origin')).toUpperCase() : 'MVD';
+  // transport=all: la opcion mas barata de CUALQUIER medio (auto, bus o vuelo). Lo usa la home "tu plata manda", que
+  // responde "a donde llego con esta plata" y tiene que ver que en auto o bus, con varias personas, sale bastante menos.
+  // Sin el parametro sigue siendo 'flight', que es lo que anticipan las tarjetas de destinos destacados.
+  const transport = String(url.searchParams.get('transport') || '').toLowerCase() === 'all' ? 'all' : 'flight';
   const today = model.getToday();
   const re = /^\d{4}-\d{2}-\d{2}$/;
   const items = String(url.searchParams.get('items') || '').split(',')
@@ -2550,7 +2563,7 @@ function featuredPriceItems(req, res, url) {
       // alternativa que la app muestra aparte y no la que se abre al tocar
       // "Ver propuesta". El cartel tiene que anticipar lo que se ve después.
       // El filtro de avion_ba es el mismo que usa adaptPackagesToStyle.
-      const trip = { dest: key, pax: pax, budget: 0, style: style, transport: 'flight', kmPerLiter: 12,
+      const trip = { dest: key, pax: pax, budget: 0, style: style, transport: transport, kmPerLiter: 12,
         hotelType: hotelType, origin: origin, fuelPriceUsd: Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2 };
       const cheapest = model.build(trip, depDate, retDate, today, null)
         .filter(function (proposal) { return proposal.mode !== 'avion_ba'; })
@@ -2558,7 +2571,7 @@ function featuredPriceItems(req, res, url) {
       if (!cheapest) return null;
       return {
         key: key, total: cheapest.total, pp: cheapest.pp, nights: nights,
-        modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel
+        mode: cheapest.mode, modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel
       };
     })
     .filter(Boolean)
