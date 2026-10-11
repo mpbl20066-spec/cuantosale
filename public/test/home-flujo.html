@@ -1012,27 +1012,31 @@
   .af2-b.is-ini[data-tip]:hover::after{left:0;transform:none}
   .af2-b.is-fin[data-tip]:hover::after{left:auto;right:0;transform:none}
   @media (hover:none){.af2-b[data-tip]:hover::after{display:none}}
-  /* Grafico de barras de la comparativa: barras gruesas, esquinas casi rectas, precio arriba y dia abajo */
-  .af3{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;margin:14px 0 10px;padding-top:24px}
-  .af3-b{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:4px 0;border:0;border-radius:6px;background:transparent;color:#fff;font-family:var(--fb);cursor:pointer;transition:background .15s}
-  .af3-b:hover{background:rgba(255,255,255,.05)}
+  /* Grafico de barras de la comparativa: el precio va pegado arriba de cada barra y la etiqueta (Mas barato / Tu dia) debajo del dia */
+  .af3{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px;margin:14px 0 10px}
+  .af3-b{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:6px 0 4px;border:0;border-radius:10px;background:transparent;color:#fff;font-family:var(--fb);cursor:pointer;transition:background .15s}
+  .af3-b:hover{background:rgba(255,255,255,.04)}
   .af3-b:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .af3-p{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-weight:800;color:#C5CDD8;font-variant-numeric:tabular-nums}
-  .af3-b.is-tuya .af3-p,.af3-b.is-barata .af3-p,.af3-b.is-sel .af3-p{color:#fff}
-  .af3-t{display:flex;align-items:flex-end;justify-content:center;width:100%;height:120px;border-bottom:2px solid rgba(255,255,255,.18)}
-  .af3-t i{display:block;width:72%;max-width:52px;border-radius:4px 4px 0 0;background:#3A4A63;transition:height .35s ease,background .15s}
-  .af3-b:hover .af3-t i{background:#4A5D7A}
-  .af3-b.is-tuya .af3-t i{background:#F5C518}
-  .af3-b.is-barata .af3-t i{background:#4ADE80}
-  .af3-b.is-sel .af3-t i{box-shadow:0 0 0 2px #fff}
-  .af3-d{font-size:12px;font-weight:800;color:#fff;white-space:nowrap}
-  .af3-badge{position:absolute;top:-22px;left:50%;transform:translateX(-50%);padding:2px 7px;border-radius:4px;background:rgba(74,222,128,.18);border:1px solid rgba(74,222,128,.5);color:#86EFAC;font-size:10px;font-weight:800;white-space:nowrap}
-  .af3-badge--t{background:rgba(245,197,24,.16);border-color:rgba(245,197,24,.55);color:#F5C518}
+  .af3-b.is-sel{background:rgba(255,255,255,.07)}
+  .af3-t{display:flex;align-items:flex-end;justify-content:center;width:100%;height:132px;padding-top:22px;box-sizing:border-box;border-bottom:1px solid rgba(255,255,255,.12)}
+  .af3-t i{position:relative;display:block;width:64%;max-width:44px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#52627C,#3A4760);transition:height .35s ease,background .15s}
+  .af3-b:hover .af3-t i{background:linear-gradient(180deg,#64769A,#465673)}
+  .af3-b.is-tuya .af3-t i{background:linear-gradient(180deg,#FFD84A,#E0AE00)}
+  .af3-b.is-barata .af3-t i{background:linear-gradient(180deg,#6EE7A0,#22C55E);box-shadow:0 0 18px rgba(74,222,128,.25)}
+  .af3-p{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:700;font-style:normal;color:#9FB0C8;font-variant-numeric:tabular-nums}
+  .af3-b.is-tuya .af3-p{color:#F5C518;font-weight:800}
+  .af3-b.is-barata .af3-p{color:#86EFAC;font-weight:800}
+  .af3-b.is-sel .af3-p{color:#fff}
+  .af3-d{font-size:12px;font-weight:600;color:#9FB0C8;white-space:nowrap}
+  .af3-b.is-tuya .af3-d,.af3-b.is-barata .af3-d,.af3-b.is-sel .af3-d{color:#fff;font-weight:800}
+  .af3-tag{min-height:13px;font-size:10px;font-weight:800;line-height:13px;letter-spacing:.02em;white-space:nowrap;color:#86EFAC}
+  .af3-tag--t{color:#F5C518}
   .af3-b.is-vacia{cursor:default;opacity:.45}
+  .af3-b.is-vacia .af3-t{align-items:center;color:#9FB0C8;font-size:12px}
   .af3--ghost .af3-b{cursor:default}
   .af3--ghost .af3-t i{background:rgba(255,255,255,.12);animation:af2-lat 1.2s ease-in-out infinite alternate}
   .af3--ghost .af3-b.is-tuya .af3-t i{background:rgba(245,197,24,.5)}
-  @media (max-width:479px){.af3{gap:6px}.af3-p{font-size:10.5px}.af3-t{height:104px}}
+  @media (max-width:479px){.af3{gap:4px}.af3-p{font-size:10px}.af3-t{height:116px}.af3-t i{width:72%}}
   @media (prefers-reduced-motion:reduce){.af3--ghost .af3-t i{animation:none}.af3-t i{transition:none}}
   /* Tira de fechas: fichas grandes, borde grueso y esquinas casi rectas */
   /* La tira se desliza adentro de la tarjeta: sin min-width:0 el contenedor crecia con las fichas y estiraba la pagina. */
@@ -1660,7 +1664,7 @@
     if (!c.estado || c.estado === 'cargando') {
       var alto = [55, 72, 46, 64, 80, 50, 68];
       return caja('<span aria-hidden="true">💡</span> Buscando el mejor día para salir…', '<div class="af3 af3--ghost" role="status" aria-label="Buscando precios de otras fechas">' + dias.map(function (iso, k) {
-        return '<span class="af3-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af3-p">&nbsp;</span><span class="af3-t"><i style="height:' + alto[k % alto.length] + '%"></i></span><span class="af3-d">' + dia(iso) + '</span></span>';
+        return '<span class="af3-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af3-t"><i style="height:' + alto[k % alto.length] + '%"></i></span><span class="af3-d">' + dia(iso) + '</span><span class="af3-tag"></span></span>';
       }).join('') + '</div>');
     }
     if (c.estado !== 'ok') return caja('<span aria-hidden="true">💡</span> Compará fechas para ahorrar', '<a class="af2-link" href="' + esc(urlVuelos(IDA, VUELTA)) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver precios por fecha en Google Flights ↗</a>');
@@ -1674,14 +1678,15 @@
     var titulo = hayAhorro ? '<span aria-hidden="true">💡</span> Salí el ' + dia(barata.dep).toLowerCase() + ' y ahorrá ' + f(ahorro) : '<span aria-hidden="true">💡</span> Tu fecha es la más barata de estos días';
     var barras = dias.map(function (iso, k) {
       var x = por[iso];
-      if (!x) return '<span class="af3-b is-vacia" title="Sin precio para ese día"><span class="af3-p">—</span><span class="af3-t"></span><span class="af3-d">' + dia(iso) + '</span></span>';
+      if (!x) return '<span class="af3-b is-vacia" title="Sin precio para ese día"><span class="af3-t">—</span><span class="af3-d">' + dia(iso) + '</span><span class="af3-tag"></span></span>';
       var v = tot(x), dif = base - v, d = new Date(iso + 'T12:00:00');
       var esTuya = iso === IDA, esBarata = x === barata && hayAhorro;
-      var h = max > min ? 28 + 72 * (v - min) / (max - min) : 64;
+      /* Escala desde el 75% del minimo: se notan las diferencias sin exagerarlas (antes US$ 130 parecia la mitad) */
+      var piso = min * 0.75, h = max > min ? 100 * (v - piso) / (max - piso) : 64;
       var tip = DIA_A[d.getDay()] + ' ' + fdc(iso) + ' → ' + fdc(sumarDias(iso, NOCHES)) + ': ' + f(v) + (esTuya ? ' (tu fecha)' : (Math.round(dif) ? (dif > 0 ? ', ahorrás ' + f(dif) : ', ' + f(-dif) + ' más') : ''));
       return '<button type="button" class="af3-b' + (esTuya ? ' is-tuya' : '') + (esBarata ? ' is-barata' : '') + (S.cmpSel === iso ? ' is-sel' : '') + '" data-af-sel="' + iso + '" aria-pressed="' + (S.cmpSel === iso) + '" aria-label="' + esc(tip) + '" title="' + esc(tip) + '">' +
-        (esBarata ? '<span class="af3-badge">Más barato</span>' : (esTuya ? '<span class="af3-badge af3-badge--t">Tu día</span>' : '')) +
-        '<span class="af3-p">' + f(v) + '</span><span class="af3-t"><i style="height:' + h.toFixed(0) + '%"></i></span><span class="af3-d">' + dia(iso) + '</span></button>';
+        '<span class="af3-t"><i style="height:' + h.toFixed(0) + '%"><span class="af3-p">' + f(v) + '</span></i></span><span class="af3-d">' + dia(iso) + '</span>' +
+        '<span class="af3-tag' + (esTuya && !esBarata ? ' af3-tag--t' : '') + '">' + (esBarata ? 'Más barato' : (esTuya ? 'Tu día' : '')) + '</span></button>';
     }).join('');
     var sel = S.cmpSel && por[S.cmpSel] && S.cmpSel !== IDA ? por[S.cmpSel] : null, det = '';
     if (sel) {
