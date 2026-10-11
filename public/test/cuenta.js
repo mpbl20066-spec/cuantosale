@@ -334,7 +334,7 @@
     var cuerpo;
     if (S.cargando) cuerpo = '<p class="cp-p" role="status">Cargando tus viajes…</p>';
     else if (S.error) cuerpo = '<p class="cp-err" role="alert">' + esc(S.error) + '</p>';
-    else if (!S.viajes || !S.viajes.length) cuerpo = '<p class="cp-p">Todavía no guardaste viajes. Armá uno y tocá <b>Guardar mi viaje</b>.</p><a class="cp-btn" href="/test/">Armar un viaje</a>';
+    else if (!S.viajes || !S.viajes.length) cuerpo = '<p class="cp-p">Todavía no guardaste viajes. Armá uno y tocá <b>Guardar mi viaje</b>.</p><a class="cp-btn" href="/">Armar un viaje</a>';
     else cuerpo = S.viajes.map(function (t) {
       var fd = t.flight_details || {}, fechas = fdc(t.departure_date) + (t.return_date ? ' → ' + fdc(t.return_date) : '');
       var url = fd.fuente === 'test' && fd.url ? fd.url : '';
@@ -383,8 +383,8 @@
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
     if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
     if (t.hasAttribute('data-pasaporte')) { cerrar(); window.CS_GAME.abrir(); return; }
-    if (t.hasAttribute('data-alcancia')) { location.href = '/test/home-ahorro.html'; return; }
-    if (t.hasAttribute('data-dividir')) { location.href = '/grupo?volver=' + encodeURIComponent(location.pathname.indexOf('/test') === 0 ? '/test/' : (location.pathname.indexOf('/nuevo') === 0 ? '/nuevo/' : '/')); return; }
+    if (t.hasAttribute('data-alcancia')) { location.href = '/ahorro'; return; }
+    if (t.hasAttribute('data-dividir')) { location.href = '/grupo?volver=' + encodeURIComponent(location.pathname.indexOf('/nuevo') === 0 ? '/nuevo/' : '/'); return; }
     if (t.hasAttribute('data-login')) { ir('login'); return; }
     if (t.hasAttribute('data-editar')) { ir('editar'); return; }
     if (t.hasAttribute('data-tema')) { aplicarTema(temaActual() === 'night' ? 'light' : 'night'); pintar(); var f = raiz.querySelector('[data-tema]'); if (f) f.focus(); return; }
