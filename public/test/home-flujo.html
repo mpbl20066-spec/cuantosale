@@ -114,23 +114,20 @@
   .f-orden{gap:8px}
   .f-orden>span{font-size:12.5px;font-weight:700;color:var(--ink)}
   .f-orden .f-sort{margin:0}
-  /* Rango de precio de hoteles: una pista con dos tiradores superpuestos y la franja elegida en amarillo */
-  .hp{margin:4px 0 14px;padding:12px 14px 10px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
-  .hp-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12.5px;font-weight:700;color:var(--ink2)}
-  .hp-top b{font-family:var(--fh);font-size:14.5px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
-  .hp-r{position:relative;height:30px;margin:4px 0 0}
-  .hp-r::before{content:"";position:absolute;left:0;right:0;top:13px;height:4px;border-radius:99px;background:var(--line)}
-  .hp-fill{position:absolute;top:13px;height:4px;border-radius:99px;background:#F5C518}
-  .hp-r input{position:absolute;left:0;top:0;width:100%;height:30px;margin:0;background:transparent;pointer-events:none;-webkit-appearance:none;appearance:none}
-  .hp-r input::-webkit-slider-runnable-track{background:transparent;height:30px}
-  .hp-r input::-moz-range-track{background:transparent}
-  .hp-r input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:24px;height:24px;margin-top:3px;border-radius:50%;background:#fff;border:3px solid #F5C518;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:grab}
-  .hp-r input::-moz-range-thumb{pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid #F5C518;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:grab}
-  .hp-r input:focus-visible::-webkit-slider-thumb{outline:3px solid var(--focus);outline-offset:2px}
-  .hp-r input:focus-visible::-moz-range-thumb{outline:3px solid var(--focus);outline-offset:2px}
-  .hp-ext{display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--ink2)}
+  /* Filtros de alojamiento: categoria y zona o playa en una tarjeta */
+  .hc{margin:12px 0 14px;padding:14px;border:1px solid var(--card-border,var(--line));border-radius:16px;background:var(--card-bg,var(--surface))}
+  .hc-cat{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+  .hc-zona{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+  .hc-cat:only-child,.hc-zona:only-child{margin:0;padding:0;border:0}
+  .hc-l{font-size:12.5px;font-weight:700;color:var(--azul,var(--ink2))}
+  .hc-l--up{display:block;margin-bottom:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+  .hc-chips{display:flex;flex-wrap:wrap;gap:8px}
+  .hc-chip{display:inline-flex;align-items:center;gap:4px;min-height:38px;padding:0 14px;border:1.5px solid var(--line);border-radius:99px;background:transparent;color:var(--ink);font:700 13px var(--fb);cursor:pointer}
+  .hc-chip:hover{border-color:var(--ink2)}
+  .hc-chip.is-on{border:2px solid #F5C518;padding:0 13.5px;font-weight:800}
+  .hc-chip:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .hp-vacio{margin:6px 0 12px;padding:14px;border-radius:12px;background:var(--cel-soft);text-align:center;font-size:13.5px;font-weight:600;color:var(--ink)}
-  .hp-vacio p{margin:0 0 8px}
+  .hp-vacio p{margin:0}
   .ho{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px 12px;padding:10px;cursor:pointer}
   .ho.is-sel{padding:9.5px}
   .ho:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -149,7 +146,7 @@
   .ho__p{grid-column:1/-1;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding-top:8px;border-top:1px solid var(--line)}
   .ho__p b{display:block;font-family:var(--fh);font-size:24px;line-height:1;color:var(--ink)}
   .ho__p small{display:block;margin-top:3px;font-size:11px;font-weight:600;color:var(--ink2)}
-  .ho__ver{flex:0 0 auto;padding:9px 12px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:800;text-decoration:none;white-space:nowrap}
+  .ho__ver{flex:0 0 auto;padding:9px 14px;border:0;border-radius:99px;background:#F5C518;color:#0B1F3A;font-size:12.5px;font-weight:800;text-decoration:none;white-space:nowrap}
   .ho__ver:focus-visible,.ho__masbtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .ho__mas{display:flex;align-items:center;gap:10px;margin-top:4px;padding:12px;border-radius:14px;background:var(--good-soft);font-size:12px;line-height:1.35;color:var(--ink)}
   .ho__mas>svg{flex:0 0 26px;color:var(--good)}
@@ -1487,7 +1484,7 @@
   var todosExtras = [].concat.apply([], EXTRAS.map(function (s) { return s.items; }));
 
   /* ---- Estado ---- */
-  var S = { dia: { local: { k: 'eco' }, comidas: { k: 'casual' } }, cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 5, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: '', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'precio', comidasMonto: null, cmp: null, reales: {}, editRes: '', verMasVuelos: false };
+  var S = { catH: 'economico', dia: { local: { k: 'eco' }, comidas: { k: 'casual' } }, cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 5, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: '', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'precio', comidasMonto: null, cmp: null, reales: {}, editRes: '', verMasVuelos: false };
   var precioHotelEstimado = function (h) { return S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.total : h.precio; };
   var precioHotel = function (h) { return S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : precioHotelEstimado(h); };
   var vuelo = function () { return VUELOS.filter(function (v) { return v.id === S.vuelo; })[0] || SIN_VUELO; };
@@ -1879,7 +1876,7 @@
   var MAX_HOTELES = 5; /* de a 5; "Ver más alojamiento" suma otros 5 */
   var playasDe = function () {
     var c = {};
-    HOTELES.forEach(function (h) { c[h.zona] = (c[h.zona] || 0) + 1; });
+    hotelesDeCategoria().forEach(function (h) { c[h.zona] = (c[h.zona] || 0) + 1; });
     return Object.keys(c).sort(function (x, y) { return (x === 'Otras zonas') - (y === 'Otras zonas') || c[y] - c[x]; }).map(function (n) { return [n, c[n]]; });
   };
   /* Recomendado: buena nota con resenas de verdad, cerca de la playa y sin pasarse de precio. */
@@ -1924,34 +1921,22 @@
     var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(DEST) + ' · ' + NOCHES + ' noches · ' + personas + '</p></div></div>';
     if (S.cargandoH) return cab + cargandoHoteles();
     var aviso = S.avisoH ? '<p class="f-sub" style="padding:8px 10px;border-radius:10px;background:var(--cel-soft)">' + esc(S.avisoH) + '</p>' : '';
-    var playas = playasDe(), todos = ordenarHoteles();
+    var playas = playasDe(), todos = ordenarHoteles().filter(function (h) { return !h.tipo || h.tipo === S.catH; });
     if (S.playaSel !== 'todas' && !playas.some(function (x) { return x[0] === S.playaSel; })) S.playaSel = 'todas';
-    var enZona = todos.filter(function (h) { return S.playaSel === 'todas' || h.zona === S.playaSel; });
-    /* Rango de precio: dos tiradores sobre el total de la estadia, entre el mas barato y el mas caro de la zona elegida.
-       S.pMin / S.pMax en dolares (null = sin tope de ese lado). */
-    var precios = enZona.map(precioHotel), pLo = Math.floor(Math.min.apply(null, precios)), pHi = Math.ceil(Math.max.apply(null, precios));
-    var desde = S.pMin == null ? pLo : Math.min(Math.max(S.pMin, pLo), pHi), hasta = S.pMax == null ? pHi : Math.max(Math.min(S.pMax, pHi), desde);
-    var lista = enZona.filter(function (h) { var v = precioHotel(h); return v >= desde - 0.5 && v <= hasta + 0.5; }), mostrados = lista.slice(0, S.nH);
-    var rango = '';
-    if (enZona.length > 1 && pHi > pLo) {
-      var paso = Math.max(1, Math.round((pHi - pLo) / 60)), pct = function (v) { return (100 * (v - pLo) / (pHi - pLo)).toFixed(1); };
-      rango = '<div class="hp" role="group" aria-labelledby="hp-h" data-lo="' + pLo + '" data-hi="' + pHi + '">' +
-        '<div class="hp-top"><span id="hp-h">Precio total de la estadía</span><b id="hp-txt">' + f(desde) + ' – ' + f(hasta) + '</b></div>' +
-        '<div class="hp-r"><span class="hp-fill" style="left:' + pct(desde) + '%;right:' + (100 - pct(hasta)) + '%"></span>' +
-        '<input type="range" id="hp-min" min="' + pLo + '" max="' + pHi + '" step="' + paso + '" value="' + desde + '" aria-label="Precio mínimo">' +
-        '<input type="range" id="hp-max" min="' + pLo + '" max="' + pHi + '" step="' + paso + '" value="' + hasta + '" aria-label="Precio máximo"></div>' +
-        '<div class="hp-ext"><small>' + f(pLo) + '</small><small>' + f(pHi) + '</small></div></div>';
-    }
-    var sinRango = !lista.length && enZona.length ? '<div class="hp-vacio"><p>Ningún alojamiento entre ' + f(desde) + ' y ' + f(hasta) + '.</p><button type="button" class="f-chip" data-hp-reset="1">Ver todos los precios</button></div>' : '';
+    var lista = todos.filter(function (h) { return S.playaSel === 'todas' || h.zona === S.playaSel; }), mostrados = lista.slice(0, S.nH);
     var rapidas = (S.zonasTodas ? playas : playas.filter(function (x) { return x[0] !== 'Otras zonas'; }).slice(0, 4));
-    var zchip = function (val, txt, n) { return '<button type="button" class="f-chip' + (S.playaSel === val ? ' is-on' : '') + '" data-zona="' + esc(val) + '" aria-pressed="' + (S.playaSel === val) + '">' + esc(txt) + (n ? ' <span class="f-n">' + n + '</span>' : '') + '</button>'; };
-    /* El pedido de elegir zona solo aparece si hay mas de una zona para elegir. */
-    var selector = playas.length > 1 ? '<p class="f-sub" style="margin:6px 0 12px">Elegí la zona donde querés alojarte.</p><div class="f-zchips" role="group" aria-label="Zona donde querés alojarte">' +
-      zchip('todas', 'Todas', HOTELES.length) + rapidas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') +
-      (playas.length > 4 ? '<button type="button" class="f-chip" data-zonas-mas="1" aria-expanded="' + !!S.zonasTodas + '">' + (S.zonasTodas ? 'Menos zonas ▴' : 'Más zonas ▾') + '</button>' : '') + '</div>' : '';
-    var orden = '<div class="f-orden"><span>Ordenar por:</span>' + chips([['rec', '★ Recomendados'], ['precio', 'Precio'], ['rating', 'Valoración']], S.fHotel, 'hotel') + '</div>';
+    var zchip = function (val, txt) { return '<button type="button" class="hc-chip' + (S.playaSel === val ? ' is-on' : '') + '" data-zona="' + esc(val) + '" aria-pressed="' + (S.playaSel === val) + '">' + (val === 'todas' ? '' : '<span aria-hidden="true">' + (val === 'Otras zonas' ? '📍' : '🏖️') + '</span> ') + esc(txt) + '</button>'; };
+    /* Arriba de la lista, en una tarjeta: la categoria (Economico, Equilibrado, Comodo, All Inclusive) y la zona o playa. */
+    var cats = [['economico', 'Económico'], ['intermedio', 'Equilibrado'], ['confort', 'Cómodo'], ['all-inclusive', 'All Inclusive']];
+    var categoria = HOTELES.some(function (h) { return h.tipo; }) ? '<div class="hc-cat"><span class="hc-l" id="hc-cat">Categoría de alojamiento</span><div class="hc-chips" role="group" aria-labelledby="hc-cat">' +
+      cats.map(function (c) { return '<button type="button" class="hc-chip' + (S.catH === c[0] ? ' is-on' : '') + '" data-cath="' + c[0] + '" aria-pressed="' + (S.catH === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div></div>' : '';
+    var selector = playas.length > 1 ? '<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">Zona o playa</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
+      zchip('todas', 'Todas', 0) + rapidas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') +
+      (playas.length > 4 ? '<button type="button" class="hc-chip" data-zonas-mas="1" aria-expanded="' + !!S.zonasTodas + '">' + (S.zonasTodas ? 'Menos zonas ▴' : 'Más zonas ▾') + '</button>' : '') + '</div></div>' : '';
     var iPin = '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>';
-    return cab + aviso + selector + rango + orden + sinRango +
+    var filtros = categoria || selector ? '<div class="hc">' + categoria + selector + '</div>' : '';
+    var vacio = !lista.length ? '<div class="hp-vacio"><p>No encontramos alojamientos ' + (S.catH === 'all-inclusive' ? 'All Inclusive' : 'de esta categoría') + ' para estas fechas.</p></div>' : '';
+    return cab + aviso + filtros + vacio +
       mostrados.map(function (h, i) {
         var on = S.hotel === h.id, ins = insignia(h, i), feats = h.serv.filter(Boolean).map(function (x) { return String(x).split(/[·•]/)[0].trim(); }).filter(Boolean).slice(0, 2);
         return '<div class="opt ho' + sel(on) + '" role="button" tabindex="0" data-sel="hotel:' + h.id + '" aria-pressed="' + on + '">' + tick +
@@ -1964,10 +1949,10 @@
           (S.habitacion && S.habitacion.hotelId === h.id ? '<div class="ho__hab">Habitación: ' + esc(S.habitacion.nombre) + '</div>' : '') + '<ul class="ho__f">' + feats.map(function (x) { return '<li>✓ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
           '</div>' +
           '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + NOCHES + ' noches · ' + personas + '</small></div>' +
-          (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Ver habitaciones →') + '</button>') + '</div></div>';
+          (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Elegir habitación') + '</button>') + '</div></div>';
       }).join('') +
       (lista.length > mostrados.length ? '<button type="button" class="f-more" data-mashoteles="1">Ver más alojamiento</button>' : '') +
-      (lista.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Mostrando ' + mostrados.length + ' de ' + lista.length + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + (lista.length < enZona.length ? ' en tu rango de precio' : '') + '</p>' : '');
+      (lista.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Mostrando ' + mostrados.length + ' de ' + lista.length + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '</p>' : '');
   }
   var iClock = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', iUsers = '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.3c1.7.8 3 2.5 3 5.2"/>';
   var iImg = '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4.500 3.500 3 3-2.500L20 17"/>';
@@ -2766,10 +2751,10 @@
   /* ---- Hoteles reales (Booking, via /api/hoteles de la app) ---- */
   var TIPOS = ['economico', 'intermedio', 'confort'];
   var TIPO_TXT = { economico: 'Económico', intermedio: 'Intermedio', confort: 'Confort' };
-  function mapHotel(h) {
+  function mapHotel(h, tipo) {
     var m = String(h.roomLabel || '').replace(/\s*·.*$/, '').replace(/\s*:.*$/, '');
     var det = String(h.roomLabel || '').split(':')[1] ? String(h.roomLabel).split(':')[1].split('·')[0].trim() : '';
-    return { id: String(h.hotelId || h.name), nom: h.name, cat: (h.hotelTypeLabel || TIPO_TXT[h.hotelType] || 'Alojamiento') + (h.stars ? ' ' + h.stars + '★' : ''),
+    return { id: String(h.hotelId || h.name), tipo: tipo, nom: h.name, cat: (h.hotelTypeLabel || TIPO_TXT[h.hotelType] || 'Alojamiento') + (h.stars ? ' ' + h.stars + '★' : ''),
       rat: Number(h.rating) || 0, n: Number(h.reviewCount) || 0, zona: h.playa || h.areaLabel || DEST,
       playa: h.playaKm != null ? Math.round(h.playaKm * 1000) : null, serv: [m, det].filter(Boolean).slice(0, 2).concat(h.mealPlan ? [h.mealPlan] : []),
       precio: Number(h.total), rec: !!h.recommended, img: h.image || 'home-ilha-bahia.jpg' };
@@ -2784,17 +2769,42 @@
     };
     return Promise.all(TIPOS.map(function (t) { return pedir(t).catch(function () { return { hotels: [] }; }); })).then(function (rs) {
       var vistos = {}, lista = [];
-      rs.forEach(function (d) { [].concat(d.hotels || [], [].concat.apply([], (d.hotelsPorPlaya || []).map(function (g) { return g.hotels || []; }))).forEach(function (h) {
-        if (h.source !== 'booking' || !(Number(h.total) > 0) || vistos[h.hotelId || h.name]) return;
-        vistos[h.hotelId || h.name] = 1; lista.push(mapHotel(h));
-      }); });
+      rs.forEach(function (d, i) { sumarHoteles(lista, vistos, d, TIPOS[i]); });
       if (!lista.length) throw new Error('Booking no devolvió alojamientos');
       HOTELES = lista;
-      /* Por defecto, el alojamiento mas barato. */
-      S.hotel = HOTELES.slice().sort(function (x, y) { return x.precio - y.precio; })[0].id;
+      /* Por defecto, el alojamiento mas barato de la categoria elegida. */
+      elegirMasBarato();
     }).catch(function (e) {
       S.avisoH = 'No pudimos consultar Booking ahora (' + (e.message || 'error') + '). Mostramos ejemplos.';
     }).then(function () { S.cargandoH = false; track('flujo_hoteles', { reales: !HOTELES[0].ejemplo, cantidad: HOTELES.length }); render(false); });
+  }
+  /* Suma a la lista los alojamientos de Booking de una categoria (sin repetir dentro de la misma categoria). */
+  function sumarHoteles(lista, vistos, d, tipo) {
+    [].concat(d.hotels || [], [].concat.apply([], (d.hotelsPorPlaya || []).map(function (g) { return g.hotels || []; }))).forEach(function (h) {
+      var clave = tipo + '|' + (h.hotelId || h.name);
+      if (h.source !== 'booking' || !(Number(h.total) > 0) || vistos[clave]) return;
+      vistos[clave] = 1; lista.push(mapHotel(h, tipo));
+    });
+  }
+  /* Los de la categoria elegida. Los de ejemplo (sin Booking) no tienen categoria: se muestran todos. */
+  function hotelesDeCategoria() {
+    return HOTELES.filter(function (h) { return !h.tipo || h.tipo === S.catH; });
+  }
+  function elegirMasBarato() {
+    var l = hotelesDeCategoria().sort(function (x, y) { return x.precio - y.precio; });
+    if (l.length && !l.some(function (h) { return h.id === S.hotel; })) S.hotel = l[0].id;
+  }
+  /* All Inclusive se pide recien cuando se elige (es la categoria menos usada y cada pedido consulta Booking). */
+  function cargarAllInclusive() {
+    if (S.aiListo || !/^https?:$/.test(location.protocol)) return;
+    S.aiListo = true; S.cargandoH = true; render(false);
+    var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, ninos: ninos, style: 'comodo', hotel_type: 'all-inclusive', subcategory: '' });
+    fetch('/api/hoteles?' + q.toString()).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (d) {
+      var vistos = {}; HOTELES.forEach(function (h) { vistos[h.tipo + '|' + h.id] = 1; });
+      sumarHoteles(HOTELES, vistos, d, 'all-inclusive');
+      if (S.catH === 'all-inclusive') elegirMasBarato();
+      S.cargandoH = false; render(false);
+    });
   }
   /* ---- Habitaciones de un hotel (Booking, /api/hotel-habitaciones de la app) ---- */
   function abrirHabitaciones(hotelId) {
@@ -2949,25 +2959,7 @@
   $('main').addEventListener('keydown', function (e) {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-sel],[role=button][data-extra]')) { e.preventDefault(); e.target.click(); }
   });
-  /* Rango de precio de hoteles: mientras se arrastra solo se mueven el texto y la franja; al soltar se filtra la lista. */
-  function hpLeer(mover) {
-    var a = $('hp-min'), b = $('hp-max'); if (!a || !b) return null;
-    var lo = +a.min, hi = +a.max, x = +a.value, y = +b.value;
-    if (x > y) { if (mover === 'hp-min') a.value = x = y; else b.value = y = x; }
-    var box = a.closest('.hp'), fill = box.querySelector('.hp-fill');
-    fill.style.left = (100 * (x - lo) / (hi - lo)) + '%'; fill.style.right = (100 - 100 * (y - lo) / (hi - lo)) + '%';
-    $('hp-txt').textContent = f(x) + ' – ' + f(y);
-    return { min: x <= lo ? null : x, max: y >= hi ? null : y };
-  }
-  $('main').addEventListener('input', function (e) { if (e.target.id === 'hp-min' || e.target.id === 'hp-max') hpLeer(e.target.id); });
   $('main').addEventListener('change', function (e) {
-    if (e.target.id === 'hp-min' || e.target.id === 'hp-max') {
-      var r = hpLeer(e.target.id); if (!r) return;
-      S.pMin = r.min; S.pMax = r.max; S.nH = MAX_HOTELES; track('flujo_hotel_rango_precio', { min: r.min == null ? 0 : Math.round(r.min), max: r.max == null ? 0 : Math.round(r.max) });
-      var yr = $('main').scrollTop; render(false); $('main').scrollTop = yr;
-      var foco = $(e.target.id); if (foco) foco.focus({ preventScroll: true });
-      return;
-    }
     if (e.target.dataset.diaIn) {
       var q = e.target.dataset.diaIn, v = parseFloat(e.target.value), tasa = window.CSMoneda && CSMoneda.tasa ? CSMoneda.tasa() : 1;
       S.dia[q] = { k: 'custom', monto: v >= 0 ? v / tasa : 0 }; track('flujo_dia_monto', { rubro: q, monto: Math.round(S.dia[q].monto) });
@@ -3063,7 +3055,7 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
@@ -3103,7 +3095,11 @@
     else if (t.dataset.habs) { abrirHabitaciones(t.dataset.habs); return; }
     else if (t.dataset.xcat) { S.fExtra = t.dataset.xcat; track('flujo_filtro', { lista: 'extras', filtro: S.fExtra }); }
     else if (t.dataset.xmas) { S.xmas[t.dataset.xmas] = true; track('flujo_ver_mas', { lista: 'extras_' + t.dataset.xmas }); }
-    else if (t.dataset.hpReset) { S.pMin = S.pMax = null; S.nH = MAX_HOTELES; }
+    else if (t.dataset.cath) {
+      S.catH = t.dataset.cath; S.playaSel = 'todas'; S.nH = MAX_HOTELES; track('flujo_hotel_categoria', { categoria: S.catH });
+      if (S.catH === 'all-inclusive' && !S.aiListo) { cargarAllInclusive(); return; }
+      elegirMasBarato();
+    }
     else if (t.dataset.zona) { S.playaSel = t.dataset.zona; S.nH = MAX_HOTELES; track('flujo_playa', { playa: S.playaSel, via: 'chip' }); }
     else if (t.dataset.zonasMas) { S.zonasTodas = !S.zonasTodas; track('flujo_zonas_mas', { abierto: S.zonasTodas }); }
     else if (t.dataset.mashoteles) { S.nH += MAX_HOTELES; track('flujo_ver_mas', { lista: 'hoteles', mostrados: S.nH }); }
