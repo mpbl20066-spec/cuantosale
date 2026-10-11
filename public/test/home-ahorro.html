@@ -7,7 +7,7 @@
 <meta name="description" content="Armá tu viaje a Brasil desde Uruguay y mirá cuánto cuesta en total: vuelo, traslados, alojamiento y extras.">
 <link rel="icon" href="/icons/icon-192.png" type="image/png">
 <meta name="theme-color" content="#F7F8FA">
-<title>Mi alcancía de viaje</title>
+<title>Mi ahorro de viaje</title>
 <script src="tema.js"></script>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -321,7 +321,7 @@
   @media (min-width:768px){.g-paso b{font-size:16px}.g-paso small{font-size:13px}}
   .g-chispa{position:absolute;top:19px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;pointer-events:none;animation:g-burst .7s ease-out forwards}
 
-  /* ---- Mi alcancía de viaje ---- */
+  /* ---- Mi ahorro de viaje ---- */
   .ah{max-width:640px;margin:0 auto;padding:4px 0 24px}
   .ah [hidden]{display:none!important}
   .ah-eye{margin:14px 0 8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B8860B}
@@ -443,7 +443,7 @@
     </header>
 
     <main class="ah" id="ah">
-      <p class="ah-eye">Mi alcancía de viaje</p>
+      <p class="ah-eye">Mi ahorro de viaje</p>
 
       <!-- Paso 1: crear la meta -->
       <section id="ah-nueva" hidden>
@@ -466,7 +466,7 @@
         </div>
 
         <div class="ah-meta" aria-live="polite"><span>La meta del viaje</span><b id="ah-meta-n">Elegí un destino</b><small id="ah-base"></small></div>
-        <button type="button" class="ah-btn" id="ah-crear" disabled>Crear mi alcancía</button>
+        <button type="button" class="ah-btn" id="ah-crear" disabled>Crear mi ahorro</button>
       </section>
 
       <!-- Paso 2: la alcancia viva -->
@@ -686,7 +686,7 @@
       c.className = 'g-chispa';
       c.style.cssText = 'background:' + cols[i % 4] + ';--x:' + Math.cos(a) * d + 'px;--y:' + Math.sin(a) * d + 'px;top:50%;left:50%';
       el.appendChild(c); setTimeout(function (c) { c.remove(); }, 800, c);
-    $('ah-fuente').textContent = '';
+    }
   }
   function pintar() {
     var j = suma(A.aportes || []), pct = Math.min(100, Math.floor(j / A.meta * 100)), falta = Math.max(0, A.meta - j), sobra = Math.max(0, j - A.meta), u = unidad();
@@ -694,7 +694,7 @@
     $('ah-fill').style.height = pct + '%'; $('ah-pct').textContent = pct + '%';
     $('ah-juntado').textContent = fm(j); $('ah-metaviva').textContent = fm(A.meta);
     $('ah-falta').textContent = sobra > 0 ? 'Te pasaste por ' + fm(sobra) : (falta > 0 ? 'Te faltan ' + fm(falta) : '¡Meta cumplida!');
-    $('ah-fuente').textContent = (A.base ? textoBase(A.base) + ' ' : '') + 'Precio de referencia' + (A.base && A.base.t ? ' del ' + new Date(A.base.t).toLocaleDateString('es-UY', { day: 'numeric', month: 'short' }) : '') + ': puede cambiar hasta que reserves.';
+    $('ah-fuente').textContent = '';
 
     var P = $('ah-periodo');
     if (j >= A.meta) {
@@ -781,7 +781,7 @@
   function mostrar(editar) {
     $('ah-nueva').hidden = !!(A && !editar); $('ah-viva').hidden = !(A && !editar);
     if (A && !editar) pintar(); else { pintarForm(); if (F.dest && F.mes) recalcular(); else $('ah-meta-n').textContent = 'Elegí un destino'; }
-    $('ah-crear').textContent = A ? 'Guardar la nueva meta' : 'Crear mi alcancía';
+    $('ah-crear').textContent = A ? 'Guardar la nueva meta' : 'Crear mi ahorro';
   }
   mostrar();
   /* cuenta.js carga despues: al iniciar o cerrar sesion se vuelve a leer la alcancia de la cuenta */

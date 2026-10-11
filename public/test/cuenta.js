@@ -253,7 +253,7 @@
       ? '<button type="button" class="cp-head" data-editar data-foco><span class="cp-av">' + esc((nombre || '?').charAt(0).toUpperCase()) + '</span><span class="cp-head__t"><b>Hola, ' + esc(nombre || 'viajero') + '</b><small>Ver y editar tu perfil</small></span>' + ic(I.chev, 16) + '</button>'
       : '<button type="button" class="cp-head" data-login data-foco><span class="cp-av cp-av--v">' + ic(I.user, 24) + '</span><span class="cp-head__t"><b>Ingresá a CuántoSale</b><small>Guardá tus viajes y verlos en cualquier lado</small></span>' + ic(I.chev, 16) + '</button>';
     return cabecera('Mi cuenta') + encabezado + '<div class="cp-lista">' +
-      fila(I.alc, 'Mi alcancía de viaje<small class="cp-fila__s">' + esc(alcResumen()) + '</small>', 'data-alcancia') +
+      fila(I.alc, 'Mi ahorro de viaje<small class="cp-fila__s">' + esc(alcResumen()) + '</small>', 'data-alcancia') +
       fila(I.save, 'Mis viajes guardados', 'data-viajes') +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
       (window.CSMoneda && CSMoneda.tasaDe ? fila(I.conv, 'Conversor de monedas', 'data-conversor') : '') +

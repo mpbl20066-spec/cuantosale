@@ -100,14 +100,14 @@
   .c-mapa{margin-bottom:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
   .c-mapa__h{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--ink2)}
   .c-mapa__h b{color:var(--ink);font-size:13px}
-  .c-mapa .roadtrip-map{height:260px;border-radius:0}
+  .c-mapa .roadtrip-map{height:clamp(170px,30vh,260px);border-radius:0}
   /* Pantalla "Tu ruta en auto" (pant4) */
   .c-rt{display:grid;gap:14px;width:100%;max-width:800px;margin:0 auto;padding-bottom:40px}
   .c-rt__h h1{margin:4px 0 2px}
   .c-rt__h .c-sub{margin:0}
   .c-rt__card{overflow:hidden;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));box-shadow:0 3px 10px rgba(16,35,62,.08)}
-  .c-rt__map{height:300px!important;border-radius:0!important}
-  @media (min-width:768px){.c-rt__map{height:380px!important}}
+  .c-rt__map{height:clamp(170px,32vh,300px)!important;border-radius:0!important}
+  @media (min-width:768px){.c-rt__map{height:clamp(190px,36vh,380px)!important}}
   .c-rt__stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line)}
   .c-rt__stats div{padding:12px 14px;border-left:1px solid var(--line)}
   .c-rt__stats div:first-child{border-left:0}
@@ -126,7 +126,7 @@
   .c-rt__tot b{display:block;margin:2px 0;font-family:var(--fh);font-size:34px;font-weight:800;line-height:1.05;color:#fff}
   .c-rt__tot em{font-style:normal;font-size:14px;font-weight:700;color:#F5C518}
   [data-theme="night"] .c-rt__card .c-rt__stats,[data-theme="night"] .c-rt__card .c-rt__stats div,[data-theme="night"] .c-rt__f{border-color:rgba(255,255,255,.08)}
-  @media (min-width:1024px){.c-mapa .roadtrip-map{height:340px}}
+  @media (min-width:1024px){.c-mapa .roadtrip-map{height:clamp(190px,34vh,340px)}}
   .c-busq{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--control-border);border-radius:14px;background:var(--surface);color:var(--ink2)}
   .c-busq input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:600}
   .c-busq input:focus-visible{outline:none}
