@@ -593,7 +593,7 @@
     var orden = filas.slice().sort(function (a, b) { return (PP[a.dataset.destino] || 1e9) - (PP[b.dataset.destino] || 1e9); });
     orden.forEach(function (fi, i) { var li = fi.parentNode; li.hidden = !todos && i >= VISIBLES; lista.appendChild(li); });
     mas.hidden = filas.length <= VISIBLES;
-    mas.textContent = todos ? 'Ver menos' : 'Ver los ' + filas.length + ' destinos';
+    mas.textContent = todos ? 'Ver menos' : 'Ver más destinos';
     mas.setAttribute('aria-expanded', String(todos));
   }
   var fm = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
@@ -624,8 +624,8 @@
       antes[k] = st;
     });
     if (!hay) { ordenar(); return; }
-    document.getElementById('q-n').textContent = n === 0 ? 'Todavía no llegás a ninguno' : 'Llegás a ' + n + ' de ' + filas.length;
-    document.getElementById('q-sub').textContent = n === 0 ? 'Subí un poco la plata y se van encendiendo.' : (n === filas.length ? 'Te alcanza para todo. Elegí con el corazón.' : 'Los demás se encienden si subís la plata.');
+    document.getElementById('q-n').textContent = n === 0 ? 'Con esa plata todavía no llegás' : (n === filas.length ? 'Con tu plata llegás a todos los destinos' : 'Con tu plata llegás a ' + n + (n === 1 ? ' destino' : ' destinos'));
+    document.getElementById('q-sub').textContent = n === 0 ? 'Subí el monto para ver opciones.' : (n === filas.length ? 'Ordenados del más barato al más caro.' : 'Si subís el monto, se suman más.');
   }
   rango.addEventListener('input', function () { pintar(true); });
   if (window.CSMoneda) CSMoneda.alCambiar(function () { pintar(false); });
