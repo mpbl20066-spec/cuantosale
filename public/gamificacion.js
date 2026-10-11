@@ -42,7 +42,7 @@
   /* ---------- estado ---------- */
   function vacio() {
     return { xp: 0, sellos: {}, acc: { guardar: 0, compartir: 0, dividir: 0 }, busquedas: 0, insignias: {},
-      racha: 0, mejorRacha: 0, ultimoDia: '', dia: '', busquedasHoy: 0, hechos: {}, nivel: 0, pend: [] };
+      racha: 0, mejorRacha: 0, ultimoDia: '', dia: '', busquedasHoy: 0, hechos: {}, nivel: 0, pend: [], cupones: [], remoto: false };
   }
   function leer() {
     var s = vacio();
@@ -156,8 +156,52 @@
     return true;
   }
 
+  /* ---------- cuenta: con sesion el XP lo lleva el servidor ----------
+     Con sesion iniciada cada accion se manda a /api/pasaporte/evento y el estado (XP, sellos, cupones) vuelve de ahi:
+     el XP y los cupones no se pueden fabricar desde la consola del navegador. Los invitados siguen con el progreso
+     local, que no da premios. Al iniciar sesion, los sellos del navegador se suben una vez. */
+  function sesion() { return !!(window.CSCuenta && window.CSCuenta.usuario && window.CSCuenta.usuario()); }
+  function llamar(metodo, camino, cuerpo) {
+    return window.CSCuenta.token().then(function (t) {
+      if (!t) throw new Error('sin sesion');
+      return fetch(camino, { method: metodo, headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+    }).then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  }
+  function rachas(dias) {
+    var u = (dias || []).slice().sort(), mejor = 0, act = 0, i;
+    for (i = 0; i < u.length; i++) { act = i && diasEntre(u[i - 1], u[i]) === 1 ? act + 1 : 1; if (act > mejor) mejor = act; }
+    var h = hoy(), ult = u[u.length - 1], racha = 0;
+    if (ult && diasEntre(ult, h) <= 1) { racha = 1; for (i = u.length - 1; i > 0 && diasEntre(u[i - 1], u[i]) === 1; i--) racha++; }
+    return { racha: racha, mejor: mejor };
+  }
+  function aplicarServidor(j, avisar) {
+    var antesXp = E.xp, antesNivel = E.nivel, antesCup = (E.cupones || []).length;
+    var r = rachas(j.dias);
+    E.xp = j.xp | 0; E.sellos = j.sellos || {}; E.busquedas = j.busquedas | 0; E.cupones = j.cupones || []; E.remoto = true;
+    E.acc = { guardar: (j.acc && j.acc.guardar) | 0, compartir: (j.acc && j.acc.compartir) | 0, dividir: (j.acc && j.acc.dividir) | 0 };
+    E.racha = r.racha; E.mejorRacha = Math.max(r.mejor, 0);
+    E.nivel = nivelDe(E.xp);
+    if (avisar && E.xp > antesXp) {
+      if (E.nivel > antesNivel) aviso('¡Subiste a ' + NIVELES[E.nivel].n + '!', 'Nivel ' + (E.nivel + 1) + ' · ' + E.xp + ' XP', NIVELES[E.nivel].ico, true);
+      else aviso('+' + (E.xp - antesXp) + ' XP', 'Guardado en tu cuenta', '✨');
+    }
+    if (avisar && E.cupones.length > antesCup) aviso('¡Ganaste un cupón!', 'Mirá tus cupones en el pasaporte', '🎟️', true);
+    revisarInsignias(!!avisar);
+    guardar(); pintar();
+  }
+  function sincronizar() {
+    if (!sesion()) return Promise.resolve();
+    var subir = !E.remoto && Object.keys(E.sellos).length ? llamar('POST', '/api/pasaporte/evento', { eventos: Object.keys(E.sellos).slice(0, 25).map(function (k) { return { tipo: 'sello', ref: k, nombre: E.sellos[k].n }; }) }) : llamar('GET', '/api/pasaporte');
+    return subir.then(function (j) { aplicarServidor(j, false); }).catch(function () { /* sin red o sin configurar: queda lo que hay */ });
+  }
+  function evento(tipo, ref, nombre) {
+    return llamar('POST', '/api/pasaporte/evento', { tipo: tipo, ref: ref, nombre: nombre }).then(function (j) { aplicarServidor(j, true); }).catch(function () { /* el XP no es critico */ });
+  }
+  function hayTokenGuardado() { try { return Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); }); } catch (e) { return false; } }
+
   /* ---------- eventos del juego ---------- */
   function alEntrar() {
+    if (sesion()) { evento('visita'); return; }
     var h = hoy();
     if (E.ultimoDia === h) return;
     if (E.ultimoDia && diasEntre(E.ultimoDia, h) === 1) E.racha += 1; else E.racha = 1;
@@ -172,6 +216,7 @@
   function alBuscar() {
     var h = hoy();
     if (E.dia !== h) { E.dia = h; E.busquedasHoy = 0; }
+    if (sesion()) { if (E.busquedasHoy < TOPE_BUSQUEDAS_DIA) { E.busquedasHoy += 1; guardar(); evento('busqueda'); } return; }
     E.busquedas += 1;
     if (E.busquedasHoy < TOPE_BUSQUEDAS_DIA) { E.busquedasHoy += 1; sumar(XP.busqueda, 'Por buscar un viaje'); }
     else { revisarInsignias(true); guardar(); pintar(); }
@@ -188,13 +233,16 @@
     if (!id) { id = S.dest; nombre = etiquetaDestino(); }
     if (!id || id === 'todos') return;
     var clave = id + (!nombre && S.second ? '+' + S.second : '');
+    if (sesion()) { if (!E.sellos[clave]) evento('sello', clave, nombre || id); return; }
     if (E.sellos[clave]) return;
     E.sellos[clave] = { n: nombre || id, t: Date.now() };
     sumar(XP.destino, 'Nuevo sello: ' + E.sellos[clave].n);
   }
-  function alAccion(tipo) {
+  function alAccion(tipo, ref) {
     var S = estado();
-    var clave = tipo + '|' + (S.dest || '') + '|' + (S.second || '');
+    ref = String(ref || ((S.dest || 'viaje') + (S.second ? '+' + S.second : ''))).replace(/[^A-Za-z0-9_+.-]/g, '').slice(0, 40);
+    if (sesion()) { evento(tipo, ref); return; }
+    var clave = tipo + '|' + ref;
     if (!unaVez(clave)) return;
     E.acc[tipo] += 1;
     var motivos = { guardar: 'Por guardar un viaje', compartir: 'Por compartir un viaje', dividir: 'Por dividir los gastos' };
@@ -301,6 +349,23 @@
     if (m && !m.hidden) cuerpoModal();
   }
 
+  function fechaCorta(iso) { var d = new Date(iso); return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2); }
+  function premiosHtml() {
+    var h = '<h3>Mis cupones</h3>';
+    var cs = E.remoto ? E.cupones : [];
+    if (cs.length) {
+      h += '<ul class="gm-cupones">' + cs.map(function (c) {
+        var usado = !!c.usado_en, vencido = !usado && Date.parse(c.expira) < Date.now();
+        return '<li class="' + (usado || vencido ? 'is-off' : '') + '"><span><b>' + esc(c.pct) + '% de descuento</b><small>' + (usado ? 'Ya lo usaste' : (vencido ? 'Venció' : 'Hasta US$ ' + esc(c.tope_usd) + ' · compra mínima US$ ' + esc(c.minimo_usd) + ' · vence ' + fechaCorta(c.expira))) + '</small></span>' +
+          (usado || vencido ? '' : '<code>' + esc(c.codigo) + '</code><button type="button" data-gm-copiar="' + esc(c.codigo) + '">Copiar</button>') + '</li>';
+      }).join('') + '</ul>';
+    } else {
+      h += '<p class="gm-vacio">' + (E.remoto ? 'Llegá a Viajero (150 XP) para ganar tu primer cupón.' : 'Iniciá sesión para ganar y usar cupones.') + '</p>';
+    }
+    return h + '<h3>Premios por nivel</h3><ul class="gm-reglas"><li><b>2%</b> Viajero (150 XP)</li><li><b>3%</b> Trotamundos (350 XP)</li><li><b>5%</b> Leyenda (700 XP) y atención prioritaria</li></ul>' +
+      '<p class="gm-nota">Un cupón por nivel, de un solo uso, válido 90 días en traslados y tours (descuento máximo US$ 5, compra mínima US$ 40). Se usa al tocar Reservar.</p>';
+  }
+
   function cuerpoModal() {
     var m = document.getElementById('gm-modal');
     var p = progreso();
@@ -328,13 +393,16 @@
         '<span><b>' + esc(b.n) + '</b><small>' + esc(b.d) + '</small></span></li>';
     }).join('') + '</ul>' +
       '<h3>Cómo sumar XP</h3><ul class="gm-reglas">' +
-      '<li><b>+' + XP.visita + '</b> entrar cada día (más con racha)</li>' +
+      '<li><b>+' + XP.visita + '</b> entrar cada día</li>' +
       '<li><b>+' + XP.busqueda + '</b> buscar un viaje (hasta ' + TOPE_BUSQUEDAS_DIA + ' por día)</li>' +
       '<li><b>+' + XP.destino + '</b> abrir un destino nuevo</li>' +
       '<li><b>+' + XP.guardar + '</b> guardar un viaje</li>' +
       '<li><b>+' + XP.compartir + '</b> compartir un viaje</li>' +
       '<li><b>+' + XP.dividir + '</b> dividir los gastos</li></ul>' +
-      '<p class="gm-nota">Tu progreso se guarda en este navegador.</p></div>';
+      premiosHtml() +
+      (E.remoto ? '<p class="gm-nota">Tu progreso está guardado en tu cuenta.</p>'
+        : '<div class="gm-login"><b>Guardá tu progreso y ganá cupones</b><span>Con una cuenta tus XP quedan a salvo y se canjean por descuentos en traslados y tours.</span><button type="button" data-gm-login>Iniciar sesión</button></div>') +
+      '</div>';
     m.innerHTML = h;
   }
 
@@ -344,7 +412,13 @@
     if (!m) {
       m = document.createElement('div');
       m.id = 'gm-modal'; m.className = 'gm-modal'; m.hidden = true;
-      m.addEventListener('click', function (e) { if (e.target === m || (e.target.closest && e.target.closest('[data-gm-cerrar]'))) cerrar(); });
+      m.addEventListener('click', function (e) {
+        var t = e.target;
+        if (t === m || (t.closest && t.closest('[data-gm-cerrar]'))) { cerrar(); return; }
+        var cp = t.closest && t.closest('[data-gm-copiar]');
+        if (cp) { var cod = cp.getAttribute('data-gm-copiar'); try { navigator.clipboard.writeText(cod); cp.textContent = '¡Copiado!'; } catch (er) { cp.textContent = cod; } return; }
+        if (t.closest && t.closest('[data-gm-login]')) { cerrar(); if (window.CSCuenta) window.CSCuenta.abrir('menu'); }
+      });
       document.body.appendChild(m);
     }
     foco = document.activeElement;
@@ -367,8 +441,18 @@
     E.nivel = nivelDe(E.xp);
     pintar();
     vigilar();
-    // Un pequeno respiro para que no compita con la carga inicial de la pagina.
-    setTimeout(alEntrar, 1200);
+    // Con sesion se sincroniza con el servidor antes de contar la visita; sin sesion corre el modo invitado.
+    // No se carga el servicio de cuentas por las dudas: solo si el navegador ya tiene una sesion guardada.
+    if (window.CSCuenta && hayTokenGuardado()) {
+      window.CSCuenta.iniciar().then(function () { return sincronizar(); }).catch(function () {}).then(function () { setTimeout(alEntrar, 800); });
+      window.CSCuenta.alCambiar(function (u) {
+        if (u) sincronizar(); else { E = vacio(); guardar(); pintar(); }
+      });
+    } else {
+      // Un pequeno respiro para que no compita con la carga inicial de la pagina.
+      setTimeout(alEntrar, 1200);
+      if (window.CSCuenta) window.CSCuenta.alCambiar(function (u) { if (u) sincronizar(); });
+    }
     if (E.pend && E.pend.length) {
       cola = E.pend.slice();
       setTimeout(function () { if (!hayToast) siguiente(); }, 700);
@@ -376,5 +460,12 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 
-  window.CS_GAME = { estado: function () { return JSON.parse(JSON.stringify(E)); }, abrir: abrir };
+  window.CS_GAME = {
+    estado: function () { return JSON.parse(JSON.stringify(E)); }, abrir: abrir,
+    /* Para las paginas del flujo: CS_GAME.evento('guardar' | 'compartir' | 'dividir', <codigo del viaje>). */
+    evento: function (tipo, ref) { if (tipo === 'guardar' || tipo === 'compartir' || tipo === 'dividir') alAccion(tipo, ref); },
+    /* Cupones que se pueden usar ahora (solo con sesion). */
+    cupones: function () { return E.remoto ? (E.cupones || []).filter(function (c) { return !c.usado_en && Date.parse(c.expira) > Date.now(); }) : []; },
+    refrescar: sincronizar
+  };
 })();

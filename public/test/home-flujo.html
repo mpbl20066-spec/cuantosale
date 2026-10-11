@@ -695,7 +695,9 @@
   .cf-svc .fin-ico{flex:0 0 46px;height:46px}
   .cf-total{display:flex;justify-content:space-between;align-items:center;padding:12px;font-size:15px;font-weight:700;color:var(--ink)}
   .cf-total b{font-family:var(--fh);font-size:22px}
-  .cf-tel{display:grid;grid-template-columns:104px 1fr;gap:8px}
+  .cf-nota{margin:12px 0 0;font-size:13px;color:var(--ink2)}
+  .cf-tel{display:grid;grid-template-columns:auto 1fr;gap:8px}
+  .cf-tel__pais{display:flex;align-items:center;padding:0 14px;font-weight:700;white-space:nowrap}
   .cf-vacio{display:grid;gap:8px;margin-top:14px;padding:14px;border-radius:16px;background:var(--cel-soft);font-size:13px;font-weight:600;color:var(--ink2)}
   .cf-vacio b{font-size:15px;color:var(--ink)}
   .ed-st.is-sol{color:#8A5A0E}
@@ -2130,7 +2132,29 @@
      OJO: en la maqueta el codigo se valida en el navegador, asi que NO es seguro; en produccion
      lo firma y lo verifica el servidor (HMAC con una clave que el cliente no tiene). */
   function codigoConf(id, srv) { var h = 2166136261, t = id + '|' + srv + '|cs-demo-2026'; for (var i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36).toUpperCase().padStart(7, '0'); }
+  /* Celular uruguayo para WhatsApp: 09X XXX XXX, con o sin el 0 inicial y con o sin +598. Devuelve los 8 digitos
+     (9XXXXXXX) o '' si no es valido. Los fijos no sirven: el contacto es por WhatsApp. */
+  function telefonoUY(v) {
+    var d = String(v || '').replace(/[\s().-]/g, '');
+    if (/[^0-9+]/.test(d) || d.indexOf('+') > 0) return '';
+    d = d.replace(/^\+/, '');
+    if (d.indexOf('00598') === 0) d = d.slice(5); else if (d.indexOf('598') === 0) d = d.slice(3);
+    if (d.charAt(0) === '0') d = d.slice(1);
+    return /^9[1-9]\d{6}$/.test(d) ? d : '';
+  }
+  /* Email razonable: sin espacios ni puntos pegados, dominio con punto y terminacion de letras. */
+  function emailValido(m) {
+    m = String(m || '');
+    return m.length <= 254 && /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(m) && !/\.\./.test(m) && !/^\.|\.@/.test(m);
+  }
   var PAISES = [['+598', 'UY +598'], ['+54', 'AR +54'], ['+55', 'BR +55'], ['+56', 'CL +56'], ['+595', 'PY +595'], ['+34', 'ES +34'], ['+1', 'US +1']];
+  /* Cupones del pasaporte que se pueden usar (solo con sesion). Sin cupon es la opcion por defecto. */
+  function cuponHtml(dt) {
+    var cs = window.CS_GAME ? CS_GAME.cupones() : [];
+    if (!cs.length) return '';
+    return '<label class="g-lbl" for="cf-cupon">Cupón del pasaporte</label><select id="cf-cupon" class="g-in"><option value="">No usar cupón</option>' +
+      cs.map(function (c) { return '<option value="' + esc(c.codigo) + '"' + (dt.cupon === c.codigo ? ' selected' : '') + '>' + esc(c.pct) + '% (hasta US$ ' + esc(c.tope_usd) + ', compra mínima US$ ' + esc(c.minimo_usd) + ')</option>'; }).join('') + '</select>';
+  }
   function pantalla11() {
     var d = datosFinal(), lista = serviciosCs(), personas = personasTxt(), dt = S.datos || {}, er = S.datosErr || {};
     var total = sum(lista, function (x) { return x.precio; });
@@ -2147,10 +2171,11 @@
       '<h2 class="fin-h2">Tus datos</h2>' +
       '<form id="cs-form" class="af" novalidate>' +
       '<label class="g-lbl" for="cf-nom">Nombre y apellido</label><input id="cf-nom" class="g-in" type="text" autocomplete="name" placeholder="Ej. Juan Pérez" value="' + esc(dt.nombre || '') + '">' + err('nombre') +
-      '<label class="g-lbl" for="cf-tel">WhatsApp</label><div class="cf-tel"><select id="cf-pais" class="g-in" aria-label="Código de país">' + PAISES.map(function (c) { return '<option value="' + c[0] + '"' + ((dt.pais || '+598') === c[0] ? ' selected' : '') + '>' + c[1] + '</option>'; }).join('') + '</select>' +
-      '<input id="cf-tel" class="g-in" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="Número de teléfono" value="' + esc(dt.tel || '') + '"></div>' + err('tel') +
+      '<label class="g-lbl" for="cf-tel">WhatsApp de Uruguay</label><div class="cf-tel"><span class="g-in cf-tel__pais" aria-hidden="true">UY +598</span>' +
+      '<input id="cf-tel" class="g-in" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="09X XXX XXX" value="' + esc(dt.tel ? '0' + dt.tel : '') + '"></div>' + err('tel') +
       '<label class="g-lbl" for="cf-mail">Email</label><input id="cf-mail" class="g-in" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" value="' + esc(dt.mail || '') + '">' + err('mail') +
-      '<button type="submit" class="g-btn g-btn--main" style="margin-top:16px">Continuar →</button></form>';
+      cuponHtml(dt) + '<p class="cf-nota">Al reservar te enviamos un WhatsApp con tu pedido. Un asesor de CuántoSale lo confirma.</p>' + err('envio') +
+      '<button type="submit" class="g-btn g-btn--main" id="cf-reservar" style="margin-top:16px">Reservar</button></form>';
   }
 
   /* El mensaje que se manda es exactamente el que se muestra en la vista previa. */
@@ -2279,7 +2304,39 @@
       '<div class="al-p"><b>' + f(d.tAloj) + '</b><button type="button" class="al-btn" data-booking="ir">Ver opciones →</button></div></div>' +
       '<div class="al-ext"><b>Booking.com</b><span><i>EXTERNO · BOOKING.COM</i>Vas a ser redirigido a Booking.com para completar la reserva.</span></div>';
   }
-  /* Traslado y tours se reservan con CuantoSale: el servidor manda la confirmacion por WhatsApp. */
+  /* Reservar: el pedido le llega al asesor (por email, desde el servidor) y el asesor le manda el WhatsApp al cliente. */
+  function enviarSolicitud(dt) {
+    var lista = serviciosCs(), btn = $('cf-reservar');
+    if (!lista.length) return;
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
+    var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
+    var cuerpo = { nombre: dt.nombre, telefono: dt.pais + dt.tel, email: dt.mail, destino: DEST, fechas: fdc(IDA) + ' → ' + fdc(VUELTA), personas: personasTxt(),
+      servicios: lista.map(function (x) { return { nombre: x.nom, detalle: x.det, precio: f(x.precio) }; }), total: f(sum(lista, function (x) { return x.precio; })),
+      totalUsd: Math.round(sum(lista, function (x) { return x.precio; })), cupon: dt.cupon || '', codigo: String(window.CS_VIAJE_ID || '') };
+    /* Con sesion el pedido viaja con el token: el servidor lo usa para canjear el cupon y sumar el XP de la reserva. */
+    (window.CSCuenta && CSCuenta.usuario() ? CSCuenta.token() : Promise.resolve('')).then(function (tk) {
+      var cab = { 'Content-Type': 'application/json' }; if (tk) cab.Authorization = 'Bearer ' + tk;
+      return fetch('/api/reserva-solicitud', { method: 'POST', headers: cab, signal: ctl ? ctl.signal : undefined, body: JSON.stringify(cuerpo) });
+    })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) { var e = new Error(j.error || ('http ' + r.status)); e.cupon = r.status === 400 || r.status === 401; throw e; } return j; }); })
+      .then(function (j) {
+        clearTimeout(tm);
+        S.sol = S.sol || {};
+        lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
+        try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
+        if (window.CS_GAME) CS_GAME.refrescar();
+        track('reserva_cs_solicitud', { servicios: lista.length, importe: Math.round(sum(lista, function (x) { return x.precio; })), con_traslado: !!S.sol.tras, con_tours: !!S.sol.tours, canal: 'asesor' });
+        S.avisoCs = j && j.whatsapp ? 'Te enviamos un WhatsApp con tu pedido. Un asesor te lo confirma.' : 'Recibimos tu pedido. Un asesor te escribe por WhatsApp para confirmarlo.';
+        ir(7, 'solicitud_cuantosale');
+      })
+      .catch(function (e) {
+        clearTimeout(tm);
+        S.datosErr = { envio: e && e.cupon && e.message ? e.message : 'No pudimos enviar tu pedido ahora. Probá de nuevo en un momento.' };
+        track('reserva_cs_solicitud_error', {});
+        render(false);
+      });
+  }
+  /* (anterior, ya sin uso) Traslado y tours se reservan con CuantoSale: el servidor manda la confirmacion por WhatsApp. */
   function enviarConfirmacion() {
     var lista = serviciosCs(), dt = S.datos || {};
     if (!lista.length || !dt.tel || S.confirmacionEnviada === dt.pais + dt.tel) return;
@@ -2343,8 +2400,10 @@
     var d = datosFinal(), url = location.origin + location.pathname + '?' + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: 'guardado' }, parametrosModo())).toString();
     return { destination: DEST, destination_key: destKey, pax: pax, departure_date: IDA, return_date: VUELTA, total_amount: Math.round(d.total), url: url };
   }
+  /* Clave del viaje para el pasaporte: un evento por viaje (destino + dia de ida), asi repetir no suma. */
+  function refViaje() { return String(destKey + '-' + IDA).replace(/[^A-Za-z0-9_+.-]/g, '').slice(0, 40); }
   function guardarEnCuenta() {
-    return CSCuenta.guardarViaje(viajeParaGuardar()).then(function () { S.sesion = 'cuenta'; S.avisoGuardado = ''; track('flujo_guardar_ok', { total: Math.round(totalHastaAhora()) }); });
+    return CSCuenta.guardarViaje(viajeParaGuardar()).then(function () { S.sesion = 'cuenta'; S.avisoGuardado = ''; track('flujo_guardar_ok', { total: Math.round(totalHastaAhora()) }); if (window.CS_GAME) CS_GAME.evento('guardar', refViaje()); });
   }
   function guardarPendiente() {
     try { sessionStorage.setItem('cs_test_pendiente', JSON.stringify({ clave: [destKey, IDA, VUELTA, pax].join('|'), s: { vuelo: S.vuelo, traslado: S.traslado, tIV: S.tIV, hotel: S.hotel, habitacion: S.habitacion, extras: S.extras } })); } catch (e) { /* modo privado: se guarda sin la seleccion */ }
@@ -2398,6 +2457,7 @@
   function compartir() {
     var d = datosFinal(), txt = resumenTexto(d);
     track("flujo_compartir", { total: Math.round(d.total) });
+    if (window.CS_GAME) CS_GAME.evento("compartir", refViaje());
     var avisar = function (m) { S.compMsg = m; render(false); if (m && m.indexOf("Preparando") < 0) setTimeout(function () { S.compMsg = ""; if (S.paso === 4) render(false); }, 2500); };
     var soloTexto = function () {
       if (navigator.share) { navigator.share({ title: "Mi viaje a " + DEST, text: txt }).catch(function () {}); return; }
@@ -2702,7 +2762,7 @@
     if (e.target.id !== 'g-form') return;
     e.preventDefault();
     var mail = ($('g-mail').value || '').trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'Escribí un email válido, por ejemplo nombre@correo.com.' }; pintarModal(); return; }
+    if (!emailValido(mail)) { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'Escribí un email válido, por ejemplo nombre@correo.com.' }; pintarModal(); return; }
     track('flujo_guardar_email', {}); guardarPendiente();
     CSCuenta.loginCorreo(mail).then(function () { S.modal = { tipo: 'guardar', enviado: mail }; pintarModal(); },
       function () { S.modal = { tipo: 'guardar', email: true, mail: mail, error: 'No pudimos enviar el link. Revisá el email y probá de nuevo.' }; pintarModal(); });
@@ -2735,14 +2795,15 @@
   $('main').addEventListener('submit', function (e) {
     if (e.target.id !== 'cs-form') return;
     e.preventDefault();
-    var dt = { nombre: ($('cf-nom').value || '').trim(), pais: $('cf-pais').value, tel: ($('cf-tel').value || '').replace(/[^0-9]/g, ''), mail: ($('cf-mail').value || '').trim() }, er = {};
+    var telUY = telefonoUY($('cf-tel').value);
+    var dt = { nombre: ($('cf-nom').value || '').trim(), pais: '+598', tel: telUY || ($('cf-tel').value || '').replace(/[^0-9]/g, ''), mail: ($('cf-mail').value || '').trim(), cupon: $('cf-cupon') ? $('cf-cupon').value : '' }, er = {};
     if (dt.nombre.length < 3 || dt.nombre.indexOf(' ') < 1) er.nombre = 'Escribí tu nombre y apellido.';
-    if (dt.tel.length < 6 || dt.tel.length > 12) er.tel = 'Escribí un número de WhatsApp válido, sin el código de país.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(dt.mail)) er.mail = 'Escribí un email válido, por ejemplo nombre@correo.com.';
+    if (!telUY) er.tel = 'Escribí un celular de Uruguay válido, por ejemplo 099 123 456.';
+    if (!emailValido(dt.mail)) er.mail = 'Escribí un email válido, por ejemplo nombre@correo.com.';
     S.datos = dt; S.datosErr = er;
     if (Object.keys(er).length) { track('reserva_cs_datos_error', { campos: Object.keys(er).join(',') }); render(false); return; }
-    track('reserva_cs_datos_ok', { servicios: serviciosCs().length, pais_tel: dt.pais });
-    ir(12, 'revisar_mensaje');
+    track('reserva_cs_datos_ok', { servicios: serviciosCs().length });
+    enviarSolicitud(dt);
   });
   $('steps').addEventListener('click', function (e) {
     var rb = e.target.closest('[data-reintentar-bus]'); if (rb) { cargarBus(); return; }
@@ -2787,7 +2848,7 @@
     else if (t.dataset.guardado) { S.avisoGuardado = 'En la app real esto abre tu perfil con tus viajes guardados.'; track('flujo_ver_viaje_guardado', {}); }
     else if (t.dataset.guardarAhora) { track('flujo_guardar_ahora', {}); S.modal = { tipo: 'guardar' }; pintarModal(); return; }
     else if (t.dataset.divn) { S.divN = Math.max(1, Math.min(12, (S.divN || pax) + (+t.dataset.divn))); track('flujo_dividir_gastos', { personas: S.divN }); }
-    else if (t.dataset.dividir) { S.dividirAbierto = !S.dividirAbierto; track('flujo_dividir_gastos', { abierto: S.dividirAbierto }); }
+    else if (t.dataset.dividir) { S.dividirAbierto = !S.dividirAbierto; track('flujo_dividir_gastos', { abierto: S.dividirAbierto }); if (S.dividirAbierto && window.CS_GAME) CS_GAME.evento('dividir', refViaje()); }
     else if (t.dataset.compartir) { compartir(); return; }
     else if (t.dataset.asesor) { track('flujo_contactar_asesor', { total: Math.round(totalHastaAhora()) }); window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola! Armé mi viaje en CuántoSale. ' + resumenTexto(datosFinal()) + ' Ref: ' + window.CS_VIAJE_ID), '_blank', 'noopener'); return; }
     else if (t.dataset.seg) { S.segAbierto = S.segAbierto === t.dataset.seg ? '' : t.dataset.seg; track('flujo_distribucion_categoria', { categoria: t.dataset.seg, abierta: !!S.segAbierto }); }
@@ -2849,5 +2910,7 @@
 })();
 </script>
 <script src="cabecera.js"></script>
+<link rel="stylesheet" href="/gamificacion.css?v=3">
+<script src="/gamificacion.js?v=5"></script>
 </body>
 </html>

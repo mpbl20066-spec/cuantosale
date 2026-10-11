@@ -75,3 +75,16 @@
   .tabs .gm-chip{display:inline-flex;margin-left:6px}
   .m-head__r .gm-chip{display:none}
 }
+
+/* Cupones y aviso de inicio de sesion del pasaporte. */
+.gm-cupones{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.gm-cupones li{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px;border:2px dashed var(--accent);border-radius:14px;background:var(--bg)}
+.gm-cupones li.is-off{border-color:var(--line);opacity:.55}
+.gm-cupones li>span{flex:1 1 150px;display:grid;gap:2px}
+.gm-cupones b{font-size:14px}
+.gm-cupones small{color:var(--ink2);font-size:11px}
+.gm-cupones code{padding:5px 9px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:13px;font-weight:700;letter-spacing:.06em}
+.gm-cupones button,.gm-login button{min-height:36px;padding:0 14px;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font:700 12px Poppins,sans-serif;cursor:pointer}
+.gm-login{display:grid;gap:8px;margin-top:16px;padding:14px;border:1px solid var(--accent);border-radius:14px;background:var(--bg)}
+.gm-login span{color:var(--ink2);font-size:12px}
+.gm-login button{justify-self:start}

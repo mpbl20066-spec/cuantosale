@@ -1631,6 +1631,16 @@ async function postBienvenida(req, res) {
    SEGURIDAD: el endpoint es publico y escribe a un numero que manda el cliente,
    asi que corta por IP y por numero (un numero recibe como mucho 3 al dia). */
 const WA_GRAPH = 'https://graph.facebook.com/v21.0';
+let pasaporteCache = null;
+function pasaporteApi() {
+  if (!pasaporteCache) pasaporteCache = require('./lib/pasaporte')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout });
+  return pasaporteCache;
+}
+let reservasCache = null;
+function reservasApi() {
+  if (!reservasCache) reservasCache = require('./lib/reservas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, escapeHtml: escapeHtml, guardarPedido: guardarPedido, pasaporte: pasaporteApi() });
+  return reservasCache;
+}
 const waPorNumero = new Map();
 function waNumero(crudo) {
   let d = String(crudo || '').replace(/[^\d+]/g, '');
@@ -3041,6 +3051,23 @@ function handleRequest(req, res) {
       return postEnlace(req, res).catch(function (e) {
         return sendJson(res, 500, { error: e.message });
       });
+    }
+    /* Pasaporte del explorador (XP verificado y cupones): lib/pasaporte.js. */
+    if (url.pathname === '/api/pasaporte' || url.pathname === '/api/pasaporte/evento') {
+      const pas = pasaporteApi();
+      const alFallarPas = function (e) { return sendJson(res, e.status || 500, { error: e.message }); };
+      if (url.pathname === '/api/pasaporte' && req.method === 'GET') return pas.getEstado(req, res).catch(alFallarPas);
+      if (url.pathname === '/api/pasaporte/evento' && req.method === 'POST') return pas.postEvento(req, res).catch(alFallarPas);
+      res.writeHead(405, { Allow: 'GET, POST' }); return res.end();
+    }
+    /* Pedido de reserva: le llega al asesor por email y el asesor manda el WhatsApp al cliente (lib/reservas.js). */
+    if (url.pathname === '/api/reserva-solicitud' || url.pathname === '/api/reserva-enviar') {
+      const reservas = reservasApi();
+      const alFallar = function (e) { return sendJson(res, 500, { error: e.message }); };
+      if (url.pathname === '/api/reserva-solicitud' && req.method === 'POST') return reservas.solicitud(req, res).catch(alFallar);
+      if (url.pathname === '/api/reserva-enviar' && req.method === 'POST') return reservas.enviar(req, res).catch(alFallar);
+      if (url.pathname === '/api/reserva-enviar' && req.method === 'GET') return reservas.verEnvio(req, res, url.searchParams.get('t'));
+      res.writeHead(405, { Allow: 'GET, POST' }); return res.end();
     }
     /* Panel de la agencia: API (lib/admin.js) y la pagina. Van antes del cortafuegos de POST. */
     const adminApi = adminPanel.manejar(req, res, url);
