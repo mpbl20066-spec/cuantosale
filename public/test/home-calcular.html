@@ -195,6 +195,9 @@
   };
   /* Estado de la maqueta. Fechas por defecto: las del ejemplo de toda la maqueta. */
   var S = { pant: 1, dest: qs.get('destino') || '', ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02', pax: Math.max(1, Math.min(9, +qs.get('pax') || 2)), modo: '', vt: 'combustion', cm: 'gol', em: 'byd_dolphin', kwhp: 0.35, pxs: 2, err: {} };
+  /* Los que viajan en el auto arrancan como las personas del viaje (el selector llega a 5). Con 2 fijo, quien venia
+     con 4 terminaba con el presupuesto de 2, porque al continuar pax toma este valor. */
+  S.pxs = Math.min(5, S.pax);
   var track = function (n, p) { var plano = Object.assign({ pantalla: S.pant, fuente: fuente, destino: S.dest || undefined, pasajeros: S.pax }, p || {}); window.mockTrack(n, plano); };
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
   var debugQ = debug ? '&debug=1' : '';
@@ -406,7 +409,7 @@
       track('inicio_elegir_destino', { destino: S.dest, region: di[2], origen_seleccion: t.dataset.origen, busqueda: S.q ? S.q.length : 0 });
       $('chipd').innerHTML = chipDest(); $('grid').innerHTML = gridDest(); $('todos').innerHTML = todosDest(); return;
     }
-    if (t.dataset.p) { S.ida = ($('ida') || {}).value || S.ida; S.vuelta = ($('vuelta') || {}).value || S.vuelta; S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); var y = $('main').scrollTop; pant1(); $('main').scrollTop = y; return; }
+    if (t.dataset.p) { S.ida = ($('ida') || {}).value || S.ida; S.vuelta = ($('vuelta') || {}).value || S.vuelta; S.pax = Math.max(1, Math.min(9, S.pax + (+t.dataset.p))); S.pxs = Math.min(5, S.pax); var y = $('main').scrollTop; pant1(); $('main').scrollTop = y; return; }
     if (t.dataset.ir) { ir(+t.dataset.ir, 'volver'); return; }
     if (t.dataset.sig) {
       S.ida = $('ida').value; S.vuelta = $('vuelta').value; S.err = {};

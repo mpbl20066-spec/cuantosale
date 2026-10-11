@@ -52,3 +52,6 @@ data/_trabajo/
 # deshace con git, asi que sin esos archivos no hay vuelta atras.
 .vercel
 .env*
+
+# Carpeta de trabajo de reels: capturas y videos de stock (pesados), no van al repo.
+reels hoy/
