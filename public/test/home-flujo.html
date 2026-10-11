@@ -630,18 +630,19 @@
   .st-prog p{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:14px;font-weight:700;color:var(--azul)}
   .st-svc{display:grid;grid-template-columns:48px minmax(0,1fr) auto;column-gap:14px;row-gap:2px;align-items:center;width:100%;box-sizing:border-box;margin:0 0 12px;padding:16px;border:1px solid #E0E0E0;border-radius:12px;background:#fff;color:#1A2B4A;text-align:left;font-family:var(--fb);cursor:pointer}
   .st-svc:hover{border-color:#B8C4D6}
-  .st-svc.is-ok{background:#FDF4DC;border-color:#BBDEFB}
+  /* Confirmado = verde (cada servicio por separado); pendiente y solicitado siguen en amarillo */
+  .st-svc.is-ok{background:#ECFDF3;border-color:#16A34A}
   .st-svc:focus-visible,.st-go:focus-visible,.st-edit:focus-visible,.st-copy:focus-visible,.st-dato a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .st-svc__ico{grid-row:1/span 2;flex:none;width:48px;height:48px;background:#F5F5F5;color:#1A2B4A}
   .st-svc__t{grid-column:2;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
   .st-svc__t b{font-size:16px;font-weight:800}
   .st-svc__d{grid-column:2;font-size:14px;font-weight:500;color:var(--ink2);line-height:1.4}
-  .st-svc__x{font-style:normal;font-weight:700;color:var(--azul)}
+  .st-svc__x{font-style:normal;font-weight:700;color:#15803D}
   .st-svc__r{grid-column:3;grid-row:1/span 2;display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}
   .st-svc__r b{font-family:var(--fh);font-size:18px;font-weight:800;white-space:nowrap}
   .st-svc__r i{display:inline-flex;align-items:center;gap:2px;font-style:normal;font-size:13px;font-weight:700;color:var(--azul);white-space:nowrap}
   .st-b{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;line-height:1.4}
-  .st-b--ok{background:#FDF4DC;color:var(--azul)}
+  .st-b--ok{background:#DCFCE7;color:#15803D}
   .st-b--sol,.st-b--pen{background:#FFF8E1;color:#B26A00}
   .st-aviso{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:#FDF4DC;font-size:13px;font-weight:600;color:#1A2B4A;line-height:1.4}
   .st-side{display:flex;flex-direction:column;gap:16px}
@@ -2414,16 +2415,14 @@
         '<h1 class="rq__h">¿Ya resolviste tu alojamiento?</h1>' +
         '<button type="button" class="rq__op" data-reservado="si"><b>Sí, reservé el que había elegido</b><small>' + esc(d.h.nom) + ' · ' + f(precioHotelEstimado(d.h)) + '</small></button>' +
         '<button type="button" class="rq__op" data-reservado="otro"><b>Sí, pero elegí otro</b><small>Informar alojamiento reservado</small></button>' +
-        '<button type="button" class="rq__op rq__op--no" data-reservado="no"><b>Todavía no</b><small>Mantener pendiente</small></button>' +
-        '<button type="button" class="g-skip g-skip--l" data-ir="6" data-evento="flujo_volver_reserva">Volver a la reserva</button></div>';
+        '<button type="button" class="rq__op rq__op--no" data-reservado="no"><b>Todavía no</b><small>Mantener pendiente</small></button></div>';
     }
     return '<div class="rq"><div class="rq__ico"><span class="rq__d rq__d1"></span><span class="rq__d rq__d2"></span><span class="rq__d rq__d3"></span>' + ic(I.plane, 54) + '</div>' +
       '<h1 class="rq__h">¿Reservaste tu vuelo?</h1>' +
       '<p class="rq__p">Montevideo → ' + esc(DEST) + '</p>' +
       '<p class="rq__pr"><b>' + f(d.tVuelo) + '</b> (estimado)</p>' +
       '<button type="button" class="rq__si" data-reservado="si">Sí, ya lo reservé ✓</button>' +
-      '<button type="button" class="rq__no" data-reservado="no">Todavía no</button>' +
-      '<button type="button" class="g-skip g-skip--l" data-ir="6" data-evento="flujo_volver_reserva">Volver a la reserva</button></div>';
+      '<button type="button" class="rq__no" data-reservado="no">Todavía no</button></div>';
   }
   /* Paso 11: Confirmá tu reserva (traslados y tours, que se reservan con CuántoSale) */
   /* k = 'tras' (transfer y traslados) o 'tours' (actividades): cada uno se reserva por separado. Sin k, todos. */
@@ -3264,7 +3263,8 @@
     else if (t.dataset.reservado) {
       if (t.dataset.reservado === 'otro') { S.alojForm = {}; track('reserva_otro_alojamiento_abrir', {}); ir(10, 'otro_alojamiento'); return; }
       var si = t.dataset.reservado === 'si', clave = S.qServicio === 'vuelo' ? 'vuelo' : 'aloj', dd = datosFinal();
-      if (si) S.res[clave] = true;
+      S.res[clave] = si;   // 'Todavia no' deja pendiente solo este servicio; los demas no cambian
+      if (!si && clave === 'aloj') S.alojReservado = null;
       track(si ? 'reserva_confirmada' : 'reserva_pendiente', { servicio: clave === 'aloj' ? 'alojamiento' : 'vuelo', proveedor: clave === 'aloj' ? 'booking' : 'google_flights', importe: Math.round(clave === 'aloj' ? dd.tAloj : dd.tVuelo), partes_reservadas: partesReservadas(), partes_totales: 4, autodeclarada: true, alojamiento_elegido: clave === 'aloj' ? si : undefined });
       if (partesReservadas() === partesTotales()) track('viaje_completo', { total: Math.round(dd.total) });
       ir(7, si ? 'reservado' : 'todavia_no'); return;
