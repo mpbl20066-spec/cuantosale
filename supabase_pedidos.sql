@@ -59,3 +59,7 @@ alter table public.proveedores enable row level security;
 alter table public.pedidos enable row level security;
 revoke all on public.proveedores from anon, authenticated;
 revoke all on public.pedidos from anon, authenticated;
+-- El server entra con la service role. En este proyecto las tablas nuevas no le dan
+-- permiso solas (sin esto la API responde "permission denied for table pedidos").
+grant select, insert, update, delete on public.pedidos to service_role;
+grant select, insert, update, delete on public.proveedores to service_role;

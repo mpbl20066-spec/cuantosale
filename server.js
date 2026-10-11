@@ -2978,7 +2978,8 @@ async function guardarPedido(cuerpo) {
   try {
     const r = await pedidosStore.crearPedido(pedidosStore.desdeSolicitud(cuerpo));
     if (r.nuevo) adminPanel.avisarPedidoNuevo(r.pedido);
-  } catch (e) { console.error('[pedidos] no se pudo guardar el pedido para el panel:', e.message); }
+    return !!r.pedido;
+  } catch (e) { console.error('[pedidos] no se pudo guardar el pedido para el panel:', e.message); return false; }
 }
 
 function createServer() {
