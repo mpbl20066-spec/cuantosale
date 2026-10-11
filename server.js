@@ -778,8 +778,33 @@ function bookingCacheKey(host, candidate) { return host + '|' + candidate.toLowe
 /* Vacia el cache. Lo usan las pruebas, que simulan distintas respuestas de
    searchDestination para la misma ciudad y sin esto dependerian del orden en que
    corren. */
-function resetBookingDestCache() { bookingDestIdCache.clear(); }
-async function fetchBookingHotels(destKey, destName, style, extra) {
+function resetBookingDestCache() { bookingDestIdCache.clear(); bookingHotelsCache.clear(); bookingHotelsInflight.clear(); }
+/* Lista de hoteles ya consultada: misma ciudad/barrio, fechas y huespedes dentro
+   de BOOKING_HOTELS_TTL_MIN (30 min por defecto) se responde de memoria. Sin esto
+   cada apertura de la pantalla repetia la busqueda de la ciudad mas hasta 12 de
+   playas (cada una con su searchDestination), y eso era lo que hacia lenta la
+   pantalla. Dos pedidos iguales a la vez comparten la misma consulta. Solo se
+   guardan los aciertos con resultados. */
+const bookingHotelsCache = new Map();
+const bookingHotelsInflight = new Map();
+function fetchBookingHotels(destKey, destName, style, extra) {
+  const e = extra || {};
+  const ttl = (Number(process.env.BOOKING_HOTELS_TTL_MIN) || 30) * 60000;
+  const key = [destName, e.dep, e.ret, e.pax, e.ninos || 0, e.nights, e.hotelType === 'all-inclusive' ? 'ai' : '', e.soloDistrito ? 'd' : ''].join('|').toLowerCase();
+  const hit = bookingHotelsCache.get(key);
+  if (hit && Date.now() < hit.expiresAt) return Promise.resolve(hit.value);
+  if (bookingHotelsInflight.has(key)) return bookingHotelsInflight.get(key);
+  const p = fetchBookingHotelsLive(destKey, destName, style, extra).then(function (value) {
+    if (Array.isArray(value) && value.length) {
+      if (bookingHotelsCache.size >= 300) bookingHotelsCache.delete(bookingHotelsCache.keys().next().value);
+      bookingHotelsCache.set(key, { expiresAt: Date.now() + ttl, value: value });
+    }
+    return value;
+  }).finally(function () { bookingHotelsInflight.delete(key); });
+  bookingHotelsInflight.set(key, p);
+  return p;
+}
+async function fetchBookingHotelsLive(destKey, destName, style, extra) {
   const settings = bookingSettings();
   if (!settings.key) throw new Error('Falta configurar BOOKING_API_KEY en las variables de entorno de Vercel.');
   if (!settings.host || !settings.url) throw new Error('Falta configurar BOOKING_API_HOST o BOOKING_API_URL en Vercel.');
@@ -1751,6 +1776,38 @@ function browseVacioMsg() {
   return 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.';
 }
 
+/* Precalienta las tarifas de las rutas mas buscadas (lo llama el cron de Vercel,
+   que manda `Authorization: Bearer $CRON_SECRET`). Sin CRON_SECRET queda apagado.
+   PRECALENTAR_DESTINOS (claves separadas por coma) y PRECALENTAR_SALIDAS (cuantas
+   fechas hacia adelante, 2 por defecto) controlan cuantos creditos gasta por dia:
+   destinos x salidas x 1 pedido. Salidas = viernes dentro de 3 y 5 semanas, 5 noches. */
+const PRECALENTAR_DESTINOS_DEFAULT = ['fln', 'rio', 'sao', 'nat', 'ssa', 'for'];
+async function precalentarVuelos(req, res) {
+  // CRON_SECRET es opcional (decision del dueño): si existe se exige; si no, queda
+  // abierto. Es idempotente y lo ya guardado (48 h) no se vuelve a pedir.
+  const secreto = String(process.env.CRON_SECRET || '').trim();
+  if (secreto && req.headers.authorization !== 'Bearer ' + secreto) { res.writeHead(401); return res.end(); }
+  const claves = String(process.env.PRECALENTAR_DESTINOS || '').split(',').map(function (k) { return k.trim().toLowerCase(); }).filter(Boolean);
+  const destinos = (claves.length ? claves : PRECALENTAR_DESTINOS_DEFAULT).filter(function (k) { return AIR_DESTINATIONS[k]; });
+  const salidas = Math.max(1, Math.min(6, Number(process.env.PRECALENTAR_SALIDAS) || 2));
+  const hoy = model.getToday();
+  const rutas = [];
+  const vistos = new Set();
+  for (let i = 0; i < salidas; i++) {
+    let dep = model.addDays(hoy, 21 + i * 14);
+    while (dep.getDay() !== 5) dep = model.addDays(dep, 1);   // viernes
+    const ret = model.addDays(dep, 5);
+    destinos.forEach(function (k) {
+      const clave = AIR_DESTINATIONS[k] + model.iso(dep);
+      if (vistos.has(clave)) return;
+      vistos.add(clave);
+      rutas.push({ origin: 'MVD', destination: AIR_DESTINATIONS[k], dep: model.iso(dep), ret: model.iso(ret) });
+    });
+  }
+  const r = await flightProviders.precalentar(rutas, 'eq');
+  return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r));
+}
+
 async function calendarioVuelos(req, res, url) {
   // Se valida antes de mirar si hay credenciales: un destino inválido es un 400
   // siempre, tenga o no key puesta. Si se invirtiera el orden, con la app sin
@@ -2611,7 +2668,7 @@ const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/tr
 // el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
 // la app ya no emite boletos. Todos los endpoints de la API, incluido el
 // calendario de vuelos, siguen pidiendo user/pass.
-const PRELAUNCH_EXEMPT = new Set();
+const PRELAUNCH_EXEMPT = new Set(['/api/precalentar']);   // trae su propio secreto (CRON_SECRET)
 
 function denyPrelaunchJson(res) {
   // Sin WWW-Authenticate a propósito: en una respuesta a un fetch de la app
@@ -2946,6 +3003,12 @@ function handleRequest(req, res) {
     if (req.method === 'POST' && url.pathname === '/api/vuelos/buscar') {
       return readJson(req).then(function (body) { return buscarVuelos(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la búsqueda.' });
+      });
+    }
+    if (req.method === 'GET' && url.pathname === '/api/precalentar') {
+      return precalentarVuelos(req, res).catch(function (e) {
+        console.error('[precalentar]', e.message);
+        sendJson(res, 500, { error: e.message });
       });
     }
     if (req.method === 'GET' && url.pathname === '/api/vuelos/calendario') {
