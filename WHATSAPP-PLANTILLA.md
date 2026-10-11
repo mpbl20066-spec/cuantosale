@@ -9,6 +9,7 @@ Cuando alguien pide reservar traslados o tours (pantalla "Vas a continuar por Wh
 | `WHATSAPP_TOKEN` | Token permanente del usuario del sistema (Meta Business → Usuarios del sistema), con permiso `whatsapp_business_messaging`. |
 | `WHATSAPP_PHONE_ID` | ID del número (WhatsApp Manager → Configuración de la API → "Identificador del número de teléfono"). No es el número. |
 | `WHATSAPP_TEMPLATE` | Nombre de la plantilla. Por defecto `reserva_recibida`. |
+| `WHATSAPP_WABA_ID` | Opcional. ID de la cuenta de WhatsApp Business. Solo lo usa la prueba del panel para listar las plantillas cuando Meta no encuentra la plantilla; sin esta variable se busca con los permisos del token (necesita `whatsapp_business_management`). |
 | `WHATSAPP_TEMPLATE_LANG` | Idioma de la plantilla. Por defecto `es`. Tiene que ser el código exacto con el que se creó: Español = `es`, Español (ARG) = `es_AR`, (ESP) = `es_ES`, (MEX) = `es_MX`. Si no coincide, Meta da el error 132001 y el servidor prueba solo los otros españoles; la prueba del panel dice cuál anduvo. |
 
 Sin `WHATSAPP_TOKEN` y `WHATSAPP_PHONE_ID` el endpoint responde 503 y el flujo sigue funcionando igual (solo se abre el WhatsApp del cliente).
