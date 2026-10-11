@@ -2696,19 +2696,20 @@
       if (typeof s.tIV === 'boolean') S.tIV = s.tIV;
       if (HOTELES.some(function (x) { return x.id === s.hotel; })) { S.hotel = s.hotel; if (s.habitacion && s.habitacion.hotelId === s.hotel) S.habitacion = s.habitacion; }
       if (s.extras && typeof s.extras === 'object') S.extras = s.extras;
-      return guardarEnCuenta().then(function () { ir(5, 'guardado'); }, function (e) { S.avisoGuardado = e.message; ir(4, 'guardar_error'); });
+      return guardarEnCuenta().then(function () { ir(6, 'guardado'); }, function (e) { S.avisoGuardado = e.message; ir(4, 'guardar_error'); });
     });
   }
   function abrirGuardar() {
     if (S.sinGuardar) { ir(6, 'sin_guardar'); return; }
     var u = CSCuenta.usuario();
     if (S.sesion || u) {
-      guardarEnCuenta().then(function () { ir(5, 'guardado'); }, function (e) { S.avisoGuardado = e.message; S.modal = { tipo: 'guardar', error: e.message }; pintarModal(); });
+      guardarEnCuenta().then(function () { ir(6, 'guardado'); }, function (e) { S.avisoGuardado = e.message; S.modal = { tipo: 'guardar', error: e.message }; pintarModal(); });
       return;
     }
     S.modal = { tipo: 'guardar' }; pintarModal(); track('flujo_guardar_vista', { total: Math.round(totalHastaAhora()) });
   }
-  function seguirAReservas() { ir(5, S.sesion ? 'guardado' : 'sin_guardar'); }
+  /* Sin la pantalla intermedia de "viaje guardado": se va directo a Reservá tu viaje. */
+  function seguirAReservas() { ir(6, S.sesion ? 'guardado' : 'sin_guardar'); }
   function reservar(valor) {
     var r = valor.split(':');
     if (r[1] === 'google_flights') { S.desde8 = 0; abrirVueloIr(); return; }
@@ -3012,7 +3013,7 @@
   $('back').addEventListener('click', function () {
     track('flujo_volver', { desde: S.paso });
     if (S.paso === 1 && MODO === 'avion' && S.sub === 't') { S.sub = 'v'; render(true); return; }
-    if (S.paso === 12) ir(11, 'volver'); else if (S.paso === 11) ir(S.desde11 || 6, 'volver'); else if (S.paso === 10) ir(9, 'volver'); else if (S.paso === 9) ir(6, 'volver'); else if (S.paso === 8) ir(S.desde8 || 6, 'volver'); else if (S.paso === 7) ir(6, 'volver'); else if (S.paso === 6 && !S.sesion) ir(4, 'volver'); else if (S.paso > 1) ir(S.paso - 1, 'volver'); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
+    if (S.paso === 12) ir(11, 'volver'); else if (S.paso === 11) ir(S.desde11 || 6, 'volver'); else if (S.paso === 10) ir(9, 'volver'); else if (S.paso === 9) ir(6, 'volver'); else if (S.paso === 8) ir(S.desde8 || 6, 'volver'); else if (S.paso === 7) ir(6, 'volver'); else if (S.paso === 6) ir(4, 'volver'); else if (S.paso > 1) ir(S.paso - 1, 'volver'); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
   });
   $('cta').addEventListener('click', function () {
     track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });
