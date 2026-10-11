@@ -352,6 +352,12 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="guia"] [role="tabpanel"]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
   [data-pagina="guia"] [role="tabpanel"]>.u-h2,[data-pagina="guia"] [role="tabpanel"]>.u-cargando{grid-column:1/-1;margin-bottom:0}
   [data-pagina="guia"] [role="tabpanel"]>.u-item{margin:0}
+  /* Sin agujeros en la grilla. Con mapa: si el numero de tarjetas es par, el mapa va a lo ancho arriba (el mapa en una
+     celda dejaria la ultima sola); si es impar, ocupa una celda y la llena a la altura de la tarjeta vecina. Sin mapa y
+     con tarjetas impares, la ultima va a lo ancho. nth-child cuenta el titulo (1) y el mapa (2). */
+  [data-pagina="guia"] [role="tabpanel"]>.u-mapa{height:auto;min-height:220px;margin:0}
+  [data-pagina="guia"] [role="tabpanel"]:has(>.u-item:last-child:nth-child(even))>.u-mapa{grid-column:1/-1;min-height:300px}
+  [data-pagina="guia"] [role="tabpanel"]:not(:has(>.u-mapa))>.u-item:last-child:nth-child(even){grid-column:1/-1}
   [data-pagina="guia"] .u-cierre{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end;margin-top:14px}
   [data-pagina="guia"] .u-cierre>:only-child{grid-column:1/-1}
   [data-pagina="guia"] .u-cuando .u-item{margin:0}

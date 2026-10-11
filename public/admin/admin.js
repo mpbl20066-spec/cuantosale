@@ -6,7 +6,7 @@
   var ESTADOS_ITEM = { pendiente: 'Pendiente', consultado: 'Consultado al proveedor', confirmado: 'Confirmado', cancelado: 'Cancelado' };
   var TIPOS = { traslado: 'Traslado', tour: 'Tour / actividad', vuelo: 'Vuelo', alojamiento: 'Alojamiento', otro: 'Otro' };
   var PAGO = { sin_pago: 'Sin pago', parcial: 'Pago parcial', pagado: 'Pagado' };
-  var S = { vista: 'pedidos', filtro: 'todos', q: '', soloDeuda: false, datos: null, draft: null, dirty: false, prov: null, msg: '', cargando: false };
+  var S = { vista: 'pedidos', filtro: 'todos', provDest: 'todos', q: '', soloDeuda: false, datos: null, draft: null, dirty: false, prov: null, msg: '', cargando: false };
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function usd(n) { return 'US$ ' + (Number(n) || 0).toLocaleString('es-UY', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
@@ -150,15 +150,31 @@
     });
     out.aPagar = r2(out.aPagar); return out;
   }
+  /* Los destinos viven dentro de `servicios`, despues del punto medio: "Tours y traslados · Búzios, Cabo Frio".
+     Asi no hace falta otra columna en la base; el formulario los edita por separado y los vuelve a juntar. */
+  function partesProv(pr) {
+    var s = String(pr.servicios || ''), i = s.indexOf(' · ');
+    var dest = i < 0 ? '' : s.slice(i + 3);
+    return { hace: i < 0 ? s : s.slice(0, i), destinos: dest.split(',').map(function (x) { return x.trim(); }).filter(Boolean) };
+  }
   function vistaProveedores(d) {
     var h = '<div class="bar"><div class="chips"><b>Proveedores a los que tercerizás</b></div><button class="btn btn--main" data-act="nuevo-prov">+ Proveedor</button></div>';
     if (!d.proveedores.length) return h + '<div class="card"><p class="vacio">Todavía no cargaste proveedores. Agregalos para asignarlos a cada servicio y llevar lo que les debés.</p></div>';
-    h += '<div class="card"><table><thead><tr><th>Proveedor</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th class="num">Servicios activos</th><th class="num">Le debemos</th></tr></thead><tbody>';
-    d.proveedores.forEach(function (pr) {
-      var dp = deudaProveedor(pr.id);
+    var cuenta = {};
+    d.proveedores.forEach(function (pr) { partesProv(pr).destinos.forEach(function (x) { cuenta[x] = (cuenta[x] || 0) + 1; }); });
+    var dests = Object.keys(cuenta).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+    if (S.provDest !== 'todos' && !cuenta[S.provDest]) S.provDest = 'todos';
+    h += '<div class="bar"><div class="chips">' + ['todos'].concat(dests).map(function (x) {
+      return '<button class="chip" data-pdest="' + esc(x) + '" aria-pressed="' + (S.provDest === x) + '">' + esc(x === 'todos' ? 'Todos' : x) + '<span>' + (x === 'todos' ? d.proveedores.length : cuenta[x]) + '</span></button>';
+    }).join('') + '</div></div>';
+    var lista = d.proveedores.filter(function (pr) { return S.provDest === 'todos' || partesProv(pr).destinos.indexOf(S.provDest) >= 0; });
+    h += '<div class="card"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th class="num">Servicios activos</th><th class="num">Le debemos</th></tr></thead><tbody>';
+    lista.forEach(function (pr) {
+      var dp = deudaProveedor(pr.id), pp = partesProv(pr);
       h += '<tr class="row" data-prov="' + esc(pr.id) + '"><td data-l="Proveedor"><b>' + esc(pr.nombre) + '</b>' + (pr.activo === false ? ' <span class="pill p-cancelado">inactivo</span>' : '') + '</td>' +
+        '<td data-l="Destinos">' + (pp.destinos.length ? '<span class="tags">' + pp.destinos.map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + '</span>' : '<span class="sub">sin destino</span>') + '</td>' +
         '<td data-l="Contacto">' + esc(pr.contacto) + '<span class="sub">' + esc(pr.telefono) + (pr.email ? ' · ' + esc(pr.email) : '') + '</span></td>' +
-        '<td data-l="Hace">' + esc(pr.servicios) + '</td><td data-l="Datos de pago">' + esc(pr.datos_pago) + '</td>' +
+        '<td data-l="Hace">' + esc(pp.hace) + '</td><td data-l="Datos de pago">' + esc(pr.datos_pago) + '</td>' +
         '<td class="num" data-l="Servicios">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
     });
@@ -348,10 +364,17 @@
   /* ---------- detalle de un pedido ---------- */
   function nuevoDraft() { return { id: null, ref: 'Pedido manual', estado: 'nuevo', cliente_nombre: '', cliente_telefono: '', cliente_email: '', destino: '', fecha_ida: '', fecha_vuelta: '', personas: 2, medio_pago: '', notas: '', items: [], pagos: [], origen: 'manual' }; }
   function itemVacio() { return { id: 'n' + Date.now() + Math.random().toString(36).slice(2, 5), tipo: 'tour', nombre: '', detalle: '', precio_usd: 0, proveedor_id: '', proveedor_nombre: '', costo_usd: 0, pagado_proveedor_usd: 0, estado: 'pendiente', ref_proveedor: '', notas: '' }; }
+  /* Los proveedores que nombran el destino del pedido en "Qué servicios hace" van primero. */
+  function sinTildes(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   function provOpts(sel) {
-    return '<option value="">— Sin asignar —</option>' + S.datos.proveedores.filter(function (p) { return p.activo !== false || p.id === sel; }).map(function (p) {
-      return '<option value="' + esc(p.id) + '"' + (p.id === sel ? ' selected' : '') + '>' + esc(p.nombre) + '</option>';
-    }).join('');
+    var lugar = sinTildes(String(S.draft.destino || '').split(',')[0]).trim();
+    var op = function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === sel ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; };
+    var lista = S.datos.proveedores.filter(function (p) { return p.activo !== false || p.id === sel; });
+    var aca = lugar.length > 2 ? lista.filter(function (p) { return sinTildes(p.servicios).indexOf(lugar) >= 0; }) : [];
+    var resto = lista.filter(function (p) { return aca.indexOf(p) < 0; });
+    if (!aca.length) return '<option value="">— Sin asignar —</option>' + resto.map(op).join('');
+    return '<option value="">— Sin asignar —</option><optgroup label="Trabajan en ' + esc(String(S.draft.destino).split(',')[0]) + '">' + aca.map(op).join('') + '</optgroup>' +
+      (resto.length ? '<optgroup label="Otros">' + resto.map(op).join('') + '</optgroup>' : '');
   }
   function cuentasHtml(p) {
     var c = calc(p);
@@ -432,6 +455,7 @@
   /* ---------- proveedor ---------- */
   function abrirProv() {
     var p = S.prov, el = document.getElementById('drawer');
+    if (p._hace === undefined) { var pp = partesProv(p); p._hace = pp.hace; p._destinos = pp.destinos.join(', '); }
     if (!el) { el = document.createElement('div'); el.id = 'drawer'; el.className = 'drawer'; document.body.appendChild(el); }
     var dp = p.id ? deudaProveedor(p.id) : null;
     var f = function (campo) { return 'data-pf="' + campo + '"'; };
@@ -441,7 +465,8 @@
       '<label class="f">Persona de contacto<input ' + f('contacto') + ' value="' + esc(p.contacto) + '"></label>' +
       '<label class="f">Teléfono / WhatsApp (con código de país)<input ' + f('telefono') + ' value="' + esc(p.telefono) + '" inputmode="tel" placeholder="5989XXXXXXX"></label>' +
       '<label class="f">Email<input ' + f('email') + ' value="' + esc(p.email) + '"></label>' +
-      '<label class="f">Qué servicios hace<input ' + f('servicios') + ' value="' + esc(p.servicios) + '" placeholder="Traslados Florianópolis, tours en buggy…"></label>' +
+      '<label class="f">Qué servicios hace<input ' + f('_hace') + ' value="' + esc(p._hace) + '" placeholder="Tours y traslados"></label>' +
+      '<label class="f">Destinos (separados por coma)<input ' + f('_destinos') + ' value="' + esc(p._destinos) + '" placeholder="Búzios, Cabo Frio, Arraial do Cabo"></label>' +
       '<label class="f">Datos para pagarle (cuenta, alias, Pix)<textarea ' + f('datos_pago') + '>' + esc(p.datos_pago) + '</textarea></label>' +
       '<label class="f">Notas<textarea ' + f('notas') + '>' + esc(p.notas) + '</textarea></label>' +
       '<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pf="activo" style="width:auto;min-height:0"' + (p.activo === false ? '' : ' checked') + '> Activo (aparece al asignar servicios)</label></div>' +
@@ -475,6 +500,8 @@
   function guardarProv() {
     var p = S.prov;
     if (!p.nombre || p.nombre.trim().length < 2) return mensaje('Escribí el nombre del proveedor.', true);
+    var dest = String(p._destinos || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean).join(', ');
+    p.servicios = String(p._hace || '').replace(/ · /g, ' - ').trim() + (dest ? ' · ' + dest : '');
     mensaje('Guardando…');
     api('proveedor/guardar', p).then(function () { toast('Proveedor guardado'); cerrarPanel(true); return cargar(); }).catch(function (e) { mensaje(e.message, true); });
   }
@@ -548,6 +575,7 @@
     if (e.target.closest('a[href]')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
     var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
+    var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
     if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); pintar(); return; }
