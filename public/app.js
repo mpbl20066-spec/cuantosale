@@ -11168,7 +11168,7 @@ var HOTEL_NOTA_MINIMA = 8;
     if (supabaseSdkPromise) return supabaseSdkPromise;
     supabaseSdkPromise = new Promise(function (resolve, reject) {
       var script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3';
       script.async = true;
       script.onload = resolve;
       script.onerror = function () { reject(new Error('No pudimos cargar el servicio de cuenta.')); };

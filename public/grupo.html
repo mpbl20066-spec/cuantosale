@@ -32,11 +32,15 @@
 <!-- Misma versión que /app: el servidor marca las URLs con ?v= como
      immutable de un año, así que pedir un ?v= viejo deja al usuario pegado
      con el CSS viejo para siempre. Si tocás style.css, subí las dos páginas. -->
-<link rel="stylesheet" href="/style.css?v=303">
+<link rel="stylesheet" href="/style.css?v=304">
 <style>
   .grupo-wrap{max-width:620px;margin:0 auto;padding:24px 16px 64px}
   .grupo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
   .grupo-header a{color:var(--ink2);text-decoration:none;font-size:13px;font-weight:600}
+  /* Misma marca que la home (pin + "cuántosale"), con 44px de alto para tocarla comodo en el celular. */
+  .grupo-header .cs-marca{display:inline-flex;align-items:center;gap:7px;min-height:44px;color:var(--ink);font-family:var(--fh);font-size:19px;font-weight:800;letter-spacing:-.01em}
+  .grupo-header .cs-marca:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
+  .foot-legal a{display:inline-block;padding:12px 0}
   .grupo-kicker{color:var(--ink2);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 
   .grupo-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin-bottom:16px}
@@ -322,7 +326,7 @@
 <body>
 <div class="wrap grupo-wrap">
   <div class="grupo-header">
-    <a href="/app" id="grupo-volver">← CuántoSale</a>
+    <a href="/" id="grupo-volver" class="cs-marca" aria-label="CuántoSale, ir al inicio"><svg width="18" height="23" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="currentColor"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg><span>cuántosale</span></a>
     <span class="grupo-kicker">Dividir gastos</span>
   </div>
   <div id="grupo-app"><p class="grupo-note">Cargando…</p></div>
@@ -333,7 +337,7 @@
         var v = new URLSearchParams(location.search).get('volver');
         if (v && v.charAt(0) === '/' && v.charAt(1) !== '/' && v.indexOf(String.fromCharCode(92)) < 0) {
           var a = document.getElementById('grupo-volver');
-          if (a) { a.setAttribute('href', v); a.textContent = '← Volver'; }
+          if (a) { a.setAttribute('href', v); a.removeAttribute('aria-label'); a.textContent = '← Volver'; }
         }
       } catch (e) { /* queda el enlace a la app */ }
     })();
@@ -344,6 +348,6 @@
        /terminos con esas rutas (ver server.js). -->
   <p class="foot-legal"><a href="/privacidad">Política de privacidad</a> · <a href="/terminos">Condiciones del servicio</a></p>
 </div>
-<script src="/grupo.js?v=28" defer></script>
+<script src="/grupo.js?v=29" defer></script>
 </body>
 </html>

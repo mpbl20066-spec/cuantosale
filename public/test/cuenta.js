@@ -44,7 +44,7 @@
     if (window.supabase && window.supabase.createClient) return Promise.resolve();
     return new Promise(function (ok, no) {
       var s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'; s.async = true;
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3'; s.async = true;
       s.onload = ok; s.onerror = function () { no(new Error('No pudimos cargar el servicio de cuenta.')); };
       document.head.appendChild(s);
     });

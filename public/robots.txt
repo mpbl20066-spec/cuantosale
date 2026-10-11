@@ -14,8 +14,11 @@ User-agent: *
 Disallow: /api/
 Disallow: /admin
 
-# /test es la version nueva en construccion: no se indexa.
-Disallow: /test/
+# /test guarda los archivos de la home nueva (la raiz los carga con <base href="/test/">).
+# Solo se bloquean sus paginas HTML: el CSS, el JS y las fotos tienen que quedar
+# permitidos, porque Google renderiza la home con ellos. Con "Disallow: /test/"
+# veia la portada sin estilos y la evaluaba como una pagina rota en el celular.
+Disallow: /test/*.html
 
 # La raiz es la app de cotizacion.
 Allow: /

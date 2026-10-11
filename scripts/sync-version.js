@@ -103,6 +103,15 @@ function main() {
     const ruta = path.join(PUBLIC, nombre);
     if (!fs.existsSync(ruta)) { console.log('  ' + nombre + ': no existe, se omite'); continue; }
     const antes = fs.readFileSync(ruta, 'utf8');
+    // LA REGLA de arriba, aplicada: si la pagina ya pide un numero mas alto que
+    // el maestro, bajarla serviria el CSS viejo guardado bajo ese ?v= con
+    // immutable. Se frena y se pide subir el maestro.
+    const pedidos = (antes.match(/style\.css\?v=(\d+)/g) || []).map(function (x) { return Number(x.split('=')[1]); });
+    const mayor = Math.max.apply(null, [0].concat(pedidos));
+    if (mayor > Number(v)) {
+      throw new Error(nombre + ' pide style.css?v=' + mayor + ' y el maestro dice ' + v
+        + '. Subi el "/* version: N */" de style.css a ' + (mayor + 1) + ' o mas; nunca se baja.');
+    }
     // Se reescriben los ?v= con numero Y el placeholder CS_VERSION. El
     // placeholder lo usan las paginas que se versionaron despues de existir el
     // script (tours.html y transfers.html venian sin ?v=, servidas con

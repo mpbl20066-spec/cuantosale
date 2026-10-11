@@ -13,7 +13,6 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <script src="instalar.js" defer></script>
 <script src="moneda.js"></script>
-<link rel="preload" as="image" href="home-portada2.jpg" fetchpriority="high" media="(min-width: 768px)">
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
 <style>
@@ -34,6 +33,18 @@
   .m-head__r{display:flex;align-items:center;gap:6px}
   .tabs__mon,.tabs__sep{display:none}
   @media (min-width:768px){.tabs__mon{display:inline-flex;align-items:center;margin-left:4px}.tabs__sep{display:block;align-self:center;width:1px;height:34px;margin:0 8px;background:var(--line)}}
+  /* Logo + chip de XP + moneda + menu suman 371px: en celulares de menos de 390px (iPhone SE/mini, casi todos los
+     Android de 360px) la cabecera se salia por la derecha, el menu quedaba cortado y Chrome agrandaba la vista
+     (todo se veia un poco mas chico y la barra de cookies quedaba cortada abajo). En angosto se saca el circulo "$"
+     de la moneda (el codigo UYU sigue), se achica el logo y, en 320px, el chip de XP (sigue en Perfil). */
+  @media (max-width:400px){
+    .m-head__r{gap:4px}
+    .m-head .cs-mon__s{display:none}
+    .m-head .cs-mon__b{padding:0 8px;gap:5px}
+  }
+  @media (max-width:380px){.m-logo{font-size:20px;gap:6px}}
+  @media (max-width:350px){.m-head__r .gm-chip{display:none}}
+  .m-head{min-width:0}
   .m-menu{width:40px;height:40px;border:0;background:transparent;display:grid;place-content:center;gap:5px;cursor:pointer}
   .m-menu span{display:block;width:22px;height:2.5px;border-radius:2px;background:var(--ink)}
   /* Tarjetas de los dos caminos (formato anterior, con iconos SVG) */
@@ -251,7 +262,7 @@
   .tabs__lt small{display:none}
   .tabs__lt b{font-weight:800}
   .tabs__logo{display:none;align-items:center;gap:7px;padding-left:16px;font-family:var(--fh);font-weight:800;font-size:19px;color:var(--ink)}
-  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 7px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:11.5px;font-weight:600;cursor:pointer;position:relative}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0 7px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:12px;font-weight:600;cursor:pointer;position:relative}
   .tab svg{width:24px;height:24px}
   .tab.is-on{color:var(--ink)}
   .tab.is-on::after{content:"";position:absolute;bottom:0;width:28px;height:3px;border-radius:2px;background:var(--accent)}
@@ -330,14 +341,20 @@
   .q-monto{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
   .q-monto b{font-family:var(--fh);font-size:40px;font-weight:800;letter-spacing:-.03em;color:var(--hx-navy);line-height:1}
   .q-monto small{font-size:13px;font-weight:600;color:var(--ink2)}
-  .q-slide{padding:10px 0}
-  .q-slide input{-webkit-appearance:none;appearance:none;display:block;width:100%;height:12px;margin:0;border-radius:8px;outline:0;cursor:pointer;background:linear-gradient(90deg,#F5C518 var(--p,30%),var(--line) var(--p,30%))}
+  .q-slide{position:relative;padding:10px 0}
+  /* La pista va en el contenedor y el input ocupa los 34px del pulgar: con el input de 12px de alto, tocar la barra
+     fuera del pulgar fallaba seguido en el celular. --p lo actualiza pintar() en los dos elementos. */
+  .q-slide::before{content:"";position:absolute;left:0;right:0;top:50%;height:12px;margin-top:-6px;border-radius:8px;background:linear-gradient(90deg,#F5C518 var(--p,30%),var(--line) var(--p,30%));pointer-events:none}
+  .q-slide:has(input:disabled)::before{opacity:.55}
+  .q-slide input{-webkit-appearance:none;appearance:none;position:relative;display:block;width:100%;height:34px;margin:0;outline:0;cursor:pointer;background:transparent}
+  .q-slide input::-webkit-slider-runnable-track{background:transparent}
+  .q-slide input::-moz-range-track{background:transparent}
   .q-slide input:disabled{cursor:progress;opacity:.55}
   .q-slide input::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;background:#F5C518 radial-gradient(circle,#0B1F3A 0 3px,transparent 4px);border:3px solid #0B1F3A;box-shadow:0 3px 0 #0B1F3A;cursor:grab}
   .q-slide input::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#F5C518;border:3px solid #0B1F3A;box-shadow:0 3px 0 #0B1F3A;cursor:grab}
   .q-slide input:active::-webkit-slider-thumb{transform:scale(1.12);cursor:grabbing}
   .q-slide input:focus-visible{outline:3px solid var(--focus);outline-offset:6px}
-  .q-ejes{display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;color:var(--ink2)}
+  .q-ejes{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--ink2)}
   .q-params{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:2px dashed var(--line)}
   .q-step{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--ink2)}
   .q-step div{display:flex;align-items:center;justify-content:space-between;gap:6px}
@@ -367,9 +384,23 @@
   .q-fila[data-est="x"] .q-est{border-style:dashed}
   .q-fila{will-change:transform}
   .q-nota{margin:0 0 12px;font-size:12px;line-height:1.5;color:var(--ink2)}
-  .q-alt{display:block;margin-top:6px;text-align:center;font-size:14px;font-weight:700;color:var(--hx-navy);text-decoration:underline;text-underline-offset:3px}
+  .q-alt{display:block;margin-top:0;padding:12px 0;text-align:center;font-size:14px;font-weight:700;color:var(--hx-navy);text-decoration:underline;text-underline-offset:3px}
   .q-alt:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
   .g-bote{animation:g-check .35s ease}
+  /* Escritorio: la columna de 640px del celular dejaba media pantalla vacia. Titulo a todo el ancho y debajo dos
+     columnas: la calculadora a la izquierda y los destinos que se encienden a la derecha, asi se ve el efecto de
+     mover la plata sin hacer scroll. */
+  @media (min-width:1024px){
+    .q{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:56px;align-items:start;max-width:1120px;padding:28px 0 40px}
+    .q-eye,.q-h{grid-column:1/-1}
+    .q-h{margin-bottom:28px;font-size:40px}
+    .q-caja{grid-column:1;grid-row:3/span 4;margin:0;padding:24px 24px 18px}
+    .q-monto b{font-size:52px}
+    .q-cuenta{grid-column:2;grid-row:3}
+    .q-lista{grid-column:2;grid-row:4}
+    .q-nota{grid-column:2;grid-row:5}
+    .q-alt{grid-column:2;grid-row:6;text-align:left}
+  }
   @media (prefers-reduced-motion:reduce){
     .g-bote{animation:none!important}
     .q-fila,.q-fila img{transition:none!important}
@@ -418,11 +449,11 @@
       <div class="q-cuenta"><b id="q-n">Calculando…</b><span id="q-sub">Armando tu mapa de posibilidades</span></div>
 
       <ol class="q-lista" id="q-lista">
-        <li><a class="q-fila" data-destino="rio" href="home-destino.html?destino=rio&fuente=home_plata"><img src="dest/rio-400.jpg" alt=""><span class="q-nom">Río de Janeiro<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="fln" href="home-destino.html?destino=fln&fuente=home_plata"><img src="dest/fln-400.jpg" alt=""><span class="q-nom">Florianópolis<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="buz" href="home-destino.html?destino=buz&fuente=home_plata"><img src="dest/buz-400.jpg" alt=""><span class="q-nom">Búzios<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="bcm" href="home-destino.html?destino=bcm&fuente=home_plata"><img src="dest/bcm-400.jpg" alt=""><span class="q-nom">Balneário Camboriú<small>Brasil</small></span><span class="q-est">…</span></a></li>
-        <li><a class="q-fila" data-destino="bombinhas" href="home-destino.html?destino=bombinhas&fuente=home_plata"><img src="dest/bombinhas-400.jpg" alt=""><span class="q-nom">Bombinhas<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="rio" href="home-destino.html?destino=rio&fuente=home_plata"><img src="dest/rio-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Río de Janeiro<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="fln" href="home-destino.html?destino=fln&fuente=home_plata"><img src="dest/fln-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Florianópolis<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="buz" href="home-destino.html?destino=buz&fuente=home_plata"><img src="dest/buz-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Búzios<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="bcm" href="home-destino.html?destino=bcm&fuente=home_plata"><img src="dest/bcm-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Balneário Camboriú<small>Brasil</small></span><span class="q-est">…</span></a></li>
+        <li><a class="q-fila" data-destino="bombinhas" href="home-destino.html?destino=bombinhas&fuente=home_plata"><img src="dest/bombinhas-120.jpg" width="54" height="54" decoding="async" alt=""><span class="q-nom">Bombinhas<small>Brasil</small></span><span class="q-est">…</span></a></li>
       </ol>
       <p class="q-nota" id="q-nota"></p>
       <a class="q-alt" href="home-destino.html?fuente=home_prefiero_elegir">Ya sé a dónde voy: elegir destino →</a>
@@ -513,7 +544,8 @@
   }
   function pintar(celebrar) {
     var b = +rango.value, n = 0, hay = Object.keys(PP).length > 0;
-    rango.style.setProperty('--p', ((b - rango.min) / (rango.max - rango.min) * 100) + '%');
+    var pct = ((b - rango.min) / (rango.max - rango.min) * 100) + '%';
+    rango.style.setProperty('--p', pct); rango.parentNode.style.setProperty('--p', pct);
     document.getElementById('q-monto').textContent = fm(b);
     filas.forEach(function (fi) {
       var k = fi.dataset.destino, pp = PP[k], e = fi.querySelector('.q-est');

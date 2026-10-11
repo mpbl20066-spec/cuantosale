@@ -222,13 +222,15 @@
     if (sesion()) { evento('visita'); return; }
     var h = hoy();
     if (E.ultimoDia === h) return;
+    // Sin dia anterior es la primera visita: decirle "Bienvenido de vuelta" a quien entra por primera vez no tenia sentido.
+    var primera = !E.ultimoDia;
     if (E.ultimoDia && diasEntre(E.ultimoDia, h) === 1) E.racha += 1; else E.racha = 1;
     E.ultimoDia = h;
     E.dia = h; E.busquedasHoy = 0;
     if (E.racha > E.mejorRacha) E.mejorRacha = E.racha;
     guardar();
     var bonus = Math.min(E.racha, 7);
-    sumar(XP.visita + bonus - 1, E.racha > 1 ? 'Racha de ' + E.racha + ' días 🔥' : 'Bienvenido de vuelta');
+    sumar(XP.visita + bonus - 1, E.racha > 1 ? 'Racha de ' + E.racha + ' días 🔥' : (primera ? 'Tu primer XP: ¡bienvenido!' : 'Bienvenido de vuelta'));
   }
 
   function alBuscar() {

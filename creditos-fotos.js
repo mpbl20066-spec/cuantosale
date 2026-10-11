@@ -111,6 +111,9 @@ async function fichaConReintento(fileName) {
 
 (async function () {
   const src = SRC.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+  // Solo URLs absolutas: las fotos locales ('/fotos/guias/...', bajadas de
+  // Unsplash o Pexels, licencia sin atribucion obligatoria) no pasan por
+  // Commons y no se acreditan. Su procedencia esta en data/fotos-guias-fuentes.json.
   const urls = [...new Set([...src.matchAll(/'(https?:\/\/[^']+\.(?:jpg|jpeg|JPG|png|webp))'/g)].map((m) => m[1]))];
   const creditos = {};
   const sinFicha = [];
@@ -205,7 +208,12 @@ if (typeof module !== 'undefined' && module.exports) module.exports = FOTO_CREDI
   if (fs.existsSync(OUT)) {
     try {
       const viejo = require(OUT);
-      previas = viejo && typeof viejo === 'object' ? Object.keys(viejo).length : 0;
+      // Solo cuentan las fotos que siguen en el codigo. Una foto de Commons
+      // que se reemplazo por una propia (/fotos/guias/..., Unsplash o Pexels
+      // descargada, que no lleva credito) sale de la tabla a proposito y no
+      // es una corrida incompleta.
+      previas = viejo && typeof viejo === 'object'
+        ? Object.keys(viejo).filter((u) => urls.indexOf(u) >= 0).length : 0;
     } catch (e) { previas = 0; }
   }
   const nuevas = Object.keys(creditos).length;

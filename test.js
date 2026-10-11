@@ -288,7 +288,9 @@ function haversineKm(a, b) {
       lista.forEach(function (b) {
         const etiqueta = key + ' / ' + b.name;
         assert.ok(typeof b.lat === 'number' && typeof b.lng === 'number', etiqueta + ': sin lat/lng');
-        assert.match(String(b.foto || ''), /^https:\/\/(thumb|upload)\.wikimedia\.org\//, etiqueta + ': sin foto de Wikimedia');
+        // Foto de Wikimedia (acreditada) o propia en /fotos/guias/ (Unsplash o
+        // Pexels descargada; ver el test de creditos mas abajo).
+        assert.match(String(b.foto || ''), /^(https:\/\/(thumb|upload)\.wikimedia\.org\/|\/fotos\/guias\/[a-z0-9-]+\.jpg$)/, etiqueta + ': sin foto (ni de Wikimedia ni propia en /fotos/guias/)');
         const d = playas.km(centro, b);
         assert.ok(d <= G.maxKm, etiqueta + ': queda a ' + d.toFixed(1) + ' km del centro, el maximo es ' + G.maxKm);
         revisadas++;
@@ -434,12 +436,24 @@ function haversineKm(a, b) {
   await t('guias: toda foto de playa esta acreditada', function () {
     const G = cargarGuias();
     const creditos = require('./public/creditos-fotos.generated.js');
+    const fuentesFile = path.join(__dirname, 'data', 'fotos-guias-fuentes.json');
+    const fuentesFotos = fs.existsSync(fuentesFile) ? JSON.parse(fs.readFileSync(fuentesFile, 'utf8')) : {};
     let vistas = 0;
     Object.keys(model.DEST).forEach(function (dk) {
       const g = G.guiaPara(dk, model.DEST[dk].region);
-      (g.beaches || []).forEach(function (b) {
+      (g.beaches || []).concat(g.atracciones || []).forEach(function (b) {
         if (!b.foto) return;
         vistas++;
+        /* Las fotos propias (/fotos/guias/) son de Unsplash o Pexels, bajadas
+           y servidas desde aca: su licencia no exige credito, pero el archivo
+           tiene que existir y su procedencia (pagina de origen y autor) tiene
+           que estar en data/fotos-guias-fuentes.json como prueba de licencia. */
+        if (/^\/fotos\/guias\//.test(b.foto)) {
+          assert.ok(fs.existsSync(path.join(__dirname, 'public', b.foto)), dk + ' / ' + b.name + ': no existe public' + b.foto);
+          const fuente = fuentesFotos[b.foto.replace(/^\/fotos\/guias\//, '')];
+          assert.ok(fuente && /^(unsplash|pexels)$/.test(fuente.fuente) && fuente.url, dk + ' / ' + b.name + ': sin procedencia en data/fotos-guias-fuentes.json');
+          return;
+        }
         assert.ok(creditos[b.foto], dk + ' / ' + b.name + ': la foto no esta en la tabla de creditos');
         assert.ok(creditos[b.foto].autor, dk + ' / ' + b.name + ': credito sin autor');
         assert.ok(creditos[b.foto].licencia, dk + ' / ' + b.name + ': credito sin licencia');

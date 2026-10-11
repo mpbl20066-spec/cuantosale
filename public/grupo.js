@@ -1,4 +1,4 @@
-/* version: 28 */
+/* version: 29 */
 (function () {
   'use strict';
   var app = document.getElementById('grupo-app');
@@ -432,7 +432,7 @@
     if (!window.supabase || !window.supabase.createClient) {
       await new Promise(function (resolve, reject) {
         var script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3';
         script.onload = resolve;
         script.onerror = function () { reject(new Error('No pudimos cargar Supabase.')); };
         document.head.appendChild(script);

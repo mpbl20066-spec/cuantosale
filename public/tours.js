@@ -51,7 +51,7 @@
     if (window.supabase && window.supabase.createClient) return;
     await new Promise(function (resolve, reject) {
       var s = document.createElement('script');
-      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3';
       s.async = true;
       s.onload = resolve;
       s.onerror = function () { reject(new Error('No pudimos cargar el servicio de cuenta.')); };

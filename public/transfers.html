@@ -4,30 +4,48 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Transfers desde el aeropuerto · CuántoSale</title>
+<meta name="theme-color" content="#0A101A">
+<!-- El tema va antes del CSS, igual que en index.html: sin data-theme la pagina
+     quedaba con el fondo oscuro de :root y las tarjetas en blanco con el texto
+     blanco encima (no se leia ningun destino ni precio). -->
+<script>
+(function () {
+  var g = null;
+  try { g = localStorage.getItem('cuantosale_tema'); } catch (e) { g = null; }
+  if (g !== 'light' && g !== 'night') {
+    g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
+  }
+  document.documentElement.setAttribute('data-theme', g);
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute('content', g === 'light' ? '#F7F8FA' : '#0A101A');
+})();
+</script>
+<link rel="icon" href="/favicon.ico" sizes="any">
 <!-- Con ?v=: sin el, el server sirve el CSS con no-cache y se revalida en cada
      visita. El numero sale de scripts/sync-version.js. -->
-<link rel="stylesheet" href="/style.css?v=300">
+<link rel="stylesheet" href="/style.css?v=304">
 <style>
-body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); }
+body.transfers-page { padding: 0; background: var(--bg, #f7f6f2); color: var(--ink, #101828); }
 .tp-wrap { max-width: 900px; margin: 0 auto; padding: 20px 16px 80px; }
 .tp-wrap h1 { font-size: 22px; margin: 0 0 4px; }
-.tp-lead { margin: 0 0 16px; color: var(--muted, #666); font-size: 14px; max-width: 62ch; }
+.tp-lead { margin: 0 0 16px; color: var(--ink2, #48566A); font-size: 14px; max-width: 62ch; }
 .tp-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
-.tp-tabs { display: inline-flex; border: 1px solid var(--line, #ddd); border-radius: 10px; overflow: hidden; }
-.tp-tabs button { font: inherit; font-size: 14px; padding: 8px 14px; border: 0; background: var(--card, #fff); color: inherit; cursor: pointer; }
-.tp-tabs button + button { border-left: 1px solid var(--line, #ddd); }
-.tp-tabs button[aria-pressed="true"] { background: #0e6a6a; color: #fff; }
-.tp-bar input { flex: 1 1 200px; min-width: 160px; font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit; }
-.tp-count { font-size: 13px; color: var(--muted, #666); margin: 0 0 10px; }
+.tp-tabs { display: inline-flex; border: 1px solid var(--control-line, #ddd); border-radius: 10px; overflow: hidden; }
+.tp-tabs button { font: inherit; font-size: 14px; min-height: 44px; padding: 0 16px; border: 0; background: var(--surface, #fff); color: var(--ink, #101828); cursor: pointer; }
+.tp-tabs button + button { border-left: 1px solid var(--control-line, #ddd); }
+.tp-tabs button[aria-pressed="true"] { background: var(--action-bg, #F7C325); color: var(--action-ink, #0A101A); font-weight: 700; }
+.tp-tabs button:focus-visible, .tp-bar input:focus-visible { outline: 3px solid var(--focus, #F7C325); outline-offset: 2px; }
+.tp-bar input { flex: 1 1 200px; min-width: 160px; font: inherit; font-size: 16px; min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--control-line, #ddd); background: var(--surface, #fff); color: var(--ink, #101828); box-sizing: border-box; }
+.tp-count { font-size: 13px; color: var(--ink2, #48566A); margin: 0 0 10px; }
 .tp-list { display: grid; gap: 8px; }
-.tp-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 10px; background: var(--card, #fff); }
-.tp-name { font-weight: 600; margin: 0; }
-.tp-meta { font-size: 12.5px; color: var(--muted, #666); }
+.tp-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 12px; background: var(--surface, #fff); color: var(--ink, #101828); }
+.tp-name { font-weight: 700; font-size: 16px; margin: 0 0 2px; }
+.tp-meta { font-size: 13px; color: var(--ink2, #48566A); }
 .tp-prices { display: flex; flex-wrap: wrap; gap: 4px 14px; text-align: right; }
 @media (max-width: 480px) { .tp-row { grid-template-columns: minmax(0, 1fr); } .tp-prices { justify-content: flex-start; text-align: left; } }
 .tp-price b { display: block; font-size: 16px; }
-.tp-price span { font-size: 11.5px; color: var(--muted, #666); }
-.tp-empty { padding: 40px 12px; text-align: center; color: var(--muted, #666); }
+.tp-price span { font-size: 12.5px; color: var(--ink2, #48566A); }
+.tp-empty { padding: 40px 12px; text-align: center; color: var(--ink2, #48566A); }
 </style>
 </head>
 <body class="transfers-page">

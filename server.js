@@ -170,7 +170,7 @@ const GA_MEASUREMENT_ID = String(process.env.GA_MEASUREMENT_ID || 'G-JJSG6WSTYZ'
 /* Medicion con consentimiento. Un unico snippet reemplaza a GA4, Clarity y el script de afiliados:
    - Antes de que la persona elija no se carga ni se envia nada a terceros (Consent Mode v2 en "denied").
    - "Aceptar" guarda cs_consent=granted en localStorage y carga GA4, Clarity y afiliados.
-   - "Solo lo necesario" guarda cs_consent=denied: no se carga ninguno de los tres.
+   - "Solo necesarias" guarda cs_consent=denied: no se carga ninguno de los tres.
    track() existe siempre (encola en dataLayer) para que app.js y las pantallas no dependan del consentimiento.
    No se envian nombres, correos ni tokens: los eventos llevan solo parametros de producto (destino, medio, importes). */
 function analyticsSnippet() {
@@ -198,10 +198,12 @@ function analyticsSnippet() {
       '@media (max-width:767px){html.cs-consent[data-pagina="home"] .tabs{bottom:var(--csh)!important}}') + ';document.head.appendChild(st);}' +
     'r.style.setProperty("--csh",b.offsetHeight+"px");r.classList.add("cs-consent");}' +
     'function banner(){if(document.getElementById("cs-consent")||!document.body)return;var d=document.createElement("div");d.id="cs-consent";d.setAttribute("role","dialog");d.setAttribute("aria-label","Preferencias de cookies");' +
-    'd.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:#0A101A;color:#fff;font:14px/1.45 system-ui,sans-serif;box-shadow:0 -6px 24px rgba(0,0,0,.25)";' +
-    'd.innerHTML=\'<span style="max-width:640px">Usamos cookies para medir el uso del sitio y mejorar CuántoSale. Podés aceptarlas o continuar solo con las necesarias. <a href="/privacidad" style="color:#F7C325">Política de privacidad</a></span>\'' +
-    '+\'<span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" data-n style="min-height:44px;padding:0 16px;border:1.5px solid #fff;border-radius:99px;background:transparent;color:#fff;font:700 14px system-ui,sans-serif;cursor:pointer">Solo lo necesario</button>\'' +
-    '+\'<button type="button" data-a style="min-height:44px;padding:0 18px;border:0;border-radius:99px;background:#F7C325;color:#0A101A;font:800 14px system-ui,sans-serif;cursor:pointer">Aceptar</button></span>\';' +
+    'd.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:2147483000;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#0A101A;color:#fff;font:13px/1.4 system-ui,sans-serif;box-shadow:0 -6px 24px rgba(0,0,0,.25)";' +
+    /* Texto corto y los dos botones repartidos en una fila: la version anterior media ~145px de alto en el celular y,
+       sumada a la barra de pestanas, tapaba un tercio de la pantalla en la primera visita. */
+    'd.innerHTML=\'<span style="flex:1 1 300px;max-width:560px">Usamos cookies para medir el uso y mejorar el sitio. <a href="/privacidad" style="color:#F7C325">Privacidad</a></span>\'' +
+    '+\'<span style="display:flex;gap:8px;flex:0 1 320px"><button type="button" data-n style="flex:1;min-height:44px;padding:0 14px;border:1.5px solid #fff;border-radius:99px;background:transparent;color:#fff;font:700 14px system-ui,sans-serif;cursor:pointer;white-space:nowrap">Solo necesarias</button>\'' +
+    '+\'<button type="button" data-a style="flex:1;min-height:44px;padding:0 18px;border:0;border-radius:99px;background:#F7C325;color:#0A101A;font:800 14px system-ui,sans-serif;cursor:pointer">Aceptar</button></span>\';' +
     'd.querySelector("[data-n]").onclick=function(){elegir("denied");};d.querySelector("[data-a]").onclick=function(){elegir("granted");};document.body.appendChild(d);ajustar();window.addEventListener("resize",ajustar);}' +
     'window.csConsentimiento={abrir:function(){try{localStorage.removeItem(K);}catch(e){}banner();}};' +
     'if(v==="granted")cargar();else if(v!=="denied"){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",banner);else banner();}' +
@@ -2754,17 +2756,39 @@ const COMPRESSIBLE_EXT = new Set(['.html', '.css', '.js', '.json', '.svg']);
 // una lectura de disco + una compresión de 350KB en el hilo único, con todas las
 // requests concurrentes esperando. El resultado se cachea por archivo+mtime para
 // que solo se pague una vez por despliegue.
-const gzipCache = new Map();
-function gzipCached(file, mtimeMs, payload) {
-  const key = file + '|' + mtimeMs;
-  const hit = gzipCache.get(key);
+//
+// Brotli cuando el navegador lo acepta (todos los actuales): ~20 % menos que gzip
+// (style.css 44 -> 35 KB, app.js 117 -> 97 KB). La compresion es asincrona (corre
+// en el pool de libuv, no en el hilo de las requests) y se guarda la promesa, asi
+// que dos pedidos simultaneos del mismo archivo comprimen una sola vez.
+//
+// La clave lleva un hash del contenido cuando la pagina pasa por `transform`:
+// /grupo/<id> reescribe el titulo con el nombre de cada viaje, y con la clave
+// archivo+fecha sola se le servia a un grupo la vista previa (og:title) del
+// primero que se habia comprimido.
+const compCache = new Map();
+function comprimido(enc, file, mtimeMs, payload, variable) {
+  const key = enc + '|' + file + '|' + mtimeMs + '|' + payload.length +
+    (variable ? '|' + crypto.createHash('sha1').update(payload).digest('hex') : '');
+  const hit = compCache.get(key);
   if (hit) return hit;
-  const compressed = zlib.gzipSync(payload, { level: 6 });
-  // Poda de seguridad: si se despliega muchas veces sin reiniciar, el mapa no
-  // tiene que crecer sin límite.
-  if (gzipCache.size > 24) gzipCache.clear();
-  gzipCache.set(key, compressed);
-  return compressed;
+  const p = new Promise(function (ok, fallo) {
+    const listo = function (err, buf) { if (err) fallo(err); else ok(buf); };
+    if (enc === 'br') {
+      zlib.brotliCompress(payload, { params: {
+        [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+        [zlib.constants.BROTLI_PARAM_SIZE_HINT]: payload.length
+      } }, listo);
+    } else {
+      zlib.gzip(payload, { level: 6 }, listo);
+    }
+  });
+  // Poda de seguridad: el mapa no tiene que crecer sin limite (las paginas de
+  // grupo son una entrada por viaje).
+  if (compCache.size > 200) compCache.clear();
+  compCache.set(key, p);
+  p.catch(function () { compCache.delete(key); });
+  return p;
 }
 // app.js (~780 KB) y style.css (~270 KB) se sirven sin minificar. En el
 // despliegue se minifican una vez por instancia con esbuild (solo espacios,
@@ -2804,9 +2828,19 @@ function cacheControlEstatico(req, ext, rel) {
   if (versionado) return 'public, max-age=31536000, ' + (cdn ? 's-maxage=31536000, ' : '') + 'immutable';
   return cdn ? 'public, max-age=0, must-revalidate, s-maxage=31536000' : 'no-cache';
 }
+// Lo que empieza con "_" en public/ es de desarrollo: vistas previas
+// (_preview-*.html), maquetas (_mockups/), historias armadas a mano y hasta un
+// __pycache__. En el despliegue no se sirve: eran paginas a medio hacer
+// publicadas bajo el dominio, que Google podia encontrar. En local siguen
+// abriendo para poder trabajar con ellas. DEV_FILES=1 las habilita en Vercel.
+const OCULTAR_DESARROLLO = !!process.env.VERCEL && process.env.DEV_FILES !== '1';
+function esArchivoDeDesarrollo(rel) {
+  return rel.split('/').some(function (seg) { return seg.charAt(0) === '_'; });
+}
 function serveStatic(req, res, pathname, transform) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/index.html';
+  if (OCULTAR_DESARROLLO && esArchivoDeDesarrollo(rel)) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
   if (checkPrelaunchAccess(req, res, rel)) return;
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (file !== PUBLIC_DIR && file.indexOf(PUBLIC_DIR + path.sep) !== 0) { res.writeHead(403); return res.end('Prohibido'); }
@@ -2846,10 +2880,17 @@ function serveStatic(req, res, pathname, transform) {
       };
       if (COMPRESSIBLE_EXT.has(ext) && payload.length > 512) {
         const acceptEncoding = String(req.headers['accept-encoding'] || '');
-        if (acceptEncoding.indexOf('gzip') >= 0) {
-          headers['Content-Encoding'] = 'gzip';
-          res.writeHead(200, headers);
-          return res.end(gzipCached(file, stat.mtimeMs, payload));
+        const enc = /\bbr\b/.test(acceptEncoding) ? 'br' : (acceptEncoding.indexOf('gzip') >= 0 ? 'gzip' : null);
+        if (enc) {
+          return comprimido(enc, file, stat.mtimeMs, payload, typeof transform === 'function').then(function (buf) {
+            headers['Content-Encoding'] = enc;
+            res.writeHead(200, headers);
+            res.end(buf);
+          }, function () {
+            // Si la compresion falla se manda sin comprimir: mas pesado, pero la pagina llega.
+            res.writeHead(200, headers);
+            res.end(payload);
+          });
         }
       }
       res.writeHead(200, headers);
@@ -2963,7 +3004,8 @@ function nuevoPagina(pathname, search) {
 /* Devuelve la ruta canonica si la URL pedida es una variante o una URL vieja (/test/...). */
 function nuevoRedireccion(pathname, search) {
   const q = search || '';
-  const viejo = /^\/test\/(home-[a-z-]+\.html)$/i.exec(pathname);
+  /* home2.html (la home de la raiz) tambien: sin esto /test/home2.html respondia 200 con la home entera, un duplicado. */
+  const viejo = /^\/test\/(home[0-9]*(?:-[a-z-]+)?\.html)$/i.exec(pathname);
   if (viejo && NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()]) return NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()] + q;
   if (/^\/test\/?$/i.test(pathname)) return (NUEVO || '/') + q;
   /* Variantes de mayusculas o barra final de una ruta limpia. */
@@ -2973,6 +3015,40 @@ function nuevoRedireccion(pathname, search) {
     if (!NUEVO && NUEVO_SLUGS.indexOf(slug) >= 0 && ('/' + slug) !== pathname) return '/' + slug + q;
   }
   return null;
+}
+/* Los CSS, JS e imagenes que piden las paginas de /test iban sin ?v=, asi que se servian con max-age=0: en cada
+   visita el navegador volvia a preguntar por cada archivo (unos 15 viajes de ida y vuelta en la home, y en 4G cada uno
+   cuesta). Aca se les agrega ?v=<hash del contenido> al servir el HTML, y con eso cacheControlEstatico los marca
+   immutable por un ano. Es el hash y no la fecha del archivo porque en Vercel las fechas no cambian entre despliegues:
+   un archivo editado tendria el mismo ?v= y el navegador seguiria con el viejo para siempre.
+   En Vercel cada archivo se lee una sola vez por instancia (no cambian dentro de un despliegue); en local se recalcula
+   en cada pedido para que un cambio se vea al recargar. Los <link rel="preload"> se dejan como estan: su URL tiene que
+   coincidir con la del url() del CSS, que no lleva version, o la foto se bajaria dos veces. */
+const versionAssetCache = new Map();
+function versionDeAsset(file) {
+  const fija = !!process.env.VERCEL;
+  if (fija && versionAssetCache.has(file)) return versionAssetCache.get(file);
+  let v = null;
+  try {
+    const h = crypto.createHash('sha1').update(fs.readFileSync(file));
+    // Los .js de /test salen reescritos con la tabla de rutas (nuevoReescribir): si cambia la tabla cambia lo que se
+    // sirve aunque el archivo sea el mismo, asi que la tabla entra en el hash.
+    if (path.extname(file) === '.js') h.update(JSON.stringify(NUEVO_POR_ARCHIVO));
+    v = parseInt(h.digest('hex').slice(0, 10), 16);
+  } catch (e) { v = null; }
+  if (fija) versionAssetCache.set(file, v);
+  return v;
+}
+function versionarAssets(html) {
+  return html.replace(/<(?:link|script|img)\b[^>]*>/gi, function (tag) {
+    if (/\brel=["']?preload/i.test(tag)) return tag;
+    return tag.replace(/(\s(?:href|src)=")([^"?#:]+\.(?:css|js|jpe?g|png|webp|svg))"/i, function (m, pre, ref) {
+      const file = path.normalize(path.join(PUBLIC_DIR, ref.charAt(0) === '/' ? ref : path.join('test', ref)));
+      if (file.indexOf(PUBLIC_DIR + path.sep) !== 0) return m;
+      const v = versionDeAsset(file);
+      return v ? pre + ref + '?v=' + v + '"' : m;
+    });
+  });
 }
 function nuevoReescribir(texto) {
   return texto.replace(/(home-[a-z-]+\.html)/g, function (f) { return NUEVO_POR_ARCHIVO[f] || f; });
@@ -3291,12 +3367,19 @@ function handleRequest(req, res) {
     if (mDestino) {
       return destinosWeb.pagina(mDestino[1]).then(function (html) {
       if (!html) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
-      res.writeHead(200, {
+      const cabeceras = {
         'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP,
         'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
-        'Cache-Control': 'public, max-age=0, must-revalidate, s-maxage=3600'
-      });
-      return res.end(injectAnalytics(Buffer.from(html, 'utf8'), '.html'));
+        'Cache-Control': 'public, max-age=0, must-revalidate, s-maxage=3600', 'Vary': 'Accept-Encoding'
+      };
+      const cuerpo = injectAnalytics(Buffer.from(html, 'utf8'), '.html');
+      // Se comprime como los estaticos: eran ~25 KB de HTML sin comprimir en la pagina que llega desde Google.
+      const ae = String(req.headers['accept-encoding'] || '');
+      const enc = /\bbr\b/.test(ae) ? 'br' : (ae.indexOf('gzip') >= 0 ? 'gzip' : null);
+      if (!enc) { res.writeHead(200, cabeceras); return res.end(cuerpo); }
+      return comprimido(enc, 'destino:' + mDestino[1], 0, cuerpo, true).then(function (buf) {
+        cabeceras['Content-Encoding'] = enc; res.writeHead(200, cabeceras); res.end(buf);
+      }, function () { res.writeHead(200, cabeceras); res.end(cuerpo); });
       }).catch(function () { res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Error'); });
     }
     if (/^\/tours\/?$/i.test(url.pathname)) {
@@ -3326,7 +3409,7 @@ function handleRequest(req, res) {
     if (nuevoPag) {
       try {
         serveStatic(req, res, '/test/' + nuevoPag.archivo + '.html', function (data) {
-          let html = nuevoReescribir(data.toString('utf8'));
+          let html = versionarAssets(nuevoReescribir(data.toString('utf8')));
           const indexable = !!NUEVO_INDEXABLES[nuevoPag.slug];
           if (indexable) html = html.replace(/<meta name="robots"[^>]*>\s*/i, '');
           const canonical = 'https://cuantosale.uy' + ((NUEVO + (nuevoPag.slug ? '/' + nuevoPag.slug : '')) || '/');

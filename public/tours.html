@@ -5,24 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Catálogo de tours · CuántoSale</title>
+<!-- El tema va antes del CSS (igual que en index.html): sin data-theme la pagina
+     quedaba en el oscuro de :root con tarjetas blancas de texto blanco. -->
+<script>
+(function () {
+  var g = null;
+  try { g = localStorage.getItem('cuantosale_tema'); } catch (e) { g = null; }
+  if (g !== 'light' && g !== 'night') {
+    g = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'night';
+  }
+  document.documentElement.setAttribute('data-theme', g);
+})();
+</script>
+<link rel="icon" href="/favicon.ico" sizes="any">
 <!-- Con ?v=: sin el, el server sirve el CSS con no-cache y se revalida en cada
      visita, que es una descarga completa del archivo cada vez que alguien abre
      el panel. Con la version, queda cacheado un ano y hay que subirla a mano
      cuando se toca style.css. El numero sale de scripts/sync-version.js. -->
-<link rel="stylesheet" href="/style.css?v=300">
+<link rel="stylesheet" href="/style.css?v=304">
 <style>
 /* El panel reusa los tokens del tema. No es una pagina nueva con su propio
    estilo: si el tema oscuro se rompe aca, se rompe en toda la app, y son los
    mismos usuarios los que van a estar en las dos pantallas. */
-body.tours-panel { padding: 0; background: var(--bg, #f7f6f2); }
+body.tours-panel { padding: 0; background: var(--bg, #f7f6f2); color: var(--ink, #101828); }
 .panel-wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 80px; }
 .panel-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
 .panel-head h1 { font-size: 22px; margin: 0 0 4px; }
-.panel-head p { margin: 0; color: var(--muted, #666); font-size: 14px; max-width: 62ch; }
+.panel-head p { margin: 0; color: var(--ink2, #666); font-size: 14px; max-width: 62ch; }
 .panel-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
 .panel-bar input, .panel-bar select, .panel-bar button {
   font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px;
-  border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit;
+  border: 1px solid var(--line, #ddd); background: var(--surface, #fff); color: inherit;
 }
 .panel-bar input[type=search] { flex: 1 1 220px; min-width: 180px; }
 .panel-bar button { cursor: pointer; }
@@ -30,12 +43,12 @@ body.tours-panel { padding: 0; background: var(--bg, #f7f6f2); }
 .tours-list { display: grid; gap: 8px; }
 .tour-row {
   display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center;
-  padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 10px; background: var(--card, #fff);
+  padding: 12px 14px; border: 1px solid var(--line, #e3e0d8); border-radius: 10px; background: var(--surface, #fff);
 }
 .tour-row.is-off { opacity: .55; }
 .tour-row__main { min-width: 0; }
 .tour-row__title { font-weight: 600; margin: 0 0 2px; }
-.tour-row__meta { font-size: 12.5px; color: var(--muted, #666); display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.tour-row__meta { font-size: 12.5px; color: var(--ink2, #666); display: flex; flex-wrap: wrap; gap: 4px 10px; }
 .tour-row__meta code { font-size: 12px; background: rgba(127,127,127,.13); padding: 1px 5px; border-radius: 4px; }
 .tour-row__actions { display: flex; gap: 6px; }
 .tour-row__actions button { font: inherit; font-size: 13px; padding: 6px 10px; border-radius: 7px; border: 1px solid var(--line, #ddd); background: transparent; color: inherit; cursor: pointer; }
@@ -44,18 +57,18 @@ body.tours-panel { padding: 0; background: var(--bg, #f7f6f2); }
 .panel-status { margin: 14px 0; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
 .panel-status.is-error { background: rgba(179,38,30,.1); color: #b3261e; }
 .panel-status.is-ok { background: rgba(1,121,72,.1); color: #046c4e; }
-.panel-note { font-size: 13px; color: var(--muted, #666); background: rgba(127,127,127,.09); padding: 10px 12px; border-radius: 8px; margin: 0 0 16px; }
-.editor { border: 1px solid var(--line, #ddd); border-radius: 10px; padding: 16px; margin-top: 20px; background: var(--card, #fff); }
+.panel-note { font-size: 13px; color: var(--ink2, #666); background: rgba(127,127,127,.09); padding: 10px 12px; border-radius: 8px; margin: 0 0 16px; }
+.editor { border: 1px solid var(--line, #ddd); border-radius: 10px; padding: 16px; margin-top: 20px; background: var(--surface, #fff); }
 .editor h2 { font-size: 17px; margin: 0 0 12px; }
 .editor label { display: block; font-size: 13px; margin-bottom: 10px; }
-.editor label > span { display: block; margin-bottom: 4px; color: var(--muted, #666); }
-.editor input, .editor textarea, .editor select { width: 100%; font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit; }
+.editor label > span { display: block; margin-bottom: 4px; color: var(--ink2, #666); }
+.editor input, .editor textarea, .editor select { width: 100%; font: inherit; font-size: 14px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--surface, #fff); color: inherit; }
 .editor textarea { min-height: 76px; resize: vertical; }
 .editor__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
 .editor__actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-.editor__actions button { font: inherit; font-size: 14px; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--card, #fff); color: inherit; cursor: pointer; }
+.editor__actions button { font: inherit; font-size: 14px; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line, #ddd); background: var(--surface, #fff); color: inherit; cursor: pointer; }
 .editor__actions button.primary { background: #0e6a6a; border-color: #0e6a6a; color: #fff; }
-.empty { padding: 40px 12px; text-align: center; color: var(--muted, #666); }
+.empty { padding: 40px 12px; text-align: center; color: var(--ink2, #666); }
 </style>
 </head>
 <body class="tours-panel">
@@ -76,7 +89,7 @@ body.tours-panel { padding: 0; background: var(--bg, #f7f6f2); }
     <label style="display:flex;gap:6px;align-items:center;font-size:14px;">
       <input type="checkbox" id="soloInactivos" style="width:auto;"> Solo desactivados
     </label>
-    <span data-count style="font-size:14px;color:var(--muted,#666);"></span>
+    <span data-count style="font-size:14px;color:var(--ink2,#666);"></span>
   </div>
 
   <p class="panel-note" data-nota hidden></p>
