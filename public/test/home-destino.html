@@ -344,8 +344,7 @@
   var fLarga = function (s) { var q = String(s).split('-'); return +q[2] + ' de ' + ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][+q[1] - 1] + ' de ' + q[0]; };
   /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
   var S = { pant: 1, dest: qs.get('destino') || '', sel: '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
-    ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: Math.max(0, +qs.get('ninos') || 0) };
-  if (S.ninos >= S.pax) S.ninos = 0;   // siempre viaja al menos un adulto
+    ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: 0 };   // sin selector de niños: todos se cuentan como personas
   S.cal = String(S.ida).slice(0, 7) + '-01'; if (S.cal > MAXM) S.cal = MAXM; S.paso = 'ida';   // mes que muestra el calendario y que fecha se elige con el proximo toque
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
@@ -538,9 +537,8 @@
       "<div class=\"cal\" id=\"cal\"" + (S.calOn ? "" : " hidden") + ">" + calHTML() + "</div>" +
       "<p class=\"d-noches" + (nn.ok || nn.pend ? "" : " is-err") + "\" id=\"noches\" role=\"status\">" + esc(nn.t) + "</p>" +
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
-      "<div class=\"d-quien\">" + fila("Adultos", "Desde 12 años", "ad", S.pax - S.ninos, S.pax - S.ninos <= 1, S.pax >= 9) +
-      fila("Niños", "De 2 a 11 años", "ni", S.ninos, S.ninos <= 0, S.pax >= 9) + "</div>" +
-      "<p class=\"d-limite\">" + (S.pax >= 9 ? "Máximo 9 personas por reserva. Para grupos más grandes, escribinos por WhatsApp. " : "") + "Los bebés menores de 2 años viajan en brazos y no se cuentan. Con niños, el alojamiento se cotiza para habitación familiar; vuelos y actividades se cotizan como pasajero y la tarifa de niño se confirma al reservar.</p>" +
+      "<div class=\"d-quien\">" + fila("Personas", "", "ad", S.pax, S.pax <= 1, S.pax >= 9) + "</div>" +
+      (S.pax >= 9 ? "<p class=\"d-limite\">Máximo 9 personas por reserva. Para grupos más grandes, escribinos por WhatsApp.</p>" : "") +
       (S.err ? "<p class=\"d-vacio\" role=\"alert\" style=\"text-align:left;color:var(--coral)\">" + esc(S.err) + "</p>" : "") +
       "<button type=\"button\" class=\"d-cont\" data-seguir=\"1\" data-evento=\"destino_continuar\" data-destino=\"" + S.dest + "\">Continuar " + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + "</button></div>" +
       (d ? "<div class=\"d-foto\" aria-hidden=\"true\"><img src=\"" + fv + "\" alt=\"\"><span><b>" + esc(d[1]) + "</b><small>" + esc(d[2]) + "</small></span></div>" : "") + "</div>";

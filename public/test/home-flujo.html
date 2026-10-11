@@ -1304,7 +1304,7 @@
   .pz-stack span{display:block;height:100%;min-width:4px}
   .pz-r__t{min-width:0}
   .pz-r__t b{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14.5px;font-weight:800}
-  .pz-r__t small{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .pz-r__t small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;line-height:1.3;color:var(--ink2);overflow-wrap:anywhere}
   .pz-r__v{text-align:right}
   .pz-r__v b{display:block;font-family:var(--fh);font-size:16px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
   .pz-r__v small{font-size:11.5px;font-weight:700;color:var(--ink2)}
@@ -2144,9 +2144,8 @@
       '<input id="rs-in" type="number" inputmode="decimal" min="0" step="1" value="' + Math.round((x.real != null ? x.real : x.est) * tasa) + '"><button type="submit">Guardar</button><button type="button" class="rs-cancel" data-res-cancel="1">Cancelar</button></span></form>';
     var acc = [];
     if (x.irTxt) acc.push('<button type="button" class="pz-a" data-ir="' + x.ir + '"' + (x.sub ? ' data-sub="' + x.sub + '"' : '') + '>' + x.irTxt + '</button>');
-    if (x.edit && S.editRes !== x.k) acc.push(x.real != null
-      ? '<button type="button" class="pz-a" data-res-edit="' + x.k + '">Cambiar precio</button><button type="button" class="pz-a pz-a--q" data-res-quitar="' + x.k + '">Deshacer</button>'
-      : '<button type="button" class="pz-a" data-res-edit="' + x.k + '">Ya lo reservé</button>');
+    /* Sin "Ya lo reservé" en Tu presupuesto; si ya figura como reservado, se puede cambiar o deshacer. */
+    if (x.edit && S.editRes !== x.k && x.real != null) acc.push('<button type="button" class="pz-a" data-res-edit="' + x.k + '">Cambiar precio</button><button type="button" class="pz-a pz-a--q" data-res-quitar="' + x.k + '">Deshacer</button>');
     return '<li class="pz-r is-open">' + cab + '<div class="pz-r__d">' + cuerpo + (acc.length ? '<div class="pz-r__acc">' + acc.join('') + '</div>' : '') + '</div></li>';
   }
   /* "Donde podes ahorrar" en Tu presupuesto (como en la app): solo alternativas con precio de verdad y al menos
@@ -2174,8 +2173,9 @@
     }
     if (!S.res.aloj && d.h) {
       var nota = d.h.rat || 0, tope = nota * 0.93;
-      var mh = HOTELES.filter(function (h) { return h.id !== d.h.id && (d.h.ejemplo || !h.ejemplo) && (!nota || (h.rat || 0) >= tope); })
-        .sort(function (a, b) { return precioHotel(a) - precioHotel(b); })[0];
+      /* Primero uno mas barato con nota parecida; si no hay, el mas barato que haya. */
+      var otros = HOTELES.filter(function (h) { return h.id !== d.h.id && (d.h.ejemplo || !h.ejemplo); }).sort(function (a, b) { return precioHotel(a) - precioHotel(b); });
+      var mh = otros.filter(function (h) { return !nota || (h.rat || 0) >= tope; })[0] || otros[0];
       if (mh && d.tAloj - precioHotel(mh) >= AHORRO_MIN) l.push({ save: d.tAloj - precioHotel(mh), t: 'Alojate en ' + mh.nom, p: NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + (mh.rat ? ' · nota ' + String(mh.rat).replace('.', ',') : '') + (mh.zona ? ' · ' + mh.zona : '') + '.', b: '<button type="button" class="ah2-b" data-ahorro-hotel="' + esc(mh.id) + '">Cambiar a este alojamiento</button>' });
     }
     if (S.busAlt && S.busAlt.precio && !S.res.vuelo) {
@@ -2183,9 +2183,10 @@
       if (sb >= AHORRO_MIN) l.push({ save: sb, t: 'Andá en bus', p: 'Pasaje ida y vuelta' + (S.busAlt.dur ? ' · ' + S.busAlt.dur : '') + ', en vez de vuelo y transfer.', b: '<button type="button" class="ah2-b" data-ahorro-bus="1">Ver mi viaje en bus</button>' });
     }
     l.sort(function (a, b) { return b.save - a.save; });
+    /* Si ya es lo mas barato (o todavia se esta buscando el bus), la seccion no aparece. */
+    if (!l.length) return '';
     return '<section class="ah2" aria-labelledby="ah2-h"><h2 id="ah2-h">Dónde podés ahorrar</h2><p class="ah2-sub">Comparamos fechas, rutas y alojamiento con tu viaje.</p>' +
-      (l.length ? l.map(function (x) { return '<div class="ah2-tip"><span class="ah2-s">−' + f(x.save) + '</span><div><b>' + esc(x.t) + '</b><p>' + esc(x.p) + '</p>' + x.b + '</div></div>'; }).join('')
-        : '<p class="ah2-ok">' + (S.busAlt === 'cargando' ? 'Buscando alternativas…' : 'Con estas fechas, esta ruta y este alojamiento ya estás en una muy buena combinación.') + '</p>') + '</section>';
+      l.map(function (x) { return '<div class="ah2-tip"><span class="ah2-s">−' + f(x.save) + '</span><div><b>' + esc(x.t) + '</b><p>' + esc(x.p) + '</p>' + x.b + '</div></div>'; }).join('') + '</section>';
   }
   function pantalla4() {
     cargarBusAlt();
@@ -2203,8 +2204,8 @@
         '<ul class="pz-chips">' + chip(I.plane, 'Montevideo → ' + DEST) + chip(iCalP, fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches')) + chip(iPersP, personasTxt()) +
           (MODO !== 'avion' ? chip(ICO_PLATA[MODO], MODO === 'auto' ? 'En auto' : 'En bus') : '') + '</ul>' +
         (CREDITO_FOTO[destKey] ? '<small class="pz-credit">' + CREDITO_FOTO[destKey] + '</small>' : '') + '</section>' +
-      '<section class="pz-total" aria-label="Costo total">' +
-        '<div class="pz-total__m"><span>Costo total del viaje</span><b>' + f(total) + '</b><em>' + f(total / pax) + ' por persona</em></div>' +
+      '<section class="pz-total" aria-label="Costo por persona">' +
+        '<div class="pz-total__m"><span>Costo por persona</span><b>' + f(total / pax) + '</b><em>' + f(total) + ' costo total del viaje</em></div>' +
         (reservado > 0 ? '<div class="pz-total__s"><p><span>Ya reservado</span><b>' + f(reservado) + '</b></p><p><span>Falta reservar</span><b>' + f(porReservar) + '</b></p></div>' : '') +
         '<p class="pz-total__n">Valores para ' + personasTxt() + ' en ' + monedaTxt + '. Comidas y transporte local con costos aproximados.</p></section>' +
       ahorrosViaje(d) +
