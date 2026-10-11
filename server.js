@@ -49,6 +49,7 @@ const travelpayouts = require('./lib/providers/travelpayouts');
 // todas las propuestas.
 const tours = require('./lib/tours');
 const pedidosStore = require('./lib/pedidos');
+const mensajesStore = require('./lib/mensajes');
 
 /*
  * Tasas de cambio para el selector de moneda.
@@ -1647,7 +1648,7 @@ function pasaporteApi() {
 }
 let reservasCache = null;
 function reservasApi() {
-  if (!reservasCache) reservasCache = require('./lib/reservas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, escapeHtml: escapeHtml, guardarPedido: guardarPedido, pasaporte: pasaporteApi() });
+  if (!reservasCache) reservasCache = require('./lib/reservas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, escapeHtml: escapeHtml, guardarPedido: guardarPedido, guardarMensaje: guardarMensaje, pasaporte: pasaporteApi() });
   return reservasCache;
 }
 const waPorNumero = new Map();
@@ -2686,7 +2687,7 @@ function prelaunchAuthorized(req) {
    - /api/travelpayouts/postback: lo llama el panel de Travelpayouts desde
      afuera, sin sesion ni basic auth. Si estuviera candado, la venta nunca se
      confirmaria y ademas el panel lo marcaria como error. */
-const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/travelpayouts/postback']);
+const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/travelpayouts/postback', '/api/whatsapp/webhook']);
 
 // Rutas que NO pasan por el candado de pre-lanzamiento. Queda vacío a propósito:
 // el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
@@ -2987,6 +2988,48 @@ function serveGrupoPage(req, res, groupId) {
    guarda en lib/pedidos.js para verlo en /admin. No tira nunca: si el almacenamiento
    falla, el pedido igual sigue su camino (WhatsApp y email al asesor). */
 const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual });
+/* Webhook de WhatsApp (Cloud API de Meta): mensajes de los clientes y estados de los nuestros, para la bandeja del
+   panel (lib/mensajes.js). GET es la verificacion que hace Meta al configurarlo (WHATSAPP_VERIFY_TOKEN). En POST se
+   comprueba la firma X-Hub-Signature-256 con WHATSAPP_APP_SECRET (la clave secreta de la app de Meta): sin ella
+   cualquiera podria meter mensajes falsos en la bandeja. Si el guardado falla se responde 500 para que Meta reintente. */
+function leerCrudo(req, maxBytes) {
+  return new Promise(function (resolve, reject) {
+    const partes = []; let size = 0;
+    req.on('data', function (c) { size += c.length; if (size > maxBytes) { const e = new Error('Demasiado grande'); e.status = 413; reject(e); req.destroy(); return; } partes.push(c); });
+    req.on('end', function () { resolve(Buffer.concat(partes)); });
+    req.on('error', reject);
+  });
+}
+let avisoSinSecretoWa = false;
+async function webhookWhatsapp(req, res, url) {
+  if (req.method === 'GET') {
+    const vt = String(process.env.WHATSAPP_VERIFY_TOKEN || '').trim();
+    if (vt && url.searchParams.get('hub.mode') === 'subscribe' && safeEqual(String(url.searchParams.get('hub.verify_token') || ''), vt)) {
+      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' });
+      return res.end(String(url.searchParams.get('hub.challenge') || ''));
+    }
+    res.writeHead(403); return res.end();
+  }
+  if (req.method !== 'POST') { res.writeHead(405); return res.end(); }
+  const crudo = await leerCrudo(req, 1024 * 1024);
+  const secreto = String(process.env.WHATSAPP_APP_SECRET || '').trim();
+  if (secreto) {
+    const esperada = 'sha256=' + crypto.createHmac('sha256', secreto).update(crudo).digest('hex');
+    if (!safeEqual(String(req.headers['x-hub-signature-256'] || ''), esperada)) { res.writeHead(403); return res.end(); }
+  } else if (!avisoSinSecretoWa) {
+    avisoSinSecretoWa = true;
+    console.warn('[whatsapp] falta WHATSAPP_APP_SECRET: el webhook acepta avisos sin comprobar que vengan de Meta.');
+  }
+  let cuerpo;
+  try { cuerpo = JSON.parse(crudo.toString('utf8')); } catch (e) { return sendJson(res, 200, { ok: true }); }
+  try { await mensajesStore.procesarWebhook(cuerpo); }
+  catch (e) { console.error('[whatsapp] no se pudo guardar el aviso:', e.message); return sendJson(res, 500, { error: 'reintentar' }); }
+  return sendJson(res, 200, { ok: true });
+}
+/* La confirmacion automatica de una reserva tambien queda en la bandeja, para ver la conversacion entera. */
+function guardarMensaje(m) {
+  return mensajesStore.guardar(m).catch(function (e) { console.error('[whatsapp] no se pudo guardar el mensaje enviado:', e.message); });
+}
 async function guardarPedido(cuerpo) {
   try {
     const r = await pedidosStore.crearPedido(pedidosStore.desdeSolicitud(cuerpo));
@@ -3082,6 +3125,12 @@ function handleRequest(req, res) {
       if (url.pathname === '/api/reserva-enviar' && req.method === 'POST') return reservas.enviar(req, res).catch(alFallar);
       if (url.pathname === '/api/reserva-enviar' && req.method === 'GET') return reservas.verEnvio(req, res, url.searchParams.get('t'));
       res.writeHead(405, { Allow: 'GET, POST' }); return res.end();
+    }
+    if (url.pathname === '/api/whatsapp/webhook') {
+      return webhookWhatsapp(req, res, url).catch(function (e) {
+        console.error('[whatsapp] webhook:', e.message);
+        if (!res.headersSent) sendJson(res, e.status || 500, { error: 'error' });
+      });
     }
     /* Panel de la agencia: API (lib/admin.js) y la pagina. Van antes del cortafuegos de POST. */
     const adminApi = adminPanel.manejar(req, res, url);

@@ -91,6 +91,30 @@ tbody tr.row:hover{background:color-mix(in srgb,var(--info) 6%,transparent)}
 a.lnk{color:var(--info);font-weight:600;text-decoration:none}
 a.lnk:hover{text-decoration:underline}
 .pagoRow{display:grid;grid-template-columns:130px 110px 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center}
+.chat{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 290px);min-height:420px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:24px}
+.chat-lista{border-right:1px solid var(--line);overflow:auto}
+.chat-it{display:grid;gap:2px;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);padding:10px 14px}
+.chat-it:hover{background:var(--bg)}.chat-it.is-on{background:var(--infobg)}
+.chat-it__top{display:flex;justify-content:space-between;gap:8px}.chat-it__top small{color:var(--muted);font-size:12px;white-space:nowrap}
+.chat-it__prev{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-badge{font-style:normal;background:#1DAA61;color:#fff;border-radius:99px;min-width:20px;height:20px;padding:0 6px;font-size:12px;font-weight:700;display:inline-grid;place-items:center}
+.chat-conv{display:flex;flex-direction:column;min-width:0;min-height:0}
+.chat-cab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+.chat-cab div{flex:1;min-width:120px}.chat-cab small{display:block;color:var(--muted);font-size:12px}
+.chat-volver{display:none}
+.chat-msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.msg{max-width:min(76%,520px);padding:8px 10px 6px;border-radius:12px;font-size:14.5px;line-height:1.4;word-wrap:break-word;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+.msg--in{align-self:flex-start;background:var(--card);border-top-left-radius:4px}
+.msg--out{align-self:flex-end;background:#D9FDD3;color:#111;border-top-right-radius:4px}
+.msg--auto{background:#FFF4CC;color:#111}
+.msg__h{display:block;text-align:right;font-size:11px;opacity:.6;margin-top:2px}
+.tilde.is-leido{color:#1D8CF8;opacity:1}.tilde.is-mal{color:#B42318}
+.msg__err{display:block;color:#B42318;font-size:12px;margin-top:4px}
+.chat-caja{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);align-items:flex-end}
+.chat-caja textarea{min-height:44px;max-height:160px}
+.chat-conv>#chat-caja>.err{padding:0 12px 8px}
+.chat-aviso{margin:0;padding:12px 14px;border-top:1px solid var(--line);background:var(--warnbg);color:var(--warn);font-size:13.5px}
+@media (max-width:760px){.chat{grid-template-columns:1fr;height:calc(100vh - 200px)}.chat.con-chat .chat-lista{display:none}.chat:not(.con-chat) .chat-conv{display:none}.chat-volver{display:inline-flex}}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--brand);color:#fff;padding:10px 18px;border-radius:99px;z-index:60;font-weight:600}
 @media (max-width:760px){
   .hide-m{display:none}
@@ -107,6 +131,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=4"></script>
+<script src="/admin/admin.js?v=5"></script>
 </body>
 </html>

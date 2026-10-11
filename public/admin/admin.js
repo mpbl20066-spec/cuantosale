@@ -66,6 +66,7 @@
     var html = '<header class="top"><div class="wrap"><h1>Cuánto<i>Sale</i> · Panel</h1>' +
       '<nav class="tabs" role="tablist"><button class="tab" role="tab" data-vista="pedidos" aria-selected="' + (S.vista === 'pedidos') + '">Pedidos' + (k.nuevos ? ' (' + k.nuevos + ')' : '') + '</button>' +
       '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button>' +
+      '<button class="tab" role="tab" data-vista="mensajes" aria-selected="' + (S.vista === 'mensajes') + '">Mensajes<span id="tab-noleidos">' + (S.chats && S.chats.no_leidos ? ' (' + S.chats.no_leidos + ')' : '') + '</span></button>' +
       '<button class="tab" role="tab" data-vista="whatsapp" aria-selected="' + (S.vista === 'whatsapp') + '">WhatsApp</button></nav>' +
       '<button class="btn btn--sm" data-act="recargar">Actualizar</button><button class="btn btn--sm" data-act="salir">Salir</button></div></header><div class="wrap">';
     if (d.almacenamiento !== 'supabase') {
@@ -80,7 +81,7 @@
       kpi('Por cobrar', usd(k.por_cobrar_usd), 'clientes que nos deben', k.por_cobrar_usd ? 'kpi--warn' : '') +
       kpi('Por pagar', usd(k.por_pagar_proveedores_usd), 'a proveedores', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
       kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
-    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : vistaProveedores(d));
+    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : vistaProveedores(d)));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
@@ -162,6 +163,87 @@
     });
     return h + '</tbody></table></div>';
   }
+
+  /* ---------- Mensajes: la bandeja de WhatsApp ----------
+     El numero vive en la API de Meta y no en un celular: lo que escriben los clientes llega solo aca. Se actualiza
+     cada 15 s. Al refrescar solo se tocan la lista y los mensajes, nunca la caja de texto, para no borrar lo escrito. */
+  function horaCorta(iso) {
+    var d = new Date(iso); if (isNaN(d)) return '';
+    var hora = d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' });
+    return new Date().toDateString() === d.toDateString() ? hora : d.toLocaleDateString('es-UY', { day: '2-digit', month: 'short' }).replace('.', '') + ' ' + hora;
+  }
+  function telLindo(t) { t = String(t || ''); return /^598\d{8}$/.test(t) ? '0' + t.slice(3, 5) + ' ' + t.slice(5, 8) + ' ' + t.slice(8) : '+' + t; }
+  function chatActual() { return S.chats && S.chats.chats.filter(function (c) { return c.telefono === S.chatTel; })[0]; }
+  function listaChatsHtml() {
+    if (!S.chats) return '<p class="sub" style="padding:14px">Cargando…</p>';
+    if (!S.chats.chats.length) return '<p class="sub" style="padding:14px">Todavía no hay mensajes. Cuando un cliente le escriba al WhatsApp de CuántoSale, aparece acá.</p>';
+    return S.chats.chats.map(function (c) {
+      var u = c.ultimo, prev = (u.direccion === 'out' ? 'Vos: ' : '') + u.texto;
+      return '<button class="chat-it' + (c.telefono === S.chatTel ? ' is-on' : '') + '" data-chat="' + esc(c.telefono) + '">' +
+        '<span class="chat-it__top"><b>' + esc(c.nombre || (c.pedidos[0] && c.pedidos[0].nombre) || telLindo(c.telefono)) + '</b><small>' + esc(horaCorta(u.created_at)) + '</small></span>' +
+        '<span class="chat-it__prev">' + esc(prev.slice(0, 80)) + (c.no_leidos ? '<i class="chat-badge">' + c.no_leidos + '</i>' : '') + '</span></button>';
+    }).join('');
+  }
+  var TILDE = { sent: '✓', delivered: '✓✓', read: '✓✓', failed: '⚠', enviando: '…' };
+  function mensajesHtml() {
+    if (!S.chatTel) return '<p class="sub" style="margin:auto">Elegí un chat.</p>';
+    if (!S.conv) return '<p class="sub" style="margin:auto">Cargando…</p>';
+    return S.conv.map(function (m) {
+      var out = m.direccion === 'out';
+      return '<div class="msg ' + (out ? 'msg--out' : 'msg--in') + (m.tipo === 'template' ? ' msg--auto' : '') + '">' + esc(m.texto).replace(/\n/g, '<br>') +
+        '<span class="msg__h">' + esc(horaCorta(m.created_at)) + (out ? ' <span class="tilde' + (m.estado === 'read' ? ' is-leido' : '') + (m.estado === 'failed' ? ' is-mal' : '') + '" title="' + esc(m.estado + (m.error ? ': ' + m.error : '')) + '">' + (TILDE[m.estado] || '') + '</span>' : '') + '</span>' +
+        (m.estado === 'failed' && m.error ? '<span class="msg__err">No se entregó: ' + esc(m.error) + '</span>' : '') + '</div>';
+    }).join('');
+  }
+  function cabeceraChatHtml() {
+    var c = chatActual(); if (!c) return '';
+    return '<div class="chat-cab"><button class="btn btn--sm chat-volver" data-chat="" aria-label="Volver a los chats">←</button><div><b>' + esc(c.nombre || telLindo(c.telefono)) + '</b><small>' + esc(telLindo(c.telefono)) + '</small></div>' +
+      c.pedidos.map(function (p) { return '<button class="btn btn--sm" data-ir-pedido="' + esc(p.id) + '">Pedido ' + esc(p.ref) + '</button>'; }).join('') + '</div>';
+  }
+  function cajaHtml() {
+    var c = chatActual(); if (!c) return '';
+    if (!c.ventana_abierta) return '<p class="chat-aviso">Pasaron más de 24 h desde el último mensaje de este cliente. WhatsApp solo deja escribirle de nuevo con una plantilla aprobada, o cuando él te vuelva a escribir.</p>';
+    return '<form id="chat-form" class="chat-caja"><textarea id="chat-txt" rows="2" placeholder="Escribí tu respuesta… (Enter envía, Shift+Enter baja de línea)" aria-label="Respuesta">' + esc(S.borrador || '') + '</textarea><button class="btn btn--main" type="submit">Enviar</button></form><p id="chat-err" class="err" role="alert"></p>';
+  }
+  function vistaMensajes() {
+    if (!S.chats) cargarChats();
+    return '<div class="chat' + (S.chatTel ? ' con-chat' : '') + '"><div class="chat-lista" id="chat-lista">' + listaChatsHtml() + '</div>' +
+      '<div class="chat-conv">' + (S.chatTel ? '<div id="chat-cab">' + cabeceraChatHtml() + '</div>' : '') + '<div class="chat-msgs" id="chat-msgs">' + mensajesHtml() + '</div>' +
+      (S.chatTel ? '<div id="chat-caja">' + cajaHtml() + '</div>' : '') + '</div></div>';
+  }
+  function abajo() { var m = document.getElementById('chat-msgs'); if (m) m.scrollTop = m.scrollHeight; }
+  function refrescarMensajes(irAbajo) {
+    var tab = document.getElementById('tab-noleidos'); if (tab) tab.textContent = S.chats && S.chats.no_leidos ? ' (' + S.chats.no_leidos + ')' : '';
+    if (S.vista !== 'mensajes') return;
+    var l = document.getElementById('chat-lista'); if (l) l.innerHTML = listaChatsHtml();
+    var m = document.getElementById('chat-msgs');
+    if (m) { var alFinal = m.scrollHeight - m.scrollTop - m.clientHeight < 40; m.innerHTML = mensajesHtml(); if (irAbajo || alFinal) abajo(); }
+    var cab = document.getElementById('chat-cab'); if (cab) cab.innerHTML = cabeceraChatHtml();
+    var caja = document.getElementById('chat-caja'), c = chatActual();
+    if (caja && !!document.getElementById('chat-txt') !== !!(c && c.ventana_abierta)) caja.innerHTML = cajaHtml();
+  }
+  function cargarChats() {
+    if (S.cargandoChats) return; S.cargandoChats = true;
+    return api('mensajes/chats').then(function (j) { S.chats = j; S.cargandoChats = false; refrescarMensajes(false); })
+      .catch(function () { S.cargandoChats = false; });
+  }
+  function cargarConv(irAbajo) {
+    var tel = S.chatTel; if (!tel) return;
+    return api('mensajes/chat?tel=' + encodeURIComponent(tel)).then(function (j) {
+      if (S.chatTel !== tel) return;
+      S.conv = j.mensajes;
+      var c = chatActual(); if (c && c.no_leidos) { S.chats.no_leidos -= c.no_leidos; c.no_leidos = 0; }
+      refrescarMensajes(irAbajo);
+    }).catch(function () {});
+  }
+  function abrirChat(tel) {
+    S.chatTel = tel || null; S.conv = null; S.borrador = '';
+    pintar(); if (tel) cargarConv(true);
+  }
+  setInterval(function () {
+    if (!S.datos || document.hidden) return;
+    cargarChats(); if (S.vista === 'mensajes' && S.chatTel) cargarConv(false);
+  }, 15000);
 
   /* ---------- WhatsApp: estado del numero, registro y prueba ---------- */
   var WA_ESTADOS = { CONNECTED: 'Conectado', PENDING: 'Pendiente', NOT_VERIFIED: 'Sin verificar', VERIFIED: 'Verificado', APPROVED: 'Aprobado', PENDING_REVIEW: 'En revisión', DECLINED: 'Rechazado', FLAGGED: 'Marcado', RESTRICTED: 'Restringido', DISCONNECTED: 'Desconectado', CLOUD_API: 'API en la nube', NOT_APPLICABLE: 'Sin registrar', AVAILABLE_WITHOUT_REVIEW: 'Aprobado', NONE: 'Sin revisar', EXPIRED: 'Vencido' };
@@ -305,7 +387,7 @@
   /* ---------- acciones ---------- */
   function cargar() {
     S.cargando = true;
-    return api('datos').then(function (d) { S.datos = d; S.cargando = false; if (!S.draft && !S.prov) pintar(); else pintarFondo(); }).catch(function (e) {
+    return api('datos').then(function (d) { S.datos = d; S.cargando = false; cargarChats(); if (!S.draft && !S.prov) pintar(); else pintarFondo(); }).catch(function (e) {
       S.cargando = false; if (e.status !== 401) { app.innerHTML = '<p class="vacio">No se pudo cargar: ' + esc(e.message) + ' <button class="btn" data-act="recargar">Reintentar</button></p>'; }
     });
   }
@@ -340,6 +422,7 @@
   function valor(el) { return el.type === 'number' ? (el.value === '' ? 0 : parseFloat(el.value)) : el.value; }
   function alEditar(e) {
     var el = e.target;
+    if (el.id === 'chat-txt') { S.borrador = el.value; return; }
     if (el.id === 'q') { S.q = el.value; var pos = el.selectionStart; pintar(); var q = document.getElementById('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (er) { /* sin rango */ } } return; }
     if (el.matches && el.matches('[data-deuda]')) { S.soloDeuda = el.checked; pintar(); return; }
     if (el.hasAttribute('data-pf') && S.prov) { S.prov[el.getAttribute('data-pf')] = el.type === 'checkbox' ? el.checked : el.value; return; }
@@ -366,6 +449,17 @@
   document.addEventListener('change', alEditar);
 
   document.addEventListener('submit', function (e) {
+    if (e.target.id === 'chat-form') {
+      e.preventDefault();
+      var ta = document.getElementById('chat-txt'), err = document.getElementById('chat-err'), bt = e.target.querySelector('button'), texto = (ta.value || '').trim();
+      if (!texto) return;
+      bt.disabled = true; err.textContent = '';
+      api('mensajes/enviar', { telefono: S.chatTel, texto: texto }).then(function (r) {
+        S.borrador = ''; ta.value = ''; bt.disabled = false;
+        S.conv = (S.conv || []).concat([r.mensaje]); refrescarMensajes(true); cargarChats(); ta.focus();
+      }).catch(function (er) { bt.disabled = false; err.textContent = er.message; });
+      return;
+    }
     if (e.target.id === 'wa-reg' || e.target.id === 'wa-prueba') {
       e.preventDefault();
       var f = new FormData(e.target), msg = document.getElementById('wa-msg'), b = e.target.querySelector('button');
@@ -386,6 +480,8 @@
 
   document.addEventListener('click', function (e) {
     if (e.target.closest('a[href]')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
+    var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
+    var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
     if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); pintar(); return; }
@@ -409,7 +505,8 @@
       case 'guardar-prov': guardarProv(); break;
     }
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target && e.target.id === 'chat-txt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('chat-form'); if (f) f.requestSubmit(); return; } if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
 
   /* ---------- arranque ---------- */
   api('sesion').then(function (s) {
