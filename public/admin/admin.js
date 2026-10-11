@@ -93,6 +93,7 @@
     app.innerHTML = '<div class="login"><form id="login" autocomplete="on"><h1>Panel de CuántoSale</h1><p>Entrá con tu usuario y contraseña.</p>' +
       '<label class="f">Usuario<input name="user" autocomplete="username" required autofocus></label>' +
       '<label class="f">Contraseña<input name="pass" type="password" autocomplete="current-password" required></label>' +
+      '<label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" name="recordar" checked style="width:auto;min-height:0"> Mantener la sesión en este dispositivo (30 días)</label>' +
       '<p class="err" id="login-err" role="alert">' + esc(err || '') + '</p><button class="btn btn--main" type="submit">Entrar</button></form></div>';
   }
 
@@ -207,7 +208,7 @@
   }
   function vistaMensajes() {
     if (!S.chats) cargarChats();
-    return '<div class="chat' + (S.chatTel ? ' con-chat' : '') + '"><div class="chat-lista" id="chat-lista">' + listaChatsHtml() + '</div>' +
+    return avisosHtml() + '<div class="chat' + (S.chatTel ? ' con-chat' : '') + '"><div class="chat-lista" id="chat-lista">' + listaChatsHtml() + '</div>' +
       '<div class="chat-conv">' + (S.chatTel ? '<div id="chat-cab">' + cabeceraChatHtml() + '</div>' : '') + '<div class="chat-msgs" id="chat-msgs">' + mensajesHtml() + '</div>' +
       (S.chatTel ? '<div id="chat-caja">' + cajaHtml() + '</div>' : '') + '</div></div>';
   }
@@ -249,6 +250,65 @@
     if (!S.datos || document.hidden) return;
     cargarChats(); if (S.vista === 'mensajes' && S.chatTel) cargarConv(false);
   }, 15000);
+
+  /* ---------- Notificaciones en este dispositivo (lib/push.js + /admin/sw.js) ----------
+     En iPhone solo funcionan con el panel agregado a la pantalla de inicio (iOS 16.4 o mas nuevo). */
+  var AV = { estado: 'cargando' };
+  function soportaAvisos() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function b64aBytes(b64) { var s = atob(b64.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((b64.length + 3) % 4)); var a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
+  function registroSW() { return navigator.serviceWorker.register('/admin/sw.js', { scope: '/admin/' }); }
+  function revisarAvisos() {
+    if (!soportaAvisos()) { AV = { estado: 'sin-soporte' }; return pintarAvisos(); }
+    if (Notification.permission === 'denied') { AV = { estado: 'bloqueado' }; return pintarAvisos(); }
+    registroSW().then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) {
+      AV = { estado: sub && Notification.permission === 'granted' ? 'activo' : 'apagado' };
+      // Se vuelve a mandar en cada carga: si la base se reinicio o la suscripcion cambio, queda al dia.
+      if (sub && AV.estado === 'activo') api('push/suscribir', { suscripcion: sub.toJSON() }).catch(function () {});
+      pintarAvisos();
+    }).catch(function () { AV = { estado: 'apagado' }; pintarAvisos(); });
+  }
+  function activarAvisos() {
+    AV = { estado: 'activando' }; pintarAvisos();
+    var clave;
+    api('push/clave').then(function (j) {
+      if (!j.configurado) throw new Error('Las notificaciones todavía no están configuradas en el servidor.');
+      clave = j.clave;
+      return Notification.requestPermission();
+    }).then(function (p) {
+      if (p !== 'granted') throw new Error(p === 'denied' ? 'Bloqueaste las notificaciones. Activalas desde los ajustes del navegador para este sitio.' : 'No diste el permiso.');
+      return registroSW();
+    }).then(function (reg) {
+      return reg.pushManager.getSubscription().then(function (s) { return s || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64aBytes(clave) }); });
+    }).then(function (sub) { return api('push/suscribir', { suscripcion: sub.toJSON() }); })
+      .then(function () { AV = { estado: 'activo' }; pintarAvisos(); toast('Listo: te avisamos en este dispositivo'); })
+      .catch(function (e) { AV = { estado: 'error', error: e.message }; pintarAvisos(); });
+  }
+  function desactivarAvisos() {
+    registroSW().then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) {
+      if (!sub) return;
+      return api('push/baja', { endpoint: sub.endpoint }).catch(function () {}).then(function () { return sub.unsubscribe(); });
+    }).then(function () { AV = { estado: 'apagado' }; pintarAvisos(); });
+  }
+  function avisosHtml() {
+    var e = AV.estado, h = '<div class="avisos" id="avisos">';
+    if (e === 'activo') h += '<span>🔔 Avisos activados en este dispositivo.</span><button class="btn btn--sm" data-act="avisos-off">Desactivar</button>';
+    else if (e === 'sin-soporte') h += '<span>Este navegador no permite notificaciones.' + (/iPhone|iPad/.test(navigator.userAgent) ? ' En iPhone, agregá el panel a la pantalla de inicio (Compartir → Agregar a inicio) y abrilo desde ahí.' : '') + '</span>';
+    else if (e === 'bloqueado') h += '<span>Las notificaciones están bloqueadas para este sitio. Activalas desde los ajustes del navegador.</span>';
+    else if (e === 'activando') h += '<span>Activando…</span>';
+    else if (e === 'cargando') h += '<span class="sub">Revisando avisos…</span>';
+    else h += '<span>Recibí una notificación cuando un cliente te escriba o llegue un pedido.' + (AV.error ? ' <b class="deuda">' + esc(AV.error) + '</b>' : '') + '</span><button class="btn btn--sm btn--main" data-act="avisos-on">Activar avisos</button>';
+    return h + '</div>';
+  }
+  function pintarAvisos() { var el = document.getElementById('avisos'); if (el) el.outerHTML = avisosHtml(); }
+  /* Al tocar una notificacion: /admin/?chat=<tel> abre ese chat y /admin/?pedido=<id> abre el pedido. */
+  function irA(url) {
+    var u; try { u = new URL(url, location.origin); } catch (e) { return; }
+    var tel = u.searchParams.get('chat'), ped = u.searchParams.get('pedido');
+    if (tel) { S.vista = 'mensajes'; S.chatTel = tel; S.conv = null; pintar(); cargarConv(true); }
+    else if (ped && S.datos) { S.vista = 'pedidos'; pintar(); abrir(ped); }
+    else { S.vista = 'mensajes'; pintar(); }
+  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) { if (e.data && e.data.tipo === 'abrir') { cargar(); irA(e.data.url); } });
 
   /* ---------- WhatsApp: estado del numero, registro y prueba ---------- */
   var WA_ESTADOS = { CONNECTED: 'Conectado', PENDING: 'Pendiente', NOT_VERIFIED: 'Sin verificar', VERIFIED: 'Verificado', APPROVED: 'Aprobado', PENDING_REVIEW: 'En revisión', DECLINED: 'Rechazado', FLAGGED: 'Marcado', RESTRICTED: 'Restringido', DISCONNECTED: 'Desconectado', CLOUD_API: 'API en la nube', NOT_APPLICABLE: 'Sin registrar', AVAILABLE_WITHOUT_REVIEW: 'Aprobado', NONE: 'Sin revisar', EXPIRED: 'Vencido' };
@@ -392,7 +452,8 @@
   /* ---------- acciones ---------- */
   function cargar() {
     S.cargando = true;
-    return api('datos').then(function (d) { S.datos = d; S.cargando = false; cargarChats(); if (!S.draft && !S.prov) pintar(); else pintarFondo(); }).catch(function (e) {
+    return api('datos').then(function (d) { S.datos = d; S.cargando = false; cargarChats(); if (AV.estado === 'cargando') revisarAvisos();
+      if (S.primeraVez !== false) { S.primeraVez = false; if (/[?&](chat|pedido)=/.test(location.search)) { setTimeout(function () { irA(location.href); history.replaceState(null, '', '/admin/'); }, 0); } } if (!S.draft && !S.prov) pintar(); else pintarFondo(); }).catch(function (e) {
       S.cargando = false; if (e.status !== 401) { app.innerHTML = '<p class="vacio">No se pudo cargar: ' + esc(e.message) + ' <button class="btn" data-act="recargar">Reintentar</button></p>'; }
     });
   }
@@ -479,7 +540,7 @@
     e.preventDefault();
     var fd = new FormData(e.target), btn = e.target.querySelector('button');
     btn.disabled = true;
-    api('login', { user: fd.get('user'), pass: fd.get('pass') }).then(function () { return cargar(); })
+    api('login', { user: fd.get('user'), pass: fd.get('pass'), recordar: !!fd.get('recordar') }).then(function () { return cargar(); })
       .catch(function (er) { pintarLogin(er.message); });
   });
 
@@ -498,6 +559,8 @@
     if (t.hasAttribute('data-pagado-total')) { var it = S.draft.items[+t.getAttribute('data-pagado-total')]; it.pagado_proveedor_usd = it.costo_usd || 0; S.dirty = true; refrescarPanel(); return; }
     switch (t.getAttribute('data-act')) {
       case 'recargar': cargar(); break;
+      case 'avisos-on': activarAvisos(); break;
+      case 'avisos-off': desactivarAvisos(); break;
       case 'wa-recargar': cargarWa(); pintar(); break;
       case 'salir': api('logout', {}).then(function () { S.datos = null; cerrarPanel(true); pintarLogin(); }); break;
       case 'nuevo': S.draft = nuevoDraft(); S.dirty = false; abrirPanel(); break;
