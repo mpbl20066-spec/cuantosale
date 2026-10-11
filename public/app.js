@@ -3413,10 +3413,19 @@ var HOTEL_NOTA_MINIMA = 8;
      desde el exterior. Entra Prex en su lugar, que es una red de cajeros que la
      gente efectivamente usa para sacar y para transferir. */
   var CHECKOUT_PAYMENTS = [
-    { id: 'tarjeta', label: 'Tarjeta de crédito (Mercado Pago, +5,99 % de comisión)', title: 'Tarjeta de crédito', detail: 'A través de Mercado Pago · aplica 5,99 % de comisión', icon: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>' },
     { id: 'transferencia', label: 'Transferencia bancaria', title: 'Transferencia bancaria', detail: 'Locales y cuentas habilitadas', icon: '<path d="M3 10 12 4l9 6M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18"/>' },
-    { id: 'pix', label: 'Pix', title: 'Pix', detail: 'Pago inmediato', icon: '<path d="M13 3 5 13.5h6L10 21l9-11.5h-6z"/>' }
+    { id: 'prex', label: 'Prex', title: 'Prex', detail: 'Transferencia a nuestra cuenta Prex', icon: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M7 12h10M13 9l3 3-3 3"/>' },
+    { id: 'pix', label: 'Pix', title: 'Pix', detail: 'Pago inmediato', icon: '<path d="M13 3 5 13.5h6L10 21l9-11.5h-6z"/>' },
+    { id: 'abitab', label: 'Abitab / Redpagos', title: 'Abitab / Redpagos', detail: 'Depósito en efectivo', icon: '<path d="M4 9h16v10H4zM4 9l8-5 8 5"/><circle cx="12" cy="14" r="2"/>' },
+    { id: 'tarjeta', label: 'Tarjeta de crédito (link de Mercado Pago, +5 %)', title: 'Tarjeta de crédito', detail: 'Te mandamos un link de Mercado Pago · 5 % de recargo', icon: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>' }
   ];
+  /* Para reservar se pide una sena cuando el proveedor confirma, nunca antes: el 50 %
+     de los traslados y el 25 % de los tours (la misma regla que lib/pedidos.js usa en
+     el panel). El resto se paga antes del viaje. */
+  var SENA_PCT = { traslado: 0.5, tour: 0.25 };
+  function senaDe(t) {
+    return (t.total - t.transferTotal) * SENA_PCT.tour + t.transferTotal * SENA_PCT.traslado;
+  }
   var CHECKOUT_DOC_TYPES = ['Cédula de identidad', 'Pasaporte', 'Otro documento'];
   var CHECKOUT_TITLES = ['Sr.', 'Sra.', 'Srta.', 'Dr.', 'Dra.'];
   var CHECKOUT_COUNTRIES = ['Uruguay', 'Argentina', 'Brasil', 'Chile', 'Paraguay', 'España', 'Otro'];
@@ -3880,8 +3889,8 @@ var HOTEL_NOTA_MINIMA = 8;
     var t = checkoutTotals();
     return '<div class="checkout-panel" data-checkout-panel="pago">' +
       '<h2 class="checkout-panel__title">¿Cómo te queda más cómodo pagar?</h2>' +
-      '<p class="checkout-panel__lead">Elegí tu preferencia y el operador te indica cómo completar el pago.</p>' +
-      '<p class="checkout-notice"><strong>Aún no procesamos pagos.</strong> Esta app cotiza y coordina, pero no cobra: la reserva se confirma y se abona a través del operador.</p>' +
+      '<p class="checkout-panel__lead">Elegí tu preferencia. Ahora no se cobra nada.</p>' +
+      '<p class="checkout-notice"><strong>Primero confirmamos, después pagás la seña.</strong> Cuando el proveedor confirme la disponibilidad te pedimos una seña para reservar: el 50 % de los traslados y el 25 % de los tours. El resto se paga antes del viaje.</p>' +
       '<div class="checkout-pay-card" role="radiogroup" aria-label="Medio de pago">' +
       '<p class="checkout-pay-card__eyebrow">Opciones disponibles</p>' +
       CHECKOUT_PAYMENTS.map(function (p) {
@@ -3893,7 +3902,8 @@ var HOTEL_NOTA_MINIMA = 8;
           '<span class="checkout-pay__check" aria-hidden="true">' + checkIcon() + '</span>' +
           '</label>';
       }).join('') + '</div>' +
-      '<p class="checkout-pay-total">Total a confirmar: <b>' + money(t.total) + '</b> · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') + '</p>' +
+      '<p class="checkout-pay-total">Total a confirmar: <b>' + money(t.total) + '</b> · ' + t.pax + (t.pax === 1 ? ' persona' : ' personas') +
+      (t.total > 0 ? '<br>Seña para reservar: <b>' + money(senaDe(t)) + '</b>' : '') + '</p>' +
       '</div>';
   }
   function checkoutPanelListo() {
@@ -4211,6 +4221,7 @@ var HOTEL_NOTA_MINIMA = 8;
     L.push('');
     L.push('---');
     L.push('💰 TOTAL ESTIMADO: **' + money(t.total) + '** *(A confirmar)*');
+    if (t.total > 0) L.push('🔖 SEÑA PARA RESERVAR: ' + money(senaDe(t)) + ' *(50 % traslados, 25 % tours; se paga cuando se confirma)*');
     L.push('---');
     L.push('');
     L.push('💬 ¿Nos confirman disponibilidad, horarios, puntos de encuentro y el valor final, por favor? ¡Muchas gracias! ✨');

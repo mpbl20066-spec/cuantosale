@@ -116,7 +116,9 @@ const cuerpo = ['checkoutTours', 'checkoutTransferLine', 'checkoutPedido', 'chec
   // checkoutTours() llama a descuentoToursDe(), que calcula el descuento por
   // codigo de promo sobre el subtotal de actividades. Sin ella el test muere con
   // ReferenceError antes de comprobar nada del checkout.
-  'descuentoToursDe']
+  'descuentoToursDe',
+  // El mensaje de WhatsApp suma la seña para reservar con senaDe().
+  'senaDe']
   .map(extraer).join('\n');
 
 const deps =
@@ -129,6 +131,8 @@ const deps =
   'var EDAD_MINIMA = 18;\n' +
   'var DESCUENTO_TOURS_PCT = 5;\n' +
   'var DESCUENTO_TOURS_MIN = 2;\n' +
+  // La seña: el valor es el de app.js (y lib/pedidos.js); test.js comprueba que coincidan.
+  'var SENA_PCT = { traslado: 0.5, tour: 0.25 };\n' +
   'var DESCUENTO_TOURS_CODIGOS = { buz: "BUZIOS5", arraial: "ARRAIAL5", cabo: "CABOFRIO5", ilha: "ILHAGRANDE5" };\n' +
   // checkoutTransferLine() ahora lee los DOS tramos (transferType y
   // transferTypeVuelta) y pide el total a trasladoDelViaje(). Los dos stubs van

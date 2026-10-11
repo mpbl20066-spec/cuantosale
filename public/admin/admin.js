@@ -6,7 +6,7 @@
   var ESTADOS_ITEM = { pendiente: 'Pendiente', consultado: 'Consultado al proveedor', confirmado: 'Confirmado', cancelado: 'Cancelado' };
   var TIPOS = { traslado: 'Traslado', tour: 'Tour / actividad', vuelo: 'Vuelo', alojamiento: 'Alojamiento', otro: 'Otro' };
   var PAGO = { sin_pago: 'Sin pago', parcial: 'Pago parcial', pagado: 'Pagado' };
-  var S = { vista: 'pedidos', filtro: 'todos', provDest: 'todos', q: '', soloDeuda: false, datos: null, draft: null, dirty: false, prov: null, msg: '', cargando: false };
+  var S = { vista: 'pedidos', filtro: 'todos', provDest: 'todos', q: '', soloDeuda: false, datos: null, draft: null, dirty: false, prov: null, msg: '', cargando: false, senaMoneda: 'USD', tasas: null };
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function usd(n) { return 'US$ ' + (Number(n) || 0).toLocaleString('es-UY', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
@@ -26,7 +26,7 @@
     if (p.destino) L.push('*Destino:* ' + p.destino);
     if (fechas || personas) L.push('*Fechas:* ' + [fechas, personas].filter(Boolean).join(' · '));
     if (items.length) { L.push('*Servicios:*'); items.forEach(function (i) { L.push('- ' + i.nombre + (i.detalle ? ' (' + i.detalle + ')' : '')); }); }
-    L.push('*Total estimado:* ' + usd(calc(p).total), '', 'Te confirmamos disponibilidad y, una vez confirmado, te enviamos el link de pago.', 'Ref: ' + (p.ref || ''));
+    L.push('*Total estimado:* ' + usd(calc(p).total), '', 'Te confirmamos disponibilidad con el proveedor y ahí te pedimos una seña para reservar (50 % de los traslados y 25 % de los tours).', 'Ref: ' + (p.ref || ''));
     return L.join('\n');
   }
 
@@ -54,7 +54,9 @@
     var pagProv = sum(items, function (i) { return Math.min(i.pagado_proveedor_usd || 0, i.costo_usd || 0); });
     var cobrado = sum(p.pagos || [], function (x) { return x.monto_usd; });
     var canc = p.estado === 'cancelado';
-    return { total: total, cobrado: cobrado, saldo: canc ? 0 : r2(Math.max(0, total - cobrado)), costo: costo, aPagar: canc ? 0 : r2(Math.max(0, costo - pagProv)), margen: r2(total - costo) };
+    var pct = (S.datos && S.datos.pago && S.datos.pago.sena_pct) || { traslado: 0.5, tour: 0.25 };
+    var sena = sum(items, function (i) { return (i.precio_usd || 0) * (pct[i.tipo] || 0); });
+    return { sena: sena, senaPend: canc ? 0 : r2(Math.max(0, sena - cobrado)), total: total, cobrado: cobrado, saldo: canc ? 0 : r2(Math.max(0, total - cobrado)), costo: costo, aPagar: canc ? 0 : r2(Math.max(0, costo - pagProv)), margen: r2(total - costo) };
   }
 
   /* ---------- pantallas ---------- */
@@ -381,13 +383,70 @@
     return [['Total del cliente', c.total], ['Cobrado', c.cobrado], ['Saldo del cliente', c.saldo], ['Costo proveedores', c.costo], ['A pagar a proveedores', c.aPagar], ['Margen', c.margen]]
       .map(function (x) { return '<div><small>' + x[0] + '</small><b' + ((x[0] === 'Saldo del cliente' || x[0] === 'A pagar a proveedores') && x[1] ? ' class="deuda"' : '') + '>' + usd(x[1]) + '</b></div>'; }).join('');
   }
+  /* ---------- sena (misma regla que lib/pedidos.js) ----------
+     Se pide cuando el proveedor ya confirmo. El monto sale en USD (la moneda del modelo) y se puede mandar en la
+     moneda que prefiera el cliente con la cotizacion del dia de /api/tasas. La tarjeta va por un link de Mercado
+     Pago que se arma a mano, con 5 % de recargo. */
+  var MONEDA_SENA = { USD: 'Dólares (US$)', UYU: 'Pesos uruguayos ($)', BRL: 'Reales (R$)' };
+  function cargarTasas() {
+    if (S.tasas) return;
+    S.tasas = { cargando: true };
+    fetch('/api/tasas', { credentials: 'same-origin' }).then(function (r) { return r.json(); })
+      .then(function (j) { S.tasas = j && j.rates ? { rates: j.rates } : { error: true }; if (S.draft) refrescarPanel(); })
+      .catch(function () { S.tasas = { error: true }; if (S.draft) refrescarPanel(); });
+  }
+  /* Monto en la moneda elegida, o null si todavia no hay cotizacion para convertir. */
+  function enMoneda(montoUsd, moneda) {
+    if (moneda === 'USD') return montoUsd;
+    var rate = S.tasas && S.tasas.rates && Number(S.tasas.rates[moneda]);
+    return rate > 0 ? montoUsd * rate : null;
+  }
+  function plata(montoUsd, moneda) {
+    var v = enMoneda(montoUsd, moneda);
+    if (v === null) return usd(montoUsd);
+    var sim = { USD: 'US$ ', UYU: '$ ', BRL: 'R$ ' }[moneda];
+    var dec = moneda === 'UYU' ? 0 : 2;
+    return sim + (moneda === 'UYU' ? Math.ceil(v) : Math.ceil(v * 100) / 100).toLocaleString('es-UY', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+  function recargoTarjeta() { var r = S.datos && S.datos.pago && Number(S.datos.pago.recargo_tarjeta); return r >= 0 ? r : 0.05; }
+  function mensajeSena(p) {
+    var c = calc(p), m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
+    var monto = c.senaPend, conTarjeta = r2(monto * (1 + recargoTarjeta()));
+    var L = ['Hola ' + (String(p.cliente_nombre || '').trim().split(' ')[0] || '') + '! Buenas noticias: el proveedor confirmó tu reserva' + (p.destino ? ' en ' + p.destino : '') + '.', '',
+      'Para dejarla reservada te pedimos una seña de *' + plata(monto, m) + '* (50 % de los traslados y 25 % de los tours).', '', '*Cómo pagar la seña:*'];
+    if (dp.transferencia) L.push('- Transferencia bancaria: ' + dp.transferencia);
+    if (dp.prex) L.push('- Prex: ' + dp.prex);
+    if (dp.pix) L.push('- Pix: ' + dp.pix);
+    if (dp.abitab_redpagos) L.push('- Abitab / Redpagos: ' + dp.abitab_redpagos);
+    L.push('- Tarjeta de crédito: te mandamos un link de Mercado Pago por ' + plata(conTarjeta, m) + ' (incluye ' + Math.round(recargoTarjeta() * 100) + ' % de recargo).');
+    L.push('', 'Cuando pagues, mandanos el comprobante por acá. El resto se abona antes del viaje.', 'Ref: ' + (p.ref || ''));
+    return L.join('\n');
+  }
+  function senaHtml(p) {
+    var c = calc(p);
+    if (!c.sena) return '<p class="sub">Este pedido no lleva seña: solo los traslados (50 %) y los tours (25 %) se señan.</p>';
+    var m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
+    var faltan = !dp.transferencia && !dp.prex && !dp.pix && !dp.abitab_redpagos;
+    var sinTasa = m !== 'USD' && enMoneda(1, m) === null;
+    var wa = p.cliente_telefono && c.senaPend > 0 ? waUrl(p.cliente_telefono, mensajeSena(p)) : '';
+    return '<div class="cuentas"><div><small>Seña del pedido</small><b>' + usd(c.sena) + '</b></div>' +
+      '<div><small>Seña pendiente</small><b' + (c.senaPend ? ' class="deuda"' : ' class="ok"') + '>' + (c.senaPend ? plata(c.senaPend, m) : 'Cobrada') + '</b></div>' +
+      (c.senaPend ? '<div><small>Con tarjeta (+' + Math.round(recargoTarjeta() * 100) + ' %)</small><b>' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m) + '</b></div>' : '') + '</div>' +
+      (c.senaPend ? '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px">' +
+        '<label class="f" style="min-width:200px">Moneda para el cliente<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>' +
+        (wa ? '<a class="btn btn--wa" target="_blank" rel="noopener" href="' + esc(wa) + '">Pedir seña por WhatsApp</a>' : '<span class="sub">Cargá el teléfono del cliente para mandarle la seña.</span>') +
+        '<button type="button" class="btn btn--sm" data-act="registrar-sena">Registrar seña cobrada</button></div>' : '') +
+      (c.senaPend && p.estado !== 'confirmado' ? '<p class="sub" style="margin-top:8px">Pedila cuando el proveedor confirme (estado "Confirmado").</p>' : '') +
+      (sinTasa ? '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>' : '') +
+      (faltan && c.senaPend ? '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_TRANSFERENCIA, PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>' : '');
+  }
   function itemHtml(it, i) {
     var pr = S.datos.proveedores.filter(function (x) { return x.id === it.proveedor_id; })[0];
     var msgProv = 'Hola' + (pr && pr.contacto ? ' ' + pr.contacto : '') + '! Te consulto disponibilidad para: ' + it.nombre + (it.detalle ? ' (' + it.detalle + ')' : '') +
       '. Fecha: ' + fecha(S.draft.fecha_ida) + (S.draft.fecha_vuelta ? ' al ' + fecha(S.draft.fecha_vuelta) : '') + '. Pasajeros: ' + S.draft.personas + '. A nombre de ' + S.draft.cliente_nombre + '. Ref ' + S.draft.ref + '. ¡Gracias!';
     var f = function (campo, tipo, extra) { return 'data-i="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
     return '<div class="item"><div class="item__top"><input ' + f('nombre') + ' value="' + esc(it.nombre) + '" placeholder="Servicio (ej. Traslado aeropuerto – hotel)" aria-label="Servicio">' +
-      '<button type="button" class="btn btn--sm btn--danger" data-quitar-item="' + i + '" aria-label="Quitar servicio">✕</button></div>' +
+      '<button type="button" class="btn btn--sm btn--danger btn--x" data-quitar-item="' + i + '" aria-label="Quitar servicio">✕</button></div>' +
       '<div class="grid"><label class="f">Tipo<select ' + f('tipo') + '>' + opts(TIPOS, it.tipo) + '</select></label>' +
       '<label class="f">Detalle<input ' + f('detalle') + ' value="' + esc(it.detalle) + '"></label>' +
       '<label class="f">Estado del servicio<select ' + f('estado') + '>' + opts(ESTADOS_ITEM, it.estado) + '</select></label></div>' +
@@ -408,7 +467,7 @@
       '<input ' + f('monto_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (pg.monto_usd || '') + '" placeholder="US$" aria-label="Monto en US$">' +
       '<input ' + f('medio') + ' value="' + esc(pg.medio) + '" placeholder="Medio (transferencia, Pix…)" aria-label="Medio">' +
       '<input ' + f('nota') + ' value="' + esc(pg.nota) + '" placeholder="Nota" aria-label="Nota">' +
-      '<button type="button" class="btn btn--sm btn--danger" data-quitar-pago="' + i + '" aria-label="Quitar cobro">✕</button></div>';
+      '<button type="button" class="btn btn--sm btn--danger btn--x" data-quitar-pago="' + i + '" aria-label="Quitar cobro">✕</button></div>';
   }
   function abrirPanel() {
     var p = S.draft, esNuevo = !p.id;
@@ -421,6 +480,7 @@
       '<div class="panel__head"><h2>' + esc(esNuevo ? 'Nuevo pedido manual' : p.ref) + (esNuevo ? '' : ' <span class="pill p-' + p.estado + '" id="pill-estado">' + esc(ESTADOS[p.estado]) + '</span>') + '</h2>' +
       '<button class="btn btn--sm" data-act="cerrar">Cerrar</button></div><div class="panel__body">' +
       '<section class="sec"><h3>Cuentas</h3><div class="cuentas" id="cuentas-box">' + cuentasHtml(p) + '</div></section>' +
+      (esNuevo || !p.items.length ? '' : '<section class="sec"><h3>Seña</h3><div id="sena-box">' + senaHtml(p) + '</div></section>') +
       '<section class="sec"><h3>Cliente y viaje</h3><div class="grid">' +
       '<label class="f">Estado del pedido<select ' + f('estado') + '>' + opts(ESTADOS, p.estado) + '</select></label>' +
       '<label class="f">Nombre<input ' + f('cliente_nombre') + ' value="' + esc(p.cliente_nombre) + '"></label>' +
@@ -507,7 +567,7 @@
   }
   function abrir(id) {
     var p = S.datos.pedidos.filter(function (x) { return x.id === id; })[0]; if (!p) return;
-    S.draft = JSON.parse(JSON.stringify(p)); S.dirty = false; abrirPanel();
+    S.draft = JSON.parse(JSON.stringify(p)); S.dirty = false; cargarTasas(); abrirPanel();
   }
   function nuevoProveedor() { return { id: null, nombre: '', contacto: '', telefono: '', email: '', servicios: '', datos_pago: '', notas: '', activo: true }; }
 
@@ -519,6 +579,7 @@
     if (el.id === 'q') { S.q = el.value; var pos = el.selectionStart; pintar(); var q = document.getElementById('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (er) { /* sin rango */ } } return; }
     if (el.matches && el.matches('[data-deuda]')) { S.soloDeuda = el.checked; pintar(); return; }
     if (el.hasAttribute('data-pf') && S.prov) { S.prov[el.getAttribute('data-pf')] = el.type === 'checkbox' ? el.checked : el.value; return; }
+    if (el.hasAttribute('data-sena-moneda')) { S.senaMoneda = el.value; refrescarPanel(); return; }
     if (!S.draft || !el.hasAttribute('data-f')) return;
     var campo = el.getAttribute('data-f'), v = valor(el);
     S.dirty = true;
@@ -537,6 +598,9 @@
       if (campo === 'estado') { var pl = document.getElementById('pill-estado'); if (pl) { pl.className = 'pill p-' + v; pl.textContent = ESTADOS[v]; } }
     }
     var cb = document.getElementById('cuentas-box'); if (cb) cb.innerHTML = cuentasHtml(S.draft);
+    /* La sena se repinta en el change y no en cada tecla: tiene un select y repintarlo mientras se escribe en
+       otro campo no molesta, pero si el foco estuviera en el select lo perderia. */
+    var sb = document.getElementById('sena-box'); if (sb && e.type === 'change') sb.innerHTML = senaHtml(S.draft);
   }
   document.addEventListener('input', alEditar);
   document.addEventListener('change', alEditar);
@@ -601,6 +665,7 @@
       case 'add-item': S.draft.items.push(itemVacio()); S.dirty = true; refrescarPanel(); break;
       case 'add-pago': S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: 0, medio: S.draft.medio_pago || '', nota: '' }); S.dirty = true; refrescarPanel(); break;
       case 'cobrar-saldo': var c = calc(S.draft); if (c.saldo > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: c.saldo, medio: S.draft.medio_pago || '', nota: 'Saldo' }); S.dirty = true; refrescarPanel(); } break;
+      case 'registrar-sena': var cs = calc(S.draft); if (cs.senaPend > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: cs.senaPend, medio: S.draft.medio_pago || '', nota: 'Seña' }); S.dirty = true; refrescarPanel(); } break;
       case 'guardar': guardar(); break;
       case 'guardar-prov': guardarProv(); break;
     }

@@ -40,6 +40,8 @@ button{cursor:pointer}
 .btn--wa{display:inline-flex;align-items:center;background:#1DAA61;border-color:#1DAA61;color:#fff;text-decoration:none}
 .btn--wa:hover{background:#168A4E;border-color:#168A4E}
 .btn--sm{padding:4px 10px;min-height:30px;font-size:13px}
+/* Cruz para quitar: cuadrada y fija. Sin esto el padding la hacia ovalada y en la grilla del celular se estiraba a todo el ancho. */
+.btn--x{width:32px;height:32px;min-height:32px;padding:0;display:inline-grid;place-items:center;flex:none;justify-self:start;font-size:14px;line-height:1}
 .top .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}
 .login{min-height:100vh;display:grid;place-items:center;padding:16px}
 .login form{width:100%;max-width:360px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 24px;display:grid;gap:14px}
@@ -142,6 +144,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=10"></script>
+<script src="/admin/admin.js?v=12"></script>
 </body>
 </html>

@@ -590,6 +590,31 @@ function haversineKm(a, b) {
     assert.strictEqual(gramadoAuto.S.transport, 'auto');
   });
 
+  await t('la seña es 50 % de los traslados y 25 % de los tours, y baja con lo cobrado', function () {
+    const pedidos = require('./lib/pedidos');
+    const p = { estado: 'confirmado', pagos: [], items: [
+      { tipo: 'traslado', precio_usd: 100, estado: 'confirmado' },
+      { tipo: 'tour', precio_usd: 200, estado: 'confirmado' },
+      { tipo: 'tour', precio_usd: 400, estado: 'cancelado' },      // cancelado: no suma
+      { tipo: 'alojamiento', precio_usd: 900, estado: 'pendiente' } // no lo vende CuantoSale: sin seña
+    ] };
+    assert.strictEqual(pedidos.cuentas(p).sena_usd, 100);
+    assert.strictEqual(pedidos.cuentas(p).sena_pendiente_usd, 100);
+    p.pagos = [{ monto_usd: 30 }];
+    assert.strictEqual(pedidos.cuentas(p).sena_pendiente_usd, 70);
+    p.pagos = [{ monto_usd: 150 }];
+    assert.strictEqual(pedidos.cuentas(p).sena_pendiente_usd, 0, 'pagar de más no deja seña negativa');
+    p.estado = 'cancelado';
+    assert.strictEqual(pedidos.cuentas(p).sena_pendiente_usd, 0, 'un pedido cancelado no tiene seña pendiente');
+    // El panel y el checkout repiten la regla: si cambia en un lado tiene que cambiar en los tres.
+    const admin = fs.readFileSync(path.join(__dirname, 'public', 'admin', 'admin.js'), 'utf8');
+    const appJs = fs.readFileSync(path.join(__dirname, 'public', 'app.js'), 'utf8');
+    assert.deepStrictEqual(pedidos.SENA_PCT, { traslado: 0.5, tour: 0.25 });
+    assert.ok(admin.includes('{ traslado: 0.5, tour: 0.25 }'), 'admin.js tiene que usar la misma seña');
+    assert.ok(appJs.includes('var SENA_PCT = { traslado: 0.5, tour: 0.25 };'), 'app.js tiene que usar la misma seña');
+    assert.ok(!/5,99/.test(appJs), 'el recargo de tarjeta es 5 %, no 5,99 %');
+  });
+
   console.log('Servidor y proveedores');
   process.env.RATE_LIMIT_PER_MIN = '1000';
   /* El server lee el .env de la maquina, pero solo las variables que no estan
