@@ -16,6 +16,19 @@
   function opts(map, sel) { return Object.keys(map).map(function (k) { return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + esc(map[k]) + '</option>'; }).join(''); }
   function digitos(t) { return String(t || '').replace(/\D/g, ''); }
   function waUrl(tel, texto) { var d = digitos(tel); return 'https://wa.me/' + d + '?text=' + encodeURIComponent(texto); }
+  /* La confirmacion de reserva ya escrita, la misma que arma lib/pedidos.js para el email. Sin emojis: WhatsApp Web
+     los muestra como "?" cuando llegan dentro de un enlace wa.me. */
+  function mensajeConfirmacion(p) {
+    var items = (p.items || []).filter(function (i) { return i.estado !== 'cancelado' && i.nombre; });
+    var fechas = p.fechas_txt || (p.fecha_ida ? fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') : '');
+    var personas = p.personas_txt || (p.personas ? p.personas + (p.personas == 1 ? ' persona' : ' personas') : '');
+    var L = ['Hola ' + (String(p.cliente_nombre || '').trim().split(' ')[0] || '') + '! Gracias por elegir CuántoSale.', '', 'Recibimos tu solicitud de reserva:'];
+    if (p.destino) L.push('*Destino:* ' + p.destino);
+    if (fechas || personas) L.push('*Fechas:* ' + [fechas, personas].filter(Boolean).join(' · '));
+    if (items.length) { L.push('*Servicios:*'); items.forEach(function (i) { L.push('- ' + i.nombre + (i.detalle ? ' (' + i.detalle + ')' : '')); }); }
+    L.push('*Total estimado:* ' + usd(calc(p).total), '', 'Te confirmamos disponibilidad y, una vez confirmado, te enviamos el link de pago.', 'Ref: ' + (p.ref || ''));
+    return L.join('\n');
+  }
 
   function api(ruta, cuerpo) {
     var init = cuerpo === undefined ? { credentials: 'same-origin' } : { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) };
@@ -52,7 +65,8 @@
     var cuenta = function (e) { return e === 'todos' ? d.pedidos.length : (k.por_estado[e] || 0); };
     var html = '<header class="top"><div class="wrap"><h1>Cuánto<i>Sale</i> · Panel</h1>' +
       '<nav class="tabs" role="tablist"><button class="tab" role="tab" data-vista="pedidos" aria-selected="' + (S.vista === 'pedidos') + '">Pedidos' + (k.nuevos ? ' (' + k.nuevos + ')' : '') + '</button>' +
-      '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button></nav>' +
+      '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button>' +
+      '<button class="tab" role="tab" data-vista="whatsapp" aria-selected="' + (S.vista === 'whatsapp') + '">WhatsApp</button></nav>' +
       '<button class="btn btn--sm" data-act="recargar">Actualizar</button><button class="btn btn--sm" data-act="salir">Salir</button></div></header><div class="wrap">';
     if (d.almacenamiento !== 'supabase') {
       html += '<p class="aviso">' + (d.almacenamiento === 'archivo'
@@ -66,7 +80,7 @@
       kpi('Por cobrar', usd(k.por_cobrar_usd), 'clientes que nos deben', k.por_cobrar_usd ? 'kpi--warn' : '') +
       kpi('Por pagar', usd(k.por_pagar_proveedores_usd), 'a proveedores', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
       kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
-    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : vistaProveedores(d);
+    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : vistaProveedores(d));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
@@ -110,7 +124,8 @@
       }).join('') || '<span class="sub">Sin servicios</span>';
       h += '<tr class="row" data-abrir="' + esc(p.id) + '">' +
         '<td data-l="Pedido"><b>' + esc(p.ref) + '</b><span class="sub">' + esc(fechaHora(p.created_at)) + (p.origen === 'manual' ? ' · manual' : '') + '</span></td>' +
-        '<td data-l="Cliente"><b>' + esc(p.cliente_nombre || '—') + '</b><span class="sub">' + esc(p.cliente_telefono) + '</span></td>' +
+        '<td data-l="Cliente"><b>' + esc(p.cliente_nombre || '—') + '</b><span class="sub">' + esc(p.cliente_telefono) + '</span>' +
+          (p.cliente_telefono && items.length && p.estado !== 'cancelado' ? '<a class="lnk sub" target="_blank" rel="noopener" href="' + esc(waUrl(p.cliente_telefono, mensajeConfirmacion(p))) + '">Confirmar por WhatsApp</a>' : '') + '</td>' +
         '<td data-l="Viaje">' + esc(p.destino || '—') + '<span class="sub">' + fecha(p.fecha_ida) + ' → ' + fecha(p.fecha_vuelta) + ' · ' + esc(p.personas) + ' pers.</span></td>' +
         '<td data-l="Servicios" style="text-align:left">' + servs + '</td>' +
         '<td class="num" data-l="Total"><b>' + usd(c.total_usd) + '</b></td>' +
@@ -146,6 +161,41 @@
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
     });
     return h + '</tbody></table></div>';
+  }
+
+  /* ---------- WhatsApp: estado del numero, registro y prueba ---------- */
+  var WA_ESTADOS = { CONNECTED: 'Conectado', PENDING: 'Pendiente', NOT_VERIFIED: 'Sin verificar', VERIFIED: 'Verificado', APPROVED: 'Aprobado', PENDING_REVIEW: 'En revisión', DECLINED: 'Rechazado', FLAGGED: 'Marcado', RESTRICTED: 'Restringido', DISCONNECTED: 'Desconectado', CLOUD_API: 'API en la nube', NOT_APPLICABLE: 'Sin registrar' };
+  function waTxt(v) { return v ? (WA_ESTADOS[v] || v) : '—'; }
+  function cargarWa() {
+    S.wa = { cargando: true };
+    api('whatsapp/estado').then(function (j) { S.wa = { datos: j }; if (S.vista === 'whatsapp') pintar(); })
+      .catch(function (e) { S.wa = { error: e.message }; if (S.vista === 'whatsapp') pintar(); });
+  }
+  function vistaWhatsapp() {
+    var w = S.wa;
+    if (!w) { cargarWa(); w = S.wa; }
+    var h = '<div class="sec" style="max-width:640px">';
+    if (w.cargando) return h + '<p class="sub">Consultando a Meta…</p></div>';
+    if (w.error) h += '<p class="err">' + esc(w.error) + '</p>';
+    var d = w.datos;
+    if (d && !d.configurado) return h + '<h3>Falta configurar</h3><p>Cargá en Vercel: <b>' + esc(d.falta.join(' y ')) + '</b>, y hacé Redeploy.</p></div>';
+    if (d && d.numero) {
+      var n = d.numero, ok = n.status === 'CONNECTED' && n.platform_type === 'CLOUD_API';
+      h += '<h3>Número</h3><p style="margin:0 0 8px;font-size:18px"><b>' + esc(n.display_phone_number || '') + '</b> · ' + esc(n.verified_name || '') + '</p>' +
+        '<div class="cuentas"><div><small>Estado</small><b class="' + (ok ? 'ok' : 'deuda') + '">' + esc(waTxt(n.status)) + '</b></div>' +
+        '<div><small>Registro</small><b>' + esc(waTxt(n.platform_type)) + '</b></div>' +
+        '<div><small>Código SMS</small><b>' + esc(waTxt(n.code_verification_status)) + '</b></div>' +
+        '<div><small>Nombre visible</small><b>' + esc(waTxt(n.name_status)) + '</b></div></div>';
+      h += ok ? '<p class="ok" style="margin:12px 0 0">Listo: los WhatsApp automáticos salen desde este número.</p>'
+        : '<p class="sub" style="margin:12px 0 0">Si el registro no dice "API en la nube", registralo abajo.</p>';
+    }
+    h += '<h3 style="margin-top:20px">Registrar el número</h3><p class="sub" style="margin:0 0 8px">Inventá un PIN de 6 números y anotalo: es la verificación en dos pasos del número.</p>' +
+      '<form id="wa-reg" style="display:flex;gap:8px;flex-wrap:wrap"><input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="PIN de 6 números" style="max-width:200px" required><button class="btn btn--main" type="submit">Registrar</button></form>' +
+      '<h3 style="margin-top:20px">Mandar una prueba</h3><p class="sub" style="margin:0 0 8px">Manda la plantilla "' + esc((d && d.plantilla) || 'reserva_recibida') + '" con datos de ejemplo. La plantilla tiene que estar aprobada.</p>' +
+      '<form id="wa-prueba" style="display:flex;gap:8px;flex-wrap:wrap"><input name="tel" inputmode="tel" placeholder="Tu celular, ej. 099123456" style="max-width:240px" required><button class="btn" type="submit">Enviar prueba</button></form>' +
+      '<p id="wa-msg" role="status" style="margin:12px 0 0;font-weight:600">' + esc(w.msg || '') + '</p>' +
+      '<p style="margin:14px 0 0"><button class="btn btn--sm" data-act="wa-recargar">Actualizar estado</button></p></div>';
+    return h;
   }
 
   /* ---------- detalle de un pedido ---------- */
@@ -193,6 +243,7 @@
   function abrirPanel() {
     var p = S.draft, esNuevo = !p.id;
     var wa = p.cliente_telefono ? waUrl(p.cliente_telefono, 'Hola ' + (p.cliente_nombre || '').split(' ')[0] + '! Te escribimos de CuántoSale por tu pedido ' + p.ref + '.') : '';
+    var waConf = p.cliente_telefono && p.items.length ? waUrl(p.cliente_telefono, mensajeConfirmacion(p)) : '';
     var el = document.getElementById('drawer');
     if (!el) { el = document.createElement('div'); el.id = 'drawer'; el.className = 'drawer'; document.body.appendChild(el); }
     var f = function (campo) { return 'data-f="' + campo + '"'; };
@@ -210,6 +261,7 @@
       '<label class="f">Vuelta<input ' + f('fecha_vuelta') + ' type="date" value="' + esc(p.fecha_vuelta || '') + '"></label>' +
       '<label class="f">Personas<input ' + f('personas') + ' type="number" min="1" max="60" value="' + esc(p.personas) + '"></label>' +
       '<label class="f">Medio de pago preferido<input ' + f('medio_pago') + ' value="' + esc(p.medio_pago) + '"></label></div>' +
+      (waConf ? '<p style="margin:12px 0 0"><a class="btn btn--wa" target="_blank" rel="noopener" href="' + esc(waConf) + '">Enviar confirmación por WhatsApp</a></p>' : '') +
       (wa ? '<p style="margin:10px 0 0"><a class="lnk" target="_blank" rel="noopener" href="' + esc(wa) + '">Escribirle al cliente por WhatsApp</a></p>' : '') +
       (p.created_at ? '<p class="sub" style="margin-top:8px">Recibido ' + esc(fechaHora(p.created_at)) + ' · origen: ' + esc(p.origen || 'web') + '</p>' : '') + '</section>' +
       '<section class="sec"><h3>Servicios y proveedores</h3><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div>' +
@@ -314,6 +366,16 @@
   document.addEventListener('change', alEditar);
 
   document.addEventListener('submit', function (e) {
+    if (e.target.id === 'wa-reg' || e.target.id === 'wa-prueba') {
+      e.preventDefault();
+      var f = new FormData(e.target), msg = document.getElementById('wa-msg'), b = e.target.querySelector('button');
+      var reg = e.target.id === 'wa-reg';
+      b.disabled = true; msg.style.color = ''; msg.textContent = reg ? 'Registrando…' : 'Enviando…';
+      (reg ? api('whatsapp/registrar', { pin: String(f.get('pin') || '') }) : api('whatsapp/prueba', { telefono: String(f.get('tel') || '') }))
+        .then(function () { S.wa = null; cargarWa(); S.wa.msg = ''; toast(reg ? 'Número registrado' : 'Prueba enviada: revisá tu WhatsApp'); })
+        .catch(function (er) { b.disabled = false; msg.style.color = 'var(--bad)'; msg.textContent = er.message; });
+      return;
+    }
     if (e.target.id !== 'login') return;
     e.preventDefault();
     var fd = new FormData(e.target), btn = e.target.querySelector('button');
@@ -323,6 +385,7 @@
   });
 
   document.addEventListener('click', function (e) {
+    if (e.target.closest('a[href]')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
     if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); pintar(); return; }
@@ -334,6 +397,7 @@
     if (t.hasAttribute('data-pagado-total')) { var it = S.draft.items[+t.getAttribute('data-pagado-total')]; it.pagado_proveedor_usd = it.costo_usd || 0; S.dirty = true; refrescarPanel(); return; }
     switch (t.getAttribute('data-act')) {
       case 'recargar': cargar(); break;
+      case 'wa-recargar': cargarWa(); pintar(); break;
       case 'salir': api('logout', {}).then(function () { S.datos = null; cerrarPanel(true); pintarLogin(); }); break;
       case 'nuevo': S.draft = nuevoDraft(); S.dirty = false; abrirPanel(); break;
       case 'nuevo-prov': S.prov = nuevoProveedor(); S.dirty = false; abrirProv(); break;
