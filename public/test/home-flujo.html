@@ -2915,7 +2915,25 @@
       .then(function () { S.cargandoV = false; render(false); });
   }
   var CTAS = { 1: 'Continuar a Alojamiento →', 2: 'Continuar a Extras →', 3: 'Continuar a Tu presupuesto →', 4: 'Reservar mi viaje →' };
+  /* Vuelo y alojamiento que la persona marco como reservados: quedan en este navegador por viaje (destino, fechas y
+     personas), asi al volver desde Mis viajes siguen apareciendo como Reservado. Traslados y tours los confirma el
+     asesor en /admin y se consultan cada vez (sincronizarPedidos). */
+  var CLAVE_RES = 'cs_res_' + [destKey, IDA, VUELTA, pax].join('|'), ultimoRes = '';
+  function guardarReservados() {
+    var v = JSON.stringify({ vuelo: !!S.res.vuelo, aloj: !!S.res.aloj, realVuelo: S.reales && S.reales.vuelo || null, alojReservado: S.alojReservado || null });
+    if (v === ultimoRes) return;
+    ultimoRes = v;
+    try { localStorage.setItem(CLAVE_RES, v); } catch (e) { /* modo privado */ }
+  }
+  function leerReservados() {
+    var g; try { g = JSON.parse(localStorage.getItem(CLAVE_RES) || 'null'); } catch (e) { g = null; }
+    if (!g) return;
+    if (g.vuelo) { S.res.vuelo = true; if (g.realVuelo) { S.reales = S.reales || {}; S.reales.vuelo = g.realVuelo; } }
+    if (g.aloj) { S.res.aloj = true; if (g.alojReservado) S.alojReservado = g.alojReservado; }
+    ultimoRes = JSON.stringify({ vuelo: !!S.res.vuelo, aloj: !!S.res.aloj, realVuelo: S.reales && S.reales.vuelo || null, alojReservado: S.alojReservado || null });
+  }
   function render(scrollTop) {
+    if (ultimoRes || S.res.vuelo || S.res.aloj) guardarReservados();
     pintarPasos(); pintarTotal();
     if (S.paso === 4 && window.CSTarjeta) CSTarjeta.precalentar(datosTarjeta());
     $('main').dataset.paso = S.paso;
@@ -3368,6 +3386,7 @@
     }
     render(false); $('main').scrollTop = y;
   });
+  leerReservados();
   paginaVirtual(1);
   track('flujo_paso', { paso: 1, nombre: NOMBRES[0], motivo: 'entrada', total: Math.round(totalHastaAhora()) });
   render(true);
