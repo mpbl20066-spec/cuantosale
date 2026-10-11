@@ -2336,12 +2336,53 @@
       '<p class="vi__legal">CuántoSale no realiza la reserva del alojamiento.</p></div>';
   }
   /* Google Flights con ruta, fechas y pasajeros ("for N adults": Google no entiende niños en el texto; los vuelos ya se cotizan a tarifa de adulto). */
-  function urlVuelos(ida, vuelta) {
-    return 'https://www.google.com/travel/flights?' + new URLSearchParams({ q: 'Flights from MVD to ' + (AEROPUERTO[destKey] || destKey.toUpperCase()) + ' on ' + ida + ' through ' + vuelta + ' for ' + pax + (pax === 1 ? ' adult' : ' adults') }).toString();
+  /* Google Flights con ruta, fechas y pasajeros. Con un vuelo elegido (v) se arma el parametro tfs de Google (protobuf en
+     base64) con ESE vuelo de ida y de vuelta ya seleccionados (tramo por tramo, con su numero de vuelo), y en el mismo
+     link el filtro de aerolinea y escalas: si Google no reconoce el vuelo exacto, igual muestra solo esa aerolinea con
+     esas escalas. Si el vuelo no trae los tramos (cache vieja), se filtra con el texto ("nonstop on JetSMART"). */
+  function urlVuelos(ida, vuelta, v) {
+    var dest = AEROPUERTO[destKey] || destKey.toUpperCase(), g = v && v.gf;
+    if (g && g.codIda && ida === IDA && vuelta === VUELTA) {
+      try { return 'https://www.google.com/travel/flights/search?' + new URLSearchParams({ tfs: tfsVuelo(dest, ida, vuelta, g), hl: 'es-419', curr: 'USD' }).toString(); } catch (e) { /* sigue con el texto */ }
+    }
+    var filtro = '';
+    if (g && g.codIda && ida === IDA && vuelta === VUELTA) filtro = (g.escIda === 0 ? ' nonstop' : '') + ' on ' + g.airIda;
+    return 'https://www.google.com/travel/flights?' + new URLSearchParams({ q: 'Flights from MVD to ' + dest + ' on ' + ida + ' through ' + vuelta + ' for ' + pax + (pax === 1 ? ' adult' : ' adults') + filtro }).toString();
+  }
+  /* Codificador minimo de protobuf para el tfs de Google Flights. Campos (mismos que usan las librerias que lo leen):
+     Info { 3: tramos, 8: pasajeros (1 = adulto, uno por persona), 9: clase (1 = turista), 19: viaje (1 = ida y vuelta) }
+     Tramo { 2: fecha, 4: vuelos elegidos, 5: escalas maximas, 6: aerolineas, 13: desde, 14: hasta }
+     Vuelo elegido { 1: desde, 2: fecha, 3: hasta, 5: aerolinea, 6: numero }   Aeropuerto { 1: 1 (aeropuerto), 2: codigo } */
+  function tfsVuelo(dest, ida, vuelta, g) {
+    var vint = function (n) { var b = []; while (n > 127) { b.push((n & 127) | 128); n = Math.floor(n / 128); } b.push(n); return b; };
+    var utf8 = function (t) { return Array.prototype.map.call(unescape(encodeURIComponent(t)), function (c) { return c.charCodeAt(0); }); };
+    var campo = function (n, tipo) { return vint(n * 8 + tipo); };
+    var num = function (n, v) { return campo(n, 0).concat(vint(v)); };
+    var bytes = function (n, b) { return campo(n, 2).concat(vint(b.length), b); };
+    var txt = function (n, t) { return bytes(n, utf8(String(t))); };
+    var aero = function (n, cod) { return bytes(n, num(1, 1).concat(txt(2, cod))); };
+    var tramo = function (fecha, desde, hasta, segs, cods, escalas) {
+      var b = txt(2, fecha);
+      (segs || []).forEach(function (x) {
+        if (!x.from || !x.to || !x.date || !x.airline || !x.number) throw new Error('tramo incompleto');
+        b = b.concat(bytes(4, txt(1, x.from).concat(txt(2, x.date), txt(3, x.to), txt(5, x.airline), txt(6, x.number))));
+      });
+      if (escalas != null) b = b.concat(num(5, escalas));
+      cods.forEach(function (c) { b = b.concat(txt(6, c)); });
+      return bytes(3, b.concat(aero(13, desde), aero(14, hasta)));
+    };
+    /* Google aplica el filtro de aerolineas y de escalas a todo el viaje: van las de los dos sentidos (ida con Gol y
+       vuelta con JetSMART deja Gol y JetSMART) y las escalas del sentido con mas escalas. */
+    var cods = [g.codIda, g.codVta].filter(function (c, i, a) { return c && a.indexOf(c) === i; });
+    var esc = g.escVta == null ? g.escIda : Math.max(g.escIda, g.escVta);
+    var info = tramo(ida, 'MVD', dest, g.ida, cods, esc).concat(tramo(vuelta, dest, 'MVD', g.vta, cods, esc));
+    for (var i = 0; i < pax; i++) info = info.concat(num(8, 1));
+    info = info.concat(num(9, 1), num(19, 1));
+    return btoa(String.fromCharCode.apply(null, info)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
   function irATercero(servicio) {
     var id = window.CS_VIAJE_ID, d = datosFinal(), url;
-    if (servicio === 'vuelo') url = urlVuelos(IDA, VUELTA);
+    if (servicio === 'vuelo') url = urlVuelos(IDA, VUELTA, d.v);
     else {
       /* Con el id de Booking del hotel se abre ESE alojamiento (dest_type=hotel); buscar por nombre devolvia
          el destino mas parecido y no la pousada. Los hoteles de ejemplo no tienen id: ahi solo queda el nombre. */
@@ -2385,13 +2426,14 @@
       '<button type="button" class="g-skip g-skip--l" data-ir="6" data-evento="flujo_volver_reserva">Volver a la reserva</button></div>';
   }
   /* Paso 11: Confirmá tu reserva (traslados y tours, que se reservan con CuántoSale) */
-  function serviciosCs() {
+  /* k = 'tras' (transfer y traslados) o 'tours' (actividades): cada uno se reserva por separado. Sin k, todos. */
+  function serviciosCs(k) {
     var d = datosFinal(), pers = personasTxt(), lista = [];
     if (d.t) lista.push({ ico: 'van', nom: d.t.nom + ' aeropuerto', det: 'Aeropuerto ⇄ alojamiento', pers: pers, precio: d.tTras });
     d.ex.forEach(function (e) {
       if (e.cat === 'tours' || e.cat === 'tras') lista.push({ ico: e.cat === 'tras' ? 'van' : 'palm', nom: e.nom, det: e.dur || '', pers: e.pp ? pers : (e.grupo || ''), precio: precioExtra(e) });
     });
-    return lista;
+    return k ? lista.filter(function (x) { return (x.ico === 'palm') === (k === 'tours'); }) : lista;
   }
   /* Paso 13: Reserva confirmada (la confirma el asesor; en la maqueta se simula al tocar una fila "Solicitado"). */
   function pantalla13() {
@@ -2438,14 +2480,13 @@
       cs.map(function (c) { return '<option value="' + esc(c.codigo) + '"' + (dt.cupon === c.codigo ? ' selected' : '') + '>' + (c.monto_brl != null ? 'R$ ' + esc(c.monto_brl) + ' de descuento (hasta el ' + esc(c.tope_pct) + '% de la reserva)' : esc(c.pct) + '%') + '</option>'; }).join('') + '</select>';
   }
   function pantalla11() {
-    var d = datosFinal(), lista = serviciosCs(), personas = personasTxt(), dt = S.datos || {}, er = S.datosErr || {};
+    var d = datosFinal(), lista = serviciosCs(S.csK), personas = personasTxt(), dt = S.datos || {}, er = S.datosErr || {};
     var total = sum(lista, function (x) { return x.precio; });
     var cab = '<h1 class="f-h" style="margin-top:4px">Confirmá tu reserva</h1><p class="f-sub" style="margin:4px 0 12px">Completá tus datos para finalizar la reserva de los servicios seleccionados.</p>' +
-      '<div class="cf-trip"><div class="cf-trip__top"><span class="cf-trip__img" aria-hidden="true"></span><span><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small>' +
-      '<button type="button" class="cf-trip__ver" data-resumen="1" aria-expanded="' + !!S.resumenAbierto + '">Ver resumen del viaje ' + (S.resumenAbierto ? '⌃' : '⌄') + '</button></span></div>' +
-      (S.resumenAbierto ? '<ul class="cf-res"><li><span>Vuelo</span><b>' + f(d.tVuelo) + '</b></li><li><span>Alojamiento</span><b>' + f(d.tAloj) + '</b></li><li><span>Servicios con CuántoSale</span><b>' + f(total) + '</b></li><li><span>Total estimado del viaje</span><b>' + f(d.total) + '</b></li></ul>' : '') + '</div>';
-    if (!lista.length) return cab + '<div class="cf-vacio"><b>Todavía no elegiste traslados ni tours.</b><span>Elegí lo que quieras reservar con CuántoSale y volvé acá.</span>' +
-      '<button type="button" class="g-btn g-btn--main" data-ir="1" data-evento="flujo_cs_elegir_traslado">Elegir traslado</button><button type="button" class="g-btn" data-ir="3" data-evento="flujo_cs_elegir_tours">Elegir tours y actividades</button></div>';
+      '<div class="cf-trip"><div class="cf-trip__top"><span class="cf-trip__img" aria-hidden="true"></span><span><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small></span></div></div>';
+    if (!lista.length) return cab + '<div class="cf-vacio"><b>' + (S.csK === 'tras' ? 'Todavía no elegiste un transfer.' : S.csK === 'tours' ? 'Todavía no elegiste tours ni actividades.' : 'Todavía no elegiste traslados ni tours.') + '</b><span>Elegí lo que quieras reservar con CuántoSale y volvé acá.</span>' +
+      (S.csK !== 'tours' ? '<button type="button" class="g-btn g-btn--main" data-ir="1" data-sub="t" data-evento="flujo_cs_elegir_traslado">Elegir traslado</button>' : '') +
+      (S.csK !== 'tras' ? '<button type="button" class="g-btn' + (S.csK === 'tours' ? ' g-btn--main' : '') + '" data-ir="3" data-evento="flujo_cs_elegir_tours">Elegir tours y actividades</button>' : '') + '</div>';
     var err = function (k) { return er[k] ? '<p class="g-err" role="alert">' + esc(er[k]) + '</p>' : ''; };
     return cab + '<h2 class="fin-h2">Servicios a reservar</h2><div class="cf-lista">' +
       lista.map(function (x) { return '<div class="cf-svc"><span class="fin-ico fin-ico--green">' + ic(I[x.ico], 24) + '</span><span class="fin-t"><b>' + esc(x.nom) + '</b><small>' + esc(x.det) + '<br>' + esc(x.pers) + '</small></span><span class="fin-p">' + f(x.precio) + '</span></div>'; }).join('') +
@@ -2454,7 +2495,7 @@
       '<form id="cs-form" class="af" novalidate>' +
       '<label class="g-lbl" for="cf-nom">Nombre y apellido</label><input id="cf-nom" class="g-in" type="text" autocomplete="name" placeholder="Ej. Juan Pérez" value="' + esc(dt.nombre || '') + '">' + err('nombre') +
       '<label class="g-lbl" for="cf-tel">WhatsApp de Uruguay</label><div class="cf-tel"><span class="g-in cf-tel__pais" aria-hidden="true">UY +598</span>' +
-      '<input id="cf-tel" class="g-in" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="09X XXX XXX" value="' + esc(dt.tel ? '0' + dt.tel : '') + '"></div>' + err('tel') +
+      '<input id="cf-tel" class="g-in" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="09X XXX XXX" value="' + esc(dt.tel ? '0' + dt.tel : (dt.telTxt || '')) + '"></div>' + err('tel') +
       '<label class="g-lbl" for="cf-mail">Email</label><input id="cf-mail" class="g-in" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" value="' + esc(dt.mail || '') + '">' + err('mail') +
       cuponHtml(dt) + '<p class="cf-nota">Al reservar te enviamos un WhatsApp con tu pedido. Un asesor de CuántoSale lo confirma.</p>' + err('envio') +
       '<button type="submit" class="g-btn g-btn--main" id="cf-reservar" style="margin-top:16px">Reservar</button></form>';
@@ -2464,7 +2505,7 @@
   /* Sin emojis: WhatsApp Desktop/Web los muestra como "?" cuando vienen en un enlace wa.me.
      Se usa el formato propio de WhatsApp: *negrita* y listas con viñetas. */
   function mensajeWA() {
-    var lista = serviciosCs(), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
+    var lista = serviciosCs(S.csK), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
     return 'Hola CuántoSale! Quiero reservar parte de mi viaje a *' + DEST + '*.\n\n' +
       '*Fechas:* ' + fdc(IDA) + ' → ' + fdc(VUELTA) + '\n*Personas:* ' + pax + '\n\n' +
       '*Servicios a reservar:*\n' + lista.map(function (x) { return '• ' + x.nom + ' — ' + f(x.precio); }).join('\n') +
@@ -2588,7 +2629,7 @@
   }
   /* Reservar: el pedido le llega al asesor (por email, desde el servidor) y el asesor le manda el WhatsApp al cliente. */
   function enviarSolicitud(dt) {
-    var lista = serviciosCs(), btn = $('cf-reservar');
+    var lista = serviciosCs(S.csK), btn = $('cf-reservar');
     if (!lista.length) return;
     if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
@@ -2610,6 +2651,7 @@
         clearTimeout(tm);
         S.sol = S.sol || {};
         lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
+        if (S.datos) S.datos.cupon = '';   // el cupon se usa una vez; nombre, celular y mail quedan para el otro pedido
         try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
         try { if (window.CS_GAME && CS_GAME.refrescar) CS_GAME.refrescar(); } catch (er) { /* el pasaporte no puede trabar la reserva */ }
         track('reserva_cs_solicitud', { servicios: lista.length, importe: Math.round(sum(lista, function (x) { return x.precio; })), con_traslado: !!S.sol.tras, con_tours: !!S.sol.tours, canal: 'asesor' });
@@ -2625,7 +2667,7 @@
   }
   /* (anterior, ya sin uso) Traslado y tours se reservan con CuantoSale: el servidor manda la confirmacion por WhatsApp. */
   function enviarConfirmacion() {
-    var lista = serviciosCs(), dt = S.datos || {};
+    var lista = serviciosCs(S.csK), dt = S.datos || {};
     if (!lista.length || !dt.tel || S.confirmacionEnviada === dt.pais + dt.tel) return;
     S.confirmacionEnviada = dt.pais + dt.tel;   // un solo envio por numero, aunque toquen el boton dos veces
     fetch('/api/reserva-whatsapp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
@@ -2760,6 +2802,7 @@
     var r = valor.split(':');
     if (r[1] === 'google_flights') { S.desde8 = 0; abrirVueloIr(); return; }
     if (r[1] === 'booking') { abrirAlojIr(); return; }
+    S.csK = r[1] === 'traslado' ? 'tras' : 'tours'; S.datosErr = {};
     S.desde11 = S.paso; ir(11, 'reservar_con_cuantosale');
     track('reserva_click', { servicio: r[1], proveedor: 'cuantosale', salida_a_tercero: false, importe: Math.round(r[1] === 'traslado' ? datosFinal().tTras : datosFinal().tExtras), sesion: S.sesion || 'sin_sesion' });
   }
@@ -2803,7 +2846,11 @@
     var o1 = o.outbound || {}, esc = o.stops != null ? o.stops : (o1.stops || 0), air = o.airline || 'Aerolínea';
     /* Logo: Ignav no lo manda; el codigo IATA de la aerolinea son las dos primeras letras del numero de vuelo (LA8111 -> LA). */
     var cod = String(o.flight_number || o1.flight_number || '').toUpperCase().slice(0, 2), logo = o.logo || (/^[A-Z0-9]{2}$/.test(cod) ? 'https://pics.avs.io/80/80/' + cod + '.png' : '');
-    return { id: String(o.id || 'v' + i), air: air, logo: logo, ab: air.replace(/[^A-Za-zÁÉÍÓÚ ]/g, '').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase() || '✈',
+    var o2 = o.inbound || {}, codDe = function (n) { var c = String(n || '').toUpperCase().slice(0, 2); return /^[A-Z0-9]{2}$/.test(c) ? c : ''; };
+    var gf = { ida: Array.isArray(o1.segments) ? o1.segments : null, vta: Array.isArray(o2.segments) ? o2.segments : null,
+      codIda: codDe(o1.flight_number || o.flight_number), codVta: codDe(o2.flight_number), escIda: esc, escVta: o2.stops != null ? o2.stops : null,
+      airIda: o1.airline || air, airVta: o2.airline || '' };
+    return { id: String(o.id || 'v' + i), air: air, logo: logo, gf: gf, ab: air.replace(/[^A-Za-zÁÉÍÓÚ ]/g, '').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase() || '✈',
       sal: hora(o.departure), lle: hora(o.arrival), dur: minutos(o.duration), durT: o.duration || '', esc: esc, escT: esc === 0 ? 'Directo' : esc + (esc === 1 ? ' escala' : ' escalas'),
       precio: o.price_usd / k, mejor: false, rec: i === 0 };
   }
@@ -3171,13 +3218,15 @@
     if (e.target.id !== 'cs-form') return;
     e.preventDefault();
     var telUY = telefonoUY($('cf-tel').value);
-    var dt = { nombre: ($('cf-nom').value || '').trim(), pais: '+598', tel: telUY || ($('cf-tel').value || '').replace(/[^0-9]/g, ''), mail: ($('cf-mail').value || '').trim(), cupon: $('cf-cupon') ? $('cf-cupon').value : '' }, er = {};
+    var dt = { nombre: ($('cf-nom').value || '').trim(), pais: '+598', tel: telUY, telTxt: telUY ? '' : ($('cf-tel').value || '').trim(), mail: ($('cf-mail').value || '').trim(), cupon: $('cf-cupon') ? $('cf-cupon').value : '' }, er = {};
     if (dt.nombre.length < 3 || dt.nombre.indexOf(' ') < 1) er.nombre = 'Escribí tu nombre y apellido.';
     if (!telUY) er.tel = 'Escribí un celular de Uruguay válido, por ejemplo 099 123 456.';
     if (!emailValido(dt.mail)) er.mail = 'Escribí un email válido, por ejemplo nombre@correo.com.';
     S.datos = dt; S.datosErr = er;
     if (Object.keys(er).length) { track('reserva_cs_datos_error', { campos: Object.keys(er).join(',') }); render(false); return; }
-    track('reserva_cs_datos_ok', { servicios: serviciosCs().length });
+    /* Los datos quedan en este navegador: si despues reserva el otro servicio (tours o transfer), el formulario ya viene lleno. */
+    try { localStorage.setItem('cs_datos_reserva', JSON.stringify({ nombre: dt.nombre, pais: dt.pais, tel: dt.tel, mail: dt.mail })); } catch (er2) { /* modo privado */ }
+    track('reserva_cs_datos_ok', { servicios: serviciosCs(S.csK).length });
     enviarSolicitud(dt);
   });
   $('steps').addEventListener('click', function (e) {
@@ -3197,7 +3246,7 @@
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
     if (t.dataset.wa) {
-      var lista = serviciosCs(), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
+      var lista = serviciosCs(S.csK), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
       S.sol = S.sol || {};
       lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
       /* Para Analytics solo viajan datos agregados: nunca el nombre, el telefono ni el email. */
@@ -3303,6 +3352,7 @@
   histIni = false;
   var vuelosListos = Promise.resolve(MODO === 'avion' ? cargarVuelos() : (MODO === 'bus' ? cargarBus() : null));
   CSCuenta.alCambiar(function (u) { if (u) restaurarPendiente(u); });
+  if (!S.datos) { try { var dg = JSON.parse(localStorage.getItem('cs_datos_reserva') || 'null'); if (dg && dg.nombre) S.datos = { nombre: dg.nombre, pais: dg.pais || '+598', tel: dg.tel || '', mail: dg.mail || '', cupon: '' }; } catch (e) { /* modo privado */ } }
   /* Viaje guardado: el link trae la seleccion (sel=...) y se abre en Tu presupuesto con todo lo elegido. */
   (function () {
     var raw = qs.get('sel'), s0 = null;
