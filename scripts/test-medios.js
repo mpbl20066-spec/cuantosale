@@ -68,18 +68,21 @@ DESTS.forEach(function (d) {
   ok(n <= 3, d.k + ': no ofrece mas medios de los que existen');
 });
 
-/* 4. Ningun destino con una sola alternativa se queda trabado en la pantalla.
-      Se ejecuta la logica real de home-destino.html: se extraen las funciones
-      que deciden y se corre el mismo criterio que usa la pagina. */
-console.log('4. home-destino.html: no pregunta el medio de transporte');
+/* 4. El medio de transporte solo se pregunta cuando hay para elegir.
+      La pantalla "¿Cómo querés viajar?" se saco el 9/10 y volvio el 10/10 como
+      pantalla 3 "¿Cómo querés ir?", pero SOLO para los destinos con mas de un
+      medio cotizable (auto o bus ademas del avion). Un destino de solo avion
+      no puede quedar trabado en una pantalla con una unica opcion. */
+console.log('4. home-destino.html: el medio se pregunta solo si hay mas de uno');
 const htmlDestino = fs.readFileSync(path.join(RAIZ, 'public', 'test', 'home-destino.html'), 'utf8');
 const htmlCalcular = fs.readFileSync(path.join(RAIZ, 'public', 'test', 'home-calcular.html'), 'utf8');
-ok(!/Cómo querés viajar/.test(htmlDestino), 'home-destino ya no tiene la pantalla "¿Cómo querés viajar?"');
-ok(!/d-medios|d-medio__|data-medio=/.test(htmlDestino), 'no quedan las tarjetas de medio de transporte');
+ok(/function irA\(\) \{ if \(mediosDe\(destInfo\(\)\)\.length > 1\) ir\(3\); else aResultados\(\); \}/.test(htmlDestino),
+  'de las fechas: con un solo medio va derecho a resultados, con varios a la pantalla 3');
+ok(/if \(S\.dest && destInfo\(\) && qs\.get\('pax'\) && !qs\.get\('editar'\)\) \{ if \(mediosDe\(destInfo\(\)\)\.length > 1 && !qs\.get\('modo'\)\) \{ S\.pant = 3; \} else \{ aResultados\(\); \} \}/.test(htmlDestino),
+  'entrar con destino y pax: con un solo medio (o modo ya elegido) va derecho a resultados');
+ok(/\['avion', 'auto', 'bus'\]\.filter\(function \(k\) \{ return mediosDe\(d\)\.indexOf\(k\) >= 0; \}\)/.test(htmlDestino),
+  'la pantalla 3 ofrece solo los medios que el destino puede cotizar');
 ok(!/Comparar opciones/.test(htmlDestino), 'no queda "Comparar opciones"');
-ok(!/pant3/.test(htmlDestino), 'no queda la pantalla 3');
-ok(/if \(S\.dest && destInfo\(\) && qs\.get\('pax'\)\) \{ aResultados\(\); \}/.test(htmlDestino),
-  'entrar con destino y pax va derecho a resultados');
 ok(/ir\(2\)/.test(htmlDestino), 'elegir destino sigue yendo a las fechas');
 ok(!/porTierra/.test(htmlDestino), 'home-destino no decide por region (porTierra)');
 ok(!/GRUPO\[/.test(htmlDestino), 'home-destino no mapea region a grupo de transporte');

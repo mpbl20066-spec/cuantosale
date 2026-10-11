@@ -42,8 +42,12 @@ async function main() {
   }
   ok((await pedir(base, '/xyz-no-existe')).status === 404, '/xyz-no-existe -> 404');
   for (const n of ['/nuevo', '/nuevo/destinos']) ok((await pedir(base, n)).status === 404, n + ' ya no existe (404)');
+  /* /app era la start_url de la PWA vieja: ahora lleva a la home nueva (ver server.js),
+     salvo el enlace corto de presupuesto /app?viaje=<token>, que sigue en la app anterior. */
   const app = await pedir(base, '/app');
-  ok(app.status === 200 && /id="app"|app\.js/.test(app.body), '/app sigue sirviendo la app anterior');
+  ok(app.status === 302 && app.loc === '/', '/app -> 302 / (la PWA instalada abre la home nueva)');
+  const appViaje = await pedir(base, '/app?viaje=abcdefgh');
+  ok(appViaje.status === 200 && /app\.js/.test(appViaje.body), '/app?viaje=<token> sigue en la app anterior');
   const viaje = await pedir(base, '/?viaje=abcdefgh');
   ok(viaje.status === 200 && /app\.js/.test(viaje.body), '/?viaje=<token> sigue yendo a la app anterior');
   const home = await pedir(base, '/');
@@ -65,7 +69,7 @@ async function main() {
       pg.on('pageerror', function (e) { errores.push(e.message); });
       pg.on('response', function (r) { if (r.status() >= 400 && r.url().indexOf(base) === 0) malas.push(r.status() + ' ' + r.url().replace(base, '')); });
       await pg.goto(base + '/', { waitUntil: 'networkidle' });
-      await pg.click('a[data-camino="ya_se_donde"]');
+      await pg.click('.q-camino a[href^="/destinos"]');   /* "Ya sé a dónde voy" */
       await pg.waitForURL(/\/destinos/);
       ok(true, 'home -> /destinos');
       await pg.click('[data-dest="rio"]');

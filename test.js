@@ -592,12 +592,52 @@ function haversineKm(a, b) {
 
   console.log('Servidor y proveedores');
   process.env.RATE_LIMIT_PER_MIN = '1000';
+  /* El server lee el .env de la maquina, pero solo las variables que no estan
+     definidas. Vaciarlas aca antes del require deja la suite aislada: sin esto
+     las pruebas salian contra Ignav y el cache de Supabase reales, y el
+     resultado dependia de lo que hubiera en esa tabla ese dia. */
+  process.env.IGNAV_API_KEY = '';
+  process.env.IGNAV_CACHE_DB = '0';
+  process.env.SERPAPI_CACHE_DB = '0';
+  process.env.SUPABASE_URL = '';
+  process.env.SUPABASE_SERVICE_ROLE_KEY = '';
+  process.env.SUPABASE_SERVICE_KEY = '';
+  process.env.VUELOS_CACHE_FILE = path.join(require('os').tmpdir(), 'cuantosale-test-vuelos-' + process.pid + '.json');
   process.env.SERPAPI_API_KEY = '';
   process.env.BOOKING_API_KEY = '';
   process.env.BOOKING_API_HOST = 'booking-com15.p.rapidapi.com';
   const app = require('./server');
   const serpapi = require('./lib/providers/serpapi');
   const flights = require('./lib/providers');
+  const ignav = require('./lib/providers/ignav');
+
+  /* Los vuelos salen solo de Ignav (lib/providers/vuelos.js). El helper prende
+     la key, usa market US para que los precios lleguen en USD (sin pedir
+     cotizacion) y deja todo como estaba al terminar. `responder` recibe la URL
+     y el body del pedido y devuelve el JSON de Ignav. */
+  async function conIgnav(responder, fn, extraEnv) {
+    const env = Object.assign({ IGNAV_API_KEY: 'test-key', IGNAV_MARKET: 'US' }, extraEnv || {});
+    const antes = {};
+    Object.keys(env).forEach(function (k) { antes[k] = process.env[k]; process.env[k] = env[k]; });
+    flights.clearCache();
+    ignav.setFetch(async function (url, init) {
+      const body = init && init.body ? JSON.parse(init.body) : null;
+      return { ok: true, status: 200, json: async function () { return responder(url, body); } };
+    });
+    try { return await fn(); } finally {
+      ignav.setFetch(null);
+      flights.clearCache();
+      Object.keys(antes).forEach(function (k) { if (antes[k] === undefined) delete process.env[k]; else process.env[k] = antes[k]; });
+    }
+  }
+  function ignavItinerario(precio, tramos, vuelta) {
+    const leg = function (segs) {
+      return { duration_minutes: 165, segments: segs.map(function (x) {
+        return { departure_airport: x[0], arrival_airport: x[1], departure_time_local: x[2], arrival_time_local: x[3], marketing_carrier_code: x[4], flight_number: x[5], operating_carrier_name: x[6] };
+      }) };
+    };
+    return { price: { amount: precio, currency: 'USD' }, outbound: leg(tramos), inbound: vuelta ? leg(vuelta) : null, ignav_id: 'ign-' + precio };
+  }
 
   // Respuesta de google_flights recortada a lo que el provider realmente lee.
   // El fixture imita el caso real: en una búsqueda de ida y vuelta, `price` es
@@ -798,43 +838,29 @@ function haversineKm(a, b) {
   });
 
   await t('el cache evita pagar dos veces la misma fecha', async function () {
-    const oldKey = process.env.SERPAPI_API_KEY;
-    process.env.SERPAPI_API_KEY = 'test-key';
-    process.env.SERPAPI_CALENDAR_TTL_H = '24';
     let calls = 0;
-    serpapi.setFetch(async function () {
+    await conIgnav(function () {
       calls += 1;
-      return { ok: true, status: 200, json: async function () {
-        return { best_flights: [{ price: 100, type: 'Round trip', total_duration: 100, layovers: [], flights: [] }], price_insights: { lowest_price: 210, price_level: 'low' } };
-      } };
-    });
-    flights.clearCache();
-    try {
+      return { itineraries: [ignavItinerario(200, [['MVD', 'FLN', '2027-01-10T10:00', '2027-01-10T12:45', 'G3', '100', 'GOL']])] };
+    }, async function () {
       const points = [{ shift: 0, dep: dep, ret: ret }, { shift: 1, dep: dep, ret: ret }];
       const first = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
       const callsAfterFirst = calls;
+      assert.ok(callsAfterFirst > 0, 'la primera pasada tiene que consultar a Ignav');
       const second = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
       assert.strictEqual(second.real, first.real, 'la segunda pasada devuelve lo mismo');
       // Los dos puntos comparten la clave (mismo dep y ret en el fixture), asi
-      // que el segundo tiene que salir del cache sin gastar otro crédito.
-      assert.strictEqual(calls, callsAfterFirst, 'la segunda consulta no puede volver a pegarle a SerpAPI');
-    } finally {
-      serpapi.setFetch(null);
-      flights.clearCache();
-      process.env.SERPAPI_API_KEY = oldKey;
-    }
+      // que el segundo tiene que salir del cache sin gastar otra busqueda.
+      assert.strictEqual(calls, callsAfterFirst, 'la segunda consulta no puede volver a pegarle a Ignav');
+    }, { IGNAV_CALENDAR_LIVE: '1' });
   });
 
   await t('el calendario reparte precio real y estimado por separado', async function () {
-    const oldKey = process.env.SERPAPI_API_KEY;
-    process.env.SERPAPI_API_KEY = 'test-key';
-    serpapi.setFetch(async function () {
-      return { ok: true, status: 200, json: async function () {
-        return { best_flights: [{ price: 200, type: 'Round trip', total_duration: 100, layovers: [], flights: [] }] };
-      } };
-    });
-    flights.clearCache();
-    try {
+    await conIgnav(function (url, body) {
+      // Un punto sin itinerarios: tiene que quedar estimado y sin precio.
+      if (body.departure_date === '2027-01-09') return { itineraries: [] };
+      return { itineraries: [ignavItinerario(400, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
+    }, async function () {
       const points = [
         { shift: -1, dep: '2027-01-09', ret: '2027-01-16' },
         { shift: 0, dep: '2027-01-10', ret: '2027-01-17' },
@@ -842,21 +868,19 @@ function haversineKm(a, b) {
       ];
       const result = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
       assert.strictEqual(result.puntos.length, 3);
-      assert.strictEqual(result.real + result.estimados, 3, 'cada punto tiene que estar en una de las dos listas');
+      assert.strictEqual(result.real, 2);
+      assert.strictEqual(result.estimados, 1);
       result.puntos.forEach(function (punto) {
-        if (punto.real) assert.ok(punto.pp > 0, 'un punto real siempre trae precio');
+        if (punto.real) assert.strictEqual(punto.pp, 200, 'el total de 2 adultos se divide por persona');
         else assert.strictEqual(punto.pp, null, 'un punto estimado no inventa precio');
       });
-    } finally {
-      serpapi.setFetch(null);
-      flights.clearCache();
-      process.env.SERPAPI_API_KEY = oldKey;
-    }
+    }, { IGNAV_CALENDAR_LIVE: '1' });
   });
   await t('normaliza hoteles reales de Booking.com con tarifa e imagen', async function () {
     const originalFetch = global.fetch;
     const seen = [];
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     global.fetch = async function (url, options) {
       const parsed = new URL(url); seen.push({ url: parsed, options: options });
       if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { status: true, data: [{ dest_id: '-123', search_type: 'city', name: 'Florianópolis' }] }; } };
@@ -885,6 +909,7 @@ function haversineKm(a, b) {
   await t('un hotel real sin foto se conserva y completa con el respaldo', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     global.fetch = async function (url) {
       const parsed = new URL(url);
       if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
@@ -911,6 +936,7 @@ function haversineKm(a, b) {
   await t('un hotel de Booking con nota menor a 8 no llega a la pantalla', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     // Booking devuelve primero lo que a el le parece bueno, no lo barato ni lo
     // bien valorado: el 7,2 suele abrir la lista. El filtro tiene que sacar
     // ese primero, no dejar que el precio lo ubique adelante de los demas.
@@ -946,6 +972,7 @@ function haversineKm(a, b) {
   await t('el filtro de nota avisa cuantos dejo afuera y por que', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     global.fetch = async function (url) {
       const parsed = new URL(url);
       if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
@@ -977,6 +1004,7 @@ function haversineKm(a, b) {
   await t('el tipo que se devuelve siempre esta declarado como disponible', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     global.fetch = async function (url) {
       const parsed = new URL(url);
       if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
@@ -1011,6 +1039,7 @@ function haversineKm(a, b) {
   await t('con un hotel cargado, los tres tipos del espectro siempre devuelven 3', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     global.fetch = async function (url) {
       const parsed = new URL(url);
       if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
@@ -1036,6 +1065,7 @@ function haversineKm(a, b) {
   await t('un tipo estricto sin datos no se declara disponible ni se rellena', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     global.fetch = async function (url) {
       const parsed = new URL(url);
       if (parsed.pathname.endsWith('/searchDestination')) return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: '-123', search_type: 'city' }] }; } };
@@ -1062,6 +1092,7 @@ function haversineKm(a, b) {
   await t('el id de ciudad de Booking se consulta una vez y se reusa', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     // Se cuenta por query y no en total: Cabo Frio tiene una ciudad cercana
     // asociada, asi que un pedido legitimo puede mirar dos.
     const busquedas = [];
@@ -1092,6 +1123,7 @@ function haversineKm(a, b) {
   await t('un id de ciudad que no se pudo resolver no se cachea', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     const Torres = 'Destino Que Solo Existe Para Esta Prueba';
     let intentos = 0;
     global.fetch = async function (url) {
@@ -1122,6 +1154,7 @@ function haversineKm(a, b) {
   await t('el nombre sin barra va en una sola consulta y resuelve', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     const consultas = [];
     global.fetch = async function (url, options) {
       const parsed = new URL(url);
@@ -1154,6 +1187,7 @@ function haversineKm(a, b) {
   await t('sin hoteles en el rango de la categoría no se muestran reales de otra categoría', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     // Los dos reales cuestan US$ 50 y 60 la noche, muy por debajo del rango de
     // "confort" en Rio (desde ~US$ 132). Antes se mostraban igual, antes que los
     // estimados: Comodo aparecia con hoteles de US$ 50 al lado de un Equilibrado
@@ -1186,6 +1220,7 @@ function haversineKm(a, b) {
        entre categorias no se puede cruzar. */
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     const nochePrecios = [40, 48, 55, 62, 70, 78, 86, 95, 104, 112, 122, 135, 150, 165, 180, 200, 225, 260];
     global.fetch = async function (url) {
       const parsed = new URL(url);
@@ -1216,6 +1251,7 @@ function haversineKm(a, b) {
   await t('ante fallos de Booking siempre entrega 3 opciones de respaldo de la categoría elegida', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
+    app.resetBookingDestCache();
     global.fetch = async function () { throw new Error('timeout'); };
     const originalWarn = console.warn; console.warn = function () {};
     try {
@@ -1230,41 +1266,39 @@ function haversineKm(a, b) {
   const server = app.createServer();
   await new Promise(function (r) { server.listen(0, r); });
   const port = server.address().port;
-  await t('expone vuelos de Google Flights por la ruta de búsqueda que consume la PWA', async function () {
-    const oldKey = process.env.SERPAPI_API_KEY;
-    process.env.SERPAPI_API_KEY = 'test-key';
-    flights.clearCache();
-    serpapi.setFetch(async function (url) {
-      const parsed = new URL(url);
-      assert.strictEqual(parsed.pathname, '/search.json');
-      assert.strictEqual(parsed.searchParams.get('engine'), 'google_flights');
-      return { ok: true, status: 200, json: async function () { return serpapiOutboundFixture(); } };
-    });
-    try {
+  await t('expone vuelos por la ruta de búsqueda que consume la PWA', async function () {
+    const pedidos = [];
+    await conIgnav(function (url, body) {
+      pedidos.push({ url: String(url), body: body });
+      return { itineraries: [
+        ignavItinerario(180, [['MVD', 'FLN', '2027-01-10T10:00', '2027-01-10T12:45', 'AR', '123', 'Aerolínea Test']], [['FLN', 'MVD', '2027-01-17T14:00', '2027-01-17T16:40', 'AR', '124', 'Aerolínea Test']]),
+        ignavItinerario(240, [['MVD', 'GRU', '2027-01-10T08:00', '2027-01-10T10:30', 'G3', '10', 'GOL'], ['GRU', 'FLN', '2027-01-10T12:00', '2027-01-10T13:00', 'G3', '20', 'GOL']]),
+        // Un self transfer no se ofrece: si un tramo se atrasa el otro se pierde.
+        Object.assign(ignavItinerario(90, [['MVD', 'FLN', '2027-01-10T06:00', '2027-01-10T09:00', 'XX', '1', 'Low Cost']]), { requires_self_transfer: true })
+      ] };
+    }, async function () {
       const response = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 1, style: 'ahorro' });
       const payload = JSON.parse(response.body);
       assert.strictEqual(response.status, 200);
-      assert.strictEqual(payload.provider, 'serpapi');
-      assert.strictEqual(payload.offers[0].departure_airport.code, 'MVD');
-      assert.strictEqual(payload.offers[0].price_usd, 180);
-      assert.strictEqual(payload.offers[0].airline, 'Aerolínea Test');
+      assert.strictEqual(payload.provider, 'ignav');
+      assert.ok(pedidos.length >= 1 && pedidos[0].url.endsWith('/round-trip'), 'ida y vuelta va a /round-trip');
+      assert.strictEqual(pedidos[0].body.origin, 'MVD');
+      assert.strictEqual(pedidos[0].body.destination, 'FLN');
+      assert.strictEqual(payload.offers.length, 2, 'el self transfer queda afuera');
+      const barato = payload.offers.reduce(function (a, b) { return a.price_usd <= b.price_usd ? a : b; });
+      assert.strictEqual(barato.price_usd, 180);
+      assert.strictEqual(barato.departure_airport.code, 'MVD');
+      assert.strictEqual(barato.airline, 'Aerolínea Test');
+      assert.ok(barato.inbound, 'Ignav trae el tramo de vuelta');
       // Ninguna tarjeta puede llevar un link de pago propio: la reserva se
       // completa afuera y la app no cobra vuelos.
       assert.ok(payload.offers.every(function (o) { return !o.booking_url && !o.checkout_url; }));
-    } finally {
-      serpapi.setFetch(null);
-      flights.clearCache();
-      process.env.SERPAPI_API_KEY = oldKey;
-    }
+    });
   });
   await t('el calendario de fechas responde puntos con precio por separado', async function () {
-    const oldKey = process.env.SERPAPI_API_KEY;
-    process.env.SERPAPI_API_KEY = 'test-key';
-    flights.clearCache();
-    serpapi.setFetch(async function () {
-      return { ok: true, status: 200, json: async function () { return { best_flights: [{ price: 300, type: 'Round trip', total_duration: 100, layovers: [], flights: [] }] }; } };
-    });
-    try {
+    await conIgnav(function (url, body) {
+      return { itineraries: [ignavItinerario(600, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
+    }, async function () {
       const r = await get(port, '/api/vuelos/calendario?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&style=eq&origin=MVD');
       const j = JSON.parse(r.body);
       assert.strictEqual(r.status, 200);
@@ -1273,11 +1307,7 @@ function haversineKm(a, b) {
       assert.ok(j.puntos.length > 1, 'el calendario tiene que traer varias fechas');
       assert.ok(j.puntos.every(function (p) { return typeof p.dep === 'string' && typeof p.shift === 'number'; }));
       assert.ok(j.puntos.some(function (p) { return p.real; }), 'con el buscador andando algun punto tiene que traer precio real');
-    } finally {
-      serpapi.setFetch(null);
-      flights.clearCache();
-      process.env.SERPAPI_API_KEY = oldKey;
-    }
+    }, { IGNAV_CALENDAR_LIVE: '1', IGNAV_DAILY_MAX: '100' });
   });
   await t('el calendario rechaza destinos que no vuelan', async function () {
     const r = await get(port, '/api/vuelos/calendario?dest=zz&dep=' + dep + '&ret=' + ret + '&pax=2&style=eq');
@@ -2413,8 +2443,8 @@ function haversineKm(a, b) {
     assert.ok(!appScript.body.includes('Reservar los tours seleccionados'), 'el pie con la nota y el botón de reserva ya no debe existir');
   });
   await t('con key vacía la búsqueda real de vuelos responde con error controlado', async function () {
-    const oldKey = process.env.SERPAPI_API_KEY;
-    process.env.SERPAPI_API_KEY = '';
+    const oldKey = process.env.IGNAV_API_KEY;
+    process.env.IGNAV_API_KEY = '';
     flights.clearCache();
     try {
       const r = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 2, style: 'eq' });
@@ -2429,10 +2459,11 @@ function haversineKm(a, b) {
       assert.strictEqual(cj.configured, false);
       assert.deepStrictEqual(cj.puntos, []);
     } finally {
-      process.env.SERPAPI_API_KEY = oldKey;
+      process.env.IGNAV_API_KEY = oldKey;
       flights.clearCache();
     }
   });
   server.close();
+  try { fs.unlinkSync(process.env.VUELOS_CACHE_FILE); } catch (e) { /* no se llego a escribir */ }
   console.log('\n' + passed + ' pruebas OK' + (process.exitCode ? ' (con fallas)' : ''));
 })();
