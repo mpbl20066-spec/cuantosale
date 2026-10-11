@@ -873,6 +873,8 @@
   .fc-air{display:flex;align-items:center;gap:12px;min-width:0}
   .fc-logo{flex:0 0 40px;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--cel-soft);color:var(--ink);font-family:var(--fh);font-size:13px;font-weight:800;letter-spacing:.02em}
   [data-theme="night"] .fc-logo{background:rgba(255,255,255,.07)}
+  .fc-logo{position:relative;overflow:hidden}
+  .fc-logo__img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:4px;box-sizing:border-box;background:#fff}
   .fc-air__t{display:flex;flex-direction:column;gap:5px;min-width:0}
   .fc-air__t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14.5px;font-weight:800}
   .fc-bs{display:flex;flex-wrap:nowrap;gap:5px;min-width:0}
@@ -1574,7 +1576,11 @@
     var a = VUELOS.slice();
     if (S.fVuelo === 'precio') a.sort(function (x, y) { return x.precio - y.precio; });
     else if (S.fVuelo === 'directo') a.sort(function (x, y) { return x.esc - y.esc || x.dur - y.dur; });
-    else a.sort(function (x, y) { return (y.mejor ? 1 : 0) - (x.mejor ? 1 : 0); });   /* recomendados: la mejor opcion primero */
+    else {   /* recomendados: la mejor opcion primero y, si hay, el directo mas barato segundo (para que se vea sin "Ver mas") */
+      var dir = a.filter(function (x) { return x.esc === 0 && !x.mejor; }).sort(function (x, y) { return x.precio - y.precio; })[0];
+      var rango = function (x) { return x.mejor ? 0 : (x === dir ? 1 : 2); };
+      a.sort(function (x, y) { return rango(x) - rango(y); });
+    }
     return a;
   }
   function chips(lista, act, grupo) {
@@ -1630,7 +1636,7 @@
     var barato = v.id === idBarato;
     var badges = v.mejor ? '<span class="fc-b fc-b--mejor">' + (barato ? 'Mejor y más barato' : 'Mejor opción') + '</span>' : (barato ? '<span class="fc-b">Más barato</span>' : '');
     return '<div class="fc' + (on ? ' is-sel' : '') + '" role="button" tabindex="0" data-sel="vuelo:' + esc(v.id) + '" aria-pressed="' + on + '" aria-label="' + esc(v.air) + ', sale ' + v.sal + ', llega ' + v.lle + ', ' + esc(v.escT) + ', ' + f(precioVuelo(v)) + (on ? ', elegido' : '') + '">' + tick +
-      '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + '</span></div>' +
+      '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + (v.logo ? '<img class="fc-logo__img" src="' + esc(v.logo) + '" alt="" loading="lazy" decoding="async">' : '') + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + '</span></div>' +
       '<div class="fc-ruta"><div class="fc-pt"><b>' + v.sal + '</b><small>MVD</small></div>' +
         '<div class="fc-mid"><small>' + esc(v.durT) + '</small><i aria-hidden="true"></i><small class="' + (v.esc === 0 ? 'is-dir' : '') + '">' + esc(v.escT) + '</small></div>' +
         '<div class="fc-pt fc-pt--d"><b>' + v.lle + '</b><small>' + esc(AEROPUERTO[destKey] || '') + '</small></div></div>' +
@@ -1729,7 +1735,7 @@
         return '<span class="af3-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af3-t"><i style="height:' + alto[k % alto.length] + '%"></i></span>' + lbl(iso) + '</span>';
       }).join('') + '</div>' + ley);
     }
-    if (c.estado !== 'ok') return caja('<span aria-hidden="true">💡</span> Compará fechas para ahorrar', '<a class="af2-link" href="' + esc(urlVuelos(IDA, VUELTA)) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver precios por fecha en Google Flights ↗</a>');
+    if (c.estado !== 'ok') return '';   /* sin precios de otras fechas no se muestra la comparativa */
     var tot = function (x) { return x.pp * pax; };
     var por = {}; c.puntos.forEach(function (x) { por[x.dep] = x; });
     var vis = dias.map(function (iso) { return por[iso] || null; }), con = vis.filter(Boolean);
@@ -1755,8 +1761,7 @@
       var dsel = base - tot(sel);
       det = '<div class="af2-det"><p>Saliendo el <b>' + dia(sel.dep).toLowerCase() + ' ' + fdc(sel.dep).replace(/^\d+ /, '') + '</b> (vuelta ' + fdc(sumarDias(sel.dep, NOCHES)) + '): <b>' + f(tot(sel)) + '</b>' +
         (Math.round(dsel) ? ' · <span class="' + (dsel > 0 ? 'af2-menos' : 'af2-mas') + '">' + (dsel > 0 ? 'ahorrás ' + f(dsel) : f(-dsel) + ' más') + '</span>' : '') + '</p>' +
-        '<div class="af2-acc"><button type="button" class="af2-usar" data-usar-fecha="' + sel.dep + '">Usar estas fechas</button>' +
-        '<a class="af2-link" href="' + esc(urlVuelos(sel.dep, sumarDias(sel.dep, NOCHES))) + '" target="_blank" rel="noopener" data-evento="flujo_comparar_fechas_gf">Ver en Google Flights ↗</a></div></div>';
+        '<div class="af2-acc"><button type="button" class="af2-usar" data-usar-fecha="' + sel.dep + '">Usar estas fechas</button></div></div>';
     }
     return caja(titulo, '<div class="af3" role="group" aria-label="Precio del vuelo por fecha de salida">' + barras + '</div>' + ley + det +
       '<p class="af2-nota">Precios reales de hoy · Tocá un día para verlo · Tus fechas no cambian solas.</p>');
@@ -2611,7 +2616,9 @@
   var minutos = function (t) { var m = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?/.exec(t || ''); return (+m[1] || 0) * 60 + (+m[2] || 0); };
   function mapVuelo(o, i, minP) {
     var o1 = o.outbound || {}, esc = o.stops != null ? o.stops : (o1.stops || 0), air = o.airline || 'Aerolínea';
-    return { id: String(o.id || 'v' + i), air: air, ab: air.replace(/[^A-Za-zÁÉÍÓÚ ]/g, '').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase() || '✈',
+    /* Logo: Ignav no lo manda; el codigo IATA de la aerolinea son las dos primeras letras del numero de vuelo (LA8111 -> LA). */
+    var cod = String(o.flight_number || o1.flight_number || '').toUpperCase().slice(0, 2), logo = o.logo || (/^[A-Z0-9]{2}$/.test(cod) ? 'https://pics.avs.io/80/80/' + cod + '.png' : '');
+    return { id: String(o.id || 'v' + i), air: air, logo: logo, ab: air.replace(/[^A-Za-zÁÉÍÓÚ ]/g, '').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase() || '✈',
       sal: hora(o.departure), lle: hora(o.arrival), dur: minutos(o.duration), durT: o.duration || '', esc: esc, escT: esc === 0 ? 'Directo' : esc + (esc === 1 ? ' escala' : ' escalas'),
       precio: o.price_usd / k, mejor: false, rec: i === 0 };
   }
@@ -2639,7 +2646,7 @@
         var offers = d.offers.filter(function (o) {
           var c = [o.airline, o.departure, o.arrival, Math.round(o.price_usd)].join('|');
           if (!(o.price_usd > 0) || vistos[c]) return false; vistos[c] = 1; return true;
-        }).slice(0, 12);
+        });   /* todos: cortar en los 12 mas baratos dejaba afuera los directos y otras aerolineas (Rio: solo LATAM con escala) */
         if (!offers.length) throw new Error('sin vuelos');
         VUELOS = offers.map(function (o, i) { return mapVuelo(o, i); });
         if (d.destination) AEROPUERTO[destKey] = d.destination;
@@ -2734,8 +2741,7 @@
     var c = S.cmp || {}, cab = '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet cal" role="dialog" aria-modal="true" aria-labelledby="cal-h">' +
       '<div class="f-modal__top"><div><small>CALENDARIO DE PRECIOS</small><h2 id="cal-h">Mismo viaje, otra fecha</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>';
     if (!c.estado || c.estado === 'cargando') return cab + '<div class="cal-cargando" role="status"><span class="fl-spin" aria-hidden="true"></span>Buscando precios de otras fechas…</div></div>';
-    if (c.estado !== 'ok') return cab + '<p class="cal-p">No encontramos precios de otras fechas para este viaje. Compará fechas para encontrar posibles ahorros.</p>' +
-      '<a class="g-btn g-btn--main cal-gf" href="' + esc(urlVuelos(IDA, VUELTA)) + '" target="_blank" rel="noopener">Comparar fechas en Google Flights →</a></div>';
+    if (c.estado !== 'ok') return cab + '<p class="cal-p">No encontramos precios de otras fechas para este viaje. Tus fechas siguen siendo una buena opción.</p></div>';
     var tot = function (x) { return x.pp * pax; };
     var pts = c.puntos.slice().sort(function (a, b) { return a.dep < b.dep ? -1 : 1; });
     var tuyo = pts.filter(function (x) { return x.dep === IDA; })[0];
@@ -2853,6 +2859,7 @@
     if (S.paso === 1 && MODO === 'avion' && S.sub !== 't') { S.sub = 't'; render(true); return; }
     if (S.paso === 4) { track('flujo_ver_opciones_reservar', { total: Math.round(totalHastaAhora()), con_sesion: !!S.sesion }); abrirGuardar(); } else ir(S.paso + 1, 'continuar');
   });
+  document.addEventListener('error', function (e) { if (e.target && e.target.classList && e.target.classList.contains('fc-logo__img')) e.target.remove(); }, true);
   $('main').addEventListener('keydown', function (e) {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-sel],[role=button][data-extra]')) { e.preventDefault(); e.target.click(); }
   });
