@@ -2315,7 +2315,11 @@
       servicios: lista.map(function (x) { return { tipo: x.ico === 'palm' ? 'tour' : 'traslado', nombre: x.nom, detalle: x.det, precio: f(x.precio), precio_usd: Math.round(x.precio * 100) / 100 }; }), total: f(sum(lista, function (x) { return x.precio; })),
       totalUsd: Math.round(sum(lista, function (x) { return x.precio; })), cupon: dt.cupon || '', codigo: String(window.CS_VIAJE_ID || '') };
     /* Con sesion el pedido viaja con el token: el servidor lo usa para canjear el cupon y sumar el XP de la reserva. */
-    (window.CSCuenta && CSCuenta.usuario() ? CSCuenta.token() : Promise.resolve('')).then(function (tk) {
+    /* El token de Supabase a veces no responde nunca (getSession se traba) y el boton quedaba en "Enviando…" para siempre:
+       si en 4 s no llega, el pedido sale igual, sin sesion (sin cupon ni XP, pero el pedido no se pierde). */
+    var conTope = function (pr, ms) { return Promise.race([pr, new Promise(function (ok) { setTimeout(function () { ok(''); }, ms); })]); };
+    var tokenSesion = function () { try { return window.CSCuenta && CSCuenta.usuario() ? conTope(CSCuenta.token(), 4000) : Promise.resolve(''); } catch (er) { return Promise.resolve(''); } };
+    tokenSesion().catch(function () { return ''; }).then(function (tk) {
       var cab = { 'Content-Type': 'application/json' }; if (tk) cab.Authorization = 'Bearer ' + tk;
       return fetch('/api/reserva-solicitud', { method: 'POST', headers: cab, signal: ctl ? ctl.signal : undefined, body: JSON.stringify(cuerpo) });
     })
@@ -2325,7 +2329,7 @@
         S.sol = S.sol || {};
         lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
         try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
-        if (window.CS_GAME) CS_GAME.refrescar();
+        try { if (window.CS_GAME && CS_GAME.refrescar) CS_GAME.refrescar(); } catch (er) { /* el pasaporte no puede trabar la reserva */ }
         track('reserva_cs_solicitud', { servicios: lista.length, importe: Math.round(sum(lista, function (x) { return x.precio; })), con_traslado: !!S.sol.tras, con_tours: !!S.sol.tours, canal: 'asesor' });
         S.avisoCs = j && j.whatsapp ? 'Te enviamos un WhatsApp con tu pedido. Un asesor te lo confirma.' : 'Recibimos tu pedido. Un asesor te escribe por WhatsApp para confirmarlo.';
         ir(7, 'solicitud_cuantosale');
