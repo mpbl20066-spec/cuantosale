@@ -260,7 +260,6 @@
       interruptor() +
       fila(I.help, 'Ayuda y soporte', 'data-ayuda') +
       (u ? fila(I.cog, 'Configuración', 'data-editar') : '') +
-      fila(I.doc, 'Términos y condiciones', 'data-terminos') +
       (u ? fila(I.out, 'Cerrar sesión', 'data-salir', '', true) : '') + '</div>' + pie();
   }
   /* Conversor de monedas: las mismas cotizaciones que usa toda la web (moneda.js, /api/tasas). Convierte mientras se escribe. */
