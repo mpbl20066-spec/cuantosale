@@ -1643,7 +1643,7 @@ async function postBienvenida(req, res) {
 const WA_GRAPH = 'https://graph.facebook.com/v21.0';
 let pasaporteCache = null;
 function pasaporteApi() {
-  if (!pasaporteCache) pasaporteCache = require('./lib/pasaporte')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout });
+  if (!pasaporteCache) pasaporteCache = require('./lib/pasaporte')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, tasas: getTasas });
   return pasaporteCache;
 }
 let reservasCache = null;

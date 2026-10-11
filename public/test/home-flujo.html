@@ -2158,7 +2158,7 @@
     var cs = window.CS_GAME ? CS_GAME.cupones() : [];
     if (!cs.length) return '';
     return '<label class="g-lbl" for="cf-cupon">Cupón del pasaporte</label><select id="cf-cupon" class="g-in"><option value="">No usar cupón</option>' +
-      cs.map(function (c) { return '<option value="' + esc(c.codigo) + '"' + (dt.cupon === c.codigo ? ' selected' : '') + '>' + esc(c.pct) + '% (hasta US$ ' + esc(c.tope_usd) + ', compra mínima US$ ' + esc(c.minimo_usd) + ')</option>'; }).join('') + '</select>';
+      cs.map(function (c) { return '<option value="' + esc(c.codigo) + '"' + (dt.cupon === c.codigo ? ' selected' : '') + '>' + (c.monto_brl != null ? 'R$ ' + esc(c.monto_brl) + ' de descuento (hasta el ' + esc(c.tope_pct) + '% de la reserva)' : esc(c.pct) + '%') + '</option>'; }).join('') + '</select>';
   }
   function pantalla11() {
     var d = datosFinal(), lista = serviciosCs(), personas = personasTxt(), dt = S.datos || {}, er = S.datosErr || {};

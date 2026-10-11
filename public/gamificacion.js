@@ -356,14 +356,14 @@
     if (cs.length) {
       h += '<ul class="gm-cupones">' + cs.map(function (c) {
         var usado = !!c.usado_en, vencido = !usado && Date.parse(c.expira) < Date.now();
-        return '<li class="' + (usado || vencido ? 'is-off' : '') + '"><span><b>' + esc(c.pct) + '% de descuento</b><small>' + (usado ? 'Ya lo usaste' : (vencido ? 'Venció' : 'Hasta US$ ' + esc(c.tope_usd) + ' · compra mínima US$ ' + esc(c.minimo_usd) + ' · vence ' + fechaCorta(c.expira))) + '</small></span>' +
+        return '<li class="' + (usado || vencido ? 'is-off' : '') + '"><span><b>' + (c.monto_brl != null ? 'R$ ' + esc(c.monto_brl) + ' de descuento' : esc(c.pct) + '% de descuento') + '</b><small>' + (usado ? 'Ya lo usaste' : (vencido ? 'Venció' : (c.monto_brl != null ? 'Hasta el ' + esc(c.tope_pct) + '% de la reserva' : 'Hasta US$ ' + esc(c.tope_usd)) + ' · vence ' + fechaCorta(c.expira))) + '</small></span>' +
           (usado || vencido ? '' : '<code>' + esc(c.codigo) + '</code><button type="button" data-gm-copiar="' + esc(c.codigo) + '">Copiar</button>') + '</li>';
       }).join('') + '</ul>';
     } else {
       h += '<p class="gm-vacio">' + (E.remoto ? 'Llegá a Viajero (150 XP) para ganar tu primer cupón.' : 'Iniciá sesión para ganar y usar cupones.') + '</p>';
     }
-    return h + '<h3>Premios por nivel</h3><ul class="gm-reglas"><li><b>2%</b> Viajero (150 XP)</li><li><b>3%</b> Trotamundos (350 XP)</li><li><b>5%</b> Leyenda (700 XP) y atención prioritaria</li></ul>' +
-      '<p class="gm-nota">Un cupón por nivel, de un solo uso, válido 90 días en traslados y tours (descuento máximo US$ 5, compra mínima US$ 40). Se usa al tocar Reservar.</p>';
+    return h + '<h3>Premios por nivel</h3><ul class="gm-reglas"><li><b>R$ 15</b> Viajero (150 XP)</li><li><b>R$ 30</b> Trotamundos (350 XP)</li><li><b>R$ 50</b> Leyenda (700 XP) y atención prioritaria</li></ul>' +
+      '<p class="gm-nota">Un cupón por nivel, de un solo uso, válido 90 días en traslados y tours (el descuento no pasa del 15% de la reserva). Se descuenta en dólares al valor del día y se usa al tocar Reservar.</p>';
   }
 
   function cuerpoModal() {

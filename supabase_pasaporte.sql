@@ -40,3 +40,9 @@ drop policy if exists "cupones solo server" on public.cupones;
 create policy "cupones solo server" on public.cupones for all using (false) with check (false);
 grant select, insert, update, delete on public.pasaporte_eventos to service_role;
 grant select, insert, update, delete on public.cupones to service_role;
+
+-- Cupones en reales: un monto fijo en R$ (se descuenta en dolares al valor del dia) con tope en % de la reserva.
+-- Los cupones viejos (en %) que nadie uso se borran para que se vuelvan a crear con el formato nuevo; los usados quedan.
+alter table public.cupones add column if not exists monto_brl numeric;
+alter table public.cupones add column if not exists tope_pct numeric;
+delete from public.cupones where monto_brl is null and usado_en is null;
