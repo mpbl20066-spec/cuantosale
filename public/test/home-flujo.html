@@ -2807,6 +2807,7 @@
     $('foot').hidden = S.paso >= 5;
     if (S.paso < 5) { $('cta').textContent = S.paso === 1 && MODO === 'avion' && S.sub !== 't' ? 'Continuar a Transfer →' : CTAS[S.paso]; $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS) || (MODO === 'avion' && S.paso === 1 && !S.vuelo); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
     if (scrollTop) $('main').scrollTop = 0;
+    marcarHistoria();
     vigilarComparativa();
     /* Si los 10 dias no entran a lo ancho, la tira arranca con la mas barata (o tu fecha) a la vista */
     var tira = $('main').querySelector('.af3:not(.af3--ghost)'), foco = tira && (tira.querySelector('.is-barata') || tira.querySelector('.is-tuya'));
@@ -3000,6 +3001,30 @@
       '<p class="td-pr"><b>' + f(e.precio) + '</b> ' + (e.pp ? 'por persona' : 'por vehículo') + '</p>' +
       '<button type="button" class="g-btn ' + (on ? '' : 'g-btn--main') + '" data-extra="' + e.id + '" data-cerrar-det="1">' + (on ? 'Sacar de mi viaje' : 'Sumar a mi viaje') + '</button></div>';
   }
+  /* Atras del celular: cada pantalla del flujo es una entrada del historial, asi el gesto/boton de atras
+     vuelve a la pantalla anterior en vez de salir del flujo y perder el viaje. hist guarda la clave de cada entrada. */
+  var hist = [], histIni = true;
+  function claveHist(p, sub) { return p === 1 ? '1' + (sub || 'v') : String(p); }
+  function marcarHistoria() {
+    var k = claveHist(S.paso, S.sub), h = history.state;
+    if (h && h.csK === k) return;
+    try {
+      if (histIni || !h || h.csI == null) { var i = h && h.csI != null ? h.csI : 0; hist[i] = k; history.replaceState({ csK: k, csI: i }, ''); }
+      else { hist.length = h.csI + 1; hist.push(k); history.pushState({ csK: k, csI: h.csI + 1 }, ''); }
+    } catch (e) { /* sin historial: el flujo funciona igual */ }
+  }
+  window.addEventListener('popstate', function (e) {
+    var h = e.state; if (!h || !h.csK) return;
+    var p = parseInt(h.csK, 10), sub = p === 1 ? (h.csK.slice(1) || 'v') : undefined;
+    track('flujo_volver', { desde: S.paso, via: 'historial' });
+    if (p === 1 && S.paso === 1) { S.sub = sub; S.modal = null; pintarModal(); render(true); } else ir(p, 'historial', sub);
+  });
+  /* Volver con la flecha de la pantalla: si la anterior del historial es justo esa, se usa el historial (no se apilan entradas). */
+  function volverA(p, sub) {
+    var h = history.state;
+    if (h && h.csI > 0 && hist[h.csI - 1] === claveHist(p, sub)) { history.back(); return; }
+    ir(p, 'volver', sub);
+  }
   function ir(p, motivo, sub) {
     if (p === 1 && MODO === 'auto') { location.href = 'home-calcular.html?' + new URLSearchParams({ destino: destKey, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, modo: 'auto', fuente: 'destino_auto', origen_home: qs.get('origen_home') || '' }).toString() + (debug ? '&debug=1' : ''); return; }
     if (p === 1) S.sub = sub || (S.paso === 2 ? 't' : 'v');
@@ -3012,8 +3037,8 @@
   /* ---- Eventos ---- */
   $('back').addEventListener('click', function () {
     track('flujo_volver', { desde: S.paso });
-    if (S.paso === 1 && MODO === 'avion' && S.sub === 't') { S.sub = 'v'; render(true); return; }
-    if (S.paso === 12) ir(11, 'volver'); else if (S.paso === 11) ir(S.desde11 || 6, 'volver'); else if (S.paso === 10) ir(9, 'volver'); else if (S.paso === 9) ir(6, 'volver'); else if (S.paso === 8) ir(S.desde8 || 6, 'volver'); else if (S.paso === 7) ir(6, 'volver'); else if (S.paso === 6) ir(4, 'volver'); else if (S.paso > 1) ir(S.paso - 1, 'volver'); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
+    if (S.paso === 1 && MODO === 'avion' && S.sub === 't') { volverA(1, 'v'); return; }
+    if (S.paso === 12) volverA(11); else if (S.paso === 11) volverA(S.desde11 || 6); else if (S.paso === 10) volverA(9); else if (S.paso === 9) volverA(6); else if (S.paso === 8) volverA(S.desde8 || 6); else if (S.paso === 7) volverA(6); else if (S.paso === 6) volverA(4); else if (S.paso > 1) volverA(S.paso - 1); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
   });
   $('cta').addEventListener('click', function () {
     track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });
@@ -3156,7 +3181,7 @@
     else if (t.dataset.asesor) { track('flujo_contactar_asesor', { total: Math.round(totalHastaAhora()) }); window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola! Armé mi viaje en CuántoSale. ' + resumenTexto(datosFinal()) + ' Ref: ' + window.CS_VIAJE_ID), '_blank', 'noopener'); return; }
     else if (t.dataset.seg) { S.segAbierto = S.segAbierto === t.dataset.seg ? '' : t.dataset.seg; track('flujo_distribucion_categoria', { categoria: t.dataset.seg, abierta: !!S.segAbierto }); }
     else if (t.dataset.comidas) { S.comidasAbierto = !S.comidasAbierto; track('flujo_ver_comidas', { abierto: S.comidasAbierto }); }
-    else if (t.dataset.ir) { track('flujo_resumen_editar', { paso_destino: +t.dataset.ir }); ir(+t.dataset.ir, 'resumen'); if (t.dataset.sub) { S.sub = t.dataset.sub; render(true); } return; }
+    else if (t.dataset.ir) { track('flujo_resumen_editar', { paso_destino: +t.dataset.ir }); ir(+t.dataset.ir, 'resumen', t.dataset.sub); return; }
     else if (t.dataset.habs) { abrirHabitaciones(t.dataset.habs); return; }
     else if (t.dataset.xcat) { S.fExtra = t.dataset.xcat; track('flujo_filtro', { lista: 'extras', filtro: S.fExtra }); }
     else if (t.dataset.xmas) { S.xmas[t.dataset.xmas] = true; track('flujo_ver_mas', { lista: 'extras_' + t.dataset.xmas }); }
@@ -3226,6 +3251,7 @@
     } else { S.avisoCs = 'Ese enlace de confirmación no es válido. Pedile uno nuevo a tu asesor.'; ir(7, 'enlace_invalido'); }
   }
   var p0 = +qs.get('paso') || (MODO === 'auto' ? 2 : 0); if (!cf && p0 >= 2 && p0 <= 4) ir(p0, MODO === 'auto' ? 'desde_auto' : 'desde_ahorro');
+  histIni = false;
   var vuelosListos = Promise.resolve(MODO === 'avion' ? cargarVuelos() : (MODO === 'bus' ? cargarBus() : null));
   CSCuenta.alCambiar(function (u) { if (u) restaurarPendiente(u); });
 })();
