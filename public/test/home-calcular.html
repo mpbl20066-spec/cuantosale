@@ -388,7 +388,7 @@
   var PANT = { 1: pant1, 2: pant2, 3: pant3, 4: pant4, 5: pant5 };
   var PAGS = { 1: ['destino-fechas', '¿A dónde querés ir?'], 2: ['como-viajar', '¿Cómo querés viajar?'], 3: ['auto', 'Contanos sobre tu auto'], 4: ['ruta-auto', 'Tu ruta en auto'], 5: ['resumen-auto', 'Tu viaje'] };
   function ir(n, motivo) {
-    S.pant = n; PANT[n](); $('main').insertAdjacentHTML('beforeend', '<p class="c-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>'); $('main').scrollTop = 0;
+    S.pant = n; PANT[n](); $('main').scrollTop = 0;
     document.title = PAGS[n][1] + ' · CuántoSale';
     window.mockTrack('page_view', { page_path: '/viaje/inicio/' + PAGS[n][0], page_title: PAGS[n][1] + ' · CuántoSale', motivo: motivo });
   }
@@ -456,7 +456,7 @@
   });
   window.mockTrack('page_view', { page_path: '/viaje/inicio/' + PAGS[1][0], page_title: PAGS[1][1] + ' · CuántoSale', motivo: 'entrada' });
   document.title = PAGS[1][1] + ' · CuántoSale';
-  pant1(); $('main').insertAdjacentHTML('beforeend', '<p class="c-ref">Código de tu viaje: <b>' + esc(window.CS_VIAJE_ID || '') + '</b></p>');
+  pant1();
   /* Viene pedido en auto (desde presupuesto o destino): directo a los datos del auto, luego combustible, peajes y mapa. */
   if (qs.get('modo') === 'auto' && destInfo() && mediosDe(destInfo()).indexOf('auto') >= 0) { S.modo = 'auto'; ir(3, 'modo_auto'); }
 })();
