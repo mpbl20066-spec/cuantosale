@@ -89,6 +89,8 @@
   .f-h3{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-size:17px;font-weight:800;margin:18px 0 2px;color:var(--ink)}
   .f-h3 svg{color:var(--azul)}
   .f-h3+.f-sub{margin-bottom:8px}
+  .ho-mas{display:flex;justify-content:center;gap:4px 18px;flex-wrap:wrap}
+  .ho-mas .f-more{margin:2px 0 0}
   .f-more{display:block;margin:2px auto 0;padding:8px 14px;border:0;background:transparent;color:var(--ink);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 
   .trc:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -1009,7 +1011,10 @@
   .dd-o strong small,.dd-o>small{display:block;font-family:var(--fb);font-size:11px;font-weight:600;color:var(--ink2)}
   .dd-o__ing{display:flex;align-items:center;gap:6px;font-size:17px!important}
   .dd-o label{font-size:12px;font-weight:700;color:var(--ink2)}
-  .dd-in{display:flex;align-items:center;gap:6px;margin-top:auto;font-family:var(--fh);font-size:20px;font-weight:800}
+  /* .dd-o>.dd-in y no .dd-in: si no, .dd-o>span (la descripcion de 12px) le ganaba y el monto escrito salia chiquito */
+  .dd-o>.dd-in{display:flex;align-items:center;gap:6px;margin-top:auto;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.1;color:var(--ink)}
+  .dd-in input{-moz-appearance:textfield;appearance:textfield}
+  .dd-in input::-webkit-outer-spin-button,.dd-in input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .dd-in input{width:100%;min-width:0;padding:2px 4px;border:0;border-bottom:2px solid var(--ink2);background:transparent;color:var(--ink);font:inherit;font-variant-numeric:tabular-nums}
   .dd-in input:focus{outline:none;border-bottom-color:#F5C518}
   .dd-tot{margin:8px 2px 0;font-size:12.5px;font-weight:700;color:var(--ink2)}
@@ -1484,7 +1489,7 @@
   var todosExtras = [].concat.apply([], EXTRAS.map(function (s) { return s.items; }));
 
   /* ---- Estado ---- */
-  var S = { catH: 'economico', dia: { local: { k: 'eco' }, comidas: { k: 'casual' } }, cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 5, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: '', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'precio', comidasMonto: null, cmp: null, reales: {}, editRes: '', verMasVuelos: false };
+  var S = { catH: 'economico', dia: { local: { k: 'eco' }, comidas: { k: 'casual' } }, cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 4, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: '', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'precio', comidasMonto: null, cmp: null, reales: {}, editRes: '', verMasVuelos: false };
   var precioHotelEstimado = function (h) { return S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.total : h.precio; };
   var precioHotel = function (h) { return S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : precioHotelEstimado(h); };
   var vuelo = function () { return VUELOS.filter(function (v) { return v.id === S.vuelo; })[0] || SIN_VUELO; };
@@ -1873,7 +1878,7 @@
     else a.sort(function (x, y) { return puntajeH(y) - puntajeH(x); });
     return a;
   }
-  var MAX_HOTELES = 5; /* de a 5; "Ver más alojamiento" suma otros 5 */
+  var MAX_HOTELES = 4; /* de a 4; "Ver más alojamiento" suma otros 4 y "Ver menos" vuelve a 4 */
   var playasDe = function () {
     var c = {};
     hotelesDeCategoria().forEach(function (h) { c[h.zona] = (c[h.zona] || 0) + 1; });
@@ -1930,7 +1935,8 @@
     var cats = [['economico', 'Económico'], ['intermedio', 'Equilibrado'], ['confort', 'Cómodo'], ['all-inclusive', 'All Inclusive']];
     var categoria = HOTELES.some(function (h) { return h.tipo; }) ? '<div class="hc-cat"><span class="hc-l" id="hc-cat">Categoría de alojamiento</span><div class="hc-chips" role="group" aria-labelledby="hc-cat">' +
       cats.map(function (c) { return '<button type="button" class="hc-chip' + (S.catH === c[0] ? ' is-on' : '') + '" data-cath="' + c[0] + '" aria-pressed="' + (S.catH === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div></div>' : '';
-    var selector = playas.length > 1 ? '<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">Zona o playa</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
+    /* La zona o playa se ve siempre que haya hoteles (aunque sea una sola zona), para que el filtro no desaparezca al cambiar de categoria */
+    var selector = playas.length ? '<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">Zona o playa</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
       zchip('todas', 'Todas', 0) + rapidas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') +
       (playas.length > 4 ? '<button type="button" class="hc-chip" data-zonas-mas="1" aria-expanded="' + !!S.zonasTodas + '">' + (S.zonasTodas ? 'Menos zonas ▴' : 'Más zonas ▾') + '</button>' : '') + '</div></div>' : '';
     var iPin = '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>';
@@ -1951,7 +1957,10 @@
           '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + NOCHES + ' noches · ' + personas + '</small></div>' +
           (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Elegir habitación') + '</button>') + '</div></div>';
       }).join('') +
-      (lista.length > mostrados.length ? '<button type="button" class="f-more" data-mashoteles="1">Ver más alojamiento</button>' : '') +
+      /* Ver mas suma de a 4; Ver menos vuelve a los primeros 4 */
+      (lista.length > mostrados.length || S.nH > MAX_HOTELES ? '<div class="ho-mas">' +
+        (lista.length > mostrados.length ? '<button type="button" class="f-more" data-mashoteles="1">Ver más alojamiento</button>' : '') +
+        (S.nH > MAX_HOTELES && mostrados.length > MAX_HOTELES ? '<button type="button" class="f-more" data-menoshoteles="1">Ver menos</button>' : '') + '</div>' : '') +
       (lista.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Mostrando ' + mostrados.length + ' de ' + lista.length + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '</p>' : '');
   }
   var iClock = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', iUsers = '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.3c1.7.8 3 2.5 3 5.2"/>';
@@ -1962,7 +1971,7 @@
     var items = grupo.items;
     var baratos = items.map(function (x) { return x.precio; }).sort(function (a, b) { return a - b; });
     if (items.length > 1 && e.precio === baratos[0]) return '💰 Mejor precio';
-    if (e.cat === 'tours' && items.length > 1 && horas(e.dur) === Math.max.apply(null, items.map(function (x) { return horas(x.dur); }))) return '🟢 Experiencia completa';
+    if (e.cat === 'tours' && items.length > 1 && horas(e.dur) === Math.max.apply(null, items.map(function (x) { return horas(x.dur); }))) return 'Recomendado';
     return '';
   }
   function filaExtra(e, grupo) {
@@ -1988,7 +1997,7 @@
       var t = TITULO_X[g.cat], todos = S.fExtra !== 'todos' || S.xmas[g.cat], lim = todos ? g.items.length : CUANTOS_X[g.cat], vis = g.items.slice(0, lim);
       /* "Ver más tours" solo si quedan tours sin mostrar; si lo que queda son traslados, se muestran todos de una. */
       if (!g.items.slice(lim).some(function (e) { return e.cat === 'tours'; })) vis = g.items.slice();
-      return '<h2 class="f-h3 x-h3"><span class="x-ico">' + t[0] + '</span><span>' + t[1] + '<small>' + esc(t[2]) + (g.cat === 'tours' ? esc(DEST) : '') + '</small></span></h2>' +
+      return '<h2 class="f-h3 x-h3"><span>' + t[1] + '</span></h2>' +
         vis.map(function (e) { return filaExtra(e, g); }).join('') +
         (g.items.length > vis.length ? '<button type="button" class="f-more" data-xmas="' + g.cat + '">' + MAS_TXT[g.cat] + '</button>' : '');
     }).join('') + bloqueDia('local') + bloqueDia('comidas');
@@ -2931,7 +2940,8 @@
       '<div class="td-meta"><span>' + ic(iClock, 16) + esc(e.dur || '') + '</span>' + (e.grupo ? '<span>' + ic(iUsers, 16) + esc(e.grupo) + '</span>' : '') + (t.edad ? '<span>' + esc(t.edad) + '</span>' : '') + '</div>' +
       (t.descripcion ? '<p class="td-p">' + esc(t.descripcion) + '</p>' : '') + (t.detalle && t.detalle !== t.descripcion ? '<p class="td-p">' + esc(t.detalle) + '</p>' : '') +
       lista('Qué incluye', t.incluye, mkSi, 'si') + lista('No incluye', t.noIncluye, mkNo, 'no') + lista('Qué llevar', t.llevar, '<i class="td-i td-i--l" aria-hidden="true"></i>', 'l') +
-      (t.cancelacion ? '<p class="td-c">' + esc(t.cancelacion) + '</p>' : '') +
+      /* El catalogo dice "Gratis hasta 72 hs antes": se aclara que es la cancelacion */
+      (t.cancelacion ? '<p class="td-c">' + esc(/cancel/i.test(t.cancelacion) ? t.cancelacion : (/^gratis/i.test(t.cancelacion) ? 'Cancelación gratis' + t.cancelacion.replace(/^gratis/i, '') : 'Cancelación: ' + t.cancelacion)) + '</p>' : '') +
       '<p class="td-pr"><b>' + f(e.precio) + '</b> ' + (e.pp ? 'por persona' : 'por vehículo') + '</p>' +
       '<button type="button" class="g-btn ' + (on ? '' : 'g-btn--main') + '" data-extra="' + e.id + '" data-cerrar-det="1">' + (on ? 'Sacar de mi viaje' : 'Sumar a mi viaje') + '</button></div>';
   }
@@ -3055,7 +3065,7 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-zonas-mas],[data-mashoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-zonas-mas],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
@@ -3102,6 +3112,10 @@
     }
     else if (t.dataset.zona) { S.playaSel = t.dataset.zona; S.nH = MAX_HOTELES; track('flujo_playa', { playa: S.playaSel, via: 'chip' }); }
     else if (t.dataset.zonasMas) { S.zonasTodas = !S.zonasTodas; track('flujo_zonas_mas', { abierto: S.zonasTodas }); }
+    else if (t.dataset.menoshoteles) {
+      S.nH = MAX_HOTELES; track('flujo_ver_menos', { lista: 'hoteles' }); render(false);
+      var mn = $('main'), h0 = mn.querySelector('.ho'); if (h0) mn.scrollTop += h0.getBoundingClientRect().top - mn.getBoundingClientRect().top - 120; return;
+    }
     else if (t.dataset.mashoteles) { S.nH += MAX_HOTELES; track('flujo_ver_mas', { lista: 'hoteles', mostrados: S.nH }); }
     else if (t.dataset.cmp) { compararFechas(); return; }
     else if (t.dataset.afSel) { S.cmpSel = S.cmpSel === t.dataset.afSel ? '' : t.dataset.afSel; track('flujo_comparativa_fecha', { fecha: t.dataset.afSel }); render(false); $('main').scrollTop = y; var fb = $('main').querySelector('[data-af-sel="' + S.cmpSel + '"]'); if (fb) fb.focus(); return; }
