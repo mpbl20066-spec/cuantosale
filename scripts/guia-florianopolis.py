@@ -512,26 +512,26 @@ def generar():
           'Grupos de amigos y parejas jóvenes',
           'Dónde está la movida y las playas con olas'],
          ['<b>Sur</b><br/>Naufragados, Campeche',
-          'Naturaleza y silencio. Naufragados es una postal sin servicios',
-          'Adventureros y quien quiera desconectar de verdad',
-          'Carrete, o el mejor atardecer del estado'],
+          'Naturaleza: playas a las que se llega por sendero',
+          'Aventureros y quien quiera desconectar',
+          'Senderos: a Naufragados y Lagoinha do Leste se llega a pie'],
          ['<b>Centro</b><br/>Beira-Mar',
-          'Ciudad: comercio, mercadito, ciclovia, movimiento',
-          'Quien quiera ver el producto de la isla y comer PF barato',
-          'El corazón. El Prato executivo y el bondinho salen de acá'],
+          'Ciudad: comercio, Mercado Público, costanera con ciclovía',
+          'Quien quiera caminar la ciudad y comer PF barato',
+          'Centro histórico, Mercado Público y puente Hercílio Luz'],
          ['<b>Lagoa</b><br/>Lagoa da Conceição',
-          'No es mar: laguna de agua dulce, tibia y protegida',
+          'No es mar: laguna salobre, conectada al océano',
           'El plan cuando el tiempo está feo',
           'No depende del oleaje. Kayak, paddle y dunas al lado'],
-         ['<b>Santo Antônio</b><br/>y São Francisco',
-          'Sur de la isla, entre el centro y el sur',
-          'El que recorre la Costa Verde a pie o en bondinho',
-          'El tramo de 12 km de caminata con vista al mar']],
+         ['<b>Bahía</b><br/>Santo Antônio, Ribeirão',
+          'Pueblos azorianos sobre la bahía, al noroeste y al sur',
+          'Quien busca ostras y atardecer',
+          'Casas coloniales y criaderos de ostras frente al agua']],
         [3.3 * cm, 4.3 * cm, 4.2 * cm, 4.7 * cm])]
 
     st += [Spacer(1, 6), P('Tres cosas de zonificación que se saben después de sufrir', st_h2)]
-    claves = ('Toda la isla es un mismo lugar', 'La franja no se camina',
-              'El centro viejo está donde no lo esperás', 'Auto solo si vas al sur')
+    claves = ('Toda la isla es un mismo lugar', 'En la bahía no se nada',
+              'Dónde está el centro histórico', 'Auto o bus, según el plan')
     for t in d['tips']:
         if t['titulo'] in claves:
             st += tip('<b>%s.</b> %s' % (t['titulo'], t['texto']))
@@ -547,8 +547,8 @@ def generar():
     for item in d['comer']:
         st.append(P('<b>%s</b> &nbsp;<font color="#E65100"><b>US$ %s</b></font> &nbsp;'
                     '<font color="#78909C">%s · %s</font><br/>%s'
-                    % (item['name'], item['usd'] or '—', item['tipo'] or '',
-                       item['momento'] or '', item['nota']), st_body))
+                    % (item['name'], item.get('usd') or '—', item.get('tipo') or '',
+                       item.get('momento') or '', item['nota']), st_body))
         st.append(Spacer(1, 3))
 
     st += [Spacer(1, 5), P('El Prato Feito y la comida por peso', st_h2)]
@@ -563,9 +563,8 @@ def generar():
         'Hipermax). El precio por kilo es una fracción del de un supermercado de barrio.',
         'El <b>kiosco de playa</b> cobra dos o tres veces por la misma cerveza que en la '
         'ciudad. Es un peaje por la sombra: pagá solo la botellita de agua.',
-        'La <b>feira do produtor</b> del sábado, en la Beira-Mar y en São Francisco, es la '
-        'compra más barata del viaje: fruta, pan de queso, jugos naturales y comida hecha a '
-        'precio de productor. Se compra, se cocina y se come en la playa.',
+        'La <b>feira do produtor</b> (feria de productores de los barrios) es la '
+        'compra más barata de fruta y verdura del viaje.',
         'Para el agua y la cerveza de todos los días, el súper del barrio. Para la compra '
         'grande, el mayorista. Para lo fresco del fin de semana, la feira.',
     ])
@@ -574,7 +573,7 @@ def generar():
     st.append(tabla(
         ['Nivel', 'Comida por día', 'Traslado por día', 'Se traduce en'],
         [['Económico', 'US$ %s' % comida.get('casual', '28'),
-          'US$ %s' % trasl.get('eco', '16'), 'PF, bondinho, beaches gratuitas'],
+          'US$ %s' % trasl.get('eco', '16'), 'PF, bus urbano, playas gratis'],
          ['Medio', 'US$ %s' % comida.get('moderado', '55'),
           'US$ %s' % trasl.get('medio', '24'), 'restaurante y algún taxi'],
          ['Confort', 'US$ %s' % comida.get('gourmet', '90'),
