@@ -70,6 +70,7 @@
       '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button>' +
       '<button class="tab" role="tab" data-vista="servicios" aria-selected="' + (S.vista === 'servicios') + '">Servicios</button>' +
       '<button class="tab" role="tab" data-vista="publicar" aria-selected="' + (S.vista === 'publicar') + '">Por publicar<span id="tab-pub">' + (nPend() ? ' (' + nPend() + ')' : '') + '</span></button>' +
+      '<button class="tab" role="tab" data-vista="importar" aria-selected="' + (S.vista === 'importar') + '">Importar</button>' +
       '<button class="tab" role="tab" data-vista="mensajes" aria-selected="' + (S.vista === 'mensajes') + '">Mensajes<span id="tab-noleidos">' + (S.chats && S.chats.no_leidos ? ' (' + S.chats.no_leidos + ')' : '') + '</span></button>' +
       '<button class="tab" role="tab" data-vista="whatsapp" aria-selected="' + (S.vista === 'whatsapp') + '">WhatsApp</button>' +
       '<button class="tab" role="tab" data-vista="viajes" aria-selected="' + (S.vista === 'viajes') + '">Viajes guardados</button>' +
@@ -98,7 +99,7 @@
       if (S.verPre) html += detallePrecarga(pc, S.verPre);
     }
     html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
-      (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : vistaProveedores(d)))))));
+      (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : vistaProveedores(d))))))));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
@@ -699,6 +700,13 @@
     'orden', 'proveedor_id', 'tipo', 'duracion', 'grupo', 'punto_salida', 'edad_minima', 'incluye', 'no_incluye', 'politica_cancelacion', 'que_llevar', 'link_web'];
 
   function brl(n) { return 'R$ ' + (Number(n) || 0).toLocaleString('es-UY', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+  /* El precio publicado se guarda en US$ por persona, que es lo que usa la web (y cada visitante lo ve en su moneda).
+     En el panel se muestra en reales, con la misma cotizacion de operaciones, para compararlo de un vistazo con lo que
+     cobra el proveedor. Sin cotizacion cargada se muestra en dolares. */
+  function pub(n) {
+    var cot = S.ops && S.ops.datos && Number(S.ops.datos.config.cotizacion);
+    return cot > 0 ? brl(r2(Number(n) * cot)) : usd(n);
+  }
   function hoyISO() { return new Date().toISOString().slice(0, 10); }
   function provDe(id) { return id && S.datos ? S.datos.proveedores.filter(function (p) { return p.id === id; })[0] : null; }
   function destNombre(k) { var o = S.ops && S.ops.datos; var d = o ? o.destinos.filter(function (x) { return x.key === k; })[0] : null; return d ? d.nombre : k; }
@@ -736,7 +744,7 @@
     if (!S.ops || S.ops.error) S.ops = { cargando: true };
     return api('ops/datos').then(function (d) {
       S.ops = { datos: d };
-      if (S.vista === 'servicios' || S.vista === 'publicar') pintarFondo(); else actualizarBadgePub();
+      if (S.vista === 'servicios' || S.vista === 'publicar' || S.vista === 'importar') pintarFondo(); else actualizarBadgePub();
       if (S.srv) refrescarSrv();
     }).catch(function (e) { S.ops = { error: e.message }; if (S.vista === 'servicios' || S.vista === 'publicar') pintarFondo(); });
   }
@@ -749,9 +757,10 @@
     if (o.error) return '<div class="card"><p class="vacio">No se pudieron cargar los servicios: ' + esc(o.error) + ' <button class="btn" data-act="ops-recargar">Reintentar</button></p></div>';
     var d = o.datos, pend = pendPorTour(), dias = d.config.dias_desactualizado;
     var clase = function (s) {
-      return { todos: true, publicados: s.activo && s.revision === 'ok', pendientes: !!pend[s.id], revision: s.revision === 'pendiente', inactivos: !s.activo, viejos: s.activo && viejo(s, dias) };
+      if (s.eliminado_at) return { papelera: true };
+      return { todos: true, publicados: s.activo && s.revision === 'ok', nuevos: !s.publicado_at, pendientes: !!pend[s.id], revision: s.revision === 'pendiente', inactivos: !s.activo && !!s.publicado_at, viejos: s.activo && viejo(s, dias) };
     };
-    var nombres = { todos: 'Todos', publicados: 'En la web', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados' };
+    var nombres = { todos: 'Todos', publicados: 'Activos', nuevos: 'Nuevos', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados', papelera: 'Papelera' };
     var cuenta = {}; Object.keys(nombres).forEach(function (k) { cuenta[k] = 0; });
     d.servicios.forEach(function (s) { var c = clase(s); Object.keys(c).forEach(function (k) { if (c[k]) cuenta[k]++; }); });
     var f = S.srvFiltro || 'todos', q = sinTildes(S.qSrv || '');
@@ -766,7 +775,8 @@
     d.servicios.forEach(function (s) { destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1; });
     var h = '<div class="bar"><div class="chips"><b>Servicios: tours, actividades y traslados</b></div><button class="btn btn--main" data-act="nuevo-srv">+ Servicio</button></div>' +
       '<p class="sub" style="margin:-4px 0 12px">Cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') +
-      ' · margen general ' + (d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) + ' por persona sobre precios en reales' : 'sin margen') + '</p>' +
+      ' · margen general ' + (d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor) + ' (' + pub(d.config.margen.valor) + ')') + ' por persona sobre precios en reales' : 'sin margen') +
+      ' · los precios publicados se muestran en reales; la web los guarda en dólares</p>' +
       '<div class="bar"><div class="chips">' + Object.keys(nombres).map(function (k) {
         return '<button class="chip" data-sfiltro="' + k + '" aria-pressed="' + (f === k) + '">' + esc(nombres[k]) + '<span>' + cuenta[k] + '</span></button>';
       }).join('') + '</div></div>' +
@@ -775,18 +785,23 @@
       '<select data-sprov style="max-width:240px"><option value="">Todos los proveedores</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
       '<input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '"></div>';
-    if (!lista.length) return h + '<div class="card"><p class="vacio">No hay servicios con ese filtro.</p></div>';
-    h += '<div class="card"><table><thead><tr><th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th></tr></thead><tbody>';
+    if (!lista.length) return h + '<div class="card"><p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
+    if (f === 'papelera') h += '<p class="sub" style="margin:-4px 0 12px">Lo que está en la papelera no se ve en la web. "Recuperar" lo deja como estaba; "Borrar" lo elimina para siempre (su historial de precios queda).</p>';
+    h += '<div class="card"><table><thead><tr><th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
     lista.forEach(function (s) {
       var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
-      var estado = !s.activo ? '<span class="pill p-cancelado">apagado</span>' : '<span class="pill p-confirmado">en la web</span>';
+      var estado = s.eliminado_at ? '<span class="pill p-cancelado">en la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo">Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado">Activo</span>' : '<span class="pill p-cancelado">Apagado</span>'));
+      if (s.tipo === 'traslado' && !s.eliminado_at) estado += ' <span class="pill p-consultado" title="La web calcula los traslados aparte">no va a la web</span>';
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '">revisar</span>';
       h += '<tr class="row" data-srv="' + esc(s.id) + '"><td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub">' + esc(destNombre(s.destino)) + ' · ' + esc(TIPOS_SRV[s.tipo] || s.tipo) + ' · ' + (pr ? esc(pr.nombre) : '<i>sin proveedor</i>') + '</span></td>' +
         '<td data-l="Proveedor cobra">' + origenTxt(s) + '</td>' +
-        '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + usd(s.precio_publicado) + '</b>' : '—') + '<span class="sub">por persona</span></td>' +
-        '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? usd(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
+        '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') + '</td>' +
+        '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? pub(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
         '<td data-l="Estado">' + estado + '</td>' +
-        '<td data-l="Verificado"' + (c.viejos ? ' class="deuda"' : '') + '>' + (s.verificado ? esc(fecha(s.verificado)) + ' ' + esc(s.verificado.slice(0, 4)) : 'nunca') + '</td></tr>';
+        '<td data-l="Verificado"' + (c.viejos ? ' class="deuda"' : '') + '>' + (s.verificado ? esc(fecha(s.verificado)) + ' ' + esc(s.verificado.slice(0, 4)) : 'nunca') + '</td>' +
+        '<td data-l="" style="white-space:nowrap">' + (s.eliminado_at
+          ? '<button class="btn btn--sm" data-recuperar="' + esc(s.id) + '">Recuperar</button> <button class="btn btn--sm btn--danger" data-borrar="' + esc(s.id) + '">Borrar</button>'
+          : '<button class="btn btn--sm btn--x" data-papelera="' + esc(s.id) + '" title="Mandar a la papelera" aria-label="Mandar a la papelera">🗑</button>') + '</td></tr>';
     });
     return h + '</tbody></table></div>';
   }
@@ -827,11 +842,14 @@
       var s = porId[c.tour_id] || {}, p = pctTxt(c.publicado_antes, c.publicado_despues);
       var fuerte = c.publicado_antes && c.publicado_despues != null && Math.abs((c.publicado_despues - c.publicado_antes) / c.publicado_antes) >= 0.2;
       var noSe = c.publicado_despues == null && (c.despues.activo === true || (c.despues.activo === undefined && s.activo));
+      /* Igual que en lib/operaciones.js publicar(): importado sin unidad, hay que confirmarla en el editor. */
+      var sinUnidad = c.origen === 'importacion' && s.revision === 'pendiente' && /unidad|persona o por/.test(s.revision_motivo || '') && c.despues.activo === true;
       h += '<tr><td data-l="Elegir"><input type="checkbox" data-sel="' + esc(c.id) + '" style="width:auto;min-height:0"' + (S.sel[c.id] ? ' checked' : '') + '></td>' +
         '<td data-l="Servicio"><a class="lnk" href="#" data-srv="' + esc(c.tour_id || '') + '">' + esc(s.titulo || String(c.tour_clave).split('#')[1] || '?') + '</a><span class="sub">' + esc(destNombre(s.destino || String(c.tour_clave).split('#')[0])) + (s.precio_publicado == null && !s.activo ? ' · nuevo' : '') + '</span></td>' +
         '<td data-l="Qué cambia">' + difsHtml(c) + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') + '</td>' +
-        '<td class="num" data-l="Publicado hoy">' + (c.publicado_antes != null ? usd(c.publicado_antes) : '—') + '</td>' +
-        '<td class="num" data-l="Quedaría">' + (noSe ? '<span class="deuda">no se puede calcular</span>' : (c.publicado_despues != null ? '<b' + (fuerte ? ' class="deuda"' : '') + '>' + usd(c.publicado_despues) + '</b><span class="sub">' + esc(p) + '</span>' : '—')) + '</td>' +
+        '<td class="num" data-l="Publicado hoy">' + (c.publicado_antes != null ? pub(c.publicado_antes) + '<span class="sub">' + usd(c.publicado_antes) + '</span>' : '—') + '</td>' +
+        '<td class="num" data-l="Quedaría">' + (noSe ? '<span class="deuda">no se puede calcular</span>' : (c.publicado_despues != null ? '<b' + (fuerte ? ' class="deuda"' : '') + '>' + pub(c.publicado_despues) + '</b><span class="sub">' + usd(c.publicado_despues) + ' · ' + esc(p) + '</span>' : '—')) +
+          (sinUnidad ? '<span class="sub deuda">Falta confirmar si es por persona o por vehículo: abrilo y publicalo desde ahí</span>' : '') + '</td>' +
         '<td data-l="Origen">' + esc(ORIGENES[c.origen] || c.origen) + '<span class="sub">' + esc(fechaHora(c.creado_at)) + (c.creado_por ? ' · ' + esc(c.creado_por) : '') + '</span></td>' +
         '<td data-l=""><button class="btn btn--sm" data-pub-uno="' + esc(c.id) + '">Publicar</button></td></tr>';
     });
@@ -867,10 +885,10 @@
   }
   function prevHtml() {
     var cfg = S.ops.datos.config, x = srvParaCalc(), c = calcPub(x, provDe(x.proveedor_id), cfg), o = S.srv.orig;
-    var hoy = o && o.precio_publicado != null ? usd(o.precio_publicado) : 'nada (no está en la web)';
+    var hoy = o && o.precio_publicado != null ? pub(o.precio_publicado) : 'nada (no está en la web)';
     if (c.error) return '<div><small>Publicado hoy</small><b>' + esc(hoy) + '</b></div><div style="grid-column:span 2"><small>Quedaría</small><b class="deuda" style="font-size:14px">' + esc(c.error) + '</b></div>';
-    return '<div><small>Publicado hoy</small><b>' + esc(hoy) + '</b></div><div><small>Quedaría (por persona)</small><b>' + usd(c.valor) + '</b> <span class="sub">' + esc(pctTxt(o && o.precio_publicado, c.valor)) + '</span></div>' +
-      '<div style="grid-column:1/-1"><small>Cuenta</small><span class="sub">' + esc(c.pasos.join(' ')) + '</span></div>';
+    return '<div><small>Publicado hoy</small><b>' + esc(hoy) + '</b></div><div><small>Quedaría (por persona)</small><b>' + pub(c.valor) + '</b> <span class="sub">' + esc(pctTxt(o && o.precio_publicado, c.valor)) + '</span></div>' +
+      '<div style="grid-column:1/-1"><small>Cuenta</small><span class="sub">' + esc(c.pasos.join(' ') + ' = ' + usd(c.valor) + ' en la web (' + pub(c.valor) + ')') + '</span></div>';
   }
   function abrirSrv() {
     var s = S.srv, f = s.f, d = S.ops.datos, el = document.getElementById('drawer');
@@ -881,7 +899,7 @@
     var provs = S.datos.proveedores.filter(function (p) { return !p.eliminado_at || p.id === f.proveedor_id; });
     var pend = s.pend;
     el.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Servicio" style="width:min(820px,100%)"><div class="panel__head"><h2>' + esc(s.orig ? s.orig.titulo : 'Nuevo servicio') +
-      (s.orig ? ' <span class="pill ' + (s.orig.activo ? 'p-confirmado">en la web' : 'p-cancelado">apagado') + '</span>' : '') + '</h2><button class="btn btn--sm" data-act="cerrar">Cerrar</button></div><div class="panel__body">' +
+      (s.orig ? ' <span class="pill ' + (s.orig.eliminado_at ? 'p-cancelado">en la papelera' : (!s.orig.publicado_at ? 'p-nuevo">Nuevo' : (s.orig.activo ? 'p-confirmado">Activo' : 'p-cancelado">Apagado'))) + '</span>' : '') + '</h2><button class="btn btn--sm" data-act="cerrar">Cerrar</button></div><div class="panel__body">' +
       (pend ? '<p class="aviso" style="margin:0">Tiene un cambio sin publicar (' + esc(ORIGENES[pend.origen] || pend.origen) + ', ' + esc(fechaHora(pend.creado_at)) + '). Lo que ves abajo ya lo incluye. ' +
         '<button class="btn btn--sm" data-pub-uno="' + esc(pend.id) + '">Publicarlo</button> <button class="btn btn--sm btn--danger" data-desc-uno="' + esc(pend.id) + '">Descartarlo</button></p>' : '') +
       (s.orig && s.orig.revision === 'pendiente' ? '<p class="aviso" style="margin:0">Para revisar: ' + esc(s.orig.revision_motivo || 'faltan datos') + '</p>' : '') +
@@ -920,7 +938,7 @@
       var pill = c.estado === 'publicado' ? 'p-confirmado' : (c.estado === 'pendiente' ? 'p-pendiente' : 'p-cancelado');
       return '<div class="item"><div class="item__top"><div style="flex:1"><b>' + esc(fechaHora(c.resuelto_at || c.creado_at)) + '</b> · ' + esc(ORIGENES[c.origen] || c.origen) +
         ' <span class="pill ' + pill + '">' + esc(ESTADOS_CAMBIO[c.estado] || c.estado) + '</span>' +
-        (c.publicado_despues != null ? '<span class="sub">Precio publicado: ' + (c.publicado_antes != null ? usd(c.publicado_antes) + ' → ' : '') + usd(c.publicado_despues) + ' ' + esc(pctTxt(c.publicado_antes, c.publicado_despues)) + '</span>' : '') +
+        (c.publicado_despues != null ? '<span class="sub">Precio publicado: ' + (c.publicado_antes != null ? pub(c.publicado_antes) + ' → ' : '') + pub(c.publicado_despues) + ' ' + esc(pctTxt(c.publicado_antes, c.publicado_despues)) + '</span>' : '') +
         (c.origen !== 'inicial' ? difsHtml(c) : '') + (c.fuente ? '<span class="sub">Fuente: ' + esc(c.fuente) + '</span>' : '') + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') +
         '<span class="sub">' + (c.creado_por ? 'Por ' + esc(c.creado_por) : '') + (c.resuelto_por && c.estado === 'publicado' ? ' · publicó ' + esc(c.resuelto_por) : '') + '</span></div>' +
         (c.estado === 'publicado' && c.origen !== 'inicial' && Object.keys(c.antes || {}).length ? '<button class="btn btn--sm" data-revertir="' + esc(c.id) + '">Volver a lo de antes</button>' : '') + '</div></div>';
@@ -938,7 +956,7 @@
       var c = calcPub(srvParaCalc(), provDe(f.proveedor_id), S.ops.datos.config);
       if (f.activo && c.error) return mensaje(c.error, true);
       var antes = s.orig && s.orig.precio_publicado;
-      if (!confirm('¿Publicar ya?' + (c.valor != null ? '\nPrecio en la web: ' + (antes != null ? usd(antes) + ' → ' : '') + usd(c.valor) + ' por persona.' : ''))) return;
+      if (!confirm('¿Publicar ya?' + (c.valor != null ? '\nPrecio publicado: ' + (antes != null ? pub(antes) + ' → ' : '') + pub(c.valor) + ' por persona (' + usd(c.valor) + ').' : ''))) return;
     }
     mensaje(publicarYa ? 'Publicando…' : 'Guardando…');
     api('ops/proponer', { id: s.id, cambios: cambios, publicar: !!publicarYa }).then(function (r) {
@@ -962,6 +980,167 @@
   function descartarCambios(ids) {
     if (!ids.length || !confirm('¿Descartar ' + ids.length + ' cambio(s)? La web sigue como está.')) return;
     return api('ops/descartar', { ids: ids }).then(function (r) { S.sel = {}; toast(r.descartados + ' descartado(s)'); return cargarOps(); }).catch(function (e) { toast(e.message); });
+  }
+
+  /* ---------- Importar (CSV o Excel) ----------
+     El archivo se lee en el navegador; al server van solo las columnas elegidas, ya con el nombre de CuántoSale.
+     La vista previa y la confirmacion las calcula el server con la misma funcion (lib/operaciones.js analizarImport),
+     asi que lo que se confirma es lo que se vio. Nada se publica: todo queda en "Por publicar". */
+  var ACCIONES_IMP = { nuevo: 'Nuevo', parecido: 'Parecido a uno tuyo', igual: 'Igual a uno tuyo', repetido: 'Repetido en el archivo', actualiza: 'Cambia', sin_cambios: 'Sin cambios', error: 'Con error' };
+  var DECISIONES_IMP = { nuevo: 'Importar como nuevo', omitir: 'No importar', asignar: 'Asignar el operador al tuyo', actualizar: 'Actualizar' };
+  var PILL_IMP = { nuevo: 'p-nuevo', parecido: 'p-pendiente', igual: 'p-cancelado', repetido: 'p-cancelado', actualiza: 'p-consultado', sin_cambios: 'p-completado', error: 'p-cancelado' };
+
+  function normH(s) { return sinTildes(s).replace(/[^a-z0-9]+/g, ' ').trim(); }
+  function leerCSV(texto) {
+    texto = String(texto).replace(/^﻿/, '');
+    var primera = texto.split(/\r?\n/)[0] || '';
+    var sep = (primera.split(';').length > primera.split(',').length) ? ';' : (primera.indexOf('\t') >= 0 && primera.split('\t').length > primera.split(',').length ? '\t' : ',');
+    var filas = [], fila = [], campo = '', q = false;
+    for (var i = 0; i < texto.length; i++) {
+      var c = texto[i];
+      if (q) { if (c === '"') { if (texto[i + 1] === '"') { campo += '"'; i++; } else q = false; } else campo += c; }
+      else if (c === '"') q = true;
+      else if (c === sep) { fila.push(campo); campo = ''; }
+      else if (c === '\n') { fila.push(campo.replace(/\r$/, '')); filas.push(fila); fila = []; campo = ''; }
+      else campo += c;
+    }
+    if (campo || fila.length) { fila.push(campo.replace(/\r$/, '')); filas.push(fila); }
+    filas = filas.filter(function (f) { return f.some(function (x) { return String(x).trim(); }); });
+    var cab = (filas.shift() || []).map(function (x) { return String(x).trim(); });
+    return { cabeceras: cab, filas: filas.map(function (f) { var o = {}; cab.forEach(function (h, j) { o[h] = f[j] == null ? '' : f[j]; }); return o; }) };
+  }
+  function cargarSheetJS() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    return new Promise(function (ok, mal) {
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+      s.onload = function () { ok(window.XLSX); }; s.onerror = function () { mal(new Error('No se pudo cargar el lector de Excel. Probá guardando el archivo como CSV.')); };
+      document.head.appendChild(s);
+    });
+  }
+  function leerArchivo(file) {
+    S.imp = { paso: 'leyendo', archivo: file.name }; pintar();
+    var esExcel = /\.(xlsx|xls)$/i.test(file.name);
+    var p = esExcel
+      ? Promise.all([cargarSheetJS(), file.arrayBuffer()]).then(function (r) {
+        var wb = r[0].read(r[1], { type: 'array' }), hoja = wb.Sheets[wb.SheetNames[0]];
+        var filas = r[0].utils.sheet_to_json(hoja, { defval: '', raw: false });
+        return { cabeceras: filas.length ? Object.keys(filas[0]) : [], filas: filas };
+      })
+      : file.text().then(leerCSV);
+    p.then(function (d) {
+      if (!d.filas.length) throw new Error('El archivo no tiene filas.');
+      var mapeo = {};
+      S.ops.datos.campos_import.forEach(function (c) {
+        var opciones = [c.k, c.nombre].concat(c.sin).map(normH);
+        var h = d.cabeceras.filter(function (x) { return opciones.indexOf(normH(x)) >= 0; })[0];
+        if (h) mapeo[c.k] = h;
+      });
+      S.imp = { paso: 'columnas', archivo: file.name, cabeceras: d.cabeceras, filas: d.filas, mapeo: mapeo };
+      pintar();
+    }).catch(function (e) { S.imp = { paso: 'archivo', error: e.message }; pintar(); });
+  }
+  function filasMapeadas() {
+    var m = S.imp.mapeo;
+    return S.imp.filas.map(function (f) { var o = {}; Object.keys(m).forEach(function (k) { if (m[k]) o[k] = f[m[k]]; }); return o; });
+  }
+  function decisionDe(r) { return (S.imp.decisiones && S.imp.decisiones[r.n]) || r.decision; }
+  function resumenDecisiones() {
+    var t = { nuevo: 0, asignar: 0, actualizar: 0, omitir: 0, error: 0 };
+    S.imp.previa.filas.forEach(function (r) { if (r.accion === 'error') t.error++; else t[decisionDe(r)] = (t[decisionDe(r)] || 0) + 1; });
+    return t;
+  }
+  function cargarImportaciones() {
+    api('ops/importaciones').then(function (j) { S.impHist = j.importaciones; if (S.vista === 'importar') pintar(); }).catch(function () { S.impHist = []; });
+  }
+  function descargarCSV(nombre, filas) {
+    var csv = '﻿' + filas.map(function (f) { return f.map(function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = nombre; a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  function vistaImportar() {
+    if (!S.ops || !S.ops.datos) return '<p class="vacio">Cargando…</p>';
+    var im = S.imp || { paso: 'archivo' }, h = '<div class="bar"><div class="chips"><b>Importar servicios y precios</b></div>' +
+      (im.paso !== 'archivo' && im.paso !== 'leyendo' ? '<button class="btn btn--sm" data-act="imp-reiniciar">Empezar de nuevo</button>' : '') + '</div>';
+    if (im.paso === 'leyendo' || im.paso === 'analizando' || im.paso === 'confirmando') return h + '<div class="card"><p class="vacio">' + (im.paso === 'confirmando' ? 'Importando… no cierres esta pestaña.' : (im.paso === 'analizando' ? 'Comparando con lo que ya tenés…' : 'Leyendo ' + esc(im.archivo) + '…')) + '</p></div>';
+    if (im.paso === 'archivo') {
+      if (S.impHist === undefined) { S.impHist = null; cargarImportaciones(); }
+      h += '<section class="sec"><h3>1. Elegí el archivo</h3><p class="sub" style="margin:0 0 10px">CSV o Excel, una fila por servicio. Nada se publica: lo que importes queda como <b>Nuevo</b> en Servicios y los precios esperan en <b>Por publicar</b>. Si volvés a subir el mismo archivo, actualiza en vez de duplicar.</p>' +
+        '<input type="file" id="imp-archivo" accept=".csv,.txt,.xlsx,.xls">' + (im.error ? '<p class="err" style="margin-top:8px">' + esc(im.error) + '</p>' : '') + '</section>';
+      var hist = S.impHist || [];
+      if (hist.length) {
+        h += '<div class="card uso-card"><h3 class="uso-h">Últimas importaciones</h3><table><thead><tr><th>Archivo</th><th>Cuándo</th><th class="num">Nuevos</th><th class="num">Actualiza</th><th class="num">No importados</th><th class="num">Errores</th><th></th></tr></thead><tbody>' +
+          hist.map(function (x) { var t = x.totales || {}; return '<tr><td data-l="Archivo">' + esc(x.archivo || '—') + (x.estado !== 'confirmada' ? ' <span class="pill p-cancelado">' + esc(x.estado) + '</span>' : '') + '</td><td data-l="Cuándo">' + esc(fechaHora(x.confirmado_at || x.creado_at)) + '</td>' +
+            '<td class="num" data-l="Nuevos">' + (t.nuevos || 0) + '</td><td class="num" data-l="Actualiza">' + (t.actualiza || 0) + '</td><td class="num" data-l="No importados">' + ((t.omitidas || 0) + (t.sin_cambios || 0)) + '</td>' +
+            '<td class="num" data-l="Errores">' + (t.errores ? '<span class="deuda">' + t.errores + '</span>' : 0) + '</td><td data-l=""><button class="btn btn--sm" data-imp-detalle="' + esc(x.id) + '">Descargar detalle</button></td></tr>'; }).join('') + '</tbody></table></div>';
+      }
+      return h;
+    }
+    if (im.paso === 'columnas') {
+      var campos = S.ops.datos.campos_import, faltan = campos.filter(function (c) { return c.obligatorio && !im.mapeo[c.k]; });
+      var ejemplo = function (col) { var f = im.filas.filter(function (x) { return String(x[col] || '').trim(); })[0]; var v = f ? String(f[col]) : ''; return v.length > 60 ? v.slice(0, 57) + '…' : v; };
+      h += '<section class="sec"><h3>2. Qué es cada columna</h3><p class="sub" style="margin:0 0 10px">' + esc(im.archivo) + ' · ' + im.filas.length + ' filas · ' + im.cabeceras.length + ' columnas. Las que reconocí ya están elegidas; revisalas.</p>' +
+        '<div class="card"><table><thead><tr><th>Dato de CuántoSale</th><th>Columna del archivo</th><th>Ejemplo</th></tr></thead><tbody>' +
+        campos.map(function (c) {
+          return '<tr><td data-l="Dato"><b>' + esc(c.nombre) + '</b>' + (c.obligatorio ? ' <span class="deuda">*</span>' : '') + '</td><td data-l="Columna"><select data-imp-col="' + esc(c.k) + '"><option value="">— no usar —</option>' +
+            im.cabeceras.map(function (x) { return '<option' + (im.mapeo[c.k] === x ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></td>' +
+            '<td data-l="Ejemplo"><span class="sub">' + esc(im.mapeo[c.k] ? ejemplo(im.mapeo[c.k]) : '') + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="bar" style="margin-top:12px"><span class="sub" style="flex:1">' + (faltan.length ? 'Falta elegir: ' + esc(faltan.map(function (c) { return c.nombre; }).join(', ')) : '') + '</span>' +
+        '<button class="btn btn--main" data-act="imp-previa"' + (faltan.length ? ' disabled' : '') + '>Ver vista previa</button></div></section>';
+      return h;
+    }
+    if (im.paso === 'previa') {
+      var pv = im.previa, tot = pv.totales, f = im.filtro || 'todos', rs = resumenDecisiones();
+      var provNuevos = {}; pv.filas.forEach(function (r) { if (r.proveedor_nuevo && r.accion !== 'error' && decisionDe(r) !== 'omitir') provNuevos[r.operador] = 1; });
+      h += '<section class="sec"><h3>3. Vista previa</h3><p style="margin:0 0 6px">' + esc(im.archivo) + ': se van a crear <b>' + rs.nuevo + '</b> servicios nuevos' + (rs.actualizar ? ', actualizar <b>' + rs.actualizar + '</b>' : '') + (rs.asignar ? ', asignar operador a <b>' + rs.asignar + '</b> de los tuyos' : '') +
+        ' y <b>' + rs.omitir + '</b> no se importan' + (rs.error ? ' (<span class="deuda">' + rs.error + ' con error</span>)' : '') + '. Proveedores nuevos: <b>' + Object.keys(provNuevos).length + '</b>.</p>' +
+        '<p class="sub" style="margin:0">Los iguales a uno que ya tenés no se importan, salvo que elijas otra cosa en la fila. Nada de esto se publica hasta que lo revises en "Por publicar".</p></section>';
+      h += '<div class="bar"><div class="chips">' + ['todos'].concat(Object.keys(ACCIONES_IMP)).filter(function (k) { return k === 'todos' || tot[k]; }).map(function (k) {
+        return '<button class="chip" data-imp-filtro="' + k + '" aria-pressed="' + (f === k) + '">' + esc(k === 'todos' ? 'Todas' : ACCIONES_IMP[k]) + '<span>' + (k === 'todos' ? tot.total : tot[k]) + '</span></button>';
+      }).join('') + '</div>' + (tot.error ? '<button class="btn btn--sm" data-act="imp-errores">Descargar errores</button>' : '') + '</div>';
+      var filas = pv.filas.filter(function (r) { return f === 'todos' || r.accion === f; });
+      h += '<div class="card"><table><thead><tr><th class="num">#</th><th>Servicio</th><th>Precio</th><th>Qué pasa</th><th>Qué hacer</th></tr></thead><tbody>' +
+        filas.map(function (r) {
+          var que = '<span class="pill ' + (PILL_IMP[r.accion] || '') + '">' + esc(ACCIONES_IMP[r.accion] || r.accion) + '</span>' +
+            (r.ref ? '<span class="sub">' + (r.accion === 'actualiza' || r.accion === 'sin_cambios' ? 'Ya cargado' : 'Tuyo: ') + ' «' + esc(r.ref.titulo) + '»' + (r.ref.precio_publicado != null ? ' · ' + pub(r.ref.precio_publicado) : '') + (r.similitud && r.similitud < 1 ? ' · ' + Math.round(r.similitud * 100) + ' % parecido' : '') + '</span>' : '') +
+            r.errores.map(function (x) { return '<span class="sub deuda">' + esc(x) + '</span>'; }).join('') + r.avisos.map(function (x) { return '<span class="sub">' + esc(x) + '</span>'; }).join('');
+          var dec = r.opciones.length > 1 ? '<select data-imp-dec="' + r.n + '">' + r.opciones.map(function (o) { return '<option value="' + o + '"' + (decisionDe(r) === o ? ' selected' : '') + '>' + esc(DECISIONES_IMP[o]) + '</option>'; }).join('') + '</select>'
+            : '<span class="sub">' + esc(r.accion === 'error' ? 'Corregí el archivo' : DECISIONES_IMP[r.opciones[0] || 'omitir']) + '</span>';
+          return '<tr><td class="num" data-l="Fila">' + r.n + '</td><td data-l="Servicio"><b>' + esc(r.titulo || '(sin título)') + '</b><span class="sub">' + esc(r.destino ? destNombre(r.destino) : r.destino_texto) + ' · ' + esc(TIPOS_SRV[r.tipo] || r.tipo) + '</span>' +
+            '<span class="sub">' + esc(r.operador) + (r.proveedor_nuevo ? ' <span class="tag">proveedor nuevo</span>' : '') + '</span></td>' +
+            '<td data-l="Precio">' + (r.monto != null ? (r.moneda === 'USD' ? usd(r.monto) : brl(r.monto)) + '<span class="sub">' + esc(r.unidad ? UNIDADES[r.unidad] : 'unidad sin indicar') + (r.capacidad ? ' · hasta ' + r.capacidad : '') + '</span>' : '—') +
+            (r.publicado_estimado != null && r.tipo !== 'traslado' ? '<span class="sub">→ publicado' + pub(r.publicado_estimado) + ' por persona</span>' : '') + '</td>' +
+            '<td data-l="Qué pasa">' + que + '</td><td data-l="Qué hacer">' + dec + '</td></tr>';
+        }).join('') + '</tbody></table></div>' +
+        '<div class="bar" style="margin:12px 0 24px"><button class="btn" data-act="imp-columnas">Volver a las columnas</button><span style="flex:1"></span><button class="btn btn--main" data-act="imp-confirmar"' + (rs.nuevo + rs.actualizar + rs.asignar ? '' : ' disabled') + '>Confirmar importación</button></div>';
+      return h;
+    }
+    if (im.paso === 'listo') {
+      var t = im.resultado.totales;
+      return h + '<section class="sec"><h3>4. Listo</h3><div class="cuentas">' +
+        [['Servicios nuevos', t.nuevos], ['Actualizados / asignados', t.actualiza], ['Proveedores nuevos', t.proveedores_nuevos], ['Cambios para revisar', t.cambios_pendientes], ['No importados', t.omitidas + t.sin_cambios], ['Con error', t.errores]]
+          .map(function (x) { return '<div><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join('') + '</div>' +
+        '<p class="sub" style="margin:12px 0">Los nuevos están en Servicios con la etiqueta <b>Nuevo</b> y todavía no se ven en la web. Revisá los precios en "Por publicar" y publicá los que estén bien.</p>' +
+        '<button class="btn btn--main" data-vista="publicar">Ir a Por publicar</button> <button class="btn" data-act="imp-reiniciar">Importar otro archivo</button></section>';
+    }
+    return h;
+  }
+  function pedirPrevia() {
+    var filas = filasMapeadas();
+    S.imp.paso = 'analizando'; pintar();
+    api('ops/importar/previa', { filas: filas }).then(function (pv) { S.imp.previa = pv; S.imp.decisiones = {}; S.imp.paso = 'previa'; S.imp.filtro = 'todos'; pintar(); })
+      .catch(function (e) { S.imp.paso = 'columnas'; pintar(); toast(e.message); });
+  }
+  function confirmarImport() {
+    var rs = resumenDecisiones();
+    if (!confirm('¿Importar?\n\n' + rs.nuevo + ' servicios nuevos (quedan como Nuevo, sin publicar)\n' + (rs.actualizar + rs.asignar) + ' servicios tuyos con cambios para revisar\n' + rs.omitir + ' filas no se importan')) return;
+    var im = S.imp;
+    im.paso = 'confirmando'; pintar();
+    api('ops/importar/confirmar', { archivo: im.archivo, mapeo: im.mapeo, filas: filasMapeadas(), decisiones: im.decisiones })
+      .then(function (r) { im.resultado = r; im.paso = 'listo'; S.impHist = undefined; pintar(); cargarOps(); })
+      .catch(function (e) { im.paso = 'previa'; pintar(); toast('No se pudo importar: ' + e.message); });
   }
 
   /* ---------- acciones ---------- */
@@ -1019,6 +1198,9 @@
     if (el.id === 'q-viajes') { S.qViajes = el.value; var pv = el.selectionStart; pintar(); var qv = document.getElementById('q-viajes'); if (qv) { qv.focus(); try { qv.setSelectionRange(pv, pv); } catch (er) { /* sin rango */ } } return; }
     if (el.matches && el.matches('[data-deuda]')) { S.soloDeuda = el.checked; pintar(); return; }
     if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
+    if (el.id === 'imp-archivo') { if (e.type === 'change' && el.files && el.files[0]) leerArchivo(el.files[0]); return; }
+    if (el.hasAttribute('data-imp-col')) { if (e.type === 'change') { S.imp.mapeo[el.getAttribute('data-imp-col')] = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-imp-dec')) { if (e.type === 'change') { S.imp.decisiones[el.getAttribute('data-imp-dec')] = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sdest')) { if (e.type === 'change') { S.srvDest = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sprov')) { if (e.type === 'change') { S.srvProv = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sel')) { if (e.type === 'change') { if (el.checked) S.sel[el.getAttribute('data-sel')] = 1; else delete S.sel[el.getAttribute('data-sel')]; pintar(); } return; }
@@ -1102,6 +1284,27 @@
     var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
     var vsp = e.target.closest('[data-ver-srv-prov]'); if (vsp) { e.preventDefault(); S.srvProv = vsp.getAttribute('data-ver-srv-prov'); S.srvFiltro = 'todos'; S.vista = 'servicios'; pintar(); return; }
     var sfc = e.target.closest('[data-sfiltro]'); if (sfc) { S.srvFiltro = sfc.getAttribute('data-sfiltro'); pintar(); return; }
+    var pp = e.target.closest('[data-papelera],[data-recuperar],[data-borrar]');
+    if (pp) {
+      var pid = pp.getAttribute('data-papelera') || pp.getAttribute('data-recuperar') || pp.getAttribute('data-borrar');
+      var ps = S.ops.datos.servicios.filter(function (x) { return x.id === pid; })[0] || { titulo: '' };
+      if (pp.hasAttribute('data-borrar')) {
+        if (!confirm('¿Borrar para siempre «' + ps.titulo + '»? No se puede deshacer (el historial de precios queda).')) return;
+        api('ops/borrar', { id: pid }).then(function () { toast('Borrado'); return cargarOps(); }).catch(function (er) { toast(er.message); });
+      } else {
+        var tirar = pp.hasAttribute('data-papelera');
+        if (tirar && !confirm('¿Mandar «' + ps.titulo + '» a la papelera?' + (ps.activo ? '\nSale de la web ahora.' : '') + '\nLo podés recuperar desde Papelera.')) return;
+        api('ops/papelera', { id: pid, eliminar: tirar }).then(function () { toast(tirar ? 'En la papelera' : 'Recuperado'); return cargarOps(); }).catch(function (er) { toast(er.message); });
+      }
+      return;
+    }
+    var imf = e.target.closest('[data-imp-filtro]'); if (imf) { S.imp.filtro = imf.getAttribute('data-imp-filtro'); pintar(); return; }
+    var imd = e.target.closest('[data-imp-detalle]'); if (imd) {
+      api('ops/importacion?id=' + encodeURIComponent(imd.getAttribute('data-imp-detalle'))).then(function (j) {
+        descargarCSV('importacion-detalle.csv', [['Fila', 'Resultado', 'Servicio', 'Proveedor', 'Avisos y errores']].concat(j.filas.map(function (f) { return [f.n, f.accion, (f.datos || {}).titulo, (f.datos || {}).operador, (f.errores || []).join(' · ')]; })));
+      }).catch(function (er) { toast(er.message); });
+      return;
+    }
     var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
     var pu = e.target.closest('[data-pub-uno]'); if (pu) { if (S.dirty && !confirm('Lo que editaste y no guardaste se pierde. ¿Publicar igual?')) return; S.dirty = false; publicarCambios([pu.getAttribute('data-pub-uno')]); return; }
     var du = e.target.closest('[data-desc-uno]'); if (du) { S.dirty = false; descartarCambios([du.getAttribute('data-desc-uno')]); return; }
@@ -1138,6 +1341,11 @@
       case 'ver-papelera': S.provPapelera = !S.provPapelera; pintar(); break;
       case 'ops-recargar': cargarOps(); pintar(); break;
       case 'nuevo-srv': abrirServicio(null); break;
+      case 'imp-reiniciar': S.imp = null; S.impHist = undefined; pintar(); break;
+      case 'imp-previa': pedirPrevia(); break;
+      case 'imp-columnas': S.imp.paso = 'columnas'; pintar(); break;
+      case 'imp-confirmar': confirmarImport(); break;
+      case 'imp-errores': descargarCSV('errores-importacion.csv', [['Fila', 'Servicio', 'Proveedor', 'Error']].concat(S.imp.previa.filas.filter(function (r) { return r.accion === 'error'; }).map(function (r) { return [r.n, r.titulo, r.operador, r.errores.join(' · ')]; }))); break;
       case 'srv-guardar': guardarSrv(false); break;
       case 'srv-publicar': guardarSrv(true); break;
       case 'pub-sel': if (confirm('¿Publicar ' + Object.keys(S.sel).length + ' cambio(s)? Se ven en la web en hasta 1 minuto.')) publicarCambios(Object.keys(S.sel)); break;
@@ -1149,7 +1357,7 @@
     if (e.target && e.target.id === 'chat-txt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('chat-form'); if (f) f.requestSubmit(); return; } if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
 
   /* ---------- arranque ---------- */
-  var vq = /[?&]vista=(servicios|publicar|proveedores)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
+  var vq = /[?&]vista=(servicios|publicar|proveedores|importar)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();

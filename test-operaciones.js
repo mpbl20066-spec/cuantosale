@@ -71,5 +71,75 @@ t('igual trata vacio y null como lo mismo y compara numeros como numeros', funct
   assert.ok(!ops.igual(180, 181));
 });
 
+/* ---------- importacion ---------- */
+
+t('la unidad en texto libre: vehiculo gana sobre pax y persona sobre tramo', function () {
+  assert.strictEqual(ops.unidadDe('por vehículo, hasta 3 pax'), 'vehiculo');
+  assert.strictEqual(ops.unidadDe('por persona por tramo, según grupo'), 'persona');
+  assert.strictEqual(ops.unidadDe('por adulto'), 'persona');
+  assert.strictEqual(ops.unidadDe('por máquina, hasta 2'), 'vehiculo');
+  assert.strictEqual(ops.unidadDe('por embarcación'), 'embarcacion');
+  assert.strictEqual(ops.unidadDe('por trecho'), 'tramo');
+  assert.strictEqual(ops.unidadDe('unidad no indicada'), null);
+});
+
+t('la capacidad sale de "hasta N", y un rango no es una capacidad', function () {
+  assert.strictEqual(ops.capacidadDe('por vehículo', 'Hasta 4 personas (según la portada)'), 4);
+  assert.strictEqual(ops.capacidadDe('por vehículo, hasta 3 pax', ''), 3);
+  assert.strictEqual(ops.capacidadDe('por vehículo', '1 a 15 pasajeros según tarifa'), null);
+});
+
+t('montos en formato brasilero y en formato con punto', function () {
+  assert.strictEqual(ops.monto('1.400,50'), 1400.5);
+  assert.strictEqual(ops.monto('R$ 1.400'), 1400);
+  assert.strictEqual(ops.monto('180'), 180);
+  assert.strictEqual(ops.monto('24.99'), 24.99);
+  assert.strictEqual(ops.monto(''), null);
+});
+
+function ctxPrueba() {
+  return {
+    tours: [{ id: 't1', destino: 'mcz', titulo: 'Praia do Gunga', proveedor_id: null, precio_brl: 90, precio_publicado: 22.5, unidad: 'persona' },
+      { id: 't2', destino: 'mcz', titulo: 'Paseo X', proveedor_id: 'p1', precio_brl: 100, precio_publicado: 24.45, unidad: 'persona' }],
+    proveedores: [{ id: 'p1', nombre: 'Operadora Uno' }],
+    alias: { 'maceio': 'mcz' },
+    cfg: CFG
+  };
+}
+const base = { operador: 'Otra', destino: 'Maceió', monto: '50', moneda: 'BRL', unidad: 'por persona' };
+
+t('igual a uno que ya esta: por defecto no se importa', function () {
+  const r = ops.analizarImport([Object.assign({}, base, { titulo: 'Praia do Gunga' })], {}, ctxPrueba())[0];
+  assert.strictEqual(r.accion, 'igual');
+  assert.strictEqual(r.decision, 'omitir');
+  assert.strictEqual(r.ref.id, 't1');
+});
+
+t('dos filas con el mismo paseo en el archivo: entra la primera', function () {
+  const r = ops.analizarImport([Object.assign({}, base, { titulo: 'Morro do Camaleão' }), Object.assign({}, base, { operador: 'Tercera', titulo: 'Morro do Camaleão' })], {}, ctxPrueba());
+  assert.strictEqual(r[0].decision, 'nuevo');
+  assert.strictEqual(r[1].accion, 'repetido');
+  assert.strictEqual(r[1].decision, 'omitir');
+});
+
+t('reimportar el mismo servicio del mismo operador actualiza en vez de duplicar', function () {
+  const ctx = ctxPrueba();
+  const r = ops.analizarImport([Object.assign({}, base, { operador: 'Operadora Uno', titulo: 'Paseo X', monto: '120' })], {}, ctx)[0];
+  assert.strictEqual(r.accion, 'actualiza');
+  const igual = ops.analizarImport([Object.assign({}, base, { operador: 'Operadora Uno', titulo: 'Paseo X', monto: '100' })], {}, ctx)[0];
+  assert.strictEqual(igual.accion, 'sin_cambios');
+});
+
+t('un destino que no esta en la web es un error, no un servicio invisible', function () {
+  const r = ops.analizarImport([Object.assign({}, base, { titulo: 'Algo', destino: 'Atlantida' })], {}, ctxPrueba())[0];
+  assert.strictEqual(r.accion, 'error');
+});
+
+t('la decision elegida en la vista previa se respeta solo si es una opcion valida', function () {
+  const fila = [Object.assign({}, base, { titulo: 'Praia do Gunga' })];
+  assert.strictEqual(ops.analizarImport(fila, { 1: 'asignar' }, ctxPrueba())[0].decision, 'asignar');
+  assert.strictEqual(ops.analizarImport(fila, { 1: 'cualquiera' }, ctxPrueba())[0].decision, 'omitir');
+});
+
 console.log('\n' + (fallas ? fallas + ' de ' + pruebas + ' pruebas FALLARON' : pruebas + ' pruebas OK'));
 process.exit(fallas ? 1 : 0);
