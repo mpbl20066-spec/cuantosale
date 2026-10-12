@@ -69,7 +69,8 @@
       '<nav class="tabs" role="tablist"><button class="tab" role="tab" data-vista="pedidos" aria-selected="' + (S.vista === 'pedidos') + '">Pedidos' + (k.nuevos ? ' (' + k.nuevos + ')' : '') + '</button>' +
       '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button>' +
       '<button class="tab" role="tab" data-vista="mensajes" aria-selected="' + (S.vista === 'mensajes') + '">Mensajes<span id="tab-noleidos">' + (S.chats && S.chats.no_leidos ? ' (' + S.chats.no_leidos + ')' : '') + '</span></button>' +
-      '<button class="tab" role="tab" data-vista="whatsapp" aria-selected="' + (S.vista === 'whatsapp') + '">WhatsApp</button></nav>' +
+      '<button class="tab" role="tab" data-vista="whatsapp" aria-selected="' + (S.vista === 'whatsapp') + '">WhatsApp</button>' +
+      '<button class="tab" role="tab" data-vista="viajes" aria-selected="' + (S.vista === 'viajes') + '">Viajes guardados</button></nav>' +
       '<button class="btn btn--sm" data-act="recargar">Actualizar</button><button class="btn btn--sm" data-act="salir">Salir</button></div></header><div class="wrap">';
     if (d.almacenamiento !== 'supabase') {
       html += '<p class="aviso">' + (d.almacenamiento === 'archivo'
@@ -83,7 +84,7 @@
       kpi('Por cobrar', usd(k.por_cobrar_usd), 'clientes que nos deben', k.por_cobrar_usd ? 'kpi--warn' : '') +
       kpi('Por pagar', usd(k.por_pagar_proveedores_usd), 'a proveedores', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
       kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
-    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : vistaProveedores(d)));
+    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : vistaProveedores(d))));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
@@ -179,6 +180,40 @@
         '<td data-l="Hace">' + esc(pp.hace) + '</td><td data-l="Datos de pago">' + esc(pr.datos_pago) + '</td>' +
         '<td class="num" data-l="Servicios">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+
+  /* ---------- Viajes guardados ----------
+     Lo que la gente guardo en su cuenta (tabla trips), con su correo. "Abrir" va al link corto /viaje/<codigo>. */
+  function cargarViajes() {
+    S.viajes = { cargando: true }; pintar();
+    api('viajes').then(function (j) { S.viajes = { lista: j.viajes || [] }; if (S.vista === 'viajes') pintar(); })
+      .catch(function (e) { S.viajes = { error: e.message }; if (S.vista === 'viajes') pintar(); });
+  }
+  function vistaViajes() {
+    var v = S.viajes || {};
+    if (v.cargando) return '<div class="card"><p class="vacio">Cargando viajes…</p></div>';
+    if (v.error) return '<p class="aviso">' + esc(v.error) + '</p>';
+    var q = String(S.qViajes || '').toLowerCase().trim();
+    var lista = (v.lista || []).filter(function (t) { return !q || (t.email + ' ' + t.nombre + ' ' + t.destino).toLowerCase().indexOf(q) >= 0; });
+    var h = '<div class="bar"><div class="chips"><b>' + lista.length + ' viaje(s) guardado(s)</b></div><input type="search" id="q-viajes" placeholder="Buscar por correo, nombre o destino" value="' + esc(S.qViajes || '') + '"></div>';
+    if (!lista.length) return h + '<div class="card"><p class="vacio">' + (q ? 'Nada coincide con la búsqueda.' : 'Todavía nadie guardó un viaje.') + '</p></div>';
+    h += '<div class="card"><table><thead><tr><th>Guardado</th><th>Persona</th><th>Destino</th><th>Viaje</th><th>Qué eligió</th><th class="num">Total</th><th></th></tr></thead><tbody>';
+    lista.forEach(function (t) {
+      var dt = t.detalle || {}, el = [];
+      if (dt.vuelo) el.push('Vuelo ' + dt.vuelo.aerolinea);
+      if (dt.bus) el.push('Bus'); if (dt.auto) el.push('Auto');
+      if (dt.alojamiento) el.push(dt.alojamiento.nombre);
+      if (dt.transfer) el.push(dt.transfer.nombre);
+      (dt.tours || []).forEach(function (x) { el.push(x.nombre); });
+      h += '<tr><td data-l="Guardado">' + esc(fechaHora(t.creado)) + '</td>' +
+        '<td data-l="Persona"><b>' + esc(t.nombre || '—') + '</b><span class="sub">' + (t.email ? '<a class="lnk" href="mailto:' + esc(t.email) + '">' + esc(t.email) + '</a>' : 'sin correo') + '</span></td>' +
+        '<td data-l="Destino">' + esc(t.destino) + '</td>' +
+        '<td data-l="Viaje">' + esc(fecha(t.ida)) + (t.vuelta ? ' → ' + esc(fecha(t.vuelta)) : '') + (t.pax ? '<span class="sub">' + esc(t.pax) + (Number(t.pax) === 1 ? ' persona' : ' personas') + '</span>' : '') + '</td>' +
+        '<td data-l="Qué eligió">' + (el.length ? '<span class="tags">' + el.map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + '</span>' : '<span class="sub">—</span>') + '</td>' +
+        '<td class="num" data-l="Total">' + usd(t.total) + '</td>' +
+        '<td data-l="">' + (t.link ? '<a class="btn btn--sm" href="' + esc(t.link) + '" target="_blank" rel="noopener">Abrir</a>' : '<span class="sub">app anterior</span>') + '</td></tr>';
     });
     return h + '</tbody></table></div>';
   }
@@ -577,6 +612,7 @@
     var el = e.target;
     if (el.id === 'chat-txt') { S.borrador = el.value; return; }
     if (el.id === 'q') { S.q = el.value; var pos = el.selectionStart; pintar(); var q = document.getElementById('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (er) { /* sin rango */ } } return; }
+    if (el.id === 'q-viajes') { S.qViajes = el.value; var pv = el.selectionStart; pintar(); var qv = document.getElementById('q-viajes'); if (qv) { qv.focus(); try { qv.setSelectionRange(pv, pv); } catch (er) { /* sin rango */ } } return; }
     if (el.matches && el.matches('[data-deuda]')) { S.soloDeuda = el.checked; pintar(); return; }
     if (el.hasAttribute('data-pf') && S.prov) { S.prov[el.getAttribute('data-pf')] = el.type === 'checkbox' ? el.checked : el.value; return; }
     if (el.hasAttribute('data-sena-moneda')) { S.senaMoneda = el.value; refrescarPanel(); return; }
@@ -646,7 +682,7 @@
     var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
-    if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); pintar(); return; }
+    if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); if (S.vista === 'viajes' && (!S.viajes || S.viajes.error)) cargarViajes(); else pintar(); return; }
     if (t.hasAttribute('data-filtro')) { S.filtro = t.getAttribute('data-filtro'); pintar(); return; }
     if (t.hasAttribute('data-abrir')) { abrir(t.getAttribute('data-abrir')); return; }
     if (t.hasAttribute('data-prov')) { var id = t.getAttribute('data-prov'); S.prov = JSON.parse(JSON.stringify(S.datos.proveedores.filter(function (x) { return x.id === id; })[0])); S.dirty = false; abrirProv(); return; }
@@ -654,7 +690,7 @@
     if (t.hasAttribute('data-quitar-pago')) { S.draft.pagos.splice(+t.getAttribute('data-quitar-pago'), 1); S.dirty = true; refrescarPanel(); return; }
     if (t.hasAttribute('data-pagado-total')) { var it = S.draft.items[+t.getAttribute('data-pagado-total')]; it.pagado_proveedor_usd = it.costo_usd || 0; S.dirty = true; refrescarPanel(); return; }
     switch (t.getAttribute('data-act')) {
-      case 'recargar': cargar(); break;
+      case 'recargar': cargar(); if (S.vista === 'viajes') cargarViajes(); break;
       case 'avisos-on': activarAvisos(); break;
       case 'avisos-off': desactivarAvisos(); break;
       case 'wa-recargar': cargarWa(); pintar(); break;

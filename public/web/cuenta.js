@@ -155,6 +155,12 @@
       }).select().single();
     }).then(function (r) { if (r.error) throw new Error('No pudimos guardar el viaje: ' + r.error.message); return r.data; });
   }
+  /* El id (uuid) de la fila en base64url: 22 caracteres. Es el mismo codigo que arma lib/viajes-guardados.js. */
+  function linkCorto(id) {
+    var h = String(id || '').replace(/-/g, ''); if (!/^[0-9a-f]{32}$/i.test(h)) return '';
+    var b = ''; for (var i = 0; i < 32; i += 2) b += String.fromCharCode(parseInt(h.substr(i, 2), 16));
+    return '/viaje/' + btoa(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
   function listarViajes() {
     return iniciar().then(function () { return cliente.from('trips').select('*').eq('user_id', usuario.id).order('created_at', { ascending: false }); })
       .then(function (r) { if (r.error) throw new Error('No pudimos cargar tus viajes.'); return r.data || []; });
@@ -337,9 +343,8 @@
     else if (!S.viajes || !S.viajes.length) cuerpo = '<p class="cp-p">Todavía no guardaste viajes. Armá uno y tocá <b>Guardar mi viaje</b>.</p><a class="cp-btn" href="/">Armar un viaje</a>';
     else cuerpo = S.viajes.map(function (t) {
       var fd = t.flight_details || {}, fechas = fdc(t.departure_date) + (t.return_date ? ' → ' + fdc(t.return_date) : '');
-      var url = fd.fuente === 'test' && fd.url ? fd.url : '';
-      /* Si el link no trae lo elegido pero el viaje si lo guardo, se agrega: asi abre en Estado de tu viaje y no en el primer paso. */
-      if (url && fd.seleccion && !/[?&]sel=/.test(url)) url += (url.indexOf('?') < 0 ? '?' : '&') + 'sel=' + encodeURIComponent(JSON.stringify(fd.seleccion));
+      /* Link corto /viaje/<codigo>: el server lee la fila y redirige al planificador con lo elegido (lib/viajes-guardados.js). */
+      var url = fd.fuente === 'test' && fd.url ? linkCorto(t.id) : '';
       /* Lo que se eligio al guardar (vuelo, transfer, alojamiento, tours), con el precio de ese momento. */
       var dt = fd.detalle, items = [];
       if (dt) {

@@ -1410,7 +1410,12 @@
 <script src="cuenta.js"></script>
 <script>
 (function () {
-  var qs = new URLSearchParams(location.search);
+  /* Ruta y parametros con los que se abrio la pagina. Un viaje guardado llega por /viaje/<codigo> (redirige aca con
+     &g=<codigo>) y la barra vuelve a mostrar ese link corto: de ahi en mas location ya no tiene los parametros. */
+  var RUTA0 = location.pathname, qs = new URLSearchParams(location.search);
+  if (/^[A-Za-z0-9_-]{22}$/.test(qs.get('g') || '')) { try { history.replaceState(history.state, '', '/viaje/' + qs.get('g')); } catch (e) { /* queda la URL larga */ } }
+  qs.delete('g');   // cambiar fechas o pasar a bus ya no es el viaje guardado
+  var BUSQ0 = qs.toString() ? '?' + qs.toString() : '';
   /* Los nombres salen de window.CS_DESTS (destinos-datos.js), que se genera desde
      lib/model.js. Antes era una lista escrita a mano aca, y por el camino quedo el
      nombre de Arraial d'Ajuda con la apostrola comida (dâ€™Ajuda). */
@@ -1428,7 +1433,7 @@
   };
   var IDA = qs.get('ida') || '2026-12-26', VUELTA = qs.get('vuelta') || '2027-01-02';
   var NOCHES = Math.max(1, Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5) || 1), NOCHES_TXT = NOCHES + (NOCHES === 1 ? ' noche' : ' noches');
-  var debug = /[?&]debug=1/.test(location.search);
+  var debug = /[?&]debug=1/.test(BUSQ0);
   /* Medio de transporte elegido en "¿Cómo querés ir?": avion (vuelos + traslados, el flujo de siempre), auto (consumo, km y mapa se ven
      en home-calcular.html, que vuelve aca con el costo ya calculado) o bus (se elige aca mismo). Alojamiento, extras, presupuesto y
      reserva son iguales para los tres. */
@@ -1764,7 +1769,7 @@
     var vSel = VUELOS.filter(function (v) { return v.id === S.vuelo; })[0];
     if (vSel && visibles.indexOf(vSel) < 0) visibles = visibles.concat(vSel);
     var idBarato = VUELOS.length > 1 ? masBarato().id : '';
-    var cambiarFechas = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
+    var cambiarFechas = 'home-destino.html' + BUSQ0 + (BUSQ0 ? '&' : '?') + 'editar=1';
     var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
       (ninos && VUELOS.length ? '<p class="f-sub">Vuelos cotizados para ' + pax + ' pasajeros a tarifa de adulto. Los niños de 2 a 11 años suelen tener descuento: la aerolínea lo confirma al reservar.</p>' : '') +
       (S.cargandoV ? cargandoVuelos() : '') +
@@ -2832,7 +2837,7 @@
   }
   function viajeParaGuardar() {
     var d = datosFinal(), sel = seleccionActual();
-    var url = location.origin + location.pathname + '?' + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: 'guardado' }, parametrosModo(), { sel: JSON.stringify(sel) })).toString();
+    var url = location.origin + RUTA0 + '?' + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: 'guardado' }, parametrosModo(), { sel: JSON.stringify(sel) })).toString();
     return { destination: DEST, destination_key: destKey, pax: pax, departure_date: IDA, return_date: VUELTA, total_amount: Math.round(d.total), url: url, seleccion: sel, detalle: detalleReserva(d) };
   }
   /* Clave del viaje para el pasaporte: un evento por viaje (destino + dia de ida), asi repetir no suma. */
@@ -2892,7 +2897,7 @@
   /* Compartir: genera la tarjeta del viaje (tarjeta.js, la misma de la app) y la manda por la hoja de compartir del
      celular o por WhatsApp con la imagen copiada en escritorio. Si no se puede armar la imagen, se comparte solo el texto. */
   function datosTarjeta() {
-    var d = datosFinal(), url = location.origin + location.pathname + "?" + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: "compartido" }, parametrosModo())).toString();
+    var d = datosFinal(), url = location.origin + RUTA0 + "?" + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: "compartido" }, parametrosModo())).toString();
     return { dest: { key: destKey, name: DEST, country: "Brasil" }, ida: IDA, vuelta: VUELTA, pax: pax, pp: d.total / pax, total: d.total,
       entries: [
         MODO === 'avion' ? { category: "pasajes", label: "Vuelo", value: d.tVuelo, color: "c1" } : (MODO === 'auto' ? { category: "auto", label: "Auto", value: d.tVuelo, color: "c1" } : { category: "bus", label: "Bus", value: d.tVuelo, color: "c1" }),
@@ -3142,7 +3147,7 @@
   }
   /* Rearma el viaje con otra fecha de salida (mismas noches). Solo se llama por un toque explicito en "Usar estas fechas". */
   function usarFecha(dep, desde) {
-    var nq = new URLSearchParams(location.search); nq.set('ida', dep); nq.set('vuelta', sumarDias(dep, NOCHES)); nq.delete('paso');
+    var nq = new URLSearchParams(BUSQ0); nq.set('ida', dep); nq.set('vuelta', sumarDias(dep, NOCHES)); nq.delete('paso');
     /* Se mantiene lo elegido (transfer, categoria de alojamiento, tours, comidas) y se vuelve al mismo paso, con el
        vuelo mas barato de la nueva fecha: es el que da el ahorro que se prometio. Antes se perdia todo y quedaba el
        vuelo recomendado, que podia costar lo mismo que antes. */
@@ -3150,7 +3155,7 @@
     nq.set('mant', JSON.stringify({ traslado: sa.traslado, tIV: sa.tIV, catH: sa.catH, sinAloj: sa.sinAloj, toursN: sa.toursN, dia: sa.dia, barato: 1 }));
     if (S.paso >= 2 && S.paso <= 4) nq.set('paso', S.paso);
     track('flujo_calendario_usar_fechas', { fecha_nueva: dep, desde: desde });
-    location.href = location.pathname + '?' + nq.toString();
+    location.href = RUTA0 + '?' + nq.toString();
   }
   function cerrarModal() { S.modal = null; pintarModal(); }
   function pintarModal() {
@@ -3255,7 +3260,7 @@
   $('back').addEventListener('click', function () {
     track('flujo_volver', { desde: S.paso });
     if (S.paso === 1 && MODO === 'avion' && S.sub === 't') { volverA(1, 'v'); return; }
-    if (S.paso === 12) volverA(11); else if (S.paso === 11) volverA(S.desde11 || 6); else if (S.paso === 10) volverA(9); else if (S.paso === 9) volverA(7); else if (S.paso === 8) volverA(S.desde8 || 6); else if (S.paso === 7) volverA(4); else if (S.paso === 6) volverA(4); else if (S.paso > 1) volverA(S.paso - 1); else location.href = 'home-destino.html' + location.search + (location.search ? '&' : '?') + 'editar=1';
+    if (S.paso === 12) volverA(11); else if (S.paso === 11) volverA(S.desde11 || 6); else if (S.paso === 10) volverA(9); else if (S.paso === 9) volverA(7); else if (S.paso === 8) volverA(S.desde8 || 6); else if (S.paso === 7) volverA(4); else if (S.paso === 6) volverA(4); else if (S.paso > 1) volverA(S.paso - 1); else location.href = 'home-destino.html' + BUSQ0 + (BUSQ0 ? '&' : '?') + 'editar=1';
   });
   $('cta').addEventListener('click', function () {
     track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });
@@ -3424,8 +3429,8 @@
     else if (t.dataset.usarFecha) { usarFecha(t.dataset.usarFecha, 'comparativa'); return; }
     else if (t.dataset.ahorroHotel) { S.hotel = t.dataset.ahorroHotel; S.sinAloj = false; track('flujo_ahorro_aplicar', { tipo: 'alojamiento', opcion: S.hotel }); }
     else if (t.dataset.ahorroBus) {
-      var bq = new URLSearchParams(location.search); bq.set('modo', 'bus'); bq.delete('paso');
-      track('flujo_ahorro_aplicar', { tipo: 'bus' }); location.href = location.pathname + '?' + bq.toString(); return;
+      var bq = new URLSearchParams(BUSQ0); bq.set('modo', 'bus'); bq.delete('paso');
+      track('flujo_ahorro_aplicar', { tipo: 'bus' }); location.href = RUTA0 + '?' + bq.toString(); return;
     }
     else if (t.dataset.resEdit) { S.editRes = t.dataset.resEdit; render(false); $('main').scrollTop = y; var ri = $('rs-in'); if (ri) { ri.focus(); ri.select(); } return; }
     else if (t.dataset.resCancel) { S.editRes = ''; }

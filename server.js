@@ -3081,6 +3081,7 @@ function serveGrupoPage(req, res, groupId) {
    lib/reservas.js llama con cada pedido ya validado de POST /api/reserva-solicitud: lo
    guarda en lib/pedidos.js para verlo en /admin. No tira nunca: si el almacenamiento
    falla, el pedido igual sigue su camino (WhatsApp y email al asesor). */
+const viajesGuardados = require('./lib/viajes-guardados');
 const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual });
 /* Webhook de WhatsApp (Cloud API de Meta): mensajes de los clientes y estados de los nuestros, para la bandeja del
    panel (lib/mensajes.js). GET es la verificacion que hace Meta al configurarlo (WHATSAPP_VERIFY_TOKEN). En POST se
@@ -3378,6 +3379,9 @@ function handleRequest(req, res) {
     // Enlace corto del presupuesto: /v/<codigo> redirige a /?viaje=<token>.
     const mCorto = /^\/v\/([A-Za-z0-9_-]{8})\/?$/.exec(url.pathname);
     if (mCorto && req.method === 'GET') return getEnlaceCorto(req, res, mCorto[1]);
+    // Viaje guardado: /viaje/<codigo> (id de trips en base64url) redirige al planificador con lo elegido (lib/viajes-guardados.js).
+    const mViaje = /^\/viaje\/([A-Za-z0-9_-]{22})\/?$/.exec(url.pathname);
+    if (mViaje && req.method === 'GET') return viajesGuardados.redirigir(req, res, mViaje[1]);
     // Paginas publicas por destino para Google (lib/destinos-web.js).
     const mDestino = /^\/destino\/([a-z0-9-]+)\/?$/.exec(url.pathname);
     if (mDestino) {
