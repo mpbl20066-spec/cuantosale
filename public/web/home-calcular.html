@@ -194,6 +194,9 @@
     chev: '<path d="m9 5 7 7-7 7"/>'
   };
   /* Estado de la maqueta. Fechas por defecto: las del ejemplo de toda la maqueta. */
+  /* Viaje de dos paradas (?segundo=&noches1=, ver home-destino.html): el auto llega a la primera parada y los dos datos
+     siguen de largo hasta home-flujo.html, que arma el alojamiento y los paseos de cada una. */
+  var conParadas = function (o) { if (/^[a-z0-9-]{1,40}$/.test(qs.get('segundo') || '')) { o.segundo = qs.get('segundo'); o.noches1 = qs.get('noches1') || ''; } return o; };
   var S = { pant: 1, dest: /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : '', ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02', pax: Math.max(1, Math.min(9, +qs.get('pax') || 2)), modo: '', vt: 'combustion', cm: 'gol', em: 'byd_dolphin', kwhp: 0.35, pxs: 2, err: {} };
   /* Los que viajan arrancan como las personas del viaje: al continuar, pax toma este valor. De 6 en adelante van
      en 2 autos (PERSONAS_POR_AUTO del modelo): antes el selector cortaba en 5 y el viaje entero quedaba para 5. */
@@ -408,7 +411,7 @@
   }
   function irResultado(modo) {
     /* Sin pantalla de resultados: se va derecho al flujo (vuelo + traslado, o bus). */
-    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, modo: modo === 'bus' ? 'bus' : 'avion', fuente: 'calcular_presupuesto', origen_home: fuente });
+    var q = new URLSearchParams(conParadas({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, modo: modo === 'bus' ? 'bus' : 'avion', fuente: 'calcular_presupuesto', origen_home: fuente }));
     location.href = 'home-flujo.html?' + q.toString() + debugQ;
   }
 
@@ -447,7 +450,7 @@
       if (S.modo === 'auto') ir(3, 'modo_auto'); else irResultado(S.modo); return;
     }
     if (t.dataset.editar) { ir(3, 'editar'); return; }
-    if (t.dataset.seguir) { track('inicio_continuar_resumen', { modo: 'auto', tipo_auto: S.vt }); location.href = 'home-flujo.html?' + new URLSearchParams({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, paso: 2, modo: 'auto', fuente: 'inicio_auto' }).toString() + debugQ; return; }
+    if (t.dataset.seguir) { track('inicio_continuar_resumen', { modo: 'auto', tipo_auto: S.vt }); location.href = 'home-flujo.html?' + new URLSearchParams(conParadas({ destino: S.dest, pax: S.pax, ida: S.ida, vuelta: S.vuelta, paso: 2, modo: 'auto', fuente: 'inicio_auto' })).toString() + debugQ; return; }
     if (t.dataset.cambiar) { S.avisoAuto = 'En la app real podés elegir marca y modelo; acá queda un auto de ejemplo según el tipo.'; track('inicio_cambiar_auto', {}); pant3(); return; }
     if (t.dataset.vt) { S.vt = t.dataset.vt; pant3(); track('inicio_tipo_auto', { tipo_auto: S.vt }); return; }
     if (t.dataset.calc) { S.pxs = +$('pxs').value; track('inicio_calcular_ruta', { tipo_auto: S.vt, modelo: S.vt === 'ev' ? S.em : S.cm, km: ruta().km, personas_auto: S.pxs }); ir(4, 'calcular_ruta'); return; }
@@ -455,7 +458,7 @@
        el costo del auto viaja en el enlace y home-flujo lo usa en lugar del vuelo. */
     if (t.dataset.agregar) {
       var r = ruta(); track('inicio_agregar_ruta', { importe: Math.round(r.total), km: r.km }); S.pax = S.pxs;
-      location.href = 'home-flujo.html?' + new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: Math.min(+qs.get('ninos') || 0, S.pax - 1), ida: S.ida, vuelta: S.vuelta, paso: 2, modo: 'auto', auto: Math.round(r.total), km: r.km, horas: Math.round(r.horas), comb: Math.round(r.comb), peajes: Math.round(r.peajes), fuente: 'inicio_auto', origen_home: qs.get('origen_home') || '' }).toString() + debugQ; return;
+      location.href = 'home-flujo.html?' + new URLSearchParams(conParadas({ destino: S.dest, pax: S.pax, ninos: Math.min(+qs.get('ninos') || 0, S.pax - 1), ida: S.ida, vuelta: S.vuelta, paso: 2, modo: 'auto', auto: Math.round(r.total), km: r.km, horas: Math.round(r.horas), comb: Math.round(r.comb), peajes: Math.round(r.peajes), fuente: 'inicio_auto', origen_home: qs.get('origen_home') || '' })).toString() + debugQ; return;
     }
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'kwhp') { S.kwhp = parseFloat(e.target.value) || 0; $('calc').innerHTML = calcTxt(); } });

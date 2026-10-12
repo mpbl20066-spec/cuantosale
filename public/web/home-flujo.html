@@ -1409,6 +1409,13 @@
   .ls .ls-h{font-size:20px!important}
   .ls .ls-p{font-size:13.5px}
   @media (min-width:640px){.ls .ls-h{font-size:24px!important}}
+  /* Dos paradas: pestanas de alojamiento (una por parada, con el hotel elegido) */
+  .f-par{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 4px}
+  .f-par__b{display:flex;flex-direction:column;gap:2px;min-width:0;padding:10px 12px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
+  .f-par__b b{font-size:14px;font-weight:800}
+  .f-par__b small{font-size:12px;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .f-par__b.is-on{border-color:var(--accent);background:var(--cel-soft);box-shadow:0 0 0 2px rgba(247,195,37,.3)}
+  .f-par__b:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 </style>
 <link rel="stylesheet" href="web.css">
 <link rel="stylesheet" href="layout.css">
@@ -1430,6 +1437,7 @@
 <script src="../transfer-precios.js"></script>
 <script src="extras-data.js"></script>
 <script src="destinos-datos.js"></script>
+<script src="paradas-datos.js"></script>
 <script src="home-track.js"></script>
 <script src="tarjeta.js"></script>
 <script src="cuenta.js"></script>
@@ -1471,6 +1479,25 @@
   var IDA = qs.get('ida') || '2026-12-26', VUELTA = qs.get('vuelta') || '2027-01-02';
   var NOCHES = Math.max(1, Math.round((new Date(VUELTA) - new Date(IDA)) / 864e5) || 1), NOCHES_TXT = NOCHES + (NOCHES === 1 ? ' noche' : ' noches');
   var debug = /[?&]debug=1/.test(BUSQ0);
+  /* ---- Viaje de dos paradas: ?segundo=buz&noches1=3 (lo arma home-destino.html) ----
+     El vuelo (o el bus, o el auto) va y vuelve de la primera parada. Alojamiento, paseos y comidas son de cada parada
+     con sus noches; el transfer llega a la primera y vuelve desde la segunda, y entre las dos hay un traslado
+     (paradas-datos.js, la misma cuenta que model.comboTransfer). Sin una segunda parada valida PAR es null y la
+     pagina es la de un solo destino. */
+  var PAR = (function () {
+    var k2 = qs.get('segundo') || '', t = ((window.CS_PARADAS || {})[destKey] || []).filter(function (x) { return x.k === k2; })[0];
+    if (!t || !DESTS[k2] || NOCHES < 2) return null;
+    var n1 = Math.max(1, Math.min(NOCHES - 1, Math.round(+qs.get('noches1') || Math.floor(NOCHES / 2))));
+    var d = new Date(IDA + 'T12:00:00'); d.setDate(d.getDate() + n1);
+    var cambio = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    return { tramo: t, l: [{ k: destKey, nom: DEST, noches: n1, ida: IDA, vuelta: cambio, h: null }, { k: k2, nom: DESTS[k2], noches: NOCHES - n1, ida: cambio, vuelta: VUELTA, h: null }] };
+  })();
+  /* DEST1: la primera parada, a donde va el vuelo. DEST: el nombre del viaje ("Río de Janeiro + Búzios"). */
+  var DEST1 = DEST; if (PAR) DEST = DEST1 + ' + ' + PAR.l[1].nom;
+  var CLAVE_DEST = destKey + (PAR ? '+' + PAR.l[1].k + '-' + PAR.l[0].noches : '');   // reservas y pedidos guardados, por viaje
+  var paramsPar = function () { return PAR ? { segundo: PAR.l[1].k, noches1: PAR.l[0].noches } : {}; };
+  var nochesTxt = function (n) { return n + (n === 1 ? ' noche' : ' noches'); };
+  var horasTxt = function (h) { return h < 1 ? Math.max(10, Math.round(h * 60 / 5) * 5) + ' min' : String(Math.round(h * 2) / 2).replace('.', ',') + ' h'; };
   /* Medio de transporte elegido en "¿Cómo querés ir?": avion (vuelos + traslados, el flujo de siempre), auto (consumo, km y mapa se ven
      en home-calcular.html, que vuelve aca con el costo ya calculado) o bus (se elige aca mismo). Alojamiento, extras, presupuesto y
      reserva son iguales para los tres. */
@@ -1478,7 +1505,7 @@
   var AUTO = MODO === 'auto' ? { total: Math.max(0, +qs.get('auto') || 0), km: +qs.get('km') || 0, horas: +qs.get('horas') || 0, comb: +qs.get('comb') || 0, peajes: +qs.get('peajes') || 0 } : null;
   var BUS = null;   /* { precio, dur, nombre }: se carga de /api/cotizar (transport=bus) */
   var NOMBRES = [MODO === 'auto' ? 'Auto' : (MODO === 'bus' ? 'Bus' : 'Vuelos + Transfer'), 'Alojamiento', 'Extras', 'Tu presupuesto'];
-  var parametrosModo = function () { return MODO === 'auto' ? { modo: 'auto', auto: AUTO.total, km: AUTO.km, horas: AUTO.horas, comb: AUTO.comb, peajes: AUTO.peajes } : (MODO === 'bus' ? { modo: 'bus' } : {}); };
+  var parametrosModo = function () { return Object.assign(MODO === 'auto' ? { modo: 'auto', auto: AUTO.total, km: AUTO.km, horas: AUTO.horas, comb: AUTO.comb, peajes: AUTO.peajes } : (MODO === 'bus' ? { modo: 'bus' } : {}), paramsPar()); };
   var f = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };   /* moneda elegida (moneda.js) */
   if (window.CSMoneda) CSMoneda.alCambiar(function () { render(false); if (typeof pintarModal === 'function') pintarModal(); });
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -1523,6 +1550,10 @@
     { id: 'priv', tipo: 'priv', nom: 'Transfer privado', cap: 'Hasta 4 pasajeros', dur: 'A confirmar', nota: 'Precio de ejemplo', precio: 35 },
     { id: 'comp', tipo: 'comp', nom: 'Transfer compartido', sub: 'Compartido · precio por persona', cap: 'Compartís el vehículo', dur: 'A confirmar', nota: 'Precio de ejemplo', precio: 25, pp: true }
   ];
+  /* Con dos paradas el transfer llega a la primera y vuelve desde la segunda: la vuelta se cobra con la tabla de la
+     segunda parada, con el mismo tipo de vehiculo. */
+  var TP2 = PAR ? (window.CS_TRANSFER_PRICES || {})[PAR.l[1].k] || null : null;
+  var precioVueltaTr = function (t) { var v = TP2 && TP2[t.tipo === 'priv' ? 'privado' : 'compartido']; return v > 0 ? v : t.precio; };
   var HOTELES = [
     { id: 'mar', nom: 'Pousada Mar Azul', cat: 'Pousada 4★', rat: 4.7, n: 1240, zona: 'Jurerê', playa: 200, serv: ['Wi-Fi', 'Desayuno', 'Piscina'], precio: 500, rec: true, img: 'home-ilha-bahia.jpg' },
     { id: 'ilha', nom: 'Hotel Ilha Bela', cat: 'Hotel 3★', rat: 4.3, n: 860, zona: 'Canasvieiras', playa: 600, serv: ['Wi-Fi', 'Desayuno'], precio: 420, img: 'home-playa.jpg' },
@@ -1541,10 +1572,11 @@
     { id: 'camb', cat: 'tras', nom: 'Traslado a Balneário Camboriú', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 85 },
     { id: 'tras3', cat: 'tras', nom: 'Traslado a Praia do Rosa', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 140 }
   ] : []).filter(function (e) { return e.nom.indexOf(DEST) < 0; });
+  var tourItem = function (pre) { return function (t, i) { return { id: pre + i, cat: 'tours', nom: t.titulo, dur: t.duracion, grupo: t.grupo, precio: t.precio, pp: true, foto: t.foto, autor: t.autor, real: true, info: t }; }; };
   var EXTRAS = [
-    { cat: 'tours', sec: 'Tours y actividades', sub: 'Viví experiencias únicas en tu destino.', ico: 'palm', items: TOURS.map(function (t, i) {
-      return { id: 't' + i, cat: 'tours', nom: t.titulo, dur: t.duracion, grupo: t.grupo, precio: t.precio, pp: true, foto: t.foto, autor: t.autor, real: true, info: t };
-    }).concat(TRAS_X) },
+    { cat: 'tours', sec: 'Tours y actividades', sub: 'Viví experiencias únicas en tu destino.', ico: 'palm', items: TOURS.map(tourItem('t')).concat(TRAS_X) },
+    /* Con dos paradas, los paseos de la segunda van en su propia seccion (ids u0, u1...). */
+    { cat: 'tours2', sec: 'Tours y actividades', ico: 'palm', items: PAR ? ((window.MOCK_TOURS || {})[PAR.l[1].k] || []).map(tourItem('u')) : [] }
   ].filter(function (g) { return g.items.length; });
   HOTELES.forEach(function (h) { h.ejemplo = true; });
   /* Comidas y transporte local: por persona y por dia, de la misma tabla que la app (daily-costs.js, por destino).
@@ -1552,6 +1584,14 @@
      el monto personalizado va en dolares. Total = por dia x personas x noches. */
   var TABLA_DIA = window.CS_DESTINATION_DAILY_COSTS || {};
   var COSTO_DIA = TABLA_DIA[destKey] || TABLA_DIA.rio || { transport: { eco: 4, medio: 8, confort: 17 }, food: { casual: 28, moderado: 55, gourmet: 95 } };
+  /* Dos paradas: el costo por dia es el promedio de las dos tablas, pesado por las noches de cada una. */
+  if (PAR) (function () {
+    var c2 = TABLA_DIA[PAR.l[1].k] || COSTO_DIA, w = PAR.l[0].noches / NOCHES, m = Object.assign({}, COSTO_DIA);
+    ['transport', 'food'].forEach(function (b) {
+      m[b] = {}; Object.keys(COSTO_DIA[b] || {}).forEach(function (k) { var y = (c2[b] || {})[k], x = COSTO_DIA[b][k]; m[b][k] = Math.round(x * w + (y > 0 ? y : x) * (1 - w)); });
+    });
+    COSTO_DIA = m;
+  })();
   var OPC_DIA = {
     local: { t: 'Transporte local', base: 'transport', o: [['eco', 'Económico', 'Ómnibus y líneas urbanas'], ['medio', 'Medio', 'Mixto: algo de ómnibus y algo de app'], ['confort', 'Confort', 'Taxis y transporte privado por app']] },
     comidas: { t: 'Comidas', base: 'food', o: [['casual', 'Económico', 'Supermercado, panaderías y puestos.'], ['moderado', 'Medio (Recomendado)', 'Buffets por kilo y restaurantes.'], ['gourmet', 'Gourmet', 'Restaurantes top y paradores de playa.']] }
@@ -1565,11 +1605,13 @@
   var todosExtras = [].concat.apply([], EXTRAS.map(function (s) { return s.items; }));
 
   /* ---- Estado ---- */
-  var S = { catH: 'economico', dia: { local: { k: 'eco' }, comidas: { k: 'casual' } }, cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 4, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: '', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'precio', comidasMonto: null, cmp: null, reales: {}, editRes: '', verMasVuelos: false };
+  var S = { entre: true, catH: 'economico', dia: { local: { k: 'eco' }, comidas: { k: 'casual' } }, cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 4, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: '', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'precio', comidasMonto: null, cmp: null, reales: {}, editRes: '', verMasVuelos: false };
   var precioHotelEstimado = function (h) { return S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.total : h.precio; };
-  var precioHotel = function (h) { if (!h || h.sin) return 0; return S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : precioHotelEstimado(h); };
+  var precioHotel = function (h) { if (!h || h.sin) return 0; return !PAR && S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : precioHotelEstimado(h); };
   var vuelo = function () { return VUELOS.filter(function (v) { return v.id === S.vuelo; })[0] || SIN_VUELO; };
-  var trPrecio = function (t) { return t.precio * (t.pp ? pax : Math.ceil(pax / 4)) * (S.tIV ? 2 : 1); };
+  var trPrecio = function (t) { var u = t.pp ? pax : Math.ceil(pax / 4); return t.precio * u + (S.tIV ? (PAR ? precioVueltaTr(t) : t.precio) * u : 0); };
+  /* Traslado de la primera parada a la segunda: por persona, solo ida. En auto se maneja de una a la otra: no se cobra. */
+  var entreTotal = function () { return PAR && S.entre && MODO !== 'auto' ? PAR.tramo.pp * pax : 0; };
   /* Por defecto, el transfer mas barato para este grupo (privado por vehiculo o compartido por persona). Antes era
      siempre el privado: para 1 persona en Florianopolis eran $ 7.395 contra $ 462 del compartido. */
   (function () { var l = TRASLADOS.filter(function (t) { return t.precio > 0; }).sort(function (a, b) { return trPrecio(a) - trPrecio(b); }); if (l.length) S.traslado = l[0].id; })();
@@ -1578,17 +1620,48 @@
   var hotel = function () { return S.sinAloj || (/^https?:$/.test(location.protocol) && (!S.hotelesListos || S.cargandoH)) ? SIN_HOTEL : (HOTELES.filter(function (h) { return h.id === S.hotel; })[0] || SIN_HOTEL); };
   var extrasSel = function () { return todosExtras.filter(function (e) { return S.extras[e.id]; }); };
   var sum = function (a, fn) { return a.reduce(function (t, x) { return t + fn(x); }, 0); };
+  /* ---- Alojamiento de cada parada ----
+     Las pantallas de alojamiento trabajan sobre la parada que se esta mirando (PA): HK, HN, HIDA, HVUELTA y HNOCHES,
+     y el estado de hoteles de S (lista, elegido, habitacion, categoria...). usarParada() guarda ese estado en su parada
+     y trae el de la otra; enParada() corre algo en otra parada y vuelve. Sin PAR siempre es la unica. */
+  var PA = 0, HK = destKey, HN = DEST1, HIDA = IDA, HVUELTA = VUELTA, HNOCHES = NOCHES;
+  var CAMPOS_H = ['hotel', 'habitacion', 'catH', 'playaSel', 'sinAloj', 'hotelesListos', 'cargandoH', 'aiListo', 'avisoH', 'nH', 'filtrosH', 'promH'];
+  function usarParada(i) {
+    if (!PAR || i === PA) return;
+    var g = PAR.l[PA].h = { HOTELES: HOTELES }; CAMPOS_H.forEach(function (c) { g[c] = S[c]; });
+    var p = PAR.l[i]; PA = i; HK = p.k; HN = p.nom; HIDA = p.ida; HVUELTA = p.vuelta; HNOCHES = p.noches;
+    if (p.h) { HOTELES = p.h.HOTELES; CAMPOS_H.forEach(function (c) { S[c] = p.h[c]; }); return; }
+    HOTELES = []; CAMPOS_H.forEach(function (c) { S[c] = undefined; });
+    S.catH = PAR.l[0].h ? PAR.l[0].h.catH : 'economico'; S.playaSel = 'todas'; S.nH = MAX_HOTELES; S.hotel = ''; S.habitacion = null; S.sinAloj = false;
+  }
+  function enParada(i, fn) { if (!PAR || i === PA) return fn(); var a = PA; usarParada(i); try { return fn(); } finally { usarParada(a); } }
+  /* Lo de cada parada para el presupuesto: hotel elegido, habitacion y precio estimado. */
+  function alojParadas() {
+    return (PAR ? PAR.l : [{ k: destKey, nom: DEST1, noches: NOCHES, ida: IDA, vuelta: VUELTA }]).map(function (p, i) {
+      return enParada(i, function () { var h = hotel(); return { p: p, i: i, h: h, hab: S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.nombre : '', est: h.sin ? 0 : precioHotelEstimado(h) }; });
+    });
+  }
+  /* Total del alojamiento: con dos paradas, la suma de las dos (o lo que la persona dijo que pago por todo). */
+  function alojTotal() {
+    if (!PAR) return precioHotel(hotel());
+    if (S.alojReservado && S.alojReservado.precio > 0) return S.alojReservado.precio;
+    return sum(alojParadas(), function (x) { return x.est; });
+  }
+  /* Pide los alojamientos de las paradas que todavia no los tienen; la promesa termina cuando estan todos. */
+  function cargarAlojamientos() {
+    return Promise.all((PAR ? PAR.l : [0]).map(function (x, i) { return enParada(i, function () { return S.hotelesListos ? (S.promH || null) : cargarHoteles(); }); }));
+  }
   /* Costo del transporte principal: vuelo + traslado, o el auto (combustible, peajes y otros), o el bus. */
   function transporteTotal() {
     if (MODO === 'auto') return AUTO.total;
-    if (MODO === 'bus') return BUS ? BUS.precio : 0;
-    return vueloFinal() + (trasl() ? trPrecio(trasl()) : 0);
+    if (MODO === 'bus') return (BUS ? BUS.precio : 0) + entreTotal();
+    return vueloFinal() + (trasl() ? trPrecio(trasl()) : 0) + entreTotal();
   }
   /* Vuelo: lo que la persona dijo que pago (S.reales.vuelo) o, si no informo nada, el precio del vuelo elegido. */
   function vueloFinal() { return S.reales.vuelo != null ? S.reales.vuelo : precioVuelo(vuelo()); }
   function totalHastaAhora() {
     var t = transporteTotal();
-    if (S.paso >= 2) t += precioHotel(hotel());
+    if (S.paso >= 2) t += alojTotal();
     if (S.paso >= 3) t += sum(extrasSel(), precioExtra);
     if (S.paso >= 3) t += comidasTotal();
     return t;
@@ -1621,7 +1694,7 @@
   /* Todo evento del flujo lleva el contexto del viaje, para poder segmentar en Analytics
      por destino, cantidad de personas, mes de viaje, paso y origen del clic en la home. */
   function track(n, p) {
-    var ctx = { destino: destKey, pasajeros: pax, noches: NOCHES, fecha_ida: IDA, mes_viaje: IDA.slice(0, 7), anticipacion_dias: Math.round((new Date(IDA) - new Date()) / 864e5),
+    var ctx = { destino: destKey, segunda_parada: PAR ? PAR.l[1].k : '', pasajeros: pax, noches: NOCHES, fecha_ida: IDA, mes_viaje: IDA.slice(0, 7), anticipacion_dias: Math.round((new Date(IDA) - new Date()) / 864e5),
       paso: S.paso, fuente: qs.get('fuente') || 'directo', datos_reales_hoteles: S.hotelesListos && !!HOTELES[0] && !HOTELES[0].ejemplo };
     try { ctx.total_parcial = Math.round(totalHastaAhora()); } catch (e) { /* aun sin seleccion */ }
     var plano = Object.assign(ctx, p || {});
@@ -1749,12 +1822,23 @@
     var estado = S.cargandoB ? '<p class="f-sub" role="status">Buscando el pasaje en bus…</p>' : (S.errorB ? '<p class="f-sub" role="alert">' + esc(S.errorB) + ' <button type="button" class="f-more" data-reintentar-bus="1">Reintentar</button></p>' : '');
     var tarjeta = BUS ? '<div class="opt is-sel" aria-current="true">' + tick +
       '<div class="fl__air"><span class="fl__logo">' + ic(ICO_PLATA.bus, 20) + '</span>' + esc(BUS.nombre) + '</div>' +
-      '<div class="fl__row"><div class="fl__t">Montevideo<small>Terminal</small></div><div class="fl__mid">' + esc(BUS.dur || 'Ida y vuelta') + '<i></i>Directo</div><div class="fl__t">' + esc(DEST) + '<small>Terminal</small></div>' +
+      '<div class="fl__row"><div class="fl__t">Montevideo<small>Terminal</small></div><div class="fl__mid">' + esc(BUS.dur || 'Ida y vuelta') + '<i></i>Directo</div><div class="fl__t">' + esc(DEST1) + '<small>Terminal</small></div>' +
       '<div class="fl__price"><b>' + f(BUS.precio) + '</b><small>ida y vuelta · ' + personasTxt() + '</small></div></div>' +
       '<div class="fl__foot"><span class="tagok">✓ Pasaje estimado</span></div></div>' : '';
-    return '<h1 class="f-h">Bus</h1><p class="f-sub">Montevideo → ' + esc(DEST) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
+    return '<h1 class="f-h">Bus</h1><p class="f-sub">Montevideo → ' + esc(DEST1) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
       estado + tarjeta +
-      '<p class="f-sub">El precio es una estimación del pasaje semicama/cama de ida y vuelta. Se compra directamente con la empresa de bus.</p>';
+      '<p class="f-sub">El precio es una estimación del pasaje semicama/cama de ida y vuelta. Se compra directamente con la empresa de bus.</p>' + cardEntre();
+  }
+  /* Traslado entre las dos paradas (solo con PAR): una tarjeta que se puede sacar, como el transfer. */
+  function cardEntre() {
+    if (!PAR || MODO === 'auto') return '';
+    var t = PAR.tramo, on = !!S.entre, b = PAR.l[1].nom, ferry = t.modo === 'ferry';
+    return '<h2 class="f-h3">' + ic(I.van, 22) + 'De ' + esc(DEST1) + ' a ' + esc(b) + '</h2><p class="f-sub">' + t.km + ' km · unas ' + horasTxt(t.horas) + (ferry ? ' con el cruce en barco' : ' por ruta') + ' · ' + nochesTxt(PAR.l[0].noches) + ' después de llegar</p>' +
+      '<div class="opt trc' + sel(on) + '" role="button" tabindex="0" data-entre="1" aria-pressed="' + on + '">' + tick +
+        '<div class="trc__img" role="img" aria-label="' + (ferry ? 'Ferry' : 'Van compartida') + '" style="background-image:url(traslado-van.png)"></div>' +
+        '<div class="trc__b"><b>' + (ferry ? 'Ferry a ' : 'Traslado a ') + esc(b) + '</b><small>' + (ferry ? 'Pasaje por persona' : 'Compartido · precio por persona') + '</small>' +
+        '<ul><li>' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 16) + 'Unas ' + horasTxt(t.horas) + '</li><li>' + ic('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/>', 16) + 'Precio estimado</li></ul></div>' +
+        '<div class="trc__p"><b>' + f(t.pp * pax) + '</b><small>solo ida · ' + personasTxt() + '</small></div></div>';
   }
   function cargarBus() {
     if (MODO !== 'bus') return Promise.resolve();
@@ -1779,7 +1863,7 @@
     return '<div class="fl-load" role="status"><div class="fl-load__ruta" aria-hidden="true">' +
       '<span class="fl-load__c"><b>MVD</b><small>Montevideo</small></span>' +
       '<span class="fl-load__pista"><span class="fl-load__x"><span class="fl-load__y">' + avion + '</span></span></span>' +
-      '<span class="fl-load__c fl-load__c--d"><b>' + esc(AEROPUERTO[destKey] || '✈') + '</b><small>' + esc(DEST) + '</small></span></div>' +
+      '<span class="fl-load__c fl-load__c--d"><b>' + esc(AEROPUERTO[destKey] || '✈') + '</b><small>' + esc(DEST1) + '</small></span></div>' +
       '<p class="fl-load__t"><b>Buscando vuelos para ' + personasTxt() + '</b><span class="fl-load__msgs" aria-hidden="true"><span>Comparando aerolíneas…</span><span>Revisando escalas y horarios…</span><span>Buscando el mejor precio…</span></span></p>' +
       '<div class="fl-load__bar" aria-hidden="true"><i></i></div></div>' + fantasma + fantasma;
   }
@@ -1854,7 +1938,8 @@
     if (vSel && visibles.indexOf(vSel) < 0) visibles = visibles.concat(vSel);
     var idBarato = VUELOS.length > 1 ? masBarato().id : '';
     var cambiarFechas = 'home-destino.html' + BUSQ0 + (BUSQ0 ? '&' : '?') + 'editar=1';
-    var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
+    var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST1) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
+      (PAR ? '<p class="f-sub">Viaje de dos paradas: ' + nochesTxt(PAR.l[0].noches) + ' en ' + esc(DEST1) + ' y ' + nochesTxt(PAR.l[1].noches) + ' en ' + esc(PAR.l[1].nom) + '. El vuelo va y vuelve de ' + esc(DEST1) + '.</p>' : '') +
       (ninos && VUELOS.length ? '<p class="f-sub">Vuelos cotizados para ' + pax + ' pasajeros a tarifa de adulto. Los niños de 2 a 11 años suelen tener descuento: la aerolínea lo confirma al reservar.</p>' : '') +
       (S.cargandoV ? cargandoVuelos() : '') +
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
@@ -1863,7 +1948,7 @@
       (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' + fuenteVuelos() + cajaAlerta() : '') +
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
-      '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
+      '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">' + (PAR ? 'Del aeropuerto a ' + esc(DEST1) + ' y de ' + esc(PAR.l[1].nom) + ' al aeropuerto' : 'Aeropuerto ⇄ alojamiento · ida y vuelta incluida') + ' · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
       chips([['todos', 'Todos'], ['priv', 'Privado'], ['comp', 'Compartido']], S.fTras, 'tras') +
       TRASLADOS.filter(function (t) { return S.fTras === 'todos' || S.fTras === t.tipo; }).map(function (t) {
         var on = S.traslado === t.id, sub = t.tipo === 'priv' ? 'Directo · ' + personasTxt() : t.sub;
@@ -1873,7 +1958,7 @@
           '<ul><li>' + ic('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>', 16) + esc(t.cap) + '</li><li>' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 16) + esc(t.dur) + '</li><li>' + ic('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/>', 16) + esc(t.nota) + '</li></ul></div>' +
           '<div class="trc__p"><b>' + f(trPrecio(t)) + '</b><small>ida y vuelta' + (t.pp ? ' · ' + personasTxt() : ' · ' + Math.ceil(pax / 4) + (pax > 4 ? ' vehículos' : ' vehículo')) + '</small></div></div>';
       }).join('') +
-      '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
+      cardEntre() + '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
     /* Vuelos y traslados van en dos pantallas: primero el vuelo, despues el traslado (mismo paso del flujo). */
     var k = html.indexOf('<h2 class="f-h3">');
     if (S.sub !== 't') return html.slice(0, k);
@@ -2028,7 +2113,7 @@
     if (h.precio <= precios[Math.floor(precios.length / 3)]) r.push('buen precio');
     return r.slice(0, tope || 2);
   }
-  var urlBooking = function (h) { return 'https://www.booking.com/searchresults.html?' + new URLSearchParams({ ss: h.nom + ' ' + DEST, checkin: IDA, checkout: VUELTA, group_adults: pax - ninos, group_children: ninos, no_rooms: 1 }).toString(); };
+  var urlBooking = function (h) { return 'https://www.booking.com/searchresults.html?' + new URLSearchParams({ ss: h.nom + ' ' + HN, checkin: HIDA, checkout: HVUELTA, group_adults: pax - ninos, group_children: ninos, no_rooms: 1 }).toString(); };
   /* Insignia sobre la foto: sale de datos del hotel, nunca inventada. */
   function insignia(h, i) {
     if (h.ejemplo) return '';
@@ -2046,12 +2131,12 @@
     var esq = '<div class="hl-sk" aria-hidden="true"><span class="hl-sk__img"></span><span class="hl-sk__b"><i class="hl-sk__t"></i><i class="hl-sk__s"></i><i class="hl-sk__s hl-sk__s--c"></i><i class="hl-sk__p"></i></span></div>';
     return '<div class="hl-wrap"><div class="hl-load" role="status">' +
       '<span class="hl-load__ico" aria-hidden="true"><span class="hl-load__aro"></span>' + ic(I.bed, 26) + '</span>' +
-      '<div class="hl-load__t"><b>Buscando alojamientos en Booking…</b><span class="hl-load__msgs" aria-hidden="true"><span>Comparando precios para ' + NOCHES_TXT + '…</span><span>Revisando ubicación y opiniones…</span><span>Ordenando del más barato al más caro…</span></span>' +
+      '<div class="hl-load__t"><b>Buscando alojamientos en Booking…</b><span class="hl-load__msgs" aria-hidden="true"><span>Comparando precios para ' + nochesTxt(HNOCHES) + '…</span><span>Revisando ubicación y opiniones…</span><span>Ordenando del más barato al más caro…</span></span>' +
       '<span class="hl-load__bar" aria-hidden="true"><i></i></span></div></div>' + esq + esq + '</div>';
   }
   function pantalla2() {
     var personas = personasTxt();
-    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(DEST) + ' · ' + NOCHES_TXT + ' · ' + personas + '</p></div></div>';
+    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(HN) + ' · ' + nochesTxt(HNOCHES) + ' · ' + personas + '</p></div></div>' + tabsParadas();
     var sinAlojBtn = '<button type="button" class="f-sin" data-sin-aloj="1">Continuar sin alojamiento</button>';
     if (S.cargandoH) return cab + cargandoHoteles() + sinAlojBtn;
     var aviso = S.avisoH ? '<p class="f-sub" style="padding:8px 10px;border-radius:10px;background:var(--cel-soft)">' + esc(S.avisoH) + '</p>' : '';
@@ -2091,10 +2176,19 @@
           '<div class="ho__u">' + ic(iPin, 14) + '<span>' + esc(h.zona) + (h.playa != null ? ' · ' + dist(h.playa) : '') + '</span></div>' +
           (S.habitacion && S.habitacion.hotelId === h.id ? '<div class="ho__hab">Habitación: ' + esc(S.habitacion.nombre) + '</div>' : '') + '<ul class="ho__f">' + feats.map(function (x) { return '<li>✓ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
           '</div>' +
-          '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + NOCHES_TXT + ' · ' + personas + '</small></div>' +
+          '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + nochesTxt(HNOCHES) + ' · ' + personas + '</small></div>' +
           (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Elegir habitación') + '</button>') + '</div></div>';
       }).join('') +
       (lista.length > mostrados.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Elegimos ' + mostrados.length + ' opciones distintas entre ' + lista.length + ' alojamientos' + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '.</p>' : '') + sinAlojBtn;
+  }
+  /* Dos paradas: una pestana por parada con su hotel elegido; se elige el alojamiento de cada una por separado. */
+  function tabsParadas() {
+    if (!PAR) return '';
+    return '<div class="f-par" role="group" aria-label="Alojamiento de cada parada">' + alojParadas().map(function (x) {
+      var on = x.i === PA;
+      return '<button type="button" class="f-par__b' + (on ? ' is-on' : '') + '" data-parada="' + x.i + '" aria-pressed="' + on + '"><b>' + esc(x.p.nom) + ' · ' + nochesTxt(x.p.noches) + '</b>' +
+        '<small>' + (x.h.sin ? (on && S.cargandoH ? 'Buscando…' : 'Sin elegir') : esc(x.h.nom) + ' · ' + f(x.est)) + '</small></button>';
+    }).join('') + '</div>';
   }
   /* Para no abrumar: hasta 4 alojamientos, cada uno por una razon distinta (la que se ve en la etiqueta de la foto):
      el mas barato, el mejor valorado, el mas cerca de la playa y el de mejor precio-calidad. Si el elegido no entra,
@@ -2151,10 +2245,10 @@
       '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small></div>' +
       (e.cat === 'tours' ? '<button type="button" class="x-add" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div></div>';
   }
-  var MAS_TXT = { tours: 'Ver más tours', tras: 'Ver más traslados' };
-  var TITULO_X = { tours: ['🌴', 'Tours y actividades', 'Experiencias y traslados en '] };
+  var MAS_TXT = { tours: 'Ver más tours', tours2: 'Ver más tours', tras: 'Ver más traslados' };
+  var TITULO_X = { tours: ['🌴', PAR ? 'Tours en ' + DEST1 : 'Tours y actividades', 'Experiencias y traslados en '], tours2: ['🌴', PAR ? 'Tours en ' + PAR.l[1].nom : '', ''] };
   /* Hasta 5 tours se muestran todos; con mas de 5 se ven 5 y "Ver más tours". */
-  var CUANTOS_X = { tours: 5, tras: 2 };
+  var CUANTOS_X = { tours: 5, tours2: 5, tras: 2 };
   function pantalla3() {
     var cab = '<div class="ho__head"><span class="ho__headico">' + ic(I.palm, 30) + '</span><div><h1 class="f-h" style="margin:0">Extras</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">¿Qué querés sumar a tu viaje?</p></div></div>' +
       '<p class="f-sub" style="margin:6px 0 0">Sumá solo lo que quieras. Podés continuar sin agregar extras.</p>';
@@ -2217,12 +2311,15 @@
       '<p class="dd-tot">' + f(gastoDia(q)) + ' en total · ' + personasTxt() + ' · ' + NOCHES + (NOCHES === 1 ? ' día' : ' días') + '</p></section>';
   }
   function datosFinal() {
-    var v = vuelo(), h = hotel(), t = trasl(), ex = extrasSel();
+    /* hs: el alojamiento de cada parada (uno solo sin PAR). h es el de la primera parada que tiene uno elegido. */
+    var v = vuelo(), t = trasl(), ex = extrasSel(), hs = alojParadas(), conH = hs.filter(function (x) { return !x.h.sin; });
+    var h = PAR ? (conH[0] ? conH[0].h : SIN_HOTEL) : hs[0].h;
     if (MODO !== 'avion') t = null;
-    var tVuelo = MODO === 'avion' ? vueloFinal() : (MODO === 'auto' ? AUTO.total : (BUS ? BUS.precio : 0)), tTras = t ? trPrecio(t) : 0, tAloj = precioHotel(h), tExtras = sum(ex, precioExtra);
+    var tVuelo = MODO === 'avion' ? vueloFinal() : (MODO === 'auto' ? AUTO.total : (BUS ? BUS.precio : 0)), tTras = t ? trPrecio(t) : 0, tAloj = alojTotal(), tExtras = sum(ex, precioExtra), tEntre = entreTotal();
     var tComidas = comidasParte(), tLocal = comidasTotal() - tComidas;
-    return { v: v, h: h, t: t, ex: ex, tVuelo: tVuelo, tTras: tTras, tAloj: tAloj, tExtras: tExtras, tComidas: tComidas, tLocal: tLocal,
-      total: tVuelo + tTras + tAloj + tExtras + tComidas + tLocal };
+    return { v: v, h: h, hs: hs, alojNom: PAR ? conH.map(function (x) { return x.h.nom; }).join(' + ') || h.nom : h.nom, tAlojEst: PAR ? sum(hs, function (x) { return x.est; }) : precioHotelEstimado(h),
+      t: t, ex: ex, tVuelo: tVuelo, tTras: tTras, tEntre: tEntre, tAloj: tAloj, tExtras: tExtras, tComidas: tComidas, tLocal: tLocal,
+      total: tVuelo + tTras + tEntre + tAloj + tExtras + tComidas + tLocal };
   }
   var MESES_C = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fdc = function (d) { var q = String(d || '').split('-'); return MESES_C[+q[1] - 1] && +q[2] ? +q[2] + ' ' + MESES_C[+q[1] - 1] : '?'; };
@@ -2259,7 +2356,7 @@
     var vr = VUELOS.filter(function (x) { return !x.ejemplo; });
     if (MODO === 'avion' && !d.v.ejemplo && vr.length) { var mv = Math.min.apply(null, vr.map(precioVuelo)), dv = precioVuelo(d.v) - mv; if (dv > 0) partes.push('un vuelo ' + f(dv) + ' más barato'); }
     var hr = HOTELES.filter(function (x) { return !x.ejemplo; });
-    if (!d.h.ejemplo && hr.length) { var mh = Math.min.apply(null, hr.map(function (x) { return x.precio; })), dh = d.tAloj - mh; if (dh > 0) partes.push('un alojamiento ' + f(dh) + ' más barato'); }
+    if (!PAR && !d.h.ejemplo && hr.length) { var mh = Math.min.apply(null, hr.map(function (x) { return x.precio; })), dh = d.tAloj - mh; if (dh > 0) partes.push('un alojamiento ' + f(dh) + ' más barato'); }
     return partes.length ? '<br><strong class="fin-ahorro">Hay ' + partes.join(' y ') + ' con los mismos datos de tu viaje.</strong>' : '';
   }
   /* ---- Paso 4: Tu presupuesto ----
@@ -2272,12 +2369,17 @@
   function partesViaje(d) {
     var l = [];
     if (MODO === 'avion') {
-      l.push({ k: 'vuelo', ico: ICO_PLATA.vuelo, n: 'Vuelo', det: 'Montevideo ⇄ ' + DEST + (d.v && d.v.id ? ' · ' + d.v.air : ''),
+      l.push({ k: 'vuelo', ico: ICO_PLATA.vuelo, n: 'Vuelo', det: 'Montevideo ⇄ ' + DEST1 + (d.v && d.v.id ? ' · ' + d.v.air : ''),
         info: [d.v && d.v.id ? d.v.air + ' · sale ' + d.v.sal + ' · ' + d.v.escT : 'Ida y vuelta', personasTxt()], est: precioVuelo(d.v), real: S.res.vuelo ? d.tVuelo : null, edit: true, ir: 1, irTxt: 'Cambiar vuelo' });
-      if (d.t) l.push({ k: 'tras', ico: I.van, n: 'Transfer', det: d.t.nom, info: ['Aeropuerto ⇄ alojamiento, ida y vuelta', d.t.dur], est: d.tTras, real: S.res.tras ? d.tTras : null, ir: 1, sub: 't', irTxt: 'Cambiar transfer' });
+      if (d.t) l.push({ k: 'tras', ico: I.van, n: 'Transfer', det: d.t.nom, info: [PAR ? 'Del aeropuerto a ' + DEST1 + ' y de ' + PAR.l[1].nom + ' al aeropuerto' : 'Aeropuerto ⇄ alojamiento, ida y vuelta', d.t.dur], est: d.tTras, real: S.res.tras ? d.tTras : null, ir: 1, sub: 't', irTxt: 'Cambiar transfer' });
     } else l.push({ k: MODO, ico: ICO_PLATA[MODO], n: MODO === 'auto' ? 'Auto' : 'Bus', det: MODO === 'auto' ? 'Combustible y peajes' : 'Pasajes ida y vuelta',
       info: [MODO === 'auto' ? (AUTO.km ? AUTO.km.toLocaleString('es-UY') + ' km' : 'Tu vehículo') + (AUTO.horas ? ' · unas ' + AUTO.horas + ' h de manejo' : '') : (BUS && BUS.dur ? BUS.dur : 'Ida y vuelta')], est: d.tVuelo, real: null, ir: 1, irTxt: MODO === 'auto' ? 'Cambiar el auto' : '' });
+    if (d.tEntre) l.push({ k: 'entre', ico: I.van, n: 'Traslado entre paradas', det: DEST1 + ' → ' + PAR.l[1].nom,
+      info: [PAR.tramo.km + ' km · unas ' + horasTxt(PAR.tramo.horas) + (PAR.tramo.modo === 'ferry' ? ' con el cruce en barco' : ''), 'Estimado: ' + f(PAR.tramo.pp) + ' por persona'], est: d.tEntre, real: S.res.tras ? d.tEntre : null, ir: 1, sub: MODO === 'avion' ? 't' : undefined, irTxt: 'Cambiar traslado' });
     if (d.h.sin) l.push({ k: 'aloj', ico: ICO_PLATA.aloj, n: 'Alojamiento', det: 'Sin alojamiento elegido', info: ['No suma al presupuesto.'], est: 0, real: null, edit: false, ir: 2, irTxt: 'Elegir alojamiento' });
+    else if (PAR) l.push({ k: 'aloj', ico: ICO_PLATA.aloj, n: 'Alojamiento', det: d.alojNom,
+      info: d.hs.map(function (x) { return x.p.nom + ' · ' + nochesTxt(x.p.noches) + ': ' + (x.h.sin ? 'sin alojamiento elegido' : x.h.nom + (x.hab ? ' (' + x.hab + ')' : '') + ' · ' + f(x.est)); }),
+      est: d.tAlojEst, real: S.res.aloj && S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : (S.res.aloj ? d.tAloj : null), edit: true, ir: 2, irTxt: 'Cambiar alojamiento' });
     else l.push({ k: 'aloj', ico: ICO_PLATA.aloj, n: 'Alojamiento', det: d.h.nom,
       info: [NOCHES + (NOCHES === 1 ? ' noche' : ' noches') + ' · ' + personasTxt(), S.habitacion && S.habitacion.hotelId === d.h.id ? 'Habitación: ' + S.habitacion.nombre : ''],
       est: precioHotelEstimado(d.h), real: S.res.aloj && S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : (S.res.aloj ? d.tAloj : null), edit: true, ir: 2, irTxt: 'Cambiar alojamiento' });
@@ -2287,7 +2389,7 @@
       info: d.ex.map(function (e) { return e.nom + ' · ' + f(precioExtra(e)); }), est: d.tExtras, real: S.res.tours && d.tExtras ? d.tExtras : null, ir: 3, irTxt: d.ex.length ? 'Cambiar actividades' : 'Agregar actividades' });
     return l;
   }
-  var PZ_COLOR = { vuelo: "#5B9BD5", bus: "#5B9BD5", auto: "#F0714F", tras: "#F0714F", aloj: "#7CB7E8", comidas: "#F7C325", extras: "#8FA3BB" };
+  var PZ_COLOR = { vuelo: "#5B9BD5", bus: "#5B9BD5", auto: "#F0714F", tras: "#F0714F", entre: "#F0714F", aloj: "#7CB7E8", comidas: "#F7C325", extras: "#8FA3BB" };
   function filaParte(x, total) {
     var v = x.real != null ? x.real : x.est, pct = total > 0 ? Math.round(v / total * 100) : 0, abierta = S.segAbierto === x.k;
     var tasa = window.CSMoneda && CSMoneda.tasa ? CSMoneda.tasa() : 1, sim = window.CSMoneda ? CSMoneda.simbolo() : 'US$';
@@ -2332,7 +2434,7 @@
       var n = Math.abs(alt.shift), dd = new Date(alt.dep + 'T12:00:00');
       l.push({ save: df.base - alt.pp * pax, t: 'Salí el ' + DIA_A[dd.getDay()].toLowerCase() + ' ' + fdc(alt.dep), p: n + (n === 1 ? ' día ' : ' días ') + (alt.shift < 0 ? 'antes' : 'después') + ', con las mismas ' + NOCHES_TXT + '.', b: '<button type="button" class="ah2-b" data-usar-fecha="' + alt.dep + '">Usar estas fechas</button>' });
     }
-    if (!S.res.aloj && d.h && !d.h.sin) {
+    if (!PAR && !S.res.aloj && d.h && !d.h.sin) {
       var nota = d.h.rat || 0, tope = nota * 0.93;
       /* Primero uno mas barato con nota parecida; si no hay, el mas barato que haya. */
       var otros = HOTELES.filter(function (h) { return h.id !== d.h.id && (d.h.ejemplo || !h.ejemplo); }).sort(function (a, b) { return precioHotel(a) - precioHotel(b); });
@@ -2362,7 +2464,7 @@
     return '<div class="pz">' +
       '<section class="pz-hero" style="--pz-img:url(\'../fotos/' + destKey + '.jpg\')" aria-label="Tu viaje a ' + esc(DEST) + '">' +
         '<span class="pz-hero__k">Tu viaje a</span><h1>' + esc(DEST) + '</h1>' +
-        '<ul class="pz-chips">' + chip(I.plane, 'Montevideo → ' + DEST) + chip(iCalP, fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches')) + chip(iPersP, personasTxt()) +
+        '<ul class="pz-chips">' + chip(I.plane, 'Montevideo → ' + DEST) + chip(iCalP, fdc(IDA) + ' – ' + fdc(VUELTA) + ' · ' + (PAR ? PAR.l[0].noches + ' + ' + nochesTxt(PAR.l[1].noches) : nochesTxt(NOCHES))) + chip(iPersP, personasTxt()) +
           (MODO !== 'avion' ? chip(ICO_PLATA[MODO], MODO === 'auto' ? 'En auto' : 'En bus') : '') + '</ul>' +
         (CREDITO_FOTO[destKey] ? '<small class="pz-credit">' + CREDITO_FOTO[destKey] + '</small>' : '') + '</section>' +
       '<section class="pz-total" aria-label="Costo por persona">' +
@@ -2417,10 +2519,10 @@
   function pantalla6() {
     var d = datosFinal(), personas = personasTxt();
     var toursSel = d.ex.filter(function (e) { return e.cat === 'tours'; });
-    var toursPrecios = EXTRAS.filter(function (g) { return g.cat === 'tours'; }).reduce(function (a, g) { return a.concat(g.items.map(function (e) { return e.precio; })); }, []);
+    var toursPrecios = EXTRAS.filter(function (g) { return /^tours/.test(g.cat); }).reduce(function (a, g) { return a.concat(g.items.map(function (e) { return e.precio; })); }, []);
     var desdeTours = toursPrecios.length ? Math.min.apply(null, toursPrecios) : 0;
     /* "Desde" solo cuando hay varias opciones y todavia no se eligio una; con una eleccion el precio es el real. */
-    var precioTras = d.t ? f(d.tTras) : 'Desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio)));
+    var precioTras = d.t ? f(d.tTras + d.tEntre) : 'Desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio)));
     var precioTours = toursSel.length ? f(sum(toursSel, precioExtra)) : (desdeTours ? 'Desde ' + f(desdeTours) : '');
     var fila = function (o) {
       var hecho = o.k && S.res[o.k];
@@ -2430,10 +2532,10 @@
         (o.precio ? '<strong>' + o.precio + '</strong>' : '') + '</div>' + btn + '</li>';
     };
     var filas = [];
-    if (MODO === 'avion') filas.push({ k: 'vuelo', ico: I.plane, n: 'Vuelo', prov: 'Google Flights', det: 'Montevideo ⇄ ' + esc(DEST) + (d.v && d.v.id ? ' · ' + esc(d.v.air) + ' · ' + esc(d.v.escT) : '') + ' · ' + personas, precio: f(d.tVuelo), accion: 'externo:google_flights', btn: 'Reservar en Google Flights', externo: true });
-    else filas.push({ ico: ICO_PLATA[MODO] || I.car, n: MODO === 'auto' ? 'Auto' : 'Bus', prov: MODO === 'auto' ? 'Lo manejás vos' : 'Se paga con la empresa de bus', det: 'Montevideo → ' + esc(DEST) + (MODO === 'auto' ? (AUTO.km ? ' · ' + AUTO.km.toLocaleString('es-UY') + ' km' : '') : (BUS && BUS.dur ? ' · ' + esc(BUS.dur) : '')), precio: f(d.tVuelo) });
-    if (!d.h.sin) filas.push({ k: 'aloj', ico: I.bed, n: 'Alojamiento', prov: 'Booking.com', det: esc(d.h.nom) + ' · ' + NOCHES + (NOCHES === 1 ? ' noche' : ' noches'), precio: f(d.tAloj), accion: 'externo:booking', btn: 'Reservar en Booking', externo: true });
-    if (MODO === 'avion') filas.push({ k: 'tras', ico: I.van, n: 'Transfer', prov: 'Con CuántoSale', det: (d.t ? esc(d.t.nom) + ' · ' : '') + 'aeropuerto ⇄ alojamiento', precio: precioTras, accion: 'cs:traslado', btn: 'Reservar con CuántoSale' });
+    if (MODO === 'avion') filas.push({ k: 'vuelo', ico: I.plane, n: 'Vuelo', prov: 'Google Flights', det: 'Montevideo ⇄ ' + esc(DEST1) + (d.v && d.v.id ? ' · ' + esc(d.v.air) + ' · ' + esc(d.v.escT) : '') + ' · ' + personas, precio: f(d.tVuelo), accion: 'externo:google_flights', btn: 'Reservar en Google Flights', externo: true });
+    else filas.push({ ico: ICO_PLATA[MODO] || I.car, n: MODO === 'auto' ? 'Auto' : 'Bus', prov: MODO === 'auto' ? 'Lo manejás vos' : 'Se paga con la empresa de bus', det: 'Montevideo → ' + esc(DEST1) + (MODO === 'auto' ? (AUTO.km ? ' · ' + AUTO.km.toLocaleString('es-UY') + ' km' : '') : (BUS && BUS.dur ? ' · ' + esc(BUS.dur) : '')), precio: f(d.tVuelo) });
+    if (!d.h.sin) filas.push({ k: 'aloj', ico: I.bed, n: 'Alojamiento', prov: 'Booking.com', det: esc(d.alojNom) + ' · ' + nochesTxt(NOCHES), precio: f(d.tAloj), accion: 'externo:booking', btn: 'Reservar en Booking', externo: true });
+    if (MODO === 'avion') filas.push({ k: 'tras', ico: I.van, n: 'Transfer', prov: 'Con CuántoSale', det: (d.t ? esc(d.t.nom) + ' · ' : '') + (PAR ? 'aeropuerto' + (d.tEntre ? ' y traslado a ' + esc(PAR.l[1].nom) : '') : 'aeropuerto ⇄ alojamiento'), precio: precioTras, accion: 'cs:traslado', btn: 'Reservar con CuántoSale' });
     filas.push({ k: 'tours', ico: I.palm, n: 'Tours y actividades', prov: 'Con CuántoSale', det: toursSel.length ? esc(toursSel.map(function (e) { return e.nom; }).join(', ')) : 'Experiencias en ' + esc(DEST), precio: precioTours, accion: 'cs:tours', btn: toursSel.length ? 'Reservar con CuántoSale' : 'Ver actividades' });
     var iCal6 = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', iPers6 = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>';
     return '<div class="rv2">' +
@@ -2471,6 +2573,17 @@
   function abrirAlojIr() { S.modal = { tipo: 'alojamiento_ir' }; pintarModal(); track('flujo_alojamiento_ir_vista', {}); }
   function alojIrHoja() {
     var d = datosFinal(), h = d.h, personas = personasTxt();
+    if (PAR) return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet vi vi2" role="dialog" aria-modal="true" aria-labelledby="vi-h">' +
+      '<button type="button" class="f-modal__x vi__x" data-cerrar="1" aria-label="Cerrar">✕</button>' +
+      '<div class="vi2-h"><span class="vi2-i">' + ic(I.bed, 24) + '</span><div><h2 class="vi__h" id="vi-h">Vas a buscar tus alojamientos</h2><p class="vi__p">Uno por parada: te llevamos a Booking con las fechas de cada uno.</p></div></div>' +
+      d.hs.filter(function (x) { return !x.h.sin; }).map(function (x) {
+        return '<div class="vi2-c"><div class="vi2-v"><span class="vi2-air"><b>' + esc(x.h.nom) + '</b>' + esc(x.p.nom) + '</span><span class="vi2-hs">' + nochesTxt(x.p.noches) + '</span></div>' +
+          '<div class="vi2-p"><b>' + f(x.est) + '</b><small>estimado</small></div>' +
+          '<ul class="vi2-m"><li>' + ic(iCalR, 15) + fdc(x.p.ida) + ' → ' + fdc(x.p.vuelta) + '</li><li>' + ic(iPersR, 15) + personas + '</li></ul>' +
+          '<div class="vi2-b"><button type="button" class="g-btn g-btn--main" data-bk="' + x.i + '">Ir a Booking: ' + esc(x.p.nom) + ic(iExt, 16) + '</button></div></div>';
+      }).join('') +
+      '<div class="vi2-b"><button type="button" class="g-btn" data-cerrar="1">Volver</button></div>' +
+      '<p class="vi__legal">CuántoSale no realiza la reserva del alojamiento.</p></div>';
     return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet vi vi2" role="dialog" aria-modal="true" aria-labelledby="vi-h">' +
       '<button type="button" class="f-modal__x vi__x" data-cerrar="1" aria-label="Cerrar">✕</button>' +
       '<div class="vi2-h"><span class="vi2-i">' + ic(I.bed, 24) + '</span><div><h2 class="vi__h" id="vi-h">Vas a buscar tu alojamiento</h2><p class="vi__p">Te llevamos a Booking para ver disponibilidad y reservar.</p></div></div>' +
@@ -2525,16 +2638,18 @@
     info = info.concat(num(9, 1), num(19, 1));
     return btoa(String.fromCharCode.apply(null, info)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
-  function irATercero(servicio) {
+  function irATercero(servicio, parada) {
     var id = window.CS_VIAJE_ID, d = datosFinal(), url;
     if (servicio === 'vuelo') url = urlVuelos(IDA, VUELTA, d.v);
     else {
       /* Con el id de Booking del hotel se abre ESE alojamiento (dest_type=hotel); buscar por nombre devolvia
          el destino mas parecido y no la pousada. Los hoteles de ejemplo no tienen id: ahi solo queda el nombre. */
-      var q = { checkin: IDA, checkout: VUELTA, group_adults: pax - ninos, group_children: ninos, no_rooms: 1, label: 'cs-' + id };
-      if (/^[0-9]{3,12}$/.test(String(d.h.id)) && !d.h.ejemplo) { q.dest_id = d.h.id; q.dest_type = 'hotel'; q.ss = d.h.nom; }
-      else q.ss = d.h.nom + ' ' + DEST;
-      url = 'https://www.booking.com/searchresults.html?' + new URLSearchParams(q).toString();
+      url = enParada(parada || 0, function () {
+        var h = hotel(), q = { checkin: HIDA, checkout: HVUELTA, group_adults: pax - ninos, group_children: ninos, no_rooms: 1, label: 'cs-' + id };
+        if (/^[0-9]{3,12}$/.test(String(h.id)) && !h.ejemplo) { q.dest_id = h.id; q.dest_type = 'hotel'; q.ss = h.nom; }
+        else q.ss = h.nom + ' ' + HN;
+        return 'https://www.booking.com/searchresults.html?' + new URLSearchParams(q).toString();
+      });
     }
     track('reserva_click', { servicio: servicio, proveedor: servicio === 'vuelo' ? 'google_flights' : 'booking', salida_a_tercero: true, importe: Math.round(servicio === 'vuelo' ? d.tVuelo : d.tAloj), sesion: S.sesion || 'sin_sesion' });
     S.esperando = servicio;
@@ -2557,13 +2672,13 @@
     if (!vuelo) {
       return '<div class="rq"><div class="rq__ico"><span class="rq__d rq__d1"></span><span class="rq__d rq__d2"></span><span class="rq__d rq__d3"></span>' + ic(I.bed, 54) + '</div>' +
         '<h1 class="rq__h">¿Ya resolviste tu alojamiento?</h1>' +
-        '<button type="button" class="rq__op" data-reservado="si"><b>Sí, reservé el que había elegido</b><small>' + esc(d.h.nom) + ' · ' + f(precioHotelEstimado(d.h)) + '</small></button>' +
+        '<button type="button" class="rq__op" data-reservado="si"><b>Sí, reservé el que había elegido</b><small>' + esc(d.alojNom) + ' · ' + f(d.tAlojEst) + '</small></button>' +
         '<button type="button" class="rq__op" data-reservado="otro"><b>Sí, pero elegí otro</b><small>Informar alojamiento reservado</small></button>' +
         '<button type="button" class="rq__op rq__op--no" data-reservado="no"><b>Todavía no</b><small>Mantener pendiente</small></button></div>';
     }
     return '<div class="rq"><div class="rq__ico"><span class="rq__d rq__d1"></span><span class="rq__d rq__d2"></span><span class="rq__d rq__d3"></span>' + ic(I.plane, 54) + '</div>' +
       '<h1 class="rq__h">¿Reservaste tu vuelo?</h1>' +
-      '<p class="rq__p">Montevideo → ' + esc(DEST) + '</p>' +
+      '<p class="rq__p">Montevideo → ' + esc(DEST1) + '</p>' +
       '<p class="rq__pr"><b>' + f(d.tVuelo) + '</b> (estimado)</p>' +
       '<button type="button" class="rq__si" data-reservado="si">Sí, ya lo reservé ✓</button>' +
       '<button type="button" class="rq__no" data-reservado="no">Todavía no</button></div>';
@@ -2572,7 +2687,8 @@
   /* k = 'tras' (transfer y traslados) o 'tours' (actividades): cada uno se reserva por separado. Sin k, todos. */
   function serviciosCs(k) {
     var d = datosFinal(), pers = personasTxt(), lista = [];
-    if (d.t) lista.push({ ico: 'van', nom: d.t.nom + ' aeropuerto', det: 'Aeropuerto ⇄ alojamiento', pers: pers, precio: d.tTras });
+    if (d.t) lista.push({ ico: 'van', nom: d.t.nom + ' aeropuerto', det: PAR ? 'Aeropuerto → ' + DEST1 + ' · ' + PAR.l[1].nom + ' → aeropuerto' : 'Aeropuerto ⇄ alojamiento', pers: pers, precio: d.tTras });
+    if (d.tEntre) lista.push({ ico: 'van', nom: (PAR.tramo.modo === 'ferry' ? 'Ferry ' : 'Traslado ') + DEST1 + ' → ' + PAR.l[1].nom, det: PAR.tramo.km + ' km · solo ida · ' + fdc(PAR.l[1].ida), pers: pers, precio: d.tEntre });
     d.ex.forEach(function (e) {
       if (e.cat === 'tours' || e.cat === 'tras') lista.push({ ico: e.cat === 'tras' ? 'van' : 'palm', nom: e.nom, det: e.dur || '', pers: e.pp ? pers : (e.grupo || ''), precio: precioExtra(e) });
     });
@@ -2692,16 +2808,16 @@
     cargarSeguro();
     var d = datosFinal(), n = partesReservadas();
     var toursSel = d.ex.filter(function (e) { return e.cat === 'tours'; });
-    var toursPrecios = EXTRAS.filter(function (g) { return g.cat === 'tours'; }).reduce(function (a, g) { return a.concat(g.items.map(function (e) { return e.precio; })); }, []);
-    var precioTras = d.t ? f(d.tTras) : 'Desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio)));
+    var toursPrecios = EXTRAS.filter(function (g) { return /^tours/.test(g.cat); }).reduce(function (a, g) { return a.concat(g.items.map(function (e) { return e.precio; })); }, []);
+    var precioTras = d.t ? f(d.tTras + d.tEntre) : 'Desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio)));
     var precioTours = toursSel.length ? f(sum(toursSel, precioExtra)) : (toursPrecios.length ? 'Desde ' + f(Math.min.apply(null, toursPrecios)) : '');
     var fechasTxt = fdc(IDA) + ' – ' + fdc(VUELTA) + ' ' + IDA.slice(0, 4);
     var gente = personasTxt().replace(' · ', ' + ');
     var noches = NOCHES + (NOCHES === 1 ? ' noche' : ' noches');
     var hotelReal = S.hotelesListos && d.h && !d.h.ejemplo;
     var desc = {
-      vuelo: esc(d.v.air) + ' · Montevideo → ' + esc(DEST) + ' · ' + fdc(IDA) + ' – ' + fdc(VUELTA),
-      aloj: (hotelReal ? esc(d.h.nom) + (d.h.zona ? ' · ' + esc(d.h.zona) : '') + ' · ' : '') + noches,
+      vuelo: esc(d.v.air) + ' · Montevideo → ' + esc(DEST1) + ' · ' + fdc(IDA) + ' – ' + fdc(VUELTA),
+      aloj: (hotelReal ? (PAR ? esc(d.alojNom) : esc(d.h.nom) + (d.h.zona ? ' · ' + esc(d.h.zona) : '')) + ' · ' : '') + noches,
       tras: (d.t ? esc(d.t.nom) + ' · ' : '') + 'Aeropuerto ↔ alojamiento',
       tours: toursSel.length ? toursSel.slice(0, 2).map(function (e) { return esc(e.nom || e.titulo || ''); }).filter(Boolean).join(', ') + (toursSel.length > 2 ? ' y ' + (toursSel.length - 2) + ' más' : '') : 'Excursiones y actividades en ' + esc(DEST)
     };
@@ -2720,7 +2836,7 @@
     var cIcon = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
     var gIcon = '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.3c1.7.8 3 2.5 3 5.2"/>';
     var vIcon = I.plane;
-    var editar = 'home-destino.html?' + new URLSearchParams({ destino: destKey, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, editar: '1', origen_home: 'estado_viaje' }).toString();
+    var editar = 'home-destino.html?' + new URLSearchParams(Object.assign({ destino: destKey, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, editar: '1', origen_home: 'estado_viaje' }, paramsPar())).toString();
     return '<div class="st">' +
       '<div class="st-hero" style="--st-img:url(\'../fotos/' + esc(destKey) + '.jpg\')">' +
         '<span class="st-chip">' + ic(pIcon, 15) + 'Tu viaje</span>' +
@@ -2743,7 +2859,7 @@
             '<span class="st-svc__t"><b>Seguro de viaje</b><span class="st-b st-b--opc">Opcional</span></span>' +
             '<span class="st-svc__d">Asistencia médica, equipaje y cancelación · Protege tu Viaje</span>' +
             '<span class="st-svc__r"><b>' + (S.seguro && S.seguro.desde ? 'Desde ' + f(S.seguro.desde) : 'Cotizar') + '</b></span></button>' +
-          (S.alojReservado && S.alojReservado.precio ? '<p class="ed-act">Presupuesto actualizado: <b>' + f(d.total) + '</b> (' + (d.tAloj - precioHotelEstimado(d.h) >= 0 ? '+' : '−') + f(Math.abs(d.tAloj - precioHotelEstimado(d.h))) + ' en alojamiento vs. lo estimado)</p>' : '') +
+          (S.alojReservado && S.alojReservado.precio ? '<p class="ed-act">Presupuesto actualizado: <b>' + f(d.total) + '</b> (' + (d.tAloj - d.tAlojEst >= 0 ? '+' : '−') + f(Math.abs(d.tAloj - d.tAlojEst)) + ' en alojamiento vs. lo estimado)</p>' : '') +
           (S.avisoCs ? '<p class="st-aviso" role="status">' + esc(S.avisoCs) + '</p>' : '') +
         '</section>' +
         '<aside class="st-side">' +
@@ -2782,7 +2898,7 @@
   /* Reservar: el pedido le llega al asesor (por email, desde el servidor) y el asesor le manda el WhatsApp al cliente. */
   /* Pedidos hechos desde este navegador: el id del pedido en el panel /admin, por servicio y por viaje. Con eso la pagina
      pregunta a /api/reserva-estado y, cuando el asesor confirma en /admin, el servicio pasa a "Reservado". */
-  var CLAVE_VIAJE = [destKey, IDA, VUELTA, pax].join('|');
+  var CLAVE_VIAJE = [CLAVE_DEST, IDA, VUELTA, pax].join('|');
   function pedidosGuardados() { try { var l = JSON.parse(localStorage.getItem('cs_pedidos') || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
   function anotarPedido(id, k) {
     if (!id || typeof id !== 'string') return;
@@ -2914,7 +3030,8 @@
     var v = vuelo();
     return { vuelo: S.vuelo || null, vueloK: v && v.id ? [v.air, v.sal, v.lle].join('|') : null,
       toursN: extrasSel().map(function (e) { return e.nom; }), traslado: S.traslado || null, tIV: S.tIV, hotel: S.sinAloj ? null : (S.hotel || null), sinAloj: !!S.sinAloj,
-      habitacion: S.sinAloj ? null : (S.habitacion || null), extras: Object.keys(S.extras || {}).filter(function (k) { return S.extras[k]; }), dia: S.dia, catH: S.catH };
+      habitacion: S.sinAloj ? null : (S.habitacion || null), extras: Object.keys(S.extras || {}).filter(function (k) { return S.extras[k]; }), dia: S.dia, catH: S.catH,
+      entre: S.entre, paradas: PAR ? PAR.l.map(function (p, i) { return enParada(i, function () { return { hotel: S.sinAloj ? null : (S.hotel || null), sinAloj: !!S.sinAloj, habitacion: S.sinAloj ? null : (S.habitacion || null), catH: S.catH }; }); }) : undefined };
   }
   /* Foto de la reserva tal como se guardo (nombres y precios en USD), por si mas adelante cambian los precios o el vuelo ya no esta. */
   function detalleReserva(d) {
@@ -2925,7 +3042,9 @@
       bus: MODO === 'bus' && BUS ? { precio: r(d.tVuelo) } : null,
       auto: MODO === 'auto' ? { precio: r(d.tVuelo) } : null,
       transfer: d.t ? { nombre: d.t.nom, ida_y_vuelta: !!S.tIV, precio: r(d.tTras) } : null,
-      alojamiento: d.h && !d.h.sin ? { nombre: d.h.nom, zona: d.h.zona || '', habitacion: S.habitacion && S.habitacion.hotelId === d.h.id ? S.habitacion.nombre : '', precio: r(d.tAloj) } : null,
+      entre_paradas: d.tEntre ? { desde: DEST1, hasta: PAR.l[1].nom, precio: r(d.tEntre) } : null,
+      paradas: PAR ? d.hs.map(function (x) { return { destino: x.p.nom, noches: x.p.noches, alojamiento: x.h.sin ? null : x.h.nom, habitacion: x.hab, precio: r(x.est) }; }) : null,
+      alojamiento: d.h && !d.h.sin ? { nombre: d.alojNom, zona: d.h.zona || '', habitacion: S.habitacion && S.habitacion.hotelId === d.h.id ? S.habitacion.nombre : '', precio: r(d.tAloj) } : null,
       tours: d.ex.map(function (e) { return { nombre: e.nom, precio: r(precioExtra(e)) }; }),
       comidas: { nivel: S.dia.comidas && S.dia.comidas.k, precio: r(d.tComidas) },
       transporte_local: { nivel: S.dia.local && S.dia.local.k, precio: r(d.tLocal) }
@@ -2933,7 +3052,7 @@
   }
   function viajeParaGuardar() {
     var d = datosFinal(), sel = seleccionActual();
-    var url = location.origin + RUTA0 + '?' + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: 'guardado' }, parametrosModo(), { sel: JSON.stringify(sel) })).toString();
+    var url = location.origin + RUTA0 + '?' + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST1, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: 'guardado' }, parametrosModo(), { sel: JSON.stringify(sel) })).toString();
     return { destination: DEST, destination_key: destKey, pax: pax, departure_date: IDA, return_date: VUELTA, total_amount: Math.round(d.total), url: url, seleccion: sel, detalle: detalleReserva(d) };
   }
   /* Clave del viaje para el pasaporte: un evento por viaje (destino + dia de ida), asi repetir no suma. */
@@ -2942,11 +3061,11 @@
     return CSCuenta.guardarViaje(viajeParaGuardar()).then(function () { S.sesion = 'cuenta'; S.avisoGuardado = ''; track('flujo_guardar_ok', { total: Math.round(totalHastaAhora()) }); if (window.CS_GAME) CS_GAME.evento('guardar', refViaje()); });
   }
   function guardarPendiente() {
-    try { sessionStorage.setItem('cs_test_pendiente', JSON.stringify({ clave: [destKey, IDA, VUELTA, pax].join('|'), s: seleccionActual() })); } catch (e) { /* modo privado: se guarda sin la seleccion */ }
+    try { sessionStorage.setItem('cs_test_pendiente', JSON.stringify({ clave: [CLAVE_DEST, IDA, VUELTA, pax].join('|'), s: seleccionActual() })); } catch (e) { /* modo privado: se guarda sin la seleccion */ }
   }
   function restaurarPendiente(u) {
     var p; try { p = JSON.parse(sessionStorage.getItem('cs_test_pendiente') || 'null'); } catch (e) { p = null; }
-    if (!p || !u || p.clave !== [destKey, IDA, VUELTA, pax].join('|')) return;
+    if (!p || !u || p.clave !== [CLAVE_DEST, IDA, VUELTA, pax].join('|')) return;
     try { sessionStorage.removeItem('cs_test_pendiente'); } catch (e) { /* nada */ }
     aplicarSeleccion(p.s || {}).then(function () {
       return guardarEnCuenta().then(function () { ir(7, 'guardado'); }, function (e) { S.avisoGuardado = e.message; ir(4, 'guardar_error'); });
@@ -2955,16 +3074,21 @@
   /* Vuelve a poner lo elegido (vuelo, transfer, alojamiento y habitacion, tours, comidas y transporte local).
      Lo que ya no exista (por ejemplo un vuelo que salio de la lista) queda con la opcion por defecto. */
   function aplicarSeleccion(s) {
-    var hoteles = s.sinAloj || !s.hotel ? Promise.resolve() : (S.hotelesListos && !S.cargandoH ? Promise.resolve() : cargarHoteles());
+    var hoteles = PAR ? cargarAlojamientos() : (s.sinAloj || !s.hotel ? Promise.resolve() : (S.hotelesListos && !S.cargandoH ? Promise.resolve() : cargarHoteles()));
+    var aplicarHotel = function (x) {
+      if (x.catH) S.catH = x.catH;
+      if (x.sinAloj) { S.sinAloj = true; S.habitacion = null; }
+      else if (HOTELES.some(function (h) { return h.id === x.hotel; })) { S.sinAloj = false; S.hotel = x.hotel; if (x.habitacion && x.habitacion.hotelId === x.hotel) S.habitacion = x.habitacion; }
+    };
     return Promise.all([vuelosListos, hoteles]).then(function () {
       /* El vuelo se busca por aerolinea y horarios (los ids dependen del orden de la lista, que cambia con los dias). */
       var vk = s.vueloK && VUELOS.filter(function (v) { return [v.air, v.sal, v.lle].join('|') === s.vueloK; })[0];
       if (vk) S.vuelo = vk.id; else if (!s.vueloK && VUELOS.some(function (v) { return v.id === s.vuelo; })) S.vuelo = s.vuelo;
       if (s.traslado === null || TRASLADOS.some(function (t) { return t.id === s.traslado; })) S.traslado = s.traslado;
       if (typeof s.tIV === 'boolean') S.tIV = s.tIV;
-      if (s.catH) S.catH = s.catH;
-      if (s.sinAloj) { S.sinAloj = true; S.habitacion = null; }
-      else if (HOTELES.some(function (x) { return x.id === s.hotel; })) { S.sinAloj = false; S.hotel = s.hotel; if (s.habitacion && s.habitacion.hotelId === s.hotel) S.habitacion = s.habitacion; }
+      if (typeof s.entre === 'boolean') S.entre = s.entre;
+      if (PAR && Array.isArray(s.paradas)) s.paradas.forEach(function (x, i) { if (x && PAR.l[i]) enParada(i, function () { aplicarHotel(x); }); });
+      else aplicarHotel(s);
       if (Array.isArray(s.toursN) && s.toursN.length) { S.extras = {}; todosExtras.forEach(function (e) { if (s.toursN.indexOf(e.nom) >= 0) S.extras[e.id] = true; }); }
       else if (Array.isArray(s.extras)) { S.extras = {}; s.extras.forEach(function (id) { S.extras[id] = true; }); }
       else if (s.extras && typeof s.extras === 'object') S.extras = s.extras;
@@ -2993,14 +3117,14 @@
   /* Compartir: genera la tarjeta del viaje (tarjeta.js, la misma de la app) y la manda por la hoja de compartir del
      celular o por WhatsApp con la imagen copiada en escritorio. Si no se puede armar la imagen, se comparte solo el texto. */
   function datosTarjeta() {
-    var d = datosFinal(), url = location.origin + RUTA0 + "?" + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: "compartido" }, parametrosModo())).toString();
+    var d = datosFinal(), url = location.origin + RUTA0 + "?" + new URLSearchParams(Object.assign({ destino: destKey, nombre: DEST1, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, fuente: "compartido" }, parametrosModo())).toString();
     return { dest: { key: destKey, name: DEST, country: "Brasil" }, ida: IDA, vuelta: VUELTA, pax: pax, pp: d.total / pax, total: d.total,
       entries: [
         MODO === 'avion' ? { category: "pasajes", label: "Vuelo", value: d.tVuelo, color: "c1" } : (MODO === 'auto' ? { category: "auto", label: "Auto", value: d.tVuelo, color: "c1" } : { category: "bus", label: "Bus", value: d.tVuelo, color: "c1" }),
         { category: "alojamiento", label: "Hotel", value: d.tAloj, color: "c3" },
         { category: "comidas", label: "Comida", value: d.tComidas, color: "c4" },
         { category: "local", label: "Transporte local", value: d.tLocal, color: "c6" },
-        { category: "traslados", label: "Transfer", value: d.tTras, color: "c2" },
+        { category: "traslados", label: "Transfer", value: d.tTras + d.tEntre, color: "c2" },
         { category: "tours", label: "Tours y extras", value: d.tExtras, color: "c7" }
       ],
       texto: "Mi viaje a " + DEST + " · " + CSTarjeta.rangoFechas(IDA, VUELTA) + " · " + f(d.total) + "\nAbrí el presupuesto: " + url };
@@ -3077,7 +3201,7 @@
   /* Vuelo y alojamiento que la persona marco como reservados: quedan en este navegador por viaje (destino, fechas y
      personas), asi al volver desde Mis viajes siguen apareciendo como Reservado. Traslados y tours los confirma el
      asesor en /admin y se consultan cada vez (sincronizarPedidos). */
-  var CLAVE_RES = 'cs_res_' + [destKey, IDA, VUELTA, pax].join('|'), ultimoRes = '';
+  var CLAVE_RES = 'cs_res_' + [CLAVE_DEST, IDA, VUELTA, pax].join('|'), ultimoRes = '';
   /* Con sesion, ademas se guarda en la cuenta (cuenta.js: CSCuenta.reservas) para verlo desde otro celular o compu. */
   var estadoRes = function () { return JSON.stringify({ vuelo: !!S.res.vuelo, aloj: !!S.res.aloj, realVuelo: S.reales && S.reales.vuelo || null, alojReservado: S.alojReservado || null }); };
   function subirReservas() { if (window.CSCuenta && CSCuenta.reservas) CSCuenta.reservas.sync().catch(function () { /* queda en el navegador */ }); }
@@ -3121,7 +3245,7 @@
     document.documentElement.classList.toggle('cs-oscuro', S.paso === 5);
     $('steps').hidden = S.paso >= 5 || !!S.abriendo;
     $('foot').hidden = S.paso >= 5 || !!S.abriendo;
-    if (S.paso < 5) { $('cta').textContent = S.paso === 1 && MODO === 'avion' && S.sub !== 't' ? 'Continuar a Transfer →' : CTAS[S.paso]; $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS) || (MODO === 'avion' && S.paso === 1 && !S.vuelo); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
+    if (S.paso < 5) { $('cta').textContent = S.paso === 1 && MODO === 'avion' && S.sub !== 't' ? 'Continuar a Transfer →' : (S.paso === 2 && PAR && PA === 0 ? 'Continuar a ' + PAR.l[1].nom + ' →' : CTAS[S.paso]); $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS) || (MODO === 'avion' && S.paso === 1 && !S.vuelo); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
     if (scrollTop) $('main').scrollTop = 0;
     marcarHistoria();
     vigilarComparativa();
@@ -3136,7 +3260,7 @@
     var m = String(h.roomLabel || '').replace(/\s*·.*$/, '').replace(/\s*:.*$/, '');
     var det = String(h.roomLabel || '').split(':')[1] ? String(h.roomLabel).split(':')[1].split('·')[0].trim() : '';
     return { id: String(h.hotelId || h.name), tipo: tipo, nom: h.name, cat: (h.hotelTypeLabel || TIPO_TXT[h.hotelType] || 'Alojamiento') + (h.stars ? ' ' + h.stars + '★' : ''),
-      rat: Number(h.rating) || 0, n: Number(h.reviewCount) || 0, zona: h.playa || h.barrio || h.areaLabel || DEST, barrio: !!h.barrio,
+      rat: Number(h.rating) || 0, n: Number(h.reviewCount) || 0, zona: h.playa || h.barrio || h.areaLabel || HN, barrio: !!h.barrio,
       playa: h.playaKm != null ? Math.round(h.playaKm * 1000) : null, serv: [m, det].filter(Boolean).slice(0, 2).concat(h.mealPlan ? [h.mealPlan] : []),
       precio: Number(h.total), rec: !!h.recommended, img: h.image || 'home-ilha-bahia.jpg' };
   }
@@ -3144,23 +3268,32 @@
     S.hotelesListos = true;
     if (!/^https?:$/.test(location.protocol)) { S.avisoH = 'Hoteles de ejemplo: abrí la maqueta desde el servidor de la app (localhost) para ver precios reales de Booking.'; return Promise.resolve(); }
     S.cargandoH = true;
+    /* La parada se fija aca: si la persona cambia de pestana mientras Booking responde, la lista va a la parada que la pidio. */
+    var pi = PA, q0 = { dest: HK, dep: HIDA, ret: HVUELTA };
     var pedir = function (tipo) {
-      var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, ninos: ninos, style: 'ahorro', hotel_type: tipo, subcategory: '' });
+      var q = new URLSearchParams({ dest: q0.dest, dep: q0.dep, ret: q0.ret, pax: pax, ninos: ninos, style: 'ahorro', hotel_type: tipo, subcategory: '' });
       return fetch('/api/hoteles?' + q.toString()).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'error'); return d; }); });
     };
-    return Promise.all(TIPOS.map(function (t) { return pedir(t).catch(function () { return { hotels: [] }; }); })).then(function (rs) {
-      var vistos = {}, lista = [];
-      rs.forEach(function (d, i) { sumarHoteles(lista, vistos, d, TIPOS[i]); });
-      if (!lista.length) throw new Error('Booking no devolvió alojamientos');
-      HOTELES = lista;
-      /* Por defecto, el alojamiento mas barato de la categoria elegida. */
-      elegirMasBarato();
+    return (S.promH = Promise.all(TIPOS.map(function (t) { return pedir(t).catch(function () { return { hotels: [] }; }); })).then(function (rs) {
+      enParada(pi, function () {
+        var vistos = {}, lista = [];
+        rs.forEach(function (d, i) { sumarHoteles(lista, vistos, d, TIPOS[i]); });
+        if (!lista.length) throw new Error('Booking no devolvió alojamientos');
+        HOTELES = lista;
+        /* Por defecto, el alojamiento mas barato de la categoria elegida. */
+        elegirMasBarato();
+      });
     }).catch(function (e) {
       /* Sin Booking no se muestran los de ejemplo: son de Florianopolis y uno quedaba sumado al presupuesto
          como si fuera real. El viaje sigue sin alojamiento y la persona lo puede reintentar. */
-      HOTELES = []; S.sinAloj = true; S.habitacion = null;
-      S.avisoH = 'No pudimos consultar Booking ahora (' + (e.message || 'error') + '). Podés seguir sin alojamiento y sumarlo después.';
-    }).then(function () { S.cargandoH = false; track('flujo_hoteles', { reales: !!HOTELES.length && !HOTELES[0].ejemplo, cantidad: HOTELES.length }); render(false); });
+      enParada(pi, function () {
+        HOTELES = []; S.sinAloj = true; S.habitacion = null;
+        S.avisoH = 'No pudimos consultar Booking ahora (' + (e.message || 'error') + '). Podés seguir sin alojamiento y sumarlo después.';
+      });
+    }).then(function () {
+      enParada(pi, function () { S.cargandoH = false; track('flujo_hoteles', { reales: !!HOTELES.length && !HOTELES[0].ejemplo, cantidad: HOTELES.length, parada: pi + 1 }); });
+      render(false);
+    }));
   }
   /* Suma a la lista los alojamientos de Booking de una categoria (sin repetir dentro de la misma categoria). */
   function sumarHoteles(lista, vistos, d, tipo) {
@@ -3186,12 +3319,15 @@
   function cargarAllInclusive() {
     if (S.aiListo || !/^https?:$/.test(location.protocol)) return;
     S.aiListo = true; S.cargandoH = true; render(false);
-    var q = new URLSearchParams({ dest: destKey, dep: IDA, ret: VUELTA, pax: pax, ninos: ninos, style: 'comodo', hotel_type: 'all-inclusive', subcategory: '' });
+    var pi = PA, q = new URLSearchParams({ dest: HK, dep: HIDA, ret: HVUELTA, pax: pax, ninos: ninos, style: 'comodo', hotel_type: 'all-inclusive', subcategory: '' });
     fetch('/api/hoteles?' + q.toString()).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (d) {
-      var vistos = {}; HOTELES.forEach(function (h) { vistos[h.tipo + '|' + h.id] = 1; });
-      sumarHoteles(HOTELES, vistos, d, 'all-inclusive');
-      if (S.catH === 'all-inclusive') elegirMasBarato();
-      S.cargandoH = false; render(false);
+      enParada(pi, function () {
+        var vistos = {}; HOTELES.forEach(function (h) { vistos[h.tipo + '|' + h.id] = 1; });
+        sumarHoteles(HOTELES, vistos, d, 'all-inclusive');
+        if (S.catH === 'all-inclusive') elegirMasBarato();
+        S.cargandoH = false;
+      });
+      render(false);
     });
   }
   /* ---- Habitaciones de un hotel (Booking, /api/hotel-habitaciones de la app) ---- */
@@ -3200,7 +3336,7 @@
     S.modal = { hotelId: hotelId, cargando: true, rooms: [], error: '' };
     track('flujo_ver_habitaciones', { hotel: hotelId, nombre: h.nom, zona: h.zona });
     pintarModal();
-    var q = new URLSearchParams({ hotel_id: hotelId, dep: IDA, ret: VUELTA, pax: pax, ninos: ninos });
+    var q = new URLSearchParams({ hotel_id: hotelId, dep: HIDA, ret: HVUELTA, pax: pax, ninos: ninos });
     fetch('/api/hotel-habitaciones?' + q.toString()).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'error'); return d; }); })
       .then(function (d) {
         var entra = function (r) { return !r.maxOccupancy || r.maxOccupancy >= pax; };
@@ -3299,7 +3435,7 @@
           (r.maxOccupancy && r.maxOccupancy < pax ? '<span class="hb__no">No entran las ' + pax + ' personas</span>' : '') +
           (r.meal ? '<span class="hb__ok">' + esc(r.meal) + '</span>' : '<span class="hb__no">No incluye comidas</span>') +
           (r.cancelText ? '<span class="' + (libre ? 'hb__ok' : 'hb__no') + '">' + esc(r.cancelText) + '</span>' : '') + '</div>' +
-          '<div class="hb__p"><b>' + f(r.total) + '</b><small>total ' + NOCHES_TXT + '</small></div></button>';
+          '<div class="hb__p"><b>' + f(r.total) + '</b><small>total ' + nochesTxt(HNOCHES) + '</small></div></button>';
       }).join(''));
     el.hidden = false;
     el.innerHTML = '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Habitaciones disponibles">' +
@@ -3357,11 +3493,13 @@
     ir(p, 'volver', sub);
   }
   function ir(p, motivo, sub) {
-    if (p === 1 && MODO === 'auto') { location.href = 'home-calcular.html?' + new URLSearchParams({ destino: destKey, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, modo: 'auto', fuente: 'destino_auto', origen_home: qs.get('origen_home') || '' }).toString() + (debug ? '&debug=1' : ''); return; }
+    if (p === 1 && MODO === 'auto') { location.href = 'home-calcular.html?' + new URLSearchParams(Object.assign({ destino: destKey, pax: pax, ninos: ninos, ida: IDA, vuelta: VUELTA, modo: 'auto', fuente: 'destino_auto', origen_home: qs.get('origen_home') || '' }, paramsPar())).toString() + (debug ? '&debug=1' : ''); return; }
     if (p === 1) S.sub = sub || (S.paso === 2 ? 't' : 'v');
+    /* Al alojamiento se entra por la primera parada; volviendo desde Extras, por la segunda. */
+    if (PAR && p === 2 && S.paso !== 2) usarParada(S.paso === 3 ? 1 : 0);
     S.paso = p; S.reservar = false; S.modal = null; pintarModal(); paginaVirtual(p);
     /* Tambien al saltar directo a Extras o al presupuesto (paso= en el link, cambio de fechas): sin esto quedaba el hotel de ejemplo. */
-    if (p >= 2 && !S.hotelesListos) cargarHoteles();
+    if (p >= 2) cargarAlojamientos();
     if (p === 6 || p === 7) sincronizarPedidos();
     render(true);
     track('flujo_paso', { paso: p, nombre: NOMBRES[p - 1] || 'Reservar', motivo: motivo, total: Math.round(totalHastaAhora()) });
@@ -3370,17 +3508,19 @@
   /* ---- Eventos ---- */
   $('back').addEventListener('click', function () {
     track('flujo_volver', { desde: S.paso });
+    if (S.paso === 2 && PAR && PA === 1) { usarParada(0); render(true); return; }
     if (S.paso === 1 && MODO === 'avion' && S.sub === 't') { volverA(1, 'v'); return; }
     if (S.paso === 12) volverA(11); else if (S.paso === 11) volverA(S.desde11 || 6); else if (S.paso === 10) volverA(9); else if (S.paso === 9) volverA(7); else if (S.paso === 8) volverA(S.desde8 || 6); else if (S.paso === 7) volverA(4); else if (S.paso === 6) volverA(4); else if (S.paso > 1) volverA(S.paso - 1); else location.href = 'home-destino.html' + BUSQ0 + (BUSQ0 ? '&' : '?') + 'editar=1';
   });
   $('cta').addEventListener('click', function () {
     track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });
     if (S.paso === 1 && MODO === 'avion' && S.sub !== 't') { S.sub = 't'; render(true); return; }
+    if (S.paso === 2 && PAR && PA === 0) { usarParada(1); track('flujo_parada', { parada: 2, via: 'continuar' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
     if (S.paso === 4) { track('flujo_ver_opciones_reservar', { total: Math.round(totalHastaAhora()), con_sesion: !!S.sesion }); abrirGuardar(); } else ir(S.paso + 1, 'continuar');
   });
   document.addEventListener('error', function (e) { if (e.target && e.target.classList && e.target.classList.contains('fc-logo__img')) e.target.remove(); }, true);
   $('main').addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-sel],[role=button][data-extra]')) { e.preventDefault(); e.target.click(); }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-sel],[role=button][data-extra],[role=button][data-entre]')) { e.preventDefault(); e.target.click(); }
   });
   $('main').addEventListener('change', function (e) {
     if (e.target.dataset.diaIn) {
@@ -3399,7 +3539,7 @@
     var uf = e.target.closest('[data-usar-fecha]'); if (uf) { usarFecha(uf.dataset.usarFecha, 'calendario'); return; }
     if (e.target.closest('[data-cerrar]')) { cerrarModal(); return; }
     if (e.target.closest('[data-gf]')) { irATercero('vuelo'); return; }
-    if (e.target.closest('[data-bk]')) { irATercero('alojamiento'); return; }
+    if (e.target.closest('[data-bk]')) { irATercero('alojamiento', +e.target.closest('[data-bk]').dataset.bk || 0); return; }
     if (e.target.closest('[data-sg]')) { irASeguro(); return; }
     var ex = e.target.closest('[data-extra]');
     if (ex) { var xid = ex.dataset.extra; S.extras[xid] = !S.extras[xid]; var xe = todosExtras.filter(function (z) { return z.id === xid; })[0]; track('flujo_extra', { opcion: xid, nombre: xe && xe.nom, categoria: xe && xe.cat, precio: xe && Math.round(precioExtra(xe)), real: !!(xe && xe.real), agregado: S.extras[xid], desde: 'detalle' }); cerrarModal(); var yy = $('main').scrollTop; render(false); $('main').scrollTop = yy; return; }
@@ -3436,8 +3576,8 @@
     e.preventDefault();
     var kf = e.target.dataset.k, v = parseFloat($('rs-in').value), tasa = window.CSMoneda && CSMoneda.tasa ? CSMoneda.tasa() : 1;
     if (!(v > 0)) { $('rs-in').focus(); return; }
-    var usd = v / tasa, dd = datosFinal(), estimado = kf === 'vuelo' ? precioVuelo(dd.v) : precioHotelEstimado(dd.h);
-    if (kf === 'vuelo') S.reales.vuelo = usd; else S.alojReservado = { nombre: dd.h.nom, precio: usd, noches: NOCHES };
+    var usd = v / tasa, dd = datosFinal(), estimado = kf === 'vuelo' ? precioVuelo(dd.v) : dd.tAlojEst;
+    if (kf === 'vuelo') S.reales.vuelo = usd; else S.alojReservado = { nombre: dd.alojNom, precio: usd, noches: NOCHES };
     S.res[kf] = true; S.editRes = '';
     track('reserva_confirmada', { servicio: kf === 'aloj' ? 'alojamiento' : 'vuelo', autodeclarada: true, desde: 'resumen', precio_estimado: Math.round(estimado), precio_reservado: Math.round(usd), diferencia_precio: Math.round(usd - estimado) });
     var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
@@ -3447,7 +3587,7 @@
     e.preventDefault();
     var nombre = ($('af-nom').value || '').trim(), precio = parseFloat($('af-pre').value) || 0, noches = Math.max(1, Math.min(60, parseInt($('af-noc').value, 10) || NOCHES));
     if (nombre.length < 2) { S.alojForm = { nombre: nombre, precio: $('af-pre').value, noches: noches, error: 'Escribí el nombre del alojamiento.' }; render(false); return; }
-    var dd = datosFinal(), estimado = precioHotelEstimado(dd.h);
+    var dd = datosFinal(), estimado = dd.tAlojEst;
     S.alojReservado = { nombre: nombre, precio: precio, noches: noches }; S.res.aloj = true;
     track('reserva_confirmada', { servicio: 'alojamiento', proveedor: 'booking', autodeclarada: true, alojamiento_elegido: false, alojamiento_distinto: true, precio_estimado: Math.round(estimado), precio_reservado: Math.round(precio), diferencia_precio: precio ? Math.round(precio - estimado) : undefined, noches: noches, partes_reservadas: partesReservadas(), partes_totales: partesTotales() });
     if (partesReservadas() === partesTotales()) track('viaje_completo', { total: Math.round(datosFinal().total) });
@@ -3489,10 +3629,12 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
+    if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
+    if (t.dataset.entre) { S.entre = !S.entre; track('flujo_traslado_entre_paradas', { activo: S.entre, precio: Math.round(PAR ? PAR.tramo.pp * pax : 0) }); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.wa) {
       var lista = serviciosCs(S.csK), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
       S.sol = S.sol || {};
@@ -3558,7 +3700,11 @@
       if (kq === 'vuelo') delete S.reales.vuelo; else if (kq === 'aloj') S.alojReservado = null;
       track('reserva_quitada', { servicio: kq === 'aloj' ? 'alojamiento' : 'vuelo', desde: 'resumen' });
     }
-    else if (t.dataset.sinAloj) { S.sinAloj = true; S.habitacion = null; track('flujo_sin_alojamiento', {}); ir(3, 'sin_alojamiento'); return; }
+    else if (t.dataset.sinAloj) {
+      S.sinAloj = true; S.habitacion = null; track('flujo_sin_alojamiento', { parada: PA + 1 });
+      if (PAR && PA === 0) { usarParada(1); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
+      ir(3, 'sin_alojamiento'); return;
+    }
     else if (t.dataset.sinTransfer) { S.traslado = null; track('flujo_sin_transfer', {}); ir(2, 'sin_transfer'); return; }
     else if (t.dataset.dia) {
       var dq = t.dataset.dia.split(':'), prev = S.dia[dq[0]];

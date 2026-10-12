@@ -98,6 +98,16 @@
   .d-pers__s{display:block;font-size:12px;font-weight:600;color:var(--ink2)}
   .d-pers output{min-width:22px;text-align:center;font-weight:800;font-size:16px;color:var(--ink)}
   .d-limite{margin:8px 2px 0;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  /* Segunda parada: chips con los destinos que se combinan con el elegido y, si se elige uno, el reparto de noches. */
+  .d-par .d-sub{margin:0 0 10px;font-size:13.5px}
+  .d-par__chips{display:flex;flex-wrap:wrap;gap:8px}
+  .d-par__c{display:inline-flex;flex-direction:column;align-items:flex-start;padding:8px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font:700 14px var(--fb);text-align:left;cursor:pointer}
+  .d-par__c small{font-size:11.5px;font-weight:600;color:var(--ink2)}
+  .d-par__c:hover{border-color:var(--ink2)}
+  .d-par__c.is-on{border-color:var(--accent);background:var(--cel-soft);box-shadow:0 0 0 2px rgba(247,195,37,.3)}
+  .d-par__c:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .d-par__rep{margin-top:12px}
+  .d-par__nota{margin:8px 2px 0;font-size:12.5px;font-weight:600;color:var(--ink2);line-height:1.4}
   .d-foot{flex:0 0 auto;padding:10px 18px 22px;background:var(--bg)}
   .d-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;padding:15px 16px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:15px;font-weight:800;cursor:pointer}
   .lg-pin{vertical-align:-3px;margin:0 5px 0 0}
@@ -302,6 +312,7 @@
 <script src="home-track.js"></script>
 <script src="destinos-datos.js"></script>
 <script src="ruta-datos.js"></script>
+<script src="paradas-datos.js"></script>
 <script>
 (function () {
   var qs = new URLSearchParams(location.search), fuente = qs.get('fuente') || 'directo', debug = /[?&]debug=1/.test(location.search);
@@ -344,7 +355,8 @@
   var fLarga = function (s) { var q = String(s).split('-'); return +q[2] + ' de ' + ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][+q[1] - 1] + ' de ' + q[0]; };
   /* Fechas por defecto: a partir de la semana que viene, una semana de viaje. */
   var S = { pant: 1, dest: /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : '', sel: '', q: '', todos: false, err: '', medio: qs.get('modo') || 'avion',
-    ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: 0 };   // sin selector de niños: todos se cuentan como personas
+    ida: qs.get('ida') || sumarDias(iso(HOY), 10), vuelta: qs.get('vuelta') || sumarDias(iso(HOY), 17), pax: +qs.get('pax') || 2, ninos: 0,   // sin selector de niños: todos se cuentan como personas
+    seg: /^[a-z0-9-]{1,40}$/.test(qs.get('segundo') || '') ? qs.get('segundo') : '', n1: +qs.get('noches1') || 0 };   // segunda parada y noches en la primera
   S.cal = String(S.ida).slice(0, 7) + '-01'; if (S.cal > MAXM) S.cal = MAXM; S.paso = 'ida';   // mes que muestra el calendario y que fecha se elige con el proximo toque
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant, fuente: fuente }, p || {})); };
   var destInfo = function () { return DESTS.filter(function (d) { return d[0] === S.dest; })[0]; };
@@ -458,6 +470,38 @@
     if (S.vuelta > MAXF) return { ok: false, t: "Buscamos vuelos hasta 12 meses adelante: elegí fechas hasta el " + fLarga(MAXF) + "." };
     return { ok: true, t: plural(n, "noche", "noches") };   /* las personas ya se ven mas abajo: no se repiten aca */
   }
+  /* ---- Segunda parada ("3 noches en Río y 4 en Búzios") ----
+     Los destinos que se combinan con cada uno salen de paradas-datos.js (los pares de la app vieja que comparten
+     aeropuerto). El vuelo es ida y vuelta a la primera parada; el traslado entre las dos lo suma home-flujo.html. */
+  var PARES = window.CS_PARADAS || {};
+  var nombreDe = function (k) { var d = DESTS.filter(function (x) { return x[0] === k; })[0]; return d ? d[1] : ''; };
+  var paresDe = function (k) { return (PARES[k] || []).filter(function (p) { return nombreDe(p.k); }); };
+  var parElegido = function () { return paresDe(S.dest).filter(function (p) { return p.k === S.seg; })[0] || null; };
+  var nochesViaje = function () { var n = Math.round((new Date(S.vuelta + 'T12:00:00') - new Date(S.ida + 'T12:00:00')) / 864e5); return n >= 1 ? n : 0; };
+  /* Noches en la primera parada: las que se eligieron, dentro de 1..total-1; por defecto la mitad (7 -> 3 y 4). */
+  function noches1() { var n = nochesViaje(); if (n < 2) return 0; var a = S.n1 || Math.floor(n / 2); return Math.max(1, Math.min(n - 1, a)); }
+  var horasTxt = function (h) { return h < 1 ? Math.max(10, Math.round(h * 60 / 5) * 5) + ' min' : String(Math.round(h * 2) / 2).replace('.', ',') + ' h'; };
+  function paradasHTML() {
+    var l = paresDe(S.dest); if (!l.length) return '';
+    var d1 = nombreDe(S.dest), par = parElegido(), n = nochesViaje();   // a lo sumo 7 opciones (Florianopolis): se ven todas
+    var chip = function (k, t, sub) { var on = S.seg === k; return '<button type="button" class="d-par__c' + (on ? ' is-on' : '') + '" data-seg="' + (k || '-') + '" aria-pressed="' + on + '">' + esc(t) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</button>'; };
+    var h = '<h2 class="d-h2" style="margin-top:22px">¿Sumás una segunda parada?</h2>' +
+      '<p class="d-sub">Por ejemplo, unas noches en ' + esc(d1) + ' y otras en ' + esc(nombreDe(l[0].k)) + '. El vuelo es el mismo.</p>' +
+      '<div class="d-par__chips" role="group" aria-label="Segunda parada">' + chip('', 'Solo ' + d1, '') +
+      l.map(function (p) { return chip(p.k, '+ ' + nombreDe(p.k), (p.modo === 'ferry' ? 'en barco · ' : '') + horasTxt(p.horas) + ' de ' + d1); }).join('') + '</div>';
+    if (par) {
+      if (n < 2) h += '<p class="d-par__nota">Para dos paradas hacen falta al menos 2 noches.</p>';
+      else {
+        var a = noches1(), b = n - a;
+        h += '<div class="d-par__rep">' +
+          fila(esc(d1), 'Primera parada', 'n1', plural(a, 'noche', 'noches'), a <= 1, b <= 1) +
+          '<div class="d-pers"><b>' + esc(nombreDe(par.k)) + '<small class="d-pers__s">Segunda parada</small></b><output>' + plural(b, 'noche', 'noches') + '</output></div></div>' +
+          '<p class="d-par__nota">Traslado de ' + esc(d1) + ' a ' + esc(nombreDe(par.k)) + ': ' + par.km + ' km, unas ' + horasTxt(par.horas) + (par.modo === 'ferry' ? ' con el cruce en barco' : '') + '. Lo sumamos al presupuesto.</p>';
+      }
+    }
+    return h;
+  }
+  function pintarParadas() { var c = $('paradas'); if (c) c.innerHTML = paradasHTML(); }
   /* Una fila de personas: nombre, aclaracion de edad y el selector - n +. Los limites los pone el que la llama. */
   function fila(nombre, sub, clave, n, sinMenos, sinMas) {
     return "<div class=\"d-pers\">" + ic(I.ppl, 22) + "<b>" + nombre + "<small class=\"d-pers__s\">" + sub + "</small></b>" +
@@ -509,6 +553,7 @@
     if (v) { v.value = S.vuelta; v.min = sumarDias(S.ida, 1); }
     setTimeout(function () { S.sync = false; }, 0);
     if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok && !nn.pend); }
+    pintarParadas();
     var ev = $('vuelta'); if (ev && ev.parentNode) ev.parentNode.classList.toggle('is-act', S.paso === 'vuelta');   // el campo que espera la proxima fecha
     if (c) { c.innerHTML = calHTML(); c.hidden = !S.calOn; }
   }
@@ -539,6 +584,7 @@
       "<h2 class=\"d-h2\" style=\"margin-top:22px\">¿Quiénes viajan?</h2>" +
       "<div class=\"d-quien\">" + fila("Personas", "", "ad", S.pax, S.pax <= 1, S.pax >= 9) + "</div>" +
       (S.pax >= 9 ? "<p class=\"d-limite\">Máximo 9 personas por reserva. Para grupos más grandes, escribinos por WhatsApp.</p>" : "") +
+      "<div class=\"d-par\" id=\"paradas\">" + paradasHTML() + "</div>" +
       (S.err ? "<p class=\"d-vacio\" role=\"alert\" style=\"text-align:left;color:var(--coral)\">" + esc(S.err) + "</p>" : "") +
       "<button type=\"button\" class=\"d-cont\" data-seguir=\"1\" data-evento=\"destino_continuar\" data-destino=\"" + S.dest + "\">Continuar " + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + "</button></div>" +
       (d ? "<div class=\"d-foto\" aria-hidden=\"true\"><img src=\"" + fv + "\" alt=\"\"><span><b>" + esc(d[1]) + "</b><small>" + esc(d[2]) + "</small></span></div>" : "") + "</div>";
@@ -590,13 +636,14 @@
   function aResultados() {
     /* Con las fechas elegidas se va derecho a elegir el vuelo (paso 1 del flujo de reserva). */
     var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente });
+    var par = parElegido(); if (par && nochesViaje() >= 2) { q.set('segundo', par.k); q.set('noches1', noches1()); } else par = null;
     /* Avion: elegir vuelo. Auto: datos del auto, combustible, peajes y mapa. Bus: resultado del bus. */
     var m = mediosDe(destInfo()).indexOf(S.medio) >= 0 ? S.medio : 'avion';
     /* Se anota en "Tus búsquedas recientes" de la portada. */
     /* Si se entra con todo en el link, esto corre antes de que cargue cuenta.js: se anota directo en el navegador
        (la misma clave) y cuenta.js la sube a la cuenta la proxima vez que haya sesion. */
     try {
-      var rb = { dest: S.dest, destLabel: destInfo()[1], dep: S.ida, ret: S.vuelta, pax: S.pax, transport: { avion: 'flight', auto: 'auto', bus: 'bus' }[m], t: Date.now() };
+      var rb = { dest: S.dest, destLabel: destInfo()[1] + (par ? ' + ' + nombreDe(par.k) : ''), dep: S.ida, ret: S.vuelta, pax: S.pax, transport: { avion: 'flight', auto: 'auto', bus: 'bus' }[m], t: Date.now() };
       if (window.CSCuenta) CSCuenta.recientes.anotar(rb);
       else { var rl = JSON.parse(localStorage.getItem('cs_recientes_v1') || '[]'); localStorage.setItem('cs_recientes_v1', JSON.stringify([rb].concat((Array.isArray(rl) ? rl : []).filter(function (x) { return x && x.dest !== rb.dest; })).slice(0, 4))); }
     } catch (e) { /* las recientes son accesorias */ }
@@ -625,11 +672,13 @@
     }
     if (t.dataset.sel) { S.sel = t.dataset.sel; S.q = ''; var b1 = document.getElementById('bus'); if (b1) b1.value = ''; track('destino_sugerencia', { destino: S.sel }); actualizar(); return; }
     if (t.dataset.limpiar) { S.q = ''; var b0 = document.getElementById('bus'); if (b0) { b0.value = ''; b0.focus(); } actualizar(); return; }
-    if (t.dataset.continuar) { var pv = destPrevia(); if (!pv) return; S.dest = pv[0]; track('destino_pasa_a_fechas', { destino: S.dest, via: 'continuar' }); ir(2); return; }
+    if (t.dataset.continuar) { var pv = destPrevia(); if (!pv) return; if (S.dest !== pv[0]) { S.seg = ''; S.n1 = 0; } S.dest = pv[0]; track('destino_pasa_a_fechas', { destino: S.dest, via: 'continuar' }); ir(2); return; }
     if (t.dataset.todos) { S.todos = !S.todos; track('destino_ver_todos_toggle', { todos: S.todos }); pintar(); return; }
     /* El click en la tarjeta ya dispara el evento data-evento="destino_elegido"
        (ver home-track.js); acá solo se registra el paso a la pantalla de fechas. */
-    if (t.dataset.dest) { S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
+    if (t.dataset.dest) { if (S.dest !== t.dataset.dest) { S.seg = ''; S.n1 = 0; } S.dest = t.dataset.dest; track('destino_pasa_a_fechas', { destino: S.dest }); ir(2); return; }
+    if (t.dataset.seg) { S.seg = t.dataset.seg === '-' ? '' : t.dataset.seg; S.n1 = 0; track('destino_segunda_parada', { destino: S.dest, segunda: S.seg || 'ninguna' }); pintarParadas(); return; }
+    if (t.dataset.n1) { var nt = nochesViaje(); S.n1 = Math.max(1, Math.min(nt - 1, noches1() + (+t.dataset.n1))); track('destino_reparto_noches', { primera: S.n1, segunda: nt - S.n1 }); pintarParadas(); return; }
     if (t.dataset.medio) { S.medio = t.dataset.medio; track('destino_medio', { medio: S.medio }); pintar(); return; }
     if (t.dataset.irmedio) { track('destino_continuar_medio', { medio: S.medio }); aResultados(); return; }
     if (t.dataset.cambiar) { track('destino_cambiar_destino', { destino: S.dest }); ir(1); return; }
@@ -664,6 +713,7 @@
     S.err = '';
     var n = $('noches'), nn = textoNoches();
     if (n) { n.textContent = nn.t; n.classList.toggle('is-err', !nn.ok && !nn.pend); }
+    pintarParadas();
     if (S.ida) { S.cal = String(S.ida).slice(0, 7) + '-01'; if (S.cal > MAXM) S.cal = MAXM; }
     var c = $('cal'); if (c) c.innerHTML = calHTML();
   }
