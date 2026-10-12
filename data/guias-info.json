@@ -6022,5 +6022,1145 @@
     ]
    }
   ]
+ },
+ "rosa": {
+  "antes": {
+   "titulo": "Antes de viajar a Praia do Rosa",
+   "intro": "El Rosa es una villa de Imbituba armada sobre un morro, con la playa abajo y una laguna detrás. No tiene aeropuerto ni terminal propia, y las posadas están repartidas entre calles de tierra: conviene resolver antes cómo llegás y dónde dejás el auto.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Se vuela a Florianópolis (FLN), a unos 90 km por la BR-101. Desde Montevideo también se llega en auto, por el Chuy y Porto Alegre."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cuatro o cinco días caminás los senderos a la Praia Vermelha y a la Praia da Luz, y te queda tiempo para Ibiraquera, Ferrugem o Garopaba."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Dentro del Rosa se camina. El auto sirve para las playas vecinas, pero al Rosa solo se entra por dos accesos, Rosa Norte y Rosa Sul, y en verano los dos se llenan."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Praia do Rosa desde Montevideo",
+    "intro": "No hay aeropuerto en el Rosa: se vuela a Florianópolis y se sigue unos 90 km hacia el sur por la BR-101. Al ser un destino del sur, también se llega en auto o en ómnibus.",
+    "items": [
+     {
+      "t": "Vuelo a Florianópolis (FLN)",
+      "d": "Es el aeropuerto internacional más cercano. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo."
+     },
+     {
+      "t": "Del aeropuerto al Rosa",
+      "d": "Son unos 90 km por la BR-101, cerca de 1 h 30 sin tránsito, con un peaje en el camino. En el aeropuerto hay alquiladoras de auto, transfers privados y taxis. Uber hace el viaje, pero puede no aceptarlo."
+     },
+     {
+      "t": "En ómnibus desde Florianópolis",
+      "d": "Santo Anjo y Eucatur van de la rodoviária de Florianópolis a la de Imbituba, a unos 25 km del Rosa. Podés pedir bajarte antes, en Campo D'Una, donde hay taxis y vans al Rosa. Otra opción es ir a Garopaba, a unos 15 km, y seguir desde ahí."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Son unos 1.175 km por el Chuy, Porto Alegre y la BR-101: cerca de 15 h 30 de manejo, así que conviene partirlo en dos días."
+     },
+     {
+      "t": "En ómnibus desde Montevideo",
+      "d": "EGA y TTL van de Tres Cruces a Florianópolis en unas 18 a 20 horas por la BR-101. Desde Florianópolis seguís en ómnibus a Imbituba o Garopaba, y el último tramo, en taxi."
+     }
+    ],
+    "cierre": {
+     "t": "Dónde dejar el auto",
+     "d": "Preguntá si tu posada tiene estacionamiento. En verano los lugares públicos cerca de la playa se llenan temprano, los privados cobran por día y en Rosa Norte hay que dejar el auto arriba del morro y bajar caminando."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Praia do Rosa",
+    "intro": "Casi ninguna posada está frente al mar: la mayoría está en el morro y a la playa se baja caminando, unos 15 minutos desde el Centrinho. Elegí según si querés tener los restaurantes cerca o tranquilidad.",
+    "items": [
+     {
+      "t": "Centrinho",
+      "d": "Las dos calles con restaurantes, bares, tiendas y mercado, en el medio entre Rosa Norte y Rosa Sul. No tiene vista al mar, pero es lo más cómodo si no vas a tener auto."
+     },
+     {
+      "t": "Rosa Sul",
+      "d": "El lado de agua más calma, con más bajadas a la playa y bares que atienden en la arena. Lo eligen familias y parejas. De acá sale el sendero a la Praia da Luz."
+     },
+     {
+      "t": "Rosa Norte",
+      "d": "Más verde, con menos posadas y menos movimiento. Es el lado del surf y de donde sale el sendero a la Praia Vermelha. El acceso en auto es más complicado."
+     },
+     {
+      "t": "Lagoa de Ibiraquera",
+      "d": "Posadas y casas a orillas de la laguna, pensadas para kitesurf, windsurf y stand-up. Es más tranquilo, pero para ir al Rosa necesitás auto."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Praia do Rosa",
+    "intro": "La villa se recorre a pie y varias playas se alcanzan por senderos. Para las playas vecinas vas a necesitar algún transporte.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "El Centrinho se camina de punta a punta y de ahí bajás a la playa por calles o senderos. Las calles son angostas, de tierra y sin veredas: andá con calzado cómodo."
+     },
+     {
+      "t": "Senderos",
+      "d": "Desde Rosa Norte sale el sendero bien señalizado a la Praia Vermelha; desde Rosa Sul, el de la Praia da Luz, unos 20 minutos. La travesía entre el Ouvidor y Rosa Norte son unos 4 km, de 3 a 4 horas, casi sin sombra."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay líneas locales hacia Imbituba y Garopaba, pero pasan poco y no bajan hasta la playa."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Uber funciona, pero puede tardar bastante en conseguir auto. Para volver de noche o de una playa alejada, arreglá antes con un taxi."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para Ibiraquera, Ferrugem, Garopaba y el Ouvidor. Dentro del Rosa las calles son de tierra, con pozos, y con lluvia se ponen difíciles."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Praia do Rosa de noche",
+    "intro": "La noche es tranquila y se concentra en el Centrinho.",
+    "items": [
+     {
+      "t": "El Centrinho",
+      "d": "Restaurantes, bares y tiendas abiertos hasta tarde en las dos calles principales, con algún lugar de música en vivo. Varias posadas tienen restaurante abierto al público."
+     },
+     {
+      "t": "Horarios",
+      "d": "Muchos restaurantes cierran después del almuerzo y vuelven a abrir alrededor de las 19."
+     },
+     {
+      "t": "Fiestas grandes",
+      "d": "Año Nuevo y Carnaval son las fechas de más movimiento. Para fiesta todas las noches en enero, la gente va a Ferrugem."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Las calles del morro no tienen veredas y muchas tienen poca luz: llevá linterna o la del celular para volver a la posada."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Praia do Rosa",
+    "intro": "Es un lugar tranquilo. Los cuidados pasan sobre todo por el mar, los senderos y las calles de noche.",
+    "bullets": [
+     "Rosa Norte tiene olas para surf: bañate cerca de los guardavidas y con bandera roja no te metas. Los Bomberos de Santa Catarina publican el estado de las banderas en la app CBMSC Cidadão.",
+     "En las piscinas naturales del camino a la Praia Vermelha, fijate en la marea: con marea alta entran olas.",
+     "Hacé los senderos de día, con agua, protector y calzado cerrado: en la travesía al Ouvidor casi no hay sombra ni dónde comprar nada.",
+     "Con lluvia, las calles de tierra y los senderos se ponen resbalosos.",
+     "En el auto no dejes nada a la vista en los estacionamientos de playa."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "La tarjeta se acepta en la mayoría de los restaurantes y posadas. Pix es el pago instantáneo de Brasil y lo vas a ver en todas partes, pero necesitás una cuenta o una app que lo permita; si no, tarjeta o efectivo."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llegá con algo de efectivo para estacionamientos, taxis y puestos de playa. Si necesitás un banco, en Garopaba e Imbituba hay más opciones que en la villa."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas); en Santa Catarina la tensión es de 220 V."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y gorra",
+     "Calzado cerrado para los senderos y para las calles de tierra",
+     "Linterna o power bank para volver de noche por el morro",
+     "Algo de abrigo: las noches refrescan y de mayo a septiembre hace frío",
+     "Piloto liviano: en verano llueve de tarde",
+     "Traje de neoprene si vas a surfear",
+     "Agua y algo para comer en los senderos largos",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "itapema": {
+  "antes": {
+   "titulo": "Antes de viajar a Itapema",
+   "intro": "Itapema es una ciudad de edificios sobre la BR-101, entre Balneário Camboriú y Porto Belo. Tiene toda la infraestructura de una ciudad, así que lo que más conviene decidir antes es la zona donde dormís.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Se vuela a Navegantes (NVT), a unos 50 km, o a Florianópolis (FLN), a unos 80 km. Desde Montevideo también se llega en auto, por la BR-101."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con tres o cuatro días recorrés las playas y los miradores. Si querés sumar Bombinhas, Porto Belo o Balneário Camboriú de día, agregá dos o tres más."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Entre el Centro y Meia Praia se camina y hay Uber. Para la Ilhota, la Praia Grossa y las ciudades vecinas el auto ayuda, aunque en verano la BR-101 se carga y estacionar cuesta."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Itapema desde Montevideo",
+    "intro": "Itapema no tiene aeropuerto: se vuela a Navegantes o a Florianópolis y se sigue por la BR-101. Al ser un destino del sur, también se llega en auto o en ómnibus.",
+    "items": [
+     {
+      "t": "Vuelo a Florianópolis (FLN)",
+      "d": "Es el aeropuerto internacional de la zona. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo. Del aeropuerto a Itapema son unos 80 km por la BR-101: alrededor de 1 hora sin tránsito, bastante más si se traba la salida de la isla."
+     },
+     {
+      "t": "Vuelo a Navegantes (NVT)",
+      "d": "Queda más cerca, a unos 50 km de Meia Praia, y te ahorrás el tránsito de Florianópolis. No hay vuelos desde Montevideo: se llega con escala en São Paulo con Azul, GOL o LATAM."
+     },
+     {
+      "t": "Del aeropuerto a Itapema",
+      "d": "En los dos aeropuertos hay alquiladoras de auto, transfers, taxi y Uber. Desde Florianópolis también hay ómnibus de la rodoviária a Itapema, en algo más de una hora."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Son unos 1.300 km por el Chuy, Porto Alegre y la BR-101: cerca de 17 horas de manejo, así que conviene partirlo en dos días."
+     },
+     {
+      "t": "En ómnibus desde Montevideo",
+      "d": "No hay ómnibus directo. EGA y TTL van de Tres Cruces a Florianópolis en unas 18 a 20 horas, y de ahí seguís en ómnibus hasta la rodoviária de Itapema, que está junto a la BR-101."
+     }
+    ],
+    "cierre": {
+     "t": "El tránsito en verano",
+     "d": "La BR-101 atraviesa la ciudad y en enero, febrero y los fines de semana largos se carga mucho. Si llegás en auto, evitá los sábados de recambio en las horas pico."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Itapema",
+    "intro": "La ciudad es larga y plana a lo largo de la playa, con calas más tranquilas al norte. Elegí según si querés caminar a todo o tener tranquilidad.",
+    "items": [
+     {
+      "t": "Meia Praia",
+      "d": "La zona con más infraestructura: rambla iluminada, ciclovía, kioscos y la Avenida Nereu Ramos llena de restaurantes y tiendas. Sirve para familias y parejas que quieren todo cerca. Es la más pedida y la más cara en temporada alta: reservá con tiempo."
+     },
+     {
+      "t": "Centro",
+      "d": "Plano, con mercados, farmacias y bancos cerca, y hoteles frente al mar de todos los precios. Buena opción si no vas a tener auto y querés hacer todo a pie."
+     },
+     {
+      "t": "Canto da Praia",
+      "d": "El extremo norte de la playa del centro, de aire de pueblo de pescadores y buenos atardeceres. Más tranquilo, con menos hoteles; conviene tener auto."
+     },
+     {
+      "t": "Ilhota y Praia Grossa",
+      "d": "Las calas del norte, lejos del ruido de los edificios, con resorts y posadas frente al mar. Para moverte desde ahí necesitás auto."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Itapema",
+    "intro": "En la parte central se camina o se pedalea por la rambla. Para las calas del norte y las ciudades vecinas hace falta algún transporte.",
+    "items": [
+     {
+      "t": "A pie y en bicicleta",
+      "d": "Meia Praia y el Centro se recorren por la rambla y la ciclovía, de punta a punta y sin subidas."
+     },
+     {
+      "t": "Uber y apps",
+      "d": "Funcionan bien en el eje Centro–Meia Praia. En verano, a las horas pico, la tarifa dinámica sube."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay líneas que unen Itapema con Balneário Camboriú, Porto Belo e Itajaí. A Camboriú son unos 55 minutos. Sirven para ir de día a las ciudades vecinas, no tanto para moverte dentro de Itapema."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para la Ilhota, la Praia Grossa, Bombinhas y Porto Belo. En temporada alta estacionar en Meia Praia cuesta y la BR-101 se carga."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Itapema de noche",
+    "intro": "La noche se reparte entre la avenida, la rambla y el Centro.",
+    "items": [
+     {
+      "t": "Avenida Nereu Ramos",
+      "d": "La avenida más movida de Meia Praia: de día tiendas y de noche restaurantes, cervecerías y bares. Se combina con una caminata por la rambla."
+     },
+     {
+      "t": "La rambla de Meia Praia",
+      "d": "Bares frente al mar, desde botecos con mesas de plástico hasta lugares con DJ y música en vivo."
+     },
+     {
+      "t": "Centro",
+      "d": "Bares sobre la playa y algún lounge que abre hasta la madrugada."
+     }
+    ],
+    "cierre": {
+     "t": "Si querés boliche grande",
+     "d": "Balneário Camboriú está a menos de 30 minutos: volvé en Uber o taxi."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Itapema",
+    "intro": "Es una ciudad tranquila para el turista. Los cuidados son los de cualquier balneario grande.",
+    "bullets": [
+     "Meia Praia y el Centro tienen agua calma, pero la Praia Grossa tiene olas: bañate cerca de los guardavidas y con bandera roja no te metas. Los Bomberos de Santa Catarina publican el estado de las banderas en la app CBMSC Cidadão.",
+     "A la Praia Grossa se baja por un sendero: hacelo de día y con calzado que agarre.",
+     "No dejes cosas solas en la arena ni nada a la vista en el auto.",
+     "Cruzá la BR-101 solo por las pasarelas y los semáforos: el tránsito es rápido y pesado.",
+     "Para volver tarde a la noche, pedí un Uber en vez de caminar por calles vacías lejos de la rambla."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "La tarjeta se acepta en casi todos lados. Pix es el pago instantáneo de Brasil y lo vas a ver en todas partes, pero necesitás una cuenta o una app que lo permita; si no, tarjeta o efectivo."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Hay bancos y cajeros en el Centro. Tené algo de efectivo para kioscos de playa y estacionamientos."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas); en Santa Catarina la tensión es de 220 V."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar, gorra y lentes de sol",
+     "Ropa liviana y algo para salir de noche",
+     "Calzado con agarre para el sendero de la Praia Grossa",
+     "Máscara de snorkel para la Ilhota",
+     "Algo de abrigo: de mayo a septiembre hace frío",
+     "Piloto liviano: en verano llueve fuerte de tarde",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "garopaba": {
+  "antes": {
+   "titulo": "Antes de viajar a Garopaba",
+   "intro": "Garopaba es un pueblo con la playa central en una bahía calma y playas de surf, dunas y morros alrededor. Las playas están separadas por varios kilómetros, así que conviene decidir antes dónde dormís y cómo te vas a mover.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Se vuela a Florianópolis (FLN) y se sigue unos 90 km hacia el sur por la BR-101. Desde Montevideo también se llega en auto, por el Chuy y Porto Alegre."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cinco a siete días recorrés Silveira, Siriú, Ferrugem y la Barra, y te queda tiempo para el Rosa o, en invierno, para salir a ver ballenas."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Desde el centro se camina a la playa central y a la Vigia. Para el resto de las playas el auto ayuda mucho; fuera de temporada el ómnibus entre playas pasa poco."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Garopaba desde Montevideo",
+    "intro": "No hay aeropuerto en Garopaba: se vuela a Florianópolis y se sigue por la BR-101. Al ser un destino del sur, también se llega en auto o en ómnibus.",
+    "items": [
+     {
+      "t": "Vuelo a Florianópolis (FLN)",
+      "d": "Es el aeropuerto internacional más cercano. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo."
+     },
+     {
+      "t": "De Florianópolis a Garopaba en auto",
+      "d": "Se baja por la BR-101 hasta el acceso del km 272, en Araçatuba, y desde ahí quedan unos 15 km hasta el centro. En total, cerca de 1 h 20 desde Florianópolis, con un peaje. En el aeropuerto hay alquiladoras, transfers y taxis."
+     },
+     {
+      "t": "De Florianópolis a Garopaba en ómnibus",
+      "d": "Paulo Tur y Santo Anjo salen de la rodoviária Rita Maria, en el centro de Florianópolis, con varios horarios por día. Del aeropuerto a la rodoviária tenés que ir en taxi, Uber o bus urbano."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Son unos 1.190 km por el Chuy, Porto Alegre y la BR-101: cerca de 15 h 30 de manejo, así que conviene partirlo en dos días."
+     },
+     {
+      "t": "En ómnibus desde Montevideo",
+      "d": "EGA y TTL van de Tres Cruces a Florianópolis en unas 18 a 20 horas. De ahí seguís en el ómnibus a Garopaba."
+     }
+    ],
+    "cierre": {
+     "t": "En temporada alta",
+     "d": "En enero y en los feriados, comprá el ómnibus de Florianópolis con anticipación y reservá el alojamiento con tiempo: muchas posadas se llenan."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Garopaba",
+    "intro": "El municipio tiene varias playas con perfiles muy distintos. El centro tiene todo a mano; las demás son más tranquilas o más de surf.",
+    "items": [
+     {
+      "t": "Centro (Praia de Garopaba)",
+      "d": "La playa más urbanizada, de mar casi siempre calmo, con rambla, comercios, bancos y restaurantes. Sirve para familias y para quien no va a tener auto."
+     },
+     {
+      "t": "Vigia",
+      "d": "Zona residencial a menos de 2 km del centro, con posadas más tranquilas y mar calmo. Para parejas."
+     },
+     {
+      "t": "Silveira",
+      "d": "A unos 3 km del centro, entre morros verdes, con olas para surf y posadas con vista al mar. Se llega por camino de tierra."
+     },
+     {
+      "t": "Ferrugem",
+      "d": "A unos 7 km, con muchas posadas y la noche más movida de la zona en verano. Para gente joven y surfistas."
+     },
+     {
+      "t": "Siriú",
+      "d": "A unos 9 km al norte, con dunas y una villa chica con posadas y restaurantes. Para descansar; necesitás auto."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Garopaba",
+    "intro": "Las playas están dispersas y algunas se alcanzan solo por camino de tierra o sendero. El auto es lo más práctico.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Desde el centro caminás por la rambla de la playa central y a la Vigia."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay líneas locales del centro a las playas, pero pasan poco, sobre todo fuera de temporada."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Hay apps de transporte en la zona, pero pueden tardar en conseguir auto. Para volver de una playa alejada, arreglá antes la vuelta."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para Silveira, Siriú, Ferrugem, la Barra, el Ouvidor y el Rosa (a unos 15 km). Algunos accesos son de tierra."
+     },
+     {
+      "t": "Senderos",
+      "d": "La travesía del Ouvidor a Rosa Norte son unos 4 km, de 3 a 4 horas, bien señalizada y casi sin sombra."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Garopaba de noche",
+    "intro": "La noche del centro es tranquila; la de la zona está en Ferrugem.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "Restaurantes, pubs con música en vivo y bares de surf sobre la calle principal, para cenar y tomar algo."
+     },
+     {
+      "t": "Ferrugem",
+      "d": "A 7 km, el centrito de Ferrugem es el punto de encuentro de la noche en verano, con bares y fiestas. Fuera de temporada se calma."
+     },
+     {
+      "t": "Praia do Rosa",
+      "d": "A unos 15 km, con bares y restaurantes en el Centrinho; Año Nuevo y Carnaval son sus noches más fuertes."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si salís en Ferrugem o en el Rosa, arreglá la vuelta antes y, si tomaste, no manejes."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Garopaba",
+    "intro": "Es un pueblo tranquilo. Los cuidados pasan sobre todo por el mar.",
+    "bullets": [
+     "Silveira y Ferrugem tienen olas fuertes y en Silveira hay corriente: bañate cerca de los guardavidas y con bandera roja no te metas. Los Bomberos de Santa Catarina publican el estado de las banderas en la app CBMSC Cidadão.",
+     "Si te agarra una corriente de retorno, no nades contra ella: nadá paralelo a la arena o flotá y hacé señas.",
+     "Para un baño tranquilo, la playa central, la Vigia y la laguna de la Barra.",
+     "Hacé la travesía al Rosa y los senderos de día, con agua y protector.",
+     "En el auto no dejes nada a la vista en los estacionamientos de playa."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "La tarjeta se acepta en la mayoría de los comercios. Pix es el pago instantáneo de Brasil y lo vas a ver en todas partes, pero necesitás una cuenta o una app que lo permita; si no, tarjeta o efectivo."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Los bancos están en el centro. En las otras playas hay menos servicios: sacá antes de salir."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas); en Santa Catarina la tensión es de 220 V."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y gorra",
+     "Traje de neoprene si vas a surfear",
+     "Calzado cerrado para los senderos y la travesía al Rosa",
+     "Algo de abrigo: las noches refrescan y de mayo a septiembre hace frío",
+     "Binoculares si vas de julio a noviembre, para las ballenas",
+     "Piloto liviano: en verano llueve de tarde",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "ferrugem": {
+  "antes": {
+   "titulo": "Antes de viajar a Ferrugem",
+   "intro": "Ferrugem es una playa de Garopaba, a unos 7 km del centro, con una calle principal llena de posadas y bares y una laguna detrás. En verano es la playa de la noche; el resto del año, un pueblo de surfistas.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Se vuela a Florianópolis (FLN), a unos 95 km. Desde Montevideo también se llega en auto, por el Chuy y Porto Alegre."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cuatro o cinco días tenés playa, surf y noche, y te queda tiempo para Silveira, Garopaba y el Rosa."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Dentro de Ferrugem se camina. Para las playas vecinas el auto ayuda, pero en verano la calle principal se traba y estacionar cuesta."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Ferrugem desde Montevideo",
+    "intro": "No hay aeropuerto en Ferrugem: se vuela a Florianópolis y se sigue por la BR-101 hasta Garopaba. Al ser un destino del sur, también se llega en auto o en ómnibus.",
+    "items": [
+     {
+      "t": "Vuelo a Florianópolis (FLN)",
+      "d": "Es el aeropuerto internacional más cercano. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo."
+     },
+     {
+      "t": "De Florianópolis a Ferrugem en auto",
+      "d": "Son unos 95 km: se baja por la BR-101 hasta el acceso a Garopaba, en el km 272, y de Garopaba quedan unos 7 km. Cerca de 1 h 30 sin tránsito, con un peaje. En el aeropuerto hay alquiladoras, transfers y taxis."
+     },
+     {
+      "t": "En ómnibus",
+      "d": "Paulo Tur y Santo Anjo van de la rodoviária Rita Maria, en Florianópolis, a Garopaba, con varios horarios por día. De Garopaba a Ferrugem seguís en taxi o en ómnibus local."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Son unos 1.190 km por el Chuy, Porto Alegre y la BR-101: cerca de 15 h 30 de manejo, así que conviene partirlo en dos días."
+     },
+     {
+      "t": "En ómnibus desde Montevideo",
+      "d": "EGA y TTL van de Tres Cruces a Florianópolis en unas 18 a 20 horas. De ahí, ómnibus a Garopaba y el último tramo en taxi."
+     }
+    ],
+    "cierre": {
+     "t": "Reservá con tiempo",
+     "d": "Para Año Nuevo, Carnaval y las semanas de enero, las posadas de Ferrugem se llenan con meses de anticipación."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Ferrugem",
+    "intro": "Todo gira alrededor de la Rua Geral, la calle principal. Cuanto más cerca, más movimiento; si buscás dormir, alejate un poco.",
+    "items": [
+     {
+      "t": "Rua Geral y el centrito",
+      "d": "Posadas, restaurantes, lanchonetes y tiendas sobre la calle principal y las calles de alrededor. Para gente joven que quiere salir de noche y caminar a todo."
+     },
+     {
+      "t": "Silveira",
+      "d": "A unos 8 km, entre morros verdes, con posadas con vista al mar y olas para surf. Más tranquila que Ferrugem; necesitás auto para ir y venir."
+     },
+     {
+      "t": "Barra y Barrinha",
+      "d": "Del otro lado del canal de la laguna, con aire de comunidad de pescadores y pocas posadas. La laguna tiene agua calma, buena para chicos. Al centrito de Ferrugem se va caminando unos 10 minutos por la orilla."
+     },
+     {
+      "t": "Garopaba centro",
+      "d": "A unos 7 km, con más servicios y bancos. Sirve si querés ir a Ferrugem de día o de noche y dormir tranquilo."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Ferrugem",
+    "intro": "Ferrugem se recorre a pie. Para las playas vecinas hace falta algún transporte.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "De la Rua Geral a la playa, a la Barra y a la laguna se camina. Las calles se embarran con lluvia."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay ómnibus locales a Garopaba, pero pasan poco, sobre todo fuera de temporada."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Hay apps de transporte en la zona, pero pueden tardar en conseguir auto. Para volver tarde, arreglá antes con un taxi."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para Silveira, Garopaba, el Ouvidor y el Rosa. En verano la Rua Geral se traba y los lugares para estacionar se llenan."
+     },
+     {
+      "t": "Senderos",
+      "d": "A Silveira se puede llegar por un sendero, pero no es fácil: llevá calzado cerrado y agua."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Ferrugem de noche",
+    "intro": "En enero y febrero es la noche más movida de la costa entre Garopaba y el Rosa.",
+    "items": [
+     {
+      "t": "Rua Geral",
+      "d": "Bares y restaurantes uno al lado del otro, con mucha gente en la calle en temporada. El público es sobre todo joven."
+     },
+     {
+      "t": "Sobre la arena",
+      "d": "En el canto norte hay un bar frente al mar, el punto de los surfistas al atardecer."
+     },
+     {
+      "t": "Fiestas",
+      "d": "Año Nuevo y Carnaval llenan Ferrugem. Fuera del verano, la noche es tranquila."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si te alojás lejos de la Rua Geral, arreglá la vuelta antes y, si tomaste, no manejes."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Ferrugem",
+    "intro": "Es un lugar tranquilo. Los cuidados pasan por el mar y por las noches de fiesta.",
+    "bullets": [
+     "Ferrugem tiene olas fuertes: bañate cerca de los guardavidas y con bandera roja no te metas. Los Bomberos de Santa Catarina publican el estado de las banderas en la app CBMSC Cidadão.",
+     "Si te agarra una corriente de retorno, no nades contra ella: nadá paralelo a la arena o flotá y hacé señas.",
+     "Para un baño tranquilo, la laguna de la Barra.",
+     "En las piscinas naturales y las piedras del canto sur, ojo con la marea y el limo, que resbala.",
+     "En las noches de fiesta, cuidá el celular y la billetera y no dejes nada a la vista en el auto."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "La tarjeta se acepta en la mayoría de los comercios. Pix es el pago instantáneo de Brasil y lo vas a ver en todas partes, pero necesitás una cuenta o una app que lo permita; si no, tarjeta o efectivo."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Los bancos están en el centro de Garopaba, a 7 km. Llegá con algo de efectivo."
+     },
+     {
+      "t": "En la arena",
+      "d": "En Ferrugem casi no hay alquiler de sombrillas ni venta en la playa: llevá sombrilla, sillas y conservadora."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas); en Santa Catarina la tensión es de 220 V."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y gorra",
+     "Sombrilla, sillas y conservadora",
+     "Traje de neoprene si vas a surfear",
+     "Calzado que se pueda mojar para las calles de tierra",
+     "Ropa para salir de noche",
+     "Algo de abrigo: las noches refrescan y de mayo a septiembre hace frío",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "picarras": {
+  "antes": {
+   "titulo": "Antes de viajar a Piçarras",
+   "intro": "Balneário Piçarras es una ciudad de playa sobre la BR-101, en el litoral norte de Santa Catarina, pegada a Penha y a Beto Carrero World. Es plana y tranquila, con el aeropuerto de Navegantes a unos 20 km.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Se vuela a Navegantes (NVT), a unos 20 km, o a Florianópolis (FLN), a unos 120 km. Desde Montevideo también se llega en auto, por la BR-101."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cuatro o cinco días tenés playa, un día para Beto Carrero y otro para las calas de Penha. Si querés sumar Balneário Camboriú, agregá uno más."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "En Piçarras se camina por la rambla. Para Penha, Beto Carrero y las ciudades vecinas el auto ayuda, aunque también hay ómnibus, Uber y taxi."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Piçarras desde Montevideo",
+    "intro": "Piçarras no tiene aeropuerto: el más cercano es Navegantes, a unos 20 km. Al ser un destino del sur, también se llega en auto o en ómnibus.",
+    "items": [
+     {
+      "t": "Vuelo a Navegantes (NVT)",
+      "d": "Es el aeropuerto más cercano. No hay vuelos desde Montevideo: se llega con escala en São Paulo con Azul, GOL o LATAM. Del aeropuerto a Piçarras son unos 20 km por la BR-101."
+     },
+     {
+      "t": "Vuelo a Florianópolis (FLN)",
+      "d": "Tiene más vuelos. Los directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si no, con escala en São Paulo. Del aeropuerto a Piçarras son unos 120 km por la BR-101: cerca de 1 h 45 sin tránsito."
+     },
+     {
+      "t": "Del aeropuerto a Piçarras",
+      "d": "En los dos aeropuertos hay alquiladoras de auto, taxi y Uber. Viação Catarinense une Florianópolis con la región de Penha y Piçarras."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Son unos 1.345 km por el Chuy, Porto Alegre y la BR-101: cerca de 17 horas de manejo, así que conviene partirlo en dos días."
+     },
+     {
+      "t": "En ómnibus desde Montevideo",
+      "d": "No hay ómnibus directo. EGA y TTL van de Tres Cruces a Florianópolis en unas 18 a 20 horas, y de ahí seguís en ómnibus hasta Piçarras."
+     }
+    ],
+    "cierre": {
+     "t": "En el camino",
+     "d": "La BR-101 pasa a poco más de 1 km del mar: Piçarras queda a mano tanto si venís del sur como del norte."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Piçarras",
+    "intro": "La mejor ubicación está en el tramo con rambla, entre la desembocadura del río y la mitad sur de la Praia das Palmeiras.",
+    "items": [
+     {
+      "t": "Centro (Praia de Piçarras)",
+      "d": "La playa principal, con más de 2 km de rambla, hoteles, restaurantes y comercio. Sirve para familias y para quien no va a tener auto."
+     },
+     {
+      "t": "Barra do Rio Piçarras",
+      "d": "El extremo sur, junto a la desembocadura del río y el límite con Penha, con el muelle turístico. Queda cerca del centro y de la salida hacia Beto Carrero."
+     },
+     {
+      "t": "Praia das Palmeiras",
+      "d": "Al norte del centro. La mitad sur tiene paseo de madera y alquileres frente al mar; la mitad norte no está pavimentada y es más tranquila."
+     },
+     {
+      "t": "Penha, cerca de Beto Carrero",
+      "d": "En la Armação, del lado de Penha, hay posadas y hoteles a pocos minutos a pie del parque. Conviene si el plan principal es Beto Carrero."
+     }
+    ],
+    "bullets": [
+     "En temporada abundan los apartamentos y casas de alquiler, además de hoteles y posadas.",
+     "En julio también se llena, por las vacaciones de invierno en Beto Carrero."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Piçarras",
+    "intro": "La ciudad es plana y la playa se recorre a pie. Para Penha y Beto Carrero, auto, Uber u ómnibus.",
+    "items": [
+     {
+      "t": "A pie y en bicicleta",
+      "d": "La rambla de la playa central se camina de punta a punta, y el muelle de la desembocadura se recorre a pie."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Funcionan en la zona. Beto Carrero queda a unos 10 a 16 km según de dónde salgas, y el auto te deja prácticamente en la puerta."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Viação Catarinense une Piçarras con Balneário Camboriú, Itajaí, Navegantes y Penha. Para la entrada de Beto Carrero, desde Piçarras seguís en taxi o en línea municipal."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para las calas de Penha, Beto Carrero y Balneário Camboriú (a unos 40 km). La BR-101 se carga en verano."
+     },
+     {
+      "t": "Barco",
+      "d": "Los paseos en escuna salen de Penha."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Piçarras",
+    "intro": "Es una ciudad tranquila y el mar de la playa central es calmo. Los cuidados son los de cualquier balneario.",
+    "bullets": [
+     "La playa central tiene agua calma, pero la Ponta do Jacques tiene olas más fuertes: bañate cerca de los guardavidas y con bandera roja no te metas. Los Bomberos de Santa Catarina publican el estado de las banderas en la app CBMSC Cidadão.",
+     "Con chicos, aunque el mar sea calmo, quedate cerca de los puestos de guardavidas.",
+     "No te bañes junto a la desembocadura del río ni cerca de las piedras del muelle.",
+     "No dejes cosas solas en la arena ni nada a la vista en el auto, sobre todo en el estacionamiento de Beto Carrero.",
+     "Cruzá la BR-101 solo por las pasarelas y los semáforos."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "La tarjeta se acepta en casi todos lados. Pix es el pago instantáneo de Brasil y lo vas a ver en todas partes, pero necesitás una cuenta o una app que lo permita; si no, tarjeta o efectivo."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Tené algo para kioscos de playa y estacionamientos."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas); en Santa Catarina la tensión es de 220 V."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar, gorra y lentes de sol",
+     "Ropa liviana y de playa",
+     "Calzado cómodo para el día en Beto Carrero",
+     "Bolsa estanca o piloto para las atracciones de agua",
+     "Algo de abrigo: de mayo a septiembre hace frío",
+     "Piloto liviano: en verano llueve de tarde",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "torres": {
+  "antes": {
+   "titulo": "Antes de viajar a Torres",
+   "intro": "Torres es la ciudad del extremo norte del litoral gaúcho, en el límite con Santa Catarina, con los morros de piedra sobre el mar. Se llega en auto en un día desde Montevideo, y el centro, las calas y los morros se recorren a pie.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Desde Montevideo lo más común es ir en auto, unos 985 km. En avión, se vuela a Porto Alegre (POA), a unos 190 km, o a Florianópolis (FLN)."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con tres o cuatro días caminás los morros, la Guarita y las calas, y te queda tiempo para cruzar a Passo de Torres o para un día en la Itapeva."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Del centro a la Prainha, la Cal y la Praia Grande se camina. El auto sirve para la Itapeva, la Guarita si no querés caminar y el viaje de ida y vuelta."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Torres desde Montevideo",
+    "intro": "Torres no tiene vuelos comerciales. Desde Montevideo se llega en auto en un día largo, o en avión a Porto Alegre y desde ahí por tierra.",
+    "items": [
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Son unos 985 km por el Chuy, Pelotas, la zona de Porto Alegre, la Freeway (BR-290) y la BR-101: entre 12 y 13 horas de manejo. Se hace en un día largo o se parte con una noche en el camino."
+     },
+     {
+      "t": "Vuelo a Porto Alegre (POA)",
+      "d": "Azul vuelve a volar directo de Montevideo a Porto Alegre desde el 14 de diciembre de 2026, los lunes y viernes. Si en tus fechas no hay directo, se vuela con escala, en general en São Paulo."
+     },
+     {
+      "t": "De Porto Alegre a Torres",
+      "d": "Son unos 190 km por la Freeway (BR-290) y la BR-101, cerca de 2 h 15 en auto, con tres peajes. En ómnibus, Unesul sale de la rodoviária de Porto Alegre; el viaje dura entre 3 h y 3 h 45. Del aeropuerto a la rodoviária se va en el tren Trensurb."
+     },
+     {
+      "t": "Por Florianópolis",
+      "d": "Otra opción es volar a Florianópolis (FLN) y bajar por la BR-101: son unos 280 km."
+     },
+     {
+      "t": "En ómnibus desde Montevideo",
+      "d": "No hay ómnibus directo: se va de Tres Cruces a Porto Alegre y de ahí a Torres. En total, unas 17 a 18 horas."
+     }
+    ],
+    "cierre": {
+     "t": "Antes de salir",
+     "d": "En auto, llevá el documento del vehículo, la carta verde y el registro de conducir. En enero y Carnaval la BR-101 se carga los sábados y en los finales de feriado."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Torres",
+    "intro": "La ciudad es chica y casi todo queda cerca. La diferencia está entre dormir en el centro, en la playa larga o entre los morros.",
+    "items": [
+     {
+      "t": "Centro y Prainha",
+      "d": "Entre la Prainha y el canto sur de la Praia Grande está la mayoría de los hoteles y posadas, cerca del comercio y los restaurantes. Es la opción si no vas a tener auto."
+     },
+     {
+      "t": "Praia Grande",
+      "d": "Calles anchas, dunas y la playa larga hasta los Molhes. Hay pocas posadas y muchos apartamentos y casas de alquiler. Es donde se hacen el Año Nuevo y la mayoría de los eventos."
+     },
+     {
+      "t": "Praia da Cal",
+      "d": "Entre los morros, cerca de la Lagoa do Violão y del Parque da Guarita. Más de casas, apartamentos y kitnets que de posadas; la elige quien surfea."
+     },
+     {
+      "t": "Itapeva",
+      "d": "La playa más larga, de unos 6 km, lejos del centro, con casas de temporada frente al mar. Tranquila, pero necesitás auto."
+     },
+     {
+      "t": "Avenida Castelo Branco",
+      "d": "En la entrada de la ciudad, lejos del mar, están los hoteles más económicos."
+     }
+    ],
+    "bullets": [
+     "Entre la semana de Navidad y mediados de febrero los precios suben mucho: reservá con tiempo."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚶",
+    "titulo": "Cómo moverse por Torres",
+    "intro": "Torres se recorre a pie: el centro, las calas y los morros están a pocas cuadras unos de otros.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Del centro a la Prainha, la Cal y la Praia Grande se camina. A la Guarita son unos 3 km por la orilla y los morros."
+     },
+     {
+      "t": "Senderos de los morros",
+      "d": "Los caminos del Morro do Farol y del Parque da Guarita van por arriba de los acantilados, con subidas y escalones: calzado cómodo."
+     },
+     {
+      "t": "Auto",
+      "d": "Sirve para la Itapeva, Passo de Torres y la Guarita. El estacionamiento del parque se cobra aparte."
+     },
+     {
+      "t": "Passo de Torres",
+      "d": "Del otro lado del río Mampituba, ya en Santa Catarina, con playas más tranquilas. Se cruza a pie por la pasarela colgante sobre el río."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Torres de noche",
+    "intro": "La noche tiene movimiento sobre todo en temporada, de diciembre a Carnaval.",
+    "items": [
+     {
+      "t": "Orla de la Praia Grande",
+      "d": "Bares, kioscos y lugares con shows sobre la costanera, el punto más movido en verano."
+     },
+     {
+      "t": "Lagoa do Violão",
+      "d": "Alrededor de la laguna hay bares y restaurantes muy buscados en temporada."
+     },
+     {
+      "t": "Centro",
+      "d": "Restaurantes y bares para cenar y caminar, con música en vivo en algunas noches de verano."
+     }
+    ],
+    "cierre": {
+     "t": "Fuera de temporada",
+     "d": "Baja mucho el movimiento y varios comercios de playa cierran: confirmá horarios antes de salir."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Torres",
+    "intro": "Es una ciudad tranquila. Los cuidados pasan por el mar, el viento y los acantilados.",
+    "bullets": [
+     "La Praia Grande y la Cal tienen olas y corriente: bañate cerca de los guardavidas y con bandera roja no te metas.",
+     "Si te agarra una corriente de retorno, no nades contra ella: nadá paralelo a la arena o flotá y hacé señas.",
+     "En los morros y en la Guarita no te acerques al borde de los acantilados y no te subas a las piedras con olas: el limo resbala.",
+     "Con viento sur y mar grande, las piedras y los molhes son peligrosos.",
+     "No dejes cosas solas en la arena ni nada a la vista en el auto."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "La tarjeta se acepta en casi todos lados. Pix es el pago instantáneo de Brasil y lo vas a ver en todas partes, pero necesitás una cuenta o una app que lo permita; si no, tarjeta o efectivo."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Tené algo para estacionamientos y kioscos de playa."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas). En Rio Grande do Sul hay redes de 127 V y de 220 V: confirmá la tensión en tu alojamiento antes de enchufar algo que no sea bivolt."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y gorra",
+     "Un rompevientos: el viento sur aparece aun en verano",
+     "Calzado cómodo para los morros y la Guarita",
+     "Algo de abrigo para la noche, también en enero",
+     "Ropa de lluvia: llueve parejo todo el año",
+     "Si vas en auto: documento del vehículo, carta verde y registro",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
  }
 }
