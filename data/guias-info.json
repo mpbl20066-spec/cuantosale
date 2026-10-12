@@ -391,5 +391,219 @@
     ]
    }
   ]
+ },
+ "buz": {
+  "antes": {
+   "titulo": "Antes de viajar a Búzios",
+   "intro": "Búzios es una península a unos 170 km de Río de Janeiro, con más de veinte playas repartidas en pocos kilómetros. No tiene aeropuerto con vuelos regulares: se llega por Río y se sigue por ruta.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Río",
+     "d": "Se vuela al aeropuerto del Galeão (GIG) y de ahí son unas 3 horas por ruta. El aeropuerto de Cabo Frio (CFB), a unos 25 km, solo tiene vuelos de temporada."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 4 o 5 días ves las calas del norte, Geribá y Ferradura, un paseo en barco y una noche en la Rua das Pedras sin correr. Si querés sumar Arraial do Cabo o Cabo Frio, agregá uno o dos días."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "El centro, Ossos y la Rua das Pedras se recorren a pie, y a las playas se llega en van, taxi, Uber o taxi-barco. El auto ayuda para las playas alejadas, como Rasa o Caravelas, pero en temporada alta hay tránsito y cuesta estacionar."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Búzios desde Montevideo",
+    "intro": "Se vuela a Río de Janeiro y se sigue unas 3 horas por tierra.",
+    "items": [
+     {
+      "t": "Vuelo a Río (GIG)",
+      "d": "Hay vuelo directo de Montevideo al Galeão con GOL, de unas 2 h 40. Con escala en São Paulo también hay opciones todos los días."
+     },
+     {
+      "t": "Del Galeão a Búzios en auto",
+      "d": "Son unos 180 km: Linha Vermelha, Puente Río-Niterói, BR-101 y Via Lagos (RJ-124), que tiene peaje. Calculá unas 3 horas sin tránsito; en finde y feriados puede tardar mucho más."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay transfers compartidos y autos privados desde el Galeão y desde los hoteles de Río hasta tu posada. Es lo más práctico si llegás con valijas."
+     },
+     {
+      "t": "Ómnibus 1001",
+      "d": "Auto Viação 1001 sale de la Rodoviária Novo Rio durante todo el día y tarda entre 3 y 4 horas. Desde el Galeão hay pocos horarios y solo en temporada alta: revisá antes en el sitio de 1001."
+     },
+     {
+      "t": "Aeropuerto de Cabo Frio (CFB)",
+      "d": "Está a unos 25 km de Búzios, pero no tiene vuelos regulares desde Río; solo hay vuelos de temporada desde algunas ciudades. Si te sirve uno, de ahí seguís en taxi o Uber."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si aterrizás de noche en el Galeão, conviene dormir en Río y salir a Búzios a la mañana: el camino es más tranquilo de día."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado aeropuerto → Búzios y la vuelta."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Búzios",
+    "intro": "Las distancias son cortas, pero no todo se camina. Elegí según si querés salir de noche o estar frente a una playa tranquila.",
+    "items": [
+     {
+      "t": "Centro y Rua das Pedras",
+      "d": "Lo más práctico para moverse a pie, con restaurantes, bares y la salida de los barcos cerca. Conviene si no vas a alquilar auto o si querés salir de noche."
+     },
+     {
+      "t": "Ossos y Armação",
+      "d": "El pueblo viejo, al norte del centro, a pocos pasos de los taxis-barco y del sendero a Azeda. Tiene posadas más chicas y más calma que la Rua das Pedras."
+     },
+     {
+      "t": "João Fernandes",
+      "d": "Posadas sobre la cala de agua quieta, con bares en la arena. Es de las zonas más caras; para el centro necesitás taxi, van o una caminata larga."
+     },
+     {
+      "t": "Geribá",
+      "d": "Posadas frente al mar, surf y ambiente joven. Queda lejos del centro a pie, pero cerca de Ferradura y Manguinhos."
+     },
+     {
+      "t": "Ferradura",
+      "d": "Muchas casas y departamentos de alquiler, con mar calmo para chicos. Es una buena base para familias que se mueven en auto."
+     }
+    ],
+    "bullets": [
+     "Manguinhos y Ossos suelen tener precios más bajos que João Fernandes o Geribá.",
+     "Si vas en auto, preguntá si la posada tiene estacionamiento propio."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Búzios",
+    "intro": "Combiná caminata, van y barco. En temporada alta el auto es más lento de lo que parece.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Sirve para el centro, la Orla Bardot, la Rua das Pedras y Ossos, y para las calas cercanas por senderos cortos. Entre playas hay cerros con subidas fuertes."
+     },
+     {
+      "t": "Vans",
+      "d": "Son el transporte público: recorren la avenida José Bento Ribeiro Dantas de punta a punta. Paran donde les hacés seña y te dejan a unos minutos a pie de la playa."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Uber funciona en Búzios y suele salir más barato que el taxi, aunque hay menos autos que en una ciudad grande. Los taxis tienen tarifa fija por destino; pedile el teléfono al chofer para la vuelta."
+     },
+     {
+      "t": "Taxi-barco",
+      "d": "Sale de Ossos y del Cais do Mangue, en la Praia da Armação, hacia Azeda, João Fernandes, Tartaruga y Manguinhos. Se paga por persona según la distancia."
+     },
+     {
+      "t": "Auto y buggy",
+      "d": "Es lo más cómodo para Rasa, Caravelas o Manguinhos. Hay poca oferta de alquiler en Búzios: conviene alquilar en Río. También se alquilan buggies por día."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Búzios de noche",
+    "intro": "La noche se arma entre la Orla Bardot y la Rua das Pedras.",
+    "items": [
+     {
+      "t": "Rua das Pedras",
+      "d": "Bares, restaurantes y boliches uno al lado del otro. En temporada y los fines de semana la movida sigue hasta la madrugada."
+     },
+     {
+      "t": "Atardecer antes de salir",
+      "d": "El plan es ver la puesta de sol en la Orla Bardot o en el Porto da Barra y después cenar en el centro."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Los horarios cambian mucho entre temporada alta y baja: preguntá en tu posada qué está abierto esa semana."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Búzios",
+    "intro": "Es un lugar tranquilo para recorrer, con los cuidados de cualquier destino turístico.",
+    "bullets": [
+     "En Brava, Geribá y Caravelas hay olas y corrientes: nadá cerca de la orilla y respetá las banderas.",
+     "Hacé de día los senderos a las calas, como Forno, Olho de Boi o la Ponta da Lagoinha.",
+     "En la arena no dejes el celular ni la billetera solos mientras te metés al agua.",
+     "No dejes nada a la vista en el auto estacionado en las playas.",
+     "Si llegás al Galeão de noche, preferí transfer o quedarte en Río y viajar de día: el camino pasa por la Linha Vermelha."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "Conviene tener una alternativa a la tarjeta. Llevá algo de efectivo para vans, taxis-barco y puestos de playa."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Están en el centro; en las playas no hay. Sacá antes de salir."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Búzios la red es de 127 V (lo que en Brasil llaman 110 V). Revisá que tus cargadores sean bivolt y confirmá en tu alojamiento."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Búzios es playa, barco y algo de sendero.",
+    "grupos": [
+     {
+      "titulo": "Para todos los viajes",
+      "bullets": [
+       "Protector solar",
+       "Ropa liviana y de playa",
+       "Un abrigo liviano: de mayo a septiembre refresca de noche",
+       "Ropa para salir por la Rua das Pedras",
+       "Mochila pequeña",
+       "Cargador / power bank",
+       "Efectivo y un medio de pago alternativo"
+      ]
+     },
+     {
+      "titulo": "Para el agua y los senderos",
+      "bullets": [
+       "Máscara y snorkel propios",
+       "Sandalias o calzado con agarre para las rocas",
+       "Agua: en Forno, Olho de Boi y la Ponta da Lagoinha no venden nada",
+       "Bolsa estanca para el celular en el barco"
+      ]
+     }
+    ]
+   }
+  ]
  }
 }
