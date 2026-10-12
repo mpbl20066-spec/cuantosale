@@ -157,6 +157,8 @@
   .gm-pin text.gm-pin__n{font:800 9.5px var(--fb);fill:#0F1B2D;stroke:none}
   .gm-mini i{position:absolute;top:8px;left:8px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--gm-y);color:#0F1B2D;font:800 12px var(--fb);font-style:normal}
   .gm-mvd circle{fill:#fff}
+  .gm-guia{stroke:var(--gm-y);opacity:.75}
+  .gm-guia__o{fill:var(--gm-y)}
   .gm-mvd text{font:700 10px var(--fb);fill:var(--gm-gris)}
   .gm-ley{display:flex;justify-content:center;gap:16px;margin:8px 0 0;padding:0;list-style:none;font-size:12px;color:var(--gm-gris)}
   .gm-ley li{display:flex;align-items:center;gap:6px}
@@ -483,7 +485,7 @@
   }
   /* ---- "Mas baratos": vuelo + alojamiento por persona desde Montevideo, del mismo endpoint de la portada
      (/api/destinos-destacados: modelo de costos con el pasaje real si el servidor ya lo tiene). Viaje tipo: 2
-     personas, 7 noches desde el 15 del mes (el proximo que todavia no paso). Se pide una vez por mes. */
+     personas, 7 noches desde el 15 del mes (ver fechasMes). Se pide una vez por mes. */
   var PRECIOS = {}, PIDIENDO = {}, MEDIO = {};
   var MODO_APP = { avion_mvd: 'avion', avion_ba: 'avion', auto: 'auto', bus: 'bus' };
   /* el mismo link que "Calculá tu viaje" de la guia, con las fechas del precio que se mostro */
@@ -491,12 +493,18 @@
     var f = fechasMes(S.mes), modo = MODO_APP[MEDIO[S.mes + k]];
     return 'home-destino.html?destino=' + k + '&ida=' + f.dep + '&vuelta=' + f.ret + '&pax=2' + (modo ? '&modo=' + modo : '') + '&fuente=guias_mas_baratos' + (debug ? '&debug=1' : '');
   }
+  /* Salida el 15 del mes. Si para eso faltan menos de 10 dias: en el mes actual se sale en 10 dias si todavia entra
+     una semana en el mes (el 12 de octubre daba octubre de 2027; ahora 22 de octubre); si no, el 15 del año siguiente. */
   function fechasMes(m) {
-    var hoy = new Date(), dep = new Date(hoy.getFullYear(), m - 1, 15);
-    if (dep - hoy < 10 * 864e5) dep.setFullYear(dep.getFullYear() + 1);
+    var hoy = new Date(), dep = new Date(hoy.getFullYear(), m - 1, 15), pronto = new Date(hoy.getTime() + 10 * 864e5);
+    if (dep < pronto) {
+      var finMes = new Date(hoy.getFullYear(), m, 0).getDate();
+      if (pronto.getMonth() === m - 1 && pronto.getFullYear() === hoy.getFullYear() && pronto.getDate() <= finMes - 6) dep = new Date(pronto.getFullYear(), pronto.getMonth(), pronto.getDate());
+      else dep.setFullYear(dep.getFullYear() + 1);
+    }
     var ret = new Date(dep); ret.setDate(ret.getDate() + 7);
     var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-    return { dep: iso(dep), ret: iso(ret), anio: dep.getFullYear() };
+    return { dep: iso(dep), ret: iso(ret), anio: dep.getFullYear(), dia: dep.getDate() };
   }
   function pedirPrecios(m) {
     if (PRECIOS[m] || PIDIENDO[m]) return;
@@ -529,14 +537,15 @@
       var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
       p = max > min ? 1 - (pr[d.k] - min) / (max - min) : 1;
     }
-    return 0.45 * c + 0.35 * p + 0.1 * (enMes(d) ? 1 : 0) + 0.1 * (esAlta(d) ? 0 : 1);
+    var resto = 0.45 * c + 0.1 * (enMes(d) ? 1 : 0) + 0.1 * (esAlta(d) ? 0 : 1);
+    /* sin precios (todavia cargando, o el servidor no respondio) se ordena con clima y temporada, en la misma escala */
+    return vals.length ? resto + 0.35 * p : resto / 0.65;
   }
   function rankRec(filtro) {
-    if (!PRECIOS[S.mes]) return [];
     return separar(DESTS.filter(filtro || function () { return true; }).map(function (d) { return { d: d, s: puntajeRec(d) }; })
       .sort(function (a, b) { return b.s - a.s; }).map(function (x) { return x.d; }));
   }
-  /* Los 5 primeros del mes (para el cartel del mapa); sin precios todavia, ninguno. */
+  /* Los 5 primeros del mes (para el cartel del mapa). */
   var esTop = function (d) { return rankRec().slice(0, 5).indexOf(d) >= 0; };
   function km(a, b) {
     var r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
@@ -672,12 +681,41 @@
   function mapa() {
     var num = {}, k = escalaPin(), tr = function (p) { return ' transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ') scale(' + k.toFixed(3) + ')"'; };
     visibles().forEach(function (d, i) { num[d.k] = i + 1; });
+    /* Los numerados que se pisan (Pipa, Natal, Joao Pessoa y Recife quedan a pocos px sin zoom) se separan hasta que
+       se lean, y una linea fina los une con su lugar real. Con zoom ya no se pisan y quedan en su lugar. */
+    var pos = {}, guias = '';
+    S.posPin = pos;
+    (function () {
+      var R = 8 * k, minD = 2 * R + 2 * k, pts = DESTS.filter(function (d) { return num[d.k] && d.lat != null; })
+        .map(function (d, i) { var q = xy(d.lat, d.lon); return { k: d.k, x: q[0], y: q[1], ox: q[0], oy: q[1], i: i }; });
+      for (var it = 0; it < 80; it++) {
+        var movio = false;
+        for (var a = 0; a < pts.length; a++) for (var b = a + 1; b < pts.length; b++) {
+          var A = pts[a], B = pts[b], dx = B.x - A.x, dy = B.y - A.y, dd = Math.hypot(dx, dy);
+          if (dd >= minD) continue;
+          if (dd < 0.01) { dx = Math.cos(B.i); dy = Math.sin(B.i); dd = 1; }
+          var e = (minD - dd) / 2 + 0.01;
+          A.x -= dx / dd * e; A.y -= dy / dd * e; B.x += dx / dd * e; B.y += dy / dd * e; movio = true;
+        }
+        /* que ninguno quede cortado contra el borde de la vista (la punta noreste esta pegada al borde derecho) */
+        pts.forEach(function (q) {
+          q.x = Math.max(S.vb.x + R + k, Math.min(S.vb.x + S.vb.w - R - k, q.x));
+          q.y = Math.max(S.vb.y + R + k, Math.min(S.vb.y + S.vb.h - R - k, q.y));
+        });
+        if (!movio) break;
+      }
+      pts.forEach(function (q) {
+        pos[q.k] = [q.x, q.y];
+        if (Math.hypot(q.x - q.ox, q.y - q.oy) > R * 0.6) guias += '<line class="gm-guia" x1="' + q.ox.toFixed(1) + '" y1="' + q.oy.toFixed(1) + '" x2="' + q.x.toFixed(1) + '" y2="' + q.y.toFixed(1) + '" stroke-width="' + (1.2 * k).toFixed(2) + '"/><circle class="gm-guia__o" cx="' + q.ox.toFixed(1) + '" cy="' + q.oy.toFixed(1) + '" r="' + (2.2 * k).toFixed(2) + '"/>';
+      });
+    })();
     var m = xy(-34.88, -56.18);
     var h = '<g class="gm-mvd" aria-hidden="true"' + tr(m) + '><circle r="3"/><text x="6" y="4">Montevideo</text></g>';
     /* los recomendados y el elegido se dibujan al final para que queden arriba de los grises */
     var orden = DESTS.filter(function (d) { return d.lat != null; }).sort(function (a, b) { return (!!num[a.k] - !!num[b.k]) || ((num[b.k] || 0) - (num[a.k] || 0)) || ((a.k === S.sel) - (b.k === S.sel)); });
+    h += '<g aria-hidden="true">' + guias + '</g>';
     h += orden.map(function (d) {
-      var p = xy(d.lat, d.lon), n = num[d.k], rec = !!n, sel = d.k === S.sel, izq = p[0] > S.vb.x + S.vb.w * 0.72;
+      var p = pos[d.k] || xy(d.lat, d.lon), n = num[d.k], rec = !!n, sel = d.k === S.sel, izq = p[0] > S.vb.x + S.vb.w * 0.72;
       var cls = 'gm-pin' + (rec ? ' is-rec' : '') + (sel ? ' is-sel' : '') + (coincide(d) ? '' : ' is-off');
       return '<g class="' + cls + '" data-pin="' + d.k + '" tabindex="' + (coincide(d) ? 0 : -1) + '" role="button" aria-label="' + esc(d.name) + (rec ? ', número ' + n + ' de los recomendados de ' + MESES[S.mes - 1] : '') + '"' + tr(p) + '>' +
         '<title>' + esc(d.name) + '</title><circle r="' + (rec ? 8 : sel ? 7 : 4.5) + '"/>' +
@@ -716,10 +754,13 @@
     [].forEach.call(document.querySelectorAll('.gm-tab'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.rank === S.rank)); });
     $('gmRecT').textContent = S.rank === 'clima' ? 'Mejor clima en ' + mes : S.rank === 'precio' ? 'Más baratos en ' + mes : 'Los mejores para ir en ' + mes;
     $('gmRecNota').textContent = S.rank === 'clima' ? 'Playas ordenadas por sol, poca lluvia y calor de playa en ' + mes + ': máxima promedio y días con lluvia fuerte, según el clima de 2015 a 2024 (Open-Meteo).' + (S.tipo && S.tipo !== 'beach' ? '' : ' Para ciudad o sierra, filtrá por tipo en el buscador.')
-      : S.rank === 'precio' ? 'Vuelo y alojamiento desde Montevideo, por persona, para 2 personas y 7 noches desde el 15 de ' + mes + ' de ' + f.anio + '. Tocá un destino para cotizarlo con esas fechas.'
-        : 'Lo mejor de ' + mes + ' sumando todo: clima (temperatura, lluvia y sol), precio de vuelo y alojamiento por persona, y si es temporada alta.';
+      : S.rank === 'precio' ? 'Vuelo y alojamiento desde Montevideo, por persona, para 2 personas y 7 noches desde el ' + f.dia + ' de ' + mes + ' de ' + f.anio + '. Tocá un destino para cotizarlo con esas fechas.'
+        : 'Lo mejor de ' + mes + ' sumando todo: clima (temperatura, lluvia y sol), precio de vuelo y alojamiento por persona, y si es temporada alta.' +
+          (PRECIOS[S.mes] === null ? ' Ahora no pudimos calcular los precios: están ordenados por clima y temporada.' : '');
     var mas = $('gmRecMas');
-    if (S.rank !== 'clima' && !PRECIOS[S.mes]) {
+    /* Recomendados no espera a los precios: se muestra con clima y temporada y se reordena cuando llegan */
+    if (S.rank === 'top' && PRECIOS[S.mes] === undefined) pedirPrecios(S.mes);
+    if (S.rank === 'precio' && !PRECIOS[S.mes]) {
       var fallo = PRECIOS[S.mes] === null;
       $('gmRec').innerHTML = '<p class="gm-cargando">' + (fallo ? 'No pudimos calcular los precios ahora. Probá de nuevo en un rato.' : 'Calculando precios…') + '</p>';
       mas.hidden = true;
@@ -737,7 +778,7 @@
   }
   function favTxt() {
     $('gmFavTxt').textContent = favs.length ? (favs.length === 1 ? 'Tenés 1 destino guardado: ' : 'Tenés ' + favs.length + ' destinos guardados: ') + favs.slice(0, 3).map(function (k) { return C.Nombres[k]; }).join(', ') + (favs.length > 3 ? '...' : '.')
-      : 'Tocá el corazón de cualquier destino para guardarlo acá.';
+      : 'Tocá el corazón de cualquier destino para guardarlo. Con tu cuenta, los ves en cualquier celular.';
   }
   function filtrosUI() {
     [].forEach.call(document.querySelectorAll('#gmFil .gm-chip'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.tipo === S.tipo)); });
@@ -769,7 +810,7 @@
     var mejor = '', dmin = Math.pow(22 * escalaPin(), 2);   // hasta 22 unidades del mapa (unos 2 grados)
     DESTS.forEach(function (d) {
       if (d.lat == null || !coincide(d)) return;
-      var p = xy(d.lat, d.lon), dd = (p[0] - pt.x) * (p[0] - pt.x) + (p[1] - pt.y) * (p[1] - pt.y);
+      var p = (S.posPin && S.posPin[d.k]) || xy(d.lat, d.lon), dd = (p[0] - pt.x) * (p[0] - pt.x) + (p[1] - pt.y) * (p[1] - pt.y);
       if (dd < dmin) { dmin = dd; mejor = d.k; }
     });
     return mejor;

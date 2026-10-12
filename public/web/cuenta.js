@@ -367,17 +367,17 @@
     raiz.hidden = false; document.documentElement.classList.add('cs-perfil-abierto');
     pintar();
     iniciar().then(function () {
-      if (S.vista === 'viajes') { if (usuario) cargarViajes(); else ir('login'); }
+      if (S.vista === 'viajes') { if (usuario) cargarViajes(); else if (favLeer().length) pintar(); else ir('login'); }
       else if (S.vista === 'alertas') { if (usuario) cargarAlertas(); else ir('login'); }
       else if (S.vista === 'editar' && !usuario) ir('login');
       else pintar();
-    }, function (e) { if (S.vista === 'viajes' || S.vista === 'alertas' || S.vista === 'editar') S.vista = 'login'; S.error = e.message; pintar(); });
+    }, function (e) { if (S.vista === 'viajes' && favLeer().length) { pintar(); return; } if (S.vista === 'viajes' || S.vista === 'alertas' || S.vista === 'editar') S.vista = 'login'; S.error = e.message; pintar(); });
     var f = raiz.querySelector('[data-foco]') || raiz.querySelector('button'); if (f) f.focus();
   }
   function cerrar() { if (!raiz) return; raiz.hidden = true; document.documentElement.classList.remove('cs-perfil-abierto'); }
   function ir(v) { S.vista = v; S.error = ''; S.aviso = ''; pintar(); if (v === 'viajes') cargarViajes(); if (v === 'alertas') cargarAlertas(); var f = raiz.querySelector('[data-foco]'); if (f) f.focus(); }
   function cargarViajes() {
-    if (!usuario) { S.vista = 'login'; pintar(); return; }
+    if (!usuario) { if (!favLeer().length) S.vista = 'login'; pintar(); return; }
     S.cargando = true; S.viajes = null; S.error = ''; pintar();
     listarViajes().then(function (l) { S.viajes = l; }, function (e) { S.error = e.message; }).then(function () { S.cargando = false; pintar(); });
   }
@@ -481,6 +481,16 @@
       (S.error ? '<p class="cp-err" role="alert">' + esc(S.error) + '</p>' : '') + (S.aviso ? '<p class="cp-ok" role="status">' + esc(S.aviso) + '</p>' : '') +
       '<button type="submit" class="cp-btn"' + (S.enviando ? ' disabled' : '') + '>' + ic(I.mail, 18) + (S.enviando ? 'Enviando…' : 'Enviarme un link para entrar') + '</button></form></div>';
   }
+  function favListaHtml() {
+    return '<ul class="cp-favs">' + favLeer().map(function (x) {
+      return '<li><a href="/web/home-guia.html?destino=' + encodeURIComponent(x.k) + '&fuente=guardados">' + esc(x.n || x.k) + '</a></li>';
+    }).join('') + '</ul>';
+  }
+  function vistaFavSinSesion() {
+    return cabecera('Guardados') + '<div class="cp-cuerpo" data-foco tabindex="-1"><h3 class="cp-sub">Destinos favoritos</h3>' + favListaHtml() +
+      '<p class="cp-p">Están guardados en este navegador. Iniciá sesión para tenerlos en cualquier celular o compu y para guardar tus viajes.</p>' +
+      '<button type="button" class="cp-btn" data-ir-login>Iniciar sesión</button></div>';
+  }
   function vistaViajes() {
     var cuerpo;
     if (S.cargando) cuerpo = '<p class="cp-p" role="status">Cargando tus viajes…</p>';
@@ -506,9 +516,7 @@
         '<div class="cp-viaje__a">' + (url ? '<a class="cp-btn cp-btn--s" href="' + esc(url) + '">Abrir</a>' : '<span class="cp-nota">Guardado en la app anterior</span>') +
         '<button type="button" class="cp-btn cp-btn--s cp-btn--o" data-borrar="' + esc(t.id) + '" aria-label="Eliminar el viaje a ' + esc(t.destination || '') + '">' + ic(I.trash, 16) + '</button></div></article>';
     }).join('');
-    var favs = favLeer(), favHtml = favs.length ? '<h3 class="cp-sub">Destinos favoritos</h3><ul class="cp-favs">' + favs.map(function (x) {
-      return '<li><a href="/web/home-guia.html?destino=' + encodeURIComponent(x.k) + '&fuente=guardados">' + esc(x.n || x.k) + '</a></li>';
-    }).join('') + '</ul><h3 class="cp-sub">Viajes</h3>' : '';
+    var favHtml = favLeer().length ? '<h3 class="cp-sub">Destinos favoritos</h3>' + favListaHtml() + '<h3 class="cp-sub">Viajes</h3>' : '';
     return cabecera('Guardados') + '<div class="cp-cuerpo" data-foco tabindex="-1">' + favHtml + cuerpo + '</div>';
   }
   function vistaAlertas() {
@@ -537,9 +545,11 @@
   function pintar() {
     if (!raiz) return;
     var v = S.vista;
-    if ((v === 'viajes' || v === 'alertas' || v === 'editar') && !usuario && !listo) { raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + cabecera('Mi cuenta') + '<div class="cp-cuerpo"><p class="cp-p" role="status">Cargando…</p></div></div>'; return; }
-    if ((v === 'viajes' || v === 'alertas' || v === 'editar') && !usuario) v = S.vista = 'login';
-    raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? vistaViajes() : v === 'alertas' ? vistaAlertas() : v === 'editar' ? vistaEditar() : v === 'conversor' ? vistaConversor() : menu()) + '</div>';
+    /* Guardados sin sesion: si hay destinos favoritos en el navegador se muestran, con la invitacion a iniciar sesion */
+    var favSinSesion = v === 'viajes' && !usuario && favLeer().length > 0;
+    if (!favSinSesion && (v === 'viajes' || v === 'alertas' || v === 'editar') && !usuario && !listo) { raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + cabecera('Mi cuenta') + '<div class="cp-cuerpo"><p class="cp-p" role="status">Cargando…</p></div></div>'; return; }
+    if (!favSinSesion && (v === 'viajes' || v === 'alertas' || v === 'editar') && !usuario) v = S.vista = 'login';
+    raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? (usuario ? vistaViajes() : vistaFavSinSesion()) : v === 'alertas' ? vistaAlertas() : v === 'editar' ? vistaEditar() : v === 'conversor' ? vistaConversor() : menu()) + '</div>';
     if (v === 'login') montarGoogle(raiz.querySelector('[data-google]'), {
       ok: function () { S.error = ''; ir('menu'); },
       error: function () { S.error = 'Google no pudo validar tu cuenta. Probá con el botón de nuevo o entrá con tu correo.'; pintar(); }
@@ -550,7 +560,8 @@
     var t = e.target.closest('button,a'); if (!t) return;
     if (t.hasAttribute('data-cerrar')) { cerrar(); return; }
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
-    if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
+    if (t.hasAttribute('data-ir-login')) { ir('login'); return; }
+    if (t.hasAttribute('data-viajes')) { if (usuario || favLeer().length) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
     if (t.hasAttribute('data-alertas')) { if (usuario) ir('alertas'); else iniciar().then(function () { ir(usuario ? 'alertas' : 'login'); }, function () { ir('login'); }); return; }
     if (t.hasAttribute('data-push-on')) {
       S.pushOcupado = true; S.pushError = ''; pintar();
