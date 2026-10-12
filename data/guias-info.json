@@ -1165,5 +1165,185 @@
     ]
    }
   ]
+ },
+ "ilhabela": {
+  "antes": {
+   "titulo": "Antes de viajar a Ilhabela",
+   "intro": "Ilhabela es una isla montañosa frente a São Sebastião, en el litoral norte de São Paulo. Se llega en balsa y casi todo pasa sobre una sola ruta asfaltada por el lado del canal; el lado del océano es parque estadual, con caminos de tierra y senderos.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Guarulhos",
+     "d": "No hay aeropuerto en la isla: se vuela a São Paulo-Guarulhos (GRU), se sigue por tierra hasta São Sebastião, a unos 180 km, y se cruza en balsa."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con cuatro o cinco días te da para las playas del canal, una cascada y un día entero en Castelhanos o el Bonete, que llevan muchas horas de ida y vuelta."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Si te quedás entre la Vila y el Perequê te movés en ómnibus o en aplicación. Para las playas del sur y del norte, el auto ayuda; a Castelhanos se va en 4x4 con agencia."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Ilhabela desde Montevideo",
+    "intro": "Hay vuelos directos de Montevideo a São Paulo-Guarulhos, de unas 2 h 40. Desde ahí se sigue por tierra hasta São Sebastião y se cruza en balsa.",
+    "items": [
+     {
+      "t": "Vuelo a Guarulhos (GRU)",
+      "d": "Es la opción más simple: vuelo directo desde Carrasco y después unos 180 km por ruta. Campinas (VCP) es otra opción, pero queda a unos 285 km de la isla."
+     },
+     {
+      "t": "De Guarulhos a São Sebastião en auto",
+      "d": "Unos 180 km, cerca de 3 horas: Rodovia Ayrton Senna y Carvalho Pinto hasta la Rodovia dos Tamoios, que baja la sierra hasta Caraguatatuba, y de ahí a São Sebastião. Hay peajes y, en feriados, mucho tránsito."
+     },
+     {
+      "t": "En ómnibus",
+      "d": "La Litorânea y su asociada Pássaro Marron salen del aeropuerto de Guarulhos y de la terminal Tietê hacia São Sebastião, en unas 4 horas. Paran cerca de la balsa, y se cruza a pie."
+     },
+     {
+      "t": "La balsa",
+      "d": "Sale de São Sebastião y llega a la Avenida Princesa Isabel, en Ilhabela. Funciona las 24 horas: de día sale según la demanda, con hasta 30 minutos entre una y otra, y de madrugada cada hora. El cruce dura 15 a 20 minutos. El auto paga solo a la ida; los peatones cruzan sin cargo por una fila aparte."
+     }
+    ],
+    "cierre": {
+     "t": "Hora Marcada",
+     "d": "Si cruzás en auto en verano o en un feriado, comprá el horario en el sistema Hora Marcada (horamarcada.dh.sp.gov.br). Cuesta bastante más que la tarifa común, pero te evita esperas de varias horas. Para ver la espera en el momento: 0800 77 33 711."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Ilhabela",
+    "intro": "Toda la parte habitada está sobre la costa del canal, a lo largo de una sola ruta. La elección es entre estar cerca de la Vila, de las playas del sur o de la tranquilidad del norte.",
+    "items": [
+     {
+      "t": "Vila (centro histórico)",
+      "d": "Para salir a cenar a pie y moverte sin auto: restaurantes, bares, heladerías y posadas boutique en casas antiguas. Las playas de la Vila son chicas."
+     },
+     {
+      "t": "Perequê y Barra Velha",
+      "d": "Entre la balsa y la Vila, con supermercados, farmacias y agencias de paseos. Práctico si no tenés auto; la zona de la balsa tiene mucho tránsito."
+     },
+     {
+      "t": "Sur: Feiticeira, Julião, Praia Grande y Curral",
+      "d": "Posadas más cuidadas y hoteles frente al mar, cerca de las playas con más movimiento y de las cascadas del sur. Conviene tener auto."
+     },
+     {
+      "t": "Norte: Siriúba, Viana y Armação",
+      "d": "Playas calmas y poco movimiento, con posadas chicas y casas de alquiler. Bueno para descansar o para los deportes de viento de la Armação."
+     },
+     {
+      "t": "Bonete y Castelhanos",
+      "d": "Del lado del océano solo hay posadas simples y campings de las comunidades caiçaras. Para dormir una o dos noches lejos de todo, sin ruta asfaltada."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Ilhabela",
+    "intro": "La única ruta asfaltada corre por el lado del canal, del Borrifos en el sur hasta la Ponta das Canas en el norte. Para el otro lado de la isla hace falta 4x4, barco o caminar.",
+    "items": [
+     {
+      "t": "Ómnibus",
+      "d": "La empresa Expresso Fênix recorre la ruta principal de sur a norte. Sirve para moverte entre las playas del canal; consultá los horarios en el lugar."
+     },
+     {
+      "t": "Aplicaciones y taxi",
+      "d": "Funcionan bien entre Barra Velha, el Perequê y la Vila. En los extremos hay pocos autos: acordá la vuelta con el chofer."
+     },
+     {
+      "t": "Bicicleta",
+      "d": "Entre la Vila y el Perequê hay ciclovía y es plano. Hacia el Jabaquara o el Borrifos hay subidas fuertes."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para las playas del sur y del norte y para los comienzos de los senderos. En verano los estacionamientos de las playas se llenan."
+     },
+     {
+      "t": "4x4 y barco",
+      "d": "La ruta de tierra a Castelhanos tiene control de acceso y un cupo diario de vehículos, y se hace con tracción 4x4; lo habitual es ir con agencia. Al Bonete, a Castelhanos y a las caletas del este también salen barcos y taxis náuticos."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Ilhabela de noche",
+    "intro": "La noche de la isla es tranquila y se concentra en dos lugares.",
+    "items": [
+     {
+      "t": "La Vila",
+      "d": "Restaurantes, bares, hamburgueserías y heladerías en las calles del centro histórico, para cenar y caminar. Los fines de semana de enero hay espera para conseguir mesa."
+     },
+     {
+      "t": "El Curral al atardecer",
+      "d": "Los bares sobre la arena tienen música y movimiento a la hora de la puesta del sol, sobre todo en temporada."
+     }
+    ],
+    "cierre": {
+     "t": "En temporada baja",
+     "d": "Muchos lugares cierran temprano o solo abren los fines de semana: confirmá el horario antes de salir."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Ilhabela",
+    "intro": "Es una isla tranquila. Los riesgos tienen más que ver con la naturaleza que con la ciudad.",
+    "bullets": [
+     "Hacé los senderos de día, con calzado cerrado, y salí del parque antes de que oscurezca.",
+     "En las cascadas no te metas al río si llueve fuerte en la sierra: el agua puede crecer de golpe.",
+     "Las playas del lado del océano, como el Bonete, tienen olas y no tienen guardavidas. Las del canal son calmas.",
+     "Con lluvia, los caminos de tierra a Castelhanos y al Jabaquara se ponen resbalosos y pueden cerrarse.",
+     "No dejes nada a la vista en el auto en los estacionamientos de playas y senderos.",
+     "El único hospital de la isla está en Barra Velha, cerca de la balsa. Si viajás con remedios de uso diario, llevá suficientes."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Efectivo",
+      "d": "La balsa no acepta tarjetas (solo efectivo o tag de peaje), y en Castelhanos y el Bonete conviene tener efectivo."
+     },
+     {
+      "t": "Internet y señal",
+      "d": "En la costa del océano (Castelhanos, Bonete) casi no hay señal de celular: bajá los mapas offline antes de salir."
+     },
+     {
+      "t": "Borrachudos",
+      "d": "El mosquito chico de la isla pica de día, sobre todo en senderos y cascadas en verano. Repelente fuerte y ropa de manga larga para el monte."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Repelente con icaridina, y mucho.",
+     "Zapatillas de trekking o con buena suela para senderos y piedras mojadas.",
+     "Máscara de snorkel.",
+     "Efectivo para la balsa, los kioscos y los barcos.",
+     "Campera liviana de lluvia: en verano llueve casi todas las tardes.",
+     "Botella de agua y algo para comer en los senderos largos."
+    ]
+   }
+  ]
  }
 }
