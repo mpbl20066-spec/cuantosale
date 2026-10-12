@@ -66,17 +66,17 @@
   .gm-card[data-accion="guias"] .gm-card__t b{padding-right:96px}
   .gm-badge{position:absolute;top:16px;right:16px;padding:5px 12px;border-radius:99px;background:var(--gm-y);color:#0F1B2D;font-size:12px;font-weight:800}
   .gm-nota{font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:15px;line-height:1.25;color:#fff;transform:rotate(-6deg)}
-  .gm-todas{margin-top:16px;padding:20px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:var(--gm-card);color:#fff}
-  .gm-todas h2{margin:0;font-family:var(--fh);font-size:18px;font-weight:800;color:#fff}
-  .gm-todas p{margin:6px 0 14px;font-size:14px;line-height:1.5;color:var(--gm-gris)}
-  .gm-todas ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px;margin:0;padding:0;list-style:none}
-  .gm-todas a{display:block;padding:7px 0;color:#fff;font-size:14px;text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:4px}
-  .gm-todas a:hover{text-decoration-color:var(--gm-y)}
-  .gm-todas a:focus-visible{outline:3px solid var(--gm-y);outline-offset:2px}
-  @media (min-width:768px){.gm-todas{padding:26px 28px}.gm-todas ul{grid-template-columns:repeat(4,minmax(0,1fr))}}
-  .gm-cierre{position:relative;display:flex;align-items:center;gap:18px;margin-top:16px;padding:22px 20px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:var(--gm-card);overflow:hidden}
-  .gm-cierre p{margin:0;position:relative;font-size:16px;line-height:1.45;color:#fff}
-  .gm-ola{position:absolute;right:0;bottom:0;width:42%;height:60%;opacity:.8}
+  /* final de la pagina: olas que se mueven y un sol que sube. Sin movimiento si el sistema pide reducirlo. */
+  .gm-fin{position:relative;height:150px;margin:34px -18px -28px;overflow:hidden}
+  .gm-fin svg{position:absolute;left:0;bottom:0;width:200%;height:70px}
+  .gm-fin .gm-sol{position:absolute;left:50%;bottom:30px;width:84px;height:84px;margin-left:-42px;border-radius:50%;background:radial-gradient(circle,#FFE27A 0 45%,#F5C518 46% 60%,rgba(245,197,24,.18) 61%);animation:gm-sol 6s ease-out both}
+  .gm-fin .gm-o1 path{fill:#2C4468}.gm-fin .gm-o2 path{fill:#1F4E86}.gm-fin .gm-o3 path{fill:#1A2B4A}
+  .gm-fin .gm-o1{animation:gm-ola 14s linear infinite;opacity:.55;bottom:18px}
+  .gm-fin .gm-o2{animation:gm-ola 9s linear infinite reverse;opacity:.8;bottom:6px}
+  .gm-fin .gm-o3{animation:gm-ola 6s linear infinite}
+  @keyframes gm-ola{to{transform:translateX(-50%)}}
+  @keyframes gm-sol{from{transform:translateY(70px)}to{transform:none}}
+  @media (prefers-reduced-motion:reduce){.gm-fin *{animation:none!important}}
   @media (min-width:768px){
     .gm{padding:36px 24px 44px}
     .gm-pin{width:56px;height:56px}.gm-pin svg{width:24px;height:30px}
@@ -95,9 +95,8 @@
     .gm-card[data-accion="guias"] .gm-card__t b{padding-right:0}
     .gm-card__t>span{font-size:16px}
     .gm-card__ilu{position:relative;flex:0 0 38%;display:block;align-self:stretch;min-height:110px}
-    .gm-cierre{margin-top:20px;padding:26px 28px}
-    .gm-cierre svg:first-child{width:64px;height:54px}
-    .gm-cierre p{font-size:17px}
+    .gm-fin{height:190px;margin:44px -24px -44px}
+    .gm-fin svg{height:90px}
   }
   /* ilustraciones: una guia abierta con la foto del Cristo, un corazon con flecha, un globo con avion */
   .gm-ilu-guia .gm-pag{position:absolute;bottom:-34px;width:118px;height:150px;border-radius:10px;background:#fff center/cover;box-shadow:0 8px 20px rgba(0,0,0,.35)}
@@ -108,9 +107,89 @@
   .gm-ilu-fav{align-items:center;gap:8px;justify-content:center}
   @media (min-width:768px){.gm-ilu-fav{display:flex}}
   .gm-corazon{display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff}
-  .gm-ilu-mundo .gm-globo{position:absolute;left:0;bottom:0}
-  .gm-ilu-mundo .gm-nota--m{position:absolute;right:28px;top:16px}
-  .gm-ilu-mundo .gm-rayas{position:absolute;right:0;top:44px}
+  /* buscador: el icono de la derecha abre los filtros por tipo de lugar; el numero dice si hay uno puesto */
+  .gm-bus__l{display:flex;color:#fff}
+  .gm-bus__f{position:relative;display:grid;place-items:center;width:40px;height:40px;margin:-8px -8px -8px 0;border:0;border-radius:10px;background:transparent;color:#fff}
+  .gm-bus__f[aria-expanded="true"]{background:rgba(255,255,255,.1);color:var(--gm-y)}
+  .gm-bus__n{position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:var(--gm-y)}
+  .gm-bus__n[hidden]{display:none}
+  .gm-bus__f:focus-visible,.gm-chip:focus-visible,.gm-fav:focus-visible,.gm-pin:focus-visible,.gm-mini:focus-visible{outline:3px solid var(--gm-y);outline-offset:2px}
+  .gm-fil{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .gm-fil[hidden]{display:none}
+  .gm-chip{padding:8px 14px;border:1px solid rgba(255,255,255,.18);border-radius:99px;background:transparent;color:#fff;font-size:14px;font-weight:700;white-space:nowrap}
+  .gm-chip[aria-pressed="true"]{background:var(--gm-y);border-color:var(--gm-y);color:#0F1B2D}
+  /* tarjeta de destino con corazon: el corazon es otro boton encima, no va adentro del boton de la tarjeta */
+  .gm-dw{position:relative;flex:0 0 150px;scroll-snap-align:start;display:flex}
+  .gm-dw .gm-dest{flex:1;width:100%}
+  .gm-fav{position:absolute;top:8px;right:8px;z-index:1;display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:rgba(10,16,26,.55);color:var(--gm-y)}
+  .gm-fav svg,.g-fav svg{color:inherit}
+  .gm-fav[aria-pressed="true"] path{fill:currentColor}
+  .gm-vacio{flex:1;margin:0;padding:18px 0;font-size:14px;line-height:1.5;color:var(--gm-gris)}
+  /* Cuando viajas: meses, mapa y recomendados */
+  .gm-mes{margin-top:26px;padding:20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:var(--gm-card);color:#fff}
+  .gm-mes__h h2{margin:0;font-family:var(--fh);font-size:20px;font-weight:800;color:#fff}
+  .gm-mes__h p{margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--gm-gris)}
+  .gm-meses{display:flex;gap:6px;margin:14px -20px 0;padding:0 20px 4px;overflow-x:auto;scrollbar-width:none}
+  .gm-meses::-webkit-scrollbar{display:none}
+  .gm-meses .gm-chip{flex:0 0 auto;padding:7px 12px}
+  .gm-mes__c{display:flex;flex-direction:column;gap:18px;margin-top:16px}
+  .gm-mapa{position:relative}
+  .gm-mapa svg{display:block;width:100%;max-width:420px;height:auto;margin:0 auto}
+  .gm-mapa__br{fill:#25406A;stroke:#3C5A88;stroke-width:1.2;stroke-linejoin:round}
+  .gm-mapa__uy{fill:#1F3352;stroke:#3C5A88;stroke-width:1;stroke-linejoin:round}
+  .gm-pin{cursor:pointer}
+  .gm-pin circle{fill:#7F8EA3;stroke:#0F1B2D;stroke-width:1.5;transition:r .15s}
+  .gm-pin.is-rec circle{fill:var(--gm-y)}
+  .gm-pin.is-off{display:none}
+  .gm-pin.is-sel circle{stroke:#fff;stroke-width:2.5}
+  .gm-pin:hover circle{stroke:#fff}
+  .gm-pin text{font:800 11px var(--fb);fill:#fff;paint-order:stroke;stroke:#0F1B2D;stroke-width:3px;pointer-events:none}
+  .gm-pin text.gm-pin__n{font:800 9.5px var(--fb);fill:#0F1B2D;stroke:none}
+  .gm-mini i{position:absolute;top:8px;left:8px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--gm-y);color:#0F1B2D;font:800 12px var(--fb);font-style:normal}
+  .gm-mvd circle{fill:#fff}
+  .gm-mvd text{font:700 10px var(--fb);fill:var(--gm-gris)}
+  .gm-ley{display:flex;justify-content:center;gap:16px;margin:8px 0 0;padding:0;list-style:none;font-size:12px;color:var(--gm-gris)}
+  .gm-ley li{display:flex;align-items:center;gap:6px}
+  .gm-ley i{width:10px;height:10px;border-radius:50%;background:#7F8EA3}
+  .gm-ley i.is-rec{background:var(--gm-y)}
+  .gm-sel{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px;border-radius:12px;background:rgba(255,255,255,.07)}
+  .gm-sel[hidden]{display:none}
+  .gm-sel__f{flex:0 0 64px;height:64px;border-radius:10px;background:#0F1B2D center/cover}
+  .gm-sel__t{flex:1;min-width:0;font-size:13px;line-height:1.4;color:var(--gm-gris)}
+  .gm-sel__t b{display:block;font-family:var(--fh);font-size:16px;color:#fff}
+  .gm-sel__t .gm-link{min-height:0;padding:6px 0 0;white-space:nowrap}
+  .gm-sel__t .gm-link svg,.gm-rec .gm-link svg{flex:0 0 14px;width:14px;height:14px}
+  .gm-sel .gm-fav{position:static;flex:0 0 auto;background:rgba(255,255,255,.1)}
+  .gm-rec h3{margin:0;font-family:var(--fh);font-size:16px;font-weight:800;color:#fff}
+  .gm-rec__l{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .gm-mini{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:110px;box-sizing:border-box;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:#0F1B2D center/cover no-repeat;color:#fff;text-align:left;overflow:hidden}
+  .gm-mini::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,0) 25%,rgba(10,16,26,.9))}
+  .gm-mini>*{position:relative}
+  .gm-mini b{font-size:14px;line-height:1.2}
+  .gm-mini small{margin-top:3px;font-size:11.5px;font-weight:700;color:#9FE3B4}
+  .gm-mini small.is-alta{color:#FFC48A}
+  .gm-rec .gm-link{margin-top:8px}
+  @media (min-width:768px){
+    .gm-mes{margin-top:34px;padding:28px}
+    .gm-mes__h h2{font-size:24px}
+    .gm-mes__h p{font-size:16px}
+    .gm-meses{flex-wrap:wrap;margin:16px 0 0;padding:0;overflow:visible}
+    .gm-mes__c{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px;align-items:start}
+    .gm-rec__l{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .gm-dw{flex:none}
+    .gm-pop__g.is-filtro{grid-template-columns:repeat(5,minmax(0,1fr))}
+  }
+  /* con un filtro puesto la grilla muestra todos los que coinciden, no una fila de 5 */
+  @media (max-width:767px){.gm-pop__g.is-filtro{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:14px 0 0;padding:0;overflow:visible}.gm-pop__g.is-filtro .gm-dest{height:140px}}
+  /* lista (pantalla 2 y favoritos): el corazon va dentro de la tarjeta, antes de la flecha. Amarillo en modo
+     oscuro, azul en modo claro; vacio si no esta guardado, lleno si esta. */
+  .g-fila{position:relative;display:flex}
+  .g-fila .g-dest{flex:1;min-width:0}
+  .g-fila .g-dest__t{margin-right:44px}
+  .g-fav{position:absolute;top:50%;right:34px;transform:translateY(-50%);display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--marca-navy,#0B2A55);cursor:pointer}
+  [data-theme="night"] .g-fav{color:#F7C325}
+  .g-fav[aria-pressed="true"] path{fill:currentColor}
+  .g-fav:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   /* en escritorio es una pagina, no un panel ni una tarjeta flotante */
   @media (min-width:1024px){
     html[data-pagina="guias"].cs-hdr .g-menu{position:fixed;inset:65px 0 0 0;left:0;top:65px;transform:none;width:auto;max-height:none;height:auto;border-radius:0;box-shadow:none;padding:0;justify-content:flex-start}
@@ -173,60 +252,70 @@
         <span class="gm-pin" aria-hidden="true"><svg width="26" height="32" viewBox="0 0 24 30"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="#0F1B2D"/><circle cx="12" cy="11.5" r="4.6" fill="#F5C518"/></svg></span>
         <div><h1>Destinos</h1><p>Encontrá tu próximo destino. Inspirate, explorá y empezá a planear tu viaje.</p></div>
       </header>
-      <label class="gm-bus" for="busmenu">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
-        <input id="busmenu" type="search" placeholder="Buscá por destino, país o ciudad..." autocomplete="off">
-        <svg class="gm-bus__f" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3 6h5M14 6h7M3 12h9M18 12h3M3 18h3M12 18h9"/><circle cx="11" cy="6" r="2.2"/><circle cx="15" cy="12" r="2.2"/><circle cx="9" cy="18" r="2.2"/></svg>
-      </label>
+      <div class="gm-bus">
+        <label for="busmenu" class="gm-bus__l"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg><span class="sr-only">Buscar destino</span></label>
+        <input id="busmenu" type="search" placeholder="Buscá por destino o estado..." autocomplete="off">
+        <button type="button" class="gm-bus__f" id="filtros" aria-expanded="false" aria-controls="gmFil" aria-label="Filtrar por tipo de lugar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3 6h5M14 6h7M3 12h9M18 12h3M3 18h3M12 18h9"/><circle cx="11" cy="6" r="2.2"/><circle cx="15" cy="12" r="2.2"/><circle cx="9" cy="18" r="2.2"/></svg><i class="gm-bus__n" id="filN" hidden></i></button>
+      </div>
+      <div class="gm-fil" id="gmFil" hidden role="group" aria-label="Tipo de lugar">
+        <button type="button" class="gm-chip" data-tipo="" aria-pressed="true">Todos</button>
+        <button type="button" class="gm-chip" data-tipo="beach" aria-pressed="false">Playa</button>
+        <button type="button" class="gm-chip" data-tipo="city" aria-pressed="false">Ciudad</button>
+        <button type="button" class="gm-chip" data-tipo="nature" aria-pressed="false">Sierra</button>
+      </div>
 
       <section class="gm-pop" aria-labelledby="gmPop">
         <div class="gm-pop__h">
-          <h2 id="gmPop"><svg width="24" height="28" viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1c1 4 6 7 6 13a6 6 0 0 1-12 0c0-2 1-3.5 2-4.5.2 1.5 1 2.5 2 3C10 8 10.5 4 12 1z" fill="#F5C518"/></svg>Destinos populares</h2>
+          <h2 id="gmPop"><svg width="24" height="28" viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1c1 4 6 7 6 13a6 6 0 0 1-12 0c0-2 1-3.5 2-4.5.2 1.5 1 2.5 2 3C10 8 10.5 4 12 1z" fill="#F5C518"/></svg><span id="gmPopT">Destinos populares</span></h2>
           <button type="button" class="gm-link" data-accion="guias" data-evento="guias_menu">Ver todos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
         </div>
-        <div class="gm-pop__g">
-          <button type="button" class="gm-dest" data-dest="rio" data-evento="guias_abrir" data-destino="rio" style="background-image:url(../fotos/rio.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Río de Janeiro</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
-          <button type="button" class="gm-dest" data-dest="fln" data-evento="guias_abrir" data-destino="fln" style="background-image:url(../fotos/fln.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Florianópolis</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
-          <button type="button" class="gm-dest" data-dest="buz" data-evento="guias_abrir" data-destino="buz" style="background-image:url(../fotos/buz.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Búzios</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
-          <button type="button" class="gm-dest" data-dest="ilha" data-evento="guias_abrir" data-destino="ilha" style="background-image:url(../fotos/ilha.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Ilha Grande</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
-          <button type="button" class="gm-dest" data-dest="maragogi" data-evento="guias_abrir" data-destino="maragogi" style="background-image:url(../fotos/maragogi.jpg)"><span><svg width="16" height="18" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 24s8-6.5 8-13a8 8 0 1 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="11" r="2.8"/></svg>Maragogi</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+        <div class="gm-pop__g" id="gmGrid" aria-live="polite"></div>
+      </section>
+
+      <!-- Mapa de Brasil + recomendados por mes. Los meses salen de la temporada de cada guia (destinos-datos.js). -->
+      <section class="gm-mes" aria-labelledby="gmMesT">
+        <div class="gm-mes__h">
+          <h2 id="gmMesT">¿Cuándo viajás?</h2>
+          <p>Elegí el mes y te mostramos los destinos que están mejor para ir.</p>
+        </div>
+        <div class="gm-meses" id="gmMeses" role="group" aria-label="Mes del viaje"></div>
+        <div class="gm-mes__c">
+          <div class="gm-mapa">
+            <svg id="gmMapa" viewBox="-6 -6 396 420" role="group" aria-label="Mapa de Brasil con los destinos">
+              <path class="gm-mapa__br" d="M160.1 358.2L173.0 344.5L183.9 334.8L190.4 330.7L198.5 325.2L198.7 317.2L193.9 311.5L189.1 313.4L191.0 307.6L192.3 301.7L192.3 296.2L188.8 294.4L185.2 296.0L181.6 295.6L180.5 291.7L179.6 282.6L177.8 279.6L171.2 276.9L167.3 278.8L157.1 276.9L157.7 263.3L154.9 257.8L157.9 255.7L157.0 250.0L159.6 245.6L161.3 237.7L159.0 231.5L153.8 228.7L152.7 224.8L154.1 219.0L135.6 218.6L131.9 206.9L134.7 206.8L134.6 202.5L132.7 199.5L132.3 193.8L126.7 190.8L120.6 190.9L116.6 188.0L110.1 186.0L106.3 182.3L95.5 180.6L85.0 171.7L85.8 165.0L84.6 161.1L85.6 153.6L73.0 155.3L67.9 159.1L59.4 163.1L57.3 166.1L52.3 166.4L45.1 165.5L39.7 167.2L35.3 166.1L35.9 150.9L28.0 156.8L19.5 156.5L15.8 151.2L9.4 150.6L11.4 146.3L6.1 140.2L2.1 131.2L4.6 129.4L4.6 125.2L10.4 122.3L9.5 116.9L11.9 113.4L12.6 108.7L23.7 101.9L31.6 100.0L32.9 98.5L41.6 99.0L45.9 71.6L46.2 67.2L44.7 61.5L40.4 57.9L40.4 50.6L45.9 48.9L47.8 50.0L48.1 46.1L42.5 45.1L42.3 38.9L61.2 39.1L64.4 35.6L67.0 38.8L68.9 44.7L70.7 43.5L76.1 48.8L83.6 48.1L85.4 45.0L92.6 42.7L96.6 41.1L97.7 36.8L104.6 34.0L104.1 31.9L95.9 31.0L94.6 24.7L95.0 18.0L90.6 15.4L92.5 14.5L99.6 15.8L107.3 18.3L110.1 15.9L117.0 14.4L127.8 10.6L131.4 6.8L130.1 4.0L135.1 3.6L137.3 5.9L136.1 10.3L139.4 11.8L141.6 16.4L138.9 19.9L137.4 28.4L139.9 33.5L140.6 38.1L146.5 42.8L151.3 43.3L152.3 41.4L155.4 40.9L159.8 39.2L162.9 36.5L168.2 37.4L170.6 37.0L175.8 37.8L176.7 35.8L175.1 33.8L176.1 30.9L180.0 31.8L184.5 30.8L190.0 32.9L194.3 34.9L197.3 32.2L199.4 32.7L200.7 35.5L205.4 34.8L209.1 31.0L212.0 23.6L217.7 14.4L221.0 14.0L223.4 19.5L228.8 37.0L234.0 38.6L234.3 45.5L227.0 53.8L230.0 56.8L247.1 58.4L247.4 68.4L254.8 61.8L266.9 65.4L283.0 71.5L287.7 77.4L286.1 82.9L297.3 79.8L316.1 85.1L330.6 84.7L344.8 93.0L357.2 104.2L364.6 107.1L372.9 107.5L376.4 110.6L379.6 123.4L381.3 129.4L377.4 146.0L372.5 152.5L358.9 166.4L352.7 177.7L345.6 186.4L343.2 186.6L340.5 193.9L341.1 212.7L338.4 228.1L337.4 234.7L334.4 238.6L332.7 252.0L322.9 265.0L321.2 275.4L313.4 279.7L311.1 285.7L300.6 285.7L285.5 289.5L278.6 294.0L267.8 296.9L256.5 304.9L248.3 314.8L246.9 322.2L248.5 327.8L246.7 337.9L244.5 342.7L237.7 348.2L227.0 365.8L218.5 373.8L212.0 378.5L207.6 388.0L201.2 393.7L198.5 388.0L202.8 383.3L197.2 376.5L189.6 370.9L179.6 364.5L176.1 364.8L166.4 357.1L160.1 358.2Z"/>
+              <path class="gm-mapa__uy" d="M160.1 358.2L166.4 357.1L176.1 364.8L179.6 364.5L189.6 370.9L197.2 376.5L202.8 383.3L198.5 388.0L201.2 393.7L197.0 400.0L186.1 405.5L178.9 403.5L173.7 404.6L164.8 400.3L158.2 400.6L152.4 395.1L153.1 388.6L155.2 386.4L155.1 376.4L157.7 366.2L160.1 358.2Z"/>
+              <g id="gmPins"></g>
+            </svg>
+            <ul class="gm-ley" aria-hidden="true"><li><i class="is-rec"></i>Los mejores del mes</li><li><i></i>Otros destinos</li></ul>
+            <div class="gm-sel" id="gmSel" hidden></div>
+          </div>
+          <div class="gm-rec">
+            <h3 id="gmRecT"></h3>
+            <div class="gm-rec__l" id="gmRec"></div>
+            <button type="button" class="gm-link" id="gmRecMas" hidden></button>
+          </div>
         </div>
       </section>
 
-      <button type="button" class="gm-card" data-accion="guias" data-evento="guias_menu" data_accion="guias">
+      <button type="button" class="gm-card" data-accion="guias" data-evento="guias_menu">
         <span class="gm-card__i"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-2.5 6 2.5 6-2.5v14.5L15 20.5 9 18l-6 2.5z"/><path d="M9 3.5V18M15 6v14.5"/></svg></span>
         <span class="gm-card__t"><b>Guías de viaje</b><span>Todo lo que necesitás saber de cada destino: playas, comida, actividades, transporte y consejos prácticos.</span><em>Ver guías <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
         <span class="gm-card__ilu gm-ilu-guia" aria-hidden="true"><i class="gm-pag gm-pag--b"></i><i class="gm-pag gm-pag--a" style="background-image:url(../fotos/rio.jpg)"></i><span class="gm-nota">Guías completas<br>de cada destino</span><svg class="gm-flecha" width="46" height="30" viewBox="0 0 46 30" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M40 4c-2 12-14 20-32 21M8 25l8-6M8 25l9 3"/></svg></span>
         <span class="gm-badge">40 destinos</span>
       </button>
 
-      <button type="button" class="gm-card" data-accion="favoritos" data-evento="guias_menu" data_accion="favoritos">
+      <button type="button" class="gm-card" data-accion="favoritos" data-evento="guias_menu">
         <span class="gm-card__i"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg></span>
-        <span class="gm-card__t"><b>Mis favoritos</b><span>Guardá tus destinos preferidos para encontrarlos más rápido.</span><em>Ver favoritos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
+        <span class="gm-card__t"><b>Mis favoritos</b><span id="gmFavTxt">Tocá el corazón de cualquier destino para guardarlo acá.</span><em>Ver favoritos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
         <span class="gm-card__ilu gm-ilu-fav" aria-hidden="true"><span class="gm-corazon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg></span><svg width="34" height="26" viewBox="0 0 34 26" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M32 6c-8-4-16-1-24 6M8 12l1-8M8 12l8 2"/></svg><span class="gm-nota">Tus destinos<br>favoritos en un solo lugar</span></span>
       </button>
 
-      <button type="button" class="gm-card" data-accion="explorar" data-evento="guias_menu" data_accion="explorar">
-        <span class="gm-card__i"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span>
-        <span class="gm-card__t"><b>Explorar destinos</b><span>Buscá por país, ciudad o tipo de viaje y encontrá el lugar perfecto para vos.</span><em>Explorar destinos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
-        <span class="gm-card__ilu gm-ilu-mundo" aria-hidden="true">
-          <svg class="gm-globo" width="230" height="150" viewBox="0 0 230 150"><defs><radialGradient id="gmG" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#4FA3E8"/><stop offset="1" stop-color="#123A6B"/></radialGradient><clipPath id="gmC"><circle cx="130" cy="112" r="70"/></clipPath></defs><circle cx="130" cy="112" r="70" fill="url(#gmG)"/><g clip-path="url(#gmC)" fill="#4E9B52"><path d="M84 78c16-9 34-7 46 5 9 9 5 23-7 30-14 7-25 21-39 12-9-7-12-30 0-47z"/><path d="M142 106c11-5 25 2 30 13s-7 25-16 18-18-27-14-31z"/></g><path d="M6 82C20 44 62 24 106 30" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="4 5" stroke-linecap="round"/><path d="m118 22 34-5-9 9 20 3-7 4-23 0-7 11-5-2 3-11-11-5z" fill="#F5C518" transform="rotate(-12 135 26)"/></svg>
-          <span class="gm-nota gm-nota--m">El mundo<br>te espera</span><svg class="gm-rayas" width="26" height="30" viewBox="0 0 26 30" stroke="#F5C518" stroke-width="2.4" stroke-linecap="round"><path d="M4 4l10 2M10 20l4-8M16 26l8-6"/></svg>
-        </span>
-      </button>
-
-      <!-- Enlaces reales a /destino/<slug> (las guias publicas que indexa Google). El server pone la lista. -->
-      <section class="gm-todas" aria-labelledby="gmTodas">
-        <h2 id="gmTodas">Guía completa de cada destino</h2>
-        <p>Playas, qué hacer, dónde comer y cuándo ir, todo en una página.</p>
-        <ul><!--CS_ENLACES_DESTINOS--></ul>
-      </section>
-
-      <section class="gm-cierre">
-        <svg width="56" height="48" viewBox="0 0 56 48" fill="none" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M14 30a14 14 0 0 1 28 0M28 6v6M10 12l4 4M46 12l-4 4M2 24h6M48 24h6M6 36c6-4 8 4 14 0s8 4 14 0 8 4 14 0"/></svg>
-        <p><b>Los mejores viajes<br>comienzan con una buena idea.</b></p>
-        <svg class="gm-ola" viewBox="0 0 300 40" preserveAspectRatio="none" fill="none" stroke="#2C4468" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M0 30c30-16 54-18 84-6s54 6 84-6 54-14 84-4 38 6 48 0"/></svg>
-      </section>
+      <div class="gm-fin" aria-hidden="true">
+        <span class="gm-sol"></span>
+        <svg class="gm-o1" viewBox="0 0 800 60" preserveAspectRatio="none"><path d="M0 30 Q 50 10 100 30 T 200 30 T 300 30 T 400 30 T 500 30 T 600 30 T 700 30 T 800 30 V 60 H 0 Z"/></svg>
+        <svg class="gm-o2" viewBox="0 0 800 60" preserveAspectRatio="none"><path d="M0 30 Q 50 10 100 30 T 200 30 T 300 30 T 400 30 T 500 30 T 600 30 T 700 30 T 800 30 V 60 H 0 Z"/></svg>
+        <svg class="gm-o3" viewBox="0 0 800 60" preserveAspectRatio="none"><path d="M0 30 Q 50 10 100 30 T 200 30 T 300 30 T 400 30 T 500 30 T 600 30 T 700 30 T 800 30 V 60 H 0 Z"/></svg>
+      </div>
     </div>
   </div>
 </div>
@@ -240,48 +329,236 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var ic = function (p, s) { return '<svg width="' + (s || 22) + '" height="' + (s || 22) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>'; };
   var I = { lupa: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>', chev: '<path d="m9 5 7 7-7 7"/>',
-    libro: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v16H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v4H6.5A2.5 2.5 0 0 1 4 20.5z"/>',
-    corazon: '<path d="M6 3h12v18l-6-4.5L6 21z"/>' };
-  var S = { pant: 1, q: '' };
+    pin: '<path d="M12 22s7-5.7 7-11.4a7 7 0 1 0-14 0C5 16.3 12 22 12 22z"/><circle cx="12" cy="10.5" r="2.5"/>',
+    corazon: '<path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/>' };
+  var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  /* pant: 1 menu, 2 lista de guias, 3 favoritos */
+  var S = { pant: 1, q: '', tipo: '', mes: new Date().getMonth() + 1, sel: '', recTodos: false };
+  var DESTS = (window.CS_DESTS || []).filter(function (d) { return d.meses; }), POR = {};
+  DESTS.forEach(function (d) { POR[d.k] = d; });
+  /* Los cinco de siempre, y en el mismo orden. Tambien desempatan los recomendados del mes: primero los mas elegidos. */
+  var POPULARES = ['rio', 'fln', 'buz', 'ilha', 'maragogi'];
   /* Las claves son las del modelo (viaje-datos.js), ordenadas por nombre para que la
      lista se lea como un indice y no como la tabla del modelo. */
   var CLAVES = Object.keys(C.Nombres).sort(function (a, b) { return C.Nombres[a].localeCompare(C.Nombres[b], 'es'); });
   var track = function (n, p) { window.mockTrack(n, Object.assign({ pantalla: S.pant }, p || {})); };
+  var foto = function (k) { return '../fotos/' + k + '.jpg'; };
+  var sinTilde = function (s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); };
+  var enMes = function (d) { return d.meses.indexOf(S.mes) >= 0; };
+  var esAlta = function (d) { return d.alta.indexOf(S.mes) >= 0; };
 
-  function menu() { $('menu').hidden = false; }
+  /* ---- favoritos: en este navegador (localStorage). Si no deja guardar, duran lo que dura la pagina. */
+  var FAV_KEY = 'cs_favoritos', favs = [];
+  try { favs = JSON.parse(localStorage.getItem(FAV_KEY) || '[]').filter(function (k) { return C.Nombres[k]; }); } catch (e) { favs = []; }
+  var esFav = function (k) { return favs.indexOf(k) >= 0; };
+  function alternarFav(k) {
+    if (esFav(k)) favs = favs.filter(function (x) { return x !== k; }); else favs.push(k);
+    try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch (e) { /* sin almacenamiento */ }
+    track(esFav(k) ? 'guias_fav_agregar' : 'guias_fav_quitar', { destino: k });
+  }
+  function botonFav(k, clase) {
+    var on = esFav(k), n = C.Nombres[k] || k;
+    return '<button type="button" class="' + clase + '" data-fav="' + k + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Quitar ' : 'Guardar ') + esc(n) + (on ? ' de favoritos' : ' en favoritos') + '">' + ic(I.corazon, 18).replace('<svg', '<svg class="cs-keep"') + '</button>';
+  }
+
+  /* ---- filtro del buscador (texto + tipo de lugar): vale para la grilla, el mapa y los recomendados del mes */
+  function coincide(d) {
+    if (S.tipo && d.group !== S.tipo) return false;
+    if (!S.q) return true;
+    var q = sinTilde(S.q);
+    return sinTilde(d.name).indexOf(q) >= 0 || sinTilde(d.region).indexOf(q) >= 0;
+  }
+  var hayFiltro = function () { return !!(S.q || S.tipo); };
+
+  function tarjeta(k) {
+    return '<div class="gm-dw"><button type="button" class="gm-dest" data-dest="' + k + '" style="background-image:url(' + foto(k) + ')"><span>' + ic(I.pin, 16) + esc(C.Nombres[k]) + '</span>' + ic(I.chev, 16) + '</button>' + botonFav(k, 'gm-fav') + '</div>';
+  }
+  function grilla() {
+    var g = $('gmGrid'), l;
+    if (hayFiltro()) {
+      l = CLAVES.filter(function (k) { return POR[k] && coincide(POR[k]); });
+      $('gmPopT').textContent = l.length === 1 ? '1 destino' : l.length + ' destinos';
+    } else {
+      l = POPULARES; $('gmPopT').textContent = 'Destinos populares';
+    }
+    g.classList.toggle('is-filtro', hayFiltro());
+    g.innerHTML = l.length ? l.map(tarjeta).join('') : '<p class="gm-vacio">No encontramos destinos con ese nombre. Probá con otro, o con el estado (Bahía, Santa Catarina...).</p>';
+  }
+
+  /* ---- mapa: misma proyeccion que el contorno (equirectangular, 10 px por grado, corregida por cos 15°) */
+  var K = Math.cos(15 * Math.PI / 180);
+  var xy = function (lat, lon) { return [(lon + 74.2) * K * 10, (5.6 - lat) * 10]; };
+  /* Los 5 mejores de cada mes, elegidos a mano y en este orden. Los que no estan entre los 40 destinos (Guarapari,
+     Vitoria, Sao Luis, Barreirinhas, Canoa Quebrada, Sao Miguel do Gostoso, Sao Miguel dos Milagres, Praia dos
+     Carneiros) se cambiaron por el destino mas parecido de esa epoca que si tiene guia. */
+  var TOP_MES = {
+    1: ['fln', 'bombinhas', 'bcm', 'buz', 'arraial'],
+    2: ['buz', 'arraial', 'rio', 'ilha', 'cabo'],
+    3: ['fln', 'bombinhas', 'rosa', 'buz', 'paraty'],
+    4: ['buz', 'paraty', 'ilha', 'rio', 'angra'],
+    5: ['buz', 'arraial', 'cabo', 'rio', 'angra'],
+    6: ['for', 'jericoacoara', 'gram', 'canela', 'rio'],
+    7: ['jericoacoara', 'for', 'gram', 'nat', 'pip'],
+    8: ['jericoacoara', 'for', 'pip', 'nat', 'joaopessoa'],
+    9: ['pip', 'nat', 'joaopessoa', 'rec', 'porto'],
+    10: ['mcz', 'maragogi', 'porto', 'joaopessoa', 'fernando'],
+    11: ['porto', 'mcz', 'maragogi', 'pip', 'fernando'],
+    12: ['mcz', 'maragogi', 'porto', 'fln', 'trancoso']
+  };
+  var esTop = function (d) { return (TOP_MES[S.mes] || []).indexOf(d.k) >= 0; };
+  /* primero los 5 del mes; despues ("Ver mas") los demas que ese mes tambien convienen segun la temporada de su guia:
+     los que no estan en temporada alta (buen clima y menos gente), despues los mas elegidos */
+  function recomendados() {
+    var top = (TOP_MES[S.mes] || []).map(function (k) { return POR[k]; }).filter(function (d) { return d && coincide(d); });
+    var resto = DESTS.filter(function (d) { return enMes(d) && !esTop(d) && coincide(d); }).sort(function (a, b) {
+      if (esAlta(a) !== esAlta(b)) return esAlta(a) ? 1 : -1;
+      var pa = POPULARES.indexOf(a.k), pb = POPULARES.indexOf(b.k);
+      if (pa !== pb) return (pa < 0 ? 99 : pa) - (pb < 0 ? 99 : pb);
+      return a.name.localeCompare(b.name, 'es');
+    });
+    return top.concat(resto);
+  }
+  /* [12,1,2,3] -> "diciembre a marzo"; [1,2,7,8] -> "enero a febrero y julio a agosto" */
+  function rangos(ms) {
+    if (!ms.length) return 'otra época';
+    if (ms.length === 12) return 'cualquier mes';
+    var set = {}, tramos = [], ini = 1, i;
+    ms.forEach(function (m) { set[m] = 1; });
+    while (set[ini] && set[ini === 1 ? 12 : ini - 1]) ini++;   // arrancar donde empieza un tramo
+    for (i = 0; i < 12; i++) {
+      var m = ((ini - 1 + i) % 12) + 1, prev = m === 1 ? 12 : m - 1;
+      if (!set[m]) continue;
+      if (tramos.length && tramos[tramos.length - 1].fin === prev) tramos[tramos.length - 1].fin = m; else tramos.push({ ini: m, fin: m });
+    }
+    var t = tramos.map(function (r) { return r.ini === r.fin ? MESES[r.ini - 1] : MESES[r.ini - 1] + ' a ' + MESES[r.fin - 1]; });
+    return t.length > 1 ? t.slice(0, -1).join(', ') + ' y ' + t[t.length - 1] : t[0];
+  }
+  var REC_MAX = 5;
+  /* Los recomendados que se ven en la lista, en orden: el numero del pin es el de la tarjeta. */
+  function visibles() { var l = recomendados(); return S.recTodos ? l : l.slice(0, REC_MAX); }
+  function mapa() {
+    var num = {};
+    visibles().forEach(function (d, i) { num[d.k] = i + 1; });
+    var m = xy(-34.88, -56.18);
+    var h = '<g class="gm-mvd" aria-hidden="true"><circle cx="' + m[0].toFixed(1) + '" cy="' + m[1].toFixed(1) + '" r="3"/><text x="' + (m[0] + 6).toFixed(1) + '" y="' + (m[1] + 4).toFixed(1) + '">Montevideo</text></g>';
+    /* los recomendados y el elegido se dibujan al final para que queden arriba de los grises */
+    var orden = DESTS.filter(function (d) { return d.lat != null; }).sort(function (a, b) { return (!!num[a.k] - !!num[b.k]) || ((num[b.k] || 0) - (num[a.k] || 0)) || ((a.k === S.sel) - (b.k === S.sel)); });
+    h += orden.map(function (d) {
+      var p = xy(d.lat, d.lon), n = num[d.k], rec = !!n, sel = d.k === S.sel, izq = p[0] > 300;
+      var cls = 'gm-pin' + (rec ? ' is-rec' : '') + (sel ? ' is-sel' : '') + (coincide(d) ? '' : ' is-off');
+      return '<g class="' + cls + '" data-pin="' + d.k + '" tabindex="' + (coincide(d) ? 0 : -1) + '" role="button" aria-label="' + esc(d.name) + (rec ? ', número ' + n + ' de los recomendados de ' + MESES[S.mes - 1] : '') + '">' +
+        '<title>' + esc(d.name) + '</title><circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (rec ? 8 : sel ? 7 : 4.5) + '"/>' +
+        (rec ? '<text class="gm-pin__n" x="' + p[0].toFixed(1) + '" y="' + (p[1] + 3.4).toFixed(1) + '" text-anchor="middle">' + n + '</text>' : '') +
+        (sel ? '<text x="' + (p[0] + (izq ? -11 : 11)).toFixed(1) + '" y="' + (p[1] + 4).toFixed(1) + '"' + (izq ? ' text-anchor="end"' : '') + '>' + esc(d.name) + '</text>' : '') + '</g>';
+    }).join('');
+    $('gmPins').innerHTML = h;
+    var d = POR[S.sel], box = $('gmSel');
+    if (!d) { box.hidden = true; return; }
+    var txt = esTop(d) ? 'Uno de los mejores para ir en ' + MESES[S.mes - 1] + '.' + (esAlta(d) ? ' Es temporada alta: más gente y precios más altos.' : '')
+      : enMes(d) ? (esAlta(d) ? 'Buen mes para ir, pero es temporada alta: más gente y precios más altos.' : 'Buen mes para ir: buen clima y menos gente.')
+      : 'En ' + MESES[S.mes - 1] + ' no es lo ideal. Mejor de ' + rangos(d.meses) + '.';
+    box.hidden = false;
+    box.innerHTML = '<span class="gm-sel__f" style="background-image:url(' + foto(d.k) + ')" aria-hidden="true"></span>' +
+      '<span class="gm-sel__t"><b>' + esc(d.name) + '</b>' + esc(d.region) + ' · ' + esc(txt) +
+      '<br><button type="button" class="gm-link" data-dest="' + d.k + '">Ver guía ' + ic(I.chev, 14) + '</button></span>' + botonFav(d.k, 'gm-fav');
+  }
+  function meses() {
+    $('gmMeses').innerHTML = MESES.map(function (n, i) {
+      return '<button type="button" class="gm-chip" data-mes="' + (i + 1) + '" aria-pressed="' + (S.mes === i + 1) + '" aria-label="' + n + '">' + n.charAt(0).toUpperCase() + n.slice(1, 3) + '</button>';
+    }).join('');
+  }
+  function listaMes() {
+    var l = recomendados(), v = visibles();
+    $('gmRecT').textContent = 'Los mejores para ir en ' + MESES[S.mes - 1];
+    $('gmRec').innerHTML = l.length ? v.map(function (d, i) {
+      return '<button type="button" class="gm-mini" data-dest="' + d.k + '" style="background-image:url(' + foto(d.k) + ')"><i aria-hidden="true">' + (i + 1) + '</i><b>' + esc(d.name) + '</b>' +
+        (esAlta(d) ? '<small class="is-alta">Temporada alta</small>' : '<small>Buen clima, menos gente</small>') + '</button>';
+    }).join('') : '<p class="gm-vacio">' + (hayFiltro() ? 'Ninguno de los destinos que buscaste conviene en ' + MESES[S.mes - 1] + '. Probá con otro mes.' : 'No hay destinos recomendados para este mes.') + '</p>';
+    var mas = $('gmRecMas');
+    mas.hidden = l.length <= REC_MAX;
+    mas.innerHTML = (S.recTodos ? 'Ver menos' : 'Ver más') + ' ' + ic(I.chev, 14);
+  }
+  function favTxt() {
+    $('gmFavTxt').textContent = favs.length ? (favs.length === 1 ? 'Tenés 1 destino guardado: ' : 'Tenés ' + favs.length + ' destinos guardados: ') + favs.slice(0, 3).map(function (k) { return C.Nombres[k]; }).join(', ') + (favs.length > 3 ? '...' : '.')
+      : 'Tocá el corazón de cualquier destino para guardarlo acá.';
+  }
+  function filtrosUI() {
+    [].forEach.call(document.querySelectorAll('#gmFil .gm-chip'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.tipo === S.tipo)); });
+    $('filN').hidden = !S.tipo;
+  }
+  function menu() { $('menu').hidden = false; grilla(); meses(); mapa(); listaMes(); favTxt(); filtrosUI(); }
+
   function lista() {
     $('menu').hidden = true;
-    var q = S.q.toLowerCase();
-    var l = CLAVES.filter(function (k) { return !q || C.Nombres[k].toLowerCase().indexOf(q) >= 0; });
-    $('main').innerHTML = '<h1 class="g-tit">Guías de viaje</h1>' +
-      '<p class="g-sub">Qué hacer, dónde comer y los tips que ahorran plata.<br>Elegí un destino y leé la guía antes de armarte el viaje.</p>' +
-      '<label class="g-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="Buscar destino…" value="' + esc(S.q) + '" autocomplete="off"></label>' +
+    var fav = S.pant === 3, q = sinTilde(S.q);
+    var l = fav ? CLAVES.filter(esFav) : CLAVES.filter(function (k) { return !q || sinTilde(C.Nombres[k]).indexOf(q) >= 0; });
+    $('main').innerHTML = (fav ? '<h1 class="g-tit">Mis favoritos</h1><p class="g-sub">Los destinos que guardaste en este navegador.</p>'
+      : '<h1 class="g-tit">Guías de viaje</h1>' +
+        '<p class="g-sub">Qué hacer, dónde comer y los tips que ahorran plata.<br>Elegí un destino y leé la guía antes de armarte el viaje.</p>' +
+        '<label class="g-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="Buscar destino…" value="' + esc(S.q) + '" autocomplete="off"></label>') +
       (l.length ? '<div class="g-lista">' + l.map(function (k) {
-        return '<button type="button" class="g-dest" data-dest="' + k + '" data-evento="guias_abrir" data-destino="' + k + '">' +
-          '<span class="g-dest__f" style="background-image:url(../fotos/' + k + '.jpg)" aria-hidden="true"></span>' +
+        return '<div class="g-fila"><button type="button" class="g-dest" data-dest="' + k + '">' +
+          '<span class="g-dest__f" style="background-image:url(' + foto(k) + ')" aria-hidden="true"></span>' +
           '<span class="g-dest__t"><b>' + esc(C.Nombres[k]) + '</b><small>Guía de viaje</small></span>' +
-          ic(I.chev, 16) + '</button>';
-      }).join('') + '</div>' : '<p class="g-vacio">No encontramos ese destino.<br>Probá con otro nombre.</p>');
+          ic(I.chev, 16) + '</button>' + botonFav(k, 'g-fav') + '</div>';
+      }).join('') + '</div>' : fav ? '<p class="g-vacio">Todavía no guardaste destinos.<br>Tocá el corazón en cualquier destino y aparece acá.</p>'
+        : '<p class="g-vacio">No encontramos ese destino.<br>Probá con otro nombre.</p>');
   }
   function pintar() { if (S.pant === 1) menu(); else lista(); }
 
+  function pinCercano(svg, cx, cy) {
+    var m = svg.getScreenCTM(); if (!m) return '';
+    var pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy; pt = pt.matrixTransform(m.inverse());
+    var mejor = '', dmin = 22 * 22;   // hasta 22 unidades del mapa (unos 2 grados)
+    DESTS.forEach(function (d) {
+      if (d.lat == null || !coincide(d)) return;
+      var p = xy(d.lat, d.lon), dd = (p[0] - pt.x) * (p[0] - pt.x) + (p[1] - pt.y) * (p[1] - pt.y);
+      if (dd < dmin) { dmin = dd; mejor = d.k; }
+    });
+    return mejor;
+  }
+  function elegirPin(k) {
+    S.sel = S.sel === k ? '' : k;
+    if (S.sel) track('guias_mapa_pin', { destino: k, mes: S.mes });
+    mapa();
+  }
   document.addEventListener('click', function (e) {
+    /* en el mapa gana el destino mas cerca del toque, no el punto que quedo dibujado arriba: en Santa Catarina y
+       en la costa de Rio hay varios pegados y con el dedo se elegia el vecino */
+    var svg = e.target.closest('#gmMapa');
+    if (svg) { var k = pinCercano(svg, e.clientX, e.clientY); if (k) elegirPin(k); return; }
     var t = e.target.closest('button'); if (!t) return;
-    if (t.id === 'atras') { location.href = 'home-dos-caminos.html' + (debug ? '?debug=1' : ''); return; }
-    if (t.dataset.accion) {
-      if (t.dataset.accion === 'guias') { S.pant = 2; track('guias_ver_lista'); pintar(); $('bus').focus(); return; }
-      /* "Mis favoritos" y "Explorar destinos" todavia no tienen destino propio: el
-         menu no trae a la nada, avisamos y dejamos al usuario en la lista. */
-      window.mockTrack('guias_menu_sin_pantalla', { accion: t.dataset.accion });
-      S.pant = 2; pintar();
+    if (t.id === 'atras') {
+      if (S.pant !== 1) { S.pant = 1; pintar(); return; }
+      location.href = 'home-dos-caminos.html' + (debug ? '?debug=1' : ''); return;
+    }
+    if (t.dataset.fav) {
+      var k = t.dataset.fav, zona = t.closest('#gmGrid') ? 'gmGrid' : t.closest('#gmSel') ? 'gmSel' : 'main';
+      alternarFav(k);
+      if (S.pant === 1) { grilla(); mapa(); favTxt(); } else lista();
+      /* repintar cambia el boton: el foco vuelve al mismo corazon */
+      var nb = $(zona) && $(zona).querySelector('[data-fav="' + k + '"]'); if (nb) nb.focus();
       return;
     }
+    if (t.id === 'filtros') { var abrir = $('gmFil').hidden; $('gmFil').hidden = !abrir; t.setAttribute('aria-expanded', String(abrir)); return; }
+    if (t.dataset.tipo != null) { S.tipo = t.dataset.tipo; track('guias_filtro_tipo', { tipo: S.tipo || 'todos' }); filtrosUI(); grilla(); mapa(); listaMes(); return; }
+    if (t.dataset.mes) { S.mes = +t.dataset.mes; S.recTodos = false; track('guias_mes', { mes: S.mes }); meses(); mapa(); listaMes(); return; }
+    if (t.id === 'gmRecMas') { S.recTodos = !S.recTodos; listaMes(); mapa(); return; }
+    if (t.dataset.accion === 'guias') { S.pant = 2; track('guias_ver_lista'); pintar(); $('bus').focus(); return; }
+    if (t.dataset.accion === 'favoritos') { S.pant = 3; track('guias_ver_favoritos', { cantidad: favs.length }); pintar(); return; }
     if (t.dataset.dest) { track('guias_abrir', { destino: t.dataset.dest }); location.href = 'home-guia.html?destino=' + t.dataset.dest + (debug ? '&debug=1' : ''); }
+  });
+  document.addEventListener('keydown', function (e) {
+    var pin = e.target.closest && e.target.closest('[data-pin]');
+    if (pin && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); var k = pin.dataset.pin; elegirPin(k); var np = $('gmPins').querySelector('[data-pin="' + k + '"]'); if (np) np.focus(); }
   });
   document.addEventListener('input', function (e) {
     if (e.target.id === 'bus') { S.q = e.target.value.trim(); lista(); var b = $('bus'); if (b) { var c = e.target.selectionStart; b.focus(); try { b.setSelectionRange(c, c); } catch (x) { /* no todos dejan */ } } }
+    /* el buscador del menu filtra mientras se escribe: la grilla de fotos, el mapa y los recomendados del mes */
+    if (e.target.id === 'busmenu') { S.q = e.target.value.trim(); grilla(); mapa(); listaMes(); }
   });
-  $('busmenu').addEventListener('keydown', function (e) { if (e.key === 'Enter') { S.q = e.target.value.trim(); S.pant = 2; track('guias_buscar'); pintar(); $('bus').focus(); } });
+  $('busmenu').addEventListener('keydown', function (e) { if (e.key === 'Enter') { track('guias_buscar', { q: S.q }); var p = document.querySelector('#gmGrid [data-dest]'); if (p) p.focus(); } });
+  if (qs.get('ver') === 'favoritos') S.pant = 3;
   pintar();
 })();
 </script>

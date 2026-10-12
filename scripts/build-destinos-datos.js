@@ -60,8 +60,30 @@ function horasDe(key) {
   return h;
 }
 
+/* `lat`/`lon`: para ubicar el destino en el mapa de /web/home-guias.html. Salen de data/destinos-geo.json (Nominatim). */
+const GEO = require('../data/destinos-geo.json').destinos;
+
+/* `meses` (1-12): cuando conviene ir, para "Recomendados por mes" de /web/home-guias.html. `alta`: los meses de
+   temporada alta, para avisar que ese mes hay mas gente y precios mas altos.
+   La base es la temporada de la guia (lib/guias.js): se recomienda todo lo que no es temporada baja, porque la baja de
+   cada guia es la epoca de lluvias o de frio. Las playas del sur ademas tienen agua fria fuera del verano aunque no
+   sea temporada baja (en octubre Capao da Canoa no es temporada baja, pero tampoco es para ir a la playa): ahi se
+   recorta a los meses de agua templada. */
+const GUIAS = require('../lib/guias.js').guias;
+const AGUA_TEMPLADA = { 'Santa Catarina': [11, 12, 1, 2, 3, 4], 'Río Grande do Sul': [12, 1, 2, 3] };
+function mesesDe(key) {
+  const t = GUIAS[key] && GUIAS[key].temporada, d = model.DEST[key];
+  if (!t) return { meses: [], alta: [] };
+  let meses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter(function (m) { return (t.baja || []).indexOf(m) < 0; });
+  const agua = (d.group || 'beach') === 'beach' && AGUA_TEMPLADA[d.region];
+  if (agua) meses = meses.filter(function (m) { return agua.indexOf(m) >= 0; });
+  return { meses: meses, alta: (t.alta || []).slice().sort(function (a, b) { return a - b; }) };
+}
+
 const datos = Object.keys(model.DEST).map(function (k) {
-  return { k: k, name: model.DEST[k].name, region: model.DEST[k].region, group: model.DEST[k].group || 'beach', medios: mediosDe(k), horas: horasDe(k) };
+  const g = GEO[k] || {}, mm = mesesDe(k);
+  return { k: k, name: model.DEST[k].name, region: model.DEST[k].region, group: model.DEST[k].group || 'beach', medios: mediosDe(k), horas: horasDe(k),
+    lat: g.lat, lon: g.lon, meses: mm.meses, alta: mm.alta };
 });
 
 const CABECERA = '/* Snapshot de lib/model.js DEST: los mismos 40 destinos que ofrece cuantosale.uy, con su region\n'
