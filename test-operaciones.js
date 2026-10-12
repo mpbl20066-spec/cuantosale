@@ -141,5 +141,51 @@ t('la decision elegida en la vista previa se respeta solo si es una opcion valid
   assert.strictEqual(ops.analizarImport(fila, { 1: 'cualquiera' }, ctxPrueba())[0].decision, 'omitir');
 });
 
-console.log('\n' + (fallas ? fallas + ' de ' + pruebas + ' pruebas FALLARON' : pruebas + ' pruebas OK'));
-process.exit(fallas ? 1 : 0);
+/* ---------- precios masivos (recalcular es async: van al final) ---------- */
+
+async function tAsync(nombre, fn) {
+  pruebas++;
+  try { await fn(); console.log('  ok     ' + nombre); }
+  catch (e) { fallas++; console.log('  FALLÓ  ' + nombre + '\n         ' + e.message.split('\n')[0]); }
+}
+
+function ctxMasivo() {
+  const ctx = {
+    tours: [
+      { id: 'a', destino: 'fln', titulo: 'A', precio_brl: 100, unidad: 'persona', activo: true, publicado_at: 'x', proveedor_id: null },
+      { id: 'b', destino: 'fln', titulo: 'B', precio_brl: 200, unidad: 'persona', activo: true, publicado_at: 'x', proveedor_id: 'p' },
+      { id: 'c', destino: 'fln', titulo: 'C', precio_brl: 300, unidad: 'persona', activo: false, publicado_at: 'x', proveedor_id: null },
+      { id: 'd', destino: 'fln', titulo: 'D', precio_brl: 300, unidad: 'persona', activo: true, publicado_at: null, proveedor_id: null },
+      { id: 'e', destino: 'fln', titulo: 'E', precio: 65, precio_brl: null, unidad: 'persona', activo: true, publicado_at: 'x', proveedor_id: null }
+    ],
+    prov: { p: { id: 'p', nombre: 'P', margen_tipo: 'pct', margen_valor: 10 } },
+    pend: {},
+    cfg: CFG
+  };
+  // Lo publicado es lo que da la configuracion de hoy.
+  ctx.tours.forEach(function (t) { t.precio_publicado = ops.calcular(t, ctx.prov[t.proveedor_id], CFG).valor; });
+  return ctx;
+}
+
+(async function () {
+  await tAsync('con la misma cotizacion y margen no cambia ningun precio publicado', async function () {
+    assert.strictEqual((await ops.recalcular(null, CFG, { simular: true }, ctxMasivo())).cambian, 0);
+  });
+  await tAsync('otra cotizacion mueve solo los que estan en la web y en reales', async function () {
+    const st = await ops.recalcular(null, { cotizacion: 5, margen: CFG.margen }, { simular: true }, ctxMasivo());
+    // a y b: en la web y en reales. c esta apagado, d nunca se publico, e es en dolares.
+    assert.strictEqual(st.cambian, 2);
+    assert.strictEqual(st.suben, 2);
+  });
+  await tAsync('otro margen general no toca al que tiene margen de su proveedor', async function () {
+    const st = await ops.recalcular(null, { cotizacion: CFG.cotizacion, margen: { tipo: 'usd', valor: 8 } }, { simular: true }, ctxMasivo());
+    assert.deepStrictEqual(st.ejemplos.map(function (x) { return x.servicio; }), ['A']);
+  });
+  await tAsync('un servicio con un cambio pendiente no recibe otro: se recalcula al mostrarlo y al publicarlo', async function () {
+    const ctx = ctxMasivo(); ctx.pend.a = { id: 'x', despues: {} };
+    const st = await ops.recalcular(null, { cotizacion: 5, margen: CFG.margen }, { simular: true }, ctx);
+    assert.ok(st.ejemplos.every(function (x) { return x.servicio !== 'A'; }));
+  });
+  console.log('\n' + (fallas ? fallas + ' de ' + pruebas + ' pruebas FALLARON' : pruebas + ' pruebas OK'));
+  process.exit(fallas ? 1 : 0);
+})();

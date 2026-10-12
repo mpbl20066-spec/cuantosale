@@ -105,6 +105,7 @@
     if (S.draft) abrirPanel();
     else if (S.prov) abrirProv();
     else if (S.srv) abrirSrv();
+    else if (S.modal) abrirModal();
   }
   /* Cuota de Booking (RapidAPI): lo que queda del plan segun la ultima respuesta. Avisa con menos del 15 %. */
   function kpiBooking(b) {
@@ -649,7 +650,7 @@
   }
   function cerrarPanel(forzar) {
     if (!forzar && S.dirty && !confirm('Tenés cambios sin guardar. ¿Cerrar igual?')) return;
-    S.draft = null; S.prov = null; S.srv = null; S.dirty = false;
+    S.draft = null; S.prov = null; S.srv = null; S.modal = null; S.dirty = false;
     var el = document.getElementById('drawer'); if (el) el.remove();
   }
 
@@ -679,6 +680,9 @@
       '<label class="f">Condiciones (cancelación, seña, forma de pago)<textarea ' + f('condiciones') + '>' + esc(p.condiciones || '') + '</textarea></label>' +
       '<label class="f">Avisos antes de cotizarle<textarea ' + f('avisos') + '>' + esc(p.avisos || '') + '</textarea></label>' +
       '<label class="f">Notas<textarea ' + f('notas') + '>' + esc(p.notas) + '</textarea></label>' +
+      '<label class="f">Margen para sus servicios<select ' + f('margen_tipo') + '><option value="">El general</option><option value="usd"' + (p.margen_tipo === 'usd' ? ' selected' : '') + '>Propio en US$ por persona</option><option value="pct"' + (p.margen_tipo === 'pct' ? ' selected' : '') + '>Propio en %</option></select></label>' +
+      '<label class="f">Valor del margen propio<input ' + f('margen_valor') + ' type="number" step="0.01" value="' + esc(p.margen_valor == null ? '' : p.margen_valor) + '" placeholder="solo si no usa el general"></label>' +
+      '<p class="sub" style="margin:0">Si cambiás el margen, los precios de sus servicios en la web quedan como cambios para revisar en "Por publicar".</p>' +
       '<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pf="activo" style="width:auto;min-height:0"' + (p.activo === false ? '' : ' checked') + '> Activo (aparece al asignar servicios)</label></div>' +
       (dp ? '<p class="sub" style="margin-top:10px">' + dp.servicios + ' servicio(s) en ' + dp.pedidos + ' pedido(s). Le debemos: <b class="' + (dp.aPagar ? 'deuda' : 'ok') + '">' + usd(dp.aPagar) + '</b></p>' : '') + '</section></div>' +
       '<div class="foot"><span class="msg" id="foot-msg" role="status"></span>' + (p.id ? '<button class="btn btn--danger" data-act="papelera-prov">' + (p.eliminado_at ? 'Sacar de la papelera' : 'Mandar a la papelera') + '</button>' : '') + '<button class="btn" data-act="cerrar">Cancelar</button><button class="btn btn--main" data-act="guardar-prov">Guardar proveedor</button></div></div>';
@@ -773,7 +777,7 @@
     });
     var destUsados = {}, provUsados = {};
     d.servicios.forEach(function (s) { destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1; });
-    var h = '<div class="bar"><div class="chips"><b>Servicios: tours, actividades y traslados</b></div><button class="btn btn--main" data-act="nuevo-srv">+ Servicio</button></div>' +
+    var h = '<div class="bar"><div class="chips"><b>Servicios: tours, actividades y traslados</b></div><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main" data-act="nuevo-srv">+ Servicio</button></div>' +
       '<p class="sub" style="margin:-4px 0 12px">Cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') +
       ' · margen general ' + (d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor) + ' (' + pub(d.config.margen.valor) + ')') + ' por persona sobre precios en reales' : 'sin margen') +
       ' · los precios publicados se muestran en reales; la web los guarda en dólares</p>' +
@@ -787,13 +791,21 @@
       '<input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '"></div>';
     if (!lista.length) return h + '<div class="card"><p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
     if (f === 'papelera') h += '<p class="sub" style="margin:-4px 0 12px">Lo que está en la papelera no se ve en la web. "Recuperar" lo deja como estaba; "Borrar" lo elimina para siempre (su historial de precios queda).</p>';
-    h += '<div class="card"><table><thead><tr><th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
+    S.srvSel = S.srvSel || {};
+    S.srvVisibles = lista.map(function (s) { return s.id; });
+    var nSel = Object.keys(S.srvSel).length;
+    if (f !== 'papelera') {
+      h += '<div class="bar"><span class="sub" style="flex:1">' + (nSel ? '<b>' + nSel + ' elegido(s)</b>' : 'Elegí servicios con la casilla para ajustarles el precio todos juntos.') + '</span>' +
+        '<button class="btn btn--sm" data-act="sel-filtro">Elegir los ' + lista.length + ' de este filtro</button>' +
+        (nSel ? '<button class="btn btn--sm" data-act="sel-limpiar">Quitar selección</button><button class="btn btn--main btn--sm" data-act="aj-abrir">Ajustar precio %</button>' : '') + '</div>';
+    }
+    h += '<div class="card"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
     lista.forEach(function (s) {
       var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
       var estado = s.eliminado_at ? '<span class="pill p-cancelado">en la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo">Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado">Activo</span>' : '<span class="pill p-cancelado">Apagado</span>'));
       if (s.tipo === 'traslado' && !s.eliminado_at) estado += ' <span class="pill p-consultado" title="La web calcula los traslados aparte">no va a la web</span>';
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '">revisar</span>';
-      h += '<tr class="row" data-srv="' + esc(s.id) + '"><td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub">' + esc(destNombre(s.destino)) + ' · ' + esc(TIPOS_SRV[s.tipo] || s.tipo) + ' · ' + (pr ? esc(pr.nombre) : '<i>sin proveedor</i>') + '</span></td>' +
+      h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub">' + esc(destNombre(s.destino)) + ' · ' + esc(TIPOS_SRV[s.tipo] || s.tipo) + ' · ' + (pr ? esc(pr.nombre) : '<i>sin proveedor</i>') + '</span></td>' +
         '<td data-l="Proveedor cobra">' + origenTxt(s) + '</td>' +
         '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') + '</td>' +
         '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? pub(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
@@ -982,6 +994,88 @@
     return api('ops/descartar', { ids: ids }).then(function (r) { S.sel = {}; toast(r.descartados + ' descartado(s)'); return cargarOps(); }).catch(function (e) { toast(e.message); });
   }
 
+  /* ---------- Precios masivos: cotizacion y margen, ajuste % (lib/operaciones.js guardarConfig / ajustar) ----------
+     Las dos ventanas primero muestran que cambiaria (simular) y recien despues preparan los cambios. Nada se publica:
+     todo va a "Por publicar". */
+  function abrirModal() {
+    var m = S.modal, el = document.getElementById('drawer');
+    if (!el) { el = document.createElement('div'); el.id = 'drawer'; el.className = 'drawer'; document.body.appendChild(el); }
+    var cuerpo = m.tipo === 'cfg' ? modalCfg(m) : modalAjuste(m);
+    el.innerHTML = '<div class="panel" role="dialog" aria-modal="true" style="width:min(640px,100%)"><div class="panel__head"><h2>' + (m.tipo === 'cfg' ? 'Cotización y margen' : 'Ajustar precio') + '</h2><button class="btn btn--sm" data-act="cerrar">Cerrar</button></div>' +
+      '<div class="panel__body">' + cuerpo.cuerpo + '</div><div class="foot"><span class="msg" id="foot-msg" role="status"></span><button class="btn" data-act="cerrar">Cancelar</button>' + cuerpo.botones + '</div></div>';
+  }
+  function statsHtml(st) {
+    if (!st) return '';
+    if (!st.cambian) return '<p class="sub" style="margin:0">Ningún precio publicado cambia.</p>';
+    return '<div class="cuentas"><div><small>Precios que cambian</small><b>' + st.cambian + '</b></div><div><small>Suben</small><b>' + st.suben + '</b></div><div><small>Bajan</small><b>' + st.bajan + '</b></div></div>' +
+      (st.ejemplos.length ? '<p class="sub" style="margin:10px 0 0">Por ejemplo: ' + st.ejemplos.map(function (x) { return esc(x.servicio) + ' ' + (x.antes != null ? pub(x.antes) + ' → ' : '') + (x.despues != null ? pub(x.despues) : '—'); }).join(' · ') + '</p>' : '');
+  }
+  function modalCfg(m) {
+    var a = function (k, extra) { return 'data-cfg="' + k + '"' + (extra || ''); };
+    var hoyTxt = m.hoy ? 'Hoy: R$ ' + String(m.hoy).replace('.', ',') + ' por dólar (exchangerate-api)' : '';
+    return { cuerpo: '<section class="sec"><div class="grid">' +
+      '<label class="f">Cotización (reales por dólar)<input ' + a('cotizacion', ' type="number" step="0.0001" min="1"') + ' value="' + esc(m.cotizacion) + '"></label>' +
+      '<label class="f">Margen general<select ' + a('margen_tipo') + '><option value="usd"' + (m.margen_tipo !== 'pct' ? ' selected' : '') + '>US$ por persona</option><option value="pct"' + (m.margen_tipo === 'pct' ? ' selected' : '') + '>Porcentaje</option></select></label>' +
+      '<label class="f">Valor del margen<input ' + a('margen_valor', ' type="number" step="0.01"') + ' value="' + esc(m.margen_valor) + '"></label>' +
+      '<label class="f">Precio viejo después de (días)<input ' + a('dias_desactualizado', ' type="number" min="7"') + ' value="' + esc(m.dias_desactualizado) + '"></label></div>' +
+      '<p style="margin:10px 0 0"><button class="btn btn--sm" data-act="cfg-hoy">Traer la cotización de hoy</button> <span class="sub" style="display:inline">' + esc(hoyTxt) + '</span></p>' +
+      '<p class="sub" style="margin:10px 0 0">El margen general se suma a los precios en reales de los servicios que no tienen margen propio ni de su proveedor. Al guardar, cada precio que cambiaría queda en "Por publicar"; la web no cambia hasta que publiques.</p></section>' +
+      (m.st ? '<section class="sec"><h3>Qué cambia' + (m.st.nota ? ': ' + esc(m.st.nota) : '') + '</h3>' + statsHtml(m.st) + '</section>' : ''),
+      botones: '<button class="btn" data-act="cfg-simular">Ver qué cambia</button><button class="btn btn--main" data-act="cfg-guardar">Guardar y preparar cambios</button>' };
+  }
+  function modalAjuste(m) {
+    var d = S.ops.datos, pend = pendPorTour(), cfg = d.config, pct = Number(String(m.pct).replace(',', '.')) || 0;
+    var filas = d.servicios.filter(function (x) { return m.ids.indexOf(x.id) >= 0; }).map(function (x) {
+      var base = Object.assign({}, x, pend[x.id] ? pend[x.id].despues : {});
+      var campo = base.precio_brl != null ? 'precio_brl' : (base.precio != null ? 'precio' : null);
+      if (!campo) return null;
+      var v = Number(base[campo]) * (1 + pct / 100); v = m.entero ? Math.round(v) : r2(v);
+      var fut = Object.assign({}, base); fut[campo] = v;
+      var c = calcPub(fut, provDe(fut.proveedor_id), cfg);
+      return { s: x, campo: campo, antes: Number(base[campo]), despues: v, pub: c.valor };
+    }).filter(Boolean);
+    return { cuerpo: '<section class="sec"><div class="grid">' +
+      '<label class="f">Porcentaje (negativo para bajar)<input data-aj="pct" type="number" step="0.1" value="' + esc(m.pct) + '" placeholder="Ej: 8 o -5"></label>' +
+      '<label class="f" style="display:flex;gap:8px;align-items:center;margin-top:22px"><input type="checkbox" data-aj="entero" style="width:auto;min-height:0"' + (m.entero ? ' checked' : '') + '> Redondear a reales enteros</label></div>' +
+      '<p class="sub" style="margin:10px 0 0">Se ajusta lo que cobra el proveedor. El precio publicado se recalcula con la cotización y el margen. Todo queda en "Por publicar".</p></section>' +
+      '<section class="sec"><h3>' + filas.length + ' servicio(s)</h3><table><tbody>' + filas.slice(0, 40).map(function (x) {
+        var fm = x.campo === 'precio_brl' ? brl : usd;
+        return '<tr><td data-l="Servicio">' + esc(x.s.titulo) + '<span class="sub">' + esc(destNombre(x.s.destino)) + '</span></td><td class="num" data-l="Proveedor">' + fm(x.antes) + (pct ? ' → <b>' + fm(x.despues) + '</b>' : '') + '</td>' +
+          '<td class="num" data-l="Quedaría publicado">' + (x.pub != null ? pub(x.pub) + '<span class="sub">publicado por persona</span>' : '—') + '</td></tr>';
+      }).join('') + '</tbody></table>' + (filas.length > 40 ? '<p class="sub">…y ' + (filas.length - 40) + ' más.</p>' : '') + '</section>',
+      botones: '<button class="btn btn--main" data-act="aj-guardar"' + (pct && filas.length ? '' : ' disabled') + '>Preparar ' + filas.length + ' cambio(s)</button>' };
+  }
+  function abrirCfg() {
+    var c = S.ops.datos.config;
+    S.modal = { tipo: 'cfg', cotizacion: c.cotizacion, margen_tipo: c.margen ? c.margen.tipo : 'usd', margen_valor: c.margen ? c.margen.valor : 0, dias_desactualizado: c.dias_desactualizado, st: null, fuente: '' };
+    abrirModal();
+  }
+  function cuerpoCfg(simular) {
+    var m = S.modal;
+    return { cotizacion: m.cotizacion, margen_tipo: m.margen_tipo, margen_valor: m.margen_valor, dias_desactualizado: m.dias_desactualizado, cotizacion_fuente: m.fuente, simular: simular };
+  }
+  function simularCfg() {
+    mensaje('Calculando…');
+    api('ops/config', cuerpoCfg(true)).then(function (st) { if (S.modal) { S.modal.st = st; abrirModal(); } }).catch(function (e) { mensaje(e.message, true); });
+  }
+  function guardarCfg() {
+    var m = S.modal;
+    if (!confirm('¿Guardar la cotización y el margen?' + (m.st && m.st.cambian ? '\n' + m.st.cambian + ' precio(s) quedan para revisar en "Por publicar".' : ''))) return;
+    mensaje('Guardando…');
+    api('ops/config', cuerpoCfg(false)).then(function (r) {
+      toast('Guardado' + (r.cambian ? ' · ' + r.cambian + ' precio(s) para revisar en "Por publicar"' : ''));
+      cerrarPanel(true); return cargarOps();
+    }).catch(function (e) { mensaje(e.message, true); });
+  }
+  function guardarAjuste() {
+    var m = S.modal;
+    if (!confirm('¿Preparar el ajuste de ' + m.pct + ' %? Los cambios quedan en "Por publicar".')) return;
+    mensaje('Preparando…');
+    api('ops/ajustar', { ids: m.ids, pct: m.pct, redondeo: m.entero ? 'entero' : '' }).then(function (r) {
+      toast(r.cambian + ' cambio(s) en "Por publicar"'); S.srvSel = {}; cerrarPanel(true); return cargarOps();
+    }).catch(function (e) { mensaje(e.message, true); });
+  }
+
   /* ---------- Importar (CSV o Excel) ----------
      El archivo se lee en el navegador; al server van solo las columnas elegidas, ya con el nombre de CuántoSale.
      La vista previa y la confirmacion las calcula el server con la misma funcion (lib/operaciones.js analizarImport),
@@ -1154,7 +1248,7 @@
     });
   }
   /* Repinta el tablero sin tocar el panel abierto. */
-  function pintarFondo() { var dr = document.getElementById('drawer'), draft = S.draft, prov = S.prov, srv = S.srv; S.draft = null; S.prov = null; S.srv = null; pintar(); S.draft = draft; S.prov = prov; S.srv = srv; if (dr && !document.getElementById('drawer')) document.body.appendChild(dr); }
+  function pintarFondo() { var dr = document.getElementById('drawer'), draft = S.draft, prov = S.prov, srv = S.srv, modal = S.modal; S.draft = null; S.prov = null; S.srv = null; S.modal = null; pintar(); S.draft = draft; S.prov = prov; S.srv = srv; S.modal = modal; if (dr && !document.getElementById('drawer')) document.body.appendChild(dr); }
   function mensaje(t, mal) { var m = document.getElementById('foot-msg'); if (m) { m.textContent = t; m.style.color = mal ? 'var(--bad)' : 'var(--ok)'; } }
 
   function guardar() {
@@ -1175,7 +1269,8 @@
     p.servicios = String(p._hace || '').replace(/ · /g, ' - ').trim() + (dest ? ' · ' + dest : '');
     p.destinos = dest;
     mensaje('Guardando…');
-    api('proveedor/guardar', p).then(function () { toast('Proveedor guardado'); cerrarPanel(true); return cargar(); }).catch(function (e) { mensaje(e.message, true); });
+    if (!p.margen_tipo) p.margen_valor = null;
+    api('proveedor/guardar', p).then(function (r) { toast('Proveedor guardado' + (r.cambios && r.cambios.cambian ? ' · ' + r.cambios.cambian + ' precio(s) para revisar en "Por publicar"' : '')); cerrarPanel(true); return cargar(); }).catch(function (e) { mensaje(e.message, true); });
   }
   function papeleraProv() {
     var p = S.prov, eliminar = !p.eliminado_at;
@@ -1198,6 +1293,13 @@
     if (el.id === 'q-viajes') { S.qViajes = el.value; var pv = el.selectionStart; pintar(); var qv = document.getElementById('q-viajes'); if (qv) { qv.focus(); try { qv.setSelectionRange(pv, pv); } catch (er) { /* sin rango */ } } return; }
     if (el.matches && el.matches('[data-deuda]')) { S.soloDeuda = el.checked; pintar(); return; }
     if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
+    if (el.hasAttribute('data-ssel')) { if (e.type === 'change') { if (el.checked) S.srvSel[el.getAttribute('data-ssel')] = 1; else delete S.srvSel[el.getAttribute('data-ssel')]; pintar(); } return; }
+    if (el.hasAttribute('data-cfg') && S.modal) { S.modal[el.getAttribute('data-cfg')] = el.value; if (el.getAttribute('data-cfg') === 'cotizacion') S.modal.fuente = ''; S.modal.st = null; return; }
+    if (el.hasAttribute('data-aj') && S.modal) {
+      if (el.getAttribute('data-aj') === 'entero') S.modal.entero = el.checked; else S.modal.pct = el.value;
+      if (e.type === 'change') { var y = (document.querySelector('#drawer .panel') || {}).scrollTop || 0; abrirModal(); var pn = document.querySelector('#drawer .panel'); if (pn) pn.scrollTop = y; }
+      return;
+    }
     if (el.id === 'imp-archivo') { if (e.type === 'change' && el.files && el.files[0]) leerArchivo(el.files[0]); return; }
     if (el.hasAttribute('data-imp-col')) { if (e.type === 'change') { S.imp.mapeo[el.getAttribute('data-imp-col')] = el.value; pintar(); } return; }
     if (el.hasAttribute('data-imp-dec')) { if (e.type === 'change') { S.imp.decisiones[el.getAttribute('data-imp-dec')] = el.value; pintar(); } return; }
@@ -1341,6 +1443,20 @@
       case 'ver-papelera': S.provPapelera = !S.provPapelera; pintar(); break;
       case 'ops-recargar': cargarOps(); pintar(); break;
       case 'nuevo-srv': abrirServicio(null); break;
+      case 'cfg-abrir': abrirCfg(); break;
+      case 'cfg-simular': simularCfg(); break;
+      case 'cfg-guardar': guardarCfg(); break;
+      case 'cfg-hoy':
+        fetch('/api/tasas', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
+          var v = j && j.rates && Number(j.rates.BRL);
+          if (!(v > 0) || !S.modal) return mensaje('No se pudo traer la cotización.', true);
+          S.modal.hoy = v; S.modal.cotizacion = v; S.modal.fuente = 'exchangerate-api ' + new Date().toISOString().slice(0, 10); S.modal.st = null; abrirModal();
+        }).catch(function () { mensaje('No se pudo traer la cotización.', true); });
+        break;
+      case 'sel-filtro': (S.srvVisibles || []).forEach(function (id) { var sv = S.ops.datos.servicios.filter(function (x) { return x.id === id; })[0]; if (sv && !sv.eliminado_at) S.srvSel[id] = 1; }); pintar(); break;
+      case 'sel-limpiar': S.srvSel = {}; pintar(); break;
+      case 'aj-abrir': S.modal = { tipo: 'ajuste', ids: Object.keys(S.srvSel), pct: '', entero: false }; abrirModal(); break;
+      case 'aj-guardar': guardarAjuste(); break;
       case 'imp-reiniciar': S.imp = null; S.impHist = undefined; pintar(); break;
       case 'imp-previa': pedirPrevia(); break;
       case 'imp-columnas': S.imp.paso = 'columnas'; pintar(); break;
