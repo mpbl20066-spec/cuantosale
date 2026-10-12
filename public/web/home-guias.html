@@ -214,6 +214,44 @@
   /* celular y tablet: la barra de arriba (volver, moneda, menu) queda encima del menu, que es fixed desde el borde:
      el menu arranca debajo de ella, si no tapaba el titulo "Destinos". --gbar lo mide el script (44px en celular). */
   @media (max-width:1023px){html.cs-hdr[data-pagina="guias"] .g-menu{top:var(--gbar,44px)}}
+  /* Modo claro: el menu de Destinos era siempre azul noche. Con el tema claro pasa a fondo claro, tarjetas blancas y
+     texto oscuro; las fotos (populares, recomendados) siguen con texto blanco sobre el degrade. El dorado de los
+     links se oscurece porque el amarillo sobre blanco no se lee; los botones amarillos quedan igual. */
+  html[data-theme="light"] .g-menu{--gm-bg:#F3F6FA;--gm-card:#FFFFFF;--gm-gris:#4B5B70;--gm-gris2:#6A7A8A;--gm-ink:#0F1B2D;--gm-line:rgba(15,27,45,.14);--gm-suave:rgba(15,27,45,.06)}
+  html[data-theme="light"] .g-menu :is(.gm-titulo h1,.gm-pop__h h2,.gm-mes__h h2,.gm-rec h3,.gm-sel__t b,.gm-card,.gm-mes,.gm-bus,.gm-bus input,.gm-bus__l,.gm-bus__f,.gm-chip,.gm-corazon,.gm-nota){color:var(--gm-ink)}
+  html[data-theme="light"] .g-menu .gm-titulo p{color:var(--gm-gris)}
+  html[data-theme="light"] .g-menu :is(.gm-bus,.gm-card,.gm-mes,.gm-chip,.gm-zoom button){border-color:var(--gm-line)}
+  html[data-theme="light"] .g-menu :is(.gm-card,.gm-mes,.gm-bus){box-shadow:0 2px 10px rgba(15,27,45,.05)}
+  html[data-theme="light"] .g-menu .gm-card:hover{border-color:rgba(15,27,45,.28)}
+  html[data-theme="light"] .g-menu :is(.gm-card__i,.gm-corazon,.gm-sel,.gm-tabs,.gm-bus__f[aria-expanded="true"]){background:var(--gm-suave)}
+  html[data-theme="light"] .g-menu :is(.gm-link,.gm-card__t em){color:#8A6100}
+  html[data-theme="light"] .g-menu .gm-bus__f[aria-expanded="true"]{color:#8A6100}
+  html[data-theme="light"] .g-menu .gm-tab{color:var(--gm-gris)}
+  html[data-theme="light"] .g-menu :is(.gm-chip,.gm-tab)[aria-pressed="true"]{color:#0F1B2D}
+  html[data-theme="light"] .g-menu .gm-card__ilu svg[stroke="#fff"]{stroke:var(--gm-ink)}
+  html[data-theme="light"] .g-menu .gm-zoom button{background:#fff;color:var(--gm-ink)}
+  html[data-theme="light"] .g-menu .gm-mapa svg.is-zoom{background:rgba(15,27,45,.03)}
+  html[data-theme="light"] .g-menu .gm-mapa__br{fill:#DCE6F2;stroke:#A9BCD6}
+  html[data-theme="light"] .g-menu .gm-mapa__uy{fill:#EEF2F7;stroke:#A9BCD6}
+  html[data-theme="light"] .g-menu .gm-pin circle{fill:#8A98AC;stroke:#fff}
+  html[data-theme="light"] .g-menu .gm-pin.is-rec circle{fill:var(--gm-y);stroke:#0F1B2D;stroke-width:1}
+  html[data-theme="light"] .g-menu .gm-pin.is-sel circle,html[data-theme="light"] .g-menu .gm-pin:hover circle{stroke:#0F1B2D}
+  html[data-theme="light"] .g-menu .gm-pin text:not(.gm-pin__n){fill:#0F1B2D;stroke:#fff}
+  html[data-theme="light"] .g-menu .gm-mvd circle{fill:#0F1B2D}
+  html[data-theme="light"] .g-menu .gm-ley i{background:#8A98AC}
+  html[data-theme="light"] .g-menu .gm-ley i.is-rec{background:var(--gm-y)}
+  /* corazones en modo claro: azul (pedido), sobre un circulo blanco en las fotos para que se vea */
+  html[data-theme="light"] .g-menu .gm-fav{background:rgba(255,255,255,.92);color:#0B2A55}
+  html[data-theme="light"] .g-menu .gm-sel .gm-fav{background:var(--gm-suave)}
+  html[data-theme="light"] .g-menu .gm-fin .gm-o1 path{fill:#CFE0F2}
+  html[data-theme="light"] .g-menu .gm-fin .gm-o2 path{fill:#9DC1E6}
+  html[data-theme="light"] .g-menu .gm-fin .gm-o3 path{fill:#6FA3D8}
+  /* celular: primero las tarjetas del mes (lo que se busca) y el mapa debajo, mas bajo */
+  @media (max-width:767px){
+    .gm-rec{order:-1}
+    .gm-mapa__v{max-width:300px}
+  }
+  .gm-mini__cta{margin-top:5px;font-size:11.5px;font-weight:800;color:var(--gm-y)}
   /* en escritorio es una pagina, no un panel ni una tarjeta flotante */
   @media (min-width:1024px){
     html[data-pagina="guias"].cs-hdr .g-menu{position:fixed;inset:65px 0 0 0;left:0;top:65px;transform:none;width:auto;max-height:none;height:auto;border-radius:0;box-shadow:none;padding:0;justify-content:flex-start}
@@ -343,7 +381,7 @@
 
       <button type="button" class="gm-card" data-accion="favoritos" data-evento="guias_menu">
         <span class="gm-card__i"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg></span>
-        <span class="gm-card__t"><b>Mis favoritos</b><span id="gmFavTxt">Tocá el corazón de cualquier destino para guardarlo acá.</span><em>Ver favoritos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
+        <span class="gm-card__t"><b>Mis favoritos</b><span id="gmFavTxt">Tocá el corazón de cualquier destino para guardarlo. Con tu cuenta, los ves en cualquier celular.</span><em>Ver favoritos <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></em></span>
         <span class="gm-card__ilu gm-ilu-fav" aria-hidden="true"><span class="gm-corazon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg></span><svg width="34" height="26" viewBox="0 0 34 26" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M32 6c-8-4-16-1-24 6M8 12l1-8M8 12l8 2"/></svg><span class="gm-nota">Tus destinos<br>favoritos en un solo lugar</span></span>
       </button>
 
@@ -385,12 +423,20 @@
   var esAlta = function (d) { return d.alta.indexOf(S.mes) >= 0; };
 
   /* ---- favoritos: en este navegador (localStorage). Si no deja guardar, duran lo que dura la pagina. */
+  /* Con cuenta.js (CSCuenta.favoritos) se guardan tambien en la cuenta y se ven en Guardados; esta pagina corre antes
+     que cuenta.js, por eso al principio lee el navegador directo (las mismas claves). */
   var FAV_KEY = 'cs_favoritos', favs = [];
   try { favs = JSON.parse(localStorage.getItem(FAV_KEY) || '[]').filter(function (k) { return C.Nombres[k]; }); } catch (e) { favs = []; }
   var esFav = function (k) { return favs.indexOf(k) >= 0; };
+  var favCuenta = function () { return window.CSCuenta && window.CSCuenta.favoritos; };
   function alternarFav(k) {
-    if (esFav(k)) favs = favs.filter(function (x) { return x !== k; }); else favs.push(k);
-    try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); } catch (e) { /* sin almacenamiento */ }
+    if (favCuenta()) {
+      favCuenta().alternar(k, C.Nombres[k]);
+      favs = favCuenta().leer().map(function (x) { return x.k; }).filter(function (x) { return C.Nombres[x]; });
+    } else {
+      if (esFav(k)) favs = favs.filter(function (x) { return x !== k; }); else favs.push(k);
+      try { localStorage.setItem(FAV_KEY, JSON.stringify(favs)); localStorage.setItem('cs_favoritos_t', String(Date.now())); } catch (e) { /* sin almacenamiento */ }
+    }
     track(esFav(k) ? 'guias_fav_agregar' : 'guias_fav_quitar', { destino: k });
   }
   function botonFav(k, clase) {
@@ -425,26 +471,6 @@
   /* ---- mapa: misma proyeccion que el contorno (equirectangular, 10 px por grado, corregida por cos 15°) */
   var K = Math.cos(15 * Math.PI / 180);
   var xy = function (lat, lon) { return [(lon + 74.2) * K * 10, (5.6 - lat) * 10]; };
-  /* Los 5 mejores de cada mes, elegidos a mano y en este orden. Los que no estan entre los 40 destinos (Guarapari,
-     Vitoria, Sao Luis, Barreirinhas, Canoa Quebrada, Sao Miguel do Gostoso, Sao Miguel dos Milagres, Praia dos
-     Carneiros) se cambiaron por el destino mas parecido de esa epoca que si tiene guia. */
-  var TOP_MES = {
-    1: ['fln', 'bombinhas', 'bcm', 'buz', 'arraial'],
-    2: ['buz', 'arraial', 'rio', 'ilha', 'cabo'],
-    3: ['fln', 'bombinhas', 'rosa', 'buz', 'paraty'],
-    4: ['buz', 'paraty', 'ilha', 'rio', 'angra'],
-    5: ['buz', 'arraial', 'cabo', 'rio', 'angra'],
-    6: ['for', 'jericoacoara', 'gram', 'canela', 'rio'],
-    7: ['jericoacoara', 'for', 'gram', 'nat', 'pip'],
-    8: ['jericoacoara', 'for', 'pip', 'nat', 'joaopessoa'],
-    9: ['pip', 'nat', 'joaopessoa', 'rec', 'porto'],
-    10: ['mcz', 'maragogi', 'porto', 'joaopessoa', 'fernando'],
-    11: ['porto', 'mcz', 'maragogi', 'pip', 'fernando'],
-    12: ['mcz', 'maragogi', 'porto', 'fln', 'trancoso']
-  };
-  var esTop = function (d) { return (TOP_MES[S.mes] || []).indexOf(d.k) >= 0; };
-  /* primero los 5 del mes; despues ("Ver mas") los demas que ese mes tambien convienen segun la temporada de su guia:
-     los que no estan en temporada alta (buen clima y menos gente), despues los mas elegidos */
   /* ---- "Mejor clima": puntaje de 0 a 1 con el clima promedio del mes (data/clima-destinos.json, 2015-2024).
      Pesa la temperatura (en la playa, maxima de 27 a 32 grados; en ciudad y sierra, de 20 a 27), los dias de lluvia
      y las horas de sol. */
@@ -458,7 +484,13 @@
   /* ---- "Mas baratos": vuelo + alojamiento por persona desde Montevideo, del mismo endpoint de la portada
      (/api/destinos-destacados: modelo de costos con el pasaje real si el servidor ya lo tiene). Viaje tipo: 2
      personas, 7 noches desde el 15 del mes (el proximo que todavia no paso). Se pide una vez por mes. */
-  var PRECIOS = {}, PIDIENDO = {};
+  var PRECIOS = {}, PIDIENDO = {}, MEDIO = {};
+  var MODO_APP = { avion_mvd: 'avion', avion_ba: 'avion', auto: 'auto', bus: 'bus' };
+  /* el mismo link que "Calculá tu viaje" de la guia, con las fechas del precio que se mostro */
+  function linkCotizar(k) {
+    var f = fechasMes(S.mes), modo = MODO_APP[MEDIO[S.mes + k]];
+    return 'home-destino.html?destino=' + k + '&ida=' + f.dep + '&vuelta=' + f.ret + '&pax=2' + (modo ? '&modo=' + modo : '') + '&fuente=guias_mas_baratos' + (debug ? '&debug=1' : '');
+  }
   function fechasMes(m) {
     var hoy = new Date(), dep = new Date(hoy.getFullYear(), m - 1, 15);
     if (dep - hoy < 10 * 864e5) dep.setFullYear(dep.getFullYear() + 1);
@@ -473,9 +505,9 @@
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
     fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'eq', origin: 'MVD', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-      .then(function (j) { var por = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) por[it.key] = it.pp; }); PRECIOS[m] = por; })
+      .then(function (j) { var por = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { por[it.key] = it.pp; MEDIO[m + it.key] = it.mode; } }); PRECIOS[m] = por; })
       .catch(function () { PRECIOS[m] = null; })
-      .then(function () { clearTimeout(tm); PIDIENDO[m] = false; if (S.mes === m && S.rank === 'precio') { listaMes(); mapa(); } });
+      .then(function () { clearTimeout(tm); PIDIENDO[m] = false; if (S.mes === m && S.rank !== 'clima') { listaMes(); mapa(); } });
   }
   var fmtUsd = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
 
@@ -483,6 +515,29 @@
      2.º y 3.º y la lista parecia la misma zona repetida. Se recorre el ranking en orden y el que queda a menos de
      SEPARACION_KM de uno ya elegido pasa al final (sigue en "Ver mas", en su orden). */
   var SEPARACION_KM = 120;
+
+  /* ---- "Recomendados": el equilibrio entre las otras dos pestanas. Antes eran 5 por mes elegidos a mano, que no
+     eran ni los de mejor clima ni los mas baratos y nadie entendia por que estaban. Ahora es un puntaje de 0 a 1:
+     45 % el clima del mes (el mismo de "Mejor clima"), 35 % el precio (el mas barato del mes vale 1 y el mas caro 0,
+     los mismos precios de "Mas baratos"), 10 % que el mes este entre los buenos de su guia y 10 % que no sea
+     temporada alta. Un destino sin datos de clima cuenta 0,4 en esa parte. */
+  function puntajeRec(d) {
+    var pr = PRECIOS[S.mes] || {}, vals = Object.keys(pr).map(function (k) { return pr[k]; }).filter(function (n) { return n > 0; });
+    var c = puntajeClima(d), p = 0;
+    if (c < 0) c = 0.4;
+    if (pr[d.k] > 0 && vals.length) {
+      var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+      p = max > min ? 1 - (pr[d.k] - min) / (max - min) : 1;
+    }
+    return 0.45 * c + 0.35 * p + 0.1 * (enMes(d) ? 1 : 0) + 0.1 * (esAlta(d) ? 0 : 1);
+  }
+  function rankRec(filtro) {
+    if (!PRECIOS[S.mes]) return [];
+    return separar(DESTS.filter(filtro || function () { return true; }).map(function (d) { return { d: d, s: puntajeRec(d) }; })
+      .sort(function (a, b) { return b.s - a.s; }).map(function (x) { return x.d; }));
+  }
+  /* Los 5 primeros del mes (para el cartel del mapa); sin precios todavia, ninguno. */
+  var esTop = function (d) { return rankRec().slice(0, 5).indexOf(d) >= 0; };
   function km(a, b) {
     var r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
     var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -496,7 +551,9 @@
 
   function recomendados() {
     if (S.rank === 'clima') {
-      return separar(DESTS.filter(function (d) { return coincide(d) && puntajeClima(d) >= 0; })
+      /* la temperatura ideal de playa y la de ciudad o sierra no se comparan: sin filtro de tipo, solo playas (antes
+         Sao Paulo salia 2.º en abril, al lado de Buzios) */
+      return separar(DESTS.filter(function (d) { return coincide(d) && (S.tipo || d.group === 'beach') && puntajeClima(d) >= 0; })
         .sort(function (a, b) { return puntajeClima(b) - puntajeClima(a); }));
     }
     if (S.rank === 'precio') {
@@ -504,14 +561,7 @@
       return separar(DESTS.filter(function (d) { return coincide(d) && pr[d.k] > 0; })
         .sort(function (a, b) { return pr[a.k] - pr[b.k]; }));
     }
-    var top = (TOP_MES[S.mes] || []).map(function (k) { return POR[k]; }).filter(function (d) { return d && coincide(d); });
-    var resto = DESTS.filter(function (d) { return enMes(d) && !esTop(d) && coincide(d); }).sort(function (a, b) {
-      if (esAlta(a) !== esAlta(b)) return esAlta(a) ? 1 : -1;
-      var pa = POPULARES.indexOf(a.k), pb = POPULARES.indexOf(b.k);
-      if (pa !== pb) return (pa < 0 ? 99 : pa) - (pb < 0 ? 99 : pb);
-      return a.name.localeCompare(b.name, 'es');
-    });
-    return top.concat(resto);
+    return rankRec(coincide);
   }
   /* [12,1,2,3] -> "diciembre a marzo"; [1,2,7,8] -> "enero a febrero y julio a agosto" */
   function rangos(ms) {
@@ -656,16 +706,20 @@
       return '<small class="is-dato">' + c[0] + '° · ' + (c[1] === 0 ? 'casi sin lluvia' : c[1] === 1 ? '1 día de lluvia' : c[1] + ' días de lluvia') + '</small>';
     }
     if (S.rank === 'precio') return '<small class="is-dato">' + fmtUsd(PRECIOS[S.mes][d.k]) + ' por persona</small>';
-    return esAlta(d) ? '<small class="is-alta">Temporada alta</small>' : '<small>Buen clima, menos gente</small>';
+    /* Recomendados: los dos datos que lo ponen arriba, clima y precio por persona. */
+    var cr = d.clima && d.clima[S.mes - 1], pp = PRECIOS[S.mes] && PRECIOS[S.mes][d.k];
+    return '<small class="is-dato">' + [cr ? cr[0] + '°' : '', pp > 0 ? fmtUsd(pp) : ''].filter(Boolean).join(' · ') + '</small>' +
+      (esAlta(d) ? '<small class="is-alta">Temporada alta</small>' : '');
   }
   function listaMes() {
     var mes = MESES[S.mes - 1], f = fechasMes(S.mes);
     [].forEach.call(document.querySelectorAll('.gm-tab'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.rank === S.rank)); });
     $('gmRecT').textContent = S.rank === 'clima' ? 'Mejor clima en ' + mes : S.rank === 'precio' ? 'Más baratos en ' + mes : 'Los mejores para ir en ' + mes;
-    $('gmRecNota').textContent = S.rank === 'clima' ? 'Máxima promedio y días con lluvia fuerte en ' + mes + ', según el clima de 2015 a 2024 (Open-Meteo). Ordenados por sol, poca lluvia y temperatura agradable.'
-      : S.rank === 'precio' ? 'Vuelo y alojamiento desde Montevideo, por persona, para 2 personas y 7 noches desde el 15 de ' + mes + ' de ' + f.anio + '. Es una estimación: el precio final depende de las fechas.' : '';
+    $('gmRecNota').textContent = S.rank === 'clima' ? 'Playas ordenadas por sol, poca lluvia y calor de playa en ' + mes + ': máxima promedio y días con lluvia fuerte, según el clima de 2015 a 2024 (Open-Meteo).' + (S.tipo && S.tipo !== 'beach' ? '' : ' Para ciudad o sierra, filtrá por tipo en el buscador.')
+      : S.rank === 'precio' ? 'Vuelo y alojamiento desde Montevideo, por persona, para 2 personas y 7 noches desde el 15 de ' + mes + ' de ' + f.anio + '. Tocá un destino para cotizarlo con esas fechas.'
+        : 'Lo mejor de ' + mes + ' sumando todo: clima (temperatura, lluvia y sol), precio de vuelo y alojamiento por persona, y si es temporada alta.';
     var mas = $('gmRecMas');
-    if (S.rank === 'precio' && !PRECIOS[S.mes]) {
+    if (S.rank !== 'clima' && !PRECIOS[S.mes]) {
       var fallo = PRECIOS[S.mes] === null;
       $('gmRec').innerHTML = '<p class="gm-cargando">' + (fallo ? 'No pudimos calcular los precios ahora. Probá de nuevo en un rato.' : 'Calculando precios…') + '</p>';
       mas.hidden = true;
@@ -674,7 +728,9 @@
     }
     var l = recomendados(), v = visibles();
     $('gmRec').innerHTML = l.length ? v.map(function (d, i) {
-      return '<button type="button" class="gm-mini" data-dest="' + d.k + '" style="background-image:url(' + foto(d.k) + ')"><i aria-hidden="true">' + (i + 1) + '</i><b>' + esc(d.name) + '</b>' + dato(d) + '</button>';
+      var cot = S.rank === 'precio' ? ' data-cotizar="' + d.k + '"' : '';
+      return '<button type="button" class="gm-mini" data-dest="' + d.k + '"' + cot + ' style="background-image:url(' + foto(d.k) + ')"><i aria-hidden="true">' + (i + 1) + '</i><b>' + esc(d.name) + '</b>' + dato(d) +
+        (cot ? '<span class="gm-mini__cta">Cotizar con estas fechas →</span>' : '') + '</button>';
     }).join('') : '<p class="gm-vacio">' + (hayFiltro() ? 'Ninguno de los destinos que buscaste aparece en ' + mes + '. Probá con otro mes.' : 'No hay destinos para este mes.') + '</p>';
     mas.hidden = l.length <= REC_MAX;
     mas.innerHTML = (S.recTodos ? 'Ver menos' : 'Ver más') + ' ' + ic(I.chev, 14);
@@ -693,7 +749,7 @@
     $('menu').hidden = true;
     var fav = S.pant === 3, q = sinTilde(S.q);
     var l = fav ? CLAVES.filter(esFav) : CLAVES.filter(function (k) { return !q || sinTilde(C.Nombres[k]).indexOf(q) >= 0; });
-    $('main').innerHTML = (fav ? '<h1 class="g-tit">Mis favoritos</h1><p class="g-sub">Los destinos que guardaste en este navegador.</p>'
+    $('main').innerHTML = (fav ? '<h1 class="g-tit">Mis favoritos</h1><p class="g-sub">' + (window.CSCuenta && CSCuenta.usuario && CSCuenta.usuario() ? 'Guardados en tu cuenta: los ves en cualquier celular o compu, y también en Guardados.' : 'Guardados en este navegador. Iniciá sesión para verlos en cualquier celular o compu.') + '</p>'
       : '<h1 class="g-tit">Guías de viaje</h1>' +
         '<p class="g-sub">Qué hacer, dónde comer y los tips que ahorran plata.<br>Elegí un destino y leé la guía antes de armarte el viaje.</p>' +
         '<label class="g-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="Buscar destino…" value="' + esc(S.q) + '" autocomplete="off"></label>') +
@@ -754,6 +810,7 @@
     if (t.id === 'gmRecMas') { S.recTodos = !S.recTodos; listaMes(); mapa(); return; }
     if (t.dataset.accion === 'guias') { S.pant = 2; track('guias_ver_lista'); pintar(); $('bus').focus(); return; }
     if (t.dataset.accion === 'favoritos') { S.pant = 3; track('guias_ver_favoritos', { cantidad: favs.length }); pintar(); return; }
+    if (t.dataset.cotizar) { track('guias_cotizar', { destino: t.dataset.cotizar, mes: S.mes }); location.href = linkCotizar(t.dataset.cotizar); return; }
     if (t.dataset.dest) { track('guias_abrir', { destino: t.dataset.dest }); location.href = 'home-guia.html?destino=' + t.dataset.dest + (debug ? '&debug=1' : ''); }
   });
   document.addEventListener('keydown', function (e) {
@@ -769,7 +826,13 @@
   function medirBarra() { var b = document.querySelector('.g-bar'); if (b) document.documentElement.style.setProperty('--gbar', Math.ceil(b.getBoundingClientRect().bottom) + 'px'); }
   medirBarra(); window.addEventListener('resize', medirBarra);
   iniciarGestos();
-  if (window.CSMoneda) CSMoneda.alCambiar(function () { if (S.pant === 1 && S.rank === 'precio') listaMes(); });
+  /* cuenta.js carga despues de esta pagina: cuando esta, se escucha si al iniciar sesion llegan favoritos de la cuenta */
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!favCuenta()) return;
+    favCuenta().alCambiar(function (l) { favs = l.map(function (x) { return x.k; }).filter(function (x) { return C.Nombres[x]; }); pintar(); });
+    if (CSCuenta.alCambiar) CSCuenta.alCambiar(function () { if (S.pant === 3) lista(); });
+  });
+  if (window.CSMoneda) CSMoneda.alCambiar(function () { if (S.pant === 1 && S.rank !== 'clima') listaMes(); });
   if (qs.get('ver') === 'favoritos') S.pant = 3;
   pintar();
 })();

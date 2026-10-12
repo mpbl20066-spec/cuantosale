@@ -66,7 +66,7 @@
   function poner(u) {
     var cambio = (usuario && usuario.id) !== (u && u.id);
     usuario = u;
-    if (cambio && u) { alcSync(); recSync(); }   // reservas_viajes las sincroniza la pagina del viaje (CSCuenta.reservas.sync) y repinta
+    if (cambio && u) { alcSync(); recSync(); favSync(); }   // reservas_viajes las sincroniza la pagina del viaje (CSCuenta.reservas.sync) y repinta
     if (cambio) oyentes.forEach(function (fn) { try { fn(usuario); } catch (e) { /* un oyente no rompe a los demas */ } });
     if (panelAbierto()) pintar();
   }
@@ -246,6 +246,45 @@
   function recSync() { recGuardarTodo(recLeer()).catch(function () { /* se reintenta en la proxima */ }); }
   function recBorrar() { return recGuardarTodo([]).catch(function () { /* queda borrada en el navegador */ }); }
 
+  /* ---------- Destinos favoritos ----------
+     Los corazones de /web/home-guias. En el navegador: cs_favoritos (claves) y cs_favoritos_n (nombres, para listarlos en
+     Guardados desde cualquier pagina). Con sesion, tambien en user_metadata.destinos_favoritos = { l: [{ k, n }], t } para
+     verlos en otro celular o compu. No se unen las dos listas: gana la mas nueva (t), si no un destino quitado en un
+     celular volveria desde la cuenta. */
+  var KF = 'cs_favoritos', KFN = 'cs_favoritos_n', KFT = 'cs_favoritos_t', MAXF = 60, favOyentes = [];
+  function favLocal() {
+    var l = [], n = {}, t = 0;
+    try { l = JSON.parse(localStorage.getItem(KF) || '[]'); n = JSON.parse(localStorage.getItem(KFN) || '{}') || {}; t = +localStorage.getItem(KFT) || 0; } catch (e) { /* nada */ }
+    return { l: (Array.isArray(l) ? l : []).filter(function (k) { return typeof k === 'string'; }).map(function (k) { return { k: k, n: n[k] || '' }; }), t: t };
+  }
+  function favRemota() { var f = usuario && usuario.user_metadata && usuario.user_metadata.destinos_favoritos; return f && Array.isArray(f.l) ? f : null; }
+  function favEscribirLocal(f) {
+    try {
+      var n = {}; f.l.forEach(function (x) { n[x.k] = x.n; });
+      localStorage.setItem(KF, JSON.stringify(f.l.map(function (x) { return x.k; }))); localStorage.setItem(KFN, JSON.stringify(n)); localStorage.setItem(KFT, String(f.t || 0));
+    } catch (e) { /* modo privado */ }
+  }
+  function favSubir(f) {
+    if (!usuario) return Promise.resolve();
+    return iniciar().then(function () { return cliente.auth.updateUser({ data: { destinos_favoritos: f } }); })
+      .then(function (r) { if (r.error) throw r.error; usuario = r.data.user; }).catch(function () { /* queda en el navegador y sube en la proxima */ });
+  }
+  function favAvisar() { var l = favLeer(); favOyentes.forEach(function (fn) { try { fn(l); } catch (e) { /* nada */ } }); }
+  function favLeer() { return favLocal().l; }
+  function favAlternar(k, nombre) {
+    var f = favLocal(), esta = f.l.some(function (x) { return x.k === k; });
+    f.l = esta ? f.l.filter(function (x) { return x.k !== k; }) : f.l.concat([{ k: k, n: nombre || '' }]).slice(-MAXF);
+    f.t = Date.now();
+    favEscribirLocal(f); favSubir(f); if (panelAbierto()) pintar();
+    return !esta;
+  }
+  /* Al iniciar sesion: si la cuenta tiene una lista mas nueva baja al navegador; si no, la del navegador sube. */
+  function favSync() {
+    var loc = favLocal(), rem = favRemota();
+    if (rem && (rem.t || 0) > (loc.t || 0)) { favEscribirLocal({ l: rem.l.slice(0, MAXF), t: rem.t }); favAvisar(); return; }
+    if (loc.t && (!rem || JSON.stringify(rem.l) !== JSON.stringify(loc.l))) favSubir(loc);
+  }
+
   /* ---------- Reservas de los viajes ----------
      Lo que la pagina del viaje (home-flujo) guarda en el navegador, tambien en la cuenta (user_metadata.reservas_viajes)
      para verlo desde otro celular o compu:
@@ -401,7 +440,7 @@
     return cabecera('Mi cuenta') + encabezado + '<div class="cp-lista">' +
       (window.CS_GAME ? fila(I.pas, 'Mi pasaporte<small class="cp-fila__s">' + esc(xpResumen()) + '</small>', 'data-pasaporte') : '') +
       fila(I.alc, 'Mi ahorro de viaje<small class="cp-fila__s">' + esc(alcResumen()) + '</small>', 'data-alcancia') +
-      fila(I.save, 'Mis viajes guardados', 'data-viajes') +
+      fila(I.save, 'Viajes y destinos guardados', 'data-viajes') +
       fila(I.bell, 'Alertas de precio', 'data-alertas') +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
       (window.CSMoneda && CSMoneda.tasaDe ? fila(I.conv, 'Conversor de monedas', 'data-conversor') : '') +
@@ -467,7 +506,10 @@
         '<div class="cp-viaje__a">' + (url ? '<a class="cp-btn cp-btn--s" href="' + esc(url) + '">Abrir</a>' : '<span class="cp-nota">Guardado en la app anterior</span>') +
         '<button type="button" class="cp-btn cp-btn--s cp-btn--o" data-borrar="' + esc(t.id) + '" aria-label="Eliminar el viaje a ' + esc(t.destination || '') + '">' + ic(I.trash, 16) + '</button></div></article>';
     }).join('');
-    return cabecera('Mis viajes guardados') + '<div class="cp-cuerpo" data-foco tabindex="-1">' + cuerpo + '</div>';
+    var favs = favLeer(), favHtml = favs.length ? '<h3 class="cp-sub">Destinos favoritos</h3><ul class="cp-favs">' + favs.map(function (x) {
+      return '<li><a href="/web/home-guia.html?destino=' + encodeURIComponent(x.k) + '&fuente=guardados">' + esc(x.n || x.k) + '</a></li>';
+    }).join('') + '</ul><h3 class="cp-sub">Viajes</h3>' : '';
+    return cabecera('Guardados') + '<div class="cp-cuerpo" data-foco tabindex="-1">' + favHtml + cuerpo + '</div>';
   }
   function vistaAlertas() {
     var cuerpo;
@@ -616,5 +658,5 @@
     return { soportado: soportado, estado: estado, activar: activar, desactivar: desactivar };
   })();
 
-  window.CSCuenta = { push: pushApi, alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, reservas: { sync: resSync }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
+  window.CSCuenta = { push: pushApi, alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, reservas: { sync: resSync }, favoritos: { leer: favLeer, alternar: favAlternar, alCambiar: function (fn) { favOyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
 })();
