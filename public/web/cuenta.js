@@ -161,6 +161,21 @@
     var b = ''; for (var i = 0; i < 32; i += 2) b += String.fromCharCode(parseInt(h.substr(i, 2), 16));
     return '/viaje/' + btoa(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
+  /* Plan B del link corto: si el server no pudo leer el viaje, /viaje/<codigo> cae en el planificador con ?g=<codigo> y
+     se lee aca con la sesion de la persona (la politica de trips deja leer los viajes propios). Devuelve la URL larga o ''. */
+  function rutaGuardada(codigo) {
+    var b; try { b = atob(String(codigo || '').replace(/-/g, '+').replace(/_/g, '/')); } catch (e) { return Promise.resolve(''); }
+    var h = ''; for (var i = 0; i < b.length; i++) h += ('0' + b.charCodeAt(i).toString(16)).slice(-2);
+    if (h.length !== 32) return Promise.resolve('');
+    var id = [h.slice(0, 8), h.slice(8, 12), h.slice(12, 16), h.slice(16, 20), h.slice(20)].join('-');
+    return iniciar().then(function () { return cliente.from('trips').select('flight_details').eq('id', id).maybeSingle(); }).then(function (r) {
+      var fd = (r && r.data && r.data.flight_details) || {}, url = fd.url ? String(fd.url) : '';
+      if (!/^(https?:\/\/[^/]+)?\/[A-Za-z0-9_-]/.test(url)) return '';
+      url = url.replace(/^https?:\/\/[^/]+/, '');
+      if (fd.seleccion && !/[?&]sel=/.test(url)) url += (url.indexOf('?') < 0 ? '?' : '&') + 'sel=' + encodeURIComponent(JSON.stringify(fd.seleccion));
+      return url;
+    }).catch(function () { return ''; });
+  }
   function listarViajes() {
     return iniciar().then(function () { return cliente.from('trips').select('*').eq('user_id', usuario.id).order('created_at', { ascending: false }); })
       .then(function (r) { if (r.error) throw new Error('No pudimos cargar tus viajes.'); return r.data || []; });
@@ -432,5 +447,5 @@
   /* Si la persona vuelve del login (Google o link del correo), la sesion se levanta sola; basta con iniciar en segundo plano. */
   if (/[?&#](code|access_token|error_description)=/.test(location.search + location.hash) || (function () { try { return Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); }); } catch (e) { return false; } })()) iniciar().catch(function () { /* sin cuenta: la pagina funciona igual */ });
 
-  window.CSCuenta = { alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
+  window.CSCuenta = { alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
 })();

@@ -1416,6 +1416,18 @@
   /* Ruta y parametros con los que se abrio la pagina. Un viaje guardado llega por /viaje/<codigo> (redirige aca con
      &g=<codigo>) y la barra vuelve a mostrar ese link corto: de ahi en mas location ya no tiene los parametros. */
   var RUTA0 = location.pathname, qs = new URLSearchParams(location.search);
+  /* Link corto que el server no pudo resolver: llega solo ?g=<codigo>, sin destino. Se busca el viaje con la sesion de la
+     persona y se recarga con la URL larga; sin sesion se pide entrar y se reintenta. */
+  if (/^[A-Za-z0-9_-]{22}$/.test(qs.get('g') || '') && !qs.get('destino')) {
+    var g0 = qs.get('g'), probar = function (u) {
+      if (!u) { CSCuenta.abrir('login'); return; }
+      CSCuenta.rutaGuardada(g0).then(function (url) { location.replace(url ? url + (url.indexOf('?') < 0 ? '?' : '&') + 'g=' + g0 : '/'); });
+    };
+    document.title = 'Abriendo tu viaje… · CuántoSale';
+    CSCuenta.iniciar().then(function () { probar(CSCuenta.usuario()); }, function () { location.replace('/'); });
+    CSCuenta.alCambiar(function (u) { if (u) probar(u); });
+    return;
+  }
   if (/^[A-Za-z0-9_-]{22}$/.test(qs.get('g') || '')) { try { history.replaceState(history.state, '', '/viaje/' + qs.get('g')); } catch (e) { /* queda la URL larga */ } }
   qs.delete('g');   // cambiar fechas o pasar a bus ya no es el viaje guardado
   var BUSQ0 = qs.toString() ? '?' + qs.toString() : '';
