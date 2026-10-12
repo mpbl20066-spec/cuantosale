@@ -117,7 +117,17 @@
   .f-orden>span{font-size:12.5px;font-weight:700;color:var(--ink)}
   .f-orden .f-sort{margin:0}
   /* Filtros de alojamiento: categoria y zona o playa en una tarjeta */
-  .hc{margin:12px 0 14px;padding:14px;border:1px solid var(--card-border,var(--line));border-radius:16px;background:var(--card-bg,var(--surface))}
+  .hc-bar{display:flex;align-items:center;gap:12px;margin:12px 0 0;padding:8px 8px 8px 14px;border:1px solid var(--card-border,var(--line));border-radius:14px;background:var(--card-bg,var(--surface))}
+  .hc-res{flex:1;min-width:0}
+  .hc-res span{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+  .hc-res b{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13.5px;color:var(--ink)}
+  .hc-fbtn{position:relative;flex:0 0 40px;display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--ink);cursor:pointer}
+  .hc-fbtn:hover{background:var(--cel-soft)}
+  .hc-fbtn[aria-expanded="true"]{background:var(--cel-soft);color:var(--azul)}
+  .hc-fbtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .hc-n{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#F5C518;color:#0F1B2D;font:800 10px/16px var(--fb);font-style:normal;text-align:center}
+  .hc[hidden]{display:none}
+  .hc{margin:8px 0 14px;padding:14px;border:1px solid var(--card-border,var(--line));border-radius:16px;background:var(--card-bg,var(--surface))}
   .hc-cat{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
   .hc-zona{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
   .hc-cat:only-child,.hc-zona:only-child{margin:0;padding:0;border:0}
@@ -2048,7 +2058,6 @@
     var playas = playasDe(), todos = ordenarHoteles().filter(function (h) { return !h.tipo || h.tipo === S.catH; });
     if (S.playaSel !== 'todas' && !playas.some(function (x) { return x[0] === S.playaSel; })) S.playaSel = 'todas';
     var lista = todos.filter(function (h) { return S.playaSel === 'todas' || h.zona === S.playaSel; }), mostrados = cuatroHoteles(lista);
-    var rapidas = (S.zonasTodas ? playas : playas.filter(function (x) { return x[0] !== 'Otras zonas'; }).slice(0, 4));
     var zchip = function (val, txt) { return '<button type="button" class="hc-chip' + (S.playaSel === val ? ' is-on' : '') + '" data-zona="' + esc(val) + '" aria-pressed="' + (S.playaSel === val) + '">' + (val === 'todas' ? '' : '<span aria-hidden="true">' + (val === 'Otras zonas' ? '📍' : '🏖️') + '</span> ') + esc(txt) + '</button>'; };
     /* Arriba de la lista, en una tarjeta: la categoria (Economico, Equilibrado, Comodo, All Inclusive) y la zona o playa. */
     var cats = [['economico', 'Económico'], ['intermedio', 'Equilibrado'], ['confort', 'Cómodo'], ['all-inclusive', 'All Inclusive']];
@@ -2056,10 +2065,16 @@
       cats.map(function (c) { return '<button type="button" class="hc-chip' + (S.catH === c[0] ? ' is-on' : '') + '" data-cath="' + c[0] + '" aria-pressed="' + (S.catH === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div></div>' : '';
     /* La zona o playa se ve siempre que haya hoteles (aunque sea una sola zona), para que el filtro no desaparezca al cambiar de categoria */
     var selector = playas.length ? '<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">Zona o playa</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
-      zchip('todas', 'Todas', 0) + rapidas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') +
-      (playas.length > 4 ? '<button type="button" class="hc-chip" data-zonas-mas="1" aria-expanded="' + !!S.zonasTodas + '">' + (S.zonasTodas ? 'Menos zonas ▴' : 'Más zonas ▾') + '</button>' : '') + '</div></div>' : '';
+      zchip('todas', 'Todas', 0) + playas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') + '</div></div>' : '';
     var iPin = '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>';
-    var filtros = categoria || selector ? '<div class="hc">' + categoria + selector + '</div>' : '';
+    /* Los filtros van plegados, como en Destinos: una barra con lo elegido y el boton de filtros; al tocarlo se abre
+       debajo la tarjeta con la categoria y todas las zonas o playas. El numerito cuenta lo que no es el valor de fabrica. */
+    var catTxt = (cats.filter(function (c) { return c[0] === S.catH; })[0] || [])[1] || '';
+    var nFil = (categoria && S.catH !== 'economico' ? 1 : 0) + (S.playaSel !== 'todas' ? 1 : 0);
+    var iFil = '<path d="M3 6h5M14 6h7M3 12h9M18 12h3M3 18h3M12 18h9"/><circle cx="11" cy="6" r="2.2"/><circle cx="15" cy="12" r="2.2"/><circle cx="9" cy="18" r="2.2"/>';
+    var filtros = categoria || selector ? '<div class="hc-bar"><div class="hc-res"><span>Filtros</span><b>' + esc([categoria ? catTxt : '', selector ? (S.playaSel === 'todas' ? 'Todas las zonas' : S.playaSel) : ''].filter(Boolean).join(' · ')) + '</b></div>' +
+      '<button type="button" class="hc-fbtn" data-filtros-h="1" aria-expanded="' + !!S.filtrosH + '" aria-controls="hcPanel" aria-label="Filtrar alojamiento por categoría y zona">' + ic(iFil, 24) + (nFil ? '<i class="hc-n">' + nFil + '</i>' : '') + '</button></div>' +
+      '<div class="hc" id="hcPanel"' + (S.filtrosH ? '' : ' hidden') + '>' + categoria + selector + '</div>' : '';
     var vacio = !lista.length ? '<div class="hp-vacio"><p>No encontramos alojamientos ' + (S.catH === 'all-inclusive' ? 'All Inclusive' : 'de esta categoría') + ' para estas fechas.</p></div>' : '';
     return cab + aviso + filtros + vacio +
       mostrados.map(function (h, i) {
@@ -3471,7 +3486,7 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-zonas-mas],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
@@ -3519,7 +3534,7 @@
       elegirMasBarato();
     }
     else if (t.dataset.zona) { S.playaSel = t.dataset.zona; S.nH = MAX_HOTELES; elegirMasBarato(); track('flujo_playa', { playa: S.playaSel, via: 'chip' }); }
-    else if (t.dataset.zonasMas) { S.zonasTodas = !S.zonasTodas; track('flujo_zonas_mas', { abierto: S.zonasTodas }); }
+    else if (t.dataset.filtrosH) { S.filtrosH = !S.filtrosH; track('flujo_filtros_hotel', { abierto: S.filtrosH }); }
     else if (t.dataset.menoshoteles) {
       S.nH = MAX_HOTELES; track('flujo_ver_menos', { lista: 'hoteles' }); render(false);
       var mn = $('main'), h0 = mn.querySelector('.ho'); if (h0) mn.scrollTop += h0.getBoundingClientRect().top - mn.getBoundingClientRect().top - 120; return;
