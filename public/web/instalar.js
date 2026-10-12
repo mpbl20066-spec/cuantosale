@@ -3,12 +3,14 @@
    - Registra /sw.js (el mismo de la app; deja pasar /web a la red, ver sw.js).
    - Android y Chrome/Edge de escritorio: guarda beforeinstallprompt y muestra un aviso chico abajo con "Instalar".
    - iPhone/iPad (Safari no tiene ese evento): el aviso explica Compartir -> "Agregar a inicio".
+   - Samsung Internet en Android: el aviso ofrece "Abrir en Chrome" (su instalacion la bloquea Android 14/15, ver abrirEnChrome).
    - "Ahora no" lo calla 30 dias (misma clave que pwa.js de la app). Ya instalada, no aparece.
    - El panel de la cuenta (cuenta.js) agrega "Instalar la app" con CSInstalar.disponible() / CSInstalar.instalar(). */
 (function () {
   var KEY = 'cuantosale_install_dismissed_at', DIAS = 30, DEMORA = 8000;
   var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   var ios = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var samsung = /Android/i.test(navigator.userAgent) && /SamsungBrowser/i.test(navigator.userAgent);   // ver abrirEnChrome
   var evento = null, aviso = null;
 
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
@@ -34,11 +36,12 @@
   function cerrarAviso() { if (aviso) { aviso.remove(); aviso = null; } }
   function mostrar(forzado) {
     if (aviso || (!forzado && callado())) return;
-    if (!evento && !ios) return;
+    if (!evento && !ios && !samsung) return;
     aviso = document.createElement('div');
     aviso.className = 'cs-inst'; aviso.setAttribute('role', 'dialog'); aviso.setAttribute('aria-label', 'Instalar CuántoSale');
     aviso.innerHTML = '<img src="/icons/icon-192.png" alt="">' +
-      (evento ? '<p><b>Instalá CuántoSale</b>Abrila como una app, sin buscarla en el navegador.</p><button type="button" class="cs-inst__si">Instalar</button>'
+      (samsung ? '<p><b>Instalá CuántoSale</b>Se instala desde Chrome.</p><button type="button" class="cs-inst__si">Abrir en Chrome</button>'
+        : evento ? '<p><b>Instalá CuántoSale</b>Abrila como una app, sin buscarla en el navegador.</p><button type="button" class="cs-inst__si">Instalar</button>'
         : '<p><b>Instalá CuántoSale</b>Tocá Compartir <span aria-hidden="true">⬆</span> y después “Agregar a inicio”.</p>') +
       '<button type="button" class="cs-inst__no" aria-label="Ahora no">✕</button>';
     aviso.addEventListener('click', function (e) {
@@ -47,18 +50,29 @@
     });
     document.body.appendChild(aviso);
   }
+  /* Samsung Internet instala la web como un APK propio armado para una version vieja de Android, y Android 14/15
+     (Galaxy S24, S25...) lo bloquea: "Unsafe app blocked... doesn't include the latest privacy protections". Desde
+     Chrome el paquete lo arma Google con una version actual y se instala bien. El intent abre esta misma pagina en
+     Chrome; si no esta instalado, Android va al fallback (Chrome en Play Store). */
+  function abrirEnChrome() {
+    var fallback = 'https://play.google.com/store/apps/details?id=com.android.chrome';
+    location.href = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end';
+  }
   function instalar() {
+    if (samsung) { cerrarAviso(); abrirEnChrome(); return; }
     if (!evento) { mostrar(true); return; }
     var ev = evento; evento = null; cerrarAviso();
     Promise.resolve(ev.prompt()).then(function () { return ev.userChoice; }).then(function (c) { if (!c || c.outcome !== 'accepted') callar(); }).catch(function () {});
   }
 
   window.addEventListener('beforeinstallprompt', function (e) {
-    e.preventDefault(); evento = e;
+    e.preventDefault();
+    if (samsung) return;   // su instalacion es la que Android bloquea: el aviso lleva a Chrome
+    evento = e;
     setTimeout(function () { mostrar(false); }, DEMORA);
   });
   window.addEventListener('appinstalled', function () { evento = null; cerrarAviso(); });
-  if (ios) setTimeout(function () { mostrar(false); }, DEMORA);
+  if (ios || samsung) setTimeout(function () { mostrar(false); }, DEMORA);
 
-  window.CSInstalar = { disponible: function () { return !!evento || ios; }, instalar: instalar };
+  window.CSInstalar = { disponible: function () { return !!evento || ios || samsung; }, instalar: instalar };
 })();
