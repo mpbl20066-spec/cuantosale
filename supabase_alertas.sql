@@ -30,3 +30,6 @@ create index if not exists alertas_precio_activas on public.alertas_precio (acti
 create index if not exists alertas_precio_usuario on public.alertas_precio (user_id, activa);
 
 alter table public.alertas_precio enable row level security;
+
+-- Este proyecto no da permisos por defecto a las tablas nuevas: sin esto el server recibe 403.
+grant select, insert, update, delete on public.alertas_precio to service_role;
