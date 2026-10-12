@@ -349,15 +349,11 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="guia"] .u-hero__cta{margin-top:24px;min-height:56px;padding:0 32px;font-size:18px}
   [data-pagina="guia"] .u-cuerpo{max-width:1200px;margin:0 auto;padding:24px 0 56px;box-sizing:border-box}
   /* Resumen: presupuesto ancho, como llegar y cuando ir al lado; lo que trae la guia en su propia fila. */
-  [data-pagina="guia"] .u-datos{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
-  [data-pagina="guia"] .u-dato--precio .u-dato__v small{display:inline;margin-left:4px}
-  [data-pagina="guia"] .u-dato{padding:20px}
-  [data-pagina="guia"] .u-dato--precio{padding:24px}
-  [data-pagina="guia"] .u-dato--precio .u-dato__v{font-size:44px}
-  [data-pagina="guia"] .u-dato__cta{display:inline-flex;padding:0 30px}
-  [data-pagina="guia"] .u-dato--ancho{grid-column:span 2}
-  [data-pagina="guia"] .u-dato--ancho:last-child{grid-column:1/-1}
-  [data-pagina="guia"] .u-dato__v{font-size:28px}
+  /* Franja de resumen: tres columnas del mismo alto, separadas por una linea. */
+  [data-pagina="guia"] .u-franja{display:grid;grid-template-columns:1.2fr 1fr 1fr}
+  [data-pagina="guia"] .u-f{padding:22px 24px}
+  [data-pagina="guia"] .u-f+.u-f{border-top:0;border-left:1px solid var(--line)}
+  [data-pagina="guia"] .u-hero__precio b{font-size:38px}
   [data-pagina="guia"] .u-lead{max-width:820px;margin:34px 0 8px;font-size:19px}
   [data-pagina="guia"] .u-tabs{top:65px;margin:0 0 4px;padding:14px 0;border-bottom:1px solid var(--line)}
   [data-pagina="guia"] .u-tab{font-size:16px;padding:11px 20px}
