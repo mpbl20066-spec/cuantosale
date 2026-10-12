@@ -1550,5 +1550,182 @@
     ]
    }
   ]
+ },
+ "porto": {
+  "antes": {
+   "titulo": "Antes de viajar a Porto de Galinhas",
+   "intro": "Porto de Galinhas es una vila de playa del municipio de Ipojuca, en el litoral sur de Pernambuco. Casi todo gira alrededor de la marea: las piscinas naturales solo aparecen con marea baja.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 5 o 6 días hacés las piscinas, el buggy por las playas, Maracaípe y el Pontal, y te quedan uno o dos días para Carneiros, Santo Aleixo o el Cabo de Santo Agostinho."
+    },
+    {
+     "t": "La puerta de entrada es Recife",
+     "d": "No hay aeropuerto en Porto de Galinhas: se vuela al aeropuerto internacional de Recife (REC), a unos 50 km."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Porto de Galinhas desde Montevideo",
+    "intro": "Se vuela a Recife y desde ahí se sigue por tierra, en auto, transfer u ómnibus.",
+    "items": [
+     {
+      "t": "Vuelo a Recife (REC)",
+      "d": "Azul tiene vuelo directo Montevideo–Recife algunos días por semana. Si no coincide con tus fechas, hay vuelos con escala en São Paulo u otra ciudad de Brasil con Azul, GOL y LATAM; si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
+     },
+     {
+      "t": "Del aeropuerto en auto o transfer",
+      "d": "Son unos 50 km hacia el sur, más o menos 1 hora sin tránsito. Alquilar auto en el aeropuerto es lo más práctico; también hay Uber, taxi y transfers de agencias que te esperan con cartel."
+     },
+     {
+      "t": "Del aeropuerto en ómnibus",
+      "d": "La Viação Vera Cruz tiene dos líneas: la 195 (Opcional), más rápida y con aire acondicionado, y la 191, que pasa por Muro Alto y Maracaípe. Las dos paran mucho en el camino y dejan en la entrada de la vila; de ahí seguís en taxi hasta el alojamiento."
+     }
+    ],
+    "cierre": {
+     "t": "Si llegás de noche",
+     "d": "Los ómnibus tienen horario limitado: si tu vuelo aterriza tarde, arreglá el transfer o el auto de antemano."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Porto de Galinhas",
+    "intro": "Elegir zona es elegir entre caminar a todo desde la vila o tener una playa calma frente al hotel.",
+    "items": [
+     {
+      "t": "Vila (centro)",
+      "d": "Donde están la mayoría de las posadas, los restaurantes y la salida de las jangadas. Es la mejor opción si venís sin auto."
+     },
+     {
+      "t": "Cupe",
+      "d": "La playa más larga, con muchos hoteles a entre 1 y 6 km del centro. El mar tiene corriente fuerte."
+     },
+     {
+      "t": "Pontal do Cupe",
+      "d": "Un tramo corto, a unos 7 km al norte, con buen baño con marea alta y baja, pero pocos hoteles."
+     },
+     {
+      "t": "Muro Alto",
+      "d": "A unos 9 km al norte, con resorts y flats frente a la piscina natural larga. Sirve para familias con chicos; para ir a la vila vas a necesitar auto o taxi."
+     },
+     {
+      "t": "Maracaípe",
+      "d": "A unos 3 km al sur, con posadas y sin hoteles grandes. Es la zona del surf y la más tranquila de noche."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Porto de Galinhas",
+    "intro": "La vila se camina; para las otras playas necesitás algún transporte.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "En la vila caminás a la playa, a la salida de las jangadas, a los restaurantes y a los bares."
+     },
+     {
+      "t": "Taxi y Uber",
+      "d": "Hay taxis y también Uber. Para playas lejanas podés arreglar con un taxista que te lleve y te busque a una hora fija."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "La línea 191 de la Vera Cruz pasa por Muro Alto y Maracaípe."
+     },
+     {
+      "t": "Buggy y paseos",
+      "d": "El buggy recorre en un día Muro Alto, el Cupe, Maracaípe y el Pontal. Para Carneiros, Santo Aleixo, el Cabo o Maragogi, las agencias de la vila venden paseos de día entero con traslado."
+     },
+     {
+      "t": "Auto",
+      "d": "Sirve si te alojás en Muro Alto o el Cupe, o si querés ir a Carneiros a tu ritmo. En Maracaípe estacionar cerca de la playa es difícil."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Porto de Galinhas de noche",
+    "intro": "La noche se concentra en la vila; el resto de la costa es tranquilo.",
+    "items": [
+     {
+      "t": "La vila",
+      "d": "Bares, restaurantes y lugares con música en vivo y forró. El movimiento más fuerte es entre las 20 y las 22, cuando la gente vuelve de los paseos y sale a cenar."
+     },
+     {
+      "t": "Maracaípe",
+      "d": "Uno o dos bares sobre la playa abiertos de noche, nada grande, salvo en Año Nuevo."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad",
+    "bullets": [
+     "En el Cupe y en Maracaípe el mar tiene corriente y olas: si no nadás bien, bañate en Muro Alto o en el Pontal do Cupe.",
+     "En las piscinas usá calzado para el agua: el coral corta y además está prohibido pisarlo.",
+     "No dejes cosas solas en la arena mientras vas a las piscinas.",
+     "En el auto no dejes nada a la vista, sobre todo en los estacionamientos de playa.",
+     "De noche quedate en las calles con movimiento de la vila y volvé en taxi o Uber si te alojás afuera."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "Las tarjetas se aceptan en hoteles, restaurantes y agencias. Muchos comercios cobran con Pix, pero para usarlo necesitás una app que te lo habilite."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llevá algo para los vendedores de la playa, el agua de coco y los puestos chicos."
+     },
+     {
+      "t": "Electricidad",
+      "d": "220 V, como en Uruguay. El tomacorriente brasileño es de patas redondas: para los enchufes de patas planas llevá adaptador."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Hace calor todo el año; entre abril y julio llueve fuerte casi todos los días.",
+    "bullets": [
+     "Protector solar, gorra y lentes de sol",
+     "Máscara de snorkel para las piscinas",
+     "Calzado para el agua, para el coral y el manglar",
+     "Ropa liviana y algo para salir de noche en la vila",
+     "Un piloto liviano si vas de abril a julio",
+     "Repelente para el manglar y el atardecer en el Pontal",
+     "Adaptador de enchufe si tus cargadores tienen patas planas",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
  }
 }
