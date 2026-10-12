@@ -2551,19 +2551,6 @@ function haversineKm(a, b) {
       assert.ok(pend && /Río de Janeiro/.test(pend.body.pendientes[0].titulo) && /planificar\?destino=rio/.test(pend.body.pendientes[0].url), 'el aviso guardado dice el destino y abre ese viaje');
       assert.ok(borradas.some(function (u) { return /alertas_push\?id=eq\.p2/.test(u); }), 'el dispositivo que ya no existe se borra');
       assert.strictEqual(res.body.push, 1, 'un dispositivo recibio el push');
-      // Push de prueba: con sesion, a los dispositivos de la persona, y una sola vez por minuto.
-      const hp = Object.assign({}, h, { limited: function () { return false; }, clientIp: function () { return '1.1.1.1'; },
-        fetchWithTimeout: async function (u, init) {
-          if (u.indexOf('/auth/v1/user') >= 0) return { ok: true, status: 200, json: async function () { return { id: '00000000-0000-0000-0000-00000000000a', email: 'a@x.com', user_metadata: {} }; } };
-          if (u.indexOf('alertas_push?select') >= 0) { const r = [{ id: 'p1', endpoint: 'https://push.example/vivo', pendientes: [] }]; return { ok: true, status: 200, text: async function () { return JSON.stringify(r); } }; }
-          return h.fetchWithTimeout(u, init);
-        } });
-      empujados.length = 0;
-      const modP = alertasMod(hp), reqP = { method: 'POST', headers: { authorization: 'Bearer ' + 'x'.repeat(30) } }, urlP = new URL('http://x/api/alertas/push-prueba');
-      const rp1 = {}; await modP.apiPush(reqP, rp1, urlP);
-      assert.deepStrictEqual([rp1.status, rp1.body.enviadas, empujados.length], [200, 1, 1], 'la prueba sale a su dispositivo: ' + JSON.stringify(rp1.body));
-      const rp2 = {}; await modP.apiPush(reqP, rp2, urlP);
-      assert.strictEqual(rp2.status, 429, 'una segunda prueba enseguida se frena');
       // Con el tope en 0 no se mide nada: quedan pendientes para el dia siguiente.
       process.env.ALERTAS_MAX_DIA = '0'; medidas.length = 0; mails.length = 0;
       const res2 = {}; await alertasMod(h).revisar({ headers: {} }, res2);

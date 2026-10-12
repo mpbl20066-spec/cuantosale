@@ -3207,7 +3207,7 @@ function handleRequest(req, res) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la búsqueda.' });
       });
     }
-    if (url.pathname === '/api/alertas' || url.pathname === '/api/alertas/baja' || url.pathname === '/api/alertas/revisar' || /^\/api\/alertas\/push(-clave|-resumen|-prueba)?$/.test(url.pathname)) {
+    if (url.pathname === '/api/alertas' || url.pathname === '/api/alertas/baja' || url.pathname === '/api/alertas/revisar' || /^\/api\/alertas\/push(-clave|-resumen)?$/.test(url.pathname)) {
       const al = alertasApi(), alFallarAl = function (e) { console.error('[alertas]', e.message); if (!res.headersSent) sendJson(res, 500, { error: 'No pudimos procesar la alerta.' }); };
       if (url.pathname === '/api/alertas') return al.api(req, res, url).catch(alFallarAl);
       if (url.pathname.indexOf('/api/alertas/push') === 0) return al.apiPush(req, res, url).catch(alFallarAl);

@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v164';
+var CACHE_NAME = 'cuantosale-shell-v165';
 var APP_SHELL = [
   // '/' (la start_url de la PWA). '/app' ya no: ahora redirige a '/', y una
   // respuesta redirigida en el precache rompe la navegacion sin senal.
@@ -106,13 +106,13 @@ self.addEventListener('push', function (event) {
     return fetch('/api/alertas/push-resumen?endpoint=' + encodeURIComponent(sub.endpoint), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }).then(function (j) {
-    /* Solo lo de los ultimos 10 minutos (lo que mando esta misma revision o la prueba): sin esto, una prueba volvia a
-       mostrar la baja real de esta manana. Si no hay nada tan nuevo, el ultimo aviso. */
+    /* Solo lo de los ultimos 10 minutos (lo que mando esta misma revision): sin esto, un push nuevo podia volver a
+       mostrar la baja de esta manana. Si no hay nada tan nuevo, el ultimo aviso. */
     var todos = j && j.avisos ? j.avisos : [], recientes = todos.filter(function (a) { return Date.now() - Date.parse(a.at) < 6e5; });
     var avisos = recientes.length ? recientes : todos.length ? [todos[0]] : [{ id: 'generico', titulo: 'Bajó el precio de un vuelo', cuerpo: 'Abrí CuántoSale para ver tus alertas de precio.', url: '/' }];
     return Promise.all(avisos.map(function (a) {
       return self.registration.showNotification(a.titulo || 'CuántoSale', {
-        body: a.cuerpo || '', icon: '/icons/icon-192.png', badge: '/icons/badge-96.png',
+        body: a.cuerpo || '', badge: '/icons/badge-96.png',
         tag: 'alerta-' + a.id, data: { url: a.url || '/' }
       });
     }));
