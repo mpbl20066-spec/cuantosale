@@ -2644,7 +2644,8 @@ async function featuredPriceItemsSinCatch(req, res, url) {
       const porMedio = {};
       if (transport === 'all') propuestas.forEach(function (p) { if (!porMedio[p.mode]) porMedio[p.mode] = { mode: p.mode, pp: p.pp, total: p.total, dur: p.dur || '' }; });
       return Object.assign({
-        key: key, total: cheapest.total, pp: cheapest.pp, nights: nights,
+        // dep/ret de vuelta: la guia pide varios meses del mismo destino y elige el mas barato por fecha, no por posicion.
+        key: key, dep: p.dep, ret: p.ret, total: cheapest.total, pp: cheapest.pp, nights: nights,
         mode: cheapest.mode, modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel,
         // Duracion del viaje de ida ("unas 6 h con escala", "unas 17 h de manejo"): la guia la muestra en "Como llegar".
         dur: cheapest.dur || '',

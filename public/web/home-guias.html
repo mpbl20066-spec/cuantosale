@@ -134,7 +134,17 @@
   .gm-meses .gm-chip{flex:0 0 auto;padding:7px 12px}
   .gm-mes__c{display:flex;flex-direction:column;gap:18px;margin-top:16px}
   .gm-mapa{position:relative}
-  .gm-mapa svg{display:block;width:100%;max-width:420px;height:auto;margin:0 auto}
+  .gm-mapa__v{position:relative;max-width:420px;margin:0 auto}
+  .gm-mapa svg{display:block;width:100%;height:auto;margin:0 auto;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+  .gm-mapa svg.is-zoom{touch-action:none;cursor:grab;border-radius:12px;background:rgba(255,255,255,.03)}
+  .gm-mapa svg.is-arrastre{cursor:grabbing}
+  .gm-mapa__br,.gm-mapa__uy{vector-effect:non-scaling-stroke}
+  /* zoom: botones arriba a la derecha del mapa; en el celular ademas se pellizca con dos dedos y, con zoom, se arrastra */
+  .gm-zoom{position:absolute;top:4px;right:4px;z-index:2;display:flex;flex-direction:column;gap:6px}
+  .gm-zoom button{display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#0F1B2D;color:#fff;font:700 22px/1 var(--fb)}
+  .gm-zoom button[hidden]{display:none}
+  .gm-zoom button:disabled{opacity:.4;cursor:default}
+  .gm-zoom button:focus-visible{outline:3px solid var(--gm-y);outline-offset:2px}
   .gm-mapa__br{fill:#25406A;stroke:#3C5A88;stroke-width:1.2;stroke-linejoin:round}
   .gm-mapa__uy{fill:#1F3352;stroke:#3C5A88;stroke-width:1;stroke-linejoin:round}
   .gm-pin{cursor:pointer}
@@ -201,6 +211,9 @@
   [data-theme="night"] .g-fav{color:#F7C325}
   .g-fav[aria-pressed="true"] path{fill:currentColor}
   .g-fav:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  /* celular y tablet: la barra de arriba (volver, moneda, menu) queda encima del menu, que es fixed desde el borde:
+     el menu arranca debajo de ella, si no tapaba el titulo "Destinos". --gbar lo mide el script (44px en celular). */
+  @media (max-width:1023px){html.cs-hdr[data-pagina="guias"] .g-menu{top:var(--gbar,44px)}}
   /* en escritorio es una pagina, no un panel ni una tarjeta flotante */
   @media (min-width:1024px){
     html[data-pagina="guias"].cs-hdr .g-menu{position:fixed;inset:65px 0 0 0;left:0;top:65px;transform:none;width:auto;max-height:none;height:auto;border-radius:0;box-shadow:none;padding:0;justify-content:flex-start}
@@ -292,11 +305,18 @@
         <div class="gm-meses" id="gmMeses" role="group" aria-label="Mes del viaje"></div>
         <div class="gm-mes__c">
           <div class="gm-mapa">
+            <div class="gm-mapa__v">
+            <div class="gm-zoom" role="group" aria-label="Zoom del mapa">
+              <button type="button" data-zoom="in" aria-label="Acercar el mapa">+</button>
+              <button type="button" data-zoom="out" aria-label="Alejar el mapa" disabled>−</button>
+              <button type="button" data-zoom="reset" aria-label="Ver todo Brasil" hidden><svg class="cs-keep" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+            </div>
             <svg id="gmMapa" viewBox="-6 -6 396 420" role="group" aria-label="Mapa de Brasil con los destinos">
               <path class="gm-mapa__br" d="M160.1 358.2L173.0 344.5L183.9 334.8L190.4 330.7L198.5 325.2L198.7 317.2L193.9 311.5L189.1 313.4L191.0 307.6L192.3 301.7L192.3 296.2L188.8 294.4L185.2 296.0L181.6 295.6L180.5 291.7L179.6 282.6L177.8 279.6L171.2 276.9L167.3 278.8L157.1 276.9L157.7 263.3L154.9 257.8L157.9 255.7L157.0 250.0L159.6 245.6L161.3 237.7L159.0 231.5L153.8 228.7L152.7 224.8L154.1 219.0L135.6 218.6L131.9 206.9L134.7 206.8L134.6 202.5L132.7 199.5L132.3 193.8L126.7 190.8L120.6 190.9L116.6 188.0L110.1 186.0L106.3 182.3L95.5 180.6L85.0 171.7L85.8 165.0L84.6 161.1L85.6 153.6L73.0 155.3L67.9 159.1L59.4 163.1L57.3 166.1L52.3 166.4L45.1 165.5L39.7 167.2L35.3 166.1L35.9 150.9L28.0 156.8L19.5 156.5L15.8 151.2L9.4 150.6L11.4 146.3L6.1 140.2L2.1 131.2L4.6 129.4L4.6 125.2L10.4 122.3L9.5 116.9L11.9 113.4L12.6 108.7L23.7 101.9L31.6 100.0L32.9 98.5L41.6 99.0L45.9 71.6L46.2 67.2L44.7 61.5L40.4 57.9L40.4 50.6L45.9 48.9L47.8 50.0L48.1 46.1L42.5 45.1L42.3 38.9L61.2 39.1L64.4 35.6L67.0 38.8L68.9 44.7L70.7 43.5L76.1 48.8L83.6 48.1L85.4 45.0L92.6 42.7L96.6 41.1L97.7 36.8L104.6 34.0L104.1 31.9L95.9 31.0L94.6 24.7L95.0 18.0L90.6 15.4L92.5 14.5L99.6 15.8L107.3 18.3L110.1 15.9L117.0 14.4L127.8 10.6L131.4 6.8L130.1 4.0L135.1 3.6L137.3 5.9L136.1 10.3L139.4 11.8L141.6 16.4L138.9 19.9L137.4 28.4L139.9 33.5L140.6 38.1L146.5 42.8L151.3 43.3L152.3 41.4L155.4 40.9L159.8 39.2L162.9 36.5L168.2 37.4L170.6 37.0L175.8 37.8L176.7 35.8L175.1 33.8L176.1 30.9L180.0 31.8L184.5 30.8L190.0 32.9L194.3 34.9L197.3 32.2L199.4 32.7L200.7 35.5L205.4 34.8L209.1 31.0L212.0 23.6L217.7 14.4L221.0 14.0L223.4 19.5L228.8 37.0L234.0 38.6L234.3 45.5L227.0 53.8L230.0 56.8L247.1 58.4L247.4 68.4L254.8 61.8L266.9 65.4L283.0 71.5L287.7 77.4L286.1 82.9L297.3 79.8L316.1 85.1L330.6 84.7L344.8 93.0L357.2 104.2L364.6 107.1L372.9 107.5L376.4 110.6L379.6 123.4L381.3 129.4L377.4 146.0L372.5 152.5L358.9 166.4L352.7 177.7L345.6 186.4L343.2 186.6L340.5 193.9L341.1 212.7L338.4 228.1L337.4 234.7L334.4 238.6L332.7 252.0L322.9 265.0L321.2 275.4L313.4 279.7L311.1 285.7L300.6 285.7L285.5 289.5L278.6 294.0L267.8 296.9L256.5 304.9L248.3 314.8L246.9 322.2L248.5 327.8L246.7 337.9L244.5 342.7L237.7 348.2L227.0 365.8L218.5 373.8L212.0 378.5L207.6 388.0L201.2 393.7L198.5 388.0L202.8 383.3L197.2 376.5L189.6 370.9L179.6 364.5L176.1 364.8L166.4 357.1L160.1 358.2Z"/>
               <path class="gm-mapa__uy" d="M160.1 358.2L166.4 357.1L176.1 364.8L179.6 364.5L189.6 370.9L197.2 376.5L202.8 383.3L198.5 388.0L201.2 393.7L197.0 400.0L186.1 405.5L178.9 403.5L173.7 404.6L164.8 400.3L158.2 400.6L152.4 395.1L153.1 388.6L155.2 386.4L155.1 376.4L157.7 366.2L160.1 358.2Z"/>
               <g id="gmPins"></g>
             </svg>
+            </div>
             <ul class="gm-ley" aria-hidden="true"><li><i class="is-rec"></i>Los mejores del mes</li><li><i></i>Otros destinos</li></ul>
             <div class="gm-sel" id="gmSel" hidden></div>
           </div>
@@ -511,20 +531,93 @@
   var REC_MAX = 5;
   /* Los recomendados que se ven en la lista, en orden: el numero del pin es el de la tarjeta. */
   function visibles() { var l = recomendados(); return S.recTodos ? l : l.slice(0, REC_MAX); }
+  /* ---- zoom del mapa: se achica el viewBox. Los pines se dibujan con scale(k) para que mantengan su tamaño en
+     pantalla (con zoom x3 no se ven tres veces mas grandes, se separan). */
+  var VB0 = { x: -6, y: -6, w: 396, h: 420 }, ZMAX = 6;
+  S.vb = { x: VB0.x, y: VB0.y, w: VB0.w, h: VB0.h };
+  var escalaPin = function () { return S.vb.w / VB0.w; };
+  function encuadrar() {
+    S.vb.x = Math.max(VB0.x, Math.min(VB0.x + VB0.w - S.vb.w, S.vb.x));
+    S.vb.y = Math.max(VB0.y, Math.min(VB0.y + VB0.h - S.vb.h, S.vb.y));
+    var svg = $('gmMapa'), z = S.vb.w < VB0.w - 0.5;
+    svg.setAttribute('viewBox', [S.vb.x, S.vb.y, S.vb.w, S.vb.h].map(function (n) { return n.toFixed(2); }).join(' '));
+    svg.classList.toggle('is-zoom', z);
+    var b = function (k) { return document.querySelector('[data-zoom="' + k + '"]'); };
+    b('in').disabled = S.vb.w <= VB0.w / ZMAX + 0.5; b('out').disabled = !z; b('reset').hidden = !z;
+  }
+  /* f > 1 acerca; (cx, cy) en unidades del mapa queda fijo en pantalla */
+  function zoom(f, cx, cy) {
+    var w = Math.max(VB0.w / ZMAX, Math.min(VB0.w, S.vb.w / f)), r = w / S.vb.w;
+    if (cx == null) { cx = S.vb.x + S.vb.w / 2; cy = S.vb.y + S.vb.h / 2; }
+    S.vb.x = cx - (cx - S.vb.x) * r; S.vb.y = cy - (cy - S.vb.y) * r;
+    S.vb.w = w; S.vb.h = VB0.h * w / VB0.w;
+    encuadrar(); mapa();
+  }
+  function aMapa(svg, x, y) {
+    var m = svg.getScreenCTM(); if (!m) return { x: 0, y: 0 };
+    var pt = svg.createSVGPoint(); pt.x = x; pt.y = y; return pt.matrixTransform(m.inverse());
+  }
+  /* gestos: con un dedo y zoom, arrastrar mueve el mapa; con dos dedos, pellizcar acerca o aleja. Sin zoom, un dedo
+     sigue moviendo la pagina (touch-action:pan-y). Un arrastre de mas de 6 px no cuenta como toque a un pin. */
+  var dedos = {}, gesto = null;
+  function iniciarGestos() {
+    var svg = $('gmMapa');
+    svg.addEventListener('pointerdown', function (e) {
+      dedos[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(dedos);
+      if (ids.length === 2) {
+        var a = dedos[ids[0]], b = dedos[ids[1]];
+        gesto = { tipo: 'pellizco', dist: Math.hypot(a.x - b.x, a.y - b.y), movio: true };
+      } else if (ids.length === 1) gesto = { tipo: 'arrastre', x: e.clientX, y: e.clientY, movio: false };
+      if (svg.classList.contains('is-zoom') || ids.length === 2) { try { svg.setPointerCapture(e.pointerId); } catch (x) { /* nada */ } }
+    });
+    svg.addEventListener('pointermove', function (e) {
+      if (!dedos[e.pointerId] || !gesto) return;
+      dedos[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(dedos), r = svg.getBoundingClientRect();
+      if (gesto.tipo === 'pellizco' && ids.length === 2) {
+        var a = dedos[ids[0]], b = dedos[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (gesto.dist > 0 && Math.abs(d / gesto.dist - 1) > 0.02) {
+          var c = aMapa(svg, (a.x + b.x) / 2, (a.y + b.y) / 2);
+          zoom(d / gesto.dist, c.x, c.y); gesto.dist = d;
+        }
+        e.preventDefault(); return;
+      }
+      if (gesto.tipo === 'arrastre' && ids.length === 1) {
+        var dx = e.clientX - gesto.x, dy = e.clientY - gesto.y;
+        if (!gesto.movio && Math.hypot(dx, dy) < 6) return;
+        gesto.movio = true;
+        if (!svg.classList.contains('is-zoom')) return;
+        svg.classList.add('is-arrastre');
+        S.vb.x -= dx * S.vb.w / r.width; S.vb.y -= dy * S.vb.h / r.height;
+        gesto.x = e.clientX; gesto.y = e.clientY; encuadrar(); e.preventDefault();
+      }
+    });
+    var soltar = function (e) {
+      delete dedos[e.pointerId];
+      svg.classList.remove('is-arrastre');
+      /* el click llega despues del pointerup: se marca para ignorarlo si fue un arrastre o un pellizco */
+      if (gesto && gesto.movio) { S.ignorarClick = true; setTimeout(function () { S.ignorarClick = false; }, 50); }
+      if (!Object.keys(dedos).length) gesto = null;
+    };
+    svg.addEventListener('pointerup', soltar);
+    svg.addEventListener('pointercancel', soltar);
+  }
+
   function mapa() {
-    var num = {};
+    var num = {}, k = escalaPin(), tr = function (p) { return ' transform="translate(' + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ') scale(' + k.toFixed(3) + ')"'; };
     visibles().forEach(function (d, i) { num[d.k] = i + 1; });
     var m = xy(-34.88, -56.18);
-    var h = '<g class="gm-mvd" aria-hidden="true"><circle cx="' + m[0].toFixed(1) + '" cy="' + m[1].toFixed(1) + '" r="3"/><text x="' + (m[0] + 6).toFixed(1) + '" y="' + (m[1] + 4).toFixed(1) + '">Montevideo</text></g>';
+    var h = '<g class="gm-mvd" aria-hidden="true"' + tr(m) + '><circle r="3"/><text x="6" y="4">Montevideo</text></g>';
     /* los recomendados y el elegido se dibujan al final para que queden arriba de los grises */
     var orden = DESTS.filter(function (d) { return d.lat != null; }).sort(function (a, b) { return (!!num[a.k] - !!num[b.k]) || ((num[b.k] || 0) - (num[a.k] || 0)) || ((a.k === S.sel) - (b.k === S.sel)); });
     h += orden.map(function (d) {
-      var p = xy(d.lat, d.lon), n = num[d.k], rec = !!n, sel = d.k === S.sel, izq = p[0] > 300;
+      var p = xy(d.lat, d.lon), n = num[d.k], rec = !!n, sel = d.k === S.sel, izq = p[0] > S.vb.x + S.vb.w * 0.72;
       var cls = 'gm-pin' + (rec ? ' is-rec' : '') + (sel ? ' is-sel' : '') + (coincide(d) ? '' : ' is-off');
-      return '<g class="' + cls + '" data-pin="' + d.k + '" tabindex="' + (coincide(d) ? 0 : -1) + '" role="button" aria-label="' + esc(d.name) + (rec ? ', número ' + n + ' de los recomendados de ' + MESES[S.mes - 1] : '') + '">' +
-        '<title>' + esc(d.name) + '</title><circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (rec ? 8 : sel ? 7 : 4.5) + '"/>' +
-        (rec ? '<text class="gm-pin__n" x="' + p[0].toFixed(1) + '" y="' + (p[1] + 3.4).toFixed(1) + '" text-anchor="middle">' + n + '</text>' : '') +
-        (sel ? '<text x="' + (p[0] + (izq ? -11 : 11)).toFixed(1) + '" y="' + (p[1] + 4).toFixed(1) + '"' + (izq ? ' text-anchor="end"' : '') + '>' + esc(d.name) + '</text>' : '') + '</g>';
+      return '<g class="' + cls + '" data-pin="' + d.k + '" tabindex="' + (coincide(d) ? 0 : -1) + '" role="button" aria-label="' + esc(d.name) + (rec ? ', número ' + n + ' de los recomendados de ' + MESES[S.mes - 1] : '') + '"' + tr(p) + '>' +
+        '<title>' + esc(d.name) + '</title><circle r="' + (rec ? 8 : sel ? 7 : 4.5) + '"/>' +
+        (rec ? '<text class="gm-pin__n" y="3.4" text-anchor="middle">' + n + '</text>' : '') +
+        (sel ? '<text x="' + (izq ? -11 : 11) + '" y="4"' + (izq ? ' text-anchor="end"' : '') + '>' + esc(d.name) + '</text>' : '') + '</g>';
     }).join('');
     $('gmPins').innerHTML = h;
     var d = POR[S.sel], box = $('gmSel');
@@ -602,7 +695,7 @@
   function pinCercano(svg, cx, cy) {
     var m = svg.getScreenCTM(); if (!m) return '';
     var pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy; pt = pt.matrixTransform(m.inverse());
-    var mejor = '', dmin = 22 * 22;   // hasta 22 unidades del mapa (unos 2 grados)
+    var mejor = '', dmin = Math.pow(22 * escalaPin(), 2);   // hasta 22 unidades del mapa (unos 2 grados)
     DESTS.forEach(function (d) {
       if (d.lat == null || !coincide(d)) return;
       var p = xy(d.lat, d.lon), dd = (p[0] - pt.x) * (p[0] - pt.x) + (p[1] - pt.y) * (p[1] - pt.y);
@@ -619,7 +712,13 @@
     /* en el mapa gana el destino mas cerca del toque, no el punto que quedo dibujado arriba: en Santa Catarina y
        en la costa de Rio hay varios pegados y con el dedo se elegia el vecino */
     var svg = e.target.closest('#gmMapa');
-    if (svg) { var k = pinCercano(svg, e.clientX, e.clientY); if (k) elegirPin(k); return; }
+    if (svg) { if (S.ignorarClick) return; var k = pinCercano(svg, e.clientX, e.clientY); if (k) elegirPin(k); return; }
+    var zb = e.target.closest('[data-zoom]');
+    if (zb) {
+      if (zb.dataset.zoom === 'reset') { S.vb = { x: VB0.x, y: VB0.y, w: VB0.w, h: VB0.h }; encuadrar(); mapa(); }
+      else zoom(zb.dataset.zoom === 'in' ? 1.6 : 1 / 1.6);
+      track('guias_mapa_zoom', { accion: zb.dataset.zoom }); return;
+    }
     var t = e.target.closest('button'); if (!t) return;
     if (t.id === 'atras') {
       if (S.pant !== 1) { S.pant = 1; pintar(); return; }
@@ -652,6 +751,9 @@
     if (e.target.id === 'busmenu') { S.q = e.target.value.trim(); grilla(); mapa(); listaMes(); }
   });
   $('busmenu').addEventListener('keydown', function (e) { if (e.key === 'Enter') { track('guias_buscar', { q: S.q }); var p = document.querySelector('#gmGrid [data-dest]'); if (p) p.focus(); } });
+  function medirBarra() { var b = document.querySelector('.g-bar'); if (b) document.documentElement.style.setProperty('--gbar', Math.ceil(b.getBoundingClientRect().bottom) + 'px'); }
+  medirBarra(); window.addEventListener('resize', medirBarra);
+  iniciarGestos();
   if (window.CSMoneda) CSMoneda.alCambiar(function () { if (S.pant === 1 && S.rank === 'precio') listaMes(); });
   if (qs.get('ver') === 'favoritos') S.pant = 3;
   pintar();

@@ -186,7 +186,20 @@
     { id: 'comer', nom: 'Dónde comer', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
   var S = { tab: '', guia: null, region: '', tours: [], estado: 'cargando', est: null };
   /* El presupuesto de la guia: el viaje real de CuantoSale con el destino ya elegido (/destinos), no una pantalla aparte. */
-  var aPresupuesto = function (fuente) { return 'home-destino.html?destino=' + K + '&fuente=' + fuente; };
+  /* Las fechas del "Desde": el 15 del mes mas barato de los proximos 11 (7 noches, 2 personas). El link lleva las
+     mismas, para que la app abra ese mismo viaje con vuelos y hoteles reales y no sus fechas por defecto (en 10 dias).
+     Mientras no llega el estimado se usa salida en 45 dias. */
+  var fechasEst = function () {
+    if (S.est && S.est.dep) return { dep: S.est.dep, ret: S.est.ret };
+    var dep = C.sumarDias(C.iso(new Date()), 45); return { dep: dep, ret: C.sumarDias(dep, 7) };
+  };
+  var MES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var mesEst = function () { return S.est && S.est.dep ? MES_LARGO[+S.est.dep.slice(5, 7) - 1] : ''; };
+  var MODO_APP = { avion_mvd: 'avion', avion_ba: 'avion', auto: 'auto', bus: 'bus' };
+  var aPresupuesto = function (fuente) {
+    var f = fechasEst(), e = S.est && S.est.barato, modo = e && MODO_APP[e.mode];
+    return 'home-destino.html?destino=' + K + '&ida=' + f.dep + '&vuelta=' + f.ret + '&pax=2' + (modo ? '&modo=' + modo : '') + '&fuente=' + fuente;
+  };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
   var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
   var lista = function (k) { return (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : []; };
@@ -210,7 +223,7 @@
   }
   function precioPortada() {
     var e = S.est && S.est.barato;
-    return e ? '<b>Desde ' + usd(e.pp) + '</b>por persona, estimado' : '';
+    return e ? '<b>Desde ' + usd(e.pp) + '</b>por persona, estimado' + (mesEst() ? ', viajando en ' + mesEst() : '') : '';
   }
   /* Resumen practico. Cada dato sale de algo que ya existe y si no esta, no se muestra:
      - presupuesto y como llegar: la misma estimacion de la portada de la app (/api/destinos-destacados, calibrada con
@@ -237,7 +250,7 @@
       var incluye = [INCLUYE_MEDIO[e.barato.mode] || 'Transporte', 'alojamiento económico', 'comidas', 'transporte local'].concat(e.barato.mode === 'auto' ? [] : ['traslados']);
       celdas.push('<div class="u-f"><span class="u-dato__l">' + icono('<path d="M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3.2c0 4.8 10 2.5 10 7.4 0 2.1-2.2 3.4-5 3.4s-5-1.3-5-3.2"/>') + 'Qué incluye el estimado</span>' +
         '<span class="u-dato__r">' + incluye.slice(0, -1).join(', ') + ' y ' + incluye[incluye.length - 1] + '</span>' +
-        '<span class="u-dato__n">Para 2 personas y 7 noches, saliendo de Montevideo. El precio final depende de tus fechas.</span></div>');
+        '<span class="u-dato__n">Para 2 personas y 7 noches, saliendo de Montevideo' + (mesEst() ? ' en ' + mesEst() + ', el mes más barato del próximo año' : '') + '. El precio final depende de tus fechas.</span></div>');
     }
     if (e && (e.barato || e.vuelo)) {
       var filas = [], vistos = {};
@@ -265,18 +278,31 @@
       '<div class="u-handoff__b"><a class="u-go" href="' + aPresupuesto('guia') + '" data-evento="guia_calcular_viaje" data-lugar="cierre" data-destino="' + K + '">Descubrí cuánto te costaría →</a></div></div>';
   }
   /* Estimacion para el resumen (sin vuelos en vivo: es el modelo, no gasta busquedas pagas). Fechas como la portada de
-     la app: salida en 45 dias, 7 noches. */
+     la app: 7 noches, en el mes mas barato de los proximos 11. */
   function cargarEstimado() {
     if (!/^https?:$/.test(location.protocol)) return;
-    var dep = C.sumarDias(C.iso(new Date()), 45), ret = C.sumarDias(dep, 7), item = K + '~' + dep + '~' + ret + '~economico';
-    var pedir = function (tr) {
-      return fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: tr, items: item }).toString())
-        .then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { return (j.items || [])[0] || null; }).catch(function () { return null; });
+    /* El 15 de cada uno de los proximos 11 meses (asi la ultima salida queda dentro del año que cotiza Ignav): un solo
+       pedido con los 11 y gana el mas barato. Es el modelo de costos con el pasaje real si ya esta en cache, sin
+       gastar busquedas. */
+    var hoy = new Date(), items = [];
+    for (var i = 1; i <= 11; i++) {
+      var d = new Date(hoy.getFullYear(), hoy.getMonth() + i, 15), dep = C.iso(d);
+      items.push(K + '~' + dep + '~' + C.sumarDias(dep, 7) + '~economico');
+    }
+    var pedir = function (tr, lista) {
+      return fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: tr, items: lista.join(',') }).toString())
+        .then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { return (j.items || []).filter(function (x) { return x.pp > 0; }); }).catch(function () { return []; });
     };
-    Promise.all([pedir('all'), pedir('flight')]).then(function (r) {
-      S.est = { barato: r[0] && r[0].pp > 0 ? r[0] : null, vuelo: r[1] && r[1].pp > 0 ? r[1] : null };
+    pedir('all', items).then(function (l) {
+      var b = l.reduce(function (min, x) { return !min || x.pp < min.pp ? x : min; }, null);
+      if (!b) return [null, null];
+      return pedir('flight', [K + '~' + b.dep + '~' + b.ret + '~economico']).then(function (v) { return [b, v[0] || null]; });
+    }).then(function (r) {
+      S.est = { barato: r[0], vuelo: r[1], dep: r[0] && r[0].dep, ret: r[0] && r[0].ret };
       var el = $('u-datos'); if (el) el.innerHTML = resumenPractico();
       var pr = $('u-precio'); if (pr) pr.innerHTML = precioPortada();
+      /* Con el estimado ya se sabe el medio (avion, auto, bus): los links lo suman y la app no lo vuelve a preguntar. */
+      document.querySelectorAll('a[href^="home-destino.html"]').forEach(function (a) { a.href = aPresupuesto(new URLSearchParams(a.getAttribute('href').split('?')[1]).get('fuente') || 'guia'); });
     });
   }
   /* Credito de la foto: solo las de Wikimedia con CC BY / BY-SA lo piden (autor y licencia), y va chiquito sobre la
