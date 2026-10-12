@@ -2488,6 +2488,63 @@ function haversineKm(a, b) {
       flights.clearCache();
     }
   });
+  await t('alertas de precio: avisan solo si el vuelo baja de verdad y el link de baja va firmado', async function () {
+    const alertas = require('./lib/alertas');
+    assert.ok(alertas.debeAvisar(600, 560), 'bajo 40 (6,7 %): avisa');
+    assert.ok(!alertas.debeAvisar(600, 590), 'bajo 10 (1,7 %): no avisa, es ruido');
+    assert.ok(!alertas.debeAvisar(150, 141), 'bajo 6 %, pero solo US$ 9: no avisa');
+    assert.ok(!alertas.debeAvisar(600, 620), 'subio: no avisa');
+    assert.ok(!alertas.debeAvisar(0, 100) && !alertas.debeAvisar(600, null), 'sin precio: no avisa');
+    const id = '11111111-2222-3333-4444-555555555555';
+    const viejo = process.env.ALERTAS_SECRET; process.env.ALERTAS_SECRET = 'secreto-de-prueba';
+    try {
+      assert.ok(alertas.firmaValida(id, alertas.firmaBaja(id)));
+      assert.ok(!alertas.firmaValida(id, 'x'.repeat(32)), 'una firma inventada no da de baja');
+      assert.ok(!alertas.firmaValida('99999999-2222-3333-4444-555555555555', alertas.firmaBaja(id)), 'la firma de una alerta no sirve para otra');
+    } finally { if (viejo === undefined) delete process.env.ALERTAS_SECRET; else process.env.ALERTAS_SECRET = viejo; }
+    // Sin sesion no se crean ni se listan alertas.
+    const sin = await post(port, '/api/alertas', { destino: 'rio', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 2 });
+    assert.ok(sin.status === 401 || sin.status === 503, 'sin sesion: ' + sin.status);
+    const baja = await get(port, '/api/alertas/baja?id=' + id + '&f=inventada');
+    assert.strictEqual(baja.status, 400);
+  });
+  await t('alertas de precio: la revision diaria mide cada ruta una vez, avisa la baja y respeta el tope', async function () {
+    const envViejo = {};
+    ['SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ANON_KEY', 'RESEND_API_KEY', 'CRON_SECRET', 'ALERTAS_MAX_DIA'].forEach(function (k) { envViejo[k] = process.env[k]; });
+    Object.assign(process.env, { SUPABASE_SERVICE_ROLE_KEY: 'srv', SUPABASE_ANON_KEY: 'anon', RESEND_API_KEY: 're', CRON_SECRET: '', ALERTAS_MAX_DIA: '50' });
+    const lejos = function (d) { return new Date(Date.now() + d * 864e5).toISOString().slice(0, 10); };
+    const fila = function (id, destino, ref, email) { return { id: id, destino: destino, fecha_ida: lejos(30), fecha_vuelta: lejos(36), pasajeros: 2, email: email, nombre: 'Ana', precio_inicial: ref, precio_referencia: ref, avisos: 0 }; };
+    const filas = [fila('a1', 'rio', 600, 'a@x.com'), fila('a2', 'rio', 600, 'b@x.com'), fila('a3', 'fln', 500, 'c@x.com')];
+    const parches = [], mails = [], medidas = [];
+    const h = {
+      sendJson: function (res, status, obj) { res.status = status; res.body = obj; },
+      fetchWithTimeout: async function (u, init) {
+        const ok = function (body) { return { ok: true, status: 200, text: async function () { return JSON.stringify(body); }, json: async function () { return body; } }; };
+        if (u.indexOf('api.resend.com') >= 0) { mails.push(JSON.parse(init.body)); return ok({ id: 'm' }); }
+        if (init && init.method === 'PATCH') { parches.push({ u: u, body: JSON.parse(init.body) }); return ok(/fecha_ida=lte/.test(u) ? [] : []); }
+        return ok(filas);
+      },
+      precio: async function (destino) { medidas.push(destino); return destino === 'rio' ? 540 : 495; },
+      gastoHoy: function () { return medidas.length; },
+      nombreDestino: function (k) { return { rio: 'Río de Janeiro', fln: 'Florianópolis' }[k] || null; }
+    };
+    try {
+      const alertasMod = require('./lib/alertas'), mod = alertasMod(h), res = {};
+      await mod.revisar({ headers: {} }, res);
+      assert.strictEqual(res.status, 200, JSON.stringify(res.body));
+      assert.deepStrictEqual(medidas.sort(), ['fln', 'rio'], 'dos alertas a Rio con la misma ruta se miden una sola vez');
+      assert.strictEqual(mails.length, 2, 'Rio bajo de 600 a 540: avisa a las dos personas; Floripa bajo 1 %: no');
+      assert.ok(mails.every(function (m) { return /Río de Janeiro/.test(m.subject) && /alertas\/baja\?id=/.test(m.html); }), 'el mail dice el destino y trae el link para darse de baja');
+      const a1 = parches.filter(function (p) { return /id=eq\.a1/.test(p.u); })[0];
+      assert.strictEqual(a1.body.precio_referencia, 540, 'despues de avisar, la referencia pasa a ser el precio nuevo');
+      const a3 = parches.filter(function (p) { return /id=eq\.a3/.test(p.u); })[0];
+      assert.ok(a3.body.precio_ultimo === 495 && a3.body.precio_referencia === undefined, 'sin aviso la referencia no cambia');
+      // Con el tope en 0 no se mide nada: quedan pendientes para el dia siguiente.
+      process.env.ALERTAS_MAX_DIA = '0'; medidas.length = 0; mails.length = 0;
+      const res2 = {}; await alertasMod(h).revisar({ headers: {} }, res2);
+      assert.strictEqual(medidas.length, 0); assert.strictEqual(res2.body.pendientes, 3);
+    } finally { Object.keys(envViejo).forEach(function (k) { if (envViejo[k] === undefined) delete process.env[k]; else process.env[k] = envViejo[k]; }); }
+  });
   server.close();
   try { fs.unlinkSync(process.env.VUELOS_CACHE_FILE); } catch (e) { /* no se llego a escribir */ }
   console.log('\n' + passed + ' pruebas OK' + (process.exitCode ? ' (con fallas)' : ''));

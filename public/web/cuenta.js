@@ -8,7 +8,7 @@
    API para otras pantallas:
      CSCuenta.usuario()                 -> usuario actual o null
      CSCuenta.alCambiar(fn)             -> fn(usuario) al iniciar/cerrar sesion
-     CSCuenta.abrir(vista)              -> abre el panel ('menu' | 'viajes' | 'login')
+     CSCuenta.abrir(vista)              -> abre el panel ('menu' | 'viajes' | 'alertas' | 'login')
      CSCuenta.guardarViaje(datos)       -> Promise; rechaza con { codigo: 'sin_sesion' } si no hay sesion */
 (function () {
   'use strict';
@@ -33,6 +33,7 @@
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
     dl: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
     conv: '<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
+    bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0"/>',
     pas: '<rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 17h6"/>',
     alc: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/>',
     mail: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/>'
@@ -273,17 +274,31 @@
     pintar();
     iniciar().then(function () {
       if (S.vista === 'viajes') { if (usuario) cargarViajes(); else ir('login'); }
+      else if (S.vista === 'alertas') { if (usuario) cargarAlertas(); else ir('login'); }
       else if (S.vista === 'editar' && !usuario) ir('login');
       else pintar();
-    }, function (e) { if (S.vista === 'viajes' || S.vista === 'editar') S.vista = 'login'; S.error = e.message; pintar(); });
+    }, function (e) { if (S.vista === 'viajes' || S.vista === 'alertas' || S.vista === 'editar') S.vista = 'login'; S.error = e.message; pintar(); });
     var f = raiz.querySelector('[data-foco]') || raiz.querySelector('button'); if (f) f.focus();
   }
   function cerrar() { if (!raiz) return; raiz.hidden = true; document.documentElement.classList.remove('cs-perfil-abierto'); }
-  function ir(v) { S.vista = v; S.error = ''; S.aviso = ''; pintar(); if (v === 'viajes') cargarViajes(); var f = raiz.querySelector('[data-foco]'); if (f) f.focus(); }
+  function ir(v) { S.vista = v; S.error = ''; S.aviso = ''; pintar(); if (v === 'viajes') cargarViajes(); if (v === 'alertas') cargarAlertas(); var f = raiz.querySelector('[data-foco]'); if (f) f.focus(); }
   function cargarViajes() {
     if (!usuario) { S.vista = 'login'; pintar(); return; }
     S.cargando = true; S.viajes = null; S.error = ''; pintar();
     listarViajes().then(function (l) { S.viajes = l; }, function (e) { S.error = e.message; }).then(function () { S.cargando = false; pintar(); });
+  }
+  /* Alertas de precio de vuelos (/api/alertas, lib/alertas.js): se crean desde la pantalla de vuelos y aca se ven y se apagan. */
+  function pedirAlertas(metodo, qs) {
+    return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) {
+      var tk = r.data && r.data.session ? r.data.session.access_token : '';
+      if (!tk) throw new Error('Iniciá sesión para ver tus alertas.');
+      return fetch('/api/alertas' + (qs || ''), { method: metodo, headers: { Authorization: 'Bearer ' + tk } });
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'No pudimos cargar tus alertas.'); return j; }); });
+  }
+  function cargarAlertas() {
+    if (!usuario) { S.vista = 'login'; pintar(); return; }
+    S.cargando = true; S.alertas = null; S.error = ''; pintar();
+    pedirAlertas('GET').then(function (j) { S.alertas = j.alertas || []; }, function (e) { S.error = e.message; }).then(function () { S.cargando = false; pintar(); });
   }
   var fila = function (icono, texto, attr, extra, rojo) {
     return '<button type="button" class="cp-fila' + (rojo ? ' is-rojo' : '') + '" ' + attr + '><span class="cp-fila__i">' + ic(icono, 22) + '</span><span class="cp-fila__t">' + texto + '</span>' + (extra === undefined ? ic(I.chev, 16) : extra) + '</button>';
@@ -312,6 +327,7 @@
       (window.CS_GAME ? fila(I.pas, 'Mi pasaporte<small class="cp-fila__s">' + esc(xpResumen()) + '</small>', 'data-pasaporte') : '') +
       fila(I.alc, 'Mi ahorro de viaje<small class="cp-fila__s">' + esc(alcResumen()) + '</small>', 'data-alcancia') +
       fila(I.save, 'Mis viajes guardados', 'data-viajes') +
+      fila(I.bell, 'Alertas de precio', 'data-alertas') +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
       (window.CSMoneda && CSMoneda.tasaDe ? fila(I.conv, 'Conversor de monedas', 'data-conversor') : '') +
       interruptor() +
@@ -378,6 +394,22 @@
     }).join('');
     return cabecera('Mis viajes guardados') + '<div class="cp-cuerpo" data-foco tabindex="-1">' + cuerpo + '</div>';
   }
+  function vistaAlertas() {
+    var cuerpo;
+    if (S.cargando) cuerpo = '<p class="cp-p" role="status">Cargando tus alertas…</p>';
+    else if (S.error) cuerpo = '<p class="cp-err" role="alert">' + esc(S.error) + '</p>';
+    else if (!S.alertas || !S.alertas.length) cuerpo = '<p class="cp-p">No estás siguiendo ningún vuelo. En la pantalla de vuelos de tu viaje tocá <b>Avisame si baja</b> y te escribimos cuando baje el precio.</p><a class="cp-btn" href="/">Armar un viaje</a>';
+    else cuerpo = '<p class="cp-p">Revisamos estos vuelos una vez por día y te mandamos un email si el más barato baja.</p>' + S.alertas.map(function (a) {
+      var pax = Number(a.pasajeros) || 1, bajo = a.precio_ultimo != null && a.precio_ultimo < a.precio_inicial;
+      var url = '/planificar?' + new URLSearchParams({ destino: a.destino, ida: a.fecha_ida, vuelta: a.fecha_vuelta, pax: String(pax) }).toString();
+      return '<article class="cp-viaje"><div class="cp-viaje__t"><b>Montevideo → ' + esc(a.nombre_destino) + '</b><small>' + esc(fdc(a.fecha_ida) + ' → ' + fdc(a.fecha_vuelta)) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas') + '</small></div>' +
+        '<div class="cp-viaje__p"><small>' + (bajo ? 'Bajó: ahora' : 'Precio del vuelo') + '</small><b>' + esc(money(a.precio_ultimo != null ? a.precio_ultimo : a.precio_inicial)) + '</b></div>' +
+        (bajo ? '<p class="cp-nota">Cuando creaste la alerta: ' + esc(money(a.precio_inicial)) + '</p>' : '') +
+        '<div class="cp-viaje__a"><a class="cp-btn cp-btn--s" href="' + esc(url) + '">Ver vuelos</a>' +
+        '<button type="button" class="cp-btn cp-btn--s cp-btn--o" data-alerta-off="' + esc(a.id) + '">Dejar de seguir</button></div></article>';
+    }).join('');
+    return cabecera('Alertas de precio') + '<div class="cp-cuerpo" data-foco tabindex="-1">' + cuerpo + '</div>';
+  }
   function vistaEditar() {
     var u = usuario;
     return cabecera('Mi perfil') + '<div class="cp-cuerpo"><form id="cp-perfil" novalidate><label class="cp-l" for="cp-nom">Nombre</label><input id="cp-nom" class="cp-in" type="text" autocomplete="name" maxlength="60" value="' + esc(nombreDe(u)) + '" data-foco>' +
@@ -388,9 +420,9 @@
   function pintar() {
     if (!raiz) return;
     var v = S.vista;
-    if ((v === 'viajes' || v === 'editar') && !usuario && !listo) { raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + cabecera('Mi cuenta') + '<div class="cp-cuerpo"><p class="cp-p" role="status">Cargando…</p></div></div>'; return; }
-    if ((v === 'viajes' || v === 'editar') && !usuario) v = S.vista = 'login';
-    raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? vistaViajes() : v === 'editar' ? vistaEditar() : v === 'conversor' ? vistaConversor() : menu()) + '</div>';
+    if ((v === 'viajes' || v === 'alertas' || v === 'editar') && !usuario && !listo) { raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + cabecera('Mi cuenta') + '<div class="cp-cuerpo"><p class="cp-p" role="status">Cargando…</p></div></div>'; return; }
+    if ((v === 'viajes' || v === 'alertas' || v === 'editar') && !usuario) v = S.vista = 'login';
+    raiz.innerHTML = '<div class="cp-fondo" data-cerrar></div><div class="cp-hoja" role="dialog" aria-modal="true" aria-label="Mi cuenta">' + (v === 'login' ? vistaLogin() : v === 'viajes' ? vistaViajes() : v === 'alertas' ? vistaAlertas() : v === 'editar' ? vistaEditar() : v === 'conversor' ? vistaConversor() : menu()) + '</div>';
     if (v === 'login') montarGoogle(raiz.querySelector('[data-google]'), {
       ok: function () { S.error = ''; ir('menu'); },
       error: function () { S.error = 'Google no pudo validar tu cuenta. Probá con el botón de nuevo o entrá con tu correo.'; pintar(); }
@@ -402,6 +434,14 @@
     if (t.hasAttribute('data-cerrar')) { cerrar(); return; }
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
     if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
+    if (t.hasAttribute('data-alertas')) { if (usuario) ir('alertas'); else iniciar().then(function () { ir(usuario ? 'alertas' : 'login'); }, function () { ir('login'); }); return; }
+    if (t.hasAttribute('data-alerta-off')) {
+      var aid = t.getAttribute('data-alerta-off');
+      t.disabled = true;
+      pedirAlertas('DELETE', '?id=' + encodeURIComponent(aid)).then(function () { S.alertas = (S.alertas || []).filter(function (x) { return String(x.id) !== String(aid); }); S.error = ''; pintar(); },
+        function (er) { S.error = er.message; pintar(); });
+      return;
+    }
     if (t.hasAttribute('data-pasaporte')) { cerrar(); window.CS_GAME.abrir(); return; }
     if (t.hasAttribute('data-alcancia')) { location.href = '/ahorro'; return; }
     if (t.hasAttribute('data-dividir')) { location.href = '/grupo?volver=' + encodeURIComponent(location.pathname.indexOf('/nuevo') === 0 ? '/nuevo/' : '/'); return; }

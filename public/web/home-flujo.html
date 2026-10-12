@@ -865,6 +865,16 @@
   @keyframes fl-gira{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion:reduce){.fl-spin{animation-duration:2.4s}}
   .f-fuente{margin:10px 2px 0;font-size:13px;line-height:1.5;color:var(--ink2)}
+  /* Alerta de precio del vuelo (lib/alertas.js) */
+  .al-box{display:flex;gap:12px;align-items:flex-start;margin:14px 0 4px;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink)}
+  .al-box__i{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--action-bg);color:var(--action-ink)}
+  .al-box__t{flex:1;min-width:0}
+  .al-box__t b{display:block;font-size:15px}
+  .al-box__t p{margin:3px 0 10px;font-size:13.5px;line-height:1.45;color:var(--ink2)}
+  .al-box__t p:last-child{margin-bottom:0}
+  .al-box .g-btn{width:auto;min-height:40px;padding:8px 16px;font-size:14px}
+  .al-box__ok{color:var(--ink)}
+  .al-box__link{padding:0;border:0;background:none;color:var(--ink);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
   .f-fuente a{color:inherit;font-weight:700}
   .fl-vacio{display:grid;gap:12px;margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:center}
   .fl-vacio b{font-size:14.5px;line-height:1.4;color:var(--ink)}
@@ -1478,6 +1488,8 @@
 
   /* ---- Vuelos: solo los reales de /api/vuelos/buscar. Sin ejemplos: hasta que llegan se ve "Buscando vuelos…"
      y, si no hay, se dice que no hay. SIN_VUELO evita que el resto del flujo se rompa mientras tanto (precio 0). ---- */
+  /* Alerta de precio del vuelo: '' | 'enviando' | 'ok' | 'error'. Se reinicia al cambiar de fechas (otra pagina). */
+  var ALERTA = { estado: '', email: '', precio: 0, error: '', pendiente: false };
   var VUELOS = [];
   var SIN_VUELO = { id: '', air: 'Vuelo', ab: '✈', sal: '--:--', lle: '--:--', dur: 0, durT: '', esc: 0, escT: '', precio: 0, ejemplo: true };
   /* Sin alojamiento elegido (la persona siguio sin elegir, o Booking todavia no respondio): suma 0 y no rompe el presupuesto. */
@@ -1782,6 +1794,28 @@
   function fuenteVuelos() {
     return '<p class="f-fuente">Precio real consultado en Google Flights. La aerolínea confirma el precio final al reservar. <a href="/como-calculamos#vuelos">¿De dónde salen los precios?</a></p>';
   }
+  /* "Avisame si baja": guarda la ruta en /api/alertas y el cron diario manda un email si el vuelo mas barato baja. */
+  function cajaAlerta() {
+    var campana = ic('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0"/>', 20), t;
+    if (ALERTA.estado === 'ok') t = '<b>Te avisamos si baja</b><p class="al-box__ok" role="status">Seguimos este vuelo todos los días. Si baja de <b>' + f(ALERTA.precio) + '</b> te escribimos a ' + esc(ALERTA.email) + '.</p>' +
+      '<p><button type="button" class="al-box__link" data-alerta-ver>Ver mis alertas</button></p>';
+    else t = '<b>¿Todavía no te decidís?</b><p>Te avisamos por email si baja el precio de este vuelo. Es gratis y lo apagás cuando quieras.</p>' +
+      (ALERTA.error ? '<p class="g-err" role="alert">' + esc(ALERTA.error) + '</p>' : '') +
+      '<button type="button" class="g-btn" data-alerta' + (ALERTA.estado === 'enviando' ? ' disabled' : '') + '>' + (ALERTA.estado === 'enviando' ? 'Creando la alerta…' : 'Avisame si baja') + '</button>';
+    return '<div class="al-box"><span class="al-box__i" aria-hidden="true">' + campana + '</span><div class="al-box__t">' + t + '</div></div>';
+  }
+  function crearAlerta() {
+    var u = window.CSCuenta && CSCuenta.usuario();
+    if (!u) { ALERTA.pendiente = true; track('alerta_precio_login', {}); CSCuenta.abrir('login'); return; }
+    ALERTA.pendiente = false; ALERTA.estado = 'enviando'; ALERTA.error = ''; render(false);
+    CSCuenta.token().then(function (tk) {
+      return fetch('/api/alertas', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tk },
+        body: JSON.stringify({ destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax }) });
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.alerta) throw new Error(j.error || 'No pudimos crear la alerta. Probá de nuevo en un momento.'); return j; }); })
+      .then(function (j) { ALERTA.estado = 'ok'; ALERTA.email = j.email || u.email || ''; ALERTA.precio = j.alerta.precio_inicial; track('alerta_precio_creada', { precio: Math.round(ALERTA.precio), ya_existia: !!j.ya }); },
+        function (e) { ALERTA.estado = 'error'; ALERTA.error = e && e.message || 'No pudimos crear la alerta.'; track('alerta_precio_error', {}); })
+      .then(function () { render(false); });
+  }
   function pantalla1() {
     if (MODO === 'bus') return pantallaBus();
     /* Recomendados: solo los que de verdad convienen (hasta 3), sin "Ver mas". Los otros filtros: 3 y "Ver mas opciones". */
@@ -1797,7 +1831,7 @@
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
         '<a class="g-btn g-btn--main" href="' + esc(cambiarFechas) + '">Cambiar fechas</a></div>' : '') +
       (VUELOS.length > 1 ? chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') : '') +
-      (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' + fuenteVuelos() : '') +
+      (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' + fuenteVuelos() + cajaAlerta() : '') +
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
       '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
@@ -3387,6 +3421,12 @@
     var rb = e.target.closest('[data-reintentar-bus]'); if (rb) { cargarBus(); return; }
     var b = e.target.closest('[data-ir]'); if (b) ir(+b.dataset.ir, 'indicador', b.dataset.sub);
   });
+  $('main').addEventListener('click', function (e) {
+    if (e.target.closest('[data-alerta]')) { crearAlerta(); return; }
+    if (e.target.closest('[data-alerta-ver]')) CSCuenta.abrir('alertas');
+  });
+  /* Quien toco "Avisame si baja" sin sesion: al entrar, la alerta se crea sola. */
+  CSCuenta.alCambiar(function (u) { if (u && ALERTA.pendiente) crearAlerta(); });
   /* Copiar el codigo del viaje (paso 7). */
   $('main').addEventListener('click', function (e) {
     var c = e.target.closest('[data-copiar]'); if (!c) return;

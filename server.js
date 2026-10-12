@@ -1647,6 +1647,24 @@ function pasaporteApi() {
   if (!pasaporteCache) pasaporteCache = require('./lib/pasaporte')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, tasas: getTasas });
   return pasaporteCache;
 }
+/* Alertas de precio de vuelos (lib/alertas.js). El precio es el total del vuelo mas barato con la MISMA busqueda que
+   la pantalla de vuelos (searchOffers, misma clave de cache): crear una alerta justo despues de buscar no gasta nada. */
+let alertasCache = null;
+async function precioVueloMasBarato(destino, ida, vuelta, pax) {
+  const destination = AIR_DESTINATIONS[destino];
+  if (!destination || !flightProviders.isLive()) return null;
+  try {
+    const r = await flightProviders.searchOffers({ origin: 'MVD', destination: destination, departureDate: ida, returnDate: vuelta, passengers: pax, style: 'ahorro' });
+    const ps = (r && r.offers || []).map(function (o) { return Number(o.price_usd); }).filter(function (n) { return n > 0; });
+    return ps.length ? Math.round(Math.min.apply(null, ps) * 100) / 100 : null;
+  } catch (e) { return null; }
+}
+function alertasApi() {
+  if (!alertasCache) alertasCache = require('./lib/alertas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout,
+    precio: precioVueloMasBarato, gastoHoy: function () { return flightProviders.stats().gastoHoy || 0; },
+    nombreDestino: function (k) { return AIR_DESTINATIONS[k] && model.DEST[k] ? model.DEST[k].name : null; } });
+  return alertasCache;
+}
 let reservasCache = null;
 function reservasApi() {
   if (!reservasCache) reservasCache = require('./lib/reservas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, escapeHtml: escapeHtml, guardarPedido: guardarPedido, guardarMensaje: guardarMensaje, pasaporte: pasaporteApi() });
@@ -2702,13 +2720,13 @@ function prelaunchAuthorized(req) {
    - /api/travelpayouts/postback: lo llama el panel de Travelpayouts desde
      afuera, sin sesion ni basic auth. Si estuviera candado, la venta nunca se
      confirmaria y ademas el panel lo marcaria como error. */
-const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/travelpayouts/postback', '/api/whatsapp/webhook']);
+const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/travelpayouts/postback', '/api/whatsapp/webhook', '/api/alertas/baja']);
 
 // Rutas que NO pasan por el candado de pre-lanzamiento. Queda vacío a propósito:
 // el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
 // la app ya no emite boletos. Todos los endpoints de la API, incluido el
 // calendario de vuelos, siguen pidiendo user/pass.
-const PRELAUNCH_EXEMPT = new Set(['/api/precalentar']);   // trae su propio secreto (CRON_SECRET)
+const PRELAUNCH_EXEMPT = new Set(['/api/precalentar', '/api/alertas/revisar']);   // traen su propio secreto (CRON_SECRET)
 
 function denyPrelaunchJson(res) {
   // Sin WWW-Authenticate a propósito: en una respuesta a un fetch de la app
@@ -3188,6 +3206,12 @@ function handleRequest(req, res) {
       return readJson(req).then(function (body) { return buscarVuelos(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la búsqueda.' });
       });
+    }
+    if (url.pathname === '/api/alertas' || url.pathname === '/api/alertas/baja' || url.pathname === '/api/alertas/revisar') {
+      const al = alertasApi(), alFallarAl = function (e) { console.error('[alertas]', e.message); if (!res.headersSent) sendJson(res, 500, { error: 'No pudimos procesar la alerta.' }); };
+      if (url.pathname === '/api/alertas') return al.api(req, res, url).catch(alFallarAl);
+      if (req.method !== 'GET') return sendJson(res, 405, { error: 'Método no permitido.' });
+      return (url.pathname === '/api/alertas/baja' ? al.baja(req, res, url) : al.revisar(req, res)).catch(alFallarAl);
     }
     if (req.method === 'GET' && url.pathname === '/api/precalentar') {
       return precalentarVuelos(req, res).catch(function (e) {
