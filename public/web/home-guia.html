@@ -75,6 +75,7 @@
   .u-mas:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
   .u-foto{height:220px;margin:-16px -16px 14px;border-radius:20px 20px 0 0;background:var(--cel-soft) center/cover}
   .u-precio{display:inline-block;margin-top:7px;padding:5px 11px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:14px;font-weight:800}
+  [role="tabpanel"]>section[aria-label="Clima por mes"]{grid-column:1/-1}
   .u-clima{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:var(--surface);margin-bottom:10px;scrollbar-width:thin}
   .u-clima table{border-collapse:collapse;width:100%;font-size:12.5px}
   .u-clima th,.u-clima td{padding:9px 1px;text-align:center;border-bottom:1px solid var(--line);color:var(--ink);white-space:nowrap}
@@ -392,7 +393,7 @@
         (ts.length ? '<div class="u-tabs" role="tablist" aria-label="Categorías de la guía">' + ts.map(function (t) {
           return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + cuantos(t) + '</small></button>';
         }).join('') + '</div>' +
-        '<div role="tabpanel">' + (S.tab === ts[0].id ? climaHtml() : '') + listaGuia() + '</div>' : '') +
+        '<div role="tabpanel">' + (S.tab === ts[0].id && climaHtml() ? climaHtml() + '<span hidden></span>' : '') + listaGuia() + '</div>' : '') +
         '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota && !S.guia.clima ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
         cierre() + '</div>';
     }
