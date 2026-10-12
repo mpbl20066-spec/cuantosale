@@ -351,15 +351,15 @@
   var iso = function (d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); };
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
   var HOY = iso(new Date());
-  /* Los vuelos se pueden buscar con hasta 6 meses de anticipacion: ninguna fecha pasa de hoy + 6 meses.
-     Si el dia no existe en ese mes (31 de agosto + 6 = 31 de febrero) queda el ultimo dia del mes. */
-  var MAXF = (function () { var d = new Date(), m = new Date(d.getFullYear(), d.getMonth() + 6, 1), u = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(); m.setDate(Math.min(d.getDate(), u)); return iso(m); })();
+  /* Los vuelos se pueden buscar con hasta 12 meses de anticipacion: ninguna fecha pasa de hoy + 12 meses.
+     Si el dia no existe en ese mes (29 de febrero + 12) queda el ultimo dia del mes. */
+  var MAXF = (function () { var d = new Date(), m = new Date(d.getFullYear(), d.getMonth() + 12, 1), u = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate(); m.setDate(Math.min(d.getDate(), u)); return iso(m); })();
   var MAXIDA = sumarDias(MAXF, -1);   /* la ida deja al menos una noche antes del tope */
   /* Paso 1: presupuesto y como viaja (cuando). Paso 2: fechas, mes o noches. Paso 3: resultados. */
   var ORIGENES0 = 'Montevideo, Uruguay';
   var S = { origen: ORIGENES0, paso: 1, cuando: 'fechas', presupuesto: +qs.get('presupuesto') || 1000, pax: +qs.get('pax') || 2, ida: qs.get('ida') || '2026-12-26', vuelta: qs.get('vuelta') || '2027-01-02',
     mes: -1, noches: '5-7', err: '', modo: 'todos', medio: 'comparar', tipo: 'todos', abierto: null, modoDet: 'auto', cargando: false, error: '', n: 6 };
-  /* Fechas dentro del tope de 6 meses (tambien las que llegan por la URL). */
+  /* Fechas dentro del tope de 12 meses (tambien las que llegan por la URL). */
   function acotarFechas() {
     if (S.ida > MAXIDA) S.ida = MAXIDA;
     if (S.vuelta > MAXF) S.vuelta = MAXF;
@@ -380,7 +380,7 @@
     var n = NOCHES_N[S.noches], ida;
     if (S.cuando === 'flexible') { var m = mesesOfrecidos().filter(function (x) { return x.i === S.mes; })[0]; ida = iso(new Date(m.y, m.i, 12)); }
     else ida = sumarDias(HOY, 45);
-    /* el ultimo mes ofrecido puede pasarse del tope de 6 meses: el viaje se corre para atras */
+    /* el ultimo mes ofrecido puede pasarse del tope de 12 meses: el viaje se corre para atras */
     if (sumarDias(ida, n) > MAXF) return { ida: sumarDias(MAXF, -n), vuelta: MAXF };
     return { ida: ida, vuelta: sumarDias(ida, n) };
   }
@@ -447,7 +447,7 @@
   var iPers = '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>';
   var iMezcla = '<path d="M3 7h3c4 0 5 10 9 10h6M3 17h3c1.5 0 2.600-1 3.500-2.500M15 7h6M18 4l3 3-3 3M18 14l3 3-3 3"/>';
   var CUANDO = [['fechas', 'Tengo fechas', iCal], ['flexible', 'Soy flexible', iCal], ['igual', 'Me da igual', iMezcla]];
-  var TXT_TOPE = function () { return 'Podés elegir fechas hasta el ' + fdc(MAXF) + ' ' + MAXF.slice(0, 4) + ': los vuelos se buscan con hasta 6 meses de anticipación.'; };
+  var TXT_TOPE = function () { return 'Podés elegir fechas hasta el ' + fdc(MAXF) + ' ' + MAXF.slice(0, 4) + ': los vuelos se buscan con hasta 12 meses de anticipación.'; };
   var ayuda = function () { return S.err ? '<p class="g-err p-err" role="alert">' + esc(S.err) + '</p>' : ''; };
   var personas = function () {
     return '<h2 class="p-h2">¿Cuántas personas?</h2><div class="p-pers">' + ic(iPers, 22) + '<b>' + S.pax + (S.pax === 1 ? ' persona' : ' personas') + '</b>' +

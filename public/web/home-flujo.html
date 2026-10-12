@@ -1504,8 +1504,8 @@
   var SIN_VUELO = { id: '', air: 'Vuelo', ab: '✈', sal: '--:--', lle: '--:--', dur: 0, durT: '', esc: 0, escT: '', precio: 0, ejemplo: true };
   /* Sin alojamiento elegido (la persona siguio sin elegir, o Booking todavia no respondio): suma 0 y no rompe el presupuesto. */
   var SIN_HOTEL = { id: '', nom: 'Sin alojamiento', zona: '', rat: 0, n: 0, precio: 0, serv: [], ejemplo: true, sin: true };
-  /* Los vuelos se pueden buscar hasta 6 meses antes de la salida. */
-  var MAX_MESES = 6;
+  /* Los vuelos se pueden buscar hasta 12 meses antes de la salida. */
+  var MAX_MESES = 12;
   var limiteVuelos = (function () { var d = new Date(); d.setHours(0, 0, 0, 0); d.setMonth(d.getMonth() + MAX_MESES); return d; })();
   var idaMuyLejos = new Date(IDA + 'T00:00:00') > limiteVuelos;
   /* Traslados: tabla real de la app (transfer-precios.js). compartido = USD por persona;
@@ -3047,7 +3047,7 @@
   }
   function cargarVuelos() {
     if (!/^https?:$/.test(location.protocol)) { S.avisoV = 'Abrí la página desde el servidor de la app para ver los vuelos.'; return; }
-    if (idaMuyLejos) { S.avisoV = 'Los vuelos se pueden buscar hasta 6 meses antes de viajar. Elegí una fecha de ida más cercana.'; track('flujo_vuelos', { reales: false, motivo: 'mas_de_6_meses' }); render(false); return; }
+    if (idaMuyLejos) { S.avisoV = 'Los vuelos se pueden buscar hasta ' + MAX_MESES + ' meses antes de viajar. Elegí una fecha de ida más cercana.'; track('flujo_vuelos', { reales: false, motivo: 'mas_de_' + MAX_MESES + '_meses' }); render(false); return; }
     /* Fechas que no sirven (pasadas, vuelta antes de la ida o mal escritas) o un destino que no existe: se avisa
        aca, sin gastar una busqueda paga que igual iba a fallar con un "probá en unos minutos" engañoso. */
     var hoyF = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10), fOk = /^\d{4}-\d{2}-\d{2}$/;

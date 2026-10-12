@@ -336,9 +336,9 @@
   var sumarDias = function (s, n) { var d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
   var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
   var fdc = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : (+q[2] + ' ' + MESES[+q[1] - 1]); };
-  /* Los vuelos se buscan hasta 6 meses adelante: el calendario, los campos y "Continuar" no dejan pasar de esa fecha.
-     (Si el dia no existe en ese mes, p. ej. 31 de agosto + 6 meses, queda el ultimo dia del mes.) */
-  var MAXF = (function () { var d = new Date(HOY.getFullYear(), HOY.getMonth() + 6, HOY.getDate(), 12); if (d.getDate() !== HOY.getDate()) d.setDate(0); return iso(d); })();
+  /* Los vuelos se buscan hasta 12 meses adelante: el calendario, los campos y "Continuar" no dejan pasar de esa fecha.
+     (Si el dia no existe en ese mes, p. ej. 29 de febrero + 12 meses, queda el ultimo dia del mes.) */
+  var MAXF = (function () { var d = new Date(HOY.getFullYear(), HOY.getMonth() + 12, HOY.getDate(), 12); if (d.getDate() !== HOY.getDate()) d.setDate(0); return iso(d); })();
   var MAXM = MAXF.slice(0, 7) + '-01';   // ultimo mes al que se puede llegar en el calendario
   var TACTIL = !!(window.matchMedia && matchMedia('(hover:none) and (pointer:coarse)').matches);   // celular: sin selector nativo
   var fLarga = function (s) { var q = String(s).split('-'); return +q[2] + ' de ' + ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][+q[1] - 1] + ' de ' + q[0]; };
@@ -455,7 +455,7 @@
     if (!S.vuelta) return { ok: false, pend: true, t: "Elegí la fecha de vuelta en el calendario." };
     var n = Math.round((new Date(S.vuelta + "T12:00:00") - new Date(S.ida + "T12:00:00")) / 864e5);
     if (!(n >= 1)) return { ok: false, t: "La vuelta tiene que ser posterior a la ida." };
-    if (S.vuelta > MAXF) return { ok: false, t: "Buscamos vuelos hasta 6 meses adelante: elegí fechas hasta el " + fLarga(MAXF) + "." };
+    if (S.vuelta > MAXF) return { ok: false, t: "Buscamos vuelos hasta 12 meses adelante: elegí fechas hasta el " + fLarga(MAXF) + "." };
     return { ok: true, t: plural(n, "noche", "noches") };   /* las personas ya se ven mas abajo: no se repiten aca */
   }
   /* Una fila de personas: nombre, aclaracion de edad y el selector - n +. Los limites los pone el que la llama. */
@@ -499,7 +499,7 @@
       '<button type="button" class="cal__nav cal__nav--n" data-calnav="1" aria-label="Mes siguiente"' + (esUltimo ? ' disabled' : '') + '>' + ic('<path d="m9 5 7 7-7 7"/>', 18) + '</button>' +
       '<div class="cal__ms">' + calMes(y, m) + calMes(y2, m2) + '</div>' +
       '<p class="cal__ay" aria-live="polite">' + (S.paso === 'vuelta' ? 'Ahora elegí la fecha de vuelta.' : (S.ida && S.vuelta ? 'Tocá otra fecha para cambiar el viaje.' : 'Elegí la fecha de ida y después la de vuelta.')) + '</p>' +
-      '<p class="cal__max">Buscamos vuelos hasta 6 meses adelante (hasta el ' + fLarga(MAXF) + ').</p>';
+      '<p class="cal__max">Buscamos vuelos hasta 12 meses adelante (hasta el ' + fLarga(MAXF) + ').</p>';
   }
   /* Despues de un toque en el calendario: campos, noches, marca del campo activo y calendario. */
   function calSync() {
@@ -647,7 +647,7 @@
       if (!(S.ida >= sumarDias(iso(HOY), 1))) { S.err = 'Elegí una fecha a partir de mañana.'; pant2(); return; }
       if (!S.vuelta) { S.err = 'Elegí la fecha de vuelta en el calendario.'; pant2(); return; }
       if (!(S.vuelta > S.ida)) { S.err = 'La fecha de vuelta tiene que ser posterior a la de ida.'; pant2(); return; }
-      if (S.ida > MAXF || S.vuelta > MAXF) { S.err = 'Buscamos vuelos hasta 6 meses adelante: elegí fechas hasta el ' + fLarga(MAXF) + '.'; pant2(); return; }
+      if (S.ida > MAXF || S.vuelta > MAXF) { S.err = 'Buscamos vuelos hasta 12 meses adelante: elegí fechas hasta el ' + fLarga(MAXF) + '.'; pant2(); return; }
       track('destino_continuar', { destino: S.dest, personas: S.pax });
       irA();
       return;
