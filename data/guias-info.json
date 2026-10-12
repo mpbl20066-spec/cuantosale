@@ -3896,5 +3896,1205 @@
     ]
    }
   ]
+ },
+ "arraial": {
+  "antes": {
+   "titulo": "Antes de viajar a Arraial do Cabo",
+   "intro": "Arraial do Cabo es un pueblo chico en la punta de la Región de los Lagos, a unos 165 km de Río. No tiene aeropuerto: se llega por Río o por Cabo Frio y se sigue por ruta.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Río",
+     "d": "Se vuela al Galeão (GIG) o a Santos Dumont (SDU) y de ahí son unas 2 h 30 por ruta. El aeropuerto de Cabo Frio (CFB) queda a unos 10 km, pero tiene pocos vuelos."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 3 o 4 días hacés el paseo en barco, el Pontal do Atalaia, el sendero al Forno y una tarde en la Praia Grande sin correr. Si querés sumar Cabo Frio o Búzios, agregá uno o dos días."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "El pueblo es chico y entre las playas cercanas se camina unos 20 minutos. Sin auto te arreglás con taxi, Uber y barco; el auto sirve si vas a combinar con Búzios o Cabo Frio."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Arraial do Cabo desde Montevideo",
+    "intro": "Se vuela a Río de Janeiro y se sigue unas 2 h 30 a 3 horas por tierra.",
+    "items": [
+     {
+      "t": "Vuelo a Río (GIG)",
+      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, y algunas llegan a Santos Dumont (SDU), más cerca del Puente Río-Niterói."
+     },
+     {
+      "t": "De Río a Arraial en auto",
+      "d": "Son unos 165 km desde Santos Dumont y unos 168 km desde el Galeão: Puente Río-Niterói, BR-101, Via Lagos (RJ-124, con peaje) y RJ-140 por São Pedro da Aldeia y Cabo Frio. Sin tránsito, unas 2 h 30."
+     },
+     {
+      "t": "Ómnibus desde la Rodoviária Novo Rio",
+      "d": "Auto Viação 1001 sale de la Rodoviária Novo Rio durante el día y tarda unas 3 horas. No todos los horarios paran en Arraial y en Cabo Frio: fijate al comprar. Del aeropuerto a la Rodoviária hay ómnibus ejecutivo, taxi o Uber; desde Santos Dumont también llega el VLT."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay transfers compartidos y privados desde los dos aeropuertos de Río y desde los hoteles de la Zona Sul hasta tu posada. Es lo más práctico si llegás con valijas."
+     },
+     {
+      "t": "Aeropuerto de Cabo Frio (CFB)",
+      "d": "Está a unos 10 km, unos 15 minutos. Tiene pocos vuelos, en general desde São Paulo o Belo Horizonte. De ahí seguís en taxi o Uber."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Evitá llegar un viernes de tarde o en un feriado largo: en Carnaval o Año Nuevo el viaje desde Río puede llevar hasta 7 horas."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado aeropuerto → Arraial y la vuelta."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Arraial do Cabo",
+    "intro": "Arraial no tiene un centro con muchos bares: la elección es entre estar cerca de los barcos o frente a una playa para nadar.",
+    "items": [
+     {
+      "t": "Praia dos Anjos",
+      "d": "La más práctica: ahí salen los barcos, empieza el sendero al Forno y hay más restaurantes. La playa no es para bañarse, pero te ahorra traslados."
+     },
+     {
+      "t": "Prainha",
+      "d": "De las pocas playas con posadas sobre la arena. Es fácil estacionar y queda cerca del centro."
+     },
+     {
+      "t": "Praia Grande",
+      "d": "Playa larga con olas, hostels, departamentos y una rambla para caminar de noche. Sirve para presupuesto ajustado y para surfistas."
+     },
+     {
+      "t": "Pontal do Atalaia",
+      "d": "Un barrio cerrado sobre el morro, con posadas boutique y las mejores vistas. Es lo más tranquilo, pero para todo lo demás necesitás auto o taxi."
+     },
+     {
+      "t": "Cabo Frio como base",
+      "d": "A unos 15 a 20 minutos, con más hoteles, restaurantes y vida nocturna. Conviene si querés salir de noche y no te importa ir y venir."
+     }
+    ],
+    "bullets": [
+     "Si vas en auto, preguntá si la posada tiene estacionamiento propio."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Arraial do Cabo",
+    "intro": "Entre caminata, barco y algún taxi llegás a todo.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Entre la Praia dos Anjos, la Prainha y la Praia Grande se camina unos 20 minutos. Al Forno se llega por un sendero corto desde el puerto."
+     },
+     {
+      "t": "Taxi y Uber",
+      "d": "Funcionan dentro del pueblo y hasta Cabo Frio. En el Pontal do Atalaia los taxis trabajan en sistema de lotação, compartidos con otros pasajeros."
+     },
+     {
+      "t": "Barco",
+      "d": "Los paseos y los taxi-barcos al Forno y a las Prainhas do Pontal salen de la Praia dos Anjos."
+     },
+     {
+      "t": "Ómnibus a Cabo Frio y Búzios",
+      "d": "Salineira hace Arraial–Cabo Frio en unos 20 minutos y Arraial–Búzios en unos 45. También hay 1001 a Cabo Frio, más o menos cada hora."
+     },
+     {
+      "t": "Auto",
+      "d": "Sirve para combinar con otras ciudades de la región. En temporada alta el tránsito es lento y cuesta estacionar cerca de las playas."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Arraial do Cabo de noche",
+    "intro": "La noche es tranquila: más cena y caminata que boliche.",
+    "items": [
+     {
+      "t": "Rambla de la Praia Grande",
+      "d": "Es el paseo de la noche, con restaurantes y kioscos frente al mar."
+     },
+     {
+      "t": "Praia dos Anjos",
+      "d": "Concentra la mayoría de los restaurantes del pueblo, cerca del puerto."
+     },
+     {
+      "t": "Cabo Frio",
+      "d": "Si querés bares y más movimiento, está a 13 km, unos 15 a 20 minutos en auto."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Arraial do Cabo",
+    "intro": "Es un pueblo tranquilo y en temporada hay más policía en las playas y en el centro.",
+    "bullets": [
+     "Lo más común son los robos en autos estacionados, sobre todo en temporada alta: no dejes nada a la vista.",
+     "La Praia Grande tiene olas fuertes: nadá cerca de la orilla y respetá las banderas.",
+     "Hacé el sendero al Forno y la bajada al Pontal de día, con calzado que agarre.",
+     "En la arena no dejes el celular ni la billetera solos mientras te metés al agua.",
+     "Si llegás al Galeão de noche, preferí transfer o dormir en Río: el camino pasa por la Linha Vermelha."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y efectivo",
+      "d": "En los comercios aceptan tarjeta, pero no siempre en los barcos ni en los kioscos de playa. Llevá efectivo."
+     },
+     {
+      "t": "Bancos",
+      "d": "Hay Banco do Brasil, Bradesco e Itaú en el pueblo; en las playas no hay cajeros. Sacá antes de salir."
+     },
+     {
+      "t": "Compras",
+      "d": "Hay supermercados, farmacias y estaciones de servicio. En Cabo Frio hay más opciones."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La red es de 127 V (lo que en Brasil llaman 110 V). Revisá que tus cargadores sean bivolt y confirmá en tu alojamiento."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Arraial es barco, sendero corto y mucho viento.",
+    "bullets": [
+     "Protector solar, gorra y lentes de sol: el viento engaña y el sol pega fuerte",
+     "Un abrigo liviano para el barco y para la noche",
+     "Calzado para el agua o sandalias con agarre para las rocas y el sendero",
+     "Máscara y snorkel propios",
+     "Bolsa estanca para el celular en el barco",
+     "Repelente para el atardecer y los senderos",
+     "Bolso térmico con agua: entre semana muchos kioscos de playa no abren",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "cabo": {
+  "antes": {
+   "titulo": "Antes de viajar a Cabo Frio",
+   "intro": "Cabo Frio es la ciudad más grande de la Región de los Lagos, a unos 155 km de Río. Tiene aeropuerto propio con pocos vuelos, así que lo habitual es llegar por Río y seguir por ruta.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Río",
+     "d": "Se vuela al Galeão (GIG) o a Santos Dumont (SDU) y de ahí son unas 2 h 30 por ruta. El aeropuerto de Cabo Frio (CFB) recibe vuelos desde São Paulo y algunos de temporada."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 3 o 4 días ves la Praia do Forte, el Peró, las Conchas, la Ilha do Japonês y hacés el paseo en barco. Como queda a 15 km de Arraial y a 25 km de Búzios, sumá un día por cada una si querés conocerlas."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Si te alojás cerca de la Praia do Forte o del centro, te movés a pie, en ómnibus y en Uber. El auto ayuda para las Dunas, el Foguete y las ciudades vecinas, pero en la zona del Forte casi no hay dónde estacionar."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Cabo Frio desde Montevideo",
+    "intro": "Lo más simple es volar a Río y seguir unas 2 h 30 por tierra. Desde diciembre de 2026 también se puede volar con escala en São Paulo hasta el aeropuerto de la ciudad.",
+    "items": [
+     {
+      "t": "Vuelo a Río (GIG)",
+      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU), más cerca del Puente Río-Niterói."
+     },
+     {
+      "t": "De Río a Cabo Frio en auto",
+      "d": "Son unos 155 km: Puente Río-Niterói, BR-101 y Via Lagos (RJ-124, con peaje) hasta São Pedro da Aldeia. Sin tránsito, unas 2 h 30."
+     },
+     {
+      "t": "Ómnibus desde la Rodoviária Novo Rio",
+      "d": "Auto Viação 1001 y otras empresas salen de la Rodoviária Novo Rio a lo largo del día. Del aeropuerto a la Rodoviária hay ómnibus ejecutivo, taxi o Uber; desde Santos Dumont también llega el VLT."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay transfers compartidos y privados desde el Galeão, Santos Dumont y los hoteles de Río. Es lo más práctico si llegás con valijas."
+     },
+     {
+      "t": "Aeropuerto de Cabo Frio (CFB)",
+      "d": "LATAM anunció vuelos Guarulhos–Cabo Frio desde diciembre de 2026, cuatro veces por semana, y Azul vuela desde Belo Horizonte en verano. Desde Montevideo, combinás en Guarulhos. Revisá si la ruta sigue vigente para tus fechas."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Los fines de semana y feriados llega mucha gente de Río y la Via Lagos se traba. Si podés, viajá entre semana y de día."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado aeropuerto → Cabo Frio y la vuelta."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Cabo Frio",
+    "intro": "La ciudad es grande y las playas están repartidas. Elegí según si querés caminar a todo o estar frente a una playa tranquila.",
+    "items": [
+     {
+      "t": "Praia do Forte",
+      "d": "La zona con más hoteles, restaurantes y agencias de paseos, a 10 o 15 minutos a pie del centro. Sirve para familias y grupos que quieren movimiento; el canto izquierdo de la playa tiene menos olas."
+     },
+     {
+      "t": "Bairro da Passagem",
+      "d": "El barrio histórico, con calles de piedra, casas coloniales y restaurantes alrededor de la plaza. Ideal para parejas; de acá salen los botes a la Ilha do Japonês."
+     },
+     {
+      "t": "Centro",
+      "d": "La opción más económica y práctica sin auto, con bancos, supermercados, la rodoviária y el canal a mano."
+     },
+     {
+      "t": "Peró",
+      "d": "Barrio residencial y calmo junto a una playa con Bandera Azul, cerca de las Conchas. Conviene para familias; hay ómnibus frecuentes desde la zona de la rodoviária."
+     },
+     {
+      "t": "Dunas y Foguete",
+      "d": "Lo más tranquilo, con playas abiertas que atraen a surfistas y kitesurfistas. Hay poco comercio y para el centro necesitás auto."
+     }
+    ],
+    "bullets": [
+     "Si vas en auto, buscá alojamiento con estacionamiento: en la zona del Forte casi no hay lugar en la calle.",
+     "Ogiva, entre el centro y el Peró, no tiene playa pero es tranquila y sirve si te movés en auto."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Cabo Frio",
+    "intro": "Entre caminata, Uber y ómnibus te arreglás; el auto es para las playas lejanas.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "La Praia do Forte, el centro, el canal y la Passagem quedan cerca y se recorren caminando."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Uber funciona en Cabo Frio y sirve para el Peró, las Conchas o las Dunas, y para ir y volver de Arraial."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay líneas al Peró desde la zona de la rodoviária. Salineira une Cabo Frio con Arraial (sale del punto Itajuru, en el Largo Santo Antônio) y con Búzios; en temporada alta van llenos."
+     },
+     {
+      "t": "Barco",
+      "d": "Los paseos salen del Canal do Itajuru. A la Ilha do Japonês conviene cruzar en bote desde la Passagem."
+     },
+     {
+      "t": "Auto",
+      "d": "Ayuda para las Dunas, el Foguete y las ciudades vecinas. Los fines de semana de verano el tránsito en la entrada de la ciudad puede llevar horas."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Cabo Frio de noche",
+    "intro": "Tiene más movida que Arraial: es donde sale la gente de toda la región.",
+    "items": [
+     {
+      "t": "Boulevard Canal",
+      "d": "Bares frente al Canal do Itajuru, en el centro. Es el punto más animado de la noche."
+     },
+     {
+      "t": "Bairro da Passagem",
+      "d": "Restaurantes y bares en la plaza, a veces con música en vivo. Lindo para caminar de noche."
+     },
+     {
+      "t": "Praia do Forte",
+      "d": "Kioscos, bares y eventos sobre la rambla, con la Praça das Águas como referencia."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Cabo Frio",
+    "intro": "Se recorre con tranquilidad la rambla y los puntos turísticos, con los cuidados de cualquier ciudad de playa grande.",
+    "bullets": [
+     "Los robos ocurren sobre todo en playas y senderos más aislados: andá en horarios con gente y no lleves cosas de valor.",
+     "Respetá la bandera roja: marca lugares donde no conviene bañarse por riesgo de ahogamiento.",
+     "No te subas a piedras ni acantilados para sacar fotos.",
+     "Contratá paseos en barco solo con embarcaciones registradas y habilitadas por la prefectura.",
+     "En la arena no dejes el celular ni la billetera solos mientras te metés al agua.",
+     "Si llegás al Galeão de noche, preferí transfer o dormir en Río: el camino pasa por la Linha Vermelha."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y efectivo",
+      "d": "Conviene tener una alternativa a la tarjeta. Llevá algo de efectivo para ómnibus, botes y kioscos de playa."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Están en el centro y en las zonas comerciales; en las playas alejadas no hay."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La red es de 127 V (lo que en Brasil llaman 110 V). Revisá que tus cargadores sean bivolt y confirmá en tu alojamiento."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Cabo Frio es playa con viento y agua más fría de lo que esperás.",
+    "bullets": [
+     "Protector solar, gorra y lentes de sol",
+     "Un abrigo liviano para la noche y los días de viento",
+     "Ropa liviana y de playa",
+     "Kit de playa completo si vas a las Dunas o al Foguete: hay poco comercio en la arena",
+     "Máscara y snorkel para las Conchas y el paseo en barco",
+     "Bolsa estanca para el celular en el barco",
+     "Cargador / power bank",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "ilha": {
+  "antes": {
+   "titulo": "Antes de viajar a Ilha Grande",
+   "intro": "Ilha Grande es una isla frente a la costa sur del estado de Río, sin puente y sin autos. Se llega en barco desde el continente, casi siempre a la Vila do Abraão.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Río",
+     "d": "Se vuela al Galeão (GIG) o a Santos Dumont (SDU), se sigue por la ruta BR-101 hasta un puerto del continente y de ahí se cruza en barco. Contá con medio día de viaje desde que aterrizás."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 4 o 5 días hacés el sendero a Lopes Mendes, un paseo en barco por el norte o la vuelta a la isla y te queda margen por si llueve. Con 3 días vas a tener que elegir."
+    },
+    {
+     "t": "Sin auto",
+     "d": "En la isla no entran autos particulares. Si llegás manejando, lo dejás en un estacionamiento privado del puerto en el continente."
+    },
+    {
+     "t": "Viajá liviano",
+     "d": "Las calles de Abraão son de tierra y arena y todo se camina: una mochila es más cómoda que una valija con rueditas."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Ilha Grande desde Montevideo",
+    "intro": "Son tres tramos: vuelo a Río, ruta por la Costa Verde y barco a la isla.",
+    "items": [
+     {
+      "t": "Vuelo a Río (GIG)",
+      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
+     },
+     {
+      "t": "Por Conceição de Jacareí",
+      "d": "Es el puerto más usado: unos 135 km desde Río, unas 2 horas por la BR-101. De ahí salen lanchas rápidas a Abraão (15 a 25 minutos) y escunas (unos 50 minutos), con varios horarios por día."
+     },
+     {
+      "t": "Por Angra dos Reis",
+      "d": "Unos 150 km desde Río, unas 3 horas en ómnibus. Hay barca pública (1 h 10 a 1 h 30, pocos horarios por día) y lanchas rápidas (20 a 30 minutos). El cruce es por aguas más protegidas: conviene si te mareás."
+     },
+     {
+      "t": "Por Mangaratiba",
+      "d": "Unos 100 km desde Río. La barca pública sale una vez por día a la mañana y tarda alrededor de 1 h 30."
+     },
+     {
+      "t": "Ómnibus desde la Rodoviária Novo Rio",
+      "d": "Viação Costa Verde va a Angra (unas 3 horas) y para en Conceição de Jacareí (unas 2 horas): pedile al chofer que te deje en el km 455 de la BR-101. La rodoviária de Angra queda a unos 2 km del muelle."
+     },
+     {
+      "t": "Transfer van + barco",
+      "d": "Agencias de Río venden el combo puerta a puerta: van hasta Conceição de Jacareí y lancha hasta Abraão. Es lo más simple si llegás con poco tiempo."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si aterrizás de tarde o de noche, dormí en Río o en Angra: los últimos barcos a la isla salen temprano y el horario cambia según el día."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado a la costa, barco ida y vuelta y, si vas en auto, el estacionamiento por día.",
+     "En fines de semana largos y feriados, comprá el barco de vuelta con anticipación."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Ilha Grande",
+    "intro": "Casi todo el alojamiento está en Abraão. Fuera de la vila hay pocas opciones y los barcos entre playas son escasos.",
+    "items": [
+     {
+      "t": "Vila do Abraão",
+      "d": "La base más práctica: llegan los barcos, salen los senderos y los paseos, y están casi todos los restaurantes. Son posadas, hostels y campings, no grandes hoteles. Los hostels se concentran en la calle detrás del muelle."
+     },
+     {
+      "t": "Praia do Canto y alrededores",
+      "d": "El extremo de Abraão, a unos 10 minutos a pie del muelle. Tiene posadas más tranquilas sin alejarte de la vila."
+     },
+     {
+      "t": "Araçatiba",
+      "d": "El segundo pueblo de la isla, más barato y tranquilo, pero con poca infraestructura. No hay barco público directo desde Abraão."
+     },
+     {
+      "t": "Saco do Céu, Bananal y Sítio Forte",
+      "d": "Posadas aisladas sobre las bahías del norte, para descansar o para luna de miel. Se llega en barco y dependés de la posada para moverte."
+     },
+     {
+      "t": "Aventureiro y Palmas",
+      "d": "Casi no hay posadas: son lugares de camping y algún chalé. Solo se acampa en campings habilitados."
+     }
+    ],
+    "bullets": [
+     "En Año Nuevo y Carnaval reservá con mucha anticipación.",
+     "Si elegís una posada fuera de Abraão, preguntá cómo y a qué hora te llevan y te traen del muelle."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚤",
+    "titulo": "Cómo moverse por Ilha Grande",
+    "intro": "No hay calles para autos: todo es a pie o en barco.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Senderos señalizados unen Abraão con muchas playas. El de Dois Rios lleva de 3 a 4 horas por la selva: salí temprano y llevá por lo menos 2 litros de agua por persona."
+     },
+     {
+      "t": "Taxi-barco",
+      "d": "Sale del muelle de Abraão hacia playas como Abraãozinho, Pouso o Lopes Mendes. Se puede ir caminando y volver en barco: preguntá el último horario."
+     },
+     {
+      "t": "Paseos en barco",
+      "d": "Las agencias de Abraão venden paseos de día al norte, al sur y la vuelta a la isla. Dependen del mar: con mal tiempo se cancelan."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Ilha Grande de noche",
+    "intro": "No hay boliches: la noche es de bares y música en vivo en Abraão.",
+    "items": [
+     {
+      "t": "Plaza de Abraão",
+      "d": "En la plaza principal se junta la gente con cerveza y música en vivo: samba, forró o bossa nova."
+     },
+     {
+      "t": "Bares de la playa",
+      "d": "Sobre la Praia do Abraão hay bares con mesas en la arena y música algunas noches."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Oscurece temprano. Si volvés de una playa caminando después de las 18, llevá linterna."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Ilha Grande",
+    "intro": "Abraão es tranquila. Los riesgos están en los senderos y en el mar.",
+    "bullets": [
+     "Empezá los senderos temprano y calculá volver antes de que oscurezca.",
+     "Avisá en la posada a dónde vas si hacés un sendero largo, como Dois Rios o Aventureiro.",
+     "En Lopes Mendes hay corrientes fuertes más adentro: nadá cerca de la orilla.",
+     "En Conceição de Jacareí usá solo barcos habilitados y con chaleco salvavidas; evitá los clandestinos.",
+     "Con lluvia, los senderos se ponen resbalosos: calzado con agarre.",
+     "En la arena no dejes el celular ni la billetera solos mientras te metés al agua."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Cajeros",
+      "d": "En la isla no hay bancos y en Abraão hay pocos cajeros, que en temporada alta suelen quedarse sin plata. Sacá en el continente, en Angra o Mangaratiba."
+     },
+     {
+      "t": "Tarjetas",
+      "d": "En los comercios de Abraão se usa tarjeta, pero llevá efectivo para barcos, puestos chicos y las playas alejadas."
+     },
+     {
+      "t": "Internet",
+      "d": "La señal de celular es inestable y fuera de Abraão casi no hay. Llevá eSIM o chip, y no cuentes con 4G en los senderos."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La red es de 127 V (lo que en Brasil llaman 110 V). Revisá que tus cargadores sean bivolt. Los cortes de luz también cortan la señal."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Ilha Grande es sendero, barco y lluvia de tarde: armá una mochila liviana.",
+    "bullets": [
+     "Mochila en lugar de valija con rueditas",
+     "Calzado de trekking o sandalias con agarre",
+     "Botella de agua grande",
+     "Linterna o frontal",
+     "Repelente y protector solar",
+     "Piloto o campera de lluvia liviana",
+     "Bolsa estanca para el celular en el barco",
+     "Power bank: hay cortes de luz",
+     "Efectivo sacado en el continente"
+    ]
+   }
+  ]
+ },
+ "paraty": {
+  "antes": {
+   "titulo": "Antes de viajar a Paraty",
+   "intro": "Paraty queda en el extremo sur del estado de Río, casi en el límite con São Paulo, a unos 240 km de cada capital. No tiene aeropuerto con vuelos regulares: se llega por ruta.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Dos puertas de entrada",
+     "d": "Podés volar a Río (Galeão, GIG, o Santos Dumont, SDU) o a São Paulo (Guarulhos, GRU). Desde cualquiera de los dos son entre 4 y 5 horas por ruta."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 4 días recorrés el centro histórico, hacés el paseo en barco por la bahía y un día en Trindade. Si querés sumar el Saco do Mamanguá, la Praia do Sono o las cascadas, agregá uno o dos días."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "En el centro histórico no circulan autos y todo se camina. Para Trindade, Paraty-Mirim o las cascadas hay ómnibus locales y agencias, pero con auto te movés con más libertad."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Paraty desde Montevideo",
+    "intro": "Se vuela a Río o a São Paulo y se sigue por la BR-101, la Rio-Santos. Elegí la ciudad según el vuelo que te sirva: el tramo por tierra es parecido.",
+    "items": [
+     {
+      "t": "Vuelo a Río (GIG)",
+      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
+     },
+     {
+      "t": "Vuelo a São Paulo (GRU)",
+      "d": "Hay vuelos directos de Montevideo a Guarulhos, por ejemplo con GOL. Desde Guarulhos a Paraty son unos 250 km, unas 4 h 30 en auto."
+     },
+     {
+      "t": "De Río a Paraty en auto",
+      "d": "Son unos 240 a 250 km por la BR-101, bordeando la Costa Verde y pasando por Angra dos Reis: entre 4 y 4 h 30. En feriados hay tránsito y con lluvia fuerte puede haber derrumbes en la subida cerca de Paraty."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Desde Río, Viação Costa Verde sale de la Rodoviária Novo Rio varias veces por día y tarda unas 5 horas. Desde São Paulo, Reunidas Paulista sale de la Terminal Tietê y tarda unas 6 horas. La rodoviária de Paraty queda a unos 10 minutos a pie del centro histórico."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay transfers desde los aeropuertos y los hoteles de Río y de São Paulo hasta tu posada, de unas 5 horas. Es lo más cómodo si llegás con valijas."
+     }
+    ],
+    "cierre": {
+     "t": "En el camino",
+     "d": "Si venís de Río, Angra dos Reis queda a unos 100 km de Paraty: podés cortar el viaje ahí y sumar Ilha Grande."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado aeropuerto → Paraty y la vuelta.",
+     "En temporada alta y en feriados, comprá el ómnibus con unos días de anticipación."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Paraty",
+    "intro": "Elegí entre dormir dentro del centro histórico, a pocas cuadras, o junto a una playa más lejos.",
+    "items": [
+     {
+      "t": "Centro histórico",
+      "d": "Lo más práctico para caminar a todo y salir de noche. Las posadas son más caras y muchas no tienen estacionamiento."
+     },
+     {
+      "t": "Alrededores del centro",
+      "d": "A pocas cuadras del empedrado, con posadas más baratas y muchas con estacionamiento."
+     },
+     {
+      "t": "Jabaquara",
+      "d": "Cerca del centro pero más tranquilo, y la mayoría de las posadas tiene estacionamiento. Sirve si vas en auto o con chicos."
+     },
+     {
+      "t": "Pontal",
+      "d": "Cruzando el puente del río Perequê-Açu, a unos 10 minutos a pie del centro, con alojamiento más barato y bares de playa."
+     },
+     {
+      "t": "Trindade",
+      "d": "A 25 km, una media hora en auto. Es la opción si querés playa de agua clara todos los días; para el centro histórico vas a depender del ómnibus o del auto."
+     }
+    ],
+    "bullets": [
+     "En la FLIP, en Carnaval y en Año Nuevo se llena todo: reservá con tiempo."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Paraty",
+    "intro": "El centro se camina; para las playas lejanas se combina ómnibus, barco y auto.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "El centro histórico es peatonal: solo pasan carros con caballo. El Pontal y el Jabaquara quedan a una caminata corta."
+     },
+     {
+      "t": "Ómnibus locales",
+      "d": "Colitur sale de la rodoviária hacia Trindade, Paraty-Mirim, Jabaquara y Mambucaba. Hay servicios desde temprano hasta la noche; revisá el último horario de vuelta."
+     },
+     {
+      "t": "Barco",
+      "d": "Los paseos por la bahía y los taxi-barcos salen del muelle del centro. Al Saco do Mamanguá se llega en barco desde Paraty-Mirim."
+     },
+     {
+      "t": "Auto",
+      "d": "Ayuda para Trindade, las cascadas y la ruta a Cunha. El estacionamiento en la calle cerca del centro es pago y se paga con la app Paraty Rotativo."
+     },
+     {
+      "t": "Agencias",
+      "d": "Muchos paseos se venden con traslado en barco o en 4x4, una forma de llegar a las playas y cascadas sin manejar."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Paraty de noche",
+    "intro": "La noche se arma en el empedrado del centro histórico y en el Pontal.",
+    "items": [
+     {
+      "t": "Centro histórico",
+      "d": "Restaurantes y bares con música en vivo, de jazz y bossa nova a samba y forró, alrededor de la Praça da Matriz. Se llena entre las 19 y las 21."
+     },
+     {
+      "t": "Pontal",
+      "d": "Bares sobre la playa que los fines de semana siguen hasta tarde."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "En temporada alta, en la FLIP y en los festivales, reservá la cena o llegá temprano."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Paraty",
+    "intro": "El centro es tranquilo para caminar. Los cuidados son el empedrado, la ruta y el mar abierto de Trindade.",
+    "bullets": [
+     "El empedrado es irregular y se pone resbaloso con lluvia: mirá dónde pisás, sobre todo de noche.",
+     "La ruta a Trindade es de sierra, con curvas y bajadas fuertes: manejá con calma y evitá hacerla de noche si no la conocés.",
+     "En las playas de mar abierto de Trindade hay olas y corrientes: nadá cerca de la orilla.",
+     "Hacé de día los senderos a la Praia do Sono, el Cachadaço y la Juatinga, y volvé antes de que oscurezca.",
+     "En la arena no dejes el celular ni la billetera solos mientras te metés al agua."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y efectivo",
+      "d": "En el centro se usa tarjeta. Llevá efectivo para los ómnibus y las vans a Trindade, los barqueros y los puestos de playa."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Sacá en Paraty antes de salir a Trindade, la Juatinga o el Mamanguá."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La red es de 127 V (lo que en Brasil llaman 110 V). Revisá que tus cargadores sean bivolt y confirmá en tu alojamiento."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Paraty es empedrado, barco, sendero y lluvia de verano.",
+    "bullets": [
+     "Calzado plano y cómodo para el empedrado",
+     "Sandalias con agarre o zapatillas para senderos y cascadas",
+     "Repelente: en el manglar y las cascadas hay mosquitos",
+     "Protector solar y gorra",
+     "Piloto o paraguas liviano",
+     "Bolsa estanca para el celular en el barco",
+     "Cargador / power bank",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "angra": {
+  "antes": {
+   "titulo": "Antes de viajar a Angra dos Reis",
+   "intro": "Angra dos Reis es una ciudad portuaria sobre la BR-101, a unos 150 km de Río. Lo que se viene a ver está en la bahía, así que el viaje se organiza alrededor de los barcos.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Río",
+     "d": "Angra no tiene vuelos regulares: se vuela al Galeão (GIG) o a Santos Dumont (SDU) y se sigue por la BR-101, la ruta Rio-Santos."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 3 o 4 días hacés un paseo de escuna, uno en lancha chica y te queda margen por si el mar no deja salir. Si querés dormir en Ilha Grande, sumá dos noches más."
+    },
+    {
+     "t": "Elegí la zona antes que el hotel",
+     "d": "Las mejores playas no están cerca del centro y algunas zonas solo se recorren en auto o en barco. Definí primero si querés moverte a pie o estar aislado."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Angra dos Reis desde Montevideo",
+    "intro": "Se vuela a Río y se sigue unos 150 km por la costa.",
+    "items": [
+     {
+      "t": "Vuelo a Río (GIG)",
+      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
+     },
+     {
+      "t": "Ómnibus desde la Rodoviária Novo Rio",
+      "d": "Viação Costa Verde sale de la Rodoviária Novo Rio y tarda unas 3 horas. La rodoviária de Angra queda a unos 2 km del centro y de los muelles: taxi, Uber u ómnibus local."
+     },
+     {
+      "t": "Auto",
+      "d": "Son unos 150 km por la BR-101, bordeando la Costa Verde. En feriados y fines de semana de verano hay tránsito a la salida de Río."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay transfers desde los aeropuertos y hoteles de Río hasta Angra. Muchas agencias combinan el traslado con el barco a Ilha Grande."
+     },
+     {
+      "t": "Desde Paraty o São Paulo",
+      "d": "Paraty está a unos 100 km, menos de 2 horas en auto o en ómnibus. Si volás a Guarulhos, el camino sigue por Paraty."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si vas a hacer paseos en barco, no los programes para el día de llegada: salen a la mañana temprano."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado aeropuerto → Angra y la vuelta."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Angra dos Reis",
+    "intro": "Angra es extensa: entre el centro y los resorts hay muchos kilómetros de ruta.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "La opción si viajás sin auto o con presupuesto ajustado. Tenés a pie los bancos, los supermercados, la noche y los muelles de las escunas, las lanchas y el barco a Ilha Grande. Las playas del centro no son para bañarse."
+     },
+     {
+      "t": "Praia do Bonfim",
+      "d": "Cerca del centro pero tranquila y residencial, con playa para kayak y SUP. Hay pocos hoteles y en temporada alta suben los precios."
+     },
+     {
+      "t": "Estrada do Contorno",
+      "d": "Posadas y casas con vista a la bahía, en una ruta de curvas. Para parejas y familias que buscan calma; necesitás auto."
+     },
+     {
+      "t": "Frade y Tanguá",
+      "d": "La zona de los resorts y condominios, con marina propia y todo resuelto adentro. Es lo más caro de la ciudad."
+     },
+     {
+      "t": "Ilha Grande",
+      "d": "Si querés despertarte en una isla sin autos, podés dormir en la Vila do Abraão y hacer los paseos desde ahí."
+     }
+    ],
+    "bullets": [
+     "Si vas en auto, preguntá si el alojamiento tiene estacionamiento."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚤",
+    "titulo": "Cómo moverse por Angra dos Reis",
+    "intro": "En tierra, auto o Uber; en el agua, escuna, lancha o taxi-barco.",
+    "items": [
+     {
+      "t": "Barco",
+      "d": "Las escunas y lanchas salen del Cais de Santa Luzia, en el centro, y de las marinas de la Praia do Anil. El barco a Ilha Grande también sale del centro."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Uber funciona en Angra y es lo más práctico para ir de la rodoviária al centro o a las playas cercanas."
+     },
+     {
+      "t": "A pie",
+      "d": "Sirve dentro del centro y hasta los muelles."
+     },
+     {
+      "t": "Auto",
+      "d": "Ayuda si te alojás sobre la Estrada do Contorno o lejos del centro, y para llegar a playas de la ruta como Mambucaba."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Angra dos Reis de noche",
+    "intro": "La noche no es el fuerte de Angra: se cena y se toma algo.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "Concentra los bares y restaurantes, cerca del muelle. En temporada alta se llena."
+     },
+     {
+      "t": "Resorts y marinas",
+      "d": "Si te alojás en Frade, Tanguá o Bracuhy, la noche suele quedar dentro del resort o de la marina."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Angra dos Reis",
+    "intro": "Los cuidados son los de cualquier ciudad portuaria, más los del mar.",
+    "bullets": [
+     "Contratá paseos con empresas habilitadas y que tengan chaleco salvavidas para todos.",
+     "Los paseos dependen del mar: si el operador cancela por mal tiempo, no insistas con otro.",
+     "En las paradas para nadar, no te alejes del barco y respetá el horario de vuelta.",
+     "Si llegás de noche, movete en taxi o Uber entre la rodoviária y tu alojamiento.",
+     "En el auto, no dejes nada a la vista cuando estacionás en las playas."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Hay bancos y cajeros en el centro. Sacá antes de los paseos y antes de cruzar a Ilha Grande, donde hay pocos cajeros."
+     },
+     {
+      "t": "Tarjetas",
+      "d": "En el centro se usa tarjeta, pero en los barcos y con los vendedores de las islas llevá efectivo."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La red es de 127 V (lo que en Brasil llaman 110 V). Revisá que tus cargadores sean bivolt y confirmá en tu alojamiento."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "En Angra el día se pasa en el barco.",
+    "bullets": [
+     "Protector solar resistente al agua y gorra",
+     "Máscara y snorkel propios",
+     "Bolsa estanca para el celular",
+     "Toalla de secado rápido",
+     "Pastilla para el mareo si te descomponés en barco",
+     "Piloto liviano: en verano llueve casi todas las tardes",
+     "Repelente",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ },
+ "ubatuba": {
+  "antes": {
+   "titulo": "Antes de viajar a Ubatuba",
+   "intro": "Ubatuba está en el litoral norte de São Paulo, a unos 230 km de la capital y a unos 70 km del límite con Río. Las playas se reparten a lo largo de la ruta Rio-Santos, así que la zona donde te alojás pesa mucho.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es São Paulo",
+     "d": "Se vuela a São Paulo y se sigue por tierra, entre 3 y 4 horas según el tránsito. El aeropuerto más cercano es el de São José dos Campos, pero tiene pocos vuelos y suele salir más caro."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 4 o 5 días combinás calas del norte, playas del sur, la Ilha Anchieta y te queda margen para los días de lluvia, que en Ubatuba son muchos."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Ayuda mucho: las playas están a lo largo de unos 80 km de ruta. Si no manejás, alojate en el Itaguá o el centro y combiná ómnibus local, Uber y paseos."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Ubatuba desde Montevideo",
+    "intro": "Se vuela a São Paulo y se sigue por la sierra hasta el mar. También se puede llegar desde Río, pero el viaje por tierra es más largo.",
+    "items": [
+     {
+      "t": "Vuelo a São Paulo (GRU)",
+      "d": "Hay vuelos directos de Montevideo a Guarulhos, por ejemplo con GOL. Con escala también hay opciones todos los días."
+     },
+     {
+      "t": "Auto desde São Paulo",
+      "d": "Son unos 230 km. Hay dos caminos: por la Dutra y la Tamoios (SP-099) hasta Caraguatatuba y de ahí por la Rio-Santos, o por Taubaté y la Rodovia Oswaldo Cruz (SP-125), más corta pero con sierra de curvas. Entre 3 y 3 h 30 sin tránsito."
+     },
+     {
+      "t": "Ómnibus desde São Paulo",
+      "d": "Viação Litorânea sale de la Terminal Tietê y tarda entre 3 h 30 y 4 h 30. Desde Guarulhos tenés que llegar primero a la terminal."
+     },
+     {
+      "t": "Ómnibus desde Río",
+      "d": "Viação Útil sale de la Rodoviária Novo Rio y tarda unas 5 horas por la Rio-Santos."
+     },
+     {
+      "t": "Desde Paraty",
+      "d": "Están a unos 72 km, alrededor de 1 hora. Hay ómnibus de Viação Útil entre las dos ciudades: se combinan bien en un mismo viaje."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "En verano y feriados la Tamoios y la Oswaldo Cruz se congestionan. Comprá el ómnibus con anticipación y elegí los primeros horarios."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado aeropuerto → Ubatuba y la vuelta."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Ubatuba",
+    "intro": "Ubatuba se divide en norte, centro y sur. Elegí según si querés salir de noche o estar frente a una cala.",
+    "items": [
+     {
+      "t": "Itaguá",
+      "d": "La base más práctica, con la mayor concentración de restaurantes y bares y una rambla con bicisenda. La playa no es para bañarse y hay pocas posadas frente al mar."
+     },
+     {
+      "t": "Praia Grande y Toninhas",
+      "d": "Al sur del centro, con infraestructura y público joven. En temporada alta se llenan y cuesta estacionar."
+     },
+     {
+      "t": "Lázaro y Domingas Dias",
+      "d": "En el sur, con mar calmo la mayor parte de los días. Para familias con chicos; necesitás auto o ómnibus para el centro."
+     },
+     {
+      "t": "Itamambuca",
+      "d": "En el norte, para surfistas y para quien busca naturaleza. Queda lejos del centro y dependés del auto para casi todo."
+     },
+     {
+      "t": "Félix y Prumirim",
+      "d": "Calas del norte rodeadas de selva, tranquilas y para desconectar. Con auto."
+     }
+    ],
+    "bullets": [
+     "Elegí la posada cerca de las playas que querés recorrer: así dependés menos del transporte.",
+     "Si vas en auto, buscá alojamiento con estacionamiento: en temporada alta en el Itaguá y la Praia Grande es un problema."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Ubatuba",
+    "intro": "Las distancias son largas y casi todo pasa por la Rio-Santos.",
+    "items": [
+     {
+      "t": "Auto",
+      "d": "Lo más cómodo para las playas lejanas. La Rio-Santos tiene curvas cerradas y tramos empinados, y muchas playas tienen poco o ningún estacionamiento. En el centro hay zona azul y estacionamientos privados."
+     },
+     {
+      "t": "Ómnibus local",
+      "d": "Verde Bus llega a playas alejadas como Almada, Lázaro o Ubatumirim. La mayoría de las paradas están sobre la ruta. Revisá horarios: los fines de semana y de noche pasa menos."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Funcionan, pero los viajes largos salen caros. En muchas playas no hay señal: acordá la hora de vuelta con el chofer y anotá su teléfono."
+     },
+     {
+      "t": "Senderos y barco",
+      "d": "Varias playas solo se alcanzan a pie o en barco, como las de la Trilha das Sete Praias. A la Ilha Anchieta se va en barco."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Ubatuba de noche",
+    "intro": "La noche se concentra en el centro.",
+    "items": [
+     {
+      "t": "Itaguá",
+      "d": "La mayor concentración de bares y restaurantes de la ciudad, sobre la rambla."
+     },
+     {
+      "t": "Praia Grande",
+      "d": "Con más movimiento y público joven en temporada."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si salís de noche, alojate cerca y evitá manejar por la Rio-Santos de regreso."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Ubatuba",
+    "intro": "Es un destino tranquilo; los cuidados son la ruta, el mar y las playas sin señal.",
+    "bullets": [
+     "Evitá manejar de noche por la Rio-Santos: tiene curvas, subidas fuertes y accidentes.",
+     "Los autos con patente de afuera llaman la atención: no dejes nada a la vista al estacionar.",
+     "En muchas playas no hay señal de celular: avisá a alguien a dónde vas.",
+     "En las playas de surf, como Itamambuca o Vermelha do Norte, hay olas y corrientes: nadá cerca de la orilla.",
+     "Hacé los senderos de día y con calzado con agarre; el Pico do Corcovado es solo para gente con experiencia."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y efectivo",
+      "d": "Conviene tener una alternativa a la tarjeta. Llevá efectivo para el ómnibus, el estacionamiento y los kioscos de las calas."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Están en el centro; en las playas del norte y del sur no cuentes con encontrar."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La red es de 127 V (lo que en Brasil llaman 110 V). Revisá que tus cargadores sean bivolt y confirmá en tu alojamiento."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local. En muchas playas no hay señal."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Ubatuba es ruta, cala y lluvia: preparate para las tres.",
+    "bullets": [
+     "Repelente fuerte: en las playas con río hay borrachudos",
+     "Piloto o paraguas liviano",
+     "Protector solar y gorra",
+     "Calzado con agarre para senderos",
+     "Un abrigo liviano: de junio a agosto las noches son frescas",
+     "Bolsa estanca para el celular en el barco",
+     "Mapas offline en el celular: en muchas playas no hay señal",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
  }
 }
