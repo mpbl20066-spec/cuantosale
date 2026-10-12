@@ -183,22 +183,21 @@
     },
     "porto": {
       "comida": {
-        "casual": 24,
-        "moderado": 43,
-        "gourmet": 73
+        "casual": 22,
+        "moderado": 41,
+        "gourmet": 61
       },
       "traslado": {
-        "eco": 5,
-        "medio": 9,
-        "confort": 17
+        "eco": 3,
+        "medio": 6,
+        "confort": 14
       },
-      "fuente": "Se buscaron precios de restaurante de Porto de Galinhas. Lo que hay publicado es sobre el resort con todo incluido, que no separa la comida: el costo real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte. Por eso el numero no se puede derivar. Se lo pone un poco por encima de Recife (28 contra 25) porque el perfil de gasto es de resort de playa. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$64.5/86.5/112.4 por dia.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Resort de playa con todo incluido en la zona, asi que se pone por encima de Recife. Pero no hay dato: el precio real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$24 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$90 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): vans R$6, taxi/buggy a Maracaipe y Muro Alto R$30. Antes {\"eco\":10,\"medio\":17,\"confort\":28}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 28/52/85 -> 24/43/73"
+      "fuente": "Grupo Dicas (2026, ticket medio por persona): Barcaxeira y Farofa Fina R$80-120, Munganga R$100-140, Peixe na Telha R$150-200, Beijupirá R$200-250. Quanto Custa Viajar (2025): restaurante medio R$100-180 por persona, desayuno en panaderia desde R$20. O Pescador ejecutivo ~R$40, self-service R$35. Uber Ipojuca (página oficial): Rua da Esperança R$18, Maracaípe R$20. El centro se recorre a pie. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 15/20/24, almoço 23,50/32/38,40, jantar 26/34,50/50.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":24,\"moderado\":43,\"gourmet\":73},\"traslado\":{\"eco\":5,\"medio\":9,\"confort\":17}} (derivado de otro destino, confianza baja)."
     },
     "maragogi": {
       "comida": {
@@ -238,42 +237,40 @@
     },
     "buz": {
       "comida": {
-        "casual": 34,
-        "moderado": 59,
-        "gourmet": 104
+        "casual": 35,
+        "moderado": 62,
+        "gourmet": 99
       },
       "traslado": {
         "eco": 4,
-        "medio": 9,
-        "confort": 19
+        "medio": 8,
+        "confort": 15
       },
-      "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$102.04/131/181 por dia. Menus ejecutivos R$49,90, PF R$25-35, casas de R$60 por persona.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Sin dato especifico de Búzios. Copia práctica de for/jericoacoara. Búzios es pueblo de playa con vida nocturna, asi que la escala es plausible, pero deberia ser un poco mas caro que el promedioNordeste: es el balneario mas caro de Rio de Janeiro.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
+      "fuente": "Quanto Custa Viajar (2025): PF en Búzios Grill desde R$29; salgados y jugo en Trigo & Cia por menos de R$20; Místico ticket medio R$150, Zuza Bistrô R$120. Brasil Show Turismo (24/05/2026): barracas y por kilo R$40-60, restaurantes medios de la Rua das Pedras R$80-120 por persona, premium R$150-250. Uber (página oficial Búzios): UberX R$20-22 a Ferradura, João Fernandes y Porto da Barra. Vans Cooper Búzios/Coopergeribá R$5 (Viaje na Viagem). Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 18,04/26/38, almoço 36/49/65, jantar 48/56/78.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
       "nota": "Las playas estan dispersas y el taxi es de los mas caros de la costa (sin app fuerte): el traslado diario sube respecto del promedio. Balneario mas caro de Rio de Janeiro, por eso tambien sube la comida.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$20 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$100 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): taxi tabelado R$20-30 por tramo, bus R$5-7. Antes {\"eco\":20,\"confort\":45,\"medio\":30}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 36/66/110 -> 34/59/104"
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":34,\"moderado\":59,\"gourmet\":104},\"traslado\":{\"eco\":4,\"medio\":9,\"confort\":19}} (derivado de otro destino, confianza baja)."
     },
     "arraial": {
       "comida": {
         "casual": 23,
-        "moderado": 41,
-        "gourmet": 78
+        "moderado": 44,
+        "gourmet": 82
       },
       "traslado": {
-        "eco": 4,
-        "medio": 7,
-        "confort": 12
+        "eco": 2,
+        "medio": 5,
+        "confort": 11
       },
-      "fuente": "Se buscaron cartas de restaurante de la region de Lagos, guias de viaje y comparadores de costo de vida. Lo unico que aparece es el distrito turistico Arraial do Cabo como conjunto, que es mas caro que Cabo Frio porque tiene las mejores playas. No hay precio publicado para el pueblo, asi que el valor es una copia de Cabo Frio. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$67.6/93.2/149.6 por dia.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Copia de cabo. Ambos son balnearios de la.region de Lagos (RJ) con economia turistica. Sin dato propio.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$20 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$62 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): bus R$5, taxi tabelado R$20. Antes {\"eco\":11,\"medio\":17,\"confort\":27}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 25/45/75 -> 23/41/78"
+      "fuente": "Self-service sin balanza R$34,99 en Praia Grande (2026) y Mandacarú R$30 (Tripadvisor). Tio Dorp platos R$40-80, filé de pescado R$75, pulpo R$135; Sol na Cozinha R$50-90 (Classe Turista / Esse Mundo é Nosso). Ómnibus municipal R$2,00 (Diário do Transporte, 25/02/2026). Uber (página oficial): Praia Grande R$16, Praia dos Anjos R$15. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 10,60/16,60/24,80, almoço 26,40/34,60/54, jantar 30,60/42/70,80.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":23,\"moderado\":41,\"gourmet\":78},\"traslado\":{\"eco\":4,\"medio\":7,\"confort\":12}} (derivado de otro destino, confianza baja)."
     },
     "cabo": {
       "comida": {
@@ -294,22 +291,21 @@
     },
     "angra": {
       "comida": {
-        "casual": 25,
-        "moderado": 45,
-        "gourmet": 85
+        "casual": 23,
+        "moderado": 48,
+        "gourmet": 89
       },
       "traslado": {
-        "eco": 5,
-        "medio": 9,
-        "confort": 15
+        "eco": 4,
+        "medio": 7,
+        "confort": 13
       },
-      "fuente": "Numbeo Angra dos Reis: comida barata R$37,50, cena media para 2 R$170, McMenu R$27,50, cerveza de tirada R$12,40, capuchino R$8, pasaje de transporte R$6. || 2026-09-30, busqueda de precios: quantocustaviajar Angra (sep/2025): R$69/102/163 por dia, promediado con la estimacion de Numbeo ya citada.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "nota": "OJO con este dato: Numbeo marca 28 entradas pero SOLO 6 colaboradores unicos y la ultima actualizacion es de abril de 2025. Es crowdsourced finito: sirve como orden de magnitud, no como precio. Por eso la confianza es baja pese a que haya fuente directa.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteComida": "2026-09-30: 32/60/105 -> 25/45/85",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$24 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$80 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): pasaje R$6 (Numbeo), taxi R$20. Antes {\"eco\":18,\"confort\":40,\"medio\":27}. Estimacion de uso, no fuente directa del total."
+      "fuente": "Quanto Custa Viajar (sep/2025): quentinha en el centro R$25-40, por kilo R$60-80/kg, petiscos de playa R$20-35, plato individual R$45-70, chope R$15-22, cena frente al mar R$250-400 por persona. Ómnibus municipal tarifa A R$5,80 (RJ Costa Verde, 07/03/2026). Uber (página oficial): Rodoviária R$20, Praia Grande R$25. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 14,40/19,80/25, almoço 25,20/37,40/60,20, jantar 29,80/44,60/78,20.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":25,\"moderado\":45,\"gourmet\":85},\"traslado\":{\"eco\":5,\"medio\":9,\"confort\":15}} (derivado de otro destino, confianza baja)."
     },
     "paraty": {
       "comida": {
@@ -368,22 +364,21 @@
     },
     "ilhabela": {
       "comida": {
-        "casual": 26,
-        "moderado": 48,
-        "gourmet": 83
+        "casual": 24,
+        "moderado": 44,
+        "gourmet": 72
       },
       "traslado": {
-        "eco": 6,
-        "medio": 11,
-        "confort": 22
+        "eco": 8,
+        "medio": 10,
+        "confort": 13
       },
-      "fuente": "Se buscaron precios de restaurante. Lo que hay es una lista de comida economica en Ilhabela (Wanderlog) que recomienda un self-service frente al foro, y el relato de un turista que vivio un mes sin gastar mucho usando transporte publico, pero ninguno con precios. La isla se llega solo por ferry, como Ilha Grande, asi que el costo viene de ahi con un recargo por turismo de verano. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$72.12/93.96/130.98 por dia.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Ilhabela es la segunda isla de Sao Paulo, accesible solo por ferry (como Ilha Grande). Copia de ilha con un poco mas: la isla es mas grande y el turismo es mas caro, pero no hay dato de precios.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$30 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$115 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): bus R$10 (tarifa plena 2026), app R$25-30. Antes {\"eco\":20,\"medio\":30,\"confort\":45}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 30/58/95 -> 26/48/83"
+      "fuente": "Real Seguro Viagem (31/08/2026): executivo en Vila y Perequê R$30-45, hamburguesas y petiscos R$25-40, mariscos para dos R$120-250. Carpe Mundi (oct/2024): Cheiro Verde PF R$31,50, Capitano R$76, Marakuthai R$76-88. Ómnibus Expresso Fênix: R$4,80 con tarjeta, R$10 en efectivo (Diário do Transporte, 23/01/2026); se toma el de efectivo. Balsa gratis a pie. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 10,56/12,60/18,06, almoço 27,60/38,40/54, jantar 33,96/42,96/58,92.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":26,\"moderado\":48,\"gourmet\":83},\"traslado\":{\"eco\":6,\"medio\":11,\"confort\":22}} (derivado de otro destino, confianza baja)."
     },
     "fln": {
       "comida": {
@@ -422,41 +417,39 @@
     },
     "bombinhas": {
       "comida": {
-        "casual": 23,
-        "moderado": 46,
-        "gourmet": 86
+        "casual": 20,
+        "moderado": 43,
+        "gourmet": 83
       },
       "traslado": {
-        "eco": 5,
-        "medio": 10,
-        "confort": 19
+        "eco": 7,
+        "medio": 11,
+        "confort": 18
       },
-      "fuente": "Se buscaron cartas de restaurante, precios de pousada y comparadores. Lo que hay publicado es de hospedaje en general: el balneario familiar de Santa Catarina, a 120 km de Floripa por la BR-101, con un pueblo chico y sin vida de resort. El lodging del catalogo ya lo pone por arriba de Floripa (52/96/170 contra 50/90/160), asi que la comida tambien. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$60/91.2/151.2 por dia.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Copia de fln. Bombinhas esta en el mismo corredor de la BR-101 y a 120 km de Floripa, con un pueblo mas chico y precios algo mas bajos: el lodging va 52/96/170 contra 50/90/160, o sea que esta CARO y la comida tambien. Es el balneario familiar de la zona.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$24 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$100 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): bus R$6 poco frecuente, Uber R$18-25. Antes {\"eco\":17,\"medio\":25,\"confort\":38}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 28/55/90 -> 23/46/86"
+      "fuente": "Quanto Custa Viajar: Coma Bem R$24, buffet libre Mandalas R$48, ejecutivo Mar de Fora R$85, Baiuca Gastrobar R$60-90 por plato, Berro d’Água R$90 por persona, Casa da Lagosta desde R$130, chope desde R$18. Uber (página oficial Bombinhas): UberX promedio R$23, a Sepultura R$18, Morro do Macaco R$24, Uber Moto R$18. Sin bus municipal con tarifa publicada. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 9,60/14,40/24, almoço 21,60/36/54, jantar 28,80/40,80/73,20.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":23,\"moderado\":46,\"gourmet\":86},\"traslado\":{\"eco\":5,\"medio\":10,\"confort\":19}} (derivado de otro destino, confianza baja)."
     },
     "rosa": {
       "comida": {
-        "casual": 26,
-        "moderado": 50,
-        "gourmet": 85
+        "casual": 22,
+        "moderado": 48,
+        "gourmet": 75
       },
       "traslado": {
-        "eco": 3,
-        "medio": 8,
-        "confort": 19
+        "eco": 4,
+        "medio": 7,
+        "confort": 13
       },
-      "fuente": "Se buscaron precios de restaurante y de pousada. Praia do Rosa esta en el mismo corredor de la BR-101 a 80 km al norte de la capital de Santa Catarina, con un pueblo aun mas chico que Bombinhas. No hay dato propio: el valor es copia de Florianopolis.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Copia de fln. Pueblo chico al norte del estado, a 80 km de la capital de Santa Catarina.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$17 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$100 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): bus a Garopaba R$4,15 poco frecuente, Uber R$30. Antes {\"eco\":18,\"medio\":27,\"confort\":42}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 28/55/90 -> 26/50/85 (misma comida que bcm, por pedido)."
+      "fuente": "Informe Floripa (16/08/2026): Festival Del Vino de Praia do Rosa, platos a R$89. Tripadvisor (Lua Marinha): unos R$350 para dos. Almuerzo PF y chope tomados de Bombinhas (R$36 y R$18), el destino con datos mas cercano. Uber (página Imbituba): UberX a Praia do Rosa R$22; las apps tienen esperas largas (TNH1). El pueblo se recorre a pie.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":26,\"moderado\":50,\"gourmet\":85},\"traslado\":{\"eco\":3,\"medio\":8,\"confort\":19}} (derivado de otro destino, confianza baja)."
     },
     "itapema": {
       "comida": {
@@ -531,41 +524,39 @@
     },
     "gram": {
       "comida": {
-        "casual": 33,
-        "moderado": 59,
-        "gourmet": 102
+        "casual": 37,
+        "moderado": 65,
+        "gourmet": 93
       },
       "traslado": {
         "eco": 5,
-        "medio": 10,
-        "confort": 19
+        "medio": 8,
+        "confort": 13
       },
-      "fuente": "Se buscaron cartas de restaurante de Gramado y comparadores de costo de vida. El dato solido que hay es regional, no de la ciudad: el IPF de la ACSP (jun/2026) da R$34,90 para el plato feito del Sur, la region mas cara del pais, frente a R$31,90 del promedio nacional. Los agregadores la ponen entre las ciudades mas caras de la region, con la misma combinacion de almuerzo caro y cena de resort. No hay carta propia: el valor es copia de Canela. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$109/138.5/171 por dia.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Copia de canela. Ambas vuelan a POA y son destinos turisticos de la misma provincia, con la misma combinacion de PF caro y cena de resort. Gramado es mas caro como alojamiento (48/89/155 contra 50/90/160, parecido).",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$27 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$100 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): circular R$6,40-6,95, Uber R$20-30. Antes {\"eco\":16,\"medio\":26,\"confort\":42}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 32/62/110 -> 33/59/102"
+      "fuente": "Quanto Custa Viajar (26/12/2025): Dona Lourdes R$22-38, Torre Café R$28-50, ejecutivo Pastasciutta R$35-55, Galeto Itália y Nonno Mio R$40-70, secuencia de fondue R$120-180. Melhores Destinos (oct/2025): fondue Carlito’s R$79, St. Gallen R$99, Le Petit Clos R$165; café colonial R$100-120. Ómnibus Gramado-Canela línea 6152 R$6,40 (Viaje na Viagem, jun/2025). Uber (página oficial): Lago Negro R$13, Rua Coberta R$14, Snowland R$21. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 15/18,50/21, almoço 32/46/60, jantar 62/74/90.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":33,\"moderado\":59,\"gourmet\":102},\"traslado\":{\"eco\":5,\"medio\":10,\"confort\":19}} (derivado de otro destino, confianza baja)."
     },
     "canela": {
       "comida": {
-        "casual": 31,
-        "moderado": 56,
-        "gourmet": 97
+        "casual": 24,
+        "moderado": 42,
+        "gourmet": 54
       },
       "traslado": {
         "eco": 5,
-        "medio": 10,
-        "confort": 22
+        "medio": 8,
+        "confort": 14
       },
-      "fuente": "Se buscaron cartas de restaurante de Canela. Comparte aeropuerto (POA) con Gramado y esta 15 km, asi que comparten el mismo mercado turistico y los mismos precios. Canela es mas chica y con mas hoteleria de temporada. No hay dato propio: el valor es copia de Gramado. || 2026-09-30, busqueda de precios: quantocustaviajar Canela da R$51/64/76 por dia, valor inverosimil porque excluye fondue (R$100-160) y cafe colonial (R$80-120). Se deriva de Gramado (15 km) con -5%.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Copia de gram. Canela esta 15 km de Gramado y comparte el mercado turistico.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$28 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$115 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): circular R$6,95, atracciones lejos, Uber R$30-40. Antes {\"eco\":17,\"medio\":27,\"confort\":42}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 32/62/110 -> 31/56/97"
+      "fuente": "Quanto Custa Viajar: ejecutivo de almuerzo R$35-60, self-service o buffet R$50-80, cafés R$25-60, café colonial R$80-120, secuencia de fondue R$100-160. Grupo Dicas: buffet casero R$35-50, churrascarias R$80-150. Ómnibus Gramado-Canela R$6,40. Uber (página oficial Canela): Rodoviária R$13, Catedral de Pedra R$18, Alpen Park R$18, Rua Coberta R$26. La tabla por comida de Quanto Custa Viajar para Canela no se usa: la cena sale mas barata que el almuerzo en los tres niveles.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":31,\"moderado\":56,\"gourmet\":97},\"traslado\":{\"eco\":5,\"medio\":10,\"confort\":22}} (derivado de otro destino, confianza baja)."
     },
     "torres": {
       "comida": {
@@ -623,24 +614,23 @@
     },
     "pip": {
       "comida": {
-        "casual": 23,
-        "moderado": 45,
-        "gourmet": 82
+        "casual": 17,
+        "moderado": 41,
+        "gourmet": 73
       },
       "traslado": {
-        "eco": 4,
-        "medio": 9,
-        "confort": 15
+        "eco": 3,
+        "medio": 6,
+        "confort": 12
       },
-      "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$51.6/86.4/134.4 por dia. El unico precio de carta (menu R$94,90) indica cena cara, por eso pesa el valor previo.",
-      "verificado": "2026-09-30",
-      "confianza": "baja",
-      "derivacion": "Pipa es un pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara pero en Rio Grande do Norte. Copia de nat con recargo por la vida nocturna. Lo que si hay dato (un menu de R$94,90 en un restaurante de la zona) sugiere que la cena es mas cara que la media de Natal, que es lo que ya se refleja.",
-      "notaMedio": "El nivel medio de traslado NO es la media geometrica de eco y confort en este destino: es 9 en vez de 8, y el desvio esta justificado en fuenteMedio.",
+      "fuente": "Elas Viajando (abr/2025): self-service sin balanza R$15-35, ~R$30 en el centrinho. Quanto Custa Viajar (oct/2025): plato de pescado o camarón R$65-95, moqueca para dos R$160-220, tapioca R$20-35, long neck R$12-18. Viajar é um Prazer: Duna by Toca desde R$100, caipirinha R$23. Uber Tibau do Sul (página oficial): Praia do Amor R$14, Madeiro R$16. El pueblo se recorre a pie. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 9,60/16,80/22,80, almoço 18/27,60/45,60, jantar 24/42/66.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
       "fuenteMedio": "2026-09-30, ajuste de criterio. La media geometrica de 4 y 15 da 8, pero ese calculo supone que el nivel medio esta a mitad de camino entre el que no se mueve y el que se mueve mucho. Pipa no es simetrica: el pueblo es chico y caminable, asi que el nivel eco es real, pero el viajero medio igual toma mototaxi a Chapadao, Madeiro o Sibauma, que quedan fuera del pueblo. El medio queda por encima de la media geometrica y no por debajo. +-1 dia de diferencia, no cambia una decision de presupuesto, pero la formula tiene que saber que este numero se aparto a mano.",
       "nota": "Pueblo chico y caminable: el centro, la playa y los restaurantes se recorren a pie. Transporte diario bajo; solo se suman taxis/mototaxi a Chapadao, Madeiro o Sibauma.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$20 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$78 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): mototaxi R$10-20, taxi a Chapadao/Madeiro R$25. Antes {\"eco\":6,\"confort\":22,\"medio\":12}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 30/55/90 -> 23/45/82"
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":23,\"moderado\":45,\"gourmet\":82},\"traslado\":{\"eco\":4,\"medio\":9,\"confort\":15}} (derivado de otro destino, confianza baja)."
     },
     "trancoso": {
       "comida": {
@@ -662,40 +652,39 @@
     },
     "ajuda": {
       "comida": {
-        "casual": 38,
-        "moderado": 70,
-        "gourmet": 120
-      },
-      "traslado": {
-        "eco": 5,
-        "medio": 10,
-        "confort": 20
-      },
-      "fuente": "No hay dato propio de Arraial d'Ajuda. Se deriva de Trancoso, que esta a 7 km por la misma costa y con la misma balsa: mismo tipo de pueblo, misma escala de beach clubs. Instagram y TikTok de la zona de Porto Seguro arman el mismo rango que el de Trancoso.",
-      "verificado": "2026-09-29",
-      "confianza": "baja",
-      "derivacion": "Copia de trancoso con un escalon menos. Arraial d'Ajuda es el pueblo mas chico de los dos y sin la vida nocturna de Trancoso, asi que come un poco mejor, pero la diferencia es chica: son 7 km. Si Trancoso esta bien calibrado, Arraial tambien.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$24 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$105 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): vans R$5-7, mototaxi R$5, taxi R$20-35. Antes {\"eco\":14,\"medio\":23,\"confort\":38}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 37/68/115 -> 38/70/120 (misma comida que trancoso, por pedido)."
-    },
-    "morro": {
-      "comida": {
-        "casual": 38,
-        "moderado": 70,
-        "gourmet": 120
+        "casual": 19,
+        "moderado": 35,
+        "gourmet": 57
       },
       "traslado": {
         "eco": 4,
         "medio": 8,
-        "confort": 16
+        "confort": 17
       },
-      "fuente": "Se buscaron cartas de restaurante y guias de la Bahia. Morro de Sao Paulo es un pueblo de playa a una hora por tierra de Salvador, con muelle y vida nocturna, del mismo tipo que Trancoso. Lo unico publicado que se le acerca es un menu de almuerzo en la praia a R$55 por persona y una cena de happy hour a R$99 para dos, que es la misma escala de Trancoso. No hay dato propio: el valor es copia de Trancoso.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Copia de trancoso. Mismo tipo: pueblo de playa de Bahia con vida nocturna y sofisticado, a una hora por tierra de Salvador. Si Trancoso esta bien calibrado, Morro tambien.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$20 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$83 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): sin autos: tractor y lancha R$20-40. Antes {\"eco\":6,\"medio\":11,\"confort\":22}. Estimacion de uso, no fuente directa del total."
+      "fuente": "Viciada em Viajar (feb/2024): Rabanete por kilo R$90/kg, esfiha R$10, moqueca individual de camarón en La Plage R$68, taxi minimo R$30, van Pitinga-centro R$5. Pé na Estrada (ene/2024): ejecutivo Cantinho Mineiro desde R$18, pizza grande Paolo R$39. Viaje na Viagem: comida o cena R$45-90 con servicio, mariscos en Praia do Espelho R$85-140 por plato. Melhores Destinos: van R$5-7.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":38,\"moderado\":70,\"gourmet\":120},\"traslado\":{\"eco\":5,\"medio\":10,\"confort\":20}} (derivado de otro destino, confianza baja)."
+    },
+    "morro": {
+      "comida": {
+        "casual": 19,
+        "moderado": 52,
+        "gourmet": 75
+      },
+      "traslado": {
+        "eco": 1,
+        "medio": 4,
+        "confort": 15
+      },
+      "fuente": "Morro de São Paulo Catamarã (oct/2024): PF Papoula R$29, PF Banana Blue R$35, Boteco do Conde desde R$25, menú del día ~R$60. Bossa Nova Bistrô (carta en su sitio): camarão ao limone R$82, frutos do mar R$92, moqueca de camarón R$219. Minha Louca Paixão moqueca para dos R$165,99. Catraca Livre: tapioca R$8-12. Pueblo sin autos: de la Primera a la Cuarta Praia a pie; taxi/tractor a la Quinta Praia desde R$80 por vehículo, barco a Gamboa R$4 (Melhores Destinos).",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":38,\"moderado\":70,\"gourmet\":120},\"traslado\":{\"eco\":4,\"medio\":8,\"confort\":16}} (derivado de otro destino, confianza baja)."
     },
     "portoseguro": {
       "comida": {
@@ -735,22 +724,21 @@
     },
     "forte": {
       "comida": {
-        "casual": 38,
-        "moderado": 70,
-        "gourmet": 120
+        "casual": 19,
+        "moderado": 40,
+        "gourmet": 74
       },
       "traslado": {
         "eco": 3,
-        "medio": 7,
-        "confort": 15
+        "medio": 6,
+        "confort": 13
       },
-      "fuente": "Instagram Praia do Forte (2026): la moqueca de la zona con muy buenos precios; hay un Iberostar Selection de 5 estrellas all-inclusive.",
-      "verificado": "2026-09-27",
-      "confianza": "baja",
-      "derivacion": "Resort turistico a 100 km de la capital de Bahia. Comida mas cara que un pueblo de playa pero traslado mas barato, porque esta todo concentrado. Copia de portoseguro con un poco mas.",
-      "notaMedio": "El nivel medio de traslado es DERIVADO (media geometrica de eco y confort, redondeada). No viene de la fuente: la \"fuente\" de este destino documenta solo los dos niveles extremos.",
-      "ajusteTraslado": "2026-09-30: recalculado con tarifas reales 2026 (R$18 eco = ~4 viajes en bus/van/omnibus local, sin taxi ni app; R$78 confort = 3-4 apps/taxis por dia; R$5,2 = US$1): vila chica, bici; vans R$6 a Imbassai. Antes {\"eco\":12,\"medio\":20,\"confort\":35}. Estimacion de uso, no fuente directa del total.",
-      "ajusteComida": "2026-09-30: 34/62/105 -> 38/70/120 (misma comida que trancoso, por pedido)."
+      "fuente": "Esse Mundo é Nosso: Judite 20 mini acarajés R$30, Tango Café tapioca desde R$17,90, Sabor da Vila moqueca de pescado R$135 y de camarón R$160, Souza Bar carne de sol R$55, Farol (Tamar) risotto R$85, Il Cantuccio pescados desde R$60, cerveza R$10-12. Quanto Custa Viajar: restaurante simple desde R$40, sofisticado R$120-200. Uber Mata de São João (página oficial): Praça ACM R$18, Praia do Lord R$20, Tamar R$32. El pueblo se recorre a pie.",
+      "verificado": "2026-10-12",
+      "confianza": "media",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada.",
+      "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
+      "anterior": "2026-10-12: antes {\"comida\":{\"casual\":38,\"moderado\":70,\"gourmet\":120},\"traslado\":{\"eco\":3,\"medio\":7,\"confort\":15}} (derivado de otro destino, confianza baja)."
     }
   }
 }

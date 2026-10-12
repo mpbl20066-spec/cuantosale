@@ -25,37 +25,37 @@
   mcz: { name: 'Maceió', transport: { eco: 3, medio: 7, confort: 15 }, food: { casual: 25, moderado: 48, gourmet: 80 } },
   rec: { name: 'Recife', transport: { eco: 3, medio: 6, confort: 14 }, food: { casual: 25, moderado: 48, gourmet: 82 } },
   joaopessoa: { name: 'João Pessoa', transport: { eco: 4, medio: 7, confort: 14 }, food: { casual: 26, moderado: 44, gourmet: 71 } },
-  porto: { name: 'Porto de Galinhas', transport: { eco: 5, medio: 9, confort: 17 }, food: { casual: 24, moderado: 43, gourmet: 73 } },
+  porto: { name: 'Porto de Galinhas', transport: { eco: 3, medio: 6, confort: 14 }, food: { casual: 22, moderado: 41, gourmet: 61 } },
   maragogi: { name: 'Maragogi', transport: { eco: 4, medio: 7, confort: 14 }, food: { casual: 24, moderado: 45, gourmet: 75 } },
   jericoacoara: { name: 'Jericoacoara', transport: { eco: 4, medio: 8, confort: 18 }, food: { casual: 32, moderado: 60, gourmet: 100 } },
-  buz: { name: 'Búzios', transport: { eco: 4, medio: 9, confort: 19 }, food: { casual: 34, moderado: 59, gourmet: 104 } },
-  arraial: { name: 'Arraial do Cabo', transport: { eco: 4, medio: 7, confort: 12 }, food: { casual: 23, moderado: 41, gourmet: 78 } },
+  buz: { name: 'Búzios', transport: { eco: 4, medio: 8, confort: 15 }, food: { casual: 35, moderado: 62, gourmet: 99 } },
+  arraial: { name: 'Arraial do Cabo', transport: { eco: 2, medio: 5, confort: 11 }, food: { casual: 23, moderado: 44, gourmet: 82 } },
   cabo: { name: 'Cabo Frio', transport: { eco: 4, medio: 7, confort: 14 }, food: { casual: 22, moderado: 40, gourmet: 70 } },
-  angra: { name: 'Angra dos Reis', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 25, moderado: 45, gourmet: 85 } },
+  angra: { name: 'Angra dos Reis', transport: { eco: 4, medio: 7, confort: 13 }, food: { casual: 23, moderado: 48, gourmet: 89 } },
   paraty: { name: 'Paraty', transport: { eco: 4, medio: 8, confort: 17 }, food: { casual: 21, moderado: 42, gourmet: 74 } },
   ilha: { name: 'Ilha Grande', transport: { eco: 4, medio: 8, confort: 15 }, food: { casual: 28, moderado: 52, gourmet: 90 } },
   ubatuba: { name: 'Ubatuba', transport: { eco: 5, medio: 10, confort: 22 }, food: { casual: 25, moderado: 48, gourmet: 80 } },
-  ilhabela: { name: 'Ilhabela', transport: { eco: 6, medio: 11, confort: 22 }, food: { casual: 26, moderado: 48, gourmet: 83 } },
+  ilhabela: { name: 'Ilhabela', transport: { eco: 8, medio: 10, confort: 13 }, food: { casual: 24, moderado: 44, gourmet: 72 } },
   fln: { name: 'Florianópolis', transport: { eco: 6, medio: 13, confort: 27 }, food: { casual: 28, moderado: 55, gourmet: 90 } },
   bcm: { name: 'Balneário Camboriú', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
-  bombinhas: { name: 'Bombinhas', transport: { eco: 5, medio: 10, confort: 19 }, food: { casual: 23, moderado: 46, gourmet: 86 } },
-  rosa: { name: 'Praia do Rosa', transport: { eco: 3, medio: 8, confort: 19 }, food: { casual: 26, moderado: 50, gourmet: 85 } },
+  bombinhas: { name: 'Bombinhas', transport: { eco: 7, medio: 11, confort: 18 }, food: { casual: 20, moderado: 43, gourmet: 83 } },
+  rosa: { name: 'Praia do Rosa', transport: { eco: 4, medio: 7, confort: 13 }, food: { casual: 22, moderado: 48, gourmet: 75 } },
   itapema: { name: 'Itapema', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 28, moderado: 54, gourmet: 92 } },
   garopaba: { name: 'Garopaba', transport: { eco: 3, medio: 7, confort: 17 }, food: { casual: 25, moderado: 50, gourmet: 86 } },
   ferrugem: { name: 'Ferrugem', transport: { eco: 3, medio: 7, confort: 15 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
   picarras: { name: 'Piçarras', transport: { eco: 4, medio: 7, confort: 14 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
-  gram: { name: 'Gramado', transport: { eco: 5, medio: 10, confort: 19 }, food: { casual: 33, moderado: 59, gourmet: 102 } },
-  canela: { name: 'Canela', transport: { eco: 5, medio: 10, confort: 22 }, food: { casual: 31, moderado: 56, gourmet: 97 } },
+  gram: { name: 'Gramado', transport: { eco: 5, medio: 8, confort: 13 }, food: { casual: 37, moderado: 65, gourmet: 93 } },
+  canela: { name: 'Canela', transport: { eco: 5, medio: 8, confort: 14 }, food: { casual: 24, moderado: 42, gourmet: 54 } },
   torres: { name: 'Torres', transport: { eco: 3, medio: 6, confort: 12 }, food: { casual: 26, moderado: 50, gourmet: 88 } },
   canoa: { name: 'Capão da Canoa', transport: { eco: 3, medio: 6, confort: 12 }, food: { casual: 25, moderado: 48, gourmet: 85 } },
   fernando: { name: 'Fernando de Noronha', transport: { eco: 4, medio: 12, confort: 34 }, food: { casual: 50, moderado: 95, gourmet: 160 } },
-  pip: { name: 'Pipa', transport: { eco: 4, medio: 9, confort: 15 }, food: { casual: 23, moderado: 45, gourmet: 82 } },
+  pip: { name: 'Pipa', transport: { eco: 3, medio: 6, confort: 12 }, food: { casual: 17, moderado: 41, gourmet: 73 } },
   trancoso: { name: 'Trancoso', transport: { eco: 5, medio: 13, confort: 33 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
-  ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 5, medio: 10, confort: 20 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
-  morro: { name: 'Morro de São Paulo', transport: { eco: 4, medio: 8, confort: 16 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
+  ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 4, medio: 8, confort: 17 }, food: { casual: 19, moderado: 35, gourmet: 57 } },
+  morro: { name: 'Morro de São Paulo', transport: { eco: 1, medio: 4, confort: 15 }, food: { casual: 19, moderado: 52, gourmet: 75 } },
   portoseguro: { name: 'Porto Seguro', transport: { eco: 4, medio: 8, confort: 17 }, food: { casual: 33, moderado: 60, gourmet: 105 } },
   itacare: { name: 'Itacaré', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 32, moderado: 58, gourmet: 100 } },
-  forte: { name: 'Praia do Forte', transport: { eco: 3, medio: 7, confort: 15 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
+  forte: { name: 'Praia do Forte', transport: { eco: 3, medio: 6, confort: 13 }, food: { casual: 19, moderado: 40, gourmet: 74 } },
 }, {
   _meta: {
       "confianza": {
@@ -119,10 +119,9 @@
       "derivacion": "Copia de rec. Joao Pessoa esta 300 km al norte y comparte corredor de vuelo, pero su cesta basica es R$92 mas barata, asi que deberia estar un poco por DEBAJO de Recife, no igual."
     },
   porto: {
-      "fuente": "Se buscaron precios de restaurante de Porto de Galinhas. Lo que hay publicado es sobre el resort con todo incluido, que no separa la comida: el costo real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte. Por eso el numero no se puede derivar. Se lo pone un poco por encima de Recife (28 contra 25) porque el perfil de gasto es de resort de playa. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$64.5/86.5/112.4 por dia.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "derivacion": "Resort de playa con todo incluido en la zona, asi que se pone por encima de Recife. Pero no hay dato: el precio real depende de si el hotel es all-inclusive o no, y la app calcula el hotel aparte."
+      "fuente": "Grupo Dicas (2026, ticket medio por persona): Barcaxeira y Farofa Fina R$80-120, Munganga R$100-140, Peixe na Telha R$150-200, Beijupirá R$200-250. Quanto Custa Viajar (2025): restaurante medio R$100-180 por persona, desayuno en panaderia desde R$20. O Pescador ejecutivo ~R$40, self-service R$35. Uber Ipojuca (página oficial): Rua da Esperança R$18, Maracaípe R$20. El centro se recorre a pie. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 15/20/24, almoço 23,50/32/38,40, jantar 26/34,50/50.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   maragogi: {
       "fuente": "brviaje24 Maragogi (2026): PF R$25-40, self-service R$65-95 el kilo, porcion de camarao R$60-130, drinks R$28-45. Reporte de 2 dias: R$186 por persona incluyendo alojamiento, desayuno y las dos comidas.",
@@ -137,17 +136,15 @@
       "nota": "La villa no admite autos y se camina. El traslado diario es bajo; los buggies a Pedra Furada o Lagoa Azul son una excursion aparte. Barato en la playa pero caro en restaurante."
     },
   buz: {
-      "fuente": "Se buscaron cartas de restaurante y guias de Búzios. Hay datos de la region: PF R$30-40, por kilo R$40-70, churrascaria rodizio R$120-250, caipirinha R$20-40, que son rangos de pueblo de playa con vida nocturna. Búzios es el balneario mas caro de Rio de Janeiro y por eso esta por encima de la media del Nordeste. Sin carta propia de la ciudad: el valor coincide con Fortaleza y Jericoacoara. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$102.04/131/181 por dia. Menus ejecutivos R$49,90, PF R$25-35, casas de R$60 por persona.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "nota": "Las playas estan dispersas y el taxi es de los mas caros de la costa (sin app fuerte): el traslado diario sube respecto del promedio. Balneario mas caro de Rio de Janeiro, por eso tambien sube la comida.",
-      "derivacion": "Sin dato especifico de Búzios. Copia práctica de for/jericoacoara. Búzios es pueblo de playa con vida nocturna, asi que la escala es plausible, pero deberia ser un poco mas caro que el promedioNordeste: es el balneario mas caro de Rio de Janeiro."
+      "fuente": "Quanto Custa Viajar (2025): PF en Búzios Grill desde R$29; salgados y jugo en Trigo & Cia por menos de R$20; Místico ticket medio R$150, Zuza Bistrô R$120. Brasil Show Turismo (24/05/2026): barracas y por kilo R$40-60, restaurantes medios de la Rua das Pedras R$80-120 por persona, premium R$150-250. Uber (página oficial Búzios): UberX R$20-22 a Ferradura, João Fernandes y Porto da Barra. Vans Cooper Búzios/Coopergeribá R$5 (Viaje na Viagem). Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 18,04/26/38, almoço 36/49/65, jantar 48/56/78.",
+      "confianza": "media",
+      "verificado": "2026-10-12",
+      "nota": "Las playas estan dispersas y el taxi es de los mas caros de la costa (sin app fuerte): el traslado diario sube respecto del promedio. Balneario mas caro de Rio de Janeiro, por eso tambien sube la comida."
     },
   arraial: {
-      "fuente": "Se buscaron cartas de restaurante de la region de Lagos, guias de viaje y comparadores de costo de vida. Lo unico que aparece es el distrito turistico Arraial do Cabo como conjunto, que es mas caro que Cabo Frio porque tiene las mejores playas. No hay precio publicado para el pueblo, asi que el valor es una copia de Cabo Frio. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$67.6/93.2/149.6 por dia.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "derivacion": "Copia de cabo. Ambos son balnearios de la.region de Lagos (RJ) con economia turistica. Sin dato propio."
+      "fuente": "Self-service sin balanza R$34,99 en Praia Grande (2026) y Mandacarú R$30 (Tripadvisor). Tio Dorp platos R$40-80, filé de pescado R$75, pulpo R$135; Sol na Cozinha R$50-90 (Classe Turista / Esse Mundo é Nosso). Ómnibus municipal R$2,00 (Diário do Transporte, 25/02/2026). Uber (página oficial): Praia Grande R$16, Praia dos Anjos R$15. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 10,60/16,60/24,80, almoço 26,40/34,60/54, jantar 30,60/42/70,80.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   cabo: {
       "fuente": "Numbeo Cabo Frio: comida barata R$30, cena media para 2 R$200. Wise: comida en restaurante economico R$35. Reparto Brasil: comida en restau USD 6,68.",
@@ -155,10 +152,9 @@
       "verificado": "2026-09-27"
     },
   angra: {
-      "fuente": "Numbeo Angra dos Reis: comida barata R$37,50, cena media para 2 R$170, McMenu R$27,50, cerveza de tirada R$12,40, capuchino R$8, pasaje de transporte R$6. || 2026-09-30, busqueda de precios: quantocustaviajar Angra (sep/2025): R$69/102/163 por dia, promediado con la estimacion de Numbeo ya citada.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "nota": "OJO con este dato: Numbeo marca 28 entradas pero SOLO 6 colaboradores unicos y la ultima actualizacion es de abril de 2025. Es crowdsourced finito: sirve como orden de magnitud, no como precio. Por eso la confianza es baja pese a que haya fuente directa."
+      "fuente": "Quanto Custa Viajar (sep/2025): quentinha en el centro R$25-40, por kilo R$60-80/kg, petiscos de playa R$20-35, plato individual R$45-70, chope R$15-22, cena frente al mar R$250-400 por persona. Ómnibus municipal tarifa A R$5,80 (RJ Costa Verde, 07/03/2026). Uber (página oficial): Rodoviária R$20, Praia Grande R$25. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 14,40/19,80/25, almoço 25,20/37,40/60,20, jantar 29,80/44,60/78,20.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   paraty: {
       "fuente": "Wise Paraty (2026): comida en restaurante economico R$35. hosteldavila Paraty: por quilo o PF R$40-55 por persona, bien servido, fuera del quadrilatero historico.",
@@ -179,10 +175,9 @@
       "nota": "Los precios de comida rapida son de los mas baratos del litoral de Sao Paulo, lo que sugiere que casual 25 (R$130/dia) esta alto. Con PF a R$25-33 y self-service a R$23,90, un dia completo da R$60-90, o sea USD 12-17."
     },
   ilhabela: {
-      "fuente": "Se buscaron precios de restaurante. Lo que hay es una lista de comida economica en Ilhabela (Wanderlog) que recomienda un self-service frente al foro, y el relato de un turista que vivio un mes sin gastar mucho usando transporte publico, pero ninguno con precios. La isla se llega solo por ferry, como Ilha Grande, asi que el costo viene de ahi con un recargo por turismo de verano. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$72.12/93.96/130.98 por dia.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "derivacion": "Ilhabela es la segunda isla de Sao Paulo, accesible solo por ferry (como Ilha Grande). Copia de ilha con un poco mas: la isla es mas grande y el turismo es mas caro, pero no hay dato de precios."
+      "fuente": "Real Seguro Viagem (31/08/2026): executivo en Vila y Perequê R$30-45, hamburguesas y petiscos R$25-40, mariscos para dos R$120-250. Carpe Mundi (oct/2024): Cheiro Verde PF R$31,50, Capitano R$76, Marakuthai R$76-88. Ómnibus Expresso Fênix: R$4,80 con tarjeta, R$10 en efectivo (Diário do Transporte, 23/01/2026); se toma el de efectivo. Balsa gratis a pie. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 10,56/12,60/18,06, almoço 27,60/38,40/54, jantar 33,96/42,96/58,92.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   fln: {
       "fuente": "world-prices Florianopolis (2026): comida en restau barato R$35, cena media para 2 R$204, capuchino R$11,4, cerveza R$12. Pack Lightly: PF R$30-40, por kilo R$40-70.",
@@ -196,16 +191,14 @@
       "nota": "La fuente es de 2025 y agrupa Camboriu con Florianopolis. El lodging de Balneario (52/92/165) esta por encima del de Floripa (50/90/160) porque es el balneario premium de la costa norte; la comida tambien deberia ir un poco mas arriba."
     },
   bombinhas: {
-      "fuente": "Se buscaron cartas de restaurante, precios de pousada y comparadores. Lo que hay publicado es de hospedaje en general: el balneario familiar de Santa Catarina, a 120 km de Floripa por la BR-101, con un pueblo chico y sin vida de resort. El lodging del catalogo ya lo pone por arriba de Floripa (52/96/170 contra 50/90/160), asi que la comida tambien. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$60/91.2/151.2 por dia.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "derivacion": "Copia de fln. Bombinhas esta en el mismo corredor de la BR-101 y a 120 km de Floripa, con un pueblo mas chico y precios algo mas bajos: el lodging va 52/96/170 contra 50/90/160, o sea que esta CARO y la comida tambien. Es el balneario familiar de la zona."
+      "fuente": "Quanto Custa Viajar: Coma Bem R$24, buffet libre Mandalas R$48, ejecutivo Mar de Fora R$85, Baiuca Gastrobar R$60-90 por plato, Berro d’Água R$90 por persona, Casa da Lagosta desde R$130, chope desde R$18. Uber (página oficial Bombinhas): UberX promedio R$23, a Sepultura R$18, Morro do Macaco R$24, Uber Moto R$18. Sin bus municipal con tarifa publicada. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 9,60/14,40/24, almoço 21,60/36/54, jantar 28,80/40,80/73,20.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   rosa: {
-      "fuente": "Se buscaron precios de restaurante y de pousada. Praia do Rosa esta en el mismo corredor de la BR-101 a 80 km al norte de la capital de Santa Catarina, con un pueblo aun mas chico que Bombinhas. No hay dato propio: el valor es copia de Florianopolis.",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "derivacion": "Copia de fln. Pueblo chico al norte del estado, a 80 km de la capital de Santa Catarina."
+      "fuente": "Informe Floripa (16/08/2026): Festival Del Vino de Praia do Rosa, platos a R$89. Tripadvisor (Lua Marinha): unos R$350 para dos. Almuerzo PF y chope tomados de Bombinhas (R$36 y R$18), el destino con datos mas cercano. Uber (página Imbituba): UberX a Praia do Rosa R$22; las apps tienen esperas largas (TNH1). El pueblo se recorre a pie.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   itapema: {
       "fuente": "RestaurantGuru Sabor de Casa Itapema (2026): buffet y marmitas R$20-40. Carta de Boka's Itapema (Meia Praia): rodizio R$119,90 por persona, camarao a la milanesa 1/4 R$240, filet mignon a la parmegiana 1/4 R$265, arranho de pescado con camarao R$160, salmon R$225.",
@@ -231,16 +224,14 @@
       "verificado": "2026-09-27"
     },
   gram: {
-      "fuente": "Se buscaron cartas de restaurante de Gramado y comparadores de costo de vida. El dato solido que hay es regional, no de la ciudad: el IPF de la ACSP (jun/2026) da R$34,90 para el plato feito del Sur, la region mas cara del pais, frente a R$31,90 del promedio nacional. Los agregadores la ponen entre las ciudades mas caras de la region, con la misma combinacion de almuerzo caro y cena de resort. No hay carta propia: el valor es copia de Canela. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$109/138.5/171 por dia.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "derivacion": "Copia de canela. Ambas vuelan a POA y son destinos turisticos de la misma provincia, con la misma combinacion de PF caro y cena de resort. Gramado es mas caro como alojamiento (48/89/155 contra 50/90/160, parecido)."
+      "fuente": "Quanto Custa Viajar (26/12/2025): Dona Lourdes R$22-38, Torre Café R$28-50, ejecutivo Pastasciutta R$35-55, Galeto Itália y Nonno Mio R$40-70, secuencia de fondue R$120-180. Melhores Destinos (oct/2025): fondue Carlito’s R$79, St. Gallen R$99, Le Petit Clos R$165; café colonial R$100-120. Ómnibus Gramado-Canela línea 6152 R$6,40 (Viaje na Viagem, jun/2025). Uber (página oficial): Lago Negro R$13, Rua Coberta R$14, Snowland R$21. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 15/18,50/21, almoço 32/46/60, jantar 62/74/90.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   canela: {
-      "fuente": "Se buscaron cartas de restaurante de Canela. Comparte aeropuerto (POA) con Gramado y esta 15 km, asi que comparten el mismo mercado turistico y los mismos precios. Canela es mas chica y con mas hoteleria de temporada. No hay dato propio: el valor es copia de Gramado. || 2026-09-30, busqueda de precios: quantocustaviajar Canela da R$51/64/76 por dia, valor inverosimil porque excluye fondue (R$100-160) y cafe colonial (R$80-120). Se deriva de Gramado (15 km) con -5%.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
-      "derivacion": "Copia de gram. Canela esta 15 km de Gramado y comparte el mercado turistico."
+      "fuente": "Quanto Custa Viajar: ejecutivo de almuerzo R$35-60, self-service o buffet R$50-80, cafés R$25-60, café colonial R$80-120, secuencia de fondue R$100-160. Grupo Dicas: buffet casero R$35-50, churrascarias R$80-150. Ómnibus Gramado-Canela R$6,40. Uber (página oficial Canela): Rodoviária R$13, Catedral de Pedra R$18, Alpen Park R$18, Rua Coberta R$26. La tabla por comida de Quanto Custa Viajar para Canela no se usa: la cena sale mas barata que el almuerzo en los tres niveles.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   torres: {
       "fuente": "RestaurantGuru Torres (2026): Oasis do Alemao R$20-40, Becco dos Sabores R$40-60 al almuerzo y R$80-100 a la cena, Mariskao R$60-80, Beira Rio R$80-200. Carta de Recanto Gaucho Torres: rodizio R$119,95 de 2 a 6, R$149,95 sabado, R$159,95 domingo.",
@@ -261,11 +252,10 @@
       "nota": "El mejor documentado de todo el catalogo, y con razon: todo llega por barco o avion desde Recife, 540 km. Mas la TPA y el ingreso al parque, que se cobran aparte."
     },
   pip: {
-      "fuente": "Se buscaron cartas de restaurante de Pipa. Lo unico con precio es un menu de entrada, plato principal y postre a R$94,90 en La Tolentino. Pipa es pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara. Sin dato de PF ni de street food: el valor es el de Natal con recargo por la vida nocturna, y el unico precio publicado confirma que la cena esta por encima de la media de Natal. || 2026-09-30, busqueda de precios: quantocustaviajar.com (comida diaria por persona, nivel bajo/economico/confort, en R$). Sirve de indice relativo frente a Rio y Salvador; subestima pueblos caros, por eso se promedia con el valor previo. Datos: R$51.6/86.4/134.4 por dia. El unico precio de carta (menu R$94,90) indica cena cara, por eso pesa el valor previo.",
-      "confianza": "baja",
-      "verificado": "2026-09-30",
+      "fuente": "Elas Viajando (abr/2025): self-service sin balanza R$15-35, ~R$30 en el centrinho. Quanto Custa Viajar (oct/2025): plato de pescado o camarón R$65-95, moqueca para dos R$160-220, tapioca R$20-35, long neck R$12-18. Viajar é um Prazer: Duna by Toca desde R$100, caipirinha R$23. Uber Tibau do Sul (página oficial): Praia do Amor R$14, Madeiro R$16. El pueblo se recorre a pie. Quanto Custa Viajar, tabla por comida (bajo costo/economico/confort, R$): café 9,60/16,80/22,80, almoço 18/27,60/45,60, jantar 24/42/66.",
+      "confianza": "media",
+      "verificado": "2026-10-12",
       "nota": "Pueblo chico y caminable: el centro, la playa y los restaurantes se recorren a pie. Transporte diario bajo; solo se suman taxis/mototaxi a Chapadao, Madeiro o Sibauma.",
-      "derivacion": "Pipa es un pueblo de surf con vida nocturna, del mismo tipo que Jericoacoara pero en Rio Grande do Norte. Copia de nat con recargo por la vida nocturna. Lo que si hay dato (un menu de R$94,90 en un restaurante de la zona) sugiere que la cena es mas cara que la media de Natal, que es lo que ya se refleja.",
       "fuenteMedio": "2026-09-30, ajuste de criterio. La media geometrica de 4 y 15 da 8, pero ese calculo supone que el nivel medio esta a mitad de camino entre el que no se mueve y el que se mueve mucho. Pipa no es simetrica: el pueblo es chico y caminable, asi que el nivel eco es real, pero el viajero medio igual toma mototaxi a Chapadao, Madeiro o Sibauma, que quedan fuera del pueblo. El medio queda por encima de la media geometrica y no por debajo. +-1 dia de diferencia, no cambia una decision de presupuesto, pero la formula tiene que saber que este numero se aparto a mano."
     },
   trancoso: {
@@ -275,16 +265,14 @@
       "nota": "Pueblo de playa con vida nocturna y jetset, el mas caro de Bahia despues de Salvador. El contraste entre el almuerzo a R$19,90 y la cena en la playa a R$150 por mesa es el rango real."
     },
   ajuda: {
-      "fuente": "No hay dato propio de Arraial d'Ajuda. Se deriva de Trancoso, que esta a 7 km por la misma costa y con la misma balsa: mismo tipo de pueblo, misma escala de beach clubs. Instagram y TikTok de la zona de Porto Seguro arman el mismo rango que el de Trancoso.",
-      "confianza": "baja",
-      "verificado": "2026-09-29",
-      "derivacion": "Copia de trancoso con un escalon menos. Arraial d'Ajuda es el pueblo mas chico de los dos y sin la vida nocturna de Trancoso, asi que come un poco mejor, pero la diferencia es chica: son 7 km. Si Trancoso esta bien calibrado, Arraial tambien."
+      "fuente": "Viciada em Viajar (feb/2024): Rabanete por kilo R$90/kg, esfiha R$10, moqueca individual de camarón en La Plage R$68, taxi minimo R$30, van Pitinga-centro R$5. Pé na Estrada (ene/2024): ejecutivo Cantinho Mineiro desde R$18, pizza grande Paolo R$39. Viaje na Viagem: comida o cena R$45-90 con servicio, mariscos en Praia do Espelho R$85-140 por plato. Melhores Destinos: van R$5-7.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   morro: {
-      "fuente": "Se buscaron cartas de restaurante y guias de la Bahia. Morro de Sao Paulo es un pueblo de playa a una hora por tierra de Salvador, con muelle y vida nocturna, del mismo tipo que Trancoso. Lo unico publicado que se le acerca es un menu de almuerzo en la praia a R$55 por persona y una cena de happy hour a R$99 para dos, que es la misma escala de Trancoso. No hay dato propio: el valor es copia de Trancoso.",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "derivacion": "Copia de trancoso. Mismo tipo: pueblo de playa de Bahia con vida nocturna y sofisticado, a una hora por tierra de Salvador. Si Trancoso esta bien calibrado, Morro tambien."
+      "fuente": "Morro de São Paulo Catamarã (oct/2024): PF Papoula R$29, PF Banana Blue R$35, Boteco do Conde desde R$25, menú del día ~R$60. Bossa Nova Bistrô (carta en su sitio): camarão ao limone R$82, frutos do mar R$92, moqueca de camarón R$219. Minha Louca Paixão moqueca para dos R$165,99. Catraca Livre: tapioca R$8-12. Pueblo sin autos: de la Primera a la Cuarta Praia a pie; taxi/tractor a la Quinta Praia desde R$80 por vehículo, barco a Gamboa R$4 (Melhores Destinos).",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     },
   portoseguro: {
       "fuente": "TikTok/reels Porto Seguro (2026): almuerzo a la voluntad desde R$19,90 en varios restaurantes; consumacion en las cabanas de la playa de R$100 a R$150 por mesa. Instagram: las barracas de Playa do Espelho cobran minimo R$100 por persona.",
@@ -299,9 +287,8 @@
       "nota": "Pueblo de surf, menos jet-set que Trancoso, asi que va un poco por debajo."
     },
   forte: {
-      "fuente": "Instagram Praia do Forte (2026): la moqueca de la zona con muy buenos precios; hay un Iberostar Selection de 5 estrellas all-inclusive.",
-      "confianza": "baja",
-      "verificado": "2026-09-27",
-      "derivacion": "Resort turistico a 100 km de la capital de Bahia. Comida mas cara que un pueblo de playa pero traslado mas barato, porque esta todo concentrado. Copia de portoseguro con un poco mas."
+      "fuente": "Esse Mundo é Nosso: Judite 20 mini acarajés R$30, Tango Café tapioca desde R$17,90, Sabor da Vila moqueca de pescado R$135 y de camarón R$160, Souza Bar carne de sol R$55, Farol (Tamar) risotto R$85, Il Cantuccio pescados desde R$60, cerveza R$10-12. Quanto Custa Viajar: restaurante simple desde R$40, sofisticado R$120-200. Uber Mata de São João (página oficial): Praça ACM R$18, Praia do Lord R$20, Tamar R$32. El pueblo se recorre a pie.",
+      "confianza": "media",
+      "verificado": "2026-10-12"
     }
 });
