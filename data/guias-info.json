@@ -973,5 +973,197 @@
     ]
    }
   ]
+ },
+ "ssa": {
+  "antes": {
+   "titulo": "Antes de viajar a Salvador de Bahía",
+   "intro": "Salvador es una ciudad grande: las playas urbanas, el centro histórico y las playas del norte quedan a distancias que se hacen en auto. Elegir bien el barrio para dormir cambia el viaje.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Se llega al aeropuerto internacional de Salvador (SSA), en el norte de la ciudad, a unos 30 km de la Barra."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 4 o 5 días alcanzás a recorrer el Pelourinho y la Cidade Baixa, hacer playa en la Barra y en el norte, y salir en barco por la bahía."
+    },
+    {
+     "t": "Cuándo ir",
+     "d": "Si buscás playa y sol, de septiembre a marzo. Para Carnaval o Año Nuevo, reservá con mucha anticipación."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Salvador de Bahía desde Montevideo",
+    "intro": "No hay un vuelo directo regular todo el año entre Montevideo y Salvador: lo habitual es volar con una escala.",
+    "items": [
+     {
+      "t": "Vuelo con escala",
+      "d": "La opción más común es con escala en São Paulo (LATAM, GOL o Azul) y de ahí a Salvador (SSA). Si combinás aerolíneas, revisá que no tengas que cambiar de aeropuerto en São Paulo."
+     },
+     {
+      "t": "Vuelos directos de temporada",
+      "d": "En algunos veranos hubo vuelos directos de temporada (GOL en 2023, SKY en 2024). Buscalos para tus fechas, pero no cuentes con ellos."
+     },
+     {
+      "t": "Del aeropuerto a la Barra",
+      "d": "Son unos 30 km. En Uber, 99 o taxi tardás de 35 minutos a más de una hora, según el tránsito."
+     },
+     {
+      "t": "Metro",
+      "d": "La Línea 2 del metro llega al aeropuerto. Sirve si vas al centro con poco equipaje: hay que combinar con la Línea 1 en Acesso Norte, y a la Barra no llega."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "En hora pico el tránsito hacia la Barra es lento. Mirá el precio en la app antes de subirte a un taxi común."
+    },
+    "bullets": [
+     "No te olvides de sumar: vuelo, equipaje, traslado aeropuerto → hotel y la vuelta."
+    ]
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Salvador de Bahía",
+    "intro": "La ciudad es extensa: conviene dormir en un barrio con movimiento, cerca del mar o del centro histórico.",
+    "items": [
+     {
+      "t": "Barra",
+      "d": "Playa de agua calma, atardecer, restaurantes y vida de noche a pie. Es la zona más cómoda para un primer viaje y para familias."
+     },
+     {
+      "t": "Ondina",
+      "d": "Al lado de la Barra, con hoteles grandes sobre la avenida costera. En Carnaval queda sobre el circuito Barra-Ondina."
+     },
+     {
+      "t": "Rio Vermelho",
+      "d": "El barrio bohemio: bares, acarajé y restaurantes. Para quien quiere salir de noche y comer bien."
+     },
+     {
+      "t": "Pelourinho y Santo Antônio Além do Carmo",
+      "d": "Posadas en casas coloniales, para quien viene por la historia y la música. De noche, movete por las calles con gente y volvé en Uber."
+     },
+     {
+      "t": "Itapuã y el norte",
+      "d": "Más tranquilo, con playas de cocoteros y cerca del aeropuerto, pero lejos del centro: cada salida al Pelourinho es un viaje largo."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Salvador",
+    "intro": "Las distancias son largas y las colinas, empinadas. Para ir de un barrio a otro, lo más práctico son las apps.",
+    "items": [
+     {
+      "t": "Uber y 99",
+      "d": "Es la forma más simple de ir de la Barra al Pelourinho, al Bonfim o al Rio Vermelho, y la recomendada de noche."
+     },
+     {
+      "t": "Elevador Lacerda",
+      "d": "Une la Cidade Alta (Pelourinho) con la Cidade Baixa (Mercado Modelo, Comércio)."
+     },
+     {
+      "t": "Metro",
+      "d": "Dos líneas: la 1 va de Lapa a Águas Claras y la 2, de Acesso Norte al aeropuerto, con parada en la terminal de ómnibus. No llega a la Barra ni al Rio Vermelho."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay muchas líneas, pero los recorridos son difíciles de entender si no conocés la ciudad. Si los usás, que sea de día."
+     },
+     {
+      "t": "Barco",
+      "d": "Del Terminal Náutico, junto al Mercado Modelo, salen las lanchas a Mar Grande y los paseos a las islas; el ferry a Itaparica sale de São Joaquim."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Salvador de noche",
+    "intro": "La noche se reparte entre tres zonas, con mucha música en vivo.",
+    "items": [
+     {
+      "t": "Rio Vermelho",
+      "d": "Bares en las plazas, puestos de acarajé y música. Es el barrio más animado de noche."
+     },
+     {
+      "t": "Pelourinho",
+      "d": "Los martes hay música en las plazas y la Bênção del Olodum. Andá por las calles principales y volvé en Uber."
+     },
+     {
+      "t": "Barra",
+      "d": "Bares sobre la rambla, cerca del faro. Lo más cómodo para salir a pie si te alojás ahí."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Salvador",
+    "bullets": [
+     "En el Pelourinho, de noche quedate en las calles con gente y bares; en las calles laterales vacías hay más robos.",
+     "Para cruzar entre barrios de noche, usá Uber, 99 o taxi.",
+     "No andes con el celular en la mano en la calle ni en las plazas llenas.",
+     "En la zona del Elevador Lacerda y el Comércio prestá más atención, sobre todo cuando cierran los comercios.",
+     "A la playa llevá solo lo necesario y no dejes cosas solas en la arena.",
+     "En las playas de mar abierto, como Amaralina o Jaguaribe, hay olas y corrientes: bañate cerca de los guardavidas."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "En restaurantes y comercios se paga con tarjeta o Pix. Para baianas de acarajé, ambulantes de playa y la feria, llevá algo de efectivo."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Usá los que están dentro de shoppings, supermercados o bancos, y de día."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Salvador la tensión es de 127 V; los enchufes de 220 V, donde los hay, suelen estar marcados. Revisá tus aparatos si no son bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y gorra: hace calor todo el año",
+     "Ropa liviana y de playa",
+     "Un piloto o paraguas si vas entre abril y julio",
+     "Calzado cómodo para las calles de piedra y las subidas del Pelourinho",
+     "Repelente",
+     "Riñonera o bolso que cierre bien",
+     "Efectivo y un medio de pago alternativo",
+     "Cargador / power bank"
+    ]
+   }
+  ]
  }
 }
