@@ -2790,5 +2790,1111 @@
     ]
    }
   ]
+ },
+ "morro": {
+  "antes": {
+   "titulo": "Antes de viajar a Morro de São Paulo",
+   "intro": "Morro queda en la isla de Tinharé, frente a la costa de Bahía, y no hay puente ni ruta: se llega siempre en barco o en avioneta. Organizar el traslado desde Salvador es la parte más importante del viaje.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Salvador",
+     "d": "Se vuela al aeropuerto de Salvador (SSA) y de ahí se sigue en catamarán, por tierra y lancha vía Valença, o en avioneta. El aeropuerto de Valença no tiene vuelos comerciales por ahora."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 4 o 5 días alcanzás a recorrer las cuatro playas, hacer la vuelta a la isla en barco y tener margen si el mar complica la vuelta."
+    },
+    {
+     "t": "Tasa de la isla (TUPA)",
+     "d": "La Prefeitura de Cairu cobra la TUPA a cada visitante. Se paga al desembarcar o antes, en la app o en tupadigital.com.br; en temporada alta, pagarla antes te ahorra la fila. Solo están exentos los menores de 5 años."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Morro de São Paulo desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a Salvador todo el año: lo habitual es volar con escala en São Paulo y desde Salvador seguir por mar.",
+    "items": [
+     {
+      "t": "Vuelo a Salvador (SSA)",
+      "d": "LATAM, GOL y Azul combinan con escala en São Paulo. Si llegás tarde, conviene dormir en Salvador y cruzar a la mañana: los catamaranes salen de mañana y temprano a la tarde."
+     },
+     {
+      "t": "Catamarán desde Salvador",
+      "d": "Sale del Terminal Marítimo frente al Mercado Modelo y tarda unas 2 h 30, con un buen tramo en mar abierto. Lo operan Biotur, Ilha Bela y Farol do Morro; presentate una hora antes y comprá con anticipación en feriados y vacaciones."
+     },
+     {
+      "t": "Si el mar está feo",
+      "d": "Con mal tiempo las empresas pueden pasar el viaje al semiterrestre sin aviso previo, y entonces tarda 4 h 30 o más."
+     },
+     {
+      "t": "Semiterrestre por Valença",
+      "d": "Ferry de São Joaquim a Bom Despacho (Itaparica), ómnibus hasta Valença (unas 2 h) y lancha a Morro. Lo venden agencias con todo incluido, o lo armás por tu cuenta. Tiene menos mar abierto: es la opción si te mareás."
+     },
+     {
+      "t": "Lancha desde Valença",
+      "d": "Del Terminal Hidroviário del centro de Valença salen lanchas (unos 40 minutos) y barcos más lentos (cerca de 1 h 30), por orden de llegada, de mañana a la tarde."
+     },
+     {
+      "t": "Avioneta",
+      "d": "Hay taxis aéreos de Salvador a la pista de Morro, en unos 25 minutos. Es lo más rápido y lo más caro; en temporada baja vuelan pocos días por semana."
+     }
+    ],
+    "cierre": {
+     "t": "Para la vuelta",
+     "d": "Si tenés vuelo el mismo día, dejá por lo menos 7 horas entre la salida de Morro y el vuelo. Lo más tranquilo es dormir la última noche en Salvador."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Morro de São Paulo",
+    "intro": "No circulan autos: elegí la zona pensando en cuánto querés caminar y cuánto ruido aguantás de noche.",
+    "items": [
+     {
+      "t": "Vila y Primeira Praia",
+      "d": "Cerca del muelle, de los restaurantes y de los comercios. Sirve si querés tener todo a mano sin dormir encima de la fiesta."
+     },
+     {
+      "t": "Segunda Praia",
+      "d": "Lo más movido de la isla, con bares sobre la arena y fiestas hasta tarde. Para salir de noche; si buscás dormir temprano, no."
+     },
+     {
+      "t": "Terceira Praia",
+      "d": "Más tranquila y a pocos minutos a pie de la Segunda. Tiene menos restaurantes y comercio, y poca arena con marea alta."
+     },
+     {
+      "t": "Quarta Praia y más allá",
+      "d": "Posadas y resorts más aislados, frente a las piscinas naturales. Para descansar o ir con chicos; volver a la vila implica una buena caminata o depender del traslado de la posada."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚶",
+    "titulo": "Cómo moverse por Morro de São Paulo",
+    "intro": "En la vila no entran autos particulares: el día a día es a pie.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Entre la vila y las cuatro playas se camina por la arena o por senderos. Con marea baja el camino por la playa es más fácil."
+     },
+     {
+      "t": "Carretilleros",
+      "d": "Esperan en el muelle y llevan las valijas en carretilla hasta la posada. Si tu posada queda lejos, preguntá si te va a buscar."
+     },
+     {
+      "t": "Trayectos largos",
+      "d": "Para Garapuá o las playas del sur hay 4x4, cuatriciclos, mototaxis y barcos. Muchas posadas alejadas tienen su propio traslado."
+     },
+     {
+      "t": "En barco",
+      "d": "La vuelta a la isla y los paseos a Boipeba salen de la Segunda Praia y del muelle."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Morro de São Paulo de noche",
+    "intro": "La noche arranca con el atardecer y sigue en la Segunda Praia.",
+    "items": [
+     {
+      "t": "Atardecer",
+      "d": "Se mira desde la Fortaleza de Tapirandu, el Farol o los bares sobre la bahía del lado del muelle, como el del Portaló."
+     },
+     {
+      "t": "Toca do Morcego",
+      "d": "Bar y club cerca de la vila que arranca con el atardecer. Los viernes y feriados hay filas y la entrada es cara."
+     },
+     {
+      "t": "Segunda Praia",
+      "d": "Barracas, música y fiestas sobre la arena hasta la madrugada, buena parte del año."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Morro de São Paulo",
+    "intro": "Sin autos y con mucha gente en la calle, la vila es tranquila. Los cuidados son los de cualquier lugar de playa con fiesta.",
+    "bullets": [
+     "De noche, volvé por la vila y las playas con movimiento; evitá los tramos oscuros entre playas lejanas.",
+     "En la fiesta de la Segunda Praia, cuidá el celular y no dejes el vaso sin mirar.",
+     "Las piscinas naturales se recorren con marea baja: fijate la tabla de mareas para no quedar lejos cuando sube.",
+     "Usá calzado para caminar sobre el arrecife: hay corales y erizos.",
+     "Si te mareás, tomá algo antes del catamarán; la vuelta suele ser más movida que la ida."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Hay pocos en la vila y no siempre tienen efectivo. Llevá reales desde Salvador o Valença."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "Casi todos los comercios aceptan tarjeta. Para carretilleros, barqueros y algunos paseos, conviene el efectivo."
+     },
+     {
+      "t": "TUPA",
+      "d": "Guardá el comprobante de la tasa: te lo pueden pedir al desembarcar."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Morro la tensión es de 220 V, a diferencia de Salvador (127 V). Revisá tus aparatos si no son bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Valija chica o mochila: todo se mueve a pie o en carretilla",
+     "Protector solar y repelente",
+     "Ropa liviana y de playa",
+     "Sandalias o zapatillas de agua para el arrecife",
+     "Máscara de snorkel para las piscinas",
+     "Pastillas para el mareo, si las usás",
+     "Efectivo para carretilleros y barqueros",
+     "Bolsa estanca para el celular en los paseos en barco"
+    ]
+   }
+  ]
+ },
+ "portoseguro": {
+  "antes": {
+   "titulo": "Antes de viajar a Porto Seguro",
+   "intro": "Porto Seguro tiene aeropuerto propio pegado a la ciudad, así que llegar es simple. Lo que conviene decidir antes es si querés la playa con música de la orla norte o dormir del otro lado del río, en Arraial d’Ajuda.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "El aeropuerto de Porto Seguro (BPS) queda a pocos kilómetros del centro y recibe vuelos directos desde São Paulo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 5 o 6 días te da para el centro histórico, un día de barracas, el barco al Recife de Fora y cruzar a Arraial d’Ajuda y Trancoso."
+    },
+    {
+     "t": "Cuándo ir",
+     "d": "Si buscás tranquilidad, evitá julio, cuando llegan los grupos de egresados. Para Año Nuevo y Carnaval, reservá con mucha anticipación."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Porto Seguro desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a Porto Seguro: se vuela con una escala, en general en São Paulo.",
+    "items": [
+     {
+      "t": "Vuelo a Porto Seguro (BPS)",
+      "d": "Azul, GOL y LATAM tienen vuelos directos de São Paulo a Porto Seguro, de unas 2 horas. Muchos salen de Congonhas: si llegás de Montevideo a Guarulhos, revisá que la conexión no te obligue a cambiar de aeropuerto."
+     },
+     {
+      "t": "Del aeropuerto al hotel",
+      "d": "El aeropuerto está a unos 2 km del centro. Hay taxis, Uber y ómnibus urbanos; a la orla norte (Taperapuã, Mundaí) son pocos minutos más."
+     },
+     {
+      "t": "Por Salvador",
+      "d": "Es mucho más largo: son más de 600 km y en ómnibus el viaje pasa las 12 horas. Solo conviene si combinás con otros destinos de Bahía."
+     }
+    ],
+    "cierre": {
+     "t": "Si seguís a Arraial",
+     "d": "Del aeropuerto andá directo a la balsa del centro: cruzás el río en unos 10 minutos y del otro lado hay vans y taxis."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Porto Seguro",
+    "intro": "La ciudad se divide entre el centro, junto al río, y las playas de la orla norte, hacia Santa Cruz Cabrália.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "Los hoteles más baratos, cerca del aeropuerto, la terminal, la balsa a Arraial y la Passarela. No tiene playa para bañarse: sirve si vas a moverte mucho o a salir de noche."
+     },
+     {
+      "t": "Taperapuã",
+      "d": "A unos 3 km del centro, con la mayor oferta de hoteles y resorts y las megabarracas. Para familias y grupos que quieren playa y movimiento."
+     },
+     {
+      "t": "Mundaí",
+      "d": "Más tranquila, con cocoteros y mar calmo; cerca del Tôa Tôa el ambiente se anima. Buena para playa sin estar en el medio del ruido."
+     },
+     {
+      "t": "Mutá y el norte",
+      "d": "Lo más calmo, a unos 14 km del centro. Para descansar y con auto o traslado."
+     }
+    ],
+    "bullets": [
+     "En verano, Año Nuevo y Carnaval reservá con tiempo: la ciudad se llena."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Porto Seguro",
+    "intro": "Las distancias son cortas, pero las playas de la orla norte quedan lejos para caminar desde el centro.",
+    "items": [
+     {
+      "t": "Uber y taxi",
+      "d": "Uber funciona en Porto Seguro y es lo más práctico entre el centro, las barracas y el aeropuerto, sobre todo de noche."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay líneas urbanas que recorren la orla norte y pasan por el centro."
+     },
+     {
+      "t": "Balsa a Arraial",
+      "d": "Sale del centro, funciona las 24 horas y lleva autos y peatones. En temporada alta la fila de autos puede pasar la hora; a pie se cruza mucho más rápido."
+     },
+     {
+      "t": "Auto",
+      "d": "Útil para Coroa Vermelha, Santa Cruz Cabrália, Trancoso o Caraíva. Si cruzás a Arraial con el auto, contá con la fila de la balsa."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Porto Seguro de noche",
+    "intro": "Porto Seguro es de las ciudades con más noche del litoral bahiano.",
+    "items": [
+     {
+      "t": "Passarela do Descobrimento",
+      "d": "La ex Passarela do Álcool, en el centro: bares, puestos de artesanía y el capeta, el trago de la casa con vodka, guaraná en polvo y leche condensada. Al final está O Beco, más tranquilo."
+     },
+     {
+      "t": "Megabarracas",
+      "d": "Axé Moi y Tôa Tôa, en la orla norte, tienen shows de axé y forró y, en temporada, luaus de noche. Mirá la programación antes de ir."
+     },
+     {
+      "t": "Ilha dos Aquários",
+      "d": "Shows en vivo en una isla del río, entre acuarios. Revisá qué noches abre."
+     },
+     {
+      "t": "Cruzar a Arraial",
+      "d": "Si preferís bares más tranquilos, la Rua do Mucugê está del otro lado de la balsa."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Porto Seguro",
+    "intro": "Es una ciudad muy turística. Los cuidados son los de cualquier lugar con mucha gente y mucha fiesta.",
+    "bullets": [
+     "De noche, movete en Uber o taxi entre la Passarela, las barracas y el hotel.",
+     "En las megabarracas y en la Passarela, cuidá el celular y la billetera: hay mucha gente.",
+     "No dejes cosas solas en la arena mientras te bañás.",
+     "Las piscinas del Recife de Fora y de Taperapuã se recorren solo con marea baja; usá calzado para el arrecife.",
+     "Si tenés vuelo y venís de Arraial en auto, sumá la fila de la balsa al horario."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "Se aceptan en la mayoría de los comercios y barracas. Llevá algo de efectivo para ambulantes, vans y la balsa."
+     },
+     {
+      "t": "Consumo mínimo",
+      "d": "Las megabarracas no cobran entrada de día, pero sí consumo mínimo por mesa. Preguntá antes de sentarte."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Porto Seguro la tensión es de 220 V, a diferencia de Salvador. Revisá tus aparatos si no son bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y repelente",
+     "Ropa liviana y de playa",
+     "Ropa cómoda para la noche de la Passarela",
+     "Zapatillas de agua para el arrecife",
+     "Máscara de snorkel para el Recife de Fora",
+     "Un piloto liviano: en noviembre y de abril a junio llueve más",
+     "Efectivo para la balsa y las vans",
+     "Cargador / power bank"
+    ]
+   }
+  ]
+ },
+ "ajuda": {
+  "antes": {
+   "titulo": "Antes de viajar a Arraial d’Ajuda",
+   "intro": "Arraial d’Ajuda es un distrito de Porto Seguro, del otro lado del Rio Buranhém. Se vuela a Porto Seguro y se cruza el río en balsa: llegar es fácil, pero en temporada alta hay que contar con las filas.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Porto Seguro",
+     "d": "No hay aeropuerto en Arraial: se vuela a Porto Seguro (BPS), a unos 10 km del centro de Arraial contando la balsa."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 5 o 6 días hacés las playas de Arraial, un día en Trancoso y una tarde en el centro histórico de Porto Seguro."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "En el pueblo se camina, y a las playas cercanas se llega en van o taxi. El auto sirve para Trancoso, Taípe y Caraíva por tu cuenta, pero en Arraial cuesta estacionar."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Arraial d’Ajuda desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a Porto Seguro: se vuela con una escala, en general en São Paulo, y desde el aeropuerto se cruza el río.",
+    "items": [
+     {
+      "t": "Vuelo a Porto Seguro (BPS)",
+      "d": "Azul, GOL y LATAM vuelan directo de São Paulo a Porto Seguro en unas 2 horas. Revisá que la conexión no te obligue a cambiar de aeropuerto en São Paulo."
+     },
+     {
+      "t": "La balsa",
+      "d": "Del aeropuerto se va en Uber o taxi hasta la balsa del centro de Porto Seguro. Cruza el río en unos 10 minutos, las 24 horas, con autos y peatones. Se paga solo a la ida, en efectivo o débito."
+     },
+     {
+      "t": "Lanchas para peatones",
+      "d": "Salen del mismo lugar que la balsa, más o menos cada media hora, de mañana temprano a la tarde. Son solo para pasajeros a pie."
+     },
+     {
+      "t": "Del otro lado del río",
+      "d": "Al bajar te esperan vans que salen cuando se llenan y te dejan en el centro, y taxis con precio fijo. En Arraial casi no hay autos de aplicación."
+     },
+     {
+      "t": "Por tierra, sin balsa",
+      "d": "Hay un camino por el interior de unos 65 km desde el aeropuerto, más de una hora en auto. No está en muy buen estado, pero sirve para no depender de la fila de la balsa el día que tenés vuelo."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay traslados compartidos y privados del aeropuerto a Arraial. Es lo más simple si llegás con valijas."
+     }
+    ],
+    "cierre": {
+     "t": "Ojo con la fila",
+     "d": "En Año Nuevo, Carnaval y feriados la fila de autos para la balsa puede llevar más de una hora. El día del vuelo, salí con tiempo."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Arraial d’Ajuda",
+    "intro": "El pueblo está arriba del acantilado y las playas abajo. Elegí entre dormir cerca de los bares o frente al mar.",
+    "items": [
+     {
+      "t": "Rua do Mucugê",
+      "d": "La calle con más posadas, restaurantes y bares, a pasos de la bajada a la playa. Es la más cara y de noche hay ruido."
+     },
+     {
+      "t": "Cerca del Mucugê y la Broadway",
+      "d": "A pocas cuadras del movimiento, pero con noches tranquilas. Buena ubicación para moverte a pie."
+     },
+     {
+      "t": "Centro histórico",
+      "d": "Alrededor de la iglesia y la Praça São Brás, con posadas simples y más baratas, muchas en casas de familia. Para presupuesto ajustado."
+     },
+     {
+      "t": "Playas: Araçaípe, Parracho, Pitinga",
+      "d": "Para despertarte frente al mar. Hay menos comercio cerca y para ir al centro dependés de van, taxi o auto. Parracho tiene beach clubs; Araçaípe es más simple."
+     }
+    ],
+    "bullets": [
+     "Si vas en auto, buscá posada con estacionamiento: en el centro el lugar escasea."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Arraial d’Ajuda",
+    "intro": "El centro es chico y se camina. Para las playas más lejanas y Trancoso hay vans, taxis y buggies.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "La Rua do Mucugê, la plaza, la Broadway y la playa de Mucugê están a minutos. Con marea baja se camina por la arena de Mucugê a Pitinga."
+     },
+     {
+      "t": "Vans",
+      "d": "Unen el centro con la balsa y con Trancoso y Caraíva. A Trancoso salen seguido y tardan unos 45 minutos. Se pagan en efectivo o Pix."
+     },
+     {
+      "t": "Taxi",
+      "d": "No tienen taxímetro: trabajan con precios fijos. Acordá el precio antes de subir."
+     },
+     {
+      "t": "Auto",
+      "d": "Cómodo para Taípe, Trancoso y Caraíva a tu ritmo. En el centro algunas calles tienen poco lugar para estacionar."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Arraial d’Ajuda de noche",
+    "intro": "La noche es de restaurantes y bares más que de boliches grandes.",
+    "items": [
+     {
+      "t": "Rua do Mucugê",
+      "d": "Restaurantes, tiendas y bares abiertos hasta tarde; muchos restaurantes abren recién al final de la tarde."
+     },
+     {
+      "t": "Praça São Brás y Broadway",
+      "d": "Puestos de comida y tragos, restaurantes más baratos y gente hasta la madrugada."
+     },
+     {
+      "t": "Porto Seguro",
+      "d": "Si querés axé y megabarracas, cruzá en balsa: funciona toda la noche."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Arraial d’Ajuda",
+    "intro": "Es un pueblo tranquilo y muy turístico. Alcanza con los cuidados de siempre.",
+    "bullets": [
+     "De noche, quedate en las calles con movimiento del centro y para volver a una posada de playa usá taxi.",
+     "La bajada y la subida a la playa son empinadas: con lluvia, cuidado con resbalar.",
+     "Las piscinas naturales se recorren con marea baja; usá calzado para el arrecife.",
+     "No dejes cosas solas en la arena ni a la vista en el auto.",
+     "Si tenés vuelo, sumá la espera de la balsa; en temporada alta puede ser larga."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La mayoría de los comercios aceptan tarjeta. Llevá efectivo para las vans, la balsa y algunos puestos."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La tensión es de 220 V, como en Porto Seguro. Revisá tus aparatos si no son bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y repelente",
+     "Ropa liviana y de playa",
+     "Calzado cómodo para la subida desde la playa",
+     "Zapatillas de agua para el arrecife",
+     "Algo de abrigo liviano: las noches de invierno son frescas",
+     "Un piloto liviano para noviembre y diciembre",
+     "Efectivo para vans y balsa",
+     "Cargador / power bank"
+    ]
+   }
+  ]
+ },
+ "forte": {
+  "antes": {
+   "titulo": "Antes de viajar a Praia do Forte",
+   "intro": "Praia do Forte es una vila del municipio de Mata de São João, sobre la costa norte de Bahía, a una hora del aeropuerto de Salvador. Se puede combinar fácil con unos días en Salvador.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Salvador",
+     "d": "Se vuela al aeropuerto de Salvador (SSA), a unos 59 km por la Estrada do Coco y la Linha Verde."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 4 o 5 días alcanzás para las piscinas naturales, el Projeto Tamar, la Sapiranga y alguna playa vecina como Imbassaí o Guarajuba."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "En la vila no entran autos y todo se camina. El auto sirve para recorrer las playas del litoral norte a tu ritmo; si te quedás en la vila, no hace falta."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Praia do Forte desde Montevideo",
+    "intro": "No hay un vuelo directo regular todo el año entre Montevideo y Salvador: lo habitual es volar con escala en São Paulo y desde el aeropuerto seguir por ruta.",
+    "items": [
+     {
+      "t": "Vuelo a Salvador (SSA)",
+      "d": "LATAM, GOL y Azul combinan con escala en São Paulo. Si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
+     },
+     {
+      "t": "En auto",
+      "d": "Del aeropuerto son unos 59 km, poco más de una hora por la Estrada do Coco y la Linha Verde (BA-099), casi toda doble vía y con un peaje a la altura de Camaçari. Desde la Barra o el Pelourinho, contá 1 h 30."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "La empresa Atlântico tiene una línea que sale del terminal del aeropuerto y llega en cerca de 1 h 30, y otra desde la Rodoviária de Salvador. Los horarios cambian: confirmalos con la empresa antes de viajar."
+     },
+     {
+      "t": "Vans",
+      "d": "Las vans de la Linha Branca salen de la zona del Shopping Bahia, junto a la Rodoviária, y paran en el camino."
+     },
+     {
+      "t": "Transfer, taxi o app",
+      "d": "Hay traslados con reserva desde el aeropuerto, con el chofer esperándote en la salida. Uber y 99 hacen el viaje, pero algunos choferes no lo aceptan porque vuelven vacíos."
+     }
+    ],
+    "cierre": {
+     "t": "Ojo con el tránsito",
+     "d": "Los viernes y las vísperas de feriado hay mucho tránsito saliendo de Salvador hacia la costa, y a la vuelta, al final de esos días."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Praia do Forte",
+    "intro": "La vila es chica: la decisión es entre una posada en el centro peatonal o un resort frente al mar.",
+    "items": [
+     {
+      "t": "Alameda do Sol",
+      "d": "La calle principal, con bares, restaurantes y la playa a pocos pasos. Lo más práctico si no vas en auto."
+     },
+     {
+      "t": "Calles laterales de la vila",
+      "d": "Posadas de todos los precios a pocas cuadras de la alameda, más tranquilas de noche."
+     },
+     {
+      "t": "Resorts frente al mar",
+      "d": "Los grandes resorts, como el Tivoli Ecoresort y el Iberostar, quedan sobre la playa a las afueras de la vila. Para descansar sin moverte, a un costo más alto."
+     },
+     {
+      "t": "Imbassaí y el norte",
+      "d": "Hacia el norte por la Linha Verde hay más resorts y posadas, como en Imbassaí. Para dormir ahí y conocer la vila conviene tener auto."
+     }
+    ],
+    "bullets": [
+     "Muchas posadas no tienen estacionamiento: si vas en auto, sumá el costo de un estacionamiento privado, porque el lugar en la calle es escaso y con horario limitado."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚶",
+    "titulo": "Cómo moverse por Praia do Forte",
+    "intro": "El centro de la vila es peatonal.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "La alameda, el Projeto Tamar, la capilla y las playas de la vila, como la Pedra do Chapéu y la del Lord, se recorren caminando."
+     },
+     {
+      "t": "Auto",
+      "d": "Se deja en los estacionamientos de la vila. Es lo más cómodo para Itacimirim, Guarajuba, Imbassaí y el Castelo Garcia d'Ávila."
+     },
+     {
+      "t": "Excursiones",
+      "d": "Agencias de la vila organizan salidas a Imbassaí, la Sapiranga y las playas vecinas."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Praia do Forte",
+    "intro": "Es una vila tranquila y peatonal, con mucho movimiento turístico.",
+    "bullets": [
+     "Las piscinas naturales se recorren con marea baja: fijate la tabla de mareas y salí antes de que suba.",
+     "Usá calzado para caminar sobre el arrecife.",
+     "Lejos de la vila las playas tienen poca gente: no dejes cosas solas en la arena.",
+     "En el auto, no dejes nada a la vista en los estacionamientos de las playas."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "En restaurantes y tiendas de la vila se paga con tarjeta o Pix. Llevá algo de efectivo para las baianas de acarajé y los puestos."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Praia do Forte la tensión es de 220 V, a diferencia de Salvador (127 V). Revisá tus aparatos si no son bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y repelente",
+     "Ropa liviana y de playa",
+     "Máscara de snorkel propia para las piscinas",
+     "Zapatillas de agua para el arrecife",
+     "Calzado cerrado para los senderos de la Sapiranga",
+     "Un piloto liviano: de abril a junio llueve más",
+     "Algo de efectivo",
+     "Cargador / power bank"
+    ]
+   }
+  ]
+ },
+ "fernando": {
+  "antes": {
+   "titulo": "Antes de viajar a Fernando de Noronha",
+   "intro": "Noronha es un archipiélago frente a la costa del nordeste de Brasil, a unos 545 km de Recife, con cupo de visitantes y dos tasas obligatorias. Más que en otros destinos, conviene tener todo pago y reservado antes de subir al avión.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Recife",
+     "d": "La isla tiene aeropuerto propio (FEN), pero no hay vuelos desde fuera de Brasil: la conexión más habitual es por Recife (REC)."
+    },
+    {
+     "t": "Dos tasas",
+     "d": "La TPA (Taxa de Preservação Ambiental), que se paga por cada día de estadía, y el ingreso al Parque Nacional Marinho, que vale 10 días y es más caro para extranjeros que para brasileños. Las dos se pagan aparte."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 5 a 7 días te da para el ilha tour, el paseo en barco, las playas del parque y alguna trilha con cupo. La TPA sube por día, así que calculá bien la estadía antes de pagarla."
+    },
+    {
+     "t": "Huso horario",
+     "d": "En Noronha es una hora más que en Brasília. Tenelo en cuenta para los horarios de vuelos y de las trilhas."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Fernando de Noronha desde Montevideo",
+    "intro": "Se vuela con al menos una escala en el continente, casi siempre en Recife, y a veces con otra en São Paulo antes.",
+    "items": [
+     {
+      "t": "Vuelo a Recife (REC)",
+      "d": "Desde Montevideo se llega a Recife con escala, en general en São Paulo. Revisá que la conexión no te obligue a cambiar de aeropuerto."
+     },
+     {
+      "t": "De Recife a Noronha",
+      "d": "Es el tramo con más vuelos. El vuelo dura alrededor de 1 h 15. Las aerolíneas que operan la isla cambiaron varias veces en los últimos años: buscá con tiempo y comparando todas."
+     },
+     {
+      "t": "Otras rutas",
+      "d": "En temporada hubo vuelos directos desde Guarulhos (São Paulo) y también se vuela desde Fortaleza. Revisá si operan en tus fechas."
+     },
+     {
+      "t": "Del aeropuerto a la posada",
+      "d": "El aeropuerto está en el medio de la isla, cerca de la ruta principal. Muchas posadas incluyen el traslado; si no, hay taxis en el aeropuerto."
+     }
+    ],
+    "cierre": {
+     "t": "Pagá la TPA antes",
+     "d": "Se paga en el sitio oficial de la administración de la isla, con boleto o tarjeta. Con tarjeta extranjera, hoy solo se puede pagar en el mostrador del aeropuerto al llegar: contá con esa fila. Si te quedás más días de los que pagaste, los días extra se cobran al doble."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Fernando de Noronha",
+    "intro": "Casi todo el alojamiento son posadas, muchas chicas y familiares. Las distancias son cortas, pero no todas las zonas se caminan.",
+    "items": [
+     {
+      "t": "Vila dos Remédios",
+      "d": "El centro histórico, con la iglesia, el fuerte, bares y restaurantes. La mejor ubicación para moverte a pie y salir de noche, y de las más caras."
+     },
+     {
+      "t": "Floresta Nova y Floresta Velha",
+      "d": "Arriba de la Vila dos Remédios, cerca de la ruta. Desde Floresta Nova se camina a la vila y a las playas cercanas; en Floresta Velha muchas posadas tienen pileta y vista al Morro do Pico."
+     },
+     {
+      "t": "Vila do Trinta",
+      "d": "Más simple y con precios más accesibles, con mercaditos, algunos restaurantes, posadas y hostels. Buena base si querés gastar menos."
+     },
+     {
+      "t": "Boldró y Sueste",
+      "d": "Lejos del centro: dependés de taxi, ómnibus o buggy. En el Sueste están algunas de las posadas más caras, con vista al mar."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Fernando de Noronha",
+    "intro": "La isla tiene una sola ruta, la BR-363, de unos 7 km. No hay Uber ni otras apps de transporte.",
+    "items": [
+     {
+      "t": "Ómnibus",
+      "d": "Es lo más barato. Recorre la BR-363 de punta a punta más o menos cada media hora, de mañana temprano hasta la noche, y se paga al chofer. Para algunas playas queda una caminata por camino de tierra desde la parada."
+     },
+     {
+      "t": "Taxi",
+      "d": "Funciona por una cooperativa, con precios fijos por trayecto. Sirve para los tramos donde el ómnibus no llega bien y para volver de noche."
+     },
+     {
+      "t": "Buggy o auto",
+      "d": "Se alquilan, pero son caros y el combustible en la isla cuesta bastante más que en el continente. Si lo alquilás, que sea para uno o dos días de recorrida."
+     },
+     {
+      "t": "Ilha tour",
+      "d": "Para el primer día, el tour en buggy o camioneta con guía local te ubica en la isla y te muestra las playas y miradores."
+     },
+     {
+      "t": "A pie",
+      "d": "Desde la Vila dos Remédios y Floresta Nova se camina a las playas cercanas, como Cachorro, Meio y Conceição."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Fernando de Noronha de noche",
+    "intro": "La noche es tranquila y se concentra en la Vila dos Remédios.",
+    "items": [
+     {
+      "t": "Atardecer",
+      "d": "El Mirante do Boldró y los bares de la Praia do Meio y la Conceição son los lugares clásicos para ver la puesta de sol."
+     },
+     {
+      "t": "Bar do Cachorro",
+      "d": "Sobre la Praia do Cachorro, con música en vivo y forró varias noches por semana. La programación cambia: preguntá en tu posada."
+     },
+     {
+      "t": "Charlas del Projeto Tamar",
+      "d": "En la base del Tamar, en el Boldró, hay charlas de noche sobre la fauna de la isla."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Fernando de Noronha",
+    "intro": "Noronha es muy tranquila en cuanto a delitos. Los cuidados son sobre todo del mar y de las reglas del parque.",
+    "bullets": [
+     "Respetá las reglas de cada playa del parque: horarios, zonas de baño y prohibiciones. Los guardaparques las controlan.",
+     "En el mar de afuera hay corrientes y olas fuertes en algunos meses: bañate donde lo indiquen.",
+     "No toques ni persigas tortugas, tiburones ni delfines, y no les des de comer a los animales.",
+     "Para las trilhas largas, andá con el guía obligatorio y en el horario agendado.",
+     "El sol es fuerte todo el año: protector, gorra y agua en cada salida."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas",
+      "d": "Se aceptan en buena parte de los comercios, restaurantes y barracas, pero donde hay mala señal el posnet puede fallar. Llevá algo de efectivo."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Hay agencias de Santander en la Vila dos Remédios y de Bradesco en la Vila do Trinta, con cajeros hasta la noche. El único cajero 24 horas está en el aeropuerto y no siempre tiene plata."
+     },
+     {
+      "t": "Ingreso al parque",
+      "d": "Se paga online en el sitio del ICMBio o en el centro de visitantes. Con el ingreso agendás la Atalaia y las trilhas con cupo."
+     },
+     {
+      "t": "Electricidad",
+      "d": "La tensión es de 220 V. Revisá tus aparatos si no son bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar (en la isla es caro)",
+     "Máscara y snorkel propios",
+     "Remera de lycra o con filtro UV para el agua",
+     "Zapatillas de agua o sandalias con agarre",
+     "Calzado para las trilhas",
+     "Botella de agua reutilizable",
+     "Bolsa estanca para el celular",
+     "Algo de efectivo",
+     "Snacks desde el continente: en la isla todo es más caro"
+    ]
+   }
+  ]
+ },
+ "rec": {
+  "antes": {
+   "titulo": "Antes de viajar a Recife",
+   "intro": "Recife es una ciudad grande, con la playa urbana de Boa Viagem al sur, el centro histórico entre ríos y Olinda al norte. Es también la base para ir de día a Porto de Galinhas y la puerta de entrada a Fernando de Noronha.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "El aeropuerto internacional de Recife (REC), Guararapes, queda a pocos kilómetros de Boa Viagem: es de los aeropuertos más cerca de la playa en Brasil."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 4 o 5 días te da para Boa Viagem, el Recife Antigo, una tarde en Olinda, los Brennand y un día en Porto de Galinhas."
+    },
+    {
+     "t": "Cuándo ir",
+     "d": "De septiembre a febrero hay sol y poca lluvia; de abril a julio llueve fuerte casi todos los días. Para Carnaval, reservá con mucha anticipación."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Recife desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a Recife: se vuela con al menos una escala, en general en São Paulo.",
+    "items": [
+     {
+      "t": "Vuelo con escala en São Paulo",
+      "d": "LATAM, GOL y Azul combinan desde Montevideo con escala en Brasil y siguen a Recife (REC). Revisá que la conexión no te obligue a cambiar de aeropuerto en São Paulo."
+     },
+     {
+      "t": "Por Buenos Aires",
+      "d": "Hay vuelos directos de Buenos Aires a Recife de algunas aerolíneas, con frecuencias que cambian según la temporada. Puede servir si te conviene cruzar a Buenos Aires."
+     },
+     {
+      "t": "Del aeropuerto a Boa Viagem",
+      "d": "Son unos 2 a 3 km: en Uber, 99 o taxi tardás de 10 a 15 minutos, más en hora pico."
+     },
+     {
+      "t": "Metro",
+      "d": "La Línea Sur del metro tiene una estación en el aeropuerto y va hacia el centro. Sirve para el centro con poco equipaje; a Boa Viagem es más práctico ir en auto."
+     }
+    ],
+    "cierre": {
+     "t": "Si seguís viaje",
+     "d": "Desde Recife salen los vuelos a Fernando de Noronha, y por ruta se llega a Porto de Galinhas, Carneiros y Maragogi."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Recife",
+    "intro": "La mayoría de los turistas duerme en la orla sur, cerca de la playa y del aeropuerto.",
+    "items": [
+     {
+      "t": "Boa Viagem",
+      "d": "El barrio más elegido por los turistas, con la rambla, muchos hoteles, restaurantes, bares y shoppings. Lo más cómodo para una primera visita."
+     },
+     {
+      "t": "Pina",
+      "d": "La punta norte de Boa Viagem, más cerca del centro y con hoteles algo más baratos. Algunas zonas cercanas a comunidades se sienten menos seguras: mirá bien la cuadra."
+     },
+     {
+      "t": "Piedade",
+      "d": "Ya en Jaboatão dos Guararapes, al sur de Boa Viagem: más tranquilo, con precios más bajos y cerca de Candeias."
+     },
+     {
+      "t": "Olinda",
+      "d": "Dormir en una posada del centro histórico es una experiencia distinta, sobre todo en Carnaval. Para moverte por Recife y salir a Porto de Galinhas, queda más lejos."
+     }
+    ],
+    "bullets": [
+     "El Recife Antigo conviene para recorrer de día, no tanto para dormir: de noche, fuera de los días de movimiento, queda vacío."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Recife",
+    "intro": "Las distancias entre Boa Viagem, el centro y Olinda se hacen mejor en auto.",
+    "items": [
+     {
+      "t": "Uber y 99",
+      "d": "Es lo más práctico para ir de Boa Viagem al Recife Antigo, a Olinda o a los Brennand, y lo recomendado de noche."
+     },
+     {
+      "t": "Metro",
+      "d": "Une el aeropuerto con el centro. Útil para evitar el tránsito, de día y con poco equipaje."
+     },
+     {
+      "t": "A pie",
+      "d": "La rambla de Boa Viagem se camina de punta a punta, y el Recife Antigo se recorre a pie entre el Marco Zero, el Paço do Frevo y la Rua do Bom Jesus."
+     },
+     {
+      "t": "Auto",
+      "d": "Para recorrer la ciudad no hace falta. Sí sirve si vas a hacer playas del litoral sur, como Porto de Galinhas o Carneiros, por tu cuenta."
+     },
+     {
+      "t": "Excursiones",
+      "d": "Agencias de Boa Viagem venden salidas de día a Porto de Galinhas, Carneiros y Maragogi, con traslado desde el hotel."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Recife de noche",
+    "intro": "Los días con más movimiento son de jueves a sábado. Conviene dedicar cada noche a una zona.",
+    "items": [
+     {
+      "t": "Boa Viagem y Pina",
+      "d": "Bares de chope y picadas sobre la orla y en las calles de atrás, muchos con vista al mar."
+     },
+     {
+      "t": "Recife Antigo",
+      "d": "Bares en la Rua da Moeda y alrededor del Marco Zero, con mesas en la calle. El movimiento depende mucho del día: preguntá en el hotel antes de ir."
+     },
+     {
+      "t": "Zona norte",
+      "d": "Casa Forte y los barrios vecinos tienen bares más de recifenses que de turistas."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Ir y volver en Uber o 99, y no cruzar la ciudad de madrugada."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Recife",
+    "intro": "Como en toda ciudad grande de Brasil, alcanza con algunos cuidados.",
+    "bullets": [
+     "En Boa Viagem, respetá los carteles de tiburones: no nades más allá del arrecife ni con marea alta.",
+     "El Recife Antigo y el centro, recorrelos de día; de noche, quedate donde hay gente y movete en auto.",
+     "Olinda, de día y por las calles con movimiento; fuera del centro las calles se vuelven solitarias.",
+     "Cuidá el celular en la rambla, en la playa y en los semáforos: no lo uses en la calle sin mirar alrededor.",
+     "Usá cajeros dentro de shoppings, supermercados o bancos, y de día."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "En restaurantes, shoppings y la mayoría de los comercios se paga con tarjeta o Pix. Para ambulantes de playa y tapioqueiras, llevá algo de efectivo."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Recife la tensión es de 220 V. Revisá tus aparatos si no son bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y repelente",
+     "Ropa liviana y de playa",
+     "Calzado cómodo para las subidas de Olinda",
+     "Zapatillas de agua para las piscinas del arrecife",
+     "Paraguas o piloto liviano si vas de abril a julio",
+     "Mochila pequeña para los paseos",
+     "Cargador / power bank",
+     "Algo de efectivo"
+    ]
+   }
+  ]
  }
 }
