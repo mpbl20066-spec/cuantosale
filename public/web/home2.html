@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Armá tu viaje a Brasil desde Uruguay y mirá cuánto cuesta en total: vuelo, traslados, alojamiento y extras.">
+<meta name="description" content="Calculá cuánto cuesta viajar a Brasil desde Uruguay: vuelo, alojamiento, traslados y comidas en 40 destinos, según tus fechas y cuántos viajan.">
 <link rel="icon" href="/icons/icon-192.png" type="image/png">
 <meta name="theme-color" content="#F7F8FA">
-<title>CuántoSale · ¿Con cuánta plata contás?</title>
+<title>Cuánto cuesta viajar a Brasil desde Uruguay · CuántoSale</title>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CuántoSale">
-<meta property="og:title" content="CuántoSale · ¿Con cuánta plata contás?">
-<meta property="og:description" content="Armá tu viaje a Brasil desde Uruguay y mirá cuánto cuesta en total: vuelo, traslados, alojamiento y extras.">
+<meta property="og:title" content="Cuánto cuesta viajar a Brasil desde Uruguay · CuántoSale">
+<meta property="og:description" content="Calculá cuánto cuesta viajar a Brasil desde Uruguay: vuelo, alojamiento, traslados y comidas en 40 destinos, según tus fechas y cuántos viajan.">
 <meta property="og:url" content="https://cuantosale.uy/">
 <meta property="og:image" content="https://cuantosale.uy/og-cuantosale.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -33,6 +33,10 @@
   .status__icons{display:flex;gap:6px;align-items:center}
   .scroll{flex:1;overflow-y:auto;padding:0 18px 20px;scrollbar-width:none}
   .scroll::-webkit-scrollbar{display:none}
+
+  .hx-foot__dest{margin:4px 0 12px;font-size:14px}
+  .hx-foot__dest summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+  .hx-foot__dest ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px;margin:0;padding:0;list-style:none}
 
   .m-head{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px}
   .m-logo{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:800;font-size:22px;color:var(--ink);letter-spacing:-.01em}
@@ -527,6 +531,7 @@
           <a href="https://www.tiktok.com/@cuantosale.uy" target="_blank" rel="noopener" style="gap:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.4 2.2 1.8 3.7 4 4v3.1a7.4 7.4 0 0 1-4-1.3v6.3A6.1 6.1 0 1 1 10.5 9v3.2a2.9 2.9 0 1 0 2.1 2.8V3z"/></svg>TikTok</a>
           <button type="button" class="hx-cookies" onclick="window.csConsentimiento&&csConsentimiento.abrir()">Preferencias de cookies</button>
         </nav>
+        <details class="hx-foot__dest"><summary>Guías de cada destino</summary><ul><!--CS_ENLACES_DESTINOS--></ul></details>
         <small class="hx-foot__legal">© 2026 CuántoSale · Los precios pueden variar: <a href="/como-calculamos" style="color:inherit;min-height:0;display:inline">mirá de dónde salen</a>.</small>
       </div>
     </footer>

@@ -3191,6 +3191,12 @@ function handleRequest(req, res) {
     if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'POST') { res.writeHead(405); return res.end(); }
     let url;
     try { url = new URL(req.url, 'http://localhost'); } catch (e) { res.writeHead(400); return res.end(); }
+    // www.cuantosale.uy servia la misma pagina con 200: para Google eran dos sitios con el contenido duplicado.
+    // 308 (permanente, conserva el metodo) al dominio sin www, con la misma ruta y los mismos parametros.
+    if (/^www\.cuantosale\.uy(:\d+)?$/i.test(String(req.headers.host || ''))) {
+      res.writeHead(308, { Location: 'https://cuantosale.uy' + url.pathname + url.search, 'Cache-Control': 'public, max-age=86400' });
+      return res.end();
+    }
     // Candado de prelanzamiento para la API. Va antes de cualquier ruta para
     // que ningún endpoint quede por afuera, tampoco los POST de más abajo.
     //
@@ -3429,7 +3435,7 @@ function handleRequest(req, res) {
       const cabeceras = {
         'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP,
         'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
-        'Cache-Control': 'public, max-age=0, must-revalidate, s-maxage=3600', 'Vary': 'Accept-Encoding'
+        'Cache-Control': 'public, max-age=0, must-revalidate, s-maxage=3600, stale-while-revalidate=86400', 'Vary': 'Accept-Encoding'
       };
       const cuerpo = injectAnalytics(Buffer.from(html, 'utf8'), '.html');
       // Se comprime como los estaticos: eran ~25 KB de HTML sin comprimir en la pagina que llega desde Google.
@@ -3472,7 +3478,7 @@ function handleRequest(req, res) {
             const pub = destinosWeb.slugDeClave(String(url.searchParams.get('destino') || 'fln').toLowerCase());
             if (pub) canonical = 'https://cuantosale.uy/destino/' + pub;
           }
-          if (nuevoPag.slug === 'guias') html = html.replace('<!--CS_ENLACES_DESTINOS-->', destinosWeb.enlacesHtml());
+          if (nuevoPag.slug === 'guias' || nuevoPag.slug === '') html = html.replace('<!--CS_ENLACES_DESTINOS-->', destinosWeb.enlacesHtml());
           html = html.replace(/<head[^>]*>/i, function (h) { return h + '<base href="/' + NUEVO_DIR + '/"><link rel="canonical" href="' + canonical + '">'; });
           return Buffer.from(html, 'utf8');
         });
