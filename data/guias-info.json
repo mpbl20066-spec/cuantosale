@@ -196,5 +196,200 @@
     ]
    }
   ]
+ },
+ "fln": {
+  "antes": {
+   "titulo": "Antes de viajar a Florianópolis",
+   "intro": "Florianópolis es casi toda una isla, con el centro frente al continente y las playas repartidas en el norte, el este y el sur. Elegir bien la zona donde dormís te ahorra horas de tráfico.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo. Llevala en buen estado."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con una semana ves el norte, la Lagoa, el sur y el centro histórico sin correr, dedicando un día a cada zona."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "El aeropuerto Hercílio Luz (FLN) está en la propia isla, al sur del centro. Si vas por tierra, llegás por la BR-101 y cruzás a la isla por los puentes del centro."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Florianópolis desde Montevideo",
+    "intro": "Hay tres formas: avión con escala, ómnibus desde Tres Cruces o auto por Rio Grande do Sul.",
+    "items": [
+     {
+      "t": "En avión al aeropuerto Hercílio Luz (FLN)",
+      "d": "Durante el año no hay vuelo directo: se vuela con escala, en general en São Paulo. En algunos veranos Azul operó un directo de temporada entre Montevideo y Florianópolis; antes de comprar, fijate si está vigente."
+     },
+     {
+      "t": "Del aeropuerto a tu zona",
+      "d": "Por ruta son unos 17 km al centro y a la Lagoa (unos 25 minutos sin tráfico), 10 km a Campeche y unos 40 km a Canasvieiras o Ingleses, cerca de 50 minutos. Hay Uber, 99, taxi y buses urbanos."
+     },
+     {
+      "t": "En ómnibus desde Tres Cruces",
+      "d": "EGA y TTL tienen salidas de Montevideo a la rodoviária de Florianópolis, en el centro, con un viaje de unas 18 a 20 horas. La rodoviária queda al lado de la terminal de buses urbanos (TICEN)."
+     },
+     {
+      "t": "En auto",
+      "d": "Son unos 1.250 km por Chuy, Pelotas y Porto Alegre, y después la BR-101, con peajes en Brasil. Calculá entre 15 y 17 horas de manejo sin contar paradas ni la frontera: conviene partirlo en dos días."
+     }
+    ],
+    "cierre": {
+     "t": "En temporada",
+     "d": "En enero y febrero, el acceso a la isla por los puentes y la ruta al norte se cargan. Si llegás en auto, evitá las horas pico de la tarde."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Florianópolis",
+    "intro": "La isla es grande y en verano cruzarla lleva tiempo. Elegí la zona según el tipo de viaje.",
+    "items": [
+     {
+      "t": "Canasvieiras e Ingleses (norte)",
+      "d": "Mucha infraestructura y todo a pie: supermercados, restaurantes y alquileres por temporada. Canasvieiras tiene el agua más calma; sirven para familias con chicos y para quien no quiere auto."
+     },
+     {
+      "t": "Jurerê Internacional (norte)",
+      "d": "Barrio de casas grandes y hoteles caros, con los beach clubs al lado. Para quien busca playa calma de día y fiesta en temporada."
+     },
+     {
+      "t": "Lagoa da Conceição (centro-este)",
+      "d": "Queda en el medio de la isla, con bares, restaurantes y noche. Es una base práctica para moverte a las playas del este y también hacia el norte o el sur, sobre todo fuera de enero."
+     },
+     {
+      "t": "Campeche y el sur",
+      "d": "Más tranquilo, de playas largas y con pueblos de pescadores como Armação y Pântano do Sul. Conviene para quien busca naturaleza y senderos, y tiene auto."
+     },
+     {
+      "t": "Centro",
+      "d": "Suele tener las tarifas más bajas y es práctico si llegás en ómnibus, pero las playas para bañarse quedan lejos. Sirve para pocos días o fuera de temporada."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Florianópolis",
+    "intro": "Las distancias son largas y en verano el tráfico es pesado. Organizate por zonas.",
+    "items": [
+     {
+      "t": "Bus urbano",
+      "d": "Todo se arma alrededor de terminales: TICEN en el centro y otras por zona, como TILAG en la Lagoa y TICAN en Canasvieiras. Con la tarjeta de transporte combinás en las terminales sin pagar de nuevo; con Pix pagás cada viaje."
+     },
+     {
+      "t": "Uber y 99",
+      "d": "Funcionan en toda la isla y desde el aeropuerto. A la noche, para volver de la Lagoa o de Jurerê, es la opción más cómoda."
+     },
+     {
+      "t": "Auto",
+      "d": "Te deja ver varias playas en un día y llegar a los pueblos del sur. En enero contá con tráfico en la ruta al norte y en el acceso a la Lagoa, y con estacionamientos pagos cerca de las playas."
+     },
+     {
+      "t": "Barco",
+      "d": "A la Costa da Lagoa se va en el barco de línea desde la Lagoa; a la Ilha do Campeche, desde Armação o Campeche; y a Anhatomirim, en las escunas de Canasvieiras."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Florianópolis de noche",
+    "intro": "La noche se reparte en tres zonas con estilos muy distintos.",
+    "items": [
+     {
+      "t": "Lagoa da Conceição",
+      "d": "Bares, música en vivo y restaurantes alrededor del centrito de la Lagoa. Es la noche más variada."
+     },
+     {
+      "t": "Jurerê Internacional",
+      "d": "Beach clubs que arrancan con almuerzo y siguen con DJ hasta la noche, y boliches grandes. Es caro y depende mucho de la temporada."
+     },
+     {
+      "t": "Centro y Beira-Mar Norte",
+      "d": "Bares más tranquilos, algunos con terraza sobre la bahía, frecuentados por gente de la ciudad."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Volvé en Uber o taxi: las distancias entre zonas son largas y de noche hay menos buses."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Florianópolis",
+    "intro": "Para el turista, el riesgo más concreto está en el mar.",
+    "bullets": [
+     "En las playas de mar abierto, entrá cerca de un puesto de guardavidas y respetá la bandera: roja es riesgo alto y doble roja, playa cerrada.",
+     "Los Bomberos de Santa Catarina publican el estado de las banderas en tiempo real en la app CBMSC Cidadão.",
+     "Si te agarra una corriente de retorno, no nades contra ella: nadá paralelo a la arena o flotá y hacé señas.",
+     "Los senderos a Lagoinha do Leste y Naufragados se hacen de día; volvé antes de que oscurezca.",
+     "En el auto, no dejes nada a la vista en los estacionamientos de playa.",
+     "Para volver tarde a la noche, pedí un Uber en vez de esperar el bus en paradas vacías."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La tarjeta se acepta en casi todos lados. En los buses urbanos ya no se paga en efectivo arriba del coche: usá la tarjeta de transporte o Pix."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Hay en el centro, en los shoppings y en los barrios grandes. En los pueblos del sur hay menos: llevá algo de efectivo."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming, eSIM o chip local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Playa, senderos y barcos: armá la valija para las tres cosas.",
+    "grupos": [
+     {
+      "titulo": "Para todos los viajes",
+      "bullets": [
+       "Protector solar y gorra",
+       "Repelente",
+       "Ropa liviana y de playa",
+       "Un buzo liviano para la noche",
+       "Piloto o paraguas: enero y febrero son los meses más lluviosos",
+       "Cargador / power bank",
+       "Tarjeta y algo de efectivo"
+      ]
+     },
+     {
+      "titulo": "Para senderos y barcos",
+      "bullets": [
+       "Calzado con agarre",
+       "Agua y algo para comer: en Lagoinha do Leste y Naufragados casi no hay servicios",
+       "Bolsa estanca para el celular"
+      ]
+     }
+    ]
+   }
+  ]
  }
 }
