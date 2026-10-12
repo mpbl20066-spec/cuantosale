@@ -12,7 +12,7 @@ self.addEventListener('push', function (e) {
       if (self.navigator && self.navigator.setAppBadge && j.no_leidos) self.navigator.setAppBadge(j.no_leidos).catch(function () {});
       return self.registration.showNotification(j.titulo || 'CuántoSale', {
         body: j.cuerpo || 'Tenés novedades en el panel.',
-        icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+        icon: '/icons/icon-192.png', badge: '/icons/badge-96.png',
         tag: j.tag || 'cs-panel', renotify: true,
         data: { url: j.url || '/admin/' }
       });

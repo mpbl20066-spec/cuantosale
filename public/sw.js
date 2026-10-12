@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v163';
+var CACHE_NAME = 'cuantosale-shell-v164';
 var APP_SHELL = [
   // '/' (la start_url de la PWA). '/app' ya no: ahora redirige a '/', y una
   // respuesta redirigida en el precache rompe la navegacion sin senal.
@@ -33,6 +33,7 @@ var APP_SHELL = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-512.png',
+  '/icons/badge-96.png',
   '/icons/apple-touch-icon.png'
   // style.css y app.js NO van acá: el HTML los pide con '?v=N', y una entrada
   // sin query nunca matchea esa URL (la clave del cache es la URL completa).
@@ -111,7 +112,7 @@ self.addEventListener('push', function (event) {
     var avisos = recientes.length ? recientes : todos.length ? [todos[0]] : [{ id: 'generico', titulo: 'Bajó el precio de un vuelo', cuerpo: 'Abrí CuántoSale para ver tus alertas de precio.', url: '/' }];
     return Promise.all(avisos.map(function (a) {
       return self.registration.showNotification(a.titulo || 'CuántoSale', {
-        body: a.cuerpo || '', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+        body: a.cuerpo || '', icon: '/icons/icon-192.png', badge: '/icons/badge-96.png',
         tag: 'alerta-' + a.id, data: { url: a.url || '/' }
       });
     }));
