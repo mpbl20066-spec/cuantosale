@@ -779,5 +779,199 @@
     ]
    }
   ]
+ },
+ "maragogi": {
+  "antes": {
+   "titulo": "Antes de viajar a Maragogi",
+   "intro": "Maragogi es un pueblo de playa en el norte de Alagoas, casi en el límite con Pernambuco, a mitad de camino entre Recife y Maceió. No tiene aeropuerto con vuelos comerciales: se llega por una de esas dos ciudades y se sigue unas dos horas por tierra.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Recife o Maceió",
+     "d": "Los dos aeropuertos quedan a unos 125 a 130 km. Recife (REC) suele tener más vuelos y tarifas más bajas; desde Maceió (MCZ) el camino va por la costa. El aeropuerto Costa dos Corais, en el mismo Maragogi, está en obras y todavía no recibe vuelos de línea."
+    },
+    {
+     "t": "Organizá los días con la marea",
+     "d": "Los galés y el Caminho de Moisés dependen de la marea baja. Antes de fijar las fechas mirá la tabla de mareas: con mareas flojas el paseo puede no salir, así que dejá algún día de margen."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Las mejores playas están repartidas a lo largo de unos 20 km de costa, y Japaratinga, Patacho y el peixe-boi quedan más al sur. Con auto te movés a tu ritmo; sin auto, dependés de los paseos de las agencias y de los traslados del hotel."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Maragogi desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a Recife ni a Maceió: se vuela con al menos una escala, en general en São Paulo, y desde el aeropuerto se sigue por ruta.",
+    "items": [
+     {
+      "t": "Vuelo a Recife (REC)",
+      "d": "Es la opción con más frecuencias. LATAM, GOL y Azul combinan desde Montevideo con escala en Brasil; revisá que la conexión no te obligue a cambiar de aeropuerto en São Paulo."
+     },
+     {
+      "t": "Vuelo a Maceió (MCZ)",
+      "d": "También con escala. Tiene menos vuelos que Recife, pero te deja del lado de Alagoas y sirve si querés parar en São Miguel dos Milagres o Japaratinga en el camino."
+     },
+     {
+      "t": "De Recife a Maragogi",
+      "d": "Son unos 125 a 135 km, unas 2 h 30 en auto. La ruta no va por la costa: corre por el interior, cerca de Porto de Galinhas y Praia dos Carneiros, mayormente en ruta simple y tranquila."
+     },
+     {
+      "t": "De Maceió a Maragogi",
+      "d": "Son unos 127 km por la AL-101 Norte, que bordea la costa: entre 2 y 3 horas. Es asfaltada y casi toda de una mano por sentido, y en Porto de Pedras se cruza el río Manguaba en balsa."
+     },
+     {
+      "t": "Transfer y taxi",
+      "d": "Los hoteles y agencias como Luck Receptivo, Costazul o Valtur hacen traslados privados o compartidos. En los aeropuertos hay mostradores de taxi para negociar el precio; conviene si son 3 o 4. Los choferes de aplicación a veces no aceptan un viaje tan largo."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Es lo más barato y lo más lento: hay pocas salidas y paran en muchos pueblos. Confirmá horarios con la Arsal o con la empresa antes de contar con él."
+     }
+    ],
+    "cierre": {
+     "t": "Una idea",
+     "d": "Si alquilás auto, podés retirarlo en Recife y devolverlo en Maceió (o al revés) pagando una tasa: así conocés las dos rutas y las playas del camino."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Maragogi",
+    "intro": "La costa se divide en tres partes, con el centro en el medio. La elección depende de si querés estar frente a una playa linda o tener todo a mano.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "Tiene más servicios, precios más bajos y restaurantes a los que se va caminando, también de noche. De acá salen la mayoría de los catamaranes a los galés. La playa del centro no es la más linda: para las mejores hay que moverse."
+     },
+     {
+      "t": "Litoral norte (Barra Grande, Antunes, Ponta de Mangue)",
+      "d": "Las playas más conocidas, con piscinas naturales en marea baja y el Caminho de Moisés. Es más caro y de noche queda muy quieto, porque casi todo cierra al terminar el día. Bueno para familias y para quien quiere el mar enfrente."
+     },
+     {
+      "t": "Litoral sur (Camacho, Burgalhau, São Bento)",
+      "d": "Más tranquilo y aislado, con pousadas con encanto y varios resorts todo incluido. Hay pocos restaurantes y kioscos, así que sirve para descansar."
+     },
+     {
+      "t": "Japaratinga",
+      "d": "El pueblo vecino, a unos 10 km al sur. Alojamiento y comida más baratos, playas calmas como Barreiras do Boqueirão y Bitingui, y queda más cerca de Porto de Pedras."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚙",
+    "titulo": "Cómo moverse por Maragogi",
+    "intro": "El transporte público es escaso y las playas están separadas por varios kilómetros. Casi todos se mueven en auto, en buggy o con paseos organizados.",
+    "items": [
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para ir a Antunes, Ponta de Mangue, Japaratinga, Patacho o el peixe-boi por tu cuenta. En las playas hay pocos lugares y los estacionamientos cobran por día."
+     },
+     {
+      "t": "Buggy",
+      "d": "Los buggies con chofer recorren el litoral norte y el sur, y algunos llegan hasta São Miguel dos Milagres. Se contratan en las agencias del centro y te buscan en el hotel."
+     },
+     {
+      "t": "Taxi y aplicaciones",
+      "d": "Hay pocos taxis: guardá el número de un chofer de confianza. Uber y 99 funcionan, pero sirven más para los traslados largos a los aeropuertos que para los viajes cortos dentro del pueblo."
+     },
+     {
+      "t": "Vans por la ruta",
+      "d": "Entre Maragogi y Japaratinga pasan vans que se paran a mano en cualquier punto de la ruta. Son baratas, pero no tienen horario fijo."
+     },
+     {
+      "t": "Paseos con traslado",
+      "d": "Sin auto, las agencias venden los galés, el buggy, São Miguel dos Milagres y Porto de Galinhas con búsqueda en el hotel."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Maragogi de noche",
+    "intro": "Maragogi no es un destino de fiesta: la noche es tranquila y se concentra en el centro.",
+    "items": [
+     {
+      "t": "La costanera del centro",
+      "d": "Bares y restaurantes frente al mar, algunos con música en vivo los días de más movimiento. Es el lugar para cenar y caminar después de la playa."
+     },
+     {
+      "t": "Un bar con música hasta tarde",
+      "d": "Fuera de la costanera hay pocos lugares que abran hasta tarde, y casi siempre de martes a domingo. Mirá sus redes antes de ir, porque los horarios cambian."
+     },
+     {
+      "t": "Litoral norte y sur",
+      "d": "De noche quedan casi vacíos. Si te alojás ahí, la noche es en la pousada o el resort, o tenés que ir en auto hasta el centro."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Maragogi",
+    "intro": "Es un pueblo tranquilo. Los cuidados tienen que ver sobre todo con el mar, el sol y el auto.",
+    "bullets": [
+     "En los galés y en las piscinas del arrecife seguí las indicaciones del guía, usá chaleco si no nadás bien y no camines sobre los corales: además de dañarlos, cortan.",
+     "Cuando la marea empieza a subir, volvé a la orilla: en el Caminho de Moisés y en los arrecifes cercanos el agua sube rápido.",
+     "El sol del mediodía es muy fuerte todo el año: protector, gorra y agua, sobre todo en el catamarán.",
+     "No dejes nada a la vista en el auto estacionado frente a la playa.",
+     "De noche las playas del norte y del sur quedan solas: no camines por la arena después de que oscurece.",
+     "El Mirante Aruanã, sobre la AL-101 en Japaratinga, está cerrado por riesgo de derrumbe de la barranca: no pares ahí."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llevá efectivo para los kioscos de playa, los estacionamientos, la balsa de Porto de Pedras, las vans y los puestos de São Bento. Los bancos y cajeros están en el centro, no en las playas."
+     },
+     {
+      "t": "Tarjetas",
+      "d": "Hoteles, agencias y restaurantes suelen aceptar tarjeta, pero en los kioscos y puestos chicos conviene tener efectivo."
+     },
+     {
+      "t": "Mareas",
+      "d": "Bajá una app de tabla de mareas (tábua de marés) y fijate la de Maragogi o Maceió: los galés, el Caminho de Moisés y las piscinas de la orilla dependen de ella."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar (mejor uno que no dañe los corales) y gorra",
+     "Máscara y snorkel propios, si tenés",
+     "Calzado para el agua, para caminar sobre el arrecife con marea baja",
+     "Bolsa estanca para el celular en el catamarán",
+     "Repelente para el atardecer",
+     "Ropa liviana y un piloto si vas de abril a julio, cuando llueve casi todos los días",
+     "Efectivo y un medio de pago alternativo",
+     "Cédula o pasaporte y la licencia de conducir si vas a alquilar auto"
+    ]
+   }
+  ]
  }
 }
