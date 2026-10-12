@@ -1,1 +1,200 @@
-{}
+{
+ "bcm": {
+  "antes": {
+   "titulo": "Antes de viajar a Balneário Camboriú",
+   "intro": "Balneário Camboriú es una ciudad de playa grande en el litoral norte de Santa Catarina. Todo lo urbano está sobre la Praia Central; las playas tranquilas y los miradores quedan al sur, por la Interpraias.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con 4 o 5 días hacés la Praia Central, la Interpraias, el Unipraias y el Cristo Luz, y te queda un día para el Beto Carrero World en Penha o para la Praia Brava."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "No tiene aeropuerto propio: el más cercano es el de Navegantes (NVT), a unos 35 km. La otra opción es Florianópolis (FLN), a unos 90 km."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Balneário Camboriú desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a Navegantes: se vuela con escala, en general en São Paulo. También podés entrar por Florianópolis o venir por tierra.",
+    "items": [
+     {
+      "t": "Vuelo a Navegantes (NVT)",
+      "d": "El aeropuerto no tiene vuelos internacionales regulares. Azul, GOL y LATAM vuelan desde São Paulo (Guarulhos y Congonhas, algo más de 1 hora de vuelo) y otras ciudades de Brasil; combinás Montevideo–São Paulo con ese tramo. Si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto en São Paulo."
+     },
+     {
+      "t": "De Navegantes a Balneário",
+      "d": "Son unos 35 km por la BR-101, entre 40 minutos y 1 hora según el tránsito. El taxi del aeropuerto tiene tarifa fija y también hay Uber y transfers. Otra ruta es cruzar el río Itajaí-Açu en la balsa Navegantes–Itajaí, que funciona las 24 horas y se paga en efectivo o Pix."
+     },
+     {
+      "t": "Por Florianópolis (FLN)",
+      "d": "Florianópolis recibe más vuelos y a veces sale más barato, pero quedan unos 90 km. Desde la terminal Rita Maria salen ómnibus de Catarinense y Reunidas a Balneário Camboriú, en 1 h 30 aproximadamente. En algunos veranos hubo vuelos directos Montevideo–Florianópolis: fijate si hay en tu temporada."
+     },
+     {
+      "t": "En auto",
+      "d": "Son unos 1.300 km por el Chuy, Porto Alegre y la BR-101: entre 16 y 18 horas de manejo, así que conviene partirlo en dos días. De Porto Alegre a Balneário son unos 520 km."
+     },
+     {
+      "t": "En ómnibus",
+      "d": "Hay ómnibus de Montevideo a Florianópolis (TTL, entre otras) y de ahí seguís en ómnibus de línea hasta la rodoviária de Balneário Camboriú. Desde Porto Alegre el viaje dura unas 8 horas."
+     }
+    ],
+    "cierre": {
+     "t": "En temporada",
+     "d": "Del 20 de diciembre a fin de febrero la BR-101 se carga y hay embotellamientos. Marzo es más tranquilo y el alojamiento baja."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Balneário Camboriú",
+    "intro": "La ciudad es una franja de edificios frente a la Praia Central. Elegir zona es elegir entre estar en el medio de todo o tener calma.",
+    "items": [
+     {
+      "t": "Centro y Praia Central",
+      "d": "Sobre la Avenida Atlântica o la Avenida Brasil caminás a la playa, a los restaurantes y a los comercios. Es lo más práctico si venís sin auto."
+     },
+     {
+      "t": "Barra Sul",
+      "d": "La punta sur de la Praia Central, al lado del teleférico del Unipraias, el Oceanic Aquarium, el barco pirata y el molhe. Es una de las zonas con más movimiento y bares."
+     },
+     {
+      "t": "Barra Norte y Pioneiros",
+      "d": "La punta norte, cerca de la rueda gigante y de la Estrada da Rainha hacia la Praia dos Amores y la Brava. Hay muchos edificios nuevos."
+     },
+     {
+      "t": "Interpraias",
+      "d": "Posadas y casas entre el verde en Laranjeiras, Taquaras, Estaleiro y Estaleirinho. Es lo más tranquilo, pero vas a depender del auto o de la línea Azul del BC Bus."
+     },
+     {
+      "t": "Praia Brava (Itajaí)",
+      "d": "Ya en Itajaí, a unos 6 km del centro: playa de olas, edificios nuevos y bares de playa. Sirve si querés surf y salir de noche fuera del centro."
+     }
+    ],
+    "bullets": [
+     "Para enero y Año Nuevo reservá con mucha anticipación: la ciudad se llena.",
+     "Si vas en auto, buscá alojamiento con garaje: en el centro el estacionamiento en la calle es pago y escaso."
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Balneário Camboriú",
+    "intro": "El centro se camina; para las playas del sur y del norte tenés ómnibus gratis, auto o aplicación.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "La rambla de la Avenida Atlântica une la Barra Sul con el Pontal Norte. Por la Passarela da Barra cruzás a pie al Bairro da Barra."
+     },
+     {
+      "t": "BC Bus, gratis",
+      "d": "El transporte municipal no cobra boleto y funciona todos los días. La Violeta va por la orla, la Azul a la Interpraias, la Amarela al Pontal Norte, la Praia dos Amores y la zona del Cristo Luz, y la Anil a Laranjeiras, con pocos horarios."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Sirven para moverte por la ciudad y para ir a la Praia Brava o al aeropuerto de Navegantes."
+     },
+     {
+      "t": "Auto",
+      "d": "Es cómodo para recorrer la Interpraias parando en cada playa y para ir a Penha o a Bombinhas. En verano contá con tránsito lento en la BR-101."
+     },
+     {
+      "t": "Teleférico y barco",
+      "d": "El bondinho del Unipraias y los barcos que salen de la Barra Sul llevan a Laranjeiras sin pasar por la ruta."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Balneário Camboriú de noche",
+    "intro": "La noche se concentra sobre la Praia Central y, en verano, en los clubes de afuera.",
+    "items": [
+     {
+      "t": "Praia Central y Barra Sul",
+      "d": "Bares, restaurantes y casas nocturnas a lo largo de la Avenida Atlântica, con la Barra Sul como una de las zonas más movidas."
+     },
+     {
+      "t": "Passeio San Miguel",
+      "d": "Un paseo gastronómico sobre la Avenida Brasil con más de 14 opciones, cerveza artesanal y música en vivo todos los días, abierto hasta las 0.30."
+     },
+     {
+      "t": "Clubes",
+      "d": "El Green Valley, en Camboriú, y el Warung Beach Club, en la Praia Brava, funcionan con fechas de fiesta: mirá la agenda antes."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Para volver de los clubes de afuera, arreglá el Uber o el taxi con tiempo: a la salida hay mucha demanda."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad",
+    "intro": "Hay mucha gente en la calle hasta tarde; los cuidados son los de cualquier playa llena.",
+    "bullets": [
+     "Desde el ensanche de la Praia Central hay más bancos de arena y corrientes: bañate frente a los guardavidas y respetá las banderas.",
+     "La Praia dos Amores, la del Buraco y la Brava tienen olas: si no nadás bien, quedate en la orilla.",
+     "En la arena llena de enero y en Año Nuevo, no pierdas de vista el celular ni la billetera.",
+     "Hacé los senderos y el Parque Raimundo Malta de día; el parque cierra a las 17 h.",
+     "En el auto no dejes nada a la vista, tampoco en los estacionamientos de las playas."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "Las tarjetas se aceptan casi en todos lados. Muchos comercios cobran con Pix, pero para usarlo necesitás una app que te lo habilite."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llevá algo para la balsa de Navegantes, los vendedores de la playa y algún estacionamiento. En el centro hay bancos y cajeros."
+     },
+     {
+      "t": "Electricidad",
+      "d": "220 V, como en Uruguay. El tomacorriente brasileño es de patas redondas: los enchufes de dos patas redondas entran; para los de patas planas llevá adaptador."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "En verano es playa y calor; de mayo a septiembre el agua está fría y a la noche refresca.",
+    "bullets": [
+     "Protector solar y gorra",
+     "Ropa de playa y algo para salir de noche",
+     "Un abrigo liviano y un piloto: llueve todo el año",
+     "Abrigo de verdad si vas de junio a agosto",
+     "Calzado cómodo para la rambla y zapatillas para los senderos",
+     "Repelente para el parque y la Interpraias",
+     "Adaptador de enchufe si tus cargadores tienen patas planas",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
+ }
+}
