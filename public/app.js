@@ -2763,7 +2763,7 @@ var HOTEL_NOTA_MINIMA = 8;
           var conNota = (g.hotels || []).filter(hotelPasaLaNota);
           var lista = hotelesQuePasanElTipo(normalizeHotelCatalog(conNota, defaultHotel), hotelType, strictType);
           if (hotelSoloReservables) lista = lista.filter(function (item) { return item.source === 'booking'; });
-          if (lista.length) secciones.push({ playa: g.playa, lista: lista });
+          if (lista.length) secciones.push({ playa: g.playa, barrio: !!g.barrio, lista: lista });
         });
       }
       function seccionesMarkup() {
@@ -2798,11 +2798,11 @@ var HOTEL_NOTA_MINIMA = 8;
         }).join('');
         var resto = Math.max(0, visibles - 3);
         var chips = secciones.length > 1
-          ? '<div class="hotel-zona"><span class="hotel-type-picks__label" id="hotel-zona-label">Zona o playa</span><div class="hotel-playa-filter" role="group" aria-labelledby="hotel-zona-label">'
+          ? '<div class="hotel-zona"><span class="hotel-type-picks__label" id="hotel-zona-label">' + (secciones[0].barrio ? 'Zona' : 'Zona o playa') + '</span><div class="hotel-playa-filter" role="group" aria-labelledby="hotel-zona-label">'
             + '<button type="button" class="hotel-playa-chip' + (!sel ? ' is-on' : '') + '" data-hotel-playa-filter="" aria-pressed="' + (!sel ? 'true' : 'false') + '">Todas</button>'
             + secciones.map(function (sec) {
               var on = sec.playa === sel;
-              return '<button type="button" class="hotel-playa-chip' + (on ? ' is-on' : '') + '" data-hotel-playa-filter="' + esc(sec.playa) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + (sec.playa === 'Otras zonas' ? '📍 ' : '🏖️ ') + esc(sec.playa) + '</button>';
+              return '<button type="button" class="hotel-playa-chip' + (on ? ' is-on' : '') + '" data-hotel-playa-filter="' + esc(sec.playa) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + (sec.playa === 'Otras zonas' || sec.barrio ? '📍 ' : '🏖️ ') + esc(sec.playa) + '</button>';
             }).join('') + '</div></div>'
           : '';
         return '<div class="hotel-playas" data-hotel-playas="' + clave + '">' + (nearby ? '<p class="hotel-nearby-note">Mostramos opciones en ' + esc(nearby) + ', una zona cercana a ' + esc(stopName) + '.</p>' : '') + chips

@@ -2058,13 +2058,15 @@
     var playas = playasDe(), todos = ordenarHoteles().filter(function (h) { return !h.tipo || h.tipo === S.catH; });
     if (S.playaSel !== 'todas' && !playas.some(function (x) { return x[0] === S.playaSel; })) S.playaSel = 'todas';
     var lista = todos.filter(function (h) { return S.playaSel === 'todas' || h.zona === S.playaSel; }), mostrados = cuatroHoteles(lista);
-    var zchip = function (val, txt) { return '<button type="button" class="hc-chip' + (S.playaSel === val ? ' is-on' : '') + '" data-zona="' + esc(val) + '" aria-pressed="' + (S.playaSel === val) + '">' + (val === 'todas' ? '' : '<span aria-hidden="true">' + (val === 'Otras zonas' ? '📍' : '🏖️') + '</span> ') + esc(txt) + '</button>'; };
+    /* En una ciudad sin playa (Sao Paulo, Gramado...) las zonas son barrios: se titula "Zona" y llevan el pin. */
+    var ciudad = HOTELES.some(function (h) { return h.barrio; });
+    var zchip = function (val, txt) { return '<button type="button" class="hc-chip' + (S.playaSel === val ? ' is-on' : '') + '" data-zona="' + esc(val) + '" aria-pressed="' + (S.playaSel === val) + '">' + (val === 'todas' ? '' : '<span aria-hidden="true">' + (val === 'Otras zonas' || ciudad ? '📍' : '🏖️') + '</span> ') + esc(txt) + '</button>'; };
     /* Arriba de la lista, en una tarjeta: la categoria (Economico, Equilibrado, Comodo, All Inclusive) y la zona o playa. */
     var cats = [['economico', 'Económico'], ['intermedio', 'Equilibrado'], ['confort', 'Cómodo'], ['all-inclusive', 'All Inclusive']];
     var categoria = HOTELES.some(function (h) { return h.tipo; }) ? '<div class="hc-cat"><span class="hc-l" id="hc-cat">Categoría de alojamiento</span><div class="hc-chips" role="group" aria-labelledby="hc-cat">' +
       cats.map(function (c) { return '<button type="button" class="hc-chip' + (S.catH === c[0] ? ' is-on' : '') + '" data-cath="' + c[0] + '" aria-pressed="' + (S.catH === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div></div>' : '';
     /* La zona o playa se ve siempre que haya hoteles (aunque sea una sola zona), para que el filtro no desaparezca al cambiar de categoria */
-    var selector = playas.length ? '<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">Zona o playa</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
+    var selector = playas.length ? '<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">' + (ciudad ? 'Zona' : 'Zona o playa') + '</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
       zchip('todas', 'Todas', 0) + playas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') + '</div></div>' : '';
     var iPin = '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>';
     /* Los filtros van plegados, como en Destinos: una barra con lo elegido y el boton de filtros; al tocarlo se abre
@@ -3133,7 +3135,7 @@
     var m = String(h.roomLabel || '').replace(/\s*·.*$/, '').replace(/\s*:.*$/, '');
     var det = String(h.roomLabel || '').split(':')[1] ? String(h.roomLabel).split(':')[1].split('·')[0].trim() : '';
     return { id: String(h.hotelId || h.name), tipo: tipo, nom: h.name, cat: (h.hotelTypeLabel || TIPO_TXT[h.hotelType] || 'Alojamiento') + (h.stars ? ' ' + h.stars + '★' : ''),
-      rat: Number(h.rating) || 0, n: Number(h.reviewCount) || 0, zona: h.playa || h.areaLabel || DEST,
+      rat: Number(h.rating) || 0, n: Number(h.reviewCount) || 0, zona: h.playa || h.barrio || h.areaLabel || DEST, barrio: !!h.barrio,
       playa: h.playaKm != null ? Math.round(h.playaKm * 1000) : null, serv: [m, det].filter(Boolean).slice(0, 2).concat(h.mealPlan ? [h.mealPlan] : []),
       precio: Number(h.total), rec: !!h.recommended, img: h.image || 'home-ilha-bahia.jpg' };
   }

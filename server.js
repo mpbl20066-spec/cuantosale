@@ -961,7 +961,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
        en paralelo y una que falle se ignora; los repetidos los saca
        uniqueHotelList. */
     if (diag && !(extra && extra.noGroups) && realHotels.length) {
-      const nombres = playas.nombresDePlayas(destKey).slice(0, PLAYAS_CONSULTADAS);
+      const nombres = playas.nombresDePlayas(destKey).concat(playas.nombresDeZonas(destKey)).slice(0, PLAYAS_CONSULTADAS);
       const porPlaya = await Promise.all(nombres.map(function (nombre) {
         return fetchBookingHotels(destKey, nombre + ', ' + destName, selectedTier, Object.assign({}, hotelExtra, { soloDistrito: true }))
           .catch(function () { return []; });
@@ -1128,7 +1128,10 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
      arriba, pero sin el tope de 3 y sin respaldo generico: una playa sin hoteles
      reales de ese tipo no tiene seccion. Los que no quedan cerca de ninguna
      playa van juntos en "Otras zonas". */
-  if (diag && !(extra && extra.noGroups) && playas.nombresDePlayas(destKey).length && priced.some(function (hotel) { return hotel.playa; })) {
+  /* En una ciudad sin playa (lib/playas.js, zonas) se agrupa igual, por barrio. */
+  const zonaDe = function (hotel) { return hotel.playa || hotel.barrio || 'Otras zonas'; };
+  const esCiudad = playas.nombresDeZonas(destKey).length > 0;
+  if (diag && !(extra && extra.noGroups) && (playas.nombresDePlayas(destKey).length || esCiudad) && priced.some(function (hotel) { return hotel.playa || hotel.barrio; })) {
     const POR_PLAYA_MAX = 12;
     const porPlaya = new Map();
     const coinciden = new Set();
@@ -1136,7 +1139,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
       .filter(function (hotel) { return hotel.perNight <= high && hotelMatchesType(hotel, hotelType, budgetTarget, priceBand); })
       .sort(porDistancia)
       .forEach(function (hotel) {
-        const clave = hotel.playa || 'Otras zonas';
+        const clave = zonaDe(hotel);
         if (!porPlaya.has(clave)) porPlaya.set(clave, []);
         coinciden.add(hotel);
         if (porPlaya.get(clave).length < POR_PLAYA_MAX) porPlaya.get(clave).push(hotel);
@@ -1150,11 +1153,11 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
        Boutique no admiten sustitucion. */
     if (['all-inclusive', 'resort', 'boutique'].indexOf(hotelType) < 0) {
       const resto = priced.filter(function (hotel) { return !coinciden.has(hotel) && dentroDelMargen(hotel); }).sort(porDistancia);
-      const claves = new Set(priced.map(function (hotel) { return hotel.playa || 'Otras zonas'; }));
+      const claves = new Set(priced.map(zonaDe));
       claves.forEach(function (clave) {
         const lista = porPlaya.get(clave) || [];
         resto.forEach(function (hotel) {
-          if (lista.length < 3 && (hotel.playa || 'Otras zonas') === clave) lista.push(hotel);
+          if (lista.length < 3 && zonaDe(hotel) === clave) lista.push(hotel);
         });
         if (lista.length) porPlaya.set(clave, lista);
       });
@@ -1176,6 +1179,7 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
     diag.hotelsPorPlaya = grupos.map(function (par) {
       return {
         playa: par[0],
+        barrio: esCiudad,
         hotels: par[1].map(function (hotel) {
           const convertido = conversion && conversion.get(hotel.bookingUrl) ? conversion.get(hotel.bookingUrl) : '';
           return Object.assign({}, hotel, {
