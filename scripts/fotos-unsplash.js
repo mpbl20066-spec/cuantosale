@@ -108,20 +108,29 @@ const claveDe = (t) => t.destinos[0] + '#' + t.titulo.trim();
 
 (async function () {
   /* 1) Una busqueda por tour (con su alternativa si trae menos de 3 fotos). */
+  /* Si se llega al limite de la hora, se sigue solo con lo que ya esta en cache: la revision sale con todo lo
+     buscado, y tour-photos.json no se escribe hasta tener todas las busquedas. */
   const pool = {};
-  try {
-    for (const t of objetivo) {
-      const k = claveDe(t), qs = BUSQ[k] || variantesDestino(t);
-      let mejor = [];
-      for (const q of qs) { const l = await buscar(q); if (l.length > mejor.length) mejor = l; if (l.length >= 3) { mejor = l; break; } }
-      pool[k] = mejor; process.stdout.write('.');
+  let limitado = false;
+  const buscarOCache = async (q) => {
+    if (cache[q]) return cache[q];
+    if (limitado) return null;
+    try { return await buscar(q); } catch (e) { if (!e.limite) throw e; limitado = true; return cache[q] || null; }
+  };
+  for (const t of objetivo) {
+    const k = claveDe(t), qs = BUSQ[k] || variantesDestino(t);
+    let mejor = [], falta = false;
+    for (const q of qs) {
+      const l = await buscarOCache(q);
+      if (!l) { falta = true; break; }
+      if (l.length > mejor.length) mejor = l;
+      if (l.length >= 3) { mejor = l; break; }
     }
-  } catch (e) {
-    if (!e.limite) throw e;
-    console.log('\nSe llego al limite de la hora de Unsplash: corre de nuevo en una hora (lo ya buscado queda en cache).');
-    process.exit(2);
+    if (!falta) { pool[k] = mejor; process.stdout.write('.'); }
   }
-  console.log('\nbusquedas listas');
+  if (limitado) { console.log('\nSe llego al limite de la hora de Unsplash: corre de nuevo en una hora (lo ya buscado queda en cache).'); process.exitCode = 2; }
+  const parcial = process.exitCode === 2;
+  if (!parcial) console.log('\nbusquedas listas');
 
   /* 2) Eleccion: la elegida a mano, o la primera candidata que no use otro tour. */
   const usadas = new Set(Object.values(ELECCION).filter(Boolean));
@@ -144,7 +153,7 @@ const claveDe = (t) => t.destinos[0] + '#' + t.titulo.trim();
       '<article><img src="' + esc(e.p.thumb) + '" loading="lazy"><p><b>' + esc(e.t.titulo) + '</b>' + esc(lugarDe(e.t)) + ' · ' + esc(e.p.txt) + '<br>Foto: ' + esc(e.p.autor) + ' · id ' + esc(e.p.id) + '</p><div class="c">' +
       e.cands.filter((c) => c.id !== e.p.id).map((c) => '<img src="' + esc(c.thumb) + '" title="' + esc(c.id + ' · ' + c.txt) + '" loading="lazy">').join('') + '</div></article>').join('') + '</section>');
   console.log(elegidas.length + ' fotos elegidas · revision en outputs/fotos-unsplash.html');
-  if (SECO) return;
+  if (SECO || parcial) return;
 
   elegidas.forEach((e) => {
     fotos[e.clave] = { url: e.p.url, autor: e.p.autor + ' en Unsplash', licencia: 'Licencia Unsplash', fuente: 'unsplash', id: e.p.id, perfil: e.p.perfil, pagina: e.p.pagina, download: e.p.download };
