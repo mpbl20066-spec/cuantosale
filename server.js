@@ -1840,8 +1840,19 @@ async function precalentarVuelos(req, res) {
       rutas.push({ origin: 'MVD', destination: AIR_DESTINATIONS[k], dep: model.iso(dep), ret: model.iso(ret) });
     });
   }
-  const r = await flightProviders.precalentar(rutas, 'eq');
-  return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r));
+  /* Y el precio de referencia de las guias: el 15 de cada uno de los proximos 11 meses, 7 noches, por aeropuerto (los
+     40 destinos comparten 11 aeropuertos, asi que son ~121 rutas). Dura 14 dias; cada corrida pide hasta
+     PRECALENTAR_GUIAS_MAX (12) de las que faltan, primero las mas cercanas. Con eso la guia elige el mes y muestra
+     el "Desde" con el vuelo real, no con la tabla del modelo. */
+  const meses = [];
+  const aeropuertos = Array.from(new Set(Object.keys(AIR_DESTINATIONS).map(function (k) { return AIR_DESTINATIONS[k]; })));
+  for (let i = 1; i <= 11; i++) {
+    const dep = new Date(hoy.getFullYear(), hoy.getMonth() + i, 15, 12);
+    aeropuertos.forEach(function (a) { meses.push({ origin: 'MVD', destination: a, dep: model.iso(dep), ret: model.iso(model.addDays(dep, 7)) }); });
+  }
+  const maxGuias = Math.max(0, Number(process.env.PRECALENTAR_GUIAS_MAX) || 12);
+  const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias)]);
+  return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]) }));
 }
 
 async function calendarioVuelos(req, res, url) {
