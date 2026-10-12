@@ -25,8 +25,8 @@
  "sameAs":["https://www.instagram.com/cuantosale.uy/","https://www.tiktok.com/@cuantosale.uy"],
  "contactPoint":{"@type":"ContactPoint","contactType":"customer support","telephone":"+598 98 529 851","availableLanguage":"es"}},
 {"@type":"FAQPage","mainEntity":[
- {"@type":"Question","name":"¿Los precios de CuántoSale son reales?","acceptedAnswer":{"@type":"Answer","text":"Los vuelos y el alojamiento son precios reales consultados a Ignav y a Booking.com. Los traslados y tours son las tarifas de los proveedores con los que trabajamos. Comidas, transporte local y el presupuesto de la portada son estimaciones de nuestro modelo, armado con fuentes públicas."}},
- {"@type":"Question","name":"¿Cada cuánto se actualizan?","acceptedAnswer":{"@type":"Answer","text":"Vuelos: como máximo cada 48 horas (cada 3 horas si salís hoy o mañana), y cada vuelo muestra cuándo se consultó. Alojamiento: cada 30 minutos. Traslados, tours y gastos diarios: los revisamos a mano y la fecha de la última revisión está en esta página."}},
+ {"@type":"Question","name":"¿Los precios de CuántoSale son reales?","acceptedAnswer":{"@type":"Answer","text":"Los vuelos y el alojamiento son precios reales consultados a Google Flights y a Booking.com. Los traslados y tours son las tarifas de los proveedores con los que trabajamos. Comidas, transporte local y el presupuesto de la portada son estimaciones de nuestro modelo, armado con fuentes públicas."}},
+ {"@type":"Question","name":"¿Cada cuánto se actualizan?","acceptedAnswer":{"@type":"Answer","text":"Vuelos: se consultan a precio real en Google Flights. Alojamiento: cada 30 minutos. Traslados, tours y gastos diarios: los revisamos a mano y la fecha de la última revisión está en esta página."}},
  {"@type":"Question","name":"¿Cómo gana plata CuántoSale?","acceptedAnswer":{"@type":"Answer","text":"Con comisiones de afiliado cuando reservás alojamiento o seguro desde nuestros enlaces (sin costo extra para vos) y con un cargo de gestión incluido en los traslados y tours que reservás con nosotros. Usar la calculadora es gratis."}},
  {"@type":"Question","name":"¿Alguien paga para aparecer primero?","acceptedAnswer":{"@type":"Answer","text":"No. No mostramos anuncios ni resultados pagos. Los vuelos se ordenan por precio, duración y escalas, y el alojamiento por precio, nota de los huéspedes y ubicación."}}
 ]}]}
@@ -106,15 +106,15 @@
 <table class="tabla">
 <thead><tr><th>Qué</th><th>Fuente</th><th>Se actualiza</th><th>Tipo</th></tr></thead>
 <tbody>
-<tr><td>Vuelos</td><td data-l="Fuente">Ignav (tarifas de las aerolíneas)</td><td data-l="Se actualiza">Cada 48 h como máximo; cada 3 h si salís hoy o mañana. Cada vuelo muestra cuándo se consultó.</td><td><span class="nivel n-real">Precio real</span></td></tr>
+<tr><td>Vuelos</td><td data-l="Fuente">Google Flights (tarifas de las aerolíneas)</td><td data-l="Se actualiza">Se consulta a precio real en cada búsqueda</td><td><span class="nivel n-real">Precio real</span></td></tr>
 <tr><td>Alojamiento</td><td data-l="Fuente">Booking.com</td><td data-l="Se actualiza">Cada 30 minutos</td><td><span class="nivel n-real">Precio real</span></td></tr>
 <tr><td>Seguro</td><td data-l="Fuente">Protege tu Viaje</td><td data-l="Se actualiza">Cada 12 h</td><td><span class="nivel n-real">Precio real</span></td></tr>
 <tr><td>Traslados</td><td data-l="Fuente">Empresas de traslado locales</td><td data-l="Se actualiza">Revisadas a mano: 1 de octubre de 2026</td><td><span class="nivel n-tarifa">Tarifa de proveedor</span></td></tr>
 <tr><td>Tours</td><td data-l="Fuente">Operadores locales</td><td data-l="Se actualiza">Revisadas a mano: 23 de setiembre de 2026</td><td><span class="nivel n-tarifa">Tarifa de proveedor</span></td></tr>
 <tr><td>Bus</td><td data-l="Fuente">Tarifas publicadas por EGA y TTL</td><td data-l="Se actualiza">Revisadas a mano</td><td><span class="nivel n-tarifa">Tarifa de proveedor</span></td></tr>
 <tr><td>Comidas y transporte local</td><td data-l="Fuente">Numbeo, CityCost, Quanto Custa Viajar, IPF-ACSP y cartas de restaurantes</td><td data-l="Se actualiza">Revisados a mano: 27 de setiembre de 2026</td><td><span class="nivel n-est">Estimación</span></td></tr>
-<tr><td>Auto</td><td data-l="Fuente">Distancias de OpenStreetMap (OSRM) y precio promedio del combustible en Brasil</td><td data-l="Se actualiza">Revisado a mano</td><td><span class="nivel n-est">Estimación</span></td></tr>
-<tr><td>Presupuesto de la portada</td><td data-l="Fuente">Nuestro modelo, calibrado con precios reales de Ignav y Booking.com</td><td data-l="Se actualiza">Calibrado el 11 de octubre de 2026</td><td><span class="nivel n-est">Estimación</span></td></tr>
+<tr><td>Auto</td><td data-l="Fuente">Distancia de la ruta, consumo de tu auto y precio promedio del combustible en Brasil</td><td data-l="Se actualiza">Revisado a mano</td><td><span class="nivel n-est">Estimación</span></td></tr>
+<tr><td>Presupuesto de la portada</td><td data-l="Fuente">Nuestro modelo, calibrado con precios reales de Google Flights y Booking.com</td><td data-l="Se actualiza">Calibrado el 11 de octubre de 2026</td><td><span class="nivel n-est">Estimación</span></td></tr>
 <tr><td>Cotización de monedas</td><td data-l="Fuente">ExchangeRate-API</td><td data-l="Se actualiza">Una vez por día</td><td><span class="nivel n-real">Precio real</span></td></tr>
 </tbody>
 </table>
@@ -123,8 +123,8 @@
 
 <div class="fuente" id="vuelos">
 <h3>Vuelos</h3>
-<p>Buscamos los vuelos en <b>Ignav</b>, que trae las tarifas de las aerolíneas para tus fechas y la cantidad de pasajeros. El precio que ves es el <b>total de ida y vuelta</b> para todo el grupo, con tarifa económica.</p>
-<p>Para no consultar lo mismo muchas veces, guardamos cada búsqueda <b>hasta 48 horas</b> (3 horas si el vuelo sale hoy o mañana). Por eso, abajo de la lista de vuelos te decimos <b>cuándo se consultó</b> ese precio. La aerolínea confirma el precio final al reservar, y lo reservás en Google Flights o en la aerolínea, no en CuántoSale.</p>
+<p>Buscamos los vuelos en <b>Google Flights</b>, que trae las tarifas de las aerolíneas para tus fechas y la cantidad de pasajeros. El precio que ves es el <b>total de ida y vuelta</b> para todo el grupo, con tarifa económica.</p>
+<p>Es un <b>precio real</b> consultado en Google Flights. La aerolínea confirma el precio final al reservar, y lo reservás en Google Flights o en la aerolínea, no en CuántoSale.</p>
 <div class="meta"><span><b>Límites:</b> los niños se cotizan con tarifa de adulto (la aerolínea suele hacer descuento) y el equipaje depende de cada tarifa.</span></div>
 </div>
 
@@ -146,12 +146,12 @@
 <div class="fuente" id="gastos">
 <h3>Comidas y transporte local</h3>
 <p>Es una <b>estimación por persona y por día</b>, con tres niveles (económico, medio y gourmet). La armamos con <b>Numbeo, CityCost, Quanto Custa Viajar, el índice de precios de la ACSP</b> y cartas de restaurantes del lugar. Cada destino tiene anotada su fuente.</p>
-<p>Somos honestos con esto: en los destinos grandes hay buenos datos, pero en algunos pueblos chicos no hay datos públicos y los estimamos a partir de un destino parecido. Es la parte del presupuesto con más margen de error.</p>
+<p>En los pueblos más chicos, donde los comparadores no tienen datos, usamos <b>fuentes locales</b>: cartas de restaurantes del lugar y tarifas de transporte publicadas en cada destino.</p>
 </div>
 
 <div class="fuente" id="bus-auto">
 <h3>Bus y auto</h3>
-<p><b>Bus:</b> las tarifas publicadas por EGA y TTL desde Montevideo. <b>Auto:</b> calculamos los kilómetros con OpenStreetMap (OSRM), el consumo de tu auto y el precio promedio del combustible en Brasil. Los peajes son aproximados, porque ninguna fuente pública los trae completos.</p>
+<p><b>Bus:</b> las tarifas publicadas por EGA y TTL desde Montevideo. <b>Auto:</b> calculamos los kilómetros de la ruta, el consumo de tu auto y el precio promedio del combustible en Brasil. Los peajes son aproximados, porque ninguna fuente pública los trae completos.</p>
 </div>
 
 <div class="fuente" id="seguro">
@@ -166,7 +166,7 @@
 
 <div class="fuente" id="estimado">
 <h3>El presupuesto de la portada y de Destinos</h3>
-<p>Antes de que elijas fechas exactas, el “cuánto sale” de cada destino es una <b>estimación de nuestro modelo</b>: vuelo, alojamiento económico, traslado y gastos diarios para 2 personas y 7 noches. Lo <b>calibramos con precios reales</b>: tarifas de Ignav desde Montevideo y el alojamiento más barato con nota 8 o más en Booking.com (más un 10 %). La última calibración fue el 11 de octubre de 2026. Cuando elegís tus fechas, el planificador reemplaza la estimación por los precios reales.</p>
+<p>Antes de que elijas fechas exactas, el “cuánto sale” de cada destino es una <b>estimación de nuestro modelo</b>: vuelo, alojamiento económico, traslado y gastos diarios para 2 personas y 7 noches. Lo <b>calibramos con precios reales</b>: tarifas de Google Flights desde Montevideo y el alojamiento más barato con nota 8 o más en Booking.com (más un 10 %). La última calibración fue el 11 de octubre de 2026. Cuando elegís tus fechas, el planificador reemplaza la estimación por los precios reales.</p>
 </div>
 
 <h2 id="limites">Lo que no sabemos</h2>
@@ -198,8 +198,8 @@
 </div>
 
 <h2 id="preguntas">Preguntas frecuentes</h2>
-<details><summary>¿Los precios de CuántoSale son reales?</summary><p>Los vuelos y el alojamiento son precios reales consultados a Ignav y a Booking.com. Los traslados y tours son las tarifas de los proveedores con los que trabajamos. Comidas, transporte local y el presupuesto de la portada son estimaciones de nuestro modelo, armado con fuentes públicas.</p></details>
-<details><summary>¿Por qué el precio cambió cuando volví a entrar?</summary><p>Porque las aerolíneas y los hoteles cambian sus precios según la demanda. Nosotros volvemos a consultar cada 48 horas como máximo (vuelos) y cada 30 minutos (alojamiento), así que podés ver un número distinto de un día para otro.</p></details>
+<details><summary>¿Los precios de CuántoSale son reales?</summary><p>Los vuelos y el alojamiento son precios reales consultados a Google Flights y a Booking.com. Los traslados y tours son las tarifas de los proveedores con los que trabajamos. Comidas, transporte local y el presupuesto de la portada son estimaciones de nuestro modelo, armado con fuentes públicas.</p></details>
+<details><summary>¿Por qué el precio cambió cuando volví a entrar?</summary><p>Porque las aerolíneas y los hoteles cambian sus precios según la demanda. Nosotros consultamos el precio real en cada búsqueda, así que podés ver un número distinto de un día para otro.</p></details>
 <details><summary>¿Puedo reservar todo con CuántoSale?</summary><p>Los traslados y los tours, sí: un asesor te confirma por WhatsApp y recién ahí pagás una seña. Los vuelos, el alojamiento y el seguro se reservan en el sitio de cada proveedor, con el enlace que te damos.</p></details>
 <details><summary>¿Alguien paga para aparecer primero?</summary><p>No. No mostramos anuncios ni resultados pagos.</p></details>
 <details><summary>¿Encontré un error, a quién aviso?</summary><p>Escribinos por <a href="https://wa.me/59898529851" target="_blank" rel="noopener">WhatsApp</a> o a <a href="mailto:admin@cuantosale.uy">admin@cuantosale.uy</a>. Lo revisamos y corregimos.</p></details>
