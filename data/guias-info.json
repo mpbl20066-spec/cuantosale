@@ -605,5 +605,179 @@
     ]
    }
   ]
+ },
+ "bombinhas": {
+  "antes": {
+   "titulo": "Antes de viajar a Bombinhas",
+   "intro": "Bombinhas es una península chica entre Porto Belo y el mar abierto, con las playas a pocos kilómetros unas de otras. No tiene aeropuerto ni terminal de ómnibus, así que conviene resolver antes cómo llegás y cómo te movés.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "Se vuela a Navegantes (NVT), a unos 60 km, o a Florianópolis (FLN), a unos 80 km. Desde Montevideo también se llega en auto, por la BR-101."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cinco a siete días recorrés las playas de la península sin apuro y te queda un día para la Ilha de Porto Belo o para Balneário Camboriú."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "En el centro se camina a Bombinhas, la Sepultura y la Lagoinha. Para Zimbros, Canto Grande o la Tainha el auto ayuda, pero del 15 de noviembre al 15 de abril se paga la tasa ambiental para entrar con él y el tránsito es lento."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Bombinhas desde Montevideo",
+    "intro": "No hay aeropuerto en Bombinhas: se vuela a Navegantes o a Florianópolis y se sigue por la BR-101. Al ser un destino del sur, también se llega en auto o en ómnibus.",
+    "items": [
+     {
+      "t": "Vuelo a Florianópolis (FLN)",
+      "d": "Es el aeropuerto internacional de la zona. En el verano 2024-2025 Azul voló directo desde Montevideo dos veces por semana; si en tus fechas no hay directo, se vuela con escala, en general en São Paulo. Del aeropuerto a Bombinhas son unos 80 a 85 km por la BR-101: cerca de 1 h 30 sin tránsito, más si se traba la salida de la isla."
+     },
+     {
+      "t": "Vuelo a Navegantes (NVT)",
+      "d": "Queda más cerca, a unos 60 km, y te ahorrás el tránsito de Florianópolis. No hay vuelos desde Montevideo: se llega con escala en São Paulo (Guarulhos, Congonhas o Campinas) con Azul, GOL o LATAM."
+     },
+     {
+      "t": "Del aeropuerto a Bombinhas",
+      "d": "En los dos aeropuertos hay alquiladoras de auto, transfers regulares y privados, taxi y Uber. Por la BR-101 se sale en el acceso a Porto Belo y desde ahí quedan unos 10 km hasta la Praia de Bombas."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Son unos 1.300 km por el Chuy, Porto Alegre y la BR-101: alrededor de 18 horas de manejo, así que conviene partirlo en dos días."
+     },
+     {
+      "t": "En ómnibus",
+      "d": "EGA y TTL van de Montevideo a Florianópolis en unas 18 a 20 horas. Bombinhas no tiene terminal: los ómnibus llegan a Porto Belo o a Itapema y de ahí seguís en taxi o Uber."
+     }
+    ],
+    "cierre": {
+     "t": "La entrada a la península",
+     "d": "En temporada alta, el tramo de unos 10 km entre el acceso a Porto Belo y la Praia de Bombas puede trabarse durante horas. Llegá temprano a la mañana y, si vas en auto entre el 15 de noviembre y el 15 de abril, pagá la tasa ambiental antes: se cobra por lectura de la patente."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Bombinhas",
+    "intro": "La península es chica, pero las playas cambian mucho de una punta a la otra. Elegí según si querés caminar a todo o tener tranquilidad.",
+    "items": [
+     {
+      "t": "Centro (Praia de Bombinhas)",
+      "d": "Concentra la mayoría de los hoteles y restaurantes. Desde acá caminás a la Sepultura, la Lagoinha y el Retiro dos Padres; es la opción si no vas a tener auto."
+     },
+     {
+      "t": "Bombas",
+      "d": "Playa larga de agua calma, con buena infraestructura y posadas en general algo más baratas que en el centro. Sirve para familias y queda bien ubicada para moverse."
+     },
+     {
+      "t": "Quatro Ilhas",
+      "d": "Entre el centro y Mariscal, con bares y restaurantes frente a la arena. Un punto medio para quien quiere playa ancha sin el movimiento del centro."
+     },
+     {
+      "t": "Mariscal",
+      "d": "Más tranquila y familiar, con hoteles de categoría media y alta. Está a unos 3 km de la playa central, así que conviene tener auto."
+     },
+     {
+      "t": "Zimbros",
+      "d": "Pueblo de pescadores sobre la bahía, rústico y con el mar calmo todo el año. Bueno para descansar y para los senderos a playas salvajes, pero lejos de todo lo demás."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Bombinhas",
+    "intro": "Las distancias son cortas, pero las calles son angostas y en verano se llenan. Combinar caminatas con algún auto o Uber suele ser lo más práctico.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Del centro se camina a la Sepultura, la Lagoinha y el Retiro dos Padres. A Bombas y Quatro Ilhas también se llega caminando un poco más."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "Hay líneas que unen los barrios con Porto Belo, pero por el relieve y las calles angostas no llegan bien a todas las playas."
+     },
+     {
+      "t": "Uber y taxi",
+      "d": "Uber funciona en Bombinhas. Para playas apartadas como la Tainha, acordá cómo volvés."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más práctico para Zimbros, Canto Grande, la Tainha y Porto Belo. En temporada alta los estacionamientos se llenan temprano, sobre todo en la Sepultura."
+     },
+     {
+      "t": "Barco",
+      "d": "Del trapiche de la Prainha salen los paseos y el buceo a Arvoredo; a la Ilha de Porto Belo se cruza desde el muelle del centro de Porto Belo."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Bombinhas",
+    "intro": "Es un lugar tranquilo. Los cuidados pasan sobre todo por el mar y los senderos.",
+    "bullets": [
+     "Mariscal, Quatro Ilhas y Canto Grande Mar de Fora tienen olas: bañate cerca de los guardavidas y con bandera roja no te metas.",
+     "Las calas como la Tainha no tienen servicios: llevá agua y volvé antes de que oscurezca.",
+     "Si subís al Morro do Macaco para el atardecer, llevá linterna para bajar.",
+     "Con lluvia, el camino de tierra a la Tainha y los senderos se ponen resbalosos.",
+     "Buceá en Arvoredo solo con operadoras autorizadas.",
+     "En el auto no dejes nada a la vista en los estacionamientos de playa."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "La tarjeta se acepta en casi todos lados. Pix es el pago instantáneo de Brasil y lo vas a ver en todas partes, pero necesitás una cuenta o una app que lo permita; si no, tarjeta o efectivo."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Tené algo para barqueros, estacionamientos y puestos de playa."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas); en Santa Catarina la tensión es de 220 V."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y gorra",
+     "Máscara y snorkel propios para la Sepultura y el Retiro dos Padres",
+     "Calzado cerrado para los senderos del Morro do Macaco y la Tainha",
+     "Algo de abrigo: las noches refrescan y de mayo a septiembre hace frío",
+     "Piloto liviano: en verano llueve de tarde",
+     "Bolsa estanca para el celular en los paseos en barco",
+     "Linterna o power bank",
+     "Efectivo y un medio de pago alternativo"
+    ]
+   }
+  ]
  }
 }
