@@ -2124,7 +2124,15 @@ function servirGuiaSecreta(req, res, url) {
   const guia = guiSecreta.guiaPara(dest, model.DEST[dest].region);
   if (!guia) return sendJson(res, 404, { error: ' todavia no hay una guia escrita para este destino.' });
   // La region va aparte (la guia no la trae): sin esto la pagina decia "Brasil" tambien en Buenos Aires.
-  return sendJson(res, 200, { guia: guia, region: model.DEST[dest].region || '' });
+  // `tours` son los del catalogo de la agencia (lib/tours.js): la guia los muestra en "Paseos y excursiones",
+  // antes de las actividades locales. Si el catalogo no responde, la guia sale igual, sin tours.
+  return tours.destino(dest).catch(function () { return []; }).then(function (lista) {
+    const resumidos = (lista || []).slice(0, 12).map(function (x) {
+      return { title: x.title, description: x.description, price: x.price, duracion: x.duracion || '',
+        foto: (x.images && x.images[0]) || (x.foto && x.foto.url) || x.image || '' };
+    });
+    sendJson(res, 200, { guia: guia, region: model.DEST[dest].region || '', tours: resumidos });
+  });
 }
 
 /* Habitaciones de UN hotel, para el modal "Ver habitaciones". Una consulta a

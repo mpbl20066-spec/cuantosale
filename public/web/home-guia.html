@@ -89,12 +89,20 @@
   .u-item--temp .u-temp{margin:0}
   .u-temp{margin:6px 0 0;font-size:16px;font-weight:600;color:var(--ink2);line-height:1.5}
   /* El cierre: desde la guia al buscador, como en la maqueta. */
-  .u-handoff{margin:28px 0 0;padding:22px 20px;border-radius:22px;background:#0B1F3A;color:#fff}
+  .u-handoff{margin:36px 0 0;padding:0;text-align:center;color:var(--ink)}
+  .u-ruta{display:block;width:100%;max-width:320px;height:auto;margin:0 auto 10px;overflow:visible}
+  .u-ruta__l{fill:none;stroke:var(--line);stroke-width:2.5;stroke-dasharray:6 7;stroke-linecap:round}
+  .u-ruta__o{fill:var(--ink2)}.u-ruta__d{fill:var(--accent);animation:u-pulso 1.8s ease-in-out infinite}
+  .u-ruta__a path{fill:var(--accent)}
+  .u-ruta__a{offset-path:path('M20 70 Q160 -10 300 60');offset-rotate:auto;animation:u-vuelo 4.5s cubic-bezier(.45,0,.4,1) infinite}
+  @keyframes u-vuelo{0%{offset-distance:0%;opacity:0}8%{opacity:1}88%{opacity:1}100%{offset-distance:100%;opacity:0}}
+  @keyframes u-pulso{0%,100%{r:6;opacity:1}50%{r:8.5;opacity:.65}}
+  @media (prefers-reduced-motion:reduce){.u-ruta__a,.u-ruta__d{animation:none}.u-ruta__a{offset-distance:55%}}
   .u-handoff__eye{display:block;margin-bottom:6px;font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
-  .u-handoff h2{margin:0 0 8px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.2;color:#fff}
-  .u-handoff p{margin:0 0 18px;font-size:16.5px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.5}
-  .u-handoff__b{display:flex;flex-wrap:wrap;gap:10px}
-  .u-handoff__b a,.u-handoff__b button{flex:1 1 200px;box-sizing:border-box;min-height:54px;padding:15px;border-radius:14px;font-size:16.5px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}
+  .u-handoff h2{margin:0 0 8px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.2;color:var(--ink)}
+  .u-handoff p{margin:0 auto 18px;max-width:520px;font-size:16.5px;font-weight:500;color:var(--ink2);line-height:1.5}
+  .u-handoff__b{display:flex;justify-content:center}
+  .u-handoff__b a{flex:0 1 360px;box-sizing:border-box;min-height:54px;padding:15px;border-radius:14px;font-size:16.5px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}
   .u-go{background:var(--action-bg);color:var(--action-ink);border:0}
   .u-volver{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6);border:0}
   .u-cargando{padding:30px 18px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
@@ -162,13 +170,14 @@
      Alegre es la seccion principal, con foto y mapa). La primera pestana es Playas si hay, si no Qué ver. */
   var TAB = [{ id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Lugares para ver', k: 'atracciones' }, { id: 'hacer', nom: 'Paseos y excursiones', k: 'hacer' },
     { id: 'comer', nom: 'Dónde comer', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
-  var S = { tab: '', guia: null, region: '', estado: 'cargando', est: null };
+  var S = { tab: '', guia: null, region: '', tours: [], estado: 'cargando', est: null };
   /* El presupuesto de la guia: el viaje real de CuantoSale con el destino ya elegido (/destinos), no una pantalla aparte. */
   var aPresupuesto = function (fuente) { return 'home-destino.html?destino=' + K + '&fuente=' + fuente; };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
   var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
   var lista = function (k) { return (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : []; };
-  var tabs = function () { return TAB.filter(function (t) { return lista(t.k).length; }); };
+  var cuantos = function (t) { return lista(t.k).length + (t.id === 'hacer' ? S.tours.length : 0); };
+  var tabs = function () { return TAB.filter(cuantos); };
   var tieneLugar = function (x) { return typeof x.lat === 'number' && typeof x.lng === 'number'; };
 
   function cabecera() {
@@ -231,10 +240,12 @@
   }
   /* Cierre de la guia: el mismo boton que la portada, despues de la informacion. */
   function cierre() {
-    return '<div class="u-handoff"><span class="u-handoff__eye">Tu próximo viaje</span><h2>Calculá tu viaje a ' + esc(NOM) + '</h2>' +
+    var avion = '<svg class="u-ruta" viewBox="0 0 320 90" aria-hidden="true"><path class="u-ruta__l" d="M20 70 Q160 -10 300 60"/>' +
+      '<circle cx="20" cy="70" r="5" class="u-ruta__o"/><circle cx="300" cy="60" r="6" class="u-ruta__d"/>' +
+      '<g class="u-ruta__a"><path d="M0-6 2 0 0 6l9-6z" transform="scale(1.6)"/></g></svg>';
+    return '<div class="u-handoff">' + avion + '<span class="u-handoff__eye">Tu próximo viaje</span><h2>Calculá tu viaje a ' + esc(NOM) + '</h2>' +
       '<p>Armá tu presupuesto completo con tus fechas: vuelo, alojamiento, traslados y comidas, con precios reales.</p>' +
-      '<div class="u-handoff__b"><a class="u-go" href="' + aPresupuesto('guia') + '" data-evento="guia_calcular_viaje" data-lugar="cierre" data-destino="' + K + '">Descubrí cuánto te costaría →</a>' +
-      '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver arriba</button></div></div>';
+      '<div class="u-handoff__b"><a class="u-go" href="' + aPresupuesto('guia') + '" data-evento="guia_calcular_viaje" data-lugar="cierre" data-destino="' + K + '">Descubrí cuánto te costaría →</a></div></div>';
   }
   /* Estimacion para el resumen (sin vuelos en vivo: es el modelo, no gasta busquedas pagas). Fechas como la portada de
      la app: salida en 45 dias, 7 noches. */
@@ -287,9 +298,17 @@
       }).join('');
     }
     if (S.tab === 'hacer') {
-      return '<h2 class="u-h2">Qué hacer</h2>' + lista('hacer').map(function (x) {
+      var tl = S.tours.map(function (x) {
+        return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')"></div>' : '') +
+          '<b>' + esc(x.title) + '</b>' + (x.duracion ? '<span class="meta">' + esc(x.duracion) + '</span>' : '') +
+          (x.description ? '<p>' + esc(x.description) + '</p>' + (String(x.description).length > 110 ? '<button type="button" class="u-mas" data-mas="1" aria-expanded="false">Ver más</button>' : '') : '') +
+          '<div class="u-acc">' + (x.price > 0 ? '<span class="u-precio">Desde ' + usd(x.price) + '</span>' : '') +
+          '<a class="u-llegar" href="' + aPresupuesto('guia_tour') + '" data-evento="guia_tour" data-lugar="' + esc(x.title) + '">Ver en tu viaje →</a></div></div>';
+      }).join('');
+      var loc = lista('hacer').map(function (x) {
         return tarjeta(x, 0, esc(x.zona || '') + (x.dur ? ' · ' + esc(x.dur) : ''), x.nota);
       }).join('');
+      return (tl ? '<h2 class="u-h2">Tours y excursiones</h2>' + tl : '') + (loc ? '<h2 class="u-h2">' + (tl ? 'Actividades locales' : 'Qué hacer') + '</h2>' + loc : '');
     }
     if (S.tab === 'comer') {
       return '<h2 class="u-h2">Dónde comer</h2>' + lista('comer').map(function (x) {
@@ -369,11 +388,11 @@
     else {
       var ts = tabs();
       if (!ts.some(function (t) { return t.id === S.tab; })) S.tab = ts.length ? ts[0].id : '';
-      cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' + climaHtml() +
+      cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' +
         (ts.length ? '<div class="u-tabs" role="tablist" aria-label="Categorías de la guía">' + ts.map(function (t) {
-          return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + lista(t.k).length + '</small></button>';
+          return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + cuantos(t) + '</small></button>';
         }).join('') + '</div>' +
-        '<div role="tabpanel">' + listaGuia() + '</div>' : '') +
+        '<div role="tabpanel">' + (S.tab === ts[0].id ? climaHtml() : '') + listaGuia() + '</div>' : '') +
         '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota && !S.guia.clima ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
         cierre() + '</div>';
     }
@@ -412,7 +431,7 @@
           .then(function (r) { if (r.status === 403 || r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
           .then(function (data) {
             if (data && data.guia) {
-              S.guia = data.guia; S.region = data.region || ''; S.estado = 'abierta';
+              S.guia = data.guia; S.region = data.region || ''; S.tours = Array.isArray(data.tours) ? data.tours : []; S.estado = 'abierta';
               track('guia_abierta', { secciones: TAB.map(function (t) { return lista(t.k).length; }) });
               pintar(); return;
             }
