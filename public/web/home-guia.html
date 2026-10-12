@@ -76,6 +76,13 @@
   .u-foto{height:220px;margin:-16px -16px 14px;border-radius:20px 20px 0 0;background:var(--cel-soft) center/cover}
   .u-precio{display:inline-block;margin-top:7px;padding:5px 11px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:14px;font-weight:800}
   [role="tabpanel"]>section[aria-label="Clima por mes"]{grid-column:1/-1}
+  .u-meses{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;margin:16px 0 4px}
+  .u-mes{border-radius:10px;padding:7px 2px;text-align:center;font-size:12.5px;font-weight:600;line-height:1.25;color:var(--ink);border:1px solid transparent}
+  .u-mes b{display:block;font-size:13px;font-weight:800}
+  .u-mes--baja{background:rgba(47,182,111,.14);border-color:rgba(47,182,111,.45)}.u-mes--baja b{color:#2FB66F}
+  .u-mes--media{background:rgba(246,178,27,.14);border-color:rgba(246,178,27,.45)}.u-mes--media b{color:#E0A100}
+  .u-mes--alta{background:rgba(229,72,72,.14);border-color:rgba(229,72,72,.45)}.u-mes--alta b{color:#E54848}
+  @media (max-width:560px){.u-meses{grid-template-columns:repeat(6,minmax(0,1fr))}}
   .u-clima{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:var(--surface);margin-bottom:10px;scrollbar-width:thin}
   .u-clima table{border-collapse:collapse;width:100%;font-size:12.5px}
   .u-clima th,.u-clima td{padding:9px 1px;text-align:center;border-bottom:1px solid var(--line);color:var(--ink);white-space:nowrap}
@@ -169,7 +176,7 @@
   var K = /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : 'fln', NOM = C.Nombres[K] || 'Tu destino';
   /* Pestanas: solo salen las que tienen algo. "Qué ver" son las atracciones (en Sao Paulo, Gramado, Canela y Porto
      Alegre es la seccion principal, con foto y mapa). La primera pestana es Playas si hay, si no Qué ver. */
-  var TAB = [{ id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Lugares para ver', k: 'atracciones' }, { id: 'hacer', nom: 'Paseos y excursiones', k: 'hacer' },
+  var TAB = [{ id: 'clima', nom: 'Clima', k: 'clima' }, { id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Lugares para ver', k: 'atracciones' }, { id: 'hacer', nom: 'Paseos y excursiones', k: 'hacer' },
     { id: 'comer', nom: 'Dónde comer', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
   var S = { tab: '', guia: null, region: '', tours: [], estado: 'cargando', est: null };
   /* El presupuesto de la guia: el viaje real de CuantoSale con el destino ya elegido (/destinos), no una pantalla aparte. */
@@ -177,7 +184,10 @@
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
   var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
   var lista = function (k) { return (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : []; };
-  var cuantos = function (t) { return lista(t.k).length + (t.id === 'hacer' ? S.tours.length : 0); };
+  var cuantos = function (t) {
+    if (t.id === 'clima') return S.guia && S.guia.clima && Array.isArray(S.guia.clima.meses) ? 1 : 0;
+    return lista(t.k).length + (t.id === 'hacer' ? S.tours.length : 0);
+  };
   var tabs = function () { return TAB.filter(cuantos); };
   var tieneLugar = function (x) { return typeof x.lat === 'number' && typeof x.lng === 'number'; };
 
@@ -286,6 +296,7 @@
   function conMapa(arr) { return arr.some(tieneLugar) ? '<div class="u-mapa" id="u-mapa" role="img" aria-label="Mapa con los lugares de esta lista"></div>' : ''; }
   function listaGuia() {
     var n = 0;
+    if (S.tab === 'clima') return climaHtml();
     if (S.tab === 'playas') {
       var b = lista('beaches');
       return '<h2 class="u-h2">Playas</h2>' + conMapa(b) + b.map(function (x) {
@@ -321,6 +332,20 @@
     }).join('');
   }
 
+  /* Tira de precios por mes: con tabla de clima sale de su demanda; si no, de la temporada (alta $$$, baja $, resto $$). */
+  function mesesHtml() {
+    var cl = S.guia && S.guia.clima, t = S.guia && S.guia.temporada;
+    if (!(cl && Array.isArray(cl.meses)) && !t) return '';
+    var nivel = function (m) {
+      if (cl && Array.isArray(cl.meses)) return (cl.meses[m - 1] || {}).demanda || 'media';
+      return (t.alta || []).indexOf(m) >= 0 ? 'alta' : (t.baja || []).indexOf(m) >= 0 ? 'baja' : 'media';
+    };
+    var SIG = { baja: '$', media: '$$', alta: '$$$' };
+    return '<div class="u-meses" aria-label="Precios por mes">' + C.MESES.map(function (n, i) {
+      var nv = nivel(i + 1);
+      return '<div class="u-mes u-mes--' + nv + '">' + esc(n.charAt(0).toUpperCase() + n.slice(1, 3)) + '<b>' + SIG[nv] + '</b></div>';
+    }).join('') + '</div>';
+  }
   /* Clima mes por mes (guia.clima): va arriba de las pestanas. Sin datos de clima, no se dibuja. */
   function climaHtml() {
     var cl = S.guia && S.guia.clima; if (!cl || !Array.isArray(cl.meses)) return '';
@@ -389,11 +414,11 @@
     else {
       var ts = tabs();
       if (!ts.some(function (t) { return t.id === S.tab; })) S.tab = ts.length ? ts[0].id : '';
-      cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' +
+      cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' + mesesHtml() +
         (ts.length ? '<div class="u-tabs" role="tablist" aria-label="Categorías de la guía">' + ts.map(function (t) {
-          return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + cuantos(t) + '</small></button>';
+          return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + (t.id === 'clima' ? '' : ' <small>' + cuantos(t) + '</small>') + '</button>';
         }).join('') + '</div>' +
-        '<div role="tabpanel">' + (S.tab === ts[0].id && climaHtml() ? climaHtml() + '<span hidden></span>' : '') + listaGuia() + '</div>' : '') +
+        '<div role="tabpanel">' + listaGuia() + '</div>' : '') +
         '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota && !S.guia.clima ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
         cierre() + '</div>';
     }
