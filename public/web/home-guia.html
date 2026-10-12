@@ -98,6 +98,8 @@
   .u-temp{margin:6px 0 0;font-size:16px;font-weight:600;color:var(--ink2);line-height:1.5}
   /* El cierre: desde la guia al buscador, como en la maqueta. */
   .u-handoff{margin:36px 0 0;padding:0;text-align:center;color:var(--ink)}
+  .visit{display:flex;flex-wrap:wrap;justify-content:center;gap:0 .32em;margin:0 auto 14px;font-weight:800;font-size:clamp(30px,7vw,52px);line-height:1.1;letter-spacing:-.01em}.visit .p{white-space:nowrap}.visit i{display:inline-block;font-style:normal;color:#F7C325;opacity:0;transform:translateY(.4em);animation:vl-in .5s cubic-bezier(.2,.8,.2,1) forwards,vl-ola 2.6s ease-in-out infinite;animation-delay:calc(var(--i)*55ms),calc(900ms + var(--i)*90ms)}.visit .v i{color:var(--ink)}@keyframes vl-in{to{opacity:1;transform:none}}@keyframes vl-ola{0%,100%{transform:none}50%{transform:translateY(-.12em)}}@media (prefers-reduced-motion:reduce){.visit i{animation:none;opacity:1;transform:none}}
+  .esc{display:block;width:100%;max-width:340px;height:auto;margin:0 auto 6px;overflow:hidden}.esc-sol{fill:#F7C325;animation:esc-sol 4s ease-in-out infinite;transform-origin:250px 34px}.esc-tronco{fill:none;stroke:#A06A3A;stroke-width:5;stroke-linecap:round}.esc-hojas path{fill:#2FB66F}.esc-palma{animation:esc-palma 3.5s ease-in-out infinite}.esc-ola path{fill:#2E8BC0}.esc-ola2 path{fill:#5AB7E6;opacity:.85}.esc-ola1{animation:esc-ola 5s linear infinite}.esc-ola2{animation:esc-ola 3.6s linear infinite reverse}.esc-ed{fill:#22324A;stroke:#33476A}.esc-ve{fill:#F7C325;opacity:.2;animation:esc-ve 4s ease-in-out infinite;animation-delay:var(--d)}.esc-luna{fill:#F3E9C6}.esc-piso{fill:#33476A}.esc-mont{fill:#2B4A3A}.esc-pino path{fill:#2FB66F}.esc-pino{animation:esc-palma 4s ease-in-out infinite;animation-delay:var(--d)}.esc-nube ellipse{fill:#D3DCE8;opacity:.55}.esc-nube{animation:esc-nube 14s linear infinite}.esc-nube2{animation-duration:20s}@keyframes esc-sol{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}@keyframes esc-palma{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}@keyframes esc-ola{from{transform:translateX(0)}to{transform:translateX(-40px)}}@keyframes esc-ve{0%,100%{opacity:.2}40%,60%{opacity:1}}@keyframes esc-nube{from{transform:translateX(-40px)}to{transform:translateX(60px)}}@media (prefers-reduced-motion:reduce){.esc *{animation:none!important}}
   .u-ruta{display:block;width:100%;max-width:320px;height:auto;margin:0 auto 10px;overflow:visible}
   .u-ruta__l{fill:none;stroke:var(--line);stroke-width:2.5;stroke-dasharray:6 7;stroke-linecap:round}
   .u-ruta__o{fill:var(--ink2)}.u-ruta__d{fill:var(--accent);animation:u-pulso 1.8s ease-in-out infinite}
@@ -251,9 +253,9 @@
   }
   /* Cierre de la guia: el mismo boton que la portada, despues de la informacion. */
   function cierre() {
-    var avion = '<svg class="u-ruta" viewBox="0 0 320 90" aria-hidden="true"><path class="u-ruta__l" d="M20 70 Q160 -10 300 60"/>' +
-      '<circle cx="20" cy="70" r="5" class="u-ruta__o"/><circle cx="300" cy="60" r="6" class="u-ruta__d"/>' +
-      '<g class="u-ruta__a"><path d="M0-6 2 0 0 6l9-6z" transform="scale(1.6)"/></g></svg>';
+    var k = 0, palabra = function (w, cls) { return '<span class="p ' + cls + '">' + Array.from(w).map(function (c) { return '<i style="--i:' + (k++) + '">' + esc(c) + '</i>'; }).join('') + '</span>'; };
+    var tipo = ((window.CS_DESTS || []).filter(function (d) { return d.k === K; })[0] || {}).group || 'beach';
+    var avion = escenaSvg(tipo) + '<div class="visit" role="img" aria-label="Visitá ' + esc(NOM) + '">' + palabra('Visitá', 'v') + String(NOM).split(' ').map(function (w) { return palabra(w, 'n'); }).join('') + '</div>';
     return '<div class="u-handoff">' + avion + '<span class="u-handoff__eye">Tu próximo viaje</span><h2>Calculá tu viaje a ' + esc(NOM) + '</h2>' +
       '<p>Armá tu presupuesto completo con tus fechas: vuelo, alojamiento, traslados y comidas, con precios reales.</p>' +
       '<div class="u-handoff__b"><a class="u-go" href="' + aPresupuesto('guia') + '" data-evento="guia_calcular_viaje" data-lugar="cierre" data-destino="' + K + '">Descubrí cuánto te costaría →</a></div></div>';
@@ -332,6 +334,36 @@
     }).join('');
   }
 
+  /* Escena animada del cierre segun el tipo de destino (playa, ciudad o naturaleza). */
+  function escenaSvg(tipo) {
+    var s = '<svg class="esc" viewBox="0 0 320 110" aria-hidden="true">';
+    if (tipo === 'city') {
+      var ed = [[18, 48, 26], [48, 30, 22], [74, 58, 30], [108, 20, 24], [136, 40, 34], [174, 12, 26], [204, 44, 22], [230, 26, 30], [264, 50, 24], [292, 36, 22]], v = '', n = 0;
+      ed.forEach(function (b) {
+        s += '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + (104 - b[1]) + '" rx="2" class="esc-ed"/>';
+        for (var y = b[1] + 8; y < 96; y += 12) for (var x = b[0] + 5; x < b[0] + b[2] - 6; x += 9) {
+          n++; if (n % 3 === 0) v += '<rect x="' + x + '" y="' + y + '" width="4" height="5" class="esc-ve" style="--d:' + ((n * 0.37) % 4).toFixed(2) + 's"/>';
+        }
+      });
+      return s + '<circle cx="290" cy="16" r="9" class="esc-luna"/>' + v + '<rect x="0" y="103" width="320" height="2" class="esc-piso"/></svg>';
+    }
+    if (tipo === 'nature') {
+      s += '<g class="esc-nube"><ellipse cx="60" cy="20" rx="20" ry="7"/><ellipse cx="74" cy="16" rx="13" ry="8"/></g>';
+      s += '<g class="esc-nube esc-nube2"><ellipse cx="220" cy="26" rx="18" ry="6"/><ellipse cx="232" cy="22" rx="11" ry="7"/></g>';
+      s += '<path d="M0 104 L70 38 L120 80 L170 30 L240 90 L280 56 L320 86 L320 104Z" class="esc-mont"/>';
+      [[40, 70], [62, 78], [150, 74], [196, 80], [262, 72], [290, 82]].forEach(function (p, i) {
+        s += '<g class="esc-pino" style="--d:' + (i * 0.4) + 's;transform-origin:' + p[0] + 'px 104px"><path d="M' + p[0] + ' ' + p[1] + ' l-9 ' + (104 - p[1] - 4) + ' h18z"/></g>';
+      });
+      return s + '</svg>';
+    }
+    s += '<circle cx="250" cy="34" r="16" class="esc-sol"/>';
+    s += '<g class="esc-palma" style="transform-origin:62px 100px"><path d="M62 100 C60 80 58 62 64 44" class="esc-tronco"/>' +
+      '<g class="esc-hojas"><path d="M64 44 C50 34 36 38 28 46 C40 40 52 42 64 46Z"/><path d="M64 44 C76 32 92 34 100 42 C88 38 76 40 64 46Z"/>' +
+      '<path d="M64 44 C58 28 46 22 36 24 C48 28 56 34 64 46Z"/><path d="M64 44 C72 28 84 24 94 26 C82 30 72 36 64 46Z"/></g></g>';
+    s += '<g class="esc-ola esc-ola1"><path d="M-40 92 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V110 H-40Z"/></g>';
+    s += '<g class="esc-ola esc-ola2"><path d="M-40 98 q20 -7 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V110 H-40Z"/></g>';
+    return s + '</svg>';
+  }
   /* Tira de precios por mes: con tabla de clima sale de su demanda; si no, de la temporada (alta $$$, baja $, resto $$). */
   function mesesHtml() {
     var cl = S.guia && S.guia.clima, t = S.guia && S.guia.temporada;
