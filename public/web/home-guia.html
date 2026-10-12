@@ -33,49 +33,64 @@
   .u-hero{position:relative;min-height:390px;display:flex;align-items:flex-end;background:#0B1F3A center/cover}
   .u-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.5) 0,rgba(10,16,26,.1) 30%,rgba(10,16,26,.85) 100%)}
   .u-hero__t{position:relative;z-index:1;width:100%;box-sizing:border-box;padding:76px 18px 22px;color:#fff}
-  .u-hero__eye{display:inline-block;margin-bottom:10px;padding:5px 11px;border-radius:99px;background:rgba(10,16,26,.55);font-size:12.5px;font-weight:700;letter-spacing:.02em}
-  .u-hero__t h1{margin:0;font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.12;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+  .u-hero__eye{display:inline-block;margin-bottom:12px;padding:6px 12px;border-radius:99px;background:rgba(10,16,26,.55);font-size:13.5px;font-weight:700;letter-spacing:.02em}
+  .u-hero__t h1{margin:0;font-family:var(--fh);font-size:33px;font-weight:800;line-height:1.12;text-shadow:0 2px 10px rgba(0,0,0,.5)}
   .u-hero__t h1 span{color:var(--accent)}
-  .u-hero__p{margin:10px 0 0;max-width:560px;font-size:15.5px;font-weight:600;line-height:1.45;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-  .u-hero__val{display:flex;align-items:center;gap:7px;margin:10px 0 0;font-size:13px;font-weight:700;color:rgba(255,255,255,.92)}
+  .u-hero__p{margin:12px 0 0;max-width:580px;font-size:17px;font-weight:600;line-height:1.45;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+  .u-hero__val{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:14.5px;font-weight:700;color:rgba(255,255,255,.92)}
   .u-hero__val svg{flex:0 0 auto;color:var(--accent)}
-  .u-hero__cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;min-height:50px;padding:0 24px;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:16px;font-weight:800;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .u-hero__cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;min-height:54px;padding:0 26px;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:17px;font-weight:800;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
   .u-hero__cta:focus-visible,.u-go:focus-visible{outline:3px solid #fff;outline-offset:3px}
   .u-cuerpo{padding:18px 18px 0}
   /* Resumen practico: solo los datos que hay (estimado del modelo, medios, temporada, lo que trae la guia). */
   .u-datos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 6px}
-  .u-dato{padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .u-dato{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
   .u-dato--ancho{grid-column:1/-1}
-  .u-dato__l{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .u-dato--precio{padding:20px 18px;border:0;background:#0B1F3A;color:#fff}
+  .u-dato--precio .u-dato__l,.u-dato--precio .u-dato__l svg{color:rgba(255,255,255,.8)}
+  .u-dato--precio .u-dato__v{font-size:38px;color:var(--accent)}
+  .u-dato--precio .u-dato__v small{display:block;margin-top:2px;color:rgba(255,255,255,.85)}
+  .u-mas[hidden]{display:none}
+  .u-dato__sup{display:block;margin-top:6px;font-size:15px;font-weight:700;color:#fff}
+  .u-incluye{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 0;padding:0;list-style:none}
+  .u-incluye li{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:rgba(255,255,255,.1);font-size:14px;font-weight:700}
+  .u-incluye li::before{content:"✓";color:var(--accent);font-weight:800}
+  .u-dato__cta{display:flex;align-items:center;justify-content:center;margin-top:18px;min-height:54px;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:17px;font-weight:800;text-decoration:none}
+  .u-dato__cta:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .u-dato--precio .u-dato__n{color:rgba(255,255,255,.75)}
+  .u-dato__l{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
   .u-dato__l svg{flex:0 0 auto;color:var(--azul)}
-  .u-dato__v{display:block;font-family:var(--fh);font-size:21px;font-weight:800;line-height:1.2;color:var(--ink)}
-  .u-dato__v small{font-family:var(--fb);font-size:13px;font-weight:700;color:var(--ink2)}
-  .u-dato__r{display:block;font-size:14.5px;font-weight:700;line-height:1.4;color:var(--ink)}
+  .u-dato__v{display:block;font-family:var(--fh);font-size:24px;font-weight:800;line-height:1.2;color:var(--ink)}
+  .u-dato__v small{font-family:var(--fb);font-size:15px;font-weight:700;color:var(--ink2)}
+  .u-dato__r{display:block;font-size:16px;font-weight:700;line-height:1.4;color:var(--ink)}
   .u-dato__r+.u-dato__r{margin-top:5px}
-  .u-dato__r small{display:block;font-size:13px;font-weight:600;color:var(--ink2)}
-  .u-dato__n{display:block;margin-top:7px;font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ink2)}
+  .u-dato__r small{display:block;margin-top:1px;font-size:14.5px;font-weight:600;color:var(--ink2)}
+  .u-dato__n{display:block;margin-top:8px;font-size:14px;font-weight:600;line-height:1.45;color:var(--ink2)}
   .u-tabs{display:flex;gap:8px;position:sticky;top:0;z-index:3;margin:0 -18px;padding:12px 18px;background:var(--bg);overflow-x:auto;scrollbar-width:none}
   .u-tabs::-webkit-scrollbar{display:none}
-  .u-tab{flex:0 0 auto;padding:9px 15px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:700;cursor:pointer}
+  .u-tab{flex:0 0 auto;padding:11px 17px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:15.5px;font-weight:700;cursor:pointer}
   .u-tab.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
   .u-tab:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .u-lead{margin:24px 0 6px;font-size:16px;font-weight:600;color:var(--ink);line-height:1.55}
-  .u-h2{margin:26px 0 12px;font-family:var(--fh);font-size:21px;font-weight:800;color:var(--ink)}
-  .u-item{padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);margin-bottom:12px}
-  .u-item b{display:block;font-size:17px;line-height:1.3}
-  .u-item .meta{display:block;margin-top:4px;font-size:13px;font-weight:700;color:var(--azul)}
-  .u-item p{margin:8px 0 0;font-size:14.5px;font-weight:500;color:var(--ink2);line-height:1.55}
-  .u-foto{height:180px;margin:-14px -14px 12px;border-radius:18px 18px 0 0;background:var(--cel-soft) center/cover}
-  .u-precio{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:12px;font-weight:800}
+  .u-lead{margin:26px 0 6px;font-size:17.5px;font-weight:600;color:var(--ink);line-height:1.55}
+  .u-h2{margin:28px 0 14px;font-family:var(--fh);font-size:24px;font-weight:800;color:var(--ink)}
+  .u-item{padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--surface);margin-bottom:14px}
+  .u-item b{display:block;font-size:19px;line-height:1.3}
+  .u-item .meta{display:block;margin-top:5px;font-size:14.5px;font-weight:700;color:var(--azul)}
+  .u-item p{margin:9px 0 0;font-size:16px;font-weight:500;color:var(--ink2);line-height:1.55;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+  .u-item.is-abierta p{display:block;-webkit-line-clamp:unset}
+  .u-mas{margin:6px 0 0;padding:6px 0;border:0;background:transparent;color:var(--azul);font-size:14.5px;font-weight:800;cursor:pointer}
+  .u-mas:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+  .u-foto{height:220px;margin:-16px -16px 14px;border-radius:20px 20px 0 0;background:var(--cel-soft) center/cover}
+  .u-precio{display:inline-block;margin-top:7px;padding:5px 11px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:14px;font-weight:800}
   .u-item--temp .u-temp{margin:0}
-  .u-temp{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .u-temp{margin:6px 0 0;font-size:16px;font-weight:600;color:var(--ink2);line-height:1.5}
   /* El cierre: desde la guia al buscador, como en la maqueta. */
   .u-handoff{margin:28px 0 0;padding:22px 20px;border-radius:22px;background:#0B1F3A;color:#fff}
   .u-handoff__eye{display:block;margin-bottom:6px;font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
-  .u-handoff h2{margin:0 0 8px;font-family:var(--fh);font-size:23px;font-weight:800;line-height:1.2;color:#fff}
-  .u-handoff p{margin:0 0 18px;font-size:15px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.5}
+  .u-handoff h2{margin:0 0 8px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.2;color:#fff}
+  .u-handoff p{margin:0 0 18px;font-size:16.5px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.5}
   .u-handoff__b{display:flex;flex-wrap:wrap;gap:10px}
-  .u-handoff__b a,.u-handoff__b button{flex:1 1 200px;box-sizing:border-box;min-height:50px;padding:14px;border-radius:14px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}
+  .u-handoff__b a,.u-handoff__b button{flex:1 1 200px;box-sizing:border-box;min-height:54px;padding:15px;border-radius:14px;font-size:16.5px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}
   .u-go{background:var(--action-bg);color:var(--action-ink);border:0}
   .u-volver{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6);border:0}
   .u-cargando{padding:30px 18px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
@@ -85,29 +100,29 @@
   /* Candado: la guia se abre con sesion iniciada (sin XP). */
   .u-lock{margin:16px 0 0;padding:20px 18px;border:1.5px solid var(--line);border-radius:20px;background:var(--surface);text-align:center}
   .u-lock__ico{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 10px;border-radius:50%;background:var(--cel-soft);color:var(--azul)}
-  .u-lock h2{margin:0 0 6px;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
-  .u-lock p{margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
+  .u-lock h2{margin:0 0 8px;font-family:var(--fh);font-size:21px;font-weight:800;color:var(--ink)}
+  .u-lock p{margin:0 0 14px;font-size:15.5px;font-weight:600;color:var(--ink2);line-height:1.5}
   .u-lock__bar{height:10px;margin:4px 0 6px;border-radius:99px;background:var(--line);overflow:hidden}
   .u-lock__bar i{display:block;height:100%;border-radius:99px;background:var(--accent)}
   .u-lock__n{display:block;margin-bottom:14px;font-size:12.5px;font-weight:800;color:var(--ink)}
   .u-lock ul{margin:0 0 16px;padding:0;list-style:none;text-align:left}
   .u-lock li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2)}
   .u-lock li b{flex:0 0 42px;color:var(--good);font-weight:800}
-  .u-lock__cta{display:block;width:100%;box-sizing:border-box;padding:14px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:14px;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}
-  .u-tab small{margin-left:3px;font-size:11px;font-weight:800;color:var(--ink2);opacity:.75}
+  .u-lock__cta{display:block;width:100%;box-sizing:border-box;padding:15px;border:0;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:16px;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}
+  .u-tab small{margin-left:4px;font-size:13px;font-weight:800;color:var(--ink2);opacity:.75}
   .u-foto{position:relative}
-  .u-cred{position:absolute;right:6px;bottom:5px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.35);color:rgba(255,255,255,.85);font-size:8.5px;font-weight:600;line-height:1.4}
+  .u-cred{position:absolute;right:6px;bottom:5px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:1px 6px;border-radius:4px;background:rgba(0,0,0,.4);color:rgba(255,255,255,.9);font-size:10px;font-weight:600;line-height:1.4}
   .u-num{position:absolute;left:10px;top:10px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#0B1F3A;color:#fff;font-size:12.5px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.3)}
   .u-num--in{position:static;display:inline-grid;width:22px;height:22px;margin-right:7px;font-size:11.5px;box-shadow:none;vertical-align:1px}
   .u-acc{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
   .u-acc:empty{display:none}
   .u-acc .u-precio{margin-top:9px}
-  .u-llegar{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:5px 11px;border-radius:99px;background:var(--cel-soft);color:var(--azul);font-size:12.5px;font-weight:800;text-decoration:none}
+  .u-llegar{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:8px 14px;border-radius:99px;background:var(--cel-soft);color:var(--azul);font-size:14.5px;font-weight:800;text-decoration:none}
   .u-llegar:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .u-mapa{height:280px;margin:0 0 14px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--cel-soft);position:relative;z-index:0}
   .u-pin span{display:grid;place-items:center;width:28px;height:28px;box-sizing:border-box;border:2px solid #fff;border-radius:50%;background:#0B1F3A;color:#fff;font:800 12.5px/1 var(--fb);box-shadow:0 2px 6px rgba(0,0,0,.35)}
   .u-lock__trae{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:2px 0 12px}
-  .u-lock__chip{padding:5px 10px;border-radius:99px;background:var(--cel-soft);color:var(--ink);font-size:12px;font-weight:700}
+  .u-lock__chip{padding:6px 12px;border-radius:99px;background:var(--cel-soft);color:var(--ink);font-size:14px;font-weight:700}
   .u-lock__chip b{font-weight:800;color:var(--azul)}
   .u-lock__sec{display:block;width:100%;margin-top:8px;padding:12px;border:0;border-radius:14px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);font-size:13.5px;font-weight:800;cursor:pointer}
   .u-foot{flex:0 0 auto;padding:8px 18px 20px;background:var(--bg)}
@@ -169,7 +184,7 @@
      - en esta guia: cuantas playas, lugares y datos trae.
      No hay "duracion recomendada" en los datos de las guias, asi que no se inventa. */
   var MEDIO = { avion_mvd: 'En avión desde Montevideo', avion_ba: 'En avión vía Buenos Aires', auto: 'En auto desde Montevideo', bus: 'En bus desde Montevideo', ferry: 'En ferry' };
-  var INCLUYE_MEDIO = { avion_mvd: 'vuelo', avion_ba: 'vuelo', auto: 'nafta y peajes', bus: 'pasaje de bus', ferry: 'ferry' };
+  var INCLUYE_MEDIO = { avion_mvd: 'Vuelo', avion_ba: 'Vuelo', auto: 'Nafta y peajes', bus: 'Pasaje de bus', ferry: 'Ferry' };
   /* En avion, el tramo del aeropuerto al destino (transfer-precios.js): sin esto Paraty decia "6 h" y faltaban los
      248 km de ruta desde Rio. Solo se muestra si es un tramo de verdad (mas de 30 km) o un cruce en barco. */
   function traslado(modo) {
@@ -184,9 +199,13 @@
   function resumenPractico() {
     var cajas = [], e = S.est, temp = (S.guia && S.guia.temporada) || (S.lock && S.lock.temporada) || null;
     if (e && e.barato) {
-      cajas.push('<div class="u-dato u-dato--ancho"><span class="u-dato__l">' + icono('<path d="M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3.2c0 4.8 10 2.5 10 7.4 0 2.1-2.2 3.4-5 3.4s-5-1.3-5-3.2"/>') + 'Presupuesto orientativo</span>' +
+      var incluye = [INCLUYE_MEDIO[e.barato.mode] || 'Transporte', 'Alojamiento económico', 'Comidas', 'Transporte local'].concat(e.barato.mode === 'auto' ? [] : ['Traslados']);
+      cajas.push('<div class="u-dato u-dato--ancho u-dato--precio"><span class="u-dato__l">' + icono('<path d="M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3.2c0 4.8 10 2.5 10 7.4 0 2.1-2.2 3.4-5 3.4s-5-1.3-5-3.2"/>') + 'Presupuesto orientativo</span>' +
         '<span class="u-dato__v">Desde ' + usd(e.barato.pp) + ' <small>por persona</small></span>' +
-        '<span class="u-dato__n">Estimado para 2 personas y 7 noches, saliendo de Montevideo: ' + (INCLUYE_MEDIO[e.barato.mode] || 'transporte') + ', alojamiento económico, comidas, transporte local y traslados. El precio exacto lo ves al calcular tu viaje con tus fechas.</span></div>');
+        '<span class="u-dato__sup">Estimado para 2 personas · 7 noches · saliendo de Montevideo</span>' +
+        '<ul class="u-incluye" aria-label="Qué incluye">' + incluye.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+        '<a class="u-dato__cta" href="' + aPresupuesto('guia_presupuesto') + '" data-evento="guia_calcular_viaje" data-lugar="presupuesto" data-destino="' + K + '">Calculá tu viaje con tus fechas →</a>' +
+        '<span class="u-dato__n">El precio final depende de tus fechas y de lo que elijas en cada paso.</span></div>');
     }
     if (e && (e.barato || e.vuelo)) {
       var filas = [], vistos = {};
@@ -249,7 +268,8 @@
   function tarjeta(x, n, meta, texto) {
     return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')">' + (n ? '<span class="u-num">' + n + '</span>' : '') + credito(x.foto) + '</div>' : '') +
       '<b>' + (!x.foto && n ? '<span class="u-num u-num--in">' + n + '</span>' : '') + esc(x.name) + '</b><span class="meta">' + meta + '</span>' +
-      (texto ? '<p>' + esc(texto) + '</p>' : '') + '<div class="u-acc">' + precio(x) + comoLlegar(x) + '</div></div>';
+      (texto ? '<p>' + esc(texto) + '</p>' + (String(texto).length > 110 ? '<button type="button" class="u-mas" data-mas="1" aria-expanded="false">Ver más</button>' : '') : '') +
+      '<div class="u-acc">' + precio(x) + comoLlegar(x) + '</div></div>';
   }
   function conMapa(arr) { return arr.some(tieneLugar) ? '<div class="u-mapa" id="u-mapa" role="img" aria-label="Mapa con los lugares de esta lista"></div>' : ''; }
   function listaGuia() {
@@ -277,7 +297,7 @@
       }).join('');
     }
     return '<h2 class="u-h2">Tips</h2>' + lista('tips').map(function (x) {
-      return '<div class="u-item"><b>' + esc(x.titulo) + '</b><p>' + esc(x.texto) + '</p></div>';
+      return '<div class="u-item"><b>' + esc(x.titulo) + '</b><p>' + esc(x.texto) + '</p>' + (String(x.texto || '').length > 110 ? '<button type="button" class="u-mas" data-mas="1" aria-expanded="false">Ver más</button>' : '') + '</div>';
     }).join('');
   }
 
@@ -347,7 +367,17 @@
     var md = document.querySelector('meta[name="description"]');
     if (md) md.setAttribute('content', 'Guía de ' + NOM + ' para viajar desde Uruguay: qué hacer, playas, dónde comer, cuándo ir y cuánto cuesta el viaje completo.');
     montarMapa();
+    ajustarMas();
   }
+  function ajustarMas() {
+    Array.prototype.forEach.call(document.querySelectorAll('.u-mas'), function (b) {
+      var p = b.previousElementSibling, it = b.closest('.u-item');
+      if (!p || (it && it.classList.contains('is-abierta'))) return;
+      b.hidden = p.scrollHeight <= p.clientHeight + 2;
+    });
+  }
+  var rz = null;
+  window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(ajustarMas, 150); });
 
   /* La guia se pide en dos pasos: primero el token, que el server firma solo con sesion (emitirTokenGuia en
      server.js), y despues el contenido. 401/403 del token son el candado; 503 es la guia cerrada. */
@@ -381,6 +411,7 @@
     if (t.id === 'atras') { location.href = 'home-guias.html' + (debug ? '?debug=1' : ''); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
     if (t.dataset.login) { if (window.CSCuenta) CSCuenta.abrir(); return; }
+    if (t.dataset.mas) { var it = t.closest('.u-item'), ab = it.classList.toggle('is-abierta'); t.textContent = ab ? 'Ver menos' : 'Ver más'; t.setAttribute('aria-expanded', String(ab)); return; }
     if (t.dataset.volver) { $('main').scrollTop = 0; track('guia_volver'); }
   });
   pintar();

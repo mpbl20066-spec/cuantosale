@@ -340,28 +340,32 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   /* Guia en PC: una sola columna centrada. Arriba la foto ancha con el nombre; abajo el resumen, las pestanas
      y las tarjetas en dos columnas; al final "Cuando conviene ir" y "Te gusta este destino" lado a lado. */
   [data-pagina="guia"] .u-main{display:block;padding:0 var(--gut,24px)}
-  [data-pagina="guia"] .u-hero{position:relative!important;top:auto!important;max-width:1080px;min-height:clamp(400px,38vw,500px);margin:0 auto;border-radius:24px;overflow:hidden;background-position:center 60%;box-shadow:0 14px 34px rgba(0,0,0,.22)}
+  [data-pagina="guia"] .u-hero{position:relative!important;top:auto!important;max-width:1200px;min-height:clamp(400px,38vw,500px);margin:0 auto;border-radius:24px;overflow:hidden;background-position:center 60%;box-shadow:0 14px 34px rgba(0,0,0,.22)}
   [data-pagina="guia"] .u-hero::after{background:linear-gradient(90deg,rgba(10,16,26,.82) 0,rgba(10,16,26,.45) 55%,rgba(10,16,26,.1) 100%)}
   [data-pagina="guia"] .u-hero__t{max-width:680px;padding:56px 44px 44px}
   [data-pagina="guia"] .u-hero__t h1{font-size:clamp(36px,2.6vw + 16px,54px)}
-  [data-pagina="guia"] .u-hero__p{font-size:18px}
-  [data-pagina="guia"] .u-hero__val{font-size:14.5px}
-  [data-pagina="guia"] .u-hero__cta{margin-top:22px;min-height:54px;padding:0 30px;font-size:17px}
-  [data-pagina="guia"] .u-cuerpo{max-width:1080px;margin:0 auto;padding:24px 0 56px;box-sizing:border-box}
+  [data-pagina="guia"] .u-hero__p{font-size:19px}
+  [data-pagina="guia"] .u-hero__val{font-size:15.5px}
+  [data-pagina="guia"] .u-hero__cta{margin-top:24px;min-height:56px;padding:0 32px;font-size:18px}
+  [data-pagina="guia"] .u-cuerpo{max-width:1200px;margin:0 auto;padding:24px 0 56px;box-sizing:border-box}
   /* Resumen: presupuesto ancho, como llegar y cuando ir al lado; lo que trae la guia en su propia fila. */
-  [data-pagina="guia"] .u-datos{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-  [data-pagina="guia"] .u-dato{padding:18px}
+  [data-pagina="guia"] .u-datos{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:start}
+  [data-pagina="guia"] .u-dato--precio .u-dato__v small{display:inline;margin-left:4px}
+  [data-pagina="guia"] .u-dato{padding:20px}
+  [data-pagina="guia"] .u-dato--precio{padding:24px}
+  [data-pagina="guia"] .u-dato--precio .u-dato__v{font-size:44px}
+  [data-pagina="guia"] .u-dato__cta{display:inline-flex;padding:0 30px}
   [data-pagina="guia"] .u-dato--ancho{grid-column:span 2}
   [data-pagina="guia"] .u-dato--ancho:last-child{grid-column:1/-1}
-  [data-pagina="guia"] .u-dato__v{font-size:26px}
-  [data-pagina="guia"] .u-lead{max-width:780px;margin:32px 0 8px;font-size:17.5px}
+  [data-pagina="guia"] .u-dato__v{font-size:28px}
+  [data-pagina="guia"] .u-lead{max-width:820px;margin:34px 0 8px;font-size:19px}
   [data-pagina="guia"] .u-tabs{top:65px;margin:0 0 4px;padding:14px 0;border-bottom:1px solid var(--line)}
-  [data-pagina="guia"] .u-tab{font-size:15px;padding:10px 18px}
-  [data-pagina="guia"] .u-h2{font-size:24px}
-  [data-pagina="guia"] .u-foto{height:210px}
+  [data-pagina="guia"] .u-tab{font-size:16px;padding:11px 20px}
+  [data-pagina="guia"] .u-h2{font-size:27px}
+  [data-pagina="guia"] .u-foto{height:250px}
   [data-pagina="guia"] .u-lock{max-width:640px;margin:24px auto 0}
   [data-pagina="guia"] .u-handoff{padding:30px 32px}
-  [data-pagina="guia"] .u-handoff h2{font-size:28px}
+  [data-pagina="guia"] .u-handoff h2{font-size:30px}
   [data-pagina="guia"] [role="tabpanel"]{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
   [data-pagina="guia"] [role="tabpanel"]>.u-h2,[data-pagina="guia"] [role="tabpanel"]>.u-cargando{grid-column:1/-1;margin-bottom:0}
   [data-pagina="guia"] [role="tabpanel"]>.u-item{margin:0}
