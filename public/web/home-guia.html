@@ -75,21 +75,17 @@
   .u-mas:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
   .u-foto{height:220px;margin:-16px -16px 14px;border-radius:20px 20px 0 0;background:var(--cel-soft) center/cover}
   .u-precio{display:inline-block;margin-top:7px;padding:5px 11px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:14px;font-weight:800}
-  .u-clima{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:var(--surface);margin-bottom:10px}
-  .u-clima table{border-collapse:collapse;width:100%;font-size:14px}
-  .u-clima th,.u-clima td{padding:9px 4px;text-align:center;border-bottom:1px solid var(--line);color:var(--ink)}
-  .u-clima th{font-size:12.5px;font-weight:700;color:var(--ink2)}
-  .u-clima td:first-child,.u-clima th:first-child{text-align:left;padding-left:12px;font-weight:800}.u-clima td:last-child,.u-clima th:last-child{padding-right:10px}
-  .u-clima tr:last-child td{border-bottom:0}
-  .u-dem{display:inline-block;padding:3px 8px;border-radius:99px;font-size:12px;font-weight:800}
-  .u-dem--alta{background:rgba(229,72,72,.18);color:#E54848}.u-dem--media{background:rgba(246,178,27,.2);color:#C98A00}.u-dem--baja{background:rgba(47,182,111,.18);color:#2FB66F}
+  .u-clima{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:var(--surface);margin-bottom:10px;scrollbar-width:thin}
+  .u-clima table{border-collapse:collapse;width:100%;font-size:12.5px}
+  .u-clima th,.u-clima td{padding:9px 1px;text-align:center;border-bottom:1px solid var(--line);color:var(--ink);white-space:nowrap}
+  .u-clima thead th{font-size:11.5px;font-weight:800;color:var(--ink2)}
+  .u-clima th[scope=row]{position:sticky;left:0;z-index:1;text-align:left;padding:9px 6px 9px 10px;font-size:12px;font-weight:700;color:var(--ink2);background:var(--surface)}
+  .u-clima tr:last-child th,.u-clima tr:last-child td{border-bottom:0}
+  .u-dem{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle}
+  .u-dem--alta{background:#E54848}.u-dem--media{background:#F6B21B}.u-dem--baja{background:#2FB66F}
+  .u-clima__ley{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 0;font-size:13px;font-weight:600;color:var(--ink2)}.u-clima__ley span{display:inline-flex;align-items:center;gap:6px}
   .u-clima__n{margin:4px 0 0;font-size:15px;font-weight:600;color:var(--ink2);line-height:1.5}
   .u-clima__f{margin:6px 0 0;font-size:12.5px;color:var(--ink2)}
-  .u-sab summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:19px;font-weight:800;color:var(--ink)}
-  .u-sab summary::-webkit-details-marker{display:none}
-  .u-sab summary::after{content:'+';font-size:22px;color:var(--azul)}.u-sab[open] summary::after{content:'−'}
-  .u-sab__c p,.u-sab__c li{font-size:15.5px;font-weight:500;color:var(--ink2);line-height:1.55}
-  .u-sab__c p{margin:10px 0 0;display:block}.u-sab__c ul{margin:8px 0 0;padding-left:18px}.u-sab__c li{margin:5px 0}.u-sab__c li b{display:inline;font-size:inherit;color:var(--ink)}
   .u-item--temp .u-temp{margin:0}
   .u-temp{margin:6px 0 0;font-size:16px;font-weight:600;color:var(--ink2);line-height:1.5}
   /* El cierre: desde la guia al buscador, como en la maqueta. */
@@ -166,14 +162,13 @@
      Alegre es la seccion principal, con foto y mapa). La primera pestana es Playas si hay, si no Qué ver. */
   var TAB = [{ id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Lugares para ver', k: 'atracciones' }, { id: 'hacer', nom: 'Paseos y excursiones', k: 'hacer' },
     { id: 'comer', nom: 'Dónde comer', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
-  var S = { tab: '', guia: null, region: '', saber: [], estado: 'cargando', est: null };
+  var S = { tab: '', guia: null, region: '', estado: 'cargando', est: null };
   /* El presupuesto de la guia: el viaje real de CuantoSale con el destino ya elegido (/destinos), no una pantalla aparte. */
   var aPresupuesto = function (fuente) { return 'home-destino.html?destino=' + K + '&fuente=' + fuente; };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
   var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
   var lista = function (k) { return (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : []; };
-  var cuantos = function (t) { return lista(t.k).length + (t.id === 'tips' ? S.saber.length : 0); };
-  var tabs = function () { return TAB.filter(cuantos); };
+  var tabs = function () { return TAB.filter(function (t) { return lista(t.k).length; }); };
   var tieneLugar = function (x) { return typeof x.lat === 'number' && typeof x.lng === 'number'; };
 
   function cabecera() {
@@ -303,27 +298,23 @@
     }
     return '<h2 class="u-h2">Tips</h2>' + lista('tips').map(function (x) {
       return '<div class="u-item"><b>' + esc(x.titulo) + '</b><p>' + esc(x.texto) + '</p>' + (String(x.texto || '').length > 110 ? '<button type="button" class="u-mas" data-mas="1" aria-expanded="false">Ver más</button>' : '') + '</div>';
-    }).join('') + S.saber.map(seccionSaber).join('');
+    }).join('');
   }
 
-  /* Una seccion de la guia editorial, plegada: titulo, intro, items, grupos, bullets y cierre. */
-  function seccionSaber(x) {
-    var li = function (t, d) { return '<li>' + (t ? '<b>' + esc(t) + ':</b> ' : '') + esc(d) + '</li>'; };
-    var c = (x.intro ? '<p>' + esc(x.intro) + '</p>' : '') +
-      (x.items && x.items.length ? '<ul>' + x.items.map(function (i) { return li(i.t, i.d); }).join('') + '</ul>' : '') +
-      (x.grupos || []).map(function (g) { return '<p><b>' + esc(g.titulo) + '</b></p><ul>' + g.bullets.map(function (b) { return li('', b); }).join('') + '</ul>'; }).join('') +
-      (x.bullets && x.bullets.length ? '<ul>' + x.bullets.map(function (b) { return li('', b); }).join('') + '</ul>' : '') +
-      (x.cierre ? '<p><b>' + esc(x.cierre.t) + ':</b> ' + esc(x.cierre.d) + '</p>' : '');
-    return '<details class="u-item u-sab"><summary>' + esc((x.icono ? x.icono + ' ' : '') + x.titulo) + '</summary><div class="u-sab__c">' + c + '</div></details>';
-  }
   /* Clima mes por mes (guia.clima): va arriba de las pestanas. Sin datos de clima, no se dibuja. */
   function climaHtml() {
     var cl = S.guia && S.guia.clima; if (!cl || !Array.isArray(cl.meses)) return '';
-    return '<section aria-label="Clima por mes"><h2 class="u-h2">' + esc(cl.titulo || 'Clima mes por mes') + '</h2><div class="u-clima"><table><thead><tr><th>Mes</th><th>Máx.</th><th>Mín.</th><th>Lluvia</th><th>Mar</th><th>Gente</th></tr></thead><tbody>' +
-      cl.meses.map(function (m) {
-        var d = String(m.demanda || '');
-        return '<tr><td>' + esc(m.m) + '</td><td>' + m.max + '°</td><td>' + m.min + '°</td><td>' + m.lluvia + ' mm</td><td>' + String(m.mar).replace('.', ',') + '°</td><td><span class="u-dem u-dem--' + esc(d) + '">' + esc(d.charAt(0).toUpperCase() + d.slice(1)) + '</span></td></tr>';
-      }).join('') + '</tbody></table></div>' + (cl.nota ? '<p class="u-clima__n">' + esc(cl.nota) + '</p>' : '') + (cl.fuente ? '<p class="u-clima__f">' + esc(cl.fuente) + '</p>' : '') + '</section>';
+    var fila = function (nom, f) { return '<tr><th scope="row">' + nom + '</th>' + cl.meses.map(function (m) { return '<td>' + f(m) + '</td>'; }).join('') + '</tr>'; };
+    var dem = { alta: 'Mucha gente', media: 'Gente media', baja: 'Poca gente' };
+    return '<section aria-label="Clima por mes"><h2 class="u-h2">' + esc(cl.titulo || 'Clima mes por mes') + '</h2><div class="u-clima"><table>' +
+      '<thead><tr><th></th>' + cl.meses.map(function (m) { return '<th scope="col">' + esc(m.m) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      fila('Máx.', function (m) { return m.max + '°'; }) +
+      fila('Mar', function (m) { return Math.round(m.mar) + '°'; }) +
+      fila('Lluvia', function (m) { return m.lluvia; }) +
+      fila('Gente', function (m) { return '<span class="u-dem u-dem--' + esc(m.demanda) + '" title="' + esc(dem[m.demanda] || '') + '"></span>'; }) +
+      '</tbody></table></div>' +
+      '<p class="u-clima__ley"><span>Temperaturas en °C y lluvia en mm.</span><span><i class="u-dem u-dem--baja"></i>Poca gente y mejores precios</span><span><i class="u-dem u-dem--media"></i>Media</span><span><i class="u-dem u-dem--alta"></i>Mucha gente y precios altos</span></p>' +
+      (cl.nota ? '<p class="u-clima__n">' + esc(cl.nota) + '</p>' : '') + (cl.fuente ? '<p class="u-clima__f">' + esc(cl.fuente) + '</p>' : '') + '</section>';
   }
 
   /* Mapa: Leaflet propio (el mismo de la app, /vendor/leaflet) con tiles de OpenStreetMap, cargado recien cuando hay
@@ -380,7 +371,7 @@
       if (!ts.some(function (t) { return t.id === S.tab; })) S.tab = ts.length ? ts[0].id : '';
       cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' + climaHtml() +
         (ts.length ? '<div class="u-tabs" role="tablist" aria-label="Categorías de la guía">' + ts.map(function (t) {
-          return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + cuantos(t) + '</small></button>';
+          return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + lista(t.k).length + '</small></button>';
         }).join('') + '</div>' +
         '<div role="tabpanel">' + listaGuia() + '</div>' : '') +
         '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota && !S.guia.clima ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
@@ -421,7 +412,7 @@
           .then(function (r) { if (r.status === 403 || r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
           .then(function (data) {
             if (data && data.guia) {
-              S.guia = data.guia; S.region = data.region || ''; S.saber = Array.isArray(data.saber) ? data.saber : []; S.estado = 'abierta';
+              S.guia = data.guia; S.region = data.region || ''; S.estado = 'abierta';
               track('guia_abierta', { secciones: TAB.map(function (t) { return lista(t.k).length; }) });
               pintar(); return;
             }

@@ -33,7 +33,6 @@ const model = require('./lib/model');
 const guiSecreta = require('./lib/guias');
 const playas = require('./lib/playas');
 const destinosWeb = require('./lib/destinos-web');
-const guiaCompleta = require('./lib/destinos-guia-completa');
 // Vuelos reales. El agregador es el único que habla con SerpAPI: ahí viven el
 // cache, el dedupe de pedidos simultáneos y la pausa cuando se acaban los
 // créditos del mes. Si el server llamara al provider directo, cada endpoint
@@ -2125,10 +2124,7 @@ function servirGuiaSecreta(req, res, url) {
   const guia = guiSecreta.guiaPara(dest, model.DEST[dest].region);
   if (!guia) return sendJson(res, 404, { error: ' todavia no hay una guia escrita para este destino.' });
   // La region va aparte (la guia no la trae): sin esto la pagina decia "Brasil" tambien en Buenos Aires.
-  // `saber` son las secciones de la guia editorial (lib/destinos-guia-completa.js, hoy solo Rio): la app las
-  // muestra dentro de la pestana Tips, las mismas que la pagina publica llama "Todo lo que tenes que saber".
-  const editorial = guiaCompleta[dest];
-  return sendJson(res, 200, { guia: guia, region: model.DEST[dest].region || '', saber: editorial ? editorial.secciones : [] });
+  return sendJson(res, 200, { guia: guia, region: model.DEST[dest].region || '' });
 }
 
 /* Habitaciones de UN hotel, para el modal "Ver habitaciones". Una consulta a
