@@ -68,6 +68,7 @@
     var html = '<header class="top"><div class="wrap"><h1>Cuánto<i>Sale</i> · Panel</h1>' +
       '<nav class="tabs" role="tablist"><button class="tab" role="tab" data-vista="pedidos" aria-selected="' + (S.vista === 'pedidos') + '">Pedidos' + (k.nuevos ? ' (' + k.nuevos + ')' : '') + '</button>' +
       '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button>' +
+      '<button class="tab" role="tab" data-vista="operaciones" aria-selected="' + (S.vista === 'operaciones') + '">Operaciones</button>' +
       '<button class="tab" role="tab" data-vista="servicios" aria-selected="' + (S.vista === 'servicios') + '">Servicios</button>' +
       '<button class="tab" role="tab" data-vista="publicar" aria-selected="' + (S.vista === 'publicar') + '">Por publicar<span id="tab-pub">' + (nPend() ? ' (' + nPend() + ')' : '') + '</span></button>' +
       '<button class="tab" role="tab" data-vista="importar" aria-selected="' + (S.vista === 'importar') + '">Importar</button>' +
@@ -99,7 +100,7 @@
       if (S.verPre) html += detallePrecarga(pc, S.verPre);
     }
     html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
-      (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : vistaProveedores(d))))))));
+      (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d)))))))));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
@@ -748,7 +749,7 @@
     if (!S.ops || S.ops.error) S.ops = { cargando: true };
     return api('ops/datos').then(function (d) {
       S.ops = { datos: d };
-      if (S.vista === 'servicios' || S.vista === 'publicar' || S.vista === 'importar') pintarFondo(); else actualizarBadgePub();
+      if (S.vista === 'servicios' || S.vista === 'publicar' || S.vista === 'importar' || S.vista === 'operaciones') pintarFondo(); else actualizarBadgePub();
       if (S.srv) refrescarSrv();
     }).catch(function (e) { S.ops = { error: e.message }; if (S.vista === 'servicios' || S.vista === 'publicar') pintarFondo(); });
   }
@@ -992,6 +993,101 @@
   function descartarCambios(ids) {
     if (!ids.length || !confirm('¿Descartar ' + ids.length + ' cambio(s)? La web sigue como está.')) return;
     return api('ops/descartar', { ids: ids }).then(function (r) { S.sel = {}; toast(r.descartados + ' descartado(s)'); return cargarOps(); }).catch(function (e) { toast(e.message); });
+  }
+
+  /* ---------- Resumen de Operaciones ----------
+     Todo sale de lo que ya carga el panel (ops/datos y los proveedores) mas ops/resumen (ultimas importaciones y
+     ultimos publicados). Cada numero lleva a la lista filtrada donde se resuelve. */
+  function cargarResumen() {
+    if (S.resumen && S.resumen.cargando) return;
+    S.resumen = { cargando: true };
+    api('ops/resumen').then(function (r) { S.resumen = r; if (S.vista === 'operaciones') pintarFondo(); })
+      .catch(function (e) { S.resumen = { error: e.message }; if (S.vista === 'operaciones') pintarFondo(); });
+    /* La cotizacion del dia, solo para avisar si la guardada quedo lejos. */
+    fetch('/api/tasas', { credentials: 'same-origin' }).then(function (r) { return r.json(); })
+      .then(function (j) { var v = j && j.rates && Number(j.rates.BRL); if (v > 0) { S.cotHoy = v; if (S.vista === 'operaciones') pintarFondo(); } }).catch(function () {});
+  }
+  function kpiIr(t, v, sub, ir, cls) {
+    return '<button class="kpi kpi--btn ' + (cls || '') + '" data-ir="' + esc(ir) + '"><small>' + esc(t) + '</small><b>' + esc(v) + '</b><em>' + esc(sub) + '</em><span class="kpi__ver">Ver →</span></button>';
+  }
+  function vistaOperaciones() {
+    var o = S.ops;
+    if (!o || o.cargando) return '<p class="vacio">Cargando…</p>';
+    if (o.error) return '<div class="card"><p class="vacio">No se pudo cargar: ' + esc(o.error) + ' <button class="btn" data-act="ops-recargar">Reintentar</button></p></div>';
+    if (!S.resumen) cargarResumen();
+    var d = o.datos, cfg = d.config, dias = cfg.dias_desactualizado, pend = pendPorTour();
+    var vivos = d.servicios.filter(function (x) { return !x.eliminado_at; });
+    var enWeb = vivos.filter(function (x) { return x.activo && x.revision === 'ok' && x.tipo !== 'traslado'; });
+    var nuevos = vivos.filter(function (x) { return !x.publicado_at; });
+    var revisar = vivos.filter(function (x) { return x.revision === 'pendiente'; });
+    var viejos = vivos.filter(function (x) { return x.activo && viejo(x, dias); });
+    var papelera = d.servicios.length - vivos.length;
+    var provs = S.datos.proveedores.filter(function (p) { return !p.eliminado_at; });
+    var provActivos = provs.filter(function (p) { return p.activo !== false; });
+    var conServ = {}; vivos.forEach(function (x) { if (x.proveedor_id) conServ[x.proveedor_id] = 1; });
+    var grandes = d.pendientes.filter(function (c) { return c.publicado_antes && c.publicado_despues != null && Math.abs((c.publicado_despues - c.publicado_antes) / c.publicado_antes) >= 0.2; });
+    var h = '<div class="bar"><div class="chips"><b>Operaciones</b></div><button class="btn btn--sm" data-act="ops-recargar">Actualizar</button></div>';
+    if (S.cotHoy && cfg.cotizacion && Math.abs(S.cotHoy - cfg.cotizacion) / cfg.cotizacion >= 0.03) {
+      h += '<p class="aviso">La cotización guardada es R$ ' + esc(String(cfg.cotizacion).replace('.', ',')) + (cfg.cotizacion_fuente ? ' (' + esc(cfg.cotizacion_fuente) + ')' : '') + ' y hoy está en R$ ' + esc(String(S.cotHoy).replace('.', ',')) +
+        '. <button class="btn btn--sm" data-act="ir-cfg">Revisar cotización</button></p>';
+    }
+    h += '<section class="kpis" aria-label="Operaciones">' +
+      kpiIr('Proveedores activos', provActivos.length, Object.keys(conServ).length + ' con servicios en el catálogo', 'v:proveedores') +
+      kpiIr('En la web', enWeb.length, 'servicios publicados', 's:publicados', 'kpi--ok') +
+      kpiIr('Nuevos sin publicar', nuevos.length, 'importados o creados', 's:nuevos', nuevos.length ? 'kpi--warn' : '') +
+      kpiIr('Para revisar', revisar.length, 'les falta un dato', 's:revision', revisar.length ? 'kpi--warn' : '') +
+      kpiIr('Precio viejo', viejos.length, 'verificado hace más de ' + dias + ' días', 's:viejos', viejos.length ? 'kpi--warn' : '') +
+      kpiIr('Por publicar', d.pendientes.length, grandes.length ? grandes.length + ' cambian más de 20 %' : 'cambios esperando revisión', 'v:publicar', d.pendientes.length ? 'kpi--warn' : '') +
+      (papelera ? kpiIr('Papelera', papelera, 'fuera de la web', 's:papelera') : '') + '</section>';
+
+    /* Por destino */
+    var porDest = {};
+    vivos.forEach(function (x) {
+      var r = porDest[x.destino] = porDest[x.destino] || { web: 0, nuevos: 0, revisar: 0, viejos: 0, pend: 0, prov: {} };
+      if (x.activo && x.revision === 'ok' && x.tipo !== 'traslado') r.web++;
+      if (!x.publicado_at) r.nuevos++;
+      if (x.revision === 'pendiente') r.revisar++;
+      if (x.activo && viejo(x, dias)) r.viejos++;
+      if (pend[x.id]) r.pend++;
+      if (x.proveedor_id) r.prov[x.proveedor_id] = 1;
+    });
+    var dests = Object.keys(porDest).sort(function (a, b) { return destNombre(a).localeCompare(destNombre(b), 'es'); });
+    var celda = function (n, cls) { return n ? (cls ? '<span class="' + cls + '">' + n + '</span>' : n) : '<span class="sub" style="display:inline">—</span>'; };
+    h += '<div class="card uso-card"><h3 class="uso-h">Servicios por destino</h3><table><thead><tr><th>Destino</th><th class="num">En la web</th><th class="num">Nuevos</th><th class="num">Para revisar</th><th class="num">Precio viejo</th><th class="num">Por publicar</th><th class="num">Proveedores</th></tr></thead><tbody>' +
+      dests.map(function (k) {
+        var r = porDest[k];
+        return '<tr class="row" data-ir="d:' + esc(k) + '"><td data-l="Destino"><b>' + esc(destNombre(k)) + '</b></td><td class="num" data-l="En la web">' + celda(r.web) + '</td><td class="num" data-l="Nuevos">' + celda(r.nuevos) + '</td>' +
+          '<td class="num" data-l="Para revisar">' + celda(r.revisar, 'deuda') + '</td><td class="num" data-l="Precio viejo">' + celda(r.viejos, 'deuda') + '</td><td class="num" data-l="Por publicar">' + celda(r.pend) + '</td>' +
+          '<td class="num" data-l="Proveedores">' + celda(Object.keys(r.prov).length) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+
+    /* Cambios por publicar, por origen */
+    if (d.pendientes.length) {
+      var porOrigen = {}; d.pendientes.forEach(function (c) { porOrigen[c.origen] = (porOrigen[c.origen] || 0) + 1; });
+      var masViejo = d.pendientes.reduce(function (a, c) { return !a || c.creado_at < a ? c.creado_at : a; }, '');
+      h += '<div class="card uso-card"><h3 class="uso-h">Por publicar</h3><p class="sub" style="padding:0 14px 12px">' +
+        Object.keys(porOrigen).map(function (k) { return '<b>' + porOrigen[k] + '</b> de ' + esc((ORIGENES[k] || k).toLowerCase()); }).join(' · ') +
+        ' · el más viejo espera desde el ' + esc(fechaHora(masViejo)) + ' <button class="btn btn--sm" data-ir="v:publicar">Revisar</button></p></div>';
+    }
+
+    /* Importaciones y ultimos publicados */
+    var rs = S.resumen || {};
+    if (rs.error) h += '<p class="aviso">No se pudo leer el historial: ' + esc(rs.error) + '</p>';
+    var imps = rs.importaciones || [];
+    h += '<div class="card uso-card"><h3 class="uso-h">Últimas importaciones</h3>' + (rs.cargando ? '<p class="vacio">Cargando…</p>' : !imps.length ? '<p class="vacio">Todavía no importaste archivos. <button class="btn btn--sm" data-ir="v:importar">Importar</button></p>' :
+      '<table><thead><tr><th>Archivo</th><th>Cuándo</th><th class="num">Nuevos</th><th class="num">Actualiza</th><th class="num">No importados</th><th class="num">Errores</th><th></th></tr></thead><tbody>' +
+      imps.map(function (x) { var t = x.totales || {}; return '<tr><td data-l="Archivo">' + esc(x.archivo || '—') + '<span class="sub">' + esc(x.creado_por || '') + '</span></td><td data-l="Cuándo">' + esc(fechaHora(x.confirmado_at || x.creado_at)) + '</td>' +
+        '<td class="num" data-l="Nuevos">' + (t.nuevos || 0) + '</td><td class="num" data-l="Actualiza">' + (t.actualiza || 0) + '</td><td class="num" data-l="No importados">' + ((t.omitidas || 0) + (t.sin_cambios || 0)) + '</td>' +
+        '<td class="num" data-l="Errores">' + (t.errores ? '<span class="deuda">' + t.errores + '</span>' : 0) + '</td><td data-l=""><button class="btn btn--sm" data-imp-detalle="' + esc(x.id) + '">Descargar detalle</button></td></tr>'; }).join('') + '</tbody></table>') + '</div>';
+    var pubs = rs.publicados || [];
+    h += '<div class="card uso-card"><h3 class="uso-h">Últimos cambios publicados</h3>' + (rs.cargando ? '<p class="vacio">Cargando…</p>' : !pubs.length ? '<p class="vacio">Todavía no publicaste cambios desde el panel.</p>' :
+      '<table><thead><tr><th>Servicio</th><th>Qué</th><th class="num">Precio publicado</th><th>Quién y cuándo</th></tr></thead><tbody>' +
+      pubs.map(function (c) { var k = String(c.tour_clave || '').split('#');
+        return '<tr' + (c.tour_id ? ' class="row" data-srv="' + esc(c.tour_id) + '"' : '') + '><td data-l="Servicio"><b>' + esc(k[1] || '?') + '</b><span class="sub">' + esc(destNombre(k[0])) + '</span></td>' +
+          '<td data-l="Qué">' + esc(ORIGENES[c.origen] || c.origen) + (c.nota ? '<span class="sub">' + esc(c.nota.length > 80 ? c.nota.slice(0, 77) + '…' : c.nota) + '</span>' : '') + '</td>' +
+          '<td class="num" data-l="Precio">' + (c.publicado_despues != null ? (c.publicado_antes != null && c.publicado_antes !== c.publicado_despues ? pub(c.publicado_antes) + ' → ' : '') + '<b>' + pub(c.publicado_despues) + '</b>' : '—') + '</td>' +
+          '<td data-l="Quién">' + esc(c.resuelto_por || '') + '<span class="sub">' + esc(fechaHora(c.resuelto_at)) + '</span></td></tr>'; }).join('') + '</tbody></table>') + '</div>';
+    return h;
   }
 
   /* ---------- Precios masivos: cotizacion y margen, ajuste % (lib/operaciones.js guardarConfig / ajustar) ----------
@@ -1385,6 +1481,12 @@
     var ud = e.target.closest('[data-uso-dias]'); if (ud) { S.usoDias = +ud.getAttribute('data-uso-dias'); cargarUso(); return; }
     var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
     var vsp = e.target.closest('[data-ver-srv-prov]'); if (vsp) { e.preventDefault(); S.srvProv = vsp.getAttribute('data-ver-srv-prov'); S.srvFiltro = 'todos'; S.vista = 'servicios'; pintar(); return; }
+    var ir = e.target.closest('[data-ir]'); if (ir) {
+      var dest = ir.getAttribute('data-ir'), tipo = dest.slice(0, 2), val = dest.slice(2);
+      if (tipo === 'v:') { S.vista = val; }
+      else { S.vista = 'servicios'; S.qSrv = ''; S.srvProv = ''; S.srvFiltro = tipo === 's:' ? val : 'todos'; S.srvDest = tipo === 'd:' ? val : ''; }
+      pintar(); window.scrollTo(0, 0); return;
+    }
     var sfc = e.target.closest('[data-sfiltro]'); if (sfc) { S.srvFiltro = sfc.getAttribute('data-sfiltro'); pintar(); return; }
     var pp = e.target.closest('[data-papelera],[data-recuperar],[data-borrar]');
     if (pp) {
@@ -1441,9 +1543,10 @@
       case 'guardar-prov': guardarProv(); break;
       case 'papelera-prov': papeleraProv(); break;
       case 'ver-papelera': S.provPapelera = !S.provPapelera; pintar(); break;
-      case 'ops-recargar': cargarOps(); pintar(); break;
+      case 'ops-recargar': cargarOps(); if (S.vista === 'operaciones') { S.resumen = null; } pintar(); break;
       case 'nuevo-srv': abrirServicio(null); break;
       case 'cfg-abrir': abrirCfg(); break;
+      case 'ir-cfg': S.vista = 'servicios'; pintar(); abrirCfg(); break;
       case 'cfg-simular': simularCfg(); break;
       case 'cfg-guardar': guardarCfg(); break;
       case 'cfg-hoy':
@@ -1473,7 +1576,7 @@
     if (e.target && e.target.id === 'chat-txt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('chat-form'); if (f) f.requestSubmit(); return; } if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
 
   /* ---------- arranque ---------- */
-  var vq = /[?&]vista=(servicios|publicar|proveedores|importar)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
+  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();
