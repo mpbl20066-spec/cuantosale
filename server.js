@@ -2569,7 +2569,15 @@ function cotizarTodos(req, res, url) {
 const FEATURED_MAX_ITEMS = 40;
 const FEATURED_HOTEL_TYPES = ['all-inclusive', 'resort', 'boutique', 'economico', 'intermedio', 'confort'];
 
-function featuredPriceItems(req, res, url) {
+/* Async por la lectura de la cache de vuelos: el try/catch de createServer() no atrapa un rechazo, asi que va aca. */
+async function featuredPriceItems(req, res, url) {
+  try { return await featuredPriceItemsSinCatch(req, res, url); } catch (error) {
+    console.error('[destinos-destacados]', error);
+    if (!res.headersSent) sendJson(res, 500, { error: 'Error inesperado. Probá de nuevo en un momento.' });
+  }
+}
+
+async function featuredPriceItemsSinCatch(req, res, url) {
   if (limited('destacados:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas consultas seguidas. Esperá un minuto y probá de nuevo.' });
   const pax = Math.min(10, Math.max(1, parseInt(url.searchParams.get('pax'), 10) || 2));
   const style = ['ahorro', 'eq', 'comodo'].indexOf(String(url.searchParams.get('style') || '').toLowerCase()) >= 0
@@ -2582,7 +2590,7 @@ function featuredPriceItems(req, res, url) {
   const transport = String(url.searchParams.get('transport') || '').toLowerCase() === 'all' ? 'all' : 'flight';
   const today = model.getToday();
   const re = /^\d{4}-\d{2}-\d{2}$/;
-  const items = String(url.searchParams.get('items') || '').split(',')
+  const pedidos = String(url.searchParams.get('items') || '').split(',')
     .map(function (raw) { return raw.split('~'); })
     .filter(function (parts) { return parts.length >= 3; })
     .map(function (parts) {
@@ -2594,6 +2602,25 @@ function featuredPriceItems(req, res, url) {
       const depDate = model.parse(dep), retDate = model.parse(ret);
       const nights = model.daysBetween(depDate, retDate);
       if (isNaN(depDate) || isNaN(retDate) || nights < 1 || nights > 30) return null;
+      return { key: key, dep: dep, ret: ret, hotelType: hotelType, depDate: depDate, retDate: retDate, nights: nights };
+    })
+    .filter(Boolean)
+    // El tope se aplica DESPUÉS de descartar los inválidos: si se cortara antes,
+    // un cliente que mandara basura en los primeros items se quedaría sin
+    // precios y la sección se mostraría sin cifras.
+    .slice(0, FEATURED_MAX_ITEMS);
+  /* El pasaje real, si el servidor ya lo tiene (alguien busco esa ruta y esas fechas): sin esto la portada usaba solo
+     la tabla del modelo, que para la zona de Rio estimaba US$ 210 por persona cuando el vuelo mas barato era US$ 283,
+     y prometia "Llegas" a un viaje que al abrirlo costaba mas. No gasta busquedas: solo lee la cache. */
+  const conVuelo = pedidos.filter(function (p) { return model.DEST[p.key].modes.avion_mvd && airportFor(p.key); });
+  const reales = await flightProviders.preciosEnCache(conVuelo.map(function (p) {
+    return { origin: origin, destination: airportFor(p.key), dep: p.dep, ret: p.ret, pax: pax };
+  }), style);
+  const vueloReal = new Map();
+  conVuelo.forEach(function (p, i) { if (reales[i] > 0) vueloReal.set(p, reales[i]); });
+  const items = pedidos
+    .map(function (p) {
+      const key = p.key, hotelType = p.hotelType, depDate = p.depDate, retDate = p.retDate, nights = p.nights;
       // 'flight' (el transporte por defecto de la app) y no 'all': con 'all'
       // el precio más bajo salía siempre en Auto / Roadtrip, que es una
       // alternativa que la app muestra aparte y no la que se abre al tocar
@@ -2601,7 +2628,8 @@ function featuredPriceItems(req, res, url) {
       // El filtro de avion_ba es el mismo que usa adaptPackagesToStyle.
       const trip = { dest: key, pax: pax, budget: 0, style: style, transport: transport, kmPerLiter: 12,
         hotelType: hotelType, origin: origin, fuelPriceUsd: Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2 };
-      const propuestas = model.build(trip, depDate, retDate, today, null)
+      const ppReal = vueloReal.get(p);
+      const propuestas = model.build(trip, depDate, retDate, today, ppReal ? { avion_mvd: { pp: ppReal } } : null)
         .filter(function (proposal) { return proposal.mode !== 'avion_ba'; })
         .sort(function (a, b) { return a.total - b.total; });
       const cheapest = propuestas[0];
@@ -2615,14 +2643,12 @@ function featuredPriceItems(req, res, url) {
         key: key, total: cheapest.total, pp: cheapest.pp, nights: nights,
         mode: cheapest.mode, modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel,
         // Duracion del viaje de ida ("unas 6 h con escala", "unas 17 h de manejo"): la guia la muestra en "Como llegar".
-        dur: cheapest.dur || ''
+        dur: cheapest.dur || '',
+        // 'real' si el pasaje salio de la cache de vuelos; 'estimado' si es de la tabla del modelo.
+        vuelo: cheapest.mode !== 'avion_mvd' ? null : (ppReal ? 'real' : 'estimado')
       }, transport === 'all' ? { opciones: Object.keys(porMedio).map(function (m) { return porMedio[m]; }) } : {});
     })
-    .filter(Boolean)
-    // El tope se aplica DESPUÉS de descartar los inválidos: si se cortara antes,
-    // un cliente que mandara basura en los primeros items se quedaría sin
-    // precios y la sección se mostraría sin cifras.
-    .slice(0, FEATURED_MAX_ITEMS);
+    .filter(Boolean);
   return sendJson(res, 200, { pax: pax, style: style, items: items });
 }
 
