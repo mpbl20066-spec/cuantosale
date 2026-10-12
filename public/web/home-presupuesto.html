@@ -311,6 +311,7 @@
 </div>
 <script src="destinos-datos.js"></script>
 <script src="viaje-datos.js"></script>
+<script src="recomendar.js"></script>
 <script src="home-track.js"></script>
 <script>
 (function () {
@@ -418,54 +419,26 @@
     });
   }
 
-  /* UNA tarjeta por destino, con el medio recomendado, y los destinos ordenados por relevancia.
-
-     Antes habia una fila por destino Y medio, ordenadas solo por precio: con "Comparar todos" los 13 destinos del sur
-     (los unicos con ruta en auto) salian tres veces cada uno y el auto copaba la lista, aunque fuera manejar 17 h a
-     Florianopolis con el vuelo entrando en el presupuesto.
-
-     Medio recomendado: entre los que entran en el presupuesto, el de menor costo "efectivo" = precio por persona + las
-     horas de viaje (ida y vuelta) valuadas a VALOR_HORA. Horas de destinos-datos.js (las del modelo): el auto suma 15 %
-     de paradas y el avion 2 h de aeropuerto. Asi 12-13 h de manejo a Porto Alegre o Gramado siguen siendo auto, y las
-     17 h a Florianopolis pasan a avion salvo que el auto sea mucho mas barato (por ejemplo, con 4 en el auto).
-     Los otros medios que tambien entran se ofrecen en la misma tarjeta.
-
-     Relevancia (solo entre los que entran): primero los destinos mas buscados (POPULARES, los de la portada), en su
-     orden, aunque salgan baratos: ahorrar no puede bajar un destino. Despues el resto, del que mas aprovecha el
-     presupuesto al que menos (un viaje de US$ 300 con US$ 1.500 no es lo que se busca). Los que no entran no se
-     muestran en la lista. */
-  var VALOR_HORA = 10, POPULARES = ['rio', 'fln', 'buz', 'bcm', 'bombinhas'];
-  var HORAS = {};
-  (window.CS_DESTS || []).forEach(function (d) { HORAS[d.k] = d.horas || {}; });
-  var horasDe = function (k, m) {
-    var h = (HORAS[k] || {})[m];
-    if (h == null) return null;
-    return m === 'auto' ? h * 1.15 : m === 'avion' ? h + 2 : h;
-  };
-  var efectivo = function (k, m, p) { var h = horasDe(k, m); return p + (h == null ? 0 : 2 * h * VALOR_HORA); };
+  /* UNA tarjeta por destino, con el medio recomendado, y los destinos ordenados por relevancia (recomendar.js, el
+     mismo criterio que la home). Antes habia una fila por destino Y medio, ordenadas solo por precio: con "Comparar
+     todos" los 13 destinos del sur (los unicos con auto) salian tres veces cada uno y el auto copaba la lista.
+     Los que no entran en el presupuesto no se muestran en la lista. */
   function filas() {
-    var l = [];
+    var l = [], R = window.CSRecomendar;
     /* Filtro por tipo de lugar (Todos / Playas / Ciudades / Naturaleza) y por medio de transporte: los dos filtran
        la misma lista, asi que viven en el estado y no cambian nada de lo que ya se consulto al servidor. */
     Object.keys(DESTS).forEach(function (k) {
       if (S.tipo !== 'todos' && (window.CS_Viaje.Tipo[k] || 'ciudad') !== S.tipo) return;
       var ops = Object.keys(DESTS[k].precios).filter(function (m) { return S.modo === 'todos' || S.modo === m; })
-        .map(function (m) { var p = DESTS[k].precios[m].pp; return { m: m, p: p, ef: efectivo(k, m, p) }; });
-      if (!ops.length) return;
-      var entran = ops.filter(function (o) { return o.p <= S.presupuesto; });
-      var rec = (entran.length ? entran : ops).slice().sort(function (a, b) { return entran.length ? a.ef - b.ef : a.p - b.p; })[0];
-      var pop = POPULARES.indexOf(k);
-      l.push({ k: k, m: rec.m, p: rec.p, alt: entran.filter(function (o) { return o.m !== rec.m; }).sort(function (a, b) { return a.p - b.p; }),
-        score: (pop >= 0 ? 1 - pop * 0.05 : 0) + Math.min(1, rec.p / S.presupuesto) * 0.5 });
+        .map(function (m) { return { m: m, p: DESTS[k].precios[m].pp }; });
+      var rec = R.medio(k, ops, S.presupuesto);
+      if (rec) l.push({ k: k, m: rec.m, p: rec.p, alt: rec.alt, score: R.relevancia(k, rec.p, S.presupuesto) });
     });
     var dentro = l.filter(function (x) { return x.p <= S.presupuesto; }).sort(function (a, b) { return b.score - a.score; });
     var fuera = l.filter(function (x) { return x.p > S.presupuesto; }).sort(function (a, b) { return a.p - b.p; });
     return dentro.concat(fuera);
   }
-  var HORAS_TXT = function (k, m) {
-    var h = (HORAS[k] || {})[m];
-    return h == null ? '' : (m === 'auto' ? Math.round(h) + ' h de manejo' : m === 'bus' ? Math.round(h) + ' h de bus' : 'unas ' + Math.round(h) + ' h');
-  };
+  var HORAS_TXT = function (k, m) { return window.CSRecomendar.horasTxt(k, m); };
   /* La barra se dibuja en #top, no en #main: #main scrollea y la barra tiene que
      quedar fija arriba en los pasos largos. ver pintar(). */
   var barra = function () { return '<div class="p-bar"><button type="button" class="p-back" id="atras" aria-label="Volver">' + ic(I.back, 22) + '<span class="p-back__t">Volver</span></button><a class="p-logo" href="home-dos-caminos.html" aria-label="CuántoSale, ir al inicio"><svg class="lg-pin" width="20" height="25" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 0C5.4 0 0 5.3 0 11.8 0 20 12 30 12 30s12-10 12-18.2C24 5.3 18.6 0 12 0z" fill="var(--ink)"/><circle cx="12" cy="11.5" r="4.6" fill="#F6B21B"/></svg>cuántosale<small>Tu viaje, sin sorpresas</small></a><span style="width:32px"></span></div>'; };

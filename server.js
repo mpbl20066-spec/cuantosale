@@ -2597,16 +2597,22 @@ function featuredPriceItems(req, res, url) {
       // El filtro de avion_ba es el mismo que usa adaptPackagesToStyle.
       const trip = { dest: key, pax: pax, budget: 0, style: style, transport: transport, kmPerLiter: 12,
         hotelType: hotelType, origin: origin, fuelPriceUsd: Number(process.env.BRAZIL_GAS_PRICE_USD) || 1.2 };
-      const cheapest = model.build(trip, depDate, retDate, today, null)
+      const propuestas = model.build(trip, depDate, retDate, today, null)
         .filter(function (proposal) { return proposal.mode !== 'avion_ba'; })
-        .sort(function (a, b) { return a.total - b.total; })[0];
+        .sort(function (a, b) { return a.total - b.total; });
+      const cheapest = propuestas[0];
       if (!cheapest) return null;
-      return {
+      /* Con transport=all, ademas el precio por persona de CADA medio (el mas barato de cada uno): la home elige el
+         medio recomendado (public/web/recomendar.js) y no siempre el mas barato, que con varias personas era el auto
+         aunque fueran 17 h de manejo. */
+      const porMedio = {};
+      if (transport === 'all') propuestas.forEach(function (p) { if (!porMedio[p.mode]) porMedio[p.mode] = { mode: p.mode, pp: p.pp, total: p.total, dur: p.dur || '' }; });
+      return Object.assign({
         key: key, total: cheapest.total, pp: cheapest.pp, nights: nights,
         mode: cheapest.mode, modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel,
         // Duracion del viaje de ida ("unas 6 h con escala", "unas 17 h de manejo"): la guia la muestra en "Como llegar".
         dur: cheapest.dur || ''
-      };
+      }, transport === 'all' ? { opciones: Object.keys(porMedio).map(function (m) { return porMedio[m]; }) } : {});
     })
     .filter(Boolean)
     // El tope se aplica DESPUÉS de descartar los inválidos: si se cortara antes,

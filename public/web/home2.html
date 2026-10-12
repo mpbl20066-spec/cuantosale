@@ -552,6 +552,7 @@
 </div>
 <script>window.mockTrack = function () {}; /* home2: sin medicion */</script>
 <script src="destinos-datos.js"></script>
+<script src="recomendar.js"></script>
 <script>
 (function () {
   /* selector de moneda (el de cuantosale.uy) en la barra */
@@ -588,9 +589,10 @@
 
   /* Tu plata manda: los precios por persona vienen del mismo endpoint que usa la app; nunca se muestran,
      solo deciden si cada destino "llega" con la plata elegida. Sin respuesta del servidor no se inventa nada. */
-  var rango = document.getElementById('q-rango'), lista = document.getElementById('q-lista'), PP = {}, MODO = {}, antes = {};
-  /* Los 40 destinos de la app (destinos-datos.js). Se ven primero los que llegan (ordenados por precio) y el resto
-     queda detras de "Ver los 40 destinos", asi la lista no se hace eterna. */
+  var rango = document.getElementById('q-rango'), lista = document.getElementById('q-lista'), PP = {}, MODO = {}, OPC = {}, antes = {};
+  /* Los 40 destinos de la app (destinos-datos.js). Se ven primero los que llegan, ordenados por relevancia
+     (recomendar.js: los mas buscados y despues los que mejor aprovechan la plata), y el resto queda detras de
+     "Ver mas destinos", asi la lista no se hace eterna. */
   var DESTS = window.CS_DESTS || [], VISIBLES = 6, todos = false;
   var CHICAS = { rio: 1, fln: 1, buz: 1, bcm: 1, bombinhas: 1 };   /* las que tienen miniatura de 120 px */
   function fotoDe(k) { return CHICAS[k] ? 'dest/' + k + '-120.jpg' : '../fotos/' + k + '.jpg'; }
@@ -603,11 +605,20 @@
   var filas = Array.prototype.slice.call(lista.querySelectorAll('.q-fila'));
   var mas = document.getElementById('q-mas');
   mas.addEventListener('click', function () { todos = !todos; ordenar(); if (!todos) document.getElementById('q').scrollIntoView({ block: 'start', behavior: quieto ? 'auto' : 'smooth' }); });
-  /* Ordena por precio (los sin precio al final) y muestra los primeros, o todos si se pidio. */
+  /* Antes ordenaba del mas barato al mas caro: con US$ 2.750 la lista arrancaba por viajes de US$ 400 en auto.
+     Ahora: primero los que llegan, por relevancia; despues los que no, del mas cercano; los sin precio al final. */
   function ordenar() {
-    var orden = filas.slice().sort(function (a, b) { return (PP[a.dataset.destino] || 1e9) - (PP[b.dataset.destino] || 1e9); });
+    var b = +rango.value, R = window.CSRecomendar;
+    var llega = function (k) { return PP[k] > 0 && PP[k] <= b; };
+    var orden = filas.slice().sort(function (x, y) {
+      var a = x.dataset.destino, c = y.dataset.destino;
+      if (llega(a) !== llega(c)) return llega(a) ? -1 : 1;
+      if (llega(a)) return R.relevancia(c, PP[c], b) - R.relevancia(a, PP[a], b);
+      return (PP[a] || 1e9) - (PP[c] || 1e9);
+    });
     orden.forEach(function (fi, i) { var li = fi.parentNode; li.hidden = !todos && i >= VISIBLES; lista.appendChild(li); });
     mas.hidden = filas.length <= VISIBLES;
+    if (FECHAS) enlaces(FECHAS.ida, FECHAS.vuelta);
     mas.textContent = todos ? 'Ver menos' : 'Ver más destinos';
     mas.setAttribute('aria-expanded', String(todos));
   }
@@ -624,8 +635,14 @@
       el.appendChild(c); (function (c) { setTimeout(function () { c.remove(); }, 800); })(c);
     }
   }
+  /* El precio y el medio de cada destino dependen de la plata: entre los medios que entran, el recomendado. */
+  function recalcular(b) {
+    Object.keys(OPC).forEach(function (k) { var rec = window.CSRecomendar.medio(k, OPC[k], b); if (rec) { PP[k] = rec.p; MODO[k] = rec.m; } });
+  }
   function pintar(celebrar) {
-    var b = +rango.value, n = 0, hay = Object.keys(PP).length > 0;
+    var b = +rango.value, n = 0;
+    recalcular(b);
+    var hay = Object.keys(PP).length > 0;
     var pct = ((b - rango.min) / (rango.max - rango.min) * 100) + '%';
     rango.style.setProperty('--p', pct); rango.parentNode.style.setProperty('--p', pct);
     document.getElementById('q-monto').textContent = fm(b);
@@ -640,14 +657,16 @@
     });
     if (!hay) { ordenar(); return; }
     document.getElementById('q-n').textContent = n === 0 ? 'Con esa plata todavía no llegás' : (n === filas.length ? 'Con tu plata llegás a todos los destinos' : 'Con tu plata llegás a ' + n + (n === 1 ? ' destino' : ' destinos'));
-    document.getElementById('q-sub').textContent = n === 0 ? 'Subí el monto para ver opciones.' : (n === filas.length ? 'Ordenados del más barato al más caro.' : 'Si subís el monto, se suman más.');
+    document.getElementById('q-sub').textContent = n === 0 ? 'Subí el monto para ver opciones.' : (n === filas.length ? 'Primero los que mejor aprovechan tu plata.' : 'Primero los que mejor aprovechan tu plata. Si subís el monto, se suman más.');
   }
   rango.addEventListener('input', function () { pintar(true); });
+  /* El orden cambia al soltar la barra, no mientras se arrastra: si no, la lista salta bajo el dedo. */
+  rango.addEventListener('change', function () { ordenar(); });
   if (window.CSMoneda) CSMoneda.alCambiar(function () { pintar(false); });
   var P = { pax: 2, noches: 7 }, LIM = { pax: [1, 8], noches: [2, 21] }, gen = 0, deb = null;
   function nota() {
     document.getElementById('q-pax').textContent = P.pax; document.getElementById('q-noches').textContent = P.noches;
-    document.getElementById('q-nota').textContent = 'Cuenta ' + P.noches + ' noches para ' + (P.pax === 1 ? '1 persona' : P.pax + ' personas') + ', saliendo de Montevideo, con el transporte más barato (auto, bus o vuelo), alojamiento, traslados, comidas y transporte local. La plata es por persona.';
+    document.getElementById('q-nota').textContent = 'Cuenta ' + P.noches + ' noches para ' + (P.pax === 1 ? '1 persona' : P.pax + ' personas') + ', saliendo de Montevideo, con el transporte que más conviene (auto, bus o vuelo, según precio y horas de viaje), alojamiento, traslados, comidas y transporte local. La plata es por persona.';
     document.querySelectorAll('.q-step button').forEach(function (b) { var k = b.dataset.p, d = +b.dataset.d; b.disabled = (P[k] + d < LIM[k][0] || P[k] + d > LIM[k][1]); });
   }
   function cargar() {
@@ -661,9 +680,14 @@
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
       .then(function (j) {
         if (mia !== gen) return;
-        var nuevo = {}, modos = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { nuevo[it.key] = it.pp; modos[it.key] = it.mode; } });
+        var nuevo = {}, modos = {}, opc = {};
+        (j.items || []).forEach(function (it) {
+          if (!(it.pp > 0)) return;
+          nuevo[it.key] = it.pp; modos[it.key] = it.mode;
+          opc[it.key] = (it.opciones && it.opciones.length ? it.opciones : [it]).map(function (o) { return { m: o.mode, p: o.pp }; });
+        });
         if (!Object.keys(nuevo).length) throw new Error('vacio');
-        PP = nuevo; MODO = modos; antes = {}; rango.disabled = false; pintar(false); ordenar(); enlaces(iso(dep), iso(ret));
+        PP = nuevo; MODO = modos; OPC = opc; antes = {}; rango.disabled = false; pintar(false); ordenar(); enlaces(iso(dep), iso(ret));
       })
       .catch(function () {
         if (mia !== gen) return;
@@ -682,7 +706,9 @@
   });
   /* Cada destino abre con lo mismo que se cotizo aca: personas, las mismas fechas (y por lo tanto noches) y el medio
      con el que salio el precio. Antes solo llevaba destino y personas, y la pagina siguiente cotizaba otra cosa. */
+  var FECHAS = null;   /* las de la ultima cotizacion: ordenar() rearma los links cuando cambia el medio recomendado */
   function enlaces(ida, vuelta) {
+    FECHAS = { ida: ida, vuelta: vuelta };
     filas.forEach(function (fi) {
       var k = fi.dataset.destino, q = { destino: k, pax: P.pax, ida: ida, vuelta: vuelta, fuente: 'home_plata' };
       if (MODO[k] === 'auto' || MODO[k] === 'bus') q.modo = MODO[k];
