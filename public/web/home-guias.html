@@ -548,10 +548,25 @@
   /* f > 1 acerca; (cx, cy) en unidades del mapa queda fijo en pantalla */
   function zoom(f, cx, cy) {
     var w = Math.max(VB0.w / ZMAX, Math.min(VB0.w, S.vb.w / f)), r = w / S.vb.w;
-    if (cx == null) { cx = S.vb.x + S.vb.w / 2; cy = S.vb.y + S.vb.h / 2; }
+    /* con los botones: hacia el destino elegido; si no hay, desde Brasil entero hacia la costa (donde estan los 40,
+       el centro del mapa es el interior vacio); con zoom ya puesto, sobre lo que se esta mirando */
+    if (cx == null) {
+      var c = POR[S.sel] ? xy(POR[S.sel].lat, POR[S.sel].lon) : S.vb.w >= VB0.w - 0.5 ? costa() : [S.vb.x + S.vb.w / 2, S.vb.y + S.vb.h / 2];
+      cx = c[0]; cy = c[1];
+      /* el punto elegido queda en el centro de la vista, no solo fijo */
+      S.vb.x = cx - S.vb.w / 2; S.vb.y = cy - S.vb.h / 2;
+    }
     S.vb.x = cx - (cx - S.vb.x) * r; S.vb.y = cy - (cy - S.vb.y) * r;
     S.vb.w = w; S.vb.h = VB0.h * w / VB0.w;
     encuadrar(); mapa();
+  }
+  function costa() {
+    var ds = DESTS.filter(function (d) { return d.lat != null && coincide(d); }); if (!ds.length) ds = DESTS.filter(function (d) { return d.lat != null; });
+    var ps = ds.map(function (d) { return xy(d.lat, d.lon); });
+    var mx = function (i, f) { return f.apply(null, ps.map(function (q) { return q[i]; })); };
+    var c = [(mx(0, Math.min) + mx(0, Math.max)) / 2, (mx(1, Math.min) + mx(1, Math.max)) / 2];
+    /* el centro de la costa cae tierra adentro (la costa es curva): se usa el destino mas cercano a ese centro */
+    return ps.reduce(function (m, q) { return Math.hypot(q[0] - c[0], q[1] - c[1]) < Math.hypot(m[0] - c[0], m[1] - c[1]) ? q : m; }, ps[0]);
   }
   function aMapa(svg, x, y) {
     var m = svg.getScreenCTM(); if (!m) return { x: 0, y: 0 };
