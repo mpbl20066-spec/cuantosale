@@ -5096,5 +5096,931 @@
     ]
    }
   ]
+ },
+ "canoa": {
+  "antes": {
+   "titulo": "Antes de viajar a Capão da Canoa",
+   "intro": "Capão da Canoa está en el Litoral Norte gaúcho, a unos 140 km de Porto Alegre. Es una ciudad de playa con vida todo el año, pero en verano su población se multiplica.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Porto Alegre",
+     "d": "Se vuela a Porto Alegre (POA) y se sigue unas 2 horas por ruta. También se puede llegar manejando desde Montevideo."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con un fin de semana largo disfrutás la playa y una tarde en Atlântida. Con una semana sumás la Lagoa dos Quadros, Torres o los parques acuáticos de la Estrada do Mar."
+    },
+    {
+     "t": "Alquiler, más que hotel",
+     "d": "Hay pocos hoteles y pousadas, y muchas casas y departamentos de temporada. En enero y febrero reservá con tiempo."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Capão da Canoa desde Montevideo",
+    "intro": "Se vuela a Porto Alegre y se sigue por tierra, o se va directo en auto por Chuy.",
+    "items": [
+     {
+      "t": "Vuelo a Porto Alegre (POA)",
+      "d": "Azul anunció vuelos directos Montevideo–Porto Alegre desde el 14 de diciembre de 2026, los lunes y viernes. Los otros días se vuela con una escala."
+     },
+     {
+      "t": "Del aeropuerto en ómnibus",
+      "d": "Unesul tiene ómnibus directos del aeropuerto Salgado Filho a Capão da Canoa, de unas 2 horas. Desde la Rodoviária de Porto Alegre salen más empresas, con viajes de 2 a 2 h 30."
+     },
+     {
+      "t": "De Porto Alegre en auto",
+      "d": "Son unos 140 km por la Freeway (BR-290), que es autopista doble, y después por la BR-101 y la RS-407, de mano simple en los últimos 22 km. Sin tránsito, cerca de 1 h 40."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Por la Ruta 9 hasta Chuy y después por Pelotas hasta la zona de Porto Alegre (entre 810 y 840 km), más los 140 km hasta la costa: unos 950 km en total. Conviene partirlo en dos días."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "En feriados largos y fines de semana de verano la Freeway se llena, sobre todo en la vuelta del domingo de tarde. Si podés, volvé temprano o el lunes."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Capão da Canoa",
+    "intro": "La costa es una sola playa larga y recta: la diferencia está en cuánto movimiento querés alrededor.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "Donde están la mayoría de los hoteles, cerca del mar, de la rambla y de los restaurantes de la Avenida Paraguassú. Es lo más práctico si no tenés auto."
+     },
+     {
+      "t": "Zona Nova y Navegantes",
+      "d": "Barrios de departamentos y casas de temporada a pocas cuadras de la playa. Sirven para quedarse una semana y cocinar."
+     },
+     {
+      "t": "Capão Novo",
+      "d": "Un distrito al norte del centro, con supermercados y comercio propio. Sirve si buscás estar lejos del movimiento de la rambla central."
+     },
+     {
+      "t": "Atlântida y Xangri-lá",
+      "d": "Al sur, a unos 7 a 9 km. Atlântida concentra la movida joven y los beach clubs del verano; Xangri-lá tiene condominios con más infraestructura."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Capão da Canoa",
+    "intro": "La ciudad es plana: se camina y se pedalea. Para salir de ella, auto, Uber u ómnibus.",
+    "items": [
+     {
+      "t": "A pie y en bicicleta",
+      "d": "La rambla tiene casi 3 km con iluminación, canchas, plazas y quioscos. Es el eje para caminar, correr y andar en bici."
+     },
+     {
+      "t": "Uber",
+      "d": "Funciona en Capão da Canoa y en los balnearios vecinos."
+     },
+     {
+      "t": "Ómnibus a Xangri-lá y Atlântida",
+      "d": "Hay ómnibus intermunicipales que unen Capão con Xangri-lá en unos 10 a 15 minutos, y siguen a Atlântida Sul y otros balnearios."
+     },
+     {
+      "t": "Auto",
+      "d": "Es lo más cómodo para la Lagoa dos Quadros, Torres y los parques acuáticos de la Estrada do Mar (RS-389)."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Capão da Canoa de noche",
+    "intro": "En verano la noche se reparte entre la rambla, la Paraguassú y Atlântida.",
+    "items": [
+     {
+      "t": "Avenida Paraguassú",
+      "d": "La calle con más restaurantes, petiscarias, lancherías y churrascarías de la ciudad."
+     },
+     {
+      "t": "Rambla y Largo do Baronda",
+      "d": "De noche la rambla iluminada es el punto de encuentro, con el monumento a Iemanjá de postal. En verano la prefectura arma shows gratis, varios en el Largo do Baronda."
+     },
+     {
+      "t": "Atlântida",
+      "d": "La movida joven del Litoral Norte. A fines de enero se hace el festival Planeta Atlântida, en la sede de la SABA: en esas fechas el alojamiento se llena."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Capão da Canoa",
+    "intro": "Es una ciudad tranquila. Los cuidados principales son en el mar.",
+    "bullets": [
+     "Bañate frente a las garitas de los guardavidas. Funcionan en la Operación Verano, de diciembre a marzo; fuera de esa época no hay guardavidas.",
+     "Respetá las banderas. La violeta avisa que hay aguas vivas.",
+     "Si te quema una agua viva, salí del agua y andá a la garita: lavá con agua de mar o suero frío, nunca con agua dulce, y no te rasques.",
+     "En el auto no dejes nada a la vista, sobre todo frente a la playa.",
+     "Emergencias: 193 para bomberos y guardavidas, 190 para la policía."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "Tarjeta y Pix en casi todos lados. Algunas billeteras de la región permiten pagar con QR de Pix: averiguá con la tuya antes de viajar."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llevá algo para quioscos de playa y ferias de artesanía."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Enchufe brasileño de tres patas redondas (NBR 14136). En Capão da Canoa la red es de 127 V, aunque en el resto del estado es de 220 V: fijate que tus cargadores sean bivolt."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar",
+     "Sombrilla y reposera, si alquilás departamento",
+     "Un buzo o campera rompeviento para la noche",
+     "Ropa de abrigo si vas fuera del verano: hay viento y el agua está fría",
+     "Paraguas o piloto: llueve parejo todo el año",
+     "Bicicleta, si vas en auto",
+     "Tarjeta y algo de efectivo"
+    ]
+   }
+  ]
+ },
+ "gram": {
+  "antes": {
+   "titulo": "Antes de viajar a Gramado",
+   "intro": "Gramado está en la Serra Gaúcha, a unos 115 km de Porto Alegre y a 7 km de Canela. No tiene aeropuerto propio: se vuela a Porto Alegre y se sube por ruta.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Porto Alegre",
+     "d": "El aeropuerto Salgado Filho (POA) está a la salida de la ciudad, así que no hace falta cruzar Porto Alegre para subir a la Serra: son unas 2 horas a 2 h 30 por ruta."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 3 días recorrés el centro, los lagos y un par de atracciones pagas. Con 4 o 5 sumás Canela y sus parques, y con una semana podés llegar a Nova Petrópolis o al Vale dos Vinhedos."
+    },
+    {
+     "t": "Reservá con tiempo en temporada",
+     "d": "En las vacaciones de julio y durante el Natal Luz los hoteles del centro se llenan primero y suben de precio."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Gramado desde Montevideo",
+    "intro": "Se vuela a Porto Alegre y se sube a la Serra en ómnibus, transfer o auto.",
+    "items": [
+     {
+      "t": "Vuelo a Porto Alegre (POA)",
+      "d": "Azul anunció vuelos directos Montevideo–Porto Alegre desde el 14 de diciembre de 2026, los lunes y viernes. Los otros días se vuela con una escala."
+     },
+     {
+      "t": "Ómnibus Citral",
+      "d": "Citral une la Rodoviária de Porto Alegre con Gramado y Canela, y la mayoría de los servicios para frente al aeropuerto, unos 15 minutos después de salir de la Rodoviária. El viaje dura unas 2 h 30."
+     },
+     {
+      "t": "En auto desde Porto Alegre",
+      "d": "Hay dos caminos: por la BR-116 hasta Nova Petrópolis y la RS-235, o por Novo Hamburgo, la RS-239 y la RS-115 por Taquara. Son entre 105 y 125 km según la ruta, con peajes en la RS-239 y la RS-115, en unas 2 horas."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay transfers compartidos y privados del aeropuerto a los hoteles de Gramado. Es lo más cómodo si llegás con valijas."
+     },
+     {
+      "t": "Aeropuerto de Caxias do Sul (CXJ)",
+      "d": "Queda más cerca, a 65 o 70 km, pero tiene pocos vuelos, en general desde São Paulo o Campinas. Para quien sale de Montevideo, casi siempre conviene Porto Alegre."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Por Chuy y Pelotas hasta Porto Alegre son entre 810 y 840 km, más unos 115 km de subida: más de 900 km en total. Conviene partirlo en dos días."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "En el Natal Luz, las vacaciones de julio y los feriados largos se forma tránsito en las entradas del pueblo. Si podés, llegá temprano."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Gramado",
+    "intro": "Gramado es chico: más que el barrio, importa a cuánto quedás de la Avenida Borges de Medeiros.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "A pie de la Rua Coberta, la Igreja São Pedro y las chocolaterías. Es lo mejor para una primera visita o si no tenés auto, pero es lo más caro y lo primero que se llena."
+     },
+     {
+      "t": "Planalto",
+      "d": "Calles arboladas y residenciales cerca del centro, donde están el Lago Negro, el Mini Mundo y el Parque das Orquídeas. Para parejas y familias que quieren tranquilidad sin alejarse."
+     },
+     {
+      "t": "Lago Negro",
+      "d": "Pousadas con aire de bosque alrededor del lago. Las calles tienen pendiente, así que para ir al centro vas a usar auto o Uber."
+     },
+     {
+      "t": "Bavária",
+      "d": "Un barrio tranquilo y plano, a unos 1,5 km del centro, con hoteles más cuidados."
+     },
+     {
+      "t": "Floresta",
+      "d": "Residencial, a 1,5 km del centro y cerca de la ExpoGramado, con pousadas más económicas. Sirve para estadías largas o grupos con auto."
+     },
+     {
+      "t": "Avenida das Hortênsias",
+      "d": "La avenida que une Gramado con Canela, a algo más de 1 km del centro. Cómoda si vas en auto, con chicos a los parques temáticos o si querés recorrer las dos ciudades."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Gramado",
+    "intro": "El centro se camina; para lo demás, Uber o auto.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "La Borges de Medeiros, la Rua Coberta, la Igreja São Pedro, el Palácio dos Festivais y el Lago Joaquina Rita Bier están cerca uno del otro. Hay subidas y bajadas."
+     },
+     {
+      "t": "Uber y 99",
+      "d": "Funcionan bien en Gramado y en Canela, y son la opción más usada para salir del centro y volver de noche. En temporada alta y días de eventos hay tarifa dinámica y más espera."
+     },
+     {
+      "t": "Ómnibus a Canela",
+      "d": "Sale de la Rodoviária de Gramado un ómnibus que va y viene a Canela durante el día, en unos 15 minutos. De noche pasa menos seguido."
+     },
+     {
+      "t": "Bustour",
+      "d": "Un ómnibus turístico de subir y bajar que recorre Gramado y Canela. En temporada alta funciona todos los días; en temporada baja, no los miércoles."
+     },
+     {
+      "t": "Auto",
+      "d": "Útil para el Snowland, Nova Petrópolis, las bodegas y Bento Gonçalves. En el centro el estacionamiento es pago y en temporada hay mucho tránsito."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Gramado de noche",
+    "intro": "La noche de Gramado es de cenar y pasear más que de bailar.",
+    "items": [
+     {
+      "t": "Rua Coberta y Borges de Medeiros",
+      "d": "Cafés, restaurantes y vidrieras iluminadas. Es el paseo de la noche, sobre todo en invierno."
+     },
+     {
+      "t": "Cena de fondue",
+      "d": "Los restaurantes de fondue del centro son el plan clásico de la noche; en temporada conviene reservar."
+     },
+     {
+      "t": "Natal Luz",
+      "d": "Durante el Natal Luz hay desfiles y espectáculos de noche, algunos en la calle y otros con entrada paga."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Gramado",
+    "intro": "Es de los destinos más tranquilos del sur de Brasil. Los cuidados tienen que ver más con el clima y la ruta.",
+    "bullets": [
+     "En las mañanas de helada, las veredas y las calles se ponen resbalosas y hay poca visibilidad: andá con cuidado y calzado con agarre.",
+     "Si manejás en invierno, salí con luz de día: la niebla en la Serra baja mucho la visibilidad.",
+     "En los desfiles del Natal Luz y en la Rua Coberta llena, cuidá el celular y la billetera como en cualquier aglomeración.",
+     "Seguí los avisos de la Defensa Civil del estado si se anuncian frío extremo o lluvias fuertes.",
+     "Emergencias: 190 para la policía, 193 para bomberos."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "Tarjeta y Pix en casi todos lados. Algunas billeteras de la región permiten pagar con QR de Pix: averiguá con la tuya antes de viajar."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llevá algo para el ómnibus, ferias y propinas. Las tarjetas se aceptan casi en todos lados."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Enchufe brasileño de tres patas redondas (NBR 14136). En Gramado la red es de 220 V: fijate que tus cargadores sean bivolt y confirmá con el hotel."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Abrigo en capas, aun en verano: las noches son frescas",
+     "Paraguas o piloto: llueve todo el año",
+     "Calzado cómodo y con agarre para las subidas",
+     "Ropa un poco más arreglada si vas a cenar afuera",
+     "Cargador / power bank",
+     "Tarjeta y algo de efectivo"
+    ]
+   }
+  ]
+ },
+ "canela": {
+  "antes": {
+   "titulo": "Antes de viajar a Canela",
+   "intro": "Canela está en la Serra Gaúcha, a unos 120 a 130 km de Porto Alegre y a 7 km de Gramado. El centro se camina, pero los parques y cascadas quedan afuera.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada es Porto Alegre",
+     "d": "Se vuela al aeropuerto Salgado Filho (POA) y se sube a la Serra en ómnibus, transfer o auto, en unas 2 horas a 2 h 30. Canela tiene un aeródromo chico, con muy pocos vuelos."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 3 días hacés el centro, el Caracol y la Ferradura. Si también querés recorrer Gramado, sumá uno o dos días."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Para el centro y Gramado alcanza con ómnibus y Uber. Para los parques que quedan lejos, como la Ferradura, o si te alojás sobre la Estrada do Caracol, el auto ayuda mucho."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Canela desde Montevideo",
+    "intro": "Se vuela a Porto Alegre y se sigue por tierra; Canela es la parada siguiente a Gramado.",
+    "items": [
+     {
+      "t": "Vuelo a Porto Alegre (POA)",
+      "d": "Azul anunció vuelos directos Montevideo–Porto Alegre desde el 14 de diciembre de 2026, los lunes y viernes. Los otros días se vuela con una escala."
+     },
+     {
+      "t": "Ómnibus Citral",
+      "d": "La línea Porto Alegre–Gramado–Canela sale de la Rodoviária y la mayoría de los servicios para frente al aeropuerto. Canela es la última parada, unos 15 minutos después de Gramado."
+     },
+     {
+      "t": "En auto desde Porto Alegre",
+      "d": "Son unos 120 a 130 km, por Nova Petrópolis y Gramado o por Taquara, en algo menos de 2 horas sin tránsito. Hay peajes en la RS-239 y la RS-115."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay transfers compartidos y privados desde el aeropuerto de Porto Alegre hasta los hoteles de Canela."
+     },
+     {
+      "t": "En auto desde Montevideo",
+      "d": "Por Chuy y Pelotas hasta Porto Alegre son entre 810 y 840 km, más la subida a la Serra: más de 900 km. Conviene partirlo en dos días."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si vas a recorrer Gramado y Canela, alojarte en Canela y moverte en el ómnibus entre las dos es la combinación más práctica sin auto."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Canela",
+    "intro": "La elección es entre el centro, donde se hace todo a pie, y el campo, con más naturaleza pero dependiendo del auto.",
+    "items": [
+     {
+      "t": "Centro",
+      "d": "Alrededor de la Catedral de Pedra está la mayoría de los hoteles y pousadas, con restaurantes y bares a pie. Es la mejor base si no tenés auto y desde ahí sale el ómnibus a Gramado."
+     },
+     {
+      "t": "Estrada do Caracol",
+      "d": "Pousadas rurales con chalés, bañera, vista y café colonial, camino al Parque do Caracol. Para parejas y para quien busca silencio, pero necesitás auto."
+     },
+     {
+      "t": "Vila Suzana",
+      "d": "Barrio residencial cerca del centro, más tranquilo, con algunos hoteles."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Canela",
+    "intro": "A pie por el centro; para los parques, auto, Uber o tour.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Del centro a la Catedral de Pedra, la plaza y los restaurantes se camina."
+     },
+     {
+      "t": "Uber y 99",
+      "d": "Funcionan en Canela y en Gramado. Si vas a un parque lejos del centro, revisá que haya señal para pedir la vuelta o acordá un horario."
+     },
+     {
+      "t": "Ómnibus a Gramado",
+      "d": "Sale de la Rodoviária de Canela durante el día y tarda unos 15 minutos. De noche hay menos frecuencia."
+     },
+     {
+      "t": "Ómnibus al Caracol",
+      "d": "Hay ómnibus al Parque do Caracol, pero con muy pocas salidas por día. Consultá el horario de vuelta en la Rodoviária antes de ir."
+     },
+     {
+      "t": "Bustour",
+      "d": "El ómnibus turístico de subir y bajar une Canela con Gramado y para en las atracciones principales. En temporada baja no funciona los miércoles."
+     },
+     {
+      "t": "Auto",
+      "d": "Lo más práctico para la Ferradura, el Caracol, los Bondinhos y las pousadas de la Estrada do Caracol."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Canela",
+    "intro": "Es un pueblo tranquilo. Los cuidados son de clima, senderos y ruta.",
+    "bullets": [
+     "En los senderos y miradores, quedate detrás de las barandas: el piso de piedra húmeda resbala.",
+     "En las mañanas de helada hay hielo en veredas y calles y poca visibilidad, sobre todo en las partes altas.",
+     "Si manejás por la Serra con niebla, bajá la velocidad y evitá manejar de noche en invierno.",
+     "Emergencias: 190 para la policía, 193 para bomberos."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "Tarjeta y Pix en casi todos lados. Algunas billeteras de la región permiten pagar con QR de Pix: averiguá con la tuya antes de viajar."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Enchufe brasileño de tres patas redondas (NBR 14136). En Canela la red es de 220 V: fijate que tus cargadores sean bivolt."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Abrigo en capas y un piloto: llueve en todas las estaciones",
+     "Calzado con agarre para senderos y miradores",
+     "Gorro y guantes si vas en junio o julio",
+     "Agua y algo para comer si vas a los parques",
+     "Cargador / power bank",
+     "Tarjeta y algo de efectivo"
+    ]
+   }
+  ]
+ },
+ "poa": {
+  "antes": {
+   "titulo": "Antes de viajar a Porto Alegre",
+   "intro": "Porto Alegre es la capital más cercana a Montevideo: se llega en un vuelo corto o en una noche de ómnibus. Es una ciudad para caminar de día por el centro y salir de noche por los barrios.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "El aeropuerto Salgado Filho (POA) queda en la zona norte, a menos de 8 km del centro. La Rodoviária está en el borde del centro histórico."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 2 o 3 días recorrés el centro, el Mercado, el Gasômetro y una noche en la Cidade Baixa. Si sumás la Serra Gaúcha, agregá al menos dos días más."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "Para la ciudad no hace falta: entre caminar, Uber y el tren te movés bien. El auto sirve si después seguís a Gramado o a la costa."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Porto Alegre desde Montevideo",
+    "intro": "Hay tres caminos: vuelo directo en algunas fechas, vuelo con escala o ómnibus de línea.",
+    "items": [
+     {
+      "t": "Vuelo directo con Azul",
+      "d": "Azul anunció la vuelta de la ruta Montevideo–Porto Alegre desde el 14 de diciembre de 2026, los lunes y viernes. El vuelo sale de Carrasco a las 14:00 y llega a las 15:35. Confirmá los horarios al comprar."
+     },
+     {
+      "t": "Vuelo con escala",
+      "d": "Los otros días se vuela con una escala. Revisá que la conexión no te obligue a cambiar de aeropuerto."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "EGA y TTL hacen Montevideo–Porto Alegre por Chuy. El viaje dura entre 11 y 12 horas y llega a la Rodoviária."
+     },
+     {
+      "t": "En auto",
+      "d": "Son entre 810 y 840 km por la Ruta 9 hasta Chuy y después por la BR-471 y la BR-116, pasando por Pelotas. Calculá unas 10 a 11 horas de manejo."
+     },
+     {
+      "t": "Del aeropuerto a la ciudad",
+      "d": "En auto, Uber o taxi son unos 15 minutos al centro. El Aeromóvel que une el aeropuerto con la estación del tren está fuera de servicio desde las inundaciones de 2024 y en reconstrucción."
+     }
+    ],
+    "cierre": {
+     "t": "Si seguís a la Serra",
+     "d": "Los ómnibus de Citral a Gramado y Canela paran frente al aeropuerto: podés salir directo sin pasar por la Rodoviária."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Porto Alegre",
+    "intro": "La elección es entre estar cerca de los sitios históricos o cerca de los bares y restaurantes.",
+    "items": [
+     {
+      "t": "Centro Histórico",
+      "d": "Te deja a pie del Mercado Público, la Casa de Cultura Mario Quintana y el Gasômetro. De día tiene mucho movimiento; de noche se vacía, así que sirve si vas a salir poco o te movés en Uber."
+     },
+     {
+      "t": "Cidade Baixa",
+      "d": "El barrio de bares y restaurantes, a unos 15 minutos a pie del centro y cerca de la Redenção. Tiene hostels y hoteles de buen precio; buscá cerca de las calles Lima e Silva, República y João Alfredo, que son las más movidas."
+     },
+     {
+      "t": "Bom Fim",
+      "d": "Entre la Cidade Baixa y Moinhos de Vento, pegado al Parque da Redenção. Es un barrio tranquilo, de clase media, con precios moderados."
+     },
+     {
+      "t": "Moinhos de Vento",
+      "d": "El barrio con fama de más seguro, con plazas, tiendas y restaurantes. Los hoteles son los más caros de la ciudad y queda algo lejos de lo turístico: vas a usar Uber para el centro."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Porto Alegre",
+    "intro": "El centro se camina; para cruzar entre barrios, lo práctico es Uber o 99.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Del Mercado al Gasômetro y a la Casa de Cultura Mario Quintana se va caminando por el centro. De ahí a la Cidade Baixa y la Redenção también se llega a pie de día."
+     },
+     {
+      "t": "Uber, 99 y taxi",
+      "d": "Funcionan en toda la ciudad y son la forma recomendada de volver de noche."
+     },
+     {
+      "t": "Trensurb",
+      "d": "El tren une la Rodoviária, la estación Mercado y la estación Aeroporto con el norte del área metropolitana. No llega a Moinhos de Vento, Bom Fim ni Cidade Baixa. En la boletería se paga en efectivo o con Pix."
+     },
+     {
+      "t": "Ómnibus urbanos",
+      "d": "Se pagan con la tarjeta TRI, que también sirve en las lotações. Para pocos días, en general conviene más Uber."
+     },
+     {
+      "t": "Linha Turismo",
+      "d": "Un ómnibus turístico de techo abierto, operado por empresas privadas, que sale del Cais do Porto y recorre los puntos principales. Consultá horarios y días antes de ir."
+     },
+     {
+      "t": "Catamarán a Guaíba",
+      "d": "CatSul cruza el lago desde el Cais Mauá hasta la ciudad de Guaíba. Cuando la creciente arrastra troncos y basura, el servicio se suspende o cambia de horario."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Porto Alegre de noche",
+    "intro": "La noche no está en el centro, sino en los barrios.",
+    "items": [
+     {
+      "t": "Cidade Baixa",
+      "d": "Bares, música en vivo y estudiantes, con la gente en la vereda en las calles João Alfredo, Lima e Silva y República."
+     },
+     {
+      "t": "Moinhos de Vento",
+      "d": "Bares y restaurantes más caros y tranquilos, para cenar o tomar algo."
+     },
+     {
+      "t": "El atardecer antes",
+      "d": "El plan clásico es mirar el sol caer sobre el Guaíba en la orla del Gasômetro y después ir a cenar a la Cidade Baixa."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Para ir y volver entre el centro y los barrios de noche, pedí Uber en lugar de caminar."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Porto Alegre",
+    "intro": "Es una ciudad grande, con los cuidados de cualquier capital brasileña. El punto delicado es el centro cuando se vacía.",
+    "bullets": [
+     "Recorré el Centro Histórico de día; de noche quedan calles vacías y no conviene caminarlas.",
+     "En el centro hubo arrebatos de celulares en la calle, incluso cerca de la Praça XV: no lo lleves en la mano en zonas de mucha gente.",
+     "En la Cidade Baixa, quedate en las calles con movimiento y volvé en Uber.",
+     "Preguntá en tu alojamiento qué recorridos conviene evitar.",
+     "Emergencias: 190 para la policía, 193 para bomberos. La Guarda Municipal atiende en el 153."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "Se acepta tarjeta en casi todos lados y Pix es el medio de pago local. Algunas billeteras de la región permiten pagar con QR de Pix: averiguá con la tuya antes de viajar."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llevá algo para el tren, ferias y puestos del Mercado. Para sacar, usá cajeros dentro de bancos o shoppings."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "En Brasil se usa el enchufe de tres patas redondas (NBR 14136). En Porto Alegre la red es de 127 V: fijate que tus cargadores sean bivolt."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Calzado cómodo para caminar el centro",
+     "Abrigo de verdad entre junio y agosto",
+     "Ropa liviana si vas en verano: hace más de 30 grados con mucha humedad",
+     "Paraguas o piloto: llueve todo el año",
+     "Mate y termo, si querés sumarte a la ronda del atardecer",
+     "Cargador / power bank",
+     "Tarjeta y algo de efectivo"
+    ]
+   }
+  ]
+ },
+ "joaopessoa": {
+  "antes": {
+   "titulo": "Antes de viajar a João Pessoa",
+   "intro": "João Pessoa es la capital de Paraíba, con una orla urbana larga y playas más salvajes al norte y al sur. Desde Montevideo se llega con al menos una escala.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "El aeropuerto Presidente Castro Pinto (JPA) queda en Bayeux, a unos 15 km de Tambaú. La alternativa es volar a Recife (REC) y seguir unos 120 km por la BR-101."
+    },
+    {
+     "t": "¿Cuántos días?",
+     "d": "Con 3 noches recorrés la orla, las piscinas naturales y la costa sur. Con 5 o 6 días sumás Cabedelo, el centro histórico y alguna playa más lejana sin correr."
+    },
+    {
+     "t": "¿Auto o no?",
+     "d": "En la orla te movés a pie y en Uber. Para la costa sur (Conde) o el norte, auto, buggy o excursión."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a João Pessoa desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a João Pessoa: se vuela con al menos una escala, en general en São Paulo.",
+    "items": [
+     {
+      "t": "Vuelo a João Pessoa (JPA)",
+      "d": "La combinación más habitual es Montevideo–Guarulhos y de ahí a João Pessoa. GOL y LATAM vuelan de Montevideo a Guarulhos, y desde Guarulhos hay vuelos a João Pessoa; si combinás vuelos separados, revisá que no tengas que cambiar de aeropuerto en São Paulo."
+     },
+     {
+      "t": "Del aeropuerto a la orla",
+      "d": "Son unos 15 km a Tambaú y más de 20 km a Cabo Branco, Manaíra o el Bessa: cerca de 40 minutos según el tránsito en la BR-230. Uber y 99 trabajan en el aeropuerto, y también hay taxis y transfers."
+     },
+     {
+      "t": "En ómnibus desde el aeropuerto",
+      "d": "Hay líneas urbanas hacia la Rodoviária, pero el viaje es largo y no hay ómnibus directo a la orla. Con valijas, conviene Uber o transfer."
+     },
+     {
+      "t": "Por Recife",
+      "d": "Si conseguís mejor vuelo a Recife, son unos 120 km por la BR-101, sin peaje, en 1 h 30 a 1 h 45 en auto. En ómnibus, Total y Progresso salen desde la terminal TIP de Recife y tardan entre 2 y 2 h 30."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si llegás de noche, pedí el Uber desde el aeropuerto o reservá el transfer antes: es un trayecto largo por la ruta."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en João Pessoa",
+    "intro": "Casi todos se alojan sobre la orla. La diferencia es cuánto movimiento querés tener en la puerta.",
+    "items": [
+     {
+      "t": "Tambaú",
+      "d": "El barrio más buscado: playa con estructura, quioscos, la feria de artesanía y la rambla con movimiento de noche. Desde ahí salen los barcos a Picãozinho y llegás a pie a Cabo Branco y Manaíra."
+     },
+     {
+      "t": "Cabo Branco",
+      "d": "Al lado de Tambaú, con un ritmo más tranquilo. Conviene la parte cercana a Tambaú y al Busto de Tamandaré; más al sur es silencioso, pero vas a depender de Uber de noche."
+     },
+     {
+      "t": "Manaíra",
+      "d": "Más residencial y comercial, cerca de los shoppings y con buenos restaurantes. Buscá la parte de la orla cercana a Tambaú."
+     },
+     {
+      "t": "Bessa",
+      "d": "La opción más calma, con la playa urbana que muchos consideran la más linda, pero con menos hoteles. Tiene bares en el interior del barrio y también salen barcos a las piscinas naturales."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por João Pessoa",
+    "intro": "La orla se camina y se pedalea; para lo demás, Uber.",
+    "items": [
+     {
+      "t": "A pie y en bicicleta",
+      "d": "La rambla une Manaíra, Tambaú y Cabo Branco, con ciclovía de Tambaú hasta el final de Cabo Branco. La ciudad tiene más de 95 km de ciclovías y ciclofaixas."
+     },
+     {
+      "t": "Uber y 99",
+      "d": "Funcionan bien en toda la ciudad. Son lo más práctico para el centro histórico, el Seixas y para volver de noche."
+     },
+     {
+      "t": "Tren a Cabedelo",
+      "d": "El VLT de la CBTU llega a la estación del Jacaré, en Cabedelo, reformada en 2025, con boletería electrónica y pago con Pix. Consultá horarios antes, sobre todo para la vuelta después del atardecer."
+     },
+     {
+      "t": "Barcos",
+      "d": "Los paseos a Picãozinho salen de Tambaú, y otros salen del Bessa. A Areia Vermelha se va desde las playas de Cabedelo, como Camboinha, y algunas agencias te buscan en el hotel."
+     },
+     {
+      "t": "Auto, buggy o excursión",
+      "d": "Para Coqueirinho, Tabatinga y Tambaba, en el Conde, y para las playas del norte. Las agencias hacen excursiones de día entero con traslado."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "João Pessoa de noche",
+    "intro": "La noche está en la orla y en algunos barrios cerca del mar.",
+    "items": [
+     {
+      "t": "Orla de Tambaú",
+      "d": "Bares, restaurantes y quioscos con gente en la rambla, sobre todo los fines de semana y en temporada alta."
+     },
+     {
+      "t": "Cabo Branco y el Busto de Tamandaré",
+      "d": "Bares y restaurantes frente al mar, en la punta más cercana a Tambaú."
+     },
+     {
+      "t": "Bessa",
+      "d": "Bares en el interior del barrio, con un público más local."
+     },
+     {
+      "t": "El atardecer antes",
+      "d": "El plan clásico es ir al Jacaré a ver la puesta de sol, alrededor de las 17 h, y volver a cenar a la orla. Llegá 30 o 40 minutos antes."
+     }
+    ]
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en João Pessoa",
+    "intro": "Las zonas turísticas de la orla son tranquilas. Los cuidados son los de cualquier capital.",
+    "bullets": [
+     "El centro histórico se visita de día: de noche se vacía, con los comercios cerrados.",
+     "En la orla quedate en los tramos iluminados y con gente; evitá caminar solo por calles oscuras.",
+     "No muestres el celular ni joyas en la calle, y para volver tarde pedí Uber.",
+     "Antes de bañarte, mirá el boletín semanal de balneabilidad de la Sudema: en algunos tramos, como el final de la Avenida Ruy Carneiro en Manaíra, el agua puede estar marcada como impropia.",
+     "En las piscinas naturales, no pises los corales y cuidá la hora de la marea para volver.",
+     "Emergencias: 190 para la policía, 193 para bomberos."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Pagos",
+      "d": "Tarjeta y Pix en casi todos lados. Algunas billeteras de la región permiten pagar con QR de Pix: averiguá con la tuya antes de viajar."
+     },
+     {
+      "t": "Efectivo",
+      "d": "Llevá algo para la feria de artesanía, los quioscos de playa y las barracas de la costa sur."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Enchufes",
+      "d": "Enchufe brasileño de tres patas redondas (NBR 14136). En Paraíba la red es de 220 V: fijate que tus cargadores sean bivolt."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar y gorra: el sol pega fuerte todo el año",
+     "Ropa liviana y de playa",
+     "Calzado para el agua, para las piscinas naturales sobre el arrecife",
+     "Bolsa estanca para el celular en los paseos en barco",
+     "Repelente",
+     "Un piloto liviano si vas entre abril y julio",
+     "Tarjeta y algo de efectivo"
+    ]
+   }
+  ]
  }
 }
