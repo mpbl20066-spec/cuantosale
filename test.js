@@ -170,9 +170,9 @@ function haversineKm(a, b) {
     assert.ok(/guardamos en este navegador/.test(app),
       'el aviso del checkout tiene que decir que se guardan en el navegador');
     /* Y la politica de privacidad tiene que contar lo mismo. */
-    assert.ok(/limpiando el almacenamiento del sitio/.test(priv),
+    assert.ok(/Podés borrar todo esto desde la configuración de tu navegador/.test(priv),
       'la politica de privacidad tiene que decir como borrar los datos guardados en el navegador');
-    assert.ok(/WhatsApp al operador/.test(priv),
+    assert.ok(/escribirte por WhatsApp o por correo sobre tu reserva/.test(priv),
       'la politica de privacidad tiene que decir que el pedido sale por WhatsApp');
   });
 

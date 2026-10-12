@@ -738,6 +738,9 @@
   .cf-total{display:flex;justify-content:space-between;align-items:center;padding:12px;font-size:15px;font-weight:700;color:var(--ink)}
   .cf-total b{font-family:var(--fh);font-size:22px}
   .cf-nota{margin:12px 0 0;font-size:13px;color:var(--ink2)}
+  .cf-acepto{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;font-size:13.5px;line-height:1.45;color:var(--ink);cursor:pointer}
+  .cf-acepto input{flex:none;width:20px;height:20px;margin:1px 0 0;accent-color:var(--action-bg)}
+  .cf-acepto a{color:inherit;font-weight:700}
   .cf-tel{display:grid;grid-template-columns:auto 1fr;gap:8px}
   .cf-tel__pais{display:flex;align-items:center;padding:0 14px;font-weight:700;white-space:nowrap}
   .cf-vacio{display:grid;gap:8px;margin-top:14px;padding:14px;border-radius:16px;background:var(--cel-soft);font-size:13px;font-weight:600;color:var(--ink2)}
@@ -2548,7 +2551,10 @@
       '<label class="g-lbl" for="cf-tel">WhatsApp de Uruguay</label><div class="cf-tel"><span class="g-in cf-tel__pais" aria-hidden="true">UY +598</span>' +
       '<input id="cf-tel" class="g-in" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="16" placeholder="09X XXX XXX" value="' + esc(dt.tel ? '0' + dt.tel : (dt.telTxt || '')) + '"></div>' + err('tel') +
       '<label class="g-lbl" for="cf-mail">Email</label><input id="cf-mail" class="g-in" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" value="' + esc(dt.mail || '') + '">' + err('mail') +
-      cuponHtml(dt) + '<p class="cf-nota">Al reservar te enviamos un WhatsApp con tu pedido. Un asesor de CuántoSale lo confirma.</p>' + err('envio') +
+      cuponHtml(dt) +
+      /* Solo mayores de 18: lo exigen los terminos y el servidor vuelve a controlarlo (lib/reservas.js). */
+      '<label class="cf-acepto" for="cf-mayor"><input id="cf-mayor" type="checkbox"' + (dt.mayor ? ' checked' : '') + '><span>Soy mayor de 18 años y acepto los <a href="/terminos" target="_blank" rel="noopener">Términos</a> y la <a href="/privacidad" target="_blank" rel="noopener">Política de privacidad</a>.</span></label>' + err('mayor') +
+      '<p class="cf-nota">Al reservar te enviamos un WhatsApp con tu pedido. Un asesor de CuántoSale lo confirma.</p>' + err('envio') +
       '<button type="submit" class="g-btn g-btn--main" id="cf-reservar" style="margin-top:16px">Reservar</button></form>';
   }
 
@@ -2723,7 +2729,7 @@
     var cuerpo = { nombre: dt.nombre, telefono: dt.pais + dt.tel, email: dt.mail, destino: DEST, fechas: fdc(IDA) + ' → ' + fdc(VUELTA), personas: personasTxt(),
       fecha_ida: IDA, fecha_vuelta: VUELTA, personas_n: pax,   /* para el panel /admin: fechas, personas y montos exactos en USD */
       servicios: lista.map(function (x) { return { tipo: x.ico === 'palm' ? 'tour' : 'traslado', nombre: x.nom, detalle: x.det, precio: f(x.precio), precio_usd: Math.round(x.precio * 100) / 100 }; }), total: f(sum(lista, function (x) { return x.precio; })),
-      totalUsd: Math.round(sum(lista, function (x) { return x.precio; })), cupon: dt.cupon || '', codigo: String(window.CS_VIAJE_ID || '') };
+      totalUsd: Math.round(sum(lista, function (x) { return x.precio; })), cupon: dt.cupon || '', codigo: String(window.CS_VIAJE_ID || ''), mayor_edad: dt.mayor === true };
     /* Con sesion el pedido viaja con el token: el servidor lo usa para canjear el cupon y sumar el XP de la reserva. */
     /* El token de Supabase a veces no responde nunca (getSession se traba) y el boton quedaba en "Enviando…" para siempre:
        si en 4 s no llega, el pedido sale igual, sin sesion (sin cupon ni XP, pero el pedido no se pierde). */
@@ -3347,10 +3353,11 @@
     if (e.target.id !== 'cs-form') return;
     e.preventDefault();
     var telUY = telefonoUY($('cf-tel').value);
-    var dt = { nombre: ($('cf-nom').value || '').trim(), pais: '+598', tel: telUY, telTxt: telUY ? '' : ($('cf-tel').value || '').trim(), mail: ($('cf-mail').value || '').trim(), cupon: $('cf-cupon') ? $('cf-cupon').value : '' }, er = {};
+    var dt = { nombre: ($('cf-nom').value || '').trim(), pais: '+598', tel: telUY, telTxt: telUY ? '' : ($('cf-tel').value || '').trim(), mail: ($('cf-mail').value || '').trim(), cupon: $('cf-cupon') ? $('cf-cupon').value : '', mayor: !!($('cf-mayor') && $('cf-mayor').checked) }, er = {};
     if (dt.nombre.length < 3 || dt.nombre.indexOf(' ') < 1) er.nombre = 'Escribí tu nombre y apellido.';
     if (!telUY) er.tel = 'Escribí un celular de Uruguay válido, por ejemplo 099 123 456.';
     if (!emailValido(dt.mail)) er.mail = 'Escribí un email válido, por ejemplo nombre@correo.com.';
+    if (!dt.mayor) er.mayor = 'Para reservar tenés que ser mayor de 18 años y aceptar los términos.';
     S.datos = dt; S.datosErr = er;
     if (Object.keys(er).length) { track('reserva_cs_datos_error', { campos: Object.keys(er).join(',') }); render(false); return; }
     /* Los datos quedan en este navegador: si despues reserva el otro servicio (tours o transfer), el formulario ya viene lleno. */
