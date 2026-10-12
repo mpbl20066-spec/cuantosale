@@ -105,7 +105,10 @@ self.addEventListener('push', function (event) {
     return fetch('/api/alertas/push-resumen?endpoint=' + encodeURIComponent(sub.endpoint), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }).then(function (j) {
-    var avisos = j && j.avisos && j.avisos.length ? j.avisos : [{ id: 'generico', titulo: 'Bajó el precio de un vuelo', cuerpo: 'Abrí CuántoSale para ver tus alertas de precio.', url: '/' }];
+    /* Solo lo de los ultimos 10 minutos (lo que mando esta misma revision o la prueba): sin esto, una prueba volvia a
+       mostrar la baja real de esta manana. Si no hay nada tan nuevo, el ultimo aviso. */
+    var todos = j && j.avisos ? j.avisos : [], recientes = todos.filter(function (a) { return Date.now() - Date.parse(a.at) < 6e5; });
+    var avisos = recientes.length ? recientes : todos.length ? [todos[0]] : [{ id: 'generico', titulo: 'Bajó el precio de un vuelo', cuerpo: 'Abrí CuántoSale para ver tus alertas de precio.', url: '/' }];
     return Promise.all(avisos.map(function (a) {
       return self.registration.showNotification(a.titulo || 'CuántoSale', {
         body: a.cuerpo || '', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',

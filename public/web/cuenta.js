@@ -309,10 +309,11 @@
     var txt = e === 'activo' ? 'Activadas: además del email, te avisamos con una notificación en este dispositivo.'
       : e === 'denegado' ? 'Bloqueaste las notificaciones de CuántoSale en este navegador. Podés habilitarlas desde su configuración.'
       : 'Además del email, podemos avisarte con una notificación en este dispositivo.';
-    var btn = e === 'activo' ? '<button type="button" class="cp-btn cp-btn--s cp-btn--o" data-push-off>Desactivar</button>'
+    var btn = e === 'activo' ? '<button type="button" class="cp-btn cp-btn--s" data-push-prueba' + (S.pushOcupado ? ' disabled' : '') + '>' + (S.pushOcupado ? 'Enviando…' : 'Enviar una de prueba') + '</button>' +
+        '<button type="button" class="cp-btn cp-btn--s cp-btn--o" data-push-off>Desactivar</button>'
       : e === 'denegado' ? '' : '<button type="button" class="cp-btn cp-btn--s" data-push-on' + (S.pushOcupado ? ' disabled' : '') + '>' + (S.pushOcupado ? 'Activando…' : 'Activar notificaciones') + '</button>';
     return '<article class="cp-viaje"><div class="cp-viaje__t"><b>' + ic(I.bell, 16) + ' Notificaciones en este dispositivo</b><small>' + esc(txt) + '</small></div>' +
-      (S.pushError ? '<p class="cp-err" role="alert">' + esc(S.pushError) + '</p>' : '') + (btn ? '<div class="cp-viaje__a">' + btn + '</div>' : '') + '</article>';
+      (S.pushError ? '<p class="cp-err" role="alert">' + esc(S.pushError) + '</p>' : '') + (S.pushAviso ? '<p class="cp-ok" role="status">' + esc(S.pushAviso) + '</p>' : '') + (btn ? '<div class="cp-viaje__a">' + btn + '</div>' : '') + '</article>';
   }
   var fila = function (icono, texto, attr, extra, rojo) {
     return '<button type="button" class="cp-fila' + (rojo ? ' is-rojo' : '') + '" ' + attr + '><span class="cp-fila__i">' + ic(icono, 22) + '</span><span class="cp-fila__t">' + texto + '</span>' + (extra === undefined ? ic(I.chev, 16) : extra) + '</button>';
@@ -455,6 +456,14 @@
         .then(function () { S.pushOcupado = false; pintar(); });
       return;
     }
+    if (t.hasAttribute('data-push-prueba')) {
+      S.pushOcupado = true; S.pushError = ''; S.pushAviso = ''; pintar();
+      pushApi.probar().then(function (j) {
+        S.pushAviso = j.enviadas ? 'Listo: te la mandamos a ' + (j.enviadas === 1 ? '1 dispositivo' : j.enviadas + ' dispositivos') + '. Tiene que llegar en unos segundos.' : '';
+        if (!j.enviadas) S.pushError = 'No pudimos entregarla. Desactivá y volvé a activar las notificaciones en este dispositivo.';
+      }, function (er) { S.pushError = er.message; }).then(function () { S.pushOcupado = false; pintar(); });
+      return;
+    }
     if (t.hasAttribute('data-push-off')) {
       pushApi.desactivar().then(function () { S.pushEstado = 'inactivo'; S.pushError = ''; pintar(); }, function (er) { S.pushError = er.message; pintar(); });
       return;
@@ -552,7 +561,8 @@
         return conToken('DELETE', '?endpoint=' + encodeURIComponent(s.endpoint)).catch(function () { /* igual se desuscribe aca */ }).then(function () { return s.unsubscribe(); });
       });
     }
-    return { soportado: soportado, estado: estado, activar: activar, desactivar: desactivar };
+    function probar() { return conToken('POST', '-prueba', {}); }
+    return { soportado: soportado, estado: estado, activar: activar, desactivar: desactivar, probar: probar };
   })();
 
   window.CSCuenta = { push: pushApi, alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
