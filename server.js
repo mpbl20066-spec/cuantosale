@@ -735,6 +735,25 @@ function hotelBudgetTarget(destKey, style, extra) {
   const rooms = Math.ceil(pax / 2);
   return Math.max(0, perPerson * rooms * hotelTypeMultiplier(hotelType));
 }
+/* Cuota de Booking (RapidAPI): cada respuesta trae en los headers x-ratelimit-requests-* cuanto queda del plan.
+   Se guarda la ultima lectura para la tarjeta del panel. En Vercel cada instancia tiene su propia memoria, asi que
+   tambien va a Supabase (cache-persistente), a lo sumo una vez por minuto por instancia. */
+const cacheDb = require('./lib/providers/cache-persistente');
+const bookingUso = { llamadas: 0, desde: Date.now(), limite: null, restantes: null, resetSeg: null, at: 0 };
+let bookingUsoGuardado = 0;
+function anotarUsoBooking(response) {
+  bookingUso.llamadas += 1;
+  const h = response && response.headers;
+  if (!h || typeof h.get !== 'function') return;
+  const num = function (nombre) { const v = h.get(nombre); return v == null || v === '' || !Number.isFinite(Number(v)) ? null : Number(v); };
+  const restantes = num('x-ratelimit-requests-remaining');
+  if (restantes == null) return;
+  Object.assign(bookingUso, { limite: num('x-ratelimit-requests-limit'), restantes: restantes, resetSeg: num('x-ratelimit-requests-reset'), at: Date.now() });
+  if (cacheDb.enabled() && Date.now() - bookingUsoGuardado > 60000) {
+    bookingUsoGuardado = Date.now();
+    cacheDb.store([{ key: 'booking-uso', value: { limite: bookingUso.limite, restantes: restantes, resetSeg: bookingUso.resetSeg, at: bookingUso.at }, expiresAt: Date.now() + 40 * 86400000 }]);
+  }
+}
 async function bookingApiJson(url, settings) {
   let response;
   try {
@@ -762,6 +781,7 @@ async function bookingApiJson(url, settings) {
       ? 'Booking API excedió el tiempo de espera.'
       : 'No se pudo conectar con Booking API (' + settings.host + ')' + (codigo ? ' [' + codigo + ']' : '') + ': ' + detalle);
   }
+  anotarUsoBooking(response);
   let payload;
   try { payload = await response.json(); } catch (error) { throw new Error('Booking API devolvió una respuesta JSON inválida.'); }
   if (!response || !response.ok || payload && payload.status === false) {
@@ -791,7 +811,46 @@ function bookingCacheKey(host, candidate) { return host + '|' + candidate.toLowe
 /* Vacia el cache. Lo usan las pruebas, que simulan distintas respuestas de
    searchDestination para la misma ciudad y sin esto dependerian del orden en que
    corren. */
-function resetBookingDestCache() { bookingDestIdCache.clear(); bookingHotelsCache.clear(); bookingHotelsInflight.clear(); }
+function resetBookingDestCache() { bookingDestIdCache.clear(); bookingSinDistrito.clear(); bookingHotelsCache.clear(); bookingHotelsInflight.clear(); }
+/* Las busquedas por playa o barrio ("Ferradurinha, Búzios") que Booking no reconoce como distrito. Eso no es un
+   tropiezo del proveedor: Booking respondio bien y no tiene ese barrio, y lo va a seguir sin tener. Sin anotarlo, cada
+   busqueda de alojamiento volvia a pagar ese searchDestination. Se recuerda BOOKING_SIN_DISTRITO_DIAS (7 por
+   defecto). Los errores de red o HTTP siguen sin guardarse (ver arriba).
+
+   Aciertos y faltas tambien van a Supabase: en Vercel cada instancia arranca con la memoria vacia y repetia hasta 13
+   searchDestination (la ciudad mas las playas) antes de buscar un solo hotel. precargarDestinosBooking los trae en una
+   sola consulta. */
+const bookingSinDistrito = new Map();
+const BOOKING_DEST_TTL_MS = 30 * 86400000;
+const bookingSinDistritoMs = function () { return (Number(process.env.BOOKING_SIN_DISTRITO_DIAS) || 7) * 86400000; };
+const claveDestPersistente = function (cacheKey) { return 'booking-dest|' + cacheKey.replace(/[,()%\s]/g, '_'); };
+const candidatosBooking = function (nombre) {
+  const partes = String(nombre || '').trim().split(/\s*\/\s*/).map(function (x) { return x.trim(); }).filter(Boolean);
+  return partes.length ? partes : [String(nombre || '').trim()];
+};
+function guardarDestBooking(cacheKey, valor, ms) {
+  if (cacheDb.enabled()) cacheDb.store([{ key: claveDestPersistente(cacheKey), value: valor, expiresAt: Date.now() + ms }]);
+}
+async function precargarDestinosBooking(nombres) {
+  const host = bookingSettings().host;
+  if (!host || !cacheDb.enabled()) return;
+  const faltan = [];
+  nombres.forEach(function (nombre) {
+    candidatosBooking(nombre).forEach(function (c) {
+      const k = bookingCacheKey(host, c);
+      if (!bookingDestIdCache.has(k) && !(bookingSinDistrito.get(k) > Date.now()) && faltan.indexOf(k) < 0) faltan.push(k);
+    });
+  });
+  if (!faltan.length) return;
+  const leidos = new Map();
+  await cacheDb.prefetch(leidos, faltan.map(claveDestPersistente));
+  faltan.forEach(function (k) {
+    const hit = leidos.get(claveDestPersistente(k));
+    if (!hit || !hit.value) return;
+    if (hit.value.sinDistrito) bookingSinDistrito.set(k, hit.expiresAt);
+    else if (hit.value.dest_id != null && hit.value.search_type) bookingDestIdCache.set(k, hit.value);
+  });
+}
 /* Lista de hoteles ya consultada: misma ciudad/barrio, fechas y huespedes dentro
    de BOOKING_HOTELS_TTL_MIN (30 min por defecto) se responde de memoria. Sin esto
    cada apertura de la pantalla repetia la busqueda de la ciudad mas hasta 12 de
@@ -832,14 +891,14 @@ async function fetchBookingHotelsLive(destKey, destName, style, extra) {
   // "Trancoso / Arraial d'Ajuda". Booking no entiende esa barra: searchDestination
   // no devuelve nada y el destino caía entero al respaldo, sin hoteles reales.
   // Se prueban las partes en orden y se usa la primera que resuelva.
-  const candidatos = hotelName.split(/\s*\/\s*/).map(function (part) { return part.trim(); }).filter(Boolean);
-  if (!candidatos.length) candidatos.push(hotelName);
+  const candidatos = candidatosBooking(hotelName);
   let target = null;
   let consultado = null;
   for (const candidato of candidatos) {
     const cacheKey = bookingCacheKey(settings.host, candidato);
     const guardado = bookingDestIdCache.get(cacheKey);
     if (guardado) { target = guardado; consultado = candidato; break; }
+    if (extra && extra.soloDistrito && bookingSinDistrito.get(cacheKey) > Date.now()) continue;
     const destinationUrl = new URL('/api/v1/hotels/searchDestination', 'https://' + settings.host);
     destinationUrl.searchParams.set('query', candidato);
     destinationUrl.searchParams.set('locale', 'es');
@@ -856,7 +915,12 @@ async function fetchBookingHotelsLive(destKey, destName, style, extra) {
       target = elegido;
       consultado = candidato;
       bookingDestIdCache.set(cacheKey, elegido);
+      guardarDestBooking(cacheKey, { dest_id: elegido.dest_id, search_type: elegido.search_type, dest_type: elegido.dest_type || '' }, BOOKING_DEST_TTL_MS);
       break;
+    }
+    if (extra && extra.soloDistrito) {
+      bookingSinDistrito.set(cacheKey, Date.now() + bookingSinDistritoMs());
+      guardarDestBooking(cacheKey, { sinDistrito: true }, bookingSinDistritoMs());
     }
   }
   if (!target) throw new Error('Booking API no encontró la ciudad "' + hotelName + '" (probó: ' + candidatos.join(', ') + ').');
@@ -937,6 +1001,9 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   };
   let realHotels = [];
   try {
+    const conGrupos = diag && !(extra && extra.noGroups);
+    await precargarDestinosBooking([destName].concat(conGrupos ? playas.nombresDePlayas(destKey).concat(playas.nombresDeZonas(destKey)).slice(0, PLAYAS_CONSULTADAS).map(function (nombre) { return nombre + ', ' + destName; }) : []))
+      .catch(function () { /* sin la precarga se consulta a Booking como antes */ });
     realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, hotelExtra)).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName, geoKey: destKey }); });
     if (realHotels.length < 3) {
       const nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
@@ -1866,10 +1933,15 @@ async function estadoPrecarga() {
   Object.keys(AIR_DESTINATIONS).forEach(function (k) { const a = AIR_DESTINATIONS[k]; if (model.DEST[k]) (porAeropuerto[a] = porAeropuerto[a] || []).push(model.DEST[k].name); });
   vuelos.aeropuertos = porAeropuerto;
   const st = flightProviders.stats();
+  /* La ultima lectura de la cuota de Booking: la de esta instancia o la guardada por otra, la mas nueva. */
+  const leidos = new Map();
+  await cacheDb.prefetch(leidos, ['booking-uso']).catch(function () { return 0; });
+  const otra = leidos.get('booking-uso'), uso = otra && otra.value && otra.value.at > bookingUso.at ? otra.value : bookingUso;
   return {
     vuelos: vuelos,
     hoteles: { destinos: factores.length, calibrados: factores.filter(function (x) { return x.factor > 0; }).length, sinDatos: factores.filter(function (x) { return x.factor === null; }).length, factores: factores },
     ignav: { gastoHoy: st.gastoHoy || 0, topeDiario: st.topeDiario || null },
+    booking: { limite: uso.limite, restantes: uso.restantes, resetSeg: uso.resetSeg, at: uso.at || null, playasPorBusqueda: PLAYAS_CONSULTADAS },
     topes: { vuelosPorDia: Number(process.env.PRECALENTAR_GUIAS_MAX || 12), hotelesPorDia: Number(process.env.PRECALENTAR_HOTELES_MAX || 4) }
   };
 }

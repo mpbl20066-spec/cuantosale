@@ -2065,8 +2065,9 @@
     var cats = [['economico', 'Económico'], ['intermedio', 'Equilibrado'], ['confort', 'Cómodo'], ['all-inclusive', 'All Inclusive']];
     var categoria = HOTELES.some(function (h) { return h.tipo; }) ? '<div class="hc-cat"><span class="hc-l" id="hc-cat">Categoría de alojamiento</span><div class="hc-chips" role="group" aria-labelledby="hc-cat">' +
       cats.map(function (c) { return '<button type="button" class="hc-chip' + (S.catH === c[0] ? ' is-on' : '') + '" data-cath="' + c[0] + '" aria-pressed="' + (S.catH === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div></div>' : '';
-    /* La zona o playa se ve siempre que haya hoteles (aunque sea una sola zona), para que el filtro no desaparezca al cambiar de categoria */
-    var selector = playas.length ? '<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">' + (ciudad ? 'Zona' : 'Zona o playa') + '</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
+    /* La zona o playa se ve cuando hay al menos dos para elegir: con una sola, "Todas" y ese chip muestran lo mismo.
+       Las zonas salen de la categoria, no de la zona elegida, asi que elegir una no hace desaparecer el filtro. */
+    var selector = playas.length > 1 ?'<div class="hc-zona"><span class="hc-l hc-l--up" id="hc-zona">' + (ciudad ? 'Zona' : 'Zona o playa') + '</span><div class="hc-chips" role="group" aria-labelledby="hc-zona">' +
       zchip('todas', 'Todas', 0) + playas.map(function (x) { return zchip(x[0], x[0], x[1]); }).join('') + '</div></div>' : '';
     var iPin = '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>';
     /* Los filtros van plegados, como en Destinos: una barra con lo elegido y el boton de filtros; al tocarlo se abre

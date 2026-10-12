@@ -90,7 +90,8 @@
       html += '<section class="kpis" aria-label="Precios de las guías">' +
         kpiPre('vuelos', 'Vuelos de las guías', pc.vuelos.conPrecio + ' / ' + pc.vuelos.rutas, 'meses con precio real (hasta ' + pc.topes.vuelosPorDia + ' por día)', pc.vuelos.conPrecio < pc.vuelos.rutas ? 'kpi--warn' : 'kpi--ok') +
         kpiPre('hoteles', 'Hoteles calibrados', pc.hoteles.calibrados + ' / ' + pc.hoteles.destinos, pc.hoteles.sinDatos ? pc.hoteles.sinDatos + ' sin hoteles en Booking' : 'con Booking, se renueva cada 30 días', pc.hoteles.calibrados < pc.hoteles.destinos ? 'kpi--warn' : 'kpi--ok') +
-        kpi('Ignav hoy', pc.ignav.gastoHoy + (pc.ignav.topeDiario ? ' / ' + pc.ignav.topeDiario : ''), 'búsquedas del día (tope)', pc.ignav.topeDiario && pc.ignav.gastoHoy >= pc.ignav.topeDiario ? 'kpi--warn' : '') + '</section>';
+        kpi('Ignav hoy', pc.ignav.gastoHoy + (pc.ignav.topeDiario ? ' / ' + pc.ignav.topeDiario : ''), 'búsquedas del día (tope)', pc.ignav.topeDiario && pc.ignav.gastoHoy >= pc.ignav.topeDiario ? 'kpi--warn' : '') +
+        kpiBooking(pc.booking) + '</section>';
       if (S.verPre) html += detallePrecarga(pc, S.verPre);
     }
     html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : vistaProveedores(d))));
@@ -98,6 +99,14 @@
     app.innerHTML = html;
     if (S.draft) abrirPanel();
     else if (S.prov) abrirProv();
+  }
+  /* Cuota de Booking (RapidAPI): lo que queda del plan segun la ultima respuesta. Avisa con menos del 15 %. */
+  function kpiBooking(b) {
+    if (!b) return '';
+    if (b.restantes == null) return kpi('Booking', '—', 'todavía sin lectura de la cuota');
+    var renueva = b.resetSeg != null && b.at ? new Date(b.at + b.resetSeg * 1000) : null;
+    var sub = 'consultas que quedan' + (renueva ? ' · se renueva el ' + renueva.getDate() + '/' + (renueva.getMonth() + 1) : '') + ' · leído ' + new Date(b.at).toLocaleString('es-UY', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return kpi('Booking', b.restantes.toLocaleString('es-UY') + (b.limite ? ' / ' + b.limite.toLocaleString('es-UY') : ''), sub, b.limite && b.restantes < b.limite * 0.15 ? 'kpi--warn' : 'kpi--ok');
   }
   /* Tarjeta de la precarga que se puede tocar: abre (o cierra) el detalle debajo. */
   function kpiPre(cual, t, v, sub, cls) {

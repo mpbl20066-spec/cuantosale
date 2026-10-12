@@ -1145,6 +1145,33 @@ function haversineKm(a, b) {
       assert.strictEqual(vecesQue('Cabo Frio'), 1, 'cambiar de tipo de alojamiento tampoco');
     } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; }
   });
+  /* Las busquedas por playa piden el distrito ("Tartaruga, Búzios"). Si Booking responde bien y no tiene ese
+     distrito, no lo va a tener en la proxima busqueda: preguntarlo de nuevo era gastar cuota en cada render. */
+  await t('una playa que Booking no tiene como distrito no se vuelve a consultar', async function () {
+    const originalFetch = global.fetch;
+    process.env.BOOKING_API_KEY = 'test-key';
+    const busquedas = [];
+    global.fetch = async function (url) {
+      const parsed = new URL(url);
+      if (parsed.pathname.endsWith('/searchDestination')) {
+        const q = parsed.searchParams.get('query');
+        busquedas.push(q);
+        return { ok: true, status: 200, json: async function () { return { data: [{ dest_id: 'c-' + q, search_type: 'city', name: q }] }; } };
+      }
+      if (parsed.pathname.endsWith('/searchHotels')) return { ok: true, status: 200, json: async function () { return { data: { hotels: [
+        { hotel_id: 'x', property: { name: 'Pousada da Praia' }, priceBreakdown: { grossPrice: { value: 500, currency: 'USD' } } }
+      ] } }; } };
+      return { ok: true, status: 200, json: async function () { return { data: [] }; } };
+    };
+    const vecesQue = function (q) { return busquedas.filter(function (x) { return x === q; }).length; };
+    try {
+      app.resetBookingDestCache();
+      await app.hotelRecommendations('buz', 'Búzios', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 }, {});
+      assert.strictEqual(vecesQue('Tartaruga, Búzios'), 1, 'la primera busqueda tiene que preguntar por la playa');
+      await app.hotelRecommendations('buz', 'Búzios', 'eq', { dep: dep, ret: ret, pax: 2, nights: 7 }, {});
+      assert.strictEqual(vecesQue('Tartaruga, Búzios'), 1, 'la segunda no puede volver a preguntar por un distrito que Booking no tiene');
+    } finally { global.fetch = originalFetch; process.env.BOOKING_API_KEY = ''; app.resetBookingDestCache(); }
+  });
   await t('un id de ciudad que no se pudo resolver no se cachea', async function () {
     const originalFetch = global.fetch;
     process.env.BOOKING_API_KEY = 'test-key';
