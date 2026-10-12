@@ -5,6 +5,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Guía del destino · CuántoSale</title>
+<meta name="description" content="Guía de viaje para viajar desde Uruguay: qué hacer, playas, dónde comer, cuándo ir y cuánto cuesta el viaje completo.">
 <script src="tema.js"></script>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -27,36 +28,56 @@
   .u-back svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
   .u-main{flex:1;overflow-y:auto;scrollbar-width:none}
   .u-main::-webkit-scrollbar{display:none}
-  .u-hero{position:relative;height:220px;background:var(--cel-soft) center/cover}
-  .u-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.45) 0,transparent 38%,rgba(10,16,26,.62) 100%)}
-  .u-hero__t{position:absolute;left:18px;right:18px;bottom:14px;z-index:1;color:#fff}
-  .u-hero__t h1{margin:0;font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.45)}
-  .u-hero__t small{display:block;margin-top:4px;font-size:13px;font-weight:600;opacity:.95}
-  .u-hero__vol{display:block;margin-top:6px;font-size:12.5px;font-weight:700;color:#fff;opacity:.9}
-  .u-cuerpo{padding:14px 18px 0}
-  .u-tabs{display:flex;gap:4px;position:sticky;top:0;z-index:3;padding:10px 0 0;background:var(--bg);overflow-x:auto;scrollbar-width:none}
+  /* Portada: la foto manda. Encima, el nombre con la promesa (descubri cuanto cuesta viajar), para que sirve la guia
+     y el boton al presupuesto, asi nadie tiene que bajar hasta el final para calcular. */
+  .u-hero{position:relative;min-height:390px;display:flex;align-items:flex-end;background:#0B1F3A center/cover}
+  .u-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.5) 0,rgba(10,16,26,.1) 30%,rgba(10,16,26,.85) 100%)}
+  .u-hero__t{position:relative;z-index:1;width:100%;box-sizing:border-box;padding:76px 18px 22px;color:#fff}
+  .u-hero__eye{display:inline-block;margin-bottom:10px;padding:5px 11px;border-radius:99px;background:rgba(10,16,26,.55);font-size:12.5px;font-weight:700;letter-spacing:.02em}
+  .u-hero__t h1{margin:0;font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.12;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+  .u-hero__t h1 span{color:var(--accent)}
+  .u-hero__p{margin:10px 0 0;max-width:560px;font-size:15.5px;font-weight:600;line-height:1.45;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+  .u-hero__val{display:flex;align-items:center;gap:7px;margin:10px 0 0;font-size:13px;font-weight:700;color:rgba(255,255,255,.92)}
+  .u-hero__val svg{flex:0 0 auto;color:var(--accent)}
+  .u-hero__cta{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;min-height:50px;padding:0 24px;border-radius:14px;background:var(--action-bg);color:var(--action-ink);font-size:16px;font-weight:800;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .u-hero__cta:focus-visible,.u-go:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .u-cuerpo{padding:18px 18px 0}
+  /* Resumen practico: solo los datos que hay (estimado del modelo, medios, temporada, lo que trae la guia). */
+  .u-datos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 6px}
+  .u-dato{padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+  .u-dato--ancho{grid-column:1/-1}
+  .u-dato__l{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .u-dato__l svg{flex:0 0 auto;color:var(--azul)}
+  .u-dato__v{display:block;font-family:var(--fh);font-size:21px;font-weight:800;line-height:1.2;color:var(--ink)}
+  .u-dato__v small{font-family:var(--fb);font-size:13px;font-weight:700;color:var(--ink2)}
+  .u-dato__r{display:block;font-size:14.5px;font-weight:700;line-height:1.4;color:var(--ink)}
+  .u-dato__r+.u-dato__r{margin-top:5px}
+  .u-dato__r small{display:block;font-size:13px;font-weight:600;color:var(--ink2)}
+  .u-dato__n{display:block;margin-top:7px;font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ink2)}
+  .u-tabs{display:flex;gap:8px;position:sticky;top:0;z-index:3;margin:0 -18px;padding:12px 18px;background:var(--bg);overflow-x:auto;scrollbar-width:none}
   .u-tabs::-webkit-scrollbar{display:none}
-  .u-tab{flex:0 0 auto;padding:10px 13px;border:0;border-bottom:2.5px solid transparent;background:transparent;color:var(--ink2);font-size:13.5px;font-weight:700;cursor:pointer}
-  .u-tab.is-on{color:var(--ink);border-bottom-color:var(--accent)}
-  .u-tab:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
-  .u-lead{margin:0 0 14px;font-size:14.5px;font-weight:600;color:var(--ink2);line-height:1.5}
-  .u-h2{margin:18px 0 8px;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--ink)}
-  .u-item{padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:9px}
-  .u-item b{display:block;font-size:15px;line-height:1.25}
-  .u-item .meta{display:block;margin-top:3px;font-size:12px;font-weight:700;color:var(--azul)}
-  .u-item p{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.5}
-  .u-foto{height:110px;margin:-13px -13px 10px;border-radius:16px 16px 0 0;background:var(--cel-soft) center/cover}
+  .u-tab{flex:0 0 auto;padding:9px 15px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:700;cursor:pointer}
+  .u-tab.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+  .u-tab:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .u-lead{margin:24px 0 6px;font-size:16px;font-weight:600;color:var(--ink);line-height:1.55}
+  .u-h2{margin:26px 0 12px;font-family:var(--fh);font-size:21px;font-weight:800;color:var(--ink)}
+  .u-item{padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface);margin-bottom:12px}
+  .u-item b{display:block;font-size:17px;line-height:1.3}
+  .u-item .meta{display:block;margin-top:4px;font-size:13px;font-weight:700;color:var(--azul)}
+  .u-item p{margin:8px 0 0;font-size:14.5px;font-weight:500;color:var(--ink2);line-height:1.55}
+  .u-foto{height:180px;margin:-14px -14px 12px;border-radius:18px 18px 0 0;background:var(--cel-soft) center/cover}
   .u-precio{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:12px;font-weight:800}
   .u-item--temp .u-temp{margin:0}
   .u-temp{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.5}
   /* El cierre: desde la guia al buscador, como en la maqueta. */
-  .u-handoff{margin:22px 0 0;padding:18px;border:1.5px solid var(--azul);border-radius:20px;background:var(--cel-soft);color:var(--ink)}
-  .u-handoff h2{margin:0 0 5px;font-family:var(--fh);font-size:19px;font-weight:800;line-height:1.2}
-  .u-handoff p{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--ink2);line-height:1.5}
-  .u-handoff__b{display:flex;gap:9px}
-  .u-handoff__b a,.u-handoff__b button{flex:1;box-sizing:border-box;padding:14px;border-radius:14px;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}
+  .u-handoff{margin:28px 0 0;padding:22px 20px;border-radius:22px;background:#0B1F3A;color:#fff}
+  .u-handoff__eye{display:block;margin-bottom:6px;font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .u-handoff h2{margin:0 0 8px;font-family:var(--fh);font-size:23px;font-weight:800;line-height:1.2;color:#fff}
+  .u-handoff p{margin:0 0 18px;font-size:15px;font-weight:500;color:rgba(255,255,255,.85);line-height:1.5}
+  .u-handoff__b{display:flex;flex-wrap:wrap;gap:10px}
+  .u-handoff__b a,.u-handoff__b button{flex:1 1 200px;box-sizing:border-box;min-height:50px;padding:14px;border-radius:14px;font-size:15px;font-weight:800;text-decoration:none;cursor:pointer;text-align:center}
   .u-go{background:var(--action-bg);color:var(--action-ink);border:0}
-  .u-volver{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);border:0}
+  .u-volver{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.6);border:0}
   .u-cargando{padding:30px 18px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
   .u-cerrada{margin:14px 18px 0;padding:18px;border:1px dashed var(--line);border-radius:18px;background:var(--surface);text-align:center}
   .u-cerrada b{display:block;font-family:var(--fh);font-size:16px;margin-bottom:5px}
@@ -83,7 +104,7 @@
   .u-acc .u-precio{margin-top:9px}
   .u-llegar{display:inline-flex;align-items:center;gap:5px;margin-top:9px;padding:5px 11px;border-radius:99px;background:var(--cel-soft);color:var(--azul);font-size:12.5px;font-weight:800;text-decoration:none}
   .u-llegar:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .u-mapa{height:220px;margin:0 0 12px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--cel-soft);position:relative;z-index:0}
+  .u-mapa{height:280px;margin:0 0 14px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--cel-soft);position:relative;z-index:0}
   .u-pin span{display:grid;place-items:center;width:28px;height:28px;box-sizing:border-box;border:2px solid #fff;border-radius:50%;background:#0B1F3A;color:#fff;font:800 12.5px/1 var(--fb);box-shadow:0 2px 6px rgba(0,0,0,.35)}
   .u-lock__trae{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:2px 0 12px}
   .u-lock__chip{padding:5px 10px;border-radius:99px;background:var(--cel-soft);color:var(--ink);font-size:12px;font-weight:700}
@@ -109,6 +130,7 @@
   <div class="u-foot" id="foot"></div>
 </div>
 <script src="destinos-datos.js"></script>
+<script src="/transfer-precios.js"></script>
 <script src="viaje-datos.js"></script>
 <script src="home-track.js"></script>
 <script>
@@ -119,9 +141,11 @@
   var K = /^[a-z0-9-]{1,40}$/.test(qs.get('destino') || '') ? qs.get('destino') : 'fln', NOM = C.Nombres[K] || 'Tu destino';
   /* Pestanas: solo salen las que tienen algo. "Qué ver" son las atracciones (en Sao Paulo, Gramado, Canela y Porto
      Alegre es la seccion principal, con foto y mapa). La primera pestana es Playas si hay, si no Qué ver. */
-  var TAB = [{ id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Qué ver', k: 'atracciones' }, { id: 'hacer', nom: 'Qué hacer', k: 'hacer' },
-    { id: 'comer', nom: 'Comida', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
-  var S = { tab: '', guia: null, region: '', estado: 'cargando' };
+  var TAB = [{ id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Lugares para ver', k: 'atracciones' }, { id: 'hacer', nom: 'Paseos y excursiones', k: 'hacer' },
+    { id: 'comer', nom: 'Dónde comer', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
+  var S = { tab: '', guia: null, region: '', estado: 'cargando', est: null };
+  /* El presupuesto de la guia: el viaje real de CuantoSale con el destino ya elegido (/destinos), no una pantalla aparte. */
+  var aPresupuesto = function (fuente) { return 'home-destino.html?destino=' + K + '&fuente=' + fuente; };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
   var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
   var lista = function (k) { return (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : []; };
@@ -129,10 +153,84 @@
   var tieneLugar = function (x) { return typeof x.lat === 'number' && typeof x.lng === 'number'; };
 
   function cabecera() {
-    return '<div class="u-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="u-hero__t"><h1>' + esc(NOM) + '</h1>' +
-      '<small>' + (S.region ? esc(S.region) + ', Brasil' : 'Brasil') + '</small>' +
-      (S.guia && S.guia.temporada ? '<span class="u-hero__vol">Temporada alta: ' + S.guia.temporada.alta.map(function (m) { return C.MESES[m - 1]; }).filter(Boolean).join(', ') + '</span>' : '') +
+    var check = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+    return '<div class="u-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="u-hero__t">' +
+      '<span class="u-hero__eye">Guía de viaje · ' + (S.region ? esc(S.region) + ', Brasil' : 'Brasil') + '</span>' +
+      '<h1>' + esc(NOM) + ': <span>descubrí cuánto cuesta viajar</span></h1>' +
+      '<p class="u-hero__p">Qué hacer, cómo llegar desde Uruguay y cuánto presupuestar para organizar tu viaje.</p>' +
+      '<p class="u-hero__val">' + check + 'Con el costo total desde Montevideo: transporte, alojamiento, comidas y traslados.</p>' +
+      '<a class="u-hero__cta" href="' + aPresupuesto('guia_portada') + '" data-evento="guia_calcular_viaje" data-lugar="portada" data-destino="' + K + '">Calculá tu viaje →</a>' +
       '</div></div>';
+  }
+  /* Resumen practico. Cada dato sale de algo que ya existe y si no esta, no se muestra:
+     - presupuesto y como llegar: la misma estimacion de la portada de la app (/api/destinos-destacados, calibrada con
+       precios reales de vuelos y de Booking), para 2 personas y 7 noches; se dice que es estimado y que incluye.
+     - cuando ir: la temporada de la guia (alta y baja, con su nota), que el server manda tambien sin sesion.
+     - en esta guia: cuantas playas, lugares y datos trae.
+     No hay "duracion recomendada" en los datos de las guias, asi que no se inventa. */
+  var MEDIO = { avion_mvd: 'En avión desde Montevideo', avion_ba: 'En avión vía Buenos Aires', auto: 'En auto desde Montevideo', bus: 'En bus desde Montevideo', ferry: 'En ferry' };
+  var INCLUYE_MEDIO = { avion_mvd: 'vuelo', avion_ba: 'vuelo', auto: 'nafta y peajes', bus: 'pasaje de bus', ferry: 'ferry' };
+  /* En avion, el tramo del aeropuerto al destino (transfer-precios.js): sin esto Paraty decia "6 h" y faltaban los
+     248 km de ruta desde Rio. Solo se muestra si es un tramo de verdad (mas de 30 km) o un cruce en barco. */
+  function traslado(modo) {
+    if (modo !== 'avion_mvd' && modo !== 'avion_ba') return '';
+    var t = (window.CS_TRANSFER_PRICES || {})[K];
+    if (!t) return '';
+    if (t.modo === 'ferry') return '<small>Más el cruce en barco desde el continente</small>';
+    if (!(t.km > 30)) return '';
+    return '<small>Más unos ' + Math.round(t.km) + ' km por ruta desde el aeropuerto' + (t.horas ? ' (unas ' + (Math.round(t.horas * 2) / 2).toString().replace('.', ',') + ' h)' : '') + '</small>';
+  }
+  function icono(d) { return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; }
+  function resumenPractico() {
+    var cajas = [], e = S.est, temp = (S.guia && S.guia.temporada) || (S.lock && S.lock.temporada) || null;
+    if (e && e.barato) {
+      cajas.push('<div class="u-dato u-dato--ancho"><span class="u-dato__l">' + icono('<path d="M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3.2c0 4.8 10 2.5 10 7.4 0 2.1-2.2 3.4-5 3.4s-5-1.3-5-3.2"/>') + 'Presupuesto orientativo</span>' +
+        '<span class="u-dato__v">Desde ' + usd(e.barato.pp) + ' <small>por persona</small></span>' +
+        '<span class="u-dato__n">Estimado para 2 personas y 7 noches, saliendo de Montevideo: ' + (INCLUYE_MEDIO[e.barato.mode] || 'transporte') + ', alojamiento económico, comidas, transporte local y traslados. El precio exacto lo ves al calcular tu viaje con tus fechas.</span></div>');
+    }
+    if (e && (e.barato || e.vuelo)) {
+      var filas = [], vistos = {};
+      [e.barato, e.vuelo].forEach(function (x) {
+        if (!x || vistos[x.mode] || !MEDIO[x.mode]) return; vistos[x.mode] = 1;
+        filas.push('<span class="u-dato__r">' + MEDIO[x.mode] + (x.dur ? '<small>' + esc(x.dur) + ' (aprox.)</small>' : '') + traslado(x.mode) + '</span>');
+      });
+      if (filas.length) cajas.push('<div class="u-dato"><span class="u-dato__l">' + icono('<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>') + 'Cómo llegar</span>' + filas.join('') + '</div>');
+    }
+    if (temp && Array.isArray(temp.alta) && temp.alta.length) {
+      var mes = function (l) { return (l || []).map(function (m) { return C.MESES[m - 1]; }).filter(Boolean).join(', '); };
+      cajas.push('<div class="u-dato"><span class="u-dato__l">' + icono('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>') + 'Cuándo ir</span>' +
+        '<span class="u-dato__r">Temporada alta<small>' + mes(temp.alta) + '</small></span>' +
+        (temp.baja && temp.baja.length ? '<span class="u-dato__r">Temporada baja<small>' + mes(temp.baja) + '</small></span>' : '') + '</div>');
+    }
+    /* Solo con la guia abierta: con el candado, los mismos numeros ya estan en la tarjeta de iniciar sesion. */
+    var inc = S.guia ? { playas: lista('beaches').length, atracciones: lista('atracciones').length, hacer: lista('hacer').length, comer: lista('comer').length, tips: lista('tips').length } : null;
+    if (inc) {
+      var trae = [[inc.playas, 'playa', 'playas'], [inc.atracciones, 'lugar para ver', 'lugares para ver'], [inc.hacer, 'paseo', 'paseos'], [inc.comer, 'dato para comer', 'datos para comer'], [inc.tips, 'tip local', 'tips locales']]
+        .filter(function (x) { return x[0] > 0; }).map(function (x) { return '<b>' + x[0] + '</b> ' + (x[0] === 1 ? x[1] : x[2]); });
+      if (trae.length) cajas.push('<div class="u-dato u-dato--ancho"><span class="u-dato__l">' + icono('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>') + 'En esta guía</span><span class="u-dato__r">' + trae.join(' · ') + '</span><span class="u-dato__n">Con fotos, mapa y cómo llegar a cada lugar.</span></div>');
+    }
+    return cajas.length ? '<section class="u-datos" aria-label="Resumen del destino">' + cajas.join('') + '</section>' : '';
+  }
+  /* Cierre de la guia: el mismo boton que la portada, despues de la informacion. */
+  function cierre() {
+    return '<div class="u-handoff"><span class="u-handoff__eye">Tu próximo viaje</span><h2>Calculá tu viaje a ' + esc(NOM) + '</h2>' +
+      '<p>Armá tu presupuesto completo con tus fechas: vuelo, alojamiento, traslados y comidas, con precios reales.</p>' +
+      '<div class="u-handoff__b"><a class="u-go" href="' + aPresupuesto('guia') + '" data-evento="guia_calcular_viaje" data-lugar="cierre" data-destino="' + K + '">Descubrí cuánto te costaría →</a>' +
+      '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver arriba</button></div></div>';
+  }
+  /* Estimacion para el resumen (sin vuelos en vivo: es el modelo, no gasta busquedas pagas). Fechas como la portada de
+     la app: salida en 45 dias, 7 noches. */
+  function cargarEstimado() {
+    if (!/^https?:$/.test(location.protocol)) return;
+    var dep = C.sumarDias(C.iso(new Date()), 45), ret = C.sumarDias(dep, 7), item = K + '~' + dep + '~' + ret + '~economico';
+    var pedir = function (tr) {
+      return fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: tr, items: item }).toString())
+        .then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { return (j.items || [])[0] || null; }).catch(function () { return null; });
+    };
+    Promise.all([pedir('all'), pedir('flight')]).then(function (r) {
+      S.est = { barato: r[0] && r[0].pp > 0 ? r[0] : null, vuelo: r[1] && r[1].pp > 0 ? r[1] : null };
+      var el = $('u-datos'); if (el) el.innerHTML = resumenPractico();
+    });
   }
   /* Credito de la foto: solo las de Wikimedia con CC BY / BY-SA lo piden (autor y licencia), y va chiquito sobre la
      foto. Las propias (/fotos/guias, de Unsplash y Pexels) y las de dominio publico no llevan. */
@@ -230,25 +328,24 @@
   function pintar() {
     var cuerpo;
     if (S.estado === 'cargando') cuerpo = '<div class="u-cargando" role="status">Cargando la guía…</div>';
-    else if (S.estado === 'bloqueada') cuerpo = candado();
+    else if (S.estado === 'bloqueada') cuerpo = candado() + cierre();
     else if (S.estado === 'cerrada') cuerpo = '<div class="u-cerrada"><b>La guía no está disponible</b><small>No pudimos abrirla ahora. Podés ver los destinos y calcular tu viaje igual.</small></div>';
     else {
       var ts = tabs();
       if (!ts.some(function (t) { return t.id === S.tab; })) S.tab = ts.length ? ts[0].id : '';
       cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' +
-        (ts.length ? '<div class="u-tabs" role="tablist">' + ts.map(function (t) {
+        (ts.length ? '<div class="u-tabs" role="tablist" aria-label="Categorías de la guía">' + ts.map(function (t) {
           return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + ' <small>' + lista(t.k).length + '</small></button>';
         }).join('') + '</div>' +
         '<div role="tabpanel">' + listaGuia() + '</div>' : '') +
         '<div class="u-cierre">' + (S.guia.temporada && S.guia.temporada.nota ? '<section class="u-cuando"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>' : '') +
-        '<div class="u-handoff"><h2>¿Te gusta este destino?</h2>' +
-        '<p>Calculá cuánto sale tu viaje y reservá en pocos pasos.</p>' +
-        '<div class="u-handoff__b"><a class="u-go" href="home-destino.html?destino=' + K + '&fuente=guia" data-evento="guia_calcular_viaje" data-destino="' + K + '">Calcular un viaje →</a>' +
-        '<button type="button" class="u-volver" data-volver="1" data-evento="guia_volver">Volver a la guía</button></div></div></div>';
+        cierre() + '</div>';
     }
-    $('main').innerHTML = cabecera() + '<div class="u-cuerpo">' + cuerpo + '</div>';
+    $('main').innerHTML = cabecera() + '<div class="u-cuerpo"><div id="u-datos">' + resumenPractico() + '</div>' + cuerpo + '</div>';
     $('foot').innerHTML = S.estado === 'cerrada' ? '<a class="u-go" style="display:block;padding:15px;border-radius:14px;text-align:center;font-weight:800;text-decoration:none;background:var(--action-bg);color:var(--action-ink)" href="home-destino.html?destino=' + K + '&fuente=guia_cerrada">Buscar otro destino</a>' : '';
-    document.title = NOM + ' · Guía de viaje · CuántoSale';
+    document.title = NOM + ': guía de viaje desde Uruguay y cuánto cuesta · CuántoSale';
+    var md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute('content', 'Guía de ' + NOM + ' para viajar desde Uruguay: qué hacer, playas, dónde comer, cuándo ir y cuánto cuesta el viaje completo.');
     montarMapa();
   }
 
@@ -287,6 +384,7 @@
     if (t.dataset.volver) { $('main').scrollTop = 0; track('guia_volver'); }
   });
   pintar();
+  cargarEstimado();
   /* cuenta.js y los creditos de las fotos cargan despues de este script: se espera a que carguen
      (load, por el defer de los creditos). Al iniciar sesion con la guia bloqueada se vuelve a pedir. */
   window.addEventListener('load', function () {

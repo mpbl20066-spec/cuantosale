@@ -2205,7 +2205,9 @@ async function emitirTokenGuia(req, res, url) {
   const largo = function (k) { return Array.isArray(g[k]) ? g[k].length : 0; };
   const incluye = { playas: largo('beaches'), atracciones: largo('atracciones'), comer: largo('comer'), hacer: largo('hacer'), tips: largo('tips') };
   const u = await pas.usuarioDe(req);
-  if (!u) return sendJson(res, 401, { motivo: 'sesion', incluye: incluye, region: model.DEST[dest].region || '', error: 'Iniciá sesión para abrir la guía.' });
+  /* La temporada (meses y la nota) no es el contenido de la guia: va tambien sin sesion, para el resumen de arriba. */
+  const temporada = g.temporada && Array.isArray(g.temporada.alta) ? g.temporada : null;
+  if (!u) return sendJson(res, 401, { motivo: 'sesion', incluye: incluye, temporada: temporada, region: model.DEST[dest].region || '', error: 'Iniciá sesión para abrir la guía.' });
   const token = guiaToken(dest);
   if (!token) return sendJson(res, 503, { error: 'La Guia Secreta no esta disponible ahora.' });
   return sendJson(res, 200, { dest: dest, token: token });
@@ -2582,7 +2584,9 @@ function featuredPriceItems(req, res, url) {
       if (!cheapest) return null;
       return {
         key: key, total: cheapest.total, pp: cheapest.pp, nights: nights,
-        mode: cheapest.mode, modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel
+        mode: cheapest.mode, modeShort: cheapest.modeShort, tierLabel: cheapest.tierLabel,
+        // Duracion del viaje de ida ("unas 6 h con escala", "unas 17 h de manejo"): la guia la muestra en "Como llegar".
+        dur: cheapest.dur || ''
       };
     })
     .filter(Boolean)
