@@ -19,7 +19,7 @@
       "precio_brl": "Opcional. El precio real en reales. Gana sobre \"precio\": el build lo convierte con la cotizacion de _meta y le suma el margen. Llenalo cuando el precio venga de un operador brasilero.",
       "detalle": "El parrafo largo que se abre en el modal. Ahi van incluidas, duracion y qué llevar."
     },
-    "retirados": "El 2026-10-01 se sacaron 40 filas con activo: false (node retirar-tours-apagados.js). Estaban apagadas en la tabla y en el JSON al mismo tiempo, y eso hacia que scripts/cargar-tours.js las volviera a subir en cada carga. Quedaron en data/tours-apagados.json, que es un archivo de trabajo: la app no lo lee. Para recuperar una, se copia la fila de ahí de vuelta a tours[]."
+    "retirados": "El 2026-10-01 se sacaron 40 filas con activo: false (node retirar-tours-apagados.js). Estaban apagadas en la tabla y en el JSON al mismo tiempo, y eso hacia que scripts/cargar-tours.js las volviera a subir en cada carga. Quedaron en data/tours-apagados.json, que se borro el 2026-10-12: si hace falta recuperar una, esta en el historial de git (git log -- data/tours-apagados.json)."
   },
   "_destinos": {
     "rio": "Río de Janeiro, Brasil",
