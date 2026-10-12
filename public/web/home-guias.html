@@ -485,7 +485,9 @@
   }
   /* ---- "Mas baratos": vuelo + alojamiento por persona desde Montevideo, del mismo endpoint de la portada
      (/api/destinos-destacados: modelo de costos con el pasaje real si el servidor ya lo tiene). Viaje tipo: 2
-     personas, 7 noches desde el 15 del mes (ver fechasMes). Se pide una vez por mes. */
+     personas, 7 noches desde el 15 del mes (ver fechasMes). Se pide una vez por mes. Estilo ahorro, hotel economico y
+     en avion: el mismo viaje que el "Desde" de la guia (estimado-guia.js) y que abre la app, asi el precio de la
+     tarjeta y el de la guia coinciden cuando el mes es el mismo. */
   var PRECIOS = {}, PIDIENDO = {}, MEDIO = {};
   var MODO_APP = { avion_mvd: 'avion', avion_ba: 'avion', auto: 'auto', bus: 'bus' };
   /* el mismo link que "Calculá tu viaje" de la guia, con las fechas del precio que se mostro */
@@ -509,9 +511,9 @@
   function pedirPrecios(m) {
     if (PRECIOS[m] || PIDIENDO[m]) return;
     PIDIENDO[m] = true;
-    var f = fechasMes(m), items = DESTS.map(function (d) { return d.k + '~' + f.dep + '~' + f.ret; }).join(',');
+    var f = fechasMes(m), items = DESTS.map(function (d) { return d.k + '~' + f.dep + '~' + f.ret + '~economico'; }).join(',');
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
-    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'eq', origin: 'MVD', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
+    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: 'flight', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
       .then(function (j) { var por = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { por[it.key] = it.pp; MEDIO[m + it.key] = it.mode; } }); PRECIOS[m] = por; })
       .catch(function () { PRECIOS[m] = null; })

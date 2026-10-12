@@ -1334,6 +1334,49 @@ function haversineKm(a, b) {
       assert.ok(j.puntos.some(function (p) { return p.real; }), 'con el buscador andando algun punto tiene que traer precio real');
     }, { IGNAV_CALENDAR_LIVE: '1', IGNAV_DAILY_MAX: '100' });
   });
+  /* El 15 de dentro de dos meses, 7 noches: una de las fechas que precarga el cron para las guias. */
+  const fechaGuia = (function () {
+    const h = new Date(), d = new Date(h.getFullYear(), h.getMonth() + 2, 15, 12), r = new Date(d.getTime() + 7 * 864e5);
+    const iso = function (x) { return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+    return { dep: iso(d), ret: iso(r) };
+  })();
+  await t('la precarga de las guias guarda el vuelo del mes, no lo vuelve a pagar y el "Desde" lo usa', async function () {
+    let pedidos = 0;
+    await conIgnav(function (url, body) {
+      pedidos++;
+      return { itineraries: [ignavItinerario(300, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
+    }, async function () {
+      const rutas = [{ origin: 'MVD', destination: 'FLN', dep: fechaGuia.dep, ret: fechaGuia.ret }];
+      const r1 = await flights.precalentarMeses(rutas, 'ahorro', 5);
+      assert.strictEqual(r1.pedidas, 1);
+      assert.strictEqual(r1.pendientes, 0);
+      const r2 = await flights.precalentarMeses(rutas, 'ahorro', 5);
+      assert.strictEqual(r2.pedidas, 0, 'lo que ya tiene precio vigente no se vuelve a pedir');
+      assert.strictEqual(pedidos, 1);
+      const cob = await flights.coberturaMeses(rutas, 'ahorro');
+      assert.deepStrictEqual(cob, { rutas: 1, conPrecio: 1 });
+      const r = await get(port, '/api/destinos-destacados?pax=2&style=ahorro&origin=MVD&transport=flight&items=fln~' + fechaGuia.dep + '~' + fechaGuia.ret + '~economico');
+      const it = JSON.parse(r.body).items[0];
+      assert.strictEqual(it.vuelo, 'real');
+      assert.strictEqual(it.dep, fechaGuia.dep);
+      assert.strictEqual(it.ret, fechaGuia.ret);
+    });
+  });
+  await t('el factor de hotel calibrado lleva el alojamiento del "Desde" al precio de Booking', async function () {
+    const url = '/api/destinos-destacados?pax=2&style=ahorro&origin=MVD&transport=flight&items=fln~' + fechaGuia.dep + '~' + fechaGuia.ret + '~economico';
+    flights.clearCache();
+    try {
+      const antes = JSON.parse((await get(port, url)).body).items[0];
+      assert.strictEqual(antes.hotel, 'estimado');
+      await flights.guardarReferencia('hcal|fln', { factor: 1.5, muestras: 2 }, 864e5);
+      const despues = JSON.parse((await get(port, url)).body).items[0];
+      assert.strictEqual(despues.hotel, 'calibrado');
+      assert.ok(despues.pp > antes.pp, 'con hoteles reales 50 % mas caros el precio por persona tiene que subir');
+      // Un destino sin factor (solo "factor: null", sin hoteles en Booking) se queda con el modelo.
+      await flights.guardarReferencia('hcal|fln', { factor: null }, 864e5);
+      assert.strictEqual(JSON.parse((await get(port, url)).body).items[0].pp, antes.pp);
+    } finally { flights.clearCache(); }
+  });
   await t('el calendario rechaza destinos que no vuelan', async function () {
     const r = await get(port, '/api/vuelos/calendario?dest=zz&dep=' + dep + '&ret=' + ret + '&pax=2&style=eq');
     assert.strictEqual(r.status, 400);

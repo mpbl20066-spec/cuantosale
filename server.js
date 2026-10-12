@@ -1848,15 +1848,89 @@ async function precalentarVuelos(req, res) {
      40 destinos comparten 11 aeropuertos, asi que son ~121 rutas). Dura 14 dias; cada corrida pide hasta
      PRECALENTAR_GUIAS_MAX (12) de las que faltan, primero las mas cercanas. Con eso la guia elige el mes y muestra
      el "Desde" con el vuelo real, no con la tabla del modelo. */
-  const meses = [];
+  const meses = rutasGuias();
+  const topeEnv = function (n, def) { const v = process.env[n]; return v !== undefined && v !== '' && Number(v) >= 0 ? Number(v) : def; };
+  const maxGuias = topeEnv('PRECALENTAR_GUIAS_MAX', 12);
+  const maxHoteles = topeEnv('PRECALENTAR_HOTELES_MAX', 4);
+  const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias), calibrarHoteles(maxHoteles)]);
+  return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]), hoteles: r[2] }));
+}
+
+/* Para /admin: cobertura de la precarga de las guias (vuelos por mes y hoteles calibrados) y gasto de hoy. */
+async function estadoPrecarga() {
+  const vuelos = await flightProviders.coberturaMeses(rutasGuias(), 'ahorro');
+  const cal = await flightProviders.leerReferencias(HOME_DESTINATION_KEYS.map(hotelCalKey));
+  const factores = HOME_DESTINATION_KEYS.map(function (k, i) { return { destino: k, factor: cal[i] ? cal[i].factor : undefined }; });
+  const st = flightProviders.stats();
+  return {
+    vuelos: vuelos,
+    hoteles: { destinos: factores.length, calibrados: factores.filter(function (x) { return x.factor > 0; }).length, sinDatos: factores.filter(function (x) { return x.factor === null; }).length, factores: factores.filter(function (x) { return x.factor > 0; }) },
+    ignav: { gastoHoy: st.gastoHoy || 0, topeDiario: st.topeDiario || null },
+    topes: { vuelosPorDia: Number(process.env.PRECALENTAR_GUIAS_MAX || 12), hotelesPorDia: Number(process.env.PRECALENTAR_HOTELES_MAX || 4) }
+  };
+}
+
+/* Las rutas del precio de referencia: el 15 de cada uno de los proximos 11 meses, 7 noches, una por aeropuerto. */
+function rutasGuias() {
+  const hoy = model.getToday(), meses = [];
   const aeropuertos = Array.from(new Set(Object.keys(AIR_DESTINATIONS).map(function (k) { return AIR_DESTINATIONS[k]; })));
   for (let i = 1; i <= 11; i++) {
     const dep = new Date(hoy.getFullYear(), hoy.getMonth() + i, 15, 12);
     aeropuertos.forEach(function (a) { meses.push({ origin: 'MVD', destination: a, dep: model.iso(dep), ret: model.iso(model.addDays(dep, 7)) }); });
   }
-  const maxGuias = Math.max(0, Number(process.env.PRECALENTAR_GUIAS_MAX) || 12);
-  const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias)]);
-  return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]) }));
+  return meses;
+}
+
+/* ---------- calibracion del alojamiento ----------
+   El "Desde" de las guias y de "¿Cuando viajas?" usa el alojamiento del modelo, y la app, al abrir el viaje, elige el
+   hotel real mas barato de Booking en la categoria Economico. Pedir Booking para 40 destinos x 11 meses seria caro,
+   asi que se calibra: por destino, 2 fechas (el 15 del mes que viene y de dentro de 5 meses, 7 noches, 2 personas),
+   el hotel economico mas barato que mostraria la app contra lo que estimaba el modelo para esas mismas noches. El
+   promedio es el factor del destino (entre 0,5 y 3) y dura 30 dias. Cada corrida calibra hasta
+   PRECALENTAR_HOTELES_MAX destinos (4) de los que no tienen factor. */
+const HOTEL_CAL_TTL = 30 * 864e5;
+function hotelCalKey(k) { return 'hcal|' + k; }
+async function hotelRealMasBarato(key, dep, ret) {
+  const nights = model.daysBetween(model.parse(dep), model.parse(ret));
+  const diag = {};
+  const extra = { dep: dep, ret: ret, pax: 2, nights: nights, hotelType: 'economico', subcategory: '' };
+  const hotels = await hotelRecommendations(key, model.DEST[key].name, 'ahorro', extra, diag);
+  const todos = [].concat(hotels || [], [].concat.apply([], (diag.hotelsPorPlaya || []).map(function (g) { return g.hotels || []; })));
+  const totales = todos.filter(function (h) { return h.source === 'booking'; }).map(function (h) { return Number(h.total); }).filter(function (n) { return n > 0; });
+  return totales.length ? Math.min.apply(null, totales) : null;
+}
+async function calibrarHoteles(max) {
+  const out = { pendientes: 0, calibrados: 0, sinDatos: 0 };
+  if (!bookingSettings().key || !max) return out;
+  const claves = HOME_DESTINATION_KEYS.slice();
+  const vals = await flightProviders.leerReferencias(claves.map(hotelCalKey));
+  const faltan = claves.filter(function (k, i) { return !vals[i]; });
+  out.pendientes = faltan.length;
+  const hoy = model.getToday();
+  const fechas = [1, 5].map(function (m) {
+    const dep = new Date(hoy.getFullYear(), hoy.getMonth() + m, 15, 12);
+    return { dep: model.iso(dep), ret: model.iso(model.addDays(dep, 7)) };
+  });
+  await Promise.all(faltan.slice(0, max).map(async function (key) {
+    const ratios = [];
+    await Promise.all(fechas.map(async function (f) {
+      let real = null;
+      try { real = await hotelRealMasBarato(key, f.dep, f.ret); } catch (e) { console.warn('[hoteles-cal]', key, e.message); }
+      const estimado = model.lodgingNightlyCosts(key, 0, model.parse(f.dep), 7).reduce(function (s, n) { return s + n; }, 0);
+      if (real > 0 && estimado > 0) ratios.push(real / estimado);
+    }));
+    if (!ratios.length) {
+      // Sin hoteles reales no hay factor: se anota igual por 7 dias para no volver a gastar la consulta manana.
+      await flightProviders.guardarReferencia(hotelCalKey(key), { factor: null }, 7 * 864e5);
+      out.sinDatos++;
+      return;
+    }
+    const factor = Math.min(3, Math.max(0.5, ratios.reduce(function (s, x) { return s + x; }, 0) / ratios.length));
+    await flightProviders.guardarReferencia(hotelCalKey(key), { factor: Math.round(factor * 1000) / 1000, muestras: ratios.length }, HOTEL_CAL_TTL);
+    out.calibrados++;
+  }));
+  out.pendientes -= out.calibrados + out.sinDatos;
+  return out;
 }
 
 async function calendarioVuelos(req, res, url) {
@@ -2637,6 +2711,19 @@ async function featuredPriceItemsSinCatch(req, res, url) {
   }), style);
   const vueloReal = new Map();
   conVuelo.forEach(function (p, i) { if (reales[i] > 0) vueloReal.set(p, reales[i]); });
+  /* El factor de hotel de cada destino (calibrarHoteles): lleva el alojamiento del modelo a lo que cuesta el hotel
+     economico real mas barato que la app elige al abrir el viaje. */
+  const clavesDest = Array.from(new Set(pedidos.map(function (p) { return p.key; })));
+  const cal = await flightProviders.leerReferencias(clavesDest.map(hotelCalKey));
+  const factorHotel = {};
+  clavesDest.forEach(function (k, i) { if (cal[i] && cal[i].factor > 0) factorHotel[k] = cal[i].factor; });
+  const calibrar = function (prop, key) {
+    const f = factorHotel[key];
+    if (!f || !prop.parts || !(prop.parts.alojamiento > 0)) return prop;
+    const extra = Math.round(prop.parts.alojamiento * (f - 1));
+    const total = prop.total + extra;
+    return Object.assign({}, prop, { total: total, pp: Math.round(total / pax), parts: Object.assign({}, prop.parts, { alojamiento: prop.parts.alojamiento + extra }) });
+  };
   const items = pedidos
     .map(function (p) {
       const key = p.key, hotelType = p.hotelType, depDate = p.depDate, retDate = p.retDate, nights = p.nights;
@@ -2650,6 +2737,7 @@ async function featuredPriceItemsSinCatch(req, res, url) {
       const ppReal = vueloReal.get(p);
       const propuestas = model.build(trip, depDate, retDate, today, ppReal ? { avion_mvd: { pp: ppReal } } : null)
         .filter(function (proposal) { return proposal.mode !== 'avion_ba'; })
+        .map(function (proposal) { return calibrar(proposal, key); })
         .sort(function (a, b) { return a.total - b.total; });
       const cheapest = propuestas[0];
       if (!cheapest) return null;
@@ -2665,7 +2753,9 @@ async function featuredPriceItemsSinCatch(req, res, url) {
         // Duracion del viaje de ida ("unas 6 h con escala", "unas 17 h de manejo"): la guia la muestra en "Como llegar".
         dur: cheapest.dur || '',
         // 'real' si el pasaje salio de la cache de vuelos; 'estimado' si es de la tabla del modelo.
-        vuelo: cheapest.mode !== 'avion_mvd' ? null : (ppReal ? 'real' : 'estimado')
+        vuelo: cheapest.mode !== 'avion_mvd' ? null : (ppReal ? 'real' : 'estimado'),
+        // 'calibrado' si el alojamiento se ajusto con hoteles reales de Booking; 'estimado' si es la tabla del modelo.
+        hotel: factorHotel[key] ? 'calibrado' : 'estimado'
       }, transport === 'all' ? { opciones: Object.keys(porMedio).map(function (m) { return porMedio[m]; }) } : {});
     })
     .filter(Boolean);
@@ -3162,7 +3252,7 @@ function serveGrupoPage(req, res, groupId) {
    guarda en lib/pedidos.js para verlo en /admin. No tira nunca: si el almacenamiento
    falla, el pedido igual sigue su camino (WhatsApp y email al asesor). */
 const viajesGuardados = require('./lib/viajes-guardados');
-const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual });
+const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga });
 /* Webhook de WhatsApp (Cloud API de Meta): mensajes de los clientes y estados de los nuestros, para la bandeja del
    panel (lib/mensajes.js). GET es la verificacion que hace Meta al configurarlo (WHATSAPP_VERIFY_TOKEN). En POST se
    comprueba la firma X-Hub-Signature-256 con WHATSAPP_APP_SECRET (la clave secreta de la app de Meta): sin ella
@@ -3493,7 +3583,8 @@ function handleRequest(req, res) {
         'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
         'Cache-Control': 'public, max-age=0, must-revalidate, s-maxage=3600, stale-while-revalidate=86400', 'Vary': 'Accept-Encoding'
       };
-      const cuerpo = injectAnalytics(Buffer.from(html, 'utf8'), '.html');
+      // versionarAssets: /web/estimado-guia.js y /transfer-precios.js con ?v=, para que un cambio no quede viejo en el navegador.
+      const cuerpo = injectAnalytics(Buffer.from(versionarAssets(html), 'utf8'), '.html');
       // Se comprime como los estaticos: eran ~25 KB de HTML sin comprimir en la pagina que llega desde Google.
       const ae = String(req.headers['accept-encoding'] || '');
       const enc = /\bbr\b/.test(ae) ? 'br' : (ae.indexOf('gzip') >= 0 ? 'gzip' : null);
