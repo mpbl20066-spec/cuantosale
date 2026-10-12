@@ -1661,7 +1661,7 @@ async function precioVueloMasBarato(destino, ida, vuelta, pax) {
 }
 function alertasApi() {
   if (!alertasCache) alertasCache = require('./lib/alertas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout,
-    precio: precioVueloMasBarato, gastoHoy: function () { return flightProviders.stats().gastoHoy || 0; },
+    precio: precioVueloMasBarato, gastoHoy: function () { return flightProviders.stats().gastoHoy || 0; }, push: require('./lib/push'),
     nombreDestino: function (k) { return AIR_DESTINATIONS[k] && model.DEST[k] ? model.DEST[k].name : null; } });
   return alertasCache;
 }
@@ -2720,7 +2720,7 @@ function prelaunchAuthorized(req) {
    - /api/travelpayouts/postback: lo llama el panel de Travelpayouts desde
      afuera, sin sesion ni basic auth. Si estuviera candado, la venta nunca se
      confirmaria y ademas el panel lo marcaria como error. */
-const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/travelpayouts/postback', '/api/whatsapp/webhook', '/api/alertas/baja']);
+const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/travelpayouts/postback', '/api/whatsapp/webhook', '/api/alertas/baja', '/api/alertas/push-resumen']);
 
 // Rutas que NO pasan por el candado de pre-lanzamiento. Queda vacío a propósito:
 // el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
@@ -3207,9 +3207,10 @@ function handleRequest(req, res) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la búsqueda.' });
       });
     }
-    if (url.pathname === '/api/alertas' || url.pathname === '/api/alertas/baja' || url.pathname === '/api/alertas/revisar') {
+    if (url.pathname === '/api/alertas' || url.pathname === '/api/alertas/baja' || url.pathname === '/api/alertas/revisar' || /^\/api\/alertas\/push(-clave|-resumen)?$/.test(url.pathname)) {
       const al = alertasApi(), alFallarAl = function (e) { console.error('[alertas]', e.message); if (!res.headersSent) sendJson(res, 500, { error: 'No pudimos procesar la alerta.' }); };
       if (url.pathname === '/api/alertas') return al.api(req, res, url).catch(alFallarAl);
+      if (url.pathname.indexOf('/api/alertas/push') === 0) return al.apiPush(req, res, url).catch(alFallarAl);
       if (req.method !== 'GET') return sendJson(res, 405, { error: 'Método no permitido.' });
       return (url.pathname === '/api/alertas/baja' ? al.baja(req, res, url) : al.revisar(req, res)).catch(alFallarAl);
     }

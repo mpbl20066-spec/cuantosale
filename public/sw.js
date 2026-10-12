@@ -95,3 +95,33 @@ self.addEventListener('fetch', function (event) {
     });
   }));
 });
+
+/* Alertas de precio (lib/alertas.js). El push llega vacio; el texto se pide al server con el endpoint de este
+   dispositivo, que es la llave: asi el precio y el destino no pasan por el servicio de push (Google, Apple, Mozilla).
+   Trae las bajas de las ultimas 24 h y muestra una notificacion por alerta (el tag evita repetir la misma). */
+self.addEventListener('push', function (event) {
+  event.waitUntil(self.registration.pushManager.getSubscription().then(function (sub) {
+    if (!sub) return null;
+    return fetch('/api/alertas/push-resumen?endpoint=' + encodeURIComponent(sub.endpoint), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }).then(function (j) {
+    var avisos = j && j.avisos && j.avisos.length ? j.avisos : [{ id: 'generico', titulo: 'Bajó el precio de un vuelo', cuerpo: 'Abrí CuántoSale para ver tus alertas de precio.', url: '/' }];
+    return Promise.all(avisos.map(function (a) {
+      return self.registration.showNotification(a.titulo || 'CuántoSale', {
+        body: a.cuerpo || '', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+        tag: 'alerta-' + a.id, data: { url: a.url || '/' }
+      });
+    }));
+  }));
+});
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (ventanas) {
+    for (var i = 0; i < ventanas.length; i++) {
+      if (new URL(ventanas[i].url).origin === self.location.origin && 'navigate' in ventanas[i]) return ventanas[i].navigate(url).then(function (v) { return v && v.focus(); });
+    }
+    return self.clients.openWindow(url);
+  }));
+});

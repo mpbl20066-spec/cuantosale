@@ -1798,11 +1798,27 @@
   function cajaAlerta() {
     var campana = ic('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0"/>', 20), t;
     if (ALERTA.estado === 'ok') t = '<b>Te avisamos si baja</b><p class="al-box__ok" role="status">Seguimos este vuelo todos los días. Si baja de <b>' + f(ALERTA.precio) + '</b> te escribimos a ' + esc(ALERTA.email) + '.</p>' +
-      '<p><button type="button" class="al-box__link" data-alerta-ver>Ver mis alertas</button></p>';
+      lineaPush() + '<p><button type="button" class="al-box__link" data-alerta-ver>Ver mis alertas</button></p>';
     else t = '<b>¿Todavía no te decidís?</b><p>Te avisamos por email si baja el precio de este vuelo. Es gratis y lo apagás cuando quieras.</p>' +
       (ALERTA.error ? '<p class="g-err" role="alert">' + esc(ALERTA.error) + '</p>' : '') +
       '<button type="button" class="g-btn" data-alerta' + (ALERTA.estado === 'enviando' ? ' disabled' : '') + '>' + (ALERTA.estado === 'enviando' ? 'Creando la alerta…' : 'Avisame si baja') + '</button>';
     return '<div class="al-box"><span class="al-box__i" aria-hidden="true">' + campana + '</span><div class="al-box__t">' + t + '</div></div>';
+  }
+  /* Notificacion en este dispositivo (CSCuenta.push): se ofrece despues de crear la alerta, nunca en lugar del email.
+     En iPhone sin la app instalada no hay push en el navegador y la linea no aparece. */
+  function lineaPush() {
+    var e = ALERTA.push;
+    if (!e || e === 'no') return '';
+    if (e === 'activo') return '<p class="al-box__ok">También te avisamos con una notificación en este dispositivo.</p>';
+    if (e === 'denegado') return '<p>Las notificaciones de CuántoSale están bloqueadas en este navegador.</p>';
+    return (ALERTA.pushError ? '<p class="g-err" role="alert">' + esc(ALERTA.pushError) + '</p>' : '') +
+      '<p><button type="button" class="g-btn" data-alerta-push' + (e === 'activando' ? ' disabled' : '') + '>' + (e === 'activando' ? 'Activando…' : 'Avisarme también en este dispositivo') + '</button></p>';
+  }
+  function activarPush() {
+    ALERTA.push = 'activando'; ALERTA.pushError = ''; render(false);
+    CSCuenta.push.activar().then(function () { ALERTA.push = 'activo'; track('alerta_push_activada', {}); },
+      function (er) { ALERTA.push = er && er.codigo === 'denegado' ? 'denegado' : 'inactivo'; ALERTA.pushError = ALERTA.push === 'denegado' ? '' : (er && er.message || 'No pudimos activar las notificaciones.'); track('alerta_push_error', { motivo: ALERTA.push }); })
+      .then(function () { render(false); });
   }
   function crearAlerta() {
     var u = window.CSCuenta && CSCuenta.usuario();
@@ -1812,7 +1828,10 @@
       return fetch('/api/alertas', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tk },
         body: JSON.stringify({ destino: destKey, fecha_ida: IDA, fecha_vuelta: VUELTA, pasajeros: pax }) });
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.alerta) throw new Error(j.error || 'No pudimos crear la alerta. Probá de nuevo en un momento.'); return j; }); })
-      .then(function (j) { ALERTA.estado = 'ok'; ALERTA.email = j.email || u.email || ''; ALERTA.precio = j.alerta.precio_inicial; track('alerta_precio_creada', { precio: Math.round(ALERTA.precio), ya_existia: !!j.ya }); },
+      .then(function (j) {
+        ALERTA.estado = 'ok'; ALERTA.email = j.email || u.email || ''; ALERTA.precio = j.alerta.precio_inicial; track('alerta_precio_creada', { precio: Math.round(ALERTA.precio), ya_existia: !!j.ya });
+        if (CSCuenta.push) CSCuenta.push.estado().then(function (e) { ALERTA.push = e; render(false); });
+      },
         function (e) { ALERTA.estado = 'error'; ALERTA.error = e && e.message || 'No pudimos crear la alerta.'; track('alerta_precio_error', {}); })
       .then(function () { render(false); });
   }
@@ -3423,6 +3442,7 @@
   });
   $('main').addEventListener('click', function (e) {
     if (e.target.closest('[data-alerta]')) { crearAlerta(); return; }
+    if (e.target.closest('[data-alerta-push]')) { activarPush(); return; }
     if (e.target.closest('[data-alerta-ver]')) CSCuenta.abrir('alertas');
   });
   /* Quien toco "Avisame si baja" sin sesion: al entrar, la alerta se crea sola. */

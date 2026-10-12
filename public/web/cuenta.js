@@ -9,7 +9,8 @@
      CSCuenta.usuario()                 -> usuario actual o null
      CSCuenta.alCambiar(fn)             -> fn(usuario) al iniciar/cerrar sesion
      CSCuenta.abrir(vista)              -> abre el panel ('menu' | 'viajes' | 'alertas' | 'login')
-     CSCuenta.guardarViaje(datos)       -> Promise; rechaza con { codigo: 'sin_sesion' } si no hay sesion */
+     CSCuenta.guardarViaje(datos)       -> Promise; rechaza con { codigo: 'sin_sesion' } si no hay sesion
+     CSCuenta.push                      -> notificaciones de las alertas de precio en este dispositivo (ver pushApi) */
 (function () {
   'use strict';
   var WHATSAPP = '59898529851';   // el mismo numero de ayuda que usa la app
@@ -299,6 +300,19 @@
     if (!usuario) { S.vista = 'login'; pintar(); return; }
     S.cargando = true; S.alertas = null; S.error = ''; pintar();
     pedirAlertas('GET').then(function (j) { S.alertas = j.alertas || []; }, function (e) { S.error = e.message; }).then(function () { S.cargando = false; pintar(); });
+    pushApi.estado().then(function (e) { S.pushEstado = e; if (S.vista === 'alertas') pintar(); });
+  }
+  /* "Notificaciones en este dispositivo", arriba de la lista de alertas. No se muestra donde no se pueden activar. */
+  function bloquePush() {
+    var e = S.pushEstado;
+    if (!e || e === 'no' || !S.alertas || !S.alertas.length) return '';
+    var txt = e === 'activo' ? 'Activadas: además del email, te avisamos con una notificación en este dispositivo.'
+      : e === 'denegado' ? 'Bloqueaste las notificaciones de CuántoSale en este navegador. Podés habilitarlas desde su configuración.'
+      : 'Además del email, podemos avisarte con una notificación en este dispositivo.';
+    var btn = e === 'activo' ? '<button type="button" class="cp-btn cp-btn--s cp-btn--o" data-push-off>Desactivar</button>'
+      : e === 'denegado' ? '' : '<button type="button" class="cp-btn cp-btn--s" data-push-on' + (S.pushOcupado ? ' disabled' : '') + '>' + (S.pushOcupado ? 'Activando…' : 'Activar notificaciones') + '</button>';
+    return '<article class="cp-viaje"><div class="cp-viaje__t"><b>' + ic(I.bell, 16) + ' Notificaciones en este dispositivo</b><small>' + esc(txt) + '</small></div>' +
+      (S.pushError ? '<p class="cp-err" role="alert">' + esc(S.pushError) + '</p>' : '') + (btn ? '<div class="cp-viaje__a">' + btn + '</div>' : '') + '</article>';
   }
   var fila = function (icono, texto, attr, extra, rojo) {
     return '<button type="button" class="cp-fila' + (rojo ? ' is-rojo' : '') + '" ' + attr + '><span class="cp-fila__i">' + ic(icono, 22) + '</span><span class="cp-fila__t">' + texto + '</span>' + (extra === undefined ? ic(I.chev, 16) : extra) + '</button>';
@@ -399,7 +413,7 @@
     if (S.cargando) cuerpo = '<p class="cp-p" role="status">Cargando tus alertas…</p>';
     else if (S.error) cuerpo = '<p class="cp-err" role="alert">' + esc(S.error) + '</p>';
     else if (!S.alertas || !S.alertas.length) cuerpo = '<p class="cp-p">No estás siguiendo ningún vuelo. En la pantalla de vuelos de tu viaje tocá <b>Avisame si baja</b> y te escribimos cuando baje el precio.</p><a class="cp-btn" href="/">Armar un viaje</a>';
-    else cuerpo = '<p class="cp-p">Revisamos estos vuelos una vez por día y te mandamos un email si el más barato baja.</p>' + S.alertas.map(function (a) {
+    else cuerpo = '<p class="cp-p">Revisamos estos vuelos una vez por día y te mandamos un email si el más barato baja.</p>' + bloquePush() + S.alertas.map(function (a) {
       var pax = Number(a.pasajeros) || 1, bajo = a.precio_ultimo != null && a.precio_ultimo < a.precio_inicial;
       var url = '/planificar?' + new URLSearchParams({ destino: a.destino, ida: a.fecha_ida, vuelta: a.fecha_vuelta, pax: String(pax) }).toString();
       return '<article class="cp-viaje"><div class="cp-viaje__t"><b>Montevideo → ' + esc(a.nombre_destino) + '</b><small>' + esc(fdc(a.fecha_ida) + ' → ' + fdc(a.fecha_vuelta)) + ' · ' + pax + (pax === 1 ? ' persona' : ' personas') + '</small></div>' +
@@ -435,6 +449,16 @@
     if (t.hasAttribute('data-menu')) { ir('menu'); return; }
     if (t.hasAttribute('data-viajes')) { if (usuario) ir('viajes'); else iniciar().then(function () { ir(usuario ? 'viajes' : 'login'); }, function () { ir('login'); }); return; }
     if (t.hasAttribute('data-alertas')) { if (usuario) ir('alertas'); else iniciar().then(function () { ir(usuario ? 'alertas' : 'login'); }, function () { ir('login'); }); return; }
+    if (t.hasAttribute('data-push-on')) {
+      S.pushOcupado = true; S.pushError = ''; pintar();
+      pushApi.activar().then(function () { S.pushEstado = 'activo'; }, function (er) { S.pushError = er.message; if (er.codigo === 'denegado') S.pushEstado = 'denegado'; })
+        .then(function () { S.pushOcupado = false; pintar(); });
+      return;
+    }
+    if (t.hasAttribute('data-push-off')) {
+      pushApi.desactivar().then(function () { S.pushEstado = 'inactivo'; S.pushError = ''; pintar(); }, function (er) { S.pushError = er.message; pintar(); });
+      return;
+    }
     if (t.hasAttribute('data-alerta-off')) {
       var aid = t.getAttribute('data-alerta-off');
       t.disabled = true;
@@ -487,5 +511,49 @@
   /* Si la persona vuelve del login (Google o link del correo), la sesion se levanta sola; basta con iniciar en segundo plano. */
   if (/[?&#](code|access_token|error_description)=/.test(location.search + location.hash) || (function () { try { return Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k); }); } catch (e) { return false; } })()) iniciar().catch(function () { /* sin cuenta: la pagina funciona igual */ });
 
-  window.CSCuenta = { alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
+  /* Notificaciones push de las alertas de precio en ESTE dispositivo (lib/alertas.js, public/sw.js).
+     soportado(): false en Safari de iPhone sin instalar la app (ahi no existe PushManager), asi no se ofrece algo que
+     no anda. estado() -> 'activo' | 'inactivo' | 'denegado' | 'no'. activar() pide el permiso: llamarlo desde un toque. */
+  var pushApi = (function () {
+    var soportado = function () { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && /^https:|^http:\/\/(localhost|127\.0\.0\.1)/.test(location.href); };
+    var registro = function () {
+      return navigator.serviceWorker.getRegistration('/').then(function (r) { return r || navigator.serviceWorker.register('/sw.js', { scope: '/' }); })
+        .then(function () { return navigator.serviceWorker.ready; });
+    };
+    var bytes = function (b64) { var s = atob((b64 + '==='.slice((b64.length + 3) % 4)).replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
+    var conToken = function (metodo, qs, cuerpo) {
+      return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) {
+        var tk = r.data && r.data.session ? r.data.session.access_token : '';
+        if (!tk) { var e = new Error('Iniciá sesión para activar las notificaciones.'); e.codigo = 'sin_sesion'; throw e; }
+        var h = { Authorization: 'Bearer ' + tk }; if (cuerpo) h['Content-Type'] = 'application/json';
+        return fetch('/api/alertas/push' + (qs || ''), { method: metodo, headers: h, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+      }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'No pudimos activar las notificaciones.'); return j; }); });
+    };
+    function estado() {
+      if (!soportado()) return Promise.resolve('no');
+      if (Notification.permission === 'denied') return Promise.resolve('denegado');
+      return navigator.serviceWorker.getRegistration('/').then(function (r) { return r ? r.pushManager.getSubscription() : null; })
+        .then(function (s) { return s && Notification.permission === 'granted' ? 'activo' : 'inactivo'; }).catch(function () { return 'inactivo'; });
+    }
+    function activar() {
+      if (!soportado()) return Promise.reject(new Error('Este navegador no permite notificaciones.'));
+      return Notification.requestPermission().then(function (p) {
+        if (p !== 'granted') { var e = new Error('Las notificaciones están bloqueadas para CuántoSale. Podés habilitarlas desde la configuración del navegador.'); e.codigo = 'denegado'; throw e; }
+        return Promise.all([registro(), fetch('/api/alertas/push-clave').then(function (r) { return r.json(); })]);
+      }).then(function (x) {
+        var reg = x[0], k = x[1];
+        if (!k || !k.configurado || !k.clave) throw new Error('Las notificaciones todavía no están disponibles.');
+        return reg.pushManager.getSubscription().then(function (s) { return s || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: bytes(k.clave) }); });
+      }).then(function (sub) { return conToken('POST', '', { suscripcion: sub.toJSON() }); });
+    }
+    function desactivar() {
+      return navigator.serviceWorker.getRegistration('/').then(function (r) { return r ? r.pushManager.getSubscription() : null; }).then(function (s) {
+        if (!s) return null;
+        return conToken('DELETE', '?endpoint=' + encodeURIComponent(s.endpoint)).catch(function () { /* igual se desuscribe aca */ }).then(function () { return s.unsubscribe(); });
+      });
+    }
+    return { soportado: soportado, estado: estado, activar: activar, desactivar: desactivar };
+  })();
+
+  window.CSCuenta = { push: pushApi, alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
 })();

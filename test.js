@@ -2513,20 +2513,26 @@ function haversineKm(a, b) {
     ['SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ANON_KEY', 'RESEND_API_KEY', 'CRON_SECRET', 'ALERTAS_MAX_DIA'].forEach(function (k) { envViejo[k] = process.env[k]; });
     Object.assign(process.env, { SUPABASE_SERVICE_ROLE_KEY: 'srv', SUPABASE_ANON_KEY: 'anon', RESEND_API_KEY: 're', CRON_SECRET: '', ALERTAS_MAX_DIA: '50' });
     const lejos = function (d) { return new Date(Date.now() + d * 864e5).toISOString().slice(0, 10); };
-    const fila = function (id, destino, ref, email) { return { id: id, destino: destino, fecha_ida: lejos(30), fecha_vuelta: lejos(36), pasajeros: 2, email: email, nombre: 'Ana', precio_inicial: ref, precio_referencia: ref, avisos: 0 }; };
+    const fila = function (id, destino, ref, email) { return { id: id, user_id: 'u-' + email, destino: destino, fecha_ida: lejos(30), fecha_vuelta: lejos(36), pasajeros: 2, email: email, nombre: 'Ana', precio_inicial: ref, precio_referencia: ref, avisos: 0 }; };
     const filas = [fila('a1', 'rio', 600, 'a@x.com'), fila('a2', 'rio', 600, 'b@x.com'), fila('a3', 'fln', 500, 'c@x.com')];
-    const parches = [], mails = [], medidas = [];
+    // Ana (a@x.com) activo las notificaciones en dos dispositivos; uno ya no existe (el servicio responde 410).
+    const subs = [{ id: 'p1', user_id: 'u-a@x.com', endpoint: 'https://push.example/vivo', pendientes: [] }, { id: 'p2', user_id: 'u-a@x.com', endpoint: 'https://push.example/muerto', pendientes: [] }];
+    const parches = [], mails = [], medidas = [], empujados = [], borradas = [];
     const h = {
       sendJson: function (res, status, obj) { res.status = status; res.body = obj; },
       fetchWithTimeout: async function (u, init) {
         const ok = function (body) { return { ok: true, status: 200, text: async function () { return JSON.stringify(body); }, json: async function () { return body; } }; };
         if (u.indexOf('api.resend.com') >= 0) { mails.push(JSON.parse(init.body)); return ok({ id: 'm' }); }
-        if (init && init.method === 'PATCH') { parches.push({ u: u, body: JSON.parse(init.body) }); return ok(/fecha_ida=lte/.test(u) ? [] : []); }
+        if (init && init.method === 'DELETE') { borradas.push(u); return ok([]); }
+        if (init && init.method === 'PATCH') { parches.push({ u: u, body: JSON.parse(init.body) }); return ok([]); }
+        if (u.indexOf('alertas_push?select') >= 0) { const uid = decodeURIComponent(/user_id=eq\.([^&]+)/.exec(u)[1]); return ok(subs.filter(function (s) { return s.user_id === uid; })); }
         return ok(filas);
       },
       precio: async function (destino) { medidas.push(destino); return destino === 'rio' ? 540 : 495; },
       gastoHoy: function () { return medidas.length; },
-      nombreDestino: function (k) { return { rio: 'Río de Janeiro', fln: 'Florianópolis' }[k] || null; }
+      nombreDestino: function (k) { return { rio: 'Río de Janeiro', fln: 'Florianópolis' }[k] || null; },
+      push: { configurado: function () { return true; }, endpointValido: function () { return true; },
+        empujar: async function (ep) { empujados.push(ep); return /muerto/.test(ep) ? 'muerta' : 'ok'; } }
     };
     try {
       const alertasMod = require('./lib/alertas'), mod = alertasMod(h), res = {};
@@ -2539,6 +2545,12 @@ function haversineKm(a, b) {
       assert.strictEqual(a1.body.precio_referencia, 540, 'despues de avisar, la referencia pasa a ser el precio nuevo');
       const a3 = parches.filter(function (p) { return /id=eq\.a3/.test(p.u); })[0];
       assert.ok(a3.body.precio_ultimo === 495 && a3.body.precio_referencia === undefined, 'sin aviso la referencia no cambia');
+      // Push: solo a los dispositivos de Ana, con el texto guardado para que lo pida el service worker.
+      assert.deepStrictEqual(empujados.sort(), ['https://push.example/muerto', 'https://push.example/vivo']);
+      const pend = parches.filter(function (p) { return /alertas_push\?id=eq\.p1/.test(p.u); })[0];
+      assert.ok(pend && /Río de Janeiro/.test(pend.body.pendientes[0].titulo) && /planificar\?destino=rio/.test(pend.body.pendientes[0].url), 'el aviso guardado dice el destino y abre ese viaje');
+      assert.ok(borradas.some(function (u) { return /alertas_push\?id=eq\.p2/.test(u); }), 'el dispositivo que ya no existe se borra');
+      assert.strictEqual(res.body.push, 1, 'un dispositivo recibio el push');
       // Con el tope en 0 no se mide nada: quedan pendientes para el dia siguiente.
       process.env.ALERTAS_MAX_DIA = '0'; medidas.length = 0; mails.length = 0;
       const res2 = {}; await alertasMod(h).revisar({ headers: {} }, res2);
