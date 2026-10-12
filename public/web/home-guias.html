@@ -65,6 +65,14 @@
   .gm-card[data-accion="guias"] .gm-card__t b{padding-right:96px}
   .gm-badge{position:absolute;top:16px;right:16px;padding:5px 12px;border-radius:99px;background:var(--gm-y);color:#0F1B2D;font-size:12px;font-weight:800}
   .gm-nota{font-family:'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;font-size:15px;line-height:1.25;color:#fff;transform:rotate(-6deg)}
+  .gm-todas{margin-top:16px;padding:20px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:var(--gm-card);color:#fff}
+  .gm-todas h2{margin:0;font-family:var(--fh);font-size:18px;font-weight:800;color:#fff}
+  .gm-todas p{margin:6px 0 14px;font-size:14px;line-height:1.5;color:var(--gm-gris)}
+  .gm-todas ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px;margin:0;padding:0;list-style:none}
+  .gm-todas a{display:block;padding:7px 0;color:#fff;font-size:14px;text-decoration:underline;text-decoration-color:rgba(255,255,255,.3);text-underline-offset:4px}
+  .gm-todas a:hover{text-decoration-color:var(--gm-y)}
+  .gm-todas a:focus-visible{outline:3px solid var(--gm-y);outline-offset:2px}
+  @media (min-width:768px){.gm-todas{padding:26px 28px}.gm-todas ul{grid-template-columns:repeat(4,minmax(0,1fr))}}
   .gm-cierre{position:relative;display:flex;align-items:center;gap:18px;margin-top:16px;padding:22px 20px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:var(--gm-card);overflow:hidden}
   .gm-cierre p{margin:0;position:relative;font-size:16px;line-height:1.45;color:#fff}
   .gm-ola{position:absolute;right:0;bottom:0;width:42%;height:60%;opacity:.8}
@@ -205,6 +213,13 @@
           <span class="gm-nota gm-nota--m">El mundo<br>te espera</span><svg class="gm-rayas" width="26" height="30" viewBox="0 0 26 30" stroke="#F5C518" stroke-width="2.4" stroke-linecap="round"><path d="M4 4l10 2M10 20l4-8M16 26l8-6"/></svg>
         </span>
       </button>
+
+      <!-- Enlaces reales a /destino/<slug> (las guias publicas que indexa Google). El server pone la lista. -->
+      <section class="gm-todas" aria-labelledby="gmTodas">
+        <h2 id="gmTodas">Guía completa de cada destino</h2>
+        <p>Playas, qué hacer, dónde comer y cuándo ir, todo en una página.</p>
+        <ul><!--CS_ENLACES_DESTINOS--></ul>
+      </section>
 
       <section class="gm-cierre">
         <svg width="56" height="48" viewBox="0 0 56 48" fill="none" stroke="#F5C518" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M14 30a14 14 0 0 1 28 0M28 6v6M10 12l4 4M46 12l-4 4M2 24h6M48 24h6M6 36c6-4 8 4 14 0s8 4 14 0 8 4 14 0"/></svg>

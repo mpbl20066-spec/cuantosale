@@ -1765,6 +1765,7 @@ async function buscarVuelos(req, res, body) {
       // eso no hace falta una segunda etapa para conocer el total, y el browse
       // cuesta un solo crédito.
       round_trip: !!returnDate,
+      consultado: result.consultado || null,   // hora en que se consulto a Ignav (puede venir de la cache)
       offers: result.offers,
       error: result.offers.length ? null : browseVacioMsg()
     });
@@ -2975,8 +2976,13 @@ const NUEVO_PAGINAS = {
   ruta: 'home-calcular', detalle: 'home-detalle', resumen: 'home-costo', reserva: 'home-reserva', guias: 'home-guias', guia: 'home-guia',
   ahorro: 'home-ahorro'
 };
-/* Paginas que se indexan: la home. El resto son herramientas que dependen de parametros y siguen con noindex. */
+/* Paginas que se indexan: la home. El resto son herramientas que dependen de parametros y siguen con noindex.
+   /guias (la portada de las guias, con enlaces a cada /destino/<slug>) se abre a Google con INDEXAR_GUIAS=1: el
+   interruptor para el dia del lanzamiento. Tambien la suma al sitemap. /guia sigue con noindex: arma el contenido con
+   JavaScript y repite el de /destino/<slug>, que es la pagina que se indexa (su canonical apunta ahi). */
 const NUEVO_INDEXABLES = { '': true };
+function indexarGuias() { return String(process.env.INDEXAR_GUIAS || '').trim() === '1'; }
+function nuevoIndexable(slug) { return !!NUEVO_INDEXABLES[slug] || (slug === 'guias' && indexarGuias()); }
 const NUEVO_POR_ARCHIVO = {};
 Object.keys(NUEVO_PAGINAS).forEach(function (k) { NUEVO_POR_ARCHIVO[NUEVO_PAGINAS[k] + '.html'] = (NUEVO + (k ? '/' + k : '')) || '/'; });
 /* La home anterior (dos caminos) ya no es la raiz, pero las otras paginas siguen enlazando a ella: tambien lleva a la home. */
@@ -3382,6 +3388,14 @@ function handleRequest(req, res) {
     // Viaje guardado: /viaje/<codigo> (id de trips en base64url) redirige al planificador con lo elegido (lib/viajes-guardados.js).
     const mViaje = /^\/viaje\/([A-Za-z0-9_-]{22})\/?$/.exec(url.pathname);
     if (mViaje && req.method === 'GET') return viajesGuardados.redirigir(req, res, mViaje[1]);
+    if (url.pathname === '/sitemap.xml' && indexarGuias()) {
+      try {
+        return serveStatic(req, res, '/sitemap.xml', function (data) {
+          const extra = '  <url>\n    <loc>https://cuantosale.uy/guias</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n';
+          return Buffer.from(data.toString('utf8').replace('</urlset>', extra + '</urlset>'), 'utf8');
+        });
+      } catch (e) { res.writeHead(400); return res.end(); }
+    }
     // Paginas publicas por destino para Google (lib/destinos-web.js).
     const mDestino = /^\/destino\/([a-z0-9-]+)\/?$/.exec(url.pathname);
     if (mDestino) {
@@ -3426,9 +3440,14 @@ function handleRequest(req, res) {
       try {
         serveStatic(req, res, '/' + NUEVO_DIR + '/' + nuevoPag.archivo + '.html', function (data) {
           let html = versionarAssets(nuevoReescribir(data.toString('utf8')));
-          const indexable = !!NUEVO_INDEXABLES[nuevoPag.slug];
+          const indexable = nuevoIndexable(nuevoPag.slug);
           if (indexable) html = html.replace(/<meta name="robots"[^>]*>\s*/i, '');
-          const canonical = 'https://cuantosale.uy' + ((NUEVO + (nuevoPag.slug ? '/' + nuevoPag.slug : '')) || '/');
+          let canonical = 'https://cuantosale.uy' + ((NUEVO + (nuevoPag.slug ? '/' + nuevoPag.slug : '')) || '/');
+          if (nuevoPag.slug === 'guia') {
+            const pub = destinosWeb.slugDeClave(String(url.searchParams.get('destino') || 'fln').toLowerCase());
+            if (pub) canonical = 'https://cuantosale.uy/destino/' + pub;
+          }
+          if (nuevoPag.slug === 'guias') html = html.replace('<!--CS_ENLACES_DESTINOS-->', destinosWeb.enlacesHtml());
           html = html.replace(/<head[^>]*>/i, function (h) { return h + '<base href="/' + NUEVO_DIR + '/"><link rel="canonical" href="' + canonical + '">'; });
           return Buffer.from(html, 'utf8');
         });
