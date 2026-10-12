@@ -70,7 +70,8 @@
       '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button>' +
       '<button class="tab" role="tab" data-vista="mensajes" aria-selected="' + (S.vista === 'mensajes') + '">Mensajes<span id="tab-noleidos">' + (S.chats && S.chats.no_leidos ? ' (' + S.chats.no_leidos + ')' : '') + '</span></button>' +
       '<button class="tab" role="tab" data-vista="whatsapp" aria-selected="' + (S.vista === 'whatsapp') + '">WhatsApp</button>' +
-      '<button class="tab" role="tab" data-vista="viajes" aria-selected="' + (S.vista === 'viajes') + '">Viajes guardados</button></nav>' +
+      '<button class="tab" role="tab" data-vista="viajes" aria-selected="' + (S.vista === 'viajes') + '">Viajes guardados</button>' +
+      '<button class="tab" role="tab" data-vista="uso" aria-selected="' + (S.vista === 'uso') + '">Uso</button></nav>' +
       '<button class="btn btn--sm" data-act="recargar">Actualizar</button><button class="btn btn--sm" data-act="salir">Salir</button></div></header><div class="wrap">';
     if (d.almacenamiento !== 'supabase') {
       html += '<p class="aviso">' + (d.almacenamiento === 'archivo'
@@ -94,7 +95,7 @@
         kpiBooking(pc.booking) + '</section>';
       if (S.verPre) html += detallePrecarga(pc, S.verPre);
     }
-    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : vistaProveedores(d))));
+    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() : vistaProveedores(d)))));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
@@ -231,6 +232,58 @@
     S.viajes = { cargando: true }; pintar();
     api('viajes').then(function (j) { S.viajes = { lista: j.viajes || [] }; if (S.vista === 'viajes') pintar(); })
       .catch(function (e) { S.viajes = { error: e.message }; if (S.vista === 'viajes') pintar(); });
+  }
+  /* ---------- Uso: el contador propio (lib/uso.js, tabla uso_diario) ----------
+     Cuenta a todos (no guarda nada de la persona, no depende de las cookies). Lo que mas importa: cuanta gente llega a
+     Destinos y a las guias, y cuantos de ahi van a cotizar, guardan o crean una alerta. */
+  function cargarUso() {
+    S.uso = { cargando: true }; pintar();
+    api('uso?dias=' + (S.usoDias || 30)).then(function (j) { S.uso = j; if (S.vista === 'uso') pintar(); })
+      .catch(function (e) { S.uso = { error: e.message }; if (S.vista === 'uso') pintar(); });
+  }
+  function vistaUso() {
+    var u = S.uso || {}, dias = S.usoDias || 30;
+    var sel = '<div class="bar"><div class="chips">' + [7, 30, 90].map(function (n) { return '<button class="chip" data-uso-dias="' + n + '" aria-pressed="' + (n === dias) + '">' + n + ' días</button>'; }).join('') + '</div></div>';
+    if (u.cargando) return sel + '<div class="card"><p class="vacio">Cargando…</p></div>';
+    if (u.error) return sel + '<p class="aviso">' + esc(u.error) + '</p>';
+    var filas = u.filas || [], nom = u.nombres || {};
+    var suma = function (ev, det) { return filas.reduce(function (t, f) { return t + ((Array.isArray(ev) ? ev.indexOf(f.evento) >= 0 : f.evento === ev) && (det == null || f.detalle === det) ? f.n : 0); }, 0); };
+    var porDetalle = function (ev) { var m = {}; filas.forEach(function (f) { if ((Array.isArray(ev) ? ev.indexOf(f.evento) >= 0 : f.evento === ev)) m[f.detalle] = (m[f.detalle] || 0) + f.n; }); return m; };
+    var pct = function (a, b) { return b ? Math.round(a / b * 100) + ' %' : '—'; };
+    var vDest = suma('vista_pagina', 'guias'), vGuia = suma('vista_pagina', 'guia');
+    var cot = suma('guias_cotizar') + suma('guia_calcular_viaje'), fav = suma(['guias_fav_agregar', 'guia_fav_agregar']), alerta = suma(['guia_alerta_creada', 'alerta_precio_creada']);
+    var h = sel + (u.almacenamiento === 'memoria' ? '<p class="aviso">Sin Supabase: se cuenta en memoria y se pierde al reiniciar. En producción hace falta correr supabase_uso.sql.</p>' : '');
+    h += '<section class="kpis" aria-label="Uso">' +
+      kpi('Visitas a Destinos', vDest, 'pantalla de destinos') +
+      kpi('Guías abiertas', vGuia, 'páginas de guía') +
+      kpi('Fueron a cotizar', cot, 'desde Destinos y las guías', 'kpi--ok') +
+      kpi('Favoritos guardados', fav, 'corazones') +
+      kpi('Alertas de precio', alerta, 'guía y vuelos') + '</section>';
+    /* embudo de la pantalla Destinos */
+    var pasos = [['Entraron a Destinos', vDest], ['Tocaron una pestaña del mes', suma('guias_ranking')], ['Abrieron una guía desde Destinos', suma('guias_abrir')], ['Fueron a cotizar desde Más baratos', suma('guias_cotizar')]];
+    h += '<div class="card uso-card"><h3 class="uso-h">Destinos: de la visita a la cotización</h3><table><tbody>' + pasos.map(function (p) {
+      var w = vDest ? Math.min(100, Math.round(p[1] / vDest * 100)) : 0;
+      /* son toques, no personas: alguien que toca dos pestañas suma 2, por eso "por visita" y no un porcentaje */
+      var x = vDest ? p[1] / vDest : 0, xt = p === pasos[0] ? '' : (vDest ? x.toLocaleString('es-UY', { maximumFractionDigits: 2 }) + ' por visita' : '—');
+      return '<tr><td>' + esc(p[0]) + '</td><td class="num">' + p[1] + '</td><td class="num">' + xt + '</td><td style="width:40%"><span class="uso-barra" style="width:' + w + '%"></span></td></tr>';
+    }).join('') + '</tbody></table><p class="sub">Cuenta toques, no personas: alguien que toca dos pestañas suma 2.</p></div>';
+    /* pestanas de Cuando viajas */
+    var rk = porDetalle('guias_ranking'), rkTot = (rk.top || 0) + (rk.clima || 0) + (rk.precio || 0);
+    h += '<div class="card uso-card"><h3 class="uso-h">Pestañas de "¿Cuándo viajás?"</h3><table><tbody>' +
+      [['top', 'Recomendados'], ['clima', 'Mejor clima'], ['precio', 'Más baratos']].map(function (x) { return '<tr><td>' + x[1] + '</td><td class="num">' + (rk[x[0]] || 0) + '</td><td class="num">' + pct(rk[x[0]] || 0, rkTot) + '</td></tr>'; }).join('') +
+      '</tbody></table><p class="sub">Cuenta los toques en la pestaña; Recomendados es la que se ve al entrar.</p></div>';
+    /* destinos */
+    var cols = { abrir: porDetalle('guias_abrir'), fav: porDetalle(['guias_fav_agregar', 'guia_fav_agregar']), cot: porDetalle(['guias_cotizar', 'guia_calcular_viaje']), pin: porDetalle('guias_mapa_pin') };
+    var claves = {}; Object.keys(cols).forEach(function (c) { Object.keys(cols[c]).forEach(function (k) { if (k) claves[k] = 1; }); });
+    var lista = Object.keys(claves).map(function (k) { return { k: k, a: cols.abrir[k] || 0, f: cols.fav[k] || 0, c: cols.cot[k] || 0, p: cols.pin[k] || 0 }; })
+      .sort(function (a, b) { return (b.a + b.f + b.c + b.p) - (a.a + a.f + a.c + a.p); }).slice(0, 20);
+    h += '<div class="card uso-card"><h3 class="uso-h">Destinos que más interesan</h3>' + (lista.length ? '<table><thead><tr><th>Destino</th><th class="num">Abrieron la guía</th><th class="num">Tocaron en el mapa</th><th class="num">Guardaron</th><th class="num">Fueron a cotizar</th></tr></thead><tbody>' +
+      lista.map(function (x) { return '<tr><td data-l="Destino">' + esc(nom[x.k] || x.k) + '</td><td class="num" data-l="Abrieron la guía">' + x.a + '</td><td class="num" data-l="Tocaron en el mapa">' + x.p + '</td><td class="num" data-l="Guardaron">' + x.f + '</td><td class="num" data-l="Fueron a cotizar">' + x.c + '</td></tr>'; }).join('') +
+      '</tbody></table>' : '<p class="vacio">Todavía no hay datos.</p>') + '</div>';
+    /* paginas vistas */
+    var pg = porDetalle('vista_pagina'), pgs = Object.keys(pg).sort(function (a, b) { return pg[b] - pg[a]; });
+    h += '<div class="card uso-card"><h3 class="uso-h">Páginas vistas</h3>' + (pgs.length ? '<table><tbody>' + pgs.map(function (k) { return '<tr><td>' + esc(k || '(sin nombre)') + '</td><td class="num">' + pg[k] + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="vacio">Todavía no hay datos.</p>') + '</div>';
+    return h + '<p class="sub">Del ' + esc(fecha(u.desde)) + ' al ' + esc(fecha(u.hasta)) + '. Cuenta a todos, sin cookies ni datos de la persona (lib/uso.js); Google Analytics solo ve a quien aceptó las cookies.</p>';
   }
   function vistaViajes() {
     var v = S.viajes || {};
@@ -722,10 +775,11 @@
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
     var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
     var pv = e.target.closest('[data-precarga]'); if (pv) { var cual = pv.getAttribute('data-precarga'); S.verPre = S.verPre === cual ? '' : cual; pintarFondo(); return; }
+    var ud = e.target.closest('[data-uso-dias]'); if (ud) { S.usoDias = +ud.getAttribute('data-uso-dias'); cargarUso(); return; }
     var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
-    if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); if (S.vista === 'viajes' && (!S.viajes || S.viajes.error)) cargarViajes(); else pintar(); return; }
+    if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); if (S.vista === 'viajes' && (!S.viajes || S.viajes.error)) cargarViajes(); else if (S.vista === 'uso') cargarUso(); else pintar(); return; }
     if (t.hasAttribute('data-filtro')) { S.filtro = t.getAttribute('data-filtro'); pintar(); return; }
     if (t.hasAttribute('data-abrir')) { abrir(t.getAttribute('data-abrir')); return; }
     if (t.hasAttribute('data-prov')) { var id = t.getAttribute('data-prov'); S.prov = JSON.parse(JSON.stringify(S.datos.proveedores.filter(function (x) { return x.id === id; })[0])); S.dirty = false; abrirProv(); return; }

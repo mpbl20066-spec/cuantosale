@@ -52,6 +52,20 @@
   [data-theme="light"] .u-fav{background:rgba(255,255,255,.94);color:#0F1B2D}
   [data-theme="light"] .u-fav svg{color:#0B2A55}
   .u-fav:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  /* "Avisame si baja": aparece cuando el destino esta guardado */
+  .u-alerta{display:flex;align-items:flex-start;gap:10px;max-width:520px;margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(10,16,26,.62);color:#fff;font-size:14px;line-height:1.45;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+  .u-alerta:empty{display:none}
+  .u-alerta svg{flex:0 0 auto;margin-top:1px;color:#F7C325}
+  .u-alerta b{display:block}
+  .u-alerta p{margin:2px 0 0}
+  .u-alerta button{margin-top:8px;min-height:40px;padding:0 16px;border:0;border-radius:10px;background:#F7C325;color:#0F1B2D;font:800 14px var(--fb);cursor:pointer}
+  .u-alerta button.u-alerta__link{min-height:0;padding:0;background:none;color:#F7C325;text-decoration:underline}
+  .u-alerta button:disabled{opacity:.6;cursor:default}
+  .u-alerta .u-alerta__err{color:#FFB4B4}
+  [data-theme="light"] .u-alerta{background:rgba(255,255,255,.95);color:#0F1B2D}
+  [data-theme="light"] .u-alerta svg{color:#0B2A55}
+  [data-theme="light"] .u-alerta button.u-alerta__link{color:#0B2A55}
+  [data-theme="light"] .u-alerta .u-alerta__err{color:#B3261E}
   .u-hero__precio{display:block;color:#fff;font-size:14.5px;font-weight:700;line-height:1.3}
   .u-hero__precio b{display:block;font-family:var(--fh);font-size:32px;font-weight:800;color:var(--accent);line-height:1.1}
   .u-hero__precio:empty{display:none}
@@ -223,6 +237,35 @@
       '<svg class="cs-keep" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg>' +
       '<span>' + (on ? 'Guardado' : 'Guardar') + '</span></button>';
   }
+  /* ---- "Avisame si baja": la misma alerta de la pantalla de vuelos (/api/alertas, email cuando el vuelo baja 5 % y
+     US$ 10), con las fechas del viaje tipo de esta guia (el mes mas barato, 7 noches, 2 personas). Se ofrece al
+     guardar el destino: quien lo guarda esta mirando el precio. Sin sesion abre el login y se crea al entrar. */
+  var AL = { estado: '', error: '', precio: 0, email: '', pendiente: false };
+  var fcorta = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : +q[2] + '/' + +q[1]; };
+  function alertaHtml() {
+    var e = S.est;
+    if (!esFav() || !e || !e.dep || !e.ret || !(e.precio && e.precio.mode === 'avion_mvd')) return '';
+    var campana = '<svg class="cs-keep" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0"/></svg>';
+    var fechas = fcorta(e.dep) + ' al ' + fcorta(e.ret);
+    if (AL.estado === 'ok') return campana + '<div><b>Te avisamos si baja</b><p>Seguimos el vuelo del ' + fechas + ' para 2 personas' + (AL.precio ? ' (hoy ' + usd(AL.precio) + ' en total)' : '') + '. Si baja, te escribimos' + (AL.email ? ' a ' + esc(AL.email) : '') + '.</p><button type="button" class="u-alerta__link" data-alerta-ver>Ver mis alertas</button></div>';
+    return campana + '<div><b>¿Te avisamos si baja el vuelo?</b><p>Seguimos el vuelo a ' + esc(NOM) + ' del ' + fechas + ' (' + esc(e.mes) + ', el mes más barato) y te escribimos si baja. Es gratis.</p>' +
+      (AL.error ? '<p class="u-alerta__err" role="alert">' + esc(AL.error) + '</p>' : '') +
+      '<button type="button" data-alerta' + (AL.estado === 'enviando' ? ' disabled' : '') + '>' + (AL.estado === 'enviando' ? 'Creando la alerta…' : 'Avisame si baja') + '</button></div>';
+  }
+  function pintarAlerta() { var el = $('u-alerta'); if (el) el.innerHTML = alertaHtml(); }
+  function crearAlerta() {
+    var u = window.CSCuenta && CSCuenta.usuario && CSCuenta.usuario(), e = S.est;
+    if (!e) return;
+    if (!u) { AL.pendiente = true; track('guia_alerta_login'); if (window.CSCuenta) CSCuenta.abrir('login'); return; }
+    AL.pendiente = false; AL.estado = 'enviando'; AL.error = ''; pintarAlerta();
+    CSCuenta.token().then(function (tk) {
+      return fetch('/api/alertas', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tk },
+        body: JSON.stringify({ destino: K, fecha_ida: e.dep, fecha_vuelta: e.ret, pasajeros: 2 }) });
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.alerta) throw new Error(j.error || 'No pudimos crear la alerta. Probá de nuevo en un momento.'); return j; }); })
+      .then(function (j) { AL.estado = 'ok'; AL.email = j.email || u.email || ''; AL.precio = j.alerta.precio_inicial; track('guia_alerta_creada', { precio: Math.round(AL.precio || 0), ya_existia: !!j.ya }); },
+        function (er) { AL.estado = 'error'; AL.error = er && er.message || 'No pudimos crear la alerta.'; track('guia_alerta_error'); })
+      .then(pintarAlerta);
+  }
   function alternarFav() {
     if (window.CSCuenta && CSCuenta.favoritos) CSCuenta.favoritos.alternar(K, NOM);
     else {
@@ -235,6 +278,7 @@
     track(esFav() ? 'guia_fav_agregar' : 'guia_fav_quitar');
     [].forEach.call(document.querySelectorAll('[data-fav-guia]'), function (b) { b.outerHTML = botonFav(); });
     var nb = document.querySelector('[data-fav-guia]'); if (nb) nb.focus();
+    pintarAlerta();
   }
 
   function cabecera() {
@@ -245,7 +289,7 @@
       '<p class="u-hero__p">Qué hacer, cómo llegar desde Uruguay y cuánto presupuestar para organizar tu viaje.</p>' +
       '<p class="u-hero__val">' + check + 'Con el costo total desde Montevideo, no solo el pasaje.</p>' +
       '<div class="u-hero__accion"><span class="u-hero__precio" id="u-precio">' + precioPortada() + '</span>' +
-      '<a class="u-hero__cta" href="' + aPresupuesto('guia_portada') + '" data-evento="guia_calcular_viaje" data-lugar="portada" data-destino="' + K + '">Calculá tu viaje →</a>' + botonFav() + '</div>' +
+      '<a class="u-hero__cta" href="' + aPresupuesto('guia_portada') + '" data-evento="guia_calcular_viaje" data-lugar="portada" data-destino="' + K + '">Calculá tu viaje →</a>' + botonFav() + '</div><div class="u-alerta" id="u-alerta" aria-live="polite">' + alertaHtml() + '</div>' +
       '</div></div>';
   }
   function precioPortada() {
@@ -311,6 +355,7 @@
       S.est = est;
       var el = $('u-datos'); if (el) el.innerHTML = resumenPractico();
       var pr = $('u-precio'); if (pr) pr.innerHTML = precioPortada();
+      pintarAlerta();
       /* Con el estimado ya se sabe el medio (avion, auto, bus): los links lo suman y la app no lo vuelve a preguntar. */
       document.querySelectorAll('a[href^="home-destino.html"]').forEach(function (a) { a.href = aPresupuesto(new URLSearchParams(a.getAttribute('href').split('?')[1]).get('fuente') || 'guia'); });
     });
@@ -543,6 +588,8 @@
     var t = e.target.closest('button'); if (!t) return;
     if (t.id === 'atras') { location.href = 'home-guias.html' + (debug ? '?debug=1' : ''); return; }
     if (t.hasAttribute('data-fav-guia')) { alternarFav(); return; }
+    if (t.hasAttribute('data-alerta')) { crearAlerta(); return; }
+    if (t.hasAttribute('data-alerta-ver')) { if (window.CSCuenta) CSCuenta.abrir('alertas'); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
     if (t.dataset.login) { if (window.CSCuenta) CSCuenta.abrir(); return; }
     if (t.dataset.mas) { var it = t.closest('.u-item'), ab = it.classList.toggle('is-abierta'); t.textContent = ab ? 'Ver menos' : 'Ver más'; t.setAttribute('aria-expanded', String(ab)); return; }
@@ -555,6 +602,10 @@
   window.addEventListener('load', function () {
     pedirGuia();
     if (window.CSCuenta) CSCuenta.alCambiar(function (u) { if (u && S.estado === 'bloqueada') { S.estado = 'cargando'; pintar(); pedirGuia(); } });
+    /* quien toco 'Avisame si baja' sin sesion: al entrar, la alerta se crea sola */
+    if (window.CSCuenta) CSCuenta.alCambiar(function (u) { if (u && AL.pendiente) crearAlerta(); });
+    /* favoritos que llegan de la cuenta al iniciar sesion */
+    if (window.CSCuenta && CSCuenta.favoritos) CSCuenta.favoritos.alCambiar(function () { [].forEach.call(document.querySelectorAll('[data-fav-guia]'), function (b) { b.outerHTML = botonFav(); }); pintarAlerta(); });
   });
 })();
 </script>

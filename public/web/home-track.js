@@ -22,10 +22,27 @@
     panel.textContent += nombre + ' ' + JSON.stringify(params) + '\n';
     panel.scrollTop = panel.scrollHeight;
   }
+  /* Contador de uso propio (/api/uso, lib/uso.js): para los eventos que importan, suma uno por dia sin guardar nada de
+     la persona, asi cuenta tambien a quien no acepto las cookies de Analytics. Solo estos eventos, y como detalle una
+     palabra corta (pagina, destino, pestana). */
+  var USO = { vista_pagina: 'pagina', guias_ranking: 'ranking', guias_mes: '', guias_abrir: 'destino', guias_cotizar: 'destino',
+    guias_fav_agregar: 'destino', guia_fav_agregar: 'destino', guias_ver_favoritos: '', guias_buscar: '', guias_filtro_tipo: 'tipo',
+    guias_mapa_pin: 'destino', guias_mapa_zoom: 'accion', guia_calcular_viaje: 'destino', guia_alerta_creada: 'destino', alerta_precio_creada: '' };
+  function contar(nombre, params) {
+    if (!(nombre in USO) || debug || !/^https?:$/.test(location.protocol)) return;
+    var d = USO[nombre] ? String(params[USO[nombre]] || '').toLowerCase() : '';
+    if (!/^[a-z0-9_-]{0,24}$/.test(d)) d = '';
+    try {
+      var cuerpo = JSON.stringify({ e: nombre, d: d });
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/uso', new Blob([cuerpo], { type: 'application/json' }));
+      else fetch('/api/uso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: cuerpo, keepalive: true }).catch(function () {});
+    } catch (e) { /* el contador nunca rompe la pagina */ }
+  }
   window.mockTrack = function (nombre, params) {
     params = params || {};
     if (!params.viaje_id) params.viaje_id = window.CS_VIAJE_ID;
     try { if (typeof window.track === 'function') window.track(nombre, params); } catch (e) { /* Analytics nunca rompe la pagina */ }
+    contar(nombre, params);
     mostrar(nombre, params);
   };
   document.addEventListener('click', function (ev) {

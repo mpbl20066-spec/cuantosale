@@ -3328,7 +3328,10 @@ function serveGrupoPage(req, res, groupId) {
    guarda en lib/pedidos.js para verlo en /admin. No tira nunca: si el almacenamiento
    falla, el pedido igual sigue su camino (WhatsApp y email al asesor). */
 const viajesGuardados = require('./lib/viajes-guardados');
-const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga });
+/* Contador de uso propio (lib/uso.js): POST /api/uso desde home-track.js y la pestana "Uso" del panel. */
+let usoCache = null;
+function usoApi() { if (!usoCache) usoCache = require('./lib/uso')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp }); return usoCache; }
+const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga, uso: function (dias) { return usoApi().resumen(dias).then(function (r) { r.nombres = {}; Object.keys(model.DEST).forEach(function (k) { r.nombres[k] = model.DEST[k].name; }); return r; }); } });
 /* Webhook de WhatsApp (Cloud API de Meta): mensajes de los clientes y estados de los nuestros, para la bandeja del
    panel (lib/mensajes.js). GET es la verificacion que hace Meta al configurarlo (WHATSAPP_VERIFY_TOKEN). En POST se
    comprueba la firma X-Hub-Signature-256 con WHATSAPP_APP_SECRET (la clave secreta de la app de Meta): sin ella
@@ -3522,6 +3525,10 @@ function handleRequest(req, res) {
       return readJson(req, 6 * 1024 * 1024).then(function (body) { return registrarTransferencia(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos registrar la transferencia.' });
       });
+    }
+    /* contador de uso (lib/uso.js): antes del cortafuegos de POST */
+    if (url.pathname === '/api/uso') {
+      return usoApi().api(req, res).catch(function (e) { if (!res.headersSent) sendJson(res, 500, { error: 'Error inesperado.' }); console.error('[uso]', e); });
     }
     if (req.method === 'POST') { res.writeHead(404); return res.end(); }
     if (url.pathname === '/api/destinos') {
