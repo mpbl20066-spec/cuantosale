@@ -152,6 +152,31 @@ t('la decision elegida en la vista previa se respeta solo si es una opcion valid
   assert.strictEqual(ops.analizarImport(fila, { 1: 'cualquiera' }, ctxPrueba())[0].decision, 'comparar');
 });
 
+/* ---------- fotos del proveedor ---------- */
+
+const fp = require('./lib/fotos-proveedor');
+
+t('las fotos de una pagina: primero la que declara (og:image), sin logos ni iconos', function () {
+  const html = '<meta property="og:image" content="/img/portada.jpg"><img src="/img/logo.png"><img src="favicon.ico">' +
+    '<img width="40" src="/img/chica.jpg"><img srcset="/img/a-400.jpg 400w, /img/a-1200.jpg 1200w" src="/img/a-400.jpg">';
+  assert.deepStrictEqual(fp.extraer(html, 'https://op.com.br/passeio/'), ['https://op.com.br/img/portada.jpg', 'https://op.com.br/img/a-1200.jpg']);
+});
+
+t('de Wix y Cloudflare se pide la foto grande', function () {
+  const html = '<img src="https://static.wixstatic.com/media/ab_cd~mv2.jpg/v1/fit/w_40,h_30/ab.jpg"><img src="https://imagedelivery.net/x/y/w=40">';
+  assert.deepStrictEqual(fp.extraer(html, 'https://op.com/'), ['https://static.wixstatic.com/media/ab_cd~mv2.jpg', 'https://imagedelivery.net/x/y/w=1600']);
+});
+
+t('no se piden direcciones internas', function () {
+  ['127.0.0.1', '10.1.2.3', '192.168.0.10', '172.20.0.1', '169.254.169.254', '::1', 'fd00::1', '::ffff:10.0.0.1'].forEach(function (ip) { assert.ok(fp.ipPrivada(ip), ip); });
+  ['8.8.8.8', '200.160.2.3', '2800:3f0:4001::1'].forEach(function (ip) { assert.ok(!fp.ipPrivada(ip), ip); });
+});
+
+t('el link de la foto solo puede ser una direccion web', function () {
+  assert.throws(function () { ops.limpiarCambios({ url_imagen: 'javascript:alert(1)' }); });
+  assert.strictEqual(ops.limpiarCambios({ url_imagen: 'https://x.supabase.co/a.jpg' }).url_imagen, 'https://x.supabase.co/a.jpg');
+});
+
 /* ---------- precios masivos (recalcular es async: van al final) ---------- */
 
 async function tAsync(nombre, fn) {
