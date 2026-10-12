@@ -80,10 +80,18 @@ function mesesDe(key) {
   return { meses: meses, alta: (t.alta || []).slice().sort(function (a, b) { return a - b; }) };
 }
 
+/* `clima`: 12 meses de [maxima °C, dias con 5 mm o mas de lluvia, horas de sol por dia], para el ranking "Mejor
+   clima". Sale de data/clima-destinos.json (node scripts/build-clima.js); si todavia no esta, el destino va sin clima. */
+let CLIMA = {};
+try { CLIMA = require('../data/clima-destinos.json').destinos; } catch (e) { CLIMA = {}; }
+function climaDe(key) {
+  return (CLIMA[key] || []).map(function (c) { return [Math.round(c.max), c.dias, c.sol]; });
+}
+
 const datos = Object.keys(model.DEST).map(function (k) {
   const g = GEO[k] || {}, mm = mesesDe(k);
   return { k: k, name: model.DEST[k].name, region: model.DEST[k].region, group: model.DEST[k].group || 'beach', medios: mediosDe(k), horas: horasDe(k),
-    lat: g.lat, lon: g.lon, meses: mm.meses, alta: mm.alta };
+    lat: g.lat, lon: g.lon, meses: mm.meses, alta: mm.alta, clima: climaDe(k) };
 });
 
 const CABECERA = '/* Snapshot de lib/model.js DEST: los mismos 40 destinos que ofrece cuantosale.uy, con su region\n'
