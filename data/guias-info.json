@@ -35,7 +35,7 @@
      },
      {
       "t": "Por Florianópolis (FLN)",
-      "d": "Florianópolis recibe más vuelos y a veces sale más barato, pero quedan unos 90 km. Desde la terminal Rita Maria salen ómnibus de Catarinense y Reunidas a Balneário Camboriú, en 1 h 30 aproximadamente. En algunos veranos hubo vuelos directos Montevideo–Florianópolis: fijate si hay en tu temporada."
+      "d": "Florianópolis recibe más vuelos y a veces sale más barato, pero quedan unos 90 km. Desde la terminal Rita Maria salen ómnibus de Catarinense y Reunidas a Balneário Camboriú, en 1 h 30 aproximadamente. Para el verano 2026-2027 no hay vuelo directo anunciado de Montevideo a Florianópolis."
      },
      {
       "t": "En auto",
@@ -225,7 +225,7 @@
     "items": [
      {
       "t": "En avión al aeropuerto Hercílio Luz (FLN)",
-      "d": "Durante el año no hay vuelo directo: se vuela con escala, en general en São Paulo. En algunos veranos Azul operó un directo de temporada entre Montevideo y Florianópolis; antes de comprar, fijate si está vigente."
+      "d": "Para el verano 2026-2027 no hay vuelo directo anunciado desde Montevideo: se vuela con escala, en general en São Paulo. En otras temporadas hubo directos de verano (Azul en 2024-2025), así que si aparece uno en tus fechas, aprovechalo."
      },
      {
       "t": "Del aeropuerto a tu zona",
@@ -424,7 +424,7 @@
     "items": [
      {
       "t": "Vuelo a Río (GIG)",
-      "d": "Hay vuelo directo de Montevideo al Galeão con GOL, de unas 2 h 40. Con escala en São Paulo también hay opciones todos los días."
+      "d": "JetSMART vuela directo de Montevideo al Galeão, en unas 3 horas. Con escala en São Paulo también hay opciones todos los días."
      },
      {
       "t": "Del Galeão a Búzios en auto",
@@ -638,7 +638,7 @@
     "items": [
      {
       "t": "Vuelo a Florianópolis (FLN)",
-      "d": "Es el aeropuerto internacional de la zona. En el verano 2024-2025 Azul voló directo desde Montevideo dos veces por semana; si en tus fechas no hay directo, se vuela con escala, en general en São Paulo. Del aeropuerto a Bombinhas son unos 80 a 85 km por la BR-101: cerca de 1 h 30 sin tránsito, más si se traba la salida de la isla."
+      "d": "Es el aeropuerto internacional de la zona. Para el verano 2026-2027 no hay vuelo directo anunciado desde Montevideo: se vuela con escala, en general en São Paulo. En otras temporadas hubo directos de verano (Azul en 2024-2025), así que si aparece uno en tus fechas, aprovechalo. Del aeropuerto a Bombinhas son unos 80 a 85 km por la BR-101: cerca de 1 h 30 sin tránsito, más si se traba la salida de la isla."
      },
      {
       "t": "Vuelo a Navegantes (NVT)",
@@ -808,11 +808,11 @@
     "id": "llegar",
     "icono": "✈️",
     "titulo": "Cómo llegar a Maragogi desde Montevideo",
-    "intro": "No hay vuelos directos de Montevideo a Recife ni a Maceió: se vuela con al menos una escala, en general en São Paulo, y desde el aeropuerto se sigue por ruta.",
+    "intro": "No hay vuelos directos de Montevideo a Maceió, pero sí a Recife algunos días por semana. Desde el aeropuerto se sigue por ruta.",
     "items": [
      {
       "t": "Vuelo a Recife (REC)",
-      "d": "Es la opción con más frecuencias. LATAM, GOL y Azul combinan desde Montevideo con escala en Brasil; revisá que la conexión no te obligue a cambiar de aeropuerto en São Paulo."
+      "d": "Es la opción con más frecuencias. Azul vuela directo Montevideo–Recife algunos días por semana, en unas 5 horas, y JetSMART anunció un directo diario de enero a marzo, desde el 7 de enero de 2027. Los otros días, LATAM, GOL y Azul combinan con escala en Brasil; revisá que la conexión no te obligue a cambiar de aeropuerto en São Paulo."
      },
      {
       "t": "Vuelo a Maceió (MCZ)",
@@ -1002,15 +1002,15 @@
     "id": "llegar",
     "icono": "✈️",
     "titulo": "Cómo llegar a Salvador de Bahía desde Montevideo",
-    "intro": "No hay un vuelo directo regular todo el año entre Montevideo y Salvador: lo habitual es volar con una escala.",
+    "intro": "SKY vuela directo desde Montevideo algunos días por semana; si no te sirven las fechas, se vuela con una escala.",
     "items": [
+     {
+      "t": "Vuelo directo con SKY",
+      "d": "SKY vuela directo Montevideo–Salvador algunos días por semana, en unas 4 h 30. Revisá los días en la aerolínea antes de armar el viaje."
+     },
      {
       "t": "Vuelo con escala",
       "d": "La opción más común es con escala en São Paulo (LATAM, GOL o Azul) y de ahí a Salvador (SSA). Si combinás aerolíneas, revisá que no tengas que cambiar de aeropuerto en São Paulo."
-     },
-     {
-      "t": "Vuelos directos de temporada",
-      "d": "En algunos veranos hubo vuelos directos de temporada (GOL en 2023, SKY en 2024). Buscalos para tus fechas, pero no cuentes con ellos."
      },
      {
       "t": "Del aeropuerto a la Barra",
@@ -1579,7 +1579,7 @@
     "items": [
      {
       "t": "Vuelo a Recife (REC)",
-      "d": "Azul tiene vuelo directo Montevideo–Recife algunos días por semana. Si no coincide con tus fechas, hay vuelos con escala en São Paulo u otra ciudad de Brasil con Azul, GOL y LATAM; si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
+      "d": "Azul vuela directo Montevideo–Recife algunos días por semana, en unas 5 horas, y JetSMART anunció un directo diario de enero a marzo, desde el 7 de enero de 2027. Si no coincide con tus fechas, hay vuelos con escala en São Paulo u otra ciudad de Brasil con Azul, GOL y LATAM; si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
      },
      {
       "t": "Del aeropuerto en auto o transfer",
@@ -1945,7 +1945,7 @@
     "items": [
      {
       "t": "Vuelo directo de temporada",
-      "d": "GOL anunció vuelos sin escalas Montevideo–Natal los sábados en temporadas puntuales, como julio y desde diciembre de 2026. Revisá las fechas en la aerolínea porque la ruta no opera todo el año."
+      "d": "GOL vuela sin escalas Montevideo–Natal los sábados, solo en algunos períodos del año. Anunció una temporada desde el 5 de diciembre de 2026: revisá en la aerolínea hasta cuándo opera y si coincide con tus fechas."
      },
      {
       "t": "Con escala",
@@ -2113,7 +2113,7 @@
     "items": [
      {
       "t": "Vuelo a Natal (NAT)",
-      "d": "GOL anunció vuelos directos Montevideo–Natal los sábados en temporadas puntuales. El resto del año se llega con escala, en general en São Paulo."
+      "d": "GOL vuela directo Montevideo–Natal los sábados, solo en algunos períodos del año (anunció una temporada desde el 5 de diciembre de 2026). El resto del tiempo se llega con escala, en general en São Paulo."
      },
      {
       "t": "Del aeropuerto en auto, taxi o Uber",
@@ -2460,11 +2460,11 @@
     "id": "llegar",
     "icono": "✈️",
     "titulo": "Cómo llegar a Fortaleza desde Montevideo",
-    "intro": "Lo habitual es volar con una escala, en general en São Paulo. En algunas temporadas GOL operó vuelos directos.",
+    "intro": "Lo habitual es volar con una escala, en general en São Paulo. GOL operó un directo de temporada.",
     "items": [
      {
       "t": "Vuelo directo de temporada",
-      "d": "GOL operó vuelos sin escalas Montevideo–Fortaleza en temporadas puntuales, como el invierno de 2026. Revisá en la aerolínea si hay en tus fechas."
+      "d": "GOL voló sin escalas Montevideo–Fortaleza los sábados en el verano 2025-2026. Para 2026-2027 no encontramos anuncio: revisá en la aerolínea si vuelve a operar en tus fechas."
      },
      {
       "t": "Con escala",
@@ -2819,11 +2819,11 @@
     "id": "llegar",
     "icono": "✈️",
     "titulo": "Cómo llegar a Morro de São Paulo desde Montevideo",
-    "intro": "No hay vuelos directos de Montevideo a Salvador todo el año: lo habitual es volar con escala en São Paulo y desde Salvador seguir por mar.",
+    "intro": "Se vuela a Salvador, directo con SKY algunos días por semana o con escala en São Paulo, y desde Salvador se sigue por mar.",
     "items": [
      {
       "t": "Vuelo a Salvador (SSA)",
-      "d": "LATAM, GOL y Azul combinan con escala en São Paulo. Si llegás tarde, conviene dormir en Salvador y cruzar a la mañana: los catamaranes salen de mañana y temprano a la tarde."
+      "d": "SKY vuela directo desde Montevideo algunos días por semana; los otros días, LATAM, GOL y Azul combinan con escala en São Paulo. Si llegás tarde, conviene dormir en Salvador y cruzar a la mañana: los catamaranes salen de mañana y temprano a la tarde."
      },
      {
       "t": "Catamarán desde Salvador",
@@ -3384,11 +3384,11 @@
     "id": "llegar",
     "icono": "✈️",
     "titulo": "Cómo llegar a Praia do Forte desde Montevideo",
-    "intro": "No hay un vuelo directo regular todo el año entre Montevideo y Salvador: lo habitual es volar con escala en São Paulo y desde el aeropuerto seguir por ruta.",
+    "intro": "Se vuela a Salvador, directo con SKY algunos días por semana o con escala en São Paulo, y desde el aeropuerto se sigue por ruta.",
     "items": [
      {
       "t": "Vuelo a Salvador (SSA)",
-      "d": "LATAM, GOL y Azul combinan con escala en São Paulo. Si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
+      "d": "SKY vuela directo desde Montevideo algunos días por semana; los otros días, LATAM, GOL y Azul combinan con escala en São Paulo. Si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
      },
      {
       "t": "En auto",
@@ -3551,7 +3551,7 @@
     "items": [
      {
       "t": "Vuelo a Recife (REC)",
-      "d": "Desde Montevideo se llega a Recife con escala, en general en São Paulo. Revisá que la conexión no te obligue a cambiar de aeropuerto."
+      "d": "Azul vuela directo Montevideo–Recife algunos días por semana, en unas 5 horas, y JetSMART anunció un directo diario de enero a marzo, desde el 7 de enero de 2027. Si no, se llega con escala, en general en São Paulo. Dejá margen entre el vuelo a Recife y el de la isla."
      },
      {
       "t": "De Recife a Noronha",
@@ -3737,11 +3737,15 @@
     "id": "llegar",
     "icono": "✈️",
     "titulo": "Cómo llegar a Recife desde Montevideo",
-    "intro": "No hay vuelos directos de Montevideo a Recife: se vuela con al menos una escala, en general en São Paulo.",
+    "intro": "Hay vuelos directos de Montevideo a Recife algunos días por semana; si no coinciden con tus fechas, se vuela con una escala, en general en São Paulo.",
     "items": [
      {
+      "t": "Vuelo directo a Recife (REC)",
+      "d": "Azul vuela directo Montevideo–Recife algunos días por semana, en unas 5 horas, y JetSMART anunció un directo diario de enero a marzo, desde el 7 de enero de 2027. Revisá los días en cada aerolínea."
+     },
+     {
       "t": "Vuelo con escala en São Paulo",
-      "d": "LATAM, GOL y Azul combinan desde Montevideo con escala en Brasil y siguen a Recife (REC). Revisá que la conexión no te obligue a cambiar de aeropuerto en São Paulo."
+      "d": "Si no hay directo en tus fechas, LATAM, GOL y Azul combinan desde Montevideo con escala en Brasil. Revisá que la conexión no te obligue a cambiar de aeropuerto en São Paulo."
      },
      {
       "t": "Por Buenos Aires",
@@ -3929,7 +3933,7 @@
     "items": [
      {
       "t": "Vuelo a Río (GIG)",
-      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, y algunas llegan a Santos Dumont (SDU), más cerca del Puente Río-Niterói."
+      "d": "JetSMART vuela directo de Montevideo al Galeão, en unas 3 horas. Con escala en São Paulo también hay opciones todos los días, y algunas llegan a Santos Dumont (SDU), más cerca del Puente Río-Niterói."
      },
      {
       "t": "De Río a Arraial en auto",
@@ -4133,7 +4137,7 @@
     "items": [
      {
       "t": "Vuelo a Río (GIG)",
-      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU), más cerca del Puente Río-Niterói."
+      "d": "JetSMART vuela directo de Montevideo al Galeão, en unas 3 horas. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU), más cerca del Puente Río-Niterói."
      },
      {
       "t": "De Río a Cabo Frio en auto",
@@ -4339,7 +4343,7 @@
     "items": [
      {
       "t": "Vuelo a Río (GIG)",
-      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
+      "d": "JetSMART vuela directo de Montevideo al Galeão, en unas 3 horas. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
      },
      {
       "t": "Por Conceição de Jacareí",
@@ -4539,11 +4543,11 @@
     "items": [
      {
       "t": "Vuelo a Río (GIG)",
-      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
+      "d": "JetSMART vuela directo de Montevideo al Galeão, en unas 3 horas. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
      },
      {
       "t": "Vuelo a São Paulo (GRU)",
-      "d": "Hay vuelos directos de Montevideo a Guarulhos, por ejemplo con GOL. Desde Guarulhos a Paraty son unos 250 km, unas 4 h 30 en auto."
+      "d": "Hay vuelos directos de Montevideo a Guarulhos con LATAM y GOL. Desde Guarulhos a Paraty son unos 250 km, unas 4 h 30 en auto."
      },
      {
       "t": "De Río a Paraty en auto",
@@ -4740,7 +4744,7 @@
     "items": [
      {
       "t": "Vuelo a Río (GIG)",
-      "d": "Hay vuelo directo de Montevideo al Galeão con GOL. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
+      "d": "JetSMART vuela directo de Montevideo al Galeão, en unas 3 horas. Con escala en São Paulo también hay opciones todos los días, algunas a Santos Dumont (SDU)."
      },
      {
       "t": "Ómnibus desde la Rodoviária Novo Rio",
@@ -4932,7 +4936,7 @@
     "items": [
      {
       "t": "Vuelo a São Paulo (GRU)",
-      "d": "Hay vuelos directos de Montevideo a Guarulhos, por ejemplo con GOL. Con escala también hay opciones todos los días."
+      "d": "Hay vuelos directos de Montevideo a Guarulhos con LATAM y GOL, todos los días."
      },
      {
       "t": "Auto desde São Paulo",
@@ -5878,7 +5882,7 @@
      },
      {
       "t": "Por Recife",
-      "d": "Si conseguís mejor vuelo a Recife, son unos 120 km por la BR-101, sin peaje, en 1 h 30 a 1 h 45 en auto. En ómnibus, Total y Progresso salen desde la terminal TIP de Recife y tardan entre 2 y 2 h 30."
+      "d": "A Recife hay vuelos directos desde Montevideo algunos días por semana: Azul, y JetSMART de enero a marzo desde el 7 de enero de 2027. De ahí son unos 120 km por la BR-101, sin peaje, en 1 h 30 a 1 h 45 en auto. En ómnibus, Total y Progresso salen desde la terminal TIP de Recife y tardan entre 2 y 2 h 30."
      }
     ],
     "cierre": {
@@ -6055,7 +6059,7 @@
     "items": [
      {
       "t": "Vuelo a Florianópolis (FLN)",
-      "d": "Es el aeropuerto internacional más cercano. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo."
+      "d": "Es el aeropuerto internacional más cercano. Para el verano 2026-2027 no hay vuelo directo anunciado desde Montevideo: se vuela con escala, en general en São Paulo. En otras temporadas hubo directos de verano (Azul en 2024-2025), así que si aparece uno en tus fechas, aprovechalo."
      },
      {
       "t": "Del aeropuerto al Rosa",
@@ -6248,7 +6252,7 @@
     "items": [
      {
       "t": "Vuelo a Florianópolis (FLN)",
-      "d": "Es el aeropuerto internacional de la zona. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo. Del aeropuerto a Itapema son unos 80 km por la BR-101: alrededor de 1 hora sin tránsito, bastante más si se traba la salida de la isla."
+      "d": "Es el aeropuerto internacional de la zona. Para el verano 2026-2027 no hay vuelo directo anunciado desde Montevideo: se vuela con escala, en general en São Paulo. En otras temporadas hubo directos de verano (Azul en 2024-2025), así que si aparece uno en tus fechas, aprovechalo. Del aeropuerto a Itapema son unos 80 km por la BR-101: alrededor de 1 hora sin tránsito, bastante más si se traba la salida de la isla."
      },
      {
       "t": "Vuelo a Navegantes (NVT)",
@@ -6436,7 +6440,7 @@
     "items": [
      {
       "t": "Vuelo a Florianópolis (FLN)",
-      "d": "Es el aeropuerto internacional más cercano. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo."
+      "d": "Es el aeropuerto internacional más cercano. Para el verano 2026-2027 no hay vuelo directo anunciado desde Montevideo: se vuela con escala, en general en São Paulo. En otras temporadas hubo directos de verano (Azul en 2024-2025), así que si aparece uno en tus fechas, aprovechalo."
      },
      {
       "t": "De Florianópolis a Garopaba en auto",
@@ -6632,7 +6636,7 @@
     "items": [
      {
       "t": "Vuelo a Florianópolis (FLN)",
-      "d": "Es el aeropuerto internacional más cercano. Los vuelos directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si en tus fechas no hay, se vuela con escala, en general en São Paulo."
+      "d": "Es el aeropuerto internacional más cercano. Para el verano 2026-2027 no hay vuelo directo anunciado desde Montevideo: se vuela con escala, en general en São Paulo. En otras temporadas hubo directos de verano (Azul en 2024-2025), así que si aparece uno en tus fechas, aprovechalo."
      },
      {
       "t": "De Florianópolis a Ferrugem en auto",
@@ -6832,7 +6836,7 @@
      },
      {
       "t": "Vuelo a Florianópolis (FLN)",
-      "d": "Tiene más vuelos. Los directos desde Montevideo han sido de temporada (Azul voló en el verano 2024-2025); si no, con escala en São Paulo. Del aeropuerto a Piçarras son unos 120 km por la BR-101: cerca de 1 h 45 sin tránsito."
+      "d": "Tiene más vuelos. Para el verano 2026-2027 no hay vuelo directo anunciado desde Montevideo: se vuela con escala, en general en São Paulo. En otras temporadas hubo directos de verano (Azul en 2024-2025), así que si aparece uno en tus fechas, aprovechalo. Del aeropuerto a Piçarras son unos 120 km por la BR-101: cerca de 1 h 45 sin tránsito."
      },
      {
       "t": "Del aeropuerto a Piçarras",
@@ -7139,7 +7143,7 @@
      },
      {
       "t": "Enchufes",
-      "d": "Tipo N (el brasileño, de dos o tres patas redondas). En Rio Grande do Sul hay redes de 127 V y de 220 V: confirmá la tensión en tu alojamiento antes de enchufar algo que no sea bivolt."
+      "d": "Tipo N (el brasileño, de dos o tres patas redondas). En Torres la red es de 127 V, como en Porto Alegre; en la Serra (Gramado, Canela) es de 220 V. Revisá que tus cargadores sean bivolt."
      },
      {
       "t": "Idioma",
