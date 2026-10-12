@@ -809,7 +809,7 @@
       if (s.tipo === 'traslado' && !s.eliminado_at) estado += ' <span class="pill p-consultado" title="La web calcula los traslados aparte">no va a la web</span>';
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '">revisar</span>';
       h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub">' + esc(destNombre(s.destino)) + ' · ' + esc(TIPOS_SRV[s.tipo] || s.tipo) + ' · ' + (pr ? esc(pr.nombre) : '<i>sin proveedor</i>') + '</span></td>' +
-        '<td data-l="Proveedor cobra">' + origenTxt(s) + '</td>' +
+        '<td data-l="Proveedor cobra">' + origenTxt(s) + (verProv(p && p.despues.link_web || s.link_web) ? '<span class="sub">' + verProv(p && p.despues.link_web || s.link_web) + '</span>' : '') + '</td>' +
         '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') + '</td>' +
         '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? pub(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
         '<td data-l="Estado">' + estado + '</td>' +
@@ -832,8 +832,26 @@
     if (k === 'proveedor_id') { var p = provDe(v); return p ? p.nombre : '(otro)'; }
     var s = String(v); return s.length > 70 ? s.slice(0, 67) + '…' : s;
   }
+  /* El link del operador se muestra como enlace ("Ver en el proveedor") y no como la direccion, que es larga y
+     quedaba cortada. Solo http(s): un link cargado desde un archivo no puede ser javascript: ni nada raro. */
+  function urlSegura(u) { u = String(u || '').trim(); return /^https?:\/\/[^\s"<>]+$/i.test(u) ? u : ''; }
+  function verProv(u, texto) {
+    var x = urlSegura(u);
+    return x ? '<a class="lnk" target="_blank" rel="noopener noreferrer" href="' + esc(x) + '">' + esc(texto || 'Ver en el proveedor') + ' ↗</a>' : '';
+  }
+  /* "Importado de x.csv · https://..." -> el texto y, aparte, el enlace. */
+  function fuenteHtml(f) {
+    var m = /(https?:\/\/\S+)/.exec(String(f || ''));
+    if (!m) return esc(f);
+    var resto = String(f).replace(m[1], '').replace(/\s*·\s*$/, '').trim();
+    return esc(resto) + (resto ? ' · ' : '') + verProv(m[1]);
+  }
   function difsHtml(c) {
     return Object.keys(c.despues || {}).map(function (k) {
+      if (k === 'link_web') {
+        var a = (c.antes || {})[k], d = c.despues[k];
+        return '<span class="sub"><b>' + esc(CAMPO_NOMBRE[k]) + ':</b> ' + (a ? verProv(a, 'el de antes') : '—') + ' → ' + (d ? verProv(d) : '—') + '</span>';
+      }
       return '<span class="sub"><b>' + esc(CAMPO_NOMBRE[k] || k) + ':</b> ' + esc(valorCampo(k, (c.antes || {})[k])) + ' → ' + esc(valorCampo(k, c.despues[k])) + '</span>';
     }).join('');
   }
@@ -869,7 +887,8 @@
       var sinUnidad = c.origen === 'importacion' && s.revision === 'pendiente' && /unidad|persona o por/.test(s.revision_motivo || '') && c.despues.activo === true;
       h += '<tr><td data-l="Elegir"><input type="checkbox" data-sel="' + esc(c.id) + '" style="width:auto;min-height:0"' + (S.sel[c.id] ? ' checked' : '') + '></td>' +
         '<td data-l="Servicio"><a class="lnk" href="#" data-srv="' + esc(c.tour_id || '') + '">' + esc(s.titulo || String(c.tour_clave).split('#')[1] || '?') + '</a><span class="sub">' + esc(destNombre(s.destino || String(c.tour_clave).split('#')[0])) + (s.precio_publicado == null && !s.activo ? ' · nuevo' : '') + '</span></td>' +
-        '<td data-l="Qué cambia">' + difsHtml(c) + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') + '</td>' +
+        '<td data-l="Qué cambia">' + difsHtml(c) + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') +
+          (!('link_web' in c.despues) && verProv(s.link_web) ? '<span class="sub">' + verProv(s.link_web) + '</span>' : '') + '</td>' +
         '<td class="num" data-l="Publicado hoy">' + (c.publicado_antes != null ? pub(c.publicado_antes) + '<span class="sub">' + usd(c.publicado_antes) + '</span>' : '—') + '</td>' +
         '<td class="num" data-l="Quedaría">' + (noSe ? '<span class="deuda">no se puede calcular</span>' : (c.publicado_despues != null ? '<b' + (fuerte ? ' class="deuda"' : '') + '>' + pub(c.publicado_despues) + '</b><span class="sub">' + usd(c.publicado_despues) + ' · ' + esc(p) + '</span>' : '—')) +
           (sinUnidad ? '<span class="sub deuda">Falta confirmar si es por persona o por vehículo: abrilo y publicalo desde ahí</span>' : '') + '</td>' +
@@ -947,7 +966,7 @@
       '<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" ' + a('activo') + ' style="width:auto;min-height:0"' + (f.activo ? ' checked' : '') + '> Mostrarlo en la web</label></div></section>' +
       '<section class="sec"><h3>Ficha</h3><div class="grid">' + inp('duracion', 'Duración') + inp('grupo', 'Grupo') + inp('punto_salida', 'Punto de salida') + inp('edad_minima', 'Edad mínima') + '</div>' +
       '<div class="grid" style="grid-template-columns:1fr;margin-top:10px">' + area('incluye', 'Incluye', 'una cosa por línea') + area('no_incluye', 'No incluye', 'una cosa por línea') + area('que_llevar', 'Qué llevar', 'una cosa por línea') +
-      area('politica_cancelacion', 'Cancelación') + inp('link_web', 'Link del operador') + '</div></section>' +
+      area('politica_cancelacion', 'Cancelación') + inp('link_web', 'Link del operador') + (verProv(f.link_web) ? '<p style="margin:-4px 0 0">' + verProv(f.link_web) + '</p>' : '') + '</div></section>' +
       (s.orig ? '<section class="sec"><h3>Historial</h3><div id="srv-hist"><p class="sub">Cargando…</p></div></section>' : '') + '</div>' +
       '<div class="foot"><span class="msg" id="foot-msg" role="status"></span><button class="btn" data-act="cerrar">Cancelar</button>' +
       '<button class="btn" data-act="srv-guardar">Guardar para revisar</button><button class="btn btn--main" data-act="srv-publicar">Publicar ahora</button></div></div>';
@@ -962,7 +981,7 @@
       return '<div class="item"><div class="item__top"><div style="flex:1"><b>' + esc(fechaHora(c.resuelto_at || c.creado_at)) + '</b> · ' + esc(ORIGENES[c.origen] || c.origen) +
         ' <span class="pill ' + pill + '">' + esc(ESTADOS_CAMBIO[c.estado] || c.estado) + '</span>' +
         (c.publicado_despues != null ? '<span class="sub">Precio publicado: ' + (c.publicado_antes != null ? pub(c.publicado_antes) + ' → ' : '') + pub(c.publicado_despues) + ' ' + esc(pctTxt(c.publicado_antes, c.publicado_despues)) + '</span>' : '') +
-        (c.origen !== 'inicial' ? difsHtml(c) : '') + (c.fuente ? '<span class="sub">Fuente: ' + esc(c.fuente) + '</span>' : '') + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') +
+        (c.origen !== 'inicial' ? difsHtml(c) : '') + (c.fuente ? '<span class="sub">Fuente: ' + fuenteHtml(c.fuente) + '</span>' : '') + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') +
         '<span class="sub">' + (c.creado_por ? 'Por ' + esc(c.creado_por) : '') + (c.resuelto_por && c.estado === 'publicado' ? ' · publicó ' + esc(c.resuelto_por) : '') + '</span></div>' +
         (c.estado === 'publicado' && c.origen !== 'inicial' && Object.keys(c.antes || {}).length ? '<button class="btn btn--sm" data-revertir="' + esc(c.id) + '">Volver a lo de antes</button>' : '') + '</div></div>';
     }).join('');
