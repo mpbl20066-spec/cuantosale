@@ -1354,7 +1354,9 @@ function haversineKm(a, b) {
       assert.strictEqual(r2.pedidas, 0, 'lo que ya tiene precio vigente no se vuelve a pedir');
       assert.strictEqual(pedidos, 1);
       const cob = await flights.coberturaMeses(rutas, 'ahorro');
-      assert.deepStrictEqual(cob, { rutas: 1, conPrecio: 1 });
+      assert.strictEqual(cob.rutas, 1);
+      assert.strictEqual(cob.conPrecio, 1);
+      assert.strictEqual(cob.detalle[0].pp, 300, 'el detalle del panel muestra el precio por persona de cada ruta');
       const r = await get(port, '/api/destinos-destacados?pax=2&style=ahorro&origin=MVD&transport=flight&items=fln~' + fechaGuia.dep + '~' + fechaGuia.ret + '~economico');
       const it = JSON.parse(r.body).items[0];
       assert.strictEqual(it.vuelo, 'real');

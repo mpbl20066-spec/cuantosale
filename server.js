@@ -1860,11 +1860,15 @@ async function precalentarVuelos(req, res) {
 async function estadoPrecarga() {
   const vuelos = await flightProviders.coberturaMeses(rutasGuias(), 'ahorro');
   const cal = await flightProviders.leerReferencias(HOME_DESTINATION_KEYS.map(hotelCalKey));
-  const factores = HOME_DESTINATION_KEYS.map(function (k, i) { return { destino: k, factor: cal[i] ? cal[i].factor : undefined }; });
+  const factores = HOME_DESTINATION_KEYS.map(function (k, i) { return { destino: k, nombre: model.DEST[k].name, factor: cal[i] ? cal[i].factor : undefined }; });
+  /* Que destinos usa cada aeropuerto, para que el detalle diga "FLN (Florianopolis, Bombinhas...)" y no solo el codigo. */
+  const porAeropuerto = {};
+  Object.keys(AIR_DESTINATIONS).forEach(function (k) { const a = AIR_DESTINATIONS[k]; if (model.DEST[k]) (porAeropuerto[a] = porAeropuerto[a] || []).push(model.DEST[k].name); });
+  vuelos.aeropuertos = porAeropuerto;
   const st = flightProviders.stats();
   return {
     vuelos: vuelos,
-    hoteles: { destinos: factores.length, calibrados: factores.filter(function (x) { return x.factor > 0; }).length, sinDatos: factores.filter(function (x) { return x.factor === null; }).length, factores: factores.filter(function (x) { return x.factor > 0; }) },
+    hoteles: { destinos: factores.length, calibrados: factores.filter(function (x) { return x.factor > 0; }).length, sinDatos: factores.filter(function (x) { return x.factor === null; }).length, factores: factores },
     ignav: { gastoHoy: st.gastoHoy || 0, topeDiario: st.topeDiario || null },
     topes: { vuelosPorDia: Number(process.env.PRECALENTAR_GUIAS_MAX || 12), hotelesPorDia: Number(process.env.PRECALENTAR_HOTELES_MAX || 4) }
   };

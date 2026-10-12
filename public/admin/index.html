@@ -58,6 +58,22 @@ textarea{min-height:76px;resize:vertical}
 .kpi small{display:block;color:var(--muted);font-weight:600;font-size:12.5px}
 .kpi b{display:block;font-size:22px;margin-top:2px;font-variant-numeric:tabular-nums}
 .kpi em{font-style:normal;font-size:12px;color:var(--muted)}
+.kpi--btn{font:inherit;color:inherit;text-align:left;cursor:pointer}
+.kpi--btn:hover{border-color:var(--muted)}
+.kpi__ver{display:block;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.precarga{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:-6px 0 16px;font-size:13.5px}
+.precarga p{margin:0 0 12px;line-height:1.5}
+.precarga__tabla{overflow-x:auto}
+.precarga table{border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.precarga th,.precarga td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.precarga thead th{color:var(--muted);font-weight:600}
+.precarga tbody th{text-align:left}
+.precarga tbody th small{display:block;font-weight:400;color:var(--muted);max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.precarga td.ok{color:var(--ok);font-weight:700}
+.precarga td.falta,.precarga__hoteles .falta b{color:var(--muted)}
+.precarga__hoteles{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 16px}
+.precarga__hoteles li{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}
+.precarga__hoteles .ok b{color:var(--ok)}
 .kpi--warn b{color:var(--warn)}.kpi--ok b{color:var(--ok)}
 .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
@@ -144,6 +160,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=14"></script>
+<script src="/admin/admin.js?v=15"></script>
 </body>
 </html>

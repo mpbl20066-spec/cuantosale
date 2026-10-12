@@ -88,15 +88,39 @@
     var pc = S.precarga;
     if (pc && pc.vuelos) {
       html += '<section class="kpis" aria-label="Precios de las guías">' +
-        kpi('Vuelos de las guías', pc.vuelos.conPrecio + ' / ' + pc.vuelos.rutas, 'meses con precio real (hasta ' + pc.topes.vuelosPorDia + ' por día)', pc.vuelos.conPrecio < pc.vuelos.rutas ? 'kpi--warn' : 'kpi--ok') +
-        kpi('Hoteles calibrados', pc.hoteles.calibrados + ' / ' + pc.hoteles.destinos, pc.hoteles.sinDatos ? pc.hoteles.sinDatos + ' sin hoteles en Booking' : 'con Booking, se renueva cada 30 días', pc.hoteles.calibrados < pc.hoteles.destinos ? 'kpi--warn' : 'kpi--ok') +
+        kpiPre('vuelos', 'Vuelos de las guías', pc.vuelos.conPrecio + ' / ' + pc.vuelos.rutas, 'meses con precio real (hasta ' + pc.topes.vuelosPorDia + ' por día)', pc.vuelos.conPrecio < pc.vuelos.rutas ? 'kpi--warn' : 'kpi--ok') +
+        kpiPre('hoteles', 'Hoteles calibrados', pc.hoteles.calibrados + ' / ' + pc.hoteles.destinos, pc.hoteles.sinDatos ? pc.hoteles.sinDatos + ' sin hoteles en Booking' : 'con Booking, se renueva cada 30 días', pc.hoteles.calibrados < pc.hoteles.destinos ? 'kpi--warn' : 'kpi--ok') +
         kpi('Ignav hoy', pc.ignav.gastoHoy + (pc.ignav.topeDiario ? ' / ' + pc.ignav.topeDiario : ''), 'búsquedas del día (tope)', pc.ignav.topeDiario && pc.ignav.gastoHoy >= pc.ignav.topeDiario ? 'kpi--warn' : '') + '</section>';
+      if (S.verPre) html += detallePrecarga(pc, S.verPre);
     }
     html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : vistaProveedores(d))));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
     else if (S.prov) abrirProv();
+  }
+  /* Tarjeta de la precarga que se puede tocar: abre (o cierra) el detalle debajo. */
+  function kpiPre(cual, t, v, sub, cls) {
+    var abierto = S.verPre === cual;
+    return '<button type="button" class="kpi kpi--btn ' + (cls || '') + '" data-precarga="' + cual + '" aria-expanded="' + abierto + '"><small>' + esc(t) + '</small><b>' + esc(v) + '</b><em>' + esc(sub) + '</em><span class="kpi__ver">' + (abierto ? 'Ocultar detalle ▲' : 'Ver detalle ▼') + '</span></button>';
+  }
+  var MES_CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  function detallePrecarga(pc, cual) {
+    if (cual === 'vuelos') {
+      var fechas = [], aeros = [];
+      pc.vuelos.detalle.forEach(function (r) { if (fechas.indexOf(r.dep) < 0) fechas.push(r.dep); if (aeros.indexOf(r.destination) < 0) aeros.push(r.destination); });
+      var celda = function (a, f) { var r = pc.vuelos.detalle.filter(function (x) { return x.destination === a && x.dep === f; })[0]; return r && r.pp ? '<td class="ok">US$ ' + Math.round(r.pp) + '</td>' : '<td class="falta">—</td>'; };
+      return '<section class="precarga"><p><b>Cómo funciona:</b> el "Desde" de cada guía busca el mes más barato para ir. Para eso, todos los días a las 6:00 (hora de Uruguay) el servidor busca en Ignav el vuelo real Montevideo → aeropuerto del destino, saliendo el 15 de cada uno de los próximos 11 meses y volviendo 7 días después. Hace hasta ' + pc.topes.vuelosPorDia + ' por día y cada precio sirve 14 días. Mientras un mes no tiene precio real (—), la guía usa el estimado del modelo. Los precios son ida y vuelta, por persona.</p>' +
+        '<div class="precarga__tabla"><table><thead><tr><th>Aeropuerto</th>' + fechas.map(function (f) { return '<th>' + MES_CORTO[+f.slice(5, 7) - 1] + ' ' + f.slice(2, 4) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        aeros.map(function (a) { var ds = (pc.vuelos.aeropuertos || {})[a] || []; return '<tr><th title="' + esc(ds.join(', ')) + '">' + esc(a) + '<small>' + esc(ds.slice(0, 3).join(', ') + (ds.length > 3 ? '…' : '')) + '</small></th>' + fechas.map(function (f) { return celda(a, f); }).join('') + '</tr>'; }).join('') +
+        '</tbody></table></div></section>';
+    }
+    var fac = pc.hoteles.factores.slice().sort(function (a, b) { return (b.factor > 0) - (a.factor > 0) || a.nombre.localeCompare(b.nombre, 'es'); });
+    return '<section class="precarga"><p><b>Cómo funciona:</b> el alojamiento del "Desde" sale del modelo de costos. Para que se parezca a lo que la persona ve al abrir el viaje, el servidor busca en Booking el hotel económico más barato de cada destino en 2 fechas y lo compara con lo que estimaba el modelo. La diferencia es el ajuste del destino: "+15 %" quiere decir que los hoteles reales salen 15 % más caros y el precio ya lo incluye. Calibra hasta ' + pc.topes.hotelesPorDia + ' destinos por día y cada ajuste dura 30 días. "Sin hoteles" es un destino donde Booking no devolvió nada: se vuelve a probar en 7 días.</p><ul class="precarga__hoteles">' +
+      fac.map(function (x) {
+        var t = x.factor > 0 ? (x.factor >= 1 ? '+' : '−') + Math.round(Math.abs(x.factor - 1) * 100) + ' %' : x.factor === null ? 'sin hoteles' : 'pendiente';
+        return '<li class="' + (x.factor > 0 ? 'ok' : 'falta') + '"><span>' + esc(x.nombre) + '</span><b>' + t + '</b></li>';
+      }).join('') + '</ul></section>';
   }
   function kpi(t, v, sub, cls) { return '<div class="kpi ' + (cls || '') + '"><small>' + esc(t) + '</small><b>' + esc(v) + '</b><em>' + esc(sub) + '</em></div>'; }
 
@@ -688,6 +712,7 @@
     if (e.target.closest('a[href]')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
     var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
+    var pv = e.target.closest('[data-precarga]'); if (pv) { var cual = pv.getAttribute('data-precarga'); S.verPre = S.verPre === cual ? '' : cual; pintarFondo(); return; }
     var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
