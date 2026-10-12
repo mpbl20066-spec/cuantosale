@@ -1727,5 +1727,1068 @@
     ]
    }
   ]
+ },
+ "sao": {
+  "antes": {
+   "titulo": "Antes de viajar a São Paulo",
+   "intro": "São Paulo es una ciudad enorme y se vive por barrios. Elegir bien dónde dormir y moverte en metro te ahorra horas de tráfico.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cuatro o cinco días recorrés el centro, la Paulista, un par de museos y los barrios para comer y salir. Si sumás una escapada a la costa o al interior, agregá días aparte."
+    },
+    {
+     "t": "La puerta de entrada es Guarulhos",
+     "d": "Los vuelos desde Montevideo llegan al aeropuerto internacional de Guarulhos (GRU), que queda en otro municipio, al noreste de la ciudad. Congonhas (CGH), dentro de la ciudad, recibe vuelos de cabotaje."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a São Paulo desde Montevideo",
+    "intro": "Hay vuelos directos desde Carrasco a Guarulhos, de unas 2 h 30 a 3 h. Es una de las rutas con más frecuencias desde Montevideo.",
+    "items": [
+     {
+      "t": "Vuelo directo a Guarulhos (GRU)",
+      "d": "LATAM opera la ruta varias veces por día y GOL también vuela sin escalas. Fijate el horario: algunos vuelos salen de madrugada desde Carrasco."
+     },
+     {
+      "t": "En tren",
+      "d": "La Línea 13-Jade de la CPTM llega a la estación Aeroporto-Guarulhos. El Expresso Aeroporto la une con Luz y Palmeiras-Barra Funda con una sola parada; el servicio común sale de Engenheiro Goulart. La estación no está en las terminales: se conecta con el AeroGRU, el tren interno gratuito."
+     },
+     {
+      "t": "En ómnibus",
+      "d": "El Airport Bus Service de la EMTU va del aeropuerto a la Avenida Paulista, la terminal Tietê y Congonhas, entre otros puntos. Según el tráfico, tarda de una a dos horas."
+     },
+     {
+      "t": "Uber, 99 o taxi",
+      "d": "Es lo más cómodo con valijas, pero el viaje depende mucho del tráfico: en hora pico puede llevar más de una hora hasta los Jardins o Pinheiros."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si llegás de tarde en un día de semana, el tren te independiza del embotellamiento de la Marginal."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en São Paulo",
+    "intro": "Conviene dormir cerca de una estación de metro. Así el tamaño de la ciudad deja de ser un problema.",
+    "items": [
+     {
+      "t": "Avenida Paulista y Jardins",
+      "d": "La opción más práctica para una primera visita: metro en la puerta, museos, compras y calles con movimiento hasta tarde."
+     },
+     {
+      "t": "Pinheiros y Vila Madalena",
+      "d": "Para comer bien y salir de noche: bares, restaurantes, el Beco do Batman y la Línea 4-Amarela para ir al centro o a la Paulista."
+     },
+     {
+      "t": "Itaim Bibi y Vila Olímpia",
+      "d": "Zona de oficinas, hoteles de negocios y restaurantes caros. Sirve si viajás por trabajo o querés estar cerca de la Faria Lima."
+     },
+     {
+      "t": "Liberdade",
+      "d": "El barrio japonés, cerca del centro y con metro. Tiene alojamiento más económico y mucha comida asiática."
+     },
+     {
+      "t": "Centro (República y Sé)",
+      "d": "Lo más barato y cerca de los edificios históricos, pero de noche se vacía y algunas cuadras son poco recomendables. Mejor si ya conocés la ciudad."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚇",
+    "titulo": "Cómo moverse por São Paulo",
+    "intro": "El metro y los trenes de la CPTM cubren casi todo lo que vas a visitar. Para lo demás, Uber o 99.",
+    "items": [
+     {
+      "t": "Metro",
+      "d": "Rápido y limpio. En las líneas 1-Azul, 2-Verde, 3-Vermelha y 15-Prata podés pagar acercando la tarjeta de crédito o débito o el celular al molinete. Las líneas 4-Amarela y 5-Lilás son privadas: si no aceptan tarjeta, comprá el boleto en la estación."
+     },
+     {
+      "t": "Bilhete Único",
+      "d": "La tarjeta recargable de la ciudad permite integración entre ómnibus, metro y tren; pagando con tarjeta bancaria esa integración no aplica."
+     },
+     {
+      "t": "Uber y 99",
+      "d": "Funcionan en toda la ciudad y son la forma más usada de volver de noche."
+     },
+     {
+      "t": "A pie",
+      "d": "Paulista, Jardins, Pinheiros y Vila Madalena se recorren caminando. Entre barrios las distancias son largas: usá el metro."
+     },
+     {
+      "t": "Auto",
+      "d": "No lo recomendamos: el tráfico es pesado y hay rotación de patentes (rodízio) que restringe circular en el centro expandido ciertos días y horarios."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "São Paulo de noche",
+    "intro": "La noche paulista se reparte por barrios y empieza tarde.",
+    "items": [
+     {
+      "t": "Vila Madalena",
+      "d": "Bares de vereda y botecos llenos, sobre todo de jueves a sábado alrededor de la Rua Aspicuelta."
+     },
+     {
+      "t": "Pinheiros",
+      "d": "Restaurantes, bares de cocteles y lugares con música en vivo, a pocas cuadras de la Vila Madalena."
+     },
+     {
+      "t": "Rua Augusta",
+      "d": "Bares, boliches y movimiento hasta la madrugada, entre la Paulista y el centro."
+     },
+     {
+      "t": "Centro",
+      "d": "Bares clásicos como el Bar Brahma, mejor para ir y volver en Uber."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Para volver de madrugada, pedí Uber o 99 desde adentro del bar y no esperes en la vereda con el celular en la mano."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en São Paulo",
+    "intro": "En los barrios turísticos se anda bien, pero hay robos de celulares y arrebatos, sobre todo en el centro.",
+    "bullets": [
+     "No uses el celular en la vereda ni en la ventanilla del auto: es lo que más se roba.",
+     "De noche evitá la zona de la estación Luz y la Cracolândia, y las calles vacías del centro.",
+     "En la Sé, la República y el metro en hora pico, llevá la mochila adelante.",
+     "Usá cajeros dentro de bancos o shoppings y no aceptes ayuda de desconocidos.",
+     "No lleves joyas ni relojes llamativos.",
+     "Si te asaltan, entregá lo que te piden y no te resistas."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La tarjeta se acepta casi en todos lados. Muchos comercios cobran con Pix, que necesita una cuenta brasileña o una app que lo habilite: tené tarjeta y algo de efectivo como respaldo."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En la ciudad lo común es 127 V, aunque en algunos lugares hay tomas de 220 V. Revisá la etiqueta de tus cargadores."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local. Hay buena señal en toda la ciudad y wifi en muchos cafés."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Paraguas o piloto: de diciembre a marzo llueve casi todas las tardes.",
+     "Un abrigo: de mayo a agosto las noches son frescas.",
+     "Calzado cómodo para caminar mucho.",
+     "Ropa para salir de noche.",
+     "Riñonera o mochila que puedas llevar adelante.",
+     "Tarjeta para pagar por aproximación en el metro.",
+     "Cargador / power bank."
+    ]
+   }
+  ]
+ },
+ "nat": {
+  "antes": {
+   "titulo": "Antes de viajar a Natal",
+   "intro": "Natal es una capital extendida a lo largo de la costa: los hoteles están en el sur, el centro histórico en el medio y las dunas de Genipabu cruzando el río, al norte.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cinco a siete días hacés playa en Ponta Negra, el buggy por las dunas, Maracajaú y una escapada a Pipa. Si querés dormir en Pipa, sumá dos o tres noches más."
+    },
+    {
+     "t": "El aeropuerto queda lejos",
+     "d": "El aeropuerto internacional (NAT) está en São Gonçalo do Amarante, a unos 35 a 45 km de Ponta Negra según la ruta. Organizá el traslado antes de llegar."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Natal desde Montevideo",
+    "intro": "En algunas temporadas hay vuelo directo; el resto del año se llega con una escala, en general en São Paulo.",
+    "items": [
+     {
+      "t": "Vuelo directo de temporada",
+      "d": "GOL anunció vuelos sin escalas Montevideo–Natal los sábados en temporadas puntuales, como julio y desde diciembre de 2026. Revisá las fechas en la aerolínea porque la ruta no opera todo el año."
+     },
+     {
+      "t": "Con escala",
+      "d": "El resto del año, LATAM, GOL o Azul combinan por São Paulo u otras ciudades brasileñas. Si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
+     },
+     {
+      "t": "Del aeropuerto a Ponta Negra en auto",
+      "d": "Por la BR-304, vía Macaíba, son unos 44 km y cerca de 45 minutos con tránsito liviano. El camino por la zona norte es más corto, pero suele trancarse y lleva una hora o más."
+     },
+     {
+      "t": "Taxi, Uber y transfer",
+      "d": "En el aeropuerto hay taxis con tarifa fija por zona, Uber y transfers que venden las agencias en el hall de llegadas."
+     }
+    ],
+    "cierre": {
+     "t": "Si seguís a Pipa",
+     "d": "Del aeropuerto a Pipa son unos 95 km y cerca de 1 h 30, sin pasar por Natal."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Natal",
+    "intro": "Casi todos los turistas se quedan en el sur de la ciudad, entre Ponta Negra y la Via Costeira.",
+    "items": [
+     {
+      "t": "Ponta Negra",
+      "d": "La opción más práctica para una primera vez: playa, restaurantes, bares y comercios a pie, con el Morro do Careca en la punta."
+     },
+     {
+      "t": "Via Costeira",
+      "d": "La franja de resorts frente al mar, entre el Parque das Dunas y la playa. Hay poco para hacer fuera del hotel: para cenar vas a necesitar Uber o taxi."
+     },
+     {
+      "t": "Praia do Meio y Areia Preta",
+      "d": "La zona hotelera antigua, más cerca del centro y del Forte dos Reis Magos. Suele ser más económica y sirve si tenés auto o viajás por trabajo."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Natal",
+    "intro": "Las distancias entre Ponta Negra, el centro y la zona norte son largas. Uber y 99 son la forma más usada.",
+    "items": [
+     {
+      "t": "Uber y 99",
+      "d": "Funcionan en toda la ciudad y conviene usarlos de noche."
+     },
+     {
+      "t": "A pie",
+      "d": "Ponta Negra se recorre caminando por la rambla. Para ir al centro o a la Via Costeira, mejor en auto."
+     },
+     {
+      "t": "Buggy y excursiones",
+      "d": "Genipabu, Maracajaú y el litoral sur se hacen en excursión o con bugueiro credenciado, que te pasa a buscar por el hotel."
+     },
+     {
+      "t": "Alquilar auto",
+      "d": "Ayuda si querés recorrer el litoral sur, llegar a Pipa o moverte sin depender de agencias. Para entrar a las dunas de Genipabu igual necesitás un bugueiro credenciado."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Natal de noche",
+    "intro": "La noche turística se concentra en Ponta Negra.",
+    "items": [
+     {
+      "t": "Alto de Ponta Negra",
+      "d": "Bares, restaurantes y lugares para bailar en las calles de arriba de la playa."
+     },
+     {
+      "t": "Rambla de Ponta Negra",
+      "d": "Para cenar temprano frente al mar. Más tarde la rambla se vacía."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Para ir y volver de los bares, pedí Uber o 99 en lugar de caminar por tramos sin gente."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Natal",
+    "intro": "Ponta Negra es la zona más cuidada para los turistas, pero igual hay robos de celulares y bolsos.",
+    "bullets": [
+     "No dejes celular, bolsos ni llaves solos en la arena mientras te bañás.",
+     "De noche quedate en calles con movimiento y usá Uber o taxi.",
+     "Evitá caminar de noche por la Via Costeira y por barrios que no conocés.",
+     "Bañate cerca de los guardavidas y respetá las banderas rojas.",
+     "En los paseos de buggy, contratá solo bugueiros credenciados."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La tarjeta se acepta en hoteles y restaurantes. Muchos comercios cobran con Pix, que necesita una cuenta brasileña o una app que lo habilite: llevá algo de efectivo en reales para puestos de playa."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Natal la tensión es 220 V. Revisá que tus cargadores sean bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar alto, gorra y lentes de sol: el sol es fuerte todo el año.",
+     "Ropa liviana y de playa.",
+     "Un piloto liviano si vas de abril a julio.",
+     "Bolsa estanca para el celular en el buggy y en Maracajaú.",
+     "Pañuelo o buff para la arena en las dunas.",
+     "Efectivo para puestos de playa.",
+     "Cargador / power bank."
+    ]
+   }
+  ]
+ },
+ "pip": {
+  "antes": {
+   "titulo": "Antes de viajar a Pipa",
+   "intro": "Pipa es una vila del municipio de Tibau do Sul, a unos 80 km de Natal. Se recorre a pie y las playas se unen por la arena con marea baja.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Tres noches como mínimo para recorrer las playas con las mareas a favor, y una más si querés ir a Tibau do Sul o hacer buggy."
+    },
+    {
+     "t": "La puerta de entrada es Natal",
+     "d": "No hay aeropuerto en Pipa: se vuela a Natal (NAT), a unos 95 km. João Pessoa (JPA) queda a una distancia parecida y es otra opción."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Pipa desde Montevideo",
+    "intro": "Se vuela a Natal y se sigue por tierra. Del aeropuerto a Pipa no hace falta pasar por la ciudad.",
+    "items": [
+     {
+      "t": "Vuelo a Natal (NAT)",
+      "d": "GOL anunció vuelos directos Montevideo–Natal los sábados en temporadas puntuales. El resto del año se llega con escala, en general en São Paulo."
+     },
+     {
+      "t": "Del aeropuerto en auto, taxi o Uber",
+      "d": "Son unos 95 km y cerca de 1 h 30. Uber funciona, pero en Pipa hay pocos autos y la vuelta no está garantizada."
+     },
+     {
+      "t": "Transfer",
+      "d": "Hay vans compartidas con horarios fijos y transfers privados que venden las agencias del aeropuerto. Si llegás de madrugada, reservá antes."
+     },
+     {
+      "t": "En ómnibus desde Natal",
+      "d": "Expresso Oceano sale de la terminal rodoviaria de Natal y llega a la avenida principal de Pipa. Hay varias salidas por día y menos los domingos y feriados."
+     },
+     {
+      "t": "Por João Pessoa",
+      "d": "Son unos 154 km por la BR-101, cerca de dos horas en auto."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "No hace falta auto para quedarte en Pipa. Sirve si querés recorrer el litoral o seguir viaje."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Pipa",
+    "intro": "La diferencia está entre dormir en el centro, con todo a pie, o en las playas de afuera, más tranquilas.",
+    "items": [
+     {
+      "t": "Centro y Avenida Baía dos Golfinhos",
+      "d": "Lo más práctico: restaurantes, bares y playas a pie. Es la opción si no tenés auto o viajás solo."
+     },
+     {
+      "t": "Praia do Amor y Chapadão",
+      "d": "Arriba del acantilado, a unos 20 minutos a pie del centro. Más tranquilo, con vista al mar y bajada por escalera a la playa."
+     },
+     {
+      "t": "Madeiro y Cacimbinhas",
+      "d": "Hoteles con vista a los acantilados, sobre la ruta a Tibau do Sul. No hay comercio cerca: para salir vas a necesitar auto, taxi o mototaxi."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚶",
+    "titulo": "Cómo moverse por Pipa",
+    "intro": "La vila se camina. Para las playas de afuera hay mototaxi, taxi y buggy.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Del centro llegás caminando a la Praia do Centro, la Baía dos Golfinhos y la Praia do Amor. Por la arena, solo con marea baja."
+     },
+     {
+      "t": "Mototaxi y taxi",
+      "d": "Son la forma más usada para ir al Madeiro, Cacimbinhas o Tibau do Sul."
+     },
+     {
+      "t": "Buggy",
+      "d": "Para recorrer las dunas y lagunas del litoral sur, con bugueiro."
+     },
+     {
+      "t": "Uber",
+      "d": "Funciona, pero con pocos autos. No cuentes con él para horarios ajustados."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Pipa de noche",
+    "intro": "La noche se arma sobre la avenida principal.",
+    "items": [
+     {
+      "t": "Avenida Baía dos Golfinhos",
+      "d": "Restaurantes, bares y puestos de comida uno al lado del otro, con gente caminando hasta tarde, sobre todo en temporada."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Las calles son de piedra o de tierra: andá con calzado cómodo."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Pipa",
+    "intro": "Es un pueblo tranquilo. Los riesgos tienen más que ver con el mar y la marea que con los robos.",
+    "bullets": [
+     "Calculá la vuelta de las caminatas por la orilla: con marea alta el mar llega al acantilado y podés quedar aislado.",
+     "La Praia do Amor tiene olas fuertes; bañate con cuidado y respetá las banderas.",
+     "No dejes cosas solas en la arena.",
+     "De noche, para volver a una posada lejos del centro, usá mototaxi o taxi.",
+     "No hay farmacias 24 horas en Pipa: llevá tus medicamentos."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Cajeros",
+      "d": "No hay sucursales bancarias en Pipa: hay cajeros Banco24horas. Llevá efectivo para no depender de ellos."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "Restaurantes y posadas aceptan tarjeta. Muchos comercios cobran con Pix, que necesita una cuenta brasileña o una app que lo habilite: tené efectivo para puestos y mototaxis."
+     },
+     {
+      "t": "Electricidad",
+      "d": "220 V, con enchufes brasileños de tres patas."
+     },
+     {
+      "t": "Salud",
+      "d": "El puesto de salud para emergencias más cercano está en Tibau do Sul."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar, gorra y lentes de sol.",
+     "Ropa liviana: aun en invierno la mínima ronda los 23°.",
+     "Calzado cómodo: las calles son de piedra o de tierra.",
+     "Botiquín con tus medicamentos habituales.",
+     "Efectivo en reales.",
+     "La tabla de mareas en el celular.",
+     "Bolsa estanca para el celular."
+    ]
+   }
+  ]
+ },
+ "trancoso": {
+  "antes": {
+   "titulo": "Antes de viajar a Trancoso",
+   "intro": "Trancoso es un distrito de Porto Seguro, en el sur de Bahía. El pueblo es chico y se camina, pero las playas más lindas del sur quedan por caminos de tierra.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cuatro o cinco días disfrutás el Quadrado, las playas de abajo y la excursión al Espelho sin apuro."
+    },
+    {
+     "t": "La puerta de entrada es Porto Seguro",
+     "d": "No hay aeropuerto en Trancoso: se vuela a Porto Seguro (BPS) y se sigue por tierra, cruzando en balsa a Arraial d'Ajuda o dando la vuelta por asfalto."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Trancoso desde Montevideo",
+    "intro": "No hay vuelos directos de Montevideo a Porto Seguro: se vuela con una escala, en general en São Paulo, y desde Porto Seguro se sigue por tierra.",
+    "items": [
+     {
+      "t": "Vuelo a Porto Seguro (BPS)",
+      "d": "La conexión más habitual es por Guarulhos; también hay combinaciones por Río de Janeiro o Campinas. Si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
+     },
+     {
+      "t": "Por la balsa",
+      "d": "Es el camino más corto: cruzás en balsa de Porto Seguro a Arraial d'Ajuda, unos 10 minutos de travesía, y seguís unos 28 km hasta Trancoso. La balsa funciona las 24 horas, pero en temporada alta puede haber fila para autos."
+     },
+     {
+      "t": "Por la ruta asfaltada",
+      "d": "Sin balsa, se da la vuelta por la BR-367 y la BA-001: son unos 75 a 80 km, todo asfalto. Sirve cuando la fila de la balsa es larga."
+     },
+     {
+      "t": "Taxi, Uber y transfer",
+      "d": "Hay taxis en el aeropuerto y Uber en Porto Seguro. Muchas posadas organizan el traslado: preguntá al reservar."
+     },
+     {
+      "t": "En ómnibus",
+      "d": "Del otro lado de la balsa, en Arraial d'Ajuda, salen ómnibus de Águia Azul y vans hacia Trancoso. Es lo más barato y lo más lento."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si llegás con poco tiempo, pedí el traslado por la balsa y consultá antes cómo está la fila."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Trancoso",
+    "intro": "La elección es entre el Quadrado, las playas o las calles del pueblo nuevo, más baratas.",
+    "items": [
+     {
+      "t": "Quadrado",
+      "d": "El centro histórico sobre el acantilado, con restaurantes y tiendas. Es lo más caro, pero tenés la noche a pie y las playas de Nativos y Coqueiros a unos 10 a 15 minutos bajando."
+     },
+     {
+      "t": "Nativos y Coqueiros",
+      "d": "Posadas frente al mar, a una caminata del Quadrado. Para quien quiere playa en la puerta sin quedar aislado."
+     },
+     {
+      "t": "Rio Verde e Itapororoca",
+      "d": "Playas más tranquilas al sur, con posadas y hoteles caros. Hay poco para comer fuera de los hoteles: muchos cenan en el Quadrado."
+     },
+     {
+      "t": "Pueblo nuevo",
+      "d": "Las calles detrás del Quadrado, hacia la rodoviaria, tienen las opciones más económicas, supermercados y farmacias. De noche algunas calles de tierra quedan vacías."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚗",
+    "titulo": "Cómo moverse por Trancoso",
+    "intro": "El pueblo y las playas cercanas se caminan. El transporte público es escaso para ir más lejos.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Del Quadrado bajás caminando a Nativos y Coqueiros, y por la arena seguís hasta Rio Verde."
+     },
+     {
+      "t": "Auto",
+      "d": "Ayuda para Itapororoca, el Espelho o Arraial d'Ajuda. Cerca del Quadrado casi no hay lugar en la calle y se usan estacionamientos privados."
+     },
+     {
+      "t": "Taxi y excursiones",
+      "d": "Para el Espelho y Caraíva hay agencias y taxis que hacen el trayecto por los caminos de tierra."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Trancoso de noche",
+    "intro": "La noche gira alrededor del Quadrado.",
+    "items": [
+     {
+      "t": "Quadrado",
+      "d": "Restaurantes con mesas en el pasto, bares y tiendas abiertas hasta tarde, con la iglesia de São João Batista iluminada."
+     },
+     {
+      "t": "Beach clubs",
+      "d": "En verano y temporada alta, en Nativos y Rio Verde hay fiestas en clubes de playa."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si dormís lejos del Quadrado, volvé en taxi: varias calles de tierra no tienen luz."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Trancoso",
+    "intro": "Es un destino tranquilo; alcanza con los cuidados de siempre.",
+    "bullets": [
+     "No dejes objetos de valor a la vista en el auto ni solos en la playa cuando hay mucha gente.",
+     "De noche evitá caminar por calles de tierra sin luz; pedí taxi.",
+     "En los restaurantes de playa, preguntá antes si hay consumo mínimo.",
+     "Con lluvia, los caminos de tierra hacia el sur se ponen difíciles: averiguá su estado antes de salir."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Hay una agencia de Bradesco y un cajero de Itaú, pero sacar plata puede complicarse en temporada. Llevá una reserva de efectivo."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La tarjeta se acepta en casi todos lados. Muchos comercios cobran con Pix, que necesita una cuenta brasileña o una app que lo habilite."
+     },
+     {
+      "t": "Electricidad",
+      "d": "220 V."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar, gorra y lentes de sol.",
+     "Ropa liviana y algo para la noche en el Quadrado.",
+     "Un abrigo liviano: de junio a agosto las noches son frescas.",
+     "Sandalias o calzado cómodo para la bajada a la playa.",
+     "Bolsa impermeable para la playa y la lluvia.",
+     "Máscara de snorkel para las piscinas naturales.",
+     "Efectivo en reales."
+    ]
+   }
+  ]
+ },
+ "for": {
+  "antes": {
+   "titulo": "Antes de viajar a Fortaleza",
+   "intro": "Fortaleza es una capital grande con la vida turística sobre la Avenida Beira-Mar. Sirve de base para playas de afuera, dunas y para seguir a Jericoacoara.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con cuatro o cinco días hacés la ciudad, la Praia do Futuro y un par de salidas, como Cumbuco o el Beach Park. Si seguís a Jericoacoara, sumá al menos tres noches allá."
+    },
+    {
+     "t": "El aeropuerto está cerca",
+     "d": "El aeropuerto internacional Pinto Martins (FOR) queda a unos 10 a 12 km de Meireles, dentro de la ciudad."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Fortaleza desde Montevideo",
+    "intro": "Lo habitual es volar con una escala, en general en São Paulo. En algunas temporadas GOL operó vuelos directos.",
+    "items": [
+     {
+      "t": "Vuelo directo de temporada",
+      "d": "GOL operó vuelos sin escalas Montevideo–Fortaleza en temporadas puntuales, como el invierno de 2026. Revisá en la aerolínea si hay en tus fechas."
+     },
+     {
+      "t": "Con escala",
+      "d": "El resto del año, LATAM, GOL o Azul combinan por São Paulo u otras ciudades brasileñas. Si mezclás aerolíneas, revisá que no tengas que cambiar de aeropuerto."
+     },
+     {
+      "t": "Del aeropuerto a la Beira-Mar",
+      "d": "Uber y 99 funcionan en el aeropuerto y hay taxis con tarifa fija. La línea 917 de ómnibus va del aeropuerto a Meireles, la Beira-Mar y la Praia de Iracema; el viaje dura una media hora."
+     }
+    ],
+    "cierre": {
+     "t": "Si seguís a Jeri",
+     "d": "Jericoacoara está a unos 280 km: el transfer 4x4 lleva de 5 a 6 horas y el ómnibus con cambio a jardineira en Jijoca, de 7 a 8."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Fortaleza",
+    "intro": "Casi todo el alojamiento turístico está sobre la costa, entre la Praia de Iracema y el Mucuripe.",
+    "items": [
+     {
+      "t": "Meireles",
+      "d": "El tramo más conocido de la Beira-Mar, con hoteles frente al mar, restaurantes y la feria nocturna. La opción más práctica, aunque más cara."
+     },
+     {
+      "t": "Praia de Iracema",
+      "d": "Más económica y cerca del centro, con el Dragão do Mar y la noche a mano. Desde ahí llegás caminando a Meireles por la rambla."
+     },
+     {
+      "t": "Mucuripe",
+      "d": "A continuación de Meireles, cerca del mercado de pescado. Tranquilo y a una caminata de la Beira-Mar."
+     },
+     {
+      "t": "Praia do Futuro",
+      "d": "Para quien quiere días de playa con agua para nadar. Queda más lejos y de noche tiene poco movimiento."
+     },
+     {
+      "t": "Cumbuco",
+      "d": "Fuera de la ciudad, a unos 30 km. Es la base de los que van a hacer kitesurf, con escuelas y posadas cerca de la playa."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Fortaleza",
+    "intro": "Uber y 99 son la forma más práctica dentro de la ciudad.",
+    "items": [
+     {
+      "t": "Uber y 99",
+      "d": "Funcionan en toda la ciudad, también para ir a la Praia do Futuro."
+     },
+     {
+      "t": "A pie",
+      "d": "La Beira-Mar se recorre caminando entre Iracema, Meireles y el Mucuripe."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "La red cubre la costa, el centro y la Praia do Futuro. Es barato pero lento, y en hora pico va lleno."
+     },
+     {
+      "t": "Excursiones y auto",
+      "d": "Cumbuco, el Beach Park, Morro Branco y Canoa Quebrada se hacen en excursión, transfer o auto alquilado. En la ciudad el auto no hace falta y estacionar en la Beira-Mar se paga."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Fortaleza de noche",
+    "intro": "La noche se reparte entre la Beira-Mar y la Praia de Iracema.",
+    "items": [
+     {
+      "t": "Feira de la Beira-Mar",
+      "d": "Artesanías y puestos de comida todas las noches en la rambla de Meireles."
+     },
+     {
+      "t": "Praia de Iracema y Dragão do Mar",
+      "d": "Bares, música en vivo y casas de forró alrededor del centro cultural Dragão do Mar."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Para moverte entre zonas de noche, usá Uber o 99 y no camines por tramos vacíos de la costa."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Fortaleza",
+    "intro": "En la Beira-Mar y Meireles hay movimiento y se anda bien. Los cuidados son los de cualquier ciudad grande.",
+    "bullets": [
+     "De noche usá Uber o 99 y evitá caminar por calles vacías o por la costa oscura.",
+     "No te bañes frente al centro: para nadar, Praia do Futuro o las playas de afuera.",
+     "En la Praia do Futuro andá de día y volvé antes de que oscurezca.",
+     "Cuidá el celular y la billetera en ferias y lugares con mucha gente.",
+     "No dejes nada solo en la arena."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La tarjeta se acepta en casi todos lados. Muchos comercios cobran con Pix, que necesita una cuenta brasileña o una app que lo habilite; algunos taxis no aceptan tarjeta."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Fortaleza la tensión es 220 V. Revisá que tus cargadores sean bivolt."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Protector solar alto, gorra y lentes de sol.",
+     "Ropa liviana y fresca: hace más de 30° casi todo el año.",
+     "Un piloto liviano si vas de febrero a mayo.",
+     "Pañuelo o buff para el viento y la arena, de julio a diciembre.",
+     "Bolsa estanca para el celular en el buggy.",
+     "Cargador / power bank."
+    ]
+   }
+  ]
+ },
+ "jericoacoara": {
+  "antes": {
+   "titulo": "Antes de viajar a Jericoacoara",
+   "intro": "Jeri es una vila sin asfalto ni postes de luz dentro de un parque nacional. Llegar lleva tiempo, así que conviene quedarse varios días.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Al menos tres o cuatro noches: un día para el buggy del este, otro para el oeste o el Preá y tiempo para la duna y la playa."
+    },
+    {
+     "t": "Dos puertas de entrada",
+     "d": "Fortaleza (FOR), a unos 280 km, o el aeropuerto regional de Jericoacoara (JJD), en Cruz, a unos 32 km de la vila."
+    },
+    {
+     "t": "La tasa, antes de llegar",
+     "d": "Pagá la tasa de turismo sustentable en el sitio de la Prefeitura de Jijoca y guardá el comprobante: te lo piden en la entrada y en la posada."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Jericoacoara desde Montevideo",
+    "intro": "No hay vuelos directos: se vuela a Fortaleza o al aeropuerto de Jericoacoara con escala, y el último tramo siempre es por la arena.",
+    "items": [
+     {
+      "t": "Vuelo al aeropuerto de Jericoacoara (JJD)",
+      "d": "Lo atienden LATAM, GOL y Azul con vuelos desde otras ciudades brasileñas. Desde ahí son unos 32 km hasta la vila en transfer 4x4."
+     },
+     {
+      "t": "Vuelo a Fortaleza (FOR)",
+      "d": "Hay más vuelos y suele ser más barato. Desde Fortaleza son unos 280 km por la CE-085 hasta Jijoca y después la arena."
+     },
+     {
+      "t": "Transfer 4x4 desde Fortaleza",
+      "d": "Compartido o privado, te busca en el aeropuerto o el hotel y te deja en la posada. Lleva de 5 a 6 horas."
+     },
+     {
+      "t": "Ómnibus desde Fortaleza",
+      "d": "Viação Guanabara sale de la Beira-Mar varias veces por día; en Jijoca cambiás a una jardineira 4x4 incluida en el pasaje. Son de 7 a 8 horas en total."
+     },
+     {
+      "t": "En auto",
+      "d": "Los autos particulares no entran a la vila: se dejan en el estacionamiento de la entrada, que incluye el traslado en jardineira. No manejes de noche por la CE-085 y, después de lluvias fuertes, conviene 4x4."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Si tu vuelo llega tarde a Fortaleza, dormí ahí y salí a Jeri a la mañana."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Jericoacoara",
+    "intro": "La vila es chica. Lo que importa es estar cerca de la Rua Principal y de la playa, porque de noche las calles no tienen luz.",
+    "items": [
+     {
+      "t": "Rua Principal",
+      "d": "El centro del movimiento: restaurantes, bares y caipirinhas cerca del mar. Cuanto más cerca de la playa, mejor."
+     },
+     {
+      "t": "Rua São Francisco",
+      "d": "Paralela a la Principal, más tranquila y con posadas de mejor precio. Tiene una pequeña feria de comida de noche."
+     },
+     {
+      "t": "Beco do Forró",
+      "d": "Otra de las calles con movimiento, a pasos de la Principal. Si tenés sueño liviano, preguntá si la posada da a la calle."
+     },
+     {
+      "t": "Lagoa do Paraíso",
+      "d": "Posadas frente a la laguna, fuera de la vila. Es tranquilo, pero quedás lejos de la playa, la duna y los restaurantes."
+     },
+     {
+      "t": "Preá",
+      "d": "Para kitesurfistas: escuelas y posadas cerca del spot, a unos 10 km de la vila."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚙",
+    "titulo": "Cómo moverse por Jericoacoara",
+    "intro": "En la vila no hay autos: se camina. Para salir, buggy o 4x4.",
+    "items": [
+     {
+      "t": "A pie",
+      "d": "Toda la vila, la playa, la duna del atardecer y la Pedra Furada se hacen caminando."
+     },
+     {
+      "t": "Buggy",
+      "d": "Para las lagunas, el Preá y los paseos del este y del oeste. Se contrata en agencias o directo con bugueiros y se comparte entre varios."
+     },
+     {
+      "t": "Jardineira y 4x4",
+      "d": "Las camionetas colectivas unen la vila con Jijoca y la entrada del parque."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Jericoacoara de noche",
+    "intro": "La noche empieza después del atardecer en la duna y sigue en la vila.",
+    "items": [
+     {
+      "t": "Rua Principal",
+      "d": "Carritos de caipirinha cerca del mar, restaurantes y gente caminando hasta tarde."
+     },
+     {
+      "t": "Forró",
+      "d": "Hay noches de forró en la vila; preguntá en tu posada qué lugares tienen baile esa semana."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Llevá la linterna del celular: no hay alumbrado público."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Jericoacoara",
+    "intro": "Es una vila tranquila, pero la falta de luz pide algunos cuidados.",
+    "bullets": [
+     "De noche quedate en la Rua Principal, el Beco do Forró y la São Francisco, que tienen movimiento.",
+     "Evitá la playa de madrugada: los robos que hubo en el pasado fueron sobre todo ahí y a esa hora.",
+     "Contratá buggies con agencias o bugueiros recomendados por tu posada.",
+     "No dejes cosas solas en la arena ni en las lagunas.",
+     "El sol y el viento engañan: tomá agua y usá protector aunque no sientas calor."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Cajeros",
+      "d": "En la vila prácticamente no hay cajeros: sacá plata en Fortaleza o en Jijoca antes de entrar."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La mayoría de las posadas y restaurantes acepta tarjeta. Muchos comercios cobran con Pix, que necesita una cuenta brasileña o una app que lo habilite: llevá efectivo para buggies y puestos."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Jijoca de Jericoacoara la tensión es 220 V."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming o eSIM / SIM local."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "bullets": [
+     "Ojotas o sandalias: las calles son de arena.",
+     "Protector solar alto, gorra y lentes de sol.",
+     "Pañuelo o buff para el viento y la arena en el buggy.",
+     "Linterna o power bank para el celular.",
+     "Bolsa estanca para el celular.",
+     "Efectivo en reales.",
+     "El comprobante de la tasa de turismo, impreso o en el celular."
+    ]
+   }
+  ]
  }
 }
