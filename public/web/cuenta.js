@@ -293,13 +293,20 @@
     return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) {
       var tk = r.data && r.data.session ? r.data.session.access_token : '';
       if (!tk) throw new Error('Iniciá sesión para ver tus alertas.');
-      return fetch('/api/alertas' + (qs || ''), { method: metodo, headers: { Authorization: 'Bearer ' + tk } });
+      /* Un corte de red (la app vuelve de segundo plano, el celular cambia de red) llega como TypeError con el
+         texto del navegador ("Failed to fetch"): se reintenta una vez y, si sigue, se explica en castellano. */
+      var pedir = function () { return fetch('/api/alertas' + (qs || ''), { method: metodo, headers: { Authorization: 'Bearer ' + tk } }); };
+      return pedir().catch(function () {
+        return new Promise(function (ok) { setTimeout(ok, 1500); }).then(pedir);
+      }).catch(function () { throw new Error('No pudimos conectarnos. Revisá tu conexión y volvé a entrar.'); });
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || 'No pudimos cargar tus alertas.'); return j; }); });
   }
   function cargarAlertas() {
     if (!usuario) { S.vista = 'login'; pintar(); return; }
     S.cargando = true; S.alertas = null; S.error = ''; pintar();
-    pedirAlertas('GET').then(function (j) { S.alertas = j.alertas || []; }, function (e) { S.error = e.message; }).then(function () { S.cargando = false; pintar(); });
+    pedirAlertas('GET').then(function (j) { S.alertas = j.alertas || []; }, function (e) {
+      S.error = e instanceof TypeError ? 'No pudimos conectarnos. Revisá tu conexión y volvé a entrar.' : e.message;
+    }).then(function () { S.cargando = false; pintar(); });
     pushApi.estado().then(function (e) { S.pushEstado = e; if (S.vista === 'alertas') pintar(); });
   }
   /* "Notificaciones en este dispositivo", arriba de la lista de alertas. No se muestra donde no se pueden activar. */
