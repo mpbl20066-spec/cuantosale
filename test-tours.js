@@ -159,6 +159,14 @@ function conEnv(vars, fn) {
     assert.strictEqual(t1.price, 41.95, 'precio: ' + t1.price);
   });
 
+  await t('el precio publicado desde /admin gana sobre la cuenta con la cotizacion', function () {
+    // Si una cotizacion nueva en data/tours.json moviera un precio ya publicado,
+    // se publicaria un cambio que nadie reviso. Ver supabase_operaciones.sql.
+    const fila = { destino: 'fln', titulo: 'X', descripcion: '', precio: null, precio_brl: 190, precio_publicado: 44.5, detalle: '' };
+    const t1 = require(LIB).desdeFila(fila, 'Florianópolis, Brasil', 5.1414, 5);
+    assert.strictEqual(t1.price, 44.5);
+  });
+
   await t('sin precio_brl el precio en dolares se respeta tal cual', function () {
     const fila = { destino: 'rio', titulo: 'X', descripcion: '', precio: 65, precio_brl: null, detalle: '' };
     const t1 = require(LIB).desdeFila(fila, 'Río de Janeiro, Brasil', 5.1414, 5);
