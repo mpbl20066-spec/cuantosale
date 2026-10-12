@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿De dónde salen los precios? | CuántoSale</title>
+<meta name="description" content="Las fuentes de cada precio de CuántoSale (vuelos, alojamiento, traslados, tours y gastos diarios), cada cuánto se actualizan, qué tan exactos son y cómo gana plata CuántoSale.">
+<meta name="theme-color" content="#0A101A">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CuántoSale">
+<meta property="og:title" content="¿De dónde salen los precios? | CuántoSale">
+<meta property="og:description" content="Cada número de CuántoSale tiene una fuente. Cuál es, cada cuánto se actualiza y qué tan exacto es.">
+<meta property="og:url" content="https://cuantosale.uy/como-calculamos">
+<meta property="og:image" content="https://cuantosale.uy/og-cuantosale.jpg">
+<meta property="og:locale" content="es_UY">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://cuantosale.uy/como-calculamos">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Organization","@id":"https://cuantosale.uy/#org","name":"CuántoSale","url":"https://cuantosale.uy","logo":"https://cuantosale.uy/icons/apple-touch-icon.png","email":"admin@cuantosale.uy","areaServed":"UY",
+ "sameAs":["https://www.instagram.com/cuantosale.uy/","https://www.tiktok.com/@cuantosale.uy"],
+ "contactPoint":{"@type":"ContactPoint","contactType":"customer support","telephone":"+598 98 529 851","availableLanguage":"es"}},
+{"@type":"FAQPage","mainEntity":[
+ {"@type":"Question","name":"¿Los precios de CuántoSale son reales?","acceptedAnswer":{"@type":"Answer","text":"Los vuelos y el alojamiento son precios reales consultados a Ignav y a Booking.com. Los traslados y tours son las tarifas de los proveedores con los que trabajamos. Comidas, transporte local y el presupuesto de la portada son estimaciones de nuestro modelo, armado con fuentes públicas."}},
+ {"@type":"Question","name":"¿Cada cuánto se actualizan?","acceptedAnswer":{"@type":"Answer","text":"Vuelos: como máximo cada 48 horas (cada 3 horas si salís hoy o mañana), y cada vuelo muestra cuándo se consultó. Alojamiento: cada 30 minutos. Traslados, tours y gastos diarios: los revisamos a mano y la fecha de la última revisión está en esta página."}},
+ {"@type":"Question","name":"¿Cómo gana plata CuántoSale?","acceptedAnswer":{"@type":"Answer","text":"Con comisiones de afiliado cuando reservás alojamiento o seguro desde nuestros enlaces (sin costo extra para vos) y con un cargo de gestión incluido en los traslados y tours que reservás con nosotros. Usar la calculadora es gratis."}},
+ {"@type":"Question","name":"¿Alguien paga para aparecer primero?","acceptedAnswer":{"@type":"Answer","text":"No. No mostramos anuncios ni resultados pagos. Los vuelos se ordenan por precio, duración y escalas, y el alojamiento por precio, nota de los huéspedes y ubicación."}}
+]}]}
+</script>
+<style>
+  :root{--bg:#0A101A;--surface:#111A28;--surface2:#16212F;--line:#2A3646;--ink:#FFFFFF;--ink2:#C9D4E2;--amber:#F7C325;--ok:#3DD6A0;--mid:#F5B94A;--low:#FF9D8A}
+  @media(prefers-color-scheme:light){:root{--bg:#F7F8FA;--surface:#FFFFFF;--surface2:#F1F4F8;--line:#E2E6EC;--ink:#101828;--ink2:#48566A;--amber:#B7791F;--ok:#16825D;--mid:#B45309;--low:#B42318}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Poppins',system-ui,sans-serif;font-size:16px;line-height:1.65}
+  .wrap{max-width:820px;margin:0 auto;padding:32px 16px 64px}
+  .logo{display:inline-block;margin-bottom:28px;color:var(--ink);font-weight:800;font-size:22px;text-decoration:none}
+  .logo span{color:var(--amber)}
+  h1{font-size:34px;line-height:1.15;margin:0 0 10px}
+  .lead{margin:0 0 6px;font-size:18px;color:var(--ink)}
+  .upd{margin:0 0 28px;color:var(--ink2);font-size:14px}
+  h2{font-size:22px;margin:44px 0 10px;scroll-margin-top:16px}
+  h3{font-size:17px;margin:0 0 4px}
+  p,li{color:var(--ink2)}
+  ul{padding-left:20px}
+  li{margin:4px 0}
+  a{color:var(--amber)}
+  b{color:var(--ink)}
+  .indice{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px;padding:0;list-style:none}
+  .indice a{display:inline-block;padding:7px 13px;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:600;text-decoration:none}
+  .tabla{width:100%;border-collapse:collapse;margin:14px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14.5px}
+  .tabla th,.tabla td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .tabla th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .tabla td{color:var(--ink2)}
+  .tabla td:first-child{color:var(--ink);font-weight:700;white-space:nowrap}
+  .tabla tr:last-child td{border-bottom:0}
+  .nivel{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12.5px;font-weight:700;white-space:nowrap;border:1px solid currentColor}
+  .n-real{color:var(--ok)}.n-tarifa{color:var(--mid)}.n-est{color:var(--low)}
+  @media(max-width:640px){
+    .tabla thead{display:none}
+    .tabla,.tabla tbody,.tabla tr,.tabla td{display:block;width:100%}
+    .tabla tr{padding:10px 4px;border-bottom:1px solid var(--line)}
+    .tabla td{border:0;padding:3px 10px}
+    .tabla td[data-l]::before{content:attr(data-l) ": ";font-weight:600;color:var(--ink)}
+  }
+  .fuente{margin:14px 0;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface);scroll-margin-top:16px}
+  .fuente p{margin:6px 0 0}
+  .fuente .meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:13.5px;color:var(--ink2)}
+  .fuente .meta b{font-weight:600}
+  .caja{margin:14px 0;padding:16px 18px;border-radius:14px;background:var(--surface2);border:1px solid var(--line)}
+  .redes{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0}
+  .redes a{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-weight:700;text-decoration:none}
+  .redes svg{flex:none}
+  details{margin:10px 0;padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+  summary{cursor:pointer;font-weight:700;color:var(--ink)}
+  details p{margin:8px 0 0}
+  .cta{display:inline-flex;align-items:center;justify-content:center;min-height:50px;margin-top:8px;padding:0 22px;border-radius:12px;background:#F6B21B;color:#1b1300;font-weight:800;text-decoration:none}
+  .foot{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);font-size:14px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<a class="logo" href="/">Cuánto<span>Sale</span></a>
+<h1>¿De dónde salen los precios?</h1>
+<p class="lead">Cada número de CuántoSale tiene una fuente. Acá te contamos cuál es, cada cuánto se actualiza y qué tan exacto es.</p>
+<p class="upd">Última revisión: 12 de octubre de 2026</p>
+
+<ul class="indice" aria-label="En esta página">
+<li><a href="#resumen">Resumen</a></li>
+<li><a href="#vuelos">Vuelos</a></li>
+<li><a href="#alojamiento">Alojamiento</a></li>
+<li><a href="#traslados">Traslados</a></li>
+<li><a href="#tours">Tours</a></li>
+<li><a href="#gastos">Comidas y transporte</a></li>
+<li><a href="#estimado">Presupuesto de la portada</a></li>
+<li><a href="#plata">Cómo ganamos plata</a></li>
+<li><a href="#nosotros">Quiénes somos</a></li>
+<li><a href="#preguntas">Preguntas</a></li>
+</ul>
+
+<h2 id="resumen">Resumen</h2>
+<p>Usamos tres tipos de precio, y en cada caso te decimos cuál es: <span class="nivel n-real">Precio real</span> (consultado en el momento a la fuente), <span class="nivel n-tarifa">Tarifa de proveedor</span> (la lista de precios de quien presta el servicio) y <span class="nivel n-est">Estimación</span> (nuestro cálculo con datos públicos).</p>
+<table class="tabla">
+<thead><tr><th>Qué</th><th>Fuente</th><th>Se actualiza</th><th>Tipo</th></tr></thead>
+<tbody>
+<tr><td>Vuelos</td><td data-l="Fuente">Ignav (tarifas de las aerolíneas)</td><td data-l="Se actualiza">Cada 48 h como máximo; cada 3 h si salís hoy o mañana. Cada vuelo muestra cuándo se consultó.</td><td><span class="nivel n-real">Precio real</span></td></tr>
+<tr><td>Alojamiento</td><td data-l="Fuente">Booking.com</td><td data-l="Se actualiza">Cada 30 minutos</td><td><span class="nivel n-real">Precio real</span></td></tr>
+<tr><td>Seguro</td><td data-l="Fuente">Protege tu Viaje</td><td data-l="Se actualiza">Cada 12 h</td><td><span class="nivel n-real">Precio real</span></td></tr>
+<tr><td>Traslados</td><td data-l="Fuente">Empresas de traslado locales</td><td data-l="Se actualiza">Revisadas a mano: 1 de octubre de 2026</td><td><span class="nivel n-tarifa">Tarifa de proveedor</span></td></tr>
+<tr><td>Tours</td><td data-l="Fuente">Operadores locales</td><td data-l="Se actualiza">Revisadas a mano: 23 de setiembre de 2026</td><td><span class="nivel n-tarifa">Tarifa de proveedor</span></td></tr>
+<tr><td>Bus</td><td data-l="Fuente">Tarifas publicadas por EGA y TTL</td><td data-l="Se actualiza">Revisadas a mano</td><td><span class="nivel n-tarifa">Tarifa de proveedor</span></td></tr>
+<tr><td>Comidas y transporte local</td><td data-l="Fuente">Numbeo, CityCost, Quanto Custa Viajar, IPF-ACSP y cartas de restaurantes</td><td data-l="Se actualiza">Revisados a mano: 27 de setiembre de 2026</td><td><span class="nivel n-est">Estimación</span></td></tr>
+<tr><td>Auto</td><td data-l="Fuente">Distancias de OpenStreetMap (OSRM) y precio promedio del combustible en Brasil</td><td data-l="Se actualiza">Revisado a mano</td><td><span class="nivel n-est">Estimación</span></td></tr>
+<tr><td>Presupuesto de la portada</td><td data-l="Fuente">Nuestro modelo, calibrado con precios reales de Ignav y Booking.com</td><td data-l="Se actualiza">Calibrado el 11 de octubre de 2026</td><td><span class="nivel n-est">Estimación</span></td></tr>
+<tr><td>Cotización de monedas</td><td data-l="Fuente">ExchangeRate-API</td><td data-l="Se actualiza">Una vez por día</td><td><span class="nivel n-real">Precio real</span></td></tr>
+</tbody>
+</table>
+
+<h2>Cada precio, en detalle</h2>
+
+<div class="fuente" id="vuelos">
+<h3>Vuelos</h3>
+<p>Buscamos los vuelos en <b>Ignav</b>, que trae las tarifas de las aerolíneas para tus fechas y la cantidad de pasajeros. El precio que ves es el <b>total de ida y vuelta</b> para todo el grupo, con tarifa económica.</p>
+<p>Para no consultar lo mismo muchas veces, guardamos cada búsqueda <b>hasta 48 horas</b> (3 horas si el vuelo sale hoy o mañana). Por eso, abajo de la lista de vuelos te decimos <b>cuándo se consultó</b> ese precio. La aerolínea confirma el precio final al reservar, y lo reservás en Google Flights o en la aerolínea, no en CuántoSale.</p>
+<div class="meta"><span><b>Límites:</b> los niños se cotizan con tarifa de adulto (la aerolínea suele hacer descuento) y el equipaje depende de cada tarifa.</span></div>
+</div>
+
+<div class="fuente" id="alojamiento">
+<h3>Alojamiento</h3>
+<p>Los hoteles y posadas salen de <b>Booking.com</b>, con el precio total de tus noches para tu grupo. Mostramos solo los que tienen <b>nota 8 o más</b> de los huéspedes (o que todavía no tienen nota) y los agrupamos por categoría de precio (económico, equilibrado, cómodo y all inclusive). La lista se vuelve a consultar cada 30 minutos. Si Booking no responde, te dejamos el enlace a la búsqueda en vez de inventar un precio.</p>
+</div>
+
+<div class="fuente" id="traslados">
+<h3>Traslados</h3>
+<p>Son las <b>tarifas de las empresas de traslado</b> con las que trabajamos en cada destino, para el trayecto entre el aeropuerto y tu alojamiento, en privado o compartido. Las tenemos en reales y las pasamos a dólares. Las revisamos destino por destino; la última revisión fue el 1 de octubre de 2026. Al reservar, un asesor te confirma el precio final por WhatsApp antes de que pagues nada.</p>
+</div>
+
+<div class="fuente" id="tours">
+<h3>Tours y actividades</h3>
+<p>Son las tarifas de los <b>operadores locales</b> de cada destino, en reales, pasadas a dólares con la cotización oficial del Banco Central de Brasil (PTAX) e incluyendo nuestro cargo de gestión. Por eso en la ficha dicen <b>“referencial”</b>: el asesor te confirma el precio y la disponibilidad antes de cobrarte la seña.</p>
+</div>
+
+<div class="fuente" id="gastos">
+<h3>Comidas y transporte local</h3>
+<p>Es una <b>estimación por persona y por día</b>, con tres niveles (económico, medio y gourmet). La armamos con <b>Numbeo, CityCost, Quanto Custa Viajar, el índice de precios de la ACSP</b> y cartas de restaurantes del lugar. Cada destino tiene anotada su fuente.</p>
+<p>Somos honestos con esto: en los destinos grandes hay buenos datos, pero en algunos pueblos chicos no hay datos públicos y los estimamos a partir de un destino parecido. Es la parte del presupuesto con más margen de error.</p>
+</div>
+
+<div class="fuente" id="bus-auto">
+<h3>Bus y auto</h3>
+<p><b>Bus:</b> las tarifas publicadas por EGA y TTL desde Montevideo. <b>Auto:</b> calculamos los kilómetros con OpenStreetMap (OSRM), el consumo de tu auto y el precio promedio del combustible en Brasil. Los peajes son aproximados, porque ninguna fuente pública los trae completos.</p>
+</div>
+
+<div class="fuente" id="seguro">
+<h3>Seguro de viaje</h3>
+<p>El precio viene de <b>Protege tu Viaje</b> para tus fechas y pasajeros. El seguro lo contratás con ellos; CuántoSale no lo vende.</p>
+</div>
+
+<div class="fuente" id="moneda">
+<h3>Monedas</h3>
+<p>Cuando cambiás la moneda (pesos uruguayos, reales, etc.) usamos la cotización del día de <b>ExchangeRate-API</b>. Los precios de origen siguen siendo los mismos: solo cambia cómo te los mostramos.</p>
+</div>
+
+<div class="fuente" id="estimado">
+<h3>El presupuesto de la portada y de Destinos</h3>
+<p>Antes de que elijas fechas exactas, el “cuánto sale” de cada destino es una <b>estimación de nuestro modelo</b>: vuelo, alojamiento económico, traslado y gastos diarios para 2 personas y 7 noches. Lo <b>calibramos con precios reales</b>: tarifas de Ignav desde Montevideo y el alojamiento más barato con nota 8 o más en Booking.com (más un 10 %). La última calibración fue el 11 de octubre de 2026. Cuando elegís tus fechas, el planificador reemplaza la estimación por los precios reales.</p>
+</div>
+
+<h2 id="limites">Lo que no sabemos</h2>
+<ul>
+<li>Los precios de vuelos y hoteles cambian todo el tiempo: el que ves puede no estar cuando reserves.</li>
+<li>No vemos las promociones de cada aerolínea ni las tarifas con tarjeta o millas.</li>
+<li>Comidas, transporte local, peajes y combustible son promedios: tu gasto real depende de cómo viajes.</li>
+</ul>
+<p>Si encontrás un precio que no coincide, <a href="https://wa.me/59898529851?text=Hola%2C%20encontr%C3%A9%20un%20precio%20que%20no%20coincide" target="_blank" rel="noopener">avisanos por WhatsApp</a> y lo revisamos.</p>
+
+<h2 id="plata">Cómo gana plata CuántoSale</h2>
+<div class="caja">
+<p style="margin-top:0"><b>Usar la calculadora es gratis.</b> Ganamos plata de dos formas:</p>
+<ul>
+<li><b>Comisiones de afiliado:</b> si reservás alojamiento en Booking.com o un seguro en Protege tu Viaje desde nuestros enlaces, ellos nos pagan una comisión. <b>Vos pagás lo mismo</b> que si entraras directo.</li>
+<li><b>Traslados y tours:</b> los que reservás con nosotros incluyen un cargo de gestión, ya sumado en el precio que ves. Con eso pagamos al asesor que coordina tu reserva y te acompaña durante el viaje.</li>
+</ul>
+<p><b>Nadie paga para aparecer primero.</b> No mostramos anuncios ni resultados pagos. Los vuelos se ordenan por precio, duración y escalas, y el alojamiento por precio, nota de los huéspedes y ubicación.</p>
+</div>
+
+<h2 id="nosotros">Quiénes somos</h2>
+<p>CuántoSale es un proyecto <b>uruguayo</b> para responder una pregunta simple antes de viajar a Brasil: <b>¿cuánto me sale el viaje completo?</b> Vuelo, alojamiento, traslados, tours y lo que gastás por día, todo en un solo número y sin sorpresas.</p>
+<p>Detrás hay personas: un asesor responde cada reserva y cada consulta por WhatsApp.</p>
+<div class="redes">
+<a href="https://www.instagram.com/cuantosale.uy/" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram @cuantosale.uy</a>
+<a href="https://www.tiktok.com/@cuantosale.uy" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.4 2.200 1.800 3.700 4 4v3.100a7.400 7.400 0 0 1-4-1.300v6.300A6.100 6.100 0 1 1 10.500 9v3.200a2.900 2.900 0 1 0 2.100 2.800V3z"/></svg>TikTok @cuantosale.uy</a>
+<a href="https://wa.me/59898529851" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.600 15.100L2 22l5-1.300A10 10 0 1 0 12 2zm5.300 14.200c-.2.600-1.300 1.200-1.800 1.200-.5.100-1 .2-3.300-.7-2.800-1.100-4.600-4-4.700-4.200-.1-.2-1.100-1.500-1.100-2.900s.7-2 1-2.300c.2-.3.500-.3.700-.3h.5c.2 0 .4 0 .6.500l.8 2c.1.200.1.400 0 .5l-.3.500-.4.400c-.1.100-.3.300-.1.600.200.300.800 1.300 1.700 2.100 1.200 1 2.100 1.300 2.400 1.500.300.100.500.100.600-.100l.900-1.100c.200-.300.400-.200.600-.100l1.900.900c.300.100.500.200.500.300.100.100.100.700-.100 1.300z"/></svg>WhatsApp</a>
+<a href="mailto:admin@cuantosale.uy"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>admin@cuantosale.uy</a>
+</div>
+
+<h2 id="preguntas">Preguntas frecuentes</h2>
+<details><summary>¿Los precios de CuántoSale son reales?</summary><p>Los vuelos y el alojamiento son precios reales consultados a Ignav y a Booking.com. Los traslados y tours son las tarifas de los proveedores con los que trabajamos. Comidas, transporte local y el presupuesto de la portada son estimaciones de nuestro modelo, armado con fuentes públicas.</p></details>
+<details><summary>¿Por qué el precio cambió cuando volví a entrar?</summary><p>Porque las aerolíneas y los hoteles cambian sus precios según la demanda. Nosotros volvemos a consultar cada 48 horas como máximo (vuelos) y cada 30 minutos (alojamiento), así que podés ver un número distinto de un día para otro.</p></details>
+<details><summary>¿Puedo reservar todo con CuántoSale?</summary><p>Los traslados y los tours, sí: un asesor te confirma por WhatsApp y recién ahí pagás una seña. Los vuelos, el alojamiento y el seguro se reservan en el sitio de cada proveedor, con el enlace que te damos.</p></details>
+<details><summary>¿Alguien paga para aparecer primero?</summary><p>No. No mostramos anuncios ni resultados pagos.</p></details>
+<details><summary>¿Encontré un error, a quién aviso?</summary><p>Escribinos por <a href="https://wa.me/59898529851" target="_blank" rel="noopener">WhatsApp</a> o a <a href="mailto:admin@cuantosale.uy">admin@cuantosale.uy</a>. Lo revisamos y corregimos.</p></details>
+
+<p style="margin-top:32px"><a class="cta" href="/">Calculá cuánto sale tu viaje</a></p>
+
+<p class="foot"><a href="/como-calculamos">De dónde salen los precios</a> · <a href="/privacidad">Política de privacidad</a> · <a href="/terminos">Condiciones del servicio</a> · <a href="https://www.instagram.com/cuantosale.uy/" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.tiktok.com/@cuantosale.uy" target="_blank" rel="noopener">TikTok</a> · <a href="https://wa.me/59898529851" target="_blank" rel="noopener">WhatsApp</a></p>
+</main>
+</body>
+</html>

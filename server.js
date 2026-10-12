@@ -3378,8 +3378,8 @@ function handleRequest(req, res) {
      * El permiso real no es este: el panel pide sesion de Supabase y las
      * funciones tours_guardar() comprueban es_agencia() dentro de la base. Esto
      * solo evita que la pagina se vea en una maquina que no es la del equipo. */
-    // Paginas legales publicas: Google las pide para la pantalla de consentimiento del login.
-    if (/^\/(privacidad|terminos)\/?$/i.test(url.pathname)) {
+    // Paginas legales publicas: Google las pide para la pantalla de consentimiento del login. /como-calculamos: de donde salen los precios.
+    if (/^\/(privacidad|terminos|como-calculamos)\/?$/i.test(url.pathname)) {
       return serveStatic(req, res, '/' + url.pathname.replace(/\//g, '').toLowerCase() + '.html');
     }
     // Enlace corto del presupuesto: /v/<codigo> redirige a /?viaje=<token>.

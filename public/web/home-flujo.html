@@ -864,6 +864,8 @@
   .fl-spin{flex:0 0 22px;width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--azul);border-radius:50%;animation:fl-gira .8s linear infinite}
   @keyframes fl-gira{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion:reduce){.fl-spin{animation-duration:2.4s}}
+  .f-fuente{margin:10px 2px 0;font-size:13px;line-height:1.5;color:var(--ink2)}
+  .f-fuente a{color:inherit;font-weight:700}
   .fl-vacio{display:grid;gap:12px;margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:center}
   .fl-vacio b{font-size:14.5px;line-height:1.4;color:var(--ink)}
   .fl-vacio .g-btn{display:block;text-decoration:none;text-align:center}
@@ -1476,7 +1478,7 @@
 
   /* ---- Vuelos: solo los reales de /api/vuelos/buscar. Sin ejemplos: hasta que llegan se ve "Buscando vuelos…"
      y, si no hay, se dice que no hay. SIN_VUELO evita que el resto del flujo se rompa mientras tanto (precio 0). ---- */
-  var VUELOS = [];
+  var VUELOS = [], VUELOS_AT = '';   // VUELOS_AT: cuando se consulto a Ignav (lo manda /api/vuelos/buscar)
   var SIN_VUELO = { id: '', air: 'Vuelo', ab: '✈', sal: '--:--', lle: '--:--', dur: 0, durT: '', esc: 0, escT: '', precio: 0, ejemplo: true };
   /* Sin alojamiento elegido (la persona siguio sin elegir, o Booking todavia no respondio): suma 0 y no rompe el presupuesto. */
   var SIN_HOTEL = { id: '', nom: 'Sin alojamiento', zona: '', rat: 0, n: 0, precio: 0, serv: [], ejemplo: true, sin: true };
@@ -1776,6 +1778,16 @@
         '<div class="fc-pt fc-pt--d"><b>' + v.lle + '</b><small>' + esc(AEROPUERTO[destKey] || '') + '</small></div></div>' +
       '<div class="fc-pr"><span class="fc-pr__v"><b>' + f(precioVuelo(v)) + '</b><small>ida y vuelta · ' + personasTxt() + '</small></span></div></div>';
   }
+  /* De donde sale el precio y cuando se consulto (la lista puede venir de la cache del server, de hasta 48 h). */
+  function fuenteVuelos() {
+    var d = VUELOS_AT ? new Date(VUELOS_AT) : null, cuando = '';
+    if (d && !isNaN(d)) {
+      var hoy = new Date(), ayer = new Date(Date.now() - 864e5), mismo = function (a, b) { return a.toDateString() === b.toDateString(); };
+      var hh = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+      cuando = ' · consultado ' + (mismo(d, hoy) ? 'hoy' : mismo(d, ayer) ? 'ayer' : 'el ' + d.getDate() + '/' + (d.getMonth() + 1)) + ' a las ' + hh;
+    }
+    return '<p class="f-fuente">Precios reales de Ignav' + cuando + '. La aerolínea confirma el precio final al reservar. <a href="/como-calculamos#vuelos">¿De dónde salen los precios?</a></p>';
+  }
   function pantalla1() {
     if (MODO === 'bus') return pantallaBus();
     /* Recomendados: solo los que de verdad convienen (hasta 3), sin "Ver mas". Los otros filtros: 3 y "Ver mas opciones". */
@@ -1791,7 +1803,7 @@
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
         '<a class="g-btn g-btn--main" href="' + esc(cambiarFechas) + '">Cambiar fechas</a></div>' : '') +
       (VUELOS.length > 1 ? chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') : '') +
-      (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' : '') +
+      (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' + fuenteVuelos() : '') +
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
       '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
@@ -2686,7 +2698,7 @@
         '</aside>' +
       '</div>' +
       '<div class="st-dato">' + ic('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>', 26) +
-        '<div><b>Dato importante</b><p>Los precios pueden variar según disponibilidad y fecha de reserva. Te recomendamos confirmar los servicios con tiempo.</p></div>' +
+        '<div><b>Dato importante</b><p>Los precios pueden variar según disponibilidad y fecha de reserva. Te recomendamos confirmar los servicios con tiempo. <a href="/como-calculamos">¿De dónde salen los precios?</a></p></div>' +
         '<a href="/terminos">Ver más información ' + ic(iChev, 14) + '</a></div>' +
     '</div>';
   }
@@ -2989,6 +3001,7 @@
         if (!offers.length) throw new Error('sin vuelos');
         VUELOS = limpiarVuelos(offers.map(function (o, i) { return mapVuelo(o, i); }));
         if (d.destination) AEROPUERTO[destKey] = d.destination;
+        VUELOS_AT = d.consultado || '';
         S.vuelo = marcarMejor().id; S.avisoV = '';
         track('flujo_vuelos', { reales: true, cantidad: VUELOS.length });
       })
@@ -3161,7 +3174,7 @@
       '<p class="cal-p">Costo del vuelo para ' + personasTxt() + ', ida y vuelta, si salís antes o después con las mismas ' + NOCHES_TXT + '. Tocá una barra para verla.</p>' +
       '<div class="cal-g">' + barras + '</div>' +
       '<ul class="cal-ley"><li><i class="is-tuya"></i>Tu fecha</li><li><i class="is-barata"></i>La más barata</li><li><i></i>Otras fechas</li></ul>' +
-      '<p class="cal-nota">Precios reales consultados hoy, en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ': pueden variar. Tus fechas solo cambian si tocás “Usar estas fechas”.</p></div>';
+      '<p class="cal-nota">Precios reales de Ignav (se vuelven a consultar como máximo cada 48 h), en ' + (window.CSMoneda ? CSMoneda.simbolo() : 'US$') + ': pueden variar. Tus fechas solo cambian si tocás “Usar estas fechas”.</p></div>';
   }
   /* Rearma el viaje con otra fecha de salida (mismas noches). Solo se llama por un toque explicito en "Usar estas fechas". */
   function usarFecha(dep, desde) {
