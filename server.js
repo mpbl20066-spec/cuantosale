@@ -32,6 +32,7 @@ const model = require('./lib/model');
 // nada. Ver guiaToken() mas abajo para como se decide quien la recibe.
 const guiSecreta = require('./lib/guias');
 const playas = require('./lib/playas');
+const mareas = require('./lib/mareas');
 const destinosWeb = require('./lib/destinos-web');
 // Vuelos reales. El agregador es el único que habla con SerpAPI: ahí viven el
 // cache, el dedupe de pedidos simultáneos y la pausa cuando se acaban los
@@ -3594,6 +3595,16 @@ function handleRequest(req, res) {
         console.error('[hoteles]', e);
         sendJson(res, 502, { error: 'No pudimos cargar alojamientos ahora.' });
       });
+    }
+    /* Mareas de los proximos dias (playas del Nordeste). Publico y sin datos personales: lo usan la guia de la app
+       y la pagina /destino/<slug>. El modulo cachea 3 horas por destino. */
+    if (url.pathname === '/api/mareas') {
+      const dm = String(url.searchParams.get('dest') || '').toLowerCase();
+      if (mareas.DESTINOS.indexOf(dm) < 0) return sendJson(res, 404, { error: 'Sin tabla de mareas para este destino.' });
+      return mareas.para(dm).then(function (m) {
+        if (!m) return sendJson(res, 503, { error: 'No pudimos traer las mareas ahora.' });
+        return sendJson(res, 200, m);
+      }).catch(function () { sendJson(res, 503, { error: 'No pudimos traer las mareas ahora.' }); });
     }
     if (url.pathname === '/api/guia') {
       return servirGuiaSecreta(req, res, url);

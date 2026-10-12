@@ -97,7 +97,12 @@
   .u-mas:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
   .u-foto{height:220px;margin:-16px -16px 14px;border-radius:20px 20px 0 0;background:var(--cel-soft) center/cover}
   .u-precio{display:inline-block;margin-top:7px;padding:5px 11px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:14px;font-weight:800}
-  [role="tabpanel"]>section[aria-label="Clima por mes"]{grid-column:1/-1}
+  [role="tabpanel"]>section[aria-label="Clima por mes"],[role="tabpanel"]>.u-mar{grid-column:1/-1}
+  .u-mar h3{margin:0 0 4px;font-size:19px;font-weight:800;color:var(--ink)}.u-mar-n{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--ink2)}
+  .u-mar-t{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:var(--surface)}.u-mar-t table{border-collapse:collapse;width:100%;font-size:14.5px}
+  .u-mar-t th,.u-mar-t td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}.u-mar-t thead th{font-size:12.5px;color:var(--ink2)}
+  .u-mar-t tr:last-child th,.u-mar-t tr:last-child td{border-bottom:0}.u-mar-t td span{display:inline-block;margin:0 10px 2px 0;white-space:nowrap}
+  .u-mar-b{font-weight:800}.u-mar-ok{color:#2FB66F}.u-mar-ok i{font-style:normal;font-size:12px;padding:1px 7px;border-radius:99px;background:rgba(47,182,111,.15)}.u-mar-f{margin:6px 0 0;font-size:12.5px;color:var(--ink2)}
   [data-pagina="guia"] [role="tabpanel"]>.u-mapa.u-mapa{grid-column:1/-1;min-height:380px}
   [data-pagina="guia"] [role="tabpanel"]:has(>.u-mapa)>.u-item:last-child:nth-child(odd),
   [data-pagina="guia"] [role="tabpanel"]:not(:has(>.u-mapa))>.u-item.u-item:last-child:nth-child(even){grid-column:1/-1;justify-self:center;width:calc(50% - 6px)}
@@ -207,7 +212,7 @@
      Alegre es la seccion principal, con foto y mapa). La primera pestana es Playas si hay, si no Qué ver. */
   var TAB = [{ id: 'clima', nom: 'Clima', k: 'clima' }, { id: 'playas', nom: 'Playas', k: 'beaches' }, { id: 'ver', nom: 'Lugares para ver', k: 'atracciones' }, { id: 'hacer', nom: 'Paseos y excursiones', k: 'hacer' },
     { id: 'comer', nom: 'Dónde comer', k: 'comer' }, { id: 'tips', nom: 'Tips', k: 'tips' }];
-  var S = { tab: '', guia: null, region: '', tours: [], estado: 'cargando', est: null };
+  var S = { tab: '', guia: null, region: '', tours: [], mareas: null, estado: 'cargando', est: null };
   /* El presupuesto de la guia: el viaje real de CuantoSale con el destino ya elegido (/destinos), no una pantalla aparte. */
   /* El "Desde" y el mes mas barato salen de estimado-guia.js (compartido con la pagina publica /destino/<slug>). Los
      links a la app llevan ese mismo viaje (fechas, 2 personas y medio), para que la app lo abra con vuelos y hoteles
@@ -386,7 +391,7 @@
     if (S.tab === 'clima') return climaHtml() || '<section aria-label="Clima por mes"><h2 class="u-h2">Cuándo conviene ir a ' + esc(NOM) + '</h2><div class="u-item u-item--temp"><p class="u-temp">' + esc(S.guia.temporada.nota) + '</p></div></section>';
     if (S.tab === 'playas') {
       var b = lista('beaches');
-      return '<h2 class="u-h2">Playas</h2>' + conMapa(b) + b.map(function (x) {
+      return '<h2 class="u-h2">Playas</h2>' + (S.mareas ? '<section class="u-mar" aria-label="Mareas">' + mareasHtml(S.mareas, 'u-mar') + '</section>' : '') + conMapa(b) + b.map(function (x) {
         return tarjeta(x, tieneLugar(x) ? ++n : 0, esc(x.zona || '') + (x.cuando ? ' · ' + esc(x.cuando) : ''), x.vibe);
       }).join('');
     }
@@ -448,6 +453,12 @@
     s += '<g class="esc-ola esc-ola1"><path d="M-40 92 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V110 H-40Z"/></g>';
     s += '<g class="esc-ola esc-ola2"><path d="M-40 98 q20 -7 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V110 H-40Z"/></g>';
     return s + '</svg>';
+  }
+  /* Mareas de los proximos dias (Nordeste): /api/mareas; si no hay tabla para el destino, no se dibuja nada. */
+  function mareasHtml(m, cls){var DS=['dom','lun','mar','mié','jue','vie','sáb'];var hoy=new Date();var iso=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};var man=new Date(hoy.getTime()+864e5);var nom=function(f){if(f===iso(hoy))return 'Hoy';if(f===iso(man))return 'Mañana';var d=new Date(f+'T12:00:00');return DS[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)};var filas=m.dias.filter(function(d){return d.fecha>=iso(hoy)}).slice(0,7).map(function(d){var b=d.bajas.map(function(x){return '<span class="'+cls+'-b'+(x.ideal?' '+cls+'-ok':'')+'">'+x.hora+(x.ideal?' <i>ideal piscinas</i>':'')+'</span>'}).join('');var a=d.altas.map(function(x){return '<span>'+x.hora+'</span>'}).join('');return '<tr><th scope="row">'+nom(d.fecha)+'</th><td>'+b+'</td><td>'+a+'</td></tr>'}).join('');return '<h3>🌊 Mareas de los próximos días</h3><p class="'+cls+'-n">Las piscinas naturales y los arrecifes se ven con marea baja: salí una hora antes de la hora marcada.</p>'+'<div class="'+cls+'-t"><table><thead><tr><th>Día</th><th>Marea baja</th><th>Marea alta</th></tr></thead><tbody>'+filas+'</tbody></table></div><p class="'+cls+'-f">'+m.fuente+'</p>'}
+  function cargarMareas() {
+    fetch('/api/mareas?dest=' + encodeURIComponent(K)).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (m) { if (!m || !m.dias) return; S.mareas = m; if (S.tab === 'playas' && S.estado === 'abierta') pintar(); }).catch(function () {});
   }
   /* Tira de precios por mes: con tabla de clima sale de su demanda; si no, de la temporada (alta $$$, baja $, resto $$). */
   function mesesHtml() {
@@ -574,7 +585,7 @@
           .then(function (r) { if (r.status === 403 || r.status === 404) return null; if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
           .then(function (data) {
             if (data && data.guia) {
-              S.guia = data.guia; S.region = data.region || ''; S.tours = Array.isArray(data.tours) ? data.tours : []; S.estado = 'abierta';
+              S.guia = data.guia; S.region = data.region || ''; S.tours = Array.isArray(data.tours) ? data.tours : []; S.estado = 'abierta'; cargarMareas();
               track('guia_abierta', { secciones: TAB.map(function (t) { return lista(t.k).length; }) });
               pintar(); return;
             }
