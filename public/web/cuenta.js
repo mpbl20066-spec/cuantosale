@@ -66,7 +66,7 @@
   function poner(u) {
     var cambio = (usuario && usuario.id) !== (u && u.id);
     usuario = u;
-    if (cambio && u) { alcSync(); recSync(); }
+    if (cambio && u) { alcSync(); recSync(); }   // reservas_viajes las sincroniza la pagina del viaje (CSCuenta.reservas.sync) y repinta
     if (cambio) oyentes.forEach(function (fn) { try { fn(usuario); } catch (e) { /* un oyente no rompe a los demas */ } });
     if (panelAbierto()) pintar();
   }
@@ -245,6 +245,60 @@
      justo antes de cambiar de pagina, cuando el pedido a la cuenta no llego a salir. */
   function recSync() { recGuardarTodo(recLeer()).catch(function () { /* se reintenta en la proxima */ }); }
   function recBorrar() { return recGuardarTodo([]).catch(function () { /* queda borrada en el navegador */ }); }
+
+  /* ---------- Reservas de los viajes ----------
+     Lo que la pagina del viaje (home-flujo) guarda en el navegador, tambien en la cuenta (user_metadata.reservas_viajes)
+     para verlo desde otro celular o compu:
+       - pedidos: [{ id, k: 'tras'|'tours', viaje, t }]  -> el pedido del panel /admin, para consultar si ya esta confirmado
+       - marcados: { '<destino|ida|vuelta|pax>': { vuelo, aloj, realVuelo, alojReservado, t } }  -> vuelo y alojamiento que la persona marco
+     En el navegador siguen en las mismas claves de siempre (cs_pedidos y cs_res_<viaje>). Al unir, cada pedido se junta por
+     id y cada viaje marcado se queda con lo mas nuevo (t). */
+  var KP = 'cs_pedidos', KRES = 'cs_res_', MAXP = 40, MAXM = 20;
+  function resLocal() {
+    var pedidos = [], marcados = {};
+    try { var l = JSON.parse(localStorage.getItem(KP) || '[]'); if (Array.isArray(l)) pedidos = l; } catch (e) { /* nada */ }
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i); if (!k || k.indexOf(KRES) !== 0) continue;
+        var v = JSON.parse(localStorage.getItem(k) || 'null'); if (v) marcados[k.slice(KRES.length)] = v;
+      }
+    } catch (e) { /* nada */ }
+    return { pedidos: pedidos, marcados: marcados };
+  }
+  function resRemota() { var r = usuario && usuario.user_metadata && usuario.user_metadata.reservas_viajes; return r && typeof r === 'object' ? { pedidos: Array.isArray(r.pedidos) ? r.pedidos : [], marcados: r.marcados && typeof r.marcados === 'object' ? r.marcados : {} } : { pedidos: [], marcados: {} }; }
+  function resUnir(a, b) {
+    var vistos = {}, pedidos = a.pedidos.concat(b.pedidos).filter(function (p) { if (!p || !p.id || vistos[p.id]) return false; vistos[p.id] = 1; return true; })
+      .sort(function (x, y) { return (y.t || 0) - (x.t || 0); }).slice(0, MAXP);
+    /* Vuelo y alojamiento se unen cada uno por su lado (tV / tA): marcar el hotel en un celular no pisa el vuelo que se
+       marco en otro. */
+    var marcados = {};
+    [a.marcados, b.marcados].forEach(function (m) {
+      Object.keys(m).forEach(function (k) {
+        var v = m[k]; if (!v) return;
+        var x = marcados[k] || { vuelo: false, realVuelo: null, tV: -1, aloj: false, alojReservado: null, tA: -1, t: 0 };
+        var tV = v.tV != null ? v.tV : (v.t || 0), tA = v.tA != null ? v.tA : (v.t || 0);
+        if (tV > x.tV) { x.vuelo = !!v.vuelo; x.realVuelo = v.realVuelo || null; x.tV = tV; }
+        if (tA > x.tA) { x.aloj = !!v.aloj; x.alojReservado = v.alojReservado || null; x.tA = tA; }
+        x.t = Math.max(x.tV, x.tA, 0);
+        marcados[k] = x;
+      });
+    });
+    var claves = Object.keys(marcados).sort(function (x, y) { return (marcados[y].t || 0) - (marcados[x].t || 0); }).slice(0, MAXM), m2 = {};
+    claves.forEach(function (k) { m2[k] = marcados[k]; });
+    return { pedidos: pedidos, marcados: m2 };
+  }
+  /* Une navegador y cuenta, deja el resultado en los dos lados y devuelve si el navegador cambio (para repintar). */
+  function resSync() {
+    var loc = resLocal(), todo = resUnir(resRemota(), loc), cambioLocal = JSON.stringify(todo) !== JSON.stringify(resUnir(loc, { pedidos: [], marcados: {} }));
+    try {
+      localStorage.setItem(KP, JSON.stringify(todo.pedidos));
+      Object.keys(todo.marcados).forEach(function (k) { localStorage.setItem(KRES + k, JSON.stringify(todo.marcados[k])); });
+    } catch (e) { /* modo privado */ }
+    if (!usuario || JSON.stringify(resUnir(resRemota(), { pedidos: [], marcados: {} })) === JSON.stringify(todo)) return Promise.resolve(cambioLocal);
+    return iniciar().then(function () { return cliente.auth.updateUser({ data: { reservas_viajes: todo } }); })
+      .then(function (r) { if (r.error) throw r.error; poner(r.data.user); return cambioLocal; })
+      .catch(function () { return cambioLocal; });   // sin red queda en el navegador y se sube en la proxima
+  }
 
   /* ---------- Panel ---------- */
   var S = { vista: 'menu', cargando: false, viajes: null, error: '', aviso: '', enviando: false, correo: '' };
@@ -562,5 +616,5 @@
     return { soportado: soportado, estado: estado, activar: activar, desactivar: desactivar };
   })();
 
-  window.CSCuenta = { push: pushApi, alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
+  window.CSCuenta = { push: pushApi, alcancia: { leer: alcLeer, guardar: alcGuardar, borrar: alcBorrar }, recientes: { leer: recLeer, anotar: recAnotar, borrar: recBorrar, alCambiar: function (fn) { oyentes.push(fn); } }, reservas: { sync: resSync }, usuario: function () { return usuario; }, alCambiar: function (fn) { oyentes.push(fn); iniciar().catch(function () {}); }, abrir: abrir, cerrar: cerrar, guardarViaje: guardarViaje, rutaGuardada: rutaGuardada, iniciar: iniciar, loginGoogle: loginGoogle, montarGoogle: montarGoogle, loginCorreo: loginCorreo, token: function () { return iniciar().then(function () { return cliente.auth.getSession(); }).then(function (r) { return r.data && r.data.session ? r.data.session.access_token : ""; }).catch(function () { return ""; }); } };
 })();

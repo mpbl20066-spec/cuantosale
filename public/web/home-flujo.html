@@ -2771,6 +2771,7 @@
     var l = pedidosGuardados().filter(function (x) { return x.id !== id; });
     l.unshift({ id: id, k: k, viaje: CLAVE_VIAJE, t: Date.now() });
     try { localStorage.setItem('cs_pedidos', JSON.stringify(l.slice(0, 30))); } catch (e) { /* modo privado */ }
+    if (window.CSCuenta && CSCuenta.reservas) CSCuenta.reservas.sync().catch(function () { /* queda en el navegador */ });
   }
   function sincronizarPedidos() {
     var mios = pedidosGuardados().filter(function (x) { return x.viaje === CLAVE_VIAJE; });
@@ -3059,18 +3060,33 @@
      personas), asi al volver desde Mis viajes siguen apareciendo como Reservado. Traslados y tours los confirma el
      asesor en /admin y se consultan cada vez (sincronizarPedidos). */
   var CLAVE_RES = 'cs_res_' + [destKey, IDA, VUELTA, pax].join('|'), ultimoRes = '';
+  /* Con sesion, ademas se guarda en la cuenta (cuenta.js: CSCuenta.reservas) para verlo desde otro celular o compu. */
+  var estadoRes = function () { return JSON.stringify({ vuelo: !!S.res.vuelo, aloj: !!S.res.aloj, realVuelo: S.reales && S.reales.vuelo || null, alojReservado: S.alojReservado || null }); };
+  function subirReservas() { if (window.CSCuenta && CSCuenta.reservas) CSCuenta.reservas.sync().catch(function () { /* queda en el navegador */ }); }
   function guardarReservados() {
-    var v = JSON.stringify({ vuelo: !!S.res.vuelo, aloj: !!S.res.aloj, realVuelo: S.reales && S.reales.vuelo || null, alojReservado: S.alojReservado || null });
+    var v = estadoRes();
     if (v === ultimoRes) return;
     ultimoRes = v;
-    try { localStorage.setItem(CLAVE_RES, v); } catch (e) { /* modo privado */ }
+    /* tV / tA: cuando cambio el vuelo y cuando cambio el alojamiento. Con eso la cuenta une cada uno por su lado y lo
+       que se marco en otro dispositivo no se pisa. */
+    var g = JSON.parse(v), prev = null, ahora = Date.now();
+    try { prev = JSON.parse(localStorage.getItem(CLAVE_RES) || 'null'); } catch (e) { prev = null; }
+    var igualV = prev ? (!!prev.vuelo === g.vuelo && (prev.realVuelo || null) === g.realVuelo) : !g.vuelo;
+    var igualA = prev ? (!!prev.aloj === g.aloj && JSON.stringify(prev.alojReservado || null) === JSON.stringify(g.alojReservado)) : !g.aloj;
+    g.tV = igualV ? (prev && prev.tV != null ? prev.tV : 0) : ahora;
+    g.tA = igualA ? (prev && prev.tA != null ? prev.tA : 0) : ahora;
+    g.t = Math.max(g.tV, g.tA);
+    try { localStorage.setItem(CLAVE_RES, JSON.stringify(g)); } catch (e) { /* modo privado */ }
+    subirReservas();
   }
   function leerReservados() {
     var g; try { g = JSON.parse(localStorage.getItem(CLAVE_RES) || 'null'); } catch (e) { g = null; }
     if (!g) return;
-    if (g.vuelo) { S.res.vuelo = true; if (g.realVuelo) { S.reales = S.reales || {}; S.reales.vuelo = g.realVuelo; } }
-    if (g.aloj) { S.res.aloj = true; if (g.alojReservado) S.alojReservado = g.alojReservado; }
-    ultimoRes = JSON.stringify({ vuelo: !!S.res.vuelo, aloj: !!S.res.aloj, realVuelo: S.reales && S.reales.vuelo || null, alojReservado: S.alojReservado || null });
+    S.res.vuelo = !!g.vuelo; S.res.aloj = !!g.aloj;
+    S.reales = S.reales || {};
+    if (g.vuelo && g.realVuelo) S.reales.vuelo = g.realVuelo; else if (!g.vuelo) delete S.reales.vuelo;
+    S.alojReservado = g.aloj && g.alojReservado ? g.alojReservado : null;
+    ultimoRes = estadoRes();
   }
   function render(scrollTop) {
     if (ultimoRes || S.res.vuelo || S.res.aloj) guardarReservados();
@@ -3569,6 +3585,16 @@
   histIni = false;
   var vuelosListos = Promise.resolve(MODO === 'avion' ? cargarVuelos() : (MODO === 'bus' ? cargarBus() : null));
   CSCuenta.alCambiar(function (u) { if (u) restaurarPendiente(u); });
+  /* Con sesion: se unen las reservas de este navegador con las de la cuenta. Si llego algo de otro dispositivo
+     (un pedido, o el vuelo o el alojamiento marcado), se vuelve a leer y se repinta. */
+  CSCuenta.alCambiar(function (u) {
+    if (!u || !CSCuenta.reservas) return;
+    CSCuenta.reservas.sync().then(function (cambio) {
+      if (!cambio) return;
+      leerReservados(); sincronizarPedidos();
+      var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
+    });
+  });
   sincronizarPedidos();
   if (!S.datos) { try { var dg = JSON.parse(localStorage.getItem('cs_datos_reserva') || 'null'); if (dg && dg.nombre) S.datos = { nombre: dg.nombre, pais: dg.pais || '+598', tel: dg.tel || '', mail: dg.mail || '', cupon: '' }; } catch (e) { /* modo privado */ } }
   /* Cambio de fechas desde el calendario (usarFecha): mantiene lo elegido y toma el vuelo mas barato. */
