@@ -992,8 +992,7 @@
         '<button class="btn btn--sm" data-pub-uno="' + esc(pend.id) + '">Publicarlo</button> <button class="btn btn--sm btn--danger" data-desc-uno="' + esc(pend.id) + '">Descartarlo</button></p>' : '') +
       (s.orig && s.orig.revision === 'pendiente' ? '<p class="aviso" style="margin:0">Para revisar: ' + esc(s.orig.revision_motivo || 'faltan datos') + '</p>' : '') +
       (s.orig && faltantes(Object.assign({}, s.orig, srvParaCalc())).length ? '<p class="aviso" style="margin:0">Para verse como tus tours publicados le falta: <b>' + esc(faltantes(Object.assign({}, s.orig, srvParaCalc())).join(', ')) + '</b>.' +
-        (s.orig.tipo !== 'traslado' ? ' <button class="btn btn--sm btn--main" data-act="ia-completar"' + (s.ia && s.ia.cargando ? ' disabled' : '') + '>' + (s.ia && s.ia.cargando ? 'Completando…' : 'Completar con IA') + '</button>' : '') + '</p>' : '') +
-      iaHtml() +
+        (s.orig.tipo !== 'traslado' && s.f.link_web ? ' ' + '<button class="btn btn--sm btn--main" data-act="ficha-traer"' + (s.trayendo ? ' disabled' : '') + '>' + (s.trayendo ? 'Trayendo…' : 'Traer textos del proveedor') + '</button>' : '') + '</p>' : '') +
       '<section class="sec"><h3>Foto</h3><div id="srv-foto">' + fotoSecHtml() + '</div></section>' +
       '<section class="sec"><h3>Precio</h3><div class="grid">' +
       '<label class="f">El proveedor cobra en<select ' + a('_moneda') + '><option value="BRL"' + (f._moneda === 'BRL' ? ' selected' : '') + '>Reales (R$)</option><option value="USD"' + (f._moneda === 'USD' ? ' selected' : '') + '>Dólares (US$)</option></select></label>' +
@@ -1015,7 +1014,7 @@
       (s.orig ? '<p class="sub" style="margin:-4px 0 0">Ojo: la foto del tour está atada al título. Si lo cambiás, la tarjeta queda sin foto.</p>' : '') +
       area('descripcion', 'Descripción') + area('detalle', 'Detalle') +
       '<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" ' + a('activo') + ' style="width:auto;min-height:0"' + (f.activo ? ' checked' : '') + '> Mostrarlo en la web</label></div></section>' +
-      '<section class="sec"><h3>Ficha' + (s.orig && s.orig.tipo !== 'traslado' ? ' <button class="btn btn--sm" data-act="ia-completar" style="float:right;text-transform:none;letter-spacing:0"' + (s.ia && s.ia.cargando ? ' disabled' : '') + '>' + (s.ia && s.ia.cargando ? 'Completando…' : 'Completar con IA') + '</button>' : '') + '</h3><div class="grid">' + inp('duracion', 'Duración') + inp('grupo', 'Grupo') + inp('punto_salida', 'Punto de salida') + inp('edad_minima', 'Edad mínima') + '</div>' +
+      '<section class="sec"><h3>Ficha' + (s.orig && s.orig.tipo !== 'traslado' ? ' <button class="btn btn--sm" data-act="ficha-traer" style="float:right;text-transform:none;letter-spacing:0"' + (s.trayendo ? ' disabled' : '') + '>' + (s.trayendo ? 'Trayendo…' : 'Traer textos del proveedor') + '</button>' : '') + '</h3><div class="grid">' + inp('duracion', 'Duración') + inp('grupo', 'Grupo') + inp('punto_salida', 'Punto de salida') + inp('edad_minima', 'Edad mínima') + '</div>' +
       '<div class="grid" style="grid-template-columns:1fr;margin-top:10px">' + area('incluye', 'Incluye', 'una cosa por línea') + area('no_incluye', 'No incluye', 'una cosa por línea') + area('que_llevar', 'Qué llevar', 'una cosa por línea') +
       area('politica_cancelacion', 'Cancelación') + inp('link_web', 'Link del operador') + (verProv(f.link_web) ? '<p style="margin:-4px 0 0">' + verProv(f.link_web) + '</p>' : '') + '</div></section>' +
       (s.orig ? '<section class="sec"><h3>Historial</h3><div id="srv-hist"><p class="sub">Cargando…</p></div></section>' : '') + '</div>' +
@@ -1110,42 +1109,32 @@
     };
     paso();
   }
-  /* ---------- Completar la ficha con IA (lib/ficha-ia.js) ----------
-     Claude lee lo que trajo el archivo y la pagina del operador y escribe la ficha en el estilo de los tours
-     publicados. Solo se llenan los campos vacios; el titulo en espanol se sugiere aparte. Nada se guarda hasta que
-     se toca "Guardar para revisar" o "Publicar ahora". */
-  var IA_CAMPOS = ['descripcion', 'detalle', 'duracion', 'grupo', 'punto_salida', 'edad_minima', 'politica_cancelacion', 'incluye', 'no_incluye', 'que_llevar'];
-  var IA_NOMBRES = { descripcion: 'descripción', detalle: 'detalle', duracion: 'duración', grupo: 'grupo', punto_salida: 'punto de salida', edad_minima: 'edad mínima', politica_cancelacion: 'cancelación', incluye: 'qué incluye', no_incluye: 'no incluye', que_llevar: 'qué llevar' };
-  function iaHtml() {
-    var ia = S.srv && S.srv.ia; if (!ia) return '';
-    if (ia.cargando) return '<p class="aviso" style="margin:0">Claude está leyendo la página del proveedor y escribiendo la ficha… puede tardar unos 30 segundos.</p>';
-    if (ia.error) return '<p class="aviso" style="margin:0;background:var(--badbg);color:var(--bad)">' + esc(ia.error) + '</p>';
-    return '<div class="sec" style="border-color:var(--info);background:var(--infobg)"><b>Ficha completada con IA</b> — revisala antes de guardar.' +
-      '<span class="sub">' + (ia.llenados.length ? 'Completé: ' + esc(ia.llenados.map(function (k) { return IA_NOMBRES[k]; }).join(', ')) + '.' : 'No había campos vacíos que completar.') +
-      (ia.pagina ? '' : ' No pude leer la página del proveedor: usé solo los datos del archivo.') + '</span>' +
-      (ia.titulo ? '<p style="margin:8px 0 0">Título sugerido: <b>' + esc(ia.titulo) + '</b> <button class="btn btn--sm" data-act="ia-titulo">Usar este título</button></p>' : '') +
-      (ia.dudas ? '<p style="margin:8px 0 0;color:var(--warn)"><b>Para revisar:</b> ' + esc(ia.dudas) + '</p>' : '') + '</div>';
-  }
+  /* ---------- Traer los textos de la pagina del proveedor (lib/fotos-proveedor.js fichaDesdePagina) ----------
+     Llena los campos vacios con lo que dice la pagina del operador, tal cual (casi siempre en portugues), para
+     corregirlo en el editor. Nada se guarda hasta que se toca "Guardar para revisar" o "Publicar ahora". */
+  var FICHA_CAMPOS = ['descripcion', 'detalle', 'duracion', 'punto_salida', 'politica_cancelacion', 'incluye', 'no_incluye', 'que_llevar'];
+  var FICHA_NOMBRES = { descripcion: 'descripción', detalle: 'detalle', duracion: 'duración', punto_salida: 'punto de salida', politica_cancelacion: 'cancelación', incluye: 'qué incluye', no_incluye: 'no incluye', que_llevar: 'qué llevar' };
   function repintarSrv() {
     var y = (document.querySelector('#drawer .panel') || {}).scrollTop || 0;
     abrirSrv();
     var pn = document.querySelector('#drawer .panel'); if (pn) pn.scrollTop = y;
   }
-  function completarIa() {
+  function traerFicha() {
     var s = S.srv; if (!s || !s.id) return toast('Guardá el servicio primero');
-    s.ia = { cargando: true }; repintarSrv();
-    api('ops/ficha/completar', { id: s.id, link: s.f.link_web || '' }).then(function (r) {
+    if (!s.f.link_web) return toast('Pegá primero el link del proveedor');
+    s.trayendo = true; repintarSrv();
+    api('ops/ficha/traer', { id: s.id, link: s.f.link_web }).then(function (r) {
+      s.trayendo = false;
       if (S.srv !== s) return;
       var fi = r.ficha, f = s.f, llenados = [];
-      IA_CAMPOS.forEach(function (k) {
-        var v = Array.isArray(fi[k]) ? fi[k].map(function (x) { return String(x).trim(); }).filter(Boolean).join('\n') : String(fi[k] || '').trim();
-        if (v && !String(f[k] || '').trim()) { f[k] = v; llenados.push(k); }
+      FICHA_CAMPOS.forEach(function (k) {
+        var v = String(fi[k] || '').trim();
+        if (v && !String(f[k] || '').trim()) { f[k] = v; llenados.push(FICHA_NOMBRES[k]); }
       });
-      var tit = String(fi.titulo || '').trim();
-      s.ia = { llenados: llenados, titulo: tit && tit !== String(f.titulo || '').trim() ? tit : '', dudas: String(fi.dudas || '').trim(), pagina: !!fi.pagina_leida };
       if (llenados.length) S.dirty = true;
       repintarSrv();
-    }).catch(function (e) { if (S.srv === s) { s.ia = { error: e.message }; repintarSrv(); } });
+      toast(llenados.length ? 'Completé: ' + llenados.join(', ') : 'La página no tenía más datos para los campos vacíos');
+    }).catch(function (e) { s.trayendo = false; if (S.srv === s) repintarSrv(); toast(e.message); });
   }
   function pintarHist() {
     var el = document.getElementById('srv-hist'); if (!el || !S.srv) return;
@@ -1911,8 +1900,7 @@
       case 'aj-guardar': guardarAjuste(); break;
       case 'fotos-buscar': buscarFotos(); break;
       case 'foto-link': agregarFotoLink(); break;
-      case 'ia-completar': completarIa(); break;
-      case 'ia-titulo': if (S.srv && S.srv.ia && S.srv.ia.titulo) { S.srv.f.titulo = S.srv.ia.titulo; S.srv.ia.titulo = ''; S.dirty = true; repintarSrv(); } break;
+      case 'ficha-traer': traerFicha(); break;
       case 'fotos-auto': fotosAuto(); break;
       case 'imp-reiniciar': S.imp = null; S.impHist = undefined; pintar(); break;
       case 'imp-previa': pedirPrevia(); break;
