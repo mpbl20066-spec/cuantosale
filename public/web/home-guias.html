@@ -161,7 +161,10 @@
   .gm-sel__t .gm-link svg,.gm-rec .gm-link svg{flex:0 0 14px;width:14px;height:14px}
   .gm-sel .gm-fav{position:static;flex:0 0 auto;background:rgba(255,255,255,.1)}
   .gm-tabs{display:flex;gap:4px;margin-bottom:14px;padding:4px;border-radius:12px;background:rgba(255,255,255,.07)}
-  .gm-tab{flex:1;min-height:40px;padding:6px 8px;border:0;border-radius:9px;background:transparent;color:var(--gm-gris);font-size:13.5px;font-weight:800;white-space:nowrap}
+  .gm-tab{flex:1 1 0;min-width:0;min-height:40px;padding:6px 4px;border:0;border-radius:9px;background:transparent;color:var(--gm-gris);font-size:13.5px;font-weight:800;line-height:1.15;text-align:center}
+  /* en el celular las tres pestanas entran en el ancho: letra mas chica y, si no alcanza, el texto baja a dos renglones */
+  .gm-tab__c{display:none}
+  @media (max-width:420px){.gm-tab{font-size:12.5px}.gm-tab__l{display:none}.gm-tab__c{display:inline}}
   .gm-tab[aria-pressed="true"]{background:var(--gm-y);color:#0F1B2D}
   .gm-tab:focus-visible{outline:3px solid var(--gm-y);outline-offset:2px}
   .gm-rec__nota{margin:10px 0 0;font-size:12.5px;line-height:1.5;color:var(--gm-gris)}
@@ -170,7 +173,7 @@
   .gm-cargando{grid-column:1/-1;margin:0;padding:24px 0;font-size:14px;color:var(--gm-gris)}
   .gm-rec h3{margin:0;font-family:var(--fh);font-size:16px;font-weight:800;color:#fff}
   .gm-rec__l{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-  .gm-mini{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:110px;box-sizing:border-box;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:#0F1B2D center/cover no-repeat;color:#fff;text-align:left;overflow:hidden}
+  .gm-mini{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:110px;box-sizing:border-box;padding:10px;border:0;border-radius:12px;background:#0F1B2D center/cover no-repeat;color:#fff;text-align:left;overflow:hidden}
   .gm-mini::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,0) 25%,rgba(10,16,26,.9))}
   .gm-mini>*{position:relative}
   .gm-mini b{font-size:14px;line-height:1.2}
@@ -299,7 +302,7 @@
           </div>
           <div class="gm-rec">
             <div class="gm-tabs" role="group" aria-label="Ordenar los destinos del mes">
-              <button type="button" class="gm-tab" data-rank="top" aria-pressed="true">Recomendados</button>
+              <button type="button" class="gm-tab" data-rank="top" aria-pressed="true"><span class="gm-tab__l">Recomendados</span><span class="gm-tab__c">Elegidos</span></button>
               <button type="button" class="gm-tab" data-rank="clima" aria-pressed="false">Mejor clima</button>
               <button type="button" class="gm-tab" data-rank="precio" aria-pressed="false">Más baratos</button>
             </div>

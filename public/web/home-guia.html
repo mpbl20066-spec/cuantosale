@@ -97,7 +97,8 @@
   .u-clima__ley{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 0;font-size:13px;font-weight:600;color:var(--ink2)}.u-clima__ley span{display:inline-flex;align-items:center;gap:6px}
   .u-clima__n{margin:4px 0 0;font-size:15px;font-weight:600;color:var(--ink2);line-height:1.5}
   .u-clima__f{margin:6px 0 0;font-size:12.5px;color:var(--ink2)}
-  .u-item--temp .u-temp{margin:0}
+  /* la nota de temporada no se despliega: va entera, sin el recorte a 3 renglones de .u-item p */
+  .u-item--temp .u-temp{margin:0;display:block;-webkit-line-clamp:unset;overflow:visible}
   .u-temp{margin:6px 0 0;font-size:16px;font-weight:600;color:var(--ink2);line-height:1.5}
   /* El cierre: desde la guia al buscador, como en la maqueta. */
   .u-handoff{margin:36px 0 0;padding:0;text-align:center;color:var(--ink)}
