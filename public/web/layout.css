@@ -1,4 +1,4 @@
-/* ============ Ancho maximo legible (todas las paginas de /test) ============
+/* ============ Ancho maximo legible (todas las paginas de /web) ============
    Se carga DESPUES de web.css. Solo corrige anchos, centrado y espaciado; no toca colores, tipografia ni estructura.
    - Barras y pies mantienen su fondo a todo el ancho, pero el contenido queda en 1200px centrado, con 24px a cada lado.
    - Modales: hoja centrada de 700px como maximo sobre un velo oscuro; en celular siguen ocupando todo el ancho.

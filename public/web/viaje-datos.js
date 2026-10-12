@@ -1,4 +1,4 @@
-/* Modelo de costos del viaje, compartido por las pantallas del /test.
+/* Modelo de costos del viaje, compartido por las pantallas del /web.
    (viaje-datos.js)
 
    POR QUE ESTE ARCHIVO
@@ -16,7 +16,7 @@
    - desglose(): las cuatro lineas que muestra el presupuesto, agrupando las
      partidas como las agrupa la maqueta.
 
-   El precio real sale de /api/cotizar; esto es el modelo de ejemplo de /test. */
+   El precio real sale de /api/cotizar; esto es el modelo de ejemplo de /web. */
 (function () {
   'use strict';
   var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];

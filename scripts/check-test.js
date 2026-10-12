@@ -9,6 +9,7 @@ const PAGINAS = ['', 'destinos', 'presupuesto', 'planificar', 'ruta', 'detalle',
 const VIEJAS = {
   '/test': '/', '/test/': '/', '/test/home-dos-caminos.html': '/', '/test/home-destino.html': '/destinos',
   '/test/home-flujo.html?destino=rio&pax=2': '/planificar?destino=rio&pax=2', '/test/HOME-calcular.html': '/ruta',
+  '/test/web.css': '/web/web.css', '/test/dest/rio-400.jpg': '/web/dest/rio-400.jpg',
   '/Destinos': '/destinos', '/destinos/': '/destinos'
 };
 let fallas = 0;

@@ -1,6 +1,6 @@
 /* Instalar CuántoSale como app desde la web nueva.
-   Antes /test no traia manifest ni service worker, asi que el navegador nunca ofrecia instalarla.
-   - Registra /sw.js (el mismo de la app; deja pasar /test a la red, ver sw.js).
+   Antes /web no traia manifest ni service worker, asi que el navegador nunca ofrecia instalarla.
+   - Registra /sw.js (el mismo de la app; deja pasar /web a la red, ver sw.js).
    - Android y Chrome/Edge de escritorio: guarda beforeinstallprompt y muestra un aviso chico abajo con "Instalar".
    - iPhone/iPad (Safari no tiene ese evento): el aviso explica Compartir -> "Agregar a inicio".
    - "Ahora no" lo calla 30 dias (misma clave que pwa.js de la app). Ya instalada, no aparece.

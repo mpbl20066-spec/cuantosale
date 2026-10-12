@@ -1,7 +1,7 @@
-/* Selector de moneda de /test, el mismo que tiene cuantosale.uy.
+/* Selector de moneda de /web, el mismo que tiene cuantosale.uy.
    - Mismas monedas y mismas tasas que la app: GET /api/tasas (UYU, USD, BRL; base USD).
    - Misma clave de almacenamiento (cuantosale_moneda): lo que la persona elige aca vale en la app y al reves.
-   - Todos los importes de /test estan en dolares (base). Para mostrarlos en otra moneda se multiplican por la tasa;
+   - Todos los importes de /web estan en dolares (base). Para mostrarlos en otra moneda se multiplican por la tasa;
      si no hay tasa para la moneda elegida se queda en la base, nunca se inventa un numero.
    Uso:  CSMoneda.fmt(usd) -> "US$ 1.234" / "$ 45.000" / "R$ 5.013";  CSMoneda.alCambiar(fn);  CSMoneda.selector() -> nodo del selector. */
 (function () {

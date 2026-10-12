@@ -1,4 +1,4 @@
-/* /test como web app, no como maqueta de celular.
+/* /web como web app, no como maqueta de celular.
    Causa raiz del problema: cada pantalla esta armada como un celular (.phone: una caja de alto fijo con
    scroll interno y el boton fijo abajo) y el marco solo se sacaba por debajo de 520px. Aca se reemplaza
    el marco por un contenedor que se adapta, y desde tablet cada pantalla reorganiza su contenido.

@@ -1,4 +1,4 @@
-/* Tema claro / oscuro de /test. Va en el <head>, antes del CSS, para que la pagina no se pinte clara y despues cambie.
+/* Tema claro / oscuro de /web. Va en el <head>, antes del CSS, para que la pagina no se pinte clara y despues cambie.
    Sigue al sistema (prefers-color-scheme) y cambia en vivo si la persona cambia el modo del celular o la compu.
    Solo si la persona toca "Modo oscuro" en el panel de la cuenta (cuenta.js) queda fijo lo que eligio: se guarda en
    cs_tema_manual. La clave vieja de la app (cuantosale_tema) ya no se lee: la escribia sola y tapaba al sistema. */

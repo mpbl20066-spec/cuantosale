@@ -1,4 +1,4 @@
-/* Cuenta y perfil de /test. Usa el mismo Supabase que la app de la raiz (/api/config): Google, link por correo, la
+/* Cuenta y perfil de /web. Usa el mismo Supabase que la app de la raiz (/api/config): Google, link por correo, la
    tabla `trips` para los viajes guardados y user_metadata.full_name para el nombre.
 
    Panel de perfil: en celular sube desde abajo; en tablet y desktop cae como menu debajo de la barra superior.
@@ -143,7 +143,7 @@
   }
   function salir() { return iniciar().then(function () { return cliente.auth.signOut(); }).then(function (r) { try { localStorage.removeItem(KA); } catch (e) { /* modo privado */ } return r; }); }
   function guardarNombre(n) { return iniciar().then(function () { return cliente.auth.updateUser({ data: { full_name: n } }); }).then(function (r) { if (r.error) throw r.error; poner(r.data.user); }); }
-  /* Los viajes de /test van a la misma tabla `trips` que usa la app de la raiz. flight_details.fuente = 'test' los distingue. */
+  /* Los viajes de /web van a la misma tabla `trips` que usa la app de la raiz. flight_details.fuente = 'test' los distingue. */
   function guardarViaje(d) {
     return iniciar().then(function () { return cliente.auth.getUser(); }).then(function (r) {
       var u = r.data && r.data.user;

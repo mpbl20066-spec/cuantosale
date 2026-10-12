@@ -1,4 +1,4 @@
-/* Barra superior de escritorio para todas las pantallas internas de /test (la home trae la suya).
+/* Barra superior de escritorio para todas las pantallas internas de /web (la home trae la suya).
    En celular y tablet (< 1024px) no se ve: ahi cada pantalla sigue con su encabezado de siempre.
    Mismos accesos que la barra de la home: Inicio y Destinos navegan; Guardados, Perfil y el menu abren el panel de cuenta
    (los maneja cuenta.js por data-guardados / data-perfil). */

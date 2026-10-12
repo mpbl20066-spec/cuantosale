@@ -1,4 +1,4 @@
-/* Panel de perfil de /test: hoja que sube desde abajo en celular y menu debajo de la barra superior en tablet y desktop. */
+/* Panel de perfil de /web: hoja que sube desde abajo en celular y menu debajo de la barra superior en tablet y desktop. */
 html.cs-perfil-abierto{overflow:hidden}
 #cs-perfil{position:fixed;inset:0;z-index:100}
 #cs-perfil[hidden]{display:none}

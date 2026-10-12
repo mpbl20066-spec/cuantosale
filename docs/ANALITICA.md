@@ -8,7 +8,7 @@ grabaciones y mapas de calor (no duplica eventos) y el script de afiliados es de
 | Pieza | Dónde | Qué hace |
 |---|---|---|
 | Snippet de medición | `server.js` → `analyticsSnippet()` / `injectAnalytics()` | Se inyecta en todo HTML. Define `gtag`, `track()` y **no carga nada de terceros hasta que la persona acepta** (Consent Mode v2, `cs_consent` en `localStorage`). |
-| `mockTrack(nombre, params)` | `public/test/home-track.js` | Agrega `viaje_id` y llama a `track()`. Con `?debug=1` muestra los eventos en pantalla. |
+| `mockTrack(nombre, params)` | `public/web/home-track.js` | Agrega `viaje_id` y llama a `track()`. Con `?debug=1` muestra los eventos en pantalla. |
 | `data-evento="x"` | atributos HTML | Cada clic en ese elemento manda el evento `x` con el resto de sus `data-*` como parámetros. |
 | `vista_pagina` | `home-track.js` | Una vez por carga, con `pagina` (atributo `data-pagina`) y `fuente` (`?fuente=`). |
 

@@ -1,4 +1,4 @@
-/* Snapshot del catalogo real de tours para las pantallas de /test.
+/* Snapshot del catalogo real de tours para las pantallas de /web.
    NO EDITAR A MANO: se regenera con `node scripts/build-extras-data.js`.
    Fuentes: data/tours.json (titulo, precio, ficha), data/tour-photos.json (foto con
    autor y licencia) y data/tour-galerias.json (galeria). Es lo mismo que arma

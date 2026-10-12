@@ -1,19 +1,19 @@
 'use strict';
 /*
- * Genera public/test/extras-data.js (window.MOCK_TOURS) desde el catalogo real.
+ * Genera public/web/extras-data.js (window.MOCK_TOURS) desde el catalogo real.
  *
  *   node scripts/build-extras-data.js
  *
  * QUE HACE
- * Las pantallas de /test muestran tours con precio, foto y ficha. Antes esos datos
+ * Las pantallas de /web muestran tours con precio, foto y ficha. Antes esos datos
  * estaban copiados a mano en extras-data.js, y la copia se separo del catalogo: tres
  * tours que el sitio real muestra con foto (Clases de Surf, el barco pirata de
- * Bombinhas y el Off Road de Ilhabela) salian en /test sin foto, y las 30 galerias
+ * Bombinhas y el Off Road de Ilhabela) salian en /web sin foto, y las 30 galerias
  * de data/tour-galerias.json no llegaban nunca.
  *
  * DE DONDE SALE CADA COSA
  * El archivo se arma con las MISMAS fuentes y en el MISMO orden que lee el server
- * (lib/tours.js), para que /test vea lo que ve el sitio:
+ * (lib/tours.js), para que /web vea lo que ve el sitio:
  *
  * - Titulo, precio, descripcion, ficha: data/tours.json (la unica fuente de verdad).
  *   El precio se convierte igual que en build-tours.js: precio_brl / cotizacion + margen.
@@ -34,7 +34,7 @@ const RAIZ = path.join(__dirname, '..');
 const CATALOGO = path.join(RAIZ, 'data', 'tours.json');
 const FOTOS = path.join(RAIZ, 'data', 'tour-photos.json');
 const GALERIAS = path.join(RAIZ, 'data', 'tour-galerias.json');
-const SALIDA = path.join(RAIZ, 'public', 'test', 'extras-data.js');
+const SALIDA = path.join(RAIZ, 'public', 'web', 'extras-data.js');
 
 const datos = JSON.parse(fs.readFileSync(CATALOGO, 'utf8'));
 const meta = datos._meta || {};
@@ -75,7 +75,7 @@ let n = 0;
 datos.tours.forEach(function (t, i) {
   const donde = 'tours[' + i + ']' + (t && t.titulo ? ' ("' + t.titulo.slice(0, 40) + '")' : '');
   if (!t || typeof t !== 'object') { errores.push(donde + ': no es un objeto'); return; }
-  // Un tour apagado no se dibuja en el sitio, asi que tampoco en /test.
+  // Un tour apagado no se dibuja en el sitio, asi que tampoco en /web.
   if (t.activo === false) return;
 
   const titulo = txt(t.titulo);
@@ -132,11 +132,11 @@ if (errores.length) {
   console.error('data/tours.json tiene ' + errores.length + ' error(es) para extras-data.js:');
   errores.slice(0, 20).forEach((e) => console.error('  - ' + e));
   if (errores.length > 20) console.error('  ... y ' + (errores.length - 20) + ' mas');
-  console.error('\nNo se escribio public/test/extras-data.js.');
+  console.error('\nNo se escribio public/web/extras-data.js.');
   process.exit(1);
 }
 
-const CABECERA = '/* Snapshot del catalogo real de tours para las pantallas de /test.\n'
+const CABECERA = '/* Snapshot del catalogo real de tours para las pantallas de /web.\n'
   + '   NO EDITAR A MANO: se regenera con `node scripts/build-extras-data.js`.\n'
   + '   Fuentes: data/tours.json (titulo, precio, ficha), data/tour-photos.json (foto con\n'
   + '   autor y licencia) y data/tour-galerias.json (galeria). Es lo mismo que arma\n'
@@ -147,9 +147,9 @@ const cuerpo = CABECERA + 'window.MOCK_TOURS = ' + JSON.stringify(porDestino) + 
 const anterior = fs.existsSync(SALIDA) ? fs.readFileSync(SALIDA, 'utf8') : null;
 if (anterior !== cuerpo) {
   fs.writeFileSync(SALIDA, cuerpo, 'utf8');
-  console.log('escrito: public/test/extras-data.js (' + n + ' apariciones en ' + Object.keys(porDestino).length + ' destinos)');
+  console.log('escrito: public/web/extras-data.js (' + n + ' apariciones en ' + Object.keys(porDestino).length + ' destinos)');
 } else {
-  console.log('public/test/extras-data.js ya estaba al dia (' + n + ' tours en ' + Object.keys(porDestino).length + ' destinos)');
+  console.log('public/web/extras-data.js ya estaba al dia (' + n + ' tours en ' + Object.keys(porDestino).length + ' destinos)');
 }
 
 const sinFoto = [];

@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v162';
+var CACHE_NAME = 'cuantosale-shell-v163';
 var APP_SHELL = [
   // '/' (la start_url de la PWA). '/app' ya no: ahora redirige a '/', y una
   // respuesta redirigida en el precache rompe la navegacion sin senal.
@@ -58,9 +58,9 @@ self.addEventListener('fetch', function (event) {
   var request = event.request;
   var url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.indexOf('/api/') === 0) return;
-  // /test es la version nueva en desarrollo: siempre va a la red. Con cache-first, web.css y los scripts (que no llevan
+  // /web (antes /test) tiene los archivos de la app nueva: siempre va a la red. Con cache-first, web.css y los scripts (que no llevan
   // ?v=) se quedaban para siempre en la copia vieja y los cambios de diseno no se veian aunque el servidor ya los tuviera.
-  if (url.pathname === '/test' || url.pathname.indexOf('/test/') === 0) return;
+  if (url.pathname.indexOf('/web/') === 0 || url.pathname.indexOf('/test/') === 0) return;
   // El panel de la agencia nunca se cachea ni se sirve sin red: tiene datos de clientes.
   if (url.pathname === '/admin' || url.pathname.indexOf('/admin/') === 0) return;
 

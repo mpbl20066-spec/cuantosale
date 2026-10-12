@@ -32,7 +32,7 @@
   $('gen').onclick = function () {
     var ref = $('ref').value.trim();
     if (!/^CS-[A-Z0-9-]{6,}$/.test(ref)) { $('out').value = 'La Ref no tiene el formato CS-XXXXXXXX-XXXX.'; return; }
-    var srv = $('srv').value, url = location.origin + '/test/home-flujo.html?' + new URLSearchParams({ viaje: ref, conf: srv, codigo: codigoConf(ref, srv) }).toString();
+    var srv = $('srv').value, url = location.origin + '/planificar?' + new URLSearchParams({ viaje: ref, conf: srv, codigo: codigoConf(ref, srv) }).toString();
     $('out').value = 'Hola! Tu reserva con CuántoSale está confirmada. Mirá los detalles acá:\n' + url;
   };
   $('copy').onclick = function () { $('out').select(); try { navigator.clipboard.writeText($('out').value); $('copy').textContent = 'Copiado'; } catch (e) { document.execCommand('copy'); } };

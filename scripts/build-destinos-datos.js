@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Genera public/test/destinos-datos.js (window.CS_DESTS) desde lib/model.js.
+ * Genera public/web/destinos-datos.js (window.CS_DESTS) desde lib/model.js.
  *
  * QUE HAY DENTRO
  * - Los 40 destinos con nombre y region, como ya estaban.
@@ -9,7 +9,7 @@
  *   precio en DEST.modes y en la whitelist de roadtrip.
  *
  * POR QUE MEDIOS Y NO LA REGION
- * Las pantallas de /test decidian el medio de transporte mirando la region
+ * Las pantallas de /web decidian el medio de transporte mirando la region
  * (Santa Catarina / Rio Grande do Sul) y con eso offering auto y bus. Contra el
  * modelo esa regla offercia bus en 13 destinos cuando solo hay 2 con pasaje de
  * bus cotizado (fln y poa, los unicos con modes.bus). Offercia una alternativa
@@ -29,7 +29,7 @@ const path = require('path');
 const model = require('../lib/model.js');
 
 const RAIZ = path.join(__dirname, '..');
-const SALIDA = path.join(RAIZ, 'public', 'test', 'destinos-datos.js');
+const SALIDA = path.join(RAIZ, 'public', 'web', 'destinos-datos.js');
 
 // Un medio entra en la lista solo si el modelo lo puede cotizar para ese destino.
 // - avion: `avion_mvd` esta en los 40. `avion_ba` existe tambien, pero
@@ -55,7 +55,7 @@ const datos = Object.keys(model.DEST).map(function (k) {
 const CABECERA = '/* Snapshot de lib/model.js DEST: los mismos 40 destinos que ofrece cuantosale.uy, con su region\n'
   + '   y los medios de transporte que el sistema puede cotizar para cada uno (`medios`).\n'
   + '   `group` es la clasificacion del modelo (beach / city / nature): de ahi sale el\n'
-  + '   filtro por tipo de lugar de /test, para que no vuelva a ser una lista a mano.\n'
+  + '   filtro por tipo de lugar de /web, para que no vuelva a ser una lista a mano.\n'
   + '   NO EDITAR A MANO: se regenera con `node scripts/build-destinos-datos.js`. */\n';
 
 fs.writeFileSync(SALIDA, CABECERA + 'window.CS_DESTS = ' + JSON.stringify(datos) + ';\n', 'utf8');

@@ -2965,9 +2965,11 @@ async function fetchGrupoNombre(groupId) {
   return name || null;
 }
 /* ---- App nueva en la raiz, con URLs limpias ----
-   Una sola tabla: ruta -> archivo de public/test. '/' es la home nueva; la app anterior sigue en /app (start_url de
+   Una sola tabla: ruta -> archivo de public/web (antes public/test). '/' es la home nueva; la app anterior sigue en /app (start_url de
    la PWA ya instalada, que precachea el service worker). Para sacarla de la raiz basta cambiar NUEVO (ej. '/nuevo'). */
 const NUEVO = '';
+/* Carpeta de public/ con los archivos de la app nueva. Las URL /test/... (el nombre anterior) redirigen aca. */
+const NUEVO_DIR = 'web';
 const NUEVO_PAGINAS = {
   '': 'home2', destinos: 'home-destino', presupuesto: 'home-presupuesto', planificar: 'home-flujo',
   ruta: 'home-calcular', detalle: 'home-detalle', resumen: 'home-costo', reserva: 'home-reserva', guias: 'home-guias', guia: 'home-guia',
@@ -3001,6 +3003,9 @@ function nuevoRedireccion(pathname, search) {
   const viejo = /^\/test\/(home[0-9]*(?:-[a-z-]+)?\.html)$/i.exec(pathname);
   if (viejo && NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()]) return NUEVO_POR_ARCHIVO[viejo[1].toLowerCase()] + q;
   if (/^\/test\/?$/i.test(pathname)) return (NUEVO || '/') + q;
+  /* CSS, JS e imagenes con la ruta vieja (HTML guardado en cache antes del cambio de carpeta). */
+  const asset = /^\/test\/([^?#]+\.(?:css|js|jpe?g|png|webp|svg|woff2?))$/i.exec(pathname);
+  if (asset) return '/' + NUEVO_DIR + '/' + asset[1] + q;
   /* Variantes de mayusculas o barra final de una ruta limpia. */
   const m = /^(\/[A-Za-z-]+)\/$|^(\/[A-Za-z-]+)$/.exec(pathname);
   if (m) {
@@ -3009,7 +3014,7 @@ function nuevoRedireccion(pathname, search) {
   }
   return null;
 }
-/* Los CSS, JS e imagenes que piden las paginas de /test iban sin ?v=, asi que se servian con max-age=0: en cada
+/* Los CSS, JS e imagenes que piden las paginas de la app nueva iban sin ?v=, asi que se servian con max-age=0: en cada
    visita el navegador volvia a preguntar por cada archivo (unos 15 viajes de ida y vuelta en la home, y en 4G cada uno
    cuesta). Aca se les agrega ?v=<hash del contenido> al servir el HTML, y con eso cacheControlEstatico los marca
    immutable por un ano. Es el hash y no la fecha del archivo porque en Vercel las fechas no cambian entre despliegues:
@@ -3024,7 +3029,7 @@ function versionDeAsset(file) {
   let v = null;
   try {
     const h = crypto.createHash('sha1').update(fs.readFileSync(file));
-    // Los .js de /test salen reescritos con la tabla de rutas (nuevoReescribir): si cambia la tabla cambia lo que se
+    // Los .js de la app nueva salen reescritos con la tabla de rutas (nuevoReescribir): si cambia la tabla cambia lo que se
     // sirve aunque el archivo sea el mismo, asi que la tabla entra en el hash.
     if (path.extname(file) === '.js') h.update(JSON.stringify(NUEVO_POR_ARCHIVO));
     v = parseInt(h.digest('hex').slice(0, 10), 16);
@@ -3036,7 +3041,7 @@ function versionarAssets(html) {
   return html.replace(/<(?:link|script|img)\b[^>]*>/gi, function (tag) {
     if (/\brel=["']?preload/i.test(tag)) return tag;
     return tag.replace(/(\s(?:href|src)=")([^"?#:]+\.(?:css|js|jpe?g|png|webp|svg))"/i, function (m, pre, ref) {
-      const file = path.normalize(path.join(PUBLIC_DIR, ref.charAt(0) === '/' ? ref : path.join('test', ref)));
+      const file = path.normalize(path.join(PUBLIC_DIR, ref.charAt(0) === '/' ? ref : path.join(NUEVO_DIR, ref)));
       if (file.indexOf(PUBLIC_DIR + path.sep) !== 0) return m;
       const v = versionDeAsset(file);
       return v ? pre + ref + '?v=' + v + '"' : m;
@@ -3405,12 +3410,8 @@ function handleRequest(req, res) {
       try { serveStatic(req, res, '/transfers.html'); } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
-    /* /test: la version nueva de la app (home con dos caminos, presupuesto, flujo del
-       viaje). Convive con la app de la raiz hasta que este lista para reemplazarla.
-       Sin la barra final los enlaces relativos de las paginas apuntarian a la raiz,
-       por eso /test redirige a /test/. Lleva noindex y Disallow en robots.txt. */
     /* URLs limpias de la app nueva: /nuevo, /nuevo/destinos, /nuevo/planificar... (tabla en NUEVO_PAGINAS).
-       Las URL viejas (/test, /test/, /test/home-xxx.html) responden 301 a la ruta limpia, con los mismos parametros. */
+       Las URL viejas (/test, /test/, /test/home-xxx.html) responden 301 a la ruta limpia (y /test/x.css a /web/x.css), con los mismos parametros. */
     const nuevoRedir = nuevoRedireccion(url.pathname, url.search);
     if (nuevoRedir) {
       res.writeHead(301, { Location: nuevoRedir, 'Cache-Control': 'public, max-age=3600' });
@@ -3419,19 +3420,19 @@ function handleRequest(req, res) {
     const nuevoPag = nuevoPagina(url.pathname, url.search);
     if (nuevoPag) {
       try {
-        serveStatic(req, res, '/test/' + nuevoPag.archivo + '.html', function (data) {
+        serveStatic(req, res, '/' + NUEVO_DIR + '/' + nuevoPag.archivo + '.html', function (data) {
           let html = versionarAssets(nuevoReescribir(data.toString('utf8')));
           const indexable = !!NUEVO_INDEXABLES[nuevoPag.slug];
           if (indexable) html = html.replace(/<meta name="robots"[^>]*>\s*/i, '');
           const canonical = 'https://cuantosale.uy' + ((NUEVO + (nuevoPag.slug ? '/' + nuevoPag.slug : '')) || '/');
-          html = html.replace(/<head[^>]*>/i, function (h) { return h + '<base href="/test/"><link rel="canonical" href="' + canonical + '">'; });
+          html = html.replace(/<head[^>]*>/i, function (h) { return h + '<base href="/' + NUEVO_DIR + '/"><link rel="canonical" href="' + canonical + '">'; });
           return Buffer.from(html, 'utf8');
         });
       } catch (e) { res.writeHead(400); res.end(); }
       return;
     }
-    /* Los scripts de /test traen enlaces a las paginas por su nombre de archivo: se reescriben a la ruta limpia. */
-    if (/^\/test\/[^/]+\.js$/i.test(url.pathname)) {
+    /* Los scripts de la app nueva traen enlaces a las paginas por su nombre de archivo: se reescriben a la ruta limpia. */
+    if (new RegExp('^/' + NUEVO_DIR + '/[^/]+\\.js$', 'i').test(url.pathname)) {
       try { return serveStatic(req, res, url.pathname, function (data) { return Buffer.from(nuevoReescribir(data.toString('utf8')), 'utf8'); }); } catch (e) { res.writeHead(400); return res.end(); }
     }
     // /app era la start_url de la PWA instalada antes del cambio a '/'. El celular
