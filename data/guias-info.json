@@ -1345,5 +1345,210 @@
     ]
    }
   ]
+ },
+ "mcz": {
+  "antes": {
+   "titulo": "Antes de viajar a Maceió",
+   "intro": "Maceió es una capital con la playa urbana enfrente y las piscinas naturales a dos kilómetros de la orilla. Casi todo pasa sobre la rambla, entre Pajuçara, Ponta Verde y Jatiúca, y las playas más lindas están a menos de una hora al norte y al sur.",
+   "items": [
+    {
+     "t": "Documentación",
+     "d": "Los uruguayos pueden ingresar a Brasil con pasaporte o cédula de identidad original, de acuerdo con la información del Consulado de Brasil en Montevideo. Llevala en buen estado."
+    },
+    {
+     "t": "Cuántos días",
+     "d": "Con una semana alcanza para las piscinas de Pajuçara, un día en el litoral norte (Ipioca o Paripueira), otro en el sur (Francês, Marechal Deodoro y el Gunga) y algo de ciudad."
+    },
+    {
+     "t": "La puerta de entrada",
+     "d": "El aeropuerto Zumbi dos Palmares (MCZ) está en Rio Largo, a unos 24 km de la rambla."
+    },
+    {
+     "t": "Fijate la luna",
+     "d": "Las piscinas naturales dependen de la marea baja. Si podés elegir fechas, que el viaje incluya días de luna llena o luna nueva."
+    }
+   ]
+  },
+  "secciones": [
+   {
+    "id": "llegar",
+    "icono": "✈️",
+    "titulo": "Cómo llegar a Maceió desde Montevideo",
+    "intro": "No hay vuelo directo desde Montevideo: se vuela con al menos una escala.",
+    "items": [
+     {
+      "t": "Vuelo a Maceió (MCZ) con escala",
+      "d": "La conexión más habitual es por São Paulo, con LATAM o GOL; el viaje completo ronda las 12 a 14 horas según la espera. Si combinás aerolíneas, revisá que no tengas que cambiar de aeropuerto en São Paulo."
+     },
+     {
+      "t": "Por Buenos Aires",
+      "d": "En verano JetSMART vende vuelos directos de Buenos Aires a Maceió, entre diciembre y marzo. Puede servir si lo combinás con un tramo Montevideo–Buenos Aires; mirá bien los horarios de conexión."
+     },
+     {
+      "t": "Del aeropuerto a la rambla",
+      "d": "Son al menos 24 km: unos 35 minutos con tránsito liviano y hasta una hora en hora pico. Hay taxis de cooperativa con tarifa fija por zona (los mostradores están a la salida) y Uber, que suele salir más barato. También hay alquiler de autos en el aeropuerto."
+     },
+     {
+      "t": "Directo al litoral norte o sur",
+      "d": "Si dormís en la Praia do Francês, la Barra de São Miguel o el litoral norte, no hace falta pasar por la ciudad: hay avenidas que llevan directo a la ruta costera AL-101."
+     }
+    ],
+    "cierre": {
+     "t": "Sumá todo",
+     "d": "Al precio del vuelo agregale el equipaje, el traslado al hotel y la vuelta."
+    }
+   },
+   {
+    "id": "alojarse",
+    "icono": "🏨",
+    "titulo": "Dónde alojarse en Maceió",
+    "intro": "Casi todos los hoteles están sobre la rambla urbana. Elegí según si querés bañarte enfrente o te alcanza con la pileta.",
+    "items": [
+     {
+      "t": "Pajuçara",
+      "d": "La zona más turística: hoteles uno al lado del otro frente al mar, restaurantes, la feria de artesanía y la salida de las jangadas a las piscinas. Sirve para quien no quiere auto."
+     },
+     {
+      "t": "Ponta Verde",
+      "d": "El lado que mira al sur, pegado a Pajuçara, tiene el mejor tramo de playa de la ciudad, pero en la rambla hay edificios de departamentos: los hoteles están a una o dos cuadras. El lado este tiene playa más larga, con más sargazo."
+     },
+     {
+      "t": "Jatiúca y Cruz das Almas",
+      "d": "Hoteles grandes y resorts urbanos con buenas piletas, cerca de los restaurantes de la Amélia Rosa y de la salida al litoral norte. El mar de enfrente pocas veces está apto para el baño."
+     },
+     {
+      "t": "Litoral norte",
+      "d": "Garça Torta, Pratagy e Ipioca tienen resorts y posadas frente a la playa, sin multitudes. Para salir de ahí conviene tener auto o arreglar taxis."
+     },
+     {
+      "t": "Litoral sur",
+      "d": "La Praia do Francês y la Barra de São Miguel tienen posadas y hoteles para quedarte unos días en vez de ir y volver."
+     }
+    ]
+   },
+   {
+    "id": "moverse",
+    "icono": "🚌",
+    "titulo": "Cómo moverse por Maceió",
+    "intro": "Casi todo lo que vas a hacer queda sobre la rambla o sale de ella.",
+    "items": [
+     {
+      "t": "A pie y en bici",
+      "d": "Pajuçara, Ponta Verde y Jatiúca se recorren caminando o por la bicisenda de la rambla."
+     },
+     {
+      "t": "Uber, 99 y taxi",
+      "d": "Es la forma práctica de moverte dentro de la ciudad. El Uber puede tardar un poco en llegar; los taxis casi no se paran en la calle y esperan en los hoteles."
+     },
+     {
+      "t": "Ómnibus",
+      "d": "No hay una línea que recorra la costa: los ómnibus unen los barrios con el Centro, así que para el turista sirven poco."
+     },
+     {
+      "t": "Paseos fuera de la ciudad",
+      "d": "Al litoral norte y al sur podés ir en excursión (lo más barato), en taxi contratado por medio día o día entero, o en auto alquilado. En Uber el problema es la vuelta: no siempre aparece un auto."
+     },
+     {
+      "t": "Auto",
+      "d": "Las rutas a las playas cercanas son buenas y están señalizadas. En la ciudad el tránsito es lento y cuesta estacionar: usalo para salir y dejalo en el hotel."
+     }
+    ]
+   },
+   {
+    "id": "noche",
+    "icono": "🌙",
+    "titulo": "Maceió de noche",
+    "intro": "La noche se reparte entre la rambla, la Jatiúca y el barrio del puerto.",
+    "items": [
+     {
+      "t": "Rambla de Pajuçara y Ponta Verde",
+      "d": "La gente camina por la costa, se junta en los quioscos y en el Marco dos Corais, y hay un patio de food trucks al lado de la feria de artesanía."
+     },
+     {
+      "t": "Avenida Amélia Rosa (Jatiúca)",
+      "d": "El corredor de restaurantes y bares de la ciudad, con otro parque de food trucks con terraza. Su nombre oficial es Av. Dr. Antônio Gomes de Barros."
+     },
+     {
+      "t": "Jaraguá",
+      "d": "Bares con música en vivo y una movida más alternativa en el barrio del puerto, de jueves a sábado."
+     }
+    ],
+    "cierre": {
+     "t": "Consejo",
+     "d": "Para ir y volver de Jaraguá pedí Uber o taxi. En muchos bares con música en vivo se cobra un adicional por el show (couvert)."
+    }
+   },
+   {
+    "id": "seguridad",
+    "icono": "🛡️",
+    "titulo": "Seguridad en Maceió",
+    "bullets": [
+     "La rambla de Pajuçara, Ponta Verde y Jatiúca tiene movimiento y patrullaje, pero no dejes el celular ni la mochila solos en la arena.",
+     "En el auto no dejes nada a la vista: los robos en autos estacionados cerca de la rambla fueron un problema.",
+     "Para ir a Jaraguá o volver tarde, usá Uber o taxi en lugar de caminar por calles vacías.",
+     "Antes de meterte al mar en la ciudad, revisá el informe semanal de balneabilidad del IMA.",
+     "En las piscinas naturales volvé cuando te indique el barquero: cuando la marea sube, el mar se pone movido.",
+     "Si manejás, seguí las rutas principales y evitá la ruta de noche."
+    ]
+   },
+   {
+    "id": "practico",
+    "icono": "💱",
+    "titulo": "Cosas prácticas que tenés que saber",
+    "items": [
+     {
+      "t": "Moneda",
+      "d": "Real brasileño (BRL / R$)."
+     },
+     {
+      "t": "Tarjetas y Pix",
+      "d": "La tarjeta se acepta en casi todos lados. Llevá algo de efectivo para la feria, las jangadas y los puestos de playa."
+     },
+     {
+      "t": "Cajeros",
+      "d": "Hay en los shoppings y en los barrios de la rambla."
+     },
+     {
+      "t": "Internet",
+      "d": "Roaming, eSIM o chip local."
+     },
+     {
+      "t": "Electricidad",
+      "d": "En Alagoas la tensión es de 220 V. Fijate que tus cargadores sean bivolt."
+     },
+     {
+      "t": "Idioma",
+      "d": "Portugués."
+     }
+    ]
+   },
+   {
+    "id": "llevar",
+    "icono": "🎒",
+    "titulo": "Qué llevar",
+    "intro": "Calor todo el año, sol fuerte y paseos en barco.",
+    "grupos": [
+     {
+      "titulo": "Para todos los viajes",
+      "bullets": [
+       "Protector solar, gorra y lentes de sol",
+       "Ropa liviana y de playa",
+       "Repelente",
+       "Piloto liviano o paraguas si viajás de abril a agosto",
+       "Cargador / power bank",
+       "Tarjeta y algo de efectivo"
+      ]
+     },
+     {
+      "titulo": "Para las piscinas naturales",
+      "bullets": [
+       "Máscara y snorkel, si tenés los tuyos",
+       "Calzado para el agua, para caminar sobre el arrecife",
+       "Bolsa estanca para el celular"
+      ]
+     }
+    ]
+   }
+  ]
  }
 }
