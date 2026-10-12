@@ -1912,15 +1912,17 @@ async function precalentarVuelos(req, res) {
       rutas.push({ origin: 'MVD', destination: AIR_DESTINATIONS[k], dep: model.iso(dep), ret: model.iso(ret) });
     });
   }
-  /* Y el precio de referencia de las guias: el 15 de cada uno de los proximos 11 meses, 7 noches, por aeropuerto (los
-     40 destinos comparten 11 aeropuertos, asi que son ~121 rutas). Dura 14 dias; cada corrida pide hasta
-     PRECALENTAR_GUIAS_MAX (12) de las que faltan, primero las mas cercanas. Con eso la guia elige el mes y muestra
-     el "Desde" con el vuelo real, no con la tabla del modelo. */
+  /* Y el precio de referencia de las guias: todos los martes y miercoles de los proximos 11 meses, 7 noches, por
+     aeropuerto (los 40 destinos comparten 11 aeropuertos: ~950 fechas). Cada precio dura 14 dias (30 si sale a mas de
+     3 meses). Cada corrida pide de las que faltan, primero las mas cercanas, hasta PRECALENTAR_GUIAS_MAX (100) y sin
+     arrancar ninguna despues de PRECALENTAR_SEGUNDOS (30): la funcion corta a los 60 s. El cron corre varias veces
+     por dia (vercel.json). Con eso la guia muestra el "Desde" con el vuelo real mas barato del mes. */
   const meses = rutasGuias();
   const topeEnv = function (n, def) { const v = process.env[n]; return v !== undefined && v !== '' && Number(v) >= 0 ? Number(v) : def; };
-  const maxGuias = topeEnv('PRECALENTAR_GUIAS_MAX', 12);
+  const maxGuias = topeEnv('PRECALENTAR_GUIAS_MAX', 100);
   const maxHoteles = topeEnv('PRECALENTAR_HOTELES_MAX', 4);
-  const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias), calibrarHoteles(maxHoteles)]);
+  const hasta = Date.now() + topeEnv('PRECALENTAR_SEGUNDOS', 30) * 1000;
+  const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias, hasta), calibrarHoteles(maxHoteles)]);
   return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]), hoteles: r[2] }));
 }
 
@@ -1943,19 +1945,31 @@ async function estadoPrecarga() {
     hoteles: { destinos: factores.length, calibrados: factores.filter(function (x) { return x.factor > 0; }).length, sinDatos: factores.filter(function (x) { return x.factor === null; }).length, factores: factores },
     ignav: { gastoHoy: st.gastoHoy || 0, topeDiario: st.topeDiario || null },
     booking: { limite: uso.limite, restantes: uso.restantes, resetSeg: uso.resetSeg, at: uso.at || null, playasPorBusqueda: PLAYAS_CONSULTADAS },
-    topes: { vuelosPorDia: Number(process.env.PRECALENTAR_GUIAS_MAX || 12), hotelesPorDia: Number(process.env.PRECALENTAR_HOTELES_MAX || 4) }
+    topes: { vuelosPorCorrida: Number(process.env.PRECALENTAR_GUIAS_MAX || 100), hotelesPorDia: Number(process.env.PRECALENTAR_HOTELES_MAX || 4) }
   };
 }
 
-/* Las rutas del precio de referencia: el 15 de cada uno de los proximos 11 meses, 7 noches, una por aeropuerto. */
+/* Las fechas que se prueban de un mes (anio, mes 1-12) para el precio de referencia: todos los martes y miercoles
+   (suelen ser los dias mas baratos para volar), 7 noches, que salgan desde manana y cuya vuelta entre en el rango
+   que cotiza Ignav (IGNAV_MAX_DAYS, 355 dias). */
+function fechasGuiaMes(anio, mes) {
+  const hoy = model.getToday(), tope = model.addDays(hoy, Number(process.env.IGNAV_MAX_DAYS) || 355), fechas = [];
+  for (let d = new Date(anio, mes - 1, 1, 12); d.getMonth() === mes - 1; d = model.addDays(d, 1)) {
+    const ret = model.addDays(d, 7);
+    if ((d.getDay() === 2 || d.getDay() === 3) && d > hoy && ret <= tope) fechas.push({ dep: model.iso(d), ret: model.iso(ret) });
+  }
+  return fechas;
+}
+/* Las rutas del precio de referencia: las fechas de fechasGuiaMes de cada uno de los proximos 11 meses, por aeropuerto. */
 function rutasGuias() {
-  const hoy = model.getToday(), meses = [];
+  const hoy = model.getToday(), rutas = [];
   const aeropuertos = Array.from(new Set(Object.keys(AIR_DESTINATIONS).map(function (k) { return AIR_DESTINATIONS[k]; })));
   for (let i = 1; i <= 11; i++) {
-    const dep = new Date(hoy.getFullYear(), hoy.getMonth() + i, 15, 12);
-    aeropuertos.forEach(function (a) { meses.push({ origin: 'MVD', destination: a, dep: model.iso(dep), ret: model.iso(model.addDays(dep, 7)) }); });
+    const m = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1, 12);
+    const fechas = fechasGuiaMes(m.getFullYear(), m.getMonth() + 1);
+    aeropuertos.forEach(function (a) { fechas.forEach(function (f) { rutas.push({ origin: 'MVD', destination: a, dep: f.dep, ret: f.ret }); }); });
   }
-  return meses;
+  return rutas;
 }
 
 /* ---------- calibracion del alojamiento ----------
@@ -2779,6 +2793,20 @@ async function featuredPriceItemsSinCatch(req, res, url) {
     // un cliente que mandara basura en los primeros items se quedaría sin
     // precios y la sección se mostraría sin cifras.
     .slice(0, FEATURED_MAX_ITEMS);
+  /* mes=1 (las guias y "¿Cuando viajas?"): el item representa el mes de su `dep`, no esa fecha. Si hay precio real de
+     alguna de las salidas que precarga el cron para ese mes (fechasGuiaMes), se cotiza la mas barata y el item vuelve
+     con esas fechas, asi el link abre el mismo viaje. Sin ninguna, queda la fecha pedida y el modelo. */
+  if (url.searchParams.get('mes') === '1') {
+    const enAvion = pedidos.filter(function (p) { return model.DEST[p.key].modes.avion_mvd && airportFor(p.key); });
+    const mejores = await flightProviders.mejorDelMes(enAvion.map(function (p) {
+      return { origin: origin, destination: airportFor(p.key), fechas: fechasGuiaMes(+p.dep.slice(0, 4), +p.dep.slice(5, 7)) };
+    }), style);
+    enAvion.forEach(function (p, i) {
+      const m = mejores[i];
+      if (!m) return;
+      Object.assign(p, { dep: m.dep, ret: m.ret, depDate: model.parse(m.dep), retDate: model.parse(m.ret), nights: model.daysBetween(model.parse(m.dep), model.parse(m.ret)) });
+    });
+  }
   /* El pasaje real, si el servidor ya lo tiene (alguien busco esa ruta y esas fechas): sin esto la portada usaba solo
      la tabla del modelo, que para la zona de Rio estimaba US$ 210 por persona cuando el vuelo mas barato era US$ 283,
      y prometia "Llegas" a un viaje que al abrirlo costaba mas. No gasta busquedas: solo lee la cache. */

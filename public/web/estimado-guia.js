@@ -5,15 +5,16 @@
    El viaje tipo es el mismo que cotizan las pestanas de "¿Cuando viajas?" (home-guias.html) y el que abre la app por
    defecto: 2 personas, 7 noches desde el 15 del mes, estilo ahorro, hotel economico y en avion. Se miran los proximos
    11 meses (asi la ultima salida queda dentro del año que cotiza Ignav) y gana el mas barato. Un destino sin vuelo
-   usa el medio mas barato que tenga. Precios de /api/destinos-destacados: el modelo de costos con el vuelo real y el
-   hotel calibrado con Booking cuando el servidor ya los tiene (no gasta busquedas). */
+   usa el medio mas barato que tenga. Precios de /api/destinos-destacados con mes=1: el vuelo real de la salida mas
+   barata del mes (de los martes y miercoles que precarga el cron) y el hotel calibrado con Booking cuando el servidor
+   ya los tiene (no gasta busquedas); el item vuelve con esas fechas. Sin precio real, el 15 y el modelo. */
 (function () {
   var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   var MODO_APP = { avion_mvd: 'avion', avion_ba: 'avion', auto: 'auto', bus: 'bus' };
   var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 
   function pedir(transporte, items) {
-    return fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: transporte, items: items.join(',') }).toString())
+    return fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: transporte, mes: '1', items: items.join(',') }).toString())
       .then(function (r) { return r.ok ? r.json() : {}; })
       .then(function (j) { return (j.items || []).filter(function (x) { return x.pp > 0; }); })
       .catch(function () { return []; });

@@ -488,11 +488,12 @@
      personas, 7 noches desde el 15 del mes (ver fechasMes). Se pide una vez por mes. Estilo ahorro, hotel economico y
      en avion: el mismo viaje que el "Desde" de la guia (estimado-guia.js) y que abre la app, asi el precio de la
      tarjeta y el de la guia coinciden cuando el mes es el mismo. */
-  var PRECIOS = {}, PIDIENDO = {}, MEDIO = {};
+  var PRECIOS = {}, PIDIENDO = {}, MEDIO = {}, FECHAS = {};
   var MODO_APP = { avion_mvd: 'avion', avion_ba: 'avion', auto: 'auto', bus: 'bus' };
-  /* el mismo link que "Calculá tu viaje" de la guia, con las fechas del precio que se mostro */
+  /* el mismo link que "Calculá tu viaje" de la guia, con las fechas del precio que se mostro (con mes=1 el servidor
+     devuelve las de la salida mas barata del mes) */
   function linkCotizar(k) {
-    var f = fechasMes(S.mes), modo = MODO_APP[MEDIO[S.mes + k]];
+    var f = FECHAS[S.mes + k] || fechasMes(S.mes), modo = MODO_APP[MEDIO[S.mes + k]];
     return 'home-destino.html?destino=' + k + '&ida=' + f.dep + '&vuelta=' + f.ret + '&pax=2' + (modo ? '&modo=' + modo : '') + '&fuente=guias_mas_baratos' + (debug ? '&debug=1' : '');
   }
   /* Salida el 15 del mes. Si para eso faltan menos de 10 dias: en el mes actual se sale en 10 dias si todavia entra
@@ -513,9 +514,9 @@
     PIDIENDO[m] = true;
     var f = fechasMes(m), items = DESTS.map(function (d) { return d.k + '~' + f.dep + '~' + f.ret + '~economico'; }).join(',');
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
-    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: 'flight', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
+    fetch('/api/destinos-destacados?' + new URLSearchParams({ pax: '2', style: 'ahorro', origin: 'MVD', transport: 'flight', mes: '1', items: items }).toString(), ctl ? { signal: ctl.signal } : {})
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
-      .then(function (j) { var por = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { por[it.key] = it.pp; MEDIO[m + it.key] = it.mode; } }); PRECIOS[m] = por; })
+      .then(function (j) { var por = {}; (j.items || []).forEach(function (it) { if (it.pp > 0) { por[it.key] = it.pp; MEDIO[m + it.key] = it.mode; FECHAS[m + it.key] = { dep: it.dep, ret: it.ret }; } }); PRECIOS[m] = por; })
       .catch(function () { PRECIOS[m] = null; })
       .then(function () { clearTimeout(tm); PIDIENDO[m] = false; if (S.mes === m && S.rank !== 'clima') { listaMes(); mapa(); } });
   }
@@ -756,7 +757,7 @@
     [].forEach.call(document.querySelectorAll('.gm-tab'), function (b) { b.setAttribute('aria-pressed', String(b.dataset.rank === S.rank)); });
     $('gmRecT').textContent = S.rank === 'clima' ? 'Mejor clima en ' + mes : S.rank === 'precio' ? 'Más baratos en ' + mes : 'Los mejores para ir en ' + mes;
     $('gmRecNota').textContent = S.rank === 'clima' ? 'Playas ordenadas por sol, poca lluvia y calor de playa en ' + mes + ': máxima promedio y días con lluvia fuerte, según el clima de 2015 a 2024 (Open-Meteo).' + (S.tipo && S.tipo !== 'beach' ? '' : ' Para ciudad o sierra, filtrá por tipo en el buscador.')
-      : S.rank === 'precio' ? 'Vuelo y alojamiento desde Montevideo, por persona, para 2 personas y 7 noches desde el ' + f.dia + ' de ' + mes + ' de ' + f.anio + '. Tocá un destino para cotizarlo con esas fechas.'
+      : S.rank === 'precio' ? 'Vuelo y alojamiento desde Montevideo, por persona, para 2 personas y 7 noches saliendo en ' + mes + ' de ' + f.anio + ', en la fecha más barata que encontramos. Tocá un destino para cotizarlo con esas fechas.'
         : 'Lo mejor de ' + mes + ' sumando todo: clima (temperatura, lluvia y sol), precio de vuelo y alojamiento por persona, y si es temporada alta.' +
           (PRECIOS[S.mes] === null ? ' Ahora no pudimos calcular los precios: están ordenados por clima y temporada.' : '');
     var mas = $('gmRecMas');

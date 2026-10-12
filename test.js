@@ -1391,6 +1391,38 @@ function haversineKm(a, b) {
       assert.strictEqual(it.ret, fechaGuia.ret);
     });
   });
+  await t('con mes=1 el "Desde" usa la salida mas barata del mes (martes o miercoles) y devuelve esas fechas', async function () {
+    const iso = function (x) { return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+    const base = new Date(+fechaGuia.dep.slice(0, 4), +fechaGuia.dep.slice(5, 7) - 1, 1, 12), salidas = [];
+    for (let d = new Date(base); d.getMonth() === base.getMonth(); d.setDate(d.getDate() + 1)) {
+      if (d.getDay() === 2 || d.getDay() === 3) salidas.push({ dep: iso(d), ret: iso(new Date(d.getTime() + 7 * 864e5)) });
+    }
+    const barata = salidas[2];
+    flights.clearCache();
+    try {
+      await conIgnav(function (url, body) {
+        const precio = body.departure_date === barata.dep ? 150 : body.departure_date === salidas[0].dep ? 'nada' : 340;
+        return { itineraries: precio === 'nada' ? [] : [ignavItinerario(precio, [['MVD', 'GIG', body.departure_date + 'T10:00', body.departure_date + 'T13:00', 'G3', '100', 'GOL']])] };
+      }, async function () {
+        const rutas = salidas.slice(0, 4).map(function (s) { return { origin: 'MVD', destination: 'GIG', dep: s.dep, ret: s.ret }; });
+        const r1 = await flights.precalentarMeses(rutas, 'ahorro', 10);
+        assert.strictEqual(r1.pedidas, 3);
+        assert.strictEqual(r1.fallidas, 1);
+        const r2 = await flights.precalentarMeses(rutas, 'ahorro', 10);
+        assert.strictEqual(r2.pendientes, 0, 'la fecha sin vuelos queda marcada y no traba la cola al dia siguiente');
+        const cob = await flights.coberturaMeses(rutas, 'ahorro');
+        assert.strictEqual(cob.rutas, 1, 'el panel agrupa por aeropuerto y mes');
+        assert.strictEqual(cob.detalle[0].pp, 150);
+        assert.strictEqual(cob.detalle[0].mejor, barata.dep);
+        const j = JSON.parse((await get(port, '/api/destinos-destacados?pax=2&style=ahorro&origin=MVD&transport=flight&mes=1&items=rio~' + fechaGuia.dep + '~' + fechaGuia.ret + '~economico')).body);
+        assert.strictEqual(j.items[0].dep, barata.dep);
+        assert.strictEqual(j.items[0].ret, barata.ret);
+        assert.strictEqual(j.items[0].vuelo, 'real');
+        const sin = JSON.parse((await get(port, '/api/destinos-destacados?pax=2&style=ahorro&origin=MVD&transport=flight&items=rio~' + fechaGuia.dep + '~' + fechaGuia.ret + '~economico')).body);
+        assert.strictEqual(sin.items[0].dep, fechaGuia.dep, 'sin mes=1 se cotiza la fecha pedida');
+      });
+    } finally { flights.clearCache(); }
+  });
   await t('el factor de hotel calibrado lleva el alojamiento del "Desde" al precio de Booking', async function () {
     const url = '/api/destinos-destacados?pax=2&style=ahorro&origin=MVD&transport=flight&items=fln~' + fechaGuia.dep + '~' + fechaGuia.ret + '~economico';
     flights.clearCache();
