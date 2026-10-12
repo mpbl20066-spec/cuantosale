@@ -226,13 +226,14 @@
       return '<button class="chip" data-pdest="' + esc(x) + '" aria-pressed="' + (S.provDest === x) + '">' + esc(x === 'todos' ? 'Todos' : x) + '<span>' + (x === 'todos' ? d.proveedores.length : cuenta[x]) + '</span></button>';
     }).join('') + '</div></div>';
     var lista = d.proveedores.filter(function (pr) { return S.provDest === 'todos' || partesProv(pr).destinos.indexOf(S.provDest) >= 0; });
-    h += '<div class="card"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th class="num">En catálogo</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
+    h += '<div class="card"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th>Tarifa neta</th><th class="num">En catálogo</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
     lista.forEach(function (pr) {
       var dp = deudaProveedor(pr.id), pp = partesProv(pr);
       h += '<tr class="row" data-prov="' + esc(pr.id) + '"><td data-l="Proveedor"><b>' + esc(pr.nombre) + '</b>' + (pr.activo === false ? ' <span class="pill p-cancelado">inactivo</span>' : '') + '</td>' +
         '<td data-l="Destinos">' + (pp.destinos.length ? '<span class="tags">' + pp.destinos.map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + '</span>' : '<span class="sub">sin destino</span>') + '</td>' +
         '<td data-l="Contacto">' + esc(pr.contacto) + '<span class="sub">' + esc(pr.telefono) + (pr.email ? ' · ' + esc(pr.email) : '') + '</span></td>' +
         '<td data-l="Hace">' + esc(pp.hace) + '</td><td data-l="Datos de pago">' + esc(pr.datos_pago) + '</td>' +
+        '<td data-l="Tarifa neta">' + (pr.tarifa_estado ? '<span class="pill ' + (pr.tarifa_estado === 'respondio' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' ? 'p-cancelado' : 'p-pendiente')) + '">' + esc(TARIFA_TXT[pr.tarifa_estado] || pr.tarifa_estado) + '</span><span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '<span class="sub">no se pidió</span>') + '</td>' +
         '<td class="num" data-l="En catálogo">' + (enCatalogo[pr.id] ? '<a class="lnk" href="#" data-ver-srv-prov="' + esc(pr.id) + '">' + enCatalogo[pr.id] + '</a>' : '—') + '</td>' +
         '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
@@ -689,7 +690,7 @@
       (p.id ? (function () {
         var suyos = ((S.ops && S.ops.datos && S.ops.datos.servicios) || []).filter(function (x) { return x.proveedor_id === p.id && !x.eliminado_at; })
           .sort(function (a, b) { return (b.publicado_at ? 1 : 0) - (a.publicado_at ? 1 : 0); });
-        var l = linkTarifa(p, suyos, 'Pedir tarifas netas');
+        var l = tarifaHtml(p, suyos, 'Pedir tarifas netas', true);
         return l ? '<p style="margin:10px 0 0">' + l + '</p><p class="sub" style="margin:4px 0 0">Mensaje en portugués que presenta CuántoSale y pide tarifas para agencia' + (suyos.length ? ', con ' + Math.min(suyos.length, 8) + ' de sus paseos' : '') + '.</p>' : '';
       })() : '') + '</section></div>' +
       '<div class="foot"><span class="msg" id="foot-msg" role="status"></span>' + (p.id ? '<button class="btn btn--danger" data-act="papelera-prov">' + (p.eliminado_at ? 'Sacar de la papelera' : 'Mandar a la papelera') + '</button>' : '') + '<button class="btn" data-act="cerrar">Cancelar</button><button class="btn btn--main" data-act="guardar-prov">Guardar proveedor</button></div></div>';
@@ -706,8 +707,8 @@
   var CAMPO_NOMBRE = { precio_brl: 'Precio R$', precio: 'Precio US$', unidad: 'Unidad', capacidad: 'Capacidad', margen_tipo: 'Tipo de margen', margen_valor: 'Margen',
     activo: 'Activo', fuente: 'Fuente', verificado: 'Verificado', destino: 'Destino', titulo: 'Título', descripcion: 'Descripción', detalle: 'Detalle', orden: 'Orden',
     proveedor_id: 'Proveedor', tipo: 'Tipo', duracion: 'Duración', grupo: 'Grupo', punto_salida: 'Punto de salida', edad_minima: 'Edad mínima', incluye: 'Incluye',
-    no_incluye: 'No incluye', politica_cancelacion: 'Cancelación', que_llevar: 'Qué llevar', link_web: 'Link', url_imagen: 'Foto' };
-  var CAMPOS_SRV = ['url_imagen', 'destino', 'titulo', 'descripcion', 'detalle', 'precio', 'precio_brl', 'unidad', 'capacidad', 'margen_tipo', 'margen_valor', 'activo', 'fuente', 'verificado',
+    no_incluye: 'No incluye', politica_cancelacion: 'Cancelación', que_llevar: 'Qué llevar', link_web: 'Link', url_imagen: 'Foto', galeria: 'Fotos' };
+  var CAMPOS_SRV = ['url_imagen', 'galeria', 'destino', 'titulo', 'descripcion', 'detalle', 'precio', 'precio_brl', 'unidad', 'capacidad', 'margen_tipo', 'margen_valor', 'activo', 'fuente', 'verificado',
     'orden', 'proveedor_id', 'tipo', 'duracion', 'grupo', 'punto_salida', 'edad_minima', 'incluye', 'no_incluye', 'politica_cancelacion', 'que_llevar', 'link_web'];
 
   function brl(n) { return 'R$ ' + (Number(n) || 0).toLocaleString('es-UY', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
@@ -736,7 +737,7 @@
   function conPendiente(s) { var p = pendPorTour()[s.id]; return p ? Object.assign({}, s, p.despues) : s; }
   function faltantes(s) {
     var x = conPendiente(s), f = [];
-    if (!x.foto_wiki && !x.url_imagen) f.push('foto');
+    if (!x.foto_wiki && !x.url_imagen && !(x.galeria || []).length) f.push('foto');
     if (!String(x.descripcion || '').trim()) f.push('descripción');
     if (!String(x.detalle || '').trim()) f.push('detalle');
     if (!String(x.duracion || '').trim()) f.push('duración');
@@ -801,6 +802,10 @@
       if (q) { var pr = provDe(s.proveedor_id); if (sinTildes(s.titulo + ' ' + destNombre(s.destino) + ' ' + (pr ? pr.nombre : '')).indexOf(q) < 0) return false; }
       return true;
     });
+    /* Ultimo cambio: lo mas nuevo entre la ultima vez que se toco la fila y su cambio sin publicar. */
+    var ultimo = function (s) { var p = pend[s.id], a = s.updated_at || ''; return p && p.creado_at > a ? p.creado_at : a; };
+    if (S.srvOrden === 'reciente') lista.sort(function (a, b) { return ultimo(b).localeCompare(ultimo(a)); });
+    else if (S.srvOrden === 'precio') lista.sort(function (a, b) { return (Number(conPendiente(a).precio_brl) || 0) - (Number(conPendiente(b).precio_brl) || 0); });
     var destUsados = {}, provUsados = {};
     d.servicios.forEach(function (s) { destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1; });
     var h = '<div class="bar"><div class="chips"><b>Servicios: tours, actividades y traslados</b></div><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main" data-act="nuevo-srv">+ Servicio</button></div>' +
@@ -814,7 +819,8 @@
         .sort(function (a, b) { return a.n.localeCompare(b.n, 'es'); }).map(function (x) { return '<option value="' + esc(x.k) + '"' + (S.srvDest === x.k ? ' selected' : '') + '>' + esc(x.n) + '</option>'; }).join('') + '</select>' +
       '<select data-sprov style="max-width:240px"><option value="">Todos los proveedores</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
-      '<input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '"></div>';
+      '<input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '">' +
+      '<select data-sorden style="max-width:210px"><option value="">Ordenar por destino</option><option value="reciente"' + (S.srvOrden === 'reciente' ? ' selected' : '') + '>Último cambio primero</option><option value="precio"' + (S.srvOrden === 'precio' ? ' selected' : '') + '>Precio del proveedor</option></select></div>';
     if (f === 'comparar') return h + vistaComparar(lista);
     if (!lista.length) return h + '<div class="card"><p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
     if (f === 'papelera') h += '<p class="sub" style="margin:-4px 0 12px">Lo que está en la papelera no se ve en la web. "Recuperar" lo deja como estaba; "Borrar" lo elimina para siempre (su historial de precios queda).</p>';
@@ -826,7 +832,7 @@
         '<button class="btn btn--sm" data-act="sel-filtro">Elegir los ' + lista.length + ' de este filtro</button>' +
         (nSel ? '<button class="btn btn--sm" data-act="sel-limpiar">Quitar selección</button><button class="btn btn--sm" data-act="fotos-auto">Traer fotos del proveedor</button><button class="btn btn--main btn--sm" data-act="aj-abrir">Ajustar precio %</button>' : '') + '</div>';
     }
-    h += '<div class="card"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
+    h += '<div class="card"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th>Último cambio</th><th></th></tr></thead><tbody>';
     lista.forEach(function (s) {
       var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
       var estado = s.eliminado_at ? '<span class="pill p-cancelado">en la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo">Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado">Activo</span>' : '<span class="pill p-cancelado">Apagado</span>'));
@@ -836,11 +842,12 @@
       h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub">' + esc(destNombre(s.destino)) + ' · ' + esc(TIPOS_SRV[s.tipo] || s.tipo) + ' · ' + (pr ? esc(pr.nombre) : '<i>sin proveedor</i>') + '</span></td>' +
         // Un nuevo tiene su precio en el cambio sin publicar: se muestra ese.
         '<td data-l="Proveedor cobra">' + origenTxt(conPendiente(s)) + (verProv(p && p.despues.link_web || s.link_web) ? '<span class="sub">' + verProv(p && p.despues.link_web || s.link_web) + '</span>' : '') +
-          (pr && !s.eliminado_at && linkTarifa(pr, [s]) ? '<span class="sub">' + linkTarifa(pr, [s]) + '</span>' : '') + '</td>' +
+          (pr && !s.eliminado_at && tarifaHtml(pr, [s]) ? '<span class="sub">' + tarifaHtml(pr, [s]) + '</span>' : '') + '</td>' +
         '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') + '</td>' +
         '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? pub(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
         '<td data-l="Estado">' + estado + '</td>' +
         '<td data-l="Verificado"' + (c.viejos ? ' class="deuda"' : '') + '>' + (conPendiente(s).verificado ? esc(fecha(conPendiente(s).verificado)) + ' ' + esc(conPendiente(s).verificado.slice(0, 4)) : 'nunca') + '</td>' +
+        '<td data-l="Último cambio">' + (ultimo(s) ? esc(fechaHora(ultimo(s))) + (p ? '<span class="sub">sin publicar</span>' : '') : '—') + '</td>' +
         '<td data-l="" style="white-space:nowrap">' + (s.eliminado_at
           ? '<button class="btn btn--sm" data-recuperar="' + esc(s.id) + '">Recuperar</button> <button class="btn btn--sm btn--danger" data-borrar="' + esc(s.id) + '">Borrar</button>'
           : '<button class="btn btn--sm btn--x" data-papelera="' + esc(s.id) + '" title="Mandar a la papelera" aria-label="Mandar a la papelera">🗑</button>') + '</td></tr>';
@@ -875,6 +882,11 @@
   }
   function difsHtml(c) {
     return Object.keys(c.despues || {}).map(function (k) {
+      if (k === 'galeria') {
+        var gl = (c.despues[k] || []).map(urlSegura).filter(Boolean);
+        return '<span class="sub"><b>Fotos:</b> ' + (gl.length ? gl.map(function (u) { return '<a target="_blank" rel="noopener noreferrer" href="' + esc(u) + '"><img src="' + esc(u) + '" alt="" style="height:40px;border-radius:6px;vertical-align:middle;margin-right:3px"></a>'; }).join('') : 'sin fotos') + '</span>';
+      }
+      if (k === 'url_imagen' && 'galeria' in (c.despues || {})) return '';
       if (k === 'url_imagen') {
         var fd = urlSegura(c.despues[k]);
         return '<span class="sub"><b>Foto:</b> ' + (fd ? '<a target="_blank" rel="noopener noreferrer" href="' + esc(fd) + '"><img src="' + esc(fd) + '" alt="" style="height:40px;border-radius:6px;vertical-align:middle"></a>' : 'sin foto') + '</span>';
@@ -937,7 +949,10 @@
     var p = s ? pendPorTour()[s.id] : null, f = {};
     CAMPOS_SRV.forEach(function (k) { f[k] = s ? s[k] : null; });
     if (!s) { f.activo = true; f.unidad = 'persona'; f.tipo = 'tour'; f.orden = 100; f.verificado = hoyISO(); }
+    f.galeria = Array.isArray(f.galeria) ? f.galeria.slice(0, 3) : [];
     if (p) Object.keys(p.despues).forEach(function (k) { f[k] = p.despues[k]; });
+    if (!Array.isArray(f.galeria)) f.galeria = [];
+    if (!f.galeria.length && f.url_imagen) f.galeria = [f.url_imagen];
     f._moneda = f.precio_brl != null ? 'BRL' : (f.precio != null ? 'USD' : 'BRL');
     f._monto = f.precio_brl != null ? f.precio_brl : (f.precio != null ? f.precio : '');
     S.srv = { id: s ? s.id : null, orig: s, pend: p, f: f, hist: null };
@@ -976,7 +991,9 @@
       (pend ? '<p class="aviso" style="margin:0">Tiene un cambio sin publicar (' + esc(ORIGENES[pend.origen] || pend.origen) + ', ' + esc(fechaHora(pend.creado_at)) + '). Lo que ves abajo ya lo incluye. ' +
         '<button class="btn btn--sm" data-pub-uno="' + esc(pend.id) + '">Publicarlo</button> <button class="btn btn--sm btn--danger" data-desc-uno="' + esc(pend.id) + '">Descartarlo</button></p>' : '') +
       (s.orig && s.orig.revision === 'pendiente' ? '<p class="aviso" style="margin:0">Para revisar: ' + esc(s.orig.revision_motivo || 'faltan datos') + '</p>' : '') +
-      (s.orig && faltantes(Object.assign({}, s.orig, srvParaCalc())).length ? '<p class="aviso" style="margin:0">Para verse como tus tours publicados le falta: <b>' + esc(faltantes(Object.assign({}, s.orig, srvParaCalc())).join(', ')) + '</b>.</p>' : '') +
+      (s.orig && faltantes(Object.assign({}, s.orig, srvParaCalc())).length ? '<p class="aviso" style="margin:0">Para verse como tus tours publicados le falta: <b>' + esc(faltantes(Object.assign({}, s.orig, srvParaCalc())).join(', ')) + '</b>.' +
+        (s.orig.tipo !== 'traslado' ? ' <button class="btn btn--sm btn--main" data-act="ia-completar"' + (s.ia && s.ia.cargando ? ' disabled' : '') + '>' + (s.ia && s.ia.cargando ? 'Completando…' : 'Completar con IA') + '</button>' : '') + '</p>' : '') +
+      iaHtml() +
       '<section class="sec"><h3>Foto</h3><div id="srv-foto">' + fotoSecHtml() + '</div></section>' +
       '<section class="sec"><h3>Precio</h3><div class="grid">' +
       '<label class="f">El proveedor cobra en<select ' + a('_moneda') + '><option value="BRL"' + (f._moneda === 'BRL' ? ' selected' : '') + '>Reales (R$)</option><option value="USD"' + (f._moneda === 'USD' ? ' selected' : '') + '>Dólares (US$)</option></select></label>' +
@@ -992,13 +1009,13 @@
       '<label class="f">Destino<select ' + a('destino') + '><option value="">Elegí…</option>' + d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '"' + (x.key === f.destino ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + '</select></label>' +
       '<label class="f">Tipo<select ' + a('tipo') + '>' + opts(TIPOS_SRV, f.tipo || 'tour') + '</select></label>' +
       '<label class="f">Proveedor<select ' + a('proveedor_id') + '><option value="">Sin proveedor</option>' + provs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === f.proveedor_id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
-        (linkTarifa(provDe(f.proveedor_id), [Object.assign({}, s.orig || {}, { titulo: f.titulo, destino: f.destino })]) ? '<span class="sub" style="font-weight:400">' + linkTarifa(provDe(f.proveedor_id), [Object.assign({}, s.orig || {}, { titulo: f.titulo, destino: f.destino })]) + '</span>' : '') + '</label>' +
+        (tarifaHtml(provDe(f.proveedor_id), [Object.assign({}, s.orig || {}, { titulo: f.titulo, destino: f.destino })]) ? '<span class="sub" style="font-weight:400">' + tarifaHtml(provDe(f.proveedor_id), [Object.assign({}, s.orig || {}, { titulo: f.titulo, destino: f.destino })]) + '</span>' : '') + '</label>' +
       inp('orden', 'Orden en la lista', ' type="number" min="0"') + '</div>' +
       '<div class="grid" style="grid-template-columns:1fr;margin-top:10px">' + inp('titulo', 'Título (tal cual se muestra)') +
       (s.orig ? '<p class="sub" style="margin:-4px 0 0">Ojo: la foto del tour está atada al título. Si lo cambiás, la tarjeta queda sin foto.</p>' : '') +
       area('descripcion', 'Descripción') + area('detalle', 'Detalle') +
       '<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" ' + a('activo') + ' style="width:auto;min-height:0"' + (f.activo ? ' checked' : '') + '> Mostrarlo en la web</label></div></section>' +
-      '<section class="sec"><h3>Ficha</h3><div class="grid">' + inp('duracion', 'Duración') + inp('grupo', 'Grupo') + inp('punto_salida', 'Punto de salida') + inp('edad_minima', 'Edad mínima') + '</div>' +
+      '<section class="sec"><h3>Ficha' + (s.orig && s.orig.tipo !== 'traslado' ? ' <button class="btn btn--sm" data-act="ia-completar" style="float:right;text-transform:none;letter-spacing:0"' + (s.ia && s.ia.cargando ? ' disabled' : '') + '>' + (s.ia && s.ia.cargando ? 'Completando…' : 'Completar con IA') + '</button>' : '') + '</h3><div class="grid">' + inp('duracion', 'Duración') + inp('grupo', 'Grupo') + inp('punto_salida', 'Punto de salida') + inp('edad_minima', 'Edad mínima') + '</div>' +
       '<div class="grid" style="grid-template-columns:1fr;margin-top:10px">' + area('incluye', 'Incluye', 'una cosa por línea') + area('no_incluye', 'No incluye', 'una cosa por línea') + area('que_llevar', 'Qué llevar', 'una cosa por línea') +
       area('politica_cancelacion', 'Cancelación') + inp('link_web', 'Link del operador') + (verProv(f.link_web) ? '<p style="margin:-4px 0 0">' + verProv(f.link_web) + '</p>' : '') + '</div></section>' +
       (s.orig ? '<section class="sec"><h3>Historial</h3><div id="srv-hist"><p class="sub">Cargando…</p></div></section>' : '') + '</div>' +
@@ -1006,22 +1023,33 @@
       '<button class="btn" data-act="srv-guardar">Guardar para revisar</button><button class="btn btn--main" data-act="srv-publicar">Publicar ahora</button></div></div>';
     if (s.hist) pintarHist();
   }
-  /* La foto: la de Wikimedia (si hay, es la que se ve en la web) y la del operador, que se busca en su pagina y se
-     copia al bucket de fotos. Elegir una la pone en el campo; se guarda o publica con el resto del servicio. */
+  /* Las fotos: hasta 3. La primera es la portada de la tarjeta; las tres van a la galeria del detalle. Se buscan en
+     la pagina del proveedor y se copian al bucket de fotos al elegirlas. Se guardan o publican con el resto del servicio.
+     Si el tour tiene foto de Wikimedia, la tarjeta sigue usando esa. */
+  function sincFotos() { var f = S.srv.f; f.galeria = (f.galeria || []).slice(0, 3); f.url_imagen = f.galeria[0] || ''; S.dirty = true; pintarFoto(); }
   function fotoSecHtml() {
-    var s = S.srv, f = s.f, wiki = s.orig && s.orig.foto_wiki, actual = urlSegura(f.url_imagen), fo = s.fotos || {};
-    var h = '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">' +
-      (wiki || actual ? '<img src="' + esc(wiki || actual) + '" alt="" style="width:180px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">' : '<div class="vacio" style="width:180px;height:120px;border:1px dashed var(--line);border-radius:10px;padding:40px 8px">Sin foto</div>') +
-      '<div style="flex:1;min-width:220px;display:grid;gap:8px">' +
-      (wiki ? '<p class="sub" style="margin:0">Tiene foto de Wikimedia (con autor y licencia): es la que se ve en la web. La del operador se usa solo si no hay esa.</p>' : '') +
-      '<label class="f">Link de la foto<input data-sf="url_imagen" value="' + esc(f.url_imagen || '') + '" placeholder="Elegila abajo o pegá un link"></label>' +
-      '<div><button class="btn btn--sm" data-act="fotos-buscar">' + (fo.cargando ? 'Buscando…' : 'Buscar fotos en la página del proveedor') + '</button>' +
-      (actual ? ' <button class="btn btn--sm" data-act="foto-quitar">Quitar foto</button>' : '') + '</div></div></div>';
+    var s = S.srv, f = s.f, wiki = s.orig && s.orig.foto_wiki, gal = f.galeria || [], fo = s.fotos || {}, origen = s.origenFoto || {};
+    var elegidas = {}; gal.forEach(function (u) { if (origen[u]) elegidas[origen[u]] = u; });
+    var h = (wiki ? '<p class="sub" style="margin:0 0 8px">Tiene foto de Wikimedia (con autor y licencia): es la portada de la tarjeta en la web. Las de acá se usan para la galería del detalle.</p>' : '') +
+      '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:600px">' + [0, 1, 2].map(function (i) {
+        var u = urlSegura(gal[i]);
+        if (!u) return '<div class="vacio" style="height:110px;border:1px dashed var(--line);border-radius:10px;padding:42px 6px;font-size:13px">' + (i === 0 ? 'Portada' : 'Foto ' + (i + 1)) + '</div>';
+        return '<div style="position:relative"><img src="' + esc(u) + '" alt="" style="width:100%;height:110px;object-fit:cover;border-radius:10px;border:' + (i === 0 ? '2px solid var(--accent)' : '1px solid var(--line)') + ';display:block">' +
+          '<span class="pill ' + (i === 0 ? 'p-pendiente' : 'p-consultado') + '" style="position:absolute;left:6px;top:6px">' + (i === 0 ? 'Portada' : 'Foto ' + (i + 1)) + '</span>' +
+          '<span style="position:absolute;right:6px;top:6px;display:flex;gap:4px">' + (i > 0 ? '<button type="button" class="btn btn--sm" data-foto-portada="' + i + '" title="Hacerla portada" style="min-height:26px;padding:2px 7px">★</button>' : '') +
+          '<button type="button" class="btn btn--sm btn--x" data-foto-quitar="' + i + '" title="Quitar" style="width:26px;height:26px;min-height:26px">✕</button></span></div>';
+      }).join('') + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:flex-end">' +
+      '<button class="btn btn--sm" data-act="fotos-buscar">' + (fo.cargando ? 'Buscando…' : 'Buscar fotos en la página del proveedor') + '</button>' +
+      '<label class="f" style="flex:1;min-width:220px">O pegá el link de una foto<span style="display:flex;gap:6px"><input id="foto-link" placeholder="https://…"><button type="button" class="btn btn--sm" data-act="foto-link">Agregar</button></span></label></div>';
     if (fo.error) h += '<p class="err" style="margin-top:8px">' + esc(fo.error) + '</p>';
     if (fo.lista) {
-      h += fo.lista.length ? '<p class="sub" style="margin:10px 0 6px">' + fo.lista.length + ' foto(s) en ' + verProv(fo.link, 'la página del proveedor') + '. Tocá la que quieras:</p>' +
+      h += fo.lista.length ? '<p class="sub" style="margin:10px 0 6px">' + fo.lista.length + ' foto(s) en ' + verProv(fo.link, 'la página del proveedor') + '. Tocá hasta 3 (tocá de nuevo para sacarla):</p>' +
         '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px">' + fo.lista.map(function (u) {
-          return '<button type="button" class="btn" data-foto-cand="' + esc(u) + '" style="padding:3px;min-height:0;' + (fo.copiando === u ? 'opacity:.5' : '') + '"><img src="' + esc(u) + '" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:90px;object-fit:cover;border-radius:7px;display:block" onerror="this.parentNode.style.display=\'none\'"></button>';
+          var sel = !!elegidas[u], cop = (fo.copiando || {})[u];
+          return '<button type="button" class="btn" data-foto-cand="' + esc(u) + '" style="padding:3px;min-height:0;position:relative;' + (sel ? 'border:3px solid var(--accent);' : '') + (cop ? 'opacity:.5' : '') + '">' +
+            '<img src="' + esc(u) + '" alt="" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:90px;object-fit:cover;border-radius:7px;display:block" onerror="this.parentNode.style.display=\'none\'">' +
+            (sel ? '<span class="pill p-pendiente" style="position:absolute;left:6px;top:6px">' + (gal.indexOf(elegidas[u]) === 0 ? 'Portada' : 'Foto ' + (gal.indexOf(elegidas[u]) + 1)) + '</span>' : '') + '</button>';
         }).join('') + '</div>' : '<p class="sub" style="margin-top:8px">No encontré fotos en esa página.</p>';
     }
     return h;
@@ -1032,31 +1060,48 @@
     if (!s.id && !s.f.link_web) return toast('Pegá primero el link del proveedor');
     s.fotos = { cargando: true }; pintarFoto();
     api('ops/fotos/buscar', s.id && s.f.link_web === (s.orig || {}).link_web ? { id: s.id } : { id: s.id, url: s.f.link_web })
-      .then(function (r) { if (S.srv === s) { s.fotos = { lista: r.fotos, link: r.link }; pintarFoto(); } })
+      .then(function (r) { if (S.srv === s) { s.fotos = { lista: r.fotos, link: r.link, copiando: {} }; pintarFoto(); } })
       .catch(function (e) { if (S.srv === s) { s.fotos = { error: e.message }; pintarFoto(); } });
   }
+  /* Tocar una miniatura: si ya esta elegida la saca; si no, la copia al bucket y la suma (hasta 3). */
   function elegirFoto(u) {
     var s = S.srv; if (!s || !s.fotos) return;
-    if (!s.id) return toast('Guardá el servicio primero y después elegí la foto');
-    s.fotos.copiando = u; pintarFoto();
+    if (!s.id) return toast('Guardá el servicio primero y después elegí las fotos');
+    s.origenFoto = s.origenFoto || {};
+    var ya = (s.f.galeria || []).filter(function (g) { return s.origenFoto[g] === u; })[0];
+    if (ya) { s.f.galeria = s.f.galeria.filter(function (g) { return g !== ya; }); return sincFotos(); }
+    if ((s.f.galeria || []).length >= 3) return toast('Ya elegiste 3: sacá una para cambiarla');
+    s.fotos.copiando = s.fotos.copiando || {}; s.fotos.copiando[u] = 1; pintarFoto();
     api('ops/fotos/copiar', { id: s.id, url: u }).then(function (r) {
+      delete s.fotos.copiando[u];
       if (S.srv !== s) return;
-      s.f.url_imagen = r.url; s.fotos.copiando = null; S.dirty = true; pintarFoto();
-      toast('Foto lista: guardá o publicá el servicio para usarla');
-    }).catch(function (e) { s.fotos.copiando = null; pintarFoto(); toast(e.message); });
+      if ((s.f.galeria || []).length >= 3) { pintarFoto(); return toast('Ya elegiste 3'); }
+      s.origenFoto[r.url] = u; s.f.galeria = (s.f.galeria || []).concat([r.url]); sincFotos();
+    }).catch(function (e) { delete s.fotos.copiando[u]; pintarFoto(); toast(e.message); });
   }
-  /* En lote, de a 6 por pedido (cada uno abre la pagina del operador y copia una foto). */
+  function agregarFotoLink() {
+    var s = S.srv, el = document.getElementById('foto-link'), u = el ? el.value.trim() : '';
+    if (!s || !u) return;
+    if (!urlSegura(u)) return toast('Ese link no es una dirección web');
+    if ((s.f.galeria || []).length >= 3) return toast('Ya elegiste 3: sacá una para cambiarla');
+    if (!s.id) { s.f.galeria = (s.f.galeria || []).concat([u]); return sincFotos(); }
+    // Tambien se copia al bucket, para que no dependa del sitio de donde viene.
+    toast('Copiando la foto…');
+    api('ops/fotos/copiar', { id: s.id, url: u }).then(function (r) { if (S.srv === s) { s.f.galeria = (s.f.galeria || []).concat([r.url]); sincFotos(); } })
+      .catch(function (e) { toast(e.message); });
+  }
+  /* En lote, de a 3 por pedido (cada uno abre la pagina del operador y copia hasta 3 fotos). */
   function fotosAuto() {
     var ids = Object.keys(S.srvSel || {}); if (!ids.length) return;
-    if (!confirm('¿Buscar la foto de ' + ids.length + ' servicio(s) en la página de su proveedor? Los que ya tienen foto se saltean. Las fotos quedan como cambio en "Por publicar".')) return;
+    if (!confirm('¿Buscar hasta 3 fotos de ' + ids.length + ' servicio(s) en la página de su proveedor? Los que ya tienen foto se saltean. Las fotos quedan como cambio en "Por publicar".')) return;
     var ok = 0, mal = [], i = 0;
     var paso = function () {
       if (i >= ids.length) {
         S.srvSel = {};
-        toast(ok + ' con foto nueva' + (mal.length ? ' · ' + mal.length + ' sin foto (' + mal.slice(0, 3).join('; ') + (mal.length > 3 ? '…' : '') + ')' : ''));
+        toast(ok + ' con fotos nuevas' + (mal.length ? ' · ' + mal.length + ' sin foto (' + mal.slice(0, 3).join('; ') + (mal.length > 3 ? '…' : '') + ')' : ''));
         return cargarOps();
       }
-      var lote = ids.slice(i, i + 6); i += 6;
+      var lote = ids.slice(i, i + 3); i += 3;
       toast('Buscando fotos… ' + Math.min(i, ids.length) + ' de ' + ids.length);
       return api('ops/fotos/auto', { ids: lote }).then(function (r) {
         r.resultados.forEach(function (x) { if (x.ok) ok++; else if (x.motivo !== 'ya tiene foto') mal.push((x.titulo || '?') + ': ' + x.motivo); });
@@ -1064,6 +1109,43 @@
       }).catch(function (e) { toast(e.message); return cargarOps(); });
     };
     paso();
+  }
+  /* ---------- Completar la ficha con IA (lib/ficha-ia.js) ----------
+     Claude lee lo que trajo el archivo y la pagina del operador y escribe la ficha en el estilo de los tours
+     publicados. Solo se llenan los campos vacios; el titulo en espanol se sugiere aparte. Nada se guarda hasta que
+     se toca "Guardar para revisar" o "Publicar ahora". */
+  var IA_CAMPOS = ['descripcion', 'detalle', 'duracion', 'grupo', 'punto_salida', 'edad_minima', 'politica_cancelacion', 'incluye', 'no_incluye', 'que_llevar'];
+  var IA_NOMBRES = { descripcion: 'descripción', detalle: 'detalle', duracion: 'duración', grupo: 'grupo', punto_salida: 'punto de salida', edad_minima: 'edad mínima', politica_cancelacion: 'cancelación', incluye: 'qué incluye', no_incluye: 'no incluye', que_llevar: 'qué llevar' };
+  function iaHtml() {
+    var ia = S.srv && S.srv.ia; if (!ia) return '';
+    if (ia.cargando) return '<p class="aviso" style="margin:0">Claude está leyendo la página del proveedor y escribiendo la ficha… puede tardar unos 30 segundos.</p>';
+    if (ia.error) return '<p class="aviso" style="margin:0;background:var(--badbg);color:var(--bad)">' + esc(ia.error) + '</p>';
+    return '<div class="sec" style="border-color:var(--info);background:var(--infobg)"><b>Ficha completada con IA</b> — revisala antes de guardar.' +
+      '<span class="sub">' + (ia.llenados.length ? 'Completé: ' + esc(ia.llenados.map(function (k) { return IA_NOMBRES[k]; }).join(', ')) + '.' : 'No había campos vacíos que completar.') +
+      (ia.pagina ? '' : ' No pude leer la página del proveedor: usé solo los datos del archivo.') + '</span>' +
+      (ia.titulo ? '<p style="margin:8px 0 0">Título sugerido: <b>' + esc(ia.titulo) + '</b> <button class="btn btn--sm" data-act="ia-titulo">Usar este título</button></p>' : '') +
+      (ia.dudas ? '<p style="margin:8px 0 0;color:var(--warn)"><b>Para revisar:</b> ' + esc(ia.dudas) + '</p>' : '') + '</div>';
+  }
+  function repintarSrv() {
+    var y = (document.querySelector('#drawer .panel') || {}).scrollTop || 0;
+    abrirSrv();
+    var pn = document.querySelector('#drawer .panel'); if (pn) pn.scrollTop = y;
+  }
+  function completarIa() {
+    var s = S.srv; if (!s || !s.id) return toast('Guardá el servicio primero');
+    s.ia = { cargando: true }; repintarSrv();
+    api('ops/ficha/completar', { id: s.id, link: s.f.link_web || '' }).then(function (r) {
+      if (S.srv !== s) return;
+      var fi = r.ficha, f = s.f, llenados = [];
+      IA_CAMPOS.forEach(function (k) {
+        var v = Array.isArray(fi[k]) ? fi[k].map(function (x) { return String(x).trim(); }).filter(Boolean).join('\n') : String(fi[k] || '').trim();
+        if (v && !String(f[k] || '').trim()) { f[k] = v; llenados.push(k); }
+      });
+      var tit = String(fi.titulo || '').trim();
+      s.ia = { llenados: llenados, titulo: tit && tit !== String(f.titulo || '').trim() ? tit : '', dudas: String(fi.dudas || '').trim(), pagina: !!fi.pagina_leida };
+      if (llenados.length) S.dirty = true;
+      repintarSrv();
+    }).catch(function (e) { if (S.srv === s) { s.ia = { error: e.message }; repintarSrv(); } });
   }
   function pintarHist() {
     var el = document.getElementById('srv-hist'); if (!el || !S.srv) return;
@@ -1143,11 +1225,43 @@
     var m = msgTarifa(pr, servicios), tel = telWa(pr), mail = String(pr.email || '').trim();
     var href = tel ? 'https://wa.me/' + tel + '?text=' + encodeURIComponent(m)
       : (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail) ? 'mailto:' + mail + '?subject=' + encodeURIComponent('Tarifas para agência - CuántoSale') + '&body=' + encodeURIComponent(m) : '');
-    return href ? '<a class="lnk" target="_blank" rel="noopener noreferrer" href="' + esc(href) + '">' + esc(texto || 'Pedir tarifa neta') + (tel ? ' (WhatsApp)' : ' (email)') + ' ↗</a>' : '';
+    return href ? '<a class="lnk" target="_blank" rel="noopener noreferrer" data-tarifa-prov="' + esc(pr.id) + '" href="' + esc(href) + '">' + esc(texto || 'Pedir tarifa neta') + (tel ? ' (WhatsApp)' : ' (email)') + ' ↗</a>' : '';
+  }
+  /* Donde estaba el link: si ya se le escribio, el estado (y los botones para marcar si respondio). El link para
+     volver a escribir queda, pero avisa antes (ver el clic en data-tarifa-prov). */
+  var TARIFA_TXT = { esperando: 'esperando respuesta', respondio: 'respondió', sin_respuesta: 'no respondió' };
+  function tarifaHtml(pr, servicios, texto, completo) {
+    if (!pr) return '';
+    var l = linkTarifa(pr, servicios, texto);
+    if (!pr.tarifa_estado) return l;
+    var cls = pr.tarifa_estado === 'respondio' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' ? 'p-cancelado' : 'p-pendiente');
+    var cuando = pr.tarifa_estado === 'respondio' && pr.tarifa_respondio_at ? pr.tarifa_respondio_at : pr.tarifa_pedida_at;
+    var marcar = function (estado, t) { return '<button type="button" class="btn btn--sm" data-tarifa-marca="' + esc(pr.id) + '|' + estado + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + '</button>'; };
+    return '<span class="pill ' + cls + '" title="Tarifa neta pedida el ' + esc(fechaHora(pr.tarifa_pedida_at)) + '">Tarifa: ' + esc(TARIFA_TXT[pr.tarifa_estado] || pr.tarifa_estado) + (cuando ? ' · ' + esc(fecha(cuando)) : '') + '</span> ' +
+      (pr.tarifa_estado === 'esperando' ? marcar('respondio', 'Respondió') + ' ' + marcar('sin_respuesta', 'No respondió') + ' ' : '') +
+      (completo && pr.tarifa_estado !== 'esperando' ? marcar('esperando', 'Volver a esperando') + ' ' : '') +
+      (completo ? marcar('borrar', 'Borrar marca') + ' ' : '') +
+      (l ? l.replace('>' + esc(texto || 'Pedir tarifa neta'), '>Volver a escribir') : '');
+  }
+  function marcarTarifa(id, estado) {
+    /* Si se tocan dos marcas seguidas (escribir y enseguida "Respondió"), las respuestas pueden llegar al reves:
+       solo se aplica la del ultimo pedido. */
+    S.tarifaSeq = S.tarifaSeq || {};
+    var seq = S.tarifaSeq[id] = (S.tarifaSeq[id] || 0) + 1;
+    return api('ops/proveedor/tarifa', { id: id, estado: estado }).then(function (r) {
+      if (S.tarifaSeq[id] !== seq) return r;
+      var lista = S.datos.proveedores;
+      for (var i = 0; i < lista.length; i++) if (lista[i].id === id) lista[i] = Object.assign({}, lista[i], r.proveedor);
+      if (S.prov && S.prov.id === id) Object.assign(S.prov, { tarifa_pedida_at: r.proveedor.tarifa_pedida_at, tarifa_estado: r.proveedor.tarifa_estado, tarifa_respondio_at: r.proveedor.tarifa_respondio_at });
+      pintarFondo();
+      // El editor abierto se repinta con lo que se esta editando (no se recarga: se perderia lo no guardado).
+      if (S.srv) repintarSrv(); else if (S.prov) abrirProv();
+      return r;
+    }).catch(function (e) { toast(e.message); });
   }
   function contactoProv(pr, x) {
     if (!pr) return '';
-    return (linkTarifa(pr, x ? [x] : []) ? linkTarifa(pr, x ? [x] : []) + ' ' : '') +
+    return (tarifaHtml(pr, x ? [x] : []) ? tarifaHtml(pr, x ? [x] : []) + ' ' : '') +
       (pr.web ? '<a class="lnk" target="_blank" rel="noopener" href="' + esc(/^https?:/.test(pr.web) ? pr.web : 'https://' + pr.web) + '">Web</a>' : '');
   }
   function columnaCmp(x, esMio, barato) {
@@ -1619,6 +1733,7 @@
     if (el.id === 'imp-archivo') { if (e.type === 'change' && el.files && el.files[0]) leerArchivo(el.files[0]); return; }
     if (el.hasAttribute('data-imp-col')) { if (e.type === 'change') { S.imp.mapeo[el.getAttribute('data-imp-col')] = el.value; pintar(); } return; }
     if (el.hasAttribute('data-imp-dec')) { if (e.type === 'change') { S.imp.decisiones[el.getAttribute('data-imp-dec')] = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-sorden')) { if (e.type === 'change') { S.srvOrden = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sdest')) { if (e.type === 'change') { S.srvDest = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sprov')) { if (e.type === 'change') { S.srvProv = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sel')) { if (e.type === 'change') { if (el.checked) S.sel[el.getAttribute('data-sel')] = 1; else delete S.sel[el.getAttribute('data-sel')]; pintar(); } return; }
@@ -1630,7 +1745,7 @@
       if (sk === '_monto' || sk === '_moneda') { S.srv.f.verificado = hoyISO(); var vf = document.querySelector('[data-sf="verificado"]'); if (vf) vf.value = S.srv.f.verificado; }
       S.dirty = true;
       var pv = document.getElementById('srv-prev'); if (pv) pv.innerHTML = prevHtml();
-      if (sk === 'url_imagen' && e.type === 'change') pintarFoto();
+
       return;
     }
     if (el.hasAttribute('data-pf') && S.prov) { S.prov[el.getAttribute('data-pf')] = el.type === 'checkbox' ? el.checked : el.value; return; }
@@ -1695,6 +1810,15 @@
   });
 
   document.addEventListener('click', function (e) {
+    var tm = e.target.closest('[data-tarifa-marca]'); if (tm) { e.preventDefault(); var pz = tm.getAttribute('data-tarifa-marca').split('|'); marcarTarifa(pz[0], pz[1]); return; }
+    var tp = e.target.closest('a[data-tarifa-prov]');
+    if (tp) {
+      var prv = provDe(tp.getAttribute('data-tarifa-prov'));
+      if (prv && prv.tarifa_pedida_at && !confirm('Ya le escribiste a ' + prv.nombre + ' el ' + fechaHora(prv.tarifa_pedida_at) + ' (' + (TARIFA_TXT[prv.tarifa_estado] || 'sin estado') + '). ¿Escribirle otra vez?')) { e.preventDefault(); return; }
+      // El enlace se abre solo (WhatsApp o email); aca se anota que se le escribio.
+      if (prv) marcarTarifa(prv.id, 'enviado');
+      return;
+    }
     if (e.target.closest('a[href]:not([href="#"])')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
     var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
@@ -1710,6 +1834,8 @@
     }
     var sfc = e.target.closest('[data-sfiltro]'); if (sfc) { S.srvFiltro = sfc.getAttribute('data-sfiltro'); pintar(); return; }
     var fc = e.target.closest('[data-foto-cand]'); if (fc) { elegirFoto(fc.getAttribute('data-foto-cand')); return; }
+    var fq = e.target.closest('[data-foto-quitar]'); if (fq && S.srv) { S.srv.f.galeria.splice(+fq.getAttribute('data-foto-quitar'), 1); sincFotos(); return; }
+    var fpo = e.target.closest('[data-foto-portada]'); if (fpo && S.srv) { var gi = +fpo.getAttribute('data-foto-portada'), gu = S.srv.f.galeria.splice(gi, 1)[0]; S.srv.f.galeria.unshift(gu); sincFotos(); return; }
     var cm = e.target.closest('[data-cmp]'); if (cm) { elegirCmp(cm.getAttribute('data-cmp'), cm.getAttribute('data-cmp-id')); return; }
     var pp = e.target.closest('[data-papelera],[data-recuperar],[data-borrar]');
     if (pp) {
@@ -1784,7 +1910,9 @@
       case 'aj-abrir': S.modal = { tipo: 'ajuste', ids: Object.keys(S.srvSel), pct: '', entero: false }; abrirModal(); break;
       case 'aj-guardar': guardarAjuste(); break;
       case 'fotos-buscar': buscarFotos(); break;
-      case 'foto-quitar': if (S.srv) { S.srv.f.url_imagen = ''; S.dirty = true; pintarFoto(); } break;
+      case 'foto-link': agregarFotoLink(); break;
+      case 'ia-completar': completarIa(); break;
+      case 'ia-titulo': if (S.srv && S.srv.ia && S.srv.ia.titulo) { S.srv.f.titulo = S.srv.ia.titulo; S.srv.ia.titulo = ''; S.dirty = true; repintarSrv(); } break;
       case 'fotos-auto': fotosAuto(); break;
       case 'imp-reiniciar': S.imp = null; S.impHist = undefined; pintar(); break;
       case 'imp-previa': pedirPrevia(); break;

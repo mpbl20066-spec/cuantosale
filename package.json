@@ -55,5 +55,8 @@
   "devDependencies": {
     "esbuild": "^0.28.2",
     "playwright-core": "^1.64.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0"
   }
 }
