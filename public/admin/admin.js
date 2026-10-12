@@ -68,6 +68,8 @@
     var html = '<header class="top"><div class="wrap"><h1>Cuánto<i>Sale</i> · Panel</h1>' +
       '<nav class="tabs" role="tablist"><button class="tab" role="tab" data-vista="pedidos" aria-selected="' + (S.vista === 'pedidos') + '">Pedidos' + (k.nuevos ? ' (' + k.nuevos + ')' : '') + '</button>' +
       '<button class="tab" role="tab" data-vista="proveedores" aria-selected="' + (S.vista === 'proveedores') + '">Proveedores</button>' +
+      '<button class="tab" role="tab" data-vista="servicios" aria-selected="' + (S.vista === 'servicios') + '">Servicios</button>' +
+      '<button class="tab" role="tab" data-vista="publicar" aria-selected="' + (S.vista === 'publicar') + '">Por publicar<span id="tab-pub">' + (nPend() ? ' (' + nPend() + ')' : '') + '</span></button>' +
       '<button class="tab" role="tab" data-vista="mensajes" aria-selected="' + (S.vista === 'mensajes') + '">Mensajes<span id="tab-noleidos">' + (S.chats && S.chats.no_leidos ? ' (' + S.chats.no_leidos + ')' : '') + '</span></button>' +
       '<button class="tab" role="tab" data-vista="whatsapp" aria-selected="' + (S.vista === 'whatsapp') + '">WhatsApp</button>' +
       '<button class="tab" role="tab" data-vista="viajes" aria-selected="' + (S.vista === 'viajes') + '">Viajes guardados</button>' +
@@ -95,11 +97,13 @@
         kpiBooking(pc.booking) + '</section>';
       if (S.verPre) html += detallePrecarga(pc, S.verPre);
     }
-    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() : vistaProveedores(d)))));
+    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
+      (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : vistaProveedores(d)))))));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
     else if (S.prov) abrirProv();
+    else if (S.srv) abrirSrv();
   }
   /* Cuota de Booking (RapidAPI): lo que queda del plan segun la ultima respuesta. Avisa con menos del 15 %. */
   function kpiBooking(b) {
@@ -203,7 +207,13 @@
     return { hace: i < 0 ? s : s.slice(0, i), destinos: dest.split(',').map(function (x) { return x.trim(); }).filter(Boolean) };
   }
   function vistaProveedores(d) {
-    var h = '<div class="bar"><div class="chips"><b>Proveedores a los que tercerizás</b></div><button class="btn btn--main" data-act="nuevo-prov">+ Proveedor</button></div>';
+    var enPapelera = d.proveedores.filter(function (pr) { return pr.eliminado_at; }).length;
+    var h = '<div class="bar"><div class="chips"><b>' + (S.provPapelera ? 'Papelera de proveedores' : 'Proveedores a los que tercerizás') + '</b></div>' +
+      (enPapelera || S.provPapelera ? '<button class="btn btn--sm" data-act="ver-papelera">' + (S.provPapelera ? 'Volver a los proveedores' : 'Papelera (' + enPapelera + ')') + '</button>' : '') +
+      '<button class="btn btn--main" data-act="nuevo-prov">+ Proveedor</button></div>';
+    d = Object.assign({}, d, { proveedores: d.proveedores.filter(function (pr) { return S.provPapelera ? pr.eliminado_at : !pr.eliminado_at; }) });
+    var enCatalogo = {}; ((S.ops && S.ops.datos && S.ops.datos.servicios) || []).forEach(function (sv) { if (sv.proveedor_id) enCatalogo[sv.proveedor_id] = (enCatalogo[sv.proveedor_id] || 0) + 1; });
+    if (!d.proveedores.length && S.provPapelera) return h + '<div class="card"><p class="vacio">La papelera está vacía.</p></div>';
     if (!d.proveedores.length) return h + '<div class="card"><p class="vacio">Todavía no cargaste proveedores. Agregalos para asignarlos a cada servicio y llevar lo que les debés.</p></div>';
     var cuenta = {};
     d.proveedores.forEach(function (pr) { partesProv(pr).destinos.forEach(function (x) { cuenta[x] = (cuenta[x] || 0) + 1; }); });
@@ -213,14 +223,15 @@
       return '<button class="chip" data-pdest="' + esc(x) + '" aria-pressed="' + (S.provDest === x) + '">' + esc(x === 'todos' ? 'Todos' : x) + '<span>' + (x === 'todos' ? d.proveedores.length : cuenta[x]) + '</span></button>';
     }).join('') + '</div></div>';
     var lista = d.proveedores.filter(function (pr) { return S.provDest === 'todos' || partesProv(pr).destinos.indexOf(S.provDest) >= 0; });
-    h += '<div class="card"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th class="num">Servicios activos</th><th class="num">Le debemos</th></tr></thead><tbody>';
+    h += '<div class="card"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th class="num">En catálogo</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
     lista.forEach(function (pr) {
       var dp = deudaProveedor(pr.id), pp = partesProv(pr);
       h += '<tr class="row" data-prov="' + esc(pr.id) + '"><td data-l="Proveedor"><b>' + esc(pr.nombre) + '</b>' + (pr.activo === false ? ' <span class="pill p-cancelado">inactivo</span>' : '') + '</td>' +
         '<td data-l="Destinos">' + (pp.destinos.length ? '<span class="tags">' + pp.destinos.map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + '</span>' : '<span class="sub">sin destino</span>') + '</td>' +
         '<td data-l="Contacto">' + esc(pr.contacto) + '<span class="sub">' + esc(pr.telefono) + (pr.email ? ' · ' + esc(pr.email) : '') + '</span></td>' +
         '<td data-l="Hace">' + esc(pp.hace) + '</td><td data-l="Datos de pago">' + esc(pr.datos_pago) + '</td>' +
-        '<td class="num" data-l="Servicios">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
+        '<td class="num" data-l="En catálogo">' + (enCatalogo[pr.id] ? '<a class="lnk" href="#" data-ver-srv-prov="' + esc(pr.id) + '">' + enCatalogo[pr.id] + '</a>' : '—') + '</td>' +
+        '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
     });
     return h + '</tbody></table></div>';
@@ -637,7 +648,7 @@
   }
   function cerrarPanel(forzar) {
     if (!forzar && S.dirty && !confirm('Tenés cambios sin guardar. ¿Cerrar igual?')) return;
-    S.draft = null; S.prov = null; S.dirty = false;
+    S.draft = null; S.prov = null; S.srv = null; S.dirty = false;
     var el = document.getElementById('drawer'); if (el) el.remove();
   }
 
@@ -654,26 +665,317 @@
       '<label class="f">Persona de contacto<input ' + f('contacto') + ' value="' + esc(p.contacto) + '"></label>' +
       '<label class="f">Teléfono / WhatsApp (con código de país)<input ' + f('telefono') + ' value="' + esc(p.telefono) + '" inputmode="tel" placeholder="5989XXXXXXX"></label>' +
       '<label class="f">Email<input ' + f('email') + ' value="' + esc(p.email) + '"></label>' +
+      '<label class="f">WhatsApp (si es otro que el teléfono)<input ' + f('whatsapp') + ' value="' + esc(p.whatsapp || '') + '" inputmode="tel"></label>' +
+      '<label class="f">Sitio web<input ' + f('web') + ' value="' + esc(p.web || '') + '" inputmode="url"></label>' +
+      '<label class="f">Instagram<input ' + f('instagram') + ' value="' + esc(p.instagram || '') + '" placeholder="@usuario"></label>' +
+      '<label class="f">Región<input ' + f('region') + ' value="' + esc(p.region || '') + '" placeholder="Noreste, Sudeste…"></label>' +
+      '<label class="f">Cadastur<input ' + f('cadastur') + ' value="' + esc(p.cadastur || '') + '"></label>' +
+      '<label class="f">Moneda en que cobra<select ' + f('moneda') + '><option value="BRL"' + (p.moneda !== 'USD' ? ' selected' : '') + '>Reales (R$)</option><option value="USD"' + (p.moneda === 'USD' ? ' selected' : '') + '>Dólares (US$)</option></select></label>' +
+      '<label class="f">Atiende en español<input ' + f('espanol') + ' value="' + esc(p.espanol || '') + '" placeholder="sí, web en español, solo portugués…"></label>' +
       '<label class="f">Qué servicios hace<input ' + f('_hace') + ' value="' + esc(p._hace) + '" placeholder="Tours y traslados"></label>' +
       '<label class="f">Destinos (separados por coma)<input ' + f('_destinos') + ' value="' + esc(p._destinos) + '" placeholder="Búzios, Cabo Frio, Arraial do Cabo"></label>' +
       '<label class="f">Datos para pagarle (cuenta, alias, Pix)<textarea ' + f('datos_pago') + '>' + esc(p.datos_pago) + '</textarea></label>' +
+      '<label class="f">Condiciones (cancelación, seña, forma de pago)<textarea ' + f('condiciones') + '>' + esc(p.condiciones || '') + '</textarea></label>' +
+      '<label class="f">Avisos antes de cotizarle<textarea ' + f('avisos') + '>' + esc(p.avisos || '') + '</textarea></label>' +
       '<label class="f">Notas<textarea ' + f('notas') + '>' + esc(p.notas) + '</textarea></label>' +
       '<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-pf="activo" style="width:auto;min-height:0"' + (p.activo === false ? '' : ' checked') + '> Activo (aparece al asignar servicios)</label></div>' +
       (dp ? '<p class="sub" style="margin-top:10px">' + dp.servicios + ' servicio(s) en ' + dp.pedidos + ' pedido(s). Le debemos: <b class="' + (dp.aPagar ? 'deuda' : 'ok') + '">' + usd(dp.aPagar) + '</b></p>' : '') + '</section></div>' +
-      '<div class="foot"><span class="msg" id="foot-msg" role="status"></span><button class="btn" data-act="cerrar">Cancelar</button><button class="btn btn--main" data-act="guardar-prov">Guardar proveedor</button></div></div>';
+      '<div class="foot"><span class="msg" id="foot-msg" role="status"></span>' + (p.id ? '<button class="btn btn--danger" data-act="papelera-prov">' + (p.eliminado_at ? 'Sacar de la papelera' : 'Mandar a la papelera') + '</button>' : '') + '<button class="btn" data-act="cerrar">Cancelar</button><button class="btn btn--main" data-act="guardar-prov">Guardar proveedor</button></div></div>';
+  }
+
+  /* ---------- Operaciones: servicios, precios y cola de cambios (lib/operaciones.js) ----------
+     La fila de cada servicio es lo publicado; lo que se edita aca se guarda como cambio pendiente y recien llega a la
+     web al publicarlo. La cuenta del precio esta repetida de lib/operaciones.js (calcular) solo para la vista previa:
+     el numero que vale es el que calcula el server al publicar. */
+  var UNIDADES = { persona: 'por persona', vehiculo: 'por vehículo', grupo: 'por grupo', embarcacion: 'por embarcación', tramo: 'por tramo' };
+  var TIPOS_SRV = { tour: 'Tour', actividad: 'Actividad', traslado: 'Traslado', barco: 'Paseo en barco', otro: 'Otro' };
+  var ORIGENES = { manual: 'Edición', importacion: 'Importación', ajuste: 'Ajuste masivo', cotizacion: 'Cotización', reversion: 'Vuelta atrás', inicial: 'Precio inicial' };
+  var ESTADOS_CAMBIO = { pendiente: 'Pendiente', publicado: 'Publicado', descartado: 'Descartado', reemplazado: 'Reemplazado' };
+  var CAMPO_NOMBRE = { precio_brl: 'Precio R$', precio: 'Precio US$', unidad: 'Unidad', capacidad: 'Capacidad', margen_tipo: 'Tipo de margen', margen_valor: 'Margen',
+    activo: 'Activo', fuente: 'Fuente', verificado: 'Verificado', destino: 'Destino', titulo: 'Título', descripcion: 'Descripción', detalle: 'Detalle', orden: 'Orden',
+    proveedor_id: 'Proveedor', tipo: 'Tipo', duracion: 'Duración', grupo: 'Grupo', punto_salida: 'Punto de salida', edad_minima: 'Edad mínima', incluye: 'Incluye',
+    no_incluye: 'No incluye', politica_cancelacion: 'Cancelación', que_llevar: 'Qué llevar', link_web: 'Link' };
+  var CAMPOS_SRV = ['destino', 'titulo', 'descripcion', 'detalle', 'precio', 'precio_brl', 'unidad', 'capacidad', 'margen_tipo', 'margen_valor', 'activo', 'fuente', 'verificado',
+    'orden', 'proveedor_id', 'tipo', 'duracion', 'grupo', 'punto_salida', 'edad_minima', 'incluye', 'no_incluye', 'politica_cancelacion', 'que_llevar', 'link_web'];
+
+  function brl(n) { return 'R$ ' + (Number(n) || 0).toLocaleString('es-UY', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+  function hoyISO() { return new Date().toISOString().slice(0, 10); }
+  function provDe(id) { return id && S.datos ? S.datos.proveedores.filter(function (p) { return p.id === id; })[0] : null; }
+  function destNombre(k) { var o = S.ops && S.ops.datos; var d = o ? o.destinos.filter(function (x) { return x.key === k; })[0] : null; return d ? d.nombre : k; }
+  function pendPorTour() { var m = {}; ((S.ops && S.ops.datos && S.ops.datos.pendientes) || []).forEach(function (c) { if (c.tour_id) m[c.tour_id] = c; }); return m; }
+  function pctTxt(a, b) {
+    if (a == null || b == null || !Number(a)) return '';
+    var p = Math.round((b - a) / a * 1000) / 10;
+    return p === 0 ? '=' : (p > 0 ? '+' : '') + p.toLocaleString('es-UY') + ' %';
+  }
+  function origenTxt(s) {
+    var m = s.precio_brl != null ? brl(s.precio_brl) : (s.precio != null ? usd(s.precio) : '—');
+    return m + ' <span class="sub">' + esc(UNIDADES[s.unidad] || 'por persona') + (s.unidad && s.unidad !== 'persona' && s.capacidad ? ' · hasta ' + s.capacidad : '') + '</span>';
+  }
+  function viejo(s, dias) { if (!s.verificado) return true; return (Date.now() - new Date(s.verificado + 'T12:00:00').getTime()) / 864e5 > dias; }
+  function calcPub(f, prov, cfg) {
+    var cot = Number(cfg.cotizacion) || 0, enReales = f.precio_brl != null && f.precio_brl !== '', base, pasos = [];
+    if (enReales) { if (!(cot > 0)) return { error: 'Falta la cotización del real.' }; base = Number(f.precio_brl) / cot; pasos.push(brl(f.precio_brl) + ' ÷ ' + cot.toLocaleString('es-UY', { maximumFractionDigits: 4 }) + ' = ' + usd(r2(base))); }
+    else if (f.precio != null && f.precio !== '') { base = Number(f.precio); pasos.push(usd(base)); }
+    else return { error: 'No tiene precio.' };
+    if (f.unidad && f.unidad !== 'persona') {
+      var cap = Number(f.capacidad);
+      if (!(cap > 0)) return { error: 'El precio es ' + UNIDADES[f.unidad] + ': poné la capacidad para pasarlo a precio por persona.' };
+      base = base / cap; pasos.push('÷ ' + cap + ' personas = ' + usd(r2(base)));
+    }
+    var m = null;
+    if (f.margen_tipo && f.margen_valor !== '' && f.margen_valor != null) m = { tipo: f.margen_tipo, valor: Number(f.margen_valor), de: 'propio' };
+    else if (prov && prov.margen_tipo && prov.margen_valor != null) m = { tipo: prov.margen_tipo, valor: Number(prov.margen_valor), de: 'del proveedor' };
+    else if (enReales && cfg.margen) m = { tipo: cfg.margen.tipo, valor: cfg.margen.valor, de: 'general' };
+    var v = m ? (m.tipo === 'pct' ? base * (1 + m.valor / 100) : base + m.valor) : base;
+    if (m) pasos.push((m.tipo === 'pct' ? '+ ' + m.valor + ' %' : '+ ' + usd(m.valor)) + ' de margen ' + m.de);
+    return { valor: Number(v.toFixed(2)), pasos: pasos };
+  }
+
+  function cargarOps() {
+    if (!S.ops || S.ops.error) S.ops = { cargando: true };
+    return api('ops/datos').then(function (d) {
+      S.ops = { datos: d };
+      if (S.vista === 'servicios' || S.vista === 'publicar') pintarFondo(); else actualizarBadgePub();
+      if (S.srv) refrescarSrv();
+    }).catch(function (e) { S.ops = { error: e.message }; if (S.vista === 'servicios' || S.vista === 'publicar') pintarFondo(); });
+  }
+  function actualizarBadgePub() { var b = document.getElementById('tab-pub'); if (b) b.textContent = nPend() ? ' (' + nPend() + ')' : ''; }
+  function nPend() { return S.ops && S.ops.datos ? S.ops.datos.pendientes.length : 0; }
+
+  function vistaServicios() {
+    var o = S.ops;
+    if (!o || o.cargando) return '<p class="vacio">Cargando servicios…</p>';
+    if (o.error) return '<div class="card"><p class="vacio">No se pudieron cargar los servicios: ' + esc(o.error) + ' <button class="btn" data-act="ops-recargar">Reintentar</button></p></div>';
+    var d = o.datos, pend = pendPorTour(), dias = d.config.dias_desactualizado;
+    var clase = function (s) {
+      return { todos: true, publicados: s.activo && s.revision === 'ok', pendientes: !!pend[s.id], revision: s.revision === 'pendiente', inactivos: !s.activo, viejos: s.activo && viejo(s, dias) };
+    };
+    var nombres = { todos: 'Todos', publicados: 'En la web', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados' };
+    var cuenta = {}; Object.keys(nombres).forEach(function (k) { cuenta[k] = 0; });
+    d.servicios.forEach(function (s) { var c = clase(s); Object.keys(c).forEach(function (k) { if (c[k]) cuenta[k]++; }); });
+    var f = S.srvFiltro || 'todos', q = sinTildes(S.qSrv || '');
+    var lista = d.servicios.filter(function (s) {
+      if (!clase(s)[f]) return false;
+      if (S.srvDest && s.destino !== S.srvDest) return false;
+      if (S.srvProv && (S.srvProv === '-' ? s.proveedor_id : s.proveedor_id !== S.srvProv)) return false;
+      if (q) { var pr = provDe(s.proveedor_id); if (sinTildes(s.titulo + ' ' + destNombre(s.destino) + ' ' + (pr ? pr.nombre : '')).indexOf(q) < 0) return false; }
+      return true;
+    });
+    var destUsados = {}, provUsados = {};
+    d.servicios.forEach(function (s) { destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1; });
+    var h = '<div class="bar"><div class="chips"><b>Servicios: tours, actividades y traslados</b></div><button class="btn btn--main" data-act="nuevo-srv">+ Servicio</button></div>' +
+      '<p class="sub" style="margin:-4px 0 12px">Cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') +
+      ' · margen general ' + (d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) + ' por persona sobre precios en reales' : 'sin margen') + '</p>' +
+      '<div class="bar"><div class="chips">' + Object.keys(nombres).map(function (k) {
+        return '<button class="chip" data-sfiltro="' + k + '" aria-pressed="' + (f === k) + '">' + esc(nombres[k]) + '<span>' + cuenta[k] + '</span></button>';
+      }).join('') + '</div></div>' +
+      '<div class="bar"><select data-sdest style="max-width:220px"><option value="">Todos los destinos</option>' + Object.keys(destUsados).map(function (k) { return { k: k, n: destNombre(k) }; })
+        .sort(function (a, b) { return a.n.localeCompare(b.n, 'es'); }).map(function (x) { return '<option value="' + esc(x.k) + '"' + (S.srvDest === x.k ? ' selected' : '') + '>' + esc(x.n) + '</option>'; }).join('') + '</select>' +
+      '<select data-sprov style="max-width:240px"><option value="">Todos los proveedores</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
+        S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
+      '<input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '"></div>';
+    if (!lista.length) return h + '<div class="card"><p class="vacio">No hay servicios con ese filtro.</p></div>';
+    h += '<div class="card"><table><thead><tr><th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th></tr></thead><tbody>';
+    lista.forEach(function (s) {
+      var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
+      var estado = !s.activo ? '<span class="pill p-cancelado">apagado</span>' : '<span class="pill p-confirmado">en la web</span>';
+      if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '">revisar</span>';
+      h += '<tr class="row" data-srv="' + esc(s.id) + '"><td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub">' + esc(destNombre(s.destino)) + ' · ' + esc(TIPOS_SRV[s.tipo] || s.tipo) + ' · ' + (pr ? esc(pr.nombre) : '<i>sin proveedor</i>') + '</span></td>' +
+        '<td data-l="Proveedor cobra">' + origenTxt(s) + '</td>' +
+        '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + usd(s.precio_publicado) + '</b>' : '—') + '<span class="sub">por persona</span></td>' +
+        '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? usd(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
+        '<td data-l="Estado">' + estado + '</td>' +
+        '<td data-l="Verificado"' + (c.viejos ? ' class="deuda"' : '') + '>' + (s.verificado ? esc(fecha(s.verificado)) + ' ' + esc(s.verificado.slice(0, 4)) : 'nunca') + '</td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+
+  function valorCampo(k, v) {
+    if (v === null || v === undefined || v === '') return '—';
+    if (k === 'precio_brl') return brl(v);
+    if (k === 'precio' || (k === 'margen_valor')) return String(v);
+    if (k === 'activo') return v ? 'sí' : 'no';
+    if (k === 'unidad') return UNIDADES[v] || v;
+    if (k === 'tipo') return TIPOS_SRV[v] || v;
+    if (k === 'destino') return destNombre(v);
+    if (k === 'proveedor_id') { var p = provDe(v); return p ? p.nombre : '(otro)'; }
+    var s = String(v); return s.length > 70 ? s.slice(0, 67) + '…' : s;
+  }
+  function difsHtml(c) {
+    return Object.keys(c.despues || {}).map(function (k) {
+      return '<span class="sub"><b>' + esc(CAMPO_NOMBRE[k] || k) + ':</b> ' + esc(valorCampo(k, (c.antes || {})[k])) + ' → ' + esc(valorCampo(k, c.despues[k])) + '</span>';
+    }).join('');
+  }
+
+  function vistaPublicar() {
+    var o = S.ops;
+    if (!o || o.cargando) return '<p class="vacio">Cargando…</p>';
+    if (o.error) return '<div class="card"><p class="vacio">No se pudo cargar: ' + esc(o.error) + ' <button class="btn" data-act="ops-recargar">Reintentar</button></p></div>';
+    var d = o.datos, porId = {}; d.servicios.forEach(function (s) { porId[s.id] = s; });
+    S.sel = S.sel || {};
+    Object.keys(S.sel).forEach(function (k) { if (!d.pendientes.some(function (c) { return c.id === k; })) delete S.sel[k]; });
+    var nSel = Object.keys(S.sel).length;
+    var h = '<div class="bar"><div class="chips"><b>' + (d.pendientes.length ? d.pendientes.length + ' cambio(s) esperando tu revisión' : 'Nada para publicar') + '</b></div>' +
+      (d.pendientes.length ? '<button class="btn btn--sm" data-act="sel-todos">' + (nSel === d.pendientes.length ? 'Ninguno' : 'Seleccionar todos') + '</button>' +
+        '<button class="btn btn--sm btn--danger" data-act="desc-sel"' + (nSel ? '' : ' disabled') + '>Descartar (' + nSel + ')</button>' +
+        '<button class="btn btn--main" data-act="pub-sel"' + (nSel ? '' : ' disabled') + '>Publicar (' + nSel + ')</button>' : '') + '</div>' +
+      '<p class="sub" style="margin:-4px 0 12px">Nada de esto se ve en la web hasta que lo publicás. Los cambios de más de 20 % aparecen en rojo.</p>';
+    if (!d.pendientes.length) return h + '<div class="card"><p class="vacio">Cuando edites un precio o importes un archivo, los cambios quedan acá para que los revises antes de publicarlos.</p></div>';
+    h += '<div class="card"><table><thead><tr><th></th><th>Servicio</th><th>Qué cambia</th><th class="num">Publicado hoy</th><th class="num">Quedaría</th><th>Origen</th><th></th></tr></thead><tbody>';
+    d.pendientes.forEach(function (c) {
+      var s = porId[c.tour_id] || {}, p = pctTxt(c.publicado_antes, c.publicado_despues);
+      var fuerte = c.publicado_antes && c.publicado_despues != null && Math.abs((c.publicado_despues - c.publicado_antes) / c.publicado_antes) >= 0.2;
+      var noSe = c.publicado_despues == null && (c.despues.activo === true || (c.despues.activo === undefined && s.activo));
+      h += '<tr><td data-l="Elegir"><input type="checkbox" data-sel="' + esc(c.id) + '" style="width:auto;min-height:0"' + (S.sel[c.id] ? ' checked' : '') + '></td>' +
+        '<td data-l="Servicio"><a class="lnk" href="#" data-srv="' + esc(c.tour_id || '') + '">' + esc(s.titulo || String(c.tour_clave).split('#')[1] || '?') + '</a><span class="sub">' + esc(destNombre(s.destino || String(c.tour_clave).split('#')[0])) + (s.precio_publicado == null && !s.activo ? ' · nuevo' : '') + '</span></td>' +
+        '<td data-l="Qué cambia">' + difsHtml(c) + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') + '</td>' +
+        '<td class="num" data-l="Publicado hoy">' + (c.publicado_antes != null ? usd(c.publicado_antes) : '—') + '</td>' +
+        '<td class="num" data-l="Quedaría">' + (noSe ? '<span class="deuda">no se puede calcular</span>' : (c.publicado_despues != null ? '<b' + (fuerte ? ' class="deuda"' : '') + '>' + usd(c.publicado_despues) + '</b><span class="sub">' + esc(p) + '</span>' : '—')) + '</td>' +
+        '<td data-l="Origen">' + esc(ORIGENES[c.origen] || c.origen) + '<span class="sub">' + esc(fechaHora(c.creado_at)) + (c.creado_por ? ' · ' + esc(c.creado_por) : '') + '</span></td>' +
+        '<td data-l=""><button class="btn btn--sm" data-pub-uno="' + esc(c.id) + '">Publicar</button></td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+
+  /* El editor arranca desde lo publicado mas el cambio pendiente, si hay: se sigue editando ese mismo cambio. */
+  function abrirServicio(id) {
+    var d = S.ops && S.ops.datos; if (!d) return;
+    var s = id ? d.servicios.filter(function (x) { return x.id === id; })[0] : null;
+    if (id && !s) return toast('Ese servicio ya no existe');
+    var p = s ? pendPorTour()[s.id] : null, f = {};
+    CAMPOS_SRV.forEach(function (k) { f[k] = s ? s[k] : null; });
+    if (!s) { f.activo = true; f.unidad = 'persona'; f.tipo = 'tour'; f.orden = 100; f.verificado = hoyISO(); }
+    if (p) Object.keys(p.despues).forEach(function (k) { f[k] = p.despues[k]; });
+    f._moneda = f.precio_brl != null ? 'BRL' : (f.precio != null ? 'USD' : 'BRL');
+    f._monto = f.precio_brl != null ? f.precio_brl : (f.precio != null ? f.precio : '');
+    S.srv = { id: s ? s.id : null, orig: s, pend: p, f: f, hist: null };
+    S.dirty = false;
+    abrirSrv();
+    if (s) api('ops/historial?id=' + encodeURIComponent(s.id)).then(function (j) { if (S.srv && S.srv.id === s.id) { S.srv.hist = j.cambios; pintarHist(); } }).catch(function () {});
+  }
+  function refrescarSrv() {
+    if (!S.srv || !S.srv.id) return;
+    var y = (document.querySelector('#drawer .panel') || {}).scrollTop || 0;
+    abrirServicio(S.srv.id);
+    var pn = document.querySelector('#drawer .panel'); if (pn) pn.scrollTop = y;
+  }
+  function srvParaCalc() {
+    var f = S.srv.f, x = Object.assign({}, f);
+    if (f._moneda === 'BRL') { x.precio_brl = f._monto === '' ? null : Number(f._monto); } else { x.precio_brl = null; x.precio = f._monto === '' ? null : Number(f._monto); }
+    return x;
+  }
+  function prevHtml() {
+    var cfg = S.ops.datos.config, x = srvParaCalc(), c = calcPub(x, provDe(x.proveedor_id), cfg), o = S.srv.orig;
+    var hoy = o && o.precio_publicado != null ? usd(o.precio_publicado) : 'nada (no está en la web)';
+    if (c.error) return '<div><small>Publicado hoy</small><b>' + esc(hoy) + '</b></div><div style="grid-column:span 2"><small>Quedaría</small><b class="deuda" style="font-size:14px">' + esc(c.error) + '</b></div>';
+    return '<div><small>Publicado hoy</small><b>' + esc(hoy) + '</b></div><div><small>Quedaría (por persona)</small><b>' + usd(c.valor) + '</b> <span class="sub">' + esc(pctTxt(o && o.precio_publicado, c.valor)) + '</span></div>' +
+      '<div style="grid-column:1/-1"><small>Cuenta</small><span class="sub">' + esc(c.pasos.join(' ')) + '</span></div>';
+  }
+  function abrirSrv() {
+    var s = S.srv, f = s.f, d = S.ops.datos, el = document.getElementById('drawer');
+    if (!el) { el = document.createElement('div'); el.id = 'drawer'; el.className = 'drawer'; document.body.appendChild(el); }
+    var a = function (campo, extra) { return 'data-sf="' + campo + '"' + (extra || ''); };
+    var inp = function (campo, label, extra) { return '<label class="f">' + label + '<input ' + a(campo, extra) + ' value="' + esc(f[campo] == null ? '' : f[campo]) + '"></label>'; };
+    var area = function (campo, label, ayuda) { return '<label class="f">' + label + (ayuda ? ' <span class="sub" style="display:inline;font-weight:400">' + ayuda + '</span>' : '') + '<textarea ' + a(campo) + '>' + esc(f[campo] || '') + '</textarea></label>'; };
+    var provs = S.datos.proveedores.filter(function (p) { return !p.eliminado_at || p.id === f.proveedor_id; });
+    var pend = s.pend;
+    el.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Servicio" style="width:min(820px,100%)"><div class="panel__head"><h2>' + esc(s.orig ? s.orig.titulo : 'Nuevo servicio') +
+      (s.orig ? ' <span class="pill ' + (s.orig.activo ? 'p-confirmado">en la web' : 'p-cancelado">apagado') + '</span>' : '') + '</h2><button class="btn btn--sm" data-act="cerrar">Cerrar</button></div><div class="panel__body">' +
+      (pend ? '<p class="aviso" style="margin:0">Tiene un cambio sin publicar (' + esc(ORIGENES[pend.origen] || pend.origen) + ', ' + esc(fechaHora(pend.creado_at)) + '). Lo que ves abajo ya lo incluye. ' +
+        '<button class="btn btn--sm" data-pub-uno="' + esc(pend.id) + '">Publicarlo</button> <button class="btn btn--sm btn--danger" data-desc-uno="' + esc(pend.id) + '">Descartarlo</button></p>' : '') +
+      (s.orig && s.orig.revision === 'pendiente' ? '<p class="aviso" style="margin:0">Para revisar: ' + esc(s.orig.revision_motivo || 'faltan datos') + '</p>' : '') +
+      '<section class="sec"><h3>Precio</h3><div class="grid">' +
+      '<label class="f">El proveedor cobra en<select ' + a('_moneda') + '><option value="BRL"' + (f._moneda === 'BRL' ? ' selected' : '') + '>Reales (R$)</option><option value="USD"' + (f._moneda === 'USD' ? ' selected' : '') + '>Dólares (US$)</option></select></label>' +
+      '<label class="f">Monto<input ' + a('_monto') + ' type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(f._monto) + '"></label>' +
+      '<label class="f">Es un precio<select ' + a('unidad') + '>' + opts(UNIDADES, f.unidad || 'persona') + '</select></label>' +
+      '<label class="f">Capacidad (personas)<input ' + a('capacidad') + ' type="number" min="1" value="' + esc(f.capacidad == null ? '' : f.capacidad) + '" placeholder="solo si no es por persona"></label>' +
+      '<label class="f">Margen<select ' + a('margen_tipo') + '><option value="">El general</option><option value="usd"' + (f.margen_tipo === 'usd' ? ' selected' : '') + '>Propio en US$ por persona</option><option value="pct"' + (f.margen_tipo === 'pct' ? ' selected' : '') + '>Propio en %</option></select></label>' +
+      '<label class="f">Valor del margen propio<input ' + a('margen_valor') + ' type="number" step="0.01" value="' + esc(f.margen_valor == null ? '' : f.margen_valor) + '"></label>' +
+      inp('fuente', 'De dónde salió el precio', ' placeholder="Web del operador, WhatsApp con…"') +
+      '<label class="f">Verificado el<input ' + a('verificado') + ' type="date" value="' + esc(f.verificado || '') + '"></label></div>' +
+      '<div class="cuentas" id="srv-prev" style="margin-top:12px">' + prevHtml() + '</div></section>' +
+      '<section class="sec"><h3>Servicio</h3><div class="grid">' +
+      '<label class="f">Destino<select ' + a('destino') + '><option value="">Elegí…</option>' + d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '"' + (x.key === f.destino ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="f">Tipo<select ' + a('tipo') + '>' + opts(TIPOS_SRV, f.tipo || 'tour') + '</select></label>' +
+      '<label class="f">Proveedor<select ' + a('proveedor_id') + '><option value="">Sin proveedor</option>' + provs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === f.proveedor_id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select></label>' +
+      inp('orden', 'Orden en la lista', ' type="number" min="0"') + '</div>' +
+      '<div class="grid" style="grid-template-columns:1fr;margin-top:10px">' + inp('titulo', 'Título (tal cual se muestra)') +
+      (s.orig ? '<p class="sub" style="margin:-4px 0 0">Ojo: la foto del tour está atada al título. Si lo cambiás, la tarjeta queda sin foto.</p>' : '') +
+      area('descripcion', 'Descripción') + area('detalle', 'Detalle') +
+      '<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" ' + a('activo') + ' style="width:auto;min-height:0"' + (f.activo ? ' checked' : '') + '> Mostrarlo en la web</label></div></section>' +
+      '<section class="sec"><h3>Ficha</h3><div class="grid">' + inp('duracion', 'Duración') + inp('grupo', 'Grupo') + inp('punto_salida', 'Punto de salida') + inp('edad_minima', 'Edad mínima') + '</div>' +
+      '<div class="grid" style="grid-template-columns:1fr;margin-top:10px">' + area('incluye', 'Incluye', 'una cosa por línea') + area('no_incluye', 'No incluye', 'una cosa por línea') + area('que_llevar', 'Qué llevar', 'una cosa por línea') +
+      area('politica_cancelacion', 'Cancelación') + inp('link_web', 'Link del operador') + '</div></section>' +
+      (s.orig ? '<section class="sec"><h3>Historial</h3><div id="srv-hist"><p class="sub">Cargando…</p></div></section>' : '') + '</div>' +
+      '<div class="foot"><span class="msg" id="foot-msg" role="status"></span><button class="btn" data-act="cerrar">Cancelar</button>' +
+      '<button class="btn" data-act="srv-guardar">Guardar para revisar</button><button class="btn btn--main" data-act="srv-publicar">Publicar ahora</button></div></div>';
+    if (s.hist) pintarHist();
+  }
+  function pintarHist() {
+    var el = document.getElementById('srv-hist'); if (!el || !S.srv) return;
+    var h = S.srv.hist || [];
+    if (!h.length) { el.innerHTML = '<p class="sub">Sin cambios registrados.</p>'; return; }
+    el.innerHTML = h.map(function (c) {
+      var pill = c.estado === 'publicado' ? 'p-confirmado' : (c.estado === 'pendiente' ? 'p-pendiente' : 'p-cancelado');
+      return '<div class="item"><div class="item__top"><div style="flex:1"><b>' + esc(fechaHora(c.resuelto_at || c.creado_at)) + '</b> · ' + esc(ORIGENES[c.origen] || c.origen) +
+        ' <span class="pill ' + pill + '">' + esc(ESTADOS_CAMBIO[c.estado] || c.estado) + '</span>' +
+        (c.publicado_despues != null ? '<span class="sub">Precio publicado: ' + (c.publicado_antes != null ? usd(c.publicado_antes) + ' → ' : '') + usd(c.publicado_despues) + ' ' + esc(pctTxt(c.publicado_antes, c.publicado_despues)) + '</span>' : '') +
+        (c.origen !== 'inicial' ? difsHtml(c) : '') + (c.fuente ? '<span class="sub">Fuente: ' + esc(c.fuente) + '</span>' : '') + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') +
+        '<span class="sub">' + (c.creado_por ? 'Por ' + esc(c.creado_por) : '') + (c.resuelto_por && c.estado === 'publicado' ? ' · publicó ' + esc(c.resuelto_por) : '') + '</span></div>' +
+        (c.estado === 'publicado' && c.origen !== 'inicial' && Object.keys(c.antes || {}).length ? '<button class="btn btn--sm" data-revertir="' + esc(c.id) + '">Volver a lo de antes</button>' : '') + '</div></div>';
+    }).join('');
+  }
+  function guardarSrv(publicarYa) {
+    var s = S.srv, f = s.f, cambios = {};
+    CAMPOS_SRV.forEach(function (k) { cambios[k] = f[k]; });
+    if (f._moneda === 'BRL') { cambios.precio_brl = f._monto === '' ? null : f._monto; delete cambios.precio; }
+    else { cambios.precio = f._monto === '' ? null : f._monto; cambios.precio_brl = null; }
+    if (!f.destino) return mensaje('Elegí el destino.', true);
+    if (!f.titulo || String(f.titulo).trim().length < 3) return mensaje('Escribí el título.', true);
+    if (f.activo && f._monto === '') return mensaje('Para mostrarlo en la web necesita precio.', true);
+    if (publicarYa) {
+      var c = calcPub(srvParaCalc(), provDe(f.proveedor_id), S.ops.datos.config);
+      if (f.activo && c.error) return mensaje(c.error, true);
+      var antes = s.orig && s.orig.precio_publicado;
+      if (!confirm('¿Publicar ya?' + (c.valor != null ? '\nPrecio en la web: ' + (antes != null ? usd(antes) + ' → ' : '') + usd(c.valor) + ' por persona.' : ''))) return;
+    }
+    mensaje(publicarYa ? 'Publicando…' : 'Guardando…');
+    api('ops/proponer', { id: s.id, cambios: cambios, publicar: !!publicarYa }).then(function (r) {
+      S.dirty = false;
+      var pub = r.publicacion;
+      if (pub && pub.errores && pub.errores.length) { toast('No se publicó: ' + pub.errores[0].error); }
+      else toast(!r.cambio ? 'No había nada distinto' : (pub ? 'Publicado. En la web en hasta 1 minuto.' : 'Guardado en "Por publicar"' + (r.aviso ? ' · ' + r.aviso : '')));
+      var id = (r.servicio && r.servicio.id) || s.id;
+      S.srv = null; var el = document.getElementById('drawer'); if (el) el.remove();
+      return cargarOps().then(function () { if (id) abrirServicio(id); });
+    }).catch(function (e) { mensaje(e.message, true); });
+  }
+  function publicarCambios(ids) {
+    if (!ids.length) return;
+    return api('ops/publicar', { ids: ids }).then(function (r) {
+      S.sel = {};
+      toast(r.errores.length ? r.publicados + ' publicado(s). No se pudo: ' + r.errores.map(function (x) { return x.servicio + ' (' + x.error + ')'; }).join('; ') : r.publicados + ' publicado(s). En la web en hasta 1 minuto.');
+      return cargarOps();
+    }).catch(function (e) { toast(e.message); });
+  }
+  function descartarCambios(ids) {
+    if (!ids.length || !confirm('¿Descartar ' + ids.length + ' cambio(s)? La web sigue como está.')) return;
+    return api('ops/descartar', { ids: ids }).then(function (r) { S.sel = {}; toast(r.descartados + ' descartado(s)'); return cargarOps(); }).catch(function (e) { toast(e.message); });
   }
 
   /* ---------- acciones ---------- */
   function cargar() {
     S.cargando = true;
     api('precarga').then(function (p) { S.precarga = p; if (S.datos) pintarFondo(); }).catch(function () { /* el resumen de precarga es un extra */ });
+    cargarOps();
     return api('datos').then(function (d) { S.datos = d; S.cargando = false; cargarChats(); if (AV.estado === 'cargando') revisarAvisos();
-      if (S.primeraVez !== false) { S.primeraVez = false; if (/[?&](chat|pedido)=/.test(location.search)) { setTimeout(function () { irA(location.href); history.replaceState(null, '', '/admin/'); }, 0); } } if (!S.draft && !S.prov) pintar(); else pintarFondo(); }).catch(function (e) {
+      if (S.primeraVez !== false) { S.primeraVez = false; if (/[?&](chat|pedido)=/.test(location.search)) { setTimeout(function () { irA(location.href); history.replaceState(null, '', '/admin/'); }, 0); } } if (!S.draft && !S.prov && !S.srv) pintar(); else pintarFondo(); }).catch(function (e) {
       S.cargando = false; if (e.status !== 401) { app.innerHTML = '<p class="vacio">No se pudo cargar: ' + esc(e.message) + ' <button class="btn" data-act="recargar">Reintentar</button></p>'; }
     });
   }
   /* Repinta el tablero sin tocar el panel abierto. */
-  function pintarFondo() { var dr = document.getElementById('drawer'), draft = S.draft, prov = S.prov; S.draft = null; S.prov = null; pintar(); S.draft = draft; S.prov = prov; if (dr && !document.getElementById('drawer')) document.body.appendChild(dr); }
+  function pintarFondo() { var dr = document.getElementById('drawer'), draft = S.draft, prov = S.prov, srv = S.srv; S.draft = null; S.prov = null; S.srv = null; pintar(); S.draft = draft; S.prov = prov; S.srv = srv; if (dr && !document.getElementById('drawer')) document.body.appendChild(dr); }
   function mensaje(t, mal) { var m = document.getElementById('foot-msg'); if (m) { m.textContent = t; m.style.color = mal ? 'var(--bad)' : 'var(--ok)'; } }
 
   function guardar() {
@@ -692,8 +994,15 @@
     if (!p.nombre || p.nombre.trim().length < 2) return mensaje('Escribí el nombre del proveedor.', true);
     var dest = String(p._destinos || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean).join(', ');
     p.servicios = String(p._hace || '').replace(/ · /g, ' - ').trim() + (dest ? ' · ' + dest : '');
+    p.destinos = dest;
     mensaje('Guardando…');
     api('proveedor/guardar', p).then(function () { toast('Proveedor guardado'); cerrarPanel(true); return cargar(); }).catch(function (e) { mensaje(e.message, true); });
+  }
+  function papeleraProv() {
+    var p = S.prov, eliminar = !p.eliminado_at;
+    if (eliminar && !confirm('¿Mandar a la papelera a ' + p.nombre + '? Queda inactivo y escondido; sus pedidos y servicios no se tocan.')) return;
+    api('proveedor/papelera', { id: p.id, eliminar: eliminar }).then(function () { toast(eliminar ? 'En la papelera' : 'Fuera de la papelera (sigue inactivo hasta que lo actives)'); cerrarPanel(true); return cargar(); })
+      .catch(function (e) { mensaje(e.message, true); });
   }
   function abrir(id) {
     var p = S.datos.pedidos.filter(function (x) { return x.id === id; })[0]; if (!p) return;
@@ -709,6 +1018,20 @@
     if (el.id === 'q') { S.q = el.value; var pos = el.selectionStart; pintar(); var q = document.getElementById('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (er) { /* sin rango */ } } return; }
     if (el.id === 'q-viajes') { S.qViajes = el.value; var pv = el.selectionStart; pintar(); var qv = document.getElementById('q-viajes'); if (qv) { qv.focus(); try { qv.setSelectionRange(pv, pv); } catch (er) { /* sin rango */ } } return; }
     if (el.matches && el.matches('[data-deuda]')) { S.soloDeuda = el.checked; pintar(); return; }
+    if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
+    if (el.hasAttribute('data-sdest')) { if (e.type === 'change') { S.srvDest = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-sprov')) { if (e.type === 'change') { S.srvProv = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-sel')) { if (e.type === 'change') { if (el.checked) S.sel[el.getAttribute('data-sel')] = 1; else delete S.sel[el.getAttribute('data-sel')]; pintar(); } return; }
+    if (el.hasAttribute('data-sf') && S.srv) {
+      var sk = el.getAttribute('data-sf');
+      S.srv.f[sk] = el.type === 'checkbox' ? el.checked : (el.type === 'number' && sk !== '_monto' ? (el.value === '' ? null : parseFloat(el.value)) : el.value);
+      if (sk === 'margen_tipo' && !el.value) S.srv.f.margen_valor = null;
+      /* Cambiar el monto es haberlo verificado hoy, salvo que se ponga otra fecha despues. */
+      if (sk === '_monto' || sk === '_moneda') { S.srv.f.verificado = hoyISO(); var vf = document.querySelector('[data-sf="verificado"]'); if (vf) vf.value = S.srv.f.verificado; }
+      S.dirty = true;
+      var pv = document.getElementById('srv-prev'); if (pv) pv.innerHTML = prevHtml();
+      return;
+    }
     if (el.hasAttribute('data-pf') && S.prov) { S.prov[el.getAttribute('data-pf')] = el.type === 'checkbox' ? el.checked : el.value; return; }
     if (el.hasAttribute('data-sena-moneda')) { S.senaMoneda = el.value; refrescarPanel(); return; }
     if (!S.draft || !el.hasAttribute('data-f')) return;
@@ -771,12 +1094,22 @@
   });
 
   document.addEventListener('click', function (e) {
-    if (e.target.closest('a[href]')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
+    if (e.target.closest('a[href]:not([href="#"])')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
     var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
     var pv = e.target.closest('[data-precarga]'); if (pv) { var cual = pv.getAttribute('data-precarga'); S.verPre = S.verPre === cual ? '' : cual; pintarFondo(); return; }
     var ud = e.target.closest('[data-uso-dias]'); if (ud) { S.usoDias = +ud.getAttribute('data-uso-dias'); cargarUso(); return; }
     var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
+    var vsp = e.target.closest('[data-ver-srv-prov]'); if (vsp) { e.preventDefault(); S.srvProv = vsp.getAttribute('data-ver-srv-prov'); S.srvFiltro = 'todos'; S.vista = 'servicios'; pintar(); return; }
+    var sfc = e.target.closest('[data-sfiltro]'); if (sfc) { S.srvFiltro = sfc.getAttribute('data-sfiltro'); pintar(); return; }
+    var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
+    var pu = e.target.closest('[data-pub-uno]'); if (pu) { if (S.dirty && !confirm('Lo que editaste y no guardaste se pierde. ¿Publicar igual?')) return; S.dirty = false; publicarCambios([pu.getAttribute('data-pub-uno')]); return; }
+    var du = e.target.closest('[data-desc-uno]'); if (du) { S.dirty = false; descartarCambios([du.getAttribute('data-desc-uno')]); return; }
+    var rv = e.target.closest('[data-revertir]'); if (rv) {
+      if (!confirm('Se prepara un cambio que vuelve a lo de antes. Queda en "Por publicar" para que lo publiques. ¿Seguir?')) return;
+      api('ops/revertir', { id: rv.getAttribute('data-revertir') }).then(function (r) { toast(r.cambio ? 'Listo: revisalo y publicalo' : (r.aviso || 'Ya está así')); S.dirty = false; return cargarOps(); }).catch(function (er) { toast(er.message); });
+      return;
+    }
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
     if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); if (S.vista === 'viajes' && (!S.viajes || S.viajes.error)) cargarViajes(); else if (S.vista === 'uso') cargarUso(); else pintar(); return; }
@@ -801,12 +1134,22 @@
       case 'registrar-sena': var cs = calc(S.draft); if (cs.senaPend > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: cs.senaPend, medio: S.draft.medio_pago || '', nota: 'Seña' }); S.dirty = true; refrescarPanel(); } break;
       case 'guardar': guardar(); break;
       case 'guardar-prov': guardarProv(); break;
+      case 'papelera-prov': papeleraProv(); break;
+      case 'ver-papelera': S.provPapelera = !S.provPapelera; pintar(); break;
+      case 'ops-recargar': cargarOps(); pintar(); break;
+      case 'nuevo-srv': abrirServicio(null); break;
+      case 'srv-guardar': guardarSrv(false); break;
+      case 'srv-publicar': guardarSrv(true); break;
+      case 'pub-sel': if (confirm('¿Publicar ' + Object.keys(S.sel).length + ' cambio(s)? Se ven en la web en hasta 1 minuto.')) publicarCambios(Object.keys(S.sel)); break;
+      case 'desc-sel': descartarCambios(Object.keys(S.sel)); break;
+      case 'sel-todos': var todos = S.ops.datos.pendientes, ya = Object.keys(S.sel).length === todos.length; S.sel = {}; if (!ya) todos.forEach(function (c) { S.sel[c.id] = 1; }); pintar(); break;
     }
   });
   document.addEventListener('keydown', function (e) {
     if (e.target && e.target.id === 'chat-txt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('chat-form'); if (f) f.requestSubmit(); return; } if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
 
   /* ---------- arranque ---------- */
+  var vq = /[?&]vista=(servicios|publicar|proveedores)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();

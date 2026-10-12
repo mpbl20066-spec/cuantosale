@@ -46,7 +46,8 @@
     "test:cache": "node test-serpapi-cache.js",
     "reels": "node outputs/reels/_build/capture.js && node outputs/reels/_build/vo.js && node outputs/reels/_build/build.js",
     "historias": "node outputs/historias/_build/build.js",
-    "historias:limpio": "node outputs/historias/_build/build.js limpio"
+    "historias:limpio": "node outputs/historias/_build/build.js limpio",
+    "test:ops": "node test-operaciones.js"
   },
   "engines": {
     "node": ">=18"

@@ -30,8 +30,10 @@ button{cursor:pointer}
 .top .wrap{display:flex;align-items:center;gap:12px;min-height:56px;flex-wrap:wrap}
 .top h1{font-size:17px;margin:0;flex:1;white-space:nowrap}
 .top h1 i{font-style:normal;color:var(--accent)}
-.tabs{display:flex;gap:4px}
-.tab{background:transparent;border:0;color:#cbd5e1;padding:8px 12px;border-radius:8px;font-weight:600}
+/* Las pestanas se deslizan de costado en el celular en vez de ensanchar la pagina. */
+.tabs{display:flex;gap:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:transparent;border:0;color:#cbd5e1;padding:8px 12px;border-radius:8px;font-weight:600;white-space:nowrap;flex:none}
 .tab[aria-selected=true]{background:rgba(255,255,255,.14);color:#fff}
 .btn{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 14px;font-weight:600;min-height:38px}
 .btn:hover{border-color:var(--muted)}
@@ -162,6 +164,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=17"></script>
+<script src="/admin/admin.js?v=18"></script>
 </body>
 </html>

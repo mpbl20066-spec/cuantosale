@@ -3677,8 +3677,12 @@ function handleRequest(req, res) {
       }, function () { res.writeHead(200, cabeceras); res.end(cuerpo); });
       }).catch(function () { res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Error'); });
     }
-    if (/^\/tours\/?$/i.test(url.pathname)) {
-      return serveStatic(req, res, '/tours.html');
+    /* El editor viejo de tours (tours.html) se reemplazo por la pestana Servicios de /admin: aquel leia tours_todos,
+       que no trae el precio en reales ni si el tour esta activo, y al guardar podia pasar un precio en reales a
+       dolares y apagar el tour. Los cambios ahora pasan por la cola de revision (lib/operaciones.js). */
+    if (/^\/tours(\.html)?\/?$/i.test(url.pathname)) {
+      res.writeHead(302, { Location: '/admin/?vista=servicios', 'Cache-Control': 'no-store' });
+      return res.end();
     }
     /* La tabla de precios de transfer. Se agregaba /transfers.html sin ruta:
        el archivo existia pero /transfers daba 404, y ese 404 es facil de
